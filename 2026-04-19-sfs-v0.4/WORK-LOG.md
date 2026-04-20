@@ -311,7 +311,7 @@ related_docs:
   - `2026-04-19-sfs-v0.4/cross-ref-audit.md` (§4 TODO 헤더 `7개 → 6개` + 1번 항목에 ✅ + "WU-4 선제 생성" 메모)
   - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (frontmatter `completed_wus` +1 줄 + `unpushed_commits` 갱신 + `queue` 재정렬)
   - `2026-04-19-sfs-v0.4/WORK-LOG.md` (본 entry)
-- **commit**: (WU-4 커밋 시 채워짐)
+- **commit**: `7d982dc` "WU-4: appendix/dialogs/README.md 선제 생성 (cross-ref-audit §4 TODO #1 해결, index 허브)"
 - **pushed**: pending (user terminal)
 - **notes**:
   - Phase 1 W1~W2 의 실제 분해 작업은 여전히 진행 예정 — 본 WU 는 **index 허브만** 먼저 만든 것. 이후 5 phase md + `dialog-engine.md` 가 본 README 를 상호참조하게 된다.

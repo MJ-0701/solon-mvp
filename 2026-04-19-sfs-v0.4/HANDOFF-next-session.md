@@ -41,8 +41,8 @@ round4_bridge:
     - "WU-12.1: ff89ea1 — sha 7f8a635 backfill + HANDOFF frontmatter completed_wus 6 WU 일괄 추가"
     - "WU-12.2: 8ab660c — PHASE1-KICKOFF-CHECKLIST.md v0.1-mvp-patch2 (submodule 레지듀 2곳 cleanup, §3.7 + §6.2)"
     - "WU-12.3: b77fcb2 — sha 8ab660c backfill + HANDOFF frontmatter completed_wus 2 WU 추가 (WU-12.1 + WU-12.2) + unpushed_commits 갱신"
-    - "WU-4: <WU-4 커밋 sha> — appendix/dialogs/README.md 선제 생성 (cross-ref-audit §4 TODO #1 해결, index 허브)"
-  unpushed_commits: "현 세션 새 로컬 커밋 = WU-12.2 (8ab660c) + WU-12.3 (b77fcb2) + WU-4 (신규 sha) + WU-4.1 backfill (예정) → 사용자가 `git push origin main` 수동 실행 필요."
+    - "WU-4: 7d982dc — appendix/dialogs/README.md 선제 생성 (cross-ref-audit §4 TODO #1 해결, index 허브)"
+  unpushed_commits: "현 세션 새 로컬 커밋 = WU-12.2 (8ab660c) + WU-12.3 (b77fcb2) + WU-4 (7d982dc) + WU-4.1 backfill (이 커밋) → 사용자가 `git push origin main` 수동 실행 필요 (총 4 커밋)."
   queue:
     next_blocking: "WU-5 🆕 05-gate-framework.md G-1 완전성 점검 (WU-11 A + WU-12 + WU-4 완료, cross-ref-audit §4 TODO #1 해결)"
     ready_after_wu4: [WU-5, WU-9, WU-7, WU-10]
