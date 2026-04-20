@@ -135,7 +135,7 @@ L1LogEvent:
       minimum: 0
       description: "agent 호출 전체 latency (도구 호출들 합 + 모델 응답 시간)"
 
-    # ---------------- SFS 컨텍스트 ----------------
+    # ---------------- Solon 컨텍스트 ----------------
     pdca_id:
       type: [string, "null"]
       description: "PDCA-NNN — null if not in PDCA scope"

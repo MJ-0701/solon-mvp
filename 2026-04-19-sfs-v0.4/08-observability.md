@@ -43,7 +43,7 @@ affects:
 # §8. 3-Channel Observability
 
 > **Context Recap (자동 생성, 수정 금지)**
-> SFS는 모든 산출물 + Gate 결과 + Escalation 로그를 **3개 채널**에 일방향 sync한다.
+> Solon은 모든 산출물 + Gate 결과 + Escalation 로그를 **3개 채널**에 일방향 sync한다.
 > L1 (S3): 기계용 raw log / L2 (git docs submodule): SSoT, 감사용 / L3 (Human View, driver-backed): 사람용 view.
 > L3는 **driver 교체 가능한 추상 채널**. Phase 1 default=notion, driver manifest 기반 교체 (§8.11, `contract/l3-driver-interface-v1`).
 > 원칙 2.6 (로컬 상태 private)과 결합되어 race condition을 구조적으로 방지.
@@ -69,7 +69,7 @@ affects:
 
 ## 8.1 3개 채널 정의
 
-`channel/l1-s3`, `channel/l2-git-docs-submodule`, `channel/l3-notion`: SFS의 모든 관측 데이터는 **3개 분리 채널**에 흐른다. 각 채널은 **독자가 다르고**, **편집 가능성이 다르며**, **단일 진실(SSoT)에서의 위치가 다르다**.
+`channel/l1-s3`, `channel/l2-git-docs-submodule`, `channel/l3-notion`: Solon의 모든 관측 데이터는 **3개 분리 채널**에 흐른다. 각 채널은 **독자가 다르고**, **편집 가능성이 다르며**, **단일 진실(SSoT)에서의 위치가 다르다**.
 
 | 채널 | 수신자 | 저장소 | 용도 | 편집 가능? | SSoT? |
 |:---:|------|--------|------|:---:|:---:|
@@ -102,7 +102,7 @@ bkit/cowork는 git만 사용 (≈ L2 only). 결과:
 - 비용/메트릭 집계 → 별도 도구 필요
 - raw debugging → 로그가 휘발
 
-→ SFS의 3-Channel은 **분업의 비용**(sync 복잡도)을 받아들이고 **분업의 가치**(독자별 최적화)를 얻는다.
+→ Solon의 3-Channel은 **분업의 비용**(sync 복잡도)을 받아들이고 **분업의 가치**(독자별 최적화)를 얻는다.
 
 ---
 
@@ -146,12 +146,12 @@ bkit/cowork는 git만 사용 (≈ L2 only). 결과:
 ### 8.2.3 SSoT 위반 시나리오
 
 **문제**: 사용자가 Notion에서 수정 → L2와 다름 → 어느 게 진짜?
-**SFS의 답**: L3(Notion)는 항상 L2 기준으로 덮어씌워짐. **사용자 수정은 다음 sync에서 사라진다**. UI에 명시적 경고 표시.
+**Solon의 답**: L3(Notion)는 항상 L2 기준으로 덮어씌워짐. **사용자 수정은 다음 sync에서 사라진다**. UI에 명시적 경고 표시.
 
 **문제**: 동일 PDCA에 대해 두 PC에서 동시 commit
-**SFS의 답**: git 표준 충돌 해결 — `.sfs-local/`는 PC별 분리이므로 충돌 안 남, `docs/`만 git rebase로 해결.
+**Solon의 답**: git 표준 충돌 해결 — `.sfs-local/`는 PC별 분리이므로 충돌 안 남, `docs/`만 git rebase로 해결.
 
-→ 두 시나리오 모두 SFS는 **L2(git)를 단일 진실**로 선언함으로써 해결.
+→ 두 시나리오 모두 Solon은 **L2(git)를 단일 진실**로 선언함으로써 해결.
 
 ### 8.2.4 docs submodule vs 동일 repo
 
@@ -309,7 +309,7 @@ node ./node_modules/sfs-plugin/hooks/observability-sync.ts --mode=post-commit
 ### 8.5.1 gitignore 표준 항목
 
 ```gitignore
-# ───────── SFS local state (PC별, 동기화 금지) ─────────
+# ───────── Solon local state (PC별, 동기화 금지) ─────────
 .sfs-local/
 .sfs-local/logs/
 .sfs-local/cache/
@@ -342,7 +342,7 @@ sfs-plugin/config/divisions.yaml
 **시나리오**: MacBook과 Windows PC에서 같은 프로젝트를 번갈아 사용.
 
 - **나쁜 설계**: `.sfs-local/`을 git에 포함 → push 충돌 → 한쪽 작업 손실
-- **SFS 설계**: `.sfs-local/`은 무조건 PC별. push 안 함 → 충돌 자체가 발생 불가
+- **Solon 설계**: `.sfs-local/`은 무조건 PC별. push 안 함 → 충돌 자체가 발생 불가
 - **L2 작업물**: `docs/`만 push/pull. 의식적 commit이므로 사용자 통제 가능
 
 → "자동 sync로 race를 푼다"가 아니라 **"sync해야 할 항목 자체를 줄여서 race를 없앤다"**. 이것이 원칙 2.6의 본질.
@@ -439,7 +439,7 @@ L1 이벤트는 **prompt 본문을 포함**할 수 있다. 따라서:
 L3 Notion 워크스페이스의 표준 구조. 플러그인이 첫 sync 시 자동 생성.
 
 ```
-SFS Workspace (Notion top page)
+Solon Workspace (Notion top page)
 │
 ├── 📊 Current Sprint Dashboard            (Sprint별 자동 갱신)
 │   ├── Sprint Header (SP-005, 2026-04-15 ~ 2026-04-26)
@@ -518,7 +518,7 @@ L3는 Notion에 한정되지 않음. 호환 후보:
 ### 8.7.3 사용자가 Notion 페이지를 편집하면
 
 §8.2.3대로 **다음 sync에서 덮어씌워짐**. 사용자에게는 다음 안내:
-- 페이지 상단에 "🔒 이 페이지는 SFS가 자동 생성합니다. L2(`docs/`)를 수정하세요." 배너
+- 페이지 상단에 "🔒 이 페이지는 Solon이 자동 생성합니다. L2(`docs/`)를 수정하세요." 배너
 - 편집 시 sync hook이 변경 detect → "(local edit overwritten)" 로그를 L2에 기록
 
 ---
@@ -527,7 +527,7 @@ L3는 Notion에 한정되지 않음. 호환 후보:
 
 각 채널은 **독립적으로 실패 가능**해야 하고, 한 채널 실패가 다른 채널을 막으면 안 된다.
 
-| 실패 채널 | 영향 | SFS의 대응 |
+| 실패 채널 | 영향 | Solon의 대응 |
 |---------|------|---------|
 | **L1 (S3 down)** | raw log 미전송 | 로컬 `.sfs-local/logs/`에 폴백, S3 복구 시 batch upload |
 | **L2 (git push 실패)** | 원격 sync 안 됨 | local commit은 성공, 사용자가 수동 `git push` |
@@ -556,7 +556,7 @@ L1, L2, L3가 모두 가능하면 → 모두 sync. 하나가 실패하면:
 - L1 손실: 90일 이내 데이터만 손실 (장기 metric은 L2의 GateReport에서 재집계)
 - L3 손실: Notion 워크스페이스 재생성 + L2 → L3 full re-sync
 
-→ L2(git)만 백업하면 SFS 전체가 복구된다. **single backup target**의 단순성.
+→ L2(git)만 백업하면 Solon 전체가 복구된다. **single backup target**의 단순성.
 
 ---
 

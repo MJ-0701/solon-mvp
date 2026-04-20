@@ -43,7 +43,7 @@ phase1_default: false           # notion이 default, none은 opt-in
 # ============== 사용 시나리오 ==============
 use_cases:
   - "Notion/Obsidian 등 어떤 도구도 쓰지 않고 git docs로 충분한 사용자"
-  - "오프라인 환경 (인터넷 끊긴 상태에서도 SFS 사용)"
+  - "오프라인 환경 (인터넷 끊긴 상태에서도 Solon 사용)"
   - "비용 zero 추구 (외부 SaaS 0개)"
   - "L3 driver 평가 중 임시 비활성화"
   - "보안 정책상 외부 SaaS 금지 (정부/금융 등)"

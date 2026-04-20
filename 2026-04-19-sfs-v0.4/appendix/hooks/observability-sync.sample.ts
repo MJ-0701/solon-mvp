@@ -32,7 +32,7 @@
  * sfs-doc-validate가 첫 JSDoc 블록에서 frontmatter 추출.
  *
  * =====================================================================
- * SFS Observability Sync Hook (TypeScript)
+ * Solon Observability Sync Hook (TypeScript)
  * Triggered by: Claude Code PostToolUse + Stop
  * Purpose: L1 S3 → L2 git docs → L3 Notion 일방향 동기화
  *
@@ -131,7 +131,7 @@ interface SyncConfig {
 
 const config: SyncConfig = {
   s3Bucket: process.env.AWS_S3_BUCKET,
-  docsRepoPath: process.env.SFS_DOCS_PATH ?? "./docs",
+  docsRepoPath: process.env.Solon_DOCS_PATH ?? "./docs",
   notionApiKey: process.env.NOTION_API_KEY,
   notionDatabaseId: process.env.NOTION_DATABASE_ID,
 };

@@ -163,7 +163,7 @@ escalation 1회당 다음 3종 산출물 생성:
 
 ## 6.3 α-1 방식 (AC 단위 부분 재오픈) 상세
 
-`concept/alpha-1-method`: SFS의 핵심 기여. **PDCA 전체를 무효화하지 않고 문제된 AC만 reopen** → design/do 자산을 최대한 보존.
+`concept/alpha-1-method`: Solon의 핵심 기여. **PDCA 전체를 무효화하지 않고 문제된 AC만 reopen** → design/do 자산을 최대한 보존.
 
 ### 6.3.1 핵심 메커니즘 (§4.4 AC Metadata 활용)
 
@@ -197,7 +197,7 @@ acceptance_criteria:
 | G3 | ✅ — `relates_to_do` 항목만 재검증 | skip |
 | G4 | ⚠️ — reopened AC 위주이지만, 5-Axis는 PDCA 전체 다시 평가 | 정량 축은 부분, 5-Axis는 전체 |
 
-→ **G4의 5-Axis가 전체 재평가인 이유**: AC 하나 고친 결과로 전체 PDCA의 가치(Value-Fit)가 바뀔 수 있기 때문. 정량은 부분, 정성은 전체가 SFS의 균형점.
+→ **G4의 5-Axis가 전체 재평가인 이유**: AC 하나 고친 결과로 전체 PDCA의 가치(Value-Fit)가 바뀔 수 있기 때문. 정량은 부분, 정성은 전체가 Solon의 균형점.
 
 ### 6.3.3 `reopened_count`의 의미와 한계
 
@@ -307,7 +307,7 @@ Sprint 내 β escalation이 **2회 이상**이면:
 - 5회 record → 어디가 진짜 사양인지 알 수 없음
 - 누적 deviation 5건 이상이면 다음 Sprint G5에서 자동 alarm → 정리 PDCA 강제 생성
 
-→ Record는 **임시 수단**, 영구 해결책 아님. SFS는 deviation 카운터를 L3 대시보드로 표면화.
+→ Record는 **임시 수단**, 영구 해결책 아님. Solon은 deviation 카운터를 L3 대시보드로 표면화.
 
 ### 6.5.5 옵션 매트릭스
 
@@ -323,7 +323,7 @@ Sprint 내 β escalation이 **2회 이상**이면:
 
 ## 6.6 H6 Self-Learning Loop 메커니즘
 
-`concept/h6-self-learning`: SFS의 **차별화 핵심 (§9 H6)**. Escalation 이력이 다음 Sprint의 plan-validator 체크리스트로 자동 환원되어, 같은 실패가 두 번 반복되지 않게 한다.
+`concept/h6-self-learning`: Solon의 **차별화 핵심 (§9 H6)**. Escalation 이력이 다음 Sprint의 plan-validator 체크리스트로 자동 환원되어, 같은 실패가 두 번 반복되지 않게 한다.
 
 ### 6.6.1 학습 파이프라인 (5단계)
 
@@ -401,13 +401,13 @@ learnings:
 
 ### 6.6.5 H6의 차별화 가치 (§9 미리보기)
 
-bkit, cowork, 일반 AI 챗봇 모두 **이전 실패가 다음 작업 prompt에 자동 반영되지 않는다**. SFS H6는:
+bkit, cowork, 일반 AI 챗봇 모두 **이전 실패가 다음 작업 prompt에 자동 반영되지 않는다**. Solon H6는:
 1. 실패가 **구조화 데이터**로 기록됨 (free-form note 아님)
 2. 패턴 추출이 **자동** (사람이 수동 정리 X)
 3. 다음 Sprint **prompt에 강제 주입** (검증 단계로)
 4. 학습 항목이 **수명주기**를 가짐 (active/dormant)
 
-→ "SFS는 시간이 지날수록 똑똑해진다"는 주장의 메커니즘.
+→ "Solon은 시간이 지날수록 똑똑해진다"는 주장의 메커니즘.
 
 ---
 

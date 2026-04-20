@@ -106,7 +106,7 @@ v0.4-r2부터는 brownfield 모드 프로젝트에 한해 Plan 이전에 **P-1 D
 
 ### 왜 Design을 Plan에서 분리하는가
 
-bkit는 "Plan에서 설계까지" 다 한다 → 1인 개발자 편의. 하지만 SFS는:
+bkit는 "Plan에서 설계까지" 다 한다 → 1인 개발자 편의. 하지만 Solon은:
 - 6 본부가 같은 Plan을 보고 **각자 다른 Design**을 만들어야 함 (PM은 user flow, Design은 wireframe, Dev는 schema)
 - Design 단계에서 **본부 간 핸드오프 검증**(G2 Gate) 필요
 - → Plan과 Design을 분리해야 G1(input completeness)과 G2(design feasibility)가 분리 평가 가능
@@ -214,9 +214,9 @@ Initiative INI-001 "결제 도메인 도입" (declared 2026-04-19)
 | 산출물 위치 | `docs/00-initiatives/{id}/` | `docs/04-sprints/{date}-{name}/` | `docs/01-pdca/{div}/PDCA-{NNN}/` |
 | 학습 로그 | Initiative final retrospective | sprint retro | PDCA Act |
 
-### 4.2.6 bkit vs SFS Sprint 비교
+### 4.2.6 bkit vs Solon Sprint 비교
 
-| | bkit | SFS |
+| | bkit | Solon |
 |---|------|-----|
 | 상위 단위 | (없음 — Sprint가 최상위) | **Initiative** (G0 brainstorm 필수) |
 | 1 Sprint = | 1 PDCA | N PDCA (본부 수만큼 병렬) |

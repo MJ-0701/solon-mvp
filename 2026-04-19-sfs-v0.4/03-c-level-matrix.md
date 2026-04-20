@@ -48,7 +48,7 @@ affects:
 # §3. C-Level × N-Division Matrix
 
 > **Context Recap (자동 생성, 수정 금지)**
-> 이 문서는 SFS의 **조직도** 정의. §2의 원칙(특히 2.2 자기검증 금지, 2.3 Gate Operator, 2.4 모델 할당)의 구체화.
+> 이 문서는 Solon의 **조직도** 정의. §2의 원칙(특히 2.2 자기검증 금지, 2.3 Gate Operator, 2.4 모델 할당)의 구체화.
 > 여기서 정의된 `role/*`, `division/*`는 §4 이후 모든 섹션에서 참조.
 > 수정 시 `affects` 전 섹션 재검토.
 
@@ -274,7 +274,7 @@ graph TB
 | 본부장 Agent | `division/design/head` (Opus) *— activation 시점에 실체화* |
 | Worker | `division/design/worker-1` (Sonnet) *— activation 시점에 실체화* |
 | PDCA 산출물 | Figma URL or `design-tokens.json`, `components.md`, `wireframes/` |
-| Phase 1 범위 | **activation 시점에 cowork plugin 7개 skill 재활용** + SFS 본부 어댑터 |
+| Phase 1 범위 | **activation 시점에 cowork plugin 7개 skill 재활용** + Solon 본부 어댑터 |
 | Evaluator Pool | `design-critique`, `accessibility-review`, `design-handoff`, `brand-guideline-checker` |
 | 외부 인터페이스 | strategy-pm (PRD read) → Design → Dev (handoff spec) |
 
@@ -288,7 +288,7 @@ graph TB
 | 본부장 Agent | `division/dev/head` (Opus) |
 | Worker | `division/dev/worker-1` (Sonnet) — backend + frontend 통합 (Phase 1) |
 | PDCA 산출물 | 코드(repo), `api.yaml`(OpenAPI), 마이그레이션, `decisions/dev-NNN.md` |
-| Phase 1 범위 | **bkit 재활용** + SFS PDCA wrapper |
+| Phase 1 범위 | **bkit 재활용** + Solon PDCA wrapper |
 | Evaluator Pool | `code-analyzer`, `gap-detector` (bkit 기존), `dev-pdca-validator` (신규) |
 | 외부 인터페이스 | Design (handoff read, Design active 시) → Dev → QA (테스트 대상 hand-over, QA active 시) |
 
@@ -300,7 +300,7 @@ graph TB
 | 본부장 Agent | `division/qa/head` (Opus) *— activation 시점에 실체화* |
 | Worker | `division/qa/worker-1` (Sonnet) *— activation 시점에 실체화* |
 | PDCA 산출물 | `test-scenarios.md`, `qa-report.md`, Zero Script QA 로그 |
-| Phase 1 범위 | **activation 시점에 bkit qa-monitor 재활용** + SFS gate hookup |
+| Phase 1 범위 | **activation 시점에 bkit qa-monitor 재활용** + Solon gate hookup |
 | Evaluator Pool | `qa-monitor` (bkit), `coverage-checker` |
 | 외부 인터페이스 | Dev (구현 read) → QA → Infra (배포 readiness 통보, Infra active 시) |
 

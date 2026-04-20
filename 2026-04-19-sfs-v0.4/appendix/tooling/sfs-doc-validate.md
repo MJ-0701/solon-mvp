@@ -25,7 +25,7 @@ affects: []
 
 # sfs-doc-validate — 문서 의존성 검증 도구
 
-> **목적**: 모든 SFS 문서의 frontmatter (depends_on / defines / references / affects)가
+> **목적**: 모든 Solon 문서의 frontmatter (depends_on / defines / references / affects)가
 > 일관성을 갖는지 자동 검증한다. **Phase 1 동반 구현 (W11~W13).**
 
 ---
@@ -119,7 +119,7 @@ sfs-doc-validate --fix-suggest    # 자동 수정 제안
 
 ```yaml
 # .github/workflows/doc-validate.yml
-name: SFS Doc Validate
+name: Solon Doc Validate
 on: [pull_request]
 jobs:
   validate:

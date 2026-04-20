@@ -821,7 +821,7 @@ Phase 1 설계에서 결정을 미룬 항목들:
 ### 7.7.3 Phase 2 진입 조건 (gatekeeper)
 
 다음 중 **하나라도 미달**이면 Phase 2 plan 작성 중단하고 Phase 1 연장:
-- Phase 1에서 최소 2개의 실제 MVP 프로젝트를 SFS로 완주
+- Phase 1에서 최소 2개의 실제 MVP 프로젝트를 Solon로 완주
 - H6 학습 패턴이 최소 10개 축적되고 활성(active) 상태
 - Escalation-to-abort 비율이 Sprint당 1건 이하로 안정화
 - 월 비용이 목표 상한(Phase 1 $500/월) 안에 수렴

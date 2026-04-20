@@ -114,13 +114,35 @@ related_docs:
   - Gate 집합은 총 6개 = G-1 (brownfield 전용, 1회성 intake) + G1~G5 (PDCA cycle 내부, 매 sprint 반복)
   - 09-differentiation.md 에서 SFS → Solon 브랜드 swap 도 함께 진행 (컨텍스트 연계, WU-8 범위 일부 선반영)
 
+### WU-8: 도큐셋 "SFS" 단독 표기 disambiguation (brand prose → Solon)
+
+- **성격**: content (브랜드 일관성) + tooling (GH Action display name)
+- **intent**: MIG-9 Archon→Solon rename 이후에도 v0.3 시절 브랜드 이름 "SFS" 가 브랜드 프로즈로 112 occurrence 잔존. 이를 정리하여 v0.4-r3 현재 상태에서는 브랜드 = Solon 으로 통일. `/sfs` CLI prefix 와 `sfs-*` 구조적 식별자는 그대로 유지 (brand-decoupled CLI).
+- **rule**:
+  - **change (brand prose → Solon)**: "SFS는/의/가/를/과", "SFS H6", "SFS 본부", "SFS 5-Axis", "SFS Evaluator", "SFS Doc Validate" 등
+  - **keep (structural identifiers)**: `/sfs` CLI prefix, `sfs-plan`/`sfs-gates`/`sfs-doc-validate` 등 ID, `sfs-v0.4-*` doc_id, `.sfs-local/` 경로, 파일명
+  - **keep (historical refs)**: `이전 SFS/bkit 프로젝트`, `SFS-v0.3` 등 pre-rename 시절을 가리키는 명시적 역사 참조
+- **files** (14):
+  - 본문 10: `00-intro.md`, `02-design-principles.md`, `03-c-level-matrix.md`, `04-pdca-redef.md`, `05-gate-framework.md`, `06-escalate-plan.md`, `07-plugin-distribution.md`, `08-observability.md`, `09-differentiation.md`, `10-phase1-implementation.md`
+  - appendix 4: `appendix/drivers/none.manifest.yaml`, `appendix/hooks/observability-sync.sample.ts`, `appendix/schemas/l1-log-event.schema.yaml`, `appendix/tooling/sfs-doc-validate.md`
+- **치환 방식**:
+  - Korean particle 연쇄 (`SFS는/이/을/과/의`) → (`Solon은/이/을/과/의`) 로 발음 정합 매핑
+  - uppercase `SFS` 단독 → `Solon` (lowercase `/sfs`, `sfs-*` 는 미영향)
+  - 복원 3곳: `07-plugin-distribution.md:917` (이전 SFS/bkit), `07-plugin-distribution.md:1050` (SFS-v0.3 버전), `02-design-principles.md:527` (이전 SFS/bkit) → 역사 참조 그대로
+- **commit**: (WU-8 커밋 시 채워짐)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - 최종 잔존 `SFS` (전체 6개): 3 역사 참조 + 3 WORK-LOG 자기 참조 (WU-8 작업 기록 그 자체) — 모두 의도된 보존.
+  - `sfs-doc-validate.md:122` GH Action display name `"SFS Doc Validate"` → `"Solon Doc Validate"` 로 함께 변경. 파일명 `sfs-doc-validate.md` 는 structural ID 로 보존 (단, 장기적으로는 `solon-doc-validate.md` 로 파일명까지 정렬하는 게 맞음 — 별도 WU 로 분리 가능).
+  - **Multi-agent abstraction 연계**: 사용자가 WU-8 진행 중 "Codex/Gemini-CLI 에서도 사용하려면 추상화가 중요" 라고 제기. `/sfs` CLI prefix 가 이미 brand-decoupled 되어 있다는 사실이 이 질문과 직결. 별도 WU (WU-11 로 제안 예정) 에서 agent runtime 추상화 계획 수립.
+
 ---
 
 ## 다음 실행 예정 (재정렬된 큐)
 
 | 순서 | WU | 성격 | 비고 |
 |:-:|----|------|------|
-| next | WU-8 | 도큐셋 "SFS" 단독 표기 disambiguation | 저위험 grep |
+| next | WU-11 🆕 | Multi-agent runtime abstraction 설계 (Claude / Codex / Gemini-CLI) | 사용자 요청 — 긴급도 高 |
 | 2 | WU-4 | cross-ref-audit.md Phase 1 pending 중 #1 해결 | audit 소비 시작 |
 | 3 | WU-5 | 05-gate-framework.md G-1 완전성 점검 | 가벼운 read+validate |
 | 4 | WU-9 | 02-design-principles.md 원칙 13 완전성 재검증 | R3 신규 — 일찍 검증 |
