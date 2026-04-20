@@ -145,6 +145,10 @@ phase_B:
   user_response: free_text
   post_processing:
     - step: "intent classifier (sonnet) — 의도 label 추출"
+      # NOTE: 아래 labels 는 **공통 fallback 세트** 이다. branch yaml 이
+      # `intent_classification_hints` 로 branch-local label 을 추가 선언하면 classifier 는
+      # union(이 enum, branch_labels) 범위에서 분류한다. 상세 규약은 본 파일의
+      # `branch_resolution.branch_extensibility_notes` (2) 항목 참고.
       labels:
         - pre-mvp-quality-gate        # qa 전형
         - domain-terminology-drift    # taxonomy 전형
@@ -337,6 +341,66 @@ branch_resolution:
     - infra
     - strategy-pm
     - custom        # /sfs division add 호출 시
+
+  # -------------------------------------------------------------------
+  # Extensibility contract — branch 가 meta 를 어디까지 override 할 수 있나
+  # (WU-10 cleanup, 2026-04-21 — 6 branches/*.yaml 실사 결과 반영)
+  # -------------------------------------------------------------------
+  branch_extensibility_notes: |
+    branch yaml 은 아래 override / extension point 를 사용할 수 있다.
+    W10 schema 작성 시 이 contract 를 `dialog-branch.schema.yaml` 로 공식화.
+
+    1) Phase override sections (all branches):
+       - phase_B_overrides        # examples_for_branch + intent_classification_hints
+       - phase_C_overrides        # intent_based_hint + default_hint
+       - phase_D_option_rules     # option_templates + warn_conditions + intent_specific_overrides
+       - terminal_additions       # terminal/<id>.extra_side_effects 추가
+
+    2) Intent label 확장성:
+       - Phase B `post_processing.labels` enum (L148-155) 은 **공통 fallback 세트**.
+       - branch 의 `intent_classification_hints` 로 branch-local label 을 추가 가능.
+       - intent classifier (sonnet) 는 branch 로딩 후 union(enum, branch_labels) 범위에서 분류.
+
+    3) Activate / Deactivate 독립 override:
+       - branch 는 activate 경로와 deactivate 경로를 각각 독립적으로 override 할 수 있다.
+       - 예: strategy-pm.yaml 은 deactivate-primary 맥락 (Phase 1 default active) 이므로
+         `phase_B_deactivate_overrides`, `deactivate_intent_hints`,
+         `phase_C_deactivate_overrides`, `phase_D_deactivate_option_rules` 를 추가.
+       - 다른 branch 는 deactivate 시 meta 의 default flow 를 따른다.
+
+    4) Terminal sub-type 확장 패턴 `<parent-terminal>-<sub>`:
+       - branch 는 meta 의 5-terminal (`activate-full / activate-scoped / activate-temporal /
+         deactivate / cancel`) 을 sub-type 으로 분기 가능.
+       - 예: strategy-pm.yaml 의 `terminal/deactivate-scope-reduce`,
+             `terminal/deactivate-temporal-pause`, `terminal/deactivate-full`.
+       - sub-type 은 local extension — runtime 에서는 parent terminal 의 side_effects 를
+         base 로 하고 branch 의 extra_side_effects 를 merge.
+       - ⚠ W10 TODO: dialog-state.schema.yaml 의 7-value split 과 최종 정합성 결정.
+
+    5) Local extension fields (branch 고유):
+       - `warn_conditions` (design, infra, custom, strategy-pm):
+         pattern-match 기반 ⚠ 주입.
+       - `typical_parent` (taxonomy):
+         scope=scoped 시 parent_division 후보 힌트.
+       - `warn_cost_cap` payload flag (infra):
+         L1 event payload 에 cost 경고 표시 — W10 event schema 에서 공식화 TODO.
+
+    6) custom branch 전용 확장 (`branches/custom.yaml`):
+       - `phase_A_prefix.step_0_mapping_check` — Phase A 이전 기존 본부 매핑 검토.
+       - `required_metadata_for_custom` — id/name/responsibility/success_criteria/non_goals/
+         suggested_workers 필수 수집.
+       - `extra_invariants` (INV-C1/C2/C3) — custom-id-uniqueness / custom-requires-responsibility /
+         custom-tier-immutable. ⚠ W10 TODO: prime-axioms.invariants 로 이관할지 branch-local
+         유지할지 결정.
+       - `division_id: <user-provided>` — `/sfs division add <id>` 의 <id> 로 런타임 치환.
+       - `defines: branch/custom-division-add` — `/sfs division add` 명령어 대응으로
+         `branch/<id>-activation` 규약 예외 허용.
+
+    7) meta-branch value merge 규칙:
+       - 동일 key 충돌 시 branch 값 우선 (branch overrides meta).
+       - meta 는 branch 가 제공하지 않은 모든 key 의 fallback.
+       - array 필드 (예: `option_templates`) 는 "병합이 아니라 치환" — branch 가 선언하면
+         meta 의 동명 필드를 통째로 대체.
 
 # ---------------------------------------------------------------------
 # Dialog Trace Schema (요약; 상세는 appendix/schemas/dialog-state.schema.yaml)

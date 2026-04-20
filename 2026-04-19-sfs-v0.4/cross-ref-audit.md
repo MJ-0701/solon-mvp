@@ -164,6 +164,20 @@ Phase 1 W9 ~ W10 구현 시:
 
 Phase 1 W10 schema 작업 시 (A) 5-terminal 통일 (deactivate 단일, 세부 variant 는 별도 필드로 추출) (B) 7-terminal 유지 + 02/dialog.yaml 에 3-variant 반영 (C) commands/division.md prefix 정합 (bare → activate-*) 중 **사용자 결정 필요**. 권장: A — UX 단순성 + dialog SSoT 존중 + deactivation 세부 variant 는 별도 `deactivation_mode` 필드로 분리.
 
+**⚠️ 추가 W10 결정 (WU-10 발견, 2026-04-21)** — `branches/*.yaml` 6 파일 실사 결과 3 건:
+
+14. **Branch override schema 공식화** — branch 는 현재 meta 의 override point 외에 `phase_D_option_rules`, `terminal_additions`, `warn_conditions` (design/infra/custom/strategy-pm), `typical_parent` (taxonomy), `warn_cost_cap` payload (infra), `phase_A_prefix` + `required_metadata_for_custom` + `extra_invariants` (custom 전용), `phase_B_deactivate_overrides` + `deactivate_intent_hints` + `phase_C_deactivate_overrides` + `phase_D_deactivate_option_rules` (strategy-pm 전용) 을 사용. WU-10 에서는 Option β (parent dialog `branch_resolution.branch_extensibility_notes` 에 contract 문서화) 로 정리. W10 schema 작성 시 (A) `dialog-branch.schema.yaml` 신설로 공식 validation (B) `branch_extensibility_notes` 유지 + semantic-validator 만 구현 중 결정.
+
+15. **Intent label 체계** — parent `phase_B.post_processing.labels` enum (7 value) 과 branch 의 `intent_classification_hints` 사이의 authoritative 관계. WU-10 에서 β 적용 (enum 은 공통 fallback, branch 는 union 확장) — W10 에서 (A) union 규약 공식화 (B) 각 branch label 을 enum 에 병합하여 단일 enum 화 (C) label 은 free-text 로 격하하고 hint 만 유지 중 결정.
+
+16. **Terminal sub-type 확장 + 7-value split 통합** — strategy-pm.yaml 의 `terminal/deactivate-scope-reduce` / `-temporal-pause` / `-full` 3 sub-terminal + 위 WU-9 항목의 `dialog-state.schema.yaml` 7-value split 과의 정합. WU-10 에서는 `<parent>-<sub>` naming pattern 을 `branch_extensibility_notes` (4) 에 명시 — W10 에서 WU-9 항목과 통합 고려.
+
+17. **Custom branch invariants 위치** — custom.yaml 의 `extra_invariants` (INV-C1/C2/C3 — custom-id-uniqueness / custom-requires-responsibility / custom-tier-immutable) 를 (A) `prime-axioms.invariants.md` 로 이관 (B) custom.yaml 에 branch-local 유지 (C) `INV-C*` prefix convention 으로 SSoT 에 추가 + branch 는 reference 만 중 결정. WU-10 에서는 β (branch-local 유지) 적용.
+
+18. **L1 event payload schema** — infra.yaml 의 `warn_cost_cap` payload flag 는 `l1.division.activated` event 의 branch 확장 필드. W10 event schema 작성 시 `event/l1.division.*` 의 payload 필드 정의 필요 (WU-10 에서는 local extension 유지).
+
+19. **`tier` 필드 정의** — custom.yaml 의 `tier: custom` 기록 + INV-C3 의 `custom-tier-immutable`. `tier` 는 `divisions.schema.yaml` 의 필드 (core / opt-in / custom 3 값) — W10 schema 작성 시 WU-9 의 division schema 작업과 통합.
+
 Phase 1 D1 ~ D2 (코드):
 
 12. `src/engines/dialog-engine.ts`

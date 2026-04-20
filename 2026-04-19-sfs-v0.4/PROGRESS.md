@@ -2,7 +2,7 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-21T01:00:00+09:00
+last_overwrite: 2026-04-21T01:55:00+09:00
 session: "5번째 세션 `serene-fervent-wozniak` (사용자 취침 자율 진행)"
 purpose: "context reset 시 다음 세션이 본 파일 1개만 읽고 즉시 이어받을 수 있도록, 매 micro-step 마다 덮어쓰는 live snapshot. 히스토리 아님 (히스토리는 WORK-LOG.md). 4 필드 (방금 끝낸 것 / in-progress / 다음 / 중간 산출물 경로) 만 유지."
 companions:
@@ -25,33 +25,39 @@ rules:
 
 ## ① Just-Finished
 
-- **WU-14 커밋 완료** (`42e3719`) — context-reset 대비 infrastructure (tmp/ + PROGRESS.md + `.gitignore` `tmp/*` 블록). 3 files changed, 87 insertions(+).
-- **WU-14.1 in-progress 마무리 단계**: WORK-LOG.md (WU-14 + WU-14.1 entries + Track B 큐 2 행 추가 + Changelog v1.16 + v1.17) + HANDOFF-next-session.md (completed_wus WU-14/WU-14.1 추가 + unpushed_commits 12→14 + queue entry_point PROGRESS.md 로 이동) + NEXT-SESSION-BRIEFING.md (v0.3 refresh, §1 표 14 커밋 + §8 세션 요약 WU-14/14.1 행 추가) 갱신 완료. 본 PROGRESS.md 가 마지막 갱신 대상.
-- 현재 git: `main [ahead 13]` (WU-14 = `42e3719` 반영, WU-14.1 commit 직전).
+- **WU-10 step 3 완료** — 6 branch yaml 전수 validation. `tmp/wu10-findings-{qa,taxonomy,design,infra,strategy-pm,custom}.md` 6 파일 생성. 공통 gap 2 건 (#F1 override 확장, #F2 intent label 확장) + branch 별 local extension (warn_conditions, typical_parent, warn_cost_cap, deactivate-*, phase_A_prefix, extra_invariants 등) 정리.
+- **WU-10 step 4 완료** — Option β minimal cleanup 적용:
+  - `appendix/dialogs/division-activation.dialog.yaml` `branch_resolution.branch_extensibility_notes` 블록 신설 (7 항목 contract: override points, intent label union, activate/deactivate 독립 override, `<parent>-<sub>` terminal naming, local extension fields, custom 전용 확장, merge 규칙).
+  - 같은 파일 Phase B `post_processing.labels` 에 cross-ref 주석 추가 (labels 는 공통 fallback, branch union 가능).
+  - `cross-ref-audit.md §4` 에 W10 TODO 14~19 6건 추가 (branch override schema, intent label union, terminal sub-type 통합, custom invariants 위치, L1 event payload, `tier` 필드 정의).
+- **WU-14.1 커밋 완료** (`853373f`, ahead 14) — WU-14 sha backfill.
+- **WU-14 커밋 완료** (`42e3719`) — context-reset 대비 infrastructure.
 
 ## ② In-Progress
 
-- **WU-14.1 commit 직전**: 본 PROGRESS.md 덮어쓰기 저장 후 → 4 파일 (WORK-LOG.md + HANDOFF-next-session.md + NEXT-SESSION-BRIEFING.md + PROGRESS.md) 을 WU-14.1 커밋으로 staging + commit (FUSE bypass 절차 재사용).
+- **WU-10 step 5 준비** — WORK-LOG entry 작성 + FUSE bypass commit. 변경 파일 3 건 (parent dialog + cross-ref-audit + findings 6 + PROGRESS).
 
 ## ③ Next (우선순위 순)
 
-1. **WU-14.1 commit** (Task #2 완료 예정): 4 파일을 staging + commit. 커밋 후 PROGRESS.md 를 다시 한번 갱신하여 WU-14.1 sha 를 `① Just-Finished` 로 이동. (단, 본 PROGRESS 자체가 커밋 대상이므로 "커밋 직전 snapshot" 과 "커밋 직후 sha 반영 snapshot" 사이에 약간의 sha mismatch 는 불가피 — 다음 micro-step 에서 PROGRESS 만 재덮어쓰기로 보정.)
-2. **WU-10 step 1** (Task #3): `ls appendix/dialogs/branches/` → `tmp/wu10-branches-list.txt` 덤프 + 파일 개수/이름 확인.
-3. **WU-10 step 2** (Task #4): SSoT (division-activation.dialog.yaml / dialog-state.schema.yaml / 02 §2.13.5 / 03 §3.3) 발췌 → `tmp/wu10-ssot-refs.md`.
-4. **WU-10 step 3** (Task #5): 각 branch yaml validate → `tmp/wu10-findings-{branch}.md`.
-5. **WU-10 step 4** (Task #6): Option β cleanup 적용 (불일치마다 A/β/C 제시 후 β 기본 채택, 의미 결정은 cross-ref-audit §4 이관).
-6. **WU-10 step 5** (Task #7): WORK-LOG entry + commit.
-7. **WU-10.1 backfill** (Task #8): WU-10 sha WORK-LOG backfill + HANDOFF frontmatter 갱신 + PROGRESS 덮어쓰기.
+1. **WU-10 step 5** (Task #7): WORK-LOG entry 작성 + FUSE bypass commit.
+   - staged: `appendix/dialogs/division-activation.dialog.yaml`, `cross-ref-audit.md`, `WORK-LOG.md`, `PROGRESS.md`, `tmp/wu10-*.md` 8 파일.
+2. **WU-10.1 backfill** (Task #8): WU-10 sha backfill + HANDOFF/BRIEFING/PROGRESS refresh + 커밋.
+3. (세션 계속 가능하면) WU-11~ queue 진입 — HANDOFF frontmatter `queue.ready_after_wu14` 또는 WORK-LOG Track B 테이블 참고.
 
 ## ④ Artifacts (현재 시점 중간 산출물 위치)
 
 | 산출물 | 경로 | 상태 |
 |--------|------|:-:|
-| WU-7 최종 결과 (plugin.json.sample) | `appendix/samples/plugin.json.sample` | ✅ 커밋됨 (`ec263c5`) |
+| WU-7 최종 결과 | `appendix/samples/plugin.json.sample` | ✅ 커밋됨 (`ec263c5`) |
 | WU-7.1 refresh | HANDOFF + BRIEFING + WORK-LOG | ✅ 커밋됨 (`af306e0`) |
 | WU-14 infrastructure | `.gitignore` + `tmp/.gitkeep` + `PROGRESS.md` | ✅ 커밋됨 (`42e3719`) |
-| WU-14.1 refresh | WORK-LOG + HANDOFF + BRIEFING + PROGRESS 갱신 | ⏳ staging 직전, 미커밋 |
-| WU-10 exploration dump | `tmp/wu10-*.{txt,md}` (예정) | ⏳ 미생성 |
+| WU-14.1 refresh | WORK-LOG + HANDOFF + BRIEFING + PROGRESS | ✅ 커밋됨 (`853373f`) |
+| WU-10 step 1 dump | `tmp/wu10-branches-list.txt` | ✅ 생성 완료 |
+| WU-10 step 2 SSoT refs | `tmp/wu10-ssot-refs.md` | ✅ 생성 완료 |
+| WU-10 step 3 findings | `tmp/wu10-findings-{qa,taxonomy,design,infra,strategy-pm,custom}.md` | ✅ 6/6 완료 |
+| WU-10 step 4 cleanup | parent dialog `branch_resolution.branch_extensibility_notes` + Phase B labels 주석 + cross-ref-audit §4 TODO 6건 | ✅ 적용 완료 (미커밋) |
+| WU-10 최종 commit | (step 5 에서 실행) | ⏳ 미커밋 |
+| WU-10.1 refresh | HANDOFF + BRIEFING + WORK-LOG + PROGRESS | ⏳ 미시작 |
 
 ## 운영 규칙 (본 세션 시작부터 적용)
 
