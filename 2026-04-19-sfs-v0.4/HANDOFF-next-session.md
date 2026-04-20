@@ -50,12 +50,14 @@ round4_bridge:
     - "WU-13: 101030f — NEXT-SESSION-BRIEFING.md 신설 (세션 간 진입 브리핑 9-섹션, ~180 lines, living handoff doc)"
     - "WU-13.1: 899643a — sha 101030f backfill + HANDOFF frontmatter completed_wus 1 WU 추가 + unpushed_commits 갱신"
     - "WU-7: ec263c5 — 07-plugin-distribution.md §7.2 plugin.json 예시 → appendix/samples/plugin.json.sample 분리 (Option β skeleton+sample: 07 본문 slim + _meta/$schema 포함 완전본 84 lines 신규 + INDEX.md §1 Hooks&Tooling&Samples (3) 확장 + cross-ref-audit §1.2/§5 동기화)"
-    - "WU-7.1: (이 커밋) — sha ec263c5 backfill + HANDOFF frontmatter completed_wus 1 WU 추가 + unpushed_commits 10→12 갱신 + NEXT-SESSION-BRIEFING.md §1 unpushed 표 / §2 next task / §8 session 요약 refresh"
-  unpushed_commits: "현 세션 새 로컬 커밋 = WU-12.2 (8ab660c) + WU-12.3 (b77fcb2) + WU-4 (7d982dc) + WU-4.1 (1c375aa) + WU-5 (20c3474) + WU-5.1 (9c4d6c0) + WU-9 (816d751) + WU-9.1 (6884bbd) + WU-13 (101030f) + WU-13.1 (899643a) + WU-7 (ec263c5) + WU-7.1 backfill (이 커밋) → 사용자가 `git push origin main` 수동 실행 필요 (총 12 커밋)."
+    - "WU-7.1: af306e0 — sha ec263c5 backfill + HANDOFF frontmatter completed_wus 1 WU 추가 + unpushed_commits 10→12 갱신 + NEXT-SESSION-BRIEFING.md §1 unpushed 표 / §2 next task / §8 session 요약 refresh"
+    - "WU-14: 42e3719 — context-reset 대비 infrastructure 셋업 (사용자 mid-session 지시). tmp/ 폴더 (.gitignore 로 내용 제외 + .gitkeep 만 track) + PROGRESS.md (덮어쓰기 방식 live 4-필드 snapshot, 매 micro-step 마다 재작성). `.gitignore` `tmp/` → `tmp/*` 수정 (ignored 디렉토리 내부 미탐색 bug 회피)"
+    - "WU-14.1: (이 커밋) — sha 42e3719 backfill + HANDOFF frontmatter completed_wus 2 WU 추가 (WU-14 + WU-14.1) + unpushed_commits 12→14 갱신 + NEXT-SESSION-BRIEFING.md §1 unpushed 표 14 커밋 refresh + §8 5번째 세션 요약에 WU-14/WU-14.1 추가 + PROGRESS.md 덮어쓰기 (① Just-Finished 에 WU-14 sha 반영, ② In-Progress 로 WU-14.1 배치)"
+  unpushed_commits: "현 세션 새 로컬 커밋 = WU-12.2 (8ab660c) + WU-12.3 (b77fcb2) + WU-4 (7d982dc) + WU-4.1 (1c375aa) + WU-5 (20c3474) + WU-5.1 (9c4d6c0) + WU-9 (816d751) + WU-9.1 (6884bbd) + WU-13 (101030f) + WU-13.1 (899643a) + WU-7 (ec263c5) + WU-7.1 (af306e0) + WU-14 (42e3719) + WU-14.1 backfill (이 커밋) → 사용자가 `git push origin main` 수동 실행 필요 (총 14 커밋)."
   queue:
     next_blocking: "WU-10 appendix/dialogs/branches/ 6 본부 YAML schema 정합성 검증 (중위험 batch, WU-5/WU-9 패턴 — read+validate → Option β)"
-    ready_after_wu7: [WU-10]
-    entry_point_for_next_session: "NEXT-SESSION-BRIEFING.md (9-섹션, 5분 진입 가이드 — 2026-04-21 WU-7.1 에서 refresh 됨)"
+    ready_after_wu14: [WU-10]
+    entry_point_for_next_session: "PROGRESS.md (live single-frame snapshot — 본 파일부터 읽고 ② In-Progress + ③ Next 로 즉시 진입) → NEXT-SESSION-BRIEFING.md (5분 진입 가이드, 보조)"
     blocked: [WU-6 (claude-shared-config/.git IP 경계 — 사용자 결정 필요)]
   user_new_directive:
     raw: "sfs를 claude 뿐만 아니라 codex랑 gemini-cli에서도 사용하고 싶거든?? 그래서 추상화 하는게 중요할듯?!"

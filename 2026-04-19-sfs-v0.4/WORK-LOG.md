@@ -511,6 +511,45 @@ related_docs:
 
 ---
 
+### WU-14: context-reset 대비 infrastructure 셋업 (tmp/ + PROGRESS.md)
+
+- **성격**: infra (사용자 지시 mid-session)
+- **intent**: 사용자가 취침한 상태에서 세션이 토큰 소진으로 중단되어도 작업 유실 최소화. 3 mechanism 도입:
+  1. `tmp/` 폴더 — 세션 중간 산출물 (draft, checksum, dump) 즉시 저장. `.gitignore` 로 내용은 제외, `.gitkeep` 만 track.
+  2. `PROGRESS.md` — 덮어쓰기 방식 live single-frame snapshot. 4 필드 (① Just-Finished / ② In-Progress / ③ Next / ④ Artifacts). 매 micro-step 완료 시 전체 재작성.
+  3. TodoList 를 WU 당 4~8 개 micro-step 으로 잘게 쪼개기 (유실되더라도 손해 최소).
+- **files**:
+  - `2026-04-19-sfs-v0.4/.gitignore` (신규 WU-14 블록 — `tmp/*` + `!tmp/.gitkeep`)
+  - `2026-04-19-sfs-v0.4/tmp/.gitkeep` (신규, 폴더 purpose 설명)
+  - `2026-04-19-sfs-v0.4/PROGRESS.md` (신규, 73 lines)
+- **commit**: `42e3719`
+- **pushed**: pending (user terminal)
+- **notes**:
+  - 사용자 발화 (원문): "토큰사용량을 너가 실시간으로 체크 못하니까 토큰을 다 사용하게 되면 작업이 유실되겠지?? 그래서 PROGRESS.md 같은거 만들어서 매 단계마다 방금 뭘 끝냈고, 다음에 뭘 할 차례인지, 중간 산출물은 어디 있는지를 덮어쓰며 기록하는식으로 가는게 베스트일거 같고".
+  - **WORK-LOG vs PROGRESS 역할 분리**: WORK-LOG = WU 단위 append-only history (재현 가능한 결정 로그). PROGRESS = 매 micro-step live snapshot (덮어쓰기, 4 필드). 둘 다 필요.
+  - **HANDOFF vs PROGRESS 관계**: HANDOFF = frontmatter SSoT (WU 커밋마다 갱신, structured data). PROGRESS = 더 finer-grained 실행 상태 (micro-step 마다 갱신, natural language). 다음 세션은 PROGRESS 먼저 읽어서 ② In-Progress 파악 → ③ Next 로 바로 진입 → HANDOFF 로 배경 confirmation.
+  - **`.gitignore` pattern 주의점**: 초기에 `tmp/` 로 작성했다가 git 이 ignored 디렉토리 내부를 탐색하지 않아 `!tmp/.gitkeep` 예외가 무효화됨을 발견 → `tmp/*` 로 수정. 주석에도 이 hazard 명시 (다음 세션이 같은 실수 하지 않도록).
+  - **WU-14.1 계획**: sha backfill + HANDOFF frontmatter `completed_wus` 에 WU-14 추가 + `unpushed_commits` 12 → 14 커밋 갱신 + NEXT-SESSION-BRIEFING.md §1 표 refresh + PROGRESS.md 의 ① Just-Finished 에 WU-14 sha 반영.
+
+---
+
+### WU-14.1: sha `42e3719` backfill + HANDOFF / BRIEFING / PROGRESS refresh
+
+- **성격**: infra
+- **intent**: WU-14 커밋 sha WORK-LOG backfill + HANDOFF frontmatter `completed_wus` 에 WU-14 추가 + `unpushed_commits` 12 → 14 커밋 갱신 + NEXT-SESSION-BRIEFING.md §1 표 refresh + PROGRESS.md 덮어쓰기 (WU-14 commit sha 반영, WU-14.1 을 ② In-Progress 로).
+- **files**:
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (WU-14 entry `commit` 실체화 + 본 entry + Track B 큐 테이블에 WU-14/WU-14.1 행 추가 + Changelog v1.16/v1.17)
+  - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (frontmatter `completed_wus` 에 WU-14 / WU-14.1 2 entries 추가 + `unpushed_commits` 12→14)
+  - `2026-04-19-sfs-v0.4/NEXT-SESSION-BRIEFING.md` (§1 unpushed 표 → 14 커밋 refresh + §8 5번째 세션 요약에 WU-14/WU-14.1 추가)
+  - `2026-04-19-sfs-v0.4/PROGRESS.md` (덮어쓰기 — ① Just-Finished 에 WU-14 sha 반영 + WU-14.1 을 ② In-Progress 로)
+- **commit**: (WU-14.1 커밋 시 채워짐)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - PROGRESS.md 자체를 WU-14.1 에서 갱신하는 것이 규칙상 올바름 (WU-14 본체 커밋 후 첫 micro-step 에서 덮어쓰기).
+  - Track B 큐에서 WU-14.1 제거 → WU-10 이 truly next_blocking (WU-7.1 완료 후에도 WU-14 / WU-14.1 이 끼어들었으므로 WU-14.1 까지 완료 후에야 WU-10 가시화).
+
+---
+
 ## 다음 실행 예정 (재정렬된 큐 — WU-5 완료 후)
 
 **2 Track 구조** — 사용자가 다음주 (2026-04-27~) 부터 admin panel MVP cycle 1 을 실제로 돌리는 동안, Claude 세션은 bridge WU 를 병렬로 소화.
@@ -541,6 +580,8 @@ related_docs:
 | ✅ done | WU-13.1 | sha 101030f backfill + HANDOFF frontmatter 갱신 | infra |
 | ✅ done | WU-7 | 07-plugin-distribution plugin.json 샘플 파일 분리 (`appendix/samples/plugin.json.sample` 신설, Option β skeleton+sample) | Phase 1 asset 준비 |
 | ✅ done | WU-7.1 | sha ec263c5 backfill + HANDOFF frontmatter 갱신 + NEXT-SESSION-BRIEFING.md §1 refresh | infra |
+| ✅ done | WU-14 | context-reset 대비 infrastructure (tmp/ + PROGRESS.md + `.gitignore` 블록) | infra (사용자 지시) |
+| ✅ done | WU-14.1 | sha 42e3719 backfill + HANDOFF / BRIEFING / PROGRESS refresh | infra |
 | next | WU-10 | appendix/dialogs/branches/ 6 본부 YAML schema 정합성 | 중위험 batch |
 | later | WU-11 B | Claude-specific 파일 frontmatter `layer:` 필드 + 본문 힌트 주석 | Phase 1 안정화 후 재검토 |
 | Phase 2 | WU-11 C | Codex / Gemini-CLI 어댑터 초안 (`appendix/runtime-adapters/`) | Phase 2 go 결정 후 |
@@ -582,3 +623,5 @@ related_docs:
 - **v1.13** (2026-04-20 심야, 4번째 세션 연속): **WU-13.1 sha `101030f` backfill**. WU-13 entry 의 `commit` 필드 실체화 + HANDOFF frontmatter `unpushed_commits` 9→10 커밋으로 갱신.
 - **v1.14** (2026-04-21 새벽, 5번째 세션 `serene-fervent-wozniak` 사용자 취침 전 자율 진행): **WU-7 완료** (`ec263c5`) — 07-plugin-distribution.md §7.2 의 70-line inline JSON 블록을 `appendix/samples/plugin.json.sample` (84 lines, `_meta` 포함) 로 분리. 07 본문은 top-level 필드 skeleton + WU-7 설명 blockquote + SSoT 경계 (§7.2.1/§7.2.2 의미 SSoT, 샘플 파일 = 현 시점 값 스냅샷) 명시. INDEX.md §1 "Hooks & Tooling (2)" → "Hooks & Tooling & Samples (3)" 확장. cross-ref-audit.md §1.2 실물 파일 목록 + §5 Sanity verdict "20+ → 21+" 동기화. WU-7.1 에서 sha backfill + HANDOFF + NEXT-SESSION-BRIEFING.md §1 refresh 예정. Track B 큐에서 WU-7 제거 → WU-10 이 next_blocking.
 - **v1.15** (2026-04-21 새벽, 5번째 세션 연속): **WU-7.1 sha `ec263c5` backfill**. WU-7 entry 의 `commit` 필드 실체화 + HANDOFF frontmatter `completed_wus` 에 WU-7 행 추가 + `unpushed_commits` 10 → 12 커밋 (WU-7 + WU-7.1) 갱신. NEXT-SESSION-BRIEFING.md §1 unpushed 커밋 목록 표를 WU-13.1 / WU-7 / WU-7.1 포함 12 커밋으로 refresh (WU-13.1 notes 에 적힌 "다음 세션 첫 작업" 을 현 세션에서 선행 소화).
+- **v1.16** (2026-04-21 새벽, 5번째 세션 mid-session interrupt): **WU-14 완료** (`42e3719`) — 사용자 지시로 context-reset 대비 infrastructure 도입. `tmp/` 폴더 (세션 중간 산출물 저장, `.gitignore` 로 내용 제외 + `.gitkeep` 만 track) + `PROGRESS.md` (덮어쓰기 방식 live 4-필드 snapshot, 매 micro-step 마다 재작성). 사용자 원문: "토큰을 다 사용하게 되면 작업이 유실되겠지?? 그래서 PROGRESS.md 같은거 만들어서... 덮어쓰며 기록하는식으로 가는게 베스트". `.gitignore` pattern 초기 작성 `tmp/` 가 ignored 디렉토리 내부 미탐색 bug 유발 → `tmp/*` 로 수정 + 주석에 hazard 명시. WU-14.1 에서 sha backfill + HANDOFF/BRIEFING/PROGRESS refresh 예정.
+- **v1.17** (2026-04-21 새벽, 5번째 세션 연속): **WU-14.1 sha `42e3719` backfill**. WU-14 entry 의 `commit` 필드 실체화 + HANDOFF frontmatter `completed_wus` 에 WU-14 / WU-14.1 2 entries 추가 + `unpushed_commits` 12 → 14 커밋 갱신. NEXT-SESSION-BRIEFING.md §1 unpushed 표 14 커밋 refresh + §8 5번째 세션 요약에 WU-14 / WU-14.1 추가. PROGRESS.md 덮어쓰기 (① Just-Finished 에 WU-14 sha 반영, ② In-Progress 로 WU-14.1 배치). Track B 큐에서 WU-14.1 완전 제거 → WU-10 이 truly next_blocking.
