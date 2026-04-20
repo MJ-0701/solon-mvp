@@ -45,11 +45,12 @@ related_docs:
 - **intent**: 일주일 bridge 기간 동안 "작은 단위 → 기록 → 커밋" 루프의 출발점 문서. 새 Claude 가 이 repo 를 열었을 때 "2026-04-20~04-27 사이에 무슨 일이 있었지?" 를 WORK-LOG.md 한 파일만 봐도 파악 가능하게 만드는 것이 목표.
 - **files**:
   - `2026-04-19-sfs-v0.4/WORK-LOG.md` (신규)
-- **commit**: (WU-1 커밋 시점에 채워짐)
+- **commit**: `7b8dae6` "WU-1: WORK-LOG.md 신설 + d034d0d backfill"
 - **pushed**: pending (user terminal)
 - **notes**:
   - bridge 기간 종료 (새 Claude 합류) 시점에 이 파일을 archive 로 이동 또는 MIGRATION-NOTES.md §3 로 병합할지는 그때 재결정.
   - WU 번호는 전역 단일 카운터 (WU-1, WU-2, ... — 날짜 구분 없이 증가).
+  - FUSE 마운트 `.git/index.lock` unlink 불가 이슈 재발 시 우회 절차: `cp -r .git /tmp/agent_git_backup && rm /tmp/agent_git_backup/index.lock && GIT_DIR=/tmp/agent_git_backup GIT_WORK_TREE=<worktree> git <cmd>` → 완료 후 rsync 역전송.
 
 ### WU-0 (backfill): d034d0d — full-scope typo + stale-ref cleanup (Option ③)
 
