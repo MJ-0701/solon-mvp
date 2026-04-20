@@ -75,19 +75,35 @@ related_docs:
 
 ---
 
-## 다음 실행 예정 (큐)
+### WU-2: HANDOFF-next-session.md Round 4 Bridge open (v2.6-final → v2.7-bridge)
 
-| 우선순위 | WU | 성격 |
-|:-:|----|------|
-| next | WU-2 | HANDOFF-next-session.md Round 4 open + full-scope cleanup 반영 (v2.7 bump) |
-| | WU-3 | 도큐셋 G1~G5 → "G-1 + G1~G5" 일관성 propagation |
-| | WU-4 | cross-ref-audit.md Phase 1 pending 첫 1개 해결 |
-| | WU-5 | 05-gate-framework.md G-1 내용 완전성 점검 |
-| | WU-6 | claude-shared-config/.git IP 경계 재정리 (사용자 결정 필요) |
-| | WU-7 | 07-plugin-distribution.md plugin.json 샘플 파일 분리 |
-| | WU-8 | 도큐셋 "SFS" 단독 표기 disambiguation |
-| | WU-9 | 02-design-principles.md 원칙 13 완전성 재검증 |
-| | WU-10 | appendix/dialogs/branches/ 6 본부 YAML schema 정합성 |
+- **성격**: infra
+- **intent**: Round 3 은 종결됐지만 새 Claude 투입 전까지 bridge 기간이 있음. HANDOFF 는 "handoff entry point" 역할만 남기고, 실제 진행 로그는 WORK-LOG.md 로 이관. frontmatter 에 `round4_bridge` 블록 신설 + top intro 에 🆕 [Round 4 Bridge 상태] 박스 추가.
+- **files**:
+  - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (frontmatter 17줄 교체 + top intro 박스 1개 추가)
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (본 엔트리 + 큐 재정렬)
+- **commit**: (WU-2 커밋 시 채워짐)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - version 2.6-final → 2.7-bridge
+  - valid_until 재정의: "새 Claude (개인 계정) 합류 후 첫 세션이 v3.0 으로 bump 할 때까지"
+  - critical_rule: "README + INDEX + HANDOFF + WORK-LOG 이 유일한 인수인계 채널"
+  - 세션 경로 stale 참조 (`optimistic-adoring-fermi`) 제거 → `<session-path>` placeholder
+
+---
+
+## 다음 실행 예정 (재정렬된 큐)
+
+| 순서 | WU | 성격 | 비고 |
+|:-:|----|------|------|
+| next | WU-3 | G1~G5 → "G-1 + G1~G5" 일관성 propagation | 저위험 grep |
+| 2 | WU-8 | 도큐셋 "SFS" 단독 표기 disambiguation | 저위험 grep (WU-3 과 pair) |
+| 3 | WU-4 | cross-ref-audit.md Phase 1 pending 중 #1 해결 | audit 소비 시작 |
+| 4 | WU-5 | 05-gate-framework.md G-1 완전성 점검 | 가벼운 read+validate |
+| 5 | WU-9 | 02-design-principles.md 원칙 13 완전성 재검증 | R3 신규 — 일찍 검증 |
+| 6 | WU-7 | 07-plugin-distribution plugin.json 샘플 파일 분리 | Phase 1 asset 준비 |
+| 7 | WU-10 | appendix/dialogs/branches/ 6 본부 YAML schema 정합성 | 중위험 batch |
+| — | WU-6 | claude-shared-config/.git IP 경계 재정리 | **BLOCKED** (사용자 결정 필요) |
 
 ---
 

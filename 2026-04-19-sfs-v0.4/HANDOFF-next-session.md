@@ -1,35 +1,53 @@
 ---
 doc_id: handoff-2026-04-20-solon-v0.4-r3-complete
-title: "인수인계 — Round 3 종결 (Solon v0.4-r3, 11/11 완료)"
-version: 2.6-final
+title: "인수인계 — Round 3 종결 + Round 4 Bridge (Solon v0.4-r3)"
+version: 2.7-bridge
 created: 2026-04-20 (오전)
-updated: 2026-04-20 (새벽 — Round 3 종결 closure, 11/11 완료 snapshot, 다음 세션은 사용자 의중에 따라 Phase 1 킥오프 or 개인 계정 이관)
+updated: 2026-04-20 (오후 — Round 4 Bridge open, 일주일 bridge 작업 루프 개시, WORK-LOG.md 로그 이관)
 author: "Claude (direct 지시 by 채명정)"
-valid_until: "Round 4 요구 추가 시 / Phase 1 킥오프 완료 시 / 개인 계정 이관 후 첫 세션이 v3.0 으로 bump 할 때까지"
-status: "Round 3 완료 (11/11) — 다음: 사용자 의중 (Phase 1 킥오프 or 개인 계정 이관)"
+valid_until: "새 Claude (개인 계정) 합류 후 첫 세션이 v3.0 으로 bump 할 때까지"
+status: "Round 4 Bridge 진행중 (WU 루프) — 2026-04-20 ~ 새 Claude 투입 전"
 account_context:
-  current: "회사 계정 (jack2718@green-ribbon.co.kr)"
+  current: "회사 계정 (jack2718@green-ribbon.co.kr) — GitHub origin (MJ-0701/solon) 에 push 완료"
   will_move_to: "채명정 개인 계정 (약 1주 이내)"
   fork_possible: false
-  migration_strategy: "문서 기반 cold-start 재개"
-  critical_rule: "로컬 문서 (README/INDEX/HANDOFF/docset 본문) 이 유일한 인수인계 채널"
+  migration_strategy: "GitHub clone + WORK-LOG.md 기반 continuation"
+  critical_rule: "README (root STOP&READ) + INDEX + HANDOFF + WORK-LOG 이 유일한 인수인계 채널"
 round3_summary:
   total_tasks: 11
   completed: 11
   in_progress: 0
   pending: 0
-  closure_note: "v0.4-r3 설계 확정 — Phase 1 구현 또는 개인 계정 이관 대기"
+  closure_note: "v0.4-r3 설계 확정"
+round4_bridge:
+  opened: 2026-04-20
+  purpose: "새 Claude 환경 투입 전까지 repo 점진 개선 (작은 WU 단위 + WORK-LOG 기록)"
+  active_log: "WORK-LOG.md (WU-1 부터)"
+  post_migration_tasks:
+    - "d034d0d (full-scope typo + stale-ref cleanup)"
+    - "WU-1 (WORK-LOG.md 신설)"
+    - "WU-2 (HANDOFF v2.7-bridge bump) — 본 파일"
+  queue:
+    ready: [WU-3, WU-4, WU-5, WU-7, WU-8, WU-9, WU-10]
+    blocked: [WU-6 (claude-shared-config/.git IP 경계 — 사용자 결정 필요)]
 ---
 
-# 📋 다음 세션 인수인계 문서 (Round 3 종결 snapshot, v2.6-final)
+# 📋 다음 세션 인수인계 문서 (Round 3 종결 + Round 4 Bridge, v2.7-bridge)
 
-> **이 문서를 제일 먼저 읽어라.** Round 3 (11-task batch) **11/11 완료, 0개 남음.** v0.4-r3 설계 docset 확정 완료. 다음 세션은 사용자 의중에 따라 Phase 1 킥오프 (시나리오 B) 또는 개인 계정 이관 (시나리오 C) 로 분기.
-> 설계 docset 경로: `/sessions/optimistic-adoring-fermi/mnt/agent_architect/2026-04-19-sfs-v0.4/`
+> **이 문서를 제일 먼저 읽어라.** Round 3 (11-task batch) **11/11 완료, 0개 남음.** v0.4-r3 설계 docset 확정 완료. **2026-04-20 Round 4 Bridge open** — 새 Claude 환경 투입 전까지 작은 WU 단위로 repo 점진 개선 중. **진행 로그는 [WORK-LOG.md](WORK-LOG.md) 참조.**
+> 설계 docset 경로: `<session-path>/mnt/agent_architect/2026-04-19-sfs-v0.4/` (GitHub: https://github.com/MJ-0701/solon)
 > ※ 세션 경로는 매번 바뀜. `2026-04-19-sfs-v0.4/` 이 폴더 이름만 고정.
 >
-> ⚠️ **[CROSS-ACCOUNT 경보]** 이 작업은 조만간 (약 1주 이내) 회사 계정 → 채명정 개인 계정으로 이관됨. 계정 간 session fork 불가 → 로컬 문서 = 유일한 인수인계 채널. 모든 의사결정/히스토리는 파일로 남길 것. §10 + `CROSS-ACCOUNT-MIGRATION.md` 참조.
+> ⚠️ **[CROSS-ACCOUNT 경보]** 이 작업은 조만간 (약 1주 이내) 회사 계정 → 채명정 개인 계정으로 이관됨. 계정 간 session fork 불가 → GitHub repo (MJ-0701/solon) + 로컬 문서 = 유일한 인수인계 채널. §10 + `CROSS-ACCOUNT-MIGRATION.md` 참조.
 >
-> 🟢 **[Round 3 상태]** Round 3 종결. §2.R3 섹션은 Round 3 내역 아카이브. 다음 세션은 사용자가 GO 신호 내면 §4.3 (Phase 1 킥오프) 또는 §4.4 (이관) 분기.
+> 🟢 **[Round 3 상태]** Round 3 종결. §2.R3 섹션은 Round 3 내역 아카이브. 본 HANDOFF 는 handoff entry point 역할만 수행하고, 실제 진행 로그는 **WORK-LOG.md** (WU-1 부터) 로 이관.
+>
+> 🆕 **[Round 4 Bridge 상태]** (2026-04-20~)
+> - 목적: 새 Claude 투입 전 bridge 작업 (repo 정합성/보강)
+> - 로그: [WORK-LOG.md](WORK-LOG.md) (WU 단위)
+> - 완료: WU-0 (d034d0d full-scope cleanup), WU-1 (WORK-LOG 신설), **WU-2 (본 파일 v2.7 bump)**
+> - 대기: WU-3 ~ WU-10 (WORK-LOG.md 큐 참조)
+> - BLOCKED: WU-6 (claude-shared-config/.git IP 경계 재정리 — 사용자 결정 대기)
 
 ---
 
