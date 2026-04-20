@@ -1,0 +1,212 @@
+# ---
+# doc_id: sfs-v0.4-appendix-schema-l1-log-event
+# title: "L1 Log Event v1 - Full Schema"
+# version: 0.4
+# status: draft
+# last_updated: 2026-04-19
+# audience: [implementers, ops, observability-engineers]
+#
+# depends_on:
+#   - sfs-v0.4-s08-observability
+#
+# defines:
+#   - schema/l1-log-event.full
+#   - rule/l1-event-id-format
+#   - rule/l1-trace-context-propagation
+#
+# references:
+#   - channel/l1-s3 (defined in: s08)
+#   - rule/local-state-gitignore (defined in: s08)
+#   - schema/gate-report-v1 (defined in: s05)
+#   - schema/escalation-v1 (defined in: s06)
+#
+# affects: []
+# ---
+
+# =====================================================================
+# 목적
+# - L1 채널 (S3 raw, append-only)에 저장되는 단일 이벤트의 형식.
+# - sfs-plugin/hooks/observability-sync.sample.ts (PostToolUse) 가
+#   매 tool 호출당 1건 생성.
+# =====================================================================
+
+L1LogEvent:
+  type: object
+  required:
+    - event_id
+    - timestamp
+    - session_id
+    - agent_id
+    - agent_role
+    - model
+    - tool_calls
+    - input_tokens
+    - output_tokens
+    - latency_ms
+    - trace_id
+
+  properties:
+    # ---------------- 식별 ----------------
+    event_id:
+      type: string
+      pattern: "^evt_\\d{13}_[a-z0-9]{6}$"
+      description: "evt_{timestamp_ms}_{random6}"
+
+    timestamp:
+      type: string
+      format: date-time
+      description: "ISO-8601, UTC"
+
+    session_id:
+      type: string
+      description: "Claude Code/Desktop 세션 ID (PostToolUse가 자동 주입)"
+
+    trace_id:
+      type: string
+      pattern: "^trc_[a-zA-Z0-9_-]+$"
+      description: "분산 trace 식별자 (PDCA, Gate, Escalate 모두 동일 trace_id 공유)"
+
+    parent_event_id:
+      type: string
+      description: "(optional) 부모 이벤트의 event_id — Tier 2 evaluator 호출 체인 추적"
+
+    # ---------------- Agent 컨텍스트 ----------------
+    agent_id:
+      type: string
+      description: "agent name + version (e.g., dev-lead@1.0.0, gap-detector@2.1.3)"
+
+    agent_role:
+      type: string
+      enum: [ceo, cto, cpo, lead, worker, evaluator, helper, system]
+      description: "역할 분류 (s03 model allocation rules에 정의)"
+
+    division:
+      type: string
+      enum: [strategy-pm, taxonomy, design, dev, qa, infra, cross, none]
+      description: "담당 본부 (s03)"
+
+    model:
+      type: string
+      description: "사용된 LLM 모델 (e.g., claude-opus-4-7, claude-sonnet-4-6, claude-haiku-4-5)"
+
+    # ---------------- Tool 호출 ----------------
+    tool_calls:
+      type: array
+      items:
+        type: object
+        required: [name, input, output]
+        properties:
+          name:
+            type: string
+            description: "tool 이름 (e.g., Read, Write, Bash, Task, mcp__notion__*)"
+          input:
+            description: "tool 입력 (truncated to 50KB if larger)"
+          output:
+            description: "tool 출력 (truncated to 50KB if larger)"
+          duration_ms:
+            type: integer
+            description: "(optional) tool 단일 호출 latency"
+
+    # ---------------- 비용 / 성능 ----------------
+    input_tokens:
+      type: integer
+      minimum: 0
+
+    output_tokens:
+      type: integer
+      minimum: 0
+
+    cache_creation_tokens:
+      type: integer
+      minimum: 0
+      description: "(optional) Anthropic prompt caching 사용 시"
+
+    cache_read_tokens:
+      type: integer
+      minimum: 0
+
+    cost_usd:
+      type: number
+      minimum: 0
+      description: "추정 비용 (모델 단가 × 토큰)"
+
+    latency_ms:
+      type: integer
+      minimum: 0
+      description: "agent 호출 전체 latency (도구 호출들 합 + 모델 응답 시간)"
+
+    # ---------------- SFS 컨텍스트 ----------------
+    pdca_id:
+      type: [string, "null"]
+      description: "PDCA-NNN — null if not in PDCA scope"
+
+    gate_id:
+      type: [string, "null"]
+      enum: [G1, G2, G3, G4, G5, null]
+      description: "현재 실행중인 Gate (해당 시)"
+
+    escalation_id:
+      type: [string, "null"]
+      pattern: "^ESC-\\d{4}-\\d{2}-\\d{2}-\\d{3}$"
+      description: "Escalation 컨텍스트 (해당 시)"
+
+    sprint_id:
+      type: [string, "null"]
+      description: "Sprint 식별자 (e.g., SPR-2026-04-W3)"
+
+    # ---------------- 라우팅 ----------------
+    classification:
+      type: string
+      enum:
+        - normal           # 일반 호출
+        - gate-execution   # G1~G5 evaluator 호출 → L2도 동시 commit
+        - escalation       # Escalate-Plan 활동
+        - sprint-retro     # G5 Sprint Retro
+        - error            # exception/throw
+      description: "L2 commit 트리거 분류"
+
+    # ---------------- 디버깅 ----------------
+    error:
+      type: object
+      description: "에러 발생 시"
+      properties:
+        type: { type: string }
+        message: { type: string }
+        stack: { type: string }
+
+    metadata:
+      type: object
+      description: "확장 필드 (forward-compat)"
+      additionalProperties: true
+
+# =====================================================================
+# 인덱싱 규칙 (L1 → L2 / L3 sync 시 사용)
+# =====================================================================
+indexing:
+  s3_key_format: "events/{YYYY}/{MM}/{DD}/{event_id}.json"
+  partition_keys: [trace_id, pdca_id, gate_id, sprint_id]
+
+  hot_query_indices:
+    - by_trace: "trace_id로 단일 PDCA의 모든 이벤트 조회"
+    - by_pdca:  "pdca_id로 PDCA 진척 추적"
+    - by_gate:  "gate_id로 Gate 실행 빈도/실패율 분석"
+    - by_sprint: "sprint_id로 Sprint 종합 비용 집계"
+
+# =====================================================================
+# Retention 정책 (s08.9)
+# =====================================================================
+retention:
+  l1_s3:
+    duration: "90 days (hot)"
+    after: "S3 Glacier (12 months) → delete"
+
+  pii_guard:
+    rule: "API 키 / 비밀번호 / 토큰 /  헤더 값 sanitize 필수"
+    enforcement: "publishToL1() 직전 redact() 호출"
+
+# =====================================================================
+# 스키마 버전 관리
+# =====================================================================
+schema_version: 1.0
+schema_id: l1-log-event-v1
+breaking_changes_policy: "MAJOR bump only (semver)"

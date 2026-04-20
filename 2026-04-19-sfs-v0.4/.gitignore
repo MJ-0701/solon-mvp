@@ -1,0 +1,68 @@
+# ──────────────────────────────────────────────────────────
+# Solon v0.4-r3 docset — .gitignore (migration snapshot)
+# Created: 2026-04-20
+# Purpose: 회사 계정 → 개인 계정 이관 (방법 B: GitHub private repo carrier)
+# ──────────────────────────────────────────────────────────
+#
+# NOTE on HANDOFF / MIGRATION-NOTES / cross-ref-audit:
+# 본래 HANDOFF-next-session.md 는 "로컬 전용, git 제외" convention 이었으나,
+# **이관 목적** 에서는 HANDOFF 가 개인 계정 새 Claude 의 유일한 인수인계 채널이므로
+# 이 migration snapshot 에서는 **포함**. 이관 후 개인 계정에서 일상 workflow 로
+# 전환 시 .gitignore 를 재정의할 것. 현재는 모든 docset 산출물 track.
+
+# ─── OS / Editor 노이즈 ───
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ─── Node / JS (Phase 1 src/ 진입 대비 사전 선언) ───
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+package-lock.json.bak
+
+# ─── Python (tooling/validator 작성 대비) ───
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+
+# ─── Build / Dist ───
+dist/
+build/
+out/
+*.log
+
+# ─── 환경 변수 (절대 commit 금지) ───
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# ─── Claude Desktop / Cowork 세션 부산물 (이관 대상 아님) ───
+# 세션 transcript 는 /sessions/* 경로라 docset 밖이지만 혹시 실수로 복사됐을 경우 차단
+.claude/projects/*/memory/
+.claude/projects/*/*.jsonl
+
+# ─── Appendix dialogs/traces 런타임 부산물 ───
+# traces/*.yaml 은 runtime 에 생성되는 dialog trace 기록.
+# 현재 빈 폴더이므로 .gitkeep 유지용으로만 track. 이후 실제 trace yaml 은 git 제외.
+appendix/dialogs/traces/*.yaml
+!appendix/dialogs/traces/.gitkeep
+
+# ─── Phase 1 이후 추가될 가능성 있는 결과물 ───
+# dogfooding 실행 결과 / 학습 로그 등
+.solon-cache/
+.solon-state.json
+*.learnings.local.yaml

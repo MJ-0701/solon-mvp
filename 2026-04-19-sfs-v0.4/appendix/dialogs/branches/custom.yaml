@@ -1,0 +1,221 @@
+# ---
+# doc_id: sfs-v0.4-appendix-dialog-branch-custom
+# title: "Custom Division Activation Branch (`/sfs division add`)"
+# version: 1.0.0
+# status: draft
+# last_updated: 2026-04-20
+# audience: [implementers, 도메인-특화-팀, 파워-유저]
+#
+# depends_on:
+#   - dialog/division-activation
+#
+# defines:
+#   - branch/custom-division-add
+#
+# note: |
+#   사전 정의된 6 본부 (dev / strategy-pm / qa / design / infra / taxonomy) 외의
+#   사용자 정의 본부를 추가할 때 사용되는 branch.
+#   `/sfs division add <id>` 로 트리거되며, custom 본부는 tier="custom" 으로 자동 기록된다.
+# ---
+
+branch_id: custom
+division_id: <user-provided>
+inherits_from: dialog/division-activation
+
+division_context: |
+  custom 본부는 "표준 6 본부로 커버되지 않는 도메인·책임" 을 담당한다.
+  - 적합: 도메인 특화 작업 (예: content-ops, compliance, billing-ops, data-science)
+  - 비적합 후보: 기존 본부로 충분히 표현 가능한 경우
+  - 1인 창업자 사각지대: "이거 custom 이 맞을까, 기존 본부 worker 로 충분할까?"
+    → 판단 기준: 책임 범위·지속성·검증 독립성
+
+# =====================================================================
+# Phase A 전용 추가 — Step 0: 기존 본부 매핑 검토
+# =====================================================================
+phase_A_prefix:
+  step_0_mapping_check: |
+    custom 본부 추가 전에, 사용자 의도를 기존 본부와 매핑할 수 있는지 확인합니다.
+
+    질문: "<id> 본부의 책임이 아래 중 하나와 겹치나요?"
+    - dev: 코드 구현·시스템 설계
+    - strategy-pm: 제품 전략·우선순위
+    - qa: 테스트·검증
+    - design: UX·UI
+    - infra: 배포·SRE
+    - taxonomy: 용어·분류
+
+    예시:
+    - "content-ops 본부 추가" → strategy-pm 하위 worker 로 충분할 수 있음
+    - "billing-ops 본부 추가" → dev 하위 billing-worker 로 충분할 수 있음
+    - "compliance 본부 추가" → taxonomy + qa 조합으로 커버 가능할 수 있음
+
+    → 겹친다면 "scoped (parent: <기존 본부>)" 를 1순위 대안으로 제시.
+    → 겹치지 않는다면 custom 독립 본부로 진행.
+
+# =====================================================================
+# Phase B — custom 본부의 정체성 정의
+# =====================================================================
+phase_B_overrides:
+  examples_for_branch: |
+    예시 (custom 본부 후보):
+    - "content-ops: 블로그·문서·마케팅 카피 운영"
+    - "billing-ops: 결제·구독 비즈니스 규칙 관리"
+    - "compliance: GDPR·SOC2·HIPAA 준수"
+    - "data-science: 모델 학습·평가·배포"
+    - "community: 사용자 커뮤니티·피드백 관리"
+
+  intent_classification_hints:
+    - label: new-business-domain
+      triggers: [새 도메인, 비즈니스, 운영, ops]
+    - label: specialized-expertise
+      triggers: [전문성, 특수, 도메인 전문가]
+    - label: regulatory-requirement
+      triggers: [규제, compliance, 법적 요구]
+    - label: research-experiment
+      triggers: [실험, R&D, 연구, POC]
+
+  required_metadata_for_custom: |
+    custom 본부 추가 시 아래 metadata 를 반드시 수집합니다:
+    - id: kebab-case, 기존 본부와 중복 금지
+    - name_ko / name_en: 본부 이름
+    - responsibility: 한 줄 책임 정의 (원칙 3: 역할 명확성)
+    - success_criteria: 본부가 잘 작동하는지 판단 기준
+    - non_goals: 이 본부가 하지 않는 일 (원칙 경계)
+    - suggested_workers: 초기 worker 후보 3 개 이내
+
+# =====================================================================
+# Phase C — scope 판단
+# =====================================================================
+phase_C_overrides:
+  intent_based_hint:
+    new-business-domain: |
+      비즈니스 도메인은 지속 성격이 강합니다. full 또는 scoped 를 권장.
+      단, 아직 검증 전이라면 temporal (POC 단위) 도 가능.
+    specialized-expertise: |
+      전문성 요구가 명확하면 full 독립 본부가 적합합니다.
+    regulatory-requirement: |
+      규제 대응은 지속 책임이므로 full 권장.
+      단, 단일 인증 획득이 목표면 temporal 후 재검토.
+    research-experiment: |
+      실험 성격이면 temporal 이 자연스럽습니다.
+      성공 시 full 승격, 실패 시 deactivate.
+
+  default_hint: |
+    custom 본부는 신규 abstraction 이므로 temporal 로 시작해
+    G5 Retro 에서 활용도 평가 후 full 승격 여부 결정하는 것도 좋은 전략입니다.
+
+# =====================================================================
+# Phase D — option 규칙
+# =====================================================================
+phase_D_option_rules:
+  option_templates:
+    - scope: temporal
+      default_intensity: 👍
+      label: "temporal (Sprint N~N+3, 활용도 검증)"
+      reasoning: "신규 abstraction 검증 기간. 검증 후 승격/종료 결정"
+      sunset_at_suggestion: "3~4 Sprint 후"
+
+    - scope: scoped
+      default_intensity: ⚪
+      label: "scoped (parent: <기존 본부>)"
+      reasoning: "기존 본부와 책임 겹침이 있으면 scoped 가 안전"
+
+    - scope: full
+      default_intensity: ⚪
+      label: "full (독립 본부)"
+      reasoning: "책임 독립성·전문성 확보된 경우 적합. 팀 규모 ≥ 3 권장"
+
+  # ⚠ 매핑 가능한 경우 경고
+  warn_conditions:
+    - pattern: "custom + 책임이 기존 본부와 80% 이상 겹침"
+      warning: "기존 본부 worker 로 충분히 표현 가능합니다. custom 은 추상화 오버헤드만 추가될 수 있습니다"
+      alternatives:
+        - "기존 본부에 worker 추가 (예: strategy-pm/workers/+content-worker)"
+        - "scoped (parent: <기존 본부>) 로 절충"
+        - "custom 유지 (사용자 override — 기록됨)"
+
+    - pattern: "custom + 1인 창업자 + 책임 범위 모호"
+      warning: "1인 환경에서 새 본부는 인지 부하 증가 리스크가 큽니다"
+      alternatives:
+        - "기존 strategy-pm 하위 worker 로 시작"
+        - "temporal 3 Sprint 로 PoC 후 재검토"
+
+  intent_specific_overrides:
+    research-experiment:
+      - scope: temporal
+        intensity: 👍
+        label: "temporal (실험 기간 Sprint N~N+2)"
+    regulatory-requirement:
+      - scope: full
+        intensity: 👍
+        label: "full (규제 지속 책임)"
+
+# =====================================================================
+# Phase E — 추가 side-effects
+# =====================================================================
+terminal_additions:
+  terminal/activate-full:
+    extra_side_effects:
+      - "appendix/divisions/<custom-id>.yaml 초기 템플릿 자동 생성"
+      - "memory/<custom-id>/responsibility.md 생성 (Phase B 에서 수집한 metadata)"
+      - "tier: custom 으로 기록 (core/opt-in 과 구분)"
+      - "L1 event: l1.division.custom.added { id: <custom-id>, scope: full, tier: custom }"
+
+  terminal/activate-scoped:
+    extra_side_effects:
+      - "parent 본부 (예: strategy-pm) 의 workers 목록에 <custom-id>-worker-scoped 추가"
+      - "appendix/divisions/<custom-id>.yaml 을 만들되 activation_state=active + scope=scoped 로 기록"
+
+  terminal/activate-temporal:
+    extra_side_effects:
+      - "sunset_at 도달 10일 전 'custom 본부 유지/승격/종료?' 3-way 질문"
+      - "G5 Retro 에 custom 본부 활용도 자동 report"
+
+# =====================================================================
+# Phase A 이전 추가 invariants
+# =====================================================================
+extra_invariants:
+  - INV-C1:
+      name: "custom-id-uniqueness"
+      description: "custom id 는 기존 6 본부 및 이전에 추가된 custom 본부와 중복 금지"
+      enforcement: "divisions.schema.yaml 의 unique 제약으로 강제"
+
+  - INV-C2:
+      name: "custom-requires-responsibility"
+      description: "custom 본부는 responsibility (한 줄 책임 정의) 없이 생성 불가"
+      enforcement: "Phase B 에서 필수 수집 → 미수집 시 terminal/cancel"
+
+  - INV-C3:
+      name: "custom-tier-immutable"
+      description: "custom 으로 생성된 본부의 tier 는 이후 core/opt-in 으로 변경 불가"
+      enforcement: "schema validation 으로 차단"
+      rationale: "tier 변경은 product 결정사항이지 user 결정사항이 아님 (원칙 13 보호 범위)"
+
+# =====================================================================
+# 채명정 예시 — 보험 도메인 custom 본부
+# =====================================================================
+example_scenario:
+  persona: "1인 창업자, 보험 SaaS, MVP 직후 (DAU 30)"
+  user_need: "보험 상품 운영 (상품 등록·요율 관리·환급 계산) 을 본부로 분리"
+  candidate_custom_id: "insurance-ops"
+
+  recommended_path: |
+    /sfs division add insurance-ops
+    → Phase A Step 0: "strategy-pm 하위 worker 로 충분할까?" 질문
+    → 사용자: "아니, 도메인 전문성이 너무 달라서 독립 필요"
+    → Phase C: full 권장 (전문성·규제 요소)
+    → Phase D: 1인 환경 warn → scoped (parent: strategy-pm) 대안 제시
+    → 사용자: "scoped 로 가자"
+    → terminal/activate-scoped: parent=strategy-pm, tier=custom
+
+  why_recommended: |
+    - 1인 환경 + DAU 낮음 → 독립 본부는 오버헤드
+    - 보험 도메인 전문성은 인정 → strategy-pm 하위 worker 로 전문성 반영
+    - 규제 확대 또는 팀 성장 시 full 로 승격 가능 (재활성 대화)
+    - custom tier 기록으로 향후 core 승격 여부 product team 판단 가능
+
+  why_not_existing_division: |
+    - strategy-pm 단일 worker 로는 요율 계산·환급 규칙 복잡도 처리 어려움
+    - taxonomy 로는 용어 관리만 가능, 비즈니스 규칙 처리 불가
+    - qa 는 검증 담당, 비즈니스 로직 오너십 없음
+    → "책임 독립성" 이 인정되어 custom 으로 분리

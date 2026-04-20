@@ -1,0 +1,84 @@
+# ---
+# doc_id: sfs-v0.4-appendix-driver-none
+# title: "L3 Driver — None (L3 disabled)"
+# version: 0.4
+# status: draft
+# last_updated: 2026-04-19
+# audience: [implementers, plugin-users]
+#
+# depends_on:
+#   - sfs-v0.4-appendix-drivers-interface
+#
+# defines:
+#   - driver/none-manifest-v1
+#
+# references:
+#   - contract/l3-driver-interface-v1 (defined in: appendix/drivers/_INTERFACE)
+#
+# affects: []
+# ---
+
+id: none
+display_name: "None (L3 disabled)"
+version: "1.0.0"
+
+# ============== Capability 선언 ==============
+collab_modes: []                # 협업 기능 없음. L2 git PR/issue로 fallback
+multi_user: not-supported
+
+auth:
+  type: none
+  required_env: []
+
+capabilities:
+  publish: false                # noop (L2 commit 만으로 충분)
+  query: false                  # 사용자가 docs/ 직접 read
+  archive: false
+  rich_view: false
+
+# ============== Phase 1 동작 ==============
+phase1_supported: true
+phase1_default: false           # notion이 default, none은 opt-in
+
+# ============== 사용 시나리오 ==============
+use_cases:
+  - "Notion/Obsidian 등 어떤 도구도 쓰지 않고 git docs로 충분한 사용자"
+  - "오프라인 환경 (인터넷 끊긴 상태에서도 SFS 사용)"
+  - "비용 zero 추구 (외부 SaaS 0개)"
+  - "L3 driver 평가 중 임시 비활성화"
+  - "보안 정책상 외부 SaaS 금지 (정부/금융 등)"
+
+# ============== 알려진 한계 ==============
+known_limitations:
+  - "Sprint dashboard 시각화 없음 — markdown 직접 read"
+  - "12-sprint rolling 자동화 없음 — 사용자가 수동 git tag/branch로 관리"
+  - "비개발자 UX 0 — 모든 사용자가 git/markdown에 친숙해야 함"
+  - "H1 (3-Channel Observability) 차별화 약화 — L1+L2만 동작 (L3 비활성)"
+
+# ============== tier별 권장 ==============
+tier_recommendations:
+  minimal: "OK. 비용 zero 추구라면 적합."
+  standard: "OK. 단, sprint 누적 시 markdown 부담 증가."
+  collab: "비추천. 다자 협업은 L2 git PR로만 가능."
+
+# ============== 비호환 경고 트리거 ==============
+warn_when:
+  - tier: collab
+    condition: always
+    severity: warning
+    message: "다자 협업 도구 없이 collab tier 선택. L2 git PR/issue 워크플로로만 협업 가능. 진행하시겠습니까?"
+  - any_tier: true
+    condition: "sprint_count >= 8"
+    severity: info
+    message: "Sprint 8회+ 누적 시 markdown 직접 read 부담. L3 driver 활성화(notion 등) 검토."
+
+# ============== fallback 동작 ==============
+fallback_behavior:
+  publish:
+    action: "noop + log to L2 only"
+    note: "L2 commit은 정상 진행. L3 publish는 silently skip."
+  query:
+    action: "throw 'L3 disabled, read docs/ directly'"
+  archive:
+    action: "noop + git tag suggestion"
+    note: "사용자에게 'git tag sprint-N-archive' 명령 제안"

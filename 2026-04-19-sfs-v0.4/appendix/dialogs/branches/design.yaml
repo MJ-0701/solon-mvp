@@ -1,0 +1,133 @@
+# ---
+# doc_id: sfs-v0.4-appendix-dialog-branch-design
+# title: "Design Division Activation Branch"
+# version: 1.0.0
+# status: draft
+# last_updated: 2026-04-20
+# audience: [implementers, B2C-제품, 프론트엔드-중심]
+#
+# depends_on:
+#   - dialog/division-activation
+#
+# defines:
+#   - branch/design-activation
+# ---
+
+branch_id: design
+division_id: design
+inherits_from: dialog/division-activation
+
+division_context: |
+  design 본부는 "UX·UI 일관성, 디자인 시스템, 접근성" 을 담당한다.
+  - 적합: B2C 제품, 첫 유입 발생, 디자이너 합류, brand 일관성 중요
+  - 비적합 후보: 관리자 도구만 있는 B2B 초기, API 전용 제품, 내부용 도구
+  - 1인 창업자 사각지대: "디자이너 없는데 design 본부가 필요한가?" → 디자인 시스템 초안은 agent 가 만들 수 있음
+
+# =====================================================================
+# Phase B
+# =====================================================================
+phase_B_overrides:
+  examples_for_branch: |
+    예시:
+    - "첫 10명 유료 사용자 유입, UX 개선 필요"
+    - "페이지마다 스타일 달라 브랜드 약함"
+    - "디자이너 합류 예정 → 컴포넌트 라이브러리 정리"
+    - "접근성(WCAG AA) 대응 시작"
+    - "모바일 전환율 낮아 UI 재검토"
+
+  intent_classification_hints:
+    - label: first-user-traffic
+      triggers: [첫 유입, 유료, 전환, onboarding]
+    - label: brand-consistency
+      triggers: [브랜드, 일관성, 스타일, 다 달라]
+    - label: designer-onboarding
+      triggers: [디자이너, 합류, 채용, 컴포넌트 라이브러리]
+    - label: accessibility-compliance
+      triggers: [접근성, WCAG, a11y, ADA]
+    - label: mobile-optimization
+      triggers: [모바일, 반응형, mobile, conversion]
+
+# =====================================================================
+# Phase C
+# =====================================================================
+phase_C_overrides:
+  intent_based_hint:
+    first-user-traffic: |
+      초기 유입 단계에서는 full 이 무겁습니다. scoped (strategy-pm 하위) 또는 temporal 고려.
+    brand-consistency: |
+      브랜드 일관성은 지속 과제. full 활성화 후 G5 Retro 에서 활용도 재검토 권장.
+    designer-onboarding: |
+      디자이너 합류 시점에 full 활성화가 자연스럽습니다.
+    accessibility-compliance: |
+      접근성은 기술적 task 성격. scoped (dev 하위) 도 가능합니다.
+    mobile-optimization: |
+      UX 개선 프로젝트면 temporal 이 적합. 완료 후 유지 여부 재검토.
+
+  default_hint: |
+    design 은 "사용자 유입 후" 가치가 커지는 경향이 있습니다.
+    사용자가 없는 단계라면 디자인 시스템 기초만 scoped 로 다루고,
+    유입 시작되면 full 로 승격하는 전략을 권장합니다.
+
+# =====================================================================
+# Phase D
+# =====================================================================
+phase_D_option_rules:
+  option_templates:
+    - scope: scoped
+      default_intensity: 👍            # 초기 단계 default
+      typical_parent: strategy-pm
+      label: "scoped (parent: strategy-pm)"
+      reasoning: "초기 디자인 시스템 정의 정도면 기획 본부 하위로 충분"
+
+    - scope: full
+      default_intensity: ⚪
+      label: "full (디자이너 합류/브랜드 중심)"
+      reasoning: "지속적 디자인 리드가 필요한 단계에서 적합"
+
+    - scope: temporal
+      default_intensity: ⚪
+      label: "temporal (특정 UX 개선 프로젝트까지)"
+      reasoning: "모바일 최적화·접근성 대응 등 기한 있는 프로젝트에 적합"
+
+  intent_specific_overrides:
+    first-user-traffic:
+      - scope: temporal
+        intensity: 👍
+        label: "temporal (onboarding 개선까지)"
+    designer-onboarding:
+      - scope: full
+        intensity: 👍
+        label: "full (디자이너 합류 + 컴포넌트 시스템)"
+
+  # ⚠ 비권장: 1인 + B2B API 제품 + 사용자 없음 → design 활성화 → 여전히 수용하되 대안 제시
+  warn_conditions:
+    - pattern: "1인 + 초기 + B2B API 전용"
+      warning: "현재 상황에서 design 은 비권장 — 디자인 시스템은 dev 본부 frontend-worker 로 충분"
+      alternatives:
+        - "dev 본부 하위에 frontend-worker 가 이미 있다면 추가 활성 불필요"
+        - "디자인 시스템 초안만 필요하면 scoped 단일 worker 로 제한"
+
+# =====================================================================
+# Phase E
+# =====================================================================
+terminal_additions:
+  terminal/activate-full:
+    extra_side_effects:
+      - "memory/design/design-system.md 초기 템플릿 생성"
+      - "design-critique evaluator 가 G3 에 wire-in"
+  terminal/activate-scoped:
+    extra_side_effects:
+      - "strategy-pm 하위 design-worker-scoped 추가"
+      - "memory/design/tokens.md (색상·타이포 기본값) 생성"
+
+# =====================================================================
+# 채명정 예시
+# =====================================================================
+example_scenario:
+  persona: "1인 창업자, B2C MVP, 첫 유료 사용자 10명 유입"
+  user_need: "UX 개선 + 브랜드 일관성"
+  recommended_path: "/sfs division activate design → scoped (parent: strategy-pm), 유입 확대 시 full 로 승격"
+  why_recommended: |
+    - 아직 디자이너 없음 → 독립 본부는 overkill
+    - 기획 본부 하위 worker 로 디자인 시스템 기초 정립
+    - 유입 확대 + 디자이너 합류 시점에 full 로 승격 대화

@@ -1,0 +1,119 @@
+# ---
+# doc_id: sfs-v0.4-appendix-dialog-branch-qa
+# title: "QA Division Activation Branch"
+# version: 1.0.0
+# status: draft
+# last_updated: 2026-04-20
+# audience: [implementers, MVP-개발자, 배포-예정-팀]
+#
+# depends_on:
+#   - dialog/division-activation
+#
+# defines:
+#   - branch/qa-activation
+# ---
+
+branch_id: qa
+division_id: qa
+inherits_from: dialog/division-activation
+
+division_context: |
+  qa 본부는 "테스트 커버리지·회귀 방어·수락 기준 정립" 을 담당한다.
+  - 적합: MVP 출시 임박, regression 잦은 제품, 수동 테스트 한계
+  - 비적합 후보: 아직 제품이 사용자에게 노출 안 된 초기 PoC, 1인 짧은 hack
+  - 1인 창업자 사각지대: "MVP 출시 전까지만 필요하지 않을까?" → 대부분 맞음 → temporal 권장
+
+# =====================================================================
+# Phase B
+# =====================================================================
+phase_B_overrides:
+  examples_for_branch: |
+    예시:
+    - "MVP 출시가 2달 남았는데 수동 테스트로는 한계"
+    - "regression 방지 프로세스 필요"
+    - "고객사 인증 앞두고 test coverage 수치 확보"
+    - "유료 전환 전 버그 줄이기"
+
+  intent_classification_hints:
+    - label: pre-mvp-quality-gate
+      triggers: [MVP, 출시, launch, 베타, 런칭]
+    - label: regression-prevention
+      triggers: [regression, 회귀, 반복 버그, smoke test]
+    - label: compliance-audit
+      triggers: [인증, audit, 고객사, SOC2, ISO]
+    - label: paid-conversion
+      triggers: [유료, 전환, 결제, paid, billing]
+
+# =====================================================================
+# Phase C
+# =====================================================================
+phase_C_overrides:
+  intent_based_hint:
+    pre-mvp-quality-gate: |
+      MVP 출시 시점까지 한정이라면 temporal(Sprint N 까지) 이 가장 적합합니다.
+      출시 후 회귀 방어가 필요하면 재활성화 하시면 됩니다.
+    regression-prevention: |
+      지속적 회귀 방어는 full 이 자연스럽습니다. temporal 은 비권장.
+    compliance-audit: |
+      인증 획득까지 temporal, 획득 후 유지라면 full 로 재활성화.
+    paid-conversion: |
+      유료 전환 품질 gate 라면 temporal 후 유지 여부 재검토를 권장.
+
+  default_hint: |
+    qa 는 "시점 기반" 성격이 강해 temporal 이 자연스러운 경우가 많습니다.
+    다만 회귀 방어가 지속 과제라면 full 을 고려하세요.
+
+# =====================================================================
+# Phase D
+# =====================================================================
+phase_D_option_rules:
+  option_templates:
+    - scope: temporal
+      default_intensity: 👍
+      label: "temporal (MVP 출시까지)"
+      reasoning: "시점 기반 품질 gate 에 적합. sunset_at 도달 시 재활성 여부 질문"
+      sunset_at_suggestion: "Sprint 7 또는 launch_date"
+
+    - scope: full
+      default_intensity: ⚪
+      label: "full (지속 본부)"
+      reasoning: "regression 방어가 지속 과제면 적합. 팀 규모 커지면 자연스러움"
+
+    - scope: scoped
+      default_intensity: ⚠
+      label: "scoped (dev 본부 하위)"
+      reasoning: "QA 가 dev 하위에 묶이면 자기검증 편향 위험 (원칙 2)"
+      alternatives_when_warned:
+        - "full 로 독립 본부 활성화 (자기검증 금지 원칙 준수)"
+        - "temporal full 로 출시까지만 독립 활성, 이후 재검토"
+
+  intent_specific_overrides:
+    pre-mvp-quality-gate:
+      - scope: temporal
+        intensity: 👍
+        label: "temporal (launch_date 까지)"
+
+# =====================================================================
+# Phase E 추가 side-effects
+# =====================================================================
+terminal_additions:
+  terminal/activate-temporal:
+    extra_side_effects:
+      - "test-coverage-checker evaluator 가 G4 에 wire-in"
+      - "sunset_at 도달 10일 전 'qa 본부 유지 여부 대화' 자동 제안"
+      - "memory/qa/test-strategy.md 초기 템플릿 생성"
+  terminal/activate-full:
+    extra_side_effects:
+      - "zero-script-qa runtime 가 모든 division 에 공급됨 (rule/qa-full-scope)"
+
+# =====================================================================
+# 채명정 예시
+# =====================================================================
+example_scenario:
+  persona: "1인 창업자, MVP 출시 2달 전, Sprint 5"
+  user_need: "출시 전 버그 줄이기 + regression 방어 체계"
+  recommended_path: "/sfs division activate qa → temporal (sunset_at: launch_date)"
+  why_recommended: |
+    - 시점 기반 목표 (MVP) 가 명확
+    - 출시 후에도 유지 필요하면 deactivate prompt 에서 재활성화 가능
+    - 1인 환경에서 full 은 overkill, scoped 는 자기검증 편향 위험

@@ -1,0 +1,681 @@
+# ---
+# doc_id: sfs-v0.4-appendix-schema-divisions
+# title: "divisions.yaml v1.1 - Full Schema (Progressive Activation)"
+# version: 0.4
+# status: draft
+# last_updated: 2026-04-20
+# audience: [implementers, plugin-customizers, c-level-self]
+#
+# depends_on:
+#   - sfs-v0.4-s03-c-level-matrix
+#   - sfs-v0.4-s07-plugin-distribution
+#   - sfs-v0.4-s02-design-principles  # 🆕 v0.4-r3 (원칙 13)
+#
+# defines:
+#   - schema/divisions-yaml-v1          # base (v1.0)
+#   - schema/divisions-yaml-v1.1        # 🆕 v0.4-r3 progressive activation
+#   - rule/division-spec-required-fields
+#   - rule/g4-formula-coefficient-sum-constraint
+#   - rule/activation-state-default-abstract     # 🆕 v0.4-r3
+#   - rule/activation-scope-temporal-requires-sunset  # 🆕 v0.4-r3
+#   - rule/activation-scope-scoped-requires-parent    # 🆕 v0.4-r3
+#   - rule/phase1-basic-active-divisions              # 🆕 v0.4-r3 (dev + strategy-pm)
+#
+# references:
+#   - division/* (defined in: s03)
+#   - rule/model-allocation-concrete (defined in: s03)
+#   - formula/g4-per-division (defined in: s05)
+#   - rule/divisions-yaml-customization (defined in: s07)
+#   - principle/progressive-activation (defined in: s02 §2.13)   # 🆕 v0.4-r3
+#   - principle/human-final-filter (defined in: s02 §2.10)
+#
+# affects:
+#   - appendix/commands/division.command-spec.md     # 🆕 v0.4-r3
+#   - appendix/dialogs/division-activation.dialog.yaml   # 🆕 v0.4-r3
+# ---
+
+# =====================================================================
+# 목적
+# - divisions.yaml은 sfs-plugin이 본부(Division)들을 동적으로 구성하기 위한
+#   단일 설정 파일.
+# - v1.0: Phase 1은 6 본부 고정, Phase 2부터 동적 추가/수정.
+# - v1.1 (🆕 v0.4-r3, principle/progressive-activation):
+#     6 본부는 모두 선언되나 activation_state 로 abstract/active/deactivated 구분.
+#     Phase 1 기본 active = dev + strategy-pm 2개, 나머지는 abstract.
+#     활성화 변경은 Socratic dialog 통해서만 수행 (rule/never-hard-block).
+# - 본 스키마는 yaml 파일이 sfs-doc-validate를 통과하기 위한 형식을 정의.
+# =====================================================================
+
+DivisionsYaml:
+  type: object
+  required: [version, tier_profile, l3_backend, c_level, divisions]
+  properties:
+
+    # ---------------- 메타 ----------------
+    version:
+      type: string
+      pattern: "^\\d+\\.\\d+$"
+      description: "divisions.yaml 스키마 버전 (semver minor까지)"
+
+    sfs_plugin_version:
+      type: string
+      description: "(optional) 호환되는 sfs-plugin 버전 범위"
+
+    last_updated:
+      type: string
+      format: date
+
+    # ---------------- Tier Profile (비용/품질 정책, §07·§10 참조) ----------------
+    tier_profile:
+      type: string
+      enum: [minimal, standard, collab]
+      default: minimal
+      description: |
+        solo founder 자원·계획에 맞는 기본 정책 (s02 §2.5.4, s07, s10 참조).
+        - minimal: Opus 최소화 (escalate only), 6-way 본부 간 병렬, Pro 플랜 Sonnet 캡 내
+          - Phase 1 dogfooding default. 14주 예산 압축에 최적.
+        - standard: Opus 정상 호출, 6-way + evaluator 다수, Team/Max plan 자연스러움
+          - Phase 1 → Phase 2 전환 지점 권장.
+        - collab: cache 적극, 본부당 N worker (Phase 2), 다자 사용 시 wall-clock 최소화
+          - Phase 2 multi-tenant SaaS 운영 시 권장.
+
+    # ---------------- L3 Backend Driver (§08 관측성, contract/l3-driver-interface-v1) ----------------
+    l3_backend:
+      type: string
+      enum: [notion, obsidian, logseq, confluence, custom, none]
+      default: notion
+      description: |
+        L3 (Human View Channel) driver 선택. manifest는 appendix/drivers/<id>.manifest.yaml.
+        - notion: Phase 1 default, Free/Plus/Team 모두 작동
+        - none: L3 비활성화, L2 git docs 직접 read (solo dogfooding 가능)
+        - obsidian/logseq/confluence: Phase 2 community contribution 후보 (현재 미구현)
+        - custom: 사용자 자작 driver (manifest + index.ts 구현 필요, advanced)
+        tier_profile × l3_backend 비호환 조합은 경고만 발생 (block 금지)
+        — rule/driver-compatibility-warn-not-block.
+
+    # ---------------- RBAC 설정 (Phase 2 상품화 시 활성화) ----------------
+    rbac_config:
+      type: object
+      description: |
+        Phase 1=enabled:false 강제 (solo 전권).
+        Phase 2부터 본부별 권한 레이어를 YAML driven으로 확장 (s02 원칙 8).
+      properties:
+        enabled:
+          type: boolean
+          default: false
+          description: "Phase 1은 항상 false (solo). Phase 2에서 true 가능."
+        tenant_isolation:
+          type: boolean
+          default: false
+          description: "multi-tenant 격리 여부 (Phase 2)"
+        role_mapping:
+          type: object
+          additionalProperties:
+            type: array
+            items: { type: string }
+          description: "role → 허용 action 매핑 (Phase 2, e.g., {viewer: [read], ceo: [read, trigger-gate]})"
+
+    # ---------------- C-Level (3 고정) ----------------
+    c_level:
+      type: object
+      required: [ceo, cto, cpo]
+      properties:
+        ceo: { $ref: "#/CLevelAgentSpec" }
+        cto: { $ref: "#/CLevelAgentSpec" }
+        cpo: { $ref: "#/CLevelAgentSpec" }
+
+    # ---------------- 본부 목록 ----------------
+    divisions:
+      type: array
+      minItems: 1
+      maxItems: 12     # Phase 2 이후 12개 상한 (관리 부담)
+      items:
+        $ref: "#/DivisionSpec"
+
+# =====================================================================
+# CLevelAgentSpec
+# =====================================================================
+CLevelAgentSpec:
+  type: object
+  required: [agent_id, model]
+  properties:
+    agent_id:
+      type: string
+      description: "e.g., ceo-agent, cto-agent, cpo-agent"
+    model:
+      type: string
+      enum: [opus]
+      description: "C-Level은 Opus 고정 (s03)"
+    primary_responsibilities:
+      type: array
+      items: { type: string }
+    five_axis_ownership:
+      type: array
+      items:
+        type: string
+        enum: [Value-Fit, User-Outcome, Soundness, Maintainability, Future-Proof]
+      description: "5-Axis 평가 중 이 C-Level이 주관하는 axis (s05.6)"
+
+# =====================================================================
+# DivisionSpec — 단일 본부의 정의
+# =====================================================================
+DivisionSpec:
+  type: object
+  required: [id, name, activation_state, tier, head_agent, workers, evaluators, pdca_artifacts, default_model, g4_formula]
+  # NOTE v0.4-r3: activation_state, tier 가 required 에 추가됨.
+  #                기존 v1.0 yaml 파일은 migration 시 activation_state=active, tier=core 로 자동 주입.
+  properties:
+
+    id:
+      type: string
+      pattern: "^[a-z][a-z0-9-]*$"
+      description: "본부 식별자 (kebab-case, e.g., strategy-pm, dev, taxonomy)"
+
+    name:
+      type: string
+      description: "본부 표시명 (한글/영문 자유)"
+
+    description:
+      type: string
+
+    # ---------------- 🆕 v0.4-r3 Activation State (principle/progressive-activation) ----------------
+    activation_state:
+      type: string
+      enum: [abstract, active, deactivated]
+      default: abstract
+      description: |
+        (🆕 v0.4-r3) 본부 활성화 상태. s02 §2.13 원칙 13 참조.
+        - abstract: schema 선언만 존재, worker/evaluator 미로딩. 리소스 점유 0.
+        - active: worker + evaluator + hook 모두 활성. 정상 운영.
+        - deactivated: 과거 active였다가 sunset된 상태. 재활성 가능.
+        기본값 abstract — 새 본부 선언 시 기본적으로 비활성 (heavy-by-default 방지).
+        Phase 1 기본 active = dev + strategy-pm 2개 (rule/phase1-basic-active-divisions).
+
+    # ---------------- 🆕 v0.4-r3 Activation Scope (active 상태에서만 의미) ----------------
+    activation_scope:
+      type: string
+      enum: [full, scoped, temporal]
+      description: |
+        (🆕 v0.4-r3) activation_state=active 일 때 활성 범위.
+        - full: 장기 활성, 독립 본부로 운영. sunset_at 불필요.
+        - scoped: 다른 본부 하위 worker로만 활성. parent_division 필수.
+        - temporal: 특정 Phase/Sprint에만 활성. sunset_at 필수.
+        activation_state != active 이면 이 필드는 무시됨 (validate-time warn).
+
+    parent_division:
+      type: string
+      description: |
+        (🆕 v0.4-r3) activation_scope=scoped 일 때 상위 본부 ID.
+        예: activation_scope=scoped, parent_division=strategy-pm
+             → 이 본부의 worker는 strategy-pm 본부 하위에서만 호출됨.
+        rule/activation-scope-scoped-requires-parent 로 강제.
+
+    sunset_at:
+      type: string
+      format: date-time
+      description: |
+        (🆕 v0.4-r3) activation_scope=temporal 일 때 자동 deactivate 예정 시점 (ISO 8601).
+        rule/activation-scope-temporal-requires-sunset 로 강제.
+        도달 시 자동 deactivate 되지 않음 (원칙 13 never-hard-block) — 대신 사용자에게 deactivate
+        후보 알림 + Socratic dialog 재실행 옵션 제시.
+
+    deactivated_at:
+      type: string
+      format: date-time
+      description: |
+        (🆕 v0.4-r3) activation_state=deactivated 로 전환된 시점 (ISO 8601).
+        재활성 시 divisions.yaml 에서 제거하지 않고 activation_state 만 active 로 복원 — 이력 유지.
+
+    # ---------------- 🆕 v0.4-r3 Tier (본부의 성격 분류) ----------------
+    tier:
+      type: string
+      enum: [core, opt-in, custom]
+      default: opt-in
+      description: |
+        (🆕 v0.4-r3) 본부의 기본 분류.
+        - core: Solon 공식 core 본부 (dev, strategy-pm, qa, design, infra, taxonomy 6종).
+                Phase 1 기본 제공. 제거 불가 (abstract 는 가능).
+        - opt-in: Solon 공식이지만 상황별 (core 외 future 본부, Phase 2 확장 후보).
+        - custom: 사용자 정의 본부 (`/sfs division add` 로 추가).
+        tier == core 인 본부는 divisions.yaml 에서 삭제 불가 (activation_state=abstract 로만 변경 가능).
+
+    # ---------------- 🆕 v0.4-r3 Dialog Trace (이력 추적) ----------------
+    dialog_trace_id:
+      type: string
+      description: |
+        (🆕 v0.4-r3) 가장 최근 activation 상태 변경을 초래한 Socratic dialog ID.
+        L1 이벤트 `l1.division.dialog.complete` 의 trace_id 와 교차 참조 가능.
+        처음 생성된 (활성화된 적 없는) abstract 본부는 null 가능.
+
+    recommendation_trigger:
+      type: string
+      enum:
+        - manual                    # 사용자가 직접 /sfs division activate 실행
+        - discovery-detected        # brownfield discovery 에서 후보 탐지
+        - sprint-retro-suggested    # G5 Retro 에서 agent 가 activation 제안
+        - phase-transition          # Phase 1→2 전환 시점
+        - custom-added              # /sfs division add 로 새 본부 추가
+        - declined                  # ⚠ 비권장 선택 시에도 수용한 기록
+        - null                      # 기본값, 변경 없음
+      description: |
+        (🆕 v0.4-r3) 이 본부의 현재 activation_state 가 왜 이렇게 설정됐는지 기록.
+        retro 재검토 · audit 추적용. agent 가 자동 변경하지 않고 dialog 종료 시에만 갱신.
+
+    # ---------------- Lead (본부장) ----------------
+    head_agent:
+      type: object
+      required: [agent_id, model]
+      properties:
+        agent_id:
+          type: string
+          description: "본부장 agent ID (e.g., dev-lead, design-lead)"
+        model:
+          type: string
+          enum: [opus, sonnet, haiku]
+          description: "본부장 모델 (s03.5 model allocation rules)"
+        responsibilities:
+          type: array
+          items: { type: string }
+
+    # ---------------- Workers (실무자) ----------------
+    workers:
+      type: array
+      items:
+        type: object
+        required: [agent_id, model]
+        properties:
+          agent_id: { type: string }
+          model:
+            type: string
+            enum: [opus, sonnet, haiku]
+          tasks:
+            type: array
+            items: { type: string }
+
+    # ---------------- Evaluators (Tier 2 외부) ----------------
+    evaluators:
+      type: array
+      minItems: 1
+      description: "본부의 Gate 평가에 호출되는 evaluator 목록 (외부성 강제 — s02 원칙 5)"
+      items:
+        type: object
+        required: [agent_id, model, gates]
+        properties:
+          agent_id:
+            type: string
+            description: "evaluator agent ID (e.g., gap-detector, plan-validator)"
+          model:
+            type: string
+            enum: [opus]
+            description: "Tier 2 evaluator는 항상 Opus (§5)"
+          gates:
+            type: array
+            items:
+              type: string
+              enum: [G1, G2, G3, G4, G5]
+            description: "이 evaluator가 담당하는 Gate"
+          source:
+            type: string
+            enum: [bkit-direct-reuse, sfs-native, cowork-rewrite, third-party]
+            description: "재활용 출처 (s10.3)"
+
+    # ---------------- PDCA 산출물 ----------------
+    pdca_artifacts:
+      type: array
+      items:
+        type: object
+        required: [phase, artifact_path, template]
+        properties:
+          phase:
+            type: string
+            enum: [plan, design, do, check, act]
+          artifact_path:
+            type: string
+            description: "L2 SSoT 내 경로 (e.g., 01-design/{pdca_id}/design.md)"
+          template:
+            type: string
+            description: "appendix/templates/ 내 템플릿 파일 (e.g., design.md)"
+
+    # ---------------- 모델 정책 ----------------
+    default_model:
+      type: string
+      enum: [opus, sonnet, haiku]
+      description: "본부 작업의 기본 모델 (worker 미지정 시 사용)"
+
+    # ---------------- G4 formula ----------------
+    g4_formula:
+      type: object
+      required: [formula, components]
+      description: "G4 Check Gate 점수 산출식 (s05.5)"
+      properties:
+        formula:
+          type: string
+          description: "수식 (e.g., 'gap-detector × 0.4 + 5-Axis × 0.6')"
+        components:
+          type: array
+          items:
+            type: object
+            required: [name, weight]
+            properties:
+              name:
+                type: string
+                description: "evaluator 또는 점수 종류 (e.g., gap-detector, 5-Axis)"
+              weight:
+                type: number
+                minimum: 0
+                maximum: 1
+                description: "가중치 (모든 component weight 합 = 1.0)"
+        weight_sum_constraint:
+          type: number
+          const: 1.0
+          description: "검증: components.weight 합 = 1.0 (validate-time check)"
+
+    # ---------------- 본부장 권한 (Operator vs Evaluator) ----------------
+    head_authority:
+      type: object
+      properties:
+        can_evaluate_own_division:
+          type: boolean
+          const: false
+          description: "본부장은 자기 본부 산출물 평가 불가 (s02 원칙 5)"
+        can_call_evaluator:
+          type: boolean
+          const: true
+        can_trigger_escalate:
+          type: boolean
+          const: true
+        can_lock_pdca:
+          type: boolean
+          const: true
+
+    # ---------------- 메모리 / 로컬 상태 ----------------
+    memory_path:
+      type: string
+      description: "본부 전용 메모리 경로 (e.g., memory/dev/, memory/design/) — gitignore 처리"
+
+    # ---------------- Phase 2 확장 표식 ----------------
+    phase2_dynamic:
+      type: boolean
+      default: false
+      description: "true면 Phase 2 시점 동적 추가 가능한 본부 (Phase 1은 6개 고정)"
+
+    # ---------------- Tier Override (본부별, optional) ----------------
+    tier_policy_override:
+      type: string
+      enum: [minimal, standard, collab]
+      description: |
+        (optional) 본부별 tier_profile override.
+        미지정 시 top-level tier_profile 상속 (validate-time resolve).
+        예: 전 본부 minimal인데 dev만 standard로 올려 test coverage 확보.
+
+    # ---------------- L3 Backend Override (본부별, optional) ----------------
+    l3_backend_override:
+      type: string
+      enum: [notion, obsidian, logseq, confluence, custom, none]
+      description: |
+        (optional) 본부별 l3_backend override.
+        미지정 시 top-level l3_backend 상속 (validate-time resolve).
+        예: 대부분 notion인데 design 본부만 obsidian 로컬 마크다운.
+
+    # ---------------- RBAC Hints (본부별, Phase 2) ----------------
+    rbac_hints:
+      type: object
+      description: "(optional) Phase 2에서 RBAC 적용 시 본부별 권한 힌트. Phase 1에서는 무시."
+      properties:
+        view_scope:
+          type: string
+          enum: [public, tenant, division-only, private]
+          default: tenant
+          description: "본부 산출물 조회 허용 범위"
+        edit_scope:
+          type: string
+          enum: [public, tenant, division-only, private]
+          default: division-only
+          description: "본부 산출물 수정 허용 범위"
+        evaluator_cross_division:
+          type: boolean
+          default: true
+          description: "외부 본부 evaluator 호출 허용 여부 (Tier 3 원칙 — s02 원칙 2). false 금지."
+
+# =====================================================================
+# Validation Rules (sfs-doc-validate가 적용)
+# =====================================================================
+validation_rules:
+  - rule: "divisions[].id 는 unique"
+  - rule: "evaluators[].agent_id 는 division 내에서 unique (다른 division 간 중복은 OK — 재사용)"
+  - rule: "g4_formula.components[].weight 합은 정확히 1.0"
+  - rule: "head_authority.can_evaluate_own_division 은 false 강제 (override 불허)"
+  - rule: "Phase 1에서는 divisions.length >= 6 (6 core 본부 선언 필수, 추가 선언은 opt-in/custom 가능)"
+  - rule: "evaluators[].model == 'opus' 강제 (Tier 2 외부 evaluator는 Opus 고정)"
+  # --- Round 2 추가 ---
+  - rule: "Phase 1에서는 rbac_config.enabled == false 강제 (solo 전권 — s02 원칙 8)"
+  - rule: "tier_profile × l3_backend 비호환 조합은 경고만 발생 (block 금지) — rule/driver-compatibility-warn-not-block (contract/l3-driver-interface-v1 §5)"
+  - rule: "l3_backend != 'none' 이면 appendix/drivers/<l3_backend>.manifest.yaml 파일 존재 필수 (phase1_supported == true 확인)"
+  - rule: "divisions[].tier_policy_override 미지정 시 top-level tier_profile 상속 (validate-time resolve)"
+  - rule: "divisions[].l3_backend_override 미지정 시 top-level l3_backend 상속 (validate-time resolve)"
+  - rule: "divisions[].rbac_hints.evaluator_cross_division == false 금지 (Tier 3 외부 evaluator 호출 차단은 원칙 2 위반)"
+  - rule: "tier_profile == 'minimal' + 본부 1개 이상이 default_model == 'opus' 인 경우 경고 (minimal 취지 위배 가능)"
+  # --- Round 3 추가 (🆕 v0.4-r3 progressive-activation) ---
+  - rule: "divisions[].activation_state 미지정 시 default='abstract' 자동 주입 (rule/activation-state-default-abstract)"
+  - rule: "divisions[].tier 미지정 시 default='opt-in' 자동 주입"
+  - rule: "tier == 'core' 인 본부는 divisions.yaml 에서 삭제 불가 — activation_state=abstract 로만 변경 가능"
+  - rule: "Phase 1 에서 tier == 'core' 본부는 정확히 6개 (dev, strategy-pm, qa, design, infra, taxonomy)"
+  - rule: "activation_state != 'active' 이면 activation_scope, parent_division, sunset_at 필드 무시 (warn on presence, not block)"
+  - rule: "activation_scope == 'temporal' 이면 sunset_at 필수 (rule/activation-scope-temporal-requires-sunset) — 위반 시 fail"
+  - rule: "activation_scope == 'scoped' 이면 parent_division 필수 (rule/activation-scope-scoped-requires-parent) — 위반 시 fail"
+  - rule: "activation_scope == 'scoped' 의 parent_division 은 존재하며 activation_state == 'active' 인 본부여야 함"
+  - rule: "activation_scope == 'scoped' self-reference 금지 (parent_division != id)"
+  - rule: "activation_scope == 'scoped' 순환 참조 금지 (A→B→A 형태 block)"
+  - rule: "activation_state == 'deactivated' 이면 deactivated_at 필수"
+  - rule: "sunset_at 과거 시각이어도 차단하지 않음 (rule/never-hard-block) — 대신 '재활성 또는 deactivate 선택' Socratic dialog 제안 경고 발생"
+  - rule: "Phase 1 기본 active 본부는 dev + strategy-pm (rule/phase1-basic-active-divisions) — 다른 조합은 경고만, 차단 금지"
+  - rule: "activation_state 변경 시 dialog_trace_id 기록 필수 (원칙 13 non-prescriptive guidance 감사용)"
+  - rule: "recommendation_trigger == 'declined' 인 경우 L1 `l1.division.dialog.complete { outcome: declined }` 이벤트 존재 검증"
+
+# =====================================================================
+# 예시 v1.1 (🆕 v0.4-r3 progressive-activation 반영)
+# — Phase 1 기본 상태: dev + strategy-pm 만 active, 나머지 4개는 abstract.
+# =====================================================================
+example_min:
+  version: "1.1"                  # 🆕 v0.4-r3 schema version bump
+  tier_profile: minimal           # Phase 1 default
+  l3_backend: notion              # Phase 1 default driver
+  rbac_config:
+    enabled: false                # Phase 1 solo 전권
+  c_level:
+    ceo:
+      agent_id: ceo-agent
+      model: opus
+      five_axis_ownership: [Value-Fit]
+    cto:
+      agent_id: cto-agent
+      model: opus
+      five_axis_ownership: [Soundness, Future-Proof]
+    cpo:
+      agent_id: cpo-agent
+      model: opus
+      five_axis_ownership: [User-Outcome, Maintainability]
+  divisions:
+    # ---------- 1. dev (Phase 1 기본 active) ----------
+    - id: dev
+      name: "기술개발 본부"
+      tier: core
+      activation_state: active
+      activation_scope: full
+      recommendation_trigger: phase-transition   # Phase 0→1 전환 시 default 활성
+      head_agent:
+        agent_id: dev-lead
+        model: sonnet
+      workers:
+        - { agent_id: backend-worker, model: sonnet }
+        - { agent_id: frontend-worker, model: sonnet }
+      evaluators:
+        - { agent_id: gap-detector, model: opus, gates: [G4], source: bkit-direct-reuse }
+        - { agent_id: code-analyzer, model: opus, gates: [G3], source: bkit-direct-reuse }
+      pdca_artifacts:
+        - { phase: design, artifact_path: "01-design/{pdca_id}/design.md", template: design.md }
+      default_model: sonnet
+      g4_formula:
+        formula: "gap-detector × 0.4 + 5-Axis × 0.6"
+        components:
+          - { name: gap-detector, weight: 0.4 }
+          - { name: 5-Axis, weight: 0.6 }
+        weight_sum_constraint: 1.0
+      head_authority:
+        can_evaluate_own_division: false
+        can_call_evaluator: true
+        can_trigger_escalate: true
+        can_lock_pdca: true
+      memory_path: "memory/dev/"
+      phase2_dynamic: false
+
+    # ---------- 2. strategy-pm (Phase 1 기본 active) ----------
+    - id: strategy-pm
+      name: "전략기획 본부"
+      tier: core
+      activation_state: active
+      activation_scope: full
+      recommendation_trigger: phase-transition
+      head_agent:
+        agent_id: pm-lead
+        model: sonnet
+      workers:
+        - { agent_id: pm-worker, model: sonnet }
+      evaluators:
+        - { agent_id: plan-validator, model: opus, gates: [G1], source: sfs-native }
+      pdca_artifacts:
+        - { phase: plan, artifact_path: "00-plan/{pdca_id}/plan.md", template: plan.md }
+      default_model: sonnet
+      g4_formula:
+        formula: "plan-validator × 1.0"
+        components: [{ name: plan-validator, weight: 1.0 }]
+        weight_sum_constraint: 1.0
+      memory_path: "memory/strategy-pm/"
+
+    # ---------- 3. qa (🆕 abstract — 활성화는 Socratic dialog 통해) ----------
+    - id: qa
+      name: "QA 본부"
+      tier: core
+      activation_state: abstract          # 🆕 v0.4-r3 기본 추상
+      # activation_scope, parent_division, sunset_at: activation_state != active 이므로 무시
+      head_agent:
+        agent_id: qa-lead
+        model: sonnet
+      workers: []                          # abstract 상태에서는 미로딩
+      evaluators:
+        - { agent_id: test-coverage-checker, model: opus, gates: [G4], source: sfs-native }
+      pdca_artifacts: []
+      default_model: sonnet
+      g4_formula:
+        formula: "test-coverage-checker × 1.0"
+        components: [{ name: test-coverage-checker, weight: 1.0 }]
+        weight_sum_constraint: 1.0
+
+    # ---------- 4. design (🆕 abstract) ----------
+    - id: design
+      name: "디자인 본부"
+      tier: core
+      activation_state: abstract
+      head_agent: { agent_id: design-lead, model: sonnet }
+      workers: []
+      evaluators:
+        - { agent_id: design-critique, model: opus, gates: [G3], source: cowork-rewrite }
+      pdca_artifacts: []
+      default_model: sonnet
+      g4_formula:
+        formula: "design-critique × 1.0"
+        components: [{ name: design-critique, weight: 1.0 }]
+        weight_sum_constraint: 1.0
+
+    # ---------- 5. infra (🆕 abstract) ----------
+    - id: infra
+      name: "인프라 본부"
+      tier: core
+      activation_state: abstract
+      head_agent: { agent_id: infra-lead, model: sonnet }
+      workers: []
+      evaluators:
+        - { agent_id: cost-estimator, model: opus, gates: [G3], source: sfs-native }
+      pdca_artifacts: []
+      default_model: sonnet
+      g4_formula:
+        formula: "cost-estimator × 1.0"
+        components: [{ name: cost-estimator, weight: 1.0 }]
+        weight_sum_constraint: 1.0
+
+    # ---------- 6. taxonomy (🆕 abstract) ----------
+    - id: taxonomy
+      name: "용어·분류 본부"
+      tier: core
+      activation_state: abstract
+      head_agent: { agent_id: taxonomy-lead, model: sonnet }
+      workers: []
+      evaluators:
+        - { agent_id: consistency-checker, model: opus, gates: [G3], source: sfs-native }
+      pdca_artifacts: []
+      default_model: sonnet
+      g4_formula:
+        formula: "consistency-checker × 1.0"
+        components: [{ name: consistency-checker, weight: 1.0 }]
+        weight_sum_constraint: 1.0
+
+# =====================================================================
+# 예시 v1.1 - Socratic dialog 결과 활성화된 상태 (채명정 보험 도메인 시나리오)
+# — taxonomy 를 scoped 로 strategy-pm 하위에 활성화
+# — qa 를 temporal 로 Sprint 5~7 한정 활성화
+# =====================================================================
+example_dialog_activated:
+  version: "1.1"
+  tier_profile: minimal
+  l3_backend: notion
+  c_level: { /* 생략 */ }
+  divisions:
+    - id: dev
+      activation_state: active
+      activation_scope: full
+      tier: core
+      # ... 이하 생략
+
+    - id: strategy-pm
+      activation_state: active
+      activation_scope: full
+      tier: core
+      # ... 이하 생략
+
+    - id: taxonomy
+      tier: core
+      activation_state: active                    # 🆕 Socratic dialog 로 활성 전환
+      activation_scope: scoped                    # strategy-pm 하위 worker 로만
+      parent_division: strategy-pm                # 🆕 scoped 필수
+      dialog_trace_id: "dlg-2026-04-25-taxo-01"   # 🆕 이 활성화를 초래한 dialog
+      recommendation_trigger: manual              # 사용자가 직접 /sfs division activate taxonomy
+
+    - id: qa
+      tier: core
+      activation_state: active
+      activation_scope: temporal                  # 🆕 Sprint 5~7 한정
+      sunset_at: "2026-06-15T00:00:00Z"           # 🆕 temporal 필수
+      dialog_trace_id: "dlg-2026-04-25-qa-03"
+      recommendation_trigger: sprint-retro-suggested
+
+    - id: design
+      activation_state: abstract                   # 여전히 abstract
+      tier: core
+
+    - id: infra
+      activation_state: abstract
+      tier: core
+
+# =====================================================================
+# 스키마 버전 관리
+# =====================================================================
+schema_version: 1.1                # 🆕 v0.4-r3 progressive-activation
+schema_id: divisions-yaml-v1.1     # v1.0 과 additive 호환 (기존 yaml 은 migration hook 거쳐 activation_state=active, tier=core 주입)
+breaking_changes_policy: "MAJOR bump only (semver)"
+migration_v1_0_to_v1_1:
+  - step: "기존 divisions[] 각 항목에 activation_state='active' 자동 주입"
+  - step: "기존 divisions[] 각 항목에 tier='core' (6 standard) 또는 'opt-in' (기타) 자동 주입"
+  - step: "activation_scope='full' 자동 주입 (기존에는 scope 개념 없었으므로 full 로 간주)"
+  - step: "recommendation_trigger='phase-transition' 자동 주입 (migration 기록)"
+  - step: "dialog_trace_id=null 유지 (migration 자체는 dialog 아님)"
+  - step: "validate 후 사용자에게 'Phase 1 기본 active 는 dev+strategy-pm 권장 — abstract 로 전환할까요?' 1회 recommendation (never-hard-block)"

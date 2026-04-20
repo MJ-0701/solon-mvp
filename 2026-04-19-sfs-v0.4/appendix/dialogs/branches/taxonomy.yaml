@@ -1,0 +1,132 @@
+# ---
+# doc_id: sfs-v0.4-appendix-dialog-branch-taxonomy
+# title: "Taxonomy Division Activation Branch"
+# version: 1.0.0
+# status: draft
+# last_updated: 2026-04-20
+# audience: [implementers, 1인-창업자, 도메인-특화-프로젝트]
+#
+# depends_on:
+#   - dialog/division-activation (appendix/dialogs/division-activation.dialog.yaml)
+#
+# defines:
+#   - branch/taxonomy-activation
+#
+# references:
+#   - principle/progressive-activation (s02 §2.13)
+#   - engine/alternative-suggestion
+# ---
+
+branch_id: taxonomy
+division_id: taxonomy
+inherits_from: dialog/division-activation
+
+# =====================================================================
+# 본부 특수 맥락
+# =====================================================================
+division_context: |
+  taxonomy 본부는 "용어·분류 일관성" 을 담당한다.
+  - 적합: 도메인 용어가 많은 분야 (보험, 의료, 법률, 금융), 다국어 제품, 이관 중 기존 용어 정리
+  - 비적합 후보: 용어 단순한 CRUD SaaS, 단기 prototype
+  - 1인 창업자 사각지대: "나 혼자인데 taxonomy 필요한가?" → 도메인 복잡도가 판단 기준 (사용자 수 아님)
+
+# =====================================================================
+# Phase B 주입 — Q1 example 질문
+# =====================================================================
+phase_B_overrides:
+  examples_for_branch: |
+    예시:
+    - "보험 상품 약관 용어가 흔들려서 agent 들이 다른 이름 사용"
+    - "기존 레거시 DB 스키마 용어와 새 제품 용어 충돌"
+    - "다국어 확장 전에 용어 사전 확립"
+    - "법률 문서 자동화 프로젝트라 용어 정확성이 생명"
+
+  intent_classification_hints:
+    - label: domain-terminology-drift
+      triggers: [용어, 약관, 스키마, 충돌, glossary, terminology]
+    - label: multilingual-prep
+      triggers: [다국어, 번역, i18n, locale]
+    - label: legacy-integration
+      triggers: [레거시, legacy, 이관, migration, 기존 DB]
+    - label: regulatory-accuracy
+      triggers: [법률, 규제, 약관, 정확, audit, compliance]
+
+# =====================================================================
+# Phase C 주입 — scope 별 recommendation
+# =====================================================================
+phase_C_overrides:
+  intent_based_hint:
+    domain-terminology-drift: |
+      용어가 흔들린다면 단기가 아니라 지속 관리가 필요해 보입니다.
+      scoped(strategy-pm 하위) 또는 full 을 권장합니다. temporal 은 비권장.
+    multilingual-prep: |
+      다국어 확장 준비라면 full 활성화가 자연스럽습니다.
+    legacy-integration: |
+      이관이 끝나면 종료될 작업일 수 있으니 temporal 이 적합해 보입니다.
+    regulatory-accuracy: |
+      규제·법률 정확성은 지속적 책임이므로 full 을 권장합니다.
+
+  default_hint: |
+    taxonomy 는 한번 활성화하면 지속 관리가 필요한 성격이 강합니다.
+    temporal 선택 시 sunset_at 도달에도 용어 정리가 필요하면 재활성화 대화를 드릴게요.
+
+# =====================================================================
+# Phase D 옵션 생성 규칙 (alternative-suggestion-engine 이 사용)
+# =====================================================================
+phase_D_option_rules:
+  # 옵션은 반드시 3개 + Cancel 로 제시. 👍 는 하나만.
+  option_templates:
+    - scope: scoped
+      default_intensity: 👍         # 1인 창업 + 도메인 작업 기본 권장
+      typical_parent: strategy-pm
+      label: "scoped (parent: strategy-pm)"
+      reasoning: "1인 또는 소규모 팀에서 용어 관리는 strategy-pm 업무의 연장"
+
+    - scope: full
+      default_intensity: ⚪
+      label: "full (독립 본부)"
+      reasoning: "다국어·규제 도메인은 독립 본부가 적합. 팀 규모 증가 예상 시 권장"
+
+    - scope: temporal
+      default_intensity: ⚠          # taxonomy 는 일반적으로 temporal 부적합
+      label: "temporal (특정 Sprint 까지)"
+      reasoning: "용어 관리는 지속 성격. temporal 종료 후 재활성 가능성 높음"
+      alternatives_when_warned:
+        - "scoped (parent: strategy-pm) 로 상시 유지 + 업무량 적을 때만 worker 호출"
+        - "full 로 활성 후 G5 Retro 에서 활용도 재검토 → 필요 시 deactivate"
+
+  intent_specific_overrides:
+    legacy-integration:
+      # 이관 프로젝트는 temporal 이 적합
+      - scope: temporal
+        intensity: 👍
+        label: "temporal (이관 완료까지)"
+        reasoning: "이관 종료 후에도 용어 유지 필요 시 재활성화"
+
+# =====================================================================
+# 본부 고유 side-effects (Phase E)
+# =====================================================================
+terminal_additions:
+  terminal/activate-full:
+    extra_side_effects:
+      - "memory/taxonomy/glossary.md 초기화 (기본 템플릿)"
+      - "L1 event: l1.division.activated { id: taxonomy, scope: full }"
+  terminal/activate-scoped:
+    extra_side_effects:
+      - "strategy-pm 본부의 workers 목록에 taxonomy-worker-scoped 추가"
+      - "memory/taxonomy/glossary.md 초기화"
+  terminal/activate-temporal:
+    extra_side_effects:
+      - "sunset_at 도달 시 'glossary 를 docs/00-meta/terminology.md 로 보존할까요?' 제안"
+
+# =====================================================================
+# 채명정 예시 (보험 도메인 1인 작업)
+# =====================================================================
+example_scenario:
+  persona: "1인 창업자, 보험 도메인, Phase 1 dogfooding, Sprint 3"
+  user_need: "보험 약관 용어 통일"
+  recommended_path: "/sfs division activate taxonomy → scoped (parent: strategy-pm)"
+  why_recommended: |
+    - 사용자 1명이므로 full 본부는 overkill
+    - 보험 약관은 지속 관리 필요하므로 temporal 부적합
+    - strategy-pm 하위 worker 로 용어 관리만 활성 → 인지 부하 최소

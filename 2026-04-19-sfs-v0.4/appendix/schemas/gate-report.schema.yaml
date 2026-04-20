@@ -1,0 +1,142 @@
+# ---
+# doc_id: sfs-v0.4-appendix-schema-gate-report
+# title: "GateReport v1 - Full Schema"
+# version: 0.4
+# status: draft
+# last_updated: 2026-04-19
+# audience: [implementers, evaluators]
+#
+# depends_on:
+#   - sfs-v0.4-s05-gate-framework
+#
+# defines:
+#   - schema/gate-report-v1.full
+#   - schema/gate-call-contract.full
+#
+# references:
+#   - enum/failure-mode-7 (defined in: s05)
+#   - concept/gate (defined in: s05)
+#   - concept/case-alpha (defined in: s06)
+#   - concept/case-beta (defined in: s06)
+#
+# affects: []
+# ---
+
+# =====================================================================
+# Note: 위 frontmatter는 YAML 주석으로 둠. sfs-doc-validate가
+# 주석에서 frontmatter를 추출 (yaml 파일은 frontmatter 미지원).
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# 1. GateCallContract (입력)
+# ---------------------------------------------------------------------
+GateCallContract:
+  type: object
+  required: [gate_id, target, evaluator, context_refs, inputs, thresholds]
+  properties:
+    gate_id:
+      type: string
+      enum: [G1, G2, G3, G4, G5]
+    target:
+      type: string
+      description: "PDCA 식별자 (e.g., division/dev/pdca/PDCA-042)"
+    evaluator:
+      type: string
+      description: "evaluator agent id + version (e.g., code-analyzer@1.2.0)"
+    context_refs:
+      type: array
+      items:
+        type: string
+      description: "L2 SSoT 내 참조 파일 경로"
+    inputs:
+      type: object
+      description: "evaluator 별 자유 필드 (code_diff, design_spec 등)"
+    thresholds:
+      type: object
+      properties:
+        min_score: { type: integer }
+        blocking_issues: { type: integer }
+
+# ---------------------------------------------------------------------
+# 2. GateReport (출력)
+# ---------------------------------------------------------------------
+GateReport:
+  type: object
+  required: [gate_id, verdict, audit]
+  properties:
+    gate_id:
+      type: string
+      enum: [G1, G2, G3, G4, G5]
+
+    verdict:
+      type: string
+      enum: [SUCCESS, FAIL-FIXABLE, FAIL-HARD, STALL, CONFLICT, TIMEOUT, ABORT]
+      # 7 Failure Modes (정의 → s05)
+
+    score:
+      type: integer
+      minimum: 0
+      maximum: 100
+      description: "G4의 경우 G4 formula 적용 결과 (s05)"
+
+    breakdown:
+      type: object
+      additionalProperties:
+        type: integer
+      description: "evaluator 별 세부 점수 (e.g., accuracy: 90, completeness: 85)"
+
+    recommendations:
+      type: array
+      items:
+        type: string
+
+    escalation:
+      type: object
+      properties:
+        required: { type: boolean }
+        case:
+          type: string
+          enum: [alpha, beta, null]
+          # 정의 → s06
+        affected_acs:
+          type: array
+          items: { type: string }
+        affected_designs:
+          type: array
+          items: { type: string }
+        affected_impls:
+          type: array
+          items: { type: string }
+
+    audit:
+      type: object
+      required: [evaluator, started_at, duration_ms]
+      properties:
+        evaluator: { type: string }
+        started_at: { type: string, format: date-time }
+        duration_ms: { type: integer }
+        token_input: { type: integer }
+        token_output: { type: integer }
+
+    user_decision_needed:
+      type: boolean
+      description: "true면 Orchestrator(사람)에게 결정 요청"
+
+    cross_division_conflict:
+      type: object
+      description: "verdict=CONFLICT 시 입력 (s06.5의 5-option 매핑)"
+      properties:
+        with_division: { type: string }
+        with_pdca: { type: string }
+        proposed_options:
+          type: array
+          items:
+            type: string
+            enum: [Align-Impl, Align-Design, Merge, Record, Escalate-Plan]
+
+# ---------------------------------------------------------------------
+# 3. 스키마 버전 관리
+# ---------------------------------------------------------------------
+schema_version: 1.0
+schema_id: gate-report-v1
+breaking_changes_policy: "MAJOR bump only (semver)"

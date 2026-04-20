@@ -1,0 +1,418 @@
+# ---
+# doc_id: sfs-v0.4-appendix-dialog-division-activation
+# title: "Division Activation Socratic Dialog Tree (meta, 5-phase)"
+# version: 1.0.0
+# status: draft
+# last_updated: 2026-04-20
+# audience: [implementers, plugin-customizers]
+#
+# depends_on:
+#   - sfs-v0.4-s02-design-principles         # 원칙 13
+#   - sfs-v0.4-appendix-schema-divisions     # v1.1
+#   - sfs-v0.4-appendix-schema-dialog-state  # turn tracking
+#
+# defines:
+#   - dialog/division-activation
+#   - schema/dialog-phase-enum (A, B, C, D, E)
+#   - schema/dialog-terminal-enum (activate-full, activate-scoped, activate-temporal, cancel)
+#
+# references:
+#   - principle/progressive-activation (s02 §2.13)
+#   - principle/human-final-filter (s02 §2.10)
+#   - engine/alternative-suggestion (appendix/engines/alternative-suggestion-engine.md)
+#   - command/sfs-division (appendix/commands/division.md)
+#   - event/l1.division.dialog.turn
+#   - event/l1.division.dialog.complete
+#   - branches/{taxonomy,qa,design,infra,strategy-pm,custom} (appendix/dialogs/branches/*.yaml)
+#
+# affects:
+#   - appendix/commands/division.md
+#   - appendix/commands/install.md    # Socratic wizard 차용
+# ---
+
+# =====================================================================
+# 목적
+# - `/sfs division activate|deactivate|add` 가 사용자와 대화하는 표준 트리.
+# - 모든 본부 활성화·비활성화 결정은 본 트리를 통과한다.
+# - 본 파일은 "메타 트리" — 공통 5-phase (A/B/C/D/E) 정의.
+# - 본부별 특수 질문은 `branches/<division-id>.yaml` 로 분리 (DRY).
+# =====================================================================
+
+dialog_id: division-activation
+dialog_version: 1.0.0
+dialog_intent: "사용자가 본부 activation_state 를 결정하는 Socratic dialog"
+owned_by_command: /sfs division
+
+# ---------------------------------------------------------------------
+# 핵심 불변식 (Invariants) — 모든 turn 에서 준수
+# ---------------------------------------------------------------------
+invariants:
+  - id: INV-1
+    name: "ask-context-first"
+    rule: "Phase A(Context) 를 건너뛰고 Phase D(Option Card) 로 jump 금지"
+    enforcement: "implementation-level assert"
+
+  - id: INV-2
+    name: "present-alternatives"
+    rule: "Phase D 에서 비권장(⚠) 옵션 선택 시 대안 1개 이상 함께 제시"
+    enforcement: "alternative-suggestion-engine 호출 필수"
+
+  - id: INV-3
+    name: "never-hard-block"
+    rule: "⚠ 비권장이어도 사용자가 재선택 시 반드시 수락. Terminal=cancel 강제 금지."
+    enforcement: "runtime check"
+
+  - id: INV-4
+    name: "turn-checkpoint"
+    rule: "매 turn 종료 시 appendix/dialogs/traces/<trace-id>.yaml 에 state 저장"
+    enforcement: "write-after-emit"
+
+  - id: INV-5
+    name: "auto-agent-call-forbidden"
+    rule: "caller 가 user 가 아닌 경우 abort + l1.rule-violation.division-auto-activation emit"
+    enforcement: "pre-dialog guard"
+
+  - id: INV-6
+    name: "recommendation-not-decision"
+    rule: "agent 가 제시한 👍/⚪/⚠ 는 참고 라벨. 최종 결정은 user."
+    enforcement: "UX (display only)"
+
+# ---------------------------------------------------------------------
+# Dialog State Machine
+# ---------------------------------------------------------------------
+states:
+  - A  # Context
+  - B  # Q1 Why now
+  - C  # Q2 Clarify
+  - D  # Option Card
+  - E  # Terminal
+  - X  # Exit (cancel from any phase)
+
+transitions:
+  - { from: start, to: A, condition: "valid invocation (caller=user, target exists)" }
+  - { from: A,     to: B, condition: "context presented" }
+  - { from: B,     to: C, condition: "Q1 intent classified" }
+  - { from: B,     to: X, condition: "user explicit exit" }
+  - { from: C,     to: D, condition: "Q2 clarified" }
+  - { from: C,     to: B, condition: "user requests rephrase Q1" }
+  - { from: D,     to: E, condition: "user option selection finalized (incl. ⚠ override)" }
+  - { from: D,     to: C, condition: "user requests re-clarify" }
+  - { from: D,     to: X, condition: "user chooses [C] cancel" }
+  - { from: E,     to: end, condition: "divisions.yaml write + L1 complete emitted" }
+  - { from: X,     to: end, condition: "cancel trace saved, no yaml change" }
+
+# ---------------------------------------------------------------------
+# Phase A — Context
+# ---------------------------------------------------------------------
+phase_A:
+  id: A
+  role: "context"
+  speaker: solon
+  template: |
+    현재 상황입니다.
+    • Phase: {current_phase}           # Phase 1 / Phase 2 / ...
+    • Sprint: {current_sprint}
+    • 활성 본부: {active_divisions}
+    • 대상 본부 현재 상태: {target.activation_state}
+    • 최근 brainstorm (최대 1건): {latest_initiative.title}
+    • recommendation_trigger: {trigger_source}   # manual / discovery-detected / ...
+    {#if target.history}
+    • {target.id} 이전 활성화 이력:
+    {target.history | render_compact}
+    {/if}
+
+    {target.id} 활성화/변경에 대해 몇 가지 여쭙겠습니다.
+  emits:
+    - event: l1.division.dialog.turn
+      payload: { phase: A, trace_id: <trace-id>, target: <div-id> }
+  checkpoint:
+    file: appendix/dialogs/traces/<trace-id>.yaml
+    fields: [phase, context_snapshot, timestamp]
+
+# ---------------------------------------------------------------------
+# Phase B — Q1 Why now (intent discovery)
+# ---------------------------------------------------------------------
+phase_B:
+  id: B
+  role: "intent-discovery"
+  speaker: solon
+  template: |
+    Q1. 왜 지금 {target.id} 를 {action} 하려 하시나요? (자유 서술)
+    예시: {examples_for_branch}
+  user_response: free_text
+  post_processing:
+    - step: "intent classifier (sonnet) — 의도 label 추출"
+      labels:
+        - pre-mvp-quality-gate        # qa 전형
+        - domain-terminology-drift    # taxonomy 전형
+        - first-user-traffic          # design 전형
+        - deployment-automation       # infra 전형
+        - burnout-protection          # deactivate 전형
+        - exploration                 # "일단 해보고 싶어서"
+        - other
+    - step: "edge-case 감지 — 답변이 짧거나 모호하면 재질문 1회 허용"
+      rephrase_policy: "at most 1 per dialog"
+  exit_keywords:
+    - "exit"
+    - "cancel"
+    - "quit"
+    - "/cancel"
+    → transition_to: X
+  emits:
+    - event: l1.division.dialog.turn
+      payload: { phase: B, intent_label: <label>, user_utterance_hash: <sha256> }
+      # 주의: raw utterance 는 저장하되 해시로만 이벤트화 (개인정보 보호)
+
+# ---------------------------------------------------------------------
+# Phase C — Q2 Clarify (scope·기간·범위)
+# ---------------------------------------------------------------------
+phase_C:
+  id: C
+  role: "clarify"
+  speaker: solon
+  template: |
+    Q2. {target.id} 활성화 기간·범위를 명확히 하고 싶습니다.
+      (1) full     — 장기 활성, 독립 본부로 운영
+      (2) scoped   — 다른 본부 하위 worker 로만
+      (3) temporal — 특정 Sprint/Phase 만 한정 (sunset_at 필수)
+
+    {intent_based_hint}
+    # 예: intent=pre-mvp-quality-gate → "MVP 출시 시점까지만 필요하시다면 3번이 적합해 보입니다"
+
+    선택 번호로 답해주세요. 질문이 있으면 자유롭게 작성하셔도 됩니다.
+  user_response: one_of [1, 2, 3] | free_text
+  post_processing:
+    - step: "scope_choice 파싱"
+    - step: "scope=scoped 면 parent_division 후보 제시 (현재 active 본부 중 선택)"
+    - step: "scope=temporal 이면 sunset_at 입력 요청 (ISO 8601 또는 'Sprint 7')"
+  back_to_B:
+    condition: "user 가 Q1 rephrase 요청 시"
+  emits:
+    - event: l1.division.dialog.turn
+      payload: { phase: C, scope_choice: <scope>, parent_division: <id|null>, sunset_at: <iso|null> }
+
+# ---------------------------------------------------------------------
+# Phase D — Option Card (최종 제안 + 대안)
+# ---------------------------------------------------------------------
+phase_D:
+  id: D
+  role: "option-card"
+  speaker: solon
+  template: |
+    확인하겠습니다. 최종 옵션을 제시합니다.
+
+    {for option in options}
+    [{option.number}] {option.intensity_emoji} {option.label}
+        {option.detail}
+        {#if option.reasoning}근거: {option.reasoning}{/if}
+        {#if option.alternatives}대안: {option.alternatives}{/if}
+    {/for}
+
+    [C] cancel
+
+    선택 번호를 입력하세요.
+  options:
+    # Phase D 에 제시할 최대 3개 옵션 + Cancel.
+    # 옵션 배열은 alternative-suggestion-engine 이 동적으로 생성.
+    - number: "1"
+      intensity_emoji: "👍|⚪|⚠"
+      label: "<scope-choice> (primary recommendation)"
+      detail: "scope, sunset_at, parent_division 명시"
+      reasoning: "<intent-based reasoning>"
+      alternatives: null
+    - number: "2"
+      intensity_emoji: "⚪"
+      label: "<alternative scope>"
+      ...
+    - number: "3"
+      intensity_emoji: "⚠"
+      label: "<edge case or override>"
+      alternatives: "대체 실행 방법 1개 이상"
+
+  user_response: one_of [1, 2, 3, C] | free_text
+
+  # 🔑 핵심 규칙: ⚠ 비권장 선택 시 "1회 재확인" — 단, 사용자가 다시 선택하면 반드시 수락
+  override_handling:
+    if_user_selects_intensity_warn:
+      step_1: "대안 재제시 (1회)"
+      step_2: "재선택 시 수락 — recommendation_trigger=declined 기록"
+      never_block: true   # INV-3 준수
+      l1_event: l1.division.dialog.override
+      payload: { user_final_choice: <opt>, recommendation_was: ⚠, alternatives_offered: [...] }
+
+  back_to_C:
+    condition: "user 가 scope 재정의 요청 시"
+
+  emits:
+    - event: l1.division.dialog.turn
+      payload: { phase: D, final_choice: <opt>, override: <bool> }
+
+# ---------------------------------------------------------------------
+# Phase E — Terminal (실행 + 기록)
+# ---------------------------------------------------------------------
+phase_E:
+  id: E
+  role: "terminal"
+  speaker: solon
+  terminals:
+    - id: terminal/activate-full
+      trigger: "Phase D 에서 full 선택"
+      side_effects:
+        - update: "divisions.yaml { activation_state: active, activation_scope: full }"
+        - create: "memory/<target-id>/ 디렉터리"
+        - emit: "l1.division.dialog.complete { outcome: activate-full }"
+        - emit: "l1.division.state-changed { from: <prev>, to: active/full }"
+      message: |
+        ✅ {target.id} 를 full activation 합니다.
+        • state: active
+        • scope: full
+        • dialog_trace_id: {trace_id}
+        변경 반영됨. `/sfs plan --division {target.id}` 로 첫 PDCA 시작 가능.
+
+    - id: terminal/activate-scoped
+      trigger: "Phase D 에서 scoped 선택"
+      side_effects:
+        - update: "divisions.yaml { activation_state: active, activation_scope: scoped, parent_division: <parent> }"
+        - create: "memory/<target-id>/"
+        - emit: "l1.division.dialog.complete { outcome: activate-scoped, parent: <parent> }"
+      message: |
+        ✅ {target.id} 를 scoped activation 합니다.
+        • scope: scoped
+        • parent_division: {parent}
+        • dialog_trace_id: {trace_id}
+
+    - id: terminal/activate-temporal
+      trigger: "Phase D 에서 temporal 선택"
+      preconditions:
+        - "sunset_at 필수 (미래 ISO 8601 또는 'Sprint N')"
+      side_effects:
+        - update: "divisions.yaml { activation_state: active, activation_scope: temporal, sunset_at: <iso> }"
+        - create: "memory/<target-id>/"
+        - schedule: "sunset_at 도달 시 `/sfs division deactivate <target.id> --prompt-renew` 자동 대화 제안 (never-hard-block)"
+        - emit: "l1.division.dialog.complete { outcome: activate-temporal, sunset_at: <iso> }"
+      message: |
+        ✅ {target.id} 를 temporal activation 합니다.
+        • scope: temporal
+        • sunset_at: {sunset_at}
+        • dialog_trace_id: {trace_id}
+        sunset_at 도달 시 "계속 유지할까요?" 대화를 다시 여쭙습니다.
+
+    - id: terminal/deactivate
+      trigger: "/sfs division deactivate 호출 + Phase D 에서 confirm"
+      side_effects:
+        - update: "divisions.yaml { activation_state: deactivated, deactivated_at: <now> }"
+        - archive: "memory/<target-id>/ → memory/.archive/<target-id>/<deactivated_at>/"
+        - emit: "l1.division.dialog.complete { outcome: deactivate }"
+      message: |
+        ✅ {target.id} 를 deactivated 로 전환합니다.
+        • deactivated_at: {now}
+        • 재활성화는 언제든 `/sfs division activate {target.id}` 로 가능.
+
+    - id: terminal/cancel
+      trigger: "Phase D [C] cancel 또는 Phase B/C exit"
+      side_effects:
+        - write: "appendix/dialogs/traces/<trace-id>.yaml { outcome: cancel, reason: <user_reason|null> }"
+        - emit: "l1.division.dialog.complete { outcome: cancel }"
+        - NO yaml_change: true
+      message: |
+        취소되었습니다. divisions.yaml 은 변경되지 않았습니다.
+        trace: {trace_id} (7일 보존 후 expired)
+
+# ---------------------------------------------------------------------
+# Branch Resolution — 본부별 특수 질문 주입
+# ---------------------------------------------------------------------
+branch_resolution:
+  description: |
+    target.id 에 따라 Phase B 의 examples_for_branch 및 Phase C 의 intent_based_hint 를
+    `appendix/dialogs/branches/<target.id>.yaml` 에서 로드하여 병합.
+    branches 파일이 없으면 default (`branches/_default.yaml`) 사용.
+  merge_strategy: "branch overrides meta, meta provides fallback"
+  supported_branches:
+    - taxonomy
+    - qa
+    - design
+    - infra
+    - strategy-pm
+    - custom        # /sfs division add 호출 시
+
+# ---------------------------------------------------------------------
+# Dialog Trace Schema (요약; 상세는 appendix/schemas/dialog-state.schema.yaml)
+# ---------------------------------------------------------------------
+trace_schema_summary:
+  file_pattern: "appendix/dialogs/traces/<trace-id>.yaml"
+  trace_id_pattern: "dlg-YYYY-MM-DD-<target-id>-<seq>"
+  fields:
+    - trace_id
+    - dialog_id: division-activation
+    - target_division_id
+    - action: activate|deactivate|add
+    - invoked_by                     # user (agent 금지)
+    - invoked_at
+    - turns:                         # 각 turn 의 phase + payload + timestamp
+        - { phase: A, payload: {...}, at: <iso> }
+        - { phase: B, payload: {...}, at: <iso> }
+    - terminal_reached               # or null if interrupted
+    - pre_state                       # abstract|active|deactivated
+    - post_state
+    - recommendation_intensity_at_choice  # 👍|⚪|⚠
+    - user_overrode_recommendation        # bool
+    - divisions_yaml_diff_hash       # 변경 전후 diff 의 sha256 (감사)
+  retention:
+    active_trace: indefinite          # 완료된 trace 는 영구 보존
+    interrupted_trace: "7 days then expired (not deleted)"
+
+# ---------------------------------------------------------------------
+# Example Full Trace (예: qa temporal 활성화)
+# ---------------------------------------------------------------------
+example_trace:
+  trace_id: dlg-2026-04-25-qa-03
+  dialog_id: division-activation
+  target_division_id: qa
+  action: activate
+  invoked_by: user
+  invoked_at: "2026-04-25T14:23:10Z"
+  turns:
+    - phase: A
+      payload:
+        current_phase: 1
+        current_sprint: 5
+        active_divisions: [dev, strategy-pm]
+        target_state: abstract
+      at: "2026-04-25T14:23:11Z"
+    - phase: B
+      payload:
+        intent_label: pre-mvp-quality-gate
+        user_utterance_hash: "sha256:abc..."
+      at: "2026-04-25T14:23:45Z"
+    - phase: C
+      payload:
+        scope_choice: temporal
+        sunset_at: "2026-06-15T00:00:00Z"
+      at: "2026-04-25T14:24:02Z"
+    - phase: D
+      payload:
+        final_choice: 1
+        options_presented:
+          - { number: 1, intensity: 👍, label: "temporal (Sprint 7)" }
+          - { number: 2, intensity: ⚪, label: "full" }
+          - { number: 3, intensity: ⚠, label: "scoped (dev 하위)" }
+        override: false
+      at: "2026-04-25T14:24:33Z"
+    - phase: E
+      payload:
+        terminal_reached: terminal/activate-temporal
+        side_effects_applied:
+          - "divisions.yaml updated"
+          - "memory/qa/ created"
+      at: "2026-04-25T14:24:35Z"
+  pre_state: abstract
+  post_state: active
+  recommendation_intensity_at_choice: 👍
+  user_overrode_recommendation: false
+  divisions_yaml_diff_hash: "sha256:def..."
+
+# ---------------------------------------------------------------------
+# Versioning
+# ---------------------------------------------------------------------
+schema_version: 1.0
+breaking_changes_policy: "MAJOR bump only (semver). 기존 traces 는 dialog_version 필드로 호환성 추적."

@@ -1,0 +1,60 @@
+# ──────────────────────────────────────────────────────────
+# solon (agent_architect) repo root — .gitignore
+# Created: 2026-04-20
+# Scope: Solon v0.4-r3 docset + v0.3 proposal archive + reusable assets (agents/, skills/, claude-shared-config/)
+# Note: 2026-04-19-sfs-v0.4/.gitignore 는 sub-scope 규칙으로 유지 (migration snapshot 용).
+# ──────────────────────────────────────────────────────────
+
+# ─── OS / Editor 노이즈 ───
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ─── 중복 압축본 (같은 이름의 디렉터리가 이미 tracked) ───
+# agents.zip / claude-shared-config.zip / skills.zip 은 각각 같은 이름 폴더의 구버전 스냅샷.
+# 소스 오브 트루스 = 폴더 본체. zip 은 실수 이관 방지용으로 제외.
+*.zip
+
+# ─── Node / JS ───
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+package-lock.json.bak
+
+# ─── Python ───
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+
+# ─── Build / Dist ───
+dist/
+build/
+out/
+*.log
+
+# ─── 환경 변수 (절대 commit 금지) ───
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# ─── Claude Desktop / Cowork 세션 부산물 ───
+.claude/projects/*/memory/
+.claude/projects/*/*.jsonl
+
+# ─── Phase 1 이후 런타임 부산물 ───
+.solon-cache/
+.solon-state.json
+*.learnings.local.yaml

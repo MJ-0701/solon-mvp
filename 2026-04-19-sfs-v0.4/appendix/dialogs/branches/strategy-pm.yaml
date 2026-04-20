@@ -1,0 +1,212 @@
+# ---
+# doc_id: sfs-v0.4-appendix-dialog-branch-strategy-pm
+# title: "Strategy-PM Division Activation/Deactivation Branch"
+# version: 1.0.0
+# status: draft
+# last_updated: 2026-04-20
+# audience: [implementers, 1인-창업자, 번아웃-위험-팀]
+#
+# depends_on:
+#   - dialog/division-activation
+#
+# defines:
+#   - branch/strategy-pm-activation
+#   - branch/strategy-pm-deactivation
+#
+# note: |
+#   strategy-pm 은 Phase 1 기본 active 본부이므로
+#   일반적으로 "activate" 보다 "deactivate" 또는 "scope 축소" 대화가 더 자주 발생한다.
+#   본 branch 는 양방향 대화를 모두 다룬다.
+# ---
+
+branch_id: strategy-pm
+division_id: strategy-pm
+inherits_from: dialog/division-activation
+
+division_context: |
+  strategy-pm 본부는 "제품 전략·우선순위·Phase 전환" 을 담당한다.
+  - 기본 상태: Phase 1 부터 active (dev 와 함께 기본 활성)
+  - 적합: 모든 프로젝트 (단, 1인 창업자는 번아웃 리스크 존재)
+  - 비활성 후보: 단일 목적 internal tool, 매우 짧은 throwaway prototype
+  - 1인 창업자 사각지대: "제품 전략을 agent 가 대신 해주면 내가 뭐 해?" → 의사결정권은 사용자,
+    agent 는 option 제시·checkpoint 역할
+
+# =====================================================================
+# Phase B — activate 맥락 (일반적으로 이미 active 이므로 드물게 사용)
+# =====================================================================
+phase_B_overrides:
+  examples_for_branch: |
+    예시:
+    - "이전에 strategy-pm 을 deactivate 했는데 다시 활성화하고 싶어"
+    - "혼자 하다가 공동창업자 합류해서 roadmap 정리 필요"
+    - "Phase 2 진입하는데 전략 본부 명시적 활성화"
+    - "Sprint retrospective 없이 하다가 체계 잡고 싶음"
+
+  intent_classification_hints:
+    - label: reactivation-after-dormant
+      triggers: [다시 활성화, 재활성화, reactivate]
+    - label: cofounder-onboarding
+      triggers: [공동창업자, 합류, 팀 합류, cofounder]
+    - label: phase-transition-prep
+      triggers: [Phase 2, Phase 전환, 확장]
+    - label: retrospective-formalization
+      triggers: [Retro, 회고, sprint retrospective]
+
+# =====================================================================
+# Phase C — activate 경로
+# =====================================================================
+phase_C_overrides:
+  intent_based_hint:
+    reactivation-after-dormant: |
+      이전 deactivate 기록이 남아있다면, 과거 컨텍스트를 자동으로 로드합니다.
+      memory/strategy-pm/archive.md 를 복원할지 확인드릴게요.
+    cofounder-onboarding: |
+      공동창업자 합류 시 full 활성화가 자연스럽습니다.
+      roadmap.md 와 priority.md 를 새로 만들어 공유 합의를 유도합니다.
+    phase-transition-prep: |
+      Phase 전환은 strategy-pm 의 핵심 업무. full 이 적합합니다.
+    retrospective-formalization: |
+      Retro 만 필요하다면 scoped (parent: dev) 도 가능. 단, G5 연동 약해질 수 있으니
+      full 을 권장합니다.
+
+  default_hint: |
+    strategy-pm 은 대부분 Phase 1 부터 이미 active 입니다.
+    deactivate 후 재활성이라면 과거 컨텍스트 로드를 확인드릴게요.
+
+# =====================================================================
+# Phase D — activate option
+# =====================================================================
+phase_D_option_rules:
+  option_templates:
+    - scope: full
+      default_intensity: 👍
+      label: "full (기본 활성)"
+      reasoning: "strategy-pm 은 Phase 1 기본 본부. 전략·우선순위·Phase 전환이 모두 포함"
+
+    - scope: scoped
+      default_intensity: ⚠
+      label: "scoped (parent: dev) — 비권장"
+      reasoning: "전략을 dev 하위에 두면 자기검증 편향 위험 (원칙 2)"
+      alternatives_when_warned:
+        - "full 로 독립 활성 (기본값)"
+        - "strategy-pm 자체를 deactivate 하고 수동으로 roadmap 관리 (비추천)"
+
+    - scope: temporal
+      default_intensity: ⚠
+      label: "temporal (특정 Phase 까지) — 비권장"
+      reasoning: "전략은 지속 본부. temporal 은 Phase 전환 때마다 재활성 대화 유발 → 피로"
+
+# =====================================================================
+# Phase B — deactivate 맥락 (실무에서 더 자주 발생)
+# =====================================================================
+phase_B_deactivate_overrides:
+  examples_for_branch: |
+    예시 (deactivate):
+    - "나 혼자인데 매번 roadmap 갱신하라고 해서 피곤해"
+    - "제품 방향 확정됐고 당분간 실행만 할 계획"
+    - "번아웃 리스크 — 의사결정 부담 줄이고 싶어"
+    - "internal tool 이라 전략 본부 무의미"
+
+  deactivate_intent_hints:
+    - label: burnout-protection
+      triggers: [피곤, 번아웃, 부담, 힘들어]
+    - label: execution-focus
+      triggers: [실행만, 만들기만, 집중]
+    - label: direction-locked
+      triggers: [방향 확정, pivot 없음, lock]
+    - label: internal-tool-no-strategy
+      triggers: [internal, 내부, 단일 목적]
+
+# =====================================================================
+# Phase C — deactivate 경로 (번아웃 보호 관점)
+# =====================================================================
+phase_C_deactivate_overrides:
+  deactivate_intent_hint:
+    burnout-protection: |
+      번아웃 보호는 원칙 13 의 핵심 시나리오입니다.
+      strategy-pm 완전 deactivate 대신, "scope 축소" 또는 "temporal pause" 도 가능합니다.
+      - scope 축소: Phase 전환 checkpoint 만 유지, daily priority 관리 해제
+      - temporal pause: 2 주간 휴면, 이후 재활성 질문
+    execution-focus: |
+      실행 집중 기간이면 temporal pause (예: 4 주) 를 권장.
+      기한 도달 시 "아직 실행 집중 중인가요?" 확인 대화.
+    direction-locked: |
+      방향 확정 상태면 scope 축소 (Phase 전환 checkpoint only) 가 적합.
+      daily·weekly priority 관리 없이도 Phase 전환 시에만 활성.
+    internal-tool-no-strategy: |
+      완전 deactivate 가 적합. deactivated_at 기록 후 recommendation_trigger=declined.
+
+  default_hint: |
+    strategy-pm deactivate 는 "번아웃 보호" 와 "execution focus" 시나리오에서 정당합니다.
+    단, Phase 2 진입 신호 감지되면 재활성 대화를 드릴게요.
+
+# =====================================================================
+# Phase D — deactivate option
+# =====================================================================
+phase_D_deactivate_option_rules:
+  option_templates:
+    - action: scope-reduce
+      default_intensity: 👍
+      label: "scope 축소 (Phase 전환 checkpoint 만 유지)"
+      reasoning: "완전 deactivate 대신, 핵심 checkpoint 만 유지하여 번아웃↓ + 방향성 유지"
+
+    - action: temporal-pause
+      default_intensity: ⚪
+      label: "temporal pause (4 주 휴면)"
+      reasoning: "기한 도달 시 재활성 대화. execution focus 기간에 적합"
+      sunset_at_suggestion: "4 주 후"
+
+    - action: full-deactivate
+      default_intensity: ⚪
+      label: "full deactivate (완전 비활성)"
+      reasoning: "internal tool 또는 방향 완전 확정 시. Phase 전환 감지 시 재활성 질문"
+
+    - action: cancel
+      default_intensity: ⚪
+      label: "취소 (현재 상태 유지)"
+
+  # ⚠ 전체 deactivate 시 보호 장치
+  warn_conditions:
+    - pattern: "full-deactivate + 활성 Sprint 존재"
+      warning: "진행 중인 Sprint 가 있는데 strategy-pm 을 완전 비활성화하면 G5 Retro 기록이 끊깁니다"
+      alternatives:
+        - "Sprint 종료 후 deactivate 로 연기"
+        - "scope 축소 (Retro 만 유지) 로 절충"
+
+# =====================================================================
+# Phase E — terminal 확장
+# =====================================================================
+terminal_additions:
+  terminal/activate-full:
+    extra_side_effects:
+      - "memory/strategy-pm/roadmap.md 갱신 (이미 존재하면 archive 로드)"
+      - "L1 event: l1.division.activated { id: strategy-pm, scope: full }"
+
+  terminal/deactivate-scope-reduce:
+    extra_side_effects:
+      - "daily·weekly priority worker 비활성"
+      - "Phase 전환 감지 worker 만 유지"
+      - "L1 event: l1.division.scope.reduced { id: strategy-pm }"
+
+  terminal/deactivate-temporal-pause:
+    extra_side_effects:
+      - "sunset_at 도달 시 'strategy-pm 재활성 필요?' 자동 질문"
+      - "기간 중 Phase 전환 신호(예: MVP launch) 감지 시 즉시 재활성 제안"
+
+  terminal/deactivate-full:
+    extra_side_effects:
+      - "memory/strategy-pm/ 전체를 memory/strategy-pm/archive/ 로 이동"
+      - "Phase 전환 trigger (user signal: 'launch', 'pivot') 감지 시 재활성 대화"
+      - "L1 event: l1.division.deactivated { id: strategy-pm, reason: user-request }"
+
+# =====================================================================
+# 채명정 예시 — 번아웃 보호 시나리오
+# =====================================================================
+example_scenario:
+  persona: "1인 창업자, Sprint 4 (MVP 1달 전), 피로 누적"
+  user_need: "당분간 실행만 집중, 매번 roadmap 갱신 질문에서 해방"
+  recommended_path: "/sfs division deactivate strategy-pm → scope-reduce (Phase 전환 checkpoint 만)"
+  why_recommended: |
+    - 완전 deactivate 는 Phase 2 진입 감지를 놓칠 위험
+    - scope-reduce 는 daily/weekly 피로를 줄이되 핵심 checkpoint 유지
+    - MVP launch 시점에 자동으로 재활성 대화 → 번아웃 보호 + 방향성 보존

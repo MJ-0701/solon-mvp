@@ -1,0 +1,154 @@
+# ---
+# doc_id: sfs-v0.4-appendix-schema-escalation
+# title: "Escalation v1 - Full Schema"
+# version: 0.4
+# status: draft
+# last_updated: 2026-04-19
+# audience: [implementers, evaluators, c-level]
+#
+# depends_on:
+#   - sfs-v0.4-s06-escalate-plan
+#
+# defines:
+#   - schema/escalation-v1.full
+#   - schema/learning-record-v1
+#
+# references:
+#   - concept/case-alpha (defined in: s06)
+#   - concept/case-beta (defined in: s06)
+#   - concept/alpha-1-method (defined in: s06)
+#   - concept/beta-3-method (defined in: s06)
+#   - concept/h6-self-learning (defined in: s06)
+#   - schema/gate-report-v1 (defined in: s05)
+#
+# affects: []
+# ---
+
+# =====================================================================
+# 1. EscalationRecord (개별 escalation 1건)
+# =====================================================================
+EscalationRecord:
+  type: object
+  required: [id, triggered_at, case, trigger, root_cause, resolution_method, outcome]
+  properties:
+    id:
+      type: string
+      pattern: "^ESC-\\d{4}-\\d{2}-\\d{2}-\\d{3}$"
+      description: "ESC-YYYY-MM-DD-NNN"
+
+    triggered_at:
+      type: string
+      format: date-time
+
+    case:
+      type: string
+      enum: [alpha, beta]
+      # alpha = AC 표현 정정 (s06)
+      # beta  = 요구사항 자체 폐기 (s06)
+
+    trigger:
+      type: object
+      required: [gate_id, pdca_id, failure_mode]
+      properties:
+        gate_id:
+          type: string
+          enum: [G1, G2, G3, G4, G5]
+        pdca_id:
+          type: string
+        failure_mode:
+          type: string
+          enum: [SUCCESS, FAIL-FIXABLE, FAIL-HARD, STALL, CONFLICT, TIMEOUT, ABORT]
+        gate_report_ref:
+          type: string
+          description: "L2 SSoT 내 GateReport 파일 경로"
+
+    affected_acs:
+      type: array
+      items: { type: string }
+      description: "alpha-1 방식의 부분 재오픈 대상 (s06.3)"
+
+    affected_designs:
+      type: array
+      items: { type: string }
+
+    affected_impls:
+      type: array
+      items: { type: string }
+
+    root_cause:
+      type: string
+      description: "원인 분석 (수동 작성 또는 evaluator 추론)"
+
+    resolution_method:
+      type: string
+      enum:
+        - alpha-1            # AC 단위 부분 재오픈
+        - beta-3             # 새 PDCA 시작
+        - conflict-1-AlignImpl
+        - conflict-2-AlignDesign
+        - conflict-3-Merge
+        - conflict-4-Record
+        - conflict-5-Escalate
+
+    user_decision_required:
+      type: boolean
+
+    user_decision:
+      type: string
+      description: "사용자가 내린 결정 요약"
+
+    user_decision_at:
+      type: string
+      format: date-time
+
+    branch:
+      type: string
+      description: "alpha-1의 경우 신규 브랜치명 (e.g., feature/PDCA-042-escalated-v1)"
+
+    outcome:
+      type: string
+      enum: [resolved, escalated-further, aborted, in-progress]
+
+    learning:
+      $ref: "#/LearningRecord"
+
+# =====================================================================
+# 2. LearningRecord (H6 Self-Learning Loop 입력)
+# =====================================================================
+LearningRecord:
+  type: object
+  description: "G5 Sprint Retro에서 자동 집계되어 validator 진화에 사용 (s06.6)"
+  properties:
+    pattern_id:
+      type: string
+      pattern: "^PTRN-\\d{4}$"
+    pattern_summary:
+      type: string
+    occurrence_count:
+      type: integer
+      description: "같은 root cause가 몇 번째인가"
+    add_to_validator:
+      type: string
+      description: "어느 evaluator의 체크리스트에 추가할지 (e.g., plan-validator)"
+    new_check:
+      type: string
+      description: "추가될 체크 항목"
+    proposed_at:
+      type: string
+      format: date-time
+    accepted:
+      type: boolean
+      description: "G5 Sprint Retro에서 수용 여부"
+    accepted_at:
+      type: string
+      format: date-time
+    accepted_by:
+      type: string
+      description: "결정자 (CEO 또는 사용자)"
+
+# =====================================================================
+# 3. 스키마 버전 관리
+# =====================================================================
+schema_version: 1.0
+schema_id: escalation-v1
+breaking_changes_policy: "MAJOR bump only (semver)"

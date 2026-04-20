@@ -1,0 +1,91 @@
+# ---
+# doc_id: sfs-v0.4-appendix-driver-notion
+# title: "L3 Driver — Notion (Default)"
+# version: 0.4
+# status: draft
+# last_updated: 2026-04-19
+# audience: [implementers, plugin-users]
+#
+# depends_on:
+#   - sfs-v0.4-appendix-drivers-interface
+#
+# defines:
+#   - driver/notion-manifest-v1
+#
+# references:
+#   - contract/l3-driver-interface-v1 (defined in: appendix/drivers/_INTERFACE)
+#
+# affects: []
+# ---
+
+id: notion
+display_name: "Notion (default)"
+version: "1.0.0"
+
+# ============== Capability 선언 ==============
+collab_modes: [realtime, async, comment, mention, view-only]
+multi_user: native              # Team plan 필요. Free/Plus는 share link 기반 view-only
+
+auth:
+  type: api-key
+  required_env:
+    - NOTION_API_KEY
+    - NOTION_PARENT_PAGE_ID     # 또는 NOTION_DATABASE_ID
+
+capabilities:
+  publish: true
+  query: true
+  archive: true                 # 12-sprint rolling, archive page 이동
+  rich_view: true               # DB view, chart embed (line/board/calendar)
+
+# ============== Phase 1 동작 ==============
+phase1_supported: true
+phase1_default: true
+
+# ============== Notion plan별 호환성 ==============
+plan_compatibility:
+  free:
+    multi_user_mode: "view-only (share link)"
+    rate_limit: "3 req/sec"
+    block_limit: "실질 무제한 (개인 workspace)"
+    cost: "$0/mo"
+    sufficient_for: [minimal, standard]
+  plus:
+    multi_user_mode: "view-only (share link) + 무제한 파일 업로드"
+    rate_limit: "3 req/sec"
+    file_size_limit: "5GB/file"
+    cost: "$10/mo (개인)"
+    sufficient_for: [minimal, standard]
+  team:
+    multi_user_mode: "native (동시 편집 + comment + mention)"
+    rate_limit: "3 req/sec"
+    advanced_permissions: true
+    cost: "$15-20/user/mo"
+    sufficient_for: [collab]
+
+# ============== 알려진 한계 ==============
+known_limitations:
+  - "Notion API rate limit 3 req/sec — 본부 6개 동시 publish 시 throttle 가능 (retry 로직 필요)"
+  - "Notion DB property 25개 한계 — Sprint dashboard 항목 설계 시 고려"
+  - "API token rotation 자동화 미지원 — 사용자 수동 갱신"
+  - "Rich text 일부 markdown 변환 손실 (escape 문자, 일부 callout)"
+
+# ============== tier별 권장 ==============
+tier_recommendations:
+  minimal: "Free plan으로 충분. 1인 사용 시 SSO 등 불필요."
+  standard: "Free/Plus 권장. Team plan은 협업자 추가 시점에 검토."
+  collab: "Team plan 권장 (realtime 동시 편집 + comment + mention)."
+
+# ============== 비호환 경고 트리거 ==============
+warn_when:
+  - tier: minimal
+    condition: "user_uses=team_plan"
+    severity: info
+    message: "Team plan 비용($15+/user/mo) 발생. Free plan으로 동일 기능 가능."
+  - tier: collab
+    condition: "user_uses=free_plan"
+    severity: warning
+    message: "다자 동시 편집 미지원. share link view-only로 fallback. realtime 원하면 Team plan."
+
+# ============== 데이터 schema 참조 ==============
+data_schema_ref: "sfs-v0.4-s08-observability#8.7.1"   # Notion DB 권장 schema (PDCA master DB)

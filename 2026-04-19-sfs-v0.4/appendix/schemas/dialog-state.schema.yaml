@@ -1,0 +1,470 @@
+# ---
+# doc_id: sfs-v0.4-appendix-schema-dialog-state
+# title: "Dialog State Schema (Turn Tracking + Mid-Dialog Resume)"
+# version: 1.0.0
+# status: draft
+# last_updated: 2026-04-20
+# audience: [implementers, dialog-engine-author, audit-reviewer]
+#
+# depends_on:
+#   - dialog/division-activation (appendix/dialogs/division-activation.dialog.yaml)
+#   - principle/progressive-activation (s02 §2.13)
+#
+# defines:
+#   - schema/dialog-state
+#   - event/l1.division.dialog.turn
+#   - event/l1.division.dialog.complete
+#   - event/l1.division.dialog.override
+#
+# purpose: |
+#   Socratic division-activation dialog 의 턴 단위 상태 저장을 위한 스키마.
+#   mid-dialog resume, audit trail, 취소 복구, override 기록의 기반이 된다.
+# ---
+
+schema_version: 1.0.0
+
+# =====================================================================
+# 1. DialogState 최상위
+# =====================================================================
+DialogState:
+  description: |
+    한 번의 division-activation 대화 세션의 완전한 상태.
+    dialog_trace_id 는 수명 내내 고정되며, 각 turn 은 append-only 로 기록된다.
+
+  required_fields:
+    - dialog_trace_id
+    - dialog_id
+    - target_division_id
+    - started_at
+    - current_phase
+    - status
+    - turns
+    - actor
+
+  fields:
+    dialog_trace_id:
+      type: string
+      pattern: "^dlg-\\d{4}-\\d{2}-\\d{2}-[a-z0-9-]+-\\d{2}$"
+      description: "형식: dlg-YYYY-MM-DD-<target-id>-<seq>. 일자별 seq 는 00 부터 시작"
+      example: "dlg-2026-04-25-qa-03"
+      immutable: true
+
+    dialog_id:
+      type: string
+      description: "대화 정의 참조. division-activation 또는 division-deactivation"
+      enum: [division-activation, division-deactivation, custom-add]
+
+    target_division_id:
+      type: string
+      description: "대상 본부 id (qa, taxonomy 등 또는 custom-id)"
+
+    branch_id:
+      type: string
+      description: "resolved branch (taxonomy/qa/design/infra/strategy-pm/custom)"
+
+    started_at:
+      type: iso8601
+      immutable: true
+
+    last_turn_at:
+      type: iso8601
+      description: "최근 turn 기록 시각 — resume 판단에 사용"
+
+    ended_at:
+      type: iso8601
+      optional: true
+      description: "status != active 가 된 시각"
+
+    current_phase:
+      type: string
+      enum: [A, B, C, D, E, X]
+      description: "A=context / B=why-now / C=clarify / D=option / E=terminal / X=exit"
+
+    status:
+      type: string
+      enum: [active, completed, cancelled, abandoned, superseded]
+      description: |
+        - active: 진행 중 (resume 가능)
+        - completed: 정상 terminal 도달
+        - cancelled: 사용자가 명시적으로 취소
+        - abandoned: 24h 이상 turn 없음 (auto-expire)
+        - superseded: 같은 target 으로 새 대화가 시작됨
+
+    terminal_reached:
+      type: string
+      optional: true
+      enum:
+        - terminal/activate-full
+        - terminal/activate-scoped
+        - terminal/activate-temporal
+        - terminal/deactivate-full
+        - terminal/deactivate-scope-reduce
+        - terminal/deactivate-temporal-pause
+        - terminal/cancel
+      description: "status == completed 시 필수"
+
+    actor:
+      type: object
+      description: "대화 개시자 — INV-5 (auto-agent-call-forbidden) 검증에 사용"
+      required:
+        - role
+      fields:
+        role:
+          type: string
+          enum: [user, system-triggered-by-user, agent]
+          description: "agent 는 금지되어야 함 — validator 가 차단"
+        user_id:
+          type: string
+          optional: true
+        invoked_by_command:
+          type: string
+          example: "/sfs division activate qa"
+
+    turns:
+      type: array
+      items: DialogTurn
+      min_items: 1
+
+    override_record:
+      type: object
+      optional: true
+      description: |
+        사용자가 권장(👍)이 아닌 옵션을 선택했을 때의 기록.
+        INV-3 (never-hard-block) 와 원칙 13 의 핵심 증거.
+      fields:
+        occurred_at_turn:
+          type: integer
+        recommended_option_id:
+          type: string
+        chosen_option_id:
+          type: string
+        user_rationale:
+          type: string
+          optional: true
+          description: "E phase 에서 수집된 자유 서술"
+        recommendation_trigger:
+          type: string
+          enum: [manual, discovery-detected, sprint-retro-suggested, phase-transition, custom-added, declined]
+
+    resume_context:
+      type: object
+      optional: true
+      description: "이전 대화 interrupt 시 save — resume command 가 로드"
+      fields:
+        suspended_at_phase:
+          type: string
+        last_user_message:
+          type: string
+        last_system_message:
+          type: string
+        can_resume_until:
+          type: iso8601
+          description: "started_at + 7일 — 이후 auto-expire"
+
+    divisions_yaml_diff_hash:
+      type: string
+      optional: true
+      description: |
+        terminal 도달 후 실제 divisions.yaml 변경이 발생한 경우의 sha256.
+        audit 시 "이 대화 → 이 변경" 의 암호학적 증거.
+
+# =====================================================================
+# 2. DialogTurn
+# =====================================================================
+DialogTurn:
+  description: "한 턴 = 시스템 질문 1개 + 사용자 응답 1개"
+
+  required_fields:
+    - turn_no
+    - phase
+    - timestamp
+    - system_prompt
+    - user_response
+
+  fields:
+    turn_no:
+      type: integer
+      minimum: 1
+      description: "대화 내 순번, 1 부터 시작"
+
+    phase:
+      type: string
+      enum: [A, B, C, D, E]
+
+    timestamp:
+      type: iso8601
+
+    system_prompt:
+      type: object
+      required: [kind, text]
+      fields:
+        kind:
+          type: string
+          enum: [context-recap, open-question, multiple-choice, confirmation]
+        text:
+          type: string
+        options_presented:
+          type: array
+          optional: true
+          items:
+            type: object
+            fields:
+              option_id: { type: string }
+              scope: { type: string, enum: [full, scoped, temporal, cancel] }
+              intensity: { type: string, enum: ["👍", "⚪", "⚠"] }
+              label: { type: string }
+              reasoning: { type: string }
+
+    user_response:
+      type: object
+      required: [kind, content]
+      fields:
+        kind:
+          type: string
+          enum: [free-text, option-selection, confirmation, cancel]
+        content:
+          type: string
+          description: "선택한 option_id 또는 자유 응답"
+        raw_input:
+          type: string
+          optional: true
+          description: "사용자 원문 (정규화 전)"
+        classified_intent:
+          type: string
+          optional: true
+          description: "B phase 에서 추출된 intent label"
+
+    engine_notes:
+      type: array
+      optional: true
+      items: { type: string }
+      description: "alternative-suggestion-engine 의 판단 근거 (debug/audit)"
+
+    duration_ms:
+      type: integer
+      optional: true
+      description: "이전 turn timestamp 와의 간격 — UX 분석용"
+
+# =====================================================================
+# 3. L1 Events — dialog 관련 3종
+# =====================================================================
+events:
+  l1.division.dialog.turn:
+    description: "매 turn 기록 시 발행. L1 observability 의 기본 단위"
+    required_fields:
+      - dialog_trace_id
+      - turn_no
+      - phase
+      - actor_role
+    example: |
+      {
+        "event": "l1.division.dialog.turn",
+        "dialog_trace_id": "dlg-2026-04-25-qa-03",
+        "turn_no": 4,
+        "phase": "D",
+        "actor_role": "user",
+        "user_choice": "option-temporal",
+        "timestamp": "2026-04-25T14:23:11Z"
+      }
+
+  l1.division.dialog.complete:
+    description: "terminal 도달 시 발행. divisions.yaml 변경 직전"
+    required_fields:
+      - dialog_trace_id
+      - terminal_reached
+      - total_turns
+      - target_division_id
+    optional_fields:
+      - divisions_yaml_diff_hash
+      - override_record_summary
+    example: |
+      {
+        "event": "l1.division.dialog.complete",
+        "dialog_trace_id": "dlg-2026-04-25-qa-03",
+        "terminal_reached": "terminal/activate-temporal",
+        "total_turns": 5,
+        "target_division_id": "qa",
+        "divisions_yaml_diff_hash": "sha256:a1b2c3...",
+        "override_record_summary": null
+      }
+
+  l1.division.dialog.override:
+    description: |
+      사용자가 권장(👍)이 아닌 옵션을 선택한 경우 발행.
+      INV-3 + 원칙 13 의 감사 지점.
+    required_fields:
+      - dialog_trace_id
+      - recommended_option_id
+      - chosen_option_id
+      - recommendation_trigger
+    optional_fields:
+      - user_rationale
+    example: |
+      {
+        "event": "l1.division.dialog.override",
+        "dialog_trace_id": "dlg-2026-04-26-infra-01",
+        "recommended_option_id": "option-cancel",
+        "chosen_option_id": "option-full",
+        "recommendation_trigger": "declined",
+        "user_rationale": "이전 계획이 급히 당겨짐"
+      }
+
+# =====================================================================
+# 4. Validation Rules
+# =====================================================================
+validation_rules:
+  - id: ds-v-01
+    rule: "dialog_trace_id 는 immutable — 어떤 turn 에서도 변경 금지"
+  - id: ds-v-02
+    rule: "turns[].turn_no 는 1 부터 연속 증가 (gap 금지)"
+  - id: ds-v-03
+    rule: "current_phase 는 A → B → C → D → E 순서만 허용 (되돌아가기 금지, 취소 시 X)"
+  - id: ds-v-04
+    rule: "status == completed 이면 terminal_reached 필수"
+  - id: ds-v-05
+    rule: "status == active 인 같은 target_division_id 대화는 동시에 최대 1개"
+    enforcement: "새 대화 개시 시 기존 active 대화를 status=superseded 로 closeout"
+  - id: ds-v-06
+    rule: "actor.role != 'user' / 'system-triggered-by-user' 이면 대화 개시 금지"
+    violates_invariant: INV-5
+    severity: error
+    note: "agent 가 대화를 자동 개시하는 것은 INV-5 위반"
+  - id: ds-v-07
+    rule: "override_record 는 chosen_option 의 intensity != 👍 일 때만 기록"
+  - id: ds-v-08
+    rule: "override_record.user_rationale 는 선택적 — 강제 수집 금지 (원칙 13: paternalism 방지)"
+  - id: ds-v-09
+    rule: "can_resume_until < now() 이면 resume 불가 — status = abandoned 로 자동 전이"
+  - id: ds-v-10
+    rule: "terminal_reached == terminal/cancel 이면 divisions_yaml_diff_hash == null"
+  - id: ds-v-11
+    rule: "same dialog_trace_id + l1.division.dialog.complete 는 최대 1회"
+  - id: ds-v-12
+    rule: "custom 본부 대화 (dialog_id == custom-add) 는 override_record 가 있어도 반드시 기록"
+
+# =====================================================================
+# 5. Resume Protocol
+# =====================================================================
+resume_protocol:
+  trigger:
+    - "사용자가 중간 응답 없이 세션 종료"
+    - "/sfs division resume <trace-id>"
+    - "같은 target 대상 새 명령 실행 시 기존 대화 감지"
+
+  steps:
+    - "status == active AND now() - last_turn_at < 7일 AND can_resume_until > now() 대화 검색"
+    - "찾으면: resume_context 복원 → suspended_at_phase 에서 재개"
+    - "못찾으면: 새 dialog_trace_id 발급 → phase A 부터 시작"
+
+  user_confirmation: |
+    resume 시 반드시 사용자에게 확인:
+    "이전 대화 (dlg-YYYY-MM-DD-xxx-NN, Phase C) 이어서 진행할까요, 새로 시작할까요?"
+    → 새로 시작 선택 시 이전 대화는 status = abandoned 로 closeout
+
+# =====================================================================
+# 6. example_min
+# =====================================================================
+example_min:
+  dialog_trace_id: "dlg-2026-04-25-qa-03"
+  dialog_id: division-activation
+  target_division_id: qa
+  branch_id: qa
+  started_at: "2026-04-25T14:20:00Z"
+  last_turn_at: "2026-04-25T14:25:30Z"
+  ended_at: "2026-04-25T14:25:30Z"
+  current_phase: E
+  status: completed
+  terminal_reached: terminal/activate-temporal
+  actor:
+    role: user
+    user_id: 채명정
+    invoked_by_command: "/sfs division activate qa"
+
+  turns:
+    - turn_no: 1
+      phase: A
+      timestamp: "2026-04-25T14:20:00Z"
+      system_prompt:
+        kind: context-recap
+        text: "qa 본부는 테스트 커버리지·회귀 방어·수락 기준 정립을 담당합니다..."
+      user_response:
+        kind: confirmation
+        content: "진행"
+    - turn_no: 2
+      phase: B
+      timestamp: "2026-04-25T14:21:30Z"
+      system_prompt:
+        kind: open-question
+        text: "왜 지금 qa 본부 활성화를 고려하시나요?"
+      user_response:
+        kind: free-text
+        content: "MVP 2달 전인데 수동 테스트로는 한계"
+        classified_intent: pre-mvp-quality-gate
+    - turn_no: 3
+      phase: C
+      timestamp: "2026-04-25T14:22:45Z"
+      system_prompt:
+        kind: open-question
+        text: "출시 후에도 회귀 방어 체계가 지속 필요하신가요?"
+      user_response:
+        kind: free-text
+        content: "출시 후는 다시 생각해볼게"
+    - turn_no: 4
+      phase: D
+      timestamp: "2026-04-25T14:24:00Z"
+      system_prompt:
+        kind: multiple-choice
+        text: "어떤 scope 로 활성화하시겠어요?"
+        options_presented:
+          - option_id: option-temporal
+            scope: temporal
+            intensity: "👍"
+            label: "temporal (launch_date 까지)"
+            reasoning: "MVP 시점 기반 품질 gate"
+          - option_id: option-full
+            scope: full
+            intensity: "⚪"
+            label: "full (지속 본부)"
+            reasoning: "회귀 방어가 지속 과제면 적합"
+          - option_id: option-scoped
+            scope: scoped
+            intensity: "⚠"
+            label: "scoped (dev 본부 하위)"
+            reasoning: "자기검증 편향 위험"
+          - option_id: option-cancel
+            scope: cancel
+            intensity: "⚪"
+            label: "취소"
+      user_response:
+        kind: option-selection
+        content: option-temporal
+    - turn_no: 5
+      phase: E
+      timestamp: "2026-04-25T14:25:30Z"
+      system_prompt:
+        kind: confirmation
+        text: "qa 본부를 temporal scope 로 launch_date 까지 활성화합니다. 확정하시겠어요?"
+      user_response:
+        kind: confirmation
+        content: "ok"
+
+  override_record: null
+
+  divisions_yaml_diff_hash: "sha256:a1b2c3d4e5f6..."
+
+# =====================================================================
+# 7. Storage
+# =====================================================================
+storage:
+  location: "memory/dialog-trace/<YYYY-MM>/<dialog_trace_id>.yaml"
+  retention: "12 months, then archive"
+  gc_policy: |
+    - status == abandoned 30일 후 → archive
+    - status == cancelled 7일 후 → archive
+    - status == completed 365일 후 → archive
+    - override_record 있는 경우 → 영구 보존 (audit 증거)
+
+  access_control:
+    read: [user-self, compliance-reviewer]
+    write: [dialog-engine only]
+    delete: forbidden  # audit immutability
