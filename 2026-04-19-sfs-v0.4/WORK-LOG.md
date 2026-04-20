@@ -138,6 +138,34 @@ related_docs:
 
 ---
 
+### WU-11: RUNTIME-ABSTRACTION.md 신설 (multi-agent runtime abstraction, A scope)
+
+- **성격**: content (신설 reference 문서)
+- **intent**: 사용자 지시 "sfs를 claude 뿐만 아니라 codex랑 gemini-cli에서도 사용하고 싶거든?? 그래서 추상화 하는게 중요할듯?!" + "A ㄱㄱ 일단 디테일은 나중에 잡는게 맞고 일단은 최대한 mvp 형태로 뽑아서 난 다음주 부터 사용하는게 목적". → 기존 본문 비파괴, `RUNTIME-ABSTRACTION.md` 1개 파일만 신설해서 4-layer 추상화 골격 + 현 docset 의 lock-in map + Phase 1/Phase 2 슬롯 선언. MVP 범위 (A scope) 만 포함, B/C 는 후속 WU 로 예약.
+- **scope 확정**: **A** (본문 수정 없음). B (Claude-specific 파일에 layer 힌트 주석) / C (Codex/Gemini 어댑터 초안) 는 Phase 1 Claude 구현 안정화 후 재검토.
+- **files**:
+  - `2026-04-19-sfs-v0.4/RUNTIME-ABSTRACTION.md` (신규, v0.1-mvp, 9 섹션 + Changelog)
+- **주요 설계 결정**:
+  1. **4-layer 모델**: L0 Domain Core (agnostic, 이미 존재) / L1 Execution Contract (agnostic, 신설) / L2 Runtime Adapter (per-runtime) / L3 Install-Package (per-runtime).
+  2. **의존 방향**: L0 → L1 → L2 → L3 단방향. 역방향 (e.g. 02-design-principles.md 에서 plugin.json 직접 언급) 은 violation.
+  3. **Phase 1 runtime scope**: Claude 단일 레일. Codex / Gemini-CLI 어댑터는 "abstract state" 로 선언 (원칙 13 progressive-activation 과 동치 구조).
+  4. **L1 6 operation 카테고리** (MVP 선언): `invoke_agent` / `spawn_worker` / `read|write|edit_file` / `invoke_tool` (§10.11 4-tier 와 직결) / `emit_l1_event` / `run_in_background + monitor`.
+  5. **Phase 1 → Phase 2 이관 4 조건**: Phase 1 success condition 6 충족 + L1 spec 이 실 Claude 구현으로 역검증 + 사용자 go 결정 + Codex/Gemini 우선순위 1개 택일 (동시 착수 금지).
+  6. **DO NOT TOUCH 고정 목록 재확인**: `/sfs` prefix, `sfs-*` IDs, `.sfs-local/`, 역사 참조 3곳, 원칙 ID 3종.
+  7. **⚠ v0.2 재판정 항목** 4개 기록: (a) §2.2 model allocation L0/L2 경계, (b) MCP 언급의 agnostic 가능성, (c) `cli-gui-shared-backend` 원칙의 GUI 정의 확장, (d) `agents/*.md` frontmatter `model:` 필드 추상화.
+- **non-goals**:
+  - 기존 본문 11개 + appendix 파일 수정 (B scope 이상 영역).
+  - L1 execution-contract.v1.yaml 실제 파일 작성 (v0.2 예정).
+  - Codex / Gemini-CLI 어댑터 실물 (v0.3 예정).
+- **commit**: (커밋 후 채워짐)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - 문서 상한선 "A4 6~8장" 자기 제약 명시 — 비대화 방지.
+  - INDEX.md 에는 아직 등록하지 않음. INDEX 갱신은 WU-11.1 또는 다음 infra WU 로 분리 가능 (의도적 분리: 이 문서가 transient reference 인지 영구 멤버인지 Phase 1 구현 진행 보며 판정).
+  - 원칙 13 (progressive-activation) 구조를 runtime 축에 재적용한 셈 — Codex/Gemini 어댑터 = "abstract division" 와 동치 (§9 참조).
+
+---
+
 ### WU-HANDOFF: HANDOFF v2.7-bridge → v2.8-bridge-handoff (세션 이관 지점)
 
 - **성격**: infra
@@ -154,16 +182,17 @@ related_docs:
 
 ---
 
-## 다음 실행 예정 (재정렬된 큐)
+## 다음 실행 예정 (재정렬된 큐 — WU-11 A 완료 후)
 
 | 순서 | WU | 성격 | 비고 |
 |:-:|----|------|------|
-| next | WU-11 🆕 | Multi-agent runtime abstraction 설계 (Claude / Codex / Gemini-CLI) | 사용자 요청 — 긴급도 高, 범위 A/B/C **사용자 확정 대기** |
-| 2 | WU-4 | cross-ref-audit.md Phase 1 pending 중 #1 해결 | audit 소비 시작 |
-| 3 | WU-5 | 05-gate-framework.md G-1 완전성 점검 | 가벼운 read+validate |
-| 4 | WU-9 | 02-design-principles.md 원칙 13 완전성 재검증 | R3 신규 — 일찍 검증 |
-| 5 | WU-7 | 07-plugin-distribution plugin.json 샘플 파일 분리 | Phase 1 asset 준비 |
-| 6 | WU-10 | appendix/dialogs/branches/ 6 본부 YAML schema 정합성 | 중위험 batch |
+| next | WU-4 | cross-ref-audit.md Phase 1 pending 중 #1 해결 | audit 소비 시작 |
+| 2 | WU-5 | 05-gate-framework.md G-1 완전성 점검 | 가벼운 read+validate |
+| 3 | WU-9 | 02-design-principles.md 원칙 13 완전성 재검증 | R3 신규 — 일찍 검증 |
+| 4 | WU-7 | 07-plugin-distribution plugin.json 샘플 파일 분리 | Phase 1 asset 준비 |
+| 5 | WU-10 | appendix/dialogs/branches/ 6 본부 YAML schema 정합성 | 중위험 batch |
+| later | WU-11 B | Claude-specific 파일 frontmatter `layer:` 필드 + 본문 힌트 주석 | Phase 1 안정화 후 재검토 |
+| Phase 2 | WU-11 C | Codex / Gemini-CLI 어댑터 초안 (`appendix/runtime-adapters/`) | Phase 2 go 결정 후 |
 | — | WU-6 | claude-shared-config/.git IP 경계 재정리 | **BLOCKED** (사용자 결정 필요) |
 
 ---
@@ -184,3 +213,4 @@ related_docs:
 - **v1.1** (2026-04-20 오후): WU-2/3 추가 + HANDOFF v2.7-bridge 연동
 - **v1.2** (2026-04-20 심야): WU-8/8.1 완료 (109 SFS → Solon) + WU-11 큐 추가 (사용자 multi-agent abstraction 지시 반영)
 - **v1.3** (2026-04-20 심야): WU-HANDOFF (세션 이관 지점, HANDOFF v2.8-bridge-handoff + NEXT-SESSION-BRIEFING.md 신설)
+- **v1.4** (2026-04-20 심야, 새 세션): WU-11 A 완료 (RUNTIME-ABSTRACTION.md v0.1-mvp 신설, 4-layer 모델 + lock-in map + Phase 1/2 슬롯 선언) + 큐 재정렬 (WU-4 가 다음, WU-11 B/C 는 Phase 1 안정화 / Phase 2 이후로 이동)
