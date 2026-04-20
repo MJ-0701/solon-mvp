@@ -274,7 +274,7 @@ divisions:
   - 다음 cycle 반영할 것 1줄
 - [ ] 프로젝트 `README.md` 업데이트: 구현된 기능 리스트 1줄씩 추가
 - [ ] (선택) `CHANGELOG.md` 생성 또는 업데이트
-- [ ] Solon 방법론 쪽 피드백이 발생하면 → Solon docset repo (= 이 repo 밖) 로 별도 issue/WU 로 올림 (submodule 쪽에 직접 commit 금지)
+- [ ] Solon 방법론 쪽 피드백이 발생하면 → Solon docset repo (= 이 repo 밖) 로 별도 issue/WU 로 올림 (admin panel repo 에는 어떤 Solon 관련 파일도 커밋 금지)
 
 ### §3.8 W1 exit 검증
 
@@ -351,7 +351,7 @@ G0 (brainstorm) + G1 + G2 + G4
 - [ ] 7-step 중 3 step 이상 skip 됨 → MVP 가 너무 가볍거나 플로우가 맞지 않음
 - [ ] Gate 가 심리적 부담만 주고 실제 의사결정에 도움이 안 됐음 → §5 축소를 더 해야 함
 - [ ] `.sfs-local/` 이 비즈니스 로직 구현을 실제로 방해했음 → 경로/스키마 단순화
-- [ ] Solon docset submodule 을 한 번도 안 봤음 → docset 자체가 MVP 에 맞춰져 있지 않다는 신호
+- [ ] Solon docset 을 한 번도 안 봤음 → docset 자체가 MVP 에 맞춰져 있지 않다는 신호
 
 ### §6.3 판정 결과 반영
 
@@ -401,3 +401,4 @@ G0 (brainstorm) + G1 + G2 + G4
 
 - **v0.1-mvp** (2026-04-20): WU-12 로 신설. 사용자 지시 "A ㄱㄱ + MVP + 다음주부터 사용 + 7-step flow + B 새 프로젝트 + 관리자 페이지 도메인" 에 대응. axis 1 = ① lightweight spike / axis 2 = B. G0+G1+G2+G4 4 gate 축소판.
 - **v0.1-mvp-patch1** (2026-04-20, 동일 WU-12 커밋 범위 내): 사용자 추가 지시 "Solon docset 은 내 개인자산이니까 사실 플러그인 형태로 배포가 돼야하는게 맞음" 반영. §1.1/§2.2/§2.4/§2.5/§6.1/§7.1/§7.2 전반에서 **submodule 전제 제거 → Solon 참조는 admin panel repo 밖 (홈 디렉토리 or 개인 `~/.claude/plugins/solon-wip/`) 으로 분리**. end-state = `claude plugin install solon` (풀스펙 W13) 명시. admin panel repo 는 Solon 존재를 모른다 (IP 경계 엄격화).
+- **v0.1-mvp-patch2** (2026-04-20 심야, WU-12.2): patch1 grep 에서 누락된 `submodule` 단어 레지듀 2곳 cleanup. §3.7 ("submodule 쪽에 직접 commit 금지" → "admin panel repo 에는 어떤 Solon 관련 파일도 커밋 금지") + §6.2 ("Solon docset submodule" → "Solon docset"). 문서 의미 변경 없음 — patch1 정신에 대한 일관성 보정만. 발견 경위: 다음 세션 재개 시 전체 재독 중 검출.

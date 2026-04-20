@@ -249,6 +249,23 @@ related_docs:
 
 ---
 
+### WU-12.2: PHASE1-KICKOFF-CHECKLIST.md v0.1-mvp-patch2 (submodule 레지듀 2곳 cleanup)
+
+- **성격**: docs
+- **intent**: WU-12 의 patch1 이 "submodule 전제 제거" 를 수행했으나 grep 에서 놓친 2 곳 (§3.7 "submodule 쪽에 직접 commit 금지" + §6.2 "Solon docset submodule") 잔존. 다음 세션 재개 시 전체 재독 중 검출. patch1 의미를 실제 텍스트 전반에 일관되게 반영.
+- **files**:
+  - `2026-04-19-sfs-v0.4/PHASE1-KICKOFF-CHECKLIST.md` (§3.7 1 line + §6.2 1 line + Changelog v0.1-mvp-patch2 entry 추가 — 총 3 edit, net 변경 2 의미 line + 1 changelog 항목)
+- **commit**: (WU-12.2 커밋 시 채워짐)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - 문서 의미 변경 없음. IP 경계 / 플러그인 배포 모델 결정은 유지.
+  - 수정 1 (§3.7): "submodule 쪽에 직접 commit 금지" → "admin panel repo 에는 어떤 Solon 관련 파일도 커밋 금지". patch1 정신상 양방향 IP 경계 (admin panel ← 금지 / Solon docset → 별도 WU) 를 더 명확히 표현.
+  - 수정 2 (§6.2): "Solon docset submodule 을 한 번도 안 봤음" → "Solon docset 을 한 번도 안 봤음". 단어 1개 삭제.
+  - 검출 경위: WU-11 A / WU-12 산출물 전체 재검토 단계 (새 세션 재개 3→2→1 검토 루프) 중 grep `submodule` 2 hit 발견.
+  - FUSE lock 재발 대비: `/tmp/agent_git_backup_wu12_2` 경로 예약 (선례: `_wu11`, `_wu11_1`, `_wu11_2`, `_wu12`).
+
+---
+
 ### WU-HANDOFF: HANDOFF v2.7-bridge → v2.8-bridge-handoff (세션 이관 지점)
 
 - **성격**: infra
