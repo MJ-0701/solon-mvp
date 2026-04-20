@@ -66,3 +66,12 @@ appendix/dialogs/traces/*.yaml
 .solon-cache/
 .solon-state.json
 *.learnings.local.yaml
+
+# ─── WU-14 세션 중간 산출물 (git 제외) ───
+# 2026-04-21 WU-14 (사용자 지시): context reset 대비 live 중간 산출물 저장소.
+# 매 micro-step draft / checksum / dump 를 tmp/ 에 즉시 저장 → 유실 방지.
+# 최종 산출물은 tmp/ 밖 (appendix/ 또는 docset 루트) 로 이동 후 tmp/ 는 삭제 가능.
+# .gitkeep 은 폴더 존재 보장. (주의: `tmp/` 대신 `tmp/*` 를 써야 `!tmp/.gitkeep`
+# 예외가 작동함 — git 은 ignored 디렉토리 내부를 탐색하지 않기 때문)
+tmp/*
+!tmp/.gitkeep

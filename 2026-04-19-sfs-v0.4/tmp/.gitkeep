@@ -1,0 +1,5 @@
+# tmp/ 폴더 보존용 placeholder.
+# 본 폴더는 WU-14 (2026-04-21) 에서 신설. 세션 중간 산출물 (draft yaml, diff 초안,
+# checksum log, exploration dump) 을 즉시 저장하여 context reset 시 유실 방지.
+# 최종 산출물은 반드시 tmp/ 밖 (appendix/ 또는 docset 루트) 으로 이동 후 커밋.
+# .gitignore 가 tmp/ 전체를 ignore 하되 본 파일 (.gitkeep) 만 track → 폴더 존재 보장.
