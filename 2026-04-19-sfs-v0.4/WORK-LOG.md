@@ -157,12 +157,29 @@ related_docs:
   - 기존 본문 11개 + appendix 파일 수정 (B scope 이상 영역).
   - L1 execution-contract.v1.yaml 실제 파일 작성 (v0.2 예정).
   - Codex / Gemini-CLI 어댑터 실물 (v0.3 예정).
-- **commit**: (커밋 후 채워짐)
+- **commit**: `4cd07e6` "WU-11 A: RUNTIME-ABSTRACTION.md 신설 (multi-agent runtime abstraction MVP)"
 - **pushed**: pending (user terminal)
 - **notes**:
   - 문서 상한선 "A4 6~8장" 자기 제약 명시 — 비대화 방지.
   - INDEX.md 에는 아직 등록하지 않음. INDEX 갱신은 WU-11.1 또는 다음 infra WU 로 분리 가능 (의도적 분리: 이 문서가 transient reference 인지 영구 멤버인지 Phase 1 구현 진행 보며 판정).
   - 원칙 13 (progressive-activation) 구조를 runtime 축에 재적용한 셈 — Codex/Gemini 어댑터 = "abstract division" 와 동치 (§9 참조).
+  - **🆕 사용자 추가 맥락 (커밋 직후 수신)**: "sfs시스템으로 다음주부터 난 새로운 프로젝트 mvp를 구축할거야 이걸 염두해둬" → 다음주 (2026-04-27~) 부터 Solon 을 실제 적용할 새 프로젝트 MVP 착수. 이는 WU-11 A 의 MVP 지향 의사결정을 사후 확증. 현 docset 큐 (WU-4~10) 는 Phase 1 착수와 경합 가능 → WU-11.1 에서 우선순위 재점검 권장. 상세는 HANDOFF §0 9번 항목 참조.
+  - FUSE lock 재발 (두 번째 발생). 이번엔 이전 세션 잔재 `/tmp/agent_git_backup` 이 `nobody:nogroup` 소유권이라 rm 불가 → 경로 변경 `/tmp/agent_git_backup_wu11` 사용. 교훈: 우회 경로는 WU 번호를 suffix 로 붙여 충돌 회피.
+  - Commit identity: 세션 ID 가 `zealous-charming-turing` 으로 바뀌어 last-commit author 와 다름. `-c user.email=jack2718@green-ribbon.co.kr -c user.name="채명정 (zealous-charming-turing, company acct, WU-11 session)"` 으로 inline 설정. global config 은 건드리지 않음.
+
+---
+
+### WU-11.1: sha 4cd07e6 backfill + 사용자 11번째 지시 기록 (HANDOFF §0)
+
+- **성격**: infra
+- **intent**: WU-11 A 커밋 sha 를 WORK-LOG 에 backfill (WU-8.1, WU-HANDOFF.1 과 동일 패턴) + WU-11 A 커밋 직후 수신된 사용자 11번째 지시 "sfs시스템으로 다음주부터 난 새로운 프로젝트 mvp를 구축할거야 이걸 염두해둬" 를 HANDOFF §0 에 영구 기록. 이 지시는 "다음 세션의 작업 우선순위가 bridge WU 계속 vs Phase 1 킥오프 준비 중 어느 쪽인지" 재점검을 유발하는 신호라 유실 시 치명적.
+- **files**:
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (WU-11 notes 보강 + 본 엔트리)
+  - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (§0 에 10번·11번 지시 추가)
+- **commit**: (커밋 후 채워짐)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - 다음 세션 첫 행동이 달라졌음: "WU-11 결정 받기" → **"Phase 1 킥오프 vs bridge WU 우선순위 확인"**. NEXT-SESSION-BRIEFING.md 도 갱신 필요하나, 세션 이관 당사자인 이번 세션에서는 HANDOFF 만 갱신하고 BRIEFING 갱신은 다음 이관 시점 (context 포화 시) 에 하는 게 경제적 — WU-11.1 범위에 포함시키지 않음.
 
 ---
 
@@ -214,3 +231,4 @@ related_docs:
 - **v1.2** (2026-04-20 심야): WU-8/8.1 완료 (109 SFS → Solon) + WU-11 큐 추가 (사용자 multi-agent abstraction 지시 반영)
 - **v1.3** (2026-04-20 심야): WU-HANDOFF (세션 이관 지점, HANDOFF v2.8-bridge-handoff + NEXT-SESSION-BRIEFING.md 신설)
 - **v1.4** (2026-04-20 심야, 새 세션): WU-11 A 완료 (RUNTIME-ABSTRACTION.md v0.1-mvp 신설, 4-layer 모델 + lock-in map + Phase 1/2 슬롯 선언) + 큐 재정렬 (WU-4 가 다음, WU-11 B/C 는 Phase 1 안정화 / Phase 2 이후로 이동)
+- **v1.5** (2026-04-20 심야): WU-11.1 완료 (sha 4cd07e6 backfill + 사용자 11번째 지시 "다음주 새 프로젝트 MVP 착수" 를 HANDOFF §0 에 영구 기록) — 다음 세션은 Phase 1 킥오프 vs bridge WU 우선순위 확인부터.
