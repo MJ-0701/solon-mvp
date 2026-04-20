@@ -224,7 +224,7 @@ related_docs:
   - `/sfs install` CLI 동작 (풀스펙 W13 산출물).
   - qa/design/infra/taxonomy 본부 선행 활성화 (원칙 13 — 필요시에만 abstract → active).
   - checklist 의 cycle 2~N 버전화 (cycle 1 전용; cycle 3 누적 후 v0.2 에서 G5 추가).
-- **commit**: (WU-12 커밋 시 채워짐 — WU-12.1 에서 backfill)
+- **commit**: `7f8a635` "WU-12: PHASE1-KICKOFF-CHECKLIST.md 신설 (Phase 1 MVP 경량 스파이크 킥오프, v0.1-mvp-patch1)"
 - **pushed**: pending (user terminal)
 - **notes**:
   - **작성 중 patch 발생**: v0.1-mvp 초안을 쓴 직후 사용자 13번째 지시 "Solon docset = 개인자산 → 플러그인 배포가 맞음" 수신. 즉시 v0.1-mvp-patch1 로 §1.1/§2.2/§2.4/§2.5/§6.1/§7.1/§7.2 전반 정정. submodule 전제 전량 제거. Changelog 에 patch1 기록.
@@ -232,6 +232,20 @@ related_docs:
   - 이 checklist 는 **cycle 1 전용**. cycle 2 는 §3 만 반복 (수정 없이). cycle 3 누적 시점 (= 5월 중순경) 에 §5 재검토 및 G5/G3 도입 여부 판정.
   - FUSE lock 재발 대비: `/tmp/agent_git_backup_wu12` 경로 사용 (선례: WU-11 = `_wu11`, WU-11.1 = `_wu11_1`, WU-11.2 = `_wu11_2`).
   - bridge 큐 (WU-4 → WU-5 → WU-9 → WU-7 → WU-10) 는 킥오프 병행으로 이동 — 사용자가 cycle 1 실행하는 동안 세션이 있을 때 bridge WU 를 병렬 수행 가능. 경쟁 관계가 아니라 2 track.
+
+---
+
+### WU-12.1: sha 7f8a635 backfill + HANDOFF frontmatter completed_wus 갱신
+
+- **성격**: infra
+- **intent**: WU-12 커밋 sha 를 WORK-LOG 에 backfill + HANDOFF frontmatter `completed_wus` 리스트에 지금까지 밀려 있던 WU-HANDOFF / WU-HANDOFF.1 / WU-11 / WU-11.1 / WU-11.2 / WU-12 6 개 일괄 추가. 그 동안 각 WU 당 개별 backfill 커밋 대신 한 번에 batch.
+- **files**:
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (WU-12 entry 의 commit 필드 + 본 엔트리)
+  - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (frontmatter `round4_bridge.completed_wus` 6 항목 추가 + `unpushed_commits` 숫자 갱신)
+- **commit**: (WU-12.1 커밋 시 채워짐)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - HANDOFF top intro "Round 4 Bridge 상태" 박스 (v2.8) 는 일부 stale 해짐 (WU-11 "사용자 대기 중" 표현 등) — 전면 개정은 v2.9 로 bump 하는 별도 WU 로 분리 가능. WU-12.1 은 frontmatter 만 건드리고 intro 박스는 다음 세션 이관 시 대개정에 맡김.
 
 ---
 

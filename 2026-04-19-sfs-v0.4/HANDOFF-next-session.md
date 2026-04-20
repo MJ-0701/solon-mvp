@@ -32,7 +32,13 @@ round4_bridge:
     - "WU-3: a67a408 — G1~G5 → G-1 + G1~G5 일관성 (current-state 3지점, 3 files)"
     - "WU-8: 764194f — SFS brand prose → Solon disambiguation (109 occurrences, 14 files)"
     - "WU-8.1: 4a1df93 — WORK-LOG 에 commit sha 764194f 기록 + WU-11 큐 추가"
-  unpushed_commits: 7 (d034d0d..4a1df93) — "사용자가 터미널에서 `git push origin main` 수동 실행 필요"
+    - "WU-HANDOFF: 30e4418 — HANDOFF v2.7-bridge → v2.8-bridge-handoff (세션 이관 지점)"
+    - "WU-HANDOFF.1: 617efe2 — NEXT-SESSION-BRIEFING.md 신설 + WORK-LOG v1.3"
+    - "WU-11 A: 4cd07e6 — RUNTIME-ABSTRACTION.md 신설 (multi-agent runtime abstraction MVP)"
+    - "WU-11.1: eed4dd1 — sha 4cd07e6 backfill + 사용자 11번째 지시 기록 (HANDOFF §0)"
+    - "WU-11.2: 6527252 — WORK-LOG 에 commit sha eed4dd1 backfill"
+    - "WU-12: 7f8a635 — PHASE1-KICKOFF-CHECKLIST.md 신설 (Phase 1 MVP 경량 스파이크, v0.1-mvp-patch1)"
+  unpushed_commits: 13+ (d034d0d..7f8a635 + WU-12.1 예정) — "사용자가 터미널에서 `git push origin main` 수동 실행 필요. FUSE 환경 git 인증 이슈 (MIG-8 때부터 동일 패턴)."
   queue:
     next_blocking: "WU-11 🆕 Multi-agent runtime abstraction (Claude / Codex / Gemini-CLI) — 사용자 A/B/C 범위 결정 대기"
     ready_after_wu11: [WU-4, WU-5, WU-9, WU-7, WU-10]
