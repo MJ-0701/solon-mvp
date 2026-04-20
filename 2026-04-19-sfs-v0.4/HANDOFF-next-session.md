@@ -42,10 +42,12 @@ round4_bridge:
     - "WU-12.2: 8ab660c — PHASE1-KICKOFF-CHECKLIST.md v0.1-mvp-patch2 (submodule 레지듀 2곳 cleanup, §3.7 + §6.2)"
     - "WU-12.3: b77fcb2 — sha 8ab660c backfill + HANDOFF frontmatter completed_wus 2 WU 추가 (WU-12.1 + WU-12.2) + unpushed_commits 갱신"
     - "WU-4: 7d982dc — appendix/dialogs/README.md 선제 생성 (cross-ref-audit §4 TODO #1 해결, index 허브)"
-  unpushed_commits: "현 세션 새 로컬 커밋 = WU-12.2 (8ab660c) + WU-12.3 (b77fcb2) + WU-4 (7d982dc) + WU-4.1 backfill (이 커밋) → 사용자가 `git push origin main` 수동 실행 필요 (총 4 커밋)."
+    - "WU-4.1: 1c375aa — sha 7d982dc backfill + HANDOFF frontmatter completed_wus 1 WU 추가 + unpushed_commits 갱신"
+    - "WU-5: 20c3474 — 05-gate-framework.md §5.11 G-1 Intake Gate 교차 정합성 보정 (Option β minimal cleanup: L1 schema gate_id G-1 추가 + §5.11.7 base schema 주석 + cross-ref-audit §4.8 schema 결정 TODO)"
+  unpushed_commits: "현 세션 새 로컬 커밋 = WU-12.2 (8ab660c) + WU-12.3 (b77fcb2) + WU-4 (7d982dc) + WU-4.1 (1c375aa) + WU-5 (20c3474) + WU-5.1 backfill (이 커밋) → 사용자가 `git push origin main` 수동 실행 필요 (총 6 커밋)."
   queue:
-    next_blocking: "WU-5 🆕 05-gate-framework.md G-1 완전성 점검 (WU-11 A + WU-12 + WU-4 완료, cross-ref-audit §4 TODO #1 해결)"
-    ready_after_wu4: [WU-5, WU-9, WU-7, WU-10]
+    next_blocking: "WU-9 🆕 02-design-principles.md 원칙 13 재검증 (WU-5 완료, §2.13 progressive-activation + non-prescriptive guidance 일관성 점검)"
+    ready_after_wu5: [WU-9, WU-7, WU-10]
     blocked: [WU-6 (claude-shared-config/.git IP 경계 — 사용자 결정 필요)]
   user_new_directive:
     raw: "sfs를 claude 뿐만 아니라 codex랑 gemini-cli에서도 사용하고 싶거든?? 그래서 추상화 하는게 중요할듯?!"

@@ -330,14 +330,53 @@ related_docs:
 - **files**:
   - `2026-04-19-sfs-v0.4/WORK-LOG.md` (WU-4 entry `commit` 필드 + 본 entry + Changelog v1.8)
   - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (frontmatter `completed_wus` WU-4 항목 sha + `unpushed_commits` 텍스트)
-- **commit**: (WU-4.1 커밋 시 채워짐)
+- **commit**: `1c375aa`
 - **pushed**: pending (user terminal)
 - **notes**:
   - WU-4 본 커밋에 HANDOFF `completed_wus` 는 이미 포함돼 있었으나 sha 는 placeholder 였음. WU-4.1 이 sha 를 실제 값으로 치환.
 
 ---
 
-## 다음 실행 예정 (재정렬된 큐 — WU-4 완료 후)
+### WU-5: 05-gate-framework.md §5.11 G-1 Intake Gate 교차 정합성 보정 (Option β minimal cleanup)
+
+- **성격**: docs (cross-ref cleanup)
+- **intent**: Track B 큐의 `next_blocking` 이었던 05-gate-framework.md §5.11 G-1 Intake Gate 의 내부 + 04 §4.3 P-1 + 07 §7.10 brownfield install + 02 §2.10~12 원칙 + appendix/schemas/l1-log-event.schema.yaml 교차 점검. 가벼운 read+validate 성격. 발견된 불일치 3건 중 2건 최소 cleanup (Option β), 1건은 Phase 1 W10 에 TODO 로 이관.
+- **발견된 불일치 3건**:
+  1. **[MEDIUM] L1 schema gate_id enum 이 G-1 누락**: `appendix/schemas/l1-log-event.schema.yaml` L145 `enum: [G1, G2, G3, G4, G5, null]` — 05 §5.11.7 의 `l1.gate.g-1.complete` event 를 실제 L1 로그에 기록하려면 G-1 enum 값 필수. → **즉시 수정**.
+  2. **[MINOR] `.g-1-signature.yaml` 6-checkbox set 이 05 §5.11.3 (meta: 읽음/비용/공존/원칙/파일/롤백) vs 07 §7.10.6 (content: Vital Stats/Architecture/Gap Matrix/Risk/Sprint Focus/가동 동의) 에서 완전히 다름** — 12개 병합 시 클릭 피로로 원칙 10 (human-final-filter) 무력화 리스크. → **Phase 1 W10 schema 작성 시 사용자 결정 필요**, cross-ref-audit §4 item 8 에 TODO 로 이관.
+  3. **[MINOR] §5.11.7 예시 event 가 base L1LogEvent 필수 필드 (event_id/timestamp/session_id/agent_id/agent_role/model/tool_calls/input_tokens/output_tokens/latency_ms/trace_id) 전부 생략** — 예시만 보면 full schema 로 오독 가능, Phase 1 emitter 구현 혼동 유발. → **즉시 주석 추가**.
+- **files**:
+  - `2026-04-19-sfs-v0.4/appendix/schemas/l1-log-event.schema.yaml` (L1LogEvent.gate_id.enum `[G1~G5, null]` → `[G-1, G0, G1~G5, null]` + description 각 gate 출처 섹션 명시)
+  - `2026-04-19-sfs-v0.4/05-gate-framework.md` (§5.11.7 JSON 예시 앞에 "base schema extension 임" 주석 1줄 추가, base 12 필수 필드 명시)
+  - `2026-04-19-sfs-v0.4/cross-ref-audit.md` (§4 item 8 `g-1-signature.schema.yaml` 에 WU-5 발견 주석 추가 — 05 vs 07 6-checkbox 결정 필요 + 권장 사항 기재)
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (본 entry)
+  - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (WU-5.1 에서 frontmatter 갱신)
+- **commit**: `20c3474` "docs(solon/v0.4-r3): WU-5 G-1 Intake Gate 교차 정합성 보정"
+- **pushed**: pending (user terminal)
+- **notes**:
+  - Option β (minimal cleanup) 채택 근거: Option α (TODO 만 기록) 는 #1 의 L1 schema enum 누락이 실제 기록 불가 상태를 방치하게 되어 부적절. Option γ (6-checkbox 결정 포함) 는 WU 범위 이탈 + 원칙 2 (self-validation-forbidden) 회색 영역.
+  - 04 §4.3 / 07 §7.10 / 02 §2.10~12 본문은 **변경 없음** — cross-ref-audit §2.2 (b) 원칙 2 회피 방침과 일관.
+  - 일관 OK 로 확인된 항목 (수정 불필요): ① 05 §5.11.2 validator 입력 `discovery-report.md + evidence/*.yaml + inventory/*.json` ↔ 04 §4.3.5 P-1 산출물 디렉토리 구조 ② 05 PASS 조건 (1·4·5·6·7 binary ✅ AND 2·3 ≥80) ↔ 04 §4.3.6 Pass 기준 (05 가 더 정량화) ③ 05 §5.11.1 1회성 ↔ 04 §4.3.10 `rule/p-1-run-once-per-install` ④ 05 §5.11.5 원칙 매핑 (10·11·12·2·3) ↔ 02 §2.10/11/12 ⑤ 05 §5.11.6 G-1/G0 케이스 매트릭스 ↔ 02 §2.12.3 G0 재필요 케이스 ⑥ 05 §5.11.8 G-1 자체 비용 <$0.30 (validator 한정) vs 07 §7.10.8 P-1 전체 비용 (Small~Large) 명확히 구분 ⑦ 05 §5.11.10 Phase 1 체크리스트 7 items ↔ INDEX §5 pending 표 ⑧ 05 §5.11.4 라우팅 (SUCCESS/FAIL-FIXABLE/STALL/TIMEOUT/ABORT; no FAIL-HARD/CONFLICT) 설계 근거 명시됨.
+  - WU-5 는 "가벼운 read+validate" 취지에 충실 — 3 파일 5 줄만 수정, 본문 재작성 없음.
+
+---
+
+### WU-5.1: sha `20c3474` backfill + HANDOFF frontmatter 갱신
+
+- **성격**: infra
+- **intent**: WU-5 커밋 sha 를 WORK-LOG 에 backfill + HANDOFF `completed_wus` 에 WU-4.1 / WU-5 항목 추가 + `unpushed_commits` 텍스트 갱신 + `queue.next_blocking` 을 WU-9 로 이동.
+- **files**:
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (WU-4.1 entry `commit` 필드 실제 값 치환 + WU-5 entry `commit` 필드 + 본 entry + Changelog v1.9 + Track B 큐 WU-5 ✅ 표기)
+  - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (frontmatter `completed_wus` WU-4.1 + WU-5 추가 + `unpushed_commits` 텍스트 + `queue.next_blocking` WU-9 로 이동)
+- **commit**: (WU-5.1 커밋 시 채워짐)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - WU-4.1 커밋 `1c375aa` 가 본 WORK-LOG entry 작성 직전에 로컬 HEAD 에 있었으나 WU-4.1 entry 의 `commit` 필드는 placeholder 였음 (이전 세션 종료 시점 경계). WU-5.1 이 WU-4.1 + WU-5 두 sha 를 함께 실체화.
+  - 3 track 큐 중 Track B 다음 항목은 WU-9 (02 원칙 13 재검증). WU-5 와 유사한 가벼운 read+validate 성격 예상.
+
+---
+
+## 다음 실행 예정 (재정렬된 큐 — WU-5 완료 후)
 
 **2 Track 구조** — 사용자가 다음주 (2026-04-27~) 부터 admin panel MVP cycle 1 을 실제로 돌리는 동안, Claude 세션은 bridge WU 를 병렬로 소화.
 
@@ -358,10 +397,11 @@ related_docs:
 | ✅ done | WU-12.2 | PHASE1-KICKOFF-CHECKLIST.md v0.1-mvp-patch2 (submodule 레지듀 2곳 cleanup) | docs |
 | ✅ done | WU-12.3 | sha 8ab660c backfill + HANDOFF frontmatter `completed_wus` 2 WU 추가 | infra |
 | ✅ done | WU-4 | cross-ref-audit.md Phase 1 pending 중 #1 해결 — `appendix/dialogs/README.md` 선제 생성 | docs |
-| next | WU-5 | 05-gate-framework.md G-1 완전성 점검 | 가벼운 read+validate |
-| 4 | WU-9 | 02-design-principles.md 원칙 13 완전성 재검증 | R3 신규 — 일찍 검증 |
-| 5 | WU-7 | 07-plugin-distribution plugin.json 샘플 파일 분리 | Phase 1 asset 준비 |
-| 6 | WU-10 | appendix/dialogs/branches/ 6 본부 YAML schema 정합성 | 중위험 batch |
+| ✅ done | WU-4.1 | sha 7d982dc backfill + HANDOFF frontmatter 갱신 | infra |
+| ✅ done | WU-5 | 05-gate-framework.md G-1 완전성 점검 (Option β minimal cleanup) | docs |
+| next | WU-9 | 02-design-principles.md 원칙 13 완전성 재검증 | R3 신규 — 일찍 검증 |
+| 4 | WU-7 | 07-plugin-distribution plugin.json 샘플 파일 분리 | Phase 1 asset 준비 |
+| 5 | WU-10 | appendix/dialogs/branches/ 6 본부 YAML schema 정합성 | 중위험 batch |
 | later | WU-11 B | Claude-specific 파일 frontmatter `layer:` 필드 + 본문 힌트 주석 | Phase 1 안정화 후 재검토 |
 | Phase 2 | WU-11 C | Codex / Gemini-CLI 어댑터 초안 (`appendix/runtime-adapters/`) | Phase 2 go 결정 후 |
 | — | WU-6 | claude-shared-config/.git IP 경계 재정리 | **BLOCKED** (사용자 결정 필요) |
@@ -395,3 +435,4 @@ related_docs:
 - **v1.6** (2026-04-20 심야, 새 세션 이어서): WU-11.2 (eed4dd1 sha backfill) + **WU-12 완료** (PHASE1-KICKOFF-CHECKLIST.md v0.1-mvp-patch1 신설, 7-step lightweight spike + admin panel 도메인 + G0/G1/G2/G4 4 gate 축소판, submodule 전제 제거 → Solon 참조는 admin panel repo 밖). 사용자 12번째·13번째 지시 HANDOFF §0 에 영구 기록. 큐 구조를 **Track A (사용자 실사용) / Track B (세션 bridge WU) / Track C (plugin 조기 배포 여지)** 3 track 으로 재조직.
 - **v1.7** (2026-04-20 심야, 3번째 세션 `funny-compassionate-wright` 재개): 펜딩으로 보였던 전 세션은 실제로 WU-12.1 (ff89ea1) push 까지 완료하고 종료됐음을 `git status` 로 확인 (origin/main 동기화). 새 세션에서 3→2→1 순서 전체 재독 중 PHASE1-KICKOFF-CHECKLIST.md 의 patch1 submodule 레지듀 2곳 (§3.7 + §6.2) 검출 → **WU-12.2** (8ab660c, patch2) cleanup + **WU-12.3** backfill (WU-12.1/12.2 frontmatter 반영). author identity 이슈는 per-command `-c user.name/email` 로 해결 (global config 변경 금지 원칙 유지).
 - **v1.8** (2026-04-20 심야, 같은 3번째 세션 연속): **WU-4 완료** (`appendix/dialogs/README.md` 선제 생성 — cross-ref-audit.md §4 TODO #1 해결, 193 lines). 5-phase 개요 / `dialog_trace_id` 규약 / ALT-INV-1~3 요약 + Phase D enforcement 매핑표. SSoT 보존 원칙 (§7) 명시 — `division-activation.dialog.yaml` / `dialog-state.schema.yaml` / `alternative-suggestion-engine.md` 재정의 금지. INDEX.md (§5 Dialogs 표 + §3.8 reader path + §4 cross-ref matrix 2곳 + §5 pending 테이블 `6→5`) / README.md (§5 file tree) / cross-ref-audit.md (§4 TODO 헤더 `7→6` + 1번 ✅) 동반 갱신. Track B 큐에서 WU-4 제거 → WU-5 가 next_blocking.
+- **v1.9** (2026-04-20 심야, 같은 3번째 세션 연속): **WU-4.1 (1c375aa) + WU-5 (20c3474) 완료**. WU-5 는 05-gate-framework.md §5.11 G-1 Intake Gate 교차 정합성 점검 (read+validate) — 불일치 3건 발견, Option β (minimal cleanup) 채택. ① L1 schema `gate_id.enum` 에 G-1 / G0 추가 (실제 기록 가능하도록) ② §5.11.7 JSON 예시 앞에 base schema extension 임을 명시하는 주석 추가 (12 필수 필드 나열) ③ `.g-1-signature.yaml` 6-checkbox set 불일치 (05 meta vs 07 content) 는 cross-ref-audit §4 item 8 에 Phase 1 W10 schema 작성 시 사용자 결정 사항으로 TODO 이관 (권장: 05 계열, 원칙 10 절차 이해 필터 충실). 04/07/02 본문 변경 없음 (§2.2 (b) 원칙 2 회피). Track B 큐에서 WU-5 제거 → WU-9 (02 원칙 13 재검증) 가 next_blocking.
