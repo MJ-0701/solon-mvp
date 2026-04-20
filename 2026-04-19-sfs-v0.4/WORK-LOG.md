@@ -129,7 +129,7 @@ related_docs:
   - Korean particle 연쇄 (`SFS는/이/을/과/의`) → (`Solon은/이/을/과/의`) 로 발음 정합 매핑
   - uppercase `SFS` 단독 → `Solon` (lowercase `/sfs`, `sfs-*` 는 미영향)
   - 복원 3곳: `07-plugin-distribution.md:917` (이전 SFS/bkit), `07-plugin-distribution.md:1050` (SFS-v0.3 버전), `02-design-principles.md:527` (이전 SFS/bkit) → 역사 참조 그대로
-- **commit**: `764194f` "WU-8: SFS brand prose → Solon disambiguation (109 occurrences, 14 files)"
+- **commit**: `764194f` "WU-8: SFS brand prose → Solon disambiguation (109 occurrences, 14 files)" + `4a1df93` "WU-8.1: WORK-LOG.md 에 commit sha 764194f 기록 + WU-11 큐 추가"
 - **pushed**: pending (user terminal)
 - **notes**:
   - 최종 잔존 `SFS` (전체 6개): 3 역사 참조 + 3 WORK-LOG 자기 참조 (WU-8 작업 기록 그 자체) — 모두 의도된 보존.
@@ -138,11 +138,27 @@ related_docs:
 
 ---
 
+### WU-HANDOFF: HANDOFF v2.7-bridge → v2.8-bridge-handoff (세션 이관 지점)
+
+- **성격**: infra
+- **intent**: 현 세션 context window 포화 임박 → 다음 세션으로 이관 필요. 사용자가 "폴더에 변경사항 커밋해서 기록해두고 handoff 문서도 최신화 시키고 다른 세션에서 브리핑 해야될 메세지 만들어줘" 지시. HANDOFF 에 (a) 세션 이관 지점 frontmatter, (b) 완료 WU 전량 sha 맵, (c) 🚨 WU-11 사용자 대기 상태, (d) push 미완 7+커밋, (e) FUSE lock 우회 절차 링크 반영.
+- **files**:
+  - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (frontmatter 재구성 + top intro 박스 갱신 + §0 지시 7~9번 추가)
+  - `NEXT-SESSION-BRIEFING.md` (repo root, 신규 — 다음 세션 첫 메시지로 복붙할 텍스트)
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (본 엔트리 + WU-8.1 sha 보강)
+- **commit**: `30e4418` "WU-HANDOFF: HANDOFF v2.7-bridge → v2.8-bridge-handoff (세션 이관 지점, WU-11 대기 반영)" + (WU-HANDOFF.1 커밋 시 채워짐 — BRIEFING + WORK-LOG)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - `NEXT-SESSION-BRIEFING.md` 는 docset 밖 (repo root) 에 배치. 이유: transient (다음 세션 첫 응답 이후 stale). docset 자체의 self-containedness 를 건드리지 않음.
+  - 다음 세션 첫 행동 순서는 BRIEFING.md "🚨 첫 행동" 섹션 참조. WU-11 결정 (A/B/C) 이 최우선.
+
+---
+
 ## 다음 실행 예정 (재정렬된 큐)
 
 | 순서 | WU | 성격 | 비고 |
 |:-:|----|------|------|
-| next | WU-11 🆕 | Multi-agent runtime abstraction 설계 (Claude / Codex / Gemini-CLI) | 사용자 요청 — 긴급도 高 |
+| next | WU-11 🆕 | Multi-agent runtime abstraction 설계 (Claude / Codex / Gemini-CLI) | 사용자 요청 — 긴급도 高, 범위 A/B/C **사용자 확정 대기** |
 | 2 | WU-4 | cross-ref-audit.md Phase 1 pending 중 #1 해결 | audit 소비 시작 |
 | 3 | WU-5 | 05-gate-framework.md G-1 완전성 점검 | 가벼운 read+validate |
 | 4 | WU-9 | 02-design-principles.md 원칙 13 완전성 재검증 | R3 신규 — 일찍 검증 |
@@ -164,4 +180,7 @@ related_docs:
 
 ## Changelog
 
-- **v1.0** (2026-04-20): WU-1 신설 + WU-0 backfill (d034d0d)
+- **v1.0** (2026-04-20 오전): WU-1 신설 + WU-0 backfill (d034d0d)
+- **v1.1** (2026-04-20 오후): WU-2/3 추가 + HANDOFF v2.7-bridge 연동
+- **v1.2** (2026-04-20 심야): WU-8/8.1 완료 (109 SFS → Solon) + WU-11 큐 추가 (사용자 multi-agent abstraction 지시 반영)
+- **v1.3** (2026-04-20 심야): WU-HANDOFF (세션 이관 지점, HANDOFF v2.8-bridge-handoff + NEXT-SESSION-BRIEFING.md 신설)
