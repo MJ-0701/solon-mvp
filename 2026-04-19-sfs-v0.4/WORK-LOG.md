@@ -255,18 +255,31 @@ related_docs:
 - **intent**: WU-12 의 patch1 이 "submodule 전제 제거" 를 수행했으나 grep 에서 놓친 2 곳 (§3.7 "submodule 쪽에 직접 commit 금지" + §6.2 "Solon docset submodule") 잔존. 다음 세션 재개 시 전체 재독 중 검출. patch1 의미를 실제 텍스트 전반에 일관되게 반영.
 - **files**:
   - `2026-04-19-sfs-v0.4/PHASE1-KICKOFF-CHECKLIST.md` (§3.7 1 line + §6.2 1 line + Changelog v0.1-mvp-patch2 entry 추가 — 총 3 edit, net 변경 2 의미 line + 1 changelog 항목)
-- **commit**: (WU-12.2 커밋 시 채워짐)
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (본 entry)
+- **commit**: `8ab660c` "WU-12.2: PHASE1-KICKOFF-CHECKLIST.md v0.1-mvp-patch2 (submodule 레지듀 2곳 cleanup)"
 - **pushed**: pending (user terminal)
 - **notes**:
   - 문서 의미 변경 없음. IP 경계 / 플러그인 배포 모델 결정은 유지.
   - 수정 1 (§3.7): "submodule 쪽에 직접 commit 금지" → "admin panel repo 에는 어떤 Solon 관련 파일도 커밋 금지". patch1 정신상 양방향 IP 경계 (admin panel ← 금지 / Solon docset → 별도 WU) 를 더 명확히 표현.
   - 수정 2 (§6.2): "Solon docset submodule 을 한 번도 안 봤음" → "Solon docset 을 한 번도 안 봤음". 단어 1개 삭제.
   - 검출 경위: WU-11 A / WU-12 산출물 전체 재검토 단계 (새 세션 재개 3→2→1 검토 루프) 중 grep `submodule` 2 hit 발견.
-  - FUSE lock 재발 대비: `/tmp/agent_git_backup_wu12_2` 경로 예약 (선례: `_wu11`, `_wu11_1`, `_wu11_2`, `_wu12`).
+  - FUSE lock 재발 대비: `/tmp/agent_git_backup_wu12_2` 경로 예약 (선례: `_wu11`, `_wu11_1`, `_wu11_2`, `_wu12`). **실제로 FUSE lock 재발 → 우회절차 사용** (`cp -r .git /tmp/agent_git_backup_wu12_2` + GIT_DIR/GIT_WORK_TREE commit + rsync 복귀). 추가로 author identity 미설정 이슈 발견 → per-command `-c user.name -c user.email` 로 해결 (global/local config 변경 금지 원칙 유지). 새 세션 (`funny-compassionate-wright`) 이름 annotation 이 commit author 에 반영됨.
 
 ---
 
-### WU-HANDOFF: HANDOFF v2.7-bridge → v2.8-bridge-handoff (세션 이관 지점)
+### WU-12.3: sha 8ab660c backfill + HANDOFF frontmatter completed_wus 2 WU 추가 (WU-12.1 + WU-12.2)
+
+- **성격**: infra
+- **intent**: WU-12.2 커밋 sha 를 WORK-LOG 에 backfill + HANDOFF frontmatter `completed_wus` 에 (a) 이전 WU-12.1 (ff89ea1, 자기 자신 추가 불가했던 분) + (b) 방금 완료된 WU-12.2 (8ab660c) 2 항목 추가. 겸하여 `unpushed_commits` 필드 현실 반영.
+- **files**:
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (WU-12.2 entry commit 필드 + 본 entry + Changelog v1.7)
+  - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (frontmatter `completed_wus` +2 줄, `unpushed_commits` 현실 반영)
+- **commit**: (WU-12.3 커밋 시 채워짐)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - HANDOFF top intro 박스 (v2.8) 는 여전히 일부 stale (WU-11 "사용자 대기 중" 표현 등) — 전면 개정은 v2.9 bump 로 분리 (이 WU 범위 밖).
+  - WU-12.1 사후 관찰: `unpushed_commits: "13+ (d034d0d..7f8a635 + WU-12.1 예정)"` 였는데 이후 ff89ea1 실제 생성됨에도 표기 미갱신 상태로 push 된 세션 종료. 다음 세션 부팅 시점에서 origin/main 과 로컬이 동기화 확인됨 → 사용자가 그 사이 터미널에서 push 수행한 것으로 해석.
+  - 현 시점 로컬 추가 커밋: `8ab660c` (WU-12.2) + `<WU-12.3 sha>` 2 건 — 사용자 다음 터미널 작업: `git push origin main`.
 
 - **성격**: infra
 - **intent**: 현 세션 context window 포화 임박 → 다음 세션으로 이관 필요. 사용자가 "폴더에 변경사항 커밋해서 기록해두고 handoff 문서도 최신화 시키고 다른 세션에서 브리핑 해야될 메세지 만들어줘" 지시. HANDOFF 에 (a) 세션 이관 지점 frontmatter, (b) 완료 WU 전량 sha 맵, (c) 🚨 WU-11 사용자 대기 상태, (d) push 미완 7+커밋, (e) FUSE lock 우회 절차 링크 반영.
@@ -336,3 +349,4 @@ related_docs:
 - **v1.4** (2026-04-20 심야, 새 세션): WU-11 A 완료 (RUNTIME-ABSTRACTION.md v0.1-mvp 신설, 4-layer 모델 + lock-in map + Phase 1/2 슬롯 선언) + 큐 재정렬 (WU-4 가 다음, WU-11 B/C 는 Phase 1 안정화 / Phase 2 이후로 이동)
 - **v1.5** (2026-04-20 심야): WU-11.1 완료 (sha 4cd07e6 backfill + 사용자 11번째 지시 "다음주 새 프로젝트 MVP 착수" 를 HANDOFF §0 에 영구 기록) — 다음 세션은 Phase 1 킥오프 vs bridge WU 우선순위 확인부터.
 - **v1.6** (2026-04-20 심야, 새 세션 이어서): WU-11.2 (eed4dd1 sha backfill) + **WU-12 완료** (PHASE1-KICKOFF-CHECKLIST.md v0.1-mvp-patch1 신설, 7-step lightweight spike + admin panel 도메인 + G0/G1/G2/G4 4 gate 축소판, submodule 전제 제거 → Solon 참조는 admin panel repo 밖). 사용자 12번째·13번째 지시 HANDOFF §0 에 영구 기록. 큐 구조를 **Track A (사용자 실사용) / Track B (세션 bridge WU) / Track C (plugin 조기 배포 여지)** 3 track 으로 재조직.
+- **v1.7** (2026-04-20 심야, 3번째 세션 `funny-compassionate-wright` 재개): 펜딩으로 보였던 전 세션은 실제로 WU-12.1 (ff89ea1) push 까지 완료하고 종료됐음을 `git status` 로 확인 (origin/main 동기화). 새 세션에서 3→2→1 순서 전체 재독 중 PHASE1-KICKOFF-CHECKLIST.md 의 patch1 submodule 레지듀 2곳 (§3.7 + §6.2) 검출 → **WU-12.2** (8ab660c, patch2) cleanup + **WU-12.3** backfill (WU-12.1/12.2 frontmatter 반영). author identity 이슈는 per-command `-c user.name/email` 로 해결 (global config 변경 금지 원칙 유지).
