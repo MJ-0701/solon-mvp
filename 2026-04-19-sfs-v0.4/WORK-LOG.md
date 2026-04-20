@@ -396,13 +396,28 @@ related_docs:
   - `2026-04-19-sfs-v0.4/cross-ref-audit.md` (§4 W10 영역에 WU-9 발견 추가 — 5 vs 7 vs bare prefix 3-option 사용자 결정 필요 + 권장 A)
   - `2026-04-19-sfs-v0.4/WORK-LOG.md` (본 entry)
   - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (WU-9.1 에서 frontmatter 갱신)
-- **commit**: (WU-9 커밋 시 채워짐)
+- **commit**: `816d751`
 - **pushed**: pending (user terminal)
 - **notes**:
   - dialog.yaml body L35-36 주석이 "/sfs division activate|deactivate|add 가 사용자와 대화하는 표준 트리" 라고 명시 → activate/deactivate 동일 트리 공유가 설계 의도. Terminal 5 (합집합) 가 SSoT.
   - `dialog-state.schema.yaml` 의 7-value split 은 "deactivation 세부 mode 추적" 요구에서 비롯됐을 가능성. Phase 1 W10 에서 `terminal_reached: {5 values}` + `deactivation_mode: {full, scope-reduce, temporal-pause}` 별도 필드로 정규화하면 양쪽 요구 모두 충족.
   - `commands/division.md` bare prefix (full/scoped/temporal/cancel) 는 L272 의 `outcome: activate-temporal` 과 자체 불일치. Phase 1 W10 에서 commands doc 의 terminal_reached 필드 표기도 activate- prefix 로 통일 권장.
   - WU-9 는 "가벼운 read+validate" 취지 유지 — 3 파일, 추가 TODO 1건, 본문 재작성 없음.
+
+---
+
+### WU-9.1: sha `816d751` backfill + HANDOFF frontmatter 갱신
+
+- **성격**: infra
+- **intent**: WU-9 커밋 sha 를 WORK-LOG 에 backfill + HANDOFF `completed_wus` 에 WU-9 항목 추가 + `unpushed_commits` 텍스트 갱신 + `queue.next_blocking` 을 WU-7 로 이동.
+- **files**:
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (WU-9 entry `commit` 필드 실체화 + 본 entry + Changelog v1.11)
+  - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (frontmatter `completed_wus` WU-9 commit sha 실체화 + `unpushed_commits` 8 커밋으로 갱신)
+- **commit**: (WU-9.1 커밋 시 채워짐)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - WU-9 의 "(이 커밋)" placeholder 를 실제 sha 로 치환.
+  - Track B 큐에서 WU-9 완전 제거 → WU-7 (07 plugin.json 샘플 분리) 이 next_blocking.
 
 ---
 
@@ -467,4 +482,5 @@ related_docs:
 - **v1.7** (2026-04-20 심야, 3번째 세션 `funny-compassionate-wright` 재개): 펜딩으로 보였던 전 세션은 실제로 WU-12.1 (ff89ea1) push 까지 완료하고 종료됐음을 `git status` 로 확인 (origin/main 동기화). 새 세션에서 3→2→1 순서 전체 재독 중 PHASE1-KICKOFF-CHECKLIST.md 의 patch1 submodule 레지듀 2곳 (§3.7 + §6.2) 검출 → **WU-12.2** (8ab660c, patch2) cleanup + **WU-12.3** backfill (WU-12.1/12.2 frontmatter 반영). author identity 이슈는 per-command `-c user.name/email` 로 해결 (global config 변경 금지 원칙 유지).
 - **v1.8** (2026-04-20 심야, 같은 3번째 세션 연속): **WU-4 완료** (`appendix/dialogs/README.md` 선제 생성 — cross-ref-audit.md §4 TODO #1 해결, 193 lines). 5-phase 개요 / `dialog_trace_id` 규약 / ALT-INV-1~3 요약 + Phase D enforcement 매핑표. SSoT 보존 원칙 (§7) 명시 — `division-activation.dialog.yaml` / `dialog-state.schema.yaml` / `alternative-suggestion-engine.md` 재정의 금지. INDEX.md (§5 Dialogs 표 + §3.8 reader path + §4 cross-ref matrix 2곳 + §5 pending 테이블 `6→5`) / README.md (§5 file tree) / cross-ref-audit.md (§4 TODO 헤더 `7→6` + 1번 ✅) 동반 갱신. Track B 큐에서 WU-4 제거 → WU-5 가 next_blocking.
 - **v1.9** (2026-04-20 심야, 같은 3번째 세션 연속): **WU-4.1 (1c375aa) + WU-5 (20c3474) 완료**. WU-5 는 05-gate-framework.md §5.11 G-1 Intake Gate 교차 정합성 점검 (read+validate) — 불일치 3건 발견, Option β (minimal cleanup) 채택. ① L1 schema `gate_id.enum` 에 G-1 / G0 추가 (실제 기록 가능하도록) ② §5.11.7 JSON 예시 앞에 base schema extension 임을 명시하는 주석 추가 (12 필수 필드 나열) ③ `.g-1-signature.yaml` 6-checkbox set 불일치 (05 meta vs 07 content) 는 cross-ref-audit §4 item 8 에 Phase 1 W10 schema 작성 시 사용자 결정 사항으로 TODO 이관 (권장: 05 계열, 원칙 10 절차 이해 필터 충실). 04/07/02 본문 변경 없음 (§2.2 (b) 원칙 2 회피). Track B 큐에서 WU-5 제거 → WU-9 (02 원칙 13 재검증) 가 next_blocking.
-- **v1.10** (2026-04-20 심야, 4번째 세션 `funny-compassionate-wright` post-compact 이어서): **WU-5.1 (9c4d6c0) + WU-9 완료**. WU-9 는 02 §2.13 원칙 13 Terminal 집합 교차 정합성 (read+validate) — Terminal 집합 4-way 불일치 발견 (`02 §2.13.5` 4 / `dialog.yaml frontmatter` 4 / `dialog.yaml body` 5 / `dialog-state.schema` 7 / `commands/division.md` 4-bare). Option β (minimal cleanup): ① 02 §2.13.5 Terminal 표 4→5 (`terminal/deactivate` 추가) + Option Card 각주 (activate 4택 vs deactivate 2택 명시) ② `division-activation.dialog.yaml` frontmatter L17 `schema/dialog-terminal-enum` 5 terminal 로 수정 — 파일 자체 내부 정합성 회복. `dialog-state.schema.yaml` 의 7-value split + `commands/division.md` bare prefix 는 cross-ref-audit §4 W10 영역에 Phase 1 W10 schema 작성 시 사용자 결정 사항으로 TODO 이관 (권장: A — 5-terminal 통일 + `deactivation_mode` 별도 필드). Track B 큐에서 WU-9 제거 → WU-7 (07 plugin.json 샘플 분리) 가 next_blocking.
+- **v1.10** (2026-04-20 심야, 4번째 세션 `funny-compassionate-wright` post-compact 이어서): **WU-5.1 (9c4d6c0) + WU-9 (816d751) 완료**. WU-9 는 02 §2.13 원칙 13 Terminal 집합 교차 정합성 (read+validate) — Terminal 집합 4-way 불일치 발견 (`02 §2.13.5` 4 / `dialog.yaml frontmatter` 4 / `dialog.yaml body` 5 / `dialog-state.schema` 7 / `commands/division.md` 4-bare). Option β (minimal cleanup): ① 02 §2.13.5 Terminal 표 4→5 (`terminal/deactivate` 추가) + Option Card 각주 (activate 4택 vs deactivate 2택 명시) ② `division-activation.dialog.yaml` frontmatter L17 `schema/dialog-terminal-enum` 5 terminal 로 수정 — 파일 자체 내부 정합성 회복. `dialog-state.schema.yaml` 의 7-value split + `commands/division.md` bare prefix 는 cross-ref-audit §4 W10 영역에 Phase 1 W10 schema 작성 시 사용자 결정 사항으로 TODO 이관 (권장: A — 5-terminal 통일 + `deactivation_mode` 별도 필드). Track B 큐에서 WU-9 제거 → WU-7 (07 plugin.json 샘플 분리) 가 next_blocking.
+- **v1.11** (2026-04-20 심야, 4번째 세션 연속): **WU-9.1 sha `816d751` backfill**. WU-9 entry 의 `commit` 필드 실체화 + HANDOFF frontmatter `unpushed_commits` 7→8 커밋으로 갱신. Track B 큐에서 WU-9 완전 제거.
