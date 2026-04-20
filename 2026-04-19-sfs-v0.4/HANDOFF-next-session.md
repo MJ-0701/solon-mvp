@@ -88,6 +88,8 @@ round4_bridge:
     - RUNTIME-ABSTRACTION.md 의 MVP 지향이 바로 이 맥락과 직결 — 과도한 선제 추상화 금지, Claude 단일 레일 질주가 옳다는 사후 확증.
     - 실 프로젝트의 이름/도메인은 아직 미공지 (product-image-studio 일 가능성 — §4.3 Phase 1 kickoff 시나리오 참조).
     - 질문 trigger: 다음 세션은 "WU-4~10 계속" vs "Phase 1 킥오프 준비 (§10.4)" 중 사용자 의중 확인부터.
+12. (2026-04-20 심야 ⑦, 새 세션 WU-12 착수 결정): **"킥오프 먼저 하고 실제로 내가 사용가능한 상태로 셋팅한 다음에 다음작업들 이어서 가는게 맞을듯?"** + 축 확정 **"1. 1번에 좀 더 가까운거 같은데 일단 기본적인 골자인 브레인스토밍 -> plan -> sprint -> 구현 -> review -> commit -> 문서화 / 2. B"** + 도메인 **"음 내가 새로가는 회사의 관리자 페이지 라고 생각하면 됨 매출, 현금영수증발행, 권한관리, 대시보드 등등 이 들어갈 예정"** → WU-12 `PHASE1-KICKOFF-CHECKLIST.md` 착수. axis 1 = ① lightweight spike (7-step) / axis 2 = B 새 별도 repo / domain = 관리자 페이지 / Gate = G0+G1+G2+G4 4개 축소판 / active 본부 = dev + strategy-pm. W0 준비 + W1 첫 cycle 체크박스화.
+13. (2026-04-20 심야 ⑧, WU-12 checklist 작성 중 — **IP 배포 모델 정정**): **"Solon docset <-- 이건 내 개인자산이니까 사실 플러그인 형태로 배포가 돼야하는게 맞음"** → checklist v0.1-mvp 초안의 submodule 전제 제거. **결정**: (a) admin panel (회사 IP) repo 에 Solon 참조 zero (`.gitmodules` 없음, 경로 하드코딩 없음, `git ls-files | grep -i solon` 빈 결과). (b) end-state = `claude plugin install solon` (07-plugin-distribution.md + 풀스펙 §10.4 W13 Plugin Packaging). (c) MVP 단계 = 사용자 개인 workspace 의 로컬 clone 또는 개인 `~/.claude/plugins/solon-wip/` 참조 (양쪽 다 admin panel repo 밖). v0.1-mvp-patch1 로 §1.1/§2.2/§2.4/§2.5/§6.1/§7.1/§7.2 전반 정정 반영. **향후 함의**: Solon docset 쪽에서 풀스펙 W13 Plugin Packaging 선행 우선순위 상향 검토 여지 — "사용자 머신마다 수동 clone 이 비효율" 이라고 cycle 1~2 운용 중 느끼면 Solon docset repo 에서 별도 WU 로 조기 착수 가능.
 
 → **해석**:
 - 기본 3원칙: 작업 진행 + 토큰 한계 도달 시 중단 + 기록 우선

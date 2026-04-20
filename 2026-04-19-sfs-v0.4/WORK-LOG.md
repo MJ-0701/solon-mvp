@@ -183,6 +183,58 @@ related_docs:
 
 ---
 
+### WU-11.2: WORK-LOG 에 commit sha eed4dd1 backfill
+
+- **성격**: infra
+- **intent**: WU-11.1 커밋 `eed4dd1` 의 sha 를 WORK-LOG 의 WU-11.1 엔트리 commit 필드에 반영. 최소 sha backfill 커밋 (1 line diff).
+- **files**:
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (WU-11.1 entry 의 commit 필드 1 line)
+- **commit**: `6527252` "WU-11.2: WORK-LOG 에 commit sha eed4dd1 backfill"
+- **pushed**: pending (user terminal)
+- **notes**:
+  - 일반 패턴: WU-N 이 자기 sha 를 적기 전에 커밋되므로 WU-N.1 에서 sha backfill 수행. 이제는 이 패턴이 정착됨.
+
+---
+
+### WU-12: PHASE1-KICKOFF-CHECKLIST.md 신설 (Phase 1 MVP 경량 스파이크 킥오프)
+
+- **성격**: content (신설 operational checklist 문서) + process (사용자 다음주 실사용 준비)
+- **intent**: 사용자 지시 "킥오프 먼저 하고 실제로 내가 사용가능한 상태로 셋팅한 다음에 다음작업들 이어서 가는게 맞을듯?" + axis 1 = ① lightweight spike (7-step: 브레인스토밍→plan→sprint→구현→review→commit→문서화) + axis 2 = B 새 별도 프로젝트 + 도메인 = 관리자 페이지 (매출/현금영수증/권한/대시보드) + 커밋 직전 사용자 13번째 지시 "Solon docset 은 내 개인자산이라 플러그인 형태로 배포돼야 함". 풀스펙 16~20주 Phase 1 의 압축 선행 런 (W0 준비 + W1 첫 cycle) 을 체크박스 형태로 펼침. MVP 용도 — 플러그인 완성 전 수동 7-step 운영.
+- **scope 확정**:
+  - axis 1 = ① (7-step lightweight)
+  - axis 2 = B (new 별도 repo)
+  - domain = admin panel (매출 / 현금영수증 / 권한 관리 / 대시보드)
+  - Solon docset 참조 = admin panel repo **밖** (홈 디렉토리 clone 또는 개인 `~/.claude/plugins/solon-wip/`). admin panel repo 에는 submodule / `.gitmodules` / 경로 하드코딩 전무 — IP 경계 엄격.
+  - Gate 축소판: G0 (브레인스토밍 entry) + G1 (plan) + G2 (구현 entry) + G4 (review). G-1/G3/G5 skip (greenfield / design abstract / cycle 1 만으로 판단 재료 부족).
+  - Active 본부: dev + strategy-pm (active). qa/design/infra/taxonomy = abstract (원칙 13 Progressive Activation).
+  - L3 observability: none (minimal tier). L1 은 `.sfs-local/events.jsonl` 수동 append, L2 는 git commit 자체.
+- **files**:
+  - `2026-04-19-sfs-v0.4/PHASE1-KICKOFF-CHECKLIST.md` (신규, v0.1-mvp-patch1, §0~§8 + Changelog)
+  - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (§0 에 12번·13번 지시 추가)
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (본 엔트리 + WU-11.2 엔트리 + 큐 재정렬 + Changelog v1.6)
+- **주요 설계 결정**:
+  1. **IP 경계 = 저장소 물리적 격리**. admin panel (회사 IP) 과 Solon docset (개인 IP) 을 절대 같은 repo 에 넣지 않음. submodule 도 금지 — `.gitmodules` 에 개인 repo URL 이 회사 repo 메타데이터로 섞이면 경계 오염.
+  2. **end-state = `claude plugin install solon`** (07-plugin-distribution.md, 풀스펙 §10.4 W13). MVP 단계에서는 플러그인 미완성이므로 사용자 개인 workspace 의 로컬 clone 으로만 참조. 3 가지 방법 (§2.2): (1) 홈 디렉토리 clone, (2) 개인 `~/.claude/plugins/solon-wip/` WIP 플러그인, (3) end-state 정식 플러그인 — MVP 에선 1번 권장.
+  3. **7-step → Solon PDCA/Gate 매핑** (§4 표): 브레인스토밍 = P-1/G0, plan = P/G1, sprint = P metadata, 구현 = D/G2, review = C/G4, commit = L2 확정, 문서화 = A.
+  4. **Gate 축소 근거** (§5): greenfield → G-1 skip / design abstract → G3 skip / cycle 1 개별 판정 → G5 skip (cycle 3 누적 후 도입).
+  5. **성공 판정 5개 조건** (§6.1): 5 중 4 충족 → 성공. 풀스펙 §10.5.1 의 6개 조건과 느슨하게 대응하되 MVP 스케일로 완화.
+  6. **Solon 브랜드 노출 최소화 (CLAUDE.md 전략)**: admin panel repo 의 CLAUDE.md 에는 "7-step flow" + "Gate G0/G1/G2/G4" 만 언급, "Solon" 명칭 및 docset 경로는 적지 않음 (IP 경계).
+- **non-goals**:
+  - 실제 admin panel repo 생성 (사용자 터미널 작업).
+  - `/sfs install` CLI 동작 (풀스펙 W13 산출물).
+  - qa/design/infra/taxonomy 본부 선행 활성화 (원칙 13 — 필요시에만 abstract → active).
+  - checklist 의 cycle 2~N 버전화 (cycle 1 전용; cycle 3 누적 후 v0.2 에서 G5 추가).
+- **commit**: (WU-12 커밋 시 채워짐 — WU-12.1 에서 backfill)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - **작성 중 patch 발생**: v0.1-mvp 초안을 쓴 직후 사용자 13번째 지시 "Solon docset = 개인자산 → 플러그인 배포가 맞음" 수신. 즉시 v0.1-mvp-patch1 로 §1.1/§2.2/§2.4/§2.5/§6.1/§7.1/§7.2 전반 정정. submodule 전제 전량 제거. Changelog 에 patch1 기록.
+  - admin panel repo 쪽 자가 검증: `git ls-files | grep -i solon` 이 항상 빈 결과여야 함 (§2.5 exit 조건).
+  - 이 checklist 는 **cycle 1 전용**. cycle 2 는 §3 만 반복 (수정 없이). cycle 3 누적 시점 (= 5월 중순경) 에 §5 재검토 및 G5/G3 도입 여부 판정.
+  - FUSE lock 재발 대비: `/tmp/agent_git_backup_wu12` 경로 사용 (선례: WU-11 = `_wu11`, WU-11.1 = `_wu11_1`, WU-11.2 = `_wu11_2`).
+  - bridge 큐 (WU-4 → WU-5 → WU-9 → WU-7 → WU-10) 는 킥오프 병행으로 이동 — 사용자가 cycle 1 실행하는 동안 세션이 있을 때 bridge WU 를 병렬 수행 가능. 경쟁 관계가 아니라 2 track.
+
+---
+
 ### WU-HANDOFF: HANDOFF v2.7-bridge → v2.8-bridge-handoff (세션 이관 지점)
 
 - **성격**: infra
@@ -199,18 +251,38 @@ related_docs:
 
 ---
 
-## 다음 실행 예정 (재정렬된 큐 — WU-11 A 완료 후)
+## 다음 실행 예정 (재정렬된 큐 — WU-12 완료 후)
+
+**2 Track 구조** — 사용자가 다음주 (2026-04-27~) 부터 admin panel MVP cycle 1 을 실제로 돌리는 동안, Claude 세션은 bridge WU 를 병렬로 소화.
+
+### Track A (사용자 실사용, 세션 무관)
+
+| 시점 | 항목 | 성격 |
+|:-:|-----|------|
+| 2026-04-27 주 | PHASE1-KICKOFF-CHECKLIST.md §2 W0 실행 (admin panel repo 생성, `.sfs-local/` 초기화, CLAUDE.md 작성) | 사용자 터미널 |
+| 2026-04-29 ~ 05-05 | §3 W1 실행 (첫 PDCA 1 cycle, 7-step) | 사용자 + Claude 페어 (다른 세션) |
+| 2026-05-05 | §6 성공/실패 판정 | 사용자 |
+| 2026-05-06 이후 | 결과를 Solon docset HANDOFF §0 에 14번 지시로 기록 (사용자가 새 WU 를 Claude 에게 지시) | infra WU |
+
+### Track B (docset repo 내부, 세션 작업)
 
 | 순서 | WU | 성격 | 비고 |
 |:-:|----|------|------|
+| immediate | WU-12.1 | WU-12 sha backfill + HANDOFF frontmatter `completed_wus` 갱신 | infra |
 | next | WU-4 | cross-ref-audit.md Phase 1 pending 중 #1 해결 | audit 소비 시작 |
-| 2 | WU-5 | 05-gate-framework.md G-1 완전성 점검 | 가벼운 read+validate |
-| 3 | WU-9 | 02-design-principles.md 원칙 13 완전성 재검증 | R3 신규 — 일찍 검증 |
-| 4 | WU-7 | 07-plugin-distribution plugin.json 샘플 파일 분리 | Phase 1 asset 준비 |
-| 5 | WU-10 | appendix/dialogs/branches/ 6 본부 YAML schema 정합성 | 중위험 batch |
+| 3 | WU-5 | 05-gate-framework.md G-1 완전성 점검 | 가벼운 read+validate |
+| 4 | WU-9 | 02-design-principles.md 원칙 13 완전성 재검증 | R3 신규 — 일찍 검증 |
+| 5 | WU-7 | 07-plugin-distribution plugin.json 샘플 파일 분리 | Phase 1 asset 준비 |
+| 6 | WU-10 | appendix/dialogs/branches/ 6 본부 YAML schema 정합성 | 중위험 batch |
 | later | WU-11 B | Claude-specific 파일 frontmatter `layer:` 필드 + 본문 힌트 주석 | Phase 1 안정화 후 재검토 |
 | Phase 2 | WU-11 C | Codex / Gemini-CLI 어댑터 초안 (`appendix/runtime-adapters/`) | Phase 2 go 결정 후 |
 | — | WU-6 | claude-shared-config/.git IP 경계 재정리 | **BLOCKED** (사용자 결정 필요) |
+
+### Track C (우선순위 상향 여지)
+
+| 조건 | 상향 대상 |
+|------|---------|
+| MVP cycle 1~2 중 "사용자 머신마다 수동 clone 이 비효율" 라고 판단되면 | 풀스펙 §10.4 W13 Plugin Packaging 조기 착수 → `claude plugin install solon` MVP 선행. 이는 Solon docset repo 쪽 WU (별도 범위) 로 발주. |
 
 ---
 
@@ -232,3 +304,4 @@ related_docs:
 - **v1.3** (2026-04-20 심야): WU-HANDOFF (세션 이관 지점, HANDOFF v2.8-bridge-handoff + NEXT-SESSION-BRIEFING.md 신설)
 - **v1.4** (2026-04-20 심야, 새 세션): WU-11 A 완료 (RUNTIME-ABSTRACTION.md v0.1-mvp 신설, 4-layer 모델 + lock-in map + Phase 1/2 슬롯 선언) + 큐 재정렬 (WU-4 가 다음, WU-11 B/C 는 Phase 1 안정화 / Phase 2 이후로 이동)
 - **v1.5** (2026-04-20 심야): WU-11.1 완료 (sha 4cd07e6 backfill + 사용자 11번째 지시 "다음주 새 프로젝트 MVP 착수" 를 HANDOFF §0 에 영구 기록) — 다음 세션은 Phase 1 킥오프 vs bridge WU 우선순위 확인부터.
+- **v1.6** (2026-04-20 심야, 새 세션 이어서): WU-11.2 (eed4dd1 sha backfill) + **WU-12 완료** (PHASE1-KICKOFF-CHECKLIST.md v0.1-mvp-patch1 신설, 7-step lightweight spike + admin panel 도메인 + G0/G1/G2/G4 4 gate 축소판, submodule 전제 제거 → Solon 참조는 admin panel repo 밖). 사용자 12번째·13번째 지시 HANDOFF §0 에 영구 기록. 큐 구조를 **Track A (사용자 실사용) / Track B (세션 bridge WU) / Track C (plugin 조기 배포 여지)** 3 track 으로 재조직.
