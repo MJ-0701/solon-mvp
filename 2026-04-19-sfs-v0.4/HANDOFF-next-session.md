@@ -52,13 +52,15 @@ round4_bridge:
     - "WU-7: ec263c5 — 07-plugin-distribution.md §7.2 plugin.json 예시 → appendix/samples/plugin.json.sample 분리 (Option β skeleton+sample: 07 본문 slim + _meta/$schema 포함 완전본 84 lines 신규 + INDEX.md §1 Hooks&Tooling&Samples (3) 확장 + cross-ref-audit §1.2/§5 동기화)"
     - "WU-7.1: af306e0 — sha ec263c5 backfill + HANDOFF frontmatter completed_wus 1 WU 추가 + unpushed_commits 10→12 갱신 + NEXT-SESSION-BRIEFING.md §1 unpushed 표 / §2 next task / §8 session 요약 refresh"
     - "WU-14: 42e3719 — context-reset 대비 infrastructure 셋업 (사용자 mid-session 지시). tmp/ 폴더 (.gitignore 로 내용 제외 + .gitkeep 만 track) + PROGRESS.md (덮어쓰기 방식 live 4-필드 snapshot, 매 micro-step 마다 재작성). `.gitignore` `tmp/` → `tmp/*` 수정 (ignored 디렉토리 내부 미탐색 bug 회피)"
-    - "WU-14.1: (이 커밋) — sha 42e3719 backfill + HANDOFF frontmatter completed_wus 2 WU 추가 (WU-14 + WU-14.1) + unpushed_commits 12→14 갱신 + NEXT-SESSION-BRIEFING.md §1 unpushed 표 14 커밋 refresh + §8 5번째 세션 요약에 WU-14/WU-14.1 추가 + PROGRESS.md 덮어쓰기 (① Just-Finished 에 WU-14 sha 반영, ② In-Progress 로 WU-14.1 배치)"
-  unpushed_commits: "현 세션 새 로컬 커밋 = WU-12.2 (8ab660c) + WU-12.3 (b77fcb2) + WU-4 (7d982dc) + WU-4.1 (1c375aa) + WU-5 (20c3474) + WU-5.1 (9c4d6c0) + WU-9 (816d751) + WU-9.1 (6884bbd) + WU-13 (101030f) + WU-13.1 (899643a) + WU-7 (ec263c5) + WU-7.1 (af306e0) + WU-14 (42e3719) + WU-14.1 backfill (이 커밋) → 사용자가 `git push origin main` 수동 실행 필요 (총 14 커밋)."
+    - "WU-14.1: 853373f — sha 42e3719 backfill + HANDOFF frontmatter completed_wus 2 WU 추가 (WU-14 + WU-14.1) + unpushed_commits 12→14 갱신 + NEXT-SESSION-BRIEFING.md §1 unpushed 표 14 커밋 refresh + §8 5번째 세션 요약에 WU-14/WU-14.1 추가 + PROGRESS.md 덮어쓰기 (① Just-Finished 에 WU-14 sha 반영, ② In-Progress 로 WU-14.1 배치)"
+    - "WU-10: 3c8cac0 — appendix/dialogs/branches/ 6 본부 YAML (taxonomy/qa/design/infra/strategy-pm/custom, 956 lines) schema 정합성 5-step validation (`tmp/wu10-*.md` 8 파일 중간 산출물, git 제외). 공통 gap 2 (override 확장 + intent label 확장) + branch 별 local extension 전수 정리. Option β minimal cleanup — parent `division-activation.dialog.yaml` 의 `branch_resolution.branch_extensibility_notes` 7-항목 contract 블록 신설 + Phase B labels 주석 + cross-ref-audit §4 W10 TODO 14~19 6건 추가 (branch override schema / intent label 체계 / terminal sub-type 통합 / custom invariants 위치 / L1 event payload / `tier` 필드)"
+    - "WU-10.1: (이 커밋) — sha 3c8cac0 backfill + HANDOFF frontmatter completed_wus 2 WU 추가 (WU-10 + WU-10.1) + unpushed_commits 14→16 갱신 + NEXT-SESSION-BRIEFING.md v0.4 refresh (16 커밋 표 + §8 5번째 세션 요약에 WU-10/WU-10.1 추가) + PROGRESS.md 덮어쓰기"
+  unpushed_commits: "현 세션 새 로컬 커밋 = WU-12.2 (8ab660c) + WU-12.3 (b77fcb2) + WU-4 (7d982dc) + WU-4.1 (1c375aa) + WU-5 (20c3474) + WU-5.1 (9c4d6c0) + WU-9 (816d751) + WU-9.1 (6884bbd) + WU-13 (101030f) + WU-13.1 (899643a) + WU-7 (ec263c5) + WU-7.1 (af306e0) + WU-14 (42e3719) + WU-14.1 (853373f) + WU-10 (3c8cac0) + WU-10.1 backfill (이 커밋) → 사용자가 `git push origin main` 수동 실행 필요 (총 16 커밋)."
   queue:
-    next_blocking: "WU-10 appendix/dialogs/branches/ 6 본부 YAML schema 정합성 검증 (중위험 batch, WU-5/WU-9 패턴 — read+validate → Option β)"
-    ready_after_wu14: [WU-10]
+    next_blocking: "(없음 — Track B 큐 clean). 다음 세션은 현 시점 상태 확인 후 새 WU 를 사용자로부터 수신하거나, `cross-ref-audit §4` W10 TODO 6건 (14~19) 의 사용자 결정 수집 세션으로 전환 가능."
+    ready_after_wu10: "(없음 — WU-11 B 는 Phase 1 안정화 후, WU-11 C 는 Phase 2 이후, WU-6 는 BLOCKED)"
     entry_point_for_next_session: "PROGRESS.md (live single-frame snapshot — 본 파일부터 읽고 ② In-Progress + ③ Next 로 즉시 진입) → NEXT-SESSION-BRIEFING.md (5분 진입 가이드, 보조)"
-    blocked: [WU-6 (claude-shared-config/.git IP 경계 — 사용자 결정 필요)]
+    blocked: [WU-6 (claude-shared-config/.git IP 경계 — 사용자 결정 필요), WU-11 B (Phase 1 안정화 후 재검토), WU-11 C (Phase 2 이후)]
   user_new_directive:
     raw: "sfs를 claude 뿐만 아니라 codex랑 gemini-cli에서도 사용하고 싶거든?? 그래서 추상화 하는게 중요할듯?!"
     implication: "Claude Code 에 암묵적으로 lock-in 된 현 docset 에 runtime abstraction layer 추가 필요"

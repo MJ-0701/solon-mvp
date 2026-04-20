@@ -594,7 +594,7 @@ related_docs:
   - `2026-04-19-sfs-v0.4/tmp/wu10-findings-custom.md` (step 3 + 종합 요약 표)
   - `2026-04-19-sfs-v0.4/WORK-LOG.md` (본 entry + Changelog v1.18)
   - `2026-04-19-sfs-v0.4/PROGRESS.md` (덮어쓰기)
-- **commit**: (WU-10 커밋 시 채워짐)
+- **commit**: `3c8cac0`
 - **pushed**: pending (user terminal)
 - **notes**:
   - **tmp/ 파일 staging**: `.gitignore` 의 `tmp/*` 패턴 때문에 `tmp/wu10-*.md` 6 파일은 **기본 미추적**. 본 WU 에서는 findings 를 WORK-LOG 요약에 녹였으므로 tmp 파일 자체는 git 제외 상태 유지. 세션 종료 후 tmp 파일은 로컬에만 남고 필요 시 사용자가 직접 보존. → WU-14 의 `tmp/` 정책 준수.
@@ -602,6 +602,23 @@ related_docs:
   - **strategy-pm 의 복잡도**: Phase 1 default active 본부는 dev + strategy-pm 두 개 (원칙 13). 이 중 strategy-pm 만 `/sfs division deactivate` 의 primary target (dev 는 deactivate 불가 가정). 따라서 strategy-pm.yaml 이 유일하게 deactivate-primary override sections 를 보유 — 의미 정당.
   - **custom branch 의 특수성**: `/sfs division add` 명령어 대응으로 `division_id: <user-provided>` placeholder + `defines: branch/custom-division-add` 규약 예외 + `extra_invariants` (branch-local) + `phase_A_prefix` (기존 본부 매핑 검토 Step 0). W10 schema 작성 시 이 특수성을 `dialog-branch.schema.yaml` 의 `if/then` 분기로 표현 가능.
   - **WU-10.1 계획**: sha backfill + HANDOFF frontmatter `completed_wus` 에 WU-10 추가 + `unpushed_commits` 14 → 16 커밋 갱신 + NEXT-SESSION-BRIEFING.md §1 표 refresh + PROGRESS.md 덮어쓰기.
+
+---
+
+### WU-10.1: sha `3c8cac0` backfill + HANDOFF / BRIEFING / PROGRESS refresh
+
+- **성격**: infra
+- **intent**: WU-10 커밋 sha WORK-LOG backfill + HANDOFF frontmatter `completed_wus` 에 WU-10 / WU-10.1 추가 + `unpushed_commits` 14 → 16 커밋 갱신 + NEXT-SESSION-BRIEFING.md §1 표 refresh + §8 5번째 세션 요약에 WU-10/WU-10.1 추가 + PROGRESS.md 덮어쓰기 (WU-10 commit sha 반영, WU-10.1 을 ② In-Progress 로).
+- **files**:
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (WU-10 entry `commit` 실체화 + 본 entry + Track B 큐 테이블에 WU-10/WU-10.1 행 갱신 + Changelog v1.19)
+  - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (frontmatter `completed_wus` 에 WU-10 / WU-10.1 2 entries 추가 + `unpushed_commits` 14→16)
+  - `2026-04-19-sfs-v0.4/NEXT-SESSION-BRIEFING.md` (§1 unpushed 표 → 16 커밋 refresh + §8 5번째 세션 요약에 WU-10/WU-10.1 추가 + frontmatter v0.4)
+  - `2026-04-19-sfs-v0.4/PROGRESS.md` (덮어쓰기 — ① Just-Finished 에 WU-10 sha 반영 + WU-10.1 을 ② In-Progress 로)
+- **commit**: (WU-10.1 커밋 시 채워짐)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - Track B 큐에서 WU-10 / WU-10.1 제거 → 다음 가시 블로커 없음 (Track B 큐 clean). WU-11 B / WU-11 C / WU-6 만 남음 (모두 `later` / `Phase 2` / `BLOCKED` 상태).
+  - 5번째 세션 성과 요약: WU-7 / WU-7.1 / WU-14 / WU-14.1 / WU-10 / WU-10.1 = 6 WU (3 본체 + 3 infra). ahead 16 커밋.
 
 ---
 
@@ -638,7 +655,7 @@ related_docs:
 | ✅ done | WU-14 | context-reset 대비 infrastructure (tmp/ + PROGRESS.md + `.gitignore` 블록) | infra (사용자 지시) |
 | ✅ done | WU-14.1 | sha 42e3719 backfill + HANDOFF / BRIEFING / PROGRESS refresh | infra |
 | ✅ done | WU-10 | appendix/dialogs/branches/ 6 본부 YAML schema 정합성 (Option β minimal cleanup — parent `branch_extensibility_notes` + cross-ref-audit §4 W10 TODO 14~19) | 중위험 batch |
-| next | WU-10.1 | WU-10 sha backfill + HANDOFF / BRIEFING / PROGRESS refresh | infra |
+| ✅ done | WU-10.1 | WU-10 sha `3c8cac0` backfill + HANDOFF / BRIEFING / PROGRESS refresh | infra |
 | later | WU-11 B | Claude-specific 파일 frontmatter `layer:` 필드 + 본문 힌트 주석 | Phase 1 안정화 후 재검토 |
 | Phase 2 | WU-11 C | Codex / Gemini-CLI 어댑터 초안 (`appendix/runtime-adapters/`) | Phase 2 go 결정 후 |
 | — | WU-6 | claude-shared-config/.git IP 경계 재정리 | **BLOCKED** (사용자 결정 필요) |
@@ -681,5 +698,6 @@ related_docs:
 - **v1.15** (2026-04-21 새벽, 5번째 세션 연속): **WU-7.1 sha `ec263c5` backfill**. WU-7 entry 의 `commit` 필드 실체화 + HANDOFF frontmatter `completed_wus` 에 WU-7 행 추가 + `unpushed_commits` 10 → 12 커밋 (WU-7 + WU-7.1) 갱신. NEXT-SESSION-BRIEFING.md §1 unpushed 커밋 목록 표를 WU-13.1 / WU-7 / WU-7.1 포함 12 커밋으로 refresh (WU-13.1 notes 에 적힌 "다음 세션 첫 작업" 을 현 세션에서 선행 소화).
 - **v1.16** (2026-04-21 새벽, 5번째 세션 mid-session interrupt): **WU-14 완료** (`42e3719`) — 사용자 지시로 context-reset 대비 infrastructure 도입. `tmp/` 폴더 (세션 중간 산출물 저장, `.gitignore` 로 내용 제외 + `.gitkeep` 만 track) + `PROGRESS.md` (덮어쓰기 방식 live 4-필드 snapshot, 매 micro-step 마다 재작성). 사용자 원문: "토큰을 다 사용하게 되면 작업이 유실되겠지?? 그래서 PROGRESS.md 같은거 만들어서... 덮어쓰며 기록하는식으로 가는게 베스트". `.gitignore` pattern 초기 작성 `tmp/` 가 ignored 디렉토리 내부 미탐색 bug 유발 → `tmp/*` 로 수정 + 주석에 hazard 명시. WU-14.1 에서 sha backfill + HANDOFF/BRIEFING/PROGRESS refresh 예정.
 - **v1.17** (2026-04-21 새벽, 5번째 세션 연속): **WU-14.1 sha `42e3719` backfill** + HANDOFF frontmatter `completed_wus` 에 WU-14 / WU-14.1 2 entries 추가 + `unpushed_commits` 12→14 커밋 갱신 + NEXT-SESSION-BRIEFING.md v0.3 refresh (14 커밋 표 + §8 5번째 세션 요약에 WU-14/14.1 추가) + PROGRESS.md 덮어쓰기 (① Just-Finished 에 WU-14 sha 반영, WU-10 step 3 을 ② In-Progress 로).
-- **v1.18** (2026-04-21 새벽, 5번째 세션 연속, WU-14 infrastructure 활용 첫 WU): **WU-10 완료** — `appendix/dialogs/branches/` 6 본부 YAML (taxonomy/qa/design/infra/strategy-pm/custom, 956 lines) schema 정합성 5-step 실행 (`tmp/wu10-*.md` 8 파일 중간 산출물). 공통 gap 2 건 (#F1 override 확장, #F2 intent label 확장) + branch 별 local extension (warn_conditions, typical_parent, warn_cost_cap, deactivate-* 섹션 3 + sub-terminal 3, phase_A_prefix, extra_invariants INV-C1/C2/C3, division_id placeholder 등) 전수 정리. **Option β minimal cleanup** 적용: parent `division-activation.dialog.yaml` 에 `branch_resolution.branch_extensibility_notes` 7-항목 contract 블록 신설 (override points, intent label union, activate/deactivate 독립 override, `<parent>-<sub>` terminal naming, local extension fields, custom 전용 확장, merge 규칙) + Phase B labels 에 cross-ref 주석 추가. 의미 결정 영역은 `cross-ref-audit §4` 에 W10 TODO 14~19 6건 추가 (branch override schema 공식화, intent label 체계, terminal sub-type 통합 (WU-9 와), custom invariants 위치, L1 event payload, `tier` 필드 정의). 원칙 2 (자기검증 금지) 준수 — A/B/C 의미 선택은 모두 W10 TODO 로 이관. tmp/wu10-*.md 파일은 `.gitignore` 의 `tmp/*` 정책에 따라 git 제외 유지 (findings 는 WORK-LOG entry 에 요약). WU-10.1 에서 sha backfill 예정.
+- **v1.18** (2026-04-21 새벽, 5번째 세션 연속, WU-14 infrastructure 활용 첫 WU): **WU-10 완료** (`3c8cac0`) — `appendix/dialogs/branches/` 6 본부 YAML (taxonomy/qa/design/infra/strategy-pm/custom, 956 lines) schema 정합성 5-step 실행 (`tmp/wu10-*.md` 8 파일 중간 산출물). 공통 gap 2 건 (#F1 override 확장, #F2 intent label 확장) + branch 별 local extension (warn_conditions, typical_parent, warn_cost_cap, deactivate-* 섹션 3 + sub-terminal 3, phase_A_prefix, extra_invariants INV-C1/C2/C3, division_id placeholder 등) 전수 정리. **Option β minimal cleanup** 적용: parent `division-activation.dialog.yaml` 에 `branch_resolution.branch_extensibility_notes` 7-항목 contract 블록 신설 (override points, intent label union, activate/deactivate 독립 override, `<parent>-<sub>` terminal naming, local extension fields, custom 전용 확장, merge 규칙) + Phase B labels 에 cross-ref 주석 추가. 의미 결정 영역은 `cross-ref-audit §4` 에 W10 TODO 14~19 6건 추가 (branch override schema 공식화, intent label 체계, terminal sub-type 통합 (WU-9 와), custom invariants 위치, L1 event payload, `tier` 필드 정의). 원칙 2 (자기검증 금지) 준수 — A/B/C 의미 선택은 모두 W10 TODO 로 이관. tmp/wu10-*.md 파일은 `.gitignore` 의 `tmp/*` 정책에 따라 git 제외 유지 (findings 는 WORK-LOG entry 에 요약). WU-10.1 에서 sha backfill 예정.
+- **v1.19** (2026-04-21 새벽, 5번째 세션 연속): **WU-10.1 sha `3c8cac0` backfill** + HANDOFF frontmatter `completed_wus` 에 WU-10 / WU-10.1 2 entries 추가 + `unpushed_commits` 14→16 커밋 갱신 + NEXT-SESSION-BRIEFING.md v0.4 refresh (16 커밋 표 + §8 5번째 세션 요약에 WU-10/WU-10.1 추가) + PROGRESS.md 덮어쓰기. Track B 큐에서 WU-10 / WU-10.1 제거 — 5번째 세션 성과 6 WU (WU-7 / WU-7.1 / WU-14 / WU-14.1 / WU-10 / WU-10.1), ahead 16 커밋.
 - **v1.17** (2026-04-21 새벽, 5번째 세션 연속): **WU-14.1 sha `42e3719` backfill**. WU-14 entry 의 `commit` 필드 실체화 + HANDOFF frontmatter `completed_wus` 에 WU-14 / WU-14.1 2 entries 추가 + `unpushed_commits` 12 → 14 커밋 갱신. NEXT-SESSION-BRIEFING.md §1 unpushed 표 14 커밋 refresh + §8 5번째 세션 요약에 WU-14 / WU-14.1 추가. PROGRESS.md 덮어쓰기 (① Just-Finished 에 WU-14 sha 반영, ② In-Progress 로 WU-14.1 배치). Track B 큐에서 WU-14.1 완전 제거 → WU-10 이 truly next_blocking.
