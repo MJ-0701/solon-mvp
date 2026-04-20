@@ -14,7 +14,10 @@
 # defines:
 #   - dialog/division-activation
 #   - schema/dialog-phase-enum (A, B, C, D, E)
-#   - schema/dialog-terminal-enum (activate-full, activate-scoped, activate-temporal, cancel)
+#   - schema/dialog-terminal-enum (activate-full, activate-scoped, activate-temporal, deactivate, cancel)
+#     # NOTE: activate 진입 흐름은 4 terminal (activate-*/cancel), deactivate 진입 흐름은 2 terminal (deactivate/cancel).
+#     # 본 enum 은 두 진입 흐름의 합집합. dialog-state.schema.yaml 의 terminal_reached 7-value split 과는
+#     # 다른 추상화 수준 — Phase 1 W10 schema 작성 시 정합성 결정 필요.
 #
 # references:
 #   - principle/progressive-activation (s02 §2.13)

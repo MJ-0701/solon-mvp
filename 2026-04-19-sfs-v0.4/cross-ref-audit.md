@@ -155,6 +155,14 @@ Phase 1 W9 ~ W10 구현 시:
 10. `appendix/schemas/existing-implementation.schema.yaml` — P-1 evidence yaml validation
 11. `appendix/templates/discovery-report.template.md` — P-1 Discovery 템플릿
 
+**⚠️ 추가 W10 정합성 결정 필요 (WU-9 발견, 2026-04-20)** — `dialog-state.schema.yaml` 의 `terminal_reached` enum 에서:
+
+- 현재 7-value 로 split 됨: `activate-full / activate-scoped / activate-temporal / deactivate-full / deactivate-scope-reduce / deactivate-temporal-pause / cancel`
+- 02 §2.13.5 + `division-activation.dialog.yaml` body (SSoT) 는 5-terminal: `activate-full / activate-scoped / activate-temporal / deactivate / cancel`
+- `commands/division.md` L50, L135 는 4-value bare prefix: `full / scoped / temporal / cancel` (activate- prefix 없음)
+
+Phase 1 W10 schema 작업 시 (A) 5-terminal 통일 (deactivate 단일, 세부 variant 는 별도 필드로 추출) (B) 7-terminal 유지 + 02/dialog.yaml 에 3-variant 반영 (C) commands/division.md prefix 정합 (bare → activate-*) 중 **사용자 결정 필요**. 권장: A — UX 단순성 + dialog SSoT 존중 + deactivation 세부 variant 는 별도 `deactivation_mode` 필드로 분리.
+
 Phase 1 D1 ~ D2 (코드):
 
 12. `src/engines/dialog-engine.ts`

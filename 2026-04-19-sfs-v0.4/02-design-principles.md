@@ -719,14 +719,17 @@ E. Terminal     — 선택 반영 + divisions.yaml 갱신 + L1 event 발행
 - **Event schema**: `l1.division.dialog.turn` (각 turn) + `l1.division.dialog.complete` (Terminal 도달)
 - **dialog-state** 는 turn 단위 checkpoint → 중단 후 재개 가능 (`appendix/schemas/dialog-state.schema.yaml`)
 
-**Terminal 4 가지**:
+**Terminal 5 가지** (activate + deactivate 흐름 공유):
 
 | Terminal | 조건 | 후속 효과 |
 |---|---|---|
-| `terminal/activate-full` | Full 선택 | divisions.yaml `state=active, scope=full` |
-| `terminal/activate-scoped` | Scoped 선택 + parent division 지정 | `state=active, scope=scoped, parent_division=<id>` |
-| `terminal/activate-temporal` | Temporal 선택 + sunset_at 지정 | `state=active, scope=temporal, sunset_at=<ISO>` |
-| `terminal/cancel` | Cancel 또는 Q1 에서 exit | divisions.yaml 변경 없음, dialog trace 로깅만 |
+| `terminal/activate-full` | `/sfs division activate` + Full 선택 | divisions.yaml `state=active, scope=full` |
+| `terminal/activate-scoped` | `/sfs division activate` + Scoped 선택 + parent division 지정 | `state=active, scope=scoped, parent_division=<id>` |
+| `terminal/activate-temporal` | `/sfs division activate` + Temporal 선택 + sunset_at 지정 | `state=active, scope=temporal, sunset_at=<ISO>` |
+| `terminal/deactivate` | `/sfs division deactivate` + Phase D confirm | `state=deactivated, deactivated_at=<now>`, memory archive |
+| `terminal/cancel` | Cancel 또는 Phase B/C 에서 exit | divisions.yaml 변경 없음, dialog trace 로깅만 |
+
+> **참고**: activate 진입 시 Phase D Option Card 는 "Full / Scoped / Temporal / Cancel" 4택. deactivate 진입 시 Phase D 는 "Confirm / Cancel" 2택. 5 Terminal 은 두 진입 흐름의 도달 가능 종점 합집합. (canonical SSoT: [appendix/dialogs/division-activation.dialog.yaml](appendix/dialogs/division-activation.dialog.yaml) Phase E)
 
 ### 2.13.6 원칙 10 (Human Final Filter) 과의 관계 — 운영 채널
 
