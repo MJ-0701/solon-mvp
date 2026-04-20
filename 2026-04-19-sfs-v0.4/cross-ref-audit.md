@@ -150,6 +150,7 @@ Phase 1 W1~W2 (dialog/engine 분해) 착수 시 다음 파일 6개를 생성 (#1
 Phase 1 W9 ~ W10 구현 시:
 
 8. `appendix/schemas/g-1-signature.schema.yaml` — G-1 Intake 서명 schema
+   - ⚠️ **작성 전 결정 필요 (WU-5 발견, 2026-04-20)**: `.g-1-signature.yaml` 의 6-checkbox 내용이 05 §5.11.3 (meta 관점: 읽음/비용/공존/원칙/파일/롤백) 과 07 §7.10.6 (content 관점: Vital Stats/Architecture/Gap Matrix/Risk/Sprint Focus/가동 동의) 사이에서 완전히 다른 set 으로 제시되어 있음. schema 작성 시 (A) 05 채택 (B) 07 채택 (C) 6 선별 mixed set 중 **사용자 결정 필요**. 권장: 05 계열(meta) — 원칙 10 의 "절차 이해" 필터 기능에 더 충실, 12개 병합 시 클릭 피로로 원칙 10 무력화 리스크.
 9. `appendix/schemas/discovery-report.schema.yaml` — P-1 Discovery Report 9-섹션 validation
 10. `appendix/schemas/existing-implementation.schema.yaml` — P-1 evidence yaml validation
 11. `appendix/templates/discovery-report.template.md` — P-1 Discovery 템플릿

@@ -776,6 +776,8 @@ G-1 PASS 후 곧바로 G1(Plan Gate)로 가지 않고 **G0(Brainstorm Gate, §4 
 
 G-1이 verdict를 확정할 때 L1(S3 raw log)에 기록되는 event.
 
+> **주의**: 아래 JSON은 `l1-log-event-v1` base schema 위에 얹히는 **G-1 고유 필드**만 표기한다. 실제 L1 기록 시 base 필수 필드(`event_id`, `timestamp`, `session_id`, `agent_id`, `agent_role`, `model`, `tool_calls`, `input_tokens`, `output_tokens`, `latency_ms`, `trace_id`, `classification: "gate-execution"`, `gate_id: "G-1"`)가 함께 포함된다. base 스키마는 `appendix/schemas/l1-log-event.schema.yaml` 참조.
+
 ```json
 {
   "event_type": "l1.gate.g-1.complete",

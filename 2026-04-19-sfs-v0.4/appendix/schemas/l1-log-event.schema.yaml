@@ -142,8 +142,8 @@ L1LogEvent:
 
     gate_id:
       type: [string, "null"]
-      enum: [G1, G2, G3, G4, G5, null]
-      description: "현재 실행중인 Gate (해당 시)"
+      enum: [G-1, G0, G1, G2, G3, G4, G5, null]
+      description: "현재 실행중인 Gate (해당 시). G-1: brownfield Intake Gate (§5.11, install-time 1회성). G0: Initiative Brainstorm Gate (§2.9, §5). G1~G5: PDCA per-Sprint Gate (§5)."
 
     escalation_id:
       type: [string, "null"]
