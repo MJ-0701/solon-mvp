@@ -92,11 +92,11 @@ enforced_by: sfs-doc-validate
 | [appendix/commands/division.md](appendix/commands/division.md) 🆕 R3 | `/sfs division` | 본부 activation_state 조회/변경 (**user-only**, INV-5 agent auto-invocation 금지) |
 
 #### Dialogs (6) 🆕 R3 — Socratic 5-phase templates
-> **⚠️ 6개 모두 🚧 Phase 1 W1~W2 구현 시 작성 예정** (forward-reference). 현재 실재하는 artifact: `appendix/dialogs/division-activation.dialog.yaml` (통합 dialog spec) + `branches/` + `traces/`. 아래 phase-*.md / README.md 는 dialog spec 을 6개 파일로 분해할 때 생성됨.
+> **⚠️ README.md 는 WU-4 (2026-04-20) 에 선제 생성** — index / overview / dialog_trace_id 요약 / ALT-INV-1~3 요약 허브. 나머지 5 phase md 는 Phase 1 W1~W2 구현 시 작성 예정. 현재 실재하는 artifact: `appendix/dialogs/README.md` (✅ WU-4) + `division-activation.dialog.yaml` (통합 dialog spec) + `branches/` + `traces/`. 아래 phase-*.md 는 dialog spec 을 5개 phase 파일로 분해할 때 생성됨.
 
 | 파일 | Phase | 역할 | 상태 |
 |------|-------|------|:-:|
-| appendix/dialogs/README.md | (index) | 5-phase 구조 개요 + `dialog_trace_id` 규약 + ALT-INV-1~3 | ❌ Phase 1 |
+| [appendix/dialogs/README.md](appendix/dialogs/README.md) | (index) | 5-phase 구조 개요 + `dialog_trace_id` 규약 + ALT-INV-1~3 | ✅ WU-4 |
 | appendix/dialogs/phase-a-context.md | A | Context 수집 (user intent / current state) | ❌ Phase 1 |
 | appendix/dialogs/phase-b-why-now.md | B (Q1) | "Why now" — 활성화 시점 필요성 확인 | ❌ Phase 1 |
 | appendix/dialogs/phase-c-clarify.md | C (Q2) | Clarify — scope/tradeoff 명확화 | ❌ Phase 1 |
@@ -139,7 +139,7 @@ enforced_by: sfs-doc-validate
 | appendix/schemas/discovery-report.schema.yaml | §4.3.11 P-1 Discovery Report 9-섹션 validation (Phase 1 W10) — 04/07 에서 "v1 frozen" 표현은 설계 의도 / 실물 Phase 1 |
 | appendix/schemas/existing-implementation.schema.yaml | §4.3.11 P-1 evidence yaml validation (Phase 1 W10) |
 | appendix/templates/discovery-report.template.md | §4 P-1 Discovery 템플릿 (Phase 1 W10) — `discovery-report.md` 로도 지칭되지만 템플릿은 `.template.md` 접미사 |
-| appendix/dialogs/README.md + phase-a~e.md (6) | §2.13 Socratic 5-phase dialog 개별 템플릿 (Phase 1 W1~W2) — 현재는 `division-activation.dialog.yaml` 통합 spec 으로 대체 |
+| appendix/dialogs/phase-a~e.md (5) | §2.13 Socratic 5-phase dialog 개별 템플릿 (Phase 1 W1~W2) — 현재는 `division-activation.dialog.yaml` 통합 spec 으로 대체. README.md 는 ✅ WU-4 선제 생성 (index 허브 역할) |
 | appendix/engines/dialog-engine.md | §2.13 Socratic 5-phase dialog 상태 머신 spec (Phase 1 W1~W2) |
 | src/engines/dialog-engine.ts (코드) | §02 §2.13 Socratic 5-phase dialog state machine 구현 (Phase 1 D1~D2) |
 | src/engines/alternative-suggestion-engine.ts (코드) | §02 §2.13 3-tier × 3-level intensity 대안 엔진 구현 (Phase 1 D1~D2) |
@@ -231,9 +231,9 @@ enforced_by: sfs-doc-validate
 `README.md §3.3 → 07 §7.10 (brownfield plugin) → 02 §2.11/§2.12 (원칙 11/12) → 04 §4.3 (P-1) → 05 §5.11 (G-1) → appendix/commands/install.md + discover.md → 10 §10.6.5 (brownfield dogfooding)`
 
 ### 3.8 Progressive Activation / 본부 활성 관리 독자 🆕 v0.4-r3
-`README.md §3.3 + §11 Glossary (activation_state/scope) → 02 §2.13 (원칙 13) + §2.14 (의존 그래프) → 03 §3.3.0 (Division Activation State) + §3.7 (Phase 1 Baseline) → appendix/engines/alternative-suggestion-engine.md (✅ R3) → appendix/dialogs/division-activation.dialog.yaml (✅ R3 통합 spec) → appendix/commands/division.md → appendix/schemas/dialog-state.schema.yaml + divisions.schema.yaml`
+`README.md §3.3 + §11 Glossary (activation_state/scope) → 02 §2.13 (원칙 13) + §2.14 (의존 그래프) → 03 §3.3.0 (Division Activation State) + §3.7 (Phase 1 Baseline) → appendix/dialogs/README.md (✅ WU-4 index 허브) → appendix/engines/alternative-suggestion-engine.md (✅ R3) → appendix/dialogs/division-activation.dialog.yaml (✅ R3 통합 spec) → appendix/commands/division.md → appendix/schemas/dialog-state.schema.yaml + divisions.schema.yaml`
 
-> 🚧 `appendix/engines/dialog-engine.md` + `appendix/dialogs/README.md` + `phase-a~e.md` 는 Phase 1 W1~W2 구현 시 생성 예정 (현재는 `division-activation.dialog.yaml` 한 파일이 통합 dialog spec 역할).
+> 🚧 `appendix/engines/dialog-engine.md` + `phase-a~e.md` 는 Phase 1 W1~W2 구현 시 생성 예정 (현재는 `division-activation.dialog.yaml` 한 파일이 통합 dialog spec 역할). `appendix/dialogs/README.md` 는 ✅ WU-4 (2026-04-20) 선제 생성 — index 허브.
 
 ---
 
@@ -269,9 +269,9 @@ enforced_by: sfs-doc-validate
 | `rule/parent-division-required-when-scoped` | appendix/schemas/divisions.schema.yaml v1.1 | 03 §3.3.0 |
 | `rule/sunset-at-required-when-temporal` | appendix/schemas/divisions.schema.yaml v1.1 | 03 §3.3.0, appendix/commands/division.md |
 | `phase/phase-1-basic-active-set` (dev + strategy-pm only) | 03 §3.7 + 10 §10.5.1 | README §9, appendix/commands/install.md |
-| **Socratic Dialog (v0.4-r3)** 🆕 R3 — 🚧 `engines/dialog-engine.md` + `dialogs/README.md` + `phase-a~e.md` 는 Phase 1 W1~W2 작성 예정 (§5 Dialogs 표 참조) | | |
+| **Socratic Dialog (v0.4-r3)** 🆕 R3 — 🚧 `engines/dialog-engine.md` + `phase-a~e.md` 는 Phase 1 W1~W2 작성 예정. `dialogs/README.md` 는 ✅ WU-4 (2026-04-20) 선제 생성 (§5 Dialogs 표 참조) | | |
 | `concept/socratic-5-phase-dialog` | 02 §2.13 + 🚧 appendix/engines/dialog-engine.md (Phase 1) + [appendix/dialogs/division-activation.dialog.yaml](appendix/dialogs/division-activation.dialog.yaml) | 🚧 appendix/dialogs/phase-*.md (Phase 1), appendix/commands/install.md, division.md |
-| `enum/dialog-phase-a-to-e` | 🚧 appendix/dialogs/README.md (Phase 1) + [appendix/schemas/dialog-state.schema.yaml](appendix/schemas/dialog-state.schema.yaml) | 🚧 appendix/engines/dialog-engine.md (Phase 1) |
+| `enum/dialog-phase-a-to-e` | [appendix/dialogs/README.md](appendix/dialogs/README.md) ✅ WU-4 (재서술, 정의는 dialog yaml `states`) + [appendix/schemas/dialog-state.schema.yaml](appendix/schemas/dialog-state.schema.yaml) | 🚧 appendix/engines/dialog-engine.md (Phase 1) |
 | `format/dialog_trace_id` (`dlg-YYYY-MM-DD-<target-id>-<seq>`) | [appendix/schemas/dialog-state.schema.yaml](appendix/schemas/dialog-state.schema.yaml) | 🚧 appendix/dialogs/phase-*.md (Phase 1), appendix/commands/install.md, division.md, [appendix/schemas/l1-log-event.schema.yaml](appendix/schemas/l1-log-event.schema.yaml) |
 | `schema/dialog-state-v1` | [appendix/schemas/dialog-state.schema.yaml](appendix/schemas/dialog-state.schema.yaml) | 🚧 appendix/engines/dialog-engine.md (Phase 1), 🚧 전 dialogs/phase-*.md (Phase 1) |
 | **Alternative Suggestion Engine (v0.4-r3)** 🆕 R3 | | |

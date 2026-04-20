@@ -137,9 +137,9 @@ R3 Task #26 에서 INDEX.md / README.md 작성 시 **실물 생성 없이 링크
 
 ## 4. 이관 후 Phase 1 시 TODO (new Claude 참조용)
 
-Phase 1 W1~W2 (dialog/engine 분해) 착수 시 다음 파일 7개를 생성:
+Phase 1 W1~W2 (dialog/engine 분해) 착수 시 다음 파일 6개를 생성 (#1 은 WU-4 에서 선제 완료):
 
-1. `appendix/dialogs/README.md` — 5-phase 개요 + `dialog_trace_id` 규약 + ALT-INV-1~3 요약. source: `division-activation.dialog.yaml` 의 phases 블록
+1. ✅ `appendix/dialogs/README.md` — 5-phase 개요 + `dialog_trace_id` 규약 + ALT-INV-1~3 요약. source: `division-activation.dialog.yaml` 의 phases 블록 + `dialog-state.schema.yaml` + `alternative-suggestion-engine.md`. **WU-4 (2026-04-20) 선제 생성** — Phase 1 W1~W2 분해 시 index 허브로 기능.
 2. `appendix/dialogs/phase-a-context.md` — Phase A 템플릿. source: 동 yaml phase_a 블록
 3. `appendix/dialogs/phase-b-why-now.md` — 동상 phase_b
 4. `appendix/dialogs/phase-c-clarify.md` — 동상 phase_c

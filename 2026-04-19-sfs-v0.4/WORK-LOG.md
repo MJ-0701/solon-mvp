@@ -295,7 +295,49 @@ related_docs:
 
 ---
 
-## 다음 실행 예정 (재정렬된 큐 — WU-12 완료 후)
+### WU-4: appendix/dialogs/README.md 선제 생성 (cross-ref-audit §4 TODO #1 해결, index 허브)
+
+- **성격**: docs
+- **intent**: cross-ref-audit.md §4 TODO 첫 항목 (`appendix/dialogs/README.md`) 을 Phase 1 W1~W2 에서 분해되기 전에 **선제 생성**. 5 phase md 는 여전히 🚧 로 남기되, index 허브 역할을 하는 README 만 먼저 만들어 docset 독서 동선 (INDEX §3.8 Progressive Activation reader path) 을 닫음. Phase 1 W1~W2 의 부담을 선제 감소 (5 phase 파일이 참조할 공용 허브 제공).
+- **scope (3 영역 요약)**:
+  1. 5-phase 개요 — A(Context) / B(Q1 Why now) / C(Q2 Clarify) / D(Option Card) / E(Terminal). 각 phase 의 화자 · 종료 조건 · 통합 spec 위치 + L1 event 매핑 + Terminal 5 분기 요약
+  2. `dialog_trace_id` 규약 — 형식 (`dlg-YYYY-MM-DD-<target-id>-<seq>`) / 정규식 / seq 증가 / 저장 위치 / 보존 정책 / L1 join key / resume protocol
+  3. ALT-INV-1~3 요약 — three-tier-required / exactly-one-recommended / never-hard-block + Phase D enforcement 매핑 표 + ALT-INV-4~6 보조 요약
+- **SSoT 보존 원칙**: 본 README 는 **재정의하지 않음** — `division-activation.dialog.yaml` (phase templates) / `dialog-state.schema.yaml` (trace_id, turn, validation) / `alternative-suggestion-engine.md` (ALT-INV 정의) 가 canonical 유지. §7 에 명시적으로 "재정의하지 않는 것" 리스트.
+- **files**:
+  - `2026-04-19-sfs-v0.4/appendix/dialogs/README.md` (신규, 193 lines — index / 5-phase / trace_id / ALT-INV / branch / context map / Phase 1 분해 계획 / SSoT 보존 / 관련 문서)
+  - `2026-04-19-sfs-v0.4/INDEX.md` (§5 Dialogs 표 README 행 `❌ → ✅ WU-4` + 상단 ⚠️ 블록 rewrite + §5 pending 테이블 `README.md + phase-a~e.md (6)` → `phase-a~e.md (5)` + §3.8 reader path 에 `dialogs/README.md` 삽입 + §4 cross-ref matrix 2곳 marker 갱신)
+  - `2026-04-19-sfs-v0.4/README.md` (§5 file tree 305행 `🚧 Phase 1 → ✅ WU-4` marker + role 보강)
+  - `2026-04-19-sfs-v0.4/cross-ref-audit.md` (§4 TODO 헤더 `7개 → 6개` + 1번 항목에 ✅ + "WU-4 선제 생성" 메모)
+  - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (frontmatter `completed_wus` +1 줄 + `unpushed_commits` 갱신 + `queue` 재정렬)
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (본 entry)
+- **commit**: (WU-4 커밋 시 채워짐)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - Phase 1 W1~W2 의 실제 분해 작업은 여전히 진행 예정 — 본 WU 는 **index 허브만** 먼저 만든 것. 이후 5 phase md + `dialog-engine.md` 가 본 README 를 상호참조하게 된다.
+  - 원칙 2 (self-validation-forbidden) 회피: README 는 SSoT 재정의 금지 규칙 (§7) 을 명시하여 drift 위험 사전 차단. 내용 변경은 SSoT 3파일 중 하나에서만.
+  - 원칙 8 (DRY): 각 invariant / 각 phase template / 각 schema 필드는 1 곳에서만 정의. README 는 "참조 + 요약 + 매핑표" 만 제공.
+  - 원칙 13 (progressive-activation / non-prescriptive): ALT-INV-3 (never-hard-block) 를 `schema violation 차단` 과 구분해서 명시. UI 가 ⚠ 옵션 disable 하는 것도 ALT-INV-3 위반임을 요약에 고정.
+  - INDEX §3.8 Progressive Activation reader path 에 `dialogs/README.md` 가 이제 실재 → reader 가 dead link 가 아닌 실제 5-phase 개요로 진입 가능.
+  - FUSE lock 대비: `/tmp/agent_git_backup_wu4` 경로 예약 (필요 시). 같은 session 내 per-command `-c user.name -c user.email` 재사용.
+
+---
+
+### WU-4.1: sha <WU-4 sha> backfill + HANDOFF frontmatter `unpushed_commits` 갱신
+
+- **성격**: infra
+- **intent**: WU-4 커밋 sha 를 WORK-LOG 에 backfill + HANDOFF `completed_wus` 의 WU-4 항목 sha placeholder 실제 값으로 치환 + `unpushed_commits` 현실 반영.
+- **files**:
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (WU-4 entry `commit` 필드 + 본 entry + Changelog v1.8)
+  - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (frontmatter `completed_wus` WU-4 항목 sha + `unpushed_commits` 텍스트)
+- **commit**: (WU-4.1 커밋 시 채워짐)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - WU-4 본 커밋에 HANDOFF `completed_wus` 는 이미 포함돼 있었으나 sha 는 placeholder 였음. WU-4.1 이 sha 를 실제 값으로 치환.
+
+---
+
+## 다음 실행 예정 (재정렬된 큐 — WU-4 완료 후)
 
 **2 Track 구조** — 사용자가 다음주 (2026-04-27~) 부터 admin panel MVP cycle 1 을 실제로 돌리는 동안, Claude 세션은 bridge WU 를 병렬로 소화.
 
@@ -312,9 +354,11 @@ related_docs:
 
 | 순서 | WU | 성격 | 비고 |
 |:-:|----|------|------|
-| immediate | WU-12.1 | WU-12 sha backfill + HANDOFF frontmatter `completed_wus` 갱신 | infra |
-| next | WU-4 | cross-ref-audit.md Phase 1 pending 중 #1 해결 | audit 소비 시작 |
-| 3 | WU-5 | 05-gate-framework.md G-1 완전성 점검 | 가벼운 read+validate |
+| ✅ done | WU-12.1 | WU-12 sha backfill + HANDOFF frontmatter `completed_wus` 갱신 | infra |
+| ✅ done | WU-12.2 | PHASE1-KICKOFF-CHECKLIST.md v0.1-mvp-patch2 (submodule 레지듀 2곳 cleanup) | docs |
+| ✅ done | WU-12.3 | sha 8ab660c backfill + HANDOFF frontmatter `completed_wus` 2 WU 추가 | infra |
+| ✅ done | WU-4 | cross-ref-audit.md Phase 1 pending 중 #1 해결 — `appendix/dialogs/README.md` 선제 생성 | docs |
+| next | WU-5 | 05-gate-framework.md G-1 완전성 점검 | 가벼운 read+validate |
 | 4 | WU-9 | 02-design-principles.md 원칙 13 완전성 재검증 | R3 신규 — 일찍 검증 |
 | 5 | WU-7 | 07-plugin-distribution plugin.json 샘플 파일 분리 | Phase 1 asset 준비 |
 | 6 | WU-10 | appendix/dialogs/branches/ 6 본부 YAML schema 정합성 | 중위험 batch |
@@ -350,3 +394,4 @@ related_docs:
 - **v1.5** (2026-04-20 심야): WU-11.1 완료 (sha 4cd07e6 backfill + 사용자 11번째 지시 "다음주 새 프로젝트 MVP 착수" 를 HANDOFF §0 에 영구 기록) — 다음 세션은 Phase 1 킥오프 vs bridge WU 우선순위 확인부터.
 - **v1.6** (2026-04-20 심야, 새 세션 이어서): WU-11.2 (eed4dd1 sha backfill) + **WU-12 완료** (PHASE1-KICKOFF-CHECKLIST.md v0.1-mvp-patch1 신설, 7-step lightweight spike + admin panel 도메인 + G0/G1/G2/G4 4 gate 축소판, submodule 전제 제거 → Solon 참조는 admin panel repo 밖). 사용자 12번째·13번째 지시 HANDOFF §0 에 영구 기록. 큐 구조를 **Track A (사용자 실사용) / Track B (세션 bridge WU) / Track C (plugin 조기 배포 여지)** 3 track 으로 재조직.
 - **v1.7** (2026-04-20 심야, 3번째 세션 `funny-compassionate-wright` 재개): 펜딩으로 보였던 전 세션은 실제로 WU-12.1 (ff89ea1) push 까지 완료하고 종료됐음을 `git status` 로 확인 (origin/main 동기화). 새 세션에서 3→2→1 순서 전체 재독 중 PHASE1-KICKOFF-CHECKLIST.md 의 patch1 submodule 레지듀 2곳 (§3.7 + §6.2) 검출 → **WU-12.2** (8ab660c, patch2) cleanup + **WU-12.3** backfill (WU-12.1/12.2 frontmatter 반영). author identity 이슈는 per-command `-c user.name/email` 로 해결 (global config 변경 금지 원칙 유지).
+- **v1.8** (2026-04-20 심야, 같은 3번째 세션 연속): **WU-4 완료** (`appendix/dialogs/README.md` 선제 생성 — cross-ref-audit.md §4 TODO #1 해결, 193 lines). 5-phase 개요 / `dialog_trace_id` 규약 / ALT-INV-1~3 요약 + Phase D enforcement 매핑표. SSoT 보존 원칙 (§7) 명시 — `division-activation.dialog.yaml` / `dialog-state.schema.yaml` / `alternative-suggestion-engine.md` 재정의 금지. INDEX.md (§5 Dialogs 표 + §3.8 reader path + §4 cross-ref matrix 2곳 + §5 pending 테이블 `6→5`) / README.md (§5 file tree) / cross-ref-audit.md (§4 TODO 헤더 `7→6` + 1번 ✅) 동반 갱신. Track B 큐에서 WU-4 제거 → WU-5 가 next_blocking.

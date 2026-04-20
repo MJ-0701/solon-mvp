@@ -302,7 +302,7 @@ Phase 1 목표: **채명정 본인이 product-image-studio 를 첫 Initiative �
     │   ├── division-activation.dialog.yaml   ✅ R3 통합 dialog spec (6개 분해 전)
     │   ├── branches/                        ✅ R3 (7 branch scenario)
     │   ├── traces/                          ✅ R3 (runtime trace 저장 공간)
-    │   ├── README.md                  🚧 Phase 1 — 5-phase 구조 개요 + dialog_trace_id 규약
+    │   ├── README.md                  ✅ WU-4 — 5-phase 구조 개요 + dialog_trace_id 규약 + ALT-INV-1~3 요약 (index 허브)
     │   ├── phase-a-context.md         🚧 Phase 1 — Context 수집
     │   ├── phase-b-why-now.md         🚧 Phase 1 — Q1 Why now
     │   ├── phase-c-clarify.md         🚧 Phase 1 — Q2 Clarify

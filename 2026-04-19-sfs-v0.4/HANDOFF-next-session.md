@@ -40,10 +40,12 @@ round4_bridge:
     - "WU-12: 7f8a635 — PHASE1-KICKOFF-CHECKLIST.md 신설 (Phase 1 MVP 경량 스파이크, v0.1-mvp-patch1)"
     - "WU-12.1: ff89ea1 — sha 7f8a635 backfill + HANDOFF frontmatter completed_wus 6 WU 일괄 추가"
     - "WU-12.2: 8ab660c — PHASE1-KICKOFF-CHECKLIST.md v0.1-mvp-patch2 (submodule 레지듀 2곳 cleanup, §3.7 + §6.2)"
-  unpushed_commits: "이전 ff89ea1 까지는 사용자가 터미널에서 push 완료 (3번째 세션 `funny-compassionate-wright` 부팅 시점에 origin/main 동기화 확인). 이후 새 로컬 커밋 = WU-12.2 (8ab660c) + WU-12.3 예정 (2 건) → 사용자가 다시 `git push origin main` 수동 실행 필요."
+    - "WU-12.3: b77fcb2 — sha 8ab660c backfill + HANDOFF frontmatter completed_wus 2 WU 추가 (WU-12.1 + WU-12.2) + unpushed_commits 갱신"
+    - "WU-4: <WU-4 커밋 sha> — appendix/dialogs/README.md 선제 생성 (cross-ref-audit §4 TODO #1 해결, index 허브)"
+  unpushed_commits: "현 세션 새 로컬 커밋 = WU-12.2 (8ab660c) + WU-12.3 (b77fcb2) + WU-4 (신규 sha) + WU-4.1 backfill (예정) → 사용자가 `git push origin main` 수동 실행 필요."
   queue:
-    next_blocking: "WU-11 🆕 Multi-agent runtime abstraction (Claude / Codex / Gemini-CLI) — 사용자 A/B/C 범위 결정 대기"
-    ready_after_wu11: [WU-4, WU-5, WU-9, WU-7, WU-10]
+    next_blocking: "WU-5 🆕 05-gate-framework.md G-1 완전성 점검 (WU-11 A + WU-12 + WU-4 완료, cross-ref-audit §4 TODO #1 해결)"
+    ready_after_wu4: [WU-5, WU-9, WU-7, WU-10]
     blocked: [WU-6 (claude-shared-config/.git IP 경계 — 사용자 결정 필요)]
   user_new_directive:
     raw: "sfs를 claude 뿐만 아니라 codex랑 gemini-cli에서도 사용하고 싶거든?? 그래서 추상화 하는게 중요할듯?!"
