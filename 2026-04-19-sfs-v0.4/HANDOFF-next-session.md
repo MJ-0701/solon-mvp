@@ -185,7 +185,7 @@ appendix/engines/alternative-suggestion-engine.md                [신규]
 1. Solon 한 줄 소개 (hero, brand vs /sfs 분리 명시)
 2. 이 docset 은 무엇인가 (스펙/근거/계약서 3 역할 + 읽기 순서)
 3. 빠른 시작 (3-minute tour, greenfield 4단계 + brownfield 3단계)
-4. 12대 원칙 요약표 (위반 시 효과 columnm 추가 + 이중 방어선 설명)
+4. 12대 원칙 요약표 (위반 시 효과 column 추가 + 이중 방어선 설명)
 5. PDCA 계층 & Gate (3-layer + phase+gate 표 + G-1~G5 요약)
 6. 13개 `/sfs *` command 개요 (operator/산출물 표)
 7. 3-Channel Observability (L1/L2/L3 표)

@@ -1,10 +1,10 @@
 ---
-doc_id: cross-account-migration-solon-v0.4-r2
+doc_id: cross-account-migration-solon-v0.4-r3
 title: "Cross-Account Migration Checklist — 회사 계정 → 개인 계정 이관 가이드"
 version: 1.0
 created: 2026-04-20
 author: "Claude (direct 지시 by 채명정)"
-applies_to: "Solon v0.4-r2 docset"
+applies_to: "Solon v0.4-r3 docset"
 status: "draft — 실제 이관 시점 미정 ('조만간')"
 related_docs:
   - "HANDOFF-next-session.md §10 Cross-Account Migration Playbook"
@@ -63,17 +63,17 @@ related_docs:
 
 ### 2.1 방법 A — zip 아카이브
 ```bash
-cd /sessions/optimistic-adoring-fermi/mnt/agent_architect
-zip -r solon-v0.4-r2-migration-$(date +%Y%m%d).zip 2026-04-19-sfs-v0.4/
+cd <session-path>/mnt/agent_architect
+zip -r solon-v0.4-r3-migration-$(date +%Y%m%d).zip 2026-04-19-sfs-v0.4/
 # zip 을 개인 기기로 다운로드 → 개인 계정 워크스페이스에 업로드/압축해제
 ```
 
 ### 2.2 방법 B — git repo (권장)
 ```bash
-cd /sessions/optimistic-adoring-fermi/mnt/agent_architect/2026-04-19-sfs-v0.4
+cd <session-path>/mnt/agent_architect/2026-04-19-sfs-v0.4
 git init                                    # 아직 repo 아닌 경우
 git add .
-git commit -m "solon v0.4-r2 pre-migration snapshot"
+git commit -m "solon v0.4-r3 pre-migration snapshot"
 git remote add origin <채명정-개인-GitHub-repo-URL>
 git push -u origin main
 ```
@@ -87,20 +87,24 @@ git push -u origin main
 ## 3. 이관 후 개인 계정 Cold Boot
 
 ### 3.1 사용자가 새 Claude 에게 줘야 할 Brief (30초)
+
+> **Scope 참고 (MIG-10 반영, 2026-04-20)**: 이관 최종 repo 는 **`agent_architect/` 전체** (docset + v0.3/v0.4 archive + agents/skills assets). 따라서 아래 brief 는 "이 폴더" 가 아닌 **"이 repo"** 기준. `git clone` 하면 맨 위에 있는 루트 `README.md` 부터 읽는 것이 자연스럽고, 이 README 자체가 `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` 로 넘어가라고 길 안내.
+
 ```
-이 폴더는 "Solon" 이라는 AI 조직 운영 프레임워크 설계 문서야.
+이 repo 는 "Solon" 이라는 AI 조직 운영 프레임워크의 설계 아카이브야.
 회사 계정에서 만들다가 개인 계정으로 넘어왔고, 너는 이관 후 첫 Claude 야.
-HANDOFF-next-session.md 를 제일 먼저 읽어. 그 다음 README, INDEX 순서.
+루트 README.md 를 먼저 읽고, 그 다음 2026-04-19-sfs-v0.4/HANDOFF-next-session.md.
 읽고 나서 "내가 뭘 이어받았는지, 다음 할 일이 뭔지" 3문단으로 요약해줘.
-내 이름은 채명정이고, Solon 은 내가 1인 창업용으로 쓸 도구야.
+내 이름은 채명정이고, Solon 은 1인 창업용으로 쓸 도구야.
 ```
 
 ### 3.2 새 Claude 의 첫 행동
-1. `HANDOFF-next-session.md` Read
-2. `README.md` Read
-3. `INDEX.md` Read (특히 §3 Reading orders 의 §3.0 10분 overview)
-4. `00-intro.md` + `02-design-principles.md` (12원칙) Read
-5. 사용자에게 요약 전달 + 다음 작업 확인 (Phase 1 착수 / Round 3 / 기타)
+1. `agent_architect/README.md` (루트) Read — repo 구조 + 3 영역 (docset/archive/assets) 파악
+2. `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` Read — 현재 상태 / 다음 할 일 / R3 종결 snapshot
+3. `2026-04-19-sfs-v0.4/README.md` Read — docset 자체 오리엔테이션
+4. `2026-04-19-sfs-v0.4/INDEX.md` Read (특히 §3 Reading orders 의 §3.0 10분 overview)
+5. `2026-04-19-sfs-v0.4/00-intro.md` + `02-design-principles.md` (13원칙) Read
+6. 사용자에게 요약 전달 + 다음 작업 확인 (Phase 1 착수 / Round 3 / 기타)
 
 ### 3.3 새 Claude 가 피해야 할 실수
 - "Solon 이 뭐예요?" 사용자에게 재질문 금지 — docset 에 다 있음.

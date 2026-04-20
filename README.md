@@ -2,7 +2,36 @@
 
 > **1인 창업용 AI-Native 조직 OS — 설계 아카이브 + 활성 docset + 재사용 자산 통합 repo.**
 
-`repo_type: design-archive + active-docset + reusable-assets` · `brand: Solon` · `cli_prefix: /sfs (Solon Founder System)` · `active_version: v0.4-r3` · `last_updated: 2026-04-20`
+`repo_type: design-archive + active-docset + reusable-assets` · `brand: Solon` · `cli_prefix: /sfs (Solo Founder System)` · `active_version: v0.4-r3` · `last_updated: 2026-04-20`
+
+---
+
+## 📣 새 Claude 에게 — 이거 먼저 읽어 (STOP & READ)
+
+> 이 섹션은 `git clone` 직후 repo 를 처음 여는 Claude 가 **반드시 맨 처음 마주치도록** 의도된 강제 브리핑이다. 사용자 (채명정) 는 이 repo 를 만든 당사자이며, 아래 지시문은 이관의 공식 인수인계 채널이다.
+
+```
+이 repo 는 "Solon" 이라는 AI 조직 운영 프레임워크의 설계 아카이브야.
+회사 계정에서 만들다가 개인 계정으로 넘어왔고, 너는 이관 후 첫 Claude 야.
+루트 README.md 를 먼저 읽고 (= 지금 이 파일),
+그 다음 2026-04-19-sfs-v0.4/HANDOFF-next-session.md.
+읽고 나서 "내가 뭘 이어받았는지, 다음 할 일이 뭔지" 3문단으로 요약해줘.
+내 이름은 채명정이고, Solon 은 1인 창업용으로 쓸 도구야.
+```
+
+**새 Claude 가 해야 할 첫 행동**:
+1. 지금 이 루트 `README.md` 를 끝까지 읽는다 (§1 ~ §6).
+2. `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` 를 읽는다 — 현재 상태 / 다음 할 일 / MIG-1~10 전수 기록.
+3. `2026-04-19-sfs-v0.4/README.md` 와 `INDEX.md §3.0 (10분 overview)` 를 읽는다.
+4. `2026-04-19-sfs-v0.4/00-intro.md` + `02-design-principles.md` (13대 원칙) 읽는다.
+5. 사용자에게 3문단 요약 + 다음 작업 확인 (Phase 1 착수 여부 등).
+
+**피해야 할 실수**:
+- "Solon 이 뭐예요?" 재질문 금지 — docset 에 다 있다.
+- 회사 계정 MCP 호출 시도 금지 — 개인 계정에서 재인증된 connector 만.
+- docset 구조 임의 변경 금지 — 우선 읽고, 변경은 사용자 허가 후.
+
+더 상세한 이관 프로토콜 + 새 Claude sanity check 질문 8개는 `2026-04-19-sfs-v0.4/CROSS-ACCOUNT-MIGRATION.md §3` 에 있음.
 
 ---
 
@@ -87,11 +116,14 @@ agent_architect/  (repo root)
 
 ### 3.1 이관 직후 첫 Claude (개인 계정)
 
-1. **`2026-04-19-sfs-v0.4/HANDOFF-next-session.md`** 먼저 — 현재 상태 / 다음 할 일 / R3 종결 snapshot
-2. **`2026-04-19-sfs-v0.4/README.md`** — docset 자체 오리엔테이션
-3. **`2026-04-19-sfs-v0.4/INDEX.md`** — 23 파일 맵 + §3 reading orders
-4. **`2026-04-19-sfs-v0.4/00-intro.md`** + **`02-design-principles.md`** (13대 원칙)
-5. 필요 시 **본 루트 README.md** (지금 이 파일) 로 돌아와서 agents/skills/config 활용
+**읽는 순서** (`git clone` 직후 기준, 사용자 verbatim brief 와 동일):
+
+1. **본 루트 `README.md`** (지금 이 파일) — repo 구조 / 3 영역 (docset/archive/assets) 파악. `git clone` 후 첫 대면 문서.
+2. **`2026-04-19-sfs-v0.4/HANDOFF-next-session.md`** — 현재 상태 / 다음 할 일 / R3 종결 snapshot (§5.1 에 MIG-1~10 전수 기록)
+3. **`2026-04-19-sfs-v0.4/README.md`** — docset 자체 오리엔테이션
+4. **`2026-04-19-sfs-v0.4/INDEX.md`** — 23 파일 맵 + §3 reading orders (§3.0 10분 overview 추천)
+5. **`2026-04-19-sfs-v0.4/00-intro.md`** + **`02-design-principles.md`** (13대 원칙)
+6. 사용자에게 "뭘 이어받았는지, 다음 할 일이 뭔지" 3 문단 요약 + 작업 확인
 
 ### 3.2 Phase 1 구현 시
 

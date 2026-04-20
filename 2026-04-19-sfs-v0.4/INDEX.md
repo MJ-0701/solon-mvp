@@ -1,6 +1,6 @@
 ---
 doc_id: sfs-v0.4-index
-title: "Solon (Solo Founder Agent System) v0.4-r3 — INDEX"
+title: "Solon (Solo Founder System) v0.4-r3 — INDEX"
 version: 0.4-r3
 status: draft
 last_updated: 2026-04-20
@@ -37,14 +37,14 @@ enforced_by: sfs-doc-validate
 
 ## 1. 문서셋 구성
 
-### 루트 (3 files)
+### 루트 (4 files)
 
 | 파일 | 제목 | 핵심 역할 |
 |------|------|----------|
 | [README.md](README.md) | Solon docset 10분 overview | 처음 들어오는 사람 진입점, 12 섹션 (v0.4-r3 업데이트) |
 | [INDEX.md](INDEX.md) (본 파일) | Navigation hub | 완전 cross-reference matrix (v0.4-r3) |
 | [CROSS-ACCOUNT-MIGRATION.md](CROSS-ACCOUNT-MIGRATION.md) | 계정 이관 체크리스트 | 회사 계정 → 개인 계정 이관 시 standalone 매뉴얼 (v1.0, 2026-04-20) |
-| [HANDOFF-next-session.md](HANDOFF-next-session.md) | 다음 세션 작업 지시 | Round 3 산출 + cross-account handoff carrier (로컬 전용, git 제외) |
+| [HANDOFF-next-session.md](HANDOFF-next-session.md) | 다음 세션 작업 지시 | Round 3 산출 + cross-account handoff carrier (git 포함 — MIG-10 이후) |
 
 ### 본문 (11 files)
 
@@ -252,10 +252,10 @@ enforced_by: sfs-doc-validate
 | `principle/self-validation-forbidden` (#2) | 02 §2.2 | 03, 04, 05, appendix/commands/handoff.md, escalate.md |
 | `principle/gate-operator` (#3) | 02 §2.3 | 03, 05, 06, appendix/commands/design.md, plan.md, do.md, handoff.md |
 | `principle/model-allocation` (#4) | 02 §2.4 | 03, 10, 전 command spec |
-| `principle/3-layer-hierarchy` (#5) | 02 §2.5 | 03, 04, 10 |
+| `principle/sprint-superset-pdca` (#5) | 02 §2.5 | 03, 04, 10 |
 | `principle/local-state-private` (#6) | 02 §2.6 | 08 |
-| `principle/cli-gui-unified-backend` (#7) | 02 §2.7 | 07 |
-| `principle/phase1-to-phase2` (#8) | 02 §2.8 | 07, 10 |
+| `principle/cli-gui-shared-backend` (#7) | 02 §2.7 | 07 |
+| `principle/phase1-phase2-separation` (#8) | 02 §2.8 | 07, 10 |
 | `principle/brainstorm-gate-mandatory` (#9) | 02 §2.9 | 03, 04, 05, appendix/commands/brainstorm.md |
 | `principle/human-final-filter` (#10) | 02 §2.10 | 04, 05, appendix/commands/check.md, escalate.md |
 | `principle/brownfield-first-pass` (#11) | 02 §2.11 | 04, 05, 07, 10 |

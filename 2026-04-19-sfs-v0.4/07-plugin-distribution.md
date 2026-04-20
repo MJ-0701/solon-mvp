@@ -221,8 +221,8 @@ sfs-plugin/
 
 ```json
 {
-  "name": "sfs-plugin",
-  "displayName": "Solo Founder Agent System",
+  "name": "solon-plugin",
+  "displayName": "Solon — Solo Founder System",
   "version": "0.4.0",
   "description": "Company-as-Code agent system for 1-person founders (6 divisions × 3 C-Level).",
   "license": "MIT",
