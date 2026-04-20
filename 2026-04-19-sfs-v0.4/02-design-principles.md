@@ -76,7 +76,7 @@ affects:
 
 ### 정의
 
-**프레임워크(Sprint, PDCA, G1~G5 Gate, Escalate-Plan)는 모든 본부에 동일 적용된다.**
+**프레임워크(Sprint, PDCA, G-1 + G1~G5 Gate, Escalate-Plan)는 모든 본부에 동일 적용된다.**
 **본부별 차이는 evaluator agent와 산출물 schema에서만 나타난다.**
 
 ### 구체

@@ -168,7 +168,7 @@ Company = Org(조직도) × Process(프로세스) × Artifact(산출물) × Obse
 
 **주장 1. 회사는 코드로 정의 가능**
 - 조직도 → `divisions.yaml` (6 본부 + 3 C-Level)
-- 프로세스 → PDCA + G1~G5 Gate + Escalate-Plan 규칙
+- 프로세스 → PDCA + G-1 + G1~G5 Gate (6 Gate) + Escalate-Plan 규칙
 - 산출물 → `gate-report.schema.yaml`, `escalation.schema.yaml`
 - 관측성 → 3-Channel sync hook (`observability-sync.ts`)
 

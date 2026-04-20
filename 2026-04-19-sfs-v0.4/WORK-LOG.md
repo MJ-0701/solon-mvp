@@ -82,7 +82,7 @@ related_docs:
 - **files**:
   - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (frontmatter 17줄 교체 + top intro 박스 1개 추가)
   - `2026-04-19-sfs-v0.4/WORK-LOG.md` (본 엔트리 + 큐 재정렬)
-- **commit**: (WU-2 커밋 시 채워짐)
+- **commit**: `54ac583` "WU-2: HANDOFF v2.6-final → v2.7-bridge (Round 4 Bridge open)"
 - **pushed**: pending (user terminal)
 - **notes**:
   - version 2.6-final → 2.7-bridge
@@ -92,17 +92,40 @@ related_docs:
 
 ---
 
+### WU-3: G1~G5 → "G-1 + G1~G5" 일관성 propagation (current-state doc 한정)
+
+- **성격**: content
+- **intent**: v0.4-r2 에서 G-1 Intake Gate 가 추가됐으나 일부 본문에서 여전히 "G1~G5" 만 언급. 범위를 (A) 현재 상태 summary (v0.4-r3) 와 (B) 역사적 delta/timeline 으로 분리하여 **A 만 수정**, B 는 역사 보존.
+- **files**:
+  - `00-intro.md:171` (프로세스 summary)
+  - `02-design-principles.md:79` (원칙 6 "도메인 agnostic" 정의)
+  - `09-differentiation.md:394` (학습 곡선 — 보너스 SFS→Solon 브랜드 swap 3개 포함)
+- **보존 (역사적 맥락)**:
+  - `01-delta-v03-to-v04.md:60,79,94` (v0.3→v0.4 delta 기록 — 당시엔 G1~G5만 존재)
+  - `MIGRATION-NOTES.md:64` (Round 1 타임라인 — G-1 은 Round 2 에서 도입)
+  - `05-gate-framework.md` 다수 (G-1 과 G1~G5 를 명시적으로 구분 기술)
+  - `10-phase1-implementation.md` 다수 (구현 계획에서 G-1 / G1~G5 명시 구분)
+  - `07-plugin-distribution.md:86,996` (config 주석 + greenfield 구분 표현)
+  - `INDEX.md`, `README.md` 이미 올바른 "G-1 + G1~G5" 표기
+  - `appendix/schemas/l1-log-event.schema.yaml:162` (log 주석 — 보존, 필요시 WU-10 에서 재검토)
+- **commit**: (WU-3 커밋 시 채워짐)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - Gate 집합은 총 6개 = G-1 (brownfield 전용, 1회성 intake) + G1~G5 (PDCA cycle 내부, 매 sprint 반복)
+  - 09-differentiation.md 에서 SFS → Solon 브랜드 swap 도 함께 진행 (컨텍스트 연계, WU-8 범위 일부 선반영)
+
+---
+
 ## 다음 실행 예정 (재정렬된 큐)
 
 | 순서 | WU | 성격 | 비고 |
 |:-:|----|------|------|
-| next | WU-3 | G1~G5 → "G-1 + G1~G5" 일관성 propagation | 저위험 grep |
-| 2 | WU-8 | 도큐셋 "SFS" 단독 표기 disambiguation | 저위험 grep (WU-3 과 pair) |
-| 3 | WU-4 | cross-ref-audit.md Phase 1 pending 중 #1 해결 | audit 소비 시작 |
-| 4 | WU-5 | 05-gate-framework.md G-1 완전성 점검 | 가벼운 read+validate |
-| 5 | WU-9 | 02-design-principles.md 원칙 13 완전성 재검증 | R3 신규 — 일찍 검증 |
-| 6 | WU-7 | 07-plugin-distribution plugin.json 샘플 파일 분리 | Phase 1 asset 준비 |
-| 7 | WU-10 | appendix/dialogs/branches/ 6 본부 YAML schema 정합성 | 중위험 batch |
+| next | WU-8 | 도큐셋 "SFS" 단독 표기 disambiguation | 저위험 grep |
+| 2 | WU-4 | cross-ref-audit.md Phase 1 pending 중 #1 해결 | audit 소비 시작 |
+| 3 | WU-5 | 05-gate-framework.md G-1 완전성 점검 | 가벼운 read+validate |
+| 4 | WU-9 | 02-design-principles.md 원칙 13 완전성 재검증 | R3 신규 — 일찍 검증 |
+| 5 | WU-7 | 07-plugin-distribution plugin.json 샘플 파일 분리 | Phase 1 asset 준비 |
+| 6 | WU-10 | appendix/dialogs/branches/ 6 본부 YAML schema 정합성 | 중위험 batch |
 | — | WU-6 | claude-shared-config/.git IP 경계 재정리 | **BLOCKED** (사용자 결정 필요) |
 
 ---
