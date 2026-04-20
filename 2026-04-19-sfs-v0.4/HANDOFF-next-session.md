@@ -1,15 +1,15 @@
 ---
 doc_id: handoff-2026-04-20-solon-v0.4-r3-complete
 title: "인수인계 — Round 3 종결 + Round 4 Bridge (Solon v0.4-r3)"
-version: 2.7-bridge
+version: 2.8-bridge-handoff
 created: 2026-04-20 (오전)
-updated: 2026-04-20 (오후 — Round 4 Bridge open, 일주일 bridge 작업 루프 개시, WORK-LOG.md 로그 이관)
+updated: 2026-04-20 (심야 — 세션 이관 직전, WU-8 완료 + WU-11 사용자 대기 상태로 bump)
 author: "Claude (direct 지시 by 채명정)"
-valid_until: "새 Claude (개인 계정) 합류 후 첫 세션이 v3.0 으로 bump 할 때까지"
-status: "Round 4 Bridge 진행중 (WU 루프) — 2026-04-20 ~ 새 Claude 투입 전"
+valid_until: "새 Claude 세션 (동일 또는 개인 계정) 이 WU-11 결정 후 v3.0 으로 bump 할 때까지"
+status: "Round 4 Bridge 진행중 (WU 루프, 세션 이관 지점) — 다음 세션이 WU-11 A/B/C 결정부터 재개"
 account_context:
-  current: "회사 계정 (jack2718@green-ribbon.co.kr) — GitHub origin (MJ-0701/solon) 에 push 완료"
-  will_move_to: "채명정 개인 계정 (약 1주 이내)"
+  current: "회사 계정 (jack2718@green-ribbon.co.kr) — GitHub origin (MJ-0701/solon) 에 로컬 커밋 존재 (push 는 사용자 터미널에서 수동)"
+  will_move_to: "채명정 개인 계정 (약 1주 이내) — 단, 세션 이관은 동일 계정 내에서도 발생 가능"
   fork_possible: false
   migration_strategy: "GitHub clone + WORK-LOG.md 기반 continuation"
   critical_rule: "README (root STOP&READ) + INDEX + HANDOFF + WORK-LOG 이 유일한 인수인계 채널"
@@ -20,16 +20,28 @@ round3_summary:
   pending: 0
   closure_note: "v0.4-r3 설계 확정"
 round4_bridge:
-  opened: 2026-04-20
+  opened: 2026-04-20 (오전)
   purpose: "새 Claude 환경 투입 전까지 repo 점진 개선 (작은 WU 단위 + WORK-LOG 기록)"
   active_log: "WORK-LOG.md (WU-1 부터)"
-  post_migration_tasks:
-    - "d034d0d (full-scope typo + stale-ref cleanup)"
-    - "WU-1 (WORK-LOG.md 신설)"
-    - "WU-2 (HANDOFF v2.7-bridge bump) — 본 파일"
+  session_handoff_point: 2026-04-20 (심야) — "세션 context window 포화 임박, 다음 세션으로 이관"
+  completed_wus:
+    - "WU-0: d034d0d — full-scope typo + stale-ref cleanup (14 files)"
+    - "WU-1: 7b8dae6 — WORK-LOG.md 신설"
+    - "WU-1.1: 11d1757 — WORK-LOG 에 commit sha 7b8dae6 기록 + FUSE lock 우회 절차 메모"
+    - "WU-2: 54ac583 — HANDOFF v2.6-final → v2.7-bridge (Round 4 Bridge open)"
+    - "WU-3: a67a408 — G1~G5 → G-1 + G1~G5 일관성 (current-state 3지점, 3 files)"
+    - "WU-8: 764194f — SFS brand prose → Solon disambiguation (109 occurrences, 14 files)"
+    - "WU-8.1: 4a1df93 — WORK-LOG 에 commit sha 764194f 기록 + WU-11 큐 추가"
+  unpushed_commits: 7 (d034d0d..4a1df93) — "사용자가 터미널에서 `git push origin main` 수동 실행 필요"
   queue:
-    ready: [WU-3, WU-4, WU-5, WU-7, WU-8, WU-9, WU-10]
+    next_blocking: "WU-11 🆕 Multi-agent runtime abstraction (Claude / Codex / Gemini-CLI) — 사용자 A/B/C 범위 결정 대기"
+    ready_after_wu11: [WU-4, WU-5, WU-9, WU-7, WU-10]
     blocked: [WU-6 (claude-shared-config/.git IP 경계 — 사용자 결정 필요)]
+  user_new_directive:
+    raw: "sfs를 claude 뿐만 아니라 codex랑 gemini-cli에서도 사용하고 싶거든?? 그래서 추상화 하는게 중요할듯?!"
+    implication: "Claude Code 에 암묵적으로 lock-in 된 현 docset 에 runtime abstraction layer 추가 필요"
+    proposed_scope: "WU-11 A (RUNTIME-ABSTRACTION.md 문서 1개만 신설, 저위험) / B (A + agent-specific 파일에 agnostic 힌트 주석) / C (B + Codex/Gemini 어댑터 초안)"
+    recommendation: "A 부터 시작 (Phase 1 Claude 범위는 유지, Phase 2 에 본격 확장 예약)"
 ---
 
 # 📋 다음 세션 인수인계 문서 (Round 3 종결 + Round 4 Bridge, v2.7-bridge)
@@ -42,12 +54,15 @@ round4_bridge:
 >
 > 🟢 **[Round 3 상태]** Round 3 종결. §2.R3 섹션은 Round 3 내역 아카이브. 본 HANDOFF 는 handoff entry point 역할만 수행하고, 실제 진행 로그는 **WORK-LOG.md** (WU-1 부터) 로 이관.
 >
-> 🆕 **[Round 4 Bridge 상태]** (2026-04-20~)
-> - 목적: 새 Claude 투입 전 bridge 작업 (repo 정합성/보강)
-> - 로그: [WORK-LOG.md](WORK-LOG.md) (WU 단위)
-> - 완료: WU-0 (d034d0d full-scope cleanup), WU-1 (WORK-LOG 신설), **WU-2 (본 파일 v2.7 bump)**
-> - 대기: WU-3 ~ WU-10 (WORK-LOG.md 큐 참조)
-> - BLOCKED: WU-6 (claude-shared-config/.git IP 경계 재정리 — 사용자 결정 대기)
+> 🆕 **[Round 4 Bridge 상태 — v2.8 세션 이관 지점]** (2026-04-20 심야)
+> - 목적: 새 Claude 환경 투입 전 bridge 작업 (repo 정합성/보강)
+> - 로그: [WORK-LOG.md](WORK-LOG.md) (WU 단위, 7 커밋 완료)
+> - **완료**: WU-0 (d034d0d), WU-1 (7b8dae6), WU-1.1 (11d1757), WU-2 (54ac583), WU-3 (a67a408), WU-8 (764194f), **WU-8.1 (4a1df93, 본 v2.8 bump)**
+> - **🚨 사용자 결정 대기 — WU-11 🆕 Multi-agent runtime abstraction**: 사용자가 "SFS 를 Claude 뿐 아니라 Codex / Gemini-CLI 에서도 쓰고 싶다 → 추상화 중요" 라고 지시. 범위 A (RUNTIME-ABSTRACTION.md 문서 1개만, 저위험 추천) / B (A + agnostic 힌트 주석) / C (B + 어댑터 초안) 중 **사용자 확정 필요**.
+> - **큐 (WU-11 결정 후)**: WU-4 → WU-5 → WU-9 → WU-7 → WU-10
+> - **BLOCKED**: WU-6 (claude-shared-config/.git IP 경계 재정리 — 사용자 결정 대기)
+> - **Push 상태**: 7 커밋 (d034d0d ~ 4a1df93) origin/main 대비 ahead, **사용자가 터미널에서 `git push origin main` 직접 실행 필요**. FUSE 환경 git 인증 이슈 (MIG-8 때부터 동일 패턴).
+> - **FUSE lock 우회**: `.git/index.lock` 이 FUSE 마운트에서 unlink 불가 → `cp -r .git /tmp/agent_git_backup && rm /tmp/agent_git_backup/index.lock && GIT_DIR=/tmp/agent_git_backup GIT_WORK_TREE=<wt> git <cmd>` → `rsync -a /tmp/agent_git_backup/ <wt>/.git/` (→ WORK-LOG §WU-1.1 참조).
 
 ---
 
@@ -63,7 +78,10 @@ round4_bridge:
    - "상황을 물어보고 더 좋은 방법이 있다면 안내, 그리고 구현 자체를 막는건 ㄴㄴ" → never-hard-block invariant (ALT-INV-3) + alternative-suggestion-engine (Task #23, 완료)
    - "Socratic dialog tree 를 좀 더 구체화 ㄱㄱ" → division-activation.dialog.yaml + 6 branch 파일 + dialog-state.schema.yaml (Task #20~#22, 완료)
    - "ㄱㄱ" → Round 3 batch 실행 GO signal (최종 11/11 종결)
-6. (2026-04-20 심야, 본 세션 중단 시점): **"음 세션 재시작 해야될거 같은데. ㅇㅇ HANDOFF 문서 일단 최신화 가장먼저 해주고 다음 세션에서 전달할 내용 이어서 요약해줘 내가 복붙으로 바로 다음 세션에서 작업시키게"** → 현재 문서가 그 결과물.
+6. (2026-04-20 심야 ①, Round 3 종결 직후): **"음 세션 재시작 해야될거 같은데. ㅇㅇ HANDOFF 문서 일단 최신화 가장먼저 해주고 다음 세션에서 전달할 내용 이어서 요약해줘 내가 복붙으로 바로 다음 세션에서 작업시키게"** → 당시 산출물이 v2.6-final 이었으나 바로 "일주일 bridge 기간 동안 점진 작업" 지시로 WU 루프 진입.
+7. (2026-04-20 오후 ②, bridge 루프 개시): **"일단 내가 새 클로드에서 작업하기 전까지 점진적으로 작은작업단위로 쪼개서 하나씩 작업하고 계속 기록한 다음에 커밋 & push하자 일주일이라는 시간동안 놀 순 없으니 이 시간도 제대로 활용 해야지"** → WORK-LOG.md 신설 + WU 루프 (WU-1~8.1 커밋).
+8. (2026-04-20 심야 ③, WU-8 완료 중): **"아 그리고 작업 먼저 끝나고 확인해주면 되는데 sfs를 claude 뿐만 아니라 codex랑 gemini-cli에서도 사용하고 싶거든?? 그래서 추상화 하는게 중요할듯?!"** → 🚨 **WU-11 Multi-agent runtime abstraction 지시**. Claude Code 에 lock-in 된 현 docset 에 abstraction layer 필요. 범위 A/B/C 제안 상태, **사용자 확정 대기**. (상세: WORK-LOG.md WU-11 큐 + frontmatter `round4_bridge.user_new_directive`).
+9. (2026-04-20 심야 ④, 본 v2.8 bump 직전): **"일단 해당세션 context window가 많이 차서 다른세션으로 이관해서 작업하려고 하거든?? 폴더에 변경사항 커밋해서 기록해두고 handoff 문서도 최신화 시키고 다른 세션에서 브리핑 해야될 메세지 만들어줘"** → 현 v2.8-bridge-handoff + 다음 세션 브리핑 텍스트가 그 산출물.
 
 → **해석**:
 - 기본 3원칙: 작업 진행 + 토큰 한계 도달 시 중단 + 기록 우선
