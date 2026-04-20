@@ -439,12 +439,28 @@ related_docs:
   - `2026-04-19-sfs-v0.4/NEXT-SESSION-BRIEFING.md` (신규, ~180 lines)
   - `2026-04-19-sfs-v0.4/WORK-LOG.md` (본 entry + Changelog v1.12)
   - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (WU-13.1 에서 frontmatter 갱신)
-- **commit**: (WU-13 커밋 시 채워짐)
+- **commit**: `101030f`
 - **pushed**: pending (user terminal)
 - **notes**:
   - WU-HANDOFF / WU-HANDOFF.1 (Round 3 → Round 4 이관 지점) 과 유사한 성격의 문서지만, 본 파일은 세션 교체 지점마다 갱신될 living 문서 (일회성 아님).
   - Round 3 시대의 `NEXT-SESSION-BRIEFING.md` 는 WU-HANDOFF.1 에서 신설됐으나 (commit 617efe2), v2.8 bridge 이후 별도 관리되지 않음. 본 WU-13 은 사실상 신설 (같은 파일명, 내용 완전 재구성).
   - 향후 세션 교체 시 본 문서를 refresh 하는 WU 를 지속 발주 (사용자 요청 시).
+
+---
+
+### WU-13.1: sha `101030f` backfill + HANDOFF frontmatter 갱신
+
+- **성격**: infra
+- **intent**: WU-13 커밋 sha 를 WORK-LOG 에 backfill + HANDOFF `completed_wus` 의 WU-13 항목 sha 실체화 + `unpushed_commits` 텍스트 10 커밋으로 갱신.
+- **files**:
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (WU-13 entry `commit` 필드 실체화 + 본 entry + Changelog v1.13)
+  - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (frontmatter `completed_wus` WU-13 sha 실체화 + `unpushed_commits` 9→10 커밋)
+- **commit**: (WU-13.1 커밋 시 채워짐)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - WU-13 의 "(이 커밋)" placeholder 를 실제 sha 로 치환.
+  - Track B 큐에서 WU-13 완전 제거 → WU-7 이 next_blocking (WU-13 은 Track B 범위 외 ad-hoc 브리핑 WU).
+  - NEXT-SESSION-BRIEFING.md §1 의 "unpushed 커밋 목록" 표는 WU-13 까지만 반영. 다음 세션 투입 직전에 WU-13.1 포함하도록 refresh 필요 (다음 세션의 첫 작업으로 권장).
 
 ---
 
@@ -514,3 +530,4 @@ related_docs:
 - **v1.10** (2026-04-20 심야, 4번째 세션 `funny-compassionate-wright` post-compact 이어서): **WU-5.1 (9c4d6c0) + WU-9 (816d751) 완료**. WU-9 는 02 §2.13 원칙 13 Terminal 집합 교차 정합성 (read+validate) — Terminal 집합 4-way 불일치 발견 (`02 §2.13.5` 4 / `dialog.yaml frontmatter` 4 / `dialog.yaml body` 5 / `dialog-state.schema` 7 / `commands/division.md` 4-bare). Option β (minimal cleanup): ① 02 §2.13.5 Terminal 표 4→5 (`terminal/deactivate` 추가) + Option Card 각주 (activate 4택 vs deactivate 2택 명시) ② `division-activation.dialog.yaml` frontmatter L17 `schema/dialog-terminal-enum` 5 terminal 로 수정 — 파일 자체 내부 정합성 회복. `dialog-state.schema.yaml` 의 7-value split + `commands/division.md` bare prefix 는 cross-ref-audit §4 W10 영역에 Phase 1 W10 schema 작성 시 사용자 결정 사항으로 TODO 이관 (권장: A — 5-terminal 통일 + `deactivation_mode` 별도 필드). Track B 큐에서 WU-9 제거 → WU-7 (07 plugin.json 샘플 분리) 가 next_blocking.
 - **v1.11** (2026-04-20 심야, 4번째 세션 연속): **WU-9.1 sha `816d751` backfill**. WU-9 entry 의 `commit` 필드 실체화 + HANDOFF frontmatter `unpushed_commits` 7→8 커밋으로 갱신. Track B 큐에서 WU-9 완전 제거.
 - **v1.12** (2026-04-20 심야, 4번째 세션 연속): **WU-13 신설 (NEXT-SESSION-BRIEFING.md)**. 사용자 요청 "다음세션에서 이어갈 수 있게 브리핑 자료 만들어줘" 대응, 9-섹션 구조 단일 진입 브리핑 (~180 lines). bkit hook 무시 / 현 상태 스냅샷 / 다음 할 일 / working style / 기술 규칙 / 파일 인벤토리 / 열린 결정 / Track 구조 / 최근 세션 요약. WU-13.1 에서 sha backfill 예정.
+- **v1.13** (2026-04-20 심야, 4번째 세션 연속): **WU-13.1 sha `101030f` backfill**. WU-13 entry 의 `commit` 필드 실체화 + HANDOFF frontmatter `unpushed_commits` 9→10 커밋으로 갱신.
