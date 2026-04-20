@@ -176,7 +176,7 @@ related_docs:
 - **files**:
   - `2026-04-19-sfs-v0.4/WORK-LOG.md` (WU-11 notes 보강 + 본 엔트리)
   - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (§0 에 10번·11번 지시 추가)
-- **commit**: (커밋 후 채워짐)
+- **commit**: `eed4dd1` "WU-11.1: sha 4cd07e6 backfill + 사용자 11번째 지시 기록 (HANDOFF §0)"
 - **pushed**: pending (user terminal)
 - **notes**:
   - 다음 세션 첫 행동이 달라졌음: "WU-11 결정 받기" → **"Phase 1 킥오프 vs bridge WU 우선순위 확인"**. NEXT-SESSION-BRIEFING.md 도 갱신 필요하나, 세션 이관 당사자인 이번 세션에서는 HANDOFF 만 갱신하고 BRIEFING 갱신은 다음 이관 시점 (context 포화 시) 에 하는 게 경제적 — WU-11.1 범위에 포함시키지 않음.
