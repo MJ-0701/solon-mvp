@@ -479,7 +479,7 @@ related_docs:
   - `2026-04-19-sfs-v0.4/cross-ref-audit.md` (§1.2 실물 파일 검증 목록에 `appendix/samples/` 1 file 추가 + §5 Sanity verdict "20+" → "21+" 갱신)
   - `2026-04-19-sfs-v0.4/WORK-LOG.md` (본 entry + Changelog v1.14)
   - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (WU-7.1 에서 frontmatter 갱신 예정)
-- **commit**: (WU-7 커밋 시 채워짐)
+- **commit**: `ec263c5`
 - **pushed**: pending (user terminal)
 - **notes**:
   - **SSoT 경계**: 07 §7.2.1 (필드 의미 표) + §7.2.2 (env optional 규칙) = 필드 **의미** 의 SSoT. 샘플 파일 = 그 구조를 따르는 현 시점 **값** 스냅샷. 필드 추가/삭제 순서는 "07 §7.2.1 표 먼저 → 샘플 파일 동기화" 로 고정 (역방향 금지 명시).
@@ -490,6 +490,24 @@ related_docs:
   - **README.md 루트 tree (§10 또는 유사)**: samples/ 를 추가하지 않음 — 기존 tree 도 hooks/ tooling/ 은 생략한 간소화 버전이라 일관성 유지. discoverability 는 INDEX.md 가 담당.
   - **WU-7.1 계획**: sha backfill + HANDOFF frontmatter `completed_wus` 에 WU-7 1건 추가 + `unpushed_commits` 10 → 12 커밋 (WU-7 + WU-7.1) 갱신 + NEXT-SESSION-BRIEFING.md §1 unpushed 표 WU-13.1/WU-7/WU-7.1 포함해 refresh (WU-13.1 notes 에 적어둔 "다음 세션 첫 작업" 을 현 세션에서 선행 처리).
   - Track B 큐에서 WU-7 제거 → **WU-10** (appendix/dialogs/branches/ 6 본부 YAML schema 정합성 batch) 가 next_blocking.
+
+---
+
+### WU-7.1: sha `ec263c5` backfill + HANDOFF frontmatter 갱신 + NEXT-SESSION-BRIEFING.md §1 refresh
+
+- **성격**: infra
+- **intent**: WU-7 커밋 sha 를 WORK-LOG 에 backfill + HANDOFF `completed_wus` 에 WU-7 추가 + `unpushed_commits` 10 → 12 커밋 (WU-7 `ec263c5` + WU-7.1 본 커밋) 갱신. 추가로 WU-13.1 notes 에 적힌 "다음 세션 첫 작업 = NEXT-SESSION-BRIEFING.md §1 unpushed 표 refresh" 를 현 세션에서 선행 소화.
+- **files**:
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (WU-7 entry `commit` 필드 실체화 + 본 entry + Track B 큐 테이블에 WU-7.1 행 추가 + Changelog v1.15)
+  - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (frontmatter `completed_wus` 에 WU-7 / WU-7.1 2 entries 추가 + `unpushed_commits` 문자열 10→12 커밋 + `queue.next_blocking` WU-7 → WU-10 변경 + `queue.ready_after_wu13` 정리)
+  - `2026-04-19-sfs-v0.4/NEXT-SESSION-BRIEFING.md` (§1 unpushed 표 → WU-13.1 / WU-7 / WU-7.1 포함 12 커밋 refresh + §2 다음 할 일 WU-7 → WU-10 으로 이동 + §8 최근 세션 요약에 5번째 세션 WU-7/WU-7.1 추가 + frontmatter last_updated 2026-04-21)
+- **commit**: (WU-7.1 커밋 시 채워짐)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - WU-7 의 "(WU-7 커밋 시 채워짐)" placeholder 를 실제 sha 로 치환.
+  - NEXT-SESSION-BRIEFING.md 는 "living document" 성격. 세션 교체 지점마다 refresh 하는 것이 정석이므로 본 WU 에서 갱신.
+  - Track B 큐에서 WU-7.1 완전 제거 → WU-10 이 now truly next_blocking.
+  - 만약 다음 세션 진입 전 사용자가 `git push origin main` 으로 일부 push 하면 ahead 숫자가 줄어듦 — NEXT-SESSION-BRIEFING.md §9 의 안내 (git status 재검증) 가 계속 유효.
 
 ---
 
@@ -522,6 +540,7 @@ related_docs:
 | ✅ done | WU-13 | NEXT-SESSION-BRIEFING.md 신설 (세션 간 진입 브리핑 9-섹션) | infra |
 | ✅ done | WU-13.1 | sha 101030f backfill + HANDOFF frontmatter 갱신 | infra |
 | ✅ done | WU-7 | 07-plugin-distribution plugin.json 샘플 파일 분리 (`appendix/samples/plugin.json.sample` 신설, Option β skeleton+sample) | Phase 1 asset 준비 |
+| ✅ done | WU-7.1 | sha ec263c5 backfill + HANDOFF frontmatter 갱신 + NEXT-SESSION-BRIEFING.md §1 refresh | infra |
 | next | WU-10 | appendix/dialogs/branches/ 6 본부 YAML schema 정합성 | 중위험 batch |
 | later | WU-11 B | Claude-specific 파일 frontmatter `layer:` 필드 + 본문 힌트 주석 | Phase 1 안정화 후 재검토 |
 | Phase 2 | WU-11 C | Codex / Gemini-CLI 어댑터 초안 (`appendix/runtime-adapters/`) | Phase 2 go 결정 후 |
@@ -561,4 +580,5 @@ related_docs:
 - **v1.11** (2026-04-20 심야, 4번째 세션 연속): **WU-9.1 sha `816d751` backfill**. WU-9 entry 의 `commit` 필드 실체화 + HANDOFF frontmatter `unpushed_commits` 7→8 커밋으로 갱신. Track B 큐에서 WU-9 완전 제거.
 - **v1.12** (2026-04-20 심야, 4번째 세션 연속): **WU-13 신설 (NEXT-SESSION-BRIEFING.md)**. 사용자 요청 "다음세션에서 이어갈 수 있게 브리핑 자료 만들어줘" 대응, 9-섹션 구조 단일 진입 브리핑 (~180 lines). bkit hook 무시 / 현 상태 스냅샷 / 다음 할 일 / working style / 기술 규칙 / 파일 인벤토리 / 열린 결정 / Track 구조 / 최근 세션 요약. WU-13.1 에서 sha backfill 예정.
 - **v1.13** (2026-04-20 심야, 4번째 세션 연속): **WU-13.1 sha `101030f` backfill**. WU-13 entry 의 `commit` 필드 실체화 + HANDOFF frontmatter `unpushed_commits` 9→10 커밋으로 갱신.
-- **v1.14** (2026-04-21 새벽, 5번째 세션 `serene-fervent-wozniak` 사용자 취침 전 자율 진행): **WU-7 완료** — 07-plugin-distribution.md §7.2 의 70-line inline JSON 블록을 `appendix/samples/plugin.json.sample` (84 lines, `_meta` 포함) 로 분리. 07 본문은 top-level 필드 skeleton + WU-7 설명 blockquote + SSoT 경계 (§7.2.1/§7.2.2 의미 SSoT, 샘플 파일 = 현 시점 값 스냅샷) 명시. INDEX.md §1 "Hooks & Tooling (2)" → "Hooks & Tooling & Samples (3)" 확장. cross-ref-audit.md §1.2 실물 파일 목록 + §5 Sanity verdict "20+ → 21+" 동기화. WU-7.1 에서 sha backfill + HANDOFF + NEXT-SESSION-BRIEFING.md §1 refresh 예정. Track B 큐에서 WU-7 제거 → WU-10 이 next_blocking.
+- **v1.14** (2026-04-21 새벽, 5번째 세션 `serene-fervent-wozniak` 사용자 취침 전 자율 진행): **WU-7 완료** (`ec263c5`) — 07-plugin-distribution.md §7.2 의 70-line inline JSON 블록을 `appendix/samples/plugin.json.sample` (84 lines, `_meta` 포함) 로 분리. 07 본문은 top-level 필드 skeleton + WU-7 설명 blockquote + SSoT 경계 (§7.2.1/§7.2.2 의미 SSoT, 샘플 파일 = 현 시점 값 스냅샷) 명시. INDEX.md §1 "Hooks & Tooling (2)" → "Hooks & Tooling & Samples (3)" 확장. cross-ref-audit.md §1.2 실물 파일 목록 + §5 Sanity verdict "20+ → 21+" 동기화. WU-7.1 에서 sha backfill + HANDOFF + NEXT-SESSION-BRIEFING.md §1 refresh 예정. Track B 큐에서 WU-7 제거 → WU-10 이 next_blocking.
+- **v1.15** (2026-04-21 새벽, 5번째 세션 연속): **WU-7.1 sha `ec263c5` backfill**. WU-7 entry 의 `commit` 필드 실체화 + HANDOFF frontmatter `completed_wus` 에 WU-7 행 추가 + `unpushed_commits` 10 → 12 커밋 (WU-7 + WU-7.1) 갱신. NEXT-SESSION-BRIEFING.md §1 unpushed 커밋 목록 표를 WU-13.1 / WU-7 / WU-7.1 포함 12 커밋으로 refresh (WU-13.1 notes 에 적힌 "다음 세션 첫 작업" 을 현 세션에서 선행 소화).
