@@ -44,6 +44,7 @@ related_docs:
 - `appendix/drivers/` — 3 files (_INTERFACE + notion + none) ✅
 - `appendix/hooks/` — 1 file (observability-sync.sample.ts) ✅
 - `appendix/tooling/` — 1 file (sfs-doc-validate.md) ✅
+- `appendix/samples/` — 1 file (plugin.json.sample) ✅ **WU-7 추가 (2026-04-20)** — 07 §7.2 inline JSON 블록을 재사용 가능한 seed 매니페스트로 분리. Phase 1 W13 Plugin Packaging 시 진입점.
 
 ---
 
@@ -176,7 +177,7 @@ Phase 1 D1 ~ D2 (코드):
 - ✅ v0.4-r2 era 설계 선언 (§2.2 4건) — INDEX.md pending 테이블에 편입, 원본 본문은 보존
 - ✅ 원칙 수 정합성 (13대 원칙) — HANDOFF §2.00 archived block 1건 제외 clean
 - ✅ `concept/division-activation-state` 정의-참조 정상 연결
-- ✅ appendix 실재 파일 (20+) 링크 모두 유효
+- ✅ appendix 실재 파일 (21+, WU-7 `appendix/samples/plugin.json.sample` 포함) 링크 모두 유효
 
 이로써 **이관 전 cross-reference 정합성 검증 완료**. 개인 계정 새 Claude 가 본 문서를 읽고 Phase 1 에서 §4 TODO 13개 파일을 순차 생성하면 docset 완전 closure 달성.
 

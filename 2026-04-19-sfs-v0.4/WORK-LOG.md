@@ -455,12 +455,41 @@ related_docs:
 - **files**:
   - `2026-04-19-sfs-v0.4/WORK-LOG.md` (WU-13 entry `commit` 필드 실체화 + 본 entry + Changelog v1.13)
   - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (frontmatter `completed_wus` WU-13 sha 실체화 + `unpushed_commits` 9→10 커밋)
-- **commit**: (WU-13.1 커밋 시 채워짐)
+- **commit**: `899643a`
 - **pushed**: pending (user terminal)
 - **notes**:
   - WU-13 의 "(이 커밋)" placeholder 를 실제 sha 로 치환.
   - Track B 큐에서 WU-13 완전 제거 → WU-7 이 next_blocking (WU-13 은 Track B 범위 외 ad-hoc 브리핑 WU).
   - NEXT-SESSION-BRIEFING.md §1 의 "unpushed 커밋 목록" 표는 WU-13 까지만 반영. 다음 세션 투입 직전에 WU-13.1 포함하도록 refresh 필요 (다음 세션의 첫 작업으로 권장).
+
+---
+
+### WU-7: 07-plugin-distribution.md §7.2 plugin.json 예시 → `appendix/samples/plugin.json.sample` 분리
+
+- **성격**: asset (Phase 1 W13 Plugin Packaging 재사용 자산 선제 생성) + docs (07 §7.2 본문 slim)
+- **intent**: 다음 세션 브리핑 §2 에 명시된 Track B 큐 next_blocking. 07 본문에 inline 으로 박혀 있던 ~70 라인 JSON 블록을 별도 파일로 분리하여 Phase 1 W13 Plugin Packaging 시점에 `claude plugin install solon` 의 seed 매니페스트로 직접 재사용 가능하게 함. 동시에 07 §7.2 본문은 top-level 필드 구조 skeleton 만 남겨 SSoT (필드 **의미**) 역할을 유지 (§7.2.1 표 + §7.2.2 env 규칙).
+- **Option β 선택 (minimal cleanup)**:
+  - A (full extract): 전체 값 + peerDep 설명까지 분리. 07 본문을 stub 로 → 과잉, SSoT 경계 불명확.
+  - **B (skeleton + sample split, 채택)**: 07 은 top-level 필드만 보여주는 skeleton + sample 파일이 완전본 보유. `$schema` / `_meta` 메타 필드는 샘플에만 추가, 본문 SSoT 는 §7.2.1/§7.2.2 의 필드 의미.
+  - C (inline 유지 + 링크만 추가): 분리 목적 (W13 재사용) 미달성.
+- **files**:
+  - `2026-04-19-sfs-v0.4/appendix/samples/plugin.json.sample` (신규, 84 lines — `_meta` 블록 포함 + 원 JSON 17 필드 전체)
+  - `2026-04-19-sfs-v0.4/07-plugin-distribution.md` (§7.2 블록 교체 — 70 line inline → WU-7 설명 blockquote + 28 line skeleton + 후속 paragraph)
+  - `2026-04-19-sfs-v0.4/INDEX.md` (§1 Appendix 의 "Hooks & Tooling (2)" → "Hooks & Tooling & Samples (3)" 섹션 헤더 + samples/plugin.json.sample 행 추가)
+  - `2026-04-19-sfs-v0.4/cross-ref-audit.md` (§1.2 실물 파일 검증 목록에 `appendix/samples/` 1 file 추가 + §5 Sanity verdict "20+" → "21+" 갱신)
+  - `2026-04-19-sfs-v0.4/WORK-LOG.md` (본 entry + Changelog v1.14)
+  - `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` (WU-7.1 에서 frontmatter 갱신 예정)
+- **commit**: (WU-7 커밋 시 채워짐)
+- **pushed**: pending (user terminal)
+- **notes**:
+  - **SSoT 경계**: 07 §7.2.1 (필드 의미 표) + §7.2.2 (env optional 규칙) = 필드 **의미** 의 SSoT. 샘플 파일 = 그 구조를 따르는 현 시점 **값** 스냅샷. 필드 추가/삭제 순서는 "07 §7.2.1 표 먼저 → 샘플 파일 동기화" 로 고정 (역방향 금지 명시).
+  - **`_meta` / `$schema`**: 샘플 파일 자체 documentation 용으로 추가 (JSON 주석 불가 대응). release 시점 packaging 스크립트가 이 두 필드를 strip (plugin 매니페스트 런타임은 해석하지 않음). 이 규칙도 `_meta.strip_meta_on_package` 필드에 자기 기술.
+  - **원칙 2 (self-validation-forbidden) 회피**: inline → 파일 분리는 **구조 변경** 이지 설계 결정 아님 (값 동일). 의미 재해석 없음.
+  - **Phase 1 W13 경로**: 풀스펙 §10.4 W13 Plugin Packaging 착수 시 이 sample 을 `sfs-plugin/plugin.json` 으로 복사 + strip script + 버전/engines 치환 + `peerDependencies` validation. Track C (조기 상향 여지) 트리거 시에도 본 파일이 1차 진입점.
+  - **cross-ref-audit.md §1.2 / §5**: 실물 파일 인벤토리 증가 반영. §4 pending TODO 에는 영향 없음 (이 파일은 Phase 1 pending 이 아닌 WU-7 실존 파일).
+  - **README.md 루트 tree (§10 또는 유사)**: samples/ 를 추가하지 않음 — 기존 tree 도 hooks/ tooling/ 은 생략한 간소화 버전이라 일관성 유지. discoverability 는 INDEX.md 가 담당.
+  - **WU-7.1 계획**: sha backfill + HANDOFF frontmatter `completed_wus` 에 WU-7 1건 추가 + `unpushed_commits` 10 → 12 커밋 (WU-7 + WU-7.1) 갱신 + NEXT-SESSION-BRIEFING.md §1 unpushed 표 WU-13.1/WU-7/WU-7.1 포함해 refresh (WU-13.1 notes 에 적어둔 "다음 세션 첫 작업" 을 현 세션에서 선행 처리).
+  - Track B 큐에서 WU-7 제거 → **WU-10** (appendix/dialogs/branches/ 6 본부 YAML schema 정합성 batch) 가 next_blocking.
 
 ---
 
@@ -491,8 +520,9 @@ related_docs:
 | ✅ done | WU-9 | 02-design-principles.md 원칙 13 Terminal 집합 교차 정합성 보정 (Option β) | docs |
 | ✅ done | WU-9.1 | WU-9 `816d751` sha backfill | infra |
 | ✅ done | WU-13 | NEXT-SESSION-BRIEFING.md 신설 (세션 간 진입 브리핑 9-섹션) | infra |
-| next | WU-7 | 07-plugin-distribution plugin.json 샘플 파일 분리 | Phase 1 asset 준비 |
-| 5 | WU-10 | appendix/dialogs/branches/ 6 본부 YAML schema 정합성 | 중위험 batch |
+| ✅ done | WU-13.1 | sha 101030f backfill + HANDOFF frontmatter 갱신 | infra |
+| ✅ done | WU-7 | 07-plugin-distribution plugin.json 샘플 파일 분리 (`appendix/samples/plugin.json.sample` 신설, Option β skeleton+sample) | Phase 1 asset 준비 |
+| next | WU-10 | appendix/dialogs/branches/ 6 본부 YAML schema 정합성 | 중위험 batch |
 | later | WU-11 B | Claude-specific 파일 frontmatter `layer:` 필드 + 본문 힌트 주석 | Phase 1 안정화 후 재검토 |
 | Phase 2 | WU-11 C | Codex / Gemini-CLI 어댑터 초안 (`appendix/runtime-adapters/`) | Phase 2 go 결정 후 |
 | — | WU-6 | claude-shared-config/.git IP 경계 재정리 | **BLOCKED** (사용자 결정 필요) |
@@ -531,3 +561,4 @@ related_docs:
 - **v1.11** (2026-04-20 심야, 4번째 세션 연속): **WU-9.1 sha `816d751` backfill**. WU-9 entry 의 `commit` 필드 실체화 + HANDOFF frontmatter `unpushed_commits` 7→8 커밋으로 갱신. Track B 큐에서 WU-9 완전 제거.
 - **v1.12** (2026-04-20 심야, 4번째 세션 연속): **WU-13 신설 (NEXT-SESSION-BRIEFING.md)**. 사용자 요청 "다음세션에서 이어갈 수 있게 브리핑 자료 만들어줘" 대응, 9-섹션 구조 단일 진입 브리핑 (~180 lines). bkit hook 무시 / 현 상태 스냅샷 / 다음 할 일 / working style / 기술 규칙 / 파일 인벤토리 / 열린 결정 / Track 구조 / 최근 세션 요약. WU-13.1 에서 sha backfill 예정.
 - **v1.13** (2026-04-20 심야, 4번째 세션 연속): **WU-13.1 sha `101030f` backfill**. WU-13 entry 의 `commit` 필드 실체화 + HANDOFF frontmatter `unpushed_commits` 9→10 커밋으로 갱신.
+- **v1.14** (2026-04-21 새벽, 5번째 세션 `serene-fervent-wozniak` 사용자 취침 전 자율 진행): **WU-7 완료** — 07-plugin-distribution.md §7.2 의 70-line inline JSON 블록을 `appendix/samples/plugin.json.sample` (84 lines, `_meta` 포함) 로 분리. 07 본문은 top-level 필드 skeleton + WU-7 설명 blockquote + SSoT 경계 (§7.2.1/§7.2.2 의미 SSoT, 샘플 파일 = 현 시점 값 스냅샷) 명시. INDEX.md §1 "Hooks & Tooling (2)" → "Hooks & Tooling & Samples (3)" 확장. cross-ref-audit.md §1.2 실물 파일 목록 + §5 Sanity verdict "20+ → 21+" 동기화. WU-7.1 에서 sha backfill + HANDOFF + NEXT-SESSION-BRIEFING.md §1 refresh 예정. Track B 큐에서 WU-7 제거 → WU-10 이 next_blocking.

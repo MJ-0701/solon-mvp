@@ -219,76 +219,42 @@ sfs-plugin/
 
 ## 7.2 plugin.json 핵심 필드
 
+> 🆕 **WU-7 (2026-04-20)**: 본 절의 plugin.json 전체 예시는 **별도 샘플 파일로 분리**되어 있다. Phase 1 W13 (Plugin Packaging) 구현 시 `claude plugin install solon` 의 매니페스트 seed 로 이 파일을 직접 재사용한다.
+>
+> - **샘플 파일**: [appendix/samples/plugin.json.sample](appendix/samples/plugin.json.sample)
+> - **SSoT**: 필드 **의미/규약** 은 본 절 (§7.2.1 / §7.2.2) 이 SSoT. 샘플은 그 구조를 따르는 현 시점 스냅샷.
+> - **갱신 규칙**: 필드 추가/삭제 시 ① 본 절 §7.2.1 표 갱신 → ② 샘플 파일 동기화. 역방향 (샘플 먼저 변경 후 본 절 방치) 금지.
+> - **release 시 처리**: 샘플에 포함된 `$schema` / `_meta` 필드는 실제 packaging 스크립트에서 제거 (plugin 매니페스트 런타임은 이 두 필드를 해석하지 않음).
+
+아래는 본 샘플에 포함된 **최상위 필드 구조**이다 (값은 생략, 전체는 샘플 파일 참조):
+
 ```json
 {
   "name": "solon-plugin",
   "displayName": "Solon — Solo Founder System",
   "version": "0.4.0",
-  "description": "Company-as-Code agent system for 1-person founders (6 divisions × 3 C-Level).",
+  "description": "...",
   "license": "MIT",
 
-  "engines": {
-    "claude-code": ">=1.5.0",
-    "claude-desktop-cowork": ">=0.2.0"
-  },
-
-  "agents": "./agents/**/*.yaml",
-  "skills": "./skills/",
-  "commands": "./commands/",
-
-  "hooks": {
-    "PostToolUse": "./hooks/observability-sync.ts",
-    "Stop": "./hooks/observability-sync.ts"
-  },
-
-  "config": {
-    "divisions": "./config/divisions.yaml",
-    "divisions_default": "./config/divisions.default.yaml",
-    "tier_profiles": "./config/tier-profiles.yaml",
-    "l3_backends": "./config/l3-backends.yaml",
-    "models": "./config/models.yaml",
-    "gates": "./config/gates.yaml"
-  },
-
-  "profile_defaults": {
-    "tier_profile": "minimal",
-    "l3_backend": "notion",
-    "install_mode": "greenfield"
-  },
-
-  "drivers": {
-    "registry": "./drivers/",
-    "phase1_supported": ["notion", "none"],
-    "phase2_planned": ["obsidian", "logseq", "confluence", "custom"]
-  },
-
-  "install_modes": {
-    "greenfield": "새 프로젝트. 빈 docs/ 생성.",
-    "brownfield": "기존 프로젝트. /sfs discover 필수 (§7.10)."
-  },
-
-  "env": {
-    "required": [],
-    "optional": [
-      "AWS_S3_BUCKET",
-      "AWS_REGION",
-      "NOTION_API_KEY",
-      "NOTION_DATABASE_ID"
-    ]
-  },
-
-  "peerDependencies": {
-    "bkit": ">=1.5.0",
-    "cowork-design": ">=0.1.0"
-  },
-
-  "phases": {
-    "current": "phase1",
-    "next": "phase2",
-    "next_eta": "2026-Q3 (잠정)"
-  }
+  "engines":           { "claude-code": "...", "claude-desktop-cowork": "..." },
+  "agents":            "./agents/**/*.yaml",
+  "skills":            "./skills/",
+  "commands":          "./commands/",
+  "hooks":             { "PostToolUse": "...", "Stop": "..." },
+  "config":            { "divisions": "...", "divisions_default": "...", "tier_profiles": "...",
+                         "l3_backends": "...", "models": "...", "gates": "..." },
+  "profile_defaults":  { "tier_profile": "minimal", "l3_backend": "notion",
+                         "install_mode": "greenfield" },
+  "drivers":           { "registry": "./drivers/", "phase1_supported": [...],
+                         "phase2_planned": [...] },
+  "install_modes":     { "greenfield": "...", "brownfield": "..." },
+  "env":               { "required": [], "optional": [...] },
+  "peerDependencies":  { "bkit": "...", "cowork-design": "..." },
+  "phases":            { "current": "phase1", "next": "phase2", "next_eta": "..." }
 }
 ```
+
+→ 전체 값 + release 전 제거 대상 `$schema` / `_meta` 까지 포함된 완전본은 샘플 파일에 있다. 본 절 이하 §7.2.1 / §7.2.2 는 각 필드의 의미와 env optional 처리 규칙을 설명한다.
 
 ### 7.2.1 주요 필드 의미
 

@@ -126,11 +126,12 @@ enforced_by: sfs-doc-validate
 | [appendix/templates/report.md](appendix/templates/report.md) | §4 PDCA Report/Act 템플릿 |
 | [appendix/templates/brainstorm.md](appendix/templates/brainstorm.md) | §4 G0 Brainstorm 템플릿 (Initiative 진입) |
 
-#### Hooks & Tooling (2)
+#### Hooks & Tooling & Samples (3)
 | 파일 | 역할 |
 |------|------|
 | [appendix/hooks/observability-sync.sample.ts](appendix/hooks/observability-sync.sample.ts) | §8 동기화 Hook 샘플 구현 |
 | [appendix/tooling/sfs-doc-validate.md](appendix/tooling/sfs-doc-validate.md) | 의존성 검증 도구 스펙 |
+| [appendix/samples/plugin.json.sample](appendix/samples/plugin.json.sample) 🆕 WU-7 | §7.2 plugin.json 전체 예시 — Phase 1 W13 `claude plugin install solon` seed 매니페스트 (필드 의미 SSoT: 07 §7.2.1/§7.2.2) |
 
 #### Phase 1 에서 생성 예정 (미존재 ❌)
 | 파일 | 역할 |

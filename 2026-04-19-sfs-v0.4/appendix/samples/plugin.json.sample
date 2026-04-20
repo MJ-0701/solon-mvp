@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "_meta": {
+    "doc_id": "sfs-v0.4-appendix-plugin-json-sample",
+    "source": "07-plugin-distribution.md §7.2",
+    "purpose": "Phase 1 W13 (plugin packaging) 시 `claude plugin install solon` 이 참조하는 플러그인 매니페스트 seed. 실제 설치 시점에 버전/엔진 범위/드라이버 화이트리스트는 릴리스 스크립트가 치환.",
+    "editable": "이 샘플은 설계 참조용이며, 필드 의미는 07-plugin-distribution.md §7.2.1/§7.2.2 를 SSoT 로 한다. 필드 추가/제거 시 07 §7.2.1 표도 함께 갱신 필요.",
+    "related": [
+      "07-plugin-distribution.md §7.1 (sfs-plugin 디렉토리 트리)",
+      "07-plugin-distribution.md §7.9 (업데이트 & 버전 정책)",
+      "appendix/schemas/divisions.schema.yaml (peerDep 아님, 내장 config/divisions.yaml 이 따르는 스키마)",
+      "appendix/drivers/_INTERFACE.md (drivers.registry 내부 manifest.yaml 계약)"
+    ],
+    "strip_meta_on_package": "실제 packaging 시 `_meta` / `$schema` 필드 제거 (plugin 매니페스트 런타임은 이 필드를 해석하지 않음)."
+  },
+
+  "name": "solon-plugin",
+  "displayName": "Solon — Solo Founder System",
+  "version": "0.4.0",
+  "description": "Company-as-Code agent system for 1-person founders (6 divisions × 3 C-Level).",
+  "license": "MIT",
+
+  "engines": {
+    "claude-code": ">=1.5.0",
+    "claude-desktop-cowork": ">=0.2.0"
+  },
+
+  "agents": "./agents/**/*.yaml",
+  "skills": "./skills/",
+  "commands": "./commands/",
+
+  "hooks": {
+    "PostToolUse": "./hooks/observability-sync.ts",
+    "Stop": "./hooks/observability-sync.ts"
+  },
+
+  "config": {
+    "divisions": "./config/divisions.yaml",
+    "divisions_default": "./config/divisions.default.yaml",
+    "tier_profiles": "./config/tier-profiles.yaml",
+    "l3_backends": "./config/l3-backends.yaml",
+    "models": "./config/models.yaml",
+    "gates": "./config/gates.yaml"
+  },
+
+  "profile_defaults": {
+    "tier_profile": "minimal",
+    "l3_backend": "notion",
+    "install_mode": "greenfield"
+  },
+
+  "drivers": {
+    "registry": "./drivers/",
+    "phase1_supported": ["notion", "none"],
+    "phase2_planned": ["obsidian", "logseq", "confluence", "custom"]
+  },
+
+  "install_modes": {
+    "greenfield": "새 프로젝트. 빈 docs/ 생성.",
+    "brownfield": "기존 프로젝트. /sfs discover 필수 (§7.10)."
+  },
+
+  "env": {
+    "required": [],
+    "optional": [
+      "AWS_S3_BUCKET",
+      "AWS_REGION",
+      "NOTION_API_KEY",
+      "NOTION_DATABASE_ID"
+    ]
+  },
+
+  "peerDependencies": {
+    "bkit": ">=1.5.0",
+    "cowork-design": ">=0.1.0"
+  },
+
+  "phases": {
+    "current": "phase1",
+    "next": "phase2",
+    "next_eta": "2026-Q3 (잠정)"
+  }
+}
