@@ -129,7 +129,7 @@ related_docs:
   - Korean particle 연쇄 (`SFS는/이/을/과/의`) → (`Solon은/이/을/과/의`) 로 발음 정합 매핑
   - uppercase `SFS` 단독 → `Solon` (lowercase `/sfs`, `sfs-*` 는 미영향)
   - 복원 3곳: `07-plugin-distribution.md:917` (이전 SFS/bkit), `07-plugin-distribution.md:1050` (SFS-v0.3 버전), `02-design-principles.md:527` (이전 SFS/bkit) → 역사 참조 그대로
-- **commit**: (WU-8 커밋 시 채워짐)
+- **commit**: `764194f` "WU-8: SFS brand prose → Solon disambiguation (109 occurrences, 14 files)"
 - **pushed**: pending (user terminal)
 - **notes**:
   - 최종 잔존 `SFS` (전체 6개): 3 역사 참조 + 3 WORK-LOG 자기 참조 (WU-8 작업 기록 그 자체) — 모두 의도된 보존.
