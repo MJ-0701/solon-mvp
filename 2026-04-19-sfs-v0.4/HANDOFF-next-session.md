@@ -46,11 +46,13 @@ round4_bridge:
     - "WU-5: 20c3474 — 05-gate-framework.md §5.11 G-1 Intake Gate 교차 정합성 보정 (Option β minimal cleanup: L1 schema gate_id G-1 추가 + §5.11.7 base schema 주석 + cross-ref-audit §4.8 schema 결정 TODO)"
     - "WU-5.1: 9c4d6c0 — sha 20c3474 backfill + HANDOFF frontmatter completed_wus 2 WU 추가 (WU-4.1 + WU-5) + unpushed_commits 갱신"
     - "WU-9: 816d751 — 02-design-principles.md §2.13 원칙 13 Terminal 집합 교차 정합성 보정 (Option β minimal cleanup: 02 §2.13.5 표 4→5 + dialog.yaml frontmatter 5 terminal + cross-ref-audit §4 W10 schema/commands prefix 결정 TODO)"
-    - "WU-9.1: (이 커밋) — sha 816d751 backfill + HANDOFF frontmatter completed_wus 1 WU 추가 + unpushed_commits 갱신"
-  unpushed_commits: "현 세션 새 로컬 커밋 = WU-12.2 (8ab660c) + WU-12.3 (b77fcb2) + WU-4 (7d982dc) + WU-4.1 (1c375aa) + WU-5 (20c3474) + WU-5.1 (9c4d6c0) + WU-9 (816d751) + WU-9.1 backfill (이 커밋) → 사용자가 `git push origin main` 수동 실행 필요 (총 8 커밋)."
+    - "WU-9.1: 6884bbd — sha 816d751 backfill + HANDOFF frontmatter completed_wus 1 WU 추가 + unpushed_commits 갱신"
+    - "WU-13: (이 커밋) — NEXT-SESSION-BRIEFING.md 신설 (세션 간 진입 브리핑 9-섹션, ~180 lines, living handoff doc)"
+  unpushed_commits: "현 세션 새 로컬 커밋 = WU-12.2 (8ab660c) + WU-12.3 (b77fcb2) + WU-4 (7d982dc) + WU-4.1 (1c375aa) + WU-5 (20c3474) + WU-5.1 (9c4d6c0) + WU-9 (816d751) + WU-9.1 (6884bbd) + WU-13 (이 커밋) → 사용자가 `git push origin main` 수동 실행 필요 (총 9 커밋)."
   queue:
-    next_blocking: "WU-7 07-plugin-distribution plugin.json 샘플 파일 분리 (Phase 1 asset 준비, WU-9 완료)"
-    ready_after_wu9: [WU-7, WU-10]
+    next_blocking: "WU-7 07-plugin-distribution plugin.json 샘플 파일 분리 (Phase 1 asset 준비, WU-13 briefing 완료)"
+    ready_after_wu13: [WU-7, WU-10]
+    entry_point_for_next_session: "NEXT-SESSION-BRIEFING.md (9-섹션, 5분 진입 가이드)"
     blocked: [WU-6 (claude-shared-config/.git IP 경계 — 사용자 결정 필요)]
   user_new_directive:
     raw: "sfs를 claude 뿐만 아니라 codex랑 gemini-cli에서도 사용하고 싶거든?? 그래서 추상화 하는게 중요할듯?!"
