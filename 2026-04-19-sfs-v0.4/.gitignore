@@ -75,3 +75,11 @@ appendix/dialogs/traces/*.yaml
 # 예외가 작동함 — git 은 ignored 디렉토리 내부를 탐색하지 않기 때문)
 tmp/*
 !tmp/.gitkeep
+
+# ─── WU-15 Workflow v2 인프라 (git 제외 추가) ───
+# 2026-04-21 WU-15: auto-snapshot 저장소 + WU scratch 영역.
+# - tmp/ 전체는 위 tmp/* 룰로 이미 차단되지만, tmp/snapshots/ 는
+#   본 WU-15 에서 새로 정식 용도 (scripts/snapshot.sh 생성물) 로 지정되므로
+#   의도를 명시. sprints/_scratch/ 는 WU 진행 중 임시 작업 파일 전용 —
+#   공식 WU 파일 (sprints/WU-*.md) 은 정상 track, _scratch/ 만 제외.
+sprints/_scratch/

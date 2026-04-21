@@ -1,0 +1,92 @@
+# ───────────────────────────────────────────────────────────────
+# Solon v0.4-r3 · .visibility-rules.yaml
+# 목적: OSS fork (마케팅 프로덕트) 빌드 시 raw-internal / business-only
+#       파일 자동 제외 규칙.
+# Phase 1 (2026-04): 실제 fork 스크립트는 Phase 2 이후. 현재는 규칙 선언만.
+# SSoT 연결: CLAUDE.md §7 (Visibility Tier) + tmp/workflow-v2-design.md §9.4
+# ───────────────────────────────────────────────────────────────
+---
+version: 1.0
+applies_to: "OSS fork (마케팅 프로덕트) 빌드 시 제외 규칙"
+phase: "declared (Phase 1) — enforcement 스크립트는 Phase 2 이후"
+---
+
+# Visibility tier 정의 (CLAUDE.md §7 발췌)
+#   oss-public      — OSS fork 포함. 마케팅 프로덕트 이상 동작 없음 검증 필수.
+#   business-only   — Business 제품만. OSS fork 에서 자동 제외.
+#   raw-internal    — 사용자 raw 데이터. 양쪽 제외 (sessions/, learning-logs/ 대부분,
+#                     tmp/, 미완성 draft 등).
+
+exclude:
+  # ── 세션 히스토리: 전량 raw-internal ──
+  - pattern: "sessions/**"
+    tier: raw-internal
+    reason: "세션 단위 decision log / 대화 요약 — 사용자 개인 운영 데이터"
+
+  # ── 학습 패턴: 기본 제외, 라벨로 선별 포함 ──
+  - pattern: "learning-logs/**"
+    tier: raw-internal
+    reason: "장기 학습 자산 기본 Business 전용"
+    override_rule: "frontmatter.visibility == oss-public 인 패턴만 선별 포함"
+
+  # ── 중간 산출물: git 에서도 제외되지만 명시적 재차단 ──
+  - pattern: "tmp/**"
+    tier: raw-internal
+    reason: "draft / dump / snapshot — 운영 부산물"
+
+  # ── WU 파일: frontmatter 기반 동적 결정 ──
+  - pattern: "sprints/WU-*.md"
+    tier_resolver: "frontmatter.visibility"
+    reason: "WU 단위 visibility tier 가 다름 — frontmatter 에서 동적 필터"
+
+  - pattern: "sprints/WU-*/**"
+    tier_resolver: "frontmatter.visibility"
+    reason: "200 line 초과 시 sub-step 분리된 WU 디렉토리 — 상위 _meta.md 의 visibility 승계"
+
+  # ── Draft 상태 문서 ──
+  - pattern: "**/*.draft.md"
+    tier: raw-internal
+    reason: "미완성 draft — 의도치 않은 OSS 유출 방지"
+
+  # ── 이관 / 운영 전용 문서 ──
+  - pattern: "MIGRATION-NOTES.md"
+    tier: raw-internal
+    reason: "회사→개인 계정 이관 기록 — 운영 내부 정보"
+  - pattern: "CROSS-ACCOUNT-MIGRATION.md"
+    tier: raw-internal
+    reason: "이관 실행 노트 — 운영 내부 정보"
+
+  # ── HANDOFF / BRIEFING: WU-17 에서 축소 예정 ──
+  - pattern: "HANDOFF-next-session.md"
+    tier: raw-internal
+    reason: "세션 간 인수인계용 — 사용자 개인 운영 흐름"
+  - pattern: "NEXT-SESSION-BRIEFING.md"
+    tier: raw-internal
+    reason: "세션 진입 가이드 — 사용자 개인 운영 흐름"
+
+  # ── PROGRESS.md: live snapshot, 개인 운영 상태 ──
+  - pattern: "PROGRESS.md"
+    tier: raw-internal
+    reason: "덮어쓰기 live snapshot — 실시간 개인 운영 상태"
+
+  # ── WORK-LOG.md: 세션 간 append 히스토리 ──
+  - pattern: "WORK-LOG.md"
+    tier: raw-internal
+    reason: "세션 간 append 히스토리 — 사용자 운영 기록"
+
+# ── 기본 포함 조건 (whitelist) ──
+include_only_if:
+  - tier: oss-public
+
+# ── 기능 축소판 override (Phase 2 이후 활용) ──
+override_replace:
+  - source_pattern: "appendix/dialogs/branches/custom.yaml"
+    replacement: "appendix/dialogs/branches/custom.oss-reduced.yaml"
+    reason: "Business 차별 기능 파일 — OSS 에는 기능 축소판 배포"
+
+# ── Phase 2 enforcement 체크리스트 (다음 단계 명세) ──
+enforcement_checklist:
+  - "fork-filter 스크립트가 본 파일을 읽고 dry-run 수행 — 제외 파일 리스트 표시"
+  - "human review 후 실제 삭제 수행"
+  - "frontmatter.visibility 미존재 파일은 FAIL (빌드 중단) — 모든 파일에 tier 명시 강제"
+  - "override_replace 대상 파일의 OSS-reduced 버전 존재 여부 검증"

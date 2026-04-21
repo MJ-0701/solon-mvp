@@ -80,8 +80,10 @@ refresh_history:
 
 1. **현 상태 확인 + 사용자 새 지시 대기** — 기본. 사용자가 로그인하면 "잘 잤어요. 5번째 세션 결과 요약" 류로 보고하고 다음 지시 수신.
 2. **cross-ref-audit §4 W10 TODO 사용자 결정 수집 세션 전환** — `#8` (G-1 6-checkbox) / `#14~19` (branch override / intent label / terminal enum / custom invariants / L1 event / tier 필드) 중 우선순위 높은 것부터 1-by-1 A/B/C 옵션 제시 + 권장안 + 사용자 선택 받기. 결정 완료된 것은 W10 schema 작성에 반영.
+   - **사전 분석 3건 선행 완료** (2026-04-21 새벽 말미, git 제외): `tmp/w10-todo-18.md` (L1 event payload) / `tmp/w10-todo-19.md` (tier 필드 정합) / `tmp/w10-todo-14.md` (branch override schema). 결정 세션 진입 시 바로 로드하여 사실관계·대안·교차 지점 요약 참고 (원칙 2 준수 — 사전 분석에서 결정하지 않음).
 3. **push 실행 확인** — 사용자가 `git push origin main` 실행했는지 확인, push 완료되면 HANDOFF / BRIEFING 의 "push 대기" 마커 정리.
 4. **신규 Phase 1 MVP 착수 준비 보조** — 사용자 Track A 의 2026-04-27 주 admin panel MVP repo 생성 준비.
+5. **나머지 W10 TODO 사전 분석 확장** — `#8` (G-1 6-checkbox) / `#15` (intent label 체계) / `#16` (terminal sub-type × 7-value split 통합 — `#8` 과 교차) / `#17` (custom invariants 위치 — `#19` 과 교차) 의 사전 분석 draft 추가 생성. Phase 1 결정 세션 준비 보조 목적.
 
 ### Track B 완료된 asset 선제 생성 (참조)
 

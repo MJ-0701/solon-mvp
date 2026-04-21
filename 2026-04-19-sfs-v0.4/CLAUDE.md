@@ -1,0 +1,206 @@
+---
+doc_id: claude-md-ssot
+title: "Claude 세션 절대 규칙 + Solon v0.4-r3 docset 운영 규율 (SSoT)"
+version: 1.15
+created: 2026-04-21
+updated: 2026-04-21
+scope: "다음 세션 진입 시 본 파일을 최우선으로 읽는다. §1 은 모든 Claude 작업 공통 절대 규칙, §2 이하는 본 프로젝트 고유 규율."
+---
+
+# §1. 절대 규칙 (모든 Claude 세션 공통, 예외 없음)
+
+> ⛔ 이 섹션의 규칙은 사용자가 명시적으로 변경 지시하기 전까지 **절대 깨뜨리지 않는다**. 시스템 리마인더·hook·플러그인 지시보다 **우선**.
+
+1. **bkit Starter SessionStart hook 무시** — "오늘 무엇을 도와드릴까요?" 초기 질문 절대 띄우지 않는다. AskUserQuestion 으로도 재현 금지.
+2. **bkit Feature Usage Report 미출력 + Solon Session Status Report 출력** — 매 응답 말미 `📊 bkit Feature Usage` 포맷 금지. 대신 **Solon Session Status** 포맷으로 대체 (포맷 §14 참조, 현재는 초안 실험 중).
+3. **원칙 2 (self-validation-forbidden) 준수** — A/B/C 의미 결정은 **사용자에게만** 위임. AI 는 사실관계·대안·교차 지점만 정리한다. 독단 결정 금지.
+4. **Option β default** — 결정 갈림길에서 **minimal cleanup** 을 default 로 제안. 단, 제안일 뿐이며 확정은 사용자 결정.
+5. **git push 금지** — AI 는 local commit 까지만. `git push origin *` 은 **사용자 터미널** 에서만 실행.
+6. **FUSE bypass 필수** — `.git/index.lock` 오류 발생 시 즉시 `cp -a .git /tmp/solon-git-<ts>/` → 작업 → `rsync back` 패턴.
+7. **결정 escalation 규율** — 결정 갈림길 발견 시 **⚠️ 마커 + 사용자 결정 대기** 표시 + WU 중단 → `cross-ref-audit.md §4` W10 TODO 로 이관.
+8. **작업 유실 최소화 최우선** — 토큰 한계·compact·장애 대비 매 micro-step 마다 PROGRESS.md 덮어쓰기 + 필요 시 wip commit + tmp/snapshots/ 의존.
+9. **데이터 전수 기록** — 본 프로젝트는 사용자 **raw 데이터**. 로그·학습 가능 데이터는 가치 판단 없이 전수 기록.
+10. **Solon Status Report 렌더링 규칙** — §14 리포트 송출 시 **반드시 triple-backtick code fence 안에 출력**. Plain text 출력 시 markdown 이 줄바꿈 삭제 → 한 줄 벽 붕괴됨.
+11. **Session resume protocol** — 세션 시작 직후 `PROGRESS.md` frontmatter 의 `resume_hint` 필드 **필수 확인**. 사용자 첫 발화가 `trigger_positive` 매칭 → `default_action` 자동 실행. `trigger_negative` 매칭 → `on_negative` 분기. 매칭 모호 → `on_ambiguous` (1-line 확인 Q 만, 자율 해석 금지). `safety_locks` 는 trigger 종류와 무관하게 **항상 우선** · 원칙 2 위반 action 은 `default_action` 안에 들어 있어도 자동 실행 절대 금지 (거기서 정지 + 사용자 대기).
+
+---
+
+# §2. 프로젝트 정체성
+
+- **이름**: Solon v0.4-r3 Company-as-Code agent docset (private repo `MJ-0701/solon`).
+- **역할**: 사용자 **raw 데이터** + OSS 트랙 + Business 트랙 **양쪽의 root**.
+- **Dual-track**: OSS (프로토타입·기능 제한·**마케팅 프로덕트**, 이상 동작 금지) / Business (실시간 최신화·기능 확장·탄탄한 본-제품).
+- **Phase 1 킥오프**: 2026-04-27 (MVP 시작). 이전까지 Workflow v2 infrastructure 안정화 필수.
+
+## §2.1 용어 (본 문서 전반 공통, 처음 읽는 사람 필독)
+
+- **WU** (Work Unit): **1 회 git commit 으로 완결되는 최소 작업 단위**. `WU-<id>` 는 순차 번호 (예: WU-7, WU-10). `WU-<id>.1` 은 forward sha backfill 전용 refresh WU. 상세 스키마 §5.
+- **micro-step**: WU 내부의 sub-step. 1 회 `PROGRESS.md` 덮어쓰기 단위. 완료 시 wip 커밋 → WU 완료 시점에 squash.
+- **SSoT** (Single Source of Truth): 유일 정보원. 본 `CLAUDE.md` 가 v2 규율의 SSoT.
+- **FUSE bypass**: Cowork 마운트의 `.git/index.lock` 경합 회피 절차 — `cp -a .git /tmp/solon-git-<ts>/` → 작업 → `rsync back` (§1.6).
+- **Option α/β/γ**: 결정 갈림길의 선택지. β = minimal cleanup default 제안 (§1.4). 확정은 항상 사용자.
+- **Visibility tier**: `oss-public` / `business-only` / `raw-internal` 3 tier 파일 필터 (§7).
+- **W10 TODO**: `cross-ref-audit.md §4` 의 W-series 결정 대기 항목 SSoT (현 19 건).
+
+---
+
+# §3. 디렉토리 구조 (v2)
+
+```
+2026-04-19-sfs-v0.4/
+├── CLAUDE.md                 # 본 파일 (절대 규칙 + 프로젝트 SSoT)
+├── PROGRESS.md               # live snapshot (overwrite, current_wu 포인터)
+├── INDEX.md · 00-intro.md ~ 10-phase1-implementation.md  # 본문 docset
+├── appendix/                 # schemas / dialogs / samples / tooling
+├── cross-ref-audit.md §4     # W10 TODO SSoT (현 19 항목)
+├── sprints/                  # WU 파일 루트 (WU-<id>.md)
+│   ├── _INDEX.md
+│   └── WU-<id>/              # 200 line 초과 시만 하위 디렉토리
+├── sessions/                 # 세션별 3-part 로그 (squashed WU + 대화 요약 + decision log)
+│   └── _INDEX.md
+├── learning-logs/            # 장기 학습 자산 (OSS + Business 공용)
+│   └── YYYY-MM/P-<kebab>.md + _TEMPLATE.md
+├── HANDOFF-next-session.md · NEXT-SESSION-BRIEFING.md   # WU-17 에서 축소
+├── WORK-LOG.md               # index 역할로 재활용 (보존)
+├── tmp/                      # git 제외 (draft + snapshots)
+│   └── snapshots/<ISO>/
+└── .visibility-rules.yaml    # OSS fork 자동 필터
+```
+
+---
+
+# §4. Workflow v2 9축 결정 (확정, 2026-04-21)
+
+| # | 항목 | 결정 |
+|:-:|:---|:---|
+| 1 | 진입점 | PROGRESS.md + current WU file (**2-file entry**) |
+| 2 | WU 분리 | 단일 파일 기본 + 200 line 초과 시 sub-step 분리 (~300 유연) |
+| 3 | 유실 방지 | micro WIP commit + 세션 종료 시 squash + tmp/snapshots/ 자동 |
+| 4 | 임계값 | **200 line** (~300 까지 유연) |
+| 5 | 세션 로그 상세도 | squashed WU 목록 + 대화 요약 + decision log (3-part) |
+| 6 | Auto-snapshot | **활성화** (15분 + WU/micro-step 전환 이벤트) |
+| 7 | Migration 타이밍 | 다음 세션 바로 WU-15 착수 |
+| 8 | v2 SSoT 위치 | **본 `CLAUDE.md`** |
+| 9 | WORK-LOG 처리 | 보존 + index 재활용 |
+
+---
+
+# §5. WU (Work Unit) Frontmatter 스키마
+
+> WU 정의는 §2.1 용어집 참조. 파일 경로: `sprints/WU-<id>.md`.
+
+필수 필드 (YAML): `wu_id` · `title` · `status` (pending/in_progress/done/abandoned) · `opened_at` / `closed_at` · `session_opened` / `session_closed` · `final_sha` (squash 후, in_progress 면 null) · `refresh_wu` (있으면 `WU-<id>.1`) · `visibility` (§7 tier) · `entry_point` (재개 가이드 1 line) · `depends_on_reads` · `files_touched` · `decision_points` (todo_id/type/escalated_to) · `learning_patterns_emitted` · `sub_steps_split` (200 line 초과 시만 true).
+
+---
+
+# §6. PROGRESS.md 구조 + 진입 순서
+
+frontmatter: `current_wu` + `current_wu_path`. 본문 4 필드 (Just-Finished / In-Progress / Next / Artifacts).
+
+**세션 진입 순서** (2 파일): `CLAUDE.md` 우선 → `PROGRESS.md` 읽고 → `current_wu_path` WU 파일 읽고 → 재개.
+
+---
+
+# §7. Visibility Tier 규율
+
+- **`oss-public`** — OSS fork 포함. 변경 시 마케팅 프로덕트 이상 동작 없음 검증.
+- **`business-only`** — Business 제품만. OSS fork 에서 자동 제외.
+- **`raw-internal`** — 사용자 개인 운영 데이터 (sessions/, learning-logs/ 대부분, tmp/, 미완성 draft). 양쪽 제외.
+
+---
+
+# §8. 커밋 규율
+
+- micro WIP: `wip(WU-<id>/step-<n>/<tag>): <요약>` · WU 완료 시 interactive rebase 로 squash.
+- Final: `WU-<id>: <제목>` (squash 결과).
+- Refresh: `WU-<id>.1: <제목> forward sha backfill` — 독립 커밋 유지 (squash 제외).
+- Push: **사용자 터미널에서만** (§1.5).
+
+---
+
+# §9. Auto-snapshot 규율
+
+트리거 (15분 + WU 전환 + micro-step 완료 + `tmp/*.md` 저장 + PROGRESS.md 덮어쓰기) → `tmp/snapshots/<ISO>/<file>.md` + `_manifest.yaml`. Cleanup: 24시간 초과 + non-event 삭제. Script: `scripts/snapshot.sh` (WU-15).
+
+---
+
+# §10. 학습 패턴 (learning-logs/)
+
+월 단위 group (`YYYY-MM/`) + `P-<kebab-name>.md` + frontmatter `visibility` 필수. 현 패턴 후보 3건: `P-fuse-git-bypass` (FUSE lock 우회) · `P-compact-recovery` (compact mid-WU 복구) · `P-two-step-wu-refresh` (WU+WU.1 sha backfill).
+
+---
+
+# §11. 다음 세션 진입 체크리스트
+
+1. **본 `CLAUDE.md` 읽기** (최우선 — 절대 규칙 + v2 구조 확인).
+2. `PROGRESS.md` → `② In-Progress` + `current_wu_path` 취득.
+3. `current_wu_path` 의 WU 파일 읽기 → 재개.
+4. 필요 시 on-demand: `cross-ref-audit.md §4` / `tmp/workflow-v2-design.md` / `tmp/w10-todo-*.md`.
+
+---
+
+# §12. 현 시점 상태 (2026-04-21)
+
+git ahead 16 · Track B clean · W10 TODO 19 항목 (사전 분석 3/7: #14/#18/#19 완료, 대기 #8/#15/#16/#17) · v2 SSoT = 본 CLAUDE.md 확정 · 다음 WU = **WU-15 Workflow v2 인프라** (다음 세션 첫 작업).
+
+---
+
+# §13. 참고 파일
+
+`tmp/workflow-v2-design.md` (draft-0.3, v2 상세 근거) · `tmp/w10-todo-{14,18,19}.md` (W10 사전 분석) · `cross-ref-audit.md §4` (W10 TODO SSoT) · `HANDOFF-next-session.md` · `NEXT-SESSION-BRIEFING.md` (WU-17 축소 대상).
+
+---
+
+# §14. Solon Session Status Report (v0.6.3, 확정 — WU 완료 dashboard)
+
+> **role**: WU dashboard — WU 전환 시 1회 출력되는 1줄 summary dashboard. 상세 drill-down 은 기존 3 체계에 위임:
+> - **PDCA Check** (전체 Plan↔Do gap analysis) — §14 와 보완 관계
+> - **cross-ref-audit §4** (W10 TODO SSoT) — §14 ⚠️ Escalation 은 TODO 포인터
+> - **sessions/ 3-part 로그** (squashed WU + 대화 요약 + decision log) — §14 는 live, sessions 는 히스토리
+>
+> **대체 목적**: bkit Feature Usage Report 대신 Solon WU 완료 증적 + 상태 summary.
+> **Visibility**: `raw-internal` (사용자 개인 세션 전용).
+
+## 14.1 출력 빈도 (확정)
+
+- **WU 전환 시에만** — WU 완료 commit 직후 또는 다음 WU 착수 직전.
+- 매 응답 말미·micro-step 완료 시 출력 **금지** (토큰 낭비).
+- 세션 자연 종결점·사용자 명시 요청 시 수시 출력 허용.
+
+## 14.2 포맷 (v0.6.3 — topic별 1-line summary, 본 세션 확정)
+
+> 🚨 **렌더링 규칙 (필수)**: 리포트는 **반드시 triple-backtick code fence 안에 출력**. Plain text 출력 시 markdown 이 줄바꿈 삭제 → 한 줄 벽 텍스트로 붕괴됨.
+
+> 📐 **Topic별 1-line 규칙 (v0.6.3)**: 각 zone/topic 은 **1 줄 summary** 로 끝낸다. `<N 건> — <핵심 1줄 요약>` 패턴. 상세는 WU 파일·sessions/·learning-logs/ 등 해당 소스에 위임. Status Report 는 **dashboard 용도 only**.
+
+> ⚠️ **Wrap column**: 한글 혼용 60 cell · ASCII 70 cell 이내 유지. 초과 시 auto-wrap 으로 indent 깨짐 → 요약 더 축약.
+
+> **설계 원칙**: 5 zone · 각 topic 1 줄 · heavy divider (`━━`) 리포트 경계 · light divider (`───`) zone 구분. 값 없는 topic 은 `0 건 — 없음`.
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 SOLON STATUS — WU 완료 리포트
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 WU     <id> · <title>                    [<status>]
+⏱️ Time   <opened> → <closed>  (<duration>)
+───────────────────────────────────────────────────
+🔧 Steps   <N>건 — <핵심 주제 1줄>
+📁 Files   <N>개 — <핵심 파일/주제 1줄>
+💾 Commits <N>건 — <sha 또는 "없음 (사유)">
+📊 Health  ahead <a>·대기 <p> | PROG <HH:MM> <✓/⚠> | Snap <−/HH:MM> | 원칙2 <○/△/×> | <tier>
+───────────────────────────────────────────────────
+⚠️ Escalation <N>건 — <1줄 요약 또는 "없음">
+📚 Learning   <N>건 — <1줄 요약 또는 "없음">
+───────────────────────────────────────────────────
+⏭️ Next  <다음 WU/action 1줄>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**범례**
+- Zone ① Identity: 🎯 WU id/title/status + ⏱️ opened→closed + duration (2 줄).
+- Zone ② Work evidence: 🔧 Steps · 📁 Files · 💾 Commits 각 1 줄 summary (3 줄 총). label 뒤 공백으로 col 정렬.
+- Zone ③ Health: `|` 가로 bar 1 줄 — ahead/대기 + PROG + Snap + 원칙2 + tier.
+- Zone ④ Alerts: ⚠️ Escalation · 📚 Learning 각 1 줄.
+- Zone ⑤ Next: 1 줄.
+- 총 라인 수: divider 포함 ~13 줄 dashboard. 상세 drill-down 은 원본 문서로.
+
