@@ -2,10 +2,10 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-21T08:00:00+09:00
-session: "6번째 세션 `relaxed-vibrant-albattani` — resume_hint 자동 감지 OK → §14.3 수용 확정 (CLAUDE.md v1.15) → WU-15 Workflow v2 인프라 설정 in_progress."
-current_wu: WU-15
-current_wu_path: sprints/WU-15.md
+last_overwrite: 2026-04-21T11:40:00+09:00
+session: "6번째 세션 `relaxed-vibrant-albattani` — resume_hint ㄱㄱ→§14.3 수용→WU-15 완료(aa0a354)→WU-15.1 refresh 진행 중 (README §11.1 glossary + frontmatter/PROGRESS backfill)."
+current_wu: WU-15.1
+current_wu_path: sprints/WU-15.md   # refresh WU 는 독립 파일 만들지 않고 WU-15.md 의 refresh_wu 필드로만 참조
 purpose: "context reset 시 다음 세션이 본 파일 1개만 읽고 즉시 이어받을 수 있도록, 매 micro-step 마다 덮어쓰는 live snapshot. 히스토리 아님 (히스토리는 sessions/ + WORK-LOG.md). 4 필드 (방금 끝낸 것 / in-progress / 다음 / 중간 산출물 경로) 만 유지."
 companions:
   - "NEXT-SESSION-BRIEFING.md (5분 진입 가이드, WU 경계마다 refresh)"
@@ -56,6 +56,11 @@ resume_hint:
 
 ## ① Just-Finished
 
+- **WU-15 커밋 완료** (`aa0a354`, ahead 17) — Workflow v2 인프라 설정 **단일 atomic commit** (12 파일, +853/-20 line):
+  - 신규: `sprints/` + `sessions/` + `learning-logs/` + `tmp/snapshots/` 디렉토리 + 각 `_INDEX.md` · `learning-logs/_TEMPLATE.md` · `.visibility-rules.yaml` · `scripts/snapshot.sh` + `scripts/squash-wu.sh` · `CLAUDE.md` v1.15 (SSoT 첫 커밋) · `sprints/WU-15.md` (본 WU 파일)
+  - 수정: `PROGRESS.md` frontmatter (current_wu / current_wu_path 신설) · `.gitignore` (sprints/_scratch/) · `NEXT-SESSION-BRIEFING.md` (W10 사전 분석 참조 2-line 흡수)
+  - FUSE bypass 1회 적용 (stale `.git/index.lock` 2026-04-20 05:42 감지 → `/tmp/solon-git-20260421T021950/` 경유 → rsync back)
+- **resume_hint 실전 검증 성공** — 본 세션 첫 발화 `ㄱㄱ` → trigger_positive 매칭 → default_action 자동 실행 → §14.3 수용 Q 에서 safety_lock 정지 → 사용자 `ㅇㅇ 수용` → WU-15 착수까지 전 과정 기대 동작. schema v1 수정 사항 없음.
 - **CLAUDE.md v1.5 확정** (루트 `/2026-04-19-sfs-v0.4/CLAUDE.md`, 196 line, 200 line 목표 내):
   - v1.0 → v1.1 (한국어 반말 제거) → v1.2 (9 항목 재정렬) → v1.3 (§14 초안 신설) → v1.4 (§14 v0.2 확정 + WU 약어) → **v1.5 (§2.1 용어집 신설 + §14 v0.3 블록 그룹핑 포맷 + §5/§8 압축)**.
   - §1 절대 규칙 9 항목: bkit Starter hook 무시 / bkit Feature Usage Report 미출력 + **Solon Session Status Report 출력** / 원칙 2 준수 / Option β default / git push 사용자 전용 / FUSE bypass 필수 / 결정 escalation 규율 / 유실 최소화 최우선 / 데이터 전수 기록.
@@ -81,23 +86,18 @@ resume_hint:
 
 ## ② In-Progress
 
-- **(없음)** — 5번째 세션 **최종 종결점**. CLAUDE.md v1.13 (v2 SSoT + §14 Solon Status Report v0.6.3 topic별 1줄 dashboard 확정) + Workflow v2 design draft-0.3 + Track B 큐 clean + W10 TODO 3건 사전 분석 완료.
-- **⚠️ §14.3 1건 대기** — 다음 세션 첫 대화에서 확인: §14 dashboard 역할 vs 기존 리포트 체계 (PDCA Check / cross-ref §4 / sessions 3-part) 역할 분담. CLAUDE.md §14.3 에 option β default 초안 기록. 사용자 확정 시 §14.3 삭제 + §14 헤더에 "role: WU dashboard" 명시로 최종 확정.
+- **WU-15.1 refresh** — WU-15 (`aa0a354`) forward sha backfill + README §11.1 workflow glossary 추가 + WU-15.md frontmatter (`status: done` · `closed_at` · `final_sha: aa0a354` · `refresh_wu: WU-15.1`) + 본 PROGRESS 갱신. 단일 refresh 커밋 예정 (wip 분할 없음). **커밋 대기** 상태.
 
-## ③ Next (다음 세션 진입 순서)
+## ③ Next (본 세션 내 or 다음 세션 진입 순서)
 
-1. **첫 대화**: CLAUDE.md §14.3 1건 확인 (option β default 초안 수용 여부 → 수용 시 §14.3 삭제 + §14 헤더 role 명시).
-2. **WU-15 "Workflow v2 인프라 설정" 즉시 착수**:
-   - `sprints/` + `sessions/` + `learning-logs/` + `tmp/snapshots/` 디렉토리 + 각 `_INDEX.md`
-   - `learning-logs/_TEMPLATE.md` 작성
-   - `.visibility-rules.yaml` 작성 — `tmp/workflow-v2-design.md §9.4` 스켈레톤 기반
-   - `PROGRESS.md` frontmatter 에 `current_wu` / `current_wu_path` 추가
-   - `scripts/squash-wu.sh` + `scripts/snapshot.sh` 초안 (실전 검증은 WU-18)
-   - `.gitignore` 에 `tmp/snapshots/`, `sprints/_scratch/` 추가
-   - **`CLAUDE.md` + `PROGRESS.md` 는 본 세션 커밋 대기** → WU-15 커밋에 포함
-3. **WU-15 후 연속**: WU-16 기존 WU 이관 → WU-17 HANDOFF/BRIEFING 축소 → WU-18 v2 운영 1주 검증 (Phase 1 킥오프 D-6, 2026-04-27).
-4. **병행 옵션**: (a) W10 결정 세션 (#14/#18/#19) · (b) 나머지 W10 사전 분석 (#15/#16/#17) · (c) WU-6 질문지 · (d) git push 확인 (origin/main 16 반영).
-5. **커밋 대기 변경사항**: `CLAUDE.md` (v1.13) + `PROGRESS.md` (live snapshot) + `tmp/workflow-v2-design.md` (git 제외, 참고용).
+1. **WU-15.1 커밋** — `WU-15.1: sha aa0a354 backfill + README §11.1 workflow glossary 추가` (FUSE bypass 1회 더 적용 예상, stale lock 재발).
+2. **WU-16 "기존 WU 이관"** — 본 세션 계속 or 다음 세션 첫 작업:
+   - `WORK-LOG.md` 의 WU-7 ~ WU-14.1 entry → `sprints/WU-<id>.md` 독립 파일 분리 (WORK-LOG 는 index 재활용)
+   - `sessions/` 에 과거 3 세션 (1~2번째 + `funny-compassionate-wright` + `serene-fervent-wozniak`) retrospective 생성 (3-part)
+   - 각 WU 에 `visibility` tier 라벨링 (대부분 `raw-internal` 예상)
+3. **WU-17 "HANDOFF / BRIEFING 축소"** — WU-16 후: 두 파일을 `sprints/_INDEX.md` + `sessions/_INDEX.md` 참조로 축약 (-80% 목표).
+4. **WU-18 "v2 운영 1주 검증"** — Phase 1 킥오프 D-6 이전: 진입 시간 · compact 복구 · learning-logs/ 첫 패턴 3건 실체화 · 임계값 조정.
+5. **병행 옵션**: (a) W10 결정 세션 (#14/#18/#19) · (b) 나머지 W10 사전 분석 (#15/#16/#17) · (c) BLOCKED WU-6 질문지 · (d) git push 확인 (origin/main 17 반영).
 
 ## ④ Artifacts (현재 시점 중간 산출물 위치)
 

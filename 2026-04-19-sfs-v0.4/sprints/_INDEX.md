@@ -17,7 +17,13 @@ updated: 2026-04-21
 
 | WU | title | status | opened | session | path |
 |:--:|:---|:-:|:---|:---|:---|
-| WU-15 | Workflow v2 인프라 설정 | in_progress | 2026-04-21 | (본 세션) | [WU-15.md](WU-15.md) |
+| WU-15.1 | WU-15 forward sha backfill + README §11.1 glossary | in_progress | 2026-04-21 | (본 세션) | [WU-15.md](WU-15.md) (refresh 전용, 독립 파일 없음) |
+
+## 완료 WU (status: done) — v2 네이티브
+
+| WU | title | final_sha | opened | closed | session | path |
+|:--:|:---|:---|:---|:---|:---|:---|
+| WU-15 | Workflow v2 인프라 설정 | `aa0a354` | 2026-04-21 | 2026-04-21 | relaxed-vibrant-albattani | [WU-15.md](WU-15.md) |
 
 ## 완료 WU (status: done) — Backfill 대상 (WU-16)
 
