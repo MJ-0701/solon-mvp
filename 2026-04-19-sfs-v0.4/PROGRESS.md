@@ -2,10 +2,16 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-21T12:15:00+09:00
-session: "6번째 세션 `relaxed-vibrant-albattani` — resume_hint ㄱㄱ→§14.3 수용→WU-15 완료(aa0a354)→WU-15.1 완료(acfae03)→sprints/_INDEX.md forward-backfill 커밋 + 세션 중단 (사용자 다른 작업 위해)."
-current_wu: null   # WU-15.1 종료 + _INDEX.md 마무리까지 완료, 다음 WU 미착수
+last_overwrite: 2026-04-21T14:17:00+09:00
+session: "6번째 세션 `relaxed-vibrant-albattani` + 7번째 세션 `serene-fervent-wozniak` (본 세션, 재개) — WU-15 병렬 감지 후 hotfix 착수: §1 #12 Session mutex protocol + current_wu_owner 스키마 신설."
+current_wu: null   # hotfix 는 WU 단위 아님
 current_wu_path: null
+current_wu_owner:
+  session_codename: serene-fervent-wozniak
+  claimed_at: 2026-04-21T14:17:00+09:00
+  last_heartbeat: 2026-04-21T14:17:00+09:00
+  current_step: "hotfix: §1 #12 Session mutex protocol + PROGRESS.md current_wu_owner 스키마 신설 (WU-15 병렬 재발 방지)"
+  ttl_minutes: 15   # 사용자 지정 (2026-04-21)
 purpose: "context reset 시 다음 세션이 본 파일 1개만 읽고 즉시 이어받을 수 있도록, 매 micro-step 마다 덮어쓰는 live snapshot. 히스토리 아님 (히스토리는 sessions/ + WORK-LOG.md). 4 필드 (방금 끝낸 것 / in-progress / 다음 / 중간 산출물 경로) 만 유지."
 companions:
   - "NEXT-SESSION-BRIEFING.md (5분 진입 가이드, WU 경계마다 refresh)"
@@ -50,15 +56,18 @@ resume_hint:
 
 ## ① Just-Finished
 
-- **세션 중단 (자연 종결점)** — 사용자 다른 작업을 위해 세션 중단 요청 (2026-04-21 12:15). WU-15 / WU-15.1 / _INDEX.md housekeeping 모두 local 커밋 완료, **push 는 사용자 터미널에서 수행 예정**.
-- **WU-15.1-fin 커밋 (`<이번 커밋 sha>`, ahead 19)** — `sprints/_INDEX.md` forward-backfill (WU-15.1 을 active → done 으로 이동 + 자기 sha `acfae03` 기록) + 본 PROGRESS.md 세션 종료 상태 반영. _INDEX.md 가 WU-15.1 본체 커밋 시점에 아직 없던 sha 를 기록하기 때문에 별도 housekeeping 커밋 분리.
+- **hotfix 착수 (WU 단위 아님)** — WU-15 병렬 작업 사후 감지 (TZ `+0000` vs `+0900` 으로 2 세션 판별). 운 좋게 충돌 안 났지만 재발 시 diff 다른 2 커밋 or FUSE race 위험. 사용자 결정: β + TTL 15min + 즉시 착수.
+  - **CLAUDE.md v1.15 → v1.16**: §1 #12 "Session mutex protocol" 신설 — owner != self AND heartbeat < TTL → STOP + 사용자 확인 / stale → takeover 허가 요청 (자동 takeover 금지) / null or self → claim.
+  - **PROGRESS.md frontmatter**: `current_wu_owner` 필드 신설 (`session_codename` · `claimed_at` · `last_heartbeat` · `current_step` · `ttl_minutes`). 본 세션 claim: `serene-fervent-wozniak` @ 14:17 KST.
+  - **배경**: `aa0a354` + `acfae03` 는 TZ `+0000` (다른 샌드박스 user `nobody`) = `relaxed-vibrant-albattani`. 나머지 모든 커밋은 TZ `+0900` = `serene-fervent-wozniak`. sessions/_INDEX.md 도 이미 self-declaration 되어 있어 사후 추적 가능.
+- **WU-15.1-fin 커밋 (`39d0d90`, ahead 19)** — `sprints/_INDEX.md` forward-backfill (WU-15.1 을 active → done 으로 이동 + 자기 sha `acfae03` 기록) + 본 PROGRESS.md 세션 종료 상태 반영. _INDEX.md 가 WU-15.1 본체 커밋 시점에 아직 없던 sha 를 기록하기 때문에 별도 housekeeping 커밋 분리.
 - **WU-15.1 커밋 완료** (`acfae03`, ahead 18) — WU-15 forward sha backfill + README §11.1 workflow glossary 추가 + `sprints/WU-15.md` frontmatter 확정 (`status: done` · `final_sha: aa0a354` · `refresh_wu: WU-15.1`).
 - **WU-15 커밋 완료** (`aa0a354`, ahead 17) — Workflow v2 인프라 설정 **단일 atomic commit** (12 파일, +853/-20 line): `sprints/` + `sessions/` + `learning-logs/` + `tmp/snapshots/` 디렉토리 + 각 `_INDEX.md` · `learning-logs/_TEMPLATE.md` · `.visibility-rules.yaml` · `scripts/snapshot.sh` + `scripts/squash-wu.sh` · **`CLAUDE.md` v1.15 (SSoT 첫 커밋, §1 11항목 · §2.1 용어집 · §14 Status Report v0.6.3 topic-1line)** · `sprints/WU-15.md` · `PROGRESS.md` frontmatter (current_wu / **resume_hint** 필드 신설) · `.gitignore` 갱신 · `NEXT-SESSION-BRIEFING.md` 2-line 흡수.
 - **resume_hint 실전 검증 성공** — 본 세션 첫 발화 `ㄱㄱ` → trigger_positive 매칭 → default_action 자동 실행 → §14.3 수용 Q 에서 safety_lock 정지 → 사용자 `ㅇㅇ 수용` → WU-15 착수까지 전 과정 기대 동작. schema v1 수정 사항 없음.
 
 ## ② In-Progress
 
-_(없음 — 세션 중단 자연 종결점, local 커밋 모두 clean.)_
+- **hotfix 커밋 대기** — CLAUDE.md v1.16 + PROGRESS.md frontmatter `current_wu_owner` 추가. 단일 커밋 (WU 번호 부여 안 함, `hotfix:` 접두사). FUSE bypass 1회 적용 예상.
 
 ## ③ Next (다음 세션 진입)
 
