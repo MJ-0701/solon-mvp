@@ -2,16 +2,16 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-21T14:17:00+09:00
-session: "6번째 세션 `relaxed-vibrant-albattani` + 7번째 세션 `serene-fervent-wozniak` (본 세션, 재개) — WU-15 병렬 감지 후 hotfix 착수: §1 #12 Session mutex protocol + current_wu_owner 스키마 신설."
-current_wu: null   # hotfix 는 WU 단위 아님
+last_overwrite: 2026-04-21T14:28:00+09:00
+session: "6번째 세션 `relaxed-vibrant-albattani` + 7번째 세션 `serene-fervent-wozniak` (본 세션) — WU-15 병렬 감지 → hotfix 커밋(422c67e: §1 #12 Session mutex) → owner release → 세션 종료 (사용자 선택 (a))."
+current_wu: null   # hotfix 완료, WU 단위 아님
 current_wu_path: null
-current_wu_owner:
-  session_codename: serene-fervent-wozniak
-  claimed_at: 2026-04-21T14:17:00+09:00
-  last_heartbeat: 2026-04-21T14:17:00+09:00
-  current_step: "hotfix: §1 #12 Session mutex protocol + PROGRESS.md current_wu_owner 스키마 신설 (WU-15 병렬 재발 방지)"
-  ttl_minutes: 15   # 사용자 지정 (2026-04-21)
+current_wu_owner: null   # 2026-04-21T14:28+09:00 `serene-fervent-wozniak` 자연 종료 release. 다음 세션은 mutex 확인 후 자유롭게 claim 가능.
+# released_history (감사 추적용, optional — 다음 세션이 직전 owner 누구였는지 참고):
+#   last_owner: serene-fervent-wozniak
+#   last_claimed_at: 2026-04-21T14:17:00+09:00
+#   last_released_at: 2026-04-21T14:28:00+09:00
+#   last_reason: "hotfix 완료 + 사용자 선택 (a) release → 세션 종료"
 purpose: "context reset 시 다음 세션이 본 파일 1개만 읽고 즉시 이어받을 수 있도록, 매 micro-step 마다 덮어쓰는 live snapshot. 히스토리 아님 (히스토리는 sessions/ + WORK-LOG.md). 4 필드 (방금 끝낸 것 / in-progress / 다음 / 중간 산출물 경로) 만 유지."
 companions:
   - "NEXT-SESSION-BRIEFING.md (5분 진입 가이드, WU 경계마다 refresh)"
@@ -56,10 +56,11 @@ resume_hint:
 
 ## ① Just-Finished
 
-- **hotfix 착수 (WU 단위 아님)** — WU-15 병렬 작업 사후 감지 (TZ `+0000` vs `+0900` 으로 2 세션 판별). 운 좋게 충돌 안 났지만 재발 시 diff 다른 2 커밋 or FUSE race 위험. 사용자 결정: β + TTL 15min + 즉시 착수.
-  - **CLAUDE.md v1.15 → v1.16**: §1 #12 "Session mutex protocol" 신설 — owner != self AND heartbeat < TTL → STOP + 사용자 확인 / stale → takeover 허가 요청 (자동 takeover 금지) / null or self → claim.
-  - **PROGRESS.md frontmatter**: `current_wu_owner` 필드 신설 (`session_codename` · `claimed_at` · `last_heartbeat` · `current_step` · `ttl_minutes`). 본 세션 claim: `serene-fervent-wozniak` @ 14:17 KST.
-  - **배경**: `aa0a354` + `acfae03` 는 TZ `+0000` (다른 샌드박스 user `nobody`) = `relaxed-vibrant-albattani`. 나머지 모든 커밋은 TZ `+0900` = `serene-fervent-wozniak`. sessions/_INDEX.md 도 이미 self-declaration 되어 있어 사후 추적 가능.
+- **세션 종료 (자연 종결점, mutex release)** — 사용자 선택 (a) 수용 → `current_wu_owner: null` release + session 종료 (2026-04-21 14:28 KST). 다음 세션은 mutex 프로토콜 통과 후 자유롭게 claim 가능.
+- **hotfix 커밋 완료 (`422c67e`, ahead 20)** — WU 단위 아님. WU-15 병렬 재발 방지용 §1 rule + schema 확장.
+  - **CLAUDE.md v1.15 → v1.16**: §1 #12 "Session mutex protocol" 신설 — owner != self AND heartbeat < TTL → STOP + 사용자 확인 / stale → takeover 허가 요청 (자동 takeover 금지) / null or self → claim. PROGRESS 덮어쓰기마다 heartbeat 자동 갱신.
+  - **PROGRESS.md frontmatter**: `current_wu_owner` 필드 신설 (`session_codename` · `claimed_at` · `last_heartbeat` · `current_step` · `ttl_minutes`). TTL 15 min (사용자 지정).
+  - **배경**: `aa0a354` + `acfae03` 는 TZ `+0000` (다른 샌드박스 user `nobody`) = `relaxed-vibrant-albattani`. 나머지 모든 커밋은 TZ `+0900` = `serene-fervent-wozniak`. sessions/_INDEX.md 도 이미 self-declaration 되어 있어 사후 추적 가능 — **git log TZ 차이가 2-세션 병렬 감지의 가장 빠른 지표** (learning-log 대상).
 - **WU-15.1-fin 커밋 (`39d0d90`, ahead 19)** — `sprints/_INDEX.md` forward-backfill (WU-15.1 을 active → done 으로 이동 + 자기 sha `acfae03` 기록) + 본 PROGRESS.md 세션 종료 상태 반영. _INDEX.md 가 WU-15.1 본체 커밋 시점에 아직 없던 sha 를 기록하기 때문에 별도 housekeeping 커밋 분리.
 - **WU-15.1 커밋 완료** (`acfae03`, ahead 18) — WU-15 forward sha backfill + README §11.1 workflow glossary 추가 + `sprints/WU-15.md` frontmatter 확정 (`status: done` · `final_sha: aa0a354` · `refresh_wu: WU-15.1`).
 - **WU-15 커밋 완료** (`aa0a354`, ahead 17) — Workflow v2 인프라 설정 **단일 atomic commit** (12 파일, +853/-20 line): `sprints/` + `sessions/` + `learning-logs/` + `tmp/snapshots/` 디렉토리 + 각 `_INDEX.md` · `learning-logs/_TEMPLATE.md` · `.visibility-rules.yaml` · `scripts/snapshot.sh` + `scripts/squash-wu.sh` · **`CLAUDE.md` v1.15 (SSoT 첫 커밋, §1 11항목 · §2.1 용어집 · §14 Status Report v0.6.3 topic-1line)** · `sprints/WU-15.md` · `PROGRESS.md` frontmatter (current_wu / **resume_hint** 필드 신설) · `.gitignore` 갱신 · `NEXT-SESSION-BRIEFING.md` 2-line 흡수.
@@ -67,7 +68,7 @@ resume_hint:
 
 ## ② In-Progress
 
-- **hotfix 커밋 대기** — CLAUDE.md v1.16 + PROGRESS.md frontmatter `current_wu_owner` 추가. 단일 커밋 (WU 번호 부여 안 함, `hotfix:` 접두사). FUSE bypass 1회 적용 예상.
+_(없음 — hotfix 커밋 완료 + mutex release + 세션 종료. local 커밋 모두 clean.)_
 
 ## ③ Next (다음 세션 진입)
 
