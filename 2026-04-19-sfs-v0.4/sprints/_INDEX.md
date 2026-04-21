@@ -15,15 +15,14 @@ updated: 2026-04-21
 
 ## 활성 WU (status: in_progress / pending)
 
-| WU | title | status | opened | session | path |
-|:--:|:---|:-:|:---|:---|:---|
-| WU-15.1 | WU-15 forward sha backfill + README §11.1 glossary | in_progress | 2026-04-21 | (본 세션) | [WU-15.md](WU-15.md) (refresh 전용, 독립 파일 없음) |
+_(없음 — WU-15.1 refresh 까지 완료. 다음 WU = WU-16 착수 대기.)_
 
 ## 완료 WU (status: done) — v2 네이티브
 
 | WU | title | final_sha | opened | closed | session | path |
 |:--:|:---|:---|:---|:---|:---|:---|
 | WU-15 | Workflow v2 인프라 설정 | `aa0a354` | 2026-04-21 | 2026-04-21 | relaxed-vibrant-albattani | [WU-15.md](WU-15.md) |
+| WU-15.1 | WU-15 sha backfill + README §11.1 glossary | `acfae03` | 2026-04-21 | 2026-04-21 | relaxed-vibrant-albattani | [WU-15.md](WU-15.md) (refresh 전용) |
 
 ## 완료 WU (status: done) — Backfill 대상 (WU-16)
 
