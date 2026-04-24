@@ -1,0 +1,86 @@
+# CLAUDE.md — `solon-mvp` 프로젝트 세션 지침
+
+> 본 파일은 Claude Code 세션이 repo 에 처음 진입할 때 최우선으로 읽는 지침.
+> 회사 IP (관리자 페이지) — 외부 링크 / 경로 / repo URL 등 비공개 정보 기록 금지.
+
+## 프로젝트 개요
+
+- **이름**: `solon-mvp`
+- **도메인**: 관리자 페이지 — 매출 조회 / 현금영수증 발행 / 권한 관리 / 대시보드
+- **단계**: MVP (Phase 1), greenfield, 7-step lightweight spike 운용.
+- **Stack**: `<STACK>` (예: Next.js 15 App Router + TypeScript)
+- **DB**: `<DB>` (예: Postgres + Prisma)
+- **배포**: `<DEPLOY>` (예: Vercel)
+- **현금영수증 외부 API**: `<RECEIPT-API>` (예: 국세청 홈택스 e-세로 / 미정)
+
+## 운영 방식 — 7-step flow
+
+각 1 cycle = 1 Sprint = 5~7 일. 순서:
+
+1. **브레인스토밍** (G0) — `.sfs-local/sprints/<sprint-id>/brainstorm.md`
+2. **plan** (G1) — `.sfs-local/sprints/<sprint-id>/plan.md`
+3. **sprint** (plan 의 metadata 섹션)
+4. **구현** (G2 entry self-check) — 실제 코드 + local commits
+5. **review** (G4) — `.sfs-local/sprints/<sprint-id>/review.md`
+6. **commit** — 사용자 터미널에서 `git push origin main`
+7. **문서화** — `.sfs-local/sprints/<sprint-id>/retro-light.md` + README 업데이트
+
+### Gate 운용 (4 개, 축소판)
+
+| Gate | 의미 | hard-block? |
+|---|---|---|
+| G0 | 브레인스토밍 entry | No — signal only |
+| G1 | plan approval | No — self-check |
+| G2 | 구현 entry | No — 구현 직전 1 줄 선언 |
+| G4 | review | No — verdict 기록만 |
+
+G-1 / G3 / G5 는 이 MVP 에서 **skip**. 필요성 느끼면 별도 논의 후 도입.
+
+> **중요 (원칙 13 ALT-INV-3)**: Gate 는 hard-block 이 아니라 **signal**. fail 이어도 cycle 은 계속 진행 가능 — 다만 기록 남김.
+
+## 산출물 저장 규칙
+
+- Sprint 산출물: `.sfs-local/sprints/<YYYY-W>-sprint-<N>/` (예: `2026-W18-sprint-1/`)
+  - `brainstorm.md` · `plan.md` · `review.md` · `retro-light.md` 4 파일
+- L1 event log: `.sfs-local/events.jsonl` (수동 append, 각 line 1 JSON)
+- 결정 (ADR mini): `.sfs-local/decisions/<N>-<short-title>.md` (1~3 줄)
+
+## 6 본부 활성 상태 (divisions)
+
+- `dev` (active) — 사용자 직접 (self-lead, Opus lead agent 없음)
+- `strategy-pm` (active) — 사용자 직접
+- `qa` (abstract) — MVP 는 manual smoke test 대체
+- `design` (abstract) — 기존 디자인 시스템 (shadcn/ui 등) 차용
+- `infra` (abstract) — `<DEPLOY>` 재사용
+- `taxonomy` (abstract) — cycle 2~3 누적 후 도입
+
+세부는 `.sfs-local/divisions.yaml`.
+
+## 관찰성 (Observability, L1/L2/L3)
+
+- **L1**: `.sfs-local/events.jsonl` 수동 append. G0/G1/G2/G4 verdict 1 이벤트씩.
+- **L2**: git commit 자체가 channel. Sprint 시작/종료 commit sha 는 plan/review 에 기록.
+- **L3**: 외부 driver 미사용 (minimal tier).
+
+## 커뮤니케이션 규율
+
+- **한국어 반말**.
+- **짧고 직설**.
+- **기록 > 기억** — 중요한 결정은 `.sfs-local/decisions/` 또는 sprint 산출물에 남김.
+- 사용자가 "ㄱㄱ" / "이어서" 한 마디면 resume — 단 의미 결정 (A/B/C) 은 사용자에게.
+
+## 절대 금지
+
+- **외부 repo / 회사 내부 자산 / 방법론 docset 의 경로 하드코딩** — 본 repo 는 회사 IP, 외부 링크 유입 시 정리 필수.
+- **`git push origin *` 자동 실행** — push 는 사용자 터미널에서만.
+- **Gate hard-block** — 구현 자체를 막지 않음 (원칙 13 never-hard-block).
+- **권한/감사 로그 무시** — 관리자 페이지 도메인은 권한 관리가 핵심. `.sfs-local/decisions/` 에 RBAC 결정 반드시 남김.
+
+## 참고 방법론
+
+사용자는 외부 개인 방법론 docset 을 보유하고 있으며, 필요 시 대화에서 "내 외부 메모의
+gate framework 참고해서..." 처럼 지칭. 본 repo 에는 해당 docset 경로 기록 안 함 (개인 IP).
+
+## Changelog
+
+- v0.1 (`2026-04-24`, W0 init): 초기 배치.
