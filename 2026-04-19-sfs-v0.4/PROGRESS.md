@@ -9,8 +9,8 @@ current_wu_path: sprints/WU-18.md
 current_wu_owner:
   session_codename: ecstatic-intelligent-brahmagupta
   claimed_at: 2026-04-24T16:19:38+09:00
-  last_heartbeat: 2026-04-24T17:25:00+09:00
-  current_step: "WU-18 본체 작성 완료 (14 신규 파일). FUSE bypass 커밋 대기."
+  last_heartbeat: 2026-04-24T17:32:00+09:00
+  current_step: "WU-18 (d200299) 커밋 완료. WU-18.1 sha backfill 진행 중."
   ttl_minutes: 15
 released_history:
   last_owner: brave-hopeful-euler
@@ -81,11 +81,12 @@ resume_hint:
 - **IP 경계 엄격**: 모든 템플릿에 Solon 경로 / repo URL 하드코딩 없음. placeholder (`<PROJECT-NAME>` / `<STACK>` / `<DB>` / `<DEPLOY>` / `<RECEIPT-API>` 등) 만.
 - **원칙 2 준수**: 의미 결정 A/B/C 0건. W0 prerequisites 4 건 전부 사용자 결정 대기로 명시 (QUICK-START §1 체크박스).
 
+- **WU-18 커밋 완료** (`d200299`, ahead +1): 17 files changed, +857 / -27. FUSE bypass 1회.
+- **WU-18.1 진행 중** (커밋 대기): sprints/WU-18.md `final_sha: d200299` + `status: done` 실체화 + sprints/_INDEX.md 활성 WU 섹션 비움 + 완료 v2 네이티브 테이블에 WU-18/WU-18.1 추가 + PROGRESS.md 본 덮어쓰기.
+
 ## ② In-Progress
 
-- **WU-18 커밋 대기**: FUSE bypass git add + commit, 메시지 `WU-18: Phase 1 MVP W0 Pre-Arming (templates + plugin-wip skeleton + QUICK-START)`.
-- **WU-18.1 예약**: 커밋 후 sha backfill + sprints/_INDEX.md 이동 + PROGRESS.md 갱신.
-- **housekeeping 예약**: WU-18.1 forward sha backfill + heartbeat.
+_(WU-18.1 커밋 직전 — 본 덮어쓰기 포함 다음 FUSE bypass commit 대기.)_
 
 ## ③ Next (WU-18 완료 직후)
 
