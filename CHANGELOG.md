@@ -3,6 +3,14 @@
 모든 릴리스는 [Semantic Versioning](https://semver.org/lang/ko/) 을 따른다. `-mvp` suffix 는
 아직 풀스펙 (사용자 개인 방법론 docset) 으로 수렴하지 않은 최소 배포판임을 표시.
 
+## [0.2.1-mvp] — 2026-04-24
+
+### Changed
+
+- **upgrade.sh** — 변경 프리뷰를 line diff 대신 checksum 기반으로 표시.
+- **upgrade.sh** — 파일별 추천 선택(`install`, `skip`, `backup+overwrite`)과 checksum 값을 함께 출력.
+- **upgrade.sh** — non-TTY dry-run 에서 `/dev/tty` 경고가 노출되지 않도록 보정.
+
 ## [0.2.0-mvp] — 2026-04-24
 
 ### Added
