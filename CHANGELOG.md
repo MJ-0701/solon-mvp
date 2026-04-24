@@ -3,6 +3,19 @@
 모든 릴리스는 [Semantic Versioning](https://semver.org/lang/ko/) 을 따른다. `-mvp` suffix 는
 아직 풀스펙 (사용자 개인 방법론 docset) 으로 수렴하지 않은 최소 배포판임을 표시.
 
+## [0.2.3-mvp] — 2026-04-24
+
+### Changed
+
+- **upgrade.sh** — checksum 기반 자동 적용 정책으로 전환. 파일별 추가 질문 없이 신규 파일 설치,
+  managed 파일 backup+overwrite, 프로젝트 지침 파일 보존을 자동 수행.
+
+## [0.2.2-mvp] — 2026-04-24
+
+### Changed
+
+- **upgrade.sh** — 프리뷰 마지막에 사용자가 실제로 누를 키와 기본값 의미를 명시.
+
 ## [0.2.1-mvp] — 2026-04-24
 
 ### Changed

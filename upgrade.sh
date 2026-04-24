@@ -158,13 +158,15 @@ cat <<EOF
 읽는 법:
   - checksum 동일       → 변경 없음
   - 기존 없음          → 자동 신규 설치
-  - checksum 다름      → 파일별로 선택 필요
+  - checksum 다름      → 자동 정책에 따라 갱신 또는 보존
 
-추천 선택:
-  - SFS.md                     → backup+overwrite (공통 SFS core 최신화)
-  - CLAUDE/AGENTS/GEMINI.md    → skip 우선 (기존 프로젝트 지침 보호)
-  - .sfs-local/divisions.yaml  → skip 우선 (프로젝트별 운영값 보호)
-  - .claude/commands/sfs.md    → backup+overwrite (배포판 관리 커맨드 최신화)
+자동 처리 정책:
+  - 신규 파일                   → 자동 설치
+  - checksum 동일               → 변경 없음
+  - SFS.md                      → backup+overwrite (공통 SFS core 최신화)
+  - CLAUDE/AGENTS/GEMINI.md     → 자동 보존 (기존 프로젝트 지침 보호)
+  - .sfs-local/divisions.yaml   → 자동 보존 (프로젝트별 운영값 보호)
+  - .claude/commands/sfs.md     → backup+overwrite (배포판 관리 커맨드 최신화)
 
 EOF
 
@@ -201,7 +203,7 @@ for pair in "${CHECK_FILES[@]}"; do
       printf "    추천: %s\n" "$rec"
     else
       rec=$(recommend_action "$dst_rel" "yes" "no")
-      printf "    상태: checksum 다름 — 대화형 처리 대상\n"
+      printf "    상태: checksum 다름 — 자동 정책 적용 대상\n"
       printf "    checksum: existing=%s  new=%s\n" "$old_sum" "$new_sum"
       printf "    추천: %s\n" "$rec"
     fi
@@ -223,8 +225,14 @@ fi
 
 cat <<EOF
 
-진행하면 신규 파일과 .gitignore/VERSION 은 자동 처리되고,
-기존 파일과 checksum 이 다른 항목은 각 파일별로 선택지를 다시 물어봅니다.
+지금 무엇을 하면 되나:
+  - 계속하려면 아래 "업그레이드 진행? [y]:" 에서 Enter 를 누르세요.
+  - 멈추려면 n 을 입력하세요.
+
+적용 결과:
+  - 신규 파일과 .gitignore/VERSION 은 자동 처리됩니다.
+  - 기존 프로젝트 지침 파일은 자동 보존됩니다.
+  - backup+overwrite 대상은 기존 파일을 .bak-YYYYMMDD-HHMMSS 로 보관한 뒤 갱신합니다.
 
 EOF
 
@@ -235,7 +243,7 @@ if [ "$(prompt "업그레이드 진행?" "y")" != "y" ]; then
 fi
 
 # ============================================================================
-# 4. 파일별 갱신 (대화형)
+# 4. 파일별 갱신 (checksum 기반 자동 처리)
 # ============================================================================
 
 update_file() {
@@ -259,26 +267,22 @@ update_file() {
 
   warn "$dst_rel checksum 다름 ($label)"
   printf "    existing=%s  new=%s\n" "$old_sum" "$new_sum"
-  printf "    추천: %s\n" "$recommended"
-  while true; do
-    local ans
-    ans=$(prompt "    선택: [s]kip / [b]ackup+overwrite / [o]verwrite / [d]iff" "$recommended")
-    case "$ans" in
-      s|S|"skip"|"") ok "skip: $dst_rel"; return 0 ;;
-      b|B|"backup"|"backup+overwrite")
-        local ts=$(date +%Y%m%d-%H%M%S)
-        mv "$dst" "$dst.bak-$ts"
-        cp "$src" "$dst"
-        ok "백업 + 갱신: $dst_rel → $dst_rel.bak-$ts"
-        return 0 ;;
-      o|O|"overwrite") cp "$src" "$dst"; ok "덮어쓰기: $dst_rel"; return 0 ;;
-      d|D|"diff")
-        printf "\n--- diff: %s ---\n" "$dst_rel"
-        diff -u "$dst" "$src" || true
-        printf "--- end ---\n\n" ;;
-      *) warn "s/b/o/d 중 선택" ;;
-    esac
-  done
+  printf "    자동 정책: %s\n" "$recommended"
+  case "$recommended" in
+    b|B|"backup"|"backup+overwrite")
+      local ts=$(date +%Y%m%d-%H%M%S)
+      mv "$dst" "$dst.bak-$ts"
+      cp "$src" "$dst"
+      ok "백업 + 갱신: $dst_rel → $dst_rel.bak-$ts"
+      ;;
+    o|O|"overwrite")
+      cp "$src" "$dst"
+      ok "덮어쓰기: $dst_rel"
+      ;;
+    *)
+      ok "보존: $dst_rel"
+      ;;
+  esac
 }
 
 info ""
