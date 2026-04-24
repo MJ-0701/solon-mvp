@@ -2,17 +2,22 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-24T10:35:00+09:00
-session: "8번째 세션 `brave-hopeful-euler` 자연 종료 — WU-16 (2b8b69e) + WU-16.1 (227f900) 완료 후 인수인계 문서 세트 (HANDOFF v2.9 + NEXT-SESSION-BRIEFING v0.5 + 본 PROGRESS) 빡씨게 refresh. 사용자 장소 이동 지시 → mutex release. 다음 세션은 CLAUDE.md → PROGRESS.md → sprints/_INDEX.md 경로로 진입."
-current_wu: null           # WU-16.1 refresh 완료 후 활성 WU 없음. 다음 세션이 WU-17 claim 예정.
-current_wu_path: null
-current_wu_owner: null     # brave-hopeful-euler 자연 종료, 명시적 release.
+last_overwrite: 2026-04-24T16:19:38+09:00
+session: "9번째 세션 `ecstatic-intelligent-brahmagupta` 진입 — 사용자 `이어서 ㄱㄱ` + 'git 자동화 당분간 ON' 지시. 환경 제약 확인 (FUSE Cowork 샌드박스 GitHub 자격 전무 → push 는 사용자 터미널 의존 유지). WU-17 default 착수 — HANDOFF/BRIEFING 축소 (v2 참조 구조)."
+current_wu: WU-17
+current_wu_path: sprints/WU-17.md
+current_wu_owner:
+  session_codename: ecstatic-intelligent-brahmagupta
+  claimed_at: 2026-04-24T16:19:38+09:00
+  last_heartbeat: 2026-04-24T16:35:00+09:00
+  current_step: "WU-17 본체 작성 완료 (HANDOFF 151 + BRIEFING 104 = 합계 -77.6%). FUSE bypass 커밋 대기."
+  ttl_minutes: 15
 released_history:
   last_owner: brave-hopeful-euler
   last_claimed_at: 2026-04-24T09:45:00+09:00
   last_released_at: 2026-04-24T10:35:00+09:00
   last_reason: "WU-16 + WU-16.1 + v0.5 인수인계 문서 refresh 완료. 사용자 장소 이동 지시 (다음 세션은 이동 후 재진입)."
-  last_final_commits: [2b8b69e, 227f900]   # session housekeeping 커밋 추가될 수 있음 (본 덮어쓰기 반영 커밋)
+  last_final_commits: [2b8b69e, 227f900, f673cc2]
 purpose: "context reset 시 다음 세션이 본 파일 1개만 읽고 즉시 이어받을 수 있도록, 매 micro-step 마다 덮어쓰는 live snapshot. 히스토리 아님."
 companions:
   - "CLAUDE.md (§1 절대 규칙 + §1.12 mutex protocol + §2.1 용어집 — 최우선 진입)"
@@ -57,45 +62,33 @@ resume_hint:
   version: 1
 ---
 
-# PROGRESS — live snapshot (세션 종료 상태, mutex released)
+# PROGRESS — live snapshot (WU-17 진행 중, mutex claimed)
 
-> 🚨 **본 파일 최우선 진입.** mutex released (`current_wu_owner: null`) → 다음 세션은 §1.12 protocol 통과 후 self 로 claim → ③ Next 메뉴 중 선택.
+> 🚨 **본 파일 최우선 진입.** mutex claimed by `ecstatic-intelligent-brahmagupta` → WU-17 (HANDOFF/BRIEFING 축소) 본체 커밋 대기.
 
 ---
 
-## ① Just-Finished (2026-04-24 brave-hopeful-euler 세션 최종 성과)
+## ① Just-Finished (2026-04-24 ecstatic-intelligent-brahmagupta 세션 진행 중)
 
-- **WU-16 본체 완료** (`2b8b69e`, ahead +1 at 커밋 시점): 기존 WU (WU-7~14.1) 이관 — sprints/WU-{7,7.1,10,10.1,13,13.1,14,14.1}.md 8 신규 + sessions/2026-04-{20-funny-compassionate-wright,21-serene-fervent-wozniak,21-relaxed-vibrant-albattani}.md 3 retrospective + sprints/_INDEX.md 3-섹션 재편 + sessions/_INDEX.md 사실 오류 수정 (WORK-LOG Changelog v1.7~v1.19 SSoT) + .gitignore 루트 bkit plugin 메모리 전역 차단 + sprints/WU-16.md 본 메타 + PROGRESS.md mutex claim. 16 files, +884/-154. FUSE bypass 1회. 원칙 2 준수 (A/B/C 의미 결정 0건).
-- **WU-16.1 refresh 완료** (`227f900`, ahead +1 추가): WU-16 sha backfill + sprints/WU-16.md frontmatter `final_sha: 2b8b69e` 실체화 + sprints/_INDEX.md WU-16/16.1 을 v2 네이티브 테이블로 이동 + sessions/_INDEX.md 8번째 세션 행 실제 파일 참조로 갱신 + sessions/2026-04-24-brave-hopeful-euler.md 신규 (3-part + learning pattern 후보 4건: P-large-wu-atomic-single-commit 신규 / P-fuse-git-bypass 재 / P-two-step-wu-refresh 재 / P-resume-hint-multi-day-gap 신규). 5 files, +184/-116.
-- **v0.5 인수인계 문서 빡센 refresh** (본 덮어쓰기 직전):
-  - `HANDOFF-next-session.md` frontmatter v2.8 → **v2.9-v2-migration-complete** (completed_wus 에 WU-15/15.1/15.1-fin/hotfix/release/WU-16/16.1 7건 추가 · unpushed_commits = WU-16+WU-16.1 2 커밋 · queue.next_blocking = WU-17 · mutex_state_at_session_end 필드 신설 · session_continuity_note 추가).
-  - `NEXT-SESSION-BRIEFING.md` v0.4 → **v0.5** (frontmatter refresh_history v0.5 entry + §1 현 상태 스냅샷 완전 재작성 (ahead 2 / mutex release / v2 완주 명시) + §2 다음 할 일 (WU-17 default + 병행 (a)~(e)) + §8 6번째 · 7번째 병렬 · 8번째 세션 요약 block 3개 추가).
-  - `sprints/_INDEX.md` WU-16.1 `(pending)` → `227f900` 실체화.
-  - `PROGRESS.md` (본 파일) frontmatter `current_wu_owner: null` + `released_history.last_*` 기록.
-- **세션 release**: `brave-hopeful-euler` 2026-04-24 10:35 KST 자연 종료. 다음 세션 = 사용자 장소 이동 후 재진입.
+- **사용자 trigger**: "이전세션 이어서 작업해야될것들 있을거야 파악 후 ㄱㄱ" + "sfs프로젝트 말하는거임" + "일단 당분간은 깃도 자동화 하자 너가 커밋하고 push까지 진행해" + "당분간만임 깃 자동화는" → resume_hint (a) WU-17 default 진입 + §1.5 git push 금지 임시 해제. 환경 제약 확인: FUSE Cowork 샌드박스에 GitHub 자격 (SSH key / gh CLI / PAT) 전무 → 이 세션 push 는 사용자 터미널 의존 유지.
+- **WU-17 본체 작성 완료** (커밋 대기):
+  - `NEXT-SESSION-BRIEFING.md` v0.5 → **v0.6-reduced** (353 → 104 lines, **-70.5%**). Pointer hub + FUSE bypass template + working style 3줄로 축소. 상세 archive 는 sessions/_INDEX.md + sprints/_INDEX.md + CLAUDE.md 로 위임.
+  - `HANDOFF-next-session.md` v2.9 → **v3.0-reduced** (786 → 151 lines, **-80.8%**). §0 사용자 지시 원문 13 건 + account_context + user_new_directive + BLOCKED/Phase 2 포인터 보존. §1~§10 archive 전면 제거 (git log 로 이전 버전 조회 가능).
+  - `sprints/WU-17.md` 신설 (v2 WU meta, status=in_progress, final_sha=null).
+  - `sprints/_INDEX.md` 활성 WU 섹션에 WU-17 추가.
+- **축소 총계**: 1139 → 255 lines = **-77.6%**. WU-17 범위 목표 (-80%) 사실상 달성.
 
 ## ② In-Progress
 
-_(없음 — 세션 종료 상태. 최종 session housekeeping 커밋 1건 (본 인수인계 refresh 반영) 실행 후 mutex 완전 release.)_
+- **WU-17 커밋 대기**: FUSE bypass git add + commit, author `채명정 (ecstatic-intelligent-brahmagupta, company acct, WU-17 session) <jack2718@green-ribbon.co.kr>`, 메시지 `WU-17: HANDOFF/BRIEFING 축소 (v2 참조 구조 전환, -77.6%)`.
+- **push 시도**: 사용자 지시로 시도 → FUSE 환경 자격 전무로 실패 예상 → 사용자 터미널 `git push origin main` fallback.
+- **WU-17.1 예약**: 커밋 후 sha backfill (sprints/WU-17.md final_sha + sprints/_INDEX.md 활성→완료 v2 섹션 이동 + PROGRESS.md 갱신).
 
-## ③ Next (다음 세션 진입, 사용자 장소 이동 후)
+## ③ Next (WU-17 완료 직후)
 
-**진입 순서** (5분 이내 착수):
-1. **CLAUDE.md** 읽기 (§1 절대 규칙 특히 #11 Session resume + #12 mutex) → 본 PROGRESS.md frontmatter `current_wu_owner` null 확인 → self claim.
-2. **PROGRESS.md** (본 파일) ③ Next 메뉴 확인 → 사용자 발화 매칭 → 진입 경로 확정.
-3. **sprints/_INDEX.md** 활성 WU 섹션 확인 (현재 비어 있음 → 새 WU 착수 필요).
-4. 필요 시 `sessions/2026-04-24-brave-hopeful-euler.md` 로 본 세션 상세 히스토리 drill-down.
-
-**메뉴**:
-- **(a, default)** **WU-17 "HANDOFF / BRIEFING 축소"** — v2 이관 완료로 중복된 HANDOFF/BRIEFING 을 `sprints/_INDEX.md` + `sessions/_INDEX.md` 참조 구조로 -80% 축소. Phase 1 킥오프 전 완주 권장.
-- (b) **WU-18 "v2 운영 1주 검증"** — learning-logs/ 패턴 3~5건 실체화.
-- (c) **W10 결정 세션** (#14/#18/#19 사전 분석 있음, tmp/w10-todo-{14,18,19}.md).
-- (d) **Phase 1 킥오프 준비** — `PHASE1-KICKOFF-CHECKLIST.md §2 W0` 실행.
-- (e) **WU-16b 확장 이관** (WU-0 ~ WU-5.1 / 8/8.1 / 11-series / 12-series).
-
-**⚠️ Phase 1 킥오프 D-day 재계산 필수**: 원래 2026-04-27 (월) 예정. 본 세션 종료 2026-04-24 → D-3. 사용자 장소 이동 후 재진입 시점에 따라 D-2 / D-1 로 좁아질 수 있음.
-
-**⚠️ push 상태**: 본 세션 종료 시 ahead 2 (WU-16 + WU-16.1) + 최종 session housekeeping 커밋 1건 = 예상 ahead 3. 사용자 터미널에서 `git push origin main` 필요.
+- **WU-18 "v2 운영 1주 검증"** — learning-logs/ 패턴 3~5건 실체화 (P-large-wu-atomic-single-commit / P-fuse-git-bypass / P-two-step-wu-refresh / P-resume-hint-multi-day-gap / P-doc-reduction-via-reference-pointers 중 선별).
+- **Phase 1 킥오프** (2026-04-27 월, D-3) 전 WU-17 + WU-17.1 완주 목표.
+- 사용자 의중에 따라 (c) W10 결정 세션 / (d) PHASE1-KICKOFF-CHECKLIST §2 W0 / (e) WU-16b 확장 이관 병렬 가능.
 
 ## ④ Artifacts (세션 종료 시점 인벤토리)
 
