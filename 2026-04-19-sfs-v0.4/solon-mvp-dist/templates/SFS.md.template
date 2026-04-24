@@ -1,0 +1,108 @@
+# SFS.md — `<PROJECT-NAME>` 7-step flow core (runtime-agnostic)
+
+> 본 파일은 **runtime-agnostic core**. Claude Code / Codex / Gemini-CLI 어느 runtime
+> 이 세션에 진입하든 동일하게 읽는 7-step flow + 4 Gate + 산출물 규칙의 단일 출처.
+> runtime 별 hint (slash command, sub-agent, tool-use) 는 `CLAUDE.md` / `AGENTS.md` /
+> `GEMINI.md` 어댑터에 분리되어 있음.
+>
+> 어떤 runtime 이든 세션 진입 시 다음 순서로 읽어라:
+> 1. 본 `SFS.md` (플로우 + 규율)
+> 2. 본인 runtime adapter (`CLAUDE.md` 또는 `AGENTS.md` 또는 `GEMINI.md`)
+> 3. `.sfs-local/divisions.yaml` (본부 활성 상태)
+
+## 프로젝트 개요
+
+- **이름**: `<PROJECT-NAME>`
+- **도메인**: `<DOMAIN>` (예: 관리자 페이지 / SaaS 대시보드 / API 서비스 / ...)
+- **단계**: MVP (Phase 1), greenfield, 7-step lightweight spike 운용.
+- **Stack**: `<STACK>` (예: Next.js 15 App Router + TypeScript)
+- **DB**: `<DB>` (예: Postgres + Prisma)
+- **배포**: `<DEPLOY>` (예: Vercel)
+
+## 운영 방식 — 7-step flow
+
+각 1 cycle = 1 Sprint = 5~7 일. 순서:
+
+1. **브레인스토밍** (G0) — `.sfs-local/sprints/<sprint-id>/brainstorm.md`
+2. **plan** (G1) — `.sfs-local/sprints/<sprint-id>/plan.md`
+3. **sprint** (plan 의 metadata 섹션)
+4. **구현** (G2 entry self-check) — 실제 코드 + local commits
+5. **review** (G4) — `.sfs-local/sprints/<sprint-id>/review.md`
+6. **commit** — `git push origin main` (사용자 터미널)
+7. **문서화** — `.sfs-local/sprints/<sprint-id>/retro-light.md` + README 업데이트
+
+### Gate 운용 (4 개, 축소판)
+
+| Gate | 의미          | hard-block? |
+|------|---------------|:-:|
+| G0   | 브레인스토밍 entry | No — signal only |
+| G1   | plan approval  | No — self-check |
+| G2   | 구현 entry     | No — 구현 직전 1 줄 선언 |
+| G4   | review         | No — verdict 기록만 |
+
+G-1 / G3 / G5 는 MVP 에서 **skip**. 필요성 느끼면 별도 논의 후 도입.
+
+> **중요 (ALT-INV-3 never-hard-block)**: Gate 는 hard-block 이 아니라 **signal**.
+> fail 이어도 cycle 은 계속 진행 가능 — 다만 기록 남김.
+
+## 산출물 저장 규칙 (.sfs-local/)
+
+- Sprint 산출물: `.sfs-local/sprints/<YYYY-W>-sprint-<N>/` (예: `2026-W18-sprint-1/`)
+  - `brainstorm.md` · `plan.md` · `review.md` · `retro-light.md` 4 파일
+- L1 event log: `.sfs-local/events.jsonl` (수동 append, 각 line 1 JSON) — **git ignore**
+- 결정 (ADR mini): `.sfs-local/decisions/<N>-<short-title>.md` (1~3 줄)
+- VERSION pin: `.sfs-local/VERSION` (solon-mvp 설치 시점 + runtime 정보)
+
+## 6 본부 활성 상태 (divisions)
+
+기본값:
+- `dev` (active) — 사용자 직접 (self-lead)
+- `strategy-pm` (active) — 사용자 직접
+- `qa` (abstract) — MVP 는 manual smoke test 대체
+- `design` (abstract) — 기존 디자인 시스템 (shadcn/ui 등) 차용
+- `infra` (abstract) — `<DEPLOY>` 재사용
+- `taxonomy` (abstract) — cycle 2~3 누적 후 도입
+
+세부는 `.sfs-local/divisions.yaml`. 승격 결정은 `.sfs-local/decisions/` 에 기록.
+
+## 관찰성 (Observability, L1/L2/L3)
+
+- **L1**: `.sfs-local/events.jsonl` 수동 append. G0/G1/G2/G4 verdict 1 이벤트씩.
+- **L2**: git commit 자체가 channel. Sprint 시작/종료 commit sha 는 plan/review 에 기록.
+- **L3**: 외부 driver 미사용 (minimal tier).
+
+## `/sfs` 명령 prefix (brand-decoupled)
+
+`/sfs` 는 brand (Solon) 와 분리된 구조적 prefix. runtime 별로 구현 방식이 다르다:
+
+- **Claude Code**: 실 slash command (`.claude/commands/sfs.md`) — `/sfs status`, `/sfs plan` 등 자동완성.
+- **Codex / Gemini-CLI**: native slash command 아님. **natural-language alias** —
+  "sfs status 해줘" / "sfs plan 작성" 처럼 자연어로 trigger. agent 는 prefix 를
+  Solon/SFS 명령으로 인식해 본 SFS.md 에 정의된 동작 실행.
+
+runtime 별 mapping 세부는 각 adapter 파일 (CLAUDE.md / AGENTS.md / GEMINI.md) §commands 참조.
+
+## 커뮤니케이션 규율 (runtime 공통)
+
+- **한국어 반말** (사용자 선호).
+- **짧고 직설**.
+- **기록 > 기억** — 중요한 결정은 `.sfs-local/decisions/` 또는 sprint 산출물에 남김.
+- 사용자가 "ㄱㄱ" / "이어서" 한 마디면 resume — 단 의미 결정 (A/B/C) 은 사용자에게.
+
+## 절대 금지 (runtime 공통)
+
+- **외부 방법론 docset 의 경로 하드코딩** — 사용자 개인 IP 일 수 있음.
+- **`git push origin *` 자동 실행** — push 는 사용자 터미널에서만.
+- **Gate hard-block** — 구현 자체를 막지 않음 (never-hard-block 원칙).
+- **runtime-specific 파일 (CLAUDE.md / AGENTS.md / GEMINI.md) 에 SFS 플로우 본체
+  중복 기재 금지** — 본 SFS.md 가 단일 출처.
+
+## 참고 방법론
+
+본 프로젝트는 `solon-mvp` (https://github.com/MJ-0701/solon-mvp) 의 7-step flow 를 사용.
+확장 지침 / 풀스펙은 사용자의 개인 방법론 docset 에 있으며, 필요 시 대화에서 참조.
+본 repo 에는 해당 docset 경로 기록 안 함.
+
+## Changelog
+
+- v0.1 (`<DATE>`, install): `solon-mvp <SOLON-VERSION>` 최초 설치 — SFS.md core 생성.

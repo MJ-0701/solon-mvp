@@ -3,6 +3,46 @@
 모든 릴리스는 [Semantic Versioning](https://semver.org/lang/ko/) 을 따른다. `-mvp` suffix 는
 아직 풀스펙 (사용자 개인 방법론 docset) 으로 수렴하지 않은 최소 배포판임을 표시.
 
+## [0.2.0-mvp] — 2026-04-24 (WU-20 Phase A 보강)
+
+### Added — runtime-neutral core + 3 adapter
+
+- **templates/SFS.md.template** 🆕 — runtime-agnostic core. 7-step flow / 4 Gate /
+  산출물 규칙 / 6 본부 / 관찰성 / `/sfs` prefix 정의의 **단일 출처**. Claude/Codex/Gemini
+  모두 공통으로 읽음.
+- **templates/AGENTS.md.template** 🆕 — OpenAI Codex CLI adapter (thin). Codex 가 repo
+  instructions 로 자동 로드. `/sfs` 는 natural-language alias (native slash command 아님).
+- **templates/GEMINI.md.template** 🆕 — Google Gemini-CLI adapter (thin). project
+  instruction context 로 로드. long context 활용 힌트 포함.
+- **templates/.claude-template/commands/sfs.md** 🆕 — Claude Code 용 `/sfs` slash
+  command 정의. install.sh 가 `.claude/commands/sfs.md` 로 복사. subcommand 6종
+  (status / brainstorm / plan / review / retro / decision).
+
+### Changed — CLAUDE.md.template → thin adapter 로 재작성
+
+- **templates/CLAUDE.md.template** — 기존 7-step / Gate / 산출물 본문 제거 → SFS.md
+  위임. Claude-specific 힌트 (Task tool / sub-agent / MCP / 모델 tier) 만 유지.
+  thin adapter 원칙 유지 (SFS.md 본문 중복 복사 금지).
+
+### Changed — install.sh / upgrade.sh / uninstall.sh 확장
+
+- **install.sh** — SFS.md + 3 adapter + `.claude/commands/sfs.md` 복사 로직 추가.
+  placeholder 치환 helper (`substitute_placeholders`) 로 리팩터. 배너 / 완료 메시지에
+  3 runtime 진입 예시 추가.
+- **upgrade.sh** — diff 대상 확장 (SFS.md / CLAUDE.md / AGENTS.md / GEMINI.md /
+  `.claude/commands/sfs.md` / divisions.yaml).
+- **uninstall.sh** — 4 adapter + slash command 파일 각각 대화형 삭제. `.claude/` 빈
+  디렉토리 자동 정리.
+
+### Scope — MVP 범위 정정 반영 (RUNTIME-ABSTRACTION.md v0.2-mvp-correction 대응)
+
+- Solon docset `RUNTIME-ABSTRACTION.md` 의 `rule/mvp-runtime-neutral-core` 에 따라
+  **MVP 배포 시점부터** SFS core 와 runtime adapter 가 분리된 형태로 제공.
+- 기존 v0.1.0-mvp 는 CLAUDE.md 단일 파일에 플로우 + Claude-specific 가 섞여 있어
+  Claude lock-in 위반이었음. 본 v0.2.0-mvp 가 정정 적용.
+- SDK/plugin 수준 adapter (OpenAI Agents SDK / Gemini SDK / `claude plugin install`)
+  는 후속 릴리스로 유지.
+
 ## [0.1.0-mvp] — 2026-04-24
 
 ### Added
@@ -36,6 +76,9 @@
 
 ## Unreleased (예정)
 
-- **0.2.0** — `install.sh` 원격 모드 (`curl | bash`) 에 따른 보안 강화 (hash 검증).
-- **0.3.0** — runtime abstraction layer (WU-11 B/C Phase 2 예약) — Codex / Gemini-CLI 어댑터 편입.
-- **0.4.0** — `claude plugin install solon` 네이티브 플러그인 변환 검토 (HANDOFF §0 #13 end-state).
+- **0.3.0-mvp** — `install.sh` 원격 모드 (`curl | bash`) 에 따른 보안 강화 (hash 검증) +
+  `sfs.sh` 폴리필 CLI (runtime 밖에서도 `.sfs-local/` 조회).
+- **0.4.0-mvp** — SDK/plugin 수준 runtime adapter (OpenAI Agents SDK / Gemini SDK)
+  편입 판정 (RUNTIME-ABSTRACTION.md §7 기준 충족 시).
+- **0.5.0** — `claude plugin install solon` 네이티브 플러그인 변환 검토 (HANDOFF §0
+  #13 end-state).

@@ -108,9 +108,13 @@ fi
 info ""
 info "변경 예정 파일 프리뷰..."
 
-# diff 보여줄 파일 3종
+# diff 보여줄 파일 (core + 3 adapter + .claude slash command + divisions)
 declare -a CHECK_FILES=(
+  "SFS.md|templates/SFS.md.template"
   "CLAUDE.md|templates/CLAUDE.md.template"
+  "AGENTS.md|templates/AGENTS.md.template"
+  "GEMINI.md|templates/GEMINI.md.template"
+  ".claude/commands/sfs.md|templates/.claude-template/commands/sfs.md"
   ".sfs-local/divisions.yaml|templates/.sfs-local-template/divisions.yaml"
 )
 
@@ -191,7 +195,15 @@ update_file() {
 info ""
 info "파일별 갱신..."
 
-update_file "CLAUDE.md" "templates/CLAUDE.md.template" "세션 지침"
+update_file "SFS.md" "templates/SFS.md.template" "runtime-agnostic core"
+update_file "CLAUDE.md" "templates/CLAUDE.md.template" "Claude adapter"
+update_file "AGENTS.md" "templates/AGENTS.md.template" "Codex adapter"
+update_file "GEMINI.md" "templates/GEMINI.md.template" "Gemini adapter"
+
+# .claude/commands/sfs.md — 디렉토리 없으면 생성 후 update
+mkdir -p "$TARGET/.claude/commands"
+update_file ".claude/commands/sfs.md" "templates/.claude-template/commands/sfs.md" "Claude slash command"
+
 update_file ".sfs-local/divisions.yaml" "templates/.sfs-local-template/divisions.yaml" "본부 활성화"
 
 # ============================================================================
@@ -249,7 +261,7 @@ ${C_BOLD}${C_GREEN}=== 업그레이드 완료 ===${C_RESET}
   $CUR_VER → $NEW_VER
 
 변경사항 git commit 권장:
-  ${C_BLUE}git add CLAUDE.md .gitignore .sfs-local/divisions.yaml .sfs-local/VERSION${C_RESET}
+  ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .claude/ .gitignore .sfs-local/divisions.yaml .sfs-local/VERSION${C_RESET}
   ${C_BLUE}git commit -m "chore: upgrade solon-mvp $CUR_VER → $NEW_VER"${C_RESET}
 
 CHANGELOG: https://github.com/${SOLON_REPO}/blob/main/CHANGELOG.md

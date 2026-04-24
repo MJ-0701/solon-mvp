@@ -116,18 +116,40 @@ if [ -f "$TARGET/.gitignore" ] && grep -qF "$GIT_MARKER_BEGIN" "$TARGET/.gitigno
 fi
 
 # ============================================================================
-# 3. CLAUDE.md — 대화형 (사용자가 수정했을 가능성)
+# 3. SFS core + runtime adapter 파일 — 대화형 (사용자가 수정했을 가능성)
 # ============================================================================
 
-if [ -f "$TARGET/CLAUDE.md" ]; then
+# remove_adapter <path> <label>
+remove_adapter() {
+  local path="$1" label="$2"
+  [ -f "$TARGET/$path" ] || return 0
   echo ""
-  warn "CLAUDE.md 가 존재합니다 (사용자가 편집했을 수 있음)"
-  if [ "$(prompt "CLAUDE.md 삭제할까요?" "N")" = "y" ] || [ "$(prompt "" "N")" = "Y" ]; then
-    rm -f "$TARGET/CLAUDE.md"
-    ok "CLAUDE.md 제거"
-  else
-    ok "CLAUDE.md 보존"
-  fi
+  warn "$path 존재 ($label) — 사용자가 편집했을 수 있음"
+  local ans
+  ans=$(prompt "  → $path 삭제?" "N")
+  case "$ans" in
+    y|Y|yes|YES)
+      rm -f "$TARGET/$path"
+      ok "$path 제거"
+      ;;
+    *)
+      ok "$path 보존"
+      ;;
+  esac
+}
+
+remove_adapter "SFS.md" "runtime-agnostic core"
+remove_adapter "CLAUDE.md" "Claude adapter"
+remove_adapter "AGENTS.md" "Codex adapter"
+remove_adapter "GEMINI.md" "Gemini adapter"
+remove_adapter ".claude/commands/sfs.md" "Claude slash command"
+
+# .claude/commands, .claude 디렉토리가 비었으면 정리
+if [ -d "$TARGET/.claude/commands" ] && [ -z "$(ls -A "$TARGET/.claude/commands" 2>/dev/null)" ]; then
+  rmdir "$TARGET/.claude/commands" 2>/dev/null && ok ".claude/commands/ 빈 디렉토리 제거" || true
+fi
+if [ -d "$TARGET/.claude" ] && [ -z "$(ls -A "$TARGET/.claude" 2>/dev/null)" ]; then
+  rmdir "$TARGET/.claude" 2>/dev/null && ok ".claude/ 빈 디렉토리 제거" || true
 fi
 
 # ============================================================================

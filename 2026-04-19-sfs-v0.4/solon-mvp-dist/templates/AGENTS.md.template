@@ -1,0 +1,66 @@
+# AGENTS.md — `<PROJECT-NAME>` Codex adapter
+
+> 본 파일은 **OpenAI Codex CLI 전용 adapter**. 7-step flow / Gate / 산출물 규칙 본문은
+> 같은 디렉토리의 [`SFS.md`](./SFS.md) 에 있음. 본 파일은 Codex runtime 에서만 의미
+> 있는 힌트 (repo instructions 포맷, natural-language alias, OpenAI Agents SDK 비고)
+> 만 담는다.
+>
+> **세션 진입 순서 (Codex)**:
+> 1. [`SFS.md`](./SFS.md) 먼저 읽기 (7-step + 4 Gate + 산출물 규칙)
+> 2. 본 파일 (Codex-specific hint)
+> 3. `.sfs-local/divisions.yaml` (본부 활성 상태)
+
+## Codex 에서 기대되는 행동
+
+- Codex CLI 는 repo 진입 시 `AGENTS.md` 를 repo instructions 로 자동 로드.
+- 본 파일 상단의 "세션 진입 순서" 에 따라 `SFS.md` 를 함께 파악한 뒤 작업 개시.
+- 의미 결정 (A/B/C scope / priority) 은 자율 금지 — 사용자에게 1-line 질문.
+- `git push` 자동 금지 (SFS.md §절대 금지 준수).
+
+## `/sfs` — natural-language alias (native slash command 아님)
+
+Codex CLI 는 `/sfs` 같은 native project-level slash command 가 아직 표준화되지 않음.
+따라서 사용자는 **자연어로 SFS 명령을 trigger** 한다:
+
+| 사용자 발화 (자연어) | 의도 | Codex 행동 |
+|---------------------|------|-----------|
+| "sfs status 해줘" / "현재 sprint 상태?" | `/sfs status` | `.sfs-local/sprints/` 스캔 후 최신 sprint 상태 요약 |
+| "sfs plan 시작" / "G1 plan 작성" | `/sfs plan` | `plan.md` skeleton 작성 (SFS.md §plan 규격) |
+| "sfs brainstorm" / "브레인스토밍 시작" | `/sfs brainstorm` | `brainstorm.md` skeleton |
+| "sfs review" / "G4 리뷰" | `/sfs review` | `review.md` + commit sha 수집 |
+| "sfs retro" / "retro-light 작성" | `/sfs retro` | `retro-light.md` + divisions 재검토 |
+| "sfs decision <title>" | `/sfs decision ...` | `.sfs-local/decisions/<N>-<title>.md` |
+
+agent 는 사용자 발화에서 `sfs` 키워드 + subcommand 이름을 인식하면 Claude adapter 의
+`/sfs` 명령과 동일 동작을 수행한다. 구체 산출물 포맷은 SFS.md 참조.
+
+## Sub-agents / Tool-use (OpenAI Agents SDK 힌트)
+
+- Codex 가 OpenAI Agents SDK 의 `Runner.run` / `function_call` 을 노출하는 경우,
+  long-running 탐색은 그쪽으로 위임 가능. 아직 MVP 단계에서는 main agent 가 직접 수행.
+- MCP 를 Codex 가 지원하면 Claude adapter 와 동일 MCP 도구를 재사용. 미지원이면 CLI
+  (`gh`, `git`, `curl`) 로 대체.
+- tool-use 호출은 `SFS.md §관찰성` 의 L1 event 기록 대상 — `.sfs-local/events.jsonl` 에
+  `{runtime: "codex", tool: "...", ...}` 로 append 권장.
+
+## 모델 선택
+
+- Codex CLI 기본 모델 (예: `o4-mini` / `gpt-4.1` 등) 을 그대로 사용. SFS 본문은 모델
+  tier 중립.
+- 비싼 모델 (`gpt-5` 급) 은 brainstorm / plan 에서만, 구현 cycle 은 효율 모델로.
+
+## 절대 금지 (Codex 특화 추가)
+
+- **CLAUDE.md / GEMINI.md 편집 금지** — 본인 runtime 은 AGENTS.md 뿐.
+- **`/sfs` 외부에 중복 alias 만들지 말 것** — prefix 는 `/sfs` 단일, 자연어 trigger 만 다양.
+- **본 파일에 SFS.md 플로우 본문을 중복 복사 금지** — adapter 는 thin 유지.
+
+## 알려진 제약 / Deferred
+
+- Codex 의 sub-agent spawn 모델이 Claude Task tool 과 얼마나 호환되는지 MVP 에서는
+  미검증. 실제 병목 발견 시 SDK adapter 착수 (RUNTIME-ABSTRACTION.md §7 기준).
+- native slash command 제공 시점에 본 adapter 의 `/sfs` 섹션 재작성 예정.
+
+## Changelog
+
+- v0.1 (`<DATE>`, install): `solon-mvp <SOLON-VERSION>` 설치 — Codex adapter 생성.
