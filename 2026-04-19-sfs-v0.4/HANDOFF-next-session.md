@@ -1,12 +1,14 @@
 ---
 doc_id: handoff-2026-04-20-solon-v0.4-r3-complete
-title: "인수인계 — Round 3 종결 + Round 4 Bridge (Solon v0.4-r3)"
-version: 2.8-bridge-handoff
+title: "인수인계 — Round 3 종결 + Round 4 Bridge + Workflow v2 이관 완료 (Solon v0.4-r3)"
+version: 2.9-v2-migration-complete
 created: 2026-04-20 (오전)
-updated: 2026-04-20 (심야 — 세션 이관 직전, WU-8 완료 + WU-11 사용자 대기 상태로 bump)
+updated: 2026-04-24 (brave-hopeful-euler 세션 종료 직전 — WU-16 / WU-16.1 완료, v2 이관 완주)
 author: "Claude (direct 지시 by 채명정)"
-valid_until: "새 Claude 세션 (동일 또는 개인 계정) 이 WU-11 결정 후 v3.0 으로 bump 할 때까지"
-status: "Round 4 Bridge 진행중 (WU 루프, 세션 이관 지점) — 다음 세션이 WU-11 A/B/C 결정부터 재개"
+valid_until: "WU-17 에서 본 HANDOFF 를 sprints/_INDEX + sessions/_INDEX 참조 구조로 -80% 축소 (v3.0) 할 때까지"
+status: "Workflow v2 이관 완료. 다음 WU = WU-17 (HANDOFF/BRIEFING 축소) default. Phase 1 킥오프 D-3 (2026-04-27 월)."
+session_continuity_note: |
+  v2 이후 인수인계 SSoT 는 CLAUDE.md (§1 절대 규칙 + §2.1 용어집) + PROGRESS.md (live snapshot + resume_hint) + sprints/WU-<id>.md (WU 단위 SSoT) + sessions/<date>-<codename>.md (세션 retrospective, 3-part). 본 HANDOFF 는 v1 시대 frontmatter SSoT 로 남아 있으나 WU-17 에서 축소 예정. 진입 순서: CLAUDE.md → PROGRESS.md → current_wu_path → 필요 시 sprints/_INDEX.md / sessions/_INDEX.md.
 account_context:
   current: "회사 계정 (jack2718@green-ribbon.co.kr) — GitHub origin (MJ-0701/solon) 에 로컬 커밋 존재 (push 는 사용자 터미널에서 수동)"
   will_move_to: "채명정 개인 계정 (약 1주 이내) — 단, 세션 이관은 동일 계정 내에서도 발생 가능"
@@ -54,13 +56,25 @@ round4_bridge:
     - "WU-14: 42e3719 — context-reset 대비 infrastructure 셋업 (사용자 mid-session 지시). tmp/ 폴더 (.gitignore 로 내용 제외 + .gitkeep 만 track) + PROGRESS.md (덮어쓰기 방식 live 4-필드 snapshot, 매 micro-step 마다 재작성). `.gitignore` `tmp/` → `tmp/*` 수정 (ignored 디렉토리 내부 미탐색 bug 회피)"
     - "WU-14.1: 853373f — sha 42e3719 backfill + HANDOFF frontmatter completed_wus 2 WU 추가 (WU-14 + WU-14.1) + unpushed_commits 12→14 갱신 + NEXT-SESSION-BRIEFING.md §1 unpushed 표 14 커밋 refresh + §8 5번째 세션 요약에 WU-14/WU-14.1 추가 + PROGRESS.md 덮어쓰기 (① Just-Finished 에 WU-14 sha 반영, ② In-Progress 로 WU-14.1 배치)"
     - "WU-10: 3c8cac0 — appendix/dialogs/branches/ 6 본부 YAML (taxonomy/qa/design/infra/strategy-pm/custom, 956 lines) schema 정합성 5-step validation (`tmp/wu10-*.md` 8 파일 중간 산출물, git 제외). 공통 gap 2 (override 확장 + intent label 확장) + branch 별 local extension 전수 정리. Option β minimal cleanup — parent `division-activation.dialog.yaml` 의 `branch_resolution.branch_extensibility_notes` 7-항목 contract 블록 신설 + Phase B labels 주석 + cross-ref-audit §4 W10 TODO 14~19 6건 추가 (branch override schema / intent label 체계 / terminal sub-type 통합 / custom invariants 위치 / L1 event payload / `tier` 필드)"
-    - "WU-10.1: (이 커밋) — sha 3c8cac0 backfill + HANDOFF frontmatter completed_wus 2 WU 추가 (WU-10 + WU-10.1) + unpushed_commits 14→16 갱신 + NEXT-SESSION-BRIEFING.md v0.4 refresh (16 커밋 표 + §8 5번째 세션 요약에 WU-10/WU-10.1 추가) + PROGRESS.md 덮어쓰기"
-  unpushed_commits: "현 세션 새 로컬 커밋 = WU-12.2 (8ab660c) + WU-12.3 (b77fcb2) + WU-4 (7d982dc) + WU-4.1 (1c375aa) + WU-5 (20c3474) + WU-5.1 (9c4d6c0) + WU-9 (816d751) + WU-9.1 (6884bbd) + WU-13 (101030f) + WU-13.1 (899643a) + WU-7 (ec263c5) + WU-7.1 (af306e0) + WU-14 (42e3719) + WU-14.1 (853373f) + WU-10 (3c8cac0) + WU-10.1 backfill (이 커밋) → 사용자가 `git push origin main` 수동 실행 필요 (총 16 커밋)."
+    - "WU-10.1: ed0ac37 — sha 3c8cac0 backfill + HANDOFF frontmatter completed_wus 2 WU 추가 (WU-10 + WU-10.1) + unpushed_commits 14→16 갱신 + NEXT-SESSION-BRIEFING.md v0.4 refresh (16 커밋 표 + §8 5번째 세션 요약에 WU-10/WU-10.1 추가) + PROGRESS.md 덮어쓰기"
+    # === Workflow v2 이관 (6-8번째 세션) ===
+    - "WU-15: aa0a354 — Workflow v2 인프라 설정 (sprints/ + sessions/ + learning-logs/ + tmp/snapshots/ + scripts/snapshot.sh + scripts/squash-wu.sh + .visibility-rules.yaml + CLAUDE.md v1.15 SSoT 신설 + PROGRESS.md frontmatter resume_hint/current_wu 확장 + sprints/WU-15.md 자기 기술). 12 files, +853/-20. session: relaxed-vibrant-albattani (6번째). FUSE bypass 1회."
+    - "WU-15.1: acfae03 — sha aa0a354 backfill + README §11.1 workflow v2 glossary 추가. relaxed-vibrant-albattani."
+    - "WU-15.1-fin: 39d0d90 — sprints/_INDEX.md forward-backfill + PROGRESS 세션 종료 반영 (housekeeping). serene-fervent-wozniak (7번째 병렬)."
+    - "hotfix: 422c67e — CLAUDE.md v1.15→v1.16 §1 #12 Session mutex protocol 신설 (current_wu_owner 5 sub-field 스키마 + TTL 15min + STOP/takeover/claim 분기). WU-15 병렬 감지 (TZ +0000 vs +0900) 사후 재발 방지. serene-fervent-wozniak."
+    - "session release: e6e9e55 — mutex release + hotfix sha backfill (serene-fervent-wozniak 자연 종료). current_wu_owner: null 명시."
+    - "WU-16: 2b8b69e — 기존 WU (WU-7 ~ WU-14.1) 이관. sprints/WU-{7,7.1,10,10.1,13,13.1,14,14.1}.md 8 파일 신규 + sessions/2026-04-{20-funny-compassionate-wright,21-serene-fervent-wozniak,21-relaxed-vibrant-albattani}.md 3 retrospective + sprints/_INDEX.md 3-섹션 재편 (v2 native / v1→v2 이관 / v1 형식 보존) + sessions/_INDEX.md 사실 오류 수정 (WORK-LOG Changelog v1.7~v1.19 SSoT) + .gitignore 루트 bkit plugin 메모리 차단 (docs/.bkit-*, .pdca-status.json) + sprints/WU-16.md 본 WU. 16 files, +884/-154. FUSE bypass 2회. session: brave-hopeful-euler (8번째)."
+    - "WU-16.1: 227f900 — sha 2b8b69e backfill + sessions/2026-04-24-brave-hopeful-euler.md 신설 (3-part retrospective + learning pattern 후보 4건: P-large-wu-atomic-single-commit 신규 / P-fuse-git-bypass 재 / P-two-step-wu-refresh 재 / P-resume-hint-multi-day-gap 신규). sprints/_INDEX.md WU-16 / WU-16.1 을 v2 네이티브 테이블로 이동. 5 files, +184/-116. brave-hopeful-euler."
+  unpushed_commits: "2026-04-24 brave-hopeful-euler 세션 종료 시점 = WU-16 (2b8b69e) + WU-16.1 (227f900). 총 2 커밋 unpushed. 이전 세션 종료 시 (relaxed/serene 7번째 2026-04-21 14:28) ahead 20 → 사용자가 2026-04-22~23 사이 `git push origin main` 완료하여 본 세션 진입 시 ahead 0 확인. 본 세션 종료 후 사용자 터미널에서 `git push origin main` 재실행 필요 (ahead 2)."
   queue:
-    next_blocking: "(없음 — Track B 큐 clean). 다음 세션은 현 시점 상태 확인 후 새 WU 를 사용자로부터 수신하거나, `cross-ref-audit §4` W10 TODO 6건 (14~19) 의 사용자 결정 수집 세션으로 전환 가능."
-    ready_after_wu10: "(없음 — WU-11 B 는 Phase 1 안정화 후, WU-11 C 는 Phase 2 이후, WU-6 는 BLOCKED)"
-    entry_point_for_next_session: "PROGRESS.md (live single-frame snapshot — 본 파일부터 읽고 ② In-Progress + ③ Next 로 즉시 진입) → NEXT-SESSION-BRIEFING.md (5분 진입 가이드, 보조)"
-    blocked: [WU-6 (claude-shared-config/.git IP 경계 — 사용자 결정 필요), WU-11 B (Phase 1 안정화 후 재검토), WU-11 C (Phase 2 이후)]
+    next_blocking: "WU-17 (HANDOFF-next-session.md + NEXT-SESSION-BRIEFING.md 를 sprints/_INDEX.md + sessions/_INDEX.md 참조 구조로 -80% 축소). Phase 1 킥오프 (2026-04-27 월, D-3) 전에 완주 권장."
+    ready_after_wu17: "WU-18 (v2 운영 1주 검증 + learning-logs/ 패턴 3~5건 실체화 + 임계값 조정). Phase 1 킥오프 후 첫 주 내 검증."
+    entry_point_for_next_session: "CLAUDE.md (§1 절대 규칙 + §2.1 용어집) → PROGRESS.md (frontmatter resume_hint + current_wu_owner mutex + ③ Next) → current_wu_path WU 파일 or sprints/_INDEX.md 활성 WU 섹션 → 재개. 본 HANDOFF + NEXT-SESSION-BRIEFING 은 배경 컨텍스트용 (WU-17 후 참조 구조로 축소됨)."
+    blocked: [WU-6 (claude-shared-config/.git IP 경계 — 사용자 결정 필요), WU-11 B (Phase 1 안정화 후 재검토), WU-11 C (Phase 2 이후), WU-16b (앞선 WU WU-0~WU-5.1/8/8.1/11-series/12-series 확장 이관 — 필요 시)]
+    mutex_state_at_session_end:
+      session_codename: brave-hopeful-euler
+      released_at: 2026-04-24T10:30:00+09:00
+      reason: "사용자 장소 이동 지시 + 세션 release. 다음 세션은 mutex 프로토콜 통과 후 자유 claim 가능."
   user_new_directive:
     raw: "sfs를 claude 뿐만 아니라 codex랑 gemini-cli에서도 사용하고 싶거든?? 그래서 추상화 하는게 중요할듯?!"
     implication: "Claude Code 에 암묵적으로 lock-in 된 현 docset 에 runtime abstraction layer 추가 필요"
