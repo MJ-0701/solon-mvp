@@ -9,8 +9,8 @@ current_wu_path: sprints/WU-19.md
 current_wu_owner:
   session_codename: ecstatic-intelligent-brahmagupta
   claimed_at: 2026-04-24T16:19:38+09:00
-  last_heartbeat: 2026-04-24T17:55:00+09:00
-  current_step: "WU-19 본체 작성 완료 (setup-w0.sh + verify-w0.sh + QUICK-START §2/§6 간소화). FUSE bypass 커밋 대기."
+  last_heartbeat: 2026-04-24T18:08:00+09:00
+  current_step: "WU-19 (74135cf) 커밋 완료. WU-19.1 sha backfill 진행 중."
   ttl_minutes: 15
 released_history:
   last_owner: brave-hopeful-euler
@@ -87,10 +87,12 @@ resume_hint:
   - `sprints/_INDEX.md` 활성 WU 섹션에 WU-19 등재.
 - **원칙 2 준수**: 스크립트 로직 = WU-18 bash 블록 그대로 이식 + OS 호환성 + 에러 핸들링. 해석 변경 0건.
 
+- **WU-19 커밋 완료** (`74135cf`, ahead +1): 7 files, +451/-93. FUSE bypass 1회. setup-w0.sh / verify-w0.sh mode 100755 유지.
+
 ## ② In-Progress
 
-- **WU-19 커밋 대기**: FUSE bypass. 메시지 `WU-19: Phase 1 MVP W0 Executable Scripts (setup-w0.sh + verify-w0.sh)`.
-- **WU-19.1 + housekeeping 예약**.
+- **WU-19.1 커밋 대기**: sprints/WU-19.md frontmatter `final_sha: 74135cf` + `status: done` 실체화 + sprints/_INDEX.md 활성→완료 v2 네이티브 이동 + PROGRESS.md 본 덮어쓰기.
+- **housekeeping 예약**: WU-19.1 sha forward backfill.
 
 ## ③ Next (WU-19 완료 직후)
 
