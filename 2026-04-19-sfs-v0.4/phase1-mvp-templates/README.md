@@ -10,6 +10,8 @@
 ```
 phase1-mvp-templates/
 ├── README.md                              # 본 파일 (Solon docset 내부용 메타)
+├── setup-w0.sh                            # 🆕 WU-19: W0 §2 실행 자동화 (env 3개 입력)
+├── verify-w0.sh                           # 🆕 WU-19: W0 §6 exit 검증 자동화 (7 체크)
 ├── CLAUDE.md.template                     # → admin panel repo 의 CLAUDE.md 로 cp
 ├── README.md.template                     # → admin panel repo 의 README.md 로 cp
 ├── .gitignore.snippet                     # → admin panel repo 의 .gitignore 에 추가 블록 (append)
@@ -21,6 +23,22 @@ phase1-mvp-templates/
 ├── sprint-0-brainstorm.md.template        # → .sfs-local/sprints/2026-W18-sprint-1/brainstorm.md 의 boilerplate
 └── PROMPT-FOR-FIRST-SESSION.md            # admin panel repo 첫 Claude 대화 시 복붙 프롬프트
 ```
+
+## 스크립트 사용 (권장 경로)
+
+```bash
+# W0 실행 (repo 생성 + templates cp + placeholder 치환 + 3 commit + push)
+export PROJECT_NAME="<project-name>"
+export SOLON_DOCSET="$HOME/workspace/solon-docset/2026-04-19-sfs-v0.4"
+export WORKSPACE="$HOME/workspace"
+"$SOLON_DOCSET/phase1-mvp-templates/setup-w0.sh"
+
+# W0 exit 검증 (7 체크)
+cd "$WORKSPACE/$PROJECT_NAME"
+"$SOLON_DOCSET/phase1-mvp-templates/verify-w0.sh"
+```
+
+상세: `../PHASE1-MVP-QUICK-START.md §2 + §6`.
 
 ## 사용 순서 (요약, 상세는 QUICK-START 참조)
 
@@ -44,4 +62,5 @@ phase1-mvp-templates/
 
 ## Changelog
 
-- **v0.1-mvp** (2026-04-24, WU-18): 초기 신설.
+- **v0.1-mvp** (2026-04-24, WU-18): 초기 신설 (CLAUDE.md.template + README.md.template + .gitignore.snippet + .sfs-local-template + sprint-0-brainstorm + PROMPT-FOR-FIRST-SESSION + 폴더 README).
+- **v0.2-mvp** (2026-04-24, WU-19): executable scripts 추가 — `setup-w0.sh` + `verify-w0.sh`. QUICK-START §2 100줄 복붙 → 스크립트 호출 1 줄로 단축.

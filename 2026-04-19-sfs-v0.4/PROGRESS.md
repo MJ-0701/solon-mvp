@@ -2,15 +2,15 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-24T17:25:00+09:00
-session: "9번째 세션 `ecstatic-intelligent-brahmagupta` 연속 — WU-17 (HANDOFF/BRIEFING 축소) 완주 + 사용자 push 완료 (ahead 0) 확인 후 WU-18 (Phase 1 MVP W0 pre-arming) 착수. 사용자 `MVP 빠르게 생성해서 사용하는게 제 1 목적` 지시에 맞춰 블로킹 없이 templates + plugin-wip skeleton + QUICK-START 사전 렌더."
-current_wu: WU-18
-current_wu_path: sprints/WU-18.md
+last_overwrite: 2026-04-24T17:55:00+09:00
+session: "9번째 세션 `ecstatic-intelligent-brahmagupta` 연속 — WU-17 축소 / WU-18 pre-arming 완주 후 사용자 `바로 이어서 ㄱㄱ` → WU-19 (원래 예약은 'W0 결정 기록 + 피드백' 이었으나, 사용자가 W0 를 아직 실행 안 했으므로 **재정의**: 'Phase 1 MVP W0 executable scripts'. setup-w0.sh + verify-w0.sh 로 QUICK-START §2 100줄 복붙을 1 줄 호출로 단축. 원래 예약 WU-19 는 WU-20 으로 연기)."
+current_wu: WU-19
+current_wu_path: sprints/WU-19.md
 current_wu_owner:
   session_codename: ecstatic-intelligent-brahmagupta
   claimed_at: 2026-04-24T16:19:38+09:00
-  last_heartbeat: 2026-04-24T17:38:00+09:00
-  current_step: "WU-18 (d200299) + WU-18.1 (12b9a72) 완료. ahead 2. 사용자 터미널 push 대기. 다음 액션은 사용자 Mac W0 실행."
+  last_heartbeat: 2026-04-24T17:55:00+09:00
+  current_step: "WU-19 본체 작성 완료 (setup-w0.sh + verify-w0.sh + QUICK-START §2/§6 간소화). FUSE bypass 커밋 대기."
   ttl_minutes: 15
 released_history:
   last_owner: brave-hopeful-euler
@@ -62,39 +62,43 @@ resume_hint:
   version: 1
 ---
 
-# PROGRESS — live snapshot (WU-18 진행 중, mutex claimed)
+# PROGRESS — live snapshot (WU-19 진행 중, mutex claimed)
 
-> 🚨 **본 파일 최우선 진입.** mutex claimed by `ecstatic-intelligent-brahmagupta` → WU-18 (Phase 1 MVP W0 pre-arming) 본체 커밋 대기.
+> 🚨 **본 파일 최우선 진입.** mutex claimed by `ecstatic-intelligent-brahmagupta` → WU-19 본체 커밋 대기.
 
 ---
 
 ## ① Just-Finished (2026-04-24 ecstatic-intelligent-brahmagupta 세션 연속)
 
-- **이전 WU-17 결과** (이미 사용자 push 완료, ahead 0 확인): HANDOFF 786→151 + BRIEFING 353→104 = -77.6% 축소. 커밋 `083cfe1` (본체) + `d5681fa` (WU-17.1 backfill) + `b8f7f74` (housekeeping forward backfill) 3 커밋.
-- **사용자 trigger (WU-18)**: "push는 해뒀고 일단 지금은 mvp를 빠르게 생성해서 사용하는게 제 1 목적이니까 그거에 맞춰서 계속 직업 ㄱㄱ" → resume_hint (d) Phase 1 킥오프 준비 경로. W0 체크리스트 §1 prerequisites 4 건 (ownership/stack/Solon 참조 방식/repo 이름) 이 사용자 결정 대기 상태이지만, "빠르게" 요구에 맞춰 블로킹 없이 pre-work 최대 실행.
-- **WU-18 본체 작성 완료** (커밋 대기):
-  - `phase1-mvp-templates/` 디렉토리 신설 (10 파일): `CLAUDE.md.template` / `README.md.template` / `.gitignore.snippet` / `.sfs-local-template/divisions.yaml.template` + events.jsonl + sprints/.gitkeep + decisions/.gitkeep / `sprint-0-brainstorm.md.template` / `PROMPT-FOR-FIRST-SESSION.md` / 폴더 README.
-  - `plugin-wip-skeleton/` 디렉토리 신설 (3 파일): `plugin.json` v0.1-wip + `README.md` + `INSTALL-GUIDE.md`.
-  - `PHASE1-MVP-QUICK-START.md` 신규 (5 분 Mac runbook, 환경변수 3 개 치환 + 스크립트 블록 + IP 경계 검증 + W0 exit 체크리스트).
-  - `sprints/WU-18.md` 신설 (v2 WU meta, status=in_progress, decision_points 4건 placeholder).
-  - `sprints/_INDEX.md` 활성 WU 섹션에 WU-18 등재.
-- **IP 경계 엄격**: 모든 템플릿에 Solon 경로 / repo URL 하드코딩 없음. placeholder (`<PROJECT-NAME>` / `<STACK>` / `<DB>` / `<DEPLOY>` / `<RECEIPT-API>` 등) 만.
-- **원칙 2 준수**: 의미 결정 A/B/C 0건. W0 prerequisites 4 건 전부 사용자 결정 대기로 명시 (QUICK-START §1 체크박스).
+### 이전 WU chain
 
-- **WU-18 커밋 완료** (`d200299`, ahead +1): 17 files changed, +857 / -27. FUSE bypass 1회.
-- **WU-18.1 커밋 완료** (`12b9a72`, ahead +1 추가): sprints/WU-18.md frontmatter (status done / final_sha d200299) + sprints/_INDEX.md 활성 WU 비움 + 완료 v2 네이티브 테이블에 WU-18/WU-18.1 추가 + PROGRESS.md 덮어쓰기. 3 files, +27/-21. WU-18.1 자체 sha `12b9a72` 는 housekeeping 커밋에서 forward backfill.
+- **WU-17** (`083cfe1` + `d5681fa` + `b8f7f74`, 사용자 push 완료): HANDOFF/BRIEFING 축소 -77.6% (1139→255 lines).
+- **WU-18** (`d200299` + `12b9a72` + `4909d7a`): Phase 1 MVP W0 pre-arming — `phase1-mvp-templates/` (10 파일) + `plugin-wip-skeleton/` (3 파일) + `PHASE1-MVP-QUICK-START.md` 신설.
+
+### WU-19 본체 (커밋 대기)
+
+- **사용자 trigger**: "바로 이어서 ㄱㄱ" → resume_hint.trigger_positive. 원래 예약된 WU-19 (W0 결정 기록) 는 사용자가 W0 미실행이라 불가 → WU-20 으로 연기. WU-19 **재정의**: "Phase 1 MVP W0 Executable Scripts".
+- **산출물**:
+  - `phase1-mvp-templates/setup-w0.sh` 신규 (executable, 3 env 입력, 9 단계 자동화: pre-check → clone → cp → placeholder 치환 → IP 경계 pre-check → 3 commit → push). bash 구문 검사 통과.
+  - `phase1-mvp-templates/verify-w0.sh` 신규 (executable, 7 체크: commit 수 / IP 경계 / .gitmodules / .sfs-local 구조 / CLAUDE.md+README / placeholder 잔여 / Solon 경로 하드코딩). bash 구문 검사 통과. exit code + PASS/FAIL/WARN 카운터.
+  - `PHASE1-MVP-QUICK-START.md` §2 + §6 간소화 (100줄 bash → 스크립트 호출 1 줄).
+  - `phase1-mvp-templates/README.md` 갱신 (스크립트 2개 추가 + changelog v0.2-mvp).
+  - `sprints/WU-19.md` 신설 (decision_points 0건).
+  - `sprints/_INDEX.md` 활성 WU 섹션에 WU-19 등재.
+- **원칙 2 준수**: 스크립트 로직 = WU-18 bash 블록 그대로 이식 + OS 호환성 + 에러 핸들링. 해석 변경 0건.
 
 ## ② In-Progress
 
-_(없음 — WU-18 + WU-18.1 완료. housekeeping 커밋 1건 (본 덮어쓰기 + WU-18.1 sha forward backfill) 으로 세션 work chain 종결 준비.)_
+- **WU-19 커밋 대기**: FUSE bypass. 메시지 `WU-19: Phase 1 MVP W0 Executable Scripts (setup-w0.sh + verify-w0.sh)`.
+- **WU-19.1 + housekeeping 예약**.
 
-## ③ Next (WU-18 완료 직후)
+## ③ Next (WU-19 완료 직후)
 
-- **사용자 실행 단계** (Mac, 2026-04-27 월 예정): `PHASE1-MVP-QUICK-START.md` 따라 W0 exit. 결정 4 건 (ownership/repo이름/stack/Solon 참조) 확정 → admin panel repo 생성 → templates cp + placeholder 치환 → 3 commit + push → W0 exit → W1 진입 (`PHASE1-KICKOFF-CHECKLIST.md §3`).
+- **사용자 실행 단계** (Mac, Phase 1 W0): `PHASE1-MVP-QUICK-START.md §2` 따라 `setup-w0.sh` 실행 → §6 `verify-w0.sh` 로 exit 검증 → 통과 시 W1 진입 (`PHASE1-KICKOFF-CHECKLIST.md §3`).
 - **Solon docset 쪽 후속 WU**:
-  - **WU-19 (예약)**: W0 결정 결과를 HANDOFF §0 에 새 사용자 지시로 기록 + W1 cycle 1 중간 회귀 피드백 (learning patterns 실체화, `learning-logs/2026-05/P-*.md`).
-  - **WU-18b (선택)**: 실제 MVP 도메인 데이터 (매출 조회 schema draft, RBAC role 목록 draft) 를 위한 추가 template 확장 — 사용자가 "더 많은 pre-work 원한다" 고 하면.
-- **v2 운영 1주 검증** (원 WU-18 후보 주제): Phase 1 W1 cycle 돌리면서 자연 검증됨 → 별도 WU 생략 가능, WU-19 에 흡수 또는 cycle 2 시작 시점에 별도 WU.
+  - **WU-20 (재정의 예약)**: 원래 WU-19 이었던 "W0 결정 기록 + W1 cycle 1 회귀 피드백". 사용자가 실제 W0 실행 후 결정 결과 (repo 이름 / stack / ownership / Solon 참조 방식) 공유 + W1 중간 learning patterns 실체화 (`learning-logs/2026-05/P-*.md`).
+  - **WU-18b (선택)**: MVP 도메인 skeleton (매출 schema draft / RBAC role draft / 현금영수증 API 어댑터) — 사용자가 "pre-work 더 원한다" 고 하면. G0 브레인스토밍 후에만 진행 (원칙 2 준수).
+- **v2 운영 1주 검증**: Phase 1 W1 cycle 1 주행 중 자연 검증됨 → 별도 WU 대신 WU-20 에 learning pattern 실체화로 흡수.
 
 ## ④ Artifacts (세션 종료 시점 인벤토리)
 

@@ -2,7 +2,7 @@
 doc_id: sprints-index
 title: "sprints/ — WU (Work Unit) 파일 목록 (v2)"
 visibility: raw-internal
-updated: 2026-04-24   # WU-18 Phase 1 MVP W0 pre-arming 반영
+updated: 2026-04-24   # WU-19 Phase 1 MVP W0 executable scripts 반영
 ---
 
 # sprints/ — WU 파일 인덱스
@@ -15,7 +15,9 @@ updated: 2026-04-24   # WU-18 Phase 1 MVP W0 pre-arming 반영
 
 ## 활성 WU (status: in_progress / pending)
 
-_(없음 — WU-18 + WU-18.1 까지 완료. 사용자 실행 단계 (Mac, Phase 1 W0 exit) 대기. 복귀 WU 는 WU-19 (결정 기록 + W1 중간 피드백) 예약.)_
+| WU | title | status | opened | session | path |
+|:--:|:---|:---|:---|:---|:---|
+| WU-19 | Phase 1 MVP W0 Executable Scripts (setup-w0.sh + verify-w0.sh) | in_progress | 2026-04-24 | ecstatic-intelligent-brahmagupta | [WU-19.md](WU-19.md) |
 
 ## 완료 WU (status: done) — v2 네이티브
 

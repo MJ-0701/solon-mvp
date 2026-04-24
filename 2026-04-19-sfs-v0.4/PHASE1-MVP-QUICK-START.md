@@ -34,69 +34,42 @@ related_docs:
 
 ---
 
-## §2 실행 스크립트 (5 분)
+## §2 실행 스크립트 (1 분)
 
-아래 블록 전체를 복사해서 Mac 터미널에 붙여넣기. **환경 변수 3 개만** 본인 값으로 채우면 됨.
+> **WU-19 간소화** (2026-04-24): 원래 100줄 bash 블록을 `setup-w0.sh` 실행으로 대체.
+> 내부 로직은 동일하나 OS 호환 + 에러 핸들링 + IP 경계 pre-check 추가.
+
+### 사전: GitHub 에 private repo 생성
+
+GitHub 에서 먼저 `<PROJECT-NAME>` private repo 생성 (README/gitignore/license 없이 빈 repo).
+
+### 실행
 
 ```bash
-# === 0) 환경 변수 (본인 값으로 치환) ===
-export PROJECT_NAME="admin-panel-mvp"                 # D2 에서 결정
-export SOLON_DOCSET="$HOME/workspace/solon-docset/2026-04-19-sfs-v0.4"   # Solon docset 실제 경로
-export WORKSPACE="$HOME/workspace"                    # admin panel repo 를 둘 부모 디렉토리
+# === 환경변수 3개 (본인 값으로 치환) ===
+export PROJECT_NAME="admin-panel-mvp"                                  # D2 에서 결정
+export SOLON_DOCSET="$HOME/workspace/solon-docset/2026-04-19-sfs-v0.4" # Solon docset 실제 경로
+export WORKSPACE="$HOME/workspace"                                     # admin panel repo 를 둘 부모 디렉토리
 
-# === 1) 새 repo 생성 + clone ===
-# GitHub 에서 먼저 private repo "$PROJECT_NAME" 생성 (README/gitignore/license 없이 빈 repo)
-cd "$WORKSPACE"
-git clone "git@github.com:$(whoami)/$PROJECT_NAME.git"   # 또는 https://github.com/USER/REPO.git
-cd "$PROJECT_NAME"
+# === optional ===
+# export GITHUB_USER="MJ-0701"         # 본인 GitHub 사용자명 (기본 = whoami)
+# export GIT_PROTOCOL="ssh"            # ssh (기본) 또는 https
 
-# === 2) 템플릿 복사 + placeholder 치환 ===
-cp "$SOLON_DOCSET/phase1-mvp-templates/CLAUDE.md.template" ./CLAUDE.md
-cp "$SOLON_DOCSET/phase1-mvp-templates/README.md.template" ./README.md
-cat "$SOLON_DOCSET/phase1-mvp-templates/.gitignore.snippet" >> ./.gitignore
-
-# .sfs-local 구조 복사
-mkdir -p .sfs-local/sprints .sfs-local/decisions
-cp "$SOLON_DOCSET/phase1-mvp-templates/.sfs-local-template/divisions.yaml.template" ./.sfs-local/divisions.yaml
-touch .sfs-local/events.jsonl
-
-# placeholder 일괄 치환 (macOS sed -i '')
-TODAY=$(date +%Y-%m-%d)
-sed -i '' "s|<PROJECT-NAME>|$PROJECT_NAME|g; s|<DATE>|$TODAY|g" \
-  ./CLAUDE.md ./README.md ./.sfs-local/divisions.yaml
-
-# === 3) 나머지 placeholder 는 에디터에서 수동 치환 ===
-echo ""
-echo "=== 다음 placeholder 들을 에디터에서 치환해 ==="
-grep -n '<[A-Z-]*>' ./CLAUDE.md ./README.md ./.sfs-local/divisions.yaml || true
-# 예: <STACK> / <DB> / <DEPLOY> / <RECEIPT-API> / <LICENSE-OR-IP-NOTICE> / <EMAIL> / <UI-LIB> / <AUTH>
-
-# === 4) IP 경계 검증 ===
-echo ""
-echo "=== IP 경계 검증 (비어있어야 정상) ==="
-git ls-files | grep -i solon && echo "❌ Solon 파일 유입! 제거 필요" || echo "✅ Solon 파일 zero"
-test -f .gitmodules && echo "❌ .gitmodules 존재" || echo "✅ .gitmodules 없음"
-
-# === 5) 초기 commit 3 개 ===
-git add .gitignore
-git commit -m "chore: initial .gitignore (Node + .sfs-local rules)"
-
-git add CLAUDE.md README.md
-git commit -m "docs: CLAUDE.md + README (7-step flow, stack TBD)"
-
-git add .sfs-local/divisions.yaml .sfs-local/events.jsonl .sfs-local/sprints/.gitkeep .sfs-local/decisions/.gitkeep 2>/dev/null || true
-# .gitkeep 은 비어있으니 경우에 따라 manual touch
-touch .sfs-local/sprints/.gitkeep .sfs-local/decisions/.gitkeep
-git add .sfs-local/
-git commit -m "chore: .sfs-local/ scaffold (divisions.yaml + events.jsonl + sprints/ + decisions/)"
-
-# === 6) push ===
-git push -u origin main
-
-echo ""
-echo "=== W0 exit ==="
-git log --oneline
+# === 스크립트 실행 ===
+"$SOLON_DOCSET/phase1-mvp-templates/setup-w0.sh"
 ```
+
+스크립트가 자동으로:
+1. 사전 체크 (env 누락, repo 기존 존재, git 설치)
+2. Repo clone
+3. Template cp (CLAUDE.md / README.md / .gitignore / .sfs-local)
+4. `<PROJECT-NAME>` / `<DATE>` placeholder 자동 치환
+5. 남은 placeholder (Stack 관련) 리포트 — 에디터에서 치환
+6. IP 경계 pre-check (Solon 파일 유입 여부)
+7. 3 initial commit 생성
+8. `git push -u origin main`
+
+**실패 시 동작**: pre-check 실패 → exit 1. push 실패 → exit 0 + 재시도 안내 (`cd <repo> && git push -u origin main`).
 
 ---
 
@@ -147,18 +120,42 @@ Solon docset 쪽 새 WU (예: WU-19) 로 기록 + commit + push.
 
 ---
 
-## §6 W0 exit 검증 체크리스트
+## §6 W0 exit 자동 검증
 
-- [ ] admin panel repo 에 3 commit 이상 (initial / CLAUDE.md+README / .sfs-local)
+> **WU-19 간소화** (2026-04-24): 체크리스트를 `verify-w0.sh` 로 자동화.
+
+```bash
+cd "$WORKSPACE/$PROJECT_NAME"
+"$SOLON_DOCSET/phase1-mvp-templates/verify-w0.sh"
+```
+
+스크립트가 7 개 항목 자동 검증:
+1. commit 수 ≥ 3
+2. IP 경계 (`git ls-files | grep -i solon` = 빈 결과)
+3. `.gitmodules` 없음 또는 Solon 항목 없음
+4. `.sfs-local/` 구조 (divisions.yaml + events.jsonl + sprints + decisions)
+5. root CLAUDE.md + README.md 존재
+6. placeholder 잔여 리포트 (Stack 결정 전이면 WARN, 결정 후 실행 시 FAIL)
+7. CLAUDE.md 에 Solon 경로 / 키워드 하드코딩 없음
+
+출력 형식: `PASS / FAIL / WARN` 카운터 + exit code.
+
+- exit 0 + WARN 0 = **완전 통과**, W1 진입
+- exit 0 + WARN>0 = 조건부 통과 (Stack 치환 후 재검증 권장)
+- exit 1 = 실패, 문제 해결 후 재실행
+
+**수동 체크리스트 (참고용, 자동 검증 대상과 동일)**:
+
+- [ ] admin panel repo 에 3 commit 이상
 - [ ] `git ls-files | grep -i solon` → 빈 결과
 - [ ] `.gitmodules` 없음
-- [ ] `ls .sfs-local/` → `divisions.yaml` + `events.jsonl` + `sprints/` + `decisions/` 존재
+- [ ] `ls .sfs-local/` → `divisions.yaml` + `events.jsonl` + `sprints/` + `decisions/`
 - [ ] `<PROJECT-NAME>` / `<DATE>` placeholder 치환 완료
-- [ ] Stack 관련 placeholder (`<STACK>` / `<DB>` / `<DEPLOY>`) 는 W1 Day 1 에 Claude 와 함께 치환 가능 (옵션)
+- [ ] Stack 관련 placeholder 는 W1 Day 1 에 Claude 와 함께 치환 가능 (옵션)
 - [ ] `CLAUDE.md` 가 Solon 경로 언급하지 않음 (IP 경계)
 - [ ] GitHub 에 push 완료
 
-모두 체크되면 **W1 진입**. PHASE1-KICKOFF-CHECKLIST §3 참조.
+모두 통과 → **W1 진입**. PHASE1-KICKOFF-CHECKLIST §3 참조.
 
 ---
 
