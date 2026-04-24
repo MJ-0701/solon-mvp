@@ -28,7 +28,7 @@ _(없음 — WU-18 + WU-18.1 까지 완료. 사용자 실행 단계 (Mac, Phase 
 | WU-17 | HANDOFF / BRIEFING 축소 (v2 참조 구조 전환, -77.6%) | `083cfe1` | 2026-04-24 | 2026-04-24 | ecstatic-intelligent-brahmagupta | [WU-17.md](WU-17.md) |
 | WU-17.1 | WU-17 sha backfill + sprints/_INDEX.md 이동 | `d5681fa` | 2026-04-24 | 2026-04-24 | ecstatic-intelligent-brahmagupta | [WU-17.md](WU-17.md) (refresh 전용) |
 | WU-18 | Phase 1 MVP W0 Pre-Arming (templates + plugin-wip + QUICK-START) | `d200299` | 2026-04-24 | 2026-04-24 | ecstatic-intelligent-brahmagupta | [WU-18.md](WU-18.md) |
-| WU-18.1 | WU-18 sha backfill + sprints/_INDEX.md 이동 | (housekeeping 커밋 sha) | 2026-04-24 | 2026-04-24 | ecstatic-intelligent-brahmagupta | [WU-18.md](WU-18.md) (refresh 전용) |
+| WU-18.1 | WU-18 sha backfill + sprints/_INDEX.md 이동 | `12b9a72` | 2026-04-24 | 2026-04-24 | ecstatic-intelligent-brahmagupta | [WU-18.md](WU-18.md) (refresh 전용) |
 
 ## 완료 WU (status: done) — v1 → v2 이관 (WU-16 backfill)
 

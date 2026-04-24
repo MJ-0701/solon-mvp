@@ -9,8 +9,8 @@ current_wu_path: sprints/WU-18.md
 current_wu_owner:
   session_codename: ecstatic-intelligent-brahmagupta
   claimed_at: 2026-04-24T16:19:38+09:00
-  last_heartbeat: 2026-04-24T17:32:00+09:00
-  current_step: "WU-18 (d200299) 커밋 완료. WU-18.1 sha backfill 진행 중."
+  last_heartbeat: 2026-04-24T17:38:00+09:00
+  current_step: "WU-18 (d200299) + WU-18.1 (12b9a72) 완료. ahead 2. 사용자 터미널 push 대기. 다음 액션은 사용자 Mac W0 실행."
   ttl_minutes: 15
 released_history:
   last_owner: brave-hopeful-euler
@@ -82,11 +82,11 @@ resume_hint:
 - **원칙 2 준수**: 의미 결정 A/B/C 0건. W0 prerequisites 4 건 전부 사용자 결정 대기로 명시 (QUICK-START §1 체크박스).
 
 - **WU-18 커밋 완료** (`d200299`, ahead +1): 17 files changed, +857 / -27. FUSE bypass 1회.
-- **WU-18.1 진행 중** (커밋 대기): sprints/WU-18.md `final_sha: d200299` + `status: done` 실체화 + sprints/_INDEX.md 활성 WU 섹션 비움 + 완료 v2 네이티브 테이블에 WU-18/WU-18.1 추가 + PROGRESS.md 본 덮어쓰기.
+- **WU-18.1 커밋 완료** (`12b9a72`, ahead +1 추가): sprints/WU-18.md frontmatter (status done / final_sha d200299) + sprints/_INDEX.md 활성 WU 비움 + 완료 v2 네이티브 테이블에 WU-18/WU-18.1 추가 + PROGRESS.md 덮어쓰기. 3 files, +27/-21. WU-18.1 자체 sha `12b9a72` 는 housekeeping 커밋에서 forward backfill.
 
 ## ② In-Progress
 
-_(WU-18.1 커밋 직전 — 본 덮어쓰기 포함 다음 FUSE bypass commit 대기.)_
+_(없음 — WU-18 + WU-18.1 완료. housekeeping 커밋 1건 (본 덮어쓰기 + WU-18.1 sha forward backfill) 으로 세션 work chain 종결 준비.)_
 
 ## ③ Next (WU-18 완료 직후)
 
