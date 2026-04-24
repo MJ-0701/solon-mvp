@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+# uninstall.sh — Solon MVP uninstaller
+#
+# 사용법:
+#   cd ~/workspace/my-project
+#   ~/tmp/solon-mvp/uninstall.sh
+#
+# 동작:
+#   1. .gitignore 에서 solon-mvp 블록 제거
+#   2. .sfs-local/ 처리 — 대화형:
+#      (a) 전부 제거 (sprints/decisions 산출물 포함)
+#      (b) scaffold 만 제거, 산출물 (sprints/decisions/events.jsonl) 보존
+#      (c) 취소
+#   3. 설치 취소 기록은 git commit 권장 (스크립트가 자동 commit 하지 않음)
+
+set -euo pipefail
+
+readonly GIT_MARKER_BEGIN="### BEGIN solon-mvp ###"
+readonly GIT_MARKER_END="### END solon-mvp ###"
+
+if [ -t 1 ] && command -v tput >/dev/null 2>&1 && [ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]; then
+  C_RED=$(tput setaf 1); C_GREEN=$(tput setaf 2); C_YELLOW=$(tput setaf 3)
+  C_BLUE=$(tput setaf 4); C_BOLD=$(tput bold); C_RESET=$(tput sgr0)
+else
+  C_RED=""; C_GREEN=""; C_YELLOW=""; C_BLUE=""; C_BOLD=""; C_RESET=""
+fi
+info()  { printf "%s%s%s\n" "$C_BLUE" "$*" "$C_RESET"; }
+ok()    { printf "  %s✓%s %s\n" "$C_GREEN" "$C_RESET" "$*"; }
+warn()  { printf "  %s⚠%s %s\n" "$C_YELLOW" "$C_RESET" "$*"; }
+err()   { printf "  %s✗%s %s\n" "$C_RED" "$C_RESET" "$*" >&2; }
+die()   { err "$*"; exit 1; }
+
+if [ ! -t 0 ] && [ -r /dev/tty ]; then exec < /dev/tty; fi
+
+prompt() {
+  local msg="$1" default="${2:-}" answer
+  if [ -n "$default" ]; then printf "%s [%s]: " "$msg" "$default"
+  else printf "%s: " "$msg"; fi
+  read -r answer || answer=""
+  echo "${answer:-$default}"
+}
+
+TARGET="$(pwd)"
+
+cat <<EOF
+
+${C_BOLD}=== Solon MVP Uninstaller ===${C_RESET}
+
+타겟:   $TARGET
+
+EOF
+
+if [ ! -d "$TARGET/.sfs-local" ] && ! grep -qF "$GIT_MARKER_BEGIN" "$TARGET/.gitignore" 2>/dev/null; then
+  warn "Solon 설치 흔적 없음 (.sfs-local/ 도 .gitignore 마커도 없음)"
+  exit 0
+fi
+
+# ============================================================================
+# 1. .sfs-local/ 처리 방법 선택
+# ============================================================================
+
+if [ -d "$TARGET/.sfs-local" ]; then
+  SPRINT_COUNT=$(find "$TARGET/.sfs-local/sprints" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+  DECISION_COUNT=$(find "$TARGET/.sfs-local/decisions" -mindepth 1 -maxdepth 1 -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+  EVENTS_LINES=$(wc -l < "$TARGET/.sfs-local/events.jsonl" 2>/dev/null || echo 0)
+  EVENTS_LINES=$(echo "$EVENTS_LINES" | tr -d ' ')
+
+  info "현재 .sfs-local/ 상태:"
+  printf "  sprints/:    %s 개 디렉토리\n" "$SPRINT_COUNT"
+  printf "  decisions/:  %s 개 파일\n" "$DECISION_COUNT"
+  printf "  events.jsonl: %s 줄\n" "$EVENTS_LINES"
+  echo ""
+
+  cat <<EOF
+선택:
+  [a] 전부 제거 (sprints/decisions 산출물 포함 — ${C_RED}복구 불가${C_RESET})
+  [b] scaffold 만 제거, 산출물 보존 (.sfs-local/sprints /decisions/events.jsonl 유지)
+  [c] 취소
+
+EOF
+  CHOICE=$(prompt "선택?" "c")
+
+  case "$CHOICE" in
+    a|A)
+      rm -rf "$TARGET/.sfs-local"
+      ok ".sfs-local/ 전부 제거"
+      ;;
+    b|B)
+      # scaffold 파일만 제거
+      rm -f "$TARGET/.sfs-local/divisions.yaml"
+      rm -f "$TARGET/.sfs-local/VERSION"
+      rm -f "$TARGET/.sfs-local/sprints/.gitkeep"
+      rm -f "$TARGET/.sfs-local/decisions/.gitkeep"
+      ok "scaffold 제거 (divisions.yaml / VERSION / .gitkeep)"
+      warn "산출물 보존: sprints/ / decisions/ / events.jsonl"
+      ;;
+    *)
+      info "취소됨."
+      exit 0
+      ;;
+  esac
+fi
+
+# ============================================================================
+# 2. .gitignore 블록 제거
+# ============================================================================
+
+if [ -f "$TARGET/.gitignore" ] && grep -qF "$GIT_MARKER_BEGIN" "$TARGET/.gitignore"; then
+  awk -v b="$GIT_MARKER_BEGIN" -v e="$GIT_MARKER_END" '
+    $0 == b { skip=1; next }
+    $0 == e { skip=0; next }
+    !skip { print }
+  ' "$TARGET/.gitignore" > "$TARGET/.gitignore.tmp"
+  mv "$TARGET/.gitignore.tmp" "$TARGET/.gitignore"
+  ok ".gitignore solon-mvp 블록 제거"
+fi
+
+# ============================================================================
+# 3. CLAUDE.md — 대화형 (사용자가 수정했을 가능성)
+# ============================================================================
+
+if [ -f "$TARGET/CLAUDE.md" ]; then
+  echo ""
+  warn "CLAUDE.md 가 존재합니다 (사용자가 편집했을 수 있음)"
+  if [ "$(prompt "CLAUDE.md 삭제할까요?" "N")" = "y" ] || [ "$(prompt "" "N")" = "Y" ]; then
+    rm -f "$TARGET/CLAUDE.md"
+    ok "CLAUDE.md 제거"
+  else
+    ok "CLAUDE.md 보존"
+  fi
+fi
+
+# ============================================================================
+# 4. 완료
+# ============================================================================
+
+cat <<EOF
+
+${C_BOLD}${C_GREEN}=== Uninstall 완료 ===${C_RESET}
+
+변경사항 git commit 권장:
+  ${C_BLUE}git add -A${C_RESET}
+  ${C_BLUE}git commit -m "chore: uninstall solon-mvp"${C_RESET}
+
+EOF

@@ -2,7 +2,7 @@
 doc_id: sprints-index
 title: "sprints/ — WU (Work Unit) 파일 목록 (v2)"
 visibility: raw-internal
-updated: 2026-04-24   # WU-19 Phase 1 MVP W0 executable scripts 반영
+updated: 2026-04-24   # WU-20 Solon MVP Distribution staging (Phase A 완료, Phase B 사용자 apply 대기)
 ---
 
 # sprints/ — WU 파일 인덱스
@@ -15,7 +15,14 @@ updated: 2026-04-24   # WU-19 Phase 1 MVP W0 executable scripts 반영
 
 ## 활성 WU (status: in_progress / pending)
 
-_(없음 — WU-19 + WU-19.1 까지 완료. 사용자 Mac W0 실행 대기 중. 복귀 WU 는 WU-20 (재정의: W0 결정 기록 + W1 회귀 피드백) 예약.)_
+| WU | title | status | opened | session | path |
+|:--:|:---|:---|:---|:---|:---|
+| WU-20 | Solon MVP Distribution 설계 + 실체화 (scope pivot) | in_progress (Phase A done, Phase B 사용자 apply 대기) | 2026-04-24 | amazing-happy-hawking | [WU-20.md](WU-20.md) |
+
+> **Phase A 완료** (본 세션): `solon-mvp-dist/` staging 구축 + install/upgrade/uninstall.sh +
+> templates/ + HANDOFF §0 #16 + learning-logs/2026-05/P-01 + WU-20.md.
+> **Phase B 대기**: 사용자가 `~/workspace/solon-mvp/` 로컬 repo 를 distribution 구조로
+> 전환 (APPLY-INSTRUCTIONS.md 실행) → install.sh dry-run 검증 → WU-20 close + WU-20.1 refresh.
 
 ## 완료 WU (status: done) — v2 네이티브
 

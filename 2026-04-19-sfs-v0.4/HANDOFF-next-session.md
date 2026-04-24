@@ -1,9 +1,9 @@
 ---
 doc_id: handoff-2026-04-20-solon-v0.4-r3-complete
 title: "인수인계 (Pointer Hub v3.0-reduced) — 사용자 지시 SSoT + 참조 허브"
-version: 3.0-reduced
+version: 3.1-reduced
 created: 2026-04-20
-updated: 2026-04-24 (WU-17 축소)
+updated: 2026-04-24 (WU-20: 16번째 사용자 지시 추가)
 author: "Claude (direct 지시 by 채명정)"
 valid_until: "WU 규율 유지되는 동안 계속 (현재 상태는 PROGRESS.md, 이관은 sprints/_INDEX.md, 본 파일은 frontmatter + §0 사용자 지시 원문 SSoT 역할)"
 status: "Pointer hub. 현재 상태는 PROGRESS.md 참조."
@@ -41,6 +41,15 @@ user_new_directive:
   date: 2026-04-20
   implication: "Claude Code 에 암묵적으로 lock-in 된 현 docset 에 runtime abstraction layer 추가 필요"
   resolution: "WU-11 A (RUNTIME-ABSTRACTION.md 신설, 4cd07e6) 완료. WU-11 B/C 는 Phase 1 안정화 / Phase 2 Go/No-Go 이후 예약."
+user_new_directive_16:
+  raw: "난 지금 solon mvp(sfs 로 실행하는 단계)를 내 개인프로젝트랑, 새로시작할 프로젝트에서 사용하기 위해서 mvp 출시를 하겠다는거임 그래서 내가 repo 이름을 solon-mvp로 진행했던건데 프로젝트에서 sh로 임시 설치해서 사용할 수 있게 만들어 둔거면 내가 진행하고있는 사이드프로젝트, 그리고 앞으로 만들 신규 프로젝트에서 sh로 설치하면 되나?"
+  date: 2026-04-24
+  decisions_3:
+    install_method: "둘 다 지원 (curl | bash + local ./install.sh)"
+    conflict_handling: "대화형 prompt (s/b/o/d)"
+    upgrade_mechanism: "upgrade.sh (VERSION 기반)"
+  implication: "solon-mvp 정체 재정의: consumer project → SFS distribution. install.sh / upgrade.sh / uninstall.sh 필요. phase1-mvp-templates/ 은 distribution 에 재흡수."
+  resolution: "WU-20 (amazing-happy-hawking 세션) — solon-mvp-dist/ staging + APPLY-INSTRUCTIONS.md 작성. 사용자 Mac 에서 로컬 solon-mvp repo 전환 apply 대기."
 ---
 
 # 📋 인수인계 — Pointer Hub (v3.0-reduced)
@@ -84,6 +93,18 @@ user_new_directive:
 13. (2026-04-20 심야 ⑧, WU-12 checklist 작성 중 — IP 배포 모델 정정): **"Solon docset <-- 이건 내 개인자산이니까 사실 플러그인 형태로 배포가 돼야하는게 맞음"** → admin panel (회사 IP) repo 에 Solon 참조 zero. End-state = `claude plugin install solon`. MVP 단계 = 사용자 개인 workspace 로컬 clone 또는 `~/.claude/plugins/solon-wip/` 참조.
 14. (2026-04-24, WU-15 이후 장소 이동 전): **"일단 세션 release 하고 다음세션은 내가 장소를 옮겨야해서 그 다음에 하자 인수인계문서만 빡씨게 ㄱㄱ"** → brave-hopeful-euler 세션 release + v0.5 refresh.
 15. (2026-04-24, WU-17 착수 trigger): **"이전세션 이어서 작업해야될것들 있을거야 파악 후 ㄱㄱ"** + **"sfs프로젝트 말하는거임"** + **"일단 당분간은 깃도 자동화 하자 너가 커밋하고 push까지 진행해 그리고 이어서 ㄱㄱ"** + **"당분간만임 깃 자동화는"** → WU-17 resume_hint (a) 자동 진입 + §1.5 git push 금지 임시 해제 (환경 제약으로 실 push 는 사용자 터미널 유지).
+
+16. (2026-04-24 심야, WU-20 scope pivot — **매우 중요**):
+    - W0 실행 단계 verify-w0.sh check #7 false-positive FAIL 발견 (repo 이름 `solon-mvp` 가 `solon` grep 에 걸림).
+    - 사용자 원 의도 재확인: **"난 지금 solon mvp(sfs 로 실행하는 단계)를 내 개인프로젝트랑, 새로시작할 프로젝트에서 사용하기 위해서 mvp 출시를 하겠다는거임 그래서 내가 repo 이름을 solon-mvp로 진행했던건데 프로젝트에서 sh로 임시 설치해서 사용할 수 있게 만들어 둔거면 내가 진행하고있는 사이드프로젝트, 그리고 앞으로 만들 신규 프로젝트에서 sh로 설치하면 되나?"**
+    - **의미 전환**: 원래 기획 (#11~#13: admin-panel MVP + Solon 참조 zero) → **`solon-mvp` 자체가 SFS 시스템의 설치 가능한 배포판**. consumer 프로젝트 (사이드프로젝트 + 신규 프로젝트) 가 `install.sh` 로 Solon 을 주입받는 구조.
+    - **3개 설계 결정 (사용자 직접)**:
+      1. 설치 방법: **둘 다 지원** (`curl -sSL ... | bash` one-liner + local `git clone + ./install.sh`)
+      2. CLAUDE.md 등 기존 파일 충돌: **대화형 prompt** (s/b/o/d = skip/backup/overwrite/diff)
+      3. 업데이트: **upgrade.sh ㄱㄱ** — VERSION 기반 대화형 merge
+    - **ㄱㄱ signal**: 자율 진행 승인 → WU-20 재정의 → Solon docset `solon-mvp-dist/` staging 구축 → apply-instructions.md 생성.
+    - **admin-panel MVP 플랜 상태**: 보류. `solon-mvp` 배포 완료 + 사이드프로젝트에 install 한 뒤, 신규 프로젝트 중 하나로 admin-panel 재활성화 검토. 현재 #11~#13 은 "예약" 상태.
+    - **phase1-mvp-templates/ 및 setup-w0.sh / verify-w0.sh 운명**: 기능은 `solon-mvp-dist/install.sh` 에 재흡수됨. 원본 phase1-mvp-templates/ 는 docset 에서 archive 또는 제거 결정 필요 (WU-20 후속).
 
 → **해석 요약**:
 - 기본 3원칙: 작업 진행 + 토큰 한계 도달 시 중단 + **기록 우선**

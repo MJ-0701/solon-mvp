@@ -2,11 +2,16 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-24T18:30:00+09:00
-session: "9번째 세션 `ecstatic-intelligent-brahmagupta` 자연 종료 — WU-17/18/19 3 WU 본체 + 3 refresh + 3 housekeeping = 9 커밋 완주. 사용자 `push완료 다음세션에서 이어서작업 할께 준비 됨?` 지시 → mutex release + 9번째 세션 retrospective 작성 + sessions/_INDEX.md 9번째 행 추가. 다음 세션은 CLAUDE.md → PROGRESS.md → sprints/_INDEX.md → sessions/_INDEX.md 경로로 진입, resume_hint default_action 따라 WU-20 (재정의된 W0 결정 기록 + W1 회귀 피드백, 단 사용자 W0 실행 후에만 가능) 또는 사용자 지정 경로."
-current_wu: null           # WU-19.1 + housekeeping 까지 완료, 활성 WU 없음. 다음 세션이 WU-20 또는 지정 WU claim 예정.
-current_wu_path: null
-current_wu_owner: null     # ecstatic-intelligent-brahmagupta 자연 종료, 명시적 release.
+last_overwrite: 2026-04-24T22:10:00+09:00
+session: "10번째 세션 `amazing-happy-hawking` 진입 — W0 실행 피드백 중 scope pivot 발견 (solon-mvp = consumer project vs distribution). 사용자 3개 답변 (both install / interactive conflict / upgrade.sh) 확정 + ㄱㄱ → WU-20 재정의 ('Solon MVP distribution 설계 + 실체화')."
+current_wu: WU-20
+current_wu_path: sprints/WU-20.md
+current_wu_owner:
+  session_codename: amazing-happy-hawking
+  claimed_at: 2026-04-24T22:10:00+09:00
+  last_heartbeat: 2026-04-24T22:10:00+09:00
+  current_step: "solon-mvp-dist/ staging 구축 개시"
+  ttl_minutes: 15
 released_history:
   last_owner: ecstatic-intelligent-brahmagupta
   last_claimed_at: 2026-04-24T16:19:38+09:00
@@ -62,13 +67,48 @@ resume_hint:
   version: 1
 ---
 
-# PROGRESS — live snapshot (9번째 세션 자연 종료, mutex released)
+# PROGRESS — live snapshot (10번째 세션 amazing-happy-hawking, WU-20 Phase A 완료)
 
-> 🚨 **본 파일 최우선 진입.** mutex released (`current_wu_owner: null`) → 다음 세션은 §1.12 protocol 통과 후 self 로 claim → ③ Next 메뉴 중 선택.
+> 🚨 **본 파일 최우선 진입.** mutex claimed by `amazing-happy-hawking`. Phase B 대기 상태 (사용자 apply). 다음 세션은 사용자 apply 결과 보고 기다리거나, 사용자 ㄱㄱ 시 WU-20 close 진행.
 
 ---
 
-## ① Just-Finished (2026-04-24 ecstatic-intelligent-brahmagupta 세션 최종 성과)
+## ⓪ 현 세션 (amazing-happy-hawking, WU-20 Phase A 완료)
+
+**W0 실행 단계 에서 scope pivot 발견** → WU-20 재정의 → `solon-mvp-dist/` staging 전체 구축.
+
+### 생성 파일 (staging)
+
+- `solon-mvp-dist/install.sh` — dual mode (curl|bash + local) + 대화형 충돌 처리 (s/b/o/d)
+- `solon-mvp-dist/upgrade.sh` — VERSION 기반 diff 프리뷰 + 파일별 merge
+- `solon-mvp-dist/uninstall.sh` — 산출물 보존 옵션 (전부/scaffold-만/취소)
+- `solon-mvp-dist/templates/CLAUDE.md.template` — 도메인 중립 (admin-panel 특화 제거)
+- `solon-mvp-dist/templates/.gitignore.snippet` — marker 기반 idempotent
+- `solon-mvp-dist/templates/.sfs-local-template/divisions.yaml + events.jsonl + sprints/ + decisions/`
+- `solon-mvp-dist/README.md` — 설치 3 방법 + 기능 요약
+- `solon-mvp-dist/CLAUDE.md` — distribution 유지보수 지침
+- `solon-mvp-dist/VERSION` — 0.1.0-mvp
+- `solon-mvp-dist/CHANGELOG.md` — [0.1.0-mvp] entry
+- `solon-mvp-dist/APPLY-INSTRUCTIONS.md` — 1회용 마이그레이션 가이드
+
+### 수정 파일 (docset 본체)
+
+- `HANDOFF-next-session.md` v3.1 — §0 #16 추가 + frontmatter `user_new_directive_16`
+- `learning-logs/2026-05/P-01-solon-mvp-scope-pivot.md` — 첫 learning pattern 실체화
+- `sprints/WU-20.md` — 본 WU 정의 (status: in_progress, sub_steps 14 중 12 done)
+- `sprints/_INDEX.md` — 활성 WU 섹션에 WU-20 1행 추가
+- `PROGRESS.md` (본 파일) — mutex claim + ⓪/① 갱신
+
+### 규율 준수
+
+- 원칙 2 (self-validation-forbidden): 모든 의미 결정은 사용자 지시 #16 의 명시적 3개 답변 기반. A/B/C 임의 결정 0건.
+- never-hard-block: install.sh / upgrade.sh / uninstall.sh 모두 사용자 선택지 제공, 자동 파괴 0건.
+- §1.5 git push: Cowork 샌드박스 실 push 불가 상태 — 모든 커밋은 사용자 터미널에서 수행.
+- IP 경계: Solon docset 내부 경로 하드코딩 0건 (distribution repo 관점에서 재검증 필요, CLAUDE.md 에 R-03 규칙 반영).
+
+---
+
+## ① Just-Finished (직전 9번째 세션 ecstatic-intelligent-brahmagupta 성과 — 보존)
 
 **9 커밋 완주** (3 WU 본체 + 3 refresh + 3 housekeeping, 사용자 push 2회 완료, 본 세션 ahead 0):
 
@@ -100,22 +140,39 @@ resume_hint:
 
 ## ② In-Progress
 
-_(없음 — 세션 종료 상태. 본 덮어쓰기 포함 최종 session housekeeping 커밋 1건 (mutex release + retrospective + _INDEX 갱신) 으로 work chain 종결.)_
+**WU-20 Phase A 완료 → Phase B 사용자 apply 대기**.
+
+- staging (`solon-mvp-dist/`) 전부 작성 완료. docset 내부 커밋 대기 (사용자 터미널 commit + push).
+- 사용자가 `~/workspace/solon-mvp/` 에서 `APPLY-INSTRUCTIONS.md` 7단계 실행 필요.
+- 완료되면 (1) install.sh dry-run 결과 + (2) solon-mvp 최신 commit sha + (3) 문제 발생 시 에러 원문 공유.
 
 ## ③ Next (다음 세션 진입)
 
-**진입 순서** (5분 이내 착수):
-1. **CLAUDE.md** 읽기 (§1 절대 규칙 특히 §1.11 resume_hint + §1.12 mutex) → 본 PROGRESS.md frontmatter `current_wu_owner` null 확인 → self claim.
-2. **PROGRESS.md** (본 파일) ③ Next 메뉴 확인 → 사용자 발화 매칭 → 진입 경로 확정.
-3. **sprints/_INDEX.md** 활성 WU 섹션 확인 (현재 비어 있음).
-4. 필요 시 `sessions/2026-04-24-ecstatic-intelligent-brahmagupta.md` 로 본 세션 상세 히스토리 drill-down.
+**진입 순서**:
+1. **CLAUDE.md** 읽기 → 본 PROGRESS.md frontmatter `current_wu_owner` 확인 (현재 amazing-happy-hawking claim 중).
+2. **PROGRESS.md** (본 파일) ⓪ 현 세션 요약 + ② In-Progress 확인.
+3. **sprints/WU-20.md** sub_steps 14 중 12 done, 2 pending (apply 대기 + close 처리).
+4. 필요 시 `learning-logs/2026-05/P-01-solon-mvp-scope-pivot.md` 로 scope pivot 맥락 drill-down.
 
 **메뉴**:
-- **(a, default)** **WU-20 "W0 결정 기록 + W1 cycle 1 회귀 피드백"** — 원래 WU-19 가 재정의되면서 WU-20 으로 연기된 것. 사용자가 Mac 에서 `setup-w0.sh` + `verify-w0.sh` 실행 완료한 경우에만 가능. 결정 결과 (repo 이름 / stack / ownership / Solon 참조 방식) → HANDOFF §0 16번째 지시로 기록 + W1 중간 learning patterns 실체화 (`learning-logs/2026-05/P-*.md` 5건 후보 중 선별).
-- (b) **WU-18b "MVP 도메인 skeleton"** — 사용자가 "pre-work 더 원한다" 고 하면. G0 브레인스토밍 후 매출 schema / RBAC role / 현금영수증 API 어댑터 skeleton (원칙 2 준수).
-- (c) **W10 결정 세션** — cross-ref-audit §4 #14/#18/#19 (tmp/w10-todo-{14,18,19}.md pre-분석 있음).
-- (d) **Phase 1 W1 cycle 1 중간 병렬 피드백** — 사용자가 W1 진행 중이면.
+- **(a, default)** **WU-20 Phase B close** — 사용자 apply 완료 보고 (install.sh dry-run + 최신 sha) 받아서 WU-20 close + WU-20.1 refresh sha backfill + learning-logs P-01 status: resolved stamping.
+- (b) **WU-20.2 phase1-mvp-templates/ archive 또는 제거** — D-20-1 decision. distribution 배포 검증된 후 원 templates 경로 처리 (사용자 확인 필수, 원칙 2).
+- (c) **WU-18b "MVP 도메인 skeleton"** — 사용자가 distribution 설치 후 실제 consumer 프로젝트 (사이드프로젝트) 에 install.sh 적용 + 첫 Sprint 진입 지원.
+- (d) **W10 결정 세션** — cross-ref-audit §4 #14/#18/#19.
 - (e) **WU-16b 확장 이관** (WU-0 ~ WU-5.1 / 8/8.1 / 11-series / 12-series).
+
+**⚠️ Phase 1 킥오프 D-day**: 2026-04-27 (월). 본 세션 2026-04-24 → **D-3**. WU-20 Phase B 완료 후 사용자가 사이드프로젝트 또는 신규 프로젝트에 `install.sh` 실행 → Day 1 (첫 Sprint 브레인스토밍) 시작 가능.
+
+**⚠️ push 상태**: 본 세션 변경사항 (WU-20 Phase A 산출물) 은 Cowork 샌드박스에서 commit 불가. 사용자 터미널에서:
+```
+cd ~/agent_architect
+git add 2026-04-19-sfs-v0.4/
+git status   # solon-mvp-dist/ + HANDOFF 수정 + learning-logs/ + sprints/ + PROGRESS.md 변경 확인
+git commit -m "feat(WU-20): Solon MVP distribution staging (Phase A)"
+git push origin main
+```
+
+**⚠️ (a) 진입 조건**: 사용자가 APPLY-INSTRUCTIONS.md 실행 완료 보고 + install.sh dry-run 결과 공유해야 (a) close 가능. 미 apply 상태면 기다림 or (c) 우선 처리.
 
 **⚠️ Phase 1 킥오프 D-day**: 2026-04-27 (월). 본 세션 종료 2026-04-24 → **D-3**. 본 세션이 준비 완료 상태 (QUICK-START + templates + scripts) 이므로 사용자가 월요일 바로 `setup-w0.sh` 실행 가능.
 
