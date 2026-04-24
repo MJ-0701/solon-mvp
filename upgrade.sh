@@ -46,8 +46,8 @@ fi
 
 prompt() {
   local msg="$1" default="${2:-}" answer
-  if [ -n "$default" ]; then printf "%s [%s]: " "$msg" "$default"
-  else printf "%s: " "$msg"; fi
+  if [ -n "$default" ]; then printf "%s [%s]: " "$msg" "$default" >&2
+  else printf "%s: " "$msg" >&2; fi
   read -r answer || answer=""
   echo "${answer:-$default}"
 }

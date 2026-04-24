@@ -3,6 +3,12 @@
 모든 릴리스는 [Semantic Versioning](https://semver.org/lang/ko/) 을 따른다. `-mvp` suffix 는
 아직 풀스펙 (사용자 개인 방법론 docset) 으로 수렴하지 않은 최소 배포판임을 표시.
 
+## [0.2.4-mvp] — 2026-04-24
+
+### Fixed
+
+- **upgrade.sh** — `prompt()`가 프롬프트 문구를 stdout으로 출력해 기본값 Enter가 취소로 처리되던 문제 수정.
+
 ## [0.2.3-mvp] — 2026-04-24
 
 ### Changed
