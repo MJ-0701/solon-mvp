@@ -3,7 +3,7 @@
 > AI-native 개발을 위한 **7-step flow** (브레인스토밍 → plan → sprint → 구현 → review → commit → 문서화)
 > 를 어떤 프로젝트에든 주입하는 경량 스캐폴드. Claude Code 우선 지원.
 
-**버전**: `0.1.0-mvp` · **라이선스**: [TBD — 개인 IP, 외부 배포 신중] · **상태**: MVP (풀스펙 아님)
+**버전**: `0.1.1-mvp` · **라이선스**: [TBD — 개인 IP, 외부 배포 신중] · **상태**: MVP (풀스펙 아님)
 
 ## 이게 뭐예요
 
@@ -51,6 +51,29 @@ cat ~/tmp/solon-mvp/templates/.gitignore.snippet >> .gitignore
 1. `CLAUDE.md` 에서 `<PROJECT-NAME>` / `<STACK>` / `<DB>` / `<DEPLOY>` placeholder 치환
 2. `cd <project> && claude` — 첫 세션에서 `/sfs status` 또는 `/sfs start` 실행
 3. commit + push
+
+## `/sfs` 사용법
+
+Claude Code 를 프로젝트 루트에서 실행한 뒤 `/sfs` 를 입력하면 현재 상태와 간단한 사용법이 같이 나옵니다.
+
+```text
+/sfs help                 사용법 보기
+/sfs status               현재 SFS 상태 확인
+/sfs start <goal>         새 sprint 시작 또는 이어가기
+/sfs plan                 현재 sprint plan.md 작성/갱신
+/sfs review               현재 변경사항 review.md 작성/갱신
+/sfs decision <decision>  짧은 결정 기록 남기기
+/sfs retro                sprint 회고 작성/갱신
+```
+
+처음 쓰는 프로젝트라면 보통 이 순서로 시작합니다.
+
+```text
+/sfs status
+/sfs start 첫 번째 목표를 한 문장으로 설명
+```
+
+Solon MVP 는 아직 풀스펙 런타임이 아니라, `.sfs-local/` 산출물을 Claude Code 안에서 일관되게 운용하기 위한 경량 스캐폴드입니다.
 
 ## 주요 기능
 

@@ -13,6 +13,7 @@
 ### Changed
 
 - **install.sh** — consumer 프로젝트에 `.claude/commands/sfs.md` 를 설치하도록 확장.
+- **/sfs command** — `/sfs` 또는 `/sfs help` 실행 시 사용법과 추천 첫 명령을 함께 안내.
 - **README.md** — 설치 후 시작 명령을 `/sfs status` / `/sfs start` 중심으로 갱신.
 
 ## [0.1.0-mvp] — 2026-04-24
