@@ -1,9 +1,9 @@
 ---
 doc_id: handoff-2026-04-20-solon-v0.4-r3-complete
 title: "인수인계 (Pointer Hub v3.0-reduced) — 사용자 지시 SSoT + 참조 허브"
-version: 3.2-reduced
+version: 3.3-reduced
 created: 2026-04-20
-updated: 2026-04-24 (WU-20 Back-port: 17번째 사용자 지시 추가 — dev=개발 / stable=배포)
+updated: 2026-04-25 (15번째 세션 admiring-nice-faraday scheduled auto-resume: mutex_state_schema sync + P-03 pointer 추가)
 author: "Claude (direct 지시 by 채명정)"
 valid_until: "WU 규율 유지되는 동안 계속 (현재 상태는 PROGRESS.md, 이관은 sprints/_INDEX.md, 본 파일은 frontmatter + §0 사용자 지시 원문 SSoT 역할)"
 status: "Pointer hub. 현재 상태는 PROGRESS.md 참조."
@@ -32,10 +32,21 @@ queue_pointers:
     - "WU-16b: 앞선 WU (WU-0~5.1 / 8/8.1 / 11/12 시리즈) 확장 이관 (필요 시)"
   phase1_kickoff_date: "2026-04-27 (월) — PHASE1-KICKOFF-CHECKLIST.md §2 W0 선행 필요"
 mutex_state_schema:
-  # 세션 종료 시 여기에 기록 (PROGRESS.md 는 live mirror)
-  last_released_session: dreamy-busy-tesla
-  last_released_at: 2026-04-24T20:45:00+09:00
-  last_released_reason: "WU-20 Phase A 보강 (v0.2.0-mvp) + Phase A Back-port (stable v0.2.4-mvp → dev staging reverse reconcile, 14 파일 checksum match) + P-02 dev-stable-divergence learning pattern 실체화 완료. 사용자 push 완료 선언 + 다음세션 인수인계 지시."
+  # 세션 종료 시 여기에 기록 (PROGRESS.md 는 live mirror — authoritative source)
+  # 15번째 세션 admiring-nice-faraday 에서 stale 11번째 → 15번째 sync.
+  # 본 필드는 참조용. 최신 release 는 PROGRESS.md frontmatter.released_history.last_* 확인.
+  last_released_session: admiring-nice-faraday
+  last_released_at: 2026-04-25T04:18:00+09:00
+  last_released_reason: "15번째 세션 scheduled auto-resume. 14번째 세션 funny-pensive-hypatia 가 staged 한 WU-20.1 refresh diff 를 commit 실체화 (2709fcf, amend 로 final_sha 5525668 backfill) + P-03 learning pattern (staged-uncommitted-on-session-crash) 실체화 + scripts/resume-session-check.sh v0.1 신설 + PROGRESS.md resume_hint.default_action step 0 추가 (인수인계 자동화 강화)."
+  prior_sessions:
+    - session: funny-pensive-hypatia  # 14번째, staged uncommitted (P-03 피해)
+      released_at: 2026-04-25T00:20:00+09:00
+    - session: funny-sweet-mayer  # 13번째
+      released_at: 2026-04-24T23:15:00+09:00
+    - session: laughing-keen-shannon  # 12번째
+      released_at: 2026-04-24T22:40:00+09:00
+    - session: dreamy-busy-tesla  # 11번째
+      released_at: 2026-04-24T20:45:00+09:00
 user_new_directive:
   raw: "sfs를 claude 뿐만 아니라 codex랑 gemini-cli에서도 사용하고 싶거든?? 그래서 추상화 하는게 중요할듯?!"
   date: 2026-04-20

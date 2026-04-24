@@ -2,7 +2,7 @@
 doc_id: sprints-index
 title: "sprints/ — WU (Work Unit) 파일 목록 (v2)"
 visibility: raw-internal
-updated: 2026-04-25   # WU-20.1 refresh (forward sha backfill + _INDEX row 추가) — funny-pensive-hypatia 세션
+updated: 2026-04-25   # WU-20.1 refresh sha 실체화 (2709fcf) — funny-pensive-hypatia staged + admiring-nice-faraday auto-resume commit
 ---
 
 # sprints/ — WU 파일 인덱스
@@ -32,7 +32,7 @@ _현재 활성 WU 없음._ WU-20.1 (refresh) 도 본 세션 내 close 완료 —
 | WU-19 | Phase 1 MVP W0 Executable Scripts (setup-w0.sh + verify-w0.sh) | `74135cf` | 2026-04-24 | 2026-04-24 | ecstatic-intelligent-brahmagupta | [WU-19.md](WU-19.md) |
 | WU-19.1 | WU-19 sha backfill + sprints/_INDEX.md 이동 | `9271f2a` | 2026-04-24 | 2026-04-24 | ecstatic-intelligent-brahmagupta | [WU-19.md](WU-19.md) (refresh 전용) |
 | WU-20 | Solon MVP Distribution 설계 + 실체화 (scope pivot) | `3ca7f56` | 2026-04-24 | 2026-04-24 | amazing-happy-hawking → dreamy-busy-tesla → funny-sweet-mayer | [WU-20.md](WU-20.md) |
-| WU-20.1 | WU-20 sha backfill 확인 + _INDEX.md row 추가 | `TBD` | 2026-04-25 | 2026-04-25 | funny-pensive-hypatia | [WU-20.1.md](WU-20.1.md) (refresh 전용) |
+| WU-20.1 | WU-20 sha backfill 확인 + _INDEX.md row 추가 | `2709fcf` | 2026-04-25 | 2026-04-25 | funny-pensive-hypatia → admiring-nice-faraday (auto-resume 실체화) | [WU-20.1.md](WU-20.1.md) (refresh 전용) |
 
 ## 완료 WU (status: done) — v1 → v2 이관 (WU-16 backfill)
 
