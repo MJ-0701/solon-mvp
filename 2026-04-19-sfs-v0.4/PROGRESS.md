@@ -9,8 +9,8 @@ current_wu_path: sprints/WU-17.md
 current_wu_owner:
   session_codename: ecstatic-intelligent-brahmagupta
   claimed_at: 2026-04-24T16:19:38+09:00
-  last_heartbeat: 2026-04-24T16:35:00+09:00
-  current_step: "WU-17 본체 작성 완료 (HANDOFF 151 + BRIEFING 104 = 합계 -77.6%). FUSE bypass 커밋 대기."
+  last_heartbeat: 2026-04-24T16:45:00+09:00
+  current_step: "WU-17 커밋 완료 (083cfe1). WU-17.1 sha backfill 진행 중."
   ttl_minutes: 15
 released_history:
   last_owner: brave-hopeful-euler
@@ -71,18 +71,20 @@ resume_hint:
 ## ① Just-Finished (2026-04-24 ecstatic-intelligent-brahmagupta 세션 진행 중)
 
 - **사용자 trigger**: "이전세션 이어서 작업해야될것들 있을거야 파악 후 ㄱㄱ" + "sfs프로젝트 말하는거임" + "일단 당분간은 깃도 자동화 하자 너가 커밋하고 push까지 진행해" + "당분간만임 깃 자동화는" → resume_hint (a) WU-17 default 진입 + §1.5 git push 금지 임시 해제. 환경 제약 확인: FUSE Cowork 샌드박스에 GitHub 자격 (SSH key / gh CLI / PAT) 전무 → 이 세션 push 는 사용자 터미널 의존 유지.
-- **WU-17 본체 작성 완료** (커밋 대기):
-  - `NEXT-SESSION-BRIEFING.md` v0.5 → **v0.6-reduced** (353 → 104 lines, **-70.5%**). Pointer hub + FUSE bypass template + working style 3줄로 축소. 상세 archive 는 sessions/_INDEX.md + sprints/_INDEX.md + CLAUDE.md 로 위임.
-  - `HANDOFF-next-session.md` v2.9 → **v3.0-reduced** (786 → 151 lines, **-80.8%**). §0 사용자 지시 원문 13 건 + account_context + user_new_directive + BLOCKED/Phase 2 포인터 보존. §1~§10 archive 전면 제거 (git log 로 이전 버전 조회 가능).
-  - `sprints/WU-17.md` 신설 (v2 WU meta, status=in_progress, final_sha=null).
-  - `sprints/_INDEX.md` 활성 WU 섹션에 WU-17 추가.
-- **축소 총계**: 1139 → 255 lines = **-77.6%**. WU-17 범위 목표 (-80%) 사실상 달성.
+- **WU-17 본체 완료** (`083cfe1`, ahead +1):
+  - `NEXT-SESSION-BRIEFING.md` v0.5 → **v0.6-reduced** (353 → 104 lines, **-70.5%**). Pointer hub + FUSE bypass template + working style 3줄.
+  - `HANDOFF-next-session.md` v2.9 → **v3.0-reduced** (786 → 151 lines, **-80.8%**). §0 사용자 지시 원문 13 건 + account_context + user_new_directive + BLOCKED/Phase 2 포인터 보존. §1~§10 archive 전면 제거.
+  - `sprints/WU-17.md` 신설.
+  - `sprints/_INDEX.md` 활성 WU 섹션에 WU-17 등재.
+  - `PROGRESS.md` ① + ② + ③ 갱신 + mutex claim.
+  - 5 files changed, +402 / -1176.
+- **축소 총계**: 1139 → 255 lines = **-77.6%**. 목표 -80% 사실상 달성.
+- **push 시도 결과**: 사용자 지시에 따라 `git push origin main` 시도 → FUSE Cowork 샌드박스 자격 전무로 `remote: Repository not found. fatal: Authentication failed` 실패. 사용자 터미널에서 수동 `git push origin main` 필요 (§1.5 원칙 fallback 유지).
+- **WU-17.1 진행 중** (커밋 대기): sprints/WU-17.md frontmatter `final_sha: 083cfe1` 실체화 + `status: done` + sprints/_INDEX.md WU-17/17.1 을 v2 네이티브 테이블로 이동 (활성 WU 섹션 비움) + PROGRESS.md 본 덮어쓰기.
 
 ## ② In-Progress
 
-- **WU-17 커밋 대기**: FUSE bypass git add + commit, author `채명정 (ecstatic-intelligent-brahmagupta, company acct, WU-17 session) <jack2718@green-ribbon.co.kr>`, 메시지 `WU-17: HANDOFF/BRIEFING 축소 (v2 참조 구조 전환, -77.6%)`.
-- **push 시도**: 사용자 지시로 시도 → FUSE 환경 자격 전무로 실패 예상 → 사용자 터미널 `git push origin main` fallback.
-- **WU-17.1 예약**: 커밋 후 sha backfill (sprints/WU-17.md final_sha + sprints/_INDEX.md 활성→완료 v2 섹션 이동 + PROGRESS.md 갱신).
+- **WU-17.1 커밋 대기**: sha backfill commit. 메시지 `WU-17.1: sha 083cfe1 backfill + sprints/_INDEX.md v2 네이티브 테이블 이동`.
 
 ## ③ Next (WU-17 완료 직후)
 
