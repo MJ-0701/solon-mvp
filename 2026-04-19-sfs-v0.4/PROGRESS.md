@@ -2,15 +2,15 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-24T16:19:38+09:00
-session: "9번째 세션 `ecstatic-intelligent-brahmagupta` 진입 — 사용자 `이어서 ㄱㄱ` + 'git 자동화 당분간 ON' 지시. 환경 제약 확인 (FUSE Cowork 샌드박스 GitHub 자격 전무 → push 는 사용자 터미널 의존 유지). WU-17 default 착수 — HANDOFF/BRIEFING 축소 (v2 참조 구조)."
-current_wu: WU-17
-current_wu_path: sprints/WU-17.md
+last_overwrite: 2026-04-24T17:25:00+09:00
+session: "9번째 세션 `ecstatic-intelligent-brahmagupta` 연속 — WU-17 (HANDOFF/BRIEFING 축소) 완주 + 사용자 push 완료 (ahead 0) 확인 후 WU-18 (Phase 1 MVP W0 pre-arming) 착수. 사용자 `MVP 빠르게 생성해서 사용하는게 제 1 목적` 지시에 맞춰 블로킹 없이 templates + plugin-wip skeleton + QUICK-START 사전 렌더."
+current_wu: WU-18
+current_wu_path: sprints/WU-18.md
 current_wu_owner:
   session_codename: ecstatic-intelligent-brahmagupta
   claimed_at: 2026-04-24T16:19:38+09:00
-  last_heartbeat: 2026-04-24T16:50:00+09:00
-  current_step: "WU-17 (083cfe1) + WU-17.1 (d5681fa) 완료. ahead 5. 사용자 터미널 push 대기."
+  last_heartbeat: 2026-04-24T17:25:00+09:00
+  current_step: "WU-18 본체 작성 완료 (14 신규 파일). FUSE bypass 커밋 대기."
   ttl_minutes: 15
 released_history:
   last_owner: brave-hopeful-euler
@@ -62,35 +62,38 @@ resume_hint:
   version: 1
 ---
 
-# PROGRESS — live snapshot (WU-17 진행 중, mutex claimed)
+# PROGRESS — live snapshot (WU-18 진행 중, mutex claimed)
 
-> 🚨 **본 파일 최우선 진입.** mutex claimed by `ecstatic-intelligent-brahmagupta` → WU-17 (HANDOFF/BRIEFING 축소) 본체 커밋 대기.
+> 🚨 **본 파일 최우선 진입.** mutex claimed by `ecstatic-intelligent-brahmagupta` → WU-18 (Phase 1 MVP W0 pre-arming) 본체 커밋 대기.
 
 ---
 
-## ① Just-Finished (2026-04-24 ecstatic-intelligent-brahmagupta 세션 진행 중)
+## ① Just-Finished (2026-04-24 ecstatic-intelligent-brahmagupta 세션 연속)
 
-- **사용자 trigger**: "이전세션 이어서 작업해야될것들 있을거야 파악 후 ㄱㄱ" + "sfs프로젝트 말하는거임" + "일단 당분간은 깃도 자동화 하자 너가 커밋하고 push까지 진행해" + "당분간만임 깃 자동화는" → resume_hint (a) WU-17 default 진입 + §1.5 git push 금지 임시 해제. 환경 제약 확인: FUSE Cowork 샌드박스에 GitHub 자격 (SSH key / gh CLI / PAT) 전무 → 이 세션 push 는 사용자 터미널 의존 유지.
-- **WU-17 본체 완료** (`083cfe1`, ahead +1):
-  - `NEXT-SESSION-BRIEFING.md` v0.5 → **v0.6-reduced** (353 → 104 lines, **-70.5%**). Pointer hub + FUSE bypass template + working style 3줄.
-  - `HANDOFF-next-session.md` v2.9 → **v3.0-reduced** (786 → 151 lines, **-80.8%**). §0 사용자 지시 원문 13 건 + account_context + user_new_directive + BLOCKED/Phase 2 포인터 보존. §1~§10 archive 전면 제거.
-  - `sprints/WU-17.md` 신설.
-  - `sprints/_INDEX.md` 활성 WU 섹션에 WU-17 등재.
-  - `PROGRESS.md` ① + ② + ③ 갱신 + mutex claim.
-  - 5 files changed, +402 / -1176.
-- **축소 총계**: 1139 → 255 lines = **-77.6%**. 목표 -80% 사실상 달성.
-- **push 시도 결과**: 사용자 지시에 따라 `git push origin main` 시도 → FUSE Cowork 샌드박스 자격 전무로 `remote: Repository not found. fatal: Authentication failed` 실패. 사용자 터미널에서 수동 `git push origin main` 필요 (§1.5 원칙 fallback 유지).
-- **WU-17.1 완료** (`d5681fa`, ahead +1 추가): sprints/WU-17.md frontmatter `final_sha: 083cfe1` + `status: done` 실체화 + sprints/_INDEX.md WU-17/17.1 을 v2 네이티브 테이블로 이동 (활성 WU 섹션 비움) + PROGRESS.md 본 덮어쓰기. 3 files changed, +34/-26. WU-17.1 자체 sha `d5681fa` 는 다음 WU (WU-18 or housekeeping) 에서 forward backfill 대상 (chicken-and-egg 회피).
+- **이전 WU-17 결과** (이미 사용자 push 완료, ahead 0 확인): HANDOFF 786→151 + BRIEFING 353→104 = -77.6% 축소. 커밋 `083cfe1` (본체) + `d5681fa` (WU-17.1 backfill) + `b8f7f74` (housekeeping forward backfill) 3 커밋.
+- **사용자 trigger (WU-18)**: "push는 해뒀고 일단 지금은 mvp를 빠르게 생성해서 사용하는게 제 1 목적이니까 그거에 맞춰서 계속 직업 ㄱㄱ" → resume_hint (d) Phase 1 킥오프 준비 경로. W0 체크리스트 §1 prerequisites 4 건 (ownership/stack/Solon 참조 방식/repo 이름) 이 사용자 결정 대기 상태이지만, "빠르게" 요구에 맞춰 블로킹 없이 pre-work 최대 실행.
+- **WU-18 본체 작성 완료** (커밋 대기):
+  - `phase1-mvp-templates/` 디렉토리 신설 (10 파일): `CLAUDE.md.template` / `README.md.template` / `.gitignore.snippet` / `.sfs-local-template/divisions.yaml.template` + events.jsonl + sprints/.gitkeep + decisions/.gitkeep / `sprint-0-brainstorm.md.template` / `PROMPT-FOR-FIRST-SESSION.md` / 폴더 README.
+  - `plugin-wip-skeleton/` 디렉토리 신설 (3 파일): `plugin.json` v0.1-wip + `README.md` + `INSTALL-GUIDE.md`.
+  - `PHASE1-MVP-QUICK-START.md` 신규 (5 분 Mac runbook, 환경변수 3 개 치환 + 스크립트 블록 + IP 경계 검증 + W0 exit 체크리스트).
+  - `sprints/WU-18.md` 신설 (v2 WU meta, status=in_progress, decision_points 4건 placeholder).
+  - `sprints/_INDEX.md` 활성 WU 섹션에 WU-18 등재.
+- **IP 경계 엄격**: 모든 템플릿에 Solon 경로 / repo URL 하드코딩 없음. placeholder (`<PROJECT-NAME>` / `<STACK>` / `<DB>` / `<DEPLOY>` / `<RECEIPT-API>` 등) 만.
+- **원칙 2 준수**: 의미 결정 A/B/C 0건. W0 prerequisites 4 건 전부 사용자 결정 대기로 명시 (QUICK-START §1 체크박스).
 
 ## ② In-Progress
 
-_(없음 — WU-17 + WU-17.1 완료. 다음 세션 또는 본 세션 추가 WU 진입 대기.)_
+- **WU-18 커밋 대기**: FUSE bypass git add + commit, 메시지 `WU-18: Phase 1 MVP W0 Pre-Arming (templates + plugin-wip skeleton + QUICK-START)`.
+- **WU-18.1 예약**: 커밋 후 sha backfill + sprints/_INDEX.md 이동 + PROGRESS.md 갱신.
+- **housekeeping 예약**: WU-18.1 forward sha backfill + heartbeat.
 
-## ③ Next (WU-17 완료 직후)
+## ③ Next (WU-18 완료 직후)
 
-- **WU-18 "v2 운영 1주 검증"** — learning-logs/ 패턴 3~5건 실체화 (P-large-wu-atomic-single-commit / P-fuse-git-bypass / P-two-step-wu-refresh / P-resume-hint-multi-day-gap / P-doc-reduction-via-reference-pointers 중 선별).
-- **Phase 1 킥오프** (2026-04-27 월, D-3) 전 WU-17 + WU-17.1 완주 목표.
-- 사용자 의중에 따라 (c) W10 결정 세션 / (d) PHASE1-KICKOFF-CHECKLIST §2 W0 / (e) WU-16b 확장 이관 병렬 가능.
+- **사용자 실행 단계** (Mac, 2026-04-27 월 예정): `PHASE1-MVP-QUICK-START.md` 따라 W0 exit. 결정 4 건 (ownership/repo이름/stack/Solon 참조) 확정 → admin panel repo 생성 → templates cp + placeholder 치환 → 3 commit + push → W0 exit → W1 진입 (`PHASE1-KICKOFF-CHECKLIST.md §3`).
+- **Solon docset 쪽 후속 WU**:
+  - **WU-19 (예약)**: W0 결정 결과를 HANDOFF §0 에 새 사용자 지시로 기록 + W1 cycle 1 중간 회귀 피드백 (learning patterns 실체화, `learning-logs/2026-05/P-*.md`).
+  - **WU-18b (선택)**: 실제 MVP 도메인 데이터 (매출 조회 schema draft, RBAC role 목록 draft) 를 위한 추가 template 확장 — 사용자가 "더 많은 pre-work 원한다" 고 하면.
+- **v2 운영 1주 검증** (원 WU-18 후보 주제): Phase 1 W1 cycle 돌리면서 자연 검증됨 → 별도 WU 생략 가능, WU-19 에 흡수 또는 cycle 2 시작 시점에 별도 WU.
 
 ## ④ Artifacts (세션 종료 시점 인벤토리)
 

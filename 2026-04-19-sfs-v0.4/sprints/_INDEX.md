@@ -2,7 +2,7 @@
 doc_id: sprints-index
 title: "sprints/ — WU (Work Unit) 파일 목록 (v2)"
 visibility: raw-internal
-updated: 2026-04-24   # WU-17 HANDOFF/BRIEFING 축소 반영
+updated: 2026-04-24   # WU-18 Phase 1 MVP W0 pre-arming 반영
 ---
 
 # sprints/ — WU 파일 인덱스
@@ -15,7 +15,9 @@ updated: 2026-04-24   # WU-17 HANDOFF/BRIEFING 축소 반영
 
 ## 활성 WU (status: in_progress / pending)
 
-_(없음 — WU-17 + WU-17.1 까지 완료. 다음 WU 후보: WU-18 (v2 운영 1주 검증) default, 또는 (c) W10 결정 세션 / (d) Phase 1 킥오프 준비 / (e) WU-16b 확장 이관.)_
+| WU | title | status | opened | session | path |
+|:--:|:---|:---|:---|:---|:---|
+| WU-18 | Phase 1 MVP W0 Pre-Arming (templates + plugin-wip skeleton + QUICK-START) | in_progress | 2026-04-24 | ecstatic-intelligent-brahmagupta | [WU-18.md](WU-18.md) |
 
 ## 완료 WU (status: done) — v2 네이티브
 

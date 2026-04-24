@@ -1,0 +1,51 @@
+# Sprint 1 — Brainstorm (G0)
+
+> **경로 권장**: `.sfs-local/sprints/2026-W18-sprint-1/brainstorm.md`
+> **단계**: 7-step 의 1번 (브레인스토밍) + P-1 pre-plan discovery. G0 entry.
+> **timebox**: Day 1~2 (약 1~2 시간).
+
+## 1. 이 프로젝트가 해결하는 문제 (1 문장)
+
+> 예시: "회사의 월별 매출 조회가 엑셀 수작업이라 1 시간 걸린다. 이 관리자 페이지가 자동화하여 3 분 이내로 줄인다."
+
+<PROBLEM-1-LINE>
+
+## 2. 1 차 기능 목록
+
+| 기능 | 이번 cycle in-scope? | 이유 |
+|---|:-:|---|
+| 매출 조회 대시보드 | ? | |
+| 현금영수증 발행 | ? | |
+| 권한 관리 (RBAC) | ? | |
+| 대시보드 (종합) | ? | |
+
+> **규칙**: 4 개 중 한 번에 1~2 개만 in-scope 권장. 첫 cycle 은 "대시보드" 또는 "매출 조회" 하나만.
+
+## 3. 모호한 영역 (plan 전에 답이 나와야 함)
+
+- Q1: `<QUESTION-1>`
+- Q2: `<QUESTION-2>`
+- Q3: `<QUESTION-3>`
+
+> 다음 cycle 에 미룰 수 있는 질문은 이 목록에 두지 않음 — "plan 전에 반드시" 만.
+
+## 4. G0 verdict
+
+- [ ] 문제 1문장이 구체적 (예/수치 포함)
+- [ ] in-scope / out-of-scope 구분 완료
+- [ ] 모호 질문이 plan 전에 답 나와야 할 것만 남음
+
+**verdict**: `<PASS | PARTIAL | FAIL>`
+**date**: `<YYYY-MM-DD>`
+**sprint-id**: `2026-W18-sprint-1`
+
+## 5. L1 이벤트 append
+
+```bash
+# .sfs-local/events.jsonl 에 한 줄 append
+echo '{"ts":"<ISO>","gate":"G0","verdict":"pass","sprint":"2026-W18-sprint-1"}' >> .sfs-local/events.jsonl
+```
+
+## 6. 다음 단계
+
+→ `plan.md` 작성 (Day 2~3)

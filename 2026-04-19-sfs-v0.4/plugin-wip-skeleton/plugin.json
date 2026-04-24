@@ -1,0 +1,21 @@
+{
+  "name": "solon-wip",
+  "version": "0.1-wip",
+  "description": "Solon docset 임시 참조 플러그인 (WU-18 pre-arming, W13 Plugin Packaging 전 임시 형태)",
+  "author": {
+    "name": "채명정",
+    "email": "jack2718@example.com"
+  },
+  "license": "SEE LICENSE IN ../LICENSE-OR-INTERNAL",
+  "notes": [
+    "이 플러그인은 사용자 개인 머신에만 설치된다 (예: ~/.claude/plugins/solon-wip/).",
+    "admin panel 등 회사 IP repo 에는 plugin.json 이 들어가지 않는다 (IP 경계).",
+    "풀스펙 W13 Plugin Packaging 완료 전까지의 임시 skeleton.",
+    "docs/ 경로에 Solon docset 본문이 mount 되거나 symlink 되면 Claude Code 가 skill/agent 로 자동 인식하기를 기대 — 단 현재는 manifest 만 있는 상태이며, 실제 skill/command 정의는 docset 쪽 appendix/commands + dialogs + engines 를 참조한다."
+  ],
+  "skills": [],
+  "commands": [],
+  "agents": [],
+  "hooks": {},
+  "runtime_scope": ["claude-code"]
+}
