@@ -3,6 +3,20 @@
 모든 릴리스는 [Semantic Versioning](https://semver.org/lang/ko/) 을 따른다. `-mvp` suffix 는
 아직 풀스펙 (사용자 개인 방법론 docset) 으로 수렴하지 않은 최소 배포판임을 표시.
 
+## [0.2.0-mvp] — 2026-04-24
+
+### Added
+
+- **templates/SFS.md.template** — Claude Code / Codex / Gemini CLI 가 공유하는 공통 SFS core 지침.
+- **templates/AGENTS.md.template** — Codex adapter 추가.
+- **templates/GEMINI.md.template** — Gemini CLI adapter 추가.
+
+### Changed
+
+- **templates/CLAUDE.md.template** — 전체 방법론 복제 대신 `SFS.md` 를 참조하는 Claude Code adapter 로 축소.
+- **install.sh / upgrade.sh / uninstall.sh** — SFS core + Claude/Codex/Gemini adapter 파일을 함께 관리.
+- **README.md** — runtime abstraction 을 MVP 범위로 명시하고 런타임별 사용법 추가.
+
 ## [0.1.1-mvp] — 2026-04-24
 
 ### Added
@@ -49,6 +63,5 @@
 
 ## Unreleased (예정)
 
-- **0.2.0** — `install.sh` 원격 모드 (`curl | bash`) 에 따른 보안 강화 (hash 검증).
-- **0.3.0** — runtime abstraction layer (WU-11 B/C Phase 2 예약) — Codex / Gemini-CLI 어댑터 편입.
+- **0.3.0** — `install.sh` 원격 모드 (`curl | bash`) 에 따른 보안 강화 (hash 검증).
 - **0.4.0** — `claude plugin install solon` 네이티브 플러그인 변환 검토 (HANDOFF §0 #13 end-state).

@@ -116,19 +116,20 @@ if [ -f "$TARGET/.gitignore" ] && grep -qF "$GIT_MARKER_BEGIN" "$TARGET/.gitigno
 fi
 
 # ============================================================================
-# 3. CLAUDE.md — 대화형 (사용자가 수정했을 가능성)
+# 3. Runtime adapter docs — 대화형 (사용자가 수정했을 가능성)
 # ============================================================================
 
-if [ -f "$TARGET/CLAUDE.md" ]; then
+for doc in SFS.md CLAUDE.md AGENTS.md GEMINI.md .claude/commands/sfs.md; do
+  [ -f "$TARGET/$doc" ] || continue
   echo ""
-  warn "CLAUDE.md 가 존재합니다 (사용자가 편집했을 수 있음)"
-  if [ "$(prompt "CLAUDE.md 삭제할까요?" "N")" = "y" ] || [ "$(prompt "" "N")" = "Y" ]; then
-    rm -f "$TARGET/CLAUDE.md"
-    ok "CLAUDE.md 제거"
+  warn "$doc 가 존재합니다 (사용자가 편집했을 수 있음)"
+  if [ "$(prompt "$doc 삭제할까요?" "N")" = "y" ] || [ "$(prompt "" "N")" = "Y" ]; then
+    rm -f "$TARGET/$doc"
+    ok "$doc 제거"
   else
-    ok "CLAUDE.md 보존"
+    ok "$doc 보존"
   fi
-fi
+done
 
 # ============================================================================
 # 4. 완료

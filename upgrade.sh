@@ -108,9 +108,13 @@ fi
 info ""
 info "변경 예정 파일 프리뷰..."
 
-# diff 보여줄 파일 3종
+# diff 보여줄 파일
 declare -a CHECK_FILES=(
+  "SFS.md|templates/SFS.md.template"
   "CLAUDE.md|templates/CLAUDE.md.template"
+  "AGENTS.md|templates/AGENTS.md.template"
+  "GEMINI.md|templates/GEMINI.md.template"
+  ".claude/commands/sfs.md|templates/.claude/commands/sfs.md"
   ".sfs-local/divisions.yaml|templates/.sfs-local-template/divisions.yaml"
 )
 
@@ -192,7 +196,28 @@ info ""
 info "파일별 갱신..."
 
 update_file "CLAUDE.md" "templates/CLAUDE.md.template" "세션 지침"
+update_file "SFS.md" "templates/SFS.md.template" "공통 SFS 지침"
+update_file "AGENTS.md" "templates/AGENTS.md.template" "Codex 어댑터"
+update_file "GEMINI.md" "templates/GEMINI.md.template" "Gemini CLI 어댑터"
+mkdir -p "$TARGET/.claude/commands"
+update_file ".claude/commands/sfs.md" "templates/.claude/commands/sfs.md" "Claude Code /sfs 커맨드"
 update_file ".sfs-local/divisions.yaml" "templates/.sfs-local-template/divisions.yaml" "본부 활성화"
+
+TODAY=$(date +%Y-%m-%d)
+if [ "$(uname)" = "Darwin" ]; then
+  SED_INPLACE=(sed -i '')
+else
+  SED_INPLACE=(sed -i)
+fi
+for auto_file in "$TARGET/SFS.md" "$TARGET/CLAUDE.md" "$TARGET/AGENTS.md" "$TARGET/GEMINI.md" "$TARGET/.sfs-local/divisions.yaml"; do
+  if [ -f "$auto_file" ]; then
+    "${SED_INPLACE[@]}" \
+      -e "s|<DATE>|$TODAY|g" \
+      -e "s|<SOLON-VERSION>|$NEW_VER|g" \
+      "$auto_file" 2>/dev/null || true
+  fi
+done
+ok "문서 자동 치환: <DATE>=$TODAY, <SOLON-VERSION>=$NEW_VER"
 
 # ============================================================================
 # 5. .gitignore 블록 교체 (marker 기반)
@@ -249,7 +274,7 @@ ${C_BOLD}${C_GREEN}=== 업그레이드 완료 ===${C_RESET}
   $CUR_VER → $NEW_VER
 
 변경사항 git commit 권장:
-  ${C_BLUE}git add CLAUDE.md .gitignore .sfs-local/divisions.yaml .sfs-local/VERSION${C_RESET}
+  ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .claude/commands/sfs.md .gitignore .sfs-local/divisions.yaml .sfs-local/VERSION${C_RESET}
   ${C_BLUE}git commit -m "chore: upgrade solon-mvp $CUR_VER → $NEW_VER"${C_RESET}
 
 CHANGELOG: https://github.com/${SOLON_REPO}/blob/main/CHANGELOG.md

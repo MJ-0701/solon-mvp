@@ -161,8 +161,8 @@ ${C_BOLD}=== Solon MVP Installer ===${C_RESET}
 Solon:  https://github.com/${SOLON_REPO} (branch: $SOLON_BRANCH)
 
 Solon 은 AI-native 7-step flow (브레인스토밍 → plan → sprint → 구현 → review →
-commit → 문서화) 를 현재 프로젝트에 주입합니다. .sfs-local/ 스캐폴드 + CLAUDE.md
-세션 지침 + /sfs 커맨드 + .gitignore 규칙이 설치됩니다.
+commit → 문서화) 를 현재 프로젝트에 주입합니다. .sfs-local/ 스캐폴드 + SFS.md
+공통 지침 + Claude/Codex/Gemini 어댑터 + .gitignore 규칙이 설치됩니다.
 
 EOF
 
@@ -278,10 +278,13 @@ install_file() {
 info ""
 info "파일 설치 (대화형)..."
 
-# 6.1) CLAUDE.md
-install_file "templates/CLAUDE.md.template" "CLAUDE.md" "세션 지침"
+# 6.1) Runtime-neutral SFS core + adapter files
+install_file "templates/SFS.md.template" "SFS.md" "공통 SFS 지침"
+install_file "templates/CLAUDE.md.template" "CLAUDE.md" "Claude Code 어댑터"
+install_file "templates/AGENTS.md.template" "AGENTS.md" "Codex 어댑터"
+install_file "templates/GEMINI.md.template" "GEMINI.md" "Gemini CLI 어댑터"
 
-# 6.2) Claude Code slash command
+# 6.2) Claude Code slash command adapter
 mkdir -p "$TARGET/.claude/commands"
 install_file "templates/.claude/commands/sfs.md" ".claude/commands/sfs.md" "Claude Code /sfs 커맨드"
 
@@ -294,13 +297,15 @@ if [ "$(uname)" = "Darwin" ]; then
 else
   SED_INPLACE=(sed -i)
 fi
-if [ -f "$TARGET/CLAUDE.md" ]; then
-  "${SED_INPLACE[@]}" \
-    -e "s|<DATE>|$TODAY|g" \
-    -e "s|<SOLON-VERSION>|$SOLON_VERSION_VAL|g" \
-    "$TARGET/CLAUDE.md" 2>/dev/null || true
-  ok "CLAUDE.md 자동 치환: <DATE>=$TODAY, <SOLON-VERSION>=$SOLON_VERSION_VAL"
-fi
+for auto_file in "$TARGET/SFS.md" "$TARGET/CLAUDE.md" "$TARGET/AGENTS.md" "$TARGET/GEMINI.md"; do
+  if [ -f "$auto_file" ]; then
+    "${SED_INPLACE[@]}" \
+      -e "s|<DATE>|$TODAY|g" \
+      -e "s|<SOLON-VERSION>|$SOLON_VERSION_VAL|g" \
+      "$auto_file" 2>/dev/null || true
+  fi
+done
+ok "문서 자동 치환: <DATE>=$TODAY, <SOLON-VERSION>=$SOLON_VERSION_VAL"
 
 # ============================================================================
 # 7. .sfs-local/ 스캐폴드 (merge 모드)
@@ -394,18 +399,21 @@ ${C_BOLD}${C_GREEN}=== Solon MVP 설치 완료 ===${C_RESET}
 설치 위치:       $TARGET
 Solon 버전:      $SOLON_VERSION
 .sfs-local/:     스캐폴드 (${C_BOLD}기존 sprint 산출물은 보존됨${C_RESET})
-/sfs 커맨드:     .claude/commands/sfs.md
+공통 지침:       SFS.md
+런타임 어댑터:   CLAUDE.md / AGENTS.md / GEMINI.md
+Claude /sfs:     .claude/commands/sfs.md
 
 다음 단계:
 
-  ${C_BOLD}1.${C_RESET} CLAUDE.md 내용 확인 + 프로젝트 특성 반영 (Stack / 도메인 등).
+  ${C_BOLD}1.${C_RESET} SFS.md 내용 확인 + 프로젝트 특성 반영 (Stack / 도메인 등).
 
-  ${C_BOLD}2.${C_RESET} Claude Code 세션 시작:
+  ${C_BOLD}2.${C_RESET} 선호 런타임에서 시작:
      ${C_BLUE}cd $TARGET && claude${C_RESET}
      ${C_BLUE}/sfs status${C_RESET} 또는 ${C_BLUE}/sfs start${C_RESET} 로 시작.
+     Codex/Gemini CLI 에서는 "SFS.md 읽고 sfs status처럼 현재 상태 요약해줘" 로 시작.
 
   ${C_BOLD}3.${C_RESET} git commit + push (Solon 주입 자체를 기록):
-     ${C_BLUE}git add CLAUDE.md .gitignore .claude/commands/sfs.md .sfs-local/${C_RESET}
+     ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .claude/commands/sfs.md .sfs-local/${C_RESET}
      ${C_BLUE}git commit -m "chore: install solon-mvp $SOLON_VERSION"${C_RESET}
      ${C_BLUE}git push${C_RESET}
 

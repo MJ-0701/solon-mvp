@@ -1,0 +1,22 @@
+# AGENTS.md — Codex adapter for Solon SFS
+
+This project uses Solon SFS.
+
+Before planning or editing, read:
+
+- `SFS.md`
+- `.sfs-local/VERSION`
+- `.sfs-local/divisions.yaml`
+- recent files under `.sfs-local/sprints/`
+- recent files under `.sfs-local/decisions/`
+
+Codex does not need a native `/sfs` slash command. Treat these user requests as SFS commands:
+
+- `sfs status`, `/sfs status`: summarize current SFS state and next action.
+- `sfs start <goal>`, `/sfs start <goal>`: create or continue the current sprint.
+- `sfs plan`: write or update the current sprint `plan.md`.
+- `sfs review`: write or update the current sprint `review.md`.
+- `sfs decision <decision>`: record a short ADR under `.sfs-local/decisions/`.
+- `sfs retro`: write or update `retro-light.md`.
+
+Preserve user work. Ask only when a decision changes behavior or could discard work.
