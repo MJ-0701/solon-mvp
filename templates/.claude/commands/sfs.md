@@ -1,6 +1,21 @@
 ---
-description: Run the Solon SFS workflow in this project
-argument-hint: "[help|status|start|plan|sprint|review|decision|log|retro] [details]"
+name: sfs
+description: |
+  Solon SFS workflow command.
+
+  Usage: /sfs [command] [goal/details]
+
+  Commands:
+  help      사용법 보기
+  status    현재 SFS 상태 확인
+  start     새 sprint 시작 또는 이어가기
+  plan      현재 sprint plan.md 작성/갱신
+  sprint    plan을 구현 단계와 gate 체크로 정리
+  review    현재 변경사항 review.md 작성/갱신
+  decision  짧은 결정 기록 남기기
+  log       events.jsonl에 이벤트 기록
+  retro     sprint 회고 작성/갱신
+argument-hint: "[command] [goal/details]"
 ---
 
 # Solon SFS Command
