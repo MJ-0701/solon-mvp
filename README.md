@@ -11,6 +11,7 @@ Solon 은 AI 와 함께 개발할 때 사용하는 경량 방법론 (7-step + 4 
 배포판** 입니다. 사용자는 개인 / 회사 프로젝트에서 `install.sh` 한 번으로 다음을 얻어요:
 
 - `CLAUDE.md` — Claude Code 세션이 최우선으로 읽는 지침서 (7-step flow 설명 포함)
+- `.claude/commands/sfs.md` — Claude Code 프로젝트 slash command (`/sfs`)
 - `.sfs-local/` — Sprint 산출물 / 결정 로그 / 이벤트 로그 스캐폴드
 - `.gitignore` 규칙 — 운영 로그 누출 방지
 
@@ -48,7 +49,7 @@ cat ~/tmp/solon-mvp/templates/.gitignore.snippet >> .gitignore
 ## 설치 후 3 단계
 
 1. `CLAUDE.md` 에서 `<PROJECT-NAME>` / `<STACK>` / `<DB>` / `<DEPLOY>` placeholder 치환
-2. `cd <project> && claude` — 첫 세션에서 "CLAUDE.md 읽고 sprint 브레인스토밍 시작" 지시
+2. `cd <project> && claude` — 첫 세션에서 `/sfs status` 또는 `/sfs start` 실행
 3. commit + push
 
 ## 주요 기능
@@ -59,6 +60,7 @@ cat ~/tmp/solon-mvp/templates/.gitignore.snippet >> .gitignore
 | 업그레이드 (VERSION diff + 파일별 merge) | [`upgrade.sh`](./upgrade.sh) |
 | 제거 (산출물 보존 옵션) | [`uninstall.sh`](./uninstall.sh) |
 | Consumer 프로젝트용 CLAUDE.md 템플릿 | [`templates/CLAUDE.md.template`](./templates/CLAUDE.md.template) |
+| Claude Code `/sfs` 커맨드 | [`templates/.claude/commands/sfs.md`](./templates/.claude/commands/sfs.md) |
 | `.sfs-local/` 스캐폴드 | [`templates/.sfs-local-template/`](./templates/.sfs-local-template/) |
 | `.gitignore` 블록 (marker 기반) | [`templates/.gitignore.snippet`](./templates/.gitignore.snippet) |
 

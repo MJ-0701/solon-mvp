@@ -6,6 +6,7 @@
 #   (2) 로컬: git clone https://github.com/MJ-0701/solon-mvp ~/tmp/solon-mvp
 #             cd ~/workspace/my-project
 #             ~/tmp/solon-mvp/install.sh
+#   (3) 비대화형: ./install.sh --yes
 #
 # 원칙:
 #   - 현 작업 디렉토리 (consumer project) 에 Solon 7-step flow 스캐폴드 주입
@@ -17,6 +18,35 @@
 # 참고: 본 스크립트는 Solon MVP 0.1.0 — 풀스펙 아님 (사용자 개인 방법론 docset 참조).
 
 set -euo pipefail
+
+ASSUME_YES=0
+
+usage() {
+  cat <<EOF
+Usage: ./install.sh [--yes]
+
+Options:
+  -y, --yes   모든 확인 프롬프트를 자동 승인합니다.
+              파일 충돌 시에는 안전한 기본값(skip)을 사용합니다.
+  -h, --help  도움말을 출력합니다.
+EOF
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -y|--yes)
+      ASSUME_YES=1
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      die "알 수 없는 옵션: $1 (지원: --yes, --help)"
+      ;;
+  esac
+  shift
+done
 
 # ============================================================================
 # 0. 상수 / 색상
@@ -50,7 +80,7 @@ die()   { err "$*"; exit 1; }
 # ============================================================================
 
 # stdin 이 pipe (curl | bash) 면 /dev/tty 로 전환
-if [ ! -t 0 ]; then
+if [ "$ASSUME_YES" -ne 1 ] && [ ! -t 0 ]; then
   if [ -r /dev/tty ]; then
     exec < /dev/tty
   else
@@ -63,10 +93,17 @@ prompt() {
   local msg="$1"
   local default="${2:-}"
   local answer
+
+  if [ "$ASSUME_YES" -eq 1 ] && [ -n "$default" ]; then
+    printf "%s [%s]: %s\n" "$msg" "$default" "$default" >&2
+    echo "$default"
+    return 0
+  fi
+
   if [ -n "$default" ]; then
-    printf "%s [%s]: " "$msg" "$default"
+    printf "%s [%s]: " "$msg" "$default" >&2
   else
-    printf "%s: " "$msg"
+    printf "%s: " "$msg" >&2
   fi
   read -r answer || answer=""
   echo "${answer:-$default}"
@@ -75,6 +112,10 @@ prompt() {
 confirm() {
   # confirm "질문" → y/Y/yes → 0, 나머지 → 1
   local ans
+  if [ "$ASSUME_YES" -eq 1 ]; then
+    printf "%s (y/N) [N]: y\n" "$1" >&2
+    return 0
+  fi
   ans=$(prompt "$1 (y/N)" "N")
   case "$ans" in
     y|Y|yes|YES) return 0 ;;
@@ -88,7 +129,11 @@ confirm() {
 
 SOURCE_DIR=""
 TMP_CLONE=""
-cleanup() { [ -n "$TMP_CLONE" ] && [ -d "$TMP_CLONE" ] && rm -rf "$TMP_CLONE"; }
+cleanup() {
+  if [ -n "$TMP_CLONE" ] && [ -d "$TMP_CLONE" ]; then
+    rm -rf "$TMP_CLONE"
+  fi
+}
 trap cleanup EXIT INT TERM
 
 SCRIPT_PATH="${BASH_SOURCE[0]:-}"
@@ -117,9 +162,15 @@ Solon:  https://github.com/${SOLON_REPO} (branch: $SOLON_BRANCH)
 
 Solon 은 AI-native 7-step flow (브레인스토밍 → plan → sprint → 구현 → review →
 commit → 문서화) 를 현재 프로젝트에 주입합니다. .sfs-local/ 스캐폴드 + CLAUDE.md
-세션 지침 + .gitignore 규칙이 설치됩니다.
+세션 지침 + /sfs 커맨드 + .gitignore 규칙이 설치됩니다.
 
 EOF
+
+if [ "$ASSUME_YES" -eq 1 ]; then
+  info "--yes 활성화: 확인 프롬프트를 자동 승인하고, 충돌 시 기본값을 사용합니다."
+else
+  info "입력 필요: 계속 설치하려면 'y' 를 입력하고 Enter 를 누르세요."
+fi
 
 if ! confirm "계속 진행할까요?"; then
   info "중단됨."
@@ -230,7 +281,11 @@ info "파일 설치 (대화형)..."
 # 6.1) CLAUDE.md
 install_file "templates/CLAUDE.md.template" "CLAUDE.md" "세션 지침"
 
-# 6.2) 자동 치환 가능한 placeholder (DATE + SOLON-VERSION) 처리
+# 6.2) Claude Code slash command
+mkdir -p "$TARGET/.claude/commands"
+install_file "templates/.claude/commands/sfs.md" ".claude/commands/sfs.md" "Claude Code /sfs 커맨드"
+
+# 6.3) 자동 치환 가능한 placeholder (DATE + SOLON-VERSION) 처리
 # <PROJECT-NAME> / <STACK> / <DB> / <DEPLOY> / <DOMAIN> 등은 consumer 수동 치환 대상.
 SOLON_VERSION_VAL=$(cat "$SOURCE_DIR/VERSION" 2>/dev/null | head -1 || echo "unknown")
 TODAY=$(date +%Y-%m-%d)
@@ -339,6 +394,7 @@ ${C_BOLD}${C_GREEN}=== Solon MVP 설치 완료 ===${C_RESET}
 설치 위치:       $TARGET
 Solon 버전:      $SOLON_VERSION
 .sfs-local/:     스캐폴드 (${C_BOLD}기존 sprint 산출물은 보존됨${C_RESET})
+/sfs 커맨드:     .claude/commands/sfs.md
 
 다음 단계:
 
@@ -346,10 +402,10 @@ Solon 버전:      $SOLON_VERSION
 
   ${C_BOLD}2.${C_RESET} Claude Code 세션 시작:
      ${C_BLUE}cd $TARGET && claude${C_RESET}
-     첫 메시지로 "CLAUDE.md 읽고 첫 sprint 브레인스토밍 시작해" 지시.
+     ${C_BLUE}/sfs status${C_RESET} 또는 ${C_BLUE}/sfs start${C_RESET} 로 시작.
 
   ${C_BOLD}3.${C_RESET} git commit + push (Solon 주입 자체를 기록):
-     ${C_BLUE}git add CLAUDE.md .gitignore .sfs-local/${C_RESET}
+     ${C_BLUE}git add CLAUDE.md .gitignore .claude/commands/sfs.md .sfs-local/${C_RESET}
      ${C_BLUE}git commit -m "chore: install solon-mvp $SOLON_VERSION"${C_RESET}
      ${C_BLUE}git push${C_RESET}
 
