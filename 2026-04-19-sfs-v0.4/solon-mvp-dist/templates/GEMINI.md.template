@@ -1,67 +1,22 @@
-# GEMINI.md — `<PROJECT-NAME>` Gemini-CLI adapter
+# GEMINI.md — Gemini CLI adapter for Solon SFS
 
-> 본 파일은 **Google Gemini-CLI 전용 adapter**. 7-step flow / Gate / 산출물 규칙
-> 본문은 같은 디렉토리의 [`SFS.md`](./SFS.md) 에 있음. 본 파일은 Gemini-CLI runtime
-> 에서만 의미 있는 힌트 (project instruction context, natural-language alias,
-> Gemini tool-use 비고) 만 담는다.
->
-> **세션 진입 순서 (Gemini-CLI)**:
-> 1. [`SFS.md`](./SFS.md) 먼저 읽기 (7-step + 4 Gate + 산출물 규칙)
-> 2. 본 파일 (Gemini-specific hint)
-> 3. `.sfs-local/divisions.yaml` (본부 활성 상태)
+This project uses Solon SFS.
 
-## Gemini-CLI 에서 기대되는 행동
+Before planning or editing, read:
 
-- Gemini-CLI 는 repo 진입 시 `GEMINI.md` 를 project instruction context 로 자동 로드.
-- 본 파일 상단의 "세션 진입 순서" 에 따라 `SFS.md` 를 함께 파악한 뒤 작업 개시.
-- 의미 결정 (A/B/C scope / priority) 은 자율 금지 — 사용자에게 1-line 질문.
-- `git push` 자동 금지 (SFS.md §절대 금지 준수).
+- `SFS.md`
+- `.sfs-local/VERSION`
+- `.sfs-local/divisions.yaml`
+- recent files under `.sfs-local/sprints/`
+- recent files under `.sfs-local/decisions/`
 
-## `/sfs` — natural-language alias (native slash command 아님)
+Gemini CLI does not need a native `/sfs` slash command. Treat these user requests as SFS commands:
 
-Gemini-CLI 에서도 `/sfs` 는 native slash command 가 아닌 **자연어 alias**.
+- `sfs status`, `/sfs status`: summarize current SFS state and next action.
+- `sfs start <goal>`, `/sfs start <goal>`: create or continue the current sprint.
+- `sfs plan`: write or update the current sprint `plan.md`.
+- `sfs review`: write or update the current sprint `review.md`.
+- `sfs decision <decision>`: record a short ADR under `.sfs-local/decisions/`.
+- `sfs retro`: write or update `retro-light.md`.
 
-| 사용자 발화 (자연어) | 의도 | Gemini 행동 |
-|---------------------|------|------------|
-| "sfs status 해줘" / "현재 sprint 상태?" | `/sfs status` | `.sfs-local/sprints/` 스캔 후 최신 sprint 상태 요약 |
-| "sfs plan 시작" / "G1 plan 작성" | `/sfs plan` | `plan.md` skeleton 작성 (SFS.md §plan 규격) |
-| "sfs brainstorm" | `/sfs brainstorm` | `brainstorm.md` skeleton |
-| "sfs review" | `/sfs review` | `review.md` + commit sha 수집 |
-| "sfs retro" | `/sfs retro` | `retro-light.md` + divisions 재검토 |
-| "sfs decision <title>" | `/sfs decision ...` | `.sfs-local/decisions/<N>-<title>.md` |
-
-산출물 포맷은 SFS.md 참조. Gemini 의 long context 장점을 살려 한 세션 안에서
-brainstorm → plan → 초안 구현 까지 한 번에 수행해도 OK (단, 각 G0/G1/G2 verdict 는
-`.sfs-local/events.jsonl` 에 분리 기록).
-
-## Long context / Tool-use 힌트 (Gemini 특화)
-
-- Gemini 2M+ token context → SFS.md 전체 + 현재 sprint 전체 산출물 + 주요 소스 코드까지
-  한꺼번에 로드 가능. MVP 에서는 이 장점을 "사용자 cycle 1 brainstorm 에서 full
-  context 참조" 에 우선 활용.
-- Gemini Code Assist CLI 의 Google 계열 tool-use (Google Search grounding 등) 는
-  optional — 사용 시 L1 event 에 `{runtime: "gemini", tool: "...", ...}` append 권장.
-- MCP 를 Gemini 가 지원하는 경우 Claude/Codex 와 동일 MCP 재사용.
-
-## 모델 선택
-
-- Gemini-CLI 기본 모델 (예: Gemini 2.5 Pro 급) 을 그대로 사용. SFS 본문은 모델 tier 중립.
-- 창작성 (brainstorm) 은 Pro, 정형 task 는 Flash 로 분기 권장.
-
-## 절대 금지 (Gemini 특화 추가)
-
-- **CLAUDE.md / AGENTS.md 편집 금지** — 본인 runtime 은 GEMINI.md 뿐.
-- **`/sfs` 외부에 중복 alias 만들지 말 것** — prefix 는 `/sfs` 단일, 자연어 trigger 만 다양.
-- **본 파일에 SFS.md 플로우 본문을 중복 복사 금지** — adapter 는 thin 유지.
-- **long context 를 믿고 `.sfs-local/decisions/` 기록을 생략 금지** — 기록 > 기억 원칙.
-
-## 알려진 제약 / Deferred
-
-- Gemini-CLI 가 long-running background 작업을 네이티브 지원하는 정도가 Claude Task
-  tool 과 동등한지 MVP 에서는 미검증. 실제 병목 발견 시 SDK adapter 착수.
-- Context window 2M 장점이 Evaluator polling pattern 과 어떻게 상호작용하는지는
-  cycle 2~3 실측 후 재평가.
-
-## Changelog
-
-- v0.1 (`<DATE>`, install): `solon-mvp <SOLON-VERSION>` 설치 — Gemini adapter 생성.
+Preserve user work. Ask only when a decision changes behavior or could discard work.

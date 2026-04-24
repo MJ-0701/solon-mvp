@@ -1,30 +1,22 @@
 # Solon MVP
 
 > AI-native 개발을 위한 **7-step flow** (브레인스토밍 → plan → sprint → 구현 → review → commit → 문서화)
-> 를 어떤 프로젝트에든 주입하는 경량 스캐폴드. Claude Code 우선 지원.
+> 를 어떤 프로젝트에든 주입하는 경량 스캐폴드. Claude Code / Codex / Gemini CLI 어댑터 지원.
 
 **버전**: `0.2.0-mvp` · **라이선스**: [TBD — 개인 IP, 외부 배포 신중] · **상태**: MVP (풀스펙 아님)
 
 ## 이게 뭐예요
 
 Solon 은 AI 와 함께 개발할 때 사용하는 경량 방법론 (7-step + 4 Gate + 6 본부) 의 **최소 실행 가능
-배포판** 입니다. **runtime-neutral 설계** — Claude Code / OpenAI Codex / Google Gemini-CLI 어느
-runtime 에서든 동일한 플로우로 작동합니다.
+배포판** 입니다. 사용자는 개인 / 회사 프로젝트에서 `install.sh` 한 번으로 다음을 얻어요:
 
-사용자는 개인 / 회사 프로젝트에서 `install.sh` 한 번으로 다음을 얻어요:
-
-| 파일 | 역할 | Layer |
-|------|------|:-:|
-| `SFS.md` | runtime-agnostic core — 7-step flow / 4 Gate / 산출물 규칙 **단일 출처** | L1 |
-| `CLAUDE.md` | Claude Code adapter (thin) — Task tool / MCP / 모델 tier 힌트 | L2 |
-| `AGENTS.md` | OpenAI Codex adapter (thin) — repo instructions / natural-language alias | L2 |
-| `GEMINI.md` | Gemini-CLI adapter (thin) — project instruction / long context 힌트 | L2 |
-| `.claude/commands/sfs.md` | Claude 용 `/sfs` slash command 정의 (subcommand 6종) | L3 |
-| `.sfs-local/` | Sprint 산출물 / 결정 로그 / 이벤트 로그 스캐폴드 | L1 |
-| `.gitignore` 블록 | 운영 로그 누출 방지 (marker 기반 idempotent) | L3 |
-
-세션 진입 시 **모든 runtime 이 먼저 SFS.md 를 읽고**, 그 다음 본인 adapter 를 읽는 구조.
-adapter 는 "thin" 원칙 — SFS 본문 중복 복사 금지.
+- `SFS.md` — Claude Code / Codex / Gemini CLI 가 공유하는 공통 SFS 지침
+- `CLAUDE.md` — Claude Code adapter
+- `AGENTS.md` — Codex adapter
+- `GEMINI.md` — Gemini CLI adapter
+- `.claude/commands/sfs.md` — Claude Code 프로젝트 slash command (`/sfs`)
+- `.sfs-local/` — Sprint 산출물 / 결정 로그 / 이벤트 로그 스캐폴드
+- `.gitignore` 규칙 — 운영 로그 누출 방지
 
 풀스펙 (6 본부 상세 / divisions.schema / dialog-tree 등) 은 별도 개인 docset 에 있으며,
 본 MVP 는 **도구 자체** 만 실제 프로젝트에 이식 가능하게 묶어놓은 것입니다.
@@ -51,12 +43,12 @@ cd ~/workspace/my-project
 ```bash
 git clone https://github.com/MJ-0701/solon-mvp ~/tmp/solon-mvp
 cd ~/workspace/my-project
-cp ~/tmp/solon-mvp/templates/SFS.md.template        SFS.md
-cp ~/tmp/solon-mvp/templates/CLAUDE.md.template     CLAUDE.md
-cp ~/tmp/solon-mvp/templates/AGENTS.md.template     AGENTS.md
-cp ~/tmp/solon-mvp/templates/GEMINI.md.template     GEMINI.md
+cp ~/tmp/solon-mvp/templates/SFS.md.template SFS.md
+cp ~/tmp/solon-mvp/templates/CLAUDE.md.template CLAUDE.md
+cp ~/tmp/solon-mvp/templates/AGENTS.md.template AGENTS.md
+cp ~/tmp/solon-mvp/templates/GEMINI.md.template GEMINI.md
 mkdir -p .claude/commands
-cp ~/tmp/solon-mvp/templates/.claude-template/commands/sfs.md .claude/commands/sfs.md
+cp ~/tmp/solon-mvp/templates/.claude/commands/sfs.md .claude/commands/sfs.md
 cp -r ~/tmp/solon-mvp/templates/.sfs-local-template .sfs-local
 cat ~/tmp/solon-mvp/templates/.gitignore.snippet >> .gitignore
 # placeholder 치환 (<PROJECT-NAME>, <DATE>, <STACK>, ...) 은 에디터에서 수동.
@@ -64,13 +56,56 @@ cat ~/tmp/solon-mvp/templates/.gitignore.snippet >> .gitignore
 
 ## 설치 후 3 단계
 
-1. `SFS.md` + 사용할 runtime adapter (CLAUDE.md / AGENTS.md / GEMINI.md) 에서
-   `<PROJECT-NAME>` / `<STACK>` / `<DB>` / `<DEPLOY>` placeholder 치환
-2. 본인 runtime 으로 세션 시작:
-   - Claude Code:  `cd <project> && claude` → "SFS.md + CLAUDE.md 읽고 /sfs status"
-   - Codex CLI:    `cd <project> && codex`  → "SFS.md + AGENTS.md 읽고 sfs status"
-   - Gemini CLI:   `cd <project> && gemini` → "SFS.md + GEMINI.md 읽고 sfs status"
+1. `SFS.md` 에서 `<PROJECT-NAME>` / `<STACK>` / `<DB>` / `<DEPLOY>` placeholder 치환
+2. 선호 런타임에서 SFS 시작
 3. commit + push
+
+## 런타임별 사용법
+
+Claude Code:
+
+```text
+/sfs
+/sfs status
+/sfs start 첫 번째 목표를 한 문장으로 설명
+```
+
+Codex:
+
+```text
+SFS.md와 AGENTS.md 읽고 sfs status처럼 현재 상태 요약해줘
+sfs start 첫 번째 목표를 한 문장으로 설명
+```
+
+Gemini CLI:
+
+```text
+SFS.md와 GEMINI.md 읽고 sfs status처럼 현재 상태 요약해줘
+sfs start 첫 번째 목표를 한 문장으로 설명
+```
+
+## `/sfs` 사용법
+
+Claude Code 를 프로젝트 루트에서 실행한 뒤 `/sfs` 를 입력하면 현재 상태와 간단한 사용법이 같이 나옵니다.
+
+```text
+/sfs help                 사용법 보기
+/sfs status               현재 SFS 상태 확인
+/sfs start <goal>         새 sprint 시작 또는 이어가기
+/sfs plan                 현재 sprint plan.md 작성/갱신
+/sfs review               현재 변경사항 review.md 작성/갱신
+/sfs decision <decision>  짧은 결정 기록 남기기
+/sfs retro                sprint 회고 작성/갱신
+```
+
+처음 쓰는 프로젝트라면 보통 이 순서로 시작합니다.
+
+```text
+/sfs status
+/sfs start 첫 번째 목표를 한 문장으로 설명
+```
+
+Solon MVP 는 아직 풀스펙 런타임이 아니라, `.sfs-local/` 산출물을 여러 AI CLI 에서 일관되게 운용하기 위한 경량 스캐폴드입니다.
 
 ## 주요 기능
 
@@ -79,11 +114,11 @@ cat ~/tmp/solon-mvp/templates/.gitignore.snippet >> .gitignore
 | 설치 (대화형 충돌 처리) | [`install.sh`](./install.sh) |
 | 업그레이드 (VERSION diff + 파일별 merge) | [`upgrade.sh`](./upgrade.sh) |
 | 제거 (산출물 보존 옵션) | [`uninstall.sh`](./uninstall.sh) |
-| runtime-agnostic core 템플릿 | [`templates/SFS.md.template`](./templates/SFS.md.template) |
-| Claude adapter 템플릿 | [`templates/CLAUDE.md.template`](./templates/CLAUDE.md.template) |
-| Codex adapter 템플릿 | [`templates/AGENTS.md.template`](./templates/AGENTS.md.template) |
-| Gemini adapter 템플릿 | [`templates/GEMINI.md.template`](./templates/GEMINI.md.template) |
-| Claude `/sfs` slash command | [`templates/.claude-template/commands/sfs.md`](./templates/.claude-template/commands/sfs.md) |
+| 공통 SFS 지침 | [`templates/SFS.md.template`](./templates/SFS.md.template) |
+| Claude Code adapter | [`templates/CLAUDE.md.template`](./templates/CLAUDE.md.template) |
+| Codex adapter | [`templates/AGENTS.md.template`](./templates/AGENTS.md.template) |
+| Gemini CLI adapter | [`templates/GEMINI.md.template`](./templates/GEMINI.md.template) |
+| Claude Code `/sfs` 커맨드 | [`templates/.claude/commands/sfs.md`](./templates/.claude/commands/sfs.md) |
 | `.sfs-local/` 스캐폴드 | [`templates/.sfs-local-template/`](./templates/.sfs-local-template/) |
 | `.gitignore` 블록 (marker 기반) | [`templates/.gitignore.snippet`](./templates/.gitignore.snippet) |
 
@@ -107,7 +142,7 @@ cd ~/workspace/my-project
 
 - `.sfs-local/VERSION` 읽어서 현재 / 최신 비교
 - 변경 예정 파일 dry-run 프리뷰
-- `CLAUDE.md` / `divisions.yaml` 대화형 병합
+- `SFS.md` / runtime adapter files / `divisions.yaml` 대화형 병합
 - `.gitignore` 블록 (marker 기반) 자동 교체
 
 ## 제거
@@ -138,6 +173,5 @@ MVP 단계라 본 repo 는 사용자 개인 사용 전제. PR / issue 는 환영
 ## 관련 리소스
 
 - Solon 풀스펙 개인 docset — 사용자 프라이빗 자산 (본 MVP 에 경로 기록 없음)
-- 7-step flow 개요: `templates/SFS.md.template` 참조 (runtime-agnostic core)
-- Runtime adapter 설계 원칙: 사용자 개인 docset `RUNTIME-ABSTRACTION.md` (v0.2-mvp-correction, `rule/mvp-runtime-neutral-core`)
-- 후속 (post-MVP) 예약 항목: SDK/plugin 수준 runtime adapter (OpenAI Agents SDK / Gemini SDK), `claude plugin install solon` 네이티브화
+- 7-step flow 개요: `templates/SFS.md.template` 참조
+- Phase 2 예약 항목: plugin 네이티브화 (`claude plugin install solon` 등)

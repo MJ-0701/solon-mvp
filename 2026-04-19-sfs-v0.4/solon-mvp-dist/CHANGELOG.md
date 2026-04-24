@@ -3,45 +3,59 @@
 모든 릴리스는 [Semantic Versioning](https://semver.org/lang/ko/) 을 따른다. `-mvp` suffix 는
 아직 풀스펙 (사용자 개인 방법론 docset) 으로 수렴하지 않은 최소 배포판임을 표시.
 
-## [0.2.0-mvp] — 2026-04-24 (WU-20 Phase A 보강)
+## [0.2.4-mvp] — 2026-04-24
 
-### Added — runtime-neutral core + 3 adapter
+### Fixed
 
-- **templates/SFS.md.template** 🆕 — runtime-agnostic core. 7-step flow / 4 Gate /
-  산출물 규칙 / 6 본부 / 관찰성 / `/sfs` prefix 정의의 **단일 출처**. Claude/Codex/Gemini
-  모두 공통으로 읽음.
-- **templates/AGENTS.md.template** 🆕 — OpenAI Codex CLI adapter (thin). Codex 가 repo
-  instructions 로 자동 로드. `/sfs` 는 natural-language alias (native slash command 아님).
-- **templates/GEMINI.md.template** 🆕 — Google Gemini-CLI adapter (thin). project
-  instruction context 로 로드. long context 활용 힌트 포함.
-- **templates/.claude-template/commands/sfs.md** 🆕 — Claude Code 용 `/sfs` slash
-  command 정의. install.sh 가 `.claude/commands/sfs.md` 로 복사. subcommand 6종
-  (status / brainstorm / plan / review / retro / decision).
+- **upgrade.sh** — `prompt()`가 프롬프트 문구를 stdout으로 출력해 기본값 Enter가 취소로 처리되던 문제 수정.
 
-### Changed — CLAUDE.md.template → thin adapter 로 재작성
+## [0.2.3-mvp] — 2026-04-24
 
-- **templates/CLAUDE.md.template** — 기존 7-step / Gate / 산출물 본문 제거 → SFS.md
-  위임. Claude-specific 힌트 (Task tool / sub-agent / MCP / 모델 tier) 만 유지.
-  thin adapter 원칙 유지 (SFS.md 본문 중복 복사 금지).
+### Changed
 
-### Changed — install.sh / upgrade.sh / uninstall.sh 확장
+- **upgrade.sh** — checksum 기반 자동 적용 정책으로 전환. 파일별 추가 질문 없이 신규 파일 설치,
+  managed 파일 backup+overwrite, 프로젝트 지침 파일 보존을 자동 수행.
 
-- **install.sh** — SFS.md + 3 adapter + `.claude/commands/sfs.md` 복사 로직 추가.
-  placeholder 치환 helper (`substitute_placeholders`) 로 리팩터. 배너 / 완료 메시지에
-  3 runtime 진입 예시 추가.
-- **upgrade.sh** — diff 대상 확장 (SFS.md / CLAUDE.md / AGENTS.md / GEMINI.md /
-  `.claude/commands/sfs.md` / divisions.yaml).
-- **uninstall.sh** — 4 adapter + slash command 파일 각각 대화형 삭제. `.claude/` 빈
-  디렉토리 자동 정리.
+## [0.2.2-mvp] — 2026-04-24
 
-### Scope — MVP 범위 정정 반영 (RUNTIME-ABSTRACTION.md v0.2-mvp-correction 대응)
+### Changed
 
-- Solon docset `RUNTIME-ABSTRACTION.md` 의 `rule/mvp-runtime-neutral-core` 에 따라
-  **MVP 배포 시점부터** SFS core 와 runtime adapter 가 분리된 형태로 제공.
-- 기존 v0.1.0-mvp 는 CLAUDE.md 단일 파일에 플로우 + Claude-specific 가 섞여 있어
-  Claude lock-in 위반이었음. 본 v0.2.0-mvp 가 정정 적용.
-- SDK/plugin 수준 adapter (OpenAI Agents SDK / Gemini SDK / `claude plugin install`)
-  는 후속 릴리스로 유지.
+- **upgrade.sh** — 프리뷰 마지막에 사용자가 실제로 누를 키와 기본값 의미를 명시.
+
+## [0.2.1-mvp] — 2026-04-24
+
+### Changed
+
+- **upgrade.sh** — 변경 프리뷰를 line diff 대신 checksum 기반으로 표시.
+- **upgrade.sh** — 파일별 추천 선택(`install`, `skip`, `backup+overwrite`)과 checksum 값을 함께 출력.
+- **upgrade.sh** — non-TTY dry-run 에서 `/dev/tty` 경고가 노출되지 않도록 보정.
+
+## [0.2.0-mvp] — 2026-04-24
+
+### Added
+
+- **templates/SFS.md.template** — Claude Code / Codex / Gemini CLI 가 공유하는 공통 SFS core 지침.
+- **templates/AGENTS.md.template** — Codex adapter 추가.
+- **templates/GEMINI.md.template** — Gemini CLI adapter 추가.
+
+### Changed
+
+- **templates/CLAUDE.md.template** — 전체 방법론 복제 대신 `SFS.md` 를 참조하는 Claude Code adapter 로 축소.
+- **install.sh / upgrade.sh / uninstall.sh** — SFS core + Claude/Codex/Gemini adapter 파일을 함께 관리.
+- **README.md** — runtime abstraction 을 MVP 범위로 명시하고 런타임별 사용법 추가.
+
+## [0.1.1-mvp] — 2026-04-24
+
+### Added
+
+- **templates/.claude/commands/sfs.md** — Claude Code 프로젝트 slash command (`/sfs`) 추가.
+  `status/start/plan/sprint/review/decision/log/retro` 모드로 `.sfs-local/` 기반 SFS 운용.
+
+### Changed
+
+- **install.sh** — consumer 프로젝트에 `.claude/commands/sfs.md` 를 설치하도록 확장.
+- **/sfs command** — `/sfs` 또는 `/sfs help` 실행 시 사용법과 추천 첫 명령을 함께 안내.
+- **README.md** — 설치 후 시작 명령을 `/sfs status` / `/sfs start` 중심으로 갱신.
 
 ## [0.1.0-mvp] — 2026-04-24
 
@@ -76,9 +90,5 @@
 
 ## Unreleased (예정)
 
-- **0.3.0-mvp** — `install.sh` 원격 모드 (`curl | bash`) 에 따른 보안 강화 (hash 검증) +
-  `sfs.sh` 폴리필 CLI (runtime 밖에서도 `.sfs-local/` 조회).
-- **0.4.0-mvp** — SDK/plugin 수준 runtime adapter (OpenAI Agents SDK / Gemini SDK)
-  편입 판정 (RUNTIME-ABSTRACTION.md §7 기준 충족 시).
-- **0.5.0** — `claude plugin install solon` 네이티브 플러그인 변환 검토 (HANDOFF §0
-  #13 end-state).
+- **0.3.0** — `install.sh` 원격 모드 (`curl | bash`) 에 따른 보안 강화 (hash 검증).
+- **0.4.0** — `claude plugin install solon` 네이티브 플러그인 변환 검토 (HANDOFF §0 #13 end-state).

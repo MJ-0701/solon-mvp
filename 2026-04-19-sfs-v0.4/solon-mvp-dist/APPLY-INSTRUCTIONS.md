@@ -1,5 +1,24 @@
 # APPLY — 기존 `solon-mvp` repo 를 distribution 구조로 전환
 
+> ⚠️ **본 문서는 historical 참조용.** WU-20 Phase B (사용자 Codex CLI) 에서
+> 이미 실 apply 완료 + v0.2.4-mvp 까지 진화. 본 가이드는 초기 전환 절차의
+> 기록이며, 다시 실행할 필요 없음. **신규 consumer 프로젝트 설치는
+> `install.sh` 만 쓰면 됨** (`curl -sSL .../install.sh | bash` 또는 `./install.sh`).
+>
+> 완료 증거 (2026-04-24, stable repo):
+>
+> ```
+> 786900a feat: add Claude Code /sfs command
+> fa9f6f4 feat: pivot to SFS distribution (WU-20)
+> 13b2d98 chore: .sfs-local/ scaffold ...
+> b83b6bf docs: CLAUDE.md + README (7-step flow, stack TBD)
+> 9d8fb09 chore: initial .gitignore (Node + .sfs-local rules)
+> ```
+>
+> 이후 v0.1.1 → v0.2.4-mvp 까지 stable 에서 진화 (본 문서와 무관).
+
+## (아래는 historical 기록)
+
 > 이 문서는 **한 번만** 실행되는 가이드. 2026-04-24 WU-20 scope pivot 으로 `solon-mvp` repo 의
 > 정체를 consumer-project-template → **SFS distribution** 으로 전환하는 마이그레이션 절차.
 >

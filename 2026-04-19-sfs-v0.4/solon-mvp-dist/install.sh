@@ -6,6 +6,7 @@
 #   (2) 로컬: git clone https://github.com/MJ-0701/solon-mvp ~/tmp/solon-mvp
 #             cd ~/workspace/my-project
 #             ~/tmp/solon-mvp/install.sh
+#   (3) 비대화형: ./install.sh --yes
 #
 # 원칙:
 #   - 현 작업 디렉토리 (consumer project) 에 Solon 7-step flow 스캐폴드 주입
@@ -17,6 +18,35 @@
 # 참고: 본 스크립트는 Solon MVP 0.1.0 — 풀스펙 아님 (사용자 개인 방법론 docset 참조).
 
 set -euo pipefail
+
+ASSUME_YES=0
+
+usage() {
+  cat <<EOF
+Usage: ./install.sh [--yes]
+
+Options:
+  -y, --yes   모든 확인 프롬프트를 자동 승인합니다.
+              파일 충돌 시에는 안전한 기본값(skip)을 사용합니다.
+  -h, --help  도움말을 출력합니다.
+EOF
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -y|--yes)
+      ASSUME_YES=1
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      die "알 수 없는 옵션: $1 (지원: --yes, --help)"
+      ;;
+  esac
+  shift
+done
 
 # ============================================================================
 # 0. 상수 / 색상
@@ -50,7 +80,7 @@ die()   { err "$*"; exit 1; }
 # ============================================================================
 
 # stdin 이 pipe (curl | bash) 면 /dev/tty 로 전환
-if [ ! -t 0 ]; then
+if [ "$ASSUME_YES" -ne 1 ] && [ ! -t 0 ]; then
   if [ -r /dev/tty ]; then
     exec < /dev/tty
   else
@@ -63,10 +93,17 @@ prompt() {
   local msg="$1"
   local default="${2:-}"
   local answer
+
+  if [ "$ASSUME_YES" -eq 1 ] && [ -n "$default" ]; then
+    printf "%s [%s]: %s\n" "$msg" "$default" "$default" >&2
+    echo "$default"
+    return 0
+  fi
+
   if [ -n "$default" ]; then
-    printf "%s [%s]: " "$msg" "$default"
+    printf "%s [%s]: " "$msg" "$default" >&2
   else
-    printf "%s: " "$msg"
+    printf "%s: " "$msg" >&2
   fi
   read -r answer || answer=""
   echo "${answer:-$default}"
@@ -75,6 +112,10 @@ prompt() {
 confirm() {
   # confirm "질문" → y/Y/yes → 0, 나머지 → 1
   local ans
+  if [ "$ASSUME_YES" -eq 1 ]; then
+    printf "%s (y/N) [N]: y\n" "$1" >&2
+    return 0
+  fi
   ans=$(prompt "$1 (y/N)" "N")
   case "$ans" in
     y|Y|yes|YES) return 0 ;;
@@ -88,7 +129,11 @@ confirm() {
 
 SOURCE_DIR=""
 TMP_CLONE=""
-cleanup() { [ -n "$TMP_CLONE" ] && [ -d "$TMP_CLONE" ] && rm -rf "$TMP_CLONE"; }
+cleanup() {
+  if [ -n "$TMP_CLONE" ] && [ -d "$TMP_CLONE" ]; then
+    rm -rf "$TMP_CLONE"
+  fi
+}
 trap cleanup EXIT INT TERM
 
 SCRIPT_PATH="${BASH_SOURCE[0]:-}"
@@ -116,17 +161,16 @@ ${C_BOLD}=== Solon MVP Installer ===${C_RESET}
 Solon:  https://github.com/${SOLON_REPO} (branch: $SOLON_BRANCH)
 
 Solon 은 AI-native 7-step flow (브레인스토밍 → plan → sprint → 구현 → review →
-commit → 문서화) 를 현재 프로젝트에 주입합니다. 설치 항목:
-
-  • SFS.md                — runtime-agnostic core (Claude/Codex/Gemini 공통)
-  • CLAUDE.md             — Claude Code adapter (thin)
-  • AGENTS.md             — OpenAI Codex adapter (thin)
-  • GEMINI.md             — Google Gemini-CLI adapter (thin)
-  • .claude/commands/sfs.md — Claude slash command (L3 Claude-specific)
-  • .sfs-local/           — sprints / decisions / divisions 스캐폴드
-  • .gitignore            — marker 기반 idempotent 블록
+commit → 문서화) 를 현재 프로젝트에 주입합니다. .sfs-local/ 스캐폴드 + SFS.md
+공통 지침 + Claude/Codex/Gemini 어댑터 + .gitignore 규칙이 설치됩니다.
 
 EOF
+
+if [ "$ASSUME_YES" -eq 1 ]; then
+  info "--yes 활성화: 확인 프롬프트를 자동 승인하고, 충돌 시 기본값을 사용합니다."
+else
+  info "입력 필요: 계속 설치하려면 'y' 를 입력하고 Enter 를 누르세요."
+fi
 
 if ! confirm "계속 진행할까요?"; then
   info "중단됨."
@@ -234,7 +278,18 @@ install_file() {
 info ""
 info "파일 설치 (대화형)..."
 
-# 6.0) 공통 치환 도구
+# 6.1) Runtime-neutral SFS core + adapter files
+install_file "templates/SFS.md.template" "SFS.md" "공통 SFS 지침"
+install_file "templates/CLAUDE.md.template" "CLAUDE.md" "Claude Code 어댑터"
+install_file "templates/AGENTS.md.template" "AGENTS.md" "Codex 어댑터"
+install_file "templates/GEMINI.md.template" "GEMINI.md" "Gemini CLI 어댑터"
+
+# 6.2) Claude Code slash command adapter
+mkdir -p "$TARGET/.claude/commands"
+install_file "templates/.claude/commands/sfs.md" ".claude/commands/sfs.md" "Claude Code /sfs 커맨드"
+
+# 6.3) 자동 치환 가능한 placeholder (DATE + SOLON-VERSION) 처리
+# <PROJECT-NAME> / <STACK> / <DB> / <DEPLOY> / <DOMAIN> 등은 consumer 수동 치환 대상.
 SOLON_VERSION_VAL=$(cat "$SOURCE_DIR/VERSION" 2>/dev/null | head -1 || echo "unknown")
 TODAY=$(date +%Y-%m-%d)
 if [ "$(uname)" = "Darwin" ]; then
@@ -242,48 +297,15 @@ if [ "$(uname)" = "Darwin" ]; then
 else
   SED_INPLACE=(sed -i)
 fi
-
-# substitute_placeholders <file>
-#   - <DATE>, <SOLON-VERSION> 자동 치환.
-#   - <PROJECT-NAME>, <STACK>, <DB>, <DEPLOY>, <DOMAIN> 등은 consumer 수동 치환 대상.
-substitute_placeholders() {
-  local f="$1"
-  [ -f "$f" ] || return 0
-  "${SED_INPLACE[@]}" \
-    -e "s|<DATE>|$TODAY|g" \
-    -e "s|<SOLON-VERSION>|$SOLON_VERSION_VAL|g" \
-    "$f" 2>/dev/null || true
-}
-
-# 6.1) SFS.md — runtime-agnostic core (3 adapter 공통 참조 대상)
-install_file "templates/SFS.md.template" "SFS.md" "runtime-agnostic core"
-substitute_placeholders "$TARGET/SFS.md"
-
-# 6.2) CLAUDE.md — Claude Code adapter (thin)
-install_file "templates/CLAUDE.md.template" "CLAUDE.md" "Claude adapter"
-substitute_placeholders "$TARGET/CLAUDE.md"
-
-# 6.3) AGENTS.md — OpenAI Codex adapter (thin)
-install_file "templates/AGENTS.md.template" "AGENTS.md" "Codex adapter"
-substitute_placeholders "$TARGET/AGENTS.md"
-
-# 6.4) GEMINI.md — Google Gemini-CLI adapter (thin)
-install_file "templates/GEMINI.md.template" "GEMINI.md" "Gemini adapter"
-substitute_placeholders "$TARGET/GEMINI.md"
-
-ok "어댑터 묶음 치환 완료: <DATE>=$TODAY, <SOLON-VERSION>=$SOLON_VERSION_VAL"
-
-# 6.5) .claude/commands/sfs.md — Claude slash command (L3 Claude-specific)
-if [ -f "$SOURCE_DIR/templates/.claude-template/commands/sfs.md" ]; then
-  mkdir -p "$TARGET/.claude/commands"
-  if [ ! -f "$TARGET/.claude/commands/sfs.md" ]; then
-    cp "$SOURCE_DIR/templates/.claude-template/commands/sfs.md" "$TARGET/.claude/commands/sfs.md"
-    substitute_placeholders "$TARGET/.claude/commands/sfs.md"
-    ok "설치: .claude/commands/sfs.md (Claude slash command)"
-  else
-    warn ".claude/commands/sfs.md 이미 존재 — skip (수동 관리)"
+for auto_file in "$TARGET/SFS.md" "$TARGET/CLAUDE.md" "$TARGET/AGENTS.md" "$TARGET/GEMINI.md"; do
+  if [ -f "$auto_file" ]; then
+    "${SED_INPLACE[@]}" \
+      -e "s|<DATE>|$TODAY|g" \
+      -e "s|<SOLON-VERSION>|$SOLON_VERSION_VAL|g" \
+      "$auto_file" 2>/dev/null || true
   fi
-fi
+done
+ok "문서 자동 치환: <DATE>=$TODAY, <SOLON-VERSION>=$SOLON_VERSION_VAL"
 
 # ============================================================================
 # 7. .sfs-local/ 스캐폴드 (merge 모드)
@@ -377,23 +399,21 @@ ${C_BOLD}${C_GREEN}=== Solon MVP 설치 완료 ===${C_RESET}
 설치 위치:       $TARGET
 Solon 버전:      $SOLON_VERSION
 .sfs-local/:     스캐폴드 (${C_BOLD}기존 sprint 산출물은 보존됨${C_RESET})
+공통 지침:       SFS.md
+런타임 어댑터:   CLAUDE.md / AGENTS.md / GEMINI.md
+Claude /sfs:     .claude/commands/sfs.md
 
 다음 단계:
 
-  ${C_BOLD}1.${C_RESET} SFS.md + 사용할 runtime adapter 에서 placeholder 치환:
-     공통:  <PROJECT-NAME> / <STACK> / <DB> / <DEPLOY> / <DOMAIN>
-     어댑터: CLAUDE.md / AGENTS.md / GEMINI.md 중 본인 사용 runtime 위주로 편집.
+  ${C_BOLD}1.${C_RESET} SFS.md 내용 확인 + 프로젝트 특성 반영 (Stack / 도메인 등).
 
-  ${C_BOLD}2.${C_RESET} Runtime 세션 시작 (예시):
-     Claude Code:  ${C_BLUE}cd $TARGET && claude${C_RESET}
-                  → "SFS.md + CLAUDE.md 읽고 /sfs status" 지시
-     Codex CLI:    ${C_BLUE}cd $TARGET && codex${C_RESET}
-                  → "SFS.md + AGENTS.md 읽고 sfs status 해줘"
-     Gemini CLI:   ${C_BLUE}cd $TARGET && gemini${C_RESET}
-                  → "SFS.md + GEMINI.md 읽고 sfs status"
+  ${C_BOLD}2.${C_RESET} 선호 런타임에서 시작:
+     ${C_BLUE}cd $TARGET && claude${C_RESET}
+     ${C_BLUE}/sfs status${C_RESET} 또는 ${C_BLUE}/sfs start${C_RESET} 로 시작.
+     Codex/Gemini CLI 에서는 "SFS.md 읽고 sfs status처럼 현재 상태 요약해줘" 로 시작.
 
   ${C_BOLD}3.${C_RESET} git commit + push (Solon 주입 자체를 기록):
-     ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .claude/ .gitignore .sfs-local/${C_RESET}
+     ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .claude/commands/sfs.md .sfs-local/${C_RESET}
      ${C_BLUE}git commit -m "chore: install solon-mvp $SOLON_VERSION"${C_RESET}
      ${C_BLUE}git push${C_RESET}
 

@@ -13,7 +13,8 @@
 #
 # 원칙:
 #   - .sfs-local/sprints/*, .sfs-local/decisions/*, .sfs-local/events.jsonl 은 절대 덮어쓰지 않음
-#   - CLAUDE.md / .gitignore / divisions.yaml 만 대상 (사용자 수정분 우선 diff 보여줌)
+#   - SFS.md / runtime adapter / .gitignore / divisions.yaml 대상
+#   - 사용자 수정 가능성이 큰 파일은 checksum + 추천 action 을 먼저 보여줌
 #   - 업그레이드 취소는 언제든 가능 (파일 쓰기 전 전부 dry-run 프리뷰)
 
 set -euo pipefail
@@ -37,12 +38,16 @@ err()   { printf "  %s✗%s %s\n" "$C_RED" "$C_RESET" "$*" >&2; }
 die()   { err "$*"; exit 1; }
 
 # pipe 대응
-if [ ! -t 0 ] && [ -r /dev/tty ]; then exec < /dev/tty; fi
+if [ ! -t 0 ] && [ -e /dev/tty ]; then
+  if { : < /dev/tty; } 2>/dev/null; then
+    exec < /dev/tty
+  fi
+fi
 
 prompt() {
   local msg="$1" default="${2:-}" answer
-  if [ -n "$default" ]; then printf "%s [%s]: " "$msg" "$default"
-  else printf "%s: " "$msg"; fi
+  if [ -n "$default" ]; then printf "%s [%s]: " "$msg" "$default" >&2
+  else printf "%s: " "$msg" >&2; fi
   read -r answer || answer=""
   echo "${answer:-$default}"
 }
@@ -54,7 +59,11 @@ prompt() {
 SCRIPT_PATH="${BASH_SOURCE[0]:-}"
 SOURCE_DIR=""
 TMP_CLONE=""
-cleanup() { [ -n "$TMP_CLONE" ] && [ -d "$TMP_CLONE" ] && rm -rf "$TMP_CLONE"; }
+cleanup() {
+  if [ -n "$TMP_CLONE" ] && [ -d "$TMP_CLONE" ]; then
+    rm -rf "$TMP_CLONE"
+  fi
+}
 trap cleanup EXIT INT TERM
 
 if [ -n "$SCRIPT_PATH" ] && [ -f "$SCRIPT_PATH" ] && [ -d "$(dirname "$SCRIPT_PATH")/templates" ]; then
@@ -108,13 +117,66 @@ fi
 info ""
 info "변경 예정 파일 프리뷰..."
 
-# diff 보여줄 파일 (core + 3 adapter + .claude slash command + divisions)
+checksum_file() {
+  local file="$1"
+  if command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$file" | awk '{print substr($1, 1, 12)}'
+  elif command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$file" | awk '{print substr($1, 1, 12)}'
+  else
+    cksum "$file" | awk '{print $1}'
+  fi
+}
+
+recommend_action() {
+  local dst_rel="$1" exists="$2" same="$3"
+
+  if [ "$same" = "yes" ]; then
+    printf "없음"
+    return 0
+  fi
+  if [ "$exists" = "no" ]; then
+    printf "install"
+    return 0
+  fi
+
+  case "$dst_rel" in
+    "SFS.md"|".claude/commands/sfs.md")
+      printf "backup+overwrite"
+      ;;
+    "CLAUDE.md"|"AGENTS.md"|"GEMINI.md"|".sfs-local/divisions.yaml")
+      printf "skip"
+      ;;
+    *)
+      printf "skip"
+      ;;
+  esac
+}
+
+cat <<EOF
+
+읽는 법:
+  - checksum 동일       → 변경 없음
+  - 기존 없음          → 자동 신규 설치
+  - checksum 다름      → 자동 정책에 따라 갱신 또는 보존
+
+자동 처리 정책:
+  - 신규 파일                   → 자동 설치
+  - checksum 동일               → 변경 없음
+  - SFS.md                      → backup+overwrite (공통 SFS core 최신화)
+  - CLAUDE/AGENTS/GEMINI.md     → 자동 보존 (기존 프로젝트 지침 보호)
+  - .sfs-local/divisions.yaml   → 자동 보존 (프로젝트별 운영값 보호)
+  - .claude/commands/sfs.md     → backup+overwrite (배포판 관리 커맨드 최신화)
+
+EOF
+
+# diff 보여줄 파일
 declare -a CHECK_FILES=(
   "SFS.md|templates/SFS.md.template"
   "CLAUDE.md|templates/CLAUDE.md.template"
   "AGENTS.md|templates/AGENTS.md.template"
   "GEMINI.md|templates/GEMINI.md.template"
-  ".claude/commands/sfs.md|templates/.claude-template/commands/sfs.md"
+  ".claude/commands/sfs.md|templates/.claude/commands/sfs.md"
   ".sfs-local/divisions.yaml|templates/.sfs-local-template/divisions.yaml"
 )
 
@@ -126,22 +188,53 @@ for pair in "${CHECK_FILES[@]}"; do
 
   printf "\n  ${C_BOLD}%s${C_RESET}\n" "$dst_rel"
   if [ ! -f "$dst" ]; then
-    printf "    (기존 없음 — 신규 설치 예정)\n"
-  elif diff -q "$dst" "$src" >/dev/null 2>&1; then
-    printf "    (동일 — 변경 없음)\n"
+    new_sum=$(checksum_file "$src")
+    rec=$(recommend_action "$dst_rel" "no" "no")
+    printf "    상태: 신규 설치\n"
+    printf "    checksum: existing=none  new=%s\n" "$new_sum"
+    printf "    추천: %s\n" "$rec"
   else
-    lines_diff=$(diff "$dst" "$src" | grep -c '^[<>]' || true)
-    printf "    (~%s 줄 차이 — 대화형 처리 대상)\n" "$lines_diff"
+    old_sum=$(checksum_file "$dst")
+    new_sum=$(checksum_file "$src")
+    if [ "$old_sum" = "$new_sum" ]; then
+      rec=$(recommend_action "$dst_rel" "yes" "yes")
+      printf "    상태: 동일 — 변경 없음\n"
+      printf "    checksum: existing=%s  new=%s\n" "$old_sum" "$new_sum"
+      printf "    추천: %s\n" "$rec"
+    else
+      rec=$(recommend_action "$dst_rel" "yes" "no")
+      printf "    상태: checksum 다름 — 자동 정책 적용 대상\n"
+      printf "    checksum: existing=%s  new=%s\n" "$old_sum" "$new_sum"
+      printf "    추천: %s\n" "$rec"
+    fi
   fi
 done
 
 # .gitignore snippet 은 marker 기반 블록 교체
 printf "\n  ${C_BOLD}.gitignore${C_RESET}\n"
+snippet_sum=$(checksum_file "$SOURCE_DIR/templates/.gitignore.snippet")
 if grep -qF "$GIT_MARKER_BEGIN" "$TARGET/.gitignore" 2>/dev/null; then
-  printf "    (solon-mvp 블록 존재 — 내용만 갱신 예정)\n"
+  printf "    상태: solon-mvp 블록 존재 — marker 블록 교체 예정\n"
+  printf "    checksum: managed-snippet=%s\n" "$snippet_sum"
+  printf "    추천: 자동 갱신\n"
 else
-  printf "    (solon-mvp 블록 없음 — 신규 추가 예정)\n"
+  printf "    상태: solon-mvp 블록 없음 — 신규 추가 예정\n"
+  printf "    checksum: managed-snippet=%s\n" "$snippet_sum"
+  printf "    추천: 자동 추가\n"
 fi
+
+cat <<EOF
+
+지금 무엇을 하면 되나:
+  - 계속하려면 아래 "업그레이드 진행? [y]:" 에서 Enter 를 누르세요.
+  - 멈추려면 n 을 입력하세요.
+
+적용 결과:
+  - 신규 파일과 .gitignore/VERSION 은 자동 처리됩니다.
+  - 기존 프로젝트 지침 파일은 자동 보존됩니다.
+  - backup+overwrite 대상은 기존 파일을 .bak-YYYYMMDD-HHMMSS 로 보관한 뒤 갱신합니다.
+
+EOF
 
 echo ""
 if [ "$(prompt "업그레이드 진행?" "y")" != "y" ]; then
@@ -150,11 +243,11 @@ if [ "$(prompt "업그레이드 진행?" "y")" != "y" ]; then
 fi
 
 # ============================================================================
-# 4. 파일별 갱신 (대화형)
+# 4. 파일별 갱신 (checksum 기반 자동 처리)
 # ============================================================================
 
 update_file() {
-  local dst_rel="$1" src_rel="$2" label="$3"
+  local dst_rel="$1" src_rel="$2" label="$3" recommended="${4:-s}"
   local dst="$TARGET/$dst_rel" src="$SOURCE_DIR/$src_rel"
 
   [ -f "$src" ] || { err "source 없음: $src_rel"; return 1; }
@@ -165,46 +258,59 @@ update_file() {
     return 0
   fi
 
-  if diff -q "$dst" "$src" >/dev/null 2>&1; then
-    ok "변경 없음: $dst_rel"
+  old_sum=$(checksum_file "$dst")
+  new_sum=$(checksum_file "$src")
+  if [ "$old_sum" = "$new_sum" ]; then
+    ok "변경 없음: $dst_rel (checksum=$old_sum)"
     return 0
   fi
 
-  warn "$dst_rel 차이 있음 ($label)"
-  while true; do
-    local ans
-    ans=$(prompt "    [s]kip / [b]ackup+overwrite / [o]verwrite / [d]iff" "s")
-    case "$ans" in
-      s|S|"") ok "skip: $dst_rel"; return 0 ;;
-      b|B)
-        local ts=$(date +%Y%m%d-%H%M%S)
-        mv "$dst" "$dst.bak-$ts"
-        cp "$src" "$dst"
-        ok "백업 + 갱신: $dst_rel → $dst_rel.bak-$ts"
-        return 0 ;;
-      o|O) cp "$src" "$dst"; ok "덮어쓰기: $dst_rel"; return 0 ;;
-      d|D)
-        printf "\n--- diff: %s ---\n" "$dst_rel"
-        diff -u "$dst" "$src" || true
-        printf "--- end ---\n\n" ;;
-      *) warn "s/b/o/d 중 선택" ;;
-    esac
-  done
+  warn "$dst_rel checksum 다름 ($label)"
+  printf "    existing=%s  new=%s\n" "$old_sum" "$new_sum"
+  printf "    자동 정책: %s\n" "$recommended"
+  case "$recommended" in
+    b|B|"backup"|"backup+overwrite")
+      local ts=$(date +%Y%m%d-%H%M%S)
+      mv "$dst" "$dst.bak-$ts"
+      cp "$src" "$dst"
+      ok "백업 + 갱신: $dst_rel → $dst_rel.bak-$ts"
+      ;;
+    o|O|"overwrite")
+      cp "$src" "$dst"
+      ok "덮어쓰기: $dst_rel"
+      ;;
+    *)
+      ok "보존: $dst_rel"
+      ;;
+  esac
 }
 
 info ""
 info "파일별 갱신..."
 
-update_file "SFS.md" "templates/SFS.md.template" "runtime-agnostic core"
-update_file "CLAUDE.md" "templates/CLAUDE.md.template" "Claude adapter"
-update_file "AGENTS.md" "templates/AGENTS.md.template" "Codex adapter"
-update_file "GEMINI.md" "templates/GEMINI.md.template" "Gemini adapter"
-
-# .claude/commands/sfs.md — 디렉토리 없으면 생성 후 update
+update_file "CLAUDE.md" "templates/CLAUDE.md.template" "Claude Code 어댑터" "s"
+update_file "SFS.md" "templates/SFS.md.template" "공통 SFS 지침" "b"
+update_file "AGENTS.md" "templates/AGENTS.md.template" "Codex 어댑터" "s"
+update_file "GEMINI.md" "templates/GEMINI.md.template" "Gemini CLI 어댑터" "s"
 mkdir -p "$TARGET/.claude/commands"
-update_file ".claude/commands/sfs.md" "templates/.claude-template/commands/sfs.md" "Claude slash command"
+update_file ".claude/commands/sfs.md" "templates/.claude/commands/sfs.md" "Claude Code /sfs 커맨드" "b"
+update_file ".sfs-local/divisions.yaml" "templates/.sfs-local-template/divisions.yaml" "본부 활성화" "s"
 
-update_file ".sfs-local/divisions.yaml" "templates/.sfs-local-template/divisions.yaml" "본부 활성화"
+TODAY=$(date +%Y-%m-%d)
+if [ "$(uname)" = "Darwin" ]; then
+  SED_INPLACE=(sed -i '')
+else
+  SED_INPLACE=(sed -i)
+fi
+for auto_file in "$TARGET/SFS.md" "$TARGET/CLAUDE.md" "$TARGET/AGENTS.md" "$TARGET/GEMINI.md" "$TARGET/.sfs-local/divisions.yaml"; do
+  if [ -f "$auto_file" ]; then
+    "${SED_INPLACE[@]}" \
+      -e "s|<DATE>|$TODAY|g" \
+      -e "s|<SOLON-VERSION>|$NEW_VER|g" \
+      "$auto_file" 2>/dev/null || true
+  fi
+done
+ok "문서 자동 치환: <DATE>=$TODAY, <SOLON-VERSION>=$NEW_VER"
 
 # ============================================================================
 # 5. .gitignore 블록 교체 (marker 기반)
@@ -261,7 +367,7 @@ ${C_BOLD}${C_GREEN}=== 업그레이드 완료 ===${C_RESET}
   $CUR_VER → $NEW_VER
 
 변경사항 git commit 권장:
-  ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .claude/ .gitignore .sfs-local/divisions.yaml .sfs-local/VERSION${C_RESET}
+  ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .claude/commands/sfs.md .gitignore .sfs-local/divisions.yaml .sfs-local/VERSION${C_RESET}
   ${C_BLUE}git commit -m "chore: upgrade solon-mvp $CUR_VER → $NEW_VER"${C_RESET}
 
 CHANGELOG: https://github.com/${SOLON_REPO}/blob/main/CHANGELOG.md

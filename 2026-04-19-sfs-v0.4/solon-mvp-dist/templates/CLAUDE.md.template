@@ -1,73 +1,24 @@
-# CLAUDE.md — `<PROJECT-NAME>` Claude Code adapter
+# CLAUDE.md — Claude Code adapter for Solon SFS
 
-> 본 파일은 **Claude Code 전용 adapter**. 7-step flow / Gate / 산출물 규칙 본문은
-> 같은 디렉토리의 [`SFS.md`](./SFS.md) 에 있음. 본 파일은 Claude Code runtime 에서만
-> 의미 있는 힌트 (slash command, sub-agent, MCP) 만 담는다.
->
-> **세션 진입 순서**:
-> 1. [`SFS.md`](./SFS.md) 먼저 읽기 (7-step + 4 Gate + 산출물 규칙)
-> 2. 본 파일 (Claude-specific hint)
-> 3. `.sfs-local/divisions.yaml` (본부 활성 상태)
+This project uses Solon SFS.
 
-## Claude Code 에서 기대되는 행동
+Before planning or editing, read:
 
-- 세션 첫 발화가 "ㄱㄱ" / "이어서" / "sprint 브레인스토밍 시작" 처럼 짧은 resume
-  signal 이면, `SFS.md` 의 7-step flow 중 "다음에 와야 할 step" 을 `.sfs-local/sprints/`
-  최신 산출물에서 추론해 이어가기.
-- 의미 결정 (A/B/C scope / priority trade-off) 은 자율 금지 — 사용자에게 1-line 질문.
-- `git push` 자동 금지 (SFS.md §절대 금지 준수). local commit 까지만.
+- `SFS.md`
+- `.sfs-local/VERSION`
+- `.sfs-local/divisions.yaml`
+- recent files under `.sfs-local/sprints/`
+- recent files under `.sfs-local/decisions/`
 
-## `/sfs` slash command
+Claude Code can use the project slash command:
 
-Claude Code 에서 `/sfs ...` 는 실제 slash command. 정의는
-[`./.claude/commands/sfs.md`](./.claude/commands/sfs.md) 파일에 있음 (install.sh 가 함께 복사).
+- `/sfs`
+- `/sfs help`
+- `/sfs status`
+- `/sfs start <goal>`
+- `/sfs plan`
+- `/sfs review`
+- `/sfs decision <decision>`
+- `/sfs retro`
 
-주요 subcommand:
-
-| 명령 | 동작 |
-|------|------|
-| `/sfs status` | 현재 sprint 상태 요약 (`.sfs-local/sprints/` 최신 디렉토리 스캔) |
-| `/sfs plan` | G1 plan 산출물 skeleton 생성 |
-| `/sfs brainstorm` | G0 브레인스토밍 산출물 skeleton 생성 |
-| `/sfs review` | G4 review 산출물 skeleton + commit sha 수집 |
-| `/sfs retro` | retro-light 작성 + divisions.yaml 재검토 제안 |
-| `/sfs decision <title>` | `.sfs-local/decisions/<N>-<title>.md` mini-ADR 작성 |
-
-slash command 구현이 필요 시 `.claude/commands/sfs.md` 편집.
-
-## Sub-agents / Task tool
-
-- Claude Code 의 `Task` tool 로 **long-running 탐색 / 독립 검증** 위임 가능.
-- MVP 단계에서는 main agent 가 직접 수행 권장 (원칙 2: self-validation-forbidden 은
-  "사용자 의미 결정" 영역에만 적용, 기계적 작업은 Task 활용 가능).
-- Sub-agent 스폰은 cycle 2~3 이후 병목 확인 후 도입.
-
-## MCP 도구
-
-- 연결된 MCP 가 있으면 SFS 7-step flow 의 각 step 에서 우선 활용:
-  - Notion MCP → sprint retro 를 Notion 에 백업
-  - Slack MCP → G4 review verdict 를 팀 채널에 알림
-  - GitHub MCP → commit sha 수집 자동화
-- MCP 없으면 CLI (`gh`, `git`, `curl`) 로 대체.
-
-## Claude 모델 선택 (tier 힌트)
-
-| 작업 | 권장 tier |
-|------|-----------|
-| brainstorm / plan 창작 | Opus |
-| 구현 (코딩) | Sonnet |
-| 정형 task (파일 복사, grep) | Haiku |
-
-모델 tier 는 runtime-agnostic 추상이 아니라 Claude 내부 할당 힌트일 뿐. SFS.md 본문은
-tier 중립.
-
-## 절대 금지 (Claude 특화 추가)
-
-- **Cowork 샌드박스 자격을 자동으로 받아 push 시도 금지** — §1.5 policy.
-- **`/sfs` 외부에 중복 alias 만들지 말 것** — prefix 는 `/sfs` 단일.
-- **본 파일에 SFS.md 플로우 본문을 중복 복사 금지** — adapter 는 thin 유지.
-- **AGENTS.md / GEMINI.md 편집 금지** — 본인 runtime 은 CLAUDE.md 뿐.
-
-## Changelog
-
-- v0.1 (`<DATE>`, install): `solon-mvp <SOLON-VERSION>` 설치 — Claude adapter 생성.
+Preserve user work. Ask only when a decision changes behavior or could discard work.
