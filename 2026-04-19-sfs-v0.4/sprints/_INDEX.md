@@ -30,7 +30,7 @@ _(없음 — WU-19 + WU-19.1 까지 완료. 사용자 Mac W0 실행 대기 중. 
 | WU-18 | Phase 1 MVP W0 Pre-Arming (templates + plugin-wip + QUICK-START) | `d200299` | 2026-04-24 | 2026-04-24 | ecstatic-intelligent-brahmagupta | [WU-18.md](WU-18.md) |
 | WU-18.1 | WU-18 sha backfill + sprints/_INDEX.md 이동 | `12b9a72` | 2026-04-24 | 2026-04-24 | ecstatic-intelligent-brahmagupta | [WU-18.md](WU-18.md) (refresh 전용) |
 | WU-19 | Phase 1 MVP W0 Executable Scripts (setup-w0.sh + verify-w0.sh) | `74135cf` | 2026-04-24 | 2026-04-24 | ecstatic-intelligent-brahmagupta | [WU-19.md](WU-19.md) |
-| WU-19.1 | WU-19 sha backfill + sprints/_INDEX.md 이동 | (housekeeping 커밋 sha) | 2026-04-24 | 2026-04-24 | ecstatic-intelligent-brahmagupta | [WU-19.md](WU-19.md) (refresh 전용) |
+| WU-19.1 | WU-19 sha backfill + sprints/_INDEX.md 이동 | `9271f2a` | 2026-04-24 | 2026-04-24 | ecstatic-intelligent-brahmagupta | [WU-19.md](WU-19.md) (refresh 전용) |
 
 ## 완료 WU (status: done) — v1 → v2 이관 (WU-16 backfill)
 

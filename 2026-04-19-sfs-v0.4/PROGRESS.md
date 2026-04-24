@@ -9,8 +9,8 @@ current_wu_path: sprints/WU-19.md
 current_wu_owner:
   session_codename: ecstatic-intelligent-brahmagupta
   claimed_at: 2026-04-24T16:19:38+09:00
-  last_heartbeat: 2026-04-24T18:08:00+09:00
-  current_step: "WU-19 (74135cf) 커밋 완료. WU-19.1 sha backfill 진행 중."
+  last_heartbeat: 2026-04-24T18:15:00+09:00
+  current_step: "WU-19 (74135cf) + WU-19.1 (9271f2a) 완료. ahead 5. 사용자 터미널 push 대기 + Mac W0 실행 대기."
   ttl_minutes: 15
 released_history:
   last_owner: brave-hopeful-euler
@@ -88,11 +88,11 @@ resume_hint:
 - **원칙 2 준수**: 스크립트 로직 = WU-18 bash 블록 그대로 이식 + OS 호환성 + 에러 핸들링. 해석 변경 0건.
 
 - **WU-19 커밋 완료** (`74135cf`, ahead +1): 7 files, +451/-93. FUSE bypass 1회. setup-w0.sh / verify-w0.sh mode 100755 유지.
+- **WU-19.1 커밋 완료** (`9271f2a`, ahead +1 추가): sprints/WU-19.md frontmatter (status done / final_sha 74135cf) + sprints/_INDEX.md 활성 비움 + 완료 v2 테이블에 WU-19/WU-19.1 추가 + PROGRESS.md 덮어쓰기. 3 files, +20/-18. WU-19.1 sha `9271f2a` 는 housekeeping 에서 forward backfill.
 
 ## ② In-Progress
 
-- **WU-19.1 커밋 대기**: sprints/WU-19.md frontmatter `final_sha: 74135cf` + `status: done` 실체화 + sprints/_INDEX.md 활성→완료 v2 네이티브 이동 + PROGRESS.md 본 덮어쓰기.
-- **housekeeping 예약**: WU-19.1 sha forward backfill.
+_(없음 — WU-19 + WU-19.1 완료. 본 덮어쓰기 포함 housekeeping 커밋 1건 대기.)_
 
 ## ③ Next (WU-19 완료 직후)
 
