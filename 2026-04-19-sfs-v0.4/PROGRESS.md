@@ -9,8 +9,8 @@ current_wu_path: sprints/WU-17.md
 current_wu_owner:
   session_codename: ecstatic-intelligent-brahmagupta
   claimed_at: 2026-04-24T16:19:38+09:00
-  last_heartbeat: 2026-04-24T16:45:00+09:00
-  current_step: "WU-17 커밋 완료 (083cfe1). WU-17.1 sha backfill 진행 중."
+  last_heartbeat: 2026-04-24T16:50:00+09:00
+  current_step: "WU-17 (083cfe1) + WU-17.1 (d5681fa) 완료. ahead 5. 사용자 터미널 push 대기."
   ttl_minutes: 15
 released_history:
   last_owner: brave-hopeful-euler
@@ -80,11 +80,11 @@ resume_hint:
   - 5 files changed, +402 / -1176.
 - **축소 총계**: 1139 → 255 lines = **-77.6%**. 목표 -80% 사실상 달성.
 - **push 시도 결과**: 사용자 지시에 따라 `git push origin main` 시도 → FUSE Cowork 샌드박스 자격 전무로 `remote: Repository not found. fatal: Authentication failed` 실패. 사용자 터미널에서 수동 `git push origin main` 필요 (§1.5 원칙 fallback 유지).
-- **WU-17.1 진행 중** (커밋 대기): sprints/WU-17.md frontmatter `final_sha: 083cfe1` 실체화 + `status: done` + sprints/_INDEX.md WU-17/17.1 을 v2 네이티브 테이블로 이동 (활성 WU 섹션 비움) + PROGRESS.md 본 덮어쓰기.
+- **WU-17.1 완료** (`d5681fa`, ahead +1 추가): sprints/WU-17.md frontmatter `final_sha: 083cfe1` + `status: done` 실체화 + sprints/_INDEX.md WU-17/17.1 을 v2 네이티브 테이블로 이동 (활성 WU 섹션 비움) + PROGRESS.md 본 덮어쓰기. 3 files changed, +34/-26. WU-17.1 자체 sha `d5681fa` 는 다음 WU (WU-18 or housekeeping) 에서 forward backfill 대상 (chicken-and-egg 회피).
 
 ## ② In-Progress
 
-- **WU-17.1 커밋 대기**: sha backfill commit. 메시지 `WU-17.1: sha 083cfe1 backfill + sprints/_INDEX.md v2 네이티브 테이블 이동`.
+_(없음 — WU-17 + WU-17.1 완료. 다음 세션 또는 본 세션 추가 WU 진입 대기.)_
 
 ## ③ Next (WU-17 완료 직후)
 
