@@ -15,9 +15,7 @@ updated: 2026-04-24   # WU-16 이관 완료 반영
 
 ## 활성 WU (status: in_progress / pending)
 
-| WU | title | opened | session | path |
-|:--:|:---|:---|:---|:---|
-| WU-16 | 기존 WU (WU-7 ~ WU-14.1) 이관 | 2026-04-24 | brave-hopeful-euler | [WU-16.md](WU-16.md) |
+_(없음 — WU-16.1 refresh 까지 완료. 다음 WU = WU-17 (HANDOFF/BRIEFING 축소) 착수 대기.)_
 
 ## 완료 WU (status: done) — v2 네이티브
 
@@ -25,6 +23,8 @@ updated: 2026-04-24   # WU-16 이관 완료 반영
 |:--:|:---|:---|:---|:---|:---|:---|
 | WU-15 | Workflow v2 인프라 설정 | `aa0a354` | 2026-04-21 | 2026-04-21 | relaxed-vibrant-albattani | [WU-15.md](WU-15.md) |
 | WU-15.1 | WU-15 sha backfill + README §11.1 glossary | `acfae03` | 2026-04-21 | 2026-04-21 | relaxed-vibrant-albattani | [WU-15.md](WU-15.md) (refresh 전용) |
+| WU-16 | 기존 WU (WU-7 ~ WU-14.1) 이관 + sessions/ 3 retrospective | `2b8b69e` | 2026-04-24 | 2026-04-24 | brave-hopeful-euler | [WU-16.md](WU-16.md) |
+| WU-16.1 | WU-16 sha backfill + sessions/2026-04-24 retrospective 신설 | (pending) | 2026-04-24 | 2026-04-24 | brave-hopeful-euler | [WU-16.md](WU-16.md) (refresh 전용) |
 
 ## 완료 WU (status: done) — v1 → v2 이관 (WU-16 backfill)
 

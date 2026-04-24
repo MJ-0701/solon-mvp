@@ -21,7 +21,7 @@ updated: 2026-04-24   # WU-16 이관 완료 반영
 | 2026-04-20 | `funny-compassionate-wright` | 3~4 (compact 전/후 병합) | WU-11.2 / WU-12.2 / WU-12.3 / WU-4 / WU-4.1 / WU-5 / WU-5.1 / WU-9 / WU-9.1 / WU-13 / WU-13.1 | [2026-04-20-funny-compassionate-wright.md](2026-04-20-funny-compassionate-wright.md) |
 | 2026-04-21 | `serene-fervent-wozniak` | 5 (사용자 취침 전 자율 진행) | WU-7 / WU-7.1 / WU-14 / WU-14.1 / WU-10 / WU-10.1 + tmp/workflow-v2-design.md draft-0.3 | [2026-04-21-serene-fervent-wozniak.md](2026-04-21-serene-fervent-wozniak.md) |
 | 2026-04-21 | `relaxed-vibrant-albattani` + `serene-fervent-wozniak` (병렬) | 6 + 7 | WU-15 / WU-15.1 / WU-15.1-fin / hotfix §1 #12 mutex / session release | [2026-04-21-relaxed-vibrant-albattani.md](2026-04-21-relaxed-vibrant-albattani.md) |
-| 2026-04-24 | `brave-hopeful-euler` | 8 (본 WU-16 진행 세션) | WU-16 / WU-16.1 (예정) | *세션 종료 시 생성 예정* |
+| 2026-04-24 | `brave-hopeful-euler` | 8 | WU-16 (`2b8b69e`) / WU-16.1 | [2026-04-24-brave-hopeful-euler.md](2026-04-24-brave-hopeful-euler.md) |
 
 ---
 
@@ -44,4 +44,4 @@ updated: 2026-04-24   # WU-16 이관 완료 반영
 - ✅ 2026-04-21 serene-fervent-wozniak (5번째 블록)
 - ✅ 2026-04-21 relaxed-vibrant-albattani + serene-fervent-wozniak 병렬 (6-7번째 블록)
 - ⏳ 2026-04-20 회사 계정 1-2번째 블록: 범위 밖 (WU-16b 연장 or 별도 WU)
-- ⏳ 2026-04-24 brave-hopeful-euler: 본 세션 종료 시 생성
+- ✅ 2026-04-24 brave-hopeful-euler: WU-16.1 에서 생성 완료
