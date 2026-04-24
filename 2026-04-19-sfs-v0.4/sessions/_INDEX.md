@@ -2,7 +2,7 @@
 doc_id: sessions-index
 title: "sessions/ — 세션별 3-part 로그 인덱스"
 visibility: raw-internal
-updated: 2026-04-24   # WU-16 이관 완료 반영
+updated: 2026-04-24   # 9번째 세션 (ecstatic-intelligent-brahmagupta, WU-17/18/19 완주) 반영
 ---
 
 # sessions/ — 세션 로그 인덱스
@@ -22,6 +22,7 @@ updated: 2026-04-24   # WU-16 이관 완료 반영
 | 2026-04-21 | `serene-fervent-wozniak` | 5 (사용자 취침 전 자율 진행) | WU-7 / WU-7.1 / WU-14 / WU-14.1 / WU-10 / WU-10.1 + tmp/workflow-v2-design.md draft-0.3 | [2026-04-21-serene-fervent-wozniak.md](2026-04-21-serene-fervent-wozniak.md) |
 | 2026-04-21 | `relaxed-vibrant-albattani` + `serene-fervent-wozniak` (병렬) | 6 + 7 | WU-15 / WU-15.1 / WU-15.1-fin / hotfix §1 #12 mutex / session release | [2026-04-21-relaxed-vibrant-albattani.md](2026-04-21-relaxed-vibrant-albattani.md) |
 | 2026-04-24 | `brave-hopeful-euler` | 8 | WU-16 (`2b8b69e`) / WU-16.1 | [2026-04-24-brave-hopeful-euler.md](2026-04-24-brave-hopeful-euler.md) |
+| 2026-04-24 | `ecstatic-intelligent-brahmagupta` | 9 | WU-17 (`083cfe1`) HANDOFF/BRIEFING 축소 -77.6% / WU-18 (`d200299`) Phase 1 MVP W0 pre-arming / WU-19 (`74135cf`) W0 executable scripts | [2026-04-24-ecstatic-intelligent-brahmagupta.md](2026-04-24-ecstatic-intelligent-brahmagupta.md) |
 
 ---
 
