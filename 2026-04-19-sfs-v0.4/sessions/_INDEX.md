@@ -2,7 +2,7 @@
 doc_id: sessions-index
 title: "sessions/ — 세션별 3-part 로그 인덱스"
 visibility: raw-internal
-updated: 2026-04-24   # 9번째 세션 (ecstatic-intelligent-brahmagupta, WU-17/18/19 완주) 반영
+updated: 2026-04-24   # 11번째 세션 (dreamy-busy-tesla, WU-20 Phase A 보강 + Back-port) 반영
 ---
 
 # sessions/ — 세션 로그 인덱스
@@ -23,6 +23,8 @@ updated: 2026-04-24   # 9번째 세션 (ecstatic-intelligent-brahmagupta, WU-17/
 | 2026-04-21 | `relaxed-vibrant-albattani` + `serene-fervent-wozniak` (병렬) | 6 + 7 | WU-15 / WU-15.1 / WU-15.1-fin / hotfix §1 #12 mutex / session release | [2026-04-21-relaxed-vibrant-albattani.md](2026-04-21-relaxed-vibrant-albattani.md) |
 | 2026-04-24 | `brave-hopeful-euler` | 8 | WU-16 (`2b8b69e`) / WU-16.1 | [2026-04-24-brave-hopeful-euler.md](2026-04-24-brave-hopeful-euler.md) |
 | 2026-04-24 | `ecstatic-intelligent-brahmagupta` | 9 | WU-17 (`083cfe1`) HANDOFF/BRIEFING 축소 -77.6% / WU-18 (`d200299`) Phase 1 MVP W0 pre-arming / WU-19 (`74135cf`) W0 executable scripts | [2026-04-24-ecstatic-intelligent-brahmagupta.md](2026-04-24-ecstatic-intelligent-brahmagupta.md) |
+| 2026-04-24 | `amazing-happy-hawking` | 10 | WU-20 Phase A (`df0887a`) Solon MVP distribution staging v0.1.0-mvp / 사용자 Codex 정정 (`40dcc2e`) RUNTIME-ABSTRACTION.md v0.2-mvp-correction | *retrospective 미작성* — WU-16b 또는 다음 세션 (a/b) 에서 재구성 후보 |
+| 2026-04-24 | `dreamy-busy-tesla` | 11 | WU-20 Phase A 보강 (v0.2.0-mvp, CLAUDE 단독 → SFS core + 3 adapter + `/sfs` slash command) / Phase A Back-port (`[TBD]`) stable v0.2.4-mvp ↔ dev staging reverse reconcile (14 파일 checksum full match) / P-02 dev-stable-divergence 실체화 / 사용자 지시 17 (dev=개발 / stable=배포) | [2026-04-24-dreamy-busy-tesla.md](2026-04-24-dreamy-busy-tesla.md) |
 
 ---
 

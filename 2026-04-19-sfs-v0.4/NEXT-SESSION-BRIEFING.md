@@ -1,9 +1,9 @@
 ---
 doc_id: sfs-v0.4-next-session-briefing
 title: "다음 세션 5분 진입 브리핑 (참조 구조 전환 후)"
-version: 0.6-reduced
+version: 0.7-reduced
 status: active
-last_updated: 2026-04-24 (WU-17 에서 축소)
+last_updated: 2026-04-24 (WU-20 Back-port 후 12번째 세션 진입 대비)
 audience: [next-claude-session]
 purpose: "세션 진입 시 5분 이내 맥락 파악 + 다음 WU 착수. 본 문서는 pointer hub 역할만 하며, SSoT 는 CLAUDE.md + PROGRESS.md + sprints/_INDEX.md + sessions/_INDEX.md."
 refresh_history:
@@ -13,6 +13,7 @@ refresh_history:
   - v0.4 (2026-04-21, WU-10.1): WU-10/10.1 반영
   - v0.5 (2026-04-24, WU-16.1): Workflow v2 이관 완주 반영 (ahead 2)
   - v0.6 (2026-04-24, WU-17): **-80% 축소, 참조 구조로 전환**. 본체 pointer hub 로 축약. 상세 히스토리 sessions/ retrospective 파일로 위임.
+  - v0.7 (2026-04-24, dreamy-busy-tesla 세션 종료): WU-20 Phase A 보강 + Back-port 완료 반영. user_new_directive_17 (dev=개발 / stable=배포) 추가. §7 "dev/stable 구조" 신설.
 ---
 
 # 다음 세션 5분 진입 브리핑 (Pointer Hub)
@@ -97,6 +98,23 @@ local commit 까지만, push 는 **사용자 터미널에서 `git push origin ma
 | v1 시대 사용자 지시 SSoT | [HANDOFF-next-session.md §0](HANDOFF-next-session.md) |
 | W10 결정 TODO | [cross-ref-audit.md §4](cross-ref-audit.md) |
 | docset repo 루트 orientation | [../README.md](../README.md) |
+
+## 7. dev / stable 구조 (WU-20 Back-port 후 확정, v0.7 신설)
+
+| 역할 | 위치 | 현재 버전 | 최신 HEAD |
+|---|---|---|---|
+| **dev SSoT** (개발 원천) | `2026-04-19-sfs-v0.4/solon-mvp-dist/` (본 docset 내 staging) | 0.2.4-mvp (back-port 후) | Back-port commit sha — 사용자 push 확인 필요 |
+| **stable release** | GitHub `MJ-0701/solon-mvp` + 로컬 `~/workspace/solon-mvp` | 0.2.4-mvp | `ac98497` |
+
+**원칙 (user_new_directive_17)**: 배포 artifact 수정은 **dev 먼저**. stable hotfix
+는 허용하나 **즉시 staging 으로 back-port 커밋** 생성 (같은 세션 안에).
+
+**R-D1 규율 제안**: 다음 세션 (a) 에서 CLAUDE.md §1 에 정식 추가 (사용자 승인 후).
+상세는 `learning-logs/2026-05/P-02-dev-stable-divergence.md`.
+
+**재발 경고**: Codex/Gemini CLI 에서 stable 을 직접 수정하면 divergence 재발.
+사용자가 다른 runtime 에서 작업 시작 시 AI 는 **"dev staging 에서 시작하시는 게
+맞겠다"** 를 1-line 확인.
 
 끝. (원 v0.5 의 §3~§9 "사용자 working style" / "기술 규칙" / "파일 인벤토리" / "열린
 결정" / "Track 구조" / "최근 세션 요약" / "기록되지 않은 것" 7 섹션 은 각각 CLAUDE.md §1 /

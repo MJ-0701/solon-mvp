@@ -2,22 +2,22 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-24T20:30:00+09:00
-session: "11번째 세션 `dreamy-busy-tesla` — Phase A 보강 (v0.2.0-mvp) 후 사용자 git log 확인 → stable repo 에 Codex 가 0.1.1~0.2.4-mvp 6 커밋 선행 merge+push 발견 → 사용자 의도 재확인 ('mvp=배포/solon=개발') → dev/stable reverse reconcile 실행. 14 파일 stable→staging 완전 동기화 (checksum match). P-02 learning pattern 실체화."
+last_overwrite: 2026-04-24T20:45:00+09:00
+session: "11번째 세션 `dreamy-busy-tesla` 종료 (mutex release). WU-20 Phase A 보강 (v0.2.0-mvp) + Phase A Back-port (stable v0.2.4-mvp → dev staging reverse reconcile, 14 파일 checksum match) + P-02 dev-stable-divergence 실체화 + 사용자 지시 17 (dev=개발 / stable=배포) 수신. 사용자 push 완료 선언. 인수인계 4종 (PROGRESS / HANDOFF §0 #17 / NEXT-SESSION-BRIEFING v0.7 / sessions/dreamy-busy-tesla retrospective) 완료."
 current_wu: WU-20
 current_wu_path: sprints/WU-20.md
-current_wu_owner:
-  session_codename: dreamy-busy-tesla
-  claimed_at: 2026-04-24T19:05:00+09:00
-  last_heartbeat: 2026-04-24T20:30:00+09:00
-  current_step: "Back-port 완료. 사용자 터미널에서 .claude-template/ git rm + staging commit 대기."
+current_wu_owner: null   # dreamy-busy-tesla release
   ttl_minutes: 15
 released_history:
-  last_owner: amazing-happy-hawking
-  last_claimed_at: 2026-04-24T22:10:00+09:00
-  last_released_at: 2026-04-24T18:41:00+09:00   # 사용자 codex 정정 커밋 (40dcc2e) 이후 묵시적 release
-  last_reason: "WU-20 Phase A 완료 (df0887a: solon-mvp-dist/ staging 14 파일). 사용자 Codex CLI 에서 RUNTIME-ABSTRACTION.md MVP 범위 정정 (40dcc2e) — SFS core 는 Claude lock-in 금지, MVP 부터 CLAUDE/AGENTS/GEMINI 3 adapter 필요. 본 Phase A 는 CLAUDE 단일이라 gap 발생 → 11번째 세션 dreamy-busy-tesla 에서 보강."
-  last_final_commits: [df0887a, 40dcc2e]   # Phase A staging + 사용자 정정
+  last_owner: dreamy-busy-tesla
+  last_claimed_at: 2026-04-24T19:05:00+09:00
+  last_released_at: 2026-04-24T20:45:00+09:00
+  last_reason: "11번째 세션 종료. WU-20 Phase A 보강 (v0.2.0-mvp) 후 stable divergence 발견 → Phase A Back-port (stable v0.2.4-mvp → dev staging 14 파일 reverse reconcile) 완료. P-02 dev-stable-divergence learning 실체화. 사용자 지시 17 (dev=개발/stable=배포) 수신. 사용자 push 완료 선언 → 인수인계 4종 작성 → mutex release."
+  last_final_commits: [df0887a, 40dcc2e, "TBD: back-port commit"]
+  prior_owner: amazing-happy-hawking
+  prior_claimed_at: 2026-04-24T22:10:00+09:00
+  prior_released_at: 2026-04-24T18:41:00+09:00
+  prior_reason: "WU-20 Phase A 완료 (df0887a: solon-mvp-dist/ staging 14 파일). 사용자 Codex CLI 에서 RUNTIME-ABSTRACTION.md MVP 범위 정정 (40dcc2e) 후 묵시적 release."
 purpose: "context reset 시 다음 세션이 본 파일 1개만 읽고 즉시 이어받을 수 있도록, 매 micro-step 마다 덮어쓰는 live snapshot. 히스토리 아님."
 companions:
   - "CLAUDE.md (§1 절대 규칙 + §1.12 mutex protocol + §2.1 용어집 — 최우선 진입)"
@@ -38,25 +38,29 @@ resume_hint:
   trigger_positive: [ㄱㄱ, 고, ㅇㅋ, ok, OK, 시작, 가자, ㅇㅇ, 진행, go, Go, start]
   trigger_negative: [ㄴㄴ, 잠깐, stop, 아니, 중단, 다른거, 다른, no]
   default_action: |
-    1. §1.12 mutex 확인: current_wu_owner null 확인 (본 파일 frontmatter) → self 로 claim 가능.
-       자기 codename = basename of /sessions/<codename>/. PROGRESS.md frontmatter current_wu_owner 에
-       (session_codename / claimed_at / last_heartbeat / current_step / ttl_minutes=15) 기록.
-    2. git 상태 확인: `git status` + `git rev-list --count origin/main..HEAD`
-       (9번째 세션 종료 시 ahead 0 = 사용자 push 2회 완료. 추가 housekeeping 커밋 반영 시 ahead 1 가능.)
-    3. ③ Next 메뉴 제시 (1-line clarifying Q, 현 세션 release 상태이므로 사용자 확인 없으면 자율 진행 금지):
-       (a) **WU-20 (재정의된 원래 WU-19)**: "W0 결정 기록 + W1 cycle 1 회귀 피드백" (default, 단 사용자가 Mac W0 실행 완료한 경우에만 가능).
-           사용자 W0 결정 (repo 이름 / stack / ownership / Solon 참조 방식) 공유 → HANDOFF §0 에 16번째 지시로 기록 + W1 learning patterns 실체화 (learning-logs/2026-05/P-*.md 5건 후보).
-       (b) WU-18b "MVP 도메인 skeleton" — 사용자가 "pre-work 더 원한다" 고 하면. G0 브레인스토밍 결과 반영 후.
-       (c) W10 결정 세션 (cross-ref-audit §4 #14/#18/#19, tmp/w10-todo-{14,18,19}.md pre-분석 있음).
-       (d) Phase 1 W1 cycle 1 중간 병렬 피드백 (사용자가 W1 진행 중이면).
-       (e) WU-16b "앞선 WU 확장 이관" (WU-0 ~ WU-5.1 / 8/8.1 / 11-series / 12-series).
-    4. 사용자가 번호/키워드 지정 시 해당 경로. 자연어 confirm 한 마디면 (a) WU-20 default.
-       **단 사용자 W0 미실행 상태이면 (a) 는 blocked** — 1-line clarifying Q 로 W0 진행 여부 먼저 확인.
+    1. §1.12 mutex 확인: current_wu_owner null (본 frontmatter) → self 로 claim.
+       자기 codename = basename of /sessions/<codename>/. 기록 필드:
+       session_codename / claimed_at / last_heartbeat / current_step / ttl_minutes=15.
+    2. git 상태 확인: `git status` + `git rev-list --count origin/main..HEAD`.
+       (11번째 세션 종료 시 사용자 push 완료 선언. 추가 housekeeping 커밋 반영 시 ahead 1 가능.)
+    3. ③ Next 메뉴 (사용자 확인 없으면 자율 진행 금지):
+       (a) **R-D1 규율 정식 채택** (default): Solon docset `CLAUDE.md §1` 에 "배포 artifact
+           수정은 dev 먼저. stable hotfix 는 즉시 back-port" 규칙 추가. learning-logs
+           `P-02` status: resolved 스탬핑.
+       (b) **WU-20 close + WU-20.1 refresh**: back-port 커밋 sha 확정 후 WU-20
+           `status: done` 전환 + WU-20.1 refresh (HANDOFF frontmatter unpushed_commits 갱신).
+       (c) **Phase 1 킥오프 준비** — D-3 (2026-04-27 월). stable v0.2.4-mvp 로 즉시
+           사용 가능. 사용자가 신규 사이드프로젝트에 install.sh 실행 지원.
+       (d) **sync/cut-release 자동화** — R-D1 스크립트화. `scripts/sync-stable-to-dev.sh`
+           + `scripts/cut-release.sh`. `0.4.0-mvp` 예약.
+       (e) **W10 결정 세션** — cross-ref-audit §4 #14/#18/#19.
+       (f) **WU-16b 확장 이관** (WU-0 ~ WU-5.1 / 8/8.1 / 11/12 시리즈).
+    4. 사용자 번호/키워드 지정 시 해당 경로. 자연어 confirm 한 마디면 (a) default.
   on_negative: |
-    "현 상태만 요약 보고 후 대기" — git ahead, 최근 WU 3건 (WU-17 / WU-18 / WU-19),
-    pending 항목 (WU-20 재정의 / WU-18b), Phase 1 D-day 카운트 (2026-04-27 기준 재계산),
-    mutex release 상태만 1-screen 요약.
-  on_ambiguous: "1-line clarifying Q 만 하고 대기 (예: 'Mac W0 실행 완료? 아니면 다른 옵션 (a~e)?')"
+    "현 상태만 요약 보고 후 대기" — git ahead, 최근 WU 2 phase (WU-20 Phase A 보강 + Back-port),
+    pending 항목 (R-D1 정식 채택 / WU-20 close / Phase 1 D-day 카운트 2026-04-27 기준 재계산),
+    dev/stable 구조 (NEXT-SESSION-BRIEFING §7 참조), mutex release 상태만 1-screen 요약.
+  on_ambiguous: "1-line clarifying Q 만 하고 대기 (예: 'R-D1 정식 채택 진행? 아니면 다른 옵션 (a~f)?')"
   safety_locks:
     - "원칙 2 (self-validation-forbidden): A/B/C 의미 결정 자동 실행 금지"
     - "§1.5: git push 자동 실행 금지 — 사용자 터미널에서만"
@@ -67,9 +71,11 @@ resume_hint:
   version: 1
 ---
 
-# PROGRESS — live snapshot (11번째 세션 dreamy-busy-tesla, Back-port v0.2.4-mvp 완료)
+# PROGRESS — live snapshot (11번째 세션 dreamy-busy-tesla 종료, mutex released)
 
-> 🚨 **본 파일 최우선 진입.** mutex claimed by `dreamy-busy-tesla`. dev/stable divergence 해소 완료 (14 파일 full sync). 사용자 터미널에서 `.claude-template/ git rm` + commit + push 대기.
+> 🚨 **본 파일 최우선 진입.** mutex **released** by `dreamy-busy-tesla` (2026-04-24T20:45+09:00).
+> 다음 세션은 frontmatter `resume_hint.default_action` 에 따라 self claim 후 진입.
+> WU-20 Phase A 보강 + Back-port 전부 완료. 사용자 push 완료 선언.
 
 ---
 

@@ -1,9 +1,9 @@
 ---
 doc_id: handoff-2026-04-20-solon-v0.4-r3-complete
 title: "인수인계 (Pointer Hub v3.0-reduced) — 사용자 지시 SSoT + 참조 허브"
-version: 3.1-reduced
+version: 3.2-reduced
 created: 2026-04-20
-updated: 2026-04-24 (WU-20: 16번째 사용자 지시 추가)
+updated: 2026-04-24 (WU-20 Back-port: 17번째 사용자 지시 추가 — dev=개발 / stable=배포)
 author: "Claude (direct 지시 by 채명정)"
 valid_until: "WU 규율 유지되는 동안 계속 (현재 상태는 PROGRESS.md, 이관은 sprints/_INDEX.md, 본 파일은 frontmatter + §0 사용자 지시 원문 SSoT 역할)"
 status: "Pointer hub. 현재 상태는 PROGRESS.md 참조."
@@ -33,9 +33,9 @@ queue_pointers:
   phase1_kickoff_date: "2026-04-27 (월) — PHASE1-KICKOFF-CHECKLIST.md §2 W0 선행 필요"
 mutex_state_schema:
   # 세션 종료 시 여기에 기록 (PROGRESS.md 는 live mirror)
-  last_released_session: brave-hopeful-euler
-  last_released_at: 2026-04-24T10:35:00+09:00
-  last_released_reason: "WU-16 + WU-16.1 + v0.5 인수인계 문서 refresh 완료. 사용자 장소 이동 지시."
+  last_released_session: dreamy-busy-tesla
+  last_released_at: 2026-04-24T20:45:00+09:00
+  last_released_reason: "WU-20 Phase A 보강 (v0.2.0-mvp) + Phase A Back-port (stable v0.2.4-mvp → dev staging reverse reconcile, 14 파일 checksum match) + P-02 dev-stable-divergence learning pattern 실체화 완료. 사용자 push 완료 선언 + 다음세션 인수인계 지시."
 user_new_directive:
   raw: "sfs를 claude 뿐만 아니라 codex랑 gemini-cli에서도 사용하고 싶거든?? 그래서 추상화 하는게 중요할듯?!"
   date: 2026-04-20
@@ -50,6 +50,27 @@ user_new_directive_16:
     upgrade_mechanism: "upgrade.sh (VERSION 기반)"
   implication: "solon-mvp 정체 재정의: consumer project → SFS distribution. install.sh / upgrade.sh / uninstall.sh 필요. phase1-mvp-templates/ 은 distribution 에 재흡수."
   resolution: "WU-20 (amazing-happy-hawking 세션) — solon-mvp-dist/ staging + APPLY-INSTRUCTIONS.md 작성. 사용자 Mac 에서 로컬 solon-mvp repo 전환 apply 대기."
+user_new_directive_17:
+  raw: "ㄴㄴㄴ mvp는 배포버전이고 solon이 개발버전이어야 함 solon-mvp가 한마디로 stable 버전이어야 함"
+  date: 2026-04-24
+  context: |
+    11번째 세션 (dreamy-busy-tesla) 에서 사용자 git log 확인 결과 solon-mvp stable 에
+    이미 Codex CLI 작업 6 커밋 (0.1.1~0.2.4-mvp, `786900a`~`ac98497`) 이 merge+push 된
+    상태 발견. staging (방금 만든 v0.2.0-mvp) 대비 stable 이 선행. 재조정 방향 3안
+    제시 — (A) stable SSoT / (B) 양방향 reconcile / (C) staging mirror — 사용자 답.
+  decision:
+    dev_ssot: "solon (Solon docset 내 solon-mvp-dist/ staging)"
+    stable_release: "solon-mvp (GitHub MJ-0701/solon-mvp, release cut 결과만)"
+    flow_direction: "dev → stable (staging 검증 끝나면 release cut)"
+  implication: |
+    (1) dev 가 SSoT. Codex/Gemini CLI 에서 작업 시에도 dev 먼저 수정 → stable cut.
+    (2) stable hotfix 는 예외 허용이지만 같은 세션 안에 staging 으로 back-port 커밋 필수.
+    (3) 본 세션의 reverse back-port (stable→dev) 는 1회성 divergence 해소. 향후 재발
+        방지를 위해 R-D1 규율 제안.
+  resolution: |
+    WU-20 Phase A Back-port 완료 — 14 파일 stable HEAD (`ac98497`) → dev staging 완전
+    동기화 (checksum full match). learning-logs/2026-05/P-02-dev-stable-divergence.md
+    실체화. R-D1 정식 채택 (CLAUDE.md §1 에 규칙 추가) 은 다음 세션 사용자 승인 후.
 ---
 
 # 📋 인수인계 — Pointer Hub (v3.0-reduced)
@@ -105,6 +126,36 @@ user_new_directive_16:
     - **ㄱㄱ signal**: 자율 진행 승인 → WU-20 재정의 → Solon docset `solon-mvp-dist/` staging 구축 → apply-instructions.md 생성.
     - **admin-panel MVP 플랜 상태**: 보류. `solon-mvp` 배포 완료 + 사이드프로젝트에 install 한 뒤, 신규 프로젝트 중 하나로 admin-panel 재활성화 검토. 현재 #11~#13 은 "예약" 상태.
     - **phase1-mvp-templates/ 및 setup-w0.sh / verify-w0.sh 운명**: 기능은 `solon-mvp-dist/install.sh` 에 재흡수됨. 원본 phase1-mvp-templates/ 는 docset 에서 archive 또는 제거 결정 필요 (WU-20 후속).
+
+17. (2026-04-24 저녁, 11번째 세션 `dreamy-busy-tesla` — dev/stable 방향 확정):
+    - **상황**: WU-20 Phase A 보강 (v0.2.0-mvp) 커밋 push 후 사용자 `git log --oneline -5`
+      결과 공유:
+      ```
+      ac98497 fix: honor upgrade prompt defaults
+      a48b7fd feat: automate checksum-based upgrades
+      41e15ed feat: add checksum-based upgrade preview
+      8134a2c feat: add runtime-neutral SFS adapters
+      e9cf47a docs: improve /sfs autocomplete help
+      ```
+      → solon-mvp stable 에 Codex CLI 작업 6 커밋 (v0.1.1 → v0.2.4-mvp) 이미 merge 완료.
+      staging (방금 만든 v0.2.0-mvp) 대비 stable 선행 = divergence.
+    - **사용자 답변 verbatim**: **"ㄴㄴㄴ mvp는 배포버전이고 solon이 개발버전이어야
+      함 solon-mvp가 한마디로 stable 버전이어야 함"** → dev SSoT 방향 확정.
+    - **함의**: 방향 역전 = 규율 위반 상태. 해소 절차 필요.
+    - **해소 (WU-20 Phase A Back-port)**: stable HEAD `ac98497` → dev staging reverse
+      reconcile. 14 파일 cp 로 full sync (`VERSION` / `CHANGELOG.md` / `README.md` /
+      `install.sh` / `upgrade.sh` / `uninstall.sh` / `CLAUDE.md` (distribution) /
+      `templates/{SFS,CLAUDE,AGENTS,GEMINI}.md.template` / `templates/.claude/commands/sfs.md`
+      / `templates/.gitignore.snippet` / `templates/.sfs-local-template/divisions.yaml`).
+      `diff -q` 모두 same + `bash -n` 3 스크립트 OK.
+    - **레거시 정리**: `solon-mvp-dist/templates/.claude-template/` 은 bash FUSE lock
+      으로 agent 삭제 실패 → 사용자 터미널 `git rm -rf` 위임.
+    - **Learning**: `learning-logs/2026-05/P-02-dev-stable-divergence.md` 실체화.
+      **R-D1 규율 제안**: "배포 artifact 수정은 dev 먼저. stable hotfix 는 같은
+      세션 안에 즉시 staging back-port 커밋 생성." CLAUDE.md §1 정식 채택은
+      다음 세션 사용자 승인 후 (원칙 2).
+    - **APPLY-INSTRUCTIONS.md 상태**: historical 로 retrograde. 신규 consumer 프로젝트
+      설치는 `install.sh` 만 사용.
 
 → **해석 요약**:
 - 기본 3원칙: 작업 진행 + 토큰 한계 도달 시 중단 + **기록 우선**
