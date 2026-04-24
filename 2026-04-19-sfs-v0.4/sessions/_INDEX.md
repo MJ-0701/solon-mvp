@@ -2,7 +2,7 @@
 doc_id: sessions-index
 title: "sessions/ — 세션별 3-part 로그 인덱스"
 visibility: raw-internal
-updated: 2026-04-21
+updated: 2026-04-24   # WU-16 이관 완료 반영
 ---
 
 # sessions/ — 세션 로그 인덱스
@@ -15,22 +15,33 @@ updated: 2026-04-21
 
 ## 세션 목록
 
-| Date | Session codename | WU 진행 | 파일 |
-|:---|:---|:---|:---|
-| 2026-04-19 | (자연어 codename 없음 — 1~2번째 세션) | WU-1 ~ WU-6 시도, BLOCKED WU-6 발생 | 이관 대기 (WU-16) |
-| 2026-04-20 | `funny-compassionate-wright` | WU-7 / WU-7.1 / 이관 (회사→개인 계정) | 이관 대기 (WU-16) |
-| 2026-04-21 | `serene-fervent-wozniak` | WU-14 / WU-14.1 / WU-10 / WU-10.1 + CLAUDE.md 신설 + v2 design | 이관 대기 (WU-16) |
-| 2026-04-21 | `relaxed-vibrant-albattani` | WU-15 진행 중 (본 세션) | `2026-04-21-relaxed-vibrant-albattani.md` (WU-15 완료 시 생성) |
+| Date | Session codename | 세션 차수 | 주요 WU / 산출물 | 파일 |
+|:---|:---|:-:|:---|:---|
+| 2026-04-20 | (회사 계정, codename 미기록) | 1~2 | WU-0 / WU-1 / WU-1.1 / WU-2 / WU-3 / WU-8 / WU-8.1 / WU-11 / WU-11.1 / WU-12 / WU-12.1 + 회사→개인 계정 migration | *미생성 — 추후 WU-16b 에서 재구성* |
+| 2026-04-20 | `funny-compassionate-wright` | 3~4 (compact 전/후 병합) | WU-11.2 / WU-12.2 / WU-12.3 / WU-4 / WU-4.1 / WU-5 / WU-5.1 / WU-9 / WU-9.1 / WU-13 / WU-13.1 | [2026-04-20-funny-compassionate-wright.md](2026-04-20-funny-compassionate-wright.md) |
+| 2026-04-21 | `serene-fervent-wozniak` | 5 (사용자 취침 전 자율 진행) | WU-7 / WU-7.1 / WU-14 / WU-14.1 / WU-10 / WU-10.1 + tmp/workflow-v2-design.md draft-0.3 | [2026-04-21-serene-fervent-wozniak.md](2026-04-21-serene-fervent-wozniak.md) |
+| 2026-04-21 | `relaxed-vibrant-albattani` + `serene-fervent-wozniak` (병렬) | 6 + 7 | WU-15 / WU-15.1 / WU-15.1-fin / hotfix §1 #12 mutex / session release | [2026-04-21-relaxed-vibrant-albattani.md](2026-04-21-relaxed-vibrant-albattani.md) |
+| 2026-04-24 | `brave-hopeful-euler` | 8 (본 WU-16 진행 세션) | WU-16 / WU-16.1 (예정) | *세션 종료 시 생성 예정* |
 
 ---
 
 ## 3-part 구조 (각 세션 파일)
 
-1. **Squashed WU 목록** — 세션 중 완료된 WU 들 (final_sha + title + line 수)
+1. **Squashed WU 목록** — 세션 중 완료된 WU 들 (final_sha + title + codename/TZ)
 2. **대화 요약** — 주요 discussion points + option β/γ 선택 이력 + 토큰/compact 이벤트
 3. **Decision log** — 이번 세션에서 확정된 결정 (W10 TODO 이관 건 포함)
 
-## Backfill 우선순위 (WU-16 대상)
+## 재구성 한계 (WU-16 이관 시 공통 패턴)
 
-- 과거 3 세션 retrospective 를 **메모리 + WORK-LOG.md + cross-ref-audit §4** 기반으로 재구성.
-- 대화 요약은 재구성 불가 항목 존재 (transcript 부재 구간) — `[재구성 한계: <구체적 사유>]` 명시.
+- Transcript 부재 — 대화 원문 복원 불가. WORK-LOG Changelog + 각 WU entry notes + PROGRESS.md snapshot + HANDOFF §0 사용자 지시 교차 재구성.
+- 정확한 세션 시작/종료 시각 불명 (Changelog "새벽/심야" 수준 표기만).
+- 병렬 세션 (6+7번째 relaxed + serene 병합) 는 git log TZ 차이 (`+0000` vs `+0900`) 가 사후 감지 유일 증거.
+- 각 세션 파일 frontmatter `reconstruction_limits` 에 한계 명시.
+
+## WU-16 이관 범위
+
+- ✅ 2026-04-20 funny-compassionate-wright (3-4번째 블록)
+- ✅ 2026-04-21 serene-fervent-wozniak (5번째 블록)
+- ✅ 2026-04-21 relaxed-vibrant-albattani + serene-fervent-wozniak 병렬 (6-7번째 블록)
+- ⏳ 2026-04-20 회사 계정 1-2번째 블록: 범위 밖 (WU-16b 연장 or 별도 WU)
+- ⏳ 2026-04-24 brave-hopeful-euler: 본 세션 종료 시 생성

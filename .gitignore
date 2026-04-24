@@ -54,6 +54,14 @@ out/
 .claude/projects/*/memory/
 .claude/projects/*/*.jsonl
 
+# ─── bkit plugin 자동 생성 메모리 (Solon IP 과 무관) ───
+# bkit Starter hook 이 세션마다 루트에 docs/.bkit-memory.json + docs/.pdca-status.json 생성.
+# 본 repo 는 bkit 프로젝트가 아니므로 (Solon v0.4-r3 docset IP) 전역 pattern 으로 차단.
+.bkit-memory.json
+.pdca-status.json
+docs/.bkit-memory.json
+docs/.pdca-status.json
+
 # ─── Phase 1 이후 런타임 부산물 ───
 .solon-cache/
 .solon-state.json

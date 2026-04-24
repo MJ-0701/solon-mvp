@@ -2,21 +2,21 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-21T14:28:00+09:00
-session: "6번째 세션 `relaxed-vibrant-albattani` + 7번째 세션 `serene-fervent-wozniak` (본 세션) — WU-15 병렬 감지 → hotfix 커밋(422c67e: §1 #12 Session mutex) → owner release → 세션 종료 (사용자 선택 (a))."
-current_wu: null   # hotfix 완료, WU 단위 아님
-current_wu_path: null
-current_wu_owner: null   # 2026-04-21T14:28+09:00 `serene-fervent-wozniak` 자연 종료 release. 다음 세션은 mutex 확인 후 자유롭게 claim 가능.
-# released_history (감사 추적용, optional — 다음 세션이 직전 owner 누구였는지 참고):
-#   last_owner: serene-fervent-wozniak
-#   last_claimed_at: 2026-04-21T14:17:00+09:00
-#   last_released_at: 2026-04-21T14:28:00+09:00
-#   last_reason: "hotfix 완료 + 사용자 선택 (a) release → 세션 종료"
+last_overwrite: 2026-04-24T10:15:00+09:00
+session: "8번째 세션 `brave-hopeful-euler` (2026-04-24) — 사용자 `이어서 ㄱㄱ` → resume_hint default_action (a) WU-16 착수. 8 WU 이관 + 3 세션 retrospective + 2 _INDEX.md 갱신 + WU-16.md 본 파일 완성. commit 직전 스냅샷."
+current_wu: WU-16
+current_wu_path: sprints/WU-16.md
+current_wu_owner:
+  session_codename: brave-hopeful-euler
+  claimed_at: 2026-04-24T09:45:00+09:00
+  last_heartbeat: 2026-04-24T10:15:00+09:00
+  current_step: "step-12 atomic commit (FUSE bypass 적용)"
+  ttl_minutes: 15
 purpose: "context reset 시 다음 세션이 본 파일 1개만 읽고 즉시 이어받을 수 있도록, 매 micro-step 마다 덮어쓰는 live snapshot. 히스토리 아님 (히스토리는 sessions/ + WORK-LOG.md). 4 필드 (방금 끝낸 것 / in-progress / 다음 / 중간 산출물 경로) 만 유지."
 companions:
-  - "NEXT-SESSION-BRIEFING.md (5분 진입 가이드, WU 경계마다 refresh)"
-  - "HANDOFF-next-session.md (frontmatter SSoT, WU 커밋마다 갱신)"
-  - "WORK-LOG.md (WU 단위 히스토리, append-only)"
+  - "NEXT-SESSION-BRIEFING.md (5분 진입 가이드, WU-17 에서 축소 예정)"
+  - "HANDOFF-next-session.md (frontmatter SSoT, WU-17 에서 축소 예정)"
+  - "WORK-LOG.md (WU 단위 히스토리, append-only — WU-16 이관 후에도 보존)"
   - "tmp/ (세션 중간 산출물, git 제외)"
 rules:
   - "본 파일은 append 아님 — 매 micro-step 완료 시 완전히 덮어씀"
@@ -29,103 +29,79 @@ resume_hint:
   trigger_negative: [ㄴㄴ, 잠깐, stop, 아니, 중단, 다른거, 다른, no]
   default_action: |
     1. git 상태 확인: `git status` + `git rev-list --count origin/main..HEAD`
-       (세션 종료 시점 ahead 19, 사용자 푸시 여부 미확정 — 이미 푸시됐으면 origin/main 반영 확인)
-    2. ③ Next 메뉴 제시 (1-line clarifying Q):
-       (a) WU-16 "기존 WU 이관" 착수 (사전 분석 완료, 바로 시작 가능)
-       (b) W10 결정 세션 (#14/#18/#19 pre-analysis 기반 A/B/C 선택)
-       (c) 나머지 W10 사전 분석 (#15/#16/#17 드래프트)
-       (d) BLOCKED WU-6 질문지
-    3. 사용자가 번호/키워드 지정 시 해당 경로로 진입. 자연어 확인 한 마디면 (a) WU-16 default.
+       (WU-16 커밋 이후 ahead +1 예상. WU-16.1 sha backfill 미완 상태면 sprints/WU-16.md frontmatter final_sha: null 확인.)
+    2. ② In-Progress 에 WU-16.1 (forward sha backfill) 이 있으면 그 지점부터 재개.
+       없으면 ③ Next 메뉴 제시.
+    3. 자연어 confirm 한 마디면 WU-16.1 refresh → WU-17 (HANDOFF/BRIEFING 축소) 순차 진행 default.
   on_negative: |
-    "현 상태만 요약 보고 후 대기" — git ahead 개수, 최근 WU 3건, tmp/ 중간 산출물 개수, pending Task 목록만 1-screen 요약.
-  on_ambiguous: "1-line clarifying Q 만 하고 대기 (예: '(a) WU-16 착수? 아니면 다른 옵션?')"
+    "현 상태만 요약 보고 후 대기" — git ahead 개수, WU-16 완료 여부, pending 항목 1-screen 요약.
+  on_ambiguous: "1-line clarifying Q 만 하고 대기 (예: 'WU-16.1 backfill 진행? 아니면 WU-17 바로?')"
   safety_locks:
-    - "원칙 2 (self-validation-forbidden): A/B/C 의미 결정 자동 실행 금지 — default_action 내부에서 만나도 거기서 정지 + 사용자 대기"
+    - "원칙 2 (self-validation-forbidden): A/B/C 의미 결정 자동 실행 금지"
     - "§1.5: git push 자동 실행 금지 — 사용자 터미널에서만"
     - "destructive git 금지: reset --hard, push --force, branch -D, checkout ."
     - "§1.6 FUSE bypass 는 자동 적용 허용 (방어적 패턴)"
     - "PROGRESS.md 덮어쓰기는 자동 허용 (§1.8 유실 최소화)"
-  version: 1  # resume_hint schema version, 추후 변경 시 bump
+    - "§1.12 Session mutex: self != owner AND active (heartbeat < TTL) → STOP + 사용자 확인"
+  version: 1
 ---
 
 # PROGRESS — live snapshot
 
-> 🚨 **이 문서는 덮어쓰기 방식.** 매 micro-step 마다 재작성됨. 히스토리가 필요하면 `WORK-LOG.md` 를 참조. 다음 세션은 본 파일을 제일 먼저 읽고 `In-Progress` + `Next` 로 바로 진입.
+> 🚨 **이 문서는 덮어쓰기 방식.** 매 micro-step 마다 재작성됨. 다음 세션은 본 파일을 제일 먼저 읽고 `② In-Progress` + `③ Next` 로 바로 진입.
 
 ---
 
 ## ① Just-Finished
 
-- **세션 종료 (자연 종결점, mutex release)** — 사용자 선택 (a) 수용 → `current_wu_owner: null` release + session 종료 (2026-04-21 14:28 KST). 다음 세션은 mutex 프로토콜 통과 후 자유롭게 claim 가능.
-- **hotfix 커밋 완료 (`422c67e`, ahead 20)** — WU 단위 아님. WU-15 병렬 재발 방지용 §1 rule + schema 확장.
-  - **CLAUDE.md v1.15 → v1.16**: §1 #12 "Session mutex protocol" 신설 — owner != self AND heartbeat < TTL → STOP + 사용자 확인 / stale → takeover 허가 요청 (자동 takeover 금지) / null or self → claim. PROGRESS 덮어쓰기마다 heartbeat 자동 갱신.
-  - **PROGRESS.md frontmatter**: `current_wu_owner` 필드 신설 (`session_codename` · `claimed_at` · `last_heartbeat` · `current_step` · `ttl_minutes`). TTL 15 min (사용자 지정).
-  - **배경**: `aa0a354` + `acfae03` 는 TZ `+0000` (다른 샌드박스 user `nobody`) = `relaxed-vibrant-albattani`. 나머지 모든 커밋은 TZ `+0900` = `serene-fervent-wozniak`. sessions/_INDEX.md 도 이미 self-declaration 되어 있어 사후 추적 가능 — **git log TZ 차이가 2-세션 병렬 감지의 가장 빠른 지표** (learning-log 대상).
-- **WU-15.1-fin 커밋 (`39d0d90`, ahead 19)** — `sprints/_INDEX.md` forward-backfill (WU-15.1 을 active → done 으로 이동 + 자기 sha `acfae03` 기록) + 본 PROGRESS.md 세션 종료 상태 반영. _INDEX.md 가 WU-15.1 본체 커밋 시점에 아직 없던 sha 를 기록하기 때문에 별도 housekeeping 커밋 분리.
-- **WU-15.1 커밋 완료** (`acfae03`, ahead 18) — WU-15 forward sha backfill + README §11.1 workflow glossary 추가 + `sprints/WU-15.md` frontmatter 확정 (`status: done` · `final_sha: aa0a354` · `refresh_wu: WU-15.1`).
-- **WU-15 커밋 완료** (`aa0a354`, ahead 17) — Workflow v2 인프라 설정 **단일 atomic commit** (12 파일, +853/-20 line): `sprints/` + `sessions/` + `learning-logs/` + `tmp/snapshots/` 디렉토리 + 각 `_INDEX.md` · `learning-logs/_TEMPLATE.md` · `.visibility-rules.yaml` · `scripts/snapshot.sh` + `scripts/squash-wu.sh` · **`CLAUDE.md` v1.15 (SSoT 첫 커밋, §1 11항목 · §2.1 용어집 · §14 Status Report v0.6.3 topic-1line)** · `sprints/WU-15.md` · `PROGRESS.md` frontmatter (current_wu / **resume_hint** 필드 신설) · `.gitignore` 갱신 · `NEXT-SESSION-BRIEFING.md` 2-line 흡수.
-- **resume_hint 실전 검증 성공** — 본 세션 첫 발화 `ㄱㄱ` → trigger_positive 매칭 → default_action 자동 실행 → §14.3 수용 Q 에서 safety_lock 정지 → 사용자 `ㅇㅇ 수용` → WU-15 착수까지 전 과정 기대 동작. schema v1 수정 사항 없음.
+- **WU-16 본체 작업 완료** — 12 micro-step 중 step 1~11 완료. step 12 (atomic commit) 만 남음.
+  - **step 1**: mutex claim (self = `brave-hopeful-euler`) + `.gitignore` 루트 bkit plugin 메모리 차단 + WU-16.md stub 생성 ✅
+  - **step 2~5**: `sprints/WU-7.md` / `WU-7.1.md` / `WU-10.md` / `WU-10.1.md` / `WU-13.md` / `WU-13.1.md` / `WU-14.md` / `WU-14.1.md` **8 파일 생성** (WORK-LOG L424-L623 이관, 원본 유지 + frontmatter 추가) ✅
+  - **step 6~8**: `sessions/2026-04-20-funny-compassionate-wright.md` (3-4번째 블록) / `2026-04-21-serene-fervent-wozniak.md` (5번째) / `2026-04-21-relaxed-vibrant-albattani.md` (6+7번째 병렬) **3 파일 생성** ✅
+  - **step 9**: `sprints/_INDEX.md` 갱신 (v2 네이티브 2행 + v1→v2 이관 8행 + v1 형식 보존 20행 + BLOCKED/Phase 2) ✅
+  - **step 10**: `sessions/_INDEX.md` 갱신 (1-2번째 placeholder + 3-4 + 5 + 6-7 병렬 + 본 8번째) ✅
+  - **step 11**: WU-16.md 본문 완성 (§2 micro-step log ✅ · §3 Acceptance 7/8 ✅ · §5 Decision log 6건) + PROGRESS.md 덮어쓰기 ✅
 
 ## ② In-Progress
 
-_(없음 — hotfix 커밋 완료 + mutex release + 세션 종료. local 커밋 모두 clean.)_
+- **step 12**: atomic commit `WU-16: 기존 WU 이관` — FUSE bypass 적용 (stale `.git/index.lock` 대비)
+  - 12 개 신규 파일 + 3 개 수정 파일 total 15 files 스테이징 예정
+  - 커밋 후 PROGRESS.md `① Just-Finished` 에 sha 는 별도 WU-16.1 refresh 에서 backfill (chicken-and-egg)
 
-## ③ Next (다음 세션 진입)
+## ③ Next (WU-16 커밋 완료 후)
 
-> 다음 세션 첫 발화가 자연어 confirm 한 마디 (`ㄱㄱ`/`ok`/`ㅇㅇ` 등) 면 frontmatter `resume_hint.default_action` 이 자동 실행됨. 우선 (a) WU-16 착수 default, 사용자가 다른 옵션 선택 시 그쪽으로 분기.
-
-1. **(default) WU-16 "기존 WU 이관"** — 사전 준비 완료 상태:
-   - `WORK-LOG.md` 의 WU-7 ~ WU-14.1 entry → `sprints/WU-<id>.md` 독립 파일 분리 (WORK-LOG 는 index 재활용)
-   - `sessions/` 에 과거 세션 retrospective 생성 (3-part: context / decisions / followups)
-   - 각 WU 에 `visibility` tier 라벨링 (대부분 `raw-internal` 예상)
-   - `sprints/_INDEX.md` 의 "Backfill 대상" 섹션 → "v2 네이티브" 로 행 이동
-2. **WU-17 "HANDOFF / BRIEFING 축소"** — WU-16 후: 두 파일을 `sprints/_INDEX.md` + `sessions/_INDEX.md` 참조로 축약 (-80% 목표).
-3. **WU-18 "v2 운영 1주 검증"** — Phase 1 킥오프 D-6 이전: 진입 시간 · compact 복구 · learning-logs/ 첫 패턴 3건 실체화 · 임계값 조정.
+1. **WU-16.1 (forward sha backfill)** — 본 커밋 sha 를 `sprints/WU-16.md` frontmatter `final_sha` 실체화 + `sprints/_INDEX.md` v1→v2 이관 테이블에 sha 기록 + PROGRESS.md 덮어쓰기 + 본 `sessions/2026-04-24-brave-hopeful-euler.md` 생성. 별도 커밋.
+2. **WU-17 "HANDOFF / BRIEFING 축소"** — HANDOFF-next-session.md + NEXT-SESSION-BRIEFING.md 를 `sprints/_INDEX.md` + `sessions/_INDEX.md` 참조 구조로 축약 (-80% 목표).
+3. **WU-18 "v2 운영 1주 검증"** — Phase 1 킥오프 D-3 (2026-04-27) 이전: 진입 시간 · compact 복구 · learning-logs/ 첫 패턴 3건 실체화 · 임계값 조정.
 4. **병행 옵션**: (b) W10 결정 세션 (#14/#18/#19) · (c) 나머지 W10 사전 분석 (#15/#16/#17) · (d) BLOCKED WU-6 질문지.
 
-**⚠️ push 확인**: 본 세션 종료 시점 `ahead 19`. 사용자 터미널에서 `git push origin main` 수행 필요 (§1.5, AI 가 수행 금지). 다음 세션 진입 시 `git rev-list --count origin/main..HEAD` 로 반영 여부 확인.
+**⚠️ Phase 1 킥오프 일정 재확인**: 본 세션 시점 2026-04-24 (금) → D-3. WU-16/16.1 → WU-17 → WU-18 을 3일 내 완주 여부 또는 WU-16/16.1 만 먼저 완주 후 Phase 1 착수 여부 사용자 결정 영역.
 
-## ④ Artifacts (현재 시점 커밋 상태)
+## ④ Artifacts (WU-16 커밋 직전 스냅샷)
 
 | 산출물 | 경로 | 상태 |
 |--------|------|:-:|
-| **CLAUDE.md v1.15 (v2 SSoT)** | `CLAUDE.md` (루트) | ✅ 커밋됨 (`aa0a354`) |
-| **PROGRESS.md + resume_hint** | `PROGRESS.md` (루트) | ✅ 커밋됨 (`aa0a354`) — 본 커밋에서 세션 종료 반영 추가 |
-| **sprints/_INDEX.md (WU-15.1 finalization)** | `sprints/_INDEX.md` | ✅ 본 커밋 (housekeeping) |
-| Workflow v2 infrastructure | `sprints/` + `sessions/` + `learning-logs/` + `tmp/snapshots/` + `.visibility-rules.yaml` + `scripts/*.sh` | ✅ 커밋됨 (`aa0a354`) |
-| WU-15.1 (README §11.1 glossary) | `README.md` §11.1 + `sprints/WU-15.md` | ✅ 커밋됨 (`acfae03`) |
-| WU-10 cleanup (Option β) | `branches/*.yaml` parent notes + labels + cross-ref-audit §4 | ✅ 커밋됨 (`3c8cac0`) |
-| WU-14 / WU-14.1 infrastructure | `.gitignore` + `tmp/.gitkeep` + `PROGRESS.md` | ✅ 커밋됨 (`42e3719` / `853373f`) |
-| WU-7 / WU-7.1 plugin schema | `appendix/samples/plugin.json.sample` | ✅ 커밋됨 (`ec263c5` / `af306e0`) |
-| W10 TODO #14/#18/#19 사전 분석 | `tmp/w10-todo-{14,18,19}.md` | ✅ 생성 완료 (git 제외) |
-| Workflow v2 design draft-0.3 | `tmp/workflow-v2-design.md` | ✅ 9축 + dual-track + snapshot spec (git 제외, WU-15 으로 구현 흡수) |
-| W10 TODO #15/#16/#17 사전 분석 | — | ⏳ 미착수 (병행 옵션 c) |
+| **sprints/WU-16.md (본체)** | `sprints/WU-16.md` | ✅ 작성 완료 (status: done, final_sha null) |
+| sprints/WU-{7,7.1,10,10.1,13,13.1,14,14.1}.md | `sprints/` 8 파일 | ✅ 생성 완료 |
+| sessions/2026-04-{20,21,21}-*.md | `sessions/` 3 파일 | ✅ 생성 완료 |
+| sprints/_INDEX.md | — | ✅ 갱신 완료 |
+| sessions/_INDEX.md | — | ✅ 갱신 완료 |
+| PROGRESS.md (본 파일) | — | ✅ 본 덮어쓰기 |
+| `.gitignore` (루트, bkit 차단) | 루트 | ✅ Edit 완료 |
+| **WU-16 atomic commit** | (미확정 sha) | 🔄 step-12 실행 대기 |
+| WU-16.1 refresh | — | ⏳ WU-16 커밋 후 |
 
-## 6번째 세션 최종 성과
+## 운영 규칙 (계속 유효)
 
-| 지표 | 값 |
-|------|-----|
-| WU 완료 | 2건 (WU-15 / WU-15.1) + housekeeping 1건 |
-| git ahead | **19 커밋** (origin/main 대비) — push 는 사용자 터미널 필요 |
-| resume_hint 실전 검증 | ✅ 성공 (`ㄱㄱ` 트리거 + safety_lock 정지 + on_decision branching 모두 기대 동작) |
-| CLAUDE.md 진화 | v1.0 → v1.15 (§14 dashboard v0.6.3 topic-1line 확정 + §1 #11 Session resume protocol 신설) |
-| Workflow v2 인프라 | 디렉토리 + scripts + visibility-rules + SSoT + learning-logs template 완성 |
-| 원칙 2 준수 | A/B/C 의미 결정 0건 (§14.3 수용은 "포맷 수용" 으로 의미 결정 아님) |
-| 중간 산출물 수 | tmp/ 12 파일 (세션 유지) |
-
-## 운영 규칙 (본 세션 시작부터 적용 — 계속 유효)
-
-1. 매 Task (micro-step) 완료 시 본 PROGRESS.md 덮어쓰기.
-2. WU 커밋 직후에도 본 PROGRESS.md 의 `① Just-Finished` 에 sha 반영.
-3. 중간 산출물은 반드시 `tmp/` 에 먼저 저장 → 최종 확정 시에만 `appendix/` 로 이동.
-4. Token 한계 근접 신호 (주관적): 응답 생성 속도 저하 or 컨텍스트 피로감 → 즉시 현 micro-step 만 마무리 + PROGRESS.md 갱신 + Task 업데이트 후 종료. 부분 결과 `tmp/` 저장 필수.
-5. critical decision (Option A/B/C 중 의미 선택) 발견 시 ⚠️ 마커 + 사용자 결정 대기 표시 + WU 진행 중단 → `cross-ref-audit.md §4` TODO 이관.
-6. 사전 분석 드래프트는 `tmp/w10-todo-<n>.md` 네이밍 → 결정하지 않고 사실관계 + 대안 + 교차 지점만 정리.
+1. 매 Task 완료 시 본 PROGRESS.md 덮어쓰기 → `last_heartbeat` 자동 갱신.
+2. WU 커밋 직후에도 본 PROGRESS.md 의 `① Just-Finished` 에 sha 반영 (WU-16.1 에서).
+3. 중간 산출물은 반드시 `tmp/` 에 먼저 저장 (본 WU 에서는 tmp/ 사용 없음 — 이관 작업은 최종 파일 직접 작성).
+4. critical decision 발견 시 ⚠️ 마커 + 사용자 결정 대기.
 
 ---
 
 **다음 세션 진입 체크리스트 (본 파일 기준)**:
 
-1. 본 PROGRESS.md frontmatter `resume_hint` 읽고 첫 발화 매칭 여부 판단.
-2. ③ Next (a) WU-16 default, 사용자 다른 지시 시 해당 경로.
-3. git push 반영 여부 확인 (`git rev-list --count origin/main..HEAD`).
+1. `PROGRESS.md` frontmatter `current_wu_owner` 확인 (§1.12 mutex protocol).
+2. `② In-Progress` step-12 (commit) 완료 여부 확인 → 미완료면 재개, 완료면 WU-16.1 refresh 로 진입.
+3. `git status` + `git rev-list --count origin/main..HEAD` 로 ahead 현황 확인.
