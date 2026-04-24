@@ -2,18 +2,22 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-24T20:45:00+09:00
-session: "11번째 세션 `dreamy-busy-tesla` 종료 (mutex release). WU-20 Phase A 보강 (v0.2.0-mvp) + Phase A Back-port (stable v0.2.4-mvp → dev staging reverse reconcile, 14 파일 checksum match) + P-02 dev-stable-divergence 실체화 + 사용자 지시 17 (dev=개발 / stable=배포) 수신. 사용자 push 완료 선언. 인수인계 4종 (PROGRESS / HANDOFF §0 #17 / NEXT-SESSION-BRIEFING v0.7 / sessions/dreamy-busy-tesla retrospective) 완료."
+last_overwrite: 2026-04-24T22:12:00+09:00
+session: "12번째 세션 `laughing-keen-shannon` 진입 (mutex claim). 사용자 지시 (a) R-D1 규율 정식 채택 진행. CLAUDE.md §1 에 13번째 규칙 추가 + learning-logs P-02 status: resolved 전환."
 current_wu: WU-20
 current_wu_path: sprints/WU-20.md
-current_wu_owner: null   # dreamy-busy-tesla release
+current_wu_owner:
+  session_codename: laughing-keen-shannon
+  claimed_at: 2026-04-24T22:12:00+09:00
+  last_heartbeat: 2026-04-24T22:12:00+09:00
+  current_step: "R-D1 정식 채택 + P-02 resolved"
   ttl_minutes: 15
 released_history:
   last_owner: dreamy-busy-tesla
   last_claimed_at: 2026-04-24T19:05:00+09:00
   last_released_at: 2026-04-24T20:45:00+09:00
   last_reason: "11번째 세션 종료. WU-20 Phase A 보강 (v0.2.0-mvp) 후 stable divergence 발견 → Phase A Back-port (stable v0.2.4-mvp → dev staging 14 파일 reverse reconcile) 완료. P-02 dev-stable-divergence learning 실체화. 사용자 지시 17 (dev=개발/stable=배포) 수신. 사용자 push 완료 선언 → 인수인계 4종 작성 → mutex release."
-  last_final_commits: [df0887a, 40dcc2e, "TBD: back-port commit"]
+  last_final_commits: [df0887a, 40dcc2e, 043e791, 3ca7f56, fcb63b1]
   prior_owner: amazing-happy-hawking
   prior_claimed_at: 2026-04-24T22:10:00+09:00
   prior_released_at: 2026-04-24T18:41:00+09:00
@@ -43,19 +47,19 @@ resume_hint:
        session_codename / claimed_at / last_heartbeat / current_step / ttl_minutes=15.
     2. git 상태 확인: `git status` + `git rev-list --count origin/main..HEAD`.
        (11번째 세션 종료 시 사용자 push 완료 선언. 추가 housekeeping 커밋 반영 시 ahead 1 가능.)
-    3. ③ Next 메뉴 (사용자 확인 없으면 자율 진행 금지):
-       (a) **R-D1 규율 정식 채택** (default): Solon docset `CLAUDE.md §1` 에 "배포 artifact
-           수정은 dev 먼저. stable hotfix 는 즉시 back-port" 규칙 추가. learning-logs
-           `P-02` status: resolved 스탬핑.
-       (b) **WU-20 close + WU-20.1 refresh**: back-port 커밋 sha 확정 후 WU-20
-           `status: done` 전환 + WU-20.1 refresh (HANDOFF frontmatter unpushed_commits 갱신).
+    3. ③ Next 메뉴 (사용자 확인 없으면 자율 진행 금지) — **(a) 12번째 세션에서 완료됨**:
+       (a) ~~**R-D1 규율 정식 채택**~~ — **COMPLETED 2026-04-24 laughing-keen-shannon.
+           CLAUDE.md v1.17 §1.13, P-02 resolved. 사용자 터미널 commit 대기.**
+       (b) **WU-20 close + WU-20.1 refresh** (**new default**): back-port 커밋 sha
+           `3ca7f56` 확정. WU-20 `status: done` 전환 + WU-20.1 refresh
+           (final_sha backfill + HANDOFF frontmatter unpushed_commits 갱신).
        (c) **Phase 1 킥오프 준비** — D-3 (2026-04-27 월). stable v0.2.4-mvp 로 즉시
            사용 가능. 사용자가 신규 사이드프로젝트에 install.sh 실행 지원.
        (d) **sync/cut-release 자동화** — R-D1 스크립트화. `scripts/sync-stable-to-dev.sh`
            + `scripts/cut-release.sh`. `0.4.0-mvp` 예약.
        (e) **W10 결정 세션** — cross-ref-audit §4 #14/#18/#19.
        (f) **WU-16b 확장 이관** (WU-0 ~ WU-5.1 / 8/8.1 / 11/12 시리즈).
-    4. 사용자 번호/키워드 지정 시 해당 경로. 자연어 confirm 한 마디면 (a) default.
+    4. 사용자 번호/키워드 지정 시 해당 경로. 자연어 confirm 한 마디면 (b) default.
   on_negative: |
     "현 상태만 요약 보고 후 대기" — git ahead, 최근 WU 2 phase (WU-20 Phase A 보강 + Back-port),
     pending 항목 (R-D1 정식 채택 / WU-20 close / Phase 1 D-day 카운트 2026-04-27 기준 재계산),
@@ -71,193 +75,136 @@ resume_hint:
   version: 1
 ---
 
-# PROGRESS — live snapshot (11번째 세션 dreamy-busy-tesla 종료, mutex released)
+# PROGRESS — live snapshot (12번째 세션 laughing-keen-shannon 진행 중, mutex claimed)
 
-> 🚨 **본 파일 최우선 진입.** mutex **released** by `dreamy-busy-tesla` (2026-04-24T20:45+09:00).
-> 다음 세션은 frontmatter `resume_hint.default_action` 에 따라 self claim 후 진입.
-> WU-20 Phase A 보강 + Back-port 전부 완료. 사용자 push 완료 선언.
-
----
-
-## ⓪ 현 세션 (dreamy-busy-tesla, WU-20 Phase A 보강 v0.2.0-mvp)
-
-**사용자 Codex CLI 수동 정정 (40dcc2e, RUNTIME-ABSTRACTION.md v0.2-mvp-correction)** →
-**사용자 "A ㄱㄱ"** → Phase A 를 `v0.1.0-mvp` (CLAUDE 단일) 에서 `v0.2.0-mvp` (SFS core
-+ 3 adapter + `/sfs` slash command) 로 보강.
-
-### 신규 파일 (보강)
-
-- `solon-mvp-dist/templates/SFS.md.template` — runtime-agnostic core (7-step / 4 Gate / 산출물 / divisions / observability / `/sfs` prefix 정의 단일 출처)
-- `solon-mvp-dist/templates/AGENTS.md.template` — OpenAI Codex adapter (thin, repo instructions / natural-language alias)
-- `solon-mvp-dist/templates/GEMINI.md.template` — Gemini-CLI adapter (thin, project instruction / long context 힌트)
-- `solon-mvp-dist/templates/.claude-template/commands/sfs.md` — Claude `/sfs` slash command (subcommand 6종: status/brainstorm/plan/review/retro/decision)
-
-### 재작성
-
-- `solon-mvp-dist/templates/CLAUDE.md.template` — thin adapter (SFS.md 위임 + Claude-specific: Task tool / MCP / 모델 tier)
-
-### 확장 (스크립트)
-
-- `solon-mvp-dist/install.sh` — `substitute_placeholders` helper + SFS/CLAUDE/AGENTS/GEMINI/`.claude/commands/sfs.md` 복사 + 배너/완료 메시지에 3 runtime 진입 예시 추가
-- `solon-mvp-dist/upgrade.sh` — diff 대상 6종으로 확장
-- `solon-mvp-dist/uninstall.sh` — adapter 4종 + slash command 대화형 삭제 + `.claude/` 빈 디렉토리 자동 정리
-
-### 메타
-
-- `solon-mvp-dist/VERSION` — 0.1.0-mvp → **0.2.0-mvp**
-- `solon-mvp-dist/CHANGELOG.md` — [0.2.0-mvp] entry (Added + Changed + Scope 3 섹션) + Unreleased 재정렬
-- `solon-mvp-dist/README.md` — 7 파일 테이블 (Layer 컬럼 포함) + 설치 후 3단계에 3 runtime 진입 예시 / 방법 3 수동 cp 도 4 adapter 반영
-- `solon-mvp-dist/APPLY-INSTRUCTIONS.md` — §5 검증 기대 결과 v0.2.0-mvp 로 갱신
-- `sprints/WU-20.md` — sub_steps 에 보강 12 step 추가 + "Phase A 보강 (v0.2.0-mvp)" 섹션 + v0.2 Changelog
-- `PROGRESS.md` (본 파일) — mutex re-claim by dreamy-busy-tesla + 덮어쓰기
-
-### 규율 준수
-
-- 원칙 2 (self-validation-forbidden): 사용자 "A ㄱㄱ" 명시 승인 범위 내 작업. Adapter 분리 판단은 RUNTIME-ABSTRACTION.md v0.2-mvp-correction (사용자 확정 문서) 기반.
-- never-hard-block: install/upgrade/uninstall 전부 대화형 + skip default.
-- §1.5 git push: Cowork 샌드박스 실 push 불가 — 커밋 메시지는 사용자 터미널에서.
-- IP 경계: Solon docset 내부 경로 하드코딩 0건. 세 adapter 모두 `<DATE>` / `<SOLON-VERSION>` / `<PROJECT-NAME>` / `<STACK>` / `<DB>` / `<DEPLOY>` / `<DOMAIN>` placeholder 만 사용.
-- thin adapter 원칙: SFS.md 플로우 본문 중복 복사 0건 — 각 adapter 에 "본 파일에 SFS.md 플로우 본문을 중복 복사 금지" 명시.
+> 🚨 **본 파일 최우선 진입.** mutex **claimed** by `laughing-keen-shannon` (2026-04-24T22:12+09:00).
+> 진행 중: **(a) R-D1 규율 정식 채택** — CLAUDE.md §1.13 추가 + P-02 resolved.
+> 이전 세션 (11번째 dreamy-busy-tesla) WU-20 Phase A + Back-port 2 커밋 이미 push 완료 (3ca7f56, 043e791, fcb63b1).
 
 ---
 
-## ① Just-Finished (직전 9번째 세션 ecstatic-intelligent-brahmagupta 성과 — 보존)
+## ① Just-Finished
 
-**9 커밋 완주** (3 WU 본체 + 3 refresh + 3 housekeeping, 사용자 push 2회 완료, 본 세션 ahead 0):
+### 12번째 세션 (laughing-keen-shannon, 2026-04-24 진입)
 
-### WU-17 HANDOFF/BRIEFING 축소 -77.6% (1139→255 lines)
+**(a) R-D1 규율 정식 채택** — 사용자 지시 메뉴 (a, default) 실행.
 
-- `083cfe1` 본체 (5 files, +402/-1176): HANDOFF v2.9→v3.0-reduced 786→151 + BRIEFING v0.5→v0.6-reduced 353→104.
-- `d5681fa` WU-17.1 sha backfill (3 files).
-- `b8f7f74` housekeeping forward backfill (2 files).
+- `CLAUDE.md` **v1.16 → v1.17** — §1 에 13번째 규칙 `R-D1 (dev-first, stable sync-back)` 추가.
+  - 본문: 배포 artifact 수정은 dev staging 에서 먼저. stable hotfix 는 같은 세션 back-port 필수 (sync(stable): <sha> 표기 + VERSION skip 금지).
+  - 근거 링크: `learning-logs/2026-05/P-02-dev-stable-divergence.md`.
+  - 자동화는 후속 `scripts/sync-stable-to-dev.sh` / `cut-release.sh` (0.4.0-mvp 예약).
+- `learning-logs/2026-05/P-02-dev-stable-divergence.md` — **status: observed → resolved**.
+  - `resolved_at: 2026-04-24` + `resolved_by: laughing-keen-shannon` + `resolved_via: CLAUDE.md v1.17 §1.13 R-D1 규칙 정식 채택`.
+  - 후속 TODO 1건 체크 (CLAUDE.md §1 추가). 나머지 3건 open: stable CLAUDE.md 동기화 / WU-20.1 refresh / 스크립트 0.4.0-mvp 예약.
+  - Changelog v0.2 entry 추가.
+- `PROGRESS.md` (본 파일) — mutex claim + 덮어쓰기.
 
-### WU-18 Phase 1 MVP W0 pre-arming
+**규율 준수**: 원칙 2 — 사용자 지시 (a) 범위 내에서 문안 작성만. 의미 결정 0건 (R-D1 문안은 P-02 v0.1 초안을 그대로 정식화).
 
-- `d200299` 본체 (17 files, +857/-27): `phase1-mvp-templates/` 10 파일 + `plugin-wip-skeleton/` 3 파일 + `PHASE1-MVP-QUICK-START.md` 신설. 모든 placeholder 사용자 결정 위임 (원칙 2).
-- `12b9a72` WU-18.1 sha backfill (3 files).
-- `4909d7a` housekeeping forward backfill (2 files).
+---
 
-### WU-19 (재정의) Phase 1 MVP W0 executable scripts
+### 11번째 세션 (dreamy-busy-tesla, 2026-04-24 종료) — 보존
 
-- `74135cf` 본체 (7 files, +451/-93): `setup-w0.sh` (executable, 9 단계 자동화) + `verify-w0.sh` (executable, 7 체크 자동화) + QUICK-START §2/§6 간소화 (100줄 bash → 스크립트 호출 1 줄).
-- `9271f2a` WU-19.1 sha backfill (3 files).
-- `ed1099f` housekeeping forward backfill (2 files).
+**WU-20 Phase A 보강 + Back-port, 3 커밋 push 완료.**
 
-### 세션 성과 요약
+- `df0887a` Solon MVP distribution staging (Phase A v0.1.0-mvp, 4-file adapter 초안).
+- `40dcc2e` RUNTIME-ABSTRACTION.md v0.2-mvp-correction (사용자 Codex CLI 수동 정정).
+- `043e791` Phase A reinforcement to v0.2.0-mvp (SFS core + 3 adapter + `/sfs` slash).
+- `3ca7f56` **sync(WU-20) back-port stable v0.2.4-mvp → dev staging** (14 파일 reverse reconcile, checksum 완전 일치).
+- `fcb63b1` session retrospective + mutex release.
+- P-02 learning log 실체화 (상기 resolved 전환의 선행 작업).
 
-- 규율 변경: §1.5 git push 임시 해제 (환경 제약으로 실 push 는 사용자 터미널 유지).
-- IP 경계 엄격: 모든 templates / scripts 에 Solon 경로 하드코딩 0건. verify-w0.sh 자동 검증.
-- 원칙 2 준수: 3 WU 전부 A/B/C 의미 결정 0건. 스크립트 로직 = 이전 bash 블록 기계적 이식.
-- **새 learning pattern 후보 5건** (WU-20 에서 실체화 검토): P-doc-reduction-via-reference-pointers / P-pre-arm-external-repo-templates / P-placeholder-driven-template-packaging / P-runbook-to-executable-script / P-wu-redefinition-when-blocked.
-- 9번째 세션 retrospective 작성 완료 (`sessions/2026-04-24-ecstatic-intelligent-brahmagupta.md`) + sessions/_INDEX.md 9번째 행 추가.
+### 10-9번째 세션 (ecstatic-intelligent-brahmagupta, 2026-04-24 종료) — 히스토리
+
+- WU-17 HANDOFF/BRIEFING 축소 -77.6%, WU-18 Phase 1 MVP W0 pre-arming, WU-19 executable scripts. 9 커밋. 상세는 `sessions/2026-04-24-ecstatic-intelligent-brahmagupta.md`.
+
+---
 
 ## ② In-Progress
 
-**Back-port 완료 → 사용자 터미널 정리 + commit + push 대기**.
+**R-D1 채택 3 파일 edit 완료** (CLAUDE.md / P-02 / PROGRESS.md). 사용자 터미널 commit 대기.
 
-- staging (`solon-mvp-dist/`) 14 파일 stable HEAD 와 checksum 완전 일치 (v0.2.4-mvp).
-- `bash -n` install/upgrade/uninstall.sh 전부 OK.
-- **잔여 레거시**: `solon-mvp-dist/templates/.claude-template/commands/sfs.md` — bash FUSE lock 으로 내가 제거 불가. 사용자 터미널에서 `git rm -rf` 필요.
-- P-02 learning log 실체화 완료 (`learning-logs/2026-05/P-02-dev-stable-divergence.md`).
-- WU-20.md 에 "Phase A Back-port" 섹션 + v0.3 Changelog 추가.
-- APPLY-INSTRUCTIONS.md 는 historical 로 retrograde (이미 stable apply 완료).
+- `git status 2026-04-19-sfs-v0.4/` 예상 변경:
+  - `modified: CLAUDE.md` (v1.16 → v1.17, §1.13 추가)
+  - `modified: learning-logs/2026-05/P-02-dev-stable-divergence.md` (resolved 전환 + Changelog v0.2)
+  - `modified: PROGRESS.md` (본 덮어쓰기)
+- 규율 변경 WU 는 단일 커밋으로 squash 가능 (원칙 2 유지, A/B/C 결정 0건).
+- Cowork 샌드박스 push 불가 — 실 push 는 사용자 Mac 터미널.
 
-## ③ Next — 사용자 터미널 정리 (Back-port commit)
-
-**사용자 Mac 터미널에서 다음 실행**:
+### 제안 커밋 명령 (사용자 터미널)
 
 ```bash
 cd ~/agent_architect
-
-# 1) .claude-template/ 레거시 디렉토리 제거 (FUSE 로 agent 가 못 지움)
-git rm -rf 2026-04-19-sfs-v0.4/solon-mvp-dist/templates/.claude-template/ 2>/dev/null || rm -rf 2026-04-19-sfs-v0.4/solon-mvp-dist/templates/.claude-template/
-
-# 2) 변경 내역 확인
 git status 2026-04-19-sfs-v0.4/
-# 예상 변경:
-#   modified:  PROGRESS.md / sprints/WU-20.md
-#   modified:  solon-mvp-dist/{VERSION, CHANGELOG.md, README.md, install.sh, upgrade.sh, uninstall.sh, APPLY-INSTRUCTIONS.md}
-#   modified:  solon-mvp-dist/templates/{SFS,CLAUDE,AGENTS,GEMINI}.md.template
-#   new file:  solon-mvp-dist/templates/.claude/commands/sfs.md
-#   new file:  learning-logs/2026-05/P-02-dev-stable-divergence.md
-#   deleted:   solon-mvp-dist/templates/.claude-template/commands/sfs.md
+git add 2026-04-19-sfs-v0.4/CLAUDE.md \
+        2026-04-19-sfs-v0.4/learning-logs/2026-05/P-02-dev-stable-divergence.md \
+        2026-04-19-sfs-v0.4/PROGRESS.md
+git commit -m "rule(R-D1): adopt dev-first + stable sync-back as CLAUDE.md §1.13
 
-# 3) commit + push
-git add 2026-04-19-sfs-v0.4/
-git commit -m "sync(WU-20): back-port solon-mvp stable (v0.2.4-mvp) → dev staging
+CLAUDE.md v1.16 → v1.17.
+§1 에 13번째 절대 규칙 R-D1 (dev-first, stable sync-back) 정식 추가.
 
-dev (Solon docset staging) vs stable (solon-mvp repo) divergence 해소.
-사용자 Codex CLI 에서 stable 에 0.1.1~0.2.4-mvp 6 커밋 선행 merge 확인 →
-full reverse reconcile (stable HEAD ac98497 기준).
+배포 artifact 수정은 dev staging 에서 먼저. stable hotfix 는 같은 세션 안에
+staging 으로 동일 문안 back-port (sync(stable): <sha> 표기 + VERSION skip 금지).
+자동화 (sync-stable-to-dev.sh / cut-release.sh) 는 0.4.0-mvp 로 예약.
 
-14 파일 stable→staging 동기화 (checksum 완전 일치):
-- VERSION 0.2.0-mvp → 0.2.4-mvp
-- CHANGELOG.md (6 entry: 0.1.0/0.1.1/0.2.0/0.2.1/0.2.2/0.2.3/0.2.4)
-- README.md (런타임별 사용법 + /sfs 사용법 섹션)
-- install.sh (--yes flag + stderr prompt + .claude/ 경로)
-- upgrade.sh (checksum 자동 정책 + placeholder 치환)
-- uninstall.sh (5 파일 loop)
-- templates/SFS.md.template (간결 축소)
-- templates/{CLAUDE,AGENTS,GEMINI}.md.template (영문 thin adapter ~22줄)
-- templates/.claude/commands/sfs.md (name: frontmatter + description 다중줄)
-
-레거시 정리:
-- templates/.claude-template/ 제거 (.claude/ 로 경로 통일)
-
-Lessons:
-- learning-logs/2026-05/P-02-dev-stable-divergence.md 실체화
-- R-D1 규율 제안: 배포 artifact 수정은 dev 먼저, stable hotfix 는 즉시 back-port
+learning-logs/2026-05/P-02-dev-stable-divergence.md:
+  status: observed → resolved
+  resolved_by: laughing-keen-shannon (12번째 세션)
+  resolved_via: CLAUDE.md v1.17 §1.13 R-D1 채택
+  Changelog v0.2 entry 추가.
 
 Refs:
-- stable commits: 786900a, e827775, e9cf47a, 8134a2c, 41e15ed, a48b7fd, ac98497
-- sprints/WU-20.md v0.3 Changelog"
-
+- WU-20 Phase A Back-port (3ca7f56) 가 P-02 관찰 계기.
+- P-02 후속 TODO: stable ~/workspace/solon-mvp/CLAUDE.md 동기화 는 다음 back-port 시 (R-D1 에 따라 dev-first)."
 git push origin main
 ```
 
 ---
 
-## ④ 다음 세션 메뉴 (commit 완료 후)
+## ③ Next — (a) 완료 후 재정렬 메뉴
 
-- **(a, default)** **R-D1 규율 정식 채택** — Solon docset `CLAUDE.md §1` 에
-  "배포 artifact 수정은 dev 먼저. stable hotfix 는 즉시 back-port" 규칙 추가
-  (원칙 2 preserve — 사용자 승인 후). learning-logs P-02 `status: resolved`.
-- **(b) WU-20 close + WU-20.1 refresh** — 본 back-port 커밋 sha 확정되면
-  WU-20 `status: done` 전환 + WU-20.1 refresh (sha backfill + HANDOFF frontmatter
-  unpushed_commits 갱신).
-- **(c) Phase 1 킥오프 준비** — D-3 (2026-04-27 월). stable v0.2.4-mvp 기준으로
-  신규 사이드프로젝트에 `install.sh` 실행 → Day 1.
-- **(d) sync/cut-release 스크립트 착수** — R-D1 자동화. `0.4.0-mvp` 예약.
-- **(e) W10 결정 세션** — cross-ref-audit §4 #14/#18/#19.
+- **(b, default)** **WU-20 close + WU-20.1 refresh** — back-port 커밋 `3ca7f56`
+  확정 sha. WU-20 `status: done` 전환 + WU-20.1 refresh (final_sha backfill
+  + HANDOFF frontmatter unpushed_commits 갱신). P-02 링크 포함.
+- **(c) Phase 1 킥오프 준비** — 2026-04-27 (월) D-day → 본 세션 D-3.
+  stable `solon-mvp` v0.2.4-mvp 로 즉시 사용 가능 — 월요일 신규 사이드
+  프로젝트에 `install.sh` 실행 → Day 1.
+- **(d) sync/cut-release 스크립트 착수** — R-D1 자동화.
+  `scripts/sync-stable-to-dev.sh` (일방향 복사 + checksum diff 리포트) +
+  `scripts/cut-release.sh` (VERSION bump + tag). `0.4.0-mvp` 예약.
+- **(e) W10 결정 세션** — cross-ref-audit §4 #14/#18/#19 사전 분석 반영.
 - **(f) WU-16b 확장 이관** (WU-0 ~ WU-5.1 / 8/8.1 / 11-series / 12-series).
 
 **⚠️ Phase 1 킥오프 D-day**: 2026-04-27 (월). 본 세션 2026-04-24 → **D-3**.
 stable v0.2.4-mvp 로 이미 사용 가능 — 월요일 바로 `install.sh` 실행 가능.
 
-## ④ Artifacts (9번째 세션 종료 시점 인벤토리)
+---
+
+## ④ Artifacts (12번째 세션 현 시점 인벤토리)
 
 | 산출물 | 경로 | 상태 |
 |--------|------|:-:|
-| **CLAUDE.md v1.16** | `2026-04-19-sfs-v0.4/CLAUDE.md` | ✅ 세션 이전 확정 (§1 12 규율, §1.12 mutex) |
-| **sprints/_INDEX.md** | — | ✅ 3-섹션 (v2 native 8행 + v1→v2 이관 8행 + v1 형식 20행) — WU-19.1 포함 |
-| **sprints/WU-{17,18,19}.md** | — | ✅ 9번째 세션 3 WU meta (all status: done) |
-| **sprints/WU-{15,15.1,16,16.1}.md** | — | ✅ 이전 세션 v2 native |
-| **sprints/WU-{7,7.1,10,10.1,13,13.1,14,14.1}.md** | — | ✅ 8 이관 파일 (WU-16 에서) |
-| **sessions/_INDEX.md** | — | ✅ 9번째 세션까지 갱신 |
-| **sessions/2026-04-24-ecstatic-intelligent-brahmagupta.md** | — | ✅ 9번째 세션 retrospective (신규, 본 세션) |
-| **sessions/2026-04-24-brave-hopeful-euler.md** | — | ✅ 8번째 |
-| **sessions/2026-04-21-relaxed-vibrant-albattani.md** | — | ✅ 6-7번째 병렬 |
-| **sessions/2026-04-21-serene-fervent-wozniak.md** | — | ✅ 5번째 |
-| **sessions/2026-04-20-funny-compassionate-wright.md** | — | ✅ 3-4번째 |
-| **HANDOFF-next-session.md v3.0-reduced** | — | ✅ WU-17 축소 -80.8% (786→151 lines) |
-| **NEXT-SESSION-BRIEFING.md v0.6-reduced** | — | ✅ WU-17 축소 -70.5% (353→104 lines) |
+| **CLAUDE.md v1.17** | `2026-04-19-sfs-v0.4/CLAUDE.md` | ✨ **본 세션 갱신** — §1 13 규율 (R-D1 추가), §1.12 mutex 유지 |
+| **learning-logs/2026-05/P-02** | — | ✨ **본 세션** status: resolved + Changelog v0.2 |
+| **PROGRESS.md (본 파일)** | — | ✨ **본 세션** mutex claim + 덮어쓰기 |
+| **sprints/_INDEX.md** | — | ✅ 3-섹션 (v2 native 8행 + v1→v2 이관 8행 + v1 형식 20행) |
+| **sprints/WU-20.md** | — | ⏳ status: in_progress (다음 세션 close 예정) |
+| **sprints/WU-{17,18,19}.md** | — | ✅ all status: done |
+| **sprints/WU-{15,15.1,16,16.1}.md** | — | ✅ v2 native |
+| **sprints/WU-{7,7.1,10,10.1,13,13.1,14,14.1}.md** | — | ✅ v1→v2 이관 |
+| **sessions/_INDEX.md** | — | ✅ 9번째 세션까지 갱신 (11번째 retrospective 는 기록됨, 12번째는 미작성) |
+| **sessions/2026-04-24-dreamy-busy-tesla.md** | — | ✅ 11번째 retrospective |
+| **sessions/2026-04-24-ecstatic-intelligent-brahmagupta.md** | — | ✅ 9번째 |
+| **HANDOFF-next-session.md v3.0-reduced** | — | ✅ 11번째 세션에서 #17 지시 반영 |
+| **NEXT-SESSION-BRIEFING.md v0.7** | — | ✅ 11번째 세션 업데이트 |
 | **PHASE1-MVP-QUICK-START.md** | — | ✅ WU-18 신설 + WU-19 §2/§6 간소화 |
-| **phase1-mvp-templates/** | — | ✅ WU-18 10 파일 + WU-19 setup-w0.sh + verify-w0.sh |
-| **plugin-wip-skeleton/** | — | ✅ WU-18 3 파일 (plugin.json + README + INSTALL-GUIDE) |
-| **PROGRESS.md (본 파일)** | — | ✅ 본 덮어쓰기 (mutex release) |
-| `.gitignore` (루트) | — | ✅ bkit plugin 메모리 차단 (WU-16 에서) |
+| **phase1-mvp-templates/** | — | ✅ 13 파일 (WU-18 10 + WU-19 setup/verify-w0.sh) |
+| **plugin-wip-skeleton/** | — | ✅ 3 파일 |
+| **solon-mvp-dist/** | — | ✅ v0.2.4-mvp (11번째 세션 back-port 완료, stable 과 checksum 일치) |
+| `.gitignore` (루트) | — | ✅ bkit plugin 메모리 차단 |
 | `tmp/` 중간 산출물 | — | 🔒 git 제외 유지 |
-| WORK-LOG.md | — | ✅ 보존 (archive 역할, WU-17 이후 정적) |
+| WORK-LOG.md | — | ✅ 보존 (archive) |
 | cross-ref-audit §4 | — | ⏳ W10 TODO 19건 (결정 대기) |
 
 ## 운영 규칙 (계속 유효)
@@ -270,11 +217,11 @@ stable v0.2.4-mvp 로 이미 사용 가능 — 월요일 바로 `install.sh` 실
 
 ---
 
-**다음 세션 진입 체크리스트 (재정리, v0.5)**:
+**다음 세션 진입 체크리스트 (재정리, v0.6)**:
 
-1. `CLAUDE.md §1` + `§1.12` 읽기 (mutex protocol + bkit hook 무시 + push 금지 등 12 규율).
-2. `PROGRESS.md` frontmatter `current_wu_owner` = `null` 확인 → self claim.
-3. `PROGRESS.md` 본문 `① Just-Finished` + `③ Next` 확인.
+1. `CLAUDE.md §1` + `§1.12` + `§1.13` 읽기 (mutex protocol + bkit hook 무시 + push 금지 + R-D1 dev-first 등 **13 규율**).
+2. `PROGRESS.md` frontmatter `current_wu_owner` 확인 → self claim / takeover / STOP 분기.
+3. `PROGRESS.md` 본문 `① Just-Finished` + `③ Next` 확인 (현 default = (b) WU-20 close).
 4. `git status` + `git rev-list --count origin/main..HEAD` 로 ahead 현황 확인 (push 여부).
 5. 사용자 첫 발화 매칭 → `resume_hint.default_action` 또는 `on_negative` / `on_ambiguous` 분기.
 6. 진입 후 WU claim → `sprints/WU-<id>.md` 생성 → 작업 개시.

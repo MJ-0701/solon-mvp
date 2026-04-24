@@ -1,16 +1,19 @@
 ---
 pattern_id: P-02-dev-stable-divergence
 title: "dev (Solon docset staging) ↔ stable (solon-mvp repo) divergence — 양쪽에서 병렬 작업하면 SSoT 무너짐"
-status: observed
+status: resolved
 severity: medium
 first_observed: 2026-04-24
 observed_by: dreamy-busy-tesla (11번째 세션)
+resolved_at: 2026-04-24
+resolved_by: laughing-keen-shannon (12번째 세션)
+resolved_via: "CLAUDE.md v1.17 §1.13 R-D1 규칙 정식 채택 (dev-first + stable sync-back hotfix path)"
 related_wu: WU-20
 related_docs:
   - RUNTIME-ABSTRACTION.md v0.2-mvp-correction
   - sprints/WU-20.md
-  - CLAUDE.md (Solon docset 루트 규율)
-resolution_target: CLAUDE.md §1 에 R-D1 규칙 추가, release cut 자동화는 후속
+  - CLAUDE.md §1.13 R-D1 (Solon docset 루트 규율)
+resolution_target: "COMPLETED — CLAUDE.md §1.13 R-D1 채택 (2026-04-24). 자동화 (sync-stable-to-dev.sh / cut-release.sh) 는 0.4.0-mvp 예약 (후속 WU)"
 ---
 
 # P-02 — dev/stable divergence
@@ -92,13 +95,12 @@ dev (staging) 을 stable 에 맞춰 full back-port.
 
 ## 후속 TODO
 
-- [ ] Solon docset `CLAUDE.md §1` 에 R-D1 규칙 정식 추가 (원칙 2 preserve — 사용자 승인 후).
-- [ ] stable `CLAUDE.md` (distribution 유지보수 지침) 에도 "본 repo 는 stable.
-      개발은 dev staging 에서. hotfix 는 sync-back 필수" 명시.
-- [ ] WU-20.1 refresh 커밋에 본 P-02 링크.
-- [ ] sync/cut-release 스크립트는 `0.4.0-mvp` 로 예약 (현 `0.3.0-mvp` 가 plugin
-      네이티브화라 별도).
+- [x] Solon docset `CLAUDE.md §1` 에 R-D1 규칙 정식 추가 — **2026-04-24 laughing-keen-shannon (12번째 세션) 에서 §1.13 로 채택 완료. CLAUDE.md v1.16 → v1.17.**
+- [ ] stable `CLAUDE.md` (distribution 유지보수 지침, `~/workspace/solon-mvp/CLAUDE.md`) 에도 "본 repo 는 stable. 개발은 dev staging 에서. hotfix 는 sync-back 필수" 명시 — 다음 stable back-port 시 함께 (R-D1 자체 규율에 따라 dev-first).
+- [ ] WU-20.1 refresh 커밋에 본 P-02 링크 (WU-20 close 시).
+- [ ] sync/cut-release 스크립트는 `0.4.0-mvp` 로 예약 (현 `0.3.0-mvp` 가 plugin 네이티브화라 별도).
 
 ## Changelog
 
 - v0.1 (2026-04-24, dreamy-busy-tesla): P-02 초안 — divergence 현상 / 원인 / reconcile / R-D1 제안.
+- v0.2 (2026-04-24, laughing-keen-shannon): **status: observed → resolved**. R-D1 이 Solon docset `CLAUDE.md §1.13` 로 정식 채택 (v1.16 → v1.17). 후속 TODO 1건 체크 완료, 3건 open 유지 (stable CLAUDE.md 동기화 / WU-20.1 refresh / 스크립트 0.4.0-mvp 예약).
