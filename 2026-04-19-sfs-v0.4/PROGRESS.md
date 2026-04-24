@@ -2,22 +2,27 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-24T23:00:00+09:00
-session: "13번째 세션 `funny-sweet-mayer` 종료 (mutex release). 사용자 지시 '다음작업 ㄱㄱ' → resume_hint.default_action (b) **WU-20 close** 완료. final_sha=3ca7f56 확정 (back-port reconciled endpoint). 1 커밋 `378ab38` + 본 PROGRESS 덮어쓰기 1 커밋. 사용자 터미널 push 대기. 다음 세션 default = **WU-20.1 refresh** (forward sha backfill)."
+last_overwrite: 2026-04-24T23:15:00+09:00
+session: "13번째 세션 `funny-sweet-mayer` 종료 (mutex release, 후속 housekeeping 포함). (1) WU-20 close (378ab38 + bfa3de8). (2) 후속 housekeeping: ~/agent_architect/CLAUDE.md redirect stub 신설 (1a48b6b) — Cowork auto-load 복구. 3 커밋 로컬. 다음 세션 default = **WU-20.1 refresh** (forward sha backfill)."
 current_wu: WU-20.1
 current_wu_path: null   # WU-20.1 파일 아직 생성 전 — 다음 세션에서 생성
-current_wu_owner: null   # funny-sweet-mayer release
+current_wu_owner: null   # funny-sweet-mayer release (housekeeping 완료)
 released_history:
   last_owner: funny-sweet-mayer
-  last_claimed_at: 2026-04-24T22:45:00+09:00
-  last_released_at: 2026-04-24T23:00:00+09:00
-  last_reason: "13번째 세션 종료. WU-20 close 완료 (status in-progress → done, final_sha 3ca7f56). sprints/_INDEX.md WU-20 활성 → 완료 v2 네이티브 이동. 2 커밋 (378ab38 close + <TBD PROGRESS snapshot>) 사용자 터미널 push 대기. 사용자 지시 '다음작업 ㄱㄱ + WU 단위로 PROGRESS.md 인수인계 갱신 + 다음 세션 진행 유도' 반영 완료."
-  last_final_commits: [378ab38]   # PROGRESS snapshot 커밋은 본 파일 write 직후 별도
-  prior_owner: laughing-keen-shannon
-  prior_claimed_at: 2026-04-24T22:12:00+09:00
-  prior_released_at: 2026-04-24T22:40:00+09:00
-  prior_reason: "12번째 세션 종료. (a) R-D1 규율 정식 채택 완료 — CLAUDE.md v1.17 §1.13 + P-02 resolved. 1 커밋 a247ade + session snapshot c7b4423 사용자 push 완료 (origin/main 반영 확인, ahead 0)."
-  prior_final_commits: [a247ade, c7b4423]
+  last_claimed_at: 2026-04-24T23:10:00+09:00   # re-claim for housekeeping
+  last_released_at: 2026-04-24T23:15:00+09:00
+  last_reason: "13번째 세션 후속 housekeeping 종료. ~/agent_architect/CLAUDE.md redirect stub 신설 (1a48b6b) — Cowork primary folder 를 ~/agent_architect 로 전환해도 루트 CLAUDE.md 가 없어서 auto-resume 이 발동 안 되는 문제 해결. bkit hook 무시 지시 + docset CLAUDE.md/PROGRESS.md Read 지시 + mutex 확인 지시 포함. SSoT 이중화 방지 위해 상세 규칙 복제는 금지."
+  last_final_commits: [378ab38, bfa3de8, 1a48b6b]
+  prior_owner: funny-sweet-mayer
+  prior_claimed_at: 2026-04-24T22:45:00+09:00
+  prior_released_at: 2026-04-24T23:00:00+09:00
+  prior_reason: "13번째 세션 WU-20 close 완료 (status in-progress → done, final_sha 3ca7f56). sprints/_INDEX.md WU-20 활성 → 완료 v2 네이티브 이동. 2 커밋 (378ab38 close + bfa3de8 PROGRESS snapshot)."
+  prior_final_commits: [378ab38, bfa3de8]
+  older_owner: laughing-keen-shannon
+  older_claimed_at: 2026-04-24T22:12:00+09:00
+  older_released_at: 2026-04-24T22:40:00+09:00
+  older_reason: "12번째 세션 종료. (a) R-D1 규율 정식 채택 완료 — CLAUDE.md v1.17 §1.13 + P-02 resolved. 1 커밋 a247ade + session snapshot c7b4423 사용자 push 완료."
+  older_final_commits: [a247ade, c7b4423]
 purpose: "context reset 시 다음 세션이 본 파일 1개만 읽고 즉시 이어받을 수 있도록, 매 micro-step 마다 덮어쓰는 live snapshot. 히스토리 아님."
 companions:
   - "CLAUDE.md (§1 절대 규칙 + §1.12 mutex protocol + §1.13 R-D1 + §2.1 용어집 — 최우선 진입)"
@@ -81,17 +86,25 @@ resume_hint:
   version: 1
 ---
 
-# PROGRESS — live snapshot (13번째 세션 funny-sweet-mayer 종료, mutex released)
+# PROGRESS — live snapshot (13번째 세션 funny-sweet-mayer 종료, mutex released, housekeeping 포함)
 
-> 🚨 **본 파일 최우선 진입.** mutex **released** by `funny-sweet-mayer` (2026-04-24T23:00+09:00).
+> 🚨 **본 파일 최우선 진입.** mutex **released** by `funny-sweet-mayer` (2026-04-24T23:15+09:00).
 > 다음 세션은 frontmatter `resume_hint.default_action` 에 따라 self claim 후 진입 — default = **(a) WU-20.1 refresh**.
-> WU-20 close 완료 (`378ab38` + PROGRESS snapshot 커밋). 사용자 터미널 push 대기.
+> 13번째 세션 로컬 커밋 **3개**: `378ab38` close(WU-20) + `bfa3de8` WU-20 PROGRESS snapshot + `1a48b6b` chore stub + 본 PROGRESS snapshot 커밋 1개 추가 예정. 사용자 터미널 push 대기.
+> **Cowork auto-load 복구 반영**: 이제 Cowork primary 를 `~/agent_architect` 로 전환하면 루트 `CLAUDE.md` stub 이 auto-load → docset CLAUDE.md + PROGRESS.md resume_hint 자동 발동 가능.
 
 ---
 
 ## ① Just-Finished
 
-### 13번째 세션 (funny-sweet-mayer, 2026-04-24 종료)
+### 13번째 세션 (funny-sweet-mayer, 2026-04-24 종료, housekeeping 포함)
+
+**후속 housekeeping — Cowork auto-load 복구 (1a48b6b).** 사용자 승인 (2026-04-24 "ㅇㅇ 추천대로 가자") 후 진행.
+
+- `1a48b6b` **chore: add agent_architect/CLAUDE.md redirect stub for Cowork auto-load** (1 file, +32 line)
+  - 원인 진단: Cowork 는 selected folder **루트** 의 `CLAUDE.md` 만 auto-load. `~/agent_architect/` 루트엔 파일이 없어서 docset SSoT (`2026-04-19-sfs-v0.4/CLAUDE.md`) 가 auto-load 안 됨 → 다른 세션에서 "ㄱㄱ" 해도 `resume_hint.default_action` 발동 불가.
+  - 해결: `~/agent_architect/CLAUDE.md` 신설 — redirect stub 역할만 (bkit hook 무시 지시 + docset CLAUDE.md/PROGRESS.md 순서대로 Read 지시 + §1.12 mutex 확인 지시). 상세 규칙 복제 금지 (SSoT 이중화 방지).
+  - private folder 라 IP 유출 이슈 없음.
 
 **사용자 지시 "다음작업 ㄱㄱ" + "WU 단위 PROGRESS 인수인계 갱신 + 다음 세션 진행 유도" → (b) default = WU-20 close 완료.**
 
@@ -167,9 +180,10 @@ stable v0.2.4-mvp 로 이미 사용 가능 — 월요일 바로 `install.sh` 실
 
 | 산출물 | 경로 | 상태 |
 |--------|------|:-:|
+| **~/agent_architect/CLAUDE.md** | `/Users/mj/agent_architect/CLAUDE.md` | ✨ **본 세션 신설** — redirect stub (Cowork auto-load bootstrap) |
 | **sprints/WU-20.md** | — | ✨ **본 세션 close** — status done, final_sha 3ca7f56, Changelog v1.0 |
 | **sprints/_INDEX.md** | — | ✨ **본 세션 갱신** — WU-20 활성→완료 v2 네이티브 이동 |
-| **PROGRESS.md (본 파일)** | — | ✨ **본 세션 mutex release + 인수인계 snapshot** |
+| **PROGRESS.md (본 파일)** | — | ✨ **본 세션 mutex release + 인수인계 snapshot (2회차)** |
 | CLAUDE.md v1.17 | `2026-04-19-sfs-v0.4/CLAUDE.md` | ✅ §1 13 규율 (R-D1 포함) 유지 |
 | learning-logs/2026-05/P-02 | — | ✅ status: resolved (12번째 세션) |
 | sprints/WU-20.1.md | — | ⏳ **다음 세션 신설 예정** (refresh) |
@@ -208,7 +222,8 @@ stable v0.2.4-mvp 로 이미 사용 가능 — 월요일 바로 `install.sh` 실
 2. `PROGRESS.md` frontmatter `current_wu_owner` 확인 → self claim / takeover / STOP 분기.
 3. `PROGRESS.md` 본문 `① Just-Finished` + `③ Next` 확인 (현 default = **(a) WU-20.1 refresh**).
 4. `git status` + `git rev-list --count origin/main..HEAD` 로 ahead 현황 확인 (push 여부).
-   - 13번째 세션 종료 시점 로컬 ahead: 2 (378ab38 + PROGRESS snapshot). 사용자 push 완료 후 ahead 0.
+   - 13번째 세션 종료 시점 로컬 ahead: **4** (378ab38 + bfa3de8 + 1a48b6b + 본 PROGRESS snapshot). 사용자 push 완료 후 ahead 0.
+   - 참고: WU-20 close 1~2번 커밋은 사용자가 이미 1차 push 완료했을 수 있음 (origin/main 이 bfa3de8 로 이미 이동 관찰). 이 경우 ahead = 2 (stub + 본 snapshot).
 5. 사용자 첫 발화 매칭 → `resume_hint.default_action` 또는 `on_negative` / `on_ambiguous` 분기.
 6. 진입 후 WU claim → `sprints/WU-<id>.md` 생성 (WU-20.1) → 작업 개시.
 7. **WU 완료 시 본 PROGRESS.md 즉시 덮어쓰기 + commit** (인수인계 규율). 다음 세션 진행 유도 안내 출력.
