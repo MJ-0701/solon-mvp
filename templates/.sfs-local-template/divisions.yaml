@@ -1,16 +1,19 @@
 # .sfs-local/divisions.yaml
-# MVP minimal divisions config (PHASE1-KICKOFF-CHECKLIST §2.3 기준)
+# Solon MVP minimal divisions config (기본값).
 # Solon docset 쪽 divisions.schema.yaml v1.1 와 호환되는 subset.
+# 프로젝트 특성에 따라 각 본부 activation_state 를 조정하고, 변경 사유는
+# `.sfs-local/decisions/<N>-activate-<division>.md` 에 기록.
 
 version: 1.0-mvp-minimal
-project: "solon-mvp"
-runtime: claude-code   # Codex / Gemini 미사용 (Phase 1 scope)
-created: "2026-04-24"
+project: "<PROJECT-NAME>"
+runtime: claude-code   # (향후) codex / gemini-cli 전환 시 값 변경
+created: "<DATE>"
+solon_mvp_version: "<SOLON-VERSION>"
 
 divisions:
   dev:
     activation_state: active
-    lead: "사용자 직접 (self-lead, no Opus lead agent yet)"
+    lead: "사용자 직접 (self-lead)"
     notes: "구현 주도. D (do) step 의 main owner."
 
   strategy-pm:
@@ -24,15 +27,15 @@ divisions:
 
   design:
     activation_state: abstract
-    reason: "shadcn/ui 등 기존 디자인 시스템 차용. 자체 design 본부 불필요."
+    reason: "기존 디자인 시스템 (shadcn/ui 등) 차용. 자체 design 본부 불필요."
 
   infra:
     activation_state: abstract
-    reason: "<DEPLOY> 재사용 가정. 필요 시 cycle 2~3 에서 activate 검토."
+    reason: "배포 플랫폼 (<DEPLOY>) 재사용 가정. 필요 시 cycle 2~3 에서 activate 검토."
 
   taxonomy:
     activation_state: abstract
-    reason: "관리자 페이지 도메인 taxonomy 는 cycle 2~3 누적 후 도입."
+    reason: "도메인 taxonomy 는 cycle 2~3 누적 후 도입."
 
 # Phase 1 MVP 기본 활성 본부 = dev + strategy-pm 2 개.
 # 나머지 4 개는 abstract — 필요 시 대화에서 선언적으로 activate 승격.

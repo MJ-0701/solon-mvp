@@ -1,46 +1,7 @@
-# === Solon 7-step flow (append 이후 아래 내용을 프로젝트 .gitignore 에 포함) ===
-
-# .sfs-local/ 운영 데이터
-# - sprints/ 산출물은 commit 권장 (팀 누적 지식)
-# - events.jsonl 은 PII/감사 로그 혼입 위험 → ignore
-# - decisions/ 는 commit 권장 (ADR mini)
-.sfs-local/events.jsonl
-.sfs-local/tmp/
-.sfs-local/*.local.*
-
-# 개발 환경
-node_modules/
-.next/
-dist/
-build/
-out/
-
-# 환경 변수
-.env
-.env.local
-.env.*.local
-!.env.example
-
-# 에디터 / OS
 .DS_Store
-.idea/
-.vscode/*
-!.vscode/settings.json
-!.vscode/extensions.json
 Thumbs.db
-
-# 테스트 / 커버리지
-coverage/
-.nyc_output/
-
-# 로그
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# 임시 파일
-*.tmp
+.idea/
+.vscode/
 *.swp
-*.bak
+/tmp/
+*.bak-*

@@ -1,86 +1,58 @@
-# CLAUDE.md — `solon-mvp` 프로젝트 세션 지침
+# CLAUDE.md — `solon-mvp` distribution repo 유지보수 지침
 
-> 본 파일은 Claude Code 세션이 repo 에 처음 진입할 때 최우선으로 읽는 지침.
-> 회사 IP (관리자 페이지) — 외부 링크 / 경로 / repo URL 등 비공개 정보 기록 금지.
+> 본 파일은 **`solon-mvp` repo 자체** (distribution) 를 다룰 때 Claude Code 세션이 참조하는 지침.
+> Consumer 프로젝트에 설치될 `CLAUDE.md` 와는 별개 (그건 `templates/CLAUDE.md.template`).
 
-## 프로젝트 개요
+## Repo 정체성
 
-- **이름**: `solon-mvp`
-- **도메인**: 관리자 페이지 — 매출 조회 / 현금영수증 발행 / 권한 관리 / 대시보드
-- **단계**: MVP (Phase 1), greenfield, 7-step lightweight spike 운용.
-- **Stack**: `<STACK>` (예: Next.js 15 App Router + TypeScript)
-- **DB**: `<DB>` (예: Postgres + Prisma)
-- **배포**: `<DEPLOY>` (예: Vercel)
-- **현금영수증 외부 API**: `<RECEIPT-API>` (예: 국세청 홈택스 e-세로 / 미정)
+- **이름**: `solon-mvp` (Solon 방법론의 설치 가능한 MVP 배포판)
+- **목적**: 사용자 개인 / 회사 프로젝트에 **Solon 7-step flow** 스캐폴드를 `install.sh` 로 주입
+- **IP**: 사용자 (채명정) 개인 자산. 공개 범위는 TBD (현재 private 권장).
+- **연계**: 풀스펙 방법론은 사용자 개인 Solon docset 에 있음 (본 repo 에는 경로 / 내용 미반영).
 
-## 운영 방식 — 7-step flow
+## 배포 원칙
 
-각 1 cycle = 1 Sprint = 5~7 일. 순서:
+1. **install.sh / upgrade.sh / uninstall.sh** 는 **bash 호환** (macOS zsh / Linux bash 공통). POSIX 친화.
+2. **templates/** 하위는 consumer 에게 그대로 배포되는 파일. 수정 시 하위 호환성 고려.
+3. **VERSION** 은 semver `X.Y.Z-mvp` 또는 `X.Y.Z`. mvp suffix 는 풀스펙 수렴 전까지 유지.
+4. **CHANGELOG.md** 는 모든 릴리스를 기록. upgrade.sh 가 이 파일을 consumer 에게 안내.
 
-1. **브레인스토밍** (G0) — `.sfs-local/sprints/<sprint-id>/brainstorm.md`
-2. **plan** (G1) — `.sfs-local/sprints/<sprint-id>/plan.md`
-3. **sprint** (plan 의 metadata 섹션)
-4. **구현** (G2 entry self-check) — 실제 코드 + local commits
-5. **review** (G4) — `.sfs-local/sprints/<sprint-id>/review.md`
-6. **commit** — 사용자 터미널에서 `git push origin main`
-7. **문서화** — `.sfs-local/sprints/<sprint-id>/retro-light.md` + README 업데이트
+## 수정 시 체크리스트
 
-### Gate 운용 (4 개, 축소판)
+### install.sh 변경 시
+- [ ] 로컬 모드 (`./install.sh`) 동작 확인
+- [ ] 원격 모드 (`curl | bash`) 동작 확인 — 특히 `read < /dev/tty` 처리
+- [ ] 멱등성 — 재실행해도 기존 산출물 파괴 안 함
+- [ ] 대화형 충돌 처리 4 옵션 (s/b/o/d) 전부 동작
 
-| Gate | 의미 | hard-block? |
-|---|---|---|
-| G0 | 브레인스토밍 entry | No — signal only |
-| G1 | plan approval | No — self-check |
-| G2 | 구현 entry | No — 구현 직전 1 줄 선언 |
-| G4 | review | No — verdict 기록만 |
+### templates/ 변경 시
+- [ ] placeholder 형식 유지 (`<PROJECT-NAME>` / `<DATE>` / `<STACK>` / `<DEPLOY>` / `<DOMAIN>` 등)
+- [ ] 도메인 특화 제거 — `solon-mvp` 는 도메인 중립 (관리자페이지/SaaS 등 특정 도메인 기술 금지)
+- [ ] 외부 Solon docset 경로 / 파일명 하드코딩 금지
 
-G-1 / G3 / G5 는 이 MVP 에서 **skip**. 필요성 느끼면 별도 논의 후 도입.
+### upgrade.sh 변경 시
+- [ ] `.sfs-local/VERSION` 형식 하위 호환
+- [ ] dry-run 프리뷰 단계 유지 (파일 쓰기 전 사용자 확인)
 
-> **중요 (원칙 13 ALT-INV-3)**: Gate 는 hard-block 이 아니라 **signal**. fail 이어도 cycle 은 계속 진행 가능 — 다만 기록 남김.
+## 7-step flow 요약 (본 repo 자체 개발에도 적용)
 
-## 산출물 저장 규칙
+1. 브레인스토밍 (G0)
+2. plan (G1)
+3. sprint
+4. 구현 (G2 entry)
+5. review (G4)
+6. commit
+7. 문서화
 
-- Sprint 산출물: `.sfs-local/sprints/<YYYY-W>-sprint-<N>/` (예: `2026-W18-sprint-1/`)
-  - `brainstorm.md` · `plan.md` · `review.md` · `retro-light.md` 4 파일
-- L1 event log: `.sfs-local/events.jsonl` (수동 append, 각 line 1 JSON)
-- 결정 (ADR mini): `.sfs-local/decisions/<N>-<short-title>.md` (1~3 줄)
-
-## 6 본부 활성 상태 (divisions)
-
-- `dev` (active) — 사용자 직접 (self-lead, Opus lead agent 없음)
-- `strategy-pm` (active) — 사용자 직접
-- `qa` (abstract) — MVP 는 manual smoke test 대체
-- `design` (abstract) — 기존 디자인 시스템 (shadcn/ui 등) 차용
-- `infra` (abstract) — `<DEPLOY>` 재사용
-- `taxonomy` (abstract) — cycle 2~3 누적 후 도입
-
-세부는 `.sfs-local/divisions.yaml`.
-
-## 관찰성 (Observability, L1/L2/L3)
-
-- **L1**: `.sfs-local/events.jsonl` 수동 append. G0/G1/G2/G4 verdict 1 이벤트씩.
-- **L2**: git commit 자체가 channel. Sprint 시작/종료 commit sha 는 plan/review 에 기록.
-- **L3**: 외부 driver 미사용 (minimal tier).
-
-## 커뮤니케이션 규율
-
-- **한국어 반말**.
-- **짧고 직설**.
-- **기록 > 기억** — 중요한 결정은 `.sfs-local/decisions/` 또는 sprint 산출물에 남김.
-- 사용자가 "ㄱㄱ" / "이어서" 한 마디면 resume — 단 의미 결정 (A/B/C) 은 사용자에게.
+Gate 는 all signal-only (ALT-INV-3 never-hard-block).
 
 ## 절대 금지
 
-- **외부 repo / 회사 내부 자산 / 방법론 docset 의 경로 하드코딩** — 본 repo 는 회사 IP, 외부 링크 유입 시 정리 필수.
-- **`git push origin *` 자동 실행** — push 는 사용자 터미널에서만.
-- **Gate hard-block** — 구현 자체를 막지 않음 (원칙 13 never-hard-block).
-- **권한/감사 로그 무시** — 관리자 페이지 도메인은 권한 관리가 핵심. `.sfs-local/decisions/` 에 RBAC 결정 반드시 남김.
-
-## 참고 방법론
-
-사용자는 외부 개인 방법론 docset 을 보유하고 있으며, 필요 시 대화에서 "내 외부 메모의
-gate framework 참고해서..." 처럼 지칭. 본 repo 에는 해당 docset 경로 기록 안 함 (개인 IP).
+- **사용자 개인 Solon docset 의 경로 / 파일명 / 내용 유출** (예: `agent_architect` / `sfs-v0.4` / `solon-docset`).
+  단 "solon" 단독 키워드 (repo 이름 포함) 는 허용.
+- **install.sh 가 자동으로 git push / commit** — consumer 의 git 은 consumer 가 관리.
+- **templates/ 에 프로젝트-특화 placeholder 없이 고정값** 넣기.
 
 ## Changelog
 
-- v0.1 (`2026-04-24`, W0 init): 초기 배치.
+[CHANGELOG.md](./CHANGELOG.md) 에 모든 릴리스 기록.
