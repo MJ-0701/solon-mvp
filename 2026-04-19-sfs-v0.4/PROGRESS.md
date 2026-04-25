@@ -2,44 +2,50 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-25T18:15:00+09:00
-session: "21번째 세션 `trusting-stoic-archimedes` (user-active-deferred). WU-23 close 완료 — V-1 vote PASS (CEO/CTO/CPO 3/3 effective PASS, 3 conditions applied). #1 sfs slash command 6 명령 (status/start/plan/review/decision/retro) minimal contract spec 확정. .claude/agents/ 페르소나 alt B 등록 완료 (mid-session reload 안 됨, fallback A 사용). a66cf2e backfill 완료. §7 사용자 복귀 시 결정 대기 6항목 정리. 다음 micro-step = WU-23 close commit + final_sha backfill + cd41dff cleanup + F-04 fix + P-04 + HANDOFF sync 진행."
-current_wu: null   # WU-23 done. WU-24 entry 는 사용자 복귀 시 §7.1 결정 (gate id schema location) 선행 필요.
+last_overwrite: 2026-04-25T22:47:00+09:00
+session: "22번째 세션 `adoring-trusting-feynman` (user-active). 21번째 자율 작업 종료 시점에 사용자 복귀 — §7 결정 7항목 일괄 수신: (1) gates 별도 spec 파일 + **CLAUDE.md ≤200 lines 메타 규칙 신설** (2) `·` 구분자 + 색상 on/off CLI flag + ISO8601 (3) ISO week sprint-id (`<YYYY-W>-sprint-<N>`) (4) 파일 준비만 (no auto-launch) (5) 하이브리드 mini-ADR (frontmatter + 5섹션) (6) auto commit (push 는 §1.5 수동 유지) (7) F-04 = (i) 정규식 minimal + 검증기 분리. 8 step 일괄 진행 — Step 1 (mutex 정리) 완료."
+current_wu: null   # step 7 에서 WU-24 entry 시 갱신
 current_wu_path: null
 current_wu_owner:
-  session_codename: trusting-stoic-archimedes
-  claimed_at: 2026-04-25T17:37:22+09:00
-  last_heartbeat: 2026-04-25T18:15:00+09:00
+  session_codename: adoring-trusting-feynman
+  claimed_at: 2026-04-25T22:47:00+09:00
+  last_heartbeat: 2026-04-25T22:47:00+09:00
   ttl_minutes: 15
-  mode: user-active-deferred   # 사용자 부재 4시간 자율 작업, takeover protocol 미적용 (사용자 명시 위임). 자율 작업 종료 시 release 예정.
+  mode: user-active
 released_history:
-  last_owner: eager-elegant-bell
-  last_claimed_at: 2026-04-25T09:48:00+09:00
-  last_released_at: 2026-04-25T10:47:00+09:00   # 20번째 takeover 시점. 19번째가 자발 release 한 게 아니라 stale 감지 후 20번째가 force release.
-  last_reason: "19번째 세션 user-active. WU-22 신설 + 8후보 1-pager + 의존성 그래프 + α/β/γ 그루핑 옵션 제시 (wip 3471c12). 사용자 결정 β 수신 이후 hang (약 56분, 파일 수정 0 / 커밋 0 / PROGRESS 덮어쓰기 0). 20번째 세션 epic-brave-galileo 가 사용자 'ㄴㄴ 이어받아서 바로 진행 ㄱㄱ' 발화 하에 stale takeover (TTL 15분 × 3.7배 초과). P-04 learning pattern 후보 (session-hang takeover)."
-  last_final_commits: [3471c12, a66cf2e]   # 19번째 wip + 20번째 WU-22 close. 21번째 세션이 TBD_20TH_SNAPSHOT → a66cf2e backfill 완료.
-  prior_owner: confident-loving-ride
-  prior_claimed_at: 2026-04-25T09:15:00+09:00
-  prior_released_at: 2026-04-25T09:45:00+09:00
-  prior_reason: "18번째 세션 user-active (D-2). 사용자 지시 'a로 ㄱㄱ' → resume_hint default_action (a) Phase 1 킥오프 dry-run 실행. WU-21 sandbox /tmp/wu21-dry/ 에서 install.sh PASS + setup-w0.sh PASS + verify-w0.sh exit 0 + WARN 3 + F-04 false-positive 2건 발견. D-day 차단 요소 없음 확정."
-  prior_final_commits: [cd94f65, 2acac45, 9766ad6]   # WU-21 + 18th snapshot + handoff snapshot
-  older_owner: admiring-fervent-dijkstra
-  older_claimed_at: 2026-04-25T09:06:00+09:00
-  older_released_at: 2026-04-25T09:10:00+09:00
-  older_reason: "17번째 세션 scheduled auto-resume. TBD_16TH_SNAPSHOT → 87b60ff 백필 + scripts/append-scheduled-task-log.sh v0.1 helper 신설 + resume-session-check.sh v0.2 → v0.3 (check #7 scheduled_task_log drift 감지 추가, exit 16) + HANDOFF mutex_state_schema sync. mutex 정상 release."
-  older_final_commits: [87b60ff]   # 17번째가 backfill 한 16번째 snapshot
-  oldest_owner: nice-kind-babbage
-  oldest_claimed_at: 2026-04-25T07:10:00+09:00
-  oldest_released_at: 2026-04-25T07:30:00+09:00
-  oldest_reason: "16번째 세션 scheduled auto-resume. 15번째의 `<cd41dff>` angle-bracket sha placeholder 를 P-03 변종으로 인식 + cleanup + resume-session-check.sh v0.2 (check #6) + scheduled_task_log 필드 신설. (21번째 세션 trusting-stoic-archimedes 가 single-quote → backtick escape 정정 — false-positive 제거)"
-  oldest_final_commits: [5d4c6c6_BACKFILLED, 87b60ff]
-  # 15번째 (admiring-nice-faraday, 2709fcf + 5d4c6c6) 은 rolling N=4 에서 drop — scheduled_task_log 에 trace 유지
+  last_owner: trusting-stoic-archimedes
+  last_claimed_at: 2026-04-25T17:37:22+09:00
+  last_released_at: 2026-04-25T22:47:00+09:00   # 22번째 세션 진입 시 자연 release (mode=user-active-deferred 4시간 위임 시간 정확히 도과 + 사용자 복귀)
+  last_reason: "21번째 세션 user-active-deferred (사용자 4시간 운동 부재 자율 작업 위임). 3-agent 합의 protocol 도입 (CEO/CTO/CPO 동등 2/3 vote, fallback A general-purpose 호출 — Claude Code agent loader startup-only P-05). .claude/agents/{generator,evaluator,planner}.md 페르소나 alt B 등록. WU-22 sha backfill (TBD_20TH→a66cf2e) + WU-23 신설/close (V-1 vote PASS effective 3/3, 6 명령 contract spec 확정, 3 conditions applied) + cd41dff false-positive cleanup + P-04/P-05 후보 + HANDOFF v3.5→v3.6 sync. 22번째 진입 시 사용자 §7 결정 7항목 수신 후 자연 release."
+  last_final_commits: [a66cf2e, f11dd4f, 1e0e6f1, 9f146e3, 449c4a6, 7ca88b0, a9dc7a5, 8215c43]   # WU-22 close (20th 작업 backfill) + 21st 자율 작업 commits 7건
+  prior_owner: epic-brave-galileo
+  prior_claimed_at: 2026-04-25T10:47:00+09:00
+  prior_released_at: 2026-04-25T17:37:22+09:00   # 21번째 진입 시 자연 release (자발 release 안 했지만 21번째가 정상 claim 가능했던 시점 = 20번째 작업 종료 시점)
+  prior_reason: "20번째 세션 user-active, takeover. 19번째 hang (β 수신 후 56분 정지) 을 stale-mutex takeover (TTL 15분 × 3.7배). 사용자 'ㄴㄴ 이어받아서 바로 진행 ㄱㄱ' 명시 confirm 후 §1.12 충족. WU-22 close (β themed-bundles 채택, sprint roadmap WU-23~29 추가) + sprints/_INDEX.md WU-21/WU-22 row 동시 추가 + §7 takeover 기록 섹션 신설 (P-04 learning pattern 표준). released_history rolling 갱신은 21번째에서 누락 (22번째 recovery)."
+  prior_final_commits: [a66cf2e]   # WU-22 close commit (20번째 작업, 21번째가 final_sha backfill)
+  older_owner: eager-elegant-bell
+  older_claimed_at: 2026-04-25T09:48:00+09:00
+  older_released_at: 2026-04-25T10:47:00+09:00   # 20번째 takeover 시점. 자발 release 안 함, hang.
+  older_reason: "19번째 세션 user-active. WU-22 신설 + 8후보 1-pager + 의존성 그래프 + α/β/γ 그루핑 옵션 제시 (wip 3471c12). 사용자 결정 β 수신 이후 hang (약 56분, 파일 수정 0 / 커밋 0 / PROGRESS 덮어쓰기 0). 20번째 세션이 stale takeover. P-04 learning pattern 후보 (session-hang takeover, WU-22 §7 표준 정립)."
+  older_final_commits: [3471c12]   # 19번째 wip 만 (β 결정 반영은 20번째)
+  oldest_owner: confident-loving-ride
+  oldest_claimed_at: 2026-04-25T09:14:00+09:00
+  oldest_released_at: 2026-04-25T09:55:00+09:00
+  oldest_reason: "18번째 세션 user-active (D-2). 사용자 지시 'a로 ㄱㄱ' → resume_hint default_action (a) Phase 1 킥오프 dry-run 실행. WU-21 sandbox /tmp/wu21-dry/ 에서 install.sh PASS + setup-w0.sh PASS + verify-w0.sh exit 0 + WARN 3 + F-04 false-positive 2건 발견. D-day 차단 요소 없음 확정. handoff 갱신 (next default = MVP next-feature 사이클)."
+  oldest_final_commits: [cd94f65, 2acac45, 9766ad6]   # WU-21 + 18th snapshot + handoff snapshot
+  # 17번째 (admiring-fervent-dijkstra) 와 16번째 (nice-kind-babbage) 가 rolling N=4 에서 drop — scheduled_task_log 에 trace 유지
+  # 15번째 (admiring-nice-faraday) 도 마찬가지 trace 유지
 
 # ── scheduled_task_log (16번째 세션 신설, 17번째 helper 화) ──────────
 # Cowork scheduled_task hourly auto-resume 의 explicit trace. rolling N=20.
 # 필드: ts (ISO8601 +09:00) · codename · check_exit · action · ahead_delta
 # 18번째 세션은 user-active (scheduled 아님) 이지만 trace 연속성 위해 한 줄 append.
 scheduled_task_log:
+  - ts: 2026-04-25T22:50:01+09:00
+    codename: adoring-trusting-feynman
+    check_exit: 0
+    action: "22번째 세션 user-active. 21st mutex 자연 release (mode=user-active-deferred 4시간 위임 종료 + 사용자 복귀) + 22nd self claim. 사용자 §7 결정 7항목 일괄 수신 (gates 별도 파일 + CLAUDE.md ≤200 lines 메타 규칙 + ISO week + 파일 준비만 + 하이브리드 ADR + auto commit + F-04 정규식+검증기 분리). 8 step 일괄 진행 시작."
+    ahead_delta: "+0 진입"
   - ts: 2026-04-25T18:00:16+09:00
     codename: trusting-stoic-archimedes
     check_exit: 16
