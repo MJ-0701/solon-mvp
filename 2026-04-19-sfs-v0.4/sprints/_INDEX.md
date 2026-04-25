@@ -2,7 +2,7 @@
 doc_id: sprints-index
 title: "sprints/ — WU (Work Unit) 파일 목록 (v2)"
 visibility: raw-internal
-updated: 2026-04-25   # WU-21 (cd94f65) + WU-22 (TBD_20TH) row 추가 — 20번째 세션 epic-brave-galileo takeover
+updated: 2026-04-25   # 21번째 세션 trusting-stoic-archimedes — WU-22 final_sha backfill (TBD_20TH → a66cf2e). WU-21 (cd94f65) + WU-22 (a66cf2e) 양쪽 row 정상 sha 보유.
 ---
 
 # sprints/ — WU 파일 인덱스
@@ -15,7 +15,11 @@ updated: 2026-04-25   # WU-21 (cd94f65) + WU-22 (TBD_20TH) row 추가 — 20번�
 
 ## 활성 WU (status: in_progress / pending)
 
-_현재 활성 WU 없음._ WU-22 close 로 WU-23 entry 준비 (WU22-D2 사용자 결정 선행 필요 — `sprints/WU-22.md §6`).
+| WU | title | status | session | path |
+|:--:|:---|:--:|:---|:---|
+| WU-23 | #1 sfs slash command detail design (6 명령 minimal contract spec) | in_progress | trusting-stoic-archimedes (open) | [WU-23.md](WU-23.md) |
+
+> WU22-D2 = "6개 명령 전부" 결정 수신 후 21번째 세션이 open. 3-agent 합의 protocol 적용 (CEO+CTO+CPO 동등 2/3 vote).
 
 ## 완료 WU (status: done) — v2 네이티브
 
@@ -34,7 +38,7 @@ _현재 활성 WU 없음._ WU-22 close 로 WU-23 entry 준비 (WU22-D2 사용자
 | WU-20 | Solon MVP Distribution 설계 + 실체화 (scope pivot) | `3ca7f56` | 2026-04-24 | 2026-04-24 | amazing-happy-hawking → dreamy-busy-tesla → funny-sweet-mayer | [WU-20.md](WU-20.md) |
 | WU-20.1 | WU-20 sha backfill 확인 + _INDEX.md row 추가 | `2709fcf` | 2026-04-25 | 2026-04-25 | funny-pensive-hypatia → admiring-nice-faraday (auto-resume 실체화) | [WU-20.1.md](WU-20.1.md) (refresh 전용) |
 | WU-21 | Phase 1 킥오프 D-2 dry-run (install.sh + setup-w0.sh sandbox PASS, F-01~F-04 findings) | `cd94f65` | 2026-04-25 | 2026-04-25 | confident-loving-ride | [WU-21.md](WU-21.md) |
-| WU-22 | MVP next-feature roadmap & sequencing (8 후보 1-pager + β release grouping 채택) | `TBD_20TH_SNAPSHOT` | 2026-04-25 | 2026-04-25 | eager-elegant-bell (open + brainstorm) → epic-brave-galileo (close, hang takeover) | [WU-22.md](WU-22.md) |
+| WU-22 | MVP next-feature roadmap & sequencing (8 후보 1-pager + β release grouping 채택) | `a66cf2e` | 2026-04-25 | 2026-04-25 | eager-elegant-bell (open + brainstorm) → epic-brave-galileo (close, hang takeover) → trusting-stoic-archimedes (sha backfill) | [WU-22.md](WU-22.md) |
 
 ## 완료 WU (status: done) — v1 → v2 이관 (WU-16 backfill)
 

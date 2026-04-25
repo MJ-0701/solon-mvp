@@ -2,17 +2,22 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-25T10:47:00+09:00
-session: "20번째 세션 `epic-brave-galileo` (user-active, takeover). 19번째 eager-elegant-bell 이 β 결정 수신 직후 약 56분 hang → 사용자 '이어받아서 바로 진행 ㄱㄱ' 으로 stale-mutex takeover 승인. WU-22 §3 β (themed-bundles) 채택 문서 반영 + §5 체크리스트 완결 + §7 takeover 기록 + _INDEX.md (WU-21/WU-22 2 row 동시 추가) + 본 PROGRESS 덮어쓰기. WU-22 close. 다음 = WU-23 (#1 sfs slash command detail design), WU22-D2 사용자 결정 선행 필요."
-current_wu: null   # WU-22 close, WU-23 entry 전 WU22-D2 결정 대기
-current_wu_path: null
-current_wu_owner: null
+last_overwrite: 2026-04-25T17:48:00+09:00
+session: "21번째 세션 `trusting-stoic-archimedes` (user-active-deferred, 4시간 자율 작업 위임). WU22-D2 = '6개 명령 전부' 결정 수신. 3-agent 협의제 (CEO+CTO+CPO 동등 2/3 vote, Q1-Q7 default + Q2 alt B) 도입. 페르소나 .claude/agents/{generator,evaluator,planner}.md 작성 완료. alt B mid-session reload 안 됨 → fallback A (general-purpose + 페르소나 Read 지시) 자동 전환. TBD_20TH_SNAPSHOT → a66cf2e backfill 완료 (WU-22.md/sprints/_INDEX.md/PROGRESS released_history). WU-23 open (#1 sfs slash 6 명령 minimal contract spec 1차 draft 완성, vote 대기)."
+current_wu: WU-23
+current_wu_path: 2026-04-19-sfs-v0.4/sprints/WU-23.md
+current_wu_owner:
+  session_codename: trusting-stoic-archimedes
+  claimed_at: 2026-04-25T17:37:22+09:00
+  last_heartbeat: 2026-04-25T17:48:00+09:00
+  ttl_minutes: 15
+  mode: user-active-deferred   # 사용자 부재 4시간 자율 작업, takeover protocol 미적용 (사용자 명시 위임)
 released_history:
   last_owner: eager-elegant-bell
   last_claimed_at: 2026-04-25T09:48:00+09:00
   last_released_at: 2026-04-25T10:47:00+09:00   # 20번째 takeover 시점. 19번째가 자발 release 한 게 아니라 stale 감지 후 20번째가 force release.
   last_reason: "19번째 세션 user-active. WU-22 신설 + 8후보 1-pager + 의존성 그래프 + α/β/γ 그루핑 옵션 제시 (wip 3471c12). 사용자 결정 β 수신 이후 hang (약 56분, 파일 수정 0 / 커밋 0 / PROGRESS 덮어쓰기 0). 20번째 세션 epic-brave-galileo 가 사용자 'ㄴㄴ 이어받아서 바로 진행 ㄱㄱ' 발화 하에 stale takeover (TTL 15분 × 3.7배 초과). P-04 learning pattern 후보 (session-hang takeover)."
-  last_final_commits: [3471c12, TBD_20TH_SNAPSHOT]   # 19번째 wip + 20번째 WU-22 close. TBD 는 다음 세션이 backfill.
+  last_final_commits: [3471c12, a66cf2e]   # 19번째 wip + 20번째 WU-22 close. 21번째 세션이 TBD_20TH_SNAPSHOT → a66cf2e backfill 완료.
   prior_owner: confident-loving-ride
   prior_claimed_at: 2026-04-25T09:15:00+09:00
   prior_released_at: 2026-04-25T09:45:00+09:00
@@ -39,7 +44,7 @@ scheduled_task_log:
     codename: epic-brave-galileo
     check_exit: 15   # bracket_sha_unrealized:1:cd41dff (16번째 narrative false-positive, 계속 누적 — 후속 cleanup 독립 WU 로 분리 필요)
     action: "20번째 세션 user-active, takeover. 19번째 eager-elegant-bell hang (β 수신 후 56분 정지) 을 stale-mutex takeover (TTL 15분 × 3.7배). 사용자 'ㄴㄴ 이어받아서 바로 진행 ㄱㄱ' 로 §1.12 확인 충족. WU-22 §3 β (themed-bundles) 채택 문서 반영 + §5 체크리스트 완결 + §7 takeover 기록 + sprints/_INDEX.md (WU-21/WU-22 2 row 동시 추가) + 본 PROGRESS 덮어쓰기. WU-22 close."
-    ahead_delta: "+1 (WU-22 close commit = TBD_20TH_SNAPSHOT)"
+    ahead_delta: "+1 (WU-22 close commit = a66cf2e, 21번째 세션 backfill 완료)"
   - ts: 2026-04-25T09:48:00+09:00
     codename: eager-elegant-bell
     check_exit: 15   # bracket_sha_unrealized:1:cd41dff (16번째 narrative false-positive, 후속 cleanup TODO)
