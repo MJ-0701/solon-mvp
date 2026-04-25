@@ -2,46 +2,44 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-25T23:43:12+09:00
-session: "23번째 세션 `dazzling-sharp-euler` (user-active) — 진입 + mutex self claim + WU-31 (Release tooling Phase 0) 신설 (spec only). 사용자 결정 = 배포 자동화 옵션 β (로컬 sh 우선, GitHub Action 후속 Phase 1+2 별도 WU) + 명시 '계획만 만들어 둬'. WU-31.md frontmatter + 본문 §0~§8 spec 작성 — 실 bash 3 sh (cut-release + sync-stable-to-dev + check-drift) + `.visibility-rules.yaml` 갱신은 다음 세션 또는 사용자 컨펌 후. dual-track / single-track OSS 전환 결정 = 보류 (영향범위 큰 결정, 추후). WU-24 (sfs slash) / WU-30 (F-04 fix) status 변경 없음."
-current_wu: WU-24   # 22nd entry 까지만 (frontmatter + 구현 spec). 23rd 는 WU-31 신설만, current_wu 변경 없음.
+last_overwrite: 2026-04-26T00:45:32+09:00
+session: "24번째 세션 `serene-sharp-edison` (user-active 정리만 + scheduled run 위임). 사용자 결정 D3 (dual-track 유지) + D6 (WU-31 spec default 4건 OK) + D7 #14 (A: dialog-branch.schema.yaml 신설). 24th 신설 = (a) §1.5' 격상 (CLAUDE.md §1.5 1줄 수정 — file 편집 + sandbox commit 까지만) + (b) **domain_locks 도메인 sub-mutex 시스템** (6 도메인 + 양방향 2 — D-A WU-24, D-B WU-31, D-C WU-30, D-D meta-logs forward/reverse, D-E meta-retro forward/reverse, D-F HANDOFF) — 동시 세션 race 0 보장 + (c) scheduled task 1:00 AM hourly 등록 + (d) 본 conversation 세션은 mutex claim 안 함 (정리 only, scheduled run 들이 mode=user-active-deferred 로 picking up). WU-24/30/31 status 변경 없음 (모두 pending spec only)."
+current_wu: WU-24   # 23rd 부터 유지. 24th 가 변경 안 함.
 current_wu_path: 2026-04-19-sfs-v0.4/sprints/WU-24.md
-current_wu_owner:   # 23번째 self claim
-  session_codename: dazzling-sharp-euler
-  claimed_at: 2026-04-25T23:43:12+09:00
-  last_heartbeat: 2026-04-25T23:43:12+09:00
-  ttl_minutes: 15
-  mode: user-active
-  current_active_intent: "WU-31 (Release tooling Phase 0) spec 신설 — '계획만 만들어 둬' 사용자 명시 지시 정합. 실 bash 구현 보류, 다음 세션 사용자 컨펌 후."
+current_wu_owner: null   # 24번째 = 본 conversation 정리만, mutex claim 안 함. scheduled run 들 (1:00 AM 부터 hourly) 이 mode=user-active-deferred 로 자유 claim. 도메인 sub-mutex 는 frontmatter 의 domain_locks block 참조.
 released_history:
-  last_owner: adoring-trusting-feynman
-  last_claimed_at: 2026-04-25T22:47:00+09:00
-  last_released_at: 2026-04-25T23:14:12+09:00   # 사용자 명시 '본 세션 종료' → 자연 release
-  last_reason: "22번째 세션 user-active. 21st mutex 자연 release + 22nd self claim 후 사용자 §7 결정 7항목 일괄 수신 + 8 step batch 일괄 진행. gates.md 신설 (sfs CLI 7-gate enum SSoT) + CLAUDE.md §1.14 ≤200 lines 메타 규칙 신설 + §14 → solon-status-report.md 분리 (CLAUDE.md 214→167 lines, P-06 후보) + WU-23 §7 7항목 resolved (WU22-D3~D9 frontmatter) + WU-30 (F-04 fix) 신설 + WU-24 (#1 sfs slash 구현 part 1) entry 준비 (frontmatter + 구현 spec). 사용자 명시 '본 세션 종료' → 자연 release. 다음 세션 default = WU-24 step-1 (실 bash 구현). push 사용자 터미널."
-  last_final_commits: [bf180de, a35b669, 7be62b4, d1189c6, c1f1fa3, b990b8b, 7923336]   # 8 step batch 7 wip commits + 본 release commit 후속
-  prior_owner: trusting-stoic-archimedes
-  prior_claimed_at: 2026-04-25T17:37:22+09:00
-  prior_released_at: 2026-04-25T22:47:00+09:00   # 22번째 진입 시 자연 release (mode=user-active-deferred 4시간 위임 시간 도과 + 사용자 복귀)
-  prior_reason: "21번째 세션 user-active-deferred (사용자 4시간 운동 부재 자율 작업 위임). 3-agent 합의 protocol 도입 + .claude/agents/ 페르소나 alt B 등록 + WU-23 신설/close (V-1 vote PASS effective 3/3, 6 명령 contract spec 확정) + cd41dff cleanup + P-04/P-05 후보 + HANDOFF v3.5→v3.6 sync. 22번째 진입 시 사용자 §7 결정 7항목 수신 후 자연 release."
-  prior_final_commits: [a66cf2e, f11dd4f, 1e0e6f1, 9f146e3, 449c4a6, 7ca88b0, a9dc7a5, 8215c43]   # WU-22 close (20th 작업 backfill) + 21st 자율 작업 commits 7건
-  older_owner: epic-brave-galileo
-  older_claimed_at: 2026-04-25T10:47:00+09:00
-  older_released_at: 2026-04-25T17:37:22+09:00   # 21번째 진입 시 자연 release (자발 release 안 했지만 21번째가 정상 claim)
-  older_reason: "20번째 세션 user-active, takeover. 19번째 hang 을 stale-mutex takeover. 사용자 'ㄴㄴ 이어받아서 바로 진행 ㄱㄱ' 명시 confirm 후 §1.12 충족. WU-22 close (β themed-bundles 채택) + sprints/_INDEX.md WU-21/WU-22 row 동시 추가 + §7 takeover 기록 (P-04 learning pattern 표준)."
-  older_final_commits: [a66cf2e]   # WU-22 close commit
-  oldest_owner: eager-elegant-bell
-  oldest_claimed_at: 2026-04-25T09:48:00+09:00
-  oldest_released_at: 2026-04-25T10:47:00+09:00   # 20번째 takeover 시점. 자발 release 안 함, hang.
-  oldest_reason: "19번째 세션 user-active. WU-22 신설 + 8후보 1-pager + α/β/γ 그루핑 (wip 3471c12). 사용자 결정 β 수신 이후 hang (약 56분, 파일 수정 0 / 커밋 0). 20번째 세션이 stale takeover. P-04 learning pattern 후보."
-  oldest_final_commits: [3471c12]   # 19번째 wip 만
-  # 18번째 (confident-loving-ride) 가 rolling N=4 에서 drop — scheduled_task_log 에 trace 유지 (09:45 + 09:55 entries)
-  # 17번째 (admiring-fervent-dijkstra), 16번째 (nice-kind-babbage), 15번째 (admiring-nice-faraday) 도 trace 유지
+  last_owner: dazzling-sharp-euler
+  last_claimed_at: 2026-04-25T23:43:12+09:00
+  last_released_at: 2026-04-25T23:55:00+09:00   # 사용자 manual commit + push 완료 (10f5e8f 까지, 24th 진입 시 ahead=0 확인)
+  last_reason: "23번째 세션 user-active. WU-31 (Release tooling Phase 0) 신설 spec only + 사용자 결정 (옵션 β + '계획만') + sandbox file:// clone 패턴 채택 (단기 α 변형) + §1.5' 격상 결정 (24th 첫 작업) + .git/index.lock FUSE bypass 사고 (P-08 후보, 복구 완료, commit 사용자 manual). 자연 release."
+  last_final_commits: [beb9f0e, 3a7693e, 10f5e8f]   # WU-31 신설 + resume_hint v9→v10→v11 + 운영 규칙 16~20
+  prior_owner: adoring-trusting-feynman
+  prior_claimed_at: 2026-04-25T22:47:00+09:00
+  prior_released_at: 2026-04-25T23:14:12+09:00
+  prior_reason: "22번째 세션 user-active. 8 step batch — gates.md 신설 + CLAUDE.md §1.14 + §14 분리 + WU-23 §7 7항목 resolved + WU-30 + WU-24 entry."
+  prior_final_commits: [bf180de, a35b669, 7be62b4, d1189c6, c1f1fa3, b990b8b, 7923336, cb1d85a]
+  older_owner: trusting-stoic-archimedes
+  older_claimed_at: 2026-04-25T17:37:22+09:00
+  older_released_at: 2026-04-25T22:47:00+09:00
+  older_reason: "21번째 세션 user-active-deferred (4시간 자율 위임). 3-agent 합의 + alt B persona + WU-23 close + P-04/P-05 후보."
+  older_final_commits: [a66cf2e, f11dd4f, 1e0e6f1, 9f146e3, 449c4a6, 7ca88b0, a9dc7a5, 8215c43]
+  oldest_owner: epic-brave-galileo
+  oldest_claimed_at: 2026-04-25T10:47:00+09:00
+  oldest_released_at: 2026-04-25T17:37:22+09:00
+  oldest_reason: "20번째 세션 user-active takeover. 19번째 hang stale takeover + WU-22 close (β) + sprints/_INDEX 갱신."
+  oldest_final_commits: [a66cf2e]
+  # 20번째 (epic-brave-galileo) 까지 rolling N=4. 19번째 (eager-elegant-bell), 18번째 (confident-loving-ride), 17번째 (admiring-fervent-dijkstra), 16번째 (nice-kind-babbage), 15번째 (admiring-nice-faraday) 는 scheduled_task_log 에 trace 유지.
 
 # ── scheduled_task_log (16번째 세션 신설, 17번째 helper 화) ──────────
 # Cowork scheduled_task hourly auto-resume 의 explicit trace. rolling N=20.
 # 필드: ts (ISO8601 +09:00) · codename · check_exit · action · ahead_delta
 # 18번째 세션은 user-active (scheduled 아님) 이지만 trace 연속성 위해 한 줄 append.
 scheduled_task_log:
+  - ts: 2026-04-26T00:45:32+09:00
+    codename: serene-sharp-edison
+    check_exit: 0
+    action: "24번째 세션 user-active 정리만 (mutex claim 안 함). 23rd 자연 release 후 진입. 사용자 결정 D3 (dual-track 유지) + D6 (WU-31 default 4건 OK) + D7 #14 (A schema 신설) 수신. 24th 신설 = §1.5' 격상 (CLAUDE.md 1줄 수정) + domain_locks 도메인 sub-mutex 시스템 (6 + 양방향 2) + scheduled task 1:00 AM hourly 등록 + 본 conversation mutex 안 잡음. 다음 = scheduled run 들 picking up."
+    ahead_delta: "+1 예상 (PROGRESS 갱신 + CLAUDE.md §1.5 수정 commit)"
   - ts: 2026-04-25T23:43:12+09:00
     codename: dazzling-sharp-euler
     check_exit: 0
@@ -97,6 +95,95 @@ scheduled_task_log:
     check_exit: null
     action: "WU-20.1 refresh 작업 staged (commit 누락 → P-03 피해)"
     ahead_delta: "0"
+
+# ── domain_locks (24번째 신설) ─────────────────────────────────────
+# 도메인별 sub-mutex (§1.12 mutex 의 도메인 단위 확장).
+# 동시 세션 (다른 conversation + scheduled run) race 0 보장.
+# 각 도메인은 자기 files_scope 만 만짐 → 거의 disjoint.
+# scheduled run 진입 시: priority 순서로 unowned 중 highest claim → 1 micro-step (5~10분) → release.
+# TTL 30분 — 초과 시 다른 세션이 stale takeover 자동 (mode=user-active-deferred 정합).
+# 양방향 도메인 (D-D / D-E): forward + reverse 동시 owner 가능, forward_idx >= reverse_idx 시 stop.
+# Cross-dependency: D-B 는 D-A.next_step >= 6 (0.3.0-mvp 예약 entry 후) 후만 claim.
+domain_locks:
+  D-A-WU-24:
+    owner: null
+    claimed_at: null
+    last_heartbeat: null
+    ttl_minutes: 30
+    next_step: 1   # WU-24.md §5 row 5 (sfs-common.sh 신설) 부터
+    files_scope:
+      - "2026-04-19-sfs-v0.4/solon-mvp-dist/templates/.sfs-local/scripts/**"
+      - "2026-04-19-sfs-v0.4/solon-mvp-dist/templates/.sfs-local/sprint-templates/**"
+      - "2026-04-19-sfs-v0.4/solon-mvp-dist/templates/.claude/commands/sfs.md"
+      - "2026-04-19-sfs-v0.4/solon-mvp-dist/{VERSION,CHANGELOG.md}"
+    priority: 1
+    spec_doc: "2026-04-19-sfs-v0.4/sprints/WU-24.md"
+  D-B-WU-31:
+    owner: null
+    claimed_at: null
+    last_heartbeat: null
+    ttl_minutes: 30
+    next_step: 1   # WU-31.md §7 row 4 (cut-release.sh 신설) 부터
+    files_scope:
+      - "2026-04-19-sfs-v0.4/scripts/{cut-release,sync-stable-to-dev,check-drift,_README}.{sh,md}"
+      - "2026-04-19-sfs-v0.4/.visibility-rules.yaml"
+    depends_on: "D-A-WU-24.next_step >= 6"   # 0.3.0-mvp 예약 entry 후
+    priority: 2
+    spec_doc: "2026-04-19-sfs-v0.4/sprints/WU-31.md"
+  D-C-WU-30:
+    owner: null
+    claimed_at: null
+    last_heartbeat: null
+    ttl_minutes: 30
+    next_step: 1   # WU-30.md §1 부터
+    files_scope:
+      - "2026-04-19-sfs-v0.4/phase1-mvp-templates/{verify-w0,verify-install}.sh"
+    priority: 3
+    spec_doc: "2026-04-19-sfs-v0.4/sprints/WU-30.md"
+  D-D-meta-logs:
+    owner_forward: null
+    owner_reverse: null
+    forward_idx: 0   # P-04 (1번째)
+    reverse_idx: 5   # P-09 (6번째)
+    list:
+      - P-04-session-hang-takeover
+      - P-05-agent-loader-startup-only
+      - P-06-claude-md-line-limit-meta-rule
+      - P-07-release-tooling-phased
+      - P-08-fuse-bypass-cp-a-broken
+      - P-09-sandbox-file-clone-isolation
+    files_scope:
+      - "2026-04-19-sfs-v0.4/learning-logs/2026-05/P-*.md"
+    stop_when: "forward_idx >= reverse_idx"
+    ttl_minutes: 30
+    priority: 4
+  D-E-meta-retro:
+    owner_forward: null
+    owner_reverse: null
+    forward_idx: 0   # 11번째 세션
+    reverse_idx: 12  # 23번째 세션
+    list: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+    files_scope:
+      - "2026-04-19-sfs-v0.4/sessions/**"
+    stop_when: "forward_idx >= reverse_idx"
+    ttl_minutes: 30
+    priority: 5
+  D-F-meta-handoff:
+    owner: null
+    claimed_at: null
+    last_heartbeat: null
+    ttl_minutes: 30
+    files_scope:
+      - "2026-04-19-sfs-v0.4/HANDOFF-next-session.md"
+      - "2026-04-19-sfs-v0.4/NEXT-SESSION-BRIEFING.md"
+    priority: 6
+
+# 공통 영역 — last-writer-wins (§1.5' 정합으로 git race 0)
+shared_files:
+  - "2026-04-19-sfs-v0.4/PROGRESS.md"           # 매 step heartbeat
+  - "2026-04-19-sfs-v0.4/sprints/_INDEX.md"     # 도메인 종료 시만
+  - "2026-04-19-sfs-v0.4/sprints/WU-*.md"       # 자기 도메인 WU 만
+
 purpose: "context reset 시 다음 세션이 본 파일 1개만 읽고 즉시 이어받을 수 있도록, 매 micro-step 마다 덮어쓰는 live snapshot."
 
 companions:
@@ -127,83 +214,59 @@ resume_hint:
   trigger_positive: [ㄱㄱ, 고, ㅇㅋ, ok, OK, 시작, 가자, ㅇㅇ, 진행, go, Go, start, "이전 세션 이어서", "이어서 ㄱㄱ", "이어서", 이어, "이어서 진행"]
   trigger_negative: [ㄴㄴ, 잠깐, stop, 아니, 중단, 다른거, 다른, no]
   default_action: |
-    🚨 **24번째 진입 첫 step = 23rd 미완 commit 마무리 (사용자 manual)**:
+    🎯 **scheduled run / 다른 세션 진입 표준 절차** (24th 신설, 1:00 AM hourly + 사용자 다른 conversation 양쪽 정합):
 
-    0a. **`.git/index.lock` 제거** — 23rd FUSE bypass 사고로 stale 0-byte lock 남음 (claude 권한으로 unlink 불가). 사용자 Mac 터미널:
-        ```sh
-        cd ~/agent_architect
-        rm -f .git/index.lock
-        git status   # 정확히 3 파일만 보여야: M PROGRESS / M _INDEX / ?? WU-31
-        ```
-    0b. **23rd commit (사용자 manual)** — outputs/23rd-session-backup/RECOVERY.md 의 commit 명령 그대로:
-        ```sh
-        git add 2026-04-19-sfs-v0.4/sprints/WU-31.md \
-                2026-04-19-sfs-v0.4/sprints/_INDEX.md \
-                2026-04-19-sfs-v0.4/PROGRESS.md
-        git commit -F outputs/23rd-session-backup/COMMIT-MSG.txt
-        git push origin main
-        ```
-    0c. **사용자가 "이전 세션 이어서 ㄱㄱ" 신호** → 본 default_action step 1~ 자동 진행.
+    1. **CLAUDE.md SSoT Read** — §1 14규율 + §1.5' (commit/push 사용자 manual) + §1.12 mutex + §1.14 ≤200 lines.
+    2. **PROGRESS.md (본 파일) Read** — frontmatter `domain_locks` + `current_wu_owner` 확인.
+    3. **scripts/resume-session-check.sh 실행** — exit 0 확인 (아니면 원인 PROGRESS 기록 후 종료).
+    4. **§1.12 + domain_locks 통합 mutex check**:
+       - `current_wu_owner=null` → 자유 진행 (자기 codename 안 잡음, 도메인만 잡음, mode=user-active-deferred)
+       - `current_wu_owner != null` + 다른 codename + TTL 미만 + mode=user-active → STOP + 사용자 confirm
+       - TTL 초과 stale → mode 확인 후 자동 takeover (user-active-deferred 한정)
+    5. **domain_locks scan (priority 1→6)**:
+       - D-A WU-24 → D-B WU-31 (D-A.next_step >= 6 cross-dep) → D-C WU-30 → D-F HANDOFF → D-D fwd → D-D rev → D-E fwd → D-E rev
+       - unowned + dep 통과 중 highest priority claim (owner=자기 codename, claimed_at, last_heartbeat, ttl_minutes=30)
+    6. **1 micro-step 진행** (5~10분, WU spec §5 row 그대로). 양방향 도메인은 forward_idx / reverse_idx 기준.
+    7. **release** — owner=null + last_step / forward_idx / reverse_idx 갱신.
+    8. **PROGRESS heartbeat** (frontmatter `last_overwrite`) + **scheduled_task_log entry append** (helper `scripts/append-scheduled-task-log.sh`).
+    9. **본문 ② In-Progress + ③ Next 1줄 갱신**.
+    10. **WU 전환 발생 시 Solon Status Report** (code fence, `solon-status-report.md` v0.6.3 spec).
+    11. **종료** — git commit/push 안 함 (§1.5'). 사용자 깬 후 누적 결과 검토 + manual commit + push.
 
-    1. **scripts/resume-session-check.sh 실행 (v0.3)** — exit 0 예상.
-    2. **§1.12 mutex**: 23rd 자연 release 후 null 또는 24th self claim.
-    3. **git status** + ahead 확인. 23rd commit 됐으면 ahead = +0 (push 후) 또는 +1 (push 전).
-    4. **🚨 sandbox file:// clone 패턴 채택 (23rd 사용자 결정 — α 변형 / β 보강)** — 본 세션부터 claude 가 host `.git` 직접 mutate 안 함:
-        ```sh
-        # 24th 진입 직후 sandbox 안에서 1회 setup
-        SRC=/sessions/<codename>/mnt/agent_architect
-        WORK=/tmp/work-24-clone
-        rm -rf $WORK && git clone file://$SRC $WORK
-        cd $WORK
-        # 이후 모든 git 작업 (add/commit) 은 $WORK 안에서
-        # 결과는 patch 또는 file:// push back to $SRC
-        ```
-        - claude file 편집은 host work tree (`$SRC/...`) 직접 OK (사용자 commit 위해)
-        - claude git add/commit 은 `$WORK` 안에서만 (lock/ref/index 오염 영향 0)
-        - 결과 export = `git format-patch` 또는 `git diff` 출력 → outputs/ 백업
-        - 또는 host로 push back: `git push file://$SRC main` (host .git lock 정상 시)
-    5. **§1.5' commit-manual 격상 결정 적용** (23rd 사용자 결정):
-        - CLAUDE.md §1.5 = "AI 는 local commit 까지만, push 는 사용자 터미널"
-        - **24th 변경**: "AI 는 file 편집까지만, **commit + push 둘 다 사용자 터미널**" (1줄 수정 필요, 24th 첫 작업)
-        - claude 의 git 작업 = `git status` / `git diff` / commit message 초안 + sandbox clone 안 commit (host 미반영) 까지
-    6. **default = WU-24 + WU-31 병렬** (23rd 사용자 결정 "병렬 ㄱㄱ"):
-        - 한 세션에서 둘 중 하나는 실 bash 구현 + 다른 하나는 spec 정합성 검증
-        - 추천 순서 = WU-24 step-1 우선 (sfs slash 가 0.3.0-mvp release cut 의 첫 대상이므로) + WU-31 은 spec 정합성 검증 후 step-1 (sfs 검증분 sync 자동화 직전)
-    7. **WU-24 step-1**: WU-24.md §5 체크리스트 row 5~10 — sfs-common.sh / sfs-status.sh / sfs-start.sh / sprint-templates 4 / adapter dispatch / VERSION+CHANGELOG / dry-run sandbox.
-    8. **WU-31 step-1**: WU-31.md §7 체크리스트 row 4~12 — cut-release.sh / sync-stable-to-dev.sh / check-drift.sh / .visibility-rules.yaml / scripts/_README.md / dry-run sandbox.
-    9. **CLAUDE.md §1.5 → §1.5' 수정 1줄** — 사용자 본인 또는 24th 첫 file 편집으로:
-        ```diff
-        - AI 는 local commit 까지만. `git push origin *` 은 **사용자 터미널** 에서만 실행.
-        + AI 는 file 편집 + sandbox file:// clone 안 commit 까지만. host repo 의 `git add/commit/push` 는 **사용자 터미널** 에서만 실행 (P-08 사고 방지, 23rd 결정).
-        ```
-    10. 대안 메뉴 (사용자 다른 길 선택 시):
-       (a) **WU-24 단독 진행** (병렬 안 하고 WU-31 보류)
-       (b) **WU-31 단독 우선** (release tooling 부터 깔끔, 0.3.0-mvp release 깔끔)
-       (c) **WU-30 (F-04 fix) 먼저**
-       (d) **CLAUDE.md §1.5 수정만 + 작업 보류** (인프라 정리 우선)
-       (e) **장기 ε (VM) 채택 검토** — UTM/Multipass/Lima 셋업 절차 + cowork 동작 검증 (23rd 사용자 장기 결정 항목)
-       (f) **dual-track / single-track OSS 전환 재논의**
-       (g) **push** (사용자 터미널)
-       (h) **Claude Code 재시작** — P-05 fallback A 졸업, native subagent 활성
-       (i) Phase 1 킥오프 실전 = D-day 2026-04-27 월
-       (j) 11~23번째 세션 retrospective 실체화
-       (k) HANDOFF mutex_state_schema 재sync + P-04~P-09 learning pattern 실체화
-       (l) `.visibility-rules.yaml` scope 확장 (WU-31 §4 그대로)
-       (m) WU-32 (Phase 1 GitHub Action 알림) 또는 WU-33 (Phase 2 tag trigger) 신설
-    11. **scheduled task auto-resume 이면** — step 4~5 sandbox setup + cleanup 만, 새 WU 착수 금지.
+    ## 사용자 결정 (24th resolved, 적용 OK)
+    - D3 dual-track 유지 (single 전환 보류 — 영향범위 큼)
+    - D6 WU-31 default 4건 모두 OK (allowlist 8파일 + checksum sha256 + commit msg 표준 + Phase timing)
+    - D7 #14 dialog-branch.schema.yaml 신설 (A 채택, 우선순위 낮음)
+
+    ## 절대 금지
+    - 새 WU 신설 (사용자 결정 영역, §1.12 safety_lock)
+    - git add/commit/push (§1.5')
+    - destructive git
+    - 사용자 유보 결정 자율 해석 (D7 #18/#19, dual-track 단일화 등)
+    - TTL 30분 초과 작업
+
+    ## 대안 메뉴 (사용자 깬 후 선택 시)
+    (a) Phase 1 킥오프 실전 = D-day 2026-04-27 월
+    (b) Claude Code 재시작 (P-05 fallback A 졸업, native subagent 활성)
+    (c) dual-track / single-track OSS 전환 재논의
+    (d) WU-32 (Phase 1 GitHub Action 알림) / WU-33 (Phase 2 tag trigger) 신설
+
+    ## 참고: sandbox file:// clone (23rd 채택, 24th §1.5' 격상으로 우선순위 ↓)
+    24th §1.5' = AI 의 git commit 권한 자체 회수. host `.git` mutate 0. file 편집 + PROGRESS heartbeat 만. sandbox clone 은 사용자가 patch 검토 필요할 때만 사용:
+    ```sh
+    SRC=/sessions/<codename>/mnt/agent_architect
+    WORK=/tmp/work-24-clone
+    rm -rf $WORK && git clone file://$SRC $WORK
+    ```
   on_negative: |
-    "현 상태만 요약 보고 후 대기" — 23rd 세션 = WU-31 (Release tooling Phase 0) frontmatter + spec only 신설.
-    23rd 후반 §1.6 FUSE bypass cp -a 사고 (P-08 후보) → ref/index 복구 완료, 단 commit 은 사용자 manual 필요 (.git/index.lock unlink 거부).
-    사용자 23rd 결정 = (a) WU-24 + WU-31 병렬 / (b) sandbox file:// clone 패턴 (α 변형 = β 보강) / (c) 장기 ε VM.
-    활성 WU 3 (WU-24 + WU-30 + WU-31), 모두 pending. 사용자 결정 대기 = 0건.
-    git ahead = +0 (push 후 가정) 또는 23rd 변경 commit 안 된 상태 (사용자 manual 필요).
-    dual-track / single-track OSS 전환 결정 = 23rd 보류 유지.
-  on_ambiguous: "1-line clarifying Q: '23rd 미완 commit 부터 manual 처리 (rm .git/index.lock + git add + commit + push) 한 다음 sandbox file:// clone 패턴으로 WU-24 + WU-31 병렬 진행할까?'"
+    "현 상태만 요약 보고 후 대기" — 24th 정리 완료 (§1.5' + domain_locks + scheduled task 1:00 AM hourly 등록).
+    활성 WU 3 (WU-24/30/31, 모두 spec only). 사용자 결정 대기 = 0건 (D3/D6/D7 resolved).
+    scheduled run 들은 1:00 AM 부터 hourly 자동 picking up (mode=user-active-deferred).
+    domain_locks 6 + 양방향 2 = race 0 보장. 공통 영역 (PROGRESS / sprints/_INDEX) 은 last-writer-wins.
+  on_ambiguous: "1-line clarifying Q: 'domain_locks priority 1 (D-A WU-24 step-1.1 sfs-common.sh) 부터 1 micro-step 진행할까, 아니면 다른 도메인 우선?'"
   on_resume_signal: |
-    사용자 "이전 세션 이어서 ㄱㄱ" 등 trigger_positive 매칭 시:
-    1. step 0a/0b 사용자 manual 절차 안내 (lock 제거 + commit + push) — 단 사용자가 이미 했다면 step 1~ 진행
-    2. 사용자 "manual 끝" / "lock 제거 완료" / "commit 했어" 같은 confirm 받으면 step 1~11 자동
-    3. confirm 없이 trigger 만이면 step 1 부터 진행하되 step 0 은 prereq 로 명시 (조용히 ahead/status 확인 후 lock 흔적 있으면 ⚠️ 마커 + 사용자 알림)
+    사용자 "이어서 ㄱㄱ" 등 trigger_positive 매칭 시 default_action step 1~11 자동 진행.
+    scheduled run auto-resume 도 동일 (mode=user-active-deferred, TTL 30분, 1 micro-step only).
   safety_locks:
     - "원칙 2 (self-validation-forbidden): A/B/C 의미 결정 자동 실행 금지"
     - "§1.5: git push 자동 실행 금지 — 사용자 터미널에서만 (commit auto, push manual)"
@@ -230,7 +293,12 @@ resume_hint:
     - "24th 부터 §1.5' 격상 결정: AI 의 commit 권한도 회수. file 편집 + sandbox clone commit 까지만. host repo 의 add/commit/push 는 사용자 터미널 만. CLAUDE.md §1.5 1줄 수정 = 24th 첫 작업."
     - "23번째 commit message 전달 패턴: heredoc inline (`git commit -F - << EOF ... EOF`) 우선, outputs/COMMIT-MSG-*.txt 는 fallback only. outputs path relative 사고 (cd ~/agent_architect 후 outputs/... 안 잡힘) 계기. RECOVERY.md / 인수인계 문서에 heredoc block 직접 포함."
     - "23번째 commit 명명 표준 명문화: wip(NNth/scope/step): ... / WU-N: ... (final) / WU-N.1: ... (refresh) / release: vX.Y.Z-mvp / sync(stable): <sha> / chore(NNth/scope): .... CLAUDE.md §8 + 본 운영 규칙 양쪽 SSoT."
-  version: 11   # v10 (23rd 후반) → v11 (23rd 종료: 운영 규칙 19/20 추가 = commit message 전달 패턴 heredoc 우선 + commit 명명 표준 명문화)
+    - "24번째 §1.5' 격상 (commit-manual): AI commit 권한도 회수. CLAUDE.md §1.5 1줄 수정 완료 (file 편집 + sandbox file:// clone 안 commit 까지만, host repo add/commit/push 모두 사용자 터미널 만). P-08 (fuse-bypass-cp-a-broken) 사고 방지 + 23rd 결정 자연 적용."
+    - "24번째 domain_locks 신설 (도메인 sub-mutex): §1.12 mutex 의 도메인 단위 확장. 6 도메인 (D-A WU-24, D-B WU-31, D-C WU-30, D-D meta-logs, D-E meta-retro, D-F HANDOFF) + 양방향 2 (D-D, D-E forward/reverse). priority 1~6 + TTL 30분 + cross-dependency (D-B depends on D-A.next_step >= 6). 동시 세션 race 0 보장 — 실무 협업 패턴 (도메인 분리 + 순차 step + 양방향 메타). files_scope 거의 disjoint."
+    - "24번째 본 conversation 세션 mutex 안 잡음: 24th 정리 only. current_wu_owner=null. scheduled run 들이 mode=user-active-deferred 로 picking up. 1:00 AM hourly scheduled task 등록. domain_locks 가 actual lock primitive — 사용자 결정 D3/D6/D7 수신 + §1.5' 1줄 수정 + scheduled task description 작성 + PROGRESS 갱신 의 정리 작업만."
+    - "24번째 사용자 결정 3건 resolved: D3 dual-track 유지 (single 전환 영향범위 큼 → 보류) / D6 WU-31 spec default 4건 모두 OK (allowlist 8파일 + checksum sha256 + commit msg 표준 + Phase timing) / D7 #14 dialog-branch.schema.yaml 신설 (A 채택, 우선순위 낮음) — D7 #18/#19 는 W10 schema 작업 시 자연 처리."
+    - "24번째 1 micro-step only 원칙: scheduled run 매 사이클 = 1 micro-step (5~10분). TTL 30분 안 끝나게 micro 단위. R3 PROGRESS overwrite race 자동 차단."
+  version: 12   # v11 (23rd 종료) → v12 (24th: §1.5' + domain_locks + 본 세션 mutex 안 잡음 + 사용자 결정 D3/D6/D7 = 운영 규칙 21~26 추가)
 ---
 
 # PROGRESS — live snapshot (23번째 세션 dazzling-sharp-euler, WU-31 신설 spec only / WU-24 current 유지)
