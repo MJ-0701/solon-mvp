@@ -1,9 +1,9 @@
 ---
 doc_id: handoff-2026-04-20-solon-v0.4-r3-complete
 title: "인수인계 (Pointer Hub v3.0-reduced) — 사용자 지시 SSoT + 참조 허브"
-version: 3.5-reduced
+version: 3.6-reduced
 created: 2026-04-20
-updated: 2026-04-25 (17번째 세션 admiring-fervent-dijkstra scheduled auto-resume: mutex_state_schema sync + append-scheduled-task-log.sh helper 신설 + check.sh v0.3 반영)
+updated: 2026-04-25 (21번째 세션 trusting-stoic-archimedes user-active-deferred 자율 작업: WU-23 close (V-1 vote PASS) + 페르소나 alt B 등록 + P-04/P-05 신설 + F-04 escalate + mutex_state_schema sync v3.6)
 author: "Claude (direct 지시 by 채명정)"
 valid_until: "WU 규율 유지되는 동안 계속 (현재 상태는 PROGRESS.md, 이관은 sprints/_INDEX.md, 본 파일은 frontmatter + §0 사용자 지시 원문 SSoT 역할)"
 status: "Pointer hub. 현재 상태는 PROGRESS.md 참조."
@@ -12,6 +12,15 @@ session_continuity_note: |
   상태 SSoT 가 아니며 (1) 사용자 지시 raw 텍스트 SSoT + (2) account_context 고정 사실 + (3)
   user_new_directive 아카이브 + (4) BLOCKED / Phase 2 포인터 역할만 한다. 현재 상태 확인은
   PROGRESS.md frontmatter / sprints/_INDEX.md / sessions/_INDEX.md 를 사용하라.
+
+  21번째 세션 (trusting-stoic-archimedes, user-active-deferred 자율 작업 mode) 추가 사항:
+  - 3-agent 합의 protocol (CEO + CTO + CPO 동등 권한 + 2/3 다수결) 도입 — `.claude/agents/{generator,evaluator,planner}.md` 신설.
+    Q1~Q7 사용자 답변 (default + Q2 alt B) 반영. fallback A (general-purpose + Read .claude/agents/<persona>.md) 패턴 운영.
+  - WU-23 close (#1 sfs slash 6 명령 minimal contract spec, V-1 vote PASS).
+  - F-04 (verify-w0.sh false-positive 2건) → ⚠️ escalate (정규식 트레이드오프 사용자 의존, WU-30 후보).
+  - learning-logs: P-04 (session-hang-takeover) + P-05 (agent-loader-startup-only) 실체화.
+  - 사용자 복귀 시 결정 대기 6항목 정리: WU-23 §7 (gate id schema 위치 block 1건 + product decisions 5건) + §7.5 F-04.
+  - 21st 자율 작업 mode = takeover 보호 비활성화 (사용자 명시 위임). 다른 세션 진입 시 §1.12 normal mode 복귀.
 account_context:
   current: "회사 계정 (jack2718@green-ribbon.co.kr) — GitHub origin (MJ-0701/solon) 에 로컬 커밋 존재"
   will_move_to: "채명정 개인 계정 (약 1주 이내) — 계정 간 session fork 불가"
@@ -33,14 +42,28 @@ queue_pointers:
   phase1_kickoff_date: "2026-04-27 (월) — PHASE1-KICKOFF-CHECKLIST.md §2 W0 선행 필요"
 mutex_state_schema:
   # 세션 종료 시 여기에 기록 (PROGRESS.md 는 live mirror — authoritative source)
-  # 17번째 세션 admiring-fervent-dijkstra 가 sync — 16번째 nice-kind-babbage → 17번째 로 교체.
+  # 21번째 세션 trusting-stoic-archimedes 가 sync — 17번째 admiring-fervent-dijkstra → 21번째 로 교체.
   # 본 필드는 참조용. 최신 release 는 PROGRESS.md frontmatter.released_history.last_* 확인.
   # 16번째부터 scheduled_task_log (PROGRESS.md frontmatter) 가 hourly trace 의 SSoT.
   # 17번째부터 scripts/append-scheduled-task-log.sh helper 가 hourly trace append 의 표준 절차.
-  last_released_session: admiring-fervent-dijkstra
-  last_released_at: 2026-04-25T09:10:00+09:00
-  last_released_reason: "17번째 세션 scheduled auto-resume. 16번째가 남긴 `TBD_16TH_SNAPSHOT` 토큰을 실체 sha `87b60ff` 로 backfill. 사용자 지시 '매 시 마다 스케줄 도니까 인수인계가 확실하게 자동화' 직접 처리: (1) scripts/append-scheduled-task-log.sh helper 신설 — hourly run 마다 한 줄 호출만으로 PROGRESS.md frontmatter scheduled_task_log 에 entry append + N=20 rolling 자동 enforce (race + 누락 방지). (2) resume-session-check.sh v0.2 → v0.3 — check #7 추가 (scheduled_task_log 첫 entry > 90분 시 exit 16, hourly cron 끊김 추적). (3) HANDOFF mutex_state_schema sync. 새 WU 착수 없음 (scheduled task 모드, 원칙 2 준수)."
+  # 20번째부터 §1.12 stale-mutex takeover 시 사용자 명시 confirm 필수 + WU 내부 §N takeover 기록.
+  # 21번째부터 user-active-deferred mode = 사용자 명시 위임 시 takeover 보호 비활성화 (mode 필드).
+  # current_active_* 필드 = 현재 진행 중 세션 정보 (release 시 prior_sessions 로 이동).
+  last_released_session: epic-brave-galileo  # 20th, hang takeover for 19th eager-elegant-bell
+  last_released_at: 2026-04-25T10:47:00+09:00
+  last_released_reason: "20번째 세션 user-active, takeover. 19번째 eager-elegant-bell 가 사용자 β 결정 수신 후 56분 hang (TTL 15분 × 3.7배). 사용자 'ㄴㄴ 이어받아서 바로 진행 ㄱㄱ' 명시 confirm 후 stale-mutex takeover. WU-22 §3 β (themed-bundles) 채택 문서 반영 + §5 체크리스트 + §7 takeover 기록 + sprints/_INDEX.md (WU-21/WU-22 row) + PROGRESS 덮어쓰기. WU-22 close. P-04 learning pattern 후보 (21번째 세션이 실체화)."
+  current_active_session: trusting-stoic-archimedes  # 21번째 세션 (still active 본 sync 시점, 자율 작업 종료 시 release)
+  current_active_mode: user-active-deferred   # 사용자 4시간 자율 작업 위임. takeover 보호 비활성화. P-04 변종.
+  current_active_claimed_at: 2026-04-25T17:37:22+09:00
+  current_active_intent: "WU-23 close (V-1 vote PASS) + 페르소나 .claude/agents/ 등록 (alt B mid-session reload 안 됨, fallback A 운영) + cd41dff cleanup + P-04/P-05 신설 + F-04 escalate + HANDOFF sync (본 sync). 자율 작업 종료 시 release."
   prior_sessions:
+    - session: eager-elegant-bell  # 19번째, hang (β 수신 후 56분 정지) — 20번째가 takeover. P-04 sample case.
+      released_at: 2026-04-25T10:47:00+09:00   # 자발 release 아님, 20번째 force release.
+      released_via: forced (stale takeover by 20th, user confirm "ㄴㄴ 이어받아서 바로 진행 ㄱㄱ")
+    - session: confident-loving-ride  # 18번째, user-active D-2 dry-run
+      released_at: 2026-04-25T09:55:00+09:00
+    - session: admiring-fervent-dijkstra  # 17번째, scheduled_task_log helper 신설 + check.sh v0.3
+      released_at: 2026-04-25T09:10:00+09:00
     - session: nice-kind-babbage  # 16번째, scheduled_task_log 신설 + check.sh v0.2 + cd41dff backfill
       released_at: 2026-04-25T07:30:00+09:00
     - session: admiring-nice-faraday  # 15번째, P-03 resolved + check.sh v0.1
