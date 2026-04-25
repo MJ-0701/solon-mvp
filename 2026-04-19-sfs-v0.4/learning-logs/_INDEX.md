@@ -2,7 +2,7 @@
 doc_id: learning-logs-index
 title: "learning-logs/ — 장기 학습 패턴 자산 인덱스"
 visibility: raw-internal
-updated: 2026-04-21
+updated: 2026-04-25   # 21번째 세션 trusting-stoic-archimedes — P-04 / P-05 신설.
 ---
 
 # learning-logs/ — 학습 패턴 인덱스
@@ -24,6 +24,16 @@ updated: 2026-04-21
 | P-fuse-git-bypass | FUSE mount .git/index.lock 경합 우회 | oss-public | WU-7 ~ WU-14 (반복 관찰) | 0 | 후보 (WU-18) |
 | P-compact-recovery | Compact mid-WU 복구 절차 (tmp/ + wip commit 보존) | raw-internal | WU-10 실전 | 0 | 후보 (WU-18) |
 | P-two-step-wu-refresh | WU + WU.1 forward sha backfill 패턴 | oss-public | WU-7.1 / WU-10.1 / WU-14.1 | 0 | 후보 (WU-18) |
+
+### 2026-05 (WU-15 ~ WU-23 실체화)
+
+| pattern_id | title | visibility | captured_from | reuse_count | status |
+|:---|:---|:-:|:---|:-:|:-:|
+| [P-01-solon-mvp-scope-pivot](2026-05/P-01-solon-mvp-scope-pivot.md) | solon-mvp MVP scope pivot (Phase 1) | business-only | WU-20 (amazing-happy-hawking) | 0 | resolved |
+| [P-02-dev-stable-divergence](2026-05/P-02-dev-stable-divergence.md) | dev (docset) ↔ stable (solon-mvp) divergence + R-D1 채택 | business-only | WU-20 Phase A Back-port (laughing-keen-shannon) | 1 | resolved |
+| [P-03-staged-uncommitted-on-session-crash](2026-05/P-03-staged-uncommitted-on-session-crash.md) | 세션 종료 시 staged diff 유실 위험 + check.sh 자동 감지 | raw-internal | WU-20.1 (admiring-nice-faraday, 15번째) | 1 | resolved |
+| [P-04-session-hang-takeover](2026-05/P-04-session-hang-takeover.md) | 세션 활성 유지하지만 진척 0 (hang) → 다음 세션이 mutex stale takeover | raw-internal | WU-22 (epic-brave-galileo, 20번째 takeover) | 1 | resolved |
+| [P-05-agent-loader-startup-only](2026-05/P-05-agent-loader-startup-only.md) | Claude Code agent loader 가 startup-only — mid-session 등록 reload 안 됨 | business-only | WU-23 (trusting-stoic-archimedes, 21번째 fallback A) | 1 | resolved |
 
 ---
 
