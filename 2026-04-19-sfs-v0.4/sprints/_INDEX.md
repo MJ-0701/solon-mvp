@@ -2,7 +2,7 @@
 doc_id: sprints-index
 title: "sprints/ — WU (Work Unit) 파일 목록 (v2)"
 visibility: raw-internal
-updated: 2026-04-25   # 21번째 세션 trusting-stoic-archimedes — WU-22 backfill (a66cf2e) + WU-23 신설/close + final_sha backfill (1e0e6f1). 양쪽 row 모두 정상 sha 보유. 후속 자율 작업 진행 중.
+updated: 2026-04-25   # 22번째 세션 adoring-trusting-feynman — 21st mutex 자연 release + 22nd self claim + 사용자 §7 결정 7항목 일괄 수신 + 8 step 일괄 진행 (gates.md 신설 + CLAUDE.md §1.14 ≤200 lines 메타 규칙 + §14 분리 + WU-23 §7 resolved + WU-30 신설 + WU-24 entry).
 ---
 
 # sprints/ — WU 파일 인덱스
@@ -15,7 +15,12 @@ updated: 2026-04-25   # 21번째 세션 trusting-stoic-archimedes — WU-22 back
 
 ## 활성 WU (status: in_progress / pending)
 
-_현재 활성 WU 없음._ WU-23 close (V-1 PASS, 3 conditions applied) 후 WU-24 entry 는 **사용자 복귀 시 §7.1 결정 (gate id schema 정의 위치) 선행 필요** — `sprints/WU-23.md §7` 참조.
+| WU | title | status | opened | session_opened | path |
+|:--:|:---|:--:|:---|:---|:---|
+| **WU-24** | #1 sfs slash 구현 part 1 (`/sfs status` + `/sfs start`) | pending | 2026-04-25 | adoring-trusting-feynman (22nd) | [WU-24.md](WU-24.md) |
+| WU-30 | F-04 verify-w0.sh fix (정규식 minimal + 두 검증기 분리) | pending | 2026-04-25 | adoring-trusting-feynman (22nd) | [WU-30.md](WU-30.md) |
+
+> **22nd 세션 결과**: WU-23 §7 사용자 결정 7항목 일괄 resolved (WU22-D3~D9). WU-24 = current_wu (frontmatter + 구현 spec only, 실 bash 코드 다음 세션). WU-30 = 신설 (frontmatter + 작업 plan, 실 fix 다음 세션 또는 사용자 컨펌 후).
 
 ## 완료 WU (status: done) — v2 네이티브
 
