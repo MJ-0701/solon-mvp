@@ -2,7 +2,7 @@
 doc_id: sprints-index
 title: "sprints/ — WU (Work Unit) 파일 목록 (v2)"
 visibility: raw-internal
-updated: 2026-04-25   # WU-20.1 refresh sha 실체화 (2709fcf) — funny-pensive-hypatia staged + admiring-nice-faraday auto-resume commit
+updated: 2026-04-25   # WU-21 (cd94f65) + WU-22 (TBD_20TH) row 추가 — 20번째 세션 epic-brave-galileo takeover
 ---
 
 # sprints/ — WU 파일 인덱스
@@ -15,7 +15,7 @@ updated: 2026-04-25   # WU-20.1 refresh sha 실체화 (2709fcf) — funny-pensiv
 
 ## 활성 WU (status: in_progress / pending)
 
-_현재 활성 WU 없음._ WU-20.1 (refresh) 도 본 세션 내 close 완료 — 아래 v2 네이티브 섹션 참조.
+_현재 활성 WU 없음._ WU-22 close 로 WU-23 entry 준비 (WU22-D2 사용자 결정 선행 필요 — `sprints/WU-22.md §6`).
 
 ## 완료 WU (status: done) — v2 네이티브
 
@@ -33,6 +33,8 @@ _현재 활성 WU 없음._ WU-20.1 (refresh) 도 본 세션 내 close 완료 —
 | WU-19.1 | WU-19 sha backfill + sprints/_INDEX.md 이동 | `9271f2a` | 2026-04-24 | 2026-04-24 | ecstatic-intelligent-brahmagupta | [WU-19.md](WU-19.md) (refresh 전용) |
 | WU-20 | Solon MVP Distribution 설계 + 실체화 (scope pivot) | `3ca7f56` | 2026-04-24 | 2026-04-24 | amazing-happy-hawking → dreamy-busy-tesla → funny-sweet-mayer | [WU-20.md](WU-20.md) |
 | WU-20.1 | WU-20 sha backfill 확인 + _INDEX.md row 추가 | `2709fcf` | 2026-04-25 | 2026-04-25 | funny-pensive-hypatia → admiring-nice-faraday (auto-resume 실체화) | [WU-20.1.md](WU-20.1.md) (refresh 전용) |
+| WU-21 | Phase 1 킥오프 D-2 dry-run (install.sh + setup-w0.sh sandbox PASS, F-01~F-04 findings) | `cd94f65` | 2026-04-25 | 2026-04-25 | confident-loving-ride | [WU-21.md](WU-21.md) |
+| WU-22 | MVP next-feature roadmap & sequencing (8 후보 1-pager + β release grouping 채택) | `TBD_20TH_SNAPSHOT` | 2026-04-25 | 2026-04-25 | eager-elegant-bell (open + brainstorm) → epic-brave-galileo (close, hang takeover) | [WU-22.md](WU-22.md) |
 
 ## 완료 WU (status: done) — v1 → v2 이관 (WU-16 backfill)
 
