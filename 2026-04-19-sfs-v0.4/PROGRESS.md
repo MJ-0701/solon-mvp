@@ -2,11 +2,15 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-25T09:55:00+09:00
-session: "18번째 세션 `confident-loving-ride` (user-active, D-2). WU-21 완료 + 사용자 push 확인. 인수인계 갱신: v0.2.4-mvp 초기틀 잡힘 확정 (사용자 인식 (A) — Solon 1줄 설치 MVP), 다음 세션 default_action = MVP next-feature 사이클 brainstorming. Phase 1 킥오프 실전은 사용자 본인 D-day 에 직접 실행 (Claude 자동 진행 대상 아님)."
-current_wu: null
-current_wu_path: null
-current_wu_owner: null   # confident-loving-ride release (WU-21 완료 후)
+last_overwrite: 2026-04-25T09:48:00+09:00
+session: "19번째 세션 `eager-elegant-bell` (user-active). 사용자 우선순위 1→2→4→6→5→3→7→8 확정 (2026-04-25 10:00 KST). WU-22 (MVP next-feature roadmap & sequencing plan) 진행 중 — 8 후보 1-pager + 의존성 그래프 + release 그루핑 옵션 α/β/γ 제시 완료. 사용자 결정 (WU22-D1) 대기."
+current_wu: WU-22
+current_wu_path: 2026-04-19-sfs-v0.4/sprints/WU-22.md
+current_wu_owner:
+  session_codename: eager-elegant-bell
+  claimed_at: 2026-04-25T09:48:00+09:00
+  last_heartbeat: 2026-04-25T09:48:00+09:00
+  ttl_minutes: 15
 released_history:
   last_owner: confident-loving-ride
   last_claimed_at: 2026-04-25T09:15:00+09:00
@@ -34,6 +38,11 @@ released_history:
 # 필드: ts (ISO8601 +09:00) · codename · check_exit · action · ahead_delta
 # 18번째 세션은 user-active (scheduled 아님) 이지만 trace 연속성 위해 한 줄 append.
 scheduled_task_log:
+  - ts: 2026-04-25T09:48:00+09:00
+    codename: eager-elegant-bell
+    check_exit: 15   # bracket_sha_unrealized:1:cd41dff (16번째 narrative false-positive, 후속 cleanup TODO)
+    action: "19번째 세션 user-active. 사용자 우선순위 #1→#2→#4→#6→#5→#3→#7→#8 확정. WU-22 신설 (8후보 1-pager + 의존성 그래프 + release 그루핑 α/β/γ). 사용자 결정 대기."
+    ahead_delta: "+1 예상 (WU-22 wip commit + final, 사용자 결정 후)"
   - ts: 2026-04-25T09:55:00+09:00
     codename: confident-loving-ride
     check_exit: 0
@@ -91,11 +100,11 @@ resume_hint:
   trigger_positive: [ㄱㄱ, 고, ㅇㅋ, ok, OK, 시작, 가자, ㅇㅇ, 진행, go, Go, start]
   trigger_negative: [ㄴㄴ, 잠깐, stop, 아니, 중단, 다른거, 다른, no]
   default_action: |
-    0. **scripts/resume-session-check.sh 실행 (v0.3)** — exit 0 이면 진행, 아니면 복구 가이드.
-    1. **§1.12 mutex**: current_wu_owner null → self claim.
+    0. **scripts/resume-session-check.sh 실행 (v0.3)** — exit 0 이면 진행, exit 15 (`<cd41dff>` false-positive narrative) 면 그대로 진행 (16번째 세션이 이미 backfill 완료, narrative 안 잔재).
+    1. **§1.12 mutex**: current_wu_owner 확인. 19번째 (eager-elegant-bell) 가 WU-22 active 면 takeover 협의 (TTL 15분 초과 시 stale).
     2. **git status** + `git rev-list --count origin/main..HEAD` 확인.
-       (18번째 세션 종료 시점 예상: ahead 6 — 2709fcf + 5d4c6c6 + 87b60ff + 17th snapshot + WU-21 commit + 18th snapshot. 사용자 push 대기.)
-    3. **③ Next 메뉴** (원칙 2). **new default = (a) MVP next-feature 사이클 brainstorming** (사용자 명시 의도 2026-04-25 09:55 KST: "mvp 기본기능 어느정도 완료 + 다음 기능 개발배포 준비"):
+    3. **WU-22 active**: 사용자가 옵션 α/β/γ 결정했는지 §3 확인. 결정됨 → WU-22 close + WU-23 (#1 sfs slash detail design) 진입. 미결정 → 결정 받기.
+    3'. (WU-22 종료 후 한정) **③ Next 메뉴** (원칙 2). **new default = WU-23 #1 sfs slash command detail design** (사용자 명시 의도 2026-04-25 09:55 KST: "mvp 기본기능 어느정도 완료 + 다음 기능 개발배포 준비"):
        (a) **MVP next-feature brainstorming** (default) — v0.2.4-mvp 초기틀 잡힘 확정. 다음 release (0.3.x or 0.4.0-mvp) 에 어떤 기능을 넣을지 후보 정리 + 사용자 결정 → plan 문서. 후보 (raw, 사용자 결정 대상):
             · sfs slash command 실제 logic (현재 어댑터에 정의만 있음, 실제 동작 부재)
             · upgrade.sh checksum-based diff preview 정교화
@@ -139,15 +148,24 @@ resume_hint:
   version: 6   # v1 (14번째) → v2 (15번째 P-03) → v3 (16번째 #6) → v4 (17번째 helper + #7) → v5 (18번째 sandbox-dry-run) → v6 (18번째 handoff: MVP next-feature default)
 ---
 
-# PROGRESS — live snapshot (18번째 세션 confident-loving-ride WU-21 완료, mutex released)
+# PROGRESS — live snapshot (19번째 세션 eager-elegant-bell, WU-22 in_progress)
 
-> 🚨 **본 파일 최우선 진입.** mutex **released** by `confident-loving-ride` (2026-04-25T09:45+09:00).
-> 다음 세션은 frontmatter `resume_hint.default_action` 에 따라 self claim 후 진입 — **step 0 (resume-session-check.sh v0.3) 필수**.
-> 18번째 세션 로컬 커밋 예상: **2 개** — (1) WU-21 Phase 1 dry-run 완료 + (2) 본 PROGRESS snapshot. 누적 ahead = 6 (2709fcf + 5d4c6c6 + 87b60ff + 17th snapshot + WU-21 + 18th snapshot). 사용자 터미널 push 대기.
+> 🚨 **본 파일 최우선 진입.** mutex **claimed** by `eager-elegant-bell` (2026-04-25T09:48+09:00).
+> WU-22 = MVP next-feature roadmap brainstorming + sequencing plan. 사용자 우선순위 1→2→4→6→5→3→7→8 확정, **release 그루핑 옵션 (α/β/γ) 결정 대기**.
+> 19번째 세션 로컬 커밋 예상: WU-22 wip + final (사용자 결정 후) + PROGRESS snapshot.
 
 ---
 
 ## ① Just-Finished
+
+### 19번째 세션 (eager-elegant-bell, user-active, 2026-04-25 09:48 KST~)
+
+**사용자 인계 요청 → 8후보 confirm → 우선순위 1→2→4→6→5→3→7→8 확정 → WU-22 신설**.
+
+- **WU-22 신설** — `sprints/WU-22.md` (frontmatter + 본문 §1~§6). 8 후보 1-pager + 의존성 그래프 + release 그루핑 옵션 α/β/γ 제시. status: in_progress.
+- **사용자 결정 대기 (WU22-D1)**: release 그루핑 — α (sequential 8 release) / β (themed bundles 4-5 release, default) / γ (big bang, 권장 X).
+- **mutex claim**: confident-loving-ride 가 09:45 KST 에 release 한 후 09:48 KST 에 eager-elegant-bell claim.
+- **resume-check exit 15 인지**: `<cd41dff>` historical narrative false-positive (16번째 세션이 5d4c6c6 로 이미 backfill 완료한 건의 텍스트 잔재). cleanup 은 사용자 결정 사안으로 후속 처리.
 
 ### 18번째 세션 (confident-loving-ride, user-active, 2026-04-25 09:14→09:45 KST)
 
@@ -188,26 +206,40 @@ resume_hint:
 
 ## ② In-Progress
 
-**없음** — WU-21 완료. mutex released. 다음 세션 진입 대기.
+**WU-22 — MVP next-feature roadmap & sequencing plan** (19번째 세션 eager-elegant-bell, 2026-04-25T09:48+09:00 claim).
 
-활성 WU: 없음. 다음 예약: **Phase 1 킥오프 실전 실행 (D-day 2026-04-27 월, D-2)**.
+- §1 8 후보 1-pager 작성 완료
+- §2 의존성 그래프 정리 완료
+- §3 release 그루핑 옵션 α/β/γ 제시 완료
+- ⏳ **사용자 결정 대기 (WU22-D1)**: α / β / γ 중 택일
+- 결정 후: WU-22 close commit + WU-23 (#1 sfs slash detail design) 진입
+
+활성 WU: **WU-22** (`2026-04-19-sfs-v0.4/sprints/WU-22.md`).
 
 ---
 
-## ③ Next — MVP next-feature 사이클 brainstorming (new default)
+## ③ Next — WU-22 결정 후 → WU-23 (#1 sfs slash detail design)
 
-> 사용자 명시 의도 (2026-04-25 09:55 KST): "mvp 기본기능 어느정도 완료 + 다음 기능 개발배포 준비, 다음 세션부터 이어가자".
-> v0.2.4-mvp 초기틀 잡힘 확정 (사용자 인식 (A) — Solon 1줄 설치 MVP). 다음 release (0.3.x or 0.4.0-mvp) 후보 brainstorming 부터 시작.
+> 사용자 우선순위 (2026-04-25 10:00 KST): **#1 → #2 → #4 → #6 → #5 → #3 → #7 → #8** 확정.
+> WU-22 §3 의 release 그루핑 옵션 (α/β/γ) 결정 후 WU-23 진입.
 
-- **(a, default)** **MVP next-feature brainstorming** — 다음 release 후보 정리 + 사용자 결정 → plan 문서. 후보 (raw, 사용자가 우선순위 결정):
-  - sfs slash command 실제 logic 구현 (현재 어댑터에 정의만 있음, status/start/plan/review/decision/retro 동작 부재)
-  - upgrade.sh checksum-based diff preview 정교화
-  - uninstall.sh 시나리오 보강 (clean removal + .gitignore marker block 정리)
-  - .sfs-local/events.jsonl schema 표준화 (gate verdict + ts + sprint-id 필수 필드)
-  - decisions/ ADR mini 자동 생성 helper
-  - Sprint cycle CLI helper (sprint dir 자동 scaffold, 4 파일 템플릿 동시 생성)
-  - 신규 어댑터 (예: cursor / windsurf / aider)
-  - solon-mvp doctor 진단 스크립트 (.sfs-local 무결성 + VERSION drift 체크)
+**WU-23 entry conditions** (사용자 결정 후 자동 활성):
+
+- WU-22 §3 의 옵션 α/β/γ 중 1개 채택 (또는 변형)
+- WU-22 commit + close
+- WU-23 새 frontmatter 작성 → #1 sfs slash command (`/sfs status`/`start`/`plan`/`review`/`decision`/`retro`) **minimal contract spec**
+- WU22-D2 사용자 결정: 6개 명령 전부 vs 핵심 2-3개 우선 (MVP scope)
+
+**WU-22 결정 후 후속 후보 (사용자 우선순위 순)**:
+
+- **#1 (1순위)** sfs slash command 실제 logic — 6 명령 (status/start/plan/review/decision/retro) dispatcher + logic. **WU-23 부터 detail design + 구현 진입 예정**.
+- **#2 (2순위)** upgrade.sh checksum-based diff preview 정교화.
+- **#4 (3순위)** .sfs-local/events.jsonl schema 표준화 (gate verdict + ts + sprint-id 필수 필드 + validator).
+- **#6 (4순위)** Sprint cycle CLI helper (sprint dir 자동 scaffold).
+- **#5 (5순위)** decisions/ ADR mini 자동 생성 helper.
+- **#3 (6순위)** uninstall.sh 시나리오 보강 (clean removal + .gitignore marker + 4 옵션).
+- **#7 (7순위)** 신규 어댑터 (cursor / windsurf / aider).
+- **#8 (8순위)** solon-mvp doctor 진단 스크립트 (.sfs-local 무결성 + VERSION drift + events.jsonl validity).
 - **(a2)** Phase 1 킥오프 실전 — **사용자 본인이 D-day 2026-04-27 (월) 에 본인 Mac 에서 직접 실행**. Claude 세션 자동 진행 대상 아님 (회사 IP 도메인이라 raw-internal).
 - **(b)** verify-w0.sh 후속 TODO (F-04 2건) — raw-internal, MVP 배포 대상 아님.
 - **(c)** sync/cut-release 자동화 (R-D1, 0.4.0-mvp 예약).
@@ -226,7 +258,8 @@ resume_hint:
 
 | 산출물 | 경로 | 상태 |
 |--------|------|:-:|
-| **sprints/WU-21.md** | — | ✨ **18번째 세션 신설** — Phase 1 킥오프 dry-run PASS, F-01~F-04 findings, status: done (final_sha TBD) |
+| **sprints/WU-22.md** | — | ✨ **19번째 세션 신설** — MVP next-feature roadmap & sequencing plan, 8 후보 1-pager + α/β/γ 옵션, status: in_progress (사용자 결정 대기) |
+| **sprints/WU-21.md** | — | ✅ 18번째 세션 신설 — Phase 1 킥오프 dry-run PASS, F-01~F-04 findings, status: done (final_sha TBD) |
 | **PROGRESS.md (본 파일)** | — | ✨ **18번째 세션 덮어쓰기** — resume_hint v5 (sandbox-dry-run 규율 + next default = Phase 1 실전) · released_history rolling (18th last) · scheduled_task_log 18th entry |
 | scripts/resume-session-check.sh | v0.3 | ✅ 17번째 세션 강화 (check #7 drift) |
 | scripts/append-scheduled-task-log.sh | v0.1 | ✅ 17번째 세션 신설 |
