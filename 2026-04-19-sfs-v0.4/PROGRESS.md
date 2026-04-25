@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-25T09:45:00+09:00
-session: "18번째 세션 `confident-loving-ride` (user-active, D-2). WU-21 완료 — Phase 1 킥오프 dry-run (install.sh sandbox PASS + setup-w0.sh pre-flight + 시뮬 PASS, D-day 차단 요소 없음, verify-w0.sh false-positive 2건 후속 TODO 로 분리)."
+last_overwrite: 2026-04-25T09:55:00+09:00
+session: "18번째 세션 `confident-loving-ride` (user-active, D-2). WU-21 완료 + 사용자 push 확인. 인수인계 갱신: v0.2.4-mvp 초기틀 잡힘 확정 (사용자 인식 (A) — Solon 1줄 설치 MVP), 다음 세션 default_action = MVP next-feature 사이클 brainstorming. Phase 1 킥오프 실전은 사용자 본인 D-day 에 직접 실행 (Claude 자동 진행 대상 아님)."
 current_wu: null
 current_wu_path: null
 current_wu_owner: null   # confident-loving-ride release (WU-21 완료 후)
@@ -34,6 +34,11 @@ released_history:
 # 필드: ts (ISO8601 +09:00) · codename · check_exit · action · ahead_delta
 # 18번째 세션은 user-active (scheduled 아님) 이지만 trace 연속성 위해 한 줄 append.
 scheduled_task_log:
+  - ts: 2026-04-25T09:55:00+09:00
+    codename: confident-loving-ride
+    check_exit: 0
+    action: "handoff 갱신: next default = MVP next-feature 사이클 brainstorming (v0.2.4-mvp 초기틀 확정, 사용자 push 완료)"
+    ahead_delta: "+1 (handoff snapshot, push 후 또 push 필요)"
   - ts: 2026-04-25T09:45:00+09:00
     codename: confident-loving-ride
     check_exit: 0   # clean (진입 시)
@@ -90,24 +95,32 @@ resume_hint:
     1. **§1.12 mutex**: current_wu_owner null → self claim.
     2. **git status** + `git rev-list --count origin/main..HEAD` 확인.
        (18번째 세션 종료 시점 예상: ahead 6 — 2709fcf + 5d4c6c6 + 87b60ff + 17th snapshot + WU-21 commit + 18th snapshot. 사용자 push 대기.)
-    3. **③ Next 메뉴** (원칙 2, 의미 결정은 사용자). **new default = (a) Phase 1 킥오프 실전 실행** (D-day 2026-04-27 (월), 오늘 기준 갱신 필요):
-       (a) **Phase 1 킥오프 실전 실행** — 사용자 Mac 에서 QUICK-START.md §2 runbook.
-           WU-21 dry-run 으로 차단 요소 없음 확인됨. GitHub 에 private repo 생성 → 3 env 설정 → setup-w0.sh 실행 → verify-w0.sh → claude 첫 세션.
-       (a2) **WU-21 learning log 승격** — learning-logs/2026-05/ 에 P-04 (sandbox-dry-run-pattern) 신설 (선택).
-       (b) **verify-w0.sh 후속 TODO** — F-04 2건 (check #7 mode flag + check #6 정규식).
-       (c) **sync/cut-release 스크립트 착수** — R-D1 자동화.
-       (d) **11~18번째 세션 retrospective 실체화** — 누적 8건.
-       (e) **HANDOFF-next-session.md mutex_state_schema 재sync**.
-       (f) **W10 결정 세션** — cross-ref-audit §4 #14/#18/#19.
-       (g) **WU-16b 확장 이관**.
-       (h) **resume-session-recover.sh (자동 복구)** — P-03 후속.
+    3. **③ Next 메뉴** (원칙 2). **new default = (a) MVP next-feature 사이클 brainstorming** (사용자 명시 의도 2026-04-25 09:55 KST: "mvp 기본기능 어느정도 완료 + 다음 기능 개발배포 준비"):
+       (a) **MVP next-feature brainstorming** (default) — v0.2.4-mvp 초기틀 잡힘 확정. 다음 release (0.3.x or 0.4.0-mvp) 에 어떤 기능을 넣을지 후보 정리 + 사용자 결정 → plan 문서. 후보 (raw, 사용자 결정 대상):
+            · sfs slash command 실제 logic (현재 어댑터에 정의만 있음, 실제 동작 부재)
+            · upgrade.sh checksum-based diff preview 정교화
+            · uninstall.sh 시나리오 보강 (clean removal + .gitignore marker block 정리)
+            · .sfs-local/events.jsonl schema 표준화
+            · decisions/ ADR mini 자동 생성 helper
+            · Sprint cycle CLI helper (sprint dir 자동 scaffold)
+            · 신규 어댑터 (예: cursor / windsurf / aider)
+            · solon-mvp doctor 진단 스크립트
+       (a2) Phase 1 킥오프 실전 — 사용자 본인 D-day (2026-04-27 월) 에 본인 Mac 에서 직접 실행. **Claude 세션 자동 진행 대상 아님**.
+       (b) verify-w0.sh 후속 TODO (F-04 2건) — raw-internal, MVP 배포 대상 아님.
+       (c) sync/cut-release 자동화 (R-D1, 0.4.0-mvp 예약).
+       (d) upgrade.sh / uninstall.sh sandbox dry-run 추가 검증.
+       (e) 11~18번째 세션 retrospective 실체화 (누적 8건).
+       (f) HANDOFF mutex_state_schema 재sync.
+       (g) W10 결정 세션 — cross-ref-audit §4 #14/#18/#19.
+       (h) WU-16b 확장 이관.
+       (i) resume-session-recover.sh (P-03 후속 자동화).
     4. 사용자 번호 지정 / 자연어 confirm 한 마디 → 해당 경로.
     5. **scheduled task auto-resume 이면** — step 3 메뉴 skip + staged/TBD/`<sha>`/stale-mutex cleanup 만 + snapshot + mutex release + helper 호출.
   on_negative: |
-    "현 상태만 요약 보고 후 대기" — WU-21 Phase 1 dry-run 완료, D-day 2026-04-27 차단 요소 없음.
-    install.sh v0.2.4-mvp + setup-w0.sh 둘 다 sandbox 검증 통과. verify-w0.sh false-positive 2건은 후속 TODO.
-    git ahead 6 (push 대기) or 0 (push 완료 후). 활성 WU 없음.
-  on_ambiguous: "1-line clarifying Q (예: 'Phase 1 실전 실행 (a) 진행? 아니면 verify-w0.sh 튜닝 (b) 또는 다른 옵션?')"
+    "현 상태만 요약 보고 후 대기" — WU-21 Phase 1 dry-run 완료, v0.2.4-mvp 초기틀 잡힘 확정.
+    install.sh + setup-w0.sh sandbox 검증 통과 + 사용자 push 완료. verify-w0.sh false-positive 2건은 raw-internal 후속.
+    git ahead = 0 (push 완료 후) 또는 1 (handoff snapshot 추가 push 대기). 활성 WU 없음.
+  on_ambiguous: "1-line clarifying Q (예: 'MVP next-feature brainstorming (a) 진행? 후보 중 우선순위 정해줄까? 아니면 다른 옵션?')"
   safety_locks:
     - "원칙 2 (self-validation-forbidden): A/B/C 의미 결정 자동 실행 금지"
     - "§1.5: git push 자동 실행 금지 — 사용자 터미널에서만"
@@ -122,7 +135,8 @@ resume_hint:
     - "17번째 helper: scheduled_task_log append helper 사용"
     - "17번째 check #7: drift 90분 초과 시 exit 16"
     - "18번째 sandbox 원칙: dry-run 은 /tmp/ 한정, 사용자 ~/workspace 와 GitHub 건드리지 않음"
-  version: 5   # v1 (14번째) → v2 (15번째 P-03 step 0) → v3 (16번째 scheduled_task_log + #6) → v4 (17번째 helper + #7) → v5 (18번째 sandbox-dry-run 규율 + next default = Phase 1 실전)
+    - "18번째 handoff (09:55 갱신): MVP 0.2.4 초기틀 확정 → 다음 default = MVP next-feature 사이클. Phase 1 킥오프 실전은 사용자 본인이 D-day 에 직접 진행 (Claude 세션 자동 X)."
+  version: 6   # v1 (14번째) → v2 (15번째 P-03) → v3 (16번째 #6) → v4 (17번째 helper + #7) → v5 (18번째 sandbox-dry-run) → v6 (18번째 handoff: MVP next-feature default)
 ---
 
 # PROGRESS — live snapshot (18번째 세션 confident-loving-ride WU-21 완료, mutex released)
@@ -180,22 +194,31 @@ resume_hint:
 
 ---
 
-## ③ Next — Phase 1 킥오프 실전 실행 (new default, D-2)
+## ③ Next — MVP next-feature 사이클 brainstorming (new default)
 
-> WU-21 dry-run 으로 스크립트 차단 요소 없음 확인됨. 실전 실행은 **사용자 Mac 에서** QUICK-START.md §2 runbook 따름.
+> 사용자 명시 의도 (2026-04-25 09:55 KST): "mvp 기본기능 어느정도 완료 + 다음 기능 개발배포 준비, 다음 세션부터 이어가자".
+> v0.2.4-mvp 초기틀 잡힘 확정 (사용자 인식 (A) — Solon 1줄 설치 MVP). 다음 release (0.3.x or 0.4.0-mvp) 후보 brainstorming 부터 시작.
 
-- **(a, default)** **Phase 1 킥오프 실전 실행** — 2026-04-27 (월), 오늘 기준 **D-2**.
-  절차: (1) GitHub 에 `<PROJECT-NAME>` private repo 생성 (빈 repo) → (2) 3 env 설정 (PROJECT_NAME / SOLON_DOCSET / WORKSPACE) → (3) `setup-w0.sh` 실행 → (4) `verify-w0.sh` 로 검증 → (5) Stack 결정 후 placeholder 수동 치환 + 추가 commit/push → (6) `cd <repo> && claude` + `PROMPT-FOR-FIRST-SESSION.md` 복붙.
-- **(a2)** WU-21 learning log 승격 — P-04 (sandbox-dry-run-pattern) 신설 (선택).
-- **(b)** verify-w0.sh 후속 TODO (F-04 2건): check #7 mode flag + check #6 정규식.
-- **(c)** sync/cut-release 스크립트 (R-D1 자동화, 0.4.0-mvp 예약).
-- **(d)** 11~18번째 세션 retrospective 실체화 (누적 8건).
-- **(e)** HANDOFF mutex_state_schema 재sync.
-- **(f)** W10 결정 세션 — cross-ref-audit §4 #14/#18/#19.
-- **(g)** WU-16b 확장 이관.
-- **(h)** resume-session-recover.sh (P-03 후속 자동화, 0.4.0-mvp 예약).
+- **(a, default)** **MVP next-feature brainstorming** — 다음 release 후보 정리 + 사용자 결정 → plan 문서. 후보 (raw, 사용자가 우선순위 결정):
+  - sfs slash command 실제 logic 구현 (현재 어댑터에 정의만 있음, status/start/plan/review/decision/retro 동작 부재)
+  - upgrade.sh checksum-based diff preview 정교화
+  - uninstall.sh 시나리오 보강 (clean removal + .gitignore marker block 정리)
+  - .sfs-local/events.jsonl schema 표준화 (gate verdict + ts + sprint-id 필수 필드)
+  - decisions/ ADR mini 자동 생성 helper
+  - Sprint cycle CLI helper (sprint dir 자동 scaffold, 4 파일 템플릿 동시 생성)
+  - 신규 어댑터 (예: cursor / windsurf / aider)
+  - solon-mvp doctor 진단 스크립트 (.sfs-local 무결성 + VERSION drift 체크)
+- **(a2)** Phase 1 킥오프 실전 — **사용자 본인이 D-day 2026-04-27 (월) 에 본인 Mac 에서 직접 실행**. Claude 세션 자동 진행 대상 아님 (회사 IP 도메인이라 raw-internal).
+- **(b)** verify-w0.sh 후속 TODO (F-04 2건) — raw-internal, MVP 배포 대상 아님.
+- **(c)** sync/cut-release 자동화 (R-D1, 0.4.0-mvp 예약).
+- **(d)** upgrade.sh / uninstall.sh sandbox dry-run 추가 검증 (WU-21 시 미실시).
+- **(e)** 11~18번째 세션 retrospective 실체화 (누적 8건).
+- **(f)** HANDOFF mutex_state_schema 재sync.
+- **(g)** W10 결정 세션 — cross-ref-audit §4 #14/#18/#19.
+- **(h)** WU-16b 확장 이관.
+- **(i)** resume-session-recover.sh (P-03 후속, 0.4.0-mvp 예약).
 
-**⚠️ D-day**: 2026-04-27 (월), 오늘 2026-04-25 (토) → **D-2**. stable v0.2.4-mvp 준비 완료.
+**참고**: D-day (2026-04-27 월) 는 사용자 본인 작업 일정이지 Claude 세션이 자동 진행할 작업 아님. (a2) 로 분리.
 
 ---
 
