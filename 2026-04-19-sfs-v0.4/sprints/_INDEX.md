@@ -2,7 +2,7 @@
 doc_id: sprints-index
 title: "sprints/ — WU (Work Unit) 파일 목록 (v2)"
 visibility: raw-internal
-updated: 2026-04-25   # 21번째 세션 trusting-stoic-archimedes — WU-22 sha backfill (a66cf2e) + WU-23 신설/close (V-1 vote PASS, final_sha=TBD_21ST_CLOSE 다음 backfill 대기).
+updated: 2026-04-25   # 21번째 세션 trusting-stoic-archimedes — WU-22 backfill (a66cf2e) + WU-23 신설/close + final_sha backfill (1e0e6f1). 양쪽 row 모두 정상 sha 보유. 후속 자율 작업 진행 중.
 ---
 
 # sprints/ — WU 파일 인덱스
@@ -35,7 +35,7 @@ _현재 활성 WU 없음._ WU-23 close (V-1 PASS, 3 conditions applied) 후 WU-2
 | WU-20.1 | WU-20 sha backfill 확인 + _INDEX.md row 추가 | `2709fcf` | 2026-04-25 | 2026-04-25 | funny-pensive-hypatia → admiring-nice-faraday (auto-resume 실체화) | [WU-20.1.md](WU-20.1.md) (refresh 전용) |
 | WU-21 | Phase 1 킥오프 D-2 dry-run (install.sh + setup-w0.sh sandbox PASS, F-01~F-04 findings) | `cd94f65` | 2026-04-25 | 2026-04-25 | confident-loving-ride | [WU-21.md](WU-21.md) |
 | WU-22 | MVP next-feature roadmap & sequencing (8 후보 1-pager + β release grouping 채택) | `a66cf2e` | 2026-04-25 | 2026-04-25 | eager-elegant-bell (open + brainstorm) → epic-brave-galileo (close, hang takeover) → trusting-stoic-archimedes (sha backfill) | [WU-22.md](WU-22.md) |
-| WU-23 | #1 sfs slash command detail design (6 명령 minimal contract spec, 3-agent vote V-1 PASS) | `TBD_21ST_CLOSE` | 2026-04-25 | 2026-04-25 | trusting-stoic-archimedes (자율 작업, 사용자 부재 4시간 위임 mode) | [WU-23.md](WU-23.md) |
+| WU-23 | #1 sfs slash command detail design (6 명령 minimal contract spec, 3-agent vote V-1 PASS) | `1e0e6f1` | 2026-04-25 | 2026-04-25 | trusting-stoic-archimedes (자율 작업, 사용자 부재 4시간 위임 mode) | [WU-23.md](WU-23.md) |
 
 ## 완료 WU (status: done) — v1 → v2 이관 (WU-16 backfill)
 
