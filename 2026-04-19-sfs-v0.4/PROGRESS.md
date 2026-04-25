@@ -2,32 +2,32 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-25T07:30:00+09:00
-session: "16번째 세션 `nice-kind-babbage` (scheduled auto-resume, hourly) — 15번째 세션 admiring-nice-faraday 가 남긴 `<cd41dff>` 예측 sha 와 실체 sha `5d4c6c6` 의 mismatch 감지 + 본문 backfill + resume-session-check.sh v0.2 (check #6 angle-bracket sha 미실체 감지 추가) + PROGRESS.md frontmatter 에 `scheduled_task_log` rolling tail 신설 (시간 단위 hourly run 의 명시적 인수인계 추적). mutex 정상 release."
+last_overwrite: 2026-04-25T09:10:00+09:00
+session: "17번째 세션 `admiring-fervent-dijkstra` (scheduled auto-resume, hourly) — 16번째 nice-kind-babbage 가 남긴 `TBD_16TH_SNAPSHOT` 플레이스홀더를 실체 sha `87b60ff` 로 backfill + scripts/append-scheduled-task-log.sh helper 신설 (다음 hourly run 부터 한 줄 호출만으로 trace append 가능, 인수인계 자동화 강화) + resume-session-check.sh v0.2 → v0.3 (check #7 scheduled_task_log drift 감지 추가, exit 16) + HANDOFF mutex_state_schema sync. mutex 정상 release."
 current_wu: null
 current_wu_path: null
-current_wu_owner: null   # nice-kind-babbage release (cd41dff backfill + check v0.2 + scheduled_task_log 신설 후)
+current_wu_owner: null   # admiring-fervent-dijkstra release (87b60ff backfill + append helper + check v0.3 + handoff sync 후)
 released_history:
-  last_owner: nice-kind-babbage
-  last_claimed_at: 2026-04-25T07:10:00+09:00
-  last_released_at: 2026-04-25T07:30:00+09:00
-  last_reason: "16번째 세션 scheduled auto-resume. 진입 시 resume-session-check.sh v0.1 → exit 0 (clean) 였지만 내부 검토 결과 15번째가 본문에 `<cd41dff>` 예측 sha 로 표기 + 실제 commit 은 `5d4c6c6` (P-03 변종 = predicted-vs-actual sha mismatch) 발견. 처리: (1) PROGRESS.md 본문 2개소 backfill `cd41dff` → `5d4c6c6` (2) resume-session-check.sh 에 check #6 (angle-bracket sha + git merge-base --is-ancestor HEAD 검증, exit code 15) 추가하여 v0.2 로 승격 (3) PROGRESS.md frontmatter 에 `scheduled_task_log` (rolling N=20) 신설 — 시간 단위 hourly run 의 명시적 trace 보존하여 인수인계 robustness 강화. 새 WU 착수 없음 (scheduled task 모드 준수)."
-  last_final_commits: [5d4c6c6_BACKFILLED, TBD_16TH_SNAPSHOT]   # 본 PROGRESS snapshot commit 은 저장 직후 실체화. 실체 sha 는 다음 세션이 backfill (P-03 예방 패턴).
-  prior_owner: admiring-nice-faraday
-  prior_claimed_at: 2026-04-25T04:00:00+09:00
-  prior_released_at: 2026-04-25T04:18:00+09:00
-  prior_reason: "15번째 세션 scheduled auto-resume. 14번째 세션의 staged-uncommitted diff (WU-20.1 refresh 3 파일) 를 그대로 commit 실체화 (2709fcf, amend 로 final_sha 5525668 backfill). 이어서 P-03 learning pattern (staged-uncommitted-on-session-crash) 실체화 + scripts/resume-session-check.sh v0.1 신설 (다음 세션 진입 직후 자동 감지) + PROGRESS.md resume_hint.default_action step 0 추가 (감지 플로우 자동 편입). HANDOFF mutex_state_schema 의 stale last_released_session 도 admiring-nice-faraday 로 sync. 인수인계 자동화 robustness 강화. 본문에 `<cd41dff>` 로 snapshot sha 예측 표기 → 실체는 `5d4c6c6` (16번째 세션이 backfill)."
-  prior_final_commits: [2709fcf, 5d4c6c6]   # 16번째 세션 backfill (cd41dff 는 dangling commit, HEAD 비-ancestor)
-  older_owner: funny-pensive-hypatia
-  older_claimed_at: 2026-04-25T00:05:00+09:00
-  older_released_at: 2026-04-25T00:20:00+09:00
-  older_reason: "14번째 세션 WU-20.1 refresh 완료 선언 (staged) 후 commit 전 termination. 15번째 세션이 이어받아 2709fcf 로 실체화. P-03 패턴 발견."
-  older_final_commits: [2709fcf_BY_SESSION_15, 6be708b_PRIOR]
-  oldest_owner: funny-sweet-mayer
-  oldest_claimed_at: 2026-04-24T23:10:00+09:00
-  oldest_released_at: 2026-04-24T23:15:00+09:00
-  oldest_reason: "13번째 세션 후속 housekeeping 종료. ~/agent_architect/CLAUDE.md redirect stub 신설 (1a48b6b). SSoT 이중화 방지 위해 상세 규칙 복제는 금지. 12번째 laughing-keen-shannon (R-D1 채택, a247ade + c7b4423) 는 본 rolling window 에서 탈락."
-  oldest_final_commits: [378ab38, bfa3de8, 1a48b6b, 6be708b]
+  last_owner: admiring-fervent-dijkstra
+  last_claimed_at: 2026-04-25T09:06:00+09:00
+  last_released_at: 2026-04-25T09:10:00+09:00
+  last_reason: "17번째 세션 scheduled auto-resume. 진입 시 resume-session-check.sh v0.2 → exit 0 (clean) — 16번째가 도입한 check #6 가 `<cd41dff>` 같은 미실체 angle-bracket sha 를 감지하지 못하도록 16번째 세션이 backfill 완료한 결과. 사용자 직접 지시 '매 시 마다 스케줄 도니까 인수인계가 확실하게 자동화' 처리: (1) `TBD_16TH_SNAPSHOT` → `87b60ff` 백필 (16번째 snapshot 의 실체 sha) (2) `scripts/append-scheduled-task-log.sh` helper 신설 — `<codename> <check_exit> <action> <ahead_delta>` 인자로 PROGRESS.md frontmatter scheduled_task_log 에 한 줄 append + N=20 rolling 자동 enforce. 다음 hourly run 부터 호출만 하면 trace 보존됨 (no-op 라도) (3) resume-session-check.sh v0.3 — check #7 추가 (scheduled_task_log last_ts 와 현재 시간 차이 90분 초과 시 exit 16 warning, hourly 주기 깨짐 감지) (4) HANDOFF mutex_state_schema.last_released_session sync (nice-kind-babbage → admiring-fervent-dijkstra). 새 WU 착수 없음 (scheduled task 모드 준수, 원칙 2 준수)."
+  last_final_commits: [TBD_17TH_SNAPSHOT]   # 본 PROGRESS snapshot commit 은 저장 직후 실체화. 실체 sha 는 다음 세션이 backfill (P-03 예방 패턴).
+  prior_owner: nice-kind-babbage
+  prior_claimed_at: 2026-04-25T07:10:00+09:00
+  prior_released_at: 2026-04-25T07:30:00+09:00
+  prior_reason: "16번째 세션 scheduled auto-resume. 진입 시 resume-session-check.sh v0.1 → exit 0 (clean) 였지만 내부 검토 결과 15번째가 본문에 `<cd41dff>` 예측 sha 로 표기 + 실제 commit 은 `5d4c6c6` (P-03 변종 = predicted-vs-actual sha mismatch) 발견. 처리: (1) PROGRESS.md 본문 2개소 backfill `cd41dff` → `5d4c6c6` (2) resume-session-check.sh 에 check #6 (angle-bracket sha + git merge-base --is-ancestor HEAD 검증, exit code 15) 추가하여 v0.2 로 승격 (3) PROGRESS.md frontmatter 에 `scheduled_task_log` (rolling N=20) 신설 — 시간 단위 hourly run 의 명시적 trace 보존하여 인수인계 robustness 강화. 새 WU 착수 없음 (scheduled task 모드 준수)."
+  prior_final_commits: [5d4c6c6_BACKFILLED, 87b60ff]   # 17번째 세션이 TBD_16TH_SNAPSHOT 을 87b60ff 로 backfill
+  older_owner: admiring-nice-faraday
+  older_claimed_at: 2026-04-25T04:00:00+09:00
+  older_released_at: 2026-04-25T04:18:00+09:00
+  older_reason: "15번째 세션 scheduled auto-resume. 14번째 세션의 staged-uncommitted diff (WU-20.1 refresh 3 파일) 를 그대로 commit 실체화 (2709fcf, amend 로 final_sha 5525668 backfill). 이어서 P-03 learning pattern (staged-uncommitted-on-session-crash) 실체화 + scripts/resume-session-check.sh v0.1 신설 + PROGRESS.md resume_hint.default_action step 0 추가. HANDOFF mutex_state_schema 의 stale last_released_session 도 admiring-nice-faraday 로 sync. 인수인계 자동화 robustness 강화. 본문에 `<cd41dff>` 로 snapshot sha 예측 표기 → 실체는 `5d4c6c6` (16번째 세션이 backfill)."
+  older_final_commits: [2709fcf, 5d4c6c6]
+  oldest_owner: funny-pensive-hypatia
+  oldest_claimed_at: 2026-04-25T00:05:00+09:00
+  oldest_released_at: 2026-04-25T00:20:00+09:00
+  oldest_reason: "14번째 세션 WU-20.1 refresh 완료 선언 (staged) 후 commit 전 termination. 15번째 세션이 이어받아 2709fcf 로 실체화. P-03 패턴 발견."
+  oldest_final_commits: [2709fcf_BY_SESSION_15, 6be708b_PRIOR]
 
 # ── scheduled_task_log (16번째 세션 신설) ──────────────────────
 # Cowork scheduled_task 가 시간 단위 (hourly) 로 깨우는 auto-resume 의 explicit
@@ -36,11 +36,16 @@ released_history:
 # 목적: scheduled task 가 idle (no-op) 인 경우에도 "살아 있다"는 증적 + drift 추적.
 # 필드: ts (ISO8601 +09:00) · codename · check_exit · action · ahead_delta (push 전후 차)
 scheduled_task_log:
+  - ts: 2026-04-25T09:10:00+09:00
+    codename: admiring-fervent-dijkstra
+    check_exit: 0   # clean (v0.2 자체 적용 후, 16번째가 cd41dff backfill 완료한 결과)
+    action: "TBD_16TH_SNAPSHOT→87b60ff backfill + append-scheduled-task-log.sh helper 신설 + check.sh v0.3 (#7 drift 감지) + HANDOFF sync"
+    ahead_delta: "+1 (17th snapshot commit, 누적 ahead 4)"
   - ts: 2026-04-25T07:30:00+09:00
     codename: nice-kind-babbage
     check_exit: 15   # bracket_sha_unrealized:cd41dff (v0.2 자체 적용 후 감지)
     action: "cd41dff→5d4c6c6 backfill + check.sh v0.2 + scheduled_task_log 신설"
-    ahead_delta: "+1 (16th snapshot commit)"
+    ahead_delta: "+1 (16th snapshot commit = 87b60ff)"
   - ts: 2026-04-25T04:18:00+09:00
     codename: admiring-nice-faraday
     check_exit: 10   # staged 14번째 diff 감지 (P-03 발동)
@@ -54,7 +59,8 @@ scheduled_task_log:
 purpose: "context reset 시 다음 세션이 본 파일 1개만 읽고 즉시 이어받을 수 있도록, 매 micro-step 마다 덮어쓰는 live snapshot. 히스토리 아님."
 companions:
   - "CLAUDE.md (§1 절대 규칙 13 + §1.12 mutex protocol + §1.13 R-D1 + §2.1 용어집)"
-  - "scripts/resume-session-check.sh (**v0.2, 16번째 세션 강화** — check #6 `<sha>` angle-bracket 미실체 감지 추가, exit code 15. v0.1 은 15번째 세션 신설)"
+  - "scripts/resume-session-check.sh (**v0.3, 17번째 세션 강화** — check #7 scheduled_task_log drift 감지 추가, exit code 16. v0.2 (16번째)·v0.1 (15번째) 누적)"
+  - "scripts/append-scheduled-task-log.sh (**v0.1, 17번째 세션 신설** — hourly run 마다 한 줄 호출만으로 scheduled_task_log 에 entry append + N=20 rolling 자동 enforce. 사용자 지시 '인수인계 자동화' 직접 처리)"
   - "learning-logs/2026-05/P-03-staged-uncommitted-on-session-crash.md (15번째 세션 신설. 16번째 세션이 변종 `<sha> vs 실체` mismatch 도 동일 패턴 계열로 인식 — P-03 범위 확장은 후속 TODO)"
   - "sprints/_INDEX.md (WU-20.1 row `2709fcf` 실체화 반영)"
   - "sprints/WU-20.md (status: done, final_sha 3ca7f56)"
@@ -73,14 +79,16 @@ rules:
   - "15번째 세션 이후: 진입 직후 `scripts/resume-session-check.sh` 실행 필수 (P-03 예방)"
   - "16번째 세션 이후: scheduled task auto-resume 마다 `scheduled_task_log` rolling tail 에 한 줄 append (no-op 포함) — handoff 연속성 증적"
   - "16번째 세션 이후: 예측 sha 는 `<sha>` angle-bracket 으로 표기 → commit 실체화 후 다음 세션이 backfill (check #6 가 자동 flag)"
+  - "17번째 세션 이후: `scheduled_task_log` append 는 가능하면 `scripts/append-scheduled-task-log.sh <codename> <check_exit> <action> <ahead_delta>` helper 사용. PROGRESS.md 직접 편집보다 race 위험 적음 + N=20 rolling 자동. check #7 (drift 90분 초과 시 exit 16) 도 본 helper 호출 누락 추적용."
 resume_hint:
   purpose: "다음 세션 첫 발화가 positive confirm 한 마디여도 히스토리 파악 + 자동 resume + P-03 방지"
   trigger_positive: [ㄱㄱ, 고, ㅇㅋ, ok, OK, 시작, 가자, ㅇㅇ, 진행, go, Go, start]
   trigger_negative: [ㄴㄴ, 잠깐, stop, 아니, 중단, 다른거, 다른, no]
   default_action: |
-    0. **scripts/resume-session-check.sh 실행 (v0.1, 15번째 세션 신설)** —
+    0. **scripts/resume-session-check.sh 실행 (v0.3, 17번째 세션 강화)** —
        staged diff / untracked 중요파일 / PROGRESS.md TBD_ 플레이스홀더 /
-       mutex last_heartbeat TTL drift / FUSE index.lock 감지.
+       mutex last_heartbeat TTL drift / FUSE index.lock / `<sha>` angle-bracket
+       플레이스홀더 / scheduled_task_log drift 감지.
        - exit 0 → 정상, 다음 단계 진행.
        - exit 10 (staged) → P-03 발동. `git diff --cached HEAD` 로 intent 확인 후
          세션 A 의도 그대로 commit 실체화 → 15번째 세션 precedent 참조.
@@ -88,6 +96,8 @@ resume_hint:
        - exit 12 (TBD_) → git log 에서 실제 sha 찾아 backfill.
        - exit 13 (stale mutex) → §1.12 takeover 승인 대기.
        - exit 14 (FUSE lock) → §1.6 bypass 절차.
+       - exit 15 (`<sha>` 미실체) → git log 에서 HEAD ancestor sha 찾아 backfill (16번째 cd41dff→5d4c6c6 사례).
+       - exit 16 (scheduled_task_log drift) → 마지막 entry 가 90분 초과. helper 호출 누락 추적 or hourly 주기 깨짐. step 마지막에 helper 호출.
        - exit 99 (복합) → 하나씩 처리.
     1. **§1.12 mutex 확인**: current_wu_owner null (본 frontmatter) → self 로 claim.
        자기 codename = basename of /sessions/<codename>/. 기록 필드:
@@ -113,12 +123,14 @@ resume_hint:
            default + `--apply` flag 필수. `0.4.0-mvp` 예약.
     4. 사용자 번호/키워드 지정 시 해당 경로. 자연어 confirm 한 마디면 (a) default.
     5. **scheduled task 실행 (현재 시간 단위 auto-resume) 이면** — step 3 메뉴는 건너뛰고
-       **staged/TBD/stale-mutex 가 있으면 우선 처리 + 완료 후 PROGRESS snapshot + mutex release**.
+       **staged/TBD/`<sha>`/stale-mutex 가 있으면 우선 처리 + 완료 후 PROGRESS snapshot + mutex release**.
        사용자 대화가 없는 상태에서 새 WU 착수는 금지 (원칙 2 + scheduled task disclaimer).
+       **세션 종료 직전** 반드시: `bash scripts/append-scheduled-task-log.sh <self-codename> <check_exit> "<action 요약>" "<ahead_delta>"` 호출 — no-op (clean + no drift) 인 경우에도 한 줄 trace 보존 (17번째 세션 helper 신설).
   on_negative: |
     "현 상태만 요약 보고 후 대기" — WU-20.1 refresh 실체화 완료 (2709fcf, final_sha
-    5525668 pre-amend). P-03 패턴 resolved. git ahead 2 (사용자 push 대기) or ahead
-    0 (push 완료 후). 활성 WU 없음. 다음 예약 = Phase 1 킥오프 (D-2).
+    5525668 pre-amend). P-03 패턴 resolved. 16번째 snapshot = 87b60ff. 17번째
+    snapshot = (TBD, push 후 backfill). git ahead 4 (사용자 push 대기) or ahead 0
+    (push 완료 후). 활성 WU 없음. 다음 예약 = Phase 1 킥오프 (D-2).
   on_ambiguous: "1-line clarifying Q 만 하고 대기 (예: 'Phase 1 킥오프 dry-run 진행? 아니면 sync 스크립트 (b) 또는 다른 옵션?')"
   safety_locks:
     - "원칙 2 (self-validation-forbidden): A/B/C 의미 결정 자동 실행 금지"
@@ -133,18 +145,33 @@ resume_hint:
     - "15번째 세션 P-03: staged diff 감지 → 세션 A 의도 보존 commit 실체화 우선. 독단 reset 금지."
     - "16번째 세션 check #6: `<sha>` angle-bracket 감지 → dangling commit 검증 후 HEAD ancestor sha 로 backfill. 독단 rebase 금지."
     - "16번째 세션: scheduled task auto-resume 는 반드시 `scheduled_task_log` 에 한 줄 append (no-op 라도 check_exit + action='noop: clean + no drift' 로 기록)."
-  version: 3   # v1 (14번째) → v2 (15번째 P-03 step 0) → v3 (16번째 scheduled_task_log + check #6 safety_locks 추가)
+    - "17번째 세션: `scheduled_task_log` append 는 가능하면 `scripts/append-scheduled-task-log.sh` helper 사용 (rolling N=20 자동 enforce + race 회피). 세션 종료 직전 반드시 1회 호출."
+    - "17번째 세션 check #7: scheduled_task_log 마지막 entry 가 90분 초과 = exit 16 warning. helper 호출 누락 or hourly 주기 깨짐 추적용."
+  version: 4   # v1 (14번째) → v2 (15번째 P-03 step 0) → v3 (16번째 scheduled_task_log + check #6 safety_locks 추가) → v4 (17번째 helper 신설 + check #7 drift 감지)
 ---
 
-# PROGRESS — live snapshot (16번째 세션 nice-kind-babbage scheduled auto-resume 종료, mutex released)
+# PROGRESS — live snapshot (17번째 세션 admiring-fervent-dijkstra scheduled auto-resume 종료, mutex released)
 
-> 🚨 **본 파일 최우선 진입.** mutex **released** by `nice-kind-babbage` (2026-04-25T07:30+09:00).
-> 다음 세션은 frontmatter `resume_hint.default_action` 에 따라 self claim 후 진입 — **step 0 (scripts/resume-session-check.sh v0.2) 필수 실행**.
-> 16번째 세션 로컬 커밋: **1 개 예상** — 본 PROGRESS snapshot (cd41dff→5d4c6c6 backfill + check.sh v0.2 (check #6 angle-bracket sha 감지 추가) + scheduled_task_log rolling tail 신설). 누적 ahead = 3 (2709fcf + 5d4c6c6 + 본 snapshot). 사용자 터미널 push 대기.
+> 🚨 **본 파일 최우선 진입.** mutex **released** by `admiring-fervent-dijkstra` (2026-04-25T09:10+09:00).
+> 다음 세션은 frontmatter `resume_hint.default_action` 에 따라 self claim 후 진입 — **step 0 (scripts/resume-session-check.sh v0.3) 필수 실행**.
+> 16번째 snapshot = `87b60ff` (17번째가 backfill). 17번째 세션 로컬 커밋: **1 개 예상** — 본 PROGRESS snapshot (TBD_16TH_SNAPSHOT→87b60ff backfill + scripts/append-scheduled-task-log.sh helper 신설 + check.sh v0.3 (check #7 drift 감지) + HANDOFF sync). 누적 ahead = 4 (2709fcf + 5d4c6c6 + 87b60ff + 본 snapshot). 사용자 터미널 push 대기.
 
 ---
 
 ## ① Just-Finished
+
+### 17번째 세션 (admiring-fervent-dijkstra, scheduled auto-resume, 2026-04-25 09:06→09:10 KST)
+
+**scheduled task 로 진입 — user 부재. 사용자 명시 지시 "이전세션 이어서 작업하고, 매 시 마다 스케줄 도니까 인수인계가 확실하게 자동화 될 수 있도록" 처리. 16번째 nice-kind-babbage 의 미실체화 토큰 (`TBD_16TH_SNAPSHOT`) 정리 + automation hardening 2건 추가.**
+
+- **TBD_16TH_SNAPSHOT → `87b60ff` 백필** — frontmatter `released_history.last_final_commits` 에서 16번째 snapshot 의 실체 sha (`87b60ff session: nice-kind-babbage scheduled hourly handoff automation + check.sh v0.2`) 로 교체. P-03 류 placeholder 미실체화 제거.
+- **`scripts/append-scheduled-task-log.sh` v0.1 신설** — hourly run 마다 한 줄 호출 (`<codename> <check_exit> <action> <ahead_delta>`) 만으로 PROGRESS.md frontmatter 의 `scheduled_task_log` 에 entry append + N=20 rolling 자동 enforce. 사용자 지시 "인수인계 자동화" 의 직접 처리 산출물. 다음 hourly run 부터 직접 PROGRESS.md 편집할 필요 없이 helper 호출만으로 trace 보존됨 (no-op 라도).
+- **`scripts/resume-session-check.sh` v0.2 → v0.3** — **check #7** 추가: `scheduled_task_log` 의 첫 entry (= 가장 최근) timestamp 와 현재 시간 차이가 **90분 초과** 시 `exit 16` warning. helper 호출 누락 or hourly cron 끊김 → drift 추적. JSON 출력에도 `sched_log_drift:<minutes>` 포함.
+- **PROGRESS.md frontmatter `released_history` rolling shift** — 17th 신규 last · 16th → prior · 15th → older · 14th → oldest · 13th funny-sweet-mayer 는 window 밖 archived. `last_final_commits` 의 미실체 토큰 (`TBD_16TH_SNAPSHOT`) 도 `87b60ff` 로 동시 fix.
+- **PROGRESS.md frontmatter `scheduled_task_log` 17번째 entry append** — `ts: 2026-04-25T09:10+09:00 / codename: admiring-fervent-dijkstra / check_exit: 0 / action: TBD_16TH_SNAPSHOT 백필 + helper 신설 + check.sh v0.3 + HANDOFF sync / ahead_delta: +1`. 본 entry 는 helper 신설 직전이므로 PROGRESS.md 직접 편집으로 추가 (다음 세션부터는 helper 사용).
+- **HANDOFF-next-session.md mutex_state_schema sync** — `last_released_session: nice-kind-babbage` → `admiring-fervent-dijkstra`. `prior_sessions` rolling shift.
+- **resume_hint version v3 → v4** — step 0 가이드에 exit 15/16 분기 추가, helper 호출 의무화 (safety_locks 2건 추가).
+- **규율 준수**: §1.3 원칙 2 (의미 결정 0건 — 모두 fact sync + automation harness, 신규 의미 결정 아님) · §1.5 push 는 사용자 터미널 · §1.8 유실 최소화 · §1.12 mutex (transient claim → release 동일 세션) · scheduled task 모드 (새 WU 착수 금지, 17번째도 cleanup + automation hardening 한정).
 
 ### 16번째 세션 (nice-kind-babbage, scheduled auto-resume, 2026-04-25 07:10→07:30 KST)
 
@@ -200,7 +227,7 @@ resume_hint:
 
 ## ② In-Progress
 
-**없음** — 16번째 세션 scheduled auto-resume 임무 완료. `<cd41dff>` backfill + check.sh v0.2 + `scheduled_task_log` 신설. mutex released. 다음 세션 진입 대기.
+**없음** — 17번째 세션 scheduled auto-resume 임무 완료. `TBD_16TH_SNAPSHOT` → `87b60ff` backfill + `scripts/append-scheduled-task-log.sh` 신설 + check.sh v0.3 (#7 drift 감지) + HANDOFF sync. mutex released. 다음 세션 진입 대기.
 
 활성 WU: 없음. 다음 예약: **Phase 1 킥오프 dry-run (D-2, 2026-04-27 월)**.
 
@@ -226,14 +253,15 @@ stable v0.2.4-mvp 로 이미 사용 가능 — 월요일 바로 `install.sh` 실
 
 ---
 
-## ④ Artifacts (16번째 세션 현 시점 인벤토리)
+## ④ Artifacts (17번째 세션 현 시점 인벤토리)
 
 | 산출물 | 경로 | 상태 |
 |--------|------|:-:|
-| **scripts/resume-session-check.sh** | v0.2 | ✨ **16번째 세션 강화** — check #6 (`<sha>` angle-bracket + HEAD ancestor 검증, exit 15) 추가. v0.1 은 15번째 |
-| **PROGRESS.md (본 파일)** | — | ✨ **16번째 세션 덮어쓰기** — resume_hint v3 (`scheduled_task_log` 규율 + check #6 safety_lock) · frontmatter `scheduled_task_log` rolling N=20 신설 · `released_history` rolling window 정리 + prior_/older_ 중복 key 버그 fix · L131 `<cd41dff>` → `5d4c6c6` backfill |
-| learning-logs/2026-05/P-03 | — | ✅ resolved (15번째). 16번째 `<sha>` 변종 감지 룰은 check.sh #6 에 반영 — P-03 문서 범위 확장은 후속 TODO |
-| **HANDOFF-next-session.md** | — | ⏳ **16번째 세션 update 대기** — mutex_state_schema.last_released_session: nice-kind-babbage 로 sync 필요 (후속 hourly 또는 다음 유인 세션) |
+| **scripts/resume-session-check.sh** | v0.3 | ✨ **17번째 세션 강화** — check #7 (scheduled_task_log drift 90분, exit 16) 추가. v0.2 (16번째 #6) · v0.1 (15번째) 누적 |
+| **scripts/append-scheduled-task-log.sh** | v0.1 | ✨ **17번째 세션 신설** — hourly run 마다 한 줄 호출로 scheduled_task_log entry append + N=20 rolling 자동. 사용자 지시 "인수인계 자동화" 직접 처리물 |
+| **PROGRESS.md (본 파일)** | — | ✨ **17번째 세션 덮어쓰기** — resume_hint v4 (helper 호출 의무 + exit 16 분기) · `released_history` rolling shift (17th last) · `TBD_16TH_SNAPSHOT` → `87b60ff` backfill · `scheduled_task_log` 17번째 entry append |
+| **HANDOFF-next-session.md** | — | ✅ **17번째 세션 sync** — mutex_state_schema.last_released_session: nice-kind-babbage → admiring-fervent-dijkstra |
+| learning-logs/2026-05/P-03 | — | ✅ resolved (15번째). 16번째 `<sha>` 변종 감지 룰은 check.sh #6, 17번째 drift 감지는 #7 에 반영 — P-03 문서 범위 확장은 후속 TODO |
 | sprints/WU-20.1.md | — | ✅ status done, final_sha 5525668 (pre-amend) · actual commit 2709fcf |
 | sprints/_INDEX.md | — | ✅ WU-20.1 row `2709fcf` 실체화 |
 | ~/agent_architect/CLAUDE.md | — | ✅ 13번째 세션 redirect stub, 유지 |

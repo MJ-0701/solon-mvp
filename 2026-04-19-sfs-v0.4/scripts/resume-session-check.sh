@@ -1,16 +1,21 @@
 #!/usr/bin/env bash
 # ────────────────────────────────────────────────────────────────
-# Solon v0.4-r3 · scripts/resume-session-check.sh  (v0.2)
+# Solon v0.4-r3 · scripts/resume-session-check.sh  (v0.3)
 # 목적: 세션 진입 직후 (§1.12 mutex claim 직후) 1회 실행하는 sanity check.
 #       - staged/untracked 유실 위험 감지 (P-03 패턴)
 #       - PROGRESS.md 의 TBD_ 플레이스홀더 감지
 #       - mutex last_heartbeat TTL drift 감지
 #       - FUSE index.lock 존재 감지
 #       - <sha> angle-bracket 미실체 감지 (v0.2, P-03 변종 — 15번째 cd41dff vs 5d4c6c6 사례)
+#       - scheduled_task_log drift 감지 (v0.3, hourly 주기 깨짐 / helper 호출 누락)
 # 변경 이력:
 #   v0.1 (15번째 admiring-nice-faraday) — 초안 5 checks.
 #   v0.2 (16번째 nice-kind-babbage)     — check #6 추가 (angle-bracket sha + HEAD ancestor 검증).
 #                                         inline code (` ... `) 안의 `<sha>` 는 retrospective 참조로 제외.
+#   v0.3 (17번째 admiring-fervent-dijkstra)
+#                                       — check #7 추가 (scheduled_task_log 마지막 entry timestamp 가
+#                                         현재 시간보다 90분 이상 지났으면 exit 16 warning).
+#                                         helper 호출 누락 / hourly cron 끊김 추적.
 # 원칙: **감지만 함. 자동 복구 금지** (원칙 2 self-validation-forbidden 준수).
 #        감지 시 표준 error code 로 exit + STDERR 에 복구 가이드 출력.
 # SSoT: CLAUDE.md §1.8 + §1.12 + learning-logs/2026-05/P-03
@@ -25,6 +30,7 @@
 #   14 = FUSE index.lock 존재 (직접 제거 불가 상태)
 #   15 = PROGRESS.md 에 <sha> 형태 angle-bracket sha 플레이스홀더 존재
 #        (15번째 세션 사례: <cd41dff> 예측 sha 가 실체 5d4c6c6 와 mismatch)
+#   16 = scheduled_task_log 마지막 entry > 90분 (hourly cron 끊김 / helper 호출 누락)
 #   99 = 복합 이슈 (여러 개 동시 발견)
 # ────────────────────────────────────────────────────────────────
 set -uo pipefail
@@ -128,6 +134,34 @@ if [[ -f "${PROGRESS_FILE}" ]]; then
   fi
 fi
 
+# ── 7. scheduled_task_log drift 감지 (v0.3) ─────────────────────
+# 17번째 세션 (admiring-fervent-dijkstra) 신설.
+# scheduled_task_log 마지막 entry (newest-first 정렬이므로 첫 entry) 의 ts 가
+# 현재 시간 기준 90분을 초과하면 hourly cron 끊김 또는 helper 호출 누락.
+# 90분 = 1시간 cron 주기 + 30분 grace period.
+DRIFT_THRESHOLD_SEC="${DRIFT_THRESHOLD_SEC:-5400}"  # 90분
+if [[ -f "${PROGRESS_FILE}" ]]; then
+  # frontmatter 안의 첫 `  - ts:` 줄에서 ISO timestamp 추출.
+  # awk 로 'scheduled_task_log:' 블록 진입 후 첫 ts 만 잡음.
+  first_ts=$(awk '
+    /^scheduled_task_log:/ {flag=1; next}
+    flag && /^  - ts:/ {sub(/^  - ts: */, "", $0); print $0; exit}
+    flag && /^[A-Za-z_].*:/ {flag=0}
+  ' "${PROGRESS_FILE}" 2>/dev/null | tr -d ' ')
+  if [[ -n "${first_ts}" ]]; then
+    last_log_epoch=$(python3 -c "from datetime import datetime; print(int(datetime.fromisoformat('${first_ts}').timestamp()))" 2>/dev/null || echo 0)
+    now_epoch=$(date +%s)
+    if [[ "${last_log_epoch}" -gt 0 ]]; then
+      drift_sec=$((now_epoch - last_log_epoch))
+      if [[ "${drift_sec}" -gt "${DRIFT_THRESHOLD_SEC}" ]]; then
+        drift_min=$((drift_sec / 60))
+        issues+=("sched_log_drift:${drift_min}m")
+        [[ $exit_code -eq 0 ]] && exit_code=16 || exit_code=99
+      fi
+    fi
+  fi
+fi
+
 # ── 출력 ───────────────────────────────────────────────────────
 if [[ ${JSON_MODE} -eq 1 ]]; then
   # JSON 한 줄
@@ -150,6 +184,7 @@ else
     [[ "${exit_code}" == 13 || "${exit_code}" == 99 ]] && echo "   [stale mutex] §1.12 — 다른 세션 TTL 초과. 사용자 승인 후 takeover. 자동 금지." >&2
     [[ "${exit_code}" == 14 || "${exit_code}" == 99 ]] && echo "   [FUSE lock] §1.6 FUSE bypass — cp -a .git /tmp/solon-git-<ts>/ → 작업 → rsync back" >&2
     [[ "${exit_code}" == 15 || "${exit_code}" == 99 ]] && echo "   [bracket_sha] PROGRESS.md 에 <sha> 형태 미실체 예측 sha. git log 에서 실제 sha 찾아 backfill (15번째 세션 cd41dff→5d4c6c6 사례 참조)" >&2
+    [[ "${exit_code}" == 16 || "${exit_code}" == 99 ]] && echo "   [sched_log_drift] scheduled_task_log 마지막 entry > 90분. hourly cron 끊김 or helper 누락. 세션 종료 직전 'bash scripts/append-scheduled-task-log.sh <codename> <check_exit> \"<action>\" \"<ahead_delta>\"' 호출 확인" >&2
   fi
 fi
 
