@@ -2,11 +2,17 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-25T23:14:12+09:00
-session: "22번째 세션 `adoring-trusting-feynman` (user-active) — **정상 종료**. 사용자 §7 결정 7항목 일괄 수신 + 8 step batch 완료 (gates.md 신설 + CLAUDE.md §1.14 ≤200 lines 메타 규칙 + §14 분리 + WU-23 §7 resolved + WU-30 신설 + WU-24 entry). 사용자 'A ㄱㄱ' confirm 후 step 1~8 진행. 사용자 '본 세션 종료' 명시 → mutex 자연 release. 다음 세션 = 23번째, default = WU-24 step-1 entry (실 bash 구현). push 는 §1.5 사용자 터미널."
-current_wu: WU-24   # 22nd entry 까지만 (frontmatter + 구현 spec). 실 bash 구현은 23번째 세션
+last_overwrite: 2026-04-25T23:43:12+09:00
+session: "23번째 세션 `dazzling-sharp-euler` (user-active) — 진입 + mutex self claim + WU-31 (Release tooling Phase 0) 신설 (spec only). 사용자 결정 = 배포 자동화 옵션 β (로컬 sh 우선, GitHub Action 후속 Phase 1+2 별도 WU) + 명시 '계획만 만들어 둬'. WU-31.md frontmatter + 본문 §0~§8 spec 작성 — 실 bash 3 sh (cut-release + sync-stable-to-dev + check-drift) + `.visibility-rules.yaml` 갱신은 다음 세션 또는 사용자 컨펌 후. dual-track / single-track OSS 전환 결정 = 보류 (영향범위 큰 결정, 추후). WU-24 (sfs slash) / WU-30 (F-04 fix) status 변경 없음."
+current_wu: WU-24   # 22nd entry 까지만 (frontmatter + 구현 spec). 23rd 는 WU-31 신설만, current_wu 변경 없음.
 current_wu_path: 2026-04-19-sfs-v0.4/sprints/WU-24.md
-current_wu_owner: null   # 22nd 세션 정상 종료 release (2026-04-25T23:14:12+09:00). 23번째 진입 시 §1.12 self claim.
+current_wu_owner:   # 23번째 self claim
+  session_codename: dazzling-sharp-euler
+  claimed_at: 2026-04-25T23:43:12+09:00
+  last_heartbeat: 2026-04-25T23:43:12+09:00
+  ttl_minutes: 15
+  mode: user-active
+  current_active_intent: "WU-31 (Release tooling Phase 0) spec 신설 — '계획만 만들어 둬' 사용자 명시 지시 정합. 실 bash 구현 보류, 다음 세션 사용자 컨펌 후."
 released_history:
   last_owner: adoring-trusting-feynman
   last_claimed_at: 2026-04-25T22:47:00+09:00
@@ -36,6 +42,11 @@ released_history:
 # 필드: ts (ISO8601 +09:00) · codename · check_exit · action · ahead_delta
 # 18번째 세션은 user-active (scheduled 아님) 이지만 trace 연속성 위해 한 줄 append.
 scheduled_task_log:
+  - ts: 2026-04-25T23:43:12+09:00
+    codename: dazzling-sharp-euler
+    check_exit: 0
+    action: "23번째 세션 user-active. 22nd mutex 자연 release (정상 종료) + 23rd self claim. 사용자 결정 수신 = 배포 자동화 옵션 β (로컬 sh 우선, GitHub Action 후속 Phase 1+2 별도 WU) + 명시 '계획만 만들어 둬' → WU-31 (Release tooling Phase 0) 신설 (spec only, frontmatter + 본문 §0~§8). 실 bash 다음 세션. dual-track / single-track OSS 전환 결정 = 보류 (영향범위 인지)."
+    ahead_delta: "+1 예상 (WU-31 신설 commit + 본 PROGRESS 갱신)"
   - ts: 2026-04-25T22:50:01+09:00
     codename: adoring-trusting-feynman
     check_exit: 0
@@ -112,41 +123,45 @@ rules:
   - "18번째 이후: sandbox dry-run 패턴 (/tmp/wu21-dry/ 류) 은 user 실제 자산 접촉 금지 — D-day 전 검증에 유효"
   - "20번째 이후: session-hang 감지 시 stale-mutex takeover 는 사용자 명시 confirm 필요 (§1.12), WU 문서 안에 §N takeover 기록 섹션 남김, P-04 learning pattern 후보"
 resume_hint:
-  purpose: "23번째 세션이 본 PROGRESS.md 1개만 읽고 즉시 WU-24 step-1 entry 가능 + P-03 방지"
+  purpose: "24번째 세션이 본 PROGRESS.md 1개만 읽고 즉시 WU-24 또는 WU-31 step-1 entry 가능 + P-03 방지"
   trigger_positive: [ㄱㄱ, 고, ㅇㅋ, ok, OK, 시작, 가자, ㅇㅇ, 진행, go, Go, start]
   trigger_negative: [ㄴㄴ, 잠깐, stop, 아니, 중단, 다른거, 다른, no]
   default_action: |
-    0. **scripts/resume-session-check.sh 실행 (v0.3)** — exit 0 예상 (cd41dff false-positive narrative 는 21st cleanup, 22nd 가 commit 정책 정합 유지).
-    1. **§1.12 mutex**: current_wu_owner null 확인 (22nd 세션 종료 시 release). 22nd 는 user-active 정상 종료 가정.
-    2. **git status** + `git rev-list --count origin/main..HEAD` 확인. 22nd 세션 종료 예상 ahead = **14+** (8 step batch commits 7건 + 최종 PROGRESS snapshot). 사용자 push 안 했다면 사용자 터미널에서 push 필요.
-    3. **default = WU-24 (#1 sfs slash 구현 part 1) step-1 entry**. WU-24.md §5 체크리스트 row 5 부터 진행:
-       - sfs-common.sh 실 작성 (helper 함수 시그니처는 WU-24 §3 정의)
+    0. **scripts/resume-session-check.sh 실행 (v0.3)** — exit 0 예상.
+    1. **§1.12 mutex**: current_wu_owner 확인. 23rd 자연 release 했으면 null + claim. 23rd 가 active 라면 §1.12 stale 체크.
+    2. **git status** + `git rev-list --count origin/main..HEAD` 확인. 23rd 세션 종료 시점 예상 ahead = **+1~2** (WU-31 신설 commit + PROGRESS final). 사용자 push 안 했다면 사용자 터미널.
+    3. **default = WU-24 (#1 sfs slash 구현 part 1) step-1 entry** (22nd → 23rd 변경 없이 유지). WU-24.md §5 체크리스트 row 5 부터:
+       - sfs-common.sh 실 작성 (WU-24 §3 시그니처)
        - sfs-status.sh 실 작성 (WU-24 §1)
        - sfs-start.sh 실 작성 (WU-24 §2)
        - sprint-templates/{plan,log,review,retro}.md 4 신설
        - .claude/commands/sfs.md adapter dispatch 추가
        - VERSION + CHANGELOG 0.3.0-mvp 예약 entry
        - dry-run sandbox (/tmp/wu24-dry/) 검증
-    3'. (R-D1 정합) 본 작업은 `solon-mvp-dist/templates/` 안 dev staging only. stable 동기화는 0.3.0-mvp release cut 타이밍.
+    3'. (R-D1 정합) 본 작업은 `solon-mvp-dist/templates/` 안 dev staging only. stable 동기화는 **WU-31 cut-release.sh 가 0.3.0-mvp release cut 타이밍에 일괄** (23rd 신설 spec).
     3''. 대안 메뉴 (원칙 2, 사용자 다른 길 선택 시):
        (a) **WU-24 step-1 entry** (default, 위 3).
-       (b) **WU-30 (F-04 fix) 진행** — 이 부분도 frontmatter 만 신설된 상태, 실 정규식 fix + 검증기 분리 구현.
-       (c) **WU-25 part 2 entry** (`/sfs plan` + `/sfs review`) — gates.md §3 사용. WU-24 끝나야 자연스럽지만 병렬 가능.
-       (d) **Claude Code 재시작** (P-05 fallback A 졸업, native subagent 호출 활성).
-       (e) **push** (사용자 터미널, §1.5).
-       (f) Phase 1 킥오프 실전 = D-day 2026-04-27 월 (오늘 기준 D-2). 사용자 본인 Mac 직접.
-       (g) sync/cut-release 자동화 (R-D1, 0.4.0-mvp 예약).
-       (h) 11~22번째 세션 retrospective 실체화 (누적 12건, 22번째 포함).
-       (i) HANDOFF mutex_state_schema 재sync + P-04/P-05/P-06 learning pattern 실체화.
-       (j) `.visibility-rules.yaml` scope 확장 (`.claude/agents/**` + `gates.md` + `solon-status-report.md`).
-       (k) resume-session-recover.sh (P-03 후속 자동화).
+       (b) **WU-31 step-1 entry** — 23rd 신설 spec 으로 실 bash 3 sh (cut-release + sync-stable-to-dev + check-drift) 구현. WU-24 와 병렬 또는 우선 진행 가능. 0.3.0-mvp release cut 직전에 활용.
+       (c) **WU-30 (F-04 fix) 진행**.
+       (d) **WU-25 part 2 entry** (`/sfs plan` + `/sfs review`) — gates.md §3 사용. WU-24 끝나야 자연.
+       (e) **Claude Code 재시작** (P-05 fallback A 졸업, native subagent 호출 활성).
+       (f) **push** (사용자 터미널, §1.5).
+       (g) Phase 1 킥오프 실전 = D-day 2026-04-27 월 (오늘 기준 D-2). 사용자 본인 Mac 직접.
+       (h) **WU-32 (Phase 1 GitHub Action drift 알림) 신설** — WU-31 실 구현 + 1~2 사이클 검증 후 자연.
+       (i) **WU-33 (Phase 2 release tag trigger 자동화) 신설** — WU-32 검증 후 자연.
+       (j) **dual-track / single-track OSS 전환 재논의** — 23rd 보류 결정 재개. §2/§7 SSoT 수정 + 라이선스 결정 stack.
+       (k) 11~23번째 세션 retrospective 실체화 (누적 13건).
+       (l) HANDOFF mutex_state_schema 재sync + P-04/P-05/P-06 learning pattern 실체화.
+       (m) `.visibility-rules.yaml` scope 확장 — WU-31 §4 spec 그대로 적용 (`.claude/agents/**` + `gates.md` + `solon-status-report.md` + agent_architect 루트 stub).
+       (n) resume-session-recover.sh (P-03 후속 자동화).
     4. 사용자 번호 지정 / 자연어 confirm 한 마디 → 해당 경로.
-    5. **scheduled task auto-resume 이면** — step 3 메뉴 skip + staged/TBD/`<sha>`/stale-mutex cleanup 만 + snapshot + mutex release + helper 호출.
+    5. **scheduled task auto-resume 이면** — step 3 메뉴 skip + cleanup 만 + snapshot + mutex release + helper 호출.
   on_negative: |
-    "현 상태만 요약 보고 후 대기" — 22nd 세션 8 step batch 완료. WU-23 §7 사용자 결정 7항목 모두 resolved.
-    WU-24 (current_wu, pending) frontmatter + 구현 spec 작성 완료, 실 bash 구현 대기. WU-30 (pending) frontmatter only.
-    git ahead = 14 예상 (22nd 세션 종료 시점), 활성 WU 2 (WU-24 + WU-30).
-  on_ambiguous: "1-line clarifying Q: 'WU-24 step-1 entry (sfs-common.sh + sfs-status.sh + sfs-start.sh 실 작성) 으로 갈까, 아니면 push 먼저?'"
+    "현 상태만 요약 보고 후 대기" — 23rd 세션 = WU-31 (Release tooling Phase 0) frontmatter + spec only 신설. 실 bash 다음 세션.
+    활성 WU 3 (WU-24 + WU-30 + WU-31), 모두 pending. 사용자 결정 대기 = 0건.
+    git ahead = +1~2 예상 (23rd 종료 시점), 22nd 분 + 23rd 분 누적 가능.
+    dual-track / single-track OSS 전환 결정 = 보류 (영향범위 인지, 추후 재개).
+  on_ambiguous: "1-line clarifying Q: 'WU-24 (sfs slash 실 bash) 로 갈까, WU-31 (release tooling 실 bash) 부터 갈까, 아니면 push 먼저?'"
   safety_locks:
     - "원칙 2 (self-validation-forbidden): A/B/C 의미 결정 자동 실행 금지"
     - "§1.5: git push 자동 실행 금지 — 사용자 터미널에서만 (commit auto, push manual)"
@@ -166,20 +181,75 @@ resume_hint:
     - "20번째 takeover 원칙: session-hang 감지 시 사용자 명시 confirm 필요"
     - "21번째 user-active-deferred mode: 사용자 명시 부재 + 자율 작업 위임 시 mutex mode=user-active-deferred + takeover 보호 비활성화"
     - "22번째 batch 진행 원칙: 사용자 §7 일괄 결정 7항목 + 8 step batch 일괄 진행. minimal cleanup default 적용 + step 별 wip commit (FUSE bypass 자동) + 매 step PROGRESS heartbeat 갱신"
-  version: 8   # v1 (14th) → v7 (20th) → v8 (22nd: §7 7항목 일괄 resolved + WU-24 entry default + §1.14 메타 규칙 + auto commit policy + alt B native 활성 가이드)
+    - "23번째 spec-only WU 패턴: 사용자 '계획만 만들어 둬' 명시 시 frontmatter + 본문 spec 만 신설, 실 구현 코드 (bash/python 등) 작성 금지. WU-31 사례. 22nd WU-24 / WU-30 와 동일 패턴."
+    - "23번째 release tooling 결정 원칙: 본 docset 의 dev↔stable 배포는 (a) Phase 0 = 로컬 sh, (b) Phase 1 = GitHub Action 알림만, (c) Phase 2 = release tag trigger. 각 phase 승급 = 1~2 사이클 실 운영 검증 통과 시. push-trigger 자동화 = §1.5 push manual + raw-internal leak 방지 + 1인 운영 비용 균형 결정."
+  version: 9   # v1 (14th) → v7 (20th) → v8 (22nd) → v9 (23rd: WU-31 신설 + release tooling 옵션 β Phase 분할 + spec-only 패턴 safety_lock + dual-track 전환 보류 명시)
 ---
 
-# PROGRESS — live snapshot (22번째 세션 adoring-trusting-feynman, 8 step batch 완료 / WU-24 current)
+# PROGRESS — live snapshot (23번째 세션 dazzling-sharp-euler, WU-31 신설 spec only / WU-24 current 유지)
 
-> 🚨 **본 파일 최우선 진입.** mutex **claimed by adoring-trusting-feynman** (mode=user-active). 21st (`trusting-stoic-archimedes`) 자연 release + 22nd self claim 완료. 사용자 §7 결정 7항목 일괄 수신 + 8 step batch 완료.
-> **22nd 핵심**: gates.md 신설 (sfs CLI gate enum SSoT, SSoT pointer = 05-gate-framework.md) + CLAUDE.md §1.14 ≤200 lines 메타 규칙 신설 + §14 → solon-status-report.md 분리 (CLAUDE.md 214→167 lines) + WU-23 §7 7항목 resolved (decision_points WU22-D3~D9) + WU-30 (F-04 fix) 신설 + WU-24 (#1 sfs slash 구현 part 1) entry 준비 (frontmatter + 구현 spec).
-> **current_wu = WU-24** — frontmatter + 구현 spec only, 실 bash 구현 (sfs-common.sh + sfs-status.sh + sfs-start.sh + sprint-templates 4 + adapter dispatch) 다음 세션.
-> release 로드맵 (β bundle): 0.3.0-mvp (#1+#4+#6) → 0.3.x patch (#5) → 0.4.0-mvp (#2+#3) → 0.5.0-mvp (#7) → 0.6.0-mvp (#8).
-> **22nd 세션 ahead = 14** (8 step batch commits 7건 + 본 PROGRESS 최종). 사용자 push 는 §1.5 정합 사용자 터미널.
+> 🚨 **본 파일 최우선 진입.** mutex **claimed by dazzling-sharp-euler** (mode=user-active). 22nd (`adoring-trusting-feynman`) 정상 종료 + 23rd self claim 완료.
+> **23rd 핵심**: 사용자 결정 = 배포 자동화 옵션 β (로컬 sh 우선, GitHub Action 후속 Phase 1+2 별도 WU). 명시 "계획만 만들어 둬" → **WU-31 (Release tooling Phase 0) 신설** — frontmatter + 본문 §0~§8 spec only. 실 bash 3 sh (`cut-release.sh` + `sync-stable-to-dev.sh` + `check-drift.sh`) + `.visibility-rules.yaml` 갱신은 다음 세션 또는 사용자 컨펌 후. dual-track / single-track OSS 전환 결정 = 보류 (영향범위 인지, 추후 재개).
+> **current_wu = WU-24 유지** — 23rd 가 변경 안 함 (사용자 변경 지시 없음). 활성 WU = WU-24 + WU-30 + WU-31 (모두 pending, spec only).
+> **22nd 핵심 (직전 세션, 보존)**: gates.md 신설 + CLAUDE.md §1.14 ≤200 lines 메타 규칙 + §14 분리 + WU-23 §7 7항목 resolved + WU-30 + WU-24 entry. 22nd 종료 commit cb1d85a (release: mutex 자연 release).
+> release 로드맵 (β bundle): 0.3.0-mvp (#1+#4+#6) → 0.3.x patch (#5) → 0.4.0-mvp (#2+#3) → 0.5.0-mvp (#7) → 0.6.0-mvp (#8). **WU-31 cut-release.sh 첫 활용 = 0.3.0-mvp release cut 직전**.
+> **23rd 세션 ahead = +1~2** (WU-31 신설 wip + 본 PROGRESS final). 22nd 분은 cb1d85a 까지 사용자 push 완료 (entry 시 ahead 0 확인). 사용자 push 는 §1.5 정합 사용자 터미널.
 
 ---
 
 ## ① Just-Finished
+
+### 23번째 세션 (dazzling-sharp-euler, user-active, 2026-04-25 23:43 KST → 진행 중, WU-31 신설 spec only)
+
+**사용자 발화 흐름**:
+1. "23번째 세션 ㄱㄱ 하기 전에 ... 지금 여기서 개발한걸 solon에 적용을 시켜야되는데 적용하는 방식이 배포방식이 아니라 복붙인가?? 배포하는 방식으로 바꿔야되는데 어떻게 바꾸지?" — 23rd 사전 컨텍스트 질문
+2. AI 정리 응답 = 현 상태 (R-D1 policy + tooling 0) + 옵션 A/β/γ + Phase 분할 spec
+3. "음 근데 굳이 이걸 내가 비공개로 해야될까 ... 그냥 오픈소스로 공개하고 ... 상품화가 힘들거 같음" — single-track OSS 전환 시사
+4. AI 영향범위 정리 = §2 dual-track / §7 visibility 3-tier / 라이선스 결정 stack 등
+5. "그럼 그냥 배포방식만 재정의 하고 가자 영향범위가 이정도로 클줄은 몰랐네 ... 깃헙에 push가 되면 트리거가 돼서 solon-mvp 레포에도 적용이 되게 ... 아니면 sh로 직접 ...?" — track 단일화 보류 + 배포 자동화 question
+6. AI 정리 응답 = 본 케이스 특수성 4가지 + Phase 분할 (β default) + γ 하이브리드
+7. **"그래 깃헙은 나중에 지금은 sh로 하는게 맞겠다 계획만 만들어 둬"** — 23rd 결정 final: 옵션 β + spec only 명시
+
+**23rd 결과** (현 본 PROGRESS 갱신 시점, 1 wip commit + 본 PROGRESS final 예정):
+
+- **WU-31 신설** — `sprints/WU-31.md` (frontmatter `status: pending` + 본문 §0~§8 spec). title: "Release tooling Phase 0 — local sh (cut-release + sync-stable-to-dev)". visibility: business-only. decision_points 0 (의미 결정은 23rd 사전 resolved). related_wu: WU-22 / WU-30 / WU-24~26 명시.
+  - **§1 Phase 분할** — Phase 0 (본 WU 로컬 sh) / Phase 1 (후속 WU-32 GitHub Action 알림) / Phase 2 (후속 WU-33 tag trigger). 각 phase 승급 = 1~2 사이클 운영 검증 통과 시.
+  - **§2 cut-release.sh 사양** — `--version X.Y.Z-mvp` 필수 + `--dry-run` default. visibility filter 적용 (allowlist + APPLY-INSTRUCTIONS.md 제외 hard-coded blocklist). VERSION/CHANGELOG bump + git commit + tag (push 안 함, §1.5 정합).
+  - **§3 sync-stable-to-dev.sh 사양** — hotfix path. `--stable-sha <sha>` + `--dry-run` default. stable → dev cp + git add (commit msg `WU-31/sync(stable): <sha>` 표준).
+  - **§4 .visibility-rules.yaml allowlist 갱신** — 22nd PROGRESS ③ 3.3 (f) 해소: `.claude/agents/**` (business-only) + `gates.md` (oss-public) + `solon-status-report.md` (raw-internal) + agent_architect 루트 stub (raw-internal) + Phase 2 enforcement_active=true.
+  - **§5 (선택) check-drift.sh** — release cut 직전 dry-run preview helper.
+  - **§6 R-D1 + visibility 메모** — sh 들 자체는 stable 동봉 안 함 (운영자 도구). OSS fork 동봉 결정은 후속.
+  - **§7 본 WU 진행 체크리스트** — row 4~12 = 다음 세션 또는 사용자 컨펌 후 (실 bash + dry-run sandbox).
+  - **§8 결론 / 다음 발화** — 23rd 세션 default_action 후보 (a/b/c/d) 정리.
+
+- **sprints/_INDEX.md 갱신** — frontmatter `updated` + 활성 WU 섹션에 WU-31 row 추가 (WU-24 + WU-30 + WU-31 = 3개 모두 pending). 23rd 결과 narrative 추가.
+
+- **PROGRESS.md (본 파일) 다중 덮어쓰기** —
+  (a) frontmatter `last_overwrite` 갱신 + `session` narrative 23rd 진입 + `current_wu_owner` claim (`session_codename: dazzling-sharp-euler`, `mode: user-active`, `current_active_intent` 명시)
+  (b) `scheduled_task_log` 23rd entry append (rolling N=20 = 11 entries kept, helper 호출 예정)
+  (c) `resume_hint` v8 → **v9** (default_action 에 WU-31 step-1 entry 옵션 추가, 대안 메뉴 (b)~(j) 재정렬, dual-track 전환 (j) 신설, version 9 갱신)
+  (d) safety_locks 23rd 추가 2건 (spec-only WU 패턴 + release tooling 결정 원칙)
+  (e) 본문 헤더 narrative 23rd 진입 갱신 (22nd 핵심 보존)
+  (f) ① Just-Finished 본 섹션 추가
+  (g) ② In-Progress 갱신 (current_wu = WU-24 유지 명시 + WU-31 추가)
+  (h) ③ Next 우선순위 갱신 (WU-31 step-1 옵션 추가, dual-track 전환 보류 항목 (h) 추가)
+  (i) ④ Artifacts 4.0 (23rd 신설) 추가
+
+- **사용자 결정 영역 — 의미 결정 0건 본 세션**:
+  - (a) 옵션 β 배포 방식 = 사용자 직접 결정 (AI 는 trade-off 정리만)
+  - (b) "계획만 만들어 둬" 명시 = 사용자 직접 지시 (AI 는 spec only 진행)
+  - (c) dual-track / single-track OSS 전환 = 사용자 보류 결정 (추후 재개)
+
+**규율 준수**:
+- §1.3 self-validation (의미 결정 0, 모두 사용자 사전 결정) ·
+- §1.4 Option β default (Phase 분할 minimal cleanup, push-trigger 즉시 자동화 안 함) ·
+- §1.5 push 금지 (commit 까지만) ·
+- §1.6 FUSE bypass (commit 시 발동 시 자동 적용) ·
+- §1.7 escalation (dual-track 전환 보류 = ⚠️ marker 후 사용자 결정 대기, 본 PROGRESS ③ 3.3 (j) 으로 이관) ·
+- §1.8 매 step PROGRESS heartbeat 갱신 ·
+- §1.12 mutex (claim, mode=user-active, ttl 15분) ·
+- §1.13 R-D1 (WU-31 본문 자체가 R-D1 spec 정합 — sh 들이 dev-first / stable hotfix sync-back 의 backbone) ·
+- §1.14 ≤200 lines (CLAUDE.md 본 세션 미접촉, 167 lines 유지)
 
 ### 22번째 세션 (adoring-trusting-feynman, user-active, 2026-04-25 22:47 KST → 23:00 KST, 8 step batch 완료)
 
@@ -271,51 +341,71 @@ resume_hint:
 
 ## ② In-Progress
 
-**current_wu = WU-24** — #1 sfs slash 구현 part 1 (`/sfs status` + `/sfs start`). frontmatter + 구현 spec (§0~§6) 작성 완료. 실 bash 구현 (§5 체크리스트 row 5~10): sfs-common.sh / sfs-status.sh / sfs-start.sh / sprint-templates {plan,log,review,retro}.md / adapter dispatch / VERSION+CHANGELOG entry. 다음 세션 또는 사용자 컨펌 후 본 세션 진행 가능.
+**current_wu = WU-24 (유지)** — 23rd 가 변경 안 함 (사용자 변경 지시 없음). #1 sfs slash 구현 part 1 (`/sfs status` + `/sfs start`). frontmatter + 구현 spec (§0~§6) 작성 완료. 실 bash 구현 (§5 체크리스트 row 5~10): sfs-common.sh / sfs-status.sh / sfs-start.sh / sprint-templates {plan,log,review,retro}.md / adapter dispatch / VERSION+CHANGELOG entry. 다음 세션 또는 사용자 컨펌 후.
 
 **WU-30** (F-04 fix, pending) — frontmatter + 작업 plan §0~§5 only. 실 정규식 fix (`[A-Z]{2,}`) + 검증기 분리 (`verify-install.sh` 신설) 다음 세션.
 
-mutex: **claimed by adoring-trusting-feynman** (mode=user-active). 22nd 8 step batch 완료 시점. 사용자 복귀 시 자연 release 판단.
+**WU-31 (23rd 신설, pending)** — Release tooling Phase 0 (로컬 sh). frontmatter + 본문 §0~§8 spec only. 실 bash 3 sh (`cut-release.sh` + `sync-stable-to-dev.sh` + `check-drift.sh`) + `.visibility-rules.yaml` allowlist 갱신 + `scripts/_README.md` 신설 + dry-run sandbox `/tmp/wu31-dry/` 검증 = §7 체크리스트 row 4~12 다음 세션.
+
+**활성 WU = 3 (모두 pending, 모두 spec only — 실 코드 0)**:
+- WU-24 (`current_wu`, sfs slash) — 22nd 신설
+- WU-30 (F-04 fix) — 22nd 신설
+- WU-31 (release tooling) — 23rd 신설 (본 세션)
+
+mutex: **claimed by dazzling-sharp-euler** (mode=user-active, ttl 15분). 23rd 본 세션 종료 시 자연 release 판단 (사용자 명시 종료 또는 작업 완료 시점).
 
 ---
 
 ## ③ Next
 
-> **22nd 8 step batch 완료**. WU-23 §7 사용자 결정 7항목 모두 resolved. WU-24 = current_wu, WU-30 = pending. 사용자 답변 대기 0건.
+> **23rd 세션 = WU-31 신설 spec only (계획만)**. 22nd 8 step batch 의 산출물 + WU-23 §7 사용자 결정 7항목 모두 resolved 유지. **사용자 결정 대기 = 0건** (23rd 세션도 의미 결정 0).
 
 ### 3.1 사용자 답변 대기 — 0건
 
-22nd 세션 진입 시 §7 7항목 일괄 수신 완료 (WU22-D3~D9 frontmatter resolved). 상세 = `sprints/WU-23.md §7.6` 인덱스 표.
+23rd 세션도 의미 결정 0 (사용자 옵션 β 결정 + "계획만" 명시 사전 수신). 22nd §7 7항목 + 23rd 결정 모두 resolved.
 
 ### 3.2 다음 세션 우선순위
 
-1. **WU-24 step-1 entry** (default) — `sfs-common.sh` + `sfs-status.sh` + `sfs-start.sh` 실 작성 + sprint-templates 4 신설 + `.claude/commands/sfs.md` adapter dispatch + VERSION/CHANGELOG 0.3.0-mvp 예약 + dry-run sandbox (`/tmp/wu24-dry/`).
-2. **push** (§1.5) — 사용자 터미널 `git push origin main` (22nd ahead 14, 누적 commits).
-3. **Claude Code 재시작** — P-05 fallback A 졸업, native `subagent_type=generator/evaluator/planner` 활성. V-2 부터 native vote 시도.
-4. **WU-30 진행** — F-04 정규식 fix (`[A-Z]{2,}` minimal) + 검증기 분리 (`verify-install.sh` 신설). WU-24 와 병렬 가능.
+1. **WU-24 step-1 entry** (default 유지, 22nd → 23rd 변경 없음) — `sfs-common.sh` + `sfs-status.sh` + `sfs-start.sh` 실 작성 + sprint-templates 4 신설 + adapter dispatch + VERSION/CHANGELOG entry + dry-run sandbox (`/tmp/wu24-dry/`).
+2. **WU-31 step-1 entry** (23rd 신설, 병렬 가능) — `cut-release.sh` + `sync-stable-to-dev.sh` + (선택) `check-drift.sh` 실 bash + `.visibility-rules.yaml` allowlist 갱신 + `scripts/_README.md` + dry-run sandbox (`/tmp/wu31-dry/`). 0.3.0-mvp release cut 직전에 첫 활용.
+3. **push** (§1.5) — 사용자 터미널. 23rd ahead = +1~2 (WU-31 + PROGRESS).
+4. **Claude Code 재시작** — P-05 fallback A 졸업, native `subagent_type=generator/evaluator/planner` 활성.
+5. **WU-30 진행** — F-04 정규식 fix + 검증기 분리. WU-24 / WU-31 와 병렬 가능.
 
 ### 3.3 미해결 후속 (non-block, 정보)
 
-- (a) Phase 1 킥오프 D-day 2026-04-27 월 (D-2 기준). 사용자 본인 Mac 직접 진행 (Claude 세션 자동 X).
-- (b) sync/cut-release 자동화 (R-D1, 0.4.0-mvp 예약) — `scripts/sync-stable-to-dev.sh` + `scripts/cut-release.sh`.
-- (c) 11~22번째 세션 retrospective 실체화 (누적 12건, 22nd 포함).
-- (d) HANDOFF-next-session.md mutex_state_schema 재sync (22nd 결정 7항목 + WU-24/WU-30 entry 반영).
-- (e) P-04 / P-05 / P-06 learning logs 실체화 (`learning-logs/2026-05/`):
+- (a) Phase 1 킥오프 D-day 2026-04-27 월 (D-2 기준). 사용자 본인 Mac 직접 진행.
+- (b) ~~sync/cut-release 자동화 (0.4.0-mvp 예약)~~ → **WU-31 spec 신설 완료 (23rd)**, 실 bash 구현 다음 세션. Phase 1+2 (GitHub Action) 는 WU-32/WU-33 후속.
+- (c) 11~23번째 세션 retrospective 실체화 (누적 13건, 23rd 포함).
+- (d) HANDOFF-next-session.md mutex_state_schema 재sync (22nd 결정 7항목 + WU-24/WU-30/**WU-31** entry 반영).
+- (e) P-04 / P-05 / P-06 / **P-07 후보** learning logs 실체화 (`learning-logs/2026-05/`):
   - P-04 = session-hang takeover (WU-22 §7 표준)
   - P-05 = agent-loader-startup-only (Claude Code mid-session reload 안 됨, fallback A 패턴)
   - P-06 = claude-md-line-limit-meta-rule (22nd 신설, §1.14 + §14 분리 사례)
-- (f) `.visibility-rules.yaml` scope 확장 — `.claude/agents/**` + `gates.md` + `solon-status-report.md` + `agent_architect/` 루트 포함.
-- (g) W10 결정 세션 — `cross-ref-audit.md §4` #14/#18/#19 (22nd 미접촉).
-- (h) WU-16b 확장 이관.
-- (i) resume-session-recover.sh (P-03 후속 자동화, 0.4.0-mvp 예약).
-- (j) WU-25 entry (#1 sfs slash 구현 part 2 = `/sfs plan` + `/sfs review`) — gates.md §3 valid enum 사용.
-- (k) WU-26 entry (#1 sfs slash 구현 part 3 = `/sfs decision` + `/sfs retro`) — 하이브리드 mini-ADR template + `--close` auto commit (push 는 §1.5 수동).
-- (l) WU-27 (#4 events.jsonl schema 표준화) + WU-28 (#6 Sprint cycle CLI helper) — 0.3.0-mvp 번들 마무리.
-- (m) WU-29 (#5 ADR helper) — 0.3.x patch 시 분리.
+  - **P-07 (23rd 후보) = release-tooling-phased** (push-trigger 자동화 vs 로컬 sh 우선 decision factor: raw-internal leak 방지 + 1인 운영 비용 + §1.5 push manual 정합)
+- (f) `.visibility-rules.yaml` scope 확장 — **WU-31 §4 spec 그대로**, 실 적용은 WU-31 step-1 시.
+- (g) W10 결정 세션 — `cross-ref-audit.md §4` #14/#18/#19 (23rd 미접촉).
+- (h) **dual-track / single-track OSS 전환 재논의** (23rd 보류 결정) — §2 dual-track 폐기 + §7 visibility 3-tier → 2-tier + 라이선스 (MIT/Apache-2.0/AGPL/BSL) + 거버넌스 (CONTRIBUTING/CoC) + public repo 공개 절차. 사용자 직감 "상품화 힘듦" 의 근거 (a 확신 / b 직감 / c 시점) 명료화 후 재개.
+- (i) WU-16b 확장 이관.
+- (j) resume-session-recover.sh (P-03 후속 자동화).
+- (k) WU-25 entry (#1 sfs slash 구현 part 2 = `/sfs plan` + `/sfs review`) — gates.md §3 사용.
+- (l) WU-26 entry (#1 sfs slash 구현 part 3 = `/sfs decision` + `/sfs retro`) — 하이브리드 mini-ADR template + `--close` auto commit.
+- (m) WU-27 (#4 events.jsonl schema 표준화) + WU-28 (#6 Sprint cycle CLI helper) — 0.3.0-mvp 번들 마무리.
+- (n) WU-29 (#5 ADR helper) — 0.3.x patch 시 분리.
+- (o) **WU-32 (Phase 1 GitHub Action drift 알림)** — WU-31 실 구현 + 1~2 사이클 운영 검증 후 신설.
+- (p) **WU-33 (Phase 2 release tag trigger 자동화)** — WU-32 검증 후 신설.
 
 ---
 
-## ④ Artifacts (22번째 세션 8 step batch 종료 시점)
+## ④ Artifacts (23번째 세션 진행 시점)
+
+### 4.0 23rd 신설/갱신 산출물
+
+| 산출물 | 경로 | 상태 / sha |
+|--------|------|:-:|
+| **sprints/WU-31.md** | `2026-04-19-sfs-v0.4/sprints/WU-31.md` | ✨ **23rd 신설** (sha TBD) — Release tooling Phase 0 (로컬 sh) spec only. frontmatter (status: pending, decision_points 0, visibility business-only) + 본문 §0~§8 (Phase 분할 + cut-release 사양 + sync-stable-to-dev 사양 + check-drift + .visibility-rules.yaml 갱신 + R-D1 메모 + 체크리스트 + 결론). 실 bash 다음 세션. |
+| **sprints/_INDEX.md** | — | ✅ **23rd 갱신** — frontmatter `updated` + 활성 WU 섹션에 WU-31 row 추가 (WU-24 + WU-30 + WU-31 = 3 pending). 23rd 결과 narrative 추가. |
+| **PROGRESS.md (본 파일)** | — | ✨ **23rd 다중 덮어쓰기** — frontmatter (`current_wu_owner = dazzling-sharp-euler` mode=user-active claim, `last_overwrite` + `last_heartbeat`, `scheduled_task_log` 23rd entry append, `resume_hint` v8 → **v9** with WU-31 옵션 + dual-track 재논의 항목, safety_locks 23rd 2건 추가) + 본문 헤더 narrative + ① Just-Finished 23rd 섹션 + ② current_wu 유지 + WU-31 추가 + ③ Next 우선순위 갱신 (WU-31 step-1 + WU-32/WU-33 후속 명시) + ④ 본 4.0 섹션. |
 
 ### 4.1 22nd 신설/갱신 산출물
 
@@ -357,7 +447,7 @@ mutex: **claimed by adoring-trusting-feynman** (mode=user-active). 22nd 8 step b
 | PHASE1-MVP-QUICK-START.md | — | ✅ D-day 차단 요소 없음 (오늘 기준 D-2, 2026-04-27 월). |
 | solon-mvp-dist/ | — | ✅ v0.2.4-mvp stable checksum 일치. 21st 자율 작업에서 미접촉. |
 
-## 운영 규칙 (22nd 세션까지 누적)
+## 운영 규칙 (23rd 세션까지 누적)
 
 1. 다음 세션 진입 시 **step 0: `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh`** 필수.
 2. §1.12 mutex 프로토콜 (claim → heartbeat → release) + **stale-mutex takeover 시 사용자 명시 confirm 필수** (20번째 확립).
@@ -372,26 +462,36 @@ mutex: **claimed by adoring-trusting-feynman** (mode=user-active). 22nd 8 step b
 11. **사용자 §N 일괄 결정 batch 패턴** (22nd 확립): 결정 대기 항목 N건 누적 시 사용자에게 한 번에 컨텍스트 + 옵션 + trade-off + β default 제시 → 사용자 일괄 답 → step batch 일괄 진행. 매 step wip commit + heartbeat 갱신. Cf. WU-23 §7 7항목 / 8 step batch 22nd 사례.
 12. **auto commit policy** (22nd WU22-D8): commit 자동, push 수동 (§1.5). PROGRESS.md 가 히스토리 보유하므로 commit 자동화 OK. 단 push 는 사용자 터미널 책임 유지.
 13. **gate enum SSoT 1원** (22nd WU22-D3): `gates.md` = sfs CLI 참조용 컴팩트 reference, `05-gate-framework.md` = 진짜 SSoT. gates.md 변경 시 05 먼저 갱신 후 sync. 7-gate enum (G-1 + G0 + G1~G5).
+14. **spec-only WU 패턴** (23rd 확립): 사용자 "계획만 만들어 둬" 명시 시 frontmatter + 본문 spec 만 신설, 실 코드 (bash/python 등) 작성 금지. 실 구현은 다음 세션 또는 사용자 컨펌 후. 22nd WU-24/WU-30 + 23rd WU-31 동일 패턴. 의미 결정 0 + 실 구현 0 = "기록 + spec" 만 남기는 가벼운 WU 전환 방법. token 비용 제어 + 결정 stack 정리에 유리.
+15. **release tooling Phase 분할 원칙** (23rd 확립): 본 docset 의 dev↔stable 배포 자동화는 (a) Phase 0 = 로컬 sh / (b) Phase 1 = GitHub Action 알림만 / (c) Phase 2 = release tag trigger. 각 phase 승급 = 1~2 사이클 실 운영 검증 통과 시. push-trigger 즉시 자동화 안 하는 이유 = §1.5 push manual 정합 + raw-internal leak 방지 + 1인 운영 비용. P-07 후보.
 
 ---
 
-**다음 세션 (23번째) 진입 체크리스트 (v1.3, 22nd 세션 8 step batch 반영)**:
+**다음 세션 (24번째) 진입 체크리스트 (v1.4, 23rd 세션 WU-31 신설 반영)**:
 
-1. `CLAUDE.md §1` + `§1.12` + `§1.13` + **§1.14 (22nd 신설 ≤200 lines)** 읽기 (총 14 규율).
-2. `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh` 실행. **exit 0 예상** (cd41dff 정합 + 22nd commit 정책 정합).
-3. `PROGRESS.md` frontmatter `current_wu_owner` 확인. 22nd 자연 release 시 null + claim. 실 release 안 됐으면 §1.12 mutex 절차 (mode=user-active 단순 release).
-4. `git status` + `git rev-list --count origin/main..HEAD` 확인. **22nd 종료 시점 예상 ahead = 14** (8 step batch commits 7건 + 본 PROGRESS 최종 + 실 14는 push 안 했을 때). 사용자 터미널 push 후 0.
-5. **default = WU-24 step-1 entry** (resume_hint v8 default_action). `sprints/WU-24.md §5` 체크리스트 row 5~10 진행:
+1. `CLAUDE.md §1` + `§1.12` + `§1.13` + `§1.14 (≤200 lines)` 읽기 (총 14 규율).
+2. `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh` 실행. **exit 0 예상**.
+3. `PROGRESS.md` frontmatter `current_wu_owner` 확인. 23rd 자연 release 시 null + claim. 실 release 안 됐으면 §1.12 mutex 절차.
+4. `git status` + `git rev-list --count origin/main..HEAD` 확인. **23rd 종료 시점 예상 ahead = +1~2** (WU-31 신설 + 본 PROGRESS final). 사용자 터미널 push 후 0.
+5. **default = WU-24 step-1 entry** (resume_hint v9 default_action 유지) — `sprints/WU-24.md §5` 체크리스트 row 5~10:
    - sfs-common.sh + sfs-status.sh + sfs-start.sh 실 작성
    - sprint-templates 4 (plan/log/review/retro) 신설
    - .claude/commands/sfs.md adapter dispatch 추가
    - VERSION + CHANGELOG 0.3.0-mvp 예약 entry
    - dry-run sandbox `/tmp/wu24-dry/`
-6. **사용자 결정 대기 = 0건** (22nd 세션 §7 7항목 모두 resolved). 추가 결정 필요 시 ⚠️ marker + escalate.
-7. **Claude Code 재시작 후 native subagent_type=generator/evaluator/planner** 호출 가능 (P-05 fallback A 졸업). V-2 부터 native vote 시도 권장.
-8. **D-day = 2026-04-27 월 (D-2)** — 사용자 본인 Mac 실행, Claude 세션 자동 아님. PHASE1-MVP-QUICK-START.md §2 runbook 사용.
+5'. **alt = WU-31 step-1 entry** (23rd 신설 spec 그대로 실 bash 구현):
+   - `scripts/cut-release.sh` 신설 (정방향, dry-run default)
+   - `scripts/sync-stable-to-dev.sh` 신설 (역방향, hotfix path)
+   - `scripts/check-drift.sh` 선택 신설
+   - `.visibility-rules.yaml` allowlist 갱신 (WU-31 §4)
+   - `scripts/_README.md` 신설/갱신
+   - dry-run sandbox `/tmp/wu31-dry/`
+6. **사용자 결정 대기 = 0건** (23rd 세션 의미 결정 0). 추가 결정 필요 시 ⚠️ marker + escalate.
+7. **Claude Code 재시작 후 native subagent_type=generator/evaluator/planner** 호출 가능 (P-05 fallback A 졸업).
+8. **D-day = 2026-04-27 월 (D-2 → 다음 세션 시점에 따라 D-1 또는 당일)** — 사용자 본인 Mac 실행. PHASE1-MVP-QUICK-START.md §2 runbook.
 9. WU 완료 시 본 PROGRESS.md 즉시 덮어쓰기 + commit (FUSE bypass 자동 적용 허용).
+10. **dual-track / single-track OSS 전환 결정** = 23rd 보류. 사용자가 "상품화 힘듦" 근거 (a 확신 / b 직감 / c 시점) 명료화 + 결정 시점 = 0.3.0-mvp release 직전 또는 추후. 추후 재개 시 WU 신설 (가칭 WU-XX "track 단일화 + license + governance").
 
-**22번째 세션 8 step batch 종료 시점 핵심 메시지** (다음 세션 한 줄 요약):
+**23번째 세션 종료 시점 핵심 메시지** (다음 세션 한 줄 요약):
 
-> 사용자 §7 결정 7항목 일괄 resolved + gates.md 신설 (7-gate enum SSoT) + CLAUDE.md §1.14 ≤200 lines 메타 규칙 + §14 → solon-status-report.md 분리 (167 lines, 33 여유) + WU-23 §7 resolved 마킹 + WU-30 신설 (F-04 fix) + WU-24 entry 준비 (#1 sfs slash 구현 part 1, 구현 spec까지). 다음 세션 = WU-24 step-1 실 bash 구현부터. push 사용자 터미널.
+> 사용자 결정 = 배포 자동화 옵션 β (로컬 sh 우선, GitHub Action 후속) + 명시 "계획만 만들어 둬" → WU-31 (Release tooling Phase 0) 신설 spec only. 실 bash 3 sh + .visibility-rules.yaml allowlist 갱신은 다음 세션. WU-24 (current_wu, sfs slash) 변경 없이 유지. dual-track / single-track OSS 전환 결정 = 보류 (영향범위 인지). 활성 WU 3 (WU-24 + WU-30 + WU-31, 모두 pending spec only). push 사용자 터미널.

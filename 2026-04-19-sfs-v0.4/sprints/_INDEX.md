@@ -2,7 +2,7 @@
 doc_id: sprints-index
 title: "sprints/ — WU (Work Unit) 파일 목록 (v2)"
 visibility: raw-internal
-updated: 2026-04-25   # 22번째 세션 adoring-trusting-feynman — 21st mutex 자연 release + 22nd self claim + 사용자 §7 결정 7항목 일괄 수신 + 8 step 일괄 진행 (gates.md 신설 + CLAUDE.md §1.14 ≤200 lines 메타 규칙 + §14 분리 + WU-23 §7 resolved + WU-30 신설 + WU-24 entry).
+updated: 2026-04-25   # 23번째 세션 dazzling-sharp-euler — 22nd mutex 자연 release 후 self claim. 사용자 결정 = 배포 자동화 옵션 β (로컬 sh 우선, GitHub Action 후속) + "계획만" 명시 → WU-31 (Release tooling Phase 0, spec only) 신설. WU-24 / WU-30 status 변경 없음.
 ---
 
 # sprints/ — WU 파일 인덱스
@@ -19,7 +19,9 @@ updated: 2026-04-25   # 22번째 세션 adoring-trusting-feynman — 21st mutex 
 |:--:|:---|:--:|:---|:---|:---|
 | **WU-24** | #1 sfs slash 구현 part 1 (`/sfs status` + `/sfs start`) | pending | 2026-04-25 | adoring-trusting-feynman (22nd) | [WU-24.md](WU-24.md) |
 | WU-30 | F-04 verify-w0.sh fix (정규식 minimal + 두 검증기 분리) | pending | 2026-04-25 | adoring-trusting-feynman (22nd) | [WU-30.md](WU-30.md) |
+| WU-31 | Release tooling Phase 0 — local sh (cut-release + sync-stable-to-dev) | pending | 2026-04-25 | dazzling-sharp-euler (23rd) | [WU-31.md](WU-31.md) |
 
+> **23rd 세션 결과**: 사용자 결정 = 배포 자동화 옵션 β (로컬 sh 우선, GitHub Action 후속) + 명시 "계획만 만들어 둬" → **WU-31 신설 (frontmatter + spec only)**. 실 bash 3 sh + `.visibility-rules.yaml` 갱신은 다음 세션 또는 사용자 컨펌 후. Phase 1+2 (GitHub Action drift 알림 / tag trigger) 는 후속 WU-32 / WU-33 예약. WU-24 / WU-30 status 변경 없음.
 > **22nd 세션 결과**: WU-23 §7 사용자 결정 7항목 일괄 resolved (WU22-D3~D9). WU-24 = current_wu (frontmatter + 구현 spec only, 실 bash 코드 다음 세션). WU-30 = 신설 (frontmatter + 작업 plan, 실 fix 다음 세션 또는 사용자 컨펌 후).
 
 ## 완료 WU (status: done) — v2 네이티브
