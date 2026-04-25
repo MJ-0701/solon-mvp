@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 # ────────────────────────────────────────────────────────────────
-# Solon v0.4-r3 · scripts/resume-session-check.sh  (v0.1)
+# Solon v0.4-r3 · scripts/resume-session-check.sh  (v0.2)
 # 목적: 세션 진입 직후 (§1.12 mutex claim 직후) 1회 실행하는 sanity check.
 #       - staged/untracked 유실 위험 감지 (P-03 패턴)
 #       - PROGRESS.md 의 TBD_ 플레이스홀더 감지
 #       - mutex last_heartbeat TTL drift 감지
 #       - FUSE index.lock 존재 감지
+#       - <sha> angle-bracket 미실체 감지 (v0.2, P-03 변종 — 15번째 cd41dff vs 5d4c6c6 사례)
+# 변경 이력:
+#   v0.1 (15번째 admiring-nice-faraday) — 초안 5 checks.
+#   v0.2 (16번째 nice-kind-babbage)     — check #6 추가 (angle-bracket sha + HEAD ancestor 검증).
+#                                         inline code (` ... `) 안의 `<sha>` 는 retrospective 참조로 제외.
 # 원칙: **감지만 함. 자동 복구 금지** (원칙 2 self-validation-forbidden 준수).
 #        감지 시 표준 error code 로 exit + STDERR 에 복구 가이드 출력.
 # SSoT: CLAUDE.md §1.8 + §1.12 + learning-logs/2026-05/P-03
@@ -18,6 +23,8 @@
 #   12 = PROGRESS.md 에 TBD_ 플레이스홀더 존재 (미실체화 commit 의심)
 #   13 = mutex last_heartbeat TTL 초과 (stale owner)
 #   14 = FUSE index.lock 존재 (직접 제거 불가 상태)
+#   15 = PROGRESS.md 에 <sha> 형태 angle-bracket sha 플레이스홀더 존재
+#        (15번째 세션 사례: <cd41dff> 예측 sha 가 실체 5d4c6c6 와 mismatch)
 #   99 = 복합 이슈 (여러 개 동시 발견)
 # ────────────────────────────────────────────────────────────────
 set -uo pipefail
@@ -92,6 +99,35 @@ if [[ -f ".git/index.lock" ]]; then
   [[ $exit_code -eq 0 ]] && exit_code=14 || exit_code=99
 fi
 
+# ── 6. <sha> angle-bracket 플레이스홀더 감지 ────────────────────
+# 15번째 세션 (admiring-nice-faraday) 이 본문에 `<cd41dff>` 형태로 예측 sha 를
+# 적었지만 실체 commit 은 `5d4c6c6` 로 다른 sha 가 나와 mismatch 발생.
+# 패턴: `<` + 7~12 자 hex + `>` (markdown autolink 형태도 매칭하지만 일반 hex 만).
+# 실제 git log 에 존재하는 sha 인지 검증 — 없으면 unrealized prediction.
+if [[ -f "${PROGRESS_FILE}" ]]; then
+  # inline code (` ... `) 는 사후 retrospective 참조 — 검사 대상에서 제외.
+  # sed 로 backtick 쌍을 제거 후에 남은 `<sha>` 만 "live" prediction 으로 간주.
+  bracket_shas=$(sed -E 's/`[^`]*`//g' "${PROGRESS_FILE}" 2>/dev/null | \
+                 grep -oE '<[0-9a-f]{7,12}>' 2>/dev/null | \
+                 tr -d '<>' | sort -u || true)
+  if [[ -n "${bracket_shas}" ]]; then
+    bad=0
+    bad_list=""
+    for s in ${bracket_shas}; do
+      # 단순 존재 (cat-file -e) 만으로는 부족 — dangling commit (rebase/amend 잔재) 도
+      # exist 하므로 HEAD ancestor 인지까지 확인해야 P-03 변종 (예측↔실체 sha mismatch) 감지.
+      if ! git merge-base --is-ancestor "${s}" HEAD 2>/dev/null; then
+        bad=$((bad+1))
+        bad_list="${bad_list} ${s}"
+      fi
+    done
+    if [[ "${bad}" -gt 0 ]]; then
+      issues+=("bracket_sha_unrealized:${bad}:$(echo ${bad_list} | tr ' ' ',')")
+      [[ $exit_code -eq 0 ]] && exit_code=15 || exit_code=99
+    fi
+  fi
+fi
+
 # ── 출력 ───────────────────────────────────────────────────────
 if [[ ${JSON_MODE} -eq 1 ]]; then
   # JSON 한 줄
@@ -113,6 +149,7 @@ else
     [[ "${exit_code}" == 12 || "${exit_code}" == 99 ]] && echo "   [TBD_ placeholder] PROGRESS.md 에 미실체화 commit 표식. git log 로 실제 sha 찾아 backfill" >&2
     [[ "${exit_code}" == 13 || "${exit_code}" == 99 ]] && echo "   [stale mutex] §1.12 — 다른 세션 TTL 초과. 사용자 승인 후 takeover. 자동 금지." >&2
     [[ "${exit_code}" == 14 || "${exit_code}" == 99 ]] && echo "   [FUSE lock] §1.6 FUSE bypass — cp -a .git /tmp/solon-git-<ts>/ → 작업 → rsync back" >&2
+    [[ "${exit_code}" == 15 || "${exit_code}" == 99 ]] && echo "   [bracket_sha] PROGRESS.md 에 <sha> 형태 미실체 예측 sha. git log 에서 실제 sha 찾아 backfill (15번째 세션 cd41dff→5d4c6c6 사례 참조)" >&2
   fi
 fi
 
