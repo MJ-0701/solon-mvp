@@ -31,7 +31,7 @@ released_history:
   oldest_owner: nice-kind-babbage
   oldest_claimed_at: 2026-04-25T07:10:00+09:00
   oldest_released_at: 2026-04-25T07:30:00+09:00
-  oldest_reason: "16번째 세션 scheduled auto-resume. 15번째의 '<cd41dff>' angle-bracket sha placeholder 를 P-03 변종으로 인식 + cleanup + resume-session-check.sh v0.2 (check #6) + scheduled_task_log 필드 신설."
+  oldest_reason: "16번째 세션 scheduled auto-resume. 15번째의 `<cd41dff>` angle-bracket sha placeholder 를 P-03 변종으로 인식 + cleanup + resume-session-check.sh v0.2 (check #6) + scheduled_task_log 필드 신설. (21번째 세션 trusting-stoic-archimedes 가 single-quote → backtick escape 정정 — false-positive 제거)"
   oldest_final_commits: [5d4c6c6_BACKFILLED, 87b60ff]
   # 15번째 (admiring-nice-faraday, 2709fcf + 5d4c6c6) 은 rolling N=4 에서 drop — scheduled_task_log 에 trace 유지
 
@@ -40,6 +40,11 @@ released_history:
 # 필드: ts (ISO8601 +09:00) · codename · check_exit · action · ahead_delta
 # 18번째 세션은 user-active (scheduled 아님) 이지만 trace 연속성 위해 한 줄 append.
 scheduled_task_log:
+  - ts: 2026-04-25T18:00:16+09:00
+    codename: trusting-stoic-archimedes
+    check_exit: 16
+    action: "21번째 세션 user-active-deferred (사용자 4시간 자율 작업 위임). 3-agent 합의 protocol 도입 (CEO+CTO+CPO 동등 2/3 vote, fallback A general-purpose 호출). .claude/agents/{generator,evaluator,planner}.md 페르소나 등록 (alt B mid-session reload 안 됨 → fallback A). a66cf2e backfill + WU-23 신설/close (V-1 vote PASS, 3 conditions applied) + final_sha 1e0e6f1 backfill. cd41dff false-positive narrative cleanup (single-quote → backtick escape 1 line 정정). §7 사용자 복귀 시 결정 대기 6항목 정리. FUSE bypass 발동 (lock stale 0-bytes)."
+    ahead_delta: "+3 (f11dd4f + 1e0e6f1 + 9f146e3)"
   - ts: 2026-04-25T10:47:00+09:00
     codename: epic-brave-galileo
     check_exit: 15   # bracket_sha_unrealized:1:cd41dff (16번째 narrative false-positive, 계속 누적 — 후속 cleanup 독립 WU 로 분리 필요)
@@ -81,6 +86,7 @@ scheduled_task_log:
     action: "WU-20.1 refresh 작업 staged (commit 누락 → P-03 피해)"
     ahead_delta: "0"
 purpose: "context reset 시 다음 세션이 본 파일 1개만 읽고 즉시 이어받을 수 있도록, 매 micro-step 마다 덮어쓰는 live snapshot."
+
 companions:
   - "CLAUDE.md (§1 13 규율 + §1.12 mutex + §1.13 R-D1 + §2.1 용어집)"
   - "scripts/resume-session-check.sh v0.3 (17번째 세션 강화, check #7 drift 감지)"
