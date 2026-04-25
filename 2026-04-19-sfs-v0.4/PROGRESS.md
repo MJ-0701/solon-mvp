@@ -2,14 +2,14 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-25T18:05:00+09:00
+last_overwrite: 2026-04-25T18:15:00+09:00
 session: "21번째 세션 `trusting-stoic-archimedes` (user-active-deferred). WU-23 close 완료 — V-1 vote PASS (CEO/CTO/CPO 3/3 effective PASS, 3 conditions applied). #1 sfs slash command 6 명령 (status/start/plan/review/decision/retro) minimal contract spec 확정. .claude/agents/ 페르소나 alt B 등록 완료 (mid-session reload 안 됨, fallback A 사용). a66cf2e backfill 완료. §7 사용자 복귀 시 결정 대기 6항목 정리. 다음 micro-step = WU-23 close commit + final_sha backfill + cd41dff cleanup + F-04 fix + P-04 + HANDOFF sync 진행."
 current_wu: null   # WU-23 done. WU-24 entry 는 사용자 복귀 시 §7.1 결정 (gate id schema location) 선행 필요.
 current_wu_path: null
 current_wu_owner:
   session_codename: trusting-stoic-archimedes
   claimed_at: 2026-04-25T17:37:22+09:00
-  last_heartbeat: 2026-04-25T18:05:00+09:00
+  last_heartbeat: 2026-04-25T18:15:00+09:00
   ttl_minutes: 15
   mode: user-active-deferred   # 사용자 부재 4시간 자율 작업, takeover protocol 미적용 (사용자 명시 위임). 자율 작업 종료 시 release 예정.
 released_history:
@@ -293,44 +293,59 @@ mutex: **claimed by trusting-stoic-archimedes** (mode=user-active-deferred). 자
 
 ---
 
-## ④ Artifacts (20번째 세션 현 시점 인벤토리)
+## ④ Artifacts (21번째 세션 자율 작업 종료 직전 인벤토리)
 
 | 산출물 | 경로 | 상태 |
 |--------|------|:-:|
-| **sprints/WU-22.md** | — | ✅ **20번째 세션 close** — β 채택, §3 β CHOSEN 표기 + 세부 sprint roadmap (WU-23~29), §5 체크리스트 완결, §7 takeover 기록 (P-04 근거), final_sha=TBD_20TH |
-| **sprints/_INDEX.md** | — | ✨ **20번째 세션 갱신** — WU-21 (cd94f65) + WU-22 (TBD_20TH) row 동시 추가, 활성 WU 섹션 업데이트 |
-| **PROGRESS.md (본 파일)** | — | ✨ **20번째 세션 덮어쓰기** — resume_hint v7 (takeover 원칙 + new default = WU-23) · released_history rolling (19th eager-elegant-bell last, 15th drop) · scheduled_task_log 20th entry prepend · companions 갱신 · rules 추가 · 본문 ①~④ 덮어쓰기 |
-| sprints/WU-21.md | — | ✅ 18번째 신설, final_sha cd94f65 — Phase 1 킥오프 dry-run PASS, F-01~F-04 findings |
-| scripts/resume-session-check.sh | v0.3 | ✅ 17번째 강화 (check #7 drift), exit 15 narrative false-positive 지속 |
-| scripts/append-scheduled-task-log.sh | v0.1 | ✅ 17번째 신설 (20번째 세션은 entry 복잡하여 직접 편집) |
-| phase1-mvp-templates/setup-w0.sh + verify-w0.sh | — | ✅ WU-21 sandbox 검증 통과 (verify 는 F-04 false-positive 2건 후속 TODO) |
-| ~/workspace/solon-mvp/install.sh v0.2.4-mvp | — | ✅ WU-21 sandbox PASS, R-D1 read-only 유지 |
-| learning-logs/2026-05/P-01~P-03 | — | ✅ all resolved. **P-04 후보**: session-hang takeover (WU-22 §7 증거, 다음 세션 실체화) |
-| HANDOFF-next-session.md | — | ⏳ 17번째 sync, 20번째 takeover 원칙 반영 필요 (후속) |
-| sprints/WU-{17,18,19,20,20.1}.md | — | ✅ all status: done |
-| sessions/_INDEX.md | — | ⏳ 11~19번째 retrospective 미작성 누적 **9건** (19번째 포함, hang 세션도 기록 필요) |
-| CLAUDE.md | `2026-04-19-sfs-v0.4/CLAUDE.md` | ✅ §1 13 규율. 20번째 세션 takeover 원칙은 PROGRESS rules 에만 반영 (CLAUDE.md 본문 편집 안 함) |
-| PHASE1-MVP-QUICK-START.md | — | ✅ D-day 차단 요소 없음 (오늘 기준 D-2, 2026-04-27 월) |
-| solon-mvp-dist/ | — | ✅ v0.2.4-mvp stable checksum 일치 |
+| **sprints/WU-23.md** | — | ✅ **21번째 신설/close** — frontmatter (V-1 vote PASS, final_sha=`1e0e6f1`) + §0 작업 진행 원칙 + §1 6 명령 contract spec (3 conditions applied) + §2 공통 모듈 (.sfs-local/current-sprint naming pattern) + §3 V-1 verbatim vote_record + §4 sprint roadmap + §5 체크리스트 close + §6 결론 + §7 사용자 복귀 시 결정 대기 (block 1 + product 5 + non-block + F-04 escalate) |
+| **.claude/agents/{generator,evaluator,planner}.md** | `agent_architect/.claude/agents/` | ✨ **21번째 신설** — Solon docset edition 페르소나 3 (CTO/CPO/CEO 동등 + 2/3 vote + max 1 retry + 본부 leaf 호출 안 함). alt B 등록, mid-session reload 안 됨 → fallback A 운영 (P-05). 사용자 복귀 후 Claude Code 재시작 시 native 활성. |
+| **learning-logs/2026-05/P-04-session-hang-takeover.md** | — | ✨ **21번째 신설** — 19th hang → 20th takeover (WU-22 §7) 일반화. visibility raw-internal. §1.12 stale-mutex confirm 원칙 + WU §N takeover 기록 표준. 21st user-active-deferred mode 변종. |
+| **learning-logs/2026-05/P-05-agent-loader-startup-only.md** | — | ✨ **21번째 신설** — Claude Code agent loader startup-only. fallback A 패턴 (general-purpose + Read .claude/agents/<persona>.md). visibility business-only. solon-mvp consumer 영향 명시. |
+| **PROGRESS.md (본 파일)** | — | ✨ **21번째 다중 덮어쓰기** — frontmatter (current_wu_owner mode=user-active-deferred, last_overwrite/heartbeat 갱신, scheduled_task_log 21st entry append helper 호출, released_history.last_final_commits TBD_20TH→a66cf2e backfill, oldest_reason cd41dff backtick escape) + 본문 ①~④ 21st 추가 + ③ Next 6 결정 대기 항목 정리. |
+| **HANDOFF-next-session.md** | — | ✨ **21번째 sync v3.5 → v3.6** — 18~21st 세션 prior_sessions rolling + current_active_* 필드 신설 (mode/intent) + session_continuity_note 21st 6 항목 추가 + 20th/21st 원칙 주석. |
+| **sprints/_INDEX.md** | — | ✨ **21번째 갱신** — WU-22 row final_sha (TBD_20TH→a66cf2e) + WU-23 row 추가 (final_sha=1e0e6f1) + 활성 WU 섹션 비움 + frontmatter updated. |
+| **sprints/WU-22.md** | — | ✅ **21번째 backfill** — final_sha TBD_20TH_SNAPSHOT → a66cf2e + §5 체크리스트 commit row 정리. (close 자체는 20th 작업) |
+| sprints/WU-21.md | — | ✅ 18번째 신설, final_sha cd94f65 — Phase 1 킥오프 dry-run PASS, F-01~F-04 findings (F-04 21st escalate 후 WU-30 후보) |
+| scripts/resume-session-check.sh | v0.3 | ✅ 17번째 강화 (check #7 drift). 21st cd41dff false-positive 제거 후 exit 0 (clean) 가능. |
+| scripts/append-scheduled-task-log.sh | v0.1 | ✅ 17번째 신설. 21st 세션이 helper 호출 (rolling N=20, 9 entries kept). |
+| phase1-mvp-templates/setup-w0.sh + verify-w0.sh | — | ⏳ WU-21 sandbox 검증 통과. F-04 (verify-w0.sh check #6/#7 false-positive 2건) 21st escalate → WU-30 후보 (사용자 결정 대기, 정규식 트레이드오프). |
+| ~/workspace/solon-mvp/install.sh v0.2.4-mvp | — | ✅ R-D1 read-only 유지. 21st 자율 작업 mode 에서 미접촉. |
+| sprints/WU-{17,18,19,20,20.1,21,22,23}.md | — | ✅ all status: done |
+| sessions/_INDEX.md | — | ⏳ 11~21번째 retrospective 미작성 누적 **11건** (21번째 본 세션 포함). 후속 (i) 항목. |
+| CLAUDE.md | `2026-04-19-sfs-v0.4/CLAUDE.md` | ✅ §1 13 규율. 21번째 세션 user-active-deferred mode 는 PROGRESS frontmatter 에만 반영 (CLAUDE.md §1.12 본문 편집 보류 — 사용자 복귀 후 결정). |
+| cross-ref-audit.md §4 W10 TODO | — | ⏳ 19 항목, 사용자 결정 영역. 21st 세션 자율 작업 mode 에서 미접촉. |
+| PHASE1-MVP-QUICK-START.md | — | ✅ D-day 차단 요소 없음 (오늘 기준 D-2, 2026-04-27 월). |
+| solon-mvp-dist/ | — | ✅ v0.2.4-mvp stable checksum 일치. 21st 자율 작업에서 미접촉. |
 
-## 운영 규칙 (20번째 세션 추가)
+## 운영 규칙 (21번째 세션 추가)
 
 1. 다음 세션 진입 시 **step 0: `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh`** 필수.
 2. §1.12 mutex 프로토콜 (claim → heartbeat → release) + **stale-mutex takeover 시 사용자 명시 confirm 필수** (20번째 확립).
 3. 매 WU 경계에서 PROGRESS.md 덮어쓰기 + commit.
 4. sandbox dry-run 은 /tmp/ 한정 (18번째 원칙 유지).
 5. scheduled task 모드 = 새 WU 착수 금지, cleanup 만.
-6. **session-hang 감지 후 takeover 시**: 대상 WU 문서 안에 §N takeover 기록 섹션 추가 (hang cause + 근거 + 작업). PROGRESS released_history 에 last_reason 에 hang 사실 명시 (20번째 확립).
+6. **session-hang 감지 후 takeover 시**: 대상 WU 문서 안에 §N takeover 기록 섹션 추가. PROGRESS released_history.last_reason 에 hang 사실 명시 (20번째 확립).
+7. **user-active-deferred mode** (21번째 신설): 사용자 명시 부재 + 자율 작업 위임 시 mutex `mode: user-active-deferred` + `current_active_intent` 명시. takeover 보호 비활성화. P-04 변종.
+8. **3-agent 합의 protocol** (21번째 신설): 의미 결정은 CEO+CTO+CPO 2/3 다수결. CONDITIONAL 모두 ≤2-line fix → effective PASS. max 1 retry round. 부결 시 ⚠️ escalate (사용자 복귀 시 결정).
+9. **fallback A 패턴** (21번째 P-05): mid-session 신설 페르소나는 native subagent_type 호출 안 됨 → general-purpose + Read .claude/agents/<persona>.md inline 지시.
 
 ---
 
-**다음 세션 (21번째) 진입 체크리스트 (v1.1, 20번째 세션 반영)**:
+**다음 세션 (22번째) 진입 체크리스트 (v1.2, 21번째 세션 반영)**:
 
 1. `CLAUDE.md §1` + `§1.12` + `§1.13` 읽기 (13 규율).
-2. `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh` 실행. exit 15 (cd41dff narrative) 예상 — 그대로 진행.
-3. `PROGRESS.md` frontmatter `current_wu_owner` 확인 → null 예상 → self claim on WU 착수 시.
-4. `git status` clean + `git rev-list --count origin/main..HEAD` 확인. 20번째 종료 예상 ahead = **2** (3471c12 + TBD_20TH_SNAPSHOT). 사용자 push 후 0.
-5. **TBD_20TH_SNAPSHOT 실 sha backfill** (첫 작업, P-03 예방). PROGRESS.md released_history.last_final_commits + _INDEX.md WU-22 row.
-6. 사용자 첫 발화 매칭 → `resume_hint.default_action` 경로. default = WU-23 entry (WU22-D2 결정 후).
+2. `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh` 실행. exit 0 예상 (21st cd41dff cleanup 완료, scheduled_task_log entry append 완료).
+3. `PROGRESS.md` frontmatter `current_wu_owner` 확인. **21번째 세션 자율 작업 종료 시점에 release 또는 사용자 복귀 시 사용자가 release 판단**. mode=user-active-deferred 라면 사용자 confirm 후 정상 release.
+4. `git status` clean + `git rev-list --count origin/main..HEAD` 확인. 21번째 자율 작업 종료 시점 예상 ahead = **6+ ** (f11dd4f / 1e0e6f1 / 9f146e3 / 449c4a6 / 7ca88b0 / a9dc7a5 / 후속). 사용자 push 후 0.
+5. **사용자 복귀 시 §7 결정 대기 6항목** 우선 처리:
+   - (1) Gate id schema 정의 위치 (block, WU-25 영향)
+   - (2-6) `/sfs status` 출력 포맷 / sprint-id auto naming / editor auto-launch / mini-ADR 5섹션 / `/sfs retro --close` auto commit
+   - 추가: (7) F-04 verify-w0.sh fix (정규식 트레이드오프 + install.sh templates marker, WU-30 후보)
+6. **Claude Code 재시작 후 native subagent_type=generator/evaluator** 호출 가능 (P-05 fallback A 졸업).
+7. `default_action` (resume_hint v8): 사용자 복귀 시 §7 결정 후 WU-24 entry (#1 sfs slash command 구현 part 1).
+
+**21번째 세션 자율 작업 종료 시점 핵심 메시지** (사용자 복귀 시 한 줄):
+
+> 페르소나 시스템 도입 + WU-23 close (V-1 vote PASS, 6 명령 contract spec 확정) + cd41dff/sched 정리 + P-04/P-05 + HANDOFF sync 완료. **사용자 복귀 시 §7 결정 6항목 + Claude Code 재시작** 후 WU-24 entry 가능.
 7. **D-day (2026-04-27 월) 오늘 기준 D-2** — 사용자 본인 Mac 실행, Claude 자동 아님.
 8. WU 완료 시 본 PROGRESS.md 즉시 덮어쓰기 + commit.
