@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (덮어쓰기 방식)"
 version: live
-last_overwrite: 2026-04-26T23:08:07+09:00
-session: "24번째 사이클 16번째 scheduled run = `quirky-exciting-clarke` (mode=user-active-deferred, hourly auto-resume). 직전 15번째 = `friendly-funny-planck` (22:10 KST, D-C row 3 = verify-w0.sh check #7 헤더 주석). 본 16번째 entry: resume-check **exit 0 = clean** (직전 15번째 +58분 = 정상 hourly 주기 유지). 진입 시 current_wu_owner=null + 모든 도메인 unowned. 직전 권장 priority order (D-C row 4 verify-install.sh 신설, 의존성 0) 채택 → **D-C-WU-30 자유 claim → §4 row 4 (verify-install.sh 신설, verify-w0.sh fork + install.sh 전용 조정)** 1 micro-step 진행. **신설 파일** = `phase1-mvp-templates/verify-install.sh` (160 lines). 7 check 구성: (1) 어댑터 4종 SFS/CLAUDE/AGENTS/GEMINI / (2) .claude/commands/sfs.md / (3) .gitmodules Solon 검사 / (4) .sfs-local 구조 14종 (scripts 3 + sprint-templates 4 포함) / (5) .gitignore solon-mvp BEGIN/END marker / (6) 사용자 수동 placeholder `<[A-Z]{2,}[A-Z0-9_-]*>` WARN / (7) install.sh §6.3 자동치환 `<DATE>`/`<SOLON-VERSION>` 잔여 FAIL. **verify-w0.sh check #1 (3-commit) + check #2 (no Solon files) + check #7 (Solon 키워드 차단) 의도적 제외** — install.sh 는 commit 안 만들고 SFS.md/CLAUDE.md adapter 안에 'Solon' 키워드 의도적 출력 (WU-21 §F-04(a) 분리 결정). bash -n PASS. T1~T4 4 smoke /tmp/wu30-row4-dry-* 전부 PASS — T4 install.sh 'Solon' 키워드 false-positive 0 검증 (분리 의도 충족). domain_locks.D-C-WU-30 release (next_step 3→4, last_step_done.row 4 기록). dev path only (R-D1) — stable (`~/workspace/solon-mvp/templates/phase1-mvp-templates/verify-install.sh` + `solon-mvp-dist/templates/phase1-mvp-templates/verify-install.sh`) 동기화는 다음 release cut (예상 0.4.0-mvp) 타이밍에 일괄. 본 run = §1.5' 정합 file 편집 (verify-install.sh 신설 + WU-30 + PROGRESS) + host .git mutate 0. 다음 정상 cron run 시 priority order: D-C-WU-30 row 5 (README.md 사용법 추가, 의존성 0, 가벼움) > D-C row 6 (dry-run sandbox 두 검증기 동작 확인) > D-B-WU-31 row 4 (cut-release.sh, D-A final_sha=TBD placeholder 인 상태 → 사용자 manual commit 후) > D-D/D-E 양방향 메타. 사용자 mac terminal 깬 후 누적 결과 검토 + (1) WU-24 final_sha backfill placeholder 해제용 사용자 manual commit + (2) cron 상태 확인 (launchctl list | grep solon / crontab -l) 권장."
+last_overwrite: 2026-04-26T23:57:48+09:00
+session: "24번째 user-active conversation `quirky-exciting-clarke` (16번째 scheduled run 의 연장 conversation, 사용자 자기 전 strategic decision). **strategic shift 적용**: scheduled run = 큰 유닛 (끊어서 진행해야 의미있는 것) 우선, user-active conversation = 작은 유닛 (5분이면 끝나는 정리). 본 PROGRESS 갱신 = domain_locks priority 재배치 + D-C `prefer_mode: user-active-only` 마킹 + D-A 완전 close 마킹 (사용자 manual commit `0cb6bee` + final_sha backfill `dd30cde` 완료, push 정상 — git ahead 0). **새 priority order (밤 동안 scheduled run 처리)**: D-B-WU-31 (1, cross-dep 충족 + 6-9 micro-step 분량) > D-D-meta-logs forward P-04~P-09 (2, 6 docs) > D-D reverse (3) > D-E-meta-retro forward 11th~23rd (4, 13 sessions) > D-E reverse (5) > D-F-meta-handoff (6) > **D-C-WU-30 (7, deferred — row 5/6/7~9 가벼움, user-active 5분 완료)**. 본 conversation = file 편집만, host .git mutate 0 (§1.5' 정합). 다음 scheduled run 00:06 KST = 17번째 = D-B-WU-31 row 4 (cut-release.sh 신설) claim 권장. — 직전 entry: 24번째 사이클 16번째 scheduled run `quirky-exciting-clarke` (mode=user-active-deferred, hourly auto-resume). 직전 15번째 = `friendly-funny-planck` (22:10 KST, D-C row 3 = verify-w0.sh check #7 헤더 주석). 본 16번째 entry: resume-check **exit 0 = clean** (직전 15번째 +58분 = 정상 hourly 주기 유지). 진입 시 current_wu_owner=null + 모든 도메인 unowned. 직전 권장 priority order (D-C row 4 verify-install.sh 신설, 의존성 0) 채택 → **D-C-WU-30 자유 claim → §4 row 4 (verify-install.sh 신설, verify-w0.sh fork + install.sh 전용 조정)** 1 micro-step 진행. **신설 파일** = `phase1-mvp-templates/verify-install.sh` (160 lines). 7 check 구성: (1) 어댑터 4종 SFS/CLAUDE/AGENTS/GEMINI / (2) .claude/commands/sfs.md / (3) .gitmodules Solon 검사 / (4) .sfs-local 구조 14종 (scripts 3 + sprint-templates 4 포함) / (5) .gitignore solon-mvp BEGIN/END marker / (6) 사용자 수동 placeholder `<[A-Z]{2,}[A-Z0-9_-]*>` WARN / (7) install.sh §6.3 자동치환 `<DATE>`/`<SOLON-VERSION>` 잔여 FAIL. **verify-w0.sh check #1 (3-commit) + check #2 (no Solon files) + check #7 (Solon 키워드 차단) 의도적 제외** — install.sh 는 commit 안 만들고 SFS.md/CLAUDE.md adapter 안에 'Solon' 키워드 의도적 출력 (WU-21 §F-04(a) 분리 결정). bash -n PASS. T1~T4 4 smoke /tmp/wu30-row4-dry-* 전부 PASS — T4 install.sh 'Solon' 키워드 false-positive 0 검증 (분리 의도 충족). domain_locks.D-C-WU-30 release (next_step 3→4, last_step_done.row 4 기록). dev path only (R-D1) — stable (`~/workspace/solon-mvp/templates/phase1-mvp-templates/verify-install.sh` + `solon-mvp-dist/templates/phase1-mvp-templates/verify-install.sh`) 동기화는 다음 release cut (예상 0.4.0-mvp) 타이밍에 일괄. 본 run = §1.5' 정합 file 편집 (verify-install.sh 신설 + WU-30 + PROGRESS) + host .git mutate 0. 다음 정상 cron run 시 priority order: D-C-WU-30 row 5 (README.md 사용법 추가, 의존성 0, 가벼움) > D-C row 6 (dry-run sandbox 두 검증기 동작 확인) > D-B-WU-31 row 4 (cut-release.sh, D-A final_sha=TBD placeholder 인 상태 → 사용자 manual commit 후) > D-D/D-E 양방향 메타. 사용자 mac terminal 깬 후 누적 결과 검토 + (1) WU-24 final_sha backfill placeholder 해제용 사용자 manual commit + (2) cron 상태 확인 (launchctl list | grep solon / crontab -l) 권장."
 current_wu: WU-24   # 23rd 부터 유지. 24th 가 변경 안 함.
 current_wu_path: 2026-04-19-sfs-v0.4/sprints/WU-24.md
 current_wu_owner: null   # 24번째 = 본 conversation 정리만, mutex claim 안 함. scheduled run 들 (1:00 AM 부터 hourly) 이 mode=user-active-deferred 로 자유 claim. 도메인 sub-mutex 는 frontmatter 의 domain_locks block 참조.
@@ -143,11 +143,11 @@ scheduled_task_log:
 
 domain_locks:
   D-A-WU-24:
-    owner: null   # released 2026-04-26T11:08:08+09:00 by happy-pensive-davinci (24th 사이클 12번째 scheduled run, mode=user-active-deferred). 직전 great-dazzling-babbage 10:24 KST release (row 12 frontmatter close) → 본 run 자유 claim → row 13 (sprints/_INDEX 갱신 + WU-24 §5 row 13 마킹) → 자연 release. WU-24 close 처리 file-편집 부분은 모두 완료 (status=done / closed_at / session_closed / final_sha placeholder / sprints/_INDEX 활성→완료 이동). 남은 = row 14 = 사용자 manual git commit (§1.5' 정합). git mutate 0 (file 편집만). **다음 priority order**: D-C row 1 (verify-w0.sh fix, 의존성 0, 가벼움) > D-B row 4 (cut-release.sh, cross-dep next_step 10≥6 충족이지만 final_sha=TBD placeholder 인 상태에서 cut-release 가 0.3.0-mvp release cut 시 abort 권장 → D-B 는 사용자 manual commit + final_sha backfill 후로 미루는 게 안전).
+    owner: null   # **FULLY CLOSED** 2026-04-26T23:30~57+09:00 by 사용자 manual commit (`0cb6bee` WU-24 close + `dd30cde` WU-24.1 final_sha backfill, push origin main 정상). row 14 (commit) ✅ + final_sha backfill ✅ = WU-24 lifecycle 100% 종결. priority=8 (closed, 더 이상 claim 안 함).
     claimed_at: null
     last_heartbeat: null
     ttl_minutes: 30
-    next_step: 10   # WU-24.md §5 row 13 (sprints/_INDEX 갱신 + PROGRESS ②/③ 갱신) 완료. 남은 = row 14 = git commit `WU-24: #1 sfs slash 구현 part 1 (status + start)` (squash from wip, 사용자 manual). final_sha placeholder backfill 도 사용자 manual commit 후 sed/edit 1회 처리.
+    next_step: 14   # row 13 (file 편집) ✅ + row 14 (사용자 manual commit `0cb6bee` ✅ + push 정상 ✅ + final_sha backfill `dd30cde` ✅) = WU-24 lifecycle 100% 종결, 추가 step 없음.
     last_step_done:
       step: "row 13 — sprints/_INDEX.md 갱신 (frontmatter updated + 활성→완료 섹션 이동) + WU-24.md §5 row 13 체크박스 마킹 + PROGRESS ②/③ 갱신"
       by: happy-pensive-davinci
@@ -168,7 +168,8 @@ domain_locks:
       - "2026-04-19-sfs-v0.4/solon-mvp-dist/{VERSION,CHANGELOG.md,install.sh}"
       - "2026-04-19-sfs-v0.4/sprints/WU-24.md"
       - "2026-04-19-sfs-v0.4/sprints/_INDEX.md"
-    priority: 1
+    priority: 8   # 24th-16: FULLY CLOSED, no claim. (직전 = 1)
+    prefer_mode: closed
     spec_doc: "2026-04-19-sfs-v0.4/sprints/WU-24.md"
   D-B-WU-31:
     owner: null
@@ -179,8 +180,9 @@ domain_locks:
     files_scope:
       - "2026-04-19-sfs-v0.4/scripts/{cut-release,sync-stable-to-dev,check-drift,_README}.{sh,md}"
       - "2026-04-19-sfs-v0.4/.visibility-rules.yaml"
-    depends_on: "D-A-WU-24.next_step >= 6"   # 0.3.0-mvp 예약 entry 후
-    priority: 2
+    depends_on: "D-A-WU-24.next_step >= 6"   # 0.3.0-mvp 예약 entry 후 — 충족 (next_step=10, final_sha=0cb6bee backfill 완료 dd30cde)
+    priority: 1   # 24th-16 strategic shift: 큰 유닛 (cut-release + sync-stable + .visibility + check-drift + dry-run = 6-9 micro-step) → scheduled run 우선
+    prefer_mode: scheduled   # 자는 동안 hourly run 으로 진행. 첫 cut 자체 (release 발화) 는 사용자 입회.
     spec_doc: "2026-04-19-sfs-v0.4/sprints/WU-31.md"
   D-C-WU-30:
     owner: null   # released 2026-04-26T23:08:07+09:00 by quirky-exciting-clarke (24th 16번째 scheduled run, mode=user-active-deferred, hourly auto-resume 정상 주기 유지). 진입 → claim → §4 row 4 (verify-install.sh 신설, verify-w0.sh fork + install.sh 전용 조정) 1 micro-step → 자연 release. 다음 row 5 = README.md 사용법 추가 (`bash verify-w0.sh` + `bash verify-install.sh` 분리 호출, 가벼움).
@@ -205,7 +207,8 @@ domain_locks:
       - "2026-04-19-sfs-v0.4/phase1-mvp-templates/{verify-w0,verify-install}.sh"
       - "2026-04-19-sfs-v0.4/phase1-mvp-templates/README.md"
       - "2026-04-19-sfs-v0.4/sprints/WU-30.md"
-    priority: 3
+    priority: 7   # 24th-16 strategic shift: D-C-WU-30 row 5/6/7~9 = 가벼움 (README.md + sandbox 통합 + close + commit) → user-active 5분 처리. scheduled run 은 skip.
+    prefer_mode: user-active-only   # 자는 동안 scheduled run 은 본 도메인 claim 안 함. 사용자 깬 후 user-active conversation 으로 정리.
     spec_doc: "2026-04-19-sfs-v0.4/sprints/WU-30.md"
   D-D-meta-logs:
     owner_forward: null
@@ -223,7 +226,8 @@ domain_locks:
       - "2026-04-19-sfs-v0.4/learning-logs/2026-05/P-*.md"
     stop_when: "forward_idx >= reverse_idx"
     ttl_minutes: 30
-    priority: 4
+    priority: 2   # 24th-16 strategic shift: 6 learning logs = 6 micro-step 분량 (이미 발생한 사고/패턴 기록, 의미결정 0). scheduled run 우선.
+    prefer_mode: scheduled
   D-E-meta-retro:
     owner_forward: null
     owner_reverse: null
@@ -234,7 +238,8 @@ domain_locks:
       - "2026-04-19-sfs-v0.4/sessions/**"
     stop_when: "forward_idx >= reverse_idx"
     ttl_minutes: 30
-    priority: 5
+    priority: 4   # 24th-16 strategic shift: 13 sessions retro = 13 micro-step 분량 (큰 유닛, 사후 정리). D-D 끝나면 진입.
+    prefer_mode: scheduled
   D-F-meta-handoff:
     owner: null
     claimed_at: null
@@ -244,6 +249,7 @@ domain_locks:
       - "2026-04-19-sfs-v0.4/HANDOFF-next-session.md"
       - "2026-04-19-sfs-v0.4/NEXT-SESSION-BRIEFING.md"
     priority: 6
+    prefer_mode: scheduled   # 작은 유닛이지만 사용자 의미결정 0 (사후 정리), scheduled OK.
 
 # 공통 영역 — last-writer-wins (§1.5' 정합으로 git race 0)
 shared_files:
@@ -290,9 +296,13 @@ resume_hint:
        - `current_wu_owner=null` → 자유 진행 (자기 codename 안 잡음, 도메인만 잡음, mode=user-active-deferred)
        - `current_wu_owner != null` + 다른 codename + TTL 미만 + mode=user-active → STOP + 사용자 confirm
        - TTL 초과 stale → mode 확인 후 자동 takeover (user-active-deferred 한정)
-    5. **domain_locks scan (priority 1→6)**:
-       - D-A WU-24 → D-B WU-31 (D-A.next_step >= 6 cross-dep) → D-C WU-30 → D-F HANDOFF → D-D fwd → D-D rev → D-E fwd → D-E rev
-       - unowned + dep 통과 중 highest priority claim (owner=자기 codename, claimed_at, last_heartbeat, ttl_minutes=30)
+    5. **domain_locks scan (24th-16 strategic shift, priority 1→8)**:
+       - **scheduled run (mode=user-active-deferred)** = `prefer_mode: scheduled` 만 claim:
+         - D-B WU-31 (1) → D-D fwd (2) → D-D rev (3) → D-E fwd (4) → D-E rev (5) → D-F HANDOFF (6)
+       - **user-active conversation (mode=user-active)** = 모든 mode claim 가능:
+         - D-C WU-30 (7, prefer_mode=user-active-only) 우선 처리 후 위 scheduled 도메인들 진행 가능
+       - D-A WU-24 (8, closed) = claim 안 함
+       - unowned + dep 통과 + prefer_mode 매칭 중 highest priority claim (owner=자기 codename, claimed_at, last_heartbeat, ttl_minutes=30)
     6. **1 micro-step 진행** (5~10분, WU spec §5 row 그대로). 양방향 도메인은 forward_idx / reverse_idx 기준.
     7. **release** — owner=null + last_step / forward_idx / reverse_idx 갱신.
     8. **PROGRESS heartbeat** (frontmatter `last_overwrite`) + **scheduled_task_log entry append** (helper `scripts/append-scheduled-task-log.sh`).
@@ -365,7 +375,8 @@ resume_hint:
     - "24번째 본 conversation 세션 mutex 안 잡음: 24th 정리 only. current_wu_owner=null. scheduled run 들이 mode=user-active-deferred 로 picking up. 1:00 AM hourly scheduled task 등록. domain_locks 가 actual lock primitive — 사용자 결정 D3/D6/D7 수신 + §1.5' 1줄 수정 + scheduled task description 작성 + PROGRESS 갱신 의 정리 작업만."
     - "24번째 사용자 결정 3건 resolved: D3 dual-track 유지 (single 전환 영향범위 큼 → 보류) / D6 WU-31 spec default 4건 모두 OK (allowlist 8파일 + checksum sha256 + commit msg 표준 + Phase timing) / D7 #14 dialog-branch.schema.yaml 신설 (A 채택, 우선순위 낮음) — D7 #18/#19 는 W10 schema 작업 시 자연 처리."
     - "24번째 1 micro-step only 원칙: scheduled run 매 사이클 = 1 micro-step (5~10분). TTL 30분 안 끝나게 micro 단위. R3 PROGRESS overwrite race 자동 차단."
-  version: 12   # v11 (23rd 종료) → v12 (24th: §1.5' + domain_locks + 본 세션 mutex 안 잡음 + 사용자 결정 D3/D6/D7 = 운영 규칙 21~26 추가)
+    - "24번째-16 strategic shift (사용자 결정): scheduled run = 큰 유닛 (끊어서 진행해야 의미있는, 6+ micro-step 분량) 우선 / user-active conversation = 작은 유닛 (5분이면 끝나는 정리). 각 도메인에 `prefer_mode: scheduled | user-active-only | closed` 마킹. scheduled run 은 `prefer_mode=scheduled` 만 claim (user-active-only 도메인 skip). user-active 는 모든 mode claim 가능. 근거: hourly auto-resume 의 핵심 가치 = 자는 동안 큰 일 끊어서 진행. D-C-WU-30 row 5/6/7~9 같은 가벼운 정리는 user-active 5분에 끝나므로 scheduled cycle 낭비."
+  version: 13   # v12 (24th-원본) → v13 (24th-16 strategic shift: prefer_mode 마킹 + priority 재배치 + D-A 완전 close 마킹)
 ---
 
 # PROGRESS — live snapshot (23번째 세션 dazzling-sharp-euler, WU-31 신설 spec only / WU-24 current 유지)
