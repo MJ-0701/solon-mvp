@@ -3,6 +3,11 @@
 # 출처: Solon docset WU-19 (2026-04-24)
 # 대응: PHASE1-MVP-QUICK-START.md §6
 # 실행: cd <repo>/ && ./verify-w0.sh  (또는 절대경로)
+#
+# 적용 대상: setup-w0.sh 산출물 전용 (3 commit + .sfs-local/ 구조 + CLAUDE.md/README.md placeholder).
+#            install.sh 산출물은 본 검증기로 검증하지 말 것 — 별도 verify-install.sh 사용 (WU-30 §2 결정).
+#            근거: WU-21 §F-04(a) — install.sh banner 의 'Solon' 키워드가 check #7 에 over-strict
+#                  match 되어 false-positive 발생. WU22-D9 (b) 결정 = 두 검증기 분리.
 
 set -euo pipefail
 
@@ -82,17 +87,20 @@ PLACEHOLDER_FILES=(CLAUDE.md README.md .sfs-local/divisions.yaml)
 PLACEHOLDER_HITS=0
 for f in "${PLACEHOLDER_FILES[@]}"; do
   [ -f "$f" ] || continue
-  if grep -n '<[A-Z][A-Z0-9_-]*>' "$f" >/dev/null; then
+  if grep -nE '<[A-Z]{2,}[A-Z0-9_-]*>' "$f" >/dev/null; then
     PLACEHOLDER_HITS=$((PLACEHOLDER_HITS+1))
     warn "$f 에 placeholder 잔여:"
-    grep -n '<[A-Z][A-Z0-9_-]*>' "$f" | sed 's/^/     /'
+    grep -nE '<[A-Z]{2,}[A-Z0-9_-]*>' "$f" | sed 's/^/     /'
   fi
 done
 [ $PLACEHOLDER_HITS -eq 0 ] && ok "placeholder 전부 치환됨"
 
 # === 7) CLAUDE.md 가 Solon 경로 미언급 (IP 경계) ===
+# 적용 대상 = setup-w0.sh 산출물 only. install.sh output 의 'Solon' 제품명 키워드는
+# 정상 banner 이므로 본 검증기에서 검사하면 false-positive (WU-21 §F-04(a)).
+# install.sh output 검증은 verify-install.sh (별도 신설 예정) 에서 수행 (WU-30 §2 / WU22-D9 (b)).
 echo ""
-echo "7) CLAUDE.md IP 경계 — Solon 경로 하드코딩 검사"
+echo "7) CLAUDE.md IP 경계 — Solon 경로 하드코딩 검사 (setup-w0.sh 산출물 한정)"
 if [ -f CLAUDE.md ] && grep -iE "solon|agent_architect|sfs-v0\.4" CLAUDE.md >/dev/null; then
   fail "CLAUDE.md 에 Solon 관련 경로/키워드 포함 — 제거 필요"
   grep -inE "solon|agent_architect|sfs-v0\.4" CLAUDE.md | sed 's/^/     /'
