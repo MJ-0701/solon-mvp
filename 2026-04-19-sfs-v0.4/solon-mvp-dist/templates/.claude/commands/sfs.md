@@ -7,8 +7,8 @@ description: |
 
   Commands:
   help      사용법 보기
-  status    현재 SFS 상태 확인
-  start     새 sprint 시작 또는 이어가기
+  status    현재 SFS 상태 확인 (bash adapter)
+  start     새 sprint 시작 또는 이어가기 (bash adapter)
   plan      현재 sprint plan.md 작성/갱신
   sprint    plan을 구현 단계와 gate 체크로 정리
   review    현재 변경사항 review.md 작성/갱신
@@ -16,13 +16,66 @@ description: |
   log       events.jsonl에 이벤트 기록
   retro     sprint 회고 작성/갱신
 argument-hint: "[command] [goal/details]"
+allowed-tools: Bash, Read, Write, Edit, Grep, Glob
 ---
 
 # Solon SFS Command
 
 You are running the Solon SFS workflow for this project.
 
-First, read these files if they exist:
+The user's arguments are interpolated below. Treat the first whitespace-delimited
+token as the subcommand and the remainder as that subcommand's arguments.
+
+```text
+$ARGUMENTS
+```
+
+## Adapter Dispatch (status / start) — execute first
+
+If the first argument is **`status`** or **`start`**, dispatch the request to the
+corresponding bash script under `.sfs-local/scripts/` and stop. These two
+subcommands are deterministic and must NOT be re-interpreted by the model.
+
+Dispatch table:
+
+| First arg | Script to run | Notes |
+|:--|:--|:--|
+| `status`  | `.sfs-local/scripts/sfs-status.sh <remaining args>` | passes flags such as `--color=auto/always/never` verbatim |
+| `start`   | `.sfs-local/scripts/sfs-start.sh <remaining args>`  | passes `<sprint-id>` and/or `--force` verbatim |
+
+Procedure (apply in order):
+
+1. **Existence check** — Use the Bash tool to verify the target script exists
+   and is executable. If `.sfs-local/scripts/sfs-{status,start}.sh` is missing
+   or not executable, fall back to the **Claude-driven mode** below for that
+   subcommand and tell the user which script is missing (1 line, no
+   speculation about the cause).
+2. **Quote args safely** — Re-quote `<remaining args>` for the shell. Reject
+   any argument containing a newline or NUL byte by reporting `unknown arg`
+   instead of executing.
+3. **Execute** — Run the script via the Bash tool. Capture stdout, stderr, and
+   exit code. Do not pipe through any other transformer.
+4. **Print output verbatim** — Emit the script's stdout exactly as produced
+   (preserve whitespace and any ANSI color escape codes from `--color=always`).
+   If exit code is non-zero, also print stderr and the exit code on a final
+   line: `exit <code>`. Map known exit codes per the script contract:
+   - status: `0`=ok, `1`=no `.sfs-local/`, `2`=corrupt `events.jsonl`,
+     `3`=not a git repo, `99`=unknown.
+   - start: `0`=ok, `1`=sprint id conflict (suggest `--force`), `4`=templates
+     missing, `5`=permission, `99`=unknown.
+5. **Stop** — After dispatch, do not add Claude-driven commentary,
+   recommendations, or alternative suggestions. The bash script is the
+   single source of truth for output format (WU22-D4: `·` separator + ISO8601
+   timestamp + per-field color rules).
+
+If `$ARGUMENTS` is empty, treat it as if the user typed `status` (run the
+status adapter) so that bare `/sfs` produces the canonical compact status line.
+
+## Read Context (Claude-driven modes only)
+
+For the remaining subcommands (`help`, `plan`, `sprint`, `review`, `decision`,
+`log`, `retro`) and for adapter fallbacks, first read these files if they
+exist:
 
 - `CLAUDE.md`
 - `.sfs-local/VERSION`
@@ -31,15 +84,10 @@ First, read these files if they exist:
 - Recent files under `.sfs-local/sprints/`
 - Recent files under `.sfs-local/decisions/`
 
-Then interpret the user arguments:
+## Command Behavior (Claude-driven modes)
 
-```text
-$ARGUMENTS
-```
-
-## Command Behavior
-
-If no arguments are provided, show a compact SFS status and a short usage guide:
+If `$ARGUMENTS` is empty and the status adapter is unavailable, show a compact
+SFS status and a short usage guide:
 
 - Current Solon version from `.sfs-local/VERSION`
 - Latest sprint directory, if any
@@ -50,8 +98,8 @@ If no arguments are provided, show a compact SFS status and a short usage guide:
 If the first argument is one of the modes below, follow that mode.
 
 - `help`: Explain how to use `/sfs`, show available modes, and recommend the best first command.
-- `status`: Summarize the current SFS state and next action.
-- `start`: Create or continue a sprint under `.sfs-local/sprints/<YYYY-Wxx-sprint-n>/`.
+- `status`: **Adapter (above).** Fallback only: summarize the current SFS state and next action from the files listed under "Read Context".
+- `start`: **Adapter (above).** Fallback only: scaffold a sprint under `.sfs-local/sprints/<YYYY-Wxx-sprint-n>/` based on `sprint-templates/`.
 - `plan`: Produce or update the current sprint `plan.md`.
 - `sprint`: Convert the current plan into implementation steps and gate checks.
 - `review`: Review the current sprint output and write/update `review.md`.
@@ -85,3 +133,4 @@ Also explain this in one or two sentences:
 - Keep sprint artifacts concise and operational.
 - Do not invent completed work. If evidence is missing, mark it as unknown.
 - Prefer concrete next actions over broad methodology explanations.
+- For `status` and `start`, the bash adapter is authoritative — do not paraphrase or augment its output.

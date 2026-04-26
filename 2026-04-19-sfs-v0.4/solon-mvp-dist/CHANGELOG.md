@@ -3,6 +3,31 @@
 모든 릴리스는 [Semantic Versioning](https://semver.org/lang/ko/) 을 따른다. `-mvp` suffix 는
 아직 풀스펙 (사용자 개인 방법론 docset) 으로 수렴하지 않은 최소 배포판임을 표시.
 
+## [0.3.0-mvp] — Unreleased (예약, WU-31 cut 대기)
+
+> **상태**: WU-24 (#1 sfs slash 구현 part 1) 완료 후 본 entry 예약. 실 release cut 은 WU-31 `cut-release.sh --version 0.3.0-mvp` 실행 시점에 `Unreleased` → `YYYY-MM-DD` 로 치환.
+> **β bundle 매핑**: WU-22 §3 β release roadmap 의 0.3.0-mvp = #1 (sfs slash) + #4 + #6. 본 entry 는 #1 만 우선 반영, #4/#6 은 cut 직전 일괄 추가.
+
+### Added
+
+- **`templates/.sfs-local-template/scripts/sfs-common.sh`** — `.sfs-local/` 검증 + state reader + sprint-id 생성 + status line 렌더 + events.jsonl append helper 군 (293 lines, bash 4+, jq optional). 함수 시그니처: `validate_sfs_local` / `read_current_sprint` / `read_current_wu` / `read_last_gate` / `read_last_gate_verdict` / `git_ahead_count` / `read_last_event_ts` / `generate_sprint_id_iso_week` / `render_status_line` / `append_event`.
+- **`templates/.sfs-local-template/scripts/sfs-status.sh`** — `/sfs status` 어댑터 (129 lines). Output 형식: `sprint <id> · WU <wu_id> · gate <last>:<verdict> · ahead <N> · last_event <ISO8601>` (WU22-D4 정합). `--color=auto/always/never` flag (auto = tty 감지). Exit codes: 0=ok / 1=no `.sfs-local/` / 2=corrupt events.jsonl / 3=not git repo / 99=unknown.
+- **`templates/.sfs-local-template/scripts/sfs-start.sh`** — `/sfs start [<sprint-id>] [--force]` 어댑터 (182 lines). Sprint-id pattern: `<YYYY-Wxx>-sprint-<N>` (ISO 8601 week, WU22-D5 정합). 4 templates copy + `current-sprint` 갱신 + events.jsonl `sprint_start` JSONL append. Path traversal 거부 + JSON-escape 보강. Exit codes: 0=ok / 1=sprint id 충돌 / 4=templates 부재 / 5=권한 / 99=unknown.
+- **`templates/.sfs-local-template/sprint-templates/plan.md`** — `phase: plan` / `gate_id: G1` + 요구사항·AC·범위·G1 자기점검 4 §.
+- **`templates/.sfs-local-template/sprint-templates/log.md`** — `phase: do` (no gate_id) + 시간순 append·결정/블로커·핸드오프 메모 3 §.
+- **`templates/.sfs-local-template/sprint-templates/review.md`** — `phase: review` / `gate_id: ""` (`/sfs review --gate G2|G3|G4` 가 set) + 대상 gate·평가 항목·verdict·다음 액션 4 §.
+- **`templates/.sfs-local-template/sprint-templates/retro.md`** — `phase: retro` / `gate_id: G5` / `closed_at: ""` (`/sfs retro --close` 가 set) + KPT·PDCA 학습·정량 메트릭·다음 sprint 인계·G5 close 체크 5 §.
+
+### Changed
+
+- **`templates/.claude/commands/sfs.md`** — Adapter dispatch 섹션 추가. `status` / `start` 두 모드는 `.sfs-local/scripts/sfs-{status,start}.sh` 가 single source of truth (Claude paraphrase 금지). 5단계 절차 (Existence check → Quote args safely → Execute → Print output verbatim → Stop) + dispatch table + exit code mapping + empty `$ARGUMENTS`→status default fallback. Claude-driven mode (`help` / `plan` / `sprint` / `review` / `decision` / `log` / `retro` 7개) 는 fallback 으로 보존, `status` / `start` 는 fallback only.
+- **`VERSION`** — 첫 줄은 `0.2.4-mvp` 유지 (cut-release.sh 가 release cut 시점에 bump). 주석 블록으로 next 버전 (`0.3.0-mvp`) 예약.
+
+### Notes
+
+- **gates.md SSoT 정합** — sprint-templates 4 파일 모두 gates.md §1 (7-Gate enum) + §2 (verdict 3-value) + 05-gate-framework.md §5.1 SSoT pointer 명시.
+- **R-D1 dev-first** — 본 entry 의 모든 산출물은 `solon-mvp-dist/templates/` (dev staging) 안에서 작업. stable repo (`~/workspace/solon-mvp/templates/`) 동기화는 cut-release.sh 시점.
+
 ## [0.2.4-mvp] — 2026-04-24
 
 ### Fixed

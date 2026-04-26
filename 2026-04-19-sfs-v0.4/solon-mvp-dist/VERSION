@@ -1,1 +1,5 @@
 0.2.4-mvp
+
+# next: 0.3.0-mvp (예약 — WU-24 sfs slash 구현 part 1 (#1 sfs-common.sh + sfs-status.sh + sfs-start.sh + sprint-templates 4 + sfs.md adapter dispatch))
+# cut: WU-31 cut-release.sh --version 0.3.0-mvp 실행 시 본 첫 줄을 0.3.0-mvp 로 bump (install.sh L293 / L380 은 `head -1` 만 읽음).
+# scope: β bundle (#1 sfs slash + #4 + #6 — release roadmap 정합).

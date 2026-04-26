@@ -348,6 +348,27 @@ mkdir -p "$TARGET/.sfs-local/sprints" "$TARGET/.sfs-local/decisions"
 [ -f "$TARGET/.sfs-local/decisions/.gitkeep" ] || touch "$TARGET/.sfs-local/decisions/.gitkeep"
 ok "  sprints/ + decisions/ 확보"
 
+# scripts/ — Solon-versioned bash adapters (sfs-common.sh + sfs-status.sh + sfs-start.sh)
+# 정책: 매 install 마다 overwrite (user 수정 영역 아님, upgrade.sh 와 동일 정합).
+# 참고: WU-24 §1/§2/§3 — `.claude/commands/sfs.md` adapter dispatch 가
+#      `.sfs-local/scripts/sfs-{status,start}.sh` 를 호출.
+SCRIPTS_SRC="$SOURCE_DIR/templates/.sfs-local-template/scripts"
+if [ -d "$SCRIPTS_SRC" ]; then
+  mkdir -p "$TARGET/.sfs-local/scripts"
+  cp "$SCRIPTS_SRC"/*.sh "$TARGET/.sfs-local/scripts/" 2>/dev/null || true
+  chmod +x "$TARGET/.sfs-local/scripts"/*.sh 2>/dev/null || true
+  ok "  scripts/ 복사 (sfs-common.sh + sfs-status.sh + sfs-start.sh, executable)"
+fi
+
+# sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용하는 4 템플릿
+# 정책: 매 install 마다 overwrite (user 수정 영역 아님, scripts/ 와 동일 정합).
+TEMPLATES_SRC="$SOURCE_DIR/templates/.sfs-local-template/sprint-templates"
+if [ -d "$TEMPLATES_SRC" ]; then
+  mkdir -p "$TARGET/.sfs-local/sprint-templates"
+  cp "$TEMPLATES_SRC"/*.md "$TARGET/.sfs-local/sprint-templates/" 2>/dev/null || true
+  ok "  sprint-templates/ 복사 (plan + log + review + retro)"
+fi
+
 # ============================================================================
 # 8. .gitignore 주입 (idempotent marker-based)
 # ============================================================================
