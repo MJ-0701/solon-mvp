@@ -2,7 +2,7 @@
 doc_id: sprints-index
 title: "sprints/ — WU (Work Unit) 파일 목록 (v2)"
 visibility: raw-internal
-updated: 2026-04-26   # 24번째 사이클 12번째 진입 = scheduled run `happy-pensive-davinci` (2026-04-26T11:08:08+09:00, mode=user-active-deferred). D-A-WU-24 row 13 (sprints/_INDEX 갱신) 진행 — WU-24 활성→완료 섹션 이동 (final_sha=TBD_24TH_great-dazzling-babbage placeholder, 사용자 manual commit 후 backfill). 직전 11번째 (great-dazzling-babbage, 2026-04-26T10:24:39+09:00, 사용자 user-active conversation) 가 row 12 (WU-24 frontmatter close = status pending→done) 완료 후 자연 release.
+updated: 2026-04-26   # 24번째 사이클 12번째 진입 = scheduled run `happy-pensive-davinci` (2026-04-26T11:08:08+09:00, mode=user-active-deferred). D-A-WU-24 row 13 (sprints/_INDEX 갱신) 진행 — WU-24 활성→완료 섹션 이동 (final_sha=0cb6bee81461d7dd9840536f939488d4a114d1eb placeholder, 사용자 manual commit 후 backfill). 직전 11번째 (great-dazzling-babbage, 2026-04-26T10:24:39+09:00, 사용자 user-active conversation) 가 row 12 (WU-24 frontmatter close = status pending→done) 완료 후 자연 release.
 ---
 
 # sprints/ — WU 파일 인덱스
@@ -43,7 +43,7 @@ updated: 2026-04-26   # 24번째 사이클 12번째 진입 = scheduled run `happ
 | WU-21 | Phase 1 킥오프 D-2 dry-run (install.sh + setup-w0.sh sandbox PASS, F-01~F-04 findings) | `cd94f65` | 2026-04-25 | 2026-04-25 | confident-loving-ride | [WU-21.md](WU-21.md) |
 | WU-22 | MVP next-feature roadmap & sequencing (8 후보 1-pager + β release grouping 채택) | `a66cf2e` | 2026-04-25 | 2026-04-25 | eager-elegant-bell (open + brainstorm) → epic-brave-galileo (close, hang takeover) → trusting-stoic-archimedes (sha backfill) | [WU-22.md](WU-22.md) |
 | WU-23 | #1 sfs slash command detail design (6 명령 minimal contract spec, 3-agent vote V-1 PASS) | `1e0e6f1` | 2026-04-25 | 2026-04-25 | trusting-stoic-archimedes (자율 작업, 사용자 부재 4시간 위임 mode) | [WU-23.md](WU-23.md) |
-| WU-24 | #1 sfs slash 구현 part 1 (`/sfs status` + `/sfs start` + sfs-common.sh + 4 templates + sfs.md adapter dispatch + VERSION/CHANGELOG 0.3.0-mvp 예약 + install.sh scaffold gap fix) | `TBD_24TH_great-dazzling-babbage` | 2026-04-25 | 2026-04-26 | adoring-trusting-feynman (22nd open) → 24th 사이클 scheduled runs (friendly-magical-galileo / brave-gifted-thompson / relaxed-gallant-maxwell / cool-magical-volta / blissful-modest-goldberg / friendly-serene-galileo) → great-dazzling-babbage (24th-11 close, user-active conversation) | [WU-24.md](WU-24.md) |
+| WU-24 | #1 sfs slash 구현 part 1 (`/sfs status` + `/sfs start` + sfs-common.sh + 4 templates + sfs.md adapter dispatch + VERSION/CHANGELOG 0.3.0-mvp 예약 + install.sh scaffold gap fix) | `0cb6bee81461d7dd9840536f939488d4a114d1eb` | 2026-04-25 | 2026-04-26 | adoring-trusting-feynman (22nd open) → 24th 사이클 scheduled runs (friendly-magical-galileo / brave-gifted-thompson / relaxed-gallant-maxwell / cool-magical-volta / blissful-modest-goldberg / friendly-serene-galileo) → great-dazzling-babbage (24th-11 close, user-active conversation) | [WU-24.md](WU-24.md) |
 
 ## 완료 WU (status: done) — v1 → v2 이관 (WU-16 backfill)
 
