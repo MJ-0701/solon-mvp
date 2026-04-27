@@ -11,7 +11,8 @@
 phase1-mvp-templates/
 ├── README.md                              # 본 파일 (Solon docset 내부용 메타)
 ├── setup-w0.sh                            # 🆕 WU-19: W0 §2 실행 자동화 (env 3개 입력)
-├── verify-w0.sh                           # 🆕 WU-19: W0 §6 exit 검증 자동화 (7 체크)
+├── verify-w0.sh                           # 🆕 WU-19: W0 §6 exit 검증 자동화 (setup-w0.sh 산출물 전용)
+├── verify-install.sh                      # 🆕 WU-30: install.sh 산출물 검증 (어댑터 4종 + .claude/commands/sfs.md + .sfs-local 구조 + 자동 치환 검증)
 ├── CLAUDE.md.template                     # → admin panel repo 의 CLAUDE.md 로 cp
 ├── README.md.template                     # → admin panel repo 의 README.md 로 cp
 ├── .gitignore.snippet                     # → admin panel repo 의 .gitignore 에 추가 블록 (append)
@@ -26,6 +27,8 @@ phase1-mvp-templates/
 
 ## 스크립트 사용 (권장 경로)
 
+### A. setup-w0.sh 경로 (template cp + 3 commit, WU-19 신설)
+
 ```bash
 # W0 실행 (repo 생성 + templates cp + placeholder 치환 + 3 commit + push)
 export PROJECT_NAME="<project-name>"
@@ -33,12 +36,29 @@ export SOLON_DOCSET="$HOME/workspace/solon-docset/2026-04-19-sfs-v0.4"
 export WORKSPACE="$HOME/workspace"
 "$SOLON_DOCSET/phase1-mvp-templates/setup-w0.sh"
 
-# W0 exit 검증 (7 체크)
+# W0 exit 검증 (setup-w0.sh 산출물 전용 — 7 체크)
 cd "$WORKSPACE/$PROJECT_NAME"
 "$SOLON_DOCSET/phase1-mvp-templates/verify-w0.sh"
 ```
 
-상세: `../PHASE1-MVP-QUICK-START.md §2 + §6`.
+### B. install.sh 경로 (solon-mvp 어댑터 설치, WU-21 ~ WU-31)
+
+```bash
+# install.sh 실행 → 어댑터 (SFS/CLAUDE/AGENTS/GEMINI) + .claude/commands/sfs.md
+#                 + .sfs-local/ 스캐폴드 + .gitignore solon-mvp marker block 설치
+cd <consumer-repo>/
+bash <path-to>/solon-mvp/install.sh
+
+# install.sh 산출물 검증 (verify-w0.sh 와 별도 호출 — 7 체크)
+bash "$SOLON_DOCSET/phase1-mvp-templates/verify-install.sh"
+```
+
+> ⚠️ **두 검증기 분리 (WU-30, WU22-D9 (b))**: `verify-w0.sh` 는 `setup-w0.sh` 산출물 전용,
+> `verify-install.sh` 는 `install.sh` 산출물 전용. 교차 호출 시 false-positive 발생 가능
+> (예: install.sh banner / 어댑터의 'Solon' 키워드가 verify-w0.sh check #2/#7 에 over-strict 매치).
+> 반드시 산출 경로에 맞는 검증기 사용.
+
+상세: `../PHASE1-MVP-QUICK-START.md §2 + §6` (setup-w0.sh) + `../sprints/WU-30.md` (verify-install.sh 분리 결정).
 
 ## 사용 순서 (요약, 상세는 QUICK-START 참조)
 
@@ -64,3 +84,4 @@ cd "$WORKSPACE/$PROJECT_NAME"
 
 - **v0.1-mvp** (2026-04-24, WU-18): 초기 신설 (CLAUDE.md.template + README.md.template + .gitignore.snippet + .sfs-local-template + sprint-0-brainstorm + PROMPT-FOR-FIRST-SESSION + 폴더 README).
 - **v0.2-mvp** (2026-04-24, WU-19): executable scripts 추가 — `setup-w0.sh` + `verify-w0.sh`. QUICK-START §2 100줄 복붙 → 스크립트 호출 1 줄로 단축.
+- **dev-pending** (2026-04-26, WU-30): 두 검증기 분리 — `verify-w0.sh` check #6 정규식 minimal fix (`[A-Z]{2,}`) + check #7 헤더 주석 (setup-w0.sh 전용 명시) + `verify-install.sh` 신설 (install.sh 산출물 전용, 160 lines, 7 체크). README §스크립트 사용 (권장 경로) 두 경로 (A. setup-w0.sh / B. install.sh) 분리. dev path only (R-D1 §1.13) — `~/workspace/solon-mvp/templates/phase1-mvp-templates/` + `solon-mvp-dist/templates/phase1-mvp-templates/` 동기화는 다음 release cut (예상 0.4.0-mvp) 타이밍.

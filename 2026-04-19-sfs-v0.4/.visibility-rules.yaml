@@ -74,6 +74,26 @@ exclude:
     tier: raw-internal
     reason: "세션 간 append 히스토리 — 사용자 운영 기록"
 
+  # ── .claude/agents/ 페르소나 (21st 신설, WU-31 row 7 추가) ──
+  - pattern: ".claude/agents/**"
+    tier: business-only
+    reason: "Solon-specific 페르소나 — OSS user 무관 (Phase 1 native subagent 활성 후 재검토)"
+
+  # ── 22nd 신설 sfs CLI gate enum SSoT (WU-31 row 7 추가) ──
+  - pattern: "gates.md"
+    tier: oss-public
+    reason: "sfs CLI 참조용 7-gate enum — OSS 동봉 OK (tier 명시 declaration only, exclude 효과 아님 — include_only_if.tier == oss-public 매칭으로 포함됨)"
+
+  # ── 22nd 신설 status report spec (WU-31 row 7 추가) ──
+  - pattern: "solon-status-report.md"
+    tier: raw-internal
+    reason: "사용자 운영용 spec — 양쪽 제외"
+
+  # ── agent_architect 루트 stub (13번째 세션 신설, WU-31 row 7 추가) ──
+  - pattern: "../CLAUDE.md"   # selected folder 루트 (docset 부모 경로)
+    tier: raw-internal
+    reason: "redirect stub — Cowork auto-load 용 사용자 운영"
+
 # ── 기본 포함 조건 (whitelist) ──
 include_only_if:
   - tier: oss-public
@@ -83,6 +103,13 @@ override_replace:
   - source_pattern: "appendix/dialogs/branches/custom.yaml"
     replacement: "appendix/dialogs/branches/custom.oss-reduced.yaml"
     reason: "Business 차별 기능 파일 — OSS 에는 기능 축소판 배포"
+
+# ── Phase 2 enforcement 활성 (WU-31 row 7) ──
+# WU-31 cut-release.sh / sync-stable-to-dev.sh / check-drift.sh 가 본 파일을 enforce.
+# 단 24th-20번째 시점에서는 세 스크립트 모두 8 allowlist + 1 blocklist 를
+# hard-coded 사용 (declaration synced, 실 동적 read 는 후속 WU-32/WU-33 에서).
+# 본 플래그 = 선언적 활성 (true 라는 의도 = "이 파일이 SSoT 임").
+enforcement_active: true
 
 # ── Phase 2 enforcement 체크리스트 (다음 단계 명세) ──
 enforcement_checklist:
