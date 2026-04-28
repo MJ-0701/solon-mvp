@@ -66,3 +66,6 @@ docs/.pdca-status.json
 .solon-cache/
 .solon-state.json
 *.learnings.local.yaml
+*.bak[0-9]?
+*.bak
+outputs/
