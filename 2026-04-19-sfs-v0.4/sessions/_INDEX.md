@@ -2,7 +2,7 @@
 doc_id: sessions-index
 title: "sessions/ — 세션별 3-part 로그 인덱스"
 visibility: raw-internal
-updated: 2026-04-28   # 24th 사이클 brave-gracious-mayer user-active conversation (사용자 '이어서 ㄱㄱ + 스케줄러도 셋팅' 요청, 2026-04-28T00:00 KST 진입): **21번째 trusting-stoic-archimedes retro 신설 165L** (D-E reverse idx 10→9, V-1 vote PASS 3/3 + alt B persona + P-04/P-05 신설 + user-active-deferred mode 첫 도입 + HANDOFF current_active_* 필드 = 24th mutex 직접 선례). 직전 갱신: 24th-32+ bold-festive-euler conversation continuation 2 (13th funny-sweet-mayer 168L + 14th funny-pensive-hypatia 144L + 22nd adoring-trusting-feynman 209L + 23rd dazzling-sharp-euler 233L) + 24th-33 gracious-nifty-gates (12th laughing-keen-shannon 102L).
+updated: 2026-04-28   # 25th 사이클 user-active conversation by gracious-determined-gauss (parallel-session-briefing-24th-47 §3 절차 정합, 2026-04-28T10:36 KST claim): **15번째 admiring-nice-faraday retro 신설 201L** (D-E forward idx 4→5, P-03 handoff automation + scripts/resume-session-check.sh v0.1 helper 신설 = 24th 사이클 cron 진입 sanity check infrastructure root + auto-resume protocol 3단 첫 코드화 + P-04 prototype trace). 직전 갱신: 24th brave-gracious-mayer (21st trusting-stoic-archimedes 165L, D-E reverse idx 10→9). 24th-32+ bold-festive-euler conversation continuation 2 (13th funny-sweet-mayer 168L + 14th funny-pensive-hypatia 144L + 22nd adoring-trusting-feynman 209L + 23rd dazzling-sharp-euler 233L) + 24th-33 gracious-nifty-gates (12th laughing-keen-shannon 102L).
 ---
 
 # sessions/ — 세션 로그 인덱스
@@ -28,7 +28,7 @@ updated: 2026-04-28   # 24th 사이클 brave-gracious-mayer user-active conversa
 | 2026-04-24 | `laughing-keen-shannon` | 12 | CLAUDE.md v1.16 → v1.17 (§1 13번째 절대 규칙 R-D1 격상 + 3-조건 hotfix 예외 + 자동화 후속 sync-stable-to-dev.sh / cut-release.sh 예약) / `a247ade` + `c7b4423` 2 commit / 짧은 단일-결정 세션 (~5분) | [2026-04-24-laughing-keen-shannon.md](2026-04-24-laughing-keen-shannon.md) |
 | 2026-04-24 | `funny-sweet-mayer` | 13 (2회차) | `378ab38 close(WU-20)` (status=done + final_sha 3ca7f56) / `1a48b6b chore: agent_architect/CLAUDE.md redirect stub` / `2709fcf refresh(WU-20.1)` / `bfa3de8` + `6be708b` 2회차 mutex release | [2026-04-24-funny-sweet-mayer.md](2026-04-24-funny-sweet-mayer.md) |
 | 2026-04-25 | `funny-pensive-hypatia` | 14 | WU-20.1 refresh staged 후 commit 누락 hang (~00:20 KST staged) → 15번째 admiring-nice-faraday auto-resume 가 `2709fcf refresh(WU-20.1)` 실체화 (Authored-original = funny-pensive-hypatia, Commit-realized-by = admiring-nice-faraday). P-04 (session-hang-takeover) 패턴의 **첫 trace** (P-04 첫 적용은 20번째 epic-brave-galileo 가 19번째 hang takeover 시점). | [2026-04-25-funny-pensive-hypatia.md](2026-04-25-funny-pensive-hypatia.md) |
-| 2026-04-25 | `admiring-nice-faraday` | 15 | `5d4c6c6 session: ... P-03 handoff automation + 15번째 snapshot` / P-03 staged-uncommitted-on-session-crash 패턴 적용 (handoff automation) | *retrospective 미작성 — D-E-meta-retro idx=4 후보* |
+| 2026-04-25 | `admiring-nice-faraday` | 15 | `2709fcf refresh(WU-20.1)` (14번째 staged 실체화) + `5d4c6c6 session: ... P-03 handoff automation + 15번째 snapshot` / P-03 (87L) + scripts/resume-session-check.sh v0.1 (119L) 동시 신설 = 24th 사이클 cron 진입 sanity check infrastructure root + auto-resume protocol 3단 첫 코드화 + HANDOFF v3.2→v3.3-reduced + PROGRESS resume_hint v2 + P-04 prototype trace | [2026-04-25-admiring-nice-faraday.md](2026-04-25-admiring-nice-faraday.md) |
 | 2026-04-25 | `nice-kind-babbage` | 16 | `87b60ff session: ... scheduled hourly handoff automation + check.sh v0.2` / scheduled task 도입 + check.sh #6 angle-bracket sha placeholder 감지 추가 | *retrospective 미작성 — D-E-meta-retro idx=5 후보* |
 | 2026-04-25 | `admiring-fervent-dijkstra` | 17 | `cf99492 session: ... scheduled hourly handoff automation v3` / append-scheduled-task-log.sh helper 신설 + check.sh #7 drift 감지 (90분 threshold, exit 16) | *retrospective 미작성 — D-E-meta-retro idx=6 후보* |
 | 2026-04-25 | `confident-loving-ride` | 18 | `cd94f65 WU-21: Phase 1 킥오프 dry-run (D-2)` / install.sh sandbox PASS + setup-w0.sh pre-flight + 시뮬 PASS / `2acac45` + `9766ad6` 2 release | *retrospective 미작성 — D-E-meta-retro idx=7 후보* |
@@ -61,7 +61,7 @@ updated: 2026-04-28   # 24th 사이클 brave-gracious-mayer user-active conversa
 - ⏳ 2026-04-20 회사 계정 1-2번째 블록: 범위 밖 (WU-16b 연장 or 별도 WU)
 - ✅ 2026-04-24 brave-hopeful-euler: WU-16.1 에서 생성 완료
 
-## D-E-meta-retro 진행 상태 (24th brave-gracious-mayer 갱신, 2026-04-28T00:00 KST)
+## D-E-meta-retro 진행 상태 (25th gracious-determined-gauss 갱신, 2026-04-28T10:36 KST)
 
 D-E-meta-retro 도메인 list = `[11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]` (총 13 sessions). PROGRESS.md `domain_locks.D-E-meta-retro` 가 SSoT.
 
@@ -69,8 +69,8 @@ D-E-meta-retro 도메인 list = `[11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22
 - ✅ idx=1 (12번째 laughing-keen-shannon) — 102L, 24th-33 신설 by gracious-nifty-gates
 - ✅ idx=2 (13번째 funny-sweet-mayer) — 168L, **24th-32+ 신설 by bold-festive-euler conversation** (2회차 mutex + Cowork redirect stub `agent_architect/CLAUDE.md` 신설 = 24th+ Cowork auto-load SSoT 트리거)
 - ✅ idx=3 (14번째 funny-pensive-hypatia) — 144L, **24th-32+ 신설 by bold-festive-euler conversation continuation 2** (hang 패턴 첫 trace + author/commit 분리 trace + P-04+P-03 lineage first case)
-- ⏳ idx=4 (15번째 admiring-nice-faraday) — P-03 handoff automation **(next forward target)**
-- ⏳ idx=5 (16번째 nice-kind-babbage) — scheduled hourly + check.sh v0.2
+- ✅ idx=4 (15번째 admiring-nice-faraday) — 201L, **25th gracious-determined-gauss 신설** (P-03 handoff automation + resume-session-check.sh v0.1 helper 신설 = 24th 사이클 cron 진입 sanity check infrastructure root + auto-resume protocol 3단 첫 코드화 + 14번째 staged commit 실체화 `2709fcf` + P-04 prototype trace)
+- ⏳ idx=5 (16번째 nice-kind-babbage) — scheduled hourly + check.sh v0.2 **(next forward target)**
 - ⏳ idx=6 (17번째 admiring-fervent-dijkstra) — append-scheduled-task-log.sh helper + drift check
 - ⏳ idx=7 (18번째 confident-loving-ride) — WU-21 Phase 1 킥오프 dry-run D-2
 - ⏳ idx=8 (19번째 eager-elegant-bell) — hang/abandoned, 20번째가 takeover
@@ -79,17 +79,18 @@ D-E-meta-retro 도메인 list = `[11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22
 - ✅ idx=11 (22번째 adoring-trusting-feynman) — 209L, **24th-32+ 신설 by bold-festive-euler conversation** (8 step batch + §1.14 메타 규칙 + WU-30/WU-24 spec)
 - ✅ reverse_idx=12 (23번째 dazzling-sharp-euler) — 233L, 24th-32+ 신설 by bold-festive-euler
 
-stop_when: forward_idx >= reverse_idx. 현재 forward_idx=4 (15th admiring-nice-faraday next) / reverse_idx=9 (20th epic-brave-galileo next, 21st 신설 후 1 감소) → **6 sessions 남음** (idx=4 15th ~ idx=9 20th, forward 5 + reverse 1 만남 지점은 idx=6/7 = 18th/17th). 24th 누적 retro 신설 = 7건 (12th cron 102L + 13th 168L + 14th 144L + 21st 165L + 22nd 209L + 23rd 233L = 1021L, 본 21st brave-gracious-mayer 추가 165L).
+stop_when: forward_idx >= reverse_idx. 현재 forward_idx=5 (16th nice-kind-babbage next) / reverse_idx=9 (20th epic-brave-galileo next) → **5 sessions 남음** (idx=5 16th ~ idx=9 20th 4 sessions + 만남 지점 idx=6/7 = 18th/17th). 25th 누적 retro 신설 = 8건 (12th 102L + 13th 168L + 14th 144L + **15th 201L** + 21st 165L + 22nd 209L + 23rd 233L = 1222L, 본 25th gracious-determined-gauss 첫 micro-step = 15th 201L 추가).
 
-### 다음 scheduled run 추천 priority (2026-04-28+ hourly)
+### 다음 scheduled run 추천 priority (2026-04-28+ hourly, 25th gracious-determined-gauss 갱신)
 
-**`prefer_mode: scheduled` 도메인만 claim 가능** (mode=user-active-deferred):
+**참고**: D-E-meta-retro `prefer_mode: user-active-only` (24th brave-gracious-mayer 결정, 작은 유닛 = scheduled cycle 낭비). scheduled run 은 D-E claim 안 하고 D-G-WU-25 / D-H-WU-26 우선. 본 priority list 는 **user-active conversation 진입 시 권장 ordering**.
 
-1. **D-E reverse idx=9 (20번째 epic-brave-galileo retro 신설)** — 큰 결정 다수 (WU-22 close + 19th hang takeover P-04 첫 적용 + 사용자 confirm + sprints/_INDEX 갱신), retro 가치 높음, ~10-15분 분량 추천 first claim.
-2. **D-E forward idx=4 (15번째 admiring-nice-faraday retro 신설)** — `5d4c6c6` P-03 handoff automation 단일 commit, retro 가치 medium, ~5-10분.
-3. **D-E reverse idx=8 (19번째 eager-elegant-bell retro 신설)** — hang/abandoned (mutex release 부재) + WU-22/step-1 brainstorm 8후보 1-pager (P-04 근거 패턴), retro 가치 medium-high, ~10분.
-4. **D-E forward idx=5 (16번째 nice-kind-babbage retro 신설)** — `87b60ff` scheduled hourly handoff automation + check.sh v0.2 (scheduled task 도입 first session), retro 가치 medium, ~10분.
-5. **D-E forward idx=6 (17번째 admiring-fervent-dijkstra retro 신설)** — `cf99492` append-scheduled-task-log.sh helper + check.sh #7 drift 감지 (90분 threshold, exit 16), retro 가치 medium, ~10분.
-6. **D-E reverse idx=7 또는 forward idx=7 (18번째 confident-loving-ride retro 신설)** — `cd94f65` WU-21 Phase 1 킥오프 dry-run D-2 + install.sh sandbox PASS + setup-w0.sh pre-flight + 시뮬 PASS + `2acac45` + `9766ad6` 2 release. forward 와 reverse 가 idx=7 에서 만남 = D-E 도메인 종결 시점, ~10-15분.
+1. **D-E reverse idx=9 (20번째 epic-brave-galileo retro 신설)** — 큰 결정 다수 (WU-22 close + 19th hang takeover P-04 첫 적용 + 사용자 confirm + sprints/_INDEX 갱신), retro 가치 높음, ~10-15분 분량.
+2. **D-E reverse idx=8 (19번째 eager-elegant-bell retro 신설)** — hang/abandoned (mutex release 부재) + WU-22/step-1 brainstorm 8후보 1-pager (P-04 근거 패턴), retro 가치 medium-high, ~10분.
+3. **D-E forward idx=5 (16번째 nice-kind-babbage retro 신설)** — `87b60ff` scheduled hourly handoff automation + check.sh v0.2 (scheduled task 도입 first session, 본 25th 신설 15th admiring-nice-faraday infrastructure 의 직접 후속), retro 가치 medium, ~10분.
+4. **D-E forward idx=6 (17번째 admiring-fervent-dijkstra retro 신설)** — `cf99492` append-scheduled-task-log.sh helper + check.sh #7 drift 감지 (90분 threshold, exit 16), retro 가치 medium, ~10분.
+5. **D-E reverse idx=7 또는 forward idx=7 (18번째 confident-loving-ride retro 신설)** — `cd94f65` WU-21 Phase 1 킥오프 dry-run D-2 + install.sh sandbox PASS + setup-w0.sh pre-flight + 시뮬 PASS + `2acac45` + `9766ad6` 2 release. forward 와 reverse 가 idx=7 에서 만남 = D-E 도메인 종결 시점, ~10-15분.
 
 D-E 도메인 종결 후 다음 priority = **D-F-meta-handoff** (HANDOFF + NEXT-SESSION-BRIEFING 정리, 작은 유닛 OK).
+
+**스케줄러 (cron 11:08 KST 48번째 진입 예정) 권장**: D-E priority 5 + prefer_mode=user-active-only → skip → D-G-WU-25 row 3/4 (sfs-review.sh / sfs-common.sh 보강) 또는 D-H-WU-26 row 2 (sfs-decision.sh) claim. briefing-24th-47 §5 충돌 분기표 정합.

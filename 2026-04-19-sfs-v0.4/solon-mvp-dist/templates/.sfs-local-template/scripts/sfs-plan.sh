@@ -57,41 +57,10 @@ Exit codes:
 EOF
 }
 
-# ─────────────────────────────────────────────────────────────────────
-# LOCAL HELPER — update_frontmatter (TODO: WU-25 row 4 시 sfs-common.sh 이관)
-# ─────────────────────────────────────────────────────────────────────
-# update_frontmatter <path> <key> <value>
-# Replace `<key>: ...` line inside the YAML frontmatter (--- ... ---) at the
-# top of the file. Appends `<key>: <value>` to the frontmatter block if the
-# key is missing. Does nothing (returns 0) if the file has no frontmatter
-# block — caller is responsible for creating one before invoking.
-#
-# Implementation note: pure-awk, no sed -i (BSD/GNU diff). Atomic via tmp+mv.
-update_frontmatter() {
-  local path="$1" key="$2" value="$3"
-  [[ -f "${path}" ]] || return 1
-  local tmp="${path}.tmp.$$"
-  awk -v k="${key}" -v v="${value}" '
-    BEGIN { in_fm=0; fm_seen=0; updated=0 }
-    NR==1 && /^---[[:space:]]*$/ {
-      in_fm=1; fm_seen=1; print; next
-    }
-    in_fm && /^---[[:space:]]*$/ {
-      if (!updated) { print k ": " v }
-      in_fm=0; print; next
-    }
-    in_fm {
-      # Match `<key>:` (allow leading whitespace = 0; YAML root keys here).
-      if ($0 ~ "^"k"[[:space:]]*:") {
-        print k ": " v
-        updated=1
-        next
-      }
-      print; next
-    }
-    { print }
-  ' "${path}" > "${tmp}" && mv -f "${tmp}" "${path}"
-}
+# NOTE: update_frontmatter() was moved to sfs-common.sh (WU-25 row 4,
+# 48번째 scheduled run `hopeful-bold-keller` 2026-04-28T11:09 KST). The
+# function is now sourced via sfs-common.sh and shared with sfs-review.sh
+# (WU-25 §2) + sfs-decision.sh / sfs-retro.sh (WU-26 §1/§2).
 
 # ─────────────────────────────────────────────────────────────────────
 # CLI parse (no positional args, only --help)

@@ -256,6 +256,77 @@ append_event() {
 }
 
 # ─────────────────────────────────────────────────────────────────────
+# GATE ID HELPERS (WU-25 §3 추가, gates.md §1 7-enum SSoT 정합)
+# ─────────────────────────────────────────────────────────────────────
+
+# validate_gate_id <id> — gates.md §1 7-enum exact match (case-sensitive, hyphen 포함).
+# 7-enum SSoT = gates.md §1 (cross-reference; 변경 시 양쪽 동시 갱신).
+# Returns: 0 valid / 1 invalid.
+# Caller usage:
+#   if ! validate_gate_id "${GATE_ID}"; then
+#     echo "unknown gate ${GATE_ID}, valid: G-1, G0, G1, G2, G3, G4, G5" >&2
+#     exit 6
+#   fi
+validate_gate_id() {
+  local id="${1:-}"
+  case "${id}" in
+    G-1|G0|G1|G2|G3|G4|G5) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+# infer_last_gate_id — events.jsonl 마지막 review_open event 의 gate_id 추출.
+# stdout: gate_id (없으면 빈 문자열). Return code 항상 0.
+# WU-25 §2.1 default — `--gate <id>` 미지정 시 추론 fallback 으로 사용.
+# read_last_gate (gate event) 와 분리: review 진입 시점 추적 = review_open scan.
+infer_last_gate_id() {
+  [[ -f "${SFS_EVENTS_FILE}" ]] || return 0
+  tac "${SFS_EVENTS_FILE}" 2>/dev/null \
+    | grep -m1 '"type":"review_open"' \
+    | sed -nE 's/.*"gate_id"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p'
+}
+
+# ─────────────────────────────────────────────────────────────────────
+# YAML FRONTMATTER UPDATER (WU-25 §3 추가, sfs-plan.sh local helper 이관)
+# ─────────────────────────────────────────────────────────────────────
+
+# update_frontmatter <path> <key> <value>
+# Replace `<key>: ...` line inside the YAML frontmatter (--- ... ---) at the
+# top of the file. Appends `<key>: <value>` to the frontmatter block if the
+# key is missing. Does nothing (returns 0) if the file has no frontmatter
+# block — caller is responsible for creating one before invoking.
+#
+# Implementation note: pure-awk, no sed -i (BSD/GNU portable). Atomic via
+# tmp+mv (no partial writes if process dies mid-update).
+#
+# Returns: 0 on success, 1 if path missing or file unwritable.
+update_frontmatter() {
+  local path="${1:?path required}" key="${2:?key required}" value="${3-}"
+  [[ -f "${path}" ]] || return 1
+  local tmp="${path}.tmp.$$"
+  awk -v k="${key}" -v v="${value}" '
+    BEGIN { in_fm=0; fm_seen=0; updated=0 }
+    NR==1 && /^---[[:space:]]*$/ {
+      in_fm=1; fm_seen=1; print; next
+    }
+    in_fm && /^---[[:space:]]*$/ {
+      if (!updated) { print k ": " v }
+      in_fm=0; print; next
+    }
+    in_fm {
+      # Match `<key>:` (allow leading whitespace = 0; YAML root keys here).
+      if ($0 ~ "^"k"[[:space:]]*:") {
+        print k ": " v
+        updated=1
+        next
+      }
+      print; next
+    }
+    { print }
+  ' "${path}" > "${tmp}" && mv -f "${tmp}" "${path}"
+}
+
+# ─────────────────────────────────────────────────────────────────────
 # USAGE STUBS (consumer scripts override / call locally)
 # ─────────────────────────────────────────────────────────────────────
 
