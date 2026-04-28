@@ -30,11 +30,12 @@ token as the subcommand and the remainder as that subcommand's arguments.
 $ARGUMENTS
 ```
 
-## Adapter Dispatch (status / start) — execute first
+## Adapter Dispatch (status / start / plan / review) — execute first
 
-If the first argument is **`status`** or **`start`**, dispatch the request to the
-corresponding bash script under `.sfs-local/scripts/` and stop. These two
-subcommands are deterministic and must NOT be re-interpreted by the model.
+If the first argument is **`status`**, **`start`**, **`plan`**, or **`review`**,
+dispatch the request to the corresponding bash script under
+`.sfs-local/scripts/` and stop. These four subcommands are deterministic and
+must NOT be re-interpreted by the model.
 
 Dispatch table:
 
@@ -42,13 +43,15 @@ Dispatch table:
 |:--|:--|:--|
 | `status`  | `.sfs-local/scripts/sfs-status.sh <remaining args>` | passes flags such as `--color=auto/always/never` verbatim |
 | `start`   | `.sfs-local/scripts/sfs-start.sh <remaining args>`  | passes `<sprint-id>` and/or `--force` verbatim |
+| `plan`    | `.sfs-local/scripts/sfs-plan.sh <remaining args>`   | takes no flags currently; remaining args reserved for future (WU-25 §1) |
+| `review`  | `.sfs-local/scripts/sfs-review.sh <remaining args>` | passes `--gate <id>` / `--gate=<id>` verbatim (gates.md §1 7-enum: G-1, G0, G1, G2, G3, G4, G5; WU-25 §2) |
 
 Procedure (apply in order):
 
 1. **Existence check** — Use the Bash tool to verify the target script exists
-   and is executable. If `.sfs-local/scripts/sfs-{status,start}.sh` is missing
-   or not executable, fall back to the **Claude-driven mode** below for that
-   subcommand and tell the user which script is missing (1 line, no
+   and is executable. If `.sfs-local/scripts/sfs-{status,start,plan,review}.sh`
+   is missing or not executable, fall back to the **Claude-driven mode** below
+   for that subcommand and tell the user which script is missing (1 line, no
    speculation about the cause).
 2. **Quote args safely** — Re-quote `<remaining args>` for the shell. Reject
    any argument containing a newline or NUL byte by reporting `unknown arg`
@@ -63,19 +66,26 @@ Procedure (apply in order):
      `3`=not a git repo, `99`=unknown.
    - start: `0`=ok, `1`=sprint id conflict (suggest `--force`), `4`=templates
      missing, `5`=permission, `99`=unknown.
+   - plan: `0`=ok, `1`=no `.sfs-local/` or no active sprint,
+     `2`=corrupt `current-sprint`, `4`=template missing, `99`=unknown.
+   - review: `0`=ok, `1`=no `.sfs-local/` or no active sprint,
+     `4`=template missing, `6`=gate id invalid or required
+     (`unknown gate <id>, valid: G-1, G0, G1, G2, G3, G4, G5`),
+     `7`=unknown CLI flag, `99`=unknown.
 5. **Stop** — After dispatch, do not add Claude-driven commentary,
    recommendations, or alternative suggestions. The bash script is the
    single source of truth for output format (WU22-D4: `·` separator + ISO8601
-   timestamp + per-field color rules).
+   timestamp + per-field color rules; WU-25 §1.1/§2.1: `plan.md ready: <path>`
+   / `review.md ready: <path> | gate <id> awaiting verdict`).
 
 If `$ARGUMENTS` is empty, treat it as if the user typed `status` (run the
 status adapter) so that bare `/sfs` produces the canonical compact status line.
 
 ## Read Context (Claude-driven modes only)
 
-For the remaining subcommands (`help`, `plan`, `sprint`, `review`, `decision`,
-`log`, `retro`) and for adapter fallbacks, first read these files if they
-exist:
+For the remaining subcommands (`help`, `sprint`, `decision`, `log`, `retro`)
+and for adapter fallbacks (including `plan` / `review` when their scripts are
+missing), first read these files if they exist:
 
 - `CLAUDE.md`
 - `.sfs-local/VERSION`
@@ -100,9 +110,9 @@ If the first argument is one of the modes below, follow that mode.
 - `help`: Explain how to use `/sfs`, show available modes, and recommend the best first command.
 - `status`: **Adapter (above).** Fallback only: summarize the current SFS state and next action from the files listed under "Read Context".
 - `start`: **Adapter (above).** Fallback only: scaffold a sprint under `.sfs-local/sprints/<YYYY-Wxx-sprint-n>/` based on `sprint-templates/`.
-- `plan`: Produce or update the current sprint `plan.md`.
+- `plan`: **Adapter (above).** Fallback only: produce or update the current sprint `plan.md` based on `sprint-templates/plan.md`.
 - `sprint`: Convert the current plan into implementation steps and gate checks.
-- `review`: Review the current sprint output and write/update `review.md`.
+- `review`: **Adapter (above).** Fallback only: review the current sprint output and write/update `review.md` (require `--gate <id>` from gates.md §1 7-enum).
 - `decision`: Record a short ADR-style decision under `.sfs-local/decisions/`.
 - `log`: Append a one-line JSON event to `.sfs-local/events.jsonl`.
 - `retro`: Write or update the current sprint `retro-light.md`.
@@ -133,4 +143,4 @@ Also explain this in one or two sentences:
 - Keep sprint artifacts concise and operational.
 - Do not invent completed work. If evidence is missing, mark it as unknown.
 - Prefer concrete next actions over broad methodology explanations.
-- For `status` and `start`, the bash adapter is authoritative — do not paraphrase or augment its output.
+- For `status`, `start`, `plan`, and `review`, the bash adapter is authoritative — do not paraphrase or augment its output.

@@ -281,9 +281,16 @@ validate_gate_id() {
 # read_last_gate (gate event) 와 분리: review 진입 시점 추적 = review_open scan.
 infer_last_gate_id() {
   [[ -f "${SFS_EVENTS_FILE}" ]] || return 0
+  # NOTE: `grep -m1` returns non-zero when there is no match; under callers
+  # using `set -o pipefail` (e.g. sfs-review.sh) that would abort the script.
+  # Trailing `|| true` enforces the documented "Return code 항상 0" contract.
+  # Fixed: 24th cycle 49번째 scheduled run `amazing-determined-gates`
+  # (WU-25 row 3 sfs-review.sh smoke test T11 surfaced the bug).
   tac "${SFS_EVENTS_FILE}" 2>/dev/null \
     | grep -m1 '"type":"review_open"' \
-    | sed -nE 's/.*"gate_id"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p'
+    | sed -nE 's/.*"gate_id"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p' \
+    || true
+  return 0
 }
 
 # ─────────────────────────────────────────────────────────────────────
