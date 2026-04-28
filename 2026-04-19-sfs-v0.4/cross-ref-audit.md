@@ -186,6 +186,10 @@ Phase 1 W10 schema 작업 시 (A) 5-terminal 통일 (deactivate 단일, 세부 v
 
    **Solon-wide executor convention CLAUDE.md §15 정식 등재 시점** = WU27-D2 `escalated_to: TBD-CLAUDE-MD-§15`. β default = WU-27 lifecycle 종결 + 1-2 사이클 실 운영 검증 후. 현재는 `sprints/WU-27.md §3.1` + 본 W-20 TODO 추적만. 정식 등재 시 (a) §15 신설 line 수 ≤ 5L 제약 (CLAUDE.md §1.14 ≤200 lines 정합) / (b) 부록 file 분리 여부 / (c) named profile registry 의 SSoT 위치 (CLAUDE.md vs sfs-common.sh source comment) 사용자 결정 영역.
 
+**⚠️ 추가 W10 결정 (25th-1 continuation 발견, 2026-04-28, admiring-zealous-newton)** — Claude Managed Agents Memory (Anthropic public beta 2026-04-23) 평가 + PROGRESS.md role 비교:
+
+21. **Claude Managed Agents Memory 채택 여부 (β default = γ 관망 + 1-2 사이클 비교 검증 후 재평가)** — 2026-04-23 Anthropic public beta 발표 (`https://claude.com/blog/claude-managed-agents-memory`). filesystem-based memory + cross-session learning + scoped permissions + audit log + roll back. 사용자 직관 "PROGRESS.md role 사라지지 않을까?" 비교 분석 결과 = **1:1 대체 아님**. (a) 다른 product target (Managed Agents = Anthropic enterprise platform 호스팅, Solon = 사용자 macbook 로컬 git repo) / (b) Solon workflow SSoT 특화 기능 (domain_locks 4-state FSM + scheduled_task_log rolling tail + resume_hint default_action step 1~11 + safety_locks 18종) generic memory layer 가 1:1 재구현 어려움 / (c) 25th-1 §3.1 Solon-wide executor convention (vendor-neutral claude/gemini/codex) 의 핵심 가치와 직접 충돌 (Managed Agents = Anthropic-tied) / (d) 1인 solo founder use case 와 enterprise-grade 인프라 mismatch. 25th-1 사용자 결정 = **γ 관망 + 1-2 사이클 비교 검증 (Rakuten/Netflix/Wisedocs/Ando 운영 사례 추적) + WU-27 진행 보존**. 재평가 시점 = (A) Anthropic 의 추가 발표 (Opus 4.7+ memory feature 개선 등) / (B) 사용자 use case 변동 (multi-team / enterprise 전환 시) / (C) 25th 후속 cycle 자연 검토 중 결정 영역. 본 항목 미해결 시 영향 = PROGRESS.md 100% 유지 + Managed Agents Memory 무시. 채택 결정 시 영향 = WU-27 일시 중단 + 별도 migration WU 신설 + §3.1 vendor-neutrality 재검토 + Anthropic 인프라 의존 결정 영역 확대.
+
 Phase 1 D1 ~ D2 (코드):
 
 12. `src/engines/dialog-engine.ts`

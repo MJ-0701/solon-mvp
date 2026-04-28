@@ -26,9 +26,16 @@ parent_file: 2026-04-19-sfs-v0.4/sprints/WU-27.md
 - Solon-wide executor convention 본 file 에서 첫 적용 demo: §3.0 시그니처 `--executor` 인자 + §3.2 table 1 row + §4.1 호출 site (`EXECUTOR_CMD=$(resolve_executor "$EXECUTOR"); cat PROMPT.md | eval "$EXECUTOR_CMD"`) + §5 Exit 9 종속.
 - review gate light pass — sub-task 1 framework 이미 승인 (decision_points WU27-D1~D5), 본 sub-task 2 = mechanical translation (decision_points 신설 0).
 
-## v0.3~ (예약, sub-task 3~6 진행 시 entry 추가)
+## v0.3 — 2026-04-28T23:25+09:00 (admiring-zealous-newton, 25번째 사이클 sub-task 3 entry, 사용자 'γ 관망 + 다음작업 이어서 ㄱㄱ')
 
-- v0.3: sub-task 3 (sfs-loop-locking.md, §6.5 Optimistic Locking + Status FSM)
+- `sprints/WU-27/sfs-loop-locking.md` 신설 (~140L) — §6.5 Optimistic Locking + Status FSM 4-state (PROGRESS / COMPLETE / FAIL / ABANDONED) + version + retry_count cap=3 + crash recovery sequence + idempotency 요구사항 + bash 함수 spec 7건.
+- spec source = `tmp/sfs-loop-design.md` v0.3 §6.5 verbatim mapping + CLAUDE.md §1.16 SSoT 정합 (24th-52 사용자 결정 verbatim 보존).
+- §6.5.1 사용자 발화 2건 (Spring JPA conceptual borrowing 명시) + §6.5.2 4-state FSM ASCII diagram + §6.5.3 yaml schema 5 신규 필드 (status / version / retry_count / failed_at / fail_reason) + §6.5.4 transition trigger 7 row table + §6.5.5 crash recovery bash pseudo-code + §6.5.6 idempotency 요구사항 (4 case) + §6.5.7 bash 함수 spec 7건 (claim_lock / release_lock / detect_stale / mark_fail / mark_abandoned / auto_restart / escalate_w10_todo) + §6.5.8 CLAUDE.md §1.16 SSoT 정합 + agents/CLAUDE.md "Max 3 rework iterations" invariant 매핑.
+- review gate light pass — sub-task 1 framework 그대로 적용 (mechanical translation).
+- 부수: `cross-ref-audit.md §4 W-21 TODO append` (Claude Managed Agents Memory γ 관망 + 1-2 사이클 비교 검증 결정 history 보존).
+
+## v0.4~ (예약, sub-task 4~6 진행 시 entry 추가)
+
 - v0.4: sub-task 4 (sfs-loop-review-gate.md, §6.6 Pre-execution Review Gate)
 - v0.5: sub-task 5 (sfs-loop-multi-worker.md, §6.0 Worker Independence + §6.4 Multi-worker spawn)
 - v1.0: sub-task 6 (실 bash 구현 완료, 0.5.0-mvp release cut 후보)
