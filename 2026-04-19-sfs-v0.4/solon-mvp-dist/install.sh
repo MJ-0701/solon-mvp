@@ -161,8 +161,9 @@ ${C_BOLD}=== Solon MVP Installer ===${C_RESET}
 Solon:  https://github.com/${SOLON_REPO} (branch: $SOLON_BRANCH)
 
 Solon 은 AI-native 7-step flow (브레인스토밍 → plan → sprint → 구현 → review →
-commit → 문서화) 를 현재 프로젝트에 주입합니다. .sfs-local/ 스캐폴드 + SFS.md
-공통 지침 + Claude/Codex/Gemini 어댑터 + .gitignore 규칙이 설치됩니다.
+commit → 문서화) 를 현재 프로젝트에 주입합니다. 이 7-step 은 full artifact chain 의
+lightweight projection 입니다. .sfs-local/ 스캐폴드 + SFS.md 공통 지침 +
+Claude/Codex/Gemini 어댑터 + .gitignore 규칙이 설치됩니다.
 
 EOF
 

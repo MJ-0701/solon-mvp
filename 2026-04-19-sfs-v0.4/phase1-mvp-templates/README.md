@@ -74,6 +74,22 @@ bash "$SOLON_DOCSET/phase1-mvp-templates/verify-install.sh"
 
 자세한 결정 체크박스 + 치환 매뉴얼은 `../PHASE1-MVP-QUICK-START.md`.
 
+## 7-step 과 full form 의 관계 (2026-04-28 구조 리뷰 반영)
+
+본 템플릿의 7-step flow 는 Solon full form 을 대체하지 않는다. Phase 1 admin panel dogfooding 을 빠르게 시작하기 위한 **lightweight projection** 이다.
+
+| MVP 7-step | Full form 매핑 | 의도 |
+|---|---|---|
+| 브레인스토밍 | Idea Capture + Discovery / Brainstorm | `brainstorm.md` 한 파일로 문제·범위·모호점 기록 |
+| plan | Product Plan + PRD + AC | `plan.md` 한 파일로 MVP 범위와 AC 기록 |
+| sprint | Sprint metadata | 별도 ceremony 없이 plan metadata 로 흡수 |
+| 구현 | Technical Design + MVP Implementation | 기술 설계는 구현 전 1~2 단락으로 제한 |
+| review | Multi-Agent Review + Dev QA | 위험도 높은 변경만 외부 리뷰 확대 |
+| commit | L2 Versioned Docs | Git commit 이 L2 SSoT checkpoint |
+| 문서화 | Docs + Retro + Learning | 새로 쓰기보다 앞 artifact 를 `retro-light.md` 로 조립 |
+
+따라서 Claude 가 이 템플릿을 읽고 "full 설계는 7단계뿐"이라고 해석하면 오해다. 7-step 은 빠른 실행형이고, 본 설계의 기초공사는 `04-pdca-redef.md §4.0` 의 13-step artifact chain + `05-gate-framework.md` 의 gate vocabulary 를 따른다.
+
 ## IP 경계 검증 규칙 (critical)
 
 - 이 폴더 자체는 Solon docset repo 안에 존재 → 그대로 있으면 개인 IP.
@@ -85,3 +101,4 @@ bash "$SOLON_DOCSET/phase1-mvp-templates/verify-install.sh"
 - **v0.1-mvp** (2026-04-24, WU-18): 초기 신설 (CLAUDE.md.template + README.md.template + .gitignore.snippet + .sfs-local-template + sprint-0-brainstorm + PROMPT-FOR-FIRST-SESSION + 폴더 README).
 - **v0.2-mvp** (2026-04-24, WU-19): executable scripts 추가 — `setup-w0.sh` + `verify-w0.sh`. QUICK-START §2 100줄 복붙 → 스크립트 호출 1 줄로 단축.
 - **dev-pending** (2026-04-26, WU-30): 두 검증기 분리 — `verify-w0.sh` check #6 정규식 minimal fix (`[A-Z]{2,}`) + check #7 헤더 주석 (setup-w0.sh 전용 명시) + `verify-install.sh` 신설 (install.sh 산출물 전용, 160 lines, 7 체크). README §스크립트 사용 (권장 경로) 두 경로 (A. setup-w0.sh / B. install.sh) 분리. dev path only (R-D1 §1.13) — `~/workspace/solon-mvp/templates/phase1-mvp-templates/` + `solon-mvp-dist/templates/phase1-mvp-templates/` 동기화는 다음 release cut (예상 0.4.0-mvp) 타이밍.
+- **dev-pending** (2026-04-28, foundation review): 7-step = full 13-step artifact chain 의 lightweight projection 임을 명시. Claude 가 MVP 템플릿만 읽고 전체 설계를 축소 해석하는 drift 방지.

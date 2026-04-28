@@ -25,6 +25,8 @@
 6. **commit** — 사용자 터미널에서 `git push origin main`
 7. **문서화** — `.sfs-local/sprints/<sprint-id>/retro-light.md` + README 업데이트
 
+> **해석 규칙**: 이 7-step 은 full startup team-agent flow 의 lightweight projection 이다. "빠르게 굴리기 위해 압축한 실행 순서"이지, Discovery/PRD/Taxonomy/UX/Technical Design/Release Readiness 를 없앤다는 뜻이 아니다. 필요성이 보이면 새 ceremony 를 만들기보다 현재 산출물 안에 evidence 를 작게 남긴다.
+
 ### Gate 운용 (4 개, 축소판)
 
 | Gate | 의미 | hard-block? |
@@ -35,6 +37,7 @@
 | G4 | review | No — verdict 기록만 |
 
 G-1 / G3 / G5 는 이 MVP 에서 **skip**. 필요성 느끼면 별도 논의 후 도입.
+Release Readiness 는 별도 Gate 로 운영하지 않지만, production 전에는 secret/auth/data/monitoring/rollback/cost 체크를 review 또는 retro-light 에 남긴다.
 
 > **중요 (원칙 13 ALT-INV-3)**: Gate 는 hard-block 이 아니라 **signal**. fail 이어도 cycle 은 계속 진행 가능 — 다만 기록 남김.
 

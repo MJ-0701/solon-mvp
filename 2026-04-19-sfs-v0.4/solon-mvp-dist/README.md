@@ -8,7 +8,9 @@
 ## 이게 뭐예요
 
 Solon 은 AI 와 함께 개발할 때 사용하는 경량 방법론 (7-step + 4 Gate + 6 본부) 의 **최소 실행 가능
-배포판** 입니다. 사용자는 개인 / 회사 프로젝트에서 `install.sh` 한 번으로 다음을 얻어요:
+배포판** 입니다. 여기서 7-step 은 full startup team-agent flow 의 lightweight projection 이며,
+Discovery/PRD/Taxonomy/UX/Technical Design/Release Readiness 를 제거한다는 뜻이 아닙니다.
+사용자는 개인 / 회사 프로젝트에서 `install.sh` 한 번으로 다음을 얻어요:
 
 - `SFS.md` — Claude Code / Codex / Gemini CLI 가 공유하는 공통 SFS 지침
 - `CLAUDE.md` — Claude Code adapter

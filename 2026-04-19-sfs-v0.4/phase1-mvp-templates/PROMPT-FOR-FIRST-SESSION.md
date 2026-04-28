@@ -9,8 +9,8 @@
 
 안녕. 이 repo 는 `<PROJECT-NAME>` — 새 회사의 관리자 페이지 MVP 다. 다음 규칙으로 작업해:
 
-1. **운영 방식**: 7-step flow (브레인스토밍 → plan → sprint → 구현 → review → commit → 문서화). 세부는 `CLAUDE.md` 읽어.
-2. **Gate**: G0 / G1 / G2 / G4 4 개만. 모두 signal, hard-block 아님. G-1 / G3 / G5 는 MVP 에서 skip.
+1. **운영 방식**: 7-step flow (브레인스토밍 → plan → sprint → 구현 → review → commit → 문서화). 이건 full startup team-agent flow 의 lightweight projection 이고, 세부는 `CLAUDE.md` 읽어.
+2. **Gate**: G0 / G1 / G2 / G4 4 개만. 모두 signal, hard-block 아님. G-1 / G3 / G5 는 MVP 에서 skip. production 전에는 Release Readiness 체크(secret/auth/data/monitoring/rollback/cost)를 review/retro-light 에 남겨.
 3. **산출물**: Sprint 산출물은 `.sfs-local/sprints/<YYYY-W>-sprint-<N>/` 에 저장. `brainstorm.md` / `plan.md` / `review.md` / `retro-light.md` 4 파일.
 4. **L1 event**: `.sfs-local/events.jsonl` 에 각 Gate verdict 를 1 line JSON 으로 append.
 5. **의사 결정**: 자가 검증 금지 (A/B/C 의미 결정은 나에게). 불확실하면 Option α/β/γ 3 개 제시하고 β (minimal) 를 기본 권장만.

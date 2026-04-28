@@ -15,6 +15,8 @@
 
 7-step flow (브레인스토밍 → plan → sprint → 구현 → review → commit → 문서화) 로 1 cycle ≈ 5~7 일 주기 운용. 세부 지침은 `CLAUDE.md`.
 
+> 이 7-step 은 빠른 MVP 실행용 축약형이다. 실제 운영 의미는 아이디어/Discovery/PRD/Taxonomy/UX/기술설계/구현/리뷰/배포/문서화 artifact chain 을 가볍게 압축한 것이다. 단계가 헷갈리면 새 단계를 늘리기보다 현재 sprint 산출물에 evidence 를 남긴다.
+
 ## 실행
 
 ```bash
