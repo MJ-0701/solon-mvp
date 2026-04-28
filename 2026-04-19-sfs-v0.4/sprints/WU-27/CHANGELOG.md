@@ -42,7 +42,15 @@ parent_file: 2026-04-19-sfs-v0.4/sprints/WU-27.md
 - review gate light pass — sub-task 1 framework 그대로 적용 (mechanical translation, decision_points 신설 0).
 - **자율 진행 프로토콜 사전 합의 (사용자 발화 25th-1 continuation 4)**: sub-task 6 entry 시 사용자 sleep + AI 자율 위임 (~7시간), §1.15 review gate self-approve (mechanical micro-step 6.1~6.8 분할), §1.5' commit 0건 (file 편집만), §1.16 status FSM 자동 적용.
 
-## v0.5~ (예약, sub-task 5~6 진행 시 entry 추가)
+## v0.5 — 2026-04-29T00:30+09:00 (admiring-zealous-newton, 25번째 사이클 sub-task 5 entry, 사용자 'push 완료 + commit 권한 위임 OK')
 
-- v0.5: sub-task 5 (sfs-loop-multi-worker.md, §6.0 Worker Independence + §6.4 Multi-worker spawn)
+- `sprints/WU-27/sfs-loop-multi-worker.md` 신설 (~155L) — §6.0 Worker Independence Invariant (사용자 2/3차 발화 verbatim) + §6.0.1~4 (worker 가 보는 것/못 보는 것 + 반-패턴 6 진단 신호 + 정당 fact 경계 + 운영 의미) + §6.1 충돌 케이스 5-row matrix + §6.2 prefer_mode 4 분리 정책 (scheduled/user-active-only/closed/deferred) + §6.3 충돌 가능 파일 처리 last-writer-wins + §6.4 Coordinator-worker 모델 (`--parallel` + `--isolation` 3 종 + aggregation rule + 24th 자연 prototype 사례 + failure mode 3건).
+- spec source = `tmp/sfs-loop-design.md` v0.3 §6.0~§6.4 verbatim mapping.
+- review gate light pass — sub-task 1 framework 그대로 적용 (mechanical translation, decision_points 신설 0).
+- §∗ 다음 sub-task = **WU-27 frontmatter close** (~5분 small) → 사용자 commit + push 일괄 batch (sub-task 1+2+3+4+5+close 6-batch) → **sub-task 6 entry = 사용자 sleep 시작 + AI ~7시간 자율 구현** (user-active-deferred mode + commit 권한 위임 OK + push 금지). sub-task 6 micro-step 분할 6.1~6.8 명시.
+- **commit 권한 위임 명시 (사용자 25th-1 continuation 5 발화 verbatim "자동진행하는동안 commit까지는 자동화 해도 됨")**: §1.5' 일시 완화 = sub-task 6 autonomous mode 한정. push 는 §1.5 절대 보존.
+
+## v0.6~ (예약, WU-27 close + sub-task 6 진행 시 entry 추가)
+
+- v0.6: WU-27 frontmatter close + sprints/_INDEX 이동
 - v1.0: sub-task 6 (실 bash 구현 완료, 0.5.0-mvp release cut 후보)
