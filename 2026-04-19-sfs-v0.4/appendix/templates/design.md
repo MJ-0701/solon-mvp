@@ -1,9 +1,9 @@
 ---
 doc_id: sfs-v0.4-appendix-template-design
 title: "PDCA Design Template"
-version: 0.4
+version: 0.4-r4
 status: draft
-last_updated: 2026-04-19
+last_updated: 2026-04-28
 audience: [division-heads, workers]
 template_type: pdca-design
 
@@ -15,6 +15,7 @@ defines:
 
 references:
   - template/plan.md (defined in: appendix/templates/plan.md)
+  - invariant/taxonomy-is-root (defined in: s02)
   - division/* (defined in: s03)
 
 affects: []
@@ -35,6 +36,7 @@ phase: design
 status: draft | g2-pending | locked
 linked_plan: PDCA-042.plan.md
 linked_acs: [AC-001, AC-002]
+linked_taxonomy_contract: PDCA-042.plan.md#taxonomy-contract
 ---
 ```
 
@@ -48,24 +50,27 @@ linked_acs: [AC-001, AC-002]
 
 ## 2. 본부별 산출물
 
-### 2.1 PM 본부
+> **Taxonomy-first rule**: 디자인/프론트/API 라벨은 Plan 의 `taxonomy_contract` 를 먼저 소비한다. 디자인이 새 용어를 만들면 taxonomy 본부 또는 strategy-pm 에 역제안으로 남긴다.
+
+### 2.1 Strategy-PM 본부
 - User Flow Diagram
 - 와이어프레임 (low-fi)
 - PRD 초안
 
-### 2.2 디자인 본부
+### 2.2 택소노미 본부
+- 분류체계 초안 (tree)
+- 라벨 가이드
+- canonical term diff (Plan 대비 변경사항)
+
+### 2.3 디자인 본부
 - Figma 시안 (high-fi)
 - 디자인 토큰 (color, typography, spacing)
 - 컴포넌트 스펙
 
-### 2.3 기술개발 본부
+### 2.4 기술개발 본부
 - API spec (OpenAPI)
 - DB schema (ERD or DDL)
 - 모듈 구조
-
-### 2.4 택소노미 본부
-- 분류체계 초안 (tree)
-- 라벨 가이드
 
 ### 2.5 품질 본부
 - 테스트 케이스 매트릭스
@@ -74,6 +79,7 @@ linked_acs: [AC-001, AC-002]
 ### 2.6 인프라 본부
 - Terraform draft
 - 비용 추정 (cost-estimator 결과)
+- secret/auth/data/monitoring/rollback/cost preliminary checklist
 
 ---
 
@@ -98,7 +104,9 @@ ac_to_design_map:
 
 - [ ] design-critique (Design 본부) / design-validator (Dev 본부) / ...
 - [ ] AC 모두 cover 되는가
+- [ ] Plan 의 taxonomy_contract 를 소비했는가
 - [ ] downstream 본부에 핸드오프 가능한 형태인가
+- [ ] infra/security/cost early risk 가 누락되지 않았는가
 - [ ] H6 학습 패턴 적용
 
 ---

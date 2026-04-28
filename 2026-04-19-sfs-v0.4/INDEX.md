@@ -1,14 +1,14 @@
 ---
 doc_id: sfs-v0.4-index
-title: "Solon (Solo Founder System) v0.4-r3 — INDEX"
-version: 0.4-r3
+title: "Solon (Solo Founder System) v0.4-r4 — INDEX"
+version: 0.4-r4
 status: draft
-last_updated: 2026-04-20
+last_updated: 2026-04-28
 role: navigation-hub
 enforced_by: sfs-doc-validate
 ---
 
-# Solon — 설계 제안서 v0.4-r3 (INDEX)
+# Solon — 설계 제안서 v0.4-r4 (INDEX)
 
 > **제품명/네이밍**: 제품 브랜드 = **Solon**, CLI prefix = **`/sfs`** (Solo Founder System, 내부 명칭). 두 이름은 의도적으로 분리 유지.
 > doc_id 는 구조 식별자이므로 `sfs-v0.4-*` 유지 (브랜드 rename 무관).
@@ -17,12 +17,19 @@ enforced_by: sfs-doc-validate
 > 각 섹션의 frontmatter에서 `depends_on` / `defines` / `references` / `affects`를 집계하여
 > **누구든 어느 섹션부터 시작해도 필요한 맥락을 빠짐없이 로드하도록 보장**한다.
 >
-> **v0.4-r3 핵심 변경 요약** (자세한 diff 는 §7 changelog 참조):
+> **v0.4-r4 핵심 변경 요약** (자세한 diff 는 §7 changelog 참조):
+> - AGENTS bootstrap shim 신설: root `AGENTS.md` → docset `AGENTS.md` → `CLAUDE.md` 실제 SSoT.
+> - Startup team-agent full flow 를 13-step artifact chain 으로 정리하고, `04-pdca-redef.md`/`05-gate-framework.md`/schema/template 에 반영.
+> - Foundation Invariants FI-1~4 추가: Artifact Contract First / Taxonomy Is Root / Shift-left Infra-Security / Continuous Documentation Ledger.
+> - Gate vocabulary 를 `G-1 + G0 + G1~G5 + RELEASE` 로 정합화. Release Readiness 는 command 미정, gate vocabulary 로 먼저 고정.
+> - MVP 7-step 은 full artifact chain 의 lightweight projection 임을 `phase1-mvp-templates/` 와 `solon-mvp-dist/` 에 명시.
+>
+> **v0.4-r3 핵심 변경 요약** (이전 Round, 유지):
 > - 원칙 12개 → **13개** (원칙 13 `progressive-activation-non-prescriptive-guidance` 추가)
 > - **activation_state** (abstract/active/deactivated) + **activation_scope** (full/scoped/temporal) 도입 → Phase 1 basic active = **dev + strategy-pm** 2개만, 나머지 4개(qa/design/infra/taxonomy)는 abstract
 > - **Socratic 5-phase dialog** (A Context → B Why-now → C Clarify → D Option Card → E Terminal) 표준화, `dialog_trace_id` format: `dlg-YYYY-MM-DD-<target-id>-<seq>`
 > - **Alternative Suggestion Engine**: 3-tier × 3-level intensity (👍 권장 / ⚪ 중립 / ⚠ 비권장), ALT-INV-1~3 (특히 ALT-INV-3 **never-hard-block**)
-> - `/sfs *` command **13 → 14개** (`/sfs division` 신규, **사용자 전용** INV-5)
+> - 사용자-facing `/sfs *` command = **13개** (`/sfs division` 포함, internal gate dispatcher 제외)
 > - `division/pm` → `division/strategy-pm` 개명
 > - Appendix 신규: `dialogs/` (5 phase 템플릿) + `engines/` (dialog-engine, alternative-suggestion-engine) + `dialog-state.schema.yaml` + `divisions.schema.yaml` v1.1
 >
@@ -41,8 +48,8 @@ enforced_by: sfs-doc-validate
 
 | 파일 | 제목 | 핵심 역할 |
 |------|------|----------|
-| [README.md](README.md) | Solon docset 10분 overview | 처음 들어오는 사람 진입점, 12 섹션 (v0.4-r3 업데이트) |
-| [INDEX.md](INDEX.md) (본 파일) | Navigation hub | 완전 cross-reference matrix (v0.4-r3) |
+| [README.md](README.md) | Solon docset 10분 overview | 처음 들어오는 사람 진입점, 12 섹션 (v0.4-r4 업데이트) |
+| [INDEX.md](INDEX.md) (본 파일) | Navigation hub | 완전 cross-reference matrix (v0.4-r4) |
 | [CROSS-ACCOUNT-MIGRATION.md](CROSS-ACCOUNT-MIGRATION.md) | 계정 이관 체크리스트 | 회사 계정 → 개인 계정 이관 시 standalone 매뉴얼 (v1.0, 2026-04-20) |
 | [HANDOFF-next-session.md](HANDOFF-next-session.md) | 다음 세션 작업 지시 | Round 3 산출 + cross-account handoff carrier (git 포함 — MIG-10 이후) |
 
@@ -52,17 +59,17 @@ enforced_by: sfs-doc-validate
 |:-:|------|------|----------|
 | 00 | [00-intro.md](00-intro.md) | Elevator Pitch + 제품 철학 선언 | 한 줄 요약, 2가지 철학 (탄탄한 설계 + 사람 최종 필터) |
 | 01 | [01-delta-v03-to-v04.md](01-delta-v03-to-v04.md) | v0.3 → v0.4 Delta | 바뀐 것만 빠르게 파악 |
-| 02 | [02-design-principles.md](02-design-principles.md) | Design Principles | **13대 원칙** (v0.4-r3 기준, 12→13 추가 — 원칙 13 Progressive Activation) 🆕 R3 |
+| 02 | [02-design-principles.md](02-design-principles.md) | Design Principles | **13대 원칙 + Foundation Invariants** (v0.4-r4 기준, FI-1~4 추가) |
 | 03 | [03-c-level-matrix.md](03-c-level-matrix.md) | C-Level × Division Matrix | 조직도 (3 C-Level × 6 본부) + **§3.3.0 Division Activation State** (abstract/active/deactivated) 🆕 R3 |
-| 04 | [04-pdca-redef.md](04-pdca-redef.md) | PDCA 재정의 | Initiative ⊃ Sprint ⊃ PDCA (3 레이어), **P-1 Discovery** + G0 Brainstorm Gate |
-| 05 | [05-gate-framework.md](05-gate-framework.md) | Gate Framework **G-1 + G1~G5** | 6개 품질 게이트 + 7 Failure Modes (G-1 Intake = brownfield install 1회성) |
+| 04 | [04-pdca-redef.md](04-pdca-redef.md) | PDCA 재정의 | Initiative ⊃ Sprint ⊃ PDCA (3 레이어), **P-1 Discovery** + startup team-agent artifact chain |
+| 05 | [05-gate-framework.md](05-gate-framework.md) | Gate Framework **G-1 + G0 + G1~G5 + RELEASE** | 품질/출시 게이트 + 7 Failure Modes (Release Readiness 포함) |
 | 06 | [06-escalate-plan.md](06-escalate-plan.md) | Escalate-Plan + H6 | Case-α/β/γ, AC 부분 재오픈, 5-Option Protocol, 자기학습 |
 | 07 | [07-plugin-distribution.md](07-plugin-distribution.md) | Plugin 배포 + Phase 2 로드맵 | solon-plugin 구조, tier profile, L3 backend driver |
 | 08 | [08-observability.md](08-observability.md) | 3-Channel Observability | L1 S3 / L2 git SSoT / L3 driver (notion/none/obsidian/logseq/confluence/custom) |
 | 09 | [09-differentiation.md](09-differentiation.md) | Differentiation vs bkit | H1/H2/H5/H6 차별화 |
-| 10 | [10-phase1-implementation.md](10-phase1-implementation.md) | Phase 1 구현 계획 | **15~19주 breakdown** (tier=minimal 기본 + brownfield optional), 8 Evaluator |
+| 10 | [10-phase1-implementation.md](10-phase1-implementation.md) | Phase 1 구현 계획 | **16~20주 breakdown** (tier=minimal 기본 + brownfield optional), 8 Evaluator |
 
-### Appendix (10 files + 14 commands + 3 drivers + 5 schemas + 5 templates + 6 dialogs + 2 engines)
+### Appendix (12 files + 13 slash commands + 3 drivers + 5 schemas + 5 templates + 6 dialogs + 2 engines + 3 reviews)
 
 #### Schemas (5)
 | 파일 | 역할 |
@@ -73,10 +80,10 @@ enforced_by: sfs-doc-validate
 | [appendix/schemas/divisions.schema.yaml](appendix/schemas/divisions.schema.yaml) | §7 divisions.yaml 스키마 (**v1.1** — activation_state/scope/parent_division/sunset_at 확장) 🆕 R3 |
 | [appendix/schemas/dialog-state.schema.yaml](appendix/schemas/dialog-state.schema.yaml) 🆕 R3 | §02 §2.13 Socratic 5-phase dialog state + dialog_trace_id 규약 (v1) |
 
-#### Commands (14) — v0.4-r3 `/sfs division` 추가
+#### Command Files (14 incl. README, 13 slash commands) — v0.4-r4 command count 정합
 | 파일 | Command | 역할 |
 |------|---------|------|
-| [appendix/commands/README.md](appendix/commands/README.md) | (index) | 14 command 전체 가이드 + schema/command-spec-v1 |
+| [appendix/commands/README.md](appendix/commands/README.md) | (index) | 13 slash command 전체 가이드 + schema/command-spec-v1 |
 | [appendix/commands/install.md](appendix/commands/install.md) | `/sfs install` | 설치 + tier/mode 선택 + **Socratic 5-phase wizard** (Haiku) 🆕 R3 |
 | [appendix/commands/discover.md](appendix/commands/discover.md) | `/sfs discover` | P-1 Discovery (brownfield 전용, read-only) |
 | [appendix/commands/brainstorm.md](appendix/commands/brainstorm.md) | `/sfs brainstorm` | G0 Brainstorm Gate (Initiative 진입) |
@@ -132,6 +139,13 @@ enforced_by: sfs-doc-validate
 | [appendix/hooks/observability-sync.sample.ts](appendix/hooks/observability-sync.sample.ts) | §8 동기화 Hook 샘플 구현 |
 | [appendix/tooling/sfs-doc-validate.md](appendix/tooling/sfs-doc-validate.md) | 의존성 검증 도구 스펙 |
 | [appendix/samples/plugin.json.sample](appendix/samples/plugin.json.sample) 🆕 WU-7 | §7.2 plugin.json 전체 예시 — Phase 1 W13 `claude plugin install solon` seed 매니페스트 (필드 의미 SSoT: 07 §7.2.1/§7.2.2) |
+
+#### Reviews (3) — 설계 검토 메모
+| 파일 | 역할 |
+|------|------|
+| [appendix/reviews/2026-04-28-startup-team-agent-flow-review.md](appendix/reviews/2026-04-28-startup-team-agent-flow-review.md) | 사용자 8단계 startup team-agent flow 리뷰 + v0.4 outline 수정 근거 + Claude 반박 예상 답변 |
+| [appendix/reviews/2026-04-28-foundation-structural-defects-review.md](appendix/reviews/2026-04-28-foundation-structural-defects-review.md) | docset AGENTS missing target + README/§10/template/MVP-dist drift 수정 근거 + 남은 foundation 리스크 |
+| [appendix/reviews/2026-04-29-contradiction-sweep.md](appendix/reviews/2026-04-29-contradiction-sweep.md) | v0.4-r4 모순 전수검사 결과 + 수정 내역 + historical exception 기준 |
 
 #### Phase 1 에서 생성 예정 (미존재 ❌)
 | 파일 | 역할 |
@@ -328,7 +342,7 @@ enforced_by: sfs-doc-validate
 | `concept/ac-level-reopen` | 06 | appendix/commands/escalate.md |
 | `schema/escalation-v1` | 06 + appendix/schemas/escalation.schema.yaml | 08 |
 | `concept/h6-self-learning` | 06 | 09 (차별화 축) |
-| **Commands (14) — v0.4-r3 `/sfs division` 추가** | | |
+| **Commands (13 slash commands) — internal gate dispatcher 제외** | | |
 | `schema/command-spec-v1` | appendix/commands/README.md | 전 command spec |
 | `command/sfs-install` (Socratic wizard 포함) | appendix/commands/install.md | 07, 10, 02 §2.13 |
 | `command/sfs-discover` | appendix/commands/discover.md | 04, 05 |
@@ -368,7 +382,7 @@ enforced_by: sfs-doc-validate
 | **Differentiation & Phase 1** | | |
 | `axis/h1~h6` | 09 | 10.5 (Phase 1 차별화 검증 기준) |
 | `plan/phase1-scope-final` | 10 | — (최종 섹션) |
-| `schedule/phase1-week-breakdown` | 10 | — (15~19주, tier=minimal 기본) |
+| `schedule/phase1-week-breakdown` | 10 | — (16~20주, tier=minimal 기본) |
 | `criteria/phase1-success` | 10 | — |
 | `gate/phase1-to-phase2-transition` | 10 | — |
 | `concept/phase1-seed-patterns` | 10 | — |
@@ -408,7 +422,8 @@ enforced_by: sfs-doc-validate
 | 2026-04-19 | v0.4-draft | §00~§10 본문 풀 작성 완료, appendix 10 파일 완결 (schemas 4 + templates 4 + hooks 1 + tooling 1) |
 | 2026-04-20 | v0.4-r1 | **원칙 9 추가** (`brainstorm-gate-mandatory`) + **Initiative 레이어 도입** (Initiative ⊃ Sprint ⊃ PDCA 3 레이어 위계). G0 Brainstorm Gate · `concept/initiative` · `gate/g0-brainstorm` · `template/brainstorm` 신규. §02/§03/§04 + INDEX cross-ref 동기화. L3 Driver Interface (`contract/l3-driver-interface-v1`) + notion/none manifest 3종 appendix 추가. `principle/worker-parallelism` 별도 항목화. |
 | 2026-04-20 | v0.4-r2 | brownfield 대응 + 브랜드 정식화 + command spec 정식화 대규모 업데이트. (1) 원칙 10 `human-final-filter` + 11 `brownfield-first-pass` + 12 `brownfield-no-retro-brainstorm` 3개 신규. (2) P-1 Discovery Phase (§4.3) + G-1 Intake Gate (§5.11) 추가. (3) 13개 `/sfs *` command spec 정식화. (4) README.md 신규. (5) Solon brand 정식화. (6) Tier Profile + L3 backend driver 일반화. (7) 8개 evaluator. (8) §00-intro 제품 철학 선언 블록. (9) §07 plugin tier + §7.10 brownfield plugin. (10) §08 L3 driver 일반화. (11) §10 Budget/Risk 재계산. (12) cross-reference defect 8 occurrence 수정. |
-| **2026-04-20** | **v0.4-r3** | **Progressive Activation + Non-Prescriptive Guidance 대규모 확장**. (1) **원칙 13 `progressive-activation-non-prescriptive-guidance`** 신규 (§02 §2.13 + §2.14 의존 그래프). (2) **activation_state** 3-state (abstract/active/deactivated) + **activation_scope** 3-scope (full/scoped/temporal) 도입 — §03 §3.3.0 Division Activation State 신설, 전 division 행에 activation_state 반영, §3.7 Phase 1 Baseline 재작성 (active worker 수 before/after 비교표 포함). (3) `divisions.schema.yaml` **v1.1** 확장 — activation_state/scope/parent_division/sunset_at 4 필드 + 13 validation rule. (4) **Socratic 5-phase dialog** 표준화 — appendix/dialogs/ 6개 파일 (README + phase-a~e), appendix/engines/dialog-engine.md 신설, `dialog-state.schema.yaml` 신규, `dialog_trace_id` format `dlg-YYYY-MM-DD-<target-id>-<seq>` 표준. (5) **Alternative Suggestion Engine** 도입 — appendix/engines/alternative-suggestion-engine.md 신설, 3-tier × 3-level intensity (👍 권장 / ⚪ 중립 / ⚠ 비권장), ALT-INV-1 (항상 3-tier) / ALT-INV-2 (정확히 1개 👍) / **ALT-INV-3 never-hard-block**. (6) `/sfs division` **14번째 command** 신설 — appendix/commands/division.md, **user-only** (INV-5 agent auto-invocation 금지), L1 event `division.activation.changed`. (7) `/sfs install` 에 Socratic wizard 통합. (8) **`division/pm` → `division/strategy-pm`** rename (§03 §3.3.1, agent id 포함). (9) **Phase 1 basic active = dev + strategy-pm 2개만**, 나머지 4개 (qa/design/infra/taxonomy) abstract, 필요 시 `/sfs division activate` 로 확장. (10) README.md §4 13대 원칙 표 + 이중 방어선 2행 추가 (원칙 13 × 10, 원칙 13 × 1) + §6 14개 command + §10 파일 맵 확장 + §11 Glossary 7개 용어 추가 (activation_state/scope, Progressive Activation, Non-Prescriptive Guidance, Socratic dialog, dialog_trace_id, /sfs division) + §12 Changelog v0.4-r3 entry. (11) INDEX.md §1/§3.8/§4/§7 동기화. |
+| **2026-04-20** | **v0.4-r3** | **Progressive Activation + Non-Prescriptive Guidance 대규모 확장**. (1) **원칙 13 `progressive-activation-non-prescriptive-guidance`** 신규 (§02 §2.13 + §2.14 의존 그래프). (2) **activation_state** 3-state (abstract/active/deactivated) + **activation_scope** 3-scope (full/scoped/temporal) 도입 — §03 §3.3.0 Division Activation State 신설, 전 division 행에 activation_state 반영, §3.7 Phase 1 Baseline 재작성 (active worker 수 before/after 비교표 포함). (3) `divisions.schema.yaml` **v1.1** 확장 — activation_state/scope/parent_division/sunset_at 4 필드 + 13 validation rule. (4) **Socratic 5-phase dialog** 표준화 — appendix/dialogs/ 6개 파일 (README + phase-a~e), appendix/engines/dialog-engine.md 신설, `dialog-state.schema.yaml` 신규, `dialog_trace_id` format `dlg-YYYY-MM-DD-<target-id>-<seq>` 표준. (5) **Alternative Suggestion Engine** 도입 — appendix/engines/alternative-suggestion-engine.md 신설, 3-tier × 3-level intensity (👍 권장 / ⚪ 중립 / ⚠ 비권장), ALT-INV-1 (항상 3-tier) / ALT-INV-2 (정확히 1개 👍) / **ALT-INV-3 never-hard-block**. (6) `/sfs division` command 신설 — appendix/commands/division.md, **user-only** (INV-5 agent auto-invocation 금지), L1 event `division.activation.changed`. (7) `/sfs install` 에 Socratic wizard 통합. (8) **`division/pm` → `division/strategy-pm`** rename (§03 §3.3.1, agent id 포함). (9) **Phase 1 basic active = dev + strategy-pm 2개만**, 나머지 4개 (qa/design/infra/taxonomy) abstract, 필요 시 `/sfs division activate` 로 확장. (10) README.md §4 13대 원칙 표 + 이중 방어선 2행 추가 (원칙 13 × 10, 원칙 13 × 1) + §6 command registry + §10 파일 맵 확장 + §11 Glossary 7개 용어 추가 (activation_state/scope, Progressive Activation, Non-Prescriptive Guidance, Socratic dialog, dialog_trace_id, /sfs division) + §12 Changelog v0.4-r3 entry. (11) INDEX.md §1/§3.8/§4/§7 동기화. |
+| **2026-04-28** | **v0.4-r4** | **기초공사 구조 보강**. (1) AGENTS bootstrap shim 신설 및 root redirect 정합. (2) startup team-agent 13-step artifact chain 과 Artifact Contract First 를 §04 에 반영. (3) G0/Release Readiness gate vocabulary 를 §05/schema/README/§10 에 정합. (4) Foundation Invariants FI-1~4 추가. (5) MVP 7-step projection 경계와 Release Readiness evidence 를 phase1 templates 및 solon-mvp-dist 에 명시. (6) appendix/templates 에 taxonomy_contract / Release Readiness evidence slot 추가. (7) 구조 리뷰 문서 2건 추가. |
 | — | v0.4-review | 내부 리뷰 완료 (예정) |
 | — | v0.4-locked | Phase 1 착수 전 락 (예정) |
 

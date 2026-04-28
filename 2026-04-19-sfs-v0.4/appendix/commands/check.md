@@ -4,7 +4,7 @@ command_name: "/sfs check"
 version: "1.0.0"
 phase: "check"
 mode: "common"
-operator: "quality/qa/lead"    # QA 본부장 + CPO 공동
+operator: "qa/lead"    # QA 본부장 + CPO 공동
 co_operator: "strategy/cpo"
 triggers:
   - "check"
@@ -53,7 +53,7 @@ PDCA 의 **Check 단계** 를 실행한다. Do 단계 산출물 (코드 + 테스
 G4 score = gap-detector (Gap × 0.4) + CPO 5-Axis (평균 × 0.6)
 ```
 
-본 command는 **quality/qa/lead (QA 본부장)** 와 **strategy/cpo (CPO)** 가 공동 오퍼레이터. QA 본부장은 Gap / 기능 정확성 축을, CPO는 User-Outcome / Value-Fit / Soundness / Future-Proof / Integrity 5축을 책임진다.
+본 command는 **qa/lead (QA 본부장)** 와 **strategy/cpo (CPO)** 가 공동 오퍼레이터. QA 본부장은 Gap / 기능 정확성 축을, CPO는 User-Outcome / Value-Fit / Soundness / Future-Proof / Integrity 5축을 책임진다.
 
 §2 원칙 10 (human-final-filter) 적용: G4 PASS 후에도 사용자가 마지막 확인 체크박스를 통과시켜야 Act phase로 이동 가능 (--yes 시 L1에 `auto_approved: true` 기록).
 

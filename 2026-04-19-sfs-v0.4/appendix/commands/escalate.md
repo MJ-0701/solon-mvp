@@ -7,7 +7,7 @@ mode: "common"
 operator: "division-lead"          # 각 본부장이 주 호출자 (β-3 심화 시 C-Level 승격)
 escalation_level_operators:
   beta-1: "division-lead"          # 본부 내 재시도
-  beta-2: "strategy/pm/lead"       # PM 본부장 조정
+  beta-2: "strategy-pm/lead"       # Strategy-PM 본부장 조정
   beta-3: "strategy/ceo"           # CEO 판단
 triggers:
   - "escalate"
@@ -71,7 +71,7 @@ Escalation Level 판정:
 | Level | 조건 | 오퍼레이터 | Output |
 |-------|------|-----------|--------|
 | **β-1** | 최초 escalate, 본부 내 해결 가능성 존재 | 본부장 | 5-Option 중 Option A/B (본부 내 액션) 채택 |
-| **β-2** | β-1 에서 option 실행했으나 24h 내 해결 안 됨 | PM 본부장 | cross-division 조정, Option C/D |
+| **β-2** | β-1 에서 option 실행했으나 24h 내 해결 안 됨 | Strategy-PM 본부장 | cross-division 조정, Option C/D |
 | **β-3** | β-2 에서도 해결 안 됨, 전략적 판단 필요 | CEO | Option E (전략 피벗 / PDCA 중단) |
 
 ## 입력 (Input)
@@ -169,13 +169,13 @@ $ /sfs escalate --feature new-pricing --case alpha --reason "G4 gap_score=63, AC
 ```bash
 $ /sfs escalate --feature notifications --case beta
 [escalate] 이전 β-1 호출 감지 (25h 전) → β-2 자동 승격
-[escalate] 오퍼레이터: PM 본부장
+[escalate] 오퍼레이터: Strategy-PM 본부장
 [escalate] cross-division 조정 관점 5-Option 재생성...
    A. [skip, β-1 에서 이미 시도]
    B. Relax AC-3 (backoff policy 기본값): 적용 시 재호출 1회
    ...
 > Option 선택: b
-[escalate] PM 본부장 → dev 본부장 에게 후속 handoff 지시 기록.
+[escalate] Strategy-PM 본부장 → dev 본부장 에게 후속 handoff 지시 기록.
 ```
 
 ### 예시 3: β-3 CEO pivot 판단 (Case γ)

@@ -103,7 +103,7 @@ graph TB
     subgraph Channels["3-Channel Observability"]
         L1[L1 S3 raw]
         L2[L2 git docs SSoT]
-        L3[L3 Notion view]
+        L3[L3 driver view]
     end
 
     Human <--> CEO
@@ -455,7 +455,7 @@ Evaluator는 **공용 풀**에 있고, 어느 본부장이든 (적합하면) 호
 | Worker (실무자) | **Sonnet 4.6** | **2 (본부당 1, active 2)** | ~2,000 | 🆕 Phase 1 기본 2 worker. abstract 4 본부는 activation 시점에 worker 1씩 추가 |
 | Helper (parser, format) | **Haiku 4.5** | shared | ~10,000 | sync, JSON 변환, simple lint |
 
-> 🆕 v0.4-r3 **heavy-by-default 회피**: 위 호출 수는 **Phase 1 15~19주 dogfooding 기본 2 active 본부 가정**의 개략 추정. 사용자가 Socratic dialog 로 본부를 추가 활성화하면 호출 수 증가. 실측은 §10 에서 갱신 (Task #27 범위).
+> 🆕 v0.4-r4 **heavy-by-default 회피**: 위 호출 수는 **Phase 1 16~20주 dogfooding 기본 2 active 본부 + 최소 1 abstract 본부 승격 가정**의 개략 추정. 사용자가 Socratic dialog 로 본부를 추가 활성화하면 호출 수 증가. 실측은 §10 에서 갱신 (Task #27 범위).
 
 ### 모델 변경 룰
 

@@ -3,8 +3,9 @@
 > **문서 성격**: v0.3 → v0.4 구조 뼈대. 각 섹션의 목적/핵심 결정/산출물 placeholder만 명시.
 > **독자**: 본인 + 향후 협업자. 이 뼈대가 확정되면 섹션별 풀 작성으로 전환.
 > **작성일**: 2026-04-19
-> **상태**: Outline Draft — 검토 후 풀 작성
+> **상태**: Outline Draft — 2026-04-28 사용자 재검토 반영
 > **선행 문서**: v0.3 (`solo-founder-agent-system-proposal.md`) — 이번 문서는 **완전 교체**가 아니라 **재프레이밍**
+> **리뷰 근거**: `2026-04-19-sfs-v0.4/appendix/reviews/2026-04-28-startup-team-agent-flow-review.md`
 
 ---
 
@@ -43,6 +44,9 @@
 - **3-Channel Observability**: S3 / docs submodule / Notion
 - **단일 sfs-plugin 배포**: Claude Code CLI + Claude Desktop 공통
 - **Phase 1 내부 사용 → Phase 2 상품화 로드맵**
+- **Artifact Contract First**: agent 호출 전 단계별 입력/출력/통과 기준을 먼저 고정
+- **Shift-left Infra/Security**: 인프라·보안은 배포 직전 1회 리뷰가 아니라 기술 설계 초반부터 최소 체크리스트로 참여
+- **Continuous Documentation**: 문서화는 마지막 단계가 아니라 각 단계 산출물의 누적 ledger, Notion은 사람용 뷰
 
 ### 1.4 폐기된 것 (Removed from v0.3)
 - [OPEN] v0.3의 어떤 부분이 완전 폐기되는지 매핑 — 풀 작성 단계에서 1:1 대조
@@ -59,6 +63,10 @@
 6. **로컬 상태는 PC별 private, 공유는 git + Notion** — race condition 구조적 방지
 7. **CLI + GUI 통합 백엔드** — Claude Code와 Claude Desktop이 같은 파일시스템 공유
 8. **Phase 1 내부 사용 → Phase 2 상품화** — 본부 정의는 YAML로, 하드코딩 금지
+9. **Artifact Contract First** — 각 단계는 다음 단계 agent가 읽을 수 있는 명시 산출물과 Gate 기준을 남겨야 함
+10. **Taxonomy is Root, not Wireframe Appendix** — 택소노미는 화면 설계의 부속물이 아니라 도메인·API·UI·문서 전체의 공통 언어
+11. **Shift-left Infra/Security** — 인프라와 보안은 구현 후 배포 직전만 보는 게 아니라 기술 설계 단계에서 최소 리스크를 먼저 드러냄
+12. **Continuous Documentation Ledger** — 최종 문서화 agent는 기억으로 재구성하지 않고, 앞 단계 artifact를 조립·번역함
 
 ---
 
@@ -97,11 +105,67 @@
 - 실무자: Sonnet (본부별 1~3명, 정확한 수는 풀 작성 단계)
 - 헬퍼 (간단 parsing/변환): Haiku
 
+### 3.5 책임 경계 (2026-04-28 리뷰 반영)
+
+에이전트는 "좋은 사람이 많다"가 아니라 "서로 다른 책임을 가진 작은 조직"이어야 한다.
+
+| 역할 | 결정 권한 | 실행 권한 | 주요 산출물 |
+|---|---|---|---|
+| CEO / Orchestrator | 제품 방향, 우선순위, gate 승인 요청 | agent 호출, 상태 전이 | initiative brief, sprint plan, decision brief |
+| CPO / Product Evaluator | 제품 가치, UX, 사용자 관점 PASS/FAIL | 수정 지시가 아닌 피드백 | product review, 5-axis evaluation |
+| CTO / Technical Evaluator | 기술 리스크, 아키텍처, 구현 가능성 판단 | 기술 설계 승인, dev lead 조율 | technical design review |
+| PM Lead | 요구사항 구조화 | PRD/user story 작성 | PRD, AC, user flow |
+| Taxonomy Lead | 용어·엔티티·상태값 정합성 | taxonomy 초안/변경 제안 | domain glossary, entity map, naming ADR |
+| Design Lead | UX flow, wireframe, design token 정합성 | 디자인 초안 작성 | wireframe, component spec |
+| Dev Lead | 구현 계획, 코드 통합 | backend/frontend worker 조율 | API, DB, frontend implementation |
+| QA / Review Pool | 검증 기준별 PASS/FAIL 리포트 | read-only review | code/product/security/gap reports |
+| Infra / Security Lead | 배포 가능성, secret, rollback, threat checklist | infra plan 작성 | deploy plan, security checklist, runbook |
+
 ---
 
 ## 4. PDCA 재정의 (도메인 agnostic)
 
-### 4.1 PDCA 단계별 산출물 매핑
+### 4.0 Startup Team-Agent Flow (full form)
+
+사용자가 2026-04-28 재정리한 흐름은 방향이 맞다. 단, 제품화 가능한 agent system 으로 만들려면 "단계 이름"보다 "artifact contract + gate"가 먼저 잠겨야 한다.
+
+Full form 은 다음 13단계다.
+
+1. **Idea Capture** — 아이디어 원문, 배경, 사용자 직감 기록
+2. **Discovery / Brainstorm** — 문제 크기, 타겟 사용자, 대체재, 시장 가설, 성공 지표 탐색
+3. **Product Plan** — MVP 범위, 로드맵, out-of-scope, 리스크 정리
+4. **PRD + Acceptance Criteria** — 요구사항을 측정 가능한 AC로 고정
+5. **Taxonomy + Domain Model** — 도메인 용어, 엔티티, 상태값, API/UI naming 기준 확정
+6. **UX Flow + Wireframe + Design Draft** — 사용자 흐름, 정보 구조, 와이어프레임, 디자인 초안
+7. **Technical Design** — API, DB, frontend architecture, integration, infra sketch
+8. **MVP Implementation** — backend/frontend worker가 AC 단위로 빠르게 구현
+9. **Multi-Agent Review** — Claude/Gemini/Codex 등으로 code/product/UX/security 관점 분리 리뷰
+10. **Dev Deploy + QA** — 개발 서버 배포, smoke/e2e/manual QA
+11. **Production Infra + Release Gate** — secret, monitoring, rollback, security checklist, 비용 점검
+12. **Production Deploy + Monitoring** — 상용 배포, 로그·알림·핵심 지표 확인
+13. **Docs + Retro + Learning Loop** — 도메인/기술/운영 문서 조립, 회고, evaluator checklist 진화
+
+사용자의 기존 8단계는 이 full form 의 좋은 축약판이다. 다만 `Discovery`, `Artifact Contract`, `Shift-left Infra/Security`, `Continuous Documentation` 이 빠지면 agent가 "잘 만든 엉뚱한 제품"을 만들거나, 마지막에 문서를 기억으로 재구성하는 위험이 커진다.
+
+### 4.1 단계별 Artifact Contract
+
+| # | 단계 | 필수 산출물 | 다음 단계 입력 | Gate |
+|:-:|---|---|---|---|
+| 1 | Idea Capture | `idea.md` | raw intent | none |
+| 2 | Discovery / Brainstorm | `brainstorm.md`, market assumptions | validated problem hypothesis | G0 |
+| 3 | Product Plan | `plan.md`, MVP scope | bounded sprint target | G1 |
+| 4 | PRD + AC | `prd.md`, `acceptance-criteria.yaml` | measurable requirements | G1 |
+| 5 | Taxonomy + Domain Model | `taxonomy/*.yaml`, entity map, naming ADR | shared language for design/dev/docs | G2 |
+| 6 | UX + Wireframe + Design Draft | wireframe, user flow, component spec | buildable UI/UX spec | G2 |
+| 7 | Technical Design | API spec, DB schema, infra sketch, security notes | implementation plan | G3 |
+| 8 | MVP Implementation | code, migrations, local test report | review target | G3 |
+| 9 | Multi-Agent Review | review reports by axis | fix list or release candidate | G4 |
+| 10 | Dev Deploy + QA | dev URL, QA report, test evidence | release readiness input | G4 |
+| 11 | Production Infra + Release Gate | deploy plan, rollback plan, security checklist | production approval brief | Release Gate |
+| 12 | Production Deploy + Monitoring | production URL, metrics, incident hooks | operating product | Release Gate |
+| 13 | Docs + Retro + Learning | domain docs, tech docs, runbook, retro | next sprint seed | G5 |
+
+### 4.2 PDCA 단계별 산출물 매핑
 | 단계 | 개발 본부 | 디자인 본부 | 기획 본부 | 택소노미 본부 |
 |---|---|---|---|---|
 | Plan | 기능 명세 + AC | UI 요구사항 | PRD | 분류 요구사항 |
@@ -110,15 +174,44 @@
 | Check | gap-detector | design-critique | prd-validator | taxonomy-consistency-checker |
 | Act | 리포트 + 학습 | 리포트 + 학습 | 리포트 + 학습 | 리포트 + 학습 |
 
-### 4.2 Sprint ⊃ 다수 PDCA
+### 4.3 Sprint ⊃ 다수 PDCA
 - 1 Sprint = N개 PDCA (본부별로 독립 진행 가능)
 - Sprint start/end는 CEO가 결정
 - Sprint 내 PDCA 의존성은 Orchestrator(CLI/Cowork)가 추적
 - [OPEN] Sprint 내 PDCA 병렬 실행 한계치 — 풀 작성 단계에서 정의
 
+### 4.4 Lightweight MVP Projection
+
+Phase 1 에서 full form 13단계를 모두 "무거운 본부 활성화"로 실행하면 과투자다. 따라서 MVP projection 은 다음처럼 압축한다.
+
+| 사용자 8단계 | Full form 매핑 | MVP 운영 |
+|---|---|---|
+| 1. 아이디어 제출 | 1 | `idea.md` 한 장 |
+| 2. 브레인스토밍 | 2 | G0 signal, 시장조사 deep dive는 필요할 때만 |
+| 3. 플랜설계 | 3~4 | `plan.md` + AC를 한 파일로 시작 |
+| 4. 기획서 및 택소노미/와이어프레임 | 4~6 | PRD, taxonomy, wireframe을 분리하되 각 1~2 page 제한 |
+| 5. 구현 | 7~8 | technical design 최소화 후 MVP 구현 |
+| 6. 분석 및 코드리뷰 | 9~10 | Claude/Gemini/Codex 다중 리뷰는 위험도 높은 변경에만 호출 |
+| 7. 인프라 구축 및 배포 | 10~12 | infra sketch는 기술 설계 때 작성, production gate에서 최종 확인 |
+| 8. 문서화 | 13 | 마지막에 새로 쓰지 않고 앞 artifact를 도메인/기술/운영 문서로 조립 |
+
 ---
 
 ## 5. Gate Framework (G1~G5)
+
+### 5.0 Gate 배치 원칙
+
+Code review 는 구현 후 1회 이벤트가 아니라 여러 gate 중 하나다. Gate 는 agent를 멈추게 하는 장치라기보다 "다음 단계로 넘겨도 되는 artifact인지"를 판단하는 계약이다.
+
+| Gate | 위치 | 핵심 질문 | 대표 evaluator |
+|:---:|---|---|---|
+| G0 | Discovery / Brainstorm 종료 | 만들 문제가 충분히 구체적인가? | CPO + intent-discovery-validator |
+| G1 | Plan / PRD 종료 | AC가 측정 가능하고 scope가 작게 잘렸는가? | plan-validator + prd-validator |
+| G2 | Taxonomy / UX / Design 종료 | 용어·흐름·화면이 구현 가능한 공통 언어로 정리됐는가? | taxonomy-consistency + design-critique |
+| G3 | Technical Design / Implementation 전후 | handoff 가능한 설계·코드·테스트 증거가 있는가? | code-analyzer + architecture reviewer |
+| G4 | Review / QA / Dev Deploy | 실제 결과가 PRD·디자인·기술 설계와 일치하는가? | gap-detector + CPO 5-Axis |
+| Release Gate | Production 전 | secret, monitoring, rollback, security, cost가 확인됐는가? | infra-lead + security reviewer |
+| G5 | Docs / Retro | 다음 sprint 에 반영할 학습이 남았는가? | CEO + strategy lead |
 
 ### 5.1 Gate 매트릭스
 | Gate | 프레임 의미 | 오퍼레이터 | Evaluator (도메인별) |
@@ -191,6 +284,8 @@ SUCCESS / FAIL-FIXABLE / FAIL-HARD / STALL / CONFLICT / TIMEOUT / ABORT
 - L2가 SSoT, Notion 편집은 L2로 역류 금지
 - Notion sync는 **post-commit hook**
 - 로컬 상태(`.bkit-memory.json` 등)는 gitignore, PC별 private
+- 문서화는 마지막 단계에서 "새로 쓰기"가 아니라 각 단계 artifact를 L2에 계속 쌓고, L3(Notion)는 비개발자가 읽기 좋게 투영한다.
+- 도메인 문서 / 팀별 문서 / 전문가용 문서 / 비전문가용 문서는 같은 L2 artifact에서 파생되어야 한다. 사람이 Notion에서 임의 편집한 내용이 SSoT가 되면 agent 간 drift가 발생한다.
 
 ### 7.3 동기화 파이프라인 Placeholder
 - [OPEN] 구체적 hook 구현 — 풀 작성 단계
@@ -251,6 +346,8 @@ sfs-plugin/
 - RBAC: 제외 (솔로 사용 가정)
 - 플러그인: 단일 sfs-plugin
 - cowork: 참조 후 독립 재작성 (Option E, 3 skill만)
+- 구현 우선순위: agent 수를 늘리기 전에 `Artifact Contract`, `GateReport`, `division activation_state` 를 먼저 구현한다.
+- 모든 본부를 처음부터 active 로 만들지 않는다. 초기에는 strategy-pm + dev 중심, taxonomy/design/infra/qa 는 필요 시 scoped activation 한다.
 
 ### 10.2 신규 개발 항목
 - C-Level agents 3개 (CEO, CTO, CPO)
@@ -282,6 +379,8 @@ sfs-plugin/
 - G1~G5 Gate 모두 1회 이상 실행
 - Escalate-Plan 1회 이상 트리거 + H6 학습 로그 1개 이상 생성
 - 3-Channel observability 모두 데이터 보유
+- 동일 feature 에 대해 domain/technical/runbook 문서가 같은 artifact source 에서 파생됨을 확인
+- 구현 후 리뷰만이 아니라 PRD/Taxonomy/Design/Tech/Release gate 중 최소 4종 이상 실행
 
 ---
 
@@ -295,12 +394,22 @@ sfs-plugin/
 
 ## 부록 C. Open Questions
 
-- [ ] Sprint 내 PDCA 병렬 실행 한계
+- [ ] Sprint 내 PDCA 병렬 실행 한계와 agent 동시 실행 비용 상한
 - [ ] G4 formula (품질/인프라 본부)
 - [ ] Escalation 스키마 YAML 확정
 - [ ] Observability hook 구체 구현
 - [ ] Phase 2 일정 (Phase 1 완주 후 재산정)
 - [ ] 본부별 실무자 agent 수와 역할 분담
+- [ ] Release Gate 를 G4의 하위로 둘지, 별도 gate 로 둘지
+- [ ] Taxonomy freeze 시점: PRD 직후인지, UX draft 직후인지
+
+---
+
+## 부록 D. 2026-04-28 리뷰 반영 메모
+
+상세 리뷰, 수정 이유, Claude agent 반박 예상과 답변은 다음 파일에 기록한다.
+
+- `2026-04-19-sfs-v0.4/appendix/reviews/2026-04-28-startup-team-agent-flow-review.md`
 
 ---
 

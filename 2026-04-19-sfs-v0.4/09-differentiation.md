@@ -116,7 +116,7 @@ Solon의 차별화는 **축 6개**로 구조화된다. **Phase 1에서 본격화
 
 - **감사 가능성**: L2 git commit graph가 모든 결정의 timestamped audit trail (§8.2)
 - **PC 간 race 제거**: `.sfs-local/`은 gitignore (§8.5.3) → 동기화 대상이 없어 race 불가능
-- **비개발자 가시성**: L3 Notion이 read-only view → 외부 이해관계자가 접근 가능
+- **비개발자 가시성**: L3 driver view가 read-only view → 외부 이해관계자가 접근 가능
 - **비용 투명성**: L1 → L2 → L3 집계로 Sprint별 비용이 대시보드에 실시간 표면화 (§8.9)
 
 ### 9.2.3 "bkit도 git 쓰지 않나?"에 대한 답변
@@ -146,11 +146,11 @@ git을 쓰는 것과 **git을 SSoT로 설계한 것**은 다르다:
 
 | Solon 본부 | 커버하는 역할 병목 (§0.2) | bkit/cowork로 못 채우는 이유 |
 |---------|-----------------------|---------------------------|
-| strategy/pm | PM (기획), CEO 의사결정 보조 | bkit에 "requirements 작성" skill 없음 |
+| strategy-pm | PM (기획), CEO 의사결정 보조 | bkit에 "requirements 작성" skill 없음 |
 | taxonomy | 도메인 용어 일관성 | 모든 도구가 용어 관리 영역 부재 |
 | design | UX flow + 디자인 시스템 + 핸드오프 | cowork 재사용하되 **연결(핸드오프)** 체계 추가 |
 | dev | 구현 + 테스트 | bkit 재사용, Solon은 Gate만 덧씌움 |
-| quality/qa | 테스트 전략, gap 분석 | bkit의 gap-detector를 G4에서 40% 가중치로 통합 |
+| qa | 테스트 전략, gap 분석 | bkit의 gap-detector를 G4에서 40% 가중치로 통합 |
 | infra | 비용/안정성/배포 | 어떤 AI 도구도 "비용 상한 체크" 체계 없음 |
 
 ### 9.3.3 "6개가 충분한가"
@@ -162,10 +162,10 @@ git을 쓰는 것과 **git을 SSoT로 설계한 것**은 다르다:
 | CEO | role/ceo (strategy C-Level) |
 | CTO | role/cto (strategy C-Level) |
 | CPO | role/cpo (strategy C-Level) |
-| PM | division/strategy/pm |
+| PM | division/strategy-pm |
 | Designer | division/design |
 | Developer | division/dev |
-| QA + Infra | division/quality/qa + division/infra |
+| QA + Infra | division/qa + division/infra |
 
 → **C-Level 3 + Division 6 = 9개 역할 정의**가 7 병목을 초과 커버. Taxonomy는 7 병목에 없던 추가 보강.
 
@@ -322,7 +322,7 @@ Phase 1에서는 기본 골격만, 본격 차별화는 Phase 2.
 **Phase 1 현재 상태**:
 - 솔로 가정, RBAC 없음
 - 1 tenant (본인)
-- L3 Notion 워크스페이스 1개
+- L3 driver view 1개 (`none` 이면 local report, notion 이면 workspace)
 
 **Phase 2 추가 기능**:
 - **RBAC**: 본부별 권한 분리 (디자이너는 design 본부만, 외부 리뷰어는 read-only)
@@ -391,7 +391,7 @@ Phase 1에서는 기본 골격만, 본격 차별화는 Phase 2.
 ### 9.8.2 매트릭스가 말하지 않는 것
 
 - **완성도**: bkit은 성숙, Solon은 설계 단계. 완성도 축은 시간 문제.
-- **학습 곡선**: Solon 은 6 본부/5 Phase/G-1 + G1~G5 등 **개념 밀도**가 높음. bkit이 훨씬 배우기 쉬움.
+- **학습 곡선**: Solon 은 6 본부/5 Phase/G-1/G0/G1~G5/RELEASE 등 **개념 밀도**가 높음. bkit이 훨씬 배우기 쉬움.
 - **비용**: Solon 은 Opus 사용 빈도가 높아 **월 운영비가 비쌈**. bkit/cowork보다 비쌀 수 있음.
 
 → Solon 은 "더 많은 것을 하지만 더 무겁다". **모두의 첫 도구는 아니다** — 1인 창업가가 실제로 7 역할 병목을 느낄 때의 도구.
@@ -447,8 +447,8 @@ bkit의 PDCA 템플릿(docs/standards/pdca/)과 Solon의 차이:
 |------|:--:|:-----:|------|
 | **Sprint당 실패 회복 시간** (first gate fail → resolution) | H6 | 평균 < 24시간 (사용자 응답 제외) | L2 escalation timestamps |
 | **동일 패턴 재발률** (같은 root_cause 반복) | H6 | < 10% | H6 학습 항목 추적 |
-| **6 본부 중 Phase 1 active 본부 수** | H2 | ≥ 4 (strategy/pm, design, dev, qa) | L2 PDCA 커밋 수 |
-| **Gate pass rate** (전체 Gate SUCCESS / Total) | H1 | ≥ 70% (Phase 1 baseline) | L3 Notion dashboard |
+| **6 본부 중 Phase 1 active 본부 수** | H2 | ≥ 3 (dev + strategy-pm + 최소 1개 abstract 승격) | L2 PDCA 커밋 수 + `division.activation.changed` event |
+| **Gate pass rate** (전체 Gate SUCCESS / Total) | H1 | ≥ 70% (Phase 1 baseline) | L3 driver view 또는 local report |
 | **L2 → L3 sync 성공률** | H1 | ≥ 99% (best-effort) | observability-sync hook 로그 |
 
 ### 9.10.1 지표 달성이 의미하는 것

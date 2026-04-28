@@ -4,7 +4,7 @@ command_name: "/sfs act"
 version: "1.0.0"
 phase: "act"
 mode: "common"
-operator: "strategy/pm/lead"
+operator: "strategy-pm/lead"
 triggers:
   - "act"
   - "learnings"
@@ -39,7 +39,7 @@ references:
 
 PDCA 의 **Act 단계** 를 실행한다. G4 PASS 이후, 해당 PDCA에서 얻은 **학습 (learnings)** 을 정리하고 H6 Self-Learning 루프에 적재한다. Act 단계는 다음 PDCA (또는 다음 Sprint) 의 개선 입력이 된다.
 
-본 command는 **strategy/pm/lead** 가 오퍼레이터. PM 본부장은 각 본부의 work-log / check-report / gate report를 통합해 **learnings-v1.md 형식** 으로 요약한다. 개별 본부의 깊은 학습은 본부별 PDCA directory에 남고, cross-division 학습만 H6 DB에 누적.
+본 command는 **strategy-pm/lead** 가 오퍼레이터. Strategy-PM 본부장은 각 본부의 work-log / check-report / gate report를 통합해 **learnings-v1.md 형식** 으로 요약한다. 개별 본부의 깊은 학습은 본부별 PDCA directory에 남고, cross-division 학습만 H6 DB에 누적.
 
 Act는 다음 PDCA의 Plan 단계에서 자동 참조됨 (§6.7.2 H6 Loop).
 

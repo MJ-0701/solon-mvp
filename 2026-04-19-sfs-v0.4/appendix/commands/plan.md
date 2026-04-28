@@ -4,7 +4,7 @@ command_name: "/sfs plan"
 version: "1.0.0"
 phase: "plan"
 mode: "common"
-operator: "strategy/pm/lead"
+operator: "strategy-pm/lead"
 triggers:
   - "plan"
   - "계획"
@@ -45,7 +45,7 @@ references:
 
 PDCA 사이클의 **Plan 단계** 를 실행한다. 새 PDCA 단위 기능을 정의하고 PRD(Product Requirements Document)와 AC(Acceptance Criteria)를 확정한 뒤, G1 Plan Gate 를 호출해 외부자 검증을 통과시킨다.
 
-본 command는 **strategy/pm/lead** 본부장이 오퍼레이터로 호출한다. 단, PRD 초안 작성은 본부장이 Sonnet worker에게 위임하며 (§2 원칙 3 본부장=Gate Operator), plan-validator Evaluator는 Opus로 외부에서 호출된다 (§2 원칙 2 자기검증 금지).
+본 command는 **strategy-pm/lead** 본부장이 오퍼레이터로 호출한다. 단, PRD 초안 작성은 본부장이 Sonnet worker에게 위임하며 (§2 원칙 3 본부장=Gate Operator), plan-validator Evaluator는 Opus로 외부에서 호출된다 (§2 원칙 2 자기검증 금지).
 
 Greenfield에서는 Initiative의 첫 PDCA 작성 전에 G0 Brainstorm PASS가 선행되어야 한다. Brownfield에서는 G-1 Intake Gate PASS가 선행되어야 한다 (둘 다 install 당 1회).
 

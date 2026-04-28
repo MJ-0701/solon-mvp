@@ -142,8 +142,8 @@ L1LogEvent:
 
     gate_id:
       type: [string, "null"]
-      enum: [G-1, G0, G1, G2, G3, G4, G5, null]
-      description: "현재 실행중인 Gate (해당 시). G-1: brownfield Intake Gate (§5.11, install-time 1회성). G0: Initiative Brainstorm Gate (§2.9, §5). G1~G5: PDCA per-Sprint Gate (§5)."
+      enum: [G-1, G0, G1, G2, G3, G4, G5, RELEASE, null]
+      description: "현재 실행중인 Gate (해당 시). G-1: brownfield Intake Gate (§5.11, install-time 1회성). G0: Initiative Brainstorm Gate (§2.9, §5). G1~G5: PDCA per-Sprint Gate (§5). RELEASE: production 전 Release Readiness Gate (§5.12)."
 
     escalation_id:
       type: [string, "null"]
@@ -159,7 +159,7 @@ L1LogEvent:
       type: string
       enum:
         - normal           # 일반 호출
-        - gate-execution   # G1~G5 evaluator 호출 → L2도 동시 commit
+        - gate-execution   # G-1/G0/G1~G5/RELEASE evaluator 호출 → L2도 동시 commit
         - escalation       # Escalate-Plan 활동
         - sprint-retro     # G5 Sprint Retro
         - error            # exception/throw

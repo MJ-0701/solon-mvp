@@ -1,9 +1,9 @@
 ---
 doc_id: sfs-v0.4-appendix-template-report
 title: "PDCA Report (Act) Template"
-version: 0.4
+version: 0.4-r4
 status: draft
-last_updated: 2026-04-19
+last_updated: 2026-04-28
 audience: [division-heads, c-level]
 template_type: pdca-report
 
@@ -17,6 +17,7 @@ defines:
 references:
   - template/analysis.md (defined in: appendix/templates/analysis.md)
   - concept/h6-self-learning (defined in: s06)
+  - gate/release-readiness (defined in: s05)
   - schema/escalation-v1 (defined in: s06)
 
 affects: []
@@ -39,6 +40,7 @@ linked_analysis: PDCA-042.analysis.md
 sprint_id: SPR-2026-04-W3
 duration_days: 3
 final_g4_score: 87
+release_readiness: not_applicable  # not_applicable | passed | failed | deferred
 ---
 ```
 
@@ -52,9 +54,9 @@ final_g4_score: 87
 
 ## 2. 산출물 링크
 
-- Plan: [PDCA-042.plan.md](./PDCA-042.plan.md)
-- Design: [PDCA-042.design.md](./PDCA-042.design.md)
-- Analysis: [PDCA-042.analysis.md](./PDCA-042.analysis.md)
+- Plan: `PDCA-042.plan.md`
+- Design: `PDCA-042.design.md`
+- Analysis: `PDCA-042.analysis.md`
 - Code: [git ref or PR link]
 
 ---
@@ -75,7 +77,7 @@ final_g4_score: 87
 |--------------|------|-----------|---------|
 | ESC-2026-04-19-001 | alpha | alpha-1 (AC-003 reopen) | resolved |
 
-→ 상세: [docs/03-analysis/escalations/ESC-2026-04-19-001.yaml](../../docs/03-analysis/escalations/)
+→ 상세: `docs/03-analysis/escalations/ESC-2026-04-19-001.yaml`
 
 ---
 
@@ -103,7 +105,17 @@ learning_records:
 
 ---
 
-## 7. 다음 PDCA / Backlog
+## 7. Release Readiness 결과 (해당 시)
+
+- Production open 포함 여부: yes | no
+- Release Readiness verdict: not_applicable | passed | failed | deferred
+- 링크: `docs/02-gates/PDCA-042/RELEASE.md` 또는 Analysis §7
+- 미해결 blocker:
+  - [ ] ...
+
+---
+
+## 8. 다음 PDCA / Backlog
 
 - [ ] AC-002 edge case 처리 → [PDCA-XXX]
 - [ ] H6 패턴 PTRN-0042 검증

@@ -1,9 +1,9 @@
 ---
 doc_id: sfs-v0.4-s04-pdca-redef
 title: "§4. PDCA 재정의 (도메인 agnostic)"
-version: 0.4
+version: 0.4-r4
 status: draft
-last_updated: 2026-04-19
+last_updated: 2026-04-28
 audience: [implementers, division-heads, c-level]
 required_reading_order: [s00, s02, s03, s04]
 
@@ -24,6 +24,9 @@ defines:
   - concept/ac-metadata
   - concept/pdca-parallel-limit
   - concept/pdca-dependency-dag
+  - concept/startup-team-agent-flow                 # 🆕 2026-04-28 structural review
+  - concept/artifact-contract-first                 # 🆕 2026-04-28 structural review
+  - concept/lightweight-mvp-projection              # 🆕 2026-04-28 structural review
   - template/plan-pdca
   - template/design-pdca
   - template/analysis-pdca
@@ -55,6 +58,7 @@ references:
   - schema/discovery-report-v1 (defined in: appendix/schemas/discovery-report.schema.yaml)  # 🆕 v0.4-r2
   - mode/greenfield (defined in: s07)              # 🆕 v0.4-r2
   - mode/brownfield (defined in: s07)              # 🆕 v0.4-r2
+  - review/startup-team-agent-flow-2026-04-28 (defined in: appendix/reviews/2026-04-28-startup-team-agent-flow-review.md)
 
 affects:
   - sfs-v0.4-s05-gate-framework
@@ -75,6 +79,7 @@ affects:
 
 ## TOC
 
+- 4.0 Startup Team-Agent Flow + Artifact Contract (2026-04-28 구조 리뷰 반영)
 - 4.1 PDCA 4단계 재정의 (Plan/Do/Check/Act) — + P-1 Discovery 🆕 v0.4-r2
 - 4.2 Initiative ⊃ N Sprint ⊃ N PDCA (3 레이어 위계)
 - 4.3 Brownfield Discovery Phase (P-1) 🆕 v0.4-r2
@@ -83,6 +88,66 @@ affects:
 - 4.6 PDCA 병렬 실행 한계 (Sprint 내)
 - 4.7 PDCA 의존성 DAG (frontmatter `depends_on`)
 - 4.8 PDCA 템플릿 연결 (appendix/templates)
+
+---
+
+## 4.0 Startup Team-Agent Flow + Artifact Contract (2026-04-28 구조 리뷰 반영)
+
+`concept/startup-team-agent-flow`, `concept/artifact-contract-first`, `concept/lightweight-mvp-projection`
+
+### 4.0.1 왜 이 addendum 이 필요한가
+
+사용자 2026-04-28 리뷰에서 "아이디어 → 브레인스토밍 → 플랜 → 기획/택소노미/와이어프레임 → 구현 → 리뷰 → 인프라/배포 → 문서화" 흐름이 재확인됐다. 이 흐름은 v0.4 의 `Initiative ⊃ Sprint ⊃ PDCA` 모델과 호환되지만, 본문 SSoT 에 반영하지 않으면 outline 과 본문이 서로 다른 구조를 말하게 된다.
+
+따라서 본 섹션은 다음 호환 규칙을 추가한다.
+
+- 사용자 8-step 은 **실행 projection** 이다.
+- Solon full form 은 **13-step artifact chain** 이다.
+- PDCA 는 이 artifact chain 을 본부별 작업 단위로 실행하는 엔진이다.
+- Gate 는 단계명을 통과시키는 장식이 아니라, 다음 agent 에 넘길 artifact 가 충분한지 확인하는 contract 이다.
+
+상세 리뷰와 반박 예상은 [`appendix/reviews/2026-04-28-startup-team-agent-flow-review.md`](appendix/reviews/2026-04-28-startup-team-agent-flow-review.md)에 둔다.
+
+### 4.0.2 Full Form 13-Step
+
+| # | 단계 | 필수 산출물 | 다음 단계 입력 | Gate |
+|:-:|---|---|---|---|
+| 1 | Idea Capture | `idea.md` | raw intent | none |
+| 2 | Discovery / Brainstorm | `brainstorm.md`, market assumptions | validated problem hypothesis | G0 |
+| 3 | Product Plan | `plan.md`, MVP scope | bounded sprint target | G1 |
+| 4 | PRD + Acceptance Criteria | `prd.md`, `acceptance-criteria.yaml` | measurable requirements | G1 |
+| 5 | Taxonomy + Domain Model | `taxonomy/*.yaml`, entity map, naming ADR | shared language for design/dev/docs | G2 |
+| 6 | UX Flow + Wireframe + Design Draft | user flow, wireframe, component spec | buildable UI/UX spec | G2 |
+| 7 | Technical Design | API spec, DB schema, infra sketch, security notes | implementation plan | G3 |
+| 8 | MVP Implementation | code, migrations, local test report | review target | G3 |
+| 9 | Multi-Agent Review | review reports by axis | fix list or release candidate | G4 |
+| 10 | Dev Deploy + QA | dev URL, QA report, test evidence | release readiness input | G4 |
+| 11 | Production Infra + Release Readiness | deploy plan, rollback plan, security checklist | production approval brief | Release Readiness Gate |
+| 12 | Production Deploy + Monitoring | production URL, metrics, incident hooks | operating product | Release Readiness Gate |
+| 13 | Docs + Retro + Learning | domain docs, tech docs, runbook, retro | next sprint seed | G5 |
+
+### 4.0.3 User 8-Step Lightweight Projection
+
+Phase 1 과 solo-founder dogfooding 에서는 full form 을 무겁게 실행하지 않는다. 다음 projection 을 기본값으로 둔다.
+
+| 사용자 8-step | Full form 매핑 | MVP 운영 |
+|---|---|---|
+| 1. 아이디어 제출 | 1 | `idea.md` 한 장 |
+| 2. 브레인스토밍 | 2 | G0 signal. 시장조사 deep dive 는 필요할 때만 |
+| 3. 플랜설계 | 3~4 | `plan.md` 안에 PRD + AC 를 함께 시작 |
+| 4. 기획서 및 택소노미/와이어프레임 | 4~6 | PRD, taxonomy, wireframe 을 분리하되 각 1~2 page 제한 |
+| 5. 구현 | 7~8 | technical design 을 최소화하고 MVP 구현 |
+| 6. 분석 및 코드리뷰 | 9~10 | Claude/Gemini/Codex 다중 리뷰는 위험도 높은 변경에만 호출 |
+| 7. 인프라 구축 및 배포 | 10~12 | infra sketch 는 기술 설계 때 작성하고, production 전 최종 gate |
+| 8. 문서화 | 13 | 마지막에 새로 쓰지 않고 앞 artifact 를 조립 |
+
+### 4.0.4 Structural Rules
+
+1. **Discovery before Plan** — Brainstorm 은 창의 발산이고, Discovery 는 문제/사용자/대체재/성공 지표를 묶는 검증 artifact 다. 둘을 같은 파일로 시작해도 되지만 Plan 앞에서 G0 evidence 는 남긴다.
+2. **Taxonomy is root** — Taxonomy 는 wireframe appendix 가 아니다. 도메인 용어, entity, state, API/UI naming, 문서 용어의 공통 언어다.
+3. **Review is multi-gate** — Code review 는 G4의 일부일 뿐이다. PRD, taxonomy, design, tech, release readiness 에도 gate 가 필요하다.
+4. **Shift-left Infra/Security** — 상용 배포 직전 full review 는 유지하되, 기술 설계 단계에서 secret/auth/data/rollback/monitoring 최소 리스크를 먼저 기록한다.
+5. **Continuous Documentation Ledger** — 문서화 agent 는 기억으로 재구성하지 않고, 앞 단계 L2 artifact 를 domain/technical/runbook/L3 view 로 조립한다.
 
 ---
 
@@ -128,7 +193,7 @@ P-1 Discovery ─[G-1 Intake Gate]─ Plan ─[G1]─ Design ─[G2]─ Do ─[G
                                        └─ G-1 Pass 후에만 정식 PDCA 진입 허용 (원칙 11)
 ```
 
-(상세 Gate 정의는 [§5](05-gate-framework.md). G-1은 §5.X로 추가 예정)
+(상세 Gate 정의는 [§5](05-gate-framework.md). G-1은 §5.11에 격리한다.)
 
 ---
 
@@ -159,13 +224,13 @@ P-1 Discovery ─[G-1 Intake Gate]─ Plan ─[G1]─ Design ─[G2]─ Do ─[G
 |------|-----|
 | 산출물 | `docs/00-initiatives/{id}-{name}/brainstorm.md` ([template/brainstorm](appendix/templates/brainstorm.md) 6 필드) |
 | 호출자 | CEO (operator) |
-| 평가자 | CPO + Tier 3 evaluator (`intent-discovery-validator`, Phase 1 추가 예정) |
+| 평가자 | CPO + Tier 3 evaluator (`intent-discovery-validator`, Phase 1 구현 대상) |
 | Pass 기준 | 6 필드 완결 + alternatives 최소 2개 + success_signal measurable + sprint_decomposition 1~3개 |
 | Fail routing | Initiative reject 또는 re-scope. **Sprint 시작 불가**. |
 
 > ⚠️ **Sprint 단위마다 brainstorm 강제 X.** Initiative 1회당 brainstorm 1회. Sprint 내 PDCA Plan은 G1만 적용.
 
-→ 상세 G0 정의는 [§5](05-gate-framework.md) Gate Framework 섹션 (G0 추가 예정).
+→ 상세 G0 정의는 [§5](05-gate-framework.md) Gate Framework 섹션과 [appendix/templates/brainstorm.md](appendix/templates/brainstorm.md)에 둔다.
 
 ### 4.2.3 Sprint 정의
 
@@ -518,7 +583,7 @@ G2 미통과 시: "기존 PDCA-{id}가 Design 단계 미완료입니다. 완료 
 pdca_id: PDCA-054
 division: dev
 depends_on:
-  - PDCA-051  # PM 본부 PRD
+  - PDCA-051  # Strategy-PM 본부 PRD
   - PDCA-053  # Design 본부 wireframe
 provides_to:
   - PDCA-055  # QA가 이 PDCA 결과를 테스트

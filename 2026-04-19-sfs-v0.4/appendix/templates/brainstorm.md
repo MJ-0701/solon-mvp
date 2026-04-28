@@ -1,9 +1,9 @@
 ---
 doc_id: sfs-v0.4-appendix-template-brainstorm
 title: "Initiative Brainstorm Template (G0 산출물)"
-version: 0.4
+version: 0.4-r4
 status: draft
-last_updated: 2026-04-19
+last_updated: 2026-04-28
 audience: [c-level, division-heads]
 
 depends_on:
@@ -76,7 +76,7 @@ sprint_decomposition:
   - sprint_id: sprint-5
     name: "결제 MVP"
     duration_weeks: 2
-    primary_divisions: [pm, design, dev, qa, infra, taxonomy]
+    primary_divisions: [strategy-pm, taxonomy, design, dev, qa, infra]
     primary_outputs: ["PRD", "결제 화면", "결제 API", "테스트", "모니터링", "용어 정의"]
   - sprint_id: sprint-6
     name: "결제 hardening"

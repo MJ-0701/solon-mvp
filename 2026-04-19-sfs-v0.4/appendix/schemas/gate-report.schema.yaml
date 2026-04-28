@@ -1,9 +1,9 @@
 # ---
 # doc_id: sfs-v0.4-appendix-schema-gate-report
 # title: "GateReport v1 - Full Schema"
-# version: 0.4
+# version: 0.4-r4
 # status: draft
-# last_updated: 2026-04-19
+# last_updated: 2026-04-28
 # audience: [implementers, evaluators]
 #
 # depends_on:
@@ -36,7 +36,7 @@ GateCallContract:
   properties:
     gate_id:
       type: string
-      enum: [G1, G2, G3, G4, G5]
+      enum: [G-1, G0, G1, G2, G3, G4, G5, RELEASE]
     target:
       type: string
       description: "PDCA 식별자 (e.g., division/dev/pdca/PDCA-042)"
@@ -66,7 +66,7 @@ GateReport:
   properties:
     gate_id:
       type: string
-      enum: [G1, G2, G3, G4, G5]
+      enum: [G-1, G0, G1, G2, G3, G4, G5, RELEASE]
 
     verdict:
       type: string
@@ -140,3 +140,5 @@ GateReport:
 schema_version: 1.0
 schema_id: gate-report-v1
 breaking_changes_policy: "MAJOR bump only (semver)"
+notes:
+  - "2026-04-28: gate_id enum expanded to include G-1, G0, and RELEASE so schema matches §5 gate vocabulary."

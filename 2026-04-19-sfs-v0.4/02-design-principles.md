@@ -1,9 +1,9 @@
 ---
 doc_id: sfs-v0.4-s02-design-principles
 title: "§2. Design Principles (13대 원칙)"
-version: 0.4
+version: 0.4-r4
 status: draft
-last_updated: 2026-04-20
+last_updated: 2026-04-28
 audience: [all, architects]
 required_reading_order: [s00, s02]
 
@@ -25,9 +25,14 @@ defines:
   - principle/brownfield-first-pass                  # 🆕 v0.4-r2
   - principle/brownfield-no-retro-brainstorm         # 🆕 v0.4-r2
   - principle/progressive-activation                 # 🆕 v0.4-r3
+  - invariant/artifact-contract-first                # 🆕 2026-04-28, non-numbered foundation invariant
+  - invariant/taxonomy-is-root                       # 🆕 2026-04-28, non-numbered foundation invariant
+  - invariant/shift-left-infra-security              # 🆕 2026-04-28, non-numbered foundation invariant
+  - invariant/continuous-documentation-ledger        # 🆕 2026-04-28, non-numbered foundation invariant
 
 references:
   - concept/company-as-code (defined in: s00)
+  - review/foundation-structural-defects-2026-04-28 (defined in: appendix/reviews/2026-04-28-foundation-structural-defects-review.md)
 
 affects:
   - sfs-v0.4-s03-c-level-matrix
@@ -66,7 +71,8 @@ affects:
 - 2.11 원칙 11 — Brownfield First Pass (기존 프로젝트 도입 전 discovery 필수) 🆕 v0.4-r2
 - 2.12 원칙 12 — Brownfield No Retro Brainstorm (이미 구현된 기능에는 G0 적용 안 함) 🆕 v0.4-r2
 - 2.13 원칙 13 — Progressive Activation + Non-Prescriptive Guidance (본부 추상 선언 + Socratic 활성화) 🆕 v0.4-r3
-- 2.14 원칙 간 관계 (의존 그래프)
+- 2.14 Foundation Invariants (2026-04-28, 13대 원칙에서 파생되는 비번호 규칙)
+- 2.15 원칙 간 관계 (의존 그래프)
 
 ---
 
@@ -76,15 +82,15 @@ affects:
 
 ### 정의
 
-**프레임워크(Sprint, PDCA, G-1 + G1~G5 Gate, Escalate-Plan)는 모든 본부에 동일 적용된다.**
+**프레임워크(Sprint, PDCA, G-1/G0/G1~G5/RELEASE Gate vocabulary, Escalate-Plan)는 모든 본부에 동일 적용된다.**
 **본부별 차이는 evaluator agent와 산출물 schema에서만 나타난다.**
 
 ### 구체
 
 | 공통 (frame) | 본부별 (evaluator + artifact) |
 |--------------|------------------------------|
-| Sprint 길이, PDCA phase 4단계 | PM 본부: PRD evaluator / Design 본부: WCAG evaluator |
-| G1 (input) ~ G5 (retro) 5 단계 | Dev 본부: code-reviewer / QA 본부: test-coverage-checker |
+| Sprint 길이, PDCA phase (Plan/Design/Do/Check/Act) | Strategy-PM 본부: PRD evaluator / Design 본부: WCAG evaluator |
+| G1 (plan) ~ G5 (retro) + conditional RELEASE | Dev 본부: code-reviewer / QA 본부: test-coverage-checker |
 | Escalate-Plan trigger 조건 | Infra 본부: cost-estimator / Taxonomy 본부: consistency-checker |
 
 ### 왜 중요한가
@@ -798,7 +804,59 @@ Phase 2 에서는:
 
 ---
 
-## 2.14 원칙 간 관계 (의존 그래프)
+## 2.14 Foundation Invariants (2026-04-28, 비번호 규칙)
+
+> 본 섹션은 **새 원칙 14~17이 아니다.** 13대 원칙 체계를 흔들지 않기 위해, 2026-04-28 구조 리뷰에서 확인된 기초공사 규칙을 기존 원칙에서 파생되는 invariant 로 둔다.
+
+### FI-1. Artifact Contract First
+
+`invariant/artifact-contract-first`
+
+각 단계는 다음 agent 가 읽을 수 있는 명시 산출물과 Gate 기준을 남겨야 한다.
+
+- 파생 원칙: 원칙 1(domain-agnostic framework), 원칙 2(self-validation-forbidden), 원칙 5(3-layer hierarchy)
+- 적용 위치: §4.0 Full Form 13-step, §5 GateCall/GateReport
+- 이유: agent 조직도보다 handoff contract 가 먼저다. contract 없이 agent 수를 늘리면 빠르게 drift 된다.
+
+### FI-2. Taxonomy Is Root
+
+`invariant/taxonomy-is-root`
+
+Taxonomy 는 wireframe appendix 가 아니라 도메인·API·UI·문서 전체의 공통 언어다.
+
+- 파생 원칙: 원칙 1(domain-agnostic framework), 원칙 9(G0 brainstorm), 원칙 13(progressive activation)
+- 적용 위치: §3 taxonomy division, §4.0 artifact chain, §5 G2/G4 taxonomy gates
+- 이유: backend schema, frontend label, Notion 문서가 다른 단어를 쓰면 agent 간 handoff 가 무너진다.
+
+### FI-3. Shift-left Infra/Security
+
+`invariant/shift-left-infra-security`
+
+Infra/Security 는 production 직전 1회 review 로만 존재하지 않는다. 기술 설계 단계에서 secret/auth/data/monitoring/rollback/cost 의 최소 리스크를 먼저 기록한다.
+
+- 파생 원칙: 원칙 3(gate operator), 원칙 10(human-final-filter), 원칙 13(progressive activation)
+- 적용 위치: §4.0 Technical Design, §5.12 Release Readiness Gate
+- 이유: 배포 직전 보안 검토만 있으면 출시 보류만 만들고 구조적 수정 여지가 줄어든다.
+
+### FI-4. Continuous Documentation Ledger
+
+`invariant/continuous-documentation-ledger`
+
+문서화 agent 는 마지막에 기억으로 재구성하지 않는다. 각 단계 L2 artifact 를 domain/technical/runbook/L3 view 로 조립한다.
+
+- 파생 원칙: 원칙 6(local private + git/Notion), 원칙 7(CLI+GUI shared backend), 원칙 10(human-final-filter)
+- 적용 위치: §8 Observability, §4.0 step 13, Phase 1 docs projection
+- 이유: Notion 을 SSoT 로 만들면 역류 편집과 agent state drift 가 발생한다. Git L2 artifact 가 원본이어야 한다.
+
+### FI 적용 규칙
+
+- 기존 13대 원칙과 충돌하면 13대 원칙이 우선한다.
+- 새 invariant 를 numbered principle 로 승급하려면 §2 전체 TOC/INDEX/README/affects 를 함께 갱신한다.
+- Phase 1 에서는 invariant 를 heavy process 로 구현하지 않는다. 1~2 page artifact 와 checklist 부터 시작한다.
+
+---
+
+## 2.15 원칙 간 관계 (의존 그래프)
 
 ```
 [원칙 1: 도메인 agnostic frame]

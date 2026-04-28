@@ -148,7 +148,7 @@ $ /sfs design --feature new-pricing --division infra \
 $ /sfs design --feature new-pricing --division taxonomy
 ...
 [design] taxonomy-consistency-checker 결과: CONFLICT
-[design] PM 본부 "플랜" vs Design 본부 "프라이싱 티어" 용어 불일치
+[design] Strategy-PM 본부 "플랜" vs Design 본부 "프라이싱 티어" 용어 불일치
 [design] 5-Option Protocol 진입:
    A) PM 용어 채택  B) Design 용어 채택  C) 제3 용어 신규 정의
    D) 본부 간 alias  E) Escalate to CEO

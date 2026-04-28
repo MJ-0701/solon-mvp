@@ -1,9 +1,9 @@
 ---
 doc_id: sfs-v0.4-s08-observability
 title: "§8. 3-Channel Observability"
-version: 0.4
+version: 0.4-r4
 status: draft
-last_updated: 2026-04-19
+last_updated: 2026-04-29
 audience: [architects, ops, c-level]
 required_reading_order: [s00, s02, s03, s04, s05, s06, s07, s08]
 
@@ -17,7 +17,7 @@ defines:
   - channel/l1-s3
   - channel/l2-git-docs-submodule
   - channel/l3-human-view
-  - channel/l3-notion                 # phase1_default driver (specialization of l3-human-view)
+  - channel/l3-notion                 # optional driver (specialization of l3-human-view)
   - rule/unidirectional-sync
   - concept/ssot-l2
   - concept/observability-hook
@@ -45,7 +45,7 @@ affects:
 > **Context Recap (자동 생성, 수정 금지)**
 > Solon은 모든 산출물 + Gate 결과 + Escalation 로그를 **3개 채널**에 일방향 sync한다.
 > L1 (S3): 기계용 raw log / L2 (git docs submodule): SSoT, 감사용 / L3 (Human View, driver-backed): 사람용 view.
-> L3는 **driver 교체 가능한 추상 채널**. Phase 1 default=notion, driver manifest 기반 교체 (§8.11, `contract/l3-driver-interface-v1`).
+> L3는 **driver 교체 가능한 추상 채널**. Phase 1 default=`none`, 필요 시 notion 등 driver manifest 기반으로 교체 (§8.11, `contract/l3-driver-interface-v1`).
 > 원칙 2.6 (로컬 상태 private)과 결합되어 race condition을 구조적으로 방지.
 > 여기서 정의된 hook은 §7 plugin 패키징에 포함됨.
 
@@ -75,7 +75,7 @@ affects:
 |:---:|------|--------|------|:---:|:---:|
 | **L1 Raw Logs** | Machine (sfs-doc-validate, retro analyzer) | S3 (또는 로컬 폴백 `.sfs-local/logs/`) | agent JSON 로그, metric, trace | ❌ append-only | ❌ |
 | **L2 Versioned Docs** | Git / 감사 / sfs agent | `docs/` (submodule 또는 동일 repo) | **SSoT** — PDCA 산출물, GateReport, escalation, learnings | ✅ 커밋으로만 | ✅ |
-| **L3 Human View** | Human / 비개발자 / 외부 이해관계자 | L3 driver (phase1 default: `notion`; [none / obsidian / logseq / confluence / custom] 교체 가능 — §8.11) | 읽기 뷰, 비개발자 UX, Sprint 대시보드 | ❌ (읽기 전용) | ❌ |
+| **L3 Human View** | Human / 비개발자 / 외부 이해관계자 | L3 driver (phase1 default: `none`; [notion / obsidian / logseq / confluence / custom] 교체 가능 — §8.11) | 읽기 뷰, 비개발자 UX, Sprint 대시보드 | ❌ (읽기 전용) | ❌ |
 
 ### 8.1.1 왜 3개로 분리하는가
 
@@ -436,7 +436,7 @@ L1 이벤트는 **prompt 본문을 포함**할 수 있다. 따라서:
 
 ## 8.7 Notion 뷰 구조 (Sprint 대시보드)
 
-L3 Notion 워크스페이스의 표준 구조. 플러그인이 첫 sync 시 자동 생성.
+Notion driver 선택 시의 L3 워크스페이스 표준 구조. `driver=none` 에서는 같은 정보를 local report/status view 로 남긴다.
 
 ```
 Solon Workspace (Notion top page)
@@ -444,11 +444,11 @@ Solon Workspace (Notion top page)
 ├── 📊 Current Sprint Dashboard            (Sprint별 자동 갱신)
 │   ├── Sprint Header (SP-005, 2026-04-15 ~ 2026-04-26)
 │   ├── 본부별 PDCA 진척
-│   │   ├── 🔵 strategy/pm:    PDCA-051 (Design 진행)
+│   │   ├── 🔵 strategy-pm:    PDCA-051 (Design 진행)
 │   │   ├── 🔵 taxonomy:       PDCA-052 (Plan 완료)
 │   │   ├── 🟢 design:         PDCA-053 (Do 진행)
 │   │   ├── 🟢 dev:            PDCA-054 (Check 대기)
-│   │   ├── 🟡 quality/qa:     PDCA-055 (blocked, ESC-...)
+│   │   ├── 🟡 qa:     PDCA-055 (blocked, ESC-...)
 │   │   └── ⚪ infra:          PDCA-056 (Plan 시작 전)
 │   │
 │   ├── Gate Pass Rate (Gate × Division 매트릭스)
@@ -584,7 +584,7 @@ L1, L2, L3가 모두 가능하면 → 모두 sync. 하나가 실패하면:
 
 ### 8.9.3 비용 가시화
 
-L3 Notion 대시보드의 "Cost This Sprint" property가 **실시간** 비용을 표면화. 임계치:
+L3 driver view 의 "Cost This Sprint" property가 **실시간** 비용을 표면화. `driver=none` 이면 local report/status view 에 동일 지표를 남긴다. 임계치:
 - Sprint budget의 80% 도달 → 경고
 - Sprint budget의 100% 도달 → C-Level alert (Sprint 종료 또는 추가 승인 필요)
 
@@ -600,7 +600,7 @@ L3 Notion 대시보드의 "Cost This Sprint" property가 **실시간** 비용을
 |---------|------|-----------|
 | **API 키 / token** | AWS, Notion, OpenAI 키 | 어떤 채널에도 저장 X (env 변수만, redact) |
 | **개인 정보 (PII)** | 사용자 이메일, 결제정보 | L1 prompt 저장 시 hash, L2/L3 명시 commit 금지 |
-| **비즈니스 비밀** | 경쟁 분석, 가격 전략 | L2까지는 OK (private repo), L3 Notion은 권한 분리 필수 |
+| **비즈니스 비밀** | 경쟁 분석, 가격 전략 | L2까지는 OK (private repo), L3 driver 는 권한 분리 필수 |
 | **제3자 데이터** | 도메인별 규제(의료/금융) | 채널별 추가 redaction layer 필요 (Phase 2) |
 
 ### 8.10.2 sync hook의 redaction 규칙

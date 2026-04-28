@@ -1,9 +1,9 @@
 ---
 doc_id: sfs-v0.4-appendix-template-analysis
 title: "PDCA Analysis (Check) Template"
-version: 0.4
+version: 0.4-r4
 status: draft
-last_updated: 2026-04-19
+last_updated: 2026-04-28
 audience: [division-heads, evaluators, qa]
 template_type: pdca-analysis
 
@@ -19,6 +19,7 @@ references:
   - template/design.md (defined in: appendix/templates/design.md)
   - schema/gate-report-v1 (defined in: s05)
   - formula/g4-per-division (defined in: s05)
+  - gate/release-readiness (defined in: s05)
 
 affects: []
 ---
@@ -38,6 +39,7 @@ phase: check
 status: g4-pending | g4-passed | g4-failed
 linked_design: PDCA-042.design.md
 gate_report_ref: docs/02-gates/PDCA-042/G4.md
+release_readiness_applicable: false
 ---
 ```
 
@@ -98,6 +100,21 @@ gate_report_ref: docs/02-gates/PDCA-042/G4.md
 ## 6. Recommendations
 
 [evaluator가 자동 채움 + 본부장이 검토]
+
+---
+
+## 7. Release Readiness Pre-Check (production 후보일 때)
+
+> G4 는 "기능이 기준에 맞는가"를 본다. Production open 은 별도 Release Readiness evidence 가 필요하다.
+
+| 항목 | 상태 | 증거 |
+|------|------|------|
+| Secret / credential | N/A | |
+| Auth / permission | N/A | |
+| Data migration / rollback | N/A | |
+| Monitoring / alert | N/A | |
+| Rollback plan | N/A | |
+| Cost ceiling | N/A | |
 
 ---
 

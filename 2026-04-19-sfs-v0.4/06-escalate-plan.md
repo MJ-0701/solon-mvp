@@ -144,7 +144,7 @@ escalation 1회당 다음 3종 산출물 생성:
 | 수정된 `plan.md` | `docs/01-plan/PDCA-042.plan.md` | AC status 업데이트 (`open`→`reopened`) |
 | (선택) 수정된 `design.md` | `docs/02-design/PDCA-042.design.md` | reopen된 AC가 가리키는 design 갱신 |
 
-→ 모두 L2 SSoT (`docs/`)에 commit, L3 Notion에 자동 sync (§8).
+→ 모두 L2 SSoT (`docs/`)에 commit, L3 driver 에 자동 sync (§8).
 
 ### 6.2.4 Escalate 처리 시간 예산
 
@@ -265,7 +265,7 @@ Case-β는 "요구사항이 틀렸다" — 즉 plan 자체가 무효. Escalate-P
 ### 6.4.4 β가 자주 발생하는 신호
 
 Sprint 내 β escalation이 **2회 이상**이면:
-- Sprint plan(strategy/ceo + strategy/pm/lead) 자체에 문제
+- Sprint plan(strategy/ceo + strategy-pm/lead) 자체에 문제
 - 다음 Sprint Plan 작성 시 plan-validator 체크리스트에 "사용자 인터뷰 검증 충분한가?" 추가
 - → H6 학습 루프로 환원 (§6.6)
 
@@ -280,9 +280,9 @@ Sprint 내 β escalation이 **2회 이상**이면:
 | 시나리오 | 충돌 본부 | 충돌 내용 |
 |---------|---------|---------|
 | Design Figma 사양과 Dev 구현이 mismatch | design ↔ dev | Figma는 모달, 구현은 풀스크린 |
-| QA 테스트 케이스가 Plan AC와 다름 | quality/qa ↔ strategy/pm | AC는 "60초 내", 테스트는 "120초 내" 검증 |
+| QA 테스트 케이스가 Plan AC와 다름 | qa ↔ strategy-pm | AC는 "60초 내", 테스트는 "120초 내" 검증 |
 | Taxonomy 용어와 UI 라벨 불일치 | taxonomy ↔ design | "주문" vs "구매" 혼용 |
-| Infra 비용 가정과 Plan 예산 초과 | infra ↔ strategy/pm | Plan 월 $500, 추정치 월 $1200 |
+| Infra 비용 가정과 Plan 예산 초과 | infra ↔ strategy-pm | Plan 월 $500, 추정치 월 $1200 |
 
 ### 6.5.2 5개 옵션 (선택지)
 
@@ -386,7 +386,7 @@ learnings:
     triggering_escalations: [ESC-2026-04-19-001, ESC-2026-04-22-003, ESC-2026-04-25-002]
     occurrences: 3
     root_cause: "메일/알림류 AC에 SLA를 명시하지 않으면 G4에서 측정 불가"
-    affected_division: "strategy/pm"
+    affected_division: "strategy-pm"
     proposed_check:
       target_validator: "plan-validator"
       check_id: "CHK-MAIL-SLA"
@@ -450,7 +450,7 @@ escalation_record:
     동기/비동기 모드를 불분명하게 두어 평균 8분 발생
 
   # 의사결정 흐름
-  case_proposed_by: "strategy/pm/lead"
+  case_proposed_by: "strategy-pm/lead"
   c_level_review:
     by: ["strategy/ceo", "strategy/cpo"]
     confirmed_at: "2026-04-19T14:15:00Z"
@@ -481,7 +481,7 @@ escalation_record:
 
   # 감사
   audit:
-    created_by: "strategy/pm/lead"
+    created_by: "strategy-pm/lead"
     last_modified_at: "2026-04-19T16:30:00Z"
 ```
 

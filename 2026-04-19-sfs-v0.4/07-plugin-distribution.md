@@ -83,7 +83,7 @@ sfs-plugin/
 │   ├── tier-profiles.yaml            # 🆕 v0.4-r2: minimal/standard/collab 정의
 │   ├── l3-backends.yaml              # 🆕 v0.4-r2: driver 매니페스트 목록 + 기본값
 │   ├── models.yaml                   # Opus/Sonnet/Haiku 할당 (§3.6)
-│   ├── gates.yaml                    # G1~G5 트리거/임계치 (§5)
+│   ├── gates.yaml                    # G-1/G0/G1~G5/RELEASE 트리거/임계치 (§5)
 │   └── .env.example                  # S3, Notion API 키 예시
 │
 ├── agents/
@@ -203,7 +203,7 @@ sfs-plugin/
 
 - **상품 특화 agent** (예: commerce-seller-lead) — Phase 2 마켓플레이스에 `sfs-commerce` 등 별도 플러그인
 - **유료 Evaluator** — Phase 1은 모두 MIT
-- **UI 대시보드 바이너리** — L3 Notion 템플릿(.yaml)만 제공 (§8)
+- **UI 대시보드 바이너리** — L3 driver template(.yaml)만 제공, notion 은 optional driver (§8)
 - **자체 MCP 서버** — Phase 1은 Claude 기본 tool + git/파일만 사용
 
 → "얇지만 완결된 코어"가 Phase 1 원칙.
@@ -308,7 +308,7 @@ rbac_config:                   # 🆕 v0.4-r2: Phase 1은 항상 disabled 강제
 divisions:
   - id: strategy-pm
     display_name: "기획 본부 (PM)"
-    head_agent: "strategy/pm/lead"
+    head_agent: "strategy-pm/lead"
     workers: 1
     evaluators:
       - plan-validator
@@ -391,7 +391,7 @@ divisions:
 
   - id: qa
     display_name: "품질 본부"
-    head_agent: "quality/qa/lead"
+    head_agent: "qa/lead"
     workers: 1
     evaluators:
       - plan-validator
@@ -722,7 +722,7 @@ rm -f "$HOME/.claude-desktop/plugins/sfs-plugin"
 | **Marketplace** | 없음 | 본부 템플릿 배포, 유료/무료 라이선싱, 사용자 fork/publish | Phase 1 완료 +4~6개월 |
 | **문서 사이트** | README.md | docs.sfs.dev (versioned) | Phase 1 완료 +1개월 |
 | **온보딩** | install.sh | `sfs init` wizard, sample project, 30분 튜토리얼 | Phase 1 완료 +2개월 |
-| **Observability UI** | L3 Notion template | 전용 대시보드 (metrics, cost, gate_pass_rate) | Phase 1 완료 +4개월 |
+| **Observability UI** | L3 driver template (`none` + `notion`) | 전용 대시보드 (metrics, cost, gate_pass_rate) | Phase 1 완료 +4개월 |
 | **라이선스** | MIT | Commercial dual license (MIT core + enterprise add-on) | Phase 1 완료 +3개월 |
 | **지원 모델** | Claude only | OpenAI/Gemini/Open-source model adapter | Phase 1 완료 +6개월+ |
 | **Agent 증원** | 본부당 1 worker | 본부당 multi-worker + 병렬 실행 | Phase 1 완료 +2~4개월 |
@@ -780,7 +780,7 @@ Phase 1 설계에서 결정을 미룬 항목들:
 
 ### 7.7.2 Phase 2 plan 작성 시 적용될 원칙
 
-- **Phase 1 data-driven**: Phase 2 결정은 Phase 1 L3 대시보드 metric을 근거로 해야 함 (주장이 아닌 측정)
+- **Phase 1 data-driven**: Phase 2 결정은 Phase 1 L3 driver/local report metric을 근거로 해야 함 (주장이 아닌 측정)
 - **모듈 분리 우선**: core/commerce/saas 분리가 Phase 2 1st priority (RBAC보다 먼저)
 - **하위 호환**: Phase 1 사용자의 `docs/`, `divisions.yaml`이 Phase 2에서도 그대로 동작해야 함 (breaking change 없음)
 
@@ -959,7 +959,7 @@ node skills/sfs-doc-validate/validate.mjs
 | **G-1 Intake** | Solon 설치 직후 (G0 이전) | `install.sh --mode brownfield` | `discovery-report-validator` + **human approval (원칙 10)** | discovery-report.md 9 섹션 모두 존재 + 사용자 승인 signature |
 
 - G0 Brainstorm Gate는 **brownfield 도입 이후 신규 기능**에 한해 적용 (이미 구현된 기능에는 적용 안 함, `principle/brownfield-no-retro-brainstorm`)
-- G1~G5는 greenfield와 동일
+- G1~G5는 greenfield와 동일하며, production open 을 수반하면 Release Readiness 도 동일하게 적용
 
 ### 7.10.6 사용자 승인의 형태 (원칙 10 이중 방어 적용)
 
@@ -998,7 +998,7 @@ discovery 시점에 이미 `docs/00-plan` 류 폴더가 있으면:
 ```
 
 - **파괴적 수정 금지**: 기존 파일은 읽기만, 생성/수정은 `00-discovery/` 하위에만
-- `.solon-manifest.yaml`: 기존 `docs/existing-PRD.md` 같은 파일을 Solon의 PM 본부 `plan` artifact로 **참조**(복제 아님)하는 맵핑 테이블
+- `.solon-manifest.yaml`: 기존 `docs/existing-PRD.md` 같은 파일을 Solon의 Strategy-PM 본부 `plan` artifact로 **참조**(복제 아님)하는 맵핑 테이블
 
 ### 7.10.8 비용 및 시간 예상 (Phase 1)
 

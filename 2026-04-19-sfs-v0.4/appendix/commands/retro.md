@@ -4,8 +4,8 @@ command_name: "/sfs retro"
 version: "1.0.0"
 phase: "sprint-close"              # Sprint 종료 (개별 PDCA 의 Act 와 구분)
 mode: "common"
-operator: "strategy/ceo"           # CEO 주관, PM 본부장 co-operator
-co_operator: "strategy/pm/lead"
+operator: "strategy/ceo"           # CEO 주관, Strategy-PM 본부장 co-operator
+co_operator: "strategy-pm/lead"
 triggers:
   - "retro"
   - "retrospective"
@@ -27,7 +27,7 @@ calls_evaluators:
   - "pattern-miner"                   # H6 seed pattern 승격 후보 추출
 model_allocation:
   default: "claude-opus-4-6"         # CEO 전략 회고 + 패턴 추출 Opus 필수
-  helper: "claude-sonnet-4-6"        # PM 본부장 집계
+  helper: "claude-sonnet-4-6"        # Strategy-PM 본부장 집계
   opus_allowed: true
 cost_budget_usd: 3.00                 # Sprint 1회, 상대적으로 고비용 허용
 timeout_ms: 1200000                   # 20분
@@ -56,7 +56,7 @@ G4 (개별 PDCA Check) 와의 구분:
 §2 원칙 9 (brainstorm-before-plan) 와의 연결:
 - G5 가 **다음 Initiative 의 G0 brainstorm 입력** 을 공급. Sprint retro 에서 발견된 "미해결 문제 / 다음에 도전할 주제" 가 다음 G0 의 inspiration 이 됨.
 
-오퍼레이터는 **CEO (사용자) 주관** 이며, **PM 본부장이 사전 집계 작업** 을 수행한다. CEO 는 집계 결과를 읽고 **전략적 판단**만 하므로 Opus 호출은 sprint-retro-analyzer + pattern-miner 2곳에 제한.
+오퍼레이터는 **CEO (사용자) 주관** 이며, **Strategy-PM 본부장이 사전 집계 작업** 을 수행한다. CEO 는 집계 결과를 읽고 **전략적 판단**만 하므로 Opus 호출은 sprint-retro-analyzer + pattern-miner 2곳에 제한.
 
 ## 입력 (Input)
 
@@ -75,7 +75,7 @@ G4 (개별 PDCA Check) 와의 구분:
    - Sprint 에 속한 모든 PDCA 의 gate-g4.yaml 스캔
    - 모든 PDCA 가 `result=pass` 또는 `--defer-pdca` 명시됐는지 확인
    - 위반 시 FAIL-HARD (미통과 PDCA 목록 표시)
-2. **Sprint 산출물 집계** (Sonnet, PM 본부장)
+2. **Sprint 산출물 집계** (Sonnet, Strategy-PM 본부장)
    - 각 PDCA 의 `docs/09-learnings/PDCA-*.learnings.md` 병합
    - `docs/04-qa/PDCA-*.5-axis.yaml` 5축 점수 sprint 평균 계산
    - `docs/05-escalation/*.md` 이 있다면 escalate 사례 요약
