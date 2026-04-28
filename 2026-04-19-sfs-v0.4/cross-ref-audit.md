@@ -178,6 +178,14 @@ Phase 1 W10 schema 작업 시 (A) 5-terminal 통일 (deactivate 단일, 세부 v
 
 19. **`tier` 필드 정의** — custom.yaml 의 `tier: custom` 기록 + INV-C3 의 `custom-tier-immutable`. `tier` 는 `divisions.schema.yaml` 의 필드 (core / opt-in / custom 3 값) — W10 schema 작성 시 WU-9 의 division schema 작업과 통합.
 
+**⚠️ 추가 W10 결정 (25th-1 발견, 2026-04-28, admiring-zealous-newton)** — WU-27 referent 변경 + Solon-wide executor convention 도입 history:
+
+20. **WU-27 referent 변경 history + Solon-wide executor convention CLAUDE.md §15 등재 시점** — 24th-52 brave-gracious-mayer continuation 5 사용자 결정 #4 (md ≤200L + 날짜/버전/skill 분리 + skill vendor-neutral) 의 다음 cycle trigger 정합 → 25th-1 admiring-zealous-newton 진입 시 **WU-27 = `/sfs loop`** 로 신설 (Ralph Loop + Solon mutex + Solon-wide executor convention `--executor` global flag + `SFS_EXECUTOR` env + sfs-common.sh::resolve_executor() shared helper, named profile claude/gemini/codex + custom string passthrough).
+
+   기존 WU-22 §, WU-23 § (2건), WU-26 §4 의 **"WU-27 = #4 events.jsonl schema 표준화"** stale reference 3 곳은 25th-1 cycle 안 sed 갱신 (각각 "재배정", "후속 WU 번호 미정" 명시). 후속 cycle 에서 events.jsonl schema 표준화 작업의 정식 WU 번호 결정 = (A) WU-28 자리 강제 진입 (기존 #6 Sprint cycle CLI helper 와 충돌, 재명명 필요) / (B) WU-30+ 미사용 번호 재할당 / (C) yagni drop 중 **사용자 결정 필요**.
+
+   **Solon-wide executor convention CLAUDE.md §15 정식 등재 시점** = WU27-D2 `escalated_to: TBD-CLAUDE-MD-§15`. β default = WU-27 lifecycle 종결 + 1-2 사이클 실 운영 검증 후. 현재는 `sprints/WU-27.md §3.1` + 본 W-20 TODO 추적만. 정식 등재 시 (a) §15 신설 line 수 ≤ 5L 제약 (CLAUDE.md §1.14 ≤200 lines 정합) / (b) 부록 file 분리 여부 / (c) named profile registry 의 SSoT 위치 (CLAUDE.md vs sfs-common.sh source comment) 사용자 결정 영역.
+
 Phase 1 D1 ~ D2 (코드):
 
 12. `src/engines/dialog-engine.ts`
