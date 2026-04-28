@@ -34,8 +34,15 @@ parent_file: 2026-04-19-sfs-v0.4/sprints/WU-27.md
 - review gate light pass — sub-task 1 framework 그대로 적용 (mechanical translation).
 - 부수: `cross-ref-audit.md §4 W-21 TODO append` (Claude Managed Agents Memory γ 관망 + 1-2 사이클 비교 검증 결정 history 보존).
 
-## v0.4~ (예약, sub-task 4~6 진행 시 entry 추가)
+## v0.4 — 2026-04-29T00:05+09:00 (admiring-zealous-newton, 25번째 사이클 sub-task 4 entry, 사용자 '순차 진행 + sub-task 6 자율 위임 plan')
 
-- v0.4: sub-task 4 (sfs-loop-review-gate.md, §6.6 Pre-execution Review Gate)
+- `sprints/WU-27/sfs-loop-review-gate.md` 신설 (~165L) — §6.6 Pre-execution Review Gate (PLANNER CEO + EVALUATOR CPO 두 페르소나 review 의무 + cascade depth cap=3 + dogfooding 사례 4건 누적) + CLAUDE.md §1.15 SSoT 정합.
+- §6.6.1 사용자 발화 2건 (자율진행 큰 작업 위주 + cascade) + §6.6.2 review gate flow ASCII + §6.6.3 "큰 작업" 5 criteria + §6.6.4 호출 spec 5 step + §6.6.5 PASS-with-conditions 3 case + §6.6.6 cascade 4 option (abandon/split/prereq/custom) + depth cap=3 + §6.6.7 dogfooding 4건 (24th-52 + 25th-1 × 3) + §6.6.8 bash 함수 spec 4건 (review_with_persona / submit_to_user / cascade_on_fail / is_big_task) + §6.6.9 CLAUDE.md §1.15 verbatim 정합.
+- spec source = `tmp/sfs-loop-design.md` v0.3 §6.6 verbatim mapping + CLAUDE.md §1.15 SSoT 정합.
+- review gate light pass — sub-task 1 framework 그대로 적용 (mechanical translation, decision_points 신설 0).
+- **자율 진행 프로토콜 사전 합의 (사용자 발화 25th-1 continuation 4)**: sub-task 6 entry 시 사용자 sleep + AI 자율 위임 (~7시간), §1.15 review gate self-approve (mechanical micro-step 6.1~6.8 분할), §1.5' commit 0건 (file 편집만), §1.16 status FSM 자동 적용.
+
+## v0.5~ (예약, sub-task 5~6 진행 시 entry 추가)
+
 - v0.5: sub-task 5 (sfs-loop-multi-worker.md, §6.0 Worker Independence + §6.4 Multi-worker spawn)
 - v1.0: sub-task 6 (실 bash 구현 완료, 0.5.0-mvp release cut 후보)
