@@ -7,6 +7,7 @@
 
 - **이름**: `solon-mvp` (Solon 방법론의 설치 가능한 MVP 배포판)
 - **목적**: 사용자 개인 / 회사 프로젝트에 **Solon 7-step flow** 스캐폴드를 `install.sh` 로 주입
+- **해석 경계**: 7-step 은 full startup team-agent artifact chain 의 lightweight projection 이다. templates 수정 시 Discovery/PRD/Taxonomy/UX/Technical Design/Release Readiness 를 제거한 것으로 오해시키면 안 된다.
 - **IP**: 사용자 (채명정) 개인 자산. 공개 범위는 TBD (현재 private 권장).
 - **연계**: 풀스펙 방법론은 사용자 개인 Solon docset 에 있음 (본 repo 에는 경로 / 내용 미반영).
 
@@ -45,6 +46,7 @@
 7. 문서화
 
 Gate 는 all signal-only (ALT-INV-3 never-hard-block).
+Production open 을 수반하면 Release Readiness evidence(secret/auth/data/monitoring/rollback/cost) 를 review 또는 retro-light 에 남긴다.
 
 ## 절대 금지
 
