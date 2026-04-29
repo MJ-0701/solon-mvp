@@ -33,6 +33,12 @@
   제품 설명 → 문제 정의 → core model → quickstart → commands → 설치/업그레이드/제거 →
   운영 원칙 순서로 재구성. 목적: 외부 독자가 Solon Product 를 제품으로 이해하고, Claude/Codex/Gemini
   runtime 계약을 같은 문서에서 확인할 수 있게 함.
+- **README product-level hardening** — README 첫 화면에서 `MVP / private beta` 상태 문구와
+  "MVP 에서의 형태" 같은 최소 배포판 중심 표현을 제거하고, product promise / operating model /
+  product surface / safety contract 중심으로 재구성. 이유: repo rename 이후 README 가 제품
+  identity 를 대표해야 하며, 기존 `-mvp` version suffix 는 release channel 설명으로만 후퇴시킴.
+  검증: `git diff --check -- README.md` 통과, README 에 `MVP / private beta`, `MVP 에서`,
+  `Solon MVP`, `친구야`, `SSoT` 노출 없음.
 - **public terminology cleanup** — 외부 독자가 뜻을 추측해야 하는 내부자 약어를
   `기준 문서` / `기준 구현` 으로 치환. 목적: README, CHANGELOG, consumer 템플릿, runtime script
   comment 에서 후속 agent 가 같은 용어로 정합성을 확인할 수 있게 함.
