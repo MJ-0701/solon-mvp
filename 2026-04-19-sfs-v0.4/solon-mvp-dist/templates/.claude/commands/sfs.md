@@ -31,12 +31,15 @@ token as the subcommand and the remainder as that subcommand's arguments.
 $ARGUMENTS
 ```
 
-## Adapter Dispatch (status / start / plan / review / decision / loop) — execute first
+## Adapter Dispatch (status / start / plan / review / decision / retro / loop) — execute first
 
 If the first argument is **`status`**, **`start`**, **`plan`**, **`review`**,
-**`decision`**, or **`loop`**, dispatch the request to the corresponding bash
-script under `.sfs-local/scripts/` and stop. These six subcommands are
+**`decision`**, **`retro`**, or **`loop`**, dispatch the request to the corresponding
+bash script under `.sfs-local/scripts/` and stop. These seven subcommands are
 deterministic and must NOT be re-interpreted by the model.
+
+⚠️ AI 자율 호출 금지 — 사용자 명시 호출 시에만 동작 (§1.5' 정합). 특히 `retro --close`
+는 sprint close + auto commit 을 트리거하므로 사용자 의도 없이 호출 금지.
 
 Dispatch table:
 
@@ -46,13 +49,14 @@ Dispatch table:
 | `start`    | `.sfs-local/scripts/sfs-start.sh <remaining args>`    | passes `<sprint-id>` and/or `--force` verbatim |
 | `plan`     | `.sfs-local/scripts/sfs-plan.sh <remaining args>`     | takes no flags currently; remaining args reserved for future (WU-25 §1) |
 | `review`   | `.sfs-local/scripts/sfs-review.sh <remaining args>`   | passes `--gate <id>` / `--gate=<id>` verbatim (gates.md §1 7-enum: G-1, G0, G1, G2, G3, G4, G5; WU-25 §2) |
-| `decision` | `.sfs-local/scripts/sfs-decision.sh <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim (WU-26 §1, WU-29 hotfix wired-up). Uses `sprint-templates/decision-light.md`. |
+| `decision` | `.sfs-local/scripts/sfs-decision.sh <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim (WU-26 §1). Uses `decisions-template/ADR-TEMPLATE.md` (5 섹션 ADR-full); `sprint-templates/decision-light.md` 은 Claude-driven fallback. |
+| `retro`    | `.sfs-local/scripts/sfs-retro.sh <remaining args>`    | passes `--close` verbatim (WU-26 §2). With `--close`: writes status/closed_at into plan.md, removes `.sfs-local/current-sprint`, appends `sprint_close` event, runs `auto_commit_close` (git add+commit, push manual per §1.5). |
 | `loop`     | `.sfs-local/scripts/sfs-loop.sh <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim (WU-27 §3) |
 
 Procedure (apply in order):
 
 1. **Existence check** — Use the Bash tool to verify the target script exists
-   and is executable. If `.sfs-local/scripts/sfs-{status,start,plan,review,decision,loop}.sh`
+   and is executable. If `.sfs-local/scripts/sfs-{status,start,plan,review,decision,retro,loop}.sh`
    is missing or not executable, fall back to the **Claude-driven mode** below
    for that subcommand and tell the user which script is missing (1 line, no
    speculation about the cause).
@@ -77,8 +81,12 @@ Procedure (apply in order):
      `7`=unknown CLI flag, `99`=unknown.
    - decision: `0`=ok, `1`=`--id` conflict (decision already exists),
      `2`=corrupt `events.jsonl`, `3`=not a git repo,
-     `4`=`sprint-templates/decision-light.md` missing, `5`=permission,
+     `4`=`decisions-template/ADR-TEMPLATE.md` missing, `5`=permission,
      `7`=`<title>` missing or unknown CLI flag, `99`=unknown.
+   - retro: `0`=ok, `1`=no `.sfs-local/` or no active sprint,
+     `4`=`sprint-templates/retro.md` missing, `7`=unknown CLI flag,
+     `8`=`--close` requested but `review.md` missing (run /sfs review first),
+     `99`=unknown.
    - loop: `0`=ok, `1`=invalid usage, `2`=PROGRESS frontmatter parse,
      `3`=drift detected (resume-check exit 16), `4`=mutex claim failed,
      `5`=safety_lock tripped, `6`=WU spec missing/corrupt,
@@ -95,9 +103,9 @@ status adapter) so that bare `/sfs` produces the canonical compact status line.
 
 ## Read Context (Claude-driven modes only)
 
-For the remaining subcommands (`help`, `sprint`, `log`, `retro`)
-and for adapter fallbacks (including `plan` / `review` / `decision` when their
-scripts are missing), first read these files if they exist:
+For the remaining subcommands (`help`, `sprint`, `log`)
+and for adapter fallbacks (including `plan` / `review` / `decision` / `retro`
+when their scripts are missing), first read these files if they exist:
 
 - `CLAUDE.md`
 - `.sfs-local/VERSION`
@@ -127,7 +135,7 @@ If the first argument is one of the modes below, follow that mode.
 - `review`: **Adapter (above).** Fallback only: review the current sprint output and write/update `review.md` (require `--gate <id>` from gates.md §1 7-enum).
 - `decision`: **Adapter (above).** Fallback only: write a short ADR-style decision under `.sfs-local/decisions/` based on `sprint-templates/decision-light.md`.
 - `log`: Append a one-line JSON event to `.sfs-local/events.jsonl`.
-- `retro`: Write or update the current sprint `retro-light.md`.
+- `retro`: **Adapter (above).** Fallback only: write or update the current sprint `retro.md` based on `sprint-templates/retro.md` (no auto commit / no sprint close in fallback).
 - `loop`: **Adapter (above).** Fallback only: explain Ralph Loop + Solon mutex pattern and recommend running `.sfs-local/scripts/sfs-loop.sh --help` directly (WU-27).
 
 ## Usage Guide Output
@@ -156,4 +164,4 @@ Also explain this in one or two sentences:
 - Keep sprint artifacts concise and operational.
 - Do not invent completed work. If evidence is missing, mark it as unknown.
 - Prefer concrete next actions over broad methodology explanations.
-- For `status`, `start`, `plan`, `review`, `decision`, and `loop`, the bash adapter is authoritative — do not paraphrase or augment its output.
+- For `status`, `start`, `plan`, `review`, `decision`, `retro`, and `loop`, the bash adapter is authoritative — do not paraphrase or augment its output.
