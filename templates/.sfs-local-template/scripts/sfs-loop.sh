@@ -1,0 +1,735 @@
+#!/usr/bin/env bash
+# .sfs-local/scripts/sfs-loop.sh
+#
+# Solon SFS — `/sfs loop` command implementation (Ralph Loop + Solon mutex
+# + Solon-wide executor convention). 7번째 명령 (WU-23 §1 6 명령 contract
+# + WU-27 추가).
+#
+# Spec source:
+#   sprints/WU-27.md (main: §0 + §1.1~1.3 + §3.1 + 분할 plan)
+#   sprints/WU-27/sfs-loop-flow.md (§2 비교 + §3 인자 + §4 12-step pseudo-flow + §5 exit codes)
+#   sprints/WU-27/sfs-loop-locking.md (§6.5 Optimistic Lock + 4-state FSM)
+#   sprints/WU-27/sfs-loop-review-gate.md (§6.6 PLANNER+EVALUATOR persona)
+#   sprints/WU-27/sfs-loop-multi-worker.md (§6.0 Worker Independence + §6.4 spawn)
+#
+# Path note: dev staging file lives at
+#   solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-loop.sh
+# install.sh copies templates/.sfs-local-template/ → consumer project's .sfs-local/.
+#
+# Visibility: business-only (solon-mvp-dist staging asset).
+# Created: 2026-04-29 (25th cycle session optimistic-vigilant-bell sub-task 6.1).
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+. "$SCRIPT_DIR/sfs-common.sh"
+
+# ─────────────────────────────────────────────────────────────────────
+# EXIT CODES (sfs-loop-flow.md §5 verbatim)
+# ─────────────────────────────────────────────────────────────────────
+SFS_LOOP_EXIT_OK=0                       # 정상 종료
+SFS_LOOP_EXIT_BADCLI=1                   # invalid usage
+SFS_LOOP_EXIT_PROGRESS_PARSE=2           # PROGRESS.md frontmatter 파싱 실패
+SFS_LOOP_EXIT_DRIFT=3                    # resume-session-check exit 16
+SFS_LOOP_EXIT_MUTEX=4                    # mutex claim 실패
+SFS_LOOP_EXIT_SAFETY_LOCK=5              # safety_lock trip
+SFS_LOOP_EXIT_SPEC_MISSING=6             # WU spec 누락 / 손상
+SFS_LOOP_EXIT_VERIFY_FAIL=7              # 산출물 verify 실패
+SFS_LOOP_EXIT_HEARTBEAT_FAIL=8           # PROGRESS heartbeat 쓰기 실패 (FUSE lock 등)
+SFS_LOOP_EXIT_EXECUTOR_FAIL=9            # executor resolve 실패
+SFS_LOOP_EXIT_UNKNOWN=99                 # bug
+
+# ─────────────────────────────────────────────────────────────────────
+# DEFAULTS (sfs-loop-flow.md §3.2 inflation table)
+# ─────────────────────────────────────────────────────────────────────
+LOOP_MODE="${LOOP_MODE:-user-active-deferred}"
+LOOP_EXECUTOR="${SFS_EXECUTOR:-claude}"
+LOOP_DOMAIN_FILTER=""
+LOOP_PRIORITY_MIN=1
+LOOP_PRIORITY_MAX=10
+LOOP_MAX_ITERS=5
+LOOP_MAX_WALL_MIN=30
+LOOP_TTL_MIN=30
+LOOP_MICRO_STEPS_PER_ITER=1
+LOOP_RELEASE_BETWEEN=true
+LOOP_EXCLUSIVE=false
+LOOP_DRY_RUN=false
+LOOP_ESCALATE_ON=""
+LOOP_OWNER=""
+LOOP_REPORT_FORMAT="text"
+
+# Multi-worker (sub-task 5 spec)
+LOOP_PARALLEL=1
+LOOP_WORKER_ID=""
+LOOP_AUTO_CODENAME=true
+LOOP_COORD_ONLY=false
+LOOP_WORKER_PREFER_MODE=""
+LOOP_WORKER_DOMAIN_PIN=""
+LOOP_ISOLATION="process"
+LOOP_NO_MENTAL_COUPLING=true
+
+# Review gate (sub-task 6.6)
+LOOP_REVIEW_GATE=true
+LOOP_PLAN_DOC=""
+LOOP_PERSONA_DIR="agents"
+
+# Internal (sub-cmd dispatch)
+LOOP_SUBCMD=""
+
+# ─────────────────────────────────────────────────────────────────────
+# USAGE
+# ─────────────────────────────────────────────────────────────────────
+usage_loop() {
+  cat <<'EOF'
+Usage:
+  /sfs loop [OPTIONS]                  Run loop iterations (default sub-cmd).
+  /sfs loop status                     Show status of currently running loop.
+  /sfs loop stop                       Stop the running loop, release mutex.
+  /sfs loop replay <task-log-id>       Replay a past scheduled_task_log entry.
+
+Core OPTIONS:
+  --mode <user-active|scheduled|user-active-deferred>
+                                       resume_hint default_action mode (default: user-active-deferred)
+  --executor <profile|cmd>             LLM executor (claude|gemini|codex|<custom>) (default: claude / $SFS_EXECUTOR)
+  --domain-filter <D-X,D-Y,...>        Comma-separated domain whitelist
+  --priority-min <N>                   Lowest priority (default 1)
+  --priority-max <N>                   Highest priority (default 10)
+  --max-iters <N>                      Max iterations (default 5; Ralph Loop infinite cap)
+  --max-wall-min <N>                   Max wall-clock minutes (default 30)
+  --ttl-min <N>                        Per-iter mutex TTL (default 30)
+  --micro-steps-per-iter <N>           Micro-steps per iteration (default 1)
+  --release-between                    Release owner between iters (default true)
+  --exclusive                          Hold owner across iters (overrides --release-between)
+  --dry-run                            Print plan only, claim nothing
+  --escalate-on <safety-lock-id,...>   Specific safety_locks to escalate on
+  --owner <codename>                   Mutex owner override (default: basename of /sessions/<x>/)
+  --report-format <text|json|status-line>
+                                       Per-iter report format (default text)
+
+Multi-worker OPTIONS (sub-task 5):
+  --parallel <N>                       Spawn N workers (default 1)
+  --worker-id <X>                      Override worker mutex owner
+  --auto-codename                      Auto-generate adjective-adjective-surname (default when parallel>1)
+  --coord-only                         Coordinator only (spawn N workers + wait + aggregate)
+  --worker-prefer-mode <X>             Per-worker prefer_mode override
+  --worker-domain-pin <D-X>            Pin worker to specific domain (⚠️ mental coupling, escalates)
+  --isolation <process|claude-instance|sub-session>
+                                       Worker isolation mode (default process)
+  --no-mental-coupling                 Enforce Worker Independence Invariant (default true)
+
+Exit codes:
+  0  success (max-iters / all-domains-closed / max-wall reached)
+  1  invalid usage
+  2  PROGRESS.md frontmatter parse error
+  3  drift detected (resume-session-check exit 16)
+  4  mutex claim failed
+  5  safety_lock tripped
+  6  WU spec file missing / corrupt
+  7  artifact verify failed
+  8  heartbeat write failed (FUSE lock?)
+  9  executor resolve failed
+  99 unknown internal error
+
+Spec: sprints/WU-27.md + sprints/WU-27/sfs-loop-{flow,locking,review-gate,multi-worker}.md
+EOF
+}
+
+# ─────────────────────────────────────────────────────────────────────
+# ARG PARSING
+# ─────────────────────────────────────────────────────────────────────
+parse_args() {
+  # Sub-command detection (first non-option positional).
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      # Sub-commands
+      status|stop|replay)
+        LOOP_SUBCMD="$1"
+        shift
+        # `replay` consumes one positional (task-log-id)
+        if [[ "$LOOP_SUBCMD" == "replay" ]]; then
+          if [[ $# -lt 1 ]]; then
+            echo "loop replay: missing <task-log-id>" >&2
+            exit "$SFS_LOOP_EXIT_BADCLI"
+          fi
+          LOOP_REPLAY_ID="$1"
+          shift
+        fi
+        ;;
+
+      # Core options
+      --mode)              LOOP_MODE="$2"; shift 2 ;;
+      --mode=*)            LOOP_MODE="${1#*=}"; shift ;;
+      --executor)          LOOP_EXECUTOR="$2"; shift 2 ;;
+      --executor=*)        LOOP_EXECUTOR="${1#*=}"; shift ;;
+      --domain-filter)     LOOP_DOMAIN_FILTER="$2"; shift 2 ;;
+      --domain-filter=*)   LOOP_DOMAIN_FILTER="${1#*=}"; shift ;;
+      --priority-min)      LOOP_PRIORITY_MIN="$2"; shift 2 ;;
+      --priority-min=*)    LOOP_PRIORITY_MIN="${1#*=}"; shift ;;
+      --priority-max)      LOOP_PRIORITY_MAX="$2"; shift 2 ;;
+      --priority-max=*)    LOOP_PRIORITY_MAX="${1#*=}"; shift ;;
+      --max-iters)         LOOP_MAX_ITERS="$2"; shift 2 ;;
+      --max-iters=*)       LOOP_MAX_ITERS="${1#*=}"; shift ;;
+      --max-wall-min)      LOOP_MAX_WALL_MIN="$2"; shift 2 ;;
+      --max-wall-min=*)    LOOP_MAX_WALL_MIN="${1#*=}"; shift ;;
+      --ttl-min)           LOOP_TTL_MIN="$2"; shift 2 ;;
+      --ttl-min=*)         LOOP_TTL_MIN="${1#*=}"; shift ;;
+      --micro-steps-per-iter)   LOOP_MICRO_STEPS_PER_ITER="$2"; shift 2 ;;
+      --micro-steps-per-iter=*) LOOP_MICRO_STEPS_PER_ITER="${1#*=}"; shift ;;
+      --release-between)   LOOP_RELEASE_BETWEEN=true;  shift ;;
+      --no-release-between) LOOP_RELEASE_BETWEEN=false; shift ;;
+      --exclusive)         LOOP_EXCLUSIVE=true; LOOP_RELEASE_BETWEEN=false; shift ;;
+      --dry-run)           LOOP_DRY_RUN=true; shift ;;
+      --escalate-on)       LOOP_ESCALATE_ON="$2"; shift 2 ;;
+      --escalate-on=*)     LOOP_ESCALATE_ON="${1#*=}"; shift ;;
+      --owner)             LOOP_OWNER="$2"; shift 2 ;;
+      --owner=*)           LOOP_OWNER="${1#*=}"; shift ;;
+      --report-format)     LOOP_REPORT_FORMAT="$2"; shift 2 ;;
+      --report-format=*)   LOOP_REPORT_FORMAT="${1#*=}"; shift ;;
+
+      # Multi-worker options
+      --parallel)          LOOP_PARALLEL="$2"; shift 2 ;;
+      --parallel=*)        LOOP_PARALLEL="${1#*=}"; shift ;;
+      --worker-id)         LOOP_WORKER_ID="$2"; shift 2 ;;
+      --worker-id=*)       LOOP_WORKER_ID="${1#*=}"; shift ;;
+      --auto-codename)     LOOP_AUTO_CODENAME=true; shift ;;
+      --no-auto-codename)  LOOP_AUTO_CODENAME=false; shift ;;
+      --coord-only)        LOOP_COORD_ONLY=true; shift ;;
+      --worker-prefer-mode)   LOOP_WORKER_PREFER_MODE="$2"; shift 2 ;;
+      --worker-prefer-mode=*) LOOP_WORKER_PREFER_MODE="${1#*=}"; shift ;;
+      --worker-domain-pin)    LOOP_WORKER_DOMAIN_PIN="$2"; shift 2 ;;
+      --worker-domain-pin=*)  LOOP_WORKER_DOMAIN_PIN="${1#*=}"; shift ;;
+      --isolation)         LOOP_ISOLATION="$2"; shift 2 ;;
+      --isolation=*)       LOOP_ISOLATION="${1#*=}"; shift ;;
+      --no-mental-coupling)    LOOP_NO_MENTAL_COUPLING=true;  shift ;;
+      --allow-mental-coupling) LOOP_NO_MENTAL_COUPLING=false; shift ;;
+
+      # Review gate options (sub-task 6.6)
+      --no-review-gate)    LOOP_REVIEW_GATE=false; shift ;;
+      --review-gate)       LOOP_REVIEW_GATE=true;  shift ;;
+      --plan-doc)          LOOP_PLAN_DOC="$2"; shift 2 ;;
+      --plan-doc=*)        LOOP_PLAN_DOC="${1#*=}"; shift ;;
+      --persona-dir)       LOOP_PERSONA_DIR="$2"; shift 2 ;;
+      --persona-dir=*)     LOOP_PERSONA_DIR="${1#*=}"; shift ;;
+
+      # Help
+      -h|--help)
+        usage_loop
+        exit "$SFS_LOOP_EXIT_OK"
+        ;;
+
+      # Unknown
+      --*)
+        echo "loop: unknown option: $1" >&2
+        usage_loop >&2
+        exit "$SFS_LOOP_EXIT_BADCLI"
+        ;;
+
+      *)
+        echo "loop: unexpected positional argument: $1" >&2
+        usage_loop >&2
+        exit "$SFS_LOOP_EXIT_BADCLI"
+        ;;
+    esac
+  done
+}
+
+# ─────────────────────────────────────────────────────────────────────
+# ARG VALIDATION (post-parse)
+# ─────────────────────────────────────────────────────────────────────
+validate_args() {
+  # Mode enum
+  case "$LOOP_MODE" in
+    user-active|scheduled|user-active-deferred) ;;
+    *)
+      echo "loop: invalid --mode '$LOOP_MODE' (expected user-active|scheduled|user-active-deferred)" >&2
+      exit "$SFS_LOOP_EXIT_BADCLI"
+      ;;
+  esac
+
+  # Numeric ranges
+  if ! [[ "$LOOP_MAX_ITERS" =~ ^[1-9][0-9]*$ ]]; then
+    echo "loop: --max-iters must be positive integer (got '$LOOP_MAX_ITERS')" >&2
+    exit "$SFS_LOOP_EXIT_BADCLI"
+  fi
+  if ! [[ "$LOOP_MAX_WALL_MIN" =~ ^[1-9][0-9]*$ ]]; then
+    echo "loop: --max-wall-min must be positive integer (got '$LOOP_MAX_WALL_MIN')" >&2
+    exit "$SFS_LOOP_EXIT_BADCLI"
+  fi
+  if ! [[ "$LOOP_TTL_MIN" =~ ^[1-9][0-9]*$ ]]; then
+    echo "loop: --ttl-min must be positive integer (got '$LOOP_TTL_MIN')" >&2
+    exit "$SFS_LOOP_EXIT_BADCLI"
+  fi
+  if ! [[ "$LOOP_MICRO_STEPS_PER_ITER" =~ ^[1-9][0-9]*$ ]]; then
+    echo "loop: --micro-steps-per-iter must be positive integer" >&2
+    exit "$SFS_LOOP_EXIT_BADCLI"
+  fi
+  if ! [[ "$LOOP_PARALLEL" =~ ^[1-9][0-9]*$ ]]; then
+    echo "loop: --parallel must be positive integer" >&2
+    exit "$SFS_LOOP_EXIT_BADCLI"
+  fi
+  if ! [[ "$LOOP_PRIORITY_MIN" =~ ^[1-9]|10$ ]]; then
+    : # 1 자리 또는 10 만 허용 (1-10 범위)
+  fi
+
+  # Mutual exclusion: --exclusive overrides --release-between (already handled in parser)
+  # Coord-only requires --parallel >= 2
+  if [[ "$LOOP_COORD_ONLY" == "true" ]] && (( LOOP_PARALLEL < 2 )); then
+    echo "loop: --coord-only requires --parallel >= 2 (got $LOOP_PARALLEL)" >&2
+    exit "$SFS_LOOP_EXIT_BADCLI"
+  fi
+
+  # Auto-codename default = true when parallel > 1
+  if (( LOOP_PARALLEL > 1 )) && [[ -z "$LOOP_WORKER_ID" ]]; then
+    LOOP_AUTO_CODENAME=true
+  fi
+
+  # Isolation enum
+  case "$LOOP_ISOLATION" in
+    process|claude-instance|sub-session) ;;
+    *)
+      echo "loop: invalid --isolation '$LOOP_ISOLATION'" >&2
+      exit "$SFS_LOOP_EXIT_BADCLI"
+      ;;
+  esac
+
+  # Report format enum
+  case "$LOOP_REPORT_FORMAT" in
+    text|json|status-line) ;;
+    *)
+      echo "loop: invalid --report-format '$LOOP_REPORT_FORMAT'" >&2
+      exit "$SFS_LOOP_EXIT_BADCLI"
+      ;;
+  esac
+
+  # Owner default = self codename (basename of /sessions/<x>/, fallback hostname)
+  if [[ -z "$LOOP_OWNER" ]]; then
+    if [[ -d /sessions ]]; then
+      LOOP_OWNER="$(ls /sessions 2>/dev/null | head -1 || echo "unknown-session")"
+    else
+      LOOP_OWNER="$(hostname -s 2>/dev/null || echo "unknown")"
+    fi
+  fi
+}
+
+# ─────────────────────────────────────────────────────────────────────
+# MAIN DISPATCH (sub-task 6.2~6.6 가 채움)
+# ─────────────────────────────────────────────────────────────────────
+main() {
+  parse_args "$@"
+  validate_args
+
+  # Sub-cmd dispatch
+  case "$LOOP_SUBCMD" in
+    status)
+      cmd_loop_status   # 후속 sub-task 6.4 (iter loop core)
+      ;;
+    stop)
+      cmd_loop_stop     # 후속 sub-task 6.4
+      ;;
+    replay)
+      cmd_loop_replay "$LOOP_REPLAY_ID"   # 후속 sub-task 6.4
+      ;;
+    "")
+      # Default = main loop. parallel >1 or coord-only → coordinator path (sub-task 6.5).
+      if (( LOOP_PARALLEL > 1 )) || [[ "$LOOP_COORD_ONLY" == "true" ]]; then
+        cmd_loop_coord
+      else
+        cmd_loop_run
+      fi
+      ;;
+    *)
+      echo "loop: unknown subcommand: $LOOP_SUBCMD" >&2
+      exit "$SFS_LOOP_EXIT_BADCLI"
+      ;;
+  esac
+}
+
+# ─────────────────────────────────────────────────────────────────────
+# INTERNAL HELPERS (sub-task 6.4)
+# ─────────────────────────────────────────────────────────────────────
+
+# _pick_domain — sweep PROGRESS.md domain_locks, pick highest-priority unowned domain.
+# Args: $1 = progress_path
+# Filters: --domain-filter (LOOP_DOMAIN_FILTER), --priority-min/max, --mode (prefer_mode match)
+# stdout: domain id or empty
+# rc: 0=picked, 1=none eligible
+_pick_domain() {
+  local progress_path="$1"
+  local filter="$LOOP_DOMAIN_FILTER"
+  local pmin="$LOOP_PRIORITY_MIN" pmax="$LOOP_PRIORITY_MAX"
+  local mode="$LOOP_MODE"
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo "_pick_domain: python3 required" >&2
+    return 99
+  fi
+  python3 - "$progress_path" "$filter" "$pmin" "$pmax" "$mode" <<'PYEOF'
+import sys, re
+path, flt, pmin, pmax, mode = sys.argv[1:6]
+pmin = int(pmin); pmax = int(pmax)
+flt_set = set(x.strip() for x in flt.split(',') if x.strip()) if flt else None
+with open(path) as f:
+    content = f.read()
+m = re.search(r'^---\n(.*?)\n---', content, re.DOTALL)
+if not m:
+    sys.exit(1)
+fm = m.group(1)
+# Find domain_locks block
+dl = re.search(r'^domain_locks:\s*\n((?:[ \t]+.*\n?)+)', fm, re.MULTILINE)
+if not dl:
+    sys.exit(1)
+body = dl.group(1)
+# Domain entries: indented N spaces, key: \n followed by deeper indent fields
+candidates = []
+cur_dom = None; cur_fields = {}
+def flush():
+    if cur_dom:
+        candidates.append((cur_dom, dict(cur_fields)))
+for line in body.splitlines():
+    if not line.strip():
+        continue
+    m1 = re.match(r'^(\s+)([\w-]+):\s*(.*)$', line)
+    if not m1:
+        continue
+    indent, key, val = m1.group(1), m1.group(2), m1.group(3).strip()
+    # Strip comment
+    val = re.sub(r'\s*#.*$', '', val).strip()
+    # Domain entry = 2-space indent (top-level under domain_locks)
+    if len(indent) == 2:
+        flush()
+        cur_dom = key
+        cur_fields = {}
+    elif cur_dom:
+        cur_fields[key] = val
+flush()
+# Filter + sort
+def eligible(d, f):
+    name = d
+    if flt_set and name not in flt_set:
+        return False
+    owner = f.get('owner', '')
+    if owner and owner not in ('null', '~', ''):
+        return False
+    status = f.get('status', '')
+    if status in ('COMPLETE', 'ABANDONED'):
+        # check priority — closed lifecycle low pri (8), but skip
+        return False
+    pr = f.get('priority', '0')
+    try:
+        pr_i = int(pr)
+    except:
+        pr_i = 0
+    if pr_i < pmin or pr_i > pmax:
+        return False
+    pmode = f.get('prefer_mode', '')
+    # mode filter: scheduled mode skips user-active-only domains
+    if mode == 'scheduled' and pmode == 'user-active-only':
+        return False
+    return True
+elig = [(d, f) for d, f in candidates if eligible(d, f)]
+if not elig:
+    sys.exit(1)
+# Sort by priority asc (1 = highest), then by name asc for determinism
+elig.sort(key=lambda x: (int(x[1].get('priority', '99')), x[0]))
+print(elig[0][0])
+PYEOF
+}
+
+# _bump_heartbeat — sed PROGRESS.md frontmatter `last_overwrite` to now (UTC ISO).
+# Args: $1 = progress_path
+# rc: 0=ok, 8=write fail
+_bump_heartbeat() {
+  local path="$1"
+  local now
+  now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  # awk-replace the last_overwrite line, preserving comments after the value
+  local tmp
+  tmp=$(mktemp) || return 8
+  awk -v now="$now" '
+    /^last_overwrite:/ && !done {
+      # preserve trailing comment if any
+      cmt = ""
+      if (match($0, /[ \t]*#.*$/)) cmt = substr($0, RSTART)
+      print "last_overwrite: " now cmt
+      done = 1; next
+    }
+    { print }
+  ' "$path" > "$tmp" && mv -f "$tmp" "$path" || return 8
+  return 0
+}
+
+# _generate_codename — generate adjective-adjective-surname (multi-worker auto-codename).
+# rc: 0
+_generate_codename() {
+  local adj1=(adoring brave bright calm clever dazzling eager gallant happy jolly
+              keen loving merry nifty quirky serene sweet trusty witty zealous)
+  local adj2=(angry busy clever cool fast funny gentle gracious lucid magic noisy
+              proud quiet rapid steady tender vivid wise yearning zesty)
+  local sur=(archimedes babbage bohr curie dijkstra einstein feynman galileo
+             hopper kepler lovelace mendel newton ohm pascal ritchie shannon
+             tesla turing wright)
+  local i1=$(( RANDOM % ${#adj1[@]} ))
+  local i2=$(( RANDOM % ${#adj2[@]} ))
+  local i3=$(( RANDOM % ${#sur[@]} ))
+  echo "${adj1[$i1]}-${adj2[$i2]}-${sur[$i3]}"
+}
+
+# ─────────────────────────────────────────────────────────────────────
+# SUB-CMD IMPLEMENTATIONS (sub-task 6.4)
+# ─────────────────────────────────────────────────────────────────────
+
+# cmd_loop_run — main loop entry (12-step pseudo-flow integration)
+# spec: sfs-loop-flow.md §4
+cmd_loop_run() {
+  local progress_path
+  progress_path=$(resolve_progress_path) || exit "$SFS_LOOP_EXIT_SPEC_MISSING"
+
+  # Step 1~3: pre-flight (CLAUDE.md / PROGRESS / drift)
+  echo "loop: pre-flight check (progress=$progress_path)" >&2
+  set +e
+  pre_flight_check "$progress_path"
+  local pf_rc=$?
+  set -e
+  if (( pf_rc == 3 )); then
+    echo "loop: drift detected, aborting (exit 3)" >&2
+    exit "$SFS_LOOP_EXIT_DRIFT"
+  fi
+  if (( pf_rc != 0 )); then
+    echo "loop: pre-flight failed (rc=$pf_rc)" >&2
+    exit "$SFS_LOOP_EXIT_HEARTBEAT_FAIL"
+  fi
+
+  # Step 1.5: Pre-execution review gate (sub-task 6.6)
+  # spec: sfs-loop-review-gate.md §6.6 + CLAUDE.md §1.15
+  if [[ "$LOOP_REVIEW_GATE" == "true" ]]; then
+    local planner="${LOOP_PERSONA_DIR}/planner.md"
+    local evaluator="${LOOP_PERSONA_DIR}/evaluator.md"
+    local plan_doc="$LOOP_PLAN_DOC"
+    if [[ -z "$plan_doc" ]]; then
+      # Auto-resolve: first sprints/WU-*.md or skip.
+      plan_doc=$(ls sprints/WU-*.md 2>/dev/null | head -1 || echo "")
+    fi
+    if [[ -f "$planner" && -f "$evaluator" && -f "$plan_doc" ]]; then
+      echo "loop: review gate (PLANNER + EVALUATOR on $plan_doc)" >&2
+      local r1 r2
+      set +e
+      r1=$(review_with_persona "$planner" "$plan_doc" 2>&1)
+      r2=$(review_with_persona "$evaluator" "$plan_doc" 2>&1)
+      set -e
+      echo "loop:   PLANNER:" >&2
+      echo "$r1" | sed 's/^/loop:     /' >&2
+      echo "loop:   EVALUATOR:" >&2
+      echo "$r2" | sed 's/^/loop:     /' >&2
+      echo "loop:   verdicts: PASS-with-conditions (MVP stub) → proceed" >&2
+    else
+      echo "loop: review gate skipped (planner/evaluator/plan_doc missing — MVP stub)" >&2
+    fi
+  fi
+
+  # Wall-clock cap
+  local start_epoch end_epoch
+  start_epoch=$(date +%s)
+  end_epoch=$(( start_epoch + LOOP_MAX_WALL_MIN * 60 ))
+
+  # Iter loop
+  local iter=0
+  local completed=0
+  local last_domain=""
+  while (( iter < LOOP_MAX_ITERS )); do
+    iter=$(( iter + 1 ))
+    local now_epoch
+    now_epoch=$(date +%s)
+    if (( now_epoch >= end_epoch )); then
+      echo "loop: max-wall-min reached ($LOOP_MAX_WALL_MIN min)" >&2
+      break
+    fi
+
+    echo "loop: ── iter $iter/$LOOP_MAX_ITERS (mode=$LOOP_MODE, executor=$LOOP_EXECUTOR, owner=$LOOP_OWNER)" >&2
+
+    # Step 4~5: domain sweep + claim
+    local picked
+    set +e
+    picked=$(_pick_domain "$progress_path")
+    local pick_rc=$?
+    set -e
+    if [[ -z "$picked" ]] || (( pick_rc != 0 )); then
+      echo "loop: no eligible domain (all-domains-closed-or-locked), exiting" >&2
+      break
+    fi
+    echo "loop:   picked domain: $picked" >&2
+
+    if [[ "$LOOP_DRY_RUN" == "true" ]]; then
+      echo "loop:   [DRY-RUN] would claim_lock $picked for $LOOP_OWNER" >&2
+    else
+      set +e
+      claim_lock "$progress_path" "$picked" "$LOOP_OWNER"
+      local claim_rc=$?
+      set -e
+      if (( claim_rc != 0 )); then
+        echo "loop:   claim_lock failed (rc=$claim_rc), trying next iter" >&2
+        continue
+      fi
+    fi
+
+    # Step 6: LLM invocation site (MVP stub — real call gated on env SFS_LOOP_LLM_LIVE=1)
+    local executor_cmd
+    executor_cmd=$(resolve_executor "$LOOP_EXECUTOR")
+    echo "loop:   executor: $executor_cmd" >&2
+    if [[ "${SFS_LOOP_LLM_LIVE:-0}" == "1" && "$LOOP_DRY_RUN" != "true" ]]; then
+      echo "loop:   [LIVE] invoking executor (real LLM call)" >&2
+      # Real call: cat PROMPT.md | $executor_cmd  (Ralph Loop pattern)
+      # MVP: PROMPT.md must exist; otherwise skip
+      if [[ -f PROMPT.md ]]; then
+        # shellcheck disable=SC2086
+        cat PROMPT.md | eval $executor_cmd || echo "loop:   executor returned non-zero" >&2
+      else
+        echo "loop:   no PROMPT.md, skipping live invocation" >&2
+      fi
+    else
+      echo "loop:   [STUB] would invoke executor (set SFS_LOOP_LLM_LIVE=1 to enable)" >&2
+    fi
+
+    # Step 7: heartbeat
+    if [[ "$LOOP_DRY_RUN" != "true" ]]; then
+      _bump_heartbeat "$progress_path" || {
+        echo "loop:   heartbeat failed, aborting" >&2
+        exit "$SFS_LOOP_EXIT_HEARTBEAT_FAIL"
+      }
+    fi
+
+    # Step 11: release_between
+    if [[ "$LOOP_RELEASE_BETWEEN" == "true" && "$LOOP_DRY_RUN" != "true" ]]; then
+      release_lock "$progress_path" "$picked" complete || true
+    fi
+
+    completed=$(( completed + 1 ))
+    last_domain="$picked"
+  done
+
+  # Final report
+  echo "loop: ── done. iterations=$completed last_domain=${last_domain:-none}" >&2
+  return "$SFS_LOOP_EXIT_OK"
+}
+
+# cmd_loop_coord — coordinator spawning N independent workers (sub-task 6.5).
+# spec: sfs-loop-multi-worker.md §6.4
+cmd_loop_coord() {
+  local N="$LOOP_PARALLEL"
+  if (( N < 1 )); then N=1; fi
+  echo "loop: coordinator spawning $N workers (isolation=$LOOP_ISOLATION, mode=$LOOP_MODE)" >&2
+
+  # Pre-flight at coordinator level (workers do their own pre-flight too)
+  local progress_path
+  progress_path=$(resolve_progress_path) || exit "$SFS_LOOP_EXIT_SPEC_MISSING"
+
+  if [[ "$LOOP_ISOLATION" != "process" ]]; then
+    echo "loop: --isolation '$LOOP_ISOLATION' not yet implemented (only 'process'), falling back to process" >&2
+  fi
+
+  local pids=()
+  local worker_ids=()
+  local logdir="${SFS_LOOP_LOGDIR:-/tmp}"
+  for i in $(seq 1 "$N"); do
+    local wid
+    if [[ -n "$LOOP_WORKER_ID" ]] && (( N == 1 )); then
+      wid="$LOOP_WORKER_ID"
+    else
+      wid="$(_generate_codename)"
+    fi
+    worker_ids+=("$wid")
+    local logfile="${logdir}/sfs-loop-worker-${wid}.log"
+
+    local extra_flags=()
+    if [[ "$LOOP_DRY_RUN" == "true" ]]; then extra_flags+=("--dry-run"); fi
+    if [[ "$LOOP_NO_MENTAL_COUPLING" == "true" ]]; then extra_flags+=("--no-mental-coupling"); fi
+
+    # COORD_ONLY mode means coordinator does no work itself; otherwise coordinator + workers
+    "$SCRIPT_DIR/sfs-loop.sh" \
+      --mode "$LOOP_MODE" \
+      --executor "$LOOP_EXECUTOR" \
+      --worker-id "$wid" \
+      --owner "$wid" \
+      --max-iters "$LOOP_MAX_ITERS" \
+      --max-wall-min "$LOOP_MAX_WALL_MIN" \
+      --ttl-min "$LOOP_TTL_MIN" \
+      --micro-steps-per-iter "$LOOP_MICRO_STEPS_PER_ITER" \
+      --parallel 1 \
+      "${extra_flags[@]}" \
+      > "$logfile" 2>&1 &
+    local pid=$!
+    pids+=("$pid")
+    echo "loop:   spawned worker $i: $wid (pid=$pid, log=$logfile)" >&2
+  done
+
+  echo "loop: waiting for ${#pids[@]} workers..." >&2
+  local agg_rc=0
+  local exit_codes=()
+  for idx in "${!pids[@]}"; do
+    local pid="${pids[$idx]}"
+    local wid="${worker_ids[$idx]}"
+    set +e
+    wait "$pid"
+    local rc=$?
+    set -e
+    exit_codes+=("$rc")
+    if (( rc != 0 )); then
+      echo "loop:   worker $wid (pid=$pid) exited rc=$rc" >&2
+      # Propagate first non-zero (spec: 5/7 priority)
+      if (( agg_rc == 0 )); then agg_rc="$rc"; fi
+    fi
+  done
+
+  echo "loop: ── coordinator done. workers=${#pids[@]} exits=[${exit_codes[*]}] agg_rc=$agg_rc" >&2
+  return "$agg_rc"
+}
+
+# cmd_loop_status — print 1-line status of current loop state.
+# spec: sfs-loop-flow.md §3.3 sub-cmd
+cmd_loop_status() {
+  local progress_path
+  progress_path=$(resolve_progress_path) || exit "$SFS_LOOP_EXIT_SPEC_MISSING"
+  local owner
+  owner=$(awk '/^current_wu_owner:/ { sub(/^current_wu_owner: */, ""); sub(/[ \t]*#.*$/, ""); print; exit }' "$progress_path")
+  owner="${owner:-null}"
+  local last
+  last=$(awk '/^last_overwrite:/ { sub(/^last_overwrite: */, ""); sub(/[ \t]*#.*$/, ""); print; exit }' "$progress_path")
+  printf 'loop · owner %s · last_overwrite %s · max_iters %d · max_wall %dmin\n' \
+    "$owner" "${last:-unknown}" "$LOOP_MAX_ITERS" "$LOOP_MAX_WALL_MIN"
+  return "$SFS_LOOP_EXIT_OK"
+}
+
+# cmd_loop_stop — release current_wu_owner (best-effort) + exit.
+cmd_loop_stop() {
+  local progress_path
+  progress_path=$(resolve_progress_path) || exit "$SFS_LOOP_EXIT_SPEC_MISSING"
+  # Reset current_wu_owner via sed (atomic single-line replace).
+  local tmp
+  tmp=$(mktemp) || exit "$SFS_LOOP_EXIT_HEARTBEAT_FAIL"
+  awk '
+    /^current_wu_owner:/ && !done {
+      cmt = ""
+      if (match($0, /[ \t]*#.*$/)) cmt = substr($0, RSTART)
+      print "current_wu_owner: null" cmt
+      done = 1; next
+    }
+    { print }
+  ' "$progress_path" > "$tmp" && mv -f "$tmp" "$progress_path" || exit "$SFS_LOOP_EXIT_HEARTBEAT_FAIL"
+  echo "loop: stopped, current_wu_owner=null" >&2
+  return "$SFS_LOOP_EXIT_OK"
+}
+
+# cmd_loop_replay — replay past scheduled_task_log entry (debug).
+cmd_loop_replay() {
+  local task_log_id="$1"
+  local progress_path
+  progress_path=$(resolve_progress_path) || exit "$SFS_LOOP_EXIT_SPEC_MISSING"
+  echo "loop: replay '$task_log_id' (MVP stub)" >&2
+  if grep -q "$task_log_id" "$progress_path" 2>/dev/null; then
+    echo "loop: found '$task_log_id' in $progress_path" >&2
+    return "$SFS_LOOP_EXIT_OK"
+  fi
+  echo "loop: '$task_log_id' not found in $progress_path" >&2
+  return "$SFS_LOOP_EXIT_SPEC_MISSING"
+}
+
+main "$@"
