@@ -1,3 +1,9 @@
+## [0.4.0-mvp] - 2026-04-29
+
+- (release cut → stable 02be2f8, tag v0.4.0-mvp)
+- WU-25 (#1 sfs slash 구현 part 2 = `/sfs plan` + `/sfs review`) + WU-26 (#1 sfs slash 구현 part 3 = `/sfs decision` + `/sfs retro --close`) 통합 cut. β release roadmap 0.4.0-mvp = #1 sfs slash 6 명령 완성.
+- 25th-5 zen-practical-archimedes (Cowork) handoff 적용 → 사용자 mac terminal cut-release.sh 실 실행. P-10 §5 stable .git/index.lock 사전 검증 적용 = 사고 0건.
+
 ## [0.3.1-mvp] - 2026-04-29
 
 - (release cut → stable caec8de)
