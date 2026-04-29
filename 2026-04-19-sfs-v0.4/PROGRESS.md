@@ -526,6 +526,38 @@ resume_hint:
 
 ## ① Just-Finished
 
+### 25번째 사이클 6번째 user-active conversation `zen-magical-feynman` (Cowork, 2026-04-29T08:00~08:30Z = 17:00~17:30 KST, 사용자 '솔론 프로젝트 총 남은작업양 확인 + 순차 진행' = 25th-5 HANDOFF default_action γ AI-doable 옵션 자율진행)
+
+**진행 batch (commit `387a8d2 WU-31.x + δ-codex(4-6)`, 25th-6 squash, push origin main 완료)**:
+
+- **W-22 cut-release.sh §1 pre-flight `.git/index.lock` 검증 보강** (P-10 자동화) — `check_index_lock()` helper (15L) + stable abort (Exit code 6 신설) / dev warn only. 6 smoke PASS (T0 bash -n / T1 --help / T3a stable lock + --apply → exit 6 / T4a stable lock + dry-run → warn / T5 lock 제거 후 정상 / T6 dev side lock + --apply → warn). P-10 reuse_count 0→1 + §5 resolved 마킹.
+- **W-23 auto-resume.sh v0.2 HANDOFF 우선 규칙** (25th-5 round-trip dogfooding 발견 후속) — `--auto` (default) HANDOFF.written_at vs PROGRESS resume_hint.last_written 신선도 비교 + `--prefer-handoff` / `--prefer-progress` override flag + JSON 출력 `source` / `prefer_mode` / `progress_last_written` / `handoff_written_at` / `progress_default_action` / `handoff_default_action` 필드 추가 (+194L). CLAUDE.md §1.19 1줄 보강 + version 1.18→1.19. 11 smoke PASS (T0~T11): T2 --auto HANDOFF newer (07:50) > PROGRESS (07:35) → source=handoff (사용자 발견 사례 핵심) / T3 explicit / T4 v0.1 backwards-compat / T5 graceful HANDOFF missing / T6 PROGRESS missing → exit 2 / T7 graceful / T8 둘 다 missing → exit 3 / T9 --format text / T10 HANDOFF older → source=progress / T11 unknown flag → exit 1.
+- **δ codex #4 upgrade.sh 신슬롯 cover** — solon-mvp-dist/upgrade.sh CHECK_FILES 6→21 + update_file calls 6→21 + chmod +x for scripts/*.sh (+89L). 0.3.x→0.4.x upgrade 시 자동 install 대상 = sfs-loop / sfs-decision / sfs-retro 3 신규 sh + decision-light.md 1 sprint-template + ADR-TEMPLATE.md / _INDEX.md 2 decisions-template = 총 15 신슬롯. 8 smoke PASS (T0 bash -n / T2 install 0.4.0-mvp baseline / T5 0.3.1→0.4.0 upgrade simulation = 5 missing slots auto-install 검증 / T6 VERSION bumped 0.3.1→0.4.0 / T7 chmod +x verify).
+- **δ codex #5 CHANGELOG raw-internal narrative 정제** (외부 OSS 노출 정리) — solon-mvp-dist/CHANGELOG.md 의 0.4.0/0.3.1/0.3.0-mvp release entry 공개용 재작성, archived Unreleased section (-76L) 제거. WU 번호 / smoke 카운트 / 세션 codename / row 참조 등 raw-internal jargon 제거, Added/Changed/Fixed/Notes 섹션으로 재구성.
+- **δ codex #6 solon-mvp-dist/AGENTS.md 신설 + ALLOWLIST 보강** — Codex/Cowork redirect stub (36L, CLAUDE.md 와 parity, 이중 SSoT 회피 명시) + cut-release.sh ALLOWLIST 8→9 (AGENTS.md 추가). 차후 cut 시 stable AGENTS.md 자동 sync = untracked dust 사전 차단 (`--allow-dirty` bypass 의존 해소). 3 smoke PASS (T0 bash -n / T2 dry-run AGENTS.md detect M=changed=1 / T3 apply mode stable AGENTS.md = dev AGENTS.md content match).
+
+**부수 갱신**:
+- CLAUDE.md §1.19 신선도 우선 규칙 1줄 보강 + version 1.18→1.19 + updated 2026-04-29.
+- cross-ref-audit.md §4 W-22 + W-23 모두 신설 + resolved 마킹 (commit `387a8d2` final_sha 동시 backfill).
+- learning-logs/2026-05/P-10-stable-stale-git-lock-recovery.md status: documented + reuse_count 0→1 + §5 resolved + commit `387a8d2` final_sha backfill.
+- solon-mvp-dist/templates/.gitignore.snippet `+ .sfs-local/**/*.bak-*` 1줄 (prior 변경, 본 batch 에 함께 commit).
+
+**규율 준수**:
+- §1.3 self-validation (의미 결정 0, 모두 25th-5 HANDOFF 의 γ AI-doable 옵션 자율 진행) ·
+- §1.4 Option β default (각 task minimal cleanup, ε WU-27 sub-task 6.8 큰 작업 보류) ·
+- §1.5' commit + push 사용자 manual (AI 는 file 편집만, host .git mutate 0) ·
+- §1.7 escalation (ε WU-27 sub-task 6.8 = 별도 세션 user-active-deferred mode 권장 = ⚠️ marker 유지) ·
+- §1.8 매 task PROGRESS heartbeat 갱신 (08:30Z) ·
+- §1.12 mutex (current_wu_owner=null 유지) ·
+- §1.13 R-D1 dev-first (모든 산출물 docset / solon-mvp-dist staging only) ·
+- §1.14 ≤200 lines (CLAUDE.md 171 lines) ·
+- §1.15 review gate (각 task ≤10분 + files ≤3 small step + decision_points 신설 0 + mechanical = light gate skip OK 정합) ·
+- §1.18 commit 안내 형식 의무 (heredoc-ready shell command block, path/branch-neutral)
+
+**잔여 작업 (다음 사이클)**:
+- 사용자 직접 영역: A 외부 onboarding · W-14~W-19 schema 결정 · W-20 §15 등재 · W-21 Managed Agents Memory γ 관망 · WU-28 D3 (consumer mirror, 0.6.0-mvp+) · codex review §5 결정 3건 (Release Readiness command / GateReport release-blocker / r3 historical snapshot)
+- 선택적 큰 작업 (AI-doable, user-active-deferred mode 권장): ε WU-27 sub-task 6.8 buffer (Ralph Loop live LLM 호출 site 검증, ~60-120분) · 0.5.0-mvp release cut (codex finding 흡수 후 1-2 cycle dogfooding 검증 후)
+
 ### 23번째 세션 (dazzling-sharp-euler, user-active, 2026-04-25 23:43 KST → 진행 중, WU-31 신설 spec only)
 
 **사용자 발화 흐름**:
