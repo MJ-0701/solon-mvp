@@ -2,7 +2,7 @@
 doc_id: sessions-index
 title: "sessions/ — 세션별 3-part 로그 인덱스"
 visibility: raw-internal
-updated: 2026-04-29   # 25th 사이클 admiring-zealous-newton continuation 6 user-active conversation (2026-04-29T01:15 KST): **16번째 nice-kind-babbage retro 신설 ~95L (D-E forward idx 5→6) + 17번째 admiring-fervent-dijkstra retro 신설 ~110L (D-E forward idx 6→7)** = 본 cycle small task batch (WU-27 spec-only close 직후, 자율 진행 모드 진입 전 정리). D-E 만남 지점 idx=7 도달 = 다음 idx=7 (forward = 18th confident-loving-ride) 신설 시 D-E 도메인 종결. 직전 갱신 = 25th gracious-determined-gauss (15th admiring-nice-faraday 201L). 24th brave-gracious-mayer (21st trusting-stoic-archimedes 165L) + 24th-32+ bold-festive-euler conversation continuation (13th 168L + 14th 144L + 22nd 209L + 23rd 233L) + 24th-33 gracious-nifty-gates (12th 102L).
+updated: 2026-04-29   # 25th-3 사이클 youthful-eloquent-franklin user-active conversation (2026-04-29T11:15+09:00 KST): **18번째 confident-loving-ride retro 신설 ~125L (D-E forward idx 7→8 advance, 만남 지점 1 step 잔여 = idx=8 19th 또는 idx=9 20th 중 1건 신설 시 forward >= reverse 도달 = D-E 도메인 종결)**. WU-21 Phase 1 킥오프 dry-run D-2 cd94f65 = install.sh sandbox FULL PASS + setup-w0.sh pre-flight + 시뮬 PASS + verify-w0.sh exit 0 + WARN 3 (Stack 치환 대기 정상) + F-04 false-positive 2건 (D-day 차단 0, 후속 WU-30 fix) + 학습 포인트 2건 (역할 분리 + sandbox dry-run 패턴). 직전 갱신 = 25th-1 admiring-zealous-newton continuation 6 (16번째 nice-kind-babbage ~95L + 17번째 admiring-fervent-dijkstra ~110L). 25th gracious-determined-gauss (15th admiring-nice-faraday 201L). 24th brave-gracious-mayer (21st trusting-stoic-archimedes 165L) + 24th-32+ bold-festive-euler conversation continuation (13th 168L + 14th 144L + 22nd 209L + 23rd 233L) + 24th-33 gracious-nifty-gates (12th 102L).
 ---
 
 # sessions/ — 세션 로그 인덱스
@@ -31,7 +31,7 @@ updated: 2026-04-29   # 25th 사이클 admiring-zealous-newton continuation 6 us
 | 2026-04-25 | `admiring-nice-faraday` | 15 | `2709fcf refresh(WU-20.1)` (14번째 staged 실체화) + `5d4c6c6 session: ... P-03 handoff automation + 15번째 snapshot` / P-03 (87L) + scripts/resume-session-check.sh v0.1 (119L) 동시 신설 = 24th 사이클 cron 진입 sanity check infrastructure root + auto-resume protocol 3단 첫 코드화 + HANDOFF v3.2→v3.3-reduced + PROGRESS resume_hint v2 + P-04 prototype trace | [2026-04-25-admiring-nice-faraday.md](2026-04-25-admiring-nice-faraday.md) |
 | 2026-04-25 | `nice-kind-babbage` | 16 | `87b60ff session: ... scheduled hourly handoff automation + check.sh v0.2` / scheduled task 도입 + check.sh #6 angle-bracket sha placeholder 감지 추가 | [2026-04-25-nice-kind-babbage.md](./2026-04-25-nice-kind-babbage.md) (~95L, 25th-1 admiring-zealous-newton continuation 6 신설) |
 | 2026-04-25 | `admiring-fervent-dijkstra` | 17 | `cf99492 session: ... scheduled hourly handoff automation v3` / append-scheduled-task-log.sh helper 신설 + check.sh #7 drift 감지 (90분 threshold, exit 16) | [2026-04-25-admiring-fervent-dijkstra.md](./2026-04-25-admiring-fervent-dijkstra.md) (~110L, 25th-1 admiring-zealous-newton continuation 6 신설) |
-| 2026-04-25 | `confident-loving-ride` | 18 | `cd94f65 WU-21: Phase 1 킥오프 dry-run (D-2)` / install.sh sandbox PASS + setup-w0.sh pre-flight + 시뮬 PASS / `2acac45` + `9766ad6` 2 release | *retrospective 미작성 — D-E-meta-retro idx=7 후보* |
+| 2026-04-25 | `confident-loving-ride` | 18 | `cd94f65 WU-21: Phase 1 킥오프 dry-run (D-2)` / install.sh sandbox PASS + setup-w0.sh pre-flight + 시뮬 PASS / `2acac45` + `9766ad6` 2 release | [2026-04-25-confident-loving-ride.md](./2026-04-25-confident-loving-ride.md) (~125L, 25th-3 youthful-eloquent-franklin 신설) |
 | 2026-04-25 | `eager-elegant-bell` | 19 | `3471c12 wip(WU-22/step-1/brainstorm)` 8후보 1-pager + 의존성 그래프 + α/β/γ release grouping / hang/abandoned (mutex release 부재, 20번째가 takeover) | *retrospective 미작성 — D-E-meta-retro idx=8 후보, hang takeover 패턴 (P-04 근거)* |
 | 2026-04-25 | `epic-brave-galileo` | 20 | `a66cf2e close(WU-22)` β themed-bundles 채택 + 19번째 hang takeover (사용자 confirm) / sprints/_INDEX 갱신 / P-04 takeover 패턴 첫 적용 | *retrospective 미작성 — D-E-meta-retro idx=9 후보* |
 | 2026-04-25 | `trusting-stoic-archimedes` | 21 | WU-23 close (V-1 vote 3/3 + 3 conditions) / P-04 + P-05 신설 / mode=user-active-deferred 첫 도입 (4시간 자율 위임) / 8 step batch (`f11dd4f` ~ `8215c43`) / HANDOFF v3.5→v3.6 + current_active_* 필드 (24th mutex 직접 선례) | [2026-04-25-trusting-stoic-archimedes.md](2026-04-25-trusting-stoic-archimedes.md) |
@@ -61,7 +61,7 @@ updated: 2026-04-29   # 25th 사이클 admiring-zealous-newton continuation 6 us
 - ⏳ 2026-04-20 회사 계정 1-2번째 블록: 범위 밖 (WU-16b 연장 or 별도 WU)
 - ✅ 2026-04-24 brave-hopeful-euler: WU-16.1 에서 생성 완료
 
-## D-E-meta-retro 진행 상태 (25th gracious-determined-gauss 갱신, 2026-04-28T10:36 KST)
+## D-E-meta-retro 진행 상태 (25th-3 youthful-eloquent-franklin 갱신, 2026-04-29T11:15+09:00 KST)
 
 D-E-meta-retro 도메인 list = `[11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]` (총 13 sessions). PROGRESS.md `domain_locks.D-E-meta-retro` 가 SSoT.
 
@@ -72,25 +72,24 @@ D-E-meta-retro 도메인 list = `[11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22
 - ✅ idx=4 (15번째 admiring-nice-faraday) — 201L, **25th gracious-determined-gauss 신설** (P-03 handoff automation + resume-session-check.sh v0.1 helper 신설 = 24th 사이클 cron 진입 sanity check infrastructure root + auto-resume protocol 3단 첫 코드화 + 14번째 staged commit 실체화 `2709fcf` + P-04 prototype trace)
 - ✅ idx=5 (16번째 nice-kind-babbage) — ~95L, **25th-1 admiring-zealous-newton continuation 6 신설** (scheduled hourly handoff automation 첫 실 적용 + scheduled_task_log block 신설 N=20 rolling tail + check.sh v0.2 check #6 angle-bracket placeholder 감지 추가)
 - ✅ idx=6 (17번째 admiring-fervent-dijkstra) — ~110L, **25th-1 admiring-zealous-newton continuation 6 신설** (append-scheduled-task-log.sh v0.1 helper 신설 + check.sh v0.3 check #7 drift 90분 threshold + exit 16 + 16번째 final_sha 백필 87b60ff 첫 forward sha backfill 패턴 사례)
-- ⏳ idx=7 (18번째 confident-loving-ride) — WU-21 Phase 1 킥오프 dry-run D-2 **(next forward target = D-E 도메인 만남 지점 종결 후보)**
+- ✅ idx=7 (18번째 confident-loving-ride) — ~125L, **25th-3 youthful-eloquent-franklin 신설** (WU-21 Phase 1 킥오프 dry-run D-2 cd94f65 + install.sh sandbox FULL PASS + setup-w0.sh pre-flight + 시뮬 PASS + verify-w0.sh exit 0 + WARN 3 (정상) + F-04 false-positive 2건 (D-day 차단 0, 후속 WU-30 fix) + 학습 포인트 2건 = 역할 분리 + sandbox dry-run 패턴)
 - ⏳ idx=8 (19번째 eager-elegant-bell) — hang/abandoned, 20번째가 takeover
 - ⏳ idx=9 (20번째 epic-brave-galileo) — WU-22 close + 19th takeover (P-04 첫 적용) **(next reverse target)**
 - ✅ idx=10 (21번째 trusting-stoic-archimedes) — 165L, **24th brave-gracious-mayer 신설** (V-1 vote PASS 3/3 + alt B persona + P-04/P-05 신설 + user-active-deferred mode 첫 도입 + HANDOFF current_active_* 필드 = 24th mutex 직접 선례)
 - ✅ idx=11 (22번째 adoring-trusting-feynman) — 209L, **24th-32+ 신설 by bold-festive-euler conversation** (8 step batch + §1.14 메타 규칙 + WU-30/WU-24 spec)
 - ✅ reverse_idx=12 (23번째 dazzling-sharp-euler) — 233L, 24th-32+ 신설 by bold-festive-euler
 
-stop_when: forward_idx >= reverse_idx. 현재 forward_idx=7 (18th confident-loving-ride next, 만남 지점 후보) / reverse_idx=9 (20th epic-brave-galileo next) → **3 sessions 남음** (idx=7 18th + idx=8 19th + idx=9 20th). 25th 누적 retro 신설 = **10건** (12th 102L + 13th 168L + 14th 144L + 15th 201L + **16th ~95L** + **17th ~110L** + 21st 165L + 22nd 209L + 23rd 233L = ~1427L, 본 25th-1 admiring-zealous-newton continuation 6 small task batch = 16th + 17th 2건 추가 + P-07 release-tooling-phased ~120L 동시 신설).
+stop_when: forward_idx >= reverse_idx. 현재 forward_idx=8 (19th eager-elegant-bell next) / reverse_idx=9 (20th epic-brave-galileo next) → **2 sessions 남음** (idx=8 19th + idx=9 20th). 다음 1건 신설 시 만남 지점 도달 = D-E 도메인 lifecycle 종결. 25th 누적 retro 신설 = **11건** (12th 102L + 13th 168L + 14th 144L + 15th 201L + 16th ~95L + 17th ~110L + **18th ~125L** + 21st 165L + 22nd 209L + 23rd 233L = ~1552L, 본 25th-3 youthful-eloquent-franklin user-active conversation 옵션 β minimal cleanup default = 18th 1건 추가 + D-E 종결까지 2 step 잔여).
 
-### 다음 scheduled run 추천 priority (2026-04-28+ hourly, 25th gracious-determined-gauss 갱신)
+### 다음 scheduled run 추천 priority (2026-04-29+ hourly, 25th-3 youthful-eloquent-franklin 갱신)
 
 **참고**: D-E-meta-retro `prefer_mode: user-active-only` (24th brave-gracious-mayer 결정, 작은 유닛 = scheduled cycle 낭비). scheduled run 은 D-E claim 안 하고 D-G-WU-25 / D-H-WU-26 우선. 본 priority list 는 **user-active conversation 진입 시 권장 ordering**.
 
-1. **D-E forward/reverse idx=7 (18번째 confident-loving-ride retro 신설)** — `cd94f65` WU-21 Phase 1 킥오프 dry-run D-2 + install.sh sandbox PASS + setup-w0.sh pre-flight + 시뮬 PASS + `2acac45` + `9766ad6` 2 release. **만남 지점 = D-E 도메인 종결**, ~10-15분, retro 가치 높음 (WU-21 신설 + Phase 1 검증 history).
-2. **D-E reverse idx=9 (20번째 epic-brave-galileo retro 신설)** — 큰 결정 다수 (WU-22 close + 19th hang takeover P-04 첫 적용 + 사용자 confirm + sprints/_INDEX 갱신), retro 가치 높음, ~10-15분 분량.
-3. **D-E reverse idx=8 (19번째 eager-elegant-bell retro 신설)** — hang/abandoned (mutex release 부재) + WU-22/step-1 brainstorm 8후보 1-pager (P-04 근거 패턴), retro 가치 medium-high, ~10분.
+1. **D-E reverse idx=9 (20번째 epic-brave-galileo retro 신설)** — 큰 결정 다수 (WU-22 close `a66cf2e` + 19th hang takeover P-04 첫 적용 + 사용자 confirm + sprints/_INDEX 갱신), retro 가치 높음, ~10-15분 분량. **20th 신설 시 reverse_idx 9→8 → forward 8 = reverse 8 만남 지점 도달 = D-E 도메인 종결** (idx=8 19th 도 reverse 로 자연 흡수 또는 forward 진행).
+2. **D-E reverse idx=8 (19번째 eager-elegant-bell retro 신설)** — hang/abandoned (mutex release 부재) + WU-22/step-1 brainstorm 8후보 1-pager (P-04 근거 패턴), retro 가치 medium-high, ~10분. **19th 신설 시 forward 8 = reverse 9 → 1 step 더 잔여** (20th).
 
-(25th-1 admiring-zealous-newton continuation 6 = idx=5 + idx=6 신설 완료, 위 3건 = 남은 잔여)
+(25th-1 admiring-zealous-newton continuation 6 = idx=5 + idx=6 신설 + 25th-3 youthful-eloquent-franklin = idx=7 신설 완료, 위 2건 = 남은 잔여)
 
-D-E 도메인 종결 후 다음 priority = **D-F-meta-handoff** (HANDOFF + NEXT-SESSION-BRIEFING 정리, 작은 유닛 OK).
+D-E 도메인 종결 후 다음 priority = **D-F-meta-handoff** (HANDOFF + NEXT-SESSION-BRIEFING 정리, 작은 유닛 OK) > WU-26 row 3 (sfs-retro.sh 신설 큰 micro-step) > 사용자 manual commit + 0.5.0-mvp release cut.
 
-**스케줄러 (cron 11:08 KST 48번째 진입 예정) 권장**: D-E priority 5 + prefer_mode=user-active-only → skip → D-G-WU-25 row 3/4 (sfs-review.sh / sfs-common.sh 보강) 또는 D-H-WU-26 row 2 (sfs-decision.sh) claim. briefing-24th-47 §5 충돌 분기표 정합.
+**스케줄러 (cron hourly 진입 예정) 권장**: D-E priority + prefer_mode=user-active-only → skip → D-G-WU-25 / D-H-WU-26 또는 다음 cycle WU-26 row 3 claim.
