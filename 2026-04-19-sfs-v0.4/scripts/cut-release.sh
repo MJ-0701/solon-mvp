@@ -38,6 +38,7 @@
 #   3 = stable repo path 없음 / git 비정상
 #   4 = git status not clean (without --allow-dirty)
 #   5 = TBD final_sha 검출 (release blocker — `final_sha: TBD_*` 인 WU 잔존)
+#   6 = stale `.git/index.lock` 검출 (P-10 후속, W-22, --apply 모드 한정)
 #  99 = unknown error
 # ────────────────────────────────────────────────────────────────
 set -euo pipefail
@@ -53,12 +54,14 @@ ALLOW_DIRTY=0
 NO_TAG=0
 SHOW_HELP=0
 
-# Allowlist (8 항목, WU-31 §2.3 verbatim)
+# Allowlist (9 항목, WU-31 §2.3 + 25th-6 codex finding #6 추가)
+# AGENTS.md = stable 의 untracked dust 해소 (dev staging 의 redirect stub 을 sync).
 ALLOWLIST=(
   "VERSION"
   "CHANGELOG.md"
   "README.md"
   "CLAUDE.md"
+  "AGENTS.md"
   "install.sh"
   "upgrade.sh"
   "uninstall.sh"
@@ -135,6 +138,23 @@ if [[ ! -d "${STABLE_REPO}/.git" ]]; then
   fail "stable repo missing .git: ${STABLE_REPO}" 3
 fi
 
+# stale `.git/index.lock` 사전 검증 (P-10 후속, W-22)
+# stable side: --apply 모드면 abort (사고 1차 사례 = 25th-2 0.3.0-mvp cut)
+# dev side:    warn 만 (step 5 dev post-flight 영향 가능성, 변종 1)
+check_index_lock() {
+  local repo="$1" label="$2" abort_in_apply="$3"
+  local lock="${repo}/.git/index.lock"
+  if [[ -f "${lock}" ]]; then
+    warn "${label} stale .git/index.lock 검출: ${lock}"
+    warn "    다른 git process 부재 확인 후 'rm -f ${lock}' 권장 (P-10 §2 절차)"
+    if [[ "${abort_in_apply}" == "1" && "${APPLY}" == "1" ]]; then
+      fail "${label} stale lock — --apply 진행 시 step 4 git add abort 위험 (P-10 사고 재현 방지)" 6
+    fi
+  fi
+}
+check_index_lock "${STABLE_REPO}" "stable" 1
+# DEV_REPO_ROOT 는 아직 미설정 — 아래 git rev-parse 후 호출
+
 # git status clean 체크 (둘 다)
 check_clean() {
   local repo="$1" label="$2"
@@ -156,10 +176,11 @@ if [[ -z "${DEV_REPO_ROOT}" ]]; then
   warn "dev repo not under git (REPO_ROOT=${REPO_ROOT}) — skipping dev-side clean check"
 else
   check_clean "${DEV_REPO_ROOT}" "dev"
+  check_index_lock "${DEV_REPO_ROOT}" "dev" 0  # dev side warn only (P-10 변종 1)
 fi
 check_clean "${STABLE_REPO}" "stable"
 
-log "  ✅ paths ok / git clean"
+log "  ✅ paths ok / git clean / no blocking stale .git/index.lock"
 
 # TBD final_sha 검출 (WU-31 후속 강화: 0.3.0-mvp release cut 시
 # WU-24 처럼 final_sha=TBD placeholder 인 WU 가 있으면 abort).

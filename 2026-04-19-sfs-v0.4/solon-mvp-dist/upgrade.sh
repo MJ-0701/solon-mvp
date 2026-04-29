@@ -147,6 +147,14 @@ recommend_action() {
     "CLAUDE.md"|"AGENTS.md"|"GEMINI.md"|".sfs-local/divisions.yaml")
       printf "skip"
       ;;
+    .sfs-local/scripts/*.sh)
+      # Solon-versioned bash code, user 수정 영역 아님
+      printf "backup+overwrite"
+      ;;
+    .sfs-local/sprint-templates/*.md|.sfs-local/decisions-template/*.md)
+      # 배포판 관리 템플릿, user 수정 영역 아님 (install.sh 정책 정합)
+      printf "backup+overwrite"
+      ;;
     *)
       printf "skip"
       ;;
@@ -161,16 +169,21 @@ cat <<EOF
   - checksum 다름      → 자동 정책에 따라 갱신 또는 보존
 
 자동 처리 정책:
-  - 신규 파일                   → 자동 설치
-  - checksum 동일               → 변경 없음
-  - SFS.md                      → backup+overwrite (공통 SFS core 최신화)
-  - CLAUDE/AGENTS/GEMINI.md     → 자동 보존 (기존 프로젝트 지침 보호)
-  - .sfs-local/divisions.yaml   → 자동 보존 (프로젝트별 운영값 보호)
-  - .claude/commands/sfs.md     → backup+overwrite (배포판 관리 커맨드 최신화)
+  - 신규 파일                          → 자동 설치
+  - checksum 동일                      → 변경 없음
+  - SFS.md                             → backup+overwrite (공통 SFS core 최신화)
+  - CLAUDE/AGENTS/GEMINI.md            → 자동 보존 (기존 프로젝트 지침 보호)
+  - .sfs-local/divisions.yaml          → 자동 보존 (프로젝트별 운영값 보호)
+  - .claude/commands/sfs.md            → backup+overwrite (배포판 관리 커맨드 최신화)
+  - .sfs-local/scripts/sfs-*.sh        → backup+overwrite (Solon-versioned bash, 신규: loop/decision/retro)
+  - .sfs-local/sprint-templates/*.md   → backup+overwrite (배포판 관리 템플릿, 신규: decision-light)
+  - .sfs-local/decisions-template/*.md → backup+overwrite (ADR-TEMPLATE 신규, WU-26)
 
 EOF
 
-# diff 보여줄 파일
+# diff 보여줄 파일 (codex finding #4 후속, 25th-6 zen-magical-feynman 보강)
+# 0.4.0-mvp 이상 = sfs-loop / sfs-decision / sfs-retro / decision-light template +
+#                  ADR-TEMPLATE 신규 슬롯 cover.
 declare -a CHECK_FILES=(
   "SFS.md|templates/SFS.md.template"
   "CLAUDE.md|templates/CLAUDE.md.template"
@@ -178,6 +191,24 @@ declare -a CHECK_FILES=(
   "GEMINI.md|templates/GEMINI.md.template"
   ".claude/commands/sfs.md|templates/.claude/commands/sfs.md"
   ".sfs-local/divisions.yaml|templates/.sfs-local-template/divisions.yaml"
+  # scripts/ — Solon-versioned bash adapters (executable, user 수정 영역 아님)
+  ".sfs-local/scripts/sfs-common.sh|templates/.sfs-local-template/scripts/sfs-common.sh"
+  ".sfs-local/scripts/sfs-status.sh|templates/.sfs-local-template/scripts/sfs-status.sh"
+  ".sfs-local/scripts/sfs-start.sh|templates/.sfs-local-template/scripts/sfs-start.sh"
+  ".sfs-local/scripts/sfs-plan.sh|templates/.sfs-local-template/scripts/sfs-plan.sh"
+  ".sfs-local/scripts/sfs-review.sh|templates/.sfs-local-template/scripts/sfs-review.sh"
+  ".sfs-local/scripts/sfs-decision.sh|templates/.sfs-local-template/scripts/sfs-decision.sh"
+  ".sfs-local/scripts/sfs-retro.sh|templates/.sfs-local-template/scripts/sfs-retro.sh"
+  ".sfs-local/scripts/sfs-loop.sh|templates/.sfs-local-template/scripts/sfs-loop.sh"
+  # sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용 (5 file)
+  ".sfs-local/sprint-templates/plan.md|templates/.sfs-local-template/sprint-templates/plan.md"
+  ".sfs-local/sprint-templates/log.md|templates/.sfs-local-template/sprint-templates/log.md"
+  ".sfs-local/sprint-templates/review.md|templates/.sfs-local-template/sprint-templates/review.md"
+  ".sfs-local/sprint-templates/retro.md|templates/.sfs-local-template/sprint-templates/retro.md"
+  ".sfs-local/sprint-templates/decision-light.md|templates/.sfs-local-template/sprint-templates/decision-light.md"
+  # decisions-template/ — sfs-decision.sh 가 ADR 신설 시 사용 (WU-26)
+  ".sfs-local/decisions-template/ADR-TEMPLATE.md|templates/.sfs-local-template/decisions-template/ADR-TEMPLATE.md"
+  ".sfs-local/decisions-template/_INDEX.md|templates/.sfs-local-template/decisions-template/_INDEX.md"
 )
 
 for pair in "${CHECK_FILES[@]}"; do
@@ -232,7 +263,7 @@ cat <<EOF
 적용 결과:
   - 신규 파일과 .gitignore/VERSION 은 자동 처리됩니다.
   - 기존 프로젝트 지침 파일은 자동 보존됩니다.
-  - backup+overwrite 대상은 기존 파일을 .bak-YYYYMMDD-HHMMSS 로 보관한 뒤 갱신합니다.
+  - backup+overwrite 대상은 기존 파일을 .sfs-local/tmp/upgrade-backups/ 아래에 보관한 뒤 갱신합니다.
 
 EOF
 
@@ -270,10 +301,16 @@ update_file() {
   printf "    자동 정책: %s\n" "$recommended"
   case "$recommended" in
     b|B|"backup"|"backup+overwrite")
-      local ts=$(date +%Y%m%d-%H%M%S)
-      mv "$dst" "$dst.bak-$ts"
+      local ts backup_dir safe_rel backup_path backup_rel
+      ts=$(date +%Y%m%d-%H%M%S)
+      backup_dir="$TARGET/.sfs-local/tmp/upgrade-backups/$ts"
+      mkdir -p "$backup_dir"
+      safe_rel="${dst_rel//\//__}"
+      backup_path="$backup_dir/$safe_rel"
+      backup_rel="${backup_path#$TARGET/}"
+      mv "$dst" "$backup_path"
       cp "$src" "$dst"
-      ok "백업 + 갱신: $dst_rel → $dst_rel.bak-$ts"
+      ok "백업 + 갱신: $dst_rel → $backup_rel"
       ;;
     o|O|"overwrite")
       cp "$src" "$dst"
@@ -295,6 +332,34 @@ update_file "GEMINI.md" "templates/GEMINI.md.template" "Gemini CLI 어댑터" "s
 mkdir -p "$TARGET/.claude/commands"
 update_file ".claude/commands/sfs.md" "templates/.claude/commands/sfs.md" "Claude Code /sfs 커맨드" "b"
 update_file ".sfs-local/divisions.yaml" "templates/.sfs-local-template/divisions.yaml" "본부 활성화" "s"
+
+# scripts/ — Solon-versioned bash adapters (codex finding #4 후속, 25th-6 보강)
+# 신규: sfs-loop / sfs-decision / sfs-retro (0.4.0-mvp 추가 슬롯)
+mkdir -p "$TARGET/.sfs-local/scripts"
+update_file ".sfs-local/scripts/sfs-common.sh"   "templates/.sfs-local-template/scripts/sfs-common.sh"   "sfs-common (shared helpers)" "b"
+update_file ".sfs-local/scripts/sfs-status.sh"   "templates/.sfs-local-template/scripts/sfs-status.sh"   "sfs status"   "b"
+update_file ".sfs-local/scripts/sfs-start.sh"    "templates/.sfs-local-template/scripts/sfs-start.sh"    "sfs start"    "b"
+update_file ".sfs-local/scripts/sfs-plan.sh"     "templates/.sfs-local-template/scripts/sfs-plan.sh"     "sfs plan"     "b"
+update_file ".sfs-local/scripts/sfs-review.sh"   "templates/.sfs-local-template/scripts/sfs-review.sh"   "sfs review"   "b"
+update_file ".sfs-local/scripts/sfs-decision.sh" "templates/.sfs-local-template/scripts/sfs-decision.sh" "sfs decision (WU-26)" "b"
+update_file ".sfs-local/scripts/sfs-retro.sh"    "templates/.sfs-local-template/scripts/sfs-retro.sh"    "sfs retro --close (WU-26)" "b"
+update_file ".sfs-local/scripts/sfs-loop.sh"     "templates/.sfs-local-template/scripts/sfs-loop.sh"     "sfs loop (WU-27 spec)" "b"
+chmod +x "$TARGET/.sfs-local/scripts"/*.sh 2>/dev/null || true
+
+# sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용 (5 file)
+# 신규: decision-light.md (0.4.0-mvp 추가)
+mkdir -p "$TARGET/.sfs-local/sprint-templates"
+update_file ".sfs-local/sprint-templates/plan.md"            "templates/.sfs-local-template/sprint-templates/plan.md"            "sprint plan template"   "b"
+update_file ".sfs-local/sprint-templates/log.md"             "templates/.sfs-local-template/sprint-templates/log.md"             "sprint log template"    "b"
+update_file ".sfs-local/sprint-templates/review.md"          "templates/.sfs-local-template/sprint-templates/review.md"          "sprint review template" "b"
+update_file ".sfs-local/sprint-templates/retro.md"           "templates/.sfs-local-template/sprint-templates/retro.md"           "sprint retro template"  "b"
+update_file ".sfs-local/sprint-templates/decision-light.md"  "templates/.sfs-local-template/sprint-templates/decision-light.md"  "decision-light template (WU-26)" "b"
+
+# decisions-template/ — sfs-decision.sh 가 ADR 신설 시 사용 (WU-26 §1)
+# 신규: ADR-TEMPLATE.md + _INDEX.md (0.4.0-mvp 추가)
+mkdir -p "$TARGET/.sfs-local/decisions-template"
+update_file ".sfs-local/decisions-template/ADR-TEMPLATE.md"  "templates/.sfs-local-template/decisions-template/ADR-TEMPLATE.md"  "ADR template (WU-26 full)"  "b"
+update_file ".sfs-local/decisions-template/_INDEX.md"        "templates/.sfs-local-template/decisions-template/_INDEX.md"        "decisions _INDEX (WU-26)"   "b"
 
 TODAY=$(date +%Y-%m-%d)
 if [ "$(uname)" = "Darwin" ]; then
@@ -367,7 +432,7 @@ ${C_BOLD}${C_GREEN}=== 업그레이드 완료 ===${C_RESET}
   $CUR_VER → $NEW_VER
 
 변경사항 git commit 권장:
-  ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .claude/commands/sfs.md .gitignore .sfs-local/divisions.yaml .sfs-local/VERSION${C_RESET}
+  ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .claude/commands/sfs.md .gitignore .sfs-local/${C_RESET}
   ${C_BLUE}git commit -m "chore: upgrade solon-mvp $CUR_VER → $NEW_VER"${C_RESET}
 
 CHANGELOG: https://github.com/${SOLON_REPO}/blob/main/CHANGELOG.md
