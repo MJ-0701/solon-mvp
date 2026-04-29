@@ -36,6 +36,30 @@ SFS_EXIT_PERM=5
 SFS_EXIT_UNKNOWN=99
 
 # ─────────────────────────────────────────────────────────────────────
+# PORTABLE HELPERS (WU-29 hotfix — codex review finding #2 macOS tac fallback)
+# ─────────────────────────────────────────────────────────────────────
+
+# reverse_lines — print file contents in reverse line order.
+#   $1 = file path
+# Returns: 0 always (missing file → empty stdout, callers use grep -m1 ... || true).
+# Priority: tac (gnu coreutils) > gtac (homebrew gnu) > tail -r (BSD/macOS) > awk fallback.
+# WU-29 §2 spec verbatim. macOS 기본 환경 (tac/gtac 부재) 에서도 정상 동작 보장.
+reverse_lines() {
+  local f="${1:-}"
+  [[ -f "${f}" ]] || return 0
+  if command -v tac >/dev/null 2>&1; then
+    tac "${f}"
+  elif command -v gtac >/dev/null 2>&1; then
+    gtac "${f}"
+  elif tail -r </dev/null >/dev/null 2>&1; then
+    # BSD tail (macOS) — `-r` reverse mode is non-POSIX but standard on Darwin.
+    tail -r "${f}"
+  else
+    awk '{a[NR]=$0} END {for (i=NR;i>0;i--) print a[i]}' "${f}"
+  fi
+}
+
+# ─────────────────────────────────────────────────────────────────────
 # VALIDATION
 # ─────────────────────────────────────────────────────────────────────
 
@@ -84,8 +108,9 @@ read_current_wu() {
     return 0
   fi
   # Fallback: scan events.jsonl backwards for last wu_open / wu_close.
+  # WU-29 hotfix: tac → reverse_lines for macOS portability.
   if [[ -f "${SFS_EVENTS_FILE}" ]]; then
-    tac "${SFS_EVENTS_FILE}" 2>/dev/null \
+    reverse_lines "${SFS_EVENTS_FILE}" \
       | grep -m1 '"type":"wu_open"' \
       | sed -nE 's/.*"wu_id"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p'
   fi
@@ -94,7 +119,8 @@ read_current_wu() {
 # read_last_gate — stdout: gate_id (events.jsonl 마지막 gate event).
 read_last_gate() {
   [[ -f "${SFS_EVENTS_FILE}" ]] || return 0
-  tac "${SFS_EVENTS_FILE}" 2>/dev/null \
+  # WU-29 hotfix: tac → reverse_lines for macOS portability.
+  reverse_lines "${SFS_EVENTS_FILE}" \
     | grep -m1 '"type":"gate"' \
     | sed -nE 's/.*"gate_id"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p'
 }
@@ -102,7 +128,8 @@ read_last_gate() {
 # read_last_gate_verdict — stdout: pass|partial|fail|empty.
 read_last_gate_verdict() {
   [[ -f "${SFS_EVENTS_FILE}" ]] || return 0
-  tac "${SFS_EVENTS_FILE}" 2>/dev/null \
+  # WU-29 hotfix: tac → reverse_lines for macOS portability.
+  reverse_lines "${SFS_EVENTS_FILE}" \
     | grep -m1 '"type":"gate"' \
     | sed -nE 's/.*"verdict"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p'
 }
@@ -286,7 +313,8 @@ infer_last_gate_id() {
   # Trailing `|| true` enforces the documented "Return code 항상 0" contract.
   # Fixed: 24th cycle 49번째 scheduled run `amazing-determined-gates`
   # (WU-25 row 3 sfs-review.sh smoke test T11 surfaced the bug).
-  tac "${SFS_EVENTS_FILE}" 2>/dev/null \
+  # WU-29 hotfix: tac → reverse_lines for macOS portability (codex review finding #2).
+  reverse_lines "${SFS_EVENTS_FILE}" \
     | grep -m1 '"type":"review_open"' \
     | sed -nE 's/.*"gate_id"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p' \
     || true
