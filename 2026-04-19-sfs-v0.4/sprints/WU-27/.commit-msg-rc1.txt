@@ -1,0 +1,42 @@
+wip(WU-27/sub-task-6.1-6.7/sfs-loop+helper-13+adapter): bash 실 구현 + 22 smoke PASS
+
+Files:
+  A solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-loop.sh (735L 신설)
+  M solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-common.sh (+571L helper 13)
+  M solon-mvp-dist/templates/.claude/commands/sfs.md (adapter +1 row 'loop')
+  M sprints/WU-27/CHANGELOG.md (v1.0-rc1 entry)
+  M PROGRESS.md (last_overwrite + current_wu_owner=optimistic-vigilant-bell mutex claim)
+
+Helper 13 (sfs-common.sh §3.1+§4+§6.5+§6.6 spec):
+  resolve_executor / resolve_progress_path / pre_flight_check
+  claim_lock / release_lock / detect_stale / mark_fail / mark_abandoned / auto_restart / escalate_w10_todo
+  is_big_task / review_with_persona / submit_to_user / cascade_on_fail
+
+sfs-loop.sh (735L):
+  cmd_loop_run (12-step pseudo-flow §4)
+  cmd_loop_coord (multi-worker spawn §6.4)
+  cmd_loop_status / cmd_loop_stop / cmd_loop_replay (§3.3 sub-cmd)
+  _pick_domain (python3 sweep + filter + priority sort)
+  _bump_heartbeat (awk last_overwrite replace)
+  _generate_codename (60 조합 adjective-adjective-surname)
+
+22 smoke PASS in /tmp/wu27-{loop-iter,coord,fix,rg}-* sandbox:
+  T1 dry-run / T2 actual claim+release+heartbeat / T3 PROGRESS mutate (newline fix) /
+  T4 status / T5 stop / T6 replay missing / T7-9 executor/priority/mode filter /
+  T10 stale takeover (mark_fail + auto_restart) / T11 --parallel 2 coord /
+  T12 --coord-only --parallel 1 reject / T13 review-gate real persona /
+  T14 --no-review-gate / T15 --plan-doc explicit / T16 custom executor passthrough /
+  T17 --max-wall-min 0 reject / T18 domain-filter NOPE / T19 priority-min 5 /
+  T20 heartbeat last_overwrite update / T21 file inventory (loop=735+common=942+sfs.md=154) /
+  T22 bash -n PASS
+
+LLM live invocation = SFS_LOOP_LLM_LIVE=1 env gating (default stub 안전)
+bug fix: repl_or_add newline missing in 4 helpers (T3 발견 후 1차 fix)
+
+WU-27 sub-task 6.1~6.7 close, 6.8 buffer 잔존 (edge case + bug fix, ~60-120분)
+§1.5' 25th-1 사용자 명시 자율 commit OK / push 금지 (morning recovery)
+
+FUSE bypass note: sandbox attempt (cp -a .git → /tmp) hit stale .git read =
+sandbox 의 cp 가 옛 main snapshot 을 가져옴 = 새 commit 이 wrong parent 에 만들어짐.
+→ Sandbox commit abort. 본 commit 은 사용자 mac terminal 에서 직접 (host .git
+fresh state 에서). Morning recovery instruction = 2026-04-19-sfs-v0.4/sprints/WU-27/MORNING-RECOVERY.md

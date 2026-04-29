@@ -50,7 +50,32 @@ parent_file: 2026-04-19-sfs-v0.4/sprints/WU-27.md
 - §∗ 다음 sub-task = **WU-27 frontmatter close** (~5분 small) → 사용자 commit + push 일괄 batch (sub-task 1+2+3+4+5+close 6-batch) → **sub-task 6 entry = 사용자 sleep 시작 + AI ~7시간 자율 구현** (user-active-deferred mode + commit 권한 위임 OK + push 금지). sub-task 6 micro-step 분할 6.1~6.8 명시.
 - **commit 권한 위임 명시 (사용자 25th-1 continuation 5 발화 verbatim "자동진행하는동안 commit까지는 자동화 해도 됨")**: §1.5' 일시 완화 = sub-task 6 autonomous mode 한정. push 는 §1.5 절대 보존.
 
-## v0.6~ (예약, WU-27 close + sub-task 6 진행 시 entry 추가)
+## v1.0-rc1 — 2026-04-29T01:35+09:00 (optimistic-vigilant-bell, 25번째 사이클 sub-task 6.1~6.7 close, user-active-deferred 자율 진행)
+
+- **sub-task 6.1**: `solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-loop.sh` 신설 (735L). shebang + 헤더 주석 + exit codes 11종 (sfs-loop-flow.md §5 verbatim) + defaults 22 (§3.2 inflation table) + usage_loop() + parse_args() (case loop, 모든 인자 + sub-cmd) + validate_args() (mode/parallel/isolation/report-format enum, mutual exclusion) + main dispatch.
+- **sub-task 6.2 + 6.3**: `solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-common.sh` +571L append helper 13건:
+  - `resolve_executor` (§3.1 Solon-wide convention, claude/gemini/codex/<custom>)
+  - `resolve_progress_path` (priority: arg > SFS_PROGRESS_PATH > .sfs-local/PROGRESS.md > ./PROGRESS.md)
+  - `pre_flight_check` (sfs-loop-flow.md §4 step 1~3: drift detection + FUSE lock warn + staged diff warn)
+  - `_domain_locks_field` (python3 yaml + awk fallback)
+  - `detect_stale` (last_heartbeat > ttl_minutes 검사)
+  - `claim_lock` / `release_lock` / `mark_fail` / `mark_abandoned` / `auto_restart` (sfs-loop-locking.md §6.5 4-state FSM, version+=1, retry_count cap=3, idempotent)
+  - `escalate_w10_todo` (cross-ref-audit.md §4 best-effort path resolve)
+  - `is_big_task` (sfs-loop-review-gate.md §6.6.3 5 criteria)
+  - `review_with_persona` / `submit_to_user` / `cascade_on_fail` (§6.6 PLANNER+EVALUATOR persona, MVP stub PASS-with-conditions, real LLM = SFS_LOOP_LLM_LIVE=1 gating).
+- **sub-task 6.4**: cmd_loop_run / cmd_loop_status / cmd_loop_stop / cmd_loop_replay 본격 구현 (sfs-loop-flow.md §4 12-step pseudo-flow integration). _pick_domain (python3 sweep + filter + priority sort) + _bump_heartbeat (awk-replace) + _generate_codename (adjective-adjective-surname 60 조합) helper 3건 추가.
+- **sub-task 6.5**: cmd_loop_coord 신설 (sfs-loop-multi-worker.md §6.4 Coordinator-worker 모델, --parallel N 시 self-spawn worker N + wait + aggregate exit codes). main dispatch 분기 (parallel >1 || coord-only → coord, else run).
+- **sub-task 6.5b**: `solon-mvp-dist/templates/.claude/commands/sfs.md` adapter +1 row "loop" (Adapter Dispatch table 5 row + Command list 1 entry + exit codes 9개 명시 + fallback 안내).
+- **sub-task 6.6**: review-gate wiring in cmd_loop_run (pre-flight 직후 PLANNER + EVALUATOR persona invocation, --no-review-gate / --plan-doc / --persona-dir flag 추가, plan_doc auto-resolve = ls sprints/WU-*.md | head -1).
+- **sub-task 6.7**: dry-run sandbox 통합 smoke 22건 PASS:
+  - T1 dry-run / T2 actual claim+release+heartbeat / T3 PROGRESS mutate verify (newline fix 검증) / T4 status / T5 stop / T6 replay missing / T7-9 executor/priority/mode filter / T10 stale takeover (mark_fail + auto_restart) / T11 --parallel 2 coord / T12 --coord-only --parallel 1 reject / T13 review-gate real persona / T14 --no-review-gate / T15 --plan-doc explicit / T16 custom executor passthrough / T17 --max-wall-min 0 reject / T18 domain-filter NOPE / T19 priority-min 5 / T20 heartbeat last_overwrite update / T21 file inventory (loop=735 + common=942 + sfs.md=154) / T22 bash -n PASS.
+- **sub-task 6.8 잔존**: edge case + bug fix buffer (~60-120분, 다음 cycle 또는 사용자 morning recovery).
+- **§1.13 stable sync**: 후속 0.5.0-mvp release cut 시점 (cut-release.sh 적용 batch).
+- **§1.5' commit 권한**: 25th-1 사용자 명시 자율 위임 OK (file 편집 + auto-commit), push 절대 보존 = morning recovery.
+- **bug fix in helper**: claim_lock / release_lock / mark_fail / mark_abandoned 4 곳의 `repl_or_add` 함수 newline fix (block 끝에 newline 없을 시 add 전 \n 추가, T3 발견 후 1차 fix).
+- **누적 분량**: sfs-loop.sh 735L 신설 + sfs-common.sh +571L 보강 = +1306L 신규. sfs.md +12 line.
+
+## v0.6~ (예약, WU-27 close + sub-task 6.8 + release cut 시 entry 추가)
 
 - v0.6: WU-27 frontmatter close + sprints/_INDEX 이동
-- v1.0: sub-task 6 (실 bash 구현 완료, 0.5.0-mvp release cut 후보)
+- v1.0: sub-task 6 close (6.8 buffer 완료, 0.5.0-mvp release cut)

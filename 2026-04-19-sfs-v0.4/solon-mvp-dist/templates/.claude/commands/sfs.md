@@ -15,6 +15,7 @@ description: |
   decision  짧은 결정 기록 남기기
   log       events.jsonl에 이벤트 기록
   retro     sprint 회고 작성/갱신
+  loop      Ralph Loop + Solon mutex 기반 자율 진행 (bash adapter, WU-27)
 argument-hint: "[command] [goal/details]"
 allowed-tools: Bash, Read, Write, Edit, Grep, Glob
 ---
@@ -30,11 +31,11 @@ token as the subcommand and the remainder as that subcommand's arguments.
 $ARGUMENTS
 ```
 
-## Adapter Dispatch (status / start / plan / review) — execute first
+## Adapter Dispatch (status / start / plan / review / loop) — execute first
 
-If the first argument is **`status`**, **`start`**, **`plan`**, or **`review`**,
+If the first argument is **`status`**, **`start`**, **`plan`**, **`review`**, or **`loop`**,
 dispatch the request to the corresponding bash script under
-`.sfs-local/scripts/` and stop. These four subcommands are deterministic and
+`.sfs-local/scripts/` and stop. These five subcommands are deterministic and
 must NOT be re-interpreted by the model.
 
 Dispatch table:
@@ -45,11 +46,12 @@ Dispatch table:
 | `start`   | `.sfs-local/scripts/sfs-start.sh <remaining args>`  | passes `<sprint-id>` and/or `--force` verbatim |
 | `plan`    | `.sfs-local/scripts/sfs-plan.sh <remaining args>`   | takes no flags currently; remaining args reserved for future (WU-25 §1) |
 | `review`  | `.sfs-local/scripts/sfs-review.sh <remaining args>` | passes `--gate <id>` / `--gate=<id>` verbatim (gates.md §1 7-enum: G-1, G0, G1, G2, G3, G4, G5; WU-25 §2) |
+| `loop`    | `.sfs-local/scripts/sfs-loop.sh <remaining args>`   | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim (WU-27 §3) |
 
 Procedure (apply in order):
 
 1. **Existence check** — Use the Bash tool to verify the target script exists
-   and is executable. If `.sfs-local/scripts/sfs-{status,start,plan,review}.sh`
+   and is executable. If `.sfs-local/scripts/sfs-{status,start,plan,review,loop}.sh`
    is missing or not executable, fall back to the **Claude-driven mode** below
    for that subcommand and tell the user which script is missing (1 line, no
    speculation about the cause).
@@ -72,6 +74,11 @@ Procedure (apply in order):
      `4`=template missing, `6`=gate id invalid or required
      (`unknown gate <id>, valid: G-1, G0, G1, G2, G3, G4, G5`),
      `7`=unknown CLI flag, `99`=unknown.
+   - loop: `0`=ok, `1`=invalid usage, `2`=PROGRESS frontmatter parse,
+     `3`=drift detected (resume-check exit 16), `4`=mutex claim failed,
+     `5`=safety_lock tripped, `6`=WU spec missing/corrupt,
+     `7`=artifact verify fail, `8`=heartbeat write fail (FUSE),
+     `9`=executor resolve fail, `99`=unknown.
 5. **Stop** — After dispatch, do not add Claude-driven commentary,
    recommendations, or alternative suggestions. The bash script is the
    single source of truth for output format (WU22-D4: `·` separator + ISO8601
@@ -116,6 +123,7 @@ If the first argument is one of the modes below, follow that mode.
 - `decision`: Record a short ADR-style decision under `.sfs-local/decisions/`.
 - `log`: Append a one-line JSON event to `.sfs-local/events.jsonl`.
 - `retro`: Write or update the current sprint `retro-light.md`.
+- `loop`: **Adapter (above).** Fallback only: explain Ralph Loop + Solon mutex pattern and recommend running `.sfs-local/scripts/sfs-loop.sh --help` directly (WU-27).
 
 ## Usage Guide Output
 

@@ -368,4 +368,575 @@ Exit codes:
 EOF
 }
 
+# ─────────────────────────────────────────────────────────────────────
+# WU-27 LOOP HELPERS — Solon-wide executor + pre-flight + mutex FSM + review gate
+# Spec: sprints/WU-27.md §3.1 + sprints/WU-27/sfs-loop-{flow,locking,review-gate}.md
+# Created: 2026-04-29 (25th cycle session optimistic-vigilant-bell sub-task 6.3).
+# ─────────────────────────────────────────────────────────────────────
+
+# ─── EXECUTOR (WU-27 §3.1 Solon-wide convention) ────────────────────────────
+# resolve_executor — given profile or custom cmd, echo resolved cmd line.
+# CLI flag > env > "claude" fallback. Unknown profile → passthrough as custom string.
+# stdout: resolved cmd
+# rc: always 0
+resolve_executor() {
+  local executor="${1:-${SFS_EXECUTOR:-claude}}"
+  case "$executor" in
+    claude) echo "claude -p --dangerously-skip-permissions" ;;
+    gemini) echo "gemini -p --yolo" ;;
+    codex)  echo "codex exec --full-auto" ;;
+    *)      echo "$executor" ;;   # custom string passthrough
+  esac
+}
+
+# ─── PROGRESS PATH RESOLVER ──────────────────────────────────────────────────
+# resolve_progress_path — resolve PROGRESS.md location.
+# Priority: arg1 > $SFS_PROGRESS_PATH > $SFS_LOCAL_DIR/PROGRESS.md > ./PROGRESS.md
+# stdout: absolute or relative path to PROGRESS.md
+# rc: 0=found, 6=not found (matches SFS_LOOP_EXIT_SPEC_MISSING)
+resolve_progress_path() {
+  local override="${1:-}"
+  local cand=""
+  if [[ -n "$override" ]]; then
+    cand="$override"
+  elif [[ -n "${SFS_PROGRESS_PATH:-}" ]]; then
+    cand="$SFS_PROGRESS_PATH"
+  elif [[ -f "${SFS_LOCAL_DIR}/PROGRESS.md" ]]; then
+    cand="${SFS_LOCAL_DIR}/PROGRESS.md"
+  elif [[ -f "PROGRESS.md" ]]; then
+    cand="PROGRESS.md"
+  else
+    echo "PROGRESS.md not found (set SFS_PROGRESS_PATH or run from a project root)" >&2
+    return 6
+  fi
+  if [[ ! -f "$cand" ]]; then
+    echo "PROGRESS.md path '$cand' does not exist" >&2
+    return 6
+  fi
+  echo "$cand"
+  return 0
+}
+
+# ─── PRE-FLIGHT (sfs-loop-flow.md §4 step 1~3) ───────────────────────────────
+# pre_flight_check — sanity check before mutex claim.
+# Inputs: $1 = PROGRESS.md path (or use resolve_progress_path)
+# Checks:
+#   - PROGRESS.md last_overwrite drift > 90 minutes (warn, return 16 = drift)
+#   - .git/index.lock present (FUSE bypass needed, warn only)
+#   - staged diff count (P-03 risk, warn only)
+#   - YAML frontmatter parsable (python3 yaml if available, else minimal awk)
+# stdout: optional context dict (key=value pairs)
+# rc: 0=clean, 3=drift detected, 8=heartbeat write/read fail
+pre_flight_check() {
+  local progress_path="${1:-}"
+  if [[ -z "$progress_path" ]]; then
+    progress_path="$(resolve_progress_path)" || return 8
+  fi
+
+  # Drift check
+  local last_overwrite
+  last_overwrite=$(awk '/^last_overwrite:/ { sub(/^last_overwrite: */, ""); sub(/[ \t]*#.*$/, ""); print; exit }' "$progress_path")
+  if [[ -n "$last_overwrite" ]]; then
+    # Strip ISO8601 timezone for date parsing (best-effort, GNU date or BSD date).
+    local lo_epoch now_epoch drift_min
+    lo_epoch=$(date -d "$last_overwrite" +%s 2>/dev/null || \
+               date -j -f "%Y-%m-%dT%H:%M:%S%z" "${last_overwrite//:00+/00+}" +%s 2>/dev/null || \
+               echo "")
+    now_epoch=$(date +%s)
+    if [[ -n "$lo_epoch" ]]; then
+      drift_min=$(( (now_epoch - lo_epoch) / 60 ))
+      if (( drift_min > 90 )); then
+        echo "pre-flight: drift detected (${drift_min}m since last_overwrite)" >&2
+        echo "drift_min=${drift_min}"
+        return 3
+      fi
+    fi
+  fi
+
+  # FUSE lock warn (non-fatal)
+  if [[ -f ".git/index.lock" ]]; then
+    echo "pre-flight: .git/index.lock present (FUSE bypass may be needed, see CLAUDE.md §1.6)" >&2
+  fi
+
+  # Staged diff warn (P-03)
+  local staged_count
+  staged_count=$(git diff --cached --name-only 2>/dev/null | wc -l | tr -d ' ')
+  if (( staged_count > 0 )); then
+    echo "pre-flight: ${staged_count} staged files (P-03 risk; review before claim)" >&2
+  fi
+
+  return 0
+}
+
+# ─── DOMAIN LOCK FSM HELPERS (sfs-loop-locking.md §6.5) ──────────────────────
+# Note: These helpers operate on PROGRESS.md frontmatter `domain_locks.<X>` blocks.
+# YAML manipulation = python3 if available (preferred), else awk-based fallback.
+# Conceptual borrowing from Spring JPA @Version (claim_lock = version+=1).
+
+# _domain_locks_field — read a single field from domain_locks.<domain>.<field>.
+# Args: $1 = progress_path, $2 = domain, $3 = field
+# stdout: field value or empty
+_domain_locks_field() {
+  local path="$1" domain="$2" field="$3"
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - "$path" "$domain" "$field" <<'PYEOF' 2>/dev/null
+import sys, re
+path, domain, field = sys.argv[1], sys.argv[2], sys.argv[3]
+with open(path) as f:
+    content = f.read()
+# Extract frontmatter (between first --- pair)
+m = re.search(r'^---\n(.*?)\n---', content, re.DOTALL)
+if not m:
+    sys.exit(0)
+fm = m.group(1)
+# Find domain block + field
+pat = rf'^\s*{re.escape(domain)}:\s*\n((?:[ \t]+.*\n?)*)'
+mm = re.search(pat, fm, re.MULTILINE)
+if not mm:
+    sys.exit(0)
+block = mm.group(1)
+fpat = rf'^\s+{re.escape(field)}:\s*(.*?)\s*(?:#.*)?$'
+fm2 = re.search(fpat, block, re.MULTILINE)
+if fm2:
+    val = fm2.group(1).strip()
+    # Strip surrounding quotes
+    if (val.startswith('"') and val.endswith('"')) or (val.startswith("'") and val.endswith("'")):
+        val = val[1:-1]
+    print(val)
+PYEOF
+  else
+    # Awk fallback (best-effort, single-level only)
+    awk -v dom="$domain" -v fld="$field" '
+      $0 ~ "^[[:space:]]*"dom":" { in_block=1; next }
+      in_block && $0 ~ "^[^ \t]" { in_block=0 }
+      in_block && $0 ~ "^[[:space:]]+"fld":" {
+        sub(/^[[:space:]]+[^:]+:[[:space:]]*/, "")
+        sub(/[[:space:]]*#.*$/, "")
+        gsub(/^["'\'']|["'\'']$/, "")
+        print; exit
+      }
+    ' "$path"
+  fi
+}
+
+# detect_stale — check if domain owner is stale (last_heartbeat > ttl_minutes).
+# Args: $1 = progress_path, $2 = domain
+# rc: 0=stale, 1=fresh, 2=no owner
+detect_stale() {
+  local path="$1" domain="$2"
+  local owner last_hb ttl
+  owner=$(_domain_locks_field "$path" "$domain" "owner")
+  if [[ -z "$owner" || "$owner" == "null" ]]; then
+    return 2
+  fi
+  last_hb=$(_domain_locks_field "$path" "$domain" "last_heartbeat")
+  ttl=$(_domain_locks_field "$path" "$domain" "ttl_minutes")
+  ttl="${ttl:-15}"
+
+  local hb_epoch now_epoch elapsed_min
+  hb_epoch=$(date -d "$last_hb" +%s 2>/dev/null || \
+             date -j -f "%Y-%m-%dT%H:%M:%S%z" "$last_hb" +%s 2>/dev/null || \
+             echo 0)
+  now_epoch=$(date +%s)
+  elapsed_min=$(( (now_epoch - hb_epoch) / 60 ))
+  if (( elapsed_min > ttl )); then
+    return 0   # stale
+  else
+    return 1   # fresh
+  fi
+}
+
+# claim_lock — claim domain lock with optimistic version bump.
+# Args: $1 = progress_path, $2 = domain, $3 = owner_codename
+# Effect: PROGRESS.md frontmatter domain_locks.<domain> updated:
+#   owner=$3, claimed_at=now, last_heartbeat=now, status=PROGRESS, version+=1, retry_count preserved
+# rc: 0=claimed, 4=race lost (other owner)
+claim_lock() {
+  local path="$1" domain="$2" owner="$3"
+  local now
+  now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+  local cur_owner
+  cur_owner=$(_domain_locks_field "$path" "$domain" "owner")
+  if [[ -n "$cur_owner" && "$cur_owner" != "null" && "$cur_owner" != "$owner" ]]; then
+    if ! detect_stale "$path" "$domain"; then
+      return 4   # race lost (active other owner)
+    fi
+    # stale → takeover allowed (caller decides retry)
+  fi
+
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - "$path" "$domain" "$owner" "$now" <<'PYEOF'
+import sys, re
+path, domain, owner, now = sys.argv[1:5]
+with open(path) as f:
+    content = f.read()
+def repl_or_add(block, key, val):
+    pat = rf'(^[ \t]+{re.escape(key)}:[ \t]*).*?(\s*#.*)?$'
+    if re.search(pat, block, re.MULTILINE):
+        return re.sub(pat, lambda m: f"{m.group(1)}{val}{m.group(2) or ''}", block, count=1, flags=re.MULTILINE)
+    indent = '    '
+    if block and not block.endswith('\n'):
+        block += '\n'
+    return block + f"{indent}{key}: {val}\n"
+def bump_version(block):
+    pat = r'(^[ \t]+version:[ \t]*)(\d+)(\s*#.*)?$'
+    m = re.search(pat, block, re.MULTILINE)
+    if m:
+        new_v = int(m.group(2)) + 1
+        return re.sub(pat, lambda mm: f"{mm.group(1)}{new_v}{mm.group(3) or ''}", block, count=1, flags=re.MULTILINE)
+    return block + "    version: 1\n"
+m = re.search(r'^(---\n)(.*?)(\n---)', content, re.DOTALL)
+if not m:
+    sys.exit(2)
+fm = m.group(2)
+dpat = rf'(^\s*{re.escape(domain)}:\s*\n)((?:[ \t]+.*\n?)*)'
+dm = re.search(dpat, fm, re.MULTILINE)
+if not dm:
+    sys.exit(2)
+header, block = dm.group(1), dm.group(2)
+block = repl_or_add(block, 'owner', owner)
+block = repl_or_add(block, 'claimed_at', now)
+block = repl_or_add(block, 'last_heartbeat', now)
+block = repl_or_add(block, 'status', 'PROGRESS')
+block = bump_version(block)
+new_fm = fm[:dm.start()] + header + block + fm[dm.end():]
+new_content = m.group(1) + new_fm + m.group(3) + content[m.end():]
+with open(path, 'w') as f:
+    f.write(new_content)
+PYEOF
+    return $?
+  else
+    echo "claim_lock: python3 required for YAML manipulation" >&2
+    return 99
+  fi
+}
+
+# release_lock — release domain lock.
+# Args: $1 = progress_path, $2 = domain, $3 = verdict (complete|fail)
+# Effect: owner=null, status=COMPLETE or FAIL based on verdict.
+# rc: 0=ok
+release_lock() {
+  local path="$1" domain="$2" verdict="${3:-complete}"
+  local new_status="COMPLETE"
+  case "$verdict" in
+    complete) new_status="COMPLETE" ;;
+    fail)     new_status="FAIL" ;;
+    *)        echo "release_lock: invalid verdict '$verdict' (expected complete|fail)" >&2; return 1 ;;
+  esac
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - "$path" "$domain" "$new_status" <<'PYEOF'
+import sys, re
+path, domain, new_status = sys.argv[1:4]
+with open(path) as f:
+    content = f.read()
+m = re.search(r'^(---\n)(.*?)(\n---)', content, re.DOTALL)
+if not m: sys.exit(2)
+fm = m.group(2)
+dpat = rf'(^\s*{re.escape(domain)}:\s*\n)((?:[ \t]+.*\n?)*)'
+dm = re.search(dpat, fm, re.MULTILINE)
+if not dm: sys.exit(2)
+header, block = dm.group(1), dm.group(2)
+def repl(block, key, val):
+    pat = rf'(^[ \t]+{re.escape(key)}:[ \t]*).*?(\s*#.*)?$'
+    if re.search(pat, block, re.MULTILINE):
+        return re.sub(pat, lambda mm: f"{mm.group(1)}{val}{mm.group(2) or ''}", block, count=1, flags=re.MULTILINE)
+    if block and not block.endswith('\n'):
+        block += '\n'
+    return block + f"    {key}: {val}\n"
+block = repl(block, 'owner', 'null')
+block = repl(block, 'status', new_status)
+new_fm = fm[:dm.start()] + header + block + fm[dm.end():]
+with open(path, 'w') as f:
+    f.write(m.group(1) + new_fm + m.group(3) + content[m.end():])
+PYEOF
+    return $?
+  fi
+  return 99
+}
+
+# mark_fail — mark domain as FAIL with reason.
+# Args: $1 = progress_path, $2 = domain, $3 = reason
+mark_fail() {
+  local path="$1" domain="$2" reason="$3"
+  local now
+  now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - "$path" "$domain" "$reason" "$now" <<'PYEOF'
+import sys, re
+path, domain, reason, now = sys.argv[1:5]
+with open(path) as f:
+    content = f.read()
+m = re.search(r'^(---\n)(.*?)(\n---)', content, re.DOTALL)
+if not m: sys.exit(2)
+fm = m.group(2)
+dpat = rf'(^\s*{re.escape(domain)}:\s*\n)((?:[ \t]+.*\n?)*)'
+dm = re.search(dpat, fm, re.MULTILINE)
+if not dm: sys.exit(2)
+header, block = dm.group(1), dm.group(2)
+def repl(b, k, v):
+    pat = rf'(^[ \t]+{re.escape(k)}:[ \t]*).*?(\s*#.*)?$'
+    if re.search(pat, b, re.MULTILINE):
+        return re.sub(pat, lambda mm: f"{mm.group(1)}{v}{mm.group(2) or ''}", b, count=1, flags=re.MULTILINE)
+    if b and not b.endswith('\n'):
+        b += '\n'
+    return b + f"    {k}: {v}\n"
+block = repl(block, 'status', 'FAIL')
+block = repl(block, 'failed_at', now)
+block = repl(block, 'fail_reason', reason)
+block = repl(block, 'owner', 'null')
+new_fm = fm[:dm.start()] + header + block + fm[dm.end():]
+with open(path, 'w') as f:
+    f.write(m.group(1) + new_fm + m.group(3) + content[m.end():])
+PYEOF
+    return $?
+  fi
+  return 99
+}
+
+# mark_abandoned — mark domain as ABANDONED (retry_count >= 3).
+# Args: $1 = progress_path, $2 = domain
+mark_abandoned() {
+  local path="$1" domain="$2"
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - "$path" "$domain" <<'PYEOF'
+import sys, re
+path, domain = sys.argv[1:3]
+with open(path) as f:
+    content = f.read()
+m = re.search(r'^(---\n)(.*?)(\n---)', content, re.DOTALL)
+if not m: sys.exit(2)
+fm = m.group(2)
+dpat = rf'(^\s*{re.escape(domain)}:\s*\n)((?:[ \t]+.*\n?)*)'
+dm = re.search(dpat, fm, re.MULTILINE)
+if not dm: sys.exit(2)
+header, block = dm.group(1), dm.group(2)
+def repl(b, k, v):
+    pat = rf'(^[ \t]+{re.escape(k)}:[ \t]*).*?(\s*#.*)?$'
+    if re.search(pat, b, re.MULTILINE):
+        return re.sub(pat, lambda mm: f"{mm.group(1)}{v}{mm.group(2) or ''}", b, count=1, flags=re.MULTILINE)
+    if b and not b.endswith('\n'):
+        b += '\n'
+    return b + f"    {k}: {v}\n"
+block = repl(block, 'status', 'ABANDONED')
+block = repl(block, 'owner', 'null')
+new_fm = fm[:dm.start()] + header + block + fm[dm.end():]
+with open(path, 'w') as f:
+    f.write(m.group(1) + new_fm + m.group(3) + content[m.end():])
+PYEOF
+    return $?
+  fi
+  return 99
+}
+
+# auto_restart — retry FAIL domain by re-claiming (retry_count+=1, version+=1).
+# Args: $1 = progress_path, $2 = domain, $3 = owner
+# Pre-cond: status==FAIL, retry_count<3.
+# rc: 0=restarted, 1=cap reached (caller should mark_abandoned), 4=other owner active
+auto_restart() {
+  local path="$1" domain="$2" owner="$3"
+  local status retry
+  status=$(_domain_locks_field "$path" "$domain" "status")
+  retry=$(_domain_locks_field "$path" "$domain" "retry_count")
+  retry="${retry:-0}"
+  if [[ "$status" != "FAIL" ]]; then
+    echo "auto_restart: domain '$domain' status='$status' (expected FAIL)" >&2
+    return 1
+  fi
+  if (( retry >= 3 )); then
+    return 1   # cap reached
+  fi
+  # bump retry, then claim
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - "$path" "$domain" <<'PYEOF'
+import sys, re
+path, domain = sys.argv[1:3]
+with open(path) as f:
+    content = f.read()
+m = re.search(r'^(---\n)(.*?)(\n---)', content, re.DOTALL)
+fm = m.group(2)
+dpat = rf'(^\s*{re.escape(domain)}:\s*\n)((?:[ \t]+.*\n?)*)'
+dm = re.search(dpat, fm, re.MULTILINE)
+header, block = dm.group(1), dm.group(2)
+pat = r'(^[ \t]+retry_count:[ \t]*)(\d+)(\s*#.*)?$'
+mm = re.search(pat, block, re.MULTILINE)
+if mm:
+    new_r = int(mm.group(2)) + 1
+    block = re.sub(pat, lambda x: f"{x.group(1)}{new_r}{x.group(3) or ''}", block, count=1, flags=re.MULTILINE)
+else:
+    block += "    retry_count: 1\n"
+new_fm = fm[:dm.start()] + header + block + fm[dm.end():]
+with open(path, 'w') as f:
+    f.write(m.group(1) + new_fm + m.group(3) + content[m.end():])
+PYEOF
+  fi
+  claim_lock "$path" "$domain" "$owner"
+  return $?
+}
+
+# escalate_w10_todo — append W-XX TODO entry to cross-ref-audit.md §4.
+# Args: $1 = domain, $2 = message
+# Side effect: cross-ref-audit.md §4 W-XX entry appended (best-effort path resolve).
+escalate_w10_todo() {
+  local domain="$1" msg="$2"
+  local audit_path=""
+  for cand in "cross-ref-audit.md" "../cross-ref-audit.md" "../../cross-ref-audit.md"; do
+    if [[ -f "$cand" ]]; then audit_path="$cand"; break; fi
+  done
+  if [[ -z "$audit_path" ]]; then
+    echo "escalate_w10_todo: cross-ref-audit.md not found, skipping (msg: $msg)" >&2
+    return 1
+  fi
+  local now
+  now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  printf '\n- W-AUTO (%s) [%s]: %s\n' "$now" "$domain" "$msg" >> "$audit_path"
+  echo "escalate_w10_todo: appended to $audit_path" >&2
+  return 0
+}
+
+# ─── REVIEW GATE HELPERS (sfs-loop-review-gate.md §6.6) ──────────────────────
+
+# is_big_task — apply 5 criteria from sfs-loop-review-gate.md §6.6.3.
+# Args: $1 = plan-spec file or stdin (frontmatter with `wall_min` / `files_touched` / `decision_points`)
+# rc: 0=big task (review gate required), 1=small task (skip OK)
+is_big_task() {
+  local spec="${1:-}"
+  local content
+  if [[ -n "$spec" && -f "$spec" ]]; then
+    content=$(cat "$spec")
+  else
+    content=$(cat)
+  fi
+  # 5 criteria
+  local wall_min files_touched decision_points spec_change visibility_change
+  wall_min=$(echo "$content" | awk '/^wall_min:/ { sub(/^wall_min:[ \t]*/, ""); print; exit }')
+  files_touched=$(echo "$content" | awk '/^files_touched_count:/ { sub(/^files_touched_count:[ \t]*/, ""); print; exit }')
+  decision_points=$(echo "$content" | grep -cE '^[ \t]*-[ \t]*id:[ \t]*[A-Z]+[0-9]+-D[0-9]+' || true)
+  decision_points="${decision_points:-0}"
+  spec_change=$(echo "$content" | awk '/^spec_change:/ { sub(/^spec_change:[ \t]*/, ""); print; exit }')
+  visibility_change=$(echo "$content" | awk '/^visibility_change:/ { sub(/^visibility_change:[ \t]*/, ""); print; exit }')
+
+  (( ${wall_min:-0} >= 10 )) && return 0
+  (( ${files_touched:-0} >= 3 )) && return 0
+  (( ${decision_points:-0} >= 1 )) && return 0
+  [[ "${spec_change:-false}" == "true" ]] && return 0
+  [[ "${visibility_change:-false}" == "true" ]] && return 0
+  return 1
+}
+
+# review_with_persona — invoke a persona file as reviewer.
+# Args: $1 = persona-path (e.g. agents/planner.md), $2 = plan-doc path
+# Output: stdout = "verdict: PASS|FAIL|PASS-with-conditions\nreason: <prose>"
+# rc: 0=PASS, 1=FAIL, 2=PASS-with-conditions
+# NOTE: This MVP version emits a deterministic stub when no executor is connected.
+#       Full LLM invocation = future WU when --executor runtime is wired.
+review_with_persona() {
+  local persona_path="$1" plan_doc="$2"
+  if [[ ! -f "$persona_path" ]]; then
+    echo "review_with_persona: persona not found: $persona_path" >&2
+    return 99
+  fi
+  if [[ ! -f "$plan_doc" ]]; then
+    echo "review_with_persona: plan doc not found: $plan_doc" >&2
+    return 99
+  fi
+  # MVP stub: always PASS-with-conditions, conditions = "smoke verification needed"
+  # Real implementation = pipe persona + plan to $(resolve_executor) and parse verdict.
+  cat <<EOF
+verdict: PASS-with-conditions
+reason: MVP review stub. Persona '$persona_path' applied to '$plan_doc'. Conditions: smoke verification + idempotency check before commit.
+EOF
+  return 2
+}
+
+# submit_to_user — write a 7-step briefing doc for user final approval.
+# Args: $1 = plan-doc, $2 = reviews-doc (combined PLANNER + EVALUATOR output)
+# Output: stdout = path to written briefing
+submit_to_user() {
+  local plan_doc="$1" reviews_doc="$2"
+  local ts now wu_id outpath
+  ts=$(date -u +"%Y%m%dT%H%M%SZ")
+  now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  wu_id=$(awk '/^wu_id:/ { sub(/^wu_id:[ \t]*/, ""); print; exit }' "$plan_doc" 2>/dev/null || echo "WU-UNKNOWN")
+  mkdir -p tmp
+  outpath="tmp/sfs-review-submit-${wu_id}-${ts}.md"
+  cat > "$outpath" <<EOF
+---
+doc_id: sfs-review-submit
+wu_id: ${wu_id}
+created: ${now}
+plan_doc: ${plan_doc}
+reviews_doc: ${reviews_doc}
+visibility: raw-internal
+---
+
+# /sfs loop — Pre-execution Review Submission
+
+## 1. Question
+Approve autonomous execution of plan?
+
+## 2. Context
+$(head -20 "$plan_doc" 2>/dev/null | sed 's/^/  /')
+
+## 3. Reviews
+$(cat "$reviews_doc" 2>/dev/null | sed 's/^/  /')
+
+## 4. Recommendation
+Default = β minimal-cleanup (proceed with conditions).
+
+## 5. Risk if Not Decided
+Loop blocks until user reply.
+
+## 6. Cascade Options (if FAIL)
+- (1) abandon (yagni)
+- (2) split into smaller sub-tasks
+- (3) prerequisite first
+- (4) custom user plan
+
+## 7. Reply Format
+"approve" | "fail (reason)" | "split" | "abandon"
+EOF
+  echo "$outpath"
+  return 0
+}
+
+# cascade_on_fail — handle review FAIL with cascade depth check.
+# Args: $1 = fail-reason, $2 = original-plan path, $3 = depth (default 0)
+# Output: stdout = path to fail-report doc
+# rc: 0=cascade allowed (depth<3), 1=cap reached (escalate W10)
+cascade_on_fail() {
+  local reason="$1" plan="$2" depth="${3:-0}"
+  local ts outpath
+  ts=$(date -u +"%Y%m%dT%H%M%SZ")
+  mkdir -p tmp
+  outpath="tmp/sfs-fail-report-$(basename "$plan" .md)-${ts}.md"
+  cat > "$outpath" <<EOF
+---
+doc_id: sfs-fail-report
+plan: ${plan}
+reason: ${reason}
+depth: ${depth}
+created: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+visibility: raw-internal
+---
+
+# /sfs loop — Review Fail Cascade Report (depth ${depth})
+
+Fail reason: ${reason}
+
+Cascade options:
+- (1) abandon (yagni)
+- (2) split larger unit into smaller sub-tasks (depth+=1, cap 3)
+- (3) work on prerequisite domain first
+- (4) user-provided custom plan
+EOF
+  if (( depth >= 3 )); then
+    escalate_w10_todo "review-cascade" "depth cap reached for plan: $plan (reason: $reason)"
+    echo "$outpath"
+    return 1
+  fi
+  echo "$outpath"
+  return 0
+}
+
 # End of sfs-common.sh
