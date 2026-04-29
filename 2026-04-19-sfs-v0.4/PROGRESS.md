@@ -405,8 +405,8 @@ resume_hint:
   purpose: "24번째 세션이 본 PROGRESS.md 1개만 읽고 (a) 23rd 미완 commit 마무리 + (b) sandbox file:// clone 패턴 채택 + (c) WU-24 + WU-31 병렬 default 자동 진행"
   trigger_positive: [ㄱㄱ, 고, ㅇㅋ, ok, OK, 시작, 가자, ㅇㅇ, 진행, go, Go, start, "이전 세션 이어서", "이어서 ㄱㄱ", "이어서", 이어, "이어서 진행"]
   trigger_negative: [ㄴㄴ, 잠깐, stop, 아니, 중단, 다른거, 다른, no]
-  default_action: |
-    🎯 **scheduled run / 다른 세션 진입 표준 절차** (24th 신설, 1:00 AM hourly + 사용자 다른 conversation 양쪽 정합):
+  default_action: WU-27 close + 0.5.0-mvp release cut (WU-25/26/27 batch). 본 sub-task 6.8 buffer = release 후 hotfix path. WU-28 dogfooding 검증 = HANDOFF auto-write + auto-resume round-trip 확인.
+  last_written: 2026-04-29T00:27:45Z
 
     1. **CLAUDE.md SSoT Read** — §1 14규율 + §1.5' (commit/push 사용자 manual) + §1.12 mutex + §1.14 ≤200 lines.
     2. **PROGRESS.md (본 파일) Read** — frontmatter `domain_locks` + `current_wu_owner` 확인.
