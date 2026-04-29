@@ -28,11 +28,11 @@
 #   99 unknown (e.g. bash trap)
 #
 # Path note: dev staging file lives at
-#   solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-review.sh
+#   solon-product/templates/.sfs-local-template/scripts/sfs-review.sh
 # install.sh copies templates/.sfs-local-template/ → consumer project's .sfs-local/.
 # WU-25 §2 spec used `.sfs-local/scripts/` as a shorthand for the consumer-side path.
 #
-# Visibility: business-only (solon-mvp-dist staging asset).
+# Visibility: business-only (solon-product staging asset).
 # Created: 2026-04-28 (24th cycle 49번째 scheduled run `amazing-determined-gates`,
 #                      mode=user-active-deferred, WU-25 §5 row 3).
 

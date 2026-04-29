@@ -1,4 +1,4 @@
-# CHANGELOG — Solon MVP
+# CHANGELOG — Solon Product
 
 모든 릴리스는 [Semantic Versioning](https://semver.org/lang/ko/) 을 따른다. `-mvp` suffix 는
 아직 풀스펙 (사용자 개인 방법론 docset) 으로 수렴하지 않은 최소 배포판임을 표시.
@@ -31,7 +31,7 @@
 
 - **README product-facing rewrite** — 초안성/내부 농담 톤의 "친구야" 섹션을 제거하고,
   제품 설명 → 문제 정의 → core model → quickstart → commands → 설치/업그레이드/제거 →
-  운영 원칙 순서로 재구성. 목적: 외부 독자가 Solon MVP 를 product 로 이해하고, Claude/Codex/Gemini
+  운영 원칙 순서로 재구성. 목적: 외부 독자가 Solon Product 를 제품으로 이해하고, Claude/Codex/Gemini
   runtime 계약을 같은 문서에서 확인할 수 있게 함.
 - **public terminology cleanup** — 외부 독자가 뜻을 추측해야 하는 내부자 약어를
   `기준 문서` / `기준 구현` 으로 치환. 목적: README, CHANGELOG, consumer 템플릿, runtime script
@@ -40,6 +40,9 @@
   `CHANGELOG.md` 의 Unreleased 또는 해당 릴리스 섹션에 변경 범위, 변경 이유, 검증 결과를 남기는
   규칙을 명시. 목적: 후속 Claude/Codex 세션이 이전 변경의 합리성과 정합성을 cross-check 할 수
   있게 함.
+- **repository rename** — GitHub repository rename 에 맞춰 배포 repo identity 와 remote URL 을
+  `MJ-0701/solon-product` 로 변경. README one-liner, install/upgrade remote clone source,
+  local clone 예시, issue/changelog 링크, root agent 지침을 새 repo 이름으로 정렬.
 
 ### Design Notes
 
@@ -49,6 +52,8 @@
 - `/sfs start` 의 primary argument 는 **goal** 이다. sprint id 는 시스템이 생성하고,
   사람이 꼭 지정해야 할 때만 `--id` 를 쓴다. 이렇게 해야 첫 sprint 의 의도가 plan/event 에 남고,
   CLI 계약이 README/adapter 문서와 일치한다.
+- product rename 후에도 consumer 하위 호환성을 위해 `.gitignore` legacy marker
+  `### BEGIN solon-mvp ###` / `### END solon-mvp ###` 는 upgrade/uninstall 에서 계속 인식한다.
 
 ## [0.4.0-mvp] — 2026-04-29
 
@@ -175,15 +180,15 @@
 
 ### Scope 확정
 
-- `solon-mvp` repo 정체: **Solon/SFS 시스템의 설치 가능한 MVP 배포**. consumer 프로젝트가
+- `solon-product` repo 정체: **Solon/SFS 시스템의 설치 가능한 product 배포**. consumer 프로젝트가
   `install.sh` 로 Solon 을 주입받아 7-step flow 운용 가능.
-- consumer 프로젝트 자체는 별도 repo. `solon-mvp` 는 도구, consumer 는 도구 사용자.
+- consumer 프로젝트 자체는 별도 repo. `solon-product` 는 도구, consumer 는 도구 사용자.
 
 ### 이전 내부 템플릿과의 연결
 
 - 본 distribution 은 개인 방법론 자산에서 공개 가능한 최소 운영 scaffold 만 추출한 형태.
   내부 docset 의 구체 경로/파일명은 repo 에 남기지 않는다.
-- consumer 프로젝트 생성용 setup/verify 흐름은 `solon-mvp` repo 에 직접 포함하지 않고,
+- consumer 프로젝트 생성용 setup/verify 흐름은 `solon-product` repo 에 직접 포함하지 않고,
   `install.sh` 의 대화형 + idempotent 설치 흐름으로 재흡수했다.
 
 ## Unreleased (예정)

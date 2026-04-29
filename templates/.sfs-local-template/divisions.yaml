@@ -1,5 +1,5 @@
 # .sfs-local/divisions.yaml
-# Solon MVP minimal divisions config (기본값).
+# Solon Product minimal divisions config (기본값).
 # Solon docset 쪽 divisions.schema.yaml v1.1 와 호환되는 subset.
 # 프로젝트 특성에 따라 각 본부 activation_state 를 조정하고, 변경 사유는
 # `.sfs-local/decisions/<N>-activate-<division>.md` 에 기록.

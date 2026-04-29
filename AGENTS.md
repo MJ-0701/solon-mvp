@@ -1,11 +1,11 @@
-# AGENTS.md — `solon-mvp` distribution repo 유지보수 지침
+# AGENTS.md — `solon-product` distribution repo 유지보수 지침
 
-> 본 파일은 **`solon-mvp` repo 자체** (distribution) 를 다룰 때 Codex 세션이 참조하는 지침.
+> 본 파일은 **`solon-product` repo 자체** (distribution) 를 다룰 때 Codex 세션이 참조하는 지침.
 > Consumer 프로젝트에 설치될 `AGENTS.md` 와는 별개 (그건 `templates/AGENTS.md.template`).
 
 ## Repo 정체성
 
-- **이름**: `solon-mvp` (Solon 방법론의 설치 가능한 MVP 배포판)
+- **이름**: `solon-product` (Solon 방법론의 설치 가능한 product 배포판)
 - **목적**: 사용자 개인 / 회사 프로젝트에 **Solon 7-step flow** 스캐폴드를 `install.sh` 로 주입
 - **해석 경계**: 7-step 은 full startup team-agent artifact chain 의 lightweight projection 이다. templates 수정 시 Discovery/PRD/Taxonomy/UX/Technical Design/Release Readiness 를 제거한 것으로 오해시키면 안 된다.
 - **IP**: 사용자 (채명정) 개인 자산. 공개 범위는 TBD (현재 private 권장).
@@ -32,7 +32,7 @@
 
 ### templates/ 변경 시
 - [ ] placeholder 형식 유지 (`<PROJECT-NAME>` / `<DATE>` / `<STACK>` / `<DEPLOY>` / `<DOMAIN>` 등)
-- [ ] 도메인 특화 제거 — `solon-mvp` 는 도메인 중립 (관리자페이지/SaaS 등 특정 도메인 기술 금지)
+- [ ] 도메인 특화 제거 — `solon-product` 는 도메인 중립 (관리자페이지/SaaS 등 특정 도메인 기술 금지)
 - [ ] 외부 Solon docset 경로 / 파일명 하드코딩 금지
 
 ### upgrade.sh 변경 시

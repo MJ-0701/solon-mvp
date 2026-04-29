@@ -154,7 +154,7 @@ When showing usage, keep it compact and practical. Include this shape:
 
 Also explain this in one or two sentences:
 
-- Solon MVP is a lightweight scaffold, not the full Solon system yet.
+- Solon Product is a lightweight scaffold, not the full Solon system yet.
 - The main artifacts live under `.sfs-local/`, and `/sfs` is the Claude Code command layer for operating them.
 
 ## Rules

@@ -20,11 +20,11 @@
 #   99 unknown (e.g. invalid CLI args, ISO week tooling missing)
 #
 # Path note: dev staging file lives at
-#   solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-start.sh
+#   solon-product/templates/.sfs-local-template/scripts/sfs-start.sh
 # install.sh copies templates/.sfs-local-template/ → consumer project's .sfs-local/.
 # WU-24 spec used `.sfs-local/scripts/` as a shorthand for the consumer-side path.
 #
-# Visibility: business-only (solon-mvp-dist staging asset).
+# Visibility: business-only (solon-product staging asset).
 # Created: 2026-04-26 (scheduled run relaxed-gallant-maxwell, 24th cycle row 7).
 
 set -euo pipefail

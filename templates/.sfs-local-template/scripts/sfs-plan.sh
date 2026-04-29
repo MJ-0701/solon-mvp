@@ -18,11 +18,11 @@
 #   99 unknown (e.g. invalid CLI args)
 #
 # Path note: dev staging file lives at
-#   solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-plan.sh
+#   solon-product/templates/.sfs-local-template/scripts/sfs-plan.sh
 # install.sh copies templates/.sfs-local-template/ → consumer project's .sfs-local/.
 # WU-25 §1 spec used `.sfs-local/scripts/` as a shorthand for the consumer-side path.
 #
-# Visibility: business-only (solon-mvp-dist staging asset).
+# Visibility: business-only (solon-product staging asset).
 # Created: 2026-04-28 (24th cycle user-active conversation `brave-gracious-mayer`,
 #                      WU-25 §5 row 2).
 

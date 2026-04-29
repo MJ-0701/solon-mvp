@@ -21,7 +21,7 @@
 #   99 unknown (e.g. bash trap)
 #
 # Path note: dev staging file lives at
-#   solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-decision.sh
+#   solon-product/templates/.sfs-local-template/scripts/sfs-decision.sh
 # install.sh copies templates/.sfs-local-template/ → consumer project's .sfs-local/.
 # WU-26 §1 spec used `.sfs-local/scripts/` as a shorthand for the consumer-side path.
 #
@@ -29,7 +29,7 @@
 #       Per WU-26 §3 + row 4, it will be moved into sfs-common.sh as `next_decision_id`
 #       (alongside `sprint_close` and `auto_commit_close`).
 #
-# Visibility: business-only (solon-mvp-dist staging asset).
+# Visibility: business-only (solon-product staging asset).
 # Created: 2026-04-28 (24th cycle user-active conversation `brave-gracious-mayer`
 #                      continuation 5, WU-26 §5 row 2).
 

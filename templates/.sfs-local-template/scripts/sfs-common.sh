@@ -5,11 +5,11 @@
 # WU-24 §3 spec implementation. bash 4+ required.
 #
 # Path note: dev staging file lives at
-#   solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-common.sh
+#   solon-product/templates/.sfs-local-template/scripts/sfs-common.sh
 # install.sh copies templates/.sfs-local-template/ → consumer project's .sfs-local/.
 # WU-24 spec used `.sfs-local/scripts/` as a shorthand for the consumer-side path.
 #
-# Visibility: business-only (solon-mvp-dist staging asset; OSS fork inclusion 결정은 후속).
+# Visibility: business-only (solon-product staging asset; OSS fork inclusion 결정은 후속).
 # Created: 2026-04-26 (scheduled run friendly-magical-galileo, 24th cycle).
 
 set -uo pipefail

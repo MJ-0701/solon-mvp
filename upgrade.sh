@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# upgrade.sh — Solon MVP upgrader (VERSION 기반)
+# upgrade.sh — Solon Product upgrader (VERSION 기반)
 #
 # 사용법:
 #   cd ~/workspace/my-project
-#   bash ~/tmp/solon-mvp/upgrade.sh              # 로컬 clone 기반
-#   curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-mvp/main/upgrade.sh | bash  # 원격
+#   bash ~/tmp/solon-product/upgrade.sh              # 로컬 clone 기반
+#   curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/upgrade.sh | bash  # 원격
 #
 # 동작:
 #   1. consumer 쪽 .sfs-local/VERSION 읽어서 installed_version 파악
@@ -19,10 +19,12 @@
 
 set -euo pipefail
 
-readonly SOLON_REPO="MJ-0701/solon-mvp"
+readonly SOLON_REPO="MJ-0701/solon-product"
 readonly SOLON_BRANCH="main"
-readonly GIT_MARKER_BEGIN="### BEGIN solon-mvp ###"
-readonly GIT_MARKER_END="### END solon-mvp ###"
+readonly GIT_MARKER_BEGIN="### BEGIN solon-product ###"
+readonly GIT_MARKER_END="### END solon-product ###"
+readonly LEGACY_GIT_MARKER_BEGIN="### BEGIN solon-mvp ###"
+readonly LEGACY_GIT_MARKER_END="### END solon-mvp ###"
 
 # 색상
 if [ -t 1 ] && command -v tput >/dev/null 2>&1 && [ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]; then
@@ -107,7 +109,7 @@ if [ -n "$SCRIPT_PATH" ] && [ -f "$SCRIPT_PATH" ] && [ -d "$(dirname "$SCRIPT_PA
 else
   command -v git >/dev/null || die "git 미설치"
   TMP_CLONE=$(mktemp -d -t solon-upgrade.XXXXXX)
-  info "Fetching Solon MVP latest..."
+  info "Fetching Solon Product latest..."
   git clone --quiet --depth=1 --branch="$SOLON_BRANCH" \
     "https://github.com/${SOLON_REPO}.git" "$TMP_CLONE" \
     || die "git clone 실패"
@@ -132,7 +134,7 @@ INSTALLED_AT=$(grep '^installed_at:' "$TARGET/.sfs-local/VERSION" | awk '{print 
 
 cat <<EOF
 
-${C_BOLD}=== Solon MVP Upgrade ===${C_RESET}
+${C_BOLD}=== Solon Product Upgrade ===${C_RESET}
 
 현재 설치:   $CUR_VER  (installed: $INSTALLED_AT)
 최신 배포:   $NEW_VER
@@ -252,11 +254,15 @@ done
 printf "\n  ${C_BOLD}.gitignore${C_RESET}\n"
 snippet_sum=$(checksum_file "$SOURCE_DIR/templates/.gitignore.snippet")
 if grep -qF "$GIT_MARKER_BEGIN" "$TARGET/.gitignore" 2>/dev/null; then
-  printf "    상태: solon-mvp 블록 존재 — marker 블록 교체 예정\n"
+  printf "    상태: solon-product 블록 존재 — marker 블록 교체 예정\n"
+  printf "    checksum: managed-snippet=%s\n" "$snippet_sum"
+  printf "    추천: 자동 갱신\n"
+elif grep -qF "$LEGACY_GIT_MARKER_BEGIN" "$TARGET/.gitignore" 2>/dev/null; then
+  printf "    상태: legacy solon-mvp 블록 존재 — solon-product marker 로 교체 예정\n"
   printf "    checksum: managed-snippet=%s\n" "$snippet_sum"
   printf "    추천: 자동 갱신\n"
 else
-  printf "    상태: solon-mvp 블록 없음 — 신규 추가 예정\n"
+  printf "    상태: solon-product 블록 없음 — 신규 추가 예정\n"
   printf "    checksum: managed-snippet=%s\n" "$snippet_sum"
   printf "    추천: 자동 추가\n"
 fi
@@ -413,15 +419,20 @@ ok "문서 자동 치환: <DATE>=$TODAY, <SOLON-VERSION>=$NEW_VER"
 info ""
 info ".gitignore 블록 갱신..."
 
-if grep -qF "$GIT_MARKER_BEGIN" "$TARGET/.gitignore" 2>/dev/null; then
-  # 블록 제거
-  awk -v b="$GIT_MARKER_BEGIN" -v e="$GIT_MARKER_END" '
+remove_gitignore_block() {
+  local begin="$1" end="$2"
+  if grep -qF "$begin" "$TARGET/.gitignore" 2>/dev/null; then
+    awk -v b="$begin" -v e="$end" '
     $0 == b { skip=1; next }
     $0 == e { skip=0; next }
     !skip { print }
-  ' "$TARGET/.gitignore" > "$TARGET/.gitignore.tmp"
-  mv "$TARGET/.gitignore.tmp" "$TARGET/.gitignore"
-fi
+    ' "$TARGET/.gitignore" > "$TARGET/.gitignore.tmp"
+    mv "$TARGET/.gitignore.tmp" "$TARGET/.gitignore"
+  fi
+}
+
+remove_gitignore_block "$GIT_MARKER_BEGIN" "$GIT_MARKER_END"
+remove_gitignore_block "$LEGACY_GIT_MARKER_BEGIN" "$LEGACY_GIT_MARKER_END"
 
 # 새 블록 append
 {
@@ -433,7 +444,7 @@ fi
   cat "$SOURCE_DIR/templates/.gitignore.snippet"
   echo "$GIT_MARKER_END"
 } >> "$TARGET/.gitignore"
-ok ".gitignore solon-mvp 블록 교체 완료"
+ok ".gitignore solon-product 블록 교체 완료"
 
 # ============================================================================
 # 6. VERSION 갱신
@@ -462,7 +473,7 @@ ${C_BOLD}${C_GREEN}=== 업그레이드 완료 ===${C_RESET}
 
 변경사항 git commit 권장:
   ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .claude/commands/sfs.md .gitignore .sfs-local/divisions.yaml .sfs-local/VERSION .sfs-local/scripts .sfs-local/sprint-templates .sfs-local/decisions-template${C_RESET}
-  ${C_BLUE}git commit -m "chore: upgrade solon-mvp $CUR_VER → $NEW_VER"${C_RESET}
+  ${C_BLUE}git commit -m "chore: upgrade solon-product $CUR_VER → $NEW_VER"${C_RESET}
 
 CHANGELOG: https://github.com/${SOLON_REPO}/blob/main/CHANGELOG.md
 
