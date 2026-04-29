@@ -1,9 +1,10 @@
 ---
 phase: retro
 gate_id: G5
-sprint_id: ""    # filled by /sfs start (currently copied verbatim)
-created_at: ""   # filled by /sfs start (currently copied verbatim)
-closed_at: ""    # filled by /sfs retro --close
+sprint_id: ""        # filled by /sfs start (currently copied verbatim)
+created_at: ""       # filled by /sfs start (currently copied verbatim)
+last_touched_at: ""  # filled by /sfs retro
+closed_at: ""        # filled by /sfs retro --close
 ---
 
 # Retro — <sprint title>

@@ -1,6 +1,10 @@
-## [0.3.1-mvp] - 2026-04-29
+## [0.4.0-mvp] - 2026-04-29
 
 - (release: cut from dev staging via cut-release.sh)
+
+## [0.3.1-mvp] - 2026-04-29
+
+- (release cut → stable caec8de)
 
 ## [0.3.0-mvp] - 2026-04-29
 

@@ -367,7 +367,16 @@ TEMPLATES_SRC="$SOURCE_DIR/templates/.sfs-local-template/sprint-templates"
 if [ -d "$TEMPLATES_SRC" ]; then
   mkdir -p "$TARGET/.sfs-local/sprint-templates"
   cp "$TEMPLATES_SRC"/*.md "$TARGET/.sfs-local/sprint-templates/" 2>/dev/null || true
-  ok "  sprint-templates/ 복사 (plan + log + review + retro)"
+  ok "  sprint-templates/ 복사 (plan + log + review + retro + decision-light)"
+fi
+
+# decisions-template/ — sfs-decision.sh 가 ADR 신설 시 사용하는 ADR-full 템플릿 (WU-26 §1)
+# 정책: 매 install 마다 overwrite (user 수정 영역 아님, scripts/ 와 동일 정합).
+DECISIONS_TPL_SRC="$SOURCE_DIR/templates/.sfs-local-template/decisions-template"
+if [ -d "$DECISIONS_TPL_SRC" ]; then
+  mkdir -p "$TARGET/.sfs-local/decisions-template"
+  cp "$DECISIONS_TPL_SRC"/*.md "$TARGET/.sfs-local/decisions-template/" 2>/dev/null || true
+  ok "  decisions-template/ 복사 (ADR-TEMPLATE.md + _INDEX.md)"
 fi
 
 # ============================================================================

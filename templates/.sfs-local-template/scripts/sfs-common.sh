@@ -967,4 +967,54 @@ EOF
   return 0
 }
 
+# ─────────────────────────────────────────────────────────────────────
+# DECISION / SPRINT CLOSE HELPERS (WU-26 §3)
+# ─────────────────────────────────────────────────────────────────────
+
+# next_decision_id — `.sfs-local/decisions/` 의 가장 큰 4-자리 id + 1.
+# stdout: 4-자리 zero-pad id (시작 "0001"). Returns: 0 always.
+# WU-26 §3 spec verbatim. sfs-decision.sh 의 inline `next_decision_id_local` 보다 우선
+# (본 표준 함수가 sfs-common.sh 에 정착, inline helper 는 deprecation 후보).
+next_decision_id() {
+  local dir="${SFS_DECISIONS_DIR}"
+  [[ -d "${dir}" ]] || { echo "0001"; return 0; }
+  local max
+  max=$(ls -1 "${dir}" 2>/dev/null | grep -oE '^[0-9]{4}' | sort -n | tail -1)
+  if [[ -z "${max}" ]]; then
+    echo "0001"
+  else
+    printf '%04d\n' $((10#${max} + 1))
+  fi
+  return 0
+}
+
+# sprint_close <sprint-dir> <iso-ts> — sprint frontmatter status=closed + closed_at.
+# 대상 = `<sprint-dir>/plan.md` 우선, 부재 시 `<sprint-dir>/sprint.md`, 둘 다 부재 시 silent return 0.
+# WU-26 §3 spec verbatim. update_frontmatter 재사용.
+sprint_close() {
+  local sdir="${1:-}" ts="${2:-}"
+  [[ -n "${sdir}" && -n "${ts}" ]] || return 0
+  local target="${sdir}/plan.md"
+  [[ -f "${target}" ]] || target="${sdir}/sprint.md"
+  [[ -f "${target}" ]] || return 0
+  update_frontmatter "${target}" "status" "closed"
+  update_frontmatter "${target}" "closed_at" "${ts}"
+  return 0
+}
+
+# auto_commit_close <sprint-id> — sprint close 후 git add + commit. push 안 함 (§1.5 정합).
+# WARNING: AI 자율 호출 금지 — 사용자가 `/sfs retro --close` 명시 호출 시에만 동작 (§1.5' 정합).
+# git operation 들은 silent fail (`|| true`) — git 부재 / pre-commit hook 등 환경 차이 흡수.
+auto_commit_close() {
+  local sid="${1:-}"
+  [[ -n "${sid}" ]] || return 0
+  git rev-parse --git-dir >/dev/null 2>&1 || return 0
+  git add "${SFS_SPRINTS_DIR}/${sid}/" 2>/dev/null || true
+  git add "${SFS_EVENTS_FILE}" 2>/dev/null || true
+  # current-sprint 가 방금 제거됐으므로 staged deletion 마킹
+  git add -A "${SFS_LOCAL_DIR}/" 2>/dev/null || true
+  git commit -m "chore(sfs): close sprint ${sid}" >/dev/null 2>&1 || true
+  return 0
+}
+
 # End of sfs-common.sh
