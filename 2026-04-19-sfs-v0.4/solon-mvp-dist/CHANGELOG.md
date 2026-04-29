@@ -1,3 +1,7 @@
+## [0.3.1-mvp] - 2026-04-29
+
+- (release cut → stable caec8de)
+
 ## [0.3.0-mvp] - 2026-04-29
 
 - (release cut → stable d28591f)
