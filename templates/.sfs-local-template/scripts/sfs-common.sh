@@ -581,13 +581,26 @@ detect_stale() {
 # rc: 0=claimed, 4=race lost (other owner)
 claim_lock() {
   local path="$1" domain="$2" owner="$3"
-  local now
+  local now lock_dir
   now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  lock_dir="${path}.lock"
 
+  # § 6.8.3 (26th-1 admiring-compassionate-euler): mkdir-based atomic claim.
+  # TOCTOU race window 차단 (POSIX-portable, macOS+Linux 양립). `mkdir` 은 atomic
+  # file system operation = 동시 worker 호출 시 한 명만 성공. 이전 버그 = bash read owner →
+  # python3 write 사이 inter-process gap 으로 양쪽 worker 가 owner=null 본 후 양쪽 write 가능.
+  # 후속 W10: stale lock dir 자동 정리 (mtime 기반) + release_lock/mark_*/auto_restart 도 동일 lock 보호.
+  if ! mkdir "$lock_dir" 2>/dev/null; then
+    return 4   # race lost (다른 worker 가 lock dir 점유 중)
+  fi
+
+  # === lock 보호 영역 시작 ===
+  local rc=0
   local cur_owner
   cur_owner=$(_domain_locks_field "$path" "$domain" "owner")
   if [[ -n "$cur_owner" && "$cur_owner" != "null" && "$cur_owner" != "$owner" ]]; then
     if ! detect_stale "$path" "$domain"; then
+      rmdir "$lock_dir" 2>/dev/null
       return 4   # race lost (active other owner)
     fi
     # stale → takeover allowed (caller decides retry)
@@ -633,11 +646,15 @@ new_content = m.group(1) + new_fm + m.group(3) + content[m.end():]
 with open(path, 'w') as f:
     f.write(new_content)
 PYEOF
-    return $?
+    rc=$?
   else
     echo "claim_lock: python3 required for YAML manipulation" >&2
-    return 99
+    rc=99
   fi
+
+  # === lock 해제 (§ 6.8.3) ===
+  rmdir "$lock_dir" 2>/dev/null
+  return $rc
 }
 
 # release_lock — release domain lock.
@@ -724,8 +741,10 @@ PYEOF
 
 # mark_abandoned — mark domain as ABANDONED (retry_count >= 3).
 # Args: $1 = progress_path, $2 = domain
+# § 6.8.4 (26th-1): 성공 시 escalate_w10_todo auto-wire (best-effort), spec §6.5.4 정합.
 mark_abandoned() {
   local path="$1" domain="$2"
+  local rc=99
   if command -v python3 >/dev/null 2>&1; then
     python3 - "$path" "$domain" <<'PYEOF'
 import sys, re
@@ -752,9 +771,15 @@ new_fm = fm[:dm.start()] + header + block + fm[dm.end():]
 with open(path, 'w') as f:
     f.write(m.group(1) + new_fm + m.group(3) + content[m.end():])
 PYEOF
-    return $?
+    rc=$?
   fi
-  return 99
+  # § 6.8.4 (26th-1 admiring-compassionate-euler): auto-escalate to W10 TODO (best-effort).
+  # ABANDONED status 마킹 성공 시 cross-ref-audit.md §4 W-AUTO entry append.
+  # escalate 실패해도 ABANDONED 자체는 잘 남으니 rc 우선 보존 (best-effort).
+  if (( rc == 0 )); then
+    escalate_w10_todo "$domain" "ABANDONED (retry_count >= 3) — domain locked unrecoverable, awaiting user resolution" >/dev/null 2>&1 || true
+  fi
+  return $rc
 }
 
 # auto_restart — retry FAIL domain by re-claiming (retry_count+=1, version+=1).
@@ -852,27 +877,88 @@ is_big_task() {
   return 1
 }
 
+# _builtin_persona_text — emit a 4-line built-in persona text for known roles.
+# § 6.8.4b (26th-1 admiring-compassionate-euler, 사용자 추가 정책): known persona file 부재 시
+# review_with_persona 가 사용하는 fallback. 미래 live=1 (WU27-D6 후속) 시 LLM 호출 stdin 공급원.
+# Args: $1 = kind (planner|evaluator)
+# rc: 0=ok stdout=persona text, 99=unknown kind
+_builtin_persona_text() {
+  local kind="$1"
+  case "$kind" in
+    planner)
+      cat <<'EOF_PLANNER'
+You are the CEO reviewer for Solon autonomous work.
+Check scope, time cap, files_touched cap, decision_points, rollback risk, and whether user approval is required.
+Prefer minimal cleanup when choices are ambiguous.
+Return verdict: PASS, FAIL, or PASS-with-conditions with one concise reason.
+EOF_PLANNER
+      ;;
+    evaluator)
+      cat <<'EOF_EVALUATOR'
+You are the CPO reviewer for Solon autonomous work.
+Check user-facing clarity, failure behavior, safety locks, recovery notes, and whether the result is understandable to the next worker.
+Prefer fail-closed behavior for uncertain automation.
+Return verdict: PASS, FAIL, or PASS-with-conditions with one concise reason.
+EOF_EVALUATOR
+      ;;
+    *)
+      return 99
+      ;;
+  esac
+  return 0
+}
+
 # review_with_persona — invoke a persona file as reviewer.
 # Args: $1 = persona-path (e.g. agents/planner.md), $2 = plan-doc path
 # Output: stdout = "verdict: PASS|FAIL|PASS-with-conditions\nreason: <prose>"
-# rc: 0=PASS, 1=FAIL, 2=PASS-with-conditions
+# rc: 0=PASS, 1=FAIL, 2=PASS-with-conditions, 99=hard error / unknown persona missing
 # NOTE: This MVP version emits a deterministic stub when no executor is connected.
-#       Full LLM invocation = future WU when --executor runtime is wired.
+#       Full LLM invocation = future WU when --executor runtime is wired (WU27-D6).
 review_with_persona() {
   local persona_path="$1" plan_doc="$2"
+  local persona_source="file"   # file | builtin-planner | builtin-evaluator
   if [[ ! -f "$persona_path" ]]; then
-    echo "review_with_persona: persona not found: $persona_path" >&2
-    return 99
+    # § 6.8.4b (26th-1): known persona missing → built-in fallback,
+    # unknown persona missing → rc=99 fail-closed (review 의미 왜곡 방지,
+    # 다른 이름으로 CEO/CPO fallback 호출 차단).
+    case "$(basename "$persona_path")" in
+      planner.md)
+        persona_source="builtin-planner"
+        echo "review_with_persona: persona file missing, using built-in fallback (planner CEO scope-risk reviewer)" >&2
+        ;;
+      evaluator.md)
+        persona_source="builtin-evaluator"
+        echo "review_with_persona: persona file missing, using built-in fallback (evaluator CPO user-impact reviewer)" >&2
+        ;;
+      *)
+        echo "review_with_persona: persona not found: $persona_path (unknown name, fail-closed)" >&2
+        return 99
+        ;;
+    esac
   fi
   if [[ ! -f "$plan_doc" ]]; then
     echo "review_with_persona: plan doc not found: $plan_doc" >&2
     return 99
   fi
-  # MVP stub: always PASS-with-conditions, conditions = "smoke verification needed"
-  # Real implementation = pipe persona + plan to $(resolve_executor) and parse verdict.
+  # § 6.8.2 (26th-1 admiring-compassionate-euler): SFS_LOOP_LLM_LIVE env gating fail-closed.
+  # CHANGELOG v1.0-rc1 entry 명시 vs 코드 미구현 spec/impl drift 해소.
+  # live=1 모드 = 실 LLM CLI 호출 shape (claude/gemini/codex 별 stdin/flag/exit parsing 차이) =
+  # WU27-D6 decision_point W10 deferred → 본 cycle = TBD fail-closed (rc=99, stub fallback 금지).
+  # live=0 (default) 모드 = 기존 MVP stub 유지 (결정성 PASS-with-conditions).
+  if [[ "${SFS_LOOP_LLM_LIVE:-0}" == "1" ]]; then
+    echo "review_with_persona: SFS_LOOP_LLM_LIVE=1 detected, but live executor CLI shape unresolved (WU27-D6, W10 deferred)" >&2
+    cat <<EOF
+verdict: ERROR
+reason: live LLM mode requested (SFS_LOOP_LLM_LIVE=1) but CLI shape unresolved (claude/gemini/codex stdin/flag/exit parsing differs — WU27-D6 W10 deferred). Fail-closed: stub fallback intentionally disabled in live mode to prevent silent degradation.
+EOF
+    return 99
+  fi
+  # MVP stub (default, live=0): always PASS-with-conditions.
+  # Real implementation = pipe persona + plan to $(resolve_executor) and parse verdict — wired after WU27-D6 decision.
+  # persona_source 는 file / builtin-planner / builtin-evaluator 중 하나 (§ 6.8.4b 정합).
   cat <<EOF
 verdict: PASS-with-conditions
-reason: MVP review stub. Persona '$persona_path' applied to '$plan_doc'. Conditions: smoke verification + idempotency check before commit.
+reason: MVP review stub (persona_source=$persona_source). Persona '$persona_path' applied to '$plan_doc'. Conditions: smoke verification + idempotency check before commit.
 EOF
   return 2
 }
