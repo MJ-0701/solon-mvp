@@ -44,11 +44,12 @@ enforced_by: sfs-doc-validate
 
 ## 1. 문서셋 구성
 
-### 루트 (4 files)
+### 루트 (5 files)
 
 | 파일 | 제목 | 핵심 역할 |
 |------|------|----------|
 | [README.md](README.md) | Solon docset 10분 overview | 처음 들어오는 사람 진입점, 12 섹션 (v0.4-r4 업데이트) |
+| [SYSTEM-IDENTITY.md](SYSTEM-IDENTITY.md) | Solon System Identity | 초기 아이디어, 해결하려는 문제, 방향성 north-star |
 | [INDEX.md](INDEX.md) (본 파일) | Navigation hub | 완전 cross-reference matrix (v0.4-r4) |
 | [CROSS-ACCOUNT-MIGRATION.md](CROSS-ACCOUNT-MIGRATION.md) | 계정 이관 체크리스트 | 회사 계정 → 개인 계정 이관 시 standalone 매뉴얼 (v1.0, 2026-04-20) |
 | [HANDOFF-next-session.md](HANDOFF-next-session.md) | 다음 세션 작업 지시 | Round 3 산출 + cross-account handoff carrier (git 포함 — MIG-10 이후) |

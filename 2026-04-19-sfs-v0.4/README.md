@@ -38,11 +38,12 @@
 
 ### 읽는 순서 (권장)
 
-1. **§00-intro.md** — 왜 Solon 인가 (2 제품 철학 선언)
-2. **§02-design-principles.md** — 13대 원칙 + Foundation Invariants (전체 의사결정 근거)
-3. **§04-pdca-redef.md** + **§05-gate-framework.md** — Runtime
-4. **§10-phase1-implementation.md** — 실제 16~20주 구현 플랜
-5. **나머지는 need-basis** — 상황에 맞춰 INDEX.md 로 내비
+1. **SYSTEM-IDENTITY.md** — 초기 아이디어, 해결하려는 문제, 방향성 north-star
+2. **§00-intro.md** — 왜 Solon 인가 (2 제품 철학 선언)
+3. **§02-design-principles.md** — 13대 원칙 + Foundation Invariants (전체 의사결정 근거)
+4. **§04-pdca-redef.md** + **§05-gate-framework.md** — Runtime
+5. **§10-phase1-implementation.md** — 실제 16~20주 구현 플랜
+6. **나머지는 need-basis** — 상황에 맞춰 INDEX.md 로 내비
 
 ---
 
