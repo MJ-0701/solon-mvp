@@ -119,7 +119,7 @@ bash -n 2026-04-19-sfs-v0.4/solon-mvp-dist/templates/.sfs-local-template/scripts
 | stable sync | `solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-common.sh` → `~/workspace/solon-mvp/templates/...` cp -a 동기 (§1.13 hotfix path) | ~3분 |
 | release cut | `scripts/cut-release.sh --version 0.5.0-mvp --apply` (WU-31 도구) | ~10분 |
 
-### 5.2 사용자 manual commit (26th-1 batch)
+### 5.2 사용자 manual commit (26th-1 batch, file 7개)
 
 ```bash
 cd ~/agent_architect
@@ -127,11 +127,13 @@ cd ~/agent_architect
 git add 2026-04-19-sfs-v0.4/solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-common.sh \
         2026-04-19-sfs-v0.4/cross-ref-audit.md \
         2026-04-19-sfs-v0.4/PROGRESS.md \
+        2026-04-19-sfs-v0.4/sprints/WU-27.md \
         2026-04-19-sfs-v0.4/sprints/WU-27/MORNING-RECOVERY.md \
-        2026-04-19-sfs-v0.4/sprints/WU-27/CHANGELOG.md
+        2026-04-19-sfs-v0.4/sprints/WU-27/CHANGELOG.md \
+        2026-04-19-sfs-v0.4/sprints/_INDEX.md
 
 git commit -m "WU-27 sub-task 6.8: bug-fix + safety-net buffer (D' 결정, mutex 26th-1 admiring-compassionate-euler)" \
-           -m "26th-1 admiring-compassionate-euler (Cowork user-active-deferred) 자율진행. 사용자 D' 결정 = β minimal cleanup + spec/impl drift 1건 + 버그 2건 fix + persona fallback 정책. 산출 = sfs-common.sh +86L (4 함수 수정 + 1 신설): (1) review_with_persona — SFS_LOOP_LLM_LIVE=1 fail-closed (rc=99 + verdict=ERROR, WU27-D6 deferred), (2) claim_lock — mkdir-based atomic claim (POSIX-portable, macOS+Linux, TOCTOU race window 차단), (3) mark_abandoned — escalate_w10_todo auto-wire (best-effort, ABANDONED 시 cross-ref-audit.md §4 W-AUTO entry append), (4) _builtin_persona_text — known persona missing 시 PLANNER/EVALUATOR 4-line built-in fallback, (5) review_with_persona — persona fallback 정책 (known → builtin / unknown → rc=99 fail-closed). cross-ref-audit.md §4 = W-24 (LLM CLI shape) + W-25 (schema migration policy) deferred 등재. PROGRESS.md = D-I-WU-27 mutex claim + heartbeat + next_step. MORNING-RECOVERY.md = §5 갱신. WU-27/CHANGELOG.md = v1.0-rc2 entry. 8/8 smoke PASS in /tmp/wu27-6.8-smoke-* sandbox (T1 builtin planner / T2 builtin evaluator / T3 unknown rc=99 / T4 missing planner.md fallback / T5 missing security.md fail-closed / T6 LIVE=1 ERROR / T7 race window mkdir / T7b lazy schema inject / T8 mark_abandoned escalate). file 편집 5개. host repo .git mutate 0 (§1.5'). schema migration 의도적 보류 (lazy inject 유지). PLANNER PASS + EVALUATOR PASS-with-conditions + 사용자 D' final approval."
+           -m "26th-1 admiring-compassionate-euler (Cowork user-active-deferred) 자율진행. 사용자 D' 결정 = β minimal cleanup + spec/impl drift 1건 + 버그 2건 fix + persona fallback 정책. 산출 = sfs-common.sh +86L (1020 → 1106): (1) review_with_persona — SFS_LOOP_LLM_LIVE=1 fail-closed (rc=99 + verdict=ERROR, WU27-D6 deferred=W-24), (2) claim_lock — mkdir-based atomic claim (POSIX-portable, macOS+Linux, TOCTOU race window 차단), (3) mark_abandoned — escalate_w10_todo auto-wire (best-effort, ABANDONED 시 cross-ref-audit.md §4 W-AUTO entry append, spec §6.5.4 정합), (4) _builtin_persona_text — known persona missing 시 PLANNER/EVALUATOR 4-line built-in fallback (사용자 추가 정책), (5) review_with_persona — persona fallback 정책 (known → builtin / unknown → rc=99 fail-closed). cross-ref-audit.md §4 = W-24 + W-25 deferred 등재 (23 → 25 항목). PROGRESS.md = D-I-WU-27 mutex claim + heartbeat. WU-27.md = §∗∗ sub_task 6 progress section 추가 (6.1~6.7 + 6.8 narrative + final_sha plan). MORNING-RECOVERY.md = §5.0/§5.1/§5.2 갱신. WU-27/CHANGELOG.md = v1.0-rc2 entry. _INDEX.md = WU-27 row 갱신 (sub-task 6.1~6.8 progress + 3 codename trace + 3 commit sha). 8/8 smoke PASS in /tmp/wu27-6.8-smoke-* sandbox (T1 builtin planner / T2 builtin evaluator / T3 unknown rc=99 / T4 missing planner.md fallback / T5 missing security.md fail-closed / T6 LIVE=1 ERROR / T7 race window mkdir / T7b lazy schema inject / T8 mark_abandoned escalate). file 편집 7개. host repo .git mutate 0 (§1.5'). schema migration 의도적 보류 (lazy inject 유지, 사용자 D-7). PLANNER PASS + EVALUATOR PASS-with-conditions + 사용자 D' final approval + audit 후 escalation. 잔여 = 0.5.0-mvp release cut + stable sync (사용자 mac terminal 영역, 집에서 다음 cycle)."
 
 # git push origin main   # 사용자 confirm 후 주석 해제 (§1.5 push 사용자 영역)
 ```
