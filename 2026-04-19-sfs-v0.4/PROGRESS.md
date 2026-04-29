@@ -406,8 +406,8 @@ resume_hint:
   purpose: "24번째 세션이 본 PROGRESS.md 1개만 읽고 (a) 23rd 미완 commit 마무리 + (b) sandbox file:// clone 패턴 채택 + (c) WU-24 + WU-31 병렬 default 자동 진행"
   trigger_positive: [ㄱㄱ, 고, ㅇㅋ, ok, OK, 시작, 가자, ㅇㅇ, 진행, go, Go, start, "이전 세션 이어서", "이어서 ㄱㄱ", "이어서", 이어, "이어서 진행"]
   trigger_negative: [ㄴㄴ, 잠깐, stop, 아니, 중단, 다른거, 다른, no]
-  default_action: 사용자 mac terminal commit + push (MORNING-RECOVERY §5.2 7 file shell block) → stable sync (sfs-common.sh → ~/workspace/solon-mvp) → 0.5.0-mvp release cut (cut-release.sh --apply). 큰 step 3개 사용자 영역 (집에서). 후속 = 외부 onboarding 친구 mac install + W10 deferred 6건 (W-14~W-21 + W-24 LLM CLI + W-25 schema migration + WU-28 D3 + codex §5 잔여 3건).
-  last_written: 2026-04-29T13:53:51Z
+  default_action: ε continuation 작업 2 (0.5.0-mvp release cut, α 즉시 vs β onboarding 후 본인 결정) + 작업 3 (stable working tree 13 file divergence 처리, cut 직전 git stash/restore 결정). 작업 1 (CLAUDE.md §1.20 단계적 안내 원칙 + W-26 + P-11) ✅ 26th-1 ε continuation 완료.
+  last_written: 2026-04-29T14:40:32Z
 
     1. **CLAUDE.md SSoT Read** — §1 14규율 + §1.5' (commit/push 사용자 manual) + §1.12 mutex + §1.14 ≤200 lines.
     2. **PROGRESS.md (본 파일) Read** — frontmatter `domain_locks` + `current_wu_owner` 확인.

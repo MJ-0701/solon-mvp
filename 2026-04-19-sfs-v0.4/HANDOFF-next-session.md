@@ -1,9 +1,9 @@
 ---
 doc_id: handoff-next-session
 title: "Next session handoff (auto-written by handoff-write.sh, WU-28)"
-written_at: 2026-04-29T13:53:51Z
-written_at_kst: 2026-04-29T13:53:51+09:00
-last_commit: dca240c
+written_at: 2026-04-29T14:40:32Z
+written_at_kst: 2026-04-29T14:40:32+09:00
+last_commit: 777540f
 visibility: raw-internal
 ---
 
@@ -14,11 +14,11 @@ visibility: raw-internal
 
 ## 1. default_action (다음 세션 진입 시 즉시 실행)
 
-사용자 mac terminal commit + push (MORNING-RECOVERY §5.2 7 file shell block) → stable sync (sfs-common.sh → ~/workspace/solon-mvp) → 0.5.0-mvp release cut (cut-release.sh --apply). 큰 step 3개 사용자 영역 (집에서). 후속 = 외부 onboarding 친구 mac install + W10 deferred 6건 (W-14~W-21 + W-24 LLM CLI + W-25 schema migration + WU-28 D3 + codex §5 잔여 3건).
+ε continuation 작업 2 (0.5.0-mvp release cut, α 즉시 vs β onboarding 후 본인 결정) + 작업 3 (stable working tree 13 file divergence 처리, cut 직전 git stash/restore 결정). 작업 1 (CLAUDE.md §1.20 단계적 안내 원칙 + W-26 + P-11) ✅ 26th-1 ε continuation 완료.
 
 ## 2. 산출 inventory (직전 세션 결과)
 
-sfs-common.sh +86L,cross-ref-audit.md +2 W10,PROGRESS.md mutex release,WU-27.md §∗∗,WU-27/MORNING-RECOVERY.md,WU-27/CHANGELOG.md v1.0-rc2,_INDEX.md WU-27 row
+CLAUDE.md §1.20 + v1.20 bump,cross-ref-audit.md §4 W-26,learning-logs/2026-05/P-11-sequential-disclosure.md,PROGRESS.md heartbeat,HANDOFF (auto-write)
 
 ## 3. 미결정 W10 TODO
 
@@ -26,14 +26,14 @@ W-14,W-15,W-16,W-17,W-18,W-19,W-20,W-21,W-24,W-25,WU-28-D3
 
 ## 4. 직전 commit
 
-`dca240c`
+`777540f`
 
 ## 5. 운영 명령
 
 ```bash
 # 본 file 자동 생성 재현:
 cd ~/agent_architect
-./2026-04-19-sfs-v0.4/scripts/handoff-write.sh \  --next-action "사용자 mac terminal commit + push (MORNING-RECOVERY §5.2 7 file shell block) → stable sync (sfs-common.sh → ~/workspace/solon-mvp) → 0.5.0-mvp release cut (cut-release.sh --apply). 큰 step 3개 사용자 영역 (집에서). 후속 = 외부 onboarding 친구 mac install + W10 deferred 6건 (W-14~W-21 + W-24 LLM CLI + W-25 schema migration + WU-28 D3 + codex §5 잔여 3건)." \  --inventory "sfs-common.sh +86L,cross-ref-audit.md +2 W10,PROGRESS.md mutex release,WU-27.md §∗∗,WU-27/MORNING-RECOVERY.md,WU-27/CHANGELOG.md v1.0-rc2,_INDEX.md WU-27 row" \  --w10-pending "W-14,W-15,W-16,W-17,W-18,W-19,W-20,W-21,W-24,W-25,WU-28-D3" \  --last-commit dca240c
+./2026-04-19-sfs-v0.4/scripts/handoff-write.sh \  --next-action "ε continuation 작업 2 (0.5.0-mvp release cut, α 즉시 vs β onboarding 후 본인 결정) + 작업 3 (stable working tree 13 file divergence 처리, cut 직전 git stash/restore 결정). 작업 1 (CLAUDE.md §1.20 단계적 안내 원칙 + W-26 + P-11) ✅ 26th-1 ε continuation 완료." \  --inventory "CLAUDE.md §1.20 + v1.20 bump,cross-ref-audit.md §4 W-26,learning-logs/2026-05/P-11-sequential-disclosure.md,PROGRESS.md heartbeat,HANDOFF (auto-write)" \  --w10-pending "W-14,W-15,W-16,W-17,W-18,W-19,W-20,W-21,W-24,W-25,WU-28-D3" \  --last-commit 777540f
 
 # 다음 세션 진입 시 (AI 가 자동 호출):
 ./2026-04-19-sfs-v0.4/scripts/auto-resume.sh
@@ -41,52 +41,50 @@ cd ~/agent_architect
 
 ---
 
-## 7. 사용자 결정 영역 (다음 세션 진입 시 우선, 26th-1 사용자 명시 요청)
+## 7. 사용자 결정 영역 (다음 세션 진입 시, 26th-1 ε continuation 후속)
 
-### 즉시 실행 (mac terminal, AI 영역 외)
+### 작업 진행 status
 
-1. **commit + push** — `MORNING-RECOVERY.md §5.2` shell block 그대로 실행. file 7개 batch.
-   - 결정 = 본 commit message 안 narrative 만족 / 분리 / 추가?
-   - 결정 = push 시점 (commit 직후 vs 검토 후)?
+- ✅ **작업 1 — 운영 규율 §1.20 등재 완료** (26th-1 ε continuation, 본 cycle 안). CLAUDE.md §1.20 단계적 안내 원칙 + W-26 + P-11 신설. 사용자 manual commit 잔존 (file 5개 batch).
+- ☐ **작업 2 — 0.5.0-mvp release cut**. α 즉시 vs β onboarding 후 본인 결정.
+- ☐ **작업 3 — stable working tree 13 file divergence 처리**. cut 직전 git stash/restore 결정.
 
-2. **stable sync** — `sfs-common.sh` 만 stable repo 동기화 (R-D1 §1.13 hotfix path).
-   ```bash
-   cp -a ~/agent_architect/2026-04-19-sfs-v0.4/solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-common.sh \
-         ~/workspace/solon-mvp/templates/.sfs-local-template/scripts/sfs-common.sh
-   cd ~/workspace/solon-mvp && git add . && git commit -m "sync(stable): sfs-common.sh +86L from dev <new-sha>" && git push origin main
-   ```
-   - 결정 = sync 시점 (commit 직후 vs 0.5.0-mvp cut 직전 batch)?
+### 사용자 manual commit (작업 1 마감, mac terminal)
 
-3. **0.5.0-mvp release cut 진행 여부 + 시점**
-   - 옵션 α: 즉시 cut (`bash scripts/cut-release.sh --version 0.5.0-mvp --apply`). 25th-6 codex finding #4·#5·#6 + 26th-1 sub-task 6.8 batch 모두 흡수.
-   - 옵션 β: 외부 onboarding 1건 후 cut (25th-6 변경분 노출 dogfooding 검증 후).
-   - 결정 = α 즉시 vs β onboarding 후?
+```bash
+cd ~/agent_architect
 
-### 후속 결정 영역 (release cycle 0.5.0+ 또는 별도 W10)
+git add 2026-04-19-sfs-v0.4/CLAUDE.md \
+        2026-04-19-sfs-v0.4/cross-ref-audit.md \
+        2026-04-19-sfs-v0.4/learning-logs/2026-05/P-11-sequential-disclosure.md \
+        2026-04-19-sfs-v0.4/PROGRESS.md \
+        2026-04-19-sfs-v0.4/HANDOFF-next-session.md
 
-4. **외부 onboarding 진행** — 친구 mac 0.5.0-mvp install 가이드 전달 + 발견 issue 별도 hotfix WU.
-   - 결정 = 진행 여부 + 시점?
+git -c user.name="Claude Cowork (26th admiring-compassionate-euler)" \
+    -c user.email="claude-cowork@solon.local" \
+  commit -m "ε-1: CLAUDE.md §1.20 단계적 안내 원칙 + P-11 + W-26 (사용자 비판 즉시 등재)" \
+         -m "26th-1 ε continuation 작업 1. 사용자 verbatim 비판 ('진단도 단계가 여러개인데... 정상흐름일땐 다음단계 안내까지만') 즉시 등재. (1) CLAUDE.md §1.20 신설 (172L, ≤200L cap 안) + version 1.19→1.20 bump. 3 case 명시 = 정상 흐름 (다음 1 step 만) / 문제 발견 (즉시 stop + 그 문제만) / 옵션 분기 (결정 갈림길에서만). §1.17 (7-step briefing prose) 의 cousin. (2) cross-ref-audit.md §4 W-26 resolved entry append (25 → 26 항목). (3) learning-logs/2026-05/P-11-sequential-disclosure.md 신설 (~110L) — worked examples 3건 (bad case sub-task 6.8 batch dump + stable 14 file batch dump + good case 본 §1.20 self-application). (4) PROGRESS.md heartbeat. (5) HANDOFF auto-write. ad-hoc 작업 (mutex skip, 작은 step ~5분, file 편집 5건). 다음 cycle 진입 시 §1.20 자동 적용 + dogfooding 누적."
 
-5. **W-24** (live LLM CLI shape, WU27-D6) — `claude` / `gemini` / `codex` 어느 executor first-class? stdin/flag/exit parsing 룰?
-   - 결정 = 0.5.0+ release cycle, 외부 onboarding 데이터 누적 후.
+git push origin main
+```
 
-6. **W-25** (PROGRESS.md domain_locks schema migration policy, WU27-D7) — 기존 7개 도메인 (D-A~D-I) 일괄 migration vs lazy inject 유지?
-   - 본 cycle = lazy 유지 (사용자 D′ 결정). 후속 검증 신호 = stale FAIL/ABANDONED 1회 이상 발견 + onboarding mixed schema 운영 영향.
+### 작업 2 + 작업 3 — 다음 세션 진입 시 (정상 흐름이라면 작업 2 부터 단계적)
 
-7. **W-21** (Claude Managed Agents Memory γ 관망) — 활성화 여부 + 시점.
+**작업 2: 0.5.0-mvp release cut 본인 결정**
+- α 즉시 cut: 25th-6 codex finding #4·#5·#6 + 26th-1 sub-task 6.8 batch + ε-1 §1.20 등재 한꺼번에 ship.
+- β onboarding 후 cut: 친구 mac install 결과 받고 발견 issue hotfix WU 신설 후 cut. β default 권장.
 
-8. **W-14 ~ W-19** (Phase 1 W10 schema 결정 6건) — dialog-branch / intent label / terminal sub-type / custom invariants / L1 event payload / tier 정의.
+**작업 3: stable working tree 13 file divergence 처리**
+- 작업 2 진입 직전 stable repo `git status` 검토.
+- cut-release.sh 가 ALLOWLIST 따라 자동 sync 시도.
+- P-10 사고 회피 위해 stable working tree clean 화 필요할 수도 (git stash push → cut → stash pop, 또는 git restore).
 
-9. **WU-28 D3** (consumer mirror 결정) — 0.6.0-mvp+ 후속.
+### 후속 deferred (release cycle 별도 / 본인 페이스)
 
-10. **codex review §5 잔여 결정 3건** — Release Readiness command surface / GateReport release-blocker 필드 / r3 historical snapshot 주석.
-
-### β default 추천 순서
-
-본 cycle 종결 (mutex release 완료) 후 다음 cycle 진입 시:
-
-1. (1) 사용자 mac terminal commit + push  ← 즉시
-2. (2) stable sync  ← commit 직후 자연
-3. **결정 분기**: α 즉시 cut / β onboarding 후 cut
-4. (4) 외부 onboarding (β 선택 시 우선 / α 선택 시 cut 후)
-5. (5)~(10) 후속 deferred — onboarding 데이터 또는 운영 검증 신호 누적 후 cycle-by-cycle 결정.
+- 외부 onboarding (친구 mac install)
+- W-24 LLM CLI shape (claude/gemini/codex first-class)
+- W-25 PROGRESS schema migration policy (lazy 유지 vs 일괄)
+- W-21 Claude Managed Agents Memory γ 관망 → 활성화
+- W-14 ~ W-19 Phase 1 schema 6건
+- WU-28 D3 consumer mirror (0.6.0+)
+- codex review §5 잔여 결정 3건
