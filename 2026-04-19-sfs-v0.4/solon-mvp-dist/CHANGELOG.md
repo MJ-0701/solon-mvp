@@ -1,3 +1,7 @@
+## [0.3.0-mvp] - 2026-04-29
+
+- (release cut → stable d28591f)
+
 # CHANGELOG — Solon MVP
 
 모든 릴리스는 [Semantic Versioning](https://semver.org/lang/ko/) 을 따른다. `-mvp` suffix 는

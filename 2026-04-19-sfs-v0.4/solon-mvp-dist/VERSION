@@ -1,9 +1,1 @@
-0.2.4-mvp
-
-# next: 0.3.0-mvp (예약 — WU-24 sfs slash 구현 part 1 (#1 sfs-common.sh + sfs-status.sh + sfs-start.sh + sprint-templates 4 + sfs.md adapter dispatch))
-# cut: WU-31 cut-release.sh --version 0.3.0-mvp 실행 시 본 첫 줄을 0.3.0-mvp 로 bump (install.sh L293 / L380 은 `head -1` 만 읽음).
-# scope: β bundle (#1 sfs slash + #4 + #6 — release roadmap 정합).
-
-# next-next: 0.4.0-mvp (예약 — WU-25 sfs slash 구현 part 2 (/sfs plan + /sfs review) + WU-26 part 3 (/sfs decision + /sfs retro --close)). 단일 cut 대상 = sfs slash 6 명령 완성 (status/start/plan/review/decision/retro --close).
-# cut: WU-31 cut-release.sh --version 0.4.0-mvp 실행 시점. 0.3.0-mvp 와 관계 = 사용자 결정 영역 (별도 cut or 통합 cut, CHANGELOG.md 의 0.4.0-mvp Unreleased entry §0.3.0-mvp 와 관계 블록 참조).
-# scope: β bundle 의 #1 sfs slash 항목 완성. WU-25 row 7 (24th-52 brave-gracious-mayer continuation 5, 2026-04-28T19:56 KST).
+0.3.0-mvp
