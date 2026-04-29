@@ -13,10 +13,10 @@ Before planning or editing, read:
 Codex does not need a native `/sfs` slash command. Treat these user requests as SFS commands:
 
 - `sfs status`, `/sfs status`: summarize current SFS state and next action.
-- `sfs start <goal>`, `/sfs start <goal>`: create or continue the current sprint.
+- `sfs start <goal>`, `/sfs start <goal>`: create or continue the current sprint; use `--id <sprint-id>` only when a custom id is required.
 - `sfs plan`: write or update the current sprint `plan.md`.
 - `sfs review`: write or update the current sprint `review.md`.
 - `sfs decision <decision>`: record a short ADR under `.sfs-local/decisions/`.
-- `sfs retro`: write or update `retro-light.md`.
+- `sfs retro`: write or update the current sprint `retro.md`.
 
 Preserve user work. Ask only when a decision changes behavior or could discard work.

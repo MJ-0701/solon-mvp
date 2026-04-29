@@ -15,7 +15,7 @@ Claude Code can use the project slash command:
 - `/sfs`
 - `/sfs help`
 - `/sfs status`
-- `/sfs start <goal>`
+- `/sfs start <goal>` (`--id <sprint-id>` only when a custom id is required)
 - `/sfs plan`
 - `/sfs review`
 - `/sfs decision <decision>`

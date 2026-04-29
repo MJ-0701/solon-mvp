@@ -3,7 +3,7 @@
 #
 # 사용법:
 #   cd ~/workspace/my-project
-#   ~/tmp/solon-mvp/upgrade.sh                   # 로컬 clone 기반
+#   bash ~/tmp/solon-mvp/upgrade.sh              # 로컬 clone 기반
 #   curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-mvp/main/upgrade.sh | bash  # 원격
 #
 # 동작:
@@ -37,15 +37,50 @@ warn()  { printf "  %s⚠%s %s\n" "$C_YELLOW" "$C_RESET" "$*"; }
 err()   { printf "  %s✗%s %s\n" "$C_RED" "$C_RESET" "$*" >&2; }
 die()   { err "$*"; exit 1; }
 
+ASSUME_YES=0
+
+usage() {
+  cat <<EOF
+Usage: ./upgrade.sh [--yes]
+
+Options:
+  -y, --yes   dry-run 프리뷰 후 확인 프롬프트를 자동 승인합니다.
+  -h, --help  도움말을 출력합니다.
+EOF
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -y|--yes)
+      ASSUME_YES=1
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      die "알 수 없는 옵션: $1 (지원: --yes, --help)"
+      ;;
+  esac
+  shift
+done
+
 # pipe 대응
-if [ ! -t 0 ] && [ -e /dev/tty ]; then
-  if { : < /dev/tty; } 2>/dev/null; then
+if [ "$ASSUME_YES" -ne 1 ] && [ ! -t 0 ]; then
+  if [ -e /dev/tty ] && { : < /dev/tty; } 2>/dev/null; then
     exec < /dev/tty
+  else
+    die "대화형 input 불가 (stdin 파이프 + /dev/tty 없음). 자동 승인하려면 --yes 를 명시하세요."
   fi
 fi
 
 prompt() {
   local msg="$1" default="${2:-}" answer
+  if [ "$ASSUME_YES" -eq 1 ] && [ -n "$default" ]; then
+    printf "%s [%s]: %s\n" "$msg" "$default" "$default" >&2
+    echo "$default"
+    return 0
+  fi
   if [ -n "$default" ]; then printf "%s [%s]: " "$msg" "$default" >&2
   else printf "%s: " "$msg" >&2; fi
   read -r answer || answer=""
@@ -167,6 +202,9 @@ cat <<EOF
   - CLAUDE/AGENTS/GEMINI.md     → 자동 보존 (기존 프로젝트 지침 보호)
   - .sfs-local/divisions.yaml   → 자동 보존 (프로젝트별 운영값 보호)
   - .claude/commands/sfs.md     → backup+overwrite (배포판 관리 커맨드 최신화)
+  - .sfs-local/scripts/         → 자동 갱신 (배포판 관리 런타임)
+  - .sfs-local/sprint-templates/ → 자동 갱신 (새 sprint 생성 템플릿)
+  - .sfs-local/decisions-template/ → 자동 갱신 (ADR 템플릿)
 
 EOF
 
@@ -222,6 +260,21 @@ else
   printf "    checksum: managed-snippet=%s\n" "$snippet_sum"
   printf "    추천: 자동 추가\n"
 fi
+
+printf "\n  ${C_BOLD}.sfs-local/scripts/${C_RESET}\n"
+script_count=$(find "$SOURCE_DIR/templates/.sfs-local-template/scripts" -maxdepth 1 -type f -name '*.sh' 2>/dev/null | wc -l | tr -d ' ')
+printf "    상태: managed runtime scripts %s개 — 자동 갱신 예정\n" "$script_count"
+printf "    추천: overwrite + chmod +x\n"
+
+printf "\n  ${C_BOLD}.sfs-local/sprint-templates/${C_RESET}\n"
+sprint_tpl_count=$(find "$SOURCE_DIR/templates/.sfs-local-template/sprint-templates" -maxdepth 1 -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+printf "    상태: sprint templates %s개 — 자동 갱신 예정\n" "$sprint_tpl_count"
+printf "    추천: overwrite\n"
+
+printf "\n  ${C_BOLD}.sfs-local/decisions-template/${C_RESET}\n"
+decision_tpl_count=$(find "$SOURCE_DIR/templates/.sfs-local-template/decisions-template" -maxdepth 1 -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+printf "    상태: decision templates %s개 — 자동 갱신 예정\n" "$decision_tpl_count"
+printf "    추천: overwrite\n"
 
 cat <<EOF
 
@@ -296,6 +349,47 @@ mkdir -p "$TARGET/.claude/commands"
 update_file ".claude/commands/sfs.md" "templates/.claude/commands/sfs.md" "Claude Code /sfs 커맨드" "b"
 update_file ".sfs-local/divisions.yaml" "templates/.sfs-local-template/divisions.yaml" "본부 활성화" "s"
 
+copy_managed_files() {
+  local src_dir="$1" dst_dir="$2" kind="$3" label="$4"
+
+  [ -d "$src_dir" ] || { warn "source 없음: $src_dir"; return 0; }
+  mkdir -p "$dst_dir"
+
+  case "$kind" in
+    sh)
+      cp "$src_dir"/*.sh "$dst_dir/" 2>/dev/null || true
+      chmod +x "$dst_dir"/*.sh 2>/dev/null || true
+      ;;
+    md)
+      cp "$src_dir"/*.md "$dst_dir/" 2>/dev/null || true
+      ;;
+    *)
+      warn "알 수 없는 managed file kind: $kind"
+      return 0
+      ;;
+  esac
+
+  ok "managed 갱신: $label"
+}
+
+copy_managed_files \
+  "$SOURCE_DIR/templates/.sfs-local-template/scripts" \
+  "$TARGET/.sfs-local/scripts" \
+  "sh" \
+  ".sfs-local/scripts/ (executable)"
+
+copy_managed_files \
+  "$SOURCE_DIR/templates/.sfs-local-template/sprint-templates" \
+  "$TARGET/.sfs-local/sprint-templates" \
+  "md" \
+  ".sfs-local/sprint-templates/"
+
+copy_managed_files \
+  "$SOURCE_DIR/templates/.sfs-local-template/decisions-template" \
+  "$TARGET/.sfs-local/decisions-template" \
+  "md" \
+  ".sfs-local/decisions-template/"
+
 TODAY=$(date +%Y-%m-%d)
 if [ "$(uname)" = "Darwin" ]; then
   SED_INPLACE=(sed -i '')
@@ -367,7 +461,7 @@ ${C_BOLD}${C_GREEN}=== 업그레이드 완료 ===${C_RESET}
   $CUR_VER → $NEW_VER
 
 변경사항 git commit 권장:
-  ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .claude/commands/sfs.md .gitignore .sfs-local/divisions.yaml .sfs-local/VERSION${C_RESET}
+  ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .claude/commands/sfs.md .gitignore .sfs-local/divisions.yaml .sfs-local/VERSION .sfs-local/scripts .sfs-local/sprint-templates .sfs-local/decisions-template${C_RESET}
   ${C_BLUE}git commit -m "chore: upgrade solon-mvp $CUR_VER → $NEW_VER"${C_RESET}
 
 CHANGELOG: https://github.com/${SOLON_REPO}/blob/main/CHANGELOG.md

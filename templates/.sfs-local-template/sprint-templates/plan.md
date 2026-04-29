@@ -10,7 +10,7 @@ last_touched_at: ""  # filled by /sfs plan (auto, ISO8601 + tz)
 
 > Sprint **G1 — Plan Gate** 산출물. 본 문서의 목적은 **요구사항·AC 의 측정 가능성 확보**.
 > 변경 이력은 `.sfs-local/events.jsonl` 의 `phase_change` / `gate_review` event 로 추적.
-> SSoT: `05-gate-framework.md §5.1` (Gate 매트릭스).
+> 기준 문서: `05-gate-framework.md §5.1` (Gate 매트릭스).
 
 ---
 

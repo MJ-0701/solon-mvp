@@ -20,6 +20,10 @@
 
 ## 수정 시 체크리스트
 
+### 공통
+- [ ] 파일을 수정하면 `CHANGELOG.md` 의 Unreleased 또는 해당 릴리스 섹션에 변경 범위, 변경 이유, 검증 결과를 남긴다.
+      후속 Claude/Codex 세션이 정합성과 합리성을 cross-check 할 수 있어야 한다.
+
 ### install.sh 변경 시
 - [ ] 로컬 모드 (`./install.sh`) 동작 확인
 - [ ] 원격 모드 (`curl | bash`) 동작 확인 — 특히 `read < /dev/tty` 처리

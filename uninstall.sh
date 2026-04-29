@@ -3,7 +3,7 @@
 #
 # 사용법:
 #   cd ~/workspace/my-project
-#   ~/tmp/solon-mvp/uninstall.sh
+#   bash ~/tmp/solon-mvp/uninstall.sh
 #
 # 동작:
 #   1. .gitignore 에서 solon-mvp 블록 제거
@@ -30,12 +30,42 @@ warn()  { printf "  %s⚠%s %s\n" "$C_YELLOW" "$C_RESET" "$*"; }
 err()   { printf "  %s✗%s %s\n" "$C_RED" "$C_RESET" "$*" >&2; }
 die()   { err "$*"; exit 1; }
 
-if [ ! -t 0 ] && [ -r /dev/tty ]; then exec < /dev/tty; fi
+usage() {
+  cat <<EOF
+Usage: ./uninstall.sh
+
+Interactively removes Solon MVP scaffold from the current project.
+
+Options:
+  -h, --help  도움말을 출력합니다.
+EOF
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      die "알 수 없는 옵션: $1 (지원: --help)"
+      ;;
+  esac
+  shift
+done
+
+if [ ! -t 0 ]; then
+  if [ -e /dev/tty ] && { : < /dev/tty; } 2>/dev/null; then
+    exec < /dev/tty
+  else
+    die "대화형 input 불가 (stdin 파이프 + /dev/tty 없음). 터미널에서 직접 실행하세요."
+  fi
+fi
 
 prompt() {
   local msg="$1" default="${2:-}" answer
-  if [ -n "$default" ]; then printf "%s [%s]: " "$msg" "$default"
-  else printf "%s: " "$msg"; fi
+  if [ -n "$default" ]; then printf "%s [%s]: " "$msg" "$default" >&2
+  else printf "%s: " "$msg" >&2; fi
   read -r answer || answer=""
   echo "${answer:-$default}"
 }
@@ -123,12 +153,16 @@ for doc in SFS.md CLAUDE.md AGENTS.md GEMINI.md .claude/commands/sfs.md; do
   [ -f "$TARGET/$doc" ] || continue
   echo ""
   warn "$doc 가 존재합니다 (사용자가 편집했을 수 있음)"
-  if [ "$(prompt "$doc 삭제할까요?" "N")" = "y" ] || [ "$(prompt "" "N")" = "Y" ]; then
-    rm -f "$TARGET/$doc"
-    ok "$doc 제거"
-  else
-    ok "$doc 보존"
-  fi
+  ans=$(prompt "$doc 삭제할까요? (y/N)" "N")
+  case "$ans" in
+    y|Y|yes|YES)
+      rm -f "$TARGET/$doc"
+      ok "$doc 제거"
+      ;;
+    *)
+      ok "$doc 보존"
+      ;;
+  esac
 done
 
 # ============================================================================

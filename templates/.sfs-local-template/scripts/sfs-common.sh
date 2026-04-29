@@ -283,11 +283,11 @@ append_event() {
 }
 
 # ─────────────────────────────────────────────────────────────────────
-# GATE ID HELPERS (WU-25 §3 추가, gates.md §1 7-enum SSoT 정합)
+# GATE ID HELPERS (WU-25 §3 추가, gates.md §1 7-enum 기준 문서 정합)
 # ─────────────────────────────────────────────────────────────────────
 
 # validate_gate_id <id> — gates.md §1 7-enum exact match (case-sensitive, hyphen 포함).
-# 7-enum SSoT = gates.md §1 (cross-reference; 변경 시 양쪽 동시 갱신).
+# 7-enum 기준 문서 = gates.md §1 (cross-reference; 변경 시 양쪽 동시 갱신).
 # Returns: 0 valid / 1 invalid.
 # Caller usage:
 #   if ! validate_gate_id "${GATE_ID}"; then

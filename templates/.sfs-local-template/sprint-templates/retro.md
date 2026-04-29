@@ -11,7 +11,7 @@ closed_at: ""        # filled by /sfs retro --close
 
 > Sprint **G5 — Sprint Retro** 산출물. 학습 루프 (정성, N PDCA 집계).
 > `/sfs retro --close` 로 본 sprint 의 `closed_at` 을 frontmatter 에 기록 + `.sfs-local/events.jsonl` 의 `sprint_close` event append.
-> SSoT: `gates.md §1` (G5) + `05-gate-framework.md §5.1.3` (Sprint Retro).
+> 기준 문서: `gates.md §1` (G5) + `05-gate-framework.md §5.1.3` (Sprint Retro).
 
 ---
 

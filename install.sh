@@ -15,7 +15,7 @@
 #   - 멱등성 (idempotent) — 재실행해도 사용자 기존 자산 파괴하지 않음
 #   - 오류 시 early exit, 롤백은 사용자 git 으로
 #
-# 참고: 본 스크립트는 Solon MVP 0.1.0 — 풀스펙 아님 (사용자 개인 방법론 docset 참조).
+# 참고: 본 스크립트는 Solon MVP 설치 엔트리포인트 — 풀스펙 아님.
 
 set -euo pipefail
 
@@ -42,7 +42,8 @@ while [ $# -gt 0 ]; do
       exit 0
       ;;
     *)
-      die "알 수 없는 옵션: $1 (지원: --yes, --help)"
+      printf "알 수 없는 옵션: %s (지원: --yes, --help)\n" "$1" >&2
+      exit 1
       ;;
   esac
   shift
@@ -349,16 +350,15 @@ mkdir -p "$TARGET/.sfs-local/sprints" "$TARGET/.sfs-local/decisions"
 [ -f "$TARGET/.sfs-local/decisions/.gitkeep" ] || touch "$TARGET/.sfs-local/decisions/.gitkeep"
 ok "  sprints/ + decisions/ 확보"
 
-# scripts/ — Solon-versioned bash adapters (sfs-common.sh + sfs-status.sh + sfs-start.sh)
+# scripts/ — Solon-versioned bash adapters (sfs-common.sh + sfs-*.sh)
 # 정책: 매 install 마다 overwrite (user 수정 영역 아님, upgrade.sh 와 동일 정합).
-# 참고: WU-24 §1/§2/§3 — `.claude/commands/sfs.md` adapter dispatch 가
-#      `.sfs-local/scripts/sfs-{status,start}.sh` 를 호출.
+# 참고: `.claude/commands/sfs.md` adapter dispatch 가 `.sfs-local/scripts/sfs-*.sh` 를 호출.
 SCRIPTS_SRC="$SOURCE_DIR/templates/.sfs-local-template/scripts"
 if [ -d "$SCRIPTS_SRC" ]; then
   mkdir -p "$TARGET/.sfs-local/scripts"
   cp "$SCRIPTS_SRC"/*.sh "$TARGET/.sfs-local/scripts/" 2>/dev/null || true
   chmod +x "$TARGET/.sfs-local/scripts"/*.sh 2>/dev/null || true
-  ok "  scripts/ 복사 (sfs-common.sh + sfs-status.sh + sfs-start.sh, executable)"
+  ok "  scripts/ 복사 (sfs-common.sh + sfs-*.sh, executable)"
 fi
 
 # sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용하는 4 템플릿
@@ -448,7 +448,7 @@ Claude /sfs:     .claude/commands/sfs.md
      ${C_BLUE}git commit -m "chore: install solon-mvp $SOLON_VERSION"${C_RESET}
      ${C_BLUE}git push${C_RESET}
 
-  ${C_BOLD}4.${C_RESET} 버전 갱신 필요 시: ${C_BLUE}solon-mvp/upgrade.sh${C_RESET} 실행.
+  ${C_BOLD}4.${C_RESET} 버전 갱신 필요 시: ${C_BLUE}bash solon-mvp/upgrade.sh${C_RESET} 실행.
 
 문제 발생 시: https://github.com/${SOLON_REPO}/issues
 

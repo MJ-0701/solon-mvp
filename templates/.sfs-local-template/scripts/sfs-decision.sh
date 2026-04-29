@@ -165,11 +165,20 @@ cp "$TEMPLATE" "$DECISION_PATH"
 # BSD/GNU). Atomic tmp+mv pattern, same as sfs-common.sh update_frontmatter.
 TMP_FILE="${DECISION_PATH}.tmp.$$"
 awk -v id="$DECISION_ID" -v title="$TITLE" -v now="$NOW" '
+function replace_all(s, needle, repl,    out, p) {
+    out = ""
+    while ((p = index(s, needle)) > 0) {
+        out = out substr(s, 1, p - 1) repl
+        s = substr(s, p + length(needle))
+    }
+    return out s
+}
 {
-    gsub(/\{\{DECISION_ID\}\}/, id)
-    gsub(/\{\{TITLE\}\}/, title)
-    gsub(/\{\{NOW\}\}/, now)
-    print
+    line = $0
+    line = replace_all(line, "{{DECISION_ID}}", id)
+    line = replace_all(line, "{{TITLE}}", title)
+    line = replace_all(line, "{{NOW}}", now)
+    print line
 }
 ' "$DECISION_PATH" > "$TMP_FILE"
 mv "$TMP_FILE" "$DECISION_PATH"
@@ -178,7 +187,10 @@ mv "$TMP_FILE" "$DECISION_PATH"
 # Use sfs-common.sh `append_event` 2-arg signature (type, json_payload).
 # Note: WU-25 row 2 narrative captured the spec→impl signature mismatch;
 #       we follow the impl form here (consistent with sfs-plan.sh / sfs-review.sh).
-append_event "decision_created" "{\"decision_id\":\"$DECISION_ID\",\"path\":\"$DECISION_PATH\",\"title\":\"$TITLE\"}"
+_esc_decision_id="$(json_escape "$DECISION_ID")"
+_esc_decision_path="$(json_escape "$DECISION_PATH")"
+_esc_decision_title="$(json_escape "$TITLE")"
+append_event "decision_created" "{\"decision_id\":\"$_esc_decision_id\",\"path\":\"$_esc_decision_path\",\"title\":\"$_esc_decision_title\"}"
 
 # ─── stdout (WU-26 §1.1 verbatim) ─────────────────────────────────────────────
 echo "decision created: $DECISION_PATH"
