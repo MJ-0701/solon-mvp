@@ -75,7 +75,33 @@ parent_file: 2026-04-19-sfs-v0.4/sprints/WU-27.md
 - **bug fix in helper**: claim_lock / release_lock / mark_fail / mark_abandoned 4 곳의 `repl_or_add` 함수 newline fix (block 끝에 newline 없을 시 add 전 \n 추가, T3 발견 후 1차 fix).
 - **누적 분량**: sfs-loop.sh 735L 신설 + sfs-common.sh +571L 보강 = +1306L 신규. sfs.md +12 line.
 
-## v0.6~ (예약, WU-27 close + sub-task 6.8 + release cut 시 entry 추가)
+## v1.0-rc2 — 2026-04-29T22:50+09:00 (admiring-compassionate-euler, 26번째 사이클 sub-task 6.8 buffer close, user-active-deferred 자율 진행, 사용자 D′ 결정)
 
-- v0.6: WU-27 frontmatter close + sprints/_INDEX 이동
-- v1.0: sub-task 6 close (6.8 buffer 완료, 0.5.0-mvp release cut)
+- **사용자 D′ 결정** (26th-1 admiring-compassionate-euler Cowork 진입): "6.8 = 실 LLM 통합이 아니라 release 전 깨질 만한 안전장치 정리". β minimal cleanup + spec/impl drift 1건 + 버그 2건 fix + persona fallback 정책. **schema migration 보류** (lazy inject 유지).
+- **sub-task 6.8.0**: mutex claim (`PROGRESS.md` D-I-WU-27 owner=admiring-compassionate-euler, ttl=30min, mode=user-active-deferred, priority 8 closed → 4 active, prefer_mode closed → user-active-deferred).
+- **sub-task 6.8.1**: 3 site read-only audit. LLM 호출 (`review_with_persona` line 861), race window (`claim_lock` line 582 TOCTOU), FSM ABANDONED 시퀀스 (`mark_abandoned` + `auto_restart`) 진단. decision_point 2건 발견 = WU27-D6 (LLM CLI shape) + WU27-D7 (schema migration policy).
+- **sub-task 6.8.2**: `review_with_persona` 에 `SFS_LOOP_LLM_LIVE=1` env gating fail-closed (rc=99 + verdict=ERROR, v1.0-rc1 의 spec/impl drift 1건 해소). live=0 default 모드 = 기존 stub PASS-with-conditions 보존. 실 LLM CLI 호출 = WU27-D6 deferred (W-24).
+- **sub-task 6.8.3**: `claim_lock` mkdir-based atomic claim (POSIX-portable, macOS+Linux 양립). `mkdir "${path}.lock" 2>/dev/null` 실패 = race lost rc=4. 정상 진행 끝에 `rmdir` 해제. 이전 버그 = bash read owner → python3 write 사이 inter-process gap 으로 양쪽 worker 다 owner=null 본 후 양쪽 write 가능 → 차단.
+- **sub-task 6.8.4**: `mark_abandoned` 안에 `escalate_w10_todo` auto-wire (best-effort). ABANDONED 마킹 성공 시 `cross-ref-audit.md §4` W-AUTO entry append. spec §6.5.4 verbatim 정합.
+- **sub-task 6.8.4b** (사용자 추가 정책): `_builtin_persona_text` helper 신설. `review_with_persona` persona file 부재 시 `case basename` 분기 — `planner.md` → builtin-planner 4-line CEO scope-risk reviewer / `evaluator.md` → builtin-evaluator 4-line CPO user-impact reviewer / 그 외 → rc=99 fail-closed. 미래 live=1 wire 시 `_builtin_persona_text` = LLM stdin 공급원.
+- **sub-task 6.8.5**: `cross-ref-audit.md §4` W-24 (live LLM CLI shape, WU27-D6) + W-25 (schema migration policy, WU27-D7) deferred 등재. 23 → 25 항목.
+- **sub-task 6.8.6**: smoke 8/8 PASS in `/tmp/wu27-6.8-smoke-*` sandbox.
+  - T1 `_builtin_persona_text planner` rc=0 + 4-line CEO text
+  - T2 `_builtin_persona_text evaluator` rc=0 + 4-line CPO text
+  - T3 `_builtin_persona_text security` rc=99 (unknown kind)
+  - T4 `review_with_persona agents/planner.md plan.md` rc=2 + persona_source=builtin-planner (file missing → fallback)
+  - T5 `review_with_persona agents/security.md plan.md` rc=99 (unknown name fail-closed)
+  - T6 `SFS_LOOP_LLM_LIVE=1 review_with_persona evaluator.md plan.md` rc=99 + verdict=ERROR
+  - T7 `claim_lock` with pre-occupied `PROGRESS.md.lock/` rc=4 (race lost)
+  - T7b `claim_lock` fresh rc=0 + owner + status=PROGRESS + version=1 (§1.16 lazy schema inject 검증)
+  - T8 `mark_abandoned` rc=0 + status=ABANDONED + W-AUTO entry append in `cross-ref-audit.md §4`
+- **sub-task 6.8.7**: PROGRESS heartbeat (22:50 + next_step 8.7) + `MORNING-RECOVERY.md §5.0/§5.1/§5.2` 갱신 + 본 v1.0-rc2 entry + 사용자 manual commit prep.
+- **schema migration 의도적 보류**: 사용자 명시 결정 정합. `claim_lock` 의 `repl_or_add` + `bump_version` 이 이미 첫 호출 시 `status=PROGRESS` + `version=1` 자동 inject = T7b 검증.
+- **누적 분량**: sfs-common.sh +86L (1020 → 1106 line). 4 함수 수정 (claim_lock + mark_abandoned + review_with_persona + 주석) + 1 신설 (`_builtin_persona_text`).
+- **review gate self-application 2번째 사례**: PLANNER PASS + EVALUATOR PASS-with-conditions + 사용자 'α 자율진행 승인ㄱㄱ' final approval + 진행 중 D′ 추가 결정 + 6.8.1 audit 후 escalation briefing.
+- **§1.5 push 절대 금지** + **§1.5' commit auto-OK** (사용자 mac terminal manual commit 영역, Cowork sandbox 안 host repo .git mutate 0).
+
+## v0.6~ (예약, WU-27 close + 0.5.0-mvp release cut 시 entry 추가)
+
+- v0.6: WU-27 frontmatter sub_task 6.8 narrative 추가 + sprints/_INDEX 이동 + status `done` 유지
+- v1.0: sub-task 6 close (6.8 buffer 완료 = v1.0-rc2, 0.5.0-mvp release cut)

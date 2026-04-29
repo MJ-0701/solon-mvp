@@ -90,14 +90,51 @@ bash -n 2026-04-19-sfs-v0.4/solon-mvp-dist/templates/.sfs-local-template/scripts
 
 ## 5. 다음 작업 (sub-task 6.8 + WU-27 close + 0.5.0-mvp release cut)
 
+### 5.0 sub-task 6.8 progress (26th-1 admiring-compassionate-euler, 2026-04-29 user-active-deferred Cowork)
+
+✅ **sub-task 6.8 본문 완료** — 사용자 D′ 결정 (β minimal cleanup + spec/impl drift 1건 + 버그 2건 + persona fallback 정책) 정합. files_touched = 3 (sfs-common.sh + cross-ref-audit.md + PROGRESS.md, 본 file + CHANGELOG 이번 micro-step 에 추가 = 5/8 cap). 시간 = ~22:30 → ~22:50 KST (~80분 사용 / 120분 cap).
+
+| micro-step | 내용 | 결과 |
+|---|---|---|
+| 6.8.0 | mutex claim (D-I-WU-27 owner=admiring-compassionate-euler, ttl=30, mode=user-active-deferred) | ✅ |
+| 6.8.1 | 3 site read-only audit (LLM 호출 / race window / FSM ABANDONED) + decision_point 2건 발견 | ✅ |
+| 6.8.2 | `review_with_persona` SFS_LOOP_LLM_LIVE=1 fail-closed (rc=99 + verdict=ERROR), live=0 stub 보존 | ✅ |
+| 6.8.3 | `claim_lock` mkdir-based atomic claim (POSIX-portable, macOS+Linux), TOCTOU race window 차단 | ✅ |
+| 6.8.4 | `mark_abandoned` 안에 `escalate_w10_todo` auto-wire (best-effort, ABANDONED 마킹 성공 시 W-AUTO entry append) | ✅ |
+| 6.8.4b | `_builtin_persona_text` helper 신설 + `review_with_persona` fallback 정책 (known planner.md/evaluator.md → builtin / unknown → rc=99) | ✅ 사용자 추가 정책 |
+| 6.8.5 | cross-ref-audit.md §4 W-24 (LLM CLI shape, WU27-D6) + W-25 (schema migration policy, WU27-D7) deferred 등재 | ✅ |
+| 6.8.6 | sandbox `/tmp/wu27-6.8-smoke-*` smoke 8/8 PASS (T1~T8: builtin text + fallback + LIVE fail-closed + race window mkdir + lazy schema inject + escalate auto-wire) | ✅ 8/8 PASS |
+| 6.8.7 | PROGRESS heartbeat + MORNING-RECOVERY (본 §5.0) + CHANGELOG v1.0-rc2 entry + 사용자 manual commit prep | ✅ |
+
+**의도적 보류 (사용자 결정)**:
+- W-24 (live LLM CLI shape) — 0.5.0+ 외부 onboarding 후 데이터 누적 시점에 결정. 본 cycle 임시 mitigation = builtin fallback persona text (planner/evaluator 4-line each).
+- W-25 (PROGRESS.md schema migration policy) — lazy inject 유지 (사용자 명시 결정). 후속 검증 신호 = stale FAIL/ABANDONED 1회 이상 + 외부 onboarding mixed schema operational 영향.
+
+### 5.1 잔여 작업 (사용자 또는 후속 cycle)
+
 | step | 내용 | 추정 |
 |---|---|---|
-| 6.8 | edge case + bug fix buffer (live LLM 호출 site 검증, race window 축소, FSM PROGRESS→ABANDONED 시퀀스 검증) | 60-120분 |
-| close | `sprints/WU-27.md` frontmatter status `done` 유지 + sub_task 6 narrative 추가 | ~5분 |
-| _INDEX | sprints/_INDEX.md 의 활성 → 완료 이동 | ~3분 |
-| stable sync | `solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-{loop,common}.sh` + `templates/.claude/commands/sfs.md` → `~/workspace/solon-mvp/templates/...` cp -a 동기 (§1.13 hotfix path) | ~5분 |
+| close | `sprints/WU-27.md` frontmatter sub_task 6.8 narrative 추가 + status `done` 유지 | ~5분 |
+| _INDEX | sprints/_INDEX.md 의 활성 → 완료 이동 (이미 완료된 경우 skip) | ~3분 |
+| stable sync | `solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-common.sh` → `~/workspace/solon-mvp/templates/...` cp -a 동기 (§1.13 hotfix path) | ~3분 |
 | release cut | `scripts/cut-release.sh --version 0.5.0-mvp --apply` (WU-31 도구) | ~10분 |
-| commit msg | `WU-27: /sfs loop 실 bash 구현 (sub-task 6.1~6.8) + 0.5.0-mvp release cut` | manual |
+
+### 5.2 사용자 manual commit (26th-1 batch)
+
+```bash
+cd ~/agent_architect
+
+git add 2026-04-19-sfs-v0.4/solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-common.sh \
+        2026-04-19-sfs-v0.4/cross-ref-audit.md \
+        2026-04-19-sfs-v0.4/PROGRESS.md \
+        2026-04-19-sfs-v0.4/sprints/WU-27/MORNING-RECOVERY.md \
+        2026-04-19-sfs-v0.4/sprints/WU-27/CHANGELOG.md
+
+git commit -m "WU-27 sub-task 6.8: bug-fix + safety-net buffer (D' 결정, mutex 26th-1 admiring-compassionate-euler)" \
+           -m "26th-1 admiring-compassionate-euler (Cowork user-active-deferred) 자율진행. 사용자 D' 결정 = β minimal cleanup + spec/impl drift 1건 + 버그 2건 fix + persona fallback 정책. 산출 = sfs-common.sh +86L (4 함수 수정 + 1 신설): (1) review_with_persona — SFS_LOOP_LLM_LIVE=1 fail-closed (rc=99 + verdict=ERROR, WU27-D6 deferred), (2) claim_lock — mkdir-based atomic claim (POSIX-portable, macOS+Linux, TOCTOU race window 차단), (3) mark_abandoned — escalate_w10_todo auto-wire (best-effort, ABANDONED 시 cross-ref-audit.md §4 W-AUTO entry append), (4) _builtin_persona_text — known persona missing 시 PLANNER/EVALUATOR 4-line built-in fallback, (5) review_with_persona — persona fallback 정책 (known → builtin / unknown → rc=99 fail-closed). cross-ref-audit.md §4 = W-24 (LLM CLI shape) + W-25 (schema migration policy) deferred 등재. PROGRESS.md = D-I-WU-27 mutex claim + heartbeat + next_step. MORNING-RECOVERY.md = §5 갱신. WU-27/CHANGELOG.md = v1.0-rc2 entry. 8/8 smoke PASS in /tmp/wu27-6.8-smoke-* sandbox (T1 builtin planner / T2 builtin evaluator / T3 unknown rc=99 / T4 missing planner.md fallback / T5 missing security.md fail-closed / T6 LIVE=1 ERROR / T7 race window mkdir / T7b lazy schema inject / T8 mark_abandoned escalate). file 편집 5개. host repo .git mutate 0 (§1.5'). schema migration 의도적 보류 (lazy inject 유지). PLANNER PASS + EVALUATOR PASS-with-conditions + 사용자 D' final approval."
+
+# git push origin main   # 사용자 confirm 후 주석 해제 (§1.5 push 사용자 영역)
+```
 
 ## 6. 본 세션 (sandbox 25th optimistic-vigilant-bell) 종결
 
