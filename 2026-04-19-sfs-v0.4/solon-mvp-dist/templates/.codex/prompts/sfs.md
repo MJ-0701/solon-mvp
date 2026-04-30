@@ -69,7 +69,7 @@ Use this shape and fill only evidence-backed values:
 🔧 Steps   <N>건 — <adapter/refinement/review path summary>
 📁 Files   <N>개 — <created/updated artifact paths>
 💾 Commits <N>건 — <sha or "없음 (planning/review artifact)">
-📊 Health  Solon SSoT ✓ | adapter <✓/−> | CEO <✓/−> | CTO/CPO <✓/−> | bkit owner ×
+📊 Health  Solon SSoT ✓ | adapter <✓/−> | CEO <✓/−> | CTO/CPO <✓/−> | Solon owner ✓
 🔎 Review  <verdict/skipped/prompt-only/n/a> — <executor result summary for review only>
 🛠 Actions <N>건 — <Required CTO actions summary, or "없음/unknown">
 ───────────────────────────────────────────────────

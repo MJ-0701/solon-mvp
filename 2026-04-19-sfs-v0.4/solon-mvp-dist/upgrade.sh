@@ -21,6 +21,36 @@
 
 set -euo pipefail
 
+ASSUME_YES=0
+
+usage() {
+  cat <<'EOF'
+Usage: sfs upgrade [--yes]
+
+Options:
+  -y, --yes   안전 기본 정책으로 non-interactive upgrade 실행
+  -h, --help  도움말 출력
+EOF
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -y|--yes)
+      ASSUME_YES=1
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "알 수 없는 옵션: $1" >&2
+      usage >&2
+      exit 99
+      ;;
+  esac
+  shift
+done
+
 readonly SOLON_REPO="MJ-0701/solon-product"
 readonly SOLON_BRANCH="main"
 readonly GIT_MARKER_BEGIN="### BEGIN solon-product ###"
@@ -51,6 +81,11 @@ fi
 
 prompt() {
   local msg="$1" default="${2:-}" answer
+  if [ "$ASSUME_YES" -eq 1 ] && [ -n "$default" ]; then
+    printf "%s [%s]: %s\n" "$msg" "$default" "$default" >&2
+    echo "$default"
+    return 0
+  fi
   if [ -n "$default" ]; then printf "%s [%s]: " "$msg" "$default" >&2
   else printf "%s: " "$msg" >&2; fi
   read -r answer || answer=""
@@ -210,7 +245,7 @@ recommend_action() {
   fi
 
   case "$dst_rel" in
-    "SFS.md"|".claude/commands/sfs.md"|".gemini/commands/sfs.toml"|".agents/skills/sfs/SKILL.md"|".sfs-local/GUIDE.md")
+    "SFS.md"|".claude/skills/sfs/SKILL.md"|".claude/commands/sfs.md"|".gemini/commands/sfs.toml"|".agents/skills/sfs/SKILL.md"|".sfs-local/GUIDE.md")
       printf "backup+overwrite"
       ;;
     "CLAUDE.md"|"AGENTS.md"|"GEMINI.md"|".sfs-local/divisions.yaml")
@@ -247,7 +282,8 @@ cat <<EOF
   - CLAUDE/AGENTS/GEMINI.md            → 자동 보존 (기존 프로젝트 지침 보호)
   - .sfs-local/divisions.yaml          → 자동 보존 (프로젝트별 운영값 보호)
   - .sfs-local/auth.env.example        → backup+overwrite (로컬 auth 템플릿, 실제 auth.env 는 ignore)
-  - .claude/commands/sfs.md            → backup+overwrite (배포판 관리 커맨드 최신화)
+  - .claude/skills/sfs/SKILL.md        → backup+overwrite (Claude Code Skill 최신화)
+  - .claude/commands/sfs.md            → backup+overwrite (legacy 커맨드 fallback 최신화)
   - .sfs-local/scripts/sfs-*.sh        → backup+overwrite (Solon-versioned bash)
   - .sfs-local/scripts/sfs.ps1         → backup+overwrite (Windows PowerShell → Git Bash wrapper)
   - .sfs-local/sprint-templates/*.md   → backup+overwrite (배포판 관리 템플릿)
@@ -264,6 +300,7 @@ declare -a CHECK_FILES=(
   "CLAUDE.md|templates/CLAUDE.md.template"
   "AGENTS.md|templates/AGENTS.md.template"
   "GEMINI.md|templates/GEMINI.md.template"
+  ".claude/skills/sfs/SKILL.md|templates/.claude/commands/sfs.md"
   ".claude/commands/sfs.md|templates/.claude/commands/sfs.md"
   ".sfs-local/divisions.yaml|templates/.sfs-local-template/divisions.yaml"
   ".sfs-local/auth.env.example|templates/.sfs-local-template/auth.env.example"
@@ -429,6 +466,8 @@ update_file "SFS.md" "templates/SFS.md.template" "공통 SFS 지침" "b"
 update_file "AGENTS.md" "templates/AGENTS.md.template" "Codex 어댑터" "s"
 update_file "GEMINI.md" "templates/GEMINI.md.template" "Gemini CLI 어댑터" "s"
 mkdir -p "$TARGET/.claude/commands"
+mkdir -p "$TARGET/.claude/skills/sfs"
+update_file ".claude/skills/sfs/SKILL.md" "templates/.claude/commands/sfs.md" "Claude Code /sfs Skill" "b"
 update_file ".claude/commands/sfs.md" "templates/.claude/commands/sfs.md" "Claude Code /sfs 커맨드" "b"
 update_file ".sfs-local/divisions.yaml" "templates/.sfs-local-template/divisions.yaml" "본부 활성화" "s"
 update_file ".sfs-local/auth.env.example" "templates/.sfs-local-template/auth.env.example" "executor auth env example" "b"
@@ -577,7 +616,8 @@ ${C_BOLD}${C_GREEN}=== 업그레이드 완료 ===${C_RESET}
 
 변경사항 git commit 권장:
   ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore \\${C_RESET}
-  ${C_BLUE}        .claude/commands/sfs.md .gemini/commands/sfs.toml \\${C_RESET}
+  ${C_BLUE}        .claude/skills/sfs/SKILL.md .claude/commands/sfs.md \\${C_RESET}
+  ${C_BLUE}        .gemini/commands/sfs.toml \\${C_RESET}
   ${C_BLUE}        .agents/skills/sfs/SKILL.md .sfs-local/${C_RESET}
   ${C_BLUE}git commit -m "chore: upgrade solon-mvp $CUR_VER → $NEW_VER"${C_RESET}
 

@@ -138,6 +138,15 @@ sfs init
 sfs agent install all
 ```
 
+이후 Solon 런타임을 새 버전으로 올린 뒤 프로젝트 adapter/docs 를 갱신할 때는
+uninstall/reinstall 하지 않습니다:
+
+```bash
+brew upgrade MJ-0701/solon-product/sfs
+cd ~/workspace/my-project
+sfs update
+```
+
 agent 별로 명시하고 싶으면 같은 프로젝트 루트에서 개별 설치한다:
 
 ```bash
@@ -375,7 +384,16 @@ consumer 프로젝트에는 필요한 state/config/custom override 만 설치됩
 
 ---
 
-## Upgrade
+## Update / Upgrade
+
+일반 사용자는 `sfs update` 를 사용합니다. 현재 설치된 global runtime 기준으로 managed
+adapter/docs 를 백업 후 갱신하고, sprint/decision/event history 와 프로젝트별 지침은 보존합니다.
+
+```bash
+brew upgrade MJ-0701/solon-product/sfs
+cd ~/workspace/my-project
+sfs update
+```
 
 Local clone 기반 upgrade 는 먼저 product clone 을 GitHub 최신으로 맞춘 뒤 consumer 프로젝트에서
 실행합니다. 이 clone 이 오래되면 upgrade 가 낡은 `VERSION` 을 읽고 "이미 최신" 이라고 잘못
