@@ -36,7 +36,15 @@ created_at: ""   # filled by /sfs start
 - 결정 갈림길 발견 시 `.sfs-local/decisions/<topic>.md` 로 mini-ADR 분리.
 - 차단 요소 (외부 답변 대기, 리소스 부족 등) 는 본 섹션에 기록 후 `review.md` 에서 verdict 로 반영.
 
-## §3. 다음 단계 / 핸드오프 메모
+## §3. CTO 구현 메모
+
+- **CTO Generator persona**: `.sfs-local/personas/cto-generator.md`
+- **구현 executor/tool**: claude / codex / gemini / custom / human
+- **변경 파일/모듈**:
+- **실행한 테스트/스모크 체크**:
+- **CPO 에게 넘길 검증 포인트**:
+
+## §4. 다음 단계 / 핸드오프 메모
 
 - G3 Pre-Handoff Gate 통과를 위한 산출물 목록 정리.
 - 인계받을 사람이 추가 컨텍스트 없이 진행 가능한 상태 점검.

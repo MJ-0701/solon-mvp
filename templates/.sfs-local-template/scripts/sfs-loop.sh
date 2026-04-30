@@ -40,6 +40,11 @@ SFS_LOOP_EXIT_HEARTBEAT_FAIL=8           # PROGRESS heartbeat 쓰기 실패 (FUS
 SFS_LOOP_EXIT_EXECUTOR_FAIL=9            # executor resolve 실패
 SFS_LOOP_EXIT_UNKNOWN=99                 # bug
 
+if ! load_sfs_auth_env; then
+  echo "loop: executor auth env load failed: ${SFS_AUTH_ENV_FILE:-${SFS_LOCAL_DIR}/auth.env}" >&2
+  exit "$SFS_LOOP_EXIT_EXECUTOR_FAIL"
+fi
+
 # ─────────────────────────────────────────────────────────────────────
 # DEFAULTS (sfs-loop-flow.md §3.2 inflation table)
 # ─────────────────────────────────────────────────────────────────────
@@ -576,6 +581,7 @@ cmd_loop_run() {
     executor_cmd=$(resolve_executor "$LOOP_EXECUTOR")
     echo "loop:   executor: $executor_cmd" >&2
     if [[ "${SFS_LOOP_LLM_LIVE:-0}" == "1" && "$LOOP_DRY_RUN" != "true" ]]; then
+      ensure_executor_headless_auth "$LOOP_EXECUTOR" || exit "$SFS_LOOP_EXIT_EXECUTOR_FAIL"
       echo "loop:   [LIVE] invoking executor (real LLM call)" >&2
       # Real call: cat PROMPT.md | $executor_cmd  (Ralph Loop pattern)
       # MVP: PROMPT.md must exist; otherwise skip

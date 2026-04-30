@@ -1,4 +1,4 @@
-## [0.5.8-product] - 2026-04-30
+## [0.5.9-product] - 2026-04-30
 
 **G0 brainstorm command and flow correction.** `/sfs start` remains the sprint workspace
 scaffold command, while `/sfs brainstorm` becomes the explicit G0 context-capture command before
@@ -11,12 +11,30 @@ scaffold command, while `/sfs brainstorm` becomes the explicit G0 context-captur
   appends a `brainstorm_open` event, and prints the artifact path.
 - **`brainstorm.md` sprint template** — G0 artifact with raw brief, problem space, constraints,
   options, scope seed, plan seed, and generator/evaluator contract seed sections.
+- **3 C-Level personas** — managed defaults for CEO, CTO Generator, and CPO Evaluator under
+  `.sfs-local/personas/`.
 
 ### Changed
 
 - **flow contract** — product docs/adapters now use `start → brainstorm → plan` as the intended
   first flow. `start` scaffolds the sprint, `brainstorm` captures context, `plan` turns it into the
   sprint contract.
+- **C-Level sprint contract** — `plan.md` now frames the flow as CEO requirements/plan →
+  CTO Generator ↔ CPO Evaluator contract → CTO implementation → CPO review → CTO rework/final
+  confirmation → retro.
+- **CPO review entrypoint** — `/sfs review` now appends a CPO Evaluator prompt to `review.md`,
+  records `evaluator_executor` / `generator_executor`, and supports configurable review tools via
+  `--executor` while keeping CPO review mandatory.
+- **review executor bridge** — `/sfs review --run` now attempts an actual CPO bridge invocation
+  (`codex`, `codex-plugin`, `gemini`, `claude`, or custom command). Missing bridges fail closed
+  instead of leaving misleading metadata.
+- **local executor auth env** — `.sfs-local/auth.env.example` documents gitignored headless
+  credential handoff for Codex/Claude/Gemini. SFS loads `.sfs-local/auth.env` when present, checks
+  named executor auth before prompt handoff, and supports explicit `--auth-interactive` bootstrap
+  when the user discovers missing auth during review.
+- **asymmetric bridge policy** — Claude → Codex may use a Claude-side Codex plugin/manual bridge
+  or Codex CLI, while Codex → Claude uses Claude CLI or prompt handoff. `claude-plugin` is
+  explicitly unsupported because Codex is not a Claude plugin host.
 - **start scaffold** — `/sfs start` now copies `brainstorm.md` along with plan/log/review/retro.
 - **newline handling** — `sfs-dispatch.sh` still rejects newline args for deterministic commands, but
   permits them for `brainstorm` so pasted raw requirements can be captured instead of dropped.

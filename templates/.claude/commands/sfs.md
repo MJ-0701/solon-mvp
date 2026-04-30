@@ -54,7 +54,7 @@ Dispatch table:
 | `guide`    | `.sfs-local/scripts/sfs-dispatch.sh guide <remaining args>`    | passes `--path` / `--print` verbatim; default prints a short context briefing |
 | `brainstorm` | `.sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context and appends it to `brainstorm.md` |
 | `plan`     | `.sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | takes no flags currently; remaining args reserved for future (WU-25 §1) |
-| `review`   | `.sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | passes `--gate <id>` / `--gate=<id>` verbatim (gates.md §1 7-enum: G-1, G0, G1, G2, G3, G4, G5; WU-25 §2) |
+| `review`   | `.sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator review. passes `--gate`, `--executor`, `--generator`, `--persona`, `--print-prompt`, `--run` verbatim |
 | `decision` | `.sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim (WU-26 §1). Uses `decisions-template/ADR-TEMPLATE.md` (5 섹션 ADR-full); `sprint-templates/decision-light.md` 은 Claude-driven fallback. |
 | `retro`    | `.sfs-local/scripts/sfs-dispatch.sh retro <remaining args>`    | passes `--close` verbatim (WU-26 §2). With `--close`: writes status/closed_at into plan.md, removes `.sfs-local/current-sprint`, appends `sprint_close` event, runs `auto_commit_close` (git add+commit, push manual per §1.5). |
 | `loop`     | `.sfs-local/scripts/sfs-dispatch.sh loop <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim (WU-27 §3) |
@@ -92,7 +92,7 @@ Procedure (apply in order):
    - review: `0`=ok, `1`=no `.sfs-local/` or no active sprint,
      `4`=template missing, `6`=gate id invalid or required
      (`unknown gate <id>, valid: G-1, G0, G1, G2, G3, G4, G5`),
-     `7`=unknown CLI flag, `99`=unknown.
+     `7`=unknown CLI flag, `9`=executor bridge missing/failed, `99`=unknown.
    - decision: `0`=ok, `1`=`--id` conflict (decision already exists),
      `2`=corrupt `events.jsonl`, `3`=not a git repo,
      `4`=`decisions-template/ADR-TEMPLATE.md` missing, `5`=permission,
@@ -110,7 +110,8 @@ Procedure (apply in order):
    recommendations, or alternative suggestions. The bash script is the
    single source of truth for output format (WU22-D4: `·` separator + ISO8601
    timestamp + per-field color rules; WU-25 §1.1/§2.1: `plan.md ready: <path>`
-   / `review.md ready: <path> | gate <id> awaiting verdict`).
+   / `review.md ready: <path> | gate <id> awaiting CPO verdict | executor <executor>`
+   / `review.md ready: <path> | gate <id> CPO run complete | executor <executor> | output <path>`).
 
 If `$ARGUMENTS` is empty, treat it as if the user typed `status` (run the
 status adapter) so that bare `/sfs` produces the canonical compact status line.
@@ -147,7 +148,7 @@ If the first argument is one of the modes below, follow that mode.
 - `brainstorm`: **Adapter (above).** Fallback only: produce or update the current sprint `brainstorm.md` based on `sprint-templates/brainstorm.md`.
 - `plan`: **Adapter (above).** Fallback only: produce or update the current sprint `plan.md` from `brainstorm.md` + `sprint-templates/plan.md`.
 - `sprint`: Convert the current plan into implementation steps and gate checks.
-- `review`: **Adapter (above).** Fallback only: review the current sprint output and write/update `review.md` (require `--gate <id>` from gates.md §1 7-enum).
+- `review`: **Adapter (above).** Fallback only: use `.sfs-local/personas/cpo-evaluator.md` and write/update `review.md`; CPO review is mandatory, executor/tool is configurable. `--run` must use a real CLI/plugin bridge. If the user explicitly asks to use a Claude-connected Codex plugin, do not treat metadata as a review: run/print the CPO prompt, invoke the connected plugin if available, then append the plugin result to `review.md`.
 - `decision`: **Adapter (above).** Fallback only: write a short ADR-style decision under `.sfs-local/decisions/` based on `sprint-templates/decision-light.md`.
 - `log`: Append a one-line JSON event to `.sfs-local/events.jsonl`.
 - `retro`: **Adapter (above).** Fallback only: write or update the current sprint `retro.md` based on `sprint-templates/retro.md` (no auto commit / no sprint close in fallback).
@@ -164,7 +165,8 @@ When showing usage, keep it compact and practical. Include this shape:
 /sfs guide                처음 사용 맥락 브리핑
 /sfs brainstorm <context> G0 raw 요구사항/대화 맥락 기록
 /sfs plan                 현재 sprint plan.md 작성/갱신
-/sfs review               현재 변경사항 review.md 작성/갱신
+/sfs review --gate G4 --executor codex --generator claude --run
+                          CPO Evaluator review bridge 실행/기록
 /sfs decision <decision>  짧은 결정 기록 남기기
 /sfs retro                sprint 회고 작성/갱신
 ```

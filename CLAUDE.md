@@ -41,15 +41,16 @@
 
 ## 7-step flow 요약 (본 repo 자체 개발에도 적용)
 
-1. 브레인스토밍 (G0)
-2. plan (G1)
-3. sprint
-4. 구현 (G2 entry)
-5. review (G4)
-6. commit
-7. 문서화
+1. CEO 요구사항 정리 (G0)
+2. CEO plan (G1)
+3. CTO Generator ↔ CPO Evaluator sprint contract
+4. CTO 구현 (G2 entry)
+5. CPO review (G4)
+6. CTO review 확인 + 사용자 최종 통과
+7. 회고 / 문서화
 
-Gate 는 all signal-only (ALT-INV-3 never-hard-block).
+Gate 는 all signal-only (ALT-INV-3 never-hard-block). 단 CPO review 자체는 sprint flow 의 필수 단계이며,
+review executor/tool 은 Codex/Gemini/Claude/custom 중 선택 가능하다.
 Production open 을 수반하면 Release Readiness evidence(secret/auth/data/monitoring/rollback/cost) 를 review 또는 retro-light 에 남긴다.
 
 ## 절대 금지

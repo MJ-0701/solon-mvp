@@ -204,11 +204,14 @@ recommend_action() {
     "CLAUDE.md"|"AGENTS.md"|"GEMINI.md"|".sfs-local/divisions.yaml")
       printf "skip"
       ;;
+    ".sfs-local/auth.env.example")
+      printf "backup+overwrite"
+      ;;
     .sfs-local/scripts/*.sh|.sfs-local/scripts/*.ps1)
       # Solon-versioned runtime code, user 수정 영역 아님
       printf "backup+overwrite"
       ;;
-    .sfs-local/sprint-templates/*.md|.sfs-local/decisions-template/*.md)
+    .sfs-local/sprint-templates/*.md|.sfs-local/decisions-template/*.md|.sfs-local/personas/*.md)
       # 배포판 관리 템플릿, user 수정 영역 아님 (install.sh 정책 정합)
       printf "backup+overwrite"
       ;;
@@ -231,10 +234,12 @@ cat <<EOF
   - SFS.md                             → backup+overwrite (공통 SFS core 최신화)
   - CLAUDE/AGENTS/GEMINI.md            → 자동 보존 (기존 프로젝트 지침 보호)
   - .sfs-local/divisions.yaml          → 자동 보존 (프로젝트별 운영값 보호)
+  - .sfs-local/auth.env.example        → backup+overwrite (로컬 auth 템플릿, 실제 auth.env 는 ignore)
   - .claude/commands/sfs.md            → backup+overwrite (배포판 관리 커맨드 최신화)
   - .sfs-local/scripts/sfs-*.sh        → backup+overwrite (Solon-versioned bash)
   - .sfs-local/scripts/sfs.ps1         → backup+overwrite (Windows PowerShell → Git Bash wrapper)
   - .sfs-local/sprint-templates/*.md   → backup+overwrite (배포판 관리 템플릿)
+  - .sfs-local/personas/*.md           → backup+overwrite (CEO/CTO/CPO 기본 persona)
   - .sfs-local/decisions-template/*.md → backup+overwrite (ADR-TEMPLATE 신규, WU-26)
 
 EOF
@@ -249,6 +254,7 @@ declare -a CHECK_FILES=(
   "GEMINI.md|templates/GEMINI.md.template"
   ".claude/commands/sfs.md|templates/.claude/commands/sfs.md"
   ".sfs-local/divisions.yaml|templates/.sfs-local-template/divisions.yaml"
+  ".sfs-local/auth.env.example|templates/.sfs-local-template/auth.env.example"
   ".sfs-local/GUIDE.md|GUIDE.md"
   # scripts/ — Solon-versioned bash adapters (executable, user 수정 영역 아님)
   ".sfs-local/scripts/sfs-dispatch.sh|templates/.sfs-local-template/scripts/sfs-dispatch.sh"
@@ -270,6 +276,10 @@ declare -a CHECK_FILES=(
   ".sfs-local/sprint-templates/review.md|templates/.sfs-local-template/sprint-templates/review.md"
   ".sfs-local/sprint-templates/retro.md|templates/.sfs-local-template/sprint-templates/retro.md"
   ".sfs-local/sprint-templates/decision-light.md|templates/.sfs-local-template/sprint-templates/decision-light.md"
+  # personas/ — CEO / CTO Generator / CPO Evaluator 기본 persona
+  ".sfs-local/personas/ceo.md|templates/.sfs-local-template/personas/ceo.md"
+  ".sfs-local/personas/cto-generator.md|templates/.sfs-local-template/personas/cto-generator.md"
+  ".sfs-local/personas/cpo-evaluator.md|templates/.sfs-local-template/personas/cpo-evaluator.md"
   # decisions-template/ — sfs-decision.sh 가 ADR 신설 시 사용 (WU-26)
   ".sfs-local/decisions-template/ADR-TEMPLATE.md|templates/.sfs-local-template/decisions-template/ADR-TEMPLATE.md"
   ".sfs-local/decisions-template/_INDEX.md|templates/.sfs-local-template/decisions-template/_INDEX.md"
@@ -399,6 +409,7 @@ update_file "GEMINI.md" "templates/GEMINI.md.template" "Gemini CLI 어댑터" "s
 mkdir -p "$TARGET/.claude/commands"
 update_file ".claude/commands/sfs.md" "templates/.claude/commands/sfs.md" "Claude Code /sfs 커맨드" "b"
 update_file ".sfs-local/divisions.yaml" "templates/.sfs-local-template/divisions.yaml" "본부 활성화" "s"
+update_file ".sfs-local/auth.env.example" "templates/.sfs-local-template/auth.env.example" "executor auth env example" "b"
 update_file ".sfs-local/GUIDE.md" "GUIDE.md" "Solon onboarding guide (/sfs guide)" "b"
 
 # scripts/ — Solon-versioned bash adapters (codex finding #4 후속, 25th-6 보강)
@@ -426,6 +437,12 @@ update_file ".sfs-local/sprint-templates/log.md"             "templates/.sfs-loc
 update_file ".sfs-local/sprint-templates/review.md"          "templates/.sfs-local-template/sprint-templates/review.md"          "sprint review template" "b"
 update_file ".sfs-local/sprint-templates/retro.md"           "templates/.sfs-local-template/sprint-templates/retro.md"           "sprint retro template"  "b"
 update_file ".sfs-local/sprint-templates/decision-light.md"  "templates/.sfs-local-template/sprint-templates/decision-light.md"  "decision-light template (WU-26)" "b"
+
+# personas/ — CEO / CTO Generator / CPO Evaluator 기본 persona
+mkdir -p "$TARGET/.sfs-local/personas"
+update_file ".sfs-local/personas/ceo.md"           "templates/.sfs-local-template/personas/ceo.md"           "CEO persona" "b"
+update_file ".sfs-local/personas/cto-generator.md" "templates/.sfs-local-template/personas/cto-generator.md" "CTO Generator persona" "b"
+update_file ".sfs-local/personas/cpo-evaluator.md" "templates/.sfs-local-template/personas/cpo-evaluator.md" "CPO Evaluator persona" "b"
 
 # decisions-template/ — sfs-decision.sh 가 ADR 신설 시 사용 (WU-26 §1)
 # 신규: ADR-TEMPLATE.md + _INDEX.md (0.4.0-mvp 추가)

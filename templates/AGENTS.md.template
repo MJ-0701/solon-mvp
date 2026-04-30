@@ -34,7 +34,7 @@ Codex desktop app 처럼 leading slash 입력(`/sfs ...`)이 모델/Skill 에 �
 | `/sfs guide`, `$sfs guide`, `sfs guide` | `bash .sfs-local/scripts/sfs-dispatch.sh guide [--path|--print]` |
 | `/sfs brainstorm ...`, `$sfs brainstorm ...`, `sfs brainstorm ...` | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm [text|--stdin]` |
 | `/sfs plan`, `$sfs plan`, `sfs plan` | `bash .sfs-local/scripts/sfs-dispatch.sh plan` |
-| `/sfs review --gate <id>`, `$sfs review --gate <id>`, `sfs review --gate <id>` | `bash .sfs-local/scripts/sfs-dispatch.sh review --gate <id>` (id ∈ G-1, G0, G1, G2, G3, G4, G5) |
+| `/sfs review --gate <id> [--executor <tool>] [--run]`, `$sfs review --gate <id> [--executor <tool>] [--run]` | `bash .sfs-local/scripts/sfs-dispatch.sh review --gate <id> [--executor <tool>] [--run]` (CPO Evaluator review bridge, id ∈ G-1, G0, G1, G2, G3, G4, G5) |
 | `/sfs decision <title>`, `$sfs decision <title>`, `sfs decision <title>` | `bash .sfs-local/scripts/sfs-dispatch.sh decision "<title>" [--id <id>]` |
 | `/sfs retro [--close]`, `$sfs retro [--close]`, `sfs retro [--close]` | `bash .sfs-local/scripts/sfs-dispatch.sh retro [--close]` |
 | `/sfs loop ...`, `$sfs loop ...`, `sfs loop ...` | `bash .sfs-local/scripts/sfs-dispatch.sh loop [OPTIONS]` (Ralph Loop + Solon mutex, see `--help`) |
@@ -54,7 +54,7 @@ Windows PowerShell 환경에서 `bash` 가 직접 호출되지 않으면
 `--executor` flag (또는 `SFS_EXECUTOR` env) 로 LLM CLI 를 명시한다:
 
 - `--executor claude` → `claude -p --dangerously-skip-permissions`
-- `--executor gemini` → `gemini -p --yolo`
+- `--executor gemini` → `gemini --skip-trust --yolo --output-format text -p "Read stdin and execute the requested task."`
 - `--executor codex` → `codex exec --full-auto`
 - `--executor "<custom command>"` → 그대로 passthrough
 

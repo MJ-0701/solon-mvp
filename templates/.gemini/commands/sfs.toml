@@ -35,7 +35,7 @@ subcommands are deterministic and must NOT be re-interpreted by the model.
 | `guide`    | `bash .sfs-local/scripts/sfs-dispatch.sh guide <remaining args>`    | default context briefing; passes `--path` / `--print` verbatim |
 | `brainstorm` | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context and appends it to `brainstorm.md` |
 | `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | takes no flags currently; remaining args reserved for future |
-| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | passes `--gate <id>` / `--gate=<id>` verbatim (id ∈ G-1, G0, G1, G2, G3, G4, G5) |
+| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator review; passes `--gate`, `--executor`, `--generator`, `--persona`, `--print-prompt`, `--run` verbatim |
 | `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim |
 | `retro`    | `bash .sfs-local/scripts/sfs-dispatch.sh retro <remaining args>`    | passes `--close` verbatim. With `--close`: writes status/closed_at, removes `.sfs-local/current-sprint`, appends `sprint_close` event, runs `auto_commit_close` (push manual per §1.5) |
 | `loop`     | `bash .sfs-local/scripts/sfs-dispatch.sh loop <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim |

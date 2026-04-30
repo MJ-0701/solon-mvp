@@ -38,7 +38,7 @@ the model.
 | `guide`    | `bash .sfs-local/scripts/sfs-dispatch.sh guide <args>`    |
 | `brainstorm` | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <args>` |
 | `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <args>`     |
-| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <args>`   |
+| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <args>`   | CPO Evaluator review; pass `--gate`, `--executor`, `--generator`, `--run` verbatim |
 | `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <args>` |
 | `retro`    | `bash .sfs-local/scripts/sfs-dispatch.sh retro <args>`    |
 | `loop`     | `bash .sfs-local/scripts/sfs-dispatch.sh loop <args>`     |

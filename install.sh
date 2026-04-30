@@ -367,6 +367,13 @@ else
   ok "  events.jsonl 기존 유지"
 fi
 
+# auth.env.example — local executor credentials template (actual auth.env is gitignored)
+if [ -f "$SOURCE_DIR/templates/.sfs-local-template/auth.env.example" ] \
+   && [ ! -f "$TARGET/.sfs-local/auth.env.example" ]; then
+  cp "$SOURCE_DIR/templates/.sfs-local-template/auth.env.example" "$TARGET/.sfs-local/auth.env.example"
+  ok "  auth.env.example 생성 (Gemini/Codex/Claude bridge auth 안내)"
+fi
+
 # sprints/ + decisions/
 mkdir -p "$TARGET/.sfs-local/sprints" "$TARGET/.sfs-local/decisions"
 [ -f "$TARGET/.sfs-local/sprints/.gitkeep" ] || touch "$TARGET/.sfs-local/sprints/.gitkeep"
@@ -399,6 +406,15 @@ if [ -d "$TEMPLATES_SRC" ]; then
   mkdir -p "$TARGET/.sfs-local/sprint-templates"
   cp "$TEMPLATES_SRC"/*.md "$TARGET/.sfs-local/sprint-templates/" 2>/dev/null || true
   ok "  sprint-templates/ 복사 (brainstorm + plan + log + review + retro + decision-light)"
+fi
+
+# personas/ — CEO / CTO Generator / CPO Evaluator 기본 persona
+# 정책: 매 install 마다 overwrite (배포판 관리 기본값, 프로젝트별 수정은 별도 파일로 분기 권장).
+PERSONAS_SRC="$SOURCE_DIR/templates/.sfs-local-template/personas"
+if [ -d "$PERSONAS_SRC" ]; then
+  mkdir -p "$TARGET/.sfs-local/personas"
+  cp "$PERSONAS_SRC"/*.md "$TARGET/.sfs-local/personas/" 2>/dev/null || true
+  ok "  personas/ 복사 (CEO + CTO Generator + CPO Evaluator)"
 fi
 
 # decisions-template/ — sfs-decision.sh 가 ADR 신설 시 사용하는 ADR-full 템플릿 (WU-26 §1)

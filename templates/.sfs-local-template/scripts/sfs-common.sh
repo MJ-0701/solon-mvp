@@ -413,10 +413,160 @@ resolve_executor() {
   local executor="${1:-${SFS_EXECUTOR:-claude}}"
   case "$executor" in
     claude) echo "claude -p --dangerously-skip-permissions" ;;
-    gemini) echo "gemini -p --yolo" ;;
+    gemini) echo 'gemini --skip-trust --yolo --output-format text -p "Read stdin and execute the requested task."' ;;
     codex)  echo "codex exec --full-auto" ;;
     *)      echo "$executor" ;;   # custom string passthrough
   esac
+}
+
+# load_sfs_auth_env — optional local executor credentials/env.
+# Default file is intentionally ignored by Solon .gitignore.
+# Supported examples: GEMINI_API_KEY, GOOGLE_API_KEY, SFS_REVIEW_*_CMD.
+get_sfs_auth_env_file() {
+  printf '%s\n' "${SFS_AUTH_ENV_FILE:-${SFS_LOCAL_DIR}/auth.env}"
+}
+
+load_sfs_auth_env() {
+  local env_file
+  env_file="$(get_sfs_auth_env_file)"
+  if [[ ! -f "$env_file" ]]; then
+    return 0
+  fi
+  set -a
+  # shellcheck disable=SC1090
+  . "$env_file"
+  set +a
+}
+
+normalize_executor_profile() {
+  case "${1:-}" in
+    claude|claude-cli) echo "claude" ;;
+    codex|codex-cli) echo "codex" ;;
+    gemini|gemini-cli) echo "gemini" ;;
+    *) echo "custom" ;;
+  esac
+}
+
+executor_auth_ready() {
+  local profile
+  profile="$(normalize_executor_profile "$1")"
+  case "$profile" in
+    claude)
+      [[ -n "${ANTHROPIC_API_KEY:-}" || -n "${CLAUDE_API_KEY:-}" || -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" || "${SFS_CLAUDE_AUTH_READY:-0}" == "1" ]] && return 0
+      command -v claude >/dev/null 2>&1 && claude auth status 2>/dev/null | grep -q '"loggedIn"[[:space:]]*:[[:space:]]*true'
+      ;;
+    codex)
+      [[ -n "${OPENAI_API_KEY:-}" || -n "${CODEX_API_KEY:-}" || "${SFS_CODEX_AUTH_READY:-0}" == "1" ]] && return 0
+      command -v codex >/dev/null 2>&1 && codex login status >/dev/null 2>&1
+      ;;
+    gemini)
+      [[ -n "${GEMINI_API_KEY:-}" || -n "${GOOGLE_API_KEY:-}" || -n "${GOOGLE_APPLICATION_CREDENTIALS:-}" || "${SFS_GEMINI_AUTH_READY:-0}" == "1" ]]
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+}
+
+ensure_executor_headless_auth() {
+  local profile upper
+  profile="$(normalize_executor_profile "$1")"
+  if executor_auth_ready "$profile"; then
+    return 0
+  fi
+  upper="$(printf '%s' "$profile" | tr '[:lower:]' '[:upper:]')"
+  cat >&2 <<EOF
+executor bridge missing: ${profile} auth is not configured for headless SFS use.
+Set provider credentials in .sfs-local/auth.env, run the ${profile} CLI login flow first and set SFS_${upper}_AUTH_READY=1, or rerun with --auth-interactive from a real terminal.
+Local place: .sfs-local/auth.env (gitignored) or SFS_AUTH_ENV_FILE=/absolute/path.
+EOF
+  return 1
+}
+
+mark_executor_auth_ready() {
+  local profile upper env_file
+  profile="$(normalize_executor_profile "$1")"
+  upper="$(printf '%s' "$profile" | tr '[:lower:]' '[:upper:]')"
+  env_file="$(get_sfs_auth_env_file)"
+  mkdir -p "$(dirname "$env_file")"
+  if [[ -f "$env_file" ]] && grep -q "^SFS_${upper}_AUTH_READY=1$" "$env_file"; then
+    export "SFS_${upper}_AUTH_READY=1"
+    return 0
+  fi
+  {
+    printf '\n# Added by Solon after successful %s interactive auth bootstrap.\n' "$profile"
+    printf 'SFS_%s_AUTH_READY=1\n' "$upper"
+  } >> "$env_file"
+  export "SFS_${upper}_AUTH_READY=1"
+}
+
+bootstrap_executor_interactive_auth() {
+  local profile out_file err_file rc
+  profile="$(normalize_executor_profile "$1")"
+  if executor_auth_ready "$profile"; then
+    mark_executor_auth_ready "$profile"
+    return 0
+  fi
+  if [[ "$profile" == "custom" ]]; then
+    return 0
+  fi
+  if ! command -v "$profile" >/dev/null 2>&1; then
+    echo "executor bridge missing: ${profile} CLI not found" >&2
+    return 1
+  fi
+  if [[ ! -r /dev/tty || ! -w /dev/tty ]]; then
+    cat >&2 <<EOF
+executor bridge missing: interactive ${profile} auth requires a real terminal.
+Run the ${profile} CLI login flow once in your terminal, or set provider credentials in .sfs-local/auth.env.
+EOF
+    return 1
+  fi
+
+  mkdir -p "${SFS_LOCAL_DIR}/tmp"
+  out_file="${SFS_LOCAL_DIR}/tmp/${profile}-auth-bootstrap.out"
+  err_file="${SFS_LOCAL_DIR}/tmp/${profile}-auth-bootstrap.err"
+  echo "${profile} auth bootstrap: follow the browser/terminal prompts, then SFS will retry the review." >&2
+
+  case "$profile" in
+    claude)
+      claude auth login < /dev/tty > "$out_file" 2> "$err_file"
+      rc=$?
+      ;;
+    codex)
+      codex login < /dev/tty > "$out_file" 2> "$err_file"
+      rc=$?
+      ;;
+    gemini)
+      gemini --skip-trust --output-format text -p "Return exactly: SFS_GEMINI_AUTH_OK" \
+        < /dev/tty > "$out_file" 2> "$err_file"
+      rc=$?
+      ;;
+  esac
+
+  if [[ "$rc" -ne 0 ]]; then
+    echo "${profile} auth bootstrap failed (exit $rc); see $err_file" >&2
+    return 1
+  fi
+  if [[ "$profile" != "gemini" ]] && ! executor_auth_ready "$profile"; then
+    echo "${profile} auth bootstrap finished, but CLI status is still not authenticated; see $err_file" >&2
+    return 1
+  fi
+
+  mark_executor_auth_ready "$profile"
+}
+
+prepare_executor_auth() {
+  local profile allow_interactive
+  profile="$(normalize_executor_profile "$1")"
+  allow_interactive="${2:-false}"
+  if executor_auth_ready "$profile"; then
+    return 0
+  fi
+  if [[ "$allow_interactive" == "true" || "$allow_interactive" == "1" || "$allow_interactive" == "yes" ]]; then
+    bootstrap_executor_interactive_auth "$profile"
+    return $?
+  fi
+  ensure_executor_headless_auth "$profile"
 }
 
 # ─── PROGRESS PATH RESOLVER ──────────────────────────────────────────────────

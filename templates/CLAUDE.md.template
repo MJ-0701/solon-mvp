@@ -24,7 +24,7 @@ Claude Code 의 native slash 진입점은 `.claude/commands/sfs.md` 가 자동 i
 | `/sfs guide [--path|--print]` | `.sfs-local/scripts/sfs-guide.sh` |
 | `/sfs brainstorm [text|--stdin]` | `.sfs-local/scripts/sfs-brainstorm.sh` |
 | `/sfs plan` | `.sfs-local/scripts/sfs-plan.sh` |
-| `/sfs review --gate <id>` | `.sfs-local/scripts/sfs-review.sh` (id ∈ G-1, G0, G1, G2, G3, G4, G5) |
+| `/sfs review --gate <id> [--executor <tool>] [--run]` | `.sfs-local/scripts/sfs-review.sh` (CPO Evaluator review bridge, id ∈ G-1, G0, G1, G2, G3, G4, G5) |
 | `/sfs decision <title> [--id <id>]` | `.sfs-local/scripts/sfs-decision.sh` |
 | `/sfs retro [--close]` | `.sfs-local/scripts/sfs-retro.sh` |
 | `/sfs loop [OPTIONS]` | `.sfs-local/scripts/sfs-loop.sh` (Ralph Loop + Solon mutex) |
@@ -39,7 +39,7 @@ stdout / stderr / exit code 는 verbatim 보고한다 (paraphrase 금지).
 다른 CLI 에서 호출하든 동일한 `--executor` flag (또는 `SFS_EXECUTOR` env) 로 LLM CLI 를 명시:
 
 - `--executor claude` → `claude -p --dangerously-skip-permissions`
-- `--executor gemini` → `gemini -p --yolo`
+- `--executor gemini` → `gemini --skip-trust --yolo --output-format text -p "Read stdin and execute the requested task."`
 - `--executor codex` → `codex exec --full-auto`
 - `--executor "<custom command>"` → 그대로 passthrough
 

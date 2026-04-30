@@ -34,7 +34,7 @@ the model. Bash adapter is single source of truth (SSoT).
 | `guide [--path|--print]` (또는 "가이드", "처음 사용법") | `bash .sfs-local/scripts/sfs-dispatch.sh guide [--path|--print]` | 기본은 짧은 맥락 브리핑, `--path` 는 경로만, `--print` 는 full guide 본문 |
 | `brainstorm [text|--stdin]` (또는 "브레인스토밍", "요구사항 정리") | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <raw context>` | G0 raw 요구사항/대화 맥락을 brainstorm.md 에 기록. newline 허용 |
 | `plan` (또는 "plan 작성", "이번 sprint 계획") | `bash .sfs-local/scripts/sfs-dispatch.sh plan` | plan.md 진입 + plan_open event |
-| `review --gate <id>` (또는 "review 작성", "검증 기록") | `bash .sfs-local/scripts/sfs-dispatch.sh review --gate <id>` | id ∈ G-1, G0, G1, G2, G3, G4, G5 |
+| `review --gate <id> [--executor <tool>] [--run]` (또는 "CPO review", "검증 기록") | `bash .sfs-local/scripts/sfs-dispatch.sh review --gate <id> [--executor <tool>] [--generator <tool>] [--run]` | CPO Evaluator persona prompt. `--run` requires a real CLI/plugin bridge. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
 | `decision <title>` (또는 "결정 기록", "ADR 추가") | `bash .sfs-local/scripts/sfs-dispatch.sh decision "<title>" [--id <id>]` | full ADR 또는 mini-ADR 분기 |
 | `retro [--close]` (또는 "회고", "sprint close") | `bash .sfs-local/scripts/sfs-dispatch.sh retro [--close]` | `--close` 시 sprint close + auto commit |
 | `loop [OPTIONS]` (또는 "자율 진행", "loop 시작") | `bash .sfs-local/scripts/sfs-dispatch.sh loop [OPTIONS]` | Ralph Loop + Solon mutex (see `--help`) |
@@ -73,8 +73,9 @@ the model. Bash adapter is single source of truth (SSoT).
      `4`=template missing, `5`=permission, `99`=unknown.
    - plan: `0`=ok, `1`=no `.sfs-local/` or no active sprint, `4`=template
      missing, `99`=unknown.
-   - review: `0`=ok, `1`=no `.sfs-local/` or no active sprint, `4`=template
-     missing, `6`=gate id invalid or required, `7`=usage, `99`=unknown.
+  - review: `0`=ok, `1`=no `.sfs-local/` or no active sprint, `4`=template
+    missing, `6`=gate id invalid or required, `7`=usage,
+    `9`=executor bridge missing/failed, `99`=unknown.
    - decision: `0`=ok, `1`=id conflict, `4`=template missing, `7`=usage,
      `99`=unknown.
    - retro: `0`=ok, `1`=no `.sfs-local/` or no active sprint, `4`=template
