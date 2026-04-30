@@ -406,8 +406,8 @@ resume_hint:
   purpose: "24번째 세션이 본 PROGRESS.md 1개만 읽고 (a) 23rd 미완 commit 마무리 + (b) sandbox file:// clone 패턴 채택 + (c) WU-24 + WU-31 병렬 default 자동 진행"
   trigger_positive: [ㄱㄱ, 고, ㅇㅋ, ok, OK, 시작, 가자, ㅇㅇ, 진행, go, Go, start, "이전 세션 이어서", "이어서 ㄱㄱ", "이어서", 이어, "이어서 진행"]
   trigger_negative: [ㄴㄴ, 잠깐, stop, 아니, 중단, 다른거, 다른, no]
-  default_action: 26th-3 ε continuation 3 ✅ 0.5.1-product hotfix prep 완료 (α default 결정 = roll-forward). 26th-2 release helper 0.5.0-mvp 실행 직후 codex 의 stable product rebrand 작업 (5765abb / 7977a75 / ced9cc1) 회귀 발견 → dev staging 자체를 product 로 정합 회복 + cut-release.sh semver 검증 -product suffix 허용 + legacy GIT_MARKER fallback 인식 (consumer 하위 호환). 다음 default = 사용자 mac terminal 에서 1줄 실행 → `bash ~/agent_architect/2026-04-19-sfs-v0.4/tmp/release-0.5.1-product.sh` (interactive 4-step). 0.5.0-mvp tag 처리 (delete vs deprecate vs keep) 는 별도 사이클.
-  last_written: 2026-04-30T10:00:00Z
+  default_action: 26th-3 ε continuation 3 ✅ 0.5.1-product hotfix prep 완료 (α default 결정 + B2 codex narrative sync-back R-D1 §1.13 정합). 26th-3 첫 시도 (단순 string rename) 가 codex 의 product positioning narrative 개선분 (ced9cc1 + 5765abb + 7977a75 = "친구야" 톤 제거, public terminology cleanup, /sfs start <goal> contract, runtime asset sync, non-TTY handling, decision JSONL escape, distribution hygiene 등 11항목) 을 보존 안 한 mental coupling 안티패턴 → 사용자 비판 "코덱스 수정사항이 합리적이면 그걸 반영하란 소린데" 즉시 수신 → README baseline 을 codex 7977a75 narrative + 본 cycle multi-adaptor 1급 통합으로 overwrite + CHANGELOG entry 재작성. 다음 default = 사용자 mac terminal 1줄 → `bash ~/agent_architect/2026-04-19-sfs-v0.4/tmp/release-0.5.1-product.sh` (interactive 4-step).
+  last_written: 2026-04-30T10:30:00Z
 
     1. **CLAUDE.md SSoT Read** — §1 14규율 + §1.5' (commit/push 사용자 manual) + §1.12 mutex + §1.14 ≤200 lines.
     2. **PROGRESS.md (본 파일) Read** — frontmatter `domain_locks` + `current_wu_owner` 확인.
@@ -563,6 +563,12 @@ resume_hint:
 **잠재 후속 P-pattern 후보**:
 - **P-12 silent-rebrand-via-legacy-marker** — repository rename 시 GIT_MARKER 양쪽 인식 + 자동 교체 awk 패턴. 본 cycle 첫 사례. 향후 rename / 추가 rebrand 시 reuse.
 - **P-13 dev-stable-divergence-on-cut** — cut-release.sh 가 stable HEAD 와 dev staging 의 narrative divergence emit 안 함 (P-10 W-22 는 lock 만 감지). 후속 W-AUTO 신설 필요 (cut-release.sh diff preview 시 stable HEAD 와 dev VERSION/h1/SOLON_REPO 비교 → divergence 강조).
+- **P-14 mental-coupling-on-rename-fix** — 사용자 비판 "코덱스 수정사항이 합리적이면 그걸 반영하란 소린데... 너 그냥 무작정 회귀만했지" 비판 즉시 수신 후 자가 인지. 26th-3 첫 시도 = 단순 string rename (mvp → product) 만 함 + codex 의 narrative 개선분 (product positioning rewrite, "친구야" 톤 제거, public terminology cleanup, /sfs start <goal> contract, runtime asset sync, non-TTY handling 등 11항목) 보존 안 함. 정합 path = git history 에서 codex 작업 결과 추출 + dev staging 으로 sync-back + 본 cycle multi-adaptor 1급 정합 통합. 본 P-pattern 의 invariant = "stable hotfix 발견 시 narrative 자체를 read 후 의도 보존, 단순 string replace 안 함". 후속 1~2 사이클 reuse 시 학습 log 신설.
+
+**B2 산출물 (codex narrative sync-back)**:
+- `solon-mvp-dist/README.md` — codex 7977a75 product positioning rewrite baseline (Why Solon / How It Works / Operating Model / Quickstart / Product Surface / Runtime Coverage / Installation / Installed Files / Safety Contract / Repository Map / Release Channel) + 본 cycle multi-adaptor 1급 통합 (4 entry point + 7-Gate enum + Codex Skills + Gemini commands + multi-vendor executor convention).
+- `solon-mvp-dist/CHANGELOG.md` 0.5.1-product entry 재작성 — Fixed 11항목 (codex narrative sync-back) + Added 5항목 (legacy fallback, Codex Skill, Gemini slash, Codex user-scoped, semver 확장) + Changed 2항목 (4 template parity, VERSION) + Notes 2항목 + Design Notes 3항목.
+- `tmp/release-0.5.1-product.sh` heredoc commit message narrative 정합 (release 본질 = sync-back + multi-adaptor 1급 통합, 단순 회귀 fix 아님 명시).
 
 **잔여 작업 (사용자 mac terminal 영역, 1줄 실행)**:
 ```sh

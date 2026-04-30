@@ -1,8 +1,8 @@
 ---
 doc_id: handoff-next-session
 title: "Next session handoff (auto-written, WU-28)"
-written_at: 2026-04-30T10:00:00Z
-written_at_kst: 2026-04-30T19:00:00+09:00
+written_at: 2026-04-30T10:30:00Z
+written_at_kst: 2026-04-30T19:30:00+09:00
 last_commit: 99b2313
 visibility: raw-internal
 ---
@@ -13,7 +13,7 @@ visibility: raw-internal
 
 ## 1. default_action (다음 세션 진입 시 즉시 실행)
 
-26th-3 ε continuation 3 ✅ 0.5.1-product hotfix prep 완료 (사용자 결정 α default = roll-forward 수신). 26th-2 helper 가 0.5.0-mvp cut 후 codex 의 stable product rebrand 작업 회귀 발견 → dev staging 자체를 product 로 정합 회복 + legacy GIT_MARKER fallback 설계 (consumer 하위 호환).
+26th-3 ε continuation 3 ✅ 0.5.1-product hotfix prep 완료 (α default 결정 + B2 codex narrative sync-back R-D1 §1.13 정합). 26th-3 첫 시도 (단순 string rename) 가 codex 의 product positioning narrative 11항목을 보존 안 한 mental coupling 안티패턴 자가 인지 → 즉시 stop + sync-back path 정합. README baseline = codex 7977a75 product positioning rewrite + 본 cycle multi-adaptor 1급 통합. legacy GIT_MARKER fallback 설계 (consumer 하위 호환).
 
 사용자 mac terminal 에서 **1줄 실행**:
 
