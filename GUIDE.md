@@ -125,7 +125,9 @@ bash .sfs-local/scripts/sfs-brainstorm.sh --stdin < requirements.txt
 direct bash 는 raw capture-only 이다. AI 없이 bash 를 직접 실행했다면, 다음에 AI runtime 에서
 `/sfs brainstorm` 을 한 번 더 실행해서 기존 `§8 Append Log` 를 CEO refinement 로 정리한다.
 
-그 다음 brainstorm 을 plan 계약으로 바꾼다:
+그 다음 brainstorm 을 plan 계약으로 바꾼다. AI runtime 에서 `/sfs plan` 은
+`plan.md ready` 만 출력하고 끝나는 명령이 아니라, bash adapter 로 G1 파일을 연 뒤
+`brainstorm.md` 를 읽어 요구사항/AC/scope 와 CTO/CPO sprint contract 를 채워야 한다:
 
 ```text
 /sfs plan
@@ -220,7 +222,7 @@ native slash UI 에서 `커맨드 없음` 으로 막힐 수 있으므로 `$sfs .
 | `/sfs guide --print` | 이 guide 본문을 터미널에 출력 |
 | `/sfs auth status` | Codex/Claude/Gemini review executor 인증 확인 |
 | `/sfs auth probe --executor gemini --timeout 20` | bridge request/response 더미 확인 |
-| `/sfs plan` | 현 sprint 의 의도/경계 작성 |
+| `/sfs plan` | 현 sprint 의 의도/경계 + G1 요구사항/AC + CTO/CPO 계약 작성 |
 | `/sfs review --gate G4 --executor codex --run` | 리뷰할 evidence 가 있을 때 CPO review bridge 실행 + verdict 기록 |
 | `/sfs decision <title>` | ADR-style 결정 기록 |
 | `/sfs retro [--close]` | 회고 작성 / sprint close + auto-commit |

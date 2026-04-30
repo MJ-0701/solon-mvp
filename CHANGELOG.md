@@ -1,3 +1,20 @@
+## [0.5.20-product] - 2026-04-30
+
+**Plan is now a hybrid command.** `/sfs plan` no longer stops at
+`plan.md ready`. AI runtimes must read the current `brainstorm.md` and fill the
+G1 plan + CTO/CPO sprint contract before returning.
+
+### Changed
+
+- **Claude/Gemini/Codex plan refinement** — `/sfs plan` dispatches the bash
+  adapter first, then performs Solon CEO/CTO/CPO G1 refinement from
+  `brainstorm.md`.
+- **No empty plan surprise** — `plan.md ready` is treated as the adapter
+  handshake, not as a complete plan.
+- **Sprint contract default** — plan refinement must fill requirements,
+  measurable AC, scope, dependencies, Generator/Evaluator contract, and a
+  next implementation backlog seed.
+
 ## [0.5.19-product] - 2026-04-30
 
 **Solon report shape, not bkit-shaped footer.** The previous

@@ -29,9 +29,10 @@ subcommand's arguments.
 
 If the first argument is `status`, `start`, `guide`, `auth`, `brainstorm`, `plan`, `review`, `decision`,
 `retro`, or `loop`, dispatch to `.sfs-local/scripts/sfs-<name>.sh` first.
-For every command except `brainstorm`, stop after printing adapter output.
-For `brainstorm`, capture raw input first and then fill `brainstorm.md` §1~§7
-as Solon CEO.
+For every command except `brainstorm` and `plan`, stop after printing adapter
+output. For `brainstorm`, capture raw input first and then fill
+`brainstorm.md` §1~§7 as Solon CEO. For `plan`, open G1 first and then fill
+`plan.md` from `brainstorm.md` with requirements/AC/scope + CTO/CPO contract.
 
 | First arg | Script |
 |:--|:--|
@@ -40,7 +41,7 @@ as Solon CEO.
 | `guide`    | `bash .sfs-local/scripts/sfs-dispatch.sh guide <args>`    |
 | `auth`     | `bash .sfs-local/scripts/sfs-dispatch.sh auth <args>`     | Codex/Claude/Gemini auth status/login/probe |
 | `brainstorm` | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <args>` | raw capture, then Solon CEO refinement |
-| `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <args>`     |
+| `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <args>`     | G1 open, then plan refinement |
 | `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <args>`   | CPO Evaluator review; pass `--gate`, `--executor`, `--generator`, `--run`, `--allow-empty` verbatim |
 | `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <args>` |
 | `retro`    | `bash .sfs-local/scripts/sfs-dispatch.sh retro <args>`    |
@@ -57,7 +58,7 @@ as Solon CEO.
 2. Re-quote args safely. Reject newline/NUL byte args, except for `brainstorm`.
 3. Execute via shell. Capture stdout/stderr/exit.
 4. Print stdout verbatim. If exit≠0, also print stderr + `exit <code>` line.
-5. For non-brainstorm commands, stop. No paraphrase, no summary.
+5. For commands other than `brainstorm` and `plan`, stop. No paraphrase, no summary.
 
 ## Brainstorm CEO Refinement
 
@@ -76,6 +77,26 @@ After `/sfs brainstorm` succeeds:
 7. Do not implement code or run `/sfs plan` automatically.
 8. Final response: `brainstorm.md refined: <path>`, optional questions, and
    the next command.
+
+## Plan G1 Refinement
+
+After `/sfs plan` succeeds:
+
+1. Resolve the active `plan.md` path from adapter stdout, or read
+   `.sfs-local/current-sprint` and open
+   `.sfs-local/sprints/<current-sprint>/plan.md`.
+2. Open the same sprint's `brainstorm.md`; use §1~§7 and §8 Append Log as the
+   source of truth.
+3. Act as **Solon CEO** for requirements/scope, then write the
+   **CTO Generator ↔ CPO Evaluator** sprint contract.
+4. Fill/update `§1` measurable requirements, `§2` verifiable AC and anti-AC,
+   `§3` scope/dependencies/decisions, `§4` G1 checklist, and `§5` sprint
+   contract. Add `§6 Phase 1 구현 Backlog Seed` when helpful.
+5. Preserve existing user edits.
+6. Ask up to 3 questions only if critical information is missing.
+7. Do not implement code or run `/sfs review` automatically.
+8. Final response: `plan.md refined: <path>`, optional questions, and
+   `next: /sfs review --gate G1 --executor codex --generator claude` when ready.
 
 ## ⚠️ Safety
 

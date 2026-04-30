@@ -12,7 +12,7 @@ description: |
   guide     사용 맥락 브리핑/guide 출력
   auth      Codex/Claude/Gemini review executor 인증 확인/로그인
   brainstorm G0 raw 요구사항/대화 맥락 기록
-  plan      현재 sprint plan.md 작성/갱신
+  plan      현재 sprint plan.md 작성/갱신 + G1 sprint contract refinement
   sprint    plan을 구현 단계와 gate 체크로 정리
   review    현재 변경사항 review.md 작성/갱신
   decision  짧은 결정 기록 남기기
@@ -58,7 +58,7 @@ as evidence/health/next information. The report design is Solon-owned:
 
 Do not imply bkit owns or orchestrates the Solon workflow. Do not add any other
 Claude-driven commentary after deterministic SFS commands, except for the
-documented `/sfs brainstorm` CEO refinement flow below.
+documented `/sfs brainstorm` and `/sfs plan` refinement flows below.
 
 The user's arguments are interpolated below. Treat the first whitespace-delimited
 token as the subcommand and the remainder as that subcommand's arguments.
@@ -74,9 +74,12 @@ If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`
 bash adaptor through `.sfs-local/scripts/sfs-dispatch.sh` first. The
 dispatcher normalizes runtime command surfaces (`/sfs`, `$sfs`, `sfs`) and
 then delegates to `.sfs-local/scripts/sfs-<command>.sh`. For all commands
-except `brainstorm`, stop after printing adapter output. `brainstorm` is a
-hybrid command: the bash adapter captures raw G0 input, then Claude performs
-the CEO refinement described in "Brainstorm CEO Refinement" below.
+except `brainstorm` and `plan`, stop after printing adapter output.
+`brainstorm` is a hybrid command: the bash adapter captures raw G0 input, then
+Claude performs the CEO refinement described in "Brainstorm CEO Refinement"
+below. `plan` is also hybrid: the bash adapter opens G1, then Claude reads the
+current `brainstorm.md` and fills the G1 plan + sprint contract described in
+"Plan G1 Refinement" below.
 
 ⚠️ AI 자율 호출 금지 — 사용자 명시 호출 시에만 동작 (§1.5' 정합). 특히 `retro --close`
 는 sprint close + auto commit 을 트리거하므로 사용자 의도 없이 호출 금지.
@@ -90,7 +93,7 @@ Dispatch table:
 | `guide`    | `.sfs-local/scripts/sfs-dispatch.sh guide <remaining args>`    | passes `--path` / `--print` verbatim; default prints a short context briefing |
 | `auth`     | `.sfs-local/scripts/sfs-dispatch.sh auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
 | `brainstorm` | `.sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then Claude fills §1~§7 as Solon CEO |
-| `plan`     | `.sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | takes no flags currently; remaining args reserved for future (WU-25 §1) |
+| `plan`     | `.sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | opens plan.md, then Claude fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
 | `review`   | `.sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator review. passes `--gate`, `--executor`, `--generator`, `--persona`, `--print-prompt`, `--run`, `--allow-empty`, and auth flags verbatim |
 | `decision` | `.sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim (WU-26 §1). Uses `decisions-template/ADR-TEMPLATE.md` (5 섹션 ADR-full); `sprint-templates/decision-light.md` 은 Claude-driven fallback. |
 | `retro`    | `.sfs-local/scripts/sfs-dispatch.sh retro <remaining args>`    | passes `--close` verbatim (WU-26 §2). With `--close`: writes status/closed_at into plan.md, removes `.sfs-local/current-sprint`, appends `sprint_close` event, runs `auto_commit_close` (git add+commit, push manual per §1.5). |
@@ -145,12 +148,13 @@ Procedure (apply in order):
      `5`=safety_lock tripped, `6`=WU spec missing/corrupt,
      `7`=artifact verify fail, `8`=heartbeat write fail (FUSE),
      `9`=executor resolve fail, `99`=unknown.
-5. **Stop or continue only for brainstorm** — After dispatch, non-brainstorm
-   commands must stop without Claude-driven commentary, alternative
+5. **Stop or continue only for brainstorm/plan** — After dispatch, commands
+   other than `brainstorm` and `plan` must stop without Claude-driven commentary, alternative
    suggestions, bkit-branded reports, or bkit-shaped "usage" footers. The bash
    script is the single source of truth for command output. If an explicit
    status/report is requested, use the Solon Session Status shape from the
-   Runtime Boundary section above. For `brainstorm` only, continue to the CEO
+   Runtime Boundary section above. For `brainstorm`, continue to the CEO
+   refinement flow below after a zero exit code. For `plan`, continue to the G1
    refinement flow below after a zero exit code.
 
 ## Brainstorm CEO Refinement
@@ -184,6 +188,40 @@ succeeds and its stdout has been printed verbatim:
    - then `questions: <N>` and the questions only if needed
    - then `next: /sfs plan` when status is `ready-for-plan`, otherwise
      `next: answer questions, then /sfs brainstorm`
+
+## Plan G1 Refinement
+
+`/sfs plan` is not adapter-only in AI runtimes. `plan.md ready` means the bash
+adapter has opened the G1 file; Claude must then fill the plan from the current
+G0 context.
+
+1. Resolve the active `plan.md` path from adapter stdout. If stdout cannot be
+   parsed, read `.sfs-local/current-sprint` and open
+   `.sfs-local/sprints/<current-sprint>/plan.md`.
+2. Open the same sprint's `brainstorm.md`. Treat `brainstorm.md` §1~§7 and
+   §8 Append Log as the source of truth for G1 planning.
+3. Act as **Solon CEO** for requirements and scope, then write the
+   **CTO Generator ↔ CPO Evaluator** sprint contract:
+   - `§1` measurable requirements from brainstorm problem/context.
+   - `§2` binary or verifiable acceptance criteria, including anti-AC.
+   - `§3` in scope / out of scope / dependencies and decision points.
+   - `§4` checklist based only on what is actually satisfied.
+   - `§5` CEO decision, CTO deliverables, CPO validation criteria,
+     rework contract, and user decision points.
+   - Add `§6 Phase 1 구현 Backlog Seed` when it materially helps the next
+     implementation sprint.
+4. Preserve user edits already present in `plan.md`; refine or complete them
+   rather than replacing with a generic template.
+5. If `brainstorm.md` is still too sparse for a usable plan, fill known
+   assumptions, leave explicit open questions, and ask up to 3 questions in the
+   final response.
+6. Do not implement code, choose irreversible infrastructure, or run
+   `/sfs review` automatically.
+7. Final response shape after editing:
+   - first line: `plan.md refined: <path>`
+   - then `questions: <N>` and the questions only if needed
+   - then `next: /sfs review --gate G1 --executor codex --generator claude`
+     when ready, otherwise `next: answer questions, then /sfs plan`
 
 If `$ARGUMENTS` is empty, treat it as if the user typed `status` (run the
 status adapter) so that bare `/sfs` produces the canonical compact status line.

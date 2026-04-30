@@ -24,7 +24,7 @@ adapter 를 직접 호출**한다 (paraphrase 금지, 결정성 유지):
 | `sfs guide`, `/sfs guide` | `bash .sfs-local/scripts/sfs-guide.sh [--path|--print]` |
 | `sfs auth ...`, `/sfs auth ...` | `bash .sfs-local/scripts/sfs-auth.sh status|check|login|probe [--executor <tool>]` |
 | `sfs brainstorm`, `/sfs brainstorm` | `bash .sfs-local/scripts/sfs-brainstorm.sh [text|--stdin]` raw capture 후 Gemini 가 Solon CEO 로 §1~§7 정리 |
-| `sfs plan`, `/sfs plan` | `bash .sfs-local/scripts/sfs-plan.sh` |
+| `sfs plan`, `/sfs plan` | `bash .sfs-local/scripts/sfs-plan.sh` 후 Gemini 가 `brainstorm.md` 기반 G1 plan + CTO/CPO contract 작성 |
 | `sfs review --gate <id> [--executor <tool>] [--run]`, `/sfs review --gate <id> [--executor <tool>] [--run]` | `bash .sfs-local/scripts/sfs-review.sh --gate <id> [--executor <tool>] [--run]` (CPO Evaluator review bridge, id ∈ G-1, G0, G1, G2, G3, G4, G5) |
 | `sfs decision <title>`, `/sfs decision <title>` | `bash .sfs-local/scripts/sfs-decision.sh "<title>" [--id <id>]` |
 | `sfs retro [--close]`, `/sfs retro [--close]` | `bash .sfs-local/scripts/sfs-retro.sh [--close]` |
@@ -34,7 +34,9 @@ adapter 를 직접 호출**한다 (paraphrase 금지, 결정성 유지):
 non-zero exit 시 stderr + exit code 도 함께 보고한다. Bash adapter 가 부재하거나 실행
 권한이 없으면 그 사실을 1줄로 사용자에게 알리고 중단한다. 단, `/sfs brainstorm` 은
 adapter 성공 후 `brainstorm.md` 의 `§8 Append Log` 를 읽고 Solon CEO 로 `§1~§7` 을 채운다.
-부족한 정보가 있으면 1~3개 질문만 남기고, 구현이나 `/sfs plan` 자동 실행은 하지 않는다.
+`/sfs plan` 은 adapter 성공 후 `brainstorm.md` 를 읽고 `plan.md` 의 요구사항/AC/scope 와
+CTO/CPO sprint contract 를 채운다. 부족한 정보가 있으면 1~3개 질문만 남기고, 구현이나
+review 자동 실행은 하지 않는다.
 
 ## `/sfs loop` — 멀티 adaptor LLM executor convention
 

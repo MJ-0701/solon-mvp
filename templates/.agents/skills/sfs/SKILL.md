@@ -1,6 +1,6 @@
 ---
 name: sfs
-description: Solon SFS workflow for Codex — use $sfs status/start/guide/auth/brainstorm/plan/review/decision/retro/loop or natural language to dispatch to bash adapter SSoT; for brainstorm, capture raw input first and then fill §1~§7 as Solon CEO. Trigger when a Codex surface delivers $sfs, sfs <command>, /sfs text that reaches the model, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "sprint 시작", "브레인스토밍", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
+description: Solon SFS workflow for Codex — use $sfs status/start/guide/auth/brainstorm/plan/review/decision/retro/loop or natural language to dispatch to bash adapter SSoT; for brainstorm, capture raw input then fill §1~§7 as Solon CEO, and for plan, fill G1 requirements/AC/scope + CTO/CPO sprint contract from brainstorm.md. Trigger when a Codex surface delivers $sfs, sfs <command>, /sfs text that reaches the model, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "sprint 시작", "브레인스토밍", "plan 작성", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
 ---
 
 # Solon SFS — Codex Skill
@@ -12,9 +12,10 @@ When the user invokes `$sfs <command>`, types `sfs <command>`, sends `/sfs`
 text that actually reaches the model, or expresses a Solon SFS workflow intent,
 dispatch the request to the corresponding bash script under
 `.sfs-local/scripts/` first.
-For every command except `brainstorm`, stop after printing adapter output. For
-`brainstorm`, continue with the CEO refinement flow below after successful raw
-capture.
+For every command except `brainstorm` and `plan`, stop after printing adapter
+output. For `brainstorm`, continue with the CEO refinement flow below after
+successful raw capture. For `plan`, continue with the G1 refinement flow below
+after the adapter opens `plan.md`.
 
 If you can read a user message that begins with `/sfs`, the runtime has already
 delivered the Solon command to this Skill. Dispatch it. But do not claim Codex
@@ -25,8 +26,9 @@ invoke `$sfs status`, `sfs status`, natural language, or direct bash
 
 The bash adapter execution is **deterministic** and must NOT be
 re-interpreted by the model. Bash adapter is single source of truth (SSoT) for
-command I/O. `brainstorm` has one documented AI-side follow-up: Solon CEO
-refinement of `brainstorm.md` §1~§7.
+command I/O. `brainstorm` and `plan` have documented AI-side follow-ups:
+Solon CEO refinement of `brainstorm.md` §1~§7, then G1 plan + CTO/CPO sprint
+contract refinement of `plan.md`.
 
 ## Dispatch Table
 
@@ -37,7 +39,7 @@ refinement of `brainstorm.md` §1~§7.
 | `guide [--path|--print]` (또는 "가이드", "처음 사용법") | `bash .sfs-local/scripts/sfs-dispatch.sh guide [--path|--print]` | 기본은 짧은 맥락 브리핑, `--path` 는 경로만, `--print` 는 full guide 본문 |
 | `auth status|check|login|probe` (또는 "인증 확인", "Gemini 로그인") | `bash .sfs-local/scripts/sfs-dispatch.sh auth <args>` | Codex/Claude/Gemini review executor 인증 점검/부트스트랩/더미 요청 |
 | `brainstorm [text|--stdin]` (또는 "브레인스토밍", "요구사항 정리") | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <raw context>` | G0 raw 요구사항/대화 맥락을 brainstorm.md 에 기록한 뒤 §1~§7을 Solon CEO로 정리. newline 허용 |
-| `plan` (또는 "plan 작성", "이번 sprint 계획") | `bash .sfs-local/scripts/sfs-dispatch.sh plan` | plan.md 진입 + plan_open event |
+| `plan` (또는 "plan 작성", "이번 sprint 계획") | `bash .sfs-local/scripts/sfs-dispatch.sh plan` | plan.md 진입 + plan_open event 후 brainstorm.md 기반 G1 plan/contract 작성 |
 | `review --gate <id> [--executor <tool>] [--run]` (또는 "CPO review", "검증 기록") | `bash .sfs-local/scripts/sfs-dispatch.sh review --gate <id> [--executor <tool>] [--generator <tool>] [--run]` | CPO Evaluator persona prompt. `--run` skips empty reviews unless `--allow-empty`. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
 | `decision <title>` (또는 "결정 기록", "ADR 추가") | `bash .sfs-local/scripts/sfs-dispatch.sh decision "<title>" [--id <id>]` | full ADR 또는 mini-ADR 분기 |
 | `retro [--close]` (또는 "회고", "sprint close") | `bash .sfs-local/scripts/sfs-dispatch.sh retro [--close]` | `--close` 시 sprint close + auto commit |
@@ -92,10 +94,11 @@ refinement of `brainstorm.md` §1~§7.
      `7`=verify fail, `8`=heartbeat fail, `9`=executor resolve fail,
      `99`=unknown.
 
-5. **Stop or continue only for brainstorm** — For non-brainstorm commands, do
-   not summarize, paraphrase, or add commentary. The bash adapter is the SSoT.
-   For `brainstorm`, continue to the CEO refinement flow below after a zero
-   exit code.
+5. **Stop or continue only for brainstorm/plan** — For commands other than
+   `brainstorm` and `plan`, do not summarize, paraphrase, or add commentary.
+   The bash adapter is the SSoT. For `brainstorm`, continue to the CEO
+   refinement flow below after a zero exit code. For `plan`, continue to the G1
+   refinement flow below after a zero exit code.
 
 ## Brainstorm CEO Refinement
 
@@ -128,6 +131,38 @@ succeeds and stdout has been shown verbatim:
    - then `questions: <N>` and the questions only if needed
    - then `next: /sfs plan` when status is `ready-for-plan`, otherwise
      `next: answer questions, then /sfs brainstorm`
+
+## Plan G1 Refinement
+
+`/sfs plan` is not adapter-only in AI runtimes. `$sfs plan` / `sfs plan` should
+first run the bash adapter, then fill `plan.md` from the current G0 context.
+
+1. Resolve the active `plan.md` path from adapter stdout. If stdout cannot be
+   parsed, read `.sfs-local/current-sprint` and open
+   `.sfs-local/sprints/<current-sprint>/plan.md`.
+2. Open the same sprint's `brainstorm.md`. Treat `brainstorm.md` §1~§7 and
+   §8 Append Log as the source of truth.
+3. Act as **Solon CEO** for requirements and scope, then write the
+   **CTO Generator ↔ CPO Evaluator** sprint contract:
+   - `§1` measurable requirements.
+   - `§2` binary/verifiable acceptance criteria and anti-AC.
+   - `§3` in scope / out of scope / dependencies and decision points.
+   - `§4` G1 checklist based only on satisfied items.
+   - `§5` CEO decision, CTO deliverables, CPO validation criteria,
+     rework contract, and user decision points.
+   - Add `§6 Phase 1 구현 Backlog Seed` when it materially helps the next
+     implementation sprint.
+4. Preserve user edits already present in `plan.md`; refine or complete them
+   rather than replacing with a generic template.
+5. If `brainstorm.md` is too sparse, fill known assumptions, leave explicit
+   open questions, and ask up to 3 questions in the final response.
+6. Do not implement code, choose irreversible infrastructure, or run
+   `/sfs review` automatically.
+7. Final response shape after editing:
+   - first line: `plan.md refined: <path>`
+   - then `questions: <N>` and the questions only if needed
+   - then `next: /sfs review --gate G1 --executor codex --generator claude`
+     when ready, otherwise `next: answer questions, then /sfs plan`
 
 ## If first arg is empty or `help`
 

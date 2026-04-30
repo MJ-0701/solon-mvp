@@ -8,13 +8,14 @@
 #   surface 를 normalize 하고, bash adapter (.sfs-local/scripts/sfs-*.sh) 가
 #   single source of truth.
 #   user 발화의 첫 token = subcommand → sfs-<subcommand>.sh 실행 + stdout verbatim 출력.
-#   단, brainstorm 은 raw capture 후 Gemini 가 Solon CEO 로 §1~§7 refinement 를 수행.
+#   단, brainstorm 은 raw capture 후 Gemini 가 Solon CEO 로 §1~§7 refinement 를 수행하고,
+#   plan 은 G1 open 후 brainstorm.md 기반 plan + CTO/CPO contract refinement 를 수행.
 #   paraphrase 금지, 결정성 유지 (Claude Code / Codex / Gemini CLI 동등 1급).
 #
 # Note: {{args}} 는 Gemini CLI v1 placeholder. 사용자가 입력한 첫 token 이 subcommand,
 #       나머지는 그 subcommand 의 인자로 그대로 전달.
 
-description = "Solon SFS workflow command — bash adapter SSoT; brainstorm captures raw input then fills §1~§7 as Solon CEO"
+description = "Solon SFS workflow command — bash adapter SSoT; brainstorm fills G0, plan fills G1 contract"
 
 prompt = """
 You are operating in a project that has Solon SFS installed.
@@ -27,9 +28,11 @@ token as the subcommand and the remainder as that subcommand's arguments.
 If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`brainstorm`**, **`plan`**, **`review`**,
 **`decision`**, **`retro`**, or **`loop`**, dispatch the request to the
 corresponding bash script under `.sfs-local/scripts/` first. For every command
-except `brainstorm`, stop after printing adapter output. `brainstorm` is a
-hybrid command: the bash adapter captures raw G0 input, then Gemini performs
-the CEO refinement described below.
+except `brainstorm` and `plan`, stop after printing adapter output.
+`brainstorm` is a hybrid command: the bash adapter captures raw G0 input, then
+Gemini performs the CEO refinement described below. `plan` is also hybrid: the
+bash adapter opens G1, then Gemini fills `plan.md` from the current
+`brainstorm.md`.
 
 | First arg | Script to run | Notes |
 |:--|:--|:--|
@@ -38,7 +41,7 @@ the CEO refinement described below.
 | `guide`    | `bash .sfs-local/scripts/sfs-dispatch.sh guide <remaining args>`    | default context briefing; passes `--path` / `--print` verbatim |
 | `auth`     | `bash .sfs-local/scripts/sfs-dispatch.sh auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
 | `brainstorm` | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then fills §1~§7 as Solon CEO |
-| `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | takes no flags currently; remaining args reserved for future |
+| `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | opens plan.md, then fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
 | `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator review; passes `--gate`, `--executor`, `--generator`, `--persona`, `--print-prompt`, `--run`, `--allow-empty`, and auth flags verbatim |
 | `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim |
 | `retro`    | `bash .sfs-local/scripts/sfs-dispatch.sh retro <remaining args>`    | passes `--close` verbatim. With `--close`: writes status/closed_at, removes `.sfs-local/current-sprint`, appends `sprint_close` event, runs `auto_commit_close` (push manual per §1.5) |
@@ -64,10 +67,11 @@ the CEO refinement described below.
    If exit code is non-zero, also print stderr and the exit code on a final
    line: `exit <code>`.
 
-5. **Stop or continue only for brainstorm** — For non-brainstorm commands, do
-   not summarize, paraphrase, or add commentary. The bash adapter is the SSoT.
-   For `brainstorm`, continue to the CEO refinement flow below after a zero
-   exit code.
+5. **Stop or continue only for brainstorm/plan** — For commands other than
+   `brainstorm` and `plan`, do not summarize, paraphrase, or add commentary.
+   The bash adapter is the SSoT. For `brainstorm`, continue to the CEO
+   refinement flow below after a zero exit code. For `plan`, continue to the G1
+   refinement flow below after a zero exit code.
 
 ## Brainstorm CEO Refinement
 
@@ -100,6 +104,30 @@ succeeds and stdout has been shown verbatim:
    - then `questions: <N>` and the questions only if needed
    - then `next: /sfs plan` when status is `ready-for-plan`, otherwise
      `next: answer questions, then /sfs brainstorm`
+
+## Plan G1 Refinement
+
+`/sfs plan` is not adapter-only in AI runtimes. After the bash adapter succeeds
+and stdout has been shown verbatim:
+
+1. Resolve the active `plan.md` path from adapter stdout, or read
+   `.sfs-local/current-sprint` and open
+   `.sfs-local/sprints/<current-sprint>/plan.md`.
+2. Open the same sprint's `brainstorm.md`; use §1~§7 and §8 Append Log as the
+   source of truth.
+3. Act as **Solon CEO** for requirements/scope, then write the
+   **CTO Generator ↔ CPO Evaluator** sprint contract:
+   - `§1` measurable requirements.
+   - `§2` verifiable AC and anti-AC.
+   - `§3` scope, dependencies, decisions.
+   - `§4` G1 checklist.
+   - `§5` CEO/CTO/CPO contract and user decision points.
+   - Optional `§6 Phase 1 구현 Backlog Seed`.
+4. Preserve user edits already present in `plan.md`.
+5. Ask up to 3 questions only if critical information is still missing.
+6. Do not implement code or run `/sfs review` automatically.
+7. Final response: `plan.md refined: <path>`, optional questions, and
+   `next: /sfs review --gate G1 --executor codex --generator claude` when ready.
 
 ## If first arg is empty or `help`
 
