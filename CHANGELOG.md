@@ -1,3 +1,23 @@
+## [0.5.29-product] - 2026-05-01
+
+**Uninstall command hardening.** Project cleanup is now usable from the global
+`sfs` CLI and can run non-interactively for real consumer repo migration tests.
+
+### Added
+
+- **Global uninstall command** — `sfs uninstall` dispatches the packaged
+  uninstaller without requiring users to locate Homebrew's `libexec` path.
+- **Non-interactive cleanup flags** — `sfs uninstall --keep-artifacts
+  --remove-docs` removes old scaffold/docs/adapters while preserving sprint
+  and decision history.
+
+### Fixed
+
+- **Interactive prompt capture** — uninstall prompts now write to stderr, so
+  selecting `b` correctly keeps artifacts instead of falling through to cancel.
+- **Current sprint preservation** — `--keep-artifacts` keeps `current-sprint`
+  and `current-wu` alongside sprint/decision/event history.
+
 ## [0.5.28-product] - 2026-05-01
 
 **Agent-first install flow.** Homebrew remains the deterministic runtime
