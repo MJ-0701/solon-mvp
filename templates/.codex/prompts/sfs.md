@@ -26,9 +26,9 @@ subcommand's arguments.
 
 ## Behavior
 
-If the first argument is `status`, `start`, `guide`, `plan`, `review`, `decision`,
+If the first argument is `status`, `start`, `guide`, `brainstorm`, `plan`, `review`, `decision`,
 `retro`, or `loop`, dispatch to `.sfs-local/scripts/sfs-<name>.sh` and stop.
-These eight subcommands are deterministic and must NOT be re-interpreted by
+These nine subcommands are deterministic and must NOT be re-interpreted by
 the model.
 
 | First arg | Script |
@@ -36,6 +36,7 @@ the model.
 | `status`   | `bash .sfs-local/scripts/sfs-dispatch.sh status <args>`   |
 | `start`    | `bash .sfs-local/scripts/sfs-dispatch.sh start <args>`    |
 | `guide`    | `bash .sfs-local/scripts/sfs-dispatch.sh guide <args>`    |
+| `brainstorm` | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <args>` |
 | `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <args>`     |
 | `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <args>`   |
 | `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <args>` |
@@ -50,7 +51,7 @@ the model.
    On Windows PowerShell, `.sfs-local/scripts/sfs.ps1 <command> [args]` is the
    wrapper entry point; it requires Git Bash. WSL users should invoke the bash
    adapter from inside the WSL shell.
-2. Re-quote args safely. Reject newline/NUL byte args.
+2. Re-quote args safely. Reject newline/NUL byte args, except for `brainstorm`.
 3. Execute via shell. Capture stdout/stderr/exit.
 4. Print stdout verbatim. If exit≠0, also print stderr + `exit <code>` line.
 5. Stop. No paraphrase, no summary.

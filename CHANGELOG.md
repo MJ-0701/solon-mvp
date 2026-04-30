@@ -1,3 +1,26 @@
+## [0.5.8-product] - 2026-04-30
+
+**G0 brainstorm command and flow correction.** `/sfs start` remains the sprint workspace
+scaffold command, while `/sfs brainstorm` becomes the explicit G0 context-capture command before
+`/sfs plan`.
+
+### Added
+
+- **`/sfs brainstorm` command** — `.sfs-local/scripts/sfs-brainstorm.sh` creates or updates the
+  active sprint's `brainstorm.md`, accepts raw/multiline context via `--stdin` or quoted args,
+  appends a `brainstorm_open` event, and prints the artifact path.
+- **`brainstorm.md` sprint template** — G0 artifact with raw brief, problem space, constraints,
+  options, scope seed, plan seed, and generator/evaluator contract seed sections.
+
+### Changed
+
+- **flow contract** — product docs/adapters now use `start → brainstorm → plan` as the intended
+  first flow. `start` scaffolds the sprint, `brainstorm` captures context, `plan` turns it into the
+  sprint contract.
+- **start scaffold** — `/sfs start` now copies `brainstorm.md` along with plan/log/review/retro.
+- **newline handling** — `sfs-dispatch.sh` still rejects newline args for deterministic commands, but
+  permits them for `brainstorm` so pasted raw requirements can be captured instead of dropped.
+
 ## [0.5.7-product] - 2026-04-30
 
 **`/sfs guide` default context briefing.** Bare `/sfs guide` should orient the user, not dump a

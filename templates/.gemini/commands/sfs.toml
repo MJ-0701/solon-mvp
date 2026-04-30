@@ -13,7 +13,7 @@
 # Note: {{args}} 는 Gemini CLI v1 placeholder. 사용자가 입력한 첫 token 이 subcommand,
 #       나머지는 그 subcommand 의 인자로 그대로 전달.
 
-description = "Solon SFS workflow command — bash adapter SSoT (status/start/guide/plan/review/decision/retro/loop)"
+description = "Solon SFS workflow command — bash adapter SSoT (status/start/guide/brainstorm/plan/review/decision/retro/loop)"
 
 prompt = """
 You are operating in a project that has Solon SFS installed.
@@ -23,9 +23,9 @@ token as the subcommand and the remainder as that subcommand's arguments.
 
 ## Behavior
 
-If the first argument is **`status`**, **`start`**, **`guide`**, **`plan`**, **`review`**,
+If the first argument is **`status`**, **`start`**, **`guide`**, **`brainstorm`**, **`plan`**, **`review`**,
 **`decision`**, **`retro`**, or **`loop`**, dispatch the request to the
-corresponding bash script under `.sfs-local/scripts/` and stop. These eight
+corresponding bash script under `.sfs-local/scripts/` and stop. These nine
 subcommands are deterministic and must NOT be re-interpreted by the model.
 
 | First arg | Script to run | Notes |
@@ -33,6 +33,7 @@ subcommands are deterministic and must NOT be re-interpreted by the model.
 | `status`   | `bash .sfs-local/scripts/sfs-dispatch.sh status <remaining args>`   | passes flags such as `--color=auto/always/never` verbatim |
 | `start`    | `bash .sfs-local/scripts/sfs-dispatch.sh start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
 | `guide`    | `bash .sfs-local/scripts/sfs-dispatch.sh guide <remaining args>`    | default context briefing; passes `--path` / `--print` verbatim |
+| `brainstorm` | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context and appends it to `brainstorm.md` |
 | `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | takes no flags currently; remaining args reserved for future |
 | `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | passes `--gate <id>` / `--gate=<id>` verbatim (id ∈ G-1, G0, G1, G2, G3, G4, G5) |
 | `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim |
@@ -49,8 +50,8 @@ subcommands are deterministic and must NOT be re-interpreted by the model.
    adapter from inside the WSL shell.
 
 2. **Quote args safely** — Re-quote `<remaining args>` for the shell. Reject
-   any argument containing a newline or NUL byte by reporting `unknown arg`
-   instead of executing.
+   any argument containing a newline or NUL byte by reporting `unknown arg`,
+   except for `brainstorm`, where multiline raw requirement context is allowed.
 
 3. **Execute** — Run the script. Capture stdout, stderr, and exit code. Do
    not pipe through any other transformer.
@@ -68,7 +69,7 @@ Print the following 3-line usage and stop:
 
 ```
 Usage: /sfs <command> [args]
-Commands: status, start, guide, plan, review, decision, retro, loop
+Commands: status, start, guide, brainstorm, plan, review, decision, retro, loop
 Help: bash .sfs-local/scripts/sfs-<command>.sh --help
 ```
 

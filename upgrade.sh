@@ -232,9 +232,9 @@ cat <<EOF
   - CLAUDE/AGENTS/GEMINI.md            → 자동 보존 (기존 프로젝트 지침 보호)
   - .sfs-local/divisions.yaml          → 자동 보존 (프로젝트별 운영값 보호)
   - .claude/commands/sfs.md            → backup+overwrite (배포판 관리 커맨드 최신화)
-  - .sfs-local/scripts/sfs-*.sh        → backup+overwrite (Solon-versioned bash, 신규: loop/decision/retro)
+  - .sfs-local/scripts/sfs-*.sh        → backup+overwrite (Solon-versioned bash)
   - .sfs-local/scripts/sfs.ps1         → backup+overwrite (Windows PowerShell → Git Bash wrapper)
-  - .sfs-local/sprint-templates/*.md   → backup+overwrite (배포판 관리 템플릿, 신규: decision-light)
+  - .sfs-local/sprint-templates/*.md   → backup+overwrite (배포판 관리 템플릿)
   - .sfs-local/decisions-template/*.md → backup+overwrite (ADR-TEMPLATE 신규, WU-26)
 
 EOF
@@ -257,12 +257,14 @@ declare -a CHECK_FILES=(
   ".sfs-local/scripts/sfs-status.sh|templates/.sfs-local-template/scripts/sfs-status.sh"
   ".sfs-local/scripts/sfs-start.sh|templates/.sfs-local-template/scripts/sfs-start.sh"
   ".sfs-local/scripts/sfs-guide.sh|templates/.sfs-local-template/scripts/sfs-guide.sh"
+  ".sfs-local/scripts/sfs-brainstorm.sh|templates/.sfs-local-template/scripts/sfs-brainstorm.sh"
   ".sfs-local/scripts/sfs-plan.sh|templates/.sfs-local-template/scripts/sfs-plan.sh"
   ".sfs-local/scripts/sfs-review.sh|templates/.sfs-local-template/scripts/sfs-review.sh"
   ".sfs-local/scripts/sfs-decision.sh|templates/.sfs-local-template/scripts/sfs-decision.sh"
   ".sfs-local/scripts/sfs-retro.sh|templates/.sfs-local-template/scripts/sfs-retro.sh"
   ".sfs-local/scripts/sfs-loop.sh|templates/.sfs-local-template/scripts/sfs-loop.sh"
-  # sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용 (5 file)
+  # sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용
+  ".sfs-local/sprint-templates/brainstorm.md|templates/.sfs-local-template/sprint-templates/brainstorm.md"
   ".sfs-local/sprint-templates/plan.md|templates/.sfs-local-template/sprint-templates/plan.md"
   ".sfs-local/sprint-templates/log.md|templates/.sfs-local-template/sprint-templates/log.md"
   ".sfs-local/sprint-templates/review.md|templates/.sfs-local-template/sprint-templates/review.md"
@@ -408,6 +410,7 @@ update_file ".sfs-local/scripts/sfs-common.sh"   "templates/.sfs-local-template/
 update_file ".sfs-local/scripts/sfs-status.sh"   "templates/.sfs-local-template/scripts/sfs-status.sh"   "sfs status"   "b"
 update_file ".sfs-local/scripts/sfs-start.sh"    "templates/.sfs-local-template/scripts/sfs-start.sh"    "sfs start"    "b"
 update_file ".sfs-local/scripts/sfs-guide.sh"    "templates/.sfs-local-template/scripts/sfs-guide.sh"    "sfs guide"    "b"
+update_file ".sfs-local/scripts/sfs-brainstorm.sh" "templates/.sfs-local-template/scripts/sfs-brainstorm.sh" "sfs brainstorm" "b"
 update_file ".sfs-local/scripts/sfs-plan.sh"     "templates/.sfs-local-template/scripts/sfs-plan.sh"     "sfs plan"     "b"
 update_file ".sfs-local/scripts/sfs-review.sh"   "templates/.sfs-local-template/scripts/sfs-review.sh"   "sfs review"   "b"
 update_file ".sfs-local/scripts/sfs-decision.sh" "templates/.sfs-local-template/scripts/sfs-decision.sh" "sfs decision (WU-26)" "b"
@@ -415,9 +418,9 @@ update_file ".sfs-local/scripts/sfs-retro.sh"    "templates/.sfs-local-template/
 update_file ".sfs-local/scripts/sfs-loop.sh"     "templates/.sfs-local-template/scripts/sfs-loop.sh"     "sfs loop (WU-27 spec)" "b"
 chmod +x "$TARGET/.sfs-local/scripts"/*.sh 2>/dev/null || true
 
-# sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용 (5 file)
-# 신규: decision-light.md (0.4.0-mvp 추가)
+# sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용
 mkdir -p "$TARGET/.sfs-local/sprint-templates"
+update_file ".sfs-local/sprint-templates/brainstorm.md"      "templates/.sfs-local-template/sprint-templates/brainstorm.md"      "sprint brainstorm template" "b"
 update_file ".sfs-local/sprint-templates/plan.md"            "templates/.sfs-local-template/sprint-templates/plan.md"            "sprint plan template"   "b"
 update_file ".sfs-local/sprint-templates/log.md"             "templates/.sfs-local-template/sprint-templates/log.md"             "sprint log template"    "b"
 update_file ".sfs-local/sprint-templates/review.md"          "templates/.sfs-local-template/sprint-templates/review.md"          "sprint review template" "b"

@@ -12,6 +12,7 @@ last_touched_at: ""  # filled by /sfs plan (auto, ISO8601 + tz)
 > Sprint **G1 — Plan Gate** 산출물. 본 문서의 목적은 **요구사항·AC 의 측정 가능성 확보**.
 > 변경 이력은 `.sfs-local/events.jsonl` 의 `phase_change` / `gate_review` event 로 추적.
 > SSoT: `05-gate-framework.md §5.1` (Gate 매트릭스).
+> 입력 기준: 같은 sprint 의 `brainstorm.md` (G0) 를 먼저 읽고 작성한다.
 
 ---
 
@@ -42,3 +43,18 @@ last_touched_at: ""  # filled by /sfs plan (auto, ISO8601 + tz)
 - [ ] 의존성 / 결정 대기 항목이 명시됨
 
 > 본 체크리스트 통과 = `/sfs review --gate G1` 진입 조건. verdict (pass / partial / fail) 는 `review.md` 에 기록.
+
+## §5. Sprint Contract (Generator ↔ Evaluator)
+
+`brainstorm.md` 의 G0 맥락을 기반으로 이번 sprint 의 실행 계약을 명시한다.
+
+- **Generator agent 가 만들 것**:
+  - 산출물:
+  - 변경 파일/모듈:
+  - 구현하지 않을 것:
+- **Evaluator agent 가 검증할 것**:
+  - AC 검증 방법:
+  - 회귀/위험 체크:
+  - 통과/부분통과/실패 기준:
+- **사용자 최종 결정이 필요한 지점**:
+  -

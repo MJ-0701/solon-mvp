@@ -93,7 +93,7 @@ direct bash 는 그 CLI build 에서만 쓰는 임시 bypass 입니다.
 sprint - · WU - · gate -:- · ahead 0 · last_event -
 ```
 
-대시는 "아직 sprint 시작 안 함" 이라는 뜻. 첫 sprint 시작:
+대시는 "아직 sprint 시작 안 함" 이라는 뜻. 첫 sprint workspace 시작:
 
 ```text
 /sfs start "todo 앱 v0 — 일정 추가/완료/삭제 + Postgres 저장"
@@ -101,19 +101,34 @@ sprint - · WU - · gate -:- · ahead 0 · last_event -
 
 이러면:
 1. `.sfs-local/sprints/2026-W18-sprint-1/` 같은 디렉토리가 생긴다 (ISO 주차 자동 명명).
-2. `plan.md` / `log.md` / `review.md` / `retro.md` 4개 sprint file 이 복사된다.
+2. `brainstorm.md` / `plan.md` / `log.md` / `review.md` / `retro.md` 5개 sprint file 이 복사된다.
 3. `events.jsonl` 에 `sprint_start` 이벤트 1줄 append.
 4. `.sfs-local/current-sprint` 에 sprint id 저장.
 
 ---
 
-## 3. 다음 10분 — `plan.md` 작성 (이게 진짜 알맹이)
+## 3. 다음 10분 — brainstorm → plan
+
+먼저 raw 요구사항과 대화 맥락을 `brainstorm.md` 에 남긴다:
+
+```text
+/sfs brainstorm "아직 정리 안 된 요구사항, 제약, 아이디어"
+```
+
+긴 내용을 붙여넣는 CLI 환경에서는 direct bash 로 stdin 을 써도 된다:
+
+```bash
+bash .sfs-local/scripts/sfs-brainstorm.sh --stdin < requirements.txt
+```
+
+그 다음 brainstorm 을 plan 계약으로 바꾼다:
 
 ```text
 /sfs plan
 ```
 
-이러면 `plan.md` 가 열리고 frontmatter 의 `phase: plan`, `last_touched_at` 이 자동 갱신된다. 본인이 채울 영역:
+이러면 `plan.md` 가 열리고 frontmatter 의 `phase: plan`, `last_touched_at` 이 자동 갱신된다.
+같은 sprint 의 `brainstorm.md` 를 읽고 본인이 채울 영역:
 
 - **목표 (Goal)**: 이번 sprint 끝나고 무엇이 동작해야 하나? 1-2줄.
 - **AC (Acceptance Criteria)**: 어떻게 동작하는 게 "끝" 인가? 3-5개 bullet.
@@ -154,7 +169,7 @@ sprint 완전히 끝났으면:
 
 ---
 
-## 5. 8 슬래시 명령 cheatsheet
+## 5. 9 슬래시 명령 cheatsheet
 
 Codex desktop app 에서 `/sfs` 가 모델/Skill 에 보이면 정상 1급 경로다. 메시지를 읽은
 Codex adapter 는 unsupported 로 답하지 말고 즉시 bash adapter 로 dispatch 한다. Codex CLI
@@ -164,7 +179,8 @@ Codex adapter 는 unsupported 로 답하지 말고 즉시 bash adapter 로 dispa
 | 명령 | 한 줄 설명 |
 |:--|:--|
 | `/sfs status` | 지금 어디까지 왔는지 1줄 |
-| `/sfs start <goal>` | 새 sprint 시작 또는 이어가기 |
+| `/sfs start <goal>` | 새 sprint workspace 초기화 |
+| `/sfs brainstorm [text]` | G0 raw 요구사항과 대화 맥락 기록 |
 | `/sfs guide` | 처음 쓸 때 필요한 맥락과 다음 명령 확인 |
 | `/sfs guide --path` | 이 onboarding guide 경로만 확인 |
 | `/sfs guide --print` | 이 guide 본문을 터미널에 출력 |
