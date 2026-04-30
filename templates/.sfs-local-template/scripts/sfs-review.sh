@@ -15,9 +15,12 @@
 #   · verdict 자체는 CPO agent output 으로 기록한다. 본 bash 명령은 prompt/evidence
 #     scaffold + executor bridge + event 기록을 담당한다.
 #
-# Output (one line):
+# Output:
 #   review.md ready: <path> | gate <gate-id> prompt ready | executor <executor> | prompt <path>
 #   review.md ready: <path> | gate <gate-id> CPO run complete | executor <executor> | output <path>
+#   ----- CPO RESULT EXCERPT (from <path>) -----
+#   <bounded executor result excerpt>
+#   ----- END CPO RESULT EXCERPT -----
 #
 # Exit codes (WU-25 §2.3 / gates.md §3 정합):
 #   0  success
@@ -67,7 +70,7 @@ fi
 # ─────────────────────────────────────────────────────────────────────
 usage_review() {
   cat <<'EOF'
-Usage: /sfs review [--gate <id>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--allow-empty] [--auth-interactive|--no-auth-interactive]
+Usage: /sfs review [--gate <id>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
 
 Open the active sprint's review.md as the CPO Evaluator review document.
   - --gate <id>   gate id (one of: G-1, G0, G1, G2, G3, G4, G5).
@@ -86,6 +89,9 @@ Open the active sprint's review.md as the CPO Evaluator review document.
   - --prompt-only
                   Prompt-only mode: create prompt/log for manual handoff.
                   Does not execute evaluator or spend executor tokens.
+  - --show-last
+                  Print the latest recorded CPO review result for the active
+                  sprint without invoking an executor. Alias: --show, --last.
   - default run   Execute the CPO evaluator through a real bridge.
                   Named profiles:
                     codex        $SFS_REVIEW_CODEX_CMD, else `codex exec --full-auto --ephemeral --output-last-message <result> -`
@@ -111,6 +117,8 @@ Open the active sprint's review.md as the CPO Evaluator review document.
     prompt body is not embedded by default to prevent recursive token growth.
   - Appends events.jsonl `review_open` event.
   - Prints the resolved review.md path + gate id + executor to stdout (no editor launch).
+  - When review runs, also prints a bounded executor result excerpt so the user
+    can see verdict/findings/actions without opening review.md manually.
 
 Exit codes:
   0  success
@@ -135,6 +143,7 @@ GENERATOR_EXECUTOR="${SFS_GENERATOR_EXECUTOR:-unknown}"
 PERSONA_PATH="${SFS_LOCAL_DIR}/personas/cpo-evaluator.md"
 PRINT_PROMPT=false
 RUN_REVIEW=true
+SHOW_LAST=false
 ALLOW_EMPTY_REVIEW="${SFS_REVIEW_ALLOW_EMPTY:-false}"
 AUTH_INTERACTIVE="${SFS_AUTH_INTERACTIVE:-auto}"
 while [[ $# -gt 0 ]]; do
@@ -197,6 +206,11 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --prompt-only|--no-run)
+      RUN_REVIEW=false
+      shift
+      ;;
+    --show-last|--show|--last)
+      SHOW_LAST=true
       RUN_REVIEW=false
       shift
       ;;
@@ -268,6 +282,109 @@ if [[ -z "${SPRINT_ID}" ]]; then
   exit "${SFS_EXIT_NO_INIT}"
 fi
 
+SPRINT_DIR="${SFS_SPRINTS_DIR}/${SPRINT_ID}"
+REVIEW_PATH="${SPRINT_DIR}/review.md"
+TEMPLATE="${SFS_LOCAL_DIR}/sprint-templates/review.md"
+
+existing_result_excerpt() {
+  local file="$1" limit="${2:-80}"
+  if [[ ! -s "$file" ]]; then
+    printf '(empty)\n'
+    return 0
+  fi
+  awk -v limit="$limit" '
+    BEGIN { found=0; count=0 }
+    /^[[:space:]>-]*Verdict:[[:space:]]*(pass|partial|fail)[[:space:]]*$/ { found=1 }
+    found && count < limit { print; count++ }
+    END { exit(found ? 0 : 1) }
+  ' "$file" && return 0
+  sed -n "1,${limit}p" "$file"
+}
+
+latest_review_output_path() {
+  local gate_filter="${1:-}" line
+  [[ -f "${SFS_EVENTS_FILE}" ]] || return 1
+  if [[ -n "${gate_filter}" ]]; then
+    line="$(grep -F '"type":"review_run"' "${SFS_EVENTS_FILE}" 2>/dev/null \
+      | grep -F "\"sprint_id\":\"${SPRINT_ID}\"" \
+      | grep -F "\"gate_id\":\"${gate_filter}\"" \
+      | tail -n 1 || true)"
+  else
+    line="$(grep -F '"type":"review_run"' "${SFS_EVENTS_FILE}" 2>/dev/null \
+      | grep -F "\"sprint_id\":\"${SPRINT_ID}\"" \
+      | tail -n 1 || true)"
+  fi
+  [[ -n "$line" ]] || return 1
+  printf '%s\n' "$line" | sed -nE 's/.*"output_path":"([^"]*)".*/\1/p'
+}
+
+latest_review_md_result_path() {
+  [[ -f "${REVIEW_PATH}" ]] || return 1
+  awk -F'`' '/^- result_path: `/ { path=$2 } END { if (path != "") print path; else exit 1 }' "${REVIEW_PATH}"
+}
+
+latest_review_md_excerpt() {
+  [[ -f "${REVIEW_PATH}" ]] || return 1
+  awk '
+    /^#### result excerpt[[:space:]]*$/ { capture=1; in_block=0; buf=""; next }
+    capture && /^```/ {
+      if (in_block) { last=buf; capture=0; in_block=0; next }
+      in_block=1; next
+    }
+    capture && in_block { buf = buf $0 ORS }
+    END { if (last != "") printf "%s", last; else exit 1 }
+  ' "${REVIEW_PATH}"
+}
+
+show_latest_review_result() {
+  local gate_filter="${1:-}" result_path gate_label
+  if [[ ! -f "${REVIEW_PATH}" ]]; then
+    echo "review.md not found: ${REVIEW_PATH} | no recorded CPO review yet"
+    return 0
+  fi
+
+  gate_label=""
+  if [[ -n "${gate_filter}" ]]; then
+    gate_label=" | gate ${gate_filter}"
+  fi
+
+  result_path="$(latest_review_output_path "${gate_filter}" || true)"
+  if [[ -z "${result_path}" && -n "${gate_filter}" ]]; then
+    echo "review.md ready: ${REVIEW_PATH}${gate_label} | latest CPO result | output not-found"
+    echo "----- CPO RESULT EXCERPT (from ${REVIEW_PATH}) -----"
+    echo "(no recorded CPO result found for gate ${gate_filter})"
+    echo "----- END CPO RESULT EXCERPT -----"
+    return 0
+  fi
+  if [[ -z "${result_path}" ]]; then
+    result_path="$(latest_review_md_result_path || true)"
+  fi
+
+  if [[ -n "${result_path}" && -f "${result_path}" ]]; then
+    echo "review.md ready: ${REVIEW_PATH}${gate_label} | latest CPO result | output ${result_path}"
+    echo "----- CPO RESULT EXCERPT (from ${result_path}) -----"
+    existing_result_excerpt "${result_path}" 120
+    echo "----- END CPO RESULT EXCERPT -----"
+    return 0
+  fi
+
+  echo "review.md ready: ${REVIEW_PATH}${gate_label} | latest CPO result | output ${result_path:-not-found}"
+  echo "----- CPO RESULT EXCERPT (from ${REVIEW_PATH}) -----"
+  if ! latest_review_md_excerpt; then
+    echo "(no recorded CPO result excerpt found)"
+  fi
+  echo "----- END CPO RESULT EXCERPT -----"
+}
+
+if [[ "${SHOW_LAST}" == "true" ]]; then
+  if [[ -n "${GATE_ID}" ]] && ! validate_gate_id "${GATE_ID}"; then
+    echo "unknown gate ${GATE_ID}, valid: G-1, G0, G1, G2, G3, G4, G5" >&2
+    exit "${SFS_EXIT_GATE}"
+  fi
+  show_latest_review_result "${GATE_ID}"
+  exit "${SFS_EXIT_OK}"
+fi
+
 # ─────────────────────────────────────────────────────────────────────
 # Resolve gate id (either --gate <id> or infer from events.jsonl)
 # ─────────────────────────────────────────────────────────────────────
@@ -282,11 +399,6 @@ if ! validate_gate_id "${GATE_ID}"; then
   echo "unknown gate ${GATE_ID}, valid: G-1, G0, G1, G2, G3, G4, G5" >&2
   exit "${SFS_EXIT_GATE}"
 fi
-
-SPRINT_DIR="${SFS_SPRINTS_DIR}/${SPRINT_ID}"
-REVIEW_PATH="${SPRINT_DIR}/review.md"
-TEMPLATE="${SFS_LOCAL_DIR}/sprint-templates/review.md"
-
 # ─────────────────────────────────────────────────────────────────────
 # Ensure review.md exists (copy from template if missing)
 # ─────────────────────────────────────────────────────────────────────
@@ -564,6 +676,13 @@ append_result_excerpt() {
   sed -n "1,${limit}p" "$file"
 }
 
+emit_result_excerpt_stdout() {
+  local file="$1" limit="${2:-80}"
+  echo "----- CPO RESULT EXCERPT (from ${file}) -----"
+  append_result_excerpt "$file" "$limit"
+  echo "----- END CPO RESULT EXCERPT -----"
+}
+
 if [[ "${RUN_REVIEW}" == "true" && "${ALLOW_EMPTY_REVIEW}" != "true" ]] && ! has_review_items; then
   {
     printf '\n### %s — CPO evaluator skipped (%s)\n\n' "${NOW}" "${GATE_ID}"
@@ -774,6 +893,7 @@ elif [[ "${RUN_REVIEW}" == "true" ]]; then
   else
     echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_ID} CPO run complete | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
   fi
+  emit_result_excerpt_stdout "${RESULT_PATH}" 80
 else
   echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_ID} prompt ready | executor ${EVALUATOR_EXECUTOR} | prompt ${PROMPT_PATH}"
 fi

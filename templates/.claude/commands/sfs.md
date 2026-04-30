@@ -60,6 +60,46 @@ Do not imply bkit owns or orchestrates the Solon workflow. Do not add any other
 Claude-driven commentary after deterministic SFS commands, except for the
 documented hybrid/conditional flows below.
 
+### Solon Report Output Rule
+
+For hybrid commands (`brainstorm`, `plan`, `decision`, `retro`) and adapter-run
+`review`, the final answer must be a **Solon report**, not a plain bullet list
+such as `plan.md refined: ...`. Put the whole report in a fenced `text` block.
+Keep the bash adapter stdout verbatim before the report when command execution
+produced stdout.
+
+Use this shape and fill only evidence-backed values:
+
+```text
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 SOLON REPORT — /sfs <command>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 Command <command> · <goal/gate/artifact>      [<status>]
+⏱️ Time    <started> → <finished>  (<duration or "n/a">)
+───────────────────────────────────────────────────
+🔧 Steps   <N>건 — <adapter/refinement/review path summary>
+📁 Files   <N>개 — <created/updated artifact paths>
+💾 Commits <N>건 — <sha or "없음 (planning/review artifact)">
+📊 Health  Solon SSoT ✓ | adapter <✓/−> | CEO <✓/−> | CTO/CPO <✓/−> | bkit owner ×
+🔎 Review  <verdict/skipped/prompt-only/n/a> — <executor result summary for review only>
+🛠 Actions <N>건 — <Required CTO actions summary, or "없음/unknown">
+───────────────────────────────────────────────────
+❓ Questions <N>건 — <질문 요약 또는 "없음">
+⚠️ Escalation <N>건 — <1줄 요약 또는 "없음">
+📚 Learning   <N>건 — <1줄 요약 또는 "없음">
+───────────────────────────────────────────────────
+⏭️ Next  <next Solon command/action>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+Never render `📊 bkit Feature Usage`, `Used`, `Not Used`, or `Recommended` as a
+separate footer. If those facts are useful, map them into `Steps`, `Health`, and
+`Next` inside the Solon report.
+
+For `/sfs review`, surface the executor-provided result that already exists in
+adapter stdout, `result_path`, or `review.md`: verdict, key findings, and
+required CTO actions. Do not create a new verdict in the current runtime.
+
 The user's arguments are interpolated below. Treat the first whitespace-delimited
 token as the subcommand and the remainder as that subcommand's arguments.
 
@@ -102,7 +142,7 @@ Dispatch table:
 | `auth`     | `.sfs-local/scripts/sfs-dispatch.sh auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
 | `brainstorm` | `.sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then Claude fills §1~§7 as Solon CEO |
 | `plan`     | `.sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | opens plan.md, then Claude fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
-| `review`   | `.sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log |
+| `review`   | `.sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` reprints the latest recorded review without rerunning executor |
 | `decision` | `.sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | creates ADR file, then Claude fills Context/Decision/Alternatives/Consequences |
 | `retro`    | `.sfs-local/scripts/sfs-dispatch.sh retro <remaining args>`    | opens retro.md, then Claude fills KPT/PDCA. With `--close`, refine before close |
 | `loop`     | `.sfs-local/scripts/sfs-dispatch.sh loop <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim (WU-27 §3) |
@@ -165,9 +205,8 @@ Procedure (apply in order):
    - `plan` → Plan G1 Refinement
    - `decision` → Decision ADR Refinement
    - `retro` → Retro G5 Refinement
-   - `review` → stop after adapter output. The adapter has either run the
-     selected executor, skipped empty evidence, or created a `--prompt-only`
-     handoff.
+   - `review` → Review CPO Handling. Print adapter stdout verbatim, then render
+     a Solon report from recorded adapter/executor evidence only.
 
 ## Brainstorm CEO Refinement
 
@@ -195,11 +234,9 @@ succeeds and its stdout has been printed verbatim:
 6. Set frontmatter `status: ready-for-plan` only when `§6` is usable for
    `/sfs plan`; otherwise keep `status: draft`.
 7. Do not implement code, choose a framework, or run `/sfs plan` automatically.
-8. Final response shape after editing:
-   - first line: `brainstorm.md refined: <path>`
-   - then `questions: <N>` and the questions only if needed
-   - then `next: /sfs plan` when status is `ready-for-plan`, otherwise
-     `next: answer questions, then /sfs brainstorm`
+8. Final response: render a Solon report. Include `brainstorm.md` path in
+   `Files`, question count in `Questions`, and `Next: /sfs plan` when status is
+   `ready-for-plan`; otherwise `Next: answer questions, then /sfs brainstorm`.
 
 ## Plan G1 Refinement
 
@@ -229,11 +266,9 @@ G0 context.
    final response.
 6. Do not implement code, choose irreversible infrastructure, or run
    `/sfs review` automatically.
-7. Final response shape after editing:
-   - first line: `plan.md refined: <path>`
-   - then `questions: <N>` and the questions only if needed
-   - then `next: /sfs review --gate G1 --executor codex --generator claude`
-     when ready, otherwise `next: answer questions, then /sfs plan`
+7. Final response: render a Solon report. Include `plan.md` path in `Files`,
+   question count in `Questions`, and `Next: /sfs review --gate G1 --executor codex --generator claude`
+   when ready; otherwise `Next: answer questions, then /sfs plan`.
 
 ## Decision ADR Refinement
 
@@ -256,10 +291,8 @@ succeeds and stdout has been printed verbatim:
      related decisions.
 4. Preserve frontmatter and user edits. Do not implement code.
 5. Ask up to 3 questions only if the ADR cannot be understood without them.
-6. Final response shape:
-   - first line: `decision refined: <path>`
-   - optional `questions: <N>`
-   - then `next: continue current sprint`
+6. Final response: render a Solon report. Include the ADR path in `Files`,
+   question count in `Questions`, and `Next: continue current sprint`.
 
 ## Review CPO Handling
 
@@ -270,12 +303,16 @@ must not silently self-validate after the adapter succeeds.
    result summary to `review.md`.
 2. If there is no reviewable evidence, the adapter exits 0 with "리뷰할 항목이
    없습니다" and suggests `/sfs auth probe --executor <tool>` for bridge tests.
-3. If `--prompt-only` is used, stop after adapter output and treat
+3. If `--show-last` / `--show` / `--last` is used, the adapter reprints the
+   latest recorded CPO result for the active sprint without invoking an
+   executor. Surface that prior result in the report.
+4. If `--prompt-only` is used, stop after adapter output and treat
    `prompt_path` as manual handoff material. Do not write a Claude verdict
    unless the user explicitly starts a separate review task with that prompt.
-4. Final response shape after normal adapter output:
-   - echo adapter stdout verbatim
-   - no extra CPO verdict from the current runtime
+5. Final response after normal adapter output: echo adapter stdout verbatim,
+   then render a Solon report. Fill `Review` and `Actions` from the executor
+   result excerpt/path when present. Do not add an extra CPO verdict from the
+   current runtime.
 
 ## Retro G5 Refinement
 
@@ -291,9 +328,9 @@ stdout has been printed verbatim:
 5. If the user invoked `retro --close`, refine `retro.md` first, then run
    `bash .sfs-local/scripts/sfs-dispatch.sh retro --close` exactly once and
    print its output verbatim.
-6. Final response shape when not closing:
-   - first line: `retro.md refined: <path>`
-   - then `next: /sfs retro --close` if ready, otherwise next required action
+6. Final response when not closing: render a Solon report. Include `retro.md`
+   path in `Files`, close-readiness in `Health`, and `Next: /sfs retro --close`
+   if ready; otherwise the next required action.
 
 If `$ARGUMENTS` is empty, treat it as if the user typed `status` (run the
 status adapter) so that bare `/sfs` produces the canonical compact status line.

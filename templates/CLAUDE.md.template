@@ -31,7 +31,7 @@ Claude Code 의 native slash 진입점은 `.claude/commands/sfs.md` 가 자동 i
 | `/sfs auth status|check|login|probe [--executor <tool>]` | `.sfs-local/scripts/sfs-auth.sh` |
 | `/sfs brainstorm [text|--stdin]` | `.sfs-local/scripts/sfs-brainstorm.sh` raw capture 후 Claude 가 Solon CEO 로 §1~§7 정리 |
 | `/sfs plan` | `.sfs-local/scripts/sfs-plan.sh` 후 Claude 가 `brainstorm.md` 기반 G1 plan + CTO/CPO contract 작성 |
-| `/sfs review --gate <id> [--executor <tool>] [--prompt-only]` | `.sfs-local/scripts/sfs-review.sh`; 기본은 선택된 CPO executor bridge 실행, `--prompt-only` 는 수동 handoff |
+| `/sfs review --gate <id> [--executor <tool>] [--prompt-only]` / `/sfs review --show-last` | `.sfs-local/scripts/sfs-review.sh`; 기본은 선택된 CPO executor bridge 실행 + bounded result excerpt 출력, `--prompt-only` 는 수동 handoff, `--show-last` 는 executor 재실행 없는 기존 결과 확인 |
 | `/sfs decision <title> [--id <id>]` | `.sfs-local/scripts/sfs-decision.sh` 후 Claude 가 ADR 본문 작성 |
 | `/sfs retro [--close]` | `.sfs-local/scripts/sfs-retro.sh`; `--close` 는 Claude 가 `retro.md` 를 먼저 채운 뒤 close adapter 1회 실행 |
 | `/sfs loop [OPTIONS]` | `.sfs-local/scripts/sfs-loop.sh` (Ralph Loop + Solon mutex) |
@@ -43,7 +43,7 @@ stdout / stderr / exit code 는 verbatim 보고한다 (paraphrase 금지).
 명령 모드는 고정이다:
 - **Bash-only**: `status`, `start`, `guide`, `auth`, `loop`.
 - **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`.
-- **Adapter-run**: `review` — 기본적으로 bash adapter 가 선택된 CPO executor bridge 를 실행한다. `--prompt-only` 일 때도 현재 Claude runtime 이 대신 verdict 를 작성하지 않고 prompt handoff 로 멈춘다.
+- **Adapter-run**: `review` — 기본적으로 bash adapter 가 선택된 CPO executor bridge 를 실행하고 stdout 에 bounded result excerpt 를 보여준다. `--show-last` 는 기존 review 결과를 재출력한다. `--prompt-only` 일 때도 현재 Claude runtime 이 대신 verdict 를 작성하지 않고 prompt handoff 로 멈춘다.
 
 부족한 정보가 있으면 1~3개 질문만 남기고, 다음 gate 를 자동 실행하지 않는다.
 

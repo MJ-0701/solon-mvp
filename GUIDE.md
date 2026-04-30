@@ -170,9 +170,11 @@ Alternatives / Consequences / References 를 바로 채운다.
 ```
 
 → full CPO prompt 는 `.sfs-local/tmp/review-prompts/` 에 저장되고, `review.md` 에는
-`prompt_path` 와 크기, 실행 결과 요약만 남는다. 기본 동작은 실제 bridge 실행이고,
-수동 handoff 만 필요하면 `--prompt-only` 로 prompt/log 만 만든다. CPO verdict 는
-`pass` / `partial` / `fail` 로 기록한다. `partial` 또는
+`prompt_path` 와 크기, 실행 결과 요약만 남는다. 명령 출력에는 bounded result excerpt 가
+바로 표시되므로 verdict/findings/required CTO actions 를 열어보지 않고 확인할 수 있다.
+기본 동작은 실제 bridge 실행이고, 수동 handoff 만 필요하면 `--prompt-only` 로 prompt/log 만
+만든다. 이미 실행된 리뷰를 다시 보려면 `/sfs review --show-last [--gate G4]` 를 사용한다.
+CPO verdict 는 `pass` / `partial` / `fail` 로 기록한다. `partial` 또는
 `fail` 이면 CTO 가 지정된 항목만 재구현하고 다시 review 를 연다.
 
 기본 review 실행은 실제 bridge 가 있을 때만 성공한다. `codex` 는 `SFS_REVIEW_CODEX_CMD` 또는
@@ -229,6 +231,7 @@ native slash UI 에서 `커맨드 없음` 으로 막힐 수 있으므로 `$sfs .
 | `/sfs auth probe --executor gemini --timeout 20` | bridge request/response 더미 확인 |
 | `/sfs plan` | 현 sprint 의 의도/경계 + G1 요구사항/AC + CTO/CPO 계약 작성 |
 | `/sfs review --gate G4 --executor codex` | 리뷰할 evidence 가 있을 때 CPO review bridge 실행 + 결과 기록 |
+| `/sfs review --show-last` | executor 재실행 없이 마지막 CPO review 결과 excerpt 확인 |
 | `/sfs decision <title>` | ADR-style 결정 기록 + AI runtime 에서 ADR 본문 작성 |
 | `/sfs retro [--close]` | 회고 작성 / `--close` 는 회고 작성 후 sprint close + auto-commit |
 | `/sfs loop` | 큰 작업 자율 진행 (Ralph Loop, 고급) |

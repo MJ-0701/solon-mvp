@@ -1,3 +1,29 @@
+## [0.5.24-product] - 2026-04-30
+
+**Review result visibility and Solon report UX.** `/sfs review` now shows the
+executor-provided result excerpt directly in command output, and AI runtime
+adapters must render hybrid/review completions as Solon reports instead of
+path-only one-liners.
+
+### Added
+
+- **Visible CPO result excerpt** — successful review runs print a bounded
+  `CPO RESULT EXCERPT` after the `review.md ready ... output <path>` line, so
+  users can see verdict/findings/required CTO actions without opening tmp files.
+- **Review recall** — `/sfs review --show-last` (aliases: `--show`, `--last`)
+  reprints the latest recorded CPO result for the active sprint without
+  rerunning Codex/Claude/Gemini or spending executor tokens.
+- **Solon report output rule** — Claude, Codex, and Gemini adapter instructions
+  now require a fenced Solon report for hybrid commands and adapter-run review,
+  with review/action fields populated only from recorded executor evidence.
+
+### Changed
+
+- **Review docs** — README, onboarding guide, SFS template, and runtime adapter
+  templates now describe `--show-last` and the stdout result excerpt behavior.
+- **Self-validation guard** — runtimes may surface the executor result already
+  produced by SFS, but must not invent an extra verdict in the same runtime.
+
 ## [0.5.23-product] - 2026-04-30
 
 **CPO review runs by default.** `/sfs review` now treats the selected CPO
