@@ -32,7 +32,7 @@ subcommands are deterministic and must NOT be re-interpreted by the model.
 |:--|:--|:--|
 | `status`   | `bash .sfs-local/scripts/sfs-dispatch.sh status <remaining args>`   | passes flags such as `--color=auto/always/never` verbatim |
 | `start`    | `bash .sfs-local/scripts/sfs-dispatch.sh start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
-| `guide`    | `bash .sfs-local/scripts/sfs-dispatch.sh guide <remaining args>`    | passes `--path` / `--print` verbatim |
+| `guide`    | `bash .sfs-local/scripts/sfs-dispatch.sh guide <remaining args>`    | default context briefing; passes `--path` / `--print` verbatim |
 | `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | takes no flags currently; remaining args reserved for future |
 | `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | passes `--gate <id>` / `--gate=<id>` verbatim (id ∈ G-1, G0, G1, G2, G3, G4, G5) |
 | `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim |

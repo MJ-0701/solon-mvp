@@ -136,7 +136,7 @@ WSL 사용자는 WSL shell 안에서 `bash .sfs-local/scripts/sfs-dispatch.sh st
 |---|---|
 | `/sfs status` | 현재 sprint, WU, gate, ahead count, last event 를 한 줄로 표시 |
 | `/sfs start <goal>` | 새 sprint 시작 또는 기존 sprint 이어가기 (`--id <sprint-id>` 지원) |
-| `/sfs guide [--print]` | 설치된 onboarding guide 경로 출력 또는 본문 보기 |
+| `/sfs guide [--path|--print]` | 짧은 사용 맥락 브리핑 / guide 경로 / full guide 본문 보기 |
 | `/sfs plan` | 현재 sprint 의 `plan.md` 작성 또는 갱신 |
 | `/sfs review --gate <id>` | gate 기준으로 `review.md` 작성 또는 갱신 (id ∈ G-1..G5) |
 | `/sfs decision <title>` | full ADR (decisions/) 또는 sprint-local mini-ADR 자동 분기 |

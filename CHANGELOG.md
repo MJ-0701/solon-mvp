@@ -1,3 +1,16 @@
+## [0.5.7-product] - 2026-04-30
+
+**`/sfs guide` default context briefing.** Bare `/sfs guide` should orient the user, not dump a
+full Markdown document and not merely print a file path.
+
+### Changed
+
+- **guide default UX** — `.sfs-local/scripts/sfs-guide.sh` now prints a compact context briefing:
+  what Solon adds, which files the user should edit first, the first command flow, and where to
+  find the full guide.
+- **full guide preserved** — `/sfs guide --print` still prints the complete Markdown onboarding
+  document. `/sfs guide --path` still prints only the guide path.
+
 ## [0.5.6-product] - 2026-04-30
 
 **Local product clone freshness guard.** 실제 사용자는 `~/tmp/solon-product` 같은 로컬 clone 을

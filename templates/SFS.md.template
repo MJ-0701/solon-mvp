@@ -67,7 +67,7 @@ Solon SFS 의 8 명령은 어떤 CLI 환경에서 호출하든 동일한 bash ad
 |:--|:--|
 | `/sfs status` | 현재 sprint / WU / 마지막 gate / git ahead / last_event 1줄 |
 | `/sfs start <goal> [--id <sprint-id>] [--force]` | sprint 디렉토리 초기화 + 4 sprint files cp |
-| `/sfs guide [--print]` | onboarding guide 경로 출력 또는 본문 보기 |
+| `/sfs guide [--path|--print]` | 짧은 사용 맥락 브리핑 / guide 경로 / full guide 본문 보기 |
 | `/sfs plan` | 현재 sprint plan.md 진입 + `plan_open` event |
 | `/sfs review --gate <id>` | review.md 진입 + `review_open` event (id ∈ G-1..G5) |
 | `/sfs decision <title> [--id <id>]` | full ADR 신설 (decisions/) 또는 mini-ADR (sprint-local) |

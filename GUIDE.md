@@ -165,7 +165,8 @@ Codex adapter 는 unsupported 로 답하지 말고 즉시 bash adapter 로 dispa
 |:--|:--|
 | `/sfs status` | 지금 어디까지 왔는지 1줄 |
 | `/sfs start <goal>` | 새 sprint 시작 또는 이어가기 |
-| `/sfs guide` | 이 onboarding guide 경로 확인 |
+| `/sfs guide` | 처음 쓸 때 필요한 맥락과 다음 명령 확인 |
+| `/sfs guide --path` | 이 onboarding guide 경로만 확인 |
 | `/sfs guide --print` | 이 guide 본문을 터미널에 출력 |
 | `/sfs plan` | 현 sprint 의 의도/경계 작성 |
 | `/sfs review --gate G2` | gate verdict 기록 (G-1 / G0 / G1 / G2 / G3 / G4 / G5) |
