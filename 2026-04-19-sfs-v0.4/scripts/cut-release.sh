@@ -377,18 +377,22 @@ done
 echo "${VERSION}" > "${STABLE_REPO}/VERSION"
 log "  ✓ stable/VERSION = ${VERSION}"
 
-# CHANGELOG entry (stable) — 단순 prepend, 사용자 사후 정리 가능
+# CHANGELOG entry (stable) — dev staging 에 같은 버전 entry 가 없을 때만 fallback prepend.
 TODAY=$(date -u +"%Y-%m-%d")
 CHLOG="${STABLE_REPO}/CHANGELOG.md"
 if [[ -f "${CHLOG}" ]]; then
-  TMPFILE="$(mktemp)"
-  {
-    printf '## [%s] - %s\n\n' "${VERSION}" "${TODAY}"
-    printf -- '- (release: cut from dev staging via cut-release.sh)\n\n'
-    cat "${CHLOG}"
-  } > "${TMPFILE}"
-  mv "${TMPFILE}" "${CHLOG}"
-  log "  ✓ stable/CHANGELOG.md prepended"
+  if grep -q "^## \[${VERSION}\]" "${CHLOG}"; then
+    log "  · stable/CHANGELOG.md 이미 ${VERSION} entry 존재"
+  else
+    TMPFILE="$(mktemp)"
+    {
+      printf '## [%s] - %s\n\n' "${VERSION}" "${TODAY}"
+      printf -- '- (release: cut from dev staging via cut-release.sh)\n\n'
+      cat "${CHLOG}"
+    } > "${TMPFILE}"
+    mv "${TMPFILE}" "${CHLOG}"
+    log "  ✓ stable/CHANGELOG.md prepended"
+  fi
 fi
 
 # git add + commit (stable)
@@ -438,7 +442,9 @@ fi
 
 log ""
 log "✅ apply complete"
-log "    stable: ${STABLE_REPO} (commit ${STABLE_SHA:0:7}${NO_TAG:+, no tag})"
+TAG_NOTE=""
+[[ "${NO_TAG}" == "1" ]] && TAG_NOTE=", no tag"
+log "    stable: ${STABLE_REPO} (commit ${STABLE_SHA:0:7}${TAG_NOTE})"
 log "    dev:    ${DEV_STAGING} (VERSION/CHANGELOG bumped)"
 log ""
 log "⚠️  push 안 함 (§1.5 manual). 사용자 터미널에서:"

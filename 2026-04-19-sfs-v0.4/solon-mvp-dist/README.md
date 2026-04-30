@@ -267,7 +267,7 @@ Uninstall 은 대화형으로 실행됩니다.
 
 ## Release Channel
 
-현재 distribution version 은 `0.5.1-product` 입니다. `-mvp` suffix (0.5.0-mvp 까지) 는 기존 설치본
+현재 distribution version 은 `0.5.2-product` 입니다. `-mvp` suffix (0.5.0-mvp 까지) 는 기존 설치본
 과의 semver 호환을 위해 유지하지만, 0.5.1+ 부터 repo identity 와 release suffix 는 product
 track 기준으로 운영합니다.
 
