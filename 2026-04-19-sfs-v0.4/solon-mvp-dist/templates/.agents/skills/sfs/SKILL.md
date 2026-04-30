@@ -31,7 +31,7 @@ the model. Bash adapter is single source of truth (SSoT).
 |:--|:--|:--|
 | `status` (또는 "현재 상태", "어디까지 했는지") | `bash .sfs-local/scripts/sfs-dispatch.sh status [--color=auto/always/never]` | 1줄 dashboard |
 | `start <goal>` (또는 "sprint 시작", "새 sprint") | `bash .sfs-local/scripts/sfs-dispatch.sh start <goal> [--id <sprint-id>] [--force]` | sprint dir 초기화 + 4 sprint files cp |
-| `guide [--print]` (또는 "가이드", "처음 사용법") | `bash .sfs-local/scripts/sfs-dispatch.sh guide [--path|--print]` | onboarding guide 경로 출력/본문 보기 |
+| `guide [--path|--print]` (또는 "가이드", "처음 사용법") | `bash .sfs-local/scripts/sfs-dispatch.sh guide [--path|--print]` | 기본은 짧은 맥락 브리핑, `--path` 는 경로만, `--print` 는 full guide 본문 |
 | `plan` (또는 "plan 작성", "이번 sprint 계획") | `bash .sfs-local/scripts/sfs-dispatch.sh plan` | plan.md 진입 + plan_open event |
 | `review --gate <id>` (또는 "review 작성", "검증 기록") | `bash .sfs-local/scripts/sfs-dispatch.sh review --gate <id>` | id ∈ G-1, G0, G1, G2, G3, G4, G5 |
 | `decision <title>` (또는 "결정 기록", "ADR 추가") | `bash .sfs-local/scripts/sfs-dispatch.sh decision "<title>" [--id <id>]` | full ADR 또는 mini-ADR 분기 |

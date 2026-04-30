@@ -3,12 +3,12 @@
 #
 # Solon SFS — `/sfs guide` command implementation.
 #
-# Output (default, one line):
-#   guide.md ready: <path>
+# Output (default):
+#   short context briefing + next commands + guide path
 #
 # Flags:
 #   --path   print only the guide path
-#   --print  print guide contents to stdout
+#   --print  print full guide contents to stdout
 #
 # Exit codes:
 #   0  success
@@ -27,9 +27,9 @@ usage_guide() {
 Usage: /sfs guide [--path|--print]
 
 Show the Solon Product onboarding guide installed with this project.
-  - Default: prints the guide path.
+  - Default: prints a short context briefing for first use.
   - --path: prints only the guide path.
-  - --print: prints the guide contents.
+  - --print: prints the full guide contents.
 
 Exit codes:
   0  success
@@ -90,7 +90,33 @@ fi
 
 case "${MODE}" in
   ready)
-    echo "guide.md ready: ${GUIDE_PATH}"
+    cat <<EOF
+Solon guide context
+
+이게 뭐야:
+  Solon 은 이 repo 안에 sprint, decision, review, retro, handoff 상태를 남겨서
+  AI 와 제품 작업할 때 맥락이 사라지지 않게 해 주는 가벼운 운영 레이어야.
+
+처음 볼 파일:
+  SFS.md        프로젝트 이름, 도메인, stack, DB, 배포 환경
+  CLAUDE.md     Claude Code 에게 알려줄 프로젝트별 맥락
+  AGENTS.md     Codex 에게 알려줄 프로젝트별 맥락
+  GEMINI.md     Gemini CLI 에게 알려줄 프로젝트별 맥락
+
+첫 흐름:
+  /sfs status
+  /sfs start "<이번 sprint 목표>"
+  /sfs plan
+
+작업 중:
+  /sfs decision "<결정 제목>"   결정이 흐려지기 전에 기록
+  /sfs review --gate G2        구현/기획 검토 evidence 남기기
+  /sfs retro --close           sprint close + local auto-commit
+
+전체 가이드:
+  /sfs guide --print
+  path: ${GUIDE_PATH}
+EOF
     ;;
   path)
     echo "${GUIDE_PATH}"

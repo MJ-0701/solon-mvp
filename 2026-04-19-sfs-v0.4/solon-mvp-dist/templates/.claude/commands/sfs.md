@@ -50,7 +50,7 @@ Dispatch table:
 |:--|:--|:--|
 | `status`   | `.sfs-local/scripts/sfs-dispatch.sh status <remaining args>`   | passes flags such as `--color=auto/always/never` verbatim |
 | `start`    | `.sfs-local/scripts/sfs-dispatch.sh start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
-| `guide`    | `.sfs-local/scripts/sfs-dispatch.sh guide <remaining args>`    | passes `--path` / `--print` verbatim; default prints the managed guide path |
+| `guide`    | `.sfs-local/scripts/sfs-dispatch.sh guide <remaining args>`    | passes `--path` / `--print` verbatim; default prints a short context briefing |
 | `plan`     | `.sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | takes no flags currently; remaining args reserved for future (WU-25 §1) |
 | `review`   | `.sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | passes `--gate <id>` / `--gate=<id>` verbatim (gates.md §1 7-enum: G-1, G0, G1, G2, G3, G4, G5; WU-25 §2) |
 | `decision` | `.sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim (WU-26 §1). Uses `decisions-template/ADR-TEMPLATE.md` (5 섹션 ADR-full); `sprint-templates/decision-light.md` 은 Claude-driven fallback. |
@@ -155,7 +155,7 @@ When showing usage, keep it compact and practical. Include this shape:
 /sfs help                 사용법 보기
 /sfs status               현재 SFS 상태 확인
 /sfs start <goal>         새 sprint 시작 또는 이어가기
-/sfs guide                onboarding guide 경로 출력
+/sfs guide                처음 사용 맥락 브리핑
 /sfs plan                 현재 sprint plan.md 작성/갱신
 /sfs review               현재 변경사항 review.md 작성/갱신
 /sfs decision <decision>  짧은 결정 기록 남기기
