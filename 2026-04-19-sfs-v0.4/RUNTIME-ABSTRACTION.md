@@ -284,6 +284,14 @@ appendix/contracts/
 >
 > CLAUDE.md §1.21 의 link 대상이며, §1 은 진입 인지만 보장하고 본 §6.5 가 실 매핑을 담는다. 도구 추가/변동 시 본 § 만 갱신 → §1 mutate 비용 0.
 
+#### Cross-runtime visibility / write ownership invariant (2026-05-01 강화)
+
+- **Runtime 분리 != evidence 차단**. Claude / Codex / Gemini-CLI 는 같은 workspace 의 `log.md`, `review.md`, `.sfs-local/queue`, `PROGRESS.md`, active/dist artifact 를 읽고 서로의 산출물을 확인할 수 있어야 한다. 이것은 memory 공유가 아니라 shared filesystem evidence cross-check 다.
+- **Self-validation 방지의 뜻**: 같은 agent instance 가 자기 산출물을 자기 verdict 로 통과시키지 않는다는 뜻이다. 다른 runtime 이 generator 산출물과 로그를 읽고 CPO/CTO cross-check 하는 것은 허용이며, 오히려 의도된 검증 경로다.
+- **Write ownership 은 제한**. 각 runtime 은 자기 claim/task, 명시된 files_scope, 자기 review/retro artifact, append-only log entry 만 수정한다. 다른 runtime 이 claim 한 task, run artifact, review artifact, files_scope 를 수정해야 하면 먼저 finding/queue task/사용자 확인으로 전환한다.
+- **읽기와 작업 방해를 구분**. 읽기, 인용, 검증, contradiction 기록은 허용이다. `complete/fail/retry/abandon`, takeover, 다른 owner 의 파일 rewrite, verdict silent rewrite 는 작업 방해가 될 수 있으므로 명시적 ownership 또는 사용자 승인 없이는 금지한다.
+- **Moving target 기록 의무**. review 중 다른 runtime 이 같은 파일을 변경하면 시작 시점 evidence 와 post-state 를 분리 기록한다. verdict 기준이 바뀌었는지 여부를 명시하고, 바뀌지 않았으면 "scope 밖 / info-only" 로 표시한다.
+
 #### 운영 매핑 (2026-04-30 baseline)
 
 **Claude Code (host CLI 직접 접근, FUSE 무관)**
@@ -311,7 +319,7 @@ appendix/contracts/
 
 #### 공유 SSoT (도구 무관)
 
-- `PROGRESS.md` frontmatter — `current_wu_owner` mutex (§1.12) + `domain_locks` D-A~D-F + `released_history` rolling. 모든 도구가 같은 mutex/lock primitive 를 read/write 함으로써 race 차단.
+- `PROGRESS.md` frontmatter — `current_wu_owner` mutex (§1.12) + `domain_locks` D-A~D-F + `released_history` rolling. 모든 도구가 같은 mutex/lock primitive 를 읽되, write 는 claim/ownership 이 있는 범위로 제한함으로써 race 차단.
 - `CLAUDE.md` §1 — 절대 규칙 20 + 환경 매핑 link (§1.21).
 - `AGENTS.md` (root + docset) — Codex/Cursor/Aider 진입점, bootstrap shim 으로 docset CLAUDE.md 까지 chain.
 

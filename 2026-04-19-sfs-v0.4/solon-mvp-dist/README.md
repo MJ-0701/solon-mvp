@@ -270,14 +270,29 @@ Skill/prompt/wrapper 는 이 API 를 runtime 별로 전달하는 adaptor surface
 Queue MVP:
 
 ```text
-/sfs loop enqueue "10x docs consistency pass"
+/sfs loop enqueue "10x docs consistency pass" --size large --target-minutes 90
 /sfs loop queue
 /sfs loop claim --owner my-worker
+/sfs loop verify <task-id-or-path>
+/sfs loop complete <task-id-or-path>
+/sfs loop fail <task-id-or-path>
+/sfs loop retry <task-id-or-path>
+/sfs loop abandon <task-id-or-path>
 /sfs loop --dry-run --max-iters 1
 ```
 
-queue 는 실행 대기열이고, sprint scope 의 SSoT 는 여전히 `brainstorm.md` / `plan.md` /
-decision file 입니다.
+queue 는 execution backlog / 실행 대기열이고, sprint scope 의 SSoT 는 여전히
+`brainstorm.md` / `plan.md` / decision file 입니다. 자율주행용 queue item 은
+`size: medium|large` 와 `target_minutes: 30~120` 범위가 기본이며, `small` 은 보통
+standalone overnight item 이 아니라 batch 후보입니다.
+
+기본 `/sfs loop` 는 non-live 모드에서 task 를 claim 한 뒤
+`.sfs-local/queue/runs/<task-id>/<timestamp>/PROMPT.md` 와 `metadata.env` 를 만들고
+executor 호출은 하지 않습니다. `SFS_LOOP_LLM_LIVE=1` 일 때만 executor 를 호출합니다.
+검증까지 자동으로 닫으려면 task 의 `## Verify` 에 runnable command bullet 을 넣고
+`SFS_LOOP_VERIFY=1 /sfs loop ...` 를 사용합니다. 수동 마무리는 `complete` / `fail` /
+`retry` / `abandon`, 또는 claimed task 에 대한 `verify` 로 처리합니다. `retry` 는
+attempts 를 1 증가시키며 `max_attempts` 를 넘으면 task 를 `abandoned/` 로 이동합니다.
 multi-vendor executor 1급 지원:
 
 - `--executor claude` → `claude -p --dangerously-skip-permissions`

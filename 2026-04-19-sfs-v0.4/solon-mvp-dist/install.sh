@@ -438,6 +438,13 @@ mkdir -p "$TARGET/.sfs-local/sprints" "$TARGET/.sfs-local/decisions"
 [ -f "$TARGET/.sfs-local/decisions/.gitkeep" ] || touch "$TARGET/.sfs-local/decisions/.gitkeep"
 ok "  sprints/ + decisions/ 확보"
 
+# queue/ — file-backed loop queue state (preserve existing tasks).
+for qstate in pending claimed done failed abandoned runs; do
+  mkdir -p "$TARGET/.sfs-local/queue/$qstate"
+  [ -f "$TARGET/.sfs-local/queue/$qstate/.gitkeep" ] || touch "$TARGET/.sfs-local/queue/$qstate/.gitkeep"
+done
+ok "  queue/ 상태 디렉토리 확보 (pending/claimed/done/failed/abandoned/runs)"
+
 if [ "$INSTALL_LAYOUT" = "vendored" ]; then
   # GUIDE.md — `/sfs guide` 가 참조하는 managed onboarding guide
   if [ -f "$SOURCE_DIR/GUIDE.md" ]; then

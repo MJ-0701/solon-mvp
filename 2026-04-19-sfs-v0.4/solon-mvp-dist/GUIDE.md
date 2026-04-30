@@ -298,9 +298,11 @@ native slash UI 에서 `커맨드 없음` 으로 막힐 수 있으므로 `$sfs .
 | `/sfs decision <title>` | ADR-style 결정 기록 + AI runtime 에서 ADR 본문 작성 |
 | `/sfs retro [--close]` | 회고 작성 / `--close` 는 회고 작성 후 sprint close + auto-commit |
 | `/sfs loop` | 큰 작업 자율 진행 (queue-first Ralph Loop, 고급) |
-| `/sfs loop enqueue "작업"` | queue 에 loop task 등록 |
-| `/sfs loop queue` | queue pending/claimed/done/failed/abandoned count 확인 |
+| `/sfs loop enqueue "작업" --size large --target-minutes 90` | queue 에 loop task 등록 |
+| `/sfs loop queue` | queue pending/claimed/done/failed/abandoned count + stale claimed 확인 |
 | `/sfs loop claim --owner <name>` | pending task 하나를 worker 가 claim |
+| `/sfs loop verify <task>` | claimed task 의 `## Verify` command 를 실행하고 done/failed 처리 |
+| `/sfs loop complete|fail|retry|abandon <task>` | queue lifecycle 수동 마무리 / 재시도 / 포기 |
 
 Codex 에서는 같은 명령을 `$sfs status`, `$sfs start ...`, `$sfs brainstorm ...` 처럼 입력한다.
 
@@ -337,14 +339,22 @@ vendored layout 의 Windows PowerShell fallback:
 /sfs loop --executor gemini --max-iters 3
 ```
 
-고급 사용자는 작은 정합성 작업을 queue 에 먼저 넣을 수 있다. queue 가 비어 있으면 loop 는 기존
-`domain_locks` sweep 으로 fallback 한다:
+고급 사용자는 큰 정합성 작업을 queue 에 먼저 넣을 수 있다. queue 는 execution backlog /
+실행 대기열이고, sprint scope SSoT 는 여전히 `brainstorm.md` / `plan.md` / decision file 이다.
+자율주행용 queue item 은 보통 `medium`(30~60분) 또는 `large`(60~120분) 로 잡고,
+`small` 은 standalone overnight item 이 아니라 batch 후보로 둔다. queue 가 비어 있으면
+loop 는 기존 `domain_locks` sweep 으로 fallback 한다:
 
 ```text
-/sfs loop enqueue "README/GUIDE/SFS template wording consistency"
+/sfs loop enqueue "README/GUIDE/SFS template wording consistency" --size medium --target-minutes 45
 /sfs loop queue
 /sfs loop --dry-run --max-iters 1
 ```
+
+non-live 기본 loop 는 claim 후 `.sfs-local/queue/runs/<task-id>/<timestamp>/PROMPT.md`
+를 만들고 executor 는 호출하지 않는다. `SFS_LOOP_LLM_LIVE=1` 일 때 executor 호출,
+`SFS_LOOP_VERIFY=1` 일 때 `## Verify` command 실행 후 done/failed lifecycle 처리를 한다.
+`retry` 는 attempts 를 1 증가시키며 `max_attempts` 를 넘으면 `abandoned/` 로 이동한다.
 
 ---
 

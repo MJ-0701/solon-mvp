@@ -128,9 +128,16 @@ Solon SFS 의 11 명령은 어떤 CLI 환경에서 호출하든 동일한 `sfs` 
 | `/sfs decision <title> [--id <id>]` | full ADR 신설 후 Context/Decision/Alternatives/Consequences 작성 |
 | `/sfs retro [--close]` | retro.md 작성/갱신. `--close` 는 retro refinement 후 sprint close + auto commit |
 | `/sfs loop [OPTIONS]` | queue-first Ralph Loop + Solon mutex 자율 진행 (see `--help`) |
-| `/sfs loop enqueue <title>` | `.sfs-local/queue/pending/` 에 loop task 등록 |
-| `/sfs loop queue` | queue pending/claimed/done/failed/abandoned count 확인 |
+| `/sfs loop enqueue <title> [--size small|medium|large] [--target-minutes N]` | `.sfs-local/queue/pending/` 에 loop task 등록 |
+| `/sfs loop queue` | queue pending/claimed/done/failed/abandoned count + stale claimed 확인 |
 | `/sfs loop claim [--owner <name>]` | pending task 하나를 worker 가 atomic claim |
+| `/sfs loop verify <task>` | claimed task 의 `## Verify` command 실행 후 done/failed 처리 |
+| `/sfs loop complete|fail|retry|abandon <task>` | queue lifecycle 수동 마무리 / 재시도 / 포기 |
+
+Queue 는 execution backlog / 실행 대기열이며, sprint scope SSoT 는 여전히
+`brainstorm.md` / `plan.md` / decision file 입니다. 자율주행용 queue item 은 보통
+`medium`(30~60분) 또는 `large`(60~120분) 로 잡고, `small` 은 batch 후보로 둡니다.
+`retry` 는 attempts 를 1 증가시키며 `max_attempts` 를 넘으면 `abandoned/` 로 이동합니다.
 
 ## 6 본부 활성 상태 (divisions)
 
