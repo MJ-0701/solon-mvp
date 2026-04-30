@@ -25,6 +25,24 @@ created_at: "2026-04-30T23:18:27+09:00"
 
 <!-- 첫 entry 예시 (삭제 후 실 entry 로 교체) -->
 
+### 2026-05-01T09:15:03+09:00 — Step 2 + Step 3 완료: events backfill (β manual-repair) + manual close
+
+- 사용자 결정: 옵션β 자율진행 승인 (timestamp=현재 / by=manual-repair / note="backfill: adapter emit gap (F-4b)").
+- **Step 2 완료**: `.sfs-local/events.jsonl` 에 4 entry append, 모두 `by:"manual-repair"` + note 명시 (pretend-normal 금지 정합):
+  - `09:15:00 review_open` (G4) — backfill, semantic ts ≈ CPO G4 review 02:30 KST 작업분.
+  - `09:15:01 retro_open` — backfill, semantic ts ≈ retro draft 09:10 KST 작업분.
+  - `09:15:02 gate_review` (G5 verdict=pass) — manual emit (F-4b 어댑터 미동작 정합).
+  - `09:15:03 sprint_close` — manual emit, 본 sprint close action.
+  - JSON validity python `json.loads` × 4 PASS.
+- **Step 3 완료**: manual close path 채택 (`sfs retro --close` 의 auto-commit 이 원본 queue task spec "Do not git add/commit/push" + CLAUDE.md §1.5 위배 → manual close 가 deterministic safe path).
+  - retro.md frontmatter `closed_at = 2026-05-01T09:15:03+09:00` (sprint_close event ts 와 동일).
+  - retro.md §5 G5 close 체크: 4 항목 중 2 항목 [x] (events.jsonl + closed_at), 2 항목 [ ] 사용자 manual 영역 (HANDOFF link + 분기 sprint 등재).
+- 사용자 manual 잔여 (wake 시 처리):
+  - HANDOFF-next-session.md / sessions/_INDEX.md 에 본 sprint 결과 link 1줄.
+  - 분기 sprint 4건 (`solon-loop-queue-lifecycle` / `solon-events-emit-restore` / `solon-adapter-dispatch-audit` / `solon-loop-queue-multi-worker-smoke`) 의 backlog 등재 결정.
+  - host repo `0b43423` 위에 dirty worktree (~25 file) git commit + push (CLAUDE.md §1.5 / §1.18 형식).
+- git 조작 0 — events.jsonl + retro.md + log.md 모두 file 편집만.
+
 ### 2026-05-01T09:10:00+09:00 — Step 1 완료: retro.md G5 draft (KPT + PDCA + 메트릭 + 분기 + close 체크)
 
 - 사용자 지시 "1,2,3 순서대로 진행해" 의 Step 1 = retro.md draft 작성. 사용자 결정 영역 (Step 2 backfill 정책) 진입 전에 멈출 수 있도록 retro.md 안에 결정 대기 항목을 ⚠️ 마커로 명시.
