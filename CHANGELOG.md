@@ -1,3 +1,7 @@
+## [0.5.34-product] - 2026-04-30
+
+- (release: cut from dev staging via cut-release.sh)
+
 ## [0.5.33-product] - 2026-05-01
 
 **Implementation command and AI-safe coding guardrails.** Solon now has an
