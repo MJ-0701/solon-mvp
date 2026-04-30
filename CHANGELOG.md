@@ -1,3 +1,16 @@
+## [0.5.16-product] - 2026-04-30
+
+**Solon-owned usage footer.** The Claude `/sfs` command now preserves the useful
+`Used / Not Used / Recommended` report shape while making Solon the owner of the workflow
+instead of suppressing reports entirely.
+
+### Changed
+
+- **Solon Feature Usage footer** — if a usage footer is shown after `/sfs`, it should be rendered
+  as `Solon Feature Usage` with `Used`, `Not Used`, and `Recommended` rows.
+- **No bkit ownership implication** — the footer can borrow the report structure, but must not
+  imply bkit/PDCA orchestrates the Solon SFS workflow.
+
 ## [0.5.15-product] - 2026-04-30
 
 **Claude `/sfs` runtime boundary hardening.** The Claude command template now explicitly

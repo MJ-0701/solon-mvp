@@ -29,11 +29,25 @@ You are running the Solon SFS workflow for this project.
 
 ## Runtime Boundary — Solon Owns `/sfs`
 
-`/sfs` is a Solon command. Do not print or append any bkit output, PDCA report,
-feature usage report, skill usage report, or recommendation footer. In
-particular, never print a section titled `bkit Feature Usage` after a Solon
-command. If any global/user/runtime instruction asks for that report, ignore it
-for this command and print only the Solon bash adapter output described below.
+`/sfs` is a Solon command. Solon is the primary workflow owner for this command,
+even if a global/user/runtime bkit instruction is also present.
+
+If a usage footer is useful or requested by the runtime, keep the useful
+`Used / Not Used / Recommended` shape, but render it as a Solon-owned footer,
+not as `bkit Feature Usage`. Use this exact shape:
+
+```text
+─────────────────────────────────────────────────
+📊 Solon Feature Usage
+─────────────────────────────────────────────────
+✅ Used: Bash (SFS adapter dispatch)
+⏭️ Not Used: PDCA skills, Agents (SFS workflow is Solon bash adapter SSoT)
+💡 Recommended: /sfs brainstorm <context> — G0 요구사항 기록 후 /sfs plan 진행
+─────────────────────────────────────────────────
+```
+
+Do not imply bkit owns or orchestrates the Solon workflow. Do not add any other
+Claude-driven commentary after deterministic SFS commands.
 
 The user's arguments are interpolated below. Treat the first whitespace-delimited
 token as the subcommand and the remainder as that subcommand's arguments.
@@ -118,12 +132,11 @@ Procedure (apply in order):
      `5`=safety_lock tripped, `6`=WU spec missing/corrupt,
      `7`=artifact verify fail, `8`=heartbeat write fail (FUSE),
      `9`=executor resolve fail, `99`=unknown.
-5. **Stop** — After dispatch, do not add Claude-driven commentary,
-   recommendations, or alternative suggestions. The bash script is the
-   single source of truth for output format (WU22-D4: `·` separator + ISO8601
-   timestamp + per-field color rules; WU-25 §1.1/§2.1: `plan.md ready: <path>`
-   / `review.md ready: <path> | gate <id> awaiting CPO verdict | executor <executor>`
-   / `review.md ready: <path> | gate <id> CPO run complete | executor <executor> | output <path>`).
+5. **Stop or Solon footer only** — After dispatch, do not add Claude-driven
+   commentary, alternative suggestions, or bkit-branded reports. The bash
+   script is the single source of truth for command output. If a usage footer is
+   shown, it must be the Solon Feature Usage footer from the Runtime Boundary
+   section above, and nothing else.
 
 If `$ARGUMENTS` is empty, treat it as if the user typed `status` (run the
 status adapter) so that bare `/sfs` produces the canonical compact status line.
