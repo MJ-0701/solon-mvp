@@ -1,3 +1,22 @@
+## [0.5.23-product] - 2026-04-30
+
+**CPO review runs by default.** `/sfs review` now treats the selected CPO
+executor bridge as the normal path, so users no longer need to remember an
+extra run flag. Manual handoff remains available through `--prompt-only`.
+
+### Changed
+
+- **Review UX** — user-facing docs, Claude/Codex/Gemini adapters, and guide
+  examples now use `/sfs review --gate <id> --executor <tool> --generator <tool>`
+  as the normal command.
+- **Prompt-only escape hatch** — `--prompt-only` is the explicit no-token
+  manual handoff mode.
+- **Backward compatibility** — old commands that still include the previous run
+  flag are accepted as a no-op, but the flag is no longer shown in user docs.
+- **Self-validation guard** — review is no longer described as current-runtime
+  conditional refinement. The adapter either runs the selected executor, skips
+  empty evidence, or creates prompt-only handoff material.
+
 ## [0.5.22-product] - 2026-04-30
 
 **Slim CPO review handoff + resilient Codex bridge.** `/sfs review` no longer

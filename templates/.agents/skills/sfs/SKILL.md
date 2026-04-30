@@ -1,6 +1,6 @@
 ---
 name: sfs
-description: Solon SFS workflow for Codex — use $sfs status/start/guide/auth/brainstorm/plan/review/decision/retro/loop or natural language to dispatch to bash adapter SSoT; brainstorm/plan/decision/retro are AI-hybrid refinements, review is conditional CPO hybrid when Codex is the selected evaluator. Trigger when a Codex surface delivers $sfs, sfs <command>, /sfs text that reaches the model, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "sprint 시작", "브레인스토밍", "plan 작성", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
+description: Solon SFS workflow for Codex — use $sfs status/start/guide/auth/brainstorm/plan/review/decision/retro/loop or natural language to dispatch to bash adapter SSoT; brainstorm/plan/decision/retro are AI-hybrid refinements, review is adapter-run by default through the selected CPO executor bridge. Trigger when a Codex surface delivers $sfs, sfs <command>, /sfs text that reaches the model, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "sprint 시작", "브레인스토밍", "plan 작성", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
 ---
 
 # Solon SFS — Codex Skill
@@ -18,9 +18,10 @@ Command modes are explicit:
   verbatim adapter output.
 - **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`. Run the
   adapter first, then perform the documented AI-side file refinement.
-- **Conditional hybrid**: `review`. Continue only when the current runtime
-  (`codex`) is the selected CPO evaluator and `--run` did not already execute
-  an external bridge. Otherwise stop after adapter output/prompt handoff.
+- **Adapter-run**: `review`. The bash adapter executes the selected CPO
+  executor bridge by default. Stop after adapter output. If `--prompt-only` is
+  used, treat the prompt path as manual handoff material and do not write a
+  Codex verdict in the current runtime.
 
 Special close guard: if the user invokes `retro --close` in an AI runtime, do
 not run the close adapter first. Run `retro` without `--close`, refine
@@ -37,8 +38,9 @@ The bash adapter execution is **deterministic** and must NOT be
 re-interpreted by the model. Bash adapter is single source of truth (SSoT) for
 command I/O. Hybrid commands have documented AI-side follow-ups:
 Solon CEO refinement of `brainstorm.md` §1~§7, G1 plan + CTO/CPO sprint
-contract refinement of `plan.md`, ADR refinement for `decision`, G5 retro
-refinement for `retro`, and conditional CPO verdict refinement for `review`.
+contract refinement of `plan.md`, ADR refinement for `decision`, and G5 retro
+refinement for `retro`. Review verdicts come from the selected CPO executor
+bridge or a manual `--prompt-only` handoff.
 
 ## Dispatch Table
 
@@ -50,7 +52,7 @@ refinement for `retro`, and conditional CPO verdict refinement for `review`.
 | `auth status|check|login|probe` (또는 "인증 확인", "Gemini 로그인") | `bash .sfs-local/scripts/sfs-dispatch.sh auth <args>` | Codex/Claude/Gemini review executor 인증 점검/부트스트랩/더미 요청 |
 | `brainstorm [text|--stdin]` (또는 "브레인스토밍", "요구사항 정리") | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <raw context>` | G0 raw 요구사항/대화 맥락을 brainstorm.md 에 기록한 뒤 §1~§7을 Solon CEO로 정리. newline 허용 |
 | `plan` (또는 "plan 작성", "이번 sprint 계획") | `bash .sfs-local/scripts/sfs-dispatch.sh plan` | plan.md 진입 + plan_open event 후 brainstorm.md 기반 G1 plan/contract 작성 |
-| `review --gate <id> [--executor <tool>] [--run]` (또는 "CPO review", "검증 기록") | `bash .sfs-local/scripts/sfs-dispatch.sh review --gate <id> [--executor <tool>] [--generator <tool>] [--run]` | CPO Evaluator prompt/run. If evaluator=`codex` and no `--run`, Codex fills verdict; otherwise handoff only. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
+| `review --gate <id> [--executor <tool>] [--prompt-only]` (또는 "CPO review", "검증 기록") | `bash .sfs-local/scripts/sfs-dispatch.sh review --gate <id> [--executor <tool>] [--generator <tool>] [--prompt-only]` | CPO Evaluator bridge run by default. `--prompt-only` creates prompt/log for manual handoff. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
 | `decision <title>` (또는 "결정 기록", "ADR 추가") | `bash .sfs-local/scripts/sfs-dispatch.sh decision "<title>" [--id <id>]` | ADR file 생성 후 Context/Decision/Alternatives/Consequences refinement |
 | `retro [--close]` (또는 "회고", "sprint close") | `bash .sfs-local/scripts/sfs-dispatch.sh retro [--close]` | retro.md 진입 후 KPT/PDCA refinement. `--close` 는 refinement 후 1회 실행 |
 | `loop [OPTIONS]` (또는 "자율 진행", "loop 시작") | `bash .sfs-local/scripts/sfs-dispatch.sh loop [OPTIONS]` | Ralph Loop + Solon mutex (see `--help`) |
@@ -111,8 +113,9 @@ refinement for `retro`, and conditional CPO verdict refinement for `review`.
    - `plan` → Plan G1 Refinement
    - `decision` → Decision ADR Refinement
    - `retro` → Retro G5 Refinement
-   - `review` → Review CPO Refinement only when evaluator is `codex` and
-     `--run` was not used.
+   - `review` → stop after adapter output. The adapter has either run the
+     selected executor, skipped empty evidence, or created a `--prompt-only`
+     handoff.
 
 ## Brainstorm CEO Refinement
 
@@ -204,29 +207,21 @@ succeeds and stdout has been shown verbatim:
    - optional `questions: <N>`
    - then `next: continue current sprint`
 
-## Review CPO Refinement
+## Review CPO Handling
 
-`/sfs review` is mandatory in the Solon flow, but self-validation is controlled.
-After the adapter succeeds:
+`/sfs review` is mandatory in the Solon flow, but the current Codex runtime
+must not silently self-validate after the adapter succeeds.
 
-1. If `--run` was used, stop after adapter output. The external executor result
-   is already appended to `review.md`.
-2. If selected `evaluator_executor` is not `codex`, stop after adapter output
-   and treat the prompt/output path as handoff material. Do not pretend Codex
-   performed the review.
-3. If selected `evaluator_executor` is `codex` and `--run` was not used, act as
-   **Solon CPO Evaluator**:
-   - Read `review.md`, the latest appended CPO prompt/evidence bundle,
-     `brainstorm.md`, `plan.md`, `log.md`, and relevant git diff/status.
-   - Fill or update `§1` scope/trigger/tool info, `§3` verdict with evidence,
-     `§4` next actions, and leave `§5` for CTO response.
-   - Verdict must be `pass`, `partial`, or `fail` (`G3` only `pass`/`fail`).
-   - If generator and evaluator are the same tool/session, call out
-     self-validation risk and require stronger evidence before `pass`.
-4. Final response shape:
-   - first line: `review.md refined: <path>`
-   - then `verdict: pass|partial|fail`
-   - then `next: <CTO action or /sfs retro>`
+1. The default command executes the selected CPO executor bridge and appends the
+   result summary to `review.md`.
+2. If there is no reviewable evidence, the adapter exits 0 with "리뷰할 항목이
+   없습니다" and suggests `/sfs auth probe --executor <tool>` for bridge tests.
+3. If `--prompt-only` is used, stop after adapter output and treat
+   `prompt_path` as manual handoff material. Do not write a Codex verdict unless
+   the user explicitly starts a separate review task with that prompt.
+4. Final response shape after normal adapter output:
+   - echo adapter stdout verbatim
+   - no extra CPO verdict from the current runtime
 
 ## Retro G5 Refinement
 

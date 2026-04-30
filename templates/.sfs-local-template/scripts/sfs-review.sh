@@ -2,9 +2,9 @@
 # .sfs-local/scripts/sfs-review.sh
 #
 # Solon SFS — `/sfs review` command implementation.
-# CPO Evaluator review entrypoint. Review is mandatory in the sprint flow;
-# the executor/tool is configurable to avoid CTO self-validation. `--run`
-# requires a real CLI/plugin bridge; metadata alone is not treated as review.
+# CPO Evaluator review entrypoint. Review is mandatory in the sprint flow.
+# By default it executes the selected evaluator through a real CLI/bridge; use
+# `--prompt-only` for manual handoff.
 # WU-25 §2 spec implementation. WU-23 §1.4 + V-1 conditions #1 (gate id SSoT
 # = gates.md §1) + WU22-D5 (7-Gate enum) 정합:
 #   · 파일 path stdout 출력만 (에디터 launch 안 함, V-1 conditions #4 정합).
@@ -13,10 +13,10 @@
 #     gate_id 추론 (sfs-common.sh::infer_last_gate_id, WU-25 row 4 신설).
 #   · CPO Evaluator persona prompt 를 review.md 에 append.
 #   · verdict 자체는 CPO agent output 으로 기록한다. 본 bash 명령은 prompt/evidence
-#     scaffold + event 기록까지만 담당한다.
+#     scaffold + executor bridge + event 기록을 담당한다.
 #
 # Output (one line):
-#   review.md ready: <path> | gate <gate-id> awaiting CPO verdict | executor <executor> | prompt <path>
+#   review.md ready: <path> | gate <gate-id> prompt ready | executor <executor> | prompt <path>
 #   review.md ready: <path> | gate <gate-id> CPO run complete | executor <executor> | output <path>
 #
 # Exit codes (WU-25 §2.3 / gates.md §3 정합):
@@ -67,7 +67,7 @@ fi
 # ─────────────────────────────────────────────────────────────────────
 usage_review() {
   cat <<'EOF'
-Usage: /sfs review [--gate <id>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--print-prompt] [--run] [--allow-empty] [--auth-interactive|--no-auth-interactive]
+Usage: /sfs review [--gate <id>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--allow-empty] [--auth-interactive|--no-auth-interactive]
 
 Open the active sprint's review.md as the CPO Evaluator review document.
   - --gate <id>   gate id (one of: G-1, G0, G1, G2, G3, G4, G5).
@@ -81,9 +81,12 @@ Open the active sprint's review.md as the CPO Evaluator review document.
   - --persona <path>
                   CPO persona path. Default: .sfs-local/personas/cpo-evaluator.md.
   - --print-prompt
-                  Print the generated CPO review prompt to stdout after updating review.md.
-  - --run
-                  Execute the CPO evaluator through a real bridge.
+                  Prompt-only mode: print the generated CPO review prompt to
+                  stdout after updating review.md. Does not execute evaluator.
+  - --prompt-only
+                  Prompt-only mode: create prompt/log for manual handoff.
+                  Does not execute evaluator or spend executor tokens.
+  - default run   Execute the CPO evaluator through a real bridge.
                   Named profiles:
                     codex        $SFS_REVIEW_CODEX_CMD, else `codex exec --full-auto --ephemeral --output-last-message <result> -`
                     codex-plugin $SFS_REVIEW_CODEX_PLUGIN_CMD only (Claude in-process plugins are not shell-callable)
@@ -131,7 +134,7 @@ EVALUATOR_EXECUTOR="${SFS_REVIEW_EXECUTOR:-codex}"
 GENERATOR_EXECUTOR="${SFS_GENERATOR_EXECUTOR:-unknown}"
 PERSONA_PATH="${SFS_LOCAL_DIR}/personas/cpo-evaluator.md"
 PRINT_PROMPT=false
-RUN_REVIEW=false
+RUN_REVIEW=true
 ALLOW_EMPTY_REVIEW="${SFS_REVIEW_ALLOW_EMPTY:-false}"
 AUTH_INTERACTIVE="${SFS_AUTH_INTERACTIVE:-auto}"
 while [[ $# -gt 0 ]]; do
@@ -190,10 +193,15 @@ while [[ $# -gt 0 ]]; do
       ;;
     --print-prompt)
       PRINT_PROMPT=true
+      RUN_REVIEW=false
+      shift
+      ;;
+    --prompt-only|--no-run)
+      RUN_REVIEW=false
       shift
       ;;
     --run)
-      RUN_REVIEW=true
+      # Deprecated no-op. Review runs by default.
       shift
       ;;
     --allow-empty)
@@ -767,7 +775,7 @@ elif [[ "${RUN_REVIEW}" == "true" ]]; then
     echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_ID} CPO run complete | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
   fi
 else
-  echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_ID} awaiting CPO verdict | executor ${EVALUATOR_EXECUTOR} | prompt ${PROMPT_PATH}"
+  echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_ID} prompt ready | executor ${EVALUATOR_EXECUTOR} | prompt ${PROMPT_PATH}"
 fi
 
 exit "${SFS_EXIT_OK}"

@@ -9,13 +9,13 @@
 #   single source of truth.
 #   user 발화의 첫 token = subcommand → sfs-<subcommand>.sh 실행 + stdout verbatim 출력.
 #   단, brainstorm/plan/decision/retro 는 adapter 후 Gemini 가 문서 refinement 를 수행하고,
-#   review 는 evaluator=gemini 이면서 --run 이 없을 때만 CPO verdict refinement 를 수행.
+#   review 는 기본적으로 adapter 가 선택된 CPO executor bridge 를 실행한다.
 #   paraphrase 금지, 결정성 유지 (Claude Code / Codex / Gemini CLI 동등 1급).
 #
 # Note: {{args}} 는 Gemini CLI v1 placeholder. 사용자가 입력한 첫 token 이 subcommand,
 #       나머지는 그 subcommand 의 인자로 그대로 전달.
 
-description = "Solon SFS workflow command — bash adapter SSoT; hybrid G0/G1/ADR/G5 refinement; conditional CPO review"
+description = "Solon SFS workflow command — bash adapter SSoT; hybrid G0/G1/ADR/G5 refinement; adapter-run CPO review"
 
 prompt = """
 You are operating in a project that has Solon SFS installed.
@@ -34,9 +34,10 @@ Command modes:
   verbatim adapter output.
 - **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`. Run the adapter,
   then perform the documented file refinement.
-- **Conditional hybrid**: `review`. Continue only when the current runtime
-  (`gemini`) is the selected CPO evaluator and `--run` did not already execute
-  an external bridge. Otherwise stop after adapter output/prompt handoff.
+- **Adapter-run**: `review`. The bash adapter executes the selected CPO
+  executor bridge by default. Stop after adapter output. If `--prompt-only` is
+  used, treat the prompt path as manual handoff material and do not write a
+  Gemini verdict in the current runtime.
 
 Special close guard: if the user invokes `retro --close` in an AI runtime, do
 not run the close adapter first. Run `retro` without `--close`, refine
@@ -50,7 +51,7 @@ not run the close adapter first. Run `retro` without `--close`, refine
 | `auth`     | `bash .sfs-local/scripts/sfs-dispatch.sh auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
 | `brainstorm` | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then fills §1~§7 as Solon CEO |
 | `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | opens plan.md, then fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
-| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator prompt/run. If evaluator=`gemini` and no `--run`, Gemini fills verdict; otherwise handoff only |
+| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log |
 | `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | creates ADR, then Gemini fills Context/Decision/Alternatives/Consequences |
 | `retro`    | `bash .sfs-local/scripts/sfs-dispatch.sh retro <remaining args>`    | opens retro.md, then Gemini fills KPT/PDCA. With `--close`, refine before close |
 | `loop`     | `bash .sfs-local/scripts/sfs-dispatch.sh loop <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim |
@@ -82,8 +83,9 @@ not run the close adapter first. Run `retro` without `--close`, refine
    - `plan` → Plan G1 Refinement
    - `decision` → Decision ADR Refinement
    - `retro` → Retro G5 Refinement
-   - `review` → Review CPO Refinement only when evaluator is `gemini` and
-     `--run` was not used.
+   - `review` → stop after adapter output. The adapter has either run the
+     selected executor, skipped empty evidence, or created a `--prompt-only`
+     handoff.
 
 ## Brainstorm CEO Refinement
 
@@ -156,19 +158,17 @@ After `/sfs decision` succeeds:
 6. Final response: `decision refined: <path>`, optional questions, and
    `next: continue current sprint`.
 
-## Review CPO Refinement
+## Review CPO Handling
 
 After `/sfs review` succeeds:
 
-1. If `--run` was used, stop after adapter output.
-2. If `evaluator_executor` is not `gemini`, stop after adapter output/prompt
-   handoff. Do not claim Gemini performed the review.
-3. If `evaluator_executor` is `gemini` and `--run` was not used, act as
-   **Solon CPO Evaluator**. Read `review.md`, latest CPO prompt/evidence,
-   sprint artifacts, and relevant git diff/status. Fill `§1`, `§3`, `§4`, and
-   leave `§5` for CTO response.
-4. Verdict must be `pass`, `partial`, or `fail` (`G3` only `pass`/`fail`).
-5. Final response: `review.md refined: <path>`, `verdict: ...`, and next action.
+1. Stop after adapter output. The selected CPO executor bridge has already run,
+   skipped empty evidence, or produced a `--prompt-only` handoff.
+2. If `--prompt-only` was used, treat `prompt_path` as manual handoff material.
+   Do not write a Gemini verdict in the current runtime unless the user
+   explicitly starts a separate review task with that prompt.
+3. Final response: adapter stdout verbatim, with no additional CPO verdict from
+   the current runtime.
 
 ## Retro G5 Refinement
 

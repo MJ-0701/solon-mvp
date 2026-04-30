@@ -49,13 +49,14 @@
 주 구현 도구로 쓰더라도, Claude 가 만든 결과를 Claude 가 그대로 통과시키는 자체검증을 피하기 위해
 Codex plugin, Codex CLI, Gemini CLI, 또는 별도 agent instance 로 CPO review 를 위임할 수 있어야 한다.
 
-`/sfs review --executor <tool>` 은 그 의도를 기록하고, `--run` 은 실제 CLI/bridge 호출을 시도한다.
-bridge 가 없으면 조용히 성공하지 않고 실패해야 한다. Claude 내부에 연결된 Codex plugin 은 shell 에서
-자동 호출할 수 없으므로 plugin bridge command 또는 printed prompt → plugin 호출 2-step 이 필요하다.
+`/sfs review --executor <tool>` 은 그 의도를 기록하고 기본적으로 실제 CLI/bridge 호출을 시도한다.
+bridge 가 없으면 조용히 성공하지 않고 실패해야 한다. 수동 handoff 만 필요하면 `--prompt-only` 를 쓴다.
+Claude 내부에 연결된 Codex plugin 은 shell 에서 자동 호출할 수 없으므로 plugin bridge command 또는
+prompt-only → plugin 호출 2-step 이 필요하다.
 
 Bridge 는 비대칭이다:
 - Claude 구현 → Codex review: Claude 쪽 Codex plugin/manual bridge 또는 `codex` CLI.
-- Codex 구현 → Claude review: Claude plugin 이 아니라 `claude` CLI (`--executor claude --run`) 또는 prompt handoff.
+- Codex 구현 → Claude review: Claude plugin 이 아니라 `claude` CLI (`--executor claude`) 또는 prompt handoff.
 - `claude-plugin` executor 는 지원하지 않는다. Codex 는 Claude plugin host 가 아니다.
 
 ### Gate 운용 (7-enum, signal-only)
@@ -98,7 +99,7 @@ Solon SFS 의 10 명령은 어떤 CLI 환경에서 호출하든 동일한 bash a
 | `/sfs auth status|check|login|probe [--executor codex|gemini|claude]` | review executor 인증 확인/로그인/더미 요청 |
 | `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락 기록 + Solon CEO 맥락 정리 |
 | `/sfs plan` | 현재 sprint plan.md 진입 + `plan_open` event 후 G1 요구사항/AC/scope + CTO/CPO sprint contract 작성 |
-| `/sfs review --gate <id> [--executor codex|gemini|claude|custom] [--run]` | CPO review prompt/run. full prompt 는 tmp prompt file에 저장하고 `review.md`에는 compact log만 남김 |
+| `/sfs review --gate <id> [--executor codex|gemini|claude|custom] [--prompt-only]` | CPO review run. full prompt 는 tmp prompt file에 저장하고 `review.md`에는 compact log/result만 남김 |
 | `/sfs decision <title> [--id <id>]` | full ADR 신설 후 Context/Decision/Alternatives/Consequences 작성 |
 | `/sfs retro [--close]` | retro.md 작성/갱신. `--close` 는 retro refinement 후 sprint close + auto commit |
 | `/sfs loop [OPTIONS]` | Ralph Loop + Solon mutex 자율 진행 (see `--help`) |

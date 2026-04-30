@@ -166,18 +166,18 @@ Alternatives / Consequences / References 를 바로 채운다.
 구현이 끝나갈 때 CPO Evaluator review 를 연다:
 
 ```text
-/sfs review --gate G4 --executor codex --generator claude --run
+/sfs review --gate G4 --executor codex --generator claude
 ```
 
 → full CPO prompt 는 `.sfs-local/tmp/review-prompts/` 에 저장되고, `review.md` 에는
-`prompt_path` 와 크기만 남는다. `--run` 이 있으면 실제 bridge 실행 결과가 기록되고,
-`--run` 이 없고 현재 AI runtime 이 선택된 evaluator 일 때만 그 runtime 이 CPO verdict 를
-직접 작성한다. CPO verdict 는 `pass` / `partial` / `fail` 로 기록한다. `partial` 또는
+`prompt_path` 와 크기, 실행 결과 요약만 남는다. 기본 동작은 실제 bridge 실행이고,
+수동 handoff 만 필요하면 `--prompt-only` 로 prompt/log 만 만든다. CPO verdict 는
+`pass` / `partial` / `fail` 로 기록한다. `partial` 또는
 `fail` 이면 CTO 가 지정된 항목만 재구현하고 다시 review 를 연다.
 
-`--run` 은 실제 bridge 가 있을 때만 성공한다. `codex` 는 `SFS_REVIEW_CODEX_CMD` 또는
+기본 review 실행은 실제 bridge 가 있을 때만 성공한다. `codex` 는 `SFS_REVIEW_CODEX_CMD` 또는
 `codex exec --full-auto --ephemeral --output-last-message <result> -` 를 사용한다. Claude 내부 Codex plugin 은 shell 에서 직접 호출할 수
-없으므로 `SFS_REVIEW_CODEX_PLUGIN_CMD` 같은 bridge 를 설정하거나, `--print-prompt` 로 나온
+없으므로 `SFS_REVIEW_CODEX_PLUGIN_CMD` 같은 bridge 를 설정하거나, `--prompt-only` 로 나온
 prompt 를 Claude 에 연결된 Codex plugin 에 넘겨야 한다.
 
 Codex/Claude/Gemini CLI 는 인증 prompt 가 먼저 뜨면 SFS 가 넘긴 review prompt 를 auth 답변으로
@@ -192,11 +192,11 @@ real terminal 에서는 `/sfs auth login --executor gemini` 처럼 브라우저/
 부르는 방식이 아니라, 설치된 Claude CLI 를 bridge 로 사용한다:
 
 ```text
-/sfs review --gate G4 --executor claude --generator codex --run
+/sfs review --gate G4 --executor claude --generator codex
 ```
 
-Claude CLI bridge 가 없으면 `--print-prompt` 로 CPO prompt 를 뽑아서 Claude 에 handoff 한다.
-`--executor claude-plugin --run` 같은 경로는 지원하지 않는다. Codex 는 Claude plugin host 가 아니다.
+Claude CLI bridge 가 없으면 `--prompt-only` 로 CPO prompt 를 뽑아서 Claude 에 handoff 한다.
+`--executor claude-plugin` 같은 경로는 지원하지 않는다. Codex 는 Claude plugin host 가 아니다.
 
 sprint 완전히 끝났으면:
 
@@ -228,7 +228,7 @@ native slash UI 에서 `커맨드 없음` 으로 막힐 수 있으므로 `$sfs .
 | `/sfs auth status` | Codex/Claude/Gemini review executor 인증 확인 |
 | `/sfs auth probe --executor gemini --timeout 20` | bridge request/response 더미 확인 |
 | `/sfs plan` | 현 sprint 의 의도/경계 + G1 요구사항/AC + CTO/CPO 계약 작성 |
-| `/sfs review --gate G4 --executor codex --run` | 리뷰할 evidence 가 있을 때 CPO review bridge 실행 + 결과 기록 |
+| `/sfs review --gate G4 --executor codex` | 리뷰할 evidence 가 있을 때 CPO review bridge 실행 + 결과 기록 |
 | `/sfs decision <title>` | ADR-style 결정 기록 + AI runtime 에서 ADR 본문 작성 |
 | `/sfs retro [--close]` | 회고 작성 / `--close` 는 회고 작성 후 sprint close + auto-commit |
 | `/sfs loop` | 큰 작업 자율 진행 (Ralph Loop, 고급) |

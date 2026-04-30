@@ -35,9 +35,10 @@ Command modes:
   verbatim adapter output.
 - **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`. Run the adapter,
   then perform the documented file refinement.
-- **Conditional hybrid**: `review`. Continue only when the current runtime
-  (`codex`) is the selected CPO evaluator and `--run` did not already execute
-  an external bridge. Otherwise stop after adapter output/prompt handoff.
+- **Adapter-run**: `review`. The bash adapter executes the selected CPO
+  executor bridge by default. Stop after adapter output. If `--prompt-only` is
+  used, treat the prompt path as manual handoff material and do not write a
+  Codex verdict in the current runtime.
 
 Special close guard: if the user invokes `retro --close` in an AI runtime, do
 not run the close adapter first. Run `retro` without `--close`, refine
@@ -51,7 +52,7 @@ not run the close adapter first. Run `retro` without `--close`, refine
 | `auth`     | `bash .sfs-local/scripts/sfs-dispatch.sh auth <args>`     | Codex/Claude/Gemini auth status/login/probe |
 | `brainstorm` | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <args>` | raw capture, then Solon CEO refinement |
 | `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <args>`     | G1 open, then plan refinement |
-| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <args>`   | CPO prompt/run. If evaluator=`codex` and no `--run`, Codex fills verdict; otherwise handoff only |
+| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <args>`   | CPO executor bridge run by default. `--prompt-only` creates manual handoff prompt/log |
 | `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <args>` | creates ADR, then Codex fills Context/Decision/Alternatives/Consequences |
 | `retro`    | `bash .sfs-local/scripts/sfs-dispatch.sh retro <args>`    | opens retro.md, then Codex fills KPT/PDCA. With `--close`, refine before close |
 | `loop`     | `bash .sfs-local/scripts/sfs-dispatch.sh loop <args>`     |
@@ -73,8 +74,9 @@ not run the close adapter first. Run `retro` without `--close`, refine
    - `plan`: Plan G1 Refinement.
    - `decision`: Decision ADR Refinement.
    - `retro`: Retro G5 Refinement.
-   - `review`: Review CPO Refinement only when evaluator is `codex` and
-     `--run` was not used.
+   - `review`: stop after adapter output. The adapter has either run the
+     selected executor, skipped empty evidence, or created a `--prompt-only`
+     handoff.
 
 ## Brainstorm CEO Refinement
 
@@ -129,19 +131,17 @@ After `/sfs decision` succeeds:
 6. Final response: `decision refined: <path>`, optional questions, and
    `next: continue current sprint`.
 
-## Review CPO Refinement
+## Review CPO Handling
 
 After `/sfs review` succeeds:
 
-1. If `--run` was used, stop after adapter output.
-2. If `evaluator_executor` is not `codex`, stop after adapter output/prompt
-   handoff. Do not claim Codex performed the review.
-3. If `evaluator_executor` is `codex` and `--run` was not used, act as
-   **Solon CPO Evaluator**. Read `review.md`, latest CPO prompt/evidence,
-   sprint artifacts, and relevant git diff/status. Fill `§1`, `§3`, `§4`, and
-   leave `§5` for CTO response.
-4. Verdict must be `pass`, `partial`, or `fail` (`G3` only `pass`/`fail`).
-5. Final response: `review.md refined: <path>`, `verdict: ...`, and next action.
+1. Stop after adapter output. The selected CPO executor bridge has already run,
+   skipped empty evidence, or produced a `--prompt-only` handoff.
+2. If `--prompt-only` was used, treat `prompt_path` as manual handoff material.
+   Do not write a Codex verdict in the current runtime unless the user
+   explicitly starts a separate review task with that prompt.
+3. Final response: adapter stdout verbatim, with no additional CPO verdict from
+   the current runtime.
 
 ## Retro G5 Refinement
 
