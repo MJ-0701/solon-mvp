@@ -2,6 +2,10 @@
 
 This project uses Solon Product SFS (multi-adaptor by design — Claude Code / Codex / Gemini CLI 동등 1급).
 
+Solon owns the `/sfs` workflow in this project. Do not print `bkit Feature Usage`,
+PDCA skill usage, feature usage reports, or bkit recommendation footers after
+Solon commands. `/sfs` output must be the bash adapter output only.
+
 Before planning or editing, read:
 
 - `SFS.md`

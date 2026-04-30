@@ -1,3 +1,15 @@
+## [0.5.15-product] - 2026-04-30
+
+**Claude `/sfs` runtime boundary hardening.** The Claude command template now explicitly
+suppresses bkit/PDCA feature usage footers after Solon commands.
+
+### Changed
+
+- **Solon owns `/sfs`** — `.claude/commands/sfs.md` now tells Claude to ignore global bkit report
+  instructions for `/sfs` and print only the deterministic Solon bash adapter output.
+- **Claude project template guard** — generated `CLAUDE.md` now includes the same Solon ownership
+  rule so new installs do not inherit bkit usage reports into Solon command responses.
+
 ## [0.5.14-product] - 2026-04-30
 
 **Auth probe early success return.** `/sfs auth probe` now returns as soon as the expected
