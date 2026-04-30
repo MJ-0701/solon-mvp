@@ -2,7 +2,7 @@
 doc_id: learning-logs-index
 title: "learning-logs/ — 장기 학습 패턴 자산 인덱스"
 visibility: raw-internal
-updated: 2026-04-27   # 24번째 사이클 32번째 user-active-deferred run `bold-festive-euler` — P-09 신설 144L (D-D reverse idx=5) + P-06 audit (24th-29 sweet-exciting-brahmagupta 신설 118L) + P-08 audit (23rd 사고 직후 신설 158L) row 추가. 24th-29 = D-D forward 첫 실 신설 (P-06), 24th-32 = D-D reverse 첫 실 신설 (P-09) + forward audit advance (P-08 idx=4 done).
+updated: 2026-05-01   # Codex cleanup session — P-15 claude-worktree-gitlink-committed 신설 + P-10/P-11/P-13/P-14 누락 row backfill. P-15 = `.claude/worktrees/<id>` 가 main HEAD 에 `160000` gitlink 로 커밋된 사고, `.gitignore` + `git rm --cached` 로 정리.
 ---
 
 # learning-logs/ — 학습 패턴 인덱스
@@ -37,6 +37,11 @@ updated: 2026-04-27   # 24번째 사이클 32번째 user-active-deferred run `bo
 | [P-06-claude-md-line-limit-meta-rule](2026-05/P-06-claude-md-line-limit-meta-rule.md) | CLAUDE.md SSoT 분량 ≤200 lines 메타 규칙 — 부록 강한 § 분리 + 사례 append | business-only | 22nd 8 step batch (adoring-trusting-feynman, §1.14 신설 + §14 → solon-status-report.md 분리) | 1 | resolved |
 | [P-08-fuse-bypass-cp-a-broken](2026-05/P-08-fuse-bypass-cp-a-broken.md) | FUSE 마운트 위 `cp -a .git` 부분 누락 + `rsync back --delete` 가 host repo 깨뜨림 — low-level git plumbing fallback + sandbox file:// clone 격리 | raw-internal | WU-31 (dazzling-sharp-euler, 23번째 후반 사고 + 사용자 manual 복구) | 1 | resolved |
 | [P-09-sandbox-file-clone-isolation](2026-05/P-09-sandbox-file-clone-isolation.md) | sandbox `file://` clone 격리 — host repo `.git` mutate 0 보장 (P-08 직접 후속, §1.5' 격상 동반) | business-only | 23rd 사용자 결정 (단기 α 변형 = β 보강) + 24th 첫 작업 §1.5' 격상 (CLAUDE.md §1.5 1줄 수정) | 1 | resolved |
+| [P-10-stable-stale-git-lock-recovery](2026-05/P-10-stable-stale-git-lock-recovery.md) | stable stale `.git/index.lock` recovery | business-only | 25th-2 0.3.0-mvp 첫 release cut | 1 | documented |
+| [P-11-sequential-disclosure](2026-05/P-11-sequential-disclosure.md) | sequential-disclosure | business-only | 26th-1 사용자 비판 + CLAUDE.md §1.20 | 0 | documented |
+| [P-13-dev-stable-divergence-on-cut](2026-05/P-13-dev-stable-divergence-on-cut.md) | dev-stable-divergence-on-cut | business-only | 26th-3 0.5.0-mvp cut 회귀 진단 | 0 | documented |
+| [P-14-mental-coupling-on-rename-fix](2026-05/P-14-mental-coupling-on-rename-fix.md) | mental-coupling-on-rename-fix | business-only | 26th-3 사용자 비판 + codex narrative sync-back | 0 | documented |
+| [P-15-claude-worktree-gitlink-committed](2026-05/P-15-claude-worktree-gitlink-committed.md) | claude-worktree-gitlink-committed | raw-internal | 2026-05-01 Codex cleanup session + commit `78ee0f0` | 1 | documented |
 
 ---
 
