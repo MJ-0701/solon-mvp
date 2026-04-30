@@ -8,14 +8,14 @@
 #   surface 를 normalize 하고, bash adapter (.sfs-local/scripts/sfs-*.sh) 가
 #   single source of truth.
 #   user 발화의 첫 token = subcommand → sfs-<subcommand>.sh 실행 + stdout verbatim 출력.
-#   단, brainstorm 은 raw capture 후 Gemini 가 Solon CEO 로 §1~§7 refinement 를 수행하고,
-#   plan 은 G1 open 후 brainstorm.md 기반 plan + CTO/CPO contract refinement 를 수행.
+#   단, brainstorm/plan/decision/retro 는 adapter 후 Gemini 가 문서 refinement 를 수행하고,
+#   review 는 evaluator=gemini 이면서 --run 이 없을 때만 CPO verdict refinement 를 수행.
 #   paraphrase 금지, 결정성 유지 (Claude Code / Codex / Gemini CLI 동등 1급).
 #
 # Note: {{args}} 는 Gemini CLI v1 placeholder. 사용자가 입력한 첫 token 이 subcommand,
 #       나머지는 그 subcommand 의 인자로 그대로 전달.
 
-description = "Solon SFS workflow command — bash adapter SSoT; brainstorm fills G0, plan fills G1 contract"
+description = "Solon SFS workflow command — bash adapter SSoT; hybrid G0/G1/ADR/G5 refinement; conditional CPO review"
 
 prompt = """
 You are operating in a project that has Solon SFS installed.
@@ -27,12 +27,20 @@ token as the subcommand and the remainder as that subcommand's arguments.
 
 If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`brainstorm`**, **`plan`**, **`review`**,
 **`decision`**, **`retro`**, or **`loop`**, dispatch the request to the
-corresponding bash script under `.sfs-local/scripts/` first. For every command
-except `brainstorm` and `plan`, stop after printing adapter output.
-`brainstorm` is a hybrid command: the bash adapter captures raw G0 input, then
-Gemini performs the CEO refinement described below. `plan` is also hybrid: the
-bash adapter opens G1, then Gemini fills `plan.md` from the current
-`brainstorm.md`.
+corresponding bash script under `.sfs-local/scripts/` first.
+
+Command modes:
+- **Bash-only**: `status`, `start`, `guide`, `auth`, `loop`. Stop after
+  verbatim adapter output.
+- **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`. Run the adapter,
+  then perform the documented file refinement.
+- **Conditional hybrid**: `review`. Continue only when the current runtime
+  (`gemini`) is the selected CPO evaluator and `--run` did not already execute
+  an external bridge. Otherwise stop after adapter output/prompt handoff.
+
+Special close guard: if the user invokes `retro --close` in an AI runtime, do
+not run the close adapter first. Run `retro` without `--close`, refine
+`retro.md`, then run `retro --close` exactly once.
 
 | First arg | Script to run | Notes |
 |:--|:--|:--|
@@ -42,9 +50,9 @@ bash adapter opens G1, then Gemini fills `plan.md` from the current
 | `auth`     | `bash .sfs-local/scripts/sfs-dispatch.sh auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
 | `brainstorm` | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then fills §1~§7 as Solon CEO |
 | `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | opens plan.md, then fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
-| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator review; passes `--gate`, `--executor`, `--generator`, `--persona`, `--print-prompt`, `--run`, `--allow-empty`, and auth flags verbatim |
-| `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim |
-| `retro`    | `bash .sfs-local/scripts/sfs-dispatch.sh retro <remaining args>`    | passes `--close` verbatim. With `--close`: writes status/closed_at, removes `.sfs-local/current-sprint`, appends `sprint_close` event, runs `auto_commit_close` (push manual per §1.5) |
+| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator prompt/run. If evaluator=`gemini` and no `--run`, Gemini fills verdict; otherwise handoff only |
+| `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | creates ADR, then Gemini fills Context/Decision/Alternatives/Consequences |
+| `retro`    | `bash .sfs-local/scripts/sfs-dispatch.sh retro <remaining args>`    | opens retro.md, then Gemini fills KPT/PDCA. With `--close`, refine before close |
 | `loop`     | `bash .sfs-local/scripts/sfs-dispatch.sh loop <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim |
 
 ## Procedure
@@ -67,11 +75,15 @@ bash adapter opens G1, then Gemini fills `plan.md` from the current
    If exit code is non-zero, also print stderr and the exit code on a final
    line: `exit <code>`.
 
-5. **Stop or continue only for brainstorm/plan** — For commands other than
-   `brainstorm` and `plan`, do not summarize, paraphrase, or add commentary.
-   The bash adapter is the SSoT. For `brainstorm`, continue to the CEO
-   refinement flow below after a zero exit code. For `plan`, continue to the G1
-   refinement flow below after a zero exit code.
+5. **Stop or continue by command mode** — After dispatch, bash-only commands
+   must stop without Gemini-driven commentary. Hybrid commands continue only
+   via the documented flow below:
+   - `brainstorm` → Brainstorm CEO Refinement
+   - `plan` → Plan G1 Refinement
+   - `decision` → Decision ADR Refinement
+   - `retro` → Retro G5 Refinement
+   - `review` → Review CPO Refinement only when evaluator is `gemini` and
+     `--run` was not used.
 
 ## Brainstorm CEO Refinement
 
@@ -129,6 +141,49 @@ and stdout has been shown verbatim:
 7. Final response: `plan.md refined: <path>`, optional questions, and
    `next: /sfs review --gate G1 --executor codex --generator claude` when ready.
 
+## Decision ADR Refinement
+
+After `/sfs decision` succeeds:
+
+1. Resolve the created ADR path from `decision created: <path>`, or open the
+   newest file under `.sfs-local/decisions/`.
+2. Read active sprint context if available: `brainstorm.md`, `plan.md`,
+   `review.md`, `retro.md`, and `.sfs-local/events.jsonl`.
+3. Act as **Solon CEO** and fill/update `Context`, `Decision`, `Alternatives`,
+   `Consequences`, and `References`.
+4. Preserve frontmatter and user edits. Do not implement code.
+5. Ask up to 3 questions only if the ADR cannot be understood without them.
+6. Final response: `decision refined: <path>`, optional questions, and
+   `next: continue current sprint`.
+
+## Review CPO Refinement
+
+After `/sfs review` succeeds:
+
+1. If `--run` was used, stop after adapter output.
+2. If `evaluator_executor` is not `gemini`, stop after adapter output/prompt
+   handoff. Do not claim Gemini performed the review.
+3. If `evaluator_executor` is `gemini` and `--run` was not used, act as
+   **Solon CPO Evaluator**. Read `review.md`, latest CPO prompt/evidence,
+   sprint artifacts, and relevant git diff/status. Fill `§1`, `§3`, `§4`, and
+   leave `§5` for CTO response.
+4. Verdict must be `pass`, `partial`, or `fail` (`G3` only `pass`/`fail`).
+5. Final response: `review.md refined: <path>`, `verdict: ...`, and next action.
+
+## Retro G5 Refinement
+
+After `/sfs retro` succeeds:
+
+1. Resolve `retro.md` from stdout or active sprint.
+2. Read sprint artifacts, events, and related decisions.
+3. Fill/update KPT, PDCA learning, evidence-backed metrics, next sprint handoff,
+   and close checklist.
+4. Preserve user edits and mark unknowns explicitly.
+5. If the user invoked `retro --close`, refine `retro.md` first, then run
+   `bash .sfs-local/scripts/sfs-dispatch.sh retro --close` exactly once and
+   print its output verbatim.
+6. Final response when not closing: `retro.md refined: <path>` plus next action.
+
 ## If first arg is empty or `help`
 
 Print the following 3-line usage and stop:
@@ -141,7 +196,8 @@ Help: bash .sfs-local/scripts/sfs-<command>.sh --help
 
 ## ⚠️ Safety
 
-- `/sfs retro --close` triggers an auto-commit. Confirm the user explicitly
-  requested it (don't infer from neighboring context).
+- `/sfs retro --close` triggers an auto-commit. In AI runtimes, refine
+  `retro.md` before running the close adapter, and only when the user explicitly
+  requested close.
 - Never run `git push origin *` automatically — push is user-only (§1.5).
 """

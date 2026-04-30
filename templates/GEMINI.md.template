@@ -25,18 +25,21 @@ adapter 를 직접 호출**한다 (paraphrase 금지, 결정성 유지):
 | `sfs auth ...`, `/sfs auth ...` | `bash .sfs-local/scripts/sfs-auth.sh status|check|login|probe [--executor <tool>]` |
 | `sfs brainstorm`, `/sfs brainstorm` | `bash .sfs-local/scripts/sfs-brainstorm.sh [text|--stdin]` raw capture 후 Gemini 가 Solon CEO 로 §1~§7 정리 |
 | `sfs plan`, `/sfs plan` | `bash .sfs-local/scripts/sfs-plan.sh` 후 Gemini 가 `brainstorm.md` 기반 G1 plan + CTO/CPO contract 작성 |
-| `sfs review --gate <id> [--executor <tool>] [--run]`, `/sfs review --gate <id> [--executor <tool>] [--run]` | `bash .sfs-local/scripts/sfs-review.sh --gate <id> [--executor <tool>] [--run]` (CPO Evaluator review bridge, id ∈ G-1, G0, G1, G2, G3, G4, G5) |
-| `sfs decision <title>`, `/sfs decision <title>` | `bash .sfs-local/scripts/sfs-decision.sh "<title>" [--id <id>]` |
-| `sfs retro [--close]`, `/sfs retro [--close]` | `bash .sfs-local/scripts/sfs-retro.sh [--close]` |
+| `sfs review --gate <id> [--executor <tool>] [--run]`, `/sfs review --gate <id> [--executor <tool>] [--run]` | `bash .sfs-local/scripts/sfs-review.sh --gate <id> [--executor <tool>] [--run]`; evaluator=`gemini` + no `--run` 이면 Gemini 가 CPO verdict 작성, 아니면 handoff/run 결과만 기록 |
+| `sfs decision <title>`, `/sfs decision <title>` | `bash .sfs-local/scripts/sfs-decision.sh "<title>" [--id <id>]` 후 Gemini 가 ADR 본문 작성 |
+| `sfs retro [--close]`, `/sfs retro [--close]` | `bash .sfs-local/scripts/sfs-retro.sh [--close]`; `--close` 는 Gemini 가 `retro.md` 를 먼저 채운 뒤 close adapter 1회 실행 |
 | `sfs loop ...`, `/sfs loop ...` | `bash .sfs-local/scripts/sfs-loop.sh [OPTIONS]` (Ralph Loop + Solon mutex, see `--help`) |
 
 각 스크립트의 stdout 은 verbatim 그대로 사용자에게 보여주고 (paraphrase 금지),
 non-zero exit 시 stderr + exit code 도 함께 보고한다. Bash adapter 가 부재하거나 실행
-권한이 없으면 그 사실을 1줄로 사용자에게 알리고 중단한다. 단, `/sfs brainstorm` 은
-adapter 성공 후 `brainstorm.md` 의 `§8 Append Log` 를 읽고 Solon CEO 로 `§1~§7` 을 채운다.
-`/sfs plan` 은 adapter 성공 후 `brainstorm.md` 를 읽고 `plan.md` 의 요구사항/AC/scope 와
-CTO/CPO sprint contract 를 채운다. 부족한 정보가 있으면 1~3개 질문만 남기고, 구현이나
-review 자동 실행은 하지 않는다.
+권한이 없으면 그 사실을 1줄로 사용자에게 알리고 중단한다.
+
+명령 모드는 고정이다:
+- **Bash-only**: `status`, `start`, `guide`, `auth`, `loop`.
+- **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`.
+- **Conditional hybrid**: `review` — 현재 runtime 이 선택된 evaluator 이고 `--run` 이 없을 때만 CPO verdict 를 직접 작성.
+
+부족한 정보가 있으면 1~3개 질문만 남기고, 다음 gate 를 자동 실행하지 않는다.
 
 ## `/sfs loop` — 멀티 adaptor LLM executor convention
 

@@ -98,9 +98,9 @@ Solon SFS 의 10 명령은 어떤 CLI 환경에서 호출하든 동일한 bash a
 | `/sfs auth status|check|login|probe [--executor codex|gemini|claude]` | review executor 인증 확인/로그인/더미 요청 |
 | `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락 기록 + Solon CEO 맥락 정리 |
 | `/sfs plan` | 현재 sprint plan.md 진입 + `plan_open` event 후 G1 요구사항/AC/scope + CTO/CPO sprint contract 작성 |
-| `/sfs review --gate <id> [--executor codex|gemini|claude|custom] [--run]` | CPO review prompt append. `--run` 은 리뷰할 evidence 가 있을 때만 실제 bridge 호출 |
-| `/sfs decision <title> [--id <id>]` | full ADR 신설 (decisions/) 또는 mini-ADR (sprint-local) |
-| `/sfs retro [--close]` | retro.md 진입 (+`--close` 시 sprint close + auto commit) |
+| `/sfs review --gate <id> [--executor codex|gemini|claude|custom] [--run]` | CPO review prompt/run. 현재 runtime 이 evaluator 이고 `--run` 이 없을 때만 직접 verdict 작성 |
+| `/sfs decision <title> [--id <id>]` | full ADR 신설 후 Context/Decision/Alternatives/Consequences 작성 |
+| `/sfs retro [--close]` | retro.md 작성/갱신. `--close` 는 retro refinement 후 sprint close + auto commit |
 | `/sfs loop [OPTIONS]` | Ralph Loop + Solon mutex 자율 진행 (see `--help`) |
 
 ## 6 본부 활성 상태 (divisions)

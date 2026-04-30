@@ -1,3 +1,28 @@
+## [0.5.21-product] - 2026-04-30
+
+**Command-mode audit: bash-only vs hybrid vs conditional-hybrid.** The
+`brainstorm` and `plan` bugs exposed a broader contract gap: some SFS commands
+open scaffold files that AI runtimes must then fill, while other commands are
+pure deterministic bash adapters. The command contract is now explicit.
+
+### Changed
+
+- **Command mode taxonomy** — `status/start/guide/auth/loop` are bash-only;
+  `brainstorm/plan/decision/retro` are AI-runtime hybrid commands;
+  `review` is conditional-hybrid only when the current runtime is the selected
+  CPO evaluator.
+- **Decision refinement** — `/sfs decision <title>` creates the ADR file, then
+  AI runtimes fill Context / Decision / Alternatives / Consequences /
+  References from current sprint context.
+- **Retro refinement before close** — AI runtimes must fill retro.md before
+  running `retro --close`; close remains explicit-user-only.
+- **Review self-validation guard** — `/sfs review` only writes a verdict in the
+  current runtime when that runtime matches `--executor`; otherwise it leaves a
+  prompt/bridge handoff and does not pretend review happened.
+- **Review evidence detection** — `decision_created` now counts as sprint
+  evidence for planning-gate review, matching the event emitted by
+  `/sfs decision`.
+
 ## [0.5.20-product] - 2026-04-30
 
 **Plan is now a hybrid command.** `/sfs plan` no longer stops at

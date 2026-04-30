@@ -31,18 +31,21 @@ Claude Code 의 native slash 진입점은 `.claude/commands/sfs.md` 가 자동 i
 | `/sfs auth status|check|login|probe [--executor <tool>]` | `.sfs-local/scripts/sfs-auth.sh` |
 | `/sfs brainstorm [text|--stdin]` | `.sfs-local/scripts/sfs-brainstorm.sh` raw capture 후 Claude 가 Solon CEO 로 §1~§7 정리 |
 | `/sfs plan` | `.sfs-local/scripts/sfs-plan.sh` 후 Claude 가 `brainstorm.md` 기반 G1 plan + CTO/CPO contract 작성 |
-| `/sfs review --gate <id> [--executor <tool>] [--run]` | `.sfs-local/scripts/sfs-review.sh` (CPO Evaluator review bridge, id ∈ G-1, G0, G1, G2, G3, G4, G5) |
-| `/sfs decision <title> [--id <id>]` | `.sfs-local/scripts/sfs-decision.sh` |
-| `/sfs retro [--close]` | `.sfs-local/scripts/sfs-retro.sh` |
+| `/sfs review --gate <id> [--executor <tool>] [--run]` | `.sfs-local/scripts/sfs-review.sh`; evaluator=`claude` + no `--run` 이면 Claude 가 CPO verdict 작성, 아니면 handoff/run 결과만 기록 |
+| `/sfs decision <title> [--id <id>]` | `.sfs-local/scripts/sfs-decision.sh` 후 Claude 가 ADR 본문 작성 |
+| `/sfs retro [--close]` | `.sfs-local/scripts/sfs-retro.sh`; `--close` 는 Claude 가 `retro.md` 를 먼저 채운 뒤 close adapter 1회 실행 |
 | `/sfs loop [OPTIONS]` | `.sfs-local/scripts/sfs-loop.sh` (Ralph Loop + Solon mutex) |
 | `/sfs`, `/sfs help` | usage 출력 (`.claude/commands/sfs.md` 의 self-help) |
 
 Bash adapter 가 부재하거나 실행 권한이 없으면 그 사실을 1줄로 사용자에게 알리고 중단한다.
-stdout / stderr / exit code 는 verbatim 보고한다 (paraphrase 금지). 단, `/sfs brainstorm` 은
-adapter 성공 후 `brainstorm.md` 의 `§8 Append Log` 를 읽고 Solon CEO 로 `§1~§7` 을 채운다.
-`/sfs plan` 은 adapter 성공 후 `brainstorm.md` 를 읽고 `plan.md` 의 요구사항/AC/scope 와
-CTO/CPO sprint contract 를 채운다. 부족한 정보가 있으면 1~3개 질문만 남기고, 구현이나
-review 자동 실행은 하지 않는다.
+stdout / stderr / exit code 는 verbatim 보고한다 (paraphrase 금지).
+
+명령 모드는 고정이다:
+- **Bash-only**: `status`, `start`, `guide`, `auth`, `loop`.
+- **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`.
+- **Conditional hybrid**: `review` — 현재 runtime 이 선택된 evaluator 이고 `--run` 이 없을 때만 CPO verdict 를 직접 작성.
+
+부족한 정보가 있으면 1~3개 질문만 남기고, 다음 gate 를 자동 실행하지 않는다.
 
 ## `/sfs loop` — multi-adaptor LLM executor convention
 

@@ -29,10 +29,19 @@ subcommand's arguments.
 
 If the first argument is `status`, `start`, `guide`, `auth`, `brainstorm`, `plan`, `review`, `decision`,
 `retro`, or `loop`, dispatch to `.sfs-local/scripts/sfs-<name>.sh` first.
-For every command except `brainstorm` and `plan`, stop after printing adapter
-output. For `brainstorm`, capture raw input first and then fill
-`brainstorm.md` §1~§7 as Solon CEO. For `plan`, open G1 first and then fill
-`plan.md` from `brainstorm.md` with requirements/AC/scope + CTO/CPO contract.
+
+Command modes:
+- **Bash-only**: `status`, `start`, `guide`, `auth`, `loop`. Stop after
+  verbatim adapter output.
+- **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`. Run the adapter,
+  then perform the documented file refinement.
+- **Conditional hybrid**: `review`. Continue only when the current runtime
+  (`codex`) is the selected CPO evaluator and `--run` did not already execute
+  an external bridge. Otherwise stop after adapter output/prompt handoff.
+
+Special close guard: if the user invokes `retro --close` in an AI runtime, do
+not run the close adapter first. Run `retro` without `--close`, refine
+`retro.md`, then run `retro --close` exactly once.
 
 | First arg | Script |
 |:--|:--|
@@ -42,9 +51,9 @@ output. For `brainstorm`, capture raw input first and then fill
 | `auth`     | `bash .sfs-local/scripts/sfs-dispatch.sh auth <args>`     | Codex/Claude/Gemini auth status/login/probe |
 | `brainstorm` | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <args>` | raw capture, then Solon CEO refinement |
 | `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <args>`     | G1 open, then plan refinement |
-| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <args>`   | CPO Evaluator review; pass `--gate`, `--executor`, `--generator`, `--run`, `--allow-empty` verbatim |
-| `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <args>` |
-| `retro`    | `bash .sfs-local/scripts/sfs-dispatch.sh retro <args>`    |
+| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <args>`   | CPO prompt/run. If evaluator=`codex` and no `--run`, Codex fills verdict; otherwise handoff only |
+| `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <args>` | creates ADR, then Codex fills Context/Decision/Alternatives/Consequences |
+| `retro`    | `bash .sfs-local/scripts/sfs-dispatch.sh retro <args>`    | opens retro.md, then Codex fills KPT/PDCA. With `--close`, refine before close |
 | `loop`     | `bash .sfs-local/scripts/sfs-dispatch.sh loop <args>`     |
 
 ## Procedure
@@ -58,7 +67,14 @@ output. For `brainstorm`, capture raw input first and then fill
 2. Re-quote args safely. Reject newline/NUL byte args, except for `brainstorm`.
 3. Execute via shell. Capture stdout/stderr/exit.
 4. Print stdout verbatim. If exit≠0, also print stderr + `exit <code>` line.
-5. For commands other than `brainstorm` and `plan`, stop. No paraphrase, no summary.
+5. Stop or continue by command mode:
+   - `status`, `start`, `guide`, `auth`, `loop`: stop. No paraphrase, no summary.
+   - `brainstorm`: Brainstorm CEO Refinement.
+   - `plan`: Plan G1 Refinement.
+   - `decision`: Decision ADR Refinement.
+   - `retro`: Retro G5 Refinement.
+   - `review`: Review CPO Refinement only when evaluator is `codex` and
+     `--run` was not used.
 
 ## Brainstorm CEO Refinement
 
@@ -98,9 +114,54 @@ After `/sfs plan` succeeds:
 8. Final response: `plan.md refined: <path>`, optional questions, and
    `next: /sfs review --gate G1 --executor codex --generator claude` when ready.
 
+## Decision ADR Refinement
+
+After `/sfs decision` succeeds:
+
+1. Resolve the created ADR path from `decision created: <path>`, or open the
+   newest file under `.sfs-local/decisions/`.
+2. Read active sprint context if available: `brainstorm.md`, `plan.md`,
+   `review.md`, `retro.md`, and `.sfs-local/events.jsonl`.
+3. Act as **Solon CEO** and fill/update `Context`, `Decision`, `Alternatives`,
+   `Consequences`, and `References`.
+4. Preserve frontmatter and user edits. Do not implement code.
+5. Ask up to 3 questions only if the ADR cannot be understood without them.
+6. Final response: `decision refined: <path>`, optional questions, and
+   `next: continue current sprint`.
+
+## Review CPO Refinement
+
+After `/sfs review` succeeds:
+
+1. If `--run` was used, stop after adapter output.
+2. If `evaluator_executor` is not `codex`, stop after adapter output/prompt
+   handoff. Do not claim Codex performed the review.
+3. If `evaluator_executor` is `codex` and `--run` was not used, act as
+   **Solon CPO Evaluator**. Read `review.md`, latest CPO prompt/evidence,
+   sprint artifacts, and relevant git diff/status. Fill `§1`, `§3`, `§4`, and
+   leave `§5` for CTO response.
+4. Verdict must be `pass`, `partial`, or `fail` (`G3` only `pass`/`fail`).
+5. Final response: `review.md refined: <path>`, `verdict: ...`, and next action.
+
+## Retro G5 Refinement
+
+After `/sfs retro` succeeds:
+
+1. Resolve `retro.md` from stdout or active sprint.
+2. Read sprint artifacts, events, and related decisions.
+3. Fill/update KPT, PDCA learning, evidence-backed metrics, next sprint handoff,
+   and close checklist.
+4. Preserve user edits and mark unknowns explicitly.
+5. If the user invoked `retro --close`, refine `retro.md` first, then run
+   `bash .sfs-local/scripts/sfs-dispatch.sh retro --close` exactly once and
+   print its output verbatim.
+6. Final response when not closing: `retro.md refined: <path>` plus next action.
+
 ## ⚠️ Safety
 
-- `/sfs retro --close` triggers auto-commit. Confirm explicit user intent.
+- `/sfs retro --close` triggers auto-commit. In AI runtimes, refine `retro.md`
+  before running the close adapter, and only when the user explicitly requested
+  close.
 - Never run `git push origin *` automatically — push is user-only (§1.5).
 
 ## Why this exists alongside the Skill

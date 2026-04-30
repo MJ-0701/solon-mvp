@@ -124,6 +124,8 @@ if [ $RC -ne 0 ]; then
     exit $RC
 fi
 
+SPRINT_ID="$(read_current_sprint || true)"
+
 # ─── decision id (auto or override) ──────────────────────────────────────────
 if [ -n "$OVERRIDE_ID" ]; then
     # Validate override format: 4-digit zero-padded (lenient — accept any non-empty
@@ -174,11 +176,23 @@ awk -v id="$DECISION_ID" -v title="$TITLE" -v now="$NOW" '
 ' "$DECISION_PATH" > "$TMP_FILE"
 mv "$TMP_FILE" "$DECISION_PATH"
 
+if [ -n "$SPRINT_ID" ]; then
+    update_frontmatter "$DECISION_PATH" "sprint_id" "\"${SPRINT_ID//\"/\\\"}\"" 2>/dev/null || true
+fi
+
 # ─── events.jsonl append ──────────────────────────────────────────────────────
 # Use sfs-common.sh `append_event` 2-arg signature (type, json_payload).
 # Note: WU-25 row 2 narrative captured the spec→impl signature mismatch;
 #       we follow the impl form here (consistent with sfs-plan.sh / sfs-review.sh).
-append_event "decision_created" "{\"decision_id\":\"$DECISION_ID\",\"path\":\"$DECISION_PATH\",\"title\":\"$TITLE\"}"
+_esc_decision_id="${DECISION_ID//\\/\\\\}"
+_esc_decision_id="${_esc_decision_id//\"/\\\"}"
+_esc_sprint="${SPRINT_ID//\\/\\\\}"
+_esc_sprint="${_esc_sprint//\"/\\\"}"
+_esc_path="${DECISION_PATH//\\/\\\\}"
+_esc_path="${_esc_path//\"/\\\"}"
+_esc_title="${TITLE//\\/\\\\}"
+_esc_title="${_esc_title//\"/\\\"}"
+append_event "decision_created" "{\"decision_id\":\"${_esc_decision_id}\",\"sprint_id\":\"${_esc_sprint}\",\"path\":\"${_esc_path}\",\"title\":\"${_esc_title}\"}"
 
 # ─── stdout (WU-26 §1.1 verbatim) ─────────────────────────────────────────────
 echo "decision created: $DECISION_PATH"

@@ -160,6 +160,8 @@ Claude 자체검증이 아니라 독립 CPO 검증을 받기 위함이다.
 ```
 
 → `.sfs-local/decisions/0001-jwt-vs-session.md` 같은 ADR-style file 자동 생성.
+AI runtime 에서는 여기서 끝내지 않고 sprint context 를 읽어 Context / Decision /
+Alternatives / Consequences / References 를 바로 채운다.
 
 구현이 끝나갈 때 CPO Evaluator review 를 연다:
 
@@ -167,9 +169,10 @@ Claude 자체검증이 아니라 독립 CPO 검증을 받기 위함이다.
 /sfs review --gate G4 --executor codex --generator claude --run
 ```
 
-→ `review.md` 에 CPO persona 기반 review prompt 가 append 된다. CPO verdict 는
-`pass` / `partial` / `fail` 로 기록한다. `partial` 또는 `fail` 이면 CTO 가 지정된 항목만
-재구현하고 다시 review 를 연다.
+→ `review.md` 에 CPO persona 기반 review prompt 가 append 된다. `--run` 이 있으면 실제
+bridge 실행 결과가 기록되고, `--run` 이 없고 현재 AI runtime 이 선택된 evaluator 일 때만
+그 runtime 이 CPO verdict 를 직접 작성한다. CPO verdict 는 `pass` / `partial` / `fail` 로
+기록한다. `partial` 또는 `fail` 이면 CTO 가 지정된 항목만 재구현하고 다시 review 를 연다.
 
 `--run` 은 실제 bridge 가 있을 때만 성공한다. `codex` 는 `SFS_REVIEW_CODEX_CMD` 또는
 `codex exec --full-auto` 를 사용한다. Claude 내부 Codex plugin 은 shell 에서 직접 호출할 수
@@ -200,7 +203,8 @@ sprint 완전히 끝났으면:
 /sfs retro --close
 ```
 
-→ `retro.md` 작성 + sprint close + auto-commit 까지 한 번에 (push 는 안 함, 너가 직접).
+→ AI runtime 에서는 먼저 `retro.md` 를 KPT/PDCA 로 채우고, 그 다음 close adapter 를 1회
+실행해 sprint close + auto-commit 까지 처리한다 (push 는 안 함, 너가 직접).
 
 > ⚠️ `--close` 는 review 한 번이라도 한 sprint 에서만 동작. review 안 했으면 exit 8 + 메시지 출력.
 
@@ -223,9 +227,9 @@ native slash UI 에서 `커맨드 없음` 으로 막힐 수 있으므로 `$sfs .
 | `/sfs auth status` | Codex/Claude/Gemini review executor 인증 확인 |
 | `/sfs auth probe --executor gemini --timeout 20` | bridge request/response 더미 확인 |
 | `/sfs plan` | 현 sprint 의 의도/경계 + G1 요구사항/AC + CTO/CPO 계약 작성 |
-| `/sfs review --gate G4 --executor codex --run` | 리뷰할 evidence 가 있을 때 CPO review bridge 실행 + verdict 기록 |
-| `/sfs decision <title>` | ADR-style 결정 기록 |
-| `/sfs retro [--close]` | 회고 작성 / sprint close + auto-commit |
+| `/sfs review --gate G4 --executor codex --run` | 리뷰할 evidence 가 있을 때 CPO review bridge 실행 + 결과 기록 |
+| `/sfs decision <title>` | ADR-style 결정 기록 + AI runtime 에서 ADR 본문 작성 |
+| `/sfs retro [--close]` | 회고 작성 / `--close` 는 회고 작성 후 sprint close + auto-commit |
 | `/sfs loop` | 큰 작업 자율 진행 (Ralph Loop, 고급) |
 
 Codex 에서는 같은 명령을 `$sfs status`, `$sfs start ...`, `$sfs brainstorm ...` 처럼 입력한다.

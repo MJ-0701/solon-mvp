@@ -388,7 +388,7 @@ reviewable_git_paths() {
 
 sprint_artifact_events_exist() {
   [[ -f "${SFS_EVENTS_FILE}" ]] || return 1
-  grep -E '"type":"(brainstorm_open|plan_open|decision_open)"' "${SFS_EVENTS_FILE}" \
+  grep -E '"type":"(brainstorm_open|plan_open|decision_created)"' "${SFS_EVENTS_FILE}" \
     | grep -q "\"sprint_id\":\"${SPRINT_ID}\""
 }
 

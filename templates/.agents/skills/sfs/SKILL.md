@@ -1,6 +1,6 @@
 ---
 name: sfs
-description: Solon SFS workflow for Codex — use $sfs status/start/guide/auth/brainstorm/plan/review/decision/retro/loop or natural language to dispatch to bash adapter SSoT; for brainstorm, capture raw input then fill §1~§7 as Solon CEO, and for plan, fill G1 requirements/AC/scope + CTO/CPO sprint contract from brainstorm.md. Trigger when a Codex surface delivers $sfs, sfs <command>, /sfs text that reaches the model, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "sprint 시작", "브레인스토밍", "plan 작성", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
+description: Solon SFS workflow for Codex — use $sfs status/start/guide/auth/brainstorm/plan/review/decision/retro/loop or natural language to dispatch to bash adapter SSoT; brainstorm/plan/decision/retro are AI-hybrid refinements, review is conditional CPO hybrid when Codex is the selected evaluator. Trigger when a Codex surface delivers $sfs, sfs <command>, /sfs text that reaches the model, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "sprint 시작", "브레인스토밍", "plan 작성", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
 ---
 
 # Solon SFS — Codex Skill
@@ -12,10 +12,19 @@ When the user invokes `$sfs <command>`, types `sfs <command>`, sends `/sfs`
 text that actually reaches the model, or expresses a Solon SFS workflow intent,
 dispatch the request to the corresponding bash script under
 `.sfs-local/scripts/` first.
-For every command except `brainstorm` and `plan`, stop after printing adapter
-output. For `brainstorm`, continue with the CEO refinement flow below after
-successful raw capture. For `plan`, continue with the G1 refinement flow below
-after the adapter opens `plan.md`.
+
+Command modes are explicit:
+- **Bash-only**: `status`, `start`, `guide`, `auth`, `loop`. Stop after
+  verbatim adapter output.
+- **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`. Run the
+  adapter first, then perform the documented AI-side file refinement.
+- **Conditional hybrid**: `review`. Continue only when the current runtime
+  (`codex`) is the selected CPO evaluator and `--run` did not already execute
+  an external bridge. Otherwise stop after adapter output/prompt handoff.
+
+Special close guard: if the user invokes `retro --close` in an AI runtime, do
+not run the close adapter first. Run `retro` without `--close`, refine
+`retro.md`, then run `retro --close` exactly once.
 
 If you can read a user message that begins with `/sfs`, the runtime has already
 delivered the Solon command to this Skill. Dispatch it. But do not claim Codex
@@ -26,9 +35,10 @@ invoke `$sfs status`, `sfs status`, natural language, or direct bash
 
 The bash adapter execution is **deterministic** and must NOT be
 re-interpreted by the model. Bash adapter is single source of truth (SSoT) for
-command I/O. `brainstorm` and `plan` have documented AI-side follow-ups:
-Solon CEO refinement of `brainstorm.md` §1~§7, then G1 plan + CTO/CPO sprint
-contract refinement of `plan.md`.
+command I/O. Hybrid commands have documented AI-side follow-ups:
+Solon CEO refinement of `brainstorm.md` §1~§7, G1 plan + CTO/CPO sprint
+contract refinement of `plan.md`, ADR refinement for `decision`, G5 retro
+refinement for `retro`, and conditional CPO verdict refinement for `review`.
 
 ## Dispatch Table
 
@@ -40,9 +50,9 @@ contract refinement of `plan.md`.
 | `auth status|check|login|probe` (또는 "인증 확인", "Gemini 로그인") | `bash .sfs-local/scripts/sfs-dispatch.sh auth <args>` | Codex/Claude/Gemini review executor 인증 점검/부트스트랩/더미 요청 |
 | `brainstorm [text|--stdin]` (또는 "브레인스토밍", "요구사항 정리") | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <raw context>` | G0 raw 요구사항/대화 맥락을 brainstorm.md 에 기록한 뒤 §1~§7을 Solon CEO로 정리. newline 허용 |
 | `plan` (또는 "plan 작성", "이번 sprint 계획") | `bash .sfs-local/scripts/sfs-dispatch.sh plan` | plan.md 진입 + plan_open event 후 brainstorm.md 기반 G1 plan/contract 작성 |
-| `review --gate <id> [--executor <tool>] [--run]` (또는 "CPO review", "검증 기록") | `bash .sfs-local/scripts/sfs-dispatch.sh review --gate <id> [--executor <tool>] [--generator <tool>] [--run]` | CPO Evaluator persona prompt. `--run` skips empty reviews unless `--allow-empty`. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
-| `decision <title>` (또는 "결정 기록", "ADR 추가") | `bash .sfs-local/scripts/sfs-dispatch.sh decision "<title>" [--id <id>]` | full ADR 또는 mini-ADR 분기 |
-| `retro [--close]` (또는 "회고", "sprint close") | `bash .sfs-local/scripts/sfs-dispatch.sh retro [--close]` | `--close` 시 sprint close + auto commit |
+| `review --gate <id> [--executor <tool>] [--run]` (또는 "CPO review", "검증 기록") | `bash .sfs-local/scripts/sfs-dispatch.sh review --gate <id> [--executor <tool>] [--generator <tool>] [--run]` | CPO Evaluator prompt/run. If evaluator=`codex` and no `--run`, Codex fills verdict; otherwise handoff only. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
+| `decision <title>` (또는 "결정 기록", "ADR 추가") | `bash .sfs-local/scripts/sfs-dispatch.sh decision "<title>" [--id <id>]` | ADR file 생성 후 Context/Decision/Alternatives/Consequences refinement |
+| `retro [--close]` (또는 "회고", "sprint close") | `bash .sfs-local/scripts/sfs-dispatch.sh retro [--close]` | retro.md 진입 후 KPT/PDCA refinement. `--close` 는 refinement 후 1회 실행 |
 | `loop [OPTIONS]` (또는 "자율 진행", "loop 시작") | `bash .sfs-local/scripts/sfs-dispatch.sh loop [OPTIONS]` | Ralph Loop + Solon mutex (see `--help`) |
 
 ## Procedure
@@ -94,11 +104,15 @@ contract refinement of `plan.md`.
      `7`=verify fail, `8`=heartbeat fail, `9`=executor resolve fail,
      `99`=unknown.
 
-5. **Stop or continue only for brainstorm/plan** — For commands other than
-   `brainstorm` and `plan`, do not summarize, paraphrase, or add commentary.
-   The bash adapter is the SSoT. For `brainstorm`, continue to the CEO
-   refinement flow below after a zero exit code. For `plan`, continue to the G1
-   refinement flow below after a zero exit code.
+5. **Stop or continue by command mode** — After dispatch, bash-only commands
+   must stop without Codex-driven commentary or alternate reports. Hybrid
+   commands continue only via the documented flow below:
+   - `brainstorm` → Brainstorm CEO Refinement
+   - `plan` → Plan G1 Refinement
+   - `decision` → Decision ADR Refinement
+   - `retro` → Retro G5 Refinement
+   - `review` → Review CPO Refinement only when evaluator is `codex` and
+     `--run` was not used.
 
 ## Brainstorm CEO Refinement
 
@@ -164,6 +178,74 @@ first run the bash adapter, then fill `plan.md` from the current G0 context.
    - then `next: /sfs review --gate G1 --executor codex --generator claude`
      when ready, otherwise `next: answer questions, then /sfs plan`
 
+## Decision ADR Refinement
+
+`/sfs decision` is not adapter-only in AI runtimes. After the bash adapter
+succeeds and stdout has been shown verbatim:
+
+1. Resolve the created ADR path from `decision created: <path>`. If stdout
+   cannot be parsed, open the newest file under `.sfs-local/decisions/`.
+2. Read the active sprint context when available: `brainstorm.md`, `plan.md`,
+   `review.md`, `retro.md`, and `.sfs-local/events.jsonl`.
+3. Act as **Solon CEO**. Fill or update ADR sections:
+   - `Context`: why this decision is needed, sprint/gate reference, known
+     constraints.
+   - `Decision`: the selected option and 1-3 core reasons. If the title is only
+     a question, keep `status: proposed` and write the most likely proposal.
+   - `Alternatives`: at least one rejected/deferred alternative, or
+     `none considered` with a reason.
+   - `Consequences`: positive effects, trade-offs, risks, and affected areas.
+   - `References`: sprint artifact paths, event ids/commit sha if known, and
+     related decisions.
+4. Preserve frontmatter and user edits. Do not implement code.
+5. Ask up to 3 questions only if the ADR cannot be understood without them.
+6. Final response shape:
+   - first line: `decision refined: <path>`
+   - optional `questions: <N>`
+   - then `next: continue current sprint`
+
+## Review CPO Refinement
+
+`/sfs review` is mandatory in the Solon flow, but self-validation is controlled.
+After the adapter succeeds:
+
+1. If `--run` was used, stop after adapter output. The external executor result
+   is already appended to `review.md`.
+2. If selected `evaluator_executor` is not `codex`, stop after adapter output
+   and treat the prompt/output path as handoff material. Do not pretend Codex
+   performed the review.
+3. If selected `evaluator_executor` is `codex` and `--run` was not used, act as
+   **Solon CPO Evaluator**:
+   - Read `review.md`, the latest appended CPO prompt/evidence bundle,
+     `brainstorm.md`, `plan.md`, `log.md`, and relevant git diff/status.
+   - Fill or update `§1` scope/trigger/tool info, `§3` verdict with evidence,
+     `§4` next actions, and leave `§5` for CTO response.
+   - Verdict must be `pass`, `partial`, or `fail` (`G3` only `pass`/`fail`).
+   - If generator and evaluator are the same tool/session, call out
+     self-validation risk and require stronger evidence before `pass`.
+4. Final response shape:
+   - first line: `review.md refined: <path>`
+   - then `verdict: pass|partial|fail`
+   - then `next: <CTO action or /sfs retro>`
+
+## Retro G5 Refinement
+
+`/sfs retro` is not adapter-only in AI runtimes. After the adapter succeeds and
+stdout has been shown verbatim:
+
+1. Resolve `retro.md` from stdout or active sprint.
+2. Read sprint artifacts: `brainstorm.md`, `plan.md`, `log.md`, `review.md`,
+   `.sfs-local/events.jsonl`, and related decisions.
+3. Fill or update `§1` KPT, `§2` PDCA learning, `§3` metrics when evidence
+   exists, `§4` next sprint handoff, and `§5` close checklist.
+4. Preserve user edits. Do not invent completed work; mark unknowns explicitly.
+5. If the user invoked `retro --close`, refine `retro.md` first, then run
+   `bash .sfs-local/scripts/sfs-dispatch.sh retro --close` exactly once and
+   print its output verbatim.
+6. Final response shape when not closing:
+   - first line: `retro.md refined: <path>`
+   - then `next: /sfs retro --close` if ready, otherwise next required action
+
 ## If first arg is empty or `help`
 
 Print this 3-line usage and stop:
@@ -176,8 +258,9 @@ Help: bash .sfs-local/scripts/sfs-<command>.sh --help
 
 ## ⚠️ Safety Locks
 
-- `/sfs retro --close` triggers an auto-commit. Confirm the user explicitly
-  requested it (don't infer from neighboring context, don't auto-invoke).
+- `/sfs retro --close` triggers an auto-commit. In AI runtimes, refine
+  `retro.md` before running the close adapter, and only when the user explicitly
+  requested close.
 - Never run `git push origin *` automatically — push is user-only (§1.5).
 - If the bash adapter is missing, do NOT try to fall back to a paraphrase
   workflow that simulates Solon SFS — instead tell the user the adapter is
