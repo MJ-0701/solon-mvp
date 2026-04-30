@@ -1,3 +1,19 @@
+## [0.5.26-product] - 2026-04-30
+
+**Review artifact bloat guard.** `/sfs review` no longer appends executor
+result excerpts into `review.md` by default, preventing repeated G1/G2 review
+runs from turning the sprint review artifact into a multi-thousand-line log.
+
+### Changed
+
+- **Slim review.md results** — full CPO executor output remains in
+  `.sfs-local/tmp/review-runs/`, while `review.md` records only result path,
+  size, and verdict metadata by default.
+- **Opt-in excerpts** — set `SFS_REVIEW_MD_EXCERPT_LINES=1..80` to embed a
+  bounded result excerpt in `review.md` for debugging or offline handoff.
+- **Bloat ceiling** — excerpt embedding is capped at 80 lines even when a larger
+  value is supplied.
+
 ## [0.5.25-product] - 2026-04-30
 
 **Localized review report UX.** `/sfs review` no longer dumps executor
