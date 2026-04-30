@@ -254,6 +254,23 @@ Windows PowerShell 에서는:
 
 `.sfs-local/sprints/`, `.sfs-local/decisions/`, `.sfs-local/events.jsonl` = **절대 덮어쓰지 않음**.
 
+### 8.5 `upgrade.sh` 가 "이미 최신" 이라는데 새 명령이 없어
+
+local clone 방식으로 설치했다면 `~/tmp/solon-product` 같은 product clone 이 upgrade 의 배포판
+소스다. GitHub 에 새 release 가 있어도 이 clone 이 오래됐으면 낡은 `VERSION` 을 읽고
+"이미 최신" 이라고 보일 수 있다.
+
+먼저 product clone 을 최신화한 뒤 프로젝트에서 upgrade 를 다시 실행:
+
+```bash
+git -C ~/tmp/solon-product pull --ff-only --tags
+cd ~/workspace/my-project
+bash ~/tmp/solon-product/upgrade.sh
+```
+
+remote one-liner (`curl .../upgrade.sh | bash`) 는 매번 GitHub main 을 새로 clone 하므로 이
+local clone freshness 문제를 피한다.
+
 ---
 
 ## 9. 다음 단계 — 1주일 사용 후

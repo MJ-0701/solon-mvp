@@ -214,6 +214,10 @@ cd ~/workspace/my-project
 bash ~/tmp/solon-product/install.sh
 ```
 
+`~/tmp/solon-product` 는 설치/업그레이드에 쓰는 사용자의 로컬 product clone 입니다. 한 번
+clone 한 뒤 시간이 지나면 GitHub 보다 뒤처질 수 있으므로, 재설치나 업그레이드 전에는
+clone 을 먼저 최신화하세요.
+
 Windows PowerShell:
 
 ```powershell
@@ -264,6 +268,14 @@ bash ~/tmp/solon-product/install.sh --yes
 ---
 
 ## Upgrade
+
+Local clone 기반 upgrade 는 먼저 product clone 을 GitHub 최신으로 맞춘 뒤 consumer 프로젝트에서
+실행합니다. 이 clone 이 오래되면 upgrade 가 낡은 `VERSION` 을 읽고 "이미 최신" 이라고 잘못
+보일 수 있습니다.
+
+```bash
+git -C ~/tmp/solon-product pull --ff-only --tags
+```
 
 ```bash
 cd ~/workspace/my-project

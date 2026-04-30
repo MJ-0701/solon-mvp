@@ -1,3 +1,18 @@
+## [0.5.6-product] - 2026-04-30
+
+**Local product clone freshness guard.** 실제 사용자는 `~/tmp/solon-product` 같은 로컬 clone 을
+install/upgrade source 로 쓰므로, GitHub release 와 이 clone 이 어긋나면 `upgrade.sh` 가
+낡은 VERSION 을 읽고 "이미 최신" 으로 오판할 수 있었다.
+
+### Fixed
+
+- **local clone stale guard** — `upgrade.sh` local mode 에서 source clone 이
+  `MJ-0701/solon-product` GitHub main 보다 뒤처졌는지 `git fetch` 로 먼저 확인하고, 뒤처졌으면
+  `git -C <clone> pull --ff-only --tags` 후 재실행하라고 중단한다.
+- **consumer/developer path separation** — README/GUIDE 에 `~/agent_architect` (dev SSoT),
+  `~/workspace/solon-mvp` (owner stable release clone), `~/tmp/solon-product` (사용자 install/upgrade
+  source clone) 역할을 혼동하지 않도록 local clone upgrade 전 최신화 절차를 명시.
+
 ## [0.5.5-product] - 2026-04-30
 
 **Codex desktop app `/sfs` canonical path 복구.** `/sfs ...` 메시지가 Codex desktop app /
