@@ -77,7 +77,22 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ ! -d "${SFS_LOCAL_DIR}" ]]; then
-  echo "no .sfs-local found, run install.sh first" >&2
+  cat >&2 <<'EOF'
+Solon CLI is installed, but this project is not initialized yet.
+
+First-time project setup:
+  sfs init --yes
+  sfs status
+  sfs guide
+
+What this means:
+  brew install MJ-0701/solon-product/sfs  installs the global sfs CLI on this Mac.
+  sfs init --yes                          injects SFS.md, .sfs-local/, and agent adapters into this project.
+  sfs update                              refreshes an already-initialized project after a runtime upgrade.
+
+Tip:
+  If this folder is not a git repo yet, sfs init --yes will run git init for you.
+EOF
   exit "${SFS_EXIT_NO_INIT}"
 fi
 

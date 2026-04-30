@@ -1,3 +1,22 @@
+## [0.5.32-product] - 2026-05-01
+
+**First-run guidance for Homebrew users.** Empty projects now explain the
+difference between installing the global CLI and initializing a project.
+
+### Added
+
+- **Project-not-initialized onboarding** — `sfs guide`, `sfs status`, and
+  `sfs update` in a clean folder now show the exact first-time setup flow:
+  `sfs init --yes`, `sfs status`, `sfs guide`.
+- **Homebrew caveats** — the formula template now prints the same first-time
+  project setup after install/reinstall.
+
+### Changed
+
+- **No internal script wording** — missing `.sfs-local/VERSION` no longer tells
+  users to run `install.sh`; it explains that `brew install` only installs the
+  global CLI and `sfs init --yes` initializes each project.
+
 ## [0.5.31-product] - 2026-05-01
 
 **Project update command and Solon-only positioning.** Users can now refresh a

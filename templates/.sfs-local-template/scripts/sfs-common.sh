@@ -124,7 +124,7 @@ sfs_guide_file() {
 # Returns: 0=ok, 1=no init, 2=events.jsonl 손상, 3=no git.
 validate_sfs_local() {
   if [[ ! -d "${SFS_LOCAL_DIR}" ]]; then
-    echo "no .sfs-local found, run /sfs start first" >&2
+    echo "no .sfs-local found — this project is not initialized yet. Run: sfs init --yes" >&2
     return ${SFS_EXIT_NO_INIT}
   fi
   if [[ -f "${SFS_EVENTS_FILE}" ]]; then

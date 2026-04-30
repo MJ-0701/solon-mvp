@@ -181,7 +181,26 @@ check_local_source_freshness
 NEW_VER=$(cat "$SOURCE_DIR/VERSION" 2>/dev/null | head -1 || echo "unknown")
 
 if [ ! -f "$TARGET/.sfs-local/VERSION" ]; then
-  die ".sfs-local/VERSION 없음 — Solon 이 설치되지 않은 상태. 먼저 install.sh 실행."
+  cat >&2 <<EOF
+Solon CLI is installed, but this project is not initialized yet.
+
+Current directory:
+  $TARGET
+
+First-time project setup:
+  sfs init --yes
+  sfs status
+  sfs guide
+
+What this means:
+  brew install MJ-0701/solon-product/sfs  installs the global sfs CLI on this Mac.
+  sfs init --yes                          injects SFS.md, .sfs-local/, and agent adapters into this project.
+  sfs update                              refreshes an already-initialized project after a runtime upgrade.
+
+Tip:
+  If this folder is not a git repo yet, sfs init --yes will run git init for you.
+EOF
+  exit 1
 fi
 
 CUR_VER=$(grep '^solon_mvp_version:' "$TARGET/.sfs-local/VERSION" | awk '{print $2}')
