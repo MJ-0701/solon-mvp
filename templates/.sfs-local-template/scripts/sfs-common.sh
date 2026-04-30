@@ -2,7 +2,7 @@
 # .sfs-local/scripts/sfs-common.sh
 #
 # Solon SFS — common helper functions sourced by sfs-status.sh / sfs-start.sh / etc.
-# WU-24 §3 spec implementation. bash 4+ required.
+# WU-24 §3 spec implementation. Bash 3.2+ compatible.
 #
 # Path note: dev staging file lives at
 #   solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-common.sh
@@ -477,7 +477,7 @@ ensure_executor_headless_auth() {
   upper="$(printf '%s' "$profile" | tr '[:lower:]' '[:upper:]')"
   cat >&2 <<EOF
 executor bridge missing: ${profile} auth is not configured for headless SFS use.
-Set provider credentials in .sfs-local/auth.env, run the ${profile} CLI login flow first and set SFS_${upper}_AUTH_READY=1, or rerun with --auth-interactive from a real terminal.
+Set provider credentials in .sfs-local/auth.env, run `/sfs auth login --executor ${profile}` from a real terminal, or rerun review with --auth-interactive.
 Local place: .sfs-local/auth.env (gitignored) or SFS_AUTH_ENV_FILE=/absolute/path.
 EOF
   return 1
@@ -546,8 +546,7 @@ EOF
     return 1
   fi
   if [[ "$profile" != "gemini" ]] && ! executor_auth_ready "$profile"; then
-    echo "${profile} auth bootstrap finished, but CLI status is still not authenticated" >&2
-    return 1
+    echo "${profile} auth bootstrap finished, but CLI status could not confirm auth; marking ready and letting the next executor request verify credentials." >&2
   fi
 
   mark_executor_auth_ready "$profile"
@@ -556,15 +555,33 @@ EOF
 prepare_executor_auth() {
   local profile allow_interactive
   profile="$(normalize_executor_profile "$1")"
-  allow_interactive="${2:-false}"
+  allow_interactive="${2:-auto}"
   if executor_auth_ready "$profile"; then
     return 0
   fi
-  if [[ "$allow_interactive" == "true" || "$allow_interactive" == "1" || "$allow_interactive" == "yes" ]]; then
-    bootstrap_executor_interactive_auth "$profile"
-    return $?
-  fi
+  case "$allow_interactive" in
+    true|1|yes|YES|y|Y)
+      bootstrap_executor_interactive_auth "$profile"
+      return $?
+      ;;
+    auto|AUTO)
+      if [[ -r /dev/tty && -w /dev/tty ]]; then
+        bootstrap_executor_interactive_auth "$profile"
+        return $?
+      fi
+      ;;
+  esac
   ensure_executor_headless_auth "$profile"
+}
+
+executor_auth_status() {
+  local profile
+  profile="$(normalize_executor_profile "$1")"
+  if executor_auth_ready "$profile"; then
+    printf '%s: ready\n' "$profile"
+  else
+    printf '%s: missing\n' "$profile"
+  fi
 }
 
 # ─── PROGRESS PATH RESOLVER ──────────────────────────────────────────────────

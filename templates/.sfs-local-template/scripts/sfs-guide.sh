@@ -105,11 +105,14 @@ Solon guide context
 
 첫 흐름:
   /sfs status
+  /sfs auth status
   /sfs start "<이번 sprint 목표>"
+  /sfs brainstorm "<아직 정리 안 된 요구사항>"
   /sfs plan
 
 작업 중:
   /sfs decision "<결정 제목>"   결정이 흐려지기 전에 기록
+  /sfs auth probe --executor gemini  bridge 연결만 가볍게 확인
   /sfs review --gate G2        구현/기획 검토 evidence 남기기
   /sfs retro --close           sprint close + local auto-commit
 

@@ -1,6 +1,6 @@
 ---
 name: sfs
-description: Solon SFS workflow — dispatch /sfs status/start/guide/brainstorm/plan/review/decision/retro/loop to bash adapter SSoT. Trigger when a Codex surface delivers /sfs, $sfs, sfs <command>, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "sprint 시작", "브레인스토밍", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth — paraphrase forbidden, exit codes verbatim.
+description: Solon SFS workflow — dispatch /sfs status/start/guide/auth/brainstorm/plan/review/decision/retro/loop to bash adapter SSoT. Trigger when a Codex surface delivers /sfs, $sfs, sfs <command>, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "sprint 시작", "브레인스토밍", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth — paraphrase forbidden, exit codes verbatim.
 ---
 
 # Solon SFS — Codex Skill
@@ -22,7 +22,7 @@ as a different Solon API. Temporary bypasses for those builds are `$sfs status`,
 `sfs status`, or direct bash (`bash .sfs-local/scripts/sfs-status.sh`) until the
 CLI slash compatibility layer is available.
 
-The nine subcommands are **deterministic** and must NOT be re-interpreted by
+The ten subcommands are **deterministic** and must NOT be re-interpreted by
 the model. Bash adapter is single source of truth (SSoT).
 
 ## Dispatch Table
@@ -32,9 +32,10 @@ the model. Bash adapter is single source of truth (SSoT).
 | `status` (또는 "현재 상태", "어디까지 했는지") | `bash .sfs-local/scripts/sfs-dispatch.sh status [--color=auto/always/never]` | 1줄 dashboard |
 | `start <goal>` (또는 "sprint 시작", "새 sprint") | `bash .sfs-local/scripts/sfs-dispatch.sh start <goal> [--id <sprint-id>] [--force]` | sprint workspace 초기화 + sprint files cp |
 | `guide [--path|--print]` (또는 "가이드", "처음 사용법") | `bash .sfs-local/scripts/sfs-dispatch.sh guide [--path|--print]` | 기본은 짧은 맥락 브리핑, `--path` 는 경로만, `--print` 는 full guide 본문 |
+| `auth status|check|login|probe` (또는 "인증 확인", "Gemini 로그인") | `bash .sfs-local/scripts/sfs-dispatch.sh auth <args>` | Codex/Claude/Gemini review executor 인증 점검/부트스트랩/더미 요청 |
 | `brainstorm [text|--stdin]` (또는 "브레인스토밍", "요구사항 정리") | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <raw context>` | G0 raw 요구사항/대화 맥락을 brainstorm.md 에 기록. newline 허용 |
 | `plan` (또는 "plan 작성", "이번 sprint 계획") | `bash .sfs-local/scripts/sfs-dispatch.sh plan` | plan.md 진입 + plan_open event |
-| `review --gate <id> [--executor <tool>] [--run]` (또는 "CPO review", "검증 기록") | `bash .sfs-local/scripts/sfs-dispatch.sh review --gate <id> [--executor <tool>] [--generator <tool>] [--run]` | CPO Evaluator persona prompt. `--run` requires a real CLI/plugin bridge. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
+| `review --gate <id> [--executor <tool>] [--run]` (또는 "CPO review", "검증 기록") | `bash .sfs-local/scripts/sfs-dispatch.sh review --gate <id> [--executor <tool>] [--generator <tool>] [--run]` | CPO Evaluator persona prompt. `--run` skips empty reviews unless `--allow-empty`. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
 | `decision <title>` (또는 "결정 기록", "ADR 추가") | `bash .sfs-local/scripts/sfs-dispatch.sh decision "<title>" [--id <id>]` | full ADR 또는 mini-ADR 분기 |
 | `retro [--close]` (또는 "회고", "sprint close") | `bash .sfs-local/scripts/sfs-dispatch.sh retro [--close]` | `--close` 시 sprint close + auto commit |
 | `loop [OPTIONS]` (또는 "자율 진행", "loop 시작") | `bash .sfs-local/scripts/sfs-dispatch.sh loop [OPTIONS]` | Ralph Loop + Solon mutex (see `--help`) |
@@ -68,12 +69,14 @@ the model. Bash adapter is single source of truth (SSoT).
      missing, `5`=permission, `99`=unknown.
    - guide: `0`=ok, `1`=no `.sfs-local/`, `4`=guide missing,
      `99`=unknown.
+   - auth: `0`=ok, `1`=no `.sfs-local/`, `7`=usage,
+     `9`=auth missing/bootstrap failed, `99`=unknown.
    - brainstorm: `0`=ok, `1`=no `.sfs-local/` or no active sprint,
      `2`=corrupt `events.jsonl` / `current-sprint`, `3`=not a git repo,
      `4`=template missing, `5`=permission, `99`=unknown.
    - plan: `0`=ok, `1`=no `.sfs-local/` or no active sprint, `4`=template
      missing, `99`=unknown.
-  - review: `0`=ok, `1`=no `.sfs-local/` or no active sprint, `4`=template
+   - review: `0`=ok, `1`=no `.sfs-local/` or no active sprint, `4`=template
     missing, `6`=gate id invalid or required, `7`=usage,
     `9`=executor bridge missing/failed, `99`=unknown.
    - decision: `0`=ok, `1`=id conflict, `4`=template missing, `7`=usage,
@@ -95,7 +98,7 @@ Print this 3-line usage and stop:
 
 ```
 Usage: /sfs <command> [args]
-Commands: status, start, guide, brainstorm, plan, review, decision, retro, loop
+Commands: status, start, guide, auth, brainstorm, plan, review, decision, retro, loop
 Help: bash .sfs-local/scripts/sfs-<command>.sh --help
 ```
 

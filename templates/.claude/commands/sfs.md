@@ -10,6 +10,7 @@ description: |
   status    현재 SFS 상태 확인 (bash adapter)
   start     새 sprint workspace 초기화 (bash adapter)
   guide     사용 맥락 브리핑/guide 출력
+  auth      Codex/Claude/Gemini review executor 인증 확인/로그인
   brainstorm G0 raw 요구사항/대화 맥락 기록
   plan      현재 sprint plan.md 작성/갱신
   sprint    plan을 구현 단계와 gate 체크로 정리
@@ -33,13 +34,13 @@ token as the subcommand and the remainder as that subcommand's arguments.
 $ARGUMENTS
 ```
 
-## Adapter Dispatch (status / start / guide / brainstorm / plan / review / decision / retro / loop) — execute first
+## Adapter Dispatch (status / start / guide / auth / brainstorm / plan / review / decision / retro / loop) — execute first
 
-If the first argument is **`status`**, **`start`**, **`guide`**, **`brainstorm`**, **`plan`**, **`review`**,
+If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`brainstorm`**, **`plan`**, **`review`**,
 **`decision`**, **`retro`**, or **`loop`**, dispatch the request to the corresponding
 bash adaptor through `.sfs-local/scripts/sfs-dispatch.sh` and stop. The
 dispatcher normalizes runtime command surfaces (`/sfs`, `$sfs`, `sfs`) and
-then delegates to `.sfs-local/scripts/sfs-<command>.sh`. These nine
+then delegates to `.sfs-local/scripts/sfs-<command>.sh`. These ten
 subcommands are deterministic and must NOT be re-interpreted by the model.
 
 ⚠️ AI 자율 호출 금지 — 사용자 명시 호출 시에만 동작 (§1.5' 정합). 특히 `retro --close`
@@ -52,9 +53,10 @@ Dispatch table:
 | `status`   | `.sfs-local/scripts/sfs-dispatch.sh status <remaining args>`   | passes flags such as `--color=auto/always/never` verbatim |
 | `start`    | `.sfs-local/scripts/sfs-dispatch.sh start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
 | `guide`    | `.sfs-local/scripts/sfs-dispatch.sh guide <remaining args>`    | passes `--path` / `--print` verbatim; default prints a short context briefing |
+| `auth`     | `.sfs-local/scripts/sfs-dispatch.sh auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, and `--all` verbatim |
 | `brainstorm` | `.sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context and appends it to `brainstorm.md` |
 | `plan`     | `.sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | takes no flags currently; remaining args reserved for future (WU-25 §1) |
-| `review`   | `.sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator review. passes `--gate`, `--executor`, `--generator`, `--persona`, `--print-prompt`, `--run` verbatim |
+| `review`   | `.sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator review. passes `--gate`, `--executor`, `--generator`, `--persona`, `--print-prompt`, `--run`, `--allow-empty`, and auth flags verbatim |
 | `decision` | `.sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim (WU-26 §1). Uses `decisions-template/ADR-TEMPLATE.md` (5 섹션 ADR-full); `sprint-templates/decision-light.md` 은 Claude-driven fallback. |
 | `retro`    | `.sfs-local/scripts/sfs-dispatch.sh retro <remaining args>`    | passes `--close` verbatim (WU-26 §2). With `--close`: writes status/closed_at into plan.md, removes `.sfs-local/current-sprint`, appends `sprint_close` event, runs `auto_commit_close` (git add+commit, push manual per §1.5). |
 | `loop`     | `.sfs-local/scripts/sfs-dispatch.sh loop <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim (WU-27 §3) |
@@ -63,7 +65,7 @@ Procedure (apply in order):
 
 1. **Existence check** — Use the Bash tool to verify the dispatcher and target
    script exist and are executable. If `.sfs-local/scripts/sfs-dispatch.sh` or
-   `.sfs-local/scripts/sfs-{status,start,guide,brainstorm,plan,review,decision,retro,loop}.sh`
+   `.sfs-local/scripts/sfs-{status,start,guide,auth,brainstorm,plan,review,decision,retro,loop}.sh`
    is missing or not executable, tell the user which script is missing (1 line,
    no speculation about the cause) and stop.
    On Windows PowerShell, `.sfs-local/scripts/sfs.ps1 <command> [args]` is the
@@ -80,6 +82,8 @@ Procedure (apply in order):
    line: `exit <code>`. Map known exit codes per the script contract:
    - status: `0`=ok, `1`=no `.sfs-local/`, `2`=corrupt `events.jsonl`,
      `3`=not a git repo, `99`=unknown.
+   - auth: `0`=ok, `1`=no `.sfs-local/`, `7`=unknown CLI flag or missing
+     executor for login/probe, `9`=auth missing/bootstrap failed, `99`=unknown.
    - start: `0`=ok, `1`=sprint id conflict (suggest `--force`), `4`=templates
      missing, `5`=permission, `99`=unknown.
    - guide: `0`=ok, `1`=no `.sfs-local/`, `4`=guide missing,
@@ -145,6 +149,7 @@ If the first argument is one of the modes below, follow that mode.
 - `status`: **Adapter (above).** Fallback only: summarize the current SFS state and next action from the files listed under "Read Context".
 - `start`: **Adapter (above).** Fallback only: scaffold a sprint under `.sfs-local/sprints/<YYYY-Wxx-sprint-n>/` based on `sprint-templates/`.
 - `guide`: **Adapter (above).** Fallback only: point the user to `.sfs-local/GUIDE.md` if it exists, otherwise `GUIDE.md`.
+- `auth`: **Adapter (above).** Fallback only: tell the user to run `.sfs-local/scripts/sfs-auth.sh --help`.
 - `brainstorm`: **Adapter (above).** Fallback only: produce or update the current sprint `brainstorm.md` based on `sprint-templates/brainstorm.md`.
 - `plan`: **Adapter (above).** Fallback only: produce or update the current sprint `plan.md` from `brainstorm.md` + `sprint-templates/plan.md`.
 - `sprint`: Convert the current plan into implementation steps and gate checks.
@@ -163,6 +168,7 @@ When showing usage, keep it compact and practical. Include this shape:
 /sfs status               현재 SFS 상태 확인
 /sfs start <goal>         새 sprint workspace 초기화
 /sfs guide                처음 사용 맥락 브리핑
+/sfs auth status          review executor 인증 상태 확인
 /sfs brainstorm <context> G0 raw 요구사항/대화 맥락 기록
 /sfs plan                 현재 sprint plan.md 작성/갱신
 /sfs review --gate G4 --executor codex --generator claude --run
@@ -183,4 +189,4 @@ Also explain this in one or two sentences:
 - Keep sprint artifacts concise and operational.
 - Do not invent completed work. If evidence is missing, mark it as unknown.
 - Prefer concrete next actions over broad methodology explanations.
-- For `status`, `start`, `guide`, `brainstorm`, `plan`, `review`, `decision`, `retro`, and `loop`, the bash adapter is authoritative — do not paraphrase or augment its output.
+- For `status`, `start`, `guide`, `auth`, `brainstorm`, `plan`, `review`, `decision`, `retro`, and `loop`, the bash adapter is authoritative — do not paraphrase or augment its output.

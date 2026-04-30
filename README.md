@@ -109,9 +109,10 @@ Headless CLI review 는 인증도 bridge 의 일부다. SFS 는 `.sfs-local/auth
 `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `SFS_REVIEW_*_CMD` 같은 로컬 값을
 넣는다. Codex/Claude/Gemini CLI login cache 를 쓰려면 `SFS_CODEX_AUTH_READY=1`,
 `SFS_CLAUDE_AUTH_READY=1`, `SFS_GEMINI_AUTH_READY=1` 중 해당 값을 명시한다.
-처음 실행 중 인증 필요성을 인지한 사용자는 `/sfs review ... --run --auth-interactive` 로
-명시적 browser/terminal auth bootstrap 을 허용할 수 있다. 기본값은 prompt 가 auth 질문에
-먹히는 일을 막기 위해 fail-closed 다.
+인증 상태는 `/sfs auth status` 로 확인하고, 필요하면 `/sfs auth login --executor <tool>` 로
+브라우저/터미널 인증을 먼저 끝낸다. bridge 자체만 확인할 때는 `/sfs auth probe --executor <tool>` 로
+작은 dummy request/response 를 확인한다. `/sfs review --run` 도 실행 전에 인증을 확인하고,
+리뷰할 evidence 가 없으면 executor 를 호출하지 않는다.
 
 ---
 
@@ -144,6 +145,7 @@ iwr -useb https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.p
 ```text
 /sfs status
 /sfs guide
+/sfs auth status
 /sfs start "첫 번째 sprint 목표"
 /sfs brainstorm "raw 요구사항과 아직 정리 안 된 맥락"
 /sfs plan
@@ -183,15 +185,16 @@ WSL 사용자는 WSL shell 안에서 `bash .sfs-local/scripts/sfs-dispatch.sh st
 | `/sfs status` | 현재 sprint, WU, gate, ahead count, last event 를 한 줄로 표시 |
 | `/sfs start <goal>` | 새 sprint workspace 초기화 (`--id <sprint-id>` 지원) |
 | `/sfs guide [--path|--print]` | 짧은 사용 맥락 브리핑 / guide 경로 / full guide 본문 보기 |
+| `/sfs auth status|check|login|probe` | Codex/Claude/Gemini review executor 인증 확인/로그인/더미 요청 |
 | `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락을 `brainstorm.md` 에 기록 |
 | `/sfs plan` | 현재 sprint 의 `plan.md` 작성 또는 갱신 |
-| `/sfs review --gate <id> [--executor <tool>] [--run]` | CPO Evaluator review prompt 기록, `--run` 시 실제 bridge 호출 (id ∈ G-1..G5) |
+| `/sfs review --gate <id> [--executor <tool>] [--run]` | CPO Evaluator review prompt 기록. `--run` 은 리뷰할 evidence 가 있을 때만 실제 bridge 호출 (id ∈ G-1..G5) |
 | `/sfs decision <title>` | full ADR (decisions/) 또는 sprint-local mini-ADR 자동 분기 |
 | `/sfs retro` | 현재 sprint 의 `retro.md` 작성 또는 갱신 |
 | `/sfs retro --close` | review 실행 여부 확인 후 sprint close + auto commit (push 는 manual) |
 | `/sfs loop [OPTIONS]` | 큰 작업에서 micro-step 단위 반복 실행을 돕는 자율 진행 모드 |
 
-9 명령 모두 동일 bash adapter SSoT 입니다. `/sfs` 가 public API 이고, Skill/prompt/wrapper 는
+10 명령 모두 동일 bash adapter SSoT 입니다. `/sfs` 가 public API 이고, Skill/prompt/wrapper 는
 그 API 를 runtime 별로 전달하는 adaptor surface 입니다.
 
 ### `/sfs loop` 자세히
@@ -212,7 +215,7 @@ CLI 에서든 동등한 deterministic bash adapter SSoT 로 동작합니다.
 
 ## Runtime Coverage
 
-설치 후 9 명령은 **세 런타임 모두에서 1급 entry point** 로 연결됩니다.
+설치 후 10 명령은 **세 런타임 모두에서 1급 entry point** 로 연결됩니다.
 
 | 런타임 | Entry point (자동 install) | 호출 방법 |
 |---|---|---|

@@ -1,3 +1,36 @@
+## [0.5.12-product] - 2026-04-30
+
+**Review auth command and empty-review cutoff.** `/sfs review --run` now checks whether there
+is reviewable evidence before spending executor tokens, and `/sfs auth` provides explicit
+status/login/probe flows for Codex/Claude/Gemini review bridges.
+
+### Added
+
+- **`/sfs auth` command** — `status`, `check`, `login`, `probe`, and `path` actions for
+  local executor auth readiness and cheap dummy request/response bridge tests.
+- **empty review guard** — implementation/release reviews with no project evidence now print
+  `리뷰할 항목이 없습니다` instead of invoking external CLIs.
+- **probe path** — `/sfs auth probe --executor <tool>` sends a tiny dummy prompt and records
+  stdout/stderr under `.sfs-local/tmp/auth-probes/`.
+
+### Changed
+
+- **review auth flow** — `/sfs review --run` defaults to auth `auto`: if auth is missing and a
+  real terminal is available, SFS can run the executor login/bootstrap before review; CI can use
+  `--no-auth-interactive` for fail-closed behavior.
+
+## [0.5.11-product] - 2026-04-30
+
+**Executor review visibility and evidence bundle fix.** `/sfs review --run` now embeds sprint
+evidence in the prompt and prints output paths before invoking external CLIs.
+
+### Fixed
+
+- **vendor tool mismatch** — CPO prompts include `git status`, `git diff --stat`, and sprint
+  artifact excerpts so Gemini/Codex/Claude do not need identical file-reading tool surfaces.
+- **apparent hangs** — review execution now prints stdout/stderr/prompt paths before the external
+  executor starts, so long-running Codex/Gemini/Claude calls are visible and inspectable.
+
 ## [0.5.10-product] - 2026-04-30
 
 **Interactive executor auth bootstrap fix.** `--auth-interactive` now attaches Codex/Claude/Gemini

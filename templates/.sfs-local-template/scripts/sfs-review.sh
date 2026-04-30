@@ -67,7 +67,7 @@ fi
 # ─────────────────────────────────────────────────────────────────────
 usage_review() {
   cat <<'EOF'
-Usage: /sfs review [--gate <id>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--print-prompt] [--run] [--auth-interactive]
+Usage: /sfs review [--gate <id>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--print-prompt] [--run] [--allow-empty] [--auth-interactive|--no-auth-interactive]
 
 Open the active sprint's review.md as the CPO Evaluator review document.
   - --gate <id>   gate id (one of: G-1, G0, G1, G2, G3, G4, G5).
@@ -91,9 +91,15 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                     claude       $SFS_REVIEW_CLAUDE_CMD, else `claude -p --dangerously-skip-permissions`
                     claude-plugin unsupported; Codex is not a Claude plugin host
                   Custom executor strings are passed through as shell commands and receive the prompt on stdin.
+  - --allow-empty
+                  Force executor invocation even when SFS finds no reviewable project/sprint evidence.
+                  Prefer `/sfs auth probe --executor <tool>` for cheap bridge request/response tests.
   - --auth-interactive
-                  If a named executor is missing headless auth, allow its CLI login/browser
-                  flow before running review. Requires a real terminal. Default is fail-closed.
+                  If a named executor is missing auth, allow its CLI login/browser
+                  flow before running review. Requires a real terminal.
+  - --no-auth-interactive
+                  Fail closed when auth is missing. Useful for CI/headless runs.
+                  Default: auto (use interactive auth when a real terminal is available).
   - Creates review.md from sprint-templates/review.md if missing.
   - Updates frontmatter: phase=review, gate_id=<id>, evaluator_role=CPO,
     evaluator_executor=<executor>, generator_executor=<generator>, last_touched_at=<ISO8601>.
@@ -124,7 +130,8 @@ GENERATOR_EXECUTOR="${SFS_GENERATOR_EXECUTOR:-unknown}"
 PERSONA_PATH="${SFS_LOCAL_DIR}/personas/cpo-evaluator.md"
 PRINT_PROMPT=false
 RUN_REVIEW=false
-AUTH_INTERACTIVE="${SFS_AUTH_INTERACTIVE:-false}"
+ALLOW_EMPTY_REVIEW="${SFS_REVIEW_ALLOW_EMPTY:-false}"
+AUTH_INTERACTIVE="${SFS_AUTH_INTERACTIVE:-auto}"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
@@ -187,8 +194,16 @@ while [[ $# -gt 0 ]]; do
       RUN_REVIEW=true
       shift
       ;;
+    --allow-empty)
+      ALLOW_EMPTY_REVIEW=true
+      shift
+      ;;
     --auth-interactive)
       AUTH_INTERACTIVE=true
+      shift
+      ;;
+    --no-auth-interactive)
+      AUTH_INTERACTIVE=false
       shift
       ;;
     --)
@@ -210,7 +225,16 @@ while [[ $# -gt 0 ]]; do
 done
 case "${AUTH_INTERACTIVE}" in
   true|1|yes|YES|y|Y) AUTH_INTERACTIVE=true ;;
-  *) AUTH_INTERACTIVE=false ;;
+  false|0|no|NO|n|N) AUTH_INTERACTIVE=false ;;
+  auto|AUTO|"") AUTH_INTERACTIVE=auto ;;
+  *)
+    echo "unknown auth mode: ${AUTH_INTERACTIVE}" >&2
+    exit "${SFS_EXIT_BADCLI}"
+    ;;
+esac
+case "${ALLOW_EMPTY_REVIEW}" in
+  true|1|yes|YES|y|Y) ALLOW_EMPTY_REVIEW=true ;;
+  *) ALLOW_EMPTY_REVIEW=false ;;
 esac
 
 # ─────────────────────────────────────────────────────────────────────
@@ -305,6 +329,87 @@ if ! update_frontmatter "${REVIEW_PATH}" "last_touched_at" "${NOW}" 2>/dev/null;
   exit "${SFS_EXIT_PERM}"
 fi
 
+render_evidence_file() {
+  local file="$1" limit="${2:-220}"
+  printf '\n### file: %s\n\n' "$file"
+  if [[ -f "$file" ]]; then
+    sed -n "1,${limit}p" "$file"
+  else
+    printf '(missing)\n'
+  fi
+}
+
+render_evidence_bundle() {
+  printf '## Embedded Evidence Bundle\n\n'
+  printf 'The following evidence was collected by SFS before invoking the executor. Review this embedded evidence first; do not assume your CLI has project file/tool access. If evidence is insufficient, return partial/fail and list the missing evidence instead of calling unsupported tools.\n\n'
+
+  printf '### git status --short\n\n'
+  git status --short 2>/dev/null || printf '(git status unavailable)\n'
+
+  printf '\n### git diff --stat\n\n'
+  git diff --stat 2>/dev/null || printf '(git diff unavailable)\n'
+
+  render_evidence_file "${SFS_LOCAL_DIR}/sprints/${SPRINT_ID}/brainstorm.md" 220
+  render_evidence_file "${SFS_LOCAL_DIR}/sprints/${SPRINT_ID}/plan.md" 260
+  render_evidence_file "${SFS_LOCAL_DIR}/sprints/${SPRINT_ID}/log.md" 220
+  render_evidence_file "${SFS_LOCAL_DIR}/sprints/${SPRINT_ID}/review.md" 220
+}
+
+is_sfs_managed_review_path() {
+  local path="$1"
+  path="${path#\"}"
+  path="${path%\"}"
+  case "$path" in
+    .sfs-local/*|.claude/commands/sfs.md|.gemini/commands/sfs.toml|.agents/skills/sfs/SKILL.md|.codex/prompts/sfs.md)
+      return 0
+      ;;
+    SFS.md|CLAUDE.md|AGENTS.md|GEMINI.md|.gitignore)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+reviewable_git_paths() {
+  git status --porcelain=v1 2>/dev/null | while IFS= read -r line; do
+    [[ -z "$line" ]] && continue
+    local path
+    path="${line#???}"
+    case "$line" in
+      R*|C*) path="${path##* -> }" ;;
+    esac
+    if ! is_sfs_managed_review_path "$path"; then
+      printf '%s\n' "$path"
+    fi
+  done
+}
+
+sprint_artifact_events_exist() {
+  [[ -f "${SFS_EVENTS_FILE}" ]] || return 1
+  grep -E '"type":"(brainstorm_open|plan_open|decision_open)"' "${SFS_EVENTS_FILE}" \
+    | grep -q "\"sprint_id\":\"${SPRINT_ID}\""
+}
+
+has_review_items() {
+  local first_project_path=""
+  first_project_path="$(reviewable_git_paths | sed -n '1p' || true)"
+  if [[ -n "$first_project_path" ]]; then
+    return 0
+  fi
+
+  # Planning gates may review sprint artifacts. Implementation/release gates
+  # should not spend executor tokens when there is no project change.
+  case "${GATE_ID}" in
+    G-1|G0|G1|G2|G3)
+      sprint_artifact_events_exist && return 0
+      ;;
+  esac
+
+  return 1
+}
+
 render_cpo_prompt() {
   local persona_note
   if [[ -f "${PERSONA_PATH}" ]]; then
@@ -327,12 +432,11 @@ Self-validation policy:
 - If this review is running in the same tool/session that generated the implementation, explicitly call that out as a risk.
 - Prefer independent review evidence from Codex/Gemini/another agent instance when implementation was produced by Claude.
 
-Read these files before verdict:
-- .sfs-local/sprints/${SPRINT_ID}/brainstorm.md
-- .sfs-local/sprints/${SPRINT_ID}/plan.md
-- .sfs-local/sprints/${SPRINT_ID}/log.md
-- .sfs-local/sprints/${SPRINT_ID}/review.md
-- git status / git diff / relevant tests
+Review the embedded evidence below. Do not rely on executor-specific tools being available.
+
+EOF
+  render_evidence_bundle
+  cat <<'EOF'
 
 Return exactly this shape:
 Verdict: pass | partial | fail
@@ -409,6 +513,43 @@ RUN_DIR="${SFS_LOCAL_DIR}/tmp/review-runs"
 PROMPT_TS="$(date -u +%Y%m%dT%H%M%SZ)"
 PROMPT_PATH="${PROMPT_DIR}/${SPRINT_ID}-${GATE_ID}-${PROMPT_TS}.txt"
 
+if [[ "${RUN_REVIEW}" == "true" && "${ALLOW_EMPTY_REVIEW}" != "true" ]] && ! has_review_items; then
+  {
+    printf '\n### %s — CPO evaluator skipped (%s)\n\n' "${NOW}" "${GATE_ID}"
+    printf -- '- executor: `%s`\n' "${EVALUATOR_EXECUTOR}"
+    printf -- '- reason: no reviewable project/sprint evidence found\n'
+    printf -- '- next: make an implementation/planning change first, or run `/sfs auth probe --executor <tool>` for a cheap bridge request/response test.\n'
+  } >> "${REVIEW_PATH}" || {
+    echo "permission denied appending CPO skip result to ${REVIEW_PATH}" >&2
+    exit "${SFS_EXIT_PERM}"
+  }
+
+  _esc_sprint="${SPRINT_ID//\\/\\\\}"
+  _esc_sprint="${_esc_sprint//\"/\\\"}"
+  _esc_gate="${GATE_ID//\\/\\\\}"
+  _esc_gate="${_esc_gate//\"/\\\"}"
+  _esc_path="${REVIEW_PATH//\\/\\\\}"
+  _esc_path="${_esc_path//\"/\\\"}"
+  _esc_eval="${EVALUATOR_EXECUTOR//\\/\\\\}"
+  _esc_eval="${_esc_eval//\"/\\\"}"
+  _esc_gen="${GENERATOR_EXECUTOR//\\/\\\\}"
+  _esc_gen="${_esc_gen//\"/\\\"}"
+  append_event "review_skip" \
+    "{\"sprint_id\":\"${_esc_sprint}\",\"gate_id\":\"${_esc_gate}\",\"path\":\"${_esc_path}\",\"evaluator_role\":\"CPO\",\"evaluator_executor\":\"${_esc_eval}\",\"generator_executor\":\"${_esc_gen}\",\"reason\":\"no_review_items\"}" \
+    2>/dev/null || {
+      echo "permission denied appending event to ${SFS_EVENTS_FILE}" >&2
+      exit "${SFS_EXIT_PERM}"
+    }
+
+  _probe_executor="$(normalize_executor_profile "${EVALUATOR_EXECUTOR}")"
+  if [[ "${_probe_executor}" == "custom" ]]; then
+    echo "리뷰할 항목이 없습니다: gate ${GATE_ID} | executor ${EVALUATOR_EXECUTOR} | use --allow-empty to force a custom executor"
+  else
+    echo "리뷰할 항목이 없습니다: gate ${GATE_ID} | executor ${EVALUATOR_EXECUTOR} | bridge test: /sfs auth probe --executor ${_probe_executor}"
+  fi
+  exit "${SFS_EXIT_OK}"
+fi
+
 if ! mkdir -p "${PROMPT_DIR}" "${RUN_DIR}" 2>/dev/null; then
   echo "permission denied creating ${PROMPT_DIR} / ${RUN_DIR}" >&2
   exit "${SFS_EXIT_PERM}"
@@ -430,11 +571,7 @@ fi
   else
     printf -- '- run_requested: false\n'
   fi
-  if [[ "${AUTH_INTERACTIVE}" == "true" || "${AUTH_INTERACTIVE}" == "1" || "${AUTH_INTERACTIVE}" == "yes" ]]; then
-    printf -- '- auth_interactive: true\n'
-  else
-    printf -- '- auth_interactive: false\n'
-  fi
+  printf -- '- auth_mode: `%s`\n' "${AUTH_INTERACTIVE}"
   printf -- '- self_validation_policy: CTO Generator output must be checked by CPO Evaluator; independent tool/instance recommended.\n\n'
   printf '```text\n'
   cat "${PROMPT_PATH}"
@@ -464,6 +601,13 @@ if [[ "${RUN_REVIEW}" == "true" ]]; then
 
   RUN_OUT="${RUN_DIR}/${SPRINT_ID}-${GATE_ID}-${PROMPT_TS}.stdout.md"
   RUN_ERR="${RUN_DIR}/${SPRINT_ID}-${GATE_ID}-${PROMPT_TS}.stderr.txt"
+  {
+    echo "executor running: ${EVALUATOR_EXECUTOR}"
+    echo "  stdout: ${RUN_OUT}"
+    echo "  stderr: ${RUN_ERR}"
+    echo "  prompt: ${PROMPT_PATH}"
+    echo "  If it looks stuck, inspect another terminal with: tail -f ${RUN_ERR}"
+  } >&2
   set +e
   eval "${EXECUTOR_CMD}" < "${PROMPT_PATH}" > "${RUN_OUT}" 2> "${RUN_ERR}"
   RUN_RC=$?
@@ -514,9 +658,11 @@ _esc_gen="${GENERATOR_EXECUTOR//\\/\\\\}"
 _esc_gen="${_esc_gen//\"/\\\"}"
 _esc_persona="${PERSONA_PATH//\\/\\\\}"
 _esc_persona="${_esc_persona//\"/\\\"}"
+_esc_auth_mode="${AUTH_INTERACTIVE//\\/\\\\}"
+_esc_auth_mode="${_esc_auth_mode//\"/\\\"}"
 
 if ! append_event "review_open" \
-  "{\"sprint_id\":\"${_esc_sprint}\",\"gate_id\":\"${_esc_gate}\",\"path\":\"${_esc_path}\",\"prompt_path\":\"${_esc_prompt}\",\"evaluator_role\":\"CPO\",\"evaluator_executor\":\"${_esc_eval}\",\"generator_executor\":\"${_esc_gen}\",\"persona\":\"${_esc_persona}\",\"run_requested\":${RUN_REVIEW},\"auth_interactive\":${AUTH_INTERACTIVE}}" \
+  "{\"sprint_id\":\"${_esc_sprint}\",\"gate_id\":\"${_esc_gate}\",\"path\":\"${_esc_path}\",\"prompt_path\":\"${_esc_prompt}\",\"evaluator_role\":\"CPO\",\"evaluator_executor\":\"${_esc_eval}\",\"generator_executor\":\"${_esc_gen}\",\"persona\":\"${_esc_persona}\",\"run_requested\":${RUN_REVIEW},\"auth_mode\":\"${_esc_auth_mode}\"}" \
   2>/dev/null; then
   echo "permission denied appending event to ${SFS_EVENTS_FILE}" >&2
   exit "${SFS_EXIT_PERM}"
