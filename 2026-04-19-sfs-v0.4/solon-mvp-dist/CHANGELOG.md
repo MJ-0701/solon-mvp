@@ -1,3 +1,28 @@
+## [0.5.33-product] - 2026-05-01
+
+**Implementation command and AI-safe coding guardrails.** Solon now has an
+explicit implementation layer so agents do not stop at planning artifacts.
+
+### Added
+
+- **`sfs implement` command** — opens `implement.md` / `log.md`, records an
+  `implement_open` event, and instructs AI runtimes to continue into real code
+  changes, tests, and evidence updates.
+- **Implementation artifact template** — `implement.md` captures work slice,
+  shared design concept, DDD terms, TDD/smoke plan, changed files, verification,
+  and review handoff.
+- **AI coding guardrails** — implementation mode now encodes the core rules:
+  shared design concept first, DDD language, TDD or smallest useful verification
+  loop, and regularity with the existing codebase.
+
+### Changed
+
+- **Agent adapters** — Claude/Gemini/Codex command surfaces now treat
+  `implement` as an always-hybrid command: run bash adapter first, then actually
+  implement and verify.
+- **README/GUIDE flow** — docs now show `plan -> implement -> review` and make
+  `sfs agent install all` the obvious default for adapter setup.
+
 ## [0.5.32-product] - 2026-05-01
 
 **First-run guidance for Homebrew users.** Empty projects now explain the

@@ -1,0 +1,67 @@
+---
+phase: implement
+status: draft
+sprint_id: ""          # filled by /sfs start
+goal: ""               # filled by /sfs start <goal>
+created_at: ""         # filled by /sfs start
+last_touched_at: ""
+---
+
+# Implement — <sprint title>
+
+> Implementation execution artifact. This file records the work slice, code
+> changes, and verification evidence. It is not a substitute for changing code.
+> AI implementation must preserve system design, not only satisfy the nearest
+> edit request.
+
+---
+
+## §0. AI Coding Guardrails — Design / DDD / TDD
+
+AI coding fails when it optimizes for the nearest change while ignoring the
+system design. Treat bad code as expensive: unclear domain language, weak tests,
+and irregular structure make future AI edits worse.
+
+- **Shared design concept first**: before editing, name the intended design,
+  module boundary, and why this slice belongs there.
+- **DDD language**: use the project's domain terms consistently in code,
+  tests, filenames, and this artifact. If terms are missing, record them before
+  implementing.
+- **TDD feedback loop**: prefer a small failing/covering test first, then make
+  it pass, then refactor. If a true test-first loop is impractical, record the
+  reason and run the smallest useful verification before widening scope.
+- **Regularity over cleverness**: follow existing codebase patterns. If a
+  pattern is unclear or harmful, stop and record the refactor decision instead
+  of adding another one-off.
+
+## §1. Implementation Target
+
+- **Work slice**:
+- **Plan source**: `plan.md`
+- **Acceptance criteria in scope**:
+- **Out of scope for this slice**:
+- **Shared design concept**:
+- **DDD terms touched**:
+
+## §2. Execution Notes
+
+- **Approach**:
+- **Files/modules expected to change**:
+- **Test-first plan**:
+- **Risks / rollback notes**:
+
+## §3. Code Changes Made
+
+- 
+
+## §4. Verification
+
+- **Commands run**:
+- **Result**:
+- **Manual smoke / inspection**:
+
+## §5. Review Handoff
+
+- **Ready for review?** no
+- **Recommended next gate**: `G4`
+- **Next command**: `/sfs review --gate G4`

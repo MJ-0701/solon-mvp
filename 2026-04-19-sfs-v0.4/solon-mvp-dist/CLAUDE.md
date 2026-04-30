@@ -44,7 +44,7 @@
 1. CEO 요구사항 정리 (G0)
 2. CEO plan (G1)
 3. CTO Generator ↔ CPO Evaluator sprint contract
-4. CTO 구현 (G2 entry)
+4. `/sfs implement` 로 CTO 구현 (G2 entry) — 실제 코드 + `implement.md`/`log.md` evidence
 5. CPO review (G4)
 6. CTO review 확인 + 사용자 최종 통과
 7. 회고 / 문서화

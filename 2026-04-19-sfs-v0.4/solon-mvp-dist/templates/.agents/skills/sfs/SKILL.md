@@ -1,6 +1,6 @@
 ---
 name: sfs
-description: Solon SFS workflow for Codex — use $sfs status/start/guide/auth/update/brainstorm/plan/review/decision/retro/loop or natural language to dispatch to bash adapter SSoT; brainstorm/plan/decision/retro are AI-hybrid refinements, review is adapter-run by default through the selected CPO executor bridge. Trigger when a Codex surface delivers $sfs, sfs <command>, /sfs text that reaches the model, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "update", "sprint 시작", "브레인스토밍", "plan 작성", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
+description: Solon SFS workflow for Codex — use $sfs status/start/guide/auth/update/brainstorm/plan/implement/review/decision/retro/loop or natural language to dispatch to bash adapter SSoT; brainstorm/plan/implement/decision/retro are AI-hybrid refinements, review is adapter-run by default through the selected CPO executor bridge. Trigger when a Codex surface delivers $sfs, sfs <command>, /sfs text that reaches the model, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "update", "sprint 시작", "브레인스토밍", "plan 작성", "구현", "implement", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
 ---
 
 # Solon SFS — Codex Skill
@@ -17,7 +17,7 @@ Command modes are explicit:
 - **Bash-first**: `status`, `start`, `guide`, `auth`, `update`, `loop`. Print verbatim
   adapter output first. A compact recap/status line is allowed when it helps
   the user see state and the next action, but adapter stdout remains SSoT.
-- **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`. Run the
+- **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `retro`. Run the
   adapter first, then perform the documented AI-side file refinement.
 - **Adapter-run**: `review`. The bash adapter executes the selected CPO
   executor bridge by default. Stop after adapter output. If `--prompt-only` is
@@ -60,13 +60,14 @@ The bash adapter execution is **deterministic** and must NOT be
 re-interpreted by the model. Bash adapter is single source of truth (SSoT) for
 command I/O. Hybrid commands have documented AI-side follow-ups:
 Solon CEO refinement of `brainstorm.md` §1~§7, G1 plan + CTO/CPO sprint
-contract refinement of `plan.md`, ADR refinement for `decision`, and G5 retro
-refinement for `retro`. Review verdicts come from the selected CPO executor
-bridge or a manual `--prompt-only` handoff.
+contract refinement of `plan.md`, implementation execution for `implement`,
+ADR refinement for `decision`, and G5 retro refinement for `retro`. Review
+verdicts come from the selected CPO executor bridge or a manual `--prompt-only`
+handoff.
 
 ## Solon Report Output Rule
 
-For hybrid commands (`brainstorm`, `plan`, `decision`, `retro`) and adapter-run
+For hybrid commands (`brainstorm`, `plan`, `implement`, `decision`, `retro`) and adapter-run
 `review`, the final answer must be a **Solon report**, not a plain bullet list
 such as `plan.md refined: ...`. Put the whole report in a fenced `text` block.
 Render the report in the user's visible language (for example, Korean for a
@@ -120,6 +121,7 @@ not create a new verdict in the current runtime.
 | `update [--skip-existing]` (또는 "Solon 업데이트", "adapter 갱신") | `sfs update [--skip-existing]` | 현재 설치된 runtime 기준으로 managed adapter/docs 갱신. sprint/decision/event history 보존 |
 | `brainstorm [text|--stdin]` (또는 "브레인스토밍", "요구사항 정리") | `sfs brainstorm <raw context>` | G0 raw 요구사항/대화 맥락을 brainstorm.md 에 기록한 뒤 §1~§7을 Solon CEO로 정리. newline 허용 |
 | `plan` (또는 "plan 작성", "이번 sprint 계획") | `sfs plan` | plan.md 진입 + plan_open event 후 brainstorm.md 기반 G1 plan/contract 작성 |
+| `implement [work slice|--stdin]` (또는 "구현", "코드 구현", "실제 작업") | `sfs implement <work slice>` | implement.md/log.md 진입 후 plan 기반으로 실제 코드 변경 + 테스트/스모크 evidence 작성. 여기서 멈추지 말고 구현까지 진행 |
 | `review --gate <id> [--executor <tool>] [--prompt-only]` / `review --show-last` (또는 "CPO review", "검증 기록", "이전 리뷰 확인") | `sfs review --gate <id> [--executor <tool>] [--generator <tool>] [--prompt-only]` 또는 `sfs review --show-last [--gate <id>]` | CPO Evaluator bridge run by default. `--prompt-only` creates prompt/log for manual handoff. `--show-last` prints compact metadata for the latest recorded result without rerunning executor. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
 | `decision <title>` (또는 "결정 기록", "ADR 추가") | `sfs decision "<title>" [--id <id>]` | ADR file 생성 후 Context/Decision/Alternatives/Consequences refinement |
 | `retro [--close]` (또는 "회고", "sprint close") | `sfs retro [--close]` | retro.md 진입 후 KPT/PDCA refinement. `--close` 는 refinement 후 1회 실행 |
@@ -159,6 +161,9 @@ not create a new verdict in the current runtime.
      `4`=template missing, `5`=permission, `99`=unknown.
    - plan: `0`=ok, `1`=no `.sfs-local/` or no active sprint, `4`=template
      missing, `99`=unknown.
+   - implement: `0`=ok, `1`=no `.sfs-local/` or no active sprint,
+     `2`=corrupt `events.jsonl` / `current-sprint`, `3`=not a git repo,
+     `4`=template missing, `5`=permission, `99`=unknown.
    - review: `0`=ok, `1`=no `.sfs-local/` or no active sprint, `4`=template
     missing, `6`=gate id invalid or required, `7`=usage,
     `9`=executor bridge missing/failed, `99`=unknown.
@@ -178,6 +183,7 @@ not create a new verdict in the current runtime.
    sprint mode. Hybrid commands continue only via the documented flow below:
    - `brainstorm` → Brainstorm CEO Refinement
    - `plan` → Plan G1 Refinement
+   - `implement` → Implementation Execution
    - `decision` → Decision ADR Refinement
    - `retro` → Retro G5 Refinement
   - `review` → Review CPO Handling. Use adapter stdout as metadata, read the
@@ -241,8 +247,35 @@ first run the bash adapter, then fill `plan.md` from the current G0 context.
 6. Do not implement code, choose irreversible infrastructure, or run
    `/sfs review` automatically.
 7. Final response: render a Solon report. Include `plan.md` path in `Files`,
-   question count in `Questions`, and `Next: /sfs review --gate G1 --executor codex --generator claude`
+   question count in `Questions`, and `Next: /sfs review --gate G1 ... then /sfs implement "<first code slice>"`
    when ready; otherwise `Next: answer questions, then /sfs plan`.
+
+## Implementation Execution
+
+`/sfs implement` is the command that turns plan into code. It is never
+artifact-only in AI runtimes. After the bash adapter succeeds and stdout has
+been shown verbatim, continue into actual implementation unless blocked.
+
+1. Resolve `implement.md`, `plan.md`, and `log.md` from adapter stdout. If
+   stdout cannot be parsed, read `.sfs-local/current-sprint` and open those
+   files under `.sfs-local/sprints/<current-sprint>/`.
+2. Read `plan.md`, `implement.md`, `log.md`, and relevant project files. If the
+   requested slice conflicts with the plan, state the conflict and ask before
+   editing.
+3. Apply the AI coding guardrails from `implement.md`:
+   - shared design concept before editing,
+   - DDD terms used consistently in code/tests/docs,
+   - TDD or smallest useful verification loop,
+   - existing codebase regularity over one-off cleverness.
+4. Implement the smallest coherent code slice. Prefer test-first when the
+   codebase has a usable test harness. If no test harness exists, create or run
+   the smallest practical smoke check and record the limitation.
+5. Update `implement.md` §1~§5 and `log.md` with changed files, decisions,
+   tests/commands, result, and review handoff. Set `implement.md` frontmatter
+   `status: ready-for-review` only when code and verification evidence exist.
+6. Run relevant tests/checks. Do not claim success without evidence.
+7. Final response: render a Solon report with actual code files in `Files`,
+   checks in `Actions` or `Steps`, and `Next: /sfs review --gate G4` when ready.
 
 ## Decision ADR Refinement
 
@@ -314,7 +347,7 @@ Print this 3-line usage and stop:
 
 ```
 Usage: /sfs <command> [args]
-Commands: status, start, guide, auth, update, brainstorm, plan, review, decision, retro, loop
+Commands: status, start, guide, auth, update, brainstorm, plan, implement, review, decision, retro, loop
 Help: bash .sfs-local/scripts/sfs-<command>.sh --help
 ```
 
