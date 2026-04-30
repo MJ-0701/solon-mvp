@@ -1,9 +1,9 @@
 ---
 doc_id: handoff-next-session
 title: "Next session handoff (auto-written, WU-28)"
-written_at: 2026-04-29T16:30:00Z
-written_at_kst: 2026-04-29T16:30:00+09:00
-last_commit: 777540f
+written_at: 2026-04-30T10:00:00Z
+written_at_kst: 2026-04-30T19:00:00+09:00
+last_commit: 99b2313
 visibility: raw-internal
 ---
 
@@ -13,17 +13,45 @@ visibility: raw-internal
 
 ## 1. default_action (다음 세션 진입 시 즉시 실행)
 
-26th-2 ε continuation 2 ✅ 0.5.0-mvp release prep 100% 완료 (file 편집 only, host .git mutate 0). 사용자 mac terminal 에서 **1줄 실행** 으로 4-step batch (commit → stable review → cut --apply → push) 자동 진행:
+26th-3 ε continuation 3 ✅ 0.5.1-product hotfix prep 완료 (사용자 결정 α default = roll-forward 수신). 26th-2 helper 가 0.5.0-mvp cut 후 codex 의 stable product rebrand 작업 회귀 발견 → dev staging 자체를 product 로 정합 회복 + legacy GIT_MARKER fallback 설계 (consumer 하위 호환).
+
+사용자 mac terminal 에서 **1줄 실행**:
 
 ```sh
-bash ~/agent_architect/2026-04-19-sfs-v0.4/tmp/release-0.5.0-mvp.sh
+bash ~/agent_architect/2026-04-19-sfs-v0.4/tmp/release-0.5.1-product.sh
 ```
 
 본 helper 가 path / branch 자동 감지, 매 step 사용자 confirm, §1.5 push 명시 confirm 정합. fallback (manual 4-step) = 본 file §7 참조.
 
-## 2. 산출 inventory (직전 세션 결과)
+## 0. 회귀 진단 요약 (26th-3 핵심)
 
-solon-mvp-dist/VERSION (0.4.0-mvp→0.5.0-mvp), solon-mvp-dist/CHANGELOG.md (0.5.0-mvp entry 보강), solon-mvp-dist/README.md (7-Gate + 7 명령 + 런타임 1급), solon-mvp-dist/install.sh (Gemini commands + Codex Skill 자동 install), solon-mvp-dist/upgrade.sh (CHECK_FILES + update_file 신규 slot 2건), solon-mvp-dist/templates/SFS.md.template / CLAUDE.md.template / AGENTS.md.template / GEMINI.md.template (4종 multi-adaptor parity), solon-mvp-dist/templates/.gemini/commands/sfs.toml (신설), solon-mvp-dist/templates/.agents/skills/sfs/SKILL.md (신설), solon-mvp-dist/templates/.codex/prompts/sfs.md (신설), tmp/release-notes-0.5.0-mvp.md (multi-adaptor parity table 보강), tmp/release-0.5.0-mvp.sh (1-batch interactive helper), PROGRESS.md (26th-2 narrative + heartbeat), HANDOFF (auto-write 본 file)
+| 시각 (KST) | commit | 의미 |
+|:--|:--|:--|
+| Apr 29 23:52 | `ced9cc1` | codex stable: prepare solon mvp product docs (R-D1 hotfix path, sync-back ❌) |
+| Apr 29 23:59 | `5765abb` | codex stable: rename repository to solon product (legacy marker fallback 패턴) |
+| Apr 30 00:03 | `7977a75` | codex stable: harden readme for product positioning |
+| Apr 30 09:07 | `99b2313` | **본 cycle helper 0.5.0-mvp release cut → codex 작업 overwrite 회귀** |
+
+→ 0.5.1-product 가 정합 baseline. 0.5.0-mvp tag 처리 (delete vs deprecate vs keep) 별도 사이클.
+
+## 2. 산출 inventory (26th-3 cycle 결과, 12+ file 편집 + helper 1 신설)
+
+α-1 dev staging mvp→product rename batch:
+- `solon-mvp-dist/VERSION` (0.5.0-mvp → 0.5.1-product)
+- `solon-mvp-dist/CHANGELOG.md` (h1 'Solon Product' + 0.5.1-product entry 신설)
+- `solon-mvp-dist/README.md` (h1 + 버전 라벨 + 상태 + 모든 install URL + tmp dir + CHANGELOG 라인)
+- `solon-mvp-dist/install.sh` (SOLON_REPO + GIT_MARKER + LEGACY 양쪽 + .gitignore 자동 교체 awk + banner / Fetching / 설치 완료 / commit hint)
+- `solon-mvp-dist/upgrade.sh` (동일)
+- `solon-mvp-dist/uninstall.sh` (양쪽 marker 동일 처리 awk)
+- `solon-mvp-dist/templates/.gitignore.snippet` (Solon Product)
+- `solon-mvp-dist/templates/SFS.md.template` (solon-mvp → solon-product)
+- `solon-mvp-dist/templates/CLAUDE.md.template` / `AGENTS.md.template` / `GEMINI.md.template` (Solon SFS → Solon Product SFS)
+
+α-2: `scripts/cut-release.sh` line 111 정규식 `-(mvp|product)$` 확장.
+
+α-3: `tmp/release-0.5.1-product.sh` 신설 (1줄 helper, interactive 4-step, heredoc commit message + 회귀 narrative + legacy marker fallback 설계 명시).
+
+α-4: `PROGRESS.md` (26th-3 narrative + heartbeat) + `HANDOFF-next-session.md` (본 file).
 
 ## 3. 미결정 W10 TODO (release-blocker 0건, 모두 후속 release)
 

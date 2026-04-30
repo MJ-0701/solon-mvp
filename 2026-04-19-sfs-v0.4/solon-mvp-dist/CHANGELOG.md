@@ -1,7 +1,26 @@
-# CHANGELOG — Solon MVP
+# CHANGELOG — Solon Product
 
-모든 릴리스는 [Semantic Versioning](https://semver.org/lang/ko/) 을 따른다. `-mvp` suffix 는
-아직 풀스펙 (사용자 개인 방법론 docset) 으로 수렴하지 않은 최소 배포판임을 표시.
+모든 릴리스는 [Semantic Versioning](https://semver.org/lang/ko/) 을 따른다. suffix 규약:
+- `-mvp` (0.5.0-mvp 까지) — 풀스펙 (사용자 개인 방법론 docset) 으로 수렴하지 않은 최소 배포판.
+- `-product` (0.5.1+) — Solon Product 로 rebrand 후 외부 onboarding 가능한 단계.
+
+## [0.5.1-product] — 2026-04-30
+
+**mvp→product rebrand roll-forward + 0.5.0-mvp 회귀 hotfix.**
+
+### Fixed
+
+- **`solon-mvp` → `solon-product` repository rename 회귀 fix** — 0.5.0-mvp release cut (`99b2313`) 가 dev staging 의 mvp 본을 stable 에 rsync 하면서 codex 의 product rebrand 작업 (`5765abb chore: rename repository to solon product` + `7977a75 docs: harden readme for product positioning` + `ced9cc1 chore: prepare solon mvp product docs`) 을 overwrite. 본 release 에서 dev staging 자체를 product 로 정합 → 다음 cut 부터는 회귀 차단.
+- **`install.sh` / `upgrade.sh` / `uninstall.sh` SOLON_REPO** — `MJ-0701/solon-mvp` → `MJ-0701/solon-product`. curl one-liner URL + git clone 예시 + tmp dir 명 + banner 모두 정합. legacy `### BEGIN solon-mvp ###` GIT_MARKER 는 fallback 으로 인식해서 product marker 로 자동 교체 (consumer 하위 호환).
+- **`README.md` h1** — `# Solon MVP` → `# Solon Product`. 버전 라벨 정합. CHANGELOG 라인 정합 ("0.5.1-product = product rebrand roll-forward").
+- **`templates/.gitignore.snippet`** — `Solon MVP` → `Solon Product`.
+- **4 runtime adapter template (SFS / CLAUDE / AGENTS / GEMINI)** — `Solon MVP` narrative → `Solon Product`.
+- **`scripts/cut-release.sh` semver 검증** — 정규식 `^[0-9]+\.[0-9]+\.[0-9]+-mvp$` → `^[0-9]+\.[0-9]+\.[0-9]+-(mvp|product)$`. -product suffix release 통과.
+
+### Notes
+
+- 0.5.0-mvp tag (`v0.5.0-mvp`) 는 외부 노출 미흡 상태로 남음 (rename 회귀 영향, 친구 onboarding curl URL 차단 위험). 본 0.5.1-product release 가 정합 baseline.
+- legacy marker 인식 = consumer 가 0.5.0-mvp 이전 install 한 프로젝트도 `upgrade.sh` 실행 시 자동으로 product marker 로 정합 회복.
 
 ## [0.5.0-mvp] — 2026-04-29
 

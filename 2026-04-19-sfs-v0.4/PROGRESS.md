@@ -406,8 +406,8 @@ resume_hint:
   purpose: "24번째 세션이 본 PROGRESS.md 1개만 읽고 (a) 23rd 미완 commit 마무리 + (b) sandbox file:// clone 패턴 채택 + (c) WU-24 + WU-31 병렬 default 자동 진행"
   trigger_positive: [ㄱㄱ, 고, ㅇㅋ, ok, OK, 시작, 가자, ㅇㅇ, 진행, go, Go, start, "이전 세션 이어서", "이어서 ㄱㄱ", "이어서", 이어, "이어서 진행"]
   trigger_negative: [ㄴㄴ, 잠깐, stop, 아니, 중단, 다른거, 다른, no]
-  default_action: 26th-2 ε continuation 2 ✅ 0.5.0-mvp release prep 100% 완료 (사용자 결정 α + C 수신 + multi-adaptor parity vendor reality fact 검증 web research + Codex Skill + Gemini commands + Codex user-scoped fallback 신설 + install.sh / upgrade.sh / README / CHANGELOG / release notes 모두 정합 회복). 다음 default = 사용자 mac terminal 에서 1줄 실행 → `bash ~/agent_architect/2026-04-19-sfs-v0.4/tmp/release-0.5.0-mvp.sh` (interactive 4-step = commit → stable review → cut --apply → push). 본 helper 가 path/branch 자동 감지 + 매 step 사용자 confirm + §1.5/§1.18 정합. fallback (manual) = HANDOFF-next-session.md §7 4-step 안내.
-  last_written: 2026-04-29T16:30:00Z
+  default_action: 26th-3 ε continuation 3 ✅ 0.5.1-product hotfix prep 완료 (α default 결정 = roll-forward). 26th-2 release helper 0.5.0-mvp 실행 직후 codex 의 stable product rebrand 작업 (5765abb / 7977a75 / ced9cc1) 회귀 발견 → dev staging 자체를 product 로 정합 회복 + cut-release.sh semver 검증 -product suffix 허용 + legacy GIT_MARKER fallback 인식 (consumer 하위 호환). 다음 default = 사용자 mac terminal 에서 1줄 실행 → `bash ~/agent_architect/2026-04-19-sfs-v0.4/tmp/release-0.5.1-product.sh` (interactive 4-step). 0.5.0-mvp tag 처리 (delete vs deprecate vs keep) 는 별도 사이클.
+  last_written: 2026-04-30T10:00:00Z
 
     1. **CLAUDE.md SSoT Read** — §1 14규율 + §1.5' (commit/push 사용자 manual) + §1.12 mutex + §1.14 ≤200 lines.
     2. **PROGRESS.md (본 파일) Read** — frontmatter `domain_locks` + `current_wu_owner` 확인.
@@ -526,6 +526,48 @@ resume_hint:
 ---
 
 ## ① Just-Finished
+
+### 26번째 사이클 3번째 ε continuation `26th-3-cowork-cycle` (Cowork user-active conversation, 2026-04-30T09:30~10:00Z KST, 사용자 verbatim 2건 = 'release 실행완료됐고 수정해야될건 이제 mvp -> product로 rename 됐어 이 내 solon-mvp 폴더는 코덱스가 작업했고 수정된 내용들 확인해줘' + 'α default ㄱㄱ' = 26th-2 helper 실행 후 codex 의 stable rebrand 작업 회귀 진단 + roll-forward 결정 위임)
+
+**핵심 발견 + 진단**:
+
+1. **회귀 사고 (R-D1 §1.13 invariant violation 사후)**: 26th-2 helper 가 `99b2313 release: 0.5.0-mvp` (Apr 30 09:07 KST) 로 cut → dev (mvp 그대로) 가 stable (codex 의 product rebrand) 위에 rsync overwrite. codex 작업 3 commits = `5765abb chore: rename repository to solon product` (Apr 29 23:59) + `7977a75 docs: harden readme for product positioning` (Apr 30 00:03) + `ced9cc1 chore: prepare solon mvp product docs` (Apr 29 23:52). codex 가 R-D1 hotfix path 의 ① sync-back 단계를 안 했음 + 본 cycle Step 2 stable working tree review 시점에 사용자가 codex 변경분을 case-by-case 못 함 → 본 cycle helper 가 일괄 cut + rsync 한 결과.
+
+2. **외부 onboarding 차단 위험**: install.sh / upgrade.sh / uninstall.sh 의 `SOLON_REPO="MJ-0701/solon-mvp"` 잔존 → GitHub repo rename 후 redirect 만료 시 친구 `curl` URL 404. README h1 `# Solon MVP`, CHANGELOG h1 `# CHANGELOG — Solon MVP`, .gitignore.snippet `Solon MVP`, 4 runtime adapter template `Solon SFS` 다 회귀.
+
+3. **cut-release.sh semver 검증 한계**: line 111 정규식 `^[0-9]+\.[0-9]+\.[0-9]+-mvp$` → `-product` suffix release 통과 못 함. fix 필요.
+
+**3-agent self-review (사용자 위임 정합, 결정 #1 α/β/γ 송출 후 α 수신)**:
+- PLANNER (CEO scope-risk): α (roll-forward 0.5.1-product) = mechanical translation, decision_points 신설 0, history 깔끔. β (revert) 는 force-push 위험. γ (사용자 직접) 는 R-D1 위반 재발 위험. → α PASS.
+- EVALUATOR (CPO user-impact): α 선택 시 친구 onboarding curl URL 즉시 정합, legacy marker fallback 으로 0.5.0-mvp 이전 install consumer 도 자동 정합. → PASS.
+- AI: α 사용자 위임 + light gate self-PASS.
+
+**α-1~α-4 산출 (cascade 4 step, file 편집 12+, host .git mutate 0)**:
+
+α-1. **dev staging mvp→product rename batch** (codex 5765abb 패턴 차용):
+   - `solon-mvp-dist/VERSION` 0.5.0-mvp → 0.5.1-product
+   - `solon-mvp-dist/install.sh` SOLON_REPO + GIT_MARKER + LEGACY_GIT_MARKER fallback + .gitignore 갱신 영역 legacy → product marker 자동 교체 awk + banner / Fetching / 설치 완료 narrative + commit hint
+   - `solon-mvp-dist/upgrade.sh` 동일
+   - `solon-mvp-dist/uninstall.sh` 양쪽 marker 동일 처리 awk (remove_block helper)
+   - `solon-mvp-dist/README.md` h1 + 버전 라벨 + 상태 'product / private beta' + 모든 install URL + tmp dir 명 + CHANGELOG 라인
+   - `solon-mvp-dist/CHANGELOG.md` h1 'Solon Product' + suffix 규약 정합 + 0.5.1-product entry 신설 (Fixed 6항목 + Notes 2항목)
+   - `solon-mvp-dist/templates/.gitignore.snippet` 'Solon Product'
+   - `solon-mvp-dist/templates/SFS.md.template` solon-mvp → solon-product
+   - `solon-mvp-dist/templates/CLAUDE.md.template` / `AGENTS.md.template` / `GEMINI.md.template` 'Solon SFS' → 'Solon Product SFS'
+α-2. **`scripts/cut-release.sh` semver 검증 fix** — line 111 정규식 `^[0-9]+\.[0-9]+\.[0-9]+-(mvp|product)$` 확장. -product suffix release 통과.
+α-3. **`tmp/release-0.5.1-product.sh` 신설** — 26th-2 helper 패턴 그대로 + version + heredoc commit message narrative (회귀 진단 + α-1~3 산출물 + legacy marker fallback 설계 + P-12 후보).
+α-4. **PROGRESS heartbeat + HANDOFF 갱신** — 본 narrative entry + last_written + default_action 1줄 helper 안내.
+
+**규율 준수**: §1.3 self-validation (α 사용자 위임) · §1.4 β default (legacy marker fallback = minimal cleanup) · §1.5' file 편집 only (host .git mutate 0) · §1.13 R-D1 사후 정합 (회귀 발견 → dev staging 정합 회복) · §1.15 light review gate (3-agent self PASS) · §1.17 7-step prose (α/β/γ 결정 송출) · §1.18 commit 안내 heredoc + path/branch-neutral · §1.20 (2) 회귀 발견 즉시 stop + 그 문제만 처리.
+
+**잠재 후속 P-pattern 후보**:
+- **P-12 silent-rebrand-via-legacy-marker** — repository rename 시 GIT_MARKER 양쪽 인식 + 자동 교체 awk 패턴. 본 cycle 첫 사례. 향후 rename / 추가 rebrand 시 reuse.
+- **P-13 dev-stable-divergence-on-cut** — cut-release.sh 가 stable HEAD 와 dev staging 의 narrative divergence emit 안 함 (P-10 W-22 는 lock 만 감지). 후속 W-AUTO 신설 필요 (cut-release.sh diff preview 시 stable HEAD 와 dev VERSION/h1/SOLON_REPO 비교 → divergence 강조).
+
+**잔여 작업 (사용자 mac terminal 영역, 1줄 실행)**:
+```sh
+bash ~/agent_architect/2026-04-19-sfs-v0.4/tmp/release-0.5.1-product.sh
+```
 
 ### 26번째 사이클 2번째 ε continuation `26th-2-cowork-cycle` (Cowork user-active conversation, 2026-04-29T15:30Z~16:30Z+, 사용자 verbatim 4건 누적 = '"α + C, 즉시 cut" → 친구 지금 자는중이라서 실행 데이터 못받음' + 'CEO,CPO agent 셋이서 회의하고 가장 best practice인 방향으로 끝까지 쭉 작업진행해' + 'loop만 멀티 adaptor 지원하는것 처럼 명시... solon의 모든 기능이 multi-adaptor로 동작할 수 있어야 됨' + 'codex랑 gemini-cli도 claude랑 동일하게 사용 가능해야됨 ... 스킬체계가 같아서 안될이유가 없을거 같다')
 

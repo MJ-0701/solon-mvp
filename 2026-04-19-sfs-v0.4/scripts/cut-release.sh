@@ -107,9 +107,10 @@ if [[ -z "${VERSION}" ]]; then
   fail "missing --version (예: --version 0.3.0-mvp)" 1
 fi
 
-# semver-mvp 형식 검증: X.Y.Z-mvp (간단 regex)
-if ! [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+-mvp$ ]]; then
-  fail "invalid --version format '${VERSION}' (expected X.Y.Z-mvp)" 1
+# semver-suffix 형식 검증: X.Y.Z-{mvp|product} (간단 regex)
+# -mvp  = 0.5.0-mvp 까지 legacy / -product = 0.5.1+ rebrand 후
+if ! [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+-(mvp|product)$ ]]; then
+  fail "invalid --version format '${VERSION}' (expected X.Y.Z-mvp or X.Y.Z-product)" 1
 fi
 
 MODE="dry-run"
