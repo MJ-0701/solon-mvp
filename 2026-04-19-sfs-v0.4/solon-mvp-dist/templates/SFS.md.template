@@ -22,11 +22,11 @@
 
 각 1 cycle = 1 Sprint = 5~7 일. 3 C-Level(CEO/CTO/CPO) 기준 순서:
 
-1. **CEO 요구사항 정리** (G0) — `.sfs-local/sprints/<sprint-id>/brainstorm.md`
-2. **CEO plan** (G1) — `.sfs-local/sprints/<sprint-id>/plan.md`
-3. **CTO Generator ↔ CPO Evaluator sprint contract** — `plan.md §5`
+1. **CEO 요구사항 정리** (G0) — `/sfs brainstorm` 이 raw 를 기록하고 Solon CEO 가 `.sfs-local/sprints/<sprint-id>/brainstorm.md` §1~§7 을 정리
+2. **CEO plan** (G1) — `/sfs plan` 이 `brainstorm.md` 를 읽고 `.sfs-local/sprints/<sprint-id>/plan.md` 의 요구사항/AC/scope 를 작성
+3. **CTO Generator ↔ CPO Evaluator sprint contract** — `/sfs plan` 이 `plan.md §5` 에 계약 작성
 4. **CTO 구현** (G2 entry) — 실제 코드 + `log.md`
-5. **CPO review** (G4) — `review.md` + CPO verdict
+5. **CPO review** (G4) — `review.md` + CPO verdict + command output result excerpt
 6. **CTO review 확인** — pass 면 최종 통과, partial/fail 이면 지정 범위 재구현
 7. **회고** (G5) — `.sfs-local/sprints/<sprint-id>/retro.md` + README 업데이트
 
@@ -49,13 +49,14 @@
 주 구현 도구로 쓰더라도, Claude 가 만든 결과를 Claude 가 그대로 통과시키는 자체검증을 피하기 위해
 Codex plugin, Codex CLI, Gemini CLI, 또는 별도 agent instance 로 CPO review 를 위임할 수 있어야 한다.
 
-`/sfs review --executor <tool>` 은 그 의도를 기록하고, `--run` 은 실제 CLI/bridge 호출을 시도한다.
-bridge 가 없으면 조용히 성공하지 않고 실패해야 한다. Claude 내부에 연결된 Codex plugin 은 shell 에서
-자동 호출할 수 없으므로 plugin bridge command 또는 printed prompt → plugin 호출 2-step 이 필요하다.
+`/sfs review --executor <tool>` 은 그 의도를 기록하고 기본적으로 실제 CLI/bridge 호출을 시도한다.
+bridge 가 없으면 조용히 성공하지 않고 실패해야 한다. 수동 handoff 만 필요하면 `--prompt-only` 를 쓴다.
+Claude 내부에 연결된 Codex plugin 은 shell 에서 자동 호출할 수 없으므로 plugin bridge command 또는
+prompt-only → plugin 호출 2-step 이 필요하다.
 
 Bridge 는 비대칭이다:
 - Claude 구현 → Codex review: Claude 쪽 Codex plugin/manual bridge 또는 `codex` CLI.
-- Codex 구현 → Claude review: Claude plugin 이 아니라 `claude` CLI (`--executor claude --run`) 또는 prompt handoff.
+- Codex 구현 → Claude review: Claude plugin 이 아니라 `claude` CLI (`--executor claude`) 또는 prompt handoff.
 - `claude-plugin` executor 는 지원하지 않는다. Codex 는 Claude plugin host 가 아니다.
 
 ### Gate 운용 (7-enum, signal-only)
@@ -96,11 +97,11 @@ Solon SFS 의 10 명령은 어떤 CLI 환경에서 호출하든 동일한 bash a
 | `/sfs start <goal> [--id <sprint-id>] [--force]` | sprint workspace 초기화 + sprint files cp |
 | `/sfs guide [--path|--print]` | 짧은 사용 맥락 브리핑 / guide 경로 / full guide 본문 보기 |
 | `/sfs auth status|check|login|probe [--executor codex|gemini|claude]` | review executor 인증 확인/로그인/더미 요청 |
-| `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락을 brainstorm.md 에 기록 |
-| `/sfs plan` | 현재 sprint plan.md 진입 + `plan_open` event |
-| `/sfs review --gate <id> [--executor codex|gemini|claude|custom] [--run]` | CPO review prompt append. `--run` 은 리뷰할 evidence 가 있을 때만 실제 bridge 호출 |
-| `/sfs decision <title> [--id <id>]` | full ADR 신설 (decisions/) 또는 mini-ADR (sprint-local) |
-| `/sfs retro [--close]` | retro.md 진입 (+`--close` 시 sprint close + auto commit) |
+| `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락 기록 + Solon CEO 맥락 정리 |
+| `/sfs plan` | 현재 sprint plan.md 진입 + `plan_open` event 후 G1 요구사항/AC/scope + CTO/CPO sprint contract 작성 |
+| `/sfs review --gate <id> [--executor codex|gemini|claude|custom] [--prompt-only]` / `/sfs review --show-last` | CPO review run. stdout 에 bounded result excerpt 를 보여주고, full prompt 는 tmp prompt file에 저장하며 `review.md`에는 compact log/result만 남김. `--show-last` 는 executor 재실행 없이 기존 결과 확인 |
+| `/sfs decision <title> [--id <id>]` | full ADR 신설 후 Context/Decision/Alternatives/Consequences 작성 |
+| `/sfs retro [--close]` | retro.md 작성/갱신. `--close` 는 retro refinement 후 sprint close + auto commit |
 | `/sfs loop [OPTIONS]` | Ralph Loop + Solon mutex 자율 진행 (see `--help`) |
 
 ## 6 본부 활성 상태 (divisions)
@@ -142,10 +143,10 @@ Solon SFS 의 10 명령은 어떤 CLI 환경에서 호출하든 동일한 bash a
 - **Claude Code**: `/sfs`, `/sfs help`, `/sfs status`, `/sfs guide`, `/sfs start <goal>`
   (`.claude/commands/sfs.md` 의 dispatch table 이 자동으로 `.sfs-local/scripts/sfs-*.sh` 호출)
 - **Codex**: `.agents/skills/sfs/SKILL.md` + `AGENTS.md` 가 동일한 dispatch table 을 안내.
-  `/sfs` 는 public command surface 이며, Codex desktop app 처럼 `/sfs` 가 모델/Skill 에
-  도달하는 환경에서는 정상 1급 경로다. Codex CLI 가 unknown leading slash 를 모델 전에
-  차단하는 build 에서만 runtime adaptor compatibility gap 으로 본다. `$sfs status`,
-  `sfs status`, 자연어, direct bash 는 그 CLI build 에서만 쓰는 임시 bypass 이다.
+  Codex app/CLI 에서는 `$sfs status`, `$sfs start ...`, `$sfs brainstorm ...` 처럼 Skill
+  mention 을 우선 사용한다. Bare `/sfs` 는 host native slash UI 가 모델 전에 차단할 수 있다.
+  이때 `커맨드 없음` / `Unrecognized command` 가 보이면 Solon 미설치가 아니라 Codex runtime
+  adaptor gap 이다. `/sfs ...` 텍스트가 모델/Skill 까지 도달한 경우에는 dispatch 대상이다.
 - **Gemini CLI**: `GEMINI.md` 가 동일한 dispatch table 을 안내. 동작 동일.
 
 `/sfs loop --executor claude|gemini|codex|<custom>` 로 Ralph Loop LLM 호출도 환경 무관.

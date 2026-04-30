@@ -77,15 +77,12 @@ PowerShell-only 환경은 아직 지원선 밖이다.
 |:--|:--|
 | Claude Code | `/sfs status` (slash popup) |
 | Gemini CLI | `/sfs status` (slash popup) |
-| Codex desktop app / compatible Codex | `/sfs status` |
-| Codex CLI blocking build | `/sfs status` 가 public API 이지만 CLI parser 에 막히면 `$sfs status` / 자연어가 임시 bypass |
+| Codex app / Codex CLI | `$sfs status` 또는 `sfs status` |
 
-아래 예시는 Solon 기준 canonical `/sfs` 표기입니다. Codex desktop app 처럼 `/sfs` 가
-prompt 본문으로 모델/Skill 에 도달하는 환경에서는 그대로 정상 경로입니다. 앱 UI 가 별도
-command chip 을 표시하지 않아도 모델이 `/sfs ...` 를 읽을 수 있으면 dispatch 대상입니다.
-Codex CLI 에서 bare `/sfs` 가 `Unrecognized command '/sfs'` 로 막히면 그건 사용자 실수가
-아니라 Codex CLI adaptor compatibility gap 입니다. `$sfs start ...`, `$sfs plan`, 자연어,
-direct bash 는 그 CLI build 에서만 쓰는 임시 bypass 입니다.
+아래 예시는 Solon 기준 `/sfs` 표기입니다. Claude Code 와 Gemini CLI 에서는 그대로 쓰면 된다.
+Codex app/CLI 에서 bare `/sfs` 를 입력했을 때 `커맨드 없음` 또는 `Unrecognized command` 가
+뜨면 Solon 이 실행된 것이 아니라 host slash parser 가 메시지를 모델 전에 차단한 것이다.
+그 경우 Codex 에서는 `$sfs start ...`, `$sfs plan`, 자연어, direct bash 를 쓴다.
 
 처음 실행하면 다음과 비슷한 1줄 dashboard 가 나온다:
 
@@ -109,7 +106,11 @@ sprint - · WU - · gate -:- · ahead 0 · last_event -
 
 ## 3. 다음 10분 — brainstorm → plan
 
-먼저 raw 요구사항과 대화 맥락을 `brainstorm.md` 에 남긴다:
+먼저 raw 요구사항과 대화 맥락을 `brainstorm.md` 에 남긴다. Claude/Codex/Gemini 같은
+AI runtime 에서 `/sfs brainstorm` 으로 실행하면 두 단계가 한 번에 이어진다.
+
+1. bash adapter 가 raw input 을 `§8 Append Log` 에 안전하게 기록한다.
+2. Solon CEO 가 그 raw 를 읽고 `§1~§7` 을 채운다. 부족한 정보가 있으면 1~3개 질문을 한다.
 
 ```text
 /sfs brainstorm "아직 정리 안 된 요구사항, 제약, 아이디어"
@@ -121,14 +122,19 @@ sprint - · WU - · gate -:- · ahead 0 · last_event -
 bash .sfs-local/scripts/sfs-brainstorm.sh --stdin < requirements.txt
 ```
 
-그 다음 brainstorm 을 plan 계약으로 바꾼다:
+direct bash 는 raw capture-only 이다. AI 없이 bash 를 직접 실행했다면, 다음에 AI runtime 에서
+`/sfs brainstorm` 을 한 번 더 실행해서 기존 `§8 Append Log` 를 CEO refinement 로 정리한다.
+
+그 다음 brainstorm 을 plan 계약으로 바꾼다. AI runtime 에서 `/sfs plan` 은
+`plan.md ready` 만 출력하고 끝나는 명령이 아니라, bash adapter 로 G1 파일을 연 뒤
+`brainstorm.md` 를 읽어 요구사항/AC/scope 와 CTO/CPO sprint contract 를 채워야 한다:
 
 ```text
 /sfs plan
 ```
 
 이러면 `plan.md` 가 열리고 frontmatter 의 `phase: plan`, `last_touched_at` 이 자동 갱신된다.
-같은 sprint 의 `brainstorm.md` 를 읽고 본인이 채울 영역:
+같은 sprint 의 `brainstorm.md` 에서 Solon CEO 가 채운 영역:
 
 - **목표 (Goal)**: 이번 sprint 끝나고 무엇이 동작해야 하나? 1-2줄.
 - **AC (Acceptance Criteria)**: 어떻게 동작하는 게 "끝" 인가? 3-5개 bullet.
@@ -154,20 +160,26 @@ Claude 자체검증이 아니라 독립 CPO 검증을 받기 위함이다.
 ```
 
 → `.sfs-local/decisions/0001-jwt-vs-session.md` 같은 ADR-style file 자동 생성.
+AI runtime 에서는 여기서 끝내지 않고 sprint context 를 읽어 Context / Decision /
+Alternatives / Consequences / References 를 바로 채운다.
 
 구현이 끝나갈 때 CPO Evaluator review 를 연다:
 
 ```text
-/sfs review --gate G4 --executor codex --generator claude --run
+/sfs review --gate G4 --executor codex --generator claude
 ```
 
-→ `review.md` 에 CPO persona 기반 review prompt 가 append 된다. CPO verdict 는
-`pass` / `partial` / `fail` 로 기록한다. `partial` 또는 `fail` 이면 CTO 가 지정된 항목만
-재구현하고 다시 review 를 연다.
+→ full CPO prompt 는 `.sfs-local/tmp/review-prompts/` 에 저장되고, `review.md` 에는
+`prompt_path` 와 크기, 실행 결과 요약만 남는다. 명령 출력에는 bounded result excerpt 가
+바로 표시되므로 verdict/findings/required CTO actions 를 열어보지 않고 확인할 수 있다.
+기본 동작은 실제 bridge 실행이고, 수동 handoff 만 필요하면 `--prompt-only` 로 prompt/log 만
+만든다. 이미 실행된 리뷰를 다시 보려면 `/sfs review --show-last [--gate G4]` 를 사용한다.
+CPO verdict 는 `pass` / `partial` / `fail` 로 기록한다. `partial` 또는
+`fail` 이면 CTO 가 지정된 항목만 재구현하고 다시 review 를 연다.
 
-`--run` 은 실제 bridge 가 있을 때만 성공한다. `codex` 는 `SFS_REVIEW_CODEX_CMD` 또는
-`codex exec --full-auto` 를 사용한다. Claude 내부 Codex plugin 은 shell 에서 직접 호출할 수
-없으므로 `SFS_REVIEW_CODEX_PLUGIN_CMD` 같은 bridge 를 설정하거나, `--print-prompt` 로 나온
+기본 review 실행은 실제 bridge 가 있을 때만 성공한다. `codex` 는 `SFS_REVIEW_CODEX_CMD` 또는
+`codex exec --full-auto --ephemeral --output-last-message <result> -` 를 사용한다. Claude 내부 Codex plugin 은 shell 에서 직접 호출할 수
+없으므로 `SFS_REVIEW_CODEX_PLUGIN_CMD` 같은 bridge 를 설정하거나, `--prompt-only` 로 나온
 prompt 를 Claude 에 연결된 Codex plugin 에 넘겨야 한다.
 
 Codex/Claude/Gemini CLI 는 인증 prompt 가 먼저 뜨면 SFS 가 넘긴 review prompt 를 auth 답변으로
@@ -182,11 +194,11 @@ real terminal 에서는 `/sfs auth login --executor gemini` 처럼 브라우저/
 부르는 방식이 아니라, 설치된 Claude CLI 를 bridge 로 사용한다:
 
 ```text
-/sfs review --gate G4 --executor claude --generator codex --run
+/sfs review --gate G4 --executor claude --generator codex
 ```
 
-Claude CLI bridge 가 없으면 `--print-prompt` 로 CPO prompt 를 뽑아서 Claude 에 handoff 한다.
-`--executor claude-plugin --run` 같은 경로는 지원하지 않는다. Codex 는 Claude plugin host 가 아니다.
+Claude CLI bridge 가 없으면 `--prompt-only` 로 CPO prompt 를 뽑아서 Claude 에 handoff 한다.
+`--executor claude-plugin` 같은 경로는 지원하지 않는다. Codex 는 Claude plugin host 가 아니다.
 
 sprint 완전히 끝났으면:
 
@@ -194,7 +206,8 @@ sprint 완전히 끝났으면:
 /sfs retro --close
 ```
 
-→ `retro.md` 작성 + sprint close + auto-commit 까지 한 번에 (push 는 안 함, 너가 직접).
+→ AI runtime 에서는 먼저 `retro.md` 를 KPT/PDCA 로 채우고, 그 다음 close adapter 를 1회
+실행해 sprint close + auto-commit 까지 처리한다 (push 는 안 함, 너가 직접).
 
 > ⚠️ `--close` 는 review 한 번이라도 한 sprint 에서만 동작. review 안 했으면 exit 8 + 메시지 출력.
 
@@ -202,26 +215,28 @@ sprint 완전히 끝났으면:
 
 ## 5. 10 슬래시 명령 cheatsheet
 
-Codex desktop app 에서 `/sfs` 가 모델/Skill 에 보이면 정상 1급 경로다. 메시지를 읽은
-Codex adapter 는 unsupported 로 답하지 말고 즉시 bash adapter 로 dispatch 한다. Codex CLI
-에서만 leading `/sfs` 가 막히는 build 는 adaptor gap 이다. 그 경우만 임시로 `$sfs` 또는
-자연어 bypass 를 쓴다.
+Claude/Gemini 에서는 `/sfs ...` 를 그대로 쓴다. Codex app/CLI 에서는 현재 bare `/sfs` 가
+native slash UI 에서 `커맨드 없음` 으로 막힐 수 있으므로 `$sfs ...` Skill mention 이 실사용
+1급 경로다. direct bash 는 항상 deterministic fallback 이다.
 
 | 명령 | 한 줄 설명 |
 |:--|:--|
 | `/sfs status` | 지금 어디까지 왔는지 1줄 |
 | `/sfs start <goal>` | 새 sprint workspace 초기화 |
-| `/sfs brainstorm [text]` | G0 raw 요구사항과 대화 맥락 기록 |
+| `/sfs brainstorm [text]` | G0 raw 기록 + Solon CEO 맥락 정리 |
 | `/sfs guide` | 처음 쓸 때 필요한 맥락과 다음 명령 확인 |
 | `/sfs guide --path` | 이 onboarding guide 경로만 확인 |
 | `/sfs guide --print` | 이 guide 본문을 터미널에 출력 |
 | `/sfs auth status` | Codex/Claude/Gemini review executor 인증 확인 |
 | `/sfs auth probe --executor gemini --timeout 20` | bridge request/response 더미 확인 |
-| `/sfs plan` | 현 sprint 의 의도/경계 작성 |
-| `/sfs review --gate G4 --executor codex --run` | 리뷰할 evidence 가 있을 때 CPO review bridge 실행 + verdict 기록 |
-| `/sfs decision <title>` | ADR-style 결정 기록 |
-| `/sfs retro [--close]` | 회고 작성 / sprint close + auto-commit |
+| `/sfs plan` | 현 sprint 의 의도/경계 + G1 요구사항/AC + CTO/CPO 계약 작성 |
+| `/sfs review --gate G4 --executor codex` | 리뷰할 evidence 가 있을 때 CPO review bridge 실행 + 결과 기록 |
+| `/sfs review --show-last` | executor 재실행 없이 마지막 CPO review 결과 excerpt 확인 |
+| `/sfs decision <title>` | ADR-style 결정 기록 + AI runtime 에서 ADR 본문 작성 |
+| `/sfs retro [--close]` | 회고 작성 / `--close` 는 회고 작성 후 sprint close + auto-commit |
 | `/sfs loop` | 큰 작업 자율 진행 (Ralph Loop, 고급) |
+
+Codex 에서는 같은 명령을 `$sfs status`, `$sfs start ...`, `$sfs brainstorm ...` 처럼 입력한다.
 
 각 명령 자체에 `--help` 있음:
 
@@ -247,7 +262,7 @@ Windows PowerShell 에서는:
 |:--|:--|
 | Claude Code | `.claude/commands/sfs.md` (자동 install) |
 | Gemini CLI | `.gemini/commands/sfs.toml` (자동 install) |
-| Codex | `.agents/skills/sfs/SKILL.md` (자동 install, project-scoped Skill; `/sfs` public API) |
+| Codex | `.agents/skills/sfs/SKILL.md` (자동 install, project-scoped Skill; `$sfs ...` 권장) |
 | Codex CLI bypass (선택, legacy prompt) | `~/.codex/prompts/sfs.md` (manual `cp`, 지원 build 에서 `/prompts:sfs ...`) |
 
 `/sfs loop` 의 LLM 호출 부분 (자율 진행 모드) 은 `--executor claude|gemini|codex|<custom>` 로 vendor 선택:

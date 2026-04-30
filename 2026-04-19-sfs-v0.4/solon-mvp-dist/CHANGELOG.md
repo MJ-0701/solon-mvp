@@ -1,3 +1,164 @@
+## [0.5.24-product] - 2026-04-30
+
+**Review result visibility and Solon report UX.** `/sfs review` now shows the
+executor-provided result excerpt directly in command output, and AI runtime
+adapters must render hybrid/review completions as Solon reports instead of
+path-only one-liners.
+
+### Added
+
+- **Visible CPO result excerpt** — successful review runs print a bounded
+  `CPO RESULT EXCERPT` after the `review.md ready ... output <path>` line, so
+  users can see verdict/findings/required CTO actions without opening tmp files.
+- **Review recall** — `/sfs review --show-last` (aliases: `--show`, `--last`)
+  reprints the latest recorded CPO result for the active sprint without
+  rerunning Codex/Claude/Gemini or spending executor tokens.
+- **Solon report output rule** — Claude, Codex, and Gemini adapter instructions
+  now require a fenced Solon report for hybrid commands and adapter-run review,
+  with review/action fields populated only from recorded executor evidence.
+
+### Changed
+
+- **Review docs** — README, onboarding guide, SFS template, and runtime adapter
+  templates now describe `--show-last` and the stdout result excerpt behavior.
+- **Self-validation guard** — runtimes may surface the executor result already
+  produced by SFS, but must not invent an extra verdict in the same runtime.
+
+## [0.5.23-product] - 2026-04-30
+
+**CPO review runs by default.** `/sfs review` now treats the selected CPO
+executor bridge as the normal path, so users no longer need to remember an
+extra run flag. Manual handoff remains available through `--prompt-only`.
+
+### Changed
+
+- **Review UX** — user-facing docs, Claude/Codex/Gemini adapters, and guide
+  examples now use `/sfs review --gate <id> --executor <tool> --generator <tool>`
+  as the normal command.
+- **Prompt-only escape hatch** — `--prompt-only` is the explicit no-token
+  manual handoff mode.
+- **Backward compatibility** — old commands that still include the previous run
+  flag are accepted as a no-op, but the flag is no longer shown in user docs.
+- **Self-validation guard** — review is no longer described as current-runtime
+  conditional refinement. The adapter either runs the selected executor, skips
+  empty evidence, or creates prompt-only handoff material.
+
+## [0.5.22-product] - 2026-04-30
+
+**Slim CPO review handoff + resilient Codex bridge.** `/sfs review` no longer
+embeds the full CPO prompt into `review.md` on every invocation. The full prompt
+is stored once under `.sfs-local/tmp/review-prompts/`, while `review.md` keeps a
+compact invocation/result log.
+
+### Changed
+
+- **Review prompt bloat guard** — `review.md` records `prompt_path`,
+  `prompt_size`, and policy metadata instead of appending the full prompt body.
+- **Bounded evidence recursion** — generated review prompts include only the
+  first 80 lines of `review.md` so old invocation logs do not recursively
+  inflate future review prompts.
+- **Codex CLI bridge hardening** — default Codex executor now uses
+  `codex exec --full-auto --ephemeral --output-last-message <result> -`.
+- **Executor warning handling** — if an executor exits non-zero but emits a
+  strict `Verdict: pass|partial|fail`, SFS records the review as completed with
+  an executor warning instead of discarding a usable CPO verdict.
+
+## [0.5.21-product] - 2026-04-30
+
+**Command-mode audit: bash-only vs hybrid vs conditional-hybrid.** The
+`brainstorm` and `plan` bugs exposed a broader contract gap: some SFS commands
+open scaffold files that AI runtimes must then fill, while other commands are
+pure deterministic bash adapters. The command contract is now explicit.
+
+### Changed
+
+- **Command mode taxonomy** — `status/start/guide/auth/loop` are bash-only;
+  `brainstorm/plan/decision/retro` are AI-runtime hybrid commands;
+  `review` is conditional-hybrid only when the current runtime is the selected
+  CPO evaluator.
+- **Decision refinement** — `/sfs decision <title>` creates the ADR file, then
+  AI runtimes fill Context / Decision / Alternatives / Consequences /
+  References from current sprint context.
+- **Retro refinement before close** — AI runtimes must fill retro.md before
+  running `retro --close`; close remains explicit-user-only.
+- **Review self-validation guard** — `/sfs review` only writes a verdict in the
+  current runtime when that runtime matches `--executor`; otherwise it leaves a
+  prompt/bridge handoff and does not pretend review happened.
+- **Review evidence detection** — `decision_created` now counts as sprint
+  evidence for planning-gate review, matching the event emitted by
+  `/sfs decision`.
+
+## [0.5.20-product] - 2026-04-30
+
+**Plan is now a hybrid command.** `/sfs plan` no longer stops at
+`plan.md ready`. AI runtimes must read the current `brainstorm.md` and fill the
+G1 plan + CTO/CPO sprint contract before returning.
+
+### Changed
+
+- **Claude/Gemini/Codex plan refinement** — `/sfs plan` dispatches the bash
+  adapter first, then performs Solon CEO/CTO/CPO G1 refinement from
+  `brainstorm.md`.
+- **No empty plan surprise** — `plan.md ready` is treated as the adapter
+  handshake, not as a complete plan.
+- **Sprint contract default** — plan refinement must fill requirements,
+  measurable AC, scope, dependencies, Generator/Evaluator contract, and a
+  next implementation backlog seed.
+
+## [0.5.19-product] - 2026-04-30
+
+**Solon report shape, not bkit-shaped footer.** The previous
+`Solon Feature Usage` footer borrowed too much of the bkit report design. Solon
+now keeps bkit-origin usage facts only as optional content inside the existing
+Solon Session Status Report shape.
+
+### Changed
+
+- **Removed bkit-style footer contract** — active Claude command/template
+  instructions no longer use `Feature Usage`, `Used`, `Not Used`, or
+  `Recommended` rows as the Solon report design.
+- **Solon Status Report alignment** — when usage facts are useful, they should
+  be folded into Solon evidence/health/next lines (`Steps`, `Health`, `Next`),
+  following `solon-status-report.md`.
+- **Default command output stays quiet** — deterministic `/sfs` commands still
+  stop after bash adapter output; reports are only for explicit status/report
+  moments or the documented brainstorm CEO refinement.
+
+## [0.5.18-product] - 2026-04-30
+
+**Codex slash parser reality check.** Codex desktop can show `커맨드 없음` for
+bare `/sfs` before the message reaches the model/Skill. The Codex entry path is
+now documented as `$sfs ...` / Skill mention first, with direct bash as the
+deterministic fallback.
+
+### Changed
+
+- **Codex invocation guidance** — docs and installer output now recommend
+  `$sfs status`, `$sfs start`, and `$sfs brainstorm` for Codex app/CLI surfaces
+  that intercept unknown slash commands.
+- **No false native slash promise** — `/sfs` remains the Solon command shape for
+  Claude/Gemini and for any surface that actually forwards the text, but Codex
+  native slash registration is not claimed until the host exposes it.
+- **Self-hosting docs alignment** — Codex Skill instructions now treat `$sfs`
+  as the practical 1급 Codex adapter path.
+- **Guide stdout alignment** — the short `/sfs guide` briefing now shows the
+  Codex `$sfs ...` path directly, not only the long Markdown guide.
+
+## [0.5.17-product] - 2026-04-30
+
+**Brainstorm CEO refinement flow.** `/sfs brainstorm` now matches the intended
+G0 flow in AI runtimes: capture raw requirements first, then have Solon CEO fill
+`brainstorm.md` §1~§7 and ask concise follow-up questions when needed.
+
+### Changed
+
+- **hybrid brainstorm command** — Claude/Codex/Gemini adapters now dispatch the
+  bash adapter for raw capture, then continue with CEO refinement instead of stopping.
+- **guide clarity** — onboarding docs explain that direct bash is capture-only,
+  while AI runtimes perform context refinement from `§8 Append Log`.
+- **brainstorm output hint** — the bash script now prints whether raw input was
+  captured and reminds AI runtimes to refine §1~§7.
+
 ## [0.5.16-product] - 2026-04-30
 
 **Solon-owned usage footer.** The Claude `/sfs` command now preserves the useful

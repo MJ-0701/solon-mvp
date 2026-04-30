@@ -1,9 +1,9 @@
 ---
 doc_id: handoff-next-session
 title: "Next session handoff (auto-written, WU-28)"
-written_at: 2026-04-30T11:00:00Z
-written_at_kst: 2026-04-30T20:00:00+09:00
-last_commit: 99b2313
+written_at: 2026-04-30T12:30:00Z
+written_at_kst: 2026-04-30T21:30:00+09:00
+last_commit: 2c3baf0
 visibility: raw-internal
 ---
 
@@ -13,17 +13,43 @@ visibility: raw-internal
 
 ## 1. default_action (다음 세션 진입 시 즉시 실행)
 
-26th-3 ε continuation 3 ✅ 완료 (α default 결정 + B2 codex narrative sync-back + C 회고/시스템 정비 3-layer). 본 cycle 발견 결함 3건 (P-13 release tooling divergence 미감지 + P-14 AI mental coupling on rename fix + R-D1 §1.13 invariant 부족) 모두 정합 회복. cut-release.sh §1 Pre-flight 강화 (exit 7 신설, --allow-divergence bypass) + P-13/P-14 learning logs 신설 + CLAUDE.md §1.13 보강 + cross-ref-audit §4 W-27/W-28 추가.
+현재 작업은 **0.5.24-product 후보: Solon report UX 복원 + review 결과 가시성**
+구현 완료 상태다.
+사용자 지적 2건 반영:
+- `/sfs plan` hybrid 결과가 `plan.md refined` 한 줄 중심으로 출력되어 예전 Solon report 대비 너무 밋밋함.
+- `/sfs review` 실행 후 `review.md ready ... output <path>` 만 보이면 사용자가 verdict/findings/actions 를 바로 알 수 없음. 이미 작성된 리뷰를 다시 확인하는 기능도 필요.
 
-사용자 mac terminal 에서 **1줄 실행**:
+다음 세션 default action:
 
-```sh
-bash ~/agent_architect/2026-04-19-sfs-v0.4/tmp/release-0.5.1-product.sh
-```
+1. release cut:
+   `bash scripts/cut-release.sh --version 0.5.24-product --apply --allow-dirty --allow-divergence`
+2. stable push + `~/tmp/solon-product` pull + `~/Soongsil` upgrade.
 
-본 helper 가 path / branch 자동 감지, 매 step 사용자 confirm, §1.5 push 명시 confirm 정합. fallback (manual 4-step) = 본 file §7 참조.
+주의:
+- `0.5.23-product` 는 이미 stable push 완료: `/Users/mj/workspace/solon-mvp` commit `2c3baf0`, tag `v0.5.23-product`.
+- Soongsil 도 `0.5.23-product` upgrade 완료.
+- 현재 `--run` 제거/기본 review 실행 작업은 완료 상태다.
+- root `AGENTS.md` / `CLAUDE.md` 는 redirect stub 이므로 절대 overwrite 금지.
+- root self-install 파일(`.agents/`, `.claude/`, `.gemini/`, `.sfs-local/`, `SFS.md`, `GEMINI.md`)은 untracked 상태로 남아 있다. 다음 세션에서 필요 시 최신 템플릿 sync 하되 stub 보존.
 
-## 0. 회귀 진단 요약 (26th-3 핵심)
+적용된 0.5.24 후보 패치:
+- `.claude/commands/sfs.md`: hybrid/adapter-run final output 을 Solon report code block 으로 강제.
+- `.agents/skills/sfs/SKILL.md`: Codex Skill 도 동일 report rule 추가.
+- `.gemini/commands/sfs.toml` + `.codex/prompts/sfs.md`: Solon report rule 전파.
+- `sfs-review.sh`: review run 완료 후 stdout 에 bounded `CPO RESULT EXCERPT` 출력.
+- `sfs-review.sh --show-last|--show|--last`: executor 재실행 없이 active sprint 의 기존 CPO 결과 재출력.
+- README/GUIDE/templates 문서화 + `VERSION` / `CHANGELOG.md` = `0.5.24-product`.
+
+아직 해야 할 것:
+- release cut / stable push / consumer upgrade.
+
+검증:
+- `bash -n` pass: dist template `sfs-review.sh`, active `.sfs-local/scripts/sfs-review.sh`.
+- `/tmp` sandbox `review --show-last --gate G1` pass: 기존 result_path 기반 excerpt 재출력.
+- `/tmp` sandbox custom executor review run pass: `review.md ready ... output <path>` 다음 `CPO RESULT EXCERPT` 표시.
+- `git diff --check` pass.
+
+## 9. Older Archive — 이전 release 회귀 진단 요약 (참고용, 현재 default_action 아님)
 
 | 시각 (KST) | commit | 의미 |
 |:--|:--|:--|
