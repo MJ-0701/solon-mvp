@@ -42,12 +42,13 @@ not as `bkit Feature Usage`. Use this exact shape:
 ─────────────────────────────────────────────────
 ✅ Used: Bash (SFS adapter dispatch)
 ⏭️ Not Used: PDCA skills, Agents (SFS workflow is Solon bash adapter SSoT)
-💡 Recommended: /sfs brainstorm <context> — G0 요구사항 기록 후 /sfs plan 진행
+💡 Recommended: /sfs brainstorm <context> — G0 raw 기록 + CEO 정리 후 /sfs plan 진행
 ─────────────────────────────────────────────────
 ```
 
 Do not imply bkit owns or orchestrates the Solon workflow. Do not add any other
-Claude-driven commentary after deterministic SFS commands.
+Claude-driven commentary after deterministic SFS commands, except for the
+documented `/sfs brainstorm` CEO refinement flow below.
 
 The user's arguments are interpolated below. Treat the first whitespace-delimited
 token as the subcommand and the remainder as that subcommand's arguments.
@@ -60,10 +61,12 @@ $ARGUMENTS
 
 If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`brainstorm`**, **`plan`**, **`review`**,
 **`decision`**, **`retro`**, or **`loop`**, dispatch the request to the corresponding
-bash adaptor through `.sfs-local/scripts/sfs-dispatch.sh` and stop. The
+bash adaptor through `.sfs-local/scripts/sfs-dispatch.sh` first. The
 dispatcher normalizes runtime command surfaces (`/sfs`, `$sfs`, `sfs`) and
-then delegates to `.sfs-local/scripts/sfs-<command>.sh`. These ten
-subcommands are deterministic and must NOT be re-interpreted by the model.
+then delegates to `.sfs-local/scripts/sfs-<command>.sh`. For all commands
+except `brainstorm`, stop after printing adapter output. `brainstorm` is a
+hybrid command: the bash adapter captures raw G0 input, then Claude performs
+the CEO refinement described in "Brainstorm CEO Refinement" below.
 
 ⚠️ AI 자율 호출 금지 — 사용자 명시 호출 시에만 동작 (§1.5' 정합). 특히 `retro --close`
 는 sprint close + auto commit 을 트리거하므로 사용자 의도 없이 호출 금지.
@@ -76,7 +79,7 @@ Dispatch table:
 | `start`    | `.sfs-local/scripts/sfs-dispatch.sh start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
 | `guide`    | `.sfs-local/scripts/sfs-dispatch.sh guide <remaining args>`    | passes `--path` / `--print` verbatim; default prints a short context briefing |
 | `auth`     | `.sfs-local/scripts/sfs-dispatch.sh auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
-| `brainstorm` | `.sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context and appends it to `brainstorm.md` |
+| `brainstorm` | `.sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then Claude fills §1~§7 as Solon CEO |
 | `plan`     | `.sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | takes no flags currently; remaining args reserved for future (WU-25 §1) |
 | `review`   | `.sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator review. passes `--gate`, `--executor`, `--generator`, `--persona`, `--print-prompt`, `--run`, `--allow-empty`, and auth flags verbatim |
 | `decision` | `.sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim (WU-26 §1). Uses `decisions-template/ADR-TEMPLATE.md` (5 섹션 ADR-full); `sprint-templates/decision-light.md` 은 Claude-driven fallback. |
@@ -132,11 +135,45 @@ Procedure (apply in order):
      `5`=safety_lock tripped, `6`=WU spec missing/corrupt,
      `7`=artifact verify fail, `8`=heartbeat write fail (FUSE),
      `9`=executor resolve fail, `99`=unknown.
-5. **Stop or Solon footer only** — After dispatch, do not add Claude-driven
-   commentary, alternative suggestions, or bkit-branded reports. The bash
-   script is the single source of truth for command output. If a usage footer is
-   shown, it must be the Solon Feature Usage footer from the Runtime Boundary
-   section above, and nothing else.
+5. **Stop or continue only for brainstorm** — After dispatch, non-brainstorm
+   commands must stop without Claude-driven commentary, alternative
+   suggestions, or bkit-branded reports. The bash script is the single source
+   of truth for command output. If a usage footer is shown, it must be the
+   Solon Feature Usage footer from the Runtime Boundary section above, and
+   nothing else. For `brainstorm` only, continue to the CEO refinement flow
+   below after a zero exit code.
+
+## Brainstorm CEO Refinement
+
+`/sfs brainstorm` is not capture-only in AI runtimes. After the bash adapter
+succeeds and its stdout has been printed verbatim:
+
+1. Resolve the active `brainstorm.md` path from adapter stdout. If stdout cannot
+   be parsed, read `.sfs-local/current-sprint` and open
+   `.sfs-local/sprints/<current-sprint>/brainstorm.md`.
+2. Read `brainstorm.md`, especially `§8. Append Log`. Treat the append log as
+   user raw data and preserve it.
+3. Act as **Solon CEO**. Fill or update `§1` through `§6` from the raw input and
+   existing context:
+   - `§1` concise raw brief / conversation notes.
+   - `§2` problem owner, urgency, current pain, success state.
+   - `§3` technical, deployment, cost/time, and user learning constraints.
+   - `§4` at least two options, including a deliberately smaller MVP option.
+   - `§5` in scope / out of scope / next sprint candidates.
+   - `§6` goal, acceptance criteria candidates, major risks, CTO Generator
+     deliverables, and CPO Evaluator review criteria.
+4. Update `§7` checklist based only on what is actually satisfied.
+5. If critical information is missing, add concise open questions inside `§6`
+   or immediately before `§7`, and ask up to 3 questions in the final response.
+   Still fill known sections with explicit assumptions and unknowns.
+6. Set frontmatter `status: ready-for-plan` only when `§6` is usable for
+   `/sfs plan`; otherwise keep `status: draft`.
+7. Do not implement code, choose a framework, or run `/sfs plan` automatically.
+8. Final response shape after editing:
+   - first line: `brainstorm.md refined: <path>`
+   - then `questions: <N>` and the questions only if needed
+   - then `next: /sfs plan` when status is `ready-for-plan`, otherwise
+     `next: answer questions, then /sfs brainstorm`
 
 If `$ARGUMENTS` is empty, treat it as if the user typed `status` (run the
 status adapter) so that bare `/sfs` produces the canonical compact status line.
@@ -171,7 +208,7 @@ If the first argument is one of the modes below, follow that mode.
 - `start`: **Adapter (above).** Fallback only: scaffold a sprint under `.sfs-local/sprints/<YYYY-Wxx-sprint-n>/` based on `sprint-templates/`.
 - `guide`: **Adapter (above).** Fallback only: point the user to `.sfs-local/GUIDE.md` if it exists, otherwise `GUIDE.md`.
 - `auth`: **Adapter (above).** Fallback only: tell the user to run `.sfs-local/scripts/sfs-auth.sh --help`.
-- `brainstorm`: **Adapter (above).** Fallback only: produce or update the current sprint `brainstorm.md` based on `sprint-templates/brainstorm.md`.
+- `brainstorm`: **Adapter first + CEO refinement (above).** Fallback only: produce or update the current sprint `brainstorm.md` based on `sprint-templates/brainstorm.md`, then fill §1~§7 as Solon CEO if file editing is available.
 - `plan`: **Adapter (above).** Fallback only: produce or update the current sprint `plan.md` from `brainstorm.md` + `sprint-templates/plan.md`.
 - `sprint`: Convert the current plan into implementation steps and gate checks.
 - `review`: **Adapter (above).** Fallback only: use `.sfs-local/personas/cpo-evaluator.md` and write/update `review.md`; CPO review is mandatory, executor/tool is configurable. `--run` must use a real CLI/plugin bridge. If the user explicitly asks to use a Claude-connected Codex plugin, do not treat metadata as a review: run/print the CPO prompt, invoke the connected plugin if available, then append the plugin result to `review.md`.
@@ -190,7 +227,7 @@ When showing usage, keep it compact and practical. Include this shape:
 /sfs start <goal>         새 sprint workspace 초기화
 /sfs guide                처음 사용 맥락 브리핑
 /sfs auth status          review executor 인증 상태 확인
-/sfs brainstorm <context> G0 raw 요구사항/대화 맥락 기록
+/sfs brainstorm <context> G0 raw 기록 + CEO 맥락 정리
 /sfs plan                 현재 sprint plan.md 작성/갱신
 /sfs review --gate G4 --executor codex --generator claude --run
                           CPO Evaluator review bridge 실행/기록
@@ -210,4 +247,5 @@ Also explain this in one or two sentences:
 - Keep sprint artifacts concise and operational.
 - Do not invent completed work. If evidence is missing, mark it as unknown.
 - Prefer concrete next actions over broad methodology explanations.
-- For `status`, `start`, `guide`, `auth`, `brainstorm`, `plan`, `review`, `decision`, `retro`, and `loop`, the bash adapter is authoritative — do not paraphrase or augment its output.
+- For `status`, `start`, `guide`, `auth`, `plan`, `review`, `decision`, `retro`, and `loop`, the bash adapter is authoritative — do not paraphrase or augment its output.
+- For `brainstorm`, the bash adapter is authoritative for raw capture, and the documented CEO refinement is the authoritative AI-side follow-up.

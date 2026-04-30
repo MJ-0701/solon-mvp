@@ -8,12 +8,13 @@
 #   surface 를 normalize 하고, bash adapter (.sfs-local/scripts/sfs-*.sh) 가
 #   single source of truth.
 #   user 발화의 첫 token = subcommand → sfs-<subcommand>.sh 실행 + stdout verbatim 출력.
+#   단, brainstorm 은 raw capture 후 Gemini 가 Solon CEO 로 §1~§7 refinement 를 수행.
 #   paraphrase 금지, 결정성 유지 (Claude Code / Codex / Gemini CLI 동등 1급).
 #
 # Note: {{args}} 는 Gemini CLI v1 placeholder. 사용자가 입력한 첫 token 이 subcommand,
 #       나머지는 그 subcommand 의 인자로 그대로 전달.
 
-description = "Solon SFS workflow command — bash adapter SSoT (status/start/guide/auth/brainstorm/plan/review/decision/retro/loop)"
+description = "Solon SFS workflow command — bash adapter SSoT; brainstorm captures raw input then fills §1~§7 as Solon CEO"
 
 prompt = """
 You are operating in a project that has Solon SFS installed.
@@ -25,8 +26,10 @@ token as the subcommand and the remainder as that subcommand's arguments.
 
 If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`brainstorm`**, **`plan`**, **`review`**,
 **`decision`**, **`retro`**, or **`loop`**, dispatch the request to the
-corresponding bash script under `.sfs-local/scripts/` and stop. These ten
-subcommands are deterministic and must NOT be re-interpreted by the model.
+corresponding bash script under `.sfs-local/scripts/` first. For every command
+except `brainstorm`, stop after printing adapter output. `brainstorm` is a
+hybrid command: the bash adapter captures raw G0 input, then Gemini performs
+the CEO refinement described below.
 
 | First arg | Script to run | Notes |
 |:--|:--|:--|
@@ -34,7 +37,7 @@ subcommands are deterministic and must NOT be re-interpreted by the model.
 | `start`    | `bash .sfs-local/scripts/sfs-dispatch.sh start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
 | `guide`    | `bash .sfs-local/scripts/sfs-dispatch.sh guide <remaining args>`    | default context briefing; passes `--path` / `--print` verbatim |
 | `auth`     | `bash .sfs-local/scripts/sfs-dispatch.sh auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
-| `brainstorm` | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context and appends it to `brainstorm.md` |
+| `brainstorm` | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then fills §1~§7 as Solon CEO |
 | `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | takes no flags currently; remaining args reserved for future |
 | `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator review; passes `--gate`, `--executor`, `--generator`, `--persona`, `--print-prompt`, `--run`, `--allow-empty`, and auth flags verbatim |
 | `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim |
@@ -61,8 +64,42 @@ subcommands are deterministic and must NOT be re-interpreted by the model.
    If exit code is non-zero, also print stderr and the exit code on a final
    line: `exit <code>`.
 
-5. **Stop** — Do not summarize, paraphrase, or add commentary. The bash
-   adapter is the SSoT.
+5. **Stop or continue only for brainstorm** — For non-brainstorm commands, do
+   not summarize, paraphrase, or add commentary. The bash adapter is the SSoT.
+   For `brainstorm`, continue to the CEO refinement flow below after a zero
+   exit code.
+
+## Brainstorm CEO Refinement
+
+`/sfs brainstorm` is not capture-only in AI runtimes. After the bash adapter
+succeeds and stdout has been shown verbatim:
+
+1. Resolve the active `brainstorm.md` path from adapter stdout. If stdout cannot
+   be parsed, read `.sfs-local/current-sprint` and open
+   `.sfs-local/sprints/<current-sprint>/brainstorm.md`.
+2. Read `brainstorm.md`, especially `§8. Append Log`. Treat the append log as
+   user raw data and preserve it.
+3. Act as **Solon CEO**. Fill or update `§1` through `§6` from the raw input and
+   existing context:
+   - `§1` concise raw brief / conversation notes.
+   - `§2` problem owner, urgency, current pain, success state.
+   - `§3` technical, deployment, cost/time, and user learning constraints.
+   - `§4` at least two options, including a deliberately smaller MVP option.
+   - `§5` in scope / out of scope / next sprint candidates.
+   - `§6` goal, acceptance criteria candidates, major risks, CTO Generator
+     deliverables, and CPO Evaluator review criteria.
+4. Update `§7` checklist based only on what is actually satisfied.
+5. If critical information is missing, add concise open questions inside `§6`
+   or immediately before `§7`, and ask up to 3 questions in the final response.
+   Still fill known sections with explicit assumptions and unknowns.
+6. Set frontmatter `status: ready-for-plan` only when `§6` is usable for
+   `/sfs plan`; otherwise keep `status: draft`.
+7. Do not implement code, choose a framework, or run `/sfs plan` automatically.
+8. Final response shape after editing:
+   - first line: `brainstorm.md refined: <path>`
+   - then `questions: <N>` and the questions only if needed
+   - then `next: /sfs plan` when status is `ready-for-plan`, otherwise
+     `next: answer questions, then /sfs brainstorm`
 
 ## If first arg is empty or `help`
 

@@ -109,7 +109,11 @@ sprint - · WU - · gate -:- · ahead 0 · last_event -
 
 ## 3. 다음 10분 — brainstorm → plan
 
-먼저 raw 요구사항과 대화 맥락을 `brainstorm.md` 에 남긴다:
+먼저 raw 요구사항과 대화 맥락을 `brainstorm.md` 에 남긴다. Claude/Codex/Gemini 같은
+AI runtime 에서 `/sfs brainstorm` 으로 실행하면 두 단계가 한 번에 이어진다.
+
+1. bash adapter 가 raw input 을 `§8 Append Log` 에 안전하게 기록한다.
+2. Solon CEO 가 그 raw 를 읽고 `§1~§7` 을 채운다. 부족한 정보가 있으면 1~3개 질문을 한다.
 
 ```text
 /sfs brainstorm "아직 정리 안 된 요구사항, 제약, 아이디어"
@@ -121,6 +125,9 @@ sprint - · WU - · gate -:- · ahead 0 · last_event -
 bash .sfs-local/scripts/sfs-brainstorm.sh --stdin < requirements.txt
 ```
 
+direct bash 는 raw capture-only 이다. AI 없이 bash 를 직접 실행했다면, 다음에 AI runtime 에서
+`/sfs brainstorm` 을 한 번 더 실행해서 기존 `§8 Append Log` 를 CEO refinement 로 정리한다.
+
 그 다음 brainstorm 을 plan 계약으로 바꾼다:
 
 ```text
@@ -128,7 +135,7 @@ bash .sfs-local/scripts/sfs-brainstorm.sh --stdin < requirements.txt
 ```
 
 이러면 `plan.md` 가 열리고 frontmatter 의 `phase: plan`, `last_touched_at` 이 자동 갱신된다.
-같은 sprint 의 `brainstorm.md` 를 읽고 본인이 채울 영역:
+같은 sprint 의 `brainstorm.md` 에서 Solon CEO 가 채운 영역:
 
 - **목표 (Goal)**: 이번 sprint 끝나고 무엇이 동작해야 하나? 1-2줄.
 - **AC (Acceptance Criteria)**: 어떻게 동작하는 게 "끝" 인가? 3-5개 bullet.
@@ -211,7 +218,7 @@ Codex adapter 는 unsupported 로 답하지 말고 즉시 bash adapter 로 dispa
 |:--|:--|
 | `/sfs status` | 지금 어디까지 왔는지 1줄 |
 | `/sfs start <goal>` | 새 sprint workspace 초기화 |
-| `/sfs brainstorm [text]` | G0 raw 요구사항과 대화 맥락 기록 |
+| `/sfs brainstorm [text]` | G0 raw 기록 + Solon CEO 맥락 정리 |
 | `/sfs guide` | 처음 쓸 때 필요한 맥락과 다음 명령 확인 |
 | `/sfs guide --path` | 이 onboarding guide 경로만 확인 |
 | `/sfs guide --print` | 이 guide 본문을 터미널에 출력 |

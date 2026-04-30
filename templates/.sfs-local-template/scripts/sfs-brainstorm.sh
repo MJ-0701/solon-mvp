@@ -9,6 +9,7 @@
 #
 # Output:
 #   brainstorm.md ready: <path>
+#   brainstorm.md ready: <path> | raw captured | AI runtime should refine §1-§7 as Solon CEO
 #
 # Exit codes:
 #   0  success
@@ -33,7 +34,10 @@ Usage: /sfs brainstorm [<raw brief>]
 Open/update the active sprint's brainstorm.md (G0 Brainstorm Gate document).
   - Creates brainstorm.md from sprint-templates/brainstorm.md if missing.
   - Accepts multiline raw context via --stdin or a quoted argument.
-  - Appends raw input to brainstorm.md for later AI/user refinement.
+  - Appends raw input to brainstorm.md.
+  - In Claude/Codex/Gemini runtimes, the /sfs adapter should then refine
+    §1~§7 as Solon CEO from the append log and ask follow-up questions.
+  - Direct bash remains capture-only and prints the file path plus refinement hint.
   - Updates frontmatter: phase=brainstorm, last_touched_at=<ISO8601>.
   - Appends events.jsonl `brainstorm_open` event.
   - Prints the resolved brainstorm.md path to stdout.
@@ -158,7 +162,11 @@ if ! append_event "brainstorm_open" "{\"sprint_id\":\"${_esc_sprint}\",\"path\":
   exit "${SFS_EXIT_PERM}"
 fi
 
-echo "brainstorm.md ready: ${BRAINSTORM_PATH}"
+if [[ -n "${RAW_TEXT}" ]]; then
+  echo "brainstorm.md ready: ${BRAINSTORM_PATH} | raw captured | AI runtime should refine §1-§7 as Solon CEO"
+else
+  echo "brainstorm.md ready: ${BRAINSTORM_PATH} | no new raw input | AI runtime may refine existing §8 append log"
+fi
 
 exit "${SFS_EXIT_OK}"
 # End of sfs-brainstorm.sh

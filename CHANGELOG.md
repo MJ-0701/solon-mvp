@@ -1,3 +1,18 @@
+## [0.5.17-product] - 2026-04-30
+
+**Brainstorm CEO refinement flow.** `/sfs brainstorm` now matches the intended
+G0 flow in AI runtimes: capture raw requirements first, then have Solon CEO fill
+`brainstorm.md` §1~§7 and ask concise follow-up questions when needed.
+
+### Changed
+
+- **hybrid brainstorm command** — Claude/Codex/Gemini adapters now dispatch the
+  bash adapter for raw capture, then continue with CEO refinement instead of stopping.
+- **guide clarity** — onboarding docs explain that direct bash is capture-only,
+  while AI runtimes perform context refinement from `§8 Append Log`.
+- **brainstorm output hint** — the bash script now prints whether raw input was
+  captured and reminds AI runtimes to refine §1~§7.
+
 ## [0.5.16-product] - 2026-04-30
 
 **Solon-owned usage footer.** The Claude `/sfs` command now preserves the useful

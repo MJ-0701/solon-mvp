@@ -37,7 +37,7 @@ sprint 로 묶고, 계획/결정/review/회고를 파일로 남기며, agent 가
 
 1. 기존 프로젝트에 Solon Product 를 설치합니다.
 2. `/sfs start <goal>` 로 sprint workspace 를 만듭니다.
-3. `/sfs brainstorm` 으로 raw 요구사항과 대화 맥락을 G0 산출물에 남깁니다.
+3. `/sfs brainstorm` 으로 raw 요구사항을 G0 산출물에 남기고, Solon CEO 가 문제/제약/옵션/scope seed/plan seed 를 정리합니다.
 4. `/sfs plan` 에서 CEO plan 과 CTO/CPO sprint contract 를 남깁니다.
 5. CTO Generator 가 구현하고, `/sfs review --gate G4 --executor codex|gemini|claude` 로 CPO Evaluator review 를 남깁니다.
 6. `/sfs status` 와 `.sfs-local/events.jsonl` 로 현재 상태를 확인합니다.
@@ -186,7 +186,7 @@ WSL 사용자는 WSL shell 안에서 `bash .sfs-local/scripts/sfs-dispatch.sh st
 | `/sfs start <goal>` | 새 sprint workspace 초기화 (`--id <sprint-id>` 지원) |
 | `/sfs guide [--path|--print]` | 짧은 사용 맥락 브리핑 / guide 경로 / full guide 본문 보기 |
 | `/sfs auth status|check|login|probe` | Codex/Claude/Gemini review executor 인증 확인/로그인/더미 요청 (`probe --timeout <seconds>` 지원) |
-| `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락을 `brainstorm.md` 에 기록 |
+| `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락을 기록하고, AI runtime 에서 Solon CEO 가 §1~§7을 정리 |
 | `/sfs plan` | 현재 sprint 의 `plan.md` 작성 또는 갱신 |
 | `/sfs review --gate <id> [--executor <tool>] [--run]` | CPO Evaluator review prompt 기록. `--run` 은 리뷰할 evidence 가 있을 때만 실제 bridge 호출 (id ∈ G-1..G5) |
 | `/sfs decision <title>` | full ADR (decisions/) 또는 sprint-local mini-ADR 자동 분기 |
@@ -398,7 +398,7 @@ Uninstall 은 대화형으로 실행됩니다.
 
 ## Release Channel
 
-현재 distribution version 은 `0.5.3-product` 입니다. `-mvp` suffix (0.5.0-mvp 까지) 는 기존 설치본
+현재 distribution version 은 `0.5.17-product` 입니다. `-mvp` suffix (0.5.0-mvp 까지) 는 기존 설치본
 과의 semver 호환을 위해 유지하지만, 0.5.1+ 부터 repo identity 와 release suffix 는 product
 track 기준으로 운영합니다.
 

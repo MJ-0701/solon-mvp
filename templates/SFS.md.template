@@ -22,7 +22,7 @@
 
 각 1 cycle = 1 Sprint = 5~7 일. 3 C-Level(CEO/CTO/CPO) 기준 순서:
 
-1. **CEO 요구사항 정리** (G0) — `.sfs-local/sprints/<sprint-id>/brainstorm.md`
+1. **CEO 요구사항 정리** (G0) — `/sfs brainstorm` 이 raw 를 기록하고 Solon CEO 가 `.sfs-local/sprints/<sprint-id>/brainstorm.md` §1~§7 을 정리
 2. **CEO plan** (G1) — `.sfs-local/sprints/<sprint-id>/plan.md`
 3. **CTO Generator ↔ CPO Evaluator sprint contract** — `plan.md §5`
 4. **CTO 구현** (G2 entry) — 실제 코드 + `log.md`
@@ -96,7 +96,7 @@ Solon SFS 의 10 명령은 어떤 CLI 환경에서 호출하든 동일한 bash a
 | `/sfs start <goal> [--id <sprint-id>] [--force]` | sprint workspace 초기화 + sprint files cp |
 | `/sfs guide [--path|--print]` | 짧은 사용 맥락 브리핑 / guide 경로 / full guide 본문 보기 |
 | `/sfs auth status|check|login|probe [--executor codex|gemini|claude]` | review executor 인증 확인/로그인/더미 요청 |
-| `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락을 brainstorm.md 에 기록 |
+| `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락 기록 + Solon CEO 맥락 정리 |
 | `/sfs plan` | 현재 sprint plan.md 진입 + `plan_open` event |
 | `/sfs review --gate <id> [--executor codex|gemini|claude|custom] [--run]` | CPO review prompt append. `--run` 은 리뷰할 evidence 가 있을 때만 실제 bridge 호출 |
 | `/sfs decision <title> [--id <id>]` | full ADR 신설 (decisions/) 또는 mini-ADR (sprint-local) |
