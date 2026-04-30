@@ -501,7 +501,7 @@ mark_executor_auth_ready() {
 }
 
 bootstrap_executor_interactive_auth() {
-  local profile out_file err_file rc
+  local profile rc
   profile="$(normalize_executor_profile "$1")"
   if executor_auth_ready "$profile"; then
     mark_executor_auth_ready "$profile"
@@ -522,33 +522,31 @@ EOF
     return 1
   fi
 
-  mkdir -p "${SFS_LOCAL_DIR}/tmp"
-  out_file="${SFS_LOCAL_DIR}/tmp/${profile}-auth-bootstrap.out"
-  err_file="${SFS_LOCAL_DIR}/tmp/${profile}-auth-bootstrap.err"
   echo "${profile} auth bootstrap: follow the browser/terminal prompts, then SFS will retry the review." >&2
+  echo "${profile} auth bootstrap: interactive output is attached directly to /dev/tty." >&2
 
   case "$profile" in
     claude)
-      claude auth login < /dev/tty > "$out_file" 2> "$err_file"
+      claude auth login < /dev/tty > /dev/tty 2> /dev/tty
       rc=$?
       ;;
     codex)
-      codex login < /dev/tty > "$out_file" 2> "$err_file"
+      codex login < /dev/tty > /dev/tty 2> /dev/tty
       rc=$?
       ;;
     gemini)
       gemini --skip-trust --output-format text -p "Return exactly: SFS_GEMINI_AUTH_OK" \
-        < /dev/tty > "$out_file" 2> "$err_file"
+        < /dev/tty > /dev/tty 2> /dev/tty
       rc=$?
       ;;
   esac
 
   if [[ "$rc" -ne 0 ]]; then
-    echo "${profile} auth bootstrap failed (exit $rc); see $err_file" >&2
+    echo "${profile} auth bootstrap failed (exit $rc)" >&2
     return 1
   fi
   if [[ "$profile" != "gemini" ]] && ! executor_auth_ready "$profile"; then
-    echo "${profile} auth bootstrap finished, but CLI status is still not authenticated; see $err_file" >&2
+    echo "${profile} auth bootstrap finished, but CLI status is still not authenticated" >&2
     return 1
   fi
 

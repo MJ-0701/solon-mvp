@@ -1,3 +1,16 @@
+## [0.5.10-product] - 2026-04-30
+
+**Interactive executor auth bootstrap fix.** `--auth-interactive` now attaches Codex/Claude/Gemini
+login output directly to `/dev/tty` instead of hiding prompts in temp files while resolving the
+executor command.
+
+### Fixed
+
+- **visible auth prompts** — browser/device/login prompts are shown in the user terminal during
+  `--auth-interactive`; stdout is kept out of `EXECUTOR_CMD` command substitution.
+- **clear bootstrap failure** — failed auth bootstrap now reports directly without pointing users
+  to hidden temp files.
+
 ## [0.5.9-product] - 2026-04-30
 
 **G0 brainstorm command and flow correction.** `/sfs start` remains the sprint workspace
