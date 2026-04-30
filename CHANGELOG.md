@@ -1,3 +1,26 @@
+## [0.5.28-product] - 2026-05-01
+
+**Agent-first install flow.** Homebrew remains the deterministic runtime
+delivery path, while Claude/Gemini/Codex integration is now explicit through
+`sfs agent install`.
+
+### Added
+
+- **Agent adapter installer** — `sfs agent install claude|gemini|codex|all`
+  installs thin entry points for Claude Code, Gemini CLI, and Codex Skills.
+- **Adapter backup safety** — changed existing adapter files are backed up under
+  `.sfs-local/tmp/agent-install-backups/` before being updated.
+- **Agent-first docs** — README, guide, and generated `SFS.md` now document the
+  preferred flow: `brew install .../sfs`, `sfs init`, then `sfs agent install`.
+
+### Changed
+
+- **Homebrew runtime wrapper** — the formula template writes a wrapper that
+  exports `SFS_DIST_DIR`, so installed `sfs` can find packaged templates even
+  when launched through `/opt/homebrew/bin/sfs`.
+- **Symlink runtime lookup** — `bin/sfs` resolves symlinked entry points before
+  searching for packaged runtime templates.
+
 ## [0.5.27-product] - 2026-04-30
 
 **Thin runtime layout foundation.** Solon can now run as a packaged `sfs`

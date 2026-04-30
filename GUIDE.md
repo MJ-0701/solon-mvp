@@ -7,7 +7,15 @@
 
 ## 0. 설치는 끝났다. 이제 뭐 할 차례?
 
-`install.sh` 가 끝나면 너의 프로젝트 루트에 다음이 새로 생겨 있다.
+Homebrew 로 global runtime 을 설치한 뒤 프로젝트 루트에서 `sfs init` 과
+`sfs agent install all` 을 실행하면 다음이 생긴다.
+
+```bash
+brew install MJ-0701/solon-product/sfs
+cd ~/workspace/my-project
+sfs init
+sfs agent install all
+```
 
 ```
 my-project/
@@ -25,6 +33,9 @@ my-project/
 기본 방향은 global `sfs` runtime + project-local `.sfs-local/` state 다. Windows 사용자는
 Git Bash/WSL 에서 `sfs status` 를 실행한다. vendored layout 을 선택했을 때만
 `.sfs-local\scripts\sfs.ps1 status` wrapper 를 fallback 으로 쓴다.
+Claude/Gemini/Codex entry point 는 얇은 agent adapter 이므로, 새 agent 를 쓰거나
+adapter 를 갱신할 때는 `sfs agent install claude|gemini|codex|all` 을 다시 실행한다.
+기존 adapter 가 커스텀되어 있으면 `.sfs-local/tmp/agent-install-backups/` 에 백업된다.
 
 **5초 mental model**:
 - **본인이 편집** = `SFS.md`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`. 이 4개는 너의 프로젝트 정체성을 담는다.
