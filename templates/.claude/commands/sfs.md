@@ -11,6 +11,7 @@ description: |
   start     새 sprint workspace 초기화 (bash adapter)
   guide     사용 맥락 브리핑/guide 출력
   auth      Codex/Claude/Gemini review executor 인증 확인/로그인
+  update    현재 설치된 Solon runtime 기준으로 project adapter/docs 갱신
   brainstorm G0 raw 요구사항/대화 맥락 기록
   plan      현재 sprint plan.md 작성/갱신 + G1 sprint contract refinement
   sprint    plan을 구현 단계와 gate 체크로 정리
@@ -29,13 +30,12 @@ You are running the Solon SFS workflow for this project.
 
 ## Runtime Boundary — Solon Owns `/sfs`
 
-`/sfs` is a Solon command. Solon is the primary workflow owner for this command,
-even if a global/user/runtime bkit instruction is also present.
+`/sfs` is a Solon command. Solon is the primary workflow owner for this command.
 
-Do not render bkit-style `Feature Usage`, `Used`, `Not Used`, or `Recommended`
-footers after Solon commands. If usage facts are useful or requested by the
-runtime, fold those facts into the existing Solon Session Status Report shape
-as evidence/health/next information. The report design is Solon-owned:
+Do not render non-Solon usage footers after Solon commands. If usage facts are
+useful or requested by the runtime, fold those facts into the existing Solon
+Session Status Report shape as evidence/health/next information. The report
+design is Solon-owned:
 
 ```text
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -47,7 +47,7 @@ as evidence/health/next information. The report design is Solon-owned:
 🔧 Steps   <N>건 — Bash adapter / CEO refinement / CPO review 등 실제 사용 경로
 📁 Files   <N>개 — 수정·생성된 Solon 산출물 요약
 💾 Commits <N>건 — 없음 또는 local commit sha
-📊 Health  Solon SSoT ✓ | adapter <✓/−> | CEO <✓/−> | CTO/CPO <✓/−> | bkit owner ×
+📊 Health  Solon SSoT ✓ | adapter <✓/−> | CEO <✓/−> | CTO/CPO <✓/−> | Solon owner ✓
 ───────────────────────────────────────────────────
 ⚠️ Escalation <N>건 — <1줄 요약 또는 "없음">
 📚 Learning   <N>건 — <1줄 요약 또는 "없음">
@@ -56,9 +56,9 @@ as evidence/health/next information. The report design is Solon-owned:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-Do not imply bkit owns or orchestrates the Solon workflow. Do not add any other
-Claude-driven commentary after deterministic SFS commands, except for the
-documented hybrid/conditional flows below.
+Do not imply any non-Solon tool owns or orchestrates the Solon workflow. Do not
+add any other Claude-driven commentary after deterministic SFS commands, except
+for the documented hybrid/conditional flows below.
 
 ### Solon Report Output Rule
 
@@ -84,7 +84,7 @@ Use this shape and fill only evidence-backed values:
 🔧 Steps   <N>건 — <adapter/refinement/review path summary>
 📁 Files   <N>개 — <created/updated artifact paths>
 💾 Commits <N>건 — <sha or "없음 (planning/review artifact)">
-📊 Health  Solon SSoT ✓ | adapter <✓/−> | CEO <✓/−> | CTO/CPO <✓/−> | bkit owner ×
+📊 Health  Solon SSoT ✓ | adapter <✓/−> | CEO <✓/−> | CTO/CPO <✓/−> | Solon owner ✓
 🔎 Review  <verdict/skipped/prompt-only/n/a> — <executor result summary for review only>
 🛠 Actions <N>건 — <Required CTO actions summary, or "없음/unknown">
 ───────────────────────────────────────────────────
@@ -96,7 +96,7 @@ Use this shape and fill only evidence-backed values:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-Never render `📊 bkit Feature Usage`, `Used`, `Not Used`, or `Recommended` as a
+Never render non-Solon feature usage, `Used`, `Not Used`, or `Recommended` as a
 separate footer. If those facts are useful, map them into `Steps`, `Health`, and
 `Next` inside the Solon report.
 
@@ -114,14 +114,14 @@ $ARGUMENTS
 
 ## Adapter Dispatch (status / start / guide / auth / brainstorm / plan / review / decision / retro / loop) — execute first
 
-If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`brainstorm`**, **`plan`**, **`review`**,
+If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`update`**, **`brainstorm`**, **`plan`**, **`review`**,
 **`decision`**, **`retro`**, or **`loop`**, dispatch the request through the
 `sfs` runtime command first. The runtime normalizes command surfaces
 (`/sfs`, `$sfs`, `sfs`) and delegates to the deterministic bash adapter. In
 vendored layout only, `.sfs-local/scripts/sfs-dispatch.sh` is an acceptable fallback.
 
 Command modes:
-- **Bash-first**: `status`, `start`, `guide`, `auth`, `loop`. Print verbatim
+- **Bash-first**: `status`, `start`, `guide`, `auth`, `update`, `loop`. Print verbatim
   adapter output first. A compact recap/status line is allowed when it helps
   the user see state and the next action, but adapter stdout remains SSoT.
 - **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`. Run the adapter,
@@ -166,6 +166,7 @@ Dispatch table:
 | `start`    | `sfs start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
 | `guide`    | `sfs guide <remaining args>`    | passes `--path` / `--print` verbatim; default prints a short context briefing |
 | `auth`     | `sfs auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
+| `update`   | `sfs update <remaining args>`   | updates managed project adapter/docs from the installed runtime; preserves sprint/decision/event history |
 | `brainstorm` | `sfs brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then Claude fills §1~§7 as Solon CEO |
 | `plan`     | `sfs plan <remaining args>`     | opens plan.md, then Claude fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
 | `review`   | `sfs review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
@@ -222,7 +223,7 @@ Procedure (apply in order):
 5. **Stop or continue by command mode** — After dispatch, bash-first commands
    must preserve adapter stdout exactly. A compact Solon recap/status is allowed
    only when it adds state or the next action, and must not contradict the
-   sprint mode. Do not emit bkit-branded reports or bkit-shaped "usage" footers.
+   sprint mode. Do not emit non-Solon branded reports or "usage" footers.
    The bash script is the single source of truth for command output. Hybrid
    commands continue only via the documented flow below:
    - `brainstorm` → Brainstorm CEO Refinement

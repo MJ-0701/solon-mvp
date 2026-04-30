@@ -6,6 +6,7 @@
 > deterministic bash adapter 로 내려간다. `.sfs-local/` 은 state/config/custom override 영역이다.
 > Claude/Gemini/Codex entry point 는 `sfs agent install claude|gemini|codex|all` 로
 > 설치/갱신하는 thin adapter 이며, 실제 runtime 은 global `sfs` CLI 이다.
+> Solon 버전 갱신 후에는 uninstall/reinstall 대신 `sfs update` 로 project adapter/docs 를 갱신한다.
 
 > Windows PowerShell 사용자는 Git for Windows 의 Git Bash 또는 WSL 에서 global `sfs` CLI 를
 > 실행한다. vendored layout 에서만 `.sfs-local\scripts\sfs.ps1 <command>` wrapper 를 fallback 으로 쓴다.

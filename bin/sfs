@@ -46,12 +46,13 @@ usage() {
   cat <<'EOF'
 Usage:
   sfs init [--yes] [--layout thin|vendored]
+  sfs update [--skip-existing]
   sfs uninstall [--keep-artifacts|--remove-all] [--remove-docs|--keep-docs]
   sfs agent install <claude|gemini|codex|all> [--skip-existing]
   sfs <command> [args]
 
 Commands:
-  agent install, uninstall
+  agent install, update, uninstall
   status, start, guide, auth, brainstorm, plan, review, decision, retro, loop
 
 Project state defaults to .sfs-local/. Override with SFS_LOCAL_DIR when needed.
@@ -69,6 +70,20 @@ Installs thin LLM-agent adapter files into the current project:
   codex   -> .agents/skills/sfs/SKILL.md
 
 Existing changed files are backed up under .sfs-local/tmp/agent-install-backups/.
+EOF
+}
+
+update_usage() {
+  cat <<'EOF'
+Usage:
+  sfs update [--skip-existing]
+
+Updates the current project from the installed Solon runtime:
+  - updates managed SFS runtime docs/adapters with backup safety
+  - preserves sprint/decision/event history and project-specific docs
+  - syncs Claude/Gemini/Codex agent entry points
+
+Use brew upgrade MJ-0701/solon-product/sfs first when you want a newer global runtime.
 EOF
 }
 
@@ -187,10 +202,45 @@ agent_command() {
   esac
 }
 
+update_command() {
+  local skip_existing=0
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --skip-existing)
+        skip_existing=1
+        shift
+        ;;
+      -h|--help)
+        update_usage
+        return 0
+        ;;
+      *)
+        echo "unknown arg: $1" >&2
+        update_usage >&2
+        return 1
+        ;;
+    esac
+  done
+
+  bash "${DIST_DIR}/upgrade.sh" --yes
+  echo "agent adapters sync:"
+  install_agent_adapter all "${skip_existing}"
+}
+
 if [[ $# -eq 0 ]]; then
   usage
   exit 0
 fi
+
+case "${1:-}" in
+  /sfs|sfs|\$sfs)
+    shift
+    if [[ $# -eq 0 ]]; then
+      usage
+      exit 0
+    fi
+    ;;
+esac
 
 case "${1:-}" in
   init|install)
@@ -200,6 +250,11 @@ case "${1:-}" in
   agent)
     shift
     agent_command "$@"
+    exit $?
+    ;;
+  update)
+    shift
+    update_command "$@"
     exit $?
     ;;
   uninstall)

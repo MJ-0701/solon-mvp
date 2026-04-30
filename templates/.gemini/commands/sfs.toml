@@ -24,12 +24,12 @@ token as the subcommand and the remainder as that subcommand's arguments.
 
 ## Behavior
 
-If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`brainstorm`**, **`plan`**, **`review`**,
+If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`update`**, **`brainstorm`**, **`plan`**, **`review`**,
 **`decision`**, **`retro`**, or **`loop`**, dispatch the request to the
 `sfs` runtime command first.
 
 Command modes:
-- **Bash-only**: `status`, `start`, `guide`, `auth`, `loop`. Stop after
+- **Bash-only**: `status`, `start`, `guide`, `auth`, `update`, `loop`. Stop after
   verbatim adapter output.
 - **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`. Run the adapter,
   then perform the documented file refinement.
@@ -66,7 +66,7 @@ Use this shape and fill only evidence-backed values:
 🔧 Steps   <N>건 — <adapter/refinement/review path summary>
 📁 Files   <N>개 — <created/updated artifact paths>
 💾 Commits <N>건 — <sha or "없음 (planning/review artifact)">
-📊 Health  Solon SSoT ✓ | adapter <✓/−> | CEO <✓/−> | CTO/CPO <✓/−> | bkit owner ×
+📊 Health  Solon SSoT ✓ | adapter <✓/−> | CEO <✓/−> | CTO/CPO <✓/−> | Solon owner ✓
 🔎 Review  <verdict/skipped/prompt-only/n/a> — <executor result summary for review only>
 🛠 Actions <N>건 — <Required CTO actions summary, or "없음/unknown">
 ───────────────────────────────────────────────────
@@ -89,6 +89,7 @@ not create a new verdict in the current runtime.
 | `start`    | `sfs start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
 | `guide`    | `sfs guide <remaining args>`    | default context briefing; passes `--path` / `--print` verbatim |
 | `auth`     | `sfs auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
+| `update`   | `sfs update <remaining args>`   | updates managed project adapter/docs from the installed runtime; preserves sprint/decision/event history |
 | `brainstorm` | `sfs brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then fills §1~§7 as Solon CEO |
 | `plan`     | `sfs plan <remaining args>`     | opens plan.md, then fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
 | `review`   | `sfs review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |

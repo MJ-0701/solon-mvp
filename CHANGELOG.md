@@ -1,3 +1,23 @@
+## [0.5.31-product] - 2026-05-01
+
+**Project update command and Solon-only positioning.** Users can now refresh a
+project with `sfs update` instead of uninstalling/reinstalling, and generated
+instructions no longer mention external workflow products.
+
+### Added
+
+- **Project update command** — `sfs update` runs the packaged upgrade flow with
+  safe defaults, then syncs Claude/Gemini/Codex agent adapters.
+- **Non-interactive upgrade flag** — `upgrade.sh --yes` uses the existing
+  backup/preserve policy without prompting.
+
+### Changed
+
+- **Solon-only reports** — active Claude/Codex/Gemini instructions now forbid
+  non-Solon footers generically without naming other products.
+- **Claude Skill upgrade coverage** — update/upgrade now manages
+  `.claude/skills/sfs/SKILL.md` as a first-class adapter.
+
 ## [0.5.30-product] - 2026-05-01
 
 **Guide command surface clarity.** The short guide now distinguishes terminal
@@ -232,15 +252,15 @@ G1 plan + CTO/CPO sprint contract before returning.
 
 ## [0.5.19-product] - 2026-04-30
 
-**Solon report shape, not bkit-shaped footer.** The previous
-`Solon Feature Usage` footer borrowed too much of the bkit report design. Solon
-now keeps bkit-origin usage facts only as optional content inside the existing
-Solon Session Status Report shape.
+**Solon report shape, not external footer shape.** The previous
+the previous usage footer borrowed too much from a non-Solon report design.
+Solon now keeps usage facts only as optional content inside the existing Solon
+Session Status Report shape.
 
 ### Changed
 
-- **Removed bkit-style footer contract** — active Claude command/template
-  instructions no longer use `Feature Usage`, `Used`, `Not Used`, or
+- **Removed external footer contract** — active Claude command/template
+  instructions no longer use footer rows like `Used`, `Not Used`, or
   `Recommended` rows as the Solon report design.
 - **Solon Status Report alignment** — when usage facts are useful, they should
   be folded into Solon evidence/health/next lines (`Steps`, `Health`, `Next`),
@@ -286,28 +306,30 @@ G0 flow in AI runtimes: capture raw requirements first, then have Solon CEO fill
 
 ## [0.5.16-product] - 2026-04-30
 
-**Solon-owned usage footer.** The Claude `/sfs` command now preserves the useful
-`Used / Not Used / Recommended` report shape while making Solon the owner of the workflow
-instead of suppressing reports entirely.
+**Solon-owned usage footer.** The Claude `/sfs` command now keeps any useful
+usage facts inside a Solon-owned report shape instead of suppressing reports
+entirely.
 
 ### Changed
 
-- **Solon Feature Usage footer** — if a usage footer is shown after `/sfs`, it should be rendered
-  as `Solon Feature Usage` with `Used`, `Not Used`, and `Recommended` rows.
-- **No bkit ownership implication** — the footer can borrow the report structure, but must not
-  imply bkit/PDCA orchestrates the Solon SFS workflow.
+- **Solon-owned usage footer** — if a usage footer is shown after `/sfs`, it
+  must be clearly Solon-owned.
+- **No external ownership implication** — the footer must not imply any other
+  workflow orchestrates Solon SFS.
 
 ## [0.5.15-product] - 2026-04-30
 
-**Claude `/sfs` runtime boundary hardening.** The Claude command template now explicitly
-suppresses bkit/PDCA feature usage footers after Solon commands.
+**Claude `/sfs` runtime boundary hardening.** The Claude command template now
+explicitly suppresses non-Solon usage footers after Solon commands.
 
 ### Changed
 
-- **Solon owns `/sfs`** — `.claude/commands/sfs.md` now tells Claude to ignore global bkit report
-  instructions for `/sfs` and print only the deterministic Solon bash adapter output.
+- **Solon owns `/sfs`** — `.claude/commands/sfs.md` now tells Claude to ignore
+  non-Solon report instructions for `/sfs` and print only the deterministic
+  Solon bash adapter output.
 - **Claude project template guard** — generated `CLAUDE.md` now includes the same Solon ownership
-  rule so new installs do not inherit bkit usage reports into Solon command responses.
+  rule so new installs do not inherit non-Solon usage reports into Solon
+  command responses.
 
 ## [0.5.14-product] - 2026-04-30
 
