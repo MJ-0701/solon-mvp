@@ -29,6 +29,7 @@
 #   bash scripts/cut-release.sh --version 0.3.0-mvp --apply
 #   bash scripts/cut-release.sh --version 0.3.0-mvp --apply --no-tag
 #   bash scripts/cut-release.sh --version 0.3.0-mvp --apply --allow-dirty
+#   bash scripts/cut-release.sh --version 0.5.1-product --apply --allow-divergence  # P-13 bypass
 #   bash scripts/cut-release.sh --help
 #
 # Exit codes:
@@ -39,6 +40,7 @@
 #   4 = git status not clean (without --allow-dirty)
 #   5 = TBD final_sha 검출 (release blocker — `final_sha: TBD_*` 인 WU 잔존)
 #   6 = stale `.git/index.lock` 검출 (P-10 후속, W-22, --apply 모드 한정)
+#   7 = P-13 dev-stable narrative divergence 검출 (--allow-divergence 로 bypass 가능, --apply 모드 한정)
 #  99 = unknown error
 # ────────────────────────────────────────────────────────────────
 set -euo pipefail
@@ -51,6 +53,7 @@ STABLE_REPO="${SOLON_STABLE_REPO:-${HOME}/workspace/solon-mvp}"
 VERSION=""
 APPLY=0
 ALLOW_DIRTY=0
+ALLOW_DIVERGENCE=0
 NO_TAG=0
 SHOW_HELP=0
 
@@ -92,6 +95,7 @@ while [[ $# -gt 0 ]]; do
     --apply)         APPLY=1; shift ;;
     --dry-run)       APPLY=0; shift ;;
     --allow-dirty)   ALLOW_DIRTY=1; shift ;;
+    --allow-divergence) ALLOW_DIVERGENCE=1; shift ;;  # P-13 bypass — stable 의 codex hotfix 무시 명시 동의 시
     --no-tag)        NO_TAG=1; shift ;;
     -h|--help)       SHOW_HELP=1; shift ;;
     *)               fail "unknown arg: $1 (use --help)" 1 ;;
@@ -121,7 +125,7 @@ log "version    = ${VERSION}"
 log "mode       = ${MODE}"
 log "dev        = ${DEV_STAGING}"
 log "stable     = ${STABLE_REPO}"
-log "allow-dirty= ${ALLOW_DIRTY}  no-tag=${NO_TAG}"
+log "allow-dirty= ${ALLOW_DIRTY}  allow-divergence=${ALLOW_DIVERGENCE}  no-tag=${NO_TAG}"
 log ""
 
 # ── §2.2.1 Pre-flight ────────────────────────────────────────
@@ -196,6 +200,64 @@ if [[ -n "${TBD_HITS}" ]]; then
   else
     warn "(dry-run 이므로 진행, --apply 시는 abort)"
   fi
+fi
+
+# P-13 dev-stable narrative divergence 감지 (26th-3 신설).
+# 사고 패턴: codex 가 stable 에서 hotfix narrative (rebrand / cleanup / contract) commit 후 dev
+# sync-back 안 하면 다음 cut 시 dev rsync overwrite = 회귀. P-13 learning log 참조.
+log "  P-13 divergence check: stable HEAD vs dev staging narrative key..."
+extract_h1() {
+  # $1 = file path. 첫 # 헤더 줄 추출 (없으면 빈 문자열).
+  head -20 "$1" 2>/dev/null | grep -m1 '^# ' | head -1 || true
+}
+extract_solon_repo() {
+  # $1 = install.sh path. SOLON_REPO 상수 line 추출.
+  grep -E '^readonly SOLON_REPO=' "$1" 2>/dev/null | head -1 || true
+}
+DEV_VER="$(cat "${DEV_STAGING}/VERSION" 2>/dev/null | head -1)"
+STABLE_VER="$(cat "${STABLE_REPO}/VERSION" 2>/dev/null | head -1)"
+DEV_README_H1="$(extract_h1 "${DEV_STAGING}/README.md")"
+STABLE_README_H1="$(extract_h1 "${STABLE_REPO}/README.md")"
+DEV_CHANGELOG_H1="$(extract_h1 "${DEV_STAGING}/CHANGELOG.md")"
+STABLE_CHANGELOG_H1="$(extract_h1 "${STABLE_REPO}/CHANGELOG.md")"
+DEV_SOLON_REPO="$(extract_solon_repo "${DEV_STAGING}/install.sh")"
+STABLE_SOLON_REPO="$(extract_solon_repo "${STABLE_REPO}/install.sh")"
+
+DIVERGENCE_HITS=()
+[[ -n "${STABLE_README_H1}" && "${DEV_README_H1}" != "${STABLE_README_H1}" ]] && \
+  DIVERGENCE_HITS+=("README h1 — dev: '${DEV_README_H1}' / stable: '${STABLE_README_H1}'")
+[[ -n "${STABLE_CHANGELOG_H1}" && "${DEV_CHANGELOG_H1}" != "${STABLE_CHANGELOG_H1}" ]] && \
+  DIVERGENCE_HITS+=("CHANGELOG h1 — dev: '${DEV_CHANGELOG_H1}' / stable: '${STABLE_CHANGELOG_H1}'")
+[[ -n "${STABLE_SOLON_REPO}" && "${DEV_SOLON_REPO}" != "${STABLE_SOLON_REPO}" ]] && \
+  DIVERGENCE_HITS+=("install.sh SOLON_REPO — dev: '${DEV_SOLON_REPO}' / stable: '${STABLE_SOLON_REPO}'")
+
+# git log 비교 (last release tag 이후 stable 에 sync-back 없는 commit 수)
+LAST_RELEASE_TAG="$(git -C "${STABLE_REPO}" describe --tags --abbrev=0 --match 'v*-mvp' --match 'v*-product' 2>/dev/null || true)"
+STABLE_SYNCBACK_LOG=""
+if [[ -n "${LAST_RELEASE_TAG}" ]]; then
+  STABLE_SYNCBACK_LOG="$(git -C "${STABLE_REPO}" log --oneline "${LAST_RELEASE_TAG}..HEAD" 2>/dev/null || true)"
+fi
+
+if [[ ${#DIVERGENCE_HITS[@]} -gt 0 || -n "${STABLE_SYNCBACK_LOG}" ]]; then
+  warn "P-13 divergence 감지 (stable hotfix sync-back 누락 가능):"
+  for d in "${DIVERGENCE_HITS[@]}"; do warn "    - ${d}"; done
+  if [[ -n "${STABLE_SYNCBACK_LOG}" ]]; then
+    warn "    - stable 에 ${LAST_RELEASE_TAG} 이후 commit 발견:"
+    printf '%s\n' "${STABLE_SYNCBACK_LOG}" | sed 's/^/        /' >&2
+  fi
+  warn "    → R-D1 §1.13 hotfix sync-back path: 각 commit 의 narrative 의도를 dev staging 으로"
+  warn "      먼저 동기화한 후 cut 재시도. 의도된 dev-only 변경이면 --allow-divergence bypass."
+  if [[ "${APPLY}" == "1" && "${ALLOW_DIVERGENCE}" != "1" ]]; then
+    fail "P-13 divergence 검출 — sync-back 후 재시도 또는 --allow-divergence bypass" 7
+  else
+    if [[ "${ALLOW_DIVERGENCE}" == "1" ]]; then
+      warn "    --allow-divergence bypass 활성 — divergence 무시하고 진행"
+    else
+      warn "    (dry-run 이므로 진행, --apply 시는 abort 단 --allow-divergence 명시 시 통과)"
+    fi
+  fi
+else
+  log "    ✅ stable HEAD narrative key 와 dev staging 일치"
 fi
 log ""
 

@@ -406,8 +406,8 @@ resume_hint:
   purpose: "24번째 세션이 본 PROGRESS.md 1개만 읽고 (a) 23rd 미완 commit 마무리 + (b) sandbox file:// clone 패턴 채택 + (c) WU-24 + WU-31 병렬 default 자동 진행"
   trigger_positive: [ㄱㄱ, 고, ㅇㅋ, ok, OK, 시작, 가자, ㅇㅇ, 진행, go, Go, start, "이전 세션 이어서", "이어서 ㄱㄱ", "이어서", 이어, "이어서 진행"]
   trigger_negative: [ㄴㄴ, 잠깐, stop, 아니, 중단, 다른거, 다른, no]
-  default_action: 26th-3 ε continuation 3 ✅ 0.5.1-product hotfix prep 완료 (α default 결정 + B2 codex narrative sync-back R-D1 §1.13 정합). 26th-3 첫 시도 (단순 string rename) 가 codex 의 product positioning narrative 개선분 (ced9cc1 + 5765abb + 7977a75 = "친구야" 톤 제거, public terminology cleanup, /sfs start <goal> contract, runtime asset sync, non-TTY handling, decision JSONL escape, distribution hygiene 등 11항목) 을 보존 안 한 mental coupling 안티패턴 → 사용자 비판 "코덱스 수정사항이 합리적이면 그걸 반영하란 소린데" 즉시 수신 → README baseline 을 codex 7977a75 narrative + 본 cycle multi-adaptor 1급 통합으로 overwrite + CHANGELOG entry 재작성. 다음 default = 사용자 mac terminal 1줄 → `bash ~/agent_architect/2026-04-19-sfs-v0.4/tmp/release-0.5.1-product.sh` (interactive 4-step).
-  last_written: 2026-04-30T10:30:00Z
+  default_action: 26th-3 ε continuation 3 ✅ 완료 (α default + B2 sync-back + C 회고/시스템 정비 3-layer). 본 cycle 발견 결함 3건 (P-13 release tooling + P-14 AI mental coupling + R-D1 §1.13 invariant 부족) 모두 정합 회복. cut-release.sh §1 Pre-flight 강화 (stable HEAD vs dev staging narrative key divergence 감지, exit 7 신설, --allow-divergence bypass) + P-13/P-14 learning logs 신설 + CLAUDE.md §1.13 보강 (1.20 → 1.21) + cross-ref-audit §4 W-27/W-28 추가. 다음 default = 사용자 mac terminal 1줄 → `bash ~/agent_architect/2026-04-19-sfs-v0.4/tmp/release-0.5.1-product.sh` (interactive 4-step). cut --apply 시 P-13 divergence 감지 1차 dogfooding 가능.
+  last_written: 2026-04-30T11:00:00Z
 
     1. **CLAUDE.md SSoT Read** — §1 14규율 + §1.5' (commit/push 사용자 manual) + §1.12 mutex + §1.14 ≤200 lines.
     2. **PROGRESS.md (본 파일) Read** — frontmatter `domain_locks` + `current_wu_owner` 확인.
@@ -569,6 +569,22 @@ resume_hint:
 - `solon-mvp-dist/README.md` — codex 7977a75 product positioning rewrite baseline (Why Solon / How It Works / Operating Model / Quickstart / Product Surface / Runtime Coverage / Installation / Installed Files / Safety Contract / Repository Map / Release Channel) + 본 cycle multi-adaptor 1급 통합 (4 entry point + 7-Gate enum + Codex Skills + Gemini commands + multi-vendor executor convention).
 - `solon-mvp-dist/CHANGELOG.md` 0.5.1-product entry 재작성 — Fixed 11항목 (codex narrative sync-back) + Added 5항목 (legacy fallback, Codex Skill, Gemini slash, Codex user-scoped, semver 확장) + Changed 2항목 (4 template parity, VERSION) + Notes 2항목 + Design Notes 3항목.
 - `tmp/release-0.5.1-product.sh` heredoc commit message narrative 정합 (release 본질 = sync-back + multi-adaptor 1급 통합, 단순 회귀 fix 아님 명시).
+
+**C 회고 + 시스템 정비 (사용자 verbatim '구조적 결함 발견됐잖아? 또 이런경우가 나올 수 있으니까 회고하고 시스템 정비 ㄱㄱ')**:
+
+본 cycle 누적 결함 3건 + invariant 보강 + script 강화 + learning logs 신설 = 후속 회귀 차단.
+
+C1. **Retrospective**: 본 cycle 의 3 구조적 결함 = (1) cut-release.sh 가 stable HEAD narrative divergence 미감지 (release tooling) + (2) AI 가 codex hotfix narrative 의 의도 read 안 하고 단순 string replace (worker 인지) + (3) R-D1 §1.13 의 sync-back 의무 invariant 가 verbatim 명시 부족 (rule). 세 결함이 결합 = 0.5.0-mvp 회귀 사고. 단일 결함 차단으로는 부족, 3-layer (rule + tooling + worker) 모두 보강 필요.
+
+C2. **`learning-logs/2026-05/P-13-dev-stable-divergence-on-cut.md` 신설** — release tooling 측 결함. timeline (Apr 29 23:52 ~ Apr 30 09:07 KST 4 commits + 99b2313 cut overwrite) + 근본 원인 (cut-release.sh §1 Pre-flight 의 부재 invariant) + Detect (narrative key divergence + git log 비교) + Prevent (R-D1 §1.13 sync-back 의무 강조 + 외부 worker 협업 invariant) + Recover (roll-forward vs revert 2 path) + 검증 데이터 (1~2 사이클 검증).
+
+C3. **`learning-logs/2026-05/P-14-mental-coupling-on-rename-fix.md` 신설** — AI worker 측 결함. 사용자 verbatim 비판 + 안티패턴 정의 (외부 증상 + 내부 mental coupling 4 가정) + 진입 조건 5단계 체크리스트 (Read / Investigate / Classify / Decide / Verify) + 본 cycle dogfooding worked example (bad case 26th-3 첫 시도 + good case 26th-3 후반 sync-back) + cousin patterns (P-13 / P-11 / P-08).
+
+C4. **`scripts/cut-release.sh` divergence 감지 강화** — Pre-flight 에 stable HEAD vs dev staging narrative key (VERSION / README h1 / CHANGELOG h1 / SOLON_REPO) divergence 감지 + git log 비교 (last release tag 이후 stable commit 검출) + warn (dry-run) / abort (--apply, exit 7 신설) + `--allow-divergence` bypass flag. usage banner + Exit codes header narrative + log line 모두 정합.
+
+C5. **`CLAUDE.md §1.13` 보강** — verbatim 에 ① sync-back 의 mental coupling 차단 (`git show <sha>:<file>` 로 narrative read 후 통합 — P-14) + ② sync-back 누락 시 다음 cut 회귀 risk 명시 (P-13) + ③ cut-release.sh §1 divergence 감지 link. version 1.20 → 1.21 bump + updated 2026-04-30. 172L 유지 (≤200L cap, 28L 여유).
+
+C6. **`cross-ref-audit.md §4`** — W-27 (P-13) + W-28 (P-14) entry 신설 (resolved 26th-3 ε continuation 3). 다음 cycle 진입 시 본 invariant 자동 적용 + 1~2 사이클 reuse 후 reuse_count 갱신.
 
 **잔여 작업 (사용자 mac terminal 영역, 1줄 실행)**:
 ```sh

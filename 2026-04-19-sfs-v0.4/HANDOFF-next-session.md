@@ -1,8 +1,8 @@
 ---
 doc_id: handoff-next-session
 title: "Next session handoff (auto-written, WU-28)"
-written_at: 2026-04-30T10:30:00Z
-written_at_kst: 2026-04-30T19:30:00+09:00
+written_at: 2026-04-30T11:00:00Z
+written_at_kst: 2026-04-30T20:00:00+09:00
 last_commit: 99b2313
 visibility: raw-internal
 ---
@@ -13,7 +13,7 @@ visibility: raw-internal
 
 ## 1. default_action (다음 세션 진입 시 즉시 실행)
 
-26th-3 ε continuation 3 ✅ 0.5.1-product hotfix prep 완료 (α default 결정 + B2 codex narrative sync-back R-D1 §1.13 정합). 26th-3 첫 시도 (단순 string rename) 가 codex 의 product positioning narrative 11항목을 보존 안 한 mental coupling 안티패턴 자가 인지 → 즉시 stop + sync-back path 정합. README baseline = codex 7977a75 product positioning rewrite + 본 cycle multi-adaptor 1급 통합. legacy GIT_MARKER fallback 설계 (consumer 하위 호환).
+26th-3 ε continuation 3 ✅ 완료 (α default 결정 + B2 codex narrative sync-back + C 회고/시스템 정비 3-layer). 본 cycle 발견 결함 3건 (P-13 release tooling divergence 미감지 + P-14 AI mental coupling on rename fix + R-D1 §1.13 invariant 부족) 모두 정합 회복. cut-release.sh §1 Pre-flight 강화 (exit 7 신설, --allow-divergence bypass) + P-13/P-14 learning logs 신설 + CLAUDE.md §1.13 보강 + cross-ref-audit §4 W-27/W-28 추가.
 
 사용자 mac terminal 에서 **1줄 실행**:
 
