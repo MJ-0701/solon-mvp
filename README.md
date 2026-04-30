@@ -197,7 +197,7 @@ WSL 사용자는 WSL shell 안에서 `bash .sfs-local/scripts/sfs-dispatch.sh st
 | `/sfs auth status|check|login|probe` | Codex/Claude/Gemini review executor 인증 확인/로그인/더미 요청 (`probe --timeout <seconds>` 지원) |
 | `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락을 기록하고, AI runtime 에서 Solon CEO 가 §1~§7을 정리 |
 | `/sfs plan` | 현재 sprint 의 `plan.md` 작성 또는 갱신 + G1 요구사항/AC/scope + CTO/CPO sprint contract refinement |
-| `/sfs review --gate <id> [--executor <tool>] [--run]` | CPO Evaluator review prompt/run. 현재 runtime 이 evaluator 이고 `--run` 이 없을 때만 직접 verdict 작성 (id ∈ G-1..G5) |
+| `/sfs review --gate <id> [--executor <tool>] [--run]` | CPO Evaluator review prompt/run. full prompt 는 tmp prompt file에 저장하고 `review.md`에는 compact log만 남김 (id ∈ G-1..G5) |
 | `/sfs decision <title>` | full ADR 생성 후 Context/Decision/Alternatives/Consequences 작성 |
 | `/sfs retro` | 현재 sprint 의 `retro.md` 작성 또는 갱신 |
 | `/sfs retro --close` | AI runtime 에서는 retro 작성 후, review 실행 여부 확인 + sprint close + auto commit (push 는 manual) |
@@ -215,7 +215,7 @@ multi-vendor executor 1급 지원:
 
 - `--executor claude` → `claude -p --dangerously-skip-permissions`
 - `--executor gemini` → `gemini --skip-trust --yolo --output-format text -p "Read stdin and execute the requested task."`
-- `--executor codex` → `codex exec --full-auto`
+- `--executor codex` → `codex exec --full-auto --ephemeral --output-last-message <result> -`
 - `--executor "<custom command>"` → 그대로 passthrough
 
 이 convention 은 `/sfs loop` 만 적용되는 게 아니라 Solon-wide invariant — 모든 명령이 어느 1급
@@ -406,7 +406,7 @@ Uninstall 은 대화형으로 실행됩니다.
 
 ## Release Channel
 
-현재 distribution version 은 `0.5.21-product` 입니다. `-mvp` suffix (0.5.0-mvp 까지) 는 기존 설치본
+현재 distribution version 은 `0.5.22-product` 입니다. `-mvp` suffix (0.5.0-mvp 까지) 는 기존 설치본
 과의 semver 호환을 위해 유지하지만, 0.5.1+ 부터 repo identity 와 release suffix 는 product
 track 기준으로 운영합니다.
 

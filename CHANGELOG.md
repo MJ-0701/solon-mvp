@@ -1,3 +1,23 @@
+## [0.5.22-product] - 2026-04-30
+
+**Slim CPO review handoff + resilient Codex bridge.** `/sfs review` no longer
+embeds the full CPO prompt into `review.md` on every invocation. The full prompt
+is stored once under `.sfs-local/tmp/review-prompts/`, while `review.md` keeps a
+compact invocation/result log.
+
+### Changed
+
+- **Review prompt bloat guard** — `review.md` records `prompt_path`,
+  `prompt_size`, and policy metadata instead of appending the full prompt body.
+- **Bounded evidence recursion** — generated review prompts include only the
+  first 80 lines of `review.md` so old invocation logs do not recursively
+  inflate future review prompts.
+- **Codex CLI bridge hardening** — default Codex executor now uses
+  `codex exec --full-auto --ephemeral --output-last-message <result> -`.
+- **Executor warning handling** — if an executor exits non-zero but emits a
+  strict `Verdict: pass|partial|fail`, SFS records the review as completed with
+  an executor warning instead of discarding a usable CPO verdict.
+
 ## [0.5.21-product] - 2026-04-30
 
 **Command-mode audit: bash-only vs hybrid vs conditional-hybrid.** The

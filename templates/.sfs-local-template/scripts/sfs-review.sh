@@ -16,7 +16,7 @@
 #     scaffold + event 기록까지만 담당한다.
 #
 # Output (one line):
-#   review.md ready: <path> | gate <gate-id> awaiting CPO verdict | executor <executor>
+#   review.md ready: <path> | gate <gate-id> awaiting CPO verdict | executor <executor> | prompt <path>
 #   review.md ready: <path> | gate <gate-id> CPO run complete | executor <executor> | output <path>
 #
 # Exit codes (WU-25 §2.3 / gates.md §3 정합):
@@ -85,7 +85,7 @@ Open the active sprint's review.md as the CPO Evaluator review document.
   - --run
                   Execute the CPO evaluator through a real bridge.
                   Named profiles:
-                    codex        $SFS_REVIEW_CODEX_CMD, else `codex exec --full-auto`
+                    codex        $SFS_REVIEW_CODEX_CMD, else `codex exec --full-auto --ephemeral --output-last-message <result> -`
                     codex-plugin $SFS_REVIEW_CODEX_PLUGIN_CMD only (Claude in-process plugins are not shell-callable)
                     gemini       $SFS_REVIEW_GEMINI_CMD, else `gemini --skip-trust --output-format text -p "Read stdin and perform the requested CPO review."`
                     claude       $SFS_REVIEW_CLAUDE_CMD, else `claude -p --dangerously-skip-permissions`
@@ -103,7 +103,9 @@ Open the active sprint's review.md as the CPO Evaluator review document.
   - Creates review.md from sprint-templates/review.md if missing.
   - Updates frontmatter: phase=review, gate_id=<id>, evaluator_role=CPO,
     evaluator_executor=<executor>, generator_executor=<generator>, last_touched_at=<ISO8601>.
-  - Appends a CPO Evaluator invocation prompt to review.md.
+  - Writes the full CPO prompt to .sfs-local/tmp/review-prompts/.
+  - Appends a compact CPO Evaluator invocation log to review.md. The full
+    prompt body is not embedded by default to prevent recursive token growth.
   - Appends events.jsonl `review_open` event.
   - Prints the resolved review.md path + gate id + executor to stdout (no editor launch).
 
@@ -352,7 +354,9 @@ render_evidence_bundle() {
   render_evidence_file "${SFS_LOCAL_DIR}/sprints/${SPRINT_ID}/brainstorm.md" 220
   render_evidence_file "${SFS_LOCAL_DIR}/sprints/${SPRINT_ID}/plan.md" 260
   render_evidence_file "${SFS_LOCAL_DIR}/sprints/${SPRINT_ID}/log.md" 220
-  render_evidence_file "${SFS_LOCAL_DIR}/sprints/${SPRINT_ID}/review.md" 220
+  printf '\n### review.md note\n\n'
+  printf 'Only the first 80 lines of review.md are embedded to prevent recursive prompt growth. Full CPO prompts live under .sfs-local/tmp/review-prompts/.\n'
+  render_evidence_file "${SFS_LOCAL_DIR}/sprints/${SPRINT_ID}/review.md" 80
 }
 
 is_sfs_managed_review_path() {
@@ -458,7 +462,7 @@ resolve_review_executor_cmd() {
         printf '%s\n' "${SFS_REVIEW_CODEX_CMD}"
       elif command -v codex >/dev/null 2>&1; then
         prepare_executor_auth "codex" "${AUTH_INTERACTIVE}" || return "${SFS_EXIT_EXECUTOR}"
-        printf '%s\n' "codex exec --full-auto"
+        printf '%s\n' "codex exec --full-auto --ephemeral --output-last-message \"${RUN_RESULT}\" -"
       else
         echo "executor bridge missing: codex CLI not found and SFS_REVIEW_CODEX_CMD unset" >&2
         return "${SFS_EXIT_EXECUTOR}"
@@ -513,6 +517,45 @@ RUN_DIR="${SFS_LOCAL_DIR}/tmp/review-runs"
 PROMPT_TS="$(date -u +%Y%m%dT%H%M%SZ)"
 PROMPT_PATH="${PROMPT_DIR}/${SPRINT_ID}-${GATE_ID}-${PROMPT_TS}.txt"
 
+count_file_lines() {
+  local file="$1"
+  if [[ -f "$file" ]]; then
+    wc -l < "$file" | tr -d '[:space:]'
+  else
+    printf '0'
+  fi
+}
+
+count_file_bytes() {
+  local file="$1"
+  if [[ -f "$file" ]]; then
+    wc -c < "$file" | tr -d '[:space:]'
+  else
+    printf '0'
+  fi
+}
+
+has_strict_verdict() {
+  local file="$1"
+  [[ -f "$file" ]] || return 1
+  grep -Eiq '^[[:space:]>-]*Verdict:[[:space:]]*(pass|partial|fail)[[:space:]]*$' "$file"
+}
+
+append_result_excerpt() {
+  local file="$1" limit="${2:-180}"
+  if [[ ! -s "$file" ]]; then
+    printf '(empty)\n'
+    return 0
+  fi
+  awk -v limit="$limit" '
+    BEGIN { found=0; count=0 }
+    /^[[:space:]>-]*Verdict:[[:space:]]*(pass|partial|fail)[[:space:]]*$/ { found=1 }
+    found && count < limit { print; count++ }
+    END { exit(found ? 0 : 1) }
+  ' "$file" && return 0
+  sed -n "1,${limit}p" "$file"
+}
+
 if [[ "${RUN_REVIEW}" == "true" && "${ALLOW_EMPTY_REVIEW}" != "true" ]] && ! has_review_items; then
   {
     printf '\n### %s — CPO evaluator skipped (%s)\n\n' "${NOW}" "${GATE_ID}"
@@ -558,6 +601,8 @@ if ! render_cpo_prompt > "${PROMPT_PATH}" 2>/dev/null; then
   echo "permission denied writing CPO prompt to ${PROMPT_PATH}" >&2
   exit "${SFS_EXIT_PERM}"
 fi
+PROMPT_LINES="$(count_file_lines "${PROMPT_PATH}")"
+PROMPT_BYTES="$(count_file_bytes "${PROMPT_PATH}")"
 
 {
   printf '\n### %s — CPO evaluator invocation (%s)\n\n' "${NOW}" "${GATE_ID}"
@@ -572,10 +617,9 @@ fi
     printf -- '- run_requested: false\n'
   fi
   printf -- '- auth_mode: `%s`\n' "${AUTH_INTERACTIVE}"
-  printf -- '- self_validation_policy: CTO Generator output must be checked by CPO Evaluator; independent tool/instance recommended.\n\n'
-  printf '```text\n'
-  cat "${PROMPT_PATH}"
-  printf '\n```\n'
+  printf -- '- prompt_size: `%s bytes / %s lines`\n' "${PROMPT_BYTES}" "${PROMPT_LINES}"
+  printf -- '- prompt_body: stored in `prompt_path` only; not embedded in review.md to avoid recursive token growth.\n'
+  printf -- '- self_validation_policy: CTO Generator output must be checked by CPO Evaluator; independent tool/instance recommended.\n'
 } >> "${REVIEW_PATH}" || {
   echo "permission denied appending CPO prompt to ${REVIEW_PATH}" >&2
   exit "${SFS_EXIT_PERM}"
@@ -583,8 +627,15 @@ fi
 
 RUN_OUT=""
 RUN_ERR=""
+RUN_RESULT=""
+RESULT_PATH=""
 RUN_RC=""
+RUN_WARNING=""
 if [[ "${RUN_REVIEW}" == "true" ]]; then
+  RUN_OUT="${RUN_DIR}/${SPRINT_ID}-${GATE_ID}-${PROMPT_TS}.stdout.md"
+  RUN_ERR="${RUN_DIR}/${SPRINT_ID}-${GATE_ID}-${PROMPT_TS}.stderr.txt"
+  RUN_RESULT="${RUN_DIR}/${SPRINT_ID}-${GATE_ID}-${PROMPT_TS}.result.md"
+
   set +e
   EXECUTOR_CMD="$(resolve_review_executor_cmd)"
   _resolve_rc=$?
@@ -599,12 +650,11 @@ if [[ "${RUN_REVIEW}" == "true" ]]; then
     exit "${SFS_EXIT_EXECUTOR}"
   fi
 
-  RUN_OUT="${RUN_DIR}/${SPRINT_ID}-${GATE_ID}-${PROMPT_TS}.stdout.md"
-  RUN_ERR="${RUN_DIR}/${SPRINT_ID}-${GATE_ID}-${PROMPT_TS}.stderr.txt"
   {
     echo "executor running: ${EVALUATOR_EXECUTOR}"
     echo "  stdout: ${RUN_OUT}"
     echo "  stderr: ${RUN_ERR}"
+    echo "  result: ${RUN_RESULT}"
     echo "  prompt: ${PROMPT_PATH}"
     echo "  If it looks stuck, inspect another terminal with: tail -f ${RUN_ERR}"
   } >&2
@@ -613,27 +663,52 @@ if [[ "${RUN_REVIEW}" == "true" ]]; then
   RUN_RC=$?
   set -e
 
+  if [[ -s "${RUN_RESULT}" ]]; then
+    RESULT_PATH="${RUN_RESULT}"
+  elif [[ -s "${RUN_OUT}" ]]; then
+    RESULT_PATH="${RUN_OUT}"
+  elif [[ -s "${RUN_ERR}" ]]; then
+    RESULT_PATH="${RUN_ERR}"
+  else
+    RESULT_PATH="${RUN_OUT}"
+  fi
+
+  if [[ "${RUN_RC}" -ne 0 ]] && has_strict_verdict "${RESULT_PATH}"; then
+    RUN_WARNING="executor returned ${RUN_RC}, but verdict-shaped output was captured"
+    echo "warning: ${RUN_WARNING}; recording review result" >&2
+  fi
+
+  RUN_OUT_LINES="$(count_file_lines "${RUN_OUT}")"
+  RUN_OUT_BYTES="$(count_file_bytes "${RUN_OUT}")"
+  RUN_ERR_LINES="$(count_file_lines "${RUN_ERR}")"
+  RUN_ERR_BYTES="$(count_file_bytes "${RUN_ERR}")"
+  RUN_RESULT_LINES="$(count_file_lines "${RESULT_PATH}")"
+  RUN_RESULT_BYTES="$(count_file_bytes "${RESULT_PATH}")"
+
   {
     printf '\n### %s — CPO evaluator result (%s)\n\n' "${NOW}" "${GATE_ID}"
     printf -- '- executor: `%s`\n' "${EVALUATOR_EXECUTOR}"
     printf -- '- executor_cmd: `%s`\n' "${EXECUTOR_CMD}"
     printf -- '- exit_code: `%s`\n' "${RUN_RC}"
-    printf -- '- stdout_path: `%s`\n' "${RUN_OUT}"
-    printf -- '- stderr_path: `%s`\n\n' "${RUN_ERR}"
-    printf '```text\n'
-    cat "${RUN_OUT}" 2>/dev/null || true
-    printf '\n```\n'
-    if [[ -s "${RUN_ERR}" ]]; then
-      printf '\n#### stderr\n\n```text\n'
-      cat "${RUN_ERR}" 2>/dev/null || true
-      printf '\n```\n'
+    if [[ -n "${RUN_WARNING}" ]]; then
+      printf -- '- warning: `%s`\n' "${RUN_WARNING}"
     fi
+    printf -- '- stdout_path: `%s`\n' "${RUN_OUT}"
+    printf -- '- stdout_size: `%s bytes / %s lines`\n' "${RUN_OUT_BYTES}" "${RUN_OUT_LINES}"
+    printf -- '- stderr_path: `%s`\n' "${RUN_ERR}"
+    printf -- '- stderr_size: `%s bytes / %s lines`\n' "${RUN_ERR_BYTES}" "${RUN_ERR_LINES}"
+    printf -- '- result_path: `%s`\n' "${RESULT_PATH}"
+    printf -- '- result_size: `%s bytes / %s lines`\n\n' "${RUN_RESULT_BYTES}" "${RUN_RESULT_LINES}"
+    printf '#### result excerpt\n\n'
+    printf '```text\n'
+    append_result_excerpt "${RESULT_PATH}" 180
+    printf '\n```\n'
   } >> "${REVIEW_PATH}" || {
     echo "permission denied appending CPO result to ${REVIEW_PATH}" >&2
     exit "${SFS_EXIT_PERM}"
   }
 
-  if [[ "${RUN_RC}" -ne 0 ]]; then
+  if [[ "${RUN_RC}" -ne 0 && -z "${RUN_WARNING}" ]]; then
     echo "executor failed: ${EVALUATOR_EXECUTOR} (exit ${RUN_RC}); see ${RUN_ERR}" >&2
     exit "${SFS_EXIT_EXECUTOR}"
   fi
@@ -669,7 +744,7 @@ if ! append_event "review_open" \
 fi
 
 if [[ "${RUN_REVIEW}" == "true" ]]; then
-  _esc_out="${RUN_OUT//\\/\\\\}"
+  _esc_out="${RESULT_PATH//\\/\\\\}"
   _esc_out="${_esc_out//\"/\\\"}"
   _esc_rc="${RUN_RC:-0}"
   if ! append_event "review_run" \
@@ -686,9 +761,13 @@ fi
 if [[ "${PRINT_PROMPT}" == "true" ]]; then
   cat "${PROMPT_PATH}"
 elif [[ "${RUN_REVIEW}" == "true" ]]; then
-  echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_ID} CPO run complete | executor ${EVALUATOR_EXECUTOR} | output ${RUN_OUT}"
+  if [[ -n "${RUN_WARNING}" ]]; then
+    echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_ID} CPO run complete with executor warning | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
+  else
+    echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_ID} CPO run complete | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
+  fi
 else
-  echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_ID} awaiting CPO verdict | executor ${EVALUATOR_EXECUTOR}"
+  echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_ID} awaiting CPO verdict | executor ${EVALUATOR_EXECUTOR} | prompt ${PROMPT_PATH}"
 fi
 
 exit "${SFS_EXIT_OK}"

@@ -54,7 +54,7 @@ stdout / stderr / exit code 는 verbatim 보고한다 (paraphrase 금지).
 
 - `--executor claude` → `claude -p --dangerously-skip-permissions`
 - `--executor gemini` → `gemini --skip-trust --yolo --output-format text -p "Read stdin and execute the requested task."`
-- `--executor codex` → `codex exec --full-auto`
+- `--executor codex` → `codex exec --full-auto --ephemeral --output-last-message <result> -`
 - `--executor "<custom command>"` → 그대로 passthrough
 
 이 convention 은 Solon-wide invariant 다 — `loop` 만 multi-adaptor 가 아니라, Solon 의 모든
