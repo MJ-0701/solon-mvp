@@ -65,6 +65,7 @@ ALLOWLIST=(
   "README.md"
   "CLAUDE.md"
   "AGENTS.md"
+  "GUIDE.md"
   "install.sh"
   "upgrade.sh"
   "uninstall.sh"
@@ -223,13 +224,18 @@ STABLE_CHANGELOG_H1="$(extract_h1 "${STABLE_REPO}/CHANGELOG.md")"
 DEV_SOLON_REPO="$(extract_solon_repo "${DEV_STAGING}/install.sh")"
 STABLE_SOLON_REPO="$(extract_solon_repo "${STABLE_REPO}/install.sh")"
 
-DIVERGENCE_HITS=()
-[[ -n "${STABLE_README_H1}" && "${DEV_README_H1}" != "${STABLE_README_H1}" ]] && \
-  DIVERGENCE_HITS+=("README h1 — dev: '${DEV_README_H1}' / stable: '${STABLE_README_H1}'")
-[[ -n "${STABLE_CHANGELOG_H1}" && "${DEV_CHANGELOG_H1}" != "${STABLE_CHANGELOG_H1}" ]] && \
-  DIVERGENCE_HITS+=("CHANGELOG h1 — dev: '${DEV_CHANGELOG_H1}' / stable: '${STABLE_CHANGELOG_H1}'")
-[[ -n "${STABLE_SOLON_REPO}" && "${DEV_SOLON_REPO}" != "${STABLE_SOLON_REPO}" ]] && \
-  DIVERGENCE_HITS+=("install.sh SOLON_REPO — dev: '${DEV_SOLON_REPO}' / stable: '${STABLE_SOLON_REPO}'")
+# macOS default bash 3.2 + `set -u` 환경에서 빈 배열 ${#arr[@]} 접근 시 unbound variable.
+# Workaround: newline-separated string 사용 (bash 3.2 호환).
+DIVERGENCE_HITS=""
+if [[ -n "${STABLE_README_H1}" && "${DEV_README_H1}" != "${STABLE_README_H1}" ]]; then
+  DIVERGENCE_HITS="${DIVERGENCE_HITS}README h1 — dev: '${DEV_README_H1}' / stable: '${STABLE_README_H1}'"$'\n'
+fi
+if [[ -n "${STABLE_CHANGELOG_H1}" && "${DEV_CHANGELOG_H1}" != "${STABLE_CHANGELOG_H1}" ]]; then
+  DIVERGENCE_HITS="${DIVERGENCE_HITS}CHANGELOG h1 — dev: '${DEV_CHANGELOG_H1}' / stable: '${STABLE_CHANGELOG_H1}'"$'\n'
+fi
+if [[ -n "${STABLE_SOLON_REPO}" && "${DEV_SOLON_REPO}" != "${STABLE_SOLON_REPO}" ]]; then
+  DIVERGENCE_HITS="${DIVERGENCE_HITS}install.sh SOLON_REPO — dev: '${DEV_SOLON_REPO}' / stable: '${STABLE_SOLON_REPO}'"$'\n'
+fi
 
 # git log 비교 (last release tag 이후 stable 에 sync-back 없는 commit 수)
 LAST_RELEASE_TAG="$(git -C "${STABLE_REPO}" describe --tags --abbrev=0 --match 'v*-mvp' --match 'v*-product' 2>/dev/null || true)"
@@ -238,9 +244,14 @@ if [[ -n "${LAST_RELEASE_TAG}" ]]; then
   STABLE_SYNCBACK_LOG="$(git -C "${STABLE_REPO}" log --oneline "${LAST_RELEASE_TAG}..HEAD" 2>/dev/null || true)"
 fi
 
-if [[ ${#DIVERGENCE_HITS[@]} -gt 0 || -n "${STABLE_SYNCBACK_LOG}" ]]; then
+if [[ -n "${DIVERGENCE_HITS}" || -n "${STABLE_SYNCBACK_LOG}" ]]; then
   warn "P-13 divergence 감지 (stable hotfix sync-back 누락 가능):"
-  for d in "${DIVERGENCE_HITS[@]}"; do warn "    - ${d}"; done
+  if [[ -n "${DIVERGENCE_HITS}" ]]; then
+    # newline-separated entries print
+    while IFS= read -r d; do
+      [[ -n "${d}" ]] && warn "    - ${d}"
+    done <<< "${DIVERGENCE_HITS}"
+  fi
   if [[ -n "${STABLE_SYNCBACK_LOG}" ]]; then
     warn "    - stable 에 ${LAST_RELEASE_TAG} 이후 commit 발견:"
     printf '%s\n' "${STABLE_SYNCBACK_LOG}" | sed 's/^/        /' >&2

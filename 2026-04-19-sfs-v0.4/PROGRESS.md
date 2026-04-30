@@ -406,8 +406,8 @@ resume_hint:
   purpose: "24번째 세션이 본 PROGRESS.md 1개만 읽고 (a) 23rd 미완 commit 마무리 + (b) sandbox file:// clone 패턴 채택 + (c) WU-24 + WU-31 병렬 default 자동 진행"
   trigger_positive: [ㄱㄱ, 고, ㅇㅋ, ok, OK, 시작, 가자, ㅇㅇ, 진행, go, Go, start, "이전 세션 이어서", "이어서 ㄱㄱ", "이어서", 이어, "이어서 진행"]
   trigger_negative: [ㄴㄴ, 잠깐, stop, 아니, 중단, 다른거, 다른, no]
-  default_action: 26th-3 ε continuation 3 ✅ 완료 (α default + B2 sync-back + C 회고/시스템 정비 3-layer). 본 cycle 발견 결함 3건 (P-13 release tooling + P-14 AI mental coupling + R-D1 §1.13 invariant 부족) 모두 정합 회복. cut-release.sh §1 Pre-flight 강화 (stable HEAD vs dev staging narrative key divergence 감지, exit 7 신설, --allow-divergence bypass) + P-13/P-14 learning logs 신설 + CLAUDE.md §1.13 보강 (1.20 → 1.21) + cross-ref-audit §4 W-27/W-28 추가. 다음 default = 사용자 mac terminal 1줄 → `bash ~/agent_architect/2026-04-19-sfs-v0.4/tmp/release-0.5.1-product.sh` (interactive 4-step). cut --apply 시 P-13 divergence 감지 1차 dogfooding 가능.
-  last_written: 2026-04-30T11:00:00Z
+  default_action: 26th-3 ε continuation 3 ✅ 완료 (α default + B2 sync-back + C 회고/시스템 정비 + D 친구 onboarding GUIDE.md). 본 cycle 발견 결함 3건 + bash 3.2 portability bug 1건 모두 fix + 외부 onboarding 가이드 1 신설. 사용자 친구 (소수지) 첫 install 시 'SFS.md 에 프로젝트 스택 넣음 대는거정' 오해 직접 해소 가능. 다음 default = 사용자 mac terminal 1줄 → `bash ~/agent_architect/2026-04-19-sfs-v0.4/tmp/release-0.5.1-product.sh` (interactive 4-step, helper 가 GUIDE.md 도 1 batch commit + cut-release.sh ALLOWLIST 10 항목 sync).
+  last_written: 2026-04-30T11:30:00Z
 
     1. **CLAUDE.md SSoT Read** — §1 14규율 + §1.5' (commit/push 사용자 manual) + §1.12 mutex + §1.14 ≤200 lines.
     2. **PROGRESS.md (본 파일) Read** — frontmatter `domain_locks` + `current_wu_owner` 확인.

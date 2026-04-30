@@ -168,3 +168,10 @@ cut 결과는 그대로 보존 (tag 도 그대로 잔존) + 다음 cut (0.5.1-ho
 ## 7. 변경 이력
 
 - 2026-04-30 (26th-3 ε continuation 3): 신설 (status: documented, severity: high, reuse_count: 0).
+- 2026-04-30 (26th-3 ε continuation 3 후반, 사용자 helper 1차 실행 시 발견):
+  **bash 3.2 portability bug fix** — 초기 구현이 `DIVERGENCE_HITS=()` 빈 배열 + `${#arr[@]}` /
+  `${arr[@]}` reference 사용했으나 macOS default bash 3.2 + `set -euo pipefail` 환경에서
+  빈 배열 access 시 `unbound variable` error. Fix = newline-separated string 패턴으로 전환
+  (`DIVERGENCE_HITS=""` + `+= "...\n"` + `while read` loop). 다른 array (MISSING) 영역은
+  ALLOWLIST 가 항상 빈-배열 시작이 아니므로 일단 보존, 후속 cycle 에서 일괄 점검 deferred.
+  사용자 reuse_count 1 (본 fix dogfooding case).

@@ -83,6 +83,10 @@ curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.s
 (자동 install 된 entry point 4종 = `.claude/commands/sfs.md` + `.gemini/commands/sfs.toml` +
 `.agents/skills/sfs/SKILL.md` + optional `~/.codex/prompts/sfs.md`).
 
+> 📘 **친구 onboarding 30분 walk-through**: 설치 직후 처음 30분 동안 `SFS.md` placeholder 치환,
+> 첫 sprint 시작, plan/review/decision/retro 흐름까지 따라 하는 가이드는 [GUIDE.md](./GUIDE.md)
+> 참조. "SFS.md 에 프로젝트 스택 적어도 되는지" 같은 자주 묻는 오해도 거기서 해소.
+
 ```text
 /sfs status
 /sfs start "첫 번째 sprint 목표"
@@ -246,6 +250,7 @@ Uninstall 은 대화형으로 실행됩니다.
 | `install.sh` | consumer 프로젝트에 Solon Product scaffold 설치 |
 | `upgrade.sh` | 설치된 scaffold 를 새 배포판으로 갱신 |
 | `uninstall.sh` | 설치된 scaffold 제거 |
+| `GUIDE.md` | 친구 onboarding 30분 walk-through (placeholder 치환 + 첫 sprint + FAQ + 트러블슈팅) |
 | `templates/SFS.md.template` | 공통 운영 지침 |
 | `templates/CLAUDE.md.template` | Claude Code adapter template |
 | `templates/AGENTS.md.template` | Codex adapter template |
