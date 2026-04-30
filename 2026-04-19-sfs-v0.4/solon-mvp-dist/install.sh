@@ -289,6 +289,24 @@ install_file "templates/GEMINI.md.template" "GEMINI.md" "Gemini CLI 어댑터"
 mkdir -p "$TARGET/.claude/commands"
 install_file "templates/.claude/commands/sfs.md" ".claude/commands/sfs.md" "Claude Code /sfs 커맨드"
 
+# 6.2b) Gemini CLI custom command (project-scoped slash 1급, TOML)
+# 위치: <project>/.gemini/commands/sfs.toml — Gemini CLI 가 자동 발견 + native /sfs 슬래시.
+mkdir -p "$TARGET/.gemini/commands"
+install_file "templates/.gemini/commands/sfs.toml" ".gemini/commands/sfs.toml" "Gemini CLI /sfs 슬래시"
+
+# 6.2c) Codex Skill (project-scoped, .agents/skills/, Anthropic Skills 호환)
+# 위치: <project>/.agents/skills/sfs/SKILL.md — Codex CLI/IDE/app 모두에서 자동 발견.
+# implicit invocation (사용자 의도 매칭) + explicit invocation ($sfs) 양쪽 작동.
+mkdir -p "$TARGET/.agents/skills/sfs"
+install_file "templates/.agents/skills/sfs/SKILL.md" ".agents/skills/sfs/SKILL.md" "Codex Skill (project-scoped)"
+
+# 6.2d) Codex CLI user-scoped prompt (optional fallback, NOT auto-installed to ~/)
+# 위치 (template 만): templates/.codex/prompts/sfs.md
+# project-scoped Skill 이 primary entry — 본 file 은 user 가 ~/.codex/prompts/sfs.md
+# 로 직접 cp 할 때 사용. install.sh 는 user $HOME 에 쓰지 않음 (사용자 영역 보호).
+# 안내만 출력:
+ok "Codex user-scoped slash fallback (optional): templates/.codex/prompts/sfs.md → ~/.codex/prompts/sfs.md (manual cp)"
+
 # 6.3) 자동 치환 가능한 placeholder (DATE + SOLON-VERSION) 처리
 # <PROJECT-NAME> / <STACK> / <DB> / <DEPLOY> / <DOMAIN> 등은 consumer 수동 치환 대상.
 SOLON_VERSION_VAL=$(cat "$SOURCE_DIR/VERSION" 2>/dev/null | head -1 || echo "unknown")
@@ -432,19 +450,24 @@ Solon 버전:      $SOLON_VERSION
 .sfs-local/:     스캐폴드 (${C_BOLD}기존 sprint 산출물은 보존됨${C_RESET})
 공통 지침:       SFS.md
 런타임 어댑터:   CLAUDE.md / AGENTS.md / GEMINI.md
-Claude /sfs:     .claude/commands/sfs.md
+Slash 1급:       .claude/commands/sfs.md (Claude Code, Markdown)
+                 .gemini/commands/sfs.toml (Gemini CLI, TOML)
+                 .agents/skills/sfs/SKILL.md (Codex, Skills 체계)
 
 다음 단계:
 
   ${C_BOLD}1.${C_RESET} SFS.md 내용 확인 + 프로젝트 특성 반영 (Stack / 도메인 등).
 
-  ${C_BOLD}2.${C_RESET} 선호 런타임에서 시작:
-     ${C_BLUE}cd $TARGET && claude${C_RESET}
-     ${C_BLUE}/sfs status${C_RESET} 또는 ${C_BLUE}/sfs start${C_RESET} 로 시작.
-     Codex/Gemini CLI 에서는 "SFS.md 읽고 sfs status처럼 현재 상태 요약해줘" 로 시작.
+  ${C_BOLD}2.${C_RESET} 선호 런타임에서 시작 (셋 다 native /sfs 슬래시 1급):
+     ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} 또는 ${C_BLUE}/sfs start${C_RESET}
+     ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} 또는 ${C_BLUE}/sfs start${C_RESET}
+     ${C_BLUE}codex${C_RESET}      → ${C_BLUE}\$sfs status${C_RESET} (explicit) 또는 자연어로 "현재 상태 확인" (implicit)
+     셋 모두 동일한 ${C_BOLD}.sfs-local/scripts/sfs-*.sh${C_RESET} bash adapter 호출.
 
   ${C_BOLD}3.${C_RESET} git commit + push (Solon 주입 자체를 기록):
-     ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .claude/commands/sfs.md .sfs-local/${C_RESET}
+     ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore \\${C_RESET}
+     ${C_BLUE}        .claude/commands/sfs.md .gemini/commands/sfs.toml \\${C_RESET}
+     ${C_BLUE}        .agents/skills/sfs/SKILL.md .sfs-local/${C_RESET}
      ${C_BLUE}git commit -m "chore: install solon-mvp $SOLON_VERSION"${C_RESET}
      ${C_BLUE}git push${C_RESET}
 

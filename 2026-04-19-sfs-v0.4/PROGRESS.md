@@ -406,8 +406,8 @@ resume_hint:
   purpose: "24번째 세션이 본 PROGRESS.md 1개만 읽고 (a) 23rd 미완 commit 마무리 + (b) sandbox file:// clone 패턴 채택 + (c) WU-24 + WU-31 병렬 default 자동 진행"
   trigger_positive: [ㄱㄱ, 고, ㅇㅋ, ok, OK, 시작, 가자, ㅇㅇ, 진행, go, Go, start, "이전 세션 이어서", "이어서 ㄱㄱ", "이어서", 이어, "이어서 진행"]
   trigger_negative: [ㄴㄴ, 잠깐, stop, 아니, 중단, 다른거, 다른, no]
-  default_action: ε continuation 작업 2 (0.5.0-mvp release cut, α 즉시 vs β onboarding 후 본인 결정) + 작업 3 (stable working tree 13 file divergence 처리, cut 직전 git stash/restore 결정). 작업 1 (CLAUDE.md §1.20 단계적 안내 원칙 + W-26 + P-11) ✅ 26th-1 ε continuation 완료.
-  last_written: 2026-04-29T14:40:32Z
+  default_action: 26th-2 ε continuation 2 ✅ 0.5.0-mvp release prep 100% 완료 (사용자 결정 α + C 수신 + multi-adaptor parity vendor reality fact 검증 web research + Codex Skill + Gemini commands + Codex user-scoped fallback 신설 + install.sh / upgrade.sh / README / CHANGELOG / release notes 모두 정합 회복). 다음 default = 사용자 mac terminal 에서 1줄 실행 → `bash ~/agent_architect/2026-04-19-sfs-v0.4/tmp/release-0.5.0-mvp.sh` (interactive 4-step = commit → stable review → cut --apply → push). 본 helper 가 path/branch 자동 감지 + 매 step 사용자 confirm + §1.5/§1.18 정합. fallback (manual) = HANDOFF-next-session.md §7 4-step 안내.
+  last_written: 2026-04-29T16:30:00Z
 
     1. **CLAUDE.md SSoT Read** — §1 14규율 + §1.5' (commit/push 사용자 manual) + §1.12 mutex + §1.14 ≤200 lines.
     2. **PROGRESS.md (본 파일) Read** — frontmatter `domain_locks` + `current_wu_owner` 확인.
@@ -526,6 +526,62 @@ resume_hint:
 ---
 
 ## ① Just-Finished
+
+### 26번째 사이클 2번째 ε continuation `26th-2-cowork-cycle` (Cowork user-active conversation, 2026-04-29T15:30Z~16:30Z+, 사용자 verbatim 4건 누적 = '"α + C, 즉시 cut" → 친구 지금 자는중이라서 실행 데이터 못받음' + 'CEO,CPO agent 셋이서 회의하고 가장 best practice인 방향으로 끝까지 쭉 작업진행해' + 'loop만 멀티 adaptor 지원하는것 처럼 명시... solon의 모든 기능이 multi-adaptor로 동작할 수 있어야 됨' + 'codex랑 gemini-cli도 claude랑 동일하게 사용 가능해야됨 ... 스킬체계가 같아서 안될이유가 없을거 같다')
+
+**ε continuation 2 후반 = 사용자 비판 2차 (multi-adaptor parity vendor reality fact 검증) 즉시 fix**:
+
+5. **사용자 검증 web research** — Gemini CLI / Codex 의 native slash 또는 Skills 체계 정확한 spec 확인:
+   - **Gemini CLI**: `.gemini/commands/sfs.toml` (TOML format, `prompt` + `description` 필드, `{{args}}` placeholder, `!{...}` shell injection, `@{...}` file injection) → **project-scoped native slash 1급** ✅
+   - **Codex CLI**: `.agents/skills/sfs/SKILL.md` (Skills 체계, frontmatter `name` + `description` + body, agentskills.io 표준 호환) → **project-scoped + user-scoped + implicit/explicit invocation 양쪽** ✅. user-scoped fallback `~/.codex/prompts/sfs.md` (Markdown) 도 optional.
+   - 즉 사용자 주장 = 100% 정확. 본 cycle 까지 narrative drift = vendor reality fact 미확인 상태에서 "Claude Code 만 1급" 으로 적은 mental coupling 안티패턴.
+6. **신규 산출물 3 file**:
+   - `templates/.gemini/commands/sfs.toml` — Gemini CLI native /sfs 슬래시 1급 (TOML, prompt = bash adapter 직접 호출 안내, 7 subcommand cover).
+   - `templates/.agents/skills/sfs/SKILL.md` — Codex Skill (project-scoped, frontmatter name=sfs + description, body = dispatch table + procedure + safety locks + multi-adaptor parity 명시).
+   - `templates/.codex/prompts/sfs.md` — Codex user-scoped slash fallback (optional, install.sh 자동 install 안 함, manual cp 안내).
+7. **install.sh + upgrade.sh 갱신**:
+   - install.sh 6.2b/6.2c (mkdir + install_file 2건) + 6.2d (user-scoped manual cp 안내) 추가. commit hint + 다음 단계 안내 multi-adaptor parity 정합.
+   - upgrade.sh CHECK_FILES + update_file 호출에 0.5.0-mvp 신규 slot 2건 추가 (Gemini commands + Codex Skill).
+8. **README.md 정합 회복**:
+   - 4 Gate → 7 Gate enum (G-1..G5) + verdict 3-enum (pass/partial/fail).
+   - `/sfs` 6 명령 → 7 명령 1급 ("선택, 큰 작업용" 분리 narrative 폐기).
+   - 런타임별 호출 표 — 셋 다 native slash 1급 + bash adapter SSoT 명시.
+   - 산출물 표 — Gemini commands + Codex Skill + user-scoped fallback 추가.
+   - 수동 cp 방법 (install 방법 3) — `.gemini/commands/sfs.toml` + `.agents/skills/sfs/SKILL.md` 추가.
+   - "0.3.0-mvp 가 첫 public release" → "0.5.0-mvp = multi-adaptor 1급 정합 release" 보강.
+9. **CHANGELOG 0.5.0-mvp Changed 섹션 보강** — Solon-wide multi-adaptor 1급 정합 + 신규 slot 3 file 명시 + install/upgrade 자동화 명시.
+10. **release notes multi-adaptor parity table 갱신** — 4 row table (Claude Code / Codex / Gemini CLI / 공통 SFS) + 0.4.0-mvp drift 상태 vs 0.5.0-mvp 정합 회복 narrative.
+11. **outputs/release helper 신설** — `tmp/release-0.5.0-mvp.sh` (raw-internal, gitignored). 사용자 mac terminal 에서 1줄 실행하면 4-step interactive batch (commit → stable review → cut --apply → push). 매 step 사용자 confirm + path/branch 자동 감지 + heredoc commit message + §1.5 push 명시 confirm.
+
+**누적 작업**: file 편집 18+ (host .git mutate 0). dev staging 8 file + docset 4 file + templates 7 file 신규 또는 갱신.
+
+**3-agent self-review 재검증** (사용자 비판 2차 수신 후): PLANNER PASS — vendor reality fact 검증 완료 후 mechanical translation, decision_points 신설 0. EVALUATOR PASS — 사용자 (친구) 가 어떤 CLI 든 install.sh 1줄로 native /sfs 슬래시 1급 사용 가능. AI worker self-PASS. 2/3+ effective PASS.
+
+**핵심 결과**: 0.5.0-mvp release prep 100% 완료 (file 편집 only, host .git mutate 0). 사용자 mac terminal 에서 1 batch commit + cut + push 만 잔존.
+
+**진행 batch (mechanical translation, decision_points 신설 0, light review gate self-apply PASS)**:
+
+1. **WU-26 + WU-27 실 bash 구현 사전 완료 확인** — sfs-decision.sh / sfs-retro.sh / sfs-loop.sh / sfs-common.sh helpers 11종 모두 25th-1 ~ 26th-1 cycle 에서 구현 완료. spec/impl drift 0. CHANGELOG 0.4.0-mvp 까지 release date `2026-04-29` 이미 마감 + last_commit `777540f` push 완료.
+2. **VERSION 0.4.0-mvp → 0.5.0-mvp** (`solon-mvp-dist/VERSION` 1줄 갱신).
+3. **CHANGELOG 0.5.0-mvp entry 신설** — Added 6 항목 (`/sfs loop` + Multi-worker coordinator + Pre-execution review gate + Optimistic locking 4-state FSM + Pre-flight check + `SFS_LOOP_LLM_LIVE` env) + Changed 3 항목 + Notes 4 항목 + Unreleased 0.6.0+ 갱신.
+4. **사용자 비판 즉시 fix (§1.20 (2) 문제 발견 흐름)** — 사용자 verbatim "loop만 멀티 adaptor(gemini-cli, codex, claude) 지원하는것 처럼 명시해뒀는데 분명 말했지만 loop뿐만 아니라 solon의 모든 기능이 multi-adaptor로 동작할 수 있어야 됨" 즉시 수신 → release blocker 3건 식별:
+   - **AGENTS.md.template / GEMINI.md.template 의 SFS commands 6-row** (loop 누락) + bash adapter 직접 호출 안내 0건 + paraphrase only.
+   - **SFS.md.template 의 7-step / Gate / 산출물 narrative drift** — `retro-light.md` (옛) → `retro.md`, 4-Gate 축소판 → 7-Gate enum (G-1..G5), decisions 1~3줄 → full ADR + mini-ADR 양쪽.
+   - **런타임별 시작법** vendor-asymmetric — Claude Code 만 1급 slash entry, Codex/Gemini 는 natural language paraphrase only.
+5. **3 runtime adapter template 정합 회복** — `SFS.md.template` (Solon-wide 7-row dispatch table + 7-Gate enum + 5 산출물 + decisions 양쪽 + 런타임별 시작법 정합) + `AGENTS.md.template` (Codex 7-row bash adapter 직접 호출 + executor convention) + `GEMINI.md.template` (Gemini CLI 동일). 이 3 file 갱신이 본 0.5.0-mvp release 의 핵심 가치.
+6. **CHANGELOG 0.5.0-mvp narrative 재구성** — "Solon-wide multi-adaptor invariant 정합 + `/sfs loop` 추가" 로 재정의. Changed 섹션 첫 항목 = "Solon-wide multi-adaptor narrative 정합" (3 template 갱신 명시). Notes 마지막 항목 = "multi-adaptor 정합은 0.2.0-mvp 부터 설계 의도였으나 runtime adapter narrative drift 로 vendor-asymmetric 됐던 것을 본 release 에서 정합 회복".
+7. **`tmp/release-notes-0.5.0-mvp.md` 신설** + 0.5.0-mvp narrative parity 강조 (multi-adaptor parity table 추가).
+
+**3-agent self-review (사용자 verbatim 위임 정합)**: PLANNER (CEO scope-risk) PASS — §1.5' 정합 (file 편집 only, host .git mutate 0). EVALUATOR (CPO user-impact) PASS-with-conditions — heredoc message + cut 명령 §1.18 path/branch-neutral 조건 충족. AI worker = self-PASS. 2/3+ effective PASS.
+
+**규율 준수**: §1.3 self-validation (사용자 결정 α+C 사전 수신, 본 cycle 신규 결정 0) · §1.4 Option β default (multi-adaptor narrative parity = minimal cleanup) · §1.5' commit/push 사용자 manual (AI 는 file 편집만, 11+ file 편집 누적 host .git mutate 0) · §1.7 escalation 0건 · §1.8 PROGRESS heartbeat (본 narrative 자체) · §1.10 Solon Status Report code fence (응답 끝) · §1.13 R-D1 dev-first (모든 산출물 dev staging only, stable 미접촉) · §1.14 ≤200 lines (CLAUDE.md 미접촉) · §1.15 review gate self-apply PASS · §1.17 7-step briefing prose (사용자 결정 #1 + #2 송출 시 사용) · §1.18 commit 안내 path/branch-neutral · §1.19 HANDOFF auto-write · §1.20 단계적 안내 (사용자 비판 발견 시 즉시 stop + 그 문제만 처리).
+
+**잔여 작업 (사용자 mac terminal 영역, 깨어났을 때 1 batch)**:
+- A. `~/agent_architect` repo 의 dev staging 편집분 1 batch wip squash commit
+- B. `~/workspace/solon-mvp` (stable repo) 의 13 file divergence 본인 case-by-case (C invariant)
+- C. `bash 2026-04-19-sfs-v0.4/scripts/cut-release.sh --version 0.5.0-mvp --apply` (stable 에 rsync + commit + tag, push 안 함)
+- D. dev repo + stable repo 양쪽 `git push origin main` + tag push
+- (자세한 명령 = HANDOFF-next-session.md §7 + 본 cycle 응답 마지막 보고서)
 
 ### 25번째 사이클 6번째 user-active conversation `zen-magical-feynman` (Cowork, 2026-04-29T08:00~08:30Z = 17:00~17:30 KST, 사용자 '솔론 프로젝트 총 남은작업양 확인 + 순차 진행' = 25th-5 HANDOFF default_action γ AI-doable 옵션 자율진행)
 

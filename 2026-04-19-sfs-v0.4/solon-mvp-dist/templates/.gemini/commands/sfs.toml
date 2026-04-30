@@ -1,0 +1,74 @@
+# Solon SFS — Gemini CLI custom command (project-scoped)
+#
+# Path: <consumer-project>/.gemini/commands/sfs.toml
+# Invoke: /sfs <subcommand> [args]
+#         예) /sfs status / /sfs start "첫 번째 sprint" / /sfs review --gate G2
+#
+# Behavior: bash adapter (.sfs-local/scripts/sfs-*.sh) 가 single source of truth.
+#   user 발화의 첫 token = subcommand → sfs-<subcommand>.sh 실행 + stdout verbatim 출력.
+#   paraphrase 금지, 결정성 유지 (Claude Code / Codex / Gemini CLI 동등 1급).
+#
+# Note: {{args}} 는 Gemini CLI v1 placeholder. 사용자가 입력한 첫 token 이 subcommand,
+#       나머지는 그 subcommand 의 인자로 그대로 전달.
+
+description = "Solon SFS workflow command — bash adapter SSoT (status/start/plan/review/decision/retro/loop)"
+
+prompt = """
+You are operating in a project that has Solon SFS installed.
+
+The user has invoked `/sfs {{args}}`. Treat the first whitespace-delimited
+token as the subcommand and the remainder as that subcommand's arguments.
+
+## Behavior
+
+If the first argument is **`status`**, **`start`**, **`plan`**, **`review`**,
+**`decision`**, **`retro`**, or **`loop`**, dispatch the request to the
+corresponding bash script under `.sfs-local/scripts/` and stop. These seven
+subcommands are deterministic and must NOT be re-interpreted by the model.
+
+| First arg | Script to run | Notes |
+|:--|:--|:--|
+| `status`   | `bash .sfs-local/scripts/sfs-status.sh <remaining args>`   | passes flags such as `--color=auto/always/never` verbatim |
+| `start`    | `bash .sfs-local/scripts/sfs-start.sh <remaining args>`    | passes `<sprint-id>` and/or `--force` verbatim |
+| `plan`     | `bash .sfs-local/scripts/sfs-plan.sh <remaining args>`     | takes no flags currently; remaining args reserved for future |
+| `review`   | `bash .sfs-local/scripts/sfs-review.sh <remaining args>`   | passes `--gate <id>` / `--gate=<id>` verbatim (id ∈ G-1, G0, G1, G2, G3, G4, G5) |
+| `decision` | `bash .sfs-local/scripts/sfs-decision.sh <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim |
+| `retro`    | `bash .sfs-local/scripts/sfs-retro.sh <remaining args>`    | passes `--close` verbatim. With `--close`: writes status/closed_at, removes `.sfs-local/current-sprint`, appends `sprint_close` event, runs `auto_commit_close` (push manual per §1.5) |
+| `loop`     | `bash .sfs-local/scripts/sfs-loop.sh <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim |
+
+## Procedure
+
+1. **Existence check** — Verify `.sfs-local/scripts/sfs-<first-arg>.sh` exists
+   and is executable. If missing, tell the user which script is missing (1
+   line) and fall back to Claude-driven mode for that subcommand.
+
+2. **Quote args safely** — Re-quote `<remaining args>` for the shell. Reject
+   any argument containing a newline or NUL byte by reporting `unknown arg`
+   instead of executing.
+
+3. **Execute** — Run the script. Capture stdout, stderr, and exit code. Do
+   not pipe through any other transformer.
+
+4. **Print output verbatim** — Emit the script's stdout exactly as produced.
+   If exit code is non-zero, also print stderr and the exit code on a final
+   line: `exit <code>`.
+
+5. **Stop** — Do not summarize, paraphrase, or add commentary. The bash
+   adapter is the SSoT.
+
+## If first arg is empty or `help`
+
+Print the following 3-line usage and stop:
+
+```
+Usage: /sfs <command> [args]
+Commands: status, start, plan, review, decision, retro, loop
+Help: bash .sfs-local/scripts/sfs-<command>.sh --help
+```
+
+## ⚠️ Safety
+
+- `/sfs retro --close` triggers an auto-commit. Confirm the user explicitly
+  requested it (don't infer from neighboring context).
+- Never run `git push origin *` automatically — push is user-only (§1.5).
+"""

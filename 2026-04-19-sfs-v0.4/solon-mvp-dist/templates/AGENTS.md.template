@@ -1,6 +1,6 @@
 # AGENTS.md — Codex adapter for Solon SFS
 
-This project uses Solon SFS.
+This project uses Solon SFS (multi-adaptor by design — Claude Code / Codex / Gemini CLI 동등 1급).
 
 Before planning or editing, read:
 
@@ -10,13 +10,44 @@ Before planning or editing, read:
 - recent files under `.sfs-local/sprints/`
 - recent files under `.sfs-local/decisions/`
 
-Codex does not need a native `/sfs` slash command. Treat these user requests as SFS commands:
+## SFS commands — bash adapter 우선 (deterministic SSoT)
 
-- `sfs status`, `/sfs status`: summarize current SFS state and next action.
-- `sfs start <goal>`, `/sfs start <goal>`: create or continue the current sprint.
-- `sfs plan`: write or update the current sprint `plan.md`.
-- `sfs review`: write or update the current sprint `review.md`.
-- `sfs decision <decision>`: record a short ADR under `.sfs-local/decisions/`.
-- `sfs retro`: write or update `retro-light.md`.
+Solon SFS 의 7 슬래시 명령은 모두 `.sfs-local/scripts/sfs-*.sh` bash adapter 가
+single source of truth (Claude/Codex/Gemini 어느 CLI 환경에서든 동일한 결과 보장).
+Codex 는 native `/sfs` slash 가 없어도 사용자 발화를 다음 명령으로 해석해서 **bash adapter
+를 직접 호출**한다 (paraphrase 금지, 결정성 유지):
 
-Preserve user work. Ask only when a decision changes behavior or could discard work.
+| 사용자 발화 | 실행할 명령 |
+|:--|:--|
+| `sfs status`, `/sfs status` | `bash .sfs-local/scripts/sfs-status.sh [--color=auto/always/never]` |
+| `sfs start <goal>`, `/sfs start <goal>` | `bash .sfs-local/scripts/sfs-start.sh [<sprint-id>] [--force]` |
+| `sfs plan`, `/sfs plan` | `bash .sfs-local/scripts/sfs-plan.sh` |
+| `sfs review --gate <id>`, `/sfs review --gate <id>` | `bash .sfs-local/scripts/sfs-review.sh --gate <id>` (id ∈ G-1, G0, G1, G2, G3, G4, G5) |
+| `sfs decision <title>`, `/sfs decision <title>` | `bash .sfs-local/scripts/sfs-decision.sh "<title>" [--id <id>]` |
+| `sfs retro [--close]`, `/sfs retro [--close]` | `bash .sfs-local/scripts/sfs-retro.sh [--close]` |
+| `sfs loop ...`, `/sfs loop ...` | `bash .sfs-local/scripts/sfs-loop.sh [OPTIONS]` (Ralph Loop + Solon mutex, see `--help`) |
+
+각 스크립트의 stdout 은 verbatim 그대로 사용자에게 보여주고 (paraphrase 금지),
+non-zero exit 시 stderr + exit code 도 함께 보고한다. Bash adapter 가 부재하거나 실행
+권한이 없으면 그 사실을 1줄로 사용자에게 알리고, 해당 명령에 한해 fallback paraphrase 모드로 진입한다.
+
+## `/sfs loop` — 멀티 adaptor LLM executor convention
+
+`/sfs loop` 는 자율 진행 (Ralph Loop 패턴) 의 LLM 호출 site 다. 어떤 CLI 환경에서 호출하든
+`--executor` flag (또는 `SFS_EXECUTOR` env) 로 LLM CLI 를 명시한다:
+
+- `--executor claude` → `claude -p --dangerously-skip-permissions`
+- `--executor gemini` → `gemini -p --yolo`
+- `--executor codex` → `codex exec --full-auto`
+- `--executor "<custom command>"` → 그대로 passthrough
+
+이 convention 은 Solon-wide invariant 다 — `loop` 만 multi-adaptor 가 아니라, Solon 의 모든
+슬래시 명령이 Claude/Codex/Gemini 어느 1급 CLI 에서든 동등한 deterministic bash adapter
+SSoT 로 동작한다. 본 AGENTS.md (Codex adapter) 와 짝이 되는 GEMINI.md / CLAUDE.md 도 동일
+규약을 따른다.
+
+## 운영 규율
+
+- 사용자 작업 보존 (Preserve user work). 결정으로 인해 동작이 바뀌거나 작업이 삭제될 수
+  있을 때만 묻는다.
+- `git push origin *` 자동 실행 금지 — push 는 사용자 터미널에서만 (Solon §1.5).

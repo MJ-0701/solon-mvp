@@ -209,6 +209,9 @@ declare -a CHECK_FILES=(
   # decisions-template/ — sfs-decision.sh 가 ADR 신설 시 사용 (WU-26)
   ".sfs-local/decisions-template/ADR-TEMPLATE.md|templates/.sfs-local-template/decisions-template/ADR-TEMPLATE.md"
   ".sfs-local/decisions-template/_INDEX.md|templates/.sfs-local-template/decisions-template/_INDEX.md"
+  # 0.5.0-mvp 신규: multi-adaptor parity (Gemini CLI native slash + Codex Skill)
+  ".gemini/commands/sfs.toml|templates/.gemini/commands/sfs.toml"
+  ".agents/skills/sfs/SKILL.md|templates/.agents/skills/sfs/SKILL.md"
 )
 
 for pair in "${CHECK_FILES[@]}"; do
@@ -360,6 +363,14 @@ update_file ".sfs-local/sprint-templates/decision-light.md"  "templates/.sfs-loc
 mkdir -p "$TARGET/.sfs-local/decisions-template"
 update_file ".sfs-local/decisions-template/ADR-TEMPLATE.md"  "templates/.sfs-local-template/decisions-template/ADR-TEMPLATE.md"  "ADR template (WU-26 full)"  "b"
 update_file ".sfs-local/decisions-template/_INDEX.md"        "templates/.sfs-local-template/decisions-template/_INDEX.md"        "decisions _INDEX (WU-26)"   "b"
+
+# multi-adaptor parity (0.5.0-mvp 신규): Gemini CLI native slash + Codex Skill
+# 신규: .gemini/commands/sfs.toml + .agents/skills/sfs/SKILL.md
+# Claude Code 1급 (.claude/commands/sfs.md) 와 동등 entry point.
+mkdir -p "$TARGET/.gemini/commands"
+mkdir -p "$TARGET/.agents/skills/sfs"
+update_file ".gemini/commands/sfs.toml"   "templates/.gemini/commands/sfs.toml"   "Gemini CLI /sfs 슬래시 (TOML)"  "b"
+update_file ".agents/skills/sfs/SKILL.md" "templates/.agents/skills/sfs/SKILL.md" "Codex Skill (project-scoped)"  "b"
 
 TODAY=$(date +%Y-%m-%d)
 if [ "$(uname)" = "Darwin" ]; then

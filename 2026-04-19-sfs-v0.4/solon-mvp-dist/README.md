@@ -3,7 +3,7 @@
 > **1인 창업가가 회사의 역할 분리·검증·기억·회복을 파일과 agent 로 재현하게 만드는 운영 시스템.**
 > Claude Code · Codex · Gemini CLI 어떤 LLM agent 에서도 동일하게 동작하는 "Company-as-Code" 경량 스캐폴드.
 
-**버전**: `0.3.0-mvp` · **라이선스**: 개인 IP — 외부 배포·상업 이용 신중 (정식 라이선스 TBD) · **상태**: MVP — 풀스펙 아님, 도구 자체는 실 운영 중
+**버전**: `0.5.0-mvp` · **라이선스**: 개인 IP — 외부 배포·상업 이용 신중 (정식 라이선스 TBD) · **상태**: MVP — 풀스펙 아님, 도구 자체는 실 운영 중
 
 ---
 
@@ -78,22 +78,23 @@ Company = Org × Process × Artifact × Observability
 
 브레인스토밍 → plan → sprint → 구현 → review → commit → 문서화. 본 MVP 가 주입하는 가벼운 projection 이고, 풀스펙 (Discovery / PRD / Taxonomy / UX / Technical Design / Release Readiness) 은 별도 docset 에 있어.
 
-### 4 Gate
+### 7 Gate
 
-각 작업 단위가 통과해야 하는 4 개의 검증 지점. **Gate 는 진행을 막지 않는 signal** (never-hard-block 원칙) — 사용자가 통과 여부 결정해.
+각 작업 단위가 통과할 수 있는 7 개의 검증 지점 (`G-1, G0, G1, G2, G3, G4, G5`). **Gate 는 진행을 막지 않는 signal** (never-hard-block 원칙) — 사용자가 통과 여부 결정해. verdict 는 `pass / partial / fail` 3-enum (G3 만 binary `block / unblock`).
 
-### `/sfs` 6 명령
+### `/sfs` 7 명령 (multi-adaptor 1급)
 
-Claude Code 에서 직접 호출하는 slash command (Codex / Gemini 에선 자연어로 호출).
+Claude Code · Codex · Gemini CLI **셋 다 native slash 1급으로 호출** 가능. 셋 모두 동일한 `.sfs-local/scripts/sfs-*.sh` bash adapter 를 SSoT 로 사용 — paraphrase 금지, 결정성 보장.
 
 | 명령 | 무엇을 하나 |
 |---|---|
 | `/sfs status` | 현재 sprint·WU·gate·ahead·last_event 1줄 dashboard |
 | `/sfs start <goal>` | 새 sprint 시작 또는 기존 sprint 이어가기 |
 | `/sfs plan` | 현 sprint 의 `plan.md` 작성·갱신 (의도·경계 기록) |
-| `/sfs review` | `review.md` 작성·갱신 + gate verdict 기록 |
-| `/sfs decision <text>` | mini-ADR 결정 기록 (auto-commit OK) |
-| `/sfs retro --close` | sprint 회고 + sprint close auto commit |
+| `/sfs review --gate <id>` | `review.md` 작성·갱신 + gate verdict 기록 (id ∈ G-1..G5) |
+| `/sfs decision <title>` | full ADR (decisions/) 또는 mini-ADR (sprint-local) 신설 |
+| `/sfs retro --close` | sprint 회고 + sprint close + auto-commit (push 는 manual) |
+| `/sfs loop [OPTIONS]` | Ralph Loop + Solon mutex 자율 진행 (multi-vendor LLM executor) |
 
 ### 작업 단위 — Sprint / WU / micro-step
 
@@ -107,9 +108,16 @@ micro-step = WU 안의 1 회 PROGRESS 갱신 단위 (~5-10 분)
 
 가장 작은 단위가 micro-step 인 이유 = 토큰 한계·세션 종료·사고 발생 시 작업 유실 최소화.
 
-### `/sfs loop` (선택, 큰 작업용)
+### `/sfs loop` 자세히 (큰 작업용)
 
-Ralph Loop + Solon mutex 결합. 사용자가 "큰 작업 = 자율 진행" 결정 시 LLM 이 한 micro-step → PROGRESS 갱신 → 자기 review gate → 다음 micro-step 을 cap (max 5 iterations) 까지 반복. **multi-vendor** 지원 (`--executor claude / codex / gemini / 사용자정의`).
+`/sfs loop` 는 자율 진행 (Ralph Loop 패턴) 의 LLM 호출 site. 사용자가 "큰 작업 = 자율 진행" 결정 시 LLM 이 한 micro-step → PROGRESS 갱신 → 자기 review gate → 다음 micro-step 을 cap (`--max-iters` default 5) 까지 반복. **multi-vendor executor** 1급 지원:
+
+- `--executor claude` → `claude -p --dangerously-skip-permissions`
+- `--executor gemini` → `gemini -p --yolo`
+- `--executor codex` → `codex exec --full-auto`
+- `--executor "<custom command>"` → 그대로 passthrough (자체 LLM CLI 도 OK)
+
+이 convention 은 `/sfs loop` 만 적용되는 게 아니라 **Solon-wide invariant** — Solon 의 모든 명령이 어느 1급 CLI 에서든 동등한 deterministic bash adapter SSoT 로 동작한다.
 
 ---
 
@@ -173,11 +181,15 @@ cp ~/tmp/solon-mvp/templates/SFS.md.template      SFS.md
 cp ~/tmp/solon-mvp/templates/CLAUDE.md.template   CLAUDE.md
 cp ~/tmp/solon-mvp/templates/AGENTS.md.template   AGENTS.md
 cp ~/tmp/solon-mvp/templates/GEMINI.md.template   GEMINI.md
-mkdir -p .claude/commands
-cp    ~/tmp/solon-mvp/templates/.claude/commands/sfs.md .claude/commands/sfs.md
-cp -r ~/tmp/solon-mvp/templates/.sfs-local-template     .sfs-local
-cat   ~/tmp/solon-mvp/templates/.gitignore.snippet     >> .gitignore
+mkdir -p .claude/commands .gemini/commands .agents/skills/sfs
+cp    ~/tmp/solon-mvp/templates/.claude/commands/sfs.md   .claude/commands/sfs.md
+cp    ~/tmp/solon-mvp/templates/.gemini/commands/sfs.toml .gemini/commands/sfs.toml
+cp    ~/tmp/solon-mvp/templates/.agents/skills/sfs/SKILL.md .agents/skills/sfs/SKILL.md
+cp -r ~/tmp/solon-mvp/templates/.sfs-local-template       .sfs-local
+cat   ~/tmp/solon-mvp/templates/.gitignore.snippet       >> .gitignore
 # placeholder 치환 (<PROJECT-NAME>, <DATE>, <STACK>, …) 은 에디터에서 수동
+# (선택) Codex user-scoped slash fallback:
+#   mkdir -p ~/.codex/prompts && cp ~/tmp/solon-mvp/templates/.codex/prompts/sfs.md ~/.codex/prompts/sfs.md
 ```
 
 ### 설치 후 3 단계
@@ -188,15 +200,26 @@ cat   ~/tmp/solon-mvp/templates/.gitignore.snippet     >> .gitignore
 
 ---
 
-## 런타임별 호출
+## 런타임별 호출 (셋 다 native slash 1급)
 
-| 런타임 | 호출 방법 |
-|---|---|
-| **Claude Code** | `/sfs status` (slash command 직접 dispatch) |
-| **Codex** | `SFS.md 와 AGENTS.md 읽고 sfs status 처럼 현재 상태 요약해줘` |
-| **Gemini CLI** | `SFS.md 와 GEMINI.md 읽고 sfs status 처럼 현재 상태 요약해줘` |
+설치 후 `/sfs` 7 명령은 **세 런타임 모두에서 native 등록**된다. 같은 `.sfs-local/scripts/sfs-*.sh` bash adapter 가 SSoT — vendor 마다 결과 동일성 보장.
 
-`/sfs` 6 명령 모두 위 3 런타임에서 동일 작동. Claude Code 는 native slash dispatch 라 가장 빠르고, Codex / Gemini 는 자연어 wrapper 통해 같은 결과.
+| 런타임 | Entry point (자동 install) | 호출 방법 |
+|---|---|---|
+| **Claude Code** | `.claude/commands/sfs.md` (Markdown slash) | `/sfs status` |
+| **Gemini CLI** | `.gemini/commands/sfs.toml` (TOML slash) | `/sfs status` |
+| **Codex** | `.agents/skills/sfs/SKILL.md` (project-scoped Skill) | `$sfs status` (explicit) 또는 자연어 (implicit, e.g. "현재 상태") |
+
+### Codex 의 user-scoped slash fallback (선택)
+
+Codex 는 native `/sfs` popup slash 도 별도 user-scoped path 에서 지원한다 (`~/.codex/prompts/sfs.md`). 본 file 은 install.sh 가 자동 install 하지 않음 (user $HOME 영역 보호) — 원하면 manual cp:
+
+```sh
+mkdir -p ~/.codex/prompts
+cp <consumer-project>/templates/.codex/prompts/sfs.md ~/.codex/prompts/sfs.md
+```
+
+설치 후 Codex CLI 에서 `/sfs status` 입력하면 native popup 에 등장.
 
 ---
 
@@ -211,7 +234,10 @@ cat   ~/tmp/solon-mvp/templates/.gitignore.snippet     >> .gitignore
 | Claude Code adapter | [`templates/CLAUDE.md.template`](./templates/CLAUDE.md.template) |
 | Codex adapter | [`templates/AGENTS.md.template`](./templates/AGENTS.md.template) |
 | Gemini CLI adapter | [`templates/GEMINI.md.template`](./templates/GEMINI.md.template) |
-| Claude Code `/sfs` 슬래시 커맨드 | [`templates/.claude/commands/sfs.md`](./templates/.claude/commands/sfs.md) |
+| Claude Code `/sfs` 슬래시 (Markdown) | [`templates/.claude/commands/sfs.md`](./templates/.claude/commands/sfs.md) |
+| Gemini CLI `/sfs` 슬래시 (TOML) | [`templates/.gemini/commands/sfs.toml`](./templates/.gemini/commands/sfs.toml) |
+| Codex Skill (project-scoped) | [`templates/.agents/skills/sfs/SKILL.md`](./templates/.agents/skills/sfs/SKILL.md) |
+| Codex user-scoped slash (optional fallback) | [`templates/.codex/prompts/sfs.md`](./templates/.codex/prompts/sfs.md) |
 | `.sfs-local/` scaffold (sprint·decision·event 로그) | [`templates/.sfs-local-template/`](./templates/.sfs-local-template/) |
 | `.gitignore` 블록 (marker 기반) | [`templates/.gitignore.snippet`](./templates/.gitignore.snippet) |
 
@@ -278,7 +304,7 @@ cd ~/workspace/my-project
 
 ## CHANGELOG
 
-[CHANGELOG.md](./CHANGELOG.md) 참조. 0.3.0-mvp 가 첫 public release 야.
+[CHANGELOG.md](./CHANGELOG.md) 참조. 0.3.0-mvp 가 첫 public release, 0.5.0-mvp 가 multi-adaptor 1급 정합 + `/sfs loop` 추가 release.
 
 ---
 
