@@ -1,3 +1,42 @@
+## [0.5.19-product] - 2026-04-30
+
+**Solon report shape, not bkit-shaped footer.** The previous
+`Solon Feature Usage` footer borrowed too much of the bkit report design. Solon
+now keeps bkit-origin usage facts only as optional content inside the existing
+Solon Session Status Report shape.
+
+### Changed
+
+- **Removed bkit-style footer contract** — active Claude command/template
+  instructions no longer use `Feature Usage`, `Used`, `Not Used`, or
+  `Recommended` rows as the Solon report design.
+- **Solon Status Report alignment** — when usage facts are useful, they should
+  be folded into Solon evidence/health/next lines (`Steps`, `Health`, `Next`),
+  following `solon-status-report.md`.
+- **Default command output stays quiet** — deterministic `/sfs` commands still
+  stop after bash adapter output; reports are only for explicit status/report
+  moments or the documented brainstorm CEO refinement.
+
+## [0.5.18-product] - 2026-04-30
+
+**Codex slash parser reality check.** Codex desktop can show `커맨드 없음` for
+bare `/sfs` before the message reaches the model/Skill. The Codex entry path is
+now documented as `$sfs ...` / Skill mention first, with direct bash as the
+deterministic fallback.
+
+### Changed
+
+- **Codex invocation guidance** — docs and installer output now recommend
+  `$sfs status`, `$sfs start`, and `$sfs brainstorm` for Codex app/CLI surfaces
+  that intercept unknown slash commands.
+- **No false native slash promise** — `/sfs` remains the Solon command shape for
+  Claude/Gemini and for any surface that actually forwards the text, but Codex
+  native slash registration is not claimed until the host exposes it.
+- **Self-hosting docs alignment** — Codex Skill instructions now treat `$sfs`
+  as the practical 1급 Codex adapter path.
+- **Guide stdout alignment** — the short `/sfs guide` briefing now shows the
+  Codex `$sfs ...` path directly, not only the long Markdown guide.
+
 ## [0.5.17-product] - 2026-04-30
 
 **Brainstorm CEO refinement flow.** `/sfs brainstorm` now matches the intended

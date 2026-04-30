@@ -298,8 +298,8 @@ mkdir -p "$TARGET/.gemini/commands"
 install_file "templates/.gemini/commands/sfs.toml" ".gemini/commands/sfs.toml" "Gemini CLI /sfs 슬래시"
 
 # 6.2c) Codex Skill (project-scoped, .agents/skills/, Anthropic Skills 호환)
-# 위치: <project>/.agents/skills/sfs/SKILL.md — Codex desktop app / compatible Codex surfaces 에서 자동 발견.
-# Codex CLI blocking build 는 leading `/sfs` 를 모델 전에 차단할 수 있으므로 Skill fallback 으로 `$sfs` / 자연어를 쓴다.
+# 위치: <project>/.agents/skills/sfs/SKILL.md — Codex Skill.
+# Codex app/CLI 는 leading `/sfs` 를 모델 전에 차단할 수 있으므로 `$sfs` / 자연어를 우선 쓴다.
 # implicit invocation (사용자 의도 매칭) + explicit invocation ($sfs) 양쪽 작동.
 mkdir -p "$TARGET/.agents/skills/sfs"
 install_file "templates/.agents/skills/sfs/SKILL.md" ".agents/skills/sfs/SKILL.md" "Codex Skill (project-scoped)"
@@ -500,14 +500,13 @@ Windows wrapper: .sfs-local/scripts/sfs.ps1 (PowerShell → Git Bash)
 
   ${C_BOLD}1.${C_RESET} SFS.md 내용 확인 + 프로젝트 특성 반영 (Stack / 도메인 등).
 
-  ${C_BOLD}2.${C_RESET} 선호 런타임에서 시작 (Solon public API 는 셋 다 /sfs):
+  ${C_BOLD}2.${C_RESET} 선호 런타임에서 시작:
      ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET}
      ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET}
-     ${C_BLUE}codex app${C_RESET}  → ${C_BLUE}/sfs status${C_RESET} (정상 1급, Skill 이 bash adapter dispatch)
-     ${C_BLUE}codex CLI${C_RESET}  → ${C_BLUE}/sfs status${C_RESET} (현재 blocking build 는 adaptor gap;
-                   임시 bypass: ${C_BLUE}\$sfs status${C_RESET}, ${C_BLUE}sfs status${C_RESET}, 자연어, direct bash)
+     ${C_BLUE}codex${C_RESET}      → ${C_BLUE}\$sfs status${C_RESET} → ${C_BLUE}\$sfs start${C_RESET} → ${C_BLUE}\$sfs brainstorm${C_RESET} → ${C_BLUE}\$sfs plan${C_RESET}
+                   (bare ${C_BLUE}/sfs${C_RESET} 가 '커맨드 없음' 으로 막히면 host slash parser gap)
      셋 모두 동일한 ${C_BOLD}.sfs-local/scripts/sfs-*.sh${C_RESET} bash adapter 호출.
-     설치 직후 가이드는 ${C_BLUE}/sfs guide${C_RESET} 또는 ${C_BLUE}/sfs guide --print${C_RESET}.
+     설치 직후 가이드는 ${C_BLUE}/sfs guide${C_RESET} 또는 ${C_BLUE}\$sfs guide${C_RESET}.
 
   ${C_BOLD}3.${C_RESET} git commit + push (Solon 주입 자체를 기록):
      ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore \\${C_RESET}

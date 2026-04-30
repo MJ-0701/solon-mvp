@@ -1,29 +1,27 @@
 ---
 name: sfs
-description: Solon SFS workflow — dispatch /sfs status/start/guide/auth/brainstorm/plan/review/decision/retro/loop to bash adapter SSoT; for brainstorm, capture raw input first and then fill §1~§7 as Solon CEO. Trigger when a Codex surface delivers /sfs, $sfs, sfs <command>, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "sprint 시작", "브레인스토밍", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
+description: Solon SFS workflow for Codex — use $sfs status/start/guide/auth/brainstorm/plan/review/decision/retro/loop or natural language to dispatch to bash adapter SSoT; for brainstorm, capture raw input first and then fill §1~§7 as Solon CEO. Trigger when a Codex surface delivers $sfs, sfs <command>, /sfs text that reaches the model, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "sprint 시작", "브레인스토밍", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
 ---
 
 # Solon SFS — Codex Skill
 
-This project uses Solon SFS. `/sfs` is the public command surface. When the
-user invokes `/sfs <command>` (if it reaches the model), `$sfs <command>`,
-types `sfs <command>`, or expresses a Solon SFS workflow intent, dispatch the
-request to the corresponding bash script under `.sfs-local/scripts/` first.
+This project uses Solon SFS. In Codex, prefer `$sfs <command>` or a natural
+language Solon workflow request. Bare `/sfs` may be intercepted by the Codex
+native slash UI before this Skill sees it (`커맨드 없음` / `Unrecognized command`).
+When the user invokes `$sfs <command>`, types `sfs <command>`, sends `/sfs`
+text that actually reaches the model, or expresses a Solon SFS workflow intent,
+dispatch the request to the corresponding bash script under
+`.sfs-local/scripts/` first.
 For every command except `brainstorm`, stop after printing adapter output. For
 `brainstorm`, continue with the CEO refinement flow below after successful raw
 capture.
 
 If you can read a user message that begins with `/sfs`, the runtime has already
-delivered the Solon command to this Skill. Do not answer that `/sfs` is
-unsupported, and do not downgrade it to a non-Solon conversation. Dispatch it.
-
-Codex desktop app or any Codex surface where `/sfs ...` reaches this Skill is
-a first-class path and must keep working. Some Codex CLI builds may intercept
-bare leading-slash input such as `/sfs status` before it reaches the model.
-Treat only that CLI interception as a Codex CLI adaptor compatibility gap, not
-as a different Solon API. Temporary bypasses for those builds are `$sfs status`,
-`sfs status`, or direct bash (`bash .sfs-local/scripts/sfs-status.sh`) until the
-CLI slash compatibility layer is available.
+delivered the Solon command to this Skill. Dispatch it. But do not claim Codex
+native slash registration exists: current Codex app/CLI surfaces can block
+unknown slash commands before the model sees them. In that case the user should
+invoke `$sfs status`, `sfs status`, natural language, or direct bash
+(`bash .sfs-local/scripts/sfs-status.sh`).
 
 The bash adapter execution is **deterministic** and must NOT be
 re-interpreted by the model. Bash adapter is single source of truth (SSoT) for
@@ -158,10 +156,9 @@ also exposed through these entry points:
 - **Claude Code**: `.claude/commands/sfs.md` (slash command, native dispatch)
 - **Gemini CLI**: `.gemini/commands/sfs.toml` (TOML custom command, native slash)
 - **Codex**: 본 Skill (`.agents/skills/sfs/SKILL.md`, project-scoped).
-  `/sfs` is the required public surface and remains first-class in Codex desktop
-  app / compatible surfaces where it reaches the model. `$sfs ...` / natural
-  language are temporary CLI bypasses only when the native slash parser blocks
-  unknown commands before the model sees them.
+  `$sfs ...` / `sfs ...` / natural language are the practical Codex entry paths
+  because current Codex app/CLI surfaces may intercept bare `/sfs` before the
+  model sees it. If `/sfs ...` text does reach this Skill, dispatch it.
 
 All entry points dispatch to the SAME bash adapter (`.sfs-local/scripts/sfs-*.sh`).
 Vendor-asymmetry between adapters is forbidden — if you find drift, it's a

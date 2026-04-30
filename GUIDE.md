@@ -77,15 +77,12 @@ PowerShell-only 환경은 아직 지원선 밖이다.
 |:--|:--|
 | Claude Code | `/sfs status` (slash popup) |
 | Gemini CLI | `/sfs status` (slash popup) |
-| Codex desktop app / compatible Codex | `/sfs status` |
-| Codex CLI blocking build | `/sfs status` 가 public API 이지만 CLI parser 에 막히면 `$sfs status` / 자연어가 임시 bypass |
+| Codex app / Codex CLI | `$sfs status` 또는 `sfs status` |
 
-아래 예시는 Solon 기준 canonical `/sfs` 표기입니다. Codex desktop app 처럼 `/sfs` 가
-prompt 본문으로 모델/Skill 에 도달하는 환경에서는 그대로 정상 경로입니다. 앱 UI 가 별도
-command chip 을 표시하지 않아도 모델이 `/sfs ...` 를 읽을 수 있으면 dispatch 대상입니다.
-Codex CLI 에서 bare `/sfs` 가 `Unrecognized command '/sfs'` 로 막히면 그건 사용자 실수가
-아니라 Codex CLI adaptor compatibility gap 입니다. `$sfs start ...`, `$sfs plan`, 자연어,
-direct bash 는 그 CLI build 에서만 쓰는 임시 bypass 입니다.
+아래 예시는 Solon 기준 `/sfs` 표기입니다. Claude Code 와 Gemini CLI 에서는 그대로 쓰면 된다.
+Codex app/CLI 에서 bare `/sfs` 를 입력했을 때 `커맨드 없음` 또는 `Unrecognized command` 가
+뜨면 Solon 이 실행된 것이 아니라 host slash parser 가 메시지를 모델 전에 차단한 것이다.
+그 경우 Codex 에서는 `$sfs start ...`, `$sfs plan`, 자연어, direct bash 를 쓴다.
 
 처음 실행하면 다음과 비슷한 1줄 dashboard 가 나온다:
 
@@ -209,10 +206,9 @@ sprint 완전히 끝났으면:
 
 ## 5. 10 슬래시 명령 cheatsheet
 
-Codex desktop app 에서 `/sfs` 가 모델/Skill 에 보이면 정상 1급 경로다. 메시지를 읽은
-Codex adapter 는 unsupported 로 답하지 말고 즉시 bash adapter 로 dispatch 한다. Codex CLI
-에서만 leading `/sfs` 가 막히는 build 는 adaptor gap 이다. 그 경우만 임시로 `$sfs` 또는
-자연어 bypass 를 쓴다.
+Claude/Gemini 에서는 `/sfs ...` 를 그대로 쓴다. Codex app/CLI 에서는 현재 bare `/sfs` 가
+native slash UI 에서 `커맨드 없음` 으로 막힐 수 있으므로 `$sfs ...` Skill mention 이 실사용
+1급 경로다. direct bash 는 항상 deterministic fallback 이다.
 
 | 명령 | 한 줄 설명 |
 |:--|:--|
@@ -229,6 +225,8 @@ Codex adapter 는 unsupported 로 답하지 말고 즉시 bash adapter 로 dispa
 | `/sfs decision <title>` | ADR-style 결정 기록 |
 | `/sfs retro [--close]` | 회고 작성 / sprint close + auto-commit |
 | `/sfs loop` | 큰 작업 자율 진행 (Ralph Loop, 고급) |
+
+Codex 에서는 같은 명령을 `$sfs status`, `$sfs start ...`, `$sfs brainstorm ...` 처럼 입력한다.
 
 각 명령 자체에 `--help` 있음:
 
@@ -254,7 +252,7 @@ Windows PowerShell 에서는:
 |:--|:--|
 | Claude Code | `.claude/commands/sfs.md` (자동 install) |
 | Gemini CLI | `.gemini/commands/sfs.toml` (자동 install) |
-| Codex | `.agents/skills/sfs/SKILL.md` (자동 install, project-scoped Skill; `/sfs` public API) |
+| Codex | `.agents/skills/sfs/SKILL.md` (자동 install, project-scoped Skill; `$sfs ...` 권장) |
 | Codex CLI bypass (선택, legacy prompt) | `~/.codex/prompts/sfs.md` (manual `cp`, 지원 build 에서 `/prompts:sfs ...`) |
 
 `/sfs loop` 의 LLM 호출 부분 (자율 진행 모드) 은 `--executor claude|gemini|codex|<custom>` 로 vendor 선택:

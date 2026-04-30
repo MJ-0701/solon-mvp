@@ -14,18 +14,20 @@ Before planning or editing, read:
 
 Solon Product SFS 의 10 명령은 모두 `.sfs-local/scripts/sfs-*.sh` bash adapter 가
 single source of truth (Claude/Codex/Gemini 어느 CLI 환경에서든 동일한 결과 보장).
-`/sfs` 는 Solon 의 public command surface 다. Runtime adaptor 는 vendor 별 입력면 차이를
-흡수해서 반드시 같은 bash adapter 로 내려보내야 한다.
+Codex 에서는 `$sfs ...` Skill mention 또는 `sfs ...` 일반 발화를 우선 사용한다. Bare `/sfs`
+는 Codex native slash UI 에서 `커맨드 없음` / `Unrecognized command` 로 모델 전에 차단될 수
+있다. Runtime adaptor 는 vendor 별 입력면 차이를 흡수해서 반드시 같은 bash adapter 로
+내려보내야 한다.
 
 Codex 가 사용자 메시지 `/sfs ...` 를 읽을 수 있다면 이미 앱/런타임 parser 를 통과한 것이다.
 이때는 "unsupported command" 로 답하지 말고 아래 dispatch table 을 즉시 적용한다.
 
-Codex desktop app 처럼 leading slash 입력(`/sfs ...`)이 모델/Skill 에 도달하는 환경에서는
-그 경로가 정상 1급 entry 다. Codex CLI 의 일부 build 는 leading slash 입력을 모델에
-도달하기 전에 native slash parser 에서 차단한다. 이 경우만 사용자 호출법 문제가 아니라
-**Codex CLI adaptor compatibility gap** 이다. 임시 bypass 로 `$sfs ...` explicit Skill,
-`sfs ...` 일반 발화, 자연어 요청이 들어오면 아래와 동일하게 **bash adapter 를 직접 호출**한다
-(paraphrase 금지, 결정성 유지):
+만약 `/sfs ...` 텍스트가 모델/Skill 에 실제로 도달했다면 이미 host parser 를 통과한 것이므로
+아래와 동일하게 dispatch 한다. 그러나 현재 Codex app/CLI 에서는 leading slash 입력이 모델에
+도달하기 전에 native slash parser 에서 차단될 수 있다. 이 경우는 Solon 미설치가 아니라
+**Codex runtime adapter compatibility gap** 이다. `$sfs ...` explicit Skill, `sfs ...` 일반 발화,
+자연어 요청이 들어오면 아래와 동일하게 **bash adapter 를 직접 호출**한다 (paraphrase 금지,
+결정성 유지):
 
 | 사용자 발화 | 실행할 명령 |
 |:--|:--|

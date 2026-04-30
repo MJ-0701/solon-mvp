@@ -133,8 +133,11 @@ cd C:\workspace\my-project
 iwr -useb https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.ps1 | iex
 ```
 
-설치 후 Solon 의 public command surface 는 세 런타임 모두 `/sfs` 입니다. Runtime adaptor 는
-각 vendor 의 입력면 차이를 흡수해서 같은 bash adapter 로 내려보내야 합니다. 자동 install 된 entry point 는
+설치 후 Solon 의 command shape 는 Claude/Gemini 에서는 `/sfs`, Codex 에서는 `$sfs` Skill
+mention 을 우선 사용합니다. Codex app/CLI 는 unknown leading slash 를 모델 전에 막고
+`커맨드 없음` / `Unrecognized command` 를 표시할 수 있으므로, Codex 에서는 `$sfs status`
+또는 자연어 요청이 실사용 1급 경로입니다. Runtime adaptor 는 각 vendor 의 입력면 차이를
+흡수해서 같은 bash adapter 로 내려보내야 합니다. 자동 install 된 entry point 는
 `.claude/commands/sfs.md` + `.gemini/commands/sfs.toml` + `.agents/skills/sfs/SKILL.md`
 입니다.
 
@@ -143,6 +146,7 @@ iwr -useb https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.p
 > 참조. "SFS.md 에 프로젝트 스택 적어도 되는지" 같은 자주 묻는 오해도 거기서 해소.
 
 ```text
+# Claude Code / Gemini CLI
 /sfs status
 /sfs guide
 /sfs auth status
@@ -152,15 +156,20 @@ iwr -useb https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.p
 /sfs review --gate G4 --executor codex --generator claude --run
 /sfs decision "초기 인증 방식은 세션 기반으로 시작한다"
 /sfs retro --close
+
+# Codex app / Codex CLI
+$sfs status
+$sfs start "첫 번째 sprint 목표"
+$sfs brainstorm "raw 요구사항과 아직 정리 안 된 맥락"
+$sfs plan
 ```
 
-Codex desktop app / compatible Codex surfaces 에서 `/sfs ...` 입력이 prompt 본문으로
-모델/Skill 까지 도달하면 그 경로가 canonical 1급 경로입니다. 앱 UI 가 별도 command chip 을
-표시하지 않아도, 모델이 `/sfs ...` 메시지를 읽을 수 있으면 `.agents/skills/sfs/SKILL.md`
-가 즉시 bash adapter 로 dispatch 해야 합니다. Codex CLI 일부 build 에서만 bare `/sfs` 가
-native slash parser 에서 모델/Skill 전에 차단될 수 있습니다. 이것은 사용자 호출법 차이가
-아니라 Codex CLI adaptor compatibility gap 입니다. `$sfs status`, `$sfs plan`, `sfs status`,
-자연어 요청, direct bash 는 그 CLI build 에서만 쓰는 임시 bypass 입니다.
+Codex app/CLI 에서 bare `/sfs` 를 입력했을 때 `커맨드 없음` 또는 `Unrecognized command`
+가 보이면 Solon Skill 이 실행된 것이 아닙니다. Host slash parser 가 메시지를 모델 전에
+차단한 상태입니다. 이때는 `$sfs status`, `$sfs plan`, `sfs status`, 자연어 요청, direct bash 를
+사용합니다. `/sfs ...` 텍스트가 실제로 모델/Skill 까지 도달하는 surface 에서는 Skill 이 즉시
+bash adapter 로 dispatch 해야 하지만, 현재 Codex app/CLI 에서 native slash 등록을 보장하지는
+않습니다.
 
 세 환경 모두 같은 `.sfs-local/scripts/sfs-*.sh` bash adapter 를 SSoT 로 호출합니다 — paraphrase
 금지, vendor 마다 결과 동일성 보장.
@@ -194,8 +203,9 @@ WSL 사용자는 WSL shell 안에서 `bash .sfs-local/scripts/sfs-dispatch.sh st
 | `/sfs retro --close` | review 실행 여부 확인 후 sprint close + auto commit (push 는 manual) |
 | `/sfs loop [OPTIONS]` | 큰 작업에서 micro-step 단위 반복 실행을 돕는 자율 진행 모드 |
 
-10 명령 모두 동일 bash adapter SSoT 입니다. `/sfs` 가 public API 이고, Skill/prompt/wrapper 는
-그 API 를 runtime 별로 전달하는 adaptor surface 입니다.
+10 명령 모두 동일 bash adapter SSoT 입니다. `/sfs` 는 Claude/Gemini 쪽 command shape 이고,
+Codex 에서는 `$sfs` Skill mention 이 같은 bash adapter 로 내려가는 command shape 입니다.
+Skill/prompt/wrapper 는 이 API 를 runtime 별로 전달하는 adaptor surface 입니다.
 
 ### `/sfs loop` 자세히
 
@@ -221,14 +231,12 @@ CLI 에서든 동등한 deterministic bash adapter SSoT 로 동작합니다.
 |---|---|---|
 | **Claude Code** | `.claude/commands/sfs.md` (Markdown slash) | `/sfs status` |
 | **Gemini CLI** | `.gemini/commands/sfs.toml` (TOML slash) | `/sfs status` |
-| **Codex desktop app / compatible Codex surfaces** | `.agents/skills/sfs/SKILL.md` (project-scoped Skill, agentskills.io 표준) | `/sfs status` |
-| **Codex CLI blocking builds** | same Skill | `$sfs status` / `sfs status` / 자연어 임시 bypass |
+| **Codex app / Codex CLI** | `.agents/skills/sfs/SKILL.md` (project-scoped Skill) | `$sfs status` / `sfs status` / 자연어 |
 
-Codex desktop app 에서 `/sfs` 가 모델/Skill 에 보이는 경로는 제거하거나 격하하면 안 됩니다.
-그 메시지를 읽은 Codex adapter 는 "unrecognized command" 로 답하지 말고 즉시 dispatch 합니다.
-Codex CLI/TUI 에서만 bare `/sfs` 가 native slash parser 에 막히면 **runtime adapter compatibility
-gap** 으로 분류합니다. Desktop app 과 CLI 둘 다 `/sfs` 를 public surface 로 받아야 Solon parity 가
-완료됩니다.
+Codex app/CLI 에서 bare `/sfs` 가 native slash parser 에 막히면 **runtime adapter
+compatibility gap** 으로 분류합니다. Solon 이 설치되어 있지 않은 것이 아니라, host UI 가
+Skill 호출 전에 입력을 선점한 것입니다. Codex native slash registration 은 host 가 공식
+extension point 를 제공할 때 다시 1급 경로로 올립니다.
 일부 Codex build 에서 user prompt fallback (`/prompts:sfs ...`, `~/.codex/prompts/sfs.md`) 을
 쓸 수 있지만, install.sh 는 user `$HOME` 에 자동 cp 하지 않습니다 (사용자 영역 보호).
 지원되는 build 에서만 manual cp:
@@ -398,7 +406,7 @@ Uninstall 은 대화형으로 실행됩니다.
 
 ## Release Channel
 
-현재 distribution version 은 `0.5.17-product` 입니다. `-mvp` suffix (0.5.0-mvp 까지) 는 기존 설치본
+현재 distribution version 은 `0.5.19-product` 입니다. `-mvp` suffix (0.5.0-mvp 까지) 는 기존 설치본
 과의 semver 호환을 위해 유지하지만, 0.5.1+ 부터 repo identity 와 release suffix 는 product
 track 기준으로 운영합니다.
 

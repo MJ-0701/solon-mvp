@@ -32,18 +32,28 @@ You are running the Solon SFS workflow for this project.
 `/sfs` is a Solon command. Solon is the primary workflow owner for this command,
 even if a global/user/runtime bkit instruction is also present.
 
-If a usage footer is useful or requested by the runtime, keep the useful
-`Used / Not Used / Recommended` shape, but render it as a Solon-owned footer,
-not as `bkit Feature Usage`. Use this exact shape:
+Do not render bkit-style `Feature Usage`, `Used`, `Not Used`, or `Recommended`
+footers after Solon commands. If usage facts are useful or requested by the
+runtime, fold those facts into the existing Solon Session Status Report shape
+as evidence/health/next information. The report design is Solon-owned:
 
 ```text
-─────────────────────────────────────────────────
-📊 Solon Feature Usage
-─────────────────────────────────────────────────
-✅ Used: Bash (SFS adapter dispatch)
-⏭️ Not Used: PDCA skills, Agents (SFS workflow is Solon bash adapter SSoT)
-💡 Recommended: /sfs brainstorm <context> — G0 raw 기록 + CEO 정리 후 /sfs plan 진행
-─────────────────────────────────────────────────
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 SOLON STATUS — SFS command
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 Command <command> · <goal/gate>              [<status>]
+⏱️ Time    <started> → <finished>  (<duration>)
+───────────────────────────────────────────────────
+🔧 Steps   <N>건 — Bash adapter / CEO refinement / CPO review 등 실제 사용 경로
+📁 Files   <N>개 — 수정·생성된 Solon 산출물 요약
+💾 Commits <N>건 — 없음 또는 local commit sha
+📊 Health  Solon SSoT ✓ | adapter <✓/−> | CEO <✓/−> | CTO/CPO <✓/−> | bkit owner ×
+───────────────────────────────────────────────────
+⚠️ Escalation <N>건 — <1줄 요약 또는 "없음">
+📚 Learning   <N>건 — <1줄 요약 또는 "없음">
+───────────────────────────────────────────────────
+⏭️ Next  <다음 Solon action 1줄>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 Do not imply bkit owns or orchestrates the Solon workflow. Do not add any other
@@ -137,11 +147,11 @@ Procedure (apply in order):
      `9`=executor resolve fail, `99`=unknown.
 5. **Stop or continue only for brainstorm** — After dispatch, non-brainstorm
    commands must stop without Claude-driven commentary, alternative
-   suggestions, or bkit-branded reports. The bash script is the single source
-   of truth for command output. If a usage footer is shown, it must be the
-   Solon Feature Usage footer from the Runtime Boundary section above, and
-   nothing else. For `brainstorm` only, continue to the CEO refinement flow
-   below after a zero exit code.
+   suggestions, bkit-branded reports, or bkit-shaped "usage" footers. The bash
+   script is the single source of truth for command output. If an explicit
+   status/report is requested, use the Solon Session Status shape from the
+   Runtime Boundary section above. For `brainstorm` only, continue to the CEO
+   refinement flow below after a zero exit code.
 
 ## Brainstorm CEO Refinement
 

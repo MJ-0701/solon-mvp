@@ -142,10 +142,10 @@ Solon SFS 의 10 명령은 어떤 CLI 환경에서 호출하든 동일한 bash a
 - **Claude Code**: `/sfs`, `/sfs help`, `/sfs status`, `/sfs guide`, `/sfs start <goal>`
   (`.claude/commands/sfs.md` 의 dispatch table 이 자동으로 `.sfs-local/scripts/sfs-*.sh` 호출)
 - **Codex**: `.agents/skills/sfs/SKILL.md` + `AGENTS.md` 가 동일한 dispatch table 을 안내.
-  `/sfs` 는 public command surface 이며, Codex desktop app 처럼 `/sfs` 가 모델/Skill 에
-  도달하는 환경에서는 정상 1급 경로다. Codex CLI 가 unknown leading slash 를 모델 전에
-  차단하는 build 에서만 runtime adaptor compatibility gap 으로 본다. `$sfs status`,
-  `sfs status`, 자연어, direct bash 는 그 CLI build 에서만 쓰는 임시 bypass 이다.
+  Codex app/CLI 에서는 `$sfs status`, `$sfs start ...`, `$sfs brainstorm ...` 처럼 Skill
+  mention 을 우선 사용한다. Bare `/sfs` 는 host native slash UI 가 모델 전에 차단할 수 있다.
+  이때 `커맨드 없음` / `Unrecognized command` 가 보이면 Solon 미설치가 아니라 Codex runtime
+  adaptor gap 이다. `/sfs ...` 텍스트가 모델/Skill 까지 도달한 경우에는 dispatch 대상이다.
 - **Gemini CLI**: `GEMINI.md` 가 동일한 dispatch table 을 안내. 동작 동일.
 
 `/sfs loop --executor claude|gemini|codex|<custom>` 로 Ralph Loop LLM 호출도 환경 무관.

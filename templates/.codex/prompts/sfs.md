@@ -5,14 +5,15 @@
 # Invoke on Codex builds that still support user prompts:
 #   /prompts:sfs $ARGUMENTS
 #
-# This file is an OPTIONAL/legacy fallback. `/sfs` remains the Solon public
-# command surface. The project-scoped Skill at `.agents/skills/sfs/SKILL.md`
-# is the primary Codex adaptor asset installed by `install.sh`.
+# This file is an OPTIONAL/legacy fallback. In Codex, the project-scoped Skill
+# at `.agents/skills/sfs/SKILL.md` is the primary adaptor asset installed by
+# `install.sh`; use `$sfs ...` / `sfs ...` when the host slash UI blocks `/sfs`.
 #
-# Current Codex CLI builds may reserve leading slash names for native commands
-# and reject unregistered `/sfs` before the model sees it. Treat that as a
-# runtime adaptor compatibility gap; `/prompts:sfs` is only a bypass when your
-# Codex build exposes `/prompts:<name>` custom prompts:
+# Current Codex app/CLI builds may reserve leading slash names for native
+# commands and reject unregistered `/sfs` before the model sees it (`커맨드 없음`
+# / `Unrecognized command`). Treat that as a runtime adaptor compatibility gap;
+# `/prompts:sfs` is only a bypass when your Codex build exposes `/prompts:<name>`
+# custom prompts:
 #   mkdir -p ~/.codex/prompts
 #   cp <consumer-project>/templates/.codex/prompts/sfs.md ~/.codex/prompts/sfs.md
 #
@@ -90,8 +91,7 @@ Codex CLI has two partial extension points:
    legacy fallback on Codex builds that expose `/prompts:<name>`.
 
 Solon SFS ships both for parity with Claude Code (slash) and Gemini CLI
-(slash). Codex desktop app / compatible Codex surfaces where `/sfs` reaches
-the model are already first-class paths. Parity is incomplete only for Codex
-CLI builds that reject unknown leading-slash commands before the model sees
-them. `$sfs ...`, natural language, and `/prompts:sfs ...` are temporary
-bypasses for those builds, not a separate Solon API.
+(slash). In Codex, current app/CLI surfaces can reject unknown leading-slash
+commands before the model sees them, so `$sfs ...`, natural language, and
+direct bash are the practical entry paths. `/prompts:sfs ...` is a legacy
+fallback only when that feature is available.

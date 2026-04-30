@@ -24,7 +24,9 @@ source "${SFS_SCRIPT_DIR}/sfs-common.sh"
 
 usage_guide() {
   cat <<'EOF'
-Usage: /sfs guide [--path|--print]
+Usage:
+  Claude Code / Gemini CLI: /sfs guide [--path|--print]
+  Codex app / Codex CLI:   $sfs guide [--path|--print]
 
 Show the Solon Product onboarding guide installed with this project.
   - Default: prints a short context briefing for first use.
@@ -103,21 +105,32 @@ Solon guide context
   AGENTS.md     Codex 에게 알려줄 프로젝트별 맥락
   GEMINI.md     Gemini CLI 에게 알려줄 프로젝트별 맥락
 
+명령 진입점:
+  Claude Code / Gemini CLI: /sfs ...
+  Codex app / Codex CLI:   \$sfs ...  (bare /sfs 가 "커맨드 없음" 으로 막힐 수 있음)
+
 첫 흐름:
-  /sfs status
-  /sfs auth status
-  /sfs start "<이번 sprint 목표>"
-  /sfs brainstorm "<아직 정리 안 된 요구사항>"
-  /sfs plan
+  Claude/Gemini: /sfs status
+  Codex:         \$sfs status
+  Claude/Gemini: /sfs auth status
+  Codex:         \$sfs auth status
+  Claude/Gemini: /sfs start "<이번 sprint 목표>"
+  Codex:         \$sfs start "<이번 sprint 목표>"
+  Claude/Gemini: /sfs brainstorm "<아직 정리 안 된 요구사항>"
+  Codex:         \$sfs brainstorm "<아직 정리 안 된 요구사항>"
+  Claude/Gemini: /sfs plan
+  Codex:         \$sfs plan
 
 작업 중:
-  /sfs decision "<결정 제목>"   결정이 흐려지기 전에 기록
-  /sfs auth probe --executor gemini  bridge 연결만 가볍게 확인
-  /sfs review --gate G2        구현/기획 검토 evidence 남기기
-  /sfs retro --close           sprint close + local auto-commit
+  /sfs decision "<결정 제목>"          결정이 흐려지기 전에 기록
+  /sfs auth probe --executor gemini   bridge 연결만 가볍게 확인
+  /sfs review --gate G2               구현/기획 검토 evidence 남기기
+  /sfs retro --close                  sprint close + local auto-commit
+  Codex 에서는 같은 명령을 \$sfs decision/review/retro ... 로 입력
 
 전체 가이드:
-  /sfs guide --print
+  Claude/Gemini: /sfs guide --print
+  Codex:         \$sfs guide --print
   path: ${GUIDE_PATH}
 EOF
     ;;
