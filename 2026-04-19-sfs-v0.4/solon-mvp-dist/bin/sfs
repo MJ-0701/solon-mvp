@@ -53,7 +53,8 @@ Usage:
 
 Commands:
   agent install, update, uninstall
-  status, start, guide, auth, brainstorm, plan, implement, review, decision, retro, loop
+  version
+  status, start, guide, auth, brainstorm, plan, implement, review, decision, retro, commit, loop
 
 Project state defaults to .sfs-local/. Override with SFS_LOCAL_DIR when needed.
 
@@ -89,8 +90,18 @@ Updates the current project from the installed Solon runtime:
   - preserves sprint/decision/event history and project-specific docs
   - syncs Claude/Gemini/Codex agent entry points
 
-Use brew upgrade MJ-0701/solon-product/sfs first when you want a newer global runtime.
+Use `brew upgrade sfs` first when you want a newer global runtime.
 EOF
+}
+
+version_command() {
+  local version_file="${DIST_DIR}/VERSION"
+  local version="unknown"
+  if [[ -f "${version_file}" ]]; then
+    version="$(head -1 "${version_file}" 2>/dev/null || true)"
+    version="${version:-unknown}"
+  fi
+  printf 'sfs %s\n' "${version}"
 }
 
 project_local_dir() {
@@ -113,6 +124,7 @@ First-time project setup:
 What this means:
   brew install MJ-0701/solon-product/sfs  installs the global sfs CLI on this Mac.
   sfs init --yes                          injects SFS.md, .sfs-local/, and agent adapters into this project.
+  brew upgrade sfs                        upgrades the global CLI after the tap is installed.
   sfs update                              refreshes an already-initialized project after a runtime upgrade.
 
 Tip:
@@ -312,6 +324,15 @@ case "${1:-}" in
     update_command "$@"
     exit $?
     ;;
+  version|-v|--version)
+    shift || true
+    if [[ $# -gt 0 ]]; then
+      echo "unexpected arg for version: $1" >&2
+      exit 1
+    fi
+    version_command
+    exit 0
+    ;;
   uninstall)
     shift
     exec bash "${DIST_DIR}/uninstall.sh" "$@"
@@ -327,7 +348,7 @@ case "${1:-}" in
 esac
 
 case "${1:-}" in
-  status|start|guide|auth|brainstorm|plan|implement|review|decision|retro|loop)
+  status|start|guide|auth|brainstorm|plan|implement|review|decision|retro|commit|loop)
     if ! ensure_project_initialized "${1:-command}"; then
       exit 1
     fi

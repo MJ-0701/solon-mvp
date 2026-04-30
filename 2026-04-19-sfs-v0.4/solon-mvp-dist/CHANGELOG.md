@@ -1,3 +1,21 @@
+## [0.5.35-product] - 2026-05-01
+
+**Short Homebrew upgrade path and version command.** Users can now verify the
+installed SFS runtime directly and docs no longer imply the long fully-qualified
+formula name is required for normal upgrades.
+
+### Added
+
+- **`sfs version` / `sfs --version`** — prints the packaged runtime version from
+  the global distribution.
+
+### Changed
+
+- **Upgrade docs** — README, GUIDE, and CLI update help now use
+  `brew upgrade sfs` after the tap has already been installed.
+- **Release channel wording** — README points to `VERSION` / `sfs version`
+  instead of a hard-coded historical version string.
+
 ## [0.5.34-product] - 2026-04-30
 
 - (release cut → stable 792f078)

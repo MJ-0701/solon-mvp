@@ -195,6 +195,7 @@ First-time project setup:
 What this means:
   brew install MJ-0701/solon-product/sfs  installs the global sfs CLI on this Mac.
   sfs init --yes                          injects SFS.md, .sfs-local/, and agent adapters into this project.
+  brew upgrade sfs                        upgrades the global CLI after the tap is installed.
   sfs update                              refreshes an already-initialized project after a runtime upgrade.
 
 Tip:
@@ -338,6 +339,7 @@ declare -a CHECK_FILES=(
   ".sfs-local/scripts/sfs-review.sh|templates/.sfs-local-template/scripts/sfs-review.sh"
   ".sfs-local/scripts/sfs-decision.sh|templates/.sfs-local-template/scripts/sfs-decision.sh"
   ".sfs-local/scripts/sfs-retro.sh|templates/.sfs-local-template/scripts/sfs-retro.sh"
+  ".sfs-local/scripts/sfs-commit.sh|templates/.sfs-local-template/scripts/sfs-commit.sh"
   ".sfs-local/scripts/sfs-loop.sh|templates/.sfs-local-template/scripts/sfs-loop.sh"
   # sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용
   ".sfs-local/sprint-templates/brainstorm.md|templates/.sfs-local-template/sprint-templates/brainstorm.md"
@@ -510,6 +512,7 @@ update_file ".sfs-local/scripts/sfs-implement.sh" "templates/.sfs-local-template
 update_file ".sfs-local/scripts/sfs-review.sh"   "templates/.sfs-local-template/scripts/sfs-review.sh"   "sfs review"   "b"
 update_file ".sfs-local/scripts/sfs-decision.sh" "templates/.sfs-local-template/scripts/sfs-decision.sh" "sfs decision (WU-26)" "b"
 update_file ".sfs-local/scripts/sfs-retro.sh"    "templates/.sfs-local-template/scripts/sfs-retro.sh"    "sfs retro --close (WU-26)" "b"
+update_file ".sfs-local/scripts/sfs-commit.sh"   "templates/.sfs-local-template/scripts/sfs-commit.sh"   "sfs commit" "b"
 update_file ".sfs-local/scripts/sfs-loop.sh"     "templates/.sfs-local-template/scripts/sfs-loop.sh"     "sfs loop (WU-27 spec)" "b"
 chmod +x "$TARGET/.sfs-local/scripts"/*.sh 2>/dev/null || true
 

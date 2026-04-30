@@ -414,7 +414,7 @@ sfs guide
 아니. global runtime 을 업데이트한 뒤 프로젝트 루트에서 `sfs update` 를 실행한다.
 
 ```bash
-brew upgrade MJ-0701/solon-product/sfs
+brew upgrade sfs
 cd ~/workspace/my-project
 sfs update
 ```
