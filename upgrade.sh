@@ -151,6 +151,8 @@ fi
 
 CUR_VER=$(grep '^solon_mvp_version:' "$TARGET/.sfs-local/VERSION" | awk '{print $2}')
 INSTALLED_AT=$(grep '^installed_at:' "$TARGET/.sfs-local/VERSION" | awk '{print $2}')
+INSTALL_LAYOUT=$(grep '^install_layout:' "$TARGET/.sfs-local/VERSION" 2>/dev/null | awk '{print $2}')
+INSTALL_LAYOUT="${INSTALL_LAYOUT:-vendored}"
 
 cat <<EOF
 
@@ -159,6 +161,7 @@ ${C_BOLD}=== Solon MVP Upgrade ===${C_RESET}
 현재 설치:   $CUR_VER  (installed: $INSTALLED_AT)
 최신 배포:   $NEW_VER
 소스 모드:   $MODE
+layout:      $INSTALL_LAYOUT
 
 EOF
 
@@ -187,6 +190,15 @@ checksum_file() {
 
 recommend_action() {
   local dst_rel="$1" exists="$2" same="$3"
+
+  if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ]; then
+    case "$dst_rel" in
+      ".sfs-local/GUIDE.md"|.sfs-local/scripts/*|.sfs-local/sprint-templates/*|.sfs-local/personas/*|.sfs-local/decisions-template/*)
+        printf "skip (thin runtime)"
+        return 0
+        ;;
+    esac
+  fi
 
   if [ "$same" = "yes" ]; then
     printf "없음"
@@ -359,6 +371,15 @@ update_file() {
   local dst_rel="$1" src_rel="$2" label="$3" recommended="${4:-s}"
   local dst="$TARGET/$dst_rel" src="$SOURCE_DIR/$src_rel"
 
+  if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ]; then
+    case "$dst_rel" in
+      ".sfs-local/GUIDE.md"|.sfs-local/scripts/*|.sfs-local/sprint-templates/*|.sfs-local/personas/*|.sfs-local/decisions-template/*)
+        ok "thin runtime 사용 — project-local managed asset skip: $dst_rel"
+        return 0
+        ;;
+    esac
+  fi
+
   [ -f "$src" ] || { err "source 없음: $src_rel"; return 1; }
 
   if [ ! -f "$dst" ]; then
@@ -476,6 +497,29 @@ for auto_file in "$TARGET/SFS.md" "$TARGET/CLAUDE.md" "$TARGET/AGENTS.md" "$TARG
 done
 ok "문서 자동 치환: <DATE>=$TODAY, <SOLON-VERSION>=$NEW_VER"
 
+# config.yaml — create when upgrading older installs; preserve user edits.
+if [ ! -f "$TARGET/.sfs-local/config.yaml" ]; then
+  runtime_command="bash .sfs-local/scripts/sfs-dispatch.sh"
+  if [ "$INSTALL_LAYOUT" = "thin" ]; then
+    runtime_command="sfs"
+  fi
+  cat > "$TARGET/.sfs-local/config.yaml" <<EOF
+runtime:
+  layout: "$INSTALL_LAYOUT"
+  command: "$runtime_command"
+  version: "$NEW_VER"
+state:
+  dir: ".sfs-local"
+overrides:
+  sprint_templates: ".sfs-local/sprint-templates"
+  decisions_template: ".sfs-local/decisions-template"
+  personas: ".sfs-local/personas"
+EOF
+  ok "config.yaml 생성 (runtime layout: $INSTALL_LAYOUT)"
+else
+  ok "config.yaml 기존 유지"
+fi
+
 # ============================================================================
 # 5. .gitignore 블록 교체 (marker 기반)
 # ============================================================================
@@ -516,6 +560,7 @@ installed_at: $INSTALLED_AT
 upgraded_at: $UPGRADED_AT
 upgraded_from: $CUR_VER
 installed_from: $MODE
+install_layout: $INSTALL_LAYOUT
 source_repo: https://github.com/${SOLON_REPO}
 EOF
 ok "VERSION 갱신: $CUR_VER → $NEW_VER"

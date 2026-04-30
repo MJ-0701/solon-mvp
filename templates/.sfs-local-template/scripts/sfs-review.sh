@@ -145,7 +145,7 @@ EOF
 GATE_ID=""
 EVALUATOR_EXECUTOR="${SFS_REVIEW_EXECUTOR:-codex}"
 GENERATOR_EXECUTOR="${SFS_GENERATOR_EXECUTOR:-unknown}"
-PERSONA_PATH="${SFS_LOCAL_DIR}/personas/cpo-evaluator.md"
+PERSONA_PATH="$(sfs_persona_file cpo-evaluator)"
 PRINT_PROMPT=false
 RUN_REVIEW=true
 SHOW_LAST=false
@@ -299,7 +299,7 @@ fi
 
 SPRINT_DIR="${SFS_SPRINTS_DIR}/${SPRINT_ID}"
 REVIEW_PATH="${SPRINT_DIR}/review.md"
-TEMPLATE="${SFS_LOCAL_DIR}/sprint-templates/review.md"
+TEMPLATE="$(sfs_sprint_template_file review)"
 
 existing_result_excerpt() {
   local file="$1" limit="${2:-80}"

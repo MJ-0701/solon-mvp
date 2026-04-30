@@ -112,7 +112,7 @@ fi
 
 SPRINT_DIR="${SFS_SPRINTS_DIR}/${SPRINT_ID}"
 BRAINSTORM_PATH="${SPRINT_DIR}/brainstorm.md"
-TEMPLATE="${SFS_LOCAL_DIR}/sprint-templates/brainstorm.md"
+TEMPLATE="$(sfs_sprint_template_file brainstorm)"
 
 if [[ ! -f "${BRAINSTORM_PATH}" ]]; then
   if [[ ! -f "${TEMPLATE}" ]]; then

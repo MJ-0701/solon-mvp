@@ -78,6 +78,8 @@ LOOP_NO_MENTAL_COUPLING=true
 LOOP_REVIEW_GATE=true
 LOOP_PLAN_DOC=""
 LOOP_PERSONA_DIR="agents"
+LOOP_QUEUE_TITLE=""
+LOOP_QUEUE_CLAIMED_PATH=""
 
 # Internal (sub-cmd dispatch)
 LOOP_SUBCMD=""
@@ -89,6 +91,9 @@ usage_loop() {
   cat <<'EOF'
 Usage:
   /sfs loop [OPTIONS]                  Run loop iterations (default sub-cmd).
+  /sfs loop queue                      Show queue counts.
+  /sfs loop enqueue <title> [OPTIONS]  Add a pending queue task.
+  /sfs loop claim [OPTIONS]            Claim the next pending queue task.
   /sfs loop status                     Show status of currently running loop.
   /sfs loop stop                       Stop the running loop, release mutex.
   /sfs loop replay <task-log-id>       Replay a past scheduled_task_log entry.
@@ -148,7 +153,7 @@ parse_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
       # Sub-commands
-      status|stop|replay)
+      status|stop|replay|queue|claim)
         LOOP_SUBCMD="$1"
         shift
         # `replay` consumes one positional (task-log-id)
@@ -160,6 +165,16 @@ parse_args() {
           LOOP_REPLAY_ID="$1"
           shift
         fi
+        ;;
+      enqueue)
+        LOOP_SUBCMD="$1"
+        shift
+        if [[ $# -lt 1 ]]; then
+          echo "loop enqueue: missing <title>" >&2
+          exit "$SFS_LOOP_EXIT_BADCLI"
+        fi
+        LOOP_QUEUE_TITLE="$1"
+        shift
         ;;
 
       # Core options
@@ -329,6 +344,15 @@ main() {
     status)
       cmd_loop_status   # 후속 sub-task 6.4 (iter loop core)
       ;;
+    queue)
+      cmd_loop_queue
+      ;;
+    enqueue)
+      cmd_loop_enqueue "$LOOP_QUEUE_TITLE"
+      ;;
+    claim)
+      cmd_loop_claim
+      ;;
     stop)
       cmd_loop_stop     # 후속 sub-task 6.4
       ;;
@@ -438,6 +462,137 @@ if not elig:
 elig.sort(key=lambda x: (int(x[1].get('priority', '99')), x[0]))
 print(elig[0][0])
 PYEOF
+}
+
+# _queue_root — stdout: .sfs-local/queue root.
+_queue_root() {
+  echo "${SFS_LOCAL_DIR}/queue"
+}
+
+# _ensure_queue_dirs — create file-backed queue state directories.
+_ensure_queue_dirs() {
+  local root
+  root="$(_queue_root)"
+  mkdir -p "$root/pending" "$root/claimed" "$root/done" "$root/failed" "$root/abandoned"
+}
+
+# _slugify — portable, conservative filename slug.
+_slugify() {
+  printf '%s' "$1" \
+    | tr '[:upper:]' '[:lower:]' \
+    | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//' \
+    | cut -c1-48
+}
+
+_queue_now_utc() {
+  date -u +"%Y-%m-%dT%H:%M:%SZ"
+}
+
+# _queue_counts — stdout: "queue · pending N · claimed N · done N · failed N · abandoned N".
+_queue_counts() {
+  _ensure_queue_dirs
+  local root
+  root="$(_queue_root)"
+  local pending claimed done failed abandoned
+  pending=$(find "$root/pending" -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+  claimed=$(find "$root/claimed" -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+  done=$(find "$root/done" -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+  failed=$(find "$root/failed" -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+  abandoned=$(find "$root/abandoned" -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+  printf 'queue · pending %s · claimed %s · done %s · failed %s · abandoned %s\n' \
+    "$pending" "$claimed" "$done" "$failed" "$abandoned"
+}
+
+# _pick_queue_task — stdout: pending task path, priority asc then path.
+# Filter: scheduled mode skips task mode=user-active-only.
+_pick_queue_task() {
+  _ensure_queue_dirs
+  local root mode
+  root="$(_queue_root)"
+  mode="$LOOP_MODE"
+  if ! command -v python3 >/dev/null 2>&1; then
+    find "$root/pending" -type f -name '*.md' | sort | head -1
+    return 0
+  fi
+  python3 - "$root/pending" "$mode" <<'PYEOF'
+import os, re, sys
+pending, mode = sys.argv[1:3]
+tasks = []
+if os.path.isdir(pending):
+    for name in os.listdir(pending):
+        if not name.endswith(".md"):
+            continue
+        path = os.path.join(pending, name)
+        try:
+            data = open(path, encoding="utf-8").read()
+        except Exception:
+            continue
+        fm = {}
+        m = re.match(r"^---\n(.*?)\n---", data, re.S)
+        if m:
+            for line in m.group(1).splitlines():
+                mm = re.match(r"^([A-Za-z0-9_-]+):\s*(.*)$", line)
+                if mm:
+                    fm[mm.group(1)] = mm.group(2).strip().strip('"')
+        if fm.get("status", "pending") != "pending":
+            continue
+        if mode == "scheduled" and fm.get("mode") == "user-active-only":
+            continue
+        try:
+            pr = int(fm.get("priority", "5"))
+        except Exception:
+            pr = 5
+        tasks.append((pr, path))
+tasks.sort(key=lambda x: (x[0], x[1]))
+if tasks:
+    print(tasks[0][1])
+PYEOF
+}
+
+# _queue_rewrite_status — update simple scalar frontmatter keys.
+_queue_rewrite_status() {
+  local path="$1" status="$2" owner="$3"
+  local now tmp
+  now="$(_queue_now_utc)"
+  tmp=$(mktemp) || return 1
+  awk -v status="$status" -v owner="$owner" -v now="$now" '
+    BEGIN { in_fm=0; seen_status=0; seen_owner=0; seen_claimed=0 }
+    NR == 1 && $0 == "---" { in_fm=1; print; next }
+    in_fm && $0 == "---" {
+      if (!seen_status) print "status: " status
+      if (owner != "" && !seen_owner) print "owner: " owner
+      if (owner != "" && !seen_claimed) print "claimed_at: " now
+      in_fm=0; print; next
+    }
+    in_fm && /^status:/ { print "status: " status; seen_status=1; next }
+    in_fm && /^owner:/ {
+      if (owner != "") { print "owner: " owner; seen_owner=1; next }
+    }
+    in_fm && /^claimed_at:/ {
+      if (owner != "") { print "claimed_at: " now; seen_claimed=1; next }
+    }
+    { print }
+  ' "$path" > "$tmp" && mv -f "$tmp" "$path"
+}
+
+# _claim_queue_task — claim the next pending task with atomic mv.
+# stdout: claimed task path.
+_claim_queue_task() {
+  local owner="$1"
+  local task claimed_dir base dest
+  task="$(_pick_queue_task)"
+  [[ -n "$task" && -f "$task" ]] || return 1
+  _ensure_queue_dirs
+  claimed_dir="$(_queue_root)/claimed/${owner}"
+  mkdir -p "$claimed_dir"
+  base="$(basename "$task")"
+  dest="${claimed_dir}/${base}"
+  if mv "$task" "$dest" 2>/dev/null; then
+    _queue_rewrite_status "$dest" "claimed" "$owner" || true
+    echo "$dest"
+    return 0
+  fi
+  return 1
 }
 
 # _bump_heartbeat — sed PROGRESS.md frontmatter `last_overwrite` to now (UTC ISO).
@@ -551,7 +706,33 @@ cmd_loop_run() {
 
     echo "loop: ── iter $iter/$LOOP_MAX_ITERS (mode=$LOOP_MODE, executor=$LOOP_EXECUTOR, owner=$LOOP_OWNER)" >&2
 
-    # Step 4~5: domain sweep + claim
+    # Step 4~5a: queue-first task pick + claim. Queue is an execution backlog;
+    # sprint scope remains in brainstorm/plan/decision artifacts.
+    local queue_task
+    queue_task="$(_pick_queue_task)"
+    if [[ -n "$queue_task" && -f "$queue_task" ]]; then
+      echo "loop:   picked queue task: $queue_task" >&2
+      if [[ "$LOOP_DRY_RUN" == "true" ]]; then
+        echo "loop:   [DRY-RUN] would claim_queue_task for $LOOP_OWNER" >&2
+      else
+        local claimed
+        set +e
+        claimed="$(_claim_queue_task "$LOOP_OWNER")"
+        local qclaim_rc=$?
+        set -e
+        if (( qclaim_rc != 0 )) || [[ -z "$claimed" ]]; then
+          echo "loop:   queue claim failed, trying next iter" >&2
+          continue
+        fi
+        echo "loop:   claimed queue task: $claimed" >&2
+        echo "loop:   [MVP] queue task execution is not wired yet; leaving task claimed" >&2
+      fi
+      completed=$(( completed + 1 ))
+      last_domain="queue"
+      continue
+    fi
+
+    # Step 4~5b: domain sweep + claim fallback
     local picked
     set +e
     picked=$(_pick_domain "$progress_path")
@@ -691,6 +872,69 @@ cmd_loop_coord() {
 
 # cmd_loop_status — print 1-line status of current loop state.
 # spec: sfs-loop-flow.md §3.3 sub-cmd
+cmd_loop_queue() {
+  _queue_counts
+  return "$SFS_LOOP_EXIT_OK"
+}
+
+cmd_loop_enqueue() {
+  local title="$1"
+  _ensure_queue_dirs
+  local now id slug sprint path safe_title
+  now="$(_queue_now_utc)"
+  id="loopq-$(date -u +"%Y%m%dT%H%M%SZ")-$$"
+  slug="$(_slugify "$title")"
+  [[ -n "$slug" ]] || slug="task"
+  sprint="$(read_current_sprint 2>/dev/null || true)"
+  path="$(_queue_root)/pending/${id}-${slug}.md"
+  safe_title="$(printf '%s' "$title" | sed 's/"/\\"/g')"
+  cat > "$path" <<EOF
+---
+task_id: ${id}
+title: "${safe_title}"
+status: pending
+priority: 5
+mode: ${LOOP_MODE}
+sprint_id: "${sprint:-}"
+owner: ""
+attempts: 0
+max_attempts: 3
+created_at: ${now}
+claimed_at: ""
+---
+
+# ${title}
+
+## Goal
+
+Describe the concrete loop task here.
+
+## Files Scope
+
+- TBD
+
+## Verify
+
+- TBD
+EOF
+  echo "queued: $path"
+  return "$SFS_LOOP_EXIT_OK"
+}
+
+cmd_loop_claim() {
+  local claimed
+  set +e
+  claimed="$(_claim_queue_task "$LOOP_OWNER")"
+  local rc=$?
+  set -e
+  if (( rc != 0 )) || [[ -z "$claimed" ]]; then
+    echo "queue: no pending task" >&2
+    return "$SFS_LOOP_EXIT_SPEC_MISSING"
+  fi
+  echo "claimed: $claimed"
+  return "$SFS_LOOP_EXIT_OK"
+}
+
 cmd_loop_status() {
   local progress_path
   progress_path=$(resolve_progress_path) || exit "$SFS_LOOP_EXIT_SPEC_MISSING"

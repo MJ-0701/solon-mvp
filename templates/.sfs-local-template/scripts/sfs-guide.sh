@@ -80,13 +80,13 @@ if [[ ! -d "${SFS_LOCAL_DIR}" ]]; then
   exit "${SFS_EXIT_NO_INIT}"
 fi
 
-GUIDE_PATH="${SFS_LOCAL_DIR}/GUIDE.md"
+GUIDE_PATH="$(sfs_guide_file)"
 if [[ ! -f "${GUIDE_PATH}" && -f "GUIDE.md" ]]; then
   GUIDE_PATH="GUIDE.md"
 fi
 
 if [[ ! -f "${GUIDE_PATH}" ]]; then
-  echo "guide missing: ${SFS_LOCAL_DIR}/GUIDE.md" >&2
+  echo "guide missing: ${GUIDE_PATH}" >&2
   exit "${SFS_EXIT_NO_TEMPLATES}"
 fi
 

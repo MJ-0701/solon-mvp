@@ -28,7 +28,8 @@ subcommand's arguments.
 ## Behavior
 
 If the first argument is `status`, `start`, `guide`, `auth`, `brainstorm`, `plan`, `review`, `decision`,
-`retro`, or `loop`, dispatch to `.sfs-local/scripts/sfs-<name>.sh` first.
+`retro`, or `loop`, dispatch to the `sfs` runtime command first. In vendored
+layout only, `.sfs-local/scripts/sfs-dispatch.sh` is an acceptable fallback.
 
 Command modes:
 - **Bash-only**: `status`, `start`, `guide`, `auth`, `loop`. Stop after
@@ -87,25 +88,21 @@ not create a new verdict in the current runtime.
 
 | First arg | Script |
 |:--|:--|
-| `status`   | `bash .sfs-local/scripts/sfs-dispatch.sh status <args>`   |
-| `start`    | `bash .sfs-local/scripts/sfs-dispatch.sh start <args>`    |
-| `guide`    | `bash .sfs-local/scripts/sfs-dispatch.sh guide <args>`    |
-| `auth`     | `bash .sfs-local/scripts/sfs-dispatch.sh auth <args>`     | Codex/Claude/Gemini auth status/login/probe |
-| `brainstorm` | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <args>` | raw capture, then Solon CEO refinement |
-| `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <args>`     | G1 open, then plan refinement |
-| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <args>`   | CPO executor bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
-| `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <args>` | creates ADR, then Codex fills Context/Decision/Alternatives/Consequences |
-| `retro`    | `bash .sfs-local/scripts/sfs-dispatch.sh retro <args>`    | opens retro.md, then Codex fills KPT/PDCA. With `--close`, refine before close |
-| `loop`     | `bash .sfs-local/scripts/sfs-dispatch.sh loop <args>`     |
+| `status`   | `sfs status <args>`   |
+| `start`    | `sfs start <args>`    |
+| `guide`    | `sfs guide <args>`    |
+| `auth`     | `sfs auth <args>`     | Codex/Claude/Gemini auth status/login/probe |
+| `brainstorm` | `sfs brainstorm <args>` | raw capture, then Solon CEO refinement |
+| `plan`     | `sfs plan <args>`     | G1 open, then plan refinement |
+| `review`   | `sfs review <args>`   | CPO executor bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
+| `decision` | `sfs decision <args>` | creates ADR, then Codex fills Context/Decision/Alternatives/Consequences |
+| `retro`    | `sfs retro <args>`    | opens retro.md, then Codex fills KPT/PDCA. With `--close`, refine before close |
+| `loop`     | `sfs loop <args>`     |
 
 ## Procedure
 
-1. Verify `.sfs-local/scripts/sfs-dispatch.sh` and
-   `.sfs-local/scripts/sfs-<first-arg>.sh` exist and are executable. If
-   missing, report 1 line and stop.
-   On Windows PowerShell, `.sfs-local/scripts/sfs.ps1 <command> [args]` is the
-   wrapper entry point; it requires Git Bash. WSL users should invoke the bash
-   adapter from inside the WSL shell.
+1. Verify `sfs` exists (`command -v sfs`). If missing, report 1 line and stop.
+   In vendored layout only, `.sfs-local/scripts/sfs-dispatch.sh` can be used as fallback.
 2. Re-quote args safely. Reject newline/NUL byte args, except for `brainstorm`.
 3. Execute via shell. Capture stdout/stderr/exit.
 4. Print stdout verbatim. If exit≠0, also print stderr + `exit <code>` line.

@@ -18,26 +18,27 @@ Before planning or editing, read:
 
 ## SFS commands — bash adapter SSoT
 
-Solon Product SFS 의 10 슬래시 명령은 모두 `.sfs-local/scripts/sfs-*.sh` bash adapter 가
-single source of truth (Claude Code / Codex / Gemini CLI 어느 환경에서든 동일 결과).
+Solon Product SFS 의 10 슬래시 명령은 모두 `sfs <command>` global runtime 이
+deterministic bash adapter 로 내려보낸다. `.sfs-local/scripts/` 는 vendored layout 의
+fallback 이고, 기본 방향은 project-local state + packaged runtime 이다.
 Claude Code 의 native slash 진입점은 `.claude/commands/sfs.md` 가 자동 install 되며,
 동일한 dispatch table 을 따른다 (paraphrase 금지, 결정성 유지):
 
 | 슬래시 | 실행 |
 |:--|:--|
-| `/sfs status [--color=auto/always/never]` | `.sfs-local/scripts/sfs-status.sh` |
-| `/sfs start <goal> [--id <sprint-id>] [--force]` | `.sfs-local/scripts/sfs-start.sh` |
-| `/sfs guide [--path|--print]` | `.sfs-local/scripts/sfs-guide.sh` |
-| `/sfs auth status|check|login|probe [--executor <tool>]` | `.sfs-local/scripts/sfs-auth.sh` |
-| `/sfs brainstorm [text|--stdin]` | `.sfs-local/scripts/sfs-brainstorm.sh` raw capture 후 Claude 가 Solon CEO 로 §1~§7 정리 |
-| `/sfs plan` | `.sfs-local/scripts/sfs-plan.sh` 후 Claude 가 `brainstorm.md` 기반 G1 plan + CTO/CPO contract 작성 |
-| `/sfs review --gate <id> [--executor <tool>] [--prompt-only]` / `/sfs review --show-last` | `.sfs-local/scripts/sfs-review.sh`; 기본은 선택된 CPO executor bridge 실행 + verdict/output path 메타데이터 출력, `--prompt-only` 는 수동 handoff, `--show-last` 는 executor 재실행 없이 기존 결과를 사용자 언어의 요약/action report 로 확인 |
-| `/sfs decision <title> [--id <id>]` | `.sfs-local/scripts/sfs-decision.sh` 후 Claude 가 ADR 본문 작성 |
-| `/sfs retro [--close]` | `.sfs-local/scripts/sfs-retro.sh`; `--close` 는 Claude 가 `retro.md` 를 먼저 채운 뒤 close adapter 1회 실행 |
-| `/sfs loop [OPTIONS]` | `.sfs-local/scripts/sfs-loop.sh` (Ralph Loop + Solon mutex) |
+| `/sfs status [--color=auto/always/never]` | `sfs status [--color=auto/always/never]` |
+| `/sfs start <goal> [--id <sprint-id>] [--force]` | `sfs start <goal> [--id <sprint-id>] [--force]` |
+| `/sfs guide [--path|--print]` | `sfs guide [--path|--print]` |
+| `/sfs auth status|check|login|probe [--executor <tool>]` | `sfs auth status|check|login|probe [--executor <tool>]` |
+| `/sfs brainstorm [text|--stdin]` | `sfs brainstorm [text|--stdin]` raw capture 후 Claude 가 Solon CEO 로 §1~§7 정리 |
+| `/sfs plan` | `sfs plan` 후 Claude 가 `brainstorm.md` 기반 G1 plan + CTO/CPO contract 작성 |
+| `/sfs review --gate <id> [--executor <tool>] [--prompt-only]` / `/sfs review --show-last` | `sfs review --gate <id> [--executor <tool>] [--prompt-only]` 또는 `sfs review --show-last`; 기본은 선택된 CPO executor bridge 실행 + verdict/output path 메타데이터 출력, `--prompt-only` 는 수동 handoff, `--show-last` 는 executor 재실행 없이 기존 결과를 사용자 언어의 요약/action report 로 확인 |
+| `/sfs decision <title> [--id <id>]` | `sfs decision "<title>" [--id <id>]` 후 Claude 가 ADR 본문 작성 |
+| `/sfs retro [--close]` | `sfs retro [--close]`; `--close` 는 Claude 가 `retro.md` 를 먼저 채운 뒤 close adapter 1회 실행 |
+| `/sfs loop [OPTIONS]` | `sfs loop [OPTIONS]` (Ralph Loop + Solon mutex) |
 | `/sfs`, `/sfs help` | usage 출력 (`.claude/commands/sfs.md` 의 self-help) |
 
-Bash adapter 가 부재하거나 실행 권한이 없으면 그 사실을 1줄로 사용자에게 알리고 중단한다.
+`sfs` runtime 이 PATH 에 없으면 그 사실을 1줄로 사용자에게 알리고 install/upgrade 를 안내한다.
 stdout / stderr / exit code 는 verbatim 보고한다 (paraphrase 금지).
 
 명령 모드는 고정이다:

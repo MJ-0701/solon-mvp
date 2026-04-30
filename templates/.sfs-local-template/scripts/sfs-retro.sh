@@ -108,7 +108,7 @@ fi
 
 SPRINT_DIR="${SFS_SPRINTS_DIR}/${SPRINT_ID}"
 RETRO_PATH="${SPRINT_DIR}/retro.md"
-TEMPLATE="${SFS_LOCAL_DIR}/sprint-templates/retro.md"
+TEMPLATE="$(sfs_sprint_template_file retro)"
 
 # ─────────────────────────────────────────────────────────────────────
 # (a) retro.md 미존재 시 template cp + placeholder 치환

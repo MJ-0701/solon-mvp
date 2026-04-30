@@ -115,20 +115,41 @@ $ARGUMENTS
 ## Adapter Dispatch (status / start / guide / auth / brainstorm / plan / review / decision / retro / loop) — execute first
 
 If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`brainstorm`**, **`plan`**, **`review`**,
-**`decision`**, **`retro`**, or **`loop`**, dispatch the request to the corresponding
-bash adaptor through `.sfs-local/scripts/sfs-dispatch.sh` first. The
-dispatcher normalizes runtime command surfaces (`/sfs`, `$sfs`, `sfs`) and
-then delegates to `.sfs-local/scripts/sfs-<command>.sh`.
+**`decision`**, **`retro`**, or **`loop`**, dispatch the request through the
+`sfs` runtime command first. The runtime normalizes command surfaces
+(`/sfs`, `$sfs`, `sfs`) and delegates to the deterministic bash adapter. In
+vendored layout only, `.sfs-local/scripts/sfs-dispatch.sh` is an acceptable fallback.
 
 Command modes:
-- **Bash-only**: `status`, `start`, `guide`, `auth`, `loop`. Stop after
-  verbatim adapter output.
+- **Bash-first**: `status`, `start`, `guide`, `auth`, `loop`. Print verbatim
+  adapter output first. A compact recap/status line is allowed when it helps
+  the user see state and the next action, but adapter stdout remains SSoT.
 - **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`. Run the adapter,
   then perform the documented file refinement.
 - **Adapter-run**: `review`. The bash adapter executes the selected CPO
   executor bridge by default. Stop after adapter output. If `--prompt-only` is
   used, treat the prompt path as manual handoff material and do not write a
   Claude verdict in the current runtime.
+
+Sprint mode guidance:
+- Do not treat every new sprint as a fresh discovery/planning sprint. If the
+  user just closed a planning sprint whose `plan.md`, review, or ADR already
+  defines the implementation backlog, the next sprint is an implementation
+  sprint by default.
+- For an implementation sprint, G0/G1 should be thin: record `inherit-from:
+  <prior sprint/plan/ADR>`, scope, and binary AC only when useful, then proceed
+  to the first code slice and `log.md` evidence. Do not recommend repeating a
+  full `brainstorm -> plan` loop unless the inherited contract is missing or
+  ambiguous.
+- If the sprint goal names concrete build work such as repo scaffold, dev
+  compose, DB schema, API boot, tests, or UI behavior, do not recap G1 contract
+  completion as sprint completion. Sprint completion requires implementation
+  evidence, test/smoke evidence, review, and retro, unless the user explicitly
+  scoped it as planning-only.
+- After `start`, a short recap is allowed and often useful. Its `Next` must be
+  inferred from sprint mode: fresh discovery can point to `brainstorm`, while
+  inherited implementation work should point to the first code slice, `log.md`
+  evidence, and later G4 review.
 
 Special close guard: if the user invokes `retro --close` in an AI runtime, do
 not run the close adapter first. Run `retro` without `--close`, refine
@@ -141,27 +162,24 @@ Dispatch table:
 
 | First arg | Script to run | Notes |
 |:--|:--|:--|
-| `status`   | `.sfs-local/scripts/sfs-dispatch.sh status <remaining args>`   | passes flags such as `--color=auto/always/never` verbatim |
-| `start`    | `.sfs-local/scripts/sfs-dispatch.sh start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
-| `guide`    | `.sfs-local/scripts/sfs-dispatch.sh guide <remaining args>`    | passes `--path` / `--print` verbatim; default prints a short context briefing |
-| `auth`     | `.sfs-local/scripts/sfs-dispatch.sh auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
-| `brainstorm` | `.sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then Claude fills §1~§7 as Solon CEO |
-| `plan`     | `.sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | opens plan.md, then Claude fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
-| `review`   | `.sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
-| `decision` | `.sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | creates ADR file, then Claude fills Context/Decision/Alternatives/Consequences |
-| `retro`    | `.sfs-local/scripts/sfs-dispatch.sh retro <remaining args>`    | opens retro.md, then Claude fills KPT/PDCA. With `--close`, refine before close |
-| `loop`     | `.sfs-local/scripts/sfs-dispatch.sh loop <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim (WU-27 §3) |
+| `status`   | `sfs status <remaining args>`   | passes flags such as `--color=auto/always/never` verbatim |
+| `start`    | `sfs start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
+| `guide`    | `sfs guide <remaining args>`    | passes `--path` / `--print` verbatim; default prints a short context briefing |
+| `auth`     | `sfs auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
+| `brainstorm` | `sfs brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then Claude fills §1~§7 as Solon CEO |
+| `plan`     | `sfs plan <remaining args>`     | opens plan.md, then Claude fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
+| `review`   | `sfs review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
+| `decision` | `sfs decision <remaining args>` | creates ADR file, then Claude fills Context/Decision/Alternatives/Consequences |
+| `retro`    | `sfs retro <remaining args>`    | opens retro.md, then Claude fills KPT/PDCA. With `--close`, refine before close |
+| `loop`     | `sfs loop <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim (WU-27 §3) |
 
 Procedure (apply in order):
 
-1. **Existence check** — Use the Bash tool to verify the dispatcher and target
-   script exist and are executable. If `.sfs-local/scripts/sfs-dispatch.sh` or
-   `.sfs-local/scripts/sfs-{status,start,guide,auth,brainstorm,plan,review,decision,retro,loop}.sh`
-   is missing or not executable, tell the user which script is missing (1 line,
-   no speculation about the cause) and stop.
-   On Windows PowerShell, `.sfs-local/scripts/sfs.ps1 <command> [args]` is the
-   wrapper entry point; it requires Git Bash. WSL users should invoke the bash
-   adapter from inside the WSL shell.
+1. **Existence check** — Use the Bash tool to verify `sfs` is available
+   (`command -v sfs`). If missing, tell the user in 1 line and stop.
+   In vendored layout only, `.sfs-local/scripts/sfs-dispatch.sh <command>` is
+   an acceptable fallback. Windows users should run global `sfs` through Git
+   Bash/WSL, or use `.sfs-local/scripts/sfs.ps1` only in vendored layout.
 2. **Quote args safely** — Re-quote `<remaining args>` for the shell. Reject
    any argument containing a newline or NUL byte by reporting `unknown arg`,
    except for `brainstorm`, where multiline raw requirement context is allowed.
@@ -201,11 +219,12 @@ Procedure (apply in order):
      `5`=safety_lock tripped, `6`=WU spec missing/corrupt,
      `7`=artifact verify fail, `8`=heartbeat write fail (FUSE),
      `9`=executor resolve fail, `99`=unknown.
-5. **Stop or continue by command mode** — After dispatch, bash-only commands
-   must stop without Claude-driven commentary, alternative suggestions,
-   bkit-branded reports, or bkit-shaped "usage" footers. The bash script is the
-   single source of truth for command output. Hybrid commands continue only via
-   the documented flow below:
+5. **Stop or continue by command mode** — After dispatch, bash-first commands
+   must preserve adapter stdout exactly. A compact Solon recap/status is allowed
+   only when it adds state or the next action, and must not contradict the
+   sprint mode. Do not emit bkit-branded reports or bkit-shaped "usage" footers.
+   The bash script is the single source of truth for command output. Hybrid
+   commands continue only via the documented flow below:
    - `brainstorm` → Brainstorm CEO Refinement
    - `plan` → Plan G1 Refinement
    - `decision` → Decision ADR Refinement

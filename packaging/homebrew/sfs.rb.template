@@ -1,0 +1,17 @@
+class Sfs < Formula
+  desc "Solon Product SFS runtime for AI-native product work"
+  homepage "https://github.com/MJ-0701/solon-product"
+
+  # Replace VERSION and SHA256 when cutting a public release tarball.
+  url "https://github.com/MJ-0701/solon-product/archive/refs/tags/vVERSION.tar.gz"
+  sha256 "SHA256"
+
+  def install
+    libexec.install Dir["*"]
+    bin.install_symlink libexec/"bin/sfs" => "sfs"
+  end
+
+  test do
+    system "#{bin}/sfs", "--help"
+  end
+end

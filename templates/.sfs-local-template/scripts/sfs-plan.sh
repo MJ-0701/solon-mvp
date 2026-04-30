@@ -114,7 +114,7 @@ fi
 
 SPRINT_DIR="${SFS_SPRINTS_DIR}/${SPRINT_ID}"
 PLAN_PATH="${SPRINT_DIR}/plan.md"
-TEMPLATE="${SFS_LOCAL_DIR}/sprint-templates/plan.md"
+TEMPLATE="$(sfs_sprint_template_file plan)"
 
 # ─────────────────────────────────────────────────────────────────────
 # Ensure plan.md exists (copy from template if missing)

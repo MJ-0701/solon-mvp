@@ -10,18 +10,39 @@ language Solon workflow request. Bare `/sfs` may be intercepted by the Codex
 native slash UI before this Skill sees it (`커맨드 없음` / `Unrecognized command`).
 When the user invokes `$sfs <command>`, types `sfs <command>`, sends `/sfs`
 text that actually reaches the model, or expresses a Solon SFS workflow intent,
-dispatch the request to the corresponding bash script under
-`.sfs-local/scripts/` first.
+dispatch the request to the `sfs` runtime command first. The runtime may be a
+global package (thin layout) or a project-local vendored fallback.
 
 Command modes are explicit:
-- **Bash-only**: `status`, `start`, `guide`, `auth`, `loop`. Stop after
-  verbatim adapter output.
+- **Bash-first**: `status`, `start`, `guide`, `auth`, `loop`. Print verbatim
+  adapter output first. A compact recap/status line is allowed when it helps
+  the user see state and the next action, but adapter stdout remains SSoT.
 - **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`. Run the
   adapter first, then perform the documented AI-side file refinement.
 - **Adapter-run**: `review`. The bash adapter executes the selected CPO
   executor bridge by default. Stop after adapter output. If `--prompt-only` is
   used, treat the prompt path as manual handoff material and do not write a
   Codex verdict in the current runtime.
+
+Sprint mode guidance:
+- Do not treat every new sprint as a fresh discovery/planning sprint. If the
+  user just closed a planning sprint whose `plan.md`, review, or ADR already
+  defines the implementation backlog, the next sprint is an implementation
+  sprint by default.
+- For an implementation sprint, G0/G1 should be thin: record `inherit-from:
+  <prior sprint/plan/ADR>`, scope, and binary AC only when useful, then proceed
+  to the first code slice and `log.md` evidence. Do not recommend repeating a
+  full `brainstorm -> plan` loop unless the inherited contract is missing or
+  ambiguous.
+- If the sprint goal names concrete build work such as repo scaffold, dev
+  compose, DB schema, API boot, tests, or UI behavior, do not recap G1 contract
+  completion as sprint completion. Sprint completion requires implementation
+  evidence, test/smoke evidence, review, and retro, unless the user explicitly
+  scoped it as planning-only.
+- After `start`, a short recap is allowed and often useful. Its `Next` must be
+  inferred from sprint mode: fresh discovery can point to `brainstorm`, while
+  inherited implementation work should point to the first code slice, `log.md`
+  evidence, and later G4 review.
 
 Special close guard: if the user invokes `retro --close` in an AI runtime, do
 not run the close adapter first. Run `retro` without `--close`, refine
@@ -32,7 +53,8 @@ delivered the Solon command to this Skill. Dispatch it. But do not claim Codex
 native slash registration exists: current Codex app/CLI surfaces can block
 unknown slash commands before the model sees them. In that case the user should
 invoke `$sfs status`, `sfs status`, natural language, or direct bash
-(`bash .sfs-local/scripts/sfs-status.sh`).
+(`sfs status`, or `bash .sfs-local/scripts/sfs-dispatch.sh status` only in
+vendored layout).
 
 The bash adapter execution is **deterministic** and must NOT be
 re-interpreted by the model. Bash adapter is single source of truth (SSoT) for
@@ -91,29 +113,27 @@ not create a new verdict in the current runtime.
 
 | User intent / first arg | Script to run | Notes |
 |:--|:--|:--|
-| `status` (또는 "현재 상태", "어디까지 했는지") | `bash .sfs-local/scripts/sfs-dispatch.sh status [--color=auto/always/never]` | 1줄 dashboard |
-| `start <goal>` (또는 "sprint 시작", "새 sprint") | `bash .sfs-local/scripts/sfs-dispatch.sh start <goal> [--id <sprint-id>] [--force]` | sprint workspace 초기화 + sprint files cp |
-| `guide [--path|--print]` (또는 "가이드", "처음 사용법") | `bash .sfs-local/scripts/sfs-dispatch.sh guide [--path|--print]` | 기본은 짧은 맥락 브리핑, `--path` 는 경로만, `--print` 는 full guide 본문 |
-| `auth status|check|login|probe` (또는 "인증 확인", "Gemini 로그인") | `bash .sfs-local/scripts/sfs-dispatch.sh auth <args>` | Codex/Claude/Gemini review executor 인증 점검/부트스트랩/더미 요청 |
-| `brainstorm [text|--stdin]` (또는 "브레인스토밍", "요구사항 정리") | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <raw context>` | G0 raw 요구사항/대화 맥락을 brainstorm.md 에 기록한 뒤 §1~§7을 Solon CEO로 정리. newline 허용 |
-| `plan` (또는 "plan 작성", "이번 sprint 계획") | `bash .sfs-local/scripts/sfs-dispatch.sh plan` | plan.md 진입 + plan_open event 후 brainstorm.md 기반 G1 plan/contract 작성 |
-| `review --gate <id> [--executor <tool>] [--prompt-only]` / `review --show-last` (또는 "CPO review", "검증 기록", "이전 리뷰 확인") | `bash .sfs-local/scripts/sfs-dispatch.sh review --gate <id> [--executor <tool>] [--generator <tool>] [--prompt-only]` 또는 `bash .sfs-local/scripts/sfs-dispatch.sh review --show-last [--gate <id>]` | CPO Evaluator bridge run by default. `--prompt-only` creates prompt/log for manual handoff. `--show-last` prints compact metadata for the latest recorded result without rerunning executor. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
-| `decision <title>` (또는 "결정 기록", "ADR 추가") | `bash .sfs-local/scripts/sfs-dispatch.sh decision "<title>" [--id <id>]` | ADR file 생성 후 Context/Decision/Alternatives/Consequences refinement |
-| `retro [--close]` (또는 "회고", "sprint close") | `bash .sfs-local/scripts/sfs-dispatch.sh retro [--close]` | retro.md 진입 후 KPT/PDCA refinement. `--close` 는 refinement 후 1회 실행 |
-| `loop [OPTIONS]` (또는 "자율 진행", "loop 시작") | `bash .sfs-local/scripts/sfs-dispatch.sh loop [OPTIONS]` | Ralph Loop + Solon mutex (see `--help`) |
+| `status` (또는 "현재 상태", "어디까지 했는지") | `sfs status [--color=auto/always/never]` | 1줄 dashboard |
+| `start <goal>` (또는 "sprint 시작", "새 sprint") | `sfs start <goal> [--id <sprint-id>] [--force]` | sprint workspace 초기화 + sprint files cp |
+| `guide [--path|--print]` (또는 "가이드", "처음 사용법") | `sfs guide [--path|--print]` | 기본은 짧은 맥락 브리핑, `--path` 는 경로만, `--print` 는 full guide 본문 |
+| `auth status|check|login|probe` (또는 "인증 확인", "Gemini 로그인") | `sfs auth <args>` | Codex/Claude/Gemini review executor 인증 점검/부트스트랩/더미 요청 |
+| `brainstorm [text|--stdin]` (또는 "브레인스토밍", "요구사항 정리") | `sfs brainstorm <raw context>` | G0 raw 요구사항/대화 맥락을 brainstorm.md 에 기록한 뒤 §1~§7을 Solon CEO로 정리. newline 허용 |
+| `plan` (또는 "plan 작성", "이번 sprint 계획") | `sfs plan` | plan.md 진입 + plan_open event 후 brainstorm.md 기반 G1 plan/contract 작성 |
+| `review --gate <id> [--executor <tool>] [--prompt-only]` / `review --show-last` (또는 "CPO review", "검증 기록", "이전 리뷰 확인") | `sfs review --gate <id> [--executor <tool>] [--generator <tool>] [--prompt-only]` 또는 `sfs review --show-last [--gate <id>]` | CPO Evaluator bridge run by default. `--prompt-only` creates prompt/log for manual handoff. `--show-last` prints compact metadata for the latest recorded result without rerunning executor. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
+| `decision <title>` (또는 "결정 기록", "ADR 추가") | `sfs decision "<title>" [--id <id>]` | ADR file 생성 후 Context/Decision/Alternatives/Consequences refinement |
+| `retro [--close]` (또는 "회고", "sprint close") | `sfs retro [--close]` | retro.md 진입 후 KPT/PDCA refinement. `--close` 는 refinement 후 1회 실행 |
+| `loop [OPTIONS]` (또는 "자율 진행", "loop 시작") | `sfs loop [OPTIONS]` | Ralph Loop + Solon mutex (see `--help`) |
 
 ## Procedure
 
-1. **Existence check** — Use the shell tool to verify the dispatcher and target
-   script exist and are executable (`ls -l .sfs-local/scripts/sfs-dispatch.sh
-   .sfs-local/scripts/sfs-<name>.sh`). If either is
-   missing, tell the user which script is missing in 1 line and stop (do NOT
-   try to recreate the script — install/upgrade is user's responsibility via
-   `install.sh` / `upgrade.sh`).
+1. **Existence check** — Use the shell tool to verify `sfs` is available
+   (`command -v sfs`). If it is missing, tell the user in 1 line and stop (do
+   NOT try to recreate the runtime — install/upgrade is user's responsibility
+   via Homebrew/source package or `install.sh --layout vendored` fallback).
 
-   On Windows PowerShell, use `.sfs-local/scripts/sfs.ps1 <command> [args]`
-   when direct `bash` invocation is unavailable. The wrapper requires Git Bash.
-   WSL users should invoke the bash adapter from inside the WSL shell.
+   In vendored layout only, `.sfs-local/scripts/sfs-dispatch.sh <command>` is
+   an acceptable fallback. Windows users should run global `sfs` from Git
+   Bash/WSL, or use `.sfs-local/scripts/sfs.ps1` only in vendored layout.
 
 2. **Quote args safely** — Re-quote `<remaining args>` for the shell. Reject
    any argument containing a newline or NUL byte by reporting `unknown arg`,
@@ -151,9 +171,10 @@ not create a new verdict in the current runtime.
      `7`=verify fail, `8`=heartbeat fail, `9`=executor resolve fail,
      `99`=unknown.
 
-5. **Stop or continue by command mode** — After dispatch, bash-only commands
-   must stop without Codex-driven commentary or alternate reports. Hybrid
-   commands continue only via the documented flow below:
+5. **Stop or continue by command mode** — After dispatch, bash-first commands
+   must preserve adapter stdout exactly. A compact Solon recap/status is allowed
+   only when it adds state or the next action, and must not contradict the
+   sprint mode. Hybrid commands continue only via the documented flow below:
    - `brainstorm` → Brainstorm CEO Refinement
    - `plan` → Plan G1 Refinement
    - `decision` → Decision ADR Refinement
