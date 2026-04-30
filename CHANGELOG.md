@@ -1,3 +1,20 @@
+## [0.5.5-product] - 2026-04-30
+
+**Codex desktop app `/sfs` canonical path 복구.** `/sfs ...` 메시지가 Codex desktop app /
+compatible Codex surface 에서 모델 또는 Skill 까지 도달하면, 그 순간 정상 Solon command 로
+간주하고 bash adapter 로 즉시 dispatch 하도록 Skill/AGENTS/README/GUIDE/install 안내를 강화.
+
+### Fixed
+
+- **Codex app `/sfs` unsupported 오판 방지** — 모델이 `/sfs ...` 메시지를 읽을 수 있으면 이미
+  runtime parser 를 통과한 것이므로 `unsupported command` 로 답하지 않고 `.sfs-local/scripts/sfs-dispatch.sh`
+  로 내려보내도록 Codex Skill 과 AGENTS adapter template 에 명시.
+- **Codex CLI gap 범위 축소** — bare `/sfs` 가 native slash parser 에서 차단되는 경우만
+  Codex CLI adaptor compatibility gap 으로 분류. `$sfs ...`, `sfs ...`, 자연어, direct bash 는
+  그 blocking build 에서만 쓰는 임시 bypass 로 유지.
+- **install/onboarding 문구 정렬** — Codex app 은 `/sfs status` 정상 1급 경로로 안내하고,
+  command chip 표시 여부와 Solon dispatch 가능 여부를 분리해서 설명.
+
 ## [0.5.4-product] - 2026-04-30
 
 - (release cut → stable 2baee1d)

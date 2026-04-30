@@ -17,6 +17,9 @@ single source of truth (Claude/Codex/Gemini 어느 CLI 환경에서든 동일한
 `/sfs` 는 Solon 의 public command surface 다. Runtime adaptor 는 vendor 별 입력면 차이를
 흡수해서 반드시 같은 bash adapter 로 내려보내야 한다.
 
+Codex 가 사용자 메시지 `/sfs ...` 를 읽을 수 있다면 이미 앱/런타임 parser 를 통과한 것이다.
+이때는 "unsupported command" 로 답하지 말고 아래 dispatch table 을 즉시 적용한다.
+
 Codex desktop app 처럼 leading slash 입력(`/sfs ...`)이 모델/Skill 에 도달하는 환경에서는
 그 경로가 정상 1급 entry 다. Codex CLI 의 일부 build 는 leading slash 입력을 모델에
 도달하기 전에 native slash parser 에서 차단한다. 이 경우만 사용자 호출법 문제가 아니라

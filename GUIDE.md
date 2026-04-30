@@ -81,10 +81,11 @@ PowerShell-only 환경은 아직 지원선 밖이다.
 | Codex CLI blocking build | `/sfs status` 가 public API 이지만 CLI parser 에 막히면 `$sfs status` / 자연어가 임시 bypass |
 
 아래 예시는 Solon 기준 canonical `/sfs` 표기입니다. Codex desktop app 처럼 `/sfs` 가
-모델/Skill 에 도달하는 환경에서는 그대로 정상 경로입니다. Codex CLI 에서 bare `/sfs` 가
-`Unrecognized command '/sfs'` 로 막히면 그건 사용자 실수가 아니라 Codex CLI adaptor
-compatibility gap 입니다. `$sfs start ...`, `$sfs plan`, 자연어, direct bash 는 그 CLI build 에서만
-쓰는 임시 bypass 입니다.
+prompt 본문으로 모델/Skill 에 도달하는 환경에서는 그대로 정상 경로입니다. 앱 UI 가 별도
+command chip 을 표시하지 않아도 모델이 `/sfs ...` 를 읽을 수 있으면 dispatch 대상입니다.
+Codex CLI 에서 bare `/sfs` 가 `Unrecognized command '/sfs'` 로 막히면 그건 사용자 실수가
+아니라 Codex CLI adaptor compatibility gap 입니다. `$sfs start ...`, `$sfs plan`, 자연어,
+direct bash 는 그 CLI build 에서만 쓰는 임시 bypass 입니다.
 
 처음 실행하면 다음과 비슷한 1줄 dashboard 가 나온다:
 
@@ -155,9 +156,10 @@ sprint 완전히 끝났으면:
 
 ## 5. 8 슬래시 명령 cheatsheet
 
-Codex desktop app 에서 `/sfs` 가 모델/Skill 에 보이면 정상 1급 경로다. Codex CLI 에서만
-leading `/sfs` 가 막히는 build 는 adaptor gap 이다. 그 경우만 임시로 `$sfs` 또는 자연어
-bypass 를 쓴다.
+Codex desktop app 에서 `/sfs` 가 모델/Skill 에 보이면 정상 1급 경로다. 메시지를 읽은
+Codex adapter 는 unsupported 로 답하지 말고 즉시 bash adapter 로 dispatch 한다. Codex CLI
+에서만 leading `/sfs` 가 막히는 build 는 adaptor gap 이다. 그 경우만 임시로 `$sfs` 또는
+자연어 bypass 를 쓴다.
 
 | 명령 | 한 줄 설명 |
 |:--|:--|
