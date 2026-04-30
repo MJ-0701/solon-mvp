@@ -1,3 +1,14 @@
+## [0.5.14-product] - 2026-04-30
+
+**Auth probe early success return.** `/sfs auth probe` now returns as soon as the expected
+`SFS_AUTH_PROBE_OK` marker appears in stdout, instead of waiting for CLIs that keep their process
+open briefly after emitting the response.
+
+### Changed
+
+- **probe marker short-circuit** — Solon interrupts the executor after the probe marker is captured,
+  so Gemini/Codex/Claude probes can complete promptly even if the CLI delays process shutdown.
+
 ## [0.5.13-product] - 2026-04-30
 
 **Auth probe timeout guard.** `/sfs auth probe` now has a hard timeout and validates that the

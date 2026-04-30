@@ -155,7 +155,7 @@ normalize_selected_executors() {
 }
 
 run_probe_command_with_timeout() {
-  local cmd="$1" timeout="$2" prompt_path="$3" out_path="$4" err_path="$5"
+  local cmd="$1" timeout="$2" prompt_path="$3" out_path="$4" err_path="$5" marker="$6"
   local pid elapsed
 
   set +m 2>/dev/null || true
@@ -168,6 +168,13 @@ run_probe_command_with_timeout() {
   elapsed=0
 
   while kill -0 "$pid" 2>/dev/null; do
+    if [[ -n "$marker" && -f "$out_path" ]] && grep -q "$marker" "$out_path" 2>/dev/null; then
+      disown "$pid" 2>/dev/null || true
+      kill "$pid" 2>/dev/null || true
+      sleep 1
+      kill -9 "$pid" 2>/dev/null || true
+      return 0
+    fi
     if [[ "$elapsed" -ge "$timeout" ]]; then
       {
         printf '\nSFS auth probe timed out after %ss.\n' "$timeout"
@@ -278,7 +285,7 @@ EOF
     echo "  prompt: ${PROMPT_PATH}"
     echo "  timeout: ${PROBE_TIMEOUT}s"
     set +e
-    run_probe_command_with_timeout "$PROBE_CMD" "$PROBE_TIMEOUT" "$PROMPT_PATH" "$OUT_PATH" "$ERR_PATH"
+    run_probe_command_with_timeout "$PROBE_CMD" "$PROBE_TIMEOUT" "$PROMPT_PATH" "$OUT_PATH" "$ERR_PATH" "SFS_AUTH_PROBE_OK"
     rc=$?
     set -e
     if [[ "$rc" -ne 0 ]]; then
