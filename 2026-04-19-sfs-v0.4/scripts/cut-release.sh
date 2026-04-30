@@ -31,6 +31,7 @@
 #   bash scripts/cut-release.sh --version 0.3.0-mvp --apply --no-tag
 #   bash scripts/cut-release.sh --version 0.3.0-mvp --apply --allow-dirty
 #   bash scripts/cut-release.sh --version 0.5.1-product --apply --allow-divergence  # P-13 bypass
+#   SOLON_STABLE_REPO=~/tmp/solon-product bash scripts/cut-release.sh --version 0.5.27-product --apply --allow-dirty
 #   bash scripts/cut-release.sh --help
 #
 # Exit codes:
@@ -58,7 +59,7 @@ ALLOW_DIVERGENCE=0
 NO_TAG=0
 SHOW_HELP=0
 
-# Allowlist (9 항목, WU-31 §2.3 + 25th-6 codex finding #6 추가)
+# Allowlist (WU-31 §2.3 + 25th-6 codex finding #6 + 0.5.27 thin runtime)
 # AGENTS.md = stable 의 untracked dust 해소 (dev staging 의 redirect stub 을 sync).
 ALLOWLIST=(
   "VERSION"
@@ -74,6 +75,8 @@ ALLOWLIST=(
   "uninstall.sh"
   "uninstall.ps1"
   "templates"
+  "bin"
+  "packaging"
 )
 
 # Hard blocklist (dev 전용)

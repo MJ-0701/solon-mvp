@@ -1,3 +1,48 @@
+## [0.5.27-product] - 2026-04-30
+
+**Thin runtime layout foundation.** Solon can now run as a packaged `sfs`
+runtime while consumer projects keep only state, docs, config, and custom
+overrides.
+
+### Added
+
+- **Global `sfs` entrypoint** — `bin/sfs` locates the packaged runtime and
+  dispatches `sfs status/start/plan/...` without requiring project-local
+  runtime scripts.
+- **Thin install layout** — `install.sh --layout thin` creates project state
+  and adapter docs while skipping managed scripts/templates/personas.
+- **Runtime config** — `.sfs-local/config.yaml` records `thin` vs `vendored`
+  layout and documented override paths.
+- **Homebrew formula template** — release owners can publish `bin/sfs` through
+  a tap by filling `packaging/homebrew/sfs.rb.template` URL and sha256.
+
+### Changed
+
+- **Template fallback** — command scripts now resolve sprint templates,
+  decision templates, personas, and guide docs from project-local overrides
+  first, then packaged runtime defaults.
+- **Adapter docs** — Claude, Codex, Gemini, README, and onboarding guide now
+  describe `sfs <command>` as the primary runtime surface and project-local
+  scripts as vendored fallback.
+- **Upgrade behavior** — thin installs skip project-local runtime assets during
+  upgrade instead of reintroducing bloat.
+
+## [0.5.26-product] - 2026-04-30
+
+**Review artifact bloat guard.** `/sfs review` no longer appends executor
+result excerpts into `review.md` by default, preventing repeated G1/G2 review
+runs from turning the sprint review artifact into a multi-thousand-line log.
+
+### Changed
+
+- **Slim review.md results** — full CPO executor output remains in
+  `.sfs-local/tmp/review-runs/`, while `review.md` records only result path,
+  size, and verdict metadata by default.
+- **Opt-in excerpts** — set `SFS_REVIEW_MD_EXCERPT_LINES=1..80` to embed a
+  bounded result excerpt in `review.md` for debugging or offline handoff.
+- **Bloat ceiling** — excerpt embedding is capped at 80 lines even when a larger
+  value is supplied.
+
 ## [0.5.25-product] - 2026-04-30
 
 **Localized review report UX.** `/sfs review` no longer dumps executor

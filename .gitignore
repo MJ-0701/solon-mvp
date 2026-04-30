@@ -69,3 +69,22 @@ docs/.pdca-status.json
 *.bak[0-9]?
 *.bak
 outputs/
+
+### BEGIN solon-product ###
+# Solon Product (7-step flow) — 아래 블록은 solon-product 의 install.sh / upgrade.sh 가 관리.
+# 수동 수정 가능하지만 upgrade.sh 실행 시 교체되므로 consumer 측 커스텀은 블록 바깥에 배치.
+
+# .sfs-local/ 운영 규칙
+#   - sprints/ 산출물: commit 권장 (팀 누적 지식)
+#   - decisions/ (ADR mini): commit 권장
+#   - events.jsonl: PII/감사 로그 혼입 위험 → ignore
+#   - tmp/: 중간 산출물, ignore
+.sfs-local/events.jsonl
+.sfs-local/tmp/
+.sfs-local/*.env
+.sfs-local/**/*.env
+!.sfs-local/*.env.example
+!.sfs-local/**/*.env.example
+.sfs-local/*.local.*
+.sfs-local/**/*.bak-*
+### END solon-product ###

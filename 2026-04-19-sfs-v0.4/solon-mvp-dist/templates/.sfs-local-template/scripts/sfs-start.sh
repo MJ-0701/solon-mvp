@@ -32,9 +32,6 @@ SFS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=./sfs-common.sh
 source "${SFS_SCRIPT_DIR}/sfs-common.sh"
 
-# Local constant: templates dir lives under SFS_LOCAL_DIR.
-SFS_TEMPLATES_DIR="${SFS_LOCAL_DIR}/sprint-templates"
-
 # ─────────────────────────────────────────────────────────────────────
 # CLI parse
 # ─────────────────────────────────────────────────────────────────────
@@ -134,15 +131,11 @@ esac
 # ─────────────────────────────────────────────────────────────────────
 # Templates check (must exist before we touch sprints/)
 # ─────────────────────────────────────────────────────────────────────
-if [[ ! -d "${SFS_TEMPLATES_DIR}" ]]; then
-  echo "templates not found: ${SFS_TEMPLATES_DIR}" >&2
-  exit "${SFS_EXIT_NO_TEMPLATES}"
-fi
-
 # Ensure all 5 expected sprint template files exist.
 for tpl in brainstorm plan log review retro; do
-  if [[ ! -f "${SFS_TEMPLATES_DIR}/${tpl}.md" ]]; then
-    echo "templates not found: ${SFS_TEMPLATES_DIR}/${tpl}.md" >&2
+  tpl_path="$(sfs_sprint_template_file "${tpl}")"
+  if [[ ! -f "${tpl_path}" ]]; then
+    echo "templates not found: ${tpl_path}" >&2
     exit "${SFS_EXIT_NO_TEMPLATES}"
   fi
 done
@@ -167,7 +160,8 @@ if ! mkdir -p "${SPRINT_DIR}" 2>/dev/null; then
 fi
 
 for tpl in brainstorm plan log review retro; do
-  if ! cp -f "${SFS_TEMPLATES_DIR}/${tpl}.md" "${SPRINT_DIR}/${tpl}.md" 2>/dev/null; then
+  tpl_path="$(sfs_sprint_template_file "${tpl}")"
+  if ! cp -f "${tpl_path}" "${SPRINT_DIR}/${tpl}.md" 2>/dev/null; then
     echo "permission denied copying ${tpl}.md to ${SPRINT_DIR}/" >&2
     exit "${SFS_EXIT_PERM}"
   fi

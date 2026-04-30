@@ -116,6 +116,9 @@ Open the active sprint's review.md as the CPO Evaluator review document.
   - Writes the full CPO prompt to .sfs-local/tmp/review-prompts/.
   - Appends a compact CPO Evaluator invocation log to review.md. The full
     prompt body is not embedded by default to prevent recursive token growth.
+  - Stores full executor results under .sfs-local/tmp/review-runs/. review.md
+    keeps only compact result metadata by default. Set
+    SFS_REVIEW_MD_EXCERPT_LINES=1..80 to embed a bounded excerpt.
   - Appends events.jsonl `review_open` event.
   - Prints the resolved review.md path + gate id + executor to stdout (no editor launch).
   - When review runs, prints compact result metadata only. AI runtimes should
@@ -142,12 +145,13 @@ EOF
 GATE_ID=""
 EVALUATOR_EXECUTOR="${SFS_REVIEW_EXECUTOR:-codex}"
 GENERATOR_EXECUTOR="${SFS_GENERATOR_EXECUTOR:-unknown}"
-PERSONA_PATH="${SFS_LOCAL_DIR}/personas/cpo-evaluator.md"
+PERSONA_PATH="$(sfs_persona_file cpo-evaluator)"
 PRINT_PROMPT=false
 RUN_REVIEW=true
 SHOW_LAST=false
 ALLOW_EMPTY_REVIEW="${SFS_REVIEW_ALLOW_EMPTY:-false}"
 AUTH_INTERACTIVE="${SFS_AUTH_INTERACTIVE:-auto}"
+REVIEW_MD_EXCERPT_LINES="${SFS_REVIEW_MD_EXCERPT_LINES:-0}"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
@@ -262,6 +266,15 @@ case "${ALLOW_EMPTY_REVIEW}" in
   true|1|yes|YES|y|Y) ALLOW_EMPTY_REVIEW=true ;;
   *) ALLOW_EMPTY_REVIEW=false ;;
 esac
+case "${REVIEW_MD_EXCERPT_LINES}" in
+  ''|*[!0-9]*)
+    echo "invalid SFS_REVIEW_MD_EXCERPT_LINES: ${REVIEW_MD_EXCERPT_LINES} (expected 0..80)" >&2
+    exit "${SFS_EXIT_BADCLI}"
+    ;;
+esac
+if (( REVIEW_MD_EXCERPT_LINES > 80 )); then
+  REVIEW_MD_EXCERPT_LINES=80
+fi
 
 # ─────────────────────────────────────────────────────────────────────
 # Validate .sfs-local + git
@@ -286,7 +299,7 @@ fi
 
 SPRINT_DIR="${SFS_SPRINTS_DIR}/${SPRINT_ID}"
 REVIEW_PATH="${SPRINT_DIR}/review.md"
-TEMPLATE="${SFS_LOCAL_DIR}/sprint-templates/review.md"
+TEMPLATE="$(sfs_sprint_template_file review)"
 
 existing_result_excerpt() {
   local file="$1" limit="${2:-80}"
@@ -842,6 +855,8 @@ if [[ "${RUN_REVIEW}" == "true" ]]; then
   RUN_ERR_BYTES="$(count_file_bytes "${RUN_ERR}")"
   RUN_RESULT_LINES="$(count_file_lines "${RESULT_PATH}")"
   RUN_RESULT_BYTES="$(count_file_bytes "${RESULT_PATH}")"
+  RUN_VERDICT="$(extract_result_verdict "${RESULT_PATH}" || true)"
+  [[ -n "${RUN_VERDICT}" ]] || RUN_VERDICT="unknown"
 
   {
     printf '\n### %s — CPO evaluator result (%s)\n\n' "${NOW}" "${GATE_ID}"
@@ -856,11 +871,17 @@ if [[ "${RUN_REVIEW}" == "true" ]]; then
     printf -- '- stderr_path: `%s`\n' "${RUN_ERR}"
     printf -- '- stderr_size: `%s bytes / %s lines`\n' "${RUN_ERR_BYTES}" "${RUN_ERR_LINES}"
     printf -- '- result_path: `%s`\n' "${RESULT_PATH}"
-    printf -- '- result_size: `%s bytes / %s lines`\n\n' "${RUN_RESULT_BYTES}" "${RUN_RESULT_LINES}"
-    printf '#### result excerpt\n\n'
-    printf '```text\n'
-    append_result_excerpt "${RESULT_PATH}" 180
-    printf '\n```\n'
+    printf -- '- result_size: `%s bytes / %s lines`\n' "${RUN_RESULT_BYTES}" "${RUN_RESULT_LINES}"
+    printf -- '- result_verdict: `%s`\n' "${RUN_VERDICT}"
+    if (( REVIEW_MD_EXCERPT_LINES > 0 )); then
+      printf -- '- result_excerpt: `%s lines max; full result stored in result_path`\n\n' "${REVIEW_MD_EXCERPT_LINES}"
+      printf '#### result excerpt\n\n'
+      printf '```text\n'
+      append_result_excerpt "${RESULT_PATH}" "${REVIEW_MD_EXCERPT_LINES}"
+      printf '\n```\n'
+    else
+      printf -- '- result_excerpt: `disabled; full result stored in result_path`\n'
+    fi
   } >> "${REVIEW_PATH}" || {
     echo "permission denied appending CPO result to ${REVIEW_PATH}" >&2
     exit "${SFS_EXIT_PERM}"

@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# sfs — Solon Product global CLI entrypoint.
+#
+# Packaged runtimes (Homebrew, source clone, local tarball) should expose this
+# file on PATH. Consumer repos keep `.sfs-local/` as state/config only.
+
+set -euo pipefail
+
+find_dist_dir() {
+  local source="${BASH_SOURCE[0]:-$0}"
+  local bin_dir
+  bin_dir="$(cd "$(dirname "${source}")" && pwd)"
+
+  local candidate
+  for candidate in \
+    "${SFS_DIST_DIR:-}" \
+    "${bin_dir}/.." \
+    "${bin_dir}" \
+    "${bin_dir}/../share/solon-product" \
+    "${bin_dir}/../share/solon"; do
+    [[ -n "${candidate}" ]] || continue
+    if [[ -d "${candidate}/templates/.sfs-local-template/scripts" ]]; then
+      cd "${candidate}" && pwd
+      return 0
+    fi
+  done
+
+  echo "cannot locate Solon runtime templates; set SFS_DIST_DIR" >&2
+  return 1
+}
+
+DIST_DIR="$(find_dist_dir)"
+RUNTIME_DIR="${DIST_DIR}/templates/.sfs-local-template"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  sfs init [--yes] [--layout thin|vendored]
+  sfs <command> [args]
+
+Commands:
+  status, start, guide, auth, brainstorm, plan, review, decision, retro, loop
+
+Project state defaults to .sfs-local/. Override with SFS_LOCAL_DIR when needed.
+EOF
+}
+
+if [[ $# -eq 0 ]]; then
+  usage
+  exit 0
+fi
+
+case "${1:-}" in
+  init|install)
+    shift
+    exec bash "${DIST_DIR}/install.sh" --layout thin "$@"
+    ;;
+  upgrade)
+    shift
+    exec bash "${DIST_DIR}/upgrade.sh" "$@"
+    ;;
+  -h|--help|help)
+    usage
+    exit 0
+    ;;
+esac
+
+export SFS_RUNTIME_DIR="${RUNTIME_DIR}"
+export SFS_DIST_DIR="${DIST_DIR}"
+export SFS_LOCAL_DIR="${SFS_LOCAL_DIR:-.sfs-local}"
+
+exec bash "${RUNTIME_DIR}/scripts/sfs-dispatch.sh" "$@"

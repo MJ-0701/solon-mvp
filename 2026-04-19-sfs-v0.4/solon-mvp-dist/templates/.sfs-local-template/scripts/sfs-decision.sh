@@ -146,7 +146,7 @@ KEBAB="$(printf '%s' "$TITLE" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9' '-' 
 
 # ─── template + path ──────────────────────────────────────────────────────────
 DECISIONS_DIR=".sfs-local/decisions"
-TEMPLATE=".sfs-local/decisions-template/ADR-TEMPLATE.md"
+TEMPLATE="$(sfs_decision_template_file ADR-TEMPLATE.md)"
 
 [ -f "$TEMPLATE" ] || { echo "template missing: $TEMPLATE" >&2; exit 4; }
 

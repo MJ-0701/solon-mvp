@@ -1,0 +1,42 @@
+# .sfs-local/divisions.yaml
+# Solon MVP minimal divisions config (기본값).
+# Solon docset 쪽 divisions.schema.yaml v1.1 와 호환되는 subset.
+# 프로젝트 특성에 따라 각 본부 activation_state 를 조정하고, 변경 사유는
+# `.sfs-local/decisions/<N>-activate-<division>.md` 에 기록.
+
+version: 1.0-mvp-minimal
+project: "agent_architect"
+runtime: claude-code   # (향후) codex / gemini-cli 전환 시 값 변경
+created: "2026-04-30"
+solon_mvp_version: "0.5.17-product"
+
+divisions:
+  dev:
+    activation_state: active
+    lead: "사용자 직접 (self-lead)"
+    notes: "구현 주도. D (do) step 의 main owner."
+
+  strategy-pm:
+    activation_state: active
+    lead: "사용자 직접"
+    notes: "brainstorm / plan / review 산출물 owner. P-1 + P + C step."
+
+  qa:
+    activation_state: abstract
+    reason: "MVP 1 cycle 에서는 manual smoke test 로 대체. cycle 3 누적 후 activate 검토."
+
+  design:
+    activation_state: abstract
+    reason: "기존 디자인 시스템 (shadcn/ui 등) 차용. 자체 design 본부 불필요."
+
+  infra:
+    activation_state: abstract
+    reason: "local macOS dev repo → stable repo → GitHub release flow 재사용. 필요 시 cycle 2~3 에서 activate 검토."
+
+  taxonomy:
+    activation_state: abstract
+    reason: "도메인 taxonomy 는 cycle 2~3 누적 후 도입."
+
+# Phase 1 MVP 기본 활성 본부 = dev + strategy-pm 2 개.
+# 나머지 4 개는 abstract — 필요 시 대화에서 선언적으로 activate 승격.
+# 승격 기록은 .sfs-local/decisions/<N>-activate-<division>.md 에 남김.

@@ -19,12 +19,26 @@ set -uo pipefail
 # CONSTANTS
 # ─────────────────────────────────────────────────────────────────────
 SFS_LOCAL_DIR="${SFS_LOCAL_DIR:-.sfs-local}"
+if [[ -z "${SFS_RUNTIME_DIR:-}" ]]; then
+  SFS_COMMON_SOURCE="${BASH_SOURCE[0]:-$0}"
+  SFS_COMMON_DIR="$(cd "$(dirname "${SFS_COMMON_SOURCE}")" && pwd)"
+  SFS_RUNTIME_DIR="$(cd "${SFS_COMMON_DIR}/.." && pwd)"
+fi
+if [[ -z "${SFS_DIST_DIR:-}" ]]; then
+  SFS_DIST_DIR="$(cd "${SFS_RUNTIME_DIR}/../.." 2>/dev/null && pwd || printf '%s\n' "${SFS_RUNTIME_DIR}")"
+fi
 SFS_EVENTS_FILE="${SFS_LOCAL_DIR}/events.jsonl"
 SFS_CURRENT_SPRINT_FILE="${SFS_LOCAL_DIR}/current-sprint"
 SFS_CURRENT_WU_FILE="${SFS_LOCAL_DIR}/current-wu"
 SFS_VERSION_FILE="${SFS_LOCAL_DIR}/VERSION"
 SFS_SPRINTS_DIR="${SFS_LOCAL_DIR}/sprints"
 SFS_DECISIONS_DIR="${SFS_LOCAL_DIR}/decisions"
+SFS_PROJECT_TEMPLATES_DIR="${SFS_LOCAL_DIR}/sprint-templates"
+SFS_RUNTIME_TEMPLATES_DIR="${SFS_RUNTIME_DIR}/sprint-templates"
+SFS_PROJECT_DECISIONS_TEMPLATE_DIR="${SFS_LOCAL_DIR}/decisions-template"
+SFS_RUNTIME_DECISIONS_TEMPLATE_DIR="${SFS_RUNTIME_DIR}/decisions-template"
+SFS_PROJECT_PERSONAS_DIR="${SFS_LOCAL_DIR}/personas"
+SFS_RUNTIME_PERSONAS_DIR="${SFS_RUNTIME_DIR}/personas"
 
 # Exit codes (WU-23 §1.1 / §1.2 정합)
 SFS_EXIT_OK=0
@@ -57,6 +71,49 @@ reverse_lines() {
   else
     awk '{a[NR]=$0} END {for (i=NR;i>0;i--) print a[i]}' "${f}"
   fi
+}
+
+# ─────────────────────────────────────────────────────────────────────
+# RUNTIME / PROJECT-LOCAL ASSET RESOLUTION
+# ─────────────────────────────────────────────────────────────────────
+
+# Project-local files are overrides. Packaged runtime files are the default.
+# This keeps consumer repos thin while preserving custom personas/templates.
+sfs_asset_file() {
+  local project_path="${1:?project path required}"
+  local runtime_path="${2:?runtime path required}"
+  if [[ -f "${project_path}" ]]; then
+    printf '%s\n' "${project_path}"
+  else
+    printf '%s\n' "${runtime_path}"
+  fi
+}
+
+sfs_sprint_template_file() {
+  local name="${1:?template name required}"
+  sfs_asset_file \
+    "${SFS_PROJECT_TEMPLATES_DIR}/${name}.md" \
+    "${SFS_RUNTIME_TEMPLATES_DIR}/${name}.md"
+}
+
+sfs_decision_template_file() {
+  local name="${1:?template name required}"
+  sfs_asset_file \
+    "${SFS_PROJECT_DECISIONS_TEMPLATE_DIR}/${name}" \
+    "${SFS_RUNTIME_DECISIONS_TEMPLATE_DIR}/${name}"
+}
+
+sfs_persona_file() {
+  local name="${1:?persona name required}"
+  sfs_asset_file \
+    "${SFS_PROJECT_PERSONAS_DIR}/${name}.md" \
+    "${SFS_RUNTIME_PERSONAS_DIR}/${name}.md"
+}
+
+sfs_guide_file() {
+  sfs_asset_file \
+    "${SFS_LOCAL_DIR}/GUIDE.md" \
+    "${SFS_DIST_DIR}/GUIDE.md"
 }
 
 # ─────────────────────────────────────────────────────────────────────
