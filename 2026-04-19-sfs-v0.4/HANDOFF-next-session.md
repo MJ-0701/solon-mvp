@@ -1,9 +1,9 @@
 ---
 doc_id: handoff-next-session
 title: "Next session handoff (auto-written, WU-28)"
-written_at: 2026-04-30T12:30:00Z
-written_at_kst: 2026-04-30T21:30:00+09:00
-last_commit: 2c3baf0
+written_at: 2026-04-30T12:50:00Z
+written_at_kst: 2026-04-30T21:50:00+09:00
+last_commit: 81c7a28
 visibility: raw-internal
 ---
 
@@ -13,41 +13,46 @@ visibility: raw-internal
 
 ## 1. default_action (다음 세션 진입 시 즉시 실행)
 
-현재 작업은 **0.5.24-product 후보: Solon report UX 복원 + review 결과 가시성**
-구현 완료 상태다.
-사용자 지적 2건 반영:
-- `/sfs plan` hybrid 결과가 `plan.md refined` 한 줄 중심으로 출력되어 예전 Solon report 대비 너무 밋밋함.
-- `/sfs review` 실행 후 `review.md ready ... output <path>` 만 보이면 사용자가 verdict/findings/actions 를 바로 알 수 없음. 이미 작성된 리뷰를 다시 확인하는 기능도 필요.
+현재 작업은 **0.5.25-product: localized review report UX** 완료 상태다.
 
-다음 세션 default action:
+사용자 지적:
+- `/sfs review --show-last` 가 기존 `.result.md` 내용을 그대로 덤프해서 화면이 시끄럽다.
+- executor 결과가 영어여도 사용자에게 보이는 내용은 사용자 native language(이번 case: 한국어)로 요약되어야 한다.
+- 전체 원문보다 verdict 요약 + 사용자가 해야 할 일(action)을 Solon report 형식으로 보여주는 게 맞다.
 
-1. release cut:
-   `bash scripts/cut-release.sh --version 0.5.24-product --apply --allow-dirty --allow-divergence`
-2. stable push + `~/tmp/solon-product` pull + `~/Soongsil` upgrade.
+적용된 0.5.25 패치:
+- `sfs-review.sh`: `CPO RESULT EXCERPT` stdout 덤프 제거. review run / `--show-last` 모두 `verdict`, `output`, `display` 메타데이터만 출력한다.
+- `.agents/skills/sfs/SKILL.md`, `.claude/commands/sfs.md`, `.gemini/commands/sfs.toml`, `.codex/prompts/sfs.md`: review 결과는 raw markdown 을 echo 하지 않고, result path / review.md 를 근거로 사용자 언어의 요약 + required actions Solon report 로 렌더링하도록 고정.
+- README / GUIDE / SFS / AGENTS / CLAUDE / GEMINI templates 문서 정합.
+- `VERSION` / `CHANGELOG.md` = `0.5.25-product`.
 
-주의:
-- `0.5.23-product` 는 이미 stable push 완료: `/Users/mj/workspace/solon-mvp` commit `2c3baf0`, tag `v0.5.23-product`.
-- Soongsil 도 `0.5.23-product` upgrade 완료.
-- 현재 `--run` 제거/기본 review 실행 작업은 완료 상태다.
-- root `AGENTS.md` / `CLAUDE.md` 는 redirect stub 이므로 절대 overwrite 금지.
-- root self-install 파일(`.agents/`, `.claude/`, `.gemini/`, `.sfs-local/`, `SFS.md`, `GEMINI.md`)은 untracked 상태로 남아 있다. 다음 세션에서 필요 시 최신 템플릿 sync 하되 stub 보존.
-
-적용된 0.5.24 후보 패치:
-- `.claude/commands/sfs.md`: hybrid/adapter-run final output 을 Solon report code block 으로 강제.
-- `.agents/skills/sfs/SKILL.md`: Codex Skill 도 동일 report rule 추가.
-- `.gemini/commands/sfs.toml` + `.codex/prompts/sfs.md`: Solon report rule 전파.
-- `sfs-review.sh`: review run 완료 후 stdout 에 bounded `CPO RESULT EXCERPT` 출력.
-- `sfs-review.sh --show-last|--show|--last`: executor 재실행 없이 active sprint 의 기존 CPO 결과 재출력.
-- README/GUIDE/templates 문서화 + `VERSION` / `CHANGELOG.md` = `0.5.24-product`.
-
-아직 해야 할 것:
-- release cut / stable push / consumer upgrade.
+배포 상태:
+- stable product repo `/Users/mj/workspace/solon-mvp`: commit `11fac9b release: 0.5.25-product`, tag `v0.5.25-product`, remote push 완료.
+- product clone `/Users/mj/tmp/solon-product`: `11fac9b` fast-forward pull 완료.
+- Soongsil consumer `/Users/mj/Soongsil`: `0.5.24-product → 0.5.25-product` upgrade 완료.
 
 검증:
-- `bash -n` pass: dist template `sfs-review.sh`, active `.sfs-local/scripts/sfs-review.sh`.
-- `/tmp` sandbox `review --show-last --gate G1` pass: 기존 result_path 기반 excerpt 재출력.
-- `/tmp` sandbox custom executor review run pass: `review.md ready ... output <path>` 다음 `CPO RESULT EXCERPT` 표시.
+- `bash -n` pass: dist template `sfs-review.sh`, active root `.sfs-local/scripts/sfs-review.sh`, Soongsil `.sfs-local/scripts/sfs-review.sh`.
+- `/private/tmp/sfs-review-ux-test.*` sandbox `review --show-last` pass: 원문 덤프 없이 `verdict/output/display` 메타데이터만 출력.
+- sandbox custom executor review run pass: stdout 에 result body 없이 metadata만 출력.
+- Soongsil `/sfs review --show-last` equivalent pass:
+  - `verdict: partial`
+  - output path: `.sfs-local/tmp/review-runs/2026-W18-sprint-2-G1-20260430T121415Z.result.md`
+  - display hint: 사용자 언어 요약/action report.
 - `git diff --check` pass.
+
+다음 세션 default action:
+- release/sync 작업은 완료됐으므로 자동 배포 action 없음.
+- 사용자가 Soongsil 제품 작업을 계속하자고 하면, 현재 G1 review verdict 가 `partial` 이므로 `plan.md` 에 아래 5개 CTO action 을 반영한 뒤 `/sfs review --gate G1 --executor codex --generator claude` 재실행:
+  1. 5-core-feature v1/optional/deferred table 추가
+  2. `manifest.json` draft fields / optional artifact entries / unknown-key policy / example 추가
+  3. component diagram + upload→index→viewer data-flow diagram 추가
+  4. `Course`, `Week`, `Artifact`, `ExamRange`, `GateSession` fields/relationships 확장
+  5. 4 gate questions + secret/env ownership plan 반영
+
+주의:
+- root `AGENTS.md` / `CLAUDE.md` 는 redirect stub 이므로 절대 overwrite 금지.
+- root self-install 파일(`.agents/`, `.claude/`, `.gemini/`, `.sfs-local/`, `SFS.md`, `GEMINI.md`)은 untracked 상태로 남아 있다. release commit 에 포함하지 말 것.
 
 ## 9. Older Archive — 이전 release 회귀 진단 요약 (참고용, 현재 default_action 아님)
 

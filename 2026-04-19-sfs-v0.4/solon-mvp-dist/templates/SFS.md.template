@@ -26,7 +26,7 @@
 2. **CEO plan** (G1) — `/sfs plan` 이 `brainstorm.md` 를 읽고 `.sfs-local/sprints/<sprint-id>/plan.md` 의 요구사항/AC/scope 를 작성
 3. **CTO Generator ↔ CPO Evaluator sprint contract** — `/sfs plan` 이 `plan.md §5` 에 계약 작성
 4. **CTO 구현** (G2 entry) — 실제 코드 + `log.md`
-5. **CPO review** (G4) — `review.md` + CPO verdict + command output result excerpt
+5. **CPO review** (G4) — `review.md` + CPO verdict + 사용자 언어 요약/action report
 6. **CTO review 확인** — pass 면 최종 통과, partial/fail 이면 지정 범위 재구현
 7. **회고** (G5) — `.sfs-local/sprints/<sprint-id>/retro.md` + README 업데이트
 
@@ -99,7 +99,7 @@ Solon SFS 의 10 명령은 어떤 CLI 환경에서 호출하든 동일한 bash a
 | `/sfs auth status|check|login|probe [--executor codex|gemini|claude]` | review executor 인증 확인/로그인/더미 요청 |
 | `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락 기록 + Solon CEO 맥락 정리 |
 | `/sfs plan` | 현재 sprint plan.md 진입 + `plan_open` event 후 G1 요구사항/AC/scope + CTO/CPO sprint contract 작성 |
-| `/sfs review --gate <id> [--executor codex|gemini|claude|custom] [--prompt-only]` / `/sfs review --show-last` | CPO review run. stdout 에 bounded result excerpt 를 보여주고, full prompt 는 tmp prompt file에 저장하며 `review.md`에는 compact log/result만 남김. `--show-last` 는 executor 재실행 없이 기존 결과 확인 |
+| `/sfs review --gate <id> [--executor codex|gemini|claude|custom] [--prompt-only]` / `/sfs review --show-last` | CPO review run. stdout 은 verdict/output path 메타데이터만 보여주고, AI runtime 이 result 를 사용자 언어의 요약+action report 로 렌더링. full prompt 는 tmp prompt file에 저장하며 `review.md`에는 compact log/result만 남김. `--show-last` 는 executor 재실행 없이 기존 결과 확인 |
 | `/sfs decision <title> [--id <id>]` | full ADR 신설 후 Context/Decision/Alternatives/Consequences 작성 |
 | `/sfs retro [--close]` | retro.md 작성/갱신. `--close` 는 retro refinement 후 sprint close + auto commit |
 | `/sfs loop [OPTIONS]` | Ralph Loop + Solon mutex 자율 진행 (see `--help`) |
