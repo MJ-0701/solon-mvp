@@ -140,12 +140,14 @@ sprint 완전히 끝났으면:
 
 ---
 
-## 5. 7 슬래시 명령 cheatsheet
+## 5. 8 슬래시 명령 cheatsheet
 
 | 명령 | 한 줄 설명 |
 |:--|:--|
 | `/sfs status` | 지금 어디까지 왔는지 1줄 |
 | `/sfs start <goal>` | 새 sprint 시작 또는 이어가기 |
+| `/sfs guide` | 이 onboarding guide 경로 확인 |
+| `/sfs guide --print` | 이 guide 본문을 터미널에 출력 |
 | `/sfs plan` | 현 sprint 의 의도/경계 작성 |
 | `/sfs review --gate G2` | gate verdict 기록 (G-1 / G0 / G1 / G2 / G3 / G4 / G5) |
 | `/sfs decision <title>` | ADR-style 결정 기록 |
@@ -156,6 +158,7 @@ sprint 완전히 끝났으면:
 
 ```bash
 bash .sfs-local/scripts/sfs-status.sh --help
+bash .sfs-local/scripts/sfs-guide.sh --help
 ```
 
 ---

@@ -1,6 +1,6 @@
 ---
 name: sfs
-description: Solon SFS workflow — dispatch /sfs (status, start, plan, review, decision, retro, loop) to bash adapter SSoT. Trigger when user types /sfs, sfs <command>, or asks Solon SFS to do something (e.g., "현재 상태 확인", "sprint 시작", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth — paraphrase forbidden, exit codes verbatim.
+description: Solon SFS workflow — dispatch /sfs (status, start, guide, plan, review, decision, retro, loop) to bash adapter SSoT. Trigger when user types /sfs, sfs <command>, or asks Solon SFS to do something (e.g., "현재 상태 확인", "guide 보기", "sprint 시작", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth — paraphrase forbidden, exit codes verbatim.
 ---
 
 # Solon SFS — Codex Skill
@@ -9,7 +9,7 @@ This project uses Solon SFS. When the user invokes `/sfs <command>` or
 expresses a Solon SFS workflow intent, dispatch the request to the
 corresponding bash script under `.sfs-local/scripts/` and stop.
 
-The seven subcommands are **deterministic** and must NOT be re-interpreted by
+The eight subcommands are **deterministic** and must NOT be re-interpreted by
 the model. Bash adapter is single source of truth (SSoT).
 
 ## Dispatch Table
@@ -18,6 +18,7 @@ the model. Bash adapter is single source of truth (SSoT).
 |:--|:--|:--|
 | `status` (또는 "현재 상태", "어디까지 했는지") | `bash .sfs-local/scripts/sfs-status.sh [--color=auto/always/never]` | 1줄 dashboard |
 | `start <goal>` (또는 "sprint 시작", "새 sprint") | `bash .sfs-local/scripts/sfs-start.sh [<sprint-id>] [--force]` | sprint dir 초기화 + 5 templates cp |
+| `guide [--print]` (또는 "가이드", "처음 사용법") | `bash .sfs-local/scripts/sfs-guide.sh [--path|--print]` | onboarding guide 경로 출력/본문 보기 |
 | `plan` (또는 "plan 작성", "이번 sprint 계획") | `bash .sfs-local/scripts/sfs-plan.sh` | plan.md 진입 + plan_open event |
 | `review --gate <id>` (또는 "review 작성", "검증 기록") | `bash .sfs-local/scripts/sfs-review.sh --gate <id>` | id ∈ G-1, G0, G1, G2, G3, G4, G5 |
 | `decision <title>` (또는 "결정 기록", "ADR 추가") | `bash .sfs-local/scripts/sfs-decision.sh "<title>" [--id <id>]` | full ADR 또는 mini-ADR 분기 |
@@ -45,6 +46,8 @@ the model. Bash adapter is single source of truth (SSoT).
      `3`=not a git repo, `99`=unknown.
    - start: `0`=ok, `1`=sprint id conflict (suggest `--force`), `4`=templates
      missing, `5`=permission, `99`=unknown.
+   - guide: `0`=ok, `1`=no `.sfs-local/`, `4`=guide missing,
+     `99`=unknown.
    - plan: `0`=ok, `1`=no `.sfs-local/` or no active sprint, `4`=template
      missing, `99`=unknown.
    - review: `0`=ok, `1`=no `.sfs-local/` or no active sprint, `4`=template
@@ -68,7 +71,7 @@ Print this 3-line usage and stop:
 
 ```
 Usage: /sfs <command> [args]
-Commands: status, start, plan, review, decision, retro, loop
+Commands: status, start, guide, plan, review, decision, retro, loop
 Help: bash .sfs-local/scripts/sfs-<command>.sh --help
 ```
 

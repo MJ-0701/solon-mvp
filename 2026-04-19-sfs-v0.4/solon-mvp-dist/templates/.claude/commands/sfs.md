@@ -9,6 +9,7 @@ description: |
   help      사용법 보기
   status    현재 SFS 상태 확인 (bash adapter)
   start     새 sprint 시작 또는 이어가기 (bash adapter)
+  guide     onboarding guide 경로 출력/본문 보기
   plan      현재 sprint plan.md 작성/갱신
   sprint    plan을 구현 단계와 gate 체크로 정리
   review    현재 변경사항 review.md 작성/갱신
@@ -31,11 +32,11 @@ token as the subcommand and the remainder as that subcommand's arguments.
 $ARGUMENTS
 ```
 
-## Adapter Dispatch (status / start / plan / review / decision / retro / loop) — execute first
+## Adapter Dispatch (status / start / guide / plan / review / decision / retro / loop) — execute first
 
-If the first argument is **`status`**, **`start`**, **`plan`**, **`review`**,
+If the first argument is **`status`**, **`start`**, **`guide`**, **`plan`**, **`review`**,
 **`decision`**, **`retro`**, or **`loop`**, dispatch the request to the corresponding
-bash script under `.sfs-local/scripts/` and stop. These seven subcommands are
+bash script under `.sfs-local/scripts/` and stop. These eight subcommands are
 deterministic and must NOT be re-interpreted by the model.
 
 ⚠️ AI 자율 호출 금지 — 사용자 명시 호출 시에만 동작 (§1.5' 정합). 특히 `retro --close`
@@ -47,6 +48,7 @@ Dispatch table:
 |:--|:--|:--|
 | `status`   | `.sfs-local/scripts/sfs-status.sh <remaining args>`   | passes flags such as `--color=auto/always/never` verbatim |
 | `start`    | `.sfs-local/scripts/sfs-start.sh <remaining args>`    | passes `<sprint-id>` and/or `--force` verbatim |
+| `guide`    | `.sfs-local/scripts/sfs-guide.sh <remaining args>`    | passes `--path` / `--print` verbatim; default prints the managed guide path |
 | `plan`     | `.sfs-local/scripts/sfs-plan.sh <remaining args>`     | takes no flags currently; remaining args reserved for future (WU-25 §1) |
 | `review`   | `.sfs-local/scripts/sfs-review.sh <remaining args>`   | passes `--gate <id>` / `--gate=<id>` verbatim (gates.md §1 7-enum: G-1, G0, G1, G2, G3, G4, G5; WU-25 §2) |
 | `decision` | `.sfs-local/scripts/sfs-decision.sh <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim (WU-26 §1). Uses `decisions-template/ADR-TEMPLATE.md` (5 섹션 ADR-full); `sprint-templates/decision-light.md` 은 Claude-driven fallback. |
@@ -56,7 +58,7 @@ Dispatch table:
 Procedure (apply in order):
 
 1. **Existence check** — Use the Bash tool to verify the target script exists
-   and is executable. If `.sfs-local/scripts/sfs-{status,start,plan,review,decision,retro,loop}.sh`
+   and is executable. If `.sfs-local/scripts/sfs-{status,start,guide,plan,review,decision,retro,loop}.sh`
    is missing or not executable, fall back to the **Claude-driven mode** below
    for that subcommand and tell the user which script is missing (1 line, no
    speculation about the cause).
@@ -73,6 +75,8 @@ Procedure (apply in order):
      `3`=not a git repo, `99`=unknown.
    - start: `0`=ok, `1`=sprint id conflict (suggest `--force`), `4`=templates
      missing, `5`=permission, `99`=unknown.
+   - guide: `0`=ok, `1`=no `.sfs-local/`, `4`=guide missing,
+     `99`=unknown.
    - plan: `0`=ok, `1`=no `.sfs-local/` or no active sprint,
      `2`=corrupt `current-sprint`, `4`=template missing, `99`=unknown.
    - review: `0`=ok, `1`=no `.sfs-local/` or no active sprint,
@@ -130,6 +134,7 @@ If the first argument is one of the modes below, follow that mode.
 - `help`: Explain how to use `/sfs`, show available modes, and recommend the best first command.
 - `status`: **Adapter (above).** Fallback only: summarize the current SFS state and next action from the files listed under "Read Context".
 - `start`: **Adapter (above).** Fallback only: scaffold a sprint under `.sfs-local/sprints/<YYYY-Wxx-sprint-n>/` based on `sprint-templates/`.
+- `guide`: **Adapter (above).** Fallback only: point the user to `.sfs-local/GUIDE.md` if it exists, otherwise `GUIDE.md`.
 - `plan`: **Adapter (above).** Fallback only: produce or update the current sprint `plan.md` based on `sprint-templates/plan.md`.
 - `sprint`: Convert the current plan into implementation steps and gate checks.
 - `review`: **Adapter (above).** Fallback only: review the current sprint output and write/update `review.md` (require `--gate <id>` from gates.md §1 7-enum).
@@ -146,6 +151,7 @@ When showing usage, keep it compact and practical. Include this shape:
 /sfs help                 사용법 보기
 /sfs status               현재 SFS 상태 확인
 /sfs start <goal>         새 sprint 시작 또는 이어가기
+/sfs guide                onboarding guide 경로 출력
 /sfs plan                 현재 sprint plan.md 작성/갱신
 /sfs review               현재 변경사항 review.md 작성/갱신
 /sfs decision <decision>  짧은 결정 기록 남기기
@@ -164,4 +170,4 @@ Also explain this in one or two sentences:
 - Keep sprint artifacts concise and operational.
 - Do not invent completed work. If evidence is missing, mark it as unknown.
 - Prefer concrete next actions over broad methodology explanations.
-- For `status`, `start`, `plan`, `review`, `decision`, `retro`, and `loop`, the bash adapter is authoritative — do not paraphrase or augment its output.
+- For `status`, `start`, `guide`, `plan`, `review`, `decision`, `retro`, and `loop`, the bash adapter is authoritative — do not paraphrase or augment its output.

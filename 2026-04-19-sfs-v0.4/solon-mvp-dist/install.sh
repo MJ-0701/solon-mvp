@@ -370,16 +370,22 @@ mkdir -p "$TARGET/.sfs-local/sprints" "$TARGET/.sfs-local/decisions"
 [ -f "$TARGET/.sfs-local/decisions/.gitkeep" ] || touch "$TARGET/.sfs-local/decisions/.gitkeep"
 ok "  sprints/ + decisions/ 확보"
 
-# scripts/ — Solon-versioned bash adapters (sfs-common.sh + sfs-status.sh + sfs-start.sh)
+# GUIDE.md — `/sfs guide` 가 참조하는 managed onboarding guide
+if [ -f "$SOURCE_DIR/GUIDE.md" ]; then
+  cp "$SOURCE_DIR/GUIDE.md" "$TARGET/.sfs-local/GUIDE.md"
+  ok "  GUIDE.md 복사 (.sfs-local/GUIDE.md, /sfs guide)"
+fi
+
+# scripts/ — Solon-versioned bash adapters
 # 정책: 매 install 마다 overwrite (user 수정 영역 아님, upgrade.sh 와 동일 정합).
 # 참고: WU-24 §1/§2/§3 — `.claude/commands/sfs.md` adapter dispatch 가
-#      `.sfs-local/scripts/sfs-{status,start}.sh` 를 호출.
+#      `.sfs-local/scripts/sfs-*.sh` 를 호출.
 SCRIPTS_SRC="$SOURCE_DIR/templates/.sfs-local-template/scripts"
 if [ -d "$SCRIPTS_SRC" ]; then
   mkdir -p "$TARGET/.sfs-local/scripts"
   cp "$SCRIPTS_SRC"/*.sh "$TARGET/.sfs-local/scripts/" 2>/dev/null || true
   chmod +x "$TARGET/.sfs-local/scripts"/*.sh 2>/dev/null || true
-  ok "  scripts/ 복사 (sfs-common.sh + sfs-status.sh + sfs-start.sh, executable)"
+  ok "  scripts/ 복사 (sfs-*.sh, executable)"
 fi
 
 # sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용하는 4 템플릿
@@ -478,6 +484,7 @@ Slash 1급:       .claude/commands/sfs.md (Claude Code, Markdown)
      ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} 또는 ${C_BLUE}/sfs start${C_RESET}
      ${C_BLUE}codex${C_RESET}      → ${C_BLUE}\$sfs status${C_RESET} (explicit) 또는 자연어로 "현재 상태 확인" (implicit)
      셋 모두 동일한 ${C_BOLD}.sfs-local/scripts/sfs-*.sh${C_RESET} bash adapter 호출.
+     설치 직후 가이드는 ${C_BLUE}/sfs guide${C_RESET} 또는 ${C_BLUE}/sfs guide --print${C_RESET}.
 
   ${C_BOLD}3.${C_RESET} git commit + push (Solon 주입 자체를 기록):
      ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore \\${C_RESET}
