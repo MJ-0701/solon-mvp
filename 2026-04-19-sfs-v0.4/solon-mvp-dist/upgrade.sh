@@ -3,13 +3,15 @@
 #
 # 사용법:
 #   cd ~/workspace/my-project
+#   git -C ~/tmp/solon-product pull --ff-only --tags
 #   ~/tmp/solon-product/upgrade.sh                   # 로컬 clone 기반
 #   curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/upgrade.sh | bash  # 원격
 #
 # 동작:
 #   1. consumer 쪽 .sfs-local/VERSION 읽어서 installed_version 파악
-#   2. distribution 쪽 최신 VERSION 조회
-#   3. 같으면 종료, 다르면 업그레이드 계획 + 대화형 파일별 처리
+#   2. 로컬 clone 기반이면 clone 이 GitHub main 보다 뒤처졌는지 먼저 확인
+#   3. distribution 쪽 최신 VERSION 조회
+#   4. 같으면 종료, 다르면 업그레이드 계획 + 대화형 파일별 처리
 #
 # 원칙:
 #   - .sfs-local/sprints/*, .sfs-local/decisions/*, .sfs-local/events.jsonl 은 절대 덮어쓰지 않음
@@ -84,6 +86,58 @@ else
 fi
 
 TARGET="$(pwd)"
+
+check_local_source_freshness() {
+  # Local clone mode means the user's product distribution source is the clone
+  # itself (for example ~/tmp/solon-product). If that clone is stale, VERSION
+  # comparison below can falsely report "already latest" while GitHub has newer
+  # adapters/scripts. Fetch refs only; do not mutate the worktree.
+  [ "$MODE" = "local" ] || return 0
+  [ -d "$SOURCE_DIR/.git" ] || return 0
+  command -v git >/dev/null 2>&1 || return 0
+
+  local remote_url local_head remote_head
+  remote_url=$(git -C "$SOURCE_DIR" remote get-url origin 2>/dev/null || true)
+  case "$remote_url" in
+    *github.com*MJ-0701/solon-product*|*github.com:MJ-0701/solon-product*) ;;
+    *) return 0 ;;
+  esac
+
+  git -C "$SOURCE_DIR" fetch --quiet origin "$SOLON_BRANCH" --tags 2>/dev/null || {
+    warn "로컬 product clone 최신 여부를 확인하지 못함: $SOURCE_DIR"
+    warn "    네트워크가 가능하면 먼저 실행 권장: git -C \"$SOURCE_DIR\" pull --ff-only --tags"
+    return 0
+  }
+
+  local_head=$(git -C "$SOURCE_DIR" rev-parse HEAD 2>/dev/null || true)
+  remote_head=$(git -C "$SOURCE_DIR" rev-parse "refs/remotes/origin/${SOLON_BRANCH}" 2>/dev/null || true)
+  [ -n "$local_head" ] && [ -n "$remote_head" ] || return 0
+  [ "$local_head" != "$remote_head" ] || return 0
+
+  if git -C "$SOURCE_DIR" merge-base --is-ancestor "$local_head" "$remote_head" 2>/dev/null; then
+    cat >&2 <<EOF
+  ✗ 로컬 product clone 이 GitHub 보다 뒤처져 있습니다.
+
+    source clone: $SOURCE_DIR
+    local HEAD : ${local_head:0:7}
+    origin/$SOLON_BRANCH: ${remote_head:0:7}
+
+    먼저 product clone 을 최신화한 뒤 upgrade 를 다시 실행하세요:
+
+      git -C "$SOURCE_DIR" pull --ff-only --tags
+      cd "$TARGET"
+      bash "$SOURCE_DIR/upgrade.sh"
+
+EOF
+    exit 10
+  fi
+
+  warn "로컬 product clone 이 origin/${SOLON_BRANCH} 과 diverge 되어 있습니다: $SOURCE_DIR"
+  warn "    local=${local_head:0:7} remote=${remote_head:0:7}"
+  warn "    개발자/owner 의 unreleased clone 이 아니라면 새로 clone 후 upgrade 권장."
+}
+
+check_local_source_freshness
 
 # ============================================================================
 # 2. 버전 비교
