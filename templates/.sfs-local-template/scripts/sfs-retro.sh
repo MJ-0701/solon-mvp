@@ -21,11 +21,11 @@
 #   99 unknown (e.g. bash trap)
 #
 # Path note: dev staging file lives at
-#   solon-product/templates/.sfs-local-template/scripts/sfs-retro.sh
+#   solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-retro.sh
 # install.sh copies templates/.sfs-local-template/ → consumer project's .sfs-local/.
 # WU-26 §2 spec used `.sfs-local/scripts/` as a shorthand for the consumer-side path.
 #
-# Visibility: business-only (solon-product staging asset).
+# Visibility: business-only (solon-mvp-dist staging asset).
 # Created: 2026-04-29 (25th-4 user-active conversation, WU-26 §5 row 3 by exciting-festive-cori).
 
 set -euo pipefail

@@ -10,7 +10,7 @@ last_touched_at: ""  # filled by /sfs review (auto, ISO8601 + tz)
 
 > Sprint **review** 단계 산출물. G2/G3/G4 중 하나의 gate 에 대한 verdict 기록.
 > 각 gate review 마다 `.sfs-local/events.jsonl` 의 `gate_review` event append.
-> 기준 문서: `gates.md §1` (7-Gate enum) + `05-gate-framework.md §5.1` (매트릭스).
+> SSoT: `gates.md §1` (7-Gate enum) + `05-gate-framework.md §5.1` (매트릭스).
 > 동일 sprint 안에서 G2/G3/G4 review 가 여러 번 발생할 경우 본 파일에 §2 섹션을 추가 append.
 
 ---

@@ -6,11 +6,9 @@
 #   · ISO 8601 week sprint-id pattern (`<YYYY-Wxx>-sprint-<N>`).
 #
 # Usage:
-#   /sfs start [<goal text>] [--id <sprint-id>] [--force]
+#   /sfs start [<sprint-id>] [--force]
 #
 # Default sprint-id: <YYYY-Wxx>-sprint-<N>  (ISO week, auto-incremented).
-# Goal text is optional, but recommended; it is stored in plan.md frontmatter
-# and the sprint_start event. Custom sprint ids should use --id.
 #
 # Exit codes (WU-23 §1.2 정합):
 #   0  success
@@ -20,11 +18,11 @@
 #   99 unknown (e.g. invalid CLI args, ISO week tooling missing)
 #
 # Path note: dev staging file lives at
-#   solon-product/templates/.sfs-local-template/scripts/sfs-start.sh
+#   solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-start.sh
 # install.sh copies templates/.sfs-local-template/ → consumer project's .sfs-local/.
 # WU-24 spec used `.sfs-local/scripts/` as a shorthand for the consumer-side path.
 #
-# Visibility: business-only (solon-product staging asset).
+# Visibility: business-only (solon-mvp-dist staging asset).
 # Created: 2026-04-26 (scheduled run relaxed-gallant-maxwell, 24th cycle row 7).
 
 set -euo pipefail
@@ -41,27 +39,12 @@ SFS_TEMPLATES_DIR="${SFS_LOCAL_DIR}/sprint-templates"
 # CLI parse
 # ─────────────────────────────────────────────────────────────────────
 SPRINT_ID=""
-GOAL=""
-GOAL_ARGS=()
 FORCE=false
-LEGACY_SPRINT_ID_RE='^[0-9]{4}-W[0-9]{2}-sprint-[A-Za-z0-9._-]+$'
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --force)
       FORCE=true
-      shift
-      ;;
-    --id)
-      if [[ $# -lt 2 ]]; then
-        echo "--id requires a value" >&2
-        exit "${SFS_EXIT_UNKNOWN}"
-      fi
-      SPRINT_ID="$2"
-      shift 2
-      ;;
-    --id=*)
-      SPRINT_ID="${1#--id=}"
       shift
       ;;
     -h|--help)
@@ -70,38 +53,34 @@ while [[ $# -gt 0 ]]; do
       ;;
     --)
       shift
-      while [[ $# -gt 0 ]]; do
-        GOAL_ARGS+=("$1")
+      # Treat remaining as positional sprint-id (only one allowed).
+      if [[ $# -gt 0 ]]; then
+        if [[ -n "${SPRINT_ID}" ]]; then
+          echo "multiple sprint-id args: '${SPRINT_ID}' and '$1'" >&2
+          exit "${SFS_EXIT_UNKNOWN}"
+        fi
+        SPRINT_ID="$1"
         shift
-      done
+      fi
+      if [[ $# -gt 0 ]]; then
+        echo "unexpected extra args after --: $*" >&2
+        exit "${SFS_EXIT_UNKNOWN}"
+      fi
       ;;
     -*)
       echo "unknown flag: $1" >&2
       exit "${SFS_EXIT_UNKNOWN}"
       ;;
     *)
-      GOAL_ARGS+=("$1")
+      if [[ -n "${SPRINT_ID}" ]]; then
+        echo "multiple sprint-id args: '${SPRINT_ID}' and '$1'" >&2
+        exit "${SFS_EXIT_UNKNOWN}"
+      fi
+      SPRINT_ID="$1"
       shift
       ;;
   esac
 done
-
-if (( ${#GOAL_ARGS[@]} > 0 )); then
-  # Backward compatibility: a single canonical sprint-id still works, but free
-  # text is now treated as the sprint goal per README/adapter contract.
-  if [[ -z "${SPRINT_ID}" && ${#GOAL_ARGS[@]} -eq 1 && "${GOAL_ARGS[0]}" =~ ${LEGACY_SPRINT_ID_RE} ]]; then
-    SPRINT_ID="${GOAL_ARGS[0]}"
-  else
-    GOAL="${GOAL_ARGS[*]}"
-  fi
-fi
-
-case "${GOAL}" in
-  *$'\n'*|*$'\r'*)
-    echo "invalid goal: newlines are not allowed" >&2
-    exit "${SFS_EXIT_UNKNOWN}"
-    ;;
-esac
 
 # ─────────────────────────────────────────────────────────────────────
 # Auto-generate sprint-id if not provided
@@ -167,18 +146,6 @@ for tpl in plan log review retro; do
   fi
 done
 
-if [[ -n "${GOAL}" ]]; then
-  GOAL_YAML="\"$(json_escape "${GOAL}")\""
-  update_frontmatter "${SPRINT_DIR}/plan.md" "goal" "${GOAL_YAML}" || true
-
-  # Keep the generated first-read artifact aligned with the user's stated goal.
-  tmp_plan="${SPRINT_DIR}/plan.md.tmp.$$"
-  awk -v goal="${GOAL}" '
-    $0 == "# Plan — <sprint title>" { print "# Plan — " goal; next }
-    { print }
-  ' "${SPRINT_DIR}/plan.md" > "${tmp_plan}" && mv -f "${tmp_plan}" "${SPRINT_DIR}/plan.md"
-fi
-
 # ─────────────────────────────────────────────────────────────────────
 # Update current-sprint pointer + emit sprint_start event
 # ─────────────────────────────────────────────────────────────────────
@@ -191,15 +158,8 @@ fi
 # rejected whitespace and slashes above, so this is mostly defensive).
 _esc_sprint="${SPRINT_ID//\\/\\\\}"
 _esc_sprint="${_esc_sprint//\"/\\\"}"
-_esc_goal="$(json_escape "${GOAL}")"
 
-event_payload="{\"sprint_id\":\"${_esc_sprint}\",\"by\":\"sfs-start\""
-if [[ -n "${GOAL}" ]]; then
-  event_payload="${event_payload},\"goal\":\"${_esc_goal}\""
-fi
-event_payload="${event_payload}}"
-
-if ! append_event "sprint_start" "${event_payload}" 2>/dev/null; then
+if ! append_event "sprint_start" "{\"sprint_id\":\"${_esc_sprint}\",\"by\":\"sfs-start\"}" 2>/dev/null; then
   echo "permission denied appending event to ${SFS_EVENTS_FILE}" >&2
   exit "${SFS_EXIT_PERM}"
 fi

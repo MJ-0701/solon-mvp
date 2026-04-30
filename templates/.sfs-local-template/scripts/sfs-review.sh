@@ -2,8 +2,8 @@
 # .sfs-local/scripts/sfs-review.sh
 #
 # Solon SFS — `/sfs review` command implementation.
-# WU-25 §2 spec implementation. WU-23 §1.4 + V-1 conditions #1 (gate id
-# 기준 문서 = gates.md §1) + WU22-D5 (7-Gate enum) 정합:
+# WU-25 §2 spec implementation. WU-23 §1.4 + V-1 conditions #1 (gate id SSoT
+# = gates.md §1) + WU22-D5 (7-Gate enum) 정합:
 #   · 파일 path stdout 출력만 (에디터 launch 안 함, V-1 conditions #4 정합).
 #   · gate id 검증 = sfs-common.sh::validate_gate_id (WU-25 row 4 신설).
 #   · `--gate <id>` 미지정 시 events.jsonl 마지막 review_open event 의
@@ -28,11 +28,11 @@
 #   99 unknown (e.g. bash trap)
 #
 # Path note: dev staging file lives at
-#   solon-product/templates/.sfs-local-template/scripts/sfs-review.sh
+#   solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-review.sh
 # install.sh copies templates/.sfs-local-template/ → consumer project's .sfs-local/.
 # WU-25 §2 spec used `.sfs-local/scripts/` as a shorthand for the consumer-side path.
 #
-# Visibility: business-only (solon-product staging asset).
+# Visibility: business-only (solon-mvp-dist staging asset).
 # Created: 2026-04-28 (24th cycle 49번째 scheduled run `amazing-determined-gates`,
 #                      mode=user-active-deferred, WU-25 §5 row 3).
 

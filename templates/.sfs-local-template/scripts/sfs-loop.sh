@@ -13,10 +13,10 @@
 #   sprints/WU-27/sfs-loop-multi-worker.md (§6.0 Worker Independence + §6.4 spawn)
 #
 # Path note: dev staging file lives at
-#   solon-product/templates/.sfs-local-template/scripts/sfs-loop.sh
+#   solon-mvp-dist/templates/.sfs-local-template/scripts/sfs-loop.sh
 # install.sh copies templates/.sfs-local-template/ → consumer project's .sfs-local/.
 #
-# Visibility: business-only (solon-product staging asset).
+# Visibility: business-only (solon-mvp-dist staging asset).
 # Created: 2026-04-29 (25th cycle session optimistic-vigilant-bell sub-task 6.1).
 
 set -euo pipefail

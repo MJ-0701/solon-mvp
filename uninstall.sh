@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# uninstall.sh — Solon Product uninstaller
+# uninstall.sh — Solon MVP uninstaller
 #
 # 사용법:
 #   cd ~/workspace/my-project
-#   bash ~/tmp/solon-product/uninstall.sh
+#   ~/tmp/solon-mvp/uninstall.sh
 #
 # 동작:
-#   1. .gitignore 에서 solon-product 블록 제거 (legacy solon-mvp marker 포함)
+#   1. .gitignore 에서 solon-mvp 블록 제거
 #   2. .sfs-local/ 처리 — 대화형:
 #      (a) 전부 제거 (sprints/decisions 산출물 포함)
 #      (b) scaffold 만 제거, 산출물 (sprints/decisions/events.jsonl) 보존
@@ -15,10 +15,8 @@
 
 set -euo pipefail
 
-readonly GIT_MARKER_BEGIN="### BEGIN solon-product ###"
-readonly GIT_MARKER_END="### END solon-product ###"
-readonly LEGACY_GIT_MARKER_BEGIN="### BEGIN solon-mvp ###"
-readonly LEGACY_GIT_MARKER_END="### END solon-mvp ###"
+readonly GIT_MARKER_BEGIN="### BEGIN solon-mvp ###"
+readonly GIT_MARKER_END="### END solon-mvp ###"
 
 if [ -t 1 ] && command -v tput >/dev/null 2>&1 && [ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]; then
   C_RED=$(tput setaf 1); C_GREEN=$(tput setaf 2); C_YELLOW=$(tput setaf 3)
@@ -32,42 +30,12 @@ warn()  { printf "  %s⚠%s %s\n" "$C_YELLOW" "$C_RESET" "$*"; }
 err()   { printf "  %s✗%s %s\n" "$C_RED" "$C_RESET" "$*" >&2; }
 die()   { err "$*"; exit 1; }
 
-usage() {
-  cat <<EOF
-Usage: ./uninstall.sh
-
-Interactively removes Solon Product scaffold from the current project.
-
-Options:
-  -h, --help  도움말을 출력합니다.
-EOF
-}
-
-while [ $# -gt 0 ]; do
-  case "$1" in
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    *)
-      die "알 수 없는 옵션: $1 (지원: --help)"
-      ;;
-  esac
-  shift
-done
-
-if [ ! -t 0 ]; then
-  if [ -e /dev/tty ] && { : < /dev/tty; } 2>/dev/null; then
-    exec < /dev/tty
-  else
-    die "대화형 input 불가 (stdin 파이프 + /dev/tty 없음). 터미널에서 직접 실행하세요."
-  fi
-fi
+if [ ! -t 0 ] && [ -r /dev/tty ]; then exec < /dev/tty; fi
 
 prompt() {
   local msg="$1" default="${2:-}" answer
-  if [ -n "$default" ]; then printf "%s [%s]: " "$msg" "$default" >&2
-  else printf "%s: " "$msg" >&2; fi
+  if [ -n "$default" ]; then printf "%s [%s]: " "$msg" "$default"
+  else printf "%s: " "$msg"; fi
   read -r answer || answer=""
   echo "${answer:-$default}"
 }
@@ -76,15 +44,13 @@ TARGET="$(pwd)"
 
 cat <<EOF
 
-${C_BOLD}=== Solon Product Uninstaller ===${C_RESET}
+${C_BOLD}=== Solon MVP Uninstaller ===${C_RESET}
 
 타겟:   $TARGET
 
 EOF
 
-if [ ! -d "$TARGET/.sfs-local" ] \
-   && ! grep -qF "$GIT_MARKER_BEGIN" "$TARGET/.gitignore" 2>/dev/null \
-   && ! grep -qF "$LEGACY_GIT_MARKER_BEGIN" "$TARGET/.gitignore" 2>/dev/null; then
+if [ ! -d "$TARGET/.sfs-local" ] && ! grep -qF "$GIT_MARKER_BEGIN" "$TARGET/.gitignore" 2>/dev/null; then
   warn "Solon 설치 흔적 없음 (.sfs-local/ 도 .gitignore 마커도 없음)"
   exit 0
 fi
@@ -139,21 +105,15 @@ fi
 # 2. .gitignore 블록 제거
 # ============================================================================
 
-remove_gitignore_block() {
-  local begin="$1" end="$2" label="$3"
-  if [ -f "$TARGET/.gitignore" ] && grep -qF "$begin" "$TARGET/.gitignore"; then
-    awk -v b="$begin" -v e="$end" '
+if [ -f "$TARGET/.gitignore" ] && grep -qF "$GIT_MARKER_BEGIN" "$TARGET/.gitignore"; then
+  awk -v b="$GIT_MARKER_BEGIN" -v e="$GIT_MARKER_END" '
     $0 == b { skip=1; next }
     $0 == e { skip=0; next }
     !skip { print }
-    ' "$TARGET/.gitignore" > "$TARGET/.gitignore.tmp"
-    mv "$TARGET/.gitignore.tmp" "$TARGET/.gitignore"
-    ok ".gitignore ${label} 블록 제거"
-  fi
-}
-
-remove_gitignore_block "$GIT_MARKER_BEGIN" "$GIT_MARKER_END" "solon-product"
-remove_gitignore_block "$LEGACY_GIT_MARKER_BEGIN" "$LEGACY_GIT_MARKER_END" "legacy solon-mvp"
+  ' "$TARGET/.gitignore" > "$TARGET/.gitignore.tmp"
+  mv "$TARGET/.gitignore.tmp" "$TARGET/.gitignore"
+  ok ".gitignore solon-mvp 블록 제거"
+fi
 
 # ============================================================================
 # 3. Runtime adapter docs — 대화형 (사용자가 수정했을 가능성)
@@ -163,16 +123,12 @@ for doc in SFS.md CLAUDE.md AGENTS.md GEMINI.md .claude/commands/sfs.md; do
   [ -f "$TARGET/$doc" ] || continue
   echo ""
   warn "$doc 가 존재합니다 (사용자가 편집했을 수 있음)"
-  ans=$(prompt "$doc 삭제할까요? (y/N)" "N")
-  case "$ans" in
-    y|Y|yes|YES)
-      rm -f "$TARGET/$doc"
-      ok "$doc 제거"
-      ;;
-    *)
-      ok "$doc 보존"
-      ;;
-  esac
+  if [ "$(prompt "$doc 삭제할까요?" "N")" = "y" ] || [ "$(prompt "" "N")" = "Y" ]; then
+    rm -f "$TARGET/$doc"
+    ok "$doc 제거"
+  else
+    ok "$doc 보존"
+  fi
 done
 
 # ============================================================================
@@ -185,6 +141,6 @@ ${C_BOLD}${C_GREEN}=== Uninstall 완료 ===${C_RESET}
 
 변경사항 git commit 권장:
   ${C_BLUE}git add -A${C_RESET}
-  ${C_BLUE}git commit -m "chore: uninstall solon-product"${C_RESET}
+  ${C_BLUE}git commit -m "chore: uninstall solon-mvp"${C_RESET}
 
 EOF

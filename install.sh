@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# install.sh — Solon Product installer
+# install.sh — Solon MVP installer
 #
 # 사용법 (dual mode):
-#   (1) 원격: curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.sh | bash
-#   (2) 로컬: git clone https://github.com/MJ-0701/solon-product ~/tmp/solon-product
+#   (1) 원격: curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-mvp/main/install.sh | bash
+#   (2) 로컬: git clone https://github.com/MJ-0701/solon-mvp ~/tmp/solon-mvp
 #             cd ~/workspace/my-project
-#             ~/tmp/solon-product/install.sh
+#             ~/tmp/solon-mvp/install.sh
 #   (3) 비대화형: ./install.sh --yes
 #
 # 원칙:
@@ -15,7 +15,7 @@
 #   - 멱등성 (idempotent) — 재실행해도 사용자 기존 자산 파괴하지 않음
 #   - 오류 시 early exit, 롤백은 사용자 git 으로
 #
-# 참고: 본 스크립트는 Solon Product 설치 엔트리포인트 — 풀스펙 아님.
+# 참고: 본 스크립트는 Solon MVP 0.1.0 — 풀스펙 아님 (사용자 개인 방법론 docset 참조).
 
 set -euo pipefail
 
@@ -42,8 +42,7 @@ while [ $# -gt 0 ]; do
       exit 0
       ;;
     *)
-      printf "알 수 없는 옵션: %s (지원: --yes, --help)\n" "$1" >&2
-      exit 1
+      die "알 수 없는 옵션: $1 (지원: --yes, --help)"
       ;;
   esac
   shift
@@ -53,12 +52,10 @@ done
 # 0. 상수 / 색상
 # ============================================================================
 
-readonly SOLON_REPO="MJ-0701/solon-product"
+readonly SOLON_REPO="MJ-0701/solon-mvp"
 readonly SOLON_BRANCH="main"
-readonly GIT_MARKER_BEGIN="### BEGIN solon-product ###"
-readonly GIT_MARKER_END="### END solon-product ###"
-readonly LEGACY_GIT_MARKER_BEGIN="### BEGIN solon-mvp ###"
-readonly LEGACY_GIT_MARKER_END="### END solon-mvp ###"
+readonly GIT_MARKER_BEGIN="### BEGIN solon-mvp ###"
+readonly GIT_MARKER_END="### END solon-mvp ###"
 
 # TTY 이면 색상 on
 if [ -t 1 ] && command -v tput >/dev/null 2>&1 && [ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]; then
@@ -157,7 +154,7 @@ fi
 
 cat <<EOF
 
-${C_BOLD}=== Solon Product Installer ===${C_RESET}
+${C_BOLD}=== Solon MVP Installer ===${C_RESET}
 
 모드:   $MODE
 타겟:   $(pwd)
@@ -187,9 +184,9 @@ fi
 
 if [ "$MODE" = "remote" ]; then
   command -v git >/dev/null || die "git 미설치 (Solon 은 consumer repo 가 git 이어야 함)"
-  TMP_CLONE=$(mktemp -d -t solon-product-install.XXXXXX)
+  TMP_CLONE=$(mktemp -d -t solon-mvp-install.XXXXXX)
   info ""
-  info "Fetching Solon Product (depth=1)..."
+  info "Fetching Solon MVP (depth=1)..."
   if ! git clone --quiet --depth=1 --branch="$SOLON_BRANCH" \
        "https://github.com/${SOLON_REPO}.git" "$TMP_CLONE" 2>&1; then
     die "git clone 실패 — 네트워크 또는 repo 권한 확인"
@@ -292,6 +289,24 @@ install_file "templates/GEMINI.md.template" "GEMINI.md" "Gemini CLI 어댑터"
 mkdir -p "$TARGET/.claude/commands"
 install_file "templates/.claude/commands/sfs.md" ".claude/commands/sfs.md" "Claude Code /sfs 커맨드"
 
+# 6.2b) Gemini CLI custom command (project-scoped slash 1급, TOML)
+# 위치: <project>/.gemini/commands/sfs.toml — Gemini CLI 가 자동 발견 + native /sfs 슬래시.
+mkdir -p "$TARGET/.gemini/commands"
+install_file "templates/.gemini/commands/sfs.toml" ".gemini/commands/sfs.toml" "Gemini CLI /sfs 슬래시"
+
+# 6.2c) Codex Skill (project-scoped, .agents/skills/, Anthropic Skills 호환)
+# 위치: <project>/.agents/skills/sfs/SKILL.md — Codex CLI/IDE/app 모두에서 자동 발견.
+# implicit invocation (사용자 의도 매칭) + explicit invocation ($sfs) 양쪽 작동.
+mkdir -p "$TARGET/.agents/skills/sfs"
+install_file "templates/.agents/skills/sfs/SKILL.md" ".agents/skills/sfs/SKILL.md" "Codex Skill (project-scoped)"
+
+# 6.2d) Codex CLI user-scoped prompt (optional fallback, NOT auto-installed to ~/)
+# 위치 (template 만): templates/.codex/prompts/sfs.md
+# project-scoped Skill 이 primary entry — 본 file 은 user 가 ~/.codex/prompts/sfs.md
+# 로 직접 cp 할 때 사용. install.sh 는 user $HOME 에 쓰지 않음 (사용자 영역 보호).
+# 안내만 출력:
+ok "Codex user-scoped slash fallback (optional): templates/.codex/prompts/sfs.md → ~/.codex/prompts/sfs.md (manual cp)"
+
 # 6.3) 자동 치환 가능한 placeholder (DATE + SOLON-VERSION) 처리
 # <PROJECT-NAME> / <STACK> / <DB> / <DEPLOY> / <DOMAIN> 등은 consumer 수동 치환 대상.
 SOLON_VERSION_VAL=$(cat "$SOURCE_DIR/VERSION" 2>/dev/null | head -1 || echo "unknown")
@@ -352,15 +367,16 @@ mkdir -p "$TARGET/.sfs-local/sprints" "$TARGET/.sfs-local/decisions"
 [ -f "$TARGET/.sfs-local/decisions/.gitkeep" ] || touch "$TARGET/.sfs-local/decisions/.gitkeep"
 ok "  sprints/ + decisions/ 확보"
 
-# scripts/ — Solon-versioned bash adapters (sfs-common.sh + sfs-*.sh)
+# scripts/ — Solon-versioned bash adapters (sfs-common.sh + sfs-status.sh + sfs-start.sh)
 # 정책: 매 install 마다 overwrite (user 수정 영역 아님, upgrade.sh 와 동일 정합).
-# 참고: `.claude/commands/sfs.md` adapter dispatch 가 `.sfs-local/scripts/sfs-*.sh` 를 호출.
+# 참고: WU-24 §1/§2/§3 — `.claude/commands/sfs.md` adapter dispatch 가
+#      `.sfs-local/scripts/sfs-{status,start}.sh` 를 호출.
 SCRIPTS_SRC="$SOURCE_DIR/templates/.sfs-local-template/scripts"
 if [ -d "$SCRIPTS_SRC" ]; then
   mkdir -p "$TARGET/.sfs-local/scripts"
   cp "$SCRIPTS_SRC"/*.sh "$TARGET/.sfs-local/scripts/" 2>/dev/null || true
   chmod +x "$TARGET/.sfs-local/scripts"/*.sh 2>/dev/null || true
-  ok "  scripts/ 복사 (sfs-common.sh + sfs-*.sh, executable)"
+  ok "  scripts/ 복사 (sfs-common.sh + sfs-status.sh + sfs-start.sh, executable)"
 fi
 
 # sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용하는 4 템플릿
@@ -390,26 +406,9 @@ info ".gitignore 갱신..."
 
 touch "$TARGET/.gitignore"
 
-remove_gitignore_block() {
-  local begin="$1" end="$2"
-  if grep -qF "$begin" "$TARGET/.gitignore" 2>/dev/null; then
-    awk -v b="$begin" -v e="$end" '
-      $0 == b { skip=1; next }
-      $0 == e { skip=0; next }
-      !skip { print }
-    ' "$TARGET/.gitignore" > "$TARGET/.gitignore.tmp"
-    mv "$TARGET/.gitignore.tmp" "$TARGET/.gitignore"
-    return 0
-  fi
-  return 1
-}
-
 if grep -qF "$GIT_MARKER_BEGIN" "$TARGET/.gitignore" 2>/dev/null; then
-  ok "solon-product 블록 이미 존재 — skip"
+  ok "solon-mvp 블록 이미 존재 — skip"
 else
-  if remove_gitignore_block "$LEGACY_GIT_MARKER_BEGIN" "$LEGACY_GIT_MARKER_END"; then
-    ok "legacy solon-mvp 블록 제거 — solon-product 블록으로 교체"
-  fi
   {
     # 기존 파일 끝에 개행 보장
     if [ -s "$TARGET/.gitignore" ] && [ "$(tail -c1 "$TARGET/.gitignore" | wc -l)" = "0" ]; then
@@ -420,7 +419,7 @@ else
     cat "$SOURCE_DIR/templates/.gitignore.snippet"
     echo "$GIT_MARKER_END"
   } >> "$TARGET/.gitignore"
-  ok "solon-product 블록 추가됨"
+  ok "solon-mvp 블록 추가됨"
 fi
 
 # ============================================================================
@@ -444,30 +443,35 @@ ok "VERSION 기록: $SOLON_VERSION ($MODE @ $INSTALLED_AT)"
 
 cat <<EOF
 
-${C_BOLD}${C_GREEN}=== Solon Product 설치 완료 ===${C_RESET}
+${C_BOLD}${C_GREEN}=== Solon MVP 설치 완료 ===${C_RESET}
 
 설치 위치:       $TARGET
 Solon 버전:      $SOLON_VERSION
 .sfs-local/:     스캐폴드 (${C_BOLD}기존 sprint 산출물은 보존됨${C_RESET})
 공통 지침:       SFS.md
 런타임 어댑터:   CLAUDE.md / AGENTS.md / GEMINI.md
-Claude /sfs:     .claude/commands/sfs.md
+Slash 1급:       .claude/commands/sfs.md (Claude Code, Markdown)
+                 .gemini/commands/sfs.toml (Gemini CLI, TOML)
+                 .agents/skills/sfs/SKILL.md (Codex, Skills 체계)
 
 다음 단계:
 
   ${C_BOLD}1.${C_RESET} SFS.md 내용 확인 + 프로젝트 특성 반영 (Stack / 도메인 등).
 
-  ${C_BOLD}2.${C_RESET} 선호 런타임에서 시작:
-     ${C_BLUE}cd $TARGET && claude${C_RESET}
-     ${C_BLUE}/sfs status${C_RESET} 또는 ${C_BLUE}/sfs start${C_RESET} 로 시작.
-     Codex/Gemini CLI 에서는 "SFS.md 읽고 sfs status처럼 현재 상태 요약해줘" 로 시작.
+  ${C_BOLD}2.${C_RESET} 선호 런타임에서 시작 (셋 다 native /sfs 슬래시 1급):
+     ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} 또는 ${C_BLUE}/sfs start${C_RESET}
+     ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} 또는 ${C_BLUE}/sfs start${C_RESET}
+     ${C_BLUE}codex${C_RESET}      → ${C_BLUE}\$sfs status${C_RESET} (explicit) 또는 자연어로 "현재 상태 확인" (implicit)
+     셋 모두 동일한 ${C_BOLD}.sfs-local/scripts/sfs-*.sh${C_RESET} bash adapter 호출.
 
   ${C_BOLD}3.${C_RESET} git commit + push (Solon 주입 자체를 기록):
-     ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .claude/commands/sfs.md .sfs-local/${C_RESET}
-     ${C_BLUE}git commit -m "chore: install solon-product $SOLON_VERSION"${C_RESET}
+     ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore \\${C_RESET}
+     ${C_BLUE}        .claude/commands/sfs.md .gemini/commands/sfs.toml \\${C_RESET}
+     ${C_BLUE}        .agents/skills/sfs/SKILL.md .sfs-local/${C_RESET}
+     ${C_BLUE}git commit -m "chore: install solon-mvp $SOLON_VERSION"${C_RESET}
      ${C_BLUE}git push${C_RESET}
 
-  ${C_BOLD}4.${C_RESET} 버전 갱신 필요 시: ${C_BLUE}bash solon-product/upgrade.sh${C_RESET} 실행.
+  ${C_BOLD}4.${C_RESET} 버전 갱신 필요 시: ${C_BLUE}solon-mvp/upgrade.sh${C_RESET} 실행.
 
 문제 발생 시: https://github.com/${SOLON_REPO}/issues
 

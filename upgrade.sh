@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# upgrade.sh — Solon Product upgrader (VERSION 기반)
+# upgrade.sh — Solon MVP upgrader (VERSION 기반)
 #
 # 사용법:
 #   cd ~/workspace/my-project
-#   bash ~/tmp/solon-product/upgrade.sh              # 로컬 clone 기반
-#   curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/upgrade.sh | bash  # 원격
+#   ~/tmp/solon-mvp/upgrade.sh                   # 로컬 clone 기반
+#   curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-mvp/main/upgrade.sh | bash  # 원격
 #
 # 동작:
 #   1. consumer 쪽 .sfs-local/VERSION 읽어서 installed_version 파악
@@ -19,12 +19,10 @@
 
 set -euo pipefail
 
-readonly SOLON_REPO="MJ-0701/solon-product"
+readonly SOLON_REPO="MJ-0701/solon-mvp"
 readonly SOLON_BRANCH="main"
-readonly GIT_MARKER_BEGIN="### BEGIN solon-product ###"
-readonly GIT_MARKER_END="### END solon-product ###"
-readonly LEGACY_GIT_MARKER_BEGIN="### BEGIN solon-mvp ###"
-readonly LEGACY_GIT_MARKER_END="### END solon-mvp ###"
+readonly GIT_MARKER_BEGIN="### BEGIN solon-mvp ###"
+readonly GIT_MARKER_END="### END solon-mvp ###"
 
 # 색상
 if [ -t 1 ] && command -v tput >/dev/null 2>&1 && [ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]; then
@@ -39,50 +37,15 @@ warn()  { printf "  %s⚠%s %s\n" "$C_YELLOW" "$C_RESET" "$*"; }
 err()   { printf "  %s✗%s %s\n" "$C_RED" "$C_RESET" "$*" >&2; }
 die()   { err "$*"; exit 1; }
 
-ASSUME_YES=0
-
-usage() {
-  cat <<EOF
-Usage: ./upgrade.sh [--yes]
-
-Options:
-  -y, --yes   dry-run 프리뷰 후 확인 프롬프트를 자동 승인합니다.
-  -h, --help  도움말을 출력합니다.
-EOF
-}
-
-while [ $# -gt 0 ]; do
-  case "$1" in
-    -y|--yes)
-      ASSUME_YES=1
-      ;;
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    *)
-      die "알 수 없는 옵션: $1 (지원: --yes, --help)"
-      ;;
-  esac
-  shift
-done
-
 # pipe 대응
-if [ "$ASSUME_YES" -ne 1 ] && [ ! -t 0 ]; then
-  if [ -e /dev/tty ] && { : < /dev/tty; } 2>/dev/null; then
+if [ ! -t 0 ] && [ -e /dev/tty ]; then
+  if { : < /dev/tty; } 2>/dev/null; then
     exec < /dev/tty
-  else
-    die "대화형 input 불가 (stdin 파이프 + /dev/tty 없음). 자동 승인하려면 --yes 를 명시하세요."
   fi
 fi
 
 prompt() {
   local msg="$1" default="${2:-}" answer
-  if [ "$ASSUME_YES" -eq 1 ] && [ -n "$default" ]; then
-    printf "%s [%s]: %s\n" "$msg" "$default" "$default" >&2
-    echo "$default"
-    return 0
-  fi
   if [ -n "$default" ]; then printf "%s [%s]: " "$msg" "$default" >&2
   else printf "%s: " "$msg" >&2; fi
   read -r answer || answer=""
@@ -109,7 +72,7 @@ if [ -n "$SCRIPT_PATH" ] && [ -f "$SCRIPT_PATH" ] && [ -d "$(dirname "$SCRIPT_PA
 else
   command -v git >/dev/null || die "git 미설치"
   TMP_CLONE=$(mktemp -d -t solon-upgrade.XXXXXX)
-  info "Fetching Solon Product latest..."
+  info "Fetching Solon MVP latest..."
   git clone --quiet --depth=1 --branch="$SOLON_BRANCH" \
     "https://github.com/${SOLON_REPO}.git" "$TMP_CLONE" \
     || die "git clone 실패"
@@ -134,7 +97,7 @@ INSTALLED_AT=$(grep '^installed_at:' "$TARGET/.sfs-local/VERSION" | awk '{print 
 
 cat <<EOF
 
-${C_BOLD}=== Solon Product Upgrade ===${C_RESET}
+${C_BOLD}=== Solon MVP Upgrade ===${C_RESET}
 
 현재 설치:   $CUR_VER  (installed: $INSTALLED_AT)
 최신 배포:   $NEW_VER
@@ -184,6 +147,14 @@ recommend_action() {
     "CLAUDE.md"|"AGENTS.md"|"GEMINI.md"|".sfs-local/divisions.yaml")
       printf "skip"
       ;;
+    .sfs-local/scripts/*.sh)
+      # Solon-versioned bash code, user 수정 영역 아님
+      printf "backup+overwrite"
+      ;;
+    .sfs-local/sprint-templates/*.md|.sfs-local/decisions-template/*.md)
+      # 배포판 관리 템플릿, user 수정 영역 아님 (install.sh 정책 정합)
+      printf "backup+overwrite"
+      ;;
     *)
       printf "skip"
       ;;
@@ -198,19 +169,21 @@ cat <<EOF
   - checksum 다름      → 자동 정책에 따라 갱신 또는 보존
 
 자동 처리 정책:
-  - 신규 파일                   → 자동 설치
-  - checksum 동일               → 변경 없음
-  - SFS.md                      → backup+overwrite (공통 SFS core 최신화)
-  - CLAUDE/AGENTS/GEMINI.md     → 자동 보존 (기존 프로젝트 지침 보호)
-  - .sfs-local/divisions.yaml   → 자동 보존 (프로젝트별 운영값 보호)
-  - .claude/commands/sfs.md     → backup+overwrite (배포판 관리 커맨드 최신화)
-  - .sfs-local/scripts/         → 자동 갱신 (배포판 관리 런타임)
-  - .sfs-local/sprint-templates/ → 자동 갱신 (새 sprint 생성 템플릿)
-  - .sfs-local/decisions-template/ → 자동 갱신 (ADR 템플릿)
+  - 신규 파일                          → 자동 설치
+  - checksum 동일                      → 변경 없음
+  - SFS.md                             → backup+overwrite (공통 SFS core 최신화)
+  - CLAUDE/AGENTS/GEMINI.md            → 자동 보존 (기존 프로젝트 지침 보호)
+  - .sfs-local/divisions.yaml          → 자동 보존 (프로젝트별 운영값 보호)
+  - .claude/commands/sfs.md            → backup+overwrite (배포판 관리 커맨드 최신화)
+  - .sfs-local/scripts/sfs-*.sh        → backup+overwrite (Solon-versioned bash, 신규: loop/decision/retro)
+  - .sfs-local/sprint-templates/*.md   → backup+overwrite (배포판 관리 템플릿, 신규: decision-light)
+  - .sfs-local/decisions-template/*.md → backup+overwrite (ADR-TEMPLATE 신규, WU-26)
 
 EOF
 
-# diff 보여줄 파일
+# diff 보여줄 파일 (codex finding #4 후속, 25th-6 zen-magical-feynman 보강)
+# 0.4.0-mvp 이상 = sfs-loop / sfs-decision / sfs-retro / decision-light template +
+#                  ADR-TEMPLATE 신규 슬롯 cover.
 declare -a CHECK_FILES=(
   "SFS.md|templates/SFS.md.template"
   "CLAUDE.md|templates/CLAUDE.md.template"
@@ -218,6 +191,27 @@ declare -a CHECK_FILES=(
   "GEMINI.md|templates/GEMINI.md.template"
   ".claude/commands/sfs.md|templates/.claude/commands/sfs.md"
   ".sfs-local/divisions.yaml|templates/.sfs-local-template/divisions.yaml"
+  # scripts/ — Solon-versioned bash adapters (executable, user 수정 영역 아님)
+  ".sfs-local/scripts/sfs-common.sh|templates/.sfs-local-template/scripts/sfs-common.sh"
+  ".sfs-local/scripts/sfs-status.sh|templates/.sfs-local-template/scripts/sfs-status.sh"
+  ".sfs-local/scripts/sfs-start.sh|templates/.sfs-local-template/scripts/sfs-start.sh"
+  ".sfs-local/scripts/sfs-plan.sh|templates/.sfs-local-template/scripts/sfs-plan.sh"
+  ".sfs-local/scripts/sfs-review.sh|templates/.sfs-local-template/scripts/sfs-review.sh"
+  ".sfs-local/scripts/sfs-decision.sh|templates/.sfs-local-template/scripts/sfs-decision.sh"
+  ".sfs-local/scripts/sfs-retro.sh|templates/.sfs-local-template/scripts/sfs-retro.sh"
+  ".sfs-local/scripts/sfs-loop.sh|templates/.sfs-local-template/scripts/sfs-loop.sh"
+  # sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용 (5 file)
+  ".sfs-local/sprint-templates/plan.md|templates/.sfs-local-template/sprint-templates/plan.md"
+  ".sfs-local/sprint-templates/log.md|templates/.sfs-local-template/sprint-templates/log.md"
+  ".sfs-local/sprint-templates/review.md|templates/.sfs-local-template/sprint-templates/review.md"
+  ".sfs-local/sprint-templates/retro.md|templates/.sfs-local-template/sprint-templates/retro.md"
+  ".sfs-local/sprint-templates/decision-light.md|templates/.sfs-local-template/sprint-templates/decision-light.md"
+  # decisions-template/ — sfs-decision.sh 가 ADR 신설 시 사용 (WU-26)
+  ".sfs-local/decisions-template/ADR-TEMPLATE.md|templates/.sfs-local-template/decisions-template/ADR-TEMPLATE.md"
+  ".sfs-local/decisions-template/_INDEX.md|templates/.sfs-local-template/decisions-template/_INDEX.md"
+  # 0.5.0-mvp 신규: multi-adaptor parity (Gemini CLI native slash + Codex Skill)
+  ".gemini/commands/sfs.toml|templates/.gemini/commands/sfs.toml"
+  ".agents/skills/sfs/SKILL.md|templates/.agents/skills/sfs/SKILL.md"
 )
 
 for pair in "${CHECK_FILES[@]}"; do
@@ -254,33 +248,14 @@ done
 printf "\n  ${C_BOLD}.gitignore${C_RESET}\n"
 snippet_sum=$(checksum_file "$SOURCE_DIR/templates/.gitignore.snippet")
 if grep -qF "$GIT_MARKER_BEGIN" "$TARGET/.gitignore" 2>/dev/null; then
-  printf "    상태: solon-product 블록 존재 — marker 블록 교체 예정\n"
-  printf "    checksum: managed-snippet=%s\n" "$snippet_sum"
-  printf "    추천: 자동 갱신\n"
-elif grep -qF "$LEGACY_GIT_MARKER_BEGIN" "$TARGET/.gitignore" 2>/dev/null; then
-  printf "    상태: legacy solon-mvp 블록 존재 — solon-product marker 로 교체 예정\n"
+  printf "    상태: solon-mvp 블록 존재 — marker 블록 교체 예정\n"
   printf "    checksum: managed-snippet=%s\n" "$snippet_sum"
   printf "    추천: 자동 갱신\n"
 else
-  printf "    상태: solon-product 블록 없음 — 신규 추가 예정\n"
+  printf "    상태: solon-mvp 블록 없음 — 신규 추가 예정\n"
   printf "    checksum: managed-snippet=%s\n" "$snippet_sum"
   printf "    추천: 자동 추가\n"
 fi
-
-printf "\n  ${C_BOLD}.sfs-local/scripts/${C_RESET}\n"
-script_count=$(find "$SOURCE_DIR/templates/.sfs-local-template/scripts" -maxdepth 1 -type f -name '*.sh' 2>/dev/null | wc -l | tr -d ' ')
-printf "    상태: managed runtime scripts %s개 — 자동 갱신 예정\n" "$script_count"
-printf "    추천: overwrite + chmod +x\n"
-
-printf "\n  ${C_BOLD}.sfs-local/sprint-templates/${C_RESET}\n"
-sprint_tpl_count=$(find "$SOURCE_DIR/templates/.sfs-local-template/sprint-templates" -maxdepth 1 -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
-printf "    상태: sprint templates %s개 — 자동 갱신 예정\n" "$sprint_tpl_count"
-printf "    추천: overwrite\n"
-
-printf "\n  ${C_BOLD}.sfs-local/decisions-template/${C_RESET}\n"
-decision_tpl_count=$(find "$SOURCE_DIR/templates/.sfs-local-template/decisions-template" -maxdepth 1 -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
-printf "    상태: decision templates %s개 — 자동 갱신 예정\n" "$decision_tpl_count"
-printf "    추천: overwrite\n"
 
 cat <<EOF
 
@@ -291,7 +266,7 @@ cat <<EOF
 적용 결과:
   - 신규 파일과 .gitignore/VERSION 은 자동 처리됩니다.
   - 기존 프로젝트 지침 파일은 자동 보존됩니다.
-  - backup+overwrite 대상은 기존 파일을 .bak-YYYYMMDD-HHMMSS 로 보관한 뒤 갱신합니다.
+  - backup+overwrite 대상은 기존 파일을 .sfs-local/tmp/upgrade-backups/ 아래에 보관한 뒤 갱신합니다.
 
 EOF
 
@@ -329,10 +304,16 @@ update_file() {
   printf "    자동 정책: %s\n" "$recommended"
   case "$recommended" in
     b|B|"backup"|"backup+overwrite")
-      local ts=$(date +%Y%m%d-%H%M%S)
-      mv "$dst" "$dst.bak-$ts"
+      local ts backup_dir safe_rel backup_path backup_rel
+      ts=$(date +%Y%m%d-%H%M%S)
+      backup_dir="$TARGET/.sfs-local/tmp/upgrade-backups/$ts"
+      mkdir -p "$backup_dir"
+      safe_rel="${dst_rel//\//__}"
+      backup_path="$backup_dir/$safe_rel"
+      backup_rel="${backup_path#$TARGET/}"
+      mv "$dst" "$backup_path"
       cp "$src" "$dst"
-      ok "백업 + 갱신: $dst_rel → $dst_rel.bak-$ts"
+      ok "백업 + 갱신: $dst_rel → $backup_rel"
       ;;
     o|O|"overwrite")
       cp "$src" "$dst"
@@ -355,46 +336,41 @@ mkdir -p "$TARGET/.claude/commands"
 update_file ".claude/commands/sfs.md" "templates/.claude/commands/sfs.md" "Claude Code /sfs 커맨드" "b"
 update_file ".sfs-local/divisions.yaml" "templates/.sfs-local-template/divisions.yaml" "본부 활성화" "s"
 
-copy_managed_files() {
-  local src_dir="$1" dst_dir="$2" kind="$3" label="$4"
+# scripts/ — Solon-versioned bash adapters (codex finding #4 후속, 25th-6 보강)
+# 신규: sfs-loop / sfs-decision / sfs-retro (0.4.0-mvp 추가 슬롯)
+mkdir -p "$TARGET/.sfs-local/scripts"
+update_file ".sfs-local/scripts/sfs-common.sh"   "templates/.sfs-local-template/scripts/sfs-common.sh"   "sfs-common (shared helpers)" "b"
+update_file ".sfs-local/scripts/sfs-status.sh"   "templates/.sfs-local-template/scripts/sfs-status.sh"   "sfs status"   "b"
+update_file ".sfs-local/scripts/sfs-start.sh"    "templates/.sfs-local-template/scripts/sfs-start.sh"    "sfs start"    "b"
+update_file ".sfs-local/scripts/sfs-plan.sh"     "templates/.sfs-local-template/scripts/sfs-plan.sh"     "sfs plan"     "b"
+update_file ".sfs-local/scripts/sfs-review.sh"   "templates/.sfs-local-template/scripts/sfs-review.sh"   "sfs review"   "b"
+update_file ".sfs-local/scripts/sfs-decision.sh" "templates/.sfs-local-template/scripts/sfs-decision.sh" "sfs decision (WU-26)" "b"
+update_file ".sfs-local/scripts/sfs-retro.sh"    "templates/.sfs-local-template/scripts/sfs-retro.sh"    "sfs retro --close (WU-26)" "b"
+update_file ".sfs-local/scripts/sfs-loop.sh"     "templates/.sfs-local-template/scripts/sfs-loop.sh"     "sfs loop (WU-27 spec)" "b"
+chmod +x "$TARGET/.sfs-local/scripts"/*.sh 2>/dev/null || true
 
-  [ -d "$src_dir" ] || { warn "source 없음: $src_dir"; return 0; }
-  mkdir -p "$dst_dir"
+# sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용 (5 file)
+# 신규: decision-light.md (0.4.0-mvp 추가)
+mkdir -p "$TARGET/.sfs-local/sprint-templates"
+update_file ".sfs-local/sprint-templates/plan.md"            "templates/.sfs-local-template/sprint-templates/plan.md"            "sprint plan template"   "b"
+update_file ".sfs-local/sprint-templates/log.md"             "templates/.sfs-local-template/sprint-templates/log.md"             "sprint log template"    "b"
+update_file ".sfs-local/sprint-templates/review.md"          "templates/.sfs-local-template/sprint-templates/review.md"          "sprint review template" "b"
+update_file ".sfs-local/sprint-templates/retro.md"           "templates/.sfs-local-template/sprint-templates/retro.md"           "sprint retro template"  "b"
+update_file ".sfs-local/sprint-templates/decision-light.md"  "templates/.sfs-local-template/sprint-templates/decision-light.md"  "decision-light template (WU-26)" "b"
 
-  case "$kind" in
-    sh)
-      cp "$src_dir"/*.sh "$dst_dir/" 2>/dev/null || true
-      chmod +x "$dst_dir"/*.sh 2>/dev/null || true
-      ;;
-    md)
-      cp "$src_dir"/*.md "$dst_dir/" 2>/dev/null || true
-      ;;
-    *)
-      warn "알 수 없는 managed file kind: $kind"
-      return 0
-      ;;
-  esac
+# decisions-template/ — sfs-decision.sh 가 ADR 신설 시 사용 (WU-26 §1)
+# 신규: ADR-TEMPLATE.md + _INDEX.md (0.4.0-mvp 추가)
+mkdir -p "$TARGET/.sfs-local/decisions-template"
+update_file ".sfs-local/decisions-template/ADR-TEMPLATE.md"  "templates/.sfs-local-template/decisions-template/ADR-TEMPLATE.md"  "ADR template (WU-26 full)"  "b"
+update_file ".sfs-local/decisions-template/_INDEX.md"        "templates/.sfs-local-template/decisions-template/_INDEX.md"        "decisions _INDEX (WU-26)"   "b"
 
-  ok "managed 갱신: $label"
-}
-
-copy_managed_files \
-  "$SOURCE_DIR/templates/.sfs-local-template/scripts" \
-  "$TARGET/.sfs-local/scripts" \
-  "sh" \
-  ".sfs-local/scripts/ (executable)"
-
-copy_managed_files \
-  "$SOURCE_DIR/templates/.sfs-local-template/sprint-templates" \
-  "$TARGET/.sfs-local/sprint-templates" \
-  "md" \
-  ".sfs-local/sprint-templates/"
-
-copy_managed_files \
-  "$SOURCE_DIR/templates/.sfs-local-template/decisions-template" \
-  "$TARGET/.sfs-local/decisions-template" \
-  "md" \
-  ".sfs-local/decisions-template/"
+# multi-adaptor parity (0.5.0-mvp 신규): Gemini CLI native slash + Codex Skill
+# 신규: .gemini/commands/sfs.toml + .agents/skills/sfs/SKILL.md
+# Claude Code 1급 (.claude/commands/sfs.md) 와 동등 entry point.
+mkdir -p "$TARGET/.gemini/commands"
+mkdir -p "$TARGET/.agents/skills/sfs"
+update_file ".gemini/commands/sfs.toml"   "templates/.gemini/commands/sfs.toml"   "Gemini CLI /sfs 슬래시 (TOML)"  "b"
+update_file ".agents/skills/sfs/SKILL.md" "templates/.agents/skills/sfs/SKILL.md" "Codex Skill (project-scoped)"  "b"
 
 TODAY=$(date +%Y-%m-%d)
 if [ "$(uname)" = "Darwin" ]; then
@@ -419,20 +395,15 @@ ok "문서 자동 치환: <DATE>=$TODAY, <SOLON-VERSION>=$NEW_VER"
 info ""
 info ".gitignore 블록 갱신..."
 
-remove_gitignore_block() {
-  local begin="$1" end="$2"
-  if grep -qF "$begin" "$TARGET/.gitignore" 2>/dev/null; then
-    awk -v b="$begin" -v e="$end" '
+if grep -qF "$GIT_MARKER_BEGIN" "$TARGET/.gitignore" 2>/dev/null; then
+  # 블록 제거
+  awk -v b="$GIT_MARKER_BEGIN" -v e="$GIT_MARKER_END" '
     $0 == b { skip=1; next }
     $0 == e { skip=0; next }
     !skip { print }
-    ' "$TARGET/.gitignore" > "$TARGET/.gitignore.tmp"
-    mv "$TARGET/.gitignore.tmp" "$TARGET/.gitignore"
-  fi
-}
-
-remove_gitignore_block "$GIT_MARKER_BEGIN" "$GIT_MARKER_END"
-remove_gitignore_block "$LEGACY_GIT_MARKER_BEGIN" "$LEGACY_GIT_MARKER_END"
+  ' "$TARGET/.gitignore" > "$TARGET/.gitignore.tmp"
+  mv "$TARGET/.gitignore.tmp" "$TARGET/.gitignore"
+fi
 
 # 새 블록 append
 {
@@ -444,7 +415,7 @@ remove_gitignore_block "$LEGACY_GIT_MARKER_BEGIN" "$LEGACY_GIT_MARKER_END"
   cat "$SOURCE_DIR/templates/.gitignore.snippet"
   echo "$GIT_MARKER_END"
 } >> "$TARGET/.gitignore"
-ok ".gitignore solon-product 블록 교체 완료"
+ok ".gitignore solon-mvp 블록 교체 완료"
 
 # ============================================================================
 # 6. VERSION 갱신
@@ -472,8 +443,8 @@ ${C_BOLD}${C_GREEN}=== 업그레이드 완료 ===${C_RESET}
   $CUR_VER → $NEW_VER
 
 변경사항 git commit 권장:
-  ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .claude/commands/sfs.md .gitignore .sfs-local/divisions.yaml .sfs-local/VERSION .sfs-local/scripts .sfs-local/sprint-templates .sfs-local/decisions-template${C_RESET}
-  ${C_BLUE}git commit -m "chore: upgrade solon-product $CUR_VER → $NEW_VER"${C_RESET}
+  ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .claude/commands/sfs.md .gitignore .sfs-local/${C_RESET}
+  ${C_BLUE}git commit -m "chore: upgrade solon-mvp $CUR_VER → $NEW_VER"${C_RESET}
 
 CHANGELOG: https://github.com/${SOLON_REPO}/blob/main/CHANGELOG.md
 

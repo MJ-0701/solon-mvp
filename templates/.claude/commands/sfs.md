@@ -46,7 +46,7 @@ Dispatch table:
 | First arg | Script to run | Notes |
 |:--|:--|:--|
 | `status`   | `.sfs-local/scripts/sfs-status.sh <remaining args>`   | passes flags such as `--color=auto/always/never` verbatim |
-| `start`    | `.sfs-local/scripts/sfs-start.sh <remaining args>`    | passes `<goal text>` plus optional `--id <sprint-id>` / `--force` verbatim |
+| `start`    | `.sfs-local/scripts/sfs-start.sh <remaining args>`    | passes `<sprint-id>` and/or `--force` verbatim |
 | `plan`     | `.sfs-local/scripts/sfs-plan.sh <remaining args>`     | takes no flags currently; remaining args reserved for future (WU-25 §1) |
 | `review`   | `.sfs-local/scripts/sfs-review.sh <remaining args>`   | passes `--gate <id>` / `--gate=<id>` verbatim (gates.md §1 7-enum: G-1, G0, G1, G2, G3, G4, G5; WU-25 §2) |
 | `decision` | `.sfs-local/scripts/sfs-decision.sh <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim (WU-26 §1). Uses `decisions-template/ADR-TEMPLATE.md` (5 섹션 ADR-full); `sprint-templates/decision-light.md` 은 Claude-driven fallback. |
@@ -94,7 +94,7 @@ Procedure (apply in order):
      `9`=executor resolve fail, `99`=unknown.
 5. **Stop** — After dispatch, do not add Claude-driven commentary,
    recommendations, or alternative suggestions. The bash script is the
-   authoritative implementation for output format (WU22-D4: `·` separator + ISO8601
+   single source of truth for output format (WU22-D4: `·` separator + ISO8601
    timestamp + per-field color rules; WU-25 §1.1/§2.1: `plan.md ready: <path>`
    / `review.md ready: <path> | gate <id> awaiting verdict`).
 
@@ -129,7 +129,7 @@ If the first argument is one of the modes below, follow that mode.
 
 - `help`: Explain how to use `/sfs`, show available modes, and recommend the best first command.
 - `status`: **Adapter (above).** Fallback only: summarize the current SFS state and next action from the files listed under "Read Context".
-- `start`: **Adapter (above).** Fallback only: scaffold a sprint under `.sfs-local/sprints/<YYYY-Wxx>-sprint-<N>/` based on `sprint-templates/`, and preserve any remaining text as the sprint goal.
+- `start`: **Adapter (above).** Fallback only: scaffold a sprint under `.sfs-local/sprints/<YYYY-Wxx-sprint-n>/` based on `sprint-templates/`.
 - `plan`: **Adapter (above).** Fallback only: produce or update the current sprint `plan.md` based on `sprint-templates/plan.md`.
 - `sprint`: Convert the current plan into implementation steps and gate checks.
 - `review`: **Adapter (above).** Fallback only: review the current sprint output and write/update `review.md` (require `--gate <id>` from gates.md §1 7-enum).
@@ -154,7 +154,7 @@ When showing usage, keep it compact and practical. Include this shape:
 
 Also explain this in one or two sentences:
 
-- Solon Product is a lightweight scaffold, not the full Solon system yet.
+- Solon MVP is a lightweight scaffold, not the full Solon system yet.
 - The main artifacts live under `.sfs-local/`, and `/sfs` is the Claude Code command layer for operating them.
 
 ## Rules

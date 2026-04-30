@@ -1,6 +1,6 @@
 # CLAUDE.md — Claude Code adapter for Solon SFS
 
-This project uses Solon SFS.
+This project uses Solon SFS (multi-adaptor by design — Claude Code / Codex / Gemini CLI 동등 1급).
 
 Before planning or editing, read:
 
@@ -10,15 +10,46 @@ Before planning or editing, read:
 - recent files under `.sfs-local/sprints/`
 - recent files under `.sfs-local/decisions/`
 
-Claude Code can use the project slash command:
+## SFS commands — bash adapter SSoT
 
-- `/sfs`
-- `/sfs help`
-- `/sfs status`
-- `/sfs start <goal>` (`--id <sprint-id>` only when a custom id is required)
-- `/sfs plan`
-- `/sfs review`
-- `/sfs decision <decision>`
-- `/sfs retro`
+Solon SFS 의 7 슬래시 명령은 모두 `.sfs-local/scripts/sfs-*.sh` bash adapter 가
+single source of truth (Claude Code / Codex / Gemini CLI 어느 환경에서든 동일 결과).
+Claude Code 의 native slash 진입점은 `.claude/commands/sfs.md` 가 자동 install 되며,
+동일한 dispatch table 을 따른다 (paraphrase 금지, 결정성 유지):
 
-Preserve user work. Ask only when a decision changes behavior or could discard work.
+| 슬래시 | 실행 |
+|:--|:--|
+| `/sfs status [--color=auto/always/never]` | `.sfs-local/scripts/sfs-status.sh` |
+| `/sfs start [<sprint-id>] [--force]` | `.sfs-local/scripts/sfs-start.sh` |
+| `/sfs plan` | `.sfs-local/scripts/sfs-plan.sh` |
+| `/sfs review --gate <id>` | `.sfs-local/scripts/sfs-review.sh` (id ∈ G-1, G0, G1, G2, G3, G4, G5) |
+| `/sfs decision <title> [--id <id>]` | `.sfs-local/scripts/sfs-decision.sh` |
+| `/sfs retro [--close]` | `.sfs-local/scripts/sfs-retro.sh` |
+| `/sfs loop [OPTIONS]` | `.sfs-local/scripts/sfs-loop.sh` (Ralph Loop + Solon mutex) |
+| `/sfs`, `/sfs help` | usage 출력 (`.claude/commands/sfs.md` 의 self-help) |
+
+Bash adapter 가 부재하거나 실행 권한이 없으면 그 사실을 1줄로 사용자에게 알리고, 해당
+명령에 한해 fallback paraphrase 모드로 진입한다. stdout / stderr / exit code 는 verbatim
+보고 (paraphrase 금지).
+
+## `/sfs loop` — multi-adaptor LLM executor convention
+
+`/sfs loop` 는 자율 진행 (Ralph Loop 패턴) 의 LLM 호출 site 다. Claude Code 환경에서 호출하든
+다른 CLI 에서 호출하든 동일한 `--executor` flag (또는 `SFS_EXECUTOR` env) 로 LLM CLI 를 명시:
+
+- `--executor claude` → `claude -p --dangerously-skip-permissions`
+- `--executor gemini` → `gemini -p --yolo`
+- `--executor codex` → `codex exec --full-auto`
+- `--executor "<custom command>"` → 그대로 passthrough
+
+이 convention 은 Solon-wide invariant 다 — `loop` 만 multi-adaptor 가 아니라, Solon 의 모든
+슬래시 명령이 어느 1급 CLI 에서든 동등한 deterministic bash adapter SSoT 로 동작한다. 본
+CLAUDE.md (Claude Code adapter) 와 짝이 되는 AGENTS.md (Codex) / GEMINI.md (Gemini CLI) 도
+동일 규약을 따른다.
+
+## 운영 규율
+
+- 사용자 작업 보존 (Preserve user work). 결정으로 인해 동작이 바뀌거나 작업이 삭제될 수
+  있을 때만 묻는다.
+- `git push origin *` 자동 실행 금지 — push 는 사용자 터미널에서만 (Solon §1.5).
+- Bash adapter 출력 paraphrase 금지 — 결정성 유지.
