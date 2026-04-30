@@ -1,6 +1,6 @@
 ---
 name: sfs
-description: Solon SFS workflow — dispatch status, start, guide, plan, review, decision, retro, loop to bash adapter SSoT. Trigger when user invokes /sfs (if visible to the model), $sfs, types sfs <command>, or asks Solon SFS to do something (e.g., "현재 상태 확인", "guide 보기", "sprint 시작", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth — paraphrase forbidden, exit codes verbatim.
+description: Solon SFS workflow — dispatch /sfs status/start/guide/plan/review/decision/retro/loop to bash adapter SSoT. Trigger when a Codex surface delivers /sfs, $sfs, sfs <command>, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "sprint 시작", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth — paraphrase forbidden, exit codes verbatim.
 ---
 
 # Solon SFS — Codex Skill
@@ -9,6 +9,10 @@ This project uses Solon SFS. `/sfs` is the public command surface. When the
 user invokes `/sfs <command>` (if it reaches the model), `$sfs <command>`,
 types `sfs <command>`, or expresses a Solon SFS workflow intent, dispatch the
 request to the corresponding bash script under `.sfs-local/scripts/` and stop.
+
+If you can read a user message that begins with `/sfs`, the runtime has already
+delivered the Solon command to this Skill. Do not answer that `/sfs` is
+unsupported, and do not downgrade it to a non-Solon conversation. Dispatch it.
 
 Codex desktop app or any Codex surface where `/sfs ...` reaches this Skill is
 a first-class path and must keep working. Some Codex CLI builds may intercept

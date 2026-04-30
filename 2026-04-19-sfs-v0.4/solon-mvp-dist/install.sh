@@ -487,8 +487,8 @@ Windows wrapper: .sfs-local/scripts/sfs.ps1 (PowerShell → Git Bash)
   ${C_BOLD}2.${C_RESET} 선호 런타임에서 시작 (Solon public API 는 셋 다 /sfs):
      ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} 또는 ${C_BLUE}/sfs start${C_RESET}
      ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} 또는 ${C_BLUE}/sfs start${C_RESET}
-     ${C_BLUE}codex app${C_RESET}  → ${C_BLUE}/sfs status${C_RESET} (모델/Skill 에 도달하면 정상 1급)
-     ${C_BLUE}codex CLI${C_RESET}  → ${C_BLUE}/sfs status${C_RESET} (CLI parser 에 막히는 build 는 adaptor gap;
+     ${C_BLUE}codex app${C_RESET}  → ${C_BLUE}/sfs status${C_RESET} (정상 1급, Skill 이 bash adapter dispatch)
+     ${C_BLUE}codex CLI${C_RESET}  → ${C_BLUE}/sfs status${C_RESET} (현재 blocking build 는 adaptor gap;
                    임시 bypass: ${C_BLUE}\$sfs status${C_RESET}, ${C_BLUE}sfs status${C_RESET}, 자연어, direct bash)
      셋 모두 동일한 ${C_BOLD}.sfs-local/scripts/sfs-*.sh${C_RESET} bash adapter 호출.
      설치 직후 가이드는 ${C_BLUE}/sfs guide${C_RESET} 또는 ${C_BLUE}/sfs guide --print${C_RESET}.

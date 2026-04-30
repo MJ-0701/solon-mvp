@@ -106,11 +106,13 @@ iwr -useb https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.p
 /sfs retro --close
 ```
 
-Codex desktop app 처럼 `/sfs ...` 입력이 모델/Skill 까지 도달하는 환경에서는 `/sfs` 가
-정상 1급 경로입니다. Codex CLI 일부 build 에서만 bare `/sfs` 가 native slash parser 에서
-모델/Skill 전에 차단될 수 있습니다. 이것은 사용자 호출법 차이가 아니라 Codex CLI adaptor
-compatibility gap 입니다. `$sfs status`, `$sfs plan`, `sfs status`, 자연어 요청, direct
-bash 는 그 CLI build 에서만 쓰는 임시 bypass 입니다.
+Codex desktop app / compatible Codex surfaces 에서 `/sfs ...` 입력이 prompt 본문으로
+모델/Skill 까지 도달하면 그 경로가 canonical 1급 경로입니다. 앱 UI 가 별도 command chip 을
+표시하지 않아도, 모델이 `/sfs ...` 메시지를 읽을 수 있으면 `.agents/skills/sfs/SKILL.md`
+가 즉시 bash adapter 로 dispatch 해야 합니다. Codex CLI 일부 build 에서만 bare `/sfs` 가
+native slash parser 에서 모델/Skill 전에 차단될 수 있습니다. 이것은 사용자 호출법 차이가
+아니라 Codex CLI adaptor compatibility gap 입니다. `$sfs status`, `$sfs plan`, `sfs status`,
+자연어 요청, direct bash 는 그 CLI build 에서만 쓰는 임시 bypass 입니다.
 
 세 환경 모두 같은 `.sfs-local/scripts/sfs-*.sh` bash adapter 를 SSoT 로 호출합니다 — paraphrase
 금지, vendor 마다 결과 동일성 보장.
@@ -172,9 +174,11 @@ CLI 에서든 동등한 deterministic bash adapter SSoT 로 동작합니다.
 | **Codex desktop app / compatible Codex surfaces** | `.agents/skills/sfs/SKILL.md` (project-scoped Skill, agentskills.io 표준) | `/sfs status` |
 | **Codex CLI blocking builds** | same Skill | `$sfs status` / `sfs status` / 자연어 임시 bypass |
 
-Codex desktop app 에서 `/sfs` 가 모델/Skill 에 보이는 경로는 유지되어야 합니다. Codex CLI/TUI
-에서만 bare `/sfs` 가 native slash parser 에 막히면 **runtime adapter compatibility gap** 으로
-분류합니다. Desktop app 과 CLI 둘 다 `/sfs` 를 public surface 로 받아야 Solon parity 가 완료됩니다.
+Codex desktop app 에서 `/sfs` 가 모델/Skill 에 보이는 경로는 제거하거나 격하하면 안 됩니다.
+그 메시지를 읽은 Codex adapter 는 "unrecognized command" 로 답하지 말고 즉시 dispatch 합니다.
+Codex CLI/TUI 에서만 bare `/sfs` 가 native slash parser 에 막히면 **runtime adapter compatibility
+gap** 으로 분류합니다. Desktop app 과 CLI 둘 다 `/sfs` 를 public surface 로 받아야 Solon parity 가
+완료됩니다.
 일부 Codex build 에서 user prompt fallback (`/prompts:sfs ...`, `~/.codex/prompts/sfs.md`) 을
 쓸 수 있지만, install.sh 는 user `$HOME` 에 자동 cp 하지 않습니다 (사용자 영역 보호).
 지원되는 build 에서만 manual cp:
