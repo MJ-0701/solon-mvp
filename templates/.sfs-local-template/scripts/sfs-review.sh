@@ -18,9 +18,10 @@
 # Output:
 #   review.md ready: <path> | gate <gate-id> prompt ready | executor <executor> | prompt <path>
 #   review.md ready: <path> | gate <gate-id> CPO run complete | executor <executor> | output <path>
-#   ----- CPO RESULT EXCERPT (from <path>) -----
-#   <bounded executor result excerpt>
-#   ----- END CPO RESULT EXCERPT -----
+#   review result ready:
+#     verdict: <pass|partial|fail|unknown>
+#     output: <path>
+#     display: 사용자 언어로 요약/해야 할 일 레포트 렌더링; 원문은 파일에 보관
 #
 # Exit codes (WU-25 §2.3 / gates.md §3 정합):
 #   0  success
@@ -117,8 +118,9 @@ Open the active sprint's review.md as the CPO Evaluator review document.
     prompt body is not embedded by default to prevent recursive token growth.
   - Appends events.jsonl `review_open` event.
   - Prints the resolved review.md path + gate id + executor to stdout (no editor launch).
-  - When review runs, also prints a bounded executor result excerpt so the user
-    can see verdict/findings/actions without opening review.md manually.
+  - When review runs, prints compact result metadata only. AI runtimes should
+    read the output path and render a localized Solon report instead of dumping
+    the raw executor markdown.
 
 Exit codes:
   0  success
@@ -336,6 +338,35 @@ latest_review_md_excerpt() {
   ' "${REVIEW_PATH}"
 }
 
+extract_result_verdict() {
+  local file="$1"
+  [[ -f "${file}" ]] || return 1
+  awk '
+    {
+      low = tolower($0)
+      if (low ~ /^[[:space:]>-]*verdict:[[:space:]]*(pass|partial|fail)[[:space:]]*$/) {
+        line = $0
+        sub(/^[[:space:]>-]*[Vv][Ee][Rr][Dd][Ii][Cc][Tt]:[[:space:]]*/, "", line)
+        sub(/[[:space:]]*$/, "", line)
+        print tolower(line)
+        found = 1
+        exit
+      }
+    }
+    END { if (!found) exit 1 }
+  ' "${file}"
+}
+
+emit_result_metadata_stdout() {
+  local file="$1" state="${2:-ready}" verdict
+  verdict="$(extract_result_verdict "${file}" || true)"
+  [[ -n "${verdict}" ]] || verdict="unknown"
+  echo "review result ${state}:"
+  echo "  verdict: ${verdict}"
+  echo "  output: ${file}"
+  echo "  display: 사용자 언어로 요약/해야 할 일 레포트 렌더링; 원문은 파일에 보관"
+}
+
 show_latest_review_result() {
   local gate_filter="${1:-}" result_path gate_label
   if [[ ! -f "${REVIEW_PATH}" ]]; then
@@ -351,9 +382,10 @@ show_latest_review_result() {
   result_path="$(latest_review_output_path "${gate_filter}" || true)"
   if [[ -z "${result_path}" && -n "${gate_filter}" ]]; then
     echo "review.md ready: ${REVIEW_PATH}${gate_label} | latest CPO result | output not-found"
-    echo "----- CPO RESULT EXCERPT (from ${REVIEW_PATH}) -----"
-    echo "(no recorded CPO result found for gate ${gate_filter})"
-    echo "----- END CPO RESULT EXCERPT -----"
+    echo "review result none:"
+    echo "  verdict: unknown"
+    echo "  output: not-found"
+    echo "  display: gate ${gate_filter} 에 기록된 CPO 결과 없음"
     return 0
   fi
   if [[ -z "${result_path}" ]]; then
@@ -362,18 +394,19 @@ show_latest_review_result() {
 
   if [[ -n "${result_path}" && -f "${result_path}" ]]; then
     echo "review.md ready: ${REVIEW_PATH}${gate_label} | latest CPO result | output ${result_path}"
-    echo "----- CPO RESULT EXCERPT (from ${result_path}) -----"
-    existing_result_excerpt "${result_path}" 120
-    echo "----- END CPO RESULT EXCERPT -----"
+    emit_result_metadata_stdout "${result_path}" "ready"
     return 0
   fi
 
   echo "review.md ready: ${REVIEW_PATH}${gate_label} | latest CPO result | output ${result_path:-not-found}"
-  echo "----- CPO RESULT EXCERPT (from ${REVIEW_PATH}) -----"
-  if ! latest_review_md_excerpt; then
-    echo "(no recorded CPO result excerpt found)"
+  if latest_review_md_excerpt >/dev/null 2>&1; then
+    emit_result_metadata_stdout "${REVIEW_PATH}" "embedded"
+  else
+    echo "review result none:"
+    echo "  verdict: unknown"
+    echo "  output: not-found"
+    echo "  display: 기록된 CPO 결과 없음"
   fi
-  echo "----- END CPO RESULT EXCERPT -----"
 }
 
 if [[ "${SHOW_LAST}" == "true" ]]; then
@@ -677,10 +710,8 @@ append_result_excerpt() {
 }
 
 emit_result_excerpt_stdout() {
-  local file="$1" limit="${2:-80}"
-  echo "----- CPO RESULT EXCERPT (from ${file}) -----"
-  append_result_excerpt "$file" "$limit"
-  echo "----- END CPO RESULT EXCERPT -----"
+  local file="$1"
+  emit_result_metadata_stdout "${file}" "ready"
 }
 
 if [[ "${RUN_REVIEW}" == "true" && "${ALLOW_EMPTY_REVIEW}" != "true" ]] && ! has_review_items; then

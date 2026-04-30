@@ -65,8 +65,12 @@ documented hybrid/conditional flows below.
 For hybrid commands (`brainstorm`, `plan`, `decision`, `retro`) and adapter-run
 `review`, the final answer must be a **Solon report**, not a plain bullet list
 such as `plan.md refined: ...`. Put the whole report in a fenced `text` block.
-Keep the bash adapter stdout verbatim before the report when command execution
-produced stdout.
+Render the report in the user's visible language (for example, Korean for a
+Korean user), even when executor evidence is in English. For `review`, do not
+dump raw executor markdown or `CPO RESULT EXCERPT` blocks into the user-facing
+answer. Treat adapter stdout as compact metadata, read `output_path` /
+`result_path` / `review.md` when needed, then summarize and translate verdict,
+findings, and required actions into the report.
 
 Use this shape and fill only evidence-backed values:
 
@@ -98,7 +102,8 @@ separate footer. If those facts are useful, map them into `Steps`, `Health`, and
 
 For `/sfs review`, surface the executor-provided result that already exists in
 adapter stdout, `result_path`, or `review.md`: verdict, key findings, and
-required CTO actions. Do not create a new verdict in the current runtime.
+required CTO actions. Show a concise report, not the source markdown body. Do
+not create a new verdict in the current runtime.
 
 The user's arguments are interpolated below. Treat the first whitespace-delimited
 token as the subcommand and the remainder as that subcommand's arguments.
@@ -142,7 +147,7 @@ Dispatch table:
 | `auth`     | `.sfs-local/scripts/sfs-dispatch.sh auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
 | `brainstorm` | `.sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then Claude fills §1~§7 as Solon CEO |
 | `plan`     | `.sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | opens plan.md, then Claude fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
-| `review`   | `.sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` reprints the latest recorded review without rerunning executor |
+| `review`   | `.sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
 | `decision` | `.sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | creates ADR file, then Claude fills Context/Decision/Alternatives/Consequences |
 | `retro`    | `.sfs-local/scripts/sfs-dispatch.sh retro <remaining args>`    | opens retro.md, then Claude fills KPT/PDCA. With `--close`, refine before close |
 | `loop`     | `.sfs-local/scripts/sfs-dispatch.sh loop <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim (WU-27 §3) |
@@ -205,8 +210,9 @@ Procedure (apply in order):
    - `plan` → Plan G1 Refinement
    - `decision` → Decision ADR Refinement
    - `retro` → Retro G5 Refinement
-   - `review` → Review CPO Handling. Print adapter stdout verbatim, then render
-     a Solon report from recorded adapter/executor evidence only.
+   - `review` → Review CPO Handling. Use adapter stdout as metadata, read the
+     recorded result path when present, then render a localized Solon report
+     from recorded adapter/executor evidence only. Do not echo raw result bodies.
 
 ## Brainstorm CEO Refinement
 
@@ -303,16 +309,18 @@ must not silently self-validate after the adapter succeeds.
    result summary to `review.md`.
 2. If there is no reviewable evidence, the adapter exits 0 with "리뷰할 항목이
    없습니다" and suggests `/sfs auth probe --executor <tool>` for bridge tests.
-3. If `--show-last` / `--show` / `--last` is used, the adapter reprints the
-   latest recorded CPO result for the active sprint without invoking an
-   executor. Surface that prior result in the report.
+3. If `--show-last` / `--show` / `--last` is used, the adapter prints compact
+   metadata for the latest recorded CPO result without invoking an executor.
+   Read the referenced result file/review.md and surface that prior result in
+   the report.
 4. If `--prompt-only` is used, stop after adapter output and treat
    `prompt_path` as manual handoff material. Do not write a Claude verdict
    unless the user explicitly starts a separate review task with that prompt.
-5. Final response after normal adapter output: echo adapter stdout verbatim,
-   then render a Solon report. Fill `Review` and `Actions` from the executor
-   result excerpt/path when present. Do not add an extra CPO verdict from the
-   current runtime.
+5. Final response after normal adapter output: render a Solon report in the
+   user's visible language. Fill `Review` and `Actions` from the executor
+   result path or `review.md` when present, translating/summarizing as needed.
+   Do not print the raw result markdown unless the user explicitly asks for the
+   raw source. Do not add an extra CPO verdict from the current runtime.
 
 ## Retro G5 Refinement
 

@@ -39,7 +39,7 @@ sprint 로 묶고, 계획/결정/review/회고를 파일로 남기며, agent 가
 2. `/sfs start <goal>` 로 sprint workspace 를 만듭니다.
 3. `/sfs brainstorm` 으로 raw 요구사항을 G0 산출물에 남기고, Solon CEO 가 문제/제약/옵션/scope seed/plan seed 를 정리합니다.
 4. `/sfs plan` 에서 `plan.md ready` handshake 후 `brainstorm.md` 를 읽고 CEO plan 과 CTO/CPO sprint contract 를 남깁니다.
-5. CTO Generator 가 구현하고, `/sfs review --gate G4 --executor codex|gemini|claude` 로 CPO Evaluator review 를 실행하고 verdict 를 남깁니다. 출력에는 bounded result excerpt 가 포함되어 사용자가 verdict/findings/actions 를 바로 볼 수 있습니다. 수동 handoff 만 필요하면 `--prompt-only` 를, 기존 리뷰 확인은 `--show-last` 를 사용합니다.
+5. CTO Generator 가 구현하고, `/sfs review --gate G4 --executor codex|gemini|claude` 로 CPO Evaluator review 를 실행하고 verdict 를 남깁니다. 명령 출력은 result path/verdict 메타데이터만 짧게 보여주고, AI runtime 은 원문 result 를 사용자의 언어로 요약해 해야 할 일을 Solon report 로 보여줍니다. 수동 handoff 만 필요하면 `--prompt-only` 를, 기존 리뷰 확인은 `--show-last` 를 사용합니다.
 6. `/sfs status` 와 `.sfs-local/events.jsonl` 로 현재 상태를 확인합니다.
 7. 필요하면 Codex/Gemini/Claude 가 같은 문서 계약을 읽고 다음 작업을 이어갑니다.
 
@@ -92,7 +92,7 @@ Codex plugin, Codex CLI, Gemini CLI, 또는 별도 agent instance 로 CPO review
 따라서 `/sfs review` 의 `--executor` 는 audit metadata 가 아니라 review bridge 의 의도다.
 기본 동작은 실제 CLI/bridge 호출이며, bridge 가 없으면 조용히 성공하지 않고 실패해야 한다.
 수동 전달만 필요할 때는 `--prompt-only` 로 prompt/log 만 생성한다. 이미 실행된 리뷰를 다시 볼 때는
-`/sfs review --show-last [--gate <id>]` 로 executor 를 다시 쓰지 않고 마지막 CPO 결과 excerpt 를 확인한다.
+`/sfs review --show-last [--gate <id>]` 로 executor 를 다시 쓰지 않고 마지막 CPO 결과를 요약 레포트로 확인한다.
 Claude 내부에 연결된 Codex plugin 은 shell 에서 자동 호출할 수 없으므로, plugin bridge command 를
 설정하거나 Claude adaptor 가 printed prompt 를 plugin 으로 넘기는 2-step 이 필요하다.
 
@@ -199,7 +199,7 @@ WSL 사용자는 WSL shell 안에서 `bash .sfs-local/scripts/sfs-dispatch.sh st
 | `/sfs auth status|check|login|probe` | Codex/Claude/Gemini review executor 인증 확인/로그인/더미 요청 (`probe --timeout <seconds>` 지원) |
 | `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락을 기록하고, AI runtime 에서 Solon CEO 가 §1~§7을 정리 |
 | `/sfs plan` | 현재 sprint 의 `plan.md` 작성 또는 갱신 + G1 요구사항/AC/scope + CTO/CPO sprint contract refinement |
-| `/sfs review --gate <id> [--executor <tool>] [--prompt-only]` / `/sfs review --show-last` | CPO Evaluator review run. stdout 에 bounded result excerpt 를 보여주고, full prompt 는 tmp prompt file에 저장하며 `review.md`에는 compact log/result를 남김 (id ∈ G-1..G5) |
+| `/sfs review --gate <id> [--executor <tool>] [--prompt-only]` / `/sfs review --show-last` | CPO Evaluator review run. stdout 은 verdict/output path 메타데이터만 보여주고, AI runtime 이 result 를 사용자 언어의 요약+action report 로 렌더링. full prompt 는 tmp prompt file에 저장하며 `review.md`에는 compact log/result를 남김 (id ∈ G-1..G5) |
 | `/sfs decision <title>` | full ADR 생성 후 Context/Decision/Alternatives/Consequences 작성 |
 | `/sfs retro` | 현재 sprint 의 `retro.md` 작성 또는 갱신 |
 | `/sfs retro --close` | AI runtime 에서는 retro 작성 후, review 실행 여부 확인 + sprint close + auto commit (push 는 manual) |
@@ -408,7 +408,7 @@ Uninstall 은 대화형으로 실행됩니다.
 
 ## Release Channel
 
-현재 distribution version 은 `0.5.24-product` 입니다. `-mvp` suffix (0.5.0-mvp 까지) 는 기존 설치본
+현재 distribution version 은 `0.5.25-product` 입니다. `-mvp` suffix (0.5.0-mvp 까지) 는 기존 설치본
 과의 semver 호환을 위해 유지하지만, 0.5.1+ 부터 repo identity 와 release suffix 는 product
 track 기준으로 운영합니다.
 

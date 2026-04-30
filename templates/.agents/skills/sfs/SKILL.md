@@ -47,8 +47,12 @@ bridge or a manual `--prompt-only` handoff.
 For hybrid commands (`brainstorm`, `plan`, `decision`, `retro`) and adapter-run
 `review`, the final answer must be a **Solon report**, not a plain bullet list
 such as `plan.md refined: ...`. Put the whole report in a fenced `text` block.
-Keep the bash adapter stdout verbatim before the report when command execution
-produced stdout.
+Render the report in the user's visible language (for example, Korean for a
+Korean user), even when executor evidence is in English. For `review`, do not
+dump raw executor markdown or `CPO RESULT EXCERPT` blocks into the user-facing
+answer. Treat adapter stdout as compact metadata, read `output_path` /
+`result_path` / `review.md` when needed, then summarize and translate verdict,
+findings, and required actions into the report.
 
 Use this shape and fill only evidence-backed values:
 
@@ -80,7 +84,8 @@ separate footer. If those facts are useful, map them into `Steps`, `Health`, and
 
 For `/sfs review`, surface the executor-provided result that already exists in
 adapter stdout, `result_path`, or `review.md`: verdict, key findings, and
-required CTO actions. Do not create a new verdict in the current runtime.
+required CTO actions. Show a concise report, not the source markdown body. Do
+not create a new verdict in the current runtime.
 
 ## Dispatch Table
 
@@ -92,7 +97,7 @@ required CTO actions. Do not create a new verdict in the current runtime.
 | `auth status|check|login|probe` (또는 "인증 확인", "Gemini 로그인") | `bash .sfs-local/scripts/sfs-dispatch.sh auth <args>` | Codex/Claude/Gemini review executor 인증 점검/부트스트랩/더미 요청 |
 | `brainstorm [text|--stdin]` (또는 "브레인스토밍", "요구사항 정리") | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <raw context>` | G0 raw 요구사항/대화 맥락을 brainstorm.md 에 기록한 뒤 §1~§7을 Solon CEO로 정리. newline 허용 |
 | `plan` (또는 "plan 작성", "이번 sprint 계획") | `bash .sfs-local/scripts/sfs-dispatch.sh plan` | plan.md 진입 + plan_open event 후 brainstorm.md 기반 G1 plan/contract 작성 |
-| `review --gate <id> [--executor <tool>] [--prompt-only]` / `review --show-last` (또는 "CPO review", "검증 기록", "이전 리뷰 확인") | `bash .sfs-local/scripts/sfs-dispatch.sh review --gate <id> [--executor <tool>] [--generator <tool>] [--prompt-only]` 또는 `bash .sfs-local/scripts/sfs-dispatch.sh review --show-last [--gate <id>]` | CPO Evaluator bridge run by default. `--prompt-only` creates prompt/log for manual handoff. `--show-last` reprints the latest recorded result without rerunning executor. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
+| `review --gate <id> [--executor <tool>] [--prompt-only]` / `review --show-last` (또는 "CPO review", "검증 기록", "이전 리뷰 확인") | `bash .sfs-local/scripts/sfs-dispatch.sh review --gate <id> [--executor <tool>] [--generator <tool>] [--prompt-only]` 또는 `bash .sfs-local/scripts/sfs-dispatch.sh review --show-last [--gate <id>]` | CPO Evaluator bridge run by default. `--prompt-only` creates prompt/log for manual handoff. `--show-last` prints compact metadata for the latest recorded result without rerunning executor. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
 | `decision <title>` (또는 "결정 기록", "ADR 추가") | `bash .sfs-local/scripts/sfs-dispatch.sh decision "<title>" [--id <id>]` | ADR file 생성 후 Context/Decision/Alternatives/Consequences refinement |
 | `retro [--close]` (또는 "회고", "sprint close") | `bash .sfs-local/scripts/sfs-dispatch.sh retro [--close]` | retro.md 진입 후 KPT/PDCA refinement. `--close` 는 refinement 후 1회 실행 |
 | `loop [OPTIONS]` (또는 "자율 진행", "loop 시작") | `bash .sfs-local/scripts/sfs-dispatch.sh loop [OPTIONS]` | Ralph Loop + Solon mutex (see `--help`) |
@@ -153,8 +158,9 @@ required CTO actions. Do not create a new verdict in the current runtime.
    - `plan` → Plan G1 Refinement
    - `decision` → Decision ADR Refinement
    - `retro` → Retro G5 Refinement
-  - `review` → Review CPO Handling. Print adapter stdout verbatim, then render
-    a Solon report from recorded adapter/executor evidence only.
+  - `review` → Review CPO Handling. Use adapter stdout as metadata, read the
+    recorded result path when present, then render a localized Solon report
+    from recorded adapter/executor evidence only. Do not echo raw result bodies.
 
 ## Brainstorm CEO Refinement
 
@@ -249,16 +255,18 @@ must not silently self-validate after the adapter succeeds.
    result summary to `review.md`.
 2. If there is no reviewable evidence, the adapter exits 0 with "리뷰할 항목이
    없습니다" and suggests `/sfs auth probe --executor <tool>` for bridge tests.
-3. If `--show-last` / `--show` / `--last` is used, the adapter reprints the
-   latest recorded CPO result for the active sprint without invoking an
-   executor. Surface that prior result in the report.
+3. If `--show-last` / `--show` / `--last` is used, the adapter prints compact
+   metadata for the latest recorded CPO result without invoking an executor.
+   Read the referenced result file/review.md and surface that prior result in
+   the report.
 4. If `--prompt-only` is used, stop after adapter output and treat
    `prompt_path` as manual handoff material. Do not write a Codex verdict unless
    the user explicitly starts a separate review task with that prompt.
-5. Final response after normal adapter output: echo adapter stdout verbatim,
-   then render a Solon report. Fill `Review` and `Actions` from the executor
-   result excerpt/path when present. Do not add an extra CPO verdict from the
-   current runtime.
+5. Final response after normal adapter output: render a Solon report in the
+   user's visible language. Fill `Review` and `Actions` from the executor
+   result path or `review.md` when present, translating/summarizing as needed.
+   Do not print the raw result markdown unless the user explicitly asks for the
+   raw source. Do not add an extra CPO verdict from the current runtime.
 
 ## Retro G5 Refinement
 

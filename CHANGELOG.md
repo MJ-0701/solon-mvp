@@ -1,3 +1,21 @@
+## [0.5.25-product] - 2026-04-30
+
+**Localized review report UX.** `/sfs review` no longer dumps executor
+markdown into command output. The adapter prints compact verdict/output-path
+metadata, while AI runtimes read the recorded result and render a concise Solon
+report in the user's visible language.
+
+### Changed
+
+- **No raw review dump** — review runs and `--show-last` now show metadata only
+  on stdout, keeping full CPO output in `.sfs-local/tmp/review-runs/` and
+  `review.md`.
+- **Native-language reports** — Claude, Codex, and Gemini instructions require
+  review summaries/actions to be translated and summarized for the user instead
+  of echoing English source markdown.
+- **Docs aligned** — README, guide, SFS template, and adapter templates now
+  describe review as localized summary + required actions, not excerpt replay.
+
 ## [0.5.24-product] - 2026-04-30
 
 **Review result visibility and Solon report UX.** `/sfs review` now shows the

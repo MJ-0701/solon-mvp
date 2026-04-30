@@ -49,8 +49,12 @@ not run the close adapter first. Run `retro` without `--close`, refine
 For hybrid commands (`brainstorm`, `plan`, `decision`, `retro`) and adapter-run
 `review`, the final answer must be a **Solon report**, not a plain bullet list
 such as `plan.md refined: ...`. Put the whole report in a fenced `text` block.
-Keep the bash adapter stdout verbatim before the report when command execution
-produced stdout.
+Render the report in the user's visible language (for example, Korean for a
+Korean user), even when executor evidence is in English. For `review`, do not
+dump raw executor markdown or `CPO RESULT EXCERPT` blocks into the user-facing
+answer. Treat adapter stdout as compact metadata, read `output_path` /
+`result_path` / `review.md` when needed, then summarize and translate verdict,
+findings, and required actions into the report.
 
 Use this shape and fill only evidence-backed values:
 
@@ -78,7 +82,8 @@ Use this shape and fill only evidence-backed values:
 
 For `/sfs review`, surface the executor-provided result that already exists in
 adapter stdout, `result_path`, or `review.md`: verdict, key findings, and
-required CTO actions. Do not create a new verdict in the current runtime.
+required CTO actions. Show a concise report, not the source markdown body. Do
+not create a new verdict in the current runtime.
 
 | First arg | Script |
 |:--|:--|
@@ -88,7 +93,7 @@ required CTO actions. Do not create a new verdict in the current runtime.
 | `auth`     | `bash .sfs-local/scripts/sfs-dispatch.sh auth <args>`     | Codex/Claude/Gemini auth status/login/probe |
 | `brainstorm` | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <args>` | raw capture, then Solon CEO refinement |
 | `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <args>`     | G1 open, then plan refinement |
-| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <args>`   | CPO executor bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` reprints the latest recorded review without rerunning executor |
+| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <args>`   | CPO executor bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
 | `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <args>` | creates ADR, then Codex fills Context/Decision/Alternatives/Consequences |
 | `retro`    | `bash .sfs-local/scripts/sfs-dispatch.sh retro <args>`    | opens retro.md, then Codex fills KPT/PDCA. With `--close`, refine before close |
 | `loop`     | `bash .sfs-local/scripts/sfs-dispatch.sh loop <args>`     |
@@ -110,8 +115,9 @@ required CTO actions. Do not create a new verdict in the current runtime.
    - `plan`: Plan G1 Refinement.
    - `decision`: Decision ADR Refinement.
    - `retro`: Retro G5 Refinement.
-   - `review`: Review CPO Handling. Print adapter stdout verbatim, then render
-     a Solon report from recorded adapter/executor evidence only.
+   - `review`: Review CPO Handling. Use adapter stdout as metadata, read the
+     recorded result path when present, then render a localized Solon report
+     from recorded adapter/executor evidence only. Do not echo raw result bodies.
 
 ## Brainstorm CEO Refinement
 
@@ -178,9 +184,11 @@ After `/sfs review` succeeds:
 2. If `--prompt-only` was used, treat `prompt_path` as manual handoff material.
    Do not write a Codex verdict in the current runtime unless the user
    explicitly starts a separate review task with that prompt.
-3. Final response: echo adapter stdout verbatim, then render a Solon report.
-   Fill `Review` and `Actions` from the executor result excerpt/path when
-   present. Do not add an extra CPO verdict from the current runtime.
+3. Final response: render a Solon report in the user's visible language. Fill
+   `Review` and `Actions` from the executor result path or `review.md` when
+   present, translating/summarizing as needed. Do not print the raw result
+   markdown unless the user explicitly asks for the raw source. Do not add an
+   extra CPO verdict from the current runtime.
 
 ## Retro G5 Refinement
 
