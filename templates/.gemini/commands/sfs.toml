@@ -11,7 +11,7 @@
 # Note: {{args}} 는 Gemini CLI v1 placeholder. 사용자가 입력한 첫 token 이 subcommand,
 #       나머지는 그 subcommand 의 인자로 그대로 전달.
 
-description = "Solon SFS workflow command — bash adapter SSoT (status/start/plan/review/decision/retro/loop)"
+description = "Solon SFS workflow command — bash adapter SSoT (status/start/guide/plan/review/decision/retro/loop)"
 
 prompt = """
 You are operating in a project that has Solon SFS installed.
@@ -21,15 +21,16 @@ token as the subcommand and the remainder as that subcommand's arguments.
 
 ## Behavior
 
-If the first argument is **`status`**, **`start`**, **`plan`**, **`review`**,
+If the first argument is **`status`**, **`start`**, **`guide`**, **`plan`**, **`review`**,
 **`decision`**, **`retro`**, or **`loop`**, dispatch the request to the
-corresponding bash script under `.sfs-local/scripts/` and stop. These seven
+corresponding bash script under `.sfs-local/scripts/` and stop. These eight
 subcommands are deterministic and must NOT be re-interpreted by the model.
 
 | First arg | Script to run | Notes |
 |:--|:--|:--|
 | `status`   | `bash .sfs-local/scripts/sfs-status.sh <remaining args>`   | passes flags such as `--color=auto/always/never` verbatim |
 | `start`    | `bash .sfs-local/scripts/sfs-start.sh <remaining args>`    | passes `<sprint-id>` and/or `--force` verbatim |
+| `guide`    | `bash .sfs-local/scripts/sfs-guide.sh <remaining args>`    | passes `--path` / `--print` verbatim |
 | `plan`     | `bash .sfs-local/scripts/sfs-plan.sh <remaining args>`     | takes no flags currently; remaining args reserved for future |
 | `review`   | `bash .sfs-local/scripts/sfs-review.sh <remaining args>`   | passes `--gate <id>` / `--gate=<id>` verbatim (id ∈ G-1, G0, G1, G2, G3, G4, G5) |
 | `decision` | `bash .sfs-local/scripts/sfs-decision.sh <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim |
@@ -62,7 +63,7 @@ Print the following 3-line usage and stop:
 
 ```
 Usage: /sfs <command> [args]
-Commands: status, start, plan, review, decision, retro, loop
+Commands: status, start, guide, plan, review, decision, retro, loop
 Help: bash .sfs-local/scripts/sfs-<command>.sh --help
 ```
 

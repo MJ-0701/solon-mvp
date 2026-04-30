@@ -12,7 +12,7 @@ Before planning or editing, read:
 
 ## SFS commands — bash adapter SSoT
 
-Solon Product SFS 의 7 슬래시 명령은 모두 `.sfs-local/scripts/sfs-*.sh` bash adapter 가
+Solon Product SFS 의 8 슬래시 명령은 모두 `.sfs-local/scripts/sfs-*.sh` bash adapter 가
 single source of truth (Claude Code / Codex / Gemini CLI 어느 환경에서든 동일 결과).
 Claude Code 의 native slash 진입점은 `.claude/commands/sfs.md` 가 자동 install 되며,
 동일한 dispatch table 을 따른다 (paraphrase 금지, 결정성 유지):
@@ -21,6 +21,7 @@ Claude Code 의 native slash 진입점은 `.claude/commands/sfs.md` 가 자동 i
 |:--|:--|
 | `/sfs status [--color=auto/always/never]` | `.sfs-local/scripts/sfs-status.sh` |
 | `/sfs start [<sprint-id>] [--force]` | `.sfs-local/scripts/sfs-start.sh` |
+| `/sfs guide [--print]` | `.sfs-local/scripts/sfs-guide.sh` |
 | `/sfs plan` | `.sfs-local/scripts/sfs-plan.sh` |
 | `/sfs review --gate <id>` | `.sfs-local/scripts/sfs-review.sh` (id ∈ G-1, G0, G1, G2, G3, G4, G5) |
 | `/sfs decision <title> [--id <id>]` | `.sfs-local/scripts/sfs-decision.sh` |

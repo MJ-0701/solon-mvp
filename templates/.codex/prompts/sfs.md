@@ -24,15 +24,16 @@ token as the subcommand and the remainder as that subcommand's arguments.
 
 ## Behavior
 
-If the first argument is `status`, `start`, `plan`, `review`, `decision`,
+If the first argument is `status`, `start`, `guide`, `plan`, `review`, `decision`,
 `retro`, or `loop`, dispatch to `.sfs-local/scripts/sfs-<name>.sh` and stop.
-These seven subcommands are deterministic and must NOT be re-interpreted by
+These eight subcommands are deterministic and must NOT be re-interpreted by
 the model.
 
 | First arg | Script |
 |:--|:--|
 | `status`   | `bash .sfs-local/scripts/sfs-status.sh <args>`   |
 | `start`    | `bash .sfs-local/scripts/sfs-start.sh <args>`    |
+| `guide`    | `bash .sfs-local/scripts/sfs-guide.sh <args>`    |
 | `plan`     | `bash .sfs-local/scripts/sfs-plan.sh <args>`     |
 | `review`   | `bash .sfs-local/scripts/sfs-review.sh <args>`   |
 | `decision` | `bash .sfs-local/scripts/sfs-decision.sh <args>` |

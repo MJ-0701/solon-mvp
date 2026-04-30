@@ -89,6 +89,7 @@ curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.s
 
 ```text
 /sfs status
+/sfs guide
 /sfs start "첫 번째 sprint 목표"
 /sfs plan
 /sfs review --gate G2
@@ -107,6 +108,7 @@ curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.s
 |---|---|
 | `/sfs status` | 현재 sprint, WU, gate, ahead count, last event 를 한 줄로 표시 |
 | `/sfs start <goal>` | 새 sprint 시작 또는 기존 sprint 이어가기 (`--id <sprint-id>` 지원) |
+| `/sfs guide [--print]` | 설치된 onboarding guide 경로 출력 또는 본문 보기 |
 | `/sfs plan` | 현재 sprint 의 `plan.md` 작성 또는 갱신 |
 | `/sfs review --gate <id>` | gate 기준으로 `review.md` 작성 또는 갱신 (id ∈ G-1..G5) |
 | `/sfs decision <title>` | full ADR (decisions/) 또는 sprint-local mini-ADR 자동 분기 |
@@ -114,7 +116,7 @@ curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.s
 | `/sfs retro --close` | review 실행 여부 확인 후 sprint close + auto commit (push 는 manual) |
 | `/sfs loop [OPTIONS]` | 큰 작업에서 micro-step 단위 반복 실행을 돕는 자율 진행 모드 |
 
-7 명령 모두 native slash 1급 entry point + 동일 bash adapter SSoT.
+8 명령 모두 native slash 1급 entry point + 동일 bash adapter SSoT.
 
 ### `/sfs loop` 자세히
 
@@ -134,7 +136,7 @@ CLI 에서든 동등한 deterministic bash adapter SSoT 로 동작합니다.
 
 ## Runtime Coverage
 
-설치 후 `/sfs` 7 명령은 **세 런타임 모두에서 native 등록**됩니다.
+설치 후 `/sfs` 8 명령은 **세 런타임 모두에서 native 등록**됩니다.
 
 | 런타임 | Entry point (자동 install) | 호출 방법 |
 |---|---|---|
@@ -267,7 +269,7 @@ Uninstall 은 대화형으로 실행됩니다.
 
 ## Release Channel
 
-현재 distribution version 은 `0.5.2-product` 입니다. `-mvp` suffix (0.5.0-mvp 까지) 는 기존 설치본
+현재 distribution version 은 `0.5.3-product` 입니다. `-mvp` suffix (0.5.0-mvp 까지) 는 기존 설치본
 과의 semver 호환을 위해 유지하지만, 0.5.1+ 부터 repo identity 와 release suffix 는 product
 track 기준으로 운영합니다.
 

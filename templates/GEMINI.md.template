@@ -12,7 +12,7 @@ Before planning or editing, read:
 
 ## SFS commands — bash adapter 우선 (deterministic SSoT)
 
-Solon Product SFS 의 7 슬래시 명령은 모두 `.sfs-local/scripts/sfs-*.sh` bash adapter 가
+Solon Product SFS 의 8 슬래시 명령은 모두 `.sfs-local/scripts/sfs-*.sh` bash adapter 가
 single source of truth (Claude/Codex/Gemini 어느 CLI 환경에서든 동일한 결과 보장).
 Gemini CLI 는 native `/sfs` slash 가 없어도 사용자 발화를 다음 명령으로 해석해서 **bash
 adapter 를 직접 호출**한다 (paraphrase 금지, 결정성 유지):
@@ -21,6 +21,7 @@ adapter 를 직접 호출**한다 (paraphrase 금지, 결정성 유지):
 |:--|:--|
 | `sfs status`, `/sfs status` | `bash .sfs-local/scripts/sfs-status.sh [--color=auto/always/never]` |
 | `sfs start <goal>`, `/sfs start <goal>` | `bash .sfs-local/scripts/sfs-start.sh [<sprint-id>] [--force]` |
+| `sfs guide`, `/sfs guide` | `bash .sfs-local/scripts/sfs-guide.sh [--path|--print]` |
 | `sfs plan`, `/sfs plan` | `bash .sfs-local/scripts/sfs-plan.sh` |
 | `sfs review --gate <id>`, `/sfs review --gate <id>` | `bash .sfs-local/scripts/sfs-review.sh --gate <id>` (id ∈ G-1, G0, G1, G2, G3, G4, G5) |
 | `sfs decision <title>`, `/sfs decision <title>` | `bash .sfs-local/scripts/sfs-decision.sh "<title>" [--id <id>]` |
