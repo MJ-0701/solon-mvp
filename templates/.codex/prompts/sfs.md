@@ -27,14 +27,14 @@ subcommand's arguments.
 
 ## Behavior
 
-If the first argument is `status`, `start`, `guide`, `auth`, `brainstorm`, `plan`, `review`, `decision`,
+If the first argument is `status`, `start`, `guide`, `auth`, `brainstorm`, `plan`, `implement`, `review`, `decision`,
 `retro`, or `loop`, dispatch to the `sfs` runtime command first. In vendored
 layout only, `.sfs-local/scripts/sfs-dispatch.sh` is an acceptable fallback.
 
 Command modes:
 - **Bash-only**: `status`, `start`, `guide`, `auth`, `loop`. Stop after
   verbatim adapter output.
-- **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`. Run the adapter,
+- **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `retro`. Run the adapter,
   then perform the documented file refinement.
 - **Adapter-run**: `review`. The bash adapter executes the selected CPO
   executor bridge by default. Stop after adapter output. If `--prompt-only` is
@@ -47,7 +47,7 @@ not run the close adapter first. Run `retro` without `--close`, refine
 
 ## Solon Report Output Rule
 
-For hybrid commands (`brainstorm`, `plan`, `decision`, `retro`) and adapter-run
+For hybrid commands (`brainstorm`, `plan`, `implement`, `decision`, `retro`) and adapter-run
 `review`, the final answer must be a **Solon report**, not a plain bullet list
 such as `plan.md refined: ...`. Put the whole report in a fenced `text` block.
 Render the report in the user's visible language (for example, Korean for a
@@ -94,6 +94,7 @@ not create a new verdict in the current runtime.
 | `auth`     | `sfs auth <args>`     | Codex/Claude/Gemini auth status/login/probe |
 | `brainstorm` | `sfs brainstorm <args>` | raw capture, then Solon CEO refinement |
 | `plan`     | `sfs plan <args>`     | G1 open, then plan refinement |
+| `implement` | `sfs implement <args>` | implementation open, then actual code changes + tests/evidence |
 | `review`   | `sfs review <args>`   | CPO executor bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
 | `decision` | `sfs decision <args>` | creates ADR, then Codex fills Context/Decision/Alternatives/Consequences |
 | `retro`    | `sfs retro <args>`    | opens retro.md, then Codex fills KPT/PDCA. With `--close`, refine before close |
@@ -110,6 +111,7 @@ not create a new verdict in the current runtime.
    - `status`, `start`, `guide`, `auth`, `loop`: stop. No paraphrase, no summary.
    - `brainstorm`: Brainstorm CEO Refinement.
    - `plan`: Plan G1 Refinement.
+   - `implement`: Implementation Execution.
    - `decision`: Decision ADR Refinement.
    - `retro`: Retro G5 Refinement.
    - `review`: Review CPO Handling. Use adapter stdout as metadata, read the
@@ -153,8 +155,24 @@ After `/sfs plan` succeeds:
 6. Ask up to 3 questions only if critical information is missing.
 7. Do not implement code or run `/sfs review` automatically.
 8. Final response: render a Solon report. Include `plan.md` path in `Files`,
-   question count in `Questions`, and `Next: /sfs review --gate G1 --executor codex --generator claude`
+   question count in `Questions`, and `Next: /sfs review --gate G1 ... then /sfs implement "<first code slice>"`
    when ready; otherwise `Next: answer questions, then /sfs plan`.
+
+## Implementation Execution
+
+After `/sfs implement` succeeds:
+
+1. Resolve `implement.md`, `plan.md`, and `log.md` from stdout, or read
+   `.sfs-local/current-sprint` and open those files under the active sprint.
+2. Read the plan and relevant project files. If the requested slice conflicts
+   with the plan, stop and ask before editing.
+3. Apply the guardrails in `implement.md`: shared design concept, DDD terms,
+   TDD or smallest useful verification, and existing codebase regularity.
+4. Implement the smallest coherent code slice. Prefer test-first where possible.
+5. Update `implement.md` and `log.md` with changed files, commands, results,
+   decisions, and review handoff. Mark ready only when code and evidence exist.
+6. Final response: render a Solon report with actual code files and checks.
+   Next should be `/sfs review --gate G4` when ready.
 
 ## Decision ADR Refinement
 

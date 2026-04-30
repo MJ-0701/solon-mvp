@@ -14,6 +14,7 @@ description: |
   update    현재 설치된 Solon runtime 기준으로 project adapter/docs 갱신
   brainstorm G0 raw 요구사항/대화 맥락 기록
   plan      현재 sprint plan.md 작성/갱신 + G1 sprint contract refinement
+  implement plan 기반 실제 코드 구현 + 테스트/evidence 기록
   sprint    plan을 구현 단계와 gate 체크로 정리
   review    CPO review bridge run/verdict (adapter-run by default)
   decision  결정 기록 생성 + ADR refinement
@@ -62,7 +63,7 @@ for the documented hybrid/conditional flows below.
 
 ### Solon Report Output Rule
 
-For hybrid commands (`brainstorm`, `plan`, `decision`, `retro`) and adapter-run
+For hybrid commands (`brainstorm`, `plan`, `implement`, `decision`, `retro`) and adapter-run
 `review`, the final answer must be a **Solon report**, not a plain bullet list
 such as `plan.md refined: ...`. Put the whole report in a fenced `text` block.
 Render the report in the user's visible language (for example, Korean for a
@@ -112,9 +113,9 @@ token as the subcommand and the remainder as that subcommand's arguments.
 $ARGUMENTS
 ```
 
-## Adapter Dispatch (status / start / guide / auth / brainstorm / plan / review / decision / retro / loop) — execute first
+## Adapter Dispatch (status / start / guide / auth / brainstorm / plan / implement / review / decision / retro / loop) — execute first
 
-If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`update`**, **`brainstorm`**, **`plan`**, **`review`**,
+If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`update`**, **`brainstorm`**, **`plan`**, **`implement`**, **`review`**,
 **`decision`**, **`retro`**, or **`loop`**, dispatch the request through the
 `sfs` runtime command first. The runtime normalizes command surfaces
 (`/sfs`, `$sfs`, `sfs`) and delegates to the deterministic bash adapter. In
@@ -124,7 +125,7 @@ Command modes:
 - **Bash-first**: `status`, `start`, `guide`, `auth`, `update`, `loop`. Print verbatim
   adapter output first. A compact recap/status line is allowed when it helps
   the user see state and the next action, but adapter stdout remains SSoT.
-- **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`. Run the adapter,
+- **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `retro`. Run the adapter,
   then perform the documented file refinement.
 - **Adapter-run**: `review`. The bash adapter executes the selected CPO
   executor bridge by default. Stop after adapter output. If `--prompt-only` is
@@ -169,6 +170,7 @@ Dispatch table:
 | `update`   | `sfs update <remaining args>`   | updates managed project adapter/docs from the installed runtime; preserves sprint/decision/event history |
 | `brainstorm` | `sfs brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then Claude fills §1~§7 as Solon CEO |
 | `plan`     | `sfs plan <remaining args>`     | opens plan.md, then Claude fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
+| `implement` | `sfs implement <remaining args>` | opens implement.md/log.md, then Claude performs actual code changes with DDD/TDD guardrails and records evidence |
 | `review`   | `sfs review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
 | `decision` | `sfs decision <remaining args>` | creates ADR file, then Claude fills Context/Decision/Alternatives/Consequences |
 | `retro`    | `sfs retro <remaining args>`    | opens retro.md, then Claude fills KPT/PDCA. With `--close`, refine before close |
@@ -203,6 +205,9 @@ Procedure (apply in order):
      `4`=template missing, `5`=permission, `99`=unknown.
    - plan: `0`=ok, `1`=no `.sfs-local/` or no active sprint,
      `2`=corrupt `current-sprint`, `4`=template missing, `99`=unknown.
+   - implement: `0`=ok, `1`=no `.sfs-local/` or no active sprint,
+     `2`=corrupt `events.jsonl` / `current-sprint`, `3`=not a git repo,
+     `4`=template missing, `5`=permission, `99`=unknown.
    - review: `0`=ok, `1`=no `.sfs-local/` or no active sprint,
      `4`=template missing, `6`=gate id invalid or required
      (`unknown gate <id>, valid: G-1, G0, G1, G2, G3, G4, G5`),
@@ -228,6 +233,7 @@ Procedure (apply in order):
    commands continue only via the documented flow below:
    - `brainstorm` → Brainstorm CEO Refinement
    - `plan` → Plan G1 Refinement
+   - `implement` → Implementation Execution
    - `decision` → Decision ADR Refinement
    - `retro` → Retro G5 Refinement
    - `review` → Review CPO Handling. Use adapter stdout as metadata, read the
@@ -293,8 +299,35 @@ G0 context.
 6. Do not implement code, choose irreversible infrastructure, or run
    `/sfs review` automatically.
 7. Final response: render a Solon report. Include `plan.md` path in `Files`,
-   question count in `Questions`, and `Next: /sfs review --gate G1 --executor codex --generator claude`
+   question count in `Questions`, and `Next: /sfs review --gate G1 ... then /sfs implement "<first code slice>"`
    when ready; otherwise `Next: answer questions, then /sfs plan`.
+
+## Implementation Execution
+
+`/sfs implement` is the command that turns plan into code. It is never
+artifact-only in AI runtimes. After the bash adapter succeeds and stdout has
+been printed verbatim, continue into actual implementation unless blocked.
+
+1. Resolve `implement.md`, `plan.md`, and `log.md` from adapter stdout. If
+   stdout cannot be parsed, read `.sfs-local/current-sprint` and open those
+   files under `.sfs-local/sprints/<current-sprint>/`.
+2. Read `plan.md`, `implement.md`, `log.md`, and relevant project files. If the
+   requested slice conflicts with the plan, state the conflict and ask before
+   editing.
+3. Apply the AI coding guardrails from `implement.md`:
+   - shared design concept before editing,
+   - DDD terms used consistently in code/tests/docs,
+   - TDD or smallest useful verification loop,
+   - existing codebase regularity over one-off cleverness.
+4. Implement the smallest coherent code slice. Prefer test-first when the
+   codebase has a usable test harness. If no test harness exists, create or run
+   the smallest practical smoke check and record the limitation.
+5. Update `implement.md` §1~§5 and `log.md` with changed files, decisions,
+   tests/commands, result, and review handoff. Set `implement.md` frontmatter
+   `status: ready-for-review` only when code and verification evidence exist.
+6. Run relevant tests/checks. Do not claim success without evidence.
+7. Final response: render a Solon report with actual code files in `Files`,
+   checks in `Actions` or `Steps`, and `Next: /sfs review --gate G4` when ready.
 
 ## Decision ADR Refinement
 
@@ -395,6 +428,7 @@ If the first argument is one of the modes below, follow that mode.
 - `auth`: **Adapter (above).** Fallback only: tell the user to run `.sfs-local/scripts/sfs-auth.sh --help`.
 - `brainstorm`: **Adapter first + CEO refinement (above).** Fallback only: produce or update the current sprint `brainstorm.md` based on `sprint-templates/brainstorm.md`, then fill §1~§7 as Solon CEO if file editing is available.
 - `plan`: **Adapter first + G1 refinement (above).** Fallback only: produce or update the current sprint `plan.md` from `brainstorm.md` + `sprint-templates/plan.md`.
+- `implement`: **Adapter first + implementation execution (above).** Fallback only: prepare `implement.md`/`log.md`; in AI runtimes, continue to actual code changes and tests.
 - `sprint`: Convert the current plan into implementation steps and gate checks.
 - `review`: **Adapter-run by default (above).** CPO review is mandatory, executor/tool is configurable, and the default path must use a real CLI/plugin bridge. If the user explicitly asks to use a Claude-connected Codex plugin, do not treat metadata as a review: create a `--prompt-only` CPO prompt, invoke the connected plugin if available, then append the plugin result to `review.md`.
 - `decision`: **Adapter first + ADR refinement (above).** Fallback only: write a short ADR-style decision under `.sfs-local/decisions/` based on `sprint-templates/decision-light.md`.
@@ -414,6 +448,7 @@ When showing usage, keep it compact and practical. Include this shape:
 /sfs auth status          review executor 인증 상태 확인
 /sfs brainstorm <context> G0 raw 기록 + CEO 맥락 정리
 /sfs plan                 현재 sprint plan.md 작성/갱신
+/sfs implement <slice>    plan 기반 실제 코드 구현 + 테스트/evidence 기록
 /sfs review --gate G4 --executor codex --generator claude
                           CPO Evaluator review bridge 실행/기록
 /sfs decision <decision>  짧은 결정 기록 남기기

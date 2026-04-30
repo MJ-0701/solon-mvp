@@ -53,7 +53,7 @@ Usage:
 
 Commands:
   agent install, update, uninstall
-  status, start, guide, auth, brainstorm, plan, review, decision, retro, loop
+  status, start, guide, auth, brainstorm, plan, implement, review, decision, retro, loop
 
 Project state defaults to .sfs-local/. Override with SFS_LOCAL_DIR when needed.
 
@@ -327,7 +327,7 @@ case "${1:-}" in
 esac
 
 case "${1:-}" in
-  status|start|guide|auth|brainstorm|plan|review|decision|retro|loop)
+  status|start|guide|auth|brainstorm|plan|implement|review|decision|retro|loop)
     if ! ensure_project_initialized "${1:-command}"; then
       exit 1
     fi

@@ -131,8 +131,8 @@ esac
 # ─────────────────────────────────────────────────────────────────────
 # Templates check (must exist before we touch sprints/)
 # ─────────────────────────────────────────────────────────────────────
-# Ensure all 5 expected sprint template files exist.
-for tpl in brainstorm plan log review retro; do
+# Ensure all expected sprint template files exist.
+for tpl in brainstorm plan implement log review retro; do
   tpl_path="$(sfs_sprint_template_file "${tpl}")"
   if [[ ! -f "${tpl_path}" ]]; then
     echo "templates not found: ${tpl_path}" >&2
@@ -159,7 +159,7 @@ if ! mkdir -p "${SPRINT_DIR}" 2>/dev/null; then
   exit "${SFS_EXIT_PERM}"
 fi
 
-for tpl in brainstorm plan log review retro; do
+for tpl in brainstorm plan implement log review retro; do
   tpl_path="$(sfs_sprint_template_file "${tpl}")"
   if ! cp -f "${tpl_path}" "${SPRINT_DIR}/${tpl}.md" 2>/dev/null; then
     echo "permission denied copying ${tpl}.md to ${SPRINT_DIR}/" >&2
@@ -173,7 +173,7 @@ _yaml_sprint="${_yaml_sprint//\"/\\\"}"
 _yaml_goal="${GOAL//\\/\\\\}"
 _yaml_goal="${_yaml_goal//\"/\\\"}"
 
-for doc in brainstorm plan log review retro; do
+for doc in brainstorm plan implement log review retro; do
   update_frontmatter "${SPRINT_DIR}/${doc}.md" "sprint_id" "\"${_yaml_sprint}\"" || true
   update_frontmatter "${SPRINT_DIR}/${doc}.md" "created_at" "\"${NOW}\"" || true
   if [[ -n "${GOAL}" ]]; then
@@ -218,6 +218,7 @@ fi
 echo "created: ${SPRINT_DIR}/"
 echo "  - brainstorm.md"
 echo "  - plan.md"
+echo "  - implement.md"
 echo "  - log.md"
 echo "  - review.md"
 echo "  - retro.md"

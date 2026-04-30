@@ -461,7 +461,7 @@ if [ "$INSTALL_LAYOUT" = "vendored" ]; then
   if [ -d "$TEMPLATES_SRC" ]; then
     mkdir -p "$TARGET/.sfs-local/sprint-templates"
     cp "$TEMPLATES_SRC"/*.md "$TARGET/.sfs-local/sprint-templates/" 2>/dev/null || true
-    ok "  sprint-templates/ 복사 (brainstorm + plan + log + review + retro + decision-light)"
+    ok "  sprint-templates/ 복사 (brainstorm + plan + implement + log + review + retro + decision-light)"
   fi
 
   # personas/ — CEO / CTO Generator / CPO Evaluator 기본 persona
@@ -565,9 +565,9 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
   ${C_BOLD}1.${C_RESET} SFS.md 내용 확인 + 프로젝트 특성 반영 (Stack / 도메인 등).
 
   ${C_BOLD}2.${C_RESET} 선호 런타임에서 시작:
-     ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET}
-     ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET}
-     ${C_BLUE}codex${C_RESET}      → ${C_BLUE}\$sfs status${C_RESET} → ${C_BLUE}\$sfs start${C_RESET} → ${C_BLUE}\$sfs brainstorm${C_RESET} → ${C_BLUE}\$sfs plan${C_RESET}
+     ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET} → ${C_BLUE}/sfs implement${C_RESET}
+     ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET} → ${C_BLUE}/sfs implement${C_RESET}
+     ${C_BLUE}codex${C_RESET}      → ${C_BLUE}\$sfs status${C_RESET} → ${C_BLUE}\$sfs start${C_RESET} → ${C_BLUE}\$sfs brainstorm${C_RESET} → ${C_BLUE}\$sfs plan${C_RESET} → ${C_BLUE}\$sfs implement${C_RESET}
                    (bare ${C_BLUE}/sfs${C_RESET} 가 '커맨드 없음' 으로 막히면 host slash parser gap)
      셋 모두 동일한 ${C_BOLD}sfs${C_RESET} runtime command 로 내려간 뒤 deterministic bash adapter 호출.
      설치 직후 가이드는 ${C_BLUE}/sfs guide${C_RESET}, ${C_BLUE}\$sfs guide${C_RESET}, 또는 shell 의 ${C_BLUE}sfs guide${C_RESET}.

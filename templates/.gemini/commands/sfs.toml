@@ -2,19 +2,19 @@
 #
 # Path: <consumer-project>/.gemini/commands/sfs.toml
 # Invoke: /sfs <subcommand> [args]
-#         예) /sfs status / /sfs start "첫 번째 sprint" / /sfs review --gate G2
+#         예) /sfs status / /sfs start "첫 번째 sprint" / /sfs implement "첫 구현 slice" / /sfs review --gate G4
 #
 # Behavior: global sfs runtime 이 command surface 를 normalize 하고 deterministic
 #   bash adapter 로 내려간다. `.sfs-local/scripts/` 는 vendored layout fallback.
 #   user 발화의 첫 token = subcommand → sfs-<subcommand>.sh 실행 + stdout verbatim 출력.
-#   단, brainstorm/plan/decision/retro 는 adapter 후 Gemini 가 문서 refinement 를 수행하고,
+#   단, brainstorm/plan/implement/decision/retro 는 adapter 후 Gemini 가 문서 refinement/구현을 수행하고,
 #   review 는 기본적으로 adapter 가 선택된 CPO executor bridge 를 실행한다.
 #   paraphrase 금지, 결정성 유지 (Claude Code / Codex / Gemini CLI 동등 1급).
 #
 # Note: {{args}} 는 Gemini CLI v1 placeholder. 사용자가 입력한 첫 token 이 subcommand,
 #       나머지는 그 subcommand 의 인자로 그대로 전달.
 
-description = "Solon SFS workflow command — bash adapter SSoT; hybrid G0/G1/ADR/G5 refinement; adapter-run CPO review"
+description = "Solon SFS workflow command — bash adapter SSoT; hybrid G0/G1/implement/ADR/G5 refinement; adapter-run CPO review"
 
 prompt = """
 You are operating in a project that has Solon SFS installed.
@@ -24,14 +24,14 @@ token as the subcommand and the remainder as that subcommand's arguments.
 
 ## Behavior
 
-If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`update`**, **`brainstorm`**, **`plan`**, **`review`**,
+If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`update`**, **`brainstorm`**, **`plan`**, **`implement`**, **`review`**,
 **`decision`**, **`retro`**, or **`loop`**, dispatch the request to the
 `sfs` runtime command first.
 
 Command modes:
 - **Bash-only**: `status`, `start`, `guide`, `auth`, `update`, `loop`. Stop after
   verbatim adapter output.
-- **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`. Run the adapter,
+- **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `retro`. Run the adapter,
   then perform the documented file refinement.
 - **Adapter-run**: `review`. The bash adapter executes the selected CPO
   executor bridge by default. Stop after adapter output. If `--prompt-only` is
@@ -44,7 +44,7 @@ not run the close adapter first. Run `retro` without `--close`, refine
 
 ## Solon Report Output Rule
 
-For hybrid commands (`brainstorm`, `plan`, `decision`, `retro`) and adapter-run
+For hybrid commands (`brainstorm`, `plan`, `implement`, `decision`, `retro`) and adapter-run
 `review`, the final answer must be a **Solon report**, not a plain bullet list
 such as `plan.md refined: ...`. Put the whole report in a fenced `text` block.
 Render the report in the user's visible language (for example, Korean for a
@@ -92,6 +92,7 @@ not create a new verdict in the current runtime.
 | `update`   | `sfs update <remaining args>`   | updates managed project adapter/docs from the installed runtime; preserves sprint/decision/event history |
 | `brainstorm` | `sfs brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then fills §1~§7 as Solon CEO |
 | `plan`     | `sfs plan <remaining args>`     | opens plan.md, then fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
+| `implement` | `sfs implement <remaining args>` | opens implement.md/log.md, then performs actual code changes with DDD/TDD guardrails and records evidence |
 | `review`   | `sfs review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
 | `decision` | `sfs decision <remaining args>` | creates ADR, then Gemini fills Context/Decision/Alternatives/Consequences |
 | `retro`    | `sfs retro <remaining args>`    | opens retro.md, then Gemini fills KPT/PDCA. With `--close`, refine before close |
@@ -119,6 +120,7 @@ not create a new verdict in the current runtime.
    via the documented flow below:
    - `brainstorm` → Brainstorm CEO Refinement
    - `plan` → Plan G1 Refinement
+   - `implement` → Implementation Execution
    - `decision` → Decision ADR Refinement
    - `retro` → Retro G5 Refinement
   - `review` → Review CPO Handling. Use adapter stdout as metadata, read the
@@ -177,8 +179,33 @@ and stdout has been shown verbatim:
 5. Ask up to 3 questions only if critical information is still missing.
 6. Do not implement code or run `/sfs review` automatically.
 7. Final response: render a Solon report. Include `plan.md` path in `Files`,
-   question count in `Questions`, and `Next: /sfs review --gate G1 --executor codex --generator claude`
+   question count in `Questions`, and `Next: /sfs review --gate G1 ... then /sfs implement "<first code slice>"`
    when ready; otherwise `Next: answer questions, then /sfs plan`.
+
+## Implementation Execution
+
+`/sfs implement` is the command that turns plan into code. It is never
+artifact-only in AI runtimes. After the bash adapter succeeds and stdout has
+been shown verbatim, continue into actual implementation unless blocked.
+
+1. Resolve `implement.md`, `plan.md`, and `log.md` from adapter stdout. If
+   stdout cannot be parsed, read `.sfs-local/current-sprint` and open those
+   files under `.sfs-local/sprints/<current-sprint>/`.
+2. Read `plan.md`, `implement.md`, `log.md`, and relevant project files. If the
+   requested slice conflicts with the plan, state the conflict and ask before
+   editing.
+3. Apply the AI coding guardrails from `implement.md`: shared design concept,
+   DDD terms, TDD or smallest useful verification loop, and existing codebase
+   regularity.
+4. Implement the smallest coherent code slice. Prefer test-first when a usable
+   test harness exists; otherwise run the smallest practical smoke check and
+   record the limitation.
+5. Update `implement.md` §1~§5 and `log.md` with changed files, decisions,
+   tests/commands, result, and review handoff. Set `implement.md` frontmatter
+   `status: ready-for-review` only when code and verification evidence exist.
+6. Run relevant tests/checks. Do not claim success without evidence.
+7. Final response: render a Solon report with actual code files in `Files`,
+   checks in `Actions` or `Steps`, and `Next: /sfs review --gate G4` when ready.
 
 ## Decision ADR Refinement
 
@@ -233,7 +260,7 @@ Print the following 3-line usage and stop:
 
 ```
 Usage: /sfs <command> [args]
-Commands: status, start, guide, auth, brainstorm, plan, review, decision, retro, loop
+Commands: status, start, guide, auth, brainstorm, plan, implement, review, decision, retro, loop
 Help: bash .sfs-local/scripts/sfs-<command>.sh --help
 ```
 

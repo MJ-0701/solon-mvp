@@ -41,7 +41,7 @@ usage_plan() {
 Usage: /sfs plan
 
 Open the active sprint's plan.md (G1 Plan Gate document).
-  - Intended flow: /sfs start → /sfs brainstorm → /sfs plan.
+  - Intended flow: /sfs start → /sfs brainstorm → /sfs plan → /sfs implement.
   - Read brainstorm.md first; plan.md is the sprint contract derived from G0.
   - Creates plan.md from sprint-templates/plan.md if missing.
   - Updates frontmatter: phase=plan, last_touched_at=<ISO8601>.
