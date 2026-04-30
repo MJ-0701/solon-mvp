@@ -1,7 +1,8 @@
 ---
 phase: do
-sprint_id: ""    # filled by /sfs start (currently copied verbatim)
-created_at: ""   # filled by /sfs start (currently copied verbatim)
+sprint_id: ""    # filled by /sfs start
+goal: ""         # filled by /sfs start <goal>
+created_at: ""   # filled by /sfs start
 ---
 
 # Log — <sprint title>

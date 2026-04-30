@@ -6,7 +6,7 @@
 #   · ISO 8601 week sprint-id pattern (`<YYYY-Wxx>-sprint-<N>`).
 #
 # Usage:
-#   /sfs start [<sprint-id>] [--force]
+#   /sfs start [<goal>] [--id <sprint-id>] [--force]
 #
 # Default sprint-id: <YYYY-Wxx>-sprint-<N>  (ISO week, auto-incremented).
 #
@@ -39,12 +39,28 @@ SFS_TEMPLATES_DIR="${SFS_LOCAL_DIR}/sprint-templates"
 # CLI parse
 # ─────────────────────────────────────────────────────────────────────
 SPRINT_ID=""
+CUSTOM_ID=""
+GOAL=""
 FORCE=false
+GOAL_PARTS=()
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --force)
       FORCE=true
+      shift
+      ;;
+    --id)
+      shift
+      if [[ $# -eq 0 ]]; then
+        echo "missing value for --id" >&2
+        exit "${SFS_EXIT_UNKNOWN}"
+      fi
+      CUSTOM_ID="$1"
+      shift
+      ;;
+    --id=*)
+      CUSTOM_ID="${1#--id=}"
       shift
       ;;
     -h|--help)
@@ -53,34 +69,37 @@ while [[ $# -gt 0 ]]; do
       ;;
     --)
       shift
-      # Treat remaining as positional sprint-id (only one allowed).
-      if [[ $# -gt 0 ]]; then
-        if [[ -n "${SPRINT_ID}" ]]; then
-          echo "multiple sprint-id args: '${SPRINT_ID}' and '$1'" >&2
-          exit "${SFS_EXIT_UNKNOWN}"
-        fi
-        SPRINT_ID="$1"
+      while [[ $# -gt 0 ]]; do
+        GOAL_PARTS+=("$1")
         shift
-      fi
-      if [[ $# -gt 0 ]]; then
-        echo "unexpected extra args after --: $*" >&2
-        exit "${SFS_EXIT_UNKNOWN}"
-      fi
+      done
       ;;
     -*)
       echo "unknown flag: $1" >&2
       exit "${SFS_EXIT_UNKNOWN}"
       ;;
     *)
-      if [[ -n "${SPRINT_ID}" ]]; then
-        echo "multiple sprint-id args: '${SPRINT_ID}' and '$1'" >&2
-        exit "${SFS_EXIT_UNKNOWN}"
-      fi
-      SPRINT_ID="$1"
+      GOAL_PARTS+=("$1")
       shift
       ;;
   esac
 done
+
+if [[ ${#GOAL_PARTS[@]} -gt 0 ]]; then
+  GOAL="${GOAL_PARTS[*]}"
+fi
+
+# Backward compatibility: a single old-style sprint id may still be passed
+# positionally. Free-text goals should use the default auto-generated id, and
+# custom ids should use `--id`.
+if [[ -z "${CUSTOM_ID}" && ${#GOAL_PARTS[@]} -eq 1 && "${GOAL_PARTS[0]}" == *sprint-* ]]; then
+  CUSTOM_ID="${GOAL_PARTS[0]}"
+  GOAL=""
+fi
+
+if [[ -n "${CUSTOM_ID}" ]]; then
+  SPRINT_ID="${CUSTOM_ID}"
+fi
 
 # ─────────────────────────────────────────────────────────────────────
 # Auto-generate sprint-id if not provided
@@ -95,6 +114,14 @@ if [[ -z "${SPRINT_ID}" ]]; then
     exit "${SFS_EXIT_UNKNOWN}"
   fi
 fi
+
+# Goal is free text but must stay single-line for frontmatter/events.jsonl.
+case "${GOAL}" in
+  *$'\n'*|*$'\r'*)
+    echo "invalid goal: newline not allowed" >&2
+    exit "${SFS_EXIT_UNKNOWN}"
+    ;;
+esac
 
 # Validate sprint-id shape (no path traversal, no whitespace, no leading dot).
 case "${SPRINT_ID}" in
@@ -146,6 +173,20 @@ for tpl in plan log review retro; do
   fi
 done
 
+NOW="$(date +%Y-%m-%dT%H:%M:%S%z 2>/dev/null | sed -E 's/([0-9]{2})$/:\1/')"
+_yaml_sprint="${SPRINT_ID//\\/\\\\}"
+_yaml_sprint="${_yaml_sprint//\"/\\\"}"
+_yaml_goal="${GOAL//\\/\\\\}"
+_yaml_goal="${_yaml_goal//\"/\\\"}"
+
+for doc in plan log review retro; do
+  update_frontmatter "${SPRINT_DIR}/${doc}.md" "sprint_id" "\"${_yaml_sprint}\"" || true
+  update_frontmatter "${SPRINT_DIR}/${doc}.md" "created_at" "\"${NOW}\"" || true
+  if [[ -n "${GOAL}" ]]; then
+    update_frontmatter "${SPRINT_DIR}/${doc}.md" "goal" "\"${_yaml_goal}\"" || true
+  fi
+done
+
 # ─────────────────────────────────────────────────────────────────────
 # Update current-sprint pointer + emit sprint_start event
 # ─────────────────────────────────────────────────────────────────────
@@ -158,8 +199,16 @@ fi
 # rejected whitespace and slashes above, so this is mostly defensive).
 _esc_sprint="${SPRINT_ID//\\/\\\\}"
 _esc_sprint="${_esc_sprint//\"/\\\"}"
+_esc_goal="${GOAL//\\/\\\\}"
+_esc_goal="${_esc_goal//\"/\\\"}"
 
-if ! append_event "sprint_start" "{\"sprint_id\":\"${_esc_sprint}\",\"by\":\"sfs-start\"}" 2>/dev/null; then
+if [[ -n "${GOAL}" ]]; then
+  _event_payload="{\"sprint_id\":\"${_esc_sprint}\",\"goal\":\"${_esc_goal}\",\"by\":\"sfs-start\"}"
+else
+  _event_payload="{\"sprint_id\":\"${_esc_sprint}\",\"by\":\"sfs-start\"}"
+fi
+
+if ! append_event "sprint_start" "${_event_payload}" 2>/dev/null; then
   echo "permission denied appending event to ${SFS_EVENTS_FILE}" >&2
   exit "${SFS_EXIT_PERM}"
 fi

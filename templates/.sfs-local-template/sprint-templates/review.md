@@ -1,8 +1,9 @@
 ---
 phase: review
 gate_id: ""          # one of G2, G3, G4 (set by /sfs review --gate <id>) — 미설정 시 빈 문자열
-sprint_id: ""        # filled by /sfs start (currently copied verbatim)
-created_at: ""       # filled by /sfs start (currently copied verbatim)
+sprint_id: ""        # filled by /sfs start
+goal: ""             # filled by /sfs start <goal>
+created_at: ""       # filled by /sfs start
 last_touched_at: ""  # filled by /sfs review (auto, ISO8601 + tz)
 ---
 

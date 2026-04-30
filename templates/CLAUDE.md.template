@@ -20,7 +20,7 @@ Claude Code 의 native slash 진입점은 `.claude/commands/sfs.md` 가 자동 i
 | 슬래시 | 실행 |
 |:--|:--|
 | `/sfs status [--color=auto/always/never]` | `.sfs-local/scripts/sfs-status.sh` |
-| `/sfs start [<sprint-id>] [--force]` | `.sfs-local/scripts/sfs-start.sh` |
+| `/sfs start <goal> [--id <sprint-id>] [--force]` | `.sfs-local/scripts/sfs-start.sh` |
 | `/sfs guide [--print]` | `.sfs-local/scripts/sfs-guide.sh` |
 | `/sfs plan` | `.sfs-local/scripts/sfs-plan.sh` |
 | `/sfs review --gate <id>` | `.sfs-local/scripts/sfs-review.sh` (id ∈ G-1, G0, G1, G2, G3, G4, G5) |
@@ -29,9 +29,8 @@ Claude Code 의 native slash 진입점은 `.claude/commands/sfs.md` 가 자동 i
 | `/sfs loop [OPTIONS]` | `.sfs-local/scripts/sfs-loop.sh` (Ralph Loop + Solon mutex) |
 | `/sfs`, `/sfs help` | usage 출력 (`.claude/commands/sfs.md` 의 self-help) |
 
-Bash adapter 가 부재하거나 실행 권한이 없으면 그 사실을 1줄로 사용자에게 알리고, 해당
-명령에 한해 fallback paraphrase 모드로 진입한다. stdout / stderr / exit code 는 verbatim
-보고 (paraphrase 금지).
+Bash adapter 가 부재하거나 실행 권한이 없으면 그 사실을 1줄로 사용자에게 알리고 중단한다.
+stdout / stderr / exit code 는 verbatim 보고한다 (paraphrase 금지).
 
 ## `/sfs loop` — multi-adaptor LLM executor convention
 

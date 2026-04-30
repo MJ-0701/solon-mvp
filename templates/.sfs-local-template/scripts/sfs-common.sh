@@ -383,9 +383,10 @@ EOF
 
 usage_start() {
   cat <<'EOF'
-Usage: /sfs start [<sprint-id>] [--force]
+Usage: /sfs start [<goal>] [--id <sprint-id>] [--force]
 
 Default sprint-id pattern: <YYYY-Wxx>-sprint-<N>  (ISO 8601 week)
+Goal is free text. Use --id only when you need a custom sprint id.
 
 Exit codes:
   0  success

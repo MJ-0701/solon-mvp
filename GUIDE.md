@@ -22,6 +22,12 @@ my-project/
 └── .gitignore                   ← Solon 마커 블록 자동 추가
 ```
 
+Windows PowerShell 사용자는 Git for Windows 의 Git Bash 가 필요하다. PowerShell 에서는
+`.sfs-local\scripts\sfs.ps1 status` 처럼 wrapper 를 쓰면 되고, wrapper 는 내부에서
+Git Bash 를 찾아 `.sfs-local/scripts/sfs-dispatch.sh` 로 넘긴다. WSL 사용자는 WSL shell
+안에서 `bash .sfs-local/scripts/sfs-dispatch.sh status` 처럼 직접 실행한다. 순수
+PowerShell-only 환경은 아직 지원선 밖이다.
+
 **5초 mental model**:
 - **본인이 편집** = `SFS.md`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`. 이 4개는 너의 프로젝트 정체성을 담는다.
 - **건드리지 마** = `.claude/`, `.gemini/`, `.agents/`, `.sfs-local/scripts/`, `.sfs-local/sprint-templates/`, `.sfs-local/decisions-template/`. 다음 `upgrade.sh` 실행 시 덮어써진다.
@@ -63,7 +69,7 @@ my-project/
 
 ---
 
-## 2. 다음 5분 — 첫 `/sfs status` + `/sfs start`
+## 2. 다음 5분 — 첫 상태 확인 + sprint start
 
 쓰는 LLM CLI 환경에 따라 셋 다 동등하게 작동한다 (paraphrase 금지, 결정성 보장):
 
@@ -71,7 +77,14 @@ my-project/
 |:--|:--|
 | Claude Code | `/sfs status` (slash popup) |
 | Gemini CLI | `/sfs status` (slash popup) |
-| Codex | `$sfs status` (explicit Skill) 또는 자연어로 "현재 sfs 상태 알려줘" |
+| Codex desktop app / compatible Codex | `/sfs status` |
+| Codex CLI blocking build | `/sfs status` 가 public API 이지만 CLI parser 에 막히면 `$sfs status` / 자연어가 임시 bypass |
+
+아래 예시는 Solon 기준 canonical `/sfs` 표기입니다. Codex desktop app 처럼 `/sfs` 가
+모델/Skill 에 도달하는 환경에서는 그대로 정상 경로입니다. Codex CLI 에서 bare `/sfs` 가
+`Unrecognized command '/sfs'` 로 막히면 그건 사용자 실수가 아니라 Codex CLI adaptor
+compatibility gap 입니다. `$sfs start ...`, `$sfs plan`, 자연어, direct bash 는 그 CLI build 에서만
+쓰는 임시 bypass 입니다.
 
 처음 실행하면 다음과 비슷한 1줄 dashboard 가 나온다:
 
@@ -87,7 +100,7 @@ sprint - · WU - · gate -:- · ahead 0 · last_event -
 
 이러면:
 1. `.sfs-local/sprints/2026-W18-sprint-1/` 같은 디렉토리가 생긴다 (ISO 주차 자동 명명).
-2. `plan.md` / `log.md` / `review.md` / `retro.md` / `decision-light.md` 5개 template 가 복사된다.
+2. `plan.md` / `log.md` / `review.md` / `retro.md` 4개 sprint file 이 복사된다.
 3. `events.jsonl` 에 `sprint_start` 이벤트 1줄 append.
 4. `.sfs-local/current-sprint` 에 sprint id 저장.
 
@@ -142,6 +155,10 @@ sprint 완전히 끝났으면:
 
 ## 5. 8 슬래시 명령 cheatsheet
 
+Codex desktop app 에서 `/sfs` 가 모델/Skill 에 보이면 정상 1급 경로다. Codex CLI 에서만
+leading `/sfs` 가 막히는 build 는 adaptor gap 이다. 그 경우만 임시로 `$sfs` 또는 자연어
+bypass 를 쓴다.
+
 | 명령 | 한 줄 설명 |
 |:--|:--|
 | `/sfs status` | 지금 어디까지 왔는지 1줄 |
@@ -161,6 +178,13 @@ bash .sfs-local/scripts/sfs-status.sh --help
 bash .sfs-local/scripts/sfs-guide.sh --help
 ```
 
+Windows PowerShell 에서는:
+
+```powershell
+.\.sfs-local\scripts\sfs.ps1 status
+.\.sfs-local\scripts\sfs.ps1 guide --print
+```
+
 ---
 
 ## 6. Multi-vendor — 어디서든 동작
@@ -171,8 +195,8 @@ bash .sfs-local/scripts/sfs-guide.sh --help
 |:--|:--|
 | Claude Code | `.claude/commands/sfs.md` (자동 install) |
 | Gemini CLI | `.gemini/commands/sfs.toml` (자동 install) |
-| Codex | `.agents/skills/sfs/SKILL.md` (자동 install, project-scoped Skill) |
-| Codex (선택, slash popup) | `~/.codex/prompts/sfs.md` (manual `cp` — 사용자 home 보호) |
+| Codex | `.agents/skills/sfs/SKILL.md` (자동 install, project-scoped Skill; `/sfs` public API) |
+| Codex CLI bypass (선택, legacy prompt) | `~/.codex/prompts/sfs.md` (manual `cp`, 지원 build 에서 `/prompts:sfs ...`) |
 
 `/sfs loop` 의 LLM 호출 부분 (자율 진행 모드) 은 `--executor claude|gemini|codex|<custom>` 로 vendor 선택:
 

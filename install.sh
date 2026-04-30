@@ -84,7 +84,7 @@ die()   { err "$*"; exit 1; }
 
 # stdin 이 pipe (curl | bash) 면 /dev/tty 로 전환
 if [ "$ASSUME_YES" -ne 1 ] && [ ! -t 0 ]; then
-  if [ -r /dev/tty ]; then
+  if [ -r /dev/tty ] && { : < /dev/tty; } 2>/dev/null; then
     exec < /dev/tty
   else
     die "대화형 input 불가 (stdin 파이프 + /dev/tty 없음). 로컬 실행 권장: git clone ... && ./install.sh"
@@ -298,17 +298,20 @@ mkdir -p "$TARGET/.gemini/commands"
 install_file "templates/.gemini/commands/sfs.toml" ".gemini/commands/sfs.toml" "Gemini CLI /sfs 슬래시"
 
 # 6.2c) Codex Skill (project-scoped, .agents/skills/, Anthropic Skills 호환)
-# 위치: <project>/.agents/skills/sfs/SKILL.md — Codex CLI/IDE/app 모두에서 자동 발견.
+# 위치: <project>/.agents/skills/sfs/SKILL.md — Codex desktop app / compatible Codex surfaces 에서 자동 발견.
+# Codex CLI blocking build 는 leading `/sfs` 를 모델 전에 차단할 수 있으므로 Skill fallback 으로 `$sfs` / 자연어를 쓴다.
 # implicit invocation (사용자 의도 매칭) + explicit invocation ($sfs) 양쪽 작동.
 mkdir -p "$TARGET/.agents/skills/sfs"
 install_file "templates/.agents/skills/sfs/SKILL.md" ".agents/skills/sfs/SKILL.md" "Codex Skill (project-scoped)"
 
-# 6.2d) Codex CLI user-scoped prompt (optional fallback, NOT auto-installed to ~/)
+# 6.2d) Codex CLI user-scoped prompt (legacy/optional fallback, NOT auto-installed to ~/)
 # 위치 (template 만): templates/.codex/prompts/sfs.md
-# project-scoped Skill 이 primary entry — 본 file 은 user 가 ~/.codex/prompts/sfs.md
-# 로 직접 cp 할 때 사용. install.sh 는 user $HOME 에 쓰지 않음 (사용자 영역 보호).
+# `/sfs` 는 Solon public command surface. project-scoped Skill 은 Codex adaptor entry 이고,
+# 본 file 은 user 가 ~/.codex/prompts/sfs.md 로 직접 cp 할 때 쓰는 legacy prompt fallback.
+# Codex build 에 따라 `/prompts:sfs` 지원 여부가 다르므로 primary 로 안내하지 않는다.
+# install.sh 는 user $HOME 에 쓰지 않음 (사용자 영역 보호).
 # 안내만 출력:
-ok "Codex user-scoped slash fallback (optional): templates/.codex/prompts/sfs.md → ~/.codex/prompts/sfs.md (manual cp)"
+ok "Codex custom prompt fallback (optional/legacy): templates/.codex/prompts/sfs.md → ~/.codex/prompts/sfs.md (manual cp, if supported)"
 
 # 6.3) 자동 치환 가능한 placeholder (DATE + SOLON-VERSION) 처리
 # <PROJECT-NAME> / <STACK> / <DB> / <DEPLOY> / <DOMAIN> 등은 consumer 수동 치환 대상.
@@ -384,8 +387,9 @@ SCRIPTS_SRC="$SOURCE_DIR/templates/.sfs-local-template/scripts"
 if [ -d "$SCRIPTS_SRC" ]; then
   mkdir -p "$TARGET/.sfs-local/scripts"
   cp "$SCRIPTS_SRC"/*.sh "$TARGET/.sfs-local/scripts/" 2>/dev/null || true
+  cp "$SCRIPTS_SRC"/*.ps1 "$TARGET/.sfs-local/scripts/" 2>/dev/null || true
   chmod +x "$TARGET/.sfs-local/scripts"/*.sh 2>/dev/null || true
-  ok "  scripts/ 복사 (sfs-*.sh, executable)"
+  ok "  scripts/ 복사 (sfs-*.sh executable + Windows sfs.ps1 wrapper)"
 fi
 
 # sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용하는 4 템플릿
@@ -471,18 +475,21 @@ Solon 버전:      $SOLON_VERSION
 .sfs-local/:     스캐폴드 (${C_BOLD}기존 sprint 산출물은 보존됨${C_RESET})
 공통 지침:       SFS.md
 런타임 어댑터:   CLAUDE.md / AGENTS.md / GEMINI.md
-Slash 1급:       .claude/commands/sfs.md (Claude Code, Markdown)
-                 .gemini/commands/sfs.toml (Gemini CLI, TOML)
+Entry 1급:       .claude/commands/sfs.md (Claude Code, Markdown slash)
+                 .gemini/commands/sfs.toml (Gemini CLI, TOML slash)
                  .agents/skills/sfs/SKILL.md (Codex, Skills 체계)
+Windows wrapper: .sfs-local/scripts/sfs.ps1 (PowerShell → Git Bash)
 
 다음 단계:
 
   ${C_BOLD}1.${C_RESET} SFS.md 내용 확인 + 프로젝트 특성 반영 (Stack / 도메인 등).
 
-  ${C_BOLD}2.${C_RESET} 선호 런타임에서 시작 (셋 다 native /sfs 슬래시 1급):
+  ${C_BOLD}2.${C_RESET} 선호 런타임에서 시작 (Solon public API 는 셋 다 /sfs):
      ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} 또는 ${C_BLUE}/sfs start${C_RESET}
      ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} 또는 ${C_BLUE}/sfs start${C_RESET}
-     ${C_BLUE}codex${C_RESET}      → ${C_BLUE}\$sfs status${C_RESET} (explicit) 또는 자연어로 "현재 상태 확인" (implicit)
+     ${C_BLUE}codex app${C_RESET}  → ${C_BLUE}/sfs status${C_RESET} (모델/Skill 에 도달하면 정상 1급)
+     ${C_BLUE}codex CLI${C_RESET}  → ${C_BLUE}/sfs status${C_RESET} (CLI parser 에 막히는 build 는 adaptor gap;
+                   임시 bypass: ${C_BLUE}\$sfs status${C_RESET}, ${C_BLUE}sfs status${C_RESET}, 자연어, direct bash)
      셋 모두 동일한 ${C_BOLD}.sfs-local/scripts/sfs-*.sh${C_RESET} bash adapter 호출.
      설치 직후 가이드는 ${C_BLUE}/sfs guide${C_RESET} 또는 ${C_BLUE}/sfs guide --print${C_RESET}.
 

@@ -33,7 +33,9 @@ warn()  { printf "  %s⚠%s %s\n" "$C_YELLOW" "$C_RESET" "$*"; }
 err()   { printf "  %s✗%s %s\n" "$C_RED" "$C_RESET" "$*" >&2; }
 die()   { err "$*"; exit 1; }
 
-if [ ! -t 0 ] && [ -r /dev/tty ]; then exec < /dev/tty; fi
+if [ ! -t 0 ] && [ -r /dev/tty ] && { : < /dev/tty; } 2>/dev/null; then
+  exec < /dev/tty
+fi
 
 prompt() {
   local msg="$1" default="${2:-}" answer
@@ -92,9 +94,15 @@ EOF
       # scaffold 파일만 제거
       rm -f "$TARGET/.sfs-local/divisions.yaml"
       rm -f "$TARGET/.sfs-local/VERSION"
+      rm -f "$TARGET/.sfs-local/GUIDE.md"
+      rm -f "$TARGET/.sfs-local/current-sprint"
+      rm -f "$TARGET/.sfs-local/current-wu"
       rm -f "$TARGET/.sfs-local/sprints/.gitkeep"
       rm -f "$TARGET/.sfs-local/decisions/.gitkeep"
-      ok "scaffold 제거 (divisions.yaml / VERSION / .gitkeep)"
+      rm -rf "$TARGET/.sfs-local/scripts"
+      rm -rf "$TARGET/.sfs-local/sprint-templates"
+      rm -rf "$TARGET/.sfs-local/decisions-template"
+      ok "scaffold 제거 (runtime scripts / templates / divisions.yaml / VERSION / GUIDE.md)"
       warn "산출물 보존: sprints/ / decisions/ / events.jsonl"
       ;;
     *)
@@ -128,17 +136,33 @@ remove_block "$LEGACY_GIT_MARKER_BEGIN" "$LEGACY_GIT_MARKER_END"
 # 3. Runtime adapter docs — 대화형 (사용자가 수정했을 가능성)
 # ============================================================================
 
-for doc in SFS.md CLAUDE.md AGENTS.md GEMINI.md .claude/commands/sfs.md; do
+for doc in \
+  SFS.md \
+  CLAUDE.md \
+  AGENTS.md \
+  GEMINI.md \
+  .claude/commands/sfs.md \
+  .gemini/commands/sfs.toml \
+  .agents/skills/sfs/SKILL.md
+do
   [ -f "$TARGET/$doc" ] || continue
   echo ""
   warn "$doc 가 존재합니다 (사용자가 편집했을 수 있음)"
-  if [ "$(prompt "$doc 삭제할까요?" "N")" = "y" ] || [ "$(prompt "" "N")" = "Y" ]; then
-    rm -f "$TARGET/$doc"
-    ok "$doc 제거"
-  else
-    ok "$doc 보존"
-  fi
+  ans=$(prompt "$doc 삭제할까요?" "N")
+  case "$ans" in
+    y|Y|yes|YES)
+      rm -f "$TARGET/$doc"
+      ok "$doc 제거"
+      ;;
+    *)
+      ok "$doc 보존"
+      ;;
+  esac
 done
+
+rmdir "$TARGET/.claude/commands" "$TARGET/.claude" 2>/dev/null || true
+rmdir "$TARGET/.gemini/commands" "$TARGET/.gemini" 2>/dev/null || true
+rmdir "$TARGET/.agents/skills/sfs" "$TARGET/.agents/skills" "$TARGET/.agents" 2>/dev/null || true
 
 # ============================================================================
 # 4. 완료

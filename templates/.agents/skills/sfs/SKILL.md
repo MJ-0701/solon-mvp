@@ -1,13 +1,22 @@
 ---
 name: sfs
-description: Solon SFS workflow — dispatch /sfs (status, start, guide, plan, review, decision, retro, loop) to bash adapter SSoT. Trigger when user types /sfs, sfs <command>, or asks Solon SFS to do something (e.g., "현재 상태 확인", "guide 보기", "sprint 시작", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth — paraphrase forbidden, exit codes verbatim.
+description: Solon SFS workflow — dispatch status, start, guide, plan, review, decision, retro, loop to bash adapter SSoT. Trigger when user invokes /sfs (if visible to the model), $sfs, types sfs <command>, or asks Solon SFS to do something (e.g., "현재 상태 확인", "guide 보기", "sprint 시작", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth — paraphrase forbidden, exit codes verbatim.
 ---
 
 # Solon SFS — Codex Skill
 
-This project uses Solon SFS. When the user invokes `/sfs <command>` or
-expresses a Solon SFS workflow intent, dispatch the request to the
-corresponding bash script under `.sfs-local/scripts/` and stop.
+This project uses Solon SFS. `/sfs` is the public command surface. When the
+user invokes `/sfs <command>` (if it reaches the model), `$sfs <command>`,
+types `sfs <command>`, or expresses a Solon SFS workflow intent, dispatch the
+request to the corresponding bash script under `.sfs-local/scripts/` and stop.
+
+Codex desktop app or any Codex surface where `/sfs ...` reaches this Skill is
+a first-class path and must keep working. Some Codex CLI builds may intercept
+bare leading-slash input such as `/sfs status` before it reaches the model.
+Treat only that CLI interception as a Codex CLI adaptor compatibility gap, not
+as a different Solon API. Temporary bypasses for those builds are `$sfs status`,
+`sfs status`, or direct bash (`bash .sfs-local/scripts/sfs-status.sh`) until the
+CLI slash compatibility layer is available.
 
 The eight subcommands are **deterministic** and must NOT be re-interpreted by
 the model. Bash adapter is single source of truth (SSoT).
@@ -16,22 +25,27 @@ the model. Bash adapter is single source of truth (SSoT).
 
 | User intent / first arg | Script to run | Notes |
 |:--|:--|:--|
-| `status` (또는 "현재 상태", "어디까지 했는지") | `bash .sfs-local/scripts/sfs-status.sh [--color=auto/always/never]` | 1줄 dashboard |
-| `start <goal>` (또는 "sprint 시작", "새 sprint") | `bash .sfs-local/scripts/sfs-start.sh [<sprint-id>] [--force]` | sprint dir 초기화 + 5 templates cp |
-| `guide [--print]` (또는 "가이드", "처음 사용법") | `bash .sfs-local/scripts/sfs-guide.sh [--path|--print]` | onboarding guide 경로 출력/본문 보기 |
-| `plan` (또는 "plan 작성", "이번 sprint 계획") | `bash .sfs-local/scripts/sfs-plan.sh` | plan.md 진입 + plan_open event |
-| `review --gate <id>` (또는 "review 작성", "검증 기록") | `bash .sfs-local/scripts/sfs-review.sh --gate <id>` | id ∈ G-1, G0, G1, G2, G3, G4, G5 |
-| `decision <title>` (또는 "결정 기록", "ADR 추가") | `bash .sfs-local/scripts/sfs-decision.sh "<title>" [--id <id>]` | full ADR 또는 mini-ADR 분기 |
-| `retro [--close]` (또는 "회고", "sprint close") | `bash .sfs-local/scripts/sfs-retro.sh [--close]` | `--close` 시 sprint close + auto commit |
-| `loop [OPTIONS]` (또는 "자율 진행", "loop 시작") | `bash .sfs-local/scripts/sfs-loop.sh [OPTIONS]` | Ralph Loop + Solon mutex (see `--help`) |
+| `status` (또는 "현재 상태", "어디까지 했는지") | `bash .sfs-local/scripts/sfs-dispatch.sh status [--color=auto/always/never]` | 1줄 dashboard |
+| `start <goal>` (또는 "sprint 시작", "새 sprint") | `bash .sfs-local/scripts/sfs-dispatch.sh start <goal> [--id <sprint-id>] [--force]` | sprint dir 초기화 + 4 sprint files cp |
+| `guide [--print]` (또는 "가이드", "처음 사용법") | `bash .sfs-local/scripts/sfs-dispatch.sh guide [--path|--print]` | onboarding guide 경로 출력/본문 보기 |
+| `plan` (또는 "plan 작성", "이번 sprint 계획") | `bash .sfs-local/scripts/sfs-dispatch.sh plan` | plan.md 진입 + plan_open event |
+| `review --gate <id>` (또는 "review 작성", "검증 기록") | `bash .sfs-local/scripts/sfs-dispatch.sh review --gate <id>` | id ∈ G-1, G0, G1, G2, G3, G4, G5 |
+| `decision <title>` (또는 "결정 기록", "ADR 추가") | `bash .sfs-local/scripts/sfs-dispatch.sh decision "<title>" [--id <id>]` | full ADR 또는 mini-ADR 분기 |
+| `retro [--close]` (또는 "회고", "sprint close") | `bash .sfs-local/scripts/sfs-dispatch.sh retro [--close]` | `--close` 시 sprint close + auto commit |
+| `loop [OPTIONS]` (또는 "자율 진행", "loop 시작") | `bash .sfs-local/scripts/sfs-dispatch.sh loop [OPTIONS]` | Ralph Loop + Solon mutex (see `--help`) |
 
 ## Procedure
 
-1. **Existence check** — Use the shell tool to verify the target script
-   exists and is executable (`ls -l .sfs-local/scripts/sfs-<name>.sh`). If
+1. **Existence check** — Use the shell tool to verify the dispatcher and target
+   script exist and are executable (`ls -l .sfs-local/scripts/sfs-dispatch.sh
+   .sfs-local/scripts/sfs-<name>.sh`). If either is
    missing, tell the user which script is missing in 1 line and stop (do NOT
    try to recreate the script — install/upgrade is user's responsibility via
    `install.sh` / `upgrade.sh`).
+
+   On Windows PowerShell, use `.sfs-local/scripts/sfs.ps1 <command> [args]`
+   when direct `bash` invocation is unavailable. The wrapper requires Git Bash.
+   WSL users should invoke the bash adapter from inside the WSL shell.
 
 2. **Quote args safely** — Re-quote `<remaining args>` for the shell. Reject
    any argument containing a newline or NUL byte by reporting `unknown arg`.
@@ -87,13 +101,16 @@ Help: bash .sfs-local/scripts/sfs-<command>.sh --help
 ## Multi-adaptor Parity
 
 This Skill is the Codex 1급 entry point for Solon SFS. The same workflow is
-also exposed:
+also exposed through these entry points:
 
 - **Claude Code**: `.claude/commands/sfs.md` (slash command, native dispatch)
 - **Gemini CLI**: `.gemini/commands/sfs.toml` (TOML custom command, native slash)
-- **Codex**: 본 Skill (`.agents/skills/sfs/SKILL.md`, project-scoped) +
-  optional user-scoped fallback (`~/.codex/prompts/sfs.md`)
+- **Codex**: 본 Skill (`.agents/skills/sfs/SKILL.md`, project-scoped).
+  `/sfs` is the required public surface and remains first-class in Codex desktop
+  app / compatible surfaces where it reaches the model. `$sfs ...` / natural
+  language are temporary CLI bypasses only when the native slash parser blocks
+  unknown commands before the model sees them.
 
-All four entry points dispatch to the SAME bash adapter (`.sfs-local/scripts/sfs-*.sh`).
+All entry points dispatch to the SAME bash adapter (`.sfs-local/scripts/sfs-*.sh`).
 Vendor-asymmetry between adapters is forbidden — if you find drift, it's a
 bug to escalate via `/sfs decision` or report upstream.
