@@ -1,3 +1,22 @@
+## [0.5.30-product] - 2026-05-01
+
+**Guide command surface clarity.** The short guide now distinguishes terminal
+commands from agent commands so users do not think they must type
+`sfs /sfs guide` in a shell.
+
+### Added
+
+- **Claude Skill install** — `sfs agent install claude` now installs
+  `.claude/skills/sfs/SKILL.md` as the primary Claude Code `/sfs` surface while
+  keeping `.claude/commands/sfs.md` as a legacy fallback.
+
+### Changed
+
+- **Guide output** — `/sfs guide` now shows `Terminal: sfs ...`,
+  `Claude/Gemini: /sfs ...`, and `Codex: $sfs ...` as separate entry points.
+- **Compatibility note** — the guide explains that `sfs /sfs guide` is accepted
+  only as adapter normalization, while the human shell command is `sfs guide`.
+
 ## [0.5.29-product] - 2026-05-01
 
 **Uninstall command hardening.** Project cleanup is now usable from the global

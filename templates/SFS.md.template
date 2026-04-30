@@ -167,7 +167,8 @@ Solon SFS 의 10 명령은 어떤 CLI 환경에서 호출하든 동일한 `sfs` 
 세 환경 모두 동일하게 `sfs` runtime 을 SSoT 로 사용한다 (paraphrase 금지):
 
 - **Claude Code**: `/sfs`, `/sfs help`, `/sfs status`, `/sfs guide`, `/sfs start <goal>`
-  (`.claude/commands/sfs.md` 의 dispatch table 이 자동으로 `sfs <command>` 호출)
+  (`.claude/skills/sfs/SKILL.md` 가 primary 이고 `.claude/commands/sfs.md` 는 legacy fallback.
+  둘 다 자동으로 `sfs <command>` 를 호출)
 - **Codex**: `.agents/skills/sfs/SKILL.md` + `AGENTS.md` 가 동일한 dispatch table 을 안내.
   Codex app/CLI 에서는 `$sfs status`, `$sfs start ...`, `$sfs brainstorm ...` 처럼 Skill
   mention 을 우선 사용한다. Bare `/sfs` 는 host native slash UI 가 모델 전에 차단할 수 있다.

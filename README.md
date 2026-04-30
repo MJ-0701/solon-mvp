@@ -168,7 +168,8 @@ mention 을 우선 사용합니다. Codex app/CLI 는 unknown leading slash 를 
 또는 자연어 요청이 실사용 1급 경로입니다. Runtime adaptor 는 각 vendor 의 입력면 차이를
 흡수해서 같은 bash adapter 로 내려보내야 합니다. `sfs agent install ...` 은 다음 thin
 entry point 를 프로젝트에 설치/갱신합니다:
-`.claude/commands/sfs.md` + `.gemini/commands/sfs.toml` + `.agents/skills/sfs/SKILL.md`.
+`.claude/skills/sfs/SKILL.md` + `.claude/commands/sfs.md` +
+`.gemini/commands/sfs.toml` + `.agents/skills/sfs/SKILL.md`.
 기존 파일이 다르면 `.sfs-local/tmp/agent-install-backups/` 에 백업한 뒤 갱신합니다.
 
 > 📘 **친구 onboarding 30분 walk-through**: 설치 직후 처음 30분 동안 `SFS.md` placeholder 치환,
@@ -274,7 +275,7 @@ CLI 에서든 동등한 deterministic bash adapter SSoT 로 동작합니다.
 
 | 런타임 | Entry point (자동 install) | 호출 방법 |
 |---|---|---|
-| **Claude Code** | `.claude/commands/sfs.md` (Markdown slash) | `/sfs status` |
+| **Claude Code** | `.claude/skills/sfs/SKILL.md` (primary Skill) + `.claude/commands/sfs.md` (legacy fallback) | `/sfs status` |
 | **Gemini CLI** | `.gemini/commands/sfs.toml` (TOML slash) | `/sfs status` |
 | **Codex app / Codex CLI** | `.agents/skills/sfs/SKILL.md` (project-scoped Skill) | `$sfs status` / `sfs status` / 자연어 |
 
@@ -349,7 +350,8 @@ bash ~/tmp/solon-product/install.sh --yes
 | `CLAUDE.md` | Claude Code adapter |
 | `AGENTS.md` | Codex adapter |
 | `GEMINI.md` | Gemini CLI adapter |
-| `.claude/commands/sfs.md` | Claude Code `/sfs` slash command |
+| `.claude/skills/sfs/SKILL.md` | Claude Code `/sfs` Skill (primary) |
+| `.claude/commands/sfs.md` | Claude Code `/sfs` legacy slash command fallback |
 | `.gemini/commands/sfs.toml` | Gemini CLI `/sfs` slash command |
 | `.agents/skills/sfs/SKILL.md` | Codex Skill (project-scoped) |
 | `.sfs-local/` | sprint, decision, event, config, custom override 를 담는 로컬 운영 디렉토리 |
@@ -398,7 +400,7 @@ powershell -ExecutionPolicy Bypass -File $env:TEMP\solon-product\upgrade.ps1
 Upgrade 는 `.sfs-local/VERSION` 과 배포판 `VERSION` 을 비교하고, 파일을 쓰기 전에
 dry-run preview 를 보여줍니다.
 
-- `SFS.md`, `.claude/commands/sfs.md`, `.gemini/commands/sfs.toml`, `.agents/skills/sfs/SKILL.md` 는 배포판 관리 영역으로 갱신 대상입니다.
+- `SFS.md`, `.claude/skills/sfs/SKILL.md`, `.claude/commands/sfs.md`, `.gemini/commands/sfs.toml`, `.agents/skills/sfs/SKILL.md` 는 배포판 관리 영역으로 갱신 대상입니다.
 - thin layout 에서는 runtime scripts/templates/personas 를 프로젝트에 복사하지 않고 global `sfs` package 를 갱신합니다.
 - vendored layout 에서는 runtime scripts/templates/personas 도 project-local 배포판 관리 영역으로 갱신합니다.
 - `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.sfs-local/divisions.yaml` 은 프로젝트별 편집 가능성이 커서 기본 보존합니다.
@@ -445,7 +447,7 @@ Uninstall 은 대화형으로 실행됩니다.
 | `templates/CLAUDE.md.template` | Claude Code adapter template |
 | `templates/AGENTS.md.template` | Codex adapter template |
 | `templates/GEMINI.md.template` | Gemini CLI adapter template |
-| `templates/.claude/commands/sfs.md` | Claude Code slash command |
+| `templates/.claude/commands/sfs.md` | Claude Code Skill/legacy slash source |
 | `templates/.gemini/commands/sfs.toml` | Gemini CLI slash command |
 | `templates/.agents/skills/sfs/SKILL.md` | Codex Skill (project-scoped) |
 | `templates/.codex/prompts/sfs.md` | Codex custom prompt fallback (optional/legacy) |

@@ -202,6 +202,7 @@ for doc in \
   AGENTS.md \
   GEMINI.md \
   .claude/commands/sfs.md \
+  .claude/skills/sfs/SKILL.md \
   .gemini/commands/sfs.toml \
   .agents/skills/sfs/SKILL.md
 do
@@ -224,7 +225,7 @@ do
   esac
 done
 
-rmdir "$TARGET/.claude/commands" "$TARGET/.claude" 2>/dev/null || true
+rmdir "$TARGET/.claude/commands" "$TARGET/.claude/skills/sfs" "$TARGET/.claude/skills" "$TARGET/.claude" 2>/dev/null || true
 rmdir "$TARGET/.gemini/commands" "$TARGET/.gemini" 2>/dev/null || true
 rmdir "$TARGET/.agents/skills/sfs" "$TARGET/.agents/skills" "$TARGET/.agents" 2>/dev/null || true
 
