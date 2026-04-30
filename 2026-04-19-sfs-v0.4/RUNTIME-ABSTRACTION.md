@@ -278,6 +278,62 @@ appendix/contracts/
 
 ✅ = MVP 검증 대상. 후속 = MVP 이후 정식 SDK/plugin adapter 대상.
 
+### §6.5 도구 → 도메인 운영 매핑 (Operational Tool-to-Domain Mapping)
+
+> **이 섹션은 §6.1~§6.3 의 distribution adapter (어떤 파일이 어디로 가는가) 와 §6.4 의 테스트 매트릭스 (호환성 검증) 를 보완한다. 본 §6.5 는 "현 시점 운영에서 어떤 작업이 어떤 도구로 어디서 일어나는가" 의 운영 매핑 SSoT.**
+>
+> CLAUDE.md §1.21 의 link 대상이며, §1 은 진입 인지만 보장하고 본 §6.5 가 실 매핑을 담는다. 도구 추가/변동 시 본 § 만 갱신 → §1 mutate 비용 0.
+
+#### 운영 매핑 (2026-04-30 baseline)
+
+**Claude Code (host CLI 직접 접근, FUSE 무관)**
+- 1차 영역: `~/agent_architect/2026-04-19-sfs-v0.4/` 메인 dev SSoT.
+- 작업 종류: WU 진입/완료, sprint 편집, learning-logs 누적, sub-agent review gate (§1.15 planner/evaluator), `.claude/` hook + slash command + plugin 운영, scripts/*.sh 작성/실행, git native 처리.
+- adapter file: `CLAUDE.md` (§6.1 정합).
+- 강점 source: 호스트 파일 직접 접근, terminal session 지속, hook native, sub-agent native.
+
+**Claude Cowork (Desktop 앱, sandbox mount)**
+- 1차 영역: 결정 dialog (본 conversation 패턴, §1.17 7-step briefing prose 송출), scheduled task `mode=user-active-deferred` (PROGRESS.md `scheduled_task_log` 누적), artifact widget 시각화 (Solon Status Report 등 §14 후보), skill 산출물 (docx/pptx/xlsx), AskUserQuestion 결정 widget, 외부 connector MCP (Slack/Linear/Notion 등).
+- 작업 종류: 사용자 1:1 active conversation, 결정 갈림길 brief, scheduled auto-resume, 비-개발 산출물 생성.
+- adapter file: `CLAUDE.md` 공유 (§6.1).
+- 위험 패턴 link: `learning-logs/2026-05/P-08-fuse-bypass-cp-a-broken.md` + `P-09-sandbox-file-clone-isolation.md` — Cowork sandbox FUSE mount 의 `.git/index.lock` 경합. .git mutate 시 §1.6 FUSE bypass 의무.
+
+**Codex (OpenAI Codex CLI / agentic)**
+- 1차 영역: `~/workspace/solon-mvp/` stable distribution repo.
+- 작업 종류: stable repo hotfix, PR 작업, production-side 실 사용자 발견 버그 fix (§1.13 R-D1 hotfix path).
+- adapter file: `AGENTS.md` (§6.2 정합, root + docset 양쪽).
+- 학습 로그 link: `P-13-dev-stable-divergence-on-cut.md` (codex hotfix narrative ↔ dev rsync overwrite 회귀) + `P-14-mental-coupling-on-rename-fix.md` (rename fix 시 narrative 의도 read 누락 안티패턴). 충돌 차단 = `scripts/cut-release.sh` Pre-flight 의 stable HEAD vs dev narrative key divergence 감지 (exit 7, `--allow-divergence` bypass).
+
+**Gemini-CLI**
+- 1차 영역: TBD (Phase 2 또는 보류).
+- adapter file: `GEMINI.md` (§6.3 정합).
+- 운영 매핑 미정 — 사용자 도입 결정 시 본 § 에 row 추가.
+
+#### 공유 SSoT (도구 무관)
+
+- `PROGRESS.md` frontmatter — `current_wu_owner` mutex (§1.12) + `domain_locks` D-A~D-F + `released_history` rolling. 모든 도구가 같은 mutex/lock primitive 를 read/write 함으로써 race 차단.
+- `CLAUDE.md` §1 — 절대 규칙 20 + 환경 매핑 link (§1.21).
+- `AGENTS.md` (root + docset) — Codex/Cursor/Aider 진입점, bootstrap shim 으로 docset CLAUDE.md 까지 chain.
+
+#### 자동화 hook (강제력 source)
+
+- §1.13 R-D1 (dev-first stable sync-back).
+- `scripts/sync-stable-to-dev.sh` — stable hotfix 발견 시 dev staging 동기화 (P-13 회귀 차단).
+- `scripts/cut-release.sh` — release cut 전 dev/stable narrative key divergence 감지, 검출 시 exit 7 (`--allow-divergence` 명시적 bypass).
+- §1.15 review gate — planner + evaluator 페르소나 self-review (큰 작업 자율진행 사전 게이트).
+
+#### 갱신 정책
+
+- 도구 추가 시: `§6.x` 신규 adapter 슬롯 + 본 §6.5 운영 매핑 row 추가.
+- 도구 변동/deprecate 시: 본 §6.5 row 만 수정 + `§6.x` adapter 상태 갱신 — CLAUDE.md §1.21 mutate 비용 0.
+- 매핑 회색 영역 발견 시: 새 도메인 (`D-X`) 신설 또는 기존 도메인 lock 에 `primary_tool` hint 추가 검토 → W10 TODO 로 이관 후 사용자 결정.
+
+#### 근거
+
+- 26번째 세션 `eager-festive-shannon` (2026-04-30) 사용자 (i)+(iii-b) 하이브리드 결정 (§1.21 link 1줄 + 본 §6.5 본체 분리).
+- AGENTS bootstrap shim (INDEX.md v0.4-r4 변경점, "AGENTS bootstrap shim 신설: root `AGENTS.md` → docset `AGENTS.md` → `CLAUDE.md` 실제 SSoT") = 멀티-agent 호환 의식 설계.
+- 2026-04-20 심야 사용자 직접 지시 verbatim ("sfs를 claude 뿐만 아니라 codex랑 gemini-cli에서도 사용하고 싶거든?? 그래서 추상화 하는게 중요할듯?!", WU-8) — 본 RUNTIME-ABSTRACTION.md 자체의 trigger 와 동일 의도.
+
 ---
 
 ## §7. 후속 SDK 어댑터 착수 판정 기준
