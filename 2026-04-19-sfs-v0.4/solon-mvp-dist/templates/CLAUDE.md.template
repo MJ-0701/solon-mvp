@@ -2,6 +2,11 @@
 
 This project uses Solon Product SFS (multi-adaptor by design — Claude Code / Codex / Gemini CLI 동등 1급).
 
+Solon owns the `/sfs` workflow in this project. If a usage footer is shown after
+a Solon command, keep the useful `Used / Not Used / Recommended` shape but
+render it as `Solon Feature Usage`, not `bkit Feature Usage`. `/sfs` output must
+remain Solon-first and bash-adapter anchored.
+
 Before planning or editing, read:
 
 - `SFS.md`
