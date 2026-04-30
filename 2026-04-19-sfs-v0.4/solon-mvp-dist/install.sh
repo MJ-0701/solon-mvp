@@ -550,6 +550,7 @@ layout:          $INSTALL_LAYOUT
 Entry 1급:       .claude/commands/sfs.md (Claude Code, Markdown slash)
                  .gemini/commands/sfs.toml (Gemini CLI, TOML slash)
                  .agents/skills/sfs/SKILL.md (Codex, Skills 체계)
+Agent 갱신:      sfs agent install claude|gemini|codex|all
 Runtime:         $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI" || echo ".sfs-local/scripts/sfs-dispatch.sh")
 Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Git Bash/WSL" || echo ".sfs-local/scripts/sfs.ps1 (PowerShell → Git Bash)")
 
@@ -572,7 +573,10 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
      ${C_BLUE}git commit -m "chore: install solon-product $SOLON_VERSION"${C_RESET}
      ${C_BLUE}git push${C_RESET}
 
-  ${C_BOLD}4.${C_RESET} 버전 갱신 필요 시: ${C_BLUE}solon-product/upgrade.sh${C_RESET} 실행.
+  ${C_BOLD}4.${C_RESET} Claude/Gemini/Codex entry point 만 갱신할 때:
+     ${C_BLUE}sfs agent install all${C_RESET}
+
+  ${C_BOLD}5.${C_RESET} 버전 갱신 필요 시: ${C_BLUE}solon-product/upgrade.sh${C_RESET} 실행.
 
 문제 발생 시: https://github.com/${SOLON_REPO}/issues
 

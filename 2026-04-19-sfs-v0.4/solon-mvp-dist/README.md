@@ -132,8 +132,18 @@ Headless CLI review 는 인증도 bridge 의 일부다. SFS 는 `.sfs-local/auth
 Global runtime 이 PATH 에 있을 때 권장 경로:
 
 ```bash
+brew install MJ-0701/solon-product/sfs
 cd ~/workspace/my-project
 sfs init
+sfs agent install all
+```
+
+agent 별로 명시하고 싶으면 같은 프로젝트 루트에서 개별 설치한다:
+
+```bash
+sfs agent install claude
+sfs agent install gemini
+sfs agent install codex
 ```
 
 아직 Homebrew/source package 로 `sfs` 를 노출하지 않았다면 기존 curl installer 를 쓸 수 있습니다.
@@ -156,9 +166,10 @@ iwr -useb https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.p
 mention 을 우선 사용합니다. Codex app/CLI 는 unknown leading slash 를 모델 전에 막고
 `커맨드 없음` / `Unrecognized command` 를 표시할 수 있으므로, Codex 에서는 `$sfs status`
 또는 자연어 요청이 실사용 1급 경로입니다. Runtime adaptor 는 각 vendor 의 입력면 차이를
-흡수해서 같은 bash adapter 로 내려보내야 합니다. 자동 install 된 entry point 는
-`.claude/commands/sfs.md` + `.gemini/commands/sfs.toml` + `.agents/skills/sfs/SKILL.md`
-입니다.
+흡수해서 같은 bash adapter 로 내려보내야 합니다. `sfs agent install ...` 은 다음 thin
+entry point 를 프로젝트에 설치/갱신합니다:
+`.claude/commands/sfs.md` + `.gemini/commands/sfs.toml` + `.agents/skills/sfs/SKILL.md`.
+기존 파일이 다르면 `.sfs-local/tmp/agent-install-backups/` 에 백업한 뒤 갱신합니다.
 
 > 📘 **친구 onboarding 30분 walk-through**: 설치 직후 처음 30분 동안 `SFS.md` placeholder 치환,
 > 첫 sprint 시작, plan/review/decision/retro 흐름까지 따라 하는 가이드는 [GUIDE.md](./GUIDE.md)

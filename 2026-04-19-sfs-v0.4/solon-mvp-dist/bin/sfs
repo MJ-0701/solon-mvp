@@ -8,8 +8,18 @@ set -euo pipefail
 
 find_dist_dir() {
   local source="${BASH_SOURCE[0]:-$0}"
+  while [[ -L "${source}" ]]; do
+    local link_dir link_target
+    link_dir="$(cd "$(dirname "${source}")" && pwd)"
+    link_target="$(readlink "${source}")"
+    case "${link_target}" in
+      /*) source="${link_target}" ;;
+      *)  source="${link_dir}/${link_target}" ;;
+    esac
+  done
+
   local bin_dir
-  bin_dir="$(cd "$(dirname "${source}")" && pwd)"
+  bin_dir="$(cd -P "$(dirname "${source}")" && pwd)"
 
   local candidate
   for candidate in \
@@ -36,13 +46,143 @@ usage() {
   cat <<'EOF'
 Usage:
   sfs init [--yes] [--layout thin|vendored]
+  sfs agent install <claude|gemini|codex|all> [--skip-existing]
   sfs <command> [args]
 
 Commands:
+  agent install
   status, start, guide, auth, brainstorm, plan, review, decision, retro, loop
 
 Project state defaults to .sfs-local/. Override with SFS_LOCAL_DIR when needed.
 EOF
+}
+
+agent_usage() {
+  cat <<'EOF'
+Usage:
+  sfs agent install <claude|gemini|codex|all> [--skip-existing]
+
+Installs thin LLM-agent adapter files into the current project:
+  claude  -> .claude/commands/sfs.md
+  gemini  -> .gemini/commands/sfs.toml
+  codex   -> .agents/skills/sfs/SKILL.md
+
+Existing changed files are backed up under .sfs-local/tmp/agent-install-backups/.
+EOF
+}
+
+backup_and_copy() {
+  local src="$1"
+  local dst_rel="$2"
+  local skip_existing="${3:-0}"
+  local dst="${PWD}/${dst_rel}"
+
+  if [[ ! -f "${src}" ]]; then
+    echo "missing packaged adapter: ${src}" >&2
+    return 4
+  fi
+
+  mkdir -p "$(dirname "${dst}")"
+
+  if [[ -f "${dst}" ]]; then
+    if cmp -s "${src}" "${dst}"; then
+      echo "unchanged: ${dst_rel}"
+      return 0
+    fi
+    if [[ "${skip_existing}" == "1" ]]; then
+      echo "skip existing: ${dst_rel}"
+      return 0
+    fi
+
+    local ts backup_dir safe_rel
+    ts="$(date +%Y%m%d-%H%M%S)"
+    backup_dir="${PWD}/.sfs-local/tmp/agent-install-backups/${ts}"
+    safe_rel="${dst_rel//\//__}"
+    mkdir -p "${backup_dir}"
+    cp "${dst}" "${backup_dir}/${safe_rel}"
+    cp "${src}" "${dst}"
+    echo "updated: ${dst_rel} (backup: .sfs-local/tmp/agent-install-backups/${ts}/${safe_rel})"
+    return 0
+  fi
+
+  cp "${src}" "${dst}"
+  echo "installed: ${dst_rel}"
+}
+
+install_agent_adapter() {
+  local target="${1:-}" skip_existing="${2:-0}"
+  case "${target}" in
+    claude|claude-code)
+      backup_and_copy "${DIST_DIR}/templates/.claude/commands/sfs.md" ".claude/commands/sfs.md" "${skip_existing}"
+      ;;
+    gemini)
+      backup_and_copy "${DIST_DIR}/templates/.gemini/commands/sfs.toml" ".gemini/commands/sfs.toml" "${skip_existing}"
+      ;;
+    codex)
+      backup_and_copy "${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md" ".agents/skills/sfs/SKILL.md" "${skip_existing}"
+      ;;
+    all)
+      install_agent_adapter claude "${skip_existing}"
+      install_agent_adapter gemini "${skip_existing}"
+      install_agent_adapter codex "${skip_existing}"
+      ;;
+    *)
+      echo "unknown agent: ${target}" >&2
+      agent_usage >&2
+      return 1
+      ;;
+  esac
+}
+
+agent_command() {
+  local sub="${1:-}"
+  shift || true
+
+  case "${sub}" in
+    install)
+      local target="" skip_existing=0
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          --skip-existing)
+            skip_existing=1
+            shift
+            ;;
+          -h|--help)
+            agent_usage
+            return 0
+            ;;
+          -*)
+            echo "unknown arg: $1" >&2
+            agent_usage >&2
+            return 1
+            ;;
+          *)
+            if [[ -n "${target}" ]]; then
+              echo "unexpected extra arg: $1" >&2
+              agent_usage >&2
+              return 1
+            fi
+            target="$1"
+            shift
+            ;;
+        esac
+      done
+      if [[ -z "${target}" ]]; then
+        echo "missing agent target" >&2
+        agent_usage >&2
+        return 1
+      fi
+      install_agent_adapter "${target}" "${skip_existing}"
+      ;;
+    -h|--help|help|"")
+      agent_usage
+      ;;
+    *)
+      echo "unknown agent subcommand: ${sub}" >&2
+      agent_usage >&2
+      return 1
+      ;;
+  esac
 }
 
 if [[ $# -eq 0 ]]; then
@@ -54,6 +194,11 @@ case "${1:-}" in
   init|install)
     shift
     exec bash "${DIST_DIR}/install.sh" --layout thin "$@"
+    ;;
+  agent)
+    shift
+    agent_command "$@"
+    exit $?
     ;;
   upgrade)
     shift
