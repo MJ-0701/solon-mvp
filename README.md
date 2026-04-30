@@ -1,9 +1,9 @@
-# Solon MVP
+# Solon Product
 
 > **1인 창업가가 회사의 역할 분리·검증·기억·회복을 파일과 agent 로 재현하게 만드는 운영 시스템.**
 > Claude Code · Codex · Gemini CLI 어떤 LLM agent 에서도 동일하게 동작하는 "Company-as-Code" 경량 스캐폴드.
 
-**버전**: `0.5.0-mvp` · **라이선스**: 개인 IP — 외부 배포·상업 이용 신중 (정식 라이선스 TBD) · **상태**: MVP — 풀스펙 아님, 도구 자체는 실 운영 중
+**버전**: `0.5.1-product` · **라이선스**: 개인 IP — 외부 배포·상업 이용 신중 (정식 라이선스 TBD) · **상태**: product / private beta — 풀스펙 아님, 도구 자체는 실 운영 중
 
 ---
 
@@ -132,7 +132,7 @@ micro-step = WU 안의 1 회 PROGRESS 갱신 단위 (~5-10 분)
 cd ~/workspace/my-project
 
 # (2) 원격 한 줄로 설치
-curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-mvp/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.sh | bash
 
 # (3) Claude Code 켜고 첫 sprint 시작
 /sfs status
@@ -161,35 +161,35 @@ curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-mvp/main/install.sh | 
 
 ```bash
 cd ~/workspace/my-project
-curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-mvp/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.sh | bash
 ```
 
 ### 방법 2 — 로컬 clone 후 실행 (오프라인·수정 가능)
 
 ```bash
-git clone https://github.com/MJ-0701/solon-mvp ~/tmp/solon-mvp
+git clone https://github.com/MJ-0701/solon-product ~/tmp/solon-product
 cd ~/workspace/my-project
-~/tmp/solon-mvp/install.sh
+~/tmp/solon-product/install.sh
 ```
 
 ### 방법 3 — 수동 cp (완전 통제)
 
 ```bash
-git clone https://github.com/MJ-0701/solon-mvp ~/tmp/solon-mvp
+git clone https://github.com/MJ-0701/solon-product ~/tmp/solon-product
 cd ~/workspace/my-project
-cp ~/tmp/solon-mvp/templates/SFS.md.template      SFS.md
-cp ~/tmp/solon-mvp/templates/CLAUDE.md.template   CLAUDE.md
-cp ~/tmp/solon-mvp/templates/AGENTS.md.template   AGENTS.md
-cp ~/tmp/solon-mvp/templates/GEMINI.md.template   GEMINI.md
+cp ~/tmp/solon-product/templates/SFS.md.template      SFS.md
+cp ~/tmp/solon-product/templates/CLAUDE.md.template   CLAUDE.md
+cp ~/tmp/solon-product/templates/AGENTS.md.template   AGENTS.md
+cp ~/tmp/solon-product/templates/GEMINI.md.template   GEMINI.md
 mkdir -p .claude/commands .gemini/commands .agents/skills/sfs
-cp    ~/tmp/solon-mvp/templates/.claude/commands/sfs.md   .claude/commands/sfs.md
-cp    ~/tmp/solon-mvp/templates/.gemini/commands/sfs.toml .gemini/commands/sfs.toml
-cp    ~/tmp/solon-mvp/templates/.agents/skills/sfs/SKILL.md .agents/skills/sfs/SKILL.md
-cp -r ~/tmp/solon-mvp/templates/.sfs-local-template       .sfs-local
-cat   ~/tmp/solon-mvp/templates/.gitignore.snippet       >> .gitignore
+cp    ~/tmp/solon-product/templates/.claude/commands/sfs.md   .claude/commands/sfs.md
+cp    ~/tmp/solon-product/templates/.gemini/commands/sfs.toml .gemini/commands/sfs.toml
+cp    ~/tmp/solon-product/templates/.agents/skills/sfs/SKILL.md .agents/skills/sfs/SKILL.md
+cp -r ~/tmp/solon-product/templates/.sfs-local-template       .sfs-local
+cat   ~/tmp/solon-product/templates/.gitignore.snippet       >> .gitignore
 # placeholder 치환 (<PROJECT-NAME>, <DATE>, <STACK>, …) 은 에디터에서 수동
 # (선택) Codex user-scoped slash fallback:
-#   mkdir -p ~/.codex/prompts && cp ~/tmp/solon-mvp/templates/.codex/prompts/sfs.md ~/.codex/prompts/sfs.md
+#   mkdir -p ~/.codex/prompts && cp ~/tmp/solon-product/templates/.codex/prompts/sfs.md ~/.codex/prompts/sfs.md
 ```
 
 ### 설치 후 3 단계
@@ -260,7 +260,7 @@ cp <consumer-project>/templates/.codex/prompts/sfs.md ~/.codex/prompts/sfs.md
 
 ```bash
 cd ~/workspace/my-project
-~/tmp/solon-mvp/upgrade.sh
+~/tmp/solon-product/upgrade.sh
 ```
 
 - `.sfs-local/VERSION` 읽어 현재 ↔ 최신 비교
@@ -272,7 +272,7 @@ cd ~/workspace/my-project
 
 ```bash
 cd ~/workspace/my-project
-~/tmp/solon-mvp/uninstall.sh
+~/tmp/solon-product/uninstall.sh
 ```
 
 선택지: (a) 전부 제거 / (b) scaffold 만 제거 + 산출물 보존 / (c) 취소.
@@ -304,7 +304,7 @@ cd ~/workspace/my-project
 
 ## CHANGELOG
 
-[CHANGELOG.md](./CHANGELOG.md) 참조. 0.3.0-mvp 가 첫 public release, 0.5.0-mvp 가 multi-adaptor 1급 정합 + `/sfs loop` 추가 release.
+[CHANGELOG.md](./CHANGELOG.md) 참조. 0.3.0-mvp 가 첫 public release, 0.5.0-mvp 가 multi-adaptor 1급 정합 + `/sfs loop` 추가 release, 0.5.1-product 가 mvp→product rebrand 정합 hotfix.
 
 ---
 

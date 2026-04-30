@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# upgrade.sh — Solon MVP upgrader (VERSION 기반)
+# upgrade.sh — Solon Product upgrader (VERSION 기반)
 #
 # 사용법:
 #   cd ~/workspace/my-project
-#   ~/tmp/solon-mvp/upgrade.sh                   # 로컬 clone 기반
-#   curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-mvp/main/upgrade.sh | bash  # 원격
+#   ~/tmp/solon-product/upgrade.sh                   # 로컬 clone 기반
+#   curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/upgrade.sh | bash  # 원격
 #
 # 동작:
 #   1. consumer 쪽 .sfs-local/VERSION 읽어서 installed_version 파악
@@ -19,10 +19,13 @@
 
 set -euo pipefail
 
-readonly SOLON_REPO="MJ-0701/solon-mvp"
+readonly SOLON_REPO="MJ-0701/solon-product"
 readonly SOLON_BRANCH="main"
-readonly GIT_MARKER_BEGIN="### BEGIN solon-mvp ###"
-readonly GIT_MARKER_END="### END solon-mvp ###"
+readonly GIT_MARKER_BEGIN="### BEGIN solon-product ###"
+readonly GIT_MARKER_END="### END solon-product ###"
+# Legacy markers (0.5.0-mvp 이전 install) — upgrade 가 fallback 으로 인식해서 product marker 로 교체.
+readonly LEGACY_GIT_MARKER_BEGIN="### BEGIN solon-mvp ###"
+readonly LEGACY_GIT_MARKER_END="### END solon-mvp ###"
 
 # 색상
 if [ -t 1 ] && command -v tput >/dev/null 2>&1 && [ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]; then
@@ -248,11 +251,11 @@ done
 printf "\n  ${C_BOLD}.gitignore${C_RESET}\n"
 snippet_sum=$(checksum_file "$SOURCE_DIR/templates/.gitignore.snippet")
 if grep -qF "$GIT_MARKER_BEGIN" "$TARGET/.gitignore" 2>/dev/null; then
-  printf "    상태: solon-mvp 블록 존재 — marker 블록 교체 예정\n"
+  printf "    상태: solon-product 블록 존재 — marker 블록 교체 예정\n"
   printf "    checksum: managed-snippet=%s\n" "$snippet_sum"
   printf "    추천: 자동 갱신\n"
 else
-  printf "    상태: solon-mvp 블록 없음 — 신규 추가 예정\n"
+  printf "    상태: solon-product 블록 없음 — 신규 추가 예정\n"
   printf "    checksum: managed-snippet=%s\n" "$snippet_sum"
   printf "    추천: 자동 추가\n"
 fi
@@ -415,7 +418,7 @@ fi
   cat "$SOURCE_DIR/templates/.gitignore.snippet"
   echo "$GIT_MARKER_END"
 } >> "$TARGET/.gitignore"
-ok ".gitignore solon-mvp 블록 교체 완료"
+ok ".gitignore solon-product 블록 교체 완료"
 
 # ============================================================================
 # 6. VERSION 갱신

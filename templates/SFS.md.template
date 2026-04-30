@@ -1,7 +1,7 @@
 # SFS.md — `<PROJECT-NAME>` Solon SFS 운영 지침
 
 > 본 파일은 Claude Code, Codex, Gemini CLI 가 **공통으로 참조하는** Solon SFS 지침입니다.
-> `solon-mvp` 를 설치해서 생성됨 (`install.sh`). 프로젝트 특성에 맞게 자유롭게 편집.
+> `solon-product` 를 설치해서 생성됨 (`install.sh`). 프로젝트 특성에 맞게 자유롭게 편집.
 > Solon 은 multi-adaptor by design — 어떤 CLI 환경에서 호출하든 `.sfs-local/scripts/`
 > 의 bash adapter 가 single source of truth 다.
 
@@ -115,5 +115,5 @@ Solon SFS 의 7 명령은 어떤 CLI 환경에서 호출하든 동일한 bash ad
 
 ## Changelog
 
-- v0.3 (`<DATE>`, multi-adaptor 1급 정합): 7-Gate enum (G-1..G5) + 산출물 5 파일 (brainstorm/plan/log/review/retro) + decisions full ADR + mini-ADR 양쪽 + AGENTS/GEMINI bash adapter 직접 호출 안내. `solon-mvp <SOLON-VERSION>`.
+- v0.3 (`<DATE>`, multi-adaptor 1급 정합): 7-Gate enum (G-1..G5) + 산출물 5 파일 (brainstorm/plan/log/review/retro) + decisions full ADR + mini-ADR 양쪽 + AGENTS/GEMINI bash adapter 직접 호출 안내. `solon-product <SOLON-VERSION>`.
 - v0.2 (runtime adapters): runtime 중립 SFS 지침.

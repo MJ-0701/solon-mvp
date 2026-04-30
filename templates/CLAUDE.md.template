@@ -1,6 +1,6 @@
-# CLAUDE.md — Claude Code adapter for Solon SFS
+# CLAUDE.md — Claude Code adapter for Solon Product SFS
 
-This project uses Solon SFS (multi-adaptor by design — Claude Code / Codex / Gemini CLI 동등 1급).
+This project uses Solon Product SFS (multi-adaptor by design — Claude Code / Codex / Gemini CLI 동등 1급).
 
 Before planning or editing, read:
 
@@ -12,7 +12,7 @@ Before planning or editing, read:
 
 ## SFS commands — bash adapter SSoT
 
-Solon SFS 의 7 슬래시 명령은 모두 `.sfs-local/scripts/sfs-*.sh` bash adapter 가
+Solon Product SFS 의 7 슬래시 명령은 모두 `.sfs-local/scripts/sfs-*.sh` bash adapter 가
 single source of truth (Claude Code / Codex / Gemini CLI 어느 환경에서든 동일 결과).
 Claude Code 의 native slash 진입점은 `.claude/commands/sfs.md` 가 자동 install 되며,
 동일한 dispatch table 을 따른다 (paraphrase 금지, 결정성 유지):

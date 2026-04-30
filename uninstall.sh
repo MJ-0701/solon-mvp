@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# uninstall.sh — Solon MVP uninstaller
+# uninstall.sh — Solon Product uninstaller
 #
 # 사용법:
 #   cd ~/workspace/my-project
-#   ~/tmp/solon-mvp/uninstall.sh
+#   ~/tmp/solon-product/uninstall.sh
 #
 # 동작:
-#   1. .gitignore 에서 solon-mvp 블록 제거
+#   1. .gitignore 에서 solon-product 블록 제거 (legacy `solon-mvp` marker 도 동일 처리)
 #   2. .sfs-local/ 처리 — 대화형:
 #      (a) 전부 제거 (sprints/decisions 산출물 포함)
 #      (b) scaffold 만 제거, 산출물 (sprints/decisions/events.jsonl) 보존
@@ -15,8 +15,11 @@
 
 set -euo pipefail
 
-readonly GIT_MARKER_BEGIN="### BEGIN solon-mvp ###"
-readonly GIT_MARKER_END="### END solon-mvp ###"
+readonly GIT_MARKER_BEGIN="### BEGIN solon-product ###"
+readonly GIT_MARKER_END="### END solon-product ###"
+# Legacy markers (0.5.0-mvp 이전 install) — uninstall 시 동일 처리.
+readonly LEGACY_GIT_MARKER_BEGIN="### BEGIN solon-mvp ###"
+readonly LEGACY_GIT_MARKER_END="### END solon-mvp ###"
 
 if [ -t 1 ] && command -v tput >/dev/null 2>&1 && [ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]; then
   C_RED=$(tput setaf 1); C_GREEN=$(tput setaf 2); C_YELLOW=$(tput setaf 3)
@@ -44,7 +47,7 @@ TARGET="$(pwd)"
 
 cat <<EOF
 
-${C_BOLD}=== Solon MVP Uninstaller ===${C_RESET}
+${C_BOLD}=== Solon Product Uninstaller ===${C_RESET}
 
 타겟:   $TARGET
 
@@ -105,15 +108,21 @@ fi
 # 2. .gitignore 블록 제거
 # ============================================================================
 
-if [ -f "$TARGET/.gitignore" ] && grep -qF "$GIT_MARKER_BEGIN" "$TARGET/.gitignore"; then
-  awk -v b="$GIT_MARKER_BEGIN" -v e="$GIT_MARKER_END" '
-    $0 == b { skip=1; next }
-    $0 == e { skip=0; next }
-    !skip { print }
-  ' "$TARGET/.gitignore" > "$TARGET/.gitignore.tmp"
-  mv "$TARGET/.gitignore.tmp" "$TARGET/.gitignore"
-  ok ".gitignore solon-mvp 블록 제거"
-fi
+# solon-product marker + legacy solon-mvp marker 양쪽 모두 동일 awk 로 제거 (idempotent).
+remove_block() {
+  local b="$1" e="$2"
+  if [ -f "$TARGET/.gitignore" ] && grep -qF "$b" "$TARGET/.gitignore"; then
+    awk -v b="$b" -v e="$e" '
+      $0 == b { skip=1; next }
+      $0 == e { skip=0; next }
+      !skip { print }
+    ' "$TARGET/.gitignore" > "$TARGET/.gitignore.tmp.$$"
+    mv "$TARGET/.gitignore.tmp.$$" "$TARGET/.gitignore"
+    ok ".gitignore '${b}' 블록 제거"
+  fi
+}
+remove_block "$GIT_MARKER_BEGIN" "$GIT_MARKER_END"
+remove_block "$LEGACY_GIT_MARKER_BEGIN" "$LEGACY_GIT_MARKER_END"
 
 # ============================================================================
 # 3. Runtime adapter docs — 대화형 (사용자가 수정했을 가능성)
@@ -141,6 +150,6 @@ ${C_BOLD}${C_GREEN}=== Uninstall 완료 ===${C_RESET}
 
 변경사항 git commit 권장:
   ${C_BLUE}git add -A${C_RESET}
-  ${C_BLUE}git commit -m "chore: uninstall solon-mvp"${C_RESET}
+  ${C_BLUE}git commit -m "chore: uninstall solon-product"${C_RESET}
 
 EOF

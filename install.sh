@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# install.sh — Solon MVP installer
+# install.sh — Solon Product installer
 #
 # 사용법 (dual mode):
-#   (1) 원격: curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-mvp/main/install.sh | bash
-#   (2) 로컬: git clone https://github.com/MJ-0701/solon-mvp ~/tmp/solon-mvp
+#   (1) 원격: curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.sh | bash
+#   (2) 로컬: git clone https://github.com/MJ-0701/solon-product ~/tmp/solon-product
 #             cd ~/workspace/my-project
-#             ~/tmp/solon-mvp/install.sh
+#             ~/tmp/solon-product/install.sh
 #   (3) 비대화형: ./install.sh --yes
 #
 # 원칙:
@@ -15,7 +15,7 @@
 #   - 멱등성 (idempotent) — 재실행해도 사용자 기존 자산 파괴하지 않음
 #   - 오류 시 early exit, 롤백은 사용자 git 으로
 #
-# 참고: 본 스크립트는 Solon MVP 0.1.0 — 풀스펙 아님 (사용자 개인 방법론 docset 참조).
+# 참고: 본 스크립트는 Solon Product 설치 엔트리포인트 — 풀스펙 아님 (사용자 개인 방법론 docset 참조).
 
 set -euo pipefail
 
@@ -52,10 +52,13 @@ done
 # 0. 상수 / 색상
 # ============================================================================
 
-readonly SOLON_REPO="MJ-0701/solon-mvp"
+readonly SOLON_REPO="MJ-0701/solon-product"
 readonly SOLON_BRANCH="main"
-readonly GIT_MARKER_BEGIN="### BEGIN solon-mvp ###"
-readonly GIT_MARKER_END="### END solon-mvp ###"
+readonly GIT_MARKER_BEGIN="### BEGIN solon-product ###"
+readonly GIT_MARKER_END="### END solon-product ###"
+# Legacy markers (0.5.0-mvp 이전 install) — uninstall / upgrade 가 fallback 으로 인식.
+readonly LEGACY_GIT_MARKER_BEGIN="### BEGIN solon-mvp ###"
+readonly LEGACY_GIT_MARKER_END="### END solon-mvp ###"
 
 # TTY 이면 색상 on
 if [ -t 1 ] && command -v tput >/dev/null 2>&1 && [ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]; then
@@ -154,13 +157,13 @@ fi
 
 cat <<EOF
 
-${C_BOLD}=== Solon MVP Installer ===${C_RESET}
+${C_BOLD}=== Solon Product Installer ===${C_RESET}
 
 모드:   $MODE
 타겟:   $(pwd)
 Solon:  https://github.com/${SOLON_REPO} (branch: $SOLON_BRANCH)
 
-Solon 은 AI-native 7-step flow (브레인스토밍 → plan → sprint → 구현 → review →
+Solon Product 는 AI-native 7-step flow (브레인스토밍 → plan → sprint → 구현 → review →
 commit → 문서화) 를 현재 프로젝트에 주입합니다. 이 7-step 은 full artifact chain 의
 lightweight projection 입니다. .sfs-local/ 스캐폴드 + SFS.md 공통 지침 +
 Claude/Codex/Gemini 어댑터 + .gitignore 규칙이 설치됩니다.
@@ -184,9 +187,9 @@ fi
 
 if [ "$MODE" = "remote" ]; then
   command -v git >/dev/null || die "git 미설치 (Solon 은 consumer repo 가 git 이어야 함)"
-  TMP_CLONE=$(mktemp -d -t solon-mvp-install.XXXXXX)
+  TMP_CLONE=$(mktemp -d -t solon-product-install.XXXXXX)
   info ""
-  info "Fetching Solon MVP (depth=1)..."
+  info "Fetching Solon Product (depth=1)..."
   if ! git clone --quiet --depth=1 --branch="$SOLON_BRANCH" \
        "https://github.com/${SOLON_REPO}.git" "$TMP_CLONE" 2>&1; then
     die "git clone 실패 — 네트워크 또는 repo 권한 확인"
@@ -406,8 +409,20 @@ info ".gitignore 갱신..."
 
 touch "$TARGET/.gitignore"
 
+# Legacy `### BEGIN solon-mvp ###` 블록이 있으면 product marker 로 교체 (idempotent rename).
+if grep -qF "$LEGACY_GIT_MARKER_BEGIN" "$TARGET/.gitignore" 2>/dev/null \
+   && ! grep -qF "$GIT_MARKER_BEGIN" "$TARGET/.gitignore" 2>/dev/null; then
+  warn "legacy 'solon-mvp' .gitignore 블록 감지 — 'solon-product' marker 로 교체"
+  awk -v old_b="$LEGACY_GIT_MARKER_BEGIN" -v old_e="$LEGACY_GIT_MARKER_END" \
+      -v new_b="$GIT_MARKER_BEGIN"        -v new_e="$GIT_MARKER_END" \
+    '{ if ($0==old_b) print new_b; else if ($0==old_e) print new_e; else print }' \
+    "$TARGET/.gitignore" > "$TARGET/.gitignore.tmp.$$" \
+    && mv "$TARGET/.gitignore.tmp.$$" "$TARGET/.gitignore"
+  ok "legacy marker → solon-product marker 교체 완료"
+fi
+
 if grep -qF "$GIT_MARKER_BEGIN" "$TARGET/.gitignore" 2>/dev/null; then
-  ok "solon-mvp 블록 이미 존재 — skip"
+  ok "solon-product 블록 이미 존재 — skip"
 else
   {
     # 기존 파일 끝에 개행 보장
@@ -419,7 +434,7 @@ else
     cat "$SOURCE_DIR/templates/.gitignore.snippet"
     echo "$GIT_MARKER_END"
   } >> "$TARGET/.gitignore"
-  ok "solon-mvp 블록 추가됨"
+  ok "solon-product 블록 추가됨"
 fi
 
 # ============================================================================
@@ -443,7 +458,7 @@ ok "VERSION 기록: $SOLON_VERSION ($MODE @ $INSTALLED_AT)"
 
 cat <<EOF
 
-${C_BOLD}${C_GREEN}=== Solon MVP 설치 완료 ===${C_RESET}
+${C_BOLD}${C_GREEN}=== Solon Product 설치 완료 ===${C_RESET}
 
 설치 위치:       $TARGET
 Solon 버전:      $SOLON_VERSION
@@ -468,10 +483,10 @@ Slash 1급:       .claude/commands/sfs.md (Claude Code, Markdown)
      ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore \\${C_RESET}
      ${C_BLUE}        .claude/commands/sfs.md .gemini/commands/sfs.toml \\${C_RESET}
      ${C_BLUE}        .agents/skills/sfs/SKILL.md .sfs-local/${C_RESET}
-     ${C_BLUE}git commit -m "chore: install solon-mvp $SOLON_VERSION"${C_RESET}
+     ${C_BLUE}git commit -m "chore: install solon-product $SOLON_VERSION"${C_RESET}
      ${C_BLUE}git push${C_RESET}
 
-  ${C_BOLD}4.${C_RESET} 버전 갱신 필요 시: ${C_BLUE}solon-mvp/upgrade.sh${C_RESET} 실행.
+  ${C_BOLD}4.${C_RESET} 버전 갱신 필요 시: ${C_BLUE}solon-product/upgrade.sh${C_RESET} 실행.
 
 문제 발생 시: https://github.com/${SOLON_REPO}/issues
 
