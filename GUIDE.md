@@ -175,7 +175,7 @@ Codex/Claude/Gemini CLI 는 인증 prompt 가 먼저 뜨면 SFS 가 넘긴 revie
 인증 상태를 먼저 확인한다. `.sfs-local/auth.env.example` 을 복사해서 API key 또는
 `SFS_CODEX_AUTH_READY=1` / `SFS_CLAUDE_AUTH_READY=1` / `SFS_GEMINI_AUTH_READY=1` 을 넣어라.
 real terminal 에서는 `/sfs auth login --executor gemini` 처럼 브라우저/터미널 인증을
-명시적으로 끝낼 수 있다. bridge 연결만 확인할 때는 `/sfs auth probe --executor gemini` 가
+명시적으로 끝낼 수 있다. bridge 연결만 확인할 때는 `/sfs auth probe --executor gemini --timeout 20` 가
 작은 dummy request/response 만 보낸다. 실제 `.sfs-local/auth.env` 는 gitignore 대상이다.
 
 반대 방향도 비대칭이다. Codex 로 구현한 뒤 Claude 리뷰를 받으려면 Codex 가 Claude plugin 을
@@ -216,7 +216,7 @@ Codex adapter 는 unsupported 로 답하지 말고 즉시 bash adapter 로 dispa
 | `/sfs guide --path` | 이 onboarding guide 경로만 확인 |
 | `/sfs guide --print` | 이 guide 본문을 터미널에 출력 |
 | `/sfs auth status` | Codex/Claude/Gemini review executor 인증 확인 |
-| `/sfs auth probe --executor gemini` | bridge request/response 더미 확인 |
+| `/sfs auth probe --executor gemini --timeout 20` | bridge request/response 더미 확인 |
 | `/sfs plan` | 현 sprint 의 의도/경계 작성 |
 | `/sfs review --gate G4 --executor codex --run` | 리뷰할 evidence 가 있을 때 CPO review bridge 실행 + verdict 기록 |
 | `/sfs decision <title>` | ADR-style 결정 기록 |

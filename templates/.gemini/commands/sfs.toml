@@ -33,7 +33,7 @@ subcommands are deterministic and must NOT be re-interpreted by the model.
 | `status`   | `bash .sfs-local/scripts/sfs-dispatch.sh status <remaining args>`   | passes flags such as `--color=auto/always/never` verbatim |
 | `start`    | `bash .sfs-local/scripts/sfs-dispatch.sh start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
 | `guide`    | `bash .sfs-local/scripts/sfs-dispatch.sh guide <remaining args>`    | default context briefing; passes `--path` / `--print` verbatim |
-| `auth`     | `bash .sfs-local/scripts/sfs-dispatch.sh auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, and `--all` verbatim |
+| `auth`     | `bash .sfs-local/scripts/sfs-dispatch.sh auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
 | `brainstorm` | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context and appends it to `brainstorm.md` |
 | `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | takes no flags currently; remaining args reserved for future |
 | `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator review; passes `--gate`, `--executor`, `--generator`, `--persona`, `--print-prompt`, `--run`, `--allow-empty`, and auth flags verbatim |

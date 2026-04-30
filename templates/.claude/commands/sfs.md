@@ -53,7 +53,7 @@ Dispatch table:
 | `status`   | `.sfs-local/scripts/sfs-dispatch.sh status <remaining args>`   | passes flags such as `--color=auto/always/never` verbatim |
 | `start`    | `.sfs-local/scripts/sfs-dispatch.sh start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
 | `guide`    | `.sfs-local/scripts/sfs-dispatch.sh guide <remaining args>`    | passes `--path` / `--print` verbatim; default prints a short context briefing |
-| `auth`     | `.sfs-local/scripts/sfs-dispatch.sh auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, and `--all` verbatim |
+| `auth`     | `.sfs-local/scripts/sfs-dispatch.sh auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
 | `brainstorm` | `.sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context and appends it to `brainstorm.md` |
 | `plan`     | `.sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | takes no flags currently; remaining args reserved for future (WU-25 §1) |
 | `review`   | `.sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator review. passes `--gate`, `--executor`, `--generator`, `--persona`, `--print-prompt`, `--run`, `--allow-empty`, and auth flags verbatim |

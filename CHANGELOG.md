@@ -1,3 +1,20 @@
+## [0.5.13-product] - 2026-04-30
+
+**Auth probe timeout guard.** `/sfs auth probe` now has a hard timeout and validates that the
+executor actually returned the probe marker before reporting success.
+
+### Fixed
+
+- **hanging Gemini probe** — `probe --executor gemini` now uses a direct probe prompt and defaults
+  to a 45 second timeout instead of waiting indefinitely.
+- **probe false positives** — probe success now requires `SFS_AUTH_PROBE_OK` in stdout; empty or
+  unrelated executor output fails with the recorded stdout/stderr paths.
+
+### Added
+
+- **`--timeout <seconds>` for `/sfs auth probe`** — users can run a smaller request/response check
+  such as `/sfs auth probe --executor gemini --timeout 20`.
+
 ## [0.5.12-product] - 2026-04-30
 
 **Review auth command and empty-review cutoff.** `/sfs review --run` now checks whether there

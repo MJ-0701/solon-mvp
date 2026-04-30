@@ -15,7 +15,7 @@ source "${SFS_SCRIPT_DIR}/sfs-common.sh"
 
 usage_auth() {
   cat <<'EOF'
-Usage: /sfs auth <status|check|login|probe|path> [--executor <codex|claude|gemini|all>] [--all]
+Usage: /sfs auth <status|check|login|probe|path> [--executor <codex|claude|gemini|all>] [--all] [--timeout <seconds>]
 
 Manage local executor auth for CPO review bridges.
   - status    Print auth readiness. Default executor: all.
@@ -25,18 +25,19 @@ Manage local executor auth for CPO review bridges.
   - probe     Send one tiny dummy request to the selected executor and store
               stdout/stderr under .sfs-local/tmp/auth-probes/.
               Requires --executor <codex|claude|gemini>.
+              Default timeout: 45 seconds.
   - path      Print the auth.env path SFS loads.
 
 Examples:
   /sfs auth status
   /sfs auth login --executor gemini
-  /sfs auth probe --executor gemini
+  /sfs auth probe --executor gemini --timeout 20
   /sfs auth check --executor codex
 
 Exit codes:
   0  success
   1  no .sfs-local/ (Solon not installed)
-  7  unknown CLI flag or missing executor for login
+  7  unknown CLI flag or missing executor for login/probe
   9  executor auth missing or bootstrap failed
   99 unknown
 EOF
@@ -49,6 +50,7 @@ fi
 
 EXECUTOR=""
 ALL=false
+PROBE_TIMEOUT="${SFS_AUTH_PROBE_TIMEOUT_SECONDS:-45}"
 
 case "$ACTION" in
   -h|--help|help)
@@ -82,6 +84,18 @@ while [[ $# -gt 0 ]]; do
       ALL=true
       shift
       ;;
+    --timeout)
+      if [[ $# -lt 2 ]]; then
+        echo "--timeout requires a value" >&2
+        exit "${SFS_EXIT_BADCLI}"
+      fi
+      PROBE_TIMEOUT="$2"
+      shift 2
+      ;;
+    --timeout=*)
+      PROBE_TIMEOUT="${1#--timeout=}"
+      shift
+      ;;
     -h|--help)
       usage_auth
       exit "${SFS_EXIT_OK}"
@@ -103,6 +117,15 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if ! printf '%s\n' "$PROBE_TIMEOUT" | grep -Eq '^[0-9]+$'; then
+  echo "--timeout must be a positive integer" >&2
+  exit "${SFS_EXIT_BADCLI}"
+fi
+if [[ "$PROBE_TIMEOUT" -lt 1 ]]; then
+  echo "--timeout must be >= 1" >&2
+  exit "${SFS_EXIT_BADCLI}"
+fi
 
 if [[ ! -d "${SFS_LOCAL_DIR}" ]]; then
   echo "no .sfs-local found, run install.sh first" >&2
@@ -129,6 +152,38 @@ normalize_selected_executors() {
       return "${SFS_EXIT_BADCLI}"
       ;;
   esac
+}
+
+run_probe_command_with_timeout() {
+  local cmd="$1" timeout="$2" prompt_path="$3" out_path="$4" err_path="$5"
+  local pid elapsed
+
+  set +m 2>/dev/null || true
+  (
+    # Replace the subshell with the executor so Solon can interrupt the process
+    # when a CLI waits forever without returning a probe response.
+    eval "exec ${cmd}" < "$prompt_path" > "$out_path" 2> "$err_path"
+  ) &
+  pid=$!
+  elapsed=0
+
+  while kill -0 "$pid" 2>/dev/null; do
+    if [[ "$elapsed" -ge "$timeout" ]]; then
+      {
+        printf '\nSFS auth probe timed out after %ss.\n' "$timeout"
+        printf 'The executor process was interrupted by Solon.\n'
+      } >> "$err_path"
+      disown "$pid" 2>/dev/null || true
+      kill "$pid" 2>/dev/null || true
+      sleep 1
+      kill -9 "$pid" 2>/dev/null || true
+      return 124
+    fi
+    sleep 1
+    elapsed=$((elapsed + 1))
+  done
+
+  wait "$pid"
 }
 
 AUTH_ENV_FILE_PATH="$(get_sfs_auth_env_file)"
@@ -211,7 +266,7 @@ EOF
     case "$profile" in
       codex)  PROBE_CMD="${SFS_REVIEW_CODEX_CMD:-codex exec --full-auto}" ;;
       claude) PROBE_CMD="${SFS_REVIEW_CLAUDE_CMD:-claude -p --dangerously-skip-permissions}" ;;
-      gemini) PROBE_CMD="${SFS_REVIEW_GEMINI_CMD:-gemini --skip-trust --output-format text -p \"Read stdin and return exactly the requested probe response.\"}" ;;
+      gemini) PROBE_CMD="${SFS_REVIEW_GEMINI_CMD:-gemini --skip-trust --output-format text -p \"Return exactly: SFS_AUTH_PROBE_OK ${profile}\"}" ;;
       *)
         echo "unknown executor: ${profile}" >&2
         exit "${SFS_EXIT_BADCLI}"
@@ -221,12 +276,17 @@ EOF
     echo "  stdout: ${OUT_PATH}"
     echo "  stderr: ${ERR_PATH}"
     echo "  prompt: ${PROMPT_PATH}"
+    echo "  timeout: ${PROBE_TIMEOUT}s"
     set +e
-    eval "$PROBE_CMD" < "$PROMPT_PATH" > "$OUT_PATH" 2> "$ERR_PATH"
+    run_probe_command_with_timeout "$PROBE_CMD" "$PROBE_TIMEOUT" "$PROMPT_PATH" "$OUT_PATH" "$ERR_PATH"
     rc=$?
     set -e
     if [[ "$rc" -ne 0 ]]; then
       echo "auth probe failed: ${profile} (exit ${rc}); see ${ERR_PATH}" >&2
+      exit "${SFS_EXIT_EXECUTOR}"
+    fi
+    if ! grep -q "SFS_AUTH_PROBE_OK" "$OUT_PATH"; then
+      echo "auth probe failed: ${profile}; expected SFS_AUTH_PROBE_OK in ${OUT_PATH}" >&2
       exit "${SFS_EXIT_EXECUTOR}"
     fi
     echo "auth probe complete: ${profile} | output ${OUT_PATH}"
