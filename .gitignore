@@ -53,6 +53,7 @@ out/
 # ─── Claude Desktop / Cowork 세션 부산물 ───
 .claude/projects/*/memory/
 .claude/projects/*/*.jsonl
+.claude/worktrees/
 
 # ─── bkit plugin 자동 생성 메모리 (Solon IP 과 무관) ───
 # bkit Starter hook 이 세션마다 루트에 docs/.bkit-memory.json + docs/.pdca-status.json 생성.
