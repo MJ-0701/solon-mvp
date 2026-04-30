@@ -321,6 +321,10 @@ install_file "templates/GEMINI.md.template" "GEMINI.md" "Gemini CLI 어댑터"
 mkdir -p "$TARGET/.claude/commands"
 install_file "templates/.claude/commands/sfs.md" ".claude/commands/sfs.md" "Claude Code /sfs 커맨드"
 
+# 6.2a) Claude Code Skill adapter (current primary command surface)
+mkdir -p "$TARGET/.claude/skills/sfs"
+install_file "templates/.claude/commands/sfs.md" ".claude/skills/sfs/SKILL.md" "Claude Code /sfs Skill"
+
 # 6.2b) Gemini CLI custom command (project-scoped slash 1급, TOML)
 # 위치: <project>/.gemini/commands/sfs.toml — Gemini CLI 가 자동 발견 + native /sfs 슬래시.
 mkdir -p "$TARGET/.gemini/commands"
@@ -547,7 +551,8 @@ layout:          $INSTALL_LAYOUT
 .sfs-local/:     state/config 스캐폴드 (${C_BOLD}기존 sprint 산출물은 보존됨${C_RESET})
 공통 지침:       SFS.md
 런타임 어댑터:   CLAUDE.md / AGENTS.md / GEMINI.md
-Entry 1급:       .claude/commands/sfs.md (Claude Code, Markdown slash)
+Entry 1급:       .claude/skills/sfs/SKILL.md (Claude Code Skill, primary)
+                 .claude/commands/sfs.md (Claude Code legacy slash)
                  .gemini/commands/sfs.toml (Gemini CLI, TOML slash)
                  .agents/skills/sfs/SKILL.md (Codex, Skills 체계)
 Agent 갱신:      sfs agent install claude|gemini|codex|all
@@ -564,11 +569,12 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
      ${C_BLUE}codex${C_RESET}      → ${C_BLUE}\$sfs status${C_RESET} → ${C_BLUE}\$sfs start${C_RESET} → ${C_BLUE}\$sfs brainstorm${C_RESET} → ${C_BLUE}\$sfs plan${C_RESET}
                    (bare ${C_BLUE}/sfs${C_RESET} 가 '커맨드 없음' 으로 막히면 host slash parser gap)
      셋 모두 동일한 ${C_BOLD}sfs${C_RESET} runtime command 로 내려간 뒤 deterministic bash adapter 호출.
-     설치 직후 가이드는 ${C_BLUE}/sfs guide${C_RESET} 또는 ${C_BLUE}\$sfs guide${C_RESET}.
+     설치 직후 가이드는 ${C_BLUE}/sfs guide${C_RESET}, ${C_BLUE}\$sfs guide${C_RESET}, 또는 shell 의 ${C_BLUE}sfs guide${C_RESET}.
 
   ${C_BOLD}3.${C_RESET} git commit + push (Solon 주입 자체를 기록):
      ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore \\${C_RESET}
-     ${C_BLUE}        .claude/commands/sfs.md .gemini/commands/sfs.toml \\${C_RESET}
+     ${C_BLUE}        .claude/skills/sfs/SKILL.md .claude/commands/sfs.md \\${C_RESET}
+     ${C_BLUE}        .gemini/commands/sfs.toml \\${C_RESET}
      ${C_BLUE}        .agents/skills/sfs/SKILL.md .sfs-local/${C_RESET}
      ${C_BLUE}git commit -m "chore: install solon-product $SOLON_VERSION"${C_RESET}
      ${C_BLUE}git push${C_RESET}

@@ -64,7 +64,7 @@ Usage:
   sfs agent install <claude|gemini|codex|all> [--skip-existing]
 
 Installs thin LLM-agent adapter files into the current project:
-  claude  -> .claude/commands/sfs.md
+  claude  -> .claude/skills/sfs/SKILL.md + .claude/commands/sfs.md
   gemini  -> .gemini/commands/sfs.toml
   codex   -> .agents/skills/sfs/SKILL.md
 
@@ -115,6 +115,7 @@ install_agent_adapter() {
   case "${target}" in
     claude|claude-code)
       backup_and_copy "${DIST_DIR}/templates/.claude/commands/sfs.md" ".claude/commands/sfs.md" "${skip_existing}"
+      backup_and_copy "${DIST_DIR}/templates/.claude/commands/sfs.md" ".claude/skills/sfs/SKILL.md" "${skip_existing}"
       ;;
     gemini)
       backup_and_copy "${DIST_DIR}/templates/.gemini/commands/sfs.toml" ".gemini/commands/sfs.toml" "${skip_existing}"
