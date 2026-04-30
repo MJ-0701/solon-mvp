@@ -79,9 +79,18 @@ cd ~/workspace/my-project
 curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.sh | bash
 ```
 
-설치 후 Claude Code, Codex, Gemini CLI 셋 다 native `/sfs` 슬래시 1급으로 호출할 수 있습니다
-(자동 install 된 entry point 4종 = `.claude/commands/sfs.md` + `.gemini/commands/sfs.toml` +
-`.agents/skills/sfs/SKILL.md` + optional `~/.codex/prompts/sfs.md`).
+Windows PowerShell 사용자는 **Git for Windows 의 Git Bash** 가 필요합니다. PowerShell 에서는
+wrapper 를 사용할 수 있습니다:
+
+```powershell
+cd C:\workspace\my-project
+iwr -useb https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.ps1 | iex
+```
+
+설치 후 Solon 의 public command surface 는 세 런타임 모두 `/sfs` 입니다. Runtime adaptor 는
+각 vendor 의 입력면 차이를 흡수해서 같은 bash adapter 로 내려보내야 합니다. 자동 install 된 entry point 는
+`.claude/commands/sfs.md` + `.gemini/commands/sfs.toml` + `.agents/skills/sfs/SKILL.md`
+입니다.
 
 > 📘 **친구 onboarding 30분 walk-through**: 설치 직후 처음 30분 동안 `SFS.md` placeholder 치환,
 > 첫 sprint 시작, plan/review/decision/retro 흐름까지 따라 하는 가이드는 [GUIDE.md](./GUIDE.md)
@@ -97,8 +106,25 @@ curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.s
 /sfs retro --close
 ```
 
+Codex desktop app 처럼 `/sfs ...` 입력이 모델/Skill 까지 도달하는 환경에서는 `/sfs` 가
+정상 1급 경로입니다. Codex CLI 일부 build 에서만 bare `/sfs` 가 native slash parser 에서
+모델/Skill 전에 차단될 수 있습니다. 이것은 사용자 호출법 차이가 아니라 Codex CLI adaptor
+compatibility gap 입니다. `$sfs status`, `$sfs plan`, `sfs status`, 자연어 요청, direct
+bash 는 그 CLI build 에서만 쓰는 임시 bypass 입니다.
+
 세 환경 모두 같은 `.sfs-local/scripts/sfs-*.sh` bash adapter 를 SSoT 로 호출합니다 — paraphrase
 금지, vendor 마다 결과 동일성 보장.
+
+Windows PowerShell 에서 direct adapter 를 호출해야 하면:
+
+```powershell
+.\.sfs-local\scripts\sfs.ps1 status
+.\.sfs-local\scripts\sfs.ps1 guide
+```
+
+이 wrapper 는 Git Bash 를 찾아 `.sfs-local/scripts/sfs-dispatch.sh` 로 넘깁니다.
+WSL 사용자는 WSL shell 안에서 `bash .sfs-local/scripts/sfs-dispatch.sh status` 처럼 직접
+실행합니다. 순수 PowerShell-only 환경은 아직 지원선 밖입니다.
 
 ---
 
@@ -116,7 +142,8 @@ curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.s
 | `/sfs retro --close` | review 실행 여부 확인 후 sprint close + auto commit (push 는 manual) |
 | `/sfs loop [OPTIONS]` | 큰 작업에서 micro-step 단위 반복 실행을 돕는 자율 진행 모드 |
 
-8 명령 모두 native slash 1급 entry point + 동일 bash adapter SSoT.
+8 명령 모두 동일 bash adapter SSoT 입니다. `/sfs` 가 public API 이고, Skill/prompt/wrapper 는
+그 API 를 runtime 별로 전달하는 adaptor surface 입니다.
 
 ### `/sfs loop` 자세히
 
@@ -136,17 +163,21 @@ CLI 에서든 동등한 deterministic bash adapter SSoT 로 동작합니다.
 
 ## Runtime Coverage
 
-설치 후 `/sfs` 8 명령은 **세 런타임 모두에서 native 등록**됩니다.
+설치 후 8 명령은 **세 런타임 모두에서 1급 entry point** 로 연결됩니다.
 
 | 런타임 | Entry point (자동 install) | 호출 방법 |
 |---|---|---|
 | **Claude Code** | `.claude/commands/sfs.md` (Markdown slash) | `/sfs status` |
 | **Gemini CLI** | `.gemini/commands/sfs.toml` (TOML slash) | `/sfs status` |
-| **Codex** | `.agents/skills/sfs/SKILL.md` (project-scoped Skill, agentskills.io 표준) | `$sfs status` (explicit) 또는 자연어 (implicit) |
+| **Codex desktop app / compatible Codex surfaces** | `.agents/skills/sfs/SKILL.md` (project-scoped Skill, agentskills.io 표준) | `/sfs status` |
+| **Codex CLI blocking builds** | same Skill | `$sfs status` / `sfs status` / 자연어 임시 bypass |
 
-Codex 는 native `/sfs` popup slash 도 별도 user-scoped path 에서 지원합니다
-(`~/.codex/prompts/sfs.md`). install.sh 가 user `$HOME` 에 자동 cp 하지 않으므로 (사용자 영역
-보호), 원하면 manual cp:
+Codex desktop app 에서 `/sfs` 가 모델/Skill 에 보이는 경로는 유지되어야 합니다. Codex CLI/TUI
+에서만 bare `/sfs` 가 native slash parser 에 막히면 **runtime adapter compatibility gap** 으로
+분류합니다. Desktop app 과 CLI 둘 다 `/sfs` 를 public surface 로 받아야 Solon parity 가 완료됩니다.
+일부 Codex build 에서 user prompt fallback (`/prompts:sfs ...`, `~/.codex/prompts/sfs.md`) 을
+쓸 수 있지만, install.sh 는 user `$HOME` 에 자동 cp 하지 않습니다 (사용자 영역 보호).
+지원되는 build 에서만 manual cp:
 
 ```sh
 mkdir -p ~/.codex/prompts
@@ -164,12 +195,27 @@ cd ~/workspace/my-project
 curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.sh | bash
 ```
 
+Windows PowerShell:
+
+```powershell
+cd C:\workspace\my-project
+iwr -useb https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.ps1 | iex
+```
+
 ### Local Clone
 
 ```bash
 git clone https://github.com/MJ-0701/solon-product ~/tmp/solon-product
 cd ~/workspace/my-project
 bash ~/tmp/solon-product/install.sh
+```
+
+Windows PowerShell:
+
+```powershell
+git clone https://github.com/MJ-0701/solon-product $env:TEMP\solon-product
+cd C:\workspace\my-project
+powershell -ExecutionPolicy Bypass -File $env:TEMP\solon-product\install.ps1
 ```
 
 ### Non-Interactive
@@ -220,6 +266,13 @@ cd ~/workspace/my-project
 bash ~/tmp/solon-product/upgrade.sh
 ```
 
+Windows PowerShell:
+
+```powershell
+cd C:\workspace\my-project
+powershell -ExecutionPolicy Bypass -File $env:TEMP\solon-product\upgrade.ps1
+```
+
 Upgrade 는 `.sfs-local/VERSION` 과 배포판 `VERSION` 을 비교하고, 파일을 쓰기 전에
 dry-run preview 를 보여줍니다.
 
@@ -237,6 +290,13 @@ cd ~/workspace/my-project
 bash ~/tmp/solon-product/uninstall.sh
 ```
 
+Windows PowerShell:
+
+```powershell
+cd C:\workspace\my-project
+powershell -ExecutionPolicy Bypass -File $env:TEMP\solon-product\uninstall.ps1
+```
+
 Uninstall 은 대화형으로 실행됩니다.
 
 - 전체 제거
@@ -250,8 +310,11 @@ Uninstall 은 대화형으로 실행됩니다.
 | 파일/디렉토리 | 역할 |
 |---|---|
 | `install.sh` | consumer 프로젝트에 Solon Product scaffold 설치 |
+| `install.ps1` | Windows PowerShell install wrapper (Git Bash 필요) |
 | `upgrade.sh` | 설치된 scaffold 를 새 배포판으로 갱신 |
+| `upgrade.ps1` | Windows PowerShell upgrade wrapper (Git Bash 필요) |
 | `uninstall.sh` | 설치된 scaffold 제거 |
+| `uninstall.ps1` | Windows PowerShell uninstall wrapper (Git Bash 필요) |
 | `GUIDE.md` | 친구 onboarding 30분 walk-through (placeholder 치환 + 첫 sprint + FAQ + 트러블슈팅) |
 | `templates/SFS.md.template` | 공통 운영 지침 |
 | `templates/CLAUDE.md.template` | Claude Code adapter template |
@@ -260,8 +323,8 @@ Uninstall 은 대화형으로 실행됩니다.
 | `templates/.claude/commands/sfs.md` | Claude Code slash command |
 | `templates/.gemini/commands/sfs.toml` | Gemini CLI slash command |
 | `templates/.agents/skills/sfs/SKILL.md` | Codex Skill (project-scoped) |
-| `templates/.codex/prompts/sfs.md` | Codex user-scoped slash fallback (optional) |
-| `templates/.sfs-local-template/` | runtime scripts, sprint templates, decision templates |
+| `templates/.codex/prompts/sfs.md` | Codex custom prompt fallback (optional/legacy) |
+| `templates/.sfs-local-template/` | runtime scripts, Windows `sfs.ps1` wrapper, sprint templates, decision templates |
 | `CHANGELOG.md` | release history |
 | `VERSION` | distribution version |
 

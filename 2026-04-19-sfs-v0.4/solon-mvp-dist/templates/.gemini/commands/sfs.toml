@@ -4,7 +4,9 @@
 # Invoke: /sfs <subcommand> [args]
 #         예) /sfs status / /sfs start "첫 번째 sprint" / /sfs review --gate G2
 #
-# Behavior: bash adapter (.sfs-local/scripts/sfs-*.sh) 가 single source of truth.
+# Behavior: bash dispatch layer (.sfs-local/scripts/sfs-dispatch.sh) 가 runtime
+#   surface 를 normalize 하고, bash adapter (.sfs-local/scripts/sfs-*.sh) 가
+#   single source of truth.
 #   user 발화의 첫 token = subcommand → sfs-<subcommand>.sh 실행 + stdout verbatim 출력.
 #   paraphrase 금지, 결정성 유지 (Claude Code / Codex / Gemini CLI 동등 1급).
 #
@@ -28,20 +30,23 @@ subcommands are deterministic and must NOT be re-interpreted by the model.
 
 | First arg | Script to run | Notes |
 |:--|:--|:--|
-| `status`   | `bash .sfs-local/scripts/sfs-status.sh <remaining args>`   | passes flags such as `--color=auto/always/never` verbatim |
-| `start`    | `bash .sfs-local/scripts/sfs-start.sh <remaining args>`    | passes `<sprint-id>` and/or `--force` verbatim |
-| `guide`    | `bash .sfs-local/scripts/sfs-guide.sh <remaining args>`    | passes `--path` / `--print` verbatim |
-| `plan`     | `bash .sfs-local/scripts/sfs-plan.sh <remaining args>`     | takes no flags currently; remaining args reserved for future |
-| `review`   | `bash .sfs-local/scripts/sfs-review.sh <remaining args>`   | passes `--gate <id>` / `--gate=<id>` verbatim (id ∈ G-1, G0, G1, G2, G3, G4, G5) |
-| `decision` | `bash .sfs-local/scripts/sfs-decision.sh <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim |
-| `retro`    | `bash .sfs-local/scripts/sfs-retro.sh <remaining args>`    | passes `--close` verbatim. With `--close`: writes status/closed_at, removes `.sfs-local/current-sprint`, appends `sprint_close` event, runs `auto_commit_close` (push manual per §1.5) |
-| `loop`     | `bash .sfs-local/scripts/sfs-loop.sh <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim |
+| `status`   | `bash .sfs-local/scripts/sfs-dispatch.sh status <remaining args>`   | passes flags such as `--color=auto/always/never` verbatim |
+| `start`    | `bash .sfs-local/scripts/sfs-dispatch.sh start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
+| `guide`    | `bash .sfs-local/scripts/sfs-dispatch.sh guide <remaining args>`    | passes `--path` / `--print` verbatim |
+| `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | takes no flags currently; remaining args reserved for future |
+| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | passes `--gate <id>` / `--gate=<id>` verbatim (id ∈ G-1, G0, G1, G2, G3, G4, G5) |
+| `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | passes `<title>` and optional `--id <override>` / `--id=<override>` verbatim |
+| `retro`    | `bash .sfs-local/scripts/sfs-dispatch.sh retro <remaining args>`    | passes `--close` verbatim. With `--close`: writes status/closed_at, removes `.sfs-local/current-sprint`, appends `sprint_close` event, runs `auto_commit_close` (push manual per §1.5) |
+| `loop`     | `bash .sfs-local/scripts/sfs-dispatch.sh loop <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim |
 
 ## Procedure
 
-1. **Existence check** — Verify `.sfs-local/scripts/sfs-<first-arg>.sh` exists
-   and is executable. If missing, tell the user which script is missing (1
-   line) and fall back to Claude-driven mode for that subcommand.
+1. **Existence check** — Verify `.sfs-local/scripts/sfs-dispatch.sh` and
+   `.sfs-local/scripts/sfs-<first-arg>.sh` exist and are executable. If
+   missing, tell the user which script is missing (1 line) and stop.
+   On Windows PowerShell, `.sfs-local/scripts/sfs.ps1 <command> [args]` is the
+   wrapper entry point; it requires Git Bash. WSL users should invoke the bash
+   adapter from inside the WSL shell.
 
 2. **Quote args safely** — Re-quote `<remaining args>` for the shell. Reject
    any argument containing a newline or NUL byte by reporting `unknown arg`

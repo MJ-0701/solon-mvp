@@ -5,6 +5,10 @@
 > Solon 은 multi-adaptor by design — 어떤 CLI 환경에서 호출하든 `.sfs-local/scripts/`
 > 의 bash adapter 가 single source of truth 다.
 
+> Windows PowerShell 사용자는 Git for Windows 의 Git Bash 가 필요하다. PowerShell 에서는
+> `.sfs-local\scripts\sfs.ps1 <command>` wrapper 를 사용한다. WSL 사용자는 WSL shell
+> 안에서 bash adapter 를 직접 호출한다.
+
 ## 프로젝트 개요
 
 - **이름**: `<PROJECT-NAME>`
@@ -62,7 +66,7 @@ Solon SFS 의 8 명령은 어떤 CLI 환경에서 호출하든 동일한 bash ad
 | 명령 | 동작 |
 |:--|:--|
 | `/sfs status` | 현재 sprint / WU / 마지막 gate / git ahead / last_event 1줄 |
-| `/sfs start [<sprint-id>] [--force]` | sprint 디렉토리 초기화 + 5 templates cp |
+| `/sfs start <goal> [--id <sprint-id>] [--force]` | sprint 디렉토리 초기화 + 4 sprint files cp |
 | `/sfs guide [--print]` | onboarding guide 경로 출력 또는 본문 보기 |
 | `/sfs plan` | 현재 sprint plan.md 진입 + `plan_open` event |
 | `/sfs review --gate <id>` | review.md 진입 + `review_open` event (id ∈ G-1..G5) |
@@ -108,11 +112,16 @@ Solon SFS 의 8 명령은 어떤 CLI 환경에서 호출하든 동일한 bash ad
 
 - **Claude Code**: `/sfs`, `/sfs help`, `/sfs status`, `/sfs guide`, `/sfs start <goal>`
   (`.claude/commands/sfs.md` 의 dispatch table 이 자동으로 `.sfs-local/scripts/sfs-*.sh` 호출)
-- **Codex**: `AGENTS.md` 가 동일한 dispatch table 을 안내. `sfs status` 또는 `/sfs status` 발화 시
-  `bash .sfs-local/scripts/sfs-status.sh` 직접 실행.
+- **Codex**: `.agents/skills/sfs/SKILL.md` + `AGENTS.md` 가 동일한 dispatch table 을 안내.
+  `/sfs` 는 public command surface 이며, Codex desktop app 처럼 `/sfs` 가 모델/Skill 에
+  도달하는 환경에서는 정상 1급 경로다. Codex CLI 가 unknown leading slash 를 모델 전에
+  차단하는 build 에서만 runtime adaptor compatibility gap 으로 본다. `$sfs status`,
+  `sfs status`, 자연어, direct bash 는 그 CLI build 에서만 쓰는 임시 bypass 이다.
 - **Gemini CLI**: `GEMINI.md` 가 동일한 dispatch table 을 안내. 동작 동일.
 
 `/sfs loop --executor claude|gemini|codex|<custom>` 로 Ralph Loop LLM 호출도 환경 무관.
+Windows PowerShell direct 호출은 `.sfs-local\scripts\sfs.ps1 status` 형태를 쓴다
+(Git Bash 필요).
 
 ## Changelog
 

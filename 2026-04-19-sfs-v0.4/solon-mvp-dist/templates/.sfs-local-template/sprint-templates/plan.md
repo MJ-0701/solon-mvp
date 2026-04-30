@@ -1,8 +1,9 @@
 ---
 phase: plan
 gate_id: G1
-sprint_id: ""        # filled by /sfs start (currently copied verbatim — set by hand or future tooling)
-created_at: ""       # filled by /sfs start (currently copied verbatim)
+sprint_id: ""        # filled by /sfs start
+goal: ""             # filled by /sfs start <goal>
+created_at: ""       # filled by /sfs start
 last_touched_at: ""  # filled by /sfs plan (auto, ISO8601 + tz)
 ---
 

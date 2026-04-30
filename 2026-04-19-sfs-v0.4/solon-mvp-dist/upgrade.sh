@@ -144,14 +144,14 @@ recommend_action() {
   fi
 
   case "$dst_rel" in
-    "SFS.md"|".claude/commands/sfs.md")
+    "SFS.md"|".claude/commands/sfs.md"|".gemini/commands/sfs.toml"|".agents/skills/sfs/SKILL.md"|".sfs-local/GUIDE.md")
       printf "backup+overwrite"
       ;;
     "CLAUDE.md"|"AGENTS.md"|"GEMINI.md"|".sfs-local/divisions.yaml")
       printf "skip"
       ;;
-    .sfs-local/scripts/*.sh)
-      # Solon-versioned bash code, user 수정 영역 아님
+    .sfs-local/scripts/*.sh|.sfs-local/scripts/*.ps1)
+      # Solon-versioned runtime code, user 수정 영역 아님
       printf "backup+overwrite"
       ;;
     .sfs-local/sprint-templates/*.md|.sfs-local/decisions-template/*.md)
@@ -179,6 +179,7 @@ cat <<EOF
   - .sfs-local/divisions.yaml          → 자동 보존 (프로젝트별 운영값 보호)
   - .claude/commands/sfs.md            → backup+overwrite (배포판 관리 커맨드 최신화)
   - .sfs-local/scripts/sfs-*.sh        → backup+overwrite (Solon-versioned bash, 신규: loop/decision/retro)
+  - .sfs-local/scripts/sfs.ps1         → backup+overwrite (Windows PowerShell → Git Bash wrapper)
   - .sfs-local/sprint-templates/*.md   → backup+overwrite (배포판 관리 템플릿, 신규: decision-light)
   - .sfs-local/decisions-template/*.md → backup+overwrite (ADR-TEMPLATE 신규, WU-26)
 
@@ -196,6 +197,8 @@ declare -a CHECK_FILES=(
   ".sfs-local/divisions.yaml|templates/.sfs-local-template/divisions.yaml"
   ".sfs-local/GUIDE.md|GUIDE.md"
   # scripts/ — Solon-versioned bash adapters (executable, user 수정 영역 아님)
+  ".sfs-local/scripts/sfs-dispatch.sh|templates/.sfs-local-template/scripts/sfs-dispatch.sh"
+  ".sfs-local/scripts/sfs.ps1|templates/.sfs-local-template/scripts/sfs.ps1"
   ".sfs-local/scripts/sfs-common.sh|templates/.sfs-local-template/scripts/sfs-common.sh"
   ".sfs-local/scripts/sfs-status.sh|templates/.sfs-local-template/scripts/sfs-status.sh"
   ".sfs-local/scripts/sfs-start.sh|templates/.sfs-local-template/scripts/sfs-start.sh"
@@ -345,6 +348,8 @@ update_file ".sfs-local/GUIDE.md" "GUIDE.md" "Solon onboarding guide (/sfs guide
 # scripts/ — Solon-versioned bash adapters (codex finding #4 후속, 25th-6 보강)
 # 신규: sfs-loop / sfs-decision / sfs-retro (0.4.0-mvp 추가 슬롯) + sfs-guide (0.5.2-product)
 mkdir -p "$TARGET/.sfs-local/scripts"
+update_file ".sfs-local/scripts/sfs-dispatch.sh" "templates/.sfs-local-template/scripts/sfs-dispatch.sh" "sfs dispatch compatibility layer" "b"
+update_file ".sfs-local/scripts/sfs.ps1"        "templates/.sfs-local-template/scripts/sfs.ps1"        "Windows PowerShell wrapper" "b"
 update_file ".sfs-local/scripts/sfs-common.sh"   "templates/.sfs-local-template/scripts/sfs-common.sh"   "sfs-common (shared helpers)" "b"
 update_file ".sfs-local/scripts/sfs-status.sh"   "templates/.sfs-local-template/scripts/sfs-status.sh"   "sfs status"   "b"
 update_file ".sfs-local/scripts/sfs-start.sh"    "templates/.sfs-local-template/scripts/sfs-start.sh"    "sfs start"    "b"
@@ -450,7 +455,9 @@ ${C_BOLD}${C_GREEN}=== 업그레이드 완료 ===${C_RESET}
   $CUR_VER → $NEW_VER
 
 변경사항 git commit 권장:
-  ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .claude/commands/sfs.md .gitignore .sfs-local/${C_RESET}
+  ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore \\${C_RESET}
+  ${C_BLUE}        .claude/commands/sfs.md .gemini/commands/sfs.toml \\${C_RESET}
+  ${C_BLUE}        .agents/skills/sfs/SKILL.md .sfs-local/${C_RESET}
   ${C_BLUE}git commit -m "chore: upgrade solon-mvp $CUR_VER → $NEW_VER"${C_RESET}
 
 CHANGELOG: https://github.com/${SOLON_REPO}/blob/main/CHANGELOG.md

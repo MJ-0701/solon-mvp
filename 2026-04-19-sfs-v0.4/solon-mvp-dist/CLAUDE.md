@@ -13,7 +13,9 @@
 
 ## 배포 원칙
 
-1. **install.sh / upgrade.sh / uninstall.sh** 는 **bash 호환** (macOS zsh / Linux bash 공통). POSIX 친화.
+1. **install.sh / upgrade.sh / uninstall.sh** 는 **bash 호환** (macOS zsh / Linux bash / WSL 공통). POSIX 친화.
+   Windows PowerShell 사용자는 `install.ps1` / `upgrade.ps1` / `uninstall.ps1` wrapper 를 쓴다
+   (내부 실행은 Git Bash 기반 bash adapter SSoT).
 2. **templates/** 하위는 consumer 에게 그대로 배포되는 파일. 수정 시 하위 호환성 고려.
 3. **VERSION** 은 semver `X.Y.Z-mvp` 또는 `X.Y.Z`. mvp suffix 는 풀스펙 수렴 전까지 유지.
 4. **CHANGELOG.md** 는 모든 릴리스를 기록. upgrade.sh 가 이 파일을 consumer 에게 안내.
@@ -23,6 +25,7 @@
 ### install.sh 변경 시
 - [ ] 로컬 모드 (`./install.sh`) 동작 확인
 - [ ] 원격 모드 (`curl | bash`) 동작 확인 — 특히 `read < /dev/tty` 처리
+- [ ] Windows PowerShell wrapper (`install.ps1`) 가 Git Bash 로 `install.sh` 를 호출하는 경로 확인
 - [ ] 멱등성 — 재실행해도 기존 산출물 파괴 안 함
 - [ ] 대화형 충돌 처리 4 옵션 (s/b/o/d) 전부 동작
 
@@ -34,6 +37,7 @@
 ### upgrade.sh 변경 시
 - [ ] `.sfs-local/VERSION` 형식 하위 호환
 - [ ] dry-run 프리뷰 단계 유지 (파일 쓰기 전 사용자 확인)
+- [ ] Windows PowerShell wrapper (`upgrade.ps1`) 와 `.sfs-local/scripts/sfs.ps1` 갱신 경로 확인
 
 ## 7-step flow 요약 (본 repo 자체 개발에도 적용)
 

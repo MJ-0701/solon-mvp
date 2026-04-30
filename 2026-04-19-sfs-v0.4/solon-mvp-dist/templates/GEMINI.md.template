@@ -20,7 +20,7 @@ adapter 를 직접 호출**한다 (paraphrase 금지, 결정성 유지):
 | 사용자 발화 | 실행할 명령 |
 |:--|:--|
 | `sfs status`, `/sfs status` | `bash .sfs-local/scripts/sfs-status.sh [--color=auto/always/never]` |
-| `sfs start <goal>`, `/sfs start <goal>` | `bash .sfs-local/scripts/sfs-start.sh [<sprint-id>] [--force]` |
+| `sfs start <goal>`, `/sfs start <goal>` | `bash .sfs-local/scripts/sfs-start.sh <goal> [--id <sprint-id>] [--force]` |
 | `sfs guide`, `/sfs guide` | `bash .sfs-local/scripts/sfs-guide.sh [--path|--print]` |
 | `sfs plan`, `/sfs plan` | `bash .sfs-local/scripts/sfs-plan.sh` |
 | `sfs review --gate <id>`, `/sfs review --gate <id>` | `bash .sfs-local/scripts/sfs-review.sh --gate <id>` (id ∈ G-1, G0, G1, G2, G3, G4, G5) |
@@ -30,7 +30,7 @@ adapter 를 직접 호출**한다 (paraphrase 금지, 결정성 유지):
 
 각 스크립트의 stdout 은 verbatim 그대로 사용자에게 보여주고 (paraphrase 금지),
 non-zero exit 시 stderr + exit code 도 함께 보고한다. Bash adapter 가 부재하거나 실행
-권한이 없으면 그 사실을 1줄로 사용자에게 알리고, 해당 명령에 한해 fallback paraphrase 모드로 진입한다.
+권한이 없으면 그 사실을 1줄로 사용자에게 알리고 중단한다.
 
 ## `/sfs loop` — 멀티 adaptor LLM executor convention
 

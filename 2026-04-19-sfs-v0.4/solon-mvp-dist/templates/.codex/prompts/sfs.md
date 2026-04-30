@@ -1,26 +1,28 @@
-# Solon SFS — Codex CLI custom prompt (user-scoped slash fallback)
+# Solon SFS — Codex CLI custom prompt (legacy/user-scoped fallback)
 #
 # Path (user-scoped, NOT project-scoped):
 #   ~/.codex/prompts/sfs.md
-# Invoke:
-#   /sfs $ARGUMENTS
+# Invoke on Codex builds that still support user prompts:
+#   /prompts:sfs $ARGUMENTS
 #
-# This file is an OPTIONAL fallback. The primary Codex 1급 entry point for
-# Solon SFS is the project-scoped Skill at `.agents/skills/sfs/SKILL.md`,
-# which is auto-installed by `install.sh` and works with implicit + explicit
-# invocation.
+# This file is an OPTIONAL/legacy fallback. `/sfs` remains the Solon public
+# command surface. The project-scoped Skill at `.agents/skills/sfs/SKILL.md`
+# is the primary Codex adaptor asset installed by `install.sh`.
 #
-# Use this user-scoped slash if you prefer the native `/sfs` popup over
-# Skills implicit invocation. Install manually:
+# Current Codex CLI builds may reserve leading slash names for native commands
+# and reject unregistered `/sfs` before the model sees it. Treat that as a
+# runtime adaptor compatibility gap; `/prompts:sfs` is only a bypass when your
+# Codex build exposes `/prompts:<name>` custom prompts:
 #   mkdir -p ~/.codex/prompts
 #   cp <consumer-project>/templates/.codex/prompts/sfs.md ~/.codex/prompts/sfs.md
 #
-# Then in Codex CLI: type `/sfs status` (or `/prompts:sfs status`).
+# Then in Codex CLI: type `/prompts:sfs status`.
 
 You are operating in a project that has Solon SFS installed.
 
-The user has invoked `/sfs $ARGUMENTS`. Treat the first whitespace-delimited
-token as the subcommand and the remainder as that subcommand's arguments.
+The user has invoked this prompt with `$ARGUMENTS`. Treat the first
+whitespace-delimited token as the subcommand and the remainder as that
+subcommand's arguments.
 
 ## Behavior
 
@@ -31,19 +33,23 @@ the model.
 
 | First arg | Script |
 |:--|:--|
-| `status`   | `bash .sfs-local/scripts/sfs-status.sh <args>`   |
-| `start`    | `bash .sfs-local/scripts/sfs-start.sh <args>`    |
-| `guide`    | `bash .sfs-local/scripts/sfs-guide.sh <args>`    |
-| `plan`     | `bash .sfs-local/scripts/sfs-plan.sh <args>`     |
-| `review`   | `bash .sfs-local/scripts/sfs-review.sh <args>`   |
-| `decision` | `bash .sfs-local/scripts/sfs-decision.sh <args>` |
-| `retro`    | `bash .sfs-local/scripts/sfs-retro.sh <args>`    |
-| `loop`     | `bash .sfs-local/scripts/sfs-loop.sh <args>`     |
+| `status`   | `bash .sfs-local/scripts/sfs-dispatch.sh status <args>`   |
+| `start`    | `bash .sfs-local/scripts/sfs-dispatch.sh start <args>`    |
+| `guide`    | `bash .sfs-local/scripts/sfs-dispatch.sh guide <args>`    |
+| `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <args>`     |
+| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <args>`   |
+| `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <args>` |
+| `retro`    | `bash .sfs-local/scripts/sfs-dispatch.sh retro <args>`    |
+| `loop`     | `bash .sfs-local/scripts/sfs-dispatch.sh loop <args>`     |
 
 ## Procedure
 
-1. Verify `.sfs-local/scripts/sfs-<first-arg>.sh` exists and is executable.
-   If missing, report 1 line and stop.
+1. Verify `.sfs-local/scripts/sfs-dispatch.sh` and
+   `.sfs-local/scripts/sfs-<first-arg>.sh` exist and are executable. If
+   missing, report 1 line and stop.
+   On Windows PowerShell, `.sfs-local/scripts/sfs.ps1 <command> [args]` is the
+   wrapper entry point; it requires Git Bash. WSL users should invoke the bash
+   adapter from inside the WSL shell.
 2. Re-quote args safely. Reject newline/NUL byte args.
 3. Execute via shell. Capture stdout/stderr/exit.
 4. Print stdout verbatim. If exit≠0, also print stderr + `exit <code>` line.
@@ -56,11 +62,15 @@ the model.
 
 ## Why this exists alongside the Skill
 
-Codex CLI has two extension points:
+Codex CLI has two partial extension points:
 1. **Skills** (`.agents/skills/<name>/SKILL.md`) — project-scoped, supports
-   implicit + explicit (`$<name>`) invocation. Recommended primary.
-2. **Custom prompts** (`~/.codex/prompts/<name>.md`) — user-scoped, native
-   slash popup (`/<name>`). Optional fallback.
+   implicit + explicit (`$<name>`) invocation.
+2. **Custom prompts** (`~/.codex/prompts/<name>.md`) — user-scoped, optional
+   legacy fallback on Codex builds that expose `/prompts:<name>`.
 
 Solon SFS ships both for parity with Claude Code (slash) and Gemini CLI
-(slash). Pick whichever feels native — they dispatch to the same bash adapter.
+(slash). Codex desktop app / compatible Codex surfaces where `/sfs` reaches
+the model are already first-class paths. Parity is incomplete only for Codex
+CLI builds that reject unknown leading-slash commands before the model sees
+them. `$sfs ...`, natural language, and `/prompts:sfs ...` are temporary
+bypasses for those builds, not a separate Solon API.
