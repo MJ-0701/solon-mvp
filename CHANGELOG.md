@@ -1,6 +1,6 @@
 ## [0.5.4-product] - 2026-04-30
 
-- (release: cut from dev staging via cut-release.sh)
+- (release cut → stable 2baee1d)
 
 # CHANGELOG — Solon Product
 
