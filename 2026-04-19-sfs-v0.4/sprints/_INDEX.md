@@ -2,7 +2,7 @@
 doc_id: sprints-index
 title: "sprints/ — WU (Work Unit) 파일 목록 (v2)"
 visibility: raw-internal
-updated: 2026-04-29   # 25번째 사이클 zen-practical-archimedes 25th-5 user-active conversation Cowork (16:14 KST 진입). **0.4.0-mvp release cut 완료** (사용자 mac terminal cut-release.sh --apply, stable commit `02be2f8` + tag `v0.4.0-mvp`). dev side post-flight: VERSION 0.3.1→0.4.0 + CHANGELOG 1-line summary prepend (0.3.0/0.3.1 패턴 정합) + 본 frontmatter 갱신 + PROGRESS heartbeat + HANDOFF-next-session.md 재작성. WU-25 + WU-26 batch (β release roadmap 0.4.0-mvp = #1 sfs slash 6 명령 완성) cut. P-10 §5 stable .git/index.lock 사전 검증 적용 사고 0건. cut-release.sh 누적 실 활용 = 3건 (0.3.0-mvp d28591f / 0.3.1-mvp caec8de / 0.4.0-mvp 02be2f8). **활성 WU 0건**. codex 6 findings: #1·#2·#3 ✅ resolved (0.3.1-mvp stable) / #4·#5·#6 ⏳ 0.5.0-mvp deferred. **다음 액션 priority**: (1) A 외부 onboarding (0.4.0-mvp baseline 친구 install) / (2) codex #4·#5·#6 정리 + 0.5.0-mvp cut / (3) WU-27 sub-task 6.8 buffer (Ralph Loop live LLM site 검증) / (4) auto-resume.sh HANDOFF 우선순위 hotfix (~10분, WU-31.x refresh 후보 — resume_hint stale 0.5.0 vs HANDOFF 0.4.0 25th-5 진입 시 발견). — 직전 25th-4 narrative 보존 below: 25th-4 user-active conversation (15:50~16:30 KST, B+C batch). [C ✅ _INDEX.md TBD ref 정리] → [B ✅ WU-26 lifecycle close (α 채택, full ADR + light fallback dual, 8 file 편집 + 22 smoke 0 FAIL)]. WU-26 final_sha=447d911 backfill 완료 (commit 4853f7a).
+updated: 2026-04-30   # 26th-3 Codex desktop/user-active follow-up. 0.5.5-product 로 Codex desktop app `/sfs` canonical path 복구 완료 (stable commit `3f26fb1`, tag `v0.5.5-product`; dev commit `6a4ed4d`). 남은 문제는 codex-cli blocking build 가 unknown leading slash 를 모델/Skill 전에 차단하는 compatibility gap. WU-34 를 신규 active backlog 로 등록. Desktop/app `/sfs` 는 해결/보존, CLI bare `/sfs` parity 는 미해결로 분리.
 ---
 
 # sprints/ — WU 파일 인덱스
@@ -17,7 +17,7 @@ updated: 2026-04-29   # 25번째 사이클 zen-practical-archimedes 25th-5 user-
 
 | WU | title | status | opened | session_opened | path |
 |:--:|:---|:--:|:---|:---|:---|
-_(현재 활성 WU 없음 — 다음 cycle 진입자 신규 WU 신설 시 본 섹션에 row 추가)_
+| WU-34 | Codex CLI `/sfs` compatibility layer — desktop app `/sfs` 는 0.5.5-product 에서 canonical 복구, codex-cli blocking build 의 bare `/sfs` parser 차단 문제 추적 | pending | 2026-04-30 | codex-desktop-user-active-20260430 | [WU-34.md](WU-34.md) |
 
 > **24th 세션 결과 (사이클 31번째)**: WU-30 close. 24th 31번째 user-active-deferred run `sleepy-exciting-pasteur` (2026-04-27T21:55+09:00, 사용자 운동 부재 자율 위임 1시간+) — D-C-WU-30 row 5~8 4 micro-step 일괄 진행. row 5 (README.md 3 위치 minimal: 포함 파일 + 스크립트 사용 §A/§B 분리 + Changelog dev-pending entry, WU22-D9 (b) 두 검증기 분리 인용 + cross-call false-positive 경고) → row 6 (dry-run sandbox `/tmp/wu30-row6-dry-$$/` 4 smoke 전부 의도된 결과 PASS — T1 A✕vw0 exit=0 / T2 B✕vinstall exit=0 + 4WARN / **T3 B✕vw0 exit=1 FAIL (WU-21 §F-04(a) verbatim 재현, 분리 결정 정당성 입증)** / **T4 A✕vinstall exit=1 FAIL (산출물 책임 영역 분리 입증)**) → row 7 (WU-30 frontmatter close = status=done + closed_at + final_sha=9fbd999e62f771f1c2dcc2fb14b093c5e5f0e1ec placeholder, WU-24.1 dd30cde 패턴 정합) → row 8 (sprints/_INDEX 활성→완료 이동 + 본 frontmatter `updated` 갱신). row 9 (commit) = 사용자 manual. **WU-30 + WU-31 + WU-21 final_sha 3건 동시 backfill 권장** (release cut 0.3.0-mvp blocker 해소). 다음 priority order = D-D-meta-logs forward (idx=4, P-08-fuse-bypass-cp-a-broken audit-only — file 이미 23rd 사고 직후 신설, learning-logs/_INDEX.md row 추가 필요) > D-D reverse (idx=5, P-09-sandbox-file-clone-isolation 신설) > D-E-meta-retro forward 11th~23rd > D-E reverse > D-F-meta-handoff.
 
