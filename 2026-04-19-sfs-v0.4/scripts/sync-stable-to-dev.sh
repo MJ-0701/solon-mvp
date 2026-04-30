@@ -26,7 +26,8 @@
 #
 # Allowlist (WU-31 §2.3 정합, hard-coded):
 #     ✅ VERSION / CHANGELOG.md / README.md / CLAUDE.md /
-#        install.sh / upgrade.sh / uninstall.sh / templates/
+#        install.sh / install.ps1 / upgrade.sh / upgrade.ps1 /
+#        uninstall.sh / uninstall.ps1 / templates/
 #     ❌ APPLY-INSTRUCTIONS.md (dev 운영자 전용, hard blocklist)
 #     · stable 에 위 외 파일이 commit 되었으면 WARN (allowlist 외, skip)
 #
@@ -62,9 +63,14 @@ ALLOWLIST=(
   "CHANGELOG.md"
   "README.md"
   "CLAUDE.md"
+  "AGENTS.md"
+  "GUIDE.md"
   "install.sh"
+  "install.ps1"
   "upgrade.sh"
+  "upgrade.ps1"
   "uninstall.sh"
+  "uninstall.ps1"
   "templates"
 )
 

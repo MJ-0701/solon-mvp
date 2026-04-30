@@ -1,3 +1,7 @@
+## [0.5.4-product] - 2026-04-30
+
+- (release cut → stable 2baee1d)
+
 # CHANGELOG — Solon Product
 
 모든 릴리스는 [Semantic Versioning](https://semver.org/lang/ko/) 을 따른다. suffix 규약:
