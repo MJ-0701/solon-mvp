@@ -134,9 +134,16 @@ Global runtime 이 PATH 에 있을 때 권장 경로:
 ```bash
 brew install MJ-0701/solon-product/sfs
 cd ~/workspace/my-project
-sfs init
+sfs init --yes
+sfs status
+sfs guide
 sfs agent install all
 ```
+
+`brew install` 은 Mac 에 global `sfs` CLI 를 설치할 뿐이고, 프로젝트 파일은 만들지
+않습니다. 각 프로젝트 루트에서 `sfs init --yes` 를 한 번 실행해야 `SFS.md`,
+`.sfs-local/`, Claude/Gemini/Codex adapter 가 생성됩니다. 아직 git repo 가 아니면
+`sfs init --yes` 가 `git init` 도 함께 실행합니다.
 
 이후 Solon 런타임을 새 버전으로 올린 뒤 프로젝트 adapter/docs 를 갱신할 때는
 uninstall/reinstall 하지 않습니다:

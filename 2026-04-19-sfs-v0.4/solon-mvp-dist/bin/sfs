@@ -56,6 +56,12 @@ Commands:
   status, start, guide, auth, brainstorm, plan, review, decision, retro, loop
 
 Project state defaults to .sfs-local/. Override with SFS_LOCAL_DIR when needed.
+
+First-time project setup after Homebrew install:
+  cd /path/to/your-project
+  sfs init --yes
+  sfs status
+  sfs guide
 EOF
 }
 
@@ -85,6 +91,54 @@ Updates the current project from the installed Solon runtime:
 
 Use brew upgrade MJ-0701/solon-product/sfs first when you want a newer global runtime.
 EOF
+}
+
+project_local_dir() {
+  printf '%s\n' "${SFS_LOCAL_DIR:-.sfs-local}"
+}
+
+project_onboarding_hint() {
+  local cmd="${1:-command}"
+  cat <<EOF
+Solon CLI is installed, but this project is not initialized yet.
+
+Current directory:
+  ${PWD}
+
+First-time project setup:
+  sfs init --yes
+  sfs status
+  sfs guide
+
+What this means:
+  brew install MJ-0701/solon-product/sfs  installs the global sfs CLI on this Mac.
+  sfs init --yes                          injects SFS.md, .sfs-local/, and agent adapters into this project.
+  sfs update                              refreshes an already-initialized project after a runtime upgrade.
+
+Tip:
+  If this folder is not a git repo yet, sfs init --yes will run git init for you.
+
+You tried:
+  sfs ${cmd}
+EOF
+}
+
+ensure_project_initialized() {
+  local cmd="${1:-command}"
+  local local_dir
+  local_dir="$(project_local_dir)"
+  if [[ -d "${local_dir}" && -f "${local_dir}/VERSION" ]]; then
+    return 0
+  fi
+  project_onboarding_hint "${cmd}" >&2
+  case "${cmd}" in
+    guide|help|-h|--help)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
 }
 
 backup_and_copy() {
@@ -222,6 +276,7 @@ update_command() {
     esac
   done
 
+  ensure_project_initialized update || return $?
   bash "${DIST_DIR}/upgrade.sh" --yes
   echo "agent adapters sync:"
   install_agent_adapter all "${skip_existing}"
@@ -268,6 +323,17 @@ case "${1:-}" in
   -h|--help|help)
     usage
     exit 0
+    ;;
+esac
+
+case "${1:-}" in
+  status|start|guide|auth|brainstorm|plan|review|decision|retro|loop)
+    if ! ensure_project_initialized "${1:-command}"; then
+      exit 1
+    fi
+    if [[ "${1:-}" == "guide" && ! -f "$(project_local_dir)/VERSION" ]]; then
+      exit 0
+    fi
     ;;
 esac
 
