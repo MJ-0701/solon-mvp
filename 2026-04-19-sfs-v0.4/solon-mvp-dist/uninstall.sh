@@ -3,6 +3,8 @@
 #
 # 사용법:
 #   cd ~/workspace/my-project
+#   sfs uninstall
+#   sfs uninstall --keep-artifacts --remove-docs
 #   ~/tmp/solon-product/uninstall.sh
 #
 # 동작:
@@ -14,6 +16,59 @@
 #   3. 설치 취소 기록은 git commit 권장 (스크립트가 자동 commit 하지 않음)
 
 set -euo pipefail
+
+ARTIFACT_MODE=""
+DOC_MODE=""
+
+usage() {
+  cat <<'EOF'
+Usage: sfs uninstall [--keep-artifacts|--remove-all] [--remove-docs|--keep-docs]
+
+Options:
+  --keep-artifacts   scaffold 만 제거하고 sprints/decisions/events.jsonl 보존
+  --remove-all       .sfs-local 전체 제거
+  --remove-docs      SFS.md/CLAUDE.md/AGENTS.md/GEMINI.md 및 agent entry point 제거
+  --keep-docs        SFS.md/CLAUDE.md/AGENTS.md/GEMINI.md 및 agent entry point 보존
+  -h, --help         도움말 출력
+EOF
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --keep-artifacts)
+      ARTIFACT_MODE="keep"
+      ;;
+    --remove-all)
+      ARTIFACT_MODE="all"
+      ;;
+    --remove-docs|--remove-adapters)
+      DOC_MODE="remove"
+      ;;
+    --keep-docs|--keep-adapters)
+      DOC_MODE="keep"
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "알 수 없는 옵션: $1" >&2
+      usage >&2
+      exit 99
+      ;;
+  esac
+  shift
+done
+
+case "$ARTIFACT_MODE" in
+  ""|keep|all) ;;
+  *) echo "알 수 없는 artifact mode: $ARTIFACT_MODE" >&2; exit 99 ;;
+esac
+
+case "$DOC_MODE" in
+  ""|remove|keep) ;;
+  *) echo "알 수 없는 doc mode: $DOC_MODE" >&2; exit 99 ;;
+esac
 
 readonly GIT_MARKER_BEGIN="### BEGIN solon-product ###"
 readonly GIT_MARKER_END="### END solon-product ###"
@@ -39,8 +94,8 @@ fi
 
 prompt() {
   local msg="$1" default="${2:-}" answer
-  if [ -n "$default" ]; then printf "%s [%s]: " "$msg" "$default"
-  else printf "%s: " "$msg"; fi
+  if [ -n "$default" ]; then printf "%s [%s]: " "$msg" "$default" >&2
+  else printf "%s: " "$msg" >&2; fi
   read -r answer || answer=""
   echo "${answer:-$default}"
 }
@@ -83,7 +138,11 @@ if [ -d "$TARGET/.sfs-local" ]; then
   [c] 취소
 
 EOF
-  CHOICE=$(prompt "선택?" "c")
+  case "$ARTIFACT_MODE" in
+    keep) CHOICE="b" ;;
+    all) CHOICE="a" ;;
+    *) CHOICE=$(prompt "선택?" "c") ;;
+  esac
 
   case "$CHOICE" in
     a|A)
@@ -96,8 +155,6 @@ EOF
       rm -f "$TARGET/.sfs-local/VERSION"
       rm -f "$TARGET/.sfs-local/GUIDE.md"
       rm -f "$TARGET/.sfs-local/auth.env.example"
-      rm -f "$TARGET/.sfs-local/current-sprint"
-      rm -f "$TARGET/.sfs-local/current-wu"
       rm -f "$TARGET/.sfs-local/sprints/.gitkeep"
       rm -f "$TARGET/.sfs-local/decisions/.gitkeep"
       rm -rf "$TARGET/.sfs-local/scripts"
@@ -105,7 +162,7 @@ EOF
       rm -rf "$TARGET/.sfs-local/personas"
       rm -rf "$TARGET/.sfs-local/decisions-template"
       ok "scaffold 제거 (runtime scripts / templates / personas / divisions.yaml / VERSION / GUIDE.md / auth.env.example)"
-      warn "산출물 보존: sprints/ / decisions/ / events.jsonl"
+      warn "산출물 보존: sprints/ / decisions/ / events.jsonl / current-sprint / current-wu"
       warn "로컬 인증값 보존: .sfs-local/auth.env"
       ;;
     *)
@@ -151,7 +208,11 @@ do
   [ -f "$TARGET/$doc" ] || continue
   echo ""
   warn "$doc 가 존재합니다 (사용자가 편집했을 수 있음)"
-  ans=$(prompt "$doc 삭제할까요?" "N")
+  case "$DOC_MODE" in
+    remove) ans="y" ;;
+    keep) ans="N" ;;
+    *) ans=$(prompt "$doc 삭제할까요?" "N") ;;
+  esac
   case "$ans" in
     y|Y|yes|YES)
       rm -f "$TARGET/$doc"

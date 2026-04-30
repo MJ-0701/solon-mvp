@@ -46,11 +46,12 @@ usage() {
   cat <<'EOF'
 Usage:
   sfs init [--yes] [--layout thin|vendored]
+  sfs uninstall [--keep-artifacts|--remove-all] [--remove-docs|--keep-docs]
   sfs agent install <claude|gemini|codex|all> [--skip-existing]
   sfs <command> [args]
 
 Commands:
-  agent install
+  agent install, uninstall
   status, start, guide, auth, brainstorm, plan, review, decision, retro, loop
 
 Project state defaults to .sfs-local/. Override with SFS_LOCAL_DIR when needed.
@@ -199,6 +200,10 @@ case "${1:-}" in
     shift
     agent_command "$@"
     exit $?
+    ;;
+  uninstall)
+    shift
+    exec bash "${DIST_DIR}/uninstall.sh" "$@"
     ;;
   upgrade)
     shift
