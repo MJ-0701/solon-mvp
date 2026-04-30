@@ -5,14 +5,19 @@ sprint_id: ""        # filled by /sfs start
 goal: ""             # filled by /sfs start <goal>
 created_at: ""       # filled by /sfs start
 last_touched_at: ""  # filled by /sfs review (auto, ISO8601 + tz)
+evaluator_role: CPO
+evaluator_persona: ".sfs-local/personas/cpo-evaluator.md"
+evaluator_executor: ""  # filled by /sfs review --executor <profile>
+generator_executor: ""  # optional, filled by /sfs review --generator <profile>
 ---
 
 # Review — <sprint title>
 
-> Sprint **review** 단계 산출물. G2/G3/G4 중 하나의 gate 에 대한 verdict 기록.
-> 각 gate review 마다 `.sfs-local/events.jsonl` 의 `gate_review` event append.
+> Sprint **CPO Evaluator review** 산출물. G2/G3/G4 중 하나의 gate 에 대한 verdict 기록.
+> 각 gate review 마다 `.sfs-local/events.jsonl` 의 `review_open` event append.
 > SSoT: `gates.md §1` (7-Gate enum) + `05-gate-framework.md §5.1` (매트릭스).
 > 동일 sprint 안에서 G2/G3/G4 review 가 여러 번 발생할 경우 본 파일에 §2 섹션을 추가 append.
+> 자체검증 방지: CTO Generator 와 CPO Evaluator 는 같은 산출물을 같은 agent instance 가 통과시키지 않는다.
 
 ---
 
@@ -21,6 +26,9 @@ last_touched_at: ""  # filled by /sfs review (auto, ISO8601 + tz)
 - **gate_id**: G2 / G3 / G4 (해당 review 시점에서 1개로 고정)
 - **scope**: 본 review 가 평가하는 산출물 / 변경 범위 / 검증 방법
 - **trigger**: `/sfs review --gate <id>` 호출 시각
+- **CPO persona**: `.sfs-local/personas/cpo-evaluator.md`
+- **review executor/tool**: codex / gemini / claude / custom
+- **generator executor/tool**: CTO 구현에 사용한 tool
 
 ## §2. 평가 항목
 
@@ -51,6 +59,17 @@ last_touched_at: ""  # filled by /sfs review (auto, ISO8601 + tz)
 
 ## §4. 다음 액션
 
-- pass → 다음 phase 진입 (Do / G3 후 Handoff / G4 후 Retro)
-- partial → Do 보강 또는 별도 WU 분기
-- fail → root cause 회귀 (Plan 재검토 또는 Design 재검토)
+- pass → CTO 최종 확인 후 G5 retro 진입
+- partial → CPO 가 지정한 항목만 CTO 재구현 후 재리뷰
+- fail → CTO 재구현 또는 CEO plan/scope 재검토
+
+## §5. CTO 응답 / 재구현 확인
+
+- **CTO 확인**: pass / rework-started / plan-escalation
+- **반영한 CPO finding**:
+- **재구현 변경 파일/모듈**:
+- **재리뷰 필요 여부**:
+
+## §6. CPO Review Invocation Log
+
+`/sfs review` 호출 시 CPO evaluator prompt 가 append 된다.

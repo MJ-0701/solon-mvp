@@ -139,8 +139,8 @@ if [[ ! -d "${SFS_TEMPLATES_DIR}" ]]; then
   exit "${SFS_EXIT_NO_TEMPLATES}"
 fi
 
-# Ensure all 4 expected template files exist (WU-24 §2.3).
-for tpl in plan log review retro; do
+# Ensure all 5 expected sprint template files exist.
+for tpl in brainstorm plan log review retro; do
   if [[ ! -f "${SFS_TEMPLATES_DIR}/${tpl}.md" ]]; then
     echo "templates not found: ${SFS_TEMPLATES_DIR}/${tpl}.md" >&2
     exit "${SFS_EXIT_NO_TEMPLATES}"
@@ -166,7 +166,7 @@ if ! mkdir -p "${SPRINT_DIR}" 2>/dev/null; then
   exit "${SFS_EXIT_PERM}"
 fi
 
-for tpl in plan log review retro; do
+for tpl in brainstorm plan log review retro; do
   if ! cp -f "${SFS_TEMPLATES_DIR}/${tpl}.md" "${SPRINT_DIR}/${tpl}.md" 2>/dev/null; then
     echo "permission denied copying ${tpl}.md to ${SPRINT_DIR}/" >&2
     exit "${SFS_EXIT_PERM}"
@@ -179,7 +179,7 @@ _yaml_sprint="${_yaml_sprint//\"/\\\"}"
 _yaml_goal="${GOAL//\\/\\\\}"
 _yaml_goal="${_yaml_goal//\"/\\\"}"
 
-for doc in plan log review retro; do
+for doc in brainstorm plan log review retro; do
   update_frontmatter "${SPRINT_DIR}/${doc}.md" "sprint_id" "\"${_yaml_sprint}\"" || true
   update_frontmatter "${SPRINT_DIR}/${doc}.md" "created_at" "\"${NOW}\"" || true
   if [[ -n "${GOAL}" ]]; then
@@ -222,6 +222,7 @@ fi
 # Report
 # ─────────────────────────────────────────────────────────────────────
 echo "created: ${SPRINT_DIR}/"
+echo "  - brainstorm.md"
 echo "  - plan.md"
 echo "  - log.md"
 echo "  - review.md"

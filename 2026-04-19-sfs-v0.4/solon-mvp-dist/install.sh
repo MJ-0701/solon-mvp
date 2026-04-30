@@ -367,6 +367,13 @@ else
   ok "  events.jsonl 기존 유지"
 fi
 
+# auth.env.example — local executor credentials template (actual auth.env is gitignored)
+if [ -f "$SOURCE_DIR/templates/.sfs-local-template/auth.env.example" ] \
+   && [ ! -f "$TARGET/.sfs-local/auth.env.example" ]; then
+  cp "$SOURCE_DIR/templates/.sfs-local-template/auth.env.example" "$TARGET/.sfs-local/auth.env.example"
+  ok "  auth.env.example 생성 (Gemini/Codex/Claude bridge auth 안내)"
+fi
+
 # sprints/ + decisions/
 mkdir -p "$TARGET/.sfs-local/sprints" "$TARGET/.sfs-local/decisions"
 [ -f "$TARGET/.sfs-local/sprints/.gitkeep" ] || touch "$TARGET/.sfs-local/sprints/.gitkeep"
@@ -392,13 +399,22 @@ if [ -d "$SCRIPTS_SRC" ]; then
   ok "  scripts/ 복사 (sfs-*.sh executable + Windows sfs.ps1 wrapper)"
 fi
 
-# sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용하는 4 템플릿
+# sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용하는 템플릿
 # 정책: 매 install 마다 overwrite (user 수정 영역 아님, scripts/ 와 동일 정합).
 TEMPLATES_SRC="$SOURCE_DIR/templates/.sfs-local-template/sprint-templates"
 if [ -d "$TEMPLATES_SRC" ]; then
   mkdir -p "$TARGET/.sfs-local/sprint-templates"
   cp "$TEMPLATES_SRC"/*.md "$TARGET/.sfs-local/sprint-templates/" 2>/dev/null || true
-  ok "  sprint-templates/ 복사 (plan + log + review + retro + decision-light)"
+  ok "  sprint-templates/ 복사 (brainstorm + plan + log + review + retro + decision-light)"
+fi
+
+# personas/ — CEO / CTO Generator / CPO Evaluator 기본 persona
+# 정책: 매 install 마다 overwrite (배포판 관리 기본값, 프로젝트별 수정은 별도 파일로 분기 권장).
+PERSONAS_SRC="$SOURCE_DIR/templates/.sfs-local-template/personas"
+if [ -d "$PERSONAS_SRC" ]; then
+  mkdir -p "$TARGET/.sfs-local/personas"
+  cp "$PERSONAS_SRC"/*.md "$TARGET/.sfs-local/personas/" 2>/dev/null || true
+  ok "  personas/ 복사 (CEO + CTO Generator + CPO Evaluator)"
 fi
 
 # decisions-template/ — sfs-decision.sh 가 ADR 신설 시 사용하는 ADR-full 템플릿 (WU-26 §1)
@@ -485,8 +501,8 @@ Windows wrapper: .sfs-local/scripts/sfs.ps1 (PowerShell → Git Bash)
   ${C_BOLD}1.${C_RESET} SFS.md 내용 확인 + 프로젝트 특성 반영 (Stack / 도메인 등).
 
   ${C_BOLD}2.${C_RESET} 선호 런타임에서 시작 (Solon public API 는 셋 다 /sfs):
-     ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} 또는 ${C_BLUE}/sfs start${C_RESET}
-     ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} 또는 ${C_BLUE}/sfs start${C_RESET}
+     ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET}
+     ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET}
      ${C_BLUE}codex app${C_RESET}  → ${C_BLUE}/sfs status${C_RESET} (정상 1급, Skill 이 bash adapter dispatch)
      ${C_BLUE}codex CLI${C_RESET}  → ${C_BLUE}/sfs status${C_RESET} (현재 blocking build 는 adaptor gap;
                    임시 bypass: ${C_BLUE}\$sfs status${C_RESET}, ${C_BLUE}sfs status${C_RESET}, 자연어, direct bash)

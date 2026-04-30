@@ -12,6 +12,7 @@ last_touched_at: ""  # filled by /sfs plan (auto, ISO8601 + tz)
 > Sprint **G1 — Plan Gate** 산출물. 본 문서의 목적은 **요구사항·AC 의 측정 가능성 확보**.
 > 변경 이력은 `.sfs-local/events.jsonl` 의 `phase_change` / `gate_review` event 로 추적.
 > SSoT: `05-gate-framework.md §5.1` (Gate 매트릭스).
+> 입력 기준: 같은 sprint 의 `brainstorm.md` (G0) 를 먼저 읽고 작성한다.
 
 ---
 
@@ -42,3 +43,32 @@ last_touched_at: ""  # filled by /sfs plan (auto, ISO8601 + tz)
 - [ ] 의존성 / 결정 대기 항목이 명시됨
 
 > 본 체크리스트 통과 = `/sfs review --gate G1` 진입 조건. verdict (pass / partial / fail) 는 `review.md` 에 기록.
+
+## §5. Sprint Contract (Generator ↔ Evaluator)
+
+`brainstorm.md` 의 G0 맥락을 기반으로 이번 sprint 의 실행 계약을 명시한다.
+역할 흐름은 **CEO → CTO Generator ↔ CPO Evaluator → CTO 구현 → CPO 리뷰 → CTO rework/final confirm → retro** 이다.
+
+- **CEO 요구사항/plan 결정**:
+  - 문제 정의:
+  - 최종 목표:
+  - 이번 sprint 에서 버릴 것:
+- **CTO Generator 가 만들 것**:
+  - persona: `.sfs-local/personas/cto-generator.md`
+  - preferred executor: claude / codex / gemini / custom:
+  - 산출물:
+  - 변경 파일/모듈:
+  - 구현하지 않을 것:
+- **CPO Evaluator 가 검증할 것**:
+  - persona: `.sfs-local/personas/cpo-evaluator.md`
+  - preferred executor: codex / gemini / claude / custom:
+  - self-validation 방지: 구현한 agent/tool 과 다른 evaluator instance/tool 사용 권장
+  - AC 검증 방법:
+  - 회귀/위험 체크:
+  - 통과/부분통과/실패 기준:
+- **CTO ↔ CPO 재작업 계약**:
+  - CPO `pass`: 최종 통과 + retro 진입
+  - CPO `partial`: 지정된 항목만 CTO 재구현 후 재리뷰
+  - CPO `fail`: plan/scope 재검토 또는 구현 재작업
+- **사용자 최종 결정이 필요한 지점**:
+  -

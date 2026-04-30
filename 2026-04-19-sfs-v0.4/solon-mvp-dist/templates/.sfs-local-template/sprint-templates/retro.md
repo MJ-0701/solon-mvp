@@ -33,8 +33,8 @@ closed_at: ""        # filled by /sfs retro --close
 ## §2. PDCA 학습
 
 - **Plan**: 의도와 결과 간 차이가 컸던 항목
-- **Do**: 실 작업 중 발견된 실무 패턴 (`learning-logs/` 후보 P-…)
-- **Check**: G4 partial 항목과 retro 시점에서의 후속 plan
+- **Do**: CTO 구현 중 발견된 실무 패턴 (`learning-logs/` 후보 P-…)
+- **Check**: CPO review verdict / G4 partial 항목과 retro 시점에서의 후속 plan
 - **Act**: 본 sprint 학습을 다음 sprint plan / convention 문서에 어떻게 반영할지
 
 ## §3. 정량 메트릭 (선택)

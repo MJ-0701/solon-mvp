@@ -30,7 +30,7 @@ PowerShell-only 환경은 아직 지원선 밖이다.
 
 **5초 mental model**:
 - **본인이 편집** = `SFS.md`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`. 이 4개는 너의 프로젝트 정체성을 담는다.
-- **건드리지 마** = `.claude/`, `.gemini/`, `.agents/`, `.sfs-local/scripts/`, `.sfs-local/sprint-templates/`, `.sfs-local/decisions-template/`. 다음 `upgrade.sh` 실행 시 덮어써진다.
+- **건드리지 마** = `.claude/`, `.gemini/`, `.agents/`, `.sfs-local/scripts/`, `.sfs-local/sprint-templates/`, `.sfs-local/personas/`, `.sfs-local/decisions-template/`. 다음 `upgrade.sh` 실행 시 덮어써진다.
 - **쌓이는 곳** = `.sfs-local/sprints/`, `.sfs-local/decisions/`, `.sfs-local/events.jsonl`. 너의 작업 기록이 누적된다. 절대 자동 덮어쓰지 않는다.
 
 ---
@@ -93,7 +93,7 @@ direct bash 는 그 CLI build 에서만 쓰는 임시 bypass 입니다.
 sprint - · WU - · gate -:- · ahead 0 · last_event -
 ```
 
-대시는 "아직 sprint 시작 안 함" 이라는 뜻. 첫 sprint 시작:
+대시는 "아직 sprint 시작 안 함" 이라는 뜻. 첫 sprint workspace 시작:
 
 ```text
 /sfs start "todo 앱 v0 — 일정 추가/완료/삭제 + Postgres 저장"
@@ -101,32 +101,53 @@ sprint - · WU - · gate -:- · ahead 0 · last_event -
 
 이러면:
 1. `.sfs-local/sprints/2026-W18-sprint-1/` 같은 디렉토리가 생긴다 (ISO 주차 자동 명명).
-2. `plan.md` / `log.md` / `review.md` / `retro.md` 4개 sprint file 이 복사된다.
+2. `brainstorm.md` / `plan.md` / `log.md` / `review.md` / `retro.md` 5개 sprint file 이 복사된다.
 3. `events.jsonl` 에 `sprint_start` 이벤트 1줄 append.
 4. `.sfs-local/current-sprint` 에 sprint id 저장.
 
 ---
 
-## 3. 다음 10분 — `plan.md` 작성 (이게 진짜 알맹이)
+## 3. 다음 10분 — brainstorm → plan
+
+먼저 raw 요구사항과 대화 맥락을 `brainstorm.md` 에 남긴다:
+
+```text
+/sfs brainstorm "아직 정리 안 된 요구사항, 제약, 아이디어"
+```
+
+긴 내용을 붙여넣는 CLI 환경에서는 direct bash 로 stdin 을 써도 된다:
+
+```bash
+bash .sfs-local/scripts/sfs-brainstorm.sh --stdin < requirements.txt
+```
+
+그 다음 brainstorm 을 plan 계약으로 바꾼다:
 
 ```text
 /sfs plan
 ```
 
-이러면 `plan.md` 가 열리고 frontmatter 의 `phase: plan`, `last_touched_at` 이 자동 갱신된다. 본인이 채울 영역:
+이러면 `plan.md` 가 열리고 frontmatter 의 `phase: plan`, `last_touched_at` 이 자동 갱신된다.
+같은 sprint 의 `brainstorm.md` 를 읽고 본인이 채울 영역:
 
 - **목표 (Goal)**: 이번 sprint 끝나고 무엇이 동작해야 하나? 1-2줄.
 - **AC (Acceptance Criteria)**: 어떻게 동작하는 게 "끝" 인가? 3-5개 bullet.
 - **범위 (In/Out of scope)**: 이번에 할 것 / 안 할 것. "안 할 것" 이 더 중요.
+- **Sprint Contract**: CEO plan 을 바탕으로 CTO Generator 가 만들 것과 CPO Evaluator 가 검증할 것.
 - **G1 self-check**: plan 자체가 OK 한가? (1줄 verdict)
 
 > 💡 **plan 의 핵심 가치 = "안 할 것" 명시**. AI 가 plan 없이 코드 짜면 over-build 하기 쉽다. plan 에 "X 는 이번 sprint 에 안 한다" 고 적어두면 AI 가 그걸 읽고 안 한다.
 
 ---
 
-## 4. 그 다음 — 구현 → review → decision → retro
+## 4. 그 다음 — CTO 구현 → CPO review → CTO 확인 → retro
 
-평소처럼 코드 짠다. 결정 내릴 일이 있을 때마다:
+`plan.md §5` 의 계약에 따라 CTO Generator 가 구현한다. Claude 로 구현했다면 CPO review 는
+Codex plugin/Codex CLI/Gemini CLI 같은 다른 tool 또는 별도 agent instance 를 쓰는 것을 권장한다.
+이게 `/sfs` adaptor 를 만든 배경이다. 같은 명령 표면으로 여러 도구를 연결해서,
+Claude 자체검증이 아니라 독립 CPO 검증을 받기 위함이다.
+
+결정 내릴 일이 있을 때마다:
 
 ```text
 /sfs decision "JWT vs 세션 — 지금은 세션 기반으로 시작 (단일 서버)"
@@ -134,13 +155,38 @@ sprint - · WU - · gate -:- · ahead 0 · last_event -
 
 → `.sfs-local/decisions/0001-jwt-vs-session.md` 같은 ADR-style file 자동 생성.
 
-구현이 끝나갈 때:
+구현이 끝나갈 때 CPO Evaluator review 를 연다:
 
 ```text
-/sfs review --gate G2
+/sfs review --gate G4 --executor codex --generator claude --run
 ```
 
-→ `review.md` 가 열린다. "G2 (구현 entry) 자기 점검" 영역 채우고 verdict (`pass` / `partial` / `fail`) 기록.
+→ `review.md` 에 CPO persona 기반 review prompt 가 append 된다. CPO verdict 는
+`pass` / `partial` / `fail` 로 기록한다. `partial` 또는 `fail` 이면 CTO 가 지정된 항목만
+재구현하고 다시 review 를 연다.
+
+`--run` 은 실제 bridge 가 있을 때만 성공한다. `codex` 는 `SFS_REVIEW_CODEX_CMD` 또는
+`codex exec --full-auto` 를 사용한다. Claude 내부 Codex plugin 은 shell 에서 직접 호출할 수
+없으므로 `SFS_REVIEW_CODEX_PLUGIN_CMD` 같은 bridge 를 설정하거나, `--print-prompt` 로 나온
+prompt 를 Claude 에 연결된 Codex plugin 에 넘겨야 한다.
+
+Codex/Claude/Gemini CLI 는 인증 prompt 가 먼저 뜨면 SFS 가 넘긴 review prompt 를 auth 답변으로
+소비할 수 있다. 그래서 SFS 는 `.sfs-local/auth.env` 를 자동 로드하고 `/sfs auth` 로
+인증 상태를 먼저 확인한다. `.sfs-local/auth.env.example` 을 복사해서 API key 또는
+`SFS_CODEX_AUTH_READY=1` / `SFS_CLAUDE_AUTH_READY=1` / `SFS_GEMINI_AUTH_READY=1` 을 넣어라.
+real terminal 에서는 `/sfs auth login --executor gemini` 처럼 브라우저/터미널 인증을
+명시적으로 끝낼 수 있다. bridge 연결만 확인할 때는 `/sfs auth probe --executor gemini --timeout 20` 가
+작은 dummy request/response 만 보낸다. 실제 `.sfs-local/auth.env` 는 gitignore 대상이다.
+
+반대 방향도 비대칭이다. Codex 로 구현한 뒤 Claude 리뷰를 받으려면 Codex 가 Claude plugin 을
+부르는 방식이 아니라, 설치된 Claude CLI 를 bridge 로 사용한다:
+
+```text
+/sfs review --gate G4 --executor claude --generator codex --run
+```
+
+Claude CLI bridge 가 없으면 `--print-prompt` 로 CPO prompt 를 뽑아서 Claude 에 handoff 한다.
+`--executor claude-plugin --run` 같은 경로는 지원하지 않는다. Codex 는 Claude plugin host 가 아니다.
 
 sprint 완전히 끝났으면:
 
@@ -154,7 +200,7 @@ sprint 완전히 끝났으면:
 
 ---
 
-## 5. 8 슬래시 명령 cheatsheet
+## 5. 10 슬래시 명령 cheatsheet
 
 Codex desktop app 에서 `/sfs` 가 모델/Skill 에 보이면 정상 1급 경로다. 메시지를 읽은
 Codex adapter 는 unsupported 로 답하지 말고 즉시 bash adapter 로 dispatch 한다. Codex CLI
@@ -164,12 +210,15 @@ Codex adapter 는 unsupported 로 답하지 말고 즉시 bash adapter 로 dispa
 | 명령 | 한 줄 설명 |
 |:--|:--|
 | `/sfs status` | 지금 어디까지 왔는지 1줄 |
-| `/sfs start <goal>` | 새 sprint 시작 또는 이어가기 |
+| `/sfs start <goal>` | 새 sprint workspace 초기화 |
+| `/sfs brainstorm [text]` | G0 raw 요구사항과 대화 맥락 기록 |
 | `/sfs guide` | 처음 쓸 때 필요한 맥락과 다음 명령 확인 |
 | `/sfs guide --path` | 이 onboarding guide 경로만 확인 |
 | `/sfs guide --print` | 이 guide 본문을 터미널에 출력 |
+| `/sfs auth status` | Codex/Claude/Gemini review executor 인증 확인 |
+| `/sfs auth probe --executor gemini --timeout 20` | bridge request/response 더미 확인 |
 | `/sfs plan` | 현 sprint 의 의도/경계 작성 |
-| `/sfs review --gate G2` | gate verdict 기록 (G-1 / G0 / G1 / G2 / G3 / G4 / G5) |
+| `/sfs review --gate G4 --executor codex --run` | 리뷰할 evidence 가 있을 때 CPO review bridge 실행 + verdict 기록 |
 | `/sfs decision <title>` | ADR-style 결정 기록 |
 | `/sfs retro [--close]` | 회고 작성 / sprint close + auto-commit |
 | `/sfs loop` | 큰 작업 자율 진행 (Ralph Loop, 고급) |
@@ -251,7 +300,7 @@ Windows PowerShell 에서는:
 
 `SFS.md`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.sfs-local/divisions.yaml` = 기본 보존 (본인 편집 가능성 큰 영역).
 
-`scripts/`, `sprint-templates/`, `decisions-template/`, `.claude/commands/sfs.md`, `.gemini/commands/sfs.toml`, `.agents/skills/sfs/SKILL.md` = 자동 갱신 (배포판 관리 영역).
+`scripts/`, `sprint-templates/`, `personas/`, `decisions-template/`, `.claude/commands/sfs.md`, `.gemini/commands/sfs.toml`, `.agents/skills/sfs/SKILL.md` = 자동 갱신 (배포판 관리 영역).
 
 `.sfs-local/sprints/`, `.sfs-local/decisions/`, `.sfs-local/events.jsonl` = **절대 덮어쓰지 않음**.
 

@@ -16,7 +16,7 @@ SFS_EXIT_UNKNOWN=99
 usage() {
   cat <<'EOF'
 Usage: /sfs <command> [args]
-Commands: status, start, guide, plan, review, decision, retro, loop
+Commands: status, start, guide, auth, brainstorm, plan, review, decision, retro, loop
 Help: bash .sfs-local/scripts/sfs-<command>.sh --help
 EOF
 }
@@ -45,7 +45,7 @@ case "${cmd}" in
     usage
     exit 0
     ;;
-  status|start|guide|plan|review|decision|retro|loop)
+  status|start|guide|auth|brainstorm|plan|review|decision|retro|loop)
     target="${SFS_SCRIPT_DIR}/sfs-${cmd}.sh"
     ;;
   *)
@@ -66,7 +66,7 @@ if [[ ! -x "${target}" ]]; then
 fi
 
 for arg in "$@"; do
-  if [[ "${arg}" == *$'\n'* ]]; then
+  if [[ "${cmd}" != "brainstorm" && "${arg}" == *$'\n'* ]]; then
     echo "unknown arg: newline not allowed" >&2
     exit "${SFS_EXIT_UNKNOWN}"
   fi

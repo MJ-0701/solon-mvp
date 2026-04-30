@@ -1,3 +1,118 @@
+## [0.5.14-product] - 2026-04-30
+
+**Auth probe early success return.** `/sfs auth probe` now returns as soon as the expected
+`SFS_AUTH_PROBE_OK` marker appears in stdout, instead of waiting for CLIs that keep their process
+open briefly after emitting the response.
+
+### Changed
+
+- **probe marker short-circuit** — Solon interrupts the executor after the probe marker is captured,
+  so Gemini/Codex/Claude probes can complete promptly even if the CLI delays process shutdown.
+
+## [0.5.13-product] - 2026-04-30
+
+**Auth probe timeout guard.** `/sfs auth probe` now has a hard timeout and validates that the
+executor actually returned the probe marker before reporting success.
+
+### Fixed
+
+- **hanging Gemini probe** — `probe --executor gemini` now uses a direct probe prompt and defaults
+  to a 45 second timeout instead of waiting indefinitely.
+- **probe false positives** — probe success now requires `SFS_AUTH_PROBE_OK` in stdout; empty or
+  unrelated executor output fails with the recorded stdout/stderr paths.
+
+### Added
+
+- **`--timeout <seconds>` for `/sfs auth probe`** — users can run a smaller request/response check
+  such as `/sfs auth probe --executor gemini --timeout 20`.
+
+## [0.5.12-product] - 2026-04-30
+
+**Review auth command and empty-review cutoff.** `/sfs review --run` now checks whether there
+is reviewable evidence before spending executor tokens, and `/sfs auth` provides explicit
+status/login/probe flows for Codex/Claude/Gemini review bridges.
+
+### Added
+
+- **`/sfs auth` command** — `status`, `check`, `login`, `probe`, and `path` actions for
+  local executor auth readiness and cheap dummy request/response bridge tests.
+- **empty review guard** — implementation/release reviews with no project evidence now print
+  `리뷰할 항목이 없습니다` instead of invoking external CLIs.
+- **probe path** — `/sfs auth probe --executor <tool>` sends a tiny dummy prompt and records
+  stdout/stderr under `.sfs-local/tmp/auth-probes/`.
+
+### Changed
+
+- **review auth flow** — `/sfs review --run` defaults to auth `auto`: if auth is missing and a
+  real terminal is available, SFS can run the executor login/bootstrap before review; CI can use
+  `--no-auth-interactive` for fail-closed behavior.
+
+## [0.5.11-product] - 2026-04-30
+
+**Executor review visibility and evidence bundle fix.** `/sfs review --run` now embeds sprint
+evidence in the prompt and prints output paths before invoking external CLIs.
+
+### Fixed
+
+- **vendor tool mismatch** — CPO prompts include `git status`, `git diff --stat`, and sprint
+  artifact excerpts so Gemini/Codex/Claude do not need identical file-reading tool surfaces.
+- **apparent hangs** — review execution now prints stdout/stderr/prompt paths before the external
+  executor starts, so long-running Codex/Gemini/Claude calls are visible and inspectable.
+
+## [0.5.10-product] - 2026-04-30
+
+**Interactive executor auth bootstrap fix.** `--auth-interactive` now attaches Codex/Claude/Gemini
+login output directly to `/dev/tty` instead of hiding prompts in temp files while resolving the
+executor command.
+
+### Fixed
+
+- **visible auth prompts** — browser/device/login prompts are shown in the user terminal during
+  `--auth-interactive`; stdout is kept out of `EXECUTOR_CMD` command substitution.
+- **clear bootstrap failure** — failed auth bootstrap now reports directly without pointing users
+  to hidden temp files.
+
+## [0.5.9-product] - 2026-04-30
+
+**G0 brainstorm command and flow correction.** `/sfs start` remains the sprint workspace
+scaffold command, while `/sfs brainstorm` becomes the explicit G0 context-capture command before
+`/sfs plan`.
+
+### Added
+
+- **`/sfs brainstorm` command** — `.sfs-local/scripts/sfs-brainstorm.sh` creates or updates the
+  active sprint's `brainstorm.md`, accepts raw/multiline context via `--stdin` or quoted args,
+  appends a `brainstorm_open` event, and prints the artifact path.
+- **`brainstorm.md` sprint template** — G0 artifact with raw brief, problem space, constraints,
+  options, scope seed, plan seed, and generator/evaluator contract seed sections.
+- **3 C-Level personas** — managed defaults for CEO, CTO Generator, and CPO Evaluator under
+  `.sfs-local/personas/`.
+
+### Changed
+
+- **flow contract** — product docs/adapters now use `start → brainstorm → plan` as the intended
+  first flow. `start` scaffolds the sprint, `brainstorm` captures context, `plan` turns it into the
+  sprint contract.
+- **C-Level sprint contract** — `plan.md` now frames the flow as CEO requirements/plan →
+  CTO Generator ↔ CPO Evaluator contract → CTO implementation → CPO review → CTO rework/final
+  confirmation → retro.
+- **CPO review entrypoint** — `/sfs review` now appends a CPO Evaluator prompt to `review.md`,
+  records `evaluator_executor` / `generator_executor`, and supports configurable review tools via
+  `--executor` while keeping CPO review mandatory.
+- **review executor bridge** — `/sfs review --run` now attempts an actual CPO bridge invocation
+  (`codex`, `codex-plugin`, `gemini`, `claude`, or custom command). Missing bridges fail closed
+  instead of leaving misleading metadata.
+- **local executor auth env** — `.sfs-local/auth.env.example` documents gitignored headless
+  credential handoff for Codex/Claude/Gemini. SFS loads `.sfs-local/auth.env` when present, checks
+  named executor auth before prompt handoff, and supports explicit `--auth-interactive` bootstrap
+  when the user discovers missing auth during review.
+- **asymmetric bridge policy** — Claude → Codex may use a Claude-side Codex plugin/manual bridge
+  or Codex CLI, while Codex → Claude uses Claude CLI or prompt handoff. `claude-plugin` is
+  explicitly unsupported because Codex is not a Claude plugin host.
+- **start scaffold** — `/sfs start` now copies `brainstorm.md` along with plan/log/review/retro.
+- **newline handling** — `sfs-dispatch.sh` still rejects newline args for deterministic commands, but
+  permits them for `brainstorm` so pasted raw requirements can be captured instead of dropped.
+
 ## [0.5.7-product] - 2026-04-30
 
 **`/sfs guide` default context briefing.** Bare `/sfs guide` should orient the user, not dump a
