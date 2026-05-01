@@ -1,3 +1,15 @@
+## [0.5.57-product] - 2026-05-02
+
+**Windows Scoop one-shot upgrade hotfix.** Tightens the Windows wrapper path so
+Scoop installs can behave like Homebrew installs when users run `sfs upgrade`.
+
+### Fixed
+
+- **Scoop self-upgrade from Windows wrappers** — `sfs.cmd upgrade` and
+  `sfs.ps1 upgrade` now run `scoop update` + `scoop update sfs` first when the
+  runtime is installed under Scoop, then reload the updated runtime before
+  refreshing the current project.
+
 ## [0.5.56-product] - 2026-05-02
 
 **Combined division activation, loop lifecycle, and artifact cleanup release.**
