@@ -248,9 +248,8 @@ entry point 를 프로젝트에 설치/갱신합니다:
 `.gemini/commands/sfs.toml` + `.agents/skills/sfs/SKILL.md`.
 기존 파일이 다르면 `.sfs-local/archives/agent-install-backups/` 에 보존한 뒤 갱신합니다.
 
-> 📘 **친구 onboarding 30분 walk-through**: 설치 직후 처음 30분 동안 `SFS.md` placeholder 치환,
-> 첫 sprint 시작, plan/review/decision/retro 흐름까지 따라 하는 가이드는 [GUIDE.md](./GUIDE.md)
-> 참조. "SFS.md 에 프로젝트 스택 적어도 되는지" 같은 자주 묻는 오해도 거기서 해소.
+> 📘 **친구 onboarding walk-through**: 요약은 [GUIDE.md](./GUIDE.md) (entry-lean),
+> 상세 버전은 [archives/GUIDE.full.md](./archives/GUIDE.full.md) 를 참고하세요.
 
 ```text
 # Claude Code / Gemini CLI
@@ -571,7 +570,8 @@ Uninstall 은 대화형으로 실행됩니다.
 | `uninstall.ps1` | Windows PowerShell uninstall wrapper (Git Bash 필요) |
 | `bin/sfs` | global Bash CLI entrypoint (`sfs init`, `sfs status`, `sfs plan`, `sfs implement` 등) |
 | `bin/sfs.cmd` / `bin/sfs.ps1` | Windows global wrappers for Scoop/PATH; locate Git Bash and delegate to `bin/sfs` |
-| `GUIDE.md` | 친구 onboarding 30분 walk-through (placeholder 치환 + 첫 sprint + FAQ + 트러블슈팅) |
+| `GUIDE.md` | onboarding quickstart (`/sfs guide` 가 출력하는 entry-lean 요약) |
+| `archives/GUIDE.full.md` | onboarding verbose (긴 버전) |
 | `templates/SFS.md.template` | 공통 운영 지침 |
 | `templates/CLAUDE.md.template` | Claude Code adapter template |
 | `templates/AGENTS.md.template` | Codex adapter template |
@@ -584,7 +584,7 @@ Uninstall 은 대화형으로 실행됩니다.
 | `packaging/homebrew/sfs.rb.template` | Homebrew tap formula template (`url`/`sha256` fill-in on release cut) |
 | `packaging/scoop/sfs.json.template` | Scoop bucket manifest template (`url`/`hash`/`extract_dir` fill-in on release cut) |
 | `.github/workflows/windows-scoop-smoke.yml` | Windows Actions smoke for Scoop install + thin project init |
-| `CHANGELOG.md` | release history |
+| `CHANGELOG.md` | release history (older condensed; full notes in `archives/`) |
 | `VERSION` | distribution version |
 
 ---

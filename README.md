@@ -70,8 +70,8 @@ CLI 입력면 차이:
 
 ## Docs
 
-- Onboarding 30분: [GUIDE.md](./GUIDE.md)
+- Onboarding (entry-lean): [GUIDE.md](./GUIDE.md)
+- Onboarding (verbose): [archives/GUIDE.full.md](./archives/GUIDE.full.md)
 - Full reference (긴 버전): [README.full.md](./README.full.md)
 - Why/가치: [10X-VALUE.md](./10X-VALUE.md)
 - 변경 이력: [CHANGELOG.md](./CHANGELOG.md)
-
