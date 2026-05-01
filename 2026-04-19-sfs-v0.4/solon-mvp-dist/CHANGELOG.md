@@ -1,12 +1,18 @@
-## [Unreleased]
+## [0.5.56-product] - 2026-05-02
 
-**Archive-first hotfix for SFS local noise plus loop lifecycle docs.** Review
-retries and runtime backup files no longer pile up in the visible
-`.sfs-local/tmp/` tree, and loop queue guidance now keeps retro-light notes
-small instead of turning queue items into sprint retros.
+**Combined division activation, loop lifecycle, and artifact cleanup release.**
+SFS now ships the finished loop-session work together with the hotfix that keeps
+review retries and runtime backups out of the visible `.sfs-local/tmp/` tree.
 
 ### Added
 
+- **`/sfs division` command** — users can list, activate, and deactivate
+  abstract divisions such as QA, design, infra, and taxonomy while recording
+  decision/event evidence.
+- **Cycle-end division recommender** — `/sfs report --compact` and
+  `/sfs retro --close` write marker-based recommendations into `report.md` and
+  `retro.md` based on project size, domain count, review verdict, and repo
+  signals.
 - **Loop queue lifecycle docs** — `GUIDE.md` now documents pending/claimed/done/
   failed/abandoned state meaning and when to promote oversized retro-light notes
   into real sprint report/retro artifacts.

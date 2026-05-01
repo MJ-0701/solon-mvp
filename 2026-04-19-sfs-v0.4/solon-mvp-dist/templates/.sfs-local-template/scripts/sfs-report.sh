@@ -112,6 +112,12 @@ fi
 
 REPORT_PATH="$(sfs_prepare_sprint_report "${SPRINT_ID}" "${NOW}" "${STATUS}")"
 
+if [[ "${COMPACT}" -eq 1 ]]; then
+  # WU-36: write cycle-end division activation recommendations into report/retro
+  # without changing stdout contracts.
+  sfs_write_cycle_end_division_recommendations "${SPRINT_ID}" "${NOW}" "${REPORT_PATH}" || true
+fi
+
 _esc_sprint="${SPRINT_ID//\\/\\\\}"
 _esc_sprint="${_esc_sprint//\"/\\\"}"
 _esc_path="${REPORT_PATH//\\/\\\\}"

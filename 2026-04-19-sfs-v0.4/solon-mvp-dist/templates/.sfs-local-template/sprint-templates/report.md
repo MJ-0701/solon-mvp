@@ -62,3 +62,9 @@ closed_at: ""        # filled by /sfs report --compact / retro --close
 - `.sfs-local/archives/.../log.md` — archived workbench: chronological notes
 - `.sfs-local/archives/.../review.md` — archived evidence: CPO verdict and required actions
 - `retro.md` — history: KPT/PDCA learning and retrospective context
+
+## §8. Next Cycle — Division Activation Recommendations
+
+<!-- solon:division-recommendations:start -->
+- (auto) Filled on `/sfs report --compact` or `/sfs retro --close`. Add manual notes outside this marker block.
+<!-- solon:division-recommendations:end -->
