@@ -4,6 +4,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$CurrentScriptPath = $MyInvocation.MyCommand.Path
 
 function Find-SfsBash {
   if ($env:SFS_BASH) {
@@ -34,6 +35,56 @@ function Find-SfsBash {
 function Convert-ToBashPath([string] $Path) {
   return ($Path -replace "\\", "/")
 }
+
+function Test-SfsUpgradeCommand([string[]] $Args) {
+  if (-not $Args -or $Args.Count -eq 0) { return $false }
+  $cmdIndex = 0
+  if ($Args[0] -in @("/sfs", "sfs", '$sfs')) { $cmdIndex = 1 }
+  if ($Args.Count -le $cmdIndex) { return $false }
+  return ($Args[$cmdIndex] -in @("upgrade", "update"))
+}
+
+function Test-NoSelfUpgrade([string[]] $Args) {
+  return (($Args -contains "--no-self-upgrade") -or $env:SFS_SKIP_SELF_UPGRADE -or ($env:SFS_UPDATE_SELF -eq "0"))
+}
+
+function Test-ScoopRuntime([string] $ScriptPath) {
+  return ($ScriptPath -match "\\scoop\\apps\\sfs\\")
+}
+
+function Invoke-ScoopSelfUpgrade([string[]] $Args) {
+  if (-not (Test-SfsUpgradeCommand $Args)) { return $false }
+  if (Test-NoSelfUpgrade $Args) { return $false }
+  if (-not (Test-ScoopRuntime $CurrentScriptPath)) { return $false }
+
+  $scoop = Get-Command scoop -ErrorAction SilentlyContinue
+  if (-not $scoop) {
+    Write-Error "scoop command not found; rerun with SFS_UPDATE_SELF=0 to use the current runtime only."
+    exit 1
+  }
+
+  Write-Host "global runtime self-upgrade:"
+  Write-Host "  scoop update"
+  & scoop update
+  if ($LASTEXITCODE -ne 0) {
+    Write-Error "scoop update failed; rerun with SFS_UPDATE_SELF=0 to use the current runtime only."
+    exit 1
+  }
+
+  Write-Host "  scoop update sfs"
+  & scoop update sfs
+  if ($LASTEXITCODE -ne 0) {
+    Write-Error "scoop update sfs failed; rerun with SFS_UPDATE_SELF=0 to use the current runtime only."
+    exit 1
+  }
+
+  Write-Host "reloading installed sfs runtime..."
+  $env:SFS_SKIP_SELF_UPGRADE = "1"
+  & $CurrentScriptPath @Args
+  exit $LASTEXITCODE
+}
+
+Invoke-ScoopSelfUpgrade $SfsArgs | Out-Null
 
 $bash = Find-SfsBash
 if (-not $bash) {
