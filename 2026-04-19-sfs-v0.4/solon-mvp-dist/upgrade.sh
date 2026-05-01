@@ -675,6 +675,7 @@ update_file ".sfs-local/scripts/sfs-status.sh"   "templates/.sfs-local-template/
 update_file ".sfs-local/scripts/sfs-start.sh"    "templates/.sfs-local-template/scripts/sfs-start.sh"    "sfs start"    "b"
 update_file ".sfs-local/scripts/sfs-guide.sh"    "templates/.sfs-local-template/scripts/sfs-guide.sh"    "sfs guide"    "b"
 update_file ".sfs-local/scripts/sfs-auth.sh"     "templates/.sfs-local-template/scripts/sfs-auth.sh"     "sfs auth"     "b"
+update_file ".sfs-local/scripts/sfs-division.sh" "templates/.sfs-local-template/scripts/sfs-division.sh" "sfs division activation" "b"
 update_file ".sfs-local/scripts/sfs-adopt.sh"    "templates/.sfs-local-template/scripts/sfs-adopt.sh"    "sfs adopt (legacy baseline intake)" "b"
 update_file ".sfs-local/scripts/sfs-brainstorm.sh" "templates/.sfs-local-template/scripts/sfs-brainstorm.sh" "sfs brainstorm" "b"
 update_file ".sfs-local/scripts/sfs-plan.sh"     "templates/.sfs-local-template/scripts/sfs-plan.sh"     "sfs plan"     "b"

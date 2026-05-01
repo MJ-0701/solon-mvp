@@ -347,7 +347,7 @@ Git Flow lifecycle 로 처리한다.
 
 ---
 
-## 5. 11 슬래시 명령 cheatsheet
+## 5. 주요 슬래시 명령 cheatsheet
 
 Claude/Gemini 에서는 `/sfs ...` 를 그대로 쓴다. Codex app/CLI 에서는 현재 bare `/sfs` 가
 native slash UI 에서 `커맨드 없음` 으로 막힐 수 있으므로 `$sfs ...` Skill mention 이 실사용
@@ -364,6 +364,9 @@ native slash UI 에서 `커맨드 없음` 으로 막힐 수 있으므로 `$sfs .
 | `/sfs auth status` | Codex/Claude/Gemini review executor 인증 확인 |
 | `/sfs auth login codex` | Codex CLI 인증 bootstrap |
 | `/sfs auth probe --executor gemini --timeout 20` | bridge request/response 더미 확인 |
+| `/sfs division list` | dev/strategy-pm/qa/design/infra/taxonomy 활성 상태 확인 |
+| `/sfs division activate design` | abstract 디자인 본부를 실행 가능한 active 본부로 승격하고 decision/event 기록 |
+| `/sfs division activate all` | 현재 abstract 인 모든 본부를 한 번에 active 로 승격 |
 | `/sfs adopt [--apply]` | legacy 프로젝트 인수인계 baseline 생성. 문서 과잉은 기존 sprint/archive tree 를 cold archive 로 접고, 문서 0은 report-first baseline 복원 |
 | `/sfs plan` | 현 sprint 의 의도/경계 + G1 요구사항/AC + CTO/CPO 계약 작성 |
 | `/sfs implement [work slice]` | plan 기반 실제 코드 변경 + 하네스 4원칙 + DDD/TDD guardrail + 6-division guardrail ledger + evidence 기록 |
