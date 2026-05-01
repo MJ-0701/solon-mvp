@@ -434,6 +434,21 @@ non-live 기본 loop 는 claim 후 `.sfs-local/queue/runs/<task-id>/<timestamp>/
 `SFS_LOOP_VERIFY=1` 일 때 `## Verify` command 실행 후 done/failed lifecycle 처리를 한다.
 `retry` 는 attempts 를 1 증가시키며 `max_attempts` 를 넘으면 `abandoned/` 로 이동한다.
 
+### Queue lifecycle (minimal)
+
+- `pending/`: 아직 아무도 잡지 않은 대기 상태. 오직 pending 만 claim 대상.
+- `claimed/<owner>/`: worker 가 `claim` 으로 원본 파일을 **mv** 해서 잡은 상태. stale claim 은 `loop queue` 에서 TTL 기반으로 경고된다.
+- `done/`: 완료된 작업. `complete` 또는 `verify` 성공 시 이동한다.
+- `failed/`: 검증 실패(또는 수동 fail) 상태. `retry` 하면 `pending/` 으로 되돌리고 `attempts += 1` 한다.
+- `abandoned/`: 포기/중단 상태. `retry` 가 `max_attempts` 를 넘으면 자동 abandon 되며, 수동 `abandon` 도 동일하게 이동한다.
+
+### Retro-light vs sprint retro
+
+- queue item 에는 짧은 `## Retro-Light` 섹션만 남긴다 (3–7 bullets 정도).
+- 내용이 커지면 queue item 에서 확장하지 말고 **정식 sprint retro/report** 로 승격한다.
+- 큰 후속 작업은 `## Backlog Seeds` 에 TODO 로 쌓지 말고 `/sfs loop enqueue ...` 로 별도 pending task 로 만든다.
+- 순서/의존이 필요하면 frontmatter `depends_on: []` 에 선행 `task_id` 를 적고, `loop queue` 의 blocked 리포트로 확인한다.
+
 ---
 
 ## 7. FAQ — 자주 묻는 것
