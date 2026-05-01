@@ -1,3 +1,16 @@
+## [0.5.50-product] - 2026-05-01
+
+**Legacy adoption release re-cut.** Publishes the `sfs adopt` feature under a
+fresh immutable release tag after `v0.5.49-product` was found to already point
+at an older stable commit.
+
+### Changed
+
+- **Release tag freshness** — the legacy project adoption runtime, docs, and
+  adapter surface from `0.5.49-product` are now published behind
+  `v0.5.50-product` so Homebrew can install the correct tarball without moving
+  an existing tag.
+
 ## [0.5.49-product] - 2026-05-01
 
 **Legacy project adoption.** SFS can now take over projects that predate SFS,
