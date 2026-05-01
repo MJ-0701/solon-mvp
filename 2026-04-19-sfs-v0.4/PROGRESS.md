@@ -11,7 +11,7 @@ current_wu_path: 2026-04-19-sfs-v0.4/sprints/WU-34.md
 
 # ── SESSION MUTEX (CLAUDE.md §1.12) ───────────────────────────────
 # Keep scalar form for tool compatibility (.sfs-local/scripts/sfs-loop.sh stop/status, auto-resume contract).
-current_wu_owner: overnight-sfs-loop-deploy#claimed_at=2026-05-02T07:56:13+09:00#ttl_minutes=15
+current_wu_owner: null
 
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
