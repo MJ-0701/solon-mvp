@@ -1,3 +1,19 @@
+## [0.5.48-product] - 2026-05-01
+
+**Persist agent model profile selections.** Fixes a regression where choosing
+an agent model profile during `sfs upgrade` printed a confirmation but left
+`.sfs-local/model-profiles.yaml` unchanged, causing the same question to appear
+again on the next upgrade.
+
+### Fixed
+
+- **Model profile persistence** — `sfs upgrade` now writes `status`,
+  `selected_runtime`, `selected_policy`, `confirmed_by`, and `confirmed_at`
+  correctly when users choose Claude recommended, all-high, custom, or fallback
+  policy.
+- **Fail-visible profile writes** — profile write failures now stop the upgrade
+  instead of being silently ignored after printing a success message.
+
 ## [0.5.47-product] - 2026-05-01
 
 **Short sprint references for tidy.** `sfs tidy --sprint` now accepts an exact
