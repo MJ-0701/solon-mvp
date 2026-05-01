@@ -295,9 +295,17 @@ Codex/Claude/Gemini CLI 는 인증 prompt 가 먼저 뜨면 SFS 가 넘긴 revie
 소비할 수 있다. 그래서 SFS 는 `.sfs-local/auth.env` 를 자동 로드하고 `/sfs auth` 로
 인증 상태를 먼저 확인한다. `.sfs-local/auth.env.example` 을 복사해서 API key 또는
 `SFS_CODEX_AUTH_READY=1` / `SFS_CLAUDE_AUTH_READY=1` / `SFS_GEMINI_AUTH_READY=1` 을 넣어라.
-real terminal 에서는 `/sfs auth login --executor gemini` 처럼 브라우저/터미널 인증을
+real terminal 에서는 `/sfs auth login gemini` 또는 `/sfs auth login --executor gemini` 처럼 브라우저/터미널 인증을
 명시적으로 끝낼 수 있다. bridge 연결만 확인할 때는 `/sfs auth probe --executor gemini --timeout 20` 가
 작은 dummy request/response 만 보낸다. 실제 `.sfs-local/auth.env` 는 gitignore 대상이다.
+
+Windows Store 로 설치된 Codex 는 `C:\Program Files\WindowsApps\OpenAI.Codex_...\app\resources\codex.exe`
+패키지 내부 파일을 직접 실행하면 access denied 가 날 수 있다. `SFS_REVIEW_CODEX_CMD` 를
+직접 지정할 때는 그 경로 대신 `codex exec ...` App Execution Alias 또는
+`/c/Users/<you>/AppData/Local/Microsoft/WindowsApps/codex.exe` 처럼 실행 가능한 shim 을 사용한다.
+CLI 가 없고 앱만 있는 executor 는 자동 review bridge 로 사용할 수 없다. 이 경우
+`/sfs review --gate <id> --executor <tool> --prompt-only` 로 prompt 파일을 만든 뒤 앱에
+수동으로 붙여넣거나, 설치된 다른 CLI executor 를 사용한다.
 
 반대 방향도 비대칭이다. Codex 로 구현한 뒤 Claude 리뷰를 받으려면 Codex 가 Claude plugin 을
 부르는 방식이 아니라, 설치된 Claude CLI 를 bridge 로 사용한다:
@@ -354,6 +362,7 @@ native slash UI 에서 `커맨드 없음` 으로 막힐 수 있으므로 `$sfs .
 | `/sfs guide --path` | 이 onboarding guide 경로만 확인 |
 | `/sfs guide --print` | 이 guide 본문을 터미널에 출력 |
 | `/sfs auth status` | Codex/Claude/Gemini review executor 인증 확인 |
+| `/sfs auth login codex` | Codex CLI 인증 bootstrap |
 | `/sfs auth probe --executor gemini --timeout 20` | bridge request/response 더미 확인 |
 | `/sfs adopt [--apply]` | legacy 프로젝트 인수인계 baseline 생성. 문서 과잉은 기존 sprint/archive tree 를 cold archive 로 접고, 문서 0은 report-first baseline 복원 |
 | `/sfs plan` | 현 sprint 의 의도/경계 + G1 요구사항/AC + CTO/CPO 계약 작성 |

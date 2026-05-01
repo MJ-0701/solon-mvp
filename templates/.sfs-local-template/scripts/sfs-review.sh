@@ -625,12 +625,28 @@ resolve_review_executor_cmd() {
   case "${EVALUATOR_EXECUTOR}" in
     codex|codex-cli)
       if [[ -n "${SFS_REVIEW_CODEX_CMD:-}" ]]; then
+        case "${SFS_REVIEW_CODEX_CMD}" in
+          *WindowsApps*OpenAI.Codex*app*resources*codex.exe*)
+            cat >&2 <<'EOF'
+executor bridge unsupported: SFS_REVIEW_CODEX_CMD points at the Windows Store package-private codex.exe.
+Windows commonly denies direct execution from:
+  C:\Program Files\WindowsApps\OpenAI.Codex_...\app\resources\codex.exe
+
+Use the App Execution Alias or another accessible shim instead, for example:
+  SFS_REVIEW_CODEX_CMD='codex exec --full-auto --ephemeral --output-last-message "${RUN_RESULT}" -'
+
+If the alias is not visible from Git Bash, use the per-user alias path:
+  /c/Users/<you>/AppData/Local/Microsoft/WindowsApps/codex.exe
+EOF
+            return "${SFS_EXIT_EXECUTOR}"
+            ;;
+        esac
         printf '%s\n' "${SFS_REVIEW_CODEX_CMD}"
       elif command -v codex >/dev/null 2>&1; then
         prepare_executor_auth "codex" "${AUTH_INTERACTIVE}" || return "${SFS_EXIT_EXECUTOR}"
         printf '%s\n' "codex exec --full-auto --ephemeral --output-last-message \"${RUN_RESULT}\" -"
       else
-        echo "executor bridge missing: codex CLI not found and SFS_REVIEW_CODEX_CMD unset" >&2
+        executor_cli_missing_hint "codex"
         return "${SFS_EXIT_EXECUTOR}"
       fi
       ;;
@@ -649,7 +665,7 @@ resolve_review_executor_cmd() {
         prepare_executor_auth "gemini" "${AUTH_INTERACTIVE}" || return "${SFS_EXIT_EXECUTOR}"
         printf '%s\n' 'gemini --skip-trust --output-format text -p "Read stdin and perform the requested CPO review."'
       else
-        echo "executor bridge missing: gemini CLI not found and SFS_REVIEW_GEMINI_CMD unset" >&2
+        executor_cli_missing_hint "gemini"
         return "${SFS_EXIT_EXECUTOR}"
       fi
       ;;
@@ -660,7 +676,7 @@ resolve_review_executor_cmd() {
         prepare_executor_auth "claude" "${AUTH_INTERACTIVE}" || return "${SFS_EXIT_EXECUTOR}"
         printf '%s\n' "claude -p --dangerously-skip-permissions"
       else
-        echo "executor bridge missing: claude CLI not found and SFS_REVIEW_CLAUDE_CMD unset" >&2
+        executor_cli_missing_hint "claude"
         return "${SFS_EXIT_EXECUTOR}"
       fi
       ;;

@@ -130,10 +130,19 @@ Headless CLI review 는 인증도 bridge 의 일부다. SFS 는 `.sfs-local/auth
 `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `SFS_REVIEW_*_CMD` 같은 로컬 값을
 넣는다. Codex/Claude/Gemini CLI login cache 를 쓰려면 `SFS_CODEX_AUTH_READY=1`,
 `SFS_CLAUDE_AUTH_READY=1`, `SFS_GEMINI_AUTH_READY=1` 중 해당 값을 명시한다.
-인증 상태는 `/sfs auth status` 로 확인하고, 필요하면 `/sfs auth login --executor <tool>` 로
+인증 상태는 `/sfs auth status` 로 확인하고, 필요하면 `/sfs auth login <tool>`
+또는 `/sfs auth login --executor <tool>` 로
 브라우저/터미널 인증을 먼저 끝낸다. bridge 자체만 확인할 때는 `/sfs auth probe --executor <tool> --timeout 20` 로
 작은 dummy request/response 를 확인한다. `/sfs review` 도 실행 전에 인증을 확인하고,
 리뷰할 evidence 가 없으면 executor 를 호출하지 않는다.
+
+Windows Store 로 설치된 Codex 는 `C:\Program Files\WindowsApps\OpenAI.Codex_...\app\resources\codex.exe`
+패키지 내부 파일을 직접 실행하면 access denied 가 날 수 있다. `SFS_REVIEW_CODEX_CMD` 를
+직접 지정할 때는 그 경로 대신 `codex exec ...` App Execution Alias 또는
+`/c/Users/<you>/AppData/Local/Microsoft/WindowsApps/codex.exe` 처럼 실행 가능한 shim 을 사용한다.
+CLI 가 없고 앱만 있는 executor 는 자동 review bridge 로 사용할 수 없다. 이 경우
+`/sfs review --gate <id> --executor <tool> --prompt-only` 로 prompt 파일을 만든 뒤 앱에
+수동으로 붙여넣거나, 설치된 다른 CLI executor 를 사용한다.
 
 ---
 
@@ -295,7 +304,7 @@ vendored layout 에서 direct adapter 를 호출해야 하면:
 | `/sfs status` | 현재 sprint, WU, gate, ahead count, last event 를 한 줄로 표시 |
 | `/sfs start <goal>` | 새 sprint workspace 초기화 (`--id <sprint-id>` 지원) |
 | `/sfs guide [--path|--print]` | 짧은 사용 맥락 브리핑 / guide 경로 / full guide 본문 보기 |
-| `/sfs auth status|check|login|probe` | Codex/Claude/Gemini review executor 인증 확인/로그인/더미 요청 (`probe --timeout <seconds>` 지원) |
+| `/sfs auth status|check|login|probe` | Codex/Claude/Gemini review executor 인증 확인/로그인/더미 요청 (`login codex` positional executor, `probe --timeout <seconds>` 지원) |
 | `/sfs adopt [--id legacy-baseline] [--apply]` | SFS 없이 진행된 legacy 프로젝트를 git/code/docs 기반으로 인계. 문서 과잉 프로젝트는 기존 visible sprint/archive tree 를 cold archive tarball 로 접고 `report.md` + `retro.md` 만 남김. 문서 0 프로젝트는 최소 baseline 을 복원. 기본은 dry-run |
 | `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락을 기록하고, AI runtime 에서 Solon CEO 가 §1~§7을 정리 |
 | `/sfs plan` | 현재 sprint 의 `plan.md` 작성 또는 갱신 + G1 요구사항/AC/scope + CTO/CPO sprint contract refinement |

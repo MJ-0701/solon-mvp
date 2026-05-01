@@ -15,7 +15,7 @@ source "${SFS_SCRIPT_DIR}/sfs-common.sh"
 
 usage_auth() {
   cat <<'EOF'
-Usage: /sfs auth <status|check|login|probe|path> [--executor <codex|claude|gemini|all>] [--all] [--timeout <seconds>]
+Usage: /sfs auth <status|check|login|probe|path> [<codex|claude|gemini|all>] [--executor <codex|claude|gemini|all>] [--all] [--timeout <seconds>]
 
 Manage local executor auth for CPO review bridges.
   - status    Print auth readiness. Default executor: all.
@@ -30,6 +30,7 @@ Manage local executor auth for CPO review bridges.
 
 Examples:
   /sfs auth status
+  /sfs auth login codex
   /sfs auth login --executor gemini
   /sfs auth probe --executor gemini --timeout 20
   /sfs auth check --executor codex
@@ -112,8 +113,28 @@ while [[ $# -gt 0 ]]; do
       exit "${SFS_EXIT_BADCLI}"
       ;;
     *)
-      echo "unknown arg: $1" >&2
-      exit "${SFS_EXIT_BADCLI}"
+      case "$1" in
+        codex|codex-cli|claude|claude-cli|gemini|gemini-cli)
+          if [[ -n "$EXECUTOR" || "$ALL" == "true" ]]; then
+            echo "unexpected extra executor arg: $1" >&2
+            exit "${SFS_EXIT_BADCLI}"
+          fi
+          EXECUTOR="$1"
+          shift
+          ;;
+        all)
+          if [[ -n "$EXECUTOR" || "$ALL" == "true" ]]; then
+            echo "unexpected extra executor arg: $1" >&2
+            exit "${SFS_EXIT_BADCLI}"
+          fi
+          ALL=true
+          shift
+          ;;
+        *)
+          echo "unknown arg: $1" >&2
+          exit "${SFS_EXIT_BADCLI}"
+          ;;
+      esac
       ;;
   esac
 done
