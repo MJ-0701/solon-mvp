@@ -138,9 +138,10 @@ sprint - · WU - · gate -:- · ahead 0 · last_event -
 ```
 
 `adopt` 는 두 극단을 모두 전제로 한다. 문서가 너무 많으면 남겨야 할 것만 visible 하게 두고,
-문서가 하나도 없으면 git/code/test/docs 흔적에서 최소한의 baseline 을 복원한다. 결과적으로
-`.sfs-local/sprints/legacy-baseline/` 에는 `report.md` + `retro.md` 만 남고, raw scan evidence 는
-`.sfs-local/archives/adopt/` 아래에 보존된다.
+기존 sprint/archive 문서 숲은 `.tar.gz` cold archive 와 짧은 manifest 로 접는다. 문서가 하나도
+없으면 git/code/test/docs 흔적에서 최소한의 baseline 을 복원한다. 결과적으로
+`.sfs-local/sprints/legacy-baseline/` 에는 `report.md` + `retro.md` 만 남고, raw scan evidence 와
+이전 sprint/archive 원문은 `.sfs-local/archives/adopt/` 아래에 압축 보존된다.
 
 ---
 
@@ -350,7 +351,7 @@ native slash UI 에서 `커맨드 없음` 으로 막힐 수 있으므로 `$sfs .
 | `/sfs guide --print` | 이 guide 본문을 터미널에 출력 |
 | `/sfs auth status` | Codex/Claude/Gemini review executor 인증 확인 |
 | `/sfs auth probe --executor gemini --timeout 20` | bridge request/response 더미 확인 |
-| `/sfs adopt [--apply]` | legacy 프로젝트 인수인계 baseline 생성. 문서 과잉/문서 0 양쪽 모두 report-first 로 정리 |
+| `/sfs adopt [--apply]` | legacy 프로젝트 인수인계 baseline 생성. 문서 과잉은 기존 sprint/archive tree 를 cold archive 로 접고, 문서 0은 report-first baseline 복원 |
 | `/sfs plan` | 현 sprint 의 의도/경계 + G1 요구사항/AC + CTO/CPO 계약 작성 |
 | `/sfs implement [work slice]` | plan 기반 실제 코드 변경 + 하네스 4원칙 + DDD/TDD guardrail + evidence 기록 |
 | `/sfs review --gate G4 --executor codex` | 리뷰할 evidence 가 있을 때 CPO review bridge 실행 + 결과 기록 |

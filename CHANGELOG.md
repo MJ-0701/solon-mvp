@@ -1,3 +1,22 @@
+## [0.5.51-product] - 2026-05-01
+
+**Legacy adoption visible-surface fix.** Tightens `sfs adopt --apply` for
+over-documented projects where moving old files into an expanded archive still
+leaves the IDE tree noisy.
+
+### Fixed
+
+- **Cold archives for legacy intake** — `adopt --apply` now collapses
+  pre-existing sprint folders and expanded archive folders into `.tar.gz`
+  files plus short manifests under `.sfs-local/archives/adopt/`, instead of
+  leaving another visible document tree.
+- **Dry-run disclosure** — `adopt` dry-run now prints
+  `would_archive_existing_sprints` and `would_collapse_existing_archives` with
+  the target tarball/manifest paths before any mutation.
+- **Re-adopt safety** — when `legacy-baseline` already exists and another
+  current sprint is active, `adopt --force` preserves that current sprint as
+  post-adopt real work instead of archiving it with legacy workbench folders.
+
 ## [0.5.50-product] - 2026-05-01
 
 **Legacy adoption release re-cut.** Publishes the `sfs adopt` feature under a
