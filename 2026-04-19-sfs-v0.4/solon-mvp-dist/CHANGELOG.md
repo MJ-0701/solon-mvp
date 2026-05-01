@@ -1,3 +1,19 @@
+## [0.5.52-product] - 2026-05-01
+
+**Product documentation sync.** Publishes the Solon 10x value guide in the
+packaged release archive so README links resolve from Homebrew and Scoop
+installs.
+
+### Added
+
+- **`10X-VALUE.md` in release archives** — the product value guide is now part
+  of the stable tagged package, matching the README link.
+
+### Fixed
+
+- **Release allowlist coverage** — release tooling now includes
+  `10X-VALUE.md`, preventing future documentation-only package drift.
+
 ## [0.5.51-product] - 2026-05-01
 
 **Legacy adoption visible-surface fix.** Tightens `sfs adopt --apply` for
