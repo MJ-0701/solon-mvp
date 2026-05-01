@@ -195,8 +195,7 @@ First-time project setup:
 What this means:
   brew install MJ-0701/solon-product/sfs  installs the global sfs CLI on this Mac.
   sfs init --yes                          injects SFS.md, .sfs-local/, and agent adapters into this project.
-  brew upgrade sfs                        upgrades the global CLI after the tap is installed.
-  sfs update                              refreshes an already-initialized project after a runtime upgrade.
+  sfs update                              upgrades the Homebrew CLI first, then refreshes this project.
 
 Tip:
   If this folder is not a git repo yet, sfs init --yes will run git init for you.
