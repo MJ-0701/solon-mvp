@@ -45,7 +45,7 @@ Solon 의 10x 가치는 AI 가 코드를 더 많이 쓰게 하는 데 있지 않
 ## How It Works
 
 1. 기존 프로젝트에 Solon Product 를 설치합니다.
-2. 이미 오래 진행된 legacy 프로젝트라면 먼저 `/sfs adopt --apply` 로 git/code/docs 기반 baseline 을 만듭니다. 문서가 너무 많아도, 문서가 하나도 없어도, visible entry 는 `report.md` + `retro.md` 만 남깁니다.
+2. 이미 오래 진행된 legacy 프로젝트라면 먼저 `/sfs adopt --apply` 로 git/code/docs 기반 baseline 을 만듭니다. 문서가 너무 많아도, 문서가 하나도 없어도, visible entry 는 `report.md` + `retro.md` 만 남기고 기존 sprint/archive 문서 숲은 cold archive tarball 로 접습니다.
 3. `/sfs start <goal>` 로 sprint workspace 를 만듭니다.
 4. 새 요구를 탐색하는 planning sprint 라면 `/sfs brainstorm` 으로 raw 요구사항을 G0 산출물에 남기고, Solon CEO 가 문제/제약/옵션/scope seed/plan seed 를 정리합니다.
 5. `/sfs plan` 에서 `plan.md ready` handshake 후 `brainstorm.md` 를 읽고 CEO plan 과 CTO/CPO sprint contract 를 남깁니다. 이때 공유 design concept, domain language, acceptance criteria, test contract 를 작은 구현 단위로 내립니다.
@@ -296,7 +296,7 @@ vendored layout 에서 direct adapter 를 호출해야 하면:
 | `/sfs start <goal>` | 새 sprint workspace 초기화 (`--id <sprint-id>` 지원) |
 | `/sfs guide [--path|--print]` | 짧은 사용 맥락 브리핑 / guide 경로 / full guide 본문 보기 |
 | `/sfs auth status|check|login|probe` | Codex/Claude/Gemini review executor 인증 확인/로그인/더미 요청 (`probe --timeout <seconds>` 지원) |
-| `/sfs adopt [--id legacy-baseline] [--apply]` | SFS 없이 진행된 legacy 프로젝트를 git/code/docs 기반으로 인계. 문서 과잉 프로젝트는 남길 것만 남기고, 문서 0 프로젝트는 최소 baseline 을 복원. 기본은 dry-run |
+| `/sfs adopt [--id legacy-baseline] [--apply]` | SFS 없이 진행된 legacy 프로젝트를 git/code/docs 기반으로 인계. 문서 과잉 프로젝트는 기존 visible sprint/archive tree 를 cold archive tarball 로 접고 `report.md` + `retro.md` 만 남김. 문서 0 프로젝트는 최소 baseline 을 복원. 기본은 dry-run |
 | `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락을 기록하고, AI runtime 에서 Solon CEO 가 §1~§7을 정리 |
 | `/sfs plan` | 현재 sprint 의 `plan.md` 작성 또는 갱신 + G1 요구사항/AC/scope + CTO/CPO sprint contract refinement |
 | `/sfs implement [work slice|--stdin]` | `implement.md`/`log.md` 를 열고 plan 기반 실제 코드 변경 + 테스트/스모크 evidence 기록. AI runtime 은 여기서 구현까지 진행 |

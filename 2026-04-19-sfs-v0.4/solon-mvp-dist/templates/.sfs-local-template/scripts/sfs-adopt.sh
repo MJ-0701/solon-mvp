@@ -22,6 +22,8 @@ Usage:
 Adopt an existing legacy project into SFS without creating document sprawl.
   - Default is dry-run; it prints the baseline sprint and evidence sources.
   - --apply creates .sfs-local/sprints/<id>/report.md and retro.md only.
+  - Existing visible sprint folders and expanded archive folders are collapsed
+    into cold .tar.gz archives with short manifests.
   - Raw scan evidence is preserved in .sfs-local/archives/adopt/<id>/...
   - The report separates evidence-backed facts from inferred next sprint ideas.
   - Existing docs/sprint files are read as signals when present, but git/code
@@ -119,6 +121,88 @@ top_changed_paths() {
     | awk -F/ '{ if (NF >= 2) print $1"/"$2; else print $1 }' \
     | sort | uniq -c | sort -nr | head -12 \
     | sed 's/^/  - /'
+}
+
+nonempty_line_count() {
+  local text="${1:-}"
+  if [[ -z "${text}" ]]; then
+    printf '0\n'
+    return "${SFS_EXIT_OK}"
+  fi
+  printf '%s\n' "${text}" | sed '/^[[:space:]]*$/d' | wc -l | tr -d '[:space:]'
+}
+
+existing_sprint_ids_for_adopt() {
+  [[ -d "${SFS_SPRINTS_DIR}" ]] || return "${SFS_EXIT_OK}"
+  find "${SFS_SPRINTS_DIR}" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null \
+    | while IFS= read -r dir; do
+        sid="$(basename "${dir}")"
+        [[ "${sid}" == "${SPRINT_ID}" ]] && continue
+        if [[ "${PRESERVE_CURRENT_SPRINT:-0}" -eq 1 && "${sid}" == "${CURRENT_SPRINT:-}" ]]; then
+          continue
+        fi
+        printf '%s\n' "${sid}"
+      done \
+    | sort
+}
+
+existing_archive_ids_for_adopt() {
+  [[ -d "${SFS_ARCHIVES_DIR}" ]] || return "${SFS_EXIT_OK}"
+  find "${SFS_ARCHIVES_DIR}" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null \
+    | while IFS= read -r dir; do
+        aid="$(basename "${dir}")"
+        [[ "${aid}" == "adopt" ]] && continue
+        printf '%s\n' "${aid}"
+      done \
+    | sort
+}
+
+print_cold_archive_plan() {
+  local label="${1:?label required}" ids="${2:-}" base_dir="${3:?base dir required}" archive_path="${4:?archive path required}" manifest_path="${5:?manifest path required}"
+  local count
+  count="$(nonempty_line_count "${ids}")"
+  echo "  ${label}: ${count}"
+  [[ "${count}" -gt 0 ]] || return "${SFS_EXIT_OK}"
+  echo "    cold_archive: ${archive_path}"
+  echo "    manifest: ${manifest_path}"
+  printf '%s\n' "${ids}" | while IFS= read -r item; do
+    [[ -n "${item}" ]] || continue
+    echo "    - ${base_dir}/${item}"
+  done
+}
+
+collapse_dirs_to_cold_archive() {
+  local ids="${1:-}" base_dir="${2:?base dir required}" archive_path="${3:?archive path required}" manifest_path="${4:?manifest path required}" title="${5:?title required}"
+  local count item
+  local tar_items=()
+  count="$(nonempty_line_count "${ids}")"
+  [[ "${count}" -gt 0 ]] || return "${SFS_EXIT_OK}"
+  mkdir -p "$(dirname "${archive_path}")" || return "${SFS_EXIT_PERM}"
+  {
+    echo "${title}"
+    echo "generated_at: ${NOW}"
+    echo "source_root: ${base_dir}"
+    echo "archive: ${archive_path}"
+    echo "count: ${count}"
+    echo
+    echo "items:"
+    printf '%s\n' "${ids}" | while IFS= read -r item; do
+      [[ -n "${item}" ]] || continue
+      echo "- ${base_dir}/${item}"
+    done
+  } > "${manifest_path}" || return "${SFS_EXIT_PERM}"
+
+  while IFS= read -r item; do
+    [[ -n "${item}" ]] || continue
+    tar_items+=("${item}")
+  done <<< "${ids}"
+  tar -czf "${archive_path}" -C "${base_dir}" "${tar_items[@]}" || return "${SFS_EXIT_PERM}"
+
+  while IFS= read -r item; do
+    [[ -n "${item}" ]] || continue
+    rm -rf "${base_dir}/${item}" || return "${SFS_EXIT_PERM}"
+  done <<< "${ids}"
+  return "${SFS_EXIT_OK}"
 }
 
 SPRINT_ID="legacy-baseline"
@@ -233,6 +317,24 @@ REPORT_PATH="${TARGET_DIR}/report.md"
 RETRO_PATH="${TARGET_DIR}/retro.md"
 ARCHIVE_DIR="${SFS_ARCHIVES_DIR}/adopt/${SPRINT_ID}/${NOW//:/-}"
 ARCHIVE_DIR="${ARCHIVE_DIR//+/-}"
+CURRENT_SPRINT=""
+if [[ -f "${SFS_CURRENT_SPRINT_FILE}" ]]; then
+  CURRENT_SPRINT="$(sed -n '1p' "${SFS_CURRENT_SPRINT_FILE}" 2>/dev/null | tr -d '[:space:]' || true)"
+fi
+PRESERVE_CURRENT_SPRINT=0
+if [[ -d "${TARGET_DIR}" && -n "${CURRENT_SPRINT}" && "${CURRENT_SPRINT}" != "${SPRINT_ID}" ]]; then
+  PRESERVE_CURRENT_SPRINT=1
+fi
+EXISTING_SPRINT_IDS="$(existing_sprint_ids_for_adopt)"
+EXISTING_ARCHIVE_IDS="$(existing_archive_ids_for_adopt)"
+EXISTING_SPRINT_ARCHIVE_COUNT="$(nonempty_line_count "${EXISTING_SPRINT_IDS}")"
+EXISTING_ARCHIVE_COLLAPSE_COUNT="$(nonempty_line_count "${EXISTING_ARCHIVE_IDS}")"
+EXISTING_SPRINTS_TARBALL="${ARCHIVE_DIR}/existing-sprints.tar.gz"
+EXISTING_SPRINTS_MANIFEST="${ARCHIVE_DIR}/existing-sprints.manifest.txt"
+EXISTING_ARCHIVES_TARBALL="${ARCHIVE_DIR}/preexisting-archives.tar.gz"
+EXISTING_ARCHIVES_MANIFEST="${ARCHIVE_DIR}/preexisting-archives.manifest.txt"
+PREEXISTING_TARGET_TARBALL="${ARCHIVE_DIR}/preexisting-target.tar.gz"
+PREEXISTING_TARGET_MANIFEST="${ARCHIVE_DIR}/preexisting-target.manifest.txt"
 
 if [[ "${APPLY}" -eq 0 ]]; then
   echo "adopt dry-run: ${SPRINT_ID}"
@@ -244,6 +346,9 @@ if [[ "${APPLY}" -eq 0 ]]; then
   echo "  test_signals: ${TEST_COUNT}"
   echo "  stack: ${STACK_SIGNALS}"
   echo "  submodules: ${SUBMODULE_COUNT}"
+  if [[ "${PRESERVE_CURRENT_SPRINT}" -eq 1 ]]; then
+    echo "  preserve_current_sprint: ${CURRENT_SPRINT} (target exists; treating as post-adopt real sprint)"
+  fi
   if [[ -d "${TARGET_DIR}" && "${FORCE}" -ne 1 ]]; then
     echo "  target: ${TARGET_DIR} (exists; --apply would require --force)"
   else
@@ -254,6 +359,14 @@ if [[ "${APPLY}" -eq 0 ]]; then
   echo "    - ${RETRO_PATH}"
   echo "  would_archive:"
   echo "    - ${ARCHIVE_DIR}/source-summary.txt"
+  print_cold_archive_plan "would_archive_existing_sprints" "${EXISTING_SPRINT_IDS}" "${SFS_SPRINTS_DIR}" "${EXISTING_SPRINTS_TARBALL}" "${EXISTING_SPRINTS_MANIFEST}"
+  print_cold_archive_plan "would_collapse_existing_archives" "${EXISTING_ARCHIVE_IDS}" "${SFS_ARCHIVES_DIR}" "${EXISTING_ARCHIVES_TARBALL}" "${EXISTING_ARCHIVES_MANIFEST}"
+  if [[ -d "${TARGET_DIR}" && "${FORCE}" -eq 1 ]]; then
+    echo "  would_archive_existing_target: 1"
+    echo "    cold_archive: ${PREEXISTING_TARGET_TARBALL}"
+    echo "    manifest: ${PREEXISTING_TARGET_MANIFEST}"
+    echo "    - ${TARGET_DIR}"
+  fi
   echo "  visible_policy: report.md + retro.md only; raw scan evidence stays archived"
   exit "${SFS_EXIT_OK}"
 fi
@@ -263,7 +376,16 @@ if [[ -d "${TARGET_DIR}" && "${FORCE}" -ne 1 ]]; then
   exit "${SFS_EXIT_NO_INIT}"
 fi
 
-mkdir -p "${TARGET_DIR}" "${ARCHIVE_DIR}" || exit "${SFS_EXIT_PERM}"
+mkdir -p "${ARCHIVE_DIR}" || exit "${SFS_EXIT_PERM}"
+
+if [[ -d "${TARGET_DIR}" && "${FORCE}" -eq 1 ]]; then
+  collapse_dirs_to_cold_archive "${SPRINT_ID}" "${SFS_SPRINTS_DIR}" "${PREEXISTING_TARGET_TARBALL}" "${PREEXISTING_TARGET_MANIFEST}" "SFS adopt preexisting target sprint archive" || exit "${SFS_EXIT_PERM}"
+fi
+
+collapse_dirs_to_cold_archive "${EXISTING_SPRINT_IDS}" "${SFS_SPRINTS_DIR}" "${EXISTING_SPRINTS_TARBALL}" "${EXISTING_SPRINTS_MANIFEST}" "SFS adopt preexisting sprint archive" || exit "${SFS_EXIT_PERM}"
+collapse_dirs_to_cold_archive "${EXISTING_ARCHIVE_IDS}" "${SFS_ARCHIVES_DIR}" "${EXISTING_ARCHIVES_TARBALL}" "${EXISTING_ARCHIVES_MANIFEST}" "SFS adopt preexisting expanded archive collapse" || exit "${SFS_EXIT_PERM}"
+
+mkdir -p "${TARGET_DIR}" || exit "${SFS_EXIT_PERM}"
 
 RECENT_COMMITS="$(git log -n "${MAX_COMMITS}" --date=short --pretty=format:'- %h %ad %s' 2>/dev/null || true)"
 TOP_CHANGED="$(top_changed_paths "${MAX_COMMITS}" || true)"
@@ -282,7 +404,25 @@ VERIFY_COMMANDS="$(suggest_verify_commands)"
   echo "test_signals: ${TEST_COUNT}"
   echo "stack: ${STACK_SIGNALS}"
   echo "sfs_sprint_count_before_adopt: ${SFS_SPRINT_COUNT}"
+  echo "preserved_current_sprint: ${CURRENT_SPRINT:-}"
+  echo "preserved_current_sprint_applied: ${PRESERVE_CURRENT_SPRINT}"
+  echo "archived_existing_sprint_count: ${EXISTING_SPRINT_ARCHIVE_COUNT}"
+  echo "collapsed_existing_archive_count: ${EXISTING_ARCHIVE_COLLAPSE_COUNT}"
   echo "submodule_count: ${SUBMODULE_COUNT}"
+  if [[ "${EXISTING_SPRINT_ARCHIVE_COUNT}" -gt 0 ]]; then
+    echo
+    echo "archived_existing_sprints:"
+    printf '%s\n' "${EXISTING_SPRINT_IDS}" | sed "s#^#- ${SFS_SPRINTS_DIR}/#"
+    echo "cold_archive: ${EXISTING_SPRINTS_TARBALL}"
+    echo "manifest: ${EXISTING_SPRINTS_MANIFEST}"
+  fi
+  if [[ "${EXISTING_ARCHIVE_COLLAPSE_COUNT}" -gt 0 ]]; then
+    echo
+    echo "collapsed_existing_archives:"
+    printf '%s\n' "${EXISTING_ARCHIVE_IDS}" | sed "s#^#- ${SFS_ARCHIVES_DIR}/#"
+    echo "cold_archive: ${EXISTING_ARCHIVES_TARBALL}"
+    echo "manifest: ${EXISTING_ARCHIVES_MANIFEST}"
+  fi
   if [[ -n "${SUBMODULE_STATUS}" ]]; then
     echo
     echo "submodules:"
@@ -333,6 +473,9 @@ confidence: "mixed"
 - **Stack signals**: ${STACK_SIGNALS}
 - **Submodule/subrepo signals**: ${SUBMODULE_COUNT}
 - **Existing SFS sprint folders before adopt**: ${SFS_SPRINT_COUNT}
+- **Preserved current sprint during re-adopt**: ${CURRENT_SPRINT:-none}
+- **Archived existing SFS sprint folders during adopt**: ${EXISTING_SPRINT_ARCHIVE_COUNT}
+- **Collapsed pre-existing expanded archive folders**: ${EXISTING_ARCHIVE_COLLAPSE_COUNT}
 
 ## §3. High-Change Areas
 
@@ -362,6 +505,9 @@ ${VERIFY_COMMANDS}
 
 - **Keep visible**: this \`report.md\` and \`retro.md\`.
 - **Archive evidence**: \`${ARCHIVE_DIR}/source-summary.txt\`.
+- **Cold archive policy**: old sprint/archive trees are stored as tarballs plus short manifests, not expanded as a second visible document tree.
+- **Archived old sprint folders**: ${EXISTING_SPRINT_ARCHIVE_COUNT} in \`${EXISTING_SPRINTS_TARBALL}\`.
+- **Collapsed old archive folders**: ${EXISTING_ARCHIVE_COLLAPSE_COUNT} in \`${EXISTING_ARCHIVES_TARBALL}\`.
 - **Next sprint candidates**:
   - turn the highest-change area into the first implementation sprint.
   - run the suggested verification commands and record pass/fail in review.
@@ -414,6 +560,8 @@ closed_at: ""
 - \`report.md\` — durable baseline entry.
 - \`retro.md\` — why the baseline is intentionally compact.
 - \`${ARCHIVE_DIR}/source-summary.txt\` — archived scan evidence.
+- \`${EXISTING_SPRINTS_TARBALL}\` — cold archive of pre-existing visible sprint folders, when any existed.
+- \`${EXISTING_ARCHIVES_TARBALL}\` — cold archive of pre-existing expanded archive folders, when any existed.
 EOF
 
 printf '%s\n' "${SPRINT_ID}" > "${SFS_CURRENT_SPRINT_FILE}" || exit "${SFS_EXIT_PERM}"
@@ -422,12 +570,23 @@ _esc_sprint="$(json_escape "${SPRINT_ID}")"
 _esc_report="$(json_escape "${REPORT_PATH}")"
 _esc_retro="$(json_escape "${RETRO_PATH}")"
 _esc_archive="$(json_escape "${ARCHIVE_DIR}/source-summary.txt")"
-append_event "legacy_adopt" "{\"sprint_id\":\"${_esc_sprint}\",\"report\":\"${_esc_report}\",\"retro\":\"${_esc_retro}\",\"archive\":\"${_esc_archive}\",\"commits\":${COMMIT_COUNT},\"tracked_files\":${TRACKED_COUNT},\"docs_signals\":${DOC_COUNT},\"test_signals\":${TEST_COUNT},\"submodules\":${SUBMODULE_COUNT}}"
+append_event "legacy_adopt" "{\"sprint_id\":\"${_esc_sprint}\",\"report\":\"${_esc_report}\",\"retro\":\"${_esc_retro}\",\"archive\":\"${_esc_archive}\",\"commits\":${COMMIT_COUNT},\"tracked_files\":${TRACKED_COUNT},\"docs_signals\":${DOC_COUNT},\"test_signals\":${TEST_COUNT},\"submodules\":${SUBMODULE_COUNT},\"archived_existing_sprints\":${EXISTING_SPRINT_ARCHIVE_COUNT},\"collapsed_existing_archives\":${EXISTING_ARCHIVE_COLLAPSE_COUNT}}"
 
 echo "adopted: ${SPRINT_ID}"
 echo "  report: ${REPORT_PATH}"
 echo "  retro: ${RETRO_PATH}"
 echo "  archive: ${ARCHIVE_DIR}/source-summary.txt"
+if [[ "${PRESERVE_CURRENT_SPRINT}" -eq 1 ]]; then
+  echo "  preserved_current_sprint: ${CURRENT_SPRINT}"
+fi
+echo "  archived_existing_sprints: ${EXISTING_SPRINT_ARCHIVE_COUNT}"
+if [[ "${EXISTING_SPRINT_ARCHIVE_COUNT}" -gt 0 ]]; then
+  echo "  existing_sprints_archive: ${EXISTING_SPRINTS_TARBALL}"
+fi
+echo "  collapsed_existing_archives: ${EXISTING_ARCHIVE_COLLAPSE_COUNT}"
+if [[ "${EXISTING_ARCHIVE_COLLAPSE_COUNT}" -gt 0 ]]; then
+  echo "  existing_archives_archive: ${EXISTING_ARCHIVES_TARBALL}"
+fi
 echo "  visible_policy: report.md + retro.md only"
 echo "  next: run baseline verification, then start the first real SFS sprint"
 

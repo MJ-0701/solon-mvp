@@ -140,7 +140,7 @@ not create a new verdict in the current runtime.
 | `upgrade [--skip-existing] [--interactive]` (또는 "Solon 업데이트", "adapter 갱신") | `sfs upgrade [--skip-existing] [--interactive]` | package manager runtime 을 먼저 최신화한 뒤 managed adapter/docs 갱신. sprint/decision/event history 보존 |
 | `update [--skip-existing]` | `sfs update [--skip-existing]` | 하위 호환 alias. 새 문서/응답에서는 `upgrade` 를 권장 |
 | `version [--check]` (또는 "버전 확인", "새 버전 확인") | `sfs version [--check]` | 현재 설치 버전 출력. `--check` 는 GitHub 최신 product tag 와 비교 |
-| `adopt [--id legacy-baseline] [--apply]` (또는 "legacy 인수인계", "기존 프로젝트 SFS 도입") | `sfs adopt [--id legacy-baseline] [--apply]` | legacy 프로젝트를 report-first baseline 으로 인계. 문서 과잉이면 남길 것만 남기고, 문서 0이면 git/code/test/docs 흔적에서 최소 baseline 복원. raw scan 은 archive 보존 |
+| `adopt [--id legacy-baseline] [--apply]` (또는 "legacy 인수인계", "기존 프로젝트 SFS 도입") | `sfs adopt [--id legacy-baseline] [--apply]` | legacy 프로젝트를 report-first baseline 으로 인계. 문서 과잉이면 기존 sprint/archive tree 를 cold archive tarball 로 접고, 문서 0이면 git/code/test/docs 흔적에서 최소 baseline 복원. raw scan 은 archive 보존 |
 | `brainstorm [text|--stdin]` (또는 "브레인스토밍", "요구사항 정리") | `sfs brainstorm <raw context>` | G0 raw 요구사항/대화 맥락을 brainstorm.md 에 기록한 뒤 §1~§7을 Solon CEO로 정리. newline 허용 |
 | `plan` (또는 "plan 작성", "이번 sprint 계획") | `sfs plan` | plan.md 진입 + plan_open event 후 brainstorm.md 기반 G1 plan/contract 작성 |
 | `implement [work slice|--stdin]` (또는 "구현", "코드 구현", "실제 작업") | `sfs implement <work slice>` | implement.md/log.md 진입 후 plan 기반으로 실제 코드 변경 + 테스트/스모크 evidence 작성. 여기서 멈추지 말고 구현까지 진행 |

@@ -193,7 +193,7 @@ Dispatch table:
 | `upgrade`  | `sfs upgrade <remaining args>`  | upgrades package-manager runtime first, then updates managed project adapter/docs; preserves sprint/decision/event history |
 | `update`   | `sfs update <remaining args>`   | compatibility alias; prefer `upgrade` in new docs/responses |
 | `version`  | `sfs version <remaining args>`  | prints installed version; `--check` compares with the latest published product tag |
-| `adopt`    | `sfs adopt <remaining args>`    | legacy project intake. creates report-first baseline from git/code/docs; raw scan evidence is archived |
+| `adopt`    | `sfs adopt <remaining args>`    | legacy project intake. creates report-first baseline from git/code/docs; old sprint/archive trees are collapsed into cold archives |
 | `brainstorm` | `sfs brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then Claude fills §1~§7 as Solon CEO |
 | `plan`     | `sfs plan <remaining args>`     | opens plan.md, then Claude fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
 | `implement` | `sfs implement <remaining args>` | opens implement.md/log.md, then Claude performs actual code changes with DDD/TDD guardrails and records evidence |
