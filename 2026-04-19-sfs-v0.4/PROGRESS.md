@@ -2,7 +2,7 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-01T19:17:02Z
+last_overwrite: 2026-05-01T22:56:13Z
 session: "doc-refactor: PROGRESS.md token-bloat compaction (full snapshot archived at archives/progress/PROGRESS-2026-05-01T181258Z-precompact.md)"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
@@ -11,11 +11,16 @@ current_wu_path: 2026-04-19-sfs-v0.4/sprints/WU-34.md
 
 # ── SESSION MUTEX (CLAUDE.md §1.12) ───────────────────────────────
 # Keep scalar form for tool compatibility (.sfs-local/scripts/sfs-loop.sh stop/status, auto-resume contract).
-current_wu_owner: null
+current_wu_owner: overnight-sfs-loop-deploy#claimed_at=2026-05-02T07:56:13+09:00#ttl_minutes=15
 
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
 scheduled_task_log:
+  - ts: 2026-05-02T07:55:48+09:00
+    codename: overnight-sfs-loop-deploy
+    check_exit: 0
+    action: "doc-refactor: CLAUDE.md entry token trim"
+    ahead_delta: "+0"
   - ts: 2026-05-02T07:49:37+09:00
     codename: overnight-sfs-loop-deploy
     check_exit: 0
