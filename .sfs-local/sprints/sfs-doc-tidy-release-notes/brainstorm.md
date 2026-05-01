@@ -15,7 +15,8 @@ status: ready-for-plan        # draft | ready-for-plan | g0-reviewed
 > `/sfs start` 는 workspace 를 만들고, `/sfs brainstorm` 은 raw 를 §8 에 기록한 뒤
 > AI runtime 에서 Solon CEO 가 §1~§7 을 채운다. direct bash 는 capture-only 다.
 > 생명주기: 본 문서는 진행 중 workbench 이다. Sprint close 후 핵심 문제/성공상태만
-> `report.md` 로 압축되고, raw history 는 `retro.md` / session log 가 담당한다.
+> `report.md` 로 정리되고, 원문은 archive 로 이동해 보존된다. Raw history 는
+> `retro.md` / session log 가 담당한다.
 
 ---
 
@@ -23,7 +24,7 @@ status: ready-for-plan        # draft | ready-for-plan | g0-reviewed
 
 기존 SFS 산출물이 작업 진행 중에는 노트패드/화이트보드처럼 쌓이는 것이 맞지만,
 완료 후에도 `brainstorm.md`, `plan.md`, `implement.md`, `log.md`, `review.md` 가
-그대로 최종 산출물처럼 남는 문제가 있다. 사용자는 삭제가 아니라 정리/압축을 원한다.
+그대로 최종 산출물처럼 남는 문제가 있다. 사용자는 삭제가 아니라 보존형 정리를 원한다.
 
 이번 sprint 는 세 가지를 하나의 운영 규칙으로 묶는다.
 
@@ -63,22 +64,22 @@ SFS 약자 정의를 Sprint Flow System 으로 바꾸지 않는다.
   - 장점: 정리 목적이 명확하다. default dry-run, `--apply`, `--sprint`, `--all` 같은 UX 를 줄 수 있다.
   - 단점: 새 명령이므로 docs/skill/installer/dispatch/release note 모두 갱신해야 한다.
   - 버릴/보류할 이유: 구현 범위가 커지면 `report --compact` helper 재사용으로 줄인다.
-- **Option C: release/retro close 때만 자동 정리**
+- **Option C: release/retro close 때만 정리**
   - 장점: 사용자 행동이 적고 lifecycle 이 자연스럽다.
-  - 단점: 기존 산출물을 별도로 정리하기 어렵고, 자동 압축은 사용자 동의 원칙과 충돌할 수 있다.
+  - 단점: 기존 산출물을 별도로 정리하기 어렵고, 자동 정리는 사용자 동의 원칙과 충돌할 수 있다.
   - 버릴/보류할 이유: 사용자 동의하의 명시 명령을 우선한다.
 
 ## §5. Scope Seed
 
 - 이번 sprint 에 넣을 것:
   - `sfs tidy` 또는 동등한 새 명령 설계/구현.
-  - 삭제 없는 보존 정책: dry-run 기본, `--apply` 시 원문 archive 후 workbench stub 압축.
+  - 삭제 없는 보존 정책: dry-run 기본, `--apply` 시 원문 archive 후 visible sprint folder 에는 남겨야 할 문서만 유지.
   - 버전 인지 UX: `sfs version --check`, `sfs upgrade`, README/GUIDE/skill 안내 정리.
   - release note 규칙: CHANGELOG entry 구조와 릴리즈 컷 전 preflight.
 - 이번 sprint 에서 뺄 것:
   - 과거 모든 docset 의 수동 대청소.
   - 웹 대시보드/GUI/검색 인덱스.
-  - 사용자에게 묻지 않는 자동 삭제 또는 자동 압축.
+  - 사용자에게 묻지 않는 자동 삭제 또는 자동 정리.
 - 다음 sprint 후보:
   - `sfs status` 에 update notice 를 선택적으로 붙이는 UX.
   - release note 를 GitHub Release body 로 자동 생성.
@@ -91,13 +92,13 @@ SFS 약자 정의를 Sprint Flow System 으로 바꾸지 않는다.
 - Goal: SFS 문서 생명주기 하네스를 실행 가능한 정리 명령과 릴리즈 운영 규칙으로 만든다.
 - Acceptance Criteria 후보:
   - AC1: `sfs tidy` 는 기본 dry-run 이고, `--apply` 없이는 파일을 바꾸지 않는다.
-  - AC2: `--apply` 는 원문 workbench 문서를 삭제하지 않고 archive 또는 snapshot 위치에 보존한다.
-  - AC3: 완료된 sprint 의 workbench 문서는 report 중심 redirect stub 로 압축된다.
+  - AC2: `--apply` 는 원문 workbench/tmp 산출물을 삭제하지 않고 archive 위치에 보존한다.
+  - AC3: 완료된 sprint 의 workbench/tmp 산출물은 archive 로 이동하고, visible sprint folder 에는 `report.md`/`retro.md` 같은 durable artifact 만 남는다.
   - AC4: README/GUIDE/skill 에 SFS = Solo Founder System, `sfs upgrade`, `sfs version --check`, release note 확인 방법이 명시된다.
   - AC5: release cut preflight 는 대상 버전의 CHANGELOG/release note entry 누락을 감지한다.
 - 주요 risk: 기존 `report --compact` helper 와 중복 구현, archive 경로가 과하게 커지는 문제, release preflight 가 hotfix 흐름을 막는 문제.
 - generator agent 가 만들 산출물: CLI dispatch, tidy adapter/helper, docs, changelog policy, release script preflight.
-- evaluator agent 가 검증할 기준: dry-run 무변경, apply 후 원문 보존, stub 생성, docs 용어 정합, release note 누락 시 preflight 실패.
+- evaluator agent 가 검증할 기준: dry-run 무변경, apply 후 원문 archive 보존, visible sprint/tmp cleanup, docs 용어 정합, release note 누락 시 preflight 실패.
 
 ## §7. G0 Checklist
 

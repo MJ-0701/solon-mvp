@@ -175,8 +175,12 @@ direct CLI 는 raw capture-only 이다. AI 없이 직접 실행했다면, 다음
 
 > 📌 **문서 생명주기**: 진행 중에는 `brainstorm.md`, `plan.md`, `implement.md`,
 > `log.md`, `review.md` 가 노트패드처럼 길어질 수 있다. Sprint 완료 전에는
-> `/sfs report` 로 한 장짜리 `report.md` 를 만들고, `/sfs retro --close` 가
-> workbench 문서를 작은 redirect/stub 로 압축한다. 회고/히스토리는 `retro.md` 가 담당한다.
+> `/sfs report` 로 한 장짜리 `report.md` 를 만들고, `/sfs retro --close` 또는
+> `/sfs tidy --apply` 가 workbench 문서와 tmp review 산출물을 archive 로 이동한다. 회고/히스토리는 `retro.md` 가 담당한다.
+> 기존 sprint 문서를 나중에 정리할 때는 `/sfs tidy --sprint <id>` 로 먼저 dry-run 을 보고,
+> `/sfs tidy --sprint <id> --apply` 를 실행한다. 초기 버전처럼 `report.md` 가 없으면
+> 먼저 생성하고, 원문 workbench/tmp 산출물은 삭제하지 않고 `.sfs-local/archives/` 로 이동한다.
+> 핵심은 "남겨야 할 것만 남긴다" 이다.
 
 이미 직전 planning sprint 에서 plan/review/ADR 이 통과했다면, 다음 implementation sprint 에서
 같은 G0/G1 을 다시 두껍게 반복하지 않는다. 그때의 `brainstorm.md`/`plan.md` 는 새 결정을
@@ -300,7 +304,7 @@ AI runtime 에서는 sprint workbench 문서와 review evidence 를 읽고 `repo
 ```text
 /sfs report --sprint <sprint-id>
 # report.md 확인/수정 후
-/sfs report --sprint <sprint-id> --compact
+/sfs tidy --sprint <sprint-id> --apply
 ```
 
 현재 sprint close:
@@ -310,7 +314,7 @@ AI runtime 에서는 sprint workbench 문서와 review evidence 를 읽고 `repo
 ```
 
 → AI runtime 에서는 먼저 `retro.md` 를 KPT/PDCA 로 채우고 `report.md` 를 최종보고서로
-정리한 뒤 close adapter 를 1회 실행한다. 이때 workbench 문서는 compact stub 로 줄고,
+정리한 뒤 close adapter 를 1회 실행한다. 이때 workbench 문서와 tmp review 산출물은 archive 로 이동하고,
 sprint close + auto-commit 까지 처리된다. 이후 branch push/main 흡수는 AI runtime 이
 Git Flow lifecycle 로 처리한다.
 
@@ -339,8 +343,9 @@ native slash UI 에서 `커맨드 없음` 으로 막힐 수 있으므로 `$sfs .
 | `/sfs review --gate G4 --executor codex` | 리뷰할 evidence 가 있을 때 CPO review bridge 실행 + 결과 기록 |
 | `/sfs review --show-last` | executor 재실행 없이 마지막 CPO review 결과를 요약/action report 로 확인 |
 | `/sfs decision <title>` | ADR-style 결정 기록 + AI runtime 에서 ADR 본문 작성 |
-| `/sfs report [--sprint <id>] [--compact]` | 최종 작업보고서 생성 / 동의 후 workbench compact |
-| `/sfs retro [--close]` | 회고 작성 / `--close` 는 회고+보고서 작성 후 compact + sprint close + auto-commit |
+| `/sfs report [--sprint <id>] [--compact]` | 최종 작업보고서 생성 / 동의 후 workbench archive |
+| `/sfs tidy [--sprint <id>\|--all] [--apply]` | 기존 sprint workbench/tmp 를 archive 로 이동하고 남길 문서만 유지 |
+| `/sfs retro [--close]` | 회고 작성 / `--close` 는 회고+보고서 작성 후 archive + sprint close + auto-commit |
 | `/sfs commit plan` | close 후 남은 working tree 분류 + Git Flow branch preflight 안내 |
 | `/sfs commit apply --group product-code` | 선택 그룹만 local commit. Git Flow-aware Conventional Commit 메시지 자동 생성, `-m` override 가능. 이후 branch push/main 흡수는 AI runtime 이 수행 |
 | `/sfs loop` | 큰 작업 자율 진행 (queue-first Ralph Loop, 고급) |
@@ -448,9 +453,12 @@ sfs guide
 프로젝트를 새 runtime 기준으로 갱신할 때 사용합니다.
 
 agent 모델 설정은 `.sfs-local/model-profiles.yaml` 에 있습니다. 이 파일이 없던 기존
-프로젝트는 `sfs upgrade` 때 생성됩니다. 설정을 안 하거나 거부하거나 나중으로 미루면 Solon 은
+프로젝트는 `sfs upgrade` 때 생성됩니다. 이 설정은 "설계/평가 agent 는 강한 모델,
+구현 worker 는 표준 모델, 단순 helper 는 가벼운 모델"처럼 역할별 모델 배치를 정하는
+용도입니다. 설정을 안 하거나 거부하거나 나중으로 미루면 Solon 은
 현재 런타임에서 사용자가 선택한 모델을 그대로 쓰고, C-Level high / worker standard /
-helper economy 는 권장값으로만 남깁니다.
+helper economy 는 권장값으로만 남깁니다. 이 fallback 상태는 확정 설정이 아니므로 다음
+`sfs upgrade` 또는 agent/model 설정 질문 때 다시 안내됩니다.
 
 ### 8.2 `/sfs start` 가 "sprint id conflict" 출력
 
@@ -475,8 +483,9 @@ sfs upgrade
 `sfs upgrade` 는 managed adapter/docs 를 백업 후 갱신하고, `.sfs-local/sprints/`,
 `.sfs-local/decisions/`, `.sfs-local/events.jsonl`, 프로젝트별 `CLAUDE.md`/`AGENTS.md`/
 `GEMINI.md` 는 보존한다. `.sfs-local/model-profiles.yaml` 이 없으면 current-model fallback
-설정으로 새로 만들고, 이미 있으면 사용자 설정 보호를 위해 보존한다. `sfs update` 는 하위 호환
-alias 로 남아 있지만 새 문서에서는 `sfs upgrade` 를 기준으로 설명한다.
+설정으로 새로 만들고, 이미 있으면 사용자 설정 보호를 위해 보존한다. fallback 또는 미확정이면
+upgrade 가 설정 여부를 다시 묻고, 사용자가 지금 설정하지 않겠다고 하면 fallback 을 유지한다.
+`sfs update` 는 하위 호환 alias 로 남아 있지만 새 문서에서는 `sfs upgrade` 를 기준으로 설명한다.
 
 ### 8.5 `upgrade.sh` 시 본인이 편집한 file 보존돼?
 

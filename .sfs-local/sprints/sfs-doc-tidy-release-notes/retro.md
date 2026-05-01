@@ -14,7 +14,7 @@ closed_at: ""        # filled by /sfs retro --close
 > `/sfs retro --close` 로 본 sprint 의 `closed_at` 을 frontmatter 에 기록 + `.sfs-local/events.jsonl` 의 `sprint_close` event append.
 > SSoT: `gates.md §1` (G5) + `05-gate-framework.md §5.1.3` (Sprint Retro).
 > 생명주기: `retro.md` 는 history/learning 을 보존하는 문서다. 실제 작업 결과는 close 전
-> `report.md` 로 압축하고, workbench 문서는 compact stub 로 정리한다.
+> `report.md` 로 정리하고, workbench/tmp 산출물 원문은 archive 로 이동해 보존한다.
 
 ---
 

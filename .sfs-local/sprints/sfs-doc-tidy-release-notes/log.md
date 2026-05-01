@@ -17,6 +17,14 @@ created_at: "2026-05-01T18:27:08+09:00"
 
 ## §1. 작업 로그 (시간순 append)
 
+### 2026-05-01T19:06:14+09:00 — `sfs tidy` archive lifecycle 구현 + smoke 검증
+
+- `sfs tidy` adapter 를 추가하고, 기존 compact helper 를 visible stub 생성 방식에서 archive 이동 방식으로 바꿨다.
+- `report --compact` / `retro --close` 도 같은 archive helper 를 사용하게 해 manual tidy 와 close cycle 이 동일한 cleanup 철학을 따른다.
+- 초기 버전 사용자처럼 `report.md` 없는 sprint 에서 `tidy --apply` 를 실행하면 `report.md` 를 만들고 workbench/tmp 원문을 `.sfs-local/archives/` 로 이동한다.
+- temp project smoke 결과: sprint visible folder 는 `report.md`, `retro.md` 만 남고, `brainstorm/plan/implement/log/review` 및 대상 tmp 2개는 archive 로 이동했다. unrelated tmp 는 그대로 남았다.
+- release preflight 결과: `0.5.46-product` entry 는 pass, 누락 버전 `9.9.9-product --apply` 는 exit 8 로 차단됐다.
+
 ```
 ### YYYY-MM-DDTHH:MM:SS+09:00 — <요약>
 

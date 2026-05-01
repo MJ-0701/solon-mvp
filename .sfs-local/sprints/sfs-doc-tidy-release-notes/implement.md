@@ -1,10 +1,10 @@
 ---
 phase: implement
-status: draft
+status: ready-for-review
 sprint_id: "sfs-doc-tidy-release-notes"
 goal: "SFS doc tidy command + update awareness + release notes policy"
 created_at: "2026-05-01T18:27:08+09:00"
-last_touched_at: ""
+last_touched_at: 2026-05-01T19:06:14+09:00
 ---
 
 # Implement — <sprint title>
@@ -14,7 +14,7 @@ last_touched_at: ""
 > AI implementation must preserve system design, not only satisfy the nearest
 > edit request.
 > 생명주기: 구현 중에는 evidence 를 충분히 남기되, close 후 최종 변경/검증 요약은
-> `report.md` 로 압축된다. 본 파일은 완료 뒤 compact stub 대상이다.
+> `report.md` 로 정리된다. 본 파일 원문은 완료 뒤 archive 로 이동해 보존된다.
 
 ---
 
@@ -49,38 +49,58 @@ small, scoped, verified, and ready to summarize.
 
 ## §1. Implementation Target
 
-- **Work slice**:
+- **Work slice**: `sfs tidy` adapter + archive-first cleanup lifecycle + release note preflight.
 - **Plan source**: `plan.md`
 - **Implementation persona**: `.sfs-local/personas/implementation-worker.md`
 - **Reasoning tier**: `execution_standard`
 - **Model profile source**: `.sfs-local/model-profiles.yaml`
-- **Runtime / resolved model / reasoning effort**:
+- **Runtime / resolved model / reasoning effort**: Codex current session.
 - **Fallback if profile unset**: current runtime model
 - **Agent model override used?** no
-- **Acceptance criteria in scope**:
-- **Out of scope for this slice**:
-- **Shared design concept**:
-- **DDD terms touched**:
+- **Acceptance criteria in scope**: dry-run, apply archive, report creation for legacy sprint, tmp cleanup, docs/skill exposure, release preflight.
+- **Out of scope for this slice**: applying tidy to real historical user sprints; archive restore UI; background update notifier.
+- **Shared design concept**: workbench files are active 노트패드; completed sprint surface keeps only durable report/retro/decision artifacts.
+- **DDD terms touched**: workbench, report, retro, archive, tmp review artifact, release note preflight.
 
 ## §2. Execution Notes
 
-- **Approach**:
-- **Files/modules expected to change**:
-- **Test-first plan**:
-- **Risks / rollback notes**:
+- **Approach**: Extend shared cleanup helper from stub-writing compaction to archive-moving cleanup; add `sfs tidy` as explicit migration command; reuse same helper in report/retro cycle.
+- **Files/modules expected to change**: `sfs-common.sh`, `sfs-tidy.sh`, dispatch/bin CLI, report/retro scripts, report template, README/GUIDE/SFS/agent command docs, `cut-release.sh`, `CHANGELOG.md`.
+- **Test-first plan**: Bash syntax checks first, then temp project smoke for legacy sprint without `report.md`, tmp artifact movement, report compact path, release preflight pass/fail.
+- **Risks / rollback notes**: Archive path growth is local and ignored by git; rollback is restoring files from `.sfs-local/archives/` because cleanup uses `mv`, not deletion.
 
 ## §3. Code Changes Made
 
-- 
+- Added `sfs-tidy.sh` with dry-run default, `--sprint`, `--current`, `--all`, and `--apply`.
+- Changed shared cleanup helper to move `brainstorm/plan/implement/log/review` into `.sfs-local/archives/sprints/<sid>/<timestamp>/` instead of writing visible stubs.
+- Added tmp review artifact cleanup: matching `.sfs-local/tmp/**/<sprint-id>*` files move into the same archive tree and unrelated tmp files stay in place.
+- Wired `tidy` into active/product dispatch, global `bin/sfs`, Codex/Claude/Gemini command docs, README/GUIDE/SFS docs, `.gitignore`, and report template.
+- Reused the archive helper from `sfs report --compact` and `sfs retro --close`, so manual tidy and lifecycle close share the same cleanup behavior.
+- Added `cut-release.sh` preflight: `--apply` fails when target `CHANGELOG.md` version entry is missing.
+- Included the other session's agent/model setting guard changes in install/upgrade/templates/model profile docs.
 
 ## §4. Verification
 
 - **Commands run**:
-- **Result**:
-- **Manual smoke / inspection**:
+  - `bash -n` on product + active `sfs-common.sh`, `sfs-tidy.sh`, `sfs-dispatch.sh`, `sfs-report.sh`, `sfs-retro.sh`, `bin/sfs`, `install.sh`, `upgrade.sh`, `scripts/cut-release.sh`
+  - temp project install/start/tidy smoke under `/private/tmp/sfs-tidy-smoke.REwE7D`
+  - `sfs tidy --sprint 2026-W18-sprint-1` dry-run
+  - `sfs tidy --sprint 2026-W18-sprint-1 --apply`
+  - `sfs report --sprint 2026-W18-sprint-2 --compact`
+  - `sfs report --sprint 2026-W18-sprint-3 --compact` after archive path output patch
+  - `cut-release.sh --version 0.5.46-product --allow-dirty --allow-divergence`
+  - `cut-release.sh --version 9.9.9-product --apply --allow-dirty --allow-divergence --no-tag`
+- **Result**: PASS. Legacy sprint without `report.md` created `report.md`, moved 5 workbench files + 2 tmp files into archive, left only `report.md`/`retro.md` visible, and preserved unrelated tmp. Missing release note apply failed with exit 8.
+- **Manual smoke / inspection**: `find` confirmed archive files and visible sprint files; `rg` confirmed no stale redirect/stub wording in managed docs.
 
 ## §5. Review Handoff
 
-- **Ready for review?** no
+- **Ready for review?** yes
 - **Recommended next gate**: `G4`
 - **Next command**: `/sfs review --gate G4`
+
+## 2026-05-01T18:31:58+09:00 — Implementation Request
+
+```text
+sfs tidy adapter + release note preflight 구현
+```

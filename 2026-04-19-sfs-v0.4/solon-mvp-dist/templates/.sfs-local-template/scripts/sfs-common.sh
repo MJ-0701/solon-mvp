@@ -33,6 +33,7 @@ SFS_CURRENT_WU_FILE="${SFS_LOCAL_DIR}/current-wu"
 SFS_VERSION_FILE="${SFS_LOCAL_DIR}/VERSION"
 SFS_SPRINTS_DIR="${SFS_LOCAL_DIR}/sprints"
 SFS_DECISIONS_DIR="${SFS_LOCAL_DIR}/decisions"
+SFS_ARCHIVES_DIR="${SFS_LOCAL_DIR}/archives"
 SFS_PROJECT_TEMPLATES_DIR="${SFS_LOCAL_DIR}/sprint-templates"
 SFS_RUNTIME_TEMPLATES_DIR="${SFS_RUNTIME_DIR}/sprint-templates"
 SFS_PROJECT_DECISIONS_TEMPLATE_DIR="${SFS_LOCAL_DIR}/decisions-template"
@@ -459,40 +460,79 @@ sfs_prepare_sprint_report() {
   printf '%s\n' "${report_path}"
 }
 
-# sfs_compact_sprint_workbench <sprint-id> <iso-ts>
-# Replaces verbose active-workbench docs with small redirects after a final
-# report exists. History belongs in retro/session logs; decisions stay intact.
-sfs_compact_sprint_workbench() {
+# sfs_workbench_archive_dir <sprint-id> <iso-ts>
+# stdout: deterministic archive directory for a tidy/compact run.
+sfs_workbench_archive_dir() {
+  local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
+  local safe_ts="${ts//:/-}"
+  safe_ts="${safe_ts//+/-}"
+  safe_ts="${safe_ts//\//-}"
+  printf '%s\n' "${SFS_ARCHIVES_DIR}/sprints/${sid}/${safe_ts}"
+}
+
+# sfs_archive_sprint_workbench <sprint-id> <iso-ts>
+# Moves visible workbench docs to a local archive so the sprint directory keeps
+# only the final report / retro / durable artifacts.
+# stdout: archive directory when at least one file was archived, else empty.
+sfs_archive_sprint_workbench() {
   local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
   local sdir="${SFS_SPRINTS_DIR}/${sid}"
-  local doc path title
+  local archive_dir doc path archived=0
+  archive_dir="$(sfs_workbench_archive_dir "${sid}" "${ts}")"
+  [[ -d "${sdir}" ]] || return ${SFS_EXIT_NO_INIT}
+
   for doc in brainstorm plan implement log review; do
     path="${sdir}/${doc}.md"
     [[ -f "${path}" ]] || continue
-    case "${doc}" in
-      brainstorm) title="Brainstorm" ;;
-      plan) title="Plan" ;;
-      implement) title="Implement" ;;
-      log) title="Log" ;;
-      review) title="Review" ;;
-      *) title="${doc}" ;;
-    esac
-    {
-      printf '%s\n' '---'
-      printf 'phase: compacted\n'
-      printf 'status: compacted\n'
-      printf 'sprint_id: %s\n' "${sid}"
-      printf 'source_artifact: %s.md\n' "${doc}"
-      printf 'compacted_at: %s\n' "${ts}"
-      printf '%s\n\n' '---'
-      printf '# %s — compacted\n\n' "${title}"
-      printf '> This active workbench artifact was compacted after sprint completion.\n'
-      printf '> Read `report.md` for the final work report and `retro.md` for history/learning.\n\n'
-      printf '%s\n' '- Final report: `report.md`'
-      printf '%s\n' '- Retrospective/history: `retro.md`'
-      printf '%s\n' '- Machine trace: `.sfs-local/events.jsonl`'
-    } > "${path}" || return ${SFS_EXIT_PERM}
+    if [[ "${archived}" -eq 0 ]]; then
+      mkdir -p "${archive_dir}" || return ${SFS_EXIT_PERM}
+      archived=1
+    fi
+    mv "${path}" "${archive_dir}/${doc}.md" || return ${SFS_EXIT_PERM}
   done
+
+  if [[ "${archived}" -eq 1 ]]; then
+    printf '%s\n' "${archive_dir}"
+  fi
+  return ${SFS_EXIT_OK}
+}
+
+# sfs_archive_sprint_tmp_artifacts <sprint-id> <iso-ts>
+# Moves ignored tmp artifacts for the sprint into the same local archive root.
+# stdout: moved file count.
+sfs_archive_sprint_tmp_artifacts() {
+  local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
+  local tmp_root="${SFS_LOCAL_DIR}/tmp"
+  local archive_root path rel dest count=0
+  [[ -d "${tmp_root}" ]] || { printf '0\n'; return ${SFS_EXIT_OK}; }
+  archive_root="$(sfs_workbench_archive_dir "${sid}" "${ts}")/tmp"
+
+  while IFS= read -r path; do
+    [[ -f "${path}" ]] || continue
+    rel="${path#${tmp_root}/}"
+    dest="${archive_root}/${rel}"
+    mkdir -p "$(dirname "${dest}")" || return ${SFS_EXIT_PERM}
+    mv "${path}" "${dest}" || return ${SFS_EXIT_PERM}
+    count=$((count + 1))
+  done < <(find "${tmp_root}" -type f -name "${sid}*" 2>/dev/null | sort)
+
+  if [[ "${count}" -gt 0 ]]; then
+    find "${tmp_root}" -depth -type d -empty -exec rmdir {} \; 2>/dev/null || true
+  fi
+  printf '%s\n' "${count}"
+  return ${SFS_EXIT_OK}
+}
+
+# sfs_compact_sprint_workbench <sprint-id> <iso-ts>
+# Moves verbose active-workbench docs to archive after a final report exists.
+# History belongs in retro/session logs and the local archive; decisions stay
+# intact. No redirect stubs are left in the sprint directory.
+sfs_compact_sprint_workbench() {
+  local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
+  local archive_dir
+  archive_dir="$(sfs_archive_sprint_workbench "${sid}" "${ts}")" || return ${SFS_EXIT_PERM}
+  sfs_archive_sprint_tmp_artifacts "${sid}" "${ts}" >/dev/null || return ${SFS_EXIT_PERM}
+  : "${archive_dir:=}"
   return ${SFS_EXIT_OK}
 }
 
