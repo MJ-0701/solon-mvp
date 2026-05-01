@@ -20,9 +20,9 @@
 #
 # Allowlist (WU-31 §2.3, hard-coded — `.visibility-rules.yaml`
 #   enforcement_active=true 는 후속 row 7 에서 활성):
-#     ✅ VERSION / CHANGELOG.md / README.md / CLAUDE.md /
+#     ✅ VERSION / CHANGELOG.md / README.md / CLAUDE.md / AGENTS.md / GUIDE.md /
 #        install.sh / install.ps1 / upgrade.sh / upgrade.ps1 /
-#        uninstall.sh / uninstall.ps1 / templates/
+#        uninstall.sh / uninstall.ps1 / templates/ / bin/ / packaging/ / .github/
 #     ❌ APPLY-INSTRUCTIONS.md (dev 운영자 전용, hard blocklist)
 #
 # Usage:
@@ -61,6 +61,7 @@ SHOW_HELP=0
 
 # Allowlist (WU-31 §2.3 + 25th-6 codex finding #6 + 0.5.27 thin runtime)
 # AGENTS.md = stable 의 untracked dust 해소 (dev staging 의 redirect stub 을 sync).
+# .github = Windows Scoop smoke workflow for packaged install verification.
 ALLOWLIST=(
   "VERSION"
   "CHANGELOG.md"
@@ -77,6 +78,7 @@ ALLOWLIST=(
   "templates"
   "bin"
   "packaging"
+  ".github"
 )
 
 # Hard blocklist (dev 전용)
@@ -326,11 +328,10 @@ for item in "${ALLOWLIST[@]}"; do
   if [[ -d "${src}" ]]; then
     src="${src}/"
     dst="${dst}/"
-    [[ -d "${dst}" ]] || mkdir -p "${dst%/}"
   fi
   while IFS= read -r line; do
     case "${line}" in
-      \>f+++++++++*) NEW=$((NEW+1));    log "  + ${line}" ;;
+      \>f+*)         NEW=$((NEW+1));    log "  + ${line}" ;;
       \>f*)          CHANGED=$((CHANGED+1)); log "  M ${line}" ;;
       \*deleting*)   DELETED=$((DELETED+1)); log "  - ${line}" ;;
       cd+++++++++*)  log "  D ${line}" ;;  # 신규 디렉토리
