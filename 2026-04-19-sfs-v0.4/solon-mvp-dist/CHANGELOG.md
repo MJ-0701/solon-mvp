@@ -1,7 +1,15 @@
 ## [Unreleased]
 
-**Archive-first hotfix for SFS local noise.** Review retries and runtime backup
-files no longer pile up in the visible `.sfs-local/tmp/` tree.
+**Archive-first hotfix for SFS local noise plus loop lifecycle docs.** Review
+retries and runtime backup files no longer pile up in the visible
+`.sfs-local/tmp/` tree, and loop queue guidance now keeps retro-light notes
+small instead of turning queue items into sprint retros.
+
+### Added
+
+- **Loop queue lifecycle docs** — `GUIDE.md` now documents pending/claimed/done/
+  failed/abandoned state meaning and when to promote oversized retro-light notes
+  into real sprint report/retro artifacts.
 
 ### Fixed
 
