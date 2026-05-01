@@ -117,7 +117,7 @@ not create a new verdict in the current runtime.
 | `review`   | `sfs review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
 | `decision` | `sfs decision <remaining args>` | creates ADR, then Gemini fills Context/Decision/Alternatives/Consequences |
 | `report`   | `sfs report <remaining args>`   | opens report.md, then Gemini fills the compact final work report |
-| `tidy`     | `sfs tidy <remaining args>`     | dry-run by default; with `--apply`, creates report.md when missing and moves workbench/tmp artifacts into archive |
+| `tidy`     | `sfs tidy <remaining args>`     | dry-run by default; `--sprint` accepts an exact id or unique suffix ref such as `W18-sprint-1`; with `--apply`, creates report.md when missing and moves workbench/tmp artifacts into archive |
 | `retro`    | `sfs retro <remaining args>`    | opens retro.md, then Gemini fills KPT/PDCA. With `--close`, refine report before close |
 | `commit`   | `sfs commit <remaining args>`   | groups working tree changes and commits only the selected group. AI runtime handles branch push/main merge/main push |
 | `loop`     | `sfs loop <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim |

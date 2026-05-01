@@ -17,11 +17,13 @@ source "${SFS_SCRIPT_DIR}/sfs-common.sh"
 usage_tidy() {
   cat <<'EOF'
 Usage:
-  /sfs tidy [--sprint <id>] [--apply]
+  /sfs tidy [--sprint <id-or-ref>] [--apply]
   /sfs tidy --all [--apply]
 
 Clean up completed sprint workbench docs without deleting them.
   - Default is dry-run; it prints what would be archived.
+  - --sprint accepts an exact sprint id or a unique suffix ref.
+    Example: W18-sprint-1 can resolve to 2026-W18-sprint-1.
   - --apply creates report.md when missing, then moves
     brainstorm/plan/implement/log/review into .sfs-local/archives/.
   - Matching .sfs-local/tmp review prompt/run files for the sprint are moved
@@ -33,8 +35,8 @@ Clean up completed sprint workbench docs without deleting them.
   - report.md, retro.md, decision files, and events.jsonl are preserved.
 
 Recommended close flow:
-  1. /sfs tidy --sprint <id>          # inspect legacy state
-  2. /sfs tidy --sprint <id> --apply  # create report if missing + archive workbench
+  1. /sfs tidy --sprint <id-or-ref>          # inspect legacy state
+  2. /sfs tidy --sprint <id-or-ref> --apply  # create report if missing + archive workbench
   3. refine report.md into the final work report if it was newly created
 
 Exit codes:
@@ -55,6 +57,50 @@ validate_sprint_id_arg() {
       ;;
   esac
   return "${SFS_EXIT_OK}"
+}
+
+resolve_sprint_ref() {
+  local ref="${1:-}"
+  local d base count=0 last="" matches=""
+  validate_sprint_id_arg "${ref}" || return "$?"
+
+  if [[ -d "${SFS_SPRINTS_DIR}/${ref}" ]]; then
+    printf '%s\n' "${ref}"
+    return "${SFS_EXIT_OK}"
+  fi
+  if [[ ! -d "${SFS_SPRINTS_DIR}" ]]; then
+    echo "no sprint workspaces found" >&2
+    return "${SFS_EXIT_NO_INIT}"
+  fi
+
+  for d in "${SFS_SPRINTS_DIR}"/*; do
+    [[ -d "${d}" ]] || continue
+    base="${d##*/}"
+    if [[ "${base}" == *"${ref}" ]]; then
+      count=$((count + 1))
+      last="${base}"
+      matches="${matches}${base}"$'\n'
+    fi
+  done
+
+  if [[ "${count}" -eq 1 ]]; then
+    printf '%s\n' "${last}"
+    return "${SFS_EXIT_OK}"
+  fi
+  if [[ "${count}" -gt 1 ]]; then
+    echo "ambiguous sprint ref: ${ref}" >&2
+    echo "matches:" >&2
+    while IFS= read -r base; do
+      [[ -n "${base}" ]] || continue
+      echo "  - ${base}" >&2
+    done <<< "${matches}"
+    echo "use the full sprint id or a longer unique suffix" >&2
+    return "${SFS_EXIT_BADCLI}"
+  fi
+
+  echo "sprint not found: ${ref}" >&2
+  echo "hint: use exact id, a unique suffix like W18-sprint-1, or --all" >&2
+  return "${SFS_EXIT_NO_INIT}"
 }
 
 tidy_candidate_count() {
@@ -155,7 +201,7 @@ else
     echo "no sprint selected (use --sprint <id>, --all, or run /sfs start first)" >&2
     exit "${SFS_EXIT_NO_INIT}"
   fi
-  validate_sprint_id_arg "${SPRINT_ID}"
+  SPRINT_ID="$(resolve_sprint_ref "${SPRINT_ID}")"
   TARGETS="${SPRINT_ID}"$'\n'
 fi
 

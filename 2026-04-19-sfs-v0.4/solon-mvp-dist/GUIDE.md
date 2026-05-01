@@ -177,8 +177,9 @@ direct CLI 는 raw capture-only 이다. AI 없이 직접 실행했다면, 다음
 > `log.md`, `review.md` 가 노트패드처럼 길어질 수 있다. Sprint 완료 전에는
 > `/sfs report` 로 한 장짜리 `report.md` 를 만들고, `/sfs retro --close` 또는
 > `/sfs tidy --apply` 가 workbench 문서와 tmp review 산출물을 archive 로 이동한다. 회고/히스토리는 `retro.md` 가 담당한다.
-> 기존 sprint 문서를 나중에 정리할 때는 `/sfs tidy --sprint <id>` 로 먼저 dry-run 을 보고,
-> `/sfs tidy --sprint <id> --apply` 를 실행한다. 초기 버전처럼 `report.md` 가 없으면
+> 기존 sprint 문서를 나중에 정리할 때는 `/sfs tidy --sprint <id-or-ref>` 로 먼저 dry-run 을 보고,
+> `/sfs tidy --sprint <id-or-ref> --apply` 를 실행한다. `W18-sprint-1` 같은 고유 suffix 는
+> `2026-W18-sprint-1` 로 해석된다. 초기 버전처럼 `report.md` 가 없으면
 > 먼저 생성하고, 원문 workbench/tmp 산출물은 삭제하지 않고 `.sfs-local/archives/` 로 이동한다.
 > 핵심은 "남겨야 할 것만 남긴다" 이다.
 
@@ -304,7 +305,7 @@ AI runtime 에서는 sprint workbench 문서와 review evidence 를 읽고 `repo
 ```text
 /sfs report --sprint <sprint-id>
 # report.md 확인/수정 후
-/sfs tidy --sprint <sprint-id> --apply
+/sfs tidy --sprint <sprint-id-or-ref> --apply
 ```
 
 현재 sprint close:
@@ -344,7 +345,7 @@ native slash UI 에서 `커맨드 없음` 으로 막힐 수 있으므로 `$sfs .
 | `/sfs review --show-last` | executor 재실행 없이 마지막 CPO review 결과를 요약/action report 로 확인 |
 | `/sfs decision <title>` | ADR-style 결정 기록 + AI runtime 에서 ADR 본문 작성 |
 | `/sfs report [--sprint <id>] [--compact]` | 최종 작업보고서 생성 / 동의 후 workbench archive |
-| `/sfs tidy [--sprint <id>\|--all] [--apply]` | 기존 sprint workbench/tmp 를 archive 로 이동하고 남길 문서만 유지 |
+| `/sfs tidy [--sprint <id-or-ref>\|--all] [--apply]` | 기존 sprint workbench/tmp 를 archive 로 이동하고 남길 문서만 유지. `W18-sprint-1` 같은 고유 suffix 참조 가능 |
 | `/sfs retro [--close]` | 회고 작성 / `--close` 는 회고+보고서 작성 후 archive + sprint close + auto-commit |
 | `/sfs commit plan` | close 후 남은 working tree 분류 + Git Flow branch preflight 안내 |
 | `/sfs commit apply --group product-code` | 선택 그룹만 local commit. Git Flow-aware Conventional Commit 메시지 자동 생성, `-m` override 가능. 이후 branch push/main 흡수는 AI runtime 이 수행 |
