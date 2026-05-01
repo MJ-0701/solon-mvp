@@ -1,3 +1,12 @@
+## [0.5.37-product] - 2026-05-01
+
+**Hotfix: package the commit command consistently.** 0.5.36 exposed `sfs commit` in docs and dispatch metadata but missed the packaged script, which made `sfs update` fail while checksumming managed files.
+
+### Fixed
+
+- Add missing `templates/.sfs-local-template/scripts/sfs-commit.sh` to the stable tarball.
+- Sync `sfs-dispatch.sh` so `commit` routes to the packaged script.
+
 ## [0.5.36-product] - 2026-05-01
 
 **One-command project update.** Users no longer need to remember a separate
