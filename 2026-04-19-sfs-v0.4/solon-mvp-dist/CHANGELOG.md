@@ -1,3 +1,59 @@
+## [0.5.41-product] - 2026-05-01
+
+**AI-owned Git Flow lifecycle.** Product adapters now match the project-wide
+rule that users can simply describe work while the AI runtime owns branch
+creation, commits, branch push, main absorption, and origin main push.
+
+### Changed
+
+- **SFS core and runtime adapters** — replaced old "push is manual/user-only"
+  guidance with AI-owned Git Flow lifecycle rules for Claude, Codex, and Gemini.
+- **`sfs commit` wording** — clarified that the command remains a local grouping
+  and commit helper, while the surrounding branch push/main merge/main push is
+  owned by the AI runtime.
+- **Guides and command prompts** — documented the fallback cases where the AI
+  must stop and ask: destructive git, unrelated dirty work, merge conflicts,
+  failing tests, protected branch/remote rejection, and auth prompts.
+
+## [0.5.40-product] - 2026-05-01
+
+**Model profile repair path.** `sfs update` now notices when an already-current
+project is missing `.sfs-local/model-profiles.yaml` and recreates it with the
+safe `current_model` fallback instead of exiting silently as "already latest."
+
+### Fixed
+
+- **Same-version update repair** — if model profiles are missing, generate the
+  project-local settings file with `selected_runtime: current` and
+  `selected_policy: current_model`.
+- **Unconfigured profile guidance** — when a profile is still on fallback/unset,
+  `sfs update` reminds users that Solon will use the current runtime model and
+  points them at the agent-specific settings file.
+
+## [0.5.39-product] - 2026-05-01
+
+**Runtime-neutral agent model profiles.** Solon now exposes Claude/Codex/Gemini
+as peer runtimes for C-Level, evaluator, worker, and helper model selection.
+
+### Added
+
+- **`.sfs-local/model-profiles.yaml`** — a project-local reasoning tier registry
+  mapping `strategic_high`, `review_high`, `execution_standard`, and
+  `helper_economy` to Claude, Codex, Gemini, current-runtime, or custom profiles.
+- **Implementation Worker persona** — fixed-scope `execution_standard` worker
+  persona separated from the `strategic_high` CTO contract owner.
+
+### Changed
+
+- **SFS core docs and sprint templates** — model selection now records
+  reasoning tier + runtime + resolved model instead of treating Claude model
+  names as canonical.
+- **Install/update flows** — new projects receive `model-profiles.yaml`; existing
+  projects get it via `sfs update` when missing, while preserving local edits.
+- **Current model fallback** — when users skip, refuse, or forget model setup,
+  Solon uses the active model/reasoning setting already selected in the current
+  runtime instead of blocking the workflow.
+
 ## [0.5.38-product] - 2026-05-01
 
 **Commit grouping command.** Solon now has an explicit `sfs commit` step for

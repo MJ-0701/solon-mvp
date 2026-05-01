@@ -38,6 +38,12 @@ and irregular structure make future AI edits worse.
 
 - **Work slice**:
 - **Plan source**: `plan.md`
+- **Implementation persona**: `.sfs-local/personas/implementation-worker.md`
+- **Reasoning tier**: `execution_standard`
+- **Model profile source**: `.sfs-local/model-profiles.yaml`
+- **Runtime / resolved model / reasoning effort**:
+- **Fallback if profile unset**: current runtime model
+- **Agent model override used?** no
 - **Acceptance criteria in scope**:
 - **Out of scope for this slice**:
 - **Shared design concept**:

@@ -75,4 +75,9 @@ SSoT 로 동작한다. 본 GEMINI.md (Gemini CLI adapter) 와 짝이 되는 AGEN
 
 - 사용자 작업 보존 (Preserve user work). 결정으로 인해 동작이 바뀌거나 작업이 삭제될 수
   있을 때만 묻는다.
-- `git push origin *` 자동 실행 금지 — push 는 사용자 터미널에서만 (Solon §1.5).
+- Git Flow lifecycle 은 Gemini 가 소유한다. 새 작업 전 `git status --short` + 현재 branch 확인,
+  도메인별 `feature/<domain>-<short-slug>` 또는 `hotfix/<domain>-<short-slug>` 생성/전환,
+  검증, commit, branch push, main 흡수, origin main push 까지 완료 조건으로 수행한다.
+- destructive git, unrelated dirty set, merge conflict, failing tests, protected branch/remote rejection,
+  auth prompt 에서만 stop + 사용자 결정/실행 요청.
+- 무차별 `git push origin *` 금지. 정확한 branch/main push 만 수행한다.

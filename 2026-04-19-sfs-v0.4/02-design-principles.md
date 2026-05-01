@@ -61,7 +61,7 @@ affects:
 - 2.1 원칙 1 — 도메인 agnostic 프레임워크 + 도메인 specific evaluator
 - 2.2 원칙 2 — 자기검증 금지 (3-Tier Separation Rule)
 - 2.3 원칙 3 — 본부장 = Gate Operator (판단자 X, 오퍼레이터 O)
-- 2.4 원칙 4 — 모델 할당 (C-Level/본부장 = Opus / 실무자 = Sonnet / 헬퍼 = Haiku)
+- 2.4 원칙 4 — 모델 할당 (reasoning tier: strategic_high / execution_standard / helper_economy)
 - 2.5 원칙 5 — Initiative ⊃ N Sprint ⊃ N PDCA (3 레이어 위계)
 - 2.6 원칙 6 — 로컬 상태 PC별 private, 공유는 git + Notion
 - 2.7 원칙 7 — CLI + GUI 통합 백엔드 (zero GUI build cost)
@@ -171,27 +171,31 @@ v0.3 §2.2 "Sonnet 실행자 + Opus 판단자 쌍"을 더 엄격하게 명문화
 
 ### 정의
 
-**역할의 인지 부하 수준에 맞춰 모델을 차등 할당한다.**
+**역할의 인지 부하 수준에 맞춰 reasoning tier 를 차등 할당한다.**
 
-| Role | 모델 | 이유 |
+> 2026-05-01 migration note: Opus/Sonnet/Haiku 는 Claude runtime baseline 예시일 뿐이다. Runtime-neutral SSoT 는 `RUNTIME-ABSTRACTION.md §5.4 Reasoning Tier Contract` 이며, Codex/Gemini 등은 같은 tier 를 자기 모델/profile 로 resolve 한다. 프로젝트가 모델 설정을 생략/거부/보류하면 `current_model` fallback 으로 현재 runtime 모델을 사용한다.
+
+| Role | reasoning tier | 이유 |
 |------|------|------|
-| C-Level (CEO/CTO/CPO) | **Opus 4.6** | 전략 판단, 본부 간 충돌 중재, 비용 정당화 |
-| 본부장 (Division Lead) | **Opus 4.6** | Gate operator, 이상 징후 탐지, escalation 판단 |
-| Evaluator | **Opus 4.6 + fork + read-only** | 독립성 + 객관성 (자기검증 금지) |
-| 실무자 (Worker) | **Sonnet 4.6** | 실행 비용 최적화, 대량 호출 지점 |
-| 헬퍼 (parsing, format 변환, sync) | **Haiku 4.5** | 초저비용 결정성 단순 작업 |
+| C-Level (CEO/CTO/CPO) | **`strategic_high`** | 전략 판단, 설계, 본부 간 충돌 중재, 비용 정당화 |
+| 본부장 (Division Lead) | **`execution_standard` 기본 / `strategic_high` escalation** | Gate operator, 이상 징후 탐지, escalation routing |
+| Evaluator | **`review_high` + fork + read-only** | 독립성 + 객관성 (자기검증 금지) |
+| 실무자 (Worker) | **`execution_standard`** | plan/architecture/AC 고정 뒤 실행 비용 최적화, 대량 호출 지점 |
+| 헬퍼 (parsing, format 변환, sync) | **`helper_economy`** | 초저비용 결정성 단순 작업 |
 
 ### 비용 절감 효과 (개략 추정)
 
 100 PDCA 사이클 기준 (Phase 1 14주 dogfooding 가정):
 
-| 모델 | 호출 수 | 단가 가중 | 비중 |
+| tier | 호출 수 | 단가 가중 | 비중 |
 |------|--------|----------|-----|
-| Opus | ~500 (Gate, escalate, retro) | × 5 | 30% |
-| Sonnet | ~5,000 (worker 실행) | × 1 | 60% |
-| Haiku | ~10,000 (sync, parse) | × 0.2 | 10% |
+| strategic_high / review_high | ~500 (Gate, escalate, retro) | × 5 | 30% |
+| execution_standard | ~5,000 (worker 실행) | × 1 | 60% |
+| helper_economy | ~10,000 (sync, parse) | × 0.2 | 10% |
 
-→ 모든 호출을 Opus로 했을 때 대비 **약 60% 비용 절감** (대략치, Phase 1 실측 후 갱신).
+→ 모든 호출을 high reasoning tier 로 했을 때 대비 **약 60% 비용 절감** (대략치, Phase 1 실측 후 갱신).
+
+단, 이것은 Solon 권장값이다. 사용자가 worker/helper 까지 high-end 모델을 쓰기로 명시하면 비용 최적화보다 사용자 정책을 우선하고, agent artifact 에 override 근거를 남긴다.
 
 ### Evaluator의 "fork + read-only" 조건
 
@@ -246,14 +250,14 @@ Sprint #5 (2주)
 
 #### 정의
 
-**Sonnet worker는 본부 내·간 병렬 실행을 기본 동작으로 한다.**
+**`execution_standard` worker는 본부 내·간 병렬 실행을 기본 동작으로 한다.**
 Orchestrator(human)가 N개 task를 한 번에 dispatch → 본부별 worker가 동시 실행 → 결과 aggregate.
 
 #### 왜 병렬이 기본인가
 
-- **Opus(판단)와 Sonnet(실행)의 비대칭 활용**: 판단은 직렬(C-Level/Lead), 실행은 본질적으로 분산 가능
+- **high reasoning(판단)과 standard execution(실행)의 비대칭 활용**: 판단은 직렬(C-Level/Lead), 실행은 본질적으로 분산 가능
 - **Sprint 처리량 최대화**: 6 본부 동시 진행 시 throughput ~6배
-- **모델 병목 해소**: Sonnet은 Opus보다 호출 캡 여유 → 병렬화로 wall-clock 단축
+- **모델 병목 해소**: standard execution tier 는 high reasoning tier 보다 호출 cap/비용 여유가 크다 → 병렬화로 wall-clock 단축
 
 #### 병렬 실행의 4 단위
 
@@ -272,9 +276,9 @@ Orchestrator(human)가 N개 task를 한 번에 dispatch → 본부별 worker가 
 
 #### tier 별 병렬도 차이
 
-| tier | Opus 호출 | Sonnet 병렬 | 비고 |
+| tier_profile | high reasoning 호출 | standard worker 병렬 | 비고 |
 |------|----------|------------|------|
-| minimal | 최소화 (escalate only) | 6-way 본부 간 OK | Pro 플랜 Sonnet 캡 내 |
+| minimal | 최소화 (escalate only) | 6-way 본부 간 OK | standard tier cap 내 |
 | standard | 정상 | 6-way + evaluator 다수 | Team/Max에서 자연스러움 |
 | collab | 정상 + cache 적극 | 본부당 N worker (Phase 2) | 다자 사용 시 wall-clock 최소화 |
 
@@ -535,9 +539,9 @@ brownfield는 discovery라는 전용 단계 없이는 원칙 1(도메인 agnosti
 
 ### 2.11.4 비용 cap (brownfield 전용)
 
-Discovery 단계는 `tier_profile=minimal` 강제 + **Opus 사용 금지** (`rule/brownfield-discovery-cost-cap`). 이는 "맥락 확보 단계에서 Opus로 전체 코드베이스를 태우는" 안티패턴 차단.
+Discovery 단계는 `tier_profile=minimal` 강제 + **high reasoning tier 사용 금지** (`rule/brownfield-discovery-cost-cap`). 이는 "맥락 확보 단계에서 가장 비싼 모델로 전체 코드베이스를 태우는" 안티패턴 차단.
 
-- 모델 할당: Haiku 70% (scan/count/extract) + Sonnet 30% (synthesize only)
+- 모델 할당: `helper_economy` 70% (scan/count/extract) + `execution_standard` 30% (synthesize only)
 - Budget cap: Small <$2, Medium <$15, Large <$60 (§7.10.8)
 - Cap 초과 감지 시 자동 pause → 사용자에게 분할 실행 제안
 
@@ -550,7 +554,7 @@ Discovery 단계는 `tier_profile=minimal` 강제 + **Opus 사용 금지** (`rul
 
 - ❌ 기존 repo에 install 후 바로 `/pdca plan` 호출 → 원칙 11 위반 (discovery skip)
 - ❌ discovery-report.md를 작성하되 Human Approval Block 서명 없이 PDCA 시작 → 원칙 11 + 원칙 10 동시 위반
-- ❌ Opus로 전체 코드베이스 read 후 Plan 작성 → budget cap 무시 (원칙 11 ∧ 원칙 4 약화)
+- ❌ high reasoning tier 로 전체 코드베이스 read 후 Plan 작성 → budget cap 무시 (원칙 11 ∧ 원칙 4 약화)
 - ✅ brownfield 감지 → `/sfs discover` 자동 실행 → report + signature → PDCA 진입
 
 ---
@@ -653,7 +657,7 @@ v0.4-r2까지의 설계는 6 본부를 모두 Phase 1 기본 구현 대상으로
 
 | 문제 | 메커니즘 | 결과 |
 |---|---|---|
-| **Heavy by default** | 1인 창업자가 개발+기획만 필요해도 Design·Infra·QA·Taxonomy 본부가 강제 로드 | 인지 부하 폭증, 불필요한 Opus 비용, 설치 첫날 abandon |
+| **Heavy by default** | 1인 창업자가 개발+기획만 필요해도 Design·Infra·QA·Taxonomy 본부가 강제 로드 | 인지 부하 폭증, 불필요한 high reasoning 비용, 설치 첫날 abandon |
 | **Prescriptive paternalism** | "사용자 <10명이니 taxonomy 불필요" 같은 규칙 기반 자동 차단 | 사용자 고유 상황(예: 보험 도메인 1인 작업자 — taxonomy는 필수) 무시 |
 | **IT 경험 부재 사각지대** | 1인 창업자가 "Infra 본부가 필요한지조차 모름" | 필요할 때 놓치는 구조적 사각지대 (가이드 부재) |
 
@@ -900,7 +904,7 @@ Infra/Security 는 production 직전 1회 review 로만 존재하지 않는다. 
 [원칙 11: Brownfield First Pass]          🆕 v0.4-r2
    └─→ 선행 조건 → [원칙 9: brownfield 진입 시 G-1 먼저, 이후 G0 (신규 기능에만)]
    └─→ 범위 설정 → [원칙 12: discovery 단계에서 retro brainstorm 금지]
-   └─→ 비용 제약 → [원칙 4: discovery는 Haiku+Sonnet만 (Opus 금지)]
+   └─→ 비용 제약 → [원칙 4: discovery는 helper_economy + execution_standard only]
    └─→ 데이터 보호 → [원칙 6: 기존 docs/는 read-only, .sfs-local/에만 쓰기]
    └─→ 입력 공급 → [원칙 13: discovery 결과가 본부 recommendation trigger로 연결]
 

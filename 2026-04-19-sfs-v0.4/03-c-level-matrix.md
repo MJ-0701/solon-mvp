@@ -57,13 +57,13 @@ affects:
 ## TOC
 
 - 3.1 조직도 개념도 (Mermaid)
-- 3.2 C-Level 3명 (Opus)
+- 3.2 C-Level 3명 (`strategic_high`)
 - 3.3 6개 본부 (Division) — 🆕 v0.4-r3 activation_state 기반
   - 3.3.0 Division Activation State (원칙 13)
   - 3.3.1~6 본부별 표
 - 3.4 본부장 = Gate Operator 상세
 - 3.5 Evaluator Pool 구조 (fork + read-only)
-- 3.6 모델 할당 최종 표 (Opus/Sonnet/Haiku, active 2 기준)
+- 3.6 모델 할당 최종 표 (reasoning tier, active 2 기준)
 - 3.7 본부별 Worker Agent 수 (Phase 1 Baseline, activation-aware)
 - 3.8 Agent ID 명명 규칙
 
@@ -75,7 +75,7 @@ affects:
 graph TB
     Human[👤 Solo Founder<br/>Orchestrator]
 
-    subgraph CLevel["C-Level (Opus)"]
+    subgraph CLevel["C-Level (strategic_high)"]
         CEO[CEO/Planner<br/>Vision + Sprint priority]
         CTO[CTO/Generator<br/>Cross-division execution]
         CPO[CPO/Evaluator<br/>5-Axis product value]
@@ -135,7 +135,7 @@ graph TB
 
 ---
 
-## 3.2 C-Level (3명, 전원 Opus 4.6)
+## 3.2 C-Level (3명, 전원 `strategic_high`)
 
 ### 3.2.1 CEO / Planner
 
@@ -144,7 +144,7 @@ graph TB
 | 항목 | 값 |
 |------|-----|
 | Agent ID | `c-level/ceo` |
-| 모델 | Opus 4.6 |
+| reasoning tier | `strategic_high` |
 | 호출 시점 | **Initiative kickoff (G0 Brainstorm 트리거)**, Sprint start, Sprint end, 본부 간 충돌 발생 시 |
 | 입력 | Sprint goal, 이전 Sprint retro, 본부별 PDCA 진척 요약 |
 | 출력 | Sprint Plan (본부별 우선순위 분배), 갈등 중재 결정 |
@@ -167,7 +167,7 @@ graph TB
 | 항목 | 값 |
 |------|-----|
 | Agent ID | `c-level/cto` |
-| 모델 | Opus 4.6 |
+| reasoning tier | `strategic_high` |
 | 호출 시점 | 본부 간 핸드오프, 기술 의존성 충돌, 아키텍처 결정 |
 | 입력 | 본부별 산출물, 기술 의존성 그래프 |
 | 출력 | 핸드오프 검증 결과, 의존성 conflict 해소 |
@@ -185,7 +185,7 @@ graph TB
 | 항목 | 값 |
 |------|-----|
 | Agent ID | `c-level/cpo` |
-| 모델 | Opus 4.6 |
+| reasoning tier | `strategic_high` |
 | 호출 시점 | G4 Check Gate, G5 Sprint Retro |
 | 입력 | 본부별 PDCA report, 5-Axis 메트릭 |
 | 출력 | 5-Axis 점수, 상품 가치 평가, 다음 Sprint 우선순위 권고 |
@@ -243,8 +243,8 @@ graph TB
 | 항목 | 값 |
 |------|-----|
 | Activation State (Phase 1 default) | **`active`** (dev 와 함께 1인 창업 최소 조합) |
-| 본부장 Agent | `division/strategy-pm/head` (Opus) |
-| Worker | `division/strategy-pm/worker-1` (Sonnet) — Phase 1 baseline 1명 |
+| 본부장 Agent | `division/strategy-pm/head` (`execution_standard` 기본 / `strategic_high` escalation) |
+| Worker | `division/strategy-pm/worker-1` (`execution_standard`) — Phase 1 baseline 1명 |
 | PDCA 산출물 | `prd.md`, `user-flow.md`, `acceptance-criteria.md` |
 | Phase 1 범위 | **풀 구현** — 모든 PRD/AC는 strategy-pm 본부 통과 필수 |
 | Evaluator Pool | `prd-validator`, `plan-validator` |
@@ -257,8 +257,8 @@ graph TB
 | 항목 | 값 |
 |------|-----|
 | Activation State (Phase 1 default) | **`abstract`** — 도메인 기반 작업 착수 시 Socratic dialog 로 활성 전환 (보험/의료 등 용어 정합성 중요 도메인) |
-| 본부장 Agent | `division/taxonomy/head` (Opus) *— activation 시점에 실체화* |
-| Worker | `division/taxonomy/worker-1` (Sonnet) *— activation 시점에 실체화* |
+| 본부장 Agent | `division/taxonomy/head` (`execution_standard` 기본 / `strategic_high` escalation) *— activation 시점에 실체화* |
+| Worker | `division/taxonomy/worker-1` (`execution_standard`) *— activation 시점에 실체화* |
 | PDCA 산출물 | `domain.yaml`, `technical.yaml`, `ui.yaml`, `decisions.md` |
 | Phase 1 범위 | **activation 시점에 풀 구현** — v0.3 §5 그대로 계승 |
 | Evaluator Pool | `taxonomy-consistency-checker` |
@@ -271,8 +271,8 @@ graph TB
 | 항목 | 값 |
 |------|-----|
 | Activation State (Phase 1 default) | **`abstract`** — UI 전환/디자인 시스템 필요 시점에 Socratic dialog 로 활성 (초기 유입 발생, MVP UI 폴리싱 등) |
-| 본부장 Agent | `division/design/head` (Opus) *— activation 시점에 실체화* |
-| Worker | `division/design/worker-1` (Sonnet) *— activation 시점에 실체화* |
+| 본부장 Agent | `division/design/head` (`execution_standard` 기본 / `strategic_high` escalation) *— activation 시점에 실체화* |
+| Worker | `division/design/worker-1` (`execution_standard`) *— activation 시점에 실체화* |
 | PDCA 산출물 | Figma URL or `design-tokens.json`, `components.md`, `wireframes/` |
 | Phase 1 범위 | **activation 시점에 cowork plugin 7개 skill 재활용** + Solon 본부 어댑터 |
 | Evaluator Pool | `design-critique`, `accessibility-review`, `design-handoff`, `brand-guideline-checker` |
@@ -285,8 +285,8 @@ graph TB
 | 항목 | 값 |
 |------|-----|
 | Activation State (Phase 1 default) | **`active`** (strategy-pm 과 함께 1인 창업 최소 조합) |
-| 본부장 Agent | `division/dev/head` (Opus) |
-| Worker | `division/dev/worker-1` (Sonnet) — backend + frontend 통합 (Phase 1) |
+| 본부장 Agent | `division/dev/head` (`execution_standard` 기본 / `strategic_high` escalation) |
+| Worker | `division/dev/worker-1` (`execution_standard`) — backend + frontend 통합 (Phase 1) |
 | PDCA 산출물 | 코드(repo), `api.yaml`(OpenAPI), 마이그레이션, `decisions/dev-NNN.md` |
 | Phase 1 범위 | **bkit 재활용** + Solon PDCA wrapper |
 | Evaluator Pool | `code-analyzer`, `gap-detector` (bkit 기존), `dev-pdca-validator` (신규) |
@@ -297,8 +297,8 @@ graph TB
 | 항목 | 값 |
 |------|-----|
 | Activation State (Phase 1 default) | **`abstract`** — MVP 출시 임박 / 품질 사고 후 Socratic dialog 로 활성 (temporal scope 로 Sprint N~N+2 한정 활성이 전형) |
-| 본부장 Agent | `division/qa/head` (Opus) *— activation 시점에 실체화* |
-| Worker | `division/qa/worker-1` (Sonnet) *— activation 시점에 실체화* |
+| 본부장 Agent | `division/qa/head` (`execution_standard` 기본 / `strategic_high` escalation) *— activation 시점에 실체화* |
+| Worker | `division/qa/worker-1` (`execution_standard`) *— activation 시점에 실체화* |
 | PDCA 산출물 | `test-scenarios.md`, `qa-report.md`, Zero Script QA 로그 |
 | Phase 1 범위 | **activation 시점에 bkit qa-monitor 재활용** + Solon gate hookup |
 | Evaluator Pool | `qa-monitor` (bkit), `coverage-checker` |
@@ -311,8 +311,8 @@ graph TB
 | 항목 | 값 |
 |------|-----|
 | Activation State (Phase 1 default) | **`abstract`** — 배포 자동화/스케일링 필요 시점에 Socratic dialog 로 활성 (1인 창업 초기에는 로컬/단일 VPS 로 scoped 활성도 일반적) |
-| 본부장 Agent | `division/infra/head` (Opus) *— activation 시점에 실체화* |
-| Worker | `division/infra/worker-1` (Sonnet) *— activation 시점에 실체화* |
+| 본부장 Agent | `division/infra/head` (`execution_standard` 기본 / `strategic_high` escalation) *— activation 시점에 실체화* |
+| Worker | `division/infra/worker-1` (`execution_standard`) *— activation 시점에 실체화* |
 | PDCA 산출물 | `terraform/`, `ci/`, `runbook.md`, `cost-estimate.md` |
 | Phase 1 범위 | **activation 시점에 최소 범위** — local dev + Vercel/single-VPS, k8s/AWS는 Phase 2 |
 | Evaluator Pool | `cost-estimator`, `infra-architect` |
@@ -445,23 +445,27 @@ Evaluator는 **공용 풀**에 있고, 어느 본부장이든 (적합하면) 호
 
 `rule/model-allocation-concrete`
 
-원칙 2.4의 추상 매핑을 Phase 1 baseline으로 구체화.
+원칙 2.4의 역할별 매핑을 Phase 1 baseline으로 구체화한다. Concrete 모델명은 더 이상 본 절의 SSoT 가 아니다. Runtime별 모델/profile resolve 는 `RUNTIME-ABSTRACTION.md §5.4 Reasoning Tier Contract` 가 담당하고, 본 절은 조직 역할과 기본 reasoning tier 만 명시한다.
 
-| 역할 | 모델 | Phase 1 인원 (기본 active) | 월 예상 호출(개략) | 비고 |
+| 역할 | reasoning tier | Phase 1 인원 (기본 active) | 월 예상 호출(개략) | 비고 |
 |------|------|-------------|-----------------|------|
-| C-Level (CEO/CTO/CPO) | **Opus 4.6** | 3 | ~150 | Sprint 2주 × 평균 25 호출 |
-| 본부장 (active divisions × 1) | **Opus 4.6** | **2 (dev + strategy-pm)** | ~200 | 🆕 v0.4-r3: Phase 1 기본 2 active. abstract 4 본부는 미로딩 — 활성 시 본부당 +~100 호출 |
-| Evaluator | **Opus 4.6** (fork+RO) | ~5 (active 본부 관련 pool) | ~150 | 🆕 abstract 본부 관련 evaluator 는 해당 본부 active 전환 시점에만 호출됨 |
-| Worker (실무자) | **Sonnet 4.6** | **2 (본부당 1, active 2)** | ~2,000 | 🆕 Phase 1 기본 2 worker. abstract 4 본부는 activation 시점에 worker 1씩 추가 |
-| Helper (parser, format) | **Haiku 4.5** | shared | ~10,000 | sync, JSON 변환, simple lint |
+| C-Level (CEO/CTO/CPO) | **`strategic_high`** | 3 | ~150 | 방향성, 설계, 본부 간 충돌, 사용자 결정 브리핑 |
+| 본부장 (active divisions × 1) | **`execution_standard` 기본 / `strategic_high` escalation** | **2 (dev + strategy-pm)** | ~200 | Gate operator. routine routing 은 standard, architecture/public contract 갈림길은 high 로 승격 |
+| Evaluator | **`review_high`** (fork+RO) | ~5 (active 본부 관련 pool) | ~150 | 자기검증 방지. schema-only deterministic review 는 `execution_standard` 허용 |
+| Worker (실무자) | **`execution_standard`** | **2 (본부당 1, active 2)** | ~2,000 | plan/architecture/AC 고정 뒤 구현, 테스트, 작은 리팩터 담당 |
+| Helper (parser, format) | **`helper_economy`** | shared | ~10,000 | sync, JSON 변환, simple lint |
 
 > 🆕 v0.4-r4 **heavy-by-default 회피**: 위 호출 수는 **Phase 1 16~20주 dogfooding 기본 2 active 본부 + 최소 1 abstract 본부 승격 가정**의 개략 추정. 사용자가 Socratic dialog 로 본부를 추가 활성화하면 호출 수 증가. 실측은 §10 에서 갱신 (Task #27 범위).
+>
+> 2026-05-01 보정: Claude 기준 Opus/Sonnet/Haiku 는 위 tier 의 한 runtime profile 일 뿐이다. Codex/Gemini adapter 는 같은 tier 를 각자 `GPT-5.5` + reasoning_effort, standard coding profile, economy profile 등으로 resolve 할 수 있다. 프로젝트 모델 설정이 없거나 사용자가 설정을 거부/보류하면 `current_model` fallback 으로 현재 runtime 모델을 그대로 쓴다.
 
 ### 모델 변경 룰
 
-- C-Level/본부장/Evaluator의 모델은 **개별 변경 금지** (Opus 고정)
-- Worker는 본부장 권한으로 일시적으로 Opus 승격 가능 (예: 복잡한 아키텍처 결정 시)
-- Helper는 Sonnet 승격 가능하지만 비용 영향 큼 → 본부장 승인 필요
+- C-Level 은 `strategic_high` 고정. concrete 모델명은 runtime adapter 가 resolve 한다.
+- Worker 는 plan / architecture / AC / files_scope 가 고정된 뒤 `execution_standard` 를 기본으로 쓴다.
+- Worker 가 architecture, public API, security, data-loss risk, 모호한 요구사항, 반복 test failure 를 만나면 즉시 `strategic_high` 로 escalation 하고 구현을 멈춘다.
+- Helper 는 `helper_economy` 기본. 의미 판단을 하게 되면 최소 `execution_standard` 로 승격한다.
+- 사용자 override 는 막지 않는다. worker/helper 까지 high-end 를 쓰겠다면 허용하되 artifact 에 `reasoning_tier`, `runtime`, `resolved_model`, `reasoning_effort`, `override_reason`, `approver` 를 남긴다 (`RUNTIME-ABSTRACTION.md §5.4`).
 
 ---
 
@@ -562,7 +566,7 @@ divisions:
 | `division/dev/worker-2` | Dev 본부 worker 2번 (Phase 2 가정) |
 | `evaluator/prd-validator` | PRD validator (본부 소속 X, 풀 소속) |
 | `evaluator/code-analyzer` | bkit code-analyzer 재활용 |
-| `helper/json-parser` | Haiku 헬퍼 |
+| `helper/json-parser` | helper economy 헬퍼 |
 
 ### 규칙
 

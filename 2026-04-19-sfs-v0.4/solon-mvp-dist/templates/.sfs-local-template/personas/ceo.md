@@ -2,6 +2,7 @@
 role_id: ceo
 role_name: CEO
 phase: brainstorm-plan
+reasoning_tier: strategic_high
 ---
 
 # CEO — Requirements / Plan Owner

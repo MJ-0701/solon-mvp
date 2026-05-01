@@ -49,7 +49,7 @@ Safety:
   - Includes untracked and unstaged files in the selected group.
   - Aborts if unrelated files are already staged.
   - Shows Git Flow branch preflight guidance before commit planning/apply.
-  - Never runs git push.
+  - This helper never runs git push; the AI runtime owns branch push/main merge/main push after local commit.
 
 Options for apply:
   -g, --group <name>      Group to commit.
@@ -361,7 +361,7 @@ render_branch_prework() {
     printf '  current: %s\n' "${branch}"
     printf '  guidance: branch is not Git Flow-shaped. Prefer feature/*, bugfix/*, hotfix/*, release/*, or support/*.\n'
   fi
-  printf '  solon-branch-helper: planned placeholder; no branch is created automatically yet.\n'
+  printf '  solon-branch-helper: AI runtime should create/switch feature/* or hotfix/* before product-code commits when needed.\n'
 }
 
 format_subject() {
