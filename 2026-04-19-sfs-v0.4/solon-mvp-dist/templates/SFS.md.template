@@ -1,12 +1,13 @@
 # SFS.md — `<PROJECT-NAME>` Solon SFS 운영 지침
 
 > 본 파일은 Claude Code, Codex, Gemini CLI 가 **공통으로 참조하는** Solon SFS 지침입니다.
+> SFS 는 **Solo Founder System** 의 약자입니다. Sprint flow 는 SFS 의 실행 메커니즘입니다.
 > `solon-product` 를 설치해서 생성됨 (`install.sh`). 프로젝트 특성에 맞게 자유롭게 편집.
 > Solon 은 multi-adaptor by design — 어떤 CLI 환경에서 호출하든 `sfs` runtime command 가
 > deterministic bash adapter 로 내려간다. `.sfs-local/` 은 state/config/custom override 영역이다.
 > Claude/Gemini/Codex entry point 는 `sfs agent install claude|gemini|codex|all` 로
 > 설치/갱신하는 thin adapter 이며, 실제 runtime 은 global `sfs` CLI 이다.
-> Solon 버전 갱신 후에는 uninstall/reinstall 대신 `sfs update` 로 project adapter/docs 를 갱신한다.
+> Solon 버전 갱신 후에는 uninstall/reinstall 대신 `sfs upgrade` 로 project adapter/docs 를 갱신한다.
 
 > Windows PowerShell 사용자는 Git for Windows 의 Git Bash 또는 WSL 에서 global `sfs` CLI 를
 > 실행한다. vendored layout 에서만 `.sfs-local\scripts\sfs.ps1 <command>` wrapper 를 fallback 으로 쓴다.

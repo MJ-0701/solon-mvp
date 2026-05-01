@@ -11,7 +11,8 @@ description: |
   start     새 sprint workspace 초기화 (bash adapter)
   guide     사용 맥락 브리핑/guide 출력
   auth      Codex/Claude/Gemini review executor 인증 확인/로그인
-  update    현재 설치된 Solon runtime 기준으로 project adapter/docs 갱신
+  upgrade   package manager runtime 최신화 + project adapter/docs 갱신
+  version   현재 설치 버전 확인 (`--check` 로 최신 product tag 비교)
   brainstorm G0 raw 요구사항/대화 맥락 기록
   plan      현재 sprint plan.md 작성/갱신 + G1 sprint contract refinement
   implement plan 기반 실제 코드 구현 + 테스트/evidence 기록
@@ -29,7 +30,7 @@ allowed-tools: Bash, Read, Write, Edit, Grep, Glob
 
 # Solon SFS Command
 
-You are running the Solon SFS workflow for this project.
+You are running the Solon SFS workflow for this project. SFS means **Solo Founder System**.
 
 ## Runtime Boundary — Solon Owns `/sfs`
 
@@ -124,14 +125,14 @@ $ARGUMENTS
 
 ## Adapter Dispatch (status / start / guide / auth / brainstorm / plan / implement / review / decision / report / retro / commit / loop) — execute first
 
-If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`update`**, **`brainstorm`**, **`plan`**, **`implement`**, **`review`**,
+If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`upgrade`**, **`update`**, **`version`**, **`brainstorm`**, **`plan`**, **`implement`**, **`review`**,
 **`decision`**, **`report`**, **`retro`**, **`commit`**, or **`loop`**, dispatch the request through the
 `sfs` runtime command first. The runtime normalizes command surfaces
 (`/sfs`, `$sfs`, `sfs`) and delegates to the deterministic bash adapter. In
 vendored layout only, `.sfs-local/scripts/sfs-dispatch.sh` is an acceptable fallback.
 
 Command modes:
-- **Bash-first**: `status`, `start`, `guide`, `auth`, `update`, `commit`, `loop`. Print verbatim
+- **Bash-first**: `status`, `start`, `guide`, `auth`, `upgrade`, `update`, `version`, `commit`, `loop`. Print verbatim
   adapter output first. A compact recap/status line is allowed when it helps
   the user see state and the next action, but adapter stdout remains SSoT.
 - **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`. Run the adapter,
@@ -184,7 +185,9 @@ Dispatch table:
 | `start`    | `sfs start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
 | `guide`    | `sfs guide <remaining args>`    | passes `--path` / `--print` verbatim; default prints a short context briefing |
 | `auth`     | `sfs auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
-| `update`   | `sfs update <remaining args>`   | updates managed project adapter/docs from the installed runtime; preserves sprint/decision/event history |
+| `upgrade`  | `sfs upgrade <remaining args>`  | upgrades package-manager runtime first, then updates managed project adapter/docs; preserves sprint/decision/event history |
+| `update`   | `sfs update <remaining args>`   | compatibility alias; prefer `upgrade` in new docs/responses |
+| `version`  | `sfs version <remaining args>`  | prints installed version; `--check` compares with the latest published product tag |
 | `brainstorm` | `sfs brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then Claude fills §1~§7 as Solon CEO |
 | `plan`     | `sfs plan <remaining args>`     | opens plan.md, then Claude fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
 | `implement` | `sfs implement <remaining args>` | opens implement.md/log.md, then Claude performs actual code changes with DDD/TDD guardrails and records evidence |
@@ -510,6 +513,8 @@ When showing usage, keep it compact and practical. Include this shape:
 /sfs start <goal>         새 sprint workspace 초기화
 /sfs guide                처음 사용 맥락 브리핑
 /sfs auth status          review executor 인증 상태 확인
+/sfs version --check      현재/최신 배포 버전 비교
+/sfs upgrade              runtime 최신화 + project adapter/docs 갱신
 /sfs brainstorm <context> G0 raw 기록 + CEO 맥락 정리
 /sfs plan                 현재 sprint plan.md 작성/갱신
 /sfs implement <slice>    plan 기반 실제 코드 구현 + 테스트/evidence 기록

@@ -1,3 +1,25 @@
+## [0.5.45-product] - 2026-05-01
+
+**Upgrade command UX and SFS naming.** SFS is now explicitly documented as
+Solo Founder System, while `sfs upgrade` becomes the recommended user-facing
+command for checking package-manager updates and refreshing project adapters.
+
+### Added
+
+- **`sfs version --check`** — prints the installed runtime version, the latest
+  published product tag, and whether an upgrade is available.
+- **Scoop-aware upgrade path** — `sfs upgrade` can self-upgrade Scoop installs
+  with `scoop update` + `scoop update sfs` before refreshing project files.
+- **SFS acronym definition** — README, GUIDE, SFS template, and agent adapters
+  now define SFS as Solo Founder System.
+
+### Changed
+
+- **`sfs upgrade` as the primary command** — promoted `upgrade` to the
+  recommended one-command path. `sfs update` remains a compatibility alias.
+- **User release discovery docs** — README now explains how users can notice new
+  releases through `sfs version --check`, Homebrew, or Scoop metadata.
+
 ## [0.5.44-product] - 2026-05-01
 
 **SFS document lifecycle and implement harness.** Sprint workbench documents now

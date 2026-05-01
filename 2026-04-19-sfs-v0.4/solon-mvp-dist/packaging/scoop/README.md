@@ -48,4 +48,6 @@ bucket can then be tested with:
 ```text
 scoop bucket add solon <our-bucket-url>
 scoop install sfs
+sfs version --check
+sfs upgrade
 ```

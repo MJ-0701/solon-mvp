@@ -14,22 +14,22 @@
 # Note: {{args}} 는 Gemini CLI v1 placeholder. 사용자가 입력한 첫 token 이 subcommand,
 #       나머지는 그 subcommand 의 인자로 그대로 전달.
 
-description = "Solon SFS workflow command — bash adapter SSoT; hybrid G0/G1/implement/ADR/report/G5 refinement; adapter-run CPO review"
+description = "Solon SFS (Solo Founder System) workflow command — bash adapter SSoT; hybrid G0/G1/implement/ADR/report/G5 refinement; adapter-run CPO review"
 
 prompt = """
-You are operating in a project that has Solon SFS installed.
+You are operating in a project that has Solon SFS installed. SFS means **Solo Founder System**.
 
 The user has invoked `/sfs {{args}}`. Treat the first whitespace-delimited
 token as the subcommand and the remainder as that subcommand's arguments.
 
 ## Behavior
 
-If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`update`**, **`brainstorm`**, **`plan`**, **`implement`**, **`review`**,
+If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`upgrade`**, **`update`**, **`version`**, **`brainstorm`**, **`plan`**, **`implement`**, **`review`**,
 **`decision`**, **`report`**, **`retro`**, **`commit`**, or **`loop`**, dispatch the request to the
 `sfs` runtime command first.
 
 Command modes:
-- **Bash-only**: `status`, `start`, `guide`, `auth`, `update`, `commit`, `loop`. Stop after
+- **Bash-only**: `status`, `start`, `guide`, `auth`, `upgrade`, `update`, `version`, `commit`, `loop`. Stop after
   verbatim adapter output.
 - **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`. Run the adapter,
   then perform the documented file refinement.
@@ -104,7 +104,9 @@ not create a new verdict in the current runtime.
 | `start`    | `sfs start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
 | `guide`    | `sfs guide <remaining args>`    | default context briefing; passes `--path` / `--print` verbatim |
 | `auth`     | `sfs auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
-| `update`   | `sfs update <remaining args>`   | updates managed project adapter/docs from the installed runtime; preserves sprint/decision/event history |
+| `upgrade`  | `sfs upgrade <remaining args>`  | upgrades package-manager runtime first, then updates managed project adapter/docs; preserves sprint/decision/event history |
+| `update`   | `sfs update <remaining args>`   | compatibility alias; prefer `upgrade` in new docs/responses |
+| `version`  | `sfs version <remaining args>`  | prints installed version; `--check` compares with the latest published product tag |
 | `brainstorm` | `sfs brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then fills §1~§7 as Solon CEO |
 | `plan`     | `sfs plan <remaining args>`     | opens plan.md, then fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
 | `implement` | `sfs implement <remaining args>` | opens implement.md/log.md, then performs actual code changes with DDD/TDD guardrails and records evidence |
@@ -306,8 +308,8 @@ Print the following 3-line usage and stop:
 
 ```
 Usage: /sfs <command> [args]
-Commands: status, start, guide, auth, brainstorm, plan, implement, review, decision, report, retro, commit, loop
-Help: bash .sfs-local/scripts/sfs-<command>.sh --help
+Commands: status, start, guide, auth, upgrade, version, brainstorm, plan, implement, review, decision, report, retro, commit, loop
+Help: sfs <command> --help
 ```
 
 ## ⚠️ Safety
