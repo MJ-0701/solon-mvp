@@ -169,13 +169,16 @@ set_model_profile_fields() {
   local runtime="$1" policy="$2" status="$3" confirmed_by="$4" confirmed_at="$5"
   local file="$TARGET/.sfs-local/model-profiles.yaml"
   [ -f "$file" ] || create_default_model_profile current current_model current_model_fallback
-  sed_inplace \
-    -e "s|^[[:space:]]*status:.*|  status: \"$status\"        # current_model_fallback | selected_at_install | confirmed | review_required|g" \
-    -e "s|^[[:space:]]*selected_runtime:.*|  selected_runtime: \"$runtime\"   # current | claude | codex | gemini | custom|g" \
-    -e "s|^[[:space:]]*selected_policy:.*|  selected_policy: \"$policy\"       # current_model | solon_recommended | all_high | custom|g" \
-    -e "s|^[[:space:]]*confirmed_by:.*|  confirmed_by: \"$confirmed_by\"|g" \
-    -e "s|^[[:space:]]*confirmed_at:.*|  confirmed_at: \"$confirmed_at\"|g" \
-    "$file" 2>/dev/null || true
+  if ! sed_inplace \
+    -e "s@^[[:space:]]*status:.*@  status: \"$status\"        # current_model_fallback | selected_at_install | confirmed | review_required@g" \
+    -e "s@^[[:space:]]*selected_runtime:.*@  selected_runtime: \"$runtime\"   # current | claude | codex | gemini | custom@g" \
+    -e "s@^[[:space:]]*selected_policy:.*@  selected_policy: \"$policy\"       # current_model | solon_recommended | all_high | custom@g" \
+    -e "s@^[[:space:]]*confirmed_by:.*@  confirmed_by: \"$confirmed_by\"@g" \
+    -e "s@^[[:space:]]*confirmed_at:.*@  confirmed_at: \"$confirmed_at\"@g" \
+    "$file"; then
+    warn "agent model profile 저장 실패: $file"
+    return 1
+  fi
 }
 
 maybe_prompt_model_profile() {
