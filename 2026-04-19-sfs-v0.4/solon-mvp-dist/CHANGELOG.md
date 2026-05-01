@@ -1,4 +1,4 @@
-## [Unreleased]
+## [0.5.42-product] - 2026-05-01
 
 **Windows Scoop packaging path.** The distribution now carries Scoop manifest
 scaffolding, Windows PATH wrappers, and a `windows-latest` smoke workflow that
