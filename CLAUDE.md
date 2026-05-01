@@ -30,7 +30,7 @@
 - [ ] 대화형 충돌 처리 4 옵션 (s/b/o/d) 전부 동작
 
 ### templates/ 변경 시
-- [ ] placeholder 형식 유지 (`<PROJECT-NAME>` / `<DATE>` / `<STACK>` / `<DEPLOY>` / `<DOMAIN>` 등)
+- [ ] placeholder 형식 유지 (`<PROJECT-NAME>` / `<DATE>` / `<PROJECT-TYPE>` / `<PROJECT-ENVIRONMENT>` 등)
 - [ ] 도메인 특화 제거 — `solon-mvp` 는 도메인 중립 (관리자페이지/SaaS 등 특정 도메인 기술 금지)
 - [ ] 외부 Solon docset 경로 / 파일명 하드코딩 금지
 

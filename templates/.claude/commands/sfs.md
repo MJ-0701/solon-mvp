@@ -11,6 +11,7 @@ description: |
   start     새 sprint workspace 초기화 (bash adapter)
   guide     사용 맥락 브리핑/guide 출력
   auth      Codex/Claude/Gemini review executor 인증 확인/로그인
+  profile   SFS.md 프로젝트 개요만 좁게 감지/보정
   upgrade   package manager runtime 최신화 + project adapter/docs 갱신
   version   현재 설치 버전 확인 (`--check` 로 최신 product tag 비교)
   brainstorm G0 raw 요구사항/대화 맥락 기록
@@ -67,7 +68,7 @@ for the documented hybrid/conditional flows below.
 
 ### Solon Report Output Rule
 
-For hybrid commands (`brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`) and adapter-run
+For hybrid commands (`profile`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`) and adapter-run
 `review`, the final answer must be a **Solon report**, not a plain bullet list
 such as `plan.md refined: ...`. Put the whole report in a fenced `text` block.
 Render the report in the user's visible language (for example, Korean for a
@@ -124,9 +125,9 @@ token as the subcommand and the remainder as that subcommand's arguments.
 $ARGUMENTS
 ```
 
-## Adapter Dispatch (status / start / guide / auth / brainstorm / plan / implement / review / decision / report / tidy / retro / commit / loop) — execute first
+## Adapter Dispatch (status / start / guide / auth / profile / brainstorm / plan / implement / review / decision / report / tidy / retro / commit / loop) — execute first
 
-If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`upgrade`**, **`update`**, **`version`**, **`brainstorm`**, **`plan`**, **`implement`**, **`review`**,
+If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`profile`**, **`upgrade`**, **`update`**, **`version`**, **`brainstorm`**, **`plan`**, **`implement`**, **`review`**,
 **`decision`**, **`report`**, **`tidy`**, **`retro`**, **`commit`**, or **`loop`**, dispatch the request through the
 `sfs` runtime command first. The runtime normalizes command surfaces
 (`/sfs`, `$sfs`, `sfs`) and delegates to the deterministic bash adapter. In
@@ -139,6 +140,8 @@ Command modes:
 - **Conditional hybrid**: `tidy`. Run the adapter first. If it created or
   touched `report.md`, read archived workbench/tmp sources and refine the
   report before answering.
+- **Narrow hybrid**: `profile`. Run the adapter first. Read only the files
+  allowed by adapter stdout and edit only `SFS.md` `## 프로젝트 개요`.
 - **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`. Run the adapter,
   then perform the documented file refinement.
 - **Adapter-run**: `review`. The bash adapter executes the selected CPO
@@ -189,6 +192,7 @@ Dispatch table:
 | `start`    | `sfs start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
 | `guide`    | `sfs guide <remaining args>`    | passes `--path` / `--print` verbatim; default prints a short context briefing |
 | `auth`     | `sfs auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
+| `profile`  | `sfs profile <remaining args>`  | SFS.md 프로젝트 개요 전용. 기본은 좁은 agent task 출력 후 해당 섹션만 refinement, `--apply` 는 shell-only quick apply |
 | `upgrade`  | `sfs upgrade <remaining args>`  | upgrades package-manager runtime first, then updates managed project adapter/docs; preserves sprint/decision/event history |
 | `update`   | `sfs update <remaining args>`   | compatibility alias; prefer `upgrade` in new docs/responses |
 | `version`  | `sfs version <remaining args>`  | prints installed version; `--check` compares with the latest published product tag |
@@ -223,6 +227,8 @@ Procedure (apply in order):
      `3`=not a git repo, `99`=unknown.
    - auth: `0`=ok, `1`=no `.sfs-local/`, `7`=unknown CLI flag or missing
      executor for login/probe, `9`=auth missing/bootstrap failed, `99`=unknown.
+   - profile: `0`=ok, `1`=SFS.md missing/apply failed, `7`=usage,
+     `99`=unknown.
    - start: `0`=ok, `1`=sprint id conflict (suggest `--force`), `4`=templates
      missing, `5`=permission, `99`=unknown.
    - guide: `0`=ok, `1`=no `.sfs-local/`, `4`=guide missing,
@@ -266,6 +272,7 @@ Procedure (apply in order):
    The bash script is the single source of truth for command output. Hybrid
    commands continue only via the documented flow below:
    - `brainstorm` → Brainstorm CEO Refinement
+   - `profile` → Project Profile Refinement
    - `plan` → Plan G1 Refinement
    - `implement` → Implementation Execution
    - `decision` → Decision ADR Refinement
@@ -276,6 +283,23 @@ Procedure (apply in order):
    - `review` → Review CPO Handling. Use adapter stdout as metadata, read the
      recorded result path when present, then render a localized Solon report
      from recorded adapter/executor evidence only. Do not echo raw result bodies.
+
+## Project Profile Refinement
+
+`/sfs profile` is a narrow project-overview command. After the bash adapter
+succeeds and stdout has been shown verbatim:
+
+1. Use adapter stdout as the scope contract. Read only files listed under
+   `allowed_read` that actually exist. Do not read sprint files, source files
+   outside the listed config/readme paths, git history, or unrelated docs.
+2. Update only `SFS.md` from `## 프로젝트 개요` until the next `## ` heading.
+   Do not edit code, sprint artifacts, decisions, or runtime adapter files.
+3. Fill name/type/stage/environment/output/delivery from deterministic detection
+   plus the minimal allowed files. Keep unknown values as placeholders.
+4. If `--apply` was used, the adapter already wrote the section. Stop after
+   adapter output unless a compact recap helps.
+5. Final response: render a Solon report. Include `SFS.md` in `Files`,
+   `Review: n/a`, and `Next: /sfs start ...` or `Next: continue current Solon flow`.
 
 ## Brainstorm CEO Refinement
 

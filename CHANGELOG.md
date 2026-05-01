@@ -1,3 +1,31 @@
+## [0.5.49-product] - 2026-05-01
+
+**Make agent model onboarding runtime-neutral.** `sfs init --yes` and
+`sfs upgrade --yes` now stay non-interactive and keep `current_model` fallback,
+while interactive setup exposes Claude, Codex, and Gemini recommended profiles
+as first-class choices.
+
+### Changed
+
+- **Installer model profile UX** — pure-terminal users now see skip/current as
+  the safe default, with explicit Claude, Codex, Gemini, all-high, and custom
+  choices in interactive mode.
+- **Install-time confirmation metadata** — non-fallback selections made during
+  `sfs init` now populate `confirmed_by` and `confirmed_at`, so later guards do
+  not treat the freshly selected profile as unconfirmed.
+- **Non-interactive install/upgrade** — `--yes` no longer stops for the model
+  profile question unless `SFS_MODEL_RUNTIME` or `SFS_MODEL_POLICY` is supplied.
+- **Model profile confirmation** — `selected_at_install` profiles are treated as
+  configured, even when `confirmed_by` is blank, so upgrade does not ask the same
+  model question again immediately after install.
+- **Project profile inference** — install/upgrade now fill the top `SFS.md`
+  project overview from common config/docs locations and keep placeholders only
+  for fields that cannot be inferred.
+- **`sfs profile` command** — AI runtimes get a dedicated narrow task for
+  refreshing only `SFS.md` `## 프로젝트 개요`, avoiding broad context reads.
+- **Same-version refresh** — `sfs upgrade` no longer exits before refreshing
+  stale managed docs/adapters when the installed version already matches.
+
 ## [0.5.48-product] - 2026-05-01
 
 **Persist agent model profile selections.** Fixes a regression where choosing

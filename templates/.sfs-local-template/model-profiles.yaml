@@ -15,8 +15,8 @@ configuration:
   status: "<MODEL-PROFILE-STATUS>"        # current_model_fallback | selected_at_install | confirmed | review_required
   selected_runtime: "<DEFAULT-RUNTIME>"   # current | claude | codex | gemini | custom
   selected_policy: "<MODEL-POLICY>"       # current_model | solon_recommended | all_high | custom
-  confirmed_by: ""
-  confirmed_at: ""
+  confirmed_by: "<MODEL-CONFIRMED-BY>"
+  confirmed_at: "<MODEL-CONFIRMED-AT>"
   note: "If this stays unconfigured, Solon uses the user's current runtime/model. When asked about agent/model settings in this state, the AI must say it is unconfirmed fallback and ask which policy to apply."
 
 reasoning_tiers:

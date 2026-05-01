@@ -28,7 +28,8 @@ Usage: ./install.sh [--yes] [--layout thin|vendored]
 
 Options:
   -y, --yes           모든 확인 프롬프트를 자동 승인합니다.
-                      파일 충돌 시에는 안전한 기본값(skip)을 사용합니다.
+                      파일 충돌 시에는 안전한 기본값(skip)을 사용하고,
+                      agent/model profile 은 current_model fallback 으로 둡니다.
   --layout thin       프로젝트에는 state/config/custom override 만 설치합니다.
                       runtime 은 PATH 의 global `sfs` CLI 를 사용합니다.
   --layout vendored   기존 방식입니다. scripts/templates/personas 를 프로젝트에 복사합니다.
@@ -38,6 +39,7 @@ Environment:
   SFS_MODEL_RUNTIME   current|claude|codex|gemini|custom (default: current)
   SFS_MODEL_POLICY    current_model|solon_recommended|all_high|custom (default: current_model)
   SFS_MODEL_PROFILE_PROMPT=0  agent/model fallback 질문을 이번 install 에서 숨김
+  SFS_PROJECT_PROFILE_PROMPT=0  프로젝트 개요 미감지 필드 질문을 이번 install 에서 숨김
 EOF
 }
 
@@ -157,6 +159,204 @@ tty_available() {
   [ -r /dev/tty ] && { : < /dev/tty; } 2>/dev/null
 }
 
+sed_escape() {
+  printf '%s' "$1" | sed 's/[&|\\]/\\&/g'
+}
+
+pkg_has() {
+  local name="$1"
+  [ -f "$TARGET/package.json" ] || return 1
+  grep -Eq "\"${name}\"[[:space:]]*:" "$TARGET/package.json" 2>/dev/null
+}
+
+append_project_environment() {
+  local part="$1"
+  [ -n "$part" ] || return 0
+  case " + $PROJECT_ENVIRONMENT + " in
+    *" + $part + "*) return 0 ;;
+  esac
+  if [ -z "$PROJECT_ENVIRONMENT" ]; then
+    PROJECT_ENVIRONMENT="$part"
+  else
+    PROJECT_ENVIRONMENT="$PROJECT_ENVIRONMENT + $part"
+  fi
+}
+
+detect_project_profile() {
+  PROJECT_TYPE="<PROJECT-TYPE>"
+  PROJECT_STAGE="Solon 운영 도입 초기"
+  PROJECT_ENVIRONMENT=""
+  PROJECT_DATA=""
+  PROJECT_OUTPUT="<PROJECT-OUTPUT>"
+  PROJECT_DELIVERY=""
+
+  if [ -f "$TARGET/package.json" ]; then
+    PROJECT_TYPE="소프트웨어/웹 제품"
+    append_project_environment "Node.js"
+    if [ -f "$TARGET/tsconfig.json" ] || pkg_has typescript; then
+      append_project_environment "TypeScript"
+    fi
+    if pkg_has next || [ -f "$TARGET/next.config.js" ] || [ -f "$TARGET/next.config.mjs" ] || [ -f "$TARGET/next.config.ts" ]; then
+      append_project_environment "Next.js"
+      PROJECT_OUTPUT="웹 앱"
+    elif pkg_has vite || [ -f "$TARGET/vite.config.js" ] || [ -f "$TARGET/vite.config.ts" ]; then
+      append_project_environment "Vite"
+      PROJECT_OUTPUT="웹 앱"
+    elif pkg_has react; then
+      append_project_environment "React"
+      PROJECT_OUTPUT="웹 앱"
+    elif pkg_has vue; then
+      append_project_environment "Vue"
+      PROJECT_OUTPUT="웹 앱"
+    elif pkg_has svelte; then
+      append_project_environment "Svelte"
+      PROJECT_OUTPUT="웹 앱"
+    else
+      PROJECT_OUTPUT="Node.js 앱"
+    fi
+    if pkg_has tailwindcss || [ -f "$TARGET/tailwind.config.js" ] || [ -f "$TARGET/tailwind.config.ts" ]; then
+      append_project_environment "Tailwind CSS"
+    fi
+    if pkg_has prisma || [ -f "$TARGET/prisma/schema.prisma" ]; then
+      append_project_environment "Prisma"
+      PROJECT_DATA="Prisma"
+    elif pkg_has drizzle-orm || [ -f "$TARGET/drizzle.config.ts" ] || [ -f "$TARGET/drizzle.config.js" ]; then
+      append_project_environment "Drizzle"
+      PROJECT_DATA="Drizzle"
+    fi
+  fi
+
+  if [ -f "$TARGET/prisma/schema.prisma" ]; then
+    if grep -Eq 'provider[[:space:]]*=[[:space:]]*"postgresql"' "$TARGET/prisma/schema.prisma" 2>/dev/null; then
+      append_project_environment "Postgres"; PROJECT_DATA="${PROJECT_DATA:+$PROJECT_DATA + }Postgres"
+    elif grep -Eq 'provider[[:space:]]*=[[:space:]]*"mysql"' "$TARGET/prisma/schema.prisma" 2>/dev/null; then
+      append_project_environment "MySQL"; PROJECT_DATA="${PROJECT_DATA:+$PROJECT_DATA + }MySQL"
+    elif grep -Eq 'provider[[:space:]]*=[[:space:]]*"sqlite"' "$TARGET/prisma/schema.prisma" 2>/dev/null; then
+      append_project_environment "SQLite"; PROJECT_DATA="${PROJECT_DATA:+$PROJECT_DATA + }SQLite"
+    elif grep -Eq 'provider[[:space:]]*=[[:space:]]*"mongodb"' "$TARGET/prisma/schema.prisma" 2>/dev/null; then
+      append_project_environment "MongoDB"; PROJECT_DATA="${PROJECT_DATA:+$PROJECT_DATA + }MongoDB"
+    fi
+  fi
+
+  if [ -f "$TARGET/pyproject.toml" ] || [ -f "$TARGET/requirements.txt" ]; then
+    [ "$PROJECT_TYPE" = "<PROJECT-TYPE>" ] && PROJECT_TYPE="소프트웨어/Python 프로젝트"
+    append_project_environment "Python"
+    PROJECT_OUTPUT="${PROJECT_OUTPUT#<PROJECT-OUTPUT>}"
+    [ -z "$PROJECT_OUTPUT" ] && PROJECT_OUTPUT="Python 앱"
+    if grep -Eiq 'fastapi' "$TARGET/pyproject.toml" "$TARGET/requirements.txt" 2>/dev/null; then
+      append_project_environment "FastAPI"
+      PROJECT_OUTPUT="API 서비스"
+    elif grep -Eiq 'django' "$TARGET/pyproject.toml" "$TARGET/requirements.txt" 2>/dev/null; then
+      append_project_environment "Django"
+      PROJECT_OUTPUT="웹 앱"
+    elif grep -Eiq 'flask' "$TARGET/pyproject.toml" "$TARGET/requirements.txt" 2>/dev/null; then
+      append_project_environment "Flask"
+      PROJECT_OUTPUT="웹/API 앱"
+    elif grep -Eiq 'streamlit' "$TARGET/pyproject.toml" "$TARGET/requirements.txt" 2>/dev/null; then
+      append_project_environment "Streamlit"
+      PROJECT_OUTPUT="데이터 앱"
+    fi
+  fi
+
+  if [ -f "$TARGET/Cargo.toml" ]; then
+    [ "$PROJECT_TYPE" = "<PROJECT-TYPE>" ] && PROJECT_TYPE="소프트웨어/Rust 프로젝트"
+    append_project_environment "Rust"
+    [ "$PROJECT_OUTPUT" = "<PROJECT-OUTPUT>" ] && PROJECT_OUTPUT="Rust 앱"
+  fi
+  if [ -f "$TARGET/go.mod" ]; then
+    [ "$PROJECT_TYPE" = "<PROJECT-TYPE>" ] && PROJECT_TYPE="소프트웨어/Go 프로젝트"
+    append_project_environment "Go"
+    [ "$PROJECT_OUTPUT" = "<PROJECT-OUTPUT>" ] && PROJECT_OUTPUT="Go 앱"
+  fi
+  if [ -f "$TARGET/Gemfile" ]; then
+    [ "$PROJECT_TYPE" = "<PROJECT-TYPE>" ] && PROJECT_TYPE="소프트웨어/Ruby 프로젝트"
+    append_project_environment "Ruby"
+    [ "$PROJECT_OUTPUT" = "<PROJECT-OUTPUT>" ] && PROJECT_OUTPUT="Ruby 앱"
+  fi
+  if [ -f "$TARGET/pom.xml" ] || [ -f "$TARGET/build.gradle" ] || [ -f "$TARGET/build.gradle.kts" ]; then
+    [ "$PROJECT_TYPE" = "<PROJECT-TYPE>" ] && PROJECT_TYPE="소프트웨어/JVM 프로젝트"
+    append_project_environment "JVM"
+    [ "$PROJECT_OUTPUT" = "<PROJECT-OUTPUT>" ] && PROJECT_OUTPUT="JVM 앱"
+  fi
+
+  if [ -f "$TARGET/vercel.json" ]; then
+    PROJECT_DELIVERY="Vercel"
+  elif [ -f "$TARGET/netlify.toml" ]; then
+    PROJECT_DELIVERY="Netlify"
+  elif [ -f "$TARGET/wrangler.toml" ]; then
+    PROJECT_DELIVERY="Cloudflare"
+  elif [ -f "$TARGET/firebase.json" ]; then
+    PROJECT_DELIVERY="Firebase"
+  elif [ -f "$TARGET/Dockerfile" ] || [ -f "$TARGET/docker-compose.yml" ] || [ -f "$TARGET/compose.yml" ]; then
+    PROJECT_DELIVERY="Docker"
+  fi
+
+  if [ -d "$TARGET/docs" ] || ls "$TARGET"/*.md >/dev/null 2>&1; then
+    if [ "$PROJECT_TYPE" = "<PROJECT-TYPE>" ]; then
+      PROJECT_TYPE="문서/지식 작업공간"
+      append_project_environment "Markdown/Git 작업공간"
+      PROJECT_OUTPUT="문서/운영 기록"
+      PROJECT_DELIVERY="${PROJECT_DELIVERY:-Git 또는 문서 공유}"
+    fi
+  fi
+
+  [ -n "$PROJECT_ENVIRONMENT" ] || PROJECT_ENVIRONMENT="<PROJECT-ENVIRONMENT>"
+  [ -n "$PROJECT_DATA" ] || PROJECT_DATA="<PROJECT-DATA>"
+  [ -n "$PROJECT_DELIVERY" ] || PROJECT_DELIVERY="<PROJECT-DELIVERY>"
+}
+
+profile_placeholder() {
+  case "${1:-}" in
+    ""|"<"*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+fill_missing_project_profile_interactive() {
+  [ "$ASSUME_YES" -eq 0 ] || return 0
+  [ "${SFS_PROJECT_PROFILE_PROMPT:-1}" != "0" ] || return 0
+
+  if profile_placeholder "$PROJECT_TYPE" \
+    || profile_placeholder "$PROJECT_ENVIRONMENT" \
+    || profile_placeholder "$PROJECT_OUTPUT" \
+    || profile_placeholder "$PROJECT_DELIVERY"; then
+    info ""
+    info "Project profile setup..."
+    cat <<'EOF'
+Solon 이 SFS.md 프로젝트 개요를 감지값으로 채웁니다.
+비워두면 placeholder 를 유지합니다. 나중에 AI runtime 에서 `sfs profile` 로 이 작업만 다시 맡길 수 있습니다.
+EOF
+  fi
+
+  local answer
+  if profile_placeholder "$PROJECT_TYPE"; then
+    answer=$(prompt "프로젝트 유형? (예: 웹 제품 / 문서 운영 / 내부 자동화)" "")
+    [ -n "$answer" ] && PROJECT_TYPE="$answer"
+  fi
+  if profile_placeholder "$PROJECT_ENVIRONMENT"; then
+    answer=$(prompt "환경? (기술 stack, 문서 도구, 협업 환경 등)" "")
+    [ -n "$answer" ] && PROJECT_ENVIRONMENT="$answer"
+  fi
+  if profile_placeholder "$PROJECT_OUTPUT"; then
+    answer=$(prompt "핵심 산출물? (예: 웹 앱 / API / 문서 / playbook)" "")
+    [ -n "$answer" ] && PROJECT_OUTPUT="$answer"
+  fi
+  if profile_placeholder "$PROJECT_DELIVERY"; then
+    answer=$(prompt "공유/운영 방식? (예: Vercel / GitHub / 로컬 문서)" "")
+    [ -n "$answer" ] && PROJECT_DELIVERY="$answer"
+  fi
+}
+
+prepare_project_profile_replacements() {
+  PROJECT_NAME_REPL=$(sed_escape "$PROJECT_NAME")
+  PROJECT_TYPE_REPL=$(sed_escape "$PROJECT_TYPE")
+  PROJECT_STAGE_REPL=$(sed_escape "$PROJECT_STAGE")
+  PROJECT_ENVIRONMENT_REPL=$(sed_escape "$PROJECT_ENVIRONMENT")
+  PROJECT_DATA_REPL=$(sed_escape "$PROJECT_DATA")
+  PROJECT_OUTPUT_REPL=$(sed_escape "$PROJECT_OUTPUT")
+  PROJECT_DELIVERY_REPL=$(sed_escape "$PROJECT_DELIVERY")
+}
+
 prompt_model_always() {
   local msg="$1" default="${2:-}" answer
   if [ -t 0 ]; then
@@ -181,18 +381,22 @@ Agent model profile:
   예: 설계/판단 agent 는 더 강한 모델, 코드 구현 agent 는 표준 모델, 단순 정리 helper 는 가벼운 모델.
 
   지금 꼭 정하지 않아도 됩니다.
-  건너뛰면 current_model fallback 으로 설치하고, 현재 Claude/Codex/Gemini 에서 사용자가
-  선택한 모델을 그대로 씁니다. 나중에 다시 설정할 수 있고, 다음 upgrade 때도 다시 안내합니다.
+  건너뛰면 current_model fallback 으로 설치하고, 현재 실행 환경에서 사용자가 선택한 모델을
+  그대로 씁니다. 순수 터미널에서 실행 중이면 2번이 가장 안전합니다. 나중에 Claude/Codex/Gemini
+  중 실제로 쓸 runtime 기준으로 다시 설정할 수 있고, 다음 upgrade 때도 다시 안내합니다.
 
   선택지:
-    1. Claude 권장: 설계/평가 Opus 4.7, 구현 Sonnet 4.6, helper Haiku
+    1. Claude 권장: 설계/평가 Opus 4.7, 구현 Sonnet 4.6, helper Haiku (가장 흔한 기본값)
     2. 지금 설정 안 함: current_model fallback 유지 (처음이면 이걸 골라도 안전)
-    3. all_high: 모든 agent/helper 를 high-end 로 설정 (품질 우선, 비용/지연 증가 가능)
-    4. custom/manual: 직접 모델 profile 작성
+    3. Codex 권장: 설계/평가 GPT-5.5 high reasoning, 구현 GPT-5.5 medium, helper mini/low
+    4. Gemini 권장: 설계/평가 high reasoning, 구현 balanced, helper flash/economy
+    5. all_high: 모든 agent/helper 를 high-end 로 설정 (품질 우선, 비용/지연 증가 가능)
+    6. custom/manual: 직접 모델 profile 작성
 
-  Codex/Claude 가 대신 실행 중인 경우:
-    위 설명과 선택지를 사용자에게 보여주고 번호를 물어보세요.
-    사용자가 "지금 설정 안 함" 이라고 하면 current_model fallback 으로 두고 계속 진행하면 됩니다.
+  순수 터미널이면 번호만 직접 입력하면 됩니다.
+  Claude/Codex/Gemini 같은 AI runtime 이 대신 실행 중이면 이 설명과 선택지를 사용자에게 보여주고
+  번호를 받아 적용하세요. 사용자가 "지금 설정 안 함" 이라고 하면 current_model fallback 으로 두고
+  계속 진행하면 됩니다.
 EOF
 }
 
@@ -206,6 +410,12 @@ choose_initial_model_profile() {
     return 0
   fi
 
+  if [ "$ASSUME_YES" -eq 1 ]; then
+    warn "--yes 활성화 — agent model profile 은 current_model fallback 으로 설치"
+    warn "    나중에 sfs upgrade 또는 .sfs-local/model-profiles.yaml 편집으로 Claude/Codex/Gemini profile 을 확정할 수 있습니다."
+    return 0
+  fi
+
   print_model_profile_question
   if ! tty_available; then
     warn "대화형 입력 불가 — current_model fallback 으로 설치"
@@ -214,7 +424,7 @@ choose_initial_model_profile() {
   fi
 
   local choice runtime
-  choice="$(prompt_model_always "agent model profile 선택? (1/2/3/4, 처음이면 2 권장)" "2")"
+  choice="$(prompt_model_always "agent model profile 선택? (1/2/3/4/5/6, 처음이면 2 권장)" "2")"
   case "$choice" in
     1)
       MODEL_RUNTIME="claude"
@@ -227,16 +437,26 @@ choose_initial_model_profile() {
       MODEL_PROFILE_STATUS="current_model_fallback"
       ;;
     3)
-      runtime="$(prompt_model_always "all_high 를 적용할 runtime? (claude/codex/gemini/custom/current)" "claude")"
+      MODEL_RUNTIME="codex"
+      MODEL_POLICY="solon_recommended"
+      MODEL_PROFILE_STATUS="selected_at_install"
+      ;;
+    4)
+      MODEL_RUNTIME="gemini"
+      MODEL_POLICY="solon_recommended"
+      MODEL_PROFILE_STATUS="selected_at_install"
+      ;;
+    5)
+      runtime="$(prompt_model_always "all_high 를 적용할 runtime? (current/claude/codex/gemini/custom)" "current")"
       case "$runtime" in
-        claude|codex|gemini|custom|current) ;;
+        current|claude|codex|gemini|custom) ;;
         *) warn "알 수 없는 runtime='$runtime' — current 로 기록"; runtime="current" ;;
       esac
       MODEL_RUNTIME="$runtime"
       MODEL_POLICY="all_high"
       MODEL_PROFILE_STATUS="selected_at_install"
       ;;
-    4)
+    6)
       MODEL_RUNTIME="custom"
       MODEL_POLICY="custom"
       MODEL_PROFILE_STATUS="review_required"
@@ -306,6 +526,11 @@ fi
 
 if [ "$ASSUME_YES" -eq 1 ]; then
   info "--yes 활성화: 확인 프롬프트를 자동 승인하고, 충돌 시 기본값을 사용합니다."
+  if [ -n "${SFS_MODEL_RUNTIME:-}" ] || [ -n "${SFS_MODEL_POLICY:-}" ]; then
+    info "agent/model profile 질문은 생략하고 SFS_MODEL_RUNTIME/SFS_MODEL_POLICY 값을 적용합니다."
+  else
+    info "agent/model profile 질문은 생략하고 current_model fallback 으로 설치합니다."
+  fi
 else
   info "입력 필요: 계속 설치하려면 'y' 를 입력하고 Enter 를 누르세요."
 fi
@@ -355,9 +580,27 @@ if [ ! -d .git ]; then
   fi
 fi
 
+detect_project_profile
+fill_missing_project_profile_interactive
+prepare_project_profile_replacements
+ok "project profile 감지: type=$PROJECT_TYPE, environment=$PROJECT_ENVIRONMENT, output=$PROJECT_OUTPUT, delivery=$PROJECT_DELIVERY"
+
 MODEL_RUNTIME="${SFS_MODEL_RUNTIME:-current}"
 MODEL_POLICY="${SFS_MODEL_POLICY:-current_model}"
 MODEL_PROFILE_STATUS="current_model_fallback"
+MODEL_CONFIRMED_BY=""
+MODEL_CONFIRMED_AT=""
+MODEL_PROFILE_SOURCE="sfs init"
+
+if [ -n "${SFS_MODEL_RUNTIME:-}" ] || [ -n "${SFS_MODEL_POLICY:-}" ]; then
+  MODEL_PROFILE_SOURCE="sfs init env"
+  if [ -n "${SFS_MODEL_RUNTIME:-}" ] && [ -z "${SFS_MODEL_POLICY:-}" ] && [ "$MODEL_RUNTIME" != "current" ]; then
+    MODEL_POLICY="solon_recommended"
+  fi
+  if [ "$MODEL_POLICY" != "current_model" ]; then
+    MODEL_PROFILE_STATUS="selected_at_install"
+  fi
+fi
 
 info ""
 info "Agent model profile setup..."
@@ -400,9 +643,20 @@ case "$MODEL_POLICY" in
     ;;
 esac
 
+if [ "$MODEL_POLICY" = "current_model" ]; then
+  MODEL_PROFILE_STATUS="current_model_fallback"
+elif [ "$MODEL_PROFILE_STATUS" = "current_model_fallback" ]; then
+  MODEL_PROFILE_STATUS="selected_at_install"
+fi
+
 if [ "$MODEL_PROFILE_STATUS" != "review_required" ] \
    && { [ "$MODEL_RUNTIME" != "current" ] || [ "$MODEL_POLICY" != "current_model" ]; }; then
   MODEL_PROFILE_STATUS="selected_at_install"
+fi
+
+if [ "$MODEL_PROFILE_STATUS" = "selected_at_install" ]; then
+  MODEL_CONFIRMED_BY="$MODEL_PROFILE_SOURCE"
+  MODEL_CONFIRMED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 fi
 ok "model profile 선택: runtime=$MODEL_RUNTIME, policy=$MODEL_POLICY, status=$MODEL_PROFILE_STATUS"
 
@@ -466,7 +720,7 @@ install_file() {
 }
 
 info ""
-info "파일 설치 (대화형)..."
+info "파일 설치..."
 
 # 6.1) Runtime-neutral SFS core + adapter files
 install_file "templates/SFS.md.template" "SFS.md" "공통 SFS 지침"
@@ -504,7 +758,6 @@ install_file "templates/.agents/skills/sfs/SKILL.md" ".agents/skills/sfs/SKILL.m
 ok "Codex custom prompt fallback (optional/legacy): templates/.codex/prompts/sfs.md → ~/.codex/prompts/sfs.md (manual cp, if supported)"
 
 # 6.3) 자동 치환 가능한 placeholder 처리
-# <PROJECT-NAME> / <STACK> / <DB> / <DEPLOY> / <DOMAIN> 등은 consumer 수동 치환 대상.
 SOLON_VERSION_VAL=$(cat "$SOURCE_DIR/VERSION" 2>/dev/null | head -1 || echo "unknown")
 TODAY=$(date +%Y-%m-%d)
 if [ "$(uname)" = "Darwin" ]; then
@@ -517,10 +770,21 @@ for auto_file in "$TARGET/SFS.md" "$TARGET/CLAUDE.md" "$TARGET/AGENTS.md" "$TARG
     "${SED_INPLACE[@]}" \
       -e "s|<DATE>|$TODAY|g" \
       -e "s|<SOLON-VERSION>|$SOLON_VERSION_VAL|g" \
+      -e "s|<PROJECT-NAME>|$PROJECT_NAME_REPL|g" \
+      -e "s|<PROJECT-TYPE>|$PROJECT_TYPE_REPL|g" \
+      -e "s|<PROJECT-STAGE>|$PROJECT_STAGE_REPL|g" \
+      -e "s|<PROJECT-ENVIRONMENT>|$PROJECT_ENVIRONMENT_REPL|g" \
+      -e "s|<PROJECT-DATA>|$PROJECT_DATA_REPL|g" \
+      -e "s|<PROJECT-OUTPUT>|$PROJECT_OUTPUT_REPL|g" \
+      -e "s|<PROJECT-DELIVERY>|$PROJECT_DELIVERY_REPL|g" \
+      -e "s|<DOMAIN>|$PROJECT_TYPE_REPL|g" \
+      -e "s|<STACK>|$PROJECT_ENVIRONMENT_REPL|g" \
+      -e "s|<DB>|$PROJECT_DATA_REPL|g" \
+      -e "s|<DEPLOY>|$PROJECT_DELIVERY_REPL|g" \
       "$auto_file" 2>/dev/null || true
   fi
 done
-ok "문서 자동 치환: <DATE>=$TODAY, <SOLON-VERSION>=$SOLON_VERSION_VAL"
+ok "문서 자동 치환: <DATE>=$TODAY, <SOLON-VERSION>=$SOLON_VERSION_VAL, project profile"
 
 # ============================================================================
 # 7. .sfs-local/ 스캐폴드 (merge 모드)
@@ -568,12 +832,14 @@ if [ ! -f "$TARGET/.sfs-local/model-profiles.yaml" ]; then
   "${SED_INPLACE[@]}" \
     -e "s|<DATE>|$TODAY|g" \
     -e "s|<SOLON-VERSION>|$SOLON_VERSION_VAL|g" \
-    -e "s|<PROJECT-NAME>|$PROJECT_NAME|g" \
+    -e "s|<PROJECT-NAME>|$PROJECT_NAME_REPL|g" \
     -e "s|<DEFAULT-RUNTIME>|$MODEL_RUNTIME|g" \
     -e "s|<MODEL-POLICY>|$MODEL_POLICY|g" \
     -e "s|<MODEL-PROFILE-STATUS>|$MODEL_PROFILE_STATUS|g" \
+    -e "s|<MODEL-CONFIRMED-BY>|$MODEL_CONFIRMED_BY|g" \
+    -e "s|<MODEL-CONFIRMED-AT>|$MODEL_CONFIRMED_AT|g" \
     "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null || true
-  ok "  model-profiles.yaml 생성 (agent별 Claude/Codex/Gemini model settings)"
+  ok "  model-profiles.yaml 생성 (agent별 Claude/Codex/Gemini model settings, runtime=$MODEL_RUNTIME, policy=$MODEL_POLICY)"
 else
   ok "  model-profiles.yaml 기존 유지"
 fi
@@ -744,7 +1010,7 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
 
 다음 단계:
 
-  ${C_BOLD}1.${C_RESET} SFS.md 내용 확인 + 프로젝트 특성 반영 (Stack / 도메인 등).
+  ${C_BOLD}1.${C_RESET} SFS.md 프로젝트 개요 확인. 미감지 placeholder 만 남아 있으면 ${C_BLUE}sfs profile${C_RESET} 로 좁게 보정.
 
   ${C_BOLD}2.${C_RESET} agent 모델 설정 확인:
      ${C_BLUE}.sfs-local/model-profiles.yaml${C_RESET}
