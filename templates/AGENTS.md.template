@@ -1,6 +1,7 @@
 # AGENTS.md — Codex adapter for Solon Product SFS
 
-This project uses Solon Product SFS (multi-adaptor by design — Claude Code / Codex / Gemini CLI 동등 1급).
+This project uses Solon Product SFS, the **Solo Founder System** for AI-native product work
+(multi-adaptor by design — Claude Code / Codex / Gemini CLI 동등 1급).
 
 Before planning or editing, read:
 

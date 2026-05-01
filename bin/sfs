@@ -46,14 +46,15 @@ usage() {
   cat <<'EOF'
 Usage:
   sfs init [--yes] [--layout thin|vendored]
-  sfs update [--skip-existing]
+  sfs upgrade [--skip-existing] [--no-self-upgrade] [--interactive]
+  sfs update [--skip-existing]          # compatibility alias for upgrade
   sfs uninstall [--keep-artifacts|--remove-all] [--remove-docs|--keep-docs]
   sfs agent install <claude|gemini|codex|all> [--skip-existing]
   sfs <command> [args]
 
 Commands:
-  agent install, update, uninstall
-  version
+  agent install, upgrade, update, uninstall
+  version [--check]
   status, start, guide, auth, brainstorm, plan, implement, review, decision, report, retro, commit, loop
 
 Project state defaults to .sfs-local/. Override with SFS_LOCAL_DIR when needed.
@@ -80,22 +81,52 @@ Existing changed files are backed up under .sfs-local/tmp/agent-install-backups/
 EOF
 }
 
-update_usage() {
+upgrade_usage() {
   cat <<'EOF'
 Usage:
-  sfs update [--skip-existing] [--no-self-upgrade]
+  sfs upgrade [--skip-existing] [--no-self-upgrade] [--interactive]
+  sfs update [--skip-existing] [--no-self-upgrade]   # compatibility alias
 
 Updates the current project from the latest Solon runtime:
   - if this CLI is installed by Homebrew, runs `brew update` + `brew upgrade sfs` first
+  - if this CLI is installed by Scoop, runs `scoop update` + `scoop update sfs` first
   - updates managed SFS runtime docs/adapters with backup safety
   - preserves sprint/decision/event history and project-specific docs
   - syncs Claude/Gemini/Codex agent entry points
 
-Use `--no-self-upgrade` or `SFS_UPDATE_SELF=0` to skip the Homebrew step.
+Use `--interactive` to run the project-file preview instead of the safe
+non-interactive default. Use `--no-self-upgrade` or `SFS_UPDATE_SELF=0` to skip
+the package-manager step.
 EOF
 }
 
 version_command() {
+  local check_latest=0
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --check|check)
+        check_latest=1
+        shift
+        ;;
+      -h|--help)
+        cat <<'EOF'
+Usage:
+  sfs version
+  sfs version --check
+
+Prints the installed SFS runtime version. With --check, also checks the latest
+published Solon Product tag on GitHub and tells you whether `sfs upgrade` is
+needed.
+EOF
+        return 0
+        ;;
+      *)
+        echo "unexpected arg for version: $1" >&2
+        return 1
+        ;;
+    esac
+  done
+
   local version_file="${DIST_DIR}/VERSION"
   local version="unknown"
   if [[ -f "${version_file}" ]]; then
@@ -103,6 +134,54 @@ version_command() {
     version="${version:-unknown}"
   fi
   printf 'sfs %s\n' "${version}"
+  if [[ "${check_latest}" == "1" ]]; then
+    local latest
+    if latest="$(latest_release_version 2>/dev/null)" && [[ -n "${latest}" ]]; then
+      printf 'latest %s\n' "${latest}"
+      if [[ "${version}" == "${latest}" ]]; then
+        printf 'status up-to-date\n'
+      else
+        printf 'status upgrade-available\n'
+        printf 'next sfs upgrade\n'
+      fi
+    else
+      printf 'latest unknown\n'
+      printf 'status check-failed\n'
+      printf 'hint check your network or package manager metadata\n'
+      return 2
+    fi
+  fi
+}
+
+latest_release_version() {
+  command -v git >/dev/null 2>&1 || return 1
+  local repo="${SFS_RELEASE_REPO_URL:-https://github.com/MJ-0701/solon-product.git}"
+  local refs line sha ref tag ver major minor patch
+  local best="" best_major=-1 best_minor=-1 best_patch=-1
+  refs="$(git ls-remote --tags --refs "${repo}" 'refs/tags/v*-product' 2>/dev/null)" || return 1
+  while IFS= read -r line; do
+    [[ -n "${line}" ]] || continue
+    sha="${line%%$'\t'*}"
+    ref="${line#*$'\t'}"
+    [[ -n "${sha}" && -n "${ref}" ]] || continue
+    tag="${ref##*/v}"
+    case "${tag}" in
+      *-product) ver="${tag%-product}" ;;
+      *) continue ;;
+    esac
+    IFS=. read -r major minor patch <<< "${ver}"
+    [[ "${major}" =~ ^[0-9]+$ && "${minor}" =~ ^[0-9]+$ && "${patch}" =~ ^[0-9]+$ ]] || continue
+    if (( major > best_major )) \
+      || (( major == best_major && minor > best_minor )) \
+      || (( major == best_major && minor == best_minor && patch > best_patch )); then
+      best="${tag}"
+      best_major="${major}"
+      best_minor="${minor}"
+      best_patch="${patch}"
+    fi
+  done <<< "${refs}"
+  [[ -n "${best}" ]] || return 1
+  printf '%s\n' "${best}"
 }
 
 project_local_dir() {
@@ -125,7 +204,7 @@ First-time project setup:
 What this means:
   brew install MJ-0701/solon-product/sfs  installs the global sfs CLI on this Mac.
   sfs init --yes                          injects SFS.md, .sfs-local/, and agent adapters into this project.
-  sfs update                              upgrades the Homebrew CLI first, then refreshes this project.
+  sfs upgrade                             upgrades the global CLI first, then refreshes this project.
 
 Tip:
   If this folder is not a git repo yet, sfs init --yes will run git init for you.
@@ -268,9 +347,10 @@ agent_command() {
   esac
 }
 
-update_command() {
+upgrade_command() {
   local skip_existing=0
   local no_self_upgrade="${SFS_SKIP_SELF_UPGRADE:-0}"
+  local interactive=0
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --skip-existing)
@@ -281,23 +361,32 @@ update_command() {
         no_self_upgrade=1
         shift
         ;;
+      --interactive)
+        interactive=1
+        shift
+        ;;
       -h|--help)
-        update_usage
+        upgrade_usage
         return 0
         ;;
       *)
         echo "unknown arg: $1" >&2
-        update_usage >&2
+        upgrade_usage >&2
         return 1
         ;;
     esac
   done
 
-  ensure_project_initialized update || return $?
+  ensure_project_initialized upgrade || return $?
   if [[ "${no_self_upgrade}" != "1" && "${SFS_UPDATE_SELF:-1}" != "0" ]]; then
     self_upgrade_if_homebrew "${skip_existing}"
+    self_upgrade_if_scoop "${skip_existing}"
   fi
-  bash "${DIST_DIR}/upgrade.sh" --yes
+  if [[ "${interactive}" == "1" ]]; then
+    bash "${DIST_DIR}/upgrade.sh"
+  else
+    bash "${DIST_DIR}/upgrade.sh" --yes
+  fi
   echo "agent adapters sync:"
   install_agent_adapter all "${skip_existing}"
 }
@@ -337,9 +426,70 @@ self_upgrade_if_homebrew() {
 
   echo "reloading installed sfs runtime..."
   if [[ "${skip_existing}" == "1" ]]; then
-    exec env SFS_SKIP_SELF_UPGRADE=1 "${sfs_bin}" update --skip-existing --no-self-upgrade
+    exec env SFS_SKIP_SELF_UPGRADE=1 "${sfs_bin}" upgrade --skip-existing --no-self-upgrade
   fi
-  exec env SFS_SKIP_SELF_UPGRADE=1 "${sfs_bin}" update --no-self-upgrade
+  exec env SFS_SKIP_SELF_UPGRADE=1 "${sfs_bin}" upgrade --no-self-upgrade
+}
+
+is_scoop_runtime() {
+  case "${DIST_DIR}" in
+    */scoop/apps/sfs/*|*/Scoop/apps/sfs/*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+run_scoop_command() {
+  if command -v scoop >/dev/null 2>&1; then
+    scoop "$@"
+    return $?
+  fi
+
+  local ps=""
+  for candidate in powershell.exe pwsh.exe powershell pwsh; do
+    if command -v "${candidate}" >/dev/null 2>&1; then
+      ps="${candidate}"
+      break
+    fi
+  done
+  [[ -n "${ps}" ]] || return 127
+
+  local joined="scoop"
+  local arg
+  for arg in "$@"; do
+    joined="${joined} ${arg}"
+  done
+  "${ps}" -NoProfile -ExecutionPolicy Bypass -Command "${joined}"
+}
+
+self_upgrade_if_scoop() {
+  local skip_existing="${1:-0}" sfs_bin
+  is_scoop_runtime || return 0
+
+  echo "global runtime self-upgrade:"
+  echo "  scoop update"
+  if ! run_scoop_command update; then
+    echo "scoop update failed; rerun with SFS_UPDATE_SELF=0 to use the current runtime only" >&2
+    return 1
+  fi
+
+  echo "  scoop update sfs"
+  if ! run_scoop_command update sfs; then
+    echo "scoop update sfs failed; rerun with SFS_UPDATE_SELF=0 to use the current runtime only" >&2
+    return 1
+  fi
+
+  sfs_bin="$(command -v sfs 2>/dev/null || true)"
+  [[ -n "${sfs_bin}" ]] || return 0
+
+  echo "reloading installed sfs runtime..."
+  if [[ "${skip_existing}" == "1" ]]; then
+    exec env SFS_SKIP_SELF_UPGRADE=1 "${sfs_bin}" upgrade --skip-existing --no-self-upgrade
+  fi
+  exec env SFS_SKIP_SELF_UPGRADE=1 "${sfs_bin}" upgrade --no-self-upgrade
 }
 
 if [[ $# -eq 0 ]]; then
@@ -367,27 +517,25 @@ case "${1:-}" in
     agent_command "$@"
     exit $?
     ;;
+  upgrade)
+    shift
+    upgrade_command "$@"
+    exit $?
+    ;;
   update)
     shift
-    update_command "$@"
+    echo "sfs update is a compatibility alias; prefer: sfs upgrade" >&2
+    upgrade_command "$@"
     exit $?
     ;;
   version|-v|--version)
     shift || true
-    if [[ $# -gt 0 ]]; then
-      echo "unexpected arg for version: $1" >&2
-      exit 1
-    fi
-    version_command
-    exit 0
+    version_command "$@"
+    exit $?
     ;;
   uninstall)
     shift
     exec bash "${DIST_DIR}/uninstall.sh" "$@"
-    ;;
-  upgrade)
-    shift
-    exec bash "${DIST_DIR}/upgrade.sh" "$@"
     ;;
   -h|--help|help)
     usage

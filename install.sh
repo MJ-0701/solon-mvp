@@ -639,7 +639,7 @@ Entry 1급:       .claude/skills/sfs/SKILL.md (Claude Code Skill)
                  .agents/skills/sfs/SKILL.md (Codex, Skills 체계)
 Model profiles: .sfs-local/model-profiles.yaml (runtime=$MODEL_RUNTIME, policy=$MODEL_POLICY)
 Agent 갱신:      sfs agent install claude|gemini|codex|all
-Project update:  sfs update
+Project upgrade: sfs upgrade
 Runtime:         $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI" || echo ".sfs-local/scripts/sfs-dispatch.sh")
 Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Git Bash/WSL" || echo ".sfs-local/scripts/sfs.ps1 (PowerShell → Git Bash)")
 
@@ -672,13 +672,14 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
      ${C_BLUE}git commit -m "chore: install solon-product $SOLON_VERSION"${C_RESET}
      ${C_BLUE}git push${C_RESET}
 
-  ${C_BOLD}5.${C_RESET} 현재 설치된 Solon runtime 으로 project adapter/docs 를 갱신할 때:
-     ${C_BLUE}sfs update${C_RESET}
+  ${C_BOLD}5.${C_RESET} 새 Solon 배포 확인 + project adapter/docs 갱신:
+     ${C_BLUE}sfs version --check${C_RESET}
+     ${C_BLUE}sfs upgrade${C_RESET}
 
   ${C_BOLD}6.${C_RESET} Claude/Gemini/Codex entry point 만 갱신할 때:
      ${C_BLUE}sfs agent install all${C_RESET}
 
-  ${C_BOLD}7.${C_RESET} interactive preview 가 필요하면: ${C_BLUE}sfs upgrade${C_RESET}
+  ${C_BOLD}7.${C_RESET} interactive preview 가 필요하면: ${C_BLUE}sfs upgrade --interactive${C_RESET}
 
 문제 발생 시: https://github.com/${SOLON_REPO}/issues
 

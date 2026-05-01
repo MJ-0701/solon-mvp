@@ -1,8 +1,12 @@
 # Solon Product
 
-> AI-native product work 를 위한 Company-as-Code 운영 레이어.
+> AI-native solo founder 를 위한 **Solo Founder System (SFS)**.
 > Solon Product 는 제품 개발에 필요한 역할 분리, 결정 기록, 검증, 회고, 인수인계를
 > 프로젝트 안에 설치합니다.
+
+SFS 는 **Solo Founder System** 의 약자입니다. 혼자 제품을 만드는 founder 가 여러 AI agent 를
+팀처럼 쓰기 위해, 프로젝트 안에 sprint flow, role boundary, decision log, review/retro loop 를
+고정하는 운영 시스템입니다. `Sprint flow` 는 SFS 의 실행 메커니즘이지, 이름의 풀이는 아닙니다.
 
 Solon Product 는 Claude Code, Codex, Gemini CLI 같은 LLM agent 와 함께 제품을 만들 때
 작업 맥락이 사라지지 않도록 돕는 로컬 운영 시스템입니다. 설치하면 현재 repository 안에
@@ -159,12 +163,21 @@ Gemini/custom 은 해당 runtime profile 이름으로 agent별 override 할 수 
 Solon 의 C-Level high / worker standard / helper economy 는 권장값이고 hard block 이 아닙니다.
 
 이후 Solon 런타임과 현재 프로젝트 adapter/docs 를 갱신할 때는 uninstall/reinstall 하지 않습니다.
-프로젝트 루트에서 `sfs update` 한 번만 실행합니다. Homebrew 설치본이면 내부에서 먼저
-`brew update` + `brew upgrade sfs` 를 실행한 뒤 프로젝트 파일을 갱신합니다:
+프로젝트 루트에서 `sfs upgrade` 한 번만 실행합니다. Homebrew 설치본이면 내부에서 먼저
+`brew update` + `brew upgrade sfs` 를 실행하고, Scoop 설치본이면 `scoop update` +
+`scoop update sfs` 를 실행한 뒤 프로젝트 파일을 갱신합니다. `sfs update` 는 하위 호환 alias 로
+남아 있지만 문서상 권장 명령은 `sfs upgrade` 입니다:
 
 ```bash
 cd ~/workspace/my-project
-sfs update
+sfs upgrade
+```
+
+새 배포가 있는지 확인만 하고 싶을 때는:
+
+```bash
+sfs version
+sfs version --check
 ```
 
 Windows 에서는 Scoop bucket 배포를 우선 검증 경로로 둡니다. bucket manifest 가 배포된 뒤에는
@@ -445,17 +458,28 @@ consumer 프로젝트에는 필요한 state/config/custom override 만 설치됩
 
 ---
 
-## Update / Upgrade
+## Version Check / Upgrade
 
-일반 사용자는 `sfs update` 를 사용합니다. Homebrew 설치본이면 global runtime 을 먼저 최신화한
-뒤 managed adapter/docs 를 백업 후 갱신하고, sprint/decision/event history 와 프로젝트별 지침은
-보존합니다. `.sfs-local/model-profiles.yaml` 이 없던 기존 프로젝트에는 current-model fallback
-설정으로 추가하고, 이미 있으면 사용자 agent/model 설정 보호를 위해 보존합니다.
+일반 사용자는 `sfs upgrade` 를 사용합니다. Homebrew 설치본이면 global runtime 을 먼저 최신화하고,
+Scoop 설치본이면 bucket manifest 기준으로 `sfs` 를 먼저 최신화한 뒤 managed adapter/docs 를 백업 후
+갱신합니다. sprint/decision/event history 와 프로젝트별 지침은 보존합니다.
+`.sfs-local/model-profiles.yaml` 이 없던 기존 프로젝트에는 current-model fallback 설정으로 추가하고,
+이미 있으면 사용자 agent/model 설정 보호를 위해 보존합니다.
 
 ```bash
 cd ~/workspace/my-project
-sfs update
+sfs version --check
+sfs upgrade
 ```
+
+Owner 가 새 버전을 배포하면 사용자는 세 경로로 알 수 있습니다.
+
+- `sfs version --check`: 현재 설치 버전과 GitHub 최신 product tag 를 비교합니다.
+- Homebrew: `brew outdated sfs` 또는 `sfs upgrade` 실행 시 tap 의 최신 formula 를 확인합니다.
+- Scoop: `scoop status sfs` 또는 `sfs upgrade` 실행 시 bucket manifest 의 최신 버전을 확인합니다.
+
+자동 background notifier 는 두지 않습니다. SFS 는 사용자가 프로젝트 루트에서 명시적으로
+`sfs version --check` 또는 `sfs upgrade` 를 호출하는 모델입니다.
 
 Local clone 기반 upgrade 는 먼저 product clone 을 GitHub 최신으로 맞춘 뒤 consumer 프로젝트에서
 실행합니다. 이 clone 이 오래되면 upgrade 가 낡은 `VERSION` 을 읽고 "이미 최신" 이라고 잘못
