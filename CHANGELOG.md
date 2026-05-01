@@ -1,3 +1,17 @@
+## [0.5.43-product] - 2026-05-01
+
+**Same-runtime CPO review wording.** Documentation now clarifies that
+`self-validation-forbidden` means separating the CTO implementer from the CPO
+reviewer, not banning same-vendor or same-runtime review.
+
+### Changed
+
+- **Adaptor design intent** — documented cross-vendor review as useful but not
+  mandatory, with same-runtime review valid when a separate CPO
+  role/agent/instance reviews evidence and records verdict/actions.
+- **Guide review flow** — reframed CPO review as role separation plus evidence
+  instead of a token-heavy multi-tool requirement.
+
 ## [0.5.42-product] - 2026-05-01
 
 **Windows Scoop packaging path.** The distribution now carries Scoop manifest

@@ -715,8 +715,6 @@ if os.path.isdir(claimed_dir):
             path = os.path.join(dirpath, name)
             fm, _, body = fm_and_body(path)
             owner = fm.get("owner") or os.path.basename(os.path.dirname(path))
-            if owner == current_owner:
-                continue
             for scope in files_scope(body):
                 claimed_scopes.append((owner, task_id(path), scope))
 
@@ -832,8 +830,6 @@ if os.path.isdir(claimed_dir):
             path = os.path.join(dirpath, name)
             fm, _, body = parse(path)
             owner = fm.get("owner") or os.path.basename(os.path.dirname(path))
-            if owner == current_owner:
-                continue
             for scope in files_scope(body):
                 claimed_scopes.append(scope)
 
