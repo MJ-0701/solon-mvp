@@ -537,6 +537,277 @@ sfs_compact_sprint_workbench() {
 }
 
 # ─────────────────────────────────────────────────────────────────────
+# CYCLE-END HELPERS — Division activation recommender (WU-36)
+# Surfaces recommendations during report/retro close without changing stdout
+# contracts. Recommendations are written into report.md/retro.md within marker
+# blocks so user edits outside the block remain untouched.
+# ─────────────────────────────────────────────────────────────────────
+
+sfs_git_file_count() {
+  git rev-parse --git-dir >/dev/null 2>&1 || { printf '0\n'; return 0; }
+  git ls-files 2>/dev/null | wc -l | tr -d '[:space:]'
+}
+
+sfs_project_size_bucket() {
+  local n="${1:-0}"
+  case "${n}" in
+    ''|*[!0-9]*) echo "unknown"; return 0 ;;
+  esac
+  if (( n < 300 )); then
+    echo "small"
+  elif (( n < 1500 )); then
+    echo "medium"
+  else
+    echo "large"
+  fi
+}
+
+sfs_progress_domain_lock_count() {
+  local progress_path
+  progress_path="$(resolve_progress_path 2>/dev/null)" || { printf '0\n'; return 0; }
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - "$progress_path" <<'PYEOF' 2>/dev/null || { printf '0\n'; return 0; }
+import sys, re
+path = sys.argv[1]
+try:
+    content = open(path, encoding="utf-8").read()
+except TypeError:
+    content = open(path).read()
+m = re.search(r'^---\n(.*?)\n---', content, re.DOTALL)
+if not m:
+    print(0); raise SystemExit(0)
+fm = m.group(1)
+dl = re.search(r'^domain_locks:\s*\n((?:[ \t]+.*\n?)+)', fm, re.MULTILINE)
+if not dl:
+    print(0); raise SystemExit(0)
+body = dl.group(1)
+count = 0
+for line in body.splitlines():
+    if re.match(r'^[ \t]{2}[\w-]+:\s*$', line):
+        count += 1
+print(count)
+PYEOF
+    return 0
+  fi
+
+  awk '
+    BEGIN { in_fm=0; in_dl=0; c=0 }
+    NR==1 && /^---[[:space:]]*$/ { in_fm=1; next }
+    in_fm && /^---[[:space:]]*$/ { exit }
+    in_fm && /^domain_locks:[[:space:]]*$/ { in_dl=1; next }
+    in_dl {
+      if ($0 ~ /^[^ \t]/) { in_dl=0; next }
+      if ($0 ~ /^[ \t][ \t][[:alnum:]_-]+:[[:space:]]*$/) { c++ }
+    }
+    END { print c+0 }
+  ' "$progress_path" 2>/dev/null || printf '0\n'
+}
+
+sfs_division_activation_state() {
+  local division="${1:?division required}"
+  local path="${SFS_LOCAL_DIR}/divisions.yaml"
+  [[ -f "${path}" ]] || { printf '\n'; return 0; }
+  awk -v div="${division}" '
+    BEGIN { in_divs=0; in_block=0 }
+    /^[[:space:]]*divisions:[[:space:]]*$/ { in_divs=1; next }
+    in_divs && /^[^[:space:]]/ { in_divs=0; in_block=0 }
+    in_divs && $0 ~ "^[[:space:]][[:space:]]"div":[[:space:]]*$" { in_block=1; next }
+    in_block && $0 ~ "^[[:space:]][[:space:]][[:alnum:]_-]+:[[:space:]]*$" { in_block=0 }
+    in_block && /^[[:space:]]+activation_state:[[:space:]]*/ {
+      sub(/^[[:space:]]+activation_state:[[:space:]]*/, "")
+      sub(/[[:space:]]*#.*$/, "")
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "")
+      print
+      exit
+    }
+  ' "${path}" 2>/dev/null || true
+}
+
+sfs_latest_review_output_path_for_sprint() {
+  local sid="${1:?sprint id required}"
+  [[ -f "${SFS_EVENTS_FILE}" ]] || return 1
+  grep -F '"type":"review_run"' "${SFS_EVENTS_FILE}" 2>/dev/null \
+    | grep -F "\"sprint_id\":\"${sid}\"" 2>/dev/null \
+    | tail -n 1 \
+    | sed -nE 's/.*"output_path":"([^"]*)".*/\1/p'
+}
+
+sfs_latest_review_md_result_path_for_sprint() {
+  local sid="${1:?sprint id required}"
+  local review_path="${SFS_SPRINTS_DIR}/${sid}/review.md"
+  [[ -f "${review_path}" ]] || return 1
+  awk -F'`' '/^- result_path: `/ { path=$2 } END { if (path != "") print path; else exit 1 }' "${review_path}"
+}
+
+sfs_extract_result_verdict() {
+  local file="${1:?file required}"
+  [[ -f "${file}" ]] || return 1
+  awk '
+    {
+      low = tolower($0)
+      if (low ~ /^[[:space:]>-]*verdict:[[:space:]]*(pass|partial|fail)[[:space:]]*$/) {
+        line = $0
+        sub(/^[[:space:]>-]*[Vv][Ee][Rr][Dd][Ii][Cc][Tt]:[[:space:]]*/, "", line)
+        sub(/[[:space:]]*$/, "", line)
+        print tolower(line)
+        found = 1
+        exit
+      }
+    }
+    END { if (!found) exit 1 }
+  ' "${file}"
+}
+
+sfs_latest_review_verdict_for_sprint() {
+  local sid="${1:?sprint id required}"
+  local out_path verdict
+  out_path="$(sfs_latest_review_output_path_for_sprint "${sid}" || true)"
+  if [[ -n "${out_path}" && -f "${out_path}" ]]; then
+    verdict="$(sfs_extract_result_verdict "${out_path}" || true)"
+    [[ -n "${verdict}" ]] && { printf '%s\n' "${verdict}"; return 0; }
+  fi
+  out_path="$(sfs_latest_review_md_result_path_for_sprint "${sid}" || true)"
+  if [[ -n "${out_path}" && -f "${out_path}" ]]; then
+    verdict="$(sfs_extract_result_verdict "${out_path}" || true)"
+    [[ -n "${verdict}" ]] && { printf '%s\n' "${verdict}"; return 0; }
+  fi
+  verdict="$(sfs_extract_result_verdict "${SFS_SPRINTS_DIR}/${sid}/review.md" 2>/dev/null || true)"
+  [[ -n "${verdict}" ]] && { printf '%s\n' "${verdict}"; return 0; }
+  printf '%s\n' "unknown"
+}
+
+sfs_repo_infra_signal_count() {
+  git rev-parse --git-dir >/dev/null 2>&1 || { printf '0\n'; return 0; }
+  git ls-files 2>/dev/null \
+    | grep -Ei '(^|/)(dockerfile|docker-compose\.ya?ml|compose\.ya?ml|k8s/|kubernetes/|helm/|terraform/|pulumi\.ya?ml|\.github/workflows/)|\.tf$' 2>/dev/null \
+    | wc -l | tr -d '[:space:]'
+}
+
+sfs_repo_ui_signal_count() {
+  git rev-parse --git-dir >/dev/null 2>&1 || { printf '0\n'; return 0; }
+  git ls-files 2>/dev/null \
+    | grep -Ei '(^|/)(package\.json|pnpm-lock\.yaml|yarn\.lock|bun\.lockb|next\.config\.)' 2>/dev/null \
+    | wc -l | tr -d '[:space:]'
+}
+
+sfs_render_division_activation_recommendations_body() {
+  local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
+  local file_count size_bucket domain_count verdict infra_count ui_count
+  file_count="$(sfs_git_file_count)"
+  size_bucket="$(sfs_project_size_bucket "${file_count}")"
+  domain_count="$(sfs_progress_domain_lock_count)"
+  verdict="$(sfs_latest_review_verdict_for_sprint "${sid}")"
+  infra_count="$(sfs_repo_infra_signal_count)"
+  ui_count="$(sfs_repo_ui_signal_count)"
+
+  cat <<EOF
+- detected: project_size=${size_bucket} (${file_count} tracked files), domains=${domain_count}, last_review=${verdict}, infra_signals=${infra_count}, ui_signals=${ui_count}
+- recommended action format: update \`.sfs-local/divisions.yaml\` + record why in \`.sfs-local/decisions/<NNNN>-activate-<division>.md\`
+EOF
+
+  local qa_state taxonomy_state infra_state design_state
+  qa_state="$(sfs_division_activation_state "qa")"
+  taxonomy_state="$(sfs_division_activation_state "taxonomy")"
+  infra_state="$(sfs_division_activation_state "infra")"
+  design_state="$(sfs_division_activation_state "design")"
+
+  # QA: size/complexity/quality signals
+  if [[ "${qa_state}" != "active" ]]; then
+    if [[ "${verdict}" == "partial" || "${verdict}" == "fail" || "${size_bucket}" != "small" ]]; then
+      echo "- recommend: \`qa\` activate (light) — regression smoke + AC checks; triggers: review!=pass or medium+ codebase"
+    fi
+  fi
+
+  # Taxonomy: multi-domain / growth signals
+  if [[ "${taxonomy_state}" != "active" ]]; then
+    if (( domain_count >= 2 )) || [[ "${size_bucket}" == "large" ]]; then
+      echo "- recommend: \`taxonomy\` activate (light) — glossary + naming/aggregation rules; triggers: multi-domain or large codebase"
+    fi
+  fi
+
+  # Infra: deploy/ops signals
+  if [[ "${infra_state}" != "active" ]]; then
+    if (( infra_count > 0 )) || [[ "${size_bucket}" == "large" ]]; then
+      echo "- consider: \`infra\` activate (light) — deploy/observability/rollback checklist; triggers: infra files present or large codebase"
+    fi
+  fi
+
+  # Design: UI/product surface signals
+  if [[ "${design_state}" != "active" ]]; then
+    if (( ui_count > 0 )) && [[ "${size_bucket}" != "small" ]]; then
+      echo "- consider: \`design\` activate (light) — UX acceptance + UI consistency; triggers: UI repo signals + medium+ size"
+    fi
+  fi
+
+  cat <<EOF
+- generated_at: ${ts} (auto) — edit outside the marker block to preserve manual notes
+EOF
+}
+
+sfs_upsert_marked_section_with_heading() {
+  local path="${1:?path required}" marker="${2:?marker required}" heading="${3:?heading required}" content_file="${4:?content file required}"
+  [[ -f "${path}" ]] || return 0
+
+  local start="<!-- solon:${marker}:start -->"
+  local end="<!-- solon:${marker}:end -->"
+  local tmp="${path}.tmp.$$"
+  awk -v start="${start}" -v end="${end}" -v heading="${heading}" -v cf="${content_file}" '
+    function emit_content() {
+      while ((getline l < cf) > 0) print l
+      close(cf)
+    }
+    {
+      if ($0 == start) {
+        print
+        emit_content()
+        in_block=1
+        found=1
+        next
+      }
+      if (in_block && $0 == end) {
+        in_block=0
+        print
+        next
+      }
+      if (in_block) next
+      print
+    }
+    END {
+      if (!found) {
+        print ""
+        print heading
+        print ""
+        print start
+        emit_content()
+        print end
+      }
+    }
+  ' "${path}" > "${tmp}" && mv -f "${tmp}" "${path}"
+}
+
+sfs_write_cycle_end_division_recommendations() {
+  local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
+  local report_path="${3:-${SFS_SPRINTS_DIR}/${sid}/report.md}"
+  local retro_path="${4:-${SFS_SPRINTS_DIR}/${sid}/retro.md}"
+
+  local tmp_dir="${SFS_LOCAL_DIR}/tmp"
+  mkdir -p "${tmp_dir}" 2>/dev/null || true
+  local tmp_file
+  tmp_file="$(mktemp "${tmp_dir}/division-reco.${sid}.XXXXXX" 2>/dev/null || mktemp "/tmp/division-reco.${sid}.XXXXXX")"
+  sfs_render_division_activation_recommendations_body "${sid}" "${ts}" > "${tmp_file}"
+
+  if [[ -f "${report_path}" ]]; then
+    sfs_upsert_marked_section_with_heading "${report_path}" "division-recommendations" "## §8. Next Cycle — Division Activation Recommendations" "${tmp_file}"
+  fi
+  if [[ -f "${retro_path}" ]]; then
+    sfs_upsert_marked_section_with_heading "${retro_path}" "division-recommendations" "## §6. 다음 cycle 본부 활성 추천 (auto)" "${tmp_file}"
+  fi
+
+  rm -f "${tmp_file}" 2>/dev/null || true
+  return 0
+}
+
+# ─────────────────────────────────────────────────────────────────────
 # USAGE STUBS (consumer scripts override / call locally)
 # ─────────────────────────────────────────────────────────────────────
 

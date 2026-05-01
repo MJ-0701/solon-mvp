@@ -1,3 +1,16 @@
+## [0.5.55-product] - 2026-05-02
+
+**Cycle-end division activation recommender.** When closing a sprint, SFS now
+surfaces a lightweight recommendation block about activating additional
+divisions based on codebase size, domain complexity, and risk signals.
+
+### Added
+
+- **Division activation recommender on close** — `/sfs report --compact` and
+  `/sfs retro --close` write a marker-based recommendations section into
+  `report.md` and `retro.md` so users see next-cycle prompts without running a
+  separate check command.
+
 ## [0.5.54-product] - 2026-05-01
 
 **Windows auth executor UX hotfix.** Tightens the `/sfs auth` and review bridge

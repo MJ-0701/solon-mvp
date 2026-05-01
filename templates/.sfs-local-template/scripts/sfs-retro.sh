@@ -166,6 +166,8 @@ if [[ "${CLOSE}" -eq 1 ]]; then
   # Completed sprint artifact lifecycle:
   # report.md becomes the final work artifact; workbench docs move to archive.
   REPORT_PATH="$(sfs_prepare_sprint_report "${SPRINT_ID}" "${NOW}" "final")"
+  # WU-36: surface cycle-end division activation recommendations inside report/retro.
+  sfs_write_cycle_end_division_recommendations "${SPRINT_ID}" "${NOW}" "${REPORT_PATH}" "${RETRO_PATH}" || true
   sprint_close "${SPRINT_DIR}" "${NOW}"
   sfs_compact_sprint_workbench "${SPRINT_ID}" "${NOW}"
 

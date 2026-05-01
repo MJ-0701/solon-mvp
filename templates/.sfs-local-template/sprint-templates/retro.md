@@ -56,3 +56,9 @@ closed_at: ""        # filled by /sfs retro --close
 - [ ] events.jsonl 마지막 entry = `gate_review G5:<verdict>`
 - [ ] `closed_at` frontmatter 기록 (`/sfs retro --close` 가 자동 채움)
 - [ ] HANDOFF / sessions log 에 본 sprint 결과 link 1줄 추가
+
+## §6. 다음 cycle 본부 활성 추천 (auto)
+
+<!-- solon:division-recommendations:start -->
+- (auto) Filled on `/sfs retro --close` or `/sfs report --compact`. Add manual notes outside this marker block.
+<!-- solon:division-recommendations:end -->
