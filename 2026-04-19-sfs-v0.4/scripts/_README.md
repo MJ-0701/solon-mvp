@@ -149,7 +149,43 @@ git add VERSION CHANGELOG.md
 git commit -m "WU-31/cut(stable): v0.3.0-mvp <stable-sha>"
 ```
 
-### 2.2 Hotfix back-port (R-D1 예외 path)
+### 2.2 Product channel publish (Homebrew + Scoop)
+
+`-product` release 는 stable tag push 만으로 끝나지 않는다. 사용자가 "배포" 라고 말하면
+release owner 는 **Homebrew tap 과 Scoop bucket 을 모두 같은 tag 로 publish** 한 뒤에만 완료
+보고한다. 한쪽만 끝난 상태는 partial release 다.
+
+```sh
+# 1. product tag 가 원격에 존재하는지 확인
+git -C ~/tmp/solon-product ls-remote --tags origin v<VERSION>
+
+# 2. Homebrew tap 갱신 + push
+#    Formula/sfs.rb url 은 v<VERSION>.tar.gz, sha256 은 해당 tarball hash.
+cd ~/tmp/homebrew-solon-product
+git status --short --branch
+# edit Formula/sfs.rb
+git add Formula/sfs.rb
+git commit -m "sfs <VERSION>"
+git push origin main
+
+# 3. Scoop bucket 갱신 + push
+#    bucket/sfs.json url 은 v<VERSION>.zip, hash 는 해당 zip SHA256.
+cd ~/tmp/scoop-solon-product
+git status --short --branch
+# edit bucket/sfs.json
+git add bucket/sfs.json
+git commit -m "sfs <VERSION>"
+git push origin main
+
+# 4. 완료 전 확인
+git -C ~/tmp/homebrew-solon-product ls-remote origin refs/heads/main
+git -C ~/tmp/scoop-solon-product ls-remote origin refs/heads/main
+```
+
+최소 검증 기준: product tag 원격 존재, Homebrew formula URL+sha 가 tag tarball 과 일치,
+Scoop manifest URL+hash 가 tag zip 과 일치, 두 channel repo `origin/main` 에 반영.
+
+### 2.3 Hotfix back-port (R-D1 예외 path)
 
 ```sh
 # 1. stable 에서 직접 hotfix commit (사용자, 별도 터미널)
@@ -172,7 +208,7 @@ git commit -m "WU-31/sync(stable): $HOTFIX_SHA"
 git push origin main
 ```
 
-### 2.3 정기 health check (자동화 후보)
+### 2.4 정기 health check (자동화 후보)
 
 ```sh
 # 매일 / 매 PR 직전

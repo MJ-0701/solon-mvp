@@ -583,4 +583,8 @@ Uninstall 은 대화형으로 실행됩니다.
 (0.5.0-mvp 까지) 는 기존 설치본과의 semver 호환을 위해 유지하지만, 0.5.1+ 부터 repo
 identity 와 release suffix 는 product track 기준으로 운영합니다.
 
+Product release publish 는 Homebrew tap 과 Scoop bucket 을 같은 tag 로 갱신한 뒤 완료로
+간주합니다. Release owner 는 GitHub product tag, Homebrew formula URL/sha256, Scoop
+manifest URL/hash 가 모두 같은 `v<VERSION>` 을 가리키는지 확인합니다.
+
 릴리스 기록은 [CHANGELOG.md](./CHANGELOG.md) 를 참조하세요.
