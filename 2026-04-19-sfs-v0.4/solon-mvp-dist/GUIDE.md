@@ -21,7 +21,7 @@ sfs agent install all
 Windows 는 Git for Windows 설치 후 Scoop 경로를 쓴다:
 
 ```powershell
-scoop bucket add solon <our-bucket-url>
+scoop bucket add solon https://github.com/MJ-0701/scoop-solon-product
 scoop install sfs
 cd C:\workspace\my-project
 git init

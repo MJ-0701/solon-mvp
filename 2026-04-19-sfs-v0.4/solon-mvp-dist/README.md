@@ -188,7 +188,7 @@ Windows 에서는 Scoop bucket 배포를 우선 검증 경로로 둡니다. buck
 PowerShell, cmd, Git Bash 어디서든 같은 `sfs` 명령이 PATH 에 잡혀야 합니다:
 
 ```powershell
-scoop bucket add solon <our-bucket-url>
+scoop bucket add solon https://github.com/MJ-0701/scoop-solon-product
 scoop install sfs
 cd C:\workspace\my-project
 git init
