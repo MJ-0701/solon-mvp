@@ -2,8 +2,8 @@
 # .sfs-local/scripts/sfs-report.sh
 #
 # Solon SFS — `/sfs report [--sprint <id>] [--compact]`.
-# Creates the compact final sprint report. With --compact, replaces verbose
-# workbench artifacts with small redirects after user/AI approval.
+# Creates the compact final sprint report. With --compact, moves verbose
+# workbench artifacts into .sfs-local/archives/ after user/AI approval.
 
 set -euo pipefail
 
@@ -20,8 +20,8 @@ Usage:
 
 Create or update the compact sprint report.
   - Without --compact, prepares .sfs-local/sprints/<id>/report.md for AI/user refinement.
-  - With --compact, marks report.md final and replaces verbose workbench docs
-    (brainstorm/plan/implement/log/review) with small redirects.
+  - With --compact, marks report.md final and moves verbose workbench docs
+    (brainstorm/plan/implement/log/review) into .sfs-local/archives/.
   - retro.md and decision files are preserved as history/learning.
 
 Exit codes:
@@ -121,8 +121,10 @@ append_event "report_ready" "{\"sprint_id\":\"${_esc_sprint}\",\"path\":\"${_esc
 echo "report.md ready: ${REPORT_PATH}"
 
 if [[ "${COMPACT}" -eq 1 ]]; then
+  ARCHIVE_PATH="$(sfs_workbench_archive_dir "${SPRINT_ID}" "${NOW}")"
   sfs_compact_sprint_workbench "${SPRINT_ID}" "${NOW}"
-  echo "workbench compacted: ${SPRINT_ID}"
+  echo "archive: ${ARCHIVE_PATH}"
+  echo "workbench archived: ${SPRINT_ID}"
 fi
 
 exit "${SFS_EXIT_OK}"

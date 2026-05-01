@@ -1,6 +1,6 @@
 ---
 name: sfs
-description: Solon SFS (Solo Founder System) workflow for Codex — use $sfs status/start/guide/auth/upgrade/version/brainstorm/plan/implement/review/decision/report/retro/commit/loop or natural language to dispatch to bash adapter SSoT; brainstorm/plan/implement/decision/report/retro are AI-hybrid refinements, review is adapter-run by default through the selected CPO executor bridge, commit is adapter-run local git grouping/commit. Trigger when a Codex surface delivers $sfs, sfs <command>, /sfs text that reaches the model, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "upgrade", "version check", "sprint 시작", "브레인스토밍", "plan 작성", "구현", "implement", "review 작성", "decision 기록", "report 작성", "retro close", "commit 정리", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
+description: Solon SFS (Solo Founder System) workflow for Codex — use $sfs status/start/guide/auth/upgrade/version/brainstorm/plan/implement/review/decision/report/tidy/retro/commit/loop or natural language to dispatch to bash adapter SSoT; brainstorm/plan/implement/decision/report/retro are AI-hybrid refinements, review is adapter-run by default through the selected CPO executor bridge, tidy is archive-first workbench migration with conditional report refinement, commit is adapter-run local git grouping/commit. Trigger when a Codex surface delivers $sfs, sfs <command>, /sfs text that reaches the model, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "upgrade", "version check", "sprint 시작", "브레인스토밍", "plan 작성", "구현", "implement", "review 작성", "decision 기록", "report 작성", "tidy 정리", "retro close", "commit 정리", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
 ---
 
 # Solon SFS — Codex Skill
@@ -17,6 +17,9 @@ Command modes are explicit:
 - **Bash-first**: `status`, `start`, `guide`, `auth`, `upgrade`, `update`, `version`, `commit`, `loop`. Print verbatim
   adapter output first. A compact recap/status line is allowed when it helps
   the user see state and the next action, but adapter stdout remains SSoT.
+- **Conditional hybrid**: `tidy`. Run the adapter first. If it created or
+  touched `report.md`, read archived workbench/tmp sources and refine `report.md`
+  into the final report before answering.
 - **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`. Run the
   adapter first, then perform the documented AI-side file refinement.
 - **Adapter-run**: `review`. The bash adapter executes the selected CPO
@@ -53,7 +56,7 @@ Sprint mode guidance:
 Special close guard: if the user invokes `retro --close` in an AI runtime, do
 not run the close adapter first. Run `retro` without `--close`, refine
 `retro.md`, run/refine `report.md`, then run `retro --close` exactly once.
-The close adapter compacts active workbench docs, so the report must be the
+The close adapter archives active workbench/tmp docs, so the report must be the
 canonical work summary before close.
 
 If you can read a user message that begins with `/sfs`, the runtime has already
@@ -142,8 +145,9 @@ not create a new verdict in the current runtime.
 | `implement [work slice|--stdin]` (또는 "구현", "코드 구현", "실제 작업") | `sfs implement <work slice>` | implement.md/log.md 진입 후 plan 기반으로 실제 코드 변경 + 테스트/스모크 evidence 작성. 여기서 멈추지 말고 구현까지 진행 |
 | `review --gate <id> [--executor <tool>] [--prompt-only]` / `review --show-last` (또는 "CPO review", "검증 기록", "이전 리뷰 확인") | `sfs review --gate <id> [--executor <tool>] [--generator <tool>] [--prompt-only]` 또는 `sfs review --show-last [--gate <id>]` | CPO Evaluator bridge run by default. `--prompt-only` creates prompt/log for manual handoff. `--show-last` prints compact metadata for the latest recorded result without rerunning executor. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
 | `decision <title>` (또는 "결정 기록", "ADR 추가") | `sfs decision "<title>" [--id <id>]` | ADR file 생성 후 Context/Decision/Alternatives/Consequences refinement |
-| `report [--sprint <id>] [--compact]` (또는 "보고서", "최종보고서") | `sfs report [--sprint <id>] [--compact]` | report.md 진입 후 최종 작업보고서 refinement. `--compact` 는 사용자 동의 후 workbench stub 압축 |
-| `retro [--close]` (또는 "회고", "sprint close") | `sfs retro [--close]` | retro.md 진입 후 KPT/PDCA refinement. `--close` 는 report refinement 후 1회 실행하며 workbench 를 compact |
+| `report [--sprint <id>] [--compact]` (또는 "보고서", "최종보고서") | `sfs report [--sprint <id>] [--compact]` | report.md 진입 후 최종 작업보고서 refinement. `--compact` 는 사용자 동의 후 workbench 를 archive 로 이동 |
+| `tidy [--sprint <id>\|--all] [--apply]` (또는 "문서 정리", "workbench 정리") | `sfs tidy [--sprint <id>\|--all] [--apply]` | 기본 dry-run. `--apply` 는 report.md 가 없으면 생성하고, workbench/tmp 를 archive 로 이동해 남겨야 할 것만 둠 |
+| `retro [--close]` (또는 "회고", "sprint close") | `sfs retro [--close]` | retro.md 진입 후 KPT/PDCA refinement. `--close` 는 report refinement 후 1회 실행하며 workbench/tmp 를 archive 로 이동 |
 | `commit [status|plan|apply --group <name>]` (또는 "commit 정리") | `sfs commit [status|plan|apply ...]` | working tree 를 의미 그룹으로 분류하고 branch preflight 안내 후 선택 그룹만 local commit. Git Flow-aware 메시지 자동 생성. 이후 branch push/main 흡수는 AI runtime 이 수행 |
 | `loop [OPTIONS]` (또는 "자율 진행", "loop 시작") | `sfs loop [OPTIONS]` | Ralph Loop + Solon mutex (see `--help`) |
 
@@ -191,6 +195,8 @@ not create a new verdict in the current runtime.
      `99`=unknown.
    - report: `0`=ok, `1`=no `.sfs-local/` or no sprint, `4`=template
      missing, `5`=permission, `7`=usage, `99`=unknown.
+   - tidy: `0`=ok, `1`=no `.sfs-local/` or no sprint, `5`=permission,
+     `7`=usage, `99`=unknown.
    - retro: `0`=ok, `1`=no `.sfs-local/` or no active sprint, `4`=template
      missing, `7`=usage, `8`=`--close` requested but review.md missing,
      `99`=unknown.
@@ -211,6 +217,7 @@ not create a new verdict in the current runtime.
    - `implement` → Implementation Execution
    - `decision` → Decision ADR Refinement
    - `report` → Final Report Refinement
+   - `tidy` → Tidy Report Refinement when report.md was created/touched
    - `retro` → Retro G5 Refinement
    - `commit` → stop after adapter output. Do not add files or create a second
      commit outside the adapter result.
@@ -379,11 +386,37 @@ artifacts into the canonical completed-sprint report.
    session logs, and events. Do not paste long logs or executor output into the
    report.
 5. If `--compact` was requested, only proceed when the user explicitly asked
-   for compaction. Treat compacted workbench files as redirect stubs; do not
-   try to restore process detail from memory.
+   for cleanup. Workbench/tmp files move to `.sfs-local/archives/`; if the
+   adapter already printed `archive: <path>`, read available sources there
+   before refining and do not recreate them in the visible sprint/tmp folders.
 6. Final response: render a Solon report. Include `report.md` path in `Files`,
-   compact status in `Health`, and `Next: /sfs retro --close` when closing the
+   archive status in `Health`, and `Next: /sfs retro --close` when closing the
    active sprint or `Next: continue current sprint` otherwise.
+
+## Tidy Report Refinement
+
+`/sfs tidy` is the migration path for older SFS users whose sprint folders may
+not have `report.md` yet. It is adapter-first, but AI runtimes must refine the
+report when the adapter creates or touches one.
+
+1. Run the adapter and print stdout verbatim.
+2. Parse `tidied: <sprint-id>`, `report: <path>`, and `archive: <path>` lines
+   when present. For dry-run output, do not edit files.
+3. If `--apply` was used and `report.md` exists, read:
+   - `report.md`
+   - archived `brainstorm.md`, `plan.md`, `implement.md`, `log.md`, `review.md`
+     under the printed archive path when they exist
+   - archived `tmp/` review prompt/run files under the printed archive path
+     when they exist
+   - `retro.md` from the sprint folder when it exists
+4. Fill `report.md` as the canonical final work report:
+   goal/outcome, delivered scope, key decisions, implementation summary,
+   verification evidence, and remaining risks.
+5. Do not recreate old workbench/tmp files in the visible sprint/tmp folders.
+   The cleanup goal is: only keep what should remain.
+6. Final response: render a Solon report. Include `report.md` and archive path
+   in `Files`, and `Next: /sfs review --gate G4` or `/sfs retro --close` when
+   appropriate.
 
 ## Retro G5 Refinement
 
@@ -399,7 +432,7 @@ stdout has been shown verbatim:
 4. Preserve user edits. Do not invent completed work; mark unknowns explicitly.
 5. If the user invoked `retro --close`, refine `retro.md` first, run/refine
    `/sfs report`, then run `bash .sfs-local/scripts/sfs-dispatch.sh retro --close`
-   exactly once and print its output verbatim. Close compacts workbench docs.
+   exactly once and print its output verbatim. Close archives workbench/tmp docs.
 6. Final response when not closing: render a Solon report. Include `retro.md`
    path in `Files`, close-readiness in `Health`, and `Next: /sfs retro --close`
    if ready; otherwise the next required action.
@@ -410,7 +443,7 @@ Print this 3-line usage and stop:
 
 ```
 Usage: /sfs <command> [args]
-Commands: status, start, guide, auth, upgrade, version, brainstorm, plan, implement, review, decision, report, retro, commit, loop
+Commands: status, start, guide, auth, upgrade, version, brainstorm, plan, implement, review, decision, report, tidy, retro, commit, loop
 Help: sfs <command> --help
 ```
 

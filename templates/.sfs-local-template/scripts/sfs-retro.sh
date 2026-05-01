@@ -5,7 +5,7 @@
 # WU-26 §2 spec implementation. WU-23 §1.6 정합:
 #   · 파일 path stdout 출력만 (에디터 launch 안 함).
 #   · `--close` 미지정 시 retro.md 진입만, stdout 1줄.
-#   · `--close` 지정 시 report.md ensure + sprint close + auto commit + stdout 3줄.
+#   · `--close` 지정 시 report.md ensure + workbench archive + sprint close + auto commit + stdout 3줄.
 #   · auto commit (sfs-common.sh::auto_commit_close) 은 사용자 명시 호출 시에만 동작 (§1.5' 정합).
 #
 # Output (1~3 lines):
@@ -164,7 +164,7 @@ if [[ "${CLOSE}" -eq 1 ]]; then
   update_frontmatter "${RETRO_PATH}" "closed_at" "${NOW}"
 
   # Completed sprint artifact lifecycle:
-  # report.md becomes the final work artifact; workbench docs become stubs.
+  # report.md becomes the final work artifact; workbench docs move to archive.
   REPORT_PATH="$(sfs_prepare_sprint_report "${SPRINT_ID}" "${NOW}" "final")"
   sprint_close "${SPRINT_DIR}" "${NOW}"
   sfs_compact_sprint_workbench "${SPRINT_ID}" "${NOW}"
