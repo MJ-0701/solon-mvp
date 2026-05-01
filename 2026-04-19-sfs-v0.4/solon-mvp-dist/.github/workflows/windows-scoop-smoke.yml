@@ -64,7 +64,8 @@ jobs:
           git -C $bucket add bucket/sfs.json
           git -C $bucket commit -m "test bucket"
 
-          "SFS_TEST_BUCKET=$bucket" >> $env:GITHUB_ENV
+          $bucketUrl = "file:///" + (($bucket -replace "\\", "/") -replace " ", "%20")
+          "SFS_TEST_BUCKET_URL=$bucketUrl" >> $env:GITHUB_ENV
 
       - name: Install Scoop
         run: |
@@ -77,7 +78,7 @@ jobs:
       - name: Install SFS from local bucket
         run: |
           $env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"
-          scoop bucket add solon $env:SFS_TEST_BUCKET
+          scoop bucket add solon $env:SFS_TEST_BUCKET_URL
           scoop install sfs
           Get-Command sfs
           sfs version
