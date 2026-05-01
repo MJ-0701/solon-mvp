@@ -1,7 +1,7 @@
 ---
 task_id: loopq-20260501T011540Z-8404
 title: "[claude] cpo review model profile contract"
-status: claimed
+status: done
 priority: 3
 mode: user-active-deferred
 sprint_id: "solon-loop-queue-mvp"
