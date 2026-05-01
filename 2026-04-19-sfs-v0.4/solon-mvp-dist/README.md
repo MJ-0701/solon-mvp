@@ -588,3 +588,40 @@ Product release publish 는 Homebrew tap 과 Scoop bucket 을 같은 tag 로 갱
 manifest URL/hash 가 모두 같은 `v<VERSION>` 을 가리키는지 확인합니다.
 
 릴리스 기록은 [CHANGELOG.md](./CHANGELOG.md) 를 참조하세요.
+
+---
+
+## 약어 사전 (Acronym Glossary)
+
+| 약어 | 풀네임 | 이 프로젝트에서의 의미 |
+|---|---|---|
+| **ADR** | Architecture Decision Record | 중요한 제품/기술 결정을 `Context / Decision / Alternatives / Consequences` 형태로 남기는 기록. SFS 에서는 `/sfs decision` 이 ADR-style decision file 을 만든다. |
+| **AC** | Acceptance Criteria | 요구사항이 완료됐다고 볼 수 있는 구체적 검수 조건. `/sfs plan` 에서 구현 slice 와 review 기준으로 내려간다. |
+| **API** | Application Programming Interface | 시스템/서비스/모듈 간 호출 계약. 외부 API, OpenAPI, internal API 모두 이 범주로 다룬다. |
+| **CEO** | Chief Executive Officer | Solon 의 전략/요구사항/scope 관점 persona. 작은 조직에서 "무엇을 할지"를 정리하는 역할이다. |
+| **CLI** | Command Line Interface | 터미널에서 실행하는 명령 인터페이스. 예: `sfs status`, `sfs plan`, `/sfs review`. |
+| **CPO** | Chief Product Officer | 제품 가치와 사용자 영향 관점의 evaluator persona. review 에서 verdict 와 CTO action 을 남긴다. |
+| **CTO** | Chief Technology Officer | 기술 설계/구현 책임 persona. CPO review 결과를 받아 구현 수정과 최종 정리를 담당한다. |
+| **DDD** | Domain-Driven Design | 도메인 언어와 모델을 먼저 정렬한 뒤 코드를 설계하는 방식. SFS implement guardrail 의 일부다. |
+| **DoD** | Definition of Done | 완료 정의. 코드 변경, 테스트 evidence, review, report/retro 등 작업별 종료 조건을 뜻한다. |
+| **G-1, G0~G5** | Gate IDs | Solon 의 검증 지점. G-1 intake, G0 brainstorm, G1 plan, G2 design/entry, G3 handoff, G4 check, G5 retro. |
+| **GUI** | Graphical User Interface | 그래픽 기반 화면 인터페이스. Solon 은 CLI first 이고 GUI 는 optional/product expansion 영역이다. |
+| **JSONL** | JSON Lines | 한 줄에 JSON 객체 하나씩 쌓는 로그 형식. `.sfs-local/events.jsonl` 이 대표 예시다. |
+| **L1 / L2 / L3** | Log / Docs / Driver channels | Observability 3채널. L1은 events, L2는 git docs SSoT, L3는 Notion/Obsidian 같은 외부 driver view. |
+| **LLM** | Large Language Model | Claude, Codex, Gemini 같은 AI 모델/runtime. SFS 는 여러 LLM runtime 이 같은 문서 계약을 읽도록 맞춘다. |
+| **MCP** | Model Context Protocol | Claude/Codex 등에서 외부 도구나 데이터 소스를 연결하는 프로토콜/connector 계층. |
+| **MVP** | Minimum Viable Product | 가장 작은 검증 가능한 제품 범위. SFS 에서는 과한 절차를 MVP filter 로 접고 핵심 evidence 만 남긴다. |
+| **OSS** | Open Source Software | 공개 가능한 오픈소스 트랙. private/business-only 자산과 구분해 관리한다. |
+| **PDCA** | Plan / Do / Check / Act | 계획, 실행, 검증, 회고의 작업 사이클. Solon sprint 안의 기본 흐름이다. |
+| **PII** | Personally Identifiable Information | 개인 식별 정보. release readiness 에서 secret/auth/data risk 와 함께 점검한다. |
+| **PM** | Product Manager | 요구사항, 우선순위, acceptance criteria 를 정리하는 제품 관리 역할. Solon 에서는 strategy-pm division 으로 표현된다. |
+| **PRD** | Product Requirements Document | 제품 요구사항 문서. 사용자의 의도와 scope 를 구현 가능한 계약으로 바꾼 산출물이다. |
+| **QA** | Quality Assurance | 품질 검증 역할/본부. 테스트 시나리오, review evidence, release readiness 를 점검한다. |
+| **RBAC** | Role-Based Access Control | 역할 기반 권한 모델. 관리자/매니저/뷰어 같은 권한 설계를 말할 때 쓰인다. |
+| **S3** | Simple Storage Service | AWS 의 object storage. 문서에서는 L1 event 저장소 예시로 등장한다. |
+| **SFS** | Solo Founder System | Solon Product 의 실행 시스템 이름. `/sfs` command, sprint flow, decision/review/retro 구조를 포함한다. |
+| **SSoT** | Single Source of Truth | 유일 정보원. 규칙이나 상태가 여러 곳에 흩어질 때 최종 기준으로 삼는 원본 문서/파일을 뜻한다. |
+| **TDD** | Test-Driven Development | 테스트를 먼저 또는 아주 작은 검증 loop 로 두고 구현하는 방식. SFS implement guardrail 의 일부다. |
+| **UI / UX** | User Interface / User Experience | 화면 구성과 사용자 경험. taxonomy/design/dev 산출물이 함께 맞춰야 하는 영역이다. |
+| **WIP** | Work In Progress | 아직 완료되지 않은 진행 중 작업. SFS 는 WIP 를 sprint workbench 문서와 event log 로 남긴다. |
+| **WU** | Work Unit | 작업 단위. `/sfs status` 의 WU 는 현재 sprint 안에서 진행 중인 작은 실행 단위를 가리킨다. |
