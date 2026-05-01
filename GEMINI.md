@@ -51,6 +51,10 @@ adapter stdout 을 먼저 그대로 보여준 뒤, Gemini 는 `plan.md`, `implem
 프로젝트 파일을 읽고 구현까지 진행한다.
 
 구현 기본값:
+- Think Before Coding: 가정, trade-off, 성공 기준을 짧게 잡고 모호하면 질문한다.
+- Simplicity First: AC 를 증명하는 최소 code/document surface 로 구현한다.
+- Surgical Changes: 요청 slice 와 직접 연결된 줄만 바꾸고, 관련 없는 정리는 follow-up 으로 남긴다.
+- Goal-Driven Execution: 변경 파일만으로 완료 처리하지 않고 검증 evidence + review handoff 까지 남긴다.
 - 공유 design concept 과 변경 boundary 를 먼저 확인한다.
 - DDD-lite 로 같은 domain term 을 코드/테스트/문서에서 같은 뜻으로 쓴다.
 - 가능하면 TDD-lite 로 작은 failing/covering test → pass → refactor 순서로 간다.

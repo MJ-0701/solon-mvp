@@ -18,11 +18,15 @@ last_touched_at: ""
 
 ---
 
-## §0. AI Coding Guardrails — Design / DDD / TDD
+## §0. AI Coding Guardrails — Harness / Design / DDD / TDD
 
 AI coding fails when it optimizes for the nearest change while ignoring the
 system design. Treat bad code as expensive: unclear domain language, weak tests,
 and irregular structure make future AI edits worse.
+
+The first four guardrails are mandatory for code implementation, not just for
+the final report. `/sfs implement` is complete only when the code slice is
+small, scoped, verified, and ready to summarize.
 
 - **Think before coding**: name assumptions, trade-offs, and success criteria
   before editing when the request is ambiguous.

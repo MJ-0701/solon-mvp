@@ -197,20 +197,25 @@ Solon 에서 첫 구현은 "스펙을 던지고 코드가 나오길 기다리는
 
 첫 coding sprint 는 아래 순서로 작게 시작한다:
 
-1. **기존 코드베이스 규칙 확인**
+1. **하네스 4원칙 고정**
+   - Think Before Coding: 가정/선택지/성공 기준을 짧게 잡고 모호하면 질문한다.
+   - Simplicity First: AC 를 증명하는 최소 code/document surface 로 간다.
+   - Surgical Changes: 요청 slice 와 직접 연결된 줄만 바꾼다.
+   - Goal-Driven Execution: 구현 + 검증 evidence + review handoff 까지를 완료 기준으로 둔다.
+2. **기존 코드베이스 규칙 확인**
    - "이 프로젝트의 폴더 구조, naming, 테스트 방식, 상태 관리 방식, API 호출 패턴을 요약해줘."
    - 새 구조를 만들기 전에 기존 규칙을 먼저 따른다.
-2. **도메인 용어 고정 (DDD-lite)**
+3. **도메인 용어 고정 (DDD-lite)**
    - `plan.md` 에 핵심 명사/행위자/상태/규칙을 적는다.
    - 예: `Course`, `Week`, `Artifact`, `ExamRange`, `GateSession`.
    - AI 에게 "이 용어를 코드와 설명에서 같은 의미로 써라" 고 지시한다.
-3. **테스트 계약 먼저 만들기 (TDD-lite)**
+4. **테스트 계약 먼저 만들기 (TDD-lite)**
    - 구현 전에 "어떤 동작이 통과하면 끝인가" 를 3~5개로 적는다.
    - 유닛 테스트가 어려우면 smoke check, browser check, CLI command output check 도 가능하다.
-4. **가장 작은 slice 구현**
+5. **가장 작은 slice 구현**
    - 한 번에 feature 전체를 만들지 않는다.
    - 하나의 AC 를 증명하는 최소 변경만 한다.
-5. **review 에서 코드보다 의도를 검증**
+6. **review 에서 코드보다 의도를 검증**
    - "컴파일됨" 이 아니라 domain intent, codebase regularity, test feedback, user-visible behavior 를 본다.
 
 ```text
@@ -220,7 +225,7 @@ AI-safe first slice =
 existing pattern + domain term + test contract + one small behavior + review action
 ```
 
-DDD/TDD 는 여기서 거창한 방법론이 아니라 AI 가 코드를 망가뜨리지 않게 하는 안전장치다.
+하네스 4원칙과 DDD/TDD 는 여기서 거창한 방법론이 아니라 AI 가 코드를 망가뜨리지 않게 하는 안전장치다.
 
 ---
 
@@ -329,7 +334,7 @@ native slash UI 에서 `커맨드 없음` 으로 막힐 수 있으므로 `$sfs .
 | `/sfs auth status` | Codex/Claude/Gemini review executor 인증 확인 |
 | `/sfs auth probe --executor gemini --timeout 20` | bridge request/response 더미 확인 |
 | `/sfs plan` | 현 sprint 의 의도/경계 + G1 요구사항/AC + CTO/CPO 계약 작성 |
-| `/sfs implement [work slice]` | plan 기반 실제 코드 변경 + DDD/TDD guardrail + evidence 기록 |
+| `/sfs implement [work slice]` | plan 기반 실제 코드 변경 + 하네스 4원칙 + DDD/TDD guardrail + evidence 기록 |
 | `/sfs review --gate G4 --executor codex` | 리뷰할 evidence 가 있을 때 CPO review bridge 실행 + 결과 기록 |
 | `/sfs review --show-last` | executor 재실행 없이 마지막 CPO review 결과를 요약/action report 로 확인 |
 | `/sfs decision <title>` | ADR-style 결정 기록 + AI runtime 에서 ADR 본문 작성 |

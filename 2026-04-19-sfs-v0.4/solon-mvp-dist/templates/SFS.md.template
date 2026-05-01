@@ -50,24 +50,36 @@
 /sfs report --sprint <sprint-id> --compact
 ```
 
-### AI coding contract — DDD/TDD 기본값
+### AI coding contract — Harness + DDD/TDD 기본값
 
 AI coding 은 좋은 코드베이스에서만 빠르다. 구조가 불규칙하고 도메인 언어가 흐린 코드베이스에서는
 AI 가 local patch 를 반복하면서 software entropy 를 키울 수 있다. 이 프로젝트에서 Solon 으로
-코드를 만들 때는 DDD/TDD 를 heavy ceremony 가 아니라 기본 안전장치로 사용한다.
+코드를 만들 때는 하네스 4원칙과 DDD/TDD 를 heavy ceremony 가 아니라 기본 안전장치로 사용한다.
 
-1. **Codebase analysis 먼저**
+1. **Think Before Coding**
+   - 구현 전 가정, 선택지, trade-off, 성공 기준을 짧게 고정한다.
+   - 모호하면 임의로 해석하지 않고 질문한다.
+2. **Simplicity First**
+   - 하나의 AC 를 증명하는 최소 code/document surface 로 구현한다.
+   - 미래 확장성, 설정, 추상화는 지금 필요한 경우에만 둔다.
+3. **Surgical Changes**
+   - 요청 slice 와 직접 연결된 코드/문서만 바꾼다.
+   - 관련 없는 cleanup 은 삭제하지 않고 follow-up 또는 report risk 로 남긴다.
+4. **Goal-Driven Execution**
+   - 완료 기준은 변경량이 아니라 구현 + 검증 evidence + review handoff 다.
+   - 구현 중 메모는 workbench 에 남겨도 되지만 완료 후 핵심은 `report.md` 로 압축한다.
+5. **Codebase analysis 먼저**
    - 새 코드를 만들기 전에 기존 폴더 구조, naming, 테스트 방식, 상태/API 패턴을 요약한다.
    - 기존 규칙과 다르게 가야 하면 `plan.md` 또는 decision file 에 이유를 남긴다.
-2. **DDD-lite domain language**
+6. **DDD-lite domain language**
    - `brainstorm.md` / `plan.md` 에 핵심 명사, 행위자, 상태, invariant 를 고정한다.
    - 같은 단어는 코드, 테스트, review 에서 같은 뜻으로 쓴다.
-3. **TDD-lite test contract**
+7. **TDD-lite test contract**
    - 구현 전 acceptance criteria 를 test 후보로 바꾼다.
    - unit test 가 과하면 smoke test, CLI output check, browser check 로 대체해도 된다.
-4. **Small implementation slice**
+8. **Small implementation slice**
    - 한 번에 큰 feature 를 만들지 않고, 하나의 AC 를 증명하는 최소 변경부터 구현한다.
-5. **Review gate**
+9. **Review gate**
    - CPO review 는 "코드가 많다" 가 아니라 domain intent, test feedback, codebase regularity,
      user-visible behavior 를 기준으로 verdict/action 을 남긴다.
 

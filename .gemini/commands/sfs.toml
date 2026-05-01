@@ -214,9 +214,13 @@ been shown verbatim, continue into actual implementation unless blocked.
 2. Read `plan.md`, `implement.md`, `log.md`, and relevant project files. If the
    requested slice conflicts with the plan, state the conflict and ask before
    editing.
-3. Apply the AI coding guardrails from `implement.md`: shared design concept,
-   DDD terms, TDD or smallest useful verification loop, and existing codebase
-   regularity.
+3. Apply the harness guardrails from `implement.md` before editing code:
+   Think Before Coding, Simplicity First, Surgical Changes, and Goal-Driven
+   Execution. State assumptions/trade-offs/success criteria, keep the code and
+   document surface small, connect every changed line to the requested slice,
+   and require verification evidence plus review handoff before completion.
+   Then preserve shared design concept, DDD language, TDD or the smallest
+   useful verification loop, and existing codebase regularity.
 4. Implement the smallest coherent code slice. Prefer test-first when a usable
    test harness exists; otherwise run the smallest practical smoke check and
    record the limitation.
