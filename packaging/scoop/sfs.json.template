@@ -1,0 +1,35 @@
+{
+  "version": "__VERSION__",
+  "description": "Solon Product SFS runtime for AI-native product work",
+  "homepage": "https://github.com/MJ-0701/solon-product",
+  "license": "Proprietary",
+  "architecture": {
+    "64bit": {
+      "url": "__URL__",
+      "hash": "__SHA256__",
+      "extract_dir": "__EXTRACT_DIR__"
+    }
+  },
+  "bin": [
+    [
+      "bin\\sfs.cmd",
+      "sfs"
+    ]
+  ],
+  "checkver": {
+    "github": "https://github.com/MJ-0701/solon-product",
+    "regex": "v([\\d.]+-product)"
+  },
+  "autoupdate": {
+    "architecture": {
+      "64bit": {
+        "url": "https://github.com/MJ-0701/solon-product/archive/refs/tags/v$version.zip",
+        "extract_dir": "solon-product-$version"
+      }
+    }
+  },
+  "notes": [
+    "Solon SFS on Windows requires Git for Windows/Git Bash. If bash.exe is not on PATH, set SFS_BASH to the full bash.exe path.",
+    "First-time project setup: cd <project>; git init; sfs init --layout thin --yes; sfs status; sfs agent install all."
+  ]
+}
