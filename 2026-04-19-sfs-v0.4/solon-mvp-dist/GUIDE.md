@@ -230,10 +230,14 @@ Solon 에서 첫 구현은 "스펙을 던지고 코드가 나오길 기다리는
 4. **테스트 계약 먼저 만들기 (TDD-lite)**
    - 구현 전에 "어떤 동작이 통과하면 끝인가" 를 3~5개로 적는다.
    - 유닛 테스트가 어려우면 smoke check, browser check, CLI command output check 도 가능하다.
-5. **가장 작은 slice 구현**
+5. **Solon division guardrails 분류**
+   - strategy-pm, taxonomy, design/frontend, dev/backend, QA, infra 를 always-on / trigger-based / scale-gated 로 짧게 분류한다.
+   - Backend Transaction discipline 은 always-on 이다. DB, Spring/JPA, Spring Batch, external API, MQ/event, idempotency, state, consistency path 가 닿으면 Transaction boundary, `REQUIRES_NEW`, JPA first-level cache, Batch chunk TX, outbox/idempotency/order/history, Hikari pool pressure, test depth 를 확인한다.
+   - Security / Infra / DevOps 는 sprint/project scope 에서 `light` / `full` / `skip` 만 묻는다. MVP-overkill 은 구현을 막지 말고 `deferred` 또는 `risk-accepted` 로 기록한다.
+6. **가장 작은 slice 구현**
    - 한 번에 feature 전체를 만들지 않는다.
    - 하나의 AC 를 증명하는 최소 변경만 한다.
-6. **review 에서 코드보다 의도를 검증**
+7. **review 에서 코드보다 의도를 검증**
    - "컴파일됨" 이 아니라 domain intent, codebase regularity, test feedback, user-visible behavior 를 본다.
 
 ```text
@@ -353,7 +357,7 @@ native slash UI 에서 `커맨드 없음` 으로 막힐 수 있으므로 `$sfs .
 | `/sfs auth probe --executor gemini --timeout 20` | bridge request/response 더미 확인 |
 | `/sfs adopt [--apply]` | legacy 프로젝트 인수인계 baseline 생성. 문서 과잉은 기존 sprint/archive tree 를 cold archive 로 접고, 문서 0은 report-first baseline 복원 |
 | `/sfs plan` | 현 sprint 의 의도/경계 + G1 요구사항/AC + CTO/CPO 계약 작성 |
-| `/sfs implement [work slice]` | plan 기반 실제 코드 변경 + 하네스 4원칙 + DDD/TDD guardrail + evidence 기록 |
+| `/sfs implement [work slice]` | plan 기반 실제 코드 변경 + 하네스 4원칙 + DDD/TDD guardrail + 6-division guardrail ledger + evidence 기록 |
 | `/sfs review --gate G4 --executor codex` | 리뷰할 evidence 가 있을 때 CPO review bridge 실행 + 결과 기록 |
 | `/sfs review --show-last` | executor 재실행 없이 마지막 CPO review 결과를 요약/action report 로 확인 |
 | `/sfs decision <title>` | ADR-style 결정 기록 + AI runtime 에서 ADR 본문 작성 |
