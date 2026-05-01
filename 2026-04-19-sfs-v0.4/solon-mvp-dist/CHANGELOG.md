@@ -1,3 +1,26 @@
+## [0.5.49-product] - 2026-05-01
+
+**Legacy project adoption.** SFS can now take over projects that predate SFS,
+including both over-documented repos and repos with almost no documentation, by
+creating a compact report-first baseline from git/code/docs signals.
+
+### Added
+
+- **`sfs adopt` command** — dry-run by default; with `--apply`, creates a
+  `legacy-baseline` sprint containing only `report.md` and `retro.md` as the
+  visible handoff entry.
+- **Archived adoption evidence** — raw scan details such as recent commits,
+  stack signals, high-change paths, docs/test counts, and submodule signals are
+  preserved under `.sfs-local/archives/adopt/` instead of expanding the visible
+  sprint folder.
+
+### Changed
+
+- **Legacy onboarding guidance** — README, GUIDE, SFS docs, and agent adapters
+  now describe report-first adoption before starting the first real SFS sprint.
+- **Adapter surface** — global CLI, vendored dispatch, upgrade packaging, Claude,
+  Codex, and Gemini adapters recognize `adopt` as a first-class SFS command.
+
 ## [0.5.48-product] - 2026-05-01
 
 **Persist agent model profile selections.** Fixes a regression where choosing

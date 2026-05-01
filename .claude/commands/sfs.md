@@ -11,6 +11,7 @@ description: |
   start     새 sprint workspace 초기화 (bash adapter)
   guide     사용 맥락 브리핑/guide 출력
   auth      Codex/Claude/Gemini review executor 인증 확인/로그인
+  adopt     legacy 프로젝트 report-first baseline 인수인계
   upgrade   package manager runtime 최신화 + project adapter/docs 갱신
   version   현재 설치 버전 확인 (`--check` 로 최신 product tag 비교)
   brainstorm G0 raw 요구사항/대화 맥락 기록
@@ -67,7 +68,7 @@ for the documented hybrid/conditional flows below.
 
 ### Solon Report Output Rule
 
-For hybrid commands (`brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`) and adapter-run
+For hybrid commands (`adopt`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`) and adapter-run
 `review`, the final answer must be a **Solon report**, not a plain bullet list
 such as `plan.md refined: ...`. Put the whole report in a fenced `text` block.
 Render the report in the user's visible language (for example, Korean for a
@@ -124,9 +125,9 @@ token as the subcommand and the remainder as that subcommand's arguments.
 $ARGUMENTS
 ```
 
-## Adapter Dispatch (status / start / guide / auth / brainstorm / plan / implement / review / decision / report / tidy / retro / commit / loop) — execute first
+## Adapter Dispatch (status / start / guide / auth / adopt / brainstorm / plan / implement / review / decision / report / tidy / retro / commit / loop) — execute first
 
-If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`upgrade`**, **`update`**, **`version`**, **`brainstorm`**, **`plan`**, **`implement`**, **`review`**,
+If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`adopt`**, **`upgrade`**, **`update`**, **`version`**, **`brainstorm`**, **`plan`**, **`implement`**, **`review`**,
 **`decision`**, **`report`**, **`tidy`**, **`retro`**, **`commit`**, or **`loop`**, dispatch the request through the
 `sfs` runtime command first. The runtime normalizes command surfaces
 (`/sfs`, `$sfs`, `sfs`) and delegates to the deterministic bash adapter. In
@@ -139,7 +140,7 @@ Command modes:
 - **Conditional hybrid**: `tidy`. Run the adapter first. If it created or
   touched `report.md`, read archived workbench/tmp sources and refine the
   report before answering.
-- **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`. Run the adapter,
+- **Always hybrid**: `adopt`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`. Run the adapter,
   then perform the documented file refinement.
 - **Adapter-run**: `review`. The bash adapter executes the selected CPO
   executor bridge by default. Stop after adapter output. If `--prompt-only` is
@@ -192,6 +193,7 @@ Dispatch table:
 | `upgrade`  | `sfs upgrade <remaining args>`  | upgrades package-manager runtime first, then updates managed project adapter/docs; preserves sprint/decision/event history |
 | `update`   | `sfs update <remaining args>`   | compatibility alias; prefer `upgrade` in new docs/responses |
 | `version`  | `sfs version <remaining args>`  | prints installed version; `--check` compares with the latest published product tag |
+| `adopt`    | `sfs adopt <remaining args>`    | legacy project intake. creates report-first baseline from git/code/docs; raw scan evidence is archived |
 | `brainstorm` | `sfs brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then Claude fills §1~§7 as Solon CEO |
 | `plan`     | `sfs plan <remaining args>`     | opens plan.md, then Claude fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
 | `implement` | `sfs implement <remaining args>` | opens implement.md/log.md, then Claude performs actual code changes with DDD/TDD guardrails and records evidence |
@@ -541,6 +543,7 @@ When showing usage, keep it compact and practical. Include this shape:
 /sfs start <goal>         새 sprint workspace 초기화
 /sfs guide                처음 사용 맥락 브리핑
 /sfs auth status          review executor 인증 상태 확인
+/sfs adopt --apply        legacy 프로젝트 report-first baseline 생성
 /sfs version --check      현재/최신 배포 버전 비교
 /sfs upgrade              runtime 최신화 + project adapter/docs 갱신
 /sfs brainstorm <context> G0 raw 기록 + CEO 맥락 정리

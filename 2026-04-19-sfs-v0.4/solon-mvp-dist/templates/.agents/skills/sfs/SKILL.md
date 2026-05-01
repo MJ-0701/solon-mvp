@@ -1,6 +1,6 @@
 ---
 name: sfs
-description: Solon SFS (Solo Founder System) workflow for Codex — use $sfs status/start/guide/auth/upgrade/version/brainstorm/plan/implement/review/decision/report/tidy/retro/commit/loop or natural language to dispatch to bash adapter SSoT; brainstorm/plan/implement/decision/report/retro are AI-hybrid refinements, review is adapter-run by default through the selected CPO executor bridge, tidy is archive-first workbench migration with conditional report refinement, commit is adapter-run local git grouping/commit. Trigger when a Codex surface delivers $sfs, sfs <command>, /sfs text that reaches the model, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "upgrade", "version check", "sprint 시작", "브레인스토밍", "plan 작성", "구현", "implement", "review 작성", "decision 기록", "report 작성", "tidy 정리", "retro close", "commit 정리", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
+description: Solon SFS (Solo Founder System) workflow for Codex — use $sfs status/start/guide/auth/adopt/upgrade/version/brainstorm/plan/implement/review/decision/report/tidy/retro/commit/loop or natural language to dispatch to bash adapter SSoT; adopt/brainstorm/plan/implement/decision/report/retro are AI-hybrid refinements, review is adapter-run by default through the selected CPO executor bridge, tidy is archive-first workbench migration with conditional report refinement, commit is adapter-run local git grouping/commit. Trigger when a Codex surface delivers $sfs, sfs <command>, /sfs text that reaches the model, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "upgrade", "version check", "legacy 인수인계", "기존 프로젝트 SFS 도입", "sprint 시작", "브레인스토밍", "plan 작성", "구현", "implement", "review 작성", "decision 기록", "report 작성", "tidy 정리", "retro close", "commit 정리", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
 ---
 
 # Solon SFS — Codex Skill
@@ -20,7 +20,7 @@ Command modes are explicit:
 - **Conditional hybrid**: `tidy`. Run the adapter first. If it created or
   touched `report.md`, read archived workbench/tmp sources and refine `report.md`
   into the final report before answering.
-- **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`. Run the
+- **Always hybrid**: `adopt`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`. Run the
   adapter first, then perform the documented AI-side file refinement.
 - **Adapter-run**: `review`. The bash adapter executes the selected CPO
   executor bridge by default. Stop after adapter output. If `--prompt-only` is
@@ -79,7 +79,7 @@ handoff.
 
 ## Solon Report Output Rule
 
-For hybrid commands (`brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`) and adapter-run
+For hybrid commands (`adopt`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`) and adapter-run
 `review`, the final answer must be a **Solon report**, not a plain bullet list
 such as `plan.md refined: ...`. Put the whole report in a fenced `text` block.
 Render the report in the user's visible language (for example, Korean for a
@@ -140,6 +140,7 @@ not create a new verdict in the current runtime.
 | `upgrade [--skip-existing] [--interactive]` (또는 "Solon 업데이트", "adapter 갱신") | `sfs upgrade [--skip-existing] [--interactive]` | package manager runtime 을 먼저 최신화한 뒤 managed adapter/docs 갱신. sprint/decision/event history 보존 |
 | `update [--skip-existing]` | `sfs update [--skip-existing]` | 하위 호환 alias. 새 문서/응답에서는 `upgrade` 를 권장 |
 | `version [--check]` (또는 "버전 확인", "새 버전 확인") | `sfs version [--check]` | 현재 설치 버전 출력. `--check` 는 GitHub 최신 product tag 와 비교 |
+| `adopt [--id legacy-baseline] [--apply]` (또는 "legacy 인수인계", "기존 프로젝트 SFS 도입") | `sfs adopt [--id legacy-baseline] [--apply]` | legacy 프로젝트를 report-first baseline 으로 인계. 문서 과잉이면 남길 것만 남기고, 문서 0이면 git/code/test/docs 흔적에서 최소 baseline 복원. raw scan 은 archive 보존 |
 | `brainstorm [text|--stdin]` (또는 "브레인스토밍", "요구사항 정리") | `sfs brainstorm <raw context>` | G0 raw 요구사항/대화 맥락을 brainstorm.md 에 기록한 뒤 §1~§7을 Solon CEO로 정리. newline 허용 |
 | `plan` (또는 "plan 작성", "이번 sprint 계획") | `sfs plan` | plan.md 진입 + plan_open event 후 brainstorm.md 기반 G1 plan/contract 작성 |
 | `implement [work slice|--stdin]` (또는 "구현", "코드 구현", "실제 작업") | `sfs implement <work slice>` | implement.md/log.md 진입 후 plan 기반으로 실제 코드 변경 + 테스트/스모크 evidence 작성. 여기서 멈추지 말고 구현까지 진행 |
@@ -212,6 +213,7 @@ not create a new verdict in the current runtime.
    must preserve adapter stdout exactly. A compact Solon recap/status is allowed
    only when it adds state or the next action, and must not contradict the
    sprint mode. Hybrid commands continue only via the documented flow below:
+   - `adopt` → Legacy Adopt Refinement
    - `brainstorm` → Brainstorm CEO Refinement
    - `plan` → Plan G1 Refinement
    - `implement` → Implementation Execution
@@ -224,6 +226,25 @@ not create a new verdict in the current runtime.
    - `review` → Review CPO Handling. Use adapter stdout as metadata, read the
     recorded result path when present, then render a localized Solon report
     from recorded adapter/executor evidence only. Do not echo raw result bodies.
+
+## Legacy Adopt Refinement
+
+`/sfs adopt` is report-first legacy intake. After the adapter succeeds and
+stdout has been shown verbatim:
+
+1. Resolve `report.md`, `retro.md`, and archive source-summary paths from stdout.
+2. Read the generated `report.md` and archived `source-summary.txt`.
+3. Refine `report.md` only enough to make it a durable baseline:
+   - separate evidence-backed facts from AI inference.
+   - preserve the invariant: visible sprint folder should stay `report.md` +
+     `retro.md` only, not recreated workbench docs.
+   - handle both extremes: over-documented projects and undocumented projects.
+   - keep raw chronology in the archive/retro, not in the report body.
+4. Do not scan the whole repo exhaustively unless the user asks. The first
+   baseline should make the next sprint possible, not complete archaeology.
+5. Final response: render a Solon report. Include report/retro/archive paths in
+   `Files`, note whether baseline verification still needs to run, and set
+   `Next` to a first real sprint or baseline verification.
 
 ## Brainstorm CEO Refinement
 
@@ -443,7 +464,7 @@ Print this 3-line usage and stop:
 
 ```
 Usage: /sfs <command> [args]
-Commands: status, start, guide, auth, upgrade, version, brainstorm, plan, implement, review, decision, report, tidy, retro, commit, loop
+Commands: status, start, guide, auth, adopt, upgrade, version, brainstorm, plan, implement, review, decision, report, tidy, retro, commit, loop
 Help: sfs <command> --help
 ```
 

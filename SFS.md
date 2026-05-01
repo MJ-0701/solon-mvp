@@ -230,6 +230,7 @@ Solon SFS 의 주요 명령은 어떤 CLI 환경에서 호출하든 동일한 `s
 | `/sfs auth status|check|login|probe [--executor codex|gemini|claude]` | review executor 인증 확인/로그인/더미 요청 |
 | `/sfs version [--check]` | 현재 설치 버전 및 최신 배포 태그 확인 |
 | `/sfs upgrade [--skip-existing] [--interactive]` | package manager runtime 최신화 + 프로젝트 adapter/docs 갱신 (`update` 는 하위 호환 alias) |
+| `/sfs adopt [--id legacy-baseline] [--apply]` | SFS 없이 진행된 legacy 프로젝트를 git/code/docs 기반으로 인계. 문서가 과잉이어도 0개여도 `report.md` + `retro.md` 만 visible baseline 으로 남기고 raw scan 은 archive 보존 |
 | `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락 기록 + Solon CEO 맥락 정리 |
 | `/sfs plan` | 현재 sprint plan.md 진입 + `plan_open` event 후 G1 요구사항/AC/scope + CTO/CPO sprint contract 작성 |
 | `/sfs implement [work slice|--stdin]` | plan 기반 실제 코드 변경 + DDD/TDD guardrail + `implement.md`/`log.md` evidence 기록 |

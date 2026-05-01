@@ -45,6 +45,7 @@ Claude Code 의 native slash 진입점은 `.claude/commands/sfs.md` 가 자동 i
 | `/sfs start <goal> [--id <sprint-id>] [--force]` | `sfs start <goal> [--id <sprint-id>] [--force]` |
 | `/sfs guide [--path|--print]` | `sfs guide [--path|--print]` |
 | `/sfs auth status|check|login|probe [--executor <tool>]` | `sfs auth status|check|login|probe [--executor <tool>]` |
+| `/sfs adopt [--id legacy-baseline] [--apply]` | `sfs adopt [--id legacy-baseline] [--apply]`; legacy 프로젝트를 report-first baseline 으로 인계. 문서 과잉/문서 0 양쪽 모두 raw scan 은 archive, visible 은 `report.md` + `retro.md` |
 | `/sfs brainstorm [text|--stdin]` | `sfs brainstorm [text|--stdin]` raw capture 후 Claude 가 Solon CEO 로 §1~§7 정리 |
 | `/sfs plan` | `sfs plan` 후 Claude 가 `brainstorm.md` 기반 G1 plan + CTO/CPO contract 작성 |
 | `/sfs implement [work slice|--stdin]` | `sfs implement [work slice|--stdin]` 후 Claude 가 `plan.md` 기반 실제 코드 변경 + 테스트/스모크 evidence 작성 |
@@ -61,7 +62,7 @@ stdout / stderr / exit code 는 verbatim 보고한다 (paraphrase 금지).
 
 명령 모드는 고정이다:
 - **Bash-only**: `status`, `start`, `guide`, `auth`, `upgrade`, `update`, `version`, `loop`.
-- **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`.
+- **Always hybrid**: `adopt`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`.
 - **Conditional hybrid**: `tidy` — adapter apply 후 report.md 를 archive source 기반으로 정제한다.
 - **Adapter-run**: `review` — 기본적으로 bash adapter 가 선택된 CPO executor bridge 를 실행하고 stdout 에는 verdict/output path 메타데이터만 보여준다. Claude 는 result 원문을 그대로 덤프하지 않고 사용자 언어로 요약/action report 를 렌더링한다. `--prompt-only` 일 때도 현재 Claude runtime 이 대신 verdict 를 작성하지 않고 prompt handoff 로 멈춘다.
 

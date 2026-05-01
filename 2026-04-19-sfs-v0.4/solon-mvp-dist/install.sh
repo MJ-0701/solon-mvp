@@ -756,6 +756,7 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
      원하면 worker/helper 도 high-end 로 바꿔도 됩니다.
 
   ${C_BOLD}3.${C_RESET} 선호 런타임에서 시작:
+     ${C_BLUE}legacy repo${C_RESET} → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs adopt --apply${C_RESET} → ${C_BLUE}/sfs start${C_RESET}
      ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET} → ${C_BLUE}/sfs implement${C_RESET} → ${C_BLUE}/sfs report${C_RESET}
      ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET} → ${C_BLUE}/sfs implement${C_RESET} → ${C_BLUE}/sfs report${C_RESET}
      ${C_BLUE}codex${C_RESET}      → ${C_BLUE}\$sfs status${C_RESET} → ${C_BLUE}\$sfs start${C_RESET} → ${C_BLUE}\$sfs brainstorm${C_RESET} → ${C_BLUE}\$sfs plan${C_RESET} → ${C_BLUE}\$sfs implement${C_RESET} → ${C_BLUE}\$sfs report${C_RESET}

@@ -45,16 +45,17 @@ Solon 의 10x 가치는 AI 가 코드를 더 많이 쓰게 하는 데 있지 않
 ## How It Works
 
 1. 기존 프로젝트에 Solon Product 를 설치합니다.
-2. `/sfs start <goal>` 로 sprint workspace 를 만듭니다.
-3. 새 요구를 탐색하는 planning sprint 라면 `/sfs brainstorm` 으로 raw 요구사항을 G0 산출물에 남기고, Solon CEO 가 문제/제약/옵션/scope seed/plan seed 를 정리합니다.
-4. `/sfs plan` 에서 `plan.md ready` handshake 후 `brainstorm.md` 를 읽고 CEO plan 과 CTO/CPO sprint contract 를 남깁니다. 이때 공유 design concept, domain language, acceptance criteria, test contract 를 작은 구현 단위로 내립니다.
+2. 이미 오래 진행된 legacy 프로젝트라면 먼저 `/sfs adopt --apply` 로 git/code/docs 기반 baseline 을 만듭니다. 문서가 너무 많아도, 문서가 하나도 없어도, visible entry 는 `report.md` + `retro.md` 만 남깁니다.
+3. `/sfs start <goal>` 로 sprint workspace 를 만듭니다.
+4. 새 요구를 탐색하는 planning sprint 라면 `/sfs brainstorm` 으로 raw 요구사항을 G0 산출물에 남기고, Solon CEO 가 문제/제약/옵션/scope seed/plan seed 를 정리합니다.
+5. `/sfs plan` 에서 `plan.md ready` handshake 후 `brainstorm.md` 를 읽고 CEO plan 과 CTO/CPO sprint contract 를 남깁니다. 이때 공유 design concept, domain language, acceptance criteria, test contract 를 작은 구현 단위로 내립니다.
    이미 통과한 plan/ADR 을 이어받는 implementation sprint 라면 G0/G1 을 다시 두껍게 돌리지 않습니다. `log.md` 또는 `plan.md` 에 `inherit-from: <prior sprint/ADR>` 와 이번 AC 만 얇게 남긴 뒤 바로 첫 구현 slice 로 들어갑니다.
    sprint goal 이 repo scaffold, dev compose, DB schema, API boot, 테스트, UI 동작처럼 구체적인 구현 산출물을 말한다면 G1 계약만으로 sprint 완료가 아닙니다. 코드/설정 변경, smoke/test evidence, review, retro 까지가 완료 조건입니다.
-5. `/sfs implement "<첫 구현 slice>"` 에서 `implement.md` + `log.md` 를 열고, AI runtime 이 실제 코드 변경과 테스트/스모크 evidence 를 남깁니다. 구현 모드는 공유 design concept, DDD 용어, TDD/작은 verification loop, 기존 코드 규칙성을 지키는 것을 기본 guardrail 로 삼습니다.
-6. `/sfs review --gate G4 --executor codex|gemini|claude` 로 CPO Evaluator review 를 실행하고 verdict 를 남깁니다. 명령 출력은 result path/verdict 메타데이터만 짧게 보여주고, AI runtime 은 원문 result 를 사용자의 언어로 요약해 해야 할 일을 Solon report 로 보여줍니다. 수동 handoff 만 필요하면 `--prompt-only` 를, 기존 리뷰 확인은 `--show-last` 를 사용합니다.
-7. `/sfs report` 로 최종 작업보고서 `report.md` 를 만들고, `/sfs retro --close` 또는 `/sfs tidy --apply` 에서 workbench 문서를 archive 로 이동합니다. `brainstorm/plan/implement/log/review` 는 작업 중 화이트보드이고, 완료 후에는 `report.md` + `retro.md` 가 읽는 입구입니다.
-8. `/sfs status` 와 `.sfs-local/events.jsonl` 로 현재 상태를 확인합니다.
-9. 필요하면 Codex/Gemini/Claude 가 같은 문서 계약을 읽고 다음 작업을 이어갑니다.
+6. `/sfs implement "<첫 구현 slice>"` 에서 `implement.md` + `log.md` 를 열고, AI runtime 이 실제 코드 변경과 테스트/스모크 evidence 를 남깁니다. 구현 모드는 공유 design concept, DDD 용어, TDD/작은 verification loop, 기존 코드 규칙성을 지키는 것을 기본 guardrail 로 삼습니다.
+7. `/sfs review --gate G4 --executor codex|gemini|claude` 로 CPO Evaluator review 를 실행하고 verdict 를 남깁니다. 명령 출력은 result path/verdict 메타데이터만 짧게 보여주고, AI runtime 은 원문 result 를 사용자의 언어로 요약해 해야 할 일을 Solon report 로 보여줍니다. 수동 handoff 만 필요하면 `--prompt-only` 를, 기존 리뷰 확인은 `--show-last` 를 사용합니다.
+8. `/sfs report` 로 최종 작업보고서 `report.md` 를 만들고, `/sfs retro --close` 또는 `/sfs tidy --apply` 에서 workbench 문서를 archive 로 이동합니다. `brainstorm/plan/implement/log/review` 는 작업 중 화이트보드이고, 완료 후에는 `report.md` + `retro.md` 가 읽는 입구입니다.
+9. `/sfs status` 와 `.sfs-local/events.jsonl` 로 현재 상태를 확인합니다.
+10. 필요하면 Codex/Gemini/Claude 가 같은 문서 계약을 읽고 다음 작업을 이어갑니다.
 
 ```text
 Product work = Goal + Role boundary + Artifact + Review signal + Handoff state
@@ -295,6 +296,7 @@ vendored layout 에서 direct adapter 를 호출해야 하면:
 | `/sfs start <goal>` | 새 sprint workspace 초기화 (`--id <sprint-id>` 지원) |
 | `/sfs guide [--path|--print]` | 짧은 사용 맥락 브리핑 / guide 경로 / full guide 본문 보기 |
 | `/sfs auth status|check|login|probe` | Codex/Claude/Gemini review executor 인증 확인/로그인/더미 요청 (`probe --timeout <seconds>` 지원) |
+| `/sfs adopt [--id legacy-baseline] [--apply]` | SFS 없이 진행된 legacy 프로젝트를 git/code/docs 기반으로 인계. 문서 과잉 프로젝트는 남길 것만 남기고, 문서 0 프로젝트는 최소 baseline 을 복원. 기본은 dry-run |
 | `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락을 기록하고, AI runtime 에서 Solon CEO 가 §1~§7을 정리 |
 | `/sfs plan` | 현재 sprint 의 `plan.md` 작성 또는 갱신 + G1 요구사항/AC/scope + CTO/CPO sprint contract refinement |
 | `/sfs implement [work slice|--stdin]` | `implement.md`/`log.md` 를 열고 plan 기반 실제 코드 변경 + 테스트/스모크 evidence 기록. AI runtime 은 여기서 구현까지 진행 |
@@ -307,7 +309,7 @@ vendored layout 에서 direct adapter 를 호출해야 하면:
 | `/sfs commit [status|plan|apply --group <name>]` | close 후 남은 working tree 를 의미 그룹으로 분리하고 branch preflight 안내 후 선택 그룹만 local commit. 메시지는 Git Flow-aware Conventional Commit 으로 자동 생성 (`-m` override). 이후 branch push/main 흡수는 AI runtime 이 수행 |
 | `/sfs loop [OPTIONS]` | queue-first + domain_locks fallback 으로 micro-step 단위 반복 실행을 돕는 자율 진행 모드 |
 
-14 명령 모두 동일 bash adapter SSoT 입니다. `/sfs` 는 Claude/Gemini 쪽 command shape 이고,
+15 명령 모두 동일 bash adapter SSoT 입니다. `/sfs` 는 Claude/Gemini 쪽 command shape 이고,
 Codex 에서는 `$sfs` Skill mention 이 같은 bash adapter 로 내려가는 command shape 입니다.
 Skill/prompt/wrapper 는 이 API 를 runtime 별로 전달하는 adaptor surface 입니다.
 
