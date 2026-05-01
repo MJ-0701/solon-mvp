@@ -7,14 +7,14 @@
 # Behavior: global sfs runtime 이 command surface 를 normalize 하고 deterministic
 #   bash adapter 로 내려간다. `.sfs-local/scripts/` 는 vendored layout fallback.
 #   user 발화의 첫 token = subcommand → sfs-<subcommand>.sh 실행 + stdout verbatim 출력.
-#   단, brainstorm/plan/implement/decision/retro 는 adapter 후 Gemini 가 문서 refinement/구현을 수행하고,
+#   단, brainstorm/plan/implement/decision/report/retro 는 adapter 후 Gemini 가 문서 refinement/구현을 수행하고,
 #   review 는 기본적으로 adapter 가 선택된 CPO executor bridge 를 실행한다.
 #   paraphrase 금지, 결정성 유지 (Claude Code / Codex / Gemini CLI 동등 1급).
 #
 # Note: {{args}} 는 Gemini CLI v1 placeholder. 사용자가 입력한 첫 token 이 subcommand,
 #       나머지는 그 subcommand 의 인자로 그대로 전달.
 
-description = "Solon SFS workflow command — bash adapter SSoT; hybrid G0/G1/implement/ADR/G5 refinement; adapter-run CPO review"
+description = "Solon SFS workflow command — bash adapter SSoT; hybrid G0/G1/implement/ADR/report/G5 refinement; adapter-run CPO review"
 
 prompt = """
 You are operating in a project that has Solon SFS installed.
@@ -25,13 +25,13 @@ token as the subcommand and the remainder as that subcommand's arguments.
 ## Behavior
 
 If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`update`**, **`brainstorm`**, **`plan`**, **`implement`**, **`review`**,
-**`decision`**, **`retro`**, **`commit`**, or **`loop`**, dispatch the request to the
+**`decision`**, **`report`**, **`retro`**, **`commit`**, or **`loop`**, dispatch the request to the
 `sfs` runtime command first.
 
 Command modes:
 - **Bash-only**: `status`, `start`, `guide`, `auth`, `update`, `commit`, `loop`. Stop after
   verbatim adapter output.
-- **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `retro`. Run the adapter,
+- **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`. Run the adapter,
   then perform the documented file refinement.
 - **Adapter-run**: `review`. The bash adapter executes the selected CPO
   executor bridge by default. Stop after adapter output. If `--prompt-only` is
@@ -46,11 +46,13 @@ Command modes:
 
 Special close guard: if the user invokes `retro --close` in an AI runtime, do
 not run the close adapter first. Run `retro` without `--close`, refine
-`retro.md`, then run `retro --close` exactly once.
+`retro.md`, run/refine `report.md`, then run `retro --close` exactly once.
+The close adapter compacts active workbench docs, so the report must be the
+canonical work summary before close.
 
 ## Solon Report Output Rule
 
-For hybrid commands (`brainstorm`, `plan`, `implement`, `decision`, `retro`) and adapter-run
+For hybrid commands (`brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`) and adapter-run
 `review`, the final answer must be a **Solon report**, not a plain bullet list
 such as `plan.md refined: ...`. Put the whole report in a fenced `text` block.
 Render the report in the user's visible language (for example, Korean for a
@@ -108,7 +110,8 @@ not create a new verdict in the current runtime.
 | `implement` | `sfs implement <remaining args>` | opens implement.md/log.md, then performs actual code changes with DDD/TDD guardrails and records evidence |
 | `review`   | `sfs review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
 | `decision` | `sfs decision <remaining args>` | creates ADR, then Gemini fills Context/Decision/Alternatives/Consequences |
-| `retro`    | `sfs retro <remaining args>`    | opens retro.md, then Gemini fills KPT/PDCA. With `--close`, refine before close |
+| `report`   | `sfs report <remaining args>`   | opens report.md, then Gemini fills the compact final work report |
+| `retro`    | `sfs retro <remaining args>`    | opens retro.md, then Gemini fills KPT/PDCA. With `--close`, refine report before close |
 | `commit`   | `sfs commit <remaining args>`   | groups working tree changes and commits only the selected group. AI runtime handles branch push/main merge/main push |
 | `loop`     | `sfs loop <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim |
 
@@ -136,6 +139,7 @@ not create a new verdict in the current runtime.
    - `plan` → Plan G1 Refinement
    - `implement` → Implementation Execution
    - `decision` → Decision ADR Refinement
+   - `report` → Final Report Refinement
    - `retro` → Retro G5 Refinement
    - `commit` → stop after adapter output. Do not add files or create a second
      commit outside the adapter result.
@@ -210,9 +214,13 @@ been shown verbatim, continue into actual implementation unless blocked.
 2. Read `plan.md`, `implement.md`, `log.md`, and relevant project files. If the
    requested slice conflicts with the plan, state the conflict and ask before
    editing.
-3. Apply the AI coding guardrails from `implement.md`: shared design concept,
-   DDD terms, TDD or smallest useful verification loop, and existing codebase
-   regularity.
+3. Apply the harness guardrails from `implement.md` before editing code:
+   Think Before Coding, Simplicity First, Surgical Changes, and Goal-Driven
+   Execution. State assumptions/trade-offs/success criteria, keep the code and
+   document surface small, connect every changed line to the requested slice,
+   and require verification evidence plus review handoff before completion.
+   Then preserve shared design concept, DDD language, TDD or the smallest
+   useful verification loop, and existing codebase regularity.
 4. Implement the smallest coherent code slice. Prefer test-first when a usable
    test harness exists; otherwise run the smallest practical smoke check and
    record the limitation.
@@ -254,18 +262,40 @@ After `/sfs review` succeeds:
    markdown unless the user explicitly asks for the raw source. Do not add an
    extra CPO verdict from the current runtime.
 
+## Final Report Refinement
+
+After `/sfs report` succeeds:
+
+1. Resolve `report.md` from stdout or active/selected sprint.
+2. Read sprint artifacts as source material: `brainstorm.md`, `plan.md`,
+   `implement.md`, `log.md`, `review.md`, `retro.md`, related decisions, and
+   `.sfs-local/events.jsonl`.
+3. Fill `report.md` as a compact final work report, not a process dump:
+   goal/outcome, final scope, key decisions, implementation summary,
+   verification evidence, remaining risks/follow-ups, and a short artifact map.
+4. Keep `report.md` concise. Raw chronology belongs in `retro.md`, `log.md`,
+   session logs, and events. Do not paste long logs or executor output into the
+   report.
+5. If `--compact` was requested, only proceed when the user explicitly asked
+   for compaction. Treat compacted workbench files as redirect stubs.
+6. Final response: render a Solon report. Include `report.md` path in `Files`,
+   compact status in `Health`, and `Next: /sfs retro --close` when closing the
+   active sprint or `Next: continue current sprint` otherwise.
+
 ## Retro G5 Refinement
 
 After `/sfs retro` succeeds:
 
 1. Resolve `retro.md` from stdout or active sprint.
-2. Read sprint artifacts, events, and related decisions.
+2. Read sprint artifacts, including `brainstorm.md`, `plan.md`,
+   `implement.md`, `log.md`, `review.md`, `report.md` when present, events,
+   and related decisions.
 3. Fill/update KPT, PDCA learning, evidence-backed metrics, next sprint handoff,
    and close checklist.
 4. Preserve user edits and mark unknowns explicitly.
-5. If the user invoked `retro --close`, refine `retro.md` first, then run
-   `bash .sfs-local/scripts/sfs-dispatch.sh retro --close` exactly once and
-   print its output verbatim.
+5. If the user invoked `retro --close`, refine `retro.md` first, run/refine
+   `/sfs report`, then run `bash .sfs-local/scripts/sfs-dispatch.sh retro --close`
+   exactly once and print its output verbatim. Close compacts workbench docs.
 6. Final response when not closing: render a Solon report. Include `retro.md`
    path in `Files`, close-readiness in `Health`, and `Next: /sfs retro --close`
    if ready; otherwise the next required action.
@@ -276,15 +306,15 @@ Print the following 3-line usage and stop:
 
 ```
 Usage: /sfs <command> [args]
-Commands: status, start, guide, auth, brainstorm, plan, implement, review, decision, retro, commit, loop
+Commands: status, start, guide, auth, brainstorm, plan, implement, review, decision, report, retro, commit, loop
 Help: bash .sfs-local/scripts/sfs-<command>.sh --help
 ```
 
 ## ⚠️ Safety
 
 - `/sfs retro --close` triggers an auto-commit. In AI runtimes, refine
-  `retro.md` before running the close adapter, and only when the user explicitly
-  requested close.
+  `retro.md` and `report.md` before running the close adapter, and only when
+  the user explicitly requested close.
 - `/sfs commit apply ...` creates a local git commit. Run it only when the
   user explicitly requested commit grouping/apply. It prints branch preflight,
   auto-generates a Git Flow-aware Conventional Commit message. Branch push/main

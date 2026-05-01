@@ -419,6 +419,84 @@ update_frontmatter() {
 }
 
 # ─────────────────────────────────────────────────────────────────────
+# SPRINT REPORT / WORKBENCH COMPACTION
+# ─────────────────────────────────────────────────────────────────────
+
+# sfs_prepare_sprint_report <sprint-id> <iso-ts> <status>
+# Ensures `<sprint>/report.md` exists and updates report frontmatter.
+# stdout: report path
+sfs_prepare_sprint_report() {
+  local sid="${1:?sprint id required}" ts="${2:?timestamp required}" status="${3:-draft}"
+  local sdir="${SFS_SPRINTS_DIR}/${sid}"
+  local report_path="${sdir}/report.md"
+  local created_report=0
+  local template
+  template="$(sfs_sprint_template_file report)"
+
+  if [[ ! -d "${sdir}" ]]; then
+    echo "sprint not found: ${sid}" >&2
+    return ${SFS_EXIT_NO_INIT}
+  fi
+  if [[ ! -f "${report_path}" ]]; then
+    if [[ ! -f "${template}" ]]; then
+      echo "template missing: ${template}" >&2
+      return ${SFS_EXIT_NO_TEMPLATES}
+    fi
+    cp "${template}" "${report_path}" || return ${SFS_EXIT_PERM}
+    created_report=1
+  fi
+
+  update_frontmatter "${report_path}" "phase" "report" || return ${SFS_EXIT_PERM}
+  update_frontmatter "${report_path}" "status" "${status}" || return ${SFS_EXIT_PERM}
+  update_frontmatter "${report_path}" "sprint_id" "${sid}" || return ${SFS_EXIT_PERM}
+  if [[ "${created_report}" -eq 1 ]]; then
+    update_frontmatter "${report_path}" "created_at" "${ts}" || return ${SFS_EXIT_PERM}
+  fi
+  update_frontmatter "${report_path}" "last_touched_at" "${ts}" || return ${SFS_EXIT_PERM}
+  if [[ "${status}" == "final" ]]; then
+    update_frontmatter "${report_path}" "closed_at" "${ts}" || return ${SFS_EXIT_PERM}
+  fi
+  printf '%s\n' "${report_path}"
+}
+
+# sfs_compact_sprint_workbench <sprint-id> <iso-ts>
+# Replaces verbose active-workbench docs with small redirects after a final
+# report exists. History belongs in retro/session logs; decisions stay intact.
+sfs_compact_sprint_workbench() {
+  local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
+  local sdir="${SFS_SPRINTS_DIR}/${sid}"
+  local doc path title
+  for doc in brainstorm plan implement log review; do
+    path="${sdir}/${doc}.md"
+    [[ -f "${path}" ]] || continue
+    case "${doc}" in
+      brainstorm) title="Brainstorm" ;;
+      plan) title="Plan" ;;
+      implement) title="Implement" ;;
+      log) title="Log" ;;
+      review) title="Review" ;;
+      *) title="${doc}" ;;
+    esac
+    {
+      printf '%s\n' '---'
+      printf 'phase: compacted\n'
+      printf 'status: compacted\n'
+      printf 'sprint_id: %s\n' "${sid}"
+      printf 'source_artifact: %s.md\n' "${doc}"
+      printf 'compacted_at: %s\n' "${ts}"
+      printf '%s\n\n' '---'
+      printf '# %s — compacted\n\n' "${title}"
+      printf '> This active workbench artifact was compacted after sprint completion.\n'
+      printf '> Read `report.md` for the final work report and `retro.md` for history/learning.\n\n'
+      printf '%s\n' '- Final report: `report.md`'
+      printf '%s\n' '- Retrospective/history: `retro.md`'
+      printf '%s\n' '- Machine trace: `.sfs-local/events.jsonl`'
+    } > "${path}" || return ${SFS_EXIT_PERM}
+  done
+  return ${SFS_EXIT_OK}
+}
+
+# ─────────────────────────────────────────────────────────────────────
 # USAGE STUBS (consumer scripts override / call locally)
 # ─────────────────────────────────────────────────────────────────────
 

@@ -1,3 +1,29 @@
+## [0.5.44-product] - 2026-05-01
+
+**SFS document lifecycle and implement harness.** Sprint workbench documents now
+stay useful while work is active, then collapse into a concise final report at
+close. The implementation entrypoint also makes the four harness principles a
+first-class coding guardrail, not just a reporting convention.
+
+### Added
+
+- **`sfs report` command** — creates/refines sprint `report.md` as the compact
+  final work summary and can compact workbench docs with explicit `--compact`.
+- **Report template and lifecycle helpers** — packaged `report.md` and shared
+  compaction helpers preserve retro/history while redirecting completed
+  workbench files to the final report.
+- **Active implement adapter** — packaged and active `sfs-implement.sh` now
+  states that AI runtimes must apply Think Before Coding, Simplicity First,
+  Surgical Changes, and Goal-Driven Execution before editing code.
+
+### Changed
+
+- **Retro close flow** — `retro --close` now expects the final report to exist
+  and compacts completed workbench docs after report refinement.
+- **Agent adapters and templates** — Codex, Claude, Gemini, SFS.md, GUIDE.md,
+  and sprint templates now describe workbench-vs-report lifecycle and the
+  implementation harness as the default coding discipline.
+
 ## [0.5.43-product] - 2026-05-01
 
 **Same-runtime CPO review wording.** Documentation now clarifies that

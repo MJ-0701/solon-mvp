@@ -10,6 +10,8 @@ created_at: ""   # filled by /sfs start
 > Sprint **Do** 단계 작업 로그. 시간순 append 형식. 각 entry 는 1줄 요약 + 필요 시 details.
 > `.sfs-local/events.jsonl` 이 machine-readable trace, 본 파일은 human-readable 보강.
 > 새 entry 는 본 §1 의 **위쪽** 에 append 권장 (최신 우선).
+> 생명주기: 본 문서는 작업 중 노트패드다. Close 후 시간순 세부 내역은 `retro.md` 와
+> events/session log 로 넘기고, 최종 알맹이는 `report.md` 에만 남긴다.
 
 ---
 

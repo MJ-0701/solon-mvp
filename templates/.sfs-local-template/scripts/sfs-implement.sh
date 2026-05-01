@@ -23,6 +23,8 @@ Open/update the active sprint's implement.md execution artifact.
   - Creates implement.md from sprint-templates/implement.md if missing.
   - Records the implementation request and appends an implement_open event.
   - Prints implement.md, plan.md, and log.md paths.
+  - AI runtimes must apply the implementation harness:
+    Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution.
   - Direct bash does not edit product code. AI runtimes must continue with
     actual code changes, tests, and evidence updates.
 

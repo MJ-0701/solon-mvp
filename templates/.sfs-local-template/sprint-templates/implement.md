@@ -13,15 +13,28 @@ last_touched_at: ""
 > changes, and verification evidence. It is not a substitute for changing code.
 > AI implementation must preserve system design, not only satisfy the nearest
 > edit request.
+> 생명주기: 구현 중에는 evidence 를 충분히 남기되, close 후 최종 변경/검증 요약은
+> `report.md` 로 압축된다. 본 파일은 완료 뒤 compact stub 대상이다.
 
 ---
 
-## §0. AI Coding Guardrails — Design / DDD / TDD
+## §0. AI Coding Guardrails — Harness / Design / DDD / TDD
 
 AI coding fails when it optimizes for the nearest change while ignoring the
 system design. Treat bad code as expensive: unclear domain language, weak tests,
 and irregular structure make future AI edits worse.
 
+The first four guardrails are mandatory for code implementation, not just for
+the final report. `/sfs implement` is complete only when the code slice is
+small, scoped, verified, and ready to summarize.
+
+- **Think before coding**: name assumptions, trade-offs, and success criteria
+  before editing when the request is ambiguous.
+- **Simplicity first**: implement the smallest code and document surface that
+  proves the AC. Do not add flexibility or ceremony for imagined futures.
+- **Surgical changes**: every changed line must connect to the requested slice.
+  Leave unrelated cleanup as a finding or follow-up.
+- **Goal-driven execution**: finish with verification evidence, not confidence.
 - **Shared design concept first**: before editing, name the intended design,
   module boundary, and why this slice belongs there.
 - **DDD language**: use the project's domain terms consistently in code,

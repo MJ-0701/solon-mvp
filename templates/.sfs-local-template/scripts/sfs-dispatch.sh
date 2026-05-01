@@ -16,7 +16,7 @@ SFS_EXIT_UNKNOWN=99
 usage() {
   cat <<'EOF'
 Usage: /sfs <command> [args]
-Commands: status, start, guide, auth, brainstorm, plan, implement, review, decision, retro, commit, loop
+Commands: status, start, guide, auth, brainstorm, plan, implement, review, decision, report, retro, commit, loop
 Help: bash .sfs-local/scripts/sfs-<command>.sh --help
 EOF
 }
@@ -45,7 +45,7 @@ case "${cmd}" in
     usage
     exit 0
     ;;
-  status|start|guide|auth|brainstorm|plan|implement|review|decision|retro|commit|loop)
+  status|start|guide|auth|brainstorm|plan|implement|review|decision|report|retro|commit|loop)
     target="${SFS_SCRIPT_DIR}/sfs-${cmd}.sh"
     ;;
   *)
