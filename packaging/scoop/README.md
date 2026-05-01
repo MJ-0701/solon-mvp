@@ -46,7 +46,7 @@ after the GitHub tag exists and the downloadable archive hash is known. The
 bucket can then be tested with:
 
 ```text
-scoop bucket add solon <our-bucket-url>
+scoop bucket add solon https://github.com/MJ-0701/scoop-solon-product
 scoop install sfs
 sfs version --check
 sfs upgrade
