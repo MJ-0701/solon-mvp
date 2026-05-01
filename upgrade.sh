@@ -220,7 +220,40 @@ layout:      $INSTALL_LAYOUT
 EOF
 
 if [ "$CUR_VER" = "$NEW_VER" ]; then
+  MODEL_PROFILE_REPAIRED=0
+  if [ ! -f "$TARGET/.sfs-local/model-profiles.yaml" ] \
+     && [ -f "$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml" ]; then
+    TODAY=$(date +%Y-%m-%d)
+    PROJECT_NAME="$(basename "$TARGET")"
+    if [ "$(uname)" = "Darwin" ]; then
+      SED_INPLACE=(sed -i '')
+    else
+      SED_INPLACE=(sed -i)
+    fi
+    mkdir -p "$TARGET/.sfs-local"
+    cp "$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml" "$TARGET/.sfs-local/model-profiles.yaml"
+    "${SED_INPLACE[@]}" \
+      -e "s|<DATE>|$TODAY|g" \
+      -e "s|<SOLON-VERSION>|$NEW_VER|g" \
+      -e "s|<PROJECT-NAME>|$PROJECT_NAME|g" \
+      -e "s|<DEFAULT-RUNTIME>|current|g" \
+      -e "s|<MODEL-POLICY>|current_model|g" \
+      -e "s|<MODEL-PROFILE-STATUS>|current_model_fallback|g" \
+      "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null || true
+    ok "model-profiles.yaml 누락 감지 — current_model fallback 설정으로 생성"
+    MODEL_PROFILE_REPAIRED=1
+  elif grep -q 'status: "current_model_fallback"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null \
+    || grep -q 'selected_runtime: "current"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null \
+    || grep -q 'status: "review_required"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null \
+    || grep -q 'selected_runtime: "unset"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null; then
+    warn "agent model profile 이 current_model fallback 상태입니다."
+    warn "    그대로 두면 현재 런타임 모델을 사용합니다."
+    warn "    agent별 모델을 확정하려면 .sfs-local/model-profiles.yaml 을 편집하세요."
+  fi
   ok "이미 최신 버전. 업그레이드 불필요."
+  if [ "$MODEL_PROFILE_REPAIRED" -eq 1 ]; then
+    warn "새 파일을 추가했으니 프로젝트 repo 에서 commit 여부를 확인하세요: .sfs-local/model-profiles.yaml"
+  fi
   exit 0
 fi
 

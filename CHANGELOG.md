@@ -1,3 +1,18 @@
+## [0.5.40-product] - 2026-05-01
+
+**Model profile repair path.** `sfs update` now notices when an already-current
+project is missing `.sfs-local/model-profiles.yaml` and recreates it with the
+safe `current_model` fallback instead of exiting silently as "already latest."
+
+### Fixed
+
+- **Same-version update repair** — if model profiles are missing, generate the
+  project-local settings file with `selected_runtime: current` and
+  `selected_policy: current_model`.
+- **Unconfigured profile guidance** — when a profile is still on fallback/unset,
+  `sfs update` reminds users that Solon will use the current runtime model and
+  points them at the agent-specific settings file.
+
 ## [0.5.39-product] - 2026-05-01
 
 **Runtime-neutral agent model profiles.** Solon now exposes Claude/Codex/Gemini
