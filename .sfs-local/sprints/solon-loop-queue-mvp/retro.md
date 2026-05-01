@@ -78,6 +78,7 @@ closed_at: "2026-05-01T09:15:03+09:00"   # manual close (option β + manual-repa
   - sprint retro 시점 git HEAD = 동일 (본 모든 변경이 dirty worktree, 사용자 manual commit pending).
   - ahead 변화 = **0** (CLAUDE.md §1.5 push 사용자 manual + §1.5' commit 도 사용자 영역 정합). 단 dirty worktree 의 file 수가 +25 정도.
 - **5-Axis CPO**: 22/25 = 88% (review.md §2.6).
+- **post-close dist install smoke (loopq-20260430T172220Z-8312)**: `/private/tmp/solon-queue-smoke-8312-clean.iEJH9X` 에서 copied dist → fresh target `install.sh --yes --layout vendored` → queue dirs/help/enqueue/claim/verify/complete/fail/retry/non-live prompt/docs checks 전부 PASS. sprint close 상태는 변경하지 않음.
 
 ## §4. 다음 sprint 인계
 

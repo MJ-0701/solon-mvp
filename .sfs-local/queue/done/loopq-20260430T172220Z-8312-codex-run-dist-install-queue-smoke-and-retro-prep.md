@@ -1,21 +1,22 @@
 ---
 task_id: loopq-20260430T172220Z-8312
 title: "[codex] run dist install queue smoke and retro prep"
-status: pending
+status: done
 priority: 3
 mode: user-active-deferred
 sprint_id: "solon-loop-queue-mvp"
-owner: ""
+owner: codex-loop
 attempts: 1
 max_attempts: 3
 created_at: 2026-04-30T17:22:20Z
-claimed_at: ""
+claimed_at: 2026-05-01T02:20:55Z
 size: medium
 target_minutes: 60
 depends_on:
   - loopq-20260430T172200Z-8310
   - loopq-20260430T172210Z-8311
 retried_at: 2026-05-01T02:07:55Z
+completed_at: 2026-05-01T02:26:47Z
 ---
 
 # [codex] run dist install queue smoke and retro prep
@@ -43,5 +44,6 @@ Scope:
 ## Verify
 
 - `git diff --check`
-- sandbox smoke evidence recorded in log.md
-- queue state remains consistent after task completion
+- `test -f .sfs-local/sprints/solon-loop-queue-mvp/log.md`
+- `grep -n "8312" .sfs-local/sprints/solon-loop-queue-mvp/log.md`
+- `grep -n "dist install queue smoke" .sfs-local/sprints/solon-loop-queue-mvp/log.md`

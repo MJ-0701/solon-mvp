@@ -25,6 +25,20 @@ created_at: "2026-04-30T23:18:27+09:00"
 
 <!-- 첫 entry 예시 (삭제 후 실 entry 로 교체) -->
 
+### 2026-05-01T11:25:34+09:00 — 8312 dist install queue smoke PASS
+
+- sandbox `/private/tmp/solon-queue-smoke-8312-clean.iEJH9X`: repo 의 `2026-04-19-sfs-v0.4/solon-mvp-dist` 를 `/private/tmp` 로 copy 한 뒤 fresh git target 에서 `install.sh --yes --layout vendored` 실행. install exit 0.
+- 설치 산출 queue dir 확인 PASS: `.sfs-local/queue/{pending,claimed,done,failed,abandoned,runs}` 전부 존재.
+- vendored installed template path 확인 PASS: `.sfs-local/scripts/sfs-dispatch.sh loop --help` 에 `enqueue/queue/claim/verify/complete/fail/retry` surface 노출.
+- queue lifecycle smoke PASS:
+  - `enqueue '8312 dist install queue smoke complete path' --size small --target-minutes 5` → frontmatter `size: small`, `target_minutes: 5`.
+  - `claim --owner smoke-owner` → `status: claimed`, `owner: smoke-owner`; `complete <claimed-path>` → `done/` 이동.
+  - `fail <task-id>` → `failed/` 이동; `retry <task-id>` → `pending/` 복귀 + `attempts: 1`; 재claim 후 complete PASS.
+  - `verify <claimed-path>` with runnable `test -d .sfs-local/queue/pending` → `.sfs-local/queue/runs/<task-id>/<stamp>/verify.commands|out|err|exit` 생성 + `verify.exit=0` + `done/` 이동.
+- non-live prompt artifact smoke PASS: `SFS_LOOP_LLM_LIVE=0 loop --max-iters 1 --no-review-gate --executor 'printf noop'` → `PROMPT.md` + `metadata.env` 생성, `executor.out` 미생성, task 는 non-live 정책대로 claimed 유지. final queue count = `pending 0 · claimed 1 · done 3 · failed 0 · abandoned 0`.
+- dist CLI/docs smoke PASS: copied dist `bin/sfs version` = `sfs 0.5.42-product`; `bin/sfs loop --help` queue surface OK. `README.md` / `GUIDE.md` / `templates/SFS.md.template` 에 execution backlog, lifecycle/retry, sizing/target minutes, non-live prompt artifacts 문구 확인.
+- 환경 note: 첫 시도에서 parent `SFS_PROGRESS_PATH=2026-04-19-sfs-v0.4/PROGRESS.md` 가 sandbox target 안 상대경로로 해석되어 default loop pre-flight exit 6 발생. clean run 은 `SFS_PROGRESS_PATH` unset 후 PASS. product artifact 수정 0, git 조작 0.
+
 ### 2026-05-01T09:15:03+09:00 — Step 2 + Step 3 완료: events backfill (β manual-repair) + manual close
 
 - 사용자 결정: 옵션β 자율진행 승인 (timestamp=현재 / by=manual-repair / note="backfill: adapter emit gap (F-4b)").
