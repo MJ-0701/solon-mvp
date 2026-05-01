@@ -50,8 +50,8 @@ bash scripts/cut-release.sh --version 0.3.0-mvp --apply --no-tag
 bash scripts/cut-release.sh --version 0.3.0-mvp --apply --allow-dirty
 ```
 
-**Allowlist (현 hard-coded 8 파일 + 1 디렉토리)**:
-- VERSION · CHANGELOG.md · README.md · CLAUDE.md · install.sh · upgrade.sh · uninstall.sh · templates/ (recursive)
+**Allowlist (현 hard-coded 파일/디렉토리)**:
+- VERSION · CHANGELOG.md · README.md · 10X-VALUE.md · CLAUDE.md · AGENTS.md · GUIDE.md · install.sh · install.ps1 · upgrade.sh · upgrade.ps1 · uninstall.sh · uninstall.ps1 · templates/ · bin/ · packaging/ · .github/ (recursive where directory)
 
 **Blocklist (1 파일, stable 잔존 시 leak 검출)**:
 - APPLY-INSTRUCTIONS.md (dev staging 전용 운영자 instruction)

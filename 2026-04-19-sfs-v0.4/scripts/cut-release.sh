@@ -20,7 +20,8 @@
 #
 # Allowlist (WU-31 §2.3, hard-coded — `.visibility-rules.yaml`
 #   enforcement_active=true 는 후속 row 7 에서 활성):
-#     ✅ VERSION / CHANGELOG.md / README.md / CLAUDE.md / AGENTS.md / GUIDE.md /
+#     ✅ VERSION / CHANGELOG.md / README.md / 10X-VALUE.md /
+#        CLAUDE.md / AGENTS.md / GUIDE.md /
 #        install.sh / install.ps1 / upgrade.sh / upgrade.ps1 /
 #        uninstall.sh / uninstall.ps1 / templates/ / bin/ / packaging/ / .github/
 #     ❌ APPLY-INSTRUCTIONS.md (dev 운영자 전용, hard blocklist)
@@ -67,6 +68,7 @@ ALLOWLIST=(
   "VERSION"
   "CHANGELOG.md"
   "README.md"
+  "10X-VALUE.md"
   "CLAUDE.md"
   "AGENTS.md"
   "GUIDE.md"
