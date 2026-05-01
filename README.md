@@ -244,7 +244,7 @@ mention 을 우선 사용합니다. Codex app/CLI 는 unknown leading slash 를 
 entry point 를 프로젝트에 설치/갱신합니다:
 `.claude/skills/sfs/SKILL.md` + `.claude/commands/sfs.md` +
 `.gemini/commands/sfs.toml` + `.agents/skills/sfs/SKILL.md`.
-기존 파일이 다르면 `.sfs-local/tmp/agent-install-backups/` 에 백업한 뒤 갱신합니다.
+기존 파일이 다르면 `.sfs-local/archives/agent-install-backups/` 에 보존한 뒤 갱신합니다.
 
 > 📘 **친구 onboarding 30분 walk-through**: 설치 직후 처음 30분 동안 `SFS.md` placeholder 치환,
 > 첫 sprint 시작, plan/review/decision/retro 흐름까지 따라 하는 가이드는 [GUIDE.md](./GUIDE.md)
@@ -305,6 +305,7 @@ vendored layout 에서 direct adapter 를 호출해야 하면:
 | `/sfs start <goal>` | 새 sprint workspace 초기화 (`--id <sprint-id>` 지원) |
 | `/sfs guide [--path|--print]` | 짧은 사용 맥락 브리핑 / guide 경로 / full guide 본문 보기 |
 | `/sfs auth status|check|login|probe` | Codex/Claude/Gemini review executor 인증 확인/로그인/더미 요청 (`login codex` positional executor, `probe --timeout <seconds>` 지원) |
+| `/sfs division list` / `/sfs division activate <division|all>` | 본부 활성 상태 확인/승격. abstract 본부를 active/scoped/temporal 로 전환하고 `.sfs-local/divisions.yaml`, decision, events evidence 를 갱신 |
 | `/sfs adopt [--id legacy-baseline] [--apply]` | SFS 없이 진행된 legacy 프로젝트를 git/code/docs 기반으로 인계. 문서 과잉 프로젝트는 기존 visible sprint/archive tree 를 cold archive tarball 로 접고 `report.md` + `retro.md` 만 남김. 문서 0 프로젝트는 최소 baseline 을 복원. 기본은 dry-run |
 | `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락을 기록하고, AI runtime 에서 Solon CEO 가 §1~§7을 정리 |
 | `/sfs plan` | 현재 sprint 의 `plan.md` 작성 또는 갱신 + G1 요구사항/AC/scope + CTO/CPO sprint contract refinement |
@@ -318,7 +319,7 @@ vendored layout 에서 direct adapter 를 호출해야 하면:
 | `/sfs commit [status|plan|apply --group <name>]` | close 후 남은 working tree 를 의미 그룹으로 분리하고 branch preflight 안내 후 선택 그룹만 local commit. 메시지는 Git Flow-aware Conventional Commit 으로 자동 생성 (`-m` override). 이후 branch push/main 흡수는 AI runtime 이 수행 |
 | `/sfs loop [OPTIONS]` | queue-first + domain_locks fallback 으로 micro-step 단위 반복 실행을 돕는 자율 진행 모드 |
 
-15 명령 모두 동일 bash adapter SSoT 입니다. `/sfs` 는 Claude/Gemini 쪽 command shape 이고,
+16 명령 모두 동일 bash adapter SSoT 입니다. `/sfs` 는 Claude/Gemini 쪽 command shape 이고,
 Codex 에서는 `$sfs` Skill mention 이 같은 bash adapter 로 내려가는 command shape 입니다.
 Skill/prompt/wrapper 는 이 API 를 runtime 별로 전달하는 adaptor surface 입니다.
 

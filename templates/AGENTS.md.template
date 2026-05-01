@@ -52,6 +52,7 @@ Codex 가 사용자 메시지 `/sfs ...` 를 읽을 수 있다면 이미 앱/런
 | `/sfs start <goal>`, `$sfs start <goal>`, `sfs start <goal>` | `sfs start <goal> [--id <sprint-id>] [--force]` |
 | `/sfs guide`, `$sfs guide`, `sfs guide` | `sfs guide [--path|--print]` |
 | `/sfs auth ...`, `$sfs auth ...`, `sfs auth ...` | `sfs auth status|check|login|probe [--executor <tool>]` |
+| `/sfs division list`, `$sfs division activate <division|all>`, `sfs division ...` | `sfs division list` / `sfs division activate <division|all>`; abstract 본부를 active/scoped/temporal 로 전환하고 decision/event evidence 를 남김 |
 | `/sfs adopt [--apply]`, `$sfs adopt [--apply]`, `sfs adopt [--apply]` | `sfs adopt [--id legacy-baseline] [--apply]`; legacy 프로젝트를 report-first baseline 으로 인계. 문서 과잉/문서 0 양쪽 모두 raw scan 은 archive, visible 은 `report.md` + `retro.md` |
 | `/sfs brainstorm ...`, `$sfs brainstorm ...`, `sfs brainstorm ...` | `sfs brainstorm [text|--stdin]` raw capture 후 Codex 가 Solon CEO 로 §1~§7 정리 |
 | `/sfs plan`, `$sfs plan`, `sfs plan` | `sfs plan` 후 Codex 가 `brainstorm.md` 기반 G1 plan + CTO/CPO contract 작성 |
@@ -69,7 +70,7 @@ non-zero exit 시 stderr + exit code 도 함께 보고한다. `sfs` runtime 이 
 그 사실을 1줄로 사용자에게 알리고 install/upgrade 를 안내한다.
 
 명령 모드는 고정이다:
-- **Bash-only**: `status`, `start`, `guide`, `auth`, `upgrade`, `update`, `version`, `commit`, `loop`.
+- **Bash-only**: `status`, `start`, `guide`, `auth`, `division`, `upgrade`, `update`, `version`, `commit`, `loop`.
 - **Always hybrid**: `adopt`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`.
 - **Conditional hybrid**: `tidy` — adapter apply 후 report.md 를 archive source 기반으로 정제한다.
 - **Adapter-run**: `review` — 기본적으로 bash adapter 가 선택된 CPO executor bridge 를 실행하고 stdout 에는 verdict/output path 메타데이터만 보여준다. Codex 는 result 원문을 그대로 덤프하지 않고 사용자 언어로 요약/action report 를 렌더링한다. `--prompt-only` 일 때도 현재 Codex runtime 이 대신 verdict 를 작성하지 않고 prompt handoff 로 멈춘다.

@@ -572,7 +572,7 @@ cat <<EOF
 적용 결과:
   - 신규 파일과 .gitignore/VERSION 은 자동 처리됩니다.
   - 기존 프로젝트 지침 파일은 자동 보존됩니다.
-  - backup+overwrite 대상은 기존 파일을 .sfs-local/tmp/upgrade-backups/ 아래에 보관한 뒤 갱신합니다.
+  - backup+overwrite 대상은 기존 파일을 .sfs-local/archives/runtime-upgrades/ 아래에 보관한 뒤 갱신합니다.
 
 EOF
 
@@ -621,14 +621,14 @@ update_file() {
     b|B|"backup"|"backup+overwrite")
       local ts backup_dir safe_rel backup_path backup_rel
       ts=$(date +%Y%m%d-%H%M%S)
-      backup_dir="$TARGET/.sfs-local/tmp/upgrade-backups/$ts"
+      backup_dir="$TARGET/.sfs-local/archives/runtime-upgrades/$ts"
       mkdir -p "$backup_dir"
       safe_rel="${dst_rel//\//__}"
       backup_path="$backup_dir/$safe_rel"
       backup_rel="${backup_path#$TARGET/}"
       mv "$dst" "$backup_path"
       cp "$src" "$dst"
-      ok "백업 + 갱신: $dst_rel → $backup_rel"
+      ok "아카이브 + 갱신: $dst_rel → $backup_rel"
       ;;
     o|O|"overwrite")
       cp "$src" "$dst"
@@ -675,6 +675,7 @@ update_file ".sfs-local/scripts/sfs-status.sh"   "templates/.sfs-local-template/
 update_file ".sfs-local/scripts/sfs-start.sh"    "templates/.sfs-local-template/scripts/sfs-start.sh"    "sfs start"    "b"
 update_file ".sfs-local/scripts/sfs-guide.sh"    "templates/.sfs-local-template/scripts/sfs-guide.sh"    "sfs guide"    "b"
 update_file ".sfs-local/scripts/sfs-auth.sh"     "templates/.sfs-local-template/scripts/sfs-auth.sh"     "sfs auth"     "b"
+update_file ".sfs-local/scripts/sfs-division.sh" "templates/.sfs-local-template/scripts/sfs-division.sh" "sfs division activation" "b"
 update_file ".sfs-local/scripts/sfs-adopt.sh"    "templates/.sfs-local-template/scripts/sfs-adopt.sh"    "sfs adopt (legacy baseline intake)" "b"
 update_file ".sfs-local/scripts/sfs-brainstorm.sh" "templates/.sfs-local-template/scripts/sfs-brainstorm.sh" "sfs brainstorm" "b"
 update_file ".sfs-local/scripts/sfs-plan.sh"     "templates/.sfs-local-template/scripts/sfs-plan.sh"     "sfs plan"     "b"

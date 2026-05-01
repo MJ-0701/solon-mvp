@@ -49,7 +49,7 @@ Windows 의 Git Bash 로 내려간다. vendored layout 을 선택했을 때만 `
 wrapper 를 fallback 으로 쓴다.
 Claude/Gemini/Codex entry point 는 얇은 agent adapter 이므로, 새 agent 를 쓰거나
 adapter 를 갱신할 때는 `sfs agent install claude|gemini|codex|all` 을 다시 실행한다.
-기존 adapter 가 커스텀되어 있으면 `.sfs-local/tmp/agent-install-backups/` 에 백업된다.
+기존 adapter 가 커스텀되어 있으면 `.sfs-local/archives/agent-install-backups/` 에 보존된다.
 Solon 버전 갱신 후에는 uninstall/reinstall 대신 `sfs upgrade` 를 실행한다.
 
 **5초 mental model**:
@@ -347,7 +347,7 @@ Git Flow lifecycle 로 처리한다.
 
 ---
 
-## 5. 11 슬래시 명령 cheatsheet
+## 5. 주요 슬래시 명령 cheatsheet
 
 Claude/Gemini 에서는 `/sfs ...` 를 그대로 쓴다. Codex app/CLI 에서는 현재 bare `/sfs` 가
 native slash UI 에서 `커맨드 없음` 으로 막힐 수 있으므로 `$sfs ...` Skill mention 이 실사용
@@ -364,6 +364,9 @@ native slash UI 에서 `커맨드 없음` 으로 막힐 수 있으므로 `$sfs .
 | `/sfs auth status` | Codex/Claude/Gemini review executor 인증 확인 |
 | `/sfs auth login codex` | Codex CLI 인증 bootstrap |
 | `/sfs auth probe --executor gemini --timeout 20` | bridge request/response 더미 확인 |
+| `/sfs division list` | dev/strategy-pm/qa/design/infra/taxonomy 활성 상태 확인 |
+| `/sfs division activate design` | abstract 디자인 본부를 실행 가능한 active 본부로 승격하고 decision/event 기록 |
+| `/sfs division activate all` | 현재 abstract 인 모든 본부를 한 번에 active 로 승격 |
 | `/sfs adopt [--apply]` | legacy 프로젝트 인수인계 baseline 생성. 문서 과잉은 기존 sprint/archive tree 를 cold archive 로 접고, 문서 0은 report-first baseline 복원 |
 | `/sfs plan` | 현 sprint 의 의도/경계 + G1 요구사항/AC + CTO/CPO 계약 작성 |
 | `/sfs implement [work slice]` | plan 기반 실제 코드 변경 + 하네스 4원칙 + DDD/TDD guardrail + 6-division guardrail ledger + evidence 기록 |
@@ -433,6 +436,21 @@ non-live 기본 loop 는 claim 후 `.sfs-local/queue/runs/<task-id>/<timestamp>/
 를 만들고 executor 는 호출하지 않는다. `SFS_LOOP_LLM_LIVE=1` 일 때 executor 호출,
 `SFS_LOOP_VERIFY=1` 일 때 `## Verify` command 실행 후 done/failed lifecycle 처리를 한다.
 `retry` 는 attempts 를 1 증가시키며 `max_attempts` 를 넘으면 `abandoned/` 로 이동한다.
+
+### Queue lifecycle (minimal)
+
+- `pending/`: 아직 아무도 잡지 않은 대기 상태. 오직 pending 만 claim 대상.
+- `claimed/<owner>/`: worker 가 `claim` 으로 원본 파일을 **mv** 해서 잡은 상태. stale claim 은 `loop queue` 에서 TTL 기반으로 경고된다.
+- `done/`: 완료된 작업. `complete` 또는 `verify` 성공 시 이동한다.
+- `failed/`: 검증 실패(또는 수동 fail) 상태. `retry` 하면 `pending/` 으로 되돌리고 `attempts += 1` 한다.
+- `abandoned/`: 포기/중단 상태. `retry` 가 `max_attempts` 를 넘으면 자동 abandon 되며, 수동 `abandon` 도 동일하게 이동한다.
+
+### Retro-light vs sprint retro
+
+- queue item 에는 짧은 `## Retro-Light` 섹션만 남긴다 (3–7 bullets 정도).
+- 내용이 커지면 queue item 에서 확장하지 말고 **정식 sprint retro/report** 로 승격한다.
+- 큰 후속 작업은 `## Backlog Seeds` 에 TODO 로 쌓지 말고 `/sfs loop enqueue ...` 로 별도 pending task 로 만든다.
+- 순서/의존이 필요하면 frontmatter `depends_on: []` 에 선행 `task_id` 를 적고, `loop queue` 의 blocked 리포트로 확인한다.
 
 ---
 

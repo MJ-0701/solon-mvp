@@ -1522,6 +1522,7 @@ status: pending
 priority: 5
 mode: ${LOOP_MODE}
 sprint_id: "${sprint:-}"
+depends_on: []
 owner: ""
 attempts: 0
 max_attempts: 3
@@ -1540,6 +1541,16 @@ Describe the concrete loop task here.
 ## Files Scope
 
 - TBD
+
+## Retro-Light
+
+Keep a short, practical note here when closing the task (aim 3–7 bullets).
+If this section grows large, promote it to a normal sprint retro instead.
+
+## Backlog Seeds
+
+If you discover work bigger than this task, enqueue it as separate queue items
+instead of expanding scope inline.
 
 ## Verify
 

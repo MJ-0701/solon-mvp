@@ -1,15 +1,33 @@
-## [0.5.55-product] - 2026-05-02
+## [0.5.56-product] - 2026-05-02
 
-**Cycle-end division activation recommender.** When closing a sprint, SFS now
-surfaces a lightweight recommendation block about activating additional
-divisions based on codebase size, domain complexity, and risk signals.
+**Combined division activation, loop lifecycle, and artifact cleanup release.**
+SFS now ships the finished loop-session work together with the hotfix that keeps
+review retries and runtime backups out of the visible `.sfs-local/tmp/` tree.
 
 ### Added
 
-- **Division activation recommender on close** — `/sfs report --compact` and
-  `/sfs retro --close` write a marker-based recommendations section into
-  `report.md` and `retro.md` so users see next-cycle prompts without running a
-  separate check command.
+- **`/sfs division` command** — users can list, activate, and deactivate
+  abstract divisions such as QA, design, infra, and taxonomy while recording
+  decision/event evidence.
+- **Cycle-end division recommender** — `/sfs report --compact` and
+  `/sfs retro --close` write marker-based recommendations into `report.md` and
+  `retro.md` based on project size, domain count, review verdict, and repo
+  signals.
+- **Loop queue lifecycle docs** — `GUIDE.md` now documents pending/claimed/done/
+  failed/abandoned state meaning and when to promote oversized retro-light notes
+  into real sprint report/retro artifacts.
+
+### Fixed
+
+- **Review retry cleanup** — before `/sfs review` writes a new prompt/run for
+  the same sprint and gate, prior matching prompt/run files move to
+  `.sfs-local/archives/review-runs/`, leaving only the latest run set in tmp.
+- **Runtime upgrade backups** — `sfs upgrade` now preserves overwritten managed
+  files under `.sfs-local/archives/runtime-upgrades/` instead of
+  `.sfs-local/tmp/upgrade-backups/`.
+- **Agent adapter backups** — `sfs agent install` now preserves overwritten
+  adapters under `.sfs-local/archives/agent-install-backups/` instead of
+  `.sfs-local/tmp/agent-install-backups/`.
 
 ## [0.5.54-product] - 2026-05-01
 

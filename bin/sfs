@@ -55,7 +55,7 @@ Usage:
 Commands:
   agent install, upgrade, update, uninstall
   version [--check]
-  status, start, guide, auth, adopt, brainstorm, plan, implement, review, decision, report, tidy, retro, commit, loop
+  status, start, guide, auth, division, adopt, brainstorm, plan, implement, review, decision, report, tidy, retro, commit, loop
 
 Project state defaults to .sfs-local/. Override with SFS_LOCAL_DIR when needed.
 
@@ -77,7 +77,7 @@ Installs thin LLM-agent adapter files into the current project:
   gemini  -> .gemini/commands/sfs.toml
   codex   -> .agents/skills/sfs/SKILL.md
 
-Existing changed files are backed up under .sfs-local/tmp/agent-install-backups/.
+Existing changed files are archived under .sfs-local/archives/agent-install-backups/.
 EOF
 }
 
@@ -257,12 +257,12 @@ backup_and_copy() {
 
     local ts backup_dir safe_rel
     ts="$(date +%Y%m%d-%H%M%S)"
-    backup_dir="${PWD}/.sfs-local/tmp/agent-install-backups/${ts}"
+    backup_dir="${PWD}/.sfs-local/archives/agent-install-backups/${ts}"
     safe_rel="${dst_rel//\//__}"
     mkdir -p "${backup_dir}"
     cp "${dst}" "${backup_dir}/${safe_rel}"
     cp "${src}" "${dst}"
-    echo "updated: ${dst_rel} (backup: .sfs-local/tmp/agent-install-backups/${ts}/${safe_rel})"
+    echo "updated: ${dst_rel} (archive: .sfs-local/archives/agent-install-backups/${ts}/${safe_rel})"
     return 0
   fi
 
@@ -544,7 +544,7 @@ case "${1:-}" in
 esac
 
 case "${1:-}" in
-  status|start|guide|auth|adopt|brainstorm|plan|implement|review|decision|report|tidy|retro|commit|loop)
+  status|start|guide|auth|division|adopt|brainstorm|plan|implement|review|decision|report|tidy|retro|commit|loop)
     if ! ensure_project_initialized "${1:-command}"; then
       exit 1
     fi

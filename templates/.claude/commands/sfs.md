@@ -11,6 +11,7 @@ description: |
   start     새 sprint workspace 초기화 (bash adapter)
   guide     사용 맥락 브리핑/guide 출력
   auth      Codex/Claude/Gemini review executor 인증 확인/로그인
+  division  본부 활성 상태 확인/승격 (divisions.yaml + decision/event)
   adopt     legacy 프로젝트 report-first baseline 인수인계
   upgrade   package manager runtime 최신화 + project adapter/docs 갱신
   version   현재 설치 버전 확인 (`--check` 로 최신 product tag 비교)
@@ -125,16 +126,16 @@ token as the subcommand and the remainder as that subcommand's arguments.
 $ARGUMENTS
 ```
 
-## Adapter Dispatch (status / start / guide / auth / adopt / brainstorm / plan / implement / review / decision / report / tidy / retro / commit / loop) — execute first
+## Adapter Dispatch (status / start / guide / auth / division / adopt / brainstorm / plan / implement / review / decision / report / tidy / retro / commit / loop) — execute first
 
-If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`adopt`**, **`upgrade`**, **`update`**, **`version`**, **`brainstorm`**, **`plan`**, **`implement`**, **`review`**,
+If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`division`**, **`adopt`**, **`upgrade`**, **`update`**, **`version`**, **`brainstorm`**, **`plan`**, **`implement`**, **`review`**,
 **`decision`**, **`report`**, **`tidy`**, **`retro`**, **`commit`**, or **`loop`**, dispatch the request through the
 `sfs` runtime command first. The runtime normalizes command surfaces
 (`/sfs`, `$sfs`, `sfs`) and delegates to the deterministic bash adapter. In
 vendored layout only, `.sfs-local/scripts/sfs-dispatch.sh` is an acceptable fallback.
 
 Command modes:
-- **Bash-first**: `status`, `start`, `guide`, `auth`, `upgrade`, `update`, `version`, `commit`, `loop`. Print verbatim
+- **Bash-first**: `status`, `start`, `guide`, `auth`, `division`, `upgrade`, `update`, `version`, `commit`, `loop`. Print verbatim
   adapter output first. A compact recap/status line is allowed when it helps
   the user see state and the next action, but adapter stdout remains SSoT.
 - **Conditional hybrid**: `tidy`. Run the adapter first. If it created or
@@ -225,6 +226,8 @@ Procedure (apply in order):
      `3`=not a git repo, `99`=unknown.
    - auth: `0`=ok, `1`=no `.sfs-local/`, `7`=unknown CLI flag or missing
      executor for login/probe, `9`=auth missing/bootstrap failed, `99`=unknown.
+   - division: `0`=ok, `1`=no `.sfs-local/`, `2`=corrupt `events.jsonl`,
+     `3`=not a git repo, `5`=permission, `7`=usage, `99`=unknown.
    - start: `0`=ok, `1`=sprint id conflict (suggest `--force`), `4`=templates
      missing, `5`=permission, `99`=unknown.
    - guide: `0`=ok, `1`=no `.sfs-local/`, `4`=guide missing,
