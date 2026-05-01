@@ -1,3 +1,23 @@
+## [Unreleased]
+
+**Windows Scoop packaging path.** The distribution now carries Scoop manifest
+scaffolding, Windows PATH wrappers, and a `windows-latest` smoke workflow that
+installs SFS through a temporary Scoop bucket before exercising thin project
+initialization.
+
+### Added
+
+- **Scoop manifest template** — `packaging/scoop/sfs.json.template` defines the
+  release archive, SHA256, `extract_dir`, `bin` shim, `checkver`, and
+  `autoupdate` contract for an own bucket.
+- **Windows global wrappers** — `bin/sfs.cmd` and `bin/sfs.ps1` locate Git Bash
+  and delegate to the packaged Bash entrypoint so PowerShell, cmd, and Git Bash
+  can call `sfs` from PATH.
+- **Windows Actions smoke** — `.github/workflows/windows-scoop-smoke.yml`
+  builds a local archive, installs via Scoop, runs `sfs version`, `sfs --help`,
+  `sfs init --layout thin --yes`, `sfs status`, and `sfs agent install all`,
+  then asserts runtime assets were not copied into the project.
+
 ## [0.5.41-product] - 2026-05-01
 
 **AI-owned Git Flow lifecycle.** Product adapters now match the project-wide

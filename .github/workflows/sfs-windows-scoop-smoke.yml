@@ -1,0 +1,134 @@
+name: SFS Windows Scoop Smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/sfs-windows-scoop-smoke.yml"
+      - "2026-04-19-sfs-v0.4/solon-mvp-dist/**"
+  push:
+    branches:
+      - main
+      - "codex-scoop-windows-ci"
+    paths:
+      - ".github/workflows/sfs-windows-scoop-smoke.yml"
+      - "2026-04-19-sfs-v0.4/solon-mvp-dist/**"
+
+jobs:
+  scoop-smoke:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build local release archive and Scoop bucket
+        run: |
+          $distRel = "2026-04-19-sfs-v0.4/solon-mvp-dist"
+          $dist = Join-Path $env:GITHUB_WORKSPACE $distRel
+          $version = (Get-Content (Join-Path $dist "VERSION") -First 1).Trim()
+          if (-not $version) { throw "VERSION is empty" }
+
+          $extractDir = "solon-product-$version"
+          $archive = Join-Path $env:RUNNER_TEMP "sfs-$version.zip"
+          git archive --format=zip --output="$archive" --prefix="$extractDir/" "HEAD:$distRel"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $hash = (Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+          $fileUrl = "file:///" + (($archive -replace "\\", "/") -replace " ", "%20")
+
+          $bucket = Join-Path $env:RUNNER_TEMP "solon-scoop-bucket"
+          $bucketDir = Join-Path $bucket "bucket"
+          New-Item -ItemType Directory -Force -Path $bucketDir | Out-Null
+
+          $template = Get-Content (Join-Path $dist "packaging/scoop/sfs.json.template") -Raw
+          $manifest = $template.Replace("__VERSION__", $version)
+          $manifest = $manifest.Replace("__URL__", $fileUrl)
+          $manifest = $manifest.Replace("__SHA256__", $hash)
+          $manifest = $manifest.Replace("__EXTRACT_DIR__", $extractDir)
+          Set-Content -Path (Join-Path $bucketDir "sfs.json") -Value $manifest -Encoding UTF8
+
+          git -C $bucket init
+          git -C $bucket config user.email "actions@github.com"
+          git -C $bucket config user.name "github-actions"
+          git -C $bucket add bucket/sfs.json
+          git -C $bucket commit -m "test bucket"
+
+          $bucketUrl = "file:///" + (($bucket -replace "\\", "/") -replace " ", "%20")
+          "SFS_TEST_BUCKET_URL=$bucketUrl" >> $env:GITHUB_ENV
+
+      - name: Install Scoop
+        run: |
+          Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+          Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+          "$env:USERPROFILE\scoop\shims" >> $env:GITHUB_PATH
+          $env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"
+          scoop --version
+
+      - name: Install SFS from local bucket
+        run: |
+          $env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"
+          scoop bucket add solon $env:SFS_TEST_BUCKET_URL
+          scoop install sfs
+          Get-Command sfs
+          sfs version
+          sfs --help
+
+      - name: Smoke thin project in PowerShell
+        run: |
+          $env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"
+          $project = Join-Path $env:RUNNER_TEMP "sfs test-project"
+          New-Item -ItemType Directory -Force -Path $project | Out-Null
+          Set-Location $project
+
+          git init
+          sfs init --layout thin --yes
+          sfs status
+          sfs agent install all
+
+          $required = @(
+            "SFS.md",
+            "CLAUDE.md",
+            "AGENTS.md",
+            "GEMINI.md",
+            ".sfs-local\VERSION",
+            ".sfs-local\config.yaml",
+            ".claude\commands\sfs.md",
+            ".claude\skills\sfs\SKILL.md",
+            ".gemini\commands\sfs.toml",
+            ".agents\skills\sfs\SKILL.md"
+          )
+          foreach ($path in $required) {
+            if (-not (Test-Path $path)) { throw "missing expected installed file: $path" }
+          }
+
+          $forbidden = @(
+            ".sfs-local\scripts",
+            ".sfs-local\sprint-templates",
+            ".sfs-local\personas",
+            ".sfs-local\decisions-template"
+          )
+          foreach ($path in $forbidden) {
+            if (Test-Path $path) { throw "thin layout copied runtime asset unexpectedly: $path" }
+          }
+
+      - name: Smoke cmd PATH
+        run: |
+          $env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"
+          cmd /c "sfs version && sfs --help >NUL"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Smoke Git Bash PATH
+        run: |
+          $env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"
+          $bash = Join-Path $env:ProgramFiles "Git\bin\bash.exe"
+          if (-not (Test-Path $bash)) {
+            $bashCommand = Get-Command bash.exe -ErrorAction SilentlyContinue
+            if (-not $bashCommand) { throw "Git Bash not found" }
+            $bash = $bashCommand.Source
+          }
+          & $bash -lc "command -v sfs && sfs version && sfs --help >/dev/null"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

@@ -161,6 +161,24 @@ cd ~/workspace/my-project
 sfs update
 ```
 
+Windows 에서는 Scoop bucket 배포를 우선 검증 경로로 둡니다. bucket manifest 가 배포된 뒤에는
+PowerShell, cmd, Git Bash 어디서든 같은 `sfs` 명령이 PATH 에 잡혀야 합니다:
+
+```powershell
+scoop bucket add solon <our-bucket-url>
+scoop install sfs
+cd C:\workspace\my-project
+git init
+sfs init --layout thin --yes
+sfs status
+sfs agent install all
+```
+
+Scoop 설치본도 프로젝트에는 thin layout 을 기본으로 둡니다. 즉 `.sfs-local/` 에 sprint/decision
+state 와 config 는 생기지만 runtime `scripts/`, `sprint-templates/`, `personas/` 는 통째로
+복사되지 않아야 합니다. 내부 bash adapter 실행에는 Git for Windows 의 Git Bash 가 필요하며,
+자동 감지가 안 되면 `SFS_BASH` 에 `bash.exe` 경로를 지정합니다.
+
 `sfs agent install all` 이 기본 권장입니다. Claude/Gemini/Codex 중 일부만 쓰는
 프로젝트라면 같은 프로젝트 루트에서 개별 설치할 수 있습니다:
 
@@ -494,7 +512,8 @@ Uninstall 은 대화형으로 실행됩니다.
 | `upgrade.ps1` | Windows PowerShell upgrade wrapper (Git Bash 필요) |
 | `uninstall.sh` | 설치된 scaffold 제거 |
 | `uninstall.ps1` | Windows PowerShell uninstall wrapper (Git Bash 필요) |
-| `bin/sfs` | global CLI entrypoint (`sfs init`, `sfs status`, `sfs plan`, `sfs implement` 등) |
+| `bin/sfs` | global Bash CLI entrypoint (`sfs init`, `sfs status`, `sfs plan`, `sfs implement` 등) |
+| `bin/sfs.cmd` / `bin/sfs.ps1` | Windows global wrappers for Scoop/PATH; locate Git Bash and delegate to `bin/sfs` |
 | `GUIDE.md` | 친구 onboarding 30분 walk-through (placeholder 치환 + 첫 sprint + FAQ + 트러블슈팅) |
 | `templates/SFS.md.template` | 공통 운영 지침 |
 | `templates/CLAUDE.md.template` | Claude Code adapter template |
@@ -506,6 +525,8 @@ Uninstall 은 대화형으로 실행됩니다.
 | `templates/.codex/prompts/sfs.md` | Codex custom prompt fallback (optional/legacy) |
 | `templates/.sfs-local-template/` | packaged runtime scripts, Windows `sfs.ps1` vendored fallback, sprint templates, decision templates |
 | `packaging/homebrew/sfs.rb.template` | Homebrew tap formula template (`url`/`sha256` fill-in on release cut) |
+| `packaging/scoop/sfs.json.template` | Scoop bucket manifest template (`url`/`hash`/`extract_dir` fill-in on release cut) |
+| `.github/workflows/windows-scoop-smoke.yml` | Windows Actions smoke for Scoop install + thin project init |
 | `CHANGELOG.md` | release history |
 | `VERSION` | distribution version |
 

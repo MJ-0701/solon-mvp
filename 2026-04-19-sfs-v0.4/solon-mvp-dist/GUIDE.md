@@ -7,13 +7,24 @@
 
 ## 0. 설치는 끝났다. 이제 뭐 할 차례?
 
-Homebrew 로 global runtime 을 설치한 뒤 프로젝트 루트에서 `sfs init` 과
+Homebrew 또는 Scoop 으로 global runtime 을 설치한 뒤 프로젝트 루트에서 `sfs init` 과
 `sfs agent install all` 을 실행하면 다음이 생긴다.
 
 ```bash
 brew install MJ-0701/solon-product/sfs
 cd ~/workspace/my-project
 sfs init
+sfs agent install all
+```
+
+Windows 는 Git for Windows 설치 후 Scoop 경로를 쓴다:
+
+```powershell
+scoop bucket add solon <our-bucket-url>
+scoop install sfs
+cd C:\workspace\my-project
+git init
+sfs init --layout thin --yes
 sfs agent install all
 ```
 
@@ -31,9 +42,10 @@ my-project/
 └── .gitignore                   ← Solon 마커 블록 자동 추가
 ```
 
-기본 방향은 global `sfs` runtime + project-local `.sfs-local/` state 다. Windows 사용자는
-Git Bash/WSL 에서 `sfs status` 를 실행한다. vendored layout 을 선택했을 때만
-`.sfs-local\scripts\sfs.ps1 status` wrapper 를 fallback 으로 쓴다.
+기본 방향은 global `sfs` runtime + project-local `.sfs-local/` state 다. Windows Scoop
+설치본은 PowerShell/cmd/Git Bash 에서 같은 `sfs` 명령을 노출하고, 내부 adapter 는 Git for
+Windows 의 Git Bash 로 내려간다. vendored layout 을 선택했을 때만 `.sfs-local\scripts\sfs.ps1 status`
+wrapper 를 fallback 으로 쓴다.
 Claude/Gemini/Codex entry point 는 얇은 agent adapter 이므로, 새 agent 를 쓰거나
 adapter 를 갱신할 때는 `sfs agent install claude|gemini|codex|all` 을 다시 실행한다.
 기존 adapter 가 커스텀되어 있으면 `.sfs-local/tmp/agent-install-backups/` 에 백업된다.
