@@ -2,7 +2,7 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-01T18:12:58Z
+last_overwrite: 2026-05-01T19:17:02Z
 session: "doc-refactor: PROGRESS.md token-bloat compaction (full snapshot archived at archives/progress/PROGRESS-2026-05-01T181258Z-precompact.md)"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
@@ -16,6 +16,11 @@ current_wu_owner: null
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
 scheduled_task_log:
+  - ts: 2026-05-02T04:13:36+09:00
+    codename: overnight-sfs-loop-deploy
+    check_exit: 16
+    action: "resume-session-check: sched_log_drift detected (this run)"
+    ahead_delta: "+0"
   - ts: 2026-05-02T02:38:27+09:00
     codename: overnight-sfs-loop-deploy
     check_exit: 0
@@ -29,6 +34,7 @@ scheduled_task_log:
 
 # ── DOMAIN LOCKS (SSoT) ──────────────────────────────────────────
 # Keep only operational fields here; verbose history lives in the archive snapshot.
+
 domain_locks:
   D-A-WU-24:
     owner: null
@@ -127,7 +133,7 @@ resume_hint:
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
-  last_written: 2026-05-01T18:12:58Z
+  last_written: 2026-05-01T19:17:02Z
 ---
 
 # PROGRESS — compact

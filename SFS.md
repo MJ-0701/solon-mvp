@@ -1,308 +1,51 @@
-# SFS.md — `<PROJECT-NAME>` Solon SFS 운영 지침
+# SFS.md — Solon SFS 운영 지침 (entry-lean)
 
-> 본 파일은 Claude Code, Codex, Gemini CLI 가 **공통으로 참조하는** Solon SFS 지침입니다.
-> SFS 는 **Solo Founder System** 의 약자입니다. Sprint flow 는 SFS 의 실행 메커니즘입니다.
-> `solon-product` 를 설치해서 생성됨 (`install.sh`). 프로젝트 특성에 맞게 자유롭게 편집.
-> Solon 은 multi-adaptor by design — 어떤 CLI 환경에서 호출하든 `sfs` runtime command 가
-> deterministic bash adapter 로 내려간다. `.sfs-local/` 은 state/config/custom override 영역이다.
-> Claude/Gemini/Codex entry point 는 `sfs agent install claude|gemini|codex|all` 로
-> 설치/갱신하는 thin adapter 이며, 실제 runtime 은 global `sfs` CLI 이다.
-> Solon 버전 갱신 후에는 uninstall/reinstall 대신 `sfs upgrade` 로 project adapter/docs 를 갱신한다.
+> 목적: Claude/Codex/Gemini 공통 진입 문서의 **entry-time token cost** 최소화.
+> 자세한 설명/배경/긴 표는 on-demand 문서로 이동한다.
 
-> Windows PowerShell 사용자는 Git for Windows 의 Git Bash 또는 WSL 에서 global `sfs` CLI 를
-> 실행한다. vendored layout 에서만 `.sfs-local\scripts\sfs.ps1 <command>` wrapper 를 fallback 으로 쓴다.
+## Entry pointers (SSoT)
 
-## 프로젝트 개요
+- Runtime full guide: `.sfs-local/GUIDE.md`
+- Project docset entry: `2026-04-19-sfs-v0.4/CLAUDE.md` → `2026-04-19-sfs-v0.4/PROGRESS.md`
+- Full pre-compact snapshot (verbatim): `archives/sfs/SFS-2026-05-01T191445Z-precompact.md`
 
-- **이름**: `<PROJECT-NAME>`
-- **도메인**: `<DOMAIN>` (예: 관리자 페이지 / SaaS 대시보드 / API 서비스 / ...)
-- **단계**: MVP (Phase 1), greenfield, 7-step lightweight spike 운용.
-- **Stack**: `<STACK>` (예: Next.js 15 App Router + TypeScript)
-- **DB**: `<DB>` (예: Postgres + Prisma)
-- **배포**: `<DEPLOY>` (예: Vercel)
+## TL;DR (7-step sprint flow)
 
-## 운영 방식 — 7-step flow
+1. G0 `/sfs brainstorm` → `brainstorm.md`
+2. G1 `/sfs plan` → `plan.md` (요구사항/AC/scope + 계약)
+3. G2 `/sfs implement` → `implement.md`/`log.md` (코드 + evidence)
+4. G4 `/sfs review` → `review.md` (결과 원문은 tmp/archives 로)
+5. G5 `/sfs retro --close` → `report.md`/`retro.md` + workbench/tmp archive
 
-각 1 cycle = 1 Sprint = 5~7 일. 3 C-Level(CEO/CTO/CPO) 기준 순서:
-
-1. **CEO 요구사항 정리** (G0) — `/sfs brainstorm` 이 raw 를 기록하고 Solon CEO 가 `.sfs-local/sprints/<sprint-id>/brainstorm.md` §1~§7 을 정리
-2. **CEO plan** (G1) — `/sfs plan` 이 `brainstorm.md` 를 읽고 `.sfs-local/sprints/<sprint-id>/plan.md` 의 요구사항/AC/scope 를 작성
-3. **CTO Generator ↔ CPO Evaluator sprint contract** — `/sfs plan` 이 `plan.md §5` 에 계약 작성
-4. **CTO 구현** (G2 entry) — `/sfs implement` 가 `implement.md`/`log.md` 를 열고 실제 코드 + evidence 작성
-5. **CPO review** (G4) — `review.md` + CPO verdict + 사용자 언어 요약/action report
-6. **CTO review 확인** — pass 면 최종 통과, partial/fail 이면 지정 범위 재구현
-7. **회고 + 보고서 정리** (G5) — `retro.md` 로 history/learning 을 남기고 `report.md` 로 최종 작업보고서를 만든 뒤 workbench/tmp 산출물을 archive 로 이동
-
-> **해석 규칙**: 이 7-step 은 full startup team-agent flow 의 lightweight projection 입니다. 빠르게 굴리기 위한 실행 순서이지, Discovery/PRD/Taxonomy/UX/Technical Design/Release Readiness 를 없앤다는 뜻이 아닙니다. 필요성이 보이면 새 ceremony 를 늘리기보다 현재 sprint 산출물 안에 evidence 를 작게 남깁니다.
-
-### Artifact lifecycle — workbench → report
-
-`brainstorm.md`, `plan.md`, `implement.md`, `log.md`, `review.md` 는 진행 중
-화이트보드/노트패드다. 작업 중에는 충분히 기록해도 되지만, 완료 후에는 그대로 최종 산출물로
-두지 않는다. Sprint close 전에 AI runtime 은 `report.md` 를 한 장짜리 작업보고서로 정리하고,
-`/sfs retro --close` 또는 `/sfs tidy --apply` 는 workbench/tmp 산출물을 archive 로 이동해
-보존하고, sprint/tmp 표면에는 남겨야 할 문서만 둔다. 히스토리와 학습은 `retro.md`,
-session log, `.sfs-local/events.jsonl` 이 담당한다.
-
-기존 sprint 를 나중에 정리할 때는 사용자 동의가 필요하다:
+## Quick commands
 
 ```text
-/sfs report --sprint <sprint-id>
-# report.md 를 확인/수정한 뒤
-/sfs tidy --sprint <sprint-id> --apply
+sfs status
+sfs guide
+sfs start "<goal>"
+sfs brainstorm "<raw>"
+sfs plan
+sfs implement "<slice>"
+sfs review --gate G4 --executor codex|gemini|claude [--prompt-only]
+sfs report --compact
+sfs tidy --apply
+sfs retro --close
 ```
 
-### AI coding contract — Harness + DDD/TDD 기본값
+## Guardrails (must keep)
 
-AI coding 은 좋은 코드베이스에서만 빠르다. 구조가 불규칙하고 도메인 언어가 흐린 코드베이스에서는
-AI 가 local patch 를 반복하면서 software entropy 를 키울 수 있다. 이 프로젝트에서 Solon 으로
-코드를 만들 때는 하네스 4원칙과 DDD/TDD 를 heavy ceremony 가 아니라 기본 안전장치로 사용한다.
+- Gate 는 hard-block 이 아니라 signal-only (never-hard-block).
+- `sfs` runtime/bash adapter 출력은 paraphrase 금지 (결정성 유지).
+- Git flow 기본값은 AI-owned(검증+commit). 단 destructive git/충돌/인증 prompt 는 즉시 stop.
 
-1. **Think Before Coding**
-   - 구현 전 가정, 선택지, trade-off, 성공 기준을 짧게 고정한다.
-   - 모호하면 임의로 해석하지 않고 질문한다.
-2. **Simplicity First**
-   - 하나의 AC 를 증명하는 최소 code/document surface 로 구현한다.
-   - 미래 확장성, 설정, 추상화는 지금 필요한 경우에만 둔다.
-3. **Surgical Changes**
-   - 요청 slice 와 직접 연결된 코드/문서만 바꾼다.
-   - 관련 없는 cleanup 은 삭제하지 않고 follow-up 또는 report risk 로 남긴다.
-4. **Goal-Driven Execution**
-   - 완료 기준은 변경량이 아니라 구현 + 검증 evidence + review handoff 다.
-   - 구현 중 메모는 workbench 에 남겨도 되지만 완료 후 핵심은 `report.md` 로 압축한다.
-5. **Codebase analysis 먼저**
-   - 새 코드를 만들기 전에 기존 폴더 구조, naming, 테스트 방식, 상태/API 패턴을 요약한다.
-   - 기존 규칙과 다르게 가야 하면 `plan.md` 또는 decision file 에 이유를 남긴다.
-6. **DDD-lite domain language**
-   - `brainstorm.md` / `plan.md` 에 핵심 명사, 행위자, 상태, invariant 를 고정한다.
-   - 같은 단어는 코드, 테스트, review 에서 같은 뜻으로 쓴다.
-7. **TDD-lite test contract**
-   - 구현 전 acceptance criteria 를 test 후보로 바꾼다.
-   - unit test 가 과하면 smoke test, CLI output check, browser check 로 대체해도 된다.
-8. **Small implementation slice**
-   - 한 번에 큰 feature 를 만들지 않고, 하나의 AC 를 증명하는 최소 변경부터 구현한다.
-9. **Review gate**
-   - CPO review 는 "코드가 많다" 가 아니라 domain intent, test feedback, codebase regularity,
-     user-visible behavior 를 기준으로 verdict/action 을 남긴다.
+## Paths (what matters)
 
-### 3 C-Level 기본 persona
+- Sprint workbench: `.sfs-local/sprints/<sprint-id>/{brainstorm,plan,implement,log,review}.md`
+- Sprint outputs: `.sfs-local/sprints/<sprint-id>/{report,retro}.md`
+- Decisions: `.sfs-local/decisions/` (+ sprint-local mini-ADR)
+- Loop queue: `.sfs-local/queue/{pending,claimed,done,failed,abandoned}` + `.sfs-local/queue/runs/`
 
-| 역할 | 기본 파일 | reasoning tier | 책임 |
-|---|---|---|---|
-| CEO | `.sfs-local/personas/ceo.md` | `strategic_high` | 요구사항 정리, plan, scope 결정 |
-| CTO Generator | `.sfs-local/personas/cto-generator.md` | `strategic_high` | architecture/contract/rework 방향 결정 |
-| Implementation Worker | `.sfs-local/personas/implementation-worker.md` | `execution_standard` | 고정된 slice 구현, 테스트, evidence 기록 |
-| CPO Evaluator | `.sfs-local/personas/cpo-evaluator.md` | `review_high` | 독립 품질검증, verdict, CTO action 제시 |
+## Notes
 
-리뷰는 필수다. 다만 **리뷰 executor/tool 은 강제가 아니다**. Claude 로 구현했다면 Codex/Gemini CLI
-같은 다른 tool 또는 별도 agent instance 로 CPO review 를 수행하는 것을 권장한다.
-
-### Runtime model profiles — Claude / Codex / Gemini 동급 설정
-
-역할은 모델명보다 먼저 정해진다. Solon 은 concrete 모델명 대신 `.sfs-local/model-profiles.yaml` 의
-reasoning tier 와 agent별 model setting 을 기록하고, 각 runtime adapter 가 자기 모델/profile 로
-resolve 한다. Claude, Codex, Gemini 는 동등한 runtime adapter 이며 한쪽 이름이 canonical 이 아니다.
-
-초기 설치 시 이 파일을 확인한다:
-
-```text
-.sfs-local/model-profiles.yaml
-```
-
-Solon 권장은 C-Level/review 는 high reasoning, 구현 worker 는 standard, helper 는 economy 다.
-다만 이건 권장일 뿐이다. 사용자가 "worker/helper 도 전부 고사양 모델로 쓰겠다" 고 정하면 막지
-않고, `selected_policy: all_high` 또는 `agent_model_overrides` 로 명시한다.
-사용자가 설정을 건너뛰거나, 거부하거나, 까먹은 경우에도 workflow 는 막지 않는다. 이때는
-`selected_policy: current_model` 로 보고 **현재 런타임에서 사용자가 선택한 모델/effort 를 그대로**
-쓴다.
-
-#### Agent/model setup question guard
-
-사용자가 "agent 설정", "모델 설정", "Opus/Sonnet/Haiku 배치", "worker 모델" 처럼
-agent model profile 을 물어보면 먼저 `.sfs-local/model-profiles.yaml` 을 확인한다.
-다음 중 하나라도 해당하면 **설정 완료로 설명하지 말고 미확정 fallback 으로 보고 사용자에게
-먼저 물어본다**:
-
-- 파일이 없음
-- `configuration.status` 가 `current_model_fallback`, `review_required`, `unset` 중 하나
-- `selected_runtime: current` 또는 `selected_policy: current_model`
-- `confirmed_by` 가 비어 있음
-
-이때 기본 질문은 짧게 한다:
-
-```text
-Agent model profile 이 아직 확정되지 않았습니다.
-이 질문은 Solon 의 역할별 agent 가 어떤 모델을 쓸지 정하는 단계입니다.
-예: 설계/판단 agent 는 더 강한 모델, 구현 agent 는 표준 모델, 단순 helper 는 가벼운 모델.
-지금 꼭 정하지 않아도 됩니다. 건너뛰면 현재 런타임 모델을 그대로 쓰고, 다음 upgrade 때 다시 안내합니다.
-
-1. Claude 권장: 설계/평가 Opus 4.7, 구현 Sonnet 4.6, helper Haiku
-2. 지금 설정 안 함: current_model fallback 유지 (처음이면 이걸 골라도 안전)
-3. all_high: worker/helper 도 high-end (품질 우선, 비용/지연 증가 가능)
-4. custom: 직접 지정
-```
-
-사용자가 이미 원하는 배치를 말한 경우(예: "설계 Opus 4.7 / 코드 Sonnet 4.6 / Helper Haiku")에는
-그 선택을 확인하고 `.sfs-local/model-profiles.yaml` 의 `selected_runtime`, `selected_policy`,
-agent별 tier/override, `confirmed_by`, `confirmed_at` 을 갱신한다. 단순 상태 조회라도 fallback 이면
-"현재 이렇게 확정돼 있다"가 아니라 "아직 확정되지 않았고 현재 모델로 fallback 중"이라고 말한다.
-
-| reasoning tier | 주 역할 | Claude 예시 | Codex 예시 | Gemini 예시 |
-|---|---|---|---|---|
-| `strategic_high` | CEO/CTO/CPO 설계, 방향성, architecture/public contract 결정 | opus-4.7 / opus-4.6 | gpt-5.5 + xhigh/very_high reasoning_effort | highest-reasoning profile |
-| `review_high` | 독립 CPO/Evaluator review | opus-4.7 / opus-4.6 | gpt-5.5 + xhigh/very_high reasoning_effort | high-reasoning reviewer |
-| `execution_standard` | plan/architecture/AC 고정 후 구현 worker | sonnet | gpt-5.5 + medium reasoning_effort | balanced coding profile |
-| `helper_economy` | parsing, formatting, deterministic helper | haiku | gpt-5.5-mini + low reasoning_effort | flash/economy profile |
-
-`execution_standard` worker 는 정해진 설계를 구현하는 실무자다. architecture, public API, security,
-data-loss risk, 모호한 요구사항, 반복 실패가 나오면 즉시 `strategic_high` 로 escalation 한다.
-Worker 가 current/high-end 모델을 쓰더라도 자기 산출물을 pass 처리할 수 없고, CPO review 는 별도
-agent/tool/instance 로 남긴다.
-
-### Adaptor 설계 배경
-
-`/sfs` adaptor 의 목적은 vendor별 명령어 모양을 맞추는 것에 그치지 않는다. 사용자가 Claude 를
-주 구현 도구로 쓰더라도, Claude 가 만든 결과를 Claude 가 그대로 통과시키는 자체검증을 피하기 위해
-Codex plugin, Codex CLI, Gemini CLI, 또는 별도 agent instance 로 CPO review 를 위임할 수 있어야 한다.
-
-`/sfs review --executor <tool>` 은 그 의도를 기록하고 기본적으로 실제 CLI/bridge 호출을 시도한다.
-bridge 가 없으면 조용히 성공하지 않고 실패해야 한다. 수동 handoff 만 필요하면 `--prompt-only` 를 쓴다.
-Claude 내부에 연결된 Codex plugin 은 shell 에서 자동 호출할 수 없으므로 plugin bridge command 또는
-prompt-only → plugin 호출 2-step 이 필요하다.
-
-Bridge 는 비대칭이다:
-- Claude 구현 → Codex review: Claude 쪽 Codex plugin/manual bridge 또는 `codex` CLI.
-- Codex 구현 → Claude review: Claude plugin 이 아니라 `claude` CLI (`--executor claude`) 또는 prompt handoff.
-- `claude-plugin` executor 는 지원하지 않는다. Codex 는 Claude plugin host 가 아니다.
-
-### Git Flow lifecycle — AI-owned by default
-
-사용자는 보통 작업만 발화한다. AI runtime 은 구현 전 `git status --short` 와 현재 branch 를 확인하고,
-작업 도메인을 판별해 `feature/<domain>-<short-slug>` 또는 production bugfix 는
-`hotfix/<domain>-<short-slug>` 를 생성/전환한다. 작업 완료 조건은 검증 통과 + commit +
-branch push + main 흡수(merge/PR 등 repo 정책) + origin main push 까지다.
-
-사용자에게 git 명령을 넘기는 경우는 예외다: destructive git, unrelated dirty set, merge conflict,
-failing tests, protected branch/remote rejection, auth prompt 처럼 AI 가 안전하게 완료할 수 없는 경우.
-`sfs commit` 은 working tree grouping/local commit helper 이고, 그 바깥의 branch/push/main 흡수는
-AI runtime 의 Git Flow lifecycle 로 처리한다.
-
-### Gate 운용 (7-enum, signal-only)
-
-| Gate | 의미 | hard-block? |
-|------|------|:-:|
-| G-1 | discovery / brainstorm entry | No — signal only |
-| G0 | 브레인스토밍 verdict | No — signal only |
-| G1 | plan approval self-check | No — self-check |
-| G2 | 구현 entry | No — 구현 직전 1 줄 선언 |
-| G3 | sprint stop / partial-block | No — verdict 기록만 |
-| G4 | review verdict | No — verdict 기록만 |
-| G5 | retro close | No — verdict 기록만 |
-
-7-enum SSoT = packaged `sfs-common.sh::validate_gate_id()` (vendored layout 에서는
-`.sfs-local/scripts/sfs-common.sh`) 이다.
-verdict 3-enum = `pass` / `partial` / `fail` (G3 만 binary `block` / `unblock`).
-Release Readiness 는 별도 Gate 로 운영하지 않지만, production 전에는 secret/auth/data/monitoring/rollback/cost 체크를 review 또는 retro 에 남깁니다.
-
-> **중요 (ALT-INV-3 never-hard-block)**: Gate 는 hard-block 이 아니라 **signal**.
-> fail 이어도 cycle 은 계속 진행 가능 — 다만 기록 남김.
-
-## 산출물 저장 규칙
-
-- Sprint 산출물: `.sfs-local/sprints/<YYYY-Wxx>-sprint-<N>/` (예: `2026-W18-sprint-1/`)
-  - 진행 중 workbench: `brainstorm.md` (G0) · `plan.md` (G1) · `implement.md` (구현 실행) · `log.md` (구현 노트) · `review.md` (G4)
-  - 완료 산출물: `report.md` (최종 작업보고서) · `retro.md` (G5 history/learning)
-- 기본 persona: `.sfs-local/personas/ceo.md` · `cto-generator.md` · `implementation-worker.md` · `cpo-evaluator.md`
-- 모델/agent profile: `.sfs-local/model-profiles.yaml` — current fallback + Claude/Codex/Gemini/custom 별 agent model mapping
-- L1 event log: `.sfs-local/events.jsonl` (`/sfs *` 명령이 자동 append, 각 line 1 JSON) — **git ignore**
-- 결정 (full ADR): `.sfs-local/decisions/<NNNN>-<short-title>.md` — `decisions-template/ADR-TEMPLATE.md` 5-section 풀 ADR.
-- 결정 (mini-ADR, sprint-local 짧은 결정): `.sfs-local/sprints/<sprint-id>/<NNNN>-<short-title>.md` — `sprint-templates/decision-light.md` 사용.
-
-## 슬래시 명령 (multi-adaptor 1급)
-
-Solon SFS 의 주요 명령은 어떤 CLI 환경에서 호출하든 동일한 `sfs` runtime 이 SSoT 다 (paraphrase 금지):
-
-| 명령 | 동작 |
-|:--|:--|
-| `/sfs status` | 현재 sprint / WU / 마지막 gate / git ahead / last_event 1줄 |
-| `/sfs start <goal> [--id <sprint-id>] [--force]` | sprint workspace 초기화 + sprint files cp |
-| `/sfs guide [--path|--print]` | 짧은 사용 맥락 브리핑 / guide 경로 / full guide 본문 보기 |
-| `/sfs auth status|check|login|probe [--executor codex|gemini|claude]` | review executor 인증 확인/로그인/더미 요청 |
-| `/sfs version [--check]` | 현재 설치 버전 및 최신 배포 태그 확인 |
-| `/sfs upgrade [--skip-existing] [--interactive]` | package manager runtime 최신화 + 프로젝트 adapter/docs 갱신 (`update` 는 하위 호환 alias) |
-| `/sfs adopt [--id legacy-baseline] [--apply]` | SFS 없이 진행된 legacy 프로젝트를 git/code/docs 기반으로 인계. 문서가 과잉이어도 0개여도 `report.md` + `retro.md` 만 visible baseline 으로 남기고 raw scan 은 archive 보존 |
-| `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락 기록 + Solon CEO 맥락 정리 |
-| `/sfs plan` | 현재 sprint plan.md 진입 + `plan_open` event 후 G1 요구사항/AC/scope + CTO/CPO sprint contract 작성 |
-| `/sfs implement [work slice|--stdin]` | plan 기반 실제 코드 변경 + DDD/TDD guardrail + `implement.md`/`log.md` evidence 기록 |
-| `/sfs review --gate <id> [--executor codex|gemini|claude|custom] [--prompt-only]` / `/sfs review --show-last` | CPO review run. stdout 은 verdict/output path 메타데이터만 보여주고, AI runtime 이 result 를 사용자 언어의 요약+action report 로 렌더링. full prompt 는 tmp prompt file에 저장하며 `review.md`에는 compact log/result만 남김. `--show-last` 는 executor 재실행 없이 기존 결과 확인 |
-| `/sfs decision <title> [--id <id>]` | full ADR 신설 후 Context/Decision/Alternatives/Consequences 작성 |
-| `/sfs report [--sprint <id>] [--compact]` | 최종 `report.md` 생성/갱신. `--compact` 는 사용자 동의 후 workbench/tmp 산출물을 archive 로 이동 |
-| `/sfs tidy [--sprint <id>\|--all] [--apply]` | 기존 sprint 의 workbench/tmp 산출물을 archive 로 이동하고 남겨야 할 문서만 유지. report.md 가 없으면 생성 |
-| `/sfs retro [--close]` | retro.md 작성/갱신. `--close` 는 retro + report refinement 후 workbench/tmp archive + sprint close + auto commit |
-| `/sfs commit [status|plan|apply --group <name>]` | working tree 를 product-code / sprint-meta / runtime-upgrade / ambiguous 로 분류하고 branch preflight 안내 후 선택 그룹만 local commit. Git Flow-aware 메시지 자동 생성. 이후 branch push/main 흡수는 AI-owned Git Flow lifecycle 로 처리 |
-| `/sfs loop [OPTIONS]` | queue-first Ralph Loop + Solon mutex 자율 진행 (see `--help`) |
-| `/sfs loop enqueue <title> [--size small|medium|large] [--target-minutes N]` | `.sfs-local/queue/pending/` 에 loop task 등록 |
-| `/sfs loop queue` | queue pending/claimed/done/failed/abandoned count + stale claimed 확인 |
-| `/sfs loop claim [--owner <name>]` | pending task 하나를 worker 가 atomic claim |
-| `/sfs loop verify <task>` | claimed task 의 `## Verify` command 실행 후 done/failed 처리 |
-| `/sfs loop complete|fail|retry|abandon <task>` | queue lifecycle 수동 마무리 / 재시도 / 포기 |
-
-Queue 는 execution backlog / 실행 대기열이며, sprint scope SSoT 는 여전히
-`brainstorm.md` / `plan.md` / decision file 입니다. 자율주행용 queue item 은 보통
-`medium`(30~60분) 또는 `large`(60~120분) 로 잡고, `small` 은 batch 후보로 둡니다.
-`retry` 는 attempts 를 1 증가시키며 `max_attempts` 를 넘으면 `abandoned/` 로 이동합니다.
-
-## 6 본부 활성 상태 (divisions)
-
-기본값:
-- `dev` (active) — 사용자 직접
-- `strategy-pm` (active) — 사용자 직접
-- `qa` (abstract) — MVP 는 manual smoke test 대체
-- `design` (abstract) — 기존 디자인 시스템 차용
-- `infra` (abstract) — `<DEPLOY>` 재사용
-- `taxonomy` (abstract) — cycle 2~3 누적 후 도입
-
-세부는 `.sfs-local/divisions.yaml`. 승격 결정은 `.sfs-local/decisions/` 에 기록.
-
-## 관찰성 (Observability, L1/L2/L3)
-
-- **L1**: `.sfs-local/events.jsonl` 자동 append. `/sfs *` 명령들이 sprint_start / plan_open / review_open / decision_created / retro_open / sprint_close / wu_open 등 이벤트 기록.
-- **L2**: git commit 자체가 channel. Sprint 시작/종료 commit sha 는 plan/review 에 기록.
-- **L3**: 외부 driver 미사용 (minimal tier).
-
-## 커뮤니케이션 규율
-
-- **한국어 반말** (사용자 선호).
-- **짧고 직설**.
-- **기록 > 기억** — 중요한 결정은 `.sfs-local/decisions/` 또는 sprint 산출물에 남김.
-- 사용자가 "ㄱㄱ" / "이어서" 한 마디면 resume — 단 의미 결정 (A/B/C) 은 사용자에게.
-
-## 절대 금지
-
-- **외부 방법론 docset 의 경로 하드코딩** — 사용자 개인 IP 일 수 있음.
-- **무차별 `git push origin *`** — 정확한 branch/main push 는 AI-owned Git Flow lifecycle 로 수행하되 wildcard push 는 금지.
-- **Gate hard-block** — 구현 자체를 막지 않음 (never-hard-block 원칙).
-- **`/sfs *` 명령의 bash adapter 출력 paraphrase** — 결정성 유지.
-
-## 런타임별 시작법 (multi-adaptor 1급)
-
-세 환경 모두 동일하게 `sfs` runtime 을 SSoT 로 사용한다 (paraphrase 금지):
-
-- **Claude Code**: `/sfs`, `/sfs help`, `/sfs status`, `/sfs guide`, `/sfs start <goal>`, `/sfs implement <slice>`
-  (`.claude/skills/sfs/SKILL.md` 가 primary 이고 `.claude/commands/sfs.md` 는 legacy fallback.
-  둘 다 자동으로 `sfs <command>` 를 호출)
-- **Codex**: `.agents/skills/sfs/SKILL.md` + `AGENTS.md` 가 동일한 dispatch table 을 안내.
-  Codex app/CLI 에서는 `$sfs status`, `$sfs start ...`, `$sfs brainstorm ...`, `$sfs implement ...` 처럼 Skill
-  mention 을 우선 사용한다. Bare `/sfs` 는 host native slash UI 가 모델 전에 차단할 수 있다.
-  이때 `커맨드 없음` / `Unrecognized command` 가 보이면 Solon 미설치가 아니라 Codex runtime
-  adaptor gap 이다. `/sfs ...` 텍스트가 모델/Skill 까지 도달한 경우에는 dispatch 대상이다.
-- **Gemini CLI**: `GEMINI.md` 가 동일한 dispatch table 을 안내. 동작 동일.
-
-`/sfs loop --executor claude|gemini|codex|<custom>` 로 Ralph Loop LLM 호출도 환경 무관.
-Windows PowerShell direct 호출은 global `sfs` 를 Git Bash/WSL 에서 실행한다. vendored layout 은
-`.sfs-local\scripts\sfs.ps1 status` fallback 을 제공한다.
-
-## Changelog
-
-- v0.3 (`<DATE>`, multi-adaptor 1급 정합): 7-Gate enum (G-1..G5) + 산출물 5 파일 (brainstorm/plan/log/review/retro) + decisions full ADR + mini-ADR 양쪽 + AGENTS/GEMINI bash adapter 직접 호출 안내. `solon-product <SOLON-VERSION>`.
-- v0.2 (runtime adapters): runtime 중립 SFS 지침.
+- Multi-adaptor by design: 어떤 CLI 환경에서도 SSoT 는 global `sfs` runtime 이다.
+- Windows PowerShell 은 Git Bash/WSL 에서 `sfs` 실행을 기본으로 한다.
