@@ -1,6 +1,6 @@
 ---
 name: sfs
-description: Solon SFS (Solo Founder System) workflow for Codex — use $sfs status/start/guide/auth/adopt/upgrade/version/brainstorm/plan/implement/review/decision/report/tidy/retro/commit/loop or natural language to dispatch to bash adapter SSoT; adopt/brainstorm/plan/implement/decision/report/retro are AI-hybrid refinements, review is adapter-run by default through the selected CPO executor bridge, tidy is archive-first workbench migration with conditional report refinement, commit is adapter-run local git grouping/commit. Trigger when a Codex surface delivers $sfs, sfs <command>, /sfs text that reaches the model, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "upgrade", "version check", "legacy 인수인계", "기존 프로젝트 SFS 도입", "sprint 시작", "브레인스토밍", "plan 작성", "구현", "implement", "review 작성", "decision 기록", "report 작성", "tidy 정리", "retro close", "commit 정리", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
+description: Solon SFS (Solo Founder System) workflow for Codex — use $sfs status/start/guide/auth/division/adopt/upgrade/version/brainstorm/plan/implement/review/decision/report/tidy/retro/commit/loop or natural language to dispatch to bash adapter SSoT; adopt/brainstorm/plan/implement/decision/report/retro are AI-hybrid refinements, review is adapter-run by default through the selected CPO executor bridge, tidy is archive-first workbench migration with conditional report refinement, commit is adapter-run local git grouping/commit. Trigger when a Codex surface delivers $sfs, sfs <command>, /sfs text that reaches the model, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "본부 활성화", "division activate", "upgrade", "version check", "legacy 인수인계", "기존 프로젝트 SFS 도입", "sprint 시작", "브레인스토밍", "plan 작성", "구현", "implement", "review 작성", "decision 기록", "report 작성", "tidy 정리", "retro close", "commit 정리", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
 ---
 
 # Solon SFS — Codex Skill
@@ -14,7 +14,7 @@ dispatch the request to the `sfs` runtime command first. The runtime may be a
 global package (thin layout) or a project-local vendored fallback.
 
 Command modes are explicit:
-- **Bash-first**: `status`, `start`, `guide`, `auth`, `upgrade`, `update`, `version`, `commit`, `loop`. Print verbatim
+- **Bash-first**: `status`, `start`, `guide`, `auth`, `division`, `upgrade`, `update`, `version`, `commit`, `loop`. Print verbatim
   adapter output first. A compact recap/status line is allowed when it helps
   the user see state and the next action, but adapter stdout remains SSoT.
 - **Conditional hybrid**: `tidy`. Run the adapter first. If it created or
@@ -137,6 +137,7 @@ not create a new verdict in the current runtime.
 | `start <goal>` (또는 "sprint 시작", "새 sprint") | `sfs start <goal> [--id <sprint-id>] [--force]` | sprint workspace 초기화 + sprint files cp |
 | `guide [--path|--print]` (또는 "가이드", "처음 사용법") | `sfs guide [--path|--print]` | 기본은 짧은 맥락 브리핑, `--path` 는 경로만, `--print` 는 full guide 본문 |
 | `auth status|check|login|probe` (또는 "인증 확인", "Gemini 로그인") | `sfs auth <args>` | Codex/Claude/Gemini review executor 인증 점검/부트스트랩/더미 요청 |
+| `division list|activate|deactivate` (또는 "본부 상태", "본부 활성화") | `sfs division <args>` | abstract 본부를 active/scoped/temporal 로 전환하고 divisions.yaml + decision + event evidence 기록 |
 | `upgrade [--skip-existing] [--interactive]` (또는 "Solon 업데이트", "adapter 갱신") | `sfs upgrade [--skip-existing] [--interactive]` | package manager runtime 을 먼저 최신화한 뒤 managed adapter/docs 갱신. sprint/decision/event history 보존 |
 | `update [--skip-existing]` | `sfs update [--skip-existing]` | 하위 호환 alias. 새 문서/응답에서는 `upgrade` 를 권장 |
 | `version [--check]` (또는 "버전 확인", "새 버전 확인") | `sfs version [--check]` | 현재 설치 버전 출력. `--check` 는 GitHub 최신 product tag 와 비교 |
@@ -181,6 +182,8 @@ not create a new verdict in the current runtime.
      `99`=unknown.
    - auth: `0`=ok, `1`=no `.sfs-local/`, `7`=usage,
      `9`=auth missing/bootstrap failed, `99`=unknown.
+   - division: `0`=ok, `1`=no `.sfs-local/`, `2`=corrupt `events.jsonl`,
+     `3`=not a git repo, `5`=permission, `7`=usage, `99`=unknown.
    - brainstorm: `0`=ok, `1`=no `.sfs-local/` or no active sprint,
      `2`=corrupt `events.jsonl` / `current-sprint`, `3`=not a git repo,
      `4`=template missing, `5`=permission, `99`=unknown.
@@ -487,7 +490,7 @@ Print this 3-line usage and stop:
 
 ```
 Usage: /sfs <command> [args]
-Commands: status, start, guide, auth, adopt, upgrade, version, brainstorm, plan, implement, review, decision, report, tidy, retro, commit, loop
+Commands: status, start, guide, auth, division, adopt, upgrade, version, brainstorm, plan, implement, review, decision, report, tidy, retro, commit, loop
 Help: sfs <command> --help
 ```
 
