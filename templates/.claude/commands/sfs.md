@@ -365,14 +365,37 @@ been printed verbatim, continue into actual implementation unless blocked.
    Then preserve the supporting implementation discipline: shared design
    concept, DDD language, TDD or the smallest useful verification loop, and
    existing codebase regularity.
-4. Implement the smallest coherent code slice. Prefer test-first when the
+4. Classify Solon division guardrails before editing and record the result in
+   `implement.md` / `log.md`. Use the same policy shape for all 6 divisions:
+   always-on craft rules, trigger-based checks, and scale-gated `light` /
+   `full` / `skip` reviews for expensive work. Solon/Claude supplies first-pass
+   guardrails for strategy-pm, taxonomy, design/frontend, dev/backend, QA, and
+   infra so the user does not need to invent every checklist. MVP-overkill
+   findings must be recorded as `deferred` or `risk-accepted`, not used to
+   block the slice unless they are correctness, money, PII, auth, data-loss, or
+   unrecoverable side-effect risks.
+5. For backend implementation, treat transaction discipline as always-on when
+   DB, Spring/JPA, Spring Batch, external API, MQ/event, idempotency, state, or
+   consistency paths are touched. Check Transaction boundaries, external calls
+   outside long DB transactions, `REQUIRES_NEW` intent and Hikari pool pressure,
+   JPA first-level cache behavior, Batch chunk transaction scope, outbox /
+   idempotency / ordering / state history, and matching tests. If
+   `REQUIRES_NEW` changes state and the caller needs that state, prefer a
+   returned result object over re-reading through the same outer
+   EntityManager.
+6. Ask the Security / Infra / DevOps guard level only once at project or sprint
+   scope when that surface is relevant: `light`, `full`, or `skip`. Keep basic
+   hygiene always-on; put skipped expensive reviews into the deferred /
+   risk-accepted ledger with the reason.
+7. Implement the smallest coherent code slice. Prefer test-first when the
    codebase has a usable test harness. If no test harness exists, create or run
    the smallest practical smoke check and record the limitation.
-5. Update `implement.md` §1~§5 and `log.md` with changed files, decisions,
-   tests/commands, result, and review handoff. Set `implement.md` frontmatter
-   `status: ready-for-review` only when code and verification evidence exist.
-6. Run relevant tests/checks. Do not claim success without evidence.
-7. Final response: render a Solon report with actual code files in `Files`,
+8. Update `implement.md` §1~§5 and `log.md` with changed files, guardrails
+   applied/skipped/deferred/risk-accepted, decisions, tests/commands, result,
+   and review handoff. Set `implement.md` frontmatter `status:
+   ready-for-review` only when code and verification evidence exist.
+9. Run relevant tests/checks. Do not claim success without evidence.
+10. Final response: render a Solon report with actual code files in `Files`,
    checks in `Actions` or `Steps`, and `Next: /sfs review --gate G4` when ready.
 
 ## Decision ADR Refinement

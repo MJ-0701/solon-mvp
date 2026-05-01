@@ -22,6 +22,7 @@ created_at: ""   # filled by /sfs start
 
 - 무엇을 했는가
 - 왜 했는가 / 어떤 결정에 의한 것인가
+- guardrails: applied=<...> / skipped=<reason> / deferred=<...> / risk-accepted=<...>
 - 결과 / 관찰 / 다음 액션
 ```
 
@@ -43,6 +44,10 @@ created_at: ""   # filled by /sfs start
 - **CTO Generator persona**: `.sfs-local/personas/cto-generator.md`
 - **구현 executor/tool**: claude / codex / gemini / custom / human
 - **변경 파일/모듈**:
+- **Solon division guardrails**: strategy-pm / taxonomy / design-frontend / dev-backend / QA / infra
+- **Security / Infra / DevOps guard level**: n/a / light / full / skip
+- **Backend Transaction checks**: n/a / Transaction / `REQUIRES_NEW` / Batch chunk / JPA cache / outbox-idempotency / Hikari pool
+- **deferred / risk-accepted ledger**:
 - **실행한 테스트/스모크 체크**:
 - **CPO 에게 넘길 검증 포인트**:
 
