@@ -564,9 +564,9 @@ sfs_project_size_bucket() {
 
 sfs_progress_domain_lock_count() {
   local progress_path
-  progress_path="$(resolve_progress_path 2>/dev/null)" || { printf '0\n'; return 0; }
+  progress_path="$(resolve_progress_path 2>/dev/null)" || { printf '1\n'; return 0; }
   if command -v python3 >/dev/null 2>&1; then
-    python3 - "$progress_path" <<'PYEOF' 2>/dev/null || { printf '0\n'; return 0; }
+    python3 - "$progress_path" <<'PYEOF' 2>/dev/null || { printf '1\n'; return 0; }
 import sys, re
 path = sys.argv[1]
 try:
@@ -575,17 +575,17 @@ except TypeError:
     content = open(path).read()
 m = re.search(r'^---\n(.*?)\n---', content, re.DOTALL)
 if not m:
-    print(0); raise SystemExit(0)
+    print(1); raise SystemExit(0)
 fm = m.group(1)
 dl = re.search(r'^domain_locks:\s*\n((?:[ \t]+.*\n?)+)', fm, re.MULTILINE)
 if not dl:
-    print(0); raise SystemExit(0)
+    print(1); raise SystemExit(0)
 body = dl.group(1)
 count = 0
 for line in body.splitlines():
     if re.match(r'^[ \t]{2}[\w-]+:\s*$', line):
         count += 1
-print(count)
+print(max(1, count))
 PYEOF
     return 0
   fi
@@ -599,8 +599,8 @@ PYEOF
       if ($0 ~ /^[^ \t]/) { in_dl=0; next }
       if ($0 ~ /^[ \t][ \t][[:alnum:]_-]+:[[:space:]]*$/) { c++ }
     }
-    END { print c+0 }
-  ' "$progress_path" 2>/dev/null || printf '0\n'
+    END { if (c < 1) c = 1; print c+0 }
+  ' "$progress_path" 2>/dev/null || printf '1\n'
 }
 
 sfs_division_activation_state() {

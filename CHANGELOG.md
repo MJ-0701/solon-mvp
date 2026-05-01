@@ -1,3 +1,14 @@
+## [0.5.58-product] - 2026-05-02
+
+**WU-36 recommender UX fix.** Keeps the cycle-end division recommendations
+readable even when a project does not use PROGRESS.md domain locks.
+
+### Fixed
+
+- **Cycle-end division recommender domain count default** — when `PROGRESS.md`
+  or `domain_locks` are absent, the recommender now reports `domains=1`
+  (single-domain baseline) instead of `0`.
+
 ## [0.5.57-product] - 2026-05-02
 
 **Windows Scoop one-shot upgrade hotfix.** Tightens the Windows wrapper path so
