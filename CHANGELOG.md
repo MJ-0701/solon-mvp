@@ -1,10 +1,38 @@
+## [0.5.38-product] - 2026-05-01
+
+**Commit grouping command.** Solon now has an explicit `sfs commit` step for
+the gap between sprint close bookkeeping and real product/runtime changes.
+
+### Added
+
+- **`sfs commit` command** — `status`/`plan` groups staged, unstaged, and
+  untracked files into `product-code`, `sprint-meta`, `runtime-upgrade`, and
+  `ambiguous`.
+- **Group apply flow** — `sfs commit apply --group <name>` stages every file in
+  the selected group, auto-generates a Git Flow-aware Conventional Commit
+  message plus file summary body, and creates one local commit while aborting
+  if unrelated files are already staged.
+- **Branch preflight placeholder** — `sfs commit plan/apply` prints current
+  branch guidance first, including `main`/`develop` warnings and the planned
+  Solon branch helper placeholder. It does not auto-create or switch branches
+  yet.
+
+### Changed
+
+- **Agent adapters and docs** — Claude/Gemini/Codex command surfaces now route
+  `commit` through the deterministic bash adapter and document that it never
+  pushes.
+
 ## [0.5.37-product] - 2026-05-01
 
-**Hotfix: package the commit command consistently.** 0.5.36 exposed `sfs commit` in docs and dispatch metadata but missed the packaged script, which made `sfs update` fail while checksumming managed files.
+**Hotfix: package the commit command consistently.** 0.5.36 exposed
+`sfs commit` in docs and dispatch metadata but missed the packaged script,
+which made `sfs update` fail while checksumming managed files.
 
 ### Fixed
 
-- Add missing `templates/.sfs-local-template/scripts/sfs-commit.sh` to the stable tarball.
+- Add missing `templates/.sfs-local-template/scripts/sfs-commit.sh` to the
+  stable tarball.
 - Sync `sfs-dispatch.sh` so `commit` routes to the packaged script.
 
 ## [0.5.36-product] - 2026-05-01
@@ -17,7 +45,7 @@
 - **`sfs update` self-upgrades Homebrew runtime first** — when the CLI is running
   from the `mj-0701/solon-product/sfs` Homebrew formula, `sfs update` runs
   `brew update` + `brew upgrade sfs`, reloads the installed runtime, then updates
-  the current project managed Solon files.
+  the current project's managed Solon files.
 - **Update docs and caveats** — README, GUIDE, update help, and Homebrew caveats
   now teach the one-command flow: `cd <project> && sfs update`.
 

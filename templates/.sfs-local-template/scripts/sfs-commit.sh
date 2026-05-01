@@ -36,7 +36,8 @@ Usage:
 What it does:
   status/plan  Show unstaged, staged, and untracked files grouped by meaning.
   apply        Stage every file in the selected group, then run one local git commit.
-               A commit message is generated automatically; -m overrides it.
+               A Conventional Commit message is generated automatically from
+               selected files and the current Git Flow branch; -m overrides it.
 
 Groups:
   product-code      Project/product source files and assets.
@@ -47,11 +48,12 @@ Groups:
 Safety:
   - Includes untracked and unstaged files in the selected group.
   - Aborts if unrelated files are already staged.
+  - Shows Git Flow branch preflight guidance before commit planning/apply.
   - Never runs git push.
 
 Options for apply:
   -g, --group <name>      Group to commit.
-  -m, --message <text>    Commit message.
+  -m, --message <text>    Override generated commit message.
       --include <path>    Add a path to the selected set.
       --exclude <path>    Remove a path from the selected set.
       --dry-run           Print what would be committed without changing git state.
@@ -224,19 +226,22 @@ render_status() {
 
 render_plan() {
   render_status
+  render_branch_prework ""
   cat <<'EOF'
 
 Recommended next commands:
   product-code:
-    sfs commit apply --group product-code -m "feat: <describe product slice>"
+    sfs commit apply --group product-code
   sprint-meta:
     sfs commit apply --group sprint-meta
   runtime-upgrade:
     sfs commit apply --group runtime-upgrade
   ambiguous:
-    sfs commit apply --group ambiguous -m "chore: <describe local files>"
+    sfs commit apply --group ambiguous
 
 Tip:
+  Auto messages follow Conventional Commits and use Git Flow branch prefixes
+  when available (feature/* -> feat, bugfix|hotfix/* -> fix, release/* -> chore).
   Use --include/--exclude when one file belongs with a different group.
 EOF
 }
@@ -245,9 +250,127 @@ default_message() {
   case "${1:-}" in
     sprint-meta) echo "chore(sfs): update sprint artifacts" ;;
     runtime-upgrade) echo "chore(sfs): update runtime" ;;
-    ambiguous) echo "chore: update local sfs files" ;;
+    ambiguous) echo "chore(sfs): update local files" ;;
     *) echo "" ;;
   esac
+}
+
+current_branch() {
+  git symbolic-ref --short HEAD 2>/dev/null || echo ""
+}
+
+branch_suffix() {
+  local branch="${1:-}"
+  case "${branch}" in
+    */*) echo "${branch#*/}" ;;
+    *) echo "" ;;
+  esac
+}
+
+normalize_scope() {
+  local raw="${1:-}" scope
+  scope="$(printf '%s' "${raw}" \
+    | tr '[:upper:]' '[:lower:]' \
+    | sed -E 's#[^a-z0-9._-]+#-#g; s#^[._-]+##; s#[._-]+$##; s#[._-][._-]+#-#g')"
+  echo "${scope}"
+}
+
+git_flow_type() {
+  local branch
+  branch="$(current_branch)"
+  case "${branch}" in
+    feature/*|feat/*) echo "feat" ;;
+    bugfix/*|fix/*|hotfix/*) echo "fix" ;;
+    release/*|support/*) echo "chore" ;;
+    *) echo "" ;;
+  esac
+}
+
+git_flow_scope() {
+  local branch suffix
+  branch="$(current_branch)"
+  case "${branch}" in
+    feature/*|feat/*|bugfix/*|fix/*|hotfix/*)
+      suffix="$(branch_suffix "${branch}")"
+      normalize_scope "${suffix}"
+      ;;
+    release/*)
+      echo "release"
+      ;;
+    support/*)
+      echo "support"
+      ;;
+    *)
+      echo ""
+      ;;
+  esac
+}
+
+git_flow_release_subject() {
+  local branch suffix
+  branch="$(current_branch)"
+  case "${branch}" in
+    release/*)
+      suffix="$(branch_suffix "${branch}")"
+      if [[ -n "${suffix}" ]]; then
+        echo "prepare ${suffix}"
+      else
+        echo "update release artifacts"
+      fi
+      ;;
+    *)
+      echo ""
+      ;;
+  esac
+}
+
+is_primary_branch() {
+  case "${1:-}" in
+    main|master|develop) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+is_git_flow_branch() {
+  case "${1:-}" in
+    feature/*|feat/*|bugfix/*|fix/*|hotfix/*|release/*|support/*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+render_branch_prework() {
+  local group="${1:-}" branch
+  branch="$(current_branch)"
+
+  printf '\nBranch preflight:\n'
+  if [[ -z "${branch}" ]]; then
+    printf '  current: detached HEAD\n'
+    printf '  guidance: create or switch to a task branch before product commits.\n'
+  elif is_git_flow_branch "${branch}"; then
+    printf '  current: %s\n' "${branch}"
+    printf '  guidance: ok - Git Flow-shaped branch detected; auto message will use it.\n'
+  elif is_primary_branch "${branch}"; then
+    printf '  current: %s\n' "${branch}"
+    if [[ "${group}" == "product-code" || -z "${group}" ]]; then
+      printf '  guidance: primary branch. Prefer a task branch before product-code commits.\n'
+      printf '  example: git switch -c feature/<work-name>\n'
+    else
+      printf '  guidance: ok for SFS bookkeeping/runtime commits; product-code should use a task branch.\n'
+    fi
+  else
+    printf '  current: %s\n' "${branch}"
+    printf '  guidance: branch is not Git Flow-shaped. Prefer feature/*, bugfix/*, hotfix/*, release/*, or support/*.\n'
+  fi
+  printf '  solon-branch-helper: planned placeholder; no branch is created automatically yet.\n'
+}
+
+format_subject() {
+  local type="$1" scope="$2" description="$3"
+  if [[ -n "${scope}" ]]; then
+    echo "${type}(${scope}): ${description}"
+  else
+    echo "${type}: ${description}"
+  fi
 }
 
 is_docs_path() {
@@ -346,42 +469,76 @@ selected_area() {
   fi
 }
 
+selected_scope() {
+  local slug branch_scope area
+  slug="$(selected_template_slug)"
+  if [[ -n "${slug}" ]]; then
+    normalize_scope "${slug}"
+    return 0
+  fi
+
+  branch_scope="$(git_flow_scope)"
+  if [[ -n "${branch_scope}" && "${branch_scope}" != "release" && "${branch_scope}" != "support" ]]; then
+    echo "${branch_scope}"
+    return 0
+  fi
+
+  area="$(selected_area)"
+  case "${area}" in
+    "project files"|"files") echo "" ;;
+    *) normalize_scope "${area}" ;;
+  esac
+}
+
 generated_subject() {
-  local group="$1" default action slug area type
+  local group="$1" default action slug area type scope release_subject
   default="$(default_message "${group}")"
   [[ -n "${default}" && "${group}" != "product-code" ]] && { echo "${default}"; return 0; }
 
   action="update"
   selected_all_untracked && action="add"
 
+  release_subject="$(git_flow_release_subject)"
+  if [[ -n "${release_subject}" ]]; then
+    format_subject "chore" "release" "${release_subject}"
+    return 0
+  fi
+
+  scope="$(selected_scope)"
+
   if selected_all_match is_docs_path; then
-    echo "docs: ${action} docs"
+    format_subject "docs" "${scope}" "${action} docs"
     return 0
   fi
   if selected_all_match is_test_path; then
-    echo "test: ${action} tests"
+    format_subject "test" "${scope}" "${action} tests"
     return 0
   fi
   if selected_all_match is_dependency_path; then
-    echo "chore: update dependencies"
+    format_subject "chore" "deps" "update dependencies"
     return 0
   fi
 
   slug="$(selected_template_slug)"
+  type="$(git_flow_type)"
+  [[ -n "${type}" ]] || type="feat"
   if [[ -n "${slug}" ]]; then
-    echo "feat: ${action} ${slug} template"
+    format_subject "${type}" "${scope}" "${action} template"
     return 0
   fi
 
-  type="feat"
   area="$(selected_area)"
-  echo "${type}: ${action} ${area}"
+  format_subject "${type}" "${scope}" "${action} ${area}"
 }
 
 generated_body() {
-  local group="$1" path
+  local group="$1" path branch
+  branch="$(current_branch)"
   {
     echo "SFS commit group: ${group}"
+    if [[ -n "${branch}" && "${branch}" != "main" && "${branch}" != "master" && "${branch}" != "develop" ]]; then
+      echo "Git flow branch: ${branch}"
+    fi
     echo ""
     echo "Files:"
     for path in "${SELECTED_PATHS[@]}"; do
@@ -533,6 +690,7 @@ apply_group() {
     auto_message=1
   fi
 
+  render_branch_prework "${group}"
   print_selected "${group}" "${message}"
   if [[ "${auto_message}" -eq 1 ]]; then
     printf 'message-source: generated\n'

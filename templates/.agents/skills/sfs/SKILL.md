@@ -1,6 +1,6 @@
 ---
 name: sfs
-description: Solon SFS workflow for Codex — use $sfs status/start/guide/auth/update/brainstorm/plan/implement/review/decision/retro/loop or natural language to dispatch to bash adapter SSoT; brainstorm/plan/implement/decision/retro are AI-hybrid refinements, review is adapter-run by default through the selected CPO executor bridge. Trigger when a Codex surface delivers $sfs, sfs <command>, /sfs text that reaches the model, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "update", "sprint 시작", "브레인스토밍", "plan 작성", "구현", "implement", "review 작성", "decision 기록", "retro close", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
+description: Solon SFS workflow for Codex — use $sfs status/start/guide/auth/update/brainstorm/plan/implement/review/decision/retro/commit/loop or natural language to dispatch to bash adapter SSoT; brainstorm/plan/implement/decision/retro are AI-hybrid refinements, review is adapter-run by default through the selected CPO executor bridge, commit is adapter-run local git grouping/commit. Trigger when a Codex surface delivers $sfs, sfs <command>, /sfs text that reaches the model, or a Solon SFS workflow request (e.g., "현재 상태 확인", "guide 보기", "auth 확인", "update", "sprint 시작", "브레인스토밍", "plan 작성", "구현", "implement", "review 작성", "decision 기록", "retro close", "commit 정리", "loop 자율 진행"). Bash adapter is single source of truth for command I/O — paraphrase forbidden, exit codes verbatim.
 ---
 
 # Solon SFS — Codex Skill
@@ -14,7 +14,7 @@ dispatch the request to the `sfs` runtime command first. The runtime may be a
 global package (thin layout) or a project-local vendored fallback.
 
 Command modes are explicit:
-- **Bash-first**: `status`, `start`, `guide`, `auth`, `update`, `loop`. Print verbatim
+- **Bash-first**: `status`, `start`, `guide`, `auth`, `update`, `commit`, `loop`. Print verbatim
   adapter output first. A compact recap/status line is allowed when it helps
   the user see state and the next action, but adapter stdout remains SSoT.
 - **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `retro`. Run the
@@ -23,6 +23,11 @@ Command modes are explicit:
   executor bridge by default. Stop after adapter output. If `--prompt-only` is
   used, treat the prompt path as manual handoff material and do not write a
   Codex verdict in the current runtime.
+- **Adapter-run local commit**: `commit`. Run only when the user explicitly
+  invokes it. It groups staged/unstaged/untracked files into `product-code`,
+  `sprint-meta`, `runtime-upgrade`, and `ambiguous`, then commits only the
+  selected group. It prints Git Flow branch preflight guidance, auto-generates
+  a Conventional Commit message unless `-m` is supplied, and never pushes.
 
 Sprint mode guidance:
 - Do not treat every new sprint as a fresh discovery/planning sprint. If the
@@ -125,6 +130,7 @@ not create a new verdict in the current runtime.
 | `review --gate <id> [--executor <tool>] [--prompt-only]` / `review --show-last` (또는 "CPO review", "검증 기록", "이전 리뷰 확인") | `sfs review --gate <id> [--executor <tool>] [--generator <tool>] [--prompt-only]` 또는 `sfs review --show-last [--gate <id>]` | CPO Evaluator bridge run by default. `--prompt-only` creates prompt/log for manual handoff. `--show-last` prints compact metadata for the latest recorded result without rerunning executor. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
 | `decision <title>` (또는 "결정 기록", "ADR 추가") | `sfs decision "<title>" [--id <id>]` | ADR file 생성 후 Context/Decision/Alternatives/Consequences refinement |
 | `retro [--close]` (또는 "회고", "sprint close") | `sfs retro [--close]` | retro.md 진입 후 KPT/PDCA refinement. `--close` 는 refinement 후 1회 실행 |
+| `commit [status|plan|apply --group <name>]` (또는 "commit 정리") | `sfs commit [status|plan|apply ...]` | working tree 를 의미 그룹으로 분류하고 branch preflight 안내 후 선택 그룹만 local commit. Git Flow-aware 메시지 자동 생성, push 안 함 |
 | `loop [OPTIONS]` (또는 "자율 진행", "loop 시작") | `sfs loop [OPTIONS]` | Ralph Loop + Solon mutex (see `--help`) |
 
 ## Procedure
@@ -172,6 +178,9 @@ not create a new verdict in the current runtime.
    - retro: `0`=ok, `1`=no `.sfs-local/` or no active sprint, `4`=template
      missing, `7`=usage, `8`=`--close` requested but review.md missing,
      `99`=unknown.
+   - commit: `0`=ok, `1`=no matching files/nothing to commit, `3`=not a git
+     repo, `5`=unsafe staged files or git commit failed, `7`=usage,
+     `99`=unknown.
    - loop: `0`=success, `1`=invalid usage, `2`=PROGRESS parse error,
      `3`=drift, `4`=mutex claim failed, `5`=safety_lock, `6`=spec missing,
      `7`=verify fail, `8`=heartbeat fail, `9`=executor resolve fail,
@@ -186,7 +195,9 @@ not create a new verdict in the current runtime.
    - `implement` → Implementation Execution
    - `decision` → Decision ADR Refinement
    - `retro` → Retro G5 Refinement
-  - `review` → Review CPO Handling. Use adapter stdout as metadata, read the
+   - `commit` → stop after adapter output. Do not add files or create a second
+     commit outside the adapter result.
+   - `review` → Review CPO Handling. Use adapter stdout as metadata, read the
     recorded result path when present, then render a localized Solon report
     from recorded adapter/executor evidence only. Do not echo raw result bodies.
 
@@ -347,7 +358,7 @@ Print this 3-line usage and stop:
 
 ```
 Usage: /sfs <command> [args]
-Commands: status, start, guide, auth, update, brainstorm, plan, implement, review, decision, retro, loop
+Commands: status, start, guide, auth, update, brainstorm, plan, implement, review, decision, retro, commit, loop
 Help: bash .sfs-local/scripts/sfs-<command>.sh --help
 ```
 
@@ -356,6 +367,9 @@ Help: bash .sfs-local/scripts/sfs-<command>.sh --help
 - `/sfs retro --close` triggers an auto-commit. In AI runtimes, refine
   `retro.md` before running the close adapter, and only when the user explicitly
   requested close.
+- `/sfs commit apply ...` triggers a local git commit. Run it only when the
+  user explicitly requested commit grouping/apply. It prints branch preflight,
+  auto-generates a Git Flow-aware Conventional Commit message, and never pushes.
 - Never run `git push origin *` automatically — push is user-only (§1.5).
 - If the bash adapter is missing, do NOT try to fall back to a paraphrase
   workflow that simulates Solon SFS — instead tell the user the adapter is
