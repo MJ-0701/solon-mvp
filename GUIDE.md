@@ -572,7 +572,7 @@ local clone freshness 문제를 피한다.
 ## 10. 더 깊게
 
 - 7-step + 7-Gate 의 의미 → `SFS.md` (본인이 customize 한 본문)
-- Solon Product 의 design 원칙 → [README.md](./README.md)
+- Solon Product 의 design 원칙 → [README.full.md](./README.full.md)
 - 변경 이력 / 향후 plan → [CHANGELOG.md](./CHANGELOG.md)
 - 문제 / 개선 제안 → https://github.com/MJ-0701/solon-product/issues
 
