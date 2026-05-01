@@ -2,6 +2,7 @@
 role_id: cpo-evaluator
 role_name: CPO Evaluator
 phase: review
+reasoning_tier: review_high
 default_executor: codex
 ---
 

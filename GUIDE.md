@@ -403,6 +403,11 @@ sfs guide
 `SFS.md`, `.sfs-local/`, agent adapter 를 생성합니다. `sfs update` 는 이미 init 된
 프로젝트를 새 runtime 기준으로 갱신할 때 사용합니다.
 
+agent 모델 설정은 `.sfs-local/model-profiles.yaml` 에 있습니다. 이 파일이 없던 기존
+프로젝트는 `sfs update` 때 생성됩니다. 설정을 안 하거나 거부하거나 나중으로 미루면 Solon 은
+현재 런타임에서 사용자가 선택한 모델을 그대로 쓰고, C-Level high / worker standard /
+helper economy 는 권장값으로만 남깁니다.
+
 ### 8.2 `/sfs start` 가 "sprint id conflict" 출력
 
 같은 ISO 주차 안에 같은 번호 sprint 가 이미 있음. `--force` 로 덮어쓰거나 `--id <new-id>` 로 다른 이름.
@@ -423,7 +428,8 @@ sfs update
 
 `sfs update` 는 managed adapter/docs 를 백업 후 갱신하고, `.sfs-local/sprints/`,
 `.sfs-local/decisions/`, `.sfs-local/events.jsonl`, 프로젝트별 `CLAUDE.md`/`AGENTS.md`/
-`GEMINI.md` 는 보존한다.
+`GEMINI.md` 는 보존한다. `.sfs-local/model-profiles.yaml` 이 없으면 current-model fallback
+설정으로 새로 만들고, 이미 있으면 사용자 설정 보호를 위해 보존한다.
 
 ### 8.5 `upgrade.sh` 시 본인이 편집한 file 보존돼?
 

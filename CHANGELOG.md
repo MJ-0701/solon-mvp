@@ -1,3 +1,27 @@
+## [0.5.39-product] - 2026-05-01
+
+**Runtime-neutral agent model profiles.** Solon now exposes Claude/Codex/Gemini
+as peer runtimes for C-Level, evaluator, worker, and helper model selection.
+
+### Added
+
+- **`.sfs-local/model-profiles.yaml`** — a project-local reasoning tier registry
+  mapping `strategic_high`, `review_high`, `execution_standard`, and
+  `helper_economy` to Claude, Codex, Gemini, current-runtime, or custom profiles.
+- **Implementation Worker persona** — fixed-scope `execution_standard` worker
+  persona separated from the `strategic_high` CTO contract owner.
+
+### Changed
+
+- **SFS core docs and sprint templates** — model selection now records
+  reasoning tier + runtime + resolved model instead of treating Claude model
+  names as canonical.
+- **Install/update flows** — new projects receive `model-profiles.yaml`; existing
+  projects get it via `sfs update` when missing, while preserving local edits.
+- **Current model fallback** — when users skip, refuse, or forget model setup,
+  Solon uses the active model/reasoning setting already selected in the current
+  runtime instead of blocking the workflow.
+
 ## [0.5.38-product] - 2026-05-01
 
 **Commit grouping command.** Solon now has an explicit `sfs commit` step for

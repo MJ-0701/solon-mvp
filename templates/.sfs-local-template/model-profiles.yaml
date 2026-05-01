@@ -1,0 +1,239 @@
+# .sfs-local/model-profiles.yaml
+# Project-local model and agent profile settings for Solon.
+# Installed by Solon <SOLON-VERSION> on <DATE>.
+#
+# This file is intentionally editable by the project owner. Solon recommends
+# cost-aware defaults, but does not block an "all high-end models" policy when
+# the project accepts the cost and latency.
+
+version: 1.1
+project: "<PROJECT-NAME>"
+created: "<DATE>"
+solon_mvp_version: "<SOLON-VERSION>"
+
+configuration:
+  status: "<MODEL-PROFILE-STATUS>"        # current_model_fallback | selected_at_install | confirmed
+  selected_runtime: "<DEFAULT-RUNTIME>"   # current | claude | codex | gemini | custom
+  selected_policy: "<MODEL-POLICY>"       # current_model | solon_recommended | all_high | custom
+  confirmed_by: ""
+  confirmed_at: ""
+  note: "If this stays unconfigured, Solon uses the user's current runtime/model and treats recommendations as advisory."
+
+reasoning_tiers:
+  strategic_high:
+    purpose: "C-Level direction, architecture, product/technical trade-offs, public contract changes"
+    cost_latency: "highest"
+    default_roles:
+      - ceo
+      - cto-generator
+    use_when:
+      - "requirements or architecture are still open"
+      - "public API, security, auth, privacy, data model, or data-loss risk exists"
+      - "the decision is expensive to reverse"
+
+  review_high:
+    purpose: "Independent CPO/Evaluator review; fork/read-only where the runtime supports it"
+    cost_latency: "high"
+    default_roles:
+      - cpo-evaluator
+      - external-reviewer
+    use_when:
+      - "the implementation author must not approve their own work"
+      - "release or user-facing quality risk is meaningful"
+
+  execution_standard:
+    purpose: "Implementation worker after plan, architecture, acceptance criteria, and files_scope are fixed"
+    cost_latency: "standard"
+    default_roles:
+      - implementation-worker
+      - division-worker
+    cannot:
+      - "approve its own work"
+      - "change architecture silently"
+      - "expand scope without escalation"
+    escalate_to: strategic_high
+    escalate_when:
+      - "architecture or public API changes"
+      - "security, auth, privacy, or data-loss risk"
+      - "acceptance criteria or requirements are ambiguous"
+      - "same test/review finding fails twice"
+      - "files_scope needs to expand"
+
+  helper_economy:
+    purpose: "Parsing, formatting, grep summaries, JSON/YAML transforms, deterministic helpers"
+    cost_latency: "lowest"
+    default_roles:
+      - parser
+      - formatter
+      - sync-helper
+
+policies:
+  current_model:
+    description: "Fallback when the project owner skips, refuses, or forgets model setup. Use the active model already selected in the current LLM runtime."
+    agent_tiers:
+      ceo: current
+      cto-generator: current
+      cpo-evaluator: current
+      implementation-worker: current
+      division-worker: current
+      parser: current
+      formatter: current
+      sync-helper: current
+
+  solon_recommended:
+    description: "Use high reasoning for C-Level/review, standard workers for fixed implementation, economy helpers for deterministic chores."
+    agent_tiers:
+      ceo: strategic_high
+      cto-generator: strategic_high
+      cpo-evaluator: review_high
+      implementation-worker: execution_standard
+      division-worker: execution_standard
+      parser: helper_economy
+      formatter: helper_economy
+      sync-helper: helper_economy
+
+  all_high:
+    description: "Allowed. Use high reasoning for every agent/helper when project cost and latency are acceptable."
+    agent_tiers:
+      ceo: strategic_high
+      cto-generator: strategic_high
+      cpo-evaluator: review_high
+      implementation-worker: strategic_high
+      division-worker: strategic_high
+      parser: strategic_high
+      formatter: strategic_high
+      sync-helper: strategic_high
+
+  custom:
+    description: "Edit agent_defaults.configured_tier and/or agent_model_overrides below."
+
+runtime_model_settings:
+  current:
+    current:
+      model: "current runtime model"
+      reasoning_effort: "current runtime setting"
+      description: "Do not override. Use whatever model/reasoning setting the user has currently selected in Claude/Codex/Gemini/custom host."
+
+  claude:
+    strategic_high:
+      model: "opus-4.7"
+      fallback_model: "opus-4.6"
+    review_high:
+      model: "opus-4.7"
+      fallback_model: "opus-4.6"
+    execution_standard:
+      model: "sonnet"
+    helper_economy:
+      model: "haiku"
+
+  codex:
+    strategic_high:
+      model: "gpt-5.5"
+      reasoning_effort: "xhigh"
+      reasoning_label: "very_high"
+    review_high:
+      model: "gpt-5.5"
+      reasoning_effort: "xhigh"
+      reasoning_label: "very_high"
+    execution_standard:
+      model: "gpt-5.5"
+      reasoning_effort: "medium"
+    helper_economy:
+      model: "gpt-5.5-mini"
+      reasoning_effort: "low"
+
+  gemini:
+    strategic_high:
+      model: "gemini-high"
+      reasoning_effort: "very_high"
+    review_high:
+      model: "gemini-high"
+      reasoning_effort: "high"
+    execution_standard:
+      model: "gemini-balanced"
+      reasoning_effort: "medium"
+    helper_economy:
+      model: "gemini-flash"
+      reasoning_effort: "low"
+
+  custom:
+    strategic_high:
+      command_or_model: "<custom-high-reasoning-command-or-model>"
+    review_high:
+      command_or_model: "<custom-review-command-or-model>"
+    execution_standard:
+      command_or_model: "<custom-implementation-command-or-model>"
+    helper_economy:
+      command_or_model: "<custom-helper-command-or-model>"
+
+agent_defaults:
+  ceo:
+    persona: ".sfs-local/personas/ceo.md"
+    recommended_tier: strategic_high
+    configured_tier: current
+  cto-generator:
+    persona: ".sfs-local/personas/cto-generator.md"
+    recommended_tier: strategic_high
+    configured_tier: current
+  cpo-evaluator:
+    persona: ".sfs-local/personas/cpo-evaluator.md"
+    recommended_tier: review_high
+    configured_tier: current
+  implementation-worker:
+    persona: ".sfs-local/personas/implementation-worker.md"
+    recommended_tier: execution_standard
+    configured_tier: current
+    escalation_tier: strategic_high
+  division-worker:
+    persona: ""
+    recommended_tier: execution_standard
+    configured_tier: current
+    escalation_tier: strategic_high
+  parser:
+    persona: ""
+    recommended_tier: helper_economy
+    configured_tier: current
+  formatter:
+    persona: ""
+    recommended_tier: helper_economy
+    configured_tier: current
+  sync-helper:
+    persona: ""
+    recommended_tier: helper_economy
+    configured_tier: current
+
+# Optional concrete per-agent overrides. Leave an agent empty to resolve via:
+# configuration.selected_runtime + agent_defaults.<agent>.configured_tier.
+# Example for "worker also high-end":
+#   implementation-worker:
+#     codex:
+#       model: "gpt-5.5"
+#       reasoning_effort: "very_high"
+#     claude:
+#       model: "opus-4.7"
+agent_model_overrides:
+  ceo: {}
+  cto-generator: {}
+  cpo-evaluator: {}
+  implementation-worker: {}
+  division-worker: {}
+  parser: {}
+  formatter: {}
+  sync-helper: {}
+
+resolution_rules:
+  - "If selected_runtime is current, missing, or unrecognized, do not block. Use the user's current runtime/model setting."
+  - "If the project owner skips, refuses, or forgets model setup, selected_policy=current_model applies."
+  - "If selected_policy is all_high, resolve every agent through the highest configured tier/profile unless an explicit agent override exists."
+  - "Solon recommendations are advisory. Higher-end overrides are allowed when cost/latency are intentional."
+  - "Worker/helper outputs still require independent review; a stronger model does not approve its own work."
+
+audit_fields:
+  required:
+    - agent
+    - reasoning_tier
+    - runtime
+    - resolved_model
+    - reasoning_effort
+    - override_reason
+    - approver

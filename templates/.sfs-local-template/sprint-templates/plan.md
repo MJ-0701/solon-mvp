@@ -55,12 +55,18 @@ last_touched_at: ""  # filled by /sfs plan (auto, ISO8601 + tz)
   - 이번 sprint 에서 버릴 것:
 - **CTO Generator 가 만들 것**:
   - persona: `.sfs-local/personas/cto-generator.md`
+  - reasoning_tier: `strategic_high` for architecture/contract; worker 실행은 `execution_standard`
+  - model profile source: `.sfs-local/model-profiles.yaml`
+  - selected runtime / policy:
+  - fallback when unset: current runtime model
   - preferred executor: claude / codex / gemini / custom:
+  - implementation worker persona: `.sfs-local/personas/implementation-worker.md`
   - 산출물:
   - 변경 파일/모듈:
   - 구현하지 않을 것:
 - **CPO Evaluator 가 검증할 것**:
   - persona: `.sfs-local/personas/cpo-evaluator.md`
+  - reasoning_tier: `review_high`
   - preferred executor: codex / gemini / claude / custom:
   - self-validation 방지: 구현한 agent/tool 과 다른 evaluator instance/tool 사용 권장
   - AC 검증 방법:

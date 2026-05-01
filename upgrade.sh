@@ -267,7 +267,7 @@ recommend_action() {
     "SFS.md"|".claude/skills/sfs/SKILL.md"|".claude/commands/sfs.md"|".gemini/commands/sfs.toml"|".agents/skills/sfs/SKILL.md"|".sfs-local/GUIDE.md")
       printf "backup+overwrite"
       ;;
-    "CLAUDE.md"|"AGENTS.md"|"GEMINI.md"|".sfs-local/divisions.yaml")
+    "CLAUDE.md"|"AGENTS.md"|"GEMINI.md"|".sfs-local/divisions.yaml"|".sfs-local/model-profiles.yaml")
       printf "skip"
       ;;
     ".sfs-local/auth.env.example")
@@ -300,13 +300,14 @@ cat <<EOF
   - SFS.md                             → backup+overwrite (공통 SFS core 최신화)
   - CLAUDE/AGENTS/GEMINI.md            → 자동 보존 (기존 프로젝트 지침 보호)
   - .sfs-local/divisions.yaml          → 자동 보존 (프로젝트별 운영값 보호)
+  - .sfs-local/model-profiles.yaml     → 없으면 설치 + 설정 안내, 있으면 자동 보존 (agent별 모델 설정 보호)
   - .sfs-local/auth.env.example        → backup+overwrite (로컬 auth 템플릿, 실제 auth.env 는 ignore)
   - .claude/skills/sfs/SKILL.md        → backup+overwrite (Claude Code Skill 최신화)
   - .claude/commands/sfs.md            → backup+overwrite (legacy 커맨드 fallback 최신화)
   - .sfs-local/scripts/sfs-*.sh        → backup+overwrite (Solon-versioned bash)
   - .sfs-local/scripts/sfs.ps1         → backup+overwrite (Windows PowerShell → Git Bash wrapper)
   - .sfs-local/sprint-templates/*.md   → backup+overwrite (배포판 관리 템플릿)
-  - .sfs-local/personas/*.md           → backup+overwrite (CEO/CTO/CPO 기본 persona)
+  - .sfs-local/personas/*.md           → backup+overwrite (CEO/CTO/worker/CPO 기본 persona)
   - .sfs-local/decisions-template/*.md → backup+overwrite (ADR-TEMPLATE 신규, WU-26)
 
 EOF
@@ -322,6 +323,7 @@ declare -a CHECK_FILES=(
   ".claude/skills/sfs/SKILL.md|templates/.claude/commands/sfs.md"
   ".claude/commands/sfs.md|templates/.claude/commands/sfs.md"
   ".sfs-local/divisions.yaml|templates/.sfs-local-template/divisions.yaml"
+  ".sfs-local/model-profiles.yaml|templates/.sfs-local-template/model-profiles.yaml"
   ".sfs-local/auth.env.example|templates/.sfs-local-template/auth.env.example"
   ".sfs-local/GUIDE.md|GUIDE.md"
   # scripts/ — Solon-versioned bash adapters (executable, user 수정 영역 아님)
@@ -351,6 +353,7 @@ declare -a CHECK_FILES=(
   # personas/ — CEO / CTO Generator / CPO Evaluator 기본 persona
   ".sfs-local/personas/ceo.md|templates/.sfs-local-template/personas/ceo.md"
   ".sfs-local/personas/cto-generator.md|templates/.sfs-local-template/personas/cto-generator.md"
+  ".sfs-local/personas/implementation-worker.md|templates/.sfs-local-template/personas/implementation-worker.md"
   ".sfs-local/personas/cpo-evaluator.md|templates/.sfs-local-template/personas/cpo-evaluator.md"
   # decisions-template/ — sfs-decision.sh 가 ADR 신설 시 사용 (WU-26)
   ".sfs-local/decisions-template/ADR-TEMPLATE.md|templates/.sfs-local-template/decisions-template/ADR-TEMPLATE.md"
@@ -483,6 +486,15 @@ update_file() {
 info ""
 info "파일별 갱신..."
 
+PROJECT_NAME="$(basename "$TARGET")"
+MODEL_RUNTIME="current"
+MODEL_POLICY="current_model"
+MODEL_PROFILE_STATUS="current_model_fallback"
+MODEL_PROFILES_WAS_MISSING=0
+if [ ! -f "$TARGET/.sfs-local/model-profiles.yaml" ]; then
+  MODEL_PROFILES_WAS_MISSING=1
+fi
+
 update_file "CLAUDE.md" "templates/CLAUDE.md.template" "Claude Code 어댑터" "s"
 update_file "SFS.md" "templates/SFS.md.template" "공통 SFS 지침" "b"
 update_file "AGENTS.md" "templates/AGENTS.md.template" "Codex 어댑터" "s"
@@ -492,6 +504,7 @@ mkdir -p "$TARGET/.claude/skills/sfs"
 update_file ".claude/skills/sfs/SKILL.md" "templates/.claude/commands/sfs.md" "Claude Code /sfs Skill" "b"
 update_file ".claude/commands/sfs.md" "templates/.claude/commands/sfs.md" "Claude Code /sfs 커맨드" "b"
 update_file ".sfs-local/divisions.yaml" "templates/.sfs-local-template/divisions.yaml" "본부 활성화" "s"
+update_file ".sfs-local/model-profiles.yaml" "templates/.sfs-local-template/model-profiles.yaml" "runtime model profiles" "s"
 update_file ".sfs-local/auth.env.example" "templates/.sfs-local-template/auth.env.example" "executor auth env example" "b"
 update_file ".sfs-local/GUIDE.md" "GUIDE.md" "Solon onboarding guide (/sfs guide)" "b"
 
@@ -525,10 +538,11 @@ update_file ".sfs-local/sprint-templates/review.md"          "templates/.sfs-loc
 update_file ".sfs-local/sprint-templates/retro.md"           "templates/.sfs-local-template/sprint-templates/retro.md"           "sprint retro template"  "b"
 update_file ".sfs-local/sprint-templates/decision-light.md"  "templates/.sfs-local-template/sprint-templates/decision-light.md"  "decision-light template (WU-26)" "b"
 
-# personas/ — CEO / CTO Generator / CPO Evaluator 기본 persona
+# personas/ — CEO / CTO Generator / Implementation Worker / CPO Evaluator 기본 persona
 mkdir -p "$TARGET/.sfs-local/personas"
 update_file ".sfs-local/personas/ceo.md"           "templates/.sfs-local-template/personas/ceo.md"           "CEO persona" "b"
 update_file ".sfs-local/personas/cto-generator.md" "templates/.sfs-local-template/personas/cto-generator.md" "CTO Generator persona" "b"
+update_file ".sfs-local/personas/implementation-worker.md" "templates/.sfs-local-template/personas/implementation-worker.md" "Implementation Worker persona" "b"
 update_file ".sfs-local/personas/cpo-evaluator.md" "templates/.sfs-local-template/personas/cpo-evaluator.md" "CPO Evaluator persona" "b"
 
 # decisions-template/ — sfs-decision.sh 가 ADR 신설 시 사용 (WU-26 §1)
@@ -551,11 +565,15 @@ if [ "$(uname)" = "Darwin" ]; then
 else
   SED_INPLACE=(sed -i)
 fi
-for auto_file in "$TARGET/SFS.md" "$TARGET/CLAUDE.md" "$TARGET/AGENTS.md" "$TARGET/GEMINI.md" "$TARGET/.sfs-local/divisions.yaml"; do
+for auto_file in "$TARGET/SFS.md" "$TARGET/CLAUDE.md" "$TARGET/AGENTS.md" "$TARGET/GEMINI.md" "$TARGET/.sfs-local/divisions.yaml" "$TARGET/.sfs-local/model-profiles.yaml"; do
   if [ -f "$auto_file" ]; then
     "${SED_INPLACE[@]}" \
       -e "s|<DATE>|$TODAY|g" \
       -e "s|<SOLON-VERSION>|$NEW_VER|g" \
+      -e "s|<PROJECT-NAME>|$PROJECT_NAME|g" \
+      -e "s|<DEFAULT-RUNTIME>|$MODEL_RUNTIME|g" \
+      -e "s|<MODEL-POLICY>|$MODEL_POLICY|g" \
+      -e "s|<MODEL-PROFILE-STATUS>|$MODEL_PROFILE_STATUS|g" \
       "$auto_file" 2>/dev/null || true
   fi
 done
@@ -578,6 +596,7 @@ overrides:
   sprint_templates: ".sfs-local/sprint-templates"
   decisions_template: ".sfs-local/decisions-template"
   personas: ".sfs-local/personas"
+  model_profiles: ".sfs-local/model-profiles.yaml"
 EOF
   ok "config.yaml 생성 (runtime layout: $INSTALL_LAYOUT)"
 else
@@ -629,6 +648,20 @@ source_repo: https://github.com/${SOLON_REPO}
 EOF
 ok "VERSION 갱신: $CUR_VER → $NEW_VER"
 
+MODEL_PROFILE_NOTICE=""
+if [ -f "$TARGET/.sfs-local/model-profiles.yaml" ]; then
+  if [ "$MODEL_PROFILES_WAS_MISSING" -eq 1 ]; then
+    MODEL_PROFILE_NOTICE="새 agent model profile 이 생성됐습니다. 설정을 안 하면 current_model fallback 으로 현재 런타임 모델을 그대로 씁니다. 원하면 .sfs-local/model-profiles.yaml 에서 selected_runtime, selected_policy, agent별 override 를 확정하세요."
+  elif grep -q 'status: "current_model_fallback"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null \
+    || grep -q 'selected_runtime: "current"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null \
+    || grep -q 'status: "review_required"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null \
+    || grep -q 'selected_runtime: "unset"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null; then
+    MODEL_PROFILE_NOTICE="agent model profile 이 current_model fallback 상태입니다. 그대로 두면 현재 런타임 모델을 사용하고, 필요하면 .sfs-local/model-profiles.yaml 에서 agent별 모델을 확정하세요."
+  elif ! grep -q '^agent_defaults:' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null; then
+    MODEL_PROFILE_NOTICE="기존 model-profiles.yaml 을 보존했습니다. 새 agent_defaults/agent_model_overrides 형식이 필요하면 배포 템플릿과 비교해 병합하세요."
+  fi
+fi
+
 # ============================================================================
 # 7. 완료
 # ============================================================================
@@ -638,6 +671,15 @@ cat <<EOF
 ${C_BOLD}${C_GREEN}=== 업그레이드 완료 ===${C_RESET}
 
   $CUR_VER → $NEW_VER
+
+Agent model profile:
+  ${MODEL_PROFILE_NOTICE:-설정 파일 유지됨: .sfs-local/model-profiles.yaml}
+
+  Solon 권장은 C-Level/review high, worker standard, helper economy 입니다.
+  프로젝트가 비용/지연을 감수한다면 worker/helper 도 high-end 모델로 설정해도 됩니다.
+  설정을 안 하거나 거부하면 현재 런타임에서 사용자가 선택한 모델을 그대로 씁니다.
+  Codex 는 model + reasoning_effort 조합(예: gpt-5.5 + xhigh/very_high), Claude 는 opus/sonnet/haiku 계열,
+  Gemini/custom 은 프로젝트 runtime 이 지원하는 profile 이름으로 agent별 override 가능합니다.
 
 변경사항 git commit 권장:
   ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore \\${C_RESET}

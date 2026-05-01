@@ -33,6 +33,10 @@ Options:
                       runtime 은 PATH 의 global `sfs` CLI 를 사용합니다.
   --layout vendored   기존 방식입니다. scripts/templates/personas 를 프로젝트에 복사합니다.
   -h, --help          도움말을 출력합니다.
+
+Environment:
+  SFS_MODEL_RUNTIME   current|claude|codex|gemini|custom (default: current)
+  SFS_MODEL_POLICY    current_model|solon_recommended|all_high|custom (default: current_model)
 EOF
 }
 
@@ -235,6 +239,7 @@ fi
 # ============================================================================
 
 TARGET="$(pwd)"
+PROJECT_NAME="$(basename "$TARGET")"
 
 info ""
 info "Pre-flight check..."
@@ -248,6 +253,59 @@ if [ ! -d .git ]; then
     warn "git 없이 진행 — version control 없이 운용하는 건 비권장"
   fi
 fi
+
+MODEL_RUNTIME="${SFS_MODEL_RUNTIME:-current}"
+MODEL_POLICY="${SFS_MODEL_POLICY:-current_model}"
+
+info ""
+info "Agent model profile setup..."
+cat <<EOF
+Solon 은 agent 별 모델 설정을 프로젝트 로컬 파일에 남깁니다:
+  .sfs-local/model-profiles.yaml
+
+권장값은 C-Level/review 는 high reasoning, 구현 worker 는 standard, helper 는 economy 입니다.
+단, 프로젝트가 비용/지연을 감수한다면 worker/helper 까지 전부 high-end 모델로 두는 것도 허용합니다.
+설정을 건너뛰거나 나중에 하기로 하면 Solon 은 현재 런타임에서 사용자가 선택한 모델을 그대로 씁니다.
+EOF
+
+if [ "$ASSUME_YES" -ne 1 ]; then
+  MODEL_RUNTIME="$(prompt "기본 LLM runtime? (current/claude/codex/gemini/custom)" "$MODEL_RUNTIME")"
+  MODEL_POLICY="$(prompt "agent model policy? (current_model/solon_recommended/all_high/custom)" "$MODEL_POLICY")"
+fi
+
+case "$MODEL_RUNTIME" in
+  current|claude|codex|gemini|custom) ;;
+  unset|"")
+    MODEL_RUNTIME="current"
+    ;;
+  *)
+    warn "알 수 없는 SFS_MODEL_RUNTIME='$MODEL_RUNTIME' — current 로 기록"
+    MODEL_RUNTIME="current"
+    ;;
+esac
+
+case "$MODEL_POLICY" in
+  current_model|solon_recommended|all_high|custom) ;;
+  recommended)
+    MODEL_POLICY="solon_recommended"
+    ;;
+  all-high)
+    MODEL_POLICY="all_high"
+    ;;
+  skip|none|"")
+    MODEL_POLICY="current_model"
+    ;;
+  *)
+    warn "알 수 없는 SFS_MODEL_POLICY='$MODEL_POLICY' — current_model 로 기록"
+    MODEL_POLICY="current_model"
+    ;;
+esac
+
+MODEL_PROFILE_STATUS="current_model_fallback"
+if [ "$MODEL_RUNTIME" != "current" ] || [ "$MODEL_POLICY" != "current_model" ]; then
+  MODEL_PROFILE_STATUS="selected_at_install"
+fi
+ok "model profile 선택: runtime=$MODEL_RUNTIME, policy=$MODEL_POLICY, status=$MODEL_PROFILE_STATUS"
 
 # ============================================================================
 # 6. 파일별 설치 (대화형 충돌 처리)
@@ -346,7 +404,7 @@ install_file "templates/.agents/skills/sfs/SKILL.md" ".agents/skills/sfs/SKILL.m
 # 안내만 출력:
 ok "Codex custom prompt fallback (optional/legacy): templates/.codex/prompts/sfs.md → ~/.codex/prompts/sfs.md (manual cp, if supported)"
 
-# 6.3) 자동 치환 가능한 placeholder (DATE + SOLON-VERSION) 처리
+# 6.3) 자동 치환 가능한 placeholder 처리
 # <PROJECT-NAME> / <STACK> / <DB> / <DEPLOY> / <DOMAIN> 등은 consumer 수동 치환 대상.
 SOLON_VERSION_VAL=$(cat "$SOURCE_DIR/VERSION" 2>/dev/null | head -1 || echo "unknown")
 TODAY=$(date +%Y-%m-%d)
@@ -398,10 +456,27 @@ overrides:
   sprint_templates: ".sfs-local/sprint-templates"
   decisions_template: ".sfs-local/decisions-template"
   personas: ".sfs-local/personas"
+  model_profiles: ".sfs-local/model-profiles.yaml"
 EOF
   ok "  config.yaml 생성 (runtime layout: $INSTALL_LAYOUT)"
 else
   ok "  config.yaml 기존 유지"
+fi
+
+# model-profiles.yaml — reasoning tier registry, 기존 있으면 skip (사용자 설정 보호)
+if [ ! -f "$TARGET/.sfs-local/model-profiles.yaml" ]; then
+  cp "$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml" "$TARGET/.sfs-local/model-profiles.yaml"
+  "${SED_INPLACE[@]}" \
+    -e "s|<DATE>|$TODAY|g" \
+    -e "s|<SOLON-VERSION>|$SOLON_VERSION_VAL|g" \
+    -e "s|<PROJECT-NAME>|$PROJECT_NAME|g" \
+    -e "s|<DEFAULT-RUNTIME>|$MODEL_RUNTIME|g" \
+    -e "s|<MODEL-POLICY>|$MODEL_POLICY|g" \
+    -e "s|<MODEL-PROFILE-STATUS>|$MODEL_PROFILE_STATUS|g" \
+    "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null || true
+  ok "  model-profiles.yaml 생성 (agent별 Claude/Codex/Gemini model settings)"
+else
+  ok "  model-profiles.yaml 기존 유지"
 fi
 
 # divisions.yaml — 기존 있으면 skip (사용자 수정분 보호)
@@ -471,12 +546,12 @@ if [ "$INSTALL_LAYOUT" = "vendored" ]; then
     ok "  sprint-templates/ 복사 (brainstorm + plan + implement + log + review + retro + decision-light)"
   fi
 
-  # personas/ — CEO / CTO Generator / CPO Evaluator 기본 persona
+  # personas/ — CEO / CTO Generator / Implementation Worker / CPO Evaluator 기본 persona
   PERSONAS_SRC="$SOURCE_DIR/templates/.sfs-local-template/personas"
   if [ -d "$PERSONAS_SRC" ]; then
     mkdir -p "$TARGET/.sfs-local/personas"
     cp "$PERSONAS_SRC"/*.md "$TARGET/.sfs-local/personas/" 2>/dev/null || true
-    ok "  personas/ 복사 (CEO + CTO Generator + CPO Evaluator)"
+    ok "  personas/ 복사 (CEO + CTO Generator + Implementation Worker + CPO Evaluator)"
   fi
 
   # decisions-template/ — sfs-decision.sh 가 ADR 신설 시 사용하는 ADR-full 템플릿 (WU-26 §1)
@@ -558,10 +633,11 @@ layout:          $INSTALL_LAYOUT
 .sfs-local/:     state/config 스캐폴드 (${C_BOLD}기존 sprint 산출물은 보존됨${C_RESET})
 공통 지침:       SFS.md
 런타임 어댑터:   CLAUDE.md / AGENTS.md / GEMINI.md
-Entry 1급:       .claude/skills/sfs/SKILL.md (Claude Code Skill, primary)
+Entry 1급:       .claude/skills/sfs/SKILL.md (Claude Code Skill)
                  .claude/commands/sfs.md (Claude Code legacy slash)
                  .gemini/commands/sfs.toml (Gemini CLI, TOML slash)
                  .agents/skills/sfs/SKILL.md (Codex, Skills 체계)
+Model profiles: .sfs-local/model-profiles.yaml (runtime=$MODEL_RUNTIME, policy=$MODEL_POLICY)
 Agent 갱신:      sfs agent install claude|gemini|codex|all
 Project update:  sfs update
 Runtime:         $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI" || echo ".sfs-local/scripts/sfs-dispatch.sh")
@@ -571,7 +647,16 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
 
   ${C_BOLD}1.${C_RESET} SFS.md 내용 확인 + 프로젝트 특성 반영 (Stack / 도메인 등).
 
-  ${C_BOLD}2.${C_RESET} 선호 런타임에서 시작:
+  ${C_BOLD}2.${C_RESET} agent 모델 설정 확인:
+     ${C_BLUE}.sfs-local/model-profiles.yaml${C_RESET}
+     - Codex: model + reasoning_effort 조합 (예: gpt-5.5 + xhigh/very_high)
+     - Claude: opus-4.7 / opus-4.6 / sonnet / haiku 등 runtime 지원 모델명
+     - Gemini/custom: 프로젝트가 쓰는 모델/profile 이름
+     - 설정을 안 하거나 거부하면: 현재 런타임에서 사용자가 선택한 모델 그대로 사용
+     Solon 권장은 C-Level high, worker standard, helper economy 이지만,
+     원하면 worker/helper 도 high-end 로 바꿔도 됩니다.
+
+  ${C_BOLD}3.${C_RESET} 선호 런타임에서 시작:
      ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET} → ${C_BLUE}/sfs implement${C_RESET}
      ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET} → ${C_BLUE}/sfs implement${C_RESET}
      ${C_BLUE}codex${C_RESET}      → ${C_BLUE}\$sfs status${C_RESET} → ${C_BLUE}\$sfs start${C_RESET} → ${C_BLUE}\$sfs brainstorm${C_RESET} → ${C_BLUE}\$sfs plan${C_RESET} → ${C_BLUE}\$sfs implement${C_RESET}
@@ -579,7 +664,7 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
      셋 모두 동일한 ${C_BOLD}sfs${C_RESET} runtime command 로 내려간 뒤 deterministic bash adapter 호출.
      설치 직후 가이드는 ${C_BLUE}/sfs guide${C_RESET}, ${C_BLUE}\$sfs guide${C_RESET}, 또는 shell 의 ${C_BLUE}sfs guide${C_RESET}.
 
-  ${C_BOLD}3.${C_RESET} git commit + push (Solon 주입 자체를 기록):
+  ${C_BOLD}4.${C_RESET} git commit + push (Solon 주입 자체를 기록):
      ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore \\${C_RESET}
      ${C_BLUE}        .claude/skills/sfs/SKILL.md .claude/commands/sfs.md \\${C_RESET}
      ${C_BLUE}        .gemini/commands/sfs.toml \\${C_RESET}
@@ -587,13 +672,13 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
      ${C_BLUE}git commit -m "chore: install solon-product $SOLON_VERSION"${C_RESET}
      ${C_BLUE}git push${C_RESET}
 
-  ${C_BOLD}4.${C_RESET} 현재 설치된 Solon runtime 으로 project adapter/docs 를 갱신할 때:
+  ${C_BOLD}5.${C_RESET} 현재 설치된 Solon runtime 으로 project adapter/docs 를 갱신할 때:
      ${C_BLUE}sfs update${C_RESET}
 
-  ${C_BOLD}5.${C_RESET} Claude/Gemini/Codex entry point 만 갱신할 때:
+  ${C_BOLD}6.${C_RESET} Claude/Gemini/Codex entry point 만 갱신할 때:
      ${C_BLUE}sfs agent install all${C_RESET}
 
-  ${C_BOLD}6.${C_RESET} interactive preview 가 필요하면: ${C_BLUE}sfs upgrade${C_RESET}
+  ${C_BOLD}7.${C_RESET} interactive preview 가 필요하면: ${C_BLUE}sfs upgrade${C_RESET}
 
 문제 발생 시: https://github.com/${SOLON_REPO}/issues
 

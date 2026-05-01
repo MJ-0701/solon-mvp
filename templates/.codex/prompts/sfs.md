@@ -61,6 +61,13 @@ findings, and required actions into the report.
 
 Use this shape and fill only evidence-backed values:
 
+Decision references in user-facing reports must be self-describing. Never output
+naked shorthand such as `D6`, `D6·D7·D8`, `WU27-D6`, or `W-24` in `Next`,
+`Actions`, `Questions`, `Escalation`, or `Learning` unless the same line expands
+each id as `<id> — <one-line title> (source: <file/section>)`. If the title or
+source cannot be found, say so explicitly and put the missing lookup under
+`Questions` instead of treating the shorthand as an actionable next step.
+
 ```text
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📋 SOLON REPORT — /sfs <command>
