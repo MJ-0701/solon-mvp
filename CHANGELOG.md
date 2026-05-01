@@ -1241,6 +1241,7 @@ Release blocker hotfix.
 
 ## Unreleased (예정)
 
+- **entry token bloat trim** — consumer 프로젝트에 설치되는 `AGENTS.md`/`CLAUDE.md`/`GEMINI.md`/`SFS.md` 템플릿을 entry-lean 으로 정리: 기본 resume 힌트/SSoT 포인터만 남기고, 오래된/긴 참고는 on-demand(`sfs guide --print`, skill/command docs) 로 이동.
 - **foundation note** — 7-step flow 가 full startup team-agent artifact chain 의 lightweight projection 임을 README / SFS template / installer banner 에 명시. Production open 전 Release Readiness evidence 를 review 또는 retro-light 에 남기도록 보강.
 - **0.6.0** — `/sfs loop` live LLM 호출 site (`SFS_LOOP_LLM_LIVE=1` 활성) — claude/gemini/codex CLI shape 결정 후 wire (`WU27-D6`).
 - **0.6.x** — consumer mirror (Solon docset → consumer .sfs-local mirror 자동 sync, `WU-28 D3`).
