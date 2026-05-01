@@ -116,8 +116,10 @@ Open the active sprint's review.md as the CPO Evaluator review document.
   - Writes the full CPO prompt to .sfs-local/tmp/review-prompts/.
   - Appends a compact CPO Evaluator invocation log to review.md. The full
     prompt body is not embedded by default to prevent recursive token growth.
-  - Stores full executor results under .sfs-local/tmp/review-runs/. review.md
-    keeps only compact result metadata by default. Set
+  - Stores only the latest full executor result set for the same sprint/gate
+    under .sfs-local/tmp/review-runs/. Older same sprint/gate prompt/run files
+    are archived under .sfs-local/archives/review-runs/ before the new run.
+    review.md keeps only compact result metadata by default. Set
     SFS_REVIEW_MD_EXCERPT_LINES=1..80 to embed a bounded excerpt.
   - Appends events.jsonl `review_open` event.
   - Prints the resolved review.md path + gate id + executor to stdout (no editor launch).
@@ -699,6 +701,23 @@ RUN_DIR="${SFS_LOCAL_DIR}/tmp/review-runs"
 PROMPT_TS="$(date -u +%Y%m%dT%H%M%SZ)"
 PROMPT_PATH="${PROMPT_DIR}/${SPRINT_ID}-${GATE_ID}-${PROMPT_TS}.txt"
 
+archive_prior_review_artifacts() {
+  local prefix="${SPRINT_ID}-${GATE_ID}-"
+  local archive_dir="${SFS_ARCHIVES_DIR}/review-runs/${SPRINT_ID}/${GATE_ID}/${PROMPT_TS}"
+  local path base moved=0
+
+  for path in "${PROMPT_DIR}/${prefix}"* "${RUN_DIR}/${prefix}"*; do
+    [[ -f "${path}" ]] || continue
+    if [[ "${moved}" -eq 0 ]]; then
+      mkdir -p "${archive_dir}" || return "${SFS_EXIT_PERM}"
+      moved=1
+    fi
+    base="${path##*/}"
+    mv "${path}" "${archive_dir}/${base}" || return "${SFS_EXIT_PERM}"
+  done
+  return "${SFS_EXIT_OK}"
+}
+
 count_file_lines() {
   local file="$1"
   if [[ -f "$file" ]]; then
@@ -782,6 +801,10 @@ fi
 
 if ! mkdir -p "${PROMPT_DIR}" "${RUN_DIR}" 2>/dev/null; then
   echo "permission denied creating ${PROMPT_DIR} / ${RUN_DIR}" >&2
+  exit "${SFS_EXIT_PERM}"
+fi
+if ! archive_prior_review_artifacts; then
+  echo "permission denied archiving prior review artifacts" >&2
   exit "${SFS_EXIT_PERM}"
 fi
 if ! render_cpo_prompt > "${PROMPT_PATH}" 2>/dev/null; then

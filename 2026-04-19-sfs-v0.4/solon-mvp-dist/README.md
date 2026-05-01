@@ -244,7 +244,7 @@ mention 을 우선 사용합니다. Codex app/CLI 는 unknown leading slash 를 
 entry point 를 프로젝트에 설치/갱신합니다:
 `.claude/skills/sfs/SKILL.md` + `.claude/commands/sfs.md` +
 `.gemini/commands/sfs.toml` + `.agents/skills/sfs/SKILL.md`.
-기존 파일이 다르면 `.sfs-local/tmp/agent-install-backups/` 에 백업한 뒤 갱신합니다.
+기존 파일이 다르면 `.sfs-local/archives/agent-install-backups/` 에 보존한 뒤 갱신합니다.
 
 > 📘 **친구 onboarding 30분 walk-through**: 설치 직후 처음 30분 동안 `SFS.md` placeholder 치환,
 > 첫 sprint 시작, plan/review/decision/retro 흐름까지 따라 하는 가이드는 [GUIDE.md](./GUIDE.md)

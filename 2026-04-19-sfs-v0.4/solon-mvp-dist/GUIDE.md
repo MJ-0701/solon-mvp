@@ -49,7 +49,7 @@ Windows 의 Git Bash 로 내려간다. vendored layout 을 선택했을 때만 `
 wrapper 를 fallback 으로 쓴다.
 Claude/Gemini/Codex entry point 는 얇은 agent adapter 이므로, 새 agent 를 쓰거나
 adapter 를 갱신할 때는 `sfs agent install claude|gemini|codex|all` 을 다시 실행한다.
-기존 adapter 가 커스텀되어 있으면 `.sfs-local/tmp/agent-install-backups/` 에 백업된다.
+기존 adapter 가 커스텀되어 있으면 `.sfs-local/archives/agent-install-backups/` 에 보존된다.
 Solon 버전 갱신 후에는 uninstall/reinstall 대신 `sfs upgrade` 를 실행한다.
 
 **5초 mental model**:

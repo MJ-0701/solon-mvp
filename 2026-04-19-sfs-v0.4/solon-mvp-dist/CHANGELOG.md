@@ -1,3 +1,20 @@
+## [Unreleased]
+
+**Archive-first hotfix for SFS local noise.** Review retries and runtime backup
+files no longer pile up in the visible `.sfs-local/tmp/` tree.
+
+### Fixed
+
+- **Review retry cleanup** — before `/sfs review` writes a new prompt/run for
+  the same sprint and gate, prior matching prompt/run files move to
+  `.sfs-local/archives/review-runs/`, leaving only the latest run set in tmp.
+- **Runtime upgrade backups** — `sfs upgrade` now preserves overwritten managed
+  files under `.sfs-local/archives/runtime-upgrades/` instead of
+  `.sfs-local/tmp/upgrade-backups/`.
+- **Agent adapter backups** — `sfs agent install` now preserves overwritten
+  adapters under `.sfs-local/archives/agent-install-backups/` instead of
+  `.sfs-local/tmp/agent-install-backups/`.
+
 ## [0.5.54-product] - 2026-05-01
 
 **Windows auth executor UX hotfix.** Tightens the `/sfs auth` and review bridge
