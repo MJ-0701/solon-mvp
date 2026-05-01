@@ -82,6 +82,7 @@ outputs/
 #   - tmp/: 중간 산출물, ignore
 .sfs-local/events.jsonl
 .sfs-local/tmp/
+.sfs-local/queue/runs/
 .sfs-local/*.env
 .sfs-local/**/*.env
 !.sfs-local/*.env.example

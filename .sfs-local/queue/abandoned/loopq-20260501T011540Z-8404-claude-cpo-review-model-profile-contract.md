@@ -1,7 +1,7 @@
 ---
 task_id: loopq-20260501T011540Z-8404
 title: "[claude] cpo review model profile contract"
-status: claimed   # defanged duplicate (real claim at claimed/claude-overnight/, FUSE delete blocked)
+status: abandoned
 priority: 3
 mode: user-active-deferred
 sprint_id: "solon-loop-queue-mvp"
@@ -17,6 +17,7 @@ depends_on:
   - loopq-20260501T011510Z-8401
   - loopq-20260501T011520Z-8402
   - loopq-20260501T011530Z-8403
+abandoned_at: 2026-05-01T02:07:55Z
 ---
 
 # [claude] cpo review model profile contract

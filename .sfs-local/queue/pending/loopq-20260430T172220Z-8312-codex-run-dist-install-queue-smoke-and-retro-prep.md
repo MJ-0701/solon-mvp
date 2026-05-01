@@ -6,7 +6,7 @@ priority: 3
 mode: user-active-deferred
 sprint_id: "solon-loop-queue-mvp"
 owner: ""
-attempts: 0
+attempts: 1
 max_attempts: 3
 created_at: 2026-04-30T17:22:20Z
 claimed_at: ""
@@ -15,6 +15,7 @@ target_minutes: 60
 depends_on:
   - loopq-20260430T172200Z-8310
   - loopq-20260430T172210Z-8311
+retried_at: 2026-05-01T02:07:55Z
 ---
 
 # [codex] run dist install queue smoke and retro prep

@@ -1,7 +1,7 @@
 ---
 task_id: loopq-20260501T020828Z-10246
 title: "codex fix queue same-owner files-scope guard"
-status: claimed
+status: done
 priority: 2
 mode: user-active-deferred
 sprint_id: "solon-loop-queue-mvp"
@@ -12,6 +12,7 @@ created_at: 2026-05-01T02:08:28Z
 claimed_at: 2026-05-01T02:09:26Z
 size: medium
 target_minutes: 45
+completed_at: 2026-05-01T02:13:38Z
 ---
 
 # codex fix queue same-owner files-scope guard

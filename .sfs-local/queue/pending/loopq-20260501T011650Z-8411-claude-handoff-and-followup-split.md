@@ -1,6 +1,6 @@
 ---
 task_id: loopq-20260501T011650Z-8411
-title: "[claude] handoff and follow-up split"
+title: "[codex] handoff and follow-up split"
 status: pending
 priority: 5
 mode: user-active-deferred
@@ -17,7 +17,7 @@ depends_on:
   - loopq-20260501T011620Z-8408
 ---
 
-# [claude] handoff and follow-up split
+# [codex] handoff and follow-up split
 
 ## Goal
 
@@ -45,5 +45,6 @@ Scope:
 
 ## Runtime Assignment
 
-- Intended runtime: Claude.
+- Intended runtime: Codex.
+- Claude is intentionally not required for this follow-up.
 - Keep handoff short. Do not turn this into a new planning sprint.
