@@ -1,262 +1,64 @@
-# Solon SFS — Codex CLI custom prompt (legacy/user-scoped fallback)
+# Solon SFS — Codex CLI custom prompt (legacy/user-scoped fallback, entry-lean)
 #
 # Path (user-scoped, NOT project-scoped):
 #   ~/.codex/prompts/sfs.md
+#
 # Invoke on Codex builds that still support user prompts:
-#   /prompts:sfs $ARGUMENTS
+#   /prompts:sfs <subcommand> [args]
 #
-# This file is an OPTIONAL/legacy fallback. In Codex, the project-scoped Skill
-# at `.agents/skills/sfs/SKILL.md` is the primary adaptor asset installed by
-# `install.sh`; use `$sfs ...` / `sfs ...` when the host slash UI blocks `/sfs`.
+# This file is an OPTIONAL legacy fallback. Prefer the project-scoped adaptor:
+# - `.agents/skills/sfs/SKILL.md` (Codex Skill, installed by `install.sh`)
+# - `SFS.md` (project SFS guide; points to `sfs guide --print`)
 #
-# Current Codex app/CLI builds may reserve leading slash names for native
-# commands and reject unregistered `/sfs` before the model sees it (`커맨드 없음`
-# / `Unrecognized command`). Treat that as a runtime adaptor compatibility gap;
-# `/prompts:sfs` is only a bypass when your Codex build exposes `/prompts:<name>`
-# custom prompts:
-#   mkdir -p ~/.codex/prompts
-#   cp <consumer-project>/templates/.codex/prompts/sfs.md ~/.codex/prompts/sfs.md
-#
-# Then in Codex CLI: type `/prompts:sfs status`.
+# Compatibility note: some Codex builds may block unregistered `/sfs` before the
+# model sees it. `/prompts:sfs` is only a bypass when your runtime exposes
+# custom prompts.
 
-You are operating in a project that has Solon SFS installed.
+You are operating in a project that has Solon SFS installed (Solo Founder System).
 
-The user has invoked this prompt with `$ARGUMENTS`. Treat the first
-whitespace-delimited token as the subcommand and the remainder as that
-subcommand's arguments.
+The user invoked this prompt with `$ARGUMENTS`. Treat the first whitespace-delimited
+token as the subcommand and the remainder as that subcommand's arguments.
 
-## Behavior
+Token-min rule: do not auto-load verbose history (`.sfs-local/events.jsonl`, old
+`scheduled_task_log`, old `review-runs`) unless needed.
 
-If the first argument is `status`, `start`, `guide`, `auth`, `adopt`, `upgrade`, `update`, `version`, `brainstorm`, `plan`, `implement`, `review`, `decision`,
-`report`, `tidy`, `retro`, `commit`, or `loop`, dispatch to the `sfs` runtime command first. In vendored
-layout only, `.sfs-local/scripts/sfs-dispatch.sh` is an acceptable fallback.
+## Always dispatch first (bash adapter SSoT)
+
+1) Verify runtime: `command -v sfs`. If missing, say so in 1 line and stop.
+2) Execute: `sfs <subcommand> <args>`.
+   - Vendored layout fallback only: `bash .sfs-local/scripts/sfs-dispatch.sh <subcommand> <args>`.
+3) Print stdout verbatim. If exit≠0, also print stderr + `exit <code>`.
+
+If `sfs loop` reports a mutex conflict (Solon `domain_locks`), stop and report the
+lock owner/domain.
+
+## After adapter (only when applicable)
 
 Command modes:
-- **Bash-first**: `status`, `start`, `guide`, `auth`, `upgrade`, `update`, `version`, `commit`, `loop`. Print
-  verbatim adapter output. For `commit`, the adapter prints branch preflight,
-  groups files, auto-generates a Git Flow-aware Conventional Commit message,
-  then the AI runtime handles branch push/main merge/main push.
-- **Conditional hybrid**: `tidy`. Run the adapter first. If it created or
-  touched `report.md`, read archived workbench/tmp sources and refine the
-  report before answering.
-- **Always hybrid**: `adopt`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`. Run the adapter,
-  then perform the documented file refinement.
-- **Adapter-run**: `review`. The bash adapter executes the selected CPO
-  executor bridge by default. Stop after adapter output. If `--prompt-only` is
-  used, treat the prompt path as manual handoff material and do not write a
-  Codex verdict in the current runtime.
+- **Bash-first**: `status|start|guide|auth|division|upgrade|update|version|commit|loop` → stop after verbatim output.
+- **Adapter-run**: `review` → stop after verbatim output unless explicitly asked to summarize recorded results.
+- **Hybrid refinement**: `adopt|brainstorm|plan|implement|decision|report|retro` and `tidy` (only if it created/touched `report.md`).
 
-Special close guard: if the user invokes `retro --close` in an AI runtime, do
-not run the close adapter first. Run `retro` without `--close`, refine
-`retro.md`, then run `retro --close` exactly once.
+Hybrid refinement rules:
+- Use adapter stdout (paths) as metadata, then open the created/pointed artifacts and refine them.
+- Use each artifact’s own guardrails (`plan.md`, `implement.md`, etc.) as SSoT for what to write.
+- Final user-facing response is a Solon report in a fenced `text` block (localized).
+- For `review`: summarize from recorded `review.md`/`result_path` metadata; do not dump raw executor markdown or create a new verdict.
 
-## Solon Report Output Rule
-
-For hybrid commands (`adopt`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`) and adapter-run
-`review`, the final answer must be a **Solon report**, not a plain bullet list
-such as `plan.md refined: ...`. Put the whole report in a fenced `text` block.
-Render the report in the user's visible language (for example, Korean for a
-Korean user), even when executor evidence is in English. For `review`, do not
-dump raw executor markdown or `CPO RESULT EXCERPT` blocks into the user-facing
-answer. Treat adapter stdout as compact metadata, read `output_path` /
-`result_path` / `review.md` when needed, then summarize and translate verdict,
-findings, and required actions into the report.
-
-Use this shape and fill only evidence-backed values:
-
-Decision references in user-facing reports must be self-describing. Never output
-naked shorthand such as `D6`, `D6·D7·D8`, `WU27-D6`, or `W-24` in `Next`,
-`Actions`, `Questions`, `Escalation`, or `Learning` unless the same line expands
-each id as `<id> — <one-line title> (source: <file/section>)`. If the title or
-source cannot be found, say so explicitly and put the missing lookup under
-`Questions` instead of treating the shorthand as an actionable next step.
-
+Minimal Solon report shape:
 ```text
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📋 SOLON REPORT — /sfs <command>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 Command <command> · <goal/gate/artifact>      [<status>]
-⏱️ Time    <started> → <finished>  (<duration or "n/a">)
-───────────────────────────────────────────────────
-🔧 Steps   <N>건 — <adapter/refinement/review path summary>
-📁 Files   <N>개 — <created/updated artifact paths>
-💾 Commits <N>건 — <sha or "없음 (planning/review artifact)">
-📊 Health  Solon SSoT ✓ | adapter <✓/−> | CEO <✓/−> | CTO/CPO <✓/−> | Solon owner ✓
-🔎 Review  <verdict/skipped/prompt-only/n/a> — <executor result summary for review only>
-🛠 Actions <N>건 — <Required CTO actions summary, or "없음/unknown">
-───────────────────────────────────────────────────
-❓ Questions <N>건 — <질문 요약 또는 "없음">
-⚠️ Escalation <N>건 — <1줄 요약 또는 "없음">
-📚 Learning   <N>건 — <1줄 요약 또는 "없음">
-───────────────────────────────────────────────────
-⏭️ Next  <next Solon command/action>
+🎯 Command <command> · <goal/gate>      [<status>]
+🔧 Steps   <adapter + refinement summary>
+📁 Files   <paths>
+💾 Commits <sha or 없음>
+⚠️ Escalation <없음/summary>
+⏭️ Next  <one next action>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-For `/sfs review`, surface the executor-provided result that already exists in
-adapter stdout, `result_path`, or `review.md`: verdict, key findings, and
-required CTO actions. Show a concise report, not the source markdown body. Do
-not create a new verdict in the current runtime.
-
-| First arg | Script |
-|:--|:--|
-| `status`   | `sfs status <args>`   |
-| `start`    | `sfs start <args>`    |
-| `guide`    | `sfs guide <args>`    |
-| `auth`     | `sfs auth <args>`     | Codex/Claude/Gemini auth status/login/probe |
-| `brainstorm` | `sfs brainstorm <args>` | raw capture, then Solon CEO refinement |
-| `plan`     | `sfs plan <args>`     | G1 open, then plan refinement |
-| `implement` | `sfs implement <args>` | implementation open, then actual code changes + tests/evidence |
-| `review`   | `sfs review <args>`   | CPO executor bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
-| `decision` | `sfs decision <args>` | creates ADR, then Codex fills Context/Decision/Alternatives/Consequences |
-| `retro`    | `sfs retro <args>`    | opens retro.md, then Codex fills KPT/PDCA. With `--close`, refine before close |
-| `commit`   | `sfs commit <args>`   | groups working tree changes and commits only the selected group. AI runtime handles branch push/main merge/main push |
-| `loop`     | `sfs loop <args>`     |
-
-## Procedure
-
-1. Verify `sfs` exists (`command -v sfs`). If missing, report 1 line and stop.
-   In vendored layout only, `.sfs-local/scripts/sfs-dispatch.sh` can be used as fallback.
-2. Re-quote args safely. Reject newline/NUL byte args, except for `brainstorm`.
-3. Execute via shell. Capture stdout/stderr/exit.
-4. Print stdout verbatim. If exit≠0, also print stderr + `exit <code>` line.
-5. Stop or continue by command mode:
-   - `status`, `start`, `guide`, `auth`, `commit`, `loop`: stop. No paraphrase, no summary.
-   - `brainstorm`: Brainstorm CEO Refinement.
-   - `plan`: Plan G1 Refinement.
-   - `implement`: Implementation Execution.
-   - `decision`: Decision ADR Refinement.
-   - `retro`: Retro G5 Refinement.
-   - `review`: Review CPO Handling. Use adapter stdout as metadata, read the
-     recorded result path when present, then render a localized Solon report
-     from recorded adapter/executor evidence only. Do not echo raw result bodies.
-
-## Brainstorm CEO Refinement
-
-After `/sfs brainstorm` succeeds:
-
-1. Resolve the active `brainstorm.md` path from adapter stdout, or read
-   `.sfs-local/current-sprint` and open
-   `.sfs-local/sprints/<current-sprint>/brainstorm.md`.
-2. Read `§8. Append Log`; preserve it as raw user data.
-3. Act as **Solon CEO** and fill/update `§1`~`§6`: raw brief, problem space,
-   constraints, options, scope seed, and plan seed.
-4. Update `§7` checklist only for satisfied items.
-5. Add up to 3 open questions if critical information is missing.
-6. Set frontmatter `status: ready-for-plan` only when `/sfs plan` has enough
-   material; otherwise keep `draft`.
-7. Do not implement code or run `/sfs plan` automatically.
-8. Final response: render a Solon report. Include `brainstorm.md` path in
-   `Files`, question count in `Questions`, and `Next: /sfs plan` when status is
-   `ready-for-plan`; otherwise `Next: answer questions, then /sfs brainstorm`.
-
-## Plan G1 Refinement
-
-After `/sfs plan` succeeds:
-
-1. Resolve the active `plan.md` path from adapter stdout, or read
-   `.sfs-local/current-sprint` and open
-   `.sfs-local/sprints/<current-sprint>/plan.md`.
-2. Open the same sprint's `brainstorm.md`; use §1~§7 and §8 Append Log as the
-   source of truth.
-3. Act as **Solon CEO** for requirements/scope, then write the
-   **CTO Generator ↔ CPO Evaluator** sprint contract.
-4. Fill/update `§1` measurable requirements, `§2` verifiable AC and anti-AC,
-   `§3` scope/dependencies/decisions, `§4` G1 checklist, and `§5` sprint
-   contract. Add `§6 Phase 1 구현 Backlog Seed` when helpful.
-5. Preserve existing user edits.
-6. Ask up to 3 questions only if critical information is missing.
-7. Do not implement code or run `/sfs review` automatically.
-8. Final response: render a Solon report. Include `plan.md` path in `Files`,
-   question count in `Questions`, and `Next: /sfs review --gate G1 ... then /sfs implement "<first code slice>"`
-   when ready; otherwise `Next: answer questions, then /sfs plan`.
-
-## Implementation Execution
-
-After `/sfs implement` succeeds:
-
-1. Resolve `implement.md`, `plan.md`, and `log.md` from stdout, or read
-   `.sfs-local/current-sprint` and open those files under the active sprint.
-2. Read the plan and relevant project files. If the requested slice conflicts
-   with the plan, stop and ask before editing.
-3. Apply the guardrails in `implement.md`: shared design concept, DDD terms,
-   TDD or smallest useful verification, and existing codebase regularity.
-4. Implement the smallest coherent code slice. Prefer test-first where possible.
-5. Update `implement.md` and `log.md` with changed files, commands, results,
-   decisions, and review handoff. Mark ready only when code and evidence exist.
-6. Final response: render a Solon report with actual code files and checks.
-   Next should be `/sfs review --gate G4` when ready.
-
-## Decision ADR Refinement
-
-After `/sfs decision` succeeds:
-
-1. Resolve the created ADR path from `decision created: <path>`, or open the
-   newest file under `.sfs-local/decisions/`.
-2. Read active sprint context if available: `brainstorm.md`, `plan.md`,
-   `review.md`, `retro.md`, and `.sfs-local/events.jsonl`.
-3. Act as **Solon CEO** and fill/update `Context`, `Decision`, `Alternatives`,
-   `Consequences`, and `References`.
-4. Preserve frontmatter and user edits. Do not implement code.
-5. Ask up to 3 questions only if the ADR cannot be understood without them.
-6. Final response: render a Solon report. Include the ADR path in `Files`,
-   question count in `Questions`, and `Next: continue current sprint`.
-
-## Review CPO Handling
-
-After `/sfs review` succeeds:
-
-1. The adapter has already run the selected CPO executor bridge, skipped empty
-   evidence, reprinted a prior review with `--show-last`, or produced a
-   `--prompt-only` handoff.
-2. If `--prompt-only` was used, treat `prompt_path` as manual handoff material.
-   Do not write a Codex verdict in the current runtime unless the user
-   explicitly starts a separate review task with that prompt.
-3. Final response: render a Solon report in the user's visible language. Fill
-   `Review` and `Actions` from the executor result path or `review.md` when
-   present, translating/summarizing as needed. Do not print the raw result
-   markdown unless the user explicitly asks for the raw source. Do not add an
-   extra CPO verdict from the current runtime.
-
-## Retro G5 Refinement
-
-After `/sfs retro` succeeds:
-
-1. Resolve `retro.md` from stdout or active sprint.
-2. Read sprint artifacts, events, and related decisions.
-3. Fill/update KPT, PDCA learning, evidence-backed metrics, next sprint handoff,
-   and close checklist.
-4. Preserve user edits and mark unknowns explicitly.
-5. If the user invoked `retro --close`, refine `retro.md` first, then run
-   `bash .sfs-local/scripts/sfs-dispatch.sh retro --close` exactly once and
-   print its output verbatim.
-6. Final response when not closing: render a Solon report. Include `retro.md`
-   path in `Files`, close-readiness in `Health`, and `Next: /sfs retro --close`
-   if ready; otherwise the next required action.
-
-## ⚠️ Safety
-
-- `/sfs retro --close` triggers auto-commit. In AI runtimes, refine `retro.md`
-  before running the close adapter, and only when the user explicitly requested
-  close.
-- `/sfs commit apply ...` creates a local git commit. Run it only when the
-  user explicitly requested commit grouping/apply. It prints branch preflight,
-  auto-generates a Git Flow-aware Conventional Commit message. Branch push/main
-  merge/main push are handled by the AI runtime Git Flow lifecycle.
-- Do not run wildcard `git push origin *`. Exact branch/main push is allowed
-  when it is part of the Git Flow lifecycle and no conflict/auth/protection
-  blocker is present.
-
-## Why this exists alongside the Skill
-
-Codex CLI has two partial extension points:
-1. **Skills** (`.agents/skills/<name>/SKILL.md`) — project-scoped, supports
-   implicit + explicit (`$<name>`) invocation.
-2. **Custom prompts** (`~/.codex/prompts/<name>.md`) — user-scoped, optional
-   legacy fallback on Codex builds that expose `/prompts:<name>`.
-
-Solon SFS ships both for parity with Claude Code (slash) and Gemini CLI
-(slash). In Codex, current app/CLI surfaces can reject unknown leading-slash
-commands before the model sees them, so `$sfs ...`, natural language, and
-direct bash are the practical entry paths. `/prompts:sfs ...` is a legacy
-fallback only when that feature is available.
+Guard:
+- Never run `retro --close` unless the user explicitly asked. If asked, refine `retro` + `report` first, then run the close step exactly once.
+- Never run `git push`, main merges, or release/publish steps unless the user explicitly asked.
