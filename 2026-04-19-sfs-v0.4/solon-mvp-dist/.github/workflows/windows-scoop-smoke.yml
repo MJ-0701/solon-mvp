@@ -94,6 +94,7 @@ jobs:
           git init
           sfs init --layout thin --yes
           sfs status
+          sfs auth status codex
           sfs agent install all
 
           $required = @(

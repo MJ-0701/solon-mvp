@@ -622,6 +622,52 @@ normalize_executor_profile() {
   esac
 }
 
+executor_cli_missing_hint() {
+  local profile
+  profile="$(normalize_executor_profile "$1")"
+  case "$profile" in
+    codex)
+      cat >&2 <<'EOF'
+executor bridge missing: codex CLI not found.
+SFS review automation needs a CLI that can read the prompt on stdin and write a result to stdout/file.
+The Codex desktop app alone is a manual UI, not a headless SFS executor bridge.
+
+Use one of:
+  - install/enable Codex CLI so `codex --help` works from the same Git Bash used by sfs
+  - run `sfs review --gate <id> --executor codex --prompt-only` and paste the prompt into the Codex app manually
+  - use an installed CLI executor, for example `sfs review --gate <id> --executor claude --generator codex`
+EOF
+      ;;
+    gemini)
+      cat >&2 <<'EOF'
+executor bridge missing: gemini CLI not found.
+SFS review automation needs a CLI that can read the prompt on stdin and write a result to stdout/file.
+The Gemini app/web UI alone is a manual UI, not a headless SFS executor bridge.
+
+Use one of:
+  - install Gemini CLI so `gemini --help` works from the same Git Bash used by sfs
+  - run `sfs review --gate <id> --executor gemini --prompt-only` and paste the prompt into Gemini manually
+  - use an installed CLI executor, for example `sfs review --gate <id> --executor claude --generator gemini`
+EOF
+      ;;
+    claude)
+      cat >&2 <<'EOF'
+executor bridge missing: claude CLI not found.
+SFS review automation needs a CLI that can read the prompt on stdin and write a result to stdout/file.
+The Claude desktop/web app alone is a manual UI, not a headless SFS executor bridge.
+
+Use one of:
+  - install Claude CLI so `claude --help` works from the same Git Bash used by sfs
+  - run `sfs review --gate <id> --executor claude --prompt-only` and paste the prompt into Claude manually
+  - use another installed CLI executor
+EOF
+      ;;
+    *)
+      echo "executor bridge missing: CLI not found for ${profile}" >&2
+      ;;
+  esac
+}
+
 executor_auth_ready() {
   local profile
   profile="$(normalize_executor_profile "$1")"
@@ -686,7 +732,7 @@ bootstrap_executor_interactive_auth() {
     return 0
   fi
   if ! command -v "$profile" >/dev/null 2>&1; then
-    echo "executor bridge missing: ${profile} CLI not found" >&2
+    executor_cli_missing_hint "$profile"
     return 1
   fi
   if [[ ! -r /dev/tty || ! -w /dev/tty ]]; then
