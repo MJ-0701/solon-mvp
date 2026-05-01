@@ -1,3 +1,18 @@
+## [0.5.47-product] - 2026-05-01
+
+**Short sprint references for tidy.** `sfs tidy --sprint` now accepts an exact
+sprint id or a unique suffix reference, so users can type refs like
+`W18-sprint-1` instead of the full `2026-W18-sprint-1` when the match is
+unambiguous.
+
+### Changed
+
+- **Tidy sprint targeting UX** — `--sprint <id-or-ref>` resolves exact ids
+  first, then unique suffix matches. Ambiguous refs fail with the matching
+  sprint ids instead of guessing.
+- **Tidy documentation** — README/GUIDE/help text now describe `id-or-ref`
+  targeting and keep `--all` as the recommended bulk cleanup path.
+
 ## [0.5.46-product] - 2026-05-01
 
 **Document tidy command and release-note preflight.** SFS now has an explicit

@@ -301,7 +301,7 @@ vendored layout 에서 direct adapter 를 호출해야 하면:
 | `/sfs review --gate <id> [--executor <tool>] [--prompt-only]` / `/sfs review --show-last` | CPO Evaluator review run. stdout 은 verdict/output path 메타데이터만 보여주고, AI runtime 이 result 를 사용자 언어의 요약+action report 로 렌더링. full prompt 는 tmp prompt file에 저장하며 `review.md`에는 compact log/result를 남김 (id ∈ G-1..G5) |
 | `/sfs decision <title>` | full ADR 생성 후 Context/Decision/Alternatives/Consequences 작성 |
 | `/sfs report [--sprint <id>] [--compact]` | 최종 작업보고서 `report.md` 생성/갱신. `--compact` 는 사용자 동의 후 workbench 문서를 archive 로 이동 |
-| `/sfs tidy [--sprint <id>|--all] [--apply]` | 완료된 sprint workbench/tmp 산출물을 archive 로 이동하고, 없으면 `report.md` 를 생성. 남겨야 할 문서만 sprint 폴더에 둠. 기본은 dry-run |
+| `/sfs tidy [--sprint <id-or-ref>|--all] [--apply]` | 완료된 sprint workbench/tmp 산출물을 archive 로 이동하고, 없으면 `report.md` 를 생성. `--sprint W18-sprint-1` 같은 고유 suffix 참조 가능. 남겨야 할 문서만 sprint 폴더에 둠. 기본은 dry-run |
 | `/sfs retro` | 현재 sprint 의 `retro.md` 작성 또는 갱신 |
 | `/sfs retro --close` | AI runtime 에서는 retro + report refinement 후, review 실행 여부 확인 + workbench/tmp archive + sprint close + auto commit. 이후 branch push/main 흡수는 Git Flow lifecycle 로 처리 |
 | `/sfs commit [status|plan|apply --group <name>]` | close 후 남은 working tree 를 의미 그룹으로 분리하고 branch preflight 안내 후 선택 그룹만 local commit. 메시지는 Git Flow-aware Conventional Commit 으로 자동 생성 (`-m` override). 이후 branch push/main 흡수는 AI runtime 이 수행 |
@@ -455,7 +455,7 @@ consumer 프로젝트에는 필요한 state/config/custom override 만 설치됩
 
 - install/upgrade/uninstall 은 consumer 프로젝트에 자동 push 하지 않습니다.
 - `/sfs retro --close` 는 사용자가 명시적으로 호출했을 때만 report 기반 workbench/tmp archive, sprint close, auto commit 을 수행합니다.
-- `/sfs tidy --apply` 는 기존 workbench 원문과 대상 sprint 의 tmp review 산출물을 `.sfs-local/archives/` 로 이동해 보존하고, sprint/tmp 폴더에는 남겨야 할 것만 둡니다. 기본 실행은 dry-run 입니다.
+- `/sfs tidy --apply` 는 기존 workbench 원문과 대상 sprint 의 tmp review 산출물을 `.sfs-local/archives/` 로 이동해 보존하고, sprint/tmp 폴더에는 남겨야 할 것만 둡니다. 기본 실행은 dry-run 입니다. 단일 sprint 는 정확한 ID 또는 고유 suffix 로 지정할 수 있습니다. 예: `--sprint W18-sprint-1` → `2026-W18-sprint-1`.
 - gate 는 진행을 강제로 막지 않는 signal 입니다.
 - 사용자가 만든 `.sfs-local/sprints/`, `.sfs-local/decisions/`, `.sfs-local/events.jsonl` 은 install/upgrade 과정에서 덮어쓰지 않습니다.
 - 기존 파일과 충돌하면 `skip`, `backup + overwrite`, `overwrite`, `diff` 중 선택합니다.
