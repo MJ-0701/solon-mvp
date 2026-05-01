@@ -16,6 +16,11 @@ current_wu_owner: null
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
 scheduled_task_log:
+  - ts: 2026-05-02T07:59:33+09:00
+    codename: overnight-sfs-loop-deploy
+    check_exit: 0
+    action: "doc-refactor: slim gemini /sfs command (entry token trim)"
+    ahead_delta: "+0"
   - ts: 2026-05-02T07:55:48+09:00
     codename: overnight-sfs-loop-deploy
     check_exit: 0
