@@ -363,7 +363,7 @@ graph TB
 # agents/division-leads/dev-lead.yaml
 id: division/dev/head
 role: division-lead
-model: claude-opus-4-6
+reasoning_tier: execution_standard   # escalates to strategic_high on architecture/public-contract decisions; concrete model resolved per .sfs-local/model-profiles.yaml (Claude/Codex/Gemini/current)
 
 system_prompt: |
   당신은 Dev 본부의 본부장이다.

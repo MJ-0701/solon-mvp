@@ -133,7 +133,7 @@ affects:
 ### Memory 연결
 
 이 원칙의 합의 근거는 `auto-memory/feedback_sfs_no_self_validation.md`에 영구 보존되어 있음.
-v0.3 §2.2 "Sonnet 실행자 + Opus 판단자 쌍"을 더 엄격하게 명문화한 것.
+v0.3 §2.2 의 Claude 시절 짝 표현 ("Sonnet 실행자 + Opus 판단자", 현재는 `execution_standard` worker + `review_high` evaluator tier 추상화로 RUNTIME-ABSTRACTION.md §5.4 가 SSoT) 을 더 엄격하게 명문화한 것.
 
 ---
 

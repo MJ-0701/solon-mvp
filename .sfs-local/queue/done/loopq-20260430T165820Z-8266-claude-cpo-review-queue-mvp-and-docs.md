@@ -1,7 +1,7 @@
 ---
 task_id: loopq-20260430T165820Z-8266
 title: "[claude] cpo review queue MVP and docs"
-status: claimed
+status: done
 priority: 2
 mode: user-active-deferred
 sprint_id: "solon-loop-queue-mvp"
@@ -10,6 +10,7 @@ attempts: 0
 max_attempts: 3
 created_at: 2026-04-30T16:58:20Z
 claimed_at: 2026-04-30T16:59:31Z
+completed_at: 2026-05-01T01:12:10Z
 ---
 
 # [claude] cpo review queue MVP and docs

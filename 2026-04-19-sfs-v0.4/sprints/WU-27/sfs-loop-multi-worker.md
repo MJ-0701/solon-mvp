@@ -23,6 +23,13 @@ spec_source: 2026-04-19-sfs-v0.4/tmp/sfs-loop-design.md (v0.3 §6.0~§6.4 verbat
 **사용자 발화 (2/3차, 24th-52 continuation 5 2026-04-28T20:23+20:30 KST)**:
 > "내가 원하는건 완전한 독립이지 지금처럼 바통터치의 느낌이 아닌데 이건 병렬로 작업하는게 아니잖아?" + "/sfs loop 기능도 이런식으로 병렬로 루프 작업을 할 수 있는 기능을 제공해줘"
 
+**운영 보정 (2026-05-01, Codex/Claude queue 병렬 dogfooding 후)**:
+- 기능상 multi-worker 는 유지하지만 운영 기본값은 **single-runner** 다.
+- 한 시점에 Codex/Claude/Cowork 중 하나만 loop 를 길게 돌린다.
+- 어느 런타임이 loop runner 로 적합한지는 작업 성격별로 AI 가 판단한다.
+- 병렬 loop 는 명시적 coordinator, disjoint `Files Scope`, dependency-free queue 가 확인된 예외에서만 허용한다.
+- 같은 backlog 를 Codex 와 Claude 가 동시에 조금씩 claim 하는 운영은 의존성 대기와 중복 pending/claimed 상태를 만들 수 있어 기본 금지한다.
+
 ### §6.0.1 Worker 가 보는 것 / 못 보는 것
 
 **OK to read** (mutex coordination = 정상 입력):

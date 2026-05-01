@@ -2,20 +2,19 @@
 #
 # Path: <consumer-project>/.gemini/commands/sfs.toml
 # Invoke: /sfs <subcommand> [args]
-#         예) /sfs status / /sfs start "첫 번째 sprint" / /sfs review --gate G2
+#         예) /sfs status / /sfs start "첫 번째 sprint" / /sfs implement "첫 구현 slice" / /sfs review --gate G4
 #
-# Behavior: bash dispatch layer (.sfs-local/scripts/sfs-dispatch.sh) 가 runtime
-#   surface 를 normalize 하고, bash adapter (.sfs-local/scripts/sfs-*.sh) 가
-#   single source of truth.
+# Behavior: global sfs runtime 이 command surface 를 normalize 하고 deterministic
+#   bash adapter 로 내려간다. `.sfs-local/scripts/` 는 vendored layout fallback.
 #   user 발화의 첫 token = subcommand → sfs-<subcommand>.sh 실행 + stdout verbatim 출력.
-#   단, brainstorm/plan/decision/retro 는 adapter 후 Gemini 가 문서 refinement 를 수행하고,
+#   단, brainstorm/plan/implement/decision/retro 는 adapter 후 Gemini 가 문서 refinement/구현을 수행하고,
 #   review 는 기본적으로 adapter 가 선택된 CPO executor bridge 를 실행한다.
 #   paraphrase 금지, 결정성 유지 (Claude Code / Codex / Gemini CLI 동등 1급).
 #
 # Note: {{args}} 는 Gemini CLI v1 placeholder. 사용자가 입력한 첫 token 이 subcommand,
 #       나머지는 그 subcommand 의 인자로 그대로 전달.
 
-description = "Solon SFS workflow command — bash adapter SSoT; hybrid G0/G1/ADR/G5 refinement; adapter-run CPO review"
+description = "Solon SFS workflow command — bash adapter SSoT; hybrid G0/G1/implement/ADR/G5 refinement; adapter-run CPO review"
 
 prompt = """
 You are operating in a project that has Solon SFS installed.
@@ -25,19 +24,25 @@ token as the subcommand and the remainder as that subcommand's arguments.
 
 ## Behavior
 
-If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`brainstorm`**, **`plan`**, **`review`**,
-**`decision`**, **`retro`**, or **`loop`**, dispatch the request to the
-corresponding bash script under `.sfs-local/scripts/` first.
+If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`update`**, **`brainstorm`**, **`plan`**, **`implement`**, **`review`**,
+**`decision`**, **`retro`**, **`commit`**, or **`loop`**, dispatch the request to the
+`sfs` runtime command first.
 
 Command modes:
-- **Bash-only**: `status`, `start`, `guide`, `auth`, `loop`. Stop after
+- **Bash-only**: `status`, `start`, `guide`, `auth`, `update`, `commit`, `loop`. Stop after
   verbatim adapter output.
-- **Always hybrid**: `brainstorm`, `plan`, `decision`, `retro`. Run the adapter,
+- **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `retro`. Run the adapter,
   then perform the documented file refinement.
 - **Adapter-run**: `review`. The bash adapter executes the selected CPO
   executor bridge by default. Stop after adapter output. If `--prompt-only` is
   used, treat the prompt path as manual handoff material and do not write a
   Gemini verdict in the current runtime.
+- **Adapter-run local commit**: `commit`. Run only when the user explicitly
+  invokes it. It groups staged/unstaged/untracked files into `product-code`,
+  `sprint-meta`, `runtime-upgrade`, and `ambiguous`, then commits only the
+  selected group. It prints Git Flow branch preflight guidance, auto-generates
+  a Conventional Commit message unless `-m` is supplied. Branch push/main
+  merge/main push are handled by the AI runtime Git Flow lifecycle.
 
 Special close guard: if the user invokes `retro --close` in an AI runtime, do
 not run the close adapter first. Run `retro` without `--close`, refine
@@ -45,7 +50,7 @@ not run the close adapter first. Run `retro` without `--close`, refine
 
 ## Solon Report Output Rule
 
-For hybrid commands (`brainstorm`, `plan`, `decision`, `retro`) and adapter-run
+For hybrid commands (`brainstorm`, `plan`, `implement`, `decision`, `retro`) and adapter-run
 `review`, the final answer must be a **Solon report**, not a plain bullet list
 such as `plan.md refined: ...`. Put the whole report in a fenced `text` block.
 Render the report in the user's visible language (for example, Korean for a
@@ -74,7 +79,7 @@ source cannot be found, say so explicitly and put the missing lookup under
 🔧 Steps   <N>건 — <adapter/refinement/review path summary>
 📁 Files   <N>개 — <created/updated artifact paths>
 💾 Commits <N>건 — <sha or "없음 (planning/review artifact)">
-📊 Health  Solon SSoT ✓ | adapter <✓/−> | CEO <✓/−> | CTO/CPO <✓/−> | bkit owner ×
+📊 Health  Solon SSoT ✓ | adapter <✓/−> | CEO <✓/−> | CTO/CPO <✓/−> | Solon owner ✓
 🔎 Review  <verdict/skipped/prompt-only/n/a> — <executor result summary for review only>
 🛠 Actions <N>건 — <Required CTO actions summary, or "없음/unknown">
 ───────────────────────────────────────────────────
@@ -93,25 +98,25 @@ not create a new verdict in the current runtime.
 
 | First arg | Script to run | Notes |
 |:--|:--|:--|
-| `status`   | `bash .sfs-local/scripts/sfs-dispatch.sh status <remaining args>`   | passes flags such as `--color=auto/always/never` verbatim |
-| `start`    | `bash .sfs-local/scripts/sfs-dispatch.sh start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
-| `guide`    | `bash .sfs-local/scripts/sfs-dispatch.sh guide <remaining args>`    | default context briefing; passes `--path` / `--print` verbatim |
-| `auth`     | `bash .sfs-local/scripts/sfs-dispatch.sh auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
-| `brainstorm` | `bash .sfs-local/scripts/sfs-dispatch.sh brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then fills §1~§7 as Solon CEO |
-| `plan`     | `bash .sfs-local/scripts/sfs-dispatch.sh plan <remaining args>`     | opens plan.md, then fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
-| `review`   | `bash .sfs-local/scripts/sfs-dispatch.sh review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
-| `decision` | `bash .sfs-local/scripts/sfs-dispatch.sh decision <remaining args>` | creates ADR, then Gemini fills Context/Decision/Alternatives/Consequences |
-| `retro`    | `bash .sfs-local/scripts/sfs-dispatch.sh retro <remaining args>`    | opens retro.md, then Gemini fills KPT/PDCA. With `--close`, refine before close |
-| `loop`     | `bash .sfs-local/scripts/sfs-dispatch.sh loop <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim |
+| `status`   | `sfs status <remaining args>`   | passes flags such as `--color=auto/always/never` verbatim |
+| `start`    | `sfs start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
+| `guide`    | `sfs guide <remaining args>`    | default context briefing; passes `--path` / `--print` verbatim |
+| `auth`     | `sfs auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
+| `update`   | `sfs update <remaining args>`   | updates managed project adapter/docs from the installed runtime; preserves sprint/decision/event history |
+| `brainstorm` | `sfs brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then fills §1~§7 as Solon CEO |
+| `plan`     | `sfs plan <remaining args>`     | opens plan.md, then fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
+| `implement` | `sfs implement <remaining args>` | opens implement.md/log.md, then performs actual code changes with DDD/TDD guardrails and records evidence |
+| `review`   | `sfs review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
+| `decision` | `sfs decision <remaining args>` | creates ADR, then Gemini fills Context/Decision/Alternatives/Consequences |
+| `retro`    | `sfs retro <remaining args>`    | opens retro.md, then Gemini fills KPT/PDCA. With `--close`, refine before close |
+| `commit`   | `sfs commit <remaining args>`   | groups working tree changes and commits only the selected group. AI runtime handles branch push/main merge/main push |
+| `loop`     | `sfs loop <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim |
 
 ## Procedure
 
-1. **Existence check** — Verify `.sfs-local/scripts/sfs-dispatch.sh` and
-   `.sfs-local/scripts/sfs-<first-arg>.sh` exist and are executable. If
-   missing, tell the user which script is missing (1 line) and stop.
-   On Windows PowerShell, `.sfs-local/scripts/sfs.ps1 <command> [args]` is the
-   wrapper entry point; it requires Git Bash. WSL users should invoke the bash
-   adapter from inside the WSL shell.
+1. **Existence check** — Verify `sfs` is available (`command -v sfs`). If
+   missing, tell the user in 1 line and stop. In vendored layout only,
+   `.sfs-local/scripts/sfs-dispatch.sh` is an acceptable fallback.
 
 2. **Quote args safely** — Re-quote `<remaining args>` for the shell. Reject
    any argument containing a newline or NUL byte by reporting `unknown arg`,
@@ -129,8 +134,11 @@ not create a new verdict in the current runtime.
    via the documented flow below:
    - `brainstorm` → Brainstorm CEO Refinement
    - `plan` → Plan G1 Refinement
+   - `implement` → Implementation Execution
    - `decision` → Decision ADR Refinement
    - `retro` → Retro G5 Refinement
+   - `commit` → stop after adapter output. Do not add files or create a second
+     commit outside the adapter result.
   - `review` → Review CPO Handling. Use adapter stdout as metadata, read the
     recorded result path when present, then render a localized Solon report
     from recorded adapter/executor evidence only. Do not echo raw result bodies.
@@ -187,8 +195,33 @@ and stdout has been shown verbatim:
 5. Ask up to 3 questions only if critical information is still missing.
 6. Do not implement code or run `/sfs review` automatically.
 7. Final response: render a Solon report. Include `plan.md` path in `Files`,
-   question count in `Questions`, and `Next: /sfs review --gate G1 --executor codex --generator claude`
+   question count in `Questions`, and `Next: /sfs review --gate G1 ... then /sfs implement "<first code slice>"`
    when ready; otherwise `Next: answer questions, then /sfs plan`.
+
+## Implementation Execution
+
+`/sfs implement` is the command that turns plan into code. It is never
+artifact-only in AI runtimes. After the bash adapter succeeds and stdout has
+been shown verbatim, continue into actual implementation unless blocked.
+
+1. Resolve `implement.md`, `plan.md`, and `log.md` from adapter stdout. If
+   stdout cannot be parsed, read `.sfs-local/current-sprint` and open those
+   files under `.sfs-local/sprints/<current-sprint>/`.
+2. Read `plan.md`, `implement.md`, `log.md`, and relevant project files. If the
+   requested slice conflicts with the plan, state the conflict and ask before
+   editing.
+3. Apply the AI coding guardrails from `implement.md`: shared design concept,
+   DDD terms, TDD or smallest useful verification loop, and existing codebase
+   regularity.
+4. Implement the smallest coherent code slice. Prefer test-first when a usable
+   test harness exists; otherwise run the smallest practical smoke check and
+   record the limitation.
+5. Update `implement.md` §1~§5 and `log.md` with changed files, decisions,
+   tests/commands, result, and review handoff. Set `implement.md` frontmatter
+   `status: ready-for-review` only when code and verification evidence exist.
+6. Run relevant tests/checks. Do not claim success without evidence.
+7. Final response: render a Solon report with actual code files in `Files`,
+   checks in `Actions` or `Steps`, and `Next: /sfs review --gate G4` when ready.
 
 ## Decision ADR Refinement
 
@@ -243,7 +276,7 @@ Print the following 3-line usage and stop:
 
 ```
 Usage: /sfs <command> [args]
-Commands: status, start, guide, auth, brainstorm, plan, review, decision, retro, loop
+Commands: status, start, guide, auth, brainstorm, plan, implement, review, decision, retro, commit, loop
 Help: bash .sfs-local/scripts/sfs-<command>.sh --help
 ```
 
@@ -252,6 +285,10 @@ Help: bash .sfs-local/scripts/sfs-<command>.sh --help
 - `/sfs retro --close` triggers an auto-commit. In AI runtimes, refine
   `retro.md` before running the close adapter, and only when the user explicitly
   requested close.
+- `/sfs commit apply ...` creates a local git commit. Run it only when the
+  user explicitly requested commit grouping/apply. It prints branch preflight,
+  auto-generates a Git Flow-aware Conventional Commit message. Branch push/main
+  merge/main push are handled by the AI runtime Git Flow lifecycle.
 - Do not run wildcard `git push origin *`. Exact branch/main push is allowed
   when it is part of the Git Flow lifecycle and no conflict/auth/protection
   blocker is present.

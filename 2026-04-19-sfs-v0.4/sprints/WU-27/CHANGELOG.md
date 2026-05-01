@@ -101,6 +101,13 @@ parent_file: 2026-04-19-sfs-v0.4/sprints/WU-27.md
 - **review gate self-application 2번째 사례**: PLANNER PASS + EVALUATOR PASS-with-conditions + 사용자 'α 자율진행 승인ㄱㄱ' final approval + 진행 중 D′ 추가 결정 + 6.8.1 audit 후 escalation briefing.
 - **§1.5 push 절대 금지** + **§1.5' commit auto-OK** (사용자 mac terminal manual commit 영역, Cowork sandbox 안 host repo .git mutate 0).
 
+## v1.0-rc3 — 2026-05-01T10:40+09:00 (Codex/Claude queue 병렬 dogfooding 운영 보정)
+
+- 사용자 결정: `loop` 는 앞으로 기본적으로 한쪽 런타임에서만 길게 돌린다. Codex/Claude/Cowork 중 어느 쪽이 효율적인지는 작업 성격별로 AI 가 판단한다.
+- 배경: Codex 와 Claude 가 같은 backlog 를 동시에 조금씩 claim 하면 queue 의 dependency/files_scope guard 는 정상 동작하지만, 실제 진행 체감은 의존성 대기와 중복 pending/claimed 상태 때문에 떨어질 수 있음.
+- `CLAUDE.md §1.21` 에 `/sfs loop` single-runner 기본 원칙 추가.
+- `sfs-loop-multi-worker.md §6.0` 에 multi-worker 기능은 유지하되 운영 기본값은 single-runner, 병렬은 coordinator + disjoint scope + dependency-free 예외로 한정한다고 명시.
+
 ## v0.6~ (예약, WU-27 close + 0.5.0-mvp release cut 시 entry 추가)
 
 - v0.6: WU-27 frontmatter sub_task 6.8 narrative 추가 + sprints/_INDEX 이동 + status `done` 유지
