@@ -20,21 +20,15 @@ Before planning or editing, read:
 
 When the user asks about agent/model settings, first inspect
 `.sfs-local/model-profiles.yaml`. If it is missing, fallback, `selected_runtime:
-current` with `selected_policy: current_model`, or `status: review_required`,
-do not describe the profile as configured. Say it is an unconfirmed
-current-model fallback and ask which policy to apply. If
-`status: selected_at_install` is paired with a concrete runtime/policy, treat
-it as configured even when older install files have blank `confirmed_by`; if
-`status: confirmed` is used, expect confirmation metadata to be present.
-Explain what the question means: it chooses which model family Solon should use
-for design/review agents, implementation workers, and simple helpers. Tell the
-user that they can safely skip it now; skipping keeps `current_model` fallback
-and will be asked again on a future upgrade or agent-setting question. Default
-choices: Claude recommended (Opus 4.7 for design/review, Sonnet 4.6 for
-implementation, Haiku for helpers), skip now / keep current_model, Codex
-recommended (GPT-5.5 high/medium + mini/low), Gemini recommended
-(high/balanced/flash tiers), all_high, or custom. In a pure terminal, skip now /
-current_model is the safest default. If the user already states the desired
+current`, `selected_policy: current_model`, or unconfirmed, do not describe the
+profile as configured. Say it is an unconfirmed current-model fallback and ask
+which policy to apply. Explain what the question means: it chooses which model
+family Solon should use for design/review agents, implementation workers, and
+simple helpers. Tell the user that they can safely skip it now; skipping keeps
+`current_model` fallback and will be asked again on a future upgrade or
+agent-setting question. Default choices: Claude recommended (Opus 4.7 for
+design/review, Sonnet 4.6 for implementation, Haiku for helpers), skip now /
+keep current_model, all_high, or custom. If the user already states the desired
 mapping, confirm it and update the model profile.
 
 ## SFS commands — bash adapter SSoT
@@ -51,7 +45,7 @@ Claude Code 의 native slash 진입점은 `.claude/commands/sfs.md` 가 자동 i
 | `/sfs start <goal> [--id <sprint-id>] [--force]` | `sfs start <goal> [--id <sprint-id>] [--force]` |
 | `/sfs guide [--path|--print]` | `sfs guide [--path|--print]` |
 | `/sfs auth status|check|login|probe [--executor <tool>]` | `sfs auth status|check|login|probe [--executor <tool>]` |
-| `/sfs profile [--prompt-only|--apply]` | `sfs profile [--prompt-only|--apply]`; SFS.md 프로젝트 개요만 좁게 감지/보정 |
+| `/sfs adopt [--id legacy-baseline] [--apply]` | `sfs adopt [--id legacy-baseline] [--apply]`; legacy 프로젝트를 report-first baseline 으로 인계. 문서 과잉/문서 0 양쪽 모두 raw scan 은 archive, visible 은 `report.md` + `retro.md` |
 | `/sfs brainstorm [text|--stdin]` | `sfs brainstorm [text|--stdin]` raw capture 후 Claude 가 Solon CEO 로 §1~§7 정리 |
 | `/sfs plan` | `sfs plan` 후 Claude 가 `brainstorm.md` 기반 G1 plan + CTO/CPO contract 작성 |
 | `/sfs implement [work slice|--stdin]` | `sfs implement [work slice|--stdin]` 후 Claude 가 `plan.md` 기반 실제 코드 변경 + 테스트/스모크 evidence 작성 |
@@ -68,19 +62,11 @@ stdout / stderr / exit code 는 verbatim 보고한다 (paraphrase 금지).
 
 명령 모드는 고정이다:
 - **Bash-only**: `status`, `start`, `guide`, `auth`, `upgrade`, `update`, `version`, `loop`.
-- **Narrow hybrid**: `profile` — adapter stdout 의 허용 파일만 읽고 `SFS.md` `## 프로젝트 개요` 섹션만 수정한다.
-- **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`.
+- **Always hybrid**: `adopt`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`.
 - **Conditional hybrid**: `tidy` — adapter apply 후 report.md 를 archive source 기반으로 정제한다.
 - **Adapter-run**: `review` — 기본적으로 bash adapter 가 선택된 CPO executor bridge 를 실행하고 stdout 에는 verdict/output path 메타데이터만 보여준다. Claude 는 result 원문을 그대로 덤프하지 않고 사용자 언어로 요약/action report 를 렌더링한다. `--prompt-only` 일 때도 현재 Claude runtime 이 대신 verdict 를 작성하지 않고 prompt handoff 로 멈춘다.
 
 부족한 정보가 있으면 1~3개 질문만 남기고, 다음 gate 를 자동 실행하지 않는다.
-
-### `/sfs profile` — project overview only
-
-`/sfs profile` 은 SFS.md 상단 프로젝트 개요 전용 명령이다. adapter stdout 을 먼저 그대로
-보여준 뒤, `allowed_read` 에 나온 파일 중 존재하는 것만 읽고 `SFS.md` 의 `## 프로젝트 개요`
-섹션만 갱신한다. sprint 문서, source 전체, git history, 관련 없는 docs 는 읽지 않는다.
-`--apply` 는 shell-only quick apply 이므로 adapter 결과만 확인하면 된다.
 
 ### `/sfs implement` — implementation execution
 

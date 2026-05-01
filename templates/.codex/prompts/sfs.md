@@ -27,16 +27,19 @@ subcommand's arguments.
 
 ## Behavior
 
-If the first argument is `status`, `start`, `guide`, `auth`, `brainstorm`, `plan`, `implement`, `review`, `decision`,
-`retro`, `commit`, or `loop`, dispatch to the `sfs` runtime command first. In vendored
+If the first argument is `status`, `start`, `guide`, `auth`, `adopt`, `upgrade`, `update`, `version`, `brainstorm`, `plan`, `implement`, `review`, `decision`,
+`report`, `tidy`, `retro`, `commit`, or `loop`, dispatch to the `sfs` runtime command first. In vendored
 layout only, `.sfs-local/scripts/sfs-dispatch.sh` is an acceptable fallback.
 
 Command modes:
-- **Bash-only**: `status`, `start`, `guide`, `auth`, `commit`, `loop`. Stop after
+- **Bash-first**: `status`, `start`, `guide`, `auth`, `upgrade`, `update`, `version`, `commit`, `loop`. Print
   verbatim adapter output. For `commit`, the adapter prints branch preflight,
   groups files, auto-generates a Git Flow-aware Conventional Commit message,
   then the AI runtime handles branch push/main merge/main push.
-- **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `retro`. Run the adapter,
+- **Conditional hybrid**: `tidy`. Run the adapter first. If it created or
+  touched `report.md`, read archived workbench/tmp sources and refine the
+  report before answering.
+- **Always hybrid**: `adopt`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`. Run the adapter,
   then perform the documented file refinement.
 - **Adapter-run**: `review`. The bash adapter executes the selected CPO
   executor bridge by default. Stop after adapter output. If `--prompt-only` is
@@ -49,7 +52,7 @@ not run the close adapter first. Run `retro` without `--close`, refine
 
 ## Solon Report Output Rule
 
-For hybrid commands (`brainstorm`, `plan`, `implement`, `decision`, `retro`) and adapter-run
+For hybrid commands (`adopt`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`) and adapter-run
 `review`, the final answer must be a **Solon report**, not a plain bullet list
 such as `plan.md refined: ...`. Put the whole report in a fenced `text` block.
 Render the report in the user's visible language (for example, Korean for a

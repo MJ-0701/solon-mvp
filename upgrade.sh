@@ -11,7 +11,7 @@
 #   1. consumer 쪽 .sfs-local/VERSION 읽어서 installed_version 파악
 #   2. 로컬 clone 기반이면 clone 이 GitHub main 보다 뒤처졌는지 먼저 확인
 #   3. distribution 쪽 최신 VERSION 조회
-#   4. 같아도 project adapter/docs refresh, 다르면 업그레이드 계획 + 대화형 파일별 처리
+#   4. 같으면 종료, 다르면 업그레이드 계획 + 대화형 파일별 처리
 #
 # 원칙:
 #   - .sfs-local/sprints/*, .sfs-local/decisions/*, .sfs-local/events.jsonl 은 절대 덮어쓰지 않음
@@ -28,15 +28,11 @@ usage() {
 Usage: sfs upgrade [--yes]
 
 Options:
-  -y, --yes   안전 기본 정책으로 non-interactive upgrade 실행.
-              agent/model profile 질문은 건너뛰고 current_model fallback 을 유지
+  -y, --yes   안전 기본 정책으로 non-interactive upgrade 실행
   -h, --help  도움말 출력
 
 Environment:
-  SFS_MODEL_RUNTIME   current|claude|codex|gemini|custom
-  SFS_MODEL_POLICY    current_model|solon_recommended|all_high|custom
   SFS_MODEL_PROFILE_PROMPT=0  agent/model fallback 질문을 이번 upgrade 에서 숨김
-  SFS_PROJECT_PROFILE_PROMPT=0  프로젝트 개요 미감지 필드 질문을 이번 upgrade 에서 숨김
 EOF
 }
 
@@ -115,248 +111,33 @@ sed_inplace() {
   fi
 }
 
-sed_escape() {
-  printf '%s' "$1" | sed 's/[&|\\]/\\&/g'
-}
-
-pkg_has() {
-  local name="$1"
-  [ -f "$TARGET/package.json" ] || return 1
-  grep -Eq "\"${name}\"[[:space:]]*:" "$TARGET/package.json" 2>/dev/null
-}
-
-append_project_environment() {
-  local part="$1"
-  [ -n "$part" ] || return 0
-  case " + $PROJECT_ENVIRONMENT + " in
-    *" + $part + "*) return 0 ;;
-  esac
-  if [ -z "$PROJECT_ENVIRONMENT" ]; then
-    PROJECT_ENVIRONMENT="$part"
-  else
-    PROJECT_ENVIRONMENT="$PROJECT_ENVIRONMENT + $part"
-  fi
-}
-
-detect_project_profile() {
-  PROJECT_TYPE="<PROJECT-TYPE>"
-  PROJECT_STAGE="Solon 운영 도입 초기"
-  PROJECT_ENVIRONMENT=""
-  PROJECT_DATA=""
-  PROJECT_OUTPUT="<PROJECT-OUTPUT>"
-  PROJECT_DELIVERY=""
-
-  if [ -f "$TARGET/package.json" ]; then
-    PROJECT_TYPE="소프트웨어/웹 제품"
-    append_project_environment "Node.js"
-    if [ -f "$TARGET/tsconfig.json" ] || pkg_has typescript; then
-      append_project_environment "TypeScript"
-    fi
-    if pkg_has next || [ -f "$TARGET/next.config.js" ] || [ -f "$TARGET/next.config.mjs" ] || [ -f "$TARGET/next.config.ts" ]; then
-      append_project_environment "Next.js"
-      PROJECT_OUTPUT="웹 앱"
-    elif pkg_has vite || [ -f "$TARGET/vite.config.js" ] || [ -f "$TARGET/vite.config.ts" ]; then
-      append_project_environment "Vite"
-      PROJECT_OUTPUT="웹 앱"
-    elif pkg_has react; then
-      append_project_environment "React"
-      PROJECT_OUTPUT="웹 앱"
-    elif pkg_has vue; then
-      append_project_environment "Vue"
-      PROJECT_OUTPUT="웹 앱"
-    elif pkg_has svelte; then
-      append_project_environment "Svelte"
-      PROJECT_OUTPUT="웹 앱"
-    else
-      PROJECT_OUTPUT="Node.js 앱"
-    fi
-    if pkg_has tailwindcss || [ -f "$TARGET/tailwind.config.js" ] || [ -f "$TARGET/tailwind.config.ts" ]; then
-      append_project_environment "Tailwind CSS"
-    fi
-    if pkg_has prisma || [ -f "$TARGET/prisma/schema.prisma" ]; then
-      append_project_environment "Prisma"
-      PROJECT_DATA="Prisma"
-    elif pkg_has drizzle-orm || [ -f "$TARGET/drizzle.config.ts" ] || [ -f "$TARGET/drizzle.config.js" ]; then
-      append_project_environment "Drizzle"
-      PROJECT_DATA="Drizzle"
-    fi
-  fi
-
-  if [ -f "$TARGET/prisma/schema.prisma" ]; then
-    if grep -Eq 'provider[[:space:]]*=[[:space:]]*"postgresql"' "$TARGET/prisma/schema.prisma" 2>/dev/null; then
-      append_project_environment "Postgres"; PROJECT_DATA="${PROJECT_DATA:+$PROJECT_DATA + }Postgres"
-    elif grep -Eq 'provider[[:space:]]*=[[:space:]]*"mysql"' "$TARGET/prisma/schema.prisma" 2>/dev/null; then
-      append_project_environment "MySQL"; PROJECT_DATA="${PROJECT_DATA:+$PROJECT_DATA + }MySQL"
-    elif grep -Eq 'provider[[:space:]]*=[[:space:]]*"sqlite"' "$TARGET/prisma/schema.prisma" 2>/dev/null; then
-      append_project_environment "SQLite"; PROJECT_DATA="${PROJECT_DATA:+$PROJECT_DATA + }SQLite"
-    elif grep -Eq 'provider[[:space:]]*=[[:space:]]*"mongodb"' "$TARGET/prisma/schema.prisma" 2>/dev/null; then
-      append_project_environment "MongoDB"; PROJECT_DATA="${PROJECT_DATA:+$PROJECT_DATA + }MongoDB"
-    fi
-  fi
-
-  if [ -f "$TARGET/pyproject.toml" ] || [ -f "$TARGET/requirements.txt" ]; then
-    [ "$PROJECT_TYPE" = "<PROJECT-TYPE>" ] && PROJECT_TYPE="소프트웨어/Python 프로젝트"
-    append_project_environment "Python"
-    PROJECT_OUTPUT="${PROJECT_OUTPUT#<PROJECT-OUTPUT>}"
-    [ -z "$PROJECT_OUTPUT" ] && PROJECT_OUTPUT="Python 앱"
-    if grep -Eiq 'fastapi' "$TARGET/pyproject.toml" "$TARGET/requirements.txt" 2>/dev/null; then
-      append_project_environment "FastAPI"
-      PROJECT_OUTPUT="API 서비스"
-    elif grep -Eiq 'django' "$TARGET/pyproject.toml" "$TARGET/requirements.txt" 2>/dev/null; then
-      append_project_environment "Django"
-      PROJECT_OUTPUT="웹 앱"
-    elif grep -Eiq 'flask' "$TARGET/pyproject.toml" "$TARGET/requirements.txt" 2>/dev/null; then
-      append_project_environment "Flask"
-      PROJECT_OUTPUT="웹/API 앱"
-    elif grep -Eiq 'streamlit' "$TARGET/pyproject.toml" "$TARGET/requirements.txt" 2>/dev/null; then
-      append_project_environment "Streamlit"
-      PROJECT_OUTPUT="데이터 앱"
-    fi
-  fi
-
-  if [ -f "$TARGET/Cargo.toml" ]; then
-    [ "$PROJECT_TYPE" = "<PROJECT-TYPE>" ] && PROJECT_TYPE="소프트웨어/Rust 프로젝트"
-    append_project_environment "Rust"
-    [ "$PROJECT_OUTPUT" = "<PROJECT-OUTPUT>" ] && PROJECT_OUTPUT="Rust 앱"
-  fi
-  if [ -f "$TARGET/go.mod" ]; then
-    [ "$PROJECT_TYPE" = "<PROJECT-TYPE>" ] && PROJECT_TYPE="소프트웨어/Go 프로젝트"
-    append_project_environment "Go"
-    [ "$PROJECT_OUTPUT" = "<PROJECT-OUTPUT>" ] && PROJECT_OUTPUT="Go 앱"
-  fi
-  if [ -f "$TARGET/Gemfile" ]; then
-    [ "$PROJECT_TYPE" = "<PROJECT-TYPE>" ] && PROJECT_TYPE="소프트웨어/Ruby 프로젝트"
-    append_project_environment "Ruby"
-    [ "$PROJECT_OUTPUT" = "<PROJECT-OUTPUT>" ] && PROJECT_OUTPUT="Ruby 앱"
-  fi
-  if [ -f "$TARGET/pom.xml" ] || [ -f "$TARGET/build.gradle" ] || [ -f "$TARGET/build.gradle.kts" ]; then
-    [ "$PROJECT_TYPE" = "<PROJECT-TYPE>" ] && PROJECT_TYPE="소프트웨어/JVM 프로젝트"
-    append_project_environment "JVM"
-    [ "$PROJECT_OUTPUT" = "<PROJECT-OUTPUT>" ] && PROJECT_OUTPUT="JVM 앱"
-  fi
-
-  if [ -f "$TARGET/vercel.json" ]; then
-    PROJECT_DELIVERY="Vercel"
-  elif [ -f "$TARGET/netlify.toml" ]; then
-    PROJECT_DELIVERY="Netlify"
-  elif [ -f "$TARGET/wrangler.toml" ]; then
-    PROJECT_DELIVERY="Cloudflare"
-  elif [ -f "$TARGET/firebase.json" ]; then
-    PROJECT_DELIVERY="Firebase"
-  elif [ -f "$TARGET/Dockerfile" ] || [ -f "$TARGET/docker-compose.yml" ] || [ -f "$TARGET/compose.yml" ]; then
-    PROJECT_DELIVERY="Docker"
-  fi
-
-  if [ -d "$TARGET/docs" ] || ls "$TARGET"/*.md >/dev/null 2>&1; then
-    if [ "$PROJECT_TYPE" = "<PROJECT-TYPE>" ]; then
-      PROJECT_TYPE="문서/지식 작업공간"
-      append_project_environment "Markdown/Git 작업공간"
-      PROJECT_OUTPUT="문서/운영 기록"
-      PROJECT_DELIVERY="${PROJECT_DELIVERY:-Git 또는 문서 공유}"
-    fi
-  fi
-
-  [ -n "$PROJECT_ENVIRONMENT" ] || PROJECT_ENVIRONMENT="<PROJECT-ENVIRONMENT>"
-  [ -n "$PROJECT_DATA" ] || PROJECT_DATA="<PROJECT-DATA>"
-  [ -n "$PROJECT_DELIVERY" ] || PROJECT_DELIVERY="<PROJECT-DELIVERY>"
-}
-
-profile_placeholder() {
-  case "${1:-}" in
-    ""|"<"*) return 0 ;;
-    *) return 1 ;;
-  esac
-}
-
-fill_missing_project_profile_interactive() {
-  [ "$ASSUME_YES" -eq 0 ] || return 0
-  [ "${SFS_PROJECT_PROFILE_PROMPT:-1}" != "0" ] || return 0
-
-  if profile_placeholder "$PROJECT_TYPE" \
-    || profile_placeholder "$PROJECT_ENVIRONMENT" \
-    || profile_placeholder "$PROJECT_OUTPUT" \
-    || profile_placeholder "$PROJECT_DELIVERY"; then
-    info ""
-    info "Project profile setup..."
-    cat <<'EOF'
-Solon 이 SFS.md 프로젝트 개요를 감지값으로 채웁니다.
-비워두면 placeholder 를 유지합니다. 나중에 AI runtime 에서 `sfs profile` 로 이 작업만 다시 맡길 수 있습니다.
-EOF
-  fi
-
-  local answer
-  if profile_placeholder "$PROJECT_TYPE"; then
-    answer=$(prompt_always "프로젝트 유형? (예: 웹 제품 / 문서 운영 / 내부 자동화)" "")
-    [ -n "$answer" ] && PROJECT_TYPE="$answer"
-  fi
-  if profile_placeholder "$PROJECT_ENVIRONMENT"; then
-    answer=$(prompt_always "환경? (기술 stack, 문서 도구, 협업 환경 등)" "")
-    [ -n "$answer" ] && PROJECT_ENVIRONMENT="$answer"
-  fi
-  if profile_placeholder "$PROJECT_OUTPUT"; then
-    answer=$(prompt_always "핵심 산출물? (예: 웹 앱 / API / 문서 / playbook)" "")
-    [ -n "$answer" ] && PROJECT_OUTPUT="$answer"
-  fi
-  if profile_placeholder "$PROJECT_DELIVERY"; then
-    answer=$(prompt_always "공유/운영 방식? (예: Vercel / GitHub / 로컬 문서)" "")
-    [ -n "$answer" ] && PROJECT_DELIVERY="$answer"
-  fi
-}
-
-prepare_project_profile_replacements() {
-  PROJECT_NAME_REPL=$(sed_escape "$PROJECT_NAME")
-  PROJECT_TYPE_REPL=$(sed_escape "$PROJECT_TYPE")
-  PROJECT_STAGE_REPL=$(sed_escape "$PROJECT_STAGE")
-  PROJECT_ENVIRONMENT_REPL=$(sed_escape "$PROJECT_ENVIRONMENT")
-  PROJECT_DATA_REPL=$(sed_escape "$PROJECT_DATA")
-  PROJECT_OUTPUT_REPL=$(sed_escape "$PROJECT_OUTPUT")
-  PROJECT_DELIVERY_REPL=$(sed_escape "$PROJECT_DELIVERY")
-}
-
 create_default_model_profile() {
   local runtime="${1:-current}" policy="${2:-current_model}" status="${3:-current_model_fallback}"
   [ -f "$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml" ] || return 1
 
-  local today project_name project_name_repl
+  local today project_name
   today=$(date +%Y-%m-%d)
   project_name="$(basename "$TARGET")"
-  project_name_repl="$(sed_escape "$project_name")"
   mkdir -p "$TARGET/.sfs-local"
   cp "$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml" "$TARGET/.sfs-local/model-profiles.yaml"
   sed_inplace \
     -e "s|<DATE>|$today|g" \
     -e "s|<SOLON-VERSION>|$NEW_VER|g" \
-    -e "s|<PROJECT-NAME>|$project_name_repl|g" \
+    -e "s|<PROJECT-NAME>|$project_name|g" \
     -e "s|<DEFAULT-RUNTIME>|$runtime|g" \
     -e "s|<MODEL-POLICY>|$policy|g" \
     -e "s|<MODEL-PROFILE-STATUS>|$status|g" \
-    -e "s|<MODEL-CONFIRMED-BY>||g" \
-    -e "s|<MODEL-CONFIRMED-AT>||g" \
     "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null || true
 }
 
 model_profile_needs_prompt() {
   local file="$TARGET/.sfs-local/model-profiles.yaml"
   [ -f "$file" ] || return 0
-
-  local status runtime policy
-  status=$(sed -nE 's/^[[:space:]]*status:[[:space:]]*"?([^"#[:space:]]+)"?.*/\1/p' "$file" 2>/dev/null | head -1)
-  runtime=$(sed -nE 's/^[[:space:]]*selected_runtime:[[:space:]]*"?([^"#[:space:]]+)"?.*/\1/p' "$file" 2>/dev/null | head -1)
-  policy=$(sed -nE 's/^[[:space:]]*selected_policy:[[:space:]]*"?([^"#[:space:]]+)"?.*/\1/p' "$file" 2>/dev/null | head -1)
-
   grep -Eq '^[[:space:]]*status:[[:space:]]*"?current_model_fallback"?' "$file" 2>/dev/null && return 0
   grep -Eq '^[[:space:]]*status:[[:space:]]*"?review_required"?' "$file" 2>/dev/null && return 0
   grep -Eq '^[[:space:]]*status:[[:space:]]*"?unset"?' "$file" 2>/dev/null && return 0
-  [ "${runtime:-unset}" = "unset" ] && return 0
-  [ "${policy:-current_model}" = "current_model" ] && return 0
-  if [ "$runtime" = "current" ] && [ "$policy" = "current_model" ]; then
-    return 0
-  fi
-  case "$status" in
-    selected_at_install|confirmed)
-      return 1
-      ;;
-  esac
+  grep -Eq '^[[:space:]]*selected_runtime:[[:space:]]*"?current"?' "$file" 2>/dev/null && return 0
+  grep -Eq '^[[:space:]]*selected_policy:[[:space:]]*"?current_model"?' "$file" 2>/dev/null && return 0
   grep -Eq '^[[:space:]]*confirmed_by:[[:space:]]*"?[[:space:]]*"?$' "$file" 2>/dev/null && return 0
   return 1
 }
@@ -369,22 +150,18 @@ Agent model profile:
   예: 설계/판단 agent 는 더 강한 모델, 코드 구현 agent 는 표준 모델, 단순 정리 helper 는 가벼운 모델.
 
   지금 꼭 정하지 않아도 됩니다.
-  건너뛰면 current_model fallback 을 유지하고, 현재 실행 환경에서 사용자가 선택한 모델을
-  그대로 씁니다. 순수 터미널에서 실행 중이면 2번이 가장 안전합니다. 나중에 Claude/Codex/Gemini
-  중 실제로 쓸 runtime 기준으로 다시 설정할 수 있고, 다음 upgrade 때도 다시 안내합니다.
+  건너뛰면 current_model fallback 을 유지하고, 현재 Claude/Codex/Gemini 에서 사용자가
+  선택한 모델을 그대로 씁니다. 나중에 다시 설정할 수 있고, 다음 upgrade 때도 다시 안내합니다.
 
   선택지:
-    1. Claude 권장: 설계/평가 Opus 4.7, 구현 Sonnet 4.6, helper Haiku (가장 흔한 기본값)
+    1. Claude 권장: 설계/평가 Opus 4.7, 구현 Sonnet 4.6, helper Haiku
     2. 지금 설정 안 함: current_model fallback 유지 (처음이면 이걸 골라도 안전)
-    3. Codex 권장: 설계/평가 GPT-5.5 high reasoning, 구현 GPT-5.5 medium, helper mini/low
-    4. Gemini 권장: 설계/평가 high reasoning, 구현 balanced, helper flash/economy
-    5. all_high: 모든 agent/helper 를 high-end 로 설정 (품질 우선, 비용/지연 증가 가능)
-    6. custom/manual: 직접 모델 profile 작성
+    3. all_high: 모든 agent/helper 를 high-end 로 설정 (품질 우선, 비용/지연 증가 가능)
+    4. custom/manual: 직접 모델 profile 작성
 
-  순수 터미널이면 번호만 직접 입력하면 됩니다.
-  Claude/Codex/Gemini 같은 AI runtime 이 대신 실행 중이면 이 설명과 선택지를 사용자에게 보여주고
-  번호를 받아 적용하세요. 사용자가 "지금 설정 안 함" 이라고 하면 current_model fallback 으로 두고
-  계속 진행하면 됩니다.
+  Codex/Claude 가 대신 실행 중인 경우:
+    위 설명과 선택지를 사용자에게 보여주고 번호를 물어보세요.
+    사용자가 "지금 설정 안 함" 이라고 하면 current_model fallback 으로 두고 계속 진행하면 됩니다.
 EOF
 }
 
@@ -405,54 +182,11 @@ set_model_profile_fields() {
 }
 
 maybe_prompt_model_profile() {
-  if [ -n "${SFS_MODEL_RUNTIME:-}" ] || [ -n "${SFS_MODEL_POLICY:-}" ]; then
-    local env_runtime="${SFS_MODEL_RUNTIME:-current}"
-    local env_policy="${SFS_MODEL_POLICY:-}"
-    local env_status="confirmed"
-    local now
-
-    if [ -z "$env_policy" ]; then
-      if [ "$env_runtime" = "current" ]; then
-        env_policy="current_model"
-      else
-        env_policy="solon_recommended"
-      fi
-    fi
-
-    case "$env_runtime" in
-      current|claude|codex|gemini|custom) ;;
-      *) warn "알 수 없는 SFS_MODEL_RUNTIME='$env_runtime' — current 로 기록"; env_runtime="current" ;;
-    esac
-    case "$env_policy" in
-      current_model|solon_recommended|all_high|custom) ;;
-      recommended) env_policy="solon_recommended" ;;
-      all-high) env_policy="all_high" ;;
-      skip|none|"") env_policy="current_model" ;;
-      *) warn "알 수 없는 SFS_MODEL_POLICY='$env_policy' — current_model 로 기록"; env_policy="current_model" ;;
-    esac
-
-    now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-    if [ "$env_policy" = "current_model" ]; then
-      env_status="current_model_fallback"
-      set_model_profile_fields "$env_runtime" "$env_policy" "$env_status" "" ""
-    else
-      set_model_profile_fields "$env_runtime" "$env_policy" "$env_status" "sfs upgrade env" "$now"
-    fi
-    ok "agent model profile env 적용: runtime=$env_runtime, policy=$env_policy, status=$env_status"
-    return 0
-  fi
-
   model_profile_needs_prompt || return 0
 
   if [ "${SFS_MODEL_PROFILE_PROMPT:-1}" = "0" ]; then
     warn "agent model profile fallback 상태 — SFS_MODEL_PROFILE_PROMPT=0 이라 이번 질문은 건너뜀"
     warn "    current_model fallback 유지. 다음 upgrade 에서 다시 질문됩니다."
-    return 0
-  fi
-
-  if [ "$ASSUME_YES" -eq 1 ]; then
-    warn "--yes 활성화 — agent model profile 질문은 건너뛰고 current_model fallback 을 유지"
-    warn "    나중에 sfs upgrade 또는 .sfs-local/model-profiles.yaml 편집으로 Claude/Codex/Gemini profile 을 확정할 수 있습니다."
     return 0
   fi
 
@@ -463,7 +197,7 @@ maybe_prompt_model_profile() {
 
   print_model_profile_question
   local choice runtime now
-  choice="$(prompt_always "agent model profile 선택? (1/2/3/4/5/6, 처음이면 2 권장)" "2")"
+  choice="$(prompt_always "agent model profile 선택? (1/2/3/4, 처음이면 2 권장)" "2")"
   now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
   case "$choice" in
@@ -476,23 +210,15 @@ maybe_prompt_model_profile() {
       ok "agent model profile 미확정 유지: current_model fallback (다음 upgrade 때 다시 질문)"
       ;;
     3)
-      set_model_profile_fields "codex" "solon_recommended" "confirmed" "sfs upgrade" "$now"
-      ok "agent model profile 확정: Codex 권장 (GPT-5.5 high/medium + mini/low)"
-      ;;
-    4)
-      set_model_profile_fields "gemini" "solon_recommended" "confirmed" "sfs upgrade" "$now"
-      ok "agent model profile 확정: Gemini 권장 (high/balanced/flash tiers)"
-      ;;
-    5)
-      runtime="$(prompt_always "all_high 를 적용할 runtime? (current/claude/codex/gemini/custom)" "current")"
+      runtime="$(prompt_always "all_high 를 적용할 runtime? (claude/codex/gemini/custom/current)" "claude")"
       case "$runtime" in
-        current|claude|codex|gemini|custom) ;;
+        claude|codex|gemini|custom|current) ;;
         *) warn "알 수 없는 runtime='$runtime' — current 로 기록"; runtime="current" ;;
       esac
       set_model_profile_fields "$runtime" "all_high" "confirmed" "sfs upgrade" "$now"
       ok "agent model profile 확정: runtime=$runtime, policy=all_high"
       ;;
-    6)
+    4)
       set_model_profile_fields "custom" "custom" "review_required" "" ""
       warn "custom/manual 선택 — .sfs-local/model-profiles.yaml 을 직접 채우면 됩니다."
       warn "    status=review_required 로 남겨 다음 upgrade/사용자 발화 때 다시 안내됩니다."
@@ -533,10 +259,6 @@ else
 fi
 
 TARGET="$(pwd)"
-PROJECT_NAME="$(basename "$TARGET")"
-detect_project_profile
-fill_missing_project_profile_interactive
-prepare_project_profile_replacements
 
 check_local_source_freshness() {
   # Local clone mode means the user's product distribution source is the clone
@@ -623,6 +345,7 @@ CUR_VER=$(grep '^solon_mvp_version:' "$TARGET/.sfs-local/VERSION" | awk '{print 
 INSTALLED_AT=$(grep '^installed_at:' "$TARGET/.sfs-local/VERSION" | awk '{print $2}')
 INSTALL_LAYOUT=$(grep '^install_layout:' "$TARGET/.sfs-local/VERSION" 2>/dev/null | awk '{print $2}')
 INSTALL_LAYOUT="${INSTALL_LAYOUT:-vendored}"
+
 cat <<EOF
 
 ${C_BOLD}=== Solon Product Upgrade ===${C_RESET}
@@ -634,7 +357,6 @@ layout:      $INSTALL_LAYOUT
 
 EOF
 
-SAME_VERSION=0
 if [ "$CUR_VER" = "$NEW_VER" ]; then
   MODEL_PROFILE_REPAIRED=0
   if [ ! -f "$TARGET/.sfs-local/model-profiles.yaml" ] \
@@ -648,8 +370,12 @@ if [ "$CUR_VER" = "$NEW_VER" ]; then
     || grep -q 'selected_runtime: "unset"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null; then
     warn "agent model profile 이 current_model fallback 상태입니다."
   fi
-  SAME_VERSION=1
-  warn "버전은 같지만 project adapter/docs refresh 를 계속합니다. stale 템플릿과 빈 프로젝트 개요를 보정합니다."
+  maybe_prompt_model_profile
+  ok "이미 최신 버전. 업그레이드 불필요."
+  if [ "$MODEL_PROFILE_REPAIRED" -eq 1 ]; then
+    warn "새 파일을 추가했으니 프로젝트 repo 에서 commit 여부를 확인하세요: .sfs-local/model-profiles.yaml"
+  fi
+  exit 0
 fi
 
 # ============================================================================
@@ -762,7 +488,7 @@ declare -a CHECK_FILES=(
   ".sfs-local/scripts/sfs-start.sh|templates/.sfs-local-template/scripts/sfs-start.sh"
   ".sfs-local/scripts/sfs-guide.sh|templates/.sfs-local-template/scripts/sfs-guide.sh"
   ".sfs-local/scripts/sfs-auth.sh|templates/.sfs-local-template/scripts/sfs-auth.sh"
-  ".sfs-local/scripts/sfs-profile.sh|templates/.sfs-local-template/scripts/sfs-profile.sh"
+  ".sfs-local/scripts/sfs-adopt.sh|templates/.sfs-local-template/scripts/sfs-adopt.sh"
   ".sfs-local/scripts/sfs-brainstorm.sh|templates/.sfs-local-template/scripts/sfs-brainstorm.sh"
   ".sfs-local/scripts/sfs-plan.sh|templates/.sfs-local-template/scripts/sfs-plan.sh"
   ".sfs-local/scripts/sfs-implement.sh|templates/.sfs-local-template/scripts/sfs-implement.sh"
@@ -949,7 +675,7 @@ update_file ".sfs-local/scripts/sfs-status.sh"   "templates/.sfs-local-template/
 update_file ".sfs-local/scripts/sfs-start.sh"    "templates/.sfs-local-template/scripts/sfs-start.sh"    "sfs start"    "b"
 update_file ".sfs-local/scripts/sfs-guide.sh"    "templates/.sfs-local-template/scripts/sfs-guide.sh"    "sfs guide"    "b"
 update_file ".sfs-local/scripts/sfs-auth.sh"     "templates/.sfs-local-template/scripts/sfs-auth.sh"     "sfs auth"     "b"
-update_file ".sfs-local/scripts/sfs-profile.sh"  "templates/.sfs-local-template/scripts/sfs-profile.sh"  "sfs profile"  "b"
+update_file ".sfs-local/scripts/sfs-adopt.sh"    "templates/.sfs-local-template/scripts/sfs-adopt.sh"    "sfs adopt (legacy baseline intake)" "b"
 update_file ".sfs-local/scripts/sfs-brainstorm.sh" "templates/.sfs-local-template/scripts/sfs-brainstorm.sh" "sfs brainstorm" "b"
 update_file ".sfs-local/scripts/sfs-plan.sh"     "templates/.sfs-local-template/scripts/sfs-plan.sh"     "sfs plan"     "b"
 update_file ".sfs-local/scripts/sfs-implement.sh" "templates/.sfs-local-template/scripts/sfs-implement.sh" "sfs implement" "b"
@@ -1004,24 +730,14 @@ for auto_file in "$TARGET/SFS.md" "$TARGET/CLAUDE.md" "$TARGET/AGENTS.md" "$TARG
     "${SED_INPLACE[@]}" \
       -e "s|<DATE>|$TODAY|g" \
       -e "s|<SOLON-VERSION>|$NEW_VER|g" \
-      -e "s|<PROJECT-NAME>|$PROJECT_NAME_REPL|g" \
-      -e "s|<PROJECT-TYPE>|$PROJECT_TYPE_REPL|g" \
-      -e "s|<PROJECT-STAGE>|$PROJECT_STAGE_REPL|g" \
-      -e "s|<PROJECT-ENVIRONMENT>|$PROJECT_ENVIRONMENT_REPL|g" \
-      -e "s|<PROJECT-DATA>|$PROJECT_DATA_REPL|g" \
-      -e "s|<PROJECT-OUTPUT>|$PROJECT_OUTPUT_REPL|g" \
-      -e "s|<PROJECT-DELIVERY>|$PROJECT_DELIVERY_REPL|g" \
-      -e "s|<DOMAIN>|$PROJECT_TYPE_REPL|g" \
-      -e "s|<STACK>|$PROJECT_ENVIRONMENT_REPL|g" \
-      -e "s|<DB>|$PROJECT_DATA_REPL|g" \
-      -e "s|<DEPLOY>|$PROJECT_DELIVERY_REPL|g" \
+      -e "s|<PROJECT-NAME>|$PROJECT_NAME|g" \
       -e "s|<DEFAULT-RUNTIME>|$MODEL_RUNTIME|g" \
       -e "s|<MODEL-POLICY>|$MODEL_POLICY|g" \
       -e "s|<MODEL-PROFILE-STATUS>|$MODEL_PROFILE_STATUS|g" \
       "$auto_file" 2>/dev/null || true
   fi
 done
-ok "문서 자동 치환: <DATE>=$TODAY, <SOLON-VERSION>=$NEW_VER, project profile"
+ok "문서 자동 치환: <DATE>=$TODAY, <SOLON-VERSION>=$NEW_VER"
 
 # config.yaml — create when upgrading older installs; preserve user edits.
 if [ ! -f "$TARGET/.sfs-local/config.yaml" ]; then
@@ -1109,24 +825,14 @@ fi
 # 7. 완료
 # ============================================================================
 
-VERSION_SUMMARY="$CUR_VER → $NEW_VER"
-COMMIT_MESSAGE="chore: upgrade solon-product $CUR_VER → $NEW_VER"
-if [ "${SAME_VERSION:-0}" -eq 1 ]; then
-  VERSION_SUMMARY="$NEW_VER (same-version refresh)"
-  COMMIT_MESSAGE="chore: refresh solon-product $NEW_VER"
-fi
-
 cat <<EOF
 
 ${C_BOLD}${C_GREEN}=== 업그레이드 완료 ===${C_RESET}
 
-  $VERSION_SUMMARY
+  $CUR_VER → $NEW_VER
 
 Agent model profile:
   ${MODEL_PROFILE_NOTICE:-설정 파일 유지됨: .sfs-local/model-profiles.yaml}
-
-Project profile:
-  SFS.md 프로젝트 개요를 감지값으로 치환했습니다. 미감지 placeholder 만 남아 있으면 sfs profile 로 좁게 보정하세요.
 
   Solon 권장은 C-Level/review high, worker standard, helper economy 입니다.
   프로젝트가 비용/지연을 감수한다면 worker/helper 도 high-end 모델로 설정해도 됩니다.
@@ -1139,7 +845,7 @@ Project profile:
   ${C_BLUE}        .claude/skills/sfs/SKILL.md .claude/commands/sfs.md \\${C_RESET}
   ${C_BLUE}        .gemini/commands/sfs.toml \\${C_RESET}
   ${C_BLUE}        .agents/skills/sfs/SKILL.md .sfs-local/${C_RESET}
-  ${C_BLUE}git commit -m "$COMMIT_MESSAGE"${C_RESET}
+  ${C_BLUE}git commit -m "chore: upgrade solon-mvp $CUR_VER → $NEW_VER"${C_RESET}
 
 CHANGELOG: https://github.com/${SOLON_REPO}/blob/main/CHANGELOG.md
 

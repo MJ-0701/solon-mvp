@@ -7,8 +7,7 @@
 # Behavior: global sfs runtime 이 command surface 를 normalize 하고 deterministic
 #   bash adapter 로 내려간다. `.sfs-local/scripts/` 는 vendored layout fallback.
 #   user 발화의 첫 token = subcommand → sfs-<subcommand>.sh 실행 + stdout verbatim 출력.
-#   단, profile 은 SFS.md 프로젝트 개요만 좁게 보정하고,
-#   brainstorm/plan/implement/decision/report/retro 는 adapter 후 Gemini 가 문서 refinement/구현을 수행하고,
+#   단, adopt/brainstorm/plan/implement/decision/report/retro 는 adapter 후 Gemini 가 문서 refinement/구현을 수행하고,
 #   tidy 는 report 생성/갱신 시 archive sources 기반 report refinement 를 수행하며,
 #   review 는 기본적으로 adapter 가 선택된 CPO executor bridge 를 실행한다.
 #   paraphrase 금지, 결정성 유지 (Claude Code / Codex / Gemini CLI 동등 1급).
@@ -16,7 +15,7 @@
 # Note: {{args}} 는 Gemini CLI v1 placeholder. 사용자가 입력한 첫 token 이 subcommand,
 #       나머지는 그 subcommand 의 인자로 그대로 전달.
 
-description = "Solon SFS (Solo Founder System) workflow command — bash adapter SSoT; narrow profile refinement; hybrid G0/G1/implement/ADR/report/G5 refinement; adapter-run CPO review"
+description = "Solon SFS (Solo Founder System) workflow command — bash adapter SSoT; hybrid adopt/G0/G1/implement/ADR/report/G5 refinement; adapter-run CPO review"
 
 prompt = """
 You are operating in a project that has Solon SFS installed. SFS means **Solo Founder System**.
@@ -26,19 +25,17 @@ token as the subcommand and the remainder as that subcommand's arguments.
 
 ## Behavior
 
-	If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`profile`**, **`upgrade`**, **`update`**, **`version`**, **`brainstorm`**, **`plan`**, **`implement`**, **`review`**,
+If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`adopt`**, **`upgrade`**, **`update`**, **`version`**, **`brainstorm`**, **`plan`**, **`implement`**, **`review`**,
 **`decision`**, **`report`**, **`tidy`**, **`retro`**, **`commit`**, or **`loop`**, dispatch the request to the
 `sfs` runtime command first.
 
 Command modes:
 - **Bash-only**: `status`, `start`, `guide`, `auth`, `upgrade`, `update`, `version`, `commit`, `loop`. Stop after
   verbatim adapter output.
-	- **Conditional hybrid**: `tidy`. Run the adapter first. If it created or
-	  touched `report.md`, read archived workbench/tmp sources and refine the
-	  report before answering.
-	- **Narrow hybrid**: `profile`. Run the adapter first. Read only the files
-	  allowed by adapter stdout and edit only `SFS.md` `## 프로젝트 개요`.
-	- **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`. Run the adapter,
+- **Conditional hybrid**: `tidy`. Run the adapter first. If it created or
+  touched `report.md`, read archived workbench/tmp sources and refine the
+  report before answering.
+- **Always hybrid**: `adopt`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`. Run the adapter,
   then perform the documented file refinement.
 - **Adapter-run**: `review`. The bash adapter executes the selected CPO
   executor bridge by default. Stop after adapter output. If `--prompt-only` is
@@ -59,7 +56,7 @@ canonical work summary before close.
 
 ## Solon Report Output Rule
 
-	For hybrid commands (`profile`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`) and adapter-run
+For hybrid commands (`adopt`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`) and adapter-run
 `review`, the final answer must be a **Solon report**, not a plain bullet list
 such as `plan.md refined: ...`. Put the whole report in a fenced `text` block.
 Render the report in the user's visible language (for example, Korean for a
@@ -109,12 +106,12 @@ not create a new verdict in the current runtime.
 |:--|:--|:--|
 | `status`   | `sfs status <remaining args>`   | passes flags such as `--color=auto/always/never` verbatim |
 | `start`    | `sfs start <remaining args>`    | passes free-text `<goal>`, optional `--id <sprint-id>`, and `--force` verbatim |
-	| `guide`    | `sfs guide <remaining args>`    | default context briefing; passes `--path` / `--print` verbatim |
-	| `auth`     | `sfs auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
-	| `profile`  | `sfs profile <remaining args>`  | SFS.md 프로젝트 개요 전용. 기본은 좁은 agent task 출력 후 해당 섹션만 refinement, `--apply` 는 shell-only quick apply |
-	| `upgrade`  | `sfs upgrade <remaining args>`  | upgrades package-manager runtime first, then updates managed project adapter/docs; preserves sprint/decision/event history |
+| `guide`    | `sfs guide <remaining args>`    | default context briefing; passes `--path` / `--print` verbatim |
+| `auth`     | `sfs auth <remaining args>`     | passes `status`, `check`, `login`, `probe`, `path`, `--executor`, `--all`, and `--timeout` verbatim |
+| `upgrade`  | `sfs upgrade <remaining args>`  | upgrades package-manager runtime first, then updates managed project adapter/docs; preserves sprint/decision/event history |
 | `update`   | `sfs update <remaining args>`   | compatibility alias; prefer `upgrade` in new docs/responses |
 | `version`  | `sfs version <remaining args>`  | prints installed version; `--check` compares with the latest published product tag |
+| `adopt`    | `sfs adopt <remaining args>`    | legacy project intake. creates report-first baseline from git/code/docs; raw scan evidence is archived |
 | `brainstorm` | `sfs brainstorm <remaining args>` | accepts raw/multiline G0 context, appends it to `brainstorm.md`, then fills §1~§7 as Solon CEO |
 | `plan`     | `sfs plan <remaining args>`     | opens plan.md, then fills G1 requirements/AC/scope + CTO/CPO contract from brainstorm.md |
 | `implement` | `sfs implement <remaining args>` | opens implement.md/log.md, then performs actual code changes with DDD/TDD guardrails and records evidence |
@@ -146,9 +143,8 @@ not create a new verdict in the current runtime.
 5. **Stop or continue by command mode** — After dispatch, bash-only commands
    must stop without Gemini-driven commentary. Hybrid commands continue only
    via the documented flow below:
-	  - `brainstorm` → Brainstorm CEO Refinement
-	  - `profile` → Project Profile Refinement
-	  - `plan` → Plan G1 Refinement
+   - `brainstorm` → Brainstorm CEO Refinement
+   - `plan` → Plan G1 Refinement
    - `implement` → Implementation Execution
    - `decision` → Decision ADR Refinement
    - `report` → Final Report Refinement
@@ -159,24 +155,7 @@ not create a new verdict in the current runtime.
     recorded result path when present, then render a localized Solon report
     from recorded adapter/executor evidence only. Do not echo raw result bodies.
 
-	## Project Profile Refinement
-
-	`/sfs profile` is a narrow project-overview command. After the bash adapter
-	succeeds and stdout has been shown verbatim:
-
-	1. Use adapter stdout as the scope contract. Read only files listed under
-	   `allowed_read` that actually exist. Do not read sprint files, source files
-	   outside the listed config/readme paths, git history, or unrelated docs.
-	2. Update only `SFS.md` from `## 프로젝트 개요` until the next `## ` heading.
-	   Do not edit code, sprint artifacts, decisions, or runtime adapter files.
-	3. Fill name/type/stage/environment/output/delivery from deterministic detection
-	   plus the minimal allowed files. Keep unknown values as placeholders.
-	4. If `--apply` was used, the adapter already wrote the section. Stop after
-	   adapter output unless a compact recap helps.
-	5. Final response: render a Solon report. Include `SFS.md` in `Files`,
-	   `Review: n/a`, and `Next: /sfs start ...` or `Next: continue current Solon flow`.
-
-	## Brainstorm CEO Refinement
+## Brainstorm CEO Refinement
 
 `/sfs brainstorm` is not capture-only in AI runtimes. After the bash adapter
 succeeds and stdout has been shown verbatim:
@@ -352,7 +331,7 @@ Print the following 3-line usage and stop:
 
 ```
 Usage: /sfs <command> [args]
-Commands: status, start, guide, auth, profile, upgrade, version, brainstorm, plan, implement, review, decision, report, tidy, retro, commit, loop
+Commands: status, start, guide, auth, adopt, upgrade, version, brainstorm, plan, implement, review, decision, report, tidy, retro, commit, loop
 Help: sfs <command> --help
 ```
 
