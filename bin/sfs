@@ -54,7 +54,7 @@ Usage:
 Commands:
   agent install, update, uninstall
   version
-  status, start, guide, auth, brainstorm, plan, implement, review, decision, retro, loop
+  status, start, guide, auth, brainstorm, plan, implement, review, decision, retro, commit, loop
 
 Project state defaults to .sfs-local/. Override with SFS_LOCAL_DIR when needed.
 
@@ -83,14 +83,15 @@ EOF
 update_usage() {
   cat <<'EOF'
 Usage:
-  sfs update [--skip-existing]
+  sfs update [--skip-existing] [--no-self-upgrade]
 
-Updates the current project from the installed Solon runtime:
+Updates the current project from the latest Solon runtime:
+  - if this CLI is installed by Homebrew, runs `brew update` + `brew upgrade sfs` first
   - updates managed SFS runtime docs/adapters with backup safety
   - preserves sprint/decision/event history and project-specific docs
   - syncs Claude/Gemini/Codex agent entry points
 
-Use `brew upgrade sfs` first when you want a newer global runtime.
+Use `--no-self-upgrade` or `SFS_UPDATE_SELF=0` to skip the Homebrew step.
 EOF
 }
 
@@ -124,8 +125,7 @@ First-time project setup:
 What this means:
   brew install MJ-0701/solon-product/sfs  installs the global sfs CLI on this Mac.
   sfs init --yes                          injects SFS.md, .sfs-local/, and agent adapters into this project.
-  brew upgrade sfs                        upgrades the global CLI after the tap is installed.
-  sfs update                              refreshes an already-initialized project after a runtime upgrade.
+  sfs update                              upgrades the Homebrew CLI first, then refreshes this project.
 
 Tip:
   If this folder is not a git repo yet, sfs init --yes will run git init for you.
@@ -270,10 +270,15 @@ agent_command() {
 
 update_command() {
   local skip_existing=0
+  local no_self_upgrade="${SFS_SKIP_SELF_UPGRADE:-0}"
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --skip-existing)
         skip_existing=1
+        shift
+        ;;
+      --no-self-upgrade)
+        no_self_upgrade=1
         shift
         ;;
       -h|--help)
@@ -289,9 +294,52 @@ update_command() {
   done
 
   ensure_project_initialized update || return $?
+  if [[ "${no_self_upgrade}" != "1" && "${SFS_UPDATE_SELF:-1}" != "0" ]]; then
+    self_upgrade_if_homebrew "${skip_existing}"
+  fi
   bash "${DIST_DIR}/upgrade.sh" --yes
   echo "agent adapters sync:"
   install_agent_adapter all "${skip_existing}"
+}
+
+is_homebrew_runtime() {
+  command -v brew >/dev/null 2>&1 || return 1
+  local prefix info
+  prefix="$(brew --prefix sfs 2>/dev/null || true)"
+  [[ -n "${prefix}" ]] || return 1
+  case "${DIST_DIR}" in
+    "${prefix}"|"${prefix}/"*) ;;
+    *) return 1 ;;
+  esac
+  info="$(brew info sfs 2>/dev/null || true)"
+  printf '%s\n' "${info}" | grep -q 'mj-0701/solon-product/sfs'
+}
+
+self_upgrade_if_homebrew() {
+  local skip_existing="${1:-0}" sfs_bin
+  is_homebrew_runtime || return 0
+
+  echo "global runtime self-upgrade:"
+  echo "  brew update"
+  if ! brew update; then
+    echo "brew update failed; rerun with SFS_UPDATE_SELF=0 to use the current runtime only" >&2
+    return 1
+  fi
+
+  echo "  brew upgrade sfs"
+  if ! brew upgrade sfs; then
+    echo "brew upgrade sfs failed; rerun with SFS_UPDATE_SELF=0 to use the current runtime only" >&2
+    return 1
+  fi
+
+  sfs_bin="$(command -v sfs 2>/dev/null || true)"
+  [[ -n "${sfs_bin}" ]] || return 0
+
+  echo "reloading installed sfs runtime..."
+  if [[ "${skip_existing}" == "1" ]]; then
+    exec env SFS_SKIP_SELF_UPGRADE=1 "${sfs_bin}" update --skip-existing --no-self-upgrade
+  fi
+  exec env SFS_SKIP_SELF_UPGRADE=1 "${sfs_bin}" update --no-self-upgrade
 }
 
 if [[ $# -eq 0 ]]; then
@@ -348,7 +396,7 @@ case "${1:-}" in
 esac
 
 case "${1:-}" in
-  status|start|guide|auth|brainstorm|plan|implement|review|decision|retro|loop)
+  status|start|guide|auth|brainstorm|plan|implement|review|decision|retro|commit|loop)
     if ! ensure_project_initialized "${1:-command}"; then
       exit 1
     fi

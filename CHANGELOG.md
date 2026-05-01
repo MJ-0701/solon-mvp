@@ -1,3 +1,17 @@
+## [0.5.36-product] - 2026-05-01
+
+**One-command project update.** Users no longer need to remember a separate
+`brew upgrade` step before refreshing a project.
+
+### Changed
+
+- **`sfs update` self-upgrades Homebrew runtime first** — when the CLI is running
+  from the `mj-0701/solon-product/sfs` Homebrew formula, `sfs update` runs
+  `brew update` + `brew upgrade sfs`, reloads the installed runtime, then updates
+  the current project managed Solon files.
+- **Update docs and caveats** — README, GUIDE, update help, and Homebrew caveats
+  now teach the one-command flow: `cd <project> && sfs update`.
+
 ## [0.5.35-product] - 2026-05-01
 
 **Short Homebrew upgrade path and version command.** Users can now verify the

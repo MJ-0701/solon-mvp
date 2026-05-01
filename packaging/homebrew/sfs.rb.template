@@ -26,7 +26,8 @@ class Sfs < Formula
 
       Homebrew installs the global sfs CLI. Run `sfs init --yes` once inside
       each project where you want Solon files, state, and agent adapters.
-      Use `sfs update` later after `brew upgrade`.
+      Later, run `sfs update` inside a project; it self-upgrades the Homebrew
+      runtime first, then updates that project's Solon files.
     EOS
   end
 
