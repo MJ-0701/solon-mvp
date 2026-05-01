@@ -1,3 +1,33 @@
+## [0.5.53-product] - 2026-05-01
+
+**Implementation guardrails and publish hygiene.** Strengthens `/sfs
+implement` with practical code-development guardrails and publishes the
+user-facing glossary / release discipline docs now needed by the product
+runtime.
+
+### Added
+
+- **`/sfs implement` 6-division guardrails** — implementation now records
+  strategy-pm, taxonomy, design/frontend, dev/backend, QA, and infra guardrail
+  coverage in `implement.md` and `log.md`.
+- **Backend Transaction discipline** — Spring/JPA/Batch/external API and
+  consistency work now treats transaction boundaries, `REQUIRES_NEW`, JPA
+  first-level cache behavior, outbox/idempotency, Hikari pool pressure, and
+  risk-matched tests as always-on checks.
+- **Security / Infra / DevOps scale gate** — expensive checks are selected once
+  per project/sprint as `light`, `full`, or `skip`; MVP-overkill work is
+  recorded as `deferred` or `risk-accepted` instead of blocking implementation.
+- **Product glossary docs** — acronym and division glossaries are included in
+  the user-facing docs so new installs have the same language as the runtime.
+
+### Changed
+
+- **Publish discipline docs** — concurrent-session release guidance now makes
+  final integration, main sync, Homebrew, and Scoop publish responsibilities
+  explicit.
+- **Scoop bucket URL docs** — product docs now point at the real Scoop bucket
+  location.
+
 ## [0.5.52-product] - 2026-05-01
 
 **Product documentation sync.** Publishes the Solon 10x value guide in the
