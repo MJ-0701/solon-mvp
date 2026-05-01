@@ -1,7 +1,7 @@
 ---
 task_id: loopq-20260501T020828Z-10248
 title: "codex v0.5.42 handoff and queue reconciliation"
-status: pending
+status: abandoned
 priority: 6
 mode: user-active-deferred
 sprint_id: "solon-loop-queue-mvp"
@@ -12,6 +12,7 @@ created_at: 2026-05-01T02:08:28Z
 claimed_at: ""
 size: medium
 target_minutes: 45
+abandoned_at: 2026-05-01T02:35:21Z
 ---
 
 # codex v0.5.42 handoff and queue reconciliation
@@ -41,3 +42,10 @@ Scope:
 ## Verify
 
 - `git diff --check`
+
+## Abandon Reason
+
+- Superseded by `loopq-20260501T011650Z-8411`, which completed the handoff and
+  queue reconciliation after `loopq-20260501T011620Z-8408` unblocked it.
+- Latest user note that Scoop bucket work is complete was applied directly to
+  `HANDOFF-next-session.md`; no second handoff reconciliation pass needed.
