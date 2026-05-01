@@ -37,6 +37,7 @@ Options:
 Environment:
   SFS_MODEL_RUNTIME   current|claude|codex|gemini|custom (default: current)
   SFS_MODEL_POLICY    current_model|solon_recommended|all_high|custom (default: current_model)
+  SFS_MODEL_PROFILE_PROMPT=0  agent/model fallback 질문을 이번 install 에서 숨김
 EOF
 }
 
@@ -151,6 +152,106 @@ confirm() {
   esac
 }
 
+tty_available() {
+  [ -t 0 ] && return 0
+  [ -r /dev/tty ] && { : < /dev/tty; } 2>/dev/null
+}
+
+prompt_model_always() {
+  local msg="$1" default="${2:-}" answer
+  if [ -t 0 ]; then
+    if [ -n "$default" ]; then printf "%s [%s]: " "$msg" "$default" >&2
+    else printf "%s: " "$msg" >&2; fi
+    read -r answer || answer=""
+  elif [ -r /dev/tty ] && { : < /dev/tty; } 2>/dev/null; then
+    if [ -n "$default" ]; then printf "%s [%s]: " "$msg" "$default" > /dev/tty
+    else printf "%s: " "$msg" > /dev/tty; fi
+    read -r answer < /dev/tty || answer=""
+  else
+    answer="$default"
+  fi
+  echo "${answer:-$default}"
+}
+
+print_model_profile_question() {
+  cat <<'EOF'
+
+Agent model profile:
+  이 질문은 Solon 의 역할별 agent 가 어떤 모델을 쓸지 정하는 단계입니다.
+  예: 설계/판단 agent 는 더 강한 모델, 코드 구현 agent 는 표준 모델, 단순 정리 helper 는 가벼운 모델.
+
+  지금 꼭 정하지 않아도 됩니다.
+  건너뛰면 current_model fallback 으로 설치하고, 현재 Claude/Codex/Gemini 에서 사용자가
+  선택한 모델을 그대로 씁니다. 나중에 다시 설정할 수 있고, 다음 upgrade 때도 다시 안내합니다.
+
+  선택지:
+    1. Claude 권장: 설계/평가 Opus 4.7, 구현 Sonnet 4.6, helper Haiku
+    2. 지금 설정 안 함: current_model fallback 유지 (처음이면 이걸 골라도 안전)
+    3. all_high: 모든 agent/helper 를 high-end 로 설정 (품질 우선, 비용/지연 증가 가능)
+    4. custom/manual: 직접 모델 profile 작성
+
+  Codex/Claude 가 대신 실행 중인 경우:
+    위 설명과 선택지를 사용자에게 보여주고 번호를 물어보세요.
+    사용자가 "지금 설정 안 함" 이라고 하면 current_model fallback 으로 두고 계속 진행하면 됩니다.
+EOF
+}
+
+choose_initial_model_profile() {
+  if [ -n "${SFS_MODEL_RUNTIME:-}" ] || [ -n "${SFS_MODEL_POLICY:-}" ]; then
+    return 0
+  fi
+
+  if [ "${SFS_MODEL_PROFILE_PROMPT:-1}" = "0" ]; then
+    warn "agent model profile 질문 숨김 — current_model fallback 으로 설치"
+    return 0
+  fi
+
+  print_model_profile_question
+  if ! tty_available; then
+    warn "대화형 입력 불가 — current_model fallback 으로 설치"
+    warn "    다음 upgrade 또는 사용자 발화 때 다시 설정 안내가 표시됩니다."
+    return 0
+  fi
+
+  local choice runtime
+  choice="$(prompt_model_always "agent model profile 선택? (1/2/3/4, 처음이면 2 권장)" "2")"
+  case "$choice" in
+    1)
+      MODEL_RUNTIME="claude"
+      MODEL_POLICY="solon_recommended"
+      MODEL_PROFILE_STATUS="selected_at_install"
+      ;;
+    2|"")
+      MODEL_RUNTIME="current"
+      MODEL_POLICY="current_model"
+      MODEL_PROFILE_STATUS="current_model_fallback"
+      ;;
+    3)
+      runtime="$(prompt_model_always "all_high 를 적용할 runtime? (claude/codex/gemini/custom/current)" "claude")"
+      case "$runtime" in
+        claude|codex|gemini|custom|current) ;;
+        *) warn "알 수 없는 runtime='$runtime' — current 로 기록"; runtime="current" ;;
+      esac
+      MODEL_RUNTIME="$runtime"
+      MODEL_POLICY="all_high"
+      MODEL_PROFILE_STATUS="selected_at_install"
+      ;;
+    4)
+      MODEL_RUNTIME="custom"
+      MODEL_POLICY="custom"
+      MODEL_PROFILE_STATUS="review_required"
+      warn "custom/manual 선택 — 설치 후 .sfs-local/model-profiles.yaml 을 직접 채우면 됩니다."
+      warn "    status=review_required 로 남겨 다음 upgrade/사용자 발화 때 다시 안내됩니다."
+      ;;
+    *)
+      warn "알 수 없는 선택 '$choice' — current_model fallback 으로 설치"
+      MODEL_RUNTIME="current"
+      MODEL_POLICY="current_model"
+      MODEL_PROFILE_STATUS="current_model_fallback"
+      ;;
+  esac
+}
+
 # ============================================================================
 # 2. 모드 판별 (local vs remote)
 # ============================================================================
@@ -256,6 +357,7 @@ fi
 
 MODEL_RUNTIME="${SFS_MODEL_RUNTIME:-current}"
 MODEL_POLICY="${SFS_MODEL_POLICY:-current_model}"
+MODEL_PROFILE_STATUS="current_model_fallback"
 
 info ""
 info "Agent model profile setup..."
@@ -268,10 +370,7 @@ Solon 은 agent 별 모델 설정을 프로젝트 로컬 파일에 남깁니다:
 설정을 건너뛰거나 나중에 하기로 하면 Solon 은 현재 런타임에서 사용자가 선택한 모델을 그대로 씁니다.
 EOF
 
-if [ "$ASSUME_YES" -ne 1 ]; then
-  MODEL_RUNTIME="$(prompt "기본 LLM runtime? (current/claude/codex/gemini/custom)" "$MODEL_RUNTIME")"
-  MODEL_POLICY="$(prompt "agent model policy? (current_model/solon_recommended/all_high/custom)" "$MODEL_POLICY")"
-fi
+choose_initial_model_profile
 
 case "$MODEL_RUNTIME" in
   current|claude|codex|gemini|custom) ;;
@@ -301,8 +400,8 @@ case "$MODEL_POLICY" in
     ;;
 esac
 
-MODEL_PROFILE_STATUS="current_model_fallback"
-if [ "$MODEL_RUNTIME" != "current" ] || [ "$MODEL_POLICY" != "current_model" ]; then
+if [ "$MODEL_PROFILE_STATUS" != "review_required" ] \
+   && { [ "$MODEL_RUNTIME" != "current" ] || [ "$MODEL_POLICY" != "current_model" ]; }; then
   MODEL_PROFILE_STATUS="selected_at_install"
 fi
 ok "model profile 선택: runtime=$MODEL_RUNTIME, policy=$MODEL_POLICY, status=$MODEL_PROFILE_STATUS"
@@ -652,7 +751,7 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
      - Codex: model + reasoning_effort 조합 (예: gpt-5.5 + xhigh/very_high)
      - Claude: opus-4.7 / opus-4.6 / sonnet / haiku 등 runtime 지원 모델명
      - Gemini/custom: 프로젝트가 쓰는 모델/profile 이름
-     - 설정을 안 하거나 거부하면: 현재 런타임에서 사용자가 선택한 모델 그대로 사용
+     - 지금 설정 안 함: 현재 런타임 모델 그대로 사용 + 다음 upgrade 때 다시 질문
      Solon 권장은 C-Level high, worker standard, helper economy 이지만,
      원하면 worker/helper 도 high-end 로 바꿔도 됩니다.
 

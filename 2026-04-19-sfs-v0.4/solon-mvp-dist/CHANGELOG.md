@@ -1,3 +1,35 @@
+## [0.5.46-product] - 2026-05-01
+
+**Document tidy command and release-note preflight.** SFS now has an explicit
+cleanup command for completed sprint workbench docs, and release cuts require a
+versioned changelog entry before publishing.
+
+### Added
+
+- **`sfs tidy` command** — dry-run by default; with `--apply`, it creates
+  `report.md` when missing and moves original workbench docs into archive.
+- **Local workbench/tmp archive** — compaction now preserves original
+  brainstorm/plan/implement/log/review files and matching tmp review artifacts
+  under `.sfs-local/archives/`, then removes them from visible sprint/tmp
+  folders.
+- **Release note preflight** — `scripts/cut-release.sh --apply` now requires a
+  target `CHANGELOG.md` entry before cutting a release.
+
+### Changed
+
+- **Report/retro cycle cleanup** — existing `report --compact` and
+  `retro --close` cycle paths now use the same archive-first cleanup helper as
+  `sfs tidy`.
+- **Report template wording** — new reports point readers to archived
+  workbench sources instead of implying verbose files stay in the sprint folder.
+- **Release documentation** — README/GUIDE describe `sfs tidy`, update
+  discovery, and the Added/Changed/Fixed release note rule.
+
+### Fixed
+
+- **Workbench cleanup ambiguity** — completed sprint cleanup is now a named
+  explicit command that leaves only durable sprint docs in the main folder.
+
 ## [0.5.45-product] - 2026-05-01
 
 **Upgrade command UX and SFS naming.** SFS is now explicitly documented as
@@ -32,8 +64,8 @@ first-class coding guardrail, not just a reporting convention.
 - **`sfs report` command** — creates/refines sprint `report.md` as the compact
   final work summary and can compact workbench docs with explicit `--compact`.
 - **Report template and lifecycle helpers** — packaged `report.md` and shared
-  compaction helpers preserve retro/history while redirecting completed
-  workbench files to the final report.
+  compaction helpers preserve retro/history while pointing completed
+  workbench files toward the final report.
 - **Active implement adapter** — packaged and active `sfs-implement.sh` now
   states that AI runtimes must apply Think Before Coding, Simplicity First,
   Surgical Changes, and Goal-Driven Execution before editing code.

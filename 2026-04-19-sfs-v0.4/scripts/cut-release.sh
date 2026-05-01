@@ -43,6 +43,7 @@
 #   5 = TBD final_sha 검출 (release blocker — `final_sha: TBD_*` 인 WU 잔존)
 #   6 = stale `.git/index.lock` 검출 (P-10 후속, W-22, --apply 모드 한정)
 #   7 = P-13 dev-stable narrative divergence 검출 (--allow-divergence 로 bypass 가능, --apply 모드 한정)
+#   8 = target VERSION release note / CHANGELOG entry 누락 (--apply 모드 한정)
 #  99 = unknown error
 # ────────────────────────────────────────────────────────────────
 set -euo pipefail
@@ -196,6 +197,26 @@ fi
 check_clean "${STABLE_REPO}" "stable"
 
 log "  ✅ paths ok / git clean / no blocking stale .git/index.lock"
+
+# Release note preflight. A product version must have an explicit target entry
+# before release cut, so users can see Added/Changed/Fixed instead of a generic
+# generated stub.
+if [[ ! -f "${DEV_STAGING}/CHANGELOG.md" ]]; then
+  fail "dev staging CHANGELOG.md missing: ${DEV_STAGING}/CHANGELOG.md" 8
+fi
+if ! grep -q "^## \\[${VERSION}\\]" "${DEV_STAGING}/CHANGELOG.md"; then
+  warn "release note entry missing for ${VERSION} in dev/CHANGELOG.md"
+  warn "    Add a section before cut, for example:"
+  warn "    ## [${VERSION}] - YYYY-MM-DD"
+  warn "    ### Added / ### Changed / ### Fixed"
+  if [[ "${APPLY}" == "1" ]]; then
+    fail "release note required before --apply" 8
+  else
+    warn "    (dry-run 이므로 진행, --apply 시는 abort)"
+  fi
+else
+  log "  ✅ release note entry found: ${VERSION}"
+fi
 
 # TBD final_sha 검출 (WU-31 후속 강화: 0.3.0-mvp release cut 시
 # WU-24 처럼 final_sha=TBD placeholder 인 WU 가 있으면 abort).

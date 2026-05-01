@@ -11,9 +11,24 @@ Before planning or editing, read:
 - recent files under `.sfs-local/sprints/`
 - recent files under `.sfs-local/decisions/`
 
+## Agent/model setting guard
+
+When the user asks about agent/model settings, first inspect
+`.sfs-local/model-profiles.yaml`. If it is missing, fallback, `selected_runtime:
+current`, `selected_policy: current_model`, or unconfirmed, do not describe the
+profile as configured. Say it is an unconfirmed current-model fallback and ask
+which policy to apply. Explain what the question means: it chooses which model
+family Solon should use for design/review agents, implementation workers, and
+simple helpers. Tell the user that they can safely skip it now; skipping keeps
+`current_model` fallback and will be asked again on a future upgrade or
+agent-setting question. Default choices: Claude recommended (Opus 4.7 for
+design/review, Sonnet 4.6 for implementation, Haiku for helpers), skip now /
+keep current_model, all_high, or custom. If the user already states the desired
+mapping, confirm it and update the model profile.
+
 ## SFS commands — bash adapter 우선 (deterministic SSoT)
 
-Solon Product SFS 의 12 슬래시 명령은 모두 `sfs <command>` global runtime 이
+Solon Product SFS 의 주요 명령은 모두 `sfs <command>` global runtime 이
 deterministic bash adapter 로 내려보낸다. `.sfs-local/scripts/` 는 vendored layout 의
 fallback 이고, 기본 방향은 project-local state + packaged runtime 이다.
 Gemini CLI 는 native `/sfs` slash 가 없어도 사용자 발화를 다음 명령으로 해석해서 **bash
@@ -30,7 +45,8 @@ adapter 를 직접 호출**한다 (paraphrase 금지, 결정성 유지):
 | `sfs implement`, `/sfs implement` | `sfs implement [work slice|--stdin]` 후 Gemini 가 `plan.md` 기반 실제 코드 변경 + 테스트/스모크 evidence 작성 |
 | `sfs review --gate <id> [--executor <tool>] [--prompt-only]`, `/sfs review --gate <id> [--executor <tool>] [--prompt-only]`, `/sfs review --show-last` | `sfs review --gate <id> [--executor <tool>] [--prompt-only]` 또는 `sfs review --show-last [--gate <id>]`; 기본은 선택된 CPO executor bridge 실행, `--prompt-only` 는 수동 handoff, `--show-last` 는 executor 재실행 없이 기존 결과를 사용자 언어의 요약/action report 로 확인 |
 | `sfs decision <title>`, `/sfs decision <title>` | `sfs decision "<title>" [--id <id>]` 후 Gemini 가 ADR 본문 작성 |
-| `sfs report [--sprint <id>] [--compact]`, `/sfs report [--sprint <id>] [--compact]` | `sfs report [--sprint <id>] [--compact]`; Gemini 가 workbench 산출물을 한 장짜리 최종 작업보고서로 정리. `--compact` 는 사용자 동의 후 redirect/stub 압축 |
+| `sfs report [--sprint <id>] [--compact]`, `/sfs report [--sprint <id>] [--compact]` | `sfs report [--sprint <id>] [--compact]`; Gemini 가 workbench 산출물을 한 장짜리 최종 작업보고서로 정리. `--compact` 는 사용자 동의 후 workbench/tmp 산출물을 archive 로 이동 |
+| `sfs tidy [--sprint <id>\|--all] [--apply]`, `/sfs tidy ...` | `sfs tidy [--sprint <id>\|--all] [--apply]`; 기본 dry-run. `--apply` 는 report.md 가 없으면 생성하고 workbench/tmp 를 archive 로 이동해 남겨야 할 문서만 유지 |
 | `sfs retro [--close]`, `/sfs retro [--close]` | `sfs retro [--close]`; `--close` 는 Gemini 가 `retro.md` 와 `report.md` 를 먼저 채운 뒤 close adapter 1회 실행 |
 | `sfs loop ...`, `/sfs loop ...` | `sfs loop [OPTIONS]` (Ralph Loop + Solon mutex, see `--help`) |
 
@@ -39,8 +55,9 @@ non-zero exit 시 stderr + exit code 도 함께 보고한다. `sfs` runtime 이 
 그 사실을 1줄로 사용자에게 알리고 install/upgrade 를 안내한다.
 
 명령 모드는 고정이다:
-- **Bash-only**: `status`, `start`, `guide`, `auth`, `loop`.
+- **Bash-only**: `status`, `start`, `guide`, `auth`, `upgrade`, `update`, `version`, `loop`.
 - **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`.
+- **Conditional hybrid**: `tidy` — adapter apply 후 report.md 를 archive source 기반으로 정제한다.
 - **Adapter-run**: `review` — 기본적으로 bash adapter 가 선택된 CPO executor bridge 를 실행하고 stdout 에는 verdict/output path 메타데이터만 보여준다. Gemini 는 result 원문을 그대로 덤프하지 않고 사용자 언어로 요약/action report 를 렌더링한다. `--prompt-only` 일 때도 현재 Gemini runtime 이 대신 verdict 를 작성하지 않고 prompt handoff 로 멈춘다.
 
 부족한 정보가 있으면 1~3개 질문만 남기고, 다음 gate 를 자동 실행하지 않는다.

@@ -30,6 +30,9 @@ Usage: sfs upgrade [--yes]
 Options:
   -y, --yes   안전 기본 정책으로 non-interactive upgrade 실행
   -h, --help  도움말 출력
+
+Environment:
+  SFS_MODEL_PROFILE_PROMPT=0  agent/model fallback 질문을 이번 upgrade 에서 숨김
 EOF
 }
 
@@ -90,6 +93,138 @@ prompt() {
   else printf "%s: " "$msg" >&2; fi
   read -r answer || answer=""
   echo "${answer:-$default}"
+}
+
+prompt_always() {
+  local msg="$1" default="${2:-}" answer
+  if [ -n "$default" ]; then printf "%s [%s]: " "$msg" "$default" >&2
+  else printf "%s: " "$msg" >&2; fi
+  read -r answer || answer=""
+  echo "${answer:-$default}"
+}
+
+sed_inplace() {
+  if [ "$(uname)" = "Darwin" ]; then
+    sed -i '' "$@"
+  else
+    sed -i "$@"
+  fi
+}
+
+create_default_model_profile() {
+  local runtime="${1:-current}" policy="${2:-current_model}" status="${3:-current_model_fallback}"
+  [ -f "$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml" ] || return 1
+
+  local today project_name
+  today=$(date +%Y-%m-%d)
+  project_name="$(basename "$TARGET")"
+  mkdir -p "$TARGET/.sfs-local"
+  cp "$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml" "$TARGET/.sfs-local/model-profiles.yaml"
+  sed_inplace \
+    -e "s|<DATE>|$today|g" \
+    -e "s|<SOLON-VERSION>|$NEW_VER|g" \
+    -e "s|<PROJECT-NAME>|$project_name|g" \
+    -e "s|<DEFAULT-RUNTIME>|$runtime|g" \
+    -e "s|<MODEL-POLICY>|$policy|g" \
+    -e "s|<MODEL-PROFILE-STATUS>|$status|g" \
+    "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null || true
+}
+
+model_profile_needs_prompt() {
+  local file="$TARGET/.sfs-local/model-profiles.yaml"
+  [ -f "$file" ] || return 0
+  grep -Eq '^[[:space:]]*status:[[:space:]]*"?current_model_fallback"?' "$file" 2>/dev/null && return 0
+  grep -Eq '^[[:space:]]*status:[[:space:]]*"?review_required"?' "$file" 2>/dev/null && return 0
+  grep -Eq '^[[:space:]]*status:[[:space:]]*"?unset"?' "$file" 2>/dev/null && return 0
+  grep -Eq '^[[:space:]]*selected_runtime:[[:space:]]*"?current"?' "$file" 2>/dev/null && return 0
+  grep -Eq '^[[:space:]]*selected_policy:[[:space:]]*"?current_model"?' "$file" 2>/dev/null && return 0
+  grep -Eq '^[[:space:]]*confirmed_by:[[:space:]]*"?[[:space:]]*"?$' "$file" 2>/dev/null && return 0
+  return 1
+}
+
+print_model_profile_question() {
+  cat <<'EOF'
+
+Agent model profile:
+  이 질문은 Solon 의 역할별 agent 가 어떤 모델을 쓸지 정하는 단계입니다.
+  예: 설계/판단 agent 는 더 강한 모델, 코드 구현 agent 는 표준 모델, 단순 정리 helper 는 가벼운 모델.
+
+  지금 꼭 정하지 않아도 됩니다.
+  건너뛰면 current_model fallback 을 유지하고, 현재 Claude/Codex/Gemini 에서 사용자가
+  선택한 모델을 그대로 씁니다. 나중에 다시 설정할 수 있고, 다음 upgrade 때도 다시 안내합니다.
+
+  선택지:
+    1. Claude 권장: 설계/평가 Opus 4.7, 구현 Sonnet 4.6, helper Haiku
+    2. 지금 설정 안 함: current_model fallback 유지 (처음이면 이걸 골라도 안전)
+    3. all_high: 모든 agent/helper 를 high-end 로 설정 (품질 우선, 비용/지연 증가 가능)
+    4. custom/manual: 직접 모델 profile 작성
+
+  Codex/Claude 가 대신 실행 중인 경우:
+    위 설명과 선택지를 사용자에게 보여주고 번호를 물어보세요.
+    사용자가 "지금 설정 안 함" 이라고 하면 current_model fallback 으로 두고 계속 진행하면 됩니다.
+EOF
+}
+
+set_model_profile_fields() {
+  local runtime="$1" policy="$2" status="$3" confirmed_by="$4" confirmed_at="$5"
+  local file="$TARGET/.sfs-local/model-profiles.yaml"
+  [ -f "$file" ] || create_default_model_profile current current_model current_model_fallback
+  sed_inplace \
+    -e "s|^[[:space:]]*status:.*|  status: \"$status\"        # current_model_fallback | selected_at_install | confirmed | review_required|g" \
+    -e "s|^[[:space:]]*selected_runtime:.*|  selected_runtime: \"$runtime\"   # current | claude | codex | gemini | custom|g" \
+    -e "s|^[[:space:]]*selected_policy:.*|  selected_policy: \"$policy\"       # current_model | solon_recommended | all_high | custom|g" \
+    -e "s|^[[:space:]]*confirmed_by:.*|  confirmed_by: \"$confirmed_by\"|g" \
+    -e "s|^[[:space:]]*confirmed_at:.*|  confirmed_at: \"$confirmed_at\"|g" \
+    "$file" 2>/dev/null || true
+}
+
+maybe_prompt_model_profile() {
+  model_profile_needs_prompt || return 0
+
+  if [ "${SFS_MODEL_PROFILE_PROMPT:-1}" = "0" ]; then
+    warn "agent model profile fallback 상태 — SFS_MODEL_PROFILE_PROMPT=0 이라 이번 질문은 건너뜀"
+    warn "    current_model fallback 유지. 다음 upgrade 에서 다시 질문됩니다."
+    return 0
+  fi
+
+  if [ ! -t 0 ]; then
+    print_model_profile_question
+    return 0
+  fi
+
+  print_model_profile_question
+  local choice runtime now
+  choice="$(prompt_always "agent model profile 선택? (1/2/3/4, 처음이면 2 권장)" "2")"
+  now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+  case "$choice" in
+    1)
+      set_model_profile_fields "claude" "solon_recommended" "confirmed" "sfs upgrade" "$now"
+      ok "agent model profile 확정: Claude 권장 (Opus 4.7 / Sonnet 4.6 / Haiku)"
+      ;;
+    2|"")
+      set_model_profile_fields "current" "current_model" "current_model_fallback" "" ""
+      ok "agent model profile 미확정 유지: current_model fallback (다음 upgrade 때 다시 질문)"
+      ;;
+    3)
+      runtime="$(prompt_always "all_high 를 적용할 runtime? (claude/codex/gemini/custom/current)" "claude")"
+      case "$runtime" in
+        claude|codex|gemini|custom|current) ;;
+        *) warn "알 수 없는 runtime='$runtime' — current 로 기록"; runtime="current" ;;
+      esac
+      set_model_profile_fields "$runtime" "all_high" "confirmed" "sfs upgrade" "$now"
+      ok "agent model profile 확정: runtime=$runtime, policy=all_high"
+      ;;
+    4)
+      set_model_profile_fields "custom" "custom" "review_required" "" ""
+      warn "custom/manual 선택 — .sfs-local/model-profiles.yaml 을 직접 채우면 됩니다."
+      warn "    status=review_required 로 남겨 다음 upgrade/사용자 발화 때 다시 안내됩니다."
+      ;;
+    *)
+      warn "알 수 없는 선택 '$choice' — current_model fallback 유지"
+      set_model_profile_fields "current" "current_model" "current_model_fallback" "" ""
+      ;;
+  esac
 }
 
 # ============================================================================
@@ -223,23 +358,7 @@ if [ "$CUR_VER" = "$NEW_VER" ]; then
   MODEL_PROFILE_REPAIRED=0
   if [ ! -f "$TARGET/.sfs-local/model-profiles.yaml" ] \
      && [ -f "$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml" ]; then
-    TODAY=$(date +%Y-%m-%d)
-    PROJECT_NAME="$(basename "$TARGET")"
-    if [ "$(uname)" = "Darwin" ]; then
-      SED_INPLACE=(sed -i '')
-    else
-      SED_INPLACE=(sed -i)
-    fi
-    mkdir -p "$TARGET/.sfs-local"
-    cp "$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml" "$TARGET/.sfs-local/model-profiles.yaml"
-    "${SED_INPLACE[@]}" \
-      -e "s|<DATE>|$TODAY|g" \
-      -e "s|<SOLON-VERSION>|$NEW_VER|g" \
-      -e "s|<PROJECT-NAME>|$PROJECT_NAME|g" \
-      -e "s|<DEFAULT-RUNTIME>|current|g" \
-      -e "s|<MODEL-POLICY>|current_model|g" \
-      -e "s|<MODEL-PROFILE-STATUS>|current_model_fallback|g" \
-      "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null || true
+    create_default_model_profile current current_model current_model_fallback
     ok "model-profiles.yaml 누락 감지 — current_model fallback 설정으로 생성"
     MODEL_PROFILE_REPAIRED=1
   elif grep -q 'status: "current_model_fallback"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null \
@@ -247,9 +366,8 @@ if [ "$CUR_VER" = "$NEW_VER" ]; then
     || grep -q 'status: "review_required"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null \
     || grep -q 'selected_runtime: "unset"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null; then
     warn "agent model profile 이 current_model fallback 상태입니다."
-    warn "    그대로 두면 현재 런타임 모델을 사용합니다."
-    warn "    agent별 모델을 확정하려면 .sfs-local/model-profiles.yaml 을 편집하세요."
   fi
+  maybe_prompt_model_profile
   ok "이미 최신 버전. 업그레이드 불필요."
   if [ "$MODEL_PROFILE_REPAIRED" -eq 1 ]; then
     warn "새 파일을 추가했으니 프로젝트 repo 에서 commit 여부를 확인하세요: .sfs-local/model-profiles.yaml"
@@ -685,15 +803,14 @@ source_repo: https://github.com/${SOLON_REPO}
 EOF
 ok "VERSION 갱신: $CUR_VER → $NEW_VER"
 
+maybe_prompt_model_profile
+
 MODEL_PROFILE_NOTICE=""
 if [ -f "$TARGET/.sfs-local/model-profiles.yaml" ]; then
-  if [ "$MODEL_PROFILES_WAS_MISSING" -eq 1 ]; then
-    MODEL_PROFILE_NOTICE="새 agent model profile 이 생성됐습니다. 설정을 안 하면 current_model fallback 으로 현재 런타임 모델을 그대로 씁니다. 원하면 .sfs-local/model-profiles.yaml 에서 selected_runtime, selected_policy, agent별 override 를 확정하세요."
-  elif grep -q 'status: "current_model_fallback"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null \
-    || grep -q 'selected_runtime: "current"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null \
-    || grep -q 'status: "review_required"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null \
-    || grep -q 'selected_runtime: "unset"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null; then
-    MODEL_PROFILE_NOTICE="agent model profile 이 current_model fallback 상태입니다. 그대로 두면 현재 런타임 모델을 사용하고, 필요하면 .sfs-local/model-profiles.yaml 에서 agent별 모델을 확정하세요."
+  if model_profile_needs_prompt; then
+    MODEL_PROFILE_NOTICE="agent model profile 이 미확정 fallback 상태입니다. 지금 설정하지 않으면 현재 런타임 모델을 쓰며, 다음 upgrade 또는 사용자 발화 때 다시 안내됩니다."
+  elif [ "$MODEL_PROFILES_WAS_MISSING" -eq 1 ]; then
+    MODEL_PROFILE_NOTICE="새 agent model profile 이 생성되고 설정되었습니다."
   elif ! grep -q '^agent_defaults:' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null; then
     MODEL_PROFILE_NOTICE="기존 model-profiles.yaml 을 보존했습니다. 새 agent_defaults/agent_model_overrides 형식이 필요하면 배포 템플릿과 비교해 병합하세요."
   fi
