@@ -1,132 +1,41 @@
-# AGENTS.md — Codex adapter for Solon Product SFS
+# AGENTS.md — Codex adapter for Solon Product SFS (entry-lean)
 
 This project uses Solon Product SFS, the **Solo Founder System** for AI-native product work
 (multi-adaptor by design — Claude Code / Codex / Gemini CLI 동등 1급).
 
-Before planning or editing, read:
+## Entry (token-min)
 
-- `SFS.md`
-- `.sfs-local/VERSION`
-- `.sfs-local/divisions.yaml`
-- recent files under `.sfs-local/sprints/`
-- recent files under `.sfs-local/decisions/`
+- Continue from the smallest durable entrypoint: `sfs status` → current sprint `report.md`.
+- Do not auto-load verbose history (`events.jsonl`, old `scheduled_task_log`, old `review-runs`) unless needed.
+
+Resume hints (default order):
+- `sfs status` (1-line dashboard)
+- `.sfs-local/current-sprint` → `.sfs-local/sprints/<id>/report.md`
+- If blocked: `.sfs-local/sprints/<id>/retro.md`, then relevant ADRs under `.sfs-local/decisions/`
 
 ## Agent/model setting guard
 
-When the user asks about agent/model settings, first inspect
-`.sfs-local/model-profiles.yaml`. If it is missing, fallback, `selected_runtime:
-current`, `selected_policy: current_model`, or unconfirmed, do not describe the
-profile as configured. Say it is an unconfirmed current-model fallback and ask
-which policy to apply. Explain what the question means: it chooses which model
-family Solon should use for design/review agents, implementation workers, and
-simple helpers. Tell the user that they can safely skip it now; skipping keeps
-`current_model` fallback and will be asked again on a future upgrade or
-agent-setting question. Default choices: Claude recommended (Opus 4.7 for
-design/review, Sonnet 4.6 for implementation, Haiku for helpers), skip now /
-keep current_model, all_high, or custom. If the user already states the desired
-mapping, confirm it and update the model profile.
+When the user asks about agent/model settings, inspect `.sfs-local/model-profiles.yaml` first.
+If it is missing or unconfirmed (`selected_runtime: current` / `selected_policy: current_model`),
+do not claim it is configured. Say it is a current-model fallback and ask which policy to apply.
 
-## SFS commands — bash adapter 우선 (deterministic SSoT)
+## SFS commands — deterministic bash adapter SSoT
 
-Solon Product SFS 의 주요 명령은 모두 `sfs <command>` global runtime 이 deterministic
-bash adapter 로 내려보낸다. `.sfs-local/scripts/` 는 vendored layout 의 fallback 이고,
-기본 방향은 project-local state + packaged runtime 이다.
-Codex 에서는 `$sfs ...` Skill mention 또는 `sfs ...` 일반 발화를 우선 사용한다. Bare `/sfs`
-는 Codex native slash UI 에서 `커맨드 없음` / `Unrecognized command` 로 모델 전에 차단될 수
-있다. Runtime adaptor 는 vendor 별 입력면 차이를 흡수해서 반드시 같은 bash adapter 로
-내려보내야 한다.
+Solon SFS commands run via the global `sfs <command>` runtime (deterministic bash adapter).
+In Codex, prefer `$sfs ...` or `sfs ...`. If `/sfs ...` reaches the model, treat it as the same intent.
 
-Codex 가 사용자 메시지 `/sfs ...` 를 읽을 수 있다면 이미 앱/런타임 parser 를 통과한 것이다.
-이때는 "unsupported command" 로 답하지 말고 아래 dispatch table 을 즉시 적용한다.
+Rules:
+- Always run the adapter first for `sfs <command>`.
+- Print adapter `stdout` verbatim; on non-zero exit also show `stderr` + exit code (no paraphrase).
+- If `sfs` is missing on PATH, say so in 1 line and point to install/upgrade.
+- If `/sfs loop` indicates a mutex conflict (Solon `domain_locks`), stop and report the lock owner/domain.
 
-만약 `/sfs ...` 텍스트가 모델/Skill 에 실제로 도달했다면 이미 host parser 를 통과한 것이므로
-아래와 동일하게 dispatch 한다. 그러나 현재 Codex app/CLI 에서는 leading slash 입력이 모델에
-도달하기 전에 native slash parser 에서 차단될 수 있다. 이 경우는 Solon 미설치가 아니라
-**Codex runtime adapter compatibility gap** 이다. `$sfs ...` explicit Skill, `sfs ...` 일반 발화,
-자연어 요청이 들어오면 아래와 동일하게 **`sfs` runtime 을 직접 호출**한다 (paraphrase 금지,
-결정성 유지):
+Hybrid refinement (only when the adapter created/pointed to files):
+- `brainstorm|plan|implement|decision|report|retro`: refine the created artifact(s) and answer as a Solon report.
+- `review`: summarize/translate from recorded results; do not dump raw executor output unless asked.
 
-| 사용자 발화 | 실행할 명령 |
-|:--|:--|
-| `/sfs status`, `$sfs status`, `sfs status` | `sfs status [--color=auto/always/never]` |
-| `/sfs start <goal>`, `$sfs start <goal>`, `sfs start <goal>` | `sfs start <goal> [--id <sprint-id>] [--force]` |
-| `/sfs guide`, `$sfs guide`, `sfs guide` | `sfs guide [--path|--print]` |
-| `/sfs auth ...`, `$sfs auth ...`, `sfs auth ...` | `sfs auth status|check|login|probe [--executor <tool>]` |
-| `/sfs division list`, `$sfs division activate <division|all>`, `sfs division ...` | `sfs division list` / `sfs division activate <division|all>`; abstract 본부를 active/scoped/temporal 로 전환하고 decision/event evidence 를 남김 |
-| `/sfs adopt [--apply]`, `$sfs adopt [--apply]`, `sfs adopt [--apply]` | `sfs adopt [--id legacy-baseline] [--apply]`; legacy 프로젝트를 report-first baseline 으로 인계. 문서 과잉/문서 0 양쪽 모두 raw scan 은 archive, visible 은 `report.md` + `retro.md` |
-| `/sfs brainstorm ...`, `$sfs brainstorm ...`, `sfs brainstorm ...` | `sfs brainstorm [text|--stdin]` raw capture 후 Codex 가 Solon CEO 로 §1~§7 정리 |
-| `/sfs plan`, `$sfs plan`, `sfs plan` | `sfs plan` 후 Codex 가 `brainstorm.md` 기반 G1 plan + CTO/CPO contract 작성 |
-| `/sfs implement ...`, `$sfs implement ...`, `sfs implement ...` | `sfs implement [work slice|--stdin]` 후 Codex 가 `plan.md` 기반 실제 코드 변경 + 테스트/스모크 evidence 작성 |
-| `/sfs review --gate <id> [--executor <tool>] [--prompt-only]`, `$sfs review --gate <id> [--executor <tool>] [--prompt-only]`, `$sfs review --show-last` | `sfs review --gate <id> [--executor <tool>] [--prompt-only]` 또는 `sfs review --show-last [--gate <id>]`; 기본은 선택된 CPO executor bridge 실행, `--prompt-only` 는 수동 handoff, `--show-last` 는 executor 재실행 없이 기존 결과를 사용자 언어의 요약/action report 로 확인 |
-| `/sfs decision <title>`, `$sfs decision <title>`, `sfs decision <title>` | `sfs decision "<title>" [--id <id>]` 후 Codex 가 ADR 본문 작성 |
-| `/sfs report [--sprint <id>] [--compact]`, `$sfs report [--sprint <id>] [--compact]`, `sfs report [--sprint <id>] [--compact]` | `sfs report [--sprint <id>] [--compact]`; Codex 가 workbench 산출물을 한 장짜리 최종 작업보고서로 정리. `--compact` 는 사용자 동의 후 workbench/tmp 산출물을 archive 로 이동 |
-| `/sfs tidy [--sprint <id>\|--all] [--apply]`, `$sfs tidy ...`, `sfs tidy ...` | `sfs tidy [--sprint <id>\|--all] [--apply]`; 기본 dry-run. `--apply` 는 report.md 가 없으면 생성하고 workbench/tmp 를 archive 로 이동해 남겨야 할 문서만 유지 |
-| `/sfs retro [--close]`, `$sfs retro [--close]`, `sfs retro [--close]` | `sfs retro [--close]`; `--close` 는 Codex 가 `retro.md` 와 `report.md` 를 먼저 채운 뒤 close adapter 1회 실행 |
-| `/sfs commit ...`, `$sfs commit ...`, `sfs commit ...` | `sfs commit [status|plan|apply --group <name>]`; working tree 의미 그룹 확인 + branch preflight 안내 + 선택 그룹 local commit. Git Flow-aware 메시지 자동 생성. 이후 branch push/main 흡수는 Codex 가 Git Flow lifecycle 로 수행 |
-| `/sfs loop ...`, `$sfs loop ...`, `sfs loop ...` | `sfs loop [OPTIONS]` (Ralph Loop + Solon mutex, see `--help`) |
+Keep questions to 1–3 when critical info is missing; do not auto-run the next gate.
 
-각 스크립트의 stdout 은 verbatim 그대로 사용자에게 보여주고 (paraphrase 금지),
-non-zero exit 시 stderr + exit code 도 함께 보고한다. `sfs` runtime 이 PATH 에 없으면
-그 사실을 1줄로 사용자에게 알리고 install/upgrade 를 안내한다.
-
-명령 모드는 고정이다:
-- **Bash-only**: `status`, `start`, `guide`, `auth`, `division`, `upgrade`, `update`, `version`, `commit`, `loop`.
-- **Always hybrid**: `adopt`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`.
-- **Conditional hybrid**: `tidy` — adapter apply 후 report.md 를 archive source 기반으로 정제한다.
-- **Adapter-run**: `review` — 기본적으로 bash adapter 가 선택된 CPO executor bridge 를 실행하고 stdout 에는 verdict/output path 메타데이터만 보여준다. Codex 는 result 원문을 그대로 덤프하지 않고 사용자 언어로 요약/action report 를 렌더링한다. `--prompt-only` 일 때도 현재 Codex runtime 이 대신 verdict 를 작성하지 않고 prompt handoff 로 멈춘다.
-- **Adapter-run local commit**: `commit` — 사용자 명시 호출 시 branch preflight 를 보여주고 선택 그룹을 local commit 한다. 메시지는 Git Flow-aware Conventional Commit 으로 자동 생성한다. branch push/main merge/main push 는 adapter 가 아니라 Codex runtime 의 Git Flow lifecycle 책임이다.
-
-부족한 정보가 있으면 1~3개 질문만 남기고, 다음 gate 를 자동 실행하지 않는다.
-
-### `/sfs implement` — implementation execution
-
-`/sfs plan` 은 구현 계약을 만드는 명령이고, `/sfs implement` 가 실제 코드를 바꾸는 명령이다.
-adapter stdout 을 먼저 그대로 보여준 뒤, Codex 는 `plan.md`, `implement.md`, `log.md`, 관련
-프로젝트 파일을 읽고 구현까지 진행한다.
-
-구현 기본값:
-- Think Before Coding: 가정, trade-off, 성공 기준을 짧게 잡고 모호하면 질문한다.
-- Simplicity First: AC 를 증명하는 최소 code/document surface 로 구현한다.
-- Surgical Changes: 요청 slice 와 직접 연결된 줄만 바꾸고, 관련 없는 정리는 follow-up 으로 남긴다.
-- Goal-Driven Execution: 변경 파일만으로 완료 처리하지 않고 검증 evidence + review handoff 까지 남긴다.
-- 공유 design concept 과 변경 boundary 를 먼저 확인한다.
-- DDD-lite 로 같은 domain term 을 코드/테스트/문서에서 같은 뜻으로 쓴다.
-- 가능하면 TDD-lite 로 작은 failing/covering test → pass → refactor 순서로 간다.
-- 기존 codebase regularity 를 우선하고, one-off 패턴을 늘리지 않는다.
-- 구현 후 `implement.md` 와 `log.md` 에 변경 파일, 검증 명령, 결과, review handoff 를 남긴다.
-
-### `/sfs report` — final report refinement
-
-`brainstorm.md`, `plan.md`, `implement.md`, `log.md`, `review.md` 는 작업 중
-workbench 다. Sprint 완료 전 Codex 는 `/sfs report` 로 `report.md` 를 간결한 최종
-작업보고서로 정리한다. 핵심은 결과, 범위, 결정, 구현 요약, 검증 evidence, 남은 리스크다.
-Raw chronology 는 `retro.md`, `log.md`, session/events 에 남긴다.
-
-Windows PowerShell 환경에서는 global `sfs` CLI 를 Git Bash/WSL 에서 실행하는 경로를 우선한다.
-vendored layout 에서만 `.sfs-local/scripts/sfs.ps1 <command> [args]` wrapper 를 fallback 으로 쓴다.
-
-## `/sfs loop` — 멀티 adaptor LLM executor convention
-
-`/sfs loop` 는 자율 진행 (Ralph Loop 패턴) 의 LLM 호출 site 다. 어떤 CLI 환경에서 호출하든
-`--executor` flag (또는 `SFS_EXECUTOR` env) 로 LLM CLI 를 명시한다:
-
-- `--executor claude` → `claude -p --dangerously-skip-permissions`
-- `--executor gemini` → `gemini --skip-trust --yolo --output-format text -p "Read stdin and execute the requested task."`
-- `--executor codex` → `codex exec --full-auto --ephemeral --output-last-message <result> -`
-- `--executor "<custom command>"` → 그대로 passthrough
-
-이 convention 은 Solon-wide invariant 다 — `loop` 만 multi-adaptor 가 아니라, Solon 의 모든
-SFS 명령이 Claude/Codex/Gemini 어느 1급 CLI 에서든 동등한 deterministic bash adapter
-SSoT 로 동작한다. 본 AGENTS.md (Codex adapter) 와 짝이 되는 GEMINI.md / CLAUDE.md 도 동일
-규약을 따른다.
-
-## 운영 규율
-
-- 사용자 작업 보존 (Preserve user work). 결정으로 인해 동작이 바뀌거나 작업이 삭제될 수
-  있을 때만 묻는다.
-- Git Flow lifecycle 은 Codex 가 소유한다. 새 작업 전 `git status --short` + 현재 branch 확인,
-  도메인별 `feature/<domain>-<short-slug>` 또는 `hotfix/<domain>-<short-slug>` 생성/전환,
-  검증, commit, branch push, main 흡수, origin main push 까지 완료 조건으로 수행한다.
-- destructive git, unrelated dirty set, merge conflict, failing tests, protected branch/remote rejection,
-  auth prompt 에서만 stop + 사용자 결정/실행 요청.
-- 무차별 `git push origin *` 금지. 정확한 branch/main push 만 수행한다.
+Full reference (only when needed):
+- `.agents/skills/sfs/SKILL.md` (Codex dispatch + Solon report shape)
+- `sfs guide --print` (project onboarding guide)
