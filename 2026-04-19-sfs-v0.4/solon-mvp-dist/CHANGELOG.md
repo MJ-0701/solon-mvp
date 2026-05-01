@@ -1,3 +1,22 @@
+## [0.5.54-product] - 2026-05-01
+
+**Windows auth executor UX hotfix.** Tightens the `/sfs auth` and review bridge
+path for Windows users who have Claude CLI installed but only desktop apps for
+Codex or Gemini.
+
+### Fixed
+
+- **Positional auth executor** — `/sfs auth login codex` now works in addition
+  to `/sfs auth login --executor codex`.
+- **App-only executor fallback** — missing Codex/Gemini CLI errors now explain
+  that desktop/web apps are manual prompt-only fallback surfaces, not headless
+  SFS executor bridges.
+- **Windows Store Codex path guard** — SFS now rejects package-private
+  `WindowsApps\OpenAI.Codex_...\app\resources\codex.exe` command overrides and
+  points users to the App Execution Alias or another executable shim.
+- **Windows smoke coverage** — the Scoop smoke workflow now exercises
+  `sfs auth status codex` so auth argument parsing stays covered.
+
 ## [0.5.53-product] - 2026-05-01
 
 **Implementation guardrails and publish hygiene.** Strengthens `/sfs
