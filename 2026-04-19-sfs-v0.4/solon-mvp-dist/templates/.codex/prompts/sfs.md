@@ -28,12 +28,14 @@ subcommand's arguments.
 ## Behavior
 
 If the first argument is `status`, `start`, `guide`, `auth`, `brainstorm`, `plan`, `implement`, `review`, `decision`,
-`retro`, or `loop`, dispatch to the `sfs` runtime command first. In vendored
+`retro`, `commit`, or `loop`, dispatch to the `sfs` runtime command first. In vendored
 layout only, `.sfs-local/scripts/sfs-dispatch.sh` is an acceptable fallback.
 
 Command modes:
-- **Bash-only**: `status`, `start`, `guide`, `auth`, `loop`. Stop after
-  verbatim adapter output.
+- **Bash-only**: `status`, `start`, `guide`, `auth`, `commit`, `loop`. Stop after
+  verbatim adapter output. For `commit`, the adapter prints branch preflight,
+  groups files, auto-generates a Git Flow-aware Conventional Commit message,
+  and never pushes.
 - **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `retro`. Run the adapter,
   then perform the documented file refinement.
 - **Adapter-run**: `review`. The bash adapter executes the selected CPO
@@ -98,6 +100,7 @@ not create a new verdict in the current runtime.
 | `review`   | `sfs review <args>`   | CPO executor bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
 | `decision` | `sfs decision <args>` | creates ADR, then Codex fills Context/Decision/Alternatives/Consequences |
 | `retro`    | `sfs retro <args>`    | opens retro.md, then Codex fills KPT/PDCA. With `--close`, refine before close |
+| `commit`   | `sfs commit <args>`   | groups working tree changes and commits only the selected group. Never pushes |
 | `loop`     | `sfs loop <args>`     |
 
 ## Procedure
@@ -108,7 +111,7 @@ not create a new verdict in the current runtime.
 3. Execute via shell. Capture stdout/stderr/exit.
 4. Print stdout verbatim. If exit≠0, also print stderr + `exit <code>` line.
 5. Stop or continue by command mode:
-   - `status`, `start`, `guide`, `auth`, `loop`: stop. No paraphrase, no summary.
+   - `status`, `start`, `guide`, `auth`, `commit`, `loop`: stop. No paraphrase, no summary.
    - `brainstorm`: Brainstorm CEO Refinement.
    - `plan`: Plan G1 Refinement.
    - `implement`: Implementation Execution.
@@ -226,6 +229,9 @@ After `/sfs retro` succeeds:
 - `/sfs retro --close` triggers auto-commit. In AI runtimes, refine `retro.md`
   before running the close adapter, and only when the user explicitly requested
   close.
+- `/sfs commit apply ...` creates a local git commit. Run it only when the
+  user explicitly requested commit grouping/apply. It prints branch preflight,
+  auto-generates a Git Flow-aware Conventional Commit message, and never pushes.
 - Never run `git push origin *` automatically — push is user-only (§1.5).
 
 ## Why this exists alongside the Skill

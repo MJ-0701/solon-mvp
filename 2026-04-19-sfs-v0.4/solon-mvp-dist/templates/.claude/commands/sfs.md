@@ -20,6 +20,7 @@ description: |
   decision  결정 기록 생성 + ADR refinement
   log       events.jsonl에 이벤트 기록
   retro     sprint 회고 작성/갱신 (+ --close before/after guard)
+  commit    working tree 의미 그룹 분류 + branch preflight + 선택 그룹 local commit
   loop      Ralph Loop + Solon mutex 기반 자율 진행 (bash adapter, WU-27)
 argument-hint: "[command] [goal/details]"
 allowed-tools: Bash, Read, Write, Edit, Grep, Glob
@@ -113,16 +114,16 @@ token as the subcommand and the remainder as that subcommand's arguments.
 $ARGUMENTS
 ```
 
-## Adapter Dispatch (status / start / guide / auth / brainstorm / plan / implement / review / decision / retro / loop) — execute first
+## Adapter Dispatch (status / start / guide / auth / brainstorm / plan / implement / review / decision / retro / commit / loop) — execute first
 
 If the first argument is **`status`**, **`start`**, **`guide`**, **`auth`**, **`update`**, **`brainstorm`**, **`plan`**, **`implement`**, **`review`**,
-**`decision`**, **`retro`**, or **`loop`**, dispatch the request through the
+**`decision`**, **`retro`**, **`commit`**, or **`loop`**, dispatch the request through the
 `sfs` runtime command first. The runtime normalizes command surfaces
 (`/sfs`, `$sfs`, `sfs`) and delegates to the deterministic bash adapter. In
 vendored layout only, `.sfs-local/scripts/sfs-dispatch.sh` is an acceptable fallback.
 
 Command modes:
-- **Bash-first**: `status`, `start`, `guide`, `auth`, `update`, `loop`. Print verbatim
+- **Bash-first**: `status`, `start`, `guide`, `auth`, `update`, `commit`, `loop`. Print verbatim
   adapter output first. A compact recap/status line is allowed when it helps
   the user see state and the next action, but adapter stdout remains SSoT.
 - **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `retro`. Run the adapter,
@@ -131,6 +132,11 @@ Command modes:
   executor bridge by default. Stop after adapter output. If `--prompt-only` is
   used, treat the prompt path as manual handoff material and do not write a
   Claude verdict in the current runtime.
+- **Adapter-run local commit**: `commit`. Run only when the user explicitly
+  invokes it. It groups staged/unstaged/untracked files into `product-code`,
+  `sprint-meta`, `runtime-upgrade`, and `ambiguous`, then commits only the
+  selected group. It prints Git Flow branch preflight guidance, auto-generates
+  a Conventional Commit message unless `-m` is supplied, and never pushes.
 
 Sprint mode guidance:
 - Do not treat every new sprint as a fresh discovery/planning sprint. If the
@@ -174,6 +180,7 @@ Dispatch table:
 | `review`   | `sfs review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
 | `decision` | `sfs decision <remaining args>` | creates ADR file, then Claude fills Context/Decision/Alternatives/Consequences |
 | `retro`    | `sfs retro <remaining args>`    | opens retro.md, then Claude fills KPT/PDCA. With `--close`, refine before close |
+| `commit`   | `sfs commit <remaining args>`   | groups working tree changes and commits only the selected group. Never pushes |
 | `loop`     | `sfs loop <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim (WU-27 §3) |
 
 Procedure (apply in order):
@@ -220,6 +227,9 @@ Procedure (apply in order):
      `4`=`sprint-templates/retro.md` missing, `7`=unknown CLI flag,
      `8`=`--close` requested but `review.md` missing (run /sfs review first),
      `99`=unknown.
+   - commit: `0`=ok, `1`=no matching files/nothing to commit, `3`=not a git
+     repo, `5`=unsafe staged files or git commit failed, `7`=usage,
+     `99`=unknown.
    - loop: `0`=ok, `1`=invalid usage, `2`=PROGRESS frontmatter parse,
      `3`=drift detected (resume-check exit 16), `4`=mutex claim failed,
      `5`=safety_lock tripped, `6`=WU spec missing/corrupt,
@@ -236,6 +246,8 @@ Procedure (apply in order):
    - `implement` → Implementation Execution
    - `decision` → Decision ADR Refinement
    - `retro` → Retro G5 Refinement
+   - `commit` → stop after adapter output. Do not add files or create a second
+     commit outside the adapter result.
    - `review` → Review CPO Handling. Use adapter stdout as metadata, read the
      recorded result path when present, then render a localized Solon report
      from recorded adapter/executor evidence only. Do not echo raw result bodies.
@@ -434,6 +446,7 @@ If the first argument is one of the modes below, follow that mode.
 - `decision`: **Adapter first + ADR refinement (above).** Fallback only: write a short ADR-style decision under `.sfs-local/decisions/` based on `sprint-templates/decision-light.md`.
 - `log`: Append a one-line JSON event to `.sfs-local/events.jsonl`.
 - `retro`: **Adapter first + G5 refinement (above).** Fallback only: write or update the current sprint `retro.md` based on `sprint-templates/retro.md` (no auto commit / no sprint close in fallback).
+- `commit`: **Adapter (above).** Fallback only: explain the commit grouping model and recommend running `sfs commit plan` directly.
 - `loop`: **Adapter (above).** Fallback only: explain Ralph Loop + Solon mutex pattern and recommend running `.sfs-local/scripts/sfs-loop.sh --help` directly (WU-27).
 
 ## Usage Guide Output
@@ -453,6 +466,8 @@ When showing usage, keep it compact and practical. Include this shape:
                           CPO Evaluator review bridge 실행/기록
 /sfs decision <decision>  짧은 결정 기록 남기기
 /sfs retro                sprint 회고 작성/갱신
+/sfs commit plan          working tree 의미 그룹 확인
+/sfs commit apply --group product-code
 ```
 
 Also explain this in one or two sentences:
@@ -467,5 +482,8 @@ Also explain this in one or two sentences:
 - Keep sprint artifacts concise and operational.
 - Do not invent completed work. If evidence is missing, mark it as unknown.
 - Prefer concrete next actions over broad methodology explanations.
-- For `status`, `start`, `guide`, `auth`, and `loop`, the bash adapter is authoritative — do not paraphrase or augment its output.
+- For `status`, `start`, `guide`, `auth`, `commit`, and `loop`, the bash adapter is authoritative — do not paraphrase or augment its output.
+- `/sfs commit apply ...` creates a local git commit. Run it only when the
+  user explicitly requested commit grouping/apply. It prints branch preflight,
+  auto-generates a Git Flow-aware Conventional Commit message, and never pushes.
 - For `brainstorm`, `plan`, `decision`, and `retro`, the bash adapter is authoritative for command I/O, and the documented refinement is the authoritative AI-side follow-up. `review` is adapter-run by default; do not add a current-runtime CPO verdict after successful adapter output.
