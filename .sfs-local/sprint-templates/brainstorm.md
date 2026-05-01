@@ -14,6 +14,8 @@ status: draft        # draft | ready-for-plan | g0-reviewed
 > 목적은 사용자의 raw 요구사항을 바로 plan 으로 굳히지 않고, 문제/대안/제약/범위를 먼저 정리하는 것.
 > `/sfs start` 는 workspace 를 만들고, `/sfs brainstorm` 은 raw 를 §8 에 기록한 뒤
 > AI runtime 에서 Solon CEO 가 §1~§7 을 채운다. direct bash 는 capture-only 다.
+> 생명주기: 본 문서는 진행 중 workbench 이다. Sprint close 후 핵심 문제/성공상태만
+> `report.md` 로 압축되고, raw history 는 `retro.md` / session log 가 담당한다.
 
 ---
 

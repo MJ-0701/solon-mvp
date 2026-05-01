@@ -19,12 +19,26 @@ set -uo pipefail
 # CONSTANTS
 # ─────────────────────────────────────────────────────────────────────
 SFS_LOCAL_DIR="${SFS_LOCAL_DIR:-.sfs-local}"
+if [[ -z "${SFS_RUNTIME_DIR:-}" ]]; then
+  SFS_COMMON_SOURCE="${BASH_SOURCE[0]:-$0}"
+  SFS_COMMON_DIR="$(cd "$(dirname "${SFS_COMMON_SOURCE}")" && pwd)"
+  SFS_RUNTIME_DIR="$(cd "${SFS_COMMON_DIR}/.." && pwd)"
+fi
+if [[ -z "${SFS_DIST_DIR:-}" ]]; then
+  SFS_DIST_DIR="$(cd "${SFS_RUNTIME_DIR}/../.." 2>/dev/null && pwd || printf '%s\n' "${SFS_RUNTIME_DIR}")"
+fi
 SFS_EVENTS_FILE="${SFS_LOCAL_DIR}/events.jsonl"
 SFS_CURRENT_SPRINT_FILE="${SFS_LOCAL_DIR}/current-sprint"
 SFS_CURRENT_WU_FILE="${SFS_LOCAL_DIR}/current-wu"
 SFS_VERSION_FILE="${SFS_LOCAL_DIR}/VERSION"
 SFS_SPRINTS_DIR="${SFS_LOCAL_DIR}/sprints"
 SFS_DECISIONS_DIR="${SFS_LOCAL_DIR}/decisions"
+SFS_PROJECT_TEMPLATES_DIR="${SFS_LOCAL_DIR}/sprint-templates"
+SFS_RUNTIME_TEMPLATES_DIR="${SFS_RUNTIME_DIR}/sprint-templates"
+SFS_PROJECT_DECISIONS_TEMPLATE_DIR="${SFS_LOCAL_DIR}/decisions-template"
+SFS_RUNTIME_DECISIONS_TEMPLATE_DIR="${SFS_RUNTIME_DIR}/decisions-template"
+SFS_PROJECT_PERSONAS_DIR="${SFS_LOCAL_DIR}/personas"
+SFS_RUNTIME_PERSONAS_DIR="${SFS_RUNTIME_DIR}/personas"
 
 # Exit codes (WU-23 §1.1 / §1.2 정합)
 SFS_EXIT_OK=0
@@ -60,6 +74,49 @@ reverse_lines() {
 }
 
 # ─────────────────────────────────────────────────────────────────────
+# RUNTIME / PROJECT-LOCAL ASSET RESOLUTION
+# ─────────────────────────────────────────────────────────────────────
+
+# Project-local files are overrides. Packaged runtime files are the default.
+# This keeps consumer repos thin while preserving custom personas/templates.
+sfs_asset_file() {
+  local project_path="${1:?project path required}"
+  local runtime_path="${2:?runtime path required}"
+  if [[ -f "${project_path}" ]]; then
+    printf '%s\n' "${project_path}"
+  else
+    printf '%s\n' "${runtime_path}"
+  fi
+}
+
+sfs_sprint_template_file() {
+  local name="${1:?template name required}"
+  sfs_asset_file \
+    "${SFS_PROJECT_TEMPLATES_DIR}/${name}.md" \
+    "${SFS_RUNTIME_TEMPLATES_DIR}/${name}.md"
+}
+
+sfs_decision_template_file() {
+  local name="${1:?template name required}"
+  sfs_asset_file \
+    "${SFS_PROJECT_DECISIONS_TEMPLATE_DIR}/${name}" \
+    "${SFS_RUNTIME_DECISIONS_TEMPLATE_DIR}/${name}"
+}
+
+sfs_persona_file() {
+  local name="${1:?persona name required}"
+  sfs_asset_file \
+    "${SFS_PROJECT_PERSONAS_DIR}/${name}.md" \
+    "${SFS_RUNTIME_PERSONAS_DIR}/${name}.md"
+}
+
+sfs_guide_file() {
+  sfs_asset_file \
+    "${SFS_LOCAL_DIR}/GUIDE.md" \
+    "${SFS_DIST_DIR}/GUIDE.md"
+}
+
+# ─────────────────────────────────────────────────────────────────────
 # VALIDATION
 # ─────────────────────────────────────────────────────────────────────
 
@@ -67,7 +124,7 @@ reverse_lines() {
 # Returns: 0=ok, 1=no init, 2=events.jsonl 손상, 3=no git.
 validate_sfs_local() {
   if [[ ! -d "${SFS_LOCAL_DIR}" ]]; then
-    echo "no .sfs-local found, run /sfs start first" >&2
+    echo "no .sfs-local found — this project is not initialized yet. Run: sfs init --yes" >&2
     return ${SFS_EXIT_NO_INIT}
   fi
   if [[ -f "${SFS_EVENTS_FILE}" ]]; then
@@ -359,6 +416,84 @@ update_frontmatter() {
     }
     { print }
   ' "${path}" > "${tmp}" && mv -f "${tmp}" "${path}"
+}
+
+# ─────────────────────────────────────────────────────────────────────
+# SPRINT REPORT / WORKBENCH COMPACTION
+# ─────────────────────────────────────────────────────────────────────
+
+# sfs_prepare_sprint_report <sprint-id> <iso-ts> <status>
+# Ensures `<sprint>/report.md` exists and updates report frontmatter.
+# stdout: report path
+sfs_prepare_sprint_report() {
+  local sid="${1:?sprint id required}" ts="${2:?timestamp required}" status="${3:-draft}"
+  local sdir="${SFS_SPRINTS_DIR}/${sid}"
+  local report_path="${sdir}/report.md"
+  local created_report=0
+  local template
+  template="$(sfs_sprint_template_file report)"
+
+  if [[ ! -d "${sdir}" ]]; then
+    echo "sprint not found: ${sid}" >&2
+    return ${SFS_EXIT_NO_INIT}
+  fi
+  if [[ ! -f "${report_path}" ]]; then
+    if [[ ! -f "${template}" ]]; then
+      echo "template missing: ${template}" >&2
+      return ${SFS_EXIT_NO_TEMPLATES}
+    fi
+    cp "${template}" "${report_path}" || return ${SFS_EXIT_PERM}
+    created_report=1
+  fi
+
+  update_frontmatter "${report_path}" "phase" "report" || return ${SFS_EXIT_PERM}
+  update_frontmatter "${report_path}" "status" "${status}" || return ${SFS_EXIT_PERM}
+  update_frontmatter "${report_path}" "sprint_id" "${sid}" || return ${SFS_EXIT_PERM}
+  if [[ "${created_report}" -eq 1 ]]; then
+    update_frontmatter "${report_path}" "created_at" "${ts}" || return ${SFS_EXIT_PERM}
+  fi
+  update_frontmatter "${report_path}" "last_touched_at" "${ts}" || return ${SFS_EXIT_PERM}
+  if [[ "${status}" == "final" ]]; then
+    update_frontmatter "${report_path}" "closed_at" "${ts}" || return ${SFS_EXIT_PERM}
+  fi
+  printf '%s\n' "${report_path}"
+}
+
+# sfs_compact_sprint_workbench <sprint-id> <iso-ts>
+# Replaces verbose active-workbench docs with small redirects after a final
+# report exists. History belongs in retro/session logs; decisions stay intact.
+sfs_compact_sprint_workbench() {
+  local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
+  local sdir="${SFS_SPRINTS_DIR}/${sid}"
+  local doc path title
+  for doc in brainstorm plan implement log review; do
+    path="${sdir}/${doc}.md"
+    [[ -f "${path}" ]] || continue
+    case "${doc}" in
+      brainstorm) title="Brainstorm" ;;
+      plan) title="Plan" ;;
+      implement) title="Implement" ;;
+      log) title="Log" ;;
+      review) title="Review" ;;
+      *) title="${doc}" ;;
+    esac
+    {
+      printf '%s\n' '---'
+      printf 'phase: compacted\n'
+      printf 'status: compacted\n'
+      printf 'sprint_id: %s\n' "${sid}"
+      printf 'source_artifact: %s.md\n' "${doc}"
+      printf 'compacted_at: %s\n' "${ts}"
+      printf '%s\n\n' '---'
+      printf '# %s — compacted\n\n' "${title}"
+      printf '> This active workbench artifact was compacted after sprint completion.\n'
+      printf '> Read `report.md` for the final work report and `retro.md` for history/learning.\n\n'
+      printf '%s\n' '- Final report: `report.md`'
+      printf '%s\n' '- Retrospective/history: `retro.md`'
+      printf '%s\n' '- Machine trace: `.sfs-local/events.jsonl`'
+    } > "${path}" || return ${SFS_EXIT_PERM}
+  done
+  return ${SFS_EXIT_OK}
 }
 
 # ─────────────────────────────────────────────────────────────────────
@@ -1255,8 +1390,9 @@ sprint_close() {
   return 0
 }
 
-# auto_commit_close <sprint-id> — sprint close 후 git add + commit. push 안 함 (§1.5 정합).
-# WARNING: AI 자율 호출 금지 — 사용자가 `/sfs retro --close` 명시 호출 시에만 동작 (§1.5' 정합).
+# auto_commit_close <sprint-id> — sprint close 후 git add + commit.
+# Branch push/main merge/main push 는 AI runtime Git Flow lifecycle 책임.
+# WARNING: AI 자율 호출 금지 — 사용자가 `/sfs retro --close` 명시 호출 시에만 동작.
 # git operation 들은 silent fail (`|| true`) — git 부재 / pre-commit hook 등 환경 차이 흡수.
 auto_commit_close() {
   local sid="${1:-}"

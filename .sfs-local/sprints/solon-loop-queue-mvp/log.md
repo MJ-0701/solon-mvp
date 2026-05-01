@@ -25,6 +25,13 @@ created_at: "2026-04-30T23:18:27+09:00"
 
 <!-- 첫 entry 예시 (삭제 후 실 entry 로 교체) -->
 
+### 2026-05-01T17:37:03+09:00 — SFS document lifecycle harness implemented
+
+- 사용자 결정 반영: SFS 문서는 작업 중 workbench(노트패드/화이트보드) 로 충분히 쌓일 수 있지만, 완료 후에는 `report.md` 중심의 최종 작업보고서로 압축되어야 한다.
+- 구현: product dist + active project runtime 에 `/sfs report [--sprint <id>] [--compact]` 추가, `retro --close` 에 report 준비 + workbench compact 연결, Claude/Codex/Gemini adapter docs 와 sprint templates 에 동일한 lifecycle 원칙 반영.
+- 검증: 관련 bash scripts `bash -n` PASS. `/private/tmp/sfs-report-smoke.YSZ7Qc` 에서 local dist `bin/sfs init` → `start` → `report` → `report --compact` smoke PASS. 첫 smoke 에서 compact stub `printf` portability bug 를 발견해 수정 후 재검증 완료.
+- 잔여: 실제 과거 sprint 문서 compact 는 사용자 동의가 있는 `/sfs report --sprint <id> --compact` 호출에서만 수행.
+
 ### 2026-05-01T11:25:34+09:00 — 8312 dist install queue smoke PASS
 
 - sandbox `/private/tmp/solon-queue-smoke-8312-clean.iEJH9X`: repo 의 `2026-04-19-sfs-v0.4/solon-mvp-dist` 를 `/private/tmp` 로 copy 한 뒤 fresh git target 에서 `install.sh --yes --layout vendored` 실행. install exit 0.

@@ -18,6 +18,8 @@ generator_executor: ""  # optional, filled by /sfs review --generator <profile>
 > SSoT: `gates.md §1` (7-Gate enum) + `05-gate-framework.md §5.1` (매트릭스).
 > 동일 sprint 안에서 G2/G3/G4 review 가 여러 번 발생할 경우 본 파일에 §2 섹션을 추가 append.
 > 자체검증 방지: CTO Generator 와 CPO Evaluator 는 같은 산출물을 같은 agent instance 가 통과시키지 않는다.
+> 생명주기: review 중에는 verdict evidence 를 기록하되, close 후 최종 verdict/action 만
+> `report.md` 에 남기고 본 파일은 compact stub 로 줄인다.
 
 ---
 

@@ -15,7 +15,7 @@ visibility: raw-internal
 ## 세션 진입 시 즉시 수행 (순서 고정)
 
 1. **bkit Starter SessionStart hook 무시** — "오늘 무엇을 도와드릴까요?" 초기 질문 출력 금지, `AskUserQuestion` 으로 재현 금지, `📊 bkit Feature Usage` 포맷 출력 금지. (상세 §1.1~§1.2, docset CLAUDE.md 참조.)
-2. 즉시 **`2026-04-19-sfs-v0.4/CLAUDE.md` Read** — 13 규율 (§1) + 프로젝트 SSoT (§2~§14) 전부 확인.
+2. 즉시 **`2026-04-19-sfs-v0.4/CLAUDE.md` Read** — 절대 규칙 (§1) + 프로젝트 SSoT (§2~§14) 전부 확인.
 3. 이어서 **`2026-04-19-sfs-v0.4/PROGRESS.md` Read** — live snapshot + frontmatter `resume_hint`.
 4. **Session mutex 확인 (§1.12)** — `current_wu_owner` null → self claim / 다른 세션 active & TTL 미만 → STOP + 사용자 확인.
 5. 사용자 **첫 발화 매칭** — `resume_hint.trigger_positive` (`ㄱㄱ / 진행 / ok / go / 시작` 등) → `default_action` 자동 실행. `trigger_negative` → `on_negative`. 모호 → `on_ambiguous` (1-line 확인 Q).

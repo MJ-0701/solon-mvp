@@ -372,6 +372,7 @@ declare -a CHECK_FILES=(
   ".sfs-local/scripts/sfs-implement.sh|templates/.sfs-local-template/scripts/sfs-implement.sh"
   ".sfs-local/scripts/sfs-review.sh|templates/.sfs-local-template/scripts/sfs-review.sh"
   ".sfs-local/scripts/sfs-decision.sh|templates/.sfs-local-template/scripts/sfs-decision.sh"
+  ".sfs-local/scripts/sfs-report.sh|templates/.sfs-local-template/scripts/sfs-report.sh"
   ".sfs-local/scripts/sfs-retro.sh|templates/.sfs-local-template/scripts/sfs-retro.sh"
   ".sfs-local/scripts/sfs-commit.sh|templates/.sfs-local-template/scripts/sfs-commit.sh"
   ".sfs-local/scripts/sfs-loop.sh|templates/.sfs-local-template/scripts/sfs-loop.sh"
@@ -382,6 +383,7 @@ declare -a CHECK_FILES=(
   ".sfs-local/sprint-templates/log.md|templates/.sfs-local-template/sprint-templates/log.md"
   ".sfs-local/sprint-templates/review.md|templates/.sfs-local-template/sprint-templates/review.md"
   ".sfs-local/sprint-templates/retro.md|templates/.sfs-local-template/sprint-templates/retro.md"
+  ".sfs-local/sprint-templates/report.md|templates/.sfs-local-template/sprint-templates/report.md"
   ".sfs-local/sprint-templates/decision-light.md|templates/.sfs-local-template/sprint-templates/decision-light.md"
   # personas/ — CEO / CTO Generator / CPO Evaluator 기본 persona
   ".sfs-local/personas/ceo.md|templates/.sfs-local-template/personas/ceo.md"
@@ -556,6 +558,7 @@ update_file ".sfs-local/scripts/sfs-plan.sh"     "templates/.sfs-local-template/
 update_file ".sfs-local/scripts/sfs-implement.sh" "templates/.sfs-local-template/scripts/sfs-implement.sh" "sfs implement" "b"
 update_file ".sfs-local/scripts/sfs-review.sh"   "templates/.sfs-local-template/scripts/sfs-review.sh"   "sfs review"   "b"
 update_file ".sfs-local/scripts/sfs-decision.sh" "templates/.sfs-local-template/scripts/sfs-decision.sh" "sfs decision (WU-26)" "b"
+update_file ".sfs-local/scripts/sfs-report.sh"   "templates/.sfs-local-template/scripts/sfs-report.sh"   "sfs report (final report + compaction)" "b"
 update_file ".sfs-local/scripts/sfs-retro.sh"    "templates/.sfs-local-template/scripts/sfs-retro.sh"    "sfs retro --close (WU-26)" "b"
 update_file ".sfs-local/scripts/sfs-commit.sh"   "templates/.sfs-local-template/scripts/sfs-commit.sh"   "sfs commit" "b"
 update_file ".sfs-local/scripts/sfs-loop.sh"     "templates/.sfs-local-template/scripts/sfs-loop.sh"     "sfs loop (WU-27 spec)" "b"
@@ -569,6 +572,7 @@ update_file ".sfs-local/sprint-templates/implement.md"       "templates/.sfs-loc
 update_file ".sfs-local/sprint-templates/log.md"             "templates/.sfs-local-template/sprint-templates/log.md"             "sprint log template"    "b"
 update_file ".sfs-local/sprint-templates/review.md"          "templates/.sfs-local-template/sprint-templates/review.md"          "sprint review template" "b"
 update_file ".sfs-local/sprint-templates/retro.md"           "templates/.sfs-local-template/sprint-templates/retro.md"           "sprint retro template"  "b"
+update_file ".sfs-local/sprint-templates/report.md"          "templates/.sfs-local-template/sprint-templates/report.md"          "sprint final report template" "b"
 update_file ".sfs-local/sprint-templates/decision-light.md"  "templates/.sfs-local-template/sprint-templates/decision-light.md"  "decision-light template (WU-26)" "b"
 
 # personas/ — CEO / CTO Generator / Implementation Worker / CPO Evaluator 기본 persona

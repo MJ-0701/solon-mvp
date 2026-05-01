@@ -17,7 +17,7 @@ Before planning or editing, read:
 
 ## SFS commands — bash adapter SSoT
 
-Solon Product SFS 의 11 슬래시 명령은 모두 `sfs <command>` global runtime 이
+Solon Product SFS 의 12 슬래시 명령은 모두 `sfs <command>` global runtime 이
 deterministic bash adapter 로 내려보낸다. `.sfs-local/scripts/` 는 vendored layout 의
 fallback 이고, 기본 방향은 project-local state + packaged runtime 이다.
 Claude Code 의 native slash 진입점은 `.claude/commands/sfs.md` 가 자동 install 되며,
@@ -34,7 +34,8 @@ Claude Code 의 native slash 진입점은 `.claude/commands/sfs.md` 가 자동 i
 | `/sfs implement [work slice|--stdin]` | `sfs implement [work slice|--stdin]` 후 Claude 가 `plan.md` 기반 실제 코드 변경 + 테스트/스모크 evidence 작성 |
 | `/sfs review --gate <id> [--executor <tool>] [--prompt-only]` / `/sfs review --show-last` | `sfs review --gate <id> [--executor <tool>] [--prompt-only]` 또는 `sfs review --show-last`; 기본은 선택된 CPO executor bridge 실행 + verdict/output path 메타데이터 출력, `--prompt-only` 는 수동 handoff, `--show-last` 는 executor 재실행 없이 기존 결과를 사용자 언어의 요약/action report 로 확인 |
 | `/sfs decision <title> [--id <id>]` | `sfs decision "<title>" [--id <id>]` 후 Claude 가 ADR 본문 작성 |
-| `/sfs retro [--close]` | `sfs retro [--close]`; `--close` 는 Claude 가 `retro.md` 를 먼저 채운 뒤 close adapter 1회 실행 |
+| `/sfs report [--sprint <id>] [--compact]` | `sfs report [--sprint <id>] [--compact]`; Claude 가 workbench 산출물을 한 장짜리 최종 작업보고서로 정리. `--compact` 는 사용자 동의 후 redirect/stub 압축 |
+| `/sfs retro [--close]` | `sfs retro [--close]`; `--close` 는 Claude 가 `retro.md` 와 `report.md` 를 먼저 채운 뒤 close adapter 1회 실행 |
 | `/sfs loop [OPTIONS]` | `sfs loop [OPTIONS]` (Ralph Loop + Solon mutex) |
 | `/sfs`, `/sfs help` | usage 출력 (`.claude/commands/sfs.md` 의 self-help) |
 
@@ -43,7 +44,7 @@ stdout / stderr / exit code 는 verbatim 보고한다 (paraphrase 금지).
 
 명령 모드는 고정이다:
 - **Bash-only**: `status`, `start`, `guide`, `auth`, `loop`.
-- **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `retro`.
+- **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`.
 - **Adapter-run**: `review` — 기본적으로 bash adapter 가 선택된 CPO executor bridge 를 실행하고 stdout 에는 verdict/output path 메타데이터만 보여준다. Claude 는 result 원문을 그대로 덤프하지 않고 사용자 언어로 요약/action report 를 렌더링한다. `--prompt-only` 일 때도 현재 Claude runtime 이 대신 verdict 를 작성하지 않고 prompt handoff 로 멈춘다.
 
 부족한 정보가 있으면 1~3개 질문만 남기고, 다음 gate 를 자동 실행하지 않는다.
@@ -60,6 +61,13 @@ adapter stdout 을 먼저 그대로 보여준 뒤, Claude 는 `plan.md`, `implem
 - 가능하면 TDD-lite 로 작은 failing/covering test → pass → refactor 순서로 간다.
 - 기존 codebase regularity 를 우선하고, one-off 패턴을 늘리지 않는다.
 - 구현 후 `implement.md` 와 `log.md` 에 변경 파일, 검증 명령, 결과, review handoff 를 남긴다.
+
+### `/sfs report` — final report refinement
+
+`brainstorm.md`, `plan.md`, `implement.md`, `log.md`, `review.md` 는 작업 중
+workbench 다. Sprint 완료 전 Claude 는 `/sfs report` 로 `report.md` 를 간결한 최종
+작업보고서로 정리한다. 핵심은 결과, 범위, 결정, 구현 요약, 검증 evidence, 남은 리스크다.
+Raw chronology 는 `retro.md`, `log.md`, session/events 에 남긴다.
 
 ## `/sfs loop` — multi-adaptor LLM executor convention
 

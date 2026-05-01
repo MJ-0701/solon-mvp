@@ -5,11 +5,12 @@
 # WU-26 §2 spec implementation. WU-23 §1.6 정합:
 #   · 파일 path stdout 출력만 (에디터 launch 안 함).
 #   · `--close` 미지정 시 retro.md 진입만, stdout 1줄.
-#   · `--close` 지정 시 sprint close + auto commit + stdout 2줄.
+#   · `--close` 지정 시 report.md ensure + sprint close + auto commit + stdout 3줄.
 #   · auto commit (sfs-common.sh::auto_commit_close) 은 사용자 명시 호출 시에만 동작 (§1.5' 정합).
 #
-# Output (1~2 lines):
+# Output (1~3 lines):
 #   retro.md ready: <path>
+#   report.md ready: <path>      # --close 시에만 추가
 #   sprint closed: <sprint-id>     # --close 시에만 추가
 #
 # Exit codes (WU-26 §2.3 / WU-23 §1.6 정합):
@@ -54,11 +55,13 @@ while [[ $# -gt 0 ]]; do
 Usage: /sfs retro [--close]
 
 Open the current sprint's retro.md (creates if missing). With --close, also
-mark the sprint closed and commit the result (push remains manual per §1.5).
+ensures report.md exists, marks the sprint closed, and commits the result.
+The AI runtime owns branch push/main merge/main push after this local close commit.
 
 Options:
-  --close       Mark sprint closed (writes status/closed_at into plan.md, removes
-                .sfs-local/current-sprint, appends sprint_close event, runs
+  --close       Ensure report.md exists, mark sprint closed (writes
+                status/closed_at into plan.md, removes .sfs-local/current-sprint,
+                appends report_ready + sprint_close events, runs
                 sfs-common.sh::auto_commit_close which performs git add+commit).
   -h, --help    Show this help.
 
@@ -108,7 +111,8 @@ fi
 
 SPRINT_DIR="${SFS_SPRINTS_DIR}/${SPRINT_ID}"
 RETRO_PATH="${SPRINT_DIR}/retro.md"
-TEMPLATE="${SFS_LOCAL_DIR}/sprint-templates/retro.md"
+REPORT_PATH="${SPRINT_DIR}/report.md"
+TEMPLATE="$(sfs_sprint_template_file retro)"
 
 # ─────────────────────────────────────────────────────────────────────
 # (a) retro.md 미존재 시 template cp + placeholder 치환
@@ -158,17 +162,24 @@ if [[ "${CLOSE}" -eq 1 ]]; then
 
   # sprint frontmatter status=closed + closed_at + closed_at on retro.md too
   update_frontmatter "${RETRO_PATH}" "closed_at" "${NOW}"
+
+  # Completed sprint artifact lifecycle:
+  # report.md becomes the final work artifact; workbench docs become stubs.
+  REPORT_PATH="$(sfs_prepare_sprint_report "${SPRINT_ID}" "${NOW}" "final")"
   sprint_close "${SPRINT_DIR}" "${NOW}"
+  sfs_compact_sprint_workbench "${SPRINT_ID}" "${NOW}"
 
   # current-sprint 클리어
   rm -f "${SFS_CURRENT_SPRINT_FILE}"
 
-  # sprint_close event (2-arg signature)
+  # report_ready + sprint_close events (2-arg signature)
+  append_event "report_ready" "{\"sprint_id\":\"${SPRINT_ID}\",\"path\":\"${REPORT_PATH}\"}"
   append_event "sprint_close" "{\"sprint_id\":\"${SPRINT_ID}\"}"
 
-  # auto commit (사용자 명시 호출 = §1.5' 정합, push 안 함)
+  # auto commit. Branch push/main merge/main push belong to the AI runtime Git Flow lifecycle.
   auto_commit_close "${SPRINT_ID}"
 
+  echo "report.md ready: ${REPORT_PATH}"
   echo "sprint closed: ${SPRINT_ID}"
 fi
 

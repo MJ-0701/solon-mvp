@@ -13,6 +13,8 @@ last_touched_at: ""  # filled by /sfs plan (auto, ISO8601 + tz)
 > 변경 이력은 `.sfs-local/events.jsonl` 의 `phase_change` / `gate_review` event 로 추적.
 > SSoT: `05-gate-framework.md §5.1` (Gate 매트릭스).
 > 입력 기준: 같은 sprint 의 `brainstorm.md` (G0) 를 먼저 읽고 작성한다.
+> 생명주기: 본 문서는 진행 중 sprint contract 이다. Close 후 최종 scope/AC/결과만
+> `report.md` 에 남고, 본 파일은 compact stub 로 줄어든다.
 
 ---
 
@@ -55,12 +57,18 @@ last_touched_at: ""  # filled by /sfs plan (auto, ISO8601 + tz)
   - 이번 sprint 에서 버릴 것:
 - **CTO Generator 가 만들 것**:
   - persona: `.sfs-local/personas/cto-generator.md`
+  - reasoning_tier: `strategic_high` for architecture/contract; worker 실행은 `execution_standard`
+  - model profile source: `.sfs-local/model-profiles.yaml`
+  - selected runtime / policy:
+  - fallback when unset: current runtime model
   - preferred executor: claude / codex / gemini / custom:
+  - implementation worker persona: `.sfs-local/personas/implementation-worker.md`
   - 산출물:
   - 변경 파일/모듈:
   - 구현하지 않을 것:
 - **CPO Evaluator 가 검증할 것**:
   - persona: `.sfs-local/personas/cpo-evaluator.md`
+  - reasoning_tier: `review_high`
   - preferred executor: codex / gemini / claude / custom:
   - self-validation 방지: 구현한 agent/tool 과 다른 evaluator instance/tool 사용 권장
   - AC 검증 방법:

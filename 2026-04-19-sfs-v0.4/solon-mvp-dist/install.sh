@@ -190,7 +190,7 @@ layout: $INSTALL_LAYOUT
 Solon:  https://github.com/${SOLON_REPO} (branch: $SOLON_BRANCH)
 
 Solon Product 는 AI-native 7-step flow (브레인스토밍 → plan → sprint → 구현 → review →
-commit → 문서화) 를 현재 프로젝트에 주입합니다. 이 7-step 은 full artifact chain 의
+report → retro close) 를 현재 프로젝트에 주입합니다. 이 7-step 은 full artifact chain 의
 lightweight projection 입니다. .sfs-local/ 스캐폴드 + SFS.md 공통 지침 +
 Claude/Codex/Gemini 어댑터 + .gitignore 규칙이 설치됩니다.
 
@@ -543,7 +543,7 @@ if [ "$INSTALL_LAYOUT" = "vendored" ]; then
   if [ -d "$TEMPLATES_SRC" ]; then
     mkdir -p "$TARGET/.sfs-local/sprint-templates"
     cp "$TEMPLATES_SRC"/*.md "$TARGET/.sfs-local/sprint-templates/" 2>/dev/null || true
-    ok "  sprint-templates/ 복사 (brainstorm + plan + implement + log + review + retro + decision-light)"
+    ok "  sprint-templates/ 복사 (brainstorm + plan + implement + log + review + retro + report + decision-light)"
   fi
 
   # personas/ — CEO / CTO Generator / Implementation Worker / CPO Evaluator 기본 persona
@@ -657,9 +657,9 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
      원하면 worker/helper 도 high-end 로 바꿔도 됩니다.
 
   ${C_BOLD}3.${C_RESET} 선호 런타임에서 시작:
-     ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET} → ${C_BLUE}/sfs implement${C_RESET}
-     ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET} → ${C_BLUE}/sfs implement${C_RESET}
-     ${C_BLUE}codex${C_RESET}      → ${C_BLUE}\$sfs status${C_RESET} → ${C_BLUE}\$sfs start${C_RESET} → ${C_BLUE}\$sfs brainstorm${C_RESET} → ${C_BLUE}\$sfs plan${C_RESET} → ${C_BLUE}\$sfs implement${C_RESET}
+     ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET} → ${C_BLUE}/sfs implement${C_RESET} → ${C_BLUE}/sfs report${C_RESET}
+     ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET} → ${C_BLUE}/sfs implement${C_RESET} → ${C_BLUE}/sfs report${C_RESET}
+     ${C_BLUE}codex${C_RESET}      → ${C_BLUE}\$sfs status${C_RESET} → ${C_BLUE}\$sfs start${C_RESET} → ${C_BLUE}\$sfs brainstorm${C_RESET} → ${C_BLUE}\$sfs plan${C_RESET} → ${C_BLUE}\$sfs implement${C_RESET} → ${C_BLUE}\$sfs report${C_RESET}
                    (bare ${C_BLUE}/sfs${C_RESET} 가 '커맨드 없음' 으로 막히면 host slash parser gap)
      셋 모두 동일한 ${C_BOLD}sfs${C_RESET} runtime command 로 내려간 뒤 deterministic bash adapter 호출.
      설치 직후 가이드는 ${C_BLUE}/sfs guide${C_RESET}, ${C_BLUE}\$sfs guide${C_RESET}, 또는 shell 의 ${C_BLUE}sfs guide${C_RESET}.
