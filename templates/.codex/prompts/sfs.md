@@ -35,7 +35,7 @@ Command modes:
 - **Bash-only**: `status`, `start`, `guide`, `auth`, `commit`, `loop`. Stop after
   verbatim adapter output. For `commit`, the adapter prints branch preflight,
   groups files, auto-generates a Git Flow-aware Conventional Commit message,
-  and never pushes.
+  then the AI runtime handles branch push/main merge/main push.
 - **Always hybrid**: `brainstorm`, `plan`, `implement`, `decision`, `retro`. Run the adapter,
   then perform the documented file refinement.
 - **Adapter-run**: `review`. The bash adapter executes the selected CPO
@@ -107,7 +107,7 @@ not create a new verdict in the current runtime.
 | `review`   | `sfs review <args>`   | CPO executor bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
 | `decision` | `sfs decision <args>` | creates ADR, then Codex fills Context/Decision/Alternatives/Consequences |
 | `retro`    | `sfs retro <args>`    | opens retro.md, then Codex fills KPT/PDCA. With `--close`, refine before close |
-| `commit`   | `sfs commit <args>`   | groups working tree changes and commits only the selected group. Never pushes |
+| `commit`   | `sfs commit <args>`   | groups working tree changes and commits only the selected group. AI runtime handles branch push/main merge/main push |
 | `loop`     | `sfs loop <args>`     |
 
 ## Procedure
@@ -238,8 +238,11 @@ After `/sfs retro` succeeds:
   close.
 - `/sfs commit apply ...` creates a local git commit. Run it only when the
   user explicitly requested commit grouping/apply. It prints branch preflight,
-  auto-generates a Git Flow-aware Conventional Commit message, and never pushes.
-- Never run `git push origin *` automatically — push is user-only (§1.5).
+  auto-generates a Git Flow-aware Conventional Commit message. Branch push/main
+  merge/main push are handled by the AI runtime Git Flow lifecycle.
+- Do not run wildcard `git push origin *`. Exact branch/main push is allowed
+  when it is part of the Git Flow lifecycle and no conflict/auth/protection
+  blocker is present.
 
 ## Why this exists alongside the Skill
 

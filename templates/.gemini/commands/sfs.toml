@@ -41,7 +41,8 @@ Command modes:
   invokes it. It groups staged/unstaged/untracked files into `product-code`,
   `sprint-meta`, `runtime-upgrade`, and `ambiguous`, then commits only the
   selected group. It prints Git Flow branch preflight guidance, auto-generates
-  a Conventional Commit message unless `-m` is supplied, and never pushes.
+  a Conventional Commit message unless `-m` is supplied. Branch push/main
+  merge/main push are handled by the AI runtime Git Flow lifecycle.
 
 Special close guard: if the user invokes `retro --close` in an AI runtime, do
 not run the close adapter first. Run `retro` without `--close`, refine
@@ -108,7 +109,7 @@ not create a new verdict in the current runtime.
 | `review`   | `sfs review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
 | `decision` | `sfs decision <remaining args>` | creates ADR, then Gemini fills Context/Decision/Alternatives/Consequences |
 | `retro`    | `sfs retro <remaining args>`    | opens retro.md, then Gemini fills KPT/PDCA. With `--close`, refine before close |
-| `commit`   | `sfs commit <remaining args>`   | groups working tree changes and commits only the selected group. Never pushes |
+| `commit`   | `sfs commit <remaining args>`   | groups working tree changes and commits only the selected group. AI runtime handles branch push/main merge/main push |
 | `loop`     | `sfs loop <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim |
 
 ## Procedure
@@ -286,6 +287,9 @@ Help: bash .sfs-local/scripts/sfs-<command>.sh --help
   requested close.
 - `/sfs commit apply ...` creates a local git commit. Run it only when the
   user explicitly requested commit grouping/apply. It prints branch preflight,
-  auto-generates a Git Flow-aware Conventional Commit message, and never pushes.
-- Never run `git push origin *` automatically — push is user-only (§1.5).
+  auto-generates a Git Flow-aware Conventional Commit message. Branch push/main
+  merge/main push are handled by the AI runtime Git Flow lifecycle.
+- Do not run wildcard `git push origin *`. Exact branch/main push is allowed
+  when it is part of the Git Flow lifecycle and no conflict/auth/protection
+  blocker is present.
 """

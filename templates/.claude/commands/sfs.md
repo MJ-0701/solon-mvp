@@ -143,7 +143,8 @@ Command modes:
   invokes it. It groups staged/unstaged/untracked files into `product-code`,
   `sprint-meta`, `runtime-upgrade`, and `ambiguous`, then commits only the
   selected group. It prints Git Flow branch preflight guidance, auto-generates
-  a Conventional Commit message unless `-m` is supplied, and never pushes.
+  a Conventional Commit message unless `-m` is supplied. Branch push/main
+  merge/main push are handled by the AI runtime Git Flow lifecycle.
 
 Sprint mode guidance:
 - Do not treat every new sprint as a fresh discovery/planning sprint. If the
@@ -187,7 +188,7 @@ Dispatch table:
 | `review`   | `sfs review <remaining args>`   | CPO Evaluator bridge run by default. `--prompt-only` creates manual handoff prompt/log. `--show-last` prints compact metadata for the latest recorded review without rerunning executor |
 | `decision` | `sfs decision <remaining args>` | creates ADR file, then Claude fills Context/Decision/Alternatives/Consequences |
 | `retro`    | `sfs retro <remaining args>`    | opens retro.md, then Claude fills KPT/PDCA. With `--close`, refine before close |
-| `commit`   | `sfs commit <remaining args>`   | groups working tree changes and commits only the selected group. Never pushes |
+| `commit`   | `sfs commit <remaining args>`   | groups working tree changes and commits only the selected group. AI runtime handles branch push/main merge/main push |
 | `loop`     | `sfs loop <remaining args>`     | Ralph Loop + Solon mutex + executor convention (claude/gemini/codex). passes `--mode`, `--executor`, `--max-iters`, `--parallel`, `--dry-run`, etc. verbatim (WU-27 §3) |
 
 Procedure (apply in order):
@@ -492,5 +493,6 @@ Also explain this in one or two sentences:
 - For `status`, `start`, `guide`, `auth`, `commit`, and `loop`, the bash adapter is authoritative — do not paraphrase or augment its output.
 - `/sfs commit apply ...` creates a local git commit. Run it only when the
   user explicitly requested commit grouping/apply. It prints branch preflight,
-  auto-generates a Git Flow-aware Conventional Commit message, and never pushes.
+  auto-generates a Git Flow-aware Conventional Commit message. Branch push/main
+  merge/main push are handled by the AI runtime Git Flow lifecycle.
 - For `brainstorm`, `plan`, `decision`, and `retro`, the bash adapter is authoritative for command I/O, and the documented refinement is the authoritative AI-side follow-up. `review` is adapter-run by default; do not add a current-runtime CPO verdict after successful adapter output.

@@ -1,3 +1,20 @@
+## [0.5.41-product] - 2026-05-01
+
+**AI-owned Git Flow lifecycle.** Product adapters now match the project-wide
+rule that users can simply describe work while the AI runtime owns branch
+creation, commits, branch push, main absorption, and origin main push.
+
+### Changed
+
+- **SFS core and runtime adapters** — replaced old "push is manual/user-only"
+  guidance with AI-owned Git Flow lifecycle rules for Claude, Codex, and Gemini.
+- **`sfs commit` wording** — clarified that the command remains a local grouping
+  and commit helper, while the surrounding branch push/main merge/main push is
+  owned by the AI runtime.
+- **Guides and command prompts** — documented the fallback cases where the AI
+  must stop and ask: destructive git, unrelated dirty work, merge conflicts,
+  failing tests, protected branch/remote rejection, and auth prompts.
+
 ## [0.5.40-product] - 2026-05-01
 
 **Model profile repair path.** `sfs update` now notices when an already-current

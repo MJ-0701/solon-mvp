@@ -259,8 +259,8 @@ vendored layout 에서 direct adapter 를 호출해야 하면:
 | `/sfs review --gate <id> [--executor <tool>] [--prompt-only]` / `/sfs review --show-last` | CPO Evaluator review run. stdout 은 verdict/output path 메타데이터만 보여주고, AI runtime 이 result 를 사용자 언어의 요약+action report 로 렌더링. full prompt 는 tmp prompt file에 저장하며 `review.md`에는 compact log/result를 남김 (id ∈ G-1..G5) |
 | `/sfs decision <title>` | full ADR 생성 후 Context/Decision/Alternatives/Consequences 작성 |
 | `/sfs retro` | 현재 sprint 의 `retro.md` 작성 또는 갱신 |
-| `/sfs retro --close` | AI runtime 에서는 retro 작성 후, review 실행 여부 확인 + sprint close + auto commit (push 는 manual) |
-| `/sfs commit [status|plan|apply --group <name>]` | close 후 남은 working tree 를 의미 그룹으로 분리하고 branch preflight 안내 후 선택 그룹만 local commit. 메시지는 Git Flow-aware Conventional Commit 으로 자동 생성 (`-m` override), push 는 manual |
+| `/sfs retro --close` | AI runtime 에서는 retro 작성 후, review 실행 여부 확인 + sprint close + auto commit. 이후 branch push/main 흡수는 Git Flow lifecycle 로 처리 |
+| `/sfs commit [status|plan|apply --group <name>]` | close 후 남은 working tree 를 의미 그룹으로 분리하고 branch preflight 안내 후 선택 그룹만 local commit. 메시지는 Git Flow-aware Conventional Commit 으로 자동 생성 (`-m` override). 이후 branch push/main 흡수는 AI runtime 이 수행 |
 | `/sfs loop [OPTIONS]` | queue-first + domain_locks fallback 으로 micro-step 단위 반복 실행을 돕는 자율 진행 모드 |
 
 12 명령 모두 동일 bash adapter SSoT 입니다. `/sfs` 는 Claude/Gemini 쪽 command shape 이고,

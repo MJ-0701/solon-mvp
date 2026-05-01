@@ -54,7 +54,8 @@ while [[ $# -gt 0 ]]; do
 Usage: /sfs retro [--close]
 
 Open the current sprint's retro.md (creates if missing). With --close, also
-mark the sprint closed and commit the result (push remains manual per §1.5).
+mark the sprint closed and commit the result. The AI runtime owns branch
+push/main merge/main push after this local close commit.
 
 Options:
   --close       Mark sprint closed (writes status/closed_at into plan.md, removes
@@ -166,7 +167,7 @@ if [[ "${CLOSE}" -eq 1 ]]; then
   # sprint_close event (2-arg signature)
   append_event "sprint_close" "{\"sprint_id\":\"${SPRINT_ID}\"}"
 
-  # auto commit (사용자 명시 호출 = §1.5' 정합, push 안 함)
+  # auto commit. Branch push/main merge/main push belong to the AI runtime Git Flow lifecycle.
   auto_commit_close "${SPRINT_ID}"
 
   echo "sprint closed: ${SPRINT_ID}"

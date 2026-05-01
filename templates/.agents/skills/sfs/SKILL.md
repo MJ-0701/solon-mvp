@@ -27,7 +27,8 @@ Command modes are explicit:
   invokes it. It groups staged/unstaged/untracked files into `product-code`,
   `sprint-meta`, `runtime-upgrade`, and `ambiguous`, then commits only the
   selected group. It prints Git Flow branch preflight guidance, auto-generates
-  a Conventional Commit message unless `-m` is supplied, and never pushes.
+  a Conventional Commit message unless `-m` is supplied. Branch push/main
+  merge/main push are handled by the AI runtime Git Flow lifecycle.
 
 Sprint mode guidance:
 - Do not treat every new sprint as a fresh discovery/planning sprint. If the
@@ -137,7 +138,7 @@ not create a new verdict in the current runtime.
 | `review --gate <id> [--executor <tool>] [--prompt-only]` / `review --show-last` (또는 "CPO review", "검증 기록", "이전 리뷰 확인") | `sfs review --gate <id> [--executor <tool>] [--generator <tool>] [--prompt-only]` 또는 `sfs review --show-last [--gate <id>]` | CPO Evaluator bridge run by default. `--prompt-only` creates prompt/log for manual handoff. `--show-last` prints compact metadata for the latest recorded result without rerunning executor. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
 | `decision <title>` (또는 "결정 기록", "ADR 추가") | `sfs decision "<title>" [--id <id>]` | ADR file 생성 후 Context/Decision/Alternatives/Consequences refinement |
 | `retro [--close]` (또는 "회고", "sprint close") | `sfs retro [--close]` | retro.md 진입 후 KPT/PDCA refinement. `--close` 는 refinement 후 1회 실행 |
-| `commit [status|plan|apply --group <name>]` (또는 "commit 정리") | `sfs commit [status|plan|apply ...]` | working tree 를 의미 그룹으로 분류하고 branch preflight 안내 후 선택 그룹만 local commit. Git Flow-aware 메시지 자동 생성, push 안 함 |
+| `commit [status|plan|apply --group <name>]` (또는 "commit 정리") | `sfs commit [status|plan|apply ...]` | working tree 를 의미 그룹으로 분류하고 branch preflight 안내 후 선택 그룹만 local commit. Git Flow-aware 메시지 자동 생성. 이후 branch push/main 흡수는 AI runtime 이 수행 |
 | `loop [OPTIONS]` (또는 "자율 진행", "loop 시작") | `sfs loop [OPTIONS]` | Ralph Loop + Solon mutex (see `--help`) |
 
 ## Procedure
@@ -376,8 +377,11 @@ Help: bash .sfs-local/scripts/sfs-<command>.sh --help
   requested close.
 - `/sfs commit apply ...` triggers a local git commit. Run it only when the
   user explicitly requested commit grouping/apply. It prints branch preflight,
-  auto-generates a Git Flow-aware Conventional Commit message, and never pushes.
-- Never run `git push origin *` automatically — push is user-only (§1.5).
+  auto-generates a Git Flow-aware Conventional Commit message. Branch push/main
+  merge/main push are handled by the AI runtime Git Flow lifecycle.
+- Do not run wildcard `git push origin *`. Exact branch/main push is allowed
+  when it is part of the Git Flow lifecycle and no conflict/auth/protection
+  blocker is present.
 - If the bash adapter is missing, do NOT try to fall back to a paraphrase
   workflow that simulates Solon SFS — instead tell the user the adapter is
   missing and suggest `install.sh` / `upgrade.sh`.
