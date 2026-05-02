@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T01:03:00Z
-session: "user-active: WU-38 release channel verification hotfix"
+last_overwrite: 2026-05-02T01:05:00Z
+session: "user-active: WU-38 sha backfilled; 0.5.61-product release pending"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: WU-38
