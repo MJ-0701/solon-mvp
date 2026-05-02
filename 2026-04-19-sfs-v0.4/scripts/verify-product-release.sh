@@ -260,7 +260,7 @@ verify_windows_cmd_self_upgrade_in_tree() {
     fail "${label} sfs.cmd sets SFS_SELF_UPGRADE_DONE before reloaded runtime call" 5
   fi
   grep -q 'SFS_SCOOP_PROJECT_UPGRADE' "${cmd_file}" || fail "${label} sfs.cmd does not suppress Scoop project hook during self-upgrade" 5
-  grep -q 'sfs.cmd upgrade --no-self-upgrade' "${scoop_hook}" || fail "${label} Scoop hook does not run project upgrade without recursive self-upgrade" 5
+  grep -q 'upgrade --no-self-upgrade' "${scoop_hook}" || fail "${label} Scoop hook does not run project upgrade without recursive self-upgrade" 5
   log "  ok ${label} Windows sfs.cmd self-upgrade reload guard"
 }
 
