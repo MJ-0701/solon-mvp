@@ -41,9 +41,9 @@ adapter 를 직접 호출**한다 (paraphrase 금지, 결정성 유지):
 | `sfs guide`, `/sfs guide` | `sfs guide [--path|--print]` |
 | `sfs auth ...`, `/sfs auth ...` | `sfs auth status|check|login|probe [--executor <tool>]` |
 | `sfs brainstorm`, `/sfs brainstorm` | `sfs brainstorm [text|--stdin]` raw capture 후 Gemini 가 Solon CEO 로 §1~§7 정리 |
-| `sfs plan`, `/sfs plan` | `sfs plan` 후 Gemini 가 `brainstorm.md` 기반 G1 plan + CTO/CPO contract 작성 |
+| `sfs plan`, `/sfs plan` | `sfs plan` 후 Gemini 가 `brainstorm.md` 기반 Gate 3 (Plan) plan + CTO/CPO contract 작성 |
 | `sfs implement`, `/sfs implement` | `sfs implement [work slice|--stdin]` 후 Gemini 가 `plan.md` 기반 실제 코드 변경 + 테스트/스모크 evidence 작성 |
-| `sfs review --gate <id> [--executor <tool>] [--prompt-only]`, `/sfs review --gate <id> [--executor <tool>] [--prompt-only]`, `/sfs review --show-last` | `sfs review --gate <id> [--executor <tool>] [--prompt-only]` 또는 `sfs review --show-last [--gate <id>]`; 기본은 선택된 CPO executor bridge 실행, `--prompt-only` 는 수동 handoff, `--show-last` 는 executor 재실행 없이 기존 결과를 사용자 언어의 요약/action report 로 확인 |
+| `sfs review --gate <n> [--executor <tool>] [--prompt-only]`, `/sfs review --gate <n> [--executor <tool>] [--prompt-only]`, `/sfs review --show-last` | `sfs review --gate <1..7> [--executor <tool>] [--prompt-only]` 또는 `sfs review --show-last [--gate <1..7>]`; 기본은 선택된 CPO executor bridge 실행, `--prompt-only` 는 수동 handoff, `--show-last` 는 executor 재실행 없이 기존 결과를 사용자 언어의 요약/action report 로 확인 |
 | `sfs decision <title>`, `/sfs decision <title>` | `sfs decision "<title>" [--id <id>]` 후 Gemini 가 ADR 본문 작성 |
 | `sfs report [--sprint <id>] [--compact]`, `/sfs report [--sprint <id>] [--compact]` | `sfs report [--sprint <id>] [--compact]`; Gemini 가 workbench 산출물을 한 장짜리 최종 작업보고서로 정리. `--compact` 는 사용자 동의 후 workbench/tmp 산출물을 archive 로 이동 |
 | `sfs tidy [--sprint <id>\|--all] [--apply]`, `/sfs tidy ...` | `sfs tidy [--sprint <id>\|--all] [--apply]`; 기본 dry-run. `--apply` 는 report.md 가 없으면 생성하고 workbench/tmp 를 archive 로 이동해 남겨야 할 문서만 유지 |

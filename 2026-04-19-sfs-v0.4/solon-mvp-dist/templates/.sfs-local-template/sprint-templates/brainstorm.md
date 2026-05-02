@@ -1,16 +1,18 @@
 ---
 phase: brainstorm
-gate_id: G0
+gate_number: 2
+gate_label: "Gate 2 (Brainstorm)"
+gate_id: G0          # legacy storage id
 sprint_id: ""        # filled by /sfs start
 goal: ""             # filled by /sfs start <goal>
 created_at: ""       # filled by /sfs start
 last_touched_at: ""  # filled by /sfs brainstorm (auto, ISO8601 + tz)
-status: draft        # draft | ready-for-plan | g0-reviewed
+status: draft        # draft | ready-for-plan | gate2-reviewed
 ---
 
 # Brainstorm — <sprint title>
 
-> Sprint **G0 — Brainstorm Gate** 산출물.
+> Sprint **Gate 2 — Brainstorm** 산출물.
 > 목적은 사용자의 raw 요구사항을 바로 plan 으로 굳히지 않고, 문제/대안/제약/범위를 먼저 정리하는 것.
 > `/sfs start` 는 workspace 를 만들고, `/sfs brainstorm` 은 raw 를 §8 에 기록한 뒤
 > AI runtime 에서 Solon CEO 가 §1~§7 을 채운다. direct bash 는 capture-only 다.
@@ -22,7 +24,7 @@ status: draft        # draft | ready-for-plan | g0-reviewed
 ## §0. AI-Era Fundamentals Gate
 
 이 gate 는 implement 전용이 아니다. AI 가 좋은 코드베이스/문서베이스에서만 잘 작동한다는
-전제 때문에, G0 부터 아래 다섯 가지를 확인한다.
+전제 때문에, Gate 2 부터 아래 다섯 가지를 확인한다.
 
 - 공유 design concept: 문제 주체, 현재 pain, 성공 상태, in/out scope.
 - 유비쿼터스 랭귀지: 같은 의미로 쓸 핵심 명사/행위자/상태/규칙.
@@ -86,7 +88,7 @@ status: draft        # draft | ready-for-plan | g0-reviewed
 - generator agent 가 만들 산출물:
 - evaluator agent 가 검증할 기준:
 
-## §7. G0 Checklist
+## §7. Gate 2 Checklist
 
 - [ ] raw brief / 대화 메모가 남아 있다
 - [ ] 문제와 성공 상태가 한 줄로 설명된다

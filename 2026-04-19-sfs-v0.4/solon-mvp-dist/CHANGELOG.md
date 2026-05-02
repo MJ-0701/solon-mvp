@@ -1,7 +1,15 @@
-## [Unreleased]
+## [0.5.74-product] - 2026-05-02
 
 ### Changed
 
+- **Gate numbering UX** — Solon reports and new docs now use plain Gate 1
+  through Gate 7 labels, and `/sfs review` accepts `--gate 1..7` while keeping
+  older storage ids as a compatibility layer.
+- **Review evidence bundle coverage** — `/sfs review` now unions indexed and
+  auto-discovered implementation files after hard ban-list and text-file
+  filtering, treats `.gitignore` as mixed product/system evidence, matches
+  verification-style headings, and drops nonexistent indexed paths from the
+  reviewable manifest.
 - **Release regression guard** — the owner-side product release verifier now
   extracts both release archives and checks that every context router target
   referenced by `_INDEX.md` is packaged, preventing missing routed modules from
@@ -890,7 +898,7 @@ extra run flag. Manual handoff remains available through `--prompt-only`.
 ### Changed
 
 - **Review UX** — user-facing docs, Claude/Codex/Gemini adapters, and guide
-  examples now use `/sfs review --gate <id> --executor <tool> --generator <tool>`
+  examples now use `/sfs review --gate <1..7> --executor <tool> --generator <tool>`
   as the normal command.
 - **Prompt-only escape hatch** — `--prompt-only` is the explicit no-token
   manual handoff mode.
@@ -1336,7 +1344,7 @@ invariant 의 첫 LLM-호출 site 로 Ralph Loop + Solon mutex + executor conven
 ### Added
 
 - **`/sfs plan`** — 현재 sprint 의 `plan.md` 를 phase=plan 으로 열고 `last_touched_at` 자동 기록. `events.jsonl` 에 `plan_open` 이벤트 append.
-- **`/sfs review --gate <id>`** — review.md 를 phase=review / gate=`<id>` 로 열고 `events.jsonl` 에 `review_open` 이벤트 append. Gate id 7-enum (`G-1, G0, G1, G2, G3, G4, G5`) 검증 + 직전 review_open 으로부터 자동 추론 fallback.
+- **`/sfs review --gate <1..7>`** — review.md 를 phase=review / gate number 로 열고 `events.jsonl` 에 `review_open` 이벤트 append. 기존 internal gate_id 는 호환용으로만 유지하며 직전 review_open 으로부터 자동 추론 fallback.
 - **`/sfs decision`** — ADR 신설 (full template) 또는 sprint-local mini-ADR (light template) 자동 분기. `decisions/` 디렉토리 + `decisions-template/` 신설.
 - **`/sfs retro --close`** — sprint retro G5 close + auto-commit. `decision-light.md` 템플릿 신설.
 - **`.sfs-local/decisions-template/`** — `ADR-TEMPLATE.md` + `_INDEX.md` 신규 슬롯.

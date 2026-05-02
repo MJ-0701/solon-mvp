@@ -11,11 +11,11 @@
 
 ## TL;DR (7-step sprint flow)
 
-1. G0 `/sfs brainstorm` → `brainstorm.md`
-2. G1 `/sfs plan` → `plan.md` (요구사항/AC/scope + 계약)
-3. G2 `/sfs implement` → `implement.md`/`log.md` (코드 + evidence)
-4. G4 `/sfs review` → `review.md` (결과 원문은 tmp/archives 로)
-5. G5 `/sfs retro --close` → `report.md`/`retro.md` + workbench/tmp archive
+1. Gate 2 (Brainstorm) `/sfs brainstorm` → `brainstorm.md`
+2. Gate 3 (Plan) `/sfs plan` → `plan.md` (요구사항/AC/scope + 계약)
+3. Gate 4 (Design/Entry) `/sfs implement` → `implement.md`/`log.md` (코드 + evidence)
+4. Gate 6 (Review) `/sfs review` → `review.md` (결과 원문은 tmp/archives 로)
+5. Gate 7 (Retro) `/sfs retro --close` → `report.md`/`retro.md` + workbench/tmp archive
 
 ## Quick commands
 
@@ -27,7 +27,7 @@ sfs start "<goal>"
 sfs brainstorm "<raw>"
 sfs plan
 sfs implement "<slice>"
-sfs review --gate G4 --executor codex|gemini|claude [--prompt-only]
+sfs review --gate 6 --executor codex|gemini|claude [--prompt-only]
 sfs report --compact
 sfs tidy --apply
 sfs retro --close

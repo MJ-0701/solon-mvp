@@ -18,3 +18,7 @@ Rules:
 - Start from `sfs status` → current sprint `report.md`.
 - Do not load old logs/history unless the routed context asks for them.
 - Stop on mutex conflicts and report owner/domain.
+- In Solon reports, show gates as `Gate N (Name)`, not naked ids:
+  Gate 1 (Intake), Gate 2 (Brainstorm), Gate 3 (Plan),
+  Gate 4 (Design), Gate 5 (Handoff), Gate 6 (Review),
+  Gate 7 (Retro). Use gate numbers 1..7 for new CLI examples.

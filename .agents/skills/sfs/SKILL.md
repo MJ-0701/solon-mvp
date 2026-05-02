@@ -40,27 +40,28 @@ Command modes are explicit:
 Sprint mode guidance:
 - AI-era software fundamentals are cross-phase, not implement-only. Shared
   design concept, ubiquitous language, tight feedback loops, deep-module
-  boundaries, and gray-box delegation must shape G0/G1/G4/report/retro as well
-  as implementation.
+  boundaries, and gray-box delegation must shape Gate 2 (Brainstorm),
+  Gate 3 (Plan), Gate 6 (Review), report, and retro as well as
+  implementation.
 - Do not treat every new sprint as a fresh discovery/planning sprint. If the
   user just closed a planning sprint whose `plan.md`, review, or ADR already
   defines the implementation backlog, the next sprint is an implementation
   sprint by default.
-- For an implementation sprint, G0/G1 should be thin: record `inherit-from:
+- For an implementation sprint, Gate 2/3 should be thin: record `inherit-from:
   <prior sprint/plan/ADR>`, scope, and binary AC only when useful, then proceed
   to the first execution slice and `log.md` evidence. Do not recommend repeating a
   full `brainstorm -> plan` loop unless the inherited contract is missing or
   ambiguous.
 - If the sprint goal names concrete build work such as repo scaffold, dev
   compose, DB schema, API boot, tests, UI behavior, taxonomy cleanup, design
-  handoff, QA evidence, or infra/runbook, do not recap G1 contract completion
+  handoff, QA evidence, or infra/runbook, do not recap Gate 3 (Plan) contract completion
   as sprint completion. Sprint completion requires implementation evidence,
   test/smoke/review evidence, review, and retro, unless the user explicitly
   scoped it as planning-only.
 - After `start`, a short recap is allowed and often useful. Its `Next` must be
   inferred from sprint mode: fresh discovery can point to `brainstorm`, while
   inherited implementation work should point to the first execution slice,
-  `log.md` evidence, and later G4 review.
+  `log.md` evidence, and later Gate 6 (Review).
 
 Special close guard: if the user invokes `retro --close` in an AI runtime, do
 not run the close adapter first. Run `retro` without `--close`, refine
@@ -79,9 +80,9 @@ vendored layout).
 The bash adapter execution is **deterministic** and must NOT be
 re-interpreted by the model. Bash adapter is single source of truth (SSoT) for
 command I/O. Hybrid commands have documented AI-side follow-ups:
-project overview refinement for `profile`, Solon CEO refinement of `brainstorm.md` §0~§7, G1 plan + CTO/CPO sprint
+project overview refinement for `profile`, Solon CEO refinement of `brainstorm.md` §0~§7, Gate 3 (Plan) plan + CTO/CPO sprint
 contract refinement of `plan.md`, implementation execution for `implement`,
-ADR refinement for `decision`, final report refinement for `report`, and G5
+ADR refinement for `decision`, final report refinement for `report`, and Gate 7 (Retro)
 retro refinement for `retro`. Review
 verdicts come from the selected CPO executor bridge or a manual `--prompt-only`
 handoff.
@@ -98,6 +99,11 @@ answer. Treat adapter stdout as compact metadata, read `output_path` /
 `result_path` / `review.md` when needed, then summarize and translate verdict,
 findings, and required actions into the report.
 
+Gate references in user-facing reports must be self-describing. Use only
+Gate 1 (Intake), Gate 2 (Brainstorm), Gate 3 (Plan), Gate 4 (Design),
+Gate 5 (Handoff), Gate 6 (Review), Gate 7 (Retro). Internal compatibility
+ids may exist for older files/events, but do not surface them in Solon reports.
+
 Use this shape and fill only evidence-backed values:
 
 Decision references in user-facing reports must be self-describing. Never output
@@ -111,7 +117,7 @@ source cannot be found, say so explicitly and put the missing lookup under
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📋 SOLON REPORT — /sfs <command>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 Command <command> · <goal/gate/artifact>      [<status>]
+🎯 Command <command> · <goal/Gate N (Name)/artifact>      [<status>]
 ⏱️ Time    <started> → <finished>  (<duration or "n/a">)
 ───────────────────────────────────────────────────
 🔧 Steps   <N>건 — <adapter/refinement/review path summary>
@@ -152,10 +158,10 @@ not create a new verdict in the current runtime.
 | `update [--skip-existing]` | `sfs update [--skip-existing]` | 하위 호환 alias. 새 문서/응답에서는 `upgrade` 를 권장 |
 | `version [--check]` (또는 "버전 확인", "새 버전 확인") | `sfs version [--check]` | 현재 설치 버전 출력. `--check` 는 GitHub 최신 product tag 와 비교 |
 | `adopt [--id legacy-baseline] [--apply]` (또는 "legacy 인수인계", "기존 프로젝트 SFS 도입") | `sfs adopt [--id legacy-baseline] [--apply]` | legacy 프로젝트를 report-first baseline 으로 인계. 문서 과잉이면 기존 sprint/archive tree 를 cold archive tarball 로 접고, 문서 0이면 git/code/test/docs 흔적에서 최소 baseline 복원. raw scan 은 archive 보존 |
-| `brainstorm [text|--stdin]` (또는 "브레인스토밍", "요구사항 정리") | `sfs brainstorm <raw context>` | G0 raw 요구사항/대화 맥락을 brainstorm.md 에 기록한 뒤 §0~§7을 Solon CEO로 정리. newline 허용 |
-| `plan` (또는 "plan 작성", "이번 sprint 계획") | `sfs plan` | plan.md 진입 + plan_open event 후 brainstorm.md 기반 G1 plan/contract 작성 |
+| `brainstorm [text|--stdin]` (또는 "브레인스토밍", "요구사항 정리") | `sfs brainstorm <raw context>` | Gate 2 (Brainstorm) raw 요구사항/대화 맥락을 brainstorm.md 에 기록한 뒤 §0~§7을 Solon CEO로 정리. newline 허용 |
+| `plan` (또는 "plan 작성", "이번 sprint 계획") | `sfs plan` | plan.md 진입 + plan_open event 후 brainstorm.md 기반 Gate 3 (Plan) plan/contract 작성 |
 | `implement [work slice|--stdin]` (또는 "구현", "코드 구현", "실제 작업") | `sfs implement <work slice>` | implement.md/log.md 진입 후 plan 기반 작업 slice 실행 + evidence 작성. 코드, taxonomy, design handoff, QA, infra/runbook, decision, docs 모두 implementation artifact 로 취급 |
-| `review --gate <id> [--executor <tool>] [--prompt-only]` / `review --show-last` (또는 "CPO review", "검증 기록", "이전 리뷰 확인") | `sfs review --gate <id> [--executor <tool>] [--generator <tool>] [--prompt-only]` 또는 `sfs review --show-last [--gate <id>]` | CPO Evaluator bridge run by default. `--prompt-only` creates prompt/log for manual handoff. `--show-last` prints compact metadata for the latest recorded result without rerunning executor. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
+| `review --gate <n> [--executor <tool>] [--prompt-only]` / `review --show-last` (또는 "CPO review", "검증 기록", "이전 리뷰 확인") | `sfs review --gate <1..7> [--executor <tool>] [--generator <tool>] [--prompt-only]` 또는 `sfs review --show-last [--gate <1..7>]` | CPO Evaluator bridge run by default. `--prompt-only` creates prompt/log for manual handoff. `--show-last` prints compact metadata for the latest recorded result without rerunning executor. Canonical gate args are 1..7; reports display Gate 1..7 labels. |
 | `decision <title>` (또는 "결정 기록", "ADR 추가") | `sfs decision "<title>" [--id <id>]` | ADR file 생성 후 Context/Decision/Alternatives/Consequences refinement |
 | `report [--sprint <id>] [--compact]` (또는 "보고서", "최종보고서") | `sfs report [--sprint <id>] [--compact]` | report.md 진입 후 최종 작업보고서 refinement. `--compact` 는 사용자 동의 후 workbench 를 archive 로 이동 |
 | `tidy [--sprint <id-or-ref>\|--all] [--apply]` (또는 "문서 정리", "workbench 정리") | `sfs tidy [--sprint <id-or-ref>\|--all] [--apply]` | 기본 dry-run. `--sprint` 는 정확한 id 또는 `W18-sprint-1` 같은 고유 suffix 참조 가능. `--apply` 는 report.md 가 없으면 생성하고, workbench/tmp 를 archive 로 이동해 남겨야 할 것만 둠 |
@@ -231,12 +237,12 @@ not create a new verdict in the current runtime.
    - `adopt` → Legacy Adopt Refinement
    - `profile` → Project Profile Refinement
    - `brainstorm` → Brainstorm CEO Refinement
-   - `plan` → Plan G1 Refinement
+   - `plan` → Gate 3 (Plan) Refinement
    - `implement` → Implementation Execution
    - `decision` → Decision ADR Refinement
    - `report` → Final Report Refinement
    - `tidy` → Tidy Report Refinement when report.md was created/touched
-   - `retro` → Retro G5 Refinement
+   - `retro` → Gate 7 (Retro) Refinement
    - `commit` → stop after adapter output. Do not add files or create a second
      commit outside the adapter result.
    - `review` → Review CPO Handling. Use adapter stdout as metadata, read the
@@ -296,10 +302,10 @@ succeeds and stdout has been shown verbatim:
    `Files`, question count in `Questions`, and `Next: /sfs plan` when status is
    `ready-for-plan`; otherwise `Next: answer questions, then /sfs brainstorm`.
 
-## Plan G1 Refinement
+## Gate 3 Plan Refinement
 
 `/sfs plan` is not adapter-only in AI runtimes. `$sfs plan` / `sfs plan` should
-first run the bash adapter, then fill `plan.md` from the current G0 context.
+first run the bash adapter, then fill `plan.md` from the current Gate 2 (Brainstorm) context.
 
 1. Resolve the active `plan.md` path from adapter stdout. If stdout cannot be
    parsed, read `.sfs-local/current-sprint` and open
@@ -311,7 +317,7 @@ first run the bash adapter, then fill `plan.md` from the current G0 context.
    - `§1` measurable requirements.
    - `§2` binary/verifiable acceptance criteria and anti-AC.
    - `§3` in scope / out of scope / dependencies and decision points.
-   - `§4` G1 checklist based only on satisfied items.
+   - `§4` Gate 3 (Plan) checklist based only on satisfied items.
    - `§5` CEO decision, CTO deliverables, CPO validation criteria,
      rework contract, and user decision points.
    - Add `§6 Phase 1 구현 Backlog Seed` when it materially helps the next
@@ -323,7 +329,7 @@ first run the bash adapter, then fill `plan.md` from the current G0 context.
 6. Do not implement code, choose irreversible infrastructure, or run
    `/sfs review` automatically.
 7. Final response: render a Solon report. Include `plan.md` path in `Files`,
-   question count in `Questions`, and `Next: /sfs review --gate G1 ... then /sfs implement "<first execution slice>"`
+   question count in `Questions`, and `Next: /sfs review --gate 3 ... then /sfs implement "<first execution slice>"`; display this as Gate 3 (Plan).
    when ready; otherwise `Next: answer questions, then /sfs plan`.
 
 ## Implementation Execution
@@ -384,7 +390,7 @@ decisions, and docs are also valid implementation artifacts.
    slice and verification evidence exist.
 9. Run relevant tests/checks/reviews. Do not claim success without evidence.
 10. Final response: render a Solon report with changed artifacts in `Files`,
-   checks in `Actions` or `Steps`, and `Next: /sfs review --gate G4` when ready.
+   checks in `Actions` or `Steps`, and `Next: /sfs review --gate 6` when ready; display this as Gate 6 (Review).
 
 ## Decision ADR Refinement
 
@@ -483,10 +489,10 @@ report when the adapter creates or touches one.
 5. Do not recreate old workbench/tmp files in the visible sprint/tmp folders.
    The cleanup goal is: only keep what should remain.
 6. Final response: render a Solon report. Include `report.md` and archive path
-   in `Files`, and `Next: /sfs review --gate G4` or `/sfs retro --close` when
+   in `Files`, and `Next: /sfs review --gate 6` (Gate 6 Review) or `/sfs retro --close` when
    appropriate.
 
-## Retro G5 Refinement
+## Gate 7 Retro Refinement
 
 `/sfs retro` is not adapter-only in AI runtimes. After the adapter succeeds and
 stdout has been shown verbatim:

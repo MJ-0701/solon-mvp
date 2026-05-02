@@ -17,8 +17,12 @@ description: Solon SFS command router for Codex. Dispatch `$sfs` / `sfs` / visib
 8. AI-era software fundamentals are cross-phase, not implement-only. Before a
    gate advances, check shared design concept, domain language, feedback loop,
    interface/artifact boundary, and gray-box delegation.
-9. For `brainstorm`, ask 1-3 blocking questions when shared understanding is
-   missing. Do not run or recommend `plan` as the next step until G0 is
+9. In Solon reports, show gates as `Gate N (Name)`, not naked ids:
+   Gate 1 (Intake), Gate 2 (Brainstorm), Gate 3 (Plan),
+   Gate 4 (Design), Gate 5 (Handoff), Gate 6 (Review),
+   Gate 7 (Retro). Use gate numbers 1..7 for new CLI examples.
+10. For `brainstorm`, ask 1-3 blocking questions when shared understanding is
+   missing. Do not run or recommend `plan` as the next step until Gate 2 is
    `ready-for-plan`.
-10. For `plan`, derive the contract from `brainstorm.md`; unresolved G0
+11. For `plan`, derive the contract from `brainstorm.md`; unresolved Gate 2
     questions stay visible instead of being hidden by assumptions.

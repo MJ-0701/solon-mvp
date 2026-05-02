@@ -31,7 +31,7 @@ usage_brainstorm() {
 Usage: /sfs brainstorm [<raw brief>]
        /sfs brainstorm --stdin
 
-Open/update the active sprint's brainstorm.md (G0 Brainstorm Gate document).
+Open/update the active sprint's brainstorm.md (Gate 2 Brainstorm document).
   - Creates brainstorm.md from sprint-templates/brainstorm.md if missing.
   - Accepts multiline raw context via --stdin or a quoted argument.
   - Appends raw input to brainstorm.md.

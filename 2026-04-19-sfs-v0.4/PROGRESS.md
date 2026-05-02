@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T06:04:46Z
-session: "idle: 0.5.73 released; context router upgrade repair"
+last_overwrite: 2026-05-02T15:48:12+09:00
+session: "idle: gate numbering/report label cleanup validated"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: null
@@ -212,6 +212,9 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
   tag `v0.5.73-product`; Homebrew `9a30c0b`; Scoop `be4134e`; installed
   `sfs version --check` reports up to date. `sfs upgrade` now repairs missing
   context router targets even when the project already reports latest.
+- Gate numbering/report-label cleanup validated locally: Solon report/CLI
+  surfaces now prefer Gate 1~7 labels and `/sfs review --gate 6` for review,
+  while older storage ids stay compatibility-only.
 
 ## ② In-Progress
 

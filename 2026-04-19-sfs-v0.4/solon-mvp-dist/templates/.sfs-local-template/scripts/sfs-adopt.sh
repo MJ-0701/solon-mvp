@@ -523,7 +523,9 @@ EOF
 cat > "${RETRO_PATH}" <<EOF
 ---
 phase: retro
-gate_id: G5
+gate_number: 7
+gate_label: "Gate 7 (Retro)"
+gate_id: G5          # legacy storage id
 sprint_id: "${SPRINT_ID}"
 goal: "Adopt existing legacy project into SFS"
 created_at: "${NOW}"

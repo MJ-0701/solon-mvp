@@ -299,7 +299,7 @@ _sfs_color_enabled() {
 
 # render_status_line MODE SPRINT WU GATE VERDICT AHEAD TS — color-aware status line.
 # Format (WU-24 §1.1):
-#   sprint <id> · WU <wu_id> · gate <last_gate>:<verdict> · ahead <N> · last_event <ISO8601_ts>
+#   sprint <id> · WU <wu_id> · gate <Gate N (Name)>:<verdict> · ahead <N> · last_event <ISO8601_ts>
 # Empty fields render as `-` to keep separator alignment.
 render_status_line() {
   local mode="${1:-auto}"
@@ -334,6 +334,9 @@ render_status_line() {
   local s_disp="${sprint:--}"
   local w_disp="${wu:--}"
   local g_disp="${gate:--}"
+  if [[ -n "${gate}" ]]; then
+    g_disp="$(sfs_gate_display_label "${gate}")"
+  fi
   local v_disp="${verdict:--}"
   local t_disp="${ts:--}"
 
@@ -386,7 +389,7 @@ append_event() {
 # Returns: 0 valid / 1 invalid.
 # Caller usage:
 #   if ! validate_gate_id "${GATE_ID}"; then
-#     echo "unknown gate ${GATE_ID}, valid: G-1, G0, G1, G2, G3, G4, G5" >&2
+#     echo "unknown gate ${GATE_ID}, valid: $(sfs_gate_valid_display_list)" >&2
 #     exit 6
 #   fi
 validate_gate_id() {
@@ -397,9 +400,70 @@ validate_gate_id() {
   esac
 }
 
+# sfs_gate_display_label <id> — user-facing gate label for Solon reports.
+# Internal ids remain stable for files/events and legacy CLI args; reports
+# should avoid naked G-1/G0/G1..G5 because the sequence is not obvious to humans.
+sfs_gate_display_label() {
+  local id="${1:-}"
+  case "${id}" in
+    G-1) printf 'Gate 1 (Intake)' ;;
+    G0)  printf 'Gate 2 (Brainstorm)' ;;
+    G1)  printf 'Gate 3 (Plan)' ;;
+    G2)  printf 'Gate 4 (Design)' ;;
+    G3)  printf 'Gate 5 (Handoff)' ;;
+    G4)  printf 'Gate 6 (Review)' ;;
+    G5)  printf 'Gate 7 (Retro)' ;;
+    *)   printf '%s' "${id:-"-"}"; return 1 ;;
+  esac
+}
+
+sfs_gate_valid_display_list() {
+  printf '1 (Gate 1 Intake), 2 (Gate 2 Brainstorm), 3 (Gate 3 Plan), 4 (Gate 4 Design), 5 (Gate 5 Handoff), 6 (Gate 6 Review), 7 (Gate 7 Retro)\n'
+}
+
+sfs_gate_number() {
+  local id="${1:-}"
+  case "${id}" in
+    G-1) printf '1' ;;
+    G0)  printf '2' ;;
+    G1)  printf '3' ;;
+    G2)  printf '4' ;;
+    G3)  printf '5' ;;
+    G4)  printf '6' ;;
+    G5)  printf '7' ;;
+    *) return 1 ;;
+  esac
+}
+
+# sfs_normalize_gate_id <id-or-number> — stdout: internal legacy id.
+# Canonical user input is 1..7. Legacy ids remain accepted for compatibility.
+sfs_normalize_gate_id() {
+  local raw="${1:-}"
+  case "${raw}" in
+    G-1|G0|G1|G2|G3|G4|G5)
+      printf '%s\n' "${raw}" ;;
+    1|Gate1|gate1|gate-1|gate_1)
+      printf 'G-1\n' ;;
+    2|Gate2|gate2|gate-2|gate_2)
+      printf 'G0\n' ;;
+    3|Gate3|gate3|gate-3|gate_3)
+      printf 'G1\n' ;;
+    4|Gate4|gate4|gate-4|gate_4)
+      printf 'G2\n' ;;
+    5|Gate5|gate5|gate-5|gate_5)
+      printf 'G3\n' ;;
+    6|G6|g6|Gate6|gate6|gate-6|gate_6)
+      printf 'G4\n' ;;
+    7|G7|g7|Gate7|gate7|gate-7|gate_7)
+      printf 'G5\n' ;;
+    *)
+      return 1 ;;
+  esac
+}
+
 # infer_last_gate_id — events.jsonl 마지막 review_open event 의 gate_id 추출.
 # stdout: gate_id (없으면 빈 문자열). Return code 항상 0.
-# WU-25 §2.1 default — `--gate <id>` 미지정 시 추론 fallback 으로 사용.
+# WU-25 §2.1 default — `--gate <1..7>` 미지정 시 추론 fallback 으로 사용.
 # read_last_gate (gate event) 와 분리: review 진입 시점 추적 = review_open scan.
 infer_last_gate_id() {
   [[ -f "${SFS_EVENTS_FILE}" ]] || return 0
@@ -984,8 +1048,8 @@ The Codex desktop app alone is a manual UI, not a headless SFS executor bridge.
 
 Use one of:
   - install/enable Codex CLI so `codex --help` works from the same Git Bash used by sfs
-  - run `sfs review --gate <id> --executor codex --prompt-only` and paste the prompt into the Codex app manually
-  - use an installed CLI executor, for example `sfs review --gate <id> --executor claude --generator codex`
+  - run `sfs review --gate <1..7> --executor codex --prompt-only` and paste the prompt into the Codex app manually
+  - use an installed CLI executor, for example `sfs review --gate 6 --executor claude --generator codex`
 EOF
       ;;
     gemini)
@@ -996,8 +1060,8 @@ The Gemini app/web UI alone is a manual UI, not a headless SFS executor bridge.
 
 Use one of:
   - install Gemini CLI so `gemini --help` works from the same Git Bash used by sfs
-  - run `sfs review --gate <id> --executor gemini --prompt-only` and paste the prompt into Gemini manually
-  - use an installed CLI executor, for example `sfs review --gate <id> --executor claude --generator gemini`
+  - run `sfs review --gate <1..7> --executor gemini --prompt-only` and paste the prompt into Gemini manually
+  - use an installed CLI executor, for example `sfs review --gate 6 --executor claude --generator gemini`
 EOF
       ;;
     claude)
@@ -1008,7 +1072,7 @@ The Claude desktop/web app alone is a manual UI, not a headless SFS executor bri
 
 Use one of:
   - install Claude CLI so `claude --help` works from the same Git Bash used by sfs
-  - run `sfs review --gate <id> --executor claude --prompt-only` and paste the prompt into Claude manually
+  - run `sfs review --gate <1..7> --executor claude --prompt-only` and paste the prompt into Claude manually
   - use another installed CLI executor
 EOF
       ;;

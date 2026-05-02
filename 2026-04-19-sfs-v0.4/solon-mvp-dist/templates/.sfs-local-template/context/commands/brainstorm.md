@@ -1,14 +1,14 @@
 ---
 id: sfs-command-brainstorm
 summary: Build shared understanding before plan; raw requirements are not a contract.
-load_when: ["brainstorm", "브레인스토밍", "requirements", "요구사항", "G0"]
+load_when: ["brainstorm", "브레인스토밍", "requirements", "요구사항", "Gate 2"]
 ---
 
 # Brainstorm
 
 - Adapter-first: run `sfs brainstorm ...`, preserve raw input in `§8 Append Log`,
   then refine `brainstorm.md` as Solon CEO.
-- G0 exists to prevent spec-to-code drift. Do not accept raw requirements as a
+- Gate 2 exists to prevent spec-to-code drift. Do not accept raw requirements as a
   finished plan; interrogate intent until the next gate has enough shape.
 - Apply AI-era fundamentals before setting `status: ready-for-plan`:
   - shared design concept: problem owner, current pain, success state, in/out
@@ -25,5 +25,5 @@ load_when: ["brainstorm", "브레인스토밍", "requirements", "요구사항", 
   `status: draft`; final `Next` is "answer questions, then brainstorm again".
 - Only set `status: ready-for-plan` when `§6 Plan Seed` can drive measurable
   requirements, AC, risks, generator deliverables, and evaluator criteria.
-- Never run `sfs plan` automatically from G0. The user or next explicit command
-  opens G1 after the questions are answered.
+- Never run `sfs plan` automatically from Gate 2. The user or next explicit command
+  opens Gate 3 after the questions are answered.
