@@ -1,83 +1,105 @@
 ---
 doc_id: handoff-next-session
-title: "Next session handoff - 0.5.85 current truth"
-written_at: 2026-05-02T13:55:09Z
-written_at_kst: 2026-05-02T22:55:09+09:00
-last_known_main_commit: 77ebe55
+title: "Next session handoff — 0.5.95 current truth + MD-size split execution"
+written_at: 2026-05-02T17:52:38Z
+written_at_kst: 2026-05-03T02:52:38+09:00
+last_known_main_commit: e3c98ad
 visibility: raw-internal
-source_task: release-0.5.85-guide-readme-close-flow
+source_task: claude-cowork-doc-audit-split (mid-flight handoff)
+session_codename: modest-charming-keller
 ---
 
 # Next Session Handoff
 
 ## 1. Current Truth
 
-- Latest Solon Product release is `0.5.85-product`.
-- Stable product repo: `4c1e1d0` / tag `v0.5.85-product`.
-- Homebrew tap: `b8bb937`.
-- Scoop bucket: `dcf1790`.
-- Dev repo main at release handoff: `77ebe55`.
-- Installed runtime reports:
-  - `sfs 0.5.85-product`
-  - `latest 0.5.85-product`
-  - `status up-to-date`
-- `bash 2026-04-19-sfs-v0.4/scripts/verify-product-release.sh --version 0.5.85-product`
-  passed after the release handoff commit:
-  product tag, Homebrew formula/hash, Scoop manifest/hash, packaged context
-  router tar/zip integrity, installed runtime, and dev/stable/Homebrew/Scoop
-  clean handoff state all OK.
-- `0.5.85-product` ships the README/GUIDE close-flow cleanup:
-  - GUIDE is now a beginner-first first-sprint walkthrough instead of a dense
-    internal manual.
-  - The normal user path is `status -> start -> brainstorm -> plan ->
-    implement -> review -> retro`.
-  - `sfs retro` is documented as the default sprint close.
-  - `sfs report` and `sfs tidy` are documented as optional/special actions for
-    report preview/rebuild and old workbench cleanup.
-  - Installer onboarding now points new users through `review -> retro`, not
-    `report` as a required intermediate step.
+- Latest Solon Product release is **`0.5.95-product`** (codex hotfix train 0.5.87-95 shipped 2026-05-03).
+- Stable product repo: tag `v0.5.95-product` (stable sha not recorded individually for 87-95 — see release verifier outputs and tap repo logs).
+- Homebrew tap and Scoop bucket: synced through 0.5.95.
+- Dev repo main at this handoff: `e3c98ad` (release: 0.5.95-product update UX). **Plus the in-flight commit** of this session that lands the PROGRESS rotation + audit + this handoff.
+- `solon-mvp-dist/VERSION` = `0.5.95-product`.
+- `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh` should now return exit `0` after the in-flight commit (drift was resolved by repairing PROGRESS resume_hint and HANDOFF written_at to match 0.5.95).
 
-## 2. Why This Handoff Exists
+## 2. What Last Session (claude-cowork:modest-charming-keller) Did
 
-This is the compact current-truth handoff after the `0.5.85-product` release.
-If future release work lands without updating `PROGRESS.md` and this file,
-`resume-session-check.sh` should detect release handoff drift and stop the new
-session before broad code inspection.
+- **Phase A — Drift recovery for codex 0.5.87-95 train**: PROGRESS.md frontmatter `last_overwrite`, `session`, `current_wu_owner`, `scheduled_task_log`, `resume_hint.default_action`, `on_ambiguous`, `last_written` all rebased to 0.5.95 baseline. ③ Next note added explaining the codex train was not entered into PROGRESS bullets at release time.
+- **Phase B — PROGRESS rotation**: ① Just-Finished + ④ Artifacts pre-0.5.93 bullets rotated verbatim to `archives/progress/PROGRESS-bullets-rotation-2026-05-03-pre-0.5.93.md` (with strict frontmatter trace per next-session split standard). PROGRESS.md down from 463 → 324 lines. 0.5.93/0.5.94/0.5.95 narratives written into the live ① + ④ from CHANGELOG content.
+- **Phase C — Full repo MD audit**: comprehensive size + auto-load classification report at [`MD-SIZE-AUDIT-2026-05-03.md`](MD-SIZE-AUDIT-2026-05-03.md). Every MD file in the repo enumerated and tier-classified.
+- **Phase D — Splits NOT executed**. Per safety constraint ("절대 누락 0"), all body-chapter / sprint / misc large-file splits are deferred to the next session for user-approved execution. See §4 below for the queue.
 
 ## 3. Validation Evidence
 
-- `docs: simplify guide close flow` landed on dev main as `77ebe55`.
-- `scripts/cut-release.sh --version 0.5.85-product --apply --allow-dirty` cut
-  stable `4c1e1d0` and tag `v0.5.85-product`.
-- Stable main and tag were pushed to `MJ-0701/solon-product`.
-- Homebrew formula published `v0.5.85-product.tar.gz` with SHA256
-  `2cb92c79f3293ad5999c23346448f32c50b2cd3fa2c03935d3ed7bc774d171ff`.
-- Scoop manifest published `v0.5.85-product.zip` with SHA256
-  `315694043bb3799dae868887633bf9e56924f69edda0653e3e75568ce7059dbf`.
-- `brew upgrade MJ-0701/solon-product/sfs` upgraded local runtime to 0.5.85.
-- `sfs version --check` returned up-to-date.
-- Full release verifier returned OK.
+- PROGRESS.md trim verified by `wc -l` (463 → 324).
+- Archive file integrity: 222 lines, frontmatter compliant with the split standard documented in `MD-SIZE-AUDIT-2026-05-03.md`.
+- Auto-load chain unchanged this session (no entry stub touched).
+- `release_handoff_drift` from `resume-session-check.sh` should clear once this commit pushes (PROGRESS resume_hint and this HANDOFF both reference 0.5.95-product).
 
-## 4. Default Action
+## 4. Default Action for Next Session — MD split execution queue
 
-1. Read `CLAUDE.md`, then `PROGRESS.md`.
-2. Run `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh`; expected
-   result is exit `0`.
-3. If `release_handoff_drift` appears, stop and repair entry/handoff SSoT
-   before inspecting product code.
-4. With clean entry state, ask the user for the next WU/domain unless they give
-   a direct task.
-5. For a direct task, do not continue a previous session branch. Start from
-   clean `main`, then create `feature/<slug>` or `hotfix/<slug>` from the
-   requirement before editing.
+> **Read this section first**, then read `MD-SIZE-AUDIT-2026-05-03.md` for the per-file detail.
+
+### 4.1 Hard rules before any split
+
+1. **Reference scan**: before touching any target file, run the path-reference grep:
+   ```bash
+   grep -rn '<target-relative-path>' --include='*.md' --include='*.sh' --include='*.yaml' --include='*.toml' \
+     --exclude-dir='.git' --exclude-dir='archives' --exclude-dir='tmp' --exclude-dir='.claude/worktrees'
+   ```
+   If references exist, decide whether the split target file's path stays stable (file remains as parent stub at same path) or links must be rewritten.
+2. **Frontmatter standard** (HARD): every new split file MUST contain the full set listed in `MD-SIZE-AUDIT-2026-05-03.md` "Frontmatter standard" section. No exceptions.
+3. **Parent link stub** (HARD): the parent file gets a 1-line `> §X moved to [<file>](path) — split: <reason>. <session>, <ISO>.` at the original §-position.
+4. **No splits to "DO NOT split" list** in `MD-SIZE-AUDIT-2026-05-03.md` ("Files that MUST NOT be split" section).
+5. **Atomic per file** — one commit per split (`split: <file> §X+Y → <subdir>/`).
+6. **After every commit**, run `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh` — must return exit `0`.
+
+### 4.2 Tier 1 split queue (body design chapters — recommended first)
+
+| Order | File | Lines | Suggested target |
+|---|---|---|---|
+| 1 | `07-plugin-distribution.md` | 1022 | `07-plugin-distribution/<sub-§>.md` × N |
+| 2 | `05-gate-framework.md` | 956 | `05-gate-framework/<sub-§>.md` × N |
+| 3 | `02-design-principles.md` | 940 | `02-design-principles/<sub-§>.md` × N |
+| 4 | `10-phase1-implementation.md` | 827 | `10-phase1-implementation/<sub-§>.md` × N |
+| 5 | `08-observability.md` | 709 | `08-observability/<sub-§>.md` × N |
+| 6 | `04-pdca-redef.md` | 645 | `04-pdca-redef/<sub-§>.md` × N |
+| 7 | `03-c-level-matrix.md` | 622 | `03-c-level-matrix/<sub-§>.md` × N |
+| 8 | `06-escalate-plan.md` | 605 | `06-escalate-plan/<sub-§>.md` × N |
+
+Pattern: keep parent file as TOC/index pointing at sub-files; each sub-file gets full frontmatter; INDEX.md / cross-ref-audit.md continue to reference parent path.
+
+### 4.3 Tier 2 split queue (closed sprint files)
+
+| Order | File | Lines | Target |
+|---|---|---|---|
+| 9 | `sprints/WU-23.md` | 406 | `sprints/WU-23/<sub-step>.md` (precedent: `sprints/WU-27/`) |
+| 10 | `sprints/WU-20.md` | 340 | `sprints/WU-20/<sub-step>.md` |
+| 11 | `sprints/WU-26.md` | 312 | `sprints/WU-26/<sub-step>.md` |
+
+Keep parent `WU-XX.md` with frontmatter (`wu_id`, `final_sha`, etc.) intact; only body content moves to sub-files. Update `sub_steps_split: true` in parent frontmatter.
+
+### 4.4 Tier 3 (misc large) — review case-by-case
+
+See `MD-SIZE-AUDIT-2026-05-03.md` Tier 3 table. Pre-flight reference scan + user confirmation per file recommended.
+
+### 4.5 §1.14 generalization (after splits land)
+
+Once Tier 1+2 splits are exercised:
+1. Update CLAUDE.md §1.14 from "CLAUDE.md 는 항상 ≤200 lines" → "단일 SSoT MD 파일 (CLAUDE.md, PROGRESS.md, HANDOFF, body-chapter parents 등) 은 ≤200 lines. 누적성 파일 (CHANGELOG, WORK-LOG, sessions, learning-logs) 은 예외".
+2. Create `scripts/check-md-size.sh` and wire into `resume-session-check.sh` as check #9 (exit code 18 for size warning).
+3. Add `cut-release.sh --apply` post-flight hook: rotate oldest ① Just-Finished + ④ Artifacts release bullet to `archives/progress/PROGRESS-bullets-rotation-<period>.md` automatically.
+4. Create `learning-logs/2026-05/P-XX-md-rotation-pattern.md` companion to P-06 for the PROGRESS-style accumulation case.
 
 ## 5. Guardrails
 
-- Do not re-open the README/GUIDE close-flow cleanup solely because it was just
-  released; treat deeper docs architecture or command UX requests as new WUs.
-- Do not rely on this file as a second SSoT for release history; `PROGRESS.md`
-  remains the live entry snapshot.
-- Keep future release completion atomic: product release/cut + channel publish +
-  verifier + `PROGRESS.md`/handoff update must land together.
-- After a task branch is merged into `main`, do not use it for the next session;
-  the next direct task gets a fresh branch from `main`.
+- Do not bypass reference scan before splitting. The "절대 누락 0" rule from user is non-negotiable.
+- Do not edit `solon-mvp-dist/CHANGELOG.md`, `WORK-LOG.md`, or any file in `archives/**` / `.sfs-local/**` / `.claude/worktrees/**` as part of MD splits. They are accumulation or runtime-managed.
+- Do not undo recent 0.5.86 work on `solon-mvp-dist/GUIDE.md` / `BEGINNER-GUIDE.md` / `README.md`. They were intentionally trimmed and should not be split further without product UX review.
+- Do not modify auto-loaded files (`.claude/agents/`, `.agents/skills/`, `.gemini/commands/`, root stubs). They are intentionally minimal.
+- After a task branch is merged into `main`, do not use it for the next session; the next direct task gets a fresh branch from `main`.
+
+## 6. Outstanding work the user asked about
+
+- ✅ PROGRESS.md slim (this session — done).
+- ⏸ §1.14 generalization (deferred to next session per user's "다음 세션에서 인계받아서 할께").
+- ⏸ Full doc audit + split execution (this session: audit done, splits deferred — see §4 above).
+- ⏸ Frontmatter standard for split files (defined in `MD-SIZE-AUDIT-2026-05-03.md`; ready for use).
