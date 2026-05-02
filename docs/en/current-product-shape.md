@@ -129,6 +129,8 @@ creates the local close commit. Use `sfs retro --draft` when you want to open
 the draft without closing.
 Older installs that still have loose sprint archives or separate review-run
 archives are compacted by `sfs upgrade` into compressed migration bundles.
+Runtime upgrade, agent install, and profile rollback backups are also kept as
+`*.tar.gz` + `manifest.txt` bundles instead of loose project files.
 
 ## Documentation Shape
 

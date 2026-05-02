@@ -268,12 +268,23 @@ apply_profile() {
     return 1
   }
 
-  local ts backup_dir backup block_tmp out_tmp
+  local ts backup_dir backup_stage backup_archive block_tmp out_tmp
   ts=$(date +%Y%m%d-%H%M%S)
-  backup_dir="$TARGET/${SFS_LOCAL_DIR}/tmp/profile-backups/${ts}"
-  mkdir -p "$backup_dir"
-  backup="$backup_dir/SFS.md"
-  cp "$SFS_MD" "$backup"
+  backup_dir="$TARGET/${SFS_LOCAL_DIR}/archives/profile-backups/${ts}"
+  backup_stage="$backup_dir/.stage"
+  backup_archive="$backup_dir/profile-backup.tar.gz"
+  mkdir -p "$backup_stage"
+  cp "$SFS_MD" "$backup_stage/SFS.md"
+  {
+    echo "SFS profile backup"
+    echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "reason: pre-profile SFS.md rollback copy"
+    echo "archive: $backup_archive"
+    echo "items:"
+    echo "- SFS.md"
+  } > "$backup_dir/manifest.txt"
+  tar -czf "$backup_archive" -C "$backup_stage" .
+  rm -rf "$backup_stage"
 
   block_tmp=$(mktemp "${TMPDIR:-/tmp}/sfs-profile-block.XXXXXX")
   out_tmp=$(mktemp "${TMPDIR:-/tmp}/sfs-profile-out.XXXXXX")
@@ -313,7 +324,7 @@ apply_profile() {
   mv "$out_tmp" "$SFS_MD"
   rm -f "$block_tmp"
   echo "profile updated: SFS.md"
-  echo "backup: ${backup#$TARGET/}"
+  echo "backup: ${backup_archive#$TARGET/}"
 }
 
 detect_project_profile

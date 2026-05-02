@@ -107,6 +107,8 @@ sfs.cmd version --check
 이관해 프로젝트 표면을 줄입니다. 기능은 없어지지 않고 `sfs context path ...` 로 같은
 runtime context 를 읽습니다. 예전 설치본의 loose sprint archive 와 per-run review archive 도
 압축 migration 으로 접어, 사용자가 봐야 할 표면과 히스토리 보관층을 분리합니다.
+runtime upgrade / agent install / profile rollback 백업도 loose 파일이 아니라
+`*.tar.gz` + `manifest.txt` bundle 로 남습니다.
 
 오래된 프로젝트에서는 `sfs` 실행 시 부드러운 업데이트 안내가 뜹니다. 끄려면
 `SFS_VERSION_NOTICE=0` 을 씁니다. 토큰 낭비 가능성이 보일 때(어댑터 문서 비대,

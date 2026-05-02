@@ -127,6 +127,8 @@ commit. Use `sfs retro --draft` only when you want to open the draft without
 closing the sprint.
 Older loose sprint archives and separate review-run archives are compacted by
 `sfs upgrade` into compressed migration bundles.
+Runtime upgrade, agent install, and profile rollback backups are also kept as
+`*.tar.gz` + `manifest.txt` bundles instead of loose project files.
 
 Use `sfs report` separately only when you want to preview or rebuild the report
 without closing the sprint. The full list of optional helpers
