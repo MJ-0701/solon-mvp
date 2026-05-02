@@ -246,9 +246,11 @@ verify_thin_surface_defaults_in_tree() {
 }
 
 verify_windows_cmd_self_upgrade_in_tree() {
-  local root="$1" label="$2" cmd_file call_line done_line
+  local root="$1" label="$2" cmd_file scoop_hook call_line done_line
   cmd_file="${root}/bin/sfs.cmd"
+  scoop_hook="${root}/bin/sfs-scoop-post-install.ps1"
   [[ -f "${cmd_file}" ]] || fail "${label} missing Windows sfs.cmd wrapper" 5
+  [[ -f "${scoop_hook}" ]] || fail "${label} missing Scoop post-install project upgrade hook" 5
 
   call_line="$(grep -n 'call "%UPDATED_SFS_CMD%" %\*' "${cmd_file}" | head -1 | cut -d: -f1 || true)"
   done_line="$(grep -n 'set "SFS_SELF_UPGRADE_DONE=1"' "${cmd_file}" | head -1 | cut -d: -f1 || true)"
@@ -257,6 +259,8 @@ verify_windows_cmd_self_upgrade_in_tree() {
   if (( done_line <= call_line )); then
     fail "${label} sfs.cmd sets SFS_SELF_UPGRADE_DONE before reloaded runtime call" 5
   fi
+  grep -q 'SFS_SCOOP_PROJECT_UPGRADE' "${cmd_file}" || fail "${label} sfs.cmd does not suppress Scoop project hook during self-upgrade" 5
+  grep -q 'sfs.cmd upgrade --no-self-upgrade' "${scoop_hook}" || fail "${label} Scoop hook does not run project upgrade without recursive self-upgrade" 5
   log "  ok ${label} Windows sfs.cmd self-upgrade reload guard"
 }
 
@@ -354,6 +358,7 @@ fi
 require_text "${SCOOP_JSON}" "\"version\": \"${VERSION}\"" "Scoop manifest"
 require_text "${SCOOP_JSON}" "v${VERSION}\\.zip" "Scoop manifest"
 require_text "${SCOOP_JSON}" "solon-product-${VERSION}" "Scoop manifest"
+require_text "${SCOOP_JSON}" "sfs-scoop-post-install.ps1" "Scoop manifest"
 SCOOP_SHA="$(sed -n 's/.*"hash": "\([^"]*\)".*/\1/p' "${SCOOP_JSON}" | head -1)"
 [[ -n "${SCOOP_SHA}" ]] || fail "Scoop manifest hash not found" 3
 ZIP_PATH="${TMP_DIR}/sfs.zip"

@@ -16,6 +16,9 @@
       "sfs"
     ]
   ],
+  "post_install": [
+    "& (Join-Path $dir 'bin\\sfs-scoop-post-install.ps1')"
+  ],
   "checkver": {
     "github": "https://github.com/MJ-0701/solon-product",
     "regex": "v([\\d.]+-product)"
@@ -30,7 +33,7 @@
   },
   "notes": [
     "Solon SFS on Windows requires Git for Windows/Git Bash. If bash.exe is not on PATH, set SFS_BASH to the full bash.exe path.",
-    "First-time PowerShell/cmd setup: cd <project>; git init; sfs.cmd init --layout thin --yes; sfs.cmd status; sfs.cmd agent install all.",
+    "First-time PowerShell/cmd setup: cd <project>; git init; sfs.cmd init --layout thin --yes; sfs.cmd status. Optional native adapters: sfs.cmd agent install all.",
     "Beginner guide: https://github.com/MJ-0701/solon-product/blob/main/BEGINNER-GUIDE.md"
   ]
 }

@@ -925,7 +925,7 @@ self_upgrade_if_scoop() {
   fi
 
   echo "  scoop update sfs"
-  if ! run_scoop_command update sfs; then
+  if ! SFS_SCOOP_PROJECT_UPGRADE=0 run_scoop_command update sfs; then
     echo "scoop update sfs failed; rerun with SFS_UPDATE_SELF=0 to use the current runtime only" >&2
     return 1
   fi

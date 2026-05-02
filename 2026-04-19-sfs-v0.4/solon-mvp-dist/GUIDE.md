@@ -333,6 +333,10 @@ sfs.cmd upgrade
 sfs.cmd version --check
 ```
 
+Scoop 설치본은 프로젝트 루트에서 `scoop update sfs` 를 실행해도 새 runtime 설치 후
+현재 Solon 프로젝트를 감지해 project upgrade 를 자동으로 이어갑니다. 프로젝트 밖에서 실행한
+Scoop 업데이트는 runtime 만 바꿉니다.
+
 오래된 프로젝트에서는 `sfs` 실행 시 부드러운 update notice 가 뜹니다. 강제 업데이트는
 아니고, 업데이트할지 묻는 안내입니다. 끄려면 `SFS_VERSION_NOTICE=0` 을 사용합니다.
 

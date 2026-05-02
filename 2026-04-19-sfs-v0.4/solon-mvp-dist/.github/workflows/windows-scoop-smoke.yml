@@ -95,7 +95,6 @@ jobs:
           sfs init --layout thin --yes
           sfs status
           sfs auth status codex
-          sfs agent install all
 
           $required = @(
             "SFS.md",
@@ -103,24 +102,51 @@ jobs:
             "AGENTS.md",
             "GEMINI.md",
             ".sfs-local\VERSION",
-            ".sfs-local\config.yaml",
-            ".claude\commands\sfs.md",
-            ".claude\skills\sfs\SKILL.md",
-            ".gemini\commands\sfs.toml",
-            ".agents\skills\sfs\SKILL.md"
+            ".sfs-local\config.yaml"
           )
           foreach ($path in $required) {
             if (-not (Test-Path $path)) { throw "missing expected installed file: $path" }
           }
 
           $forbidden = @(
+            ".claude\commands\sfs.md",
+            ".claude\skills\sfs\SKILL.md",
+            ".gemini\commands\sfs.toml",
+            ".agents\skills\sfs\SKILL.md",
             ".sfs-local\scripts",
             ".sfs-local\sprint-templates",
             ".sfs-local\personas",
             ".sfs-local\decisions-template"
           )
           foreach ($path in $forbidden) {
-            if (Test-Path $path) { throw "thin layout copied runtime asset unexpectedly: $path" }
+            if (Test-Path $path) { throw "thin layout copied project-local asset unexpectedly: $path" }
+          }
+
+          sfs agent install all
+          $adapterFiles = @(
+            ".claude\commands\sfs.md",
+            ".claude\skills\sfs\SKILL.md",
+            ".gemini\commands\sfs.toml",
+            ".agents\skills\sfs\SKILL.md"
+          )
+          foreach ($path in $adapterFiles) {
+            if (-not (Test-Path $path)) { throw "missing expected opt-in adapter file: $path" }
+          }
+
+          scoop update sfs --force
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $projectVersion = (Select-String -Path ".sfs-local\VERSION" -Pattern "^solon_mvp_version:\s*(.+)$").Matches.Groups[1].Value.Trim()
+          $runtimeVersion = ((sfs version).Trim() -replace "^sfs\s+", "")
+          if ($projectVersion -ne $runtimeVersion) {
+            throw "Scoop update did not refresh project VERSION: project=$projectVersion runtime=$runtimeVersion"
+          }
+          foreach ($path in $adapterFiles) {
+            if (Test-Path $path) { throw "Scoop project upgrade left thin adapter file: $path" }
+          }
+          $adapterArchives = Get-ChildItem ".sfs-local\archives\runtime-migrations" -Filter "project-agent-adapters.tar.gz" -Recurse -ErrorAction SilentlyContinue
+          if (-not $adapterArchives) {
+            throw "Scoop project upgrade did not archive opt-in adapter files"
           }
 
       - name: Smoke cmd PATH

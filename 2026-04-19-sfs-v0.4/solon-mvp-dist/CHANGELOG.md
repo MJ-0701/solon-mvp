@@ -1,3 +1,18 @@
+## [0.5.93-product] - 2026-05-03
+
+### Added
+
+- **Scoop project upgrade hook** — running `scoop update sfs` from an
+  initialized Solon project now updates the global runtime and then continues
+  into project upgrade automatically. Running Scoop outside a project still
+  leaves project files untouched.
+
+### Fixed
+
+- **No duplicate project migration during `sfs.cmd upgrade`** — Windows
+  self-upgrade paths temporarily set `SFS_SCOOP_PROJECT_UPGRADE=0` while they
+  call `scoop update sfs`, then run the project upgrade themselves.
+
 ## [0.5.92-product] - 2026-05-03
 
 ### Fixed

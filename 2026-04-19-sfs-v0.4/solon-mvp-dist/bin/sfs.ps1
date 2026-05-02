@@ -72,8 +72,16 @@ function Invoke-ScoopSelfUpgrade([string[]] $Args) {
   }
 
   Write-Host "  scoop update sfs"
+  $oldScoopProjectUpgrade = $env:SFS_SCOOP_PROJECT_UPGRADE
+  $env:SFS_SCOOP_PROJECT_UPGRADE = "0"
   & scoop update sfs
-  if ($LASTEXITCODE -ne 0) {
+  $scoopUpdateExitCode = $LASTEXITCODE
+  if ($null -eq $oldScoopProjectUpgrade) {
+    Remove-Item "Env:SFS_SCOOP_PROJECT_UPGRADE" -ErrorAction SilentlyContinue
+  } else {
+    $env:SFS_SCOOP_PROJECT_UPGRADE = $oldScoopProjectUpgrade
+  }
+  if ($scoopUpdateExitCode -ne 0) {
     Write-Error "scoop update sfs failed; rerun with SFS_UPDATE_SELF=0 to use the current runtime only."
     exit 1
   }
