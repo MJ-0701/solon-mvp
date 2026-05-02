@@ -1,3 +1,14 @@
+## [0.5.83-product] - 2026-05-02
+
+### Added
+
+- **Stale version notice** — initialized projects now get a soft terminal
+  notice when `sfs` detects that the project/runtime is at least five product
+  releases behind the latest published tag. The notice is throttled by a local
+  cache, skipped for install/upgrade/version/help commands, and can be disabled
+  with `SFS_VERSION_NOTICE=0`. On interactive `sfs status`, Solon also asks
+  whether to run `sfs upgrade` now.
+
 ## [0.5.82-product] - 2026-05-02
 
 ### Changed
