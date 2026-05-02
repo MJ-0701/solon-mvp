@@ -366,7 +366,13 @@ decisions, and docs are also valid implementation artifacts.
    infra so the user does not need to invent every checklist. MVP-overkill
    findings must be recorded as `deferred` or `risk-accepted`, not used to
    block the slice unless they are correctness, money, PII, auth, data-loss, or
-   unrecoverable side-effect risks.
+   unrecoverable side-effect risks. For non-Dev divisions, apply the local
+   policy ladders: strategy-pm moves lean PRD -> metric/segment roadmap ->
+   GTM/pricing/pivot approval; taxonomy moves glossary -> canonical model ->
+   rename/schema migration approval; design/frontend moves existing system ->
+   UX flow/tokens -> component system/redesign approval; QA moves AC smoke ->
+   regression matrix -> release readiness; infra moves local/single deploy ->
+   CI/CD/secrets/backup/observability -> SLO/rollback/runbook approval.
 5. For backend implementation, treat transaction discipline as always-on when
    DB, Spring/JPA, Spring Batch, external API, MQ/event, idempotency, state, or
    consistency paths are touched. Check Transaction boundaries, external calls

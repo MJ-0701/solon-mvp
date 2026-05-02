@@ -252,6 +252,12 @@ graph TB
 
 > 🆕 v0.4-r3: 기존 `division/pm` 을 `division/strategy-pm` 으로 명명 통일. 1인 창업 맥락에서 **제품 기획 + 사업 전략 결정**이 동일 본부 안에서 결합되는 실제 역할을 반영 (참조: [§02 §2.13.9](02-design-principles.md#2139-1인-창업-맥락-phase-1-dogfooding-기본)).
 
+**Strategy-PM policy**: MVP/소규모 프로젝트는 lean PRD, AC, 우선순위,
+smallest shippable slice 를 기본값으로 한다. positioning, monetization,
+launch, retention, stakeholder promise 가 걸리면 segment/metric/pricing/
+support/roadmap review 를 추가한다. pivot, roadmap expansion, enterprise
+commitment, pricing model 변경은 사용자 수용 후 구현한다.
+
 ### 3.3.2 Taxonomy — `division/taxonomy`
 
 | 항목 | 값 |
@@ -266,6 +272,12 @@ graph TB
 
 > ⚠️ Taxonomy는 모든 본부의 read-dependency. 활성화 시 Taxonomy 본부장은 다른 본부의 산출물을 grep해서 forbidden 용어 검출 권한 보유. 활성 branch 예시: [appendix/dialogs/branches/taxonomy.yaml](appendix/dialogs/branches/taxonomy.yaml)
 
+**Taxonomy policy**: 초기에는 lightweight glossary 와 일관된 name/state 만
+관리한다. 새 concept, enum, state, event, API, persisted field, analytics
+label 이 생기거나 여러 본부가 같은 용어를 재사용하면 canonical domain
+model, alias policy, schema versioning 을 추가한다. user data, public API,
+UI label, analytics 를 건드리는 rename/schema migration 은 승인 후 진행한다.
+
 ### 3.3.3 Design — `division/design`
 
 | 항목 | 값 |
@@ -279,6 +291,13 @@ graph TB
 | 외부 인터페이스 | strategy-pm (PRD read) → Design → Dev (handoff spec) |
 
 > 활성 branch 예시: [appendix/dialogs/branches/design.yaml](appendix/dialogs/branches/design.yaml)
+
+**Design/frontend policy**: MVP/소규모 프로젝트는 기존 design system 또는
+native component convention 을 따르고, usability/accessibility/responsive
+fit/error-empty-loading state 를 기본값으로 본다. screen, role, form,
+navigation, repeated component 가 늘어나면 UX flow map, tokens, component
+inventory, interaction/state contract 를 추가한다. full redesign, navigation
+model 변경, design-system replacement 는 사용자 수용 후 진행한다.
 
 ### 3.3.4 Dev (Engineering) — `division/dev`
 
@@ -314,6 +333,13 @@ refactor 를 진행한다.
 
 > 활성 branch 예시: [appendix/dialogs/branches/qa.yaml](appendix/dialogs/branches/qa.yaml) (채명정 persona 시나리오 포함)
 
+**QA policy**: MVP/소규모 프로젝트는 AC-linked smoke 와 가장 작은 regression
+signal 을 기본값으로 한다. critical flow, money/PII/auth, migration,
+concurrency, boundary case, repeated regression 이 보이면 risk matrix,
+integration/E2E coverage, flaky-test policy 를 추가한다. production exposure,
+real user traffic, rollback risk 가 보이면 Release Readiness gate 를 열고
+사용자 승인 후 blocking gate 로 승격한다.
+
 ### 3.3.6 Infra — `division/infra`
 
 | 항목 | 값 |
@@ -327,6 +353,13 @@ refactor 를 진행한다.
 | 외부 인터페이스 | QA (배포 readiness read, QA active 시) → Infra → Observability (L1/L3 sync 운영) |
 
 > 활성 branch 예시: [appendix/dialogs/branches/infra.yaml](appendix/dialogs/branches/infra.yaml)
+
+**Infra policy**: MVP/소규모 프로젝트는 local/single-deploy hygiene 을
+기본값으로 한다: secrets out of git, env separation, backup note, basic logs,
+rollback note. local 을 넘어 배포되면 CI/CD, secret rotation, dependency/
+container checks, monitoring, runbook, cost, backup/restore evidence 를
+추가한다. SLO, multi-region, k8s, IAM/network hardening, compliance posture 는
+사용자 명시 승인 후 진행한다.
 
 ---
 

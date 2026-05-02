@@ -20,3 +20,7 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   transition when domain seams grow; propose MSA only when independent deploy,
   scale, ownership, resilience, or blast-radius needs justify it. Refactor only
   after user acceptance/approval and record the evidence.
+- Non-Dev policy ladders: strategy-pm, taxonomy, design/frontend, QA, and infra
+  start lightweight, strengthen when trigger evidence appears, and require user
+  acceptance/approval before large roadmap, rename/schema, redesign,
+  release-readiness, or infra/ops transitions.

@@ -2,16 +2,16 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T18:10:00+09:00
-session: "WU-45 closed locally: Dev backend architecture evolution ladder"
+last_overwrite: 2026-05-02T18:12:54+09:00
+session: "WU-46 in progress: non-Dev division policy ladders"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
-current_wu: null
-current_wu_path: null
+current_wu: WU-46
+current_wu_path: 2026-04-19-sfs-v0.4/sprints/WU-46.md
 
 # ── SESSION MUTEX (CLAUDE.md §1.12) ───────────────────────────────
 # Keep scalar form for tool compatibility (.sfs-local/scripts/sfs-loop.sh stop/status, auto-resume contract).
-current_wu_owner: null
+current_wu_owner: codex-non-dev-division-policy-ladders # claimed_at=2026-05-02T18:12:54+09:00 last_heartbeat=2026-05-02T18:12:54+09:00 ttl_minutes=15
 
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.

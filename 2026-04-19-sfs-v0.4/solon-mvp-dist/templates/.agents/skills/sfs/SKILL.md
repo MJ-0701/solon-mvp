@@ -30,3 +30,7 @@ description: Solon SFS command router for Codex. Dispatch `$sfs` / `sfs` / visib
     guardrail: clean layered monolith for MVP/small projects, CQRS for
     non-initial backend work even on one DB, Hexagonal transition only after
     user acceptance, and MSA transition only after explicit approval.
+13. For `implement`, non-Dev divisions also follow routed policy ladders:
+    strategy-pm, taxonomy, design/frontend, QA, and infra start lightweight,
+    strengthen on trigger evidence, and require user acceptance/approval before
+    large roadmap, rename, redesign, release-readiness, or infra transitions.

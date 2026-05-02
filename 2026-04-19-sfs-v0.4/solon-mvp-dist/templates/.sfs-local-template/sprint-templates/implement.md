@@ -81,6 +81,34 @@ non-backend discipline checklist.
   cloud, container, auth, observability, or runbook changes; scale-gate
   Security / Infra / DevOps review.
 
+Non-Dev division policy ladders:
+
+- **Strategy-PM** starts with lean PRD, AC, priority, and smallest shippable
+  slice. Add metrics, segment, pricing, support, or roadmap review when the
+  work affects positioning, monetization, launch, retention, or stakeholder
+  promises. Pivot, roadmap expansion, enterprise commitment, or pricing model
+  changes need explicit user acceptance before implementation.
+- **Taxonomy** starts with a lightweight glossary and consistent names/states.
+  Add canonical domain model, enum/state/event ownership, alias policy, and
+  schema versioning when new concepts, persisted fields, APIs, analytics, or
+  multiple divisions reuse terms. Renames or schema migrations that touch user
+  data, public API, UI labels, or analytics need approval and migration notes.
+- **Design/frontend** starts from the existing design system and basic
+  usability, accessibility, responsive fit, and error/empty/loading states. Add
+  flow mapping, tokens, component inventory, and state/interaction contracts
+  when screens, roles, forms, or repeated components grow. Full redesign,
+  navigation model change, or design-system replacement needs user acceptance.
+- **QA** starts with AC-linked smoke checks and the smallest useful regression
+  signal. Add risk matrix, boundary/concurrency/migration cases, integration or
+  E2E coverage, and flaky-test policy when critical flows, money/PII, auth,
+  migrations, or repeated regressions appear. Release-readiness gates are added
+  when production exposure, user traffic, or rollback risk appears.
+- **Infra** starts with local/single-deploy hygiene: secrets out of git,
+  environment separation, backup note, basic logs, and rollback note. Add CI/CD,
+  secret rotation, dependency/container checks, monitoring, runbook, cost, and
+  backup/restore evidence when deploying beyond local. SLO, multi-region, k8s,
+  IAM/network hardening, or compliance posture needs explicit approval.
+
 Backend Transaction guardrail is not optional skill invocation. When triggered,
 check service/application transaction boundaries, external API calls outside
 long DB transactions, `REQUIRES_NEW` intent and Hikari pool pressure, JPA
@@ -138,6 +166,7 @@ or user explicitly accepts the risk.
 - **Solon divisions touched**:
 - **Artifact types touched**: code / docs / taxonomy / design / QA / infra / decision / other
 - **Trigger-based guardrails active**:
+- **Non-Dev policy ladders active**:
 - **Backend architecture mode**: n/a / clean-layered-monolith / cqrs-single-db / hexagonal-candidate / hexagonal-approved / msa-candidate / msa-approved
 - **Architecture transition approval**: n/a / pending-user / accepted / approved / rejected / deferred
 - **Security / Infra / DevOps guard level**: n/a / light / full / skip
@@ -150,6 +179,7 @@ or user explicitly accepts the risk.
 - **Feedback-first plan**:
 - **Guardrails applied**:
 - **Guardrails skipped with reason**:
+- **Non-Dev policy ladder notes**:
 - **Backend architecture evolution notes**:
 - **Deferred items**:
 - **Risk-accepted items**:
