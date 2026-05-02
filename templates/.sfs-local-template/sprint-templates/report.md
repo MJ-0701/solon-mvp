@@ -24,6 +24,7 @@ closed_at: ""        # filled by /sfs report --compact / retro --close
 - **Goal**:
 - **Outcome**: done / partial / stopped
 - **Final verdict**: pass / partial / fail / not-reviewed
+- **Gate trail**: Gate 6 (Review) — pass / partial / fail / not-reviewed
 - **One-line result**:
 
 ## §2. Final Scope

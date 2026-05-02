@@ -21,7 +21,7 @@ Rules:
 - After `start`, infer `Next` from sprint mode:
   - fresh discovery/planning goal -> `sfs brainstorm "<raw goal/context>"`
   - inherited implementation sprint -> first implementation slice + `log.md`
-    evidence, then later `sfs review --gate G4`
+    evidence, then later `sfs review --gate 6` (Gate 6 Review)
   - unclear mode -> ask 1 blocking question or point to `sfs status`
 - A compact chat Solon report is allowed when it adds state or next action, but
   it must not paraphrase or contradict adapter stdout.

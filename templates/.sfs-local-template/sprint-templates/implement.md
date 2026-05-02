@@ -145,6 +145,10 @@ or user explicitly accepts the risk.
 ## §4. Verification
 
 - **Commands run**:
+- **Raw command output**:
+  ```text
+  paste exact build/smoke/grep output here when a reviewer must verify it
+  ```
 - **Result**:
 - **Manual smoke / inspection**:
 - **Guardrail verification evidence**:
@@ -154,6 +158,6 @@ or user explicitly accepts the risk.
 ## §5. Review Handoff
 
 - **Ready for review?** no
-- **Recommended next gate**: `G4`
-- **Next command**: `/sfs review --gate G4`
+- **Recommended next gate**: Gate 6 (Review)
+- **Next command**: `/sfs review --gate 6`
 - **Guardrail ledger complete?** no

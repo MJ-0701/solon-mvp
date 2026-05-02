@@ -8,16 +8,16 @@
 # WU-25 §2 spec implementation. WU-23 §1.4 + V-1 conditions #1 (gate id SSoT
 # = gates.md §1) + WU22-D5 (7-Gate enum) 정합:
 #   · 파일 path stdout 출력만 (에디터 launch 안 함, V-1 conditions #4 정합).
-#   · gate id 검증 = sfs-common.sh::validate_gate_id (WU-25 row 4 신설).
-#   · `--gate <id>` 미지정 시 events.jsonl 마지막 review_open event 의
+#   · gate number normalization = sfs-common.sh::sfs_normalize_gate_id (WU-25 row 4 기반).
+#   · `--gate <1..7>` 미지정 시 events.jsonl 마지막 review_open event 의
 #     gate_id 추론 (sfs-common.sh::infer_last_gate_id, WU-25 row 4 신설).
 #   · CPO Evaluator persona prompt 를 review.md 에 append.
 #   · verdict 자체는 CPO agent output 으로 기록한다. 본 bash 명령은 prompt/evidence
 #     scaffold + executor bridge + event 기록을 담당한다.
 #
 # Output:
-#   review.md ready: <path> | gate <gate-id> prompt ready | executor <executor> | prompt <path>
-#   review.md ready: <path> | gate <gate-id> CPO run complete | executor <executor> | output <path>
+#   review.md ready: <path> | gate <Gate N (Name)> prompt ready | executor <executor> | prompt <path>
+#   review.md ready: <path> | gate <Gate N (Name)> CPO run complete | executor <executor> | output <path>
 #   review result ready:
 #     verdict: <pass|partial|fail|unknown>
 #     output: <path>
@@ -31,7 +31,7 @@
 #   4  sprint-templates/review.md 부재
 #   5  permission denied
 #   6  gate id invalid 또는 미지정 (--gate 누락 + 추론 실패) — gates.md §3 verbatim:
-#      "unknown gate <id>, valid: G-1, G0, G1, G2, G3, G4, G5"
+#      "unknown gate <id>, valid: 1 (Gate 1 Intake), ... 7 (Gate 7 Retro)"
 #   7  unknown CLI flag
 #   9  executor bridge missing or executor failed
 #   99 unknown (e.g. bash trap)
@@ -71,10 +71,13 @@ fi
 # ─────────────────────────────────────────────────────────────────────
 usage_review() {
   cat <<'EOF'
-Usage: /sfs review [--gate <id>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
+Usage: /sfs review [--gate <1..7>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
 
 Open the active sprint's review.md as the CPO Evaluator review document.
-  - --gate <id>   gate id (one of: G-1, G0, G1, G2, G3, G4, G5).
+  - --gate <n>    gate number, 1..7. Reports display this as Gate 1..7:
+                  1 Intake, 2 Brainstorm, 3 Plan, 4 Design,
+                  5 Handoff, 6 Review, 7 Retro.
+                  Older ids are still accepted for compatibility.
                   If omitted, inferred from the most recent `review_open`
                   event in events.jsonl. If inference fails, exit 6.
   - --executor <profile|cmd>
@@ -111,8 +114,9 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                   Fail closed when auth is missing. Useful for CI/headless runs.
                   Default: auto (use interactive auth when a real terminal is available).
   - Creates review.md from sprint-templates/review.md if missing.
-  - Updates frontmatter: phase=review, gate_id=<id>, evaluator_role=CPO,
-    evaluator_executor=<executor>, generator_executor=<generator>, last_touched_at=<ISO8601>.
+  - Updates frontmatter: phase=review, gate_number=<n>, gate_label=<Gate N>,
+    gate_id=<internal compatibility id>, evaluator_role=CPO, evaluator_executor=<executor>,
+    generator_executor=<generator>, last_touched_at=<ISO8601>.
   - Writes the full CPO prompt to .sfs-local/tmp/review-prompts/.
   - Appends a compact CPO Evaluator invocation log to review.md. The full
     prompt body is not embedded by default to prevent recursive token growth.
@@ -142,7 +146,7 @@ EOF
 }
 
 # ─────────────────────────────────────────────────────────────────────
-# CLI parse (--gate <id> | --gate=<id> | -h | --help)
+# CLI parse (--gate <1..7> | --gate=<1..7> | -h | --help)
 # ─────────────────────────────────────────────────────────────────────
 GATE_ID=""
 EVALUATOR_EXECUTOR="${SFS_REVIEW_EXECUTOR:-codex}"
@@ -444,7 +448,7 @@ show_latest_review_result() {
 
   gate_label=""
   if [[ -n "${gate_filter}" ]]; then
-    gate_label=" | gate ${gate_filter}"
+    gate_label=" | gate $(sfs_gate_display_label "${gate_filter}")"
   fi
 
   result_path="$(latest_review_output_path "${gate_filter}" || true)"
@@ -453,7 +457,7 @@ show_latest_review_result() {
     echo "review result none:"
     echo "  verdict: unknown"
     echo "  output: not-found"
-    echo "  display: gate ${gate_filter} 에 기록된 CPO 결과 없음"
+    echo "  display: $(sfs_gate_display_label "${gate_filter}") 에 기록된 CPO 결과 없음"
     return 0
   fi
   if [[ -z "${result_path}" ]]; then
@@ -478,28 +482,37 @@ show_latest_review_result() {
 }
 
 if [[ "${SHOW_LAST}" == "true" ]]; then
-  if [[ -n "${GATE_ID}" ]] && ! validate_gate_id "${GATE_ID}"; then
-    echo "unknown gate ${GATE_ID}, valid: G-1, G0, G1, G2, G3, G4, G5" >&2
-    exit "${SFS_EXIT_GATE}"
+  if [[ -n "${GATE_ID}" ]]; then
+    _normalized_gate_id="$(sfs_normalize_gate_id "${GATE_ID}" || true)"
+    if [[ -z "${_normalized_gate_id}" ]] || ! validate_gate_id "${_normalized_gate_id}"; then
+      echo "unknown gate ${GATE_ID}, valid: $(sfs_gate_valid_display_list)" >&2
+      exit "${SFS_EXIT_GATE}"
+    fi
+    GATE_ID="${_normalized_gate_id}"
   fi
   show_latest_review_result "${GATE_ID}"
   exit "${SFS_EXIT_OK}"
 fi
 
 # ─────────────────────────────────────────────────────────────────────
-# Resolve gate id (either --gate <id> or infer from events.jsonl)
+# Resolve gate id (either --gate <1..7> or infer from events.jsonl)
 # ─────────────────────────────────────────────────────────────────────
 if [[ -z "${GATE_ID}" ]]; then
   GATE_ID="$(infer_last_gate_id)"
 fi
 if [[ -z "${GATE_ID}" ]]; then
-  echo "gate id required: --gate <id>, valid: G-1, G0, G1, G2, G3, G4, G5" >&2
+  echo "gate number required: --gate <1..7>, valid: $(sfs_gate_valid_display_list)" >&2
   exit "${SFS_EXIT_GATE}"
 fi
-if ! validate_gate_id "${GATE_ID}"; then
-  echo "unknown gate ${GATE_ID}, valid: G-1, G0, G1, G2, G3, G4, G5" >&2
+_normalized_gate_id="$(sfs_normalize_gate_id "${GATE_ID}" || true)"
+if [[ -z "${_normalized_gate_id}" ]] || ! validate_gate_id "${_normalized_gate_id}"; then
+  echo "unknown gate ${GATE_ID}, valid: $(sfs_gate_valid_display_list)" >&2
   exit "${SFS_EXIT_GATE}"
 fi
+GATE_ID="${_normalized_gate_id}"
+GATE_DISPLAY="$(sfs_gate_display_label "${GATE_ID}")"
+GATE_NUMBER="$(sfs_gate_number "${GATE_ID}")"
+GATE_ARTIFACT_ID="gate${GATE_NUMBER}"
 
 normalize_inferred_executor_value() {
   local value="$1" token low_value session_hint
@@ -594,7 +607,7 @@ if [[ ! -f "${REVIEW_PATH}" ]]; then
 fi
 
 # ─────────────────────────────────────────────────────────────────────
-# Update frontmatter (phase + gate_id + last_touched_at)
+# Update frontmatter (phase + gate_number/gate_label + compatibility gate_id + last_touched_at)
 # ─────────────────────────────────────────────────────────────────────
 NOW="$(date +%Y-%m-%dT%H:%M:%S%z 2>/dev/null | sed -E 's/([0-9]{2})$/:\1/')"
 
@@ -603,6 +616,14 @@ if ! update_frontmatter "${REVIEW_PATH}" "phase" "review" 2>/dev/null; then
   exit "${SFS_EXIT_PERM}"
 fi
 if ! update_frontmatter "${REVIEW_PATH}" "gate_id" "${GATE_ID}" 2>/dev/null; then
+  echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
+  exit "${SFS_EXIT_PERM}"
+fi
+if ! update_frontmatter "${REVIEW_PATH}" "gate_number" "${GATE_NUMBER}" 2>/dev/null; then
+  echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
+  exit "${SFS_EXIT_PERM}"
+fi
+if ! update_frontmatter "${REVIEW_PATH}" "gate_label" "\"${GATE_DISPLAY//\"/\\\"}\"" 2>/dev/null; then
   echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
   exit "${SFS_EXIT_PERM}"
 fi
@@ -648,7 +669,7 @@ render_priority_evidence_sections() {
     BEGIN { capture=0; count=0; matched=0 }
     /^#{1,6}[[:space:]]+/ {
       low = tolower($0)
-      if (low ~ /build output|smoke output|file excerpt index|self-validation|risk ledger|untracked implementation surface|verification evidence|commands run/) {
+      if (low ~ /build output|smoke output|raw command output|command output|file excerpt index|self-validation|risk ledger|untracked implementation surface|verification evidence|commands run|artifact changes|review handoff|verification|검증|변경|핸드오프/) {
         capture=1
         count=0
         matched=1
@@ -692,20 +713,29 @@ indexed_review_evidence_paths() {
     [[ -n "$path" ]] || continue
     path="$(normalize_review_candidate_path "$path" || true)"
     [[ -n "$path" ]] || continue
-    if is_reviewable_project_path "$path" && is_auto_review_candidate_path "$path"; then
+    if is_reviewable_project_path "$path" && is_auto_review_candidate_path "$path" && review_evidence_file_exists "$path"; then
       printf '%s\n' "$path"
     fi
   done
 }
 
 review_evidence_paths() {
-  local indexed
-  indexed="$(indexed_review_evidence_paths || true)"
-  if [[ -n "$indexed" ]]; then
-    printf '%s\n' "$indexed" | awk '!seen[$0]++'
-  else
-    auto_review_evidence_paths | awk '!seen[$0]++'
-  fi
+  {
+    indexed_review_evidence_paths || true
+    auto_review_evidence_paths || true
+  } | awk '!seen[$0]++'
+}
+
+review_evidence_file_exists() {
+  local path="$1"
+  [[ -f "$path" ]]
+}
+
+review_evidence_file_is_text() {
+  local path="$1"
+  [[ -f "$path" ]] || return 1
+  [[ -s "$path" ]] || return 0
+  LC_ALL=C grep -Iq . "$path" 2>/dev/null
 }
 
 normalize_review_candidate_path() {
@@ -736,14 +766,17 @@ extract_path_tokens_from_file() {
       capture = (low ~ /file excerpt index|source excerpt|implementation surface|changed files|changed artifacts|변경 파일|변경 파일\/모듈|cpo 에게 넘길 검증 포인트/)
       next
     }
-    capture || /(^|[[:space:]`])(([.]\/)?src\/|src\/|scripts\/|package[.]json|vite[.]config|tsconfig|playwright[.]config|[A-Za-z0-9_.\/-]+[.](ts|tsx|js|jsx|mjs|cjs|css|scss|html|json|yml|yaml|sh|md))([[:space:]`),.;]|$)/ {
+    capture || /(^|[[:space:]`])([.]\/)?[A-Za-z0-9_.@%+=-]+(\/[A-Za-z0-9_.@%+=-]+)+(:[0-9]+(:[0-9]+)?)?([[:space:]`),.;]|$)/ || /(^|[[:space:]`])([.]gitignore|[A-Za-z0-9_.@%+=-]+[.][A-Za-z0-9_.@%+=-]+)(:[0-9]+(:[0-9]+)?)?([[:space:]`),.;]|$)/ {
       line = $0
       gsub(/[`"'\''()<>{}\[\],]/, " ", line)
       split(line, parts, /[[:space:]]+/)
       for (i in parts) {
         token = parts[i]
-        if (token ~ /^([.]\/)?(src|app|pages|components|scripts|test|tests|__tests__|public|styles|lib|server|client|config)\// ||
-            token ~ /(^|\/)(package[.]json|vite[.]config[.](ts|js|mjs)|tsconfig[^\/]*[.]json|playwright[.]config[.](ts|js)|[^\/]+[.](ts|tsx|js|jsx|mjs|cjs|css|scss|html|json|yml|yaml|sh|md))$/) {
+        sub(/[),.;]+$/, "", token)
+        sub(/:[0-9]+(:[0-9]+)?$/, "", token)
+        if (token ~ /^([.]\/)?[A-Za-z0-9_.@%+=-]+(\/[A-Za-z0-9_.@%+=-]+)+$/ ||
+            token ~ /^([.]\/)?[.]gitignore$/ ||
+            token ~ /^([.]\/)?[A-Za-z0-9_.@%+=-]+[.][A-Za-z0-9_.@%+=-]+$/) {
           print token
         }
       }
@@ -773,13 +806,7 @@ is_review_path_token() {
       ;;
   esac
   case "$token" in
-    src/*|app/*|pages/*|components/*|scripts/*|test/*|tests/*|__tests__/*|public/*|styles/*|lib/*|server/*|client/*|config/*)
-      return 0
-      ;;
-    package.json|vite.config.ts|vite.config.js|vite.config.mjs|tsconfig*.json|playwright.config.ts|playwright.config.js)
-      return 0
-      ;;
-    *.[tT][sS]|*.[tT][sS][xX]|*.[jJ][sS]|*.[jJ][sS][xX]|*.mjs|*.cjs|*.css|*.scss|*.html|*.json|*.yml|*.yaml|*.sh|*.md)
+    .gitignore|*/*|*.*)
       return 0
       ;;
     *)
@@ -795,8 +822,8 @@ extract_indexed_evidence_targets_from_file() {
     lines="$(printf '%s\n' "$raw" | grep -Eo 'line[[:space:]]+[0-9]+' | sed -E 's/line[[:space:]]+//' || true)"
     [[ -n "$lines" ]] || continue
     {
-      printf '%s\n' "$raw" | grep -Eo '([.]\/)?(src|app|pages|components|scripts|test|tests|__tests__|public|styles|lib|server|client|config)\/[A-Za-z0-9_.@%+=\/-]+' || true
-      for root in package.json vite.config.ts vite.config.js vite.config.mjs tsconfig.json playwright.config.ts playwright.config.js; do
+      printf '%s\n' "$raw" | grep -Eo '([.]\/)?[A-Za-z0-9_.@%+=-]+(/[A-Za-z0-9_.@%+=-]+)+' || true
+      for root in .gitignore package.json package-lock.json pnpm-lock.yaml yarn.lock bun.lockb vite.config.ts vite.config.js vite.config.mjs tsconfig.json playwright.config.ts playwright.config.js; do
         case "$raw" in
           *"$root"*) printf '%s\n' "$root" ;;
         esac
@@ -849,7 +876,7 @@ is_ignored_review_path() {
     .idea|.idea/*|.vscode|.vscode/*|.fleet|.fleet/*|.zed|.zed/*|.settings|.settings/*|.project|.classpath|*.iml)
       return 0
       ;;
-    .git|.git/*|.hg|.hg/*|.svn|.svn/*)
+    .git|.git/*|*.git|*.git/*|.hg|.hg/*|.svn|.svn/*)
       return 0
       ;;
     node_modules|node_modules/*|vendor|vendor/*|Pods|Pods/*)
@@ -870,7 +897,7 @@ is_ignored_review_path() {
     .DS_Store|Thumbs.db|Desktop.ini|*.log|*.tmp|*.temp|*.bak|*.swp|*.swo|*~)
       return 0
       ;;
-    .env|.env.*|*.pem|*.key|*.p12|*.pfx|*.crt|*.cer)
+    .env|.env.*|*/.env|*/.env.*|*.pem|*.key|*.p12|*.pfx|*.crt|*.cer)
       return 0
       ;;
     *.png|*.jpg|*.jpeg|*.gif|*.webp|*.ico|*.svg|*.pdf|*.zip|*.tar|*.gz|*.tgz|*.7z|*.mp4|*.mov|*.avi|*.db|*.sqlite|*.sqlite3)
@@ -889,26 +916,7 @@ is_auto_review_candidate_path() {
       return 1
       ;;
   esac
-  case "$path" in
-    src/*|app/*|pages/*|components/*|scripts/*|test/*|tests/*|__tests__/*|public/*|styles/*|lib/*|server/*|client/*|config/*)
-      return 0
-      ;;
-    docs/*.md|docs/*/*.md|README.md|CHANGELOG.md)
-      return 0
-      ;;
-    index.html|package.json|vite.config.ts|vite.config.js|vite.config.mjs|vitest.config.ts|vitest.config.js|playwright.config.ts|playwright.config.js)
-      return 0
-      ;;
-    tsconfig.json|tsconfig.*.json|jsconfig.json|eslint.config.js|eslint.config.mjs|prettier.config.js|prettier.config.mjs)
-      return 0
-      ;;
-    Dockerfile|docker-compose.yml|docker-compose.yaml|Makefile)
-      return 0
-      ;;
-    *)
-      return 1
-      ;;
-  esac
+  review_evidence_file_is_text "$path"
 }
 
 is_reviewable_project_path() {
@@ -1021,7 +1029,7 @@ is_sfs_sprint_artifact_path() {
 }
 
 render_sfs_scope_classification() {
-  local system_paths sprint_paths line path
+  local system_paths mixed_paths sprint_paths line path
   printf '\n### SFS/system scope classification\n\n'
   system_paths="$(git status --porcelain=v1 2>/dev/null | while IFS= read -r line; do
     [[ -n "$line" ]] || continue
@@ -1035,6 +1043,16 @@ render_sfs_scope_classification() {
       printf '%s\n' "$path"
     fi
   done | awk '!seen[$0]++' | sed -n '1,120p' || true)"
+  mixed_paths="$(git status --porcelain=v1 2>/dev/null | while IFS= read -r line; do
+    [[ -n "$line" ]] || continue
+    path="${line#???}"
+    if [[ "$line" == R* || "$line" == C* ]]; then
+      path="${path##* -> }"
+    fi
+    path="$(normalize_review_candidate_path "$path" || true)"
+    [[ "$path" == ".gitignore" ]] || continue
+    printf '%s\n' "$path"
+  done | awk '!seen[$0]++' | sed -n '1,20p' || true)"
   sprint_paths="$(git status --porcelain=v1 2>/dev/null | while IFS= read -r line; do
     [[ -n "$line" ]] || continue
     path="${line#???}"
@@ -1052,6 +1070,12 @@ render_sfs_scope_classification() {
   printf '#### SFS-managed system/runtime changes filtered from product scope\n\n'
   if [[ -n "$system_paths" ]]; then
     printf '%s\n' "$system_paths"
+  else
+    printf '(none detected)\n'
+  fi
+  printf '\n#### Mixed product/system files included with product-owned evidence\n\n'
+  if [[ -n "$mixed_paths" ]]; then
+    printf '%s — only content outside the solon-product managed block is product-owned evidence; the managed block remains SFS system scope.\n' "$mixed_paths"
   else
     printf '(none detected)\n'
   fi
@@ -1086,6 +1110,15 @@ render_review_file_excerpt() {
   fi
   if (( bytes > 131072 )); then
     printf '(large file: %s bytes; showing first %s lines)\n\n' "$bytes" "$limit"
+  fi
+  if [[ "$file" == ".gitignore" ]]; then
+    printf '(mixed product/system file; showing product-owned lines outside ### BEGIN/END solon-product blocks)\n\n'
+    awk '
+      /^### BEGIN solon-product ###$/ { in_managed=1; next }
+      /^### END solon-product ###$/ { in_managed=0; next }
+      !in_managed { print }
+    ' "$file" | sed -n "1,${limit}p"
+    return 0
   fi
   sed -n "1,${limit}p" "$file"
 }
@@ -1251,7 +1284,7 @@ is_sfs_managed_review_path() {
     .sfs-local/*|.claude/commands/sfs.md|.gemini/commands/sfs.toml|.agents/skills/sfs/SKILL.md|.codex/prompts/sfs.md)
       return 0
       ;;
-    SFS.md|CLAUDE.md|AGENTS.md|GEMINI.md|.gitignore)
+    SFS.md|CLAUDE.md|AGENTS.md|GEMINI.md)
       return 0
       ;;
     *)
@@ -1335,7 +1368,7 @@ You are the Solon CPO Evaluator.
 
 ${persona_note}
 
-Review gate: ${GATE_ID}
+Review gate: ${GATE_DISPLAY}
 Sprint: ${SPRINT_ID}
 Generator executor/tool: ${GENERATOR_EXECUTOR}
 Evaluator executor/tool: ${EVALUATOR_EXECUTOR}
@@ -1445,11 +1478,11 @@ fi
 PROMPT_DIR="${SFS_LOCAL_DIR}/tmp/review-prompts"
 RUN_DIR="${SFS_LOCAL_DIR}/tmp/review-runs"
 PROMPT_TS="$(date -u +%Y%m%dT%H%M%SZ)"
-PROMPT_PATH="${PROMPT_DIR}/${SPRINT_ID}-${GATE_ID}-${PROMPT_TS}.txt"
+PROMPT_PATH="${PROMPT_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_TS}.txt"
 
 archive_prior_review_artifacts() {
-  local prefix="${SPRINT_ID}-${GATE_ID}-"
-  local archive_dir="${SFS_ARCHIVES_DIR}/review-runs/${SPRINT_ID}/${GATE_ID}/${PROMPT_TS}"
+  local prefix="${SPRINT_ID}-${GATE_ARTIFACT_ID}-"
+  local archive_dir="${SFS_ARCHIVES_DIR}/review-runs/${SPRINT_ID}/${GATE_ARTIFACT_ID}/${PROMPT_TS}"
   local path base moved=0
 
   for path in "${PROMPT_DIR}/${prefix}"* "${RUN_DIR}/${prefix}"*; do
@@ -1510,7 +1543,7 @@ emit_result_excerpt_stdout() {
 
 if [[ "${RUN_REVIEW}" == "true" && "${ALLOW_EMPTY_REVIEW}" != "true" ]] && ! has_review_items; then
   {
-    printf '\n### %s — CPO evaluator skipped (%s)\n\n' "${NOW}" "${GATE_ID}"
+    printf '\n### %s — CPO evaluator skipped (%s)\n\n' "${NOW}" "${GATE_DISPLAY}"
     printf -- '- executor: `%s`\n' "${EVALUATOR_EXECUTOR}"
     printf -- '- reason: no reviewable project/sprint evidence found\n'
     printf -- '- next: make an implementation/planning change first, or run `/sfs auth probe --executor <tool>` for a cheap bridge request/response test.\n'
@@ -1538,9 +1571,9 @@ if [[ "${RUN_REVIEW}" == "true" && "${ALLOW_EMPTY_REVIEW}" != "true" ]] && ! has
 
   _probe_executor="$(normalize_executor_profile "${EVALUATOR_EXECUTOR}")"
   if [[ "${_probe_executor}" == "custom" ]]; then
-    echo "리뷰할 항목이 없습니다: gate ${GATE_ID} | executor ${EVALUATOR_EXECUTOR} | use --allow-empty to force a custom executor"
+    echo "리뷰할 항목이 없습니다: gate ${GATE_DISPLAY} | executor ${EVALUATOR_EXECUTOR} | use --allow-empty to force a custom executor"
   else
-    echo "리뷰할 항목이 없습니다: gate ${GATE_ID} | executor ${EVALUATOR_EXECUTOR} | bridge test: /sfs auth probe --executor ${_probe_executor}"
+    echo "리뷰할 항목이 없습니다: gate ${GATE_DISPLAY} | executor ${EVALUATOR_EXECUTOR} | bridge test: /sfs auth probe --executor ${_probe_executor}"
   fi
   exit "${SFS_EXIT_OK}"
 fi
@@ -1561,7 +1594,7 @@ PROMPT_LINES="$(count_file_lines "${PROMPT_PATH}")"
 PROMPT_BYTES="$(count_file_bytes "${PROMPT_PATH}")"
 
 {
-  printf '\n### %s — CPO evaluator invocation (%s)\n\n' "${NOW}" "${GATE_ID}"
+  printf '\n### %s — CPO evaluator invocation (%s)\n\n' "${NOW}" "${GATE_DISPLAY}"
   printf -- '- evaluator_role: CPO\n'
   printf -- '- evaluator_persona: `%s`\n' "${PERSONA_PATH}"
   printf -- '- evaluator_executor: `%s`\n' "${EVALUATOR_EXECUTOR}"
@@ -1588,9 +1621,9 @@ RESULT_PATH=""
 RUN_RC=""
 RUN_WARNING=""
 if [[ "${RUN_REVIEW}" == "true" ]]; then
-  RUN_OUT="${RUN_DIR}/${SPRINT_ID}-${GATE_ID}-${PROMPT_TS}.stdout.md"
-  RUN_ERR="${RUN_DIR}/${SPRINT_ID}-${GATE_ID}-${PROMPT_TS}.stderr.txt"
-  RUN_RESULT="${RUN_DIR}/${SPRINT_ID}-${GATE_ID}-${PROMPT_TS}.result.md"
+  RUN_OUT="${RUN_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_TS}.stdout.md"
+  RUN_ERR="${RUN_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_TS}.stderr.txt"
+  RUN_RESULT="${RUN_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_TS}.result.md"
 
   set +e
   EXECUTOR_CMD="$(resolve_review_executor_cmd)"
@@ -1644,7 +1677,7 @@ if [[ "${RUN_REVIEW}" == "true" ]]; then
   [[ -n "${RUN_VERDICT}" ]] || RUN_VERDICT="unknown"
 
   {
-    printf '\n### %s — CPO evaluator result (%s)\n\n' "${NOW}" "${GATE_ID}"
+    printf '\n### %s — CPO evaluator result (%s)\n\n' "${NOW}" "${GATE_DISPLAY}"
     printf -- '- executor: `%s`\n' "${EVALUATOR_EXECUTOR}"
     printf -- '- executor_cmd: `%s`\n' "${EXECUTOR_CMD}"
     printf -- '- exit_code: `%s`\n' "${RUN_RC}"
@@ -1726,13 +1759,13 @@ if [[ "${PRINT_PROMPT}" == "true" ]]; then
   cat "${PROMPT_PATH}"
 elif [[ "${RUN_REVIEW}" == "true" ]]; then
   if [[ -n "${RUN_WARNING}" ]]; then
-    echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_ID} CPO run complete with executor warning | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
+    echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} CPO run complete with executor warning | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
   else
-    echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_ID} CPO run complete | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
+    echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} CPO run complete | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
   fi
   emit_result_excerpt_stdout "${RESULT_PATH}" 80
 else
-  echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_ID} prompt ready | executor ${EVALUATOR_EXECUTOR} | prompt ${PROMPT_PATH}"
+  echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} prompt ready | executor ${EVALUATOR_EXECUTOR} | prompt ${PROMPT_PATH}"
 fi
 
 exit "${SFS_EXIT_OK}"

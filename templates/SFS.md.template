@@ -29,3 +29,5 @@ Project overview refresh:
 
 Never paraphrase bash adapter output. Bash-first commands may still surface one
 compact Next action after verbatim output. Never hardcode external private docsets.
+In Solon reports, show gates as `Gate N (Name)`, not naked ids. Use gate
+numbers 1..7 for new CLI examples; legacy ids remain compatibility-only.

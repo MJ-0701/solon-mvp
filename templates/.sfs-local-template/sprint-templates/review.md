@@ -1,6 +1,8 @@
 ---
 phase: review
-gate_id: ""          # one of G2, G3, G4 (set by /sfs review --gate <id>) — 미설정 시 빈 문자열
+gate_number: ""      # 1..7, user-facing
+gate_label: ""       # Gate N (Name)
+gate_id: ""          # legacy storage id, normalized from /sfs review --gate <1..7>
 sprint_id: ""        # filled by /sfs start
 goal: ""             # filled by /sfs start <goal>
 created_at: ""       # filled by /sfs start
@@ -13,10 +15,11 @@ generator_executor: ""  # optional, filled by /sfs review --generator <profile>
 
 # Review — <sprint title>
 
-> Sprint **CPO Evaluator review** 산출물. G2/G3/G4 중 하나의 gate 에 대한 verdict 기록.
+> Sprint **CPO Evaluator review** 산출물. 사용자 표기는 Gate 1~7 이고, `gate_id` 는
+> 오래된 events/frontmatter 호환을 위해 runtime 이 내부적으로 관리한다.
 > 각 gate review 마다 `.sfs-local/events.jsonl` 의 `review_open` event append.
 > SSoT: `gates.md §1` (7-Gate enum) + `05-gate-framework.md §5.1` (매트릭스).
-> 동일 sprint 안에서 G2/G3/G4 review 가 여러 번 발생할 경우 본 파일에 §2 섹션을 추가 append.
+> 동일 sprint 안에서 Gate 4~6 review 가 여러 번 발생할 경우 본 파일에 §2 섹션을 추가 append.
 > 자체검증 방지: CTO Generator 와 CPO Evaluator 는 같은 산출물을 같은 agent instance 가 통과시키지 않는다.
 > 생명주기: review 중에는 verdict evidence 를 기록하되, close 후 최종 verdict/action 만
 > `report.md` 에 남기고 본 파일은 compact stub 로 줄인다.
@@ -25,31 +28,32 @@ generator_executor: ""  # optional, filled by /sfs review --generator <profile>
 
 ## §1. 대상 Gate
 
-- **gate_id**: G2 / G3 / G4 (해당 review 시점에서 1개로 고정)
+- **gate label**: Gate 1 (Intake) / Gate 2 (Brainstorm) / Gate 3 (Plan) / Gate 4 (Design) / Gate 5 (Handoff) / Gate 6 (Review) / Gate 7 (Retro)
+- **gate_id**: 위 label 의 마지막 내부 id 1개로 고정
 - **scope**: 본 review 가 평가하는 산출물 / 변경 범위 / 검증 방법
-- **trigger**: `/sfs review --gate <id>` 호출 시각
+- **trigger**: `/sfs review --gate <1..7>` 호출 시각
 - **CPO persona**: `.sfs-local/personas/cpo-evaluator.md`
 - **review executor/tool**: codex / gemini / claude / custom
 - **generator executor/tool**: CTO 구현에 사용한 tool
 
 ## §2. 평가 항목
 
-### G2 — Design Gate (해당 시)
+### Gate 4 — Design (해당 시)
 
 - [ ] 설계 완성도 (interface 명세, 데이터 모델, 동작 흐름)
 - [ ] 위험 요소 식별 / 완화 plan
-- [ ] AC 와의 연결 (Plan G1 산출물 참조)
+- [ ] AC 와의 연결 (Gate 3 Plan 산출물 참조)
 
-### G3 — Pre-Handoff Gate (해당 시, **binary**)
+### Gate 5 — Handoff (해당 시, **binary**)
 
 - [ ] 산출물 self-contained
 - [ ] 핸드오프 받을 사람이 추가 컨텍스트 없이 진행 가능
 - [ ] verdict ∈ { pass, fail } only (partial 미사용 — `gates.md §2`)
 
-### G4 — Check Gate (해당 시, 5-Axis CPO)
+### Gate 6 — Review (해당 시, 5-Axis CPO)
 
 - [ ] 설계 vs 구현 gap (정량)
-- [ ] G0/G1 공유 design concept 와 실제 산출물이 어긋나지 않음
+- [ ] Gate 2/3 공유 design concept 와 실제 산출물이 어긋나지 않음
 - [ ] domain language / glossary 가 코드, docs, UI, test, report 에 일관됨
 - [ ] feedback evidence 가 AC 의 `verify by ...` 와 연결됨
 - [ ] public interface / artifact boundary 와 gray-box 위임 경계가 지켜짐
@@ -58,14 +62,14 @@ generator_executor: ""  # optional, filled by /sfs review --generator <profile>
 
 ## §3. Verdict
 
-- **verdict**: pass / partial / fail (G3 만 pass/fail)
+- **verdict**: pass / partial / fail (Gate 5 만 pass/fail)
 - **근거 (정량)**: …
 - **근거 (정성)**: …
 - **partial 시 잔여 항목**: …
 
 ## §4. 다음 액션
 
-- pass → CTO 최종 확인 후 G5 retro 진입
+- pass → CTO 최종 확인 후 Gate 7 (Retro) 진입
 - partial → CPO 가 지정한 항목만 CTO 재구현 후 재리뷰
 - fail → CTO 재구현 또는 CEO plan/scope 재검토
 

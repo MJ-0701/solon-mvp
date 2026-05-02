@@ -32,7 +32,7 @@ created_at: ""   # filled by /sfs start
 
 - `/sfs start` 로 본 sprint dir 생성
 - Plan 단계 진입 — `plan.md` 의 R/AC 채우기
-- 다음: G1 review 통과 후 Do 진입
+- 다음: Gate 3 review 통과 후 Do 진입
 
 ## §2. 발견된 결정 / 블로커 (decision log 후보)
 
@@ -53,5 +53,5 @@ created_at: ""   # filled by /sfs start
 
 ## §4. 다음 단계 / 핸드오프 메모
 
-- G3 Pre-Handoff Gate 통과를 위한 산출물 목록 정리.
+- Gate 5 (Handoff) 통과를 위한 산출물 목록 정리.
 - 인계받을 사람이 추가 컨텍스트 없이 진행 가능한 상태 점검.

@@ -19,7 +19,7 @@ Usage:
   /sfs implement --stdin
 
 Open/update the active sprint's implement.md execution artifact.
-  - Intended flow: /sfs plan -> /sfs implement -> /sfs review --gate G4.
+  - Intended flow: /sfs plan -> /sfs implement -> /sfs review --gate 6.
   - Creates implement.md from sprint-templates/implement.md if missing.
   - Records the implementation request and appends an implement_open event.
   - Prints implement.md, plan.md, and log.md paths.
