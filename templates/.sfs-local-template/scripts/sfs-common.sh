@@ -48,7 +48,44 @@ SFS_EXIT_CORRUPT=2
 SFS_EXIT_NO_GIT=3
 SFS_EXIT_NO_TEMPLATES=4
 SFS_EXIT_PERM=5
+SFS_EXIT_SAFETY=124
 SFS_EXIT_UNKNOWN=99
+
+# ─────────────────────────────────────────────────────────────────────
+# RUNTIME SAFETY GUARDS
+# ─────────────────────────────────────────────────────────────────────
+
+sfs_common_enter_depth() {
+  local depth max_depth
+  depth="${SFS_ADAPTER_DEPTH:-0}"
+  max_depth="${SFS_MAX_ADAPTER_DEPTH:-12}"
+  case "${depth}" in ''|*[!0-9]*) depth=0 ;; esac
+  case "${max_depth}" in ''|*[!0-9]*) max_depth=12 ;; esac
+  depth=$((depth + 1))
+  if (( depth > max_depth )); then
+    echo "sfs safety stop: adapter recursion depth ${depth} exceeded max ${max_depth}" >&2
+    echo "hint: check for an adapter path that sources or invokes SFS recursively" >&2
+    exit "${SFS_EXIT_SAFETY}"
+  fi
+  export SFS_ADAPTER_DEPTH="${depth}"
+}
+
+sfs_common_apply_cpu_limit() {
+  local limit
+  limit="${SFS_CPU_TIME_LIMIT_SEC:-900}"
+  case "${limit}" in
+    ''|*[!0-9]*)
+      echo "invalid SFS_CPU_TIME_LIMIT_SEC: ${limit} (expected integer seconds, 0 disables)" >&2
+      exit "${SFS_EXIT_SAFETY}"
+      ;;
+  esac
+  if (( limit > 0 )); then
+    ulimit -t "${limit}" 2>/dev/null || true
+  fi
+}
+
+sfs_common_enter_depth
+sfs_common_apply_cpu_limit
 
 # ─────────────────────────────────────────────────────────────────────
 # PORTABLE HELPERS (WU-29 hotfix — codex review finding #2 macOS tac fallback)
@@ -892,6 +929,47 @@ normalize_executor_profile() {
     gemini|gemini-cli) echo "gemini" ;;
     *) echo "custom" ;;
   esac
+}
+
+sfs_run_eval_with_timeout() {
+  local cmd="$1" timeout="$2" prompt_path="$3" out_path="$4" err_path="$5" label="${6:-executor}"
+  local pid elapsed rc grace
+  case "${timeout}" in
+    ''|*[!0-9]*)
+      echo "${label}: invalid timeout ${timeout} (expected integer seconds, 0 disables)" >&2
+      return "${SFS_EXIT_SAFETY}"
+      ;;
+  esac
+  if (( timeout == 0 )); then
+    eval "${cmd}" < "${prompt_path}" > "${out_path}" 2> "${err_path}"
+    return $?
+  fi
+
+  grace="${SFS_WATCHDOG_KILL_GRACE_SEC:-3}"
+  case "${grace}" in ''|*[!0-9]*) grace=3 ;; esac
+
+  (
+    eval "${cmd}" < "${prompt_path}" > "${out_path}" 2> "${err_path}"
+  ) &
+  pid=$!
+  elapsed=0
+  while kill -0 "${pid}" 2>/dev/null; do
+    if (( elapsed >= timeout )); then
+      {
+        printf '\n%s timed out after %ss and was stopped by SFS safety guard.\n' "${label}" "${timeout}"
+        printf 'Set the command-specific timeout env var higher for a trusted one-off run.\n'
+      } >> "${err_path}" 2>/dev/null || true
+      kill -TERM "${pid}" 2>/dev/null || true
+      sleep "${grace}"
+      kill -KILL "${pid}" 2>/dev/null || true
+      wait "${pid}" 2>/dev/null || true
+      return "${SFS_EXIT_SAFETY}"
+    fi
+    sleep 1
+    elapsed=$((elapsed + 1))
+  done
+  wait "${pid}" || rc=$?
+  return "${rc:-0}"
 }
 
 executor_cli_missing_hint() {

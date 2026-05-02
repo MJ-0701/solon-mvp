@@ -6,9 +6,134 @@
 
 set -euo pipefail
 
+sfs_requested_command() {
+  local first="${1:-}"
+  case "${first}" in
+    /sfs|sfs|\$sfs)
+      shift || true
+      ;;
+  esac
+  printf '%s\n' "${1:-help}"
+}
+
+sfs_default_timeout_sec() {
+  local cmd="$1"
+  case "${cmd}" in
+    review)
+      printf '%s\n' "${SFS_REVIEW_COMMAND_TIMEOUT_SEC:-1800}"
+      ;;
+    loop)
+      printf '%s\n' "${SFS_LOOP_COMMAND_TIMEOUT_SEC:-7200}"
+      ;;
+    init|install|upgrade|update|uninstall|agent)
+      printf '%s\n' "${SFS_MUTATION_COMMAND_TIMEOUT_SEC:-1800}"
+      ;;
+    auth)
+      printf '%s\n' "${SFS_AUTH_COMMAND_TIMEOUT_SEC:-300}"
+      ;;
+    version)
+      printf '%s\n' "${SFS_VERSION_COMMAND_TIMEOUT_SEC:-300}"
+      ;;
+    *)
+      printf '%s\n' "${SFS_COMMAND_DEFAULT_TIMEOUT_SEC:-300}"
+      ;;
+  esac
+}
+
+sfs_resolved_timeout_sec() {
+  local cmd="$1" timeout
+  timeout="${SFS_COMMAND_TIMEOUT_SEC:-$(sfs_default_timeout_sec "${cmd}")}"
+  case "${timeout}" in
+    ''|*[!0-9]*)
+      echo "invalid SFS_COMMAND_TIMEOUT_SEC: ${timeout} (expected integer seconds, 0 disables)" >&2
+      return 7
+      ;;
+  esac
+  printf '%s\n' "${timeout}"
+}
+
+sfs_enter_call_depth() {
+  local depth max_depth
+  depth="${SFS_CALL_DEPTH:-0}"
+  max_depth="${SFS_MAX_CALL_DEPTH:-6}"
+  case "${depth}" in ''|*[!0-9]*) depth=0 ;; esac
+  case "${max_depth}" in ''|*[!0-9]*) max_depth=6 ;; esac
+  depth=$((depth + 1))
+  if (( depth > max_depth )); then
+    echo "sfs safety stop: recursive command depth ${depth} exceeded max ${max_depth}" >&2
+    echo "hint: check for a command/adapter that re-invokes sfs without making progress" >&2
+    exit 124
+  fi
+  export SFS_CALL_DEPTH="${depth}"
+}
+
+sfs_run_self_with_watchdog() {
+  local timeout="$1"
+  shift
+  local self="$1"
+  shift
+  local cmd="$1"
+  shift || true
+  local child="" watchdog="" marker="" rc=0 grace
+  grace="${SFS_WATCHDOG_KILL_GRACE_SEC:-3}"
+  case "${grace}" in ''|*[!0-9]*) grace=3 ;; esac
+
+  marker="$(mktemp "${TMPDIR:-/tmp}/sfs-watchdog.XXXXXX")" || return 1
+  rm -f "${marker}"
+
+  (
+    export SFS_WATCHDOG_CHILD=1
+    bash "${self}" "$@"
+  ) &
+  child=$!
+
+  (
+    sleep "${timeout}"
+    if kill -0 "${child}" 2>/dev/null; then
+      {
+        printf 'sfs safety timeout: command `%s` exceeded %ss and was stopped\n' "${cmd}" "${timeout}"
+        printf 'hint: set SFS_COMMAND_TIMEOUT_SEC=<seconds> to raise the cap, or 0 to disable for a trusted one-off run\n'
+      } >&2
+      printf 'timeout\n' > "${marker}" 2>/dev/null || true
+      kill -TERM "${child}" 2>/dev/null || true
+      sleep "${grace}"
+      kill -KILL "${child}" 2>/dev/null || true
+    fi
+  ) &
+  watchdog=$!
+
+  trap 'kill "${child:-}" "${watchdog:-}" 2>/dev/null || true; rm -f "${marker:-}"; exit 130' INT TERM
+  wait "${child}" || rc=$?
+  kill "${watchdog}" 2>/dev/null || true
+  wait "${watchdog}" 2>/dev/null || true
+  trap - INT TERM
+
+  if [[ -f "${marker}" ]]; then
+    rc=124
+  fi
+  rm -f "${marker}"
+  return "${rc}"
+}
+
+sfs_enter_call_depth
+if [[ "${SFS_WATCHDOG_CHILD:-0}" != "1" ]]; then
+  _sfs_cmd="$(sfs_requested_command "$@")"
+  _sfs_timeout="$(sfs_resolved_timeout_sec "${_sfs_cmd}")" || exit $?
+  if (( _sfs_timeout > 0 )); then
+    sfs_run_self_with_watchdog "${_sfs_timeout}" "${BASH_SOURCE[0]:-$0}" "${_sfs_cmd}" "$@"
+    exit $?
+  fi
+fi
+
 find_dist_dir() {
   local source="${BASH_SOURCE[0]:-$0}"
+  local hops=0
   while [[ -L "${source}" ]]; do
+    hops=$((hops + 1))
+    if (( hops > 40 )); then
+      echo "sfs safety stop: too many symlink hops while locating runtime" >&2
+      return 1
+    fi
     local link_dir link_target
     link_dir="$(cd "$(dirname "${source}")" && pwd)"
     link_target="$(readlink "${source}")"

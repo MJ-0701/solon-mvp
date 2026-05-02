@@ -160,6 +160,7 @@ REVIEW_DIFF_LINES="${SFS_REVIEW_DIFF_LINES:-180}"
 REVIEW_TARGET_EXCERPT_RADIUS="${SFS_REVIEW_TARGET_EXCERPT_RADIUS:-32}"
 REVIEW_INDEXED_TARGET_MAX="${SFS_REVIEW_INDEXED_TARGET_MAX:-80}"
 REVIEW_SMALL_FILE_EXCERPT_LINES="${SFS_REVIEW_SMALL_FILE_EXCERPT_LINES:-450}"
+REVIEW_EXECUTOR_TIMEOUT="${SFS_REVIEW_EXECUTOR_TIMEOUT_SEC:-${SFS_REVIEW_COMMAND_TIMEOUT_SEC:-1500}}"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
@@ -291,6 +292,12 @@ case "${REVIEW_FILE_EXCERPT_LINES}" in
 esac
 case "${REVIEW_DIFF_LINES}" in
   ''|*[!0-9]*) REVIEW_DIFF_LINES=180 ;;
+esac
+case "${REVIEW_EXECUTOR_TIMEOUT}" in
+  ''|*[!0-9]*)
+    echo "invalid SFS_REVIEW_EXECUTOR_TIMEOUT_SEC: ${REVIEW_EXECUTOR_TIMEOUT} (expected integer seconds, 0 disables)" >&2
+    exit "${SFS_EXIT_BADCLI}"
+    ;;
 esac
 case "${REVIEW_TARGET_EXCERPT_RADIUS}" in
   ''|*[!0-9]*) REVIEW_TARGET_EXCERPT_RADIUS=32 ;;
@@ -1608,7 +1615,7 @@ if [[ "${RUN_REVIEW}" == "true" ]]; then
     echo "  If it looks stuck, inspect another terminal with: tail -f ${RUN_ERR}"
   } >&2
   set +e
-  eval "${EXECUTOR_CMD}" < "${PROMPT_PATH}" > "${RUN_OUT}" 2> "${RUN_ERR}"
+  sfs_run_eval_with_timeout "${EXECUTOR_CMD}" "${REVIEW_EXECUTOR_TIMEOUT}" "${PROMPT_PATH}" "${RUN_OUT}" "${RUN_ERR}" "review executor (${EVALUATOR_EXECUTOR})"
   RUN_RC=$?
   set -e
 

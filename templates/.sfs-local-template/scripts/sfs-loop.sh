@@ -63,6 +63,7 @@ LOOP_DRY_RUN=false
 LOOP_ESCALATE_ON=""
 LOOP_OWNER=""
 LOOP_REPORT_FORMAT="text"
+LOOP_EXECUTOR_TIMEOUT="${SFS_LOOP_EXECUTOR_TIMEOUT_SEC:-1500}"
 
 # Multi-worker (sub-task 5 spec)
 LOOP_PARALLEL=1
@@ -312,6 +313,10 @@ validate_args() {
   fi
   if ! [[ "$LOOP_PARALLEL" =~ ^[1-9][0-9]*$ ]]; then
     echo "loop: --parallel must be positive integer" >&2
+    exit "$SFS_LOOP_EXIT_BADCLI"
+  fi
+  if ! [[ "$LOOP_EXECUTOR_TIMEOUT" =~ ^[0-9]+$ ]]; then
+    echo "loop: SFS_LOOP_EXECUTOR_TIMEOUT_SEC must be integer seconds, 0 disables (got '$LOOP_EXECUTOR_TIMEOUT')" >&2
     exit "$SFS_LOOP_EXIT_BADCLI"
   fi
   if ! [[ "$LOOP_PRIORITY_MIN" =~ ^[1-9]|10$ ]]; then
@@ -1322,8 +1327,7 @@ cmd_loop_run() {
           ensure_executor_headless_auth "$LOOP_EXECUTOR" || exit "$SFS_LOOP_EXIT_EXECUTOR_FAIL"
           echo "loop:   [LIVE] invoking queue executor" >&2
           set +e
-          # shellcheck disable=SC2086
-          cat "$run_dir/PROMPT.md" | eval $executor_cmd > "$run_dir/executor.out" 2> "$run_dir/executor.err"
+          sfs_run_eval_with_timeout "$executor_cmd" "$LOOP_EXECUTOR_TIMEOUT" "$run_dir/PROMPT.md" "$run_dir/executor.out" "$run_dir/executor.err" "loop queue executor ($LOOP_EXECUTOR)"
           live_rc=$?
           set -e
           printf '%s\n' "$live_rc" > "$run_dir/executor.exit"
@@ -1391,8 +1395,18 @@ cmd_loop_run() {
       # Real call: cat PROMPT.md | $executor_cmd  (Ralph Loop pattern)
       # MVP: PROMPT.md must exist; otherwise skip
       if [[ -f PROMPT.md ]]; then
-        # shellcheck disable=SC2086
-        cat PROMPT.md | eval $executor_cmd || echo "loop:   executor returned non-zero" >&2
+        local live_dir live_out live_err live_rc
+        live_dir="${SFS_LOCAL_DIR}/tmp/loop-live"
+        mkdir -p "$live_dir" 2>/dev/null || true
+        live_out="${live_dir}/executor.out"
+        live_err="${live_dir}/executor.err"
+        set +e
+        sfs_run_eval_with_timeout "$executor_cmd" "$LOOP_EXECUTOR_TIMEOUT" "PROMPT.md" "$live_out" "$live_err" "loop executor ($LOOP_EXECUTOR)"
+        live_rc=$?
+        set -e
+        [[ -s "$live_out" ]] && cat "$live_out"
+        [[ -s "$live_err" ]] && cat "$live_err" >&2
+        (( live_rc == 0 )) || echo "loop:   executor returned non-zero (rc=$live_rc)" >&2
       else
         echo "loop:   no PROMPT.md, skipping live invocation" >&2
       fi
