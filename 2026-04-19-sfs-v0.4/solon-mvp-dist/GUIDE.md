@@ -5,6 +5,11 @@
 > SFS 는 이중 의미다. 터미널에서 쓰는 `sfs` / `/sfs` 는 표면적으로 **Sprint Flow System** 이고,
 > Solon Product 전체의 SFS 는 **Solo Founder System** 이다.
 
+**Language**: 한국어 / [English](./docs/en/guide.md)
+
+상세한 최신 흐름은 [현재 제품 흐름과 최근 변화](./docs/ko/current-product-shape.md), 철학은
+[Solon 10x 가치](./docs/ko/10x-value.md) 에서 이어서 볼 수 있다.
+
 ---
 
 ## 0. 설치는 끝났다. 이제 뭐 할 차례?
@@ -61,6 +66,23 @@ Windows PowerShell/cmd 는 `sfs.cmd upgrade` 를 실행한다.
 - **본인이 편집** = `SFS.md`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`. 이 4개는 너의 프로젝트 정체성을 담는다.
 - **건드리지 마** = `.claude/`, `.gemini/`, `.agents/`. thin layout 에서는 scripts/templates/personas 는 global runtime 에 있고, project-local override 가 필요할 때만 `.sfs-local/sprint-templates/`, `.sfs-local/personas/`, `.sfs-local/decisions-template/` 에 추가한다.
 - **쌓이는 곳** = `.sfs-local/sprints/`, `.sfs-local/decisions/`, `.sfs-local/events.jsonl`. 너의 작업 기록이 누적된다. 절대 자동 덮어쓰지 않는다.
+
+**현재 버전에서 가장 중요한 사용 감각**:
+
+- `start` 는 workspace 를 만들고, 새 요구 탐색에는 brainstorm depth 선택지를 보여준다.
+  `simple` 은 빠른 정리, 기본 `normal` 은 생각 scaffold, `hard` 는 product owner 훈련 모드다.
+- `brainstorm` 은 요구사항을 받아 적는 명령이 아니라, plan 으로 넘기기 전에 사용자의 의도,
+  모순, 우선순위, 포기할 것, 검증 방식, 경계, 용어를 필요한 깊이만큼 정리하는 단계다.
+- `implement` 는 코드만 뜻하지 않는다. 코드, 문서, 전략, 디자인 handoff, taxonomy, QA evidence,
+  infra/runbook 모두 산출물이다.
+- `review` 는 code review 하나가 아니라 artifact acceptance review 다. Solon 은 evidence 를 보고
+  code/docs/strategy/design/taxonomy/QA/ops/release lens 를 자동 추론한다.
+- `retro` 는 회고 파일만 여는 명령이 아니라 현재 sprint 를 닫는 기본 명령이다. report/retro 를
+  남기고 workbench 원문은 archive 로 접는다.
+
+좋은 문서의 기준도 여기서 나온다. 많이 쓰는 것이 목표가 아니라, 다음 세션이
+`report.md`, `retro.md`, ADR, README/GUIDE 를 보고 "무엇을 했고, 왜 했고, 무엇을 검증했고,
+다음 action 이 무엇인지" 바로 알 수 있어야 한다.
 
 ---
 

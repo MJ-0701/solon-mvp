@@ -1,0 +1,63 @@
+# Solon Product Docs
+
+**Language**: [한국어](../ko/index.md) / English
+
+The README is the product overview and table of contents. These pages hold the
+deeper operating model, judgment rules, philosophy, and examples.
+
+GitHub Markdown does not provide native language-switch tabs. Solon uses a
+small `Language` link at the top of each page instead. Collapsible `<details>`
+sections are possible, but they are not real tabs and tend to make the README
+heavier than it should be.
+
+## Start Here
+
+| Page | When to read it |
+|---|---|
+| [Current product shape](./current-product-shape.md) | To understand the latest Solon operating flow |
+| [Solon 10x value](../../10X-VALUE.md) | To understand why Solon trains judgment instead of only automating output |
+| [30-minute guide](./guide.md) | To run the first sprint after install |
+| [Beginner guide](../../BEGINNER-GUIDE.md) | Korean beginner guide for Git, terminal, and CLI basics |
+| [Release notes](../../CHANGELOG.md) | Version-by-version changes |
+
+## Current Flow
+
+```text
+sfs status
+-> sfs start "<goal>"
+-> sfs brainstorm [--simple|--hard] "<raw context>"
+-> sfs plan
+-> sfs implement "<first slice>"
+-> sfs review
+-> sfs report
+-> sfs retro
+```
+
+The point is not to outsource all thinking to AI. Solon lets AI assist the work
+while the user keeps product ownership over intent, priority, tradeoffs,
+validation, boundaries, and language.
+
+## Brainstorm Depth
+
+| Mode | Use it when | Expected result |
+|---|---|---|
+| `--simple` | The direction is already clear and you only need cleanup | Requirements summary, explicit assumptions, plan seed |
+| default `normal` | Most new product exploration | 2-5 focused questions that help the user think before plan |
+| `--hard` | Ambiguity, product judgment, or system design matters | Relentless questioning about intent, contradictions, priority, sacrifice, validation, boundaries, and terms |
+
+`normal` is no longer just passive summarization. It is the default thinking
+scaffold. `hard` is the training mode that keeps pressing until owner decisions
+are clear enough to plan.
+
+## Documentation Policy
+
+Solon does not reward writing more documents. A good document lets the next
+human or AI session quickly understand:
+
+- what changed
+- why it changed
+- how it was verified
+- what should happen next
+
+That is why README stays as a map, GUIDE stays as a practical walkthrough, and
+`docs/ko` / `docs/en` hold deeper explanations.

@@ -1,5 +1,7 @@
 # Solon 10x Value
 
+**Language**: [한국어](./docs/ko/10x-value.md) / English
+
 > Solon does not make code cheap by generating more of it.
 > Solon makes AI work safer by turning unclear intent into shared concepts,
 > domain language, testable contracts, small work units, and review signals.
@@ -22,6 +24,21 @@ Fuzzy idea
 -> independent review
 -> retro / next action
 ```
+
+## Brainstorm As Thinking Training
+
+In the AI coding era, one sentence can move a project forward. That is powerful,
+but it also creates a risk: users can stop exercising product judgment. Solon
+uses brainstorm depth to keep that judgment active.
+
+| Mode | Value |
+|---|---|
+| `--simple` | Fast cleanup when the direction is already clear |
+| default `normal` | A thinking scaffold that asks focused questions before plan |
+| `--hard` | Product-owner hard training for intent, tradeoffs, validation, boundaries, and language |
+
+`--hard` is not less AI assistance. It is AI assistance that uses questions to
+strengthen user ownership before execution starts.
 
 ## Why AI Execution Fails
 

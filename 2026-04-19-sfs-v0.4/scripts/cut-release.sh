@@ -23,7 +23,7 @@
 #     ✅ VERSION / CHANGELOG.md / README.md / BEGINNER-GUIDE.md / 10X-VALUE.md /
 #        CLAUDE.md / AGENTS.md / GUIDE.md /
 #        install.sh / install.ps1 / upgrade.sh / upgrade.ps1 /
-#        uninstall.sh / uninstall.ps1 / templates/ / bin/ / packaging/ / .github/
+#        uninstall.sh / uninstall.ps1 / templates/ / bin/ / packaging/ / .github/ / docs/
 #     ❌ APPLY-INSTRUCTIONS.md (dev 운영자 전용, hard blocklist)
 #
 # Usage:
@@ -83,6 +83,7 @@ ALLOWLIST=(
   "bin"
   "packaging"
   ".github"
+  "docs"
 )
 
 # Hard blocklist (dev 전용)
