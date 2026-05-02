@@ -153,13 +153,15 @@ resume_hint:
     2) Run: `bash scripts/resume-session-check.sh` (expect exit 0).
     3) Latest product release is `0.5.72-product`; ask user for the next
        WU/domain unless they provide a direct task.
+    4) For a direct task, start from clean `main` and create a fresh
+       `feature/<slug>` or `hotfix/<slug>` branch before edits.
   on_skip_patterns: ["아니", "잠깐", "다른", "stop"]
   on_skip_action: "What do you want to do instead (1 line)?"
   on_ambiguous: "0.5.72-product is released. What should Solon handle next?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
-  last_written: 2026-05-02T05:50:11Z
+  last_written: 2026-05-02T05:55:00Z
 ---
 
 # PROGRESS — compact
@@ -209,7 +211,8 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 ## ③ Next
 
 - Current truth is `0.5.72-product`; no active WU. Ask user for the next
-  WU/domain unless they provide a direct task.
+  WU/domain unless they provide a direct task. For a direct task, create a fresh
+  branch from clean `main` first (`feature/<slug>` or `hotfix/<slug>`).
 
 ## ④ Artifacts
 

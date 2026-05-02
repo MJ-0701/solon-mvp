@@ -65,6 +65,9 @@ or separately identified evidence packaging gaps.
    before inspecting product code.
 4. With clean entry state, ask the user for the next WU/domain unless they give
    a direct task.
+5. For a direct task, do not continue a previous session branch. Start from
+   clean `main`, then create `feature/<slug>` or `hotfix/<slug>` from the
+   requirement before editing.
 
 ## 5. Guardrails
 
@@ -74,3 +77,5 @@ or separately identified evidence packaging gaps.
   remains the live entry snapshot.
 - Keep future release completion atomic: product release/cut + channel publish +
   verifier + `PROGRESS.md`/handoff update must land together.
+- After a task branch is merged into `main`, do not use it for the next session;
+  the next direct task gets a fresh branch from `main`.
