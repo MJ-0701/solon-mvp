@@ -154,7 +154,7 @@ Solon guide context
 작업 중:
   /sfs decision "<결정 제목>"          결정이 흐려지기 전에 기록
   /sfs auth probe --executor gemini   bridge 연결만 가볍게 확인
-  /sfs implement "<작은 구현 단위>"    plan 기반 실제 코드 변경 + evidence 기록
+  /sfs implement "<작은 구현 단위>"    plan 기반 작업 artifact + evidence 기록
   /sfs review --gate G4               구현 검토 evidence 남기기
   /sfs retro --close                  sprint close + local auto-commit
   Codex 에서는 같은 명령을 \$sfs implement/decision/review/retro ... 로 입력

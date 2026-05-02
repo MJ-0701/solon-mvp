@@ -205,59 +205,63 @@ direct CLI 는 raw capture-only 이다. AI 없이 직접 실행했다면, 다음
 scope: backlog 1~3, AC: compose up / API boot / DB health / manifest schema pass".
 
 반대로 sprint goal 자체가 `repo scaffold`, `dev compose`, `DB schema`, `API boot`, 테스트,
-UI 동작 같은 구현 산출물을 말하고 있다면 G1 계약만으로 sprint 를 완료했다고 부르면 안 된다.
-그 경우 완료 조건은 실제 코드/설정 변경, `log.md` evidence, smoke/test 결과, G4 review,
-retro 까지다.
+UI 동작, taxonomy 정리, design handoff, QA evidence, infra/runbook 같은 실행 산출물을 말하고
+있다면 G1 계약만으로 sprint 를 완료했다고 부르면 안 된다. 그 경우 완료 조건은 실제 artifact
+변경, `log.md` evidence, smoke/test/review 결과, G4 review, retro 까지다.
 
-### 3.5 `/sfs implement` 로 첫 구현을 AI-safe 하게 시작하기
+### 3.5 `/sfs implement` 로 첫 실행 slice 를 AI-safe 하게 시작하기
 
 Solon 에서 첫 구현은 "스펙을 던지고 코드가 나오길 기다리는 일" 이 아니다.
-`/sfs implement` 는 `implement.md` 와 `log.md` 를 열고, AI runtime 이 실제 코드 변경과
-테스트/스모크 evidence 까지 남기도록 하는 구현 진입점이다. AI 는 눈앞의
-변경에는 빠르지만, 전체 design concept / domain language / test feedback 이 약하면 같은
-코드베이스를 점점 더 바꾸기 어렵게 만들 수 있다.
+`/sfs implement` 는 `implement.md` 와 `log.md` 를 열고, AI runtime 이 실제 작업 slice 와
+검증 evidence 까지 남기도록 하는 실행 진입점이다. 코드 변경은 중요한 산출물이지만 유일한
+산출물은 아니다. taxonomy, design handoff, QA evidence, infra/runbook, decision, docs 도
+implementation artifact 다. AI 는 눈앞의 변경에는 빠르지만, 전체 design concept / domain
+language / feedback loop 가 약하면 같은 프로젝트를 점점 더 바꾸기 어렵게 만들 수 있다.
 
-첫 coding sprint 는 아래 순서로 작게 시작한다:
+첫 execution sprint 는 아래 순서로 작게 시작한다:
 
 1. **하네스 4원칙 고정**
-   - Think Before Coding: 가정/선택지/성공 기준을 짧게 잡고 모호하면 질문한다.
-   - Simplicity First: AC 를 증명하는 최소 code/document surface 로 간다.
+   - Think Before Execution: 가정/선택지/성공 기준을 짧게 잡고 모호하면 질문한다.
+   - Simplicity First: AC 를 증명하는 최소 artifact surface 로 간다.
    - Surgical Changes: 요청 slice 와 직접 연결된 줄만 바꾼다.
-   - Goal-Driven Execution: 구현 + 검증 evidence + review handoff 까지를 완료 기준으로 둔다.
-2. **기존 코드베이스 규칙 확인**
-   - "이 프로젝트의 폴더 구조, naming, 테스트 방식, 상태 관리 방식, API 호출 패턴을 요약해줘."
+   - Goal-Driven Execution: 산출물 + 검증 evidence + review handoff 까지를 완료 기준으로 둔다.
+2. **기존 프로젝트 규칙 확인**
+   - "이 프로젝트의 폴더 구조, naming, 테스트/리뷰 방식, 상태 관리 방식, artifact 패턴을 요약해줘."
    - 새 구조를 만들기 전에 기존 규칙을 먼저 따른다.
-3. **도메인 용어 고정 (DDD-lite)**
+3. **도메인 용어 고정**
    - `plan.md` 에 핵심 명사/행위자/상태/규칙을 적는다.
    - 예: `Course`, `Week`, `Artifact`, `ExamRange`, `GateSession`.
-   - AI 에게 "이 용어를 코드와 설명에서 같은 의미로 써라" 고 지시한다.
-4. **테스트 계약 먼저 만들기 (TDD-lite)**
-   - 구현 전에 "어떤 동작이 통과하면 끝인가" 를 3~5개로 적는다.
-   - 유닛 테스트가 어려우면 smoke check, browser check, CLI command output check 도 가능하다.
+   - AI 에게 "이 용어를 코드, docs, UI label, 테스트, 보고서에서 같은 의미로 써라" 고 지시한다.
+4. **피드백 계약 먼저 만들기**
+   - 구현 전에 "무엇이 통과하면 끝인가" 를 3~5개로 적는다.
+   - 코드면 test-first 를 우선하고, 비코드면 smoke check, design review, taxonomy drift check,
+     CLI output check, 수동 inspection 도 가능하다.
 5. **Solon division guardrails 분류**
    - strategy-pm, taxonomy, design/frontend, dev/backend, QA, infra 를 always-on / trigger-based / scale-gated 로 짧게 분류한다.
    - Backend Transaction discipline 은 always-on 이다. DB, Spring/JPA, Spring Batch, external API, MQ/event, idempotency, state, consistency path 가 닿으면 Transaction boundary, `REQUIRES_NEW`, JPA first-level cache, Batch chunk TX, outbox/idempotency/order/history, Hikari pool pressure, test depth 를 확인한다.
    - Security / Infra / DevOps 는 sprint/project scope 에서 `light` / `full` / `skip` 만 묻는다. MVP-overkill 은 구현을 막지 말고 `deferred` 또는 `risk-accepted` 로 기록한다.
-6. **가장 작은 slice 구현**
+6. **가장 작은 slice 실행**
    - 한 번에 feature 전체를 만들지 않는다.
    - 하나의 AC 를 증명하는 최소 변경만 한다.
-7. **review 에서 코드보다 의도를 검증**
-   - "컴파일됨" 이 아니라 domain intent, codebase regularity, test feedback, user-visible behavior 를 본다.
+7. **review 에서 artifact 보다 의도를 검증**
+   - "파일이 바뀜" 이 아니라 domain intent, project regularity, feedback evidence,
+     user-visible behavior 를 본다.
 
 ```text
-/sfs implement "첫 구현 slice"
+/sfs implement "첫 실행 slice"
 
 AI-safe first slice =
-existing pattern + domain term + test contract + one small behavior + review action
+existing pattern + domain term + feedback contract + one small behavior + review action
 ```
 
-하네스 4원칙과 DDD/TDD 는 여기서 거창한 방법론이 아니라 AI 가 코드를 망가뜨리지 않게 하는 안전장치다.
+하네스 4원칙과 도메인/피드백 계약은 여기서 거창한 방법론이 아니라 AI 가 프로젝트를
+망가뜨리지 않게 하는 안전장치다.
 
 ---
 
 ## 4. 그 다음 — CPO review → CTO 확인 → retro
 
-`/sfs implement` 로 코드와 evidence 가 생긴 뒤 CPO review 를 연다. 기본 계약은 CTO 구현
+`/sfs implement` 로 artifact 와 evidence 가 생긴 뒤 CPO review 를 연다. 기본 계약은 CTO 구현
 agent 와 별도 CPO role/agent/instance 가 분리되어야 한다는 것이다. cross-vendor review
 (Codex/Claude/Gemini 교차 검증) 는 유용하지만 필수는 아니다. 같은 runtime 또는 같은 도구만
 쓰는 사용자도 별도 CPO instance 가 evidence 를 읽고 verdict/findings/required CTO actions 를
@@ -374,7 +378,7 @@ deterministic fallback 이다.
 | `/sfs division activate all` | 현재 abstract 인 모든 본부를 한 번에 active 로 승격 |
 | `/sfs adopt [--apply]` | legacy 프로젝트 인수인계 baseline 생성. 문서 과잉은 기존 sprint/archive tree 를 cold archive 로 접고, 문서 0은 report-first baseline 복원 |
 | `/sfs plan` | 현 sprint 의 의도/경계 + G1 요구사항/AC + CTO/CPO 계약 작성 |
-| `/sfs implement [work slice]` | plan 기반 실제 코드 변경 + 하네스 4원칙 + DDD/TDD guardrail + 6-division guardrail ledger + evidence 기록 |
+| `/sfs implement [work slice]` | plan 기반 작업 slice 실행 + 하네스 4원칙 + 도메인/피드백 계약 + 6-division guardrail ledger + evidence 기록. 코드, taxonomy, design handoff, QA, infra/runbook, decision, docs 모두 artifact 로 취급 |
 | `/sfs review --gate G4 --executor codex` | 리뷰할 evidence 가 있을 때 CPO review bridge 실행 + 결과 기록 |
 | `/sfs review --show-last` | executor 재실행 없이 마지막 CPO review 결과를 요약/action report 로 확인 |
 | `/sfs decision <title>` | ADR-style 결정 기록 + AI runtime 에서 ADR 본문 작성 |
