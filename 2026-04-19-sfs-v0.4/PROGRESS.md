@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T02:34:00Z
-session: "idle: WU-44 closed locally"
+last_overwrite: 2026-05-02T02:40:00Z
+session: "idle: WU-44 released"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: null
@@ -146,10 +146,11 @@ resume_hint:
   default_action: |
     1) Read `CLAUDE.md`, then `PROGRESS.md`.
     2) Run: `bash scripts/resume-session-check.sh` (expect exit 0).
-    3) WU-44 is closed locally at `4430df2`; release `0.5.67-product`.
+    3) WU-44 is closed and released as `0.5.67-product`; ask user for the next
+       WU/domain unless they provide a direct task.
   on_skip_patterns: ["아니", "잠깐", "다른", "stop"]
   on_skip_action: "What do you want to do instead (1 line)?"
-  on_ambiguous: "WU-44 is closed locally. Release 0.5.67-product?"
+  on_ambiguous: "WU-44 is released. What should Solon handle next?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
@@ -175,6 +176,9 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
   command: packaged adapter, global CLI routing, dispatch routing, routed
   context, generated SFS.md overview placeholders, README/GUIDE, and agent
   adapter docs.
+- WU-44 released as `0.5.67-product`: stable `dd6c018` / tag
+  `v0.5.67-product`; Homebrew `a397a46`; Scoop `4d898da`; release verifier
+  passed and installed `sfs version` reports `0.5.67-product`.
 
 ## ② In-Progress
 
@@ -182,7 +186,7 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ③ Next
 
-- Release `0.5.67-product` for the `sfs profile` command restore.
+- Ask user for the next WU/domain.
 
 ## ④ Artifacts
 
@@ -201,3 +205,5 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
   `v0.5.65-product`; Homebrew `6538fda`; Scoop `9dd73fe`.
 - Product start next-action release: stable `d6af969` / tag
   `v0.5.66-product`; Homebrew `55dc2a2`; Scoop `36ad9c5`.
+- Product profile command restore release: stable `dd6c018` / tag
+  `v0.5.67-product`; Homebrew `a397a46`; Scoop `4d898da`.
