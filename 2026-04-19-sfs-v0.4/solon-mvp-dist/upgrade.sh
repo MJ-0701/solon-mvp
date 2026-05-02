@@ -312,6 +312,47 @@ EOF
 
 check_local_source_freshness
 
+repair_missing_context_router_targets() {
+  local source_index="$SOURCE_DIR/templates/.sfs-local-template/context/_INDEX.md"
+  local target_context="$TARGET/.sfs-local/context"
+  local rel src dst repaired=0
+
+  [ -f "$source_index" ] || return 0
+  mkdir -p "$target_context/commands" "$target_context/policies"
+
+  while IFS= read -r rel; do
+    [ -n "$rel" ] || continue
+    src="$SOURCE_DIR/templates/.sfs-local-template/context/$rel"
+    dst="$target_context/$rel"
+    [ -f "$src" ] || continue
+    if [ ! -f "$dst" ]; then
+      mkdir -p "$(dirname "$dst")"
+      cp "$src" "$dst"
+      ok "context router 누락 target 수리: $rel"
+      repaired=1
+    fi
+  done < <(grep -Eo 'commands/[a-z-]+\.md|policies/[a-z-]+\.md' "$source_index" | sort -u)
+
+  [ "$repaired" -eq 0 ] || warn "새 context 파일을 추가했으니 프로젝트 repo 에서 commit 여부를 확인하세요: .sfs-local/context/"
+}
+
+verify_context_router_targets() {
+  local target_index="$TARGET/.sfs-local/context/_INDEX.md"
+  local rel missing=0
+
+  [ -f "$target_index" ] || return 0
+  while IFS= read -r rel; do
+    [ -n "$rel" ] || continue
+    if [ ! -f "$TARGET/.sfs-local/context/$rel" ]; then
+      err "context router target missing: $rel"
+      missing=1
+    fi
+  done < <(grep -Eo 'commands/[a-z-]+\.md|policies/[a-z-]+\.md' "$target_index" | sort -u)
+
+  [ "$missing" -eq 0 ] || return 1
+  ok "context router targets complete"
+}
+
 # ============================================================================
 # 2. 버전 비교
 # ============================================================================
@@ -370,6 +411,8 @@ if [ "$CUR_VER" = "$NEW_VER" ]; then
     || grep -q 'selected_runtime: "unset"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null; then
     warn "agent model profile 이 current_model fallback 상태입니다."
   fi
+  repair_missing_context_router_targets
+  verify_context_router_targets || die "context router index references missing files"
   maybe_prompt_model_profile
   ok "이미 최신 버전. 업그레이드 불필요."
   if [ "$MODEL_PROFILE_REPAIRED" -eq 1 ]; then
@@ -482,6 +525,8 @@ declare -a CHECK_FILES=(
   ".sfs-local/auth.env.example|templates/.sfs-local-template/auth.env.example"
   ".sfs-local/context/_INDEX.md|templates/.sfs-local-template/context/_INDEX.md"
   ".sfs-local/context/kernel.md|templates/.sfs-local-template/context/kernel.md"
+  ".sfs-local/context/commands/start.md|templates/.sfs-local-template/context/commands/start.md"
+  ".sfs-local/context/commands/profile.md|templates/.sfs-local-template/context/commands/profile.md"
   ".sfs-local/context/commands/brainstorm.md|templates/.sfs-local-template/context/commands/brainstorm.md"
   ".sfs-local/context/commands/plan.md|templates/.sfs-local-template/context/commands/plan.md"
   ".sfs-local/context/commands/implement.md|templates/.sfs-local-template/context/commands/implement.md"
@@ -681,6 +726,8 @@ update_file ".sfs-local/GUIDE.md" "GUIDE.md" "Solon onboarding guide (/sfs guide
 mkdir -p "$TARGET/.sfs-local/context/commands" "$TARGET/.sfs-local/context/policies"
 update_file ".sfs-local/context/_INDEX.md" "templates/.sfs-local-template/context/_INDEX.md" "context router index" "b"
 update_file ".sfs-local/context/kernel.md" "templates/.sfs-local-template/context/kernel.md" "context kernel" "b"
+update_file ".sfs-local/context/commands/start.md" "templates/.sfs-local-template/context/commands/start.md" "context start module" "b"
+update_file ".sfs-local/context/commands/profile.md" "templates/.sfs-local-template/context/commands/profile.md" "context profile module" "b"
 update_file ".sfs-local/context/commands/brainstorm.md" "templates/.sfs-local-template/context/commands/brainstorm.md" "context brainstorm module" "b"
 update_file ".sfs-local/context/commands/plan.md" "templates/.sfs-local-template/context/commands/plan.md" "context plan module" "b"
 update_file ".sfs-local/context/commands/implement.md" "templates/.sfs-local-template/context/commands/implement.md" "context implement module" "b"
@@ -690,6 +737,7 @@ update_file ".sfs-local/context/commands/upgrade.md" "templates/.sfs-local-templ
 update_file ".sfs-local/context/commands/tidy.md" "templates/.sfs-local-template/context/commands/tidy.md" "context tidy module" "b"
 update_file ".sfs-local/context/commands/loop.md" "templates/.sfs-local-template/context/commands/loop.md" "context loop module" "b"
 update_file ".sfs-local/context/policies/mutex.md" "templates/.sfs-local-template/context/policies/mutex.md" "context mutex policy" "b"
+verify_context_router_targets || die "context router index references missing files"
 
 # scripts/ — Solon-versioned bash adapters (codex finding #4 후속, 25th-6 보강)
 # 신규: sfs-loop / sfs-decision / sfs-retro (0.4.0-mvp 추가 슬롯) + sfs-guide (0.5.2-product)
