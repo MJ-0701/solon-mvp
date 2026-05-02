@@ -18,6 +18,8 @@ Rules:
 - Start from `sfs status` → current sprint `report.md`.
 - Do not load old logs/history unless the routed context asks for them.
 - Stop on mutex conflicts and report owner/domain.
+- Treat `sfs review` as artifact acceptance review. Code review is only the
+  `code` lens; otherwise follow the adapter's auto-selected lens.
 - In Solon reports, show gates as `Gate N (Name)`, not naked ids:
   Gate 1 (Intake), Gate 2 (Brainstorm), Gate 3 (Plan),
   Gate 4 (Design), Gate 5 (Handoff), Gate 6 (Review),

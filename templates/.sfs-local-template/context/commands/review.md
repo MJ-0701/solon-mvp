@@ -12,6 +12,14 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   Show gates as `Gate N (Name)`, for example Gate 6 (Review), not a naked
   internal id.
 - The generator does not self-approve its own implementation.
+- `sfs review` is an artifact acceptance review. Code review is only the
+  `code` lens; docs, strategy, design, taxonomy, QA, ops, release, and generic
+  artifacts use their own acceptance lens.
+- Let the adapter's `review_lens` stand unless it is clearly wrong. Use
+  `--lens <name>` only as an override.
 - Review the whole contract, not only changed code: shared intent, domain
   language consistency, feedback evidence, interface/artifact boundaries, and
   gray-box delegation should still match the Gate 2/3 record.
+- Surface the evaluator's next action. Pass should move toward report/retro;
+  partial should name the smallest rework slice; fail should return to plan,
+  implementation, or user escalation.
