@@ -18,6 +18,19 @@ last_touched_at: ""  # filled by /sfs plan (auto, ISO8601 + tz)
 
 ---
 
+## §0. Cross-Phase AI Fundamentals
+
+G1 은 G0 의 raw 요구를 그대로 수용하는 단계가 아니라, AI 가 안전하게 실행할 수 있는 계약으로
+바꾸는 단계다. 아래 항목은 implement 뿐 아니라 plan/review/report 에도 계속 전달된다.
+
+- 공유 design concept:
+- 유비쿼터스 랭귀지 / glossary:
+- feedback loop / evidence source:
+- public interface 또는 artifact boundary:
+- gray-box delegation: 사용자/CEO 가 직접 결정할 것 vs AI worker 가 채울 내부:
+
+위 항목이 비어 있으면 `brainstorm.md` 로 돌아가 1~3개 blocking question 을 먼저 해결한다.
+
 ## §1. 요구사항 (Requirements)
 
 본 sprint 가 풀어야 할 문제 / 사용자 니즈 / 비즈니스 입력. 1줄 요약 + 배경 컨텍스트.
@@ -43,6 +56,10 @@ last_touched_at: ""  # filled by /sfs plan (auto, ISO8601 + tz)
 - [ ] R/AC 가 측정 가능 (정량 또는 binary)
 - [ ] 범위가 sprint 1개 안에서 닫힘
 - [ ] 의존성 / 결정 대기 항목이 명시됨
+- [ ] G0 의 핵심 질문이 해소됐거나 명시적으로 defer 됨
+- [ ] glossary/domain language 가 AC 와 산출물 이름에 반영됨
+- [ ] feedback loop 가 `verify by ...` 로 연결됨
+- [ ] interface/artifact boundary 와 gray-box 위임 경계가 명시됨
 
 > 본 체크리스트 통과 = `/sfs review --gate G1` 진입 조건. verdict (pass / partial / fail) 는 `review.md` 에 기록.
 

@@ -2,7 +2,8 @@
 
 > install.sh 실행한 직후 30분 안에 첫 sprint 를 돌려보는 walk-through.
 > 본 가이드는 "왜 이런 file 이 생겼는지", "처음 어디부터 손대야 하는지", "내가 알아야 할 핵심 file 4개", 그리고 "내일도 이걸 쓸 이유" 까지 다룬다.
-> SFS 는 **Solo Founder System** 의 약자다. Sprint flow 는 SFS 안에서 돌아가는 실행 방식이다.
+> SFS 는 이중 의미다. 터미널에서 쓰는 `sfs` / `/sfs` 는 표면적으로 **Sprint Flow System** 이고,
+> Solon Product 전체의 SFS 는 **Solo Founder System** 이다.
 
 ---
 
@@ -39,7 +40,7 @@ my-project/
 ├── GEMINI.md                    ← Gemini CLI adapter (본인이 편집)
 ├── .claude/skills/sfs/SKILL.md  ← Claude Code /sfs Skill (배포판 관리, 건드리지 마)
 ├── .claude/commands/sfs.md      ← Claude Code 슬래시 (배포판 관리, 건드리지 마)
-├── .gemini/commands/sfs.toml    ← Gemini CLI 슬래시 (배포판 관리, 건드리지 마)
+├── .gemini/commands/sfs.toml    ← Gemini CLI sfs command (배포판 관리, 건드리지 마)
 ├── .agents/skills/sfs/SKILL.md  ← Codex Skill (배포판 관리, 건드리지 마)
 ├── .sfs-local/                  ← sprint / decision / event / config 가 쌓이는 곳
 └── .gitignore                   ← Solon 마커 블록 자동 추가
@@ -108,13 +109,13 @@ Windows PowerShell/cmd 는 `sfs.cmd upgrade` 를 실행한다.
 | 환경 | 첫 명령 |
 |:--|:--|
 | Claude Code | `/sfs status` (slash popup) |
-| Gemini CLI | `/sfs status` (slash popup) |
+| Gemini CLI | `sfs status` |
 | Codex CLI | `$sfs status` |
 | Codex app | `$sfs status` 또는 `/sfs status` 가 host 에서 모델까지 전달되는 경우 |
 | Windows PowerShell 직접 실행 | `sfs.cmd status` |
 
-아래 예시는 Solon 기준 `/sfs` 표기입니다. Claude Code 와 Gemini CLI 에서는 그대로 쓰면 된다.
-Codex CLI 의 공식 Skill 호출은 `$sfs ...` 다. bare `/sfs` 를 입력했을 때 `커맨드 없음` 또는
+아래 예시는 Claude Code 기준 `/sfs` 표기입니다. Gemini CLI 에서는 slash 없이 `sfs ...` 로,
+Codex CLI 에서는 `$sfs ...` 로 입력한다. bare `/sfs` 를 입력했을 때 `커맨드 없음` 또는
 `Unrecognized command` 가 뜨면 Solon 이 실행된 것이 아니라 host slash parser 가 메시지를 모델
 전에 차단한 것이다. Windows PowerShell 에서 agent 밖 direct shell 로 실행할 때는
 `sfs.cmd start ...`, `sfs.cmd plan` 처럼 쓴다.
@@ -156,13 +157,18 @@ sprint - · WU - · gate -:- · ahead 0 · last_event -
 
 ---
 
-## 3. 다음 10분 — brainstorm → plan
+## 3. 다음 10분 — shared understanding → brainstorm → plan
 
 먼저 raw 요구사항과 대화 맥락을 `brainstorm.md` 에 남긴다. Claude/Codex/Gemini 같은
 AI runtime 에서 `/sfs brainstorm` 으로 실행하면 두 단계가 한 번에 이어진다.
 
 1. bash adapter 가 raw input 을 `§8 Append Log` 에 안전하게 기록한다.
-2. Solon CEO 가 그 raw 를 읽고 `§1~§7` 을 채운다. 부족한 정보가 있으면 1~3개 질문을 한다.
+2. Solon CEO 가 그 raw 를 읽고 `§0~§7` 을 채운다. 부족한 정보가 있으면 1~3개 질문을 한다.
+
+G0 의 목적은 raw 요구를 예쁘게 받아 적는 것이 아니라, plan 으로 넘기기 전에 공유 이해를
+만드는 것이다. AI 시대의 기본 guardrail 은 여기서 이미 시작된다: 공유 design concept,
+domain language, 작은 feedback loop, public interface/artifact boundary, gray-box 위임 경계.
+이 중 plan 에 필요한 항목이 비어 있으면 `/sfs plan` 으로 넘어가지 않고 질문부터 한다.
 
 ```text
 /sfs brainstorm "아직 정리 안 된 요구사항, 제약, 아이디어"
@@ -179,7 +185,8 @@ direct CLI 는 raw capture-only 이다. AI 없이 직접 실행했다면, 다음
 
 그 다음 brainstorm 을 plan 계약으로 바꾼다. AI runtime 에서 `/sfs plan` 은
 `plan.md ready` 만 출력하고 끝나는 명령이 아니라, bash adapter 로 G1 파일을 연 뒤
-`brainstorm.md` 를 읽어 요구사항/AC/scope 와 CTO/CPO sprint contract 를 채워야 한다:
+`brainstorm.md` 를 읽어 요구사항/AC/scope 와 CTO/CPO sprint contract 를 채워야 한다. G0 의
+blocking question 이 남아 있으면 추측으로 메우지 않고 질문을 유지한다:
 
 ```text
 /sfs plan
@@ -192,6 +199,7 @@ direct CLI 는 raw capture-only 이다. AI 없이 직접 실행했다면, 다음
 - **AC (Acceptance Criteria)**: 어떻게 동작하는 게 "끝" 인가? 3-5개 bullet.
 - **범위 (In/Out of scope)**: 이번에 할 것 / 안 할 것. "안 할 것" 이 더 중요.
 - **Sprint Contract**: CEO plan 을 바탕으로 CTO Generator 가 만들 것과 CPO Evaluator 가 검증할 것.
+- **AI-era fundamentals**: 용어, feedback loop, interface boundary, gray-box 위임 경계.
 - **G1 self-check**: plan 자체가 OK 한가? (1줄 verdict)
 
 > 💡 **plan 의 핵심 가치 = "안 할 것" 명시**. AI 가 plan 없이 코드 짜면 over-build 하기 쉽다. plan 에 "X 는 이번 sprint 에 안 한다" 고 적어두면 AI 가 그걸 읽고 안 한다.
@@ -224,6 +232,8 @@ Solon 에서 첫 구현은 "스펙을 던지고 코드가 나오길 기다리는
 산출물은 아니다. taxonomy, design handoff, QA evidence, infra/runbook, decision, docs 도
 implementation artifact 다. AI 는 눈앞의 변경에는 빠르지만, 전체 design concept / domain
 language / feedback loop 가 약하면 같은 프로젝트를 점점 더 바꾸기 어렵게 만들 수 있다.
+그래서 이 절의 guardrail 은 implement 에서 처음 등장하는 규칙이 아니라, G0/G1 에서 만든
+공유 이해와 계약을 실제 artifact 로 검증하는 규칙이다.
 
 첫 execution sprint 는 아래 순서로 작게 시작한다:
 
@@ -307,11 +317,11 @@ CPO verdict 는 `pass` / `partial` / `fail` 로 기록한다. `partial` 또는
 prompt 를 Claude 에 연결된 Codex plugin 에 넘겨야 한다.
 
 Codex/Claude/Gemini CLI 는 인증 prompt 가 먼저 뜨면 SFS 가 넘긴 review prompt 를 auth 답변으로
-소비할 수 있다. 그래서 SFS 는 `.sfs-local/auth.env` 를 자동 로드하고 `/sfs auth` 로
-인증 상태를 먼저 확인한다. `.sfs-local/auth.env.example` 을 복사해서 API key 또는
+소비할 수 있다. 그래서 SFS 는 `.sfs-local/auth.env` 를 자동 로드하고, 각 runtime 의 SFS entry
+(`/sfs auth`, `sfs auth`, `$sfs auth`) 로 인증 상태를 먼저 확인한다. `.sfs-local/auth.env.example` 을 복사해서 API key 또는
 `SFS_CODEX_AUTH_READY=1` / `SFS_CLAUDE_AUTH_READY=1` / `SFS_GEMINI_AUTH_READY=1` 을 넣어라.
-real terminal 에서는 `/sfs auth login gemini` 또는 `/sfs auth login --executor gemini` 처럼 브라우저/터미널 인증을
-명시적으로 끝낼 수 있다. bridge 연결만 확인할 때는 `/sfs auth probe --executor gemini --timeout 20` 가
+direct shell 에서는 `sfs auth login gemini` 또는 `sfs auth login --executor gemini` 처럼 브라우저/터미널 인증을
+명시적으로 끝낼 수 있다. bridge 연결만 확인할 때는 `sfs auth probe --executor gemini --timeout 20` 가
 작은 dummy request/response 만 보낸다. 실제 `.sfs-local/auth.env` 는 gitignore 대상이다.
 
 Windows Store 로 설치된 Codex 는 `C:\Program Files\WindowsApps\OpenAI.Codex_...\app\resources\codex.exe`
@@ -362,18 +372,18 @@ Git Flow lifecycle 로 처리한다.
 
 ---
 
-## 5. 주요 슬래시 명령 cheatsheet
+## 5. 주요 SFS 명령 cheatsheet
 
-Claude/Gemini 에서는 `/sfs ...` 를 그대로 쓴다. Codex CLI 에서는 `$sfs ...` 가 공식 Skill
-호출이다. Codex app 에서는 `$sfs ...` 또는 `/sfs ...` 가 host 에서 모델까지 전달되는 경우를
+Claude Code 에서는 `/sfs ...`, Gemini CLI 에서는 `sfs ...`, Codex CLI 에서는 `$sfs ...` 가
+공식 호출이다. Codex app 에서는 `$sfs ...` 또는 `/sfs ...` 가 host 에서 모델까지 전달되는 경우를
 쓴다. Windows PowerShell direct shell 에서는 `sfs.cmd ...` 를 쓴다. direct bash 는 항상
 deterministic fallback 이다.
 
-| 명령 | 한 줄 설명 |
+| 명령 (Claude 표기) | 한 줄 설명 |
 |:--|:--|
 | `/sfs status` | 지금 어디까지 왔는지 1줄 |
 | `/sfs start <goal>` | 새 sprint workspace 초기화 |
-| `/sfs brainstorm [text]` | G0 raw 기록 + Solon CEO 맥락 정리 |
+| `/sfs brainstorm [text]` | G0 raw 기록 + 공유 design concept/domain language/feedback/boundary 정리, 부족하면 질문 |
 | `/sfs guide` | 처음 쓸 때 필요한 맥락과 다음 명령 확인 |
 | `/sfs guide --path` | 이 onboarding guide 경로만 확인 |
 | `/sfs guide --print` | 이 guide 본문을 터미널에 출력 |
@@ -385,7 +395,7 @@ deterministic fallback 이다.
 | `/sfs division activate design` | abstract 디자인 본부를 실행 가능한 active 본부로 승격하고 decision/event 기록 |
 | `/sfs division activate all` | 현재 abstract 인 모든 본부를 한 번에 active 로 승격 |
 | `/sfs adopt [--apply]` | legacy 프로젝트 인수인계 baseline 생성. 문서 과잉은 기존 sprint/archive tree 를 cold archive 로 접고, 문서 0은 report-first baseline 복원 |
-| `/sfs plan` | 현 sprint 의 의도/경계 + G1 요구사항/AC + CTO/CPO 계약 작성 |
+| `/sfs plan` | 현 sprint 의 의도/경계 + G1 요구사항/AC + CTO/CPO 계약 작성, G0 질문은 추측으로 덮지 않음 |
 | `/sfs implement [work slice]` | plan 기반 작업 slice 실행 + 하네스 4원칙 + 도메인/피드백 계약 + 6-division guardrail ledger + evidence 기록. 코드, taxonomy, design handoff, QA, infra/runbook, decision, docs 모두 artifact 로 취급 |
 | `/sfs review --gate G4 --executor codex` | 리뷰할 evidence 가 있을 때 CPO review bridge 실행 + 결과 기록 |
 | `/sfs review --show-last` | executor 재실행 없이 마지막 CPO review 결과를 요약/action report 로 확인 |
@@ -402,7 +412,8 @@ deterministic fallback 이다.
 | `/sfs loop verify <task>` | claimed task 의 `## Verify` command 를 실행하고 done/failed 처리 |
 | `/sfs loop complete|fail|retry|abandon <task>` | queue lifecycle 수동 마무리 / 재시도 / 포기 |
 
-Codex 에서는 같은 명령을 `$sfs status`, `$sfs start ...`, `$sfs brainstorm ...` 처럼 입력한다.
+Gemini 에서는 같은 명령을 `sfs status`, `sfs start ...`, `sfs brainstorm ...` 처럼 입력한다.
+Codex 에서는 `$sfs status`, `$sfs start ...`, `$sfs brainstorm ...` 처럼 입력한다.
 
 각 명령 자체에 `--help` 있음. Windows PowerShell/cmd 에서는 `sfs.cmd` 로 바꿔 입력한다:
 

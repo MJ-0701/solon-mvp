@@ -482,10 +482,10 @@ install_file "templates/.claude/commands/sfs.md" ".claude/commands/sfs.md" "Clau
 mkdir -p "$TARGET/.claude/skills/sfs"
 install_file "templates/.claude/commands/sfs.md" ".claude/skills/sfs/SKILL.md" "Claude Code /sfs Skill"
 
-# 6.2b) Gemini CLI custom command (project-scoped slash 1급, TOML)
-# 위치: <project>/.gemini/commands/sfs.toml — Gemini CLI 가 자동 발견 + native /sfs 슬래시.
+# 6.2b) Gemini CLI custom command (project-scoped `sfs ...`, TOML)
+# 위치: <project>/.gemini/commands/sfs.toml — Gemini CLI 가 자동 발견 + `sfs ...` command.
 mkdir -p "$TARGET/.gemini/commands"
-install_file "templates/.gemini/commands/sfs.toml" ".gemini/commands/sfs.toml" "Gemini CLI /sfs 슬래시"
+install_file "templates/.gemini/commands/sfs.toml" ".gemini/commands/sfs.toml" "Gemini CLI sfs command"
 
 # 6.2c) Codex Skill (project-scoped, .agents/skills/, Anthropic Skills 호환)
 # 위치: <project>/.agents/skills/sfs/SKILL.md — Codex Skill.
@@ -744,7 +744,7 @@ layout:          $INSTALL_LAYOUT
 런타임 어댑터:   CLAUDE.md / AGENTS.md / GEMINI.md
 Entry 1급:       .claude/skills/sfs/SKILL.md (Claude Code Skill)
                  .claude/commands/sfs.md (Claude Code legacy slash)
-                 .gemini/commands/sfs.toml (Gemini CLI, TOML slash)
+                 .gemini/commands/sfs.toml (Gemini CLI, TOML command)
                  .agents/skills/sfs/SKILL.md (Codex, Skills 체계)
 Model profiles: .sfs-local/model-profiles.yaml (runtime=$MODEL_RUNTIME, policy=$MODEL_POLICY)
 Agent 갱신:      sfs agent install claude|gemini|codex|all
@@ -768,7 +768,7 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
   ${C_BOLD}3.${C_RESET} 선호 런타임에서 시작:
      ${C_BLUE}legacy repo${C_RESET} → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs adopt --apply${C_RESET} → ${C_BLUE}/sfs start${C_RESET}
      ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET} → ${C_BLUE}/sfs implement${C_RESET} → ${C_BLUE}/sfs report${C_RESET}
-     ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET} → ${C_BLUE}/sfs implement${C_RESET} → ${C_BLUE}/sfs report${C_RESET}
+     ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}sfs status${C_RESET} → ${C_BLUE}sfs start${C_RESET} → ${C_BLUE}sfs brainstorm${C_RESET} → ${C_BLUE}sfs plan${C_RESET} → ${C_BLUE}sfs implement${C_RESET} → ${C_BLUE}sfs report${C_RESET}
      ${C_BLUE}codex${C_RESET}      → ${C_BLUE}\$sfs status${C_RESET} → ${C_BLUE}\$sfs start${C_RESET} → ${C_BLUE}\$sfs brainstorm${C_RESET} → ${C_BLUE}\$sfs plan${C_RESET} → ${C_BLUE}\$sfs implement${C_RESET} → ${C_BLUE}\$sfs report${C_RESET}
                    (Codex CLI 공식 Skill 호출은 ${C_BLUE}\$sfs${C_RESET}; bare ${C_BLUE}/sfs${C_RESET} 는 지원하지 않음)
      ${C_BLUE}powershell${C_RESET} → ${C_BLUE}sfs.cmd status${C_RESET} → ${C_BLUE}sfs.cmd start${C_RESET} → ${C_BLUE}sfs.cmd guide${C_RESET}

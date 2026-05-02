@@ -1,7 +1,8 @@
 # SFS.md — `<PROJECT-NAME>` Solon SFS router
 
-Solon SFS = Solo Founder System. This file is the shared router for Claude,
-Codex, and Gemini.
+Solon SFS has two meanings. The terminal-facing `sfs` command is the Sprint Flow
+System; the full Solon SFS is the Solo Founder System. This file is the shared
+router for Claude, Codex, and Gemini.
 
 ## 프로젝트 개요
 

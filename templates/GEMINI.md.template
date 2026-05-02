@@ -1,7 +1,7 @@
 # GEMINI.md — Solon SFS adapter
 
-Use Solon through the global `sfs` runtime. Gemini CLI text `/sfs ...` maps to
-`sfs <command>` intent.
+Use Solon through the global `sfs` runtime. In Gemini CLI, invoke Solon as
+`sfs <command>` without a leading slash.
 
 Read order:
 1. `SFS.md`
@@ -13,5 +13,8 @@ Rules:
 - Run `sfs <command>` first; adapter stdout/stderr is SSoT and stays verbatim.
 - `sfs profile` may refine only `SFS.md` `## 프로젝트 개요`.
 - Bash-first means no artifact refinement; it does not forbid a compact Next.
+- AI-era fundamentals apply across all gates, not only implement: shared design
+  concept, domain language, feedback loop, interface/artifact boundary, and
+  gray-box delegation.
 - Start from `sfs status` → current sprint `report.md`.
 - Stop on mutex conflicts and report owner/domain.

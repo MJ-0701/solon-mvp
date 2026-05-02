@@ -11,6 +11,8 @@ module:
 
 - `commands/start.md` — start / new sprint / bash-first Next.
 - `commands/profile.md` — profile / SFS.md project overview only.
+- `commands/brainstorm.md` — G0 shared understanding before plan.
+- `commands/plan.md` — G1 sprint contract and cross-phase fundamentals.
 - `commands/implement.md` — implement / build / execute work.
 - `commands/review.md` — review / CPO / verdict.
 - `commands/release.md` — release / deploy / Homebrew / Scoop.

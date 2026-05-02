@@ -10,3 +10,6 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
 - Durable close entry is `report.md` plus `retro.md`.
 - `tidy --apply` archives workbench only after report evidence exists.
 - `retro --close` needs explicit user intent; refine report/retro before final close.
+- Final report/retro should preserve the cross-phase fundamentals that mattered:
+  shared design concept, glossary/domain language, feedback evidence, boundary
+  decisions, and any gray-box delegation still risky or deferred.

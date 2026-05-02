@@ -482,6 +482,8 @@ declare -a CHECK_FILES=(
   ".sfs-local/auth.env.example|templates/.sfs-local-template/auth.env.example"
   ".sfs-local/context/_INDEX.md|templates/.sfs-local-template/context/_INDEX.md"
   ".sfs-local/context/kernel.md|templates/.sfs-local-template/context/kernel.md"
+  ".sfs-local/context/commands/brainstorm.md|templates/.sfs-local-template/context/commands/brainstorm.md"
+  ".sfs-local/context/commands/plan.md|templates/.sfs-local-template/context/commands/plan.md"
   ".sfs-local/context/commands/implement.md|templates/.sfs-local-template/context/commands/implement.md"
   ".sfs-local/context/commands/review.md|templates/.sfs-local-template/context/commands/review.md"
   ".sfs-local/context/commands/release.md|templates/.sfs-local-template/context/commands/release.md"
@@ -525,7 +527,7 @@ declare -a CHECK_FILES=(
   # decisions-template/ — sfs-decision.sh 가 ADR 신설 시 사용 (WU-26)
   ".sfs-local/decisions-template/ADR-TEMPLATE.md|templates/.sfs-local-template/decisions-template/ADR-TEMPLATE.md"
   ".sfs-local/decisions-template/_INDEX.md|templates/.sfs-local-template/decisions-template/_INDEX.md"
-  # 0.5.0-mvp 신규: multi-adaptor parity (Gemini CLI native slash + Codex Skill)
+  # 0.5.0-mvp 신규: multi-adaptor parity (Gemini CLI command + Codex Skill)
   ".gemini/commands/sfs.toml|templates/.gemini/commands/sfs.toml"
   ".agents/skills/sfs/SKILL.md|templates/.agents/skills/sfs/SKILL.md"
 )
@@ -679,6 +681,8 @@ update_file ".sfs-local/GUIDE.md" "GUIDE.md" "Solon onboarding guide (/sfs guide
 mkdir -p "$TARGET/.sfs-local/context/commands" "$TARGET/.sfs-local/context/policies"
 update_file ".sfs-local/context/_INDEX.md" "templates/.sfs-local-template/context/_INDEX.md" "context router index" "b"
 update_file ".sfs-local/context/kernel.md" "templates/.sfs-local-template/context/kernel.md" "context kernel" "b"
+update_file ".sfs-local/context/commands/brainstorm.md" "templates/.sfs-local-template/context/commands/brainstorm.md" "context brainstorm module" "b"
+update_file ".sfs-local/context/commands/plan.md" "templates/.sfs-local-template/context/commands/plan.md" "context plan module" "b"
 update_file ".sfs-local/context/commands/implement.md" "templates/.sfs-local-template/context/commands/implement.md" "context implement module" "b"
 update_file ".sfs-local/context/commands/review.md" "templates/.sfs-local-template/context/commands/review.md" "context review module" "b"
 update_file ".sfs-local/context/commands/release.md" "templates/.sfs-local-template/context/commands/release.md" "context release module" "b"
@@ -734,12 +738,12 @@ mkdir -p "$TARGET/.sfs-local/decisions-template"
 update_file ".sfs-local/decisions-template/ADR-TEMPLATE.md"  "templates/.sfs-local-template/decisions-template/ADR-TEMPLATE.md"  "ADR template (WU-26 full)"  "b"
 update_file ".sfs-local/decisions-template/_INDEX.md"        "templates/.sfs-local-template/decisions-template/_INDEX.md"        "decisions _INDEX (WU-26)"   "b"
 
-# multi-adaptor parity (0.5.0-mvp 신규): Gemini CLI native slash + Codex Skill
+# multi-adaptor parity (0.5.0-mvp 신규): Gemini CLI command + Codex Skill
 # 신규: .gemini/commands/sfs.toml + .agents/skills/sfs/SKILL.md
 # Claude Code 1급 (.claude/commands/sfs.md) 와 동등 entry point.
 mkdir -p "$TARGET/.gemini/commands"
 mkdir -p "$TARGET/.agents/skills/sfs"
-update_file ".gemini/commands/sfs.toml"   "templates/.gemini/commands/sfs.toml"   "Gemini CLI /sfs 슬래시 (TOML)"  "b"
+update_file ".gemini/commands/sfs.toml"   "templates/.gemini/commands/sfs.toml"   "Gemini CLI sfs command (TOML)"  "b"
 update_file ".agents/skills/sfs/SKILL.md" "templates/.agents/skills/sfs/SKILL.md" "Codex Skill (project-scoped)"  "b"
 
 TODAY=$(date +%Y-%m-%d)

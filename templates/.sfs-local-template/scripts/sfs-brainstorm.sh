@@ -9,7 +9,7 @@
 #
 # Output:
 #   brainstorm.md ready: <path>
-#   brainstorm.md ready: <path> | raw captured | AI runtime should refine §1-§7 as Solon CEO
+#   brainstorm.md ready: <path> | raw captured | AI runtime should refine §0-§7 as Solon CEO
 #
 # Exit codes:
 #   0  success
@@ -36,7 +36,7 @@ Open/update the active sprint's brainstorm.md (G0 Brainstorm Gate document).
   - Accepts multiline raw context via --stdin or a quoted argument.
   - Appends raw input to brainstorm.md.
   - In Claude/Codex/Gemini runtimes, the /sfs adapter should then refine
-    §1~§7 as Solon CEO from the append log and ask follow-up questions.
+    §0~§7 as Solon CEO from the append log and ask follow-up questions.
   - Direct bash remains capture-only and prints the file path plus refinement hint.
   - Updates frontmatter: phase=brainstorm, last_touched_at=<ISO8601>.
   - Appends events.jsonl `brainstorm_open` event.
@@ -163,7 +163,7 @@ if ! append_event "brainstorm_open" "{\"sprint_id\":\"${_esc_sprint}\",\"path\":
 fi
 
 if [[ -n "${RAW_TEXT}" ]]; then
-  echo "brainstorm.md ready: ${BRAINSTORM_PATH} | raw captured | AI runtime should refine §1-§7 as Solon CEO"
+  echo "brainstorm.md ready: ${BRAINSTORM_PATH} | raw captured | AI runtime should refine §0-§7 as Solon CEO"
 else
   echo "brainstorm.md ready: ${BRAINSTORM_PATH} | no new raw input | AI runtime may refine existing §8 append log"
 fi

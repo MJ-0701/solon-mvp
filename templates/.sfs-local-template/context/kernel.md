@@ -12,3 +12,10 @@ load_when: ["always", "sfs", "entry"]
 - Stop on mutex conflicts and report owner/domain.
 - Ask only 1-3 blocking questions.
 - After adapter output, read only the context module routed by `_INDEX.md`.
+- AI-era software fundamentals are all-phase guardrails, not only implement
+  rules: shared design concept, ubiquitous language, tight feedback loops,
+  deep-module boundaries, and gray-box delegation must shape brainstorm, plan,
+  implement, review, report, and retro.
+- Do not advance a gate just because raw requirements exist. If shared intent,
+  domain terms, acceptance checks, or interface boundaries are unclear, stop at
+  the current gate and ask the smallest blocking questions before moving on.
