@@ -220,6 +220,10 @@ $sfs start "첫 번째 작업 목표"
 /sfs plan
 ```
 
+`/sfs start` 가 끝나면 다음 줄에 `simple`, `normal`, `hard` brainstorm 선택지가 보입니다.
+잘 모르겠으면 추천값인 normal 을 그대로 쓰면 됩니다. 빠르게 정리만 하고 싶으면
+`/sfs brainstorm --simple ...`, 더 깊게 질문받고 싶으면 `/sfs brainstorm --hard ...` 를 씁니다.
+
 Codex CLI 라면 `/sfs` 대신 `$sfs` 를 씁니다.
 
 ```text

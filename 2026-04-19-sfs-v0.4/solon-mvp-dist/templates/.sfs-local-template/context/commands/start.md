@@ -19,7 +19,11 @@ Rules:
 - Do not create or imply durable `report.md` creation for `start`. The durable
   sprint `report.md` lifecycle belongs to `report`, `retro`, or `tidy`.
 - After `start`, infer `Next` from sprint mode:
-  - fresh discovery/planning goal -> `sfs brainstorm "<raw goal/context>"`
+  - fresh discovery/planning goal -> show the depth selector and let the user
+    pick `simple`, default `normal`, or `hard`:
+    `sfs brainstorm --simple ...`, `sfs brainstorm ...`,
+    `sfs brainstorm --hard ...` (recommend normal unless the goal is tiny or
+    strategically ambiguous).
   - inherited implementation sprint -> first implementation slice + `log.md`
     evidence, then later `sfs review --gate 6` (Gate 6 Review)
   - unclear mode -> ask 1 blocking question or point to `sfs status`

@@ -232,12 +232,11 @@ echo "  - log.md"
 echo "  - review.md"
 echo "  - retro.md"
 if [[ -n "${GOAL}" ]]; then
-  printf 'next: sfs brainstorm '
-  quote_for_shell_double "${GOAL}"
-  printf '\n'
+  _next_goal="$(quote_for_shell_double "${GOAL}")"
 else
-  echo 'next: sfs brainstorm "<raw goal/context>"'
+  _next_goal='"<raw goal/context>"'
 fi
+printf 'next: choose brainstorm depth: simple=sfs brainstorm --simple %s | normal=sfs brainstorm %s | hard=sfs brainstorm --hard %s (recommended: normal)\n' "${_next_goal}" "${_next_goal}" "${_next_goal}"
 
 exit "${SFS_EXIT_OK}"
 # End of sfs-start.sh

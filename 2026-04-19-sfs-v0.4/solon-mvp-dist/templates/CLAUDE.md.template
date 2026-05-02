@@ -15,6 +15,9 @@ Rules:
 - AI-era fundamentals apply across all gates, not only implement: shared design
   concept, domain language, feedback loop, interface/artifact boundary, and
   gray-box delegation.
+- `sfs brainstorm` has depth. `--simple` is quick requirement cleanup, default normal asks a few
+  owner-thinking questions, and `--hard` keeps plan blocked while important
+  owner decisions are unresolved.
 - Start from `sfs status` → current sprint `report.md`.
 - Do not load old logs/history unless the routed context asks for them.
 - Stop on mutex conflicts and report owner/domain.
