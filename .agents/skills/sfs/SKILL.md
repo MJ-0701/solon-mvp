@@ -17,6 +17,8 @@ Command modes are explicit:
 - **Bash-first**: `status`, `start`, `guide`, `auth`, `division`, `upgrade`, `update`, `version`, `commit`, `loop`. Print verbatim
   adapter output first. A compact recap/status line is allowed when it helps
   the user see state and the next action, but adapter stdout remains SSoT.
+  Do not reduce this to "stdout only, no Next"; it means no AI-side artifact
+  refinement unless a routed rule says otherwise.
 - **Conditional hybrid**: `tidy`. Run the adapter first. If it created or
   touched `report.md`, read archived workbench/tmp sources and refine `report.md`
   into the final report before answering.

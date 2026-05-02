@@ -215,6 +215,15 @@ fi
 # ─────────────────────────────────────────────────────────────────────
 # Report
 # ─────────────────────────────────────────────────────────────────────
+quote_for_shell_double() {
+  local value="$1"
+  value="${value//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  value="${value//\$/\\\$}"
+  value="${value//\`/\\\`}"
+  printf '"%s"' "${value}"
+}
+
 echo "created: ${SPRINT_DIR}/"
 echo "  - brainstorm.md"
 echo "  - plan.md"
@@ -222,6 +231,13 @@ echo "  - implement.md"
 echo "  - log.md"
 echo "  - review.md"
 echo "  - retro.md"
+if [[ -n "${GOAL}" ]]; then
+  printf 'next: sfs brainstorm '
+  quote_for_shell_double "${GOAL}"
+  printf '\n'
+else
+  echo 'next: sfs brainstorm "<raw goal/context>"'
+fi
 
 exit "${SFS_EXIT_OK}"
 # End of sfs-start.sh

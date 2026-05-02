@@ -834,6 +834,7 @@ Usage: /sfs start [<goal>] [--id <sprint-id>] [--force]
 Default sprint-id pattern: <YYYY-Wxx>-sprint-<N>  (ISO 8601 week)
 Goal is free text. Use --id only when you need a custom sprint id.
 Use /sfs brainstorm for multiline/raw requirement context before /sfs plan.
+On success, start prints the created files and one next action.
 
 Exit codes:
   0  success

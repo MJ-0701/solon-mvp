@@ -2,16 +2,16 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T02:01:07Z
-session: "idle: WU-42 closed"
+last_overwrite: 2026-05-02T02:14:55Z
+session: "user-active: WU-43 sfs start next-action guidance"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
-current_wu: null
-current_wu_path: null
+current_wu: WU-43
+current_wu_path: 2026-04-19-sfs-v0.4/sprints/WU-43.md
 
 # ── SESSION MUTEX (CLAUDE.md §1.12) ───────────────────────────────
 # Keep scalar form for tool compatibility (.sfs-local/scripts/sfs-loop.sh stop/status, auto-resume contract).
-current_wu_owner: null
+current_wu_owner: codex-sfs-start-next-guidance-20260502
 
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
@@ -146,11 +146,11 @@ resume_hint:
   default_action: |
     1) Read `CLAUDE.md`, then `PROGRESS.md`.
     2) Run: `bash scripts/resume-session-check.sh` (expect exit 0).
-    3) WU-42 is closed and released as `0.5.65-product`; ask user for the next
-       WU/domain unless they provide a direct task.
+    3) Continue WU-43 `sfs start` next-action guidance if still open. Otherwise
+       ask user for the next WU/domain unless they provide a direct task.
   on_skip_patterns: ["아니", "잠깐", "다른", "stop"]
   on_skip_action: "What do you want to do instead (1 line)?"
-  on_ambiguous: "WU-42 is closed. What should Solon handle next?"
+  on_ambiguous: "WU-43 may be in progress. Continue `sfs start` next-action guidance?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
@@ -169,11 +169,14 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ② In-Progress
 
-- None.
+- WU-43 `sfs start` next-action guidance: adapter stdout should still be
+  verbatim/SSoT, but successful start now needs a single readable next action.
+  `sfs-profile.sh` orphan file was inspected and left out of scope as an
+  unwired new command candidate.
 
 ## ③ Next
 
-- Ask user for the next WU/domain.
+- Finish verification, close WU-43, and commit only the start-guidance scope.
 
 ## ④ Artifacts
 

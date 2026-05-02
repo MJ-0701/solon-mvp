@@ -11,5 +11,6 @@ Read order:
 
 Rules:
 - Run `sfs <command>` first; adapter stdout/stderr is SSoT and stays verbatim.
+- Bash-first means no artifact refinement; it does not forbid a compact Next.
 - Start from `sfs status` → current sprint `report.md`.
 - Stop on mutex conflicts and report owner/domain.

@@ -9,6 +9,7 @@ load_when: ["always", "sfs", "route", "context"]
 Always keep entry docs small. Read `kernel.md` first, then only the matching
 module:
 
+- `commands/start.md` — start / new sprint / bash-first Next.
 - `commands/implement.md` — implement / build / execute work.
 - `commands/review.md` — review / CPO / verdict.
 - `commands/release.md` — release / deploy / Homebrew / Scoop.

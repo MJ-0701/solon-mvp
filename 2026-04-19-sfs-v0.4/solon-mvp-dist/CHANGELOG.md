@@ -1,3 +1,15 @@
+## [0.5.66-product] - 2026-05-02
+
+**Start next-action UX.** Makes `sfs start` point directly to the next usable
+Solon step without implying that start creates a final sprint report.
+
+### Fixed
+
+- **`sfs start` next action** — start now prints one copy-pasteable
+  `next: sfs brainstorm ...` line after scaffold creation.
+- **Bash-first agent routing** — Claude, Codex, Gemini, and routed context docs
+  now state that bash-first means no artifact refinement, not "no Next".
+
 ## [0.5.65-product] - 2026-05-02
 
 **Windows Scoop command docs alignment.** Makes Windows onboarding consistent
