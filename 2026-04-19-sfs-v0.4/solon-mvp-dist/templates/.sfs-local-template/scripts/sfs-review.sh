@@ -156,6 +156,7 @@ AUTH_INTERACTIVE="${SFS_AUTH_INTERACTIVE:-auto}"
 REVIEW_MD_EXCERPT_LINES="${SFS_REVIEW_MD_EXCERPT_LINES:-0}"
 REVIEW_FILE_EXCERPT_MAX="${SFS_REVIEW_FILE_EXCERPT_MAX:-12}"
 REVIEW_FILE_EXCERPT_LINES="${SFS_REVIEW_FILE_EXCERPT_LINES:-120}"
+REVIEW_DIFF_LINES="${SFS_REVIEW_DIFF_LINES:-180}"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
@@ -285,11 +286,17 @@ esac
 case "${REVIEW_FILE_EXCERPT_LINES}" in
   ''|*[!0-9]*) REVIEW_FILE_EXCERPT_LINES=120 ;;
 esac
+case "${REVIEW_DIFF_LINES}" in
+  ''|*[!0-9]*) REVIEW_DIFF_LINES=180 ;;
+esac
 if (( REVIEW_FILE_EXCERPT_MAX > 40 )); then
   REVIEW_FILE_EXCERPT_MAX=40
 fi
 if (( REVIEW_FILE_EXCERPT_LINES > 240 )); then
   REVIEW_FILE_EXCERPT_LINES=240
+fi
+if (( REVIEW_DIFF_LINES > 360 )); then
+  REVIEW_DIFF_LINES=360
 fi
 
 # ─────────────────────────────────────────────────────────────────────
@@ -482,6 +489,12 @@ normalize_inferred_executor_value() {
       return 1
       ;;
   esac
+  case "$low_value" in
+    *codex*) printf 'codex\n'; return 0 ;;
+    *gemini*) printf 'gemini\n'; return 0 ;;
+    *claude*) printf 'claude\n'; return 0 ;;
+    *human*) printf 'human\n'; return 0 ;;
+  esac
   token="$(printf '%s\n' "$value" | awk '{print $1}')"
   token="${token%,}"
   token="${token%;}"
@@ -494,6 +507,10 @@ infer_generator_executor_from_file() {
   local file="$1"
   [[ -f "$file" ]] || return 1
   awk '
+    /^#{1,6}[[:space:]]+/ {
+      low = tolower($0)
+      in_self_validation = (low ~ /self-validation|self validation|cto 구현 메모/)
+    }
     {
       low = tolower($0)
     }
@@ -502,7 +519,8 @@ infer_generator_executor_from_file() {
     low ~ /implementation executor[[:space:]]*:/ ||
     low ~ /implementation tool[[:space:]]*:/ ||
     low ~ /구현 executor\/tool[[:space:]]*:/ ||
-    low ~ /구현 executor[[:space:]]*:/ {
+    low ~ /구현 executor[[:space:]]*:/ ||
+    (in_self_validation && low ~ /(generator|implementation|executor|tool|구현|codex|gemini|claude|human)/) {
       line = $0
       sub(/^.*:[[:space:]]*/, "", line)
       print line
@@ -624,12 +642,87 @@ review_evidence_paths() {
     git diff --name-only --diff-filter=ACMRT 2>/dev/null || true
     git diff --cached --name-only --diff-filter=ACMRT 2>/dev/null || true
     git ls-files --others --exclude-standard 2>/dev/null || true
+    extract_indexed_evidence_paths
   } | while IFS= read -r path; do
     [[ -n "$path" ]] || continue
-    if ! is_sfs_managed_review_path "$path"; then
+    path="$(normalize_review_candidate_path "$path" || true)"
+    [[ -n "$path" ]] || continue
+    if is_reviewable_project_path "$path"; then
       printf '%s\n' "$path"
     fi
   done | awk '!seen[$0]++'
+}
+
+normalize_review_candidate_path() {
+  local path="$1"
+  path="${path#./}"
+  path="${path#\"}"
+  path="${path%\"}"
+  path="${path#\'}"
+  path="${path%\'}"
+  path="${path#\`}"
+  path="${path%\`}"
+  path="$(printf '%s\n' "$path" | sed -E 's/[),.;]+$//; s/:[0-9]+(:[0-9]+)?$//')"
+  case "$path" in
+    ""|http://*|https://*|*"://"*|/*)
+      return 1
+      ;;
+  esac
+  printf '%s\n' "$path"
+}
+
+extract_path_tokens_from_file() {
+  local file="$1"
+  [[ -f "$file" ]] || return 0
+  awk '
+    BEGIN { capture=0 }
+    /^#{1,6}[[:space:]]+/ {
+      low = tolower($0)
+      capture = (low ~ /file excerpt index|source excerpt|implementation surface|changed files|changed artifacts|변경 파일|변경 파일\/모듈|cpo 에게 넘길 검증 포인트/)
+      next
+    }
+    capture || /(^|[[:space:]`])(([.]\/)?src\/|src\/|scripts\/|package[.]json|vite[.]config|tsconfig|playwright[.]config|[A-Za-z0-9_.\/-]+[.](ts|tsx|js|jsx|mjs|cjs|css|scss|html|json|yml|yaml|sh|md))([[:space:]`),.;]|$)/ {
+      line = $0
+      gsub(/[`"'\''()<>{}\[\],]/, " ", line)
+      split(line, parts, /[[:space:]]+/)
+      for (i in parts) {
+        token = parts[i]
+        if (token ~ /^([.]\/)?(src|app|pages|components|scripts|test|tests|__tests__|public|styles|lib|server|client|config)\// ||
+            token ~ /(^|\/)(package[.]json|vite[.]config[.](ts|js|mjs)|tsconfig[^\/]*[.]json|playwright[.]config[.](ts|js)|[^\/]+[.](ts|tsx|js|jsx|mjs|cjs|css|scss|html|json|yml|yaml|sh|md))$/) {
+          print token
+        }
+      }
+    }
+  ' "$file"
+}
+
+extract_indexed_evidence_paths() {
+  {
+    extract_path_tokens_from_file "${IMPLEMENT_PATH}"
+    extract_path_tokens_from_file "${LOG_PATH}"
+  } | while IFS= read -r path; do
+    normalize_review_candidate_path "$path" || true
+  done
+}
+
+is_ignored_review_path() {
+  local path="$1"
+  case "$path" in
+    .idea|.idea/*|.vscode|.vscode/*|node_modules|node_modules/*|dist|dist/*|build|build/*|coverage|coverage/*|.DS_Store|*.iml)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+is_reviewable_project_path() {
+  local path="$1"
+  if is_sfs_managed_review_path "$path" || is_ignored_review_path "$path"; then
+    return 1
+  fi
+  return 0
 }
 
 render_untracked_manifest() {
@@ -638,7 +731,9 @@ render_untracked_manifest() {
   paths="$(git ls-files --others --exclude-standard 2>/dev/null \
     | while IFS= read -r path; do
         [[ -n "$path" ]] || continue
-        if ! is_sfs_managed_review_path "$path"; then
+        path="$(normalize_review_candidate_path "$path" || true)"
+        [[ -n "$path" ]] || continue
+        if is_reviewable_project_path "$path"; then
           printf '%s\n' "$path"
         fi
       done || true)"
@@ -657,6 +752,27 @@ render_reviewable_file_manifest() {
     printf '%s\n' "$paths" | sed -n '1,200p'
   else
     printf '(no project implementation files detected)\n'
+  fi
+}
+
+render_review_git_status() {
+  local output line path
+  output="$(git status --porcelain=v1 2>/dev/null | while IFS= read -r line; do
+    [[ -n "$line" ]] || continue
+    path="${line#???}"
+    if [[ "$line" == R* || "$line" == C* ]]; then
+      path="${path##* -> }"
+    fi
+    path="$(normalize_review_candidate_path "$path" || true)"
+    [[ -n "$path" ]] || continue
+    if is_reviewable_project_path "$path"; then
+      printf '%s\n' "$line"
+    fi
+  done || true)"
+  if [[ -n "$output" ]]; then
+    printf '%s\n' "$output"
+  else
+    printf '(no reviewable project git status entries; SFS/IDE/build metadata filtered)\n'
   fi
 }
 
@@ -680,6 +796,51 @@ render_review_file_excerpt() {
     printf '(large file: %s bytes; showing first %s lines)\n\n' "$bytes" "$limit"
   fi
   sed -n "1,${limit}p" "$file"
+}
+
+render_review_file_diff() {
+  local file="$1" limit="${2:-180}" staged unstaged
+  printf '\n### source diff: %s\n\n' "$file"
+  if [[ ! -e "$file" ]]; then
+    printf '(missing; no diff available)\n'
+    return 0
+  fi
+  staged="$(git diff --cached --no-ext-diff -- "$file" 2>/dev/null | sed -n "1,${limit}p" || true)"
+  unstaged="$(git diff --no-ext-diff -- "$file" 2>/dev/null | sed -n "1,${limit}p" || true)"
+  if [[ -n "$staged" ]]; then
+    printf '#### staged diff\n\n```diff\n%s\n```\n' "$staged"
+  fi
+  if [[ -n "$unstaged" ]]; then
+    printf '#### working tree diff\n\n```diff\n%s\n```\n' "$unstaged"
+  fi
+  if [[ -z "$staged" && -z "$unstaged" ]]; then
+    if git ls-files --error-unmatch "$file" >/dev/null 2>&1; then
+      printf '(tracked file has no working-tree diff; source excerpt included because sprint evidence referenced it)\n'
+    else
+      printf '(untracked file; no git diff available; source excerpt below is the review evidence)\n'
+    fi
+  fi
+}
+
+render_review_file_diffs() {
+  local max="${REVIEW_FILE_EXCERPT_MAX}" lines="${REVIEW_DIFF_LINES}" count=0 path paths
+  printf '\n### bounded source diffs for reviewable files\n\n'
+  paths="$(review_evidence_paths || true)"
+  if [[ -z "$paths" ]]; then
+    printf '(no project implementation files detected)\n'
+    return 0
+  fi
+  printf '%s\n' "$paths" | while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    count=$((count + 1))
+    if (( count > max )); then
+      if (( count == max + 1 )); then
+        printf '\n(diff limit reached: showing first %s files; see manifest above for the rest)\n' "$max"
+      fi
+      continue
+    fi
+    render_review_file_diff "$path" "$lines"
+  done
 }
 
 render_review_file_excerpts() {
@@ -707,8 +868,8 @@ render_evidence_bundle() {
   printf '## Embedded Evidence Bundle\n\n'
   printf 'The following evidence was collected by SFS before invoking the executor. Review this embedded evidence first; do not assume your CLI has project file/tool access. If evidence is insufficient, return partial/fail and list the missing evidence instead of calling unsupported tools.\n\n'
 
-  printf '### git status --short\n\n'
-  git status --short 2>/dev/null || printf '(git status unavailable)\n'
+  printf '### git status --short (review-filtered)\n\n'
+  render_review_git_status
 
   printf '\n### git diff --stat\n\n'
   git diff --stat 2>/dev/null || printf '(git diff unavailable)\n'
@@ -720,6 +881,7 @@ render_evidence_bundle() {
   render_evidence_file "${PLAN_PATH}" 260
   render_evidence_file "${IMPLEMENT_PATH}" 420
   render_evidence_file "${LOG_PATH}" 260
+  render_review_file_diffs
   render_review_file_excerpts
   printf '\n### review.md note\n\n'
   printf 'Only the first 80 lines of review.md are embedded to prevent recursive prompt growth. Full CPO prompts live under .sfs-local/tmp/review-prompts/.\n'
@@ -751,7 +913,9 @@ reviewable_git_paths() {
     case "$line" in
       R*|C*) path="${path##* -> }" ;;
     esac
-    if ! is_sfs_managed_review_path "$path"; then
+    path="$(normalize_review_candidate_path "$path" || true)"
+    [[ -n "$path" ]] || continue
+    if is_reviewable_project_path "$path"; then
       printf '%s\n' "$path"
     fi
   done
@@ -826,6 +990,7 @@ Self-validation policy:
 - If this review is running in the same tool/session that generated the implementation, explicitly call that out as a risk.
 - Prefer independent review evidence from Codex/Gemini/another agent instance when implementation was produced by Claude.
 - Separate implementation quality findings from evidence-bundle gaps. If the embedded bundle lacks required implementation files, build/smoke output, or untracked source excerpts, say that explicitly as an evidence packaging gap.
+- Treat File excerpt index paths as first-class review targets. The bundle should include bounded source diffs and excerpts for those paths when files are available.
 
 Review the embedded evidence below. Do not rely on executor-specific tools being available.
 
