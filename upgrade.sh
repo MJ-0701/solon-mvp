@@ -743,12 +743,81 @@ compact_legacy_tmp_artifacts() {
   return 0
 }
 
+thin_project_agent_adapter_migration() {
+  [ "${INSTALL_LAYOUT:-vendored}" = "thin" ] || return 0
+  case "${SFS_KEEP_PROJECT_AGENT_ADAPTERS:-0}" in
+    1|true|TRUE|yes|YES)
+      ok "thin project-local agent adapters 유지: SFS_KEEP_PROJECT_AGENT_ADAPTERS=${SFS_KEEP_PROJECT_AGENT_ADAPTERS}"
+      return 0
+      ;;
+  esac
+
+  local archive_dir archive_file manifest staging rel file count=0
+  local -a adapter_files=(
+    ".claude/commands/sfs.md"
+    ".claude/skills/sfs/SKILL.md"
+    ".gemini/commands/sfs.toml"
+    ".agents/skills/sfs/SKILL.md"
+  )
+
+  for rel in "${adapter_files[@]}"; do
+    [ -f "$TARGET/$rel" ] && count=$((count + 1))
+  done
+  [ "$count" -gt 0 ] || return 0
+
+  archive_dir="$TARGET/.sfs-local/archives/runtime-migrations/$(date +%Y%m%d-%H%M%S)-project-agent-adapters"
+  archive_file="$archive_dir/project-agent-adapters.tar.gz"
+  manifest="$archive_dir/manifest.txt"
+  mkdir -p "$archive_dir" || return 5
+  staging="$(mktemp -d "$archive_dir/.stage.XXXXXX")" || return 5
+
+  for rel in "${adapter_files[@]}"; do
+    file="$TARGET/$rel"
+    [ -f "$file" ] || continue
+    mkdir -p "$staging/$(dirname "$rel")" || return 5
+    cp "$file" "$staging/$rel" || return 5
+  done
+
+  {
+    echo "SFS thin project agent adapter migration"
+    echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "reason: thin layout keeps managed agent command/skill adapters in the packaged runtime by default"
+    echo "archive: $archive_file"
+    echo "count: $count"
+    echo
+    echo "policy:"
+    echo "- root CLAUDE.md / AGENTS.md / GEMINI.md remain as project-facing agent instructions"
+    echo "- project-scoped slash/skill files are optional and can be reinstalled with: sfs agent install all"
+    echo "- set SFS_KEEP_PROJECT_AGENT_ADAPTERS=1 before upgrade to keep existing project-scoped adapter files"
+    echo
+    echo "items:"
+    find "$staging" -type f 2>/dev/null | sort | while IFS= read -r staged; do
+      printf -- "- %s\n" "${staged#$staging/}"
+    done
+  } > "$manifest" || return 5
+
+  tar -czf "$archive_file" -C "$staging" . || return 5
+  rm -rf "$staging" || return 5
+
+  for rel in "${adapter_files[@]}"; do
+    rm -f "$TARGET/$rel" 2>/dev/null || return 5
+  done
+  rmdir "$TARGET/.claude/commands" "$TARGET/.claude/skills/sfs" "$TARGET/.claude/skills" "$TARGET/.claude" 2>/dev/null || true
+  rmdir "$TARGET/.gemini/commands" "$TARGET/.gemini" 2>/dev/null || true
+  rmdir "$TARGET/.agents/skills/sfs" "$TARGET/.agents/skills" "$TARGET/.agents" 2>/dev/null || true
+
+  ok "thin project agent adapters 이관: $count files → ${archive_file#$TARGET/}"
+  ok "  필요 시 opt-in 재설치: sfs agent install all"
+  return 0
+}
+
 project_surface_archive_migrations() {
   compact_legacy_runtime_upgrade_archives || return 5
   compact_legacy_agent_install_archives || return 5
   compact_legacy_sprint_archive_dirs || return 5
   compact_legacy_review_run_archives || return 5
   compact_legacy_tmp_artifacts || return 5
+  thin_project_agent_adapter_migration || return 5
   return 0
 }
 
@@ -772,7 +841,7 @@ First-time project setup:
 
 What this means:
   brew install MJ-0701/solon-product/sfs  installs the global sfs CLI on this Mac.
-  sfs init --yes                          injects SFS.md, .sfs-local/, and agent adapters into this project.
+  sfs init --yes                          injects SFS.md, root agent docs, and .sfs-local/ state into this project.
   sfs upgrade                             upgrades the global CLI first, then refreshes this project.
 
 Tip:
@@ -860,6 +929,14 @@ recommend_action() {
         printf "skip (thin runtime)"
         return 0
         ;;
+      ".claude/skills/sfs/SKILL.md"|".claude/commands/sfs.md"|".gemini/commands/sfs.toml"|".agents/skills/sfs/SKILL.md")
+        if [ "$exists" = "yes" ]; then
+          printf "migrate to packaged runtime"
+        else
+          printf "skip (opt-in agent adapter)"
+        fi
+        return 0
+        ;;
     esac
   fi
 
@@ -912,8 +989,7 @@ cat <<EOF
   - .sfs-local/model-profiles.yaml     → 없으면 설치 + 설정 안내, 있으면 자동 보존 (agent별 모델 설정 보호)
   - .sfs-local/auth.env.example        → backup+overwrite (로컬 auth 템플릿, 실제 auth.env 는 ignore)
   - .sfs-local/context/**/*.md         → thin: packaged runtime 으로 이관, vendored: backup+overwrite
-  - .claude/skills/sfs/SKILL.md        → backup+overwrite (Claude Code Skill 최신화)
-  - .claude/commands/sfs.md            → backup+overwrite (legacy 커맨드 fallback 최신화)
+  - .claude/.gemini/.agents command/skill → thin: 압축 이관 후 제거, vendored/opt-in: backup+overwrite
   - .sfs-local/scripts/sfs-*.sh        → backup+overwrite (Solon-versioned bash)
   - .sfs-local/scripts/sfs.ps1         → backup+overwrite (Windows PowerShell → Git Bash wrapper)
   - .sfs-local/sprint-templates/*.md   → backup+overwrite (배포판 관리 템플릿)
@@ -1137,6 +1213,10 @@ update_file() {
         ok "thin runtime 사용 — project-local managed asset skip: $dst_rel"
         return 0
         ;;
+      ".claude/skills/sfs/SKILL.md"|".claude/commands/sfs.md"|".gemini/commands/sfs.toml"|".agents/skills/sfs/SKILL.md")
+        ok "thin runtime 사용 — project-local agent adapter skip: $dst_rel"
+        return 0
+        ;;
     esac
   fi
 
@@ -1194,10 +1274,14 @@ update_file "CLAUDE.md" "templates/CLAUDE.md.template" "Claude Code 어댑터" "
 update_file "SFS.md" "templates/SFS.md.template" "공통 SFS 지침" "b"
 update_file "AGENTS.md" "templates/AGENTS.md.template" "Codex 어댑터" "s"
 update_file "GEMINI.md" "templates/GEMINI.md.template" "Gemini CLI 어댑터" "s"
-mkdir -p "$TARGET/.claude/commands"
-mkdir -p "$TARGET/.claude/skills/sfs"
-update_file ".claude/skills/sfs/SKILL.md" "templates/.claude/commands/sfs.md" "Claude Code /sfs Skill" "b"
-update_file ".claude/commands/sfs.md" "templates/.claude/commands/sfs.md" "Claude Code /sfs 커맨드" "b"
+if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ] && [ "${SFS_INSTALL_AGENT_ADAPTERS:-0}" != "1" ]; then
+  ok "thin runtime 사용 — project-local agent adapters skip (.claude/.gemini/.agents). opt-in: sfs agent install all"
+else
+  mkdir -p "$TARGET/.claude/commands"
+  mkdir -p "$TARGET/.claude/skills/sfs"
+  update_file ".claude/skills/sfs/SKILL.md" "templates/.claude/commands/sfs.md" "Claude Code /sfs Skill" "b"
+  update_file ".claude/commands/sfs.md" "templates/.claude/commands/sfs.md" "Claude Code /sfs 커맨드" "b"
+fi
 update_file ".sfs-local/divisions.yaml" "templates/.sfs-local-template/divisions.yaml" "본부 활성화" "s"
 update_file ".sfs-local/model-profiles.yaml" "templates/.sfs-local-template/model-profiles.yaml" "runtime model profiles" "s"
 update_file ".sfs-local/auth.env.example" "templates/.sfs-local-template/auth.env.example" "executor auth env example" "b"
@@ -1272,13 +1356,15 @@ mkdir -p "$TARGET/.sfs-local/decisions-template"
 update_file ".sfs-local/decisions-template/ADR-TEMPLATE.md"  "templates/.sfs-local-template/decisions-template/ADR-TEMPLATE.md"  "ADR template (WU-26 full)"  "b"
 update_file ".sfs-local/decisions-template/_INDEX.md"        "templates/.sfs-local-template/decisions-template/_INDEX.md"        "decisions _INDEX (WU-26)"   "b"
 
-# multi-adaptor parity (0.5.0-mvp 신규): Gemini CLI command + Codex Skill
-# 신규: .gemini/commands/sfs.toml + .agents/skills/sfs/SKILL.md
-# Claude Code 1급 (.claude/commands/sfs.md) 와 동등 entry point.
-mkdir -p "$TARGET/.gemini/commands"
-mkdir -p "$TARGET/.agents/skills/sfs"
-update_file ".gemini/commands/sfs.toml"   "templates/.gemini/commands/sfs.toml"   "Gemini CLI sfs command (TOML)"  "b"
-update_file ".agents/skills/sfs/SKILL.md" "templates/.agents/skills/sfs/SKILL.md" "Codex Skill (project-scoped)"  "b"
+if [ "${INSTALL_LAYOUT:-vendored}" != "thin" ] || [ "${SFS_INSTALL_AGENT_ADAPTERS:-0}" = "1" ]; then
+  # multi-adaptor parity (0.5.0-mvp 신규): Gemini CLI command + Codex Skill
+  # 신규: .gemini/commands/sfs.toml + .agents/skills/sfs/SKILL.md
+  # Claude Code 1급 (.claude/commands/sfs.md) 와 동등 entry point.
+  mkdir -p "$TARGET/.gemini/commands"
+  mkdir -p "$TARGET/.agents/skills/sfs"
+  update_file ".gemini/commands/sfs.toml"   "templates/.gemini/commands/sfs.toml"   "Gemini CLI sfs command (TOML)"  "b"
+  update_file ".agents/skills/sfs/SKILL.md" "templates/.agents/skills/sfs/SKILL.md" "Codex Skill (project-scoped)"  "b"
+fi
 finalize_runtime_upgrade_backup || die "runtime upgrade backup bundle failed"
 
 TODAY=$(date +%Y-%m-%d)
@@ -1389,6 +1475,14 @@ fi
 # 7. 완료
 # ============================================================================
 
+if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ]; then
+  COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .sfs-local .claude .gemini .agents${C_RESET}"
+  AGENT_HINT="project-local command/skill adapters 는 기본 제거되었습니다. 필요할 때만: sfs agent install all"
+else
+  COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .sfs-local .claude .gemini .agents${C_RESET}"
+  AGENT_HINT="vendored layout 은 project-local command/skill adapters 를 계속 동기화합니다."
+fi
+
 cat <<EOF
 
 ${C_BOLD}${C_GREEN}=== 업그레이드 완료 ===${C_RESET}
@@ -1405,11 +1499,11 @@ Agent model profile:
   Gemini/custom 은 프로젝트 runtime 이 지원하는 profile 이름으로 agent별 override 가능합니다.
 
 변경사항 git commit 권장:
-  ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore \\${C_RESET}
-  ${C_BLUE}        .claude/skills/sfs/SKILL.md .claude/commands/sfs.md \\${C_RESET}
-  ${C_BLUE}        .gemini/commands/sfs.toml \\${C_RESET}
-  ${C_BLUE}        .agents/skills/sfs/SKILL.md .sfs-local/${C_RESET}
+  ${COMMIT_HINT}
   ${C_BLUE}git commit -m "chore: upgrade solon-mvp $CUR_VER → $NEW_VER"${C_RESET}
+
+Agent adapter surface:
+  ${AGENT_HINT}
 
 CHANGELOG: https://github.com/${SOLON_REPO}/blob/main/CHANGELOG.md
 

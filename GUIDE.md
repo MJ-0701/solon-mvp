@@ -33,7 +33,6 @@ Mac:
 brew install MJ-0701/solon-product/sfs
 cd ~/workspace/my-project
 sfs init --layout thin --yes
-sfs agent install all
 sfs status
 ```
 
@@ -51,7 +50,6 @@ scoop install sfs
 cd C:\workspace\my-project
 git init
 sfs.cmd init --layout thin --yes
-sfs.cmd agent install all
 sfs.cmd status
 ```
 
@@ -64,10 +62,13 @@ sfs.cmd status
 | `AGENTS.md` | Codex 가 읽는 얇은 연결 파일 |
 | `GEMINI.md` | Gemini CLI 가 읽는 얇은 연결 파일 |
 | `.sfs-local/` | sprint, 결정, 이벤트, 설정이 쌓이는 곳 |
-| `.claude/`, `.gemini/`, `.agents/` | 각 agent runtime 과 연결하는 배포 파일 |
+| `.claude/`, `.gemini/`, `.agents/` | 필요할 때만 설치하는 native command/skill adapter |
 
 처음에는 `SFS.md` 의 프로젝트 이름, 도메인, 스택, 배포 환경만 실제 프로젝트에 맞게 바꾸면 됩니다.
 자동으로 좁게 채우고 싶으면 agent 안에서는 `/sfs profile`, 터미널에서는 `sfs profile --apply` 를 씁니다.
+thin layout 기본 설치는 project-local command/skill adapter 를 만들지 않습니다. root
+`CLAUDE.md` / `AGENTS.md` / `GEMINI.md` 가 global `sfs` runtime 을 안내합니다. native slash/skill
+파일이 꼭 필요한 프로젝트만 `sfs agent install all` 로 opt-in 설치합니다.
 
 ---
 
@@ -362,9 +363,10 @@ AI 시대의 설계 원칙은 [현재 제품 흐름과 최근 변화](./docs/ko/
 [Solon 10x 가치](./docs/ko/10x-value.md) 에서 확인합니다. 더 자세한 운영 규칙은 설치된
 thin layout 에서는 자세한 routed context 문서가 프로젝트 안에 노출되지 않고 global `sfs`
 runtime 에 들어 있습니다. agent 는 필요할 때 `sfs context path ...` 로 같은 내용을 읽습니다.
-`sfs upgrade` 는 예전 설치본에 남은 project-local managed context 와 loose archive/review-run
-기록도 압축 migration 으로 정리합니다. runtime upgrade / agent install / profile rollback
-백업도 loose 파일이 아니라 `*.tar.gz` + `manifest.txt` bundle 로 남습니다.
+`sfs upgrade` 는 예전 설치본에 남은 project-local managed context, command/skill adapter,
+loose archive/review-run 기록도 압축 migration 으로 정리합니다. runtime upgrade /
+agent install / profile rollback 백업도 loose 파일이 아니라 `*.tar.gz` + `manifest.txt`
+bundle 로 남습니다.
 
 ### `/sfs` 가 인식되지 않는다.
 

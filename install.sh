@@ -21,6 +21,7 @@ set -euo pipefail
 
 ASSUME_YES=0
 INSTALL_LAYOUT="${SFS_INSTALL_LAYOUT:-vendored}"
+INSTALL_AGENT_ADAPTERS="${SFS_INSTALL_AGENT_ADAPTERS:-}"
 
 usage() {
   cat <<EOF
@@ -32,6 +33,9 @@ Options:
   --layout thin       프로젝트에는 state/config/custom override 만 설치합니다.
                       runtime 은 PATH 의 global `sfs` CLI 를 사용합니다.
   --layout vendored   기존 방식입니다. scripts/templates/personas 를 프로젝트에 복사합니다.
+  --with-agent-adapters
+                      thin layout 에서도 .claude/.gemini/.agents command/skill
+                      adapter 파일을 프로젝트에 설치합니다. 기본값은 opt-in 입니다.
   -h, --help          도움말을 출력합니다.
 
 Environment:
@@ -58,6 +62,9 @@ while [ $# -gt 0 ]; do
     --layout=*)
       INSTALL_LAYOUT="${1#--layout=}"
       ;;
+    --with-agent-adapters|--agent-adapters)
+      INSTALL_AGENT_ADAPTERS=1
+      ;;
     *)
       echo "알 수 없는 옵션: $1 (지원: --yes, --layout, --help)" >&2
       exit 99
@@ -70,6 +77,23 @@ case "$INSTALL_LAYOUT" in
   thin|vendored) ;;
   *)
     echo "알 수 없는 layout: $INSTALL_LAYOUT (지원: thin, vendored)" >&2
+    exit 99
+    ;;
+esac
+
+if [ -z "$INSTALL_AGENT_ADAPTERS" ]; then
+  if [ "$INSTALL_LAYOUT" = "thin" ]; then
+    INSTALL_AGENT_ADAPTERS=0
+  else
+    INSTALL_AGENT_ADAPTERS=1
+  fi
+fi
+case "$INSTALL_AGENT_ADAPTERS" in
+  0|1) ;;
+  true|TRUE|yes|YES) INSTALL_AGENT_ADAPTERS=1 ;;
+  false|FALSE|no|NO) INSTALL_AGENT_ADAPTERS=0 ;;
+  *)
+    echo "알 수 없는 SFS_INSTALL_AGENT_ADAPTERS='$INSTALL_AGENT_ADAPTERS' (지원: 0|1)" >&2
     exit 99
     ;;
 esac
@@ -298,6 +322,9 @@ EOF
 
 if [ "$INSTALL_LAYOUT" = "thin" ]; then
   info "thin layout: 프로젝트에는 state/config/custom override 만 두고, runtime 은 global 'sfs' CLI 를 사용합니다."
+  if [ "$INSTALL_AGENT_ADAPTERS" = "0" ]; then
+    info "thin layout: project-local .claude/.gemini/.agents command/skill adapters 는 기본 설치하지 않습니다."
+  fi
   if ! command -v sfs >/dev/null 2>&1; then
     warn "PATH 에 global 'sfs' CLI 가 없습니다. 설치 후 명령 실행 전 brew/source package 로 sfs 를 노출해야 합니다."
   fi
@@ -473,25 +500,29 @@ install_file "templates/CLAUDE.md.template" "CLAUDE.md" "Claude Code 어댑터"
 install_file "templates/AGENTS.md.template" "AGENTS.md" "Codex 어댑터"
 install_file "templates/GEMINI.md.template" "GEMINI.md" "Gemini CLI 어댑터"
 
-# 6.2) Claude Code slash command adapter
-mkdir -p "$TARGET/.claude/commands"
-install_file "templates/.claude/commands/sfs.md" ".claude/commands/sfs.md" "Claude Code /sfs 커맨드"
+if [ "$INSTALL_AGENT_ADAPTERS" = "1" ]; then
+  # 6.2) Claude Code slash command adapter
+  mkdir -p "$TARGET/.claude/commands"
+  install_file "templates/.claude/commands/sfs.md" ".claude/commands/sfs.md" "Claude Code /sfs 커맨드"
 
-# 6.2a) Claude Code Skill adapter (current primary command surface)
-mkdir -p "$TARGET/.claude/skills/sfs"
-install_file "templates/.claude/commands/sfs.md" ".claude/skills/sfs/SKILL.md" "Claude Code /sfs Skill"
+  # 6.2a) Claude Code Skill adapter (current primary command surface)
+  mkdir -p "$TARGET/.claude/skills/sfs"
+  install_file "templates/.claude/commands/sfs.md" ".claude/skills/sfs/SKILL.md" "Claude Code /sfs Skill"
 
-# 6.2b) Gemini CLI custom command (project-scoped `sfs ...`, TOML)
-# 위치: <project>/.gemini/commands/sfs.toml — Gemini CLI 가 자동 발견 + `sfs ...` command.
-mkdir -p "$TARGET/.gemini/commands"
-install_file "templates/.gemini/commands/sfs.toml" ".gemini/commands/sfs.toml" "Gemini CLI sfs command"
+  # 6.2b) Gemini CLI custom command (project-scoped `sfs ...`, TOML)
+  # 위치: <project>/.gemini/commands/sfs.toml — Gemini CLI 가 자동 발견 + `sfs ...` command.
+  mkdir -p "$TARGET/.gemini/commands"
+  install_file "templates/.gemini/commands/sfs.toml" ".gemini/commands/sfs.toml" "Gemini CLI sfs command"
 
-# 6.2c) Codex Skill (project-scoped, .agents/skills/, Anthropic Skills 호환)
-# 위치: <project>/.agents/skills/sfs/SKILL.md — Codex Skill.
-# Codex CLI 의 공식 Skill 호출은 `$sfs`; bare `/sfs` 는 모델 전에 차단될 수 있다.
-# implicit invocation (사용자 의도 매칭) + explicit invocation ($sfs) 양쪽 작동.
-mkdir -p "$TARGET/.agents/skills/sfs"
-install_file "templates/.agents/skills/sfs/SKILL.md" ".agents/skills/sfs/SKILL.md" "Codex Skill (project-scoped)"
+  # 6.2c) Codex Skill (project-scoped, .agents/skills/, Anthropic Skills 호환)
+  # 위치: <project>/.agents/skills/sfs/SKILL.md — Codex Skill.
+  # Codex CLI 의 공식 Skill 호출은 `$sfs`; bare `/sfs` 는 모델 전에 차단될 수 있다.
+  # implicit invocation (사용자 의도 매칭) + explicit invocation ($sfs) 양쪽 작동.
+  mkdir -p "$TARGET/.agents/skills/sfs"
+  install_file "templates/.agents/skills/sfs/SKILL.md" ".agents/skills/sfs/SKILL.md" "Codex Skill (project-scoped)"
+else
+  ok "project-local agent command/skill adapters skip (opt-in: sfs agent install all)"
+fi
 
 # 6.2d) Codex CLI user-scoped prompt (legacy/optional fallback, NOT auto-installed to ~/)
 # 위치 (template 만): templates/.codex/prompts/sfs.md
@@ -733,6 +764,21 @@ ok "VERSION 기록: $SOLON_VERSION ($MODE @ $INSTALLED_AT)"
 # 10. 완료
 # ============================================================================
 
+if [ "$INSTALL_AGENT_ADAPTERS" = "1" ]; then
+  ENTRY_HINT=".claude/skills/sfs/SKILL.md (Claude Code Skill)
+                 .claude/commands/sfs.md (Claude Code legacy slash)
+                 .gemini/commands/sfs.toml (Gemini CLI, TOML command)
+                 .agents/skills/sfs/SKILL.md (Codex, Skills 체계)"
+  COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore \\
+        .claude/skills/sfs/SKILL.md .claude/commands/sfs.md \\
+        .gemini/commands/sfs.toml \\
+        .agents/skills/sfs/SKILL.md .sfs-local/${C_RESET}"
+else
+  ENTRY_HINT="global sfs runtime + root CLAUDE.md / AGENTS.md / GEMINI.md
+                 project-local command/skill adapters are opt-in"
+  COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .sfs-local/${C_RESET}"
+fi
+
 cat <<EOF
 
 ${C_BOLD}${C_GREEN}=== Solon Product 설치 완료 ===${C_RESET}
@@ -743,12 +789,9 @@ layout:          $INSTALL_LAYOUT
 .sfs-local/:     state/config 스캐폴드 (${C_BOLD}기존 sprint 산출물은 보존됨${C_RESET})
 공통 지침:       SFS.md
 런타임 어댑터:   CLAUDE.md / AGENTS.md / GEMINI.md
-Entry 1급:       .claude/skills/sfs/SKILL.md (Claude Code Skill)
-                 .claude/commands/sfs.md (Claude Code legacy slash)
-                 .gemini/commands/sfs.toml (Gemini CLI, TOML command)
-                 .agents/skills/sfs/SKILL.md (Codex, Skills 체계)
+Entry 1급:       $ENTRY_HINT
 Model profiles: .sfs-local/model-profiles.yaml (runtime=$MODEL_RUNTIME, policy=$MODEL_POLICY)
-Agent 갱신:      sfs agent install claude|gemini|codex|all
+Agent opt-in:    sfs agent install claude|gemini|codex|all
 Project upgrade: sfs upgrade
 Runtime:         $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI" || echo ".sfs-local/scripts/sfs-dispatch.sh")
 Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Git Bash/WSL" || echo ".sfs-local/scripts/sfs.ps1 (PowerShell → Git Bash)")
@@ -777,10 +820,7 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
      설치 직후 가이드는 ${C_BLUE}/sfs guide${C_RESET}, ${C_BLUE}\$sfs guide${C_RESET}, 또는 shell 의 ${C_BLUE}sfs.cmd guide${C_RESET}/${C_BLUE}sfs guide${C_RESET}.
 
   ${C_BOLD}4.${C_RESET} git commit + push (Solon 주입 자체를 기록):
-     ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore \\${C_RESET}
-     ${C_BLUE}        .claude/skills/sfs/SKILL.md .claude/commands/sfs.md \\${C_RESET}
-     ${C_BLUE}        .gemini/commands/sfs.toml \\${C_RESET}
-     ${C_BLUE}        .agents/skills/sfs/SKILL.md .sfs-local/${C_RESET}
+     ${COMMIT_HINT}
      ${C_BLUE}git commit -m "chore: install solon-product $SOLON_VERSION"${C_RESET}
      ${C_BLUE}git push${C_RESET}
 

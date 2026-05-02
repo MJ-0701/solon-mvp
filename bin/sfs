@@ -255,12 +255,14 @@ agent_usage() {
 Usage:
   sfs agent install <claude|gemini|codex|all> [--skip-existing]
 
-Installs thin LLM-agent adapter files into the current project:
+Optionally installs project-scoped LLM-agent adapter files:
   claude  -> .claude/skills/sfs/SKILL.md + .claude/commands/sfs.md
   gemini  -> .gemini/commands/sfs.toml
   codex   -> .agents/skills/sfs/SKILL.md
 
-Existing changed files are archived under .sfs-local/archives/agent-install-backups/.
+Thin layout does not install these by default. Root CLAUDE.md / AGENTS.md /
+GEMINI.md use the global `sfs` runtime without adding command files. Existing
+changed adapter files are archived under .sfs-local/archives/agent-install-backups/.
 EOF
 }
 
@@ -274,9 +276,9 @@ Updates the current project from the latest Solon runtime:
   - if this CLI is installed by Homebrew, refreshes the Solon tap and runs
     `brew update` + `brew upgrade MJ-0701/solon-product/sfs` first
   - if this CLI is installed by Scoop, runs `scoop update` + `scoop update sfs` first
-  - updates managed SFS runtime docs/adapters with backup safety
+  - updates managed SFS runtime docs with backup safety
   - preserves sprint/decision/event history and project-specific docs
-  - syncs Claude/Gemini/Codex agent entry points
+  - thin layout keeps Claude/Gemini/Codex command/skill files opt-in
 
 Use `--interactive` to run the project-file preview instead of the safe
 non-interactive default. Use `--no-self-upgrade` or `SFS_UPDATE_SELF=0` to skip
@@ -385,6 +387,16 @@ sfs_project_version() {
   version="$(awk '/^solon_mvp_version:/ {print $2; exit}' "${version_file}" 2>/dev/null || true)"
   [[ -n "${version}" ]] || return 1
   printf '%s\n' "${version}"
+}
+
+sfs_project_layout() {
+  local local_dir="$1"
+  local version_file="${local_dir}/VERSION"
+  local layout=""
+  if [[ -f "${version_file}" ]]; then
+    layout="$(awk '/^install_layout:/ {print $2; exit}' "${version_file}" 2>/dev/null || true)"
+  fi
+  printf '%s\n' "${layout:-vendored}"
 }
 
 sfs_parse_product_version() {
@@ -529,7 +541,7 @@ First-time project setup:
 
 What this means:
   brew install MJ-0701/solon-product/sfs  installs the global sfs CLI on this Mac.
-  sfs init --yes                          injects SFS.md, .sfs-local/, and agent adapters into this project.
+  sfs init --yes                          injects SFS.md, root agent docs, and .sfs-local/ state into this project.
   sfs upgrade                             upgrades the global CLI first, then refreshes this project.
 
 Tip:
@@ -781,8 +793,14 @@ upgrade_command() {
   else
     bash "${DIST_DIR}/upgrade.sh" --yes
   fi
-  echo "agent adapters sync:"
-  install_agent_adapter all "${skip_existing}"
+  local layout
+  layout="$(sfs_project_layout "$(project_local_dir)")"
+  if [[ "${layout}" != "thin" || "${SFS_INSTALL_AGENT_ADAPTERS:-0}" == "1" ]]; then
+    echo "agent adapters sync:"
+    install_agent_adapter all "${skip_existing}"
+  else
+    echo "agent adapters sync: skipped for thin layout (opt-in: sfs agent install all)"
+  fi
 }
 
 is_homebrew_runtime() {

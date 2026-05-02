@@ -131,6 +131,10 @@ Older installs that still have loose sprint archives or separate review-run
 archives are compacted by `sfs upgrade` into compressed migration bundles.
 Runtime upgrade, agent install, and profile rollback backups are also kept as
 `*.tar.gz` + `manifest.txt` bundles instead of loose project files.
+In thin layout, project-local `.claude/`, `.gemini/`, and `.agents/`
+command/skill adapters are also removed from the default surface. Root adapter
+docs point agents at the global `sfs` runtime, and projects that still need
+native slash/skill files can opt in with `sfs agent install all`.
 
 ## Documentation Shape
 
