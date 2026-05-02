@@ -1,55 +1,57 @@
 ---
 doc_id: handoff-next-session
-title: "Next session handoff — 0.5.79 current truth"
-written_at: 2026-05-02T12:16:12Z
-written_at_kst: 2026-05-02T21:16:12+09:00
-last_known_main_commit: be01069
+title: "Next session handoff — 0.5.80 current truth"
+written_at: 2026-05-02T12:34:39Z
+written_at_kst: 2026-05-02T21:34:39+09:00
+last_known_main_commit: 561aab9
 visibility: raw-internal
-source_task: release-0.5.79-review-lens-routing
+source_task: release-0.5.80-brainstorm-depth-modes
 ---
 
 # Next Session Handoff
 
 ## 1. Current Truth
 
-- Latest Solon Product release is `0.5.79-product`.
-- Stable product repo: `d6b753f` / tag `v0.5.79-product`.
-- Homebrew tap: `f179e68`.
-- Scoop bucket: `1215135`.
-- Dev repo main at release handoff: `be01069`.
+- Latest Solon Product release is `0.5.80-product`.
+- Stable product repo: `68aa669` / tag `v0.5.80-product`.
+- Homebrew tap: `0ff49c5`.
+- Scoop bucket: `7011133`.
+- Dev repo main at release handoff: `561aab9`.
 - Installed runtime reports:
-  - `sfs 0.5.79-product`
-  - `latest 0.5.79-product`
+  - `sfs 0.5.80-product`
+  - `latest 0.5.80-product`
   - `status up-to-date`
-- `bash scripts/verify-product-release.sh --version 0.5.79-product` passed:
+- `bash scripts/verify-product-release.sh --version 0.5.80-product` passed:
   product tag, Homebrew formula/hash, Scoop manifest/hash, packaged context
   router tar/zip integrity, installed runtime, and dev/stable/Homebrew/Scoop
   clean handoff state all OK.
-- `0.5.79-product` ships review lens routing:
-  - `sfs review` stays the user command and auto-selects an artifact acceptance
-    lens: code, docs, strategy, design, taxonomy, QA, ops, release, or generic
-    artifact.
-  - Code review is now explicitly only the `code` lens.
-  - CPO review prompts require a concrete next action in addition to verdict,
-    findings, evidence gaps, and required CTO actions.
+- `0.5.80-product` ships brainstorm depth modes:
+  - `sfs brainstorm --simple` (`--easy` / `--quick`) keeps the old quick
+    requirement cleanup path.
+  - default `sfs brainstorm` is now the normal owner-thinking scaffold and asks
+    focused questions before plan readiness.
+  - `sfs brainstorm --hard` is product-owner hard training; important unresolved
+    owner decisions keep Gate 2 in draft.
+  - `sfs start` prints one `next:` line with simple/normal/hard options and
+    recommends normal so users discover the mode choice without reading Guide.
 
 ## 2. Why This Handoff Exists
 
-This is the compact current-truth handoff after the `0.5.79-product` release.
+This is the compact current-truth handoff after the `0.5.80-product` release.
 If future release work lands without updating `PROGRESS.md` + this file,
 `resume-session-check.sh` should detect release handoff drift and stop the new
 session before broad code inspection.
 
 ## 3. Validation Evidence
 
-- `git push origin main` published dev main through `be01069`.
-- `scripts/cut-release.sh --version 0.5.79-product --apply` cut stable
-  `d6b753f` and tag `v0.5.79-product`.
-- Homebrew formula published `v0.5.79-product.tar.gz` with SHA256
-  `111337313bbd8ae019c83bb5b511bda996354e9b84df0e93a3347abff0aeea38`.
-- Scoop manifest published `v0.5.79-product.zip` with SHA256
-  `3020424ee9abd3b154b1db6583d886e20c278a75096949b1e279e2f22307a4b4`.
-- `brew upgrade MJ-0701/solon-product/sfs` upgraded local runtime to 0.5.79.
+- `git push origin main` published dev main through `561aab9`.
+- `scripts/cut-release.sh --version 0.5.80-product --apply --allow-dirty` cut
+  stable `68aa669` and tag `v0.5.80-product`.
+- Homebrew formula published `v0.5.80-product.tar.gz` with SHA256
+  `c0047a059a7a2c30beb51e17e1f2bcb53a6cf8e9cc21ba3ed9efeede33918209`.
+- Scoop manifest published `v0.5.80-product.zip` with SHA256
+  `9a2fb7d99dd561c82a58c0a17c377b85b7db82327b7c6a0552ece173f2a652c5`.
+- `brew upgrade MJ-0701/solon-product/sfs` upgraded local runtime to 0.5.80.
 - `sfs version --check` returned up-to-date.
 - Full release verifier returned OK.
 
@@ -67,8 +69,8 @@ session before broad code inspection.
 
 ## 5. Guardrails
 
-- Do not re-open the review lens routing work solely because it was just
-  released; treat follow-up review-mode changes as new WUs.
+- Do not re-open the brainstorm depth modes work solely because it was just
+  released; treat follow-up brainstorm behavior changes as new WUs.
 - Do not rely on this file as a second SSoT for release history; `PROGRESS.md`
   remains the live entry snapshot.
 - Keep future release completion atomic: product release/cut + channel publish +
