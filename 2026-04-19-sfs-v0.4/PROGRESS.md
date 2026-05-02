@@ -220,17 +220,17 @@ resume_hint:
   default_action: |
     1) Read `CLAUDE.md`, then `PROGRESS.md`.
     2) Run: `bash scripts/resume-session-check.sh` (expect exit 0).
-    3) Latest product release is `0.5.84-product`; ask user for the next
+    3) Latest product release is `0.5.85-product`; ask user for the next
        WU/domain unless they provide a direct task.
     4) For a direct task, start from clean `main` and create a fresh
        `feature/<slug>` or `hotfix/<slug>` branch before edits.
   on_skip_patterns: ["아니", "잠깐", "다른", "stop"]
   on_skip_action: "What do you want to do instead (1 line)?"
-  on_ambiguous: "0.5.84-product is released. What should Solon handle next?"
+  on_ambiguous: "0.5.85-product is released. What should Solon handle next?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
-  last_written: 2026-05-02T13:48:00Z
+  last_written: 2026-05-02T13:55:09Z
 ---
 
 # PROGRESS — compact
@@ -352,6 +352,12 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
   reports up to date. SFS now applies cross-agent token/harness hygiene through
   routed context and emits throttled hygiene notices for oversized adapter docs,
   oversized workbench files, or large codebases; `.sfs-local/cache/` is ignored.
+- GUIDE/README close-flow cleanup shipped as `0.5.85-product`: dev `77ebe55`;
+  stable `4c1e1d0` / tag `v0.5.85-product`; Homebrew `b8bb937`; Scoop
+  `dcf1790`; full release verifier passed and installed `sfs version --check`
+  reports up to date. GUIDE is now a beginner-first first-sprint walkthrough,
+  README stays a map/TOC, installer onboarding points through `review -> retro`,
+  and `report`/`tidy` are documented as optional/special actions.
 
 ## ② In-Progress
 
@@ -359,7 +365,7 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ③ Next
 
-- Current truth is `0.5.84-product`; no active WU. Ask user for the next
+- Current truth is `0.5.85-product`; no active WU. Ask user for the next
   WU/domain unless they provide a direct task. For any new direct task, create a
   fresh branch from clean `main` first (`feature/<slug>` or `hotfix/<slug>`).
 
@@ -419,5 +425,7 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
   `v0.5.83-product`; Homebrew `054abff`; Scoop `49cf67a`; dev `a1fab8c`.
 - Product ambient token/harness hygiene release: stable `08e2cc1` / tag
   `v0.5.84-product`; Homebrew `c257847`; Scoop `376ee36`; dev `13fff19`.
+- Product GUIDE/README close-flow cleanup release: stable `4c1e1d0` / tag
+  `v0.5.85-product`; Homebrew `b8bb937`; Scoop `dcf1790`; dev `77ebe55`.
 - Study-note G4 validation: `.sfs-local/tmp/review-runs/2026-W18-sprint-5-G4-20260502T054452Z.result.md`
   returned `pass` after code-level rework.
