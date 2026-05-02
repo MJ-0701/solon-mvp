@@ -247,6 +247,10 @@ Windows PowerShell/cmd:
 sfs.cmd upgrade
 ```
 
+Scoop 을 쓰고 있고 프로젝트 폴더에서 작업 중이라면 새 버전 배포 후 `scoop update sfs` 만
+실행해도 runtime 업데이트 뒤 현재 프로젝트 upgrade 가 이어집니다. 프로젝트 밖에서 실행한
+Scoop 업데이트는 runtime 만 바꿉니다.
+
 Mac/Git Bash:
 
 ```bash

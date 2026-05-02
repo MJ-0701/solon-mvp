@@ -80,8 +80,16 @@ if errorlevel 1 (
 )
 
 echo   scoop update sfs
+set "SFS_OLD_SCOOP_PROJECT_UPGRADE=%SFS_SCOOP_PROJECT_UPGRADE%"
+set "SFS_SCOOP_PROJECT_UPGRADE=0"
 call scoop update sfs
-if errorlevel 1 (
+set "SFS_SCOOP_UPDATE_EXIT=%ERRORLEVEL%"
+if defined SFS_OLD_SCOOP_PROJECT_UPGRADE (
+  set "SFS_SCOOP_PROJECT_UPGRADE=%SFS_OLD_SCOOP_PROJECT_UPGRADE%"
+) else (
+  set "SFS_SCOOP_PROJECT_UPGRADE="
+)
+if not "%SFS_SCOOP_UPDATE_EXIT%"=="0" (
   echo scoop update sfs failed; rerun with SFS_UPDATE_SELF=0 to use the current runtime only. 1>&2
   exit /b 1
 )

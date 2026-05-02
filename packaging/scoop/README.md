@@ -16,6 +16,13 @@ The manifest exposes `sfs` through `bin\\sfs.cmd`. The command wrapper locates
 Git for Windows Bash and delegates to the packaged Bash entrypoint at
 `bin/sfs`.
 
+The manifest also runs `bin\\sfs-scoop-post-install.ps1` after install/update.
+When `scoop update sfs` is launched from an initialized Solon project, that hook
+runs `sfs.cmd upgrade --no-self-upgrade` from the detected project root so the
+runtime and project surface move together. Set `SFS_SCOOP_PROJECT_UPGRADE=0` to
+skip this hook; `sfs.cmd upgrade` sets that variable internally while it updates
+the Scoop runtime, then performs the project upgrade itself.
+
 In PowerShell/cmd examples, use `sfs.cmd ...` explicitly. Git Bash/WSL users can
 use `sfs ...`.
 
@@ -35,6 +42,7 @@ git init
 sfs.cmd init --layout thin --yes
 sfs.cmd status
 sfs.cmd agent install all
+scoop update sfs --force
 ```
 
 The thin-layout assertion is important: project-local `.sfs-local/` must not
@@ -53,4 +61,6 @@ scoop bucket add solon https://github.com/MJ-0701/scoop-solon-product
 scoop install sfs
 sfs.cmd version --check
 sfs.cmd upgrade
+# or, from an initialized project root after a new release:
+scoop update sfs
 ```
