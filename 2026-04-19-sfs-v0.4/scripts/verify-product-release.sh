@@ -100,12 +100,19 @@ require_text() {
 }
 
 PRODUCT_REPO="https://github.com/MJ-0701/solon-product"
-HOMEBREW_RAW="https://raw.githubusercontent.com/MJ-0701/homebrew-solon-product/main/Formula/sfs.rb"
-SCOOP_RAW="https://raw.githubusercontent.com/MJ-0701/scoop-solon-product/main/bucket/sfs.json"
+HOMEBREW_REPO="https://github.com/MJ-0701/homebrew-solon-product"
+SCOOP_REPO="https://github.com/MJ-0701/scoop-solon-product"
 TAR_URL="${PRODUCT_REPO}/archive/refs/tags/v${VERSION}.tar.gz"
 ZIP_URL="${PRODUCT_REPO}/archive/refs/tags/v${VERSION}.zip"
 
 log "version = ${VERSION}"
+
+remote_main_sha() {
+  local repo="$1" label="$2" sha
+  sha="$(git ls-remote "${repo}.git" refs/heads/main | awk '{print $1}' | head -1)"
+  [[ -n "${sha}" ]] || fail "cannot resolve ${label} origin/main" 4
+  printf '%s\n' "${sha}"
+}
 
 log "[1/5] product tag"
 if ! git ls-remote --tags "${PRODUCT_REPO}.git" "refs/tags/v${VERSION}" | grep -q "refs/tags/v${VERSION}$"; then
@@ -114,6 +121,8 @@ fi
 log "  ok tag v${VERSION}"
 
 log "[2/5] Homebrew remote formula"
+HB_MAIN_SHA="$(remote_main_sha "${HOMEBREW_REPO}" "Homebrew tap")"
+HOMEBREW_RAW="https://raw.githubusercontent.com/MJ-0701/homebrew-solon-product/${HB_MAIN_SHA}/Formula/sfs.rb"
 HB_FORMULA="${TMP_DIR}/sfs.rb"
 fetch "${HOMEBREW_RAW}" "${HB_FORMULA}"
 require_text "${HB_FORMULA}" "v${VERSION}\\.tar\\.gz" "Homebrew formula"
@@ -123,7 +132,7 @@ TAR_PATH="${TMP_DIR}/sfs.tar.gz"
 fetch "${TAR_URL}" "${TAR_PATH}"
 ACTUAL_TAR_SHA="$(sha256_file "${TAR_PATH}")"
 [[ "${HB_SHA}" = "${ACTUAL_TAR_SHA}" ]] || fail "Homebrew sha mismatch: formula=${HB_SHA} actual=${ACTUAL_TAR_SHA}" 5
-log "  ok formula URL + sha256"
+log "  ok formula URL + sha256 (${HB_MAIN_SHA:0:7})"
 
 log "[3/5] local Homebrew tap freshness"
 if command -v brew >/dev/null 2>&1; then
@@ -143,6 +152,8 @@ else
 fi
 
 log "[4/5] Scoop remote manifest"
+SCOOP_MAIN_SHA="$(remote_main_sha "${SCOOP_REPO}" "Scoop bucket")"
+SCOOP_RAW="https://raw.githubusercontent.com/MJ-0701/scoop-solon-product/${SCOOP_MAIN_SHA}/bucket/sfs.json"
 SCOOP_JSON="${TMP_DIR}/sfs.json"
 fetch "${SCOOP_RAW}" "${SCOOP_JSON}"
 if command -v python3 >/dev/null 2>&1; then
@@ -157,7 +168,7 @@ ZIP_PATH="${TMP_DIR}/sfs.zip"
 fetch "${ZIP_URL}" "${ZIP_PATH}"
 ACTUAL_ZIP_SHA="$(sha256_file "${ZIP_PATH}")"
 [[ "${SCOOP_SHA}" = "${ACTUAL_ZIP_SHA}" ]] || fail "Scoop hash mismatch: manifest=${SCOOP_SHA} actual=${ACTUAL_ZIP_SHA}" 5
-log "  ok manifest URL + hash"
+log "  ok manifest URL + hash (${SCOOP_MAIN_SHA:0:7})"
 
 log "[5/5] installed runtime"
 if [[ "${CHECK_INSTALLED}" = "1" ]]; then
