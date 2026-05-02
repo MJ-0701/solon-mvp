@@ -489,7 +489,7 @@ install_file "templates/.gemini/commands/sfs.toml" ".gemini/commands/sfs.toml" "
 
 # 6.2c) Codex Skill (project-scoped, .agents/skills/, Anthropic Skills 호환)
 # 위치: <project>/.agents/skills/sfs/SKILL.md — Codex Skill.
-# Codex app/CLI 는 leading `/sfs` 를 모델 전에 차단할 수 있으므로 `$sfs` / 자연어를 우선 쓴다.
+# Codex CLI 의 공식 Skill 호출은 `$sfs`; bare `/sfs` 는 모델 전에 차단될 수 있다.
 # implicit invocation (사용자 의도 매칭) + explicit invocation ($sfs) 양쪽 작동.
 mkdir -p "$TARGET/.agents/skills/sfs"
 install_file "templates/.agents/skills/sfs/SKILL.md" ".agents/skills/sfs/SKILL.md" "Codex Skill (project-scoped)"
@@ -760,9 +760,10 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
      ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET} → ${C_BLUE}/sfs implement${C_RESET} → ${C_BLUE}/sfs report${C_RESET}
      ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET} → ${C_BLUE}/sfs implement${C_RESET} → ${C_BLUE}/sfs report${C_RESET}
      ${C_BLUE}codex${C_RESET}      → ${C_BLUE}\$sfs status${C_RESET} → ${C_BLUE}\$sfs start${C_RESET} → ${C_BLUE}\$sfs brainstorm${C_RESET} → ${C_BLUE}\$sfs plan${C_RESET} → ${C_BLUE}\$sfs implement${C_RESET} → ${C_BLUE}\$sfs report${C_RESET}
-                   (bare ${C_BLUE}/sfs${C_RESET} 가 '커맨드 없음' 으로 막히면 host slash parser gap)
-     셋 모두 동일한 ${C_BOLD}sfs${C_RESET} runtime command 로 내려간 뒤 deterministic bash adapter 호출.
-     설치 직후 가이드는 ${C_BLUE}/sfs guide${C_RESET}, ${C_BLUE}\$sfs guide${C_RESET}, 또는 shell 의 ${C_BLUE}sfs guide${C_RESET}.
+                   (Codex CLI 공식 Skill 호출은 ${C_BLUE}\$sfs${C_RESET}; bare ${C_BLUE}/sfs${C_RESET} 는 지원하지 않음)
+     ${C_BLUE}powershell${C_RESET} → ${C_BLUE}sfs.cmd status${C_RESET} → ${C_BLUE}sfs.cmd start${C_RESET} → ${C_BLUE}sfs.cmd guide${C_RESET}
+     모두 동일한 ${C_BOLD}sfs${C_RESET} runtime command 로 내려간 뒤 deterministic bash adapter 호출.
+     설치 직후 가이드는 ${C_BLUE}/sfs guide${C_RESET}, ${C_BLUE}\$sfs guide${C_RESET}, 또는 shell 의 ${C_BLUE}sfs.cmd guide${C_RESET}/${C_BLUE}sfs guide${C_RESET}.
 
   ${C_BOLD}4.${C_RESET} git commit + push (Solon 주입 자체를 기록):
      ${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore \\${C_RESET}
