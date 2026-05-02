@@ -13,7 +13,6 @@ Mac:
 brew install MJ-0701/solon-product/sfs
 cd ~/workspace/my-project
 sfs init --layout thin --yes
-sfs agent install all
 sfs status
 ```
 
@@ -25,7 +24,6 @@ scoop install sfs
 cd C:\workspace\my-project
 git init
 sfs.cmd init --layout thin --yes
-sfs.cmd agent install all
 sfs.cmd status
 ```
 
@@ -45,8 +43,14 @@ The files you normally edit are:
 | `AGENTS.md` | Codex adapter |
 | `GEMINI.md` | Gemini CLI adapter |
 
-The files under `.claude/`, `.gemini/`, `.agents/`, and packaged templates are
-runtime assets. In thin layout, they are managed by the global package.
+Project-local `.claude/`, `.gemini/`, and `.agents/` command/skill files are
+optional. In thin layout, the default surface is clean: root `CLAUDE.md`,
+`AGENTS.md`, and `GEMINI.md` point agents at the global `sfs` runtime. Install
+native slash/skill files only when a project needs them:
+
+```bash
+sfs agent install all
+```
 
 ## 2. Start A Sprint
 

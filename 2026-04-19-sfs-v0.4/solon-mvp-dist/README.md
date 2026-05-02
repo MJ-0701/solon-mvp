@@ -103,12 +103,14 @@ sfs.cmd upgrade
 sfs.cmd version --check
 ```
 
-`sfs upgrade` 는 thin layout 프로젝트의 managed context 문서를 global `sfs` runtime 으로
-이관해 프로젝트 표면을 줄입니다. 기능은 없어지지 않고 `sfs context path ...` 로 같은
-runtime context 를 읽습니다. 예전 설치본의 loose sprint archive 와 per-run review archive 도
-압축 migration 으로 접어, 사용자가 봐야 할 표면과 히스토리 보관층을 분리합니다.
-runtime upgrade / agent install / profile rollback 백업도 loose 파일이 아니라
-`*.tar.gz` + `manifest.txt` bundle 로 남습니다.
+`sfs upgrade` 는 thin layout 프로젝트의 managed context 문서와 project-local
+command/skill adapter 파일을 global `sfs` runtime 으로 이관해 프로젝트 표면을 줄입니다.
+기능은 없어지지 않고 root `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` 와
+`sfs context path ...` 로 같은 runtime context 를 읽습니다. native slash/skill 파일이 꼭
+필요한 프로젝트만 `sfs agent install all` 로 opt-in 설치합니다. 예전 설치본의 loose sprint
+archive 와 per-run review archive 도 압축 migration 으로 접어, 사용자가 봐야 할 표면과
+히스토리 보관층을 분리합니다. runtime upgrade / agent install / profile rollback 백업도
+loose 파일이 아니라 `*.tar.gz` + `manifest.txt` bundle 로 남습니다.
 
 오래된 프로젝트에서는 `sfs` 실행 시 부드러운 업데이트 안내가 뜹니다. 끄려면
 `SFS_VERSION_NOTICE=0` 을 씁니다. 토큰 낭비 가능성이 보일 때(어댑터 문서 비대,
@@ -171,10 +173,11 @@ Runtime 별 호출 표기:
 | `AGENTS.md` | Codex adapter |
 | `GEMINI.md` | Gemini CLI adapter |
 | `.sfs-local/` | sprint, decision, event, config, custom override |
-| `.claude/`, `.gemini/`, `.agents/` | runtime 별 얇은 SFS entry point |
+| `.claude/`, `.gemini/`, `.agents/` | 선택 설치하는 native command/skill entry point |
 
 thin layout 에서는 runtime scripts/templates/personas 는 global `sfs` package 에 남고, consumer
-project 에는 state/config/custom override 만 설치됩니다.
+project 에는 state/config/custom override 만 설치됩니다. `.claude/`, `.gemini/`, `.agents/`
+command/skill 파일은 기본 표면에서 빠지고, 필요할 때만 `sfs agent install all` 로 설치합니다.
 
 ---
 

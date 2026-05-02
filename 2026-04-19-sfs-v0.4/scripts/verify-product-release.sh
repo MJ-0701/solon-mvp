@@ -168,6 +168,51 @@ verify_context_router_targets_in_tree() {
   log "  ok ${label} context router targets"
 }
 
+verify_thin_surface_defaults_in_tree() {
+  local root="$1" label="$2" proj rel archive_count
+  proj="${TMP_DIR}/${label}-thin-surface"
+  mkdir -p "${proj}"
+  git -C "${proj}" init --quiet || fail "${label} thin surface git init failed" 5
+
+  (
+    cd "${proj}"
+    SFS_MODEL_PROFILE_PROMPT=0 bash "${root}/install.sh" --yes --layout thin >/dev/null
+  ) || fail "${label} thin install smoke failed" 5
+
+  for rel in \
+    ".claude/commands/sfs.md" \
+    ".claude/skills/sfs/SKILL.md" \
+    ".gemini/commands/sfs.toml" \
+    ".agents/skills/sfs/SKILL.md"
+  do
+    [[ ! -e "${proj}/${rel}" ]] || fail "${label} thin install unexpectedly created ${rel}" 5
+  done
+
+  mkdir -p "${proj}/.claude/commands" "${proj}/.claude/skills/sfs" "${proj}/.gemini/commands" "${proj}/.agents/skills/sfs"
+  cp "${root}/templates/.claude/commands/sfs.md" "${proj}/.claude/commands/sfs.md"
+  cp "${root}/templates/.claude/commands/sfs.md" "${proj}/.claude/skills/sfs/SKILL.md"
+  cp "${root}/templates/.gemini/commands/sfs.toml" "${proj}/.gemini/commands/sfs.toml"
+  cp "${root}/templates/.agents/skills/sfs/SKILL.md" "${proj}/.agents/skills/sfs/SKILL.md"
+
+  (
+    cd "${proj}"
+    SFS_MODEL_PROFILE_PROMPT=0 bash "${root}/upgrade.sh" --yes >/dev/null
+  ) || fail "${label} thin upgrade adapter migration smoke failed" 5
+
+  for rel in \
+    ".claude/commands/sfs.md" \
+    ".claude/skills/sfs/SKILL.md" \
+    ".gemini/commands/sfs.toml" \
+    ".agents/skills/sfs/SKILL.md"
+  do
+    [[ ! -e "${proj}/${rel}" ]] || fail "${label} thin upgrade left project adapter ${rel}" 5
+  done
+
+  archive_count="$(find "${proj}/.sfs-local/archives/runtime-migrations" -name project-agent-adapters.tar.gz -type f 2>/dev/null | wc -l | tr -d '[:space:]')"
+  [[ "${archive_count:-0}" -ge 1 ]] || fail "${label} thin upgrade did not create project-agent-adapters archive" 5
+  log "  ok ${label} thin surface defaults"
+}
+
 verify_packaged_context_router_integrity() {
   local tar_extract zip_extract tar_root zip_root
   tar_extract="${TMP_DIR}/tar-extract"
@@ -182,6 +227,8 @@ verify_packaged_context_router_integrity() {
   zip_root="$(archive_root_dir "${zip_extract}" "zip")"
   verify_context_router_targets_in_tree "${tar_root}" "tar.gz"
   verify_context_router_targets_in_tree "${zip_root}" "zip"
+  verify_thin_surface_defaults_in_tree "${tar_root}" "tar.gz"
+  verify_thin_surface_defaults_in_tree "${zip_root}" "zip"
 }
 
 PRODUCT_REPO="https://github.com/MJ-0701/solon-product"

@@ -1,3 +1,19 @@
+## [0.5.89-product] - 2026-05-03
+
+### Fixed
+
+- **Windows/Scoop thin-surface parity** — thin installs no longer create
+  project-local `.claude/`, `.gemini/`, or `.agents/` command/skill adapter
+  files by default. Existing thin projects migrate those files into a compressed
+  runtime migration bundle during `sfs upgrade`, and `sfs agent install all`
+  remains available as an explicit opt-in.
+- **Upgrade no longer rehydrates command adapters** — `sfs upgrade` skips the
+  post-upgrade agent adapter sync for thin projects, so the cleanup applies on
+  both Homebrew and Scoop paths instead of being immediately undone.
+- **Install and channel guidance aligned** — README, GUIDE, Homebrew caveats,
+  and Scoop notes now present command/skill adapters as optional instead of
+  part of the default project surface.
+
 ## [0.5.88-product] - 2026-05-03
 
 ### Fixed

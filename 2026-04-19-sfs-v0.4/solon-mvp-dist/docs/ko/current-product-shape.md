@@ -126,6 +126,9 @@ cold archive bundle 로 압축한 뒤, sprint close 상태와 local close commit
 예전 설치본에 남아 있던 loose sprint archive 나 별도 review-run archive 는 `sfs upgrade` 때
 압축 migration 으로 정리됩니다. runtime upgrade / agent install / profile rollback 백업도
 loose 파일 대신 `*.tar.gz` + `manifest.txt` bundle 로 남습니다.
+thin layout 에서는 project-local `.claude/`, `.gemini/`, `.agents/` command/skill adapter 도
+기본 표면에서 빠집니다. root adapter 문서가 global `sfs` runtime 을 안내하고, native
+slash/skill 파일이 필요한 프로젝트만 `sfs agent install all` 로 opt-in 설치합니다.
 
 ## 문서 구조
 
