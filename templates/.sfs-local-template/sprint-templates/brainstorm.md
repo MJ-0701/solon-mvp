@@ -7,6 +7,8 @@ sprint_id: ""        # filled by /sfs start
 goal: ""             # filled by /sfs start <goal>
 created_at: ""       # filled by /sfs start
 last_touched_at: ""  # filled by /sfs brainstorm (auto, ISO8601 + tz)
+brainstorm_depth: normal          # simple | normal | hard
+brainstorm_depth_source: default  # default | explicit
 status: draft        # draft | ready-for-plan | gate2-reviewed
 ---
 
@@ -22,6 +24,22 @@ status: draft        # draft | ready-for-plan | gate2-reviewed
 ---
 
 ## §0. AI-Era Fundamentals Gate
+
+`/sfs brainstorm` 은 세 가지 깊이를 가진다. Guide 를 읽지 않아도 `/sfs start` 의 `next:`
+line 이 선택지를 보여주며, AI runtime 은 frontmatter 의 `brainstorm_depth` 를 따른다.
+
+- **simple** (`--simple`, alias `--easy`, `--quick`): 기존의 빠른 정리 모드.
+  요구사항을 정리하고 빠진 부분을 가볍게 짚으며, 명시한 가정으로 plan 준비가 가능하다.
+- **normal** (default): 기본 owner-thinking scaffold. 핵심 결정, 모순, 우선순위,
+  성공 기준, feedback loop 중 2~5개를 되물어 사용자가 생각하게 만든다.
+- **hard** (`--hard`): product-owner hard training. 의도, 모순, 우선순위, 포기할 것,
+  검증 방식, 경계, 용어를 집요하게 캐묻고 중요한 owner decision 이 비어 있으면
+  `status: ready-for-plan` 으로 넘기지 않는다.
+
+Depth 선택은 사용자의 사고 부담을 조절하기 위한 것이다. 어느 모드든 raw 요구사항은 아직
+plan 계약이 아니며, hard 는 특히 "자동 ㄱㄱ" 대신 사용자의 제품 소유권을 강화한다.
+
+### Shared Understanding Fundamentals
 
 이 gate 는 implement 전용이 아니다. AI 가 좋은 코드베이스/문서베이스에서만 잘 작동한다는
 전제 때문에, Gate 2 부터 아래 다섯 가지를 확인한다.

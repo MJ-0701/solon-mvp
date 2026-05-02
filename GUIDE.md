@@ -138,7 +138,12 @@ sprint - · WU - · gate -:- · ahead 0 · last_event -
 3. `events.jsonl` 에 `sprint_start` 이벤트 1줄 append.
 4. `.sfs-local/current-sprint` 에 sprint id 저장.
 
-`/sfs start` 는 workspace 생성까지만 담당한다. 그 다음이 항상 `brainstorm` 인 것은 아니다.
+`/sfs start` 는 workspace 생성까지만 담당한다. 다만 새 요구 탐색처럼 brainstorm 이 어울리는
+경우를 사용자가 Guide 없이도 발견하도록, 성공 출력의 `next:` line 은 brainstorm depth 선택지를
+보여준다: `simple` 은 빠른 요구사항 정리, default `normal` 은 핵심 결정/우선순위/성공 기준을
+몇 가지 되묻는 기본값, `hard` 는 product owner hard training 이다.
+
+그 다음이 항상 `brainstorm` 인 것은 아니다.
 새 요구를 처음 탐색하는 sprint 는 `brainstorm → plan` 으로 가고, 직전 sprint 의 plan/ADR 을
 이어받아 구현하는 sprint 는 `log.md` 또는 `plan.md` 에 `inherit-from: <prior sprint/ADR>` 와
 이번 AC 만 얇게 남긴 뒤 바로 첫 구현 slice 로 들어간다.
@@ -162,8 +167,17 @@ sprint - · WU - · gate -:- · ahead 0 · last_event -
 먼저 raw 요구사항과 대화 맥락을 `brainstorm.md` 에 남긴다. Claude/Codex/Gemini 같은
 AI runtime 에서 `/sfs brainstorm` 으로 실행하면 두 단계가 한 번에 이어진다.
 
+Brainstorm depth 는 세 단계다.
+
+- `sfs brainstorm --simple ...` (`--easy`, `--quick` alias): 기존 수준의 빠른 요구사항 정리.
+  빠진 부분을 가볍게 짚고, 명시한 가정을 plan seed 로 넘길 수 있다.
+- `sfs brainstorm ...`: 기본값. 핵심 결정, 모순, 우선순위, 성공 기준, 검증 방식을 2~5개
+  되물어 사용자가 product owner 로 생각하게 만든다.
+- `sfs brainstorm --hard ...`: hard training. 의도, 모순, 포기할 것, 검증 방식, 경계,
+  용어를 집요하게 묻고 중요한 owner decision 이 비어 있으면 plan 으로 넘기지 않는다.
+
 1. bash adapter 가 raw input 을 `§8 Append Log` 에 안전하게 기록한다.
-2. Solon CEO 가 그 raw 를 읽고 `§0~§7` 을 채운다. 부족한 정보가 있으면 1~3개 질문을 한다.
+2. Solon CEO 가 그 raw 를 읽고 `§0~§7` 을 채운다. 부족한 정보가 있으면 depth 에 맞춰 질문한다.
 
 Gate 2 (Brainstorm) 의 목적은 raw 요구를 예쁘게 받아 적는 것이 아니라, plan 으로 넘기기 전에 공유 이해를
 만드는 것이다. AI 시대의 기본 guardrail 은 여기서 이미 시작된다: 공유 design concept,
@@ -390,7 +404,7 @@ deterministic fallback 이다.
 |:--|:--|
 | `/sfs status` | 지금 어디까지 왔는지 1줄 |
 | `/sfs start <goal>` | 새 sprint workspace 초기화 |
-| `/sfs brainstorm [text]` | Gate 2 (Brainstorm) raw 기록 + 공유 design concept/domain language/feedback/boundary 정리, 부족하면 질문 |
+| `/sfs brainstorm [--simple|--hard] [text]` | Gate 2 (Brainstorm) raw 기록 + depth 기반 사고 정리. simple 은 빠른 정리, 기본값은 2~5개 핵심 질문, hard 는 owner decision 이 비면 plan 보류 |
 | `/sfs guide` | 처음 쓸 때 필요한 맥락과 다음 명령 확인 |
 | `/sfs guide --path` | 이 onboarding guide 경로만 확인 |
 | `/sfs guide --print` | 이 guide 본문을 터미널에 출력 |

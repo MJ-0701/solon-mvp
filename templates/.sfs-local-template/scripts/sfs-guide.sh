@@ -144,6 +144,7 @@ Solon guide context
   Terminal:      sfs brainstorm "<아직 정리 안 된 요구사항>"
   Claude/Gemini: /sfs brainstorm "<아직 정리 안 된 요구사항>"
   Codex:         \$sfs brainstorm "<아직 정리 안 된 요구사항>"
+  Brainstorm:    --simple 빠른 정리 · default normal 핵심 질문 · --hard 깊은 PO 훈련
   Terminal:      sfs plan
   Claude/Gemini: /sfs plan
   Codex:         \$sfs plan

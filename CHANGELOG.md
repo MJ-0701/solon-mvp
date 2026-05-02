@@ -1,3 +1,16 @@
+## [0.5.80-product] - 2026-05-02
+
+### Changed
+
+- **Brainstorm depth modes** — `sfs brainstorm` now supports `--simple`
+  (`--easy` / `--quick` aliases), default normal, and `--hard`. The adapter
+  records depth in `brainstorm.md` frontmatter and events so AI runtimes can
+  choose between quick requirement cleanup, owner-thinking scaffold, and
+  product-owner hard training.
+- **Start handoff discoverability** — `sfs start` now prints one `next:` line
+  that exposes simple/normal/hard brainstorm options and recommends normal, so
+  users discover the new thinking-depth flow without reading the guide first.
+
 ## [0.5.79-product] - 2026-05-02
 
 ### Changed

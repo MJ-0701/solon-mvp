@@ -4,12 +4,12 @@
 # Solon SFS — `/sfs brainstorm` command implementation.
 #
 # Usage:
-#   /sfs brainstorm [<raw brief>]
+#   /sfs brainstorm [--simple|--easy|--quick|--hard] [<raw brief>]
 #   /sfs brainstorm --stdin
 #
 # Output:
-#   brainstorm.md ready: <path>
-#   brainstorm.md ready: <path> | raw captured | AI runtime should refine §0-§7 as Solon CEO
+#   brainstorm.md ready: <path> | depth <simple|normal|hard> (<source>)
+#   brainstorm.md ready: <path> | depth <...> | raw captured | AI runtime should refine §0-§7 as Solon CEO
 #
 # Exit codes:
 #   0  success
@@ -28,13 +28,18 @@ source "${SFS_SCRIPT_DIR}/sfs-common.sh"
 
 usage_brainstorm() {
   cat <<'EOF'
-Usage: /sfs brainstorm [<raw brief>]
+Usage: /sfs brainstorm [--simple|--easy|--quick|--hard] [<raw brief>]
        /sfs brainstorm --stdin
+       /sfs brainstorm --depth <simple|normal|hard>
 
 Open/update the active sprint's brainstorm.md (Gate 2 Brainstorm document).
   - Creates brainstorm.md from sprint-templates/brainstorm.md if missing.
   - Accepts multiline raw context via --stdin or a quoted argument.
   - Appends raw input to brainstorm.md.
+  - Records brainstorm depth:
+      --simple / --easy / --quick  quick requirement cleanup + light questions
+      default brainstorm            normal owner-thinking scaffold
+      --hard                        product-owner hard training; no plan escape
   - In Claude/Codex/Gemini runtimes, the /sfs adapter should then refine
     §0~§7 as Solon CEO from the append log and ask follow-up questions.
   - Direct bash remains capture-only and prints the file path plus refinement hint.
@@ -60,9 +65,56 @@ EOF
 
 USE_STDIN=false
 RAW_PARTS=()
+BRAINSTORM_DEPTH="normal"
+BRAINSTORM_DEPTH_SOURCE="default"
+
+set_brainstorm_depth() {
+  local raw="$1" source="$2"
+  case "${raw}" in
+    simple|easy|quick)
+      BRAINSTORM_DEPTH="simple"
+      ;;
+    normal|default)
+      BRAINSTORM_DEPTH="normal"
+      ;;
+    hard)
+      BRAINSTORM_DEPTH="hard"
+      ;;
+    *)
+      echo "invalid brainstorm depth: ${raw} (valid: simple, normal, hard)" >&2
+      exit "${SFS_EXIT_UNKNOWN}"
+      ;;
+  esac
+  BRAINSTORM_DEPTH_SOURCE="${source}"
+}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --simple|--easy|--quick)
+      set_brainstorm_depth "${1#--}" "explicit"
+      shift
+      ;;
+    --normal)
+      set_brainstorm_depth "normal" "explicit"
+      shift
+      ;;
+    --hard)
+      set_brainstorm_depth "hard" "explicit"
+      shift
+      ;;
+    --depth)
+      shift
+      if [[ $# -eq 0 ]]; then
+        echo "missing value for --depth" >&2
+        exit "${SFS_EXIT_UNKNOWN}"
+      fi
+      set_brainstorm_depth "$1" "explicit"
+      shift
+      ;;
+    --depth=*)
+      set_brainstorm_depth "${1#--depth=}" "explicit"
+      shift
+      ;;
     --stdin)
       USE_STDIN=true
       shift
@@ -139,10 +191,18 @@ if ! update_frontmatter "${BRAINSTORM_PATH}" "last_touched_at" "${NOW}" 2>/dev/n
   echo "permission denied updating frontmatter in ${BRAINSTORM_PATH}" >&2
   exit "${SFS_EXIT_PERM}"
 fi
+if ! update_frontmatter "${BRAINSTORM_PATH}" "brainstorm_depth" "${BRAINSTORM_DEPTH}" 2>/dev/null; then
+  echo "permission denied updating frontmatter in ${BRAINSTORM_PATH}" >&2
+  exit "${SFS_EXIT_PERM}"
+fi
+if ! update_frontmatter "${BRAINSTORM_PATH}" "brainstorm_depth_source" "${BRAINSTORM_DEPTH_SOURCE}" 2>/dev/null; then
+  echo "permission denied updating frontmatter in ${BRAINSTORM_PATH}" >&2
+  exit "${SFS_EXIT_PERM}"
+fi
 
 if [[ -n "${RAW_TEXT}" ]]; then
   {
-    printf '\n### %s — raw input\n\n' "${NOW}"
+    printf '\n### %s — raw input (depth: %s)\n\n' "${NOW}" "${BRAINSTORM_DEPTH}"
     printf '```text\n'
     printf '%s\n' "${RAW_TEXT}"
     printf '```\n'
@@ -156,16 +216,20 @@ _esc_sprint="${SPRINT_ID//\\/\\\\}"
 _esc_sprint="${_esc_sprint//\"/\\\"}"
 _esc_path="${BRAINSTORM_PATH//\\/\\\\}"
 _esc_path="${_esc_path//\"/\\\"}"
+_esc_depth="${BRAINSTORM_DEPTH//\\/\\\\}"
+_esc_depth="${_esc_depth//\"/\\\"}"
+_esc_depth_source="${BRAINSTORM_DEPTH_SOURCE//\\/\\\\}"
+_esc_depth_source="${_esc_depth_source//\"/\\\"}"
 
-if ! append_event "brainstorm_open" "{\"sprint_id\":\"${_esc_sprint}\",\"path\":\"${_esc_path}\"}" 2>/dev/null; then
+if ! append_event "brainstorm_open" "{\"sprint_id\":\"${_esc_sprint}\",\"path\":\"${_esc_path}\",\"depth\":\"${_esc_depth}\",\"depth_source\":\"${_esc_depth_source}\"}" 2>/dev/null; then
   echo "permission denied appending event to ${SFS_EVENTS_FILE}" >&2
   exit "${SFS_EXIT_PERM}"
 fi
 
 if [[ -n "${RAW_TEXT}" ]]; then
-  echo "brainstorm.md ready: ${BRAINSTORM_PATH} | raw captured | AI runtime should refine §0-§7 as Solon CEO"
+  echo "brainstorm.md ready: ${BRAINSTORM_PATH} | depth ${BRAINSTORM_DEPTH} (${BRAINSTORM_DEPTH_SOURCE}) | raw captured | AI runtime should refine §0-§7 as Solon CEO"
 else
-  echo "brainstorm.md ready: ${BRAINSTORM_PATH} | no new raw input | AI runtime may refine existing §8 append log"
+  echo "brainstorm.md ready: ${BRAINSTORM_PATH} | depth ${BRAINSTORM_DEPTH} (${BRAINSTORM_DEPTH_SOURCE}) | no new raw input | AI runtime may refine existing §8 append log"
 fi
 
 exit "${SFS_EXIT_OK}"
