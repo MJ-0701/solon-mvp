@@ -2,16 +2,16 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T01:49:05Z
-session: "idle: WU-41 closed"
+last_overwrite: 2026-05-02T01:55:48Z
+session: "user-active: WU-42 Windows Scoop command docs"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
-current_wu: null
-current_wu_path: null
+current_wu: WU-42
+current_wu_path: 2026-04-19-sfs-v0.4/sprints/WU-42.md
 
 # ── SESSION MUTEX (CLAUDE.md §1.12) ───────────────────────────────
 # Keep scalar form for tool compatibility (.sfs-local/scripts/sfs-loop.sh stop/status, auto-resume contract).
-current_wu_owner: null
+current_wu_owner: codex-windows-scoop-docs-20260502
 
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
@@ -146,11 +146,11 @@ resume_hint:
   default_action: |
     1) Read `CLAUDE.md`, then `PROGRESS.md`.
     2) Run: `bash scripts/resume-session-check.sh` (expect exit 0).
-    3) WU-41 is closed and released as 0.5.64-product. Ask user for the next
-       WU/domain.
+    3) Continue WU-42 Windows Scoop command docs if it is still open. Otherwise
+       ask user for the next WU/domain.
   on_skip_patterns: ["아니", "잠깐", "다른", "stop"]
   on_skip_action: "What do you want to do instead (1 line)?"
-  on_ambiguous: "WU-41 is closed. What should we work on next?"
+  on_ambiguous: "WU-42 may be in progress. Continue Windows Scoop command docs?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
@@ -169,11 +169,12 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ② In-Progress
 
-- None.
+- WU-42 Windows Scoop command docs: align public docs so PowerShell/cmd examples
+  use `sfs.cmd`, while Mac/Git Bash examples use `sfs`.
 
 ## ③ Next
 
-- Ask user for next WU/domain.
+- Validate snippets, commit, and release if needed.
 
 ## ④ Artifacts
 

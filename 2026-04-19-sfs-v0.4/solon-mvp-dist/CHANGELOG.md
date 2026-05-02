@@ -1,3 +1,18 @@
+## [0.5.65-product] - 2026-05-02
+
+**Windows Scoop command docs alignment.** Makes Windows onboarding consistent
+across README, beginner guide, GUIDE, and Scoop packaging docs.
+
+### Changed
+
+- **Windows command shape** — PowerShell/cmd examples now use `sfs.cmd ...`,
+  while Mac/Git Bash examples keep `sfs ...`.
+- **Scoop-first docs** — README Quickstart, Version Check, Upgrade, and agent
+  install examples now separate Windows/Scoop commands from Mac/Git Bash
+  commands, and source `install.ps1` paths are marked as fallback.
+- **Scoop package notes** — the Scoop manifest template and packaging README now
+  show `sfs.cmd` for first-time setup, status, upgrade, and agent install.
+
 ## [0.5.64-product] - 2026-05-02
 
 **Audience wording cleanup.** Refines the beginner onboarding language so it

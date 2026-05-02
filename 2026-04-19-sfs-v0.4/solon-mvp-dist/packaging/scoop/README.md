@@ -16,6 +16,9 @@ The manifest exposes `sfs` through `bin\\sfs.cmd`. The command wrapper locates
 Git for Windows Bash and delegates to the packaged Bash entrypoint at
 `bin/sfs`.
 
+In PowerShell/cmd examples, use `sfs.cmd ...` explicitly. Git Bash/WSL users can
+use `sfs ...`.
+
 ## Local Windows Smoke
 
 The GitHub Actions workflow builds a local source zip from the checkout,
@@ -24,14 +27,14 @@ renders a temporary bucket manifest with a `file:///` URL, and then runs:
 ```text
 scoop bucket add solon <temporary-bucket-path>
 scoop install sfs
-sfs version
-sfs --help
+sfs.cmd version
+sfs.cmd --help
 mkdir test-project
 cd test-project
 git init
-sfs init --layout thin --yes
-sfs status
-sfs agent install all
+sfs.cmd init --layout thin --yes
+sfs.cmd status
+sfs.cmd agent install all
 ```
 
 The thin-layout assertion is important: project-local `.sfs-local/` must not
@@ -48,6 +51,6 @@ bucket can then be tested with:
 ```text
 scoop bucket add solon https://github.com/MJ-0701/scoop-solon-product
 scoop install sfs
-sfs version --check
-sfs upgrade
+sfs.cmd version --check
+sfs.cmd upgrade
 ```
