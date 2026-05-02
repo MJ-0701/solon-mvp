@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T21:10:43+09:00
-session: "review lens routing implementation ready"
+last_overwrite: 2026-05-02T21:16:12+09:00
+session: "release: 0.5.79 review lens routing verified"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: null
@@ -16,6 +16,11 @@ current_wu_owner: null
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
 scheduled_task_log:
+  - ts: 2026-05-02T21:16:12+09:00
+    codename: release-0-5-79-review-lens-routing
+    check_exit: 0
+    action: "release: 0.5.79 review lens routing verified"
+    ahead_delta: "+1"
   - ts: 2026-05-02T18:41:34+09:00
     codename: release-0-5-78-context-router-core-repair
     check_exit: 0
@@ -181,17 +186,17 @@ resume_hint:
   default_action: |
     1) Read `CLAUDE.md`, then `PROGRESS.md`.
     2) Run: `bash scripts/resume-session-check.sh` (expect exit 0).
-    3) Latest product release is `0.5.78-product`; ask user for the next
+    3) Latest product release is `0.5.79-product`; ask user for the next
        WU/domain unless they provide a direct task.
     4) For a direct task, start from clean `main` and create a fresh
        `feature/<slug>` or `hotfix/<slug>` branch before edits.
   on_skip_patterns: ["아니", "잠깐", "다른", "stop"]
   on_skip_action: "What do you want to do instead (1 line)?"
-  on_ambiguous: "0.5.78-product is released. What should Solon handle next?"
+  on_ambiguous: "0.5.79-product is released. What should Solon handle next?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
-  last_written: 2026-05-02T09:41:34Z
+  last_written: 2026-05-02T12:16:12Z
 ---
 
 # PROGRESS — compact
@@ -277,6 +282,11 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
   `aef689e` / tag `v0.5.78-product`; Homebrew `ce55700`; Scoop `252c75c`;
   package/runtime verifier passed and installed `sfs version --check` reports
   up to date.
+- Review lens routing shipped as `0.5.79-product`: dev `be01069`; stable
+  `d6b753f` / tag `v0.5.79-product`; Homebrew `f179e68`; Scoop `1215135`;
+  full release verifier passed and installed `sfs version --check` reports up
+  to date. `sfs review` now auto-selects code/docs/strategy/design/taxonomy/QA/
+  ops/release/artifact acceptance lens and asks CPO for a concrete next action.
 
 ## ② In-Progress
 
@@ -284,7 +294,7 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ③ Next
 
-- Current truth is `0.5.78-product`; no active WU. Ask user for the next
+- Current truth is `0.5.79-product`; no active WU. Ask user for the next
   WU/domain unless they provide a direct task. For any new direct task, create a
   fresh branch from clean `main` first (`feature/<slug>` or `hotfix/<slug>`).
 
@@ -332,5 +342,7 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 - WU-47 local dev commit: `3f11052` (backfill `cc9785d`).
 - Product context router same-version repair release: stable `aef689e` / tag
   `v0.5.78-product`; Homebrew `ce55700`; Scoop `252c75c`; dev `cc9785d`.
+- Product review lens routing release: stable `d6b753f` / tag
+  `v0.5.79-product`; Homebrew `f179e68`; Scoop `1215135`; dev `be01069`.
 - Study-note G4 validation: `.sfs-local/tmp/review-runs/2026-W18-sprint-5-G4-20260502T054452Z.result.md`
   returned `pass` after code-level rework.
