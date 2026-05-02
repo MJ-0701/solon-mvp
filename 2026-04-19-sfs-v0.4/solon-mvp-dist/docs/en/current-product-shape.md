@@ -123,9 +123,12 @@ A sprint is complete when it is closed, and `sfs retro` does that in one step:
 sfs retro
 ```
 
-It refines `report.md` and `retro.md`, archives workbench evidence, closes the sprint state,
-and creates the local close commit. Use `sfs retro --draft` when you want to
-open the draft without closing.
+It refines `report.md` and `retro.md`, packs workbench evidence and temporary
+review scratch into one cold archive bundle, closes the sprint state, and
+creates the local close commit. Use `sfs retro --draft` when you want to open
+the draft without closing.
+Older installs that still have loose sprint archives or separate review-run
+archives are compacted by `sfs upgrade` into compressed migration bundles.
 
 ## Documentation Shape
 

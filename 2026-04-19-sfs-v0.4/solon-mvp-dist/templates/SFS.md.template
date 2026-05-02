@@ -14,10 +14,14 @@ router for Claude, Codex, and Gemini.
 - **공유/운영 방식**: `<PROJECT-DELIVERY>`
 
 Read order:
-1. `.sfs-local/context/kernel.md`
-2. `.sfs-local/context/_INDEX.md`
-3. Only the matching module under `.sfs-local/context/commands/` or
-   `.sfs-local/context/policies/`
+1. `sfs context path kernel`
+2. `sfs context path index`
+3. Only the matching module from `sfs context path commands/<name>.md` or
+   `sfs context path policies/<name>.md`
+
+In thin layout, managed context lives in the packaged global `sfs` runtime.
+`.sfs-local/context/` is optional project-local override space, not a normal
+project document surface.
 
 Default entry:
 - `sfs status`

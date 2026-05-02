@@ -551,6 +551,7 @@ runtime:
 state:
   dir: ".sfs-local"
 overrides:
+  # Optional local override. Thin layout keeps managed context in the packaged runtime.
   context: ".sfs-local/context"
   sprint_templates: ".sfs-local/sprint-templates"
   decisions_template: ".sfs-local/decisions-template"
@@ -606,14 +607,6 @@ if [ -f "$SOURCE_DIR/templates/.sfs-local-template/auth.env.example" ] \
   ok "  auth.env.example 생성 (Gemini/Codex/Claude bridge auth 안내)"
 fi
 
-# context/ — short, routed agent context modules.
-CONTEXT_SRC="$SOURCE_DIR/templates/.sfs-local-template/context"
-if [ -d "$CONTEXT_SRC" ]; then
-  mkdir -p "$TARGET/.sfs-local/context"
-  cp -R "$CONTEXT_SRC"/. "$TARGET/.sfs-local/context/" 2>/dev/null || true
-  ok "  context/ 복사 (entry router + command/policy modules)"
-fi
-
 # sprints/ + decisions/
 mkdir -p "$TARGET/.sfs-local/sprints" "$TARGET/.sfs-local/decisions"
 [ -f "$TARGET/.sfs-local/sprints/.gitkeep" ] || touch "$TARGET/.sfs-local/sprints/.gitkeep"
@@ -628,6 +621,16 @@ done
 ok "  queue/ 상태 디렉토리 확보 (pending/claimed/done/failed/abandoned/runs)"
 
 if [ "$INSTALL_LAYOUT" = "vendored" ]; then
+  # context/ — short, routed agent context modules. Thin layout keeps these in
+  # the global runtime so the consumer project only shows product state and
+  # user-owned overrides.
+  CONTEXT_SRC="$SOURCE_DIR/templates/.sfs-local-template/context"
+  if [ -d "$CONTEXT_SRC" ]; then
+    mkdir -p "$TARGET/.sfs-local/context"
+    cp -R "$CONTEXT_SRC"/. "$TARGET/.sfs-local/context/" 2>/dev/null || true
+    ok "  context/ 복사 (vendored runtime router modules)"
+  fi
+
   # GUIDE.md — `/sfs guide` 가 참조하는 managed onboarding guide
   if [ -f "$SOURCE_DIR/GUIDE.md" ]; then
     cp "$SOURCE_DIR/GUIDE.md" "$TARGET/.sfs-local/GUIDE.md"
@@ -669,9 +672,8 @@ if [ "$INSTALL_LAYOUT" = "vendored" ]; then
     ok "  decisions-template/ 복사 (ADR-TEMPLATE.md + _INDEX.md)"
   fi
 else
-  ok "  thin layout: GUIDE/scripts/sprint-templates/personas/decisions-template 는 global runtime 사용"
-  ok "  context/ 는 thin layout 에도 project-local router 로 유지"
-  ok "  project-local override 가 필요하면 .sfs-local/{context,sprint-templates,personas,decisions-template}/ 에 파일을 추가"
+  ok "  thin layout: GUIDE/context/scripts/templates/personas/decisions-template 는 global runtime 사용"
+  ok "  project-local override 가 필요할 때만 .sfs-local/{context,sprint-templates,personas,decisions-template}/ 에 파일 추가"
 fi
 
 # ============================================================================

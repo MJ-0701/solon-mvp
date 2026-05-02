@@ -175,6 +175,7 @@ Usage:
   sfs update [--skip-existing]          # compatibility alias for upgrade
   sfs uninstall [--keep-artifacts|--remove-all] [--remove-docs|--keep-docs]
   sfs agent install <claude|gemini|codex|all> [--skip-existing]
+  sfs context path <kernel|index|commands/name.md|policies/name.md>
   sfs <command> [args]
 
 Commands:
@@ -190,6 +191,63 @@ First-time project setup after Homebrew install:
   sfs status
   sfs guide
 EOF
+}
+
+context_usage() {
+  cat <<'EOF'
+Usage:
+  sfs context path <kernel|index|commands/name.md|policies/name.md>
+  sfs context cat  <kernel|index|commands/name.md|policies/name.md>
+
+Read-only helper for agent adapters. In thin layout the managed context lives in
+the packaged global runtime; project-local .sfs-local/context files are optional
+overrides only.
+EOF
+}
+
+context_resolve_rel() {
+  local key="${1:-}"
+  case "${key}" in
+    kernel) printf '%s\n' "kernel.md" ;;
+    index|_INDEX.md) printf '%s\n' "_INDEX.md" ;;
+    commands/*.md|policies/*.md) printf '%s\n' "${key}" ;;
+    *)
+      echo "unknown context key: ${key}" >&2
+      return 1
+      ;;
+  esac
+}
+
+context_command() {
+  local mode="${1:-}" rel path
+  shift || true
+  case "${mode}" in
+    path|cat) ;;
+    -h|--help|help|"")
+      context_usage
+      return 0
+      ;;
+    *)
+      echo "unknown context subcommand: ${mode}" >&2
+      context_usage >&2
+      return 1
+      ;;
+  esac
+  rel="$(context_resolve_rel "${1:-}")" || return 1
+  if [[ -f "$(project_local_dir)/context/${rel}" ]]; then
+    path="$(project_local_dir)/context/${rel}"
+  else
+    path="${RUNTIME_DIR}/context/${rel}"
+  fi
+  [[ -f "${path}" ]] || {
+    echo "context file not found: ${rel}" >&2
+    return 1
+  }
+  if [[ "${mode}" == "path" ]]; then
+    printf '%s\n' "${path}"
+  else
+    cat "${path}"
+  fi
 }
 
 agent_usage() {
@@ -796,6 +854,11 @@ case "${1:-}" in
   agent)
     shift
     agent_command "$@"
+    exit $?
+    ;;
+  context)
+    shift
+    context_command "$@"
     exit $?
     ;;
   upgrade)

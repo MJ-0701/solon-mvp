@@ -368,6 +368,191 @@ verify_context_router_targets() {
   ok "context router targets complete"
 }
 
+thin_context_runtime_migration() {
+  [ "${INSTALL_LAYOUT:-vendored}" = "thin" ] || return 0
+  local target_context="$TARGET/.sfs-local/context"
+  local source_index="$SOURCE_DIR/templates/.sfs-local-template/context/_INDEX.md"
+  local rel src dst archive_dir archive_file manifest staging count remaining
+
+  if [ ! -d "$target_context" ]; then
+    ok "thin runtime context: project-local context 없음 (packaged runtime 사용)"
+    return 0
+  fi
+
+  archive_dir="$TARGET/.sfs-local/archives/runtime-migrations/$(date +%Y%m%d-%H%M%S)-thin-context"
+  archive_file="$archive_dir/project-local-context.tar.gz"
+  manifest="$archive_dir/manifest.txt"
+  mkdir -p "$archive_dir" || return 5
+  staging=$(mktemp -d "$archive_dir/.stage.XXXXXX") || return 5
+  count=0
+
+  {
+    printf '%s\n' "_INDEX.md" "kernel.md"
+    if [ -f "$source_index" ]; then
+      grep -Eo 'commands/[a-z-]+\.md|policies/[a-z-]+\.md' "$source_index" || true
+    fi
+  } | sort -u | while IFS= read -r rel; do
+    [ -n "$rel" ] || continue
+    dst="$target_context/$rel"
+    [ -f "$dst" ] || continue
+    mkdir -p "$staging/context/$(dirname "$rel")" || exit 5
+    cp "$dst" "$staging/context/$rel" || exit 5
+    rm -f "$dst" || exit 5
+    printf '%s\n' "$rel" >> "$archive_dir/.migrated-list"
+  done
+
+  if [ -f "$archive_dir/.migrated-list" ]; then
+    count=$(wc -l < "$archive_dir/.migrated-list" | tr -d '[:space:]')
+  else
+    count=0
+  fi
+  if [ "$count" -eq 0 ]; then
+    rm -rf "$staging" "$archive_dir/.migrated-list" 2>/dev/null || true
+    rmdir "$archive_dir" 2>/dev/null || true
+    remaining=$(find "$target_context" -type f 2>/dev/null | wc -l | tr -d '[:space:]')
+    if [ "${remaining:-0}" -gt 0 ]; then
+      warn "thin runtime context: project-local custom context override 유지 ($remaining files)"
+    else
+      find "$target_context" -depth -type d -empty -exec rmdir {} \; 2>/dev/null || true
+      ok "thin runtime context: 정리할 managed context 없음"
+    fi
+    return 0
+  fi
+
+  {
+    echo "SFS thin runtime context migration"
+    echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "reason: project-local context docs moved to packaged global sfs runtime"
+    echo "archive: $archive_file"
+    echo "count: $count"
+    echo
+    echo "meaning:"
+    echo "- files were not conceptually removed from SFS"
+    echo "- managed command/policy guidance now lives in the Homebrew/Scoop sfs runtime"
+    echo "- the consumer project keeps only state, reports, decisions, and optional local overrides"
+    echo
+    echo "migrated_files:"
+    sed 's/^/- .sfs-local\/context\//' "$archive_dir/.migrated-list"
+  } > "$manifest" || return 5
+
+  tar -czf "$archive_file" -C "$staging" . || return 5
+  rm -rf "$staging" "$archive_dir/.migrated-list" || return 5
+  find "$target_context" -depth -type d -empty -exec rmdir {} \; 2>/dev/null || true
+
+  remaining=$(find "$target_context" -type f 2>/dev/null | wc -l | tr -d '[:space:]' || printf '0')
+  ok "thin runtime context 이관: managed context $count files → packaged global sfs runtime"
+  ok "  압축 백업: ${archive_file#$TARGET/}"
+  if [ "${remaining:-0}" -gt 0 ]; then
+    warn "  project-local custom context override 는 유지됨: .sfs-local/context/ ($remaining files)"
+  else
+    ok "  프로젝트 표면 정리: .sfs-local/context managed md 제거 완료"
+  fi
+  return 0
+}
+
+compact_legacy_sprint_archive_dirs() {
+  local root="$TARGET/.sfs-local/archives/sprints"
+  local dir archive_file manifest staging count total=0 file base
+  [ -d "$root" ] || return 0
+
+  while IFS= read -r dir; do
+    [ -d "$dir" ] || continue
+    archive_file="$dir/sprint-evidence.tar.gz"
+    manifest="$dir/manifest.txt"
+    [ ! -f "$archive_file" ] || continue
+
+    count=0
+    staging="$(mktemp -d "$dir/.stage.XXXXXX")" || return 5
+    while IFS= read -r file; do
+      [ -f "$file" ] || continue
+      base="$(basename "$file")"
+      cp "$file" "$staging/$base" || return 5
+      count=$((count + 1))
+    done < <(find "$dir" -maxdepth 1 -type f ! -name 'manifest.txt' ! -name '*.tar.gz' | sort)
+
+    if [ "$count" -eq 0 ]; then
+      rm -rf "$staging" 2>/dev/null || true
+      continue
+    fi
+
+    {
+      echo "SFS legacy sprint archive compaction"
+      echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      echo "reason: loose legacy sprint archive files packed into one cold archive bundle"
+      echo "archive: $archive_file"
+      echo "count: $count"
+      echo
+      echo "items:"
+      find "$staging" -type f 2>/dev/null | sort | while IFS= read -r staged; do
+        printf -- "- %s\n" "${staged#$staging/}"
+      done
+    } > "$manifest" || return 5
+
+    tar -czf "$archive_file" -C "$staging" . || return 5
+    rm -rf "$staging" || return 5
+    while IFS= read -r file; do
+      [ -f "$file" ] || continue
+      rm -f "$file" || return 5
+    done < <(find "$dir" -maxdepth 1 -type f ! -name 'manifest.txt' ! -name '*.tar.gz' | sort)
+    total=$((total + 1))
+  done < <(find "$root" -mindepth 2 -maxdepth 2 -type d | sort)
+
+  if [ "$total" -gt 0 ]; then
+    ok "legacy sprint archives 압축 정리: $total bundle(s)"
+  fi
+  return 0
+}
+
+compact_legacy_review_run_archives() {
+  local root="$TARGET/.sfs-local/archives/review-runs"
+  local archive_dir archive_file manifest staging count
+  [ -d "$root" ] || return 0
+
+  count=$(find "$root" -type f 2>/dev/null | wc -l | tr -d '[:space:]')
+  if [ "${count:-0}" -eq 0 ]; then
+    rm -rf "$root" 2>/dev/null || true
+    ok "legacy review-run archive 비움: loose file 없음"
+    return 0
+  fi
+
+  archive_dir="$TARGET/.sfs-local/archives/runtime-migrations/$(date +%Y%m%d-%H%M%S)-legacy-review-runs"
+  archive_file="$archive_dir/review-runs.tar.gz"
+  manifest="$archive_dir/manifest.txt"
+  mkdir -p "$archive_dir" || return 5
+  staging="$(mktemp -d "$archive_dir/.stage.XXXXXX")" || return 5
+  mkdir -p "$staging/review-runs" || return 5
+  cp -R "$root"/. "$staging/review-runs/" || return 5
+
+  {
+    echo "SFS legacy review-run archive migration"
+    echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "reason: old per-run review scratch archives are no longer kept as loose project files"
+    echo "archive: $archive_file"
+    echo "count: $count"
+    echo
+    echo "meaning:"
+    echo "- future superseded review scratch is discarded during implementation"
+    echo "- latest sprint review scratch is packed into the sprint cold archive bundle at tidy/retro"
+    echo "- this compressed file is retained only for legacy history"
+    echo
+    echo "items:"
+    find "$staging/review-runs" -type f 2>/dev/null | sort | while IFS= read -r staged; do
+      printf -- "- %s\n" "${staged#$staging/}"
+    done
+  } > "$manifest" || return 5
+
+  tar -czf "$archive_file" -C "$staging" . || return 5
+  rm -rf "$staging" "$root" || return 5
+  ok "legacy review-run archives 이관: $count files → ${archive_file#$TARGET/}"
+  return 0
+}
+
+project_surface_archive_migrations() {
+  compact_legacy_sprint_archive_dirs || return 5
+  compact_legacy_review_run_archives || return 5
+  return 0
+}
+
 # ============================================================================
 # 2. 버전 비교
 # ============================================================================
@@ -426,8 +611,13 @@ if [ "$CUR_VER" = "$NEW_VER" ]; then
     || grep -q 'selected_runtime: "unset"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null; then
     warn "agent model profile 이 current_model fallback 상태입니다."
   fi
-  repair_missing_context_router_targets
-  verify_context_router_targets || die "context router index references missing files"
+  if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ]; then
+    thin_context_runtime_migration || die "thin runtime context migration failed"
+  else
+    repair_missing_context_router_targets
+    verify_context_router_targets || die "context router index references missing files"
+  fi
+  project_surface_archive_migrations || die "legacy archive surface migration failed"
   maybe_prompt_model_profile
   ok "이미 최신 버전. 업그레이드 불필요."
   if [ "$MODEL_PROFILE_REPAIRED" -eq 1 ]; then
@@ -459,6 +649,14 @@ recommend_action() {
 
   if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ]; then
     case "$dst_rel" in
+      .sfs-local/context/*|.sfs-local/context/commands/*|.sfs-local/context/policies/*)
+        if [ "$exists" = "yes" ]; then
+          printf "migrate to packaged runtime"
+        else
+          printf "skip (packaged runtime)"
+        fi
+        return 0
+        ;;
       ".sfs-local/GUIDE.md"|.sfs-local/scripts/*|.sfs-local/sprint-templates/*|.sfs-local/personas/*|.sfs-local/decisions-template/*)
         printf "skip (thin runtime)"
         return 0
@@ -514,7 +712,7 @@ cat <<EOF
   - .sfs-local/divisions.yaml          → 자동 보존 (프로젝트별 운영값 보호)
   - .sfs-local/model-profiles.yaml     → 없으면 설치 + 설정 안내, 있으면 자동 보존 (agent별 모델 설정 보호)
   - .sfs-local/auth.env.example        → backup+overwrite (로컬 auth 템플릿, 실제 auth.env 는 ignore)
-  - .sfs-local/context/**/*.md         → backup+overwrite (짧은 agent context routing modules)
+  - .sfs-local/context/**/*.md         → thin: packaged runtime 으로 이관, vendored: backup+overwrite
   - .claude/skills/sfs/SKILL.md        → backup+overwrite (Claude Code Skill 최신화)
   - .claude/commands/sfs.md            → backup+overwrite (legacy 커맨드 fallback 최신화)
   - .sfs-local/scripts/sfs-*.sh        → backup+overwrite (Solon-versioned bash)
@@ -665,6 +863,10 @@ update_file() {
 
   if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ]; then
     case "$dst_rel" in
+      .sfs-local/context/*|.sfs-local/context/commands/*|.sfs-local/context/policies/*)
+        ok "thin runtime 사용 — project-local context skip: $dst_rel"
+        return 0
+        ;;
       ".sfs-local/GUIDE.md"|.sfs-local/scripts/*|.sfs-local/sprint-templates/*|.sfs-local/personas/*|.sfs-local/decisions-template/*)
         ok "thin runtime 사용 — project-local managed asset skip: $dst_rel"
         return 0
@@ -738,23 +940,28 @@ update_file ".sfs-local/model-profiles.yaml" "templates/.sfs-local-template/mode
 update_file ".sfs-local/auth.env.example" "templates/.sfs-local-template/auth.env.example" "executor auth env example" "b"
 update_file ".sfs-local/GUIDE.md" "GUIDE.md" "Solon onboarding guide (/sfs guide)" "b"
 
-# context/ — short, routed agent context modules (kept local even in thin layout)
-mkdir -p "$TARGET/.sfs-local/context/commands" "$TARGET/.sfs-local/context/policies"
-update_file ".sfs-local/context/_INDEX.md" "templates/.sfs-local-template/context/_INDEX.md" "context router index" "b"
-update_file ".sfs-local/context/kernel.md" "templates/.sfs-local-template/context/kernel.md" "context kernel" "b"
-update_file ".sfs-local/context/commands/start.md" "templates/.sfs-local-template/context/commands/start.md" "context start module" "b"
-update_file ".sfs-local/context/commands/profile.md" "templates/.sfs-local-template/context/commands/profile.md" "context profile module" "b"
-update_file ".sfs-local/context/commands/brainstorm.md" "templates/.sfs-local-template/context/commands/brainstorm.md" "context brainstorm module" "b"
-update_file ".sfs-local/context/commands/plan.md" "templates/.sfs-local-template/context/commands/plan.md" "context plan module" "b"
-update_file ".sfs-local/context/commands/implement.md" "templates/.sfs-local-template/context/commands/implement.md" "context implement module" "b"
-update_file ".sfs-local/context/commands/review.md" "templates/.sfs-local-template/context/commands/review.md" "context review module" "b"
-update_file ".sfs-local/context/commands/release.md" "templates/.sfs-local-template/context/commands/release.md" "context release module" "b"
-update_file ".sfs-local/context/commands/upgrade.md" "templates/.sfs-local-template/context/commands/upgrade.md" "context upgrade module" "b"
-update_file ".sfs-local/context/commands/tidy.md" "templates/.sfs-local-template/context/commands/tidy.md" "context tidy module" "b"
-update_file ".sfs-local/context/commands/loop.md" "templates/.sfs-local-template/context/commands/loop.md" "context loop module" "b"
-update_file ".sfs-local/context/policies/mutex.md" "templates/.sfs-local-template/context/policies/mutex.md" "context mutex policy" "b"
-update_file ".sfs-local/context/policies/token-harness.md" "templates/.sfs-local-template/context/policies/token-harness.md" "context token/harness policy" "b"
-verify_context_router_targets || die "context router index references missing files"
+if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ]; then
+  thin_context_runtime_migration || die "thin runtime context migration failed"
+else
+  # context/ — short, routed agent context modules for vendored installs.
+  mkdir -p "$TARGET/.sfs-local/context/commands" "$TARGET/.sfs-local/context/policies"
+  update_file ".sfs-local/context/_INDEX.md" "templates/.sfs-local-template/context/_INDEX.md" "context router index" "b"
+  update_file ".sfs-local/context/kernel.md" "templates/.sfs-local-template/context/kernel.md" "context kernel" "b"
+  update_file ".sfs-local/context/commands/start.md" "templates/.sfs-local-template/context/commands/start.md" "context start module" "b"
+  update_file ".sfs-local/context/commands/profile.md" "templates/.sfs-local-template/context/commands/profile.md" "context profile module" "b"
+  update_file ".sfs-local/context/commands/brainstorm.md" "templates/.sfs-local-template/context/commands/brainstorm.md" "context brainstorm module" "b"
+  update_file ".sfs-local/context/commands/plan.md" "templates/.sfs-local-template/context/commands/plan.md" "context plan module" "b"
+  update_file ".sfs-local/context/commands/implement.md" "templates/.sfs-local-template/context/commands/implement.md" "context implement module" "b"
+  update_file ".sfs-local/context/commands/review.md" "templates/.sfs-local-template/context/commands/review.md" "context review module" "b"
+  update_file ".sfs-local/context/commands/release.md" "templates/.sfs-local-template/context/commands/release.md" "context release module" "b"
+  update_file ".sfs-local/context/commands/upgrade.md" "templates/.sfs-local-template/context/commands/upgrade.md" "context upgrade module" "b"
+  update_file ".sfs-local/context/commands/tidy.md" "templates/.sfs-local-template/context/commands/tidy.md" "context tidy module" "b"
+  update_file ".sfs-local/context/commands/loop.md" "templates/.sfs-local-template/context/commands/loop.md" "context loop module" "b"
+  update_file ".sfs-local/context/policies/mutex.md" "templates/.sfs-local-template/context/policies/mutex.md" "context mutex policy" "b"
+  update_file ".sfs-local/context/policies/token-harness.md" "templates/.sfs-local-template/context/policies/token-harness.md" "context token/harness policy" "b"
+  verify_context_router_targets || die "context router index references missing files"
+fi
+project_surface_archive_migrations || die "legacy archive surface migration failed"
 
 # scripts/ — Solon-versioned bash adapters (codex finding #4 후속, 25th-6 보강)
 # 신규: sfs-loop / sfs-decision / sfs-retro (0.4.0-mvp 추가 슬롯) + sfs-guide (0.5.2-product)
@@ -845,6 +1052,7 @@ runtime:
 state:
   dir: ".sfs-local"
 overrides:
+  # Optional local override. Thin layout keeps managed context in the packaged runtime.
   context: ".sfs-local/context"
   sprint_templates: ".sfs-local/sprint-templates"
   decisions_template: ".sfs-local/decisions-template"

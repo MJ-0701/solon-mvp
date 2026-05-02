@@ -1,3 +1,24 @@
+## [0.5.87-product] - 2026-05-03
+
+### Changed
+
+- **Thin runtime context migration** — thin installs no longer copy managed
+  routed context docs into `.sfs-local/context`. Agent adapters now resolve the
+  same command/policy context through `sfs context path ...`, with optional
+  project-local overrides still honored first.
+- **Upgrade cleanup for existing projects** — `sfs upgrade` migrates old
+  project-local managed context docs into a compressed runtime migration backup
+  and explains that the guidance moved to the packaged Homebrew/Scoop runtime
+  rather than disappearing.
+- **Cold archive bundles** — sprint close/tidy now packs verbose workbench
+  files and latest review scratch into one `sprint-evidence.tar.gz` plus
+  `manifest.txt`. Legacy loose sprint archives and old per-run review archives
+  are compacted during upgrade.
+- **Adopt baseline handoff** — `sfs adopt` report/retro output now focuses on a
+  useful project snapshot, documentation topology, submodule/subrepo signals,
+  product change signals, verification entry points, and a next sprint seed
+  instead of mostly listing paths and commits.
+
 ## [0.5.86-product] - 2026-05-02
 
 ### Changed

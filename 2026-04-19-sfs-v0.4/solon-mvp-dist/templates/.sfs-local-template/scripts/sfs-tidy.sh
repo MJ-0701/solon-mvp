@@ -20,14 +20,13 @@ Usage:
   /sfs tidy [--sprint <id-or-ref>] [--apply]
   /sfs tidy --all [--apply]
 
-Clean up completed sprint workbench docs without deleting them.
+Clean up completed sprint workbench docs without leaving loose hidden files.
   - Default is dry-run; it prints what would be archived.
   - --sprint accepts an exact sprint id or a unique suffix ref.
     Example: W18-sprint-1 can resolve to 2026-W18-sprint-1.
-  - --apply creates report.md when missing, then moves
-    brainstorm/plan/implement/log/review into .sfs-local/archives/.
-  - Matching .sfs-local/tmp review prompt/run files for the sprint are moved
-    into the same archive tree.
+  - --apply creates report.md when missing, then packs
+    brainstorm/plan/implement/log/review plus matching .sfs-local/tmp review
+    prompt/run scratch into one cold .tar.gz bundle with a short manifest.
   - The visible sprint folder keeps report.md, retro.md, decisions, and other
     durable artifacts; workbench dust leaves the main reading path.
   - When report.md was created from legacy workbench docs, AI runtimes should
@@ -250,9 +249,9 @@ while IFS= read -r sid; do
     else
       echo "  report: missing (will create on --apply)"
     fi
-    echo "  workbench: ${COUNT} file(s) would move to archive"
-    echo "  tmp: ${TMP_COUNT} file(s) would move to archive"
-    echo "  archive: ${ARCHIVE_PATH}"
+    echo "  workbench: ${COUNT} file(s) would pack into cold archive"
+    echo "  tmp: ${TMP_COUNT} file(s) would pack into cold archive"
+    echo "  archive: ${ARCHIVE_PATH}/sprint-evidence.tar.gz"
     continue
   fi
 
@@ -279,9 +278,10 @@ while IFS= read -r sid; do
   else
     echo "  report: ${REPORT_PATH}"
   fi
-  echo "  archive: ${ARCHIVE_PATH}"
-  echo "  workbench: ${COUNT} file(s) moved"
-  echo "  tmp: ${TMP_COUNT} file(s) moved"
+  echo "  archive: ${ARCHIVE_PATH}/sprint-evidence.tar.gz"
+  echo "  manifest: ${ARCHIVE_PATH}/manifest.txt"
+  echo "  workbench: ${COUNT} file(s) packed"
+  echo "  tmp: ${TMP_COUNT} file(s) packed"
 done <<< "${TARGETS}"
 
 exit "${SFS_EXIT_OK}"

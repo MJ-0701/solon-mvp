@@ -118,9 +118,91 @@ top_changed_paths() {
   local max_commits="$1"
   git log --name-only --pretty=format: -n "${max_commits}" 2>/dev/null \
     | sed '/^[[:space:]]*$/d' \
+    | grep -Ev '^(\.sfs-local/|\.claude/|\.agents/|\.gemini/|docs/archive/|docs/\.pdca-snapshots/|memory/)' \
     | awk -F/ '{ if (NF >= 2) print $1"/"$2; else print $1 }' \
     | sort | uniq -c | sort -nr | head -12 \
     | sed 's/^/  - /'
+}
+
+recent_product_commits() {
+  local max_commits="$1"
+  git log -n "${max_commits}" --date=short --pretty=format:'- %h %ad %s' 2>/dev/null \
+    | grep -Ev 'chore\(sfs\)|docs\(sfs\)|close sprint|update runtime|adopt baseline' \
+    | head -18
+}
+
+project_identity_excerpt() {
+  local emitted=0
+  if [[ -f SFS.md ]]; then
+    awk '
+      /^## 프로젝트 개요/ { in_section=1; next }
+      in_section && /^## / { exit }
+      in_section && NF { print; count++; if (count >= 10) exit }
+    ' SFS.md
+    emitted=1
+  fi
+  if [[ -f README.md ]]; then
+    if [[ "${emitted}" -eq 1 ]]; then
+      printf '\n'
+    fi
+    awk '
+      NF && $0 !~ /^!\[/ {
+        print
+        count++
+        if (count >= 10) exit
+      }
+    ' README.md
+  fi
+}
+
+component_map() {
+  git ls-files 2>/dev/null \
+    | grep -Ev '^(\.gitignore$|\.sfs-local/|\.claude/|\.agents/|\.gemini/|node_modules/|build/|dist/|out/|target/|vendor/)' \
+    | awk -F/ '
+      NF >= 2 { key=$1 }
+      NF < 2 { key="root" }
+      { c[key]++ }
+      END {
+        for (k in c) printf "%6d %s\n", c[k], k
+      }
+    ' \
+    | sort -nr | head -12 | sed 's/^/  - /'
+}
+
+doc_topology() {
+  local found=0
+  if git ls-files --stage 2>/dev/null | awk '$1 == "160000" {print $4}' | grep -qx 'docs'; then
+    echo "- docs/: git submodule; read docs at its pinned commit when historical product docs matter."
+    found=1
+  elif [[ -e docs/.git ]]; then
+    echo "- docs/: nested git repository/subrepo; treat docs history as separate from main repo history."
+    found=1
+  elif [[ -d docs ]]; then
+    echo "- docs/: in-repo documentation directory."
+    found=1
+  fi
+  [[ -f README.md ]] && { echo "- README.md: current project/product entry."; found=1; }
+  [[ -f HANDOFF.md ]] && { echo "- HANDOFF.md: legacy handoff signal; verify freshness before treating as current."; found=1; }
+  [[ -f SFS.md ]] && { echo "- SFS.md: Solon operating identity and routed entry."; found=1; }
+  [[ "${found}" -eq 1 ]] || echo "- no first-class docs detected."
+}
+
+submodule_summary() {
+  local status nested
+  status="$(git submodule status --recursive 2>/dev/null || true)"
+  nested="$(find . -mindepth 2 -maxdepth 3 \
+    \( -path './.git' -o -path "./${SFS_LOCAL_DIR}" -o -path './node_modules' -o -path './frontend/node_modules' -o -path './build' -o -path './dist' \) -prune \
+    -o -name .git -print 2>/dev/null | sed 's#^\./##; s#/\.git$##' | sort || true)"
+  if [[ -z "${status}" && -z "${nested}" ]]; then
+    echo "- none"
+  else
+    if [[ -n "${status}" ]]; then
+      printf '%s\n' "${status}" | sed 's/^/- git-submodule: /'
+    fi
+    if [[ -n "${nested}" ]]; then
+      printf '%s\n' "${nested}" | sed 's/^/- nested-repo: /'
+    fi
+  fi
 }
 
 nonempty_line_count() {
@@ -307,6 +389,10 @@ TEST_COUNT="$(count_paths '(^|/)(test|tests|spec|specs|__tests__|src/test)(/|$)|
 STACK_SIGNALS="$(detect_stack_signals)"
 SUBMODULE_STATUS="$(git submodule status --recursive 2>/dev/null || true)"
 SUBMODULE_COUNT="$(git ls-files --stage 2>/dev/null | awk '$1 == "160000" {c++} END {print c+0}')"
+NESTED_REPO_COUNT="$(find . -mindepth 2 -maxdepth 3 \
+  \( -path './.git' -o -path "./${SFS_LOCAL_DIR}" -o -path './node_modules' -o -path './frontend/node_modules' -o -path './build' -o -path './dist' \) -prune \
+  -o -name .git -print 2>/dev/null | wc -l | tr -d '[:space:]')"
+SUBREPO_SIGNAL_COUNT=$((SUBMODULE_COUNT + NESTED_REPO_COUNT))
 SFS_SPRINT_COUNT=0
 if [[ -d "${SFS_SPRINTS_DIR}" ]]; then
   SFS_SPRINT_COUNT="$(find "${SFS_SPRINTS_DIR}" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d '[:space:]')"
@@ -345,7 +431,7 @@ if [[ "${APPLY}" -eq 0 ]]; then
   echo "  docs_signals: ${DOC_COUNT}"
   echo "  test_signals: ${TEST_COUNT}"
   echo "  stack: ${STACK_SIGNALS}"
-  echo "  submodules: ${SUBMODULE_COUNT}"
+  echo "  submodules/subrepos: ${SUBREPO_SIGNAL_COUNT}"
   if [[ "${PRESERVE_CURRENT_SPRINT}" -eq 1 ]]; then
     echo "  preserve_current_sprint: ${CURRENT_SPRINT} (target exists; treating as post-adopt real sprint)"
   fi
@@ -388,8 +474,13 @@ collapse_dirs_to_cold_archive "${EXISTING_ARCHIVE_IDS}" "${SFS_ARCHIVES_DIR}" "$
 mkdir -p "${TARGET_DIR}" || exit "${SFS_EXIT_PERM}"
 
 RECENT_COMMITS="$(git log -n "${MAX_COMMITS}" --date=short --pretty=format:'- %h %ad %s' 2>/dev/null || true)"
+RECENT_PRODUCT_COMMITS="$(recent_product_commits "${MAX_COMMITS}" || true)"
 TOP_CHANGED="$(top_changed_paths "${MAX_COMMITS}" || true)"
 VERIFY_COMMANDS="$(suggest_verify_commands)"
+PROJECT_IDENTITY="$(project_identity_excerpt || true)"
+COMPONENT_MAP="$(component_map || true)"
+DOC_TOPOLOGY="$(doc_topology || true)"
+SUBMODULE_SUMMARY="$(submodule_summary || true)"
 
 {
   echo "SFS adopt source summary"
@@ -409,6 +500,7 @@ VERIFY_COMMANDS="$(suggest_verify_commands)"
   echo "archived_existing_sprint_count: ${EXISTING_SPRINT_ARCHIVE_COUNT}"
   echo "collapsed_existing_archive_count: ${EXISTING_ARCHIVE_COLLAPSE_COUNT}"
   echo "submodule_count: ${SUBMODULE_COUNT}"
+  echo "nested_repo_count: ${NESTED_REPO_COUNT}"
   if [[ "${EXISTING_SPRINT_ARCHIVE_COUNT}" -gt 0 ]]; then
     echo
     echo "archived_existing_sprints:"
@@ -451,18 +543,22 @@ confidence: "mixed"
 
 # Report — Legacy Baseline Intake
 
-> This report is the first SFS reading entrance for a project that already had
-> history before SFS. It intentionally does **not** recreate every old document.
-> The rule is: keep what must remain visible, archive the rest.
+> This is the first SFS reading entrance for a project that already had history
+> before SFS. It must help the next human/AI understand the project, not merely
+> prove that old files were moved.
 
-## §1. Executive Summary
+## §1. Project Snapshot
 
-- **Goal**: adopt this legacy project into SFS without adding document sprawl.
-- **Outcome**: baseline created from git/code/docs signals.
-- **Final verdict**: not-reviewed.
-- **One-line result**: SFS can now start from \`${SPRINT_ID}\` with report-first context instead of scattered historical documents.
+The project describes itself as:
 
-## §2. Evidence-Backed Facts
+\`\`\`text
+${PROJECT_IDENTITY:-  - no README.md or SFS.md identity excerpt found}
+\`\`\`
+
+SFS did not infer product intent from archived notes. It created a compact
+handoff from current project files, git history, and documentation topology.
+
+## §2. Operating Facts
 
 - **Repository root**: \`${ROOT}\`
 - **Current branch / head**: \`${BRANCH:--}\` / \`${HEAD_SHA:--}\`
@@ -471,26 +567,49 @@ confidence: "mixed"
 - **Documentation signals**: ${DOC_COUNT}
 - **Test signals**: ${TEST_COUNT}
 - **Stack signals**: ${STACK_SIGNALS}
-- **Submodule/subrepo signals**: ${SUBMODULE_COUNT}
+- **Submodule/subrepo signals**: ${SUBREPO_SIGNAL_COUNT}
 - **Existing SFS sprint folders before adopt**: ${SFS_SPRINT_COUNT}
 - **Preserved current sprint during re-adopt**: ${CURRENT_SPRINT:-none}
 - **Archived existing SFS sprint folders during adopt**: ${EXISTING_SPRINT_ARCHIVE_COUNT}
 - **Collapsed pre-existing expanded archive folders**: ${EXISTING_ARCHIVE_COLLAPSE_COUNT}
 
-## §3. High-Change Areas
+## §3. Component Map
 
-The last ${MAX_COMMITS} commits point to these recurring paths:
+Largest tracked project surfaces, excluding SFS/agent runtime state:
+
+\`\`\`text
+${COMPONENT_MAP:-  - none}
+\`\`\`
+
+Documentation topology:
+
+\`\`\`text
+${DOC_TOPOLOGY:-  - none}
+\`\`\`
+
+Submodules:
+
+\`\`\`text
+${SUBMODULE_SUMMARY:-  - none}
+\`\`\`
+
+If docs are a submodule, treat the main repo report as the product/runtime
+handoff and read the docs submodule at its pinned commit only when docs history
+is directly relevant.
+
+## §4. Product Change Signals
+
+The last ${MAX_COMMITS} commits point to these recurring product paths after
+filtering SFS/archive/runtime noise:
 
 \`\`\`text
 ${TOP_CHANGED:-  - none}
 \`\`\`
 
-## §4. Reconstructed Work History
-
-Recent git commits:
+Recent non-SFS commits:
 
 \`\`\`text
-${RECENT_COMMITS:-  - none}
+${RECENT_PRODUCT_COMMITS:-  - none}
 \`\`\`
 
 ## §5. Verification Starting Points
@@ -508,16 +627,18 @@ ${VERIFY_COMMANDS}
 - **Cold archive policy**: old sprint/archive trees are stored as tarballs plus short manifests, not expanded as a second visible document tree.
 - **Archived old sprint folders**: ${EXISTING_SPRINT_ARCHIVE_COUNT} in \`${EXISTING_SPRINTS_TARBALL}\`.
 - **Collapsed old archive folders**: ${EXISTING_ARCHIVE_COLLAPSE_COUNT} in \`${EXISTING_ARCHIVES_TARBALL}\`.
-- **Next sprint candidates**:
-  - turn the highest-change area into the first implementation sprint.
-  - run the suggested verification commands and record pass/fail in review.
-  - use \`/sfs tidy --apply\` later only for completed SFS sprint workbench cleanup.
 
-## §7. Open Questions
+## §7. Next Sprint Contract Seed
 
-- Which high-change area is the product-critical domain?
-- Which command is the authoritative baseline verification command?
-- Are docs/submodules authoritative references or historical residue?
+Before implementation, choose one:
+
+- product area/component to change.
+- acceptance criteria that prove the slice is done.
+- verification command or manual smoke path.
+- whether docs/submodule history is authoritative for this slice.
+
+Do not start the next sprint by reading the cold archives. Use them only for
+archaeology, dispute resolution, or deep recovery.
 EOF
 
 cat > "${RETRO_PATH}" <<EOF
@@ -535,32 +656,37 @@ closed_at: ""
 
 # Retro — Legacy Baseline Intake
 
-## §1. KPT
+## §1. Why This Exists
 
-### Keep
+This retro records the adoption policy, not the whole old project history.
 
-- Preserve raw history as evidence, but make \`report.md\` the visible entry point.
+## §2. Keep
 
-### Problem
+- Keep \`report.md\` as the visible handoff entry.
+- Keep old sprint/archive trees as cold tarballs plus manifests.
+- Keep docs submodules as separate context; do not flatten them into the main SFS report.
 
-- Legacy projects often have too many scattered documents or no sprint documents at all.
-- Reading every old note before work creates more cost than value.
+## §3. Problem
 
-### Try
+- A legacy baseline report that only lists commits and path counts does not give
+  the next human/AI a useful project model.
+- Moving files into \`.sfs-local/archives/\` as loose hidden documents only moves
+  weight; it does not reduce project complexity.
+- Review prompts/runs are scratch evidence. They should not become a parallel
+  archive tree after sprint close.
 
-- Start the next sprint from the highest-value domain in \`report.md\`, not from a full archaeology pass.
+## §4. Try
 
-## §2. PDCA Learning
+- Start the next sprint from \`report.md\` §7: component, acceptance criteria,
+  verification, and docs/submodule authority.
+- Treat cold archives as recovery material only.
+- Let \`review.md\` keep the durable verdict/actions; raw review scratch should
+  be discarded on superseding runs or bundled into the sprint cold archive.
 
-- **Plan**: adoption must create a small baseline, not a second documentation system.
-- **Do**: git/code/docs signals are enough for first-pass handoff.
-- **Check**: verification commands still need a human/AI runtime to run and record evidence.
-- **Act**: next sprint should validate the baseline and choose one implementation slice.
-
-## §3. Artifact Map
+## §5. Artifact Map
 
 - \`report.md\` — durable baseline entry.
-- \`retro.md\` — why the baseline is intentionally compact.
+- \`retro.md\` — why the baseline stays compact.
 - \`${ARCHIVE_DIR}/source-summary.txt\` — archived scan evidence.
 - \`${EXISTING_SPRINTS_TARBALL}\` — cold archive of pre-existing visible sprint folders, when any existed.
 - \`${EXISTING_ARCHIVES_TARBALL}\` — cold archive of pre-existing expanded archive folders, when any existed.
@@ -572,7 +698,7 @@ _esc_sprint="$(json_escape "${SPRINT_ID}")"
 _esc_report="$(json_escape "${REPORT_PATH}")"
 _esc_retro="$(json_escape "${RETRO_PATH}")"
 _esc_archive="$(json_escape "${ARCHIVE_DIR}/source-summary.txt")"
-append_event "legacy_adopt" "{\"sprint_id\":\"${_esc_sprint}\",\"report\":\"${_esc_report}\",\"retro\":\"${_esc_retro}\",\"archive\":\"${_esc_archive}\",\"commits\":${COMMIT_COUNT},\"tracked_files\":${TRACKED_COUNT},\"docs_signals\":${DOC_COUNT},\"test_signals\":${TEST_COUNT},\"submodules\":${SUBMODULE_COUNT},\"archived_existing_sprints\":${EXISTING_SPRINT_ARCHIVE_COUNT},\"collapsed_existing_archives\":${EXISTING_ARCHIVE_COLLAPSE_COUNT}}"
+append_event "legacy_adopt" "{\"sprint_id\":\"${_esc_sprint}\",\"report\":\"${_esc_report}\",\"retro\":\"${_esc_retro}\",\"archive\":\"${_esc_archive}\",\"commits\":${COMMIT_COUNT},\"tracked_files\":${TRACKED_COUNT},\"docs_signals\":${DOC_COUNT},\"test_signals\":${TEST_COUNT},\"submodules\":${SUBMODULE_COUNT},\"nested_repos\":${NESTED_REPO_COUNT},\"archived_existing_sprints\":${EXISTING_SPRINT_ARCHIVE_COUNT},\"collapsed_existing_archives\":${EXISTING_ARCHIVE_COLLAPSE_COUNT}}"
 
 echo "adopted: ${SPRINT_ID}"
 echo "  report: ${REPORT_PATH}"

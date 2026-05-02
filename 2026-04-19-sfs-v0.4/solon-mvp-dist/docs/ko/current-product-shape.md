@@ -120,9 +120,11 @@ override 입니다.
 sfs retro
 ```
 
-이 명령은 `report.md` 와 `retro.md` 를 정리하고, workbench 원문을 archive 로 접고, sprint close 상태와
-local close commit 까지 연결합니다. 초안만 열고 sprint 는 닫지 않고 싶을 때는 `sfs retro --draft`
-를 씁니다.
+이 명령은 `report.md` 와 `retro.md` 를 정리하고, workbench 원문과 임시 review scratch 를 하나의
+cold archive bundle 로 압축한 뒤, sprint close 상태와 local close commit 까지 연결합니다.
+초안만 열고 sprint 는 닫지 않고 싶을 때는 `sfs retro --draft` 를 씁니다.
+예전 설치본에 남아 있던 loose sprint archive 나 별도 review-run archive 는 `sfs upgrade` 때
+압축 migration 으로 정리됩니다.
 
 ## 문서 구조
 
