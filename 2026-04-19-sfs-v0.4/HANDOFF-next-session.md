@@ -1,9 +1,9 @@
 ---
 doc_id: handoff-next-session
-title: "Next session handoff — 0.5.73 current truth"
-written_at: 2026-05-02T06:04:46Z
-written_at_kst: 2026-05-02T15:04:46+09:00
-last_known_main_commit: c37c6ab
+title: "Next session handoff — 0.5.74 current truth"
+written_at: 2026-05-02T07:32:21Z
+written_at_kst: 2026-05-02T16:32:21+09:00
+last_known_main_commit: ebf8a4a
 visibility: raw-internal
 source_task: codex-handoff-drift-guard
 ---
@@ -12,22 +12,25 @@ source_task: codex-handoff-drift-guard
 
 ## 1. Current Truth
 
-- Latest Solon Product release is `0.5.73-product`.
-- Stable product repo: `df8552a` / tag `v0.5.73-product`.
-- Homebrew tap: `9a30c0b`.
-- Scoop bucket: `be4134e`.
-- Dev repo main at handoff repair start: `c37c6ab`.
+- Latest Solon Product release is `0.5.74-product`.
+- Stable product repo: `2062971` / tag `v0.5.74-product`.
+- Homebrew tap: `7e00696`.
+- Scoop bucket: `24f4aa8`.
+- Dev repo main at release prep: `ebf8a4a`.
 - Installed runtime reports:
-  - `sfs 0.5.73-product`
-  - `latest 0.5.73-product`
+  - `sfs 0.5.74-product`
+  - `latest 0.5.74-product`
   - `status up-to-date`
-- `bash scripts/verify-product-release.sh --version 0.5.73-product` passed:
+- `bash scripts/verify-product-release.sh --version 0.5.74-product` passed:
   product tag, Homebrew formula/hash, Scoop manifest/hash, installed runtime,
   and dev/stable/Homebrew/Scoop clean handoff state all OK.
-- `0.5.73-product` fixes the context router upgrade bug: `sfs upgrade` now
-  manages `commands/start.md` and `commands/profile.md`, repairs missing router
-  targets even when the project already reports latest, and fails closed if
-  `_INDEX.md` still references a missing context module.
+- `0.5.74-product` ships the Gate numbering UX cleanup and the review evidence
+  bundle hotfix together. User-facing Solon report/CLI/docs now use Gate 1~7
+  labels (`/sfs review --gate 6` for review), while older storage ids remain
+  internal compatibility fields. `/sfs review` now unions indexed and
+  auto-discovered text evidence, includes raw command output sections, treats
+  `.gitignore` as mixed product/system evidence, and drops nonexistent indexed
+  paths.
 
 ## 2. Why This Handoff Exists
 
@@ -53,11 +56,11 @@ Study-note project validation exercised the upgraded SFS G4 review path:
 - Verification passed:
   - `npm run smoke:pdf-workspace`
   - `npm run build`
-  - `sfs review --gate G4 --executor codex` returned `pass`.
+  - `sfs review --gate 6 --executor codex` returned `pass`.
 - Latest reported result path:
   `.sfs-local/tmp/review-runs/2026-W18-sprint-5-G4-20260502T054452Z.result.md`.
 
-Conclusion: the G4 review evidence upgrade reached usable code-level review
+Conclusion: the Gate 6 review evidence upgrade reached usable code-level review
 quality; remaining failures should now be treated as either real code findings
 or separately identified evidence packaging gaps.
 
