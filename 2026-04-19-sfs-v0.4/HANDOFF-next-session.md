@@ -1,9 +1,9 @@
 ---
 doc_id: handoff-next-session
-title: "Next session handoff — 0.5.72 current truth"
-written_at: 2026-05-02T05:50:11Z
-written_at_kst: 2026-05-02T14:50:11+09:00
-last_known_main_commit: 4650738
+title: "Next session handoff — 0.5.73 current truth"
+written_at: 2026-05-02T06:04:46Z
+written_at_kst: 2026-05-02T15:04:46+09:00
+last_known_main_commit: c37c6ab
 visibility: raw-internal
 source_task: codex-handoff-drift-guard
 ---
@@ -12,18 +12,22 @@ source_task: codex-handoff-drift-guard
 
 ## 1. Current Truth
 
-- Latest Solon Product release is `0.5.72-product`.
-- Stable product repo: `3cb52b0` / tag `v0.5.72-product`.
-- Homebrew tap: `106c9a2`.
-- Scoop bucket: `a2c7368`.
-- Dev repo main at handoff repair start: `4650738`.
+- Latest Solon Product release is `0.5.73-product`.
+- Stable product repo: `df8552a` / tag `v0.5.73-product`.
+- Homebrew tap: `9a30c0b`.
+- Scoop bucket: `be4134e`.
+- Dev repo main at handoff repair start: `c37c6ab`.
 - Installed runtime reports:
-  - `sfs 0.5.72-product`
-  - `latest 0.5.72-product`
+  - `sfs 0.5.73-product`
+  - `latest 0.5.73-product`
   - `status up-to-date`
-- `bash scripts/verify-product-release.sh --version 0.5.72-product` passed:
+- `bash scripts/verify-product-release.sh --version 0.5.73-product` passed:
   product tag, Homebrew formula/hash, Scoop manifest/hash, installed runtime,
   and dev/stable/Homebrew/Scoop clean handoff state all OK.
+- `0.5.73-product` fixes the context router upgrade bug: `sfs upgrade` now
+  manages `commands/start.md` and `commands/profile.md`, repairs missing router
+  targets even when the project already reports latest, and fails closed if
+  `_INDEX.md` still references a missing context module.
 
 ## 2. Why This Handoff Exists
 
