@@ -155,15 +155,15 @@ sfs version --check
 Windows:
 
 ```powershell
-scoop update
-scoop update sfs
+sfs.cmd update
 sfs.cmd version --check
 ```
 
-For Scoop installs, running `scoop update sfs` from an initialized Solon project
-updates the runtime and then continues into the project upgrade. If Scoop says
-the runtime is already current but the project still needs cleanup, run
-`sfs.cmd upgrade`.
+On Windows, `sfs.cmd update` is the one-shot command. It runs `scoop update` and
+`scoop update sfs`, reloads the updated runtime, and then continues into the
+current project upgrade. Direct `scoop update sfs` can still trigger the
+post-install project hook, but bucket metadata refresh remains Scoop-owned, so
+the user-facing command is `sfs.cmd update`.
 
 Recent upgrades also repair missing managed context-router files even when the
 project already reports the latest version.

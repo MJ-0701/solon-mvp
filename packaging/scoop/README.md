@@ -19,9 +19,11 @@ Git for Windows Bash and delegates to the packaged Bash entrypoint at
 The manifest also runs `bin\\sfs-scoop-post-install.ps1` after install/update.
 When `scoop update sfs` is launched from an initialized Solon project, that hook
 runs `sfs.cmd upgrade --no-self-upgrade` from the detected project root so the
-runtime and project surface move together. Set `SFS_SCOOP_PROJECT_UPGRADE=0` to
-skip this hook; `sfs.cmd upgrade` sets that variable internally while it updates
-the Scoop runtime, then performs the project upgrade itself.
+runtime and project surface move together. The deterministic user-facing command
+is still `sfs.cmd update`: it runs `scoop update`, then `scoop update sfs`, then
+the project upgrade. Set `SFS_SCOOP_PROJECT_UPGRADE=0` to skip the manifest hook;
+`sfs.cmd update` / `sfs.cmd upgrade` set that variable internally while updating
+the Scoop runtime, then perform the project upgrade themselves.
 
 In PowerShell/cmd examples, use `sfs.cmd ...` explicitly. Git Bash/WSL users can
 use `sfs ...`.
@@ -60,7 +62,5 @@ bucket can then be tested with:
 scoop bucket add solon https://github.com/MJ-0701/scoop-solon-product
 scoop install sfs
 sfs.cmd version --check
-sfs.cmd upgrade
-# or, from an initialized project root after a new release:
-scoop update sfs
+sfs.cmd update
 ```

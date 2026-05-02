@@ -1,3 +1,15 @@
+## [0.5.95-product] - 2026-05-03
+
+### Changed
+
+- **Windows one-shot update command clarified** — Windows docs now lead with
+  `sfs.cmd update`, not a two-line Scoop sequence. The command owns the full
+  runtime + project update flow by running `scoop update`, `scoop update sfs`,
+  reloading the updated runtime, and then applying project migration.
+- **`sfs update` no longer discourages itself** — the compatibility-warning
+  line was removed so `sfs.cmd update` can serve as a clean user-facing
+  one-shot command on Windows.
+
 ## [0.5.94-product] - 2026-05-03
 
 ### Changed

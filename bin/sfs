@@ -172,7 +172,7 @@ usage() {
 Usage:
   sfs init [--yes] [--layout thin|vendored]
   sfs upgrade [--skip-existing] [--no-self-upgrade] [--interactive] [--layout thin|vendored]
-  sfs update [--skip-existing]          # compatibility alias for upgrade
+  sfs update [--skip-existing]          # one-shot runtime + project update
   sfs uninstall [--keep-artifacts|--remove-all] [--remove-docs|--keep-docs]
   sfs agent install <claude|gemini|codex|all> [--skip-existing]
   sfs context path <kernel|index|commands/name.md|policies/name.md>
@@ -270,7 +270,7 @@ upgrade_usage() {
   cat <<'EOF'
 Usage:
   sfs upgrade [--skip-existing] [--no-self-upgrade] [--interactive] [--layout thin|vendored]
-  sfs update [--skip-existing] [--no-self-upgrade]   # compatibility alias
+  sfs update [--skip-existing] [--no-self-upgrade]   # same one-shot flow
 
 Updates the current project from the latest Solon runtime:
   - if this CLI is installed by Homebrew, refreshes the Solon tap and runs
@@ -977,7 +977,6 @@ case "${1:-}" in
     ;;
   update)
     shift
-    echo "sfs update is a compatibility alias; prefer: sfs upgrade" >&2
     upgrade_command "$@"
     exit $?
     ;;
