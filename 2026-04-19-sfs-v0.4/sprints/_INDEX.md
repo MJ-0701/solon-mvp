@@ -2,7 +2,7 @@
 doc_id: sprints-index
 title: "sprints/ — WU (Work Unit) 파일 목록 (v2)"
 visibility: raw-internal
-updated: 2026-05-02   # WU-44 완료: `sfs profile` command restore.
+updated: 2026-05-02   # WU-45 완료: Dev backend architecture evolution ladder.
 ---
 
 # sprints/ — WU 파일 인덱스
@@ -62,6 +62,7 @@ updated: 2026-05-02   # WU-44 완료: `sfs profile` command restore.
 | WU-42 | Windows Scoop command docs alignment — PowerShell/cmd examples use `sfs.cmd`, Mac/Git Bash examples keep `sfs`, and source PowerShell installers are fallback. | `8f6bea9` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-42.md](WU-42.md) |
 | WU-43 | `sfs start` next-action guidance — start prints one readable `next: sfs brainstorm ...` line and routed docs clarify bash-first semantics. | `6c4ca93` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-43.md](WU-43.md) |
 | WU-44 | `sfs profile` command restore — re-adds the packaged profile adapter, routes it through `bin/sfs`/dispatch, and documents it as a narrow SFS.md project-overview command. | `4430df2` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-44.md](WU-44.md) |
+| WU-45 | Dev backend architecture evolution ladder — `/sfs implement` now records clean layered monolith for MVP/small projects, CQRS for non-initial backend work even on one DB, Hexagonal transition guidance on growing domain seams, and MSA transition guidance only after explicit approval. | `8f16102` | 2026-05-02 | 2026-05-02 | codex-dev-hq-architecture-evolution | [WU-45.md](WU-45.md) |
 
 ## 완료 WU (status: done) — v1 → v2 이관 (WU-16 backfill)
 
