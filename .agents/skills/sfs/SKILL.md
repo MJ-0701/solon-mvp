@@ -1,6 +1,6 @@
 ---
 name: sfs
-description: Solon SFS (Solo Founder System) for Codex — dispatch `$sfs <command> [args]` / `sfs <command> [args]` (and `/sfs ...` text that reaches the model) to the deterministic bash adapter `sfs`. Adapter I/O is SSoT (verbatim, no paraphrase). Hybrid refinement only for adopt/brainstorm/plan/implement/decision/report/retro (and tidy only if it touched report.md). Review is adapter-run by default (summarize from recorded artifacts only when asked). Stop on Solon mutex conflicts (`domain_locks`).
+description: Solon SFS (Solo Founder System) for Codex — dispatch `$sfs <command> [args]` / `sfs <command> [args]` (and `/sfs ...` text that reaches the model) to the deterministic bash adapter `sfs`. Adapter I/O is SSoT (verbatim, no paraphrase). Profile is a narrow SFS.md project-overview refinement. Hybrid refinement only for adopt/brainstorm/plan/implement/decision/report/retro (and tidy only if it touched report.md). Review is adapter-run by default (summarize from recorded artifacts only when asked). Stop on Solon mutex conflicts (`domain_locks`).
 ---
 
 # Solon SFS — Codex Skill
@@ -19,6 +19,8 @@ Command modes are explicit:
   the user see state and the next action, but adapter stdout remains SSoT.
   Do not reduce this to "stdout only, no Next"; it means no AI-side artifact
   refinement unless a routed rule says otherwise.
+- **Narrow hybrid**: `profile`. Run the adapter first, read only adapter-listed
+  files that exist, and edit only `SFS.md` `## 프로젝트 개요`.
 - **Conditional hybrid**: `tidy`. Run the adapter first. If it created or
   touched `report.md`, read archived workbench/tmp sources and refine `report.md`
   into the final report before answering.
@@ -73,7 +75,7 @@ vendored layout).
 The bash adapter execution is **deterministic** and must NOT be
 re-interpreted by the model. Bash adapter is single source of truth (SSoT) for
 command I/O. Hybrid commands have documented AI-side follow-ups:
-Solon CEO refinement of `brainstorm.md` §1~§7, G1 plan + CTO/CPO sprint
+project overview refinement for `profile`, Solon CEO refinement of `brainstorm.md` §1~§7, G1 plan + CTO/CPO sprint
 contract refinement of `plan.md`, implementation execution for `implement`,
 ADR refinement for `decision`, final report refinement for `report`, and G5
 retro refinement for `retro`. Review
@@ -82,7 +84,7 @@ handoff.
 
 ## Solon Report Output Rule
 
-For hybrid commands (`adopt`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`) and adapter-run
+For hybrid commands (`profile`, `adopt`, `brainstorm`, `plan`, `implement`, `decision`, `report`, `retro`) and adapter-run
 `review`, the final answer must be a **Solon report**, not a plain bullet list
 such as `plan.md refined: ...`. Put the whole report in a fenced `text` block.
 Render the report in the user's visible language (for example, Korean for a
@@ -140,6 +142,7 @@ not create a new verdict in the current runtime.
 | `start <goal>` (또는 "sprint 시작", "새 sprint") | `sfs start <goal> [--id <sprint-id>] [--force]` | sprint workspace 초기화 + sprint files cp |
 | `guide [--path|--print]` (또는 "가이드", "처음 사용법") | `sfs guide [--path|--print]` | 기본은 짧은 맥락 브리핑, `--path` 는 경로만, `--print` 는 full guide 본문 |
 | `auth status|check|login|probe` (또는 "인증 확인", "Gemini 로그인") | `sfs auth <args>` | Codex/Claude/Gemini review executor 인증 점검/부트스트랩/더미 요청 |
+| `profile [--prompt-only|--apply]` (또는 "프로젝트 개요 채우기") | `sfs profile [--prompt-only|--apply]` | SFS.md 프로젝트 개요 전용. 기본은 좁은 agent task 출력, `--apply` 는 shell-only quick apply |
 | `division list|activate|deactivate` (또는 "본부 상태", "본부 활성화") | `sfs division <args>` | abstract 본부를 active/scoped/temporal 로 전환하고 divisions.yaml + decision + event evidence 기록 |
 | `upgrade [--skip-existing] [--interactive]` (또는 "Solon 업데이트", "adapter 갱신") | `sfs upgrade [--skip-existing] [--interactive]` | package manager runtime 을 먼저 최신화한 뒤 managed adapter/docs 갱신. sprint/decision/event history 보존 |
 | `update [--skip-existing]` | `sfs update [--skip-existing]` | 하위 호환 alias. 새 문서/응답에서는 `upgrade` 를 권장 |
@@ -185,6 +188,8 @@ not create a new verdict in the current runtime.
      `99`=unknown.
    - auth: `0`=ok, `1`=no `.sfs-local/`, `7`=usage,
      `9`=auth missing/bootstrap failed, `99`=unknown.
+   - profile: `0`=ok, `1`=SFS.md missing/apply failed, `7`=usage,
+     `99`=unknown.
    - division: `0`=ok, `1`=no `.sfs-local/`, `2`=corrupt `events.jsonl`,
      `3`=not a git repo, `5`=permission, `7`=usage, `99`=unknown.
    - brainstorm: `0`=ok, `1`=no `.sfs-local/` or no active sprint,
@@ -220,6 +225,7 @@ not create a new verdict in the current runtime.
    only when it adds state or the next action, and must not contradict the
    sprint mode. Hybrid commands continue only via the documented flow below:
    - `adopt` → Legacy Adopt Refinement
+   - `profile` → Project Profile Refinement
    - `brainstorm` → Brainstorm CEO Refinement
    - `plan` → Plan G1 Refinement
    - `implement` → Implementation Execution
@@ -496,7 +502,7 @@ Print this 3-line usage and stop:
 
 ```
 Usage: /sfs <command> [args]
-Commands: status, start, guide, auth, division, adopt, upgrade, version, brainstorm, plan, implement, review, decision, report, tidy, retro, commit, loop
+Commands: status, start, guide, auth, profile, division, adopt, upgrade, version, brainstorm, plan, implement, review, decision, report, tidy, retro, commit, loop
 Help: sfs <command> --help
 ```
 

@@ -272,6 +272,10 @@ Gemini/custom 은 해당 runtime profile 이름으로 agent별 override 할 수 
 다음 `sfs upgrade` 또는 agent/model 설정 질문 때 다시 안내합니다.
 Solon 의 C-Level high / worker standard / helper economy 는 권장값이고 hard block 이 아닙니다.
 
+`SFS.md` 상단 프로젝트 개요를 다시 감지하고 싶으면 AI runtime 에서는 `sfs profile` 을,
+빠른 shell-only 갱신은 `sfs profile --apply` 를 실행합니다. 이 명령은 adapter 가 허용한
+설정/docs 파일만 읽고 `SFS.md` 의 `## 프로젝트 개요` 섹션만 수정합니다.
+
 이후 Solon 런타임과 현재 프로젝트 adapter/docs 를 갱신할 때는 uninstall/reinstall 하지 않습니다.
 프로젝트 루트에서 Mac/Git Bash 는 `sfs upgrade`, Windows PowerShell/cmd 는
 `sfs.cmd upgrade` 한 번만 실행합니다. Homebrew 설치본이면 내부에서 먼저
@@ -368,6 +372,7 @@ entry point 를 프로젝트에 설치/갱신합니다:
 /sfs status
 /sfs guide
 /sfs auth status
+/sfs profile
 /sfs start "첫 번째 sprint 목표"
 /sfs brainstorm "raw 요구사항과 아직 정리 안 된 맥락"
 /sfs plan
@@ -379,6 +384,7 @@ entry point 를 프로젝트에 설치/갱신합니다:
 
 # Codex CLI
 $sfs status
+$sfs profile
 $sfs start "첫 번째 sprint 목표"
 $sfs brainstorm "raw 요구사항과 아직 정리 안 된 맥락"
 $sfs plan
@@ -423,6 +429,7 @@ vendored layout 에서 direct adapter 를 호출해야 하면:
 | `/sfs start <goal>` | 새 sprint workspace 초기화 (`--id <sprint-id>` 지원) |
 | `/sfs guide [--path|--print]` | 짧은 사용 맥락 브리핑 / guide 경로 / full guide 본문 보기 |
 | `/sfs auth status|check|login|probe` | Codex/Claude/Gemini review executor 인증 확인/로그인/더미 요청 (`login codex` positional executor, `probe --timeout <seconds>` 지원) |
+| `/sfs profile [--prompt-only|--apply]` | `SFS.md` 프로젝트 개요만 좁게 감지/보정. 기본은 AI용 bounded task, `--apply` 는 shell-only quick apply |
 | `/sfs division list` / `/sfs division activate <division|all>` | 본부 활성 상태 확인/승격. abstract 본부를 active/scoped/temporal 로 전환하고 `.sfs-local/divisions.yaml`, decision, events evidence 를 갱신 |
 | `/sfs adopt [--id legacy-baseline] [--apply]` | SFS 없이 진행된 legacy 프로젝트를 git/code/docs 기반으로 인계. 문서 과잉 프로젝트는 기존 visible sprint/archive tree 를 cold archive tarball 로 접고 `report.md` + `retro.md` 만 남김. 문서 0 프로젝트는 최소 baseline 을 복원. 기본은 dry-run |
 | `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락을 기록하고, AI runtime 에서 Solon CEO 가 §1~§7을 정리 |
@@ -437,7 +444,7 @@ vendored layout 에서 direct adapter 를 호출해야 하면:
 | `/sfs commit [status|plan|apply --group <name>]` | close 후 남은 working tree 를 의미 그룹으로 분리하고 branch preflight 안내 후 선택 그룹만 local commit. 메시지는 Git Flow-aware Conventional Commit 으로 자동 생성 (`-m` override). 이후 branch push/main 흡수는 AI runtime 이 수행 |
 | `/sfs loop [OPTIONS]` | queue-first + domain_locks fallback 으로 micro-step 단위 반복 실행을 돕는 자율 진행 모드 |
 
-16 명령 모두 동일 bash adapter SSoT 입니다. `/sfs` 는 Claude/Gemini 쪽 command shape 이고,
+17 명령 모두 동일 bash adapter SSoT 입니다. `/sfs` 는 Claude/Gemini 쪽 command shape 이고,
 Codex 에서는 `$sfs` Skill mention 이 같은 bash adapter 로 내려가는 command shape 입니다.
 Skill/prompt/wrapper 는 이 API 를 runtime 별로 전달하는 adaptor surface 입니다.
 
@@ -488,7 +495,7 @@ CLI 에서든 동등한 deterministic bash adapter SSoT 로 동작합니다.
 
 ## Runtime Coverage
 
-설치 후 13 명령은 **세 런타임 모두에서 1급 entry point** 로 연결됩니다.
+설치 후 17 명령은 **세 런타임 모두에서 1급 entry point** 로 연결됩니다.
 
 | 런타임 | Entry point (자동 install) | 호출 방법 |
 |---|---|---|

@@ -22,6 +22,7 @@
 ```text
 sfs status
 sfs guide
+sfs profile
 sfs start "<goal>"
 sfs brainstorm "<raw>"
 sfs plan

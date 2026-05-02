@@ -6,7 +6,7 @@ description: |
   Usage: /sfs <command> [args]
 
   Commands:
-    status | start | guide | auth | division | adopt | upgrade | update | version
+    status | start | guide | auth | profile | division | adopt | upgrade | update | version
     brainstorm | plan | implement | review | decision | report | tidy | retro
     commit | loop
 argument-hint: "<command> [args]"
@@ -40,6 +40,7 @@ If `/sfs loop` reports a mutex conflict (Solon `domain_locks`), stop and report 
 
 Command modes:
 - **Bash-first**: `status|start|guide|auth|division|upgrade|update|version|commit|loop` → stop after verbatim output.
+- **Narrow hybrid**: `profile` → read only adapter-listed files and edit only `SFS.md` `## 프로젝트 개요`.
 - **Adapter-run**: `review` → stop after verbatim output unless explicitly asked to summarize recorded results.
 - **Hybrid refinement**: `adopt|brainstorm|plan|implement|decision|report|retro` and `tidy` (only if it created/touched `report.md`).
 

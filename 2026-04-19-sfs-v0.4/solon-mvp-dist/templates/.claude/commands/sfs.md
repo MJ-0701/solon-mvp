@@ -18,4 +18,5 @@ $ARGUMENTS
 3. Print stdout verbatim; on failure include stderr and exit code.
 4. Read `.sfs-local/context/kernel.md`, `_INDEX.md`, then only the routed module.
 5. For bash-first commands, do not refine artifacts, but a compact state/Next is allowed.
-6. For hybrid commands, refine pointed artifacts and answer with one Solon report.
+6. For `profile`, edit only the `SFS.md` project overview section.
+7. For hybrid commands, refine pointed artifacts and answer with one Solon report.
