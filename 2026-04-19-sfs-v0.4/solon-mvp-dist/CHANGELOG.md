@@ -1,5 +1,12 @@
 ## [Unreleased]
 
+### Changed
+
+- **Release regression guard** — the owner-side product release verifier now
+  extracts both release archives and checks that every context router target
+  referenced by `_INDEX.md` is packaged, preventing missing routed modules from
+  reaching Homebrew/Scoop release validation again.
+
 ## [0.5.73-product] - 2026-05-02
 
 ### Fixed

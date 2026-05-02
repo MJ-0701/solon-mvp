@@ -28,6 +28,7 @@ Checks:
   - Homebrew remote formula URL/sha256 points at v<VERSION>
   - local Homebrew tap clone is not stale, when present
   - Scoop remote manifest URL/hash/extract_dir points at v<VERSION>
+  - packaged context router index references resolve inside tar.gz and zip archives
   - installed `sfs version --check` is up-to-date, unless skipped
   - local release repos are on clean, pushed main branches for next-session handoff
 
@@ -123,6 +124,64 @@ require_text() {
   fi
 }
 
+archive_root_dir() {
+  local dir="$1" label="$2" candidate first="" count=0
+  candidate="${dir}/solon-product-${VERSION}"
+  if [[ -d "${candidate}" ]]; then
+    printf '%s\n' "${candidate}"
+    return 0
+  fi
+
+  while IFS= read -r candidate; do
+    if [[ -z "${first}" ]]; then
+      first="${candidate}"
+    fi
+    count=$((count + 1))
+  done < <(find "${dir}" -mindepth 1 -maxdepth 1 -type d)
+
+  if [[ "${count}" -ne 1 ]]; then
+    fail "${label} archive root is ambiguous (expected solon-product-${VERSION}, found ${count} dirs)" 5
+  fi
+  printf '%s\n' "${first}"
+}
+
+verify_context_router_targets_in_tree() {
+  local root="$1" label="$2" context_dir index rel count=0 missing=0
+  context_dir="${root}/templates/.sfs-local-template/context"
+  index="${context_dir}/_INDEX.md"
+
+  [[ -f "${index}" ]] || fail "${label} missing context router index: ${index}" 5
+
+  while IFS= read -r rel; do
+    [[ -n "${rel}" ]] || continue
+    count=$((count + 1))
+    if [[ ! -f "${context_dir}/${rel}" ]]; then
+      printf '[verify-product-release]   %s missing context router target: %s\n' "${label}" "${rel}" >&2
+      missing=1
+    fi
+  done < <(grep -Eo 'commands/[a-z-]+\.md|policies/[a-z-]+\.md' "${index}" | sort -u || true)
+
+  [[ "${count}" -gt 0 ]] || fail "${label} context router index has no routed modules" 5
+  [[ "${missing}" = "0" ]] || fail "${label} has missing context router target(s)" 5
+  log "  ok ${label} context router targets"
+}
+
+verify_packaged_context_router_integrity() {
+  local tar_extract zip_extract tar_root zip_root
+  tar_extract="${TMP_DIR}/tar-extract"
+  zip_extract="${TMP_DIR}/zip-extract"
+  mkdir -p "${tar_extract}" "${zip_extract}"
+
+  tar -xzf "${TAR_PATH}" -C "${tar_extract}" || fail "cannot extract product tar archive" 5
+  command -v unzip >/dev/null 2>&1 || fail "missing unzip for product zip archive verification" 5
+  unzip -q "${ZIP_PATH}" -d "${zip_extract}" || fail "cannot extract product zip archive" 5
+
+  tar_root="$(archive_root_dir "${tar_extract}" "tar.gz")"
+  zip_root="$(archive_root_dir "${zip_extract}" "zip")"
+  verify_context_router_targets_in_tree "${tar_root}" "tar.gz"
+  verify_context_router_targets_in_tree "${zip_root}" "zip"
+}
+
 PRODUCT_REPO="https://github.com/MJ-0701/solon-product"
 HOMEBREW_REPO="https://github.com/MJ-0701/homebrew-solon-product"
 SCOOP_REPO="https://github.com/MJ-0701/scoop-solon-product"
@@ -147,14 +206,14 @@ remote_main_sha() {
   printf '%s\n' "${sha}"
 }
 
-log "[1/6] product tag"
+log "[1/7] product tag"
 if ! GIT_HTTP_LOW_SPEED_LIMIT=1 GIT_HTTP_LOW_SPEED_TIME="${VERIFY_GIT_LOW_SPEED_TIME_SEC}" \
   git ls-remote --tags "${PRODUCT_REPO}.git" "refs/tags/v${VERSION}" | grep -q "refs/tags/v${VERSION}$"; then
   fail "missing product tag: v${VERSION}" 4
 fi
 log "  ok tag v${VERSION}"
 
-log "[2/6] Homebrew remote formula"
+log "[2/7] Homebrew remote formula"
 HB_MAIN_SHA="$(remote_main_sha "${HOMEBREW_REPO}" "Homebrew tap")"
 HOMEBREW_RAW="https://raw.githubusercontent.com/MJ-0701/homebrew-solon-product/${HB_MAIN_SHA}/Formula/sfs.rb"
 HB_FORMULA="${TMP_DIR}/sfs.rb"
@@ -168,7 +227,7 @@ ACTUAL_TAR_SHA="$(sha256_file "${TAR_PATH}")"
 [[ "${HB_SHA}" = "${ACTUAL_TAR_SHA}" ]] || fail "Homebrew sha mismatch: formula=${HB_SHA} actual=${ACTUAL_TAR_SHA}" 5
 log "  ok formula URL + sha256 (${HB_MAIN_SHA:0:7})"
 
-log "[3/6] local Homebrew tap freshness"
+log "[3/7] local Homebrew tap freshness"
 if command -v brew >/dev/null 2>&1; then
   TAP_REPO="$(brew --repo MJ-0701/solon-product 2>/dev/null || true)"
   if [[ -n "${TAP_REPO}" && -d "${TAP_REPO}/.git" ]]; then
@@ -186,7 +245,7 @@ else
   log "  skip: brew not found"
 fi
 
-log "[4/6] Scoop remote manifest"
+log "[4/7] Scoop remote manifest"
 SCOOP_MAIN_SHA="$(remote_main_sha "${SCOOP_REPO}" "Scoop bucket")"
 SCOOP_RAW="https://raw.githubusercontent.com/MJ-0701/scoop-solon-product/${SCOOP_MAIN_SHA}/bucket/sfs.json"
 SCOOP_JSON="${TMP_DIR}/sfs.json"
@@ -205,7 +264,10 @@ ACTUAL_ZIP_SHA="$(sha256_file "${ZIP_PATH}")"
 [[ "${SCOOP_SHA}" = "${ACTUAL_ZIP_SHA}" ]] || fail "Scoop hash mismatch: manifest=${SCOOP_SHA} actual=${ACTUAL_ZIP_SHA}" 5
 log "  ok manifest URL + hash (${SCOOP_MAIN_SHA:0:7})"
 
-log "[5/6] installed runtime"
+log "[5/7] packaged context router integrity"
+verify_packaged_context_router_integrity
+
+log "[6/7] installed runtime"
 if [[ "${CHECK_INSTALLED}" = "1" ]]; then
   command -v sfs >/dev/null 2>&1 || fail "installed sfs not found; rerun with --no-installed-check to skip" 7
   if ! VERSION_OUT="$(SFS_COMMAND_TIMEOUT_SEC="${VERIFY_INSTALLED_TIMEOUT_SEC}" sfs version --check 2>&1)"; then
@@ -252,7 +314,7 @@ check_clean_handoff_repo() {
   log "  ok ${label} clean + synced (${head:0:7})"
 }
 
-log "[6/6] clean handoff state"
+log "[7/7] clean handoff state"
 if [[ "${CHECK_HANDOFF_CLEAN}" = "1" ]]; then
   check_clean_handoff_repo "${DEV_REPO}" "dev repo"
   check_clean_handoff_repo "${STABLE_LOCAL_REPO}" "product stable repo"
