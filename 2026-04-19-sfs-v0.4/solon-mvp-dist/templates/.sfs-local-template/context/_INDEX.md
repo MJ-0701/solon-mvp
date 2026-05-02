@@ -20,3 +20,4 @@ module:
 - `commands/tidy.md` — tidy / report / retro / archive.
 - `commands/loop.md` — loop / autonomous work / queue.
 - `policies/mutex.md` — lock conflict or concurrent session.
+- `policies/token-harness.md` — token/context hygiene, semantic search, repeated mistake guardrails.

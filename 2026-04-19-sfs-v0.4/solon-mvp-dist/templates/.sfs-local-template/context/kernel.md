@@ -12,6 +12,9 @@ load_when: ["always", "sfs", "entry"]
 - Stop on mutex conflicts and report owner/domain.
 - Ask only 1-3 blocking questions.
 - After adapter output, read only the context module routed by `_INDEX.md`.
+- Token/harness hygiene is ambient: keep adapter memory thin, prefer routed
+  context and symbol/semantic search before broad reads, and convert repeated
+  AI mistakes into guardrails/checks during review or retro.
 - AI-era software fundamentals are all-phase guardrails, not only implement
   rules: shared design concept, ubiquitous language, tight feedback loops,
   deep-module boundaries, and gray-box delegation must shape brainstorm, plan,

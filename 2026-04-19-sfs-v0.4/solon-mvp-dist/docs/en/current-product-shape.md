@@ -148,6 +148,23 @@ docs/en/guide.md
 GitHub Markdown does not support native language tabs, so Solon uses a
 `Language` link at the top of each page.
 
+## Token / Harness Hygiene
+
+SFS does not install Claude plugins for every user. Instead, it absorbs the
+problems those plugins solve into the normal operating flow.
+
+- Session Report style: when token drain feels abnormal, inspect usage reports
+  before guessing.
+- CLAUDE.md Management style: keep adapter docs thin and move durable rules into
+  routed context or docs.
+- Serena style: in large codebases, prefer symbol/semantic search before broad
+  file reads.
+- Hookify style: turn repeated AI mistakes into guardrails, checks, hooks, or
+  short context rules.
+
+This is not Claude-only. Codex, Gemini, and other agents should use equivalent
+usage reports, LSP/index tools, and hook/check mechanisms.
+
 ## Choosing A Mode
 
 | Situation | Recommendation |

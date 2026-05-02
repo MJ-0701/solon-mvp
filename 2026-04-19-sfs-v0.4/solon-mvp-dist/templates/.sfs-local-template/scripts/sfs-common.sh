@@ -40,6 +40,7 @@ SFS_PROJECT_DECISIONS_TEMPLATE_DIR="${SFS_LOCAL_DIR}/decisions-template"
 SFS_RUNTIME_DECISIONS_TEMPLATE_DIR="${SFS_RUNTIME_DIR}/decisions-template"
 SFS_PROJECT_PERSONAS_DIR="${SFS_LOCAL_DIR}/personas"
 SFS_RUNTIME_PERSONAS_DIR="${SFS_RUNTIME_DIR}/personas"
+SFS_CACHE_DIR="${SFS_LOCAL_DIR}/cache"
 
 # Exit codes (WU-23 §1.1 / §1.2 정합)
 SFS_EXIT_OK=0
@@ -108,6 +109,119 @@ reverse_lines() {
     tail -r "${f}"
   else
     awk '{a[NR]=$0} END {for (i=NR;i>0;i--) print a[i]}' "${f}"
+  fi
+}
+
+# ─────────────────────────────────────────────────────────────────────
+# AMBIENT TOKEN / HARNESS HYGIENE
+# ─────────────────────────────────────────────────────────────────────
+
+sfs_state_value() {
+  local state_file="${1:-}" key="${2:-}"
+  [[ -f "${state_file}" && -n "${key}" ]] || return 1
+  awk -F= -v key="${key}" '$1 == key {print $2; exit}' "${state_file}" 2>/dev/null
+}
+
+sfs_write_hygiene_state() {
+  local state_file="${1:-}" checked_at="${2:-0}"
+  mkdir -p "$(dirname "${state_file}")" 2>/dev/null || return 0
+  {
+    printf 'last_checked_epoch=%s\n' "${checked_at}"
+  } > "${state_file}" 2>/dev/null || true
+}
+
+sfs_count_source_files_capped() {
+  local cap="${1:-250}"
+  case "${cap}" in ''|*[!0-9]*) cap=250 ;; esac
+  find . \
+    \( -path './.git' -o -path "./${SFS_LOCAL_DIR}" -o -path './node_modules' -o -path './dist' -o -path './build' -o -path './.next' -o -path './target' -o -path './vendor' \) -prune \
+    -o -type f \
+    \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' -o -name '*.py' -o -name '*.java' -o -name '*.kt' -o -name '*.go' -o -name '*.rs' -o -name '*.rb' -o -name '*.php' -o -name '*.cs' -o -name '*.swift' -o -name '*.cpp' -o -name '*.c' -o -name '*.h' \) \
+    -print 2>/dev/null \
+    | awk -v cap="${cap}" 'NR <= cap {count=NR} END {print count + 0}'
+}
+
+sfs_current_sprint_workbench_line_count() {
+  local sid="${1:-}" sdir doc total=0 lines
+  [[ -n "${sid}" ]] || { printf '0\n'; return 0; }
+  sdir="${SFS_SPRINTS_DIR}/${sid}"
+  [[ -d "${sdir}" ]] || { printf '0\n'; return 0; }
+  for doc in brainstorm plan implement log review; do
+    [[ -f "${sdir}/${doc}.md" ]] || continue
+    lines="$(wc -l < "${sdir}/${doc}.md" 2>/dev/null | tr -d '[:space:]' || printf '0')"
+    case "${lines}" in ''|*[!0-9]*) lines=0 ;; esac
+    total=$((total + lines))
+  done
+  printf '%s\n' "${total}"
+}
+
+sfs_maybe_emit_hygiene_notice() {
+  local cmd="${1:-command}"
+  case "${SFS_HYGIENE_NOTICE:-1}" in 0|false|off|no) return 0 ;; esac
+  case "${cmd}" in help|-h|--help|init|install|upgrade|update|uninstall|agent|version|-v|--version) return 0 ;; esac
+  [[ -d "${SFS_LOCAL_DIR}" ]] || return 0
+  if [[ "${SFS_HYGIENE_NOTICE_FORCE:-0}" != "1" && ! -t 2 ]]; then
+    return 0
+  fi
+
+  local ttl now state_file last_checked line_threshold source_threshold workbench_threshold
+  ttl="${SFS_HYGIENE_NOTICE_TTL_SEC:-86400}"
+  line_threshold="${SFS_HYGIENE_DOC_LINE_THRESHOLD:-220}"
+  source_threshold="${SFS_HYGIENE_SOURCE_FILE_THRESHOLD:-250}"
+  workbench_threshold="${SFS_HYGIENE_WORKBENCH_LINE_THRESHOLD:-600}"
+  case "${ttl}" in ''|*[!0-9]*) ttl=86400 ;; esac
+  case "${line_threshold}" in ''|*[!0-9]*) line_threshold=220 ;; esac
+  case "${source_threshold}" in ''|*[!0-9]*) source_threshold=250 ;; esac
+  case "${workbench_threshold}" in ''|*[!0-9]*) workbench_threshold=600 ;; esac
+
+  state_file="${SFS_CACHE_DIR}/hygiene-notice.env"
+  now="$(date +%s 2>/dev/null || printf '0')"
+  last_checked="$(sfs_state_value "${state_file}" last_checked_epoch || true)"
+  if [[ "${SFS_HYGIENE_NOTICE_FORCE:-0}" != "1" && "${now}" != "0" && "${last_checked}" =~ ^[0-9]+$ ]]; then
+    if (( now - last_checked < ttl )); then
+      return 0
+    fi
+  fi
+  sfs_write_hygiene_state "${state_file}" "${now}"
+
+  local notices=0 file lines source_count sprint workbench_lines
+  for file in SFS.md CLAUDE.md AGENTS.md GEMINI.md; do
+    [[ -f "${file}" ]] || continue
+    lines="$(wc -l < "${file}" 2>/dev/null | tr -d '[:space:]' || printf '0')"
+    case "${lines}" in ''|*[!0-9]*) lines=0 ;; esac
+    if (( lines > line_threshold )); then
+      if (( notices == 0 )); then
+        printf 'sfs hygiene notice:\n' >&2
+      fi
+      printf '  - %s is %s lines; keep adapter memory thin and move stable detail to routed context/docs.\n' "${file}" "${lines}" >&2
+      notices=$((notices + 1))
+    fi
+  done
+
+  source_count="$(sfs_count_source_files_capped "${source_threshold}" || printf '0')"
+  case "${source_count}" in ''|*[!0-9]*) source_count=0 ;; esac
+  if (( source_count >= source_threshold )); then
+    if (( notices == 0 )); then
+      printf 'sfs hygiene notice:\n' >&2
+    fi
+    printf '  - Large codebase detected (%s+ source files); prefer symbol/semantic search tools before broad file reads.\n' "${source_threshold}" >&2
+    notices=$((notices + 1))
+  fi
+
+  sprint="$(read_current_sprint || true)"
+  workbench_lines="$(sfs_current_sprint_workbench_line_count "${sprint}" || printf '0')"
+  case "${workbench_lines}" in ''|*[!0-9]*) workbench_lines=0 ;; esac
+  if (( workbench_lines > workbench_threshold )); then
+    if (( notices == 0 )); then
+      printf 'sfs hygiene notice:\n' >&2
+    fi
+    printf '  - Current sprint workbench is %s lines; close durable conclusions into report/retro when the slice is done.\n' "${workbench_lines}" >&2
+    notices=$((notices + 1))
+  fi
+
+  if (( notices > 0 )); then
+    printf '  - Claude users: Session Report, Serena, Hookify, and CLAUDE.md Management can accelerate this hygiene; other agents should use equivalent usage reports, symbol search, and guardrails.\n' >&2
+    printf '  - Disable: SFS_HYGIENE_NOTICE=0; tune interval: SFS_HYGIENE_NOTICE_TTL_SEC=<seconds>.\n' >&2
   fi
 }
 

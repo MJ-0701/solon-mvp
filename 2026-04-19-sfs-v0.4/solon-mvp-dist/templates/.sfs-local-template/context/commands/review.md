@@ -23,3 +23,6 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - Surface the evaluator's next action. Pass should move toward report/retro;
   partial should name the smallest rework slice; fail should return to plan,
   implementation, or user escalation.
+- If the review finds a repeated agent mistake, record the smallest harness
+  improvement: guardrail/check/hook/context-rule. Claude users may map this to
+  Hookify; other agents should use their equivalent hook or scripted check.

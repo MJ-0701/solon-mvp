@@ -65,6 +65,11 @@ Windows PowerShell/cmd 는 `sfs.cmd upgrade` 를 실행한다.
 `sfs` 는 하루에 한 번 정도 터미널 notice 를 띄워 `sfs upgrade` 를 안내한다. 강제 업데이트는
 하지 않으며, interactive `sfs status` 에서는 지금 업데이트할지도 묻는다. 자동 안내를 끄려면
 `SFS_VERSION_NOTICE=0` 을 쓴다.
+토큰/하네스 hygiene 도 별도 명령 없이 운영 중에 적용된다. SFS 는 routed context 로 agent 가
+필요한 context 만 읽게 하고, 큰 코드베이스에서는 semantic/symbol search 를 우선하라고 안내하며,
+반복 실수는 review/retro 에서 guardrail/check 로 바꾸도록 한다. adapter docs, sprint
+workbench, 코드베이스 크기가 토큰 낭비 위험을 만들면 하루 1회 이하로 hygiene notice 를 띄운다.
+끄려면 `SFS_HYGIENE_NOTICE=0` 을 쓴다.
 
 **5초 mental model**:
 - **본인이 편집** = `SFS.md`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`. 이 4개는 너의 프로젝트 정체성을 담는다.

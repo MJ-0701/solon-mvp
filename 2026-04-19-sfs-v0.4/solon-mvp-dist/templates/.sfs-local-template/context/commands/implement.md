@@ -12,6 +12,9 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - If intent is not shared, ask 1-3 precise questions before changing files.
 - Use project/domain terms consistently; add or reuse a small glossary when terms drift.
 - Move only as fast as feedback: test, smoke, preview, or review the smallest useful slice.
+- Token discipline: inspect the smallest relevant files, prefer symbol/semantic
+  search or precise `rg` before broad reads, and do not carry old workbench
+  history into the turn unless current report/plan evidence is insufficient.
 - Prefer deep modules and gray-box delegation: design the public interface, then let AI fill internals.
 - Record artifact type, domain terms, divisions, feedback checks, design/interface notes, and review handoff in `implement.md`.
 - Use TDD/DDD/transaction guardrails when code or data consistency is touched.

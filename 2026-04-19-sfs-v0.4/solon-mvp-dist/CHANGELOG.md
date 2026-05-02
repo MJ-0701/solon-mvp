@@ -1,3 +1,17 @@
+## [0.5.84-product] - 2026-05-02
+
+### Added
+
+- **Ambient token/harness hygiene** — SFS now applies token and harness hygiene
+  inside the normal command flow instead of asking users to remember extra
+  commands. Routed context adds cross-agent guidance for thin adapter memory,
+  symbol/semantic search before broad reads, usage-report checks, and converting
+  repeated AI mistakes into guardrails/checks.
+- **Hygiene notices** — initialized projects get a throttled terminal notice
+  when adapter docs, current workbench files, or large codebases look likely to
+  waste tokens. Notices are cached under `.sfs-local/cache/`, ignored by Git,
+  and can be disabled with `SFS_HYGIENE_NOTICE=0`.
+
 ## [0.5.83-product] - 2026-05-02
 
 ### Added

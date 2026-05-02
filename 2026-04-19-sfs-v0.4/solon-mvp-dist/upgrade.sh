@@ -551,6 +551,7 @@ declare -a CHECK_FILES=(
   ".sfs-local/context/commands/tidy.md|templates/.sfs-local-template/context/commands/tidy.md"
   ".sfs-local/context/commands/loop.md|templates/.sfs-local-template/context/commands/loop.md"
   ".sfs-local/context/policies/mutex.md|templates/.sfs-local-template/context/policies/mutex.md"
+  ".sfs-local/context/policies/token-harness.md|templates/.sfs-local-template/context/policies/token-harness.md"
   ".sfs-local/GUIDE.md|GUIDE.md"
   # scripts/ — Solon-versioned bash adapters (executable, user 수정 영역 아님)
   ".sfs-local/scripts/sfs-dispatch.sh|templates/.sfs-local-template/scripts/sfs-dispatch.sh"
@@ -752,6 +753,7 @@ update_file ".sfs-local/context/commands/upgrade.md" "templates/.sfs-local-templ
 update_file ".sfs-local/context/commands/tidy.md" "templates/.sfs-local-template/context/commands/tidy.md" "context tidy module" "b"
 update_file ".sfs-local/context/commands/loop.md" "templates/.sfs-local-template/context/commands/loop.md" "context loop module" "b"
 update_file ".sfs-local/context/policies/mutex.md" "templates/.sfs-local-template/context/policies/mutex.md" "context mutex policy" "b"
+update_file ".sfs-local/context/policies/token-harness.md" "templates/.sfs-local-template/context/policies/token-harness.md" "context token/harness policy" "b"
 verify_context_router_targets || die "context router index references missing files"
 
 # scripts/ — Solon-versioned bash adapters (codex finding #4 후속, 25th-6 보강)
