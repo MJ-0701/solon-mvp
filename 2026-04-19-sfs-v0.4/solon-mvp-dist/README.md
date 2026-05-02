@@ -19,12 +19,17 @@ Solon Product 는 Claude Code, Codex, Gemini CLI 같은 LLM agent 와 함께 제
 - Solon 은 역할, 기록, 검증, 인수인계 구조를 고정한다.
 - 사용자는 방향과 최종 통과 여부를 결정한다.
 
+처음 설치하는 디자이너/비개발자라면 먼저 [BEGINNER-GUIDE.md](./BEGINNER-GUIDE.md) 를
+보세요. PowerShell/Terminal 을 처음 쓰는 사람 기준으로 설치부터 첫 `sfs status` 까지
+안내합니다.
+
 ---
 
 ## Installation
 
 Solon 은 먼저 global `sfs` runtime 을 설치하고, 각 프로젝트 루트에서 `sfs init` 으로
 프로젝트 파일을 생성합니다. Windows 는 Scoop, Mac 은 Homebrew 가 권장 경로입니다.
+설치 용어가 낯설면 [Beginner Guide](./BEGINNER-GUIDE.md) 의 순서대로 진행하세요.
 
 ### Windows (Scoop)
 
@@ -643,6 +648,7 @@ Uninstall 은 대화형으로 실행됩니다.
 | `uninstall.ps1` | Windows PowerShell uninstall wrapper (Git Bash 필요) |
 | `bin/sfs` | global Bash CLI entrypoint (`sfs init`, `sfs status`, `sfs plan`, `sfs implement` 등) |
 | `bin/sfs.cmd` / `bin/sfs.ps1` | Windows global wrappers for Scoop/PATH; locate Git Bash and delegate to `bin/sfs` |
+| `BEGINNER-GUIDE.md` | 디자이너/비개발자용 설치 + 첫 사용 가이드 |
 | `GUIDE.md` | 친구 onboarding 30분 walk-through (placeholder 치환 + 첫 sprint + FAQ + 트러블슈팅) |
 | `templates/SFS.md.template` | 공통 운영 지침 |
 | `templates/CLAUDE.md.template` | Claude Code adapter template |
