@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T17:12:59+09:00
-session: "hotfix: Gate 6 review scope filter refinement implemented"
+last_overwrite: 2026-05-02T17:20:02+09:00
+session: "release: 0.5.76 Gate 6 review scope filter verified"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: null
@@ -161,13 +161,13 @@ resume_hint:
   default_action: |
     1) Read `CLAUDE.md`, then `PROGRESS.md`.
     2) Run: `bash scripts/resume-session-check.sh` (expect exit 0).
-    3) Latest product release is `0.5.75-product`; ask user for the next
+    3) Latest product release is `0.5.76-product`; ask user for the next
        WU/domain unless they provide a direct task.
     4) For a direct task, start from clean `main` and create a fresh
        `feature/<slug>` or `hotfix/<slug>` branch before edits.
   on_skip_patterns: ["아니", "잠깐", "다른", "stop"]
   on_skip_action: "What do you want to do instead (1 line)?"
-  on_ambiguous: "0.5.75-product is released. What should Solon handle next?"
+  on_ambiguous: "0.5.76-product is released. What should Solon handle next?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
@@ -231,14 +231,13 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
   manifests from bounded excerpt priority, promotes declared implement/plan
   target paths, includes safe `.env.example`, compacts `.gitignore`
   product-owned hunks, and separates same-tool review risk as warning metadata.
-- Gate 6 review scope filter refinement implemented locally as the
-  `0.5.76-product` candidate. `.claude/skills/sfs/**` is classified as SFS
-  system scope, nested generated outputs like `backend/dist/**` and
-  `backend/build/**` are excluded from reviewable manifests, and declared
-  first-class source/config excerpts are emitted before the generic first-N cap.
-  Sandbox prompt-only smoke verified the SFS skill file is system-scoped,
-  backend dist/build files are absent from product evidence, and 20 declared
-  first-class excerpts can appear while the generic cap stays at 5.
+- Gate 6 review scope filter refinement shipped as `0.5.76-product`: stable
+  `28366b1` / tag `v0.5.76-product`; Homebrew `4f7683b`; Scoop `291a03b`;
+  full release verifier passed and installed `sfs version --check` reports up
+  to date. `.claude/skills/sfs/**` is classified as SFS system scope, nested
+  generated outputs like `backend/dist/**` and `backend/build/**` are excluded
+  from reviewable manifests, and declared first-class source/config excerpts
+  are emitted before the generic first-N cap.
 
 ## ② In-Progress
 
@@ -246,10 +245,9 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ③ Next
 
-- Current truth is `0.5.75-product`; `0.5.76-product` Gate 6 review scope
-  filter candidate is implemented locally. Next action: release cut + channel
-  verification for `0.5.76-product`, or further review if the user wants
-  another pass before release.
+- Current truth is `0.5.76-product`; no active WU. Ask user for the next
+  WU/domain unless they provide a direct task. For a direct task, create a fresh
+  branch from clean `main` first (`feature/<slug>` or `hotfix/<slug>`).
 
 ## ④ Artifacts
 
@@ -286,5 +284,7 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
   tag `v0.5.74-product`; Homebrew `7e00696`; Scoop `24f4aa8`.
 - Product Gate 6 review evidence prioritization release: stable `b9e3276` /
   tag `v0.5.75-product`; Homebrew `508162d`; Scoop `9d3eb60`.
+- Product Gate 6 review scope filter release: stable `28366b1` / tag
+  `v0.5.76-product`; Homebrew `4f7683b`; Scoop `291a03b`.
 - Study-note G4 validation: `.sfs-local/tmp/review-runs/2026-W18-sprint-5-G4-20260502T054452Z.result.md`
   returned `pass` after code-level rework.

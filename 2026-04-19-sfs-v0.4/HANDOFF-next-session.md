@@ -1,9 +1,9 @@
 ---
 doc_id: handoff-next-session
-title: "Next session handoff — 0.5.75 current truth"
-written_at: 2026-05-02T08:06:58Z
-written_at_kst: 2026-05-02T17:06:58+09:00
-last_known_main_commit: 6a00b76
+title: "Next session handoff — 0.5.76 current truth"
+written_at: 2026-05-02T08:20:02Z
+written_at_kst: 2026-05-02T17:20:02+09:00
+last_known_main_commit: 400d746
 visibility: raw-internal
 source_task: codex-handoff-drift-guard
 ---
@@ -12,23 +12,23 @@ source_task: codex-handoff-drift-guard
 
 ## 1. Current Truth
 
-- Latest Solon Product release is `0.5.75-product`.
-- Stable product repo: `b9e3276` / tag `v0.5.75-product`.
-- Homebrew tap: `508162d`.
-- Scoop bucket: `9d3eb60`.
-- Dev repo main at release handoff: `6a00b76`.
+- Latest Solon Product release is `0.5.76-product`.
+- Stable product repo: `28366b1` / tag `v0.5.76-product`.
+- Homebrew tap: `4f7683b`.
+- Scoop bucket: `291a03b`.
+- Dev repo main at release handoff: `400d746`.
 - Installed runtime reports:
-  - `sfs 0.5.75-product`
-  - `latest 0.5.75-product`
+  - `sfs 0.5.76-product`
+  - `latest 0.5.76-product`
   - `status up-to-date`
-- `bash scripts/verify-product-release.sh --version 0.5.75-product` passed:
+- `bash scripts/verify-product-release.sh --version 0.5.76-product` passed:
   product tag, Homebrew formula/hash, Scoop manifest/hash, installed runtime,
   and dev/stable/Homebrew/Scoop clean handoff state all OK.
-- `0.5.75-product` ships the Gate 6 review evidence excerpt prioritization
-  hotfix. `/sfs review` now separates full manifests from bounded excerpt
-  priority, promotes declared implement/plan target paths, includes safe
-  `.env.example`, compacts `.gitignore` product-owned hunks, and separates
-  same-tool review risk as warning metadata.
+- `0.5.76-product` ships the Gate 6 review scope filter hotfix. `/sfs review`
+  now treats `.claude/skills/sfs/**` as SFS system scope, excludes nested
+  generated build outputs such as `backend/dist/**` and `backend/build/**`
+  from reviewable manifests, and emits declared first-class source/config
+  excerpts before the generic first-N excerpt cap.
 
 ## 2. Why This Handoff Exists
 
