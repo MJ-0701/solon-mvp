@@ -9,6 +9,9 @@ them.
 - **`.sfs-local/context/` modules** — installs now include a router index,
   kernel, command modules for implement/review/release/upgrade/tidy/loop, and a
   mutex policy module with compact `summary` / `load_when` frontmatter.
+- **Scoop-first README onboarding** — the README now shows a top-level
+  Windows/Scoop install path for non-developer users, including Git Bash,
+  Scoop bucket install, project init, and upgrade guidance.
 
 ### Changed
 

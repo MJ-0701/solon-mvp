@@ -21,6 +21,50 @@ Solon Product 는 Claude Code, Codex, Gemini CLI 같은 LLM agent 와 함께 제
 
 ---
 
+## Install in 5 Minutes
+
+비개발자에게는 **Windows + Scoop** 설치가 가장 낮은 진입장벽입니다. PowerShell 을 열고
+아래 순서대로 실행하면 `sfs` 명령이 PATH 에 잡힙니다.
+
+```powershell
+# 1) Git Bash 설치: Solon 내부 bash adapter 실행에 필요합니다.
+winget install --id Git.Git -e --source winget
+
+# 2) Scoop 설치: 이미 설치되어 있으면 건너뛰세요.
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+irm get.scoop.sh | iex
+
+# 3) Solon SFS 설치
+scoop bucket add solon https://github.com/MJ-0701/scoop-solon-product
+scoop install sfs
+
+# 4) 프로젝트 폴더에서 초기화
+cd C:\workspace\my-project
+git init
+sfs init --layout thin --yes
+sfs status
+```
+
+Mac 사용자는 Homebrew 로 설치합니다.
+
+```bash
+brew install MJ-0701/solon-product/sfs
+cd ~/workspace/my-project
+sfs init --layout thin --yes
+sfs status
+```
+
+업데이트는 재설치가 아니라 프로젝트 루트에서 한 번만 실행합니다.
+
+```bash
+sfs upgrade
+```
+
+Scoop 설치본은 `sfs upgrade` 실행 시 먼저 `scoop update` + `scoop update sfs` 로 global
+runtime 을 최신화한 뒤, 현재 프로젝트의 Solon adapter/docs/context 를 갱신합니다.
+
+---
+
 ## Why Solon
 
 AI 로 코드를 빨리 만들 수 있어도 제품 작업에는 반복적으로 같은 문제가 생깁니다.
@@ -400,6 +444,28 @@ cp <consumer-project>/templates/.codex/prompts/sfs.md ~/.codex/prompts/sfs.md
 ---
 
 ## Installation
+
+### Package Manager (Recommended)
+
+Windows:
+
+```powershell
+scoop bucket add solon https://github.com/MJ-0701/scoop-solon-product
+scoop install sfs
+cd C:\workspace\my-project
+sfs init --layout thin --yes
+```
+
+Mac:
+
+```bash
+brew install MJ-0701/solon-product/sfs
+cd ~/workspace/my-project
+sfs init --layout thin --yes
+```
+
+Package manager 설치는 global `sfs` runtime 만 설치합니다. 프로젝트별 SFS 파일은 각
+프로젝트 루트에서 `sfs init --layout thin --yes` 를 실행할 때 생성됩니다.
 
 ### Remote One-Liner
 
