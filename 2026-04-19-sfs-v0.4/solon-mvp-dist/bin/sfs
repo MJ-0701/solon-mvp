@@ -310,6 +310,148 @@ latest_release_version() {
   printf '%s\n' "${best}"
 }
 
+sfs_runtime_version() {
+  local version_file="${DIST_DIR}/VERSION"
+  local version="unknown"
+  if [[ -f "${version_file}" ]]; then
+    version="$(head -1 "${version_file}" 2>/dev/null || true)"
+  fi
+  printf '%s\n' "${version:-unknown}"
+}
+
+sfs_project_version() {
+  local local_dir="$1"
+  local version_file="${local_dir}/VERSION"
+  local version=""
+  [[ -f "${version_file}" ]] || return 1
+  version="$(awk '/^solon_mvp_version:/ {print $2; exit}' "${version_file}" 2>/dev/null || true)"
+  [[ -n "${version}" ]] || return 1
+  printf '%s\n' "${version}"
+}
+
+sfs_parse_product_version() {
+  local version="$1" base major minor patch
+  case "${version}" in
+    *-product) base="${version%-product}" ;;
+    *-mvp) base="${version%-mvp}" ;;
+    *) return 1 ;;
+  esac
+  IFS=. read -r major minor patch <<< "${base}"
+  [[ "${major}" =~ ^[0-9]+$ && "${minor}" =~ ^[0-9]+$ && "${patch}" =~ ^[0-9]+$ ]] || return 1
+  printf '%s %s %s\n' "${major}" "${minor}" "${patch}"
+}
+
+sfs_version_lag_steps() {
+  local current="$1" latest="$2"
+  local c_major c_minor c_patch l_major l_minor l_patch
+  read -r c_major c_minor c_patch < <(sfs_parse_product_version "${current}") || return 1
+  read -r l_major l_minor l_patch < <(sfs_parse_product_version "${latest}") || return 1
+
+  if (( l_major < c_major )) \
+    || (( l_major == c_major && l_minor < c_minor )) \
+    || (( l_major == c_major && l_minor == c_minor && l_patch <= c_patch )); then
+    printf '0\n'
+    return 0
+  fi
+
+  if (( l_major == c_major && l_minor == c_minor )); then
+    printf '%s\n' "$((l_patch - c_patch))"
+  else
+    # A minor/major jump is definitely beyond the stale-notice threshold, even
+    # though exact release count requires scanning all tags.
+    printf '%s\n' "${SFS_VERSION_NOTICE_THRESHOLD:-5}"
+  fi
+}
+
+read_notice_state_value() {
+  local state_file="$1" key="$2"
+  [[ -f "${state_file}" ]] || return 1
+  awk -F= -v key="${key}" '$1 == key {print $2; exit}' "${state_file}" 2>/dev/null
+}
+
+write_notice_state() {
+  local state_file="$1" checked_at="$2" latest="$3"
+  mkdir -p "$(dirname "${state_file}")" 2>/dev/null || return 0
+  {
+    printf 'last_checked_epoch=%s\n' "${checked_at}"
+    printf 'latest=%s\n' "${latest}"
+  } > "${state_file}" 2>/dev/null || true
+}
+
+maybe_show_stale_version_notice() {
+  local cmd="${1:-command}"
+  case "${SFS_VERSION_NOTICE:-1}" in 0|false|off|no) return 0 ;; esac
+  case "${cmd}" in init|install|upgrade|update|uninstall|version|-v|--version|help|-h|--help|agent) return 0 ;; esac
+
+  local local_dir state_file now ttl last_checked threshold latest runtime_version project_version
+  local runtime_lag=0 project_lag=0 notice_source="runtime" notice_version lag
+  local_dir="$(project_local_dir)"
+  [[ -d "${local_dir}" && -f "${local_dir}/VERSION" ]] || return 0
+  if [[ "${SFS_VERSION_NOTICE_FORCE:-0}" != "1" && ! -t 2 ]]; then
+    return 0
+  fi
+
+  threshold="${SFS_VERSION_NOTICE_THRESHOLD:-5}"
+  ttl="${SFS_VERSION_NOTICE_TTL_SEC:-86400}"
+  case "${threshold}" in ''|*[!0-9]*) threshold=5 ;; esac
+  case "${ttl}" in ''|*[!0-9]*) ttl=86400 ;; esac
+
+  state_file="${local_dir}/cache/version-notice.env"
+  now="$(date +%s 2>/dev/null || printf '0')"
+  last_checked="$(read_notice_state_value "${state_file}" last_checked_epoch || true)"
+  if [[ "${SFS_VERSION_NOTICE_FORCE:-0}" != "1" && "${now}" != "0" && "${last_checked}" =~ ^[0-9]+$ ]]; then
+    if (( now - last_checked < ttl )); then
+      return 0
+    fi
+  fi
+
+  if ! latest="$(latest_release_version 2>/dev/null)" || [[ -z "${latest}" ]]; then
+    write_notice_state "${state_file}" "${now}" "unknown"
+    return 0
+  fi
+  write_notice_state "${state_file}" "${now}" "${latest}"
+
+  runtime_version="$(sfs_runtime_version)"
+  runtime_lag="$(sfs_version_lag_steps "${runtime_version}" "${latest}" 2>/dev/null || printf '0')"
+  project_version="$(sfs_project_version "${local_dir}" 2>/dev/null || true)"
+  if [[ -n "${project_version}" ]]; then
+    project_lag="$(sfs_version_lag_steps "${project_version}" "${latest}" 2>/dev/null || printf '0')"
+  fi
+
+  if (( project_lag >= runtime_lag )); then
+    notice_source="project"
+    notice_version="${project_version:-${runtime_version}}"
+    lag="${project_lag}"
+  else
+    notice_source="runtime"
+    notice_version="${runtime_version}"
+    lag="${runtime_lag}"
+  fi
+
+  if (( lag < threshold )); then
+    return 0
+  fi
+
+  {
+    printf 'sfs notice: your Solon %s version is %s; latest is %s (%s releases behind).\n' "${notice_source}" "${notice_version}" "${latest}" "${lag}"
+    printf 'newer product-flow features may be missing. Changelog: https://github.com/MJ-0701/solon-product/blob/main/CHANGELOG.md\n'
+    printf 'update when ready: sfs upgrade\n'
+    printf 'snooze: SFS_VERSION_NOTICE=0 or SFS_VERSION_NOTICE_TTL_SEC=<seconds>\n'
+  } >&2
+
+  if [[ "${cmd}" == "status" && "${SFS_VERSION_NOTICE_PROMPT:-1}" != "0" && -t 0 ]]; then
+    local answer
+    printf 'update now after reviewing the changelog? [y/N]: ' >&2
+    read -r answer || answer=""
+    case "${answer}" in
+      y|Y|yes|YES)
+        upgrade_command --skip-existing
+        exit $?
+        ;;
+    esac
+  fi
+}
+
 project_local_dir() {
   printf '%s\n' "${SFS_LOCAL_DIR:-.sfs-local}"
 }
@@ -687,6 +829,7 @@ case "${1:-}" in
     if ! ensure_project_initialized "${1:-command}"; then
       exit 1
     fi
+    maybe_show_stale_version_notice "${1:-command}"
     if [[ "${1:-}" == "guide" && ! -f "$(project_local_dir)/VERSION" ]]; then
       exit 0
     fi

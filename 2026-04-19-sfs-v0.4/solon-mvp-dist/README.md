@@ -112,6 +112,11 @@ sfs.cmd version --check
 `.sfs-local/context/_INDEX.md`, `kernel.md`, routed command modules 가 빠져 있으면 같은 버전에서도
 복구하고, 핵심 router 파일이 여전히 없으면 실패로 멈춥니다.
 
+초기화된 프로젝트에서 `sfs` 실행 시 현재 project/runtime 이 최신 product release 보다 5단계 이상
+뒤처져 있으면 터미널에 부드러운 update notice 를 띄웁니다. 강제 업데이트는 하지 않고,
+하루에 한 번 정도만 알려주며 `sfs upgrade` 를 안내합니다. interactive `sfs status` 에서는
+지금 업데이트할지도 묻습니다. 끄려면 `SFS_VERSION_NOTICE=0` 을 사용합니다.
+
 ---
 
 ## Command Surface
