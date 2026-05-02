@@ -2,16 +2,16 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T17:20:02+09:00
-session: "release: 0.5.76 Gate 6 review scope filter verified"
+last_overwrite: 2026-05-02T18:02:28+09:00
+session: "feature: Dev HQ architecture evolution guardrail planning"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
-current_wu: null
-current_wu_path: null
+current_wu: WU-45
+current_wu_path: 2026-04-19-sfs-v0.4/sprints/WU-45.md
 
 # ── SESSION MUTEX (CLAUDE.md §1.12) ───────────────────────────────
 # Keep scalar form for tool compatibility (.sfs-local/scripts/sfs-loop.sh stop/status, auto-resume contract).
-current_wu_owner: null
+current_wu_owner: codex-dev-hq-architecture-evolution # claimed_at=2026-05-02T18:02:28+09:00 last_heartbeat=2026-05-02T18:02:28+09:00 ttl_minutes=15
 
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.

@@ -68,7 +68,11 @@ non-backend discipline checklist.
   or interaction changes; scale-gate full design review.
 - **dev/backend**: always-on codebase regularity when code is touched plus
   backend Transaction discipline when DB, Spring/JPA, Spring Batch, external
-  API, MQ/event, idempotency, state, or consistency paths are touched.
+  API, MQ/event, idempotency, state, or consistency paths are touched. Use the
+  backend architecture evolution ladder: clean layered monolith for MVP/small
+  projects; CQRS for non-initial backend work even with one DB; Hexagonal
+  transition when domain seams grow; MSA only when independent service
+  boundaries are justified and approved.
 - **QA**: always-on smallest useful verification; trigger on regression,
   concurrency, boundary, migration, or user-visible flow risk; scale-gate full
   test-plan expansion.
@@ -84,6 +88,22 @@ first-level cache behavior, Spring Batch chunk transaction scope, outbox /
 idempotency / ordering / state history, and tests that match the risk. If
 `REQUIRES_NEW` changes state and the caller needs that state, prefer returning
 a result object over re-reading through the same outer EntityManager.
+
+Backend architecture evolution guardrail is also part of implementation
+planning:
+
+- **Clean layered monolith** is the default for initial MVP and small projects.
+  Keep the layers clear, but do not create ports/services/process boundaries for
+  futures that are not yet real.
+- **CQRS** is the default for backend work beyond the initial MVP, even when the
+  system still uses one database. Separate command/write use cases from
+  query/read paths at the application boundary without forcing separate stores.
+- **Hexagonal candidate** appears when domain areas, integrations, release
+  cadence, or test seams start pulling apart. Record the trigger evidence and
+  ask for user acceptance before refactoring to ports/adapters.
+- **MSA candidate** appears only when independent deployability, scaling,
+  ownership, resilience, or blast-radius isolation is required. Ask for explicit
+  approval, then refactor incrementally from monolith/hexagonal seams.
 
 Security / Infra / DevOps guard level is asked once at project/sprint scope
 when relevant:
@@ -118,6 +138,8 @@ or user explicitly accepts the risk.
 - **Solon divisions touched**:
 - **Artifact types touched**: code / docs / taxonomy / design / QA / infra / decision / other
 - **Trigger-based guardrails active**:
+- **Backend architecture mode**: n/a / clean-layered-monolith / cqrs-single-db / hexagonal-candidate / hexagonal-approved / msa-candidate / msa-approved
+- **Architecture transition approval**: n/a / pending-user / accepted / approved / rejected / deferred
 - **Security / Infra / DevOps guard level**: n/a / light / full / skip
 - **MVP filter decisions**:
 
@@ -128,6 +150,7 @@ or user explicitly accepts the risk.
 - **Feedback-first plan**:
 - **Guardrails applied**:
 - **Guardrails skipped with reason**:
+- **Backend architecture evolution notes**:
 - **Deferred items**:
 - **Risk-accepted items**:
 - **Backend Transaction notes**:
@@ -152,6 +175,7 @@ or user explicitly accepts the risk.
 - **Result**:
 - **Manual smoke / inspection**:
 - **Guardrail verification evidence**:
+- **Architecture transition evidence when relevant**:
 - **Transaction / integration evidence when relevant**:
 - **Non-code artifact review evidence when relevant**:
 

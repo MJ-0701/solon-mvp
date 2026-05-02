@@ -26,3 +26,7 @@ description: Solon SFS command router for Codex. Dispatch `$sfs` / `sfs` / visib
    `ready-for-plan`.
 11. For `plan`, derive the contract from `brainstorm.md`; unresolved Gate 2
     questions stay visible instead of being hidden by assumptions.
+12. For `implement`, backend architecture follows the routed `implement.md`
+    guardrail: clean layered monolith for MVP/small projects, CQRS for
+    non-initial backend work even on one DB, Hexagonal transition only after
+    user acceptance, and MSA transition only after explicit approval.

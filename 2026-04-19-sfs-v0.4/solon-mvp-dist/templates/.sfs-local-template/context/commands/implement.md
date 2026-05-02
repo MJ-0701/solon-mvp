@@ -15,3 +15,8 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - Prefer deep modules and gray-box delegation: design the public interface, then let AI fill internals.
 - Record artifact type, domain terms, divisions, feedback checks, design/interface notes, and review handoff in `implement.md`.
 - Use TDD/DDD/transaction guardrails when code or data consistency is touched.
+- Backend architecture ladder: clean layered monolith for MVP/small projects;
+  CQRS for non-initial backend work even with one DB; propose Hexagonal
+  transition when domain seams grow; propose MSA only when independent deploy,
+  scale, ownership, resilience, or blast-radius needs justify it. Refactor only
+  after user acceptance/approval and record the evidence.

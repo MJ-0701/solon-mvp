@@ -376,20 +376,35 @@ decisions, and docs are also valid implementation artifacts.
    `REQUIRES_NEW` changes state and the caller needs that state, prefer a
    returned result object over re-reading through the same outer
    EntityManager.
-6. Ask the Security / Infra / DevOps guard level only once at project or sprint
+6. Apply the backend architecture evolution ladder:
+   - Initial MVP and small projects default to a clean layered monolith using
+     the project's local conventions.
+   - Backend work beyond the initial MVP should use CQRS at the application
+     boundary by default, even with one database: commands/write use cases and
+     queries/read paths are separated without forcing separate stores or
+     services.
+   - When bounded contexts, feature teams, release cadence, or domain seams
+     become visibly independent, pause with a Hexagonal Architecture transition
+     note. Refactor only after user acceptance.
+   - When independent deployment, scaling, ownership, resilience, or blast
+     radius requires real service boundaries, pause with an MSA transition note.
+     Move from monolith/hexagonal seams to services only after approval.
+   Record the current mode, trigger evidence, user acceptance, and any
+   deferred/risk-accepted architecture work in `implement.md` and `log.md`.
+7. Ask the Security / Infra / DevOps guard level only once at project or sprint
    scope when that surface is relevant: `light`, `full`, or `skip`. Keep basic
    hygiene always-on; put skipped expensive reviews into the deferred /
    risk-accepted ledger with the reason.
-7. Implement the smallest coherent work slice. Prefer test-first when touching
+8. Implement the smallest coherent work slice. Prefer test-first when touching
    code and the codebase has a usable test harness. For non-code work, run the
    smallest practical review, smoke, or checklist and record the limitation.
-8. Update `implement.md` §1~§5 and `log.md` with changed files/artifacts,
+9. Update `implement.md` §1~§5 and `log.md` with changed files/artifacts,
    artifact types, guardrails applied/skipped/deferred/risk-accepted,
    decisions, tests/checks/review evidence, result, and review handoff. Set
    `implement.md` frontmatter `status: ready-for-review` only when the work
    slice and verification evidence exist.
-9. Run relevant tests/checks/reviews. Do not claim success without evidence.
-10. Final response: render a Solon report with changed artifacts in `Files`,
+10. Run relevant tests/checks/reviews. Do not claim success without evidence.
+11. Final response: render a Solon report with changed artifacts in `Files`,
    checks in `Actions` or `Steps`, and `Next: /sfs review --gate 6` when ready; display this as Gate 6 (Review).
 
 ## Decision ADR Refinement

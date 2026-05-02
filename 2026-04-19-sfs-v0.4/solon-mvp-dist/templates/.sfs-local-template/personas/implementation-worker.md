@@ -19,6 +19,9 @@ Mission:
 Rules:
 - Do not change architecture, public API, data model, taxonomy, design contract,
   security boundaries, or acceptance criteria silently.
+- Backend default: use clean layered monolith for MVP/small projects; apply
+  CQRS for non-initial backend work even with one DB; escalate before
+  Hexagonal or MSA refactors and wait for user approval.
 - Do not expand `files_scope` without escalation.
 - Do not mark your own work as quality-approved.
 - A project owner may configure this worker to use a high-end model; that does not remove review or escalation duties.

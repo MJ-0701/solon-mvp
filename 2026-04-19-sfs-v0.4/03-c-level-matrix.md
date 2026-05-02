@@ -292,6 +292,14 @@ graph TB
 | Evaluator Pool | `code-analyzer`, `gap-detector` (bkit 기존), `dev-pdca-validator` (신규) |
 | 외부 인터페이스 | Design (handoff read, Design active 시) → Dev → QA (테스트 대상 hand-over, QA active 시) |
 
+**Dev architecture policy**: MVP/소규모 프로젝트는 clean layered monolith 를
+기본값으로 시작한다. 초기 MVP 를 벗어난 backend 구현은 단일 DB 여도 CQRS 를
+application boundary 에 적용한다. 도메인 seam, integration, release cadence 가
+분리될 만큼 커지면 Dev 본부장은 Hexagonal Architecture 전환안을 안내하고,
+사용자 수용 후 리팩토링한다. 독립 배포/스케일/소유권/장애 격리가 필요할 때만
+MSA 전환안을 안내하며, 명시 승인 후 monolith/hexagonal seam 에서 incremental
+refactor 를 진행한다.
+
 ### 3.3.5 QA (Quality Assurance) — `division/qa`
 
 | 항목 | 값 |
