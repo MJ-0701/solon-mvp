@@ -1,5 +1,16 @@
 ## [Unreleased]
 
+## [0.5.72-product] - 2026-05-02
+
+### Fixed
+
+- **Global runtime safety guards** — `sfs` now runs commands under a bounded
+  watchdog by default, stops recursive command re-entry before it can loop,
+  caps adapter recursion/CPU time, limits symlink resolution while finding the
+  runtime, and applies explicit executor timeouts to review/loop live executor
+  calls so a deadlock or circular invocation fails closed instead of burning
+  tokens indefinitely.
+
 ## [0.5.71-product] - 2026-05-02
 
 ### Fixed
