@@ -164,6 +164,7 @@ REVIEW_DIFF_LINES="${SFS_REVIEW_DIFF_LINES:-180}"
 REVIEW_TARGET_EXCERPT_RADIUS="${SFS_REVIEW_TARGET_EXCERPT_RADIUS:-32}"
 REVIEW_INDEXED_TARGET_MAX="${SFS_REVIEW_INDEXED_TARGET_MAX:-80}"
 REVIEW_SMALL_FILE_EXCERPT_LINES="${SFS_REVIEW_SMALL_FILE_EXCERPT_LINES:-450}"
+REVIEW_FIRST_CLASS_EXCERPT_MAX="${SFS_REVIEW_FIRST_CLASS_EXCERPT_MAX:-40}"
 REVIEW_EXECUTOR_TIMEOUT="${SFS_REVIEW_EXECUTOR_TIMEOUT_SEC:-${SFS_REVIEW_COMMAND_TIMEOUT_SEC:-1500}}"
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -312,6 +313,9 @@ esac
 case "${REVIEW_SMALL_FILE_EXCERPT_LINES}" in
   ''|*[!0-9]*) REVIEW_SMALL_FILE_EXCERPT_LINES=450 ;;
 esac
+case "${REVIEW_FIRST_CLASS_EXCERPT_MAX}" in
+  ''|*[!0-9]*) REVIEW_FIRST_CLASS_EXCERPT_MAX=40 ;;
+esac
 if (( REVIEW_FILE_EXCERPT_MAX > 40 )); then
   REVIEW_FILE_EXCERPT_MAX=40
 fi
@@ -329,6 +333,9 @@ if (( REVIEW_INDEXED_TARGET_MAX > 200 )); then
 fi
 if (( REVIEW_SMALL_FILE_EXCERPT_LINES > 800 )); then
   REVIEW_SMALL_FILE_EXCERPT_LINES=800
+fi
+if (( REVIEW_FIRST_CLASS_EXCERPT_MAX > 80 )); then
+  REVIEW_FIRST_CLASS_EXCERPT_MAX=80
 fi
 
 # ─────────────────────────────────────────────────────────────────────
@@ -784,6 +791,17 @@ review_excerpt_priority_paths() {
   } | awk '!seen[$0]++'
 }
 
+first_class_review_evidence_paths() {
+  local path rank
+  indexed_review_evidence_paths | sort_review_evidence_paths | while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    rank="$(review_evidence_path_rank "$path")"
+    if (( rank < 85 )); then
+      printf '%s\n' "$path"
+    fi
+  done | awk '!seen[$0]++'
+}
+
 review_evidence_paths() {
   all_reviewable_evidence_paths
 }
@@ -977,13 +995,13 @@ is_ignored_review_path() {
     node_modules|node_modules/*|vendor|vendor/*|Pods|Pods/*)
       return 0
       ;;
-    dist|dist/*|build|build/*|out|out/*|target|target/*|coverage|coverage/*)
+    dist|dist/*|*/dist|*/dist/*|build|build/*|*/build|*/build/*|out|out/*|*/out|*/out/*|target|target/*|*/target|*/target/*|coverage|coverage/*|*/coverage|*/coverage/*|*.tsbuildinfo)
       return 0
       ;;
-    .next|.next/*|.nuxt|.nuxt/*|.svelte-kit|.svelte-kit/*|.vite|.vite/*|.turbo|.turbo/*|.cache|.cache/*|.parcel-cache|.parcel-cache/*)
+    .next|.next/*|*/.next|*/.next/*|.nuxt|.nuxt/*|*/.nuxt|*/.nuxt/*|.svelte-kit|.svelte-kit/*|*/.svelte-kit|*/.svelte-kit/*|.vite|.vite/*|*/.vite|*/.vite/*|.turbo|.turbo/*|*/.turbo|*/.turbo/*|.cache|.cache/*|*/.cache|*/.cache/*|.parcel-cache|.parcel-cache/*|*/.parcel-cache|*/.parcel-cache/*)
       return 0
       ;;
-    __pycache__|__pycache__/*|.pytest_cache|.pytest_cache/*|.mypy_cache|.mypy_cache/*|.ruff_cache|.ruff_cache/*|.gradle|.gradle/*)
+    __pycache__|__pycache__/*|*/__pycache__|*/__pycache__/*|.pytest_cache|.pytest_cache/*|*/.pytest_cache|*/.pytest_cache/*|.mypy_cache|.mypy_cache/*|*/.mypy_cache|*/.mypy_cache/*|.ruff_cache|.ruff_cache/*|*/.ruff_cache|*/.ruff_cache/*|.gradle|.gradle/*|*/.gradle|*/.gradle/*)
       return 0
       ;;
     tmp|tmp/*|temp|temp/*|logs|logs/*)
@@ -1130,12 +1148,18 @@ is_sfs_sprint_artifact_path() {
 render_sfs_scope_classification() {
   local system_paths mixed_paths sprint_paths line path
   printf '\n### SFS/system scope classification\n\n'
-  system_paths="$(git status --porcelain=v1 2>/dev/null | while IFS= read -r line; do
-    [[ -n "$line" ]] || continue
-    path="${line#???}"
-    if [[ "$line" == R* || "$line" == C* ]]; then
-      path="${path##* -> }"
-    fi
+  system_paths="$({
+    git status --porcelain=v1 2>/dev/null | while IFS= read -r line; do
+      [[ -n "$line" ]] || continue
+      path="${line#???}"
+      if [[ "$line" == R* || "$line" == C* ]]; then
+        path="${path##* -> }"
+      fi
+      printf '%s\n' "$path"
+    done
+    git ls-files --others --exclude-standard 2>/dev/null || true
+  } | while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
     path="$(normalize_review_candidate_path "$path" || true)"
     [[ -n "$path" ]] || continue
     if is_sfs_managed_review_path "$path" && ! is_sfs_sprint_artifact_path "$path"; then
@@ -1393,6 +1417,28 @@ render_review_file_excerpts() {
   done
 }
 
+render_first_class_review_file_excerpts() {
+  local max="${REVIEW_FIRST_CLASS_EXCERPT_MAX}" lines="${REVIEW_FILE_EXCERPT_LINES}" count=0 path paths
+  printf '\n### declared first-class source/config excerpts\n\n'
+  printf 'Declared implement.md/plan.md/log.md source/config targets are included here before the generic first-N excerpt cap is applied. Build outputs, generated dist/build folders, SFS runtime files, examples, fixtures, and sample data are not first-class review excerpts.\n\n'
+  paths="$(first_class_review_evidence_paths || true)"
+  if [[ -z "$paths" ]]; then
+    printf '(no first-class source/config targets detected)\n'
+    return 0
+  fi
+  printf '%s\n' "$paths" | while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    count=$((count + 1))
+    if (( count > max )); then
+      if (( count == max + 1 )); then
+        printf '\n(first-class excerpt limit reached: showing first %s declared source/config files)\n' "$max"
+      fi
+      continue
+    fi
+    render_review_file_excerpt "$path" "$lines"
+  done
+}
+
 render_indexed_target_source_excerpts() {
   local radius="${REVIEW_TARGET_EXCERPT_RADIUS}" max="${REVIEW_INDEXED_TARGET_MAX}" count=0 target path line_no targets
   printf '\n### indexed target source excerpts\n\n'
@@ -1438,6 +1484,7 @@ render_evidence_bundle() {
   render_evidence_file "${LOG_PATH}" 260
   render_review_file_diffs
   render_indexed_target_source_excerpts
+  render_first_class_review_file_excerpts
   render_review_file_excerpts
   printf '\n### review.md note\n\n'
   printf 'Only the first 80 lines of review.md are embedded to prevent recursive prompt growth. Full CPO prompts live under .sfs-local/tmp/review-prompts/.\n'
@@ -1449,7 +1496,7 @@ is_sfs_managed_review_path() {
   path="${path#\"}"
   path="${path%\"}"
   case "$path" in
-    .sfs-local/*|.claude/commands/sfs.md|.gemini/commands/sfs.toml|.agents/skills/sfs/SKILL.md|.codex/prompts/sfs.md)
+    .sfs-local/*|.claude/commands/sfs.md|.claude/skills/sfs|.claude/skills/sfs/*|.gemini/commands/sfs.toml|.agents/skills/sfs/SKILL.md|.codex/prompts/sfs.md)
       return 0
       ;;
     SFS.md|CLAUDE.md|AGENTS.md|GEMINI.md)
@@ -1548,6 +1595,7 @@ Self-validation policy:
 - Treat same-tool review risk as review_independence_risk: warning unless the evidence proves a concrete product or evidence-bundle defect. Do not make same-tool risk the sole blocker for implementation quality.
 - Separate implementation quality findings from evidence-bundle gaps. If the embedded bundle lacks required implementation files, build/smoke output, or untracked source excerpts, say that explicitly as an evidence packaging gap.
 - Treat File excerpt index paths as first-class review targets. The bundle should include bounded source diffs and excerpts for those paths when files are available.
+- Treat the "declared first-class source/config excerpts" section as the primary implementation source evidence; the generic first-N excerpt cap should not hide declared source/config targets.
 - Treat SFS/runtime/adapter files listed under SFS/system scope classification as Solon system state, not product implementation scope, unless this sprint explicitly targets SFS itself.
 
 Review the embedded evidence below. Do not rely on executor-specific tools being available.

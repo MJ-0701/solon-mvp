@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T16:59:12+09:00
-session: "release: 0.5.75 Gate 6 review evidence prioritization verified"
+last_overwrite: 2026-05-02T17:12:59+09:00
+session: "hotfix: Gate 6 review scope filter refinement implemented"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: null
@@ -231,6 +231,14 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
   manifests from bounded excerpt priority, promotes declared implement/plan
   target paths, includes safe `.env.example`, compacts `.gitignore`
   product-owned hunks, and separates same-tool review risk as warning metadata.
+- Gate 6 review scope filter refinement implemented locally as the
+  `0.5.76-product` candidate. `.claude/skills/sfs/**` is classified as SFS
+  system scope, nested generated outputs like `backend/dist/**` and
+  `backend/build/**` are excluded from reviewable manifests, and declared
+  first-class source/config excerpts are emitted before the generic first-N cap.
+  Sandbox prompt-only smoke verified the SFS skill file is system-scoped,
+  backend dist/build files are absent from product evidence, and 20 declared
+  first-class excerpts can appear while the generic cap stays at 5.
 
 ## ② In-Progress
 
@@ -238,9 +246,10 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ③ Next
 
-- Current truth is `0.5.75-product`; no active WU. Ask user for the next
-  WU/domain unless they provide a direct task. For a direct task, create a fresh
-  branch from clean `main` first (`feature/<slug>` or `hotfix/<slug>`).
+- Current truth is `0.5.75-product`; `0.5.76-product` Gate 6 review scope
+  filter candidate is implemented locally. Next action: release cut + channel
+  verification for `0.5.76-product`, or further review if the user wants
+  another pass before release.
 
 ## ④ Artifacts
 

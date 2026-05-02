@@ -1,9 +1,9 @@
 ---
 doc_id: handoff-next-session
-title: "Next session handoff — 0.5.74 current truth"
-written_at: 2026-05-02T07:32:21Z
-written_at_kst: 2026-05-02T16:32:21+09:00
-last_known_main_commit: ebf8a4a
+title: "Next session handoff — 0.5.75 current truth"
+written_at: 2026-05-02T08:06:58Z
+written_at_kst: 2026-05-02T17:06:58+09:00
+last_known_main_commit: 6a00b76
 visibility: raw-internal
 source_task: codex-handoff-drift-guard
 ---
@@ -12,25 +12,23 @@ source_task: codex-handoff-drift-guard
 
 ## 1. Current Truth
 
-- Latest Solon Product release is `0.5.74-product`.
-- Stable product repo: `2062971` / tag `v0.5.74-product`.
-- Homebrew tap: `7e00696`.
-- Scoop bucket: `24f4aa8`.
-- Dev repo main at release prep: `ebf8a4a`.
+- Latest Solon Product release is `0.5.75-product`.
+- Stable product repo: `b9e3276` / tag `v0.5.75-product`.
+- Homebrew tap: `508162d`.
+- Scoop bucket: `9d3eb60`.
+- Dev repo main at release handoff: `6a00b76`.
 - Installed runtime reports:
-  - `sfs 0.5.74-product`
-  - `latest 0.5.74-product`
+  - `sfs 0.5.75-product`
+  - `latest 0.5.75-product`
   - `status up-to-date`
-- `bash scripts/verify-product-release.sh --version 0.5.74-product` passed:
+- `bash scripts/verify-product-release.sh --version 0.5.75-product` passed:
   product tag, Homebrew formula/hash, Scoop manifest/hash, installed runtime,
   and dev/stable/Homebrew/Scoop clean handoff state all OK.
-- `0.5.74-product` ships the Gate numbering UX cleanup and the review evidence
-  bundle hotfix together. User-facing Solon report/CLI/docs now use Gate 1~7
-  labels (`/sfs review --gate 6` for review), while older storage ids remain
-  internal compatibility fields. `/sfs review` now unions indexed and
-  auto-discovered text evidence, includes raw command output sections, treats
-  `.gitignore` as mixed product/system evidence, and drops nonexistent indexed
-  paths.
+- `0.5.75-product` ships the Gate 6 review evidence excerpt prioritization
+  hotfix. `/sfs review` now separates full manifests from bounded excerpt
+  priority, promotes declared implement/plan target paths, includes safe
+  `.env.example`, compacts `.gitignore` product-owned hunks, and separates
+  same-tool review risk as warning metadata.
 
 ## 2. Why This Handoff Exists
 

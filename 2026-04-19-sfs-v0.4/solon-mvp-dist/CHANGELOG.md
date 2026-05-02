@@ -1,3 +1,14 @@
+## [0.5.76-product] - 2026-05-02
+
+### Fixed
+
+- **Gate 6 review scope filtering** — `/sfs review` now treats
+  `.claude/skills/sfs/**` as SFS system scope, excludes nested generated
+  build outputs such as `backend/dist/**` and `backend/build/**` from
+  reviewable manifests, and emits declared first-class source/config excerpts
+  before the generic first-N excerpt cap so core implementation evidence is not
+  hidden by incidental files.
+
 ## [0.5.75-product] - 2026-05-02
 
 ### Fixed
