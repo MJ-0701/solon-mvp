@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T00:35:00Z
-session: "user-active: WU-34 close + 0.5.58-product release preparation"
+last_overwrite: 2026-05-02T00:26:02Z
+session: "user-active: WU-34 release handoff to parallel deployment session"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: WU-34
@@ -11,7 +11,7 @@ current_wu_path: 2026-04-19-sfs-v0.4/sprints/WU-34.md
 
 # ── SESSION MUTEX (CLAUDE.md §1.12) ───────────────────────────────
 # Keep scalar form for tool compatibility (.sfs-local/scripts/sfs-loop.sh stop/status, auto-resume contract).
-current_wu_owner: codex-sfs-release-20260502
+current_wu_owner: null
 
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
