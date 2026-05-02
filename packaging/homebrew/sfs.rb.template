@@ -28,6 +28,9 @@ class Sfs < Formula
       each project where you want Solon files, state, and agent adapters.
       Later, run `sfs upgrade` inside a project; it self-upgrades the Homebrew
       runtime first, then updates that project's Solon files.
+
+      Beginner guide:
+        https://github.com/MJ-0701/solon-product/blob/main/BEGINNER-GUIDE.md
     EOS
   end
 

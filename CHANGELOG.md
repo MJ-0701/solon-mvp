@@ -1,3 +1,20 @@
+## [0.5.63-product] - 2026-05-02
+
+**Beginner onboarding for non-developer users.** Adds a dedicated guide for
+designers and other users who are blocked before they understand terminal,
+Scoop, Homebrew, project folders, or the first `sfs status` success signal.
+
+### Added
+
+- **`BEGINNER-GUIDE.md`** — a plain-language install and first-use guide with
+  Windows/Scoop, Mac/Homebrew, test project setup, first AI commands,
+  troubleshooting, and what information to send when asking for help.
+
+### Changed
+
+- **README guide path** — the README now points first-time non-developer users
+  to the beginner guide before the regular installation and product sections.
+
 ## [0.5.62-product] - 2026-05-02
 
 **Context-routing adapter structure.** Solon adapters now stay short and route

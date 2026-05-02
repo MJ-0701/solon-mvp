@@ -30,6 +30,7 @@
   },
   "notes": [
     "Solon SFS on Windows requires Git for Windows/Git Bash. If bash.exe is not on PATH, set SFS_BASH to the full bash.exe path.",
-    "First-time project setup: cd <project>; git init; sfs init --layout thin --yes; sfs status; sfs agent install all."
+    "First-time project setup: cd <project>; git init; sfs init --layout thin --yes; sfs status; sfs agent install all.",
+    "Beginner guide: https://github.com/MJ-0701/solon-product/blob/main/BEGINNER-GUIDE.md"
   ]
 }
