@@ -452,23 +452,26 @@ thin_context_runtime_migration() {
 
 compact_legacy_sprint_archive_dirs() {
   local root="$TARGET/.sfs-local/archives/sprints"
-  local dir archive_file manifest staging count total=0 file base
+  local dir archive_file manifest staging count total=0 file rel
   [ -d "$root" ] || return 0
 
   while IFS= read -r dir; do
     [ -d "$dir" ] || continue
     archive_file="$dir/sprint-evidence.tar.gz"
     manifest="$dir/manifest.txt"
-    [ ! -f "$archive_file" ] || continue
 
     count=0
     staging="$(mktemp -d "$dir/.stage.XXXXXX")" || return 5
+    if [ -f "$archive_file" ]; then
+      tar -xzf "$archive_file" -C "$staging" || return 5
+    fi
     while IFS= read -r file; do
       [ -f "$file" ] || continue
-      base="$(basename "$file")"
-      cp "$file" "$staging/$base" || return 5
+      rel="${file#$dir/}"
+      mkdir -p "$staging/$(dirname "$rel")" || return 5
+      cp "$file" "$staging/$rel" || return 5
       count=$((count + 1))
-    done < <(find "$dir" -maxdepth 1 -type f ! -name 'manifest.txt' ! -name '*.tar.gz' | sort)
+    done < <(find "$dir" -type f ! -name 'manifest.txt' ! -name '*.tar.gz' ! -path '*/.stage/*' ! -path '*/.stage.*/*' | sort)
 
     if [ "$count" -eq 0 ]; then
       rm -rf "$staging" 2>/dev/null || true
@@ -480,7 +483,7 @@ compact_legacy_sprint_archive_dirs() {
       echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
       echo "reason: loose legacy sprint archive files packed into one cold archive bundle"
       echo "archive: $archive_file"
-      echo "count: $count"
+      echo "loose_files_compacted: $count"
       echo
       echo "items:"
       find "$staging" -type f 2>/dev/null | sort | while IFS= read -r staged; do
@@ -493,7 +496,8 @@ compact_legacy_sprint_archive_dirs() {
     while IFS= read -r file; do
       [ -f "$file" ] || continue
       rm -f "$file" || return 5
-    done < <(find "$dir" -maxdepth 1 -type f ! -name 'manifest.txt' ! -name '*.tar.gz' | sort)
+    done < <(find "$dir" -type f ! -name 'manifest.txt' ! -name '*.tar.gz' ! -path '*/.stage/*' ! -path '*/.stage.*/*' | sort)
+    find "$dir" -depth -type d -empty -exec rmdir {} \; 2>/dev/null || true
     total=$((total + 1))
   done < <(find "$root" -mindepth 2 -maxdepth 2 -type d | sort)
 
@@ -547,9 +551,204 @@ compact_legacy_review_run_archives() {
   return 0
 }
 
+compact_legacy_runtime_upgrade_archives() {
+  local root="$TARGET/.sfs-local/archives/runtime-upgrades"
+  local dir archive_file manifest staging count total=0 file rel
+  [ -d "$root" ] || return 0
+
+  while IFS= read -r dir; do
+    [ -d "$dir" ] || continue
+    archive_file="$dir/runtime-upgrade-backup.tar.gz"
+    manifest="$dir/manifest.txt"
+    count=0
+    staging="$(mktemp -d "$dir/.stage.XXXXXX")" || return 5
+    if [ -f "$archive_file" ]; then
+      tar -xzf "$archive_file" -C "$staging" || return 5
+    fi
+    while IFS= read -r file; do
+      [ -f "$file" ] || continue
+      rel="${file#$dir/}"
+      mkdir -p "$staging/legacy-flat" || return 5
+      cp "$file" "$staging/legacy-flat/$(basename "$file")" || return 5
+      count=$((count + 1))
+    done < <(find "$dir" -type f ! -name 'manifest.txt' ! -name '*.tar.gz' ! -path '*/.stage/*' ! -path '*/.stage.*/*' | sort)
+
+    if [ "$count" -eq 0 ]; then
+      rm -rf "$staging" 2>/dev/null || true
+      continue
+    fi
+
+    {
+      echo "SFS runtime upgrade backup compaction"
+      echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      echo "reason: runtime upgrade backups are cold rollback evidence, not visible project docs"
+      echo "archive: $archive_file"
+      echo "loose_files_compacted: $count"
+      echo
+      echo "items:"
+      find "$staging" -type f 2>/dev/null | sort | while IFS= read -r staged; do
+        printf -- "- %s\n" "${staged#$staging/}"
+      done
+    } > "$manifest" || return 5
+
+    tar -czf "$archive_file" -C "$staging" . || return 5
+    rm -rf "$staging" || return 5
+    while IFS= read -r file; do
+      [ -f "$file" ] || continue
+      rm -f "$file" || return 5
+    done < <(find "$dir" -type f ! -name 'manifest.txt' ! -name '*.tar.gz' ! -path '*/.stage/*' ! -path '*/.stage.*/*' | sort)
+    find "$dir" -depth -type d -empty -exec rmdir {} \; 2>/dev/null || true
+    total=$((total + 1))
+  done < <(find "$root" -mindepth 1 -maxdepth 1 -type d | sort)
+
+  if [ "$total" -gt 0 ]; then
+    ok "legacy runtime-upgrades 압축 정리: $total bundle(s)"
+  fi
+  return 0
+}
+
+compact_legacy_agent_install_archives() {
+  local root="$TARGET/.sfs-local/archives/agent-install-backups"
+  local dir archive_file manifest staging count total=0 file
+  [ -d "$root" ] || return 0
+
+  while IFS= read -r dir; do
+    [ -d "$dir" ] || continue
+    archive_file="$dir/agent-adapter-backup.tar.gz"
+    manifest="$dir/manifest.txt"
+    [ ! -f "$archive_file" ] || continue
+    count=0
+    staging="$(mktemp -d "$dir/.stage.XXXXXX")" || return 5
+    while IFS= read -r file; do
+      [ -f "$file" ] || continue
+      mkdir -p "$staging/legacy-flat" || return 5
+      cp "$file" "$staging/legacy-flat/$(basename "$file")" || return 5
+      count=$((count + 1))
+    done < <(find "$dir" -type f ! -name 'manifest.txt' ! -name '*.tar.gz' ! -path '*/.stage/*' ! -path '*/.stage.*/*' | sort)
+
+    if [ "$count" -eq 0 ]; then
+      rm -rf "$staging" 2>/dev/null || true
+      continue
+    fi
+
+    {
+      echo "SFS agent adapter backup compaction"
+      echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      echo "reason: agent install backups are rollback evidence, not visible project docs"
+      echo "archive: $archive_file"
+      echo "loose_files_compacted: $count"
+      echo
+      echo "items:"
+      find "$staging" -type f 2>/dev/null | sort | while IFS= read -r staged; do
+        printf -- "- %s\n" "${staged#$staging/}"
+      done
+    } > "$manifest" || return 5
+
+    tar -czf "$archive_file" -C "$staging" . || return 5
+    rm -rf "$staging" || return 5
+    while IFS= read -r file; do
+      [ -f "$file" ] || continue
+      rm -f "$file" || return 5
+    done < <(find "$dir" -type f ! -name 'manifest.txt' ! -name '*.tar.gz' ! -path '*/.stage/*' ! -path '*/.stage.*/*' | sort)
+    find "$dir" -depth -type d -empty -exec rmdir {} \; 2>/dev/null || true
+    total=$((total + 1))
+  done < <(find "$root" -mindepth 1 -maxdepth 1 -type d | sort)
+
+  if [ "$total" -gt 0 ]; then
+    ok "legacy agent-install backups 압축 정리: $total bundle(s)"
+  fi
+  return 0
+}
+
+compact_legacy_tmp_artifacts() {
+  local tmp_root="$TARGET/.sfs-local/tmp"
+  local current_sprint_file="$TARGET/.sfs-local/current-sprint"
+  local current_sprint="" archive_dir archive_file manifest staging file rel count=0 kept_review=0
+  [ -d "$tmp_root" ] || return 0
+  [ -f "$current_sprint_file" ] && current_sprint="$(head -1 "$current_sprint_file" | tr -d '[:space:]')"
+
+  archive_dir="$TARGET/.sfs-local/archives/runtime-migrations/$(date +%Y%m%d-%H%M%S)-legacy-tmp-artifacts"
+  archive_file="$archive_dir/tmp-artifacts.tar.gz"
+  manifest="$archive_dir/manifest.txt"
+  mkdir -p "$archive_dir" || return 5
+  staging="$(mktemp -d "$archive_dir/.stage.XXXXXX")" || return 5
+
+  while IFS= read -r file; do
+    [ -f "$file" ] || continue
+    case "$file" in
+      "$tmp_root/review-prompts/"*|"$tmp_root/review-runs/"*)
+        if [ -n "$current_sprint" ] && basename "$file" | grep -Fq "${current_sprint}"; then
+          kept_review=$((kept_review + 1))
+          continue
+        fi
+        ;;
+      "$tmp_root/upgrade-backups/"*|"$tmp_root/agent-install-backups/"*|"$tmp_root/profile-backups/"*|"$tmp_root/auth-probes/"*)
+        ;;
+      *)
+        continue
+        ;;
+    esac
+    rel="${file#$TARGET/.sfs-local/}"
+    mkdir -p "$staging/$(dirname "$rel")" || return 5
+    cp "$file" "$staging/$rel" || return 5
+    count=$((count + 1))
+  done < <(find "$tmp_root" -type f | sort)
+
+  if [ "$count" -eq 0 ]; then
+    rm -rf "$staging" 2>/dev/null || true
+    rmdir "$archive_dir" 2>/dev/null || true
+    [ "$kept_review" -eq 0 ] || ok "legacy tmp review scratch 유지: current sprint match $kept_review file(s)"
+    return 0
+  fi
+
+  {
+    echo "SFS legacy tmp artifact migration"
+    echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "reason: stale tmp/backups are not active project surface"
+    echo "archive: $archive_file"
+    echo "count: $count"
+    echo "kept_current_review_scratch: $kept_review"
+    echo
+    echo "policy:"
+    echo "- current sprint review scratch stays in tmp so retro/tidy can pack it with the sprint"
+    echo "- stale review scratch and old backup/probe dirs move to compressed cold history"
+    echo
+    echo "items:"
+    find "$staging" -type f 2>/dev/null | sort | while IFS= read -r staged; do
+      printf -- "- %s\n" "${staged#$staging/}"
+    done
+  } > "$manifest" || return 5
+
+  tar -czf "$archive_file" -C "$staging" . || return 5
+  rm -rf "$staging" || return 5
+  while IFS= read -r file; do
+    [ -f "$file" ] || continue
+    case "$file" in
+      "$tmp_root/review-prompts/"*|"$tmp_root/review-runs/"*)
+        if [ -n "$current_sprint" ] && basename "$file" | grep -Fq "${current_sprint}"; then
+          continue
+        fi
+        ;;
+      "$tmp_root/upgrade-backups/"*|"$tmp_root/agent-install-backups/"*|"$tmp_root/profile-backups/"*|"$tmp_root/auth-probes/"*)
+        ;;
+      *)
+        continue
+        ;;
+    esac
+    rm -f "$file" || return 5
+  done < <(find "$tmp_root" -type f | sort)
+  find "$tmp_root" -depth -type d -empty -exec rmdir {} \; 2>/dev/null || true
+  ok "legacy tmp artifacts 이관: $count files → ${archive_file#$TARGET/}"
+  [ "$kept_review" -eq 0 ] || ok "  current sprint review scratch 유지: $kept_review file(s)"
+  return 0
+}
+
 project_surface_archive_migrations() {
+  compact_legacy_runtime_upgrade_archives || return 5
+  compact_legacy_agent_install_archives || return 5
   compact_legacy_sprint_archive_dirs || return 5
   compact_legacy_review_run_archives || return 5
+  compact_legacy_tmp_artifacts || return 5
   return 0
 }
 
@@ -843,7 +1042,7 @@ cat <<EOF
 적용 결과:
   - 신규 파일과 .gitignore/VERSION 은 자동 처리됩니다.
   - 기존 프로젝트 지침 파일은 자동 보존됩니다.
-  - backup+overwrite 대상은 기존 파일을 .sfs-local/archives/runtime-upgrades/ 아래에 보관한 뒤 갱신합니다.
+  - backup+overwrite 대상은 기존 파일을 .sfs-local/archives/runtime-upgrades/ 아래 압축 bundle 로 보관한 뒤 갱신합니다.
 
 EOF
 
@@ -856,6 +1055,73 @@ fi
 # ============================================================================
 # 4. 파일별 갱신 (checksum 기반 자동 처리)
 # ============================================================================
+
+RUNTIME_UPGRADE_BACKUP_TS=""
+RUNTIME_UPGRADE_BACKUP_DIR=""
+RUNTIME_UPGRADE_BACKUP_STAGE=""
+RUNTIME_UPGRADE_BACKUP_LIST=""
+RUNTIME_UPGRADE_BACKUP_REL=""
+
+runtime_upgrade_backup_file() {
+  local dst="$1" dst_rel="$2"
+  local rel_dir backup_rel
+
+  if [ -z "$RUNTIME_UPGRADE_BACKUP_DIR" ]; then
+    RUNTIME_UPGRADE_BACKUP_TS="$(date +%Y%m%d-%H%M%S)"
+    RUNTIME_UPGRADE_BACKUP_DIR="$TARGET/.sfs-local/archives/runtime-upgrades/$RUNTIME_UPGRADE_BACKUP_TS"
+    RUNTIME_UPGRADE_BACKUP_STAGE="$RUNTIME_UPGRADE_BACKUP_DIR/.stage"
+    RUNTIME_UPGRADE_BACKUP_LIST="$RUNTIME_UPGRADE_BACKUP_DIR/.items"
+    mkdir -p "$RUNTIME_UPGRADE_BACKUP_STAGE" || return 5
+  fi
+
+  rel_dir="$(dirname "$dst_rel")"
+  mkdir -p "$RUNTIME_UPGRADE_BACKUP_STAGE/$rel_dir" || return 5
+  cp "$dst" "$RUNTIME_UPGRADE_BACKUP_STAGE/$dst_rel" || return 5
+  printf '%s\n' "$dst_rel" >> "$RUNTIME_UPGRADE_BACKUP_LIST" || return 5
+  RUNTIME_UPGRADE_BACKUP_REL="${RUNTIME_UPGRADE_BACKUP_DIR#$TARGET/}/runtime-upgrade-backup.tar.gz"
+  return 0
+}
+
+finalize_runtime_upgrade_backup() {
+  local archive_file manifest count
+  [ -n "$RUNTIME_UPGRADE_BACKUP_DIR" ] || return 0
+  [ -d "$RUNTIME_UPGRADE_BACKUP_STAGE" ] || return 0
+
+  archive_file="$RUNTIME_UPGRADE_BACKUP_DIR/runtime-upgrade-backup.tar.gz"
+  manifest="$RUNTIME_UPGRADE_BACKUP_DIR/manifest.txt"
+  count=$(find "$RUNTIME_UPGRADE_BACKUP_STAGE" -type f 2>/dev/null | wc -l | tr -d '[:space:]')
+  if [ "${count:-0}" -eq 0 ]; then
+    rm -rf "$RUNTIME_UPGRADE_BACKUP_STAGE" "$RUNTIME_UPGRADE_BACKUP_LIST" 2>/dev/null || true
+    rmdir "$RUNTIME_UPGRADE_BACKUP_DIR" 2>/dev/null || true
+    return 0
+  fi
+
+  {
+    echo "SFS runtime upgrade backup"
+    echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "reason: pre-upgrade rollback copies for managed runtime/adaptor files"
+    echo "archive: $archive_file"
+    echo "count: $count"
+    echo
+    echo "policy:"
+    echo "- rollback evidence is compressed cold history"
+    echo "- managed files are updated in-place after their previous versions enter this bundle"
+    echo
+    echo "items:"
+    if [ -f "$RUNTIME_UPGRADE_BACKUP_LIST" ]; then
+      sort -u "$RUNTIME_UPGRADE_BACKUP_LIST" | sed 's/^/- /'
+    else
+      find "$RUNTIME_UPGRADE_BACKUP_STAGE" -type f 2>/dev/null | sort | while IFS= read -r staged; do
+        printf -- "- %s\n" "${staged#$RUNTIME_UPGRADE_BACKUP_STAGE/}"
+      done
+    fi
+  } > "$manifest" || return 5
+
+  tar -czf "$archive_file" -C "$RUNTIME_UPGRADE_BACKUP_STAGE" . || return 5
+  rm -rf "$RUNTIME_UPGRADE_BACKUP_STAGE" "$RUNTIME_UPGRADE_BACKUP_LIST" || return 5
+  ok "runtime upgrade backup 압축 생성: ${archive_file#$TARGET/} ($count files)"
+  return 0
+}
 
 update_file() {
   local dst_rel="$1" src_rel="$2" label="$3" recommended="${4:-s}"
@@ -894,14 +1160,9 @@ update_file() {
   printf "    자동 정책: %s\n" "$recommended"
   case "$recommended" in
     b|B|"backup"|"backup+overwrite")
-      local ts backup_dir safe_rel backup_path backup_rel
-      ts=$(date +%Y%m%d-%H%M%S)
-      backup_dir="$TARGET/.sfs-local/archives/runtime-upgrades/$ts"
-      mkdir -p "$backup_dir"
-      safe_rel="${dst_rel//\//__}"
-      backup_path="$backup_dir/$safe_rel"
-      backup_rel="${backup_path#$TARGET/}"
-      mv "$dst" "$backup_path"
+      local backup_rel
+      runtime_upgrade_backup_file "$dst" "$dst_rel" || return 5
+      backup_rel="$RUNTIME_UPGRADE_BACKUP_REL"
       cp "$src" "$dst"
       ok "아카이브 + 갱신: $dst_rel → $backup_rel"
       ;;
@@ -926,6 +1187,8 @@ MODEL_PROFILES_WAS_MISSING=0
 if [ ! -f "$TARGET/.sfs-local/model-profiles.yaml" ]; then
   MODEL_PROFILES_WAS_MISSING=1
 fi
+
+project_surface_archive_migrations || die "legacy archive surface migration failed"
 
 update_file "CLAUDE.md" "templates/CLAUDE.md.template" "Claude Code 어댑터" "s"
 update_file "SFS.md" "templates/SFS.md.template" "공통 SFS 지침" "b"
@@ -961,7 +1224,6 @@ else
   update_file ".sfs-local/context/policies/token-harness.md" "templates/.sfs-local-template/context/policies/token-harness.md" "context token/harness policy" "b"
   verify_context_router_targets || die "context router index references missing files"
 fi
-project_surface_archive_migrations || die "legacy archive surface migration failed"
 
 # scripts/ — Solon-versioned bash adapters (codex finding #4 후속, 25th-6 보강)
 # 신규: sfs-loop / sfs-decision / sfs-retro (0.4.0-mvp 추가 슬롯) + sfs-guide (0.5.2-product)
@@ -1017,6 +1279,7 @@ mkdir -p "$TARGET/.gemini/commands"
 mkdir -p "$TARGET/.agents/skills/sfs"
 update_file ".gemini/commands/sfs.toml"   "templates/.gemini/commands/sfs.toml"   "Gemini CLI sfs command (TOML)"  "b"
 update_file ".agents/skills/sfs/SKILL.md" "templates/.agents/skills/sfs/SKILL.md" "Codex Skill (project-scoped)"  "b"
+finalize_runtime_upgrade_backup || die "runtime upgrade backup bundle failed"
 
 TODAY=$(date +%Y-%m-%d)
 if [ "$(uname)" = "Darwin" ]; then

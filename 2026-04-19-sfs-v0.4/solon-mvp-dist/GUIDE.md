@@ -363,7 +363,8 @@ AI 시대의 설계 원칙은 [현재 제품 흐름과 최근 변화](./docs/ko/
 thin layout 에서는 자세한 routed context 문서가 프로젝트 안에 노출되지 않고 global `sfs`
 runtime 에 들어 있습니다. agent 는 필요할 때 `sfs context path ...` 로 같은 내용을 읽습니다.
 `sfs upgrade` 는 예전 설치본에 남은 project-local managed context 와 loose archive/review-run
-기록도 압축 migration 으로 정리합니다.
+기록도 압축 migration 으로 정리합니다. runtime upgrade / agent install / profile rollback
+백업도 loose 파일이 아니라 `*.tar.gz` + `manifest.txt` bundle 로 남습니다.
 
 ### `/sfs` 가 인식되지 않는다.
 

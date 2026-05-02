@@ -558,6 +558,72 @@ ensure_project_initialized() {
   esac
 }
 
+AGENT_BACKUP_DIR=""
+AGENT_BACKUP_STAGE=""
+AGENT_BACKUP_LIST=""
+AGENT_BACKUP_REL=""
+
+agent_backup_file() {
+  local dst="$1" dst_rel="$2"
+  local ts rel_dir archive_rel
+
+  if [[ -z "${AGENT_BACKUP_DIR}" ]]; then
+    ts="$(date +%Y%m%d-%H%M%S)"
+    AGENT_BACKUP_DIR="${PWD}/.sfs-local/archives/agent-install-backups/${ts}"
+    AGENT_BACKUP_STAGE="${AGENT_BACKUP_DIR}/.stage"
+    AGENT_BACKUP_LIST="${AGENT_BACKUP_DIR}/.items"
+    mkdir -p "${AGENT_BACKUP_STAGE}" || return 5
+  fi
+
+  rel_dir="$(dirname "${dst_rel}")"
+  mkdir -p "${AGENT_BACKUP_STAGE}/${rel_dir}" || return 5
+  cp "${dst}" "${AGENT_BACKUP_STAGE}/${dst_rel}" || return 5
+  printf '%s\n' "${dst_rel}" >> "${AGENT_BACKUP_LIST}" || return 5
+  AGENT_BACKUP_REL="${AGENT_BACKUP_DIR#${PWD}/}/agent-adapter-backup.tar.gz"
+}
+
+finalize_agent_backup() {
+  local archive_file manifest count
+  [[ -n "${AGENT_BACKUP_DIR}" && -d "${AGENT_BACKUP_STAGE}" ]] || return 0
+  archive_file="${AGENT_BACKUP_DIR}/agent-adapter-backup.tar.gz"
+  manifest="${AGENT_BACKUP_DIR}/manifest.txt"
+  count="$(find "${AGENT_BACKUP_STAGE}" -type f 2>/dev/null | wc -l | tr -d '[:space:]')"
+  if [[ "${count:-0}" == "0" ]]; then
+    rm -rf "${AGENT_BACKUP_STAGE}" "${AGENT_BACKUP_LIST}" 2>/dev/null || true
+    rmdir "${AGENT_BACKUP_DIR}" 2>/dev/null || true
+    AGENT_BACKUP_DIR=""
+    AGENT_BACKUP_STAGE=""
+    AGENT_BACKUP_LIST=""
+    AGENT_BACKUP_REL=""
+    return 0
+  fi
+
+  {
+    echo "SFS agent adapter backup"
+    echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "reason: pre-install rollback copies for Claude/Gemini/Codex adapter files"
+    echo "archive: ${archive_file}"
+    echo "count: ${count}"
+    echo
+    echo "items:"
+    if [[ -f "${AGENT_BACKUP_LIST}" ]]; then
+      sort -u "${AGENT_BACKUP_LIST}" | sed 's/^/- /'
+    else
+      find "${AGENT_BACKUP_STAGE}" -type f 2>/dev/null | sort | while IFS= read -r staged; do
+        printf -- "- %s\n" "${staged#${AGENT_BACKUP_STAGE}/}"
+      done
+    fi
+  } > "${manifest}" || return 5
+
+  tar -czf "${archive_file}" -C "${AGENT_BACKUP_STAGE}" . || return 5
+  rm -rf "${AGENT_BACKUP_STAGE}" "${AGENT_BACKUP_LIST}" || return 5
+  echo "agent backup bundle: ${archive_file#${PWD}/} (${count} files)"
+  AGENT_BACKUP_DIR=""
+  AGENT_BACKUP_STAGE=""
+  AGENT_BACKUP_LIST=""
+  AGENT_BACKUP_REL=""
+}
+
 backup_and_copy() {
   local src="$1"
   local dst_rel="$2"
@@ -581,14 +647,11 @@ backup_and_copy() {
       return 0
     fi
 
-    local ts backup_dir safe_rel
-    ts="$(date +%Y%m%d-%H%M%S)"
-    backup_dir="${PWD}/.sfs-local/archives/agent-install-backups/${ts}"
-    safe_rel="${dst_rel//\//__}"
-    mkdir -p "${backup_dir}"
-    cp "${dst}" "${backup_dir}/${safe_rel}"
+    local archive_rel
+    agent_backup_file "${dst}" "${dst_rel}" || return 5
+    archive_rel="${AGENT_BACKUP_REL}"
     cp "${src}" "${dst}"
-    echo "updated: ${dst_rel} (archive: .sfs-local/archives/agent-install-backups/${ts}/${safe_rel})"
+    echo "updated: ${dst_rel} (archive: ${archive_rel})"
     return 0
   fi
 
@@ -602,17 +665,22 @@ install_agent_adapter() {
     claude|claude-code)
       backup_and_copy "${DIST_DIR}/templates/.claude/commands/sfs.md" ".claude/commands/sfs.md" "${skip_existing}"
       backup_and_copy "${DIST_DIR}/templates/.claude/commands/sfs.md" ".claude/skills/sfs/SKILL.md" "${skip_existing}"
+      finalize_agent_backup
       ;;
     gemini)
       backup_and_copy "${DIST_DIR}/templates/.gemini/commands/sfs.toml" ".gemini/commands/sfs.toml" "${skip_existing}"
+      finalize_agent_backup
       ;;
     codex)
       backup_and_copy "${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md" ".agents/skills/sfs/SKILL.md" "${skip_existing}"
+      finalize_agent_backup
       ;;
     all)
-      install_agent_adapter claude "${skip_existing}"
-      install_agent_adapter gemini "${skip_existing}"
-      install_agent_adapter codex "${skip_existing}"
+      backup_and_copy "${DIST_DIR}/templates/.claude/commands/sfs.md" ".claude/commands/sfs.md" "${skip_existing}"
+      backup_and_copy "${DIST_DIR}/templates/.claude/commands/sfs.md" ".claude/skills/sfs/SKILL.md" "${skip_existing}"
+      backup_and_copy "${DIST_DIR}/templates/.gemini/commands/sfs.toml" ".gemini/commands/sfs.toml" "${skip_existing}"
+      backup_and_copy "${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md" ".agents/skills/sfs/SKILL.md" "${skip_existing}"
+      finalize_agent_backup
       ;;
     *)
       echo "unknown agent: ${target}" >&2

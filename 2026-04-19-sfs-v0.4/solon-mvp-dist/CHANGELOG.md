@@ -1,3 +1,19 @@
+## [0.5.88-product] - 2026-05-03
+
+### Fixed
+
+- **Project-surface archive compaction audit** — `sfs upgrade` now cleans more
+  than context docs. Existing loose `runtime-upgrades`, old `agent-install`
+  backups, stale `.sfs-local/tmp` backup/review scratch, and nested loose files
+  inside legacy sprint archives are compacted into `*.tar.gz` + `manifest.txt`
+  bundles.
+- **Future rollback backups are bundled** — runtime upgrade backups and
+  `sfs agent install` backups now create one compressed bundle per run instead
+  of timestamp folders full of flattened Markdown files.
+- **Profile rollback backup moved out of tmp** — `sfs profile --apply` now keeps
+  its pre-edit `SFS.md` rollback copy under compressed `archives/profile-backups`
+  instead of `.sfs-local/tmp/profile-backups`.
+
 ## [0.5.87-product] - 2026-05-03
 
 ### Changed
