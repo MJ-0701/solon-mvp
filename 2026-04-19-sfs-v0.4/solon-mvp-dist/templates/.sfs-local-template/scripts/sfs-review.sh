@@ -154,6 +154,8 @@ SHOW_LAST=false
 ALLOW_EMPTY_REVIEW="${SFS_REVIEW_ALLOW_EMPTY:-false}"
 AUTH_INTERACTIVE="${SFS_AUTH_INTERACTIVE:-auto}"
 REVIEW_MD_EXCERPT_LINES="${SFS_REVIEW_MD_EXCERPT_LINES:-0}"
+REVIEW_FILE_EXCERPT_MAX="${SFS_REVIEW_FILE_EXCERPT_MAX:-12}"
+REVIEW_FILE_EXCERPT_LINES="${SFS_REVIEW_FILE_EXCERPT_LINES:-120}"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
@@ -277,6 +279,18 @@ esac
 if (( REVIEW_MD_EXCERPT_LINES > 80 )); then
   REVIEW_MD_EXCERPT_LINES=80
 fi
+case "${REVIEW_FILE_EXCERPT_MAX}" in
+  ''|*[!0-9]*) REVIEW_FILE_EXCERPT_MAX=12 ;;
+esac
+case "${REVIEW_FILE_EXCERPT_LINES}" in
+  ''|*[!0-9]*) REVIEW_FILE_EXCERPT_LINES=120 ;;
+esac
+if (( REVIEW_FILE_EXCERPT_MAX > 40 )); then
+  REVIEW_FILE_EXCERPT_MAX=40
+fi
+if (( REVIEW_FILE_EXCERPT_LINES > 240 )); then
+  REVIEW_FILE_EXCERPT_LINES=240
+fi
 
 # ─────────────────────────────────────────────────────────────────────
 # Validate .sfs-local + git
@@ -302,6 +316,10 @@ fi
 SPRINT_DIR="${SFS_SPRINTS_DIR}/${SPRINT_ID}"
 REVIEW_PATH="${SPRINT_DIR}/review.md"
 TEMPLATE="$(sfs_sprint_template_file review)"
+IMPLEMENT_PATH="${SPRINT_DIR}/implement.md"
+PLAN_PATH="${SPRINT_DIR}/plan.md"
+LOG_PATH="${SPRINT_DIR}/log.md"
+BRAINSTORM_PATH="${SPRINT_DIR}/brainstorm.md"
 
 existing_result_excerpt() {
   local file="$1" limit="${2:-80}"
@@ -447,6 +465,63 @@ if ! validate_gate_id "${GATE_ID}"; then
   echo "unknown gate ${GATE_ID}, valid: G-1, G0, G1, G2, G3, G4, G5" >&2
   exit "${SFS_EXIT_GATE}"
 fi
+
+normalize_inferred_executor_value() {
+  local value="$1" token low_value
+  value="$(printf '%s' "$value" \
+    | sed -E 's/[`"*]//g; s/#.*$//; s/^[[:space:]-]+//; s/[[:space:]]+$//')"
+  [[ -n "$value" ]] || return 1
+  low_value="$(printf '%s\n' "$value" | tr '[:upper:]' '[:lower:]')"
+  case "$value" in
+    *" / "*)
+      return 1
+      ;;
+  esac
+  case "$low_value" in
+    *unknown*|*"current runtime model"*|*"current-runtime-model"*)
+      return 1
+      ;;
+  esac
+  token="$(printf '%s\n' "$value" | awk '{print $1}')"
+  token="${token%,}"
+  token="${token%;}"
+  token="${token%.}"
+  [[ -n "$token" ]] || return 1
+  printf '%s\n' "$token"
+}
+
+infer_generator_executor_from_file() {
+  local file="$1"
+  [[ -f "$file" ]] || return 1
+  awk '
+    {
+      low = tolower($0)
+    }
+    low ~ /generator_executor[[:space:]]*:/ ||
+    low ~ /generator executor[[:space:]]*:/ ||
+    low ~ /implementation executor[[:space:]]*:/ ||
+    low ~ /implementation tool[[:space:]]*:/ ||
+    low ~ /구현 executor\/tool[[:space:]]*:/ ||
+    low ~ /구현 executor[[:space:]]*:/ {
+      line = $0
+      sub(/^.*:[[:space:]]*/, "", line)
+      print line
+      exit
+    }
+  ' "$file" | while IFS= read -r candidate; do
+    normalize_inferred_executor_value "$candidate" && exit 0
+  done
+}
+
+if [[ -z "${GENERATOR_EXECUTOR}" || "${GENERATOR_EXECUTOR}" == "unknown" ]]; then
+  _inferred_generator="$(infer_generator_executor_from_file "${IMPLEMENT_PATH}" || true)"
+  if [[ -z "${_inferred_generator}" ]]; then
+    _inferred_generator="$(infer_generator_executor_from_file "${LOG_PATH}" || true)"
+  fi
+  if [[ -n "${_inferred_generator}" ]]; then
+    GENERATOR_EXECUTOR="${_inferred_generator}"
+  fi
+fi
 # ─────────────────────────────────────────────────────────────────────
 # Ensure review.md exists (copy from template if missing)
 # ─────────────────────────────────────────────────────────────────────
@@ -509,6 +584,125 @@ render_evidence_file() {
   fi
 }
 
+render_priority_evidence_sections() {
+  local file="$1" limit="${2:-80}"
+  printf '\n### priority evidence sections: %s\n\n' "$file"
+  if [[ ! -f "$file" ]]; then
+    printf '(missing)\n'
+    return 0
+  fi
+  awk -v limit="$limit" '
+    BEGIN { capture=0; count=0; matched=0 }
+    /^#{1,6}[[:space:]]+/ {
+      low = tolower($0)
+      if (low ~ /build output|smoke output|file excerpt index|self-validation|risk ledger|untracked implementation surface|verification evidence|commands run/) {
+        capture=1
+        count=0
+        matched=1
+        print ""
+        print $0
+        next
+      }
+      if (capture) {
+        capture=0
+      }
+    }
+    capture && count < limit {
+      print
+      count++
+    }
+    END {
+      if (!matched) {
+        print "(no priority evidence sections matched)"
+      }
+    }
+  ' "$file"
+}
+
+review_evidence_paths() {
+  {
+    git diff --name-only --diff-filter=ACMRT 2>/dev/null || true
+    git diff --cached --name-only --diff-filter=ACMRT 2>/dev/null || true
+    git ls-files --others --exclude-standard 2>/dev/null || true
+  } | while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    if ! is_sfs_managed_review_path "$path"; then
+      printf '%s\n' "$path"
+    fi
+  done | awk '!seen[$0]++'
+}
+
+render_untracked_manifest() {
+  local paths
+  printf '\n### untracked file manifest\n\n'
+  paths="$(git ls-files --others --exclude-standard 2>/dev/null \
+    | while IFS= read -r path; do
+        [[ -n "$path" ]] || continue
+        if ! is_sfs_managed_review_path "$path"; then
+          printf '%s\n' "$path"
+        fi
+      done || true)"
+  if [[ -n "$paths" ]]; then
+    printf '%s\n' "$paths" | sed -n '1,200p'
+  else
+    printf '(no untracked project implementation files detected)\n'
+  fi
+}
+
+render_reviewable_file_manifest() {
+  local paths
+  printf '\n### reviewable implementation file manifest\n\n'
+  paths="$(review_evidence_paths || true)"
+  if [[ -n "$paths" ]]; then
+    printf '%s\n' "$paths" | sed -n '1,200p'
+  else
+    printf '(no project implementation files detected)\n'
+  fi
+}
+
+render_review_file_excerpt() {
+  local file="$1" limit="${2:-120}" bytes
+  printf '\n### source excerpt: %s\n\n' "$file"
+  if [[ ! -f "$file" ]]; then
+    printf '(missing or not a regular file)\n'
+    return 0
+  fi
+  bytes="$(wc -c < "$file" 2>/dev/null | tr -d '[:space:]' || printf '0')"
+  if [[ "$bytes" == "0" ]]; then
+    printf '(empty file)\n'
+    return 0
+  fi
+  if ! LC_ALL=C grep -Iq . "$file" 2>/dev/null; then
+    printf '(binary or non-text file skipped; %s bytes)\n' "$bytes"
+    return 0
+  fi
+  if (( bytes > 131072 )); then
+    printf '(large file: %s bytes; showing first %s lines)\n\n' "$bytes" "$limit"
+  fi
+  sed -n "1,${limit}p" "$file"
+}
+
+render_review_file_excerpts() {
+  local max="${REVIEW_FILE_EXCERPT_MAX}" lines="${REVIEW_FILE_EXCERPT_LINES}" count=0 path paths
+  printf '\n### bounded source excerpts for reviewable files\n\n'
+  paths="$(review_evidence_paths || true)"
+  if [[ -z "$paths" ]]; then
+    printf '(no project implementation files detected)\n'
+    return 0
+  fi
+  printf '%s\n' "$paths" | while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    count=$((count + 1))
+    if (( count > max )); then
+      if (( count == max + 1 )); then
+        printf '\n(excerpt limit reached: showing first %s files; see manifest above for the rest)\n' "$max"
+      fi
+      continue
+    fi
+    render_review_file_excerpt "$path" "$lines"
+  done
+}
+
 render_evidence_bundle() {
   printf '## Embedded Evidence Bundle\n\n'
   printf 'The following evidence was collected by SFS before invoking the executor. Review this embedded evidence first; do not assume your CLI has project file/tool access. If evidence is insufficient, return partial/fail and list the missing evidence instead of calling unsupported tools.\n\n'
@@ -519,12 +713,17 @@ render_evidence_bundle() {
   printf '\n### git diff --stat\n\n'
   git diff --stat 2>/dev/null || printf '(git diff unavailable)\n'
 
-  render_evidence_file "${SFS_LOCAL_DIR}/sprints/${SPRINT_ID}/brainstorm.md" 220
-  render_evidence_file "${SFS_LOCAL_DIR}/sprints/${SPRINT_ID}/plan.md" 260
-  render_evidence_file "${SFS_LOCAL_DIR}/sprints/${SPRINT_ID}/log.md" 220
+  render_untracked_manifest
+  render_reviewable_file_manifest
+  render_priority_evidence_sections "${IMPLEMENT_PATH}" 120
+  render_evidence_file "${BRAINSTORM_PATH}" 220
+  render_evidence_file "${PLAN_PATH}" 260
+  render_evidence_file "${IMPLEMENT_PATH}" 420
+  render_evidence_file "${LOG_PATH}" 260
+  render_review_file_excerpts
   printf '\n### review.md note\n\n'
   printf 'Only the first 80 lines of review.md are embedded to prevent recursive prompt growth. Full CPO prompts live under .sfs-local/tmp/review-prompts/.\n'
-  render_evidence_file "${SFS_LOCAL_DIR}/sprints/${SPRINT_ID}/review.md" 80
+  render_evidence_file "${REVIEW_PATH}" 80
 }
 
 is_sfs_managed_review_path() {
@@ -564,6 +763,26 @@ sprint_artifact_events_exist() {
     | grep -q "\"sprint_id\":\"${SPRINT_ID}\""
 }
 
+implementation_evidence_exists() {
+  local event_line
+  event_line=""
+  if [[ -f "${SFS_EVENTS_FILE}" ]]; then
+    event_line="$(grep -F '"type":"implement_open"' "${SFS_EVENTS_FILE}" 2>/dev/null \
+      | grep -F "\"sprint_id\":\"${SPRINT_ID}\"" \
+      | sed -n '1p' || true)"
+  fi
+  if [[ -n "$event_line" ]]; then
+    return 0
+  fi
+  if [[ -f "${IMPLEMENT_PATH}" ]] && grep -Eiq 'ready-for-review|Ready for review\?\*\*[[:space:]]*yes|Build output|Smoke output|File excerpt index|Commands run|npm run|passed' "${IMPLEMENT_PATH}"; then
+    return 0
+  fi
+  if [[ -f "${LOG_PATH}" ]] && grep -Eiq '실행한 테스트|smoke|build|passed|구현 executor/tool' "${LOG_PATH}"; then
+    return 0
+  fi
+  return 1
+}
+
 has_review_items() {
   local first_project_path=""
   first_project_path="$(reviewable_git_paths | sed -n '1p' || true)"
@@ -576,6 +795,9 @@ has_review_items() {
   case "${GATE_ID}" in
     G-1|G0|G1|G2|G3)
       sprint_artifact_events_exist && return 0
+      ;;
+    G4)
+      implementation_evidence_exists && return 0
       ;;
   esac
 
@@ -603,6 +825,7 @@ Self-validation policy:
 - Do not rubber-stamp CTO Generator output.
 - If this review is running in the same tool/session that generated the implementation, explicitly call that out as a risk.
 - Prefer independent review evidence from Codex/Gemini/another agent instance when implementation was produced by Claude.
+- Separate implementation quality findings from evidence-bundle gaps. If the embedded bundle lacks required implementation files, build/smoke output, or untracked source excerpts, say that explicitly as an evidence packaging gap.
 
 Review the embedded evidence below. Do not rely on executor-specific tools being available.
 
@@ -613,6 +836,8 @@ EOF
 Return exactly this shape:
 Verdict: pass | partial | fail
 Evidence checked:
+- ...
+Evidence gaps:
 - ...
 Findings:
 - ...

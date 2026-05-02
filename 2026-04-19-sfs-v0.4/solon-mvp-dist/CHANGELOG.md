@@ -1,5 +1,15 @@
 ## [Unreleased]
 
+### Fixed
+
+- **G4 review evidence bundle** — `/sfs review` now embeds `implement.md`,
+  prioritized build/smoke/source evidence sections, untracked file manifests,
+  and bounded source excerpts so CPO review sees implementation evidence even
+  when a new app surface is still untracked.
+- **Review executor attribution** — when `--generator` is omitted, review now
+  infers the generator executor from `implement.md` or `log.md` evidence before
+  recording self-validation risk metadata.
+
 ## [0.5.68-product] - 2026-05-02
 
 ### Changed
