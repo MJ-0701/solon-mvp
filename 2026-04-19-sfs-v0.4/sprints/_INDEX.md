@@ -2,7 +2,7 @@
 doc_id: sprints-index
 title: "sprints/ — WU (Work Unit) 파일 목록 (v2)"
 visibility: raw-internal
-updated: 2026-05-02   # WU-45 완료: Dev backend architecture evolution ladder.
+updated: 2026-05-02   # WU-46 완료: Non-Dev division policy ladders.
 ---
 
 # sprints/ — WU 파일 인덱스
@@ -63,6 +63,7 @@ updated: 2026-05-02   # WU-45 완료: Dev backend architecture evolution ladder.
 | WU-43 | `sfs start` next-action guidance — start prints one readable `next: sfs brainstorm ...` line and routed docs clarify bash-first semantics. | `6c4ca93` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-43.md](WU-43.md) |
 | WU-44 | `sfs profile` command restore — re-adds the packaged profile adapter, routes it through `bin/sfs`/dispatch, and documents it as a narrow SFS.md project-overview command. | `4430df2` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-44.md](WU-44.md) |
 | WU-45 | Dev backend architecture evolution ladder — `/sfs implement` now records clean layered monolith for MVP/small projects, CQRS for non-initial backend work even on one DB, Hexagonal transition guidance on growing domain seams, and MSA transition guidance only after explicit approval. | `8f16102` | 2026-05-02 | 2026-05-02 | codex-dev-hq-architecture-evolution | [WU-45.md](WU-45.md) |
+| WU-46 | Non-Dev division policy ladders — Strategy-PM, Taxonomy, Design/Frontend, QA, and Infra now start from lightweight MVP defaults, strengthen only on trigger evidence, and require user acceptance/approval before large roadmap, rename/schema, redesign, release-readiness, or infra/ops transitions. | `a67d9b3` | 2026-05-02 | 2026-05-02 | codex-non-dev-division-policy-ladders | [WU-46.md](WU-46.md) |
 
 ## 완료 WU (status: done) — v1 → v2 이관 (WU-16 backfill)
 
