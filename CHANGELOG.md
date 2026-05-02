@@ -1,3 +1,21 @@
+## [0.5.82-product] - 2026-05-02
+
+### Changed
+
+- **Current product documentation** — README and GUIDE now explain the current
+  Solon Product shape after the recent release train: brainstorm depth,
+  plan-as-contract, artifact-based implementation, review lens routing, evidence
+  bundles, context-router repair, and retro-as-close.
+- **Bilingual docs architecture** — README is now a high-level map rather than a
+  detail warehouse, with Korean/English detail pages under `docs/ko` and
+  `docs/en`, including current product shape, 10x value, and an English
+  onboarding guide. Docs also clarify that GitHub Markdown has no native
+  language-switch tabs, so Solon uses explicit language links.
+- **Documentation quality bar** — onboarding docs now state that Solon documents
+  should be high-signal handoff artifacts: enough context for the next human/AI
+  session to know what was done, why, how it was verified, and what action comes
+  next, without turning every sprint into documentation sprawl.
+
 ## [0.5.81-product] - 2026-05-02
 
 ### Changed
