@@ -17,4 +17,5 @@ $ARGUMENTS
    `bash .sfs-local/scripts/sfs-dispatch.sh <command> <args>`.
 3. Print stdout verbatim; on failure include stderr and exit code.
 4. Read `.sfs-local/context/kernel.md`, `_INDEX.md`, then only the routed module.
-5. For hybrid commands, refine pointed artifacts and answer with one Solon report.
+5. For bash-first commands, do not refine artifacts, but a compact state/Next is allowed.
+6. For hybrid commands, refine pointed artifacts and answer with one Solon report.

@@ -7,6 +7,7 @@ load_when: ["always", "sfs", "entry"]
 # SFS Kernel
 
 - Run `sfs <command>` first; bash adapter output is SSoT and must be verbatim.
+- Bash-first means no AI-side artifact refinement; it does not mean "no Next".
 - Start from `sfs status` and current sprint `report.md`; avoid old logs unless needed.
 - Stop on mutex conflicts and report owner/domain.
 - Ask only 1-3 blocking questions.
