@@ -1,55 +1,59 @@
 ---
 doc_id: handoff-next-session
-title: "Next session handoff — 0.5.81 current truth"
-written_at: 2026-05-02T12:46:16Z
-written_at_kst: 2026-05-02T21:46:16+09:00
-last_known_main_commit: 8e9e548
+title: "Next session handoff — 0.5.82 current truth"
+written_at: 2026-05-02T13:05:00Z
+written_at_kst: 2026-05-02T22:05:00+09:00
+last_known_main_commit: adc967f
 visibility: raw-internal
-source_task: release-0.5.81-retro-close-default
+source_task: release-0.5.82-product-docs-current-flow
 ---
 
 # Next Session Handoff
 
 ## 1. Current Truth
 
-- Latest Solon Product release is `0.5.81-product`.
-- Stable product repo: `2ceedde` / tag `v0.5.81-product`.
-- Homebrew tap: `aa6fe33`.
-- Scoop bucket: `c6d63c5`.
-- Dev repo main at release handoff: `8e9e548`.
+- Latest Solon Product release is `0.5.82-product`.
+- Stable product repo: `a691e4c` / tag `v0.5.82-product`.
+- Homebrew tap: `90b157b`.
+- Scoop bucket: `1c9c5da`.
+- Dev repo main at release handoff: `adc967f`.
 - Installed runtime reports:
-  - `sfs 0.5.81-product`
-  - `latest 0.5.81-product`
+  - `sfs 0.5.82-product`
+  - `latest 0.5.82-product`
   - `status up-to-date`
-- `bash scripts/verify-product-release.sh --version 0.5.81-product` passed:
+- `bash scripts/verify-product-release.sh --version 0.5.82-product` passed:
   product tag, Homebrew formula/hash, Scoop manifest/hash, packaged context
   router tar/zip integrity, installed runtime, and dev/stable/Homebrew/Scoop
   clean handoff state all OK.
-- `0.5.81-product` ships retro close default:
-  - `sfs retro` is now the normal sprint completion command.
-  - `sfs retro` opens/refines `retro.md`, ensures `report.md`, archives
-    workbench evidence, closes the sprint, and creates the local close commit.
-  - `sfs retro --close` remains a backward-compatible alias.
-  - `sfs retro --draft` / `--no-close` preserve the old open-only behavior.
-  - README and Guide now show the current flow ending with `sfs retro`.
+- `0.5.82-product` ships current product documentation:
+  - README is now a high-level flow and table of contents rather than a detail
+    warehouse.
+  - Detailed docs live under `docs/ko` and `docs/en`, with explicit language
+    links because GitHub Markdown has no native language-switch tabs.
+  - Korean 10x value docs and an English onboarding guide were added.
+  - GUIDE/README now reflect the recent release train: brainstorm depth,
+    plan-as-contract, non-code implementation artifacts, review lens routing,
+    and retro-as-close.
+  - The release script allowlist now includes `docs/` so bilingual docs ship in
+    stable packages.
 
 ## 2. Why This Handoff Exists
 
-This is the compact current-truth handoff after the `0.5.81-product` release.
+This is the compact current-truth handoff after the `0.5.82-product` release.
 If future release work lands without updating `PROGRESS.md` + this file,
 `resume-session-check.sh` should detect release handoff drift and stop the new
 session before broad code inspection.
 
 ## 3. Validation Evidence
 
-- `git push origin main` published dev main through `8e9e548`.
-- `scripts/cut-release.sh --version 0.5.81-product --apply --allow-dirty` cut
-  stable `2ceedde` and tag `v0.5.81-product`.
-- Homebrew formula published `v0.5.81-product.tar.gz` with SHA256
-  `f0361b520efe64931966e7f7fbf92ca2d5ab3a01fb6563052ced4958161be2f4`.
-- Scoop manifest published `v0.5.81-product.zip` with SHA256
-  `d8c450ce0873979908209f631e4205a7999c46a73033a21370ad61d47d7213f1`.
-- `brew upgrade MJ-0701/solon-product/sfs` upgraded local runtime to 0.5.81.
+- `git push origin main` published dev main through `adc967f`.
+- `scripts/cut-release.sh --version 0.5.82-product --apply --allow-dirty` cut
+  stable `a691e4c` and tag `v0.5.82-product`.
+- Homebrew formula published `v0.5.82-product.tar.gz` with SHA256
+  `12f1df91d7be6699ef212d85780f189ffa500b4d652b55c442f5654779bcf3d1`.
+- Scoop manifest published `v0.5.82-product.zip` with SHA256
+  `d1a69638962939f7eeb2ece040068bfd07876453afb31cf8144ddc3f94a3ccc1`.
+- `brew upgrade MJ-0701/solon-product/sfs` upgraded local runtime to 0.5.82.
 - `sfs version --check` returned up-to-date.
 - Full release verifier returned OK.
 
@@ -67,8 +71,8 @@ session before broad code inspection.
 
 ## 5. Guardrails
 
-- Do not re-open the retro close default work solely because it was just
-  released; treat follow-up retro lifecycle changes as new WUs.
+- Do not re-open the documentation current-flow work solely because it was just
+  released; treat follow-up docs IA/language/tab UX changes as new WUs.
 - Do not rely on this file as a second SSoT for release history; `PROGRESS.md`
   remains the live entry snapshot.
 - Keep future release completion atomic: product release/cut + channel publish +
