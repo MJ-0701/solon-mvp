@@ -8,7 +8,7 @@ keep product-owner judgment strong in an AI-assisted workflow.
 
 ## One-Line Summary
 
-Solon turns `start -> brainstorm -> plan -> implement -> review -> report -> retro`
+Solon turns `start -> brainstorm -> plan -> implement -> review -> retro`
 into a loop that converts fuzzy intent into a verifiable work contract. AI can
 move quickly, but the user's judgment, language, design intent, and validation
 loop stay visible.
@@ -19,8 +19,7 @@ fuzzy intent
 -> plan contract
 -> small implementation slice
 -> artifact acceptance review
--> report
--> retro close
+-> retro close with report
 ```
 
 ## Handoff After Start
@@ -125,7 +124,7 @@ optional, but a sprint is only complete when it is closed. The current default i
 sfs retro
 ```
 
-It refines report/retro, archives workbench evidence, closes the sprint state,
+It refines `report.md` and `retro.md`, archives workbench evidence, closes the sprint state,
 and creates the local close commit. Use `sfs retro --draft` only when you want to
 open the draft without closing.
 

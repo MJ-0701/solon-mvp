@@ -290,9 +290,8 @@ layout: $INSTALL_LAYOUT
 타겟:   $(pwd)
 Solon:  https://github.com/${SOLON_REPO} (branch: $SOLON_BRANCH)
 
-Solon Product 는 AI-native 7-step flow (브레인스토밍 → plan → sprint → 구현 → review →
-report → retro) 를 현재 프로젝트에 주입합니다. 이 7-step 은 full artifact chain 의
-lightweight projection 입니다. .sfs-local/ 스캐폴드 + SFS.md 공통 지침 +
+Solon Product 는 AI-native sprint flow (브레인스토밍 → plan → 구현 → review → retro) 를
+현재 프로젝트에 주입합니다. report 는 sprint close 때 함께 정리됩니다. .sfs-local/ 스캐폴드 + SFS.md 공통 지침 +
 Claude/Codex/Gemini 어댑터 + .gitignore 규칙이 설치됩니다.
 
 EOF
@@ -767,9 +766,9 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
 
   ${C_BOLD}3.${C_RESET} 선호 런타임에서 시작:
      ${C_BLUE}legacy repo${C_RESET} → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs adopt --apply${C_RESET} → ${C_BLUE}/sfs start${C_RESET}
-     ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET} → ${C_BLUE}/sfs implement${C_RESET} → ${C_BLUE}/sfs report${C_RESET}
-     ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}sfs status${C_RESET} → ${C_BLUE}sfs start${C_RESET} → ${C_BLUE}sfs brainstorm${C_RESET} → ${C_BLUE}sfs plan${C_RESET} → ${C_BLUE}sfs implement${C_RESET} → ${C_BLUE}sfs report${C_RESET}
-     ${C_BLUE}codex${C_RESET}      → ${C_BLUE}\$sfs status${C_RESET} → ${C_BLUE}\$sfs start${C_RESET} → ${C_BLUE}\$sfs brainstorm${C_RESET} → ${C_BLUE}\$sfs plan${C_RESET} → ${C_BLUE}\$sfs implement${C_RESET} → ${C_BLUE}\$sfs report${C_RESET}
+     ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET} → ${C_BLUE}/sfs implement${C_RESET} → ${C_BLUE}/sfs review${C_RESET} → ${C_BLUE}/sfs retro${C_RESET}
+     ${C_BLUE}gemini${C_RESET}     → ${C_BLUE}sfs status${C_RESET} → ${C_BLUE}sfs start${C_RESET} → ${C_BLUE}sfs brainstorm${C_RESET} → ${C_BLUE}sfs plan${C_RESET} → ${C_BLUE}sfs implement${C_RESET} → ${C_BLUE}sfs review${C_RESET} → ${C_BLUE}sfs retro${C_RESET}
+     ${C_BLUE}codex${C_RESET}      → ${C_BLUE}\$sfs status${C_RESET} → ${C_BLUE}\$sfs start${C_RESET} → ${C_BLUE}\$sfs brainstorm${C_RESET} → ${C_BLUE}\$sfs plan${C_RESET} → ${C_BLUE}\$sfs implement${C_RESET} → ${C_BLUE}\$sfs review${C_RESET} → ${C_BLUE}\$sfs retro${C_RESET}
                    (Codex CLI 공식 Skill 호출은 ${C_BLUE}\$sfs${C_RESET}; bare ${C_BLUE}/sfs${C_RESET} 는 지원하지 않음)
      ${C_BLUE}powershell${C_RESET} → ${C_BLUE}sfs.cmd status${C_RESET} → ${C_BLUE}sfs.cmd start${C_RESET} → ${C_BLUE}sfs.cmd guide${C_RESET}
      모두 동일한 ${C_BOLD}sfs${C_RESET} runtime command 로 내려간 뒤 deterministic bash adapter 호출.

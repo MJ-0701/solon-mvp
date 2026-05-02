@@ -29,13 +29,15 @@ sfs status
 -> sfs plan
 -> sfs implement "<first slice>"
 -> sfs review
--> sfs report
 -> sfs retro
 ```
 
 The point is not to outsource all thinking to AI. Solon lets AI assist the work
 while the user keeps product ownership over intent, priority, tradeoffs,
 validation, boundaries, and language.
+
+The normal close command is `sfs retro`. `sfs report` is an optional helper when
+you want to preview or rebuild the report separately.
 
 ## Brainstorm Depth
 

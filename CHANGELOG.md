@@ -1,3 +1,17 @@
+## [0.5.85-product] - 2026-05-02
+
+### Changed
+
+- **Beginner-first GUIDE rewrite** — GUIDE is now a practical first-sprint
+  walkthrough instead of a dense internal manual. It explains the default
+  `status -> start -> brainstorm -> plan -> implement -> review -> retro`
+  path, keeps backend/design/QA/ops depth in detail docs, and clarifies
+  brainstorm simple/normal/hard as three thinking levels.
+- **Retro-centered close documentation** — README, docs indexes, current-product
+  pages, English guide, and installer onboarding now present `sfs retro` as the
+  normal sprint close. `sfs report` and `sfs tidy` are documented as optional
+  helpers for report preview/rebuild and old workbench cleanup.
+
 ## [0.5.84-product] - 2026-05-02
 
 ### Added

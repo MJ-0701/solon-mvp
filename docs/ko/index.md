@@ -28,13 +28,15 @@ sfs status
 → sfs plan
 → sfs implement "<first slice>"
 → sfs review
-→ sfs report
 → sfs retro
 ```
 
 이 흐름의 목적은 AI 에게 모든 생각을 맡기는 것이 아닙니다. Solon 은 AI 가 실행을 돕는 동안
 사용자가 product owner 로서 의도, 우선순위, 포기할 것, 검증 방식, 용어를 계속 더 선명하게
 잡도록 돕습니다.
+
+일반적인 마무리는 `sfs retro` 입니다. `sfs report` 는 보고서만 먼저 보거나 과거 sprint 를
+다시 정리할 때 쓰는 보조 명령입니다.
 
 ## Brainstorm 깊이
 

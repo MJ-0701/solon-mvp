@@ -8,7 +8,7 @@
 
 ## 한 줄 요약
 
-Solon 은 `start → brainstorm → plan → implement → review → report → retro` 를 통해
+Solon 은 `start → brainstorm → plan → implement → review → retro` 를 통해
 모호한 의도를 검증 가능한 작업 계약으로 바꾸고, AI 가 빠르게 실행하더라도 사람의 판단,
 용어, 설계, 검증 흐름이 사라지지 않게 합니다.
 
@@ -18,8 +18,7 @@ fuzzy intent
 → plan contract
 → small implementation slice
 → artifact acceptance review
-→ report
-→ retro close
+→ retro close with report
 ```
 
 ## Start 이후의 인계
@@ -123,7 +122,7 @@ override 입니다.
 sfs retro
 ```
 
-이 명령은 report/retro 를 정리하고, workbench 원문을 archive 로 접고, sprint close 상태와
+이 명령은 `report.md` 와 `retro.md` 를 정리하고, workbench 원문을 archive 로 접고, sprint close 상태와
 local close commit 까지 연결합니다. 초안만 열고 싶을 때는 명시적으로 `sfs retro --draft` 를 씁니다.
 
 ## 문서 구조
