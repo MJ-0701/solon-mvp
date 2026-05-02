@@ -2,7 +2,7 @@
 doc_id: sprints-index
 title: "sprints/ — WU (Work Unit) 파일 목록 (v2)"
 visibility: raw-internal
-updated: 2026-05-02   # WU-43 완료: `sfs start` next-action guidance.
+updated: 2026-05-02   # WU-44 완료: `sfs profile` command restore.
 ---
 
 # sprints/ — WU 파일 인덱스
@@ -61,6 +61,7 @@ updated: 2026-05-02   # WU-43 완료: `sfs start` next-action guidance.
 | WU-41 | Neutral beginner guide audience wording — describe CLI/terminal familiarity instead of naming job categories. | `101f8b3` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-41.md](WU-41.md) |
 | WU-42 | Windows Scoop command docs alignment — PowerShell/cmd examples use `sfs.cmd`, Mac/Git Bash examples keep `sfs`, and source PowerShell installers are fallback. | `8f6bea9` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-42.md](WU-42.md) |
 | WU-43 | `sfs start` next-action guidance — start prints one readable `next: sfs brainstorm ...` line and routed docs clarify bash-first semantics. | `6c4ca93` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-43.md](WU-43.md) |
+| WU-44 | `sfs profile` command restore — re-adds the packaged profile adapter, routes it through `bin/sfs`/dispatch, and documents it as a narrow SFS.md project-overview command. | `4430df2` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-44.md](WU-44.md) |
 
 ## 완료 WU (status: done) — v1 → v2 이관 (WU-16 backfill)
 
