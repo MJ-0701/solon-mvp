@@ -88,7 +88,8 @@ Usage:
   sfs update [--skip-existing] [--no-self-upgrade]   # compatibility alias
 
 Updates the current project from the latest Solon runtime:
-  - if this CLI is installed by Homebrew, runs `brew update` + `brew upgrade sfs` first
+  - if this CLI is installed by Homebrew, refreshes the Solon tap and runs
+    `brew update` + `brew upgrade MJ-0701/solon-product/sfs` first
   - if this CLI is installed by Scoop, runs `scoop update` + `scoop update sfs` first
   - updates managed SFS runtime docs/adapters with backup safety
   - preserves sprint/decision/event history and project-specific docs
@@ -394,14 +395,26 @@ upgrade_command() {
 is_homebrew_runtime() {
   command -v brew >/dev/null 2>&1 || return 1
   local prefix info
-  prefix="$(brew --prefix sfs 2>/dev/null || true)"
+  prefix="$(brew --prefix MJ-0701/solon-product/sfs 2>/dev/null || brew --prefix sfs 2>/dev/null || true)"
   [[ -n "${prefix}" ]] || return 1
   case "${DIST_DIR}" in
     "${prefix}"|"${prefix}/"*) ;;
     *) return 1 ;;
   esac
-  info="$(brew info sfs 2>/dev/null || true)"
+  info="$(brew info MJ-0701/solon-product/sfs 2>/dev/null || brew info sfs 2>/dev/null || true)"
   printf '%s\n' "${info}" | grep -q 'mj-0701/solon-product/sfs'
+}
+
+refresh_homebrew_tap() {
+  local tap_repo
+  tap_repo="$(brew --repo MJ-0701/solon-product 2>/dev/null || true)"
+  [[ -n "${tap_repo}" && -d "${tap_repo}/.git" ]] || return 0
+
+  echo "  git -C ${tap_repo} pull --ff-only"
+  if ! git -C "${tap_repo}" pull --ff-only; then
+    echo "Homebrew Solon tap refresh failed; rerun after network/tap state is fixed" >&2
+    return 1
+  fi
 }
 
 self_upgrade_if_homebrew() {
@@ -409,15 +422,16 @@ self_upgrade_if_homebrew() {
   is_homebrew_runtime || return 0
 
   echo "global runtime self-upgrade:"
+  refresh_homebrew_tap || return 1
+
   echo "  brew update"
   if ! brew update; then
-    echo "brew update failed; rerun with SFS_UPDATE_SELF=0 to use the current runtime only" >&2
-    return 1
+    echo "brew update failed; continuing after explicit Solon tap refresh" >&2
   fi
 
-  echo "  brew upgrade sfs"
-  if ! brew upgrade sfs; then
-    echo "brew upgrade sfs failed; rerun with SFS_UPDATE_SELF=0 to use the current runtime only" >&2
+  echo "  brew upgrade MJ-0701/solon-product/sfs"
+  if ! brew upgrade MJ-0701/solon-product/sfs; then
+    echo "brew upgrade MJ-0701/solon-product/sfs failed; rerun with SFS_UPDATE_SELF=0 to use the current runtime only" >&2
     return 1
   fi
 

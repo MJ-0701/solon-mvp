@@ -1,16 +1,16 @@
 ---
 doc_id: scripts-readme
-title: "Solon v0.4-r3 · scripts/ 사용 가이드 (WU-31 신설 3 sh + 기존 helper 4 sh)"
+title: "Solon v0.4-r3 · scripts/ 사용 가이드 (release tooling + 운영 helper)"
 version: 0.1
 created: 2026-04-27
-updated: 2026-04-27
+updated: 2026-05-02
 visibility: business-only   # 운영자 도구 가이드. OSS fork 동봉 여부는 후속 결정 (WU-31 decision_points (1)).
 wu_origin: WU-31            # 본 문서 자체는 WU-31 §7 row 8 산출물.
 ---
 
 # `scripts/` 사용 가이드
 
-본 디렉토리는 Solon v0.4-r3 docset 운영용 helper sh 모음이다. **7개 sh** = WU-31 신설 3개 (release tooling) + 기존 4개 (mutex / scheduled / snapshot / squash). 모든 sh 는 repository root (`agent_architect/` 가 아니라 `2026-04-19-sfs-v0.4/`) 에서 호출하는 것을 기본 가정으로 작성됨.
+본 디렉토리는 Solon v0.4-r3 docset 운영용 helper sh 모음이다. 모든 sh 는 repository root (`agent_architect/` 가 아니라 `2026-04-19-sfs-v0.4/`) 에서 호출하는 것을 기본 가정으로 작성됨.
 
 > ⚠️ **§1.5' 정합 (24th 격상)** — AI 는 본 sh 들을 **호출만** 하며, 그 결과로 발생하는 host repo `git add/commit/push` 는 모두 사용자 터미널 manual. AI 가 sandbox `file://` clone 안에서 dry-run 검증하는 것은 허용 (host `.git` mutate 0).
 
@@ -23,6 +23,7 @@ wu_origin: WU-31            # 본 문서 자체는 WU-31 §7 row 8 산출물.
 | **cut-release.sh** | dev → stable 정방향 release sync (VERSION bump + CHANGELOG + tag) | release cut 직전 1회 | 중 (`--apply` 시 stable commit + tag 생성) | WU-31 §2 |
 | **sync-stable-to-dev.sh** | stable → dev 역방향 hotfix back-port | hotfix 발생 시 (드묾) | 저 (dev `git add` 까지만, commit 사용자) | WU-31 §3 |
 | **check-drift.sh** | dev↔stable diff preview (변경 0) | 매일 / release cut 직전 | 0 (read-only) | WU-31 §5 |
+| **verify-product-release.sh** | product tag + Homebrew tap + Scoop bucket + installed runtime 검증 | product channel push 후 1회 | 0 (read-only, fetch/download only) | WU-38 |
 | append-scheduled-task-log.sh | hourly cron 진입 시 PROGRESS scheduled_task_log 한 줄 append | scheduled run 매 시간 | 저 | (17번째 신설) |
 | resume-session-check.sh | 세션 진입 직후 sanity check (P-03 / sha / drift / TTL) | 매 세션 1회 | 0 (감지만) | (15번째 신설) |
 | snapshot.sh | 15분 / 이벤트 단위 file-level snapshot | 자동 cron / 수동 | 저 | (workflow v2 §10) |
@@ -177,13 +178,16 @@ git add bucket/sfs.json
 git commit -m "sfs <VERSION>"
 git push origin main
 
-# 4. 완료 전 확인
+# 4. 완료 전 확인: remote repo 뿐 아니라 실제 Homebrew tap clone / installed runtime 까지 검증
 git -C ~/tmp/homebrew-solon-product ls-remote origin refs/heads/main
 git -C ~/tmp/scoop-solon-product ls-remote origin refs/heads/main
+bash scripts/verify-product-release.sh --version <VERSION>
 ```
 
 최소 검증 기준: product tag 원격 존재, Homebrew formula URL+sha 가 tag tarball 과 일치,
-Scoop manifest URL+hash 가 tag zip 과 일치, 두 channel repo `origin/main` 에 반영.
+Scoop manifest URL+hash 가 tag zip 과 일치, 두 channel repo `origin/main` 에 반영, release
+owner machine 의 Homebrew tap clone 이 stale 이 아니며 `sfs version --check` 가 같은 버전
+`up-to-date` 를 출력.
 
 ### 2.3 Hotfix back-port (R-D1 예외 path)
 

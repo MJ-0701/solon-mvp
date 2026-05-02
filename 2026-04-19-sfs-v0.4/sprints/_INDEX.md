@@ -2,7 +2,7 @@
 doc_id: sprints-index
 title: "sprints/ — WU (Work Unit) 파일 목록 (v2)"
 visibility: raw-internal
-updated: 2026-05-02   # WU-37 완료: /sfs implement 를 code-only 가 아닌 division-aware execution contract 로 확장.
+updated: 2026-05-02   # WU-38 완료: release completion guard = Homebrew/Scoop channel + local tap/installed smoke 검증.
 ---
 
 # sprints/ — WU 파일 인덱스
@@ -55,6 +55,7 @@ updated: 2026-05-02   # WU-37 완료: /sfs implement 를 code-only 가 아닌 di
 | WU-35 | Code Development Team hardening — `/sfs implement` 6-division guardrail model. Root Skill + dist Skill + Claude command + README/GUIDE + implement/log templates now treat backend Transaction discipline as always-on, Security / Infra / DevOps as `light` / `full` / `skip`, and MVP-overkill as `deferred` / `risk-accepted`. | `dd1adf4` | 2026-05-01 | 2026-05-01 | codex-loop queue task `loopq-20260501T135406Z-49797` | [WU-35.md](WU-35.md) |
 | WU-34 | Codex CLI SFS invocation policy — Codex CLI official Skill entry = `$sfs ...`; Windows PowerShell direct shell = `sfs.cmd ...`; Codex app `/sfs ...` remains valid only when host passes prompt text through to the model/Skill. | `d359b9f` | 2026-04-30 | 2026-05-02 | codex-desktop-user-active-20260430 → codex-desktop-user-active-20260502 | [WU-34.md](WU-34.md) |
 | WU-37 | Implement execution contract hardening — `/sfs implement` now means executing the smallest verified work slice, with code, taxonomy, design handoff, QA evidence, infra/runbook, decisions, and docs all treated as implementation artifacts. | `583dcaf` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-37.md](WU-37.md) |
+| WU-38 | Release channel verification hotfix — Homebrew self-upgrade now refreshes the Solon tap and release owners must verify product tag, Homebrew formula/tap, Scoop manifest, hashes, and installed `sfs version --check` before calling deploy complete. | `TBD_WU38_COMMIT` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-38.md](WU-38.md) |
 
 ## 완료 WU (status: done) — v1 → v2 이관 (WU-16 backfill)
 
