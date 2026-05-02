@@ -637,20 +637,37 @@ render_priority_evidence_sections() {
   ' "$file"
 }
 
-review_evidence_paths() {
+auto_review_evidence_paths() {
   {
     git diff --name-only --diff-filter=ACMRT 2>/dev/null || true
     git diff --cached --name-only --diff-filter=ACMRT 2>/dev/null || true
     git ls-files --others --exclude-standard 2>/dev/null || true
-    extract_indexed_evidence_paths
   } | while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    path="$(normalize_review_candidate_path "$path" || true)"
+    [[ -n "$path" ]] || continue
+    if is_reviewable_project_path "$path" && is_auto_review_candidate_path "$path"; then
+      printf '%s\n' "$path"
+    fi
+  done
+}
+
+indexed_review_evidence_paths() {
+  extract_indexed_evidence_paths | while IFS= read -r path; do
     [[ -n "$path" ]] || continue
     path="$(normalize_review_candidate_path "$path" || true)"
     [[ -n "$path" ]] || continue
     if is_reviewable_project_path "$path"; then
       printf '%s\n' "$path"
     fi
-  done | awk '!seen[$0]++'
+  done
+}
+
+review_evidence_paths() {
+  {
+    auto_review_evidence_paths
+    indexed_review_evidence_paths
+  } | awk '!seen[$0]++'
 }
 
 normalize_review_candidate_path() {
@@ -708,7 +725,61 @@ extract_indexed_evidence_paths() {
 is_ignored_review_path() {
   local path="$1"
   case "$path" in
-    .idea|.idea/*|.vscode|.vscode/*|node_modules|node_modules/*|dist|dist/*|build|build/*|coverage|coverage/*|.DS_Store|*.iml)
+    .idea|.idea/*|.vscode|.vscode/*|.fleet|.fleet/*|.zed|.zed/*|.settings|.settings/*|.project|.classpath|*.iml)
+      return 0
+      ;;
+    .git|.git/*|.hg|.hg/*|.svn|.svn/*)
+      return 0
+      ;;
+    node_modules|node_modules/*|vendor|vendor/*|Pods|Pods/*)
+      return 0
+      ;;
+    dist|dist/*|build|build/*|out|out/*|target|target/*|coverage|coverage/*)
+      return 0
+      ;;
+    .next|.next/*|.nuxt|.nuxt/*|.svelte-kit|.svelte-kit/*|.vite|.vite/*|.turbo|.turbo/*|.cache|.cache/*|.parcel-cache|.parcel-cache/*)
+      return 0
+      ;;
+    __pycache__|__pycache__/*|.pytest_cache|.pytest_cache/*|.mypy_cache|.mypy_cache/*|.ruff_cache|.ruff_cache/*|.gradle|.gradle/*)
+      return 0
+      ;;
+    tmp|tmp/*|temp|temp/*|logs|logs/*)
+      return 0
+      ;;
+    .DS_Store|Thumbs.db|Desktop.ini|*.log|*.tmp|*.temp|*.bak|*.swp|*.swo|*~)
+      return 0
+      ;;
+    .env|.env.*|*.pem|*.key|*.p12|*.pfx|*.crt|*.cer)
+      return 0
+      ;;
+    *.png|*.jpg|*.jpeg|*.gif|*.webp|*.ico|*.svg|*.pdf|*.zip|*.tar|*.gz|*.tgz|*.7z|*.mp4|*.mov|*.avi|*.db|*.sqlite|*.sqlite3)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+is_auto_review_candidate_path() {
+  local path="$1"
+  case "$path" in
+    src/*|app/*|pages/*|components/*|scripts/*|test/*|tests/*|__tests__/*|public/*|styles/*|lib/*|server/*|client/*|config/*)
+      return 0
+      ;;
+    docs/*.md|docs/*/*.md|README.md|CHANGELOG.md)
+      return 0
+      ;;
+    package.json|vite.config.ts|vite.config.js|vite.config.mjs|vitest.config.ts|vitest.config.js|playwright.config.ts|playwright.config.js)
+      return 0
+      ;;
+    tsconfig.json|tsconfig.*.json|jsconfig.json|eslint.config.js|eslint.config.mjs|prettier.config.js|prettier.config.mjs)
+      return 0
+      ;;
+    Dockerfile|docker-compose.yml|docker-compose.yaml|Makefile)
+      return 0
+      ;;
+    *.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs|*.css|*.scss|*.html|*.json|*.yml|*.yaml|*.sh)
       return 0
       ;;
     *)
@@ -733,7 +804,7 @@ render_untracked_manifest() {
         [[ -n "$path" ]] || continue
         path="$(normalize_review_candidate_path "$path" || true)"
         [[ -n "$path" ]] || continue
-        if is_reviewable_project_path "$path"; then
+        if is_reviewable_project_path "$path" && is_auto_review_candidate_path "$path"; then
           printf '%s\n' "$path"
         fi
       done || true)"
@@ -765,7 +836,7 @@ render_review_git_status() {
     fi
     path="$(normalize_review_candidate_path "$path" || true)"
     [[ -n "$path" ]] || continue
-    if is_reviewable_project_path "$path"; then
+    if is_reviewable_project_path "$path" && is_auto_review_candidate_path "$path"; then
       printf '%s\n' "$line"
     fi
   done || true)"
