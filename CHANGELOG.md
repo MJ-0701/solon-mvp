@@ -1,3 +1,26 @@
+## [0.5.62-product] - 2026-05-02
+
+**Context-routing adapter structure.** Solon adapters now stay short and route
+Claude, Codex, and Gemini to small context modules only when a command needs
+them.
+
+### Added
+
+- **`.sfs-local/context/` modules** — installs now include a router index,
+  kernel, command modules for implement/review/release/upgrade/tidy/loop, and a
+  mutex policy module with compact `summary` / `load_when` frontmatter.
+- **Unified README installation section** — the README now presents
+  Windows/Scoop, Mac/Homebrew, source fallback, project init, and upgrade in
+  one install section so non-developer users can choose the right path quickly.
+
+### Changed
+
+- **Entry docs as routers** — `SFS.md`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`,
+  Claude command, Codex Skill/prompt, and Gemini command now point to routed
+  context instead of carrying repeated long guidance inline.
+- **Upgrade coverage** — `sfs upgrade` previews and updates context modules with
+  runtime-upgrade archive safety, including thin-layout installs.
+
 ## [0.5.61-product] - 2026-05-02
 
 **Release-channel verification hotfix.** Prevents a product release from being

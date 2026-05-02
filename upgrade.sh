@@ -424,7 +424,7 @@ recommend_action() {
     "CLAUDE.md"|"AGENTS.md"|"GEMINI.md"|".sfs-local/divisions.yaml"|".sfs-local/model-profiles.yaml")
       printf "skip"
       ;;
-    ".sfs-local/auth.env.example")
+    ".sfs-local/auth.env.example"|.sfs-local/context/*.md|.sfs-local/context/commands/*.md|.sfs-local/context/policies/*.md)
       printf "backup+overwrite"
       ;;
     .sfs-local/scripts/*.sh|.sfs-local/scripts/*.ps1)
@@ -456,6 +456,7 @@ cat <<EOF
   - .sfs-local/divisions.yaml          → 자동 보존 (프로젝트별 운영값 보호)
   - .sfs-local/model-profiles.yaml     → 없으면 설치 + 설정 안내, 있으면 자동 보존 (agent별 모델 설정 보호)
   - .sfs-local/auth.env.example        → backup+overwrite (로컬 auth 템플릿, 실제 auth.env 는 ignore)
+  - .sfs-local/context/**/*.md         → backup+overwrite (짧은 agent context routing modules)
   - .claude/skills/sfs/SKILL.md        → backup+overwrite (Claude Code Skill 최신화)
   - .claude/commands/sfs.md            → backup+overwrite (legacy 커맨드 fallback 최신화)
   - .sfs-local/scripts/sfs-*.sh        → backup+overwrite (Solon-versioned bash)
@@ -479,6 +480,15 @@ declare -a CHECK_FILES=(
   ".sfs-local/divisions.yaml|templates/.sfs-local-template/divisions.yaml"
   ".sfs-local/model-profiles.yaml|templates/.sfs-local-template/model-profiles.yaml"
   ".sfs-local/auth.env.example|templates/.sfs-local-template/auth.env.example"
+  ".sfs-local/context/_INDEX.md|templates/.sfs-local-template/context/_INDEX.md"
+  ".sfs-local/context/kernel.md|templates/.sfs-local-template/context/kernel.md"
+  ".sfs-local/context/commands/implement.md|templates/.sfs-local-template/context/commands/implement.md"
+  ".sfs-local/context/commands/review.md|templates/.sfs-local-template/context/commands/review.md"
+  ".sfs-local/context/commands/release.md|templates/.sfs-local-template/context/commands/release.md"
+  ".sfs-local/context/commands/upgrade.md|templates/.sfs-local-template/context/commands/upgrade.md"
+  ".sfs-local/context/commands/tidy.md|templates/.sfs-local-template/context/commands/tidy.md"
+  ".sfs-local/context/commands/loop.md|templates/.sfs-local-template/context/commands/loop.md"
+  ".sfs-local/context/policies/mutex.md|templates/.sfs-local-template/context/policies/mutex.md"
   ".sfs-local/GUIDE.md|GUIDE.md"
   # scripts/ — Solon-versioned bash adapters (executable, user 수정 영역 아님)
   ".sfs-local/scripts/sfs-dispatch.sh|templates/.sfs-local-template/scripts/sfs-dispatch.sh"
@@ -665,6 +675,18 @@ update_file ".sfs-local/model-profiles.yaml" "templates/.sfs-local-template/mode
 update_file ".sfs-local/auth.env.example" "templates/.sfs-local-template/auth.env.example" "executor auth env example" "b"
 update_file ".sfs-local/GUIDE.md" "GUIDE.md" "Solon onboarding guide (/sfs guide)" "b"
 
+# context/ — short, routed agent context modules (kept local even in thin layout)
+mkdir -p "$TARGET/.sfs-local/context/commands" "$TARGET/.sfs-local/context/policies"
+update_file ".sfs-local/context/_INDEX.md" "templates/.sfs-local-template/context/_INDEX.md" "context router index" "b"
+update_file ".sfs-local/context/kernel.md" "templates/.sfs-local-template/context/kernel.md" "context kernel" "b"
+update_file ".sfs-local/context/commands/implement.md" "templates/.sfs-local-template/context/commands/implement.md" "context implement module" "b"
+update_file ".sfs-local/context/commands/review.md" "templates/.sfs-local-template/context/commands/review.md" "context review module" "b"
+update_file ".sfs-local/context/commands/release.md" "templates/.sfs-local-template/context/commands/release.md" "context release module" "b"
+update_file ".sfs-local/context/commands/upgrade.md" "templates/.sfs-local-template/context/commands/upgrade.md" "context upgrade module" "b"
+update_file ".sfs-local/context/commands/tidy.md" "templates/.sfs-local-template/context/commands/tidy.md" "context tidy module" "b"
+update_file ".sfs-local/context/commands/loop.md" "templates/.sfs-local-template/context/commands/loop.md" "context loop module" "b"
+update_file ".sfs-local/context/policies/mutex.md" "templates/.sfs-local-template/context/policies/mutex.md" "context mutex policy" "b"
+
 # scripts/ — Solon-versioned bash adapters (codex finding #4 후속, 25th-6 보강)
 # 신규: sfs-loop / sfs-decision / sfs-retro (0.4.0-mvp 추가 슬롯) + sfs-guide (0.5.2-product)
 mkdir -p "$TARGET/.sfs-local/scripts"
@@ -754,6 +776,7 @@ runtime:
 state:
   dir: ".sfs-local"
 overrides:
+  context: ".sfs-local/context"
   sprint_templates: ".sfs-local/sprint-templates"
   decisions_template: ".sfs-local/decisions-template"
   personas: ".sfs-local/personas"

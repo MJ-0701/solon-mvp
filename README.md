@@ -21,6 +21,74 @@ Solon Product 는 Claude Code, Codex, Gemini CLI 같은 LLM agent 와 함께 제
 
 ---
 
+## Installation
+
+Solon 은 먼저 global `sfs` runtime 을 설치하고, 각 프로젝트 루트에서 `sfs init` 으로
+프로젝트 파일을 생성합니다. Windows 는 Scoop, Mac 은 Homebrew 가 권장 경로입니다.
+
+### Windows (Scoop)
+
+비개발자에게 가장 편한 Windows 경로입니다. PowerShell 을 열고 아래 순서대로 실행합니다.
+
+```powershell
+# 1) Git Bash 설치: Solon 내부 bash adapter 실행에 필요합니다.
+winget install --id Git.Git -e --source winget
+
+# 2) Scoop 설치: 이미 설치되어 있으면 건너뛰세요.
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+irm get.scoop.sh | iex
+
+# 3) Solon SFS 설치
+scoop bucket add solon https://github.com/MJ-0701/scoop-solon-product
+scoop install sfs
+
+# 4) 프로젝트 폴더에서 초기화
+cd C:\workspace\my-project
+git init
+sfs init --layout thin --yes
+sfs status
+```
+
+### Mac (Homebrew)
+
+```bash
+brew install MJ-0701/solon-product/sfs
+cd ~/workspace/my-project
+sfs init --layout thin --yes
+sfs status
+```
+
+### Source Fallback
+
+Homebrew/Scoop 을 쓰지 않는 경우에는 GitHub 의 installer 를 직접 실행할 수 있습니다.
+
+```bash
+cd ~/workspace/my-project
+curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.sh | bash
+```
+
+Windows PowerShell:
+
+```powershell
+cd C:\workspace\my-project
+iwr -useb https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.ps1 | iex
+```
+
+### Upgrade
+
+업데이트는 재설치가 아니라 프로젝트 루트에서 한 번만 실행합니다.
+
+```bash
+sfs upgrade
+```
+
+Scoop 설치본은 `sfs upgrade` 실행 시 먼저 `scoop update` + `scoop update sfs` 로 global
+runtime 을 최신화합니다. Homebrew 설치본은 Homebrew tap 을 새로고침한 뒤
+`MJ-0701/solon-product/sfs` 를 업그레이드합니다. 그 다음 현재 프로젝트의
+Solon adapter/docs/context 를 갱신합니다.
+
+---
+
 ## Why Solon
 
 AI 로 코드를 빨리 만들 수 있어도 제품 작업에는 반복적으로 같은 문제가 생깁니다.
@@ -399,7 +467,7 @@ cp <consumer-project>/templates/.codex/prompts/sfs.md ~/.codex/prompts/sfs.md
 
 ---
 
-## Installation
+## Manual / Source Install Details
 
 ### Remote One-Liner
 
@@ -584,6 +652,7 @@ Uninstall 은 대화형으로 실행됩니다.
 | `templates/.gemini/commands/sfs.toml` | Gemini CLI slash command |
 | `templates/.agents/skills/sfs/SKILL.md` | Codex Skill (project-scoped) |
 | `templates/.codex/prompts/sfs.md` | Codex custom prompt fallback (optional/legacy) |
+| `templates/.sfs-local-template/context/` | short routed context modules loaded only when relevant |
 | `templates/.sfs-local-template/` | packaged runtime scripts, Windows `sfs.ps1` vendored fallback, sprint templates, decision templates |
 | `packaging/homebrew/sfs.rb.template` | Homebrew tap formula template (`url`/`sha256` fill-in on release cut) |
 | `packaging/scoop/sfs.json.template` | Scoop bucket manifest template (`url`/`hash`/`extract_dir` fill-in on release cut) |

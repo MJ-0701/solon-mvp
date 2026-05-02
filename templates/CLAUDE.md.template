@@ -1,40 +1,15 @@
-# CLAUDE.md — Claude Code adapter for Solon Product SFS (entry-lean)
+# CLAUDE.md — Solon SFS adapter
 
-This project uses Solon Product SFS, the **Solo Founder System** for AI-native product work
-(multi-adaptor by design — Claude Code / Codex / Gemini CLI 동등 1급).
+Use Solon through the global `sfs` runtime. Keep this entry small.
 
-## Entry (token-min)
-
-- Continue from the smallest durable entrypoint: `/sfs status` → current sprint `report.md`.
-- Do not auto-load verbose history (`events.jsonl`, old `scheduled_task_log`, old `review-runs`) unless needed.
-
-Resume hints (default order):
-- `/sfs status` (1-line dashboard)
-- `.sfs-local/current-sprint` → `.sfs-local/sprints/<id>/report.md`
-- If blocked: `.sfs-local/sprints/<id>/retro.md`, then relevant ADRs under `.sfs-local/decisions/`
-
-## Agent/model setting guard
-
-When the user asks about agent/model settings, inspect `.sfs-local/model-profiles.yaml` first.
-If it is missing or unconfirmed (`selected_runtime: current` / `selected_policy: current_model`),
-do not claim it is configured. Say it is a current-model fallback and ask which policy to apply.
-
-## SFS commands — deterministic bash adapter SSoT
-
-Solon SFS slash commands dispatch to the global `sfs <command>` runtime (deterministic bash adapter).
+Read order:
+1. `SFS.md`
+2. `.sfs-local/context/kernel.md`
+3. `.sfs-local/context/_INDEX.md`
+4. Only the routed context module for the current command.
 
 Rules:
-- Always run the adapter first for `/sfs <command>` / `sfs <command>`.
-- Print adapter `stdout` verbatim; on non-zero exit also show `stderr` + exit code (no paraphrase).
-- If `sfs` is missing on PATH, say so in 1 line and point to install/upgrade.
-- If `/sfs loop` indicates a mutex conflict (Solon `domain_locks`), stop and report the lock owner/domain.
-
-Hybrid refinement (only when the adapter created/pointed to files):
-- `brainstorm|plan|implement|decision|report|retro`: refine the created artifact(s) and answer as a Solon report.
-- `review`: summarize/translate from recorded results; do not dump raw executor output unless asked.
-
-Keep questions to 1–3 when critical info is missing; do not auto-run the next gate.
-
-Full reference (only when needed):
-- `.claude/commands/sfs.md` (slash help + usage)
-- `sfs guide --print` (project onboarding guide)
+- Run `sfs <command>` first; adapter stdout/stderr is SSoT and stays verbatim.
+- Start from `sfs status` → current sprint `report.md`.
+- Do not load old logs/history unless the routed context asks for them.
+- Stop on mutex conflicts and report owner/domain.

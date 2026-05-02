@@ -552,6 +552,7 @@ runtime:
 state:
   dir: ".sfs-local"
 overrides:
+  context: ".sfs-local/context"
   sprint_templates: ".sfs-local/sprint-templates"
   decisions_template: ".sfs-local/decisions-template"
   personas: ".sfs-local/personas"
@@ -604,6 +605,14 @@ if [ -f "$SOURCE_DIR/templates/.sfs-local-template/auth.env.example" ] \
    && [ ! -f "$TARGET/.sfs-local/auth.env.example" ]; then
   cp "$SOURCE_DIR/templates/.sfs-local-template/auth.env.example" "$TARGET/.sfs-local/auth.env.example"
   ok "  auth.env.example 생성 (Gemini/Codex/Claude bridge auth 안내)"
+fi
+
+# context/ — short, routed agent context modules.
+CONTEXT_SRC="$SOURCE_DIR/templates/.sfs-local-template/context"
+if [ -d "$CONTEXT_SRC" ]; then
+  mkdir -p "$TARGET/.sfs-local/context"
+  cp -R "$CONTEXT_SRC"/. "$TARGET/.sfs-local/context/" 2>/dev/null || true
+  ok "  context/ 복사 (entry router + command/policy modules)"
 fi
 
 # sprints/ + decisions/
@@ -662,7 +671,8 @@ if [ "$INSTALL_LAYOUT" = "vendored" ]; then
   fi
 else
   ok "  thin layout: GUIDE/scripts/sprint-templates/personas/decisions-template 는 global runtime 사용"
-  ok "  project-local override 가 필요하면 .sfs-local/{sprint-templates,personas,decisions-template}/ 에 파일을 추가"
+  ok "  context/ 는 thin layout 에도 project-local router 로 유지"
+  ok "  project-local override 가 필요하면 .sfs-local/{context,sprint-templates,personas,decisions-template}/ 에 파일을 추가"
 fi
 
 # ============================================================================
