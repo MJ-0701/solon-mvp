@@ -1,3 +1,13 @@
+## [0.5.92-product] - 2026-05-03
+
+### Fixed
+
+- **Windows self-upgrade now continues into project upgrade** — `sfs.cmd`
+  no longer exports the internal `SFS_SELF_UPGRADE_DONE` guard before reloading
+  the updated Scoop runtime. The reloaded `sfs.cmd upgrade` now actually runs
+  the project migration instead of returning immediately after
+  `reloading installed sfs runtime...`.
+
 ## [0.5.91-product] - 2026-05-03
 
 ### Fixed

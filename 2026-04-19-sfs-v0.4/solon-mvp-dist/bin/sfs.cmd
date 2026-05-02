@@ -94,6 +94,6 @@ if not defined UPDATED_SFS_CMD set "UPDATED_SFS_CMD=%~f0"
 
 echo reloading installed sfs runtime...
 set "SFS_SKIP_SELF_UPGRADE=1"
-set "SFS_SELF_UPGRADE_DONE=1"
 call "%UPDATED_SFS_CMD%" %*
+set "SFS_SELF_UPGRADE_DONE=1"
 exit /b %ERRORLEVEL%

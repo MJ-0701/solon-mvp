@@ -245,6 +245,21 @@ verify_thin_surface_defaults_in_tree() {
   log "  ok ${label} vendored-to-thin surface migration"
 }
 
+verify_windows_cmd_self_upgrade_in_tree() {
+  local root="$1" label="$2" cmd_file call_line done_line
+  cmd_file="${root}/bin/sfs.cmd"
+  [[ -f "${cmd_file}" ]] || fail "${label} missing Windows sfs.cmd wrapper" 5
+
+  call_line="$(grep -n 'call "%UPDATED_SFS_CMD%" %\*' "${cmd_file}" | head -1 | cut -d: -f1 || true)"
+  done_line="$(grep -n 'set "SFS_SELF_UPGRADE_DONE=1"' "${cmd_file}" | head -1 | cut -d: -f1 || true)"
+  [[ -n "${call_line}" ]] || fail "${label} sfs.cmd missing updated-runtime reload call" 5
+  [[ -n "${done_line}" ]] || fail "${label} sfs.cmd missing self-upgrade completion marker" 5
+  if (( done_line <= call_line )); then
+    fail "${label} sfs.cmd sets SFS_SELF_UPGRADE_DONE before reloaded runtime call" 5
+  fi
+  log "  ok ${label} Windows sfs.cmd self-upgrade reload guard"
+}
+
 verify_packaged_context_router_integrity() {
   local tar_extract zip_extract tar_root zip_root
   tar_extract="${TMP_DIR}/tar-extract"
@@ -259,6 +274,8 @@ verify_packaged_context_router_integrity() {
   zip_root="$(archive_root_dir "${zip_extract}" "zip")"
   verify_context_router_targets_in_tree "${tar_root}" "tar.gz"
   verify_context_router_targets_in_tree "${zip_root}" "zip"
+  verify_windows_cmd_self_upgrade_in_tree "${tar_root}" "tar.gz"
+  verify_windows_cmd_self_upgrade_in_tree "${zip_root}" "zip"
   verify_thin_surface_defaults_in_tree "${tar_root}" "tar.gz"
   verify_thin_surface_defaults_in_tree "${zip_root}" "zip"
 }
