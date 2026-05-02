@@ -21,14 +21,16 @@ Solon Product 는 Claude Code, Codex, Gemini CLI 같은 LLM agent 와 함께 제
 
 개발, 터미널, CLI 환경에 아직 익숙하지 않다면 먼저
 [BEGINNER-GUIDE.md](./BEGINNER-GUIDE.md) 를 보세요. PowerShell/Terminal 을 처음 쓰는
-사람 기준으로 설치부터 첫 `sfs status` 까지 안내합니다.
+사람 기준으로 설치부터 첫 `sfs.cmd status`(Windows) 또는 `sfs status`(Mac/Git Bash)
+까지 안내합니다.
 
 ---
 
 ## Installation
 
-Solon 은 먼저 global `sfs` runtime 을 설치하고, 각 프로젝트 루트에서 `sfs init` 으로
-프로젝트 파일을 생성합니다. Windows 는 Scoop, Mac 은 Homebrew 가 권장 경로입니다.
+Solon 은 먼저 global runtime 을 설치하고, 각 프로젝트 루트에서 Windows PowerShell/cmd 는
+`sfs.cmd init`, Mac/Git Bash 는 `sfs init` 으로 프로젝트 파일을 생성합니다. Windows 는
+Scoop, Mac 은 Homebrew 가 권장 경로입니다.
 설치 용어가 낯설면 [Beginner Guide](./BEGINNER-GUIDE.md) 의 순서대로 진행하세요.
 
 ### Windows (Scoop)
@@ -50,8 +52,8 @@ scoop install sfs
 # 4) 프로젝트 폴더에서 초기화
 cd C:\workspace\my-project
 git init
-sfs init --layout thin --yes
-sfs status
+sfs.cmd init --layout thin --yes
+sfs.cmd status
 ```
 
 ### Mac (Homebrew)
@@ -83,12 +85,20 @@ iwr -useb https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.p
 
 업데이트는 재설치가 아니라 프로젝트 루트에서 한 번만 실행합니다.
 
+Windows PowerShell/cmd:
+
+```powershell
+sfs.cmd upgrade
+```
+
+Mac/Git Bash:
+
 ```bash
 sfs upgrade
 ```
 
-Scoop 설치본은 `sfs upgrade` 실행 시 먼저 `scoop update` + `scoop update sfs` 로 global
-runtime 을 최신화합니다. Homebrew 설치본은 Homebrew tap 을 새로고침한 뒤
+Scoop 설치본은 `sfs.cmd upgrade` 실행 시 먼저 `scoop update` + `scoop update sfs` 로
+global runtime 을 최신화합니다. Homebrew 설치본은 Homebrew tap 을 새로고침한 뒤
 `MJ-0701/solon-product/sfs` 를 업그레이드합니다. 그 다음 현재 프로젝트의
 Solon adapter/docs/context 를 갱신합니다.
 
@@ -223,7 +233,7 @@ CLI 가 없고 앱만 있는 executor 는 자동 review bridge 로 사용할 수
 
 설치할 프로젝트 루트에서 실행합니다.
 
-Global runtime 이 PATH 에 있을 때 권장 경로:
+### Mac / Git Bash
 
 ```bash
 brew install MJ-0701/solon-product/sfs
@@ -234,10 +244,24 @@ sfs guide
 sfs agent install all   # Claude + Gemini + Codex entry point 한번에 설치/갱신
 ```
 
-`brew install` 은 Mac 에 global `sfs` CLI 를 설치할 뿐이고, 프로젝트 파일은 만들지
-않습니다. 각 프로젝트 루트에서 `sfs init --yes` 를 한 번 실행해야 `SFS.md`,
-`.sfs-local/`, Claude/Gemini/Codex adapter 가 생성됩니다. 아직 git repo 가 아니면
-`sfs init --yes` 가 `git init` 도 함께 실행합니다.
+### Windows PowerShell / cmd (Scoop)
+
+```powershell
+scoop bucket add solon https://github.com/MJ-0701/scoop-solon-product
+scoop install sfs
+cd C:\workspace\my-project
+git init
+sfs.cmd init --layout thin --yes
+sfs.cmd status
+sfs.cmd guide
+sfs.cmd agent install all
+```
+
+Homebrew/Scoop 은 global `sfs` runtime 만 설치할 뿐이고, 프로젝트 파일은 만들지
+않습니다. 각 프로젝트 루트에서 Mac/Git Bash 는 `sfs init --yes`, Windows PowerShell/cmd 는
+`sfs.cmd init --layout thin --yes` 를 한 번 실행해야 `SFS.md`, `.sfs-local/`,
+Claude/Gemini/Codex adapter 가 생성됩니다. 아직 git repo 가 아니면 `git init` 을 먼저
+실행합니다.
 
 초기화 후 agent 모델 설정은 `.sfs-local/model-profiles.yaml` 에 남습니다. Codex 는
 `model + reasoning_effort` (예: `gpt-5.5` + `xhigh`/`very_high`), Claude 는 `opus-4.7` / `opus-4.6` / `sonnet` / `haiku`,
@@ -249,10 +273,20 @@ Gemini/custom 은 해당 runtime profile 이름으로 agent별 override 할 수 
 Solon 의 C-Level high / worker standard / helper economy 는 권장값이고 hard block 이 아닙니다.
 
 이후 Solon 런타임과 현재 프로젝트 adapter/docs 를 갱신할 때는 uninstall/reinstall 하지 않습니다.
-프로젝트 루트에서 `sfs upgrade` 한 번만 실행합니다. Homebrew 설치본이면 내부에서 먼저
+프로젝트 루트에서 Mac/Git Bash 는 `sfs upgrade`, Windows PowerShell/cmd 는
+`sfs.cmd upgrade` 한 번만 실행합니다. Homebrew 설치본이면 내부에서 먼저
 `brew update` + `brew upgrade sfs` 를 실행하고, Scoop 설치본이면 `scoop update` +
 `scoop update sfs` 를 실행한 뒤 프로젝트 파일을 갱신합니다. `sfs update` 는 하위 호환 alias 로
 남아 있지만 문서상 권장 명령은 `sfs upgrade` 입니다:
+
+Windows PowerShell/cmd:
+
+```powershell
+cd C:\workspace\my-project
+sfs.cmd upgrade
+```
+
+Mac/Git Bash:
 
 ```bash
 cd ~/workspace/my-project
@@ -261,22 +295,18 @@ sfs upgrade
 
 새 배포가 있는지 확인만 하고 싶을 때는:
 
+Windows PowerShell/cmd:
+
+```powershell
+sfs.cmd version
+sfs.cmd version --check
+```
+
+Mac/Git Bash:
+
 ```bash
 sfs version
 sfs version --check
-```
-
-Windows 에서는 Scoop bucket 배포를 우선 검증 경로로 둡니다. bucket manifest 가 배포된 뒤에는
-PowerShell, cmd, Git Bash 어디서든 같은 `sfs` 명령이 PATH 에 잡혀야 합니다:
-
-```powershell
-scoop bucket add solon https://github.com/MJ-0701/scoop-solon-product
-scoop install sfs
-cd C:\workspace\my-project
-git init
-sfs init --layout thin --yes
-sfs status
-sfs agent install all
 ```
 
 Scoop 설치본도 프로젝트에는 thin layout 을 기본으로 둡니다. 즉 `.sfs-local/` 에 sprint/decision
@@ -284,8 +314,18 @@ state 와 config 는 생기지만 runtime `scripts/`, `sprint-templates/`, `pers
 복사되지 않아야 합니다. 내부 bash adapter 실행에는 Git for Windows 의 Git Bash 가 필요하며,
 자동 감지가 안 되면 `SFS_BASH` 에 `bash.exe` 경로를 지정합니다.
 
-`sfs agent install all` 이 기본 권장입니다. Claude/Gemini/Codex 중 일부만 쓰는
+`agent install all` 이 기본 권장입니다. Claude/Gemini/Codex 중 일부만 쓰는
 프로젝트라면 같은 프로젝트 루트에서 개별 설치할 수 있습니다:
+
+Windows PowerShell/cmd:
+
+```powershell
+sfs.cmd agent install claude
+sfs.cmd agent install gemini
+sfs.cmd agent install codex
+```
+
+Mac/Git Bash:
 
 ```bash
 sfs agent install claude
@@ -301,8 +341,8 @@ cd ~/workspace/my-project
 curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.sh | bash
 ```
 
-Windows PowerShell 사용자는 **Git for Windows 의 Git Bash** 가 필요합니다. PowerShell 에서는
-wrapper 를 사용할 수 있습니다:
+Windows 에서는 Scoop 경로를 우선 사용하세요. 아래 `install.ps1` 는 source fallback 이고,
+Scoop/global `sfs.cmd` 를 쓸 수 없는 특수한 상황에서만 사용합니다:
 
 ```powershell
 cd C:\workspace\my-project
@@ -476,12 +516,14 @@ cp <consumer-project>/templates/.codex/prompts/sfs.md ~/.codex/prompts/sfs.md
 
 ### Remote One-Liner
 
+Mac/Git Bash:
+
 ```bash
 cd ~/workspace/my-project
 curl -sSL https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.sh | bash
 ```
 
-Windows PowerShell:
+Windows PowerShell source fallback (Scoop 권장 경로를 쓸 수 없을 때만):
 
 ```powershell
 cd C:\workspace\my-project
@@ -510,9 +552,18 @@ powershell -ExecutionPolicy Bypass -File $env:TEMP\solon-product\install.ps1
 
 ### Non-Interactive
 
+Mac/Git Bash:
+
 ```bash
 cd ~/workspace/my-project
 bash ~/tmp/solon-product/install.sh --yes
+```
+
+Windows PowerShell source fallback:
+
+```powershell
+cd C:\workspace\my-project
+powershell -ExecutionPolicy Bypass -File $env:TEMP\solon-product\install.ps1 -Yes
 ```
 
 `--yes` 는 확인 프롬프트를 승인하지만, 파일 충돌이 있으면 안전한 기본값인 `skip` 을
@@ -556,12 +607,23 @@ consumer 프로젝트에는 필요한 state/config/custom override 만 설치됩
 
 ## Version Check / Upgrade
 
-일반 사용자는 `sfs upgrade` 를 사용합니다. Homebrew 설치본이면 global runtime 을 먼저 최신화하고,
-Scoop 설치본이면 bucket manifest 기준으로 `sfs` 를 먼저 최신화한 뒤 managed adapter/docs 를 백업 후
-갱신합니다. sprint/decision/event history 와 프로젝트별 지침은 보존합니다.
+일반 사용자는 Mac/Git Bash 에서는 `sfs upgrade`, Windows PowerShell/cmd 에서는
+`sfs.cmd upgrade` 를 사용합니다. Homebrew 설치본이면 global runtime 을 먼저 최신화하고,
+Scoop 설치본이면 bucket manifest 기준으로 `sfs.cmd` runtime 을 먼저 최신화한 뒤 managed
+adapter/docs 를 백업 후 갱신합니다. sprint/decision/event history 와 프로젝트별 지침은 보존합니다.
 `.sfs-local/model-profiles.yaml` 이 없던 기존 프로젝트에는 current-model fallback 설정으로 추가하고,
 이미 있으면 사용자 agent/model 설정 보호를 위해 보존합니다. fallback 또는 미확정 상태이면
 upgrade 시 다시 설정 여부를 묻고, 사용자가 지금 설정하지 않겠다고 하면 fallback 을 유지합니다.
+
+Windows PowerShell/cmd:
+
+```powershell
+cd C:\workspace\my-project
+sfs.cmd version --check
+sfs.cmd upgrade
+```
+
+Mac/Git Bash:
 
 ```bash
 cd ~/workspace/my-project
@@ -571,12 +633,13 @@ sfs upgrade
 
 Owner 가 새 버전을 배포하면 사용자는 세 경로로 알 수 있습니다.
 
-- `sfs version --check`: 현재 설치 버전과 GitHub 최신 product tag 를 비교합니다.
+- `sfs version --check` / `sfs.cmd version --check`: 현재 설치 버전과 GitHub 최신 product tag 를 비교합니다.
 - Homebrew: `brew outdated sfs` 또는 `sfs upgrade` 실행 시 tap 의 최신 formula 를 확인합니다.
-- Scoop: `scoop status sfs` 또는 `sfs upgrade` 실행 시 bucket manifest 의 최신 버전을 확인합니다.
+- Scoop: `scoop status sfs` 또는 `sfs.cmd upgrade` 실행 시 bucket manifest 의 최신 버전을 확인합니다.
 
 자동 background notifier 는 두지 않습니다. SFS 는 사용자가 프로젝트 루트에서 명시적으로
-`sfs version --check` 또는 `sfs upgrade` 를 호출하는 모델입니다.
+`sfs version --check` / `sfs upgrade` 또는 Windows 의 `sfs.cmd version --check` /
+`sfs.cmd upgrade` 를 호출하는 모델입니다.
 
 릴리즈별 변경 내용은 `CHANGELOG.md` 의 해당 버전 섹션에서 확인합니다. 배포 전에는
 대상 버전의 release note entry 를 먼저 작성해야 하며, release helper 는 `Added`,
