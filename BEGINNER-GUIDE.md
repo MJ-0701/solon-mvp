@@ -244,12 +244,14 @@ $sfs plan
 Windows PowerShell/cmd:
 
 ```powershell
-sfs.cmd upgrade
+scoop update
+scoop update sfs
 ```
 
-Scoop 을 쓰고 있고 프로젝트 폴더에서 작업 중이라면 새 버전 배포 후 `scoop update sfs` 만
-실행해도 runtime 업데이트 뒤 현재 프로젝트 upgrade 가 이어집니다. 프로젝트 밖에서 실행한
-Scoop 업데이트는 runtime 만 바꿉니다.
+Scoop 을 쓰고 있고 프로젝트 폴더에서 작업 중이라면 새 버전 배포 후 `scoop update sfs` 가
+runtime 업데이트 뒤 현재 프로젝트 upgrade 까지 이어갑니다. 이미 최신 runtime 이라 Scoop 이
+재설치하지 않는 상황에서 프로젝트만 정리하려면 `sfs.cmd upgrade` 를 실행합니다.
+프로젝트 밖에서 실행한 Scoop 업데이트는 runtime 만 바꿉니다.
 
 Mac/Git Bash:
 
@@ -257,7 +259,8 @@ Mac/Git Bash:
 sfs upgrade
 ```
 
-Windows Scoop 설치본은 먼저 Scoop 패키지를 최신화하고, 그 다음 현재 프로젝트 파일을 갱신합니다.
+Windows Scoop 설치본은 프로젝트 폴더에서 `scoop update sfs` 를 실행하면 runtime 과 현재
+프로젝트 파일 갱신이 이어집니다.
 Mac Homebrew 설치본도 같은 방식으로 global runtime 을 먼저 최신화합니다.
 
 ---

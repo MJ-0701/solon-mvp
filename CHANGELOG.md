@@ -1,3 +1,13 @@
+## [0.5.94-product] - 2026-05-03
+
+### Changed
+
+- **Windows upgrade docs now lead with Scoop one-shot flow** — README, GUIDE,
+  BEGINNER-GUIDE, and the English guide now show `scoop update sfs` as the
+  primary Windows update path from an initialized project, with
+  `sfs.cmd upgrade` kept as the project-only fallback when Scoop already has
+  the latest runtime.
+
 ## [0.5.93-product] - 2026-05-03
 
 ### Added
