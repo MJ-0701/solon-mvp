@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T04:07:35Z
-session: "idle: 0.5.68 released"
+last_overwrite: 2026-05-02T05:50:11Z
+session: "idle: 0.5.72 released; handoff drift repaired"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: null
@@ -16,6 +16,11 @@ current_wu_owner: null
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
 scheduled_task_log:
+  - ts: 2026-05-02T14:50:14+09:00
+    codename: codex-handoff-drift-guard
+    check_exit: 17
+    action: "manual repair: PROGRESS/HANDOFF release drift after 0.5.72"
+    ahead_delta: "+0"
   - ts: 2026-05-02T07:59:33+09:00
     codename: overnight-sfs-loop-deploy
     check_exit: 0
@@ -146,15 +151,15 @@ resume_hint:
   default_action: |
     1) Read `CLAUDE.md`, then `PROGRESS.md`.
     2) Run: `bash scripts/resume-session-check.sh` (expect exit 0).
-    3) Latest product release is `0.5.68-product`; ask user for the next
+    3) Latest product release is `0.5.72-product`; ask user for the next
        WU/domain unless they provide a direct task.
   on_skip_patterns: ["아니", "잠깐", "다른", "stop"]
   on_skip_action: "What do you want to do instead (1 line)?"
-  on_ambiguous: "0.5.68-product is released. What should Solon handle next?"
+  on_ambiguous: "0.5.72-product is released. What should Solon handle next?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
-  last_written: 2026-05-02T04:07:35Z
+  last_written: 2026-05-02T05:50:11Z
 ---
 
 # PROGRESS — compact
@@ -183,6 +188,19 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
   shipped as `0.5.68-product`: stable `6546310` / tag `v0.5.68-product`;
   Homebrew `dbfdeb6`; Scoop `a2398d6`; release verifier passed and installed
   `sfs version --check` reports up to date.
+- G4 review evidence upgrades shipped through `0.5.69-product` →
+  `0.5.71-product`: evidence bundles now include implementation files, bounded
+  source excerpts/diffs, indexed line targets, build/smoke evidence, scoped
+  SFS/runtime classification, and generator executor attribution.
+- Runtime safety release shipped as `0.5.72-product`: stable `3cb52b0` / tag
+  `v0.5.72-product`; Homebrew `106c9a2`; Scoop `a2c7368`; installed
+  `sfs version --check` reports up to date.
+- Release verifier hardening landed at dev `4650738`: network checks, installed
+  runtime checks, and clean handoff checks are bounded; verifier passed for
+  `0.5.72-product` with dev/stable/Homebrew/Scoop all clean + synced.
+- External study-note validation confirmed the upgraded G4 path: first Codex
+  CPO run produced a real code-level `partial`, rework fixed read-mode PDF
+  pointer pass-through, smoke/build passed, and rerun returned G4 `pass`.
 
 ## ② In-Progress
 
@@ -190,7 +208,8 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ③ Next
 
-- Ask user for the next WU/domain.
+- Current truth is `0.5.72-product`; no active WU. Ask user for the next
+  WU/domain unless they provide a direct task.
 
 ## ④ Artifacts
 
@@ -213,3 +232,13 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
   `v0.5.67-product`; Homebrew `a397a46`; Scoop `4d898da`.
 - Product SFS fundamentals + runtime command-shape release: stable `6546310` /
   tag `v0.5.68-product`; Homebrew `dbfdeb6`; Scoop `a2398d6`.
+- Product G4 evidence bundle release: stable `f44a53c` / tag
+  `v0.5.69-product`; Homebrew `867b3e4`; Scoop `c88e2c2`.
+- Product code-level G4 packaging release: stable `13c1dcb` / tag
+  `v0.5.70-product`; Homebrew `05b9c7d`; Scoop `60f4e66`.
+- Product targeted G4 source evidence release: stable `b91d433` / tag
+  `v0.5.71-product`; Homebrew `821e908`; Scoop `b799fba`.
+- Product runtime safety guard release: stable `3cb52b0` / tag
+  `v0.5.72-product`; Homebrew `106c9a2`; Scoop `a2c7368`.
+- Study-note G4 validation: `.sfs-local/tmp/review-runs/2026-W18-sprint-5-G4-20260502T054452Z.result.md`
+  returned `pass` after code-level rework.

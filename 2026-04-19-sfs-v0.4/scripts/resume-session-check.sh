@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ────────────────────────────────────────────────────────────────
-# Solon v0.4-r3 · scripts/resume-session-check.sh  (v0.3)
+# Solon v0.4-r3 · scripts/resume-session-check.sh  (v0.4)
 # 목적: 세션 진입 직후 (§1.12 mutex claim 직후) 1회 실행하는 sanity check.
 #       - staged/untracked 유실 위험 감지 (P-03 패턴)
 #       - PROGRESS.md 의 TBD_ 플레이스홀더 감지
@@ -8,6 +8,7 @@
 #       - FUSE index.lock 존재 감지
 #       - <sha> angle-bracket 미실체 감지 (v0.2, P-03 변종 — 15번째 cd41dff vs 5d4c6c6 사례)
 #       - scheduled_task_log drift 감지 (v0.3, hourly 주기 깨짐 / helper 호출 누락)
+#       - product release handoff drift 감지 (v0.4, dist VERSION vs entry SSoT 불일치)
 # 변경 이력:
 #   v0.1 (15번째 admiring-nice-faraday) — 초안 5 checks.
 #   v0.2 (16번째 nice-kind-babbage)     — check #6 추가 (angle-bracket sha + HEAD ancestor 검증).
@@ -16,6 +17,8 @@
 #                                       — check #7 추가 (scheduled_task_log 마지막 entry timestamp 가
 #                                         현재 시간보다 90분 이상 지났으면 exit 16 warning).
 #                                         helper 호출 누락 / hourly cron 끊김 추적.
+#   v0.4 (codex-handoff-drift-guard)    — check #8 추가 (`solon-mvp-dist/VERSION` 이
+#                                         PROGRESS resume_hint / HANDOFF 에 없으면 exit 17).
 # 원칙: **감지만 함. 자동 복구 금지** (원칙 2 self-validation-forbidden 준수).
 #        감지 시 표준 error code 로 exit + STDERR 에 복구 가이드 출력.
 # SSoT: CLAUDE.md §1.8 + §1.12 + learning-logs/2026-05/P-03
@@ -31,6 +34,7 @@
 #   15 = PROGRESS.md 에 <sha> 형태 angle-bracket sha 플레이스홀더 존재
 #        (15번째 세션 사례: <cd41dff> 예측 sha 가 실체 5d4c6c6 와 mismatch)
 #   16 = scheduled_task_log 마지막 entry > 90분 (hourly cron 끊김 / helper 호출 누락)
+#   17 = product release handoff drift (dist VERSION 이 entry SSoT 에 미반영)
 #   99 = 복합 이슈 (여러 개 동시 발견)
 # ────────────────────────────────────────────────────────────────
 set -uo pipefail
@@ -162,6 +166,27 @@ if [[ -f "${PROGRESS_FILE}" ]]; then
   fi
 fi
 
+# ── 8. product release handoff drift 감지 (v0.4) ───────────────
+# 새 세션의 전제는 이전 release/handoff 가 완결됐다는 것. dist VERSION 이
+# resume_hint / handoff 에 반영되지 않았으면 product code 를 다시 훑기 전에
+# entry SSoT 를 먼저 복구해야 한다.
+PRODUCT_VERSION_FILE="solon-mvp-dist/VERSION"
+HANDOFF_FILE="HANDOFF-next-session.md"
+if [[ -f "${PRODUCT_VERSION_FILE}" && -f "${PROGRESS_FILE}" ]]; then
+  product_version=$(head -n1 "${PRODUCT_VERSION_FILE}" 2>/dev/null | tr -d '[:space:]' || true)
+  if [[ -n "${product_version}" && "${product_version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+-product$ ]]; then
+    resume_hint_block=$(awk '/^resume_hint:/ {flag=1} flag {print} flag && /^---[[:space:]]*$/ {exit}' "${PROGRESS_FILE}" 2>/dev/null || true)
+    if ! printf '%s\n' "${resume_hint_block}" | grep -Fq "${product_version}"; then
+      issues+=("release_handoff_drift:progress_resume_hint:${product_version}")
+      [[ $exit_code -eq 0 ]] && exit_code=17 || exit_code=99
+    fi
+    if [[ -f "${HANDOFF_FILE}" ]] && ! grep -Fq "${product_version}" "${HANDOFF_FILE}" 2>/dev/null; then
+      issues+=("release_handoff_drift:handoff:${product_version}")
+      [[ $exit_code -eq 0 ]] && exit_code=17 || exit_code=99
+    fi
+  fi
+fi
+
 # ── 출력 ───────────────────────────────────────────────────────
 if [[ ${JSON_MODE} -eq 1 ]]; then
   # JSON 한 줄
@@ -185,6 +210,7 @@ else
     [[ "${exit_code}" == 14 || "${exit_code}" == 99 ]] && echo "   [FUSE lock] §1.6 FUSE bypass — cp -a .git /tmp/solon-git-<ts>/ → 작업 → rsync back" >&2
     [[ "${exit_code}" == 15 || "${exit_code}" == 99 ]] && echo "   [bracket_sha] PROGRESS.md 에 <sha> 형태 미실체 예측 sha. git log 에서 실제 sha 찾아 backfill (15번째 세션 cd41dff→5d4c6c6 사례 참조)" >&2
     [[ "${exit_code}" == 16 || "${exit_code}" == 99 ]] && echo "   [sched_log_drift] scheduled_task_log 마지막 entry > 90분. hourly cron 끊김 or helper 누락. 세션 종료 직전 'bash scripts/append-scheduled-task-log.sh <codename> <check_exit> \"<action>\" \"<ahead_delta>\"' 호출 확인" >&2
+    [[ "${exit_code}" == 17 || "${exit_code}" == 99 ]] && echo "   [release_handoff_drift] solon-mvp-dist/VERSION 이 PROGRESS resume_hint / HANDOFF 에 미반영. product code 재검증 전에 entry SSoT 를 최신 release 로 갱신." >&2
   fi
 fi
 
