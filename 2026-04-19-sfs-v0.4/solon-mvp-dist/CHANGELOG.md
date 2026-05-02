@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [0.5.70-product] - 2026-05-02
+
 ### Fixed
 
 - **Code-level G4 review packaging** — `/sfs review` now follows
