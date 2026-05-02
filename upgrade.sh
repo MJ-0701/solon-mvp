@@ -331,16 +331,31 @@ repair_missing_context_router_targets() {
       ok "context router 누락 target 수리: $rel"
       repaired=1
     fi
-  done < <(grep -Eo 'commands/[a-z-]+\.md|policies/[a-z-]+\.md' "$source_index" | sort -u)
+  done < <(
+    {
+      printf '%s\n' "_INDEX.md" "kernel.md"
+      grep -Eo 'commands/[a-z-]+\.md|policies/[a-z-]+\.md' "$source_index" || true
+    } | sort -u
+  )
 
   [ "$repaired" -eq 0 ] || warn "새 context 파일을 추가했으니 프로젝트 repo 에서 commit 여부를 확인하세요: .sfs-local/context/"
 }
 
 verify_context_router_targets() {
   local target_index="$TARGET/.sfs-local/context/_INDEX.md"
+  local target_kernel="$TARGET/.sfs-local/context/kernel.md"
   local rel missing=0
 
-  [ -f "$target_index" ] || return 0
+  if [ ! -f "$target_index" ]; then
+    err "context router index missing: .sfs-local/context/_INDEX.md"
+    missing=1
+  fi
+  if [ ! -f "$target_kernel" ]; then
+    err "context kernel missing: .sfs-local/context/kernel.md"
+    missing=1
+  fi
+  [ "$missing" -eq 0 ] || return 1
+
   while IFS= read -r rel; do
     [ -n "$rel" ] || continue
     if [ ! -f "$TARGET/.sfs-local/context/$rel" ]; then
