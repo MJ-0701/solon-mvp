@@ -1,5 +1,16 @@
 ## [Unreleased]
 
+## [0.5.70-product] - 2026-05-02
+
+### Fixed
+
+- **Code-level G4 review packaging** — `/sfs review` now follows
+  `implement.md` file excerpt indexes into bounded source diffs and excerpts,
+  includes smoke script bodies when referenced, filters IDE/build metadata such
+  as `.idea/`, excludes unrelated cache/temp/log/secret/vendor/binary files
+  from automatic evidence collection, and infers generator executor labels more
+  robustly.
+
 ## [0.5.69-product] - 2026-05-02
 
 ### Fixed
