@@ -52,6 +52,10 @@ native slash/skill files only when a project needs them:
 sfs agent install all
 ```
 
+Global `sfs` / `sfs.cmd upgrade` promotes old vendored projects to the thin
+surface as well. Use `sfs upgrade --layout vendored` only when local runtime
+files must stay inside the project.
+
 ## 2. Start A Sprint
 
 ```bash

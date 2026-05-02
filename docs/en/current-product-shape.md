@@ -135,6 +135,9 @@ In thin layout, project-local `.claude/`, `.gemini/`, and `.agents/`
 command/skill adapters are also removed from the default surface. Root adapter
 docs point agents at the global `sfs` runtime, and projects that still need
 native slash/skill files can opt in with `sfs agent install all`.
+Global `sfs` / `sfs.cmd upgrade` also promotes existing vendored projects to
+the thin surface. Use `sfs upgrade --layout vendored` only when a project must
+keep runtime files locally.
 
 ## Documentation Shape
 

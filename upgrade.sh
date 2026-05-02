@@ -22,17 +22,21 @@
 set -euo pipefail
 
 ASSUME_YES=0
+UPGRADE_LAYOUT="${SFS_UPGRADE_LAYOUT:-}"
 
 usage() {
   cat <<'EOF'
-Usage: sfs upgrade [--yes]
+Usage: sfs upgrade [--yes] [--layout thin|vendored]
 
 Options:
-  -y, --yes   안전 기본 정책으로 non-interactive upgrade 실행
-  -h, --help  도움말 출력
+  -y, --yes           안전 기본 정책으로 non-interactive upgrade 실행
+  --layout thin       project-local runtime/agent adapters 를 global sfs runtime 으로 이관
+  --layout vendored   project-local runtime/agent adapters 를 계속 유지
+  -h, --help          도움말 출력
 
 Environment:
   SFS_MODEL_PROFILE_PROMPT=0  agent/model fallback 질문을 이번 upgrade 에서 숨김
+  SFS_UPGRADE_LAYOUT=thin|vendored
 EOF
 }
 
@@ -40,6 +44,14 @@ while [ $# -gt 0 ]; do
   case "$1" in
     -y|--yes)
       ASSUME_YES=1
+      ;;
+    --layout)
+      shift
+      [ $# -gt 0 ] || { echo "알 수 없는 옵션: --layout 값 필요 (thin|vendored)" >&2; exit 99; }
+      UPGRADE_LAYOUT="$1"
+      ;;
+    --layout=*)
+      UPGRADE_LAYOUT="${1#--layout=}"
       ;;
     -h|--help)
       usage
@@ -53,6 +65,14 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
+
+case "$UPGRADE_LAYOUT" in
+  ""|thin|vendored) ;;
+  *)
+    echo "알 수 없는 layout: $UPGRADE_LAYOUT (지원: thin, vendored)" >&2
+    exit 99
+    ;;
+esac
 
 readonly SOLON_REPO="MJ-0701/solon-product"
 readonly SOLON_BRANCH="main"
@@ -811,12 +831,85 @@ thin_project_agent_adapter_migration() {
   return 0
 }
 
+thin_project_runtime_asset_migration() {
+  [ "${INSTALL_LAYOUT:-vendored}" = "thin" ] || return 0
+  case "${SFS_KEEP_PROJECT_RUNTIME_ASSETS:-0}" in
+    1|true|TRUE|yes|YES)
+      ok "thin project-local runtime assets 유지: SFS_KEEP_PROJECT_RUNTIME_ASSETS=${SFS_KEEP_PROJECT_RUNTIME_ASSETS}"
+      return 0
+      ;;
+  esac
+
+  local archive_dir archive_file manifest staging rel path count=0
+  local -a asset_paths=(
+    ".sfs-local/GUIDE.md"
+    ".sfs-local/scripts"
+    ".sfs-local/sprint-templates"
+    ".sfs-local/personas"
+    ".sfs-local/decisions-template"
+  )
+
+  for rel in "${asset_paths[@]}"; do
+    path="$TARGET/$rel"
+    if [ -f "$path" ]; then
+      count=$((count + 1))
+    elif [ -d "$path" ]; then
+      count=$((count + $(find "$path" -type f 2>/dev/null | wc -l | tr -d '[:space:]')))
+    fi
+  done
+  [ "${count:-0}" -gt 0 ] || return 0
+
+  archive_dir="$TARGET/.sfs-local/archives/runtime-migrations/$(date +%Y%m%d-%H%M%S)-project-runtime-assets"
+  archive_file="$archive_dir/project-runtime-assets.tar.gz"
+  manifest="$archive_dir/manifest.txt"
+  mkdir -p "$archive_dir" || return 5
+  staging="$(mktemp -d "$archive_dir/.stage.XXXXXX")" || return 5
+
+  for rel in "${asset_paths[@]}"; do
+    path="$TARGET/$rel"
+    [ -e "$path" ] || continue
+    mkdir -p "$staging/$(dirname "$rel")" || return 5
+    cp -R "$path" "$staging/$rel" || return 5
+  done
+
+  {
+    echo "SFS thin project runtime asset migration"
+    echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "reason: global sfs upgrade converts managed runtime assets out of the project surface"
+    echo "archive: $archive_file"
+    echo "count: $count"
+    echo
+    echo "policy:"
+    echo "- sprint/decision/event state stays project-local"
+    echo "- managed scripts/templates/personas/GUIDE move to packaged runtime"
+    echo "- set SFS_KEEP_PROJECT_RUNTIME_ASSETS=1 before upgrade to keep project-local runtime assets"
+    echo
+    echo "items:"
+    find "$staging" -type f 2>/dev/null | sort | while IFS= read -r staged; do
+      printf -- "- %s\n" "${staged#$staging/}"
+    done
+  } > "$manifest" || return 5
+
+  tar -czf "$archive_file" -C "$staging" . || return 5
+  rm -rf "$staging" || return 5
+
+  rm -f "$TARGET/.sfs-local/GUIDE.md" 2>/dev/null || return 5
+  rm -rf "$TARGET/.sfs-local/scripts" \
+         "$TARGET/.sfs-local/sprint-templates" \
+         "$TARGET/.sfs-local/personas" \
+         "$TARGET/.sfs-local/decisions-template" 2>/dev/null || return 5
+
+  ok "thin project runtime assets 이관: $count files → ${archive_file#$TARGET/}"
+  return 0
+}
+
 project_surface_archive_migrations() {
   compact_legacy_runtime_upgrade_archives || return 5
   compact_legacy_agent_install_archives || return 5
   compact_legacy_sprint_archive_dirs || return 5
   compact_legacy_review_run_archives || return 5
   compact_legacy_tmp_artifacts || return 5
+  thin_project_runtime_asset_migration || return 5
   thin_project_agent_adapter_migration || return 5
   return 0
 }
@@ -852,8 +945,34 @@ fi
 
 CUR_VER=$(grep '^solon_mvp_version:' "$TARGET/.sfs-local/VERSION" | awk '{print $2}')
 INSTALLED_AT=$(grep '^installed_at:' "$TARGET/.sfs-local/VERSION" | awk '{print $2}')
-INSTALL_LAYOUT=$(grep '^install_layout:' "$TARGET/.sfs-local/VERSION" 2>/dev/null | awk '{print $2}')
-INSTALL_LAYOUT="${INSTALL_LAYOUT:-vendored}"
+RECORDED_INSTALL_LAYOUT=$(grep '^install_layout:' "$TARGET/.sfs-local/VERSION" 2>/dev/null | awk '{print $2}')
+CONFIG_INSTALL_LAYOUT=""
+if [ -f "$TARGET/.sfs-local/config.yaml" ]; then
+  CONFIG_INSTALL_LAYOUT=$(awk '
+    /^runtime:/ {in_runtime=1; next}
+    /^[^[:space:]]/ {in_runtime=0}
+    in_runtime && /^[[:space:]]*layout:/ {
+      gsub(/["'\'']/, "", $2)
+      print $2
+      exit
+    }
+  ' "$TARGET/.sfs-local/config.yaml" 2>/dev/null || true)
+fi
+case "${UPGRADE_LAYOUT:-}" in
+  thin|vendored)
+    INSTALL_LAYOUT="$UPGRADE_LAYOUT"
+    ;;
+  *)
+    INSTALL_LAYOUT="${RECORDED_INSTALL_LAYOUT:-${CONFIG_INSTALL_LAYOUT:-vendored}}"
+    ;;
+esac
+case "$INSTALL_LAYOUT" in
+  thin|vendored) ;;
+  *)
+    warn "알 수 없는 기존 install_layout='$INSTALL_LAYOUT' — vendored 로 처리"
+    INSTALL_LAYOUT="vendored"
+    ;;
+esac
 
 cat <<EOF
 
@@ -863,6 +982,7 @@ ${C_BOLD}=== Solon Product Upgrade ===${C_RESET}
 최신 배포:   $NEW_VER
 소스 모드:   $MODE
 layout:      $INSTALL_LAYOUT
+layout from: $([ -n "${UPGRADE_LAYOUT:-}" ] && echo "upgrade request" || echo "project metadata")
 
 EOF
 
@@ -1387,12 +1507,12 @@ for auto_file in "$TARGET/SFS.md" "$TARGET/CLAUDE.md" "$TARGET/AGENTS.md" "$TARG
 done
 ok "문서 자동 치환: <DATE>=$TODAY, <SOLON-VERSION>=$NEW_VER"
 
-# config.yaml — create when upgrading older installs; preserve user edits.
+# config.yaml — create when upgrading older installs; preserve user edits outside runtime fields.
+runtime_command="bash .sfs-local/scripts/sfs-dispatch.sh"
+if [ "$INSTALL_LAYOUT" = "thin" ]; then
+  runtime_command="sfs"
+fi
 if [ ! -f "$TARGET/.sfs-local/config.yaml" ]; then
-  runtime_command="bash .sfs-local/scripts/sfs-dispatch.sh"
-  if [ "$INSTALL_LAYOUT" = "thin" ]; then
-    runtime_command="sfs"
-  fi
   cat > "$TARGET/.sfs-local/config.yaml" <<EOF
 runtime:
   layout: "$INSTALL_LAYOUT"
@@ -1410,7 +1530,48 @@ overrides:
 EOF
   ok "config.yaml 생성 (runtime layout: $INSTALL_LAYOUT)"
 else
-  ok "config.yaml 기존 유지"
+  tmp_config="$TARGET/.sfs-local/config.yaml.tmp.$$"
+  awk -v layout="$INSTALL_LAYOUT" -v command="$runtime_command" -v version="$NEW_VER" '
+    function emit_missing() {
+      if (!seen_layout) { print "  layout: \"" layout "\"" }
+      if (!seen_command) { print "  command: \"" command "\"" }
+      if (!seen_version) { print "  version: \"" version "\"" }
+    }
+    /^runtime:[[:space:]]*$/ {
+      print
+      in_runtime=1
+      seen_layout=0
+      seen_command=0
+      seen_version=0
+      next
+    }
+    in_runtime && /^[^[:space:]]/ {
+      emit_missing()
+      in_runtime=0
+    }
+    in_runtime && /^[[:space:]]*layout:/ {
+      print "  layout: \"" layout "\""
+      seen_layout=1
+      next
+    }
+    in_runtime && /^[[:space:]]*command:/ {
+      print "  command: \"" command "\""
+      seen_command=1
+      next
+    }
+    in_runtime && /^[[:space:]]*version:/ {
+      print "  version: \"" version "\""
+      seen_version=1
+      next
+    }
+    { print }
+    END {
+      if (in_runtime) {
+        emit_missing()
+      }
+    }
+  ' "$TARGET/.sfs-local/config.yaml" > "$tmp_config" && mv "$tmp_config" "$TARGET/.sfs-local/config.yaml"
+  ok "config.yaml runtime 갱신 (layout: $INSTALL_LAYOUT)"
 fi
 
 # ============================================================================
