@@ -146,6 +146,19 @@ docs/en/guide.md
 GitHub Markdown 은 언어 전환 탭을 기본 지원하지 않습니다. 그래서 Solon 은 문서 상단의
 `Language` 링크를 표준으로 씁니다.
 
+## Token / Harness Hygiene
+
+SFS 는 Claude plugin 을 모든 사용자에게 설치하지 않습니다. 대신 그 플러그인들이 해결하는
+문제를 SFS 운영 흐름 안에 흡수합니다.
+
+- Session Report 계열: 토큰이 빨리 닳는 느낌이 있으면 usage report 를 먼저 확인한다.
+- CLAUDE.md Management 계열: adapter 문서는 얇게 유지하고, 긴 규칙은 routed context/docs 로 뺀다.
+- Serena 계열: 큰 코드베이스에서는 전체 파일 읽기보다 symbol/semantic search 를 우선한다.
+- Hookify 계열: 반복 실수는 다음에도 설명할 말이 아니라 guardrail/check/hook 으로 바꾼다.
+
+이 원칙은 특정 Claude plugin 에 묶이지 않습니다. Codex, Gemini, 다른 agent 도 각자 가진
+usage report, LSP/index, hook/check 수단으로 같은 hygiene 를 적용합니다.
+
 ## 언제 어떤 모드를 고르나
 
 | 상황 | 추천 |

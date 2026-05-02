@@ -8,6 +8,8 @@
 set -euo pipefail
 
 SFS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./sfs-common.sh
+source "${SFS_SCRIPT_DIR}/sfs-common.sh"
 
 SFS_EXIT_NO_TEMPLATES=4
 SFS_EXIT_USAGE=7
@@ -71,5 +73,7 @@ for arg in "$@"; do
     exit "${SFS_EXIT_UNKNOWN}"
   fi
 done
+
+sfs_maybe_emit_hygiene_notice "${cmd}"
 
 exec bash "${target}" "$@"

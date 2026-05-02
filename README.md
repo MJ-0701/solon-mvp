@@ -117,6 +117,12 @@ sfs.cmd version --check
 하루에 한 번 정도만 알려주며 `sfs upgrade` 를 안내합니다. interactive `sfs status` 에서는
 지금 업데이트할지도 묻습니다. 끄려면 `SFS_VERSION_NOTICE=0` 을 사용합니다.
 
+SFS 는 token/harness hygiene 도 일반 명령 흐름 안에 조용히 적용합니다. Agent 는 routed
+context 를 통해 얇은 adapter memory, 필요한 파일만 읽기, symbol/semantic search 우선,
+반복 실수의 guardrail/check 전환을 기본값으로 삼습니다. 터미널에서는 adapter docs 나 sprint
+workbench 가 비대하거나 큰 코드베이스가 감지될 때 하루 1회 이하로 hygiene notice 를 띄웁니다.
+끄려면 `SFS_HYGIENE_NOTICE=0` 을 사용합니다.
+
 ---
 
 ## Command Surface
