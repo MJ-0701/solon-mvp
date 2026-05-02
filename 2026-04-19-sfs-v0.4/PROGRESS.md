@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T16:32:21+09:00
-session: "release: 0.5.74 gate numbering + review evidence bundle verified"
+last_overwrite: 2026-05-02T16:51:35+09:00
+session: "hotfix: Gate 6 review evidence excerpt prioritization implemented"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: null
@@ -224,6 +224,12 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
   together as `0.5.74-product`: dev `ebf8a4a`; stable `2062971` / tag
   `v0.5.74-product`; Homebrew `7e00696`; Scoop `24f4aa8`; full release
   verifier passed and installed `sfs version --check` reports up to date.
+- Gate 6 review evidence excerpt-priority hotfix implemented locally as the
+  `0.5.75-product` candidate. The collector now separates full manifests from
+  bounded excerpt priority, promotes declared implement/plan target paths,
+  includes safe `.env.example`, compacts `.gitignore` product-owned hunks, and
+  separates same-tool review risk as warning metadata. Sandbox prompt-only
+  smoke verified backend first-class files enter the first 12 excerpts.
 
 ## ② In-Progress
 
@@ -231,9 +237,10 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ③ Next
 
-- Current truth is `0.5.74-product`; no active WU. Ask user for the next
-  WU/domain unless they provide a direct task. For a direct task, create a fresh
-  branch from clean `main` first (`feature/<slug>` or `hotfix/<slug>`).
+- Current truth is `0.5.74-product`; `0.5.75-product` Gate 6 evidence
+  prioritization candidate is implemented locally. Next action: release cut +
+  channel verification for `0.5.75-product`, or further review if the user
+  wants another pass before release.
 
 ## ④ Artifacts
 
