@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [0.5.69-product] - 2026-05-02
+
 ### Fixed
 
 - **G4 review evidence bundle** — `/sfs review` now embeds `implement.md`,
