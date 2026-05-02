@@ -709,21 +709,83 @@ auto_review_evidence_paths() {
 }
 
 indexed_review_evidence_paths() {
-  extract_indexed_evidence_paths | while IFS= read -r path; do
+  {
+    extract_path_tokens_from_file "${IMPLEMENT_PATH}"
+    extract_path_tokens_from_file "${PLAN_PATH}"
+    extract_path_tokens_from_file "${LOG_PATH}"
+  } | while IFS= read -r path; do
     [[ -n "$path" ]] || continue
     path="$(normalize_review_candidate_path "$path" || true)"
     [[ -n "$path" ]] || continue
-    if is_reviewable_project_path "$path" && is_auto_review_candidate_path "$path" && review_evidence_file_exists "$path"; then
-      printf '%s\n' "$path"
-    fi
-  done
+    expand_review_candidate_path "$path" | while IFS= read -r expanded; do
+      expanded="$(normalize_review_candidate_path "$expanded" || true)"
+      [[ -n "$expanded" ]] || continue
+      if is_reviewable_project_path "$expanded" && is_auto_review_candidate_path "$expanded" && review_evidence_file_exists "$expanded"; then
+        printf '%s\n' "$expanded"
+      fi
+    done
+  done | awk '!seen[$0]++'
 }
 
-review_evidence_paths() {
+review_evidence_path_rank() {
+  local path="$1"
+  case "$path" in
+    .env.example|*/.env.example)
+      printf '10\n'
+      ;;
+    */src/auth/*|*/src/materials/*|*/src/storage/*|*/src/*controller*|*/src/*service*|*/src/*module*|*/src/*route*|*/src/*resolver*)
+      printf '20\n'
+      ;;
+    backend/src/*|api/src/*|server/src/*|apps/*/src/*|packages/*/src/*)
+      printf '25\n'
+      ;;
+    package.json|package-lock.json|pnpm-lock.yaml|yarn.lock|bun.lockb|tsconfig.json|tsconfig.*.json|vite.config.*|next.config.*|nest-cli.json|.gitignore|*/package.json|*/package-lock.json|*/tsconfig.json|*/nest-cli.json)
+      printf '30\n'
+      ;;
+    README.md|*/README.md)
+      printf '40\n'
+      ;;
+    examples/*|*/examples/*|fixtures/*|*/fixtures/*|test/fixtures/*|tests/fixtures/*|src/data/*|*/src/data/*|src/domain/*|*/src/domain/*|*sample*|*example.json)
+      printf '85\n'
+      ;;
+    src/*|*/src/*)
+      printf '50\n'
+      ;;
+    *sample*|*example*)
+      printf '85\n'
+      ;;
+    *)
+      printf '65\n'
+      ;;
+  esac
+}
+
+sort_review_evidence_paths() {
+  local path rank seq=0
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    seq=$((seq + 1))
+    rank="$(review_evidence_path_rank "$path")"
+    printf '%03d\t%06d\t%s\n' "$rank" "$seq" "$path"
+  done | sort -k1,1n -k2,2n | cut -f3-
+}
+
+all_reviewable_evidence_paths() {
   {
     indexed_review_evidence_paths || true
     auto_review_evidence_paths || true
   } | awk '!seen[$0]++'
+}
+
+review_excerpt_priority_paths() {
+  {
+    indexed_review_evidence_paths | sort_review_evidence_paths
+    auto_review_evidence_paths | sort_review_evidence_paths
+  } | awk '!seen[$0]++'
+}
+
+review_evidence_paths() {
+  all_reviewable_evidence_paths
 }
 
 review_evidence_file_exists() {
@@ -756,6 +818,34 @@ normalize_review_candidate_path() {
   printf '%s\n' "$path"
 }
 
+expand_review_candidate_path() {
+  local path="$1" prefix
+  path="${path#./}"
+  case "$path" in
+    */\*\*)
+      prefix="${path%/\*\*}"
+      ;;
+    *\**)
+      prefix="${path%%\**}"
+      prefix="${prefix%/}"
+      ;;
+    *)
+      if [[ -d "$path" ]]; then
+        prefix="$path"
+      else
+        printf '%s\n' "$path"
+        return 0
+      fi
+      ;;
+  esac
+
+  if [[ -n "${prefix:-}" && -d "$prefix" ]]; then
+    find "$prefix" -type f 2>/dev/null | sort | sed 's#^\./##'
+  else
+    printf '%s\n' "$path"
+  fi
+}
+
 extract_path_tokens_from_file() {
   local file="$1"
   [[ -f "$file" ]] || return 0
@@ -763,10 +853,10 @@ extract_path_tokens_from_file() {
     BEGIN { capture=0 }
     /^#{1,6}[[:space:]]+/ {
       low = tolower($0)
-      capture = (low ~ /file excerpt index|source excerpt|implementation surface|changed files|changed artifacts|변경 파일|변경 파일\/모듈|cpo 에게 넘길 검증 포인트/)
+      capture = (low ~ /file excerpt index|source excerpt|implementation surface|changed files|changed artifacts|artifact changes made|acceptance criteria|cto generator|sprint ac|output paths|target paths|변경 파일|변경 파일\/모듈|산출물|cpo 에게 넘길 검증 포인트/)
       next
     }
-    capture || /(^|[[:space:]`])([.]\/)?[A-Za-z0-9_.@%+=-]+(\/[A-Za-z0-9_.@%+=-]+)+(:[0-9]+(:[0-9]+)?)?([[:space:]`),.;]|$)/ || /(^|[[:space:]`])([.]gitignore|[A-Za-z0-9_.@%+=-]+[.][A-Za-z0-9_.@%+=-]+)(:[0-9]+(:[0-9]+)?)?([[:space:]`),.;]|$)/ {
+    capture || /(^|[[:space:]`])([.]\/)?[A-Za-z0-9_.@%+=*-]+(\/[A-Za-z0-9_.@%+=*-]+)+(:[0-9]+(:[0-9]+)?)?([[:space:]`),.;]|$)/ || /(^|[[:space:]`])([.]gitignore|[A-Za-z0-9_.@%+=-]+[.][A-Za-z0-9_.@%+=-]+)(:[0-9]+(:[0-9]+)?)?([[:space:]`),.;]|$)/ {
       line = $0
       gsub(/[`"'\''()<>{}\[\],]/, " ", line)
       split(line, parts, /[[:space:]]+/)
@@ -774,7 +864,7 @@ extract_path_tokens_from_file() {
         token = parts[i]
         sub(/[),.;]+$/, "", token)
         sub(/:[0-9]+(:[0-9]+)?$/, "", token)
-        if (token ~ /^([.]\/)?[A-Za-z0-9_.@%+=-]+(\/[A-Za-z0-9_.@%+=-]+)+$/ ||
+        if (token ~ /^([.]\/)?[A-Za-z0-9_.@%+=*-]+(\/[A-Za-z0-9_.@%+=*-]+)+$/ ||
             token ~ /^([.]\/)?[.]gitignore$/ ||
             token ~ /^([.]\/)?[A-Za-z0-9_.@%+=-]+[.][A-Za-z0-9_.@%+=-]+$/) {
           print token
@@ -787,10 +877,15 @@ extract_path_tokens_from_file() {
 extract_indexed_evidence_paths() {
   {
     extract_path_tokens_from_file "${IMPLEMENT_PATH}"
+    extract_path_tokens_from_file "${PLAN_PATH}"
     extract_path_tokens_from_file "${LOG_PATH}"
   } | while IFS= read -r path; do
-    normalize_review_candidate_path "$path" || true
-  done
+    path="$(normalize_review_candidate_path "$path" || true)"
+    [[ -n "$path" ]] || continue
+    expand_review_candidate_path "$path" | while IFS= read -r expanded; do
+      normalize_review_candidate_path "$expanded" || true
+    done
+  done | awk '!seen[$0]++'
 }
 
 is_review_path_token() {
@@ -897,6 +992,9 @@ is_ignored_review_path() {
     .DS_Store|Thumbs.db|Desktop.ini|*.log|*.tmp|*.temp|*.bak|*.swp|*.swo|*~)
       return 0
       ;;
+    .env.example|*/.env.example)
+      return 1
+      ;;
     .env|.env.*|*/.env|*/.env.*|*.pem|*.key|*.p12|*.pfx|*.crt|*.cer)
       return 0
       ;;
@@ -928,28 +1026,17 @@ is_reviewable_project_path() {
 }
 
 render_untracked_manifest() {
-  local candidate_paths paths
+  local paths
   printf '\n### untracked file manifest\n\n'
-  candidate_paths="$(review_evidence_paths || true)"
-  if [[ -n "$candidate_paths" ]]; then
-    paths="$(printf '%s\n' "$candidate_paths" \
-      | while IFS= read -r path; do
-          [[ -n "$path" ]] || continue
-          if git ls-files --others --exclude-standard -- "$path" 2>/dev/null | grep -Fxq "$path"; then
-            printf '%s\n' "$path"
-          fi
-        done || true)"
-  else
-    paths="$(git ls-files --others --exclude-standard 2>/dev/null \
-      | while IFS= read -r path; do
-        [[ -n "$path" ]] || continue
-        path="$(normalize_review_candidate_path "$path" || true)"
-        [[ -n "$path" ]] || continue
-        if is_reviewable_project_path "$path" && is_auto_review_candidate_path "$path"; then
-          printf '%s\n' "$path"
-        fi
-      done || true)"
-  fi
+  paths="$(git ls-files --others --exclude-standard 2>/dev/null \
+    | while IFS= read -r path; do
+      [[ -n "$path" ]] || continue
+      path="$(normalize_review_candidate_path "$path" || true)"
+      [[ -n "$path" ]] || continue
+      if is_reviewable_project_path "$path" && is_auto_review_candidate_path "$path"; then
+        printf '%s\n' "$path"
+      fi
+    done | awk '!seen[$0]++' || true)"
   if [[ -n "$paths" ]]; then
     printf '%s\n' "$paths" | sed -n '1,200p'
   else
@@ -960,7 +1047,19 @@ render_untracked_manifest() {
 render_reviewable_file_manifest() {
   local paths
   printf '\n### reviewable implementation file manifest\n\n'
-  paths="$(review_evidence_paths || true)"
+  paths="$(all_reviewable_evidence_paths || true)"
+  if [[ -n "$paths" ]]; then
+    printf '%s\n' "$paths" | sed -n '1,200p'
+  else
+    printf '(no project implementation files detected)\n'
+  fi
+}
+
+render_excerpt_priority_manifest() {
+  local paths
+  printf '\n### excerpt priority file list\n\n'
+  printf 'Bounded source diffs/excerpts use this prioritized list. Declared implement.md/plan.md/log.md targets come before auto-discovered files; source slices and safe config evidence come before examples, fixtures, and sample data.\n\n'
+  paths="$(review_excerpt_priority_paths || true)"
   if [[ -n "$paths" ]]; then
     printf '%s\n' "$paths" | sed -n '1,200p'
   else
@@ -1160,11 +1259,79 @@ render_review_file_line_excerpt() {
   printf '```\n'
 }
 
+filter_gitignore_product_diff() {
+  awk '
+    BEGIN {
+      in_managed=0
+      emitted_meta=0
+      emitted=0
+      meta=""
+      hunk=""
+    }
+    /^diff --git / || /^index / || /^--- / || /^\+\+\+ / {
+      meta = meta $0 ORS
+      next
+    }
+    /^@@/ {
+      hunk = $0
+      next
+    }
+    /^[-+]### BEGIN solon-product ###$/ {
+      in_managed=1
+      next
+    }
+    /^[-+]### END solon-product ###$/ {
+      in_managed=0
+      next
+    }
+    {
+      if (in_managed) {
+        next
+      }
+      if ($0 ~ /^[-+][[:space:]]*$/) {
+        next
+      }
+      if ($0 ~ /^[-+]/) {
+        if (!emitted_meta && meta != "") {
+          printf "%s", meta
+          emitted_meta=1
+        }
+        if (hunk != "") {
+          print hunk
+          hunk=""
+        }
+        print
+        emitted=1
+      }
+    }
+    END {
+      if (!emitted) {
+        exit 1
+      }
+    }
+  '
+}
+
 render_review_file_diff() {
   local file="$1" limit="${2:-180}" staged unstaged
   printf '\n### source diff: %s\n\n' "$file"
   if [[ ! -e "$file" ]]; then
     printf '(missing; no diff available)\n'
+    return 0
+  fi
+  if [[ "$file" == ".gitignore" ]]; then
+    printf '(mixed product/system file; showing product-owned changed lines only. Solon managed block internals and blank-only churn are omitted.)\n\n'
+    staged="$(git diff --cached --no-ext-diff -U0 -- "$file" 2>/dev/null | filter_gitignore_product_diff | sed -n "1,${limit}p" || true)"
+    unstaged="$(git diff --no-ext-diff -U0 -- "$file" 2>/dev/null | filter_gitignore_product_diff | sed -n "1,${limit}p" || true)"
+    if [[ -n "$staged" ]]; then
+      printf '#### staged product-owned diff\n\n```diff\n%s\n```\n' "$staged"
+    fi
+    if [[ -n "$unstaged" ]]; then
+      printf '#### working tree product-owned diff\n\n```diff\n%s\n```\n' "$unstaged"
+    fi
+    if [[ -z "$staged" && -z "$unstaged" ]]; then
+      printf '(no product-owned .gitignore diff outside the solon-product managed block)\n'
+    fi
     return 0
   fi
   staged="$(git diff --cached --no-ext-diff -- "$file" 2>/dev/null | sed -n "1,${limit}p" || true)"
@@ -1187,7 +1354,7 @@ render_review_file_diff() {
 render_review_file_diffs() {
   local max="${REVIEW_FILE_EXCERPT_MAX}" lines="${REVIEW_DIFF_LINES}" count=0 path paths
   printf '\n### bounded source diffs for reviewable files\n\n'
-  paths="$(review_evidence_paths || true)"
+  paths="$(review_excerpt_priority_paths || true)"
   if [[ -z "$paths" ]]; then
     printf '(no project implementation files detected)\n'
     return 0
@@ -1208,7 +1375,7 @@ render_review_file_diffs() {
 render_review_file_excerpts() {
   local max="${REVIEW_FILE_EXCERPT_MAX}" lines="${REVIEW_FILE_EXCERPT_LINES}" count=0 path paths
   printf '\n### bounded source excerpts for reviewable files\n\n'
-  paths="$(review_evidence_paths || true)"
+  paths="$(review_excerpt_priority_paths || true)"
   if [[ -z "$paths" ]]; then
     printf '(no project implementation files detected)\n'
     return 0
@@ -1263,6 +1430,7 @@ render_evidence_bundle() {
 
   render_untracked_manifest
   render_reviewable_file_manifest
+  render_excerpt_priority_manifest
   render_priority_evidence_sections "${IMPLEMENT_PATH}" 120
   render_evidence_file "${BRAINSTORM_PATH}" 220
   render_evidence_file "${PLAN_PATH}" 260
@@ -1377,6 +1545,7 @@ Self-validation policy:
 - Do not rubber-stamp CTO Generator output.
 - If this review is running in the same tool/session that generated the implementation, explicitly call that out as a risk.
 - Prefer independent review evidence from Codex/Gemini/another agent instance when implementation was produced by Claude.
+- Treat same-tool review risk as review_independence_risk: warning unless the evidence proves a concrete product or evidence-bundle defect. Do not make same-tool risk the sole blocker for implementation quality.
 - Separate implementation quality findings from evidence-bundle gaps. If the embedded bundle lacks required implementation files, build/smoke output, or untracked source excerpts, say that explicitly as an evidence packaging gap.
 - Treat File excerpt index paths as first-class review targets. The bundle should include bounded source diffs and excerpts for those paths when files are available.
 - Treat SFS/runtime/adapter files listed under SFS/system scope classification as Solon system state, not product implementation scope, unless this sprint explicitly targets SFS itself.
@@ -1389,6 +1558,11 @@ EOF
 
 Return exactly this shape:
 Verdict: pass | partial | fail
+Review independence risk: none | warning | blocking
+Implementation quality verdict:
+- ...
+Evidence bundle verdict:
+- ...
 Evidence checked:
 - ...
 Evidence gaps:

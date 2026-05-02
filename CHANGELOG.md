@@ -1,3 +1,14 @@
+## [0.5.75-product] - 2026-05-02
+
+### Fixed
+
+- **Gate 6 review excerpt prioritization** — `/sfs review` now separates the
+  full reviewable manifest from the bounded excerpt priority list, promotes
+  declared `implement.md`/`plan.md` target paths ahead of incidental untracked
+  files, includes safe `.env.example` evidence, compacts `.gitignore` to
+  product-owned hunks outside the Solon managed block, and asks evaluators to
+  report same-tool review risk as a separate warning axis.
+
 ## [0.5.74-product] - 2026-05-02
 
 ### Changed
