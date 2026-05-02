@@ -34,8 +34,8 @@ next: sfs brainstorm --simple "..."  # quick cleanup
       sfs brainstorm --hard "..."    # product-owner hard training
 ```
 
-This does not replace the core command. The user still says `sfs brainstorm`.
-Solon simply exposes the available depth for the shape of the work.
+The user still types `sfs brainstorm`. Solon simply exposes the available
+depth options for the shape of the work.
 
 ## Three Brainstorm Depths
 
@@ -45,8 +45,8 @@ Solon simply exposes the available depth for the shape of the work.
 | default `normal` | none | Summarize requirements while asking focused questions about contradictions, priority, success criteria, and validation |
 | `--hard` | none | Press the user to think like a product owner about intent, sacrifices, boundaries, and terms |
 
-`normal` is not passive summarization. It is the default thinking scaffold. The
-difference between the modes is intensity.
+The three modes step up in pressure: quick cleanup, thinking scaffold, hard
+training.
 
 - `simple`: fast cleanup when the answer is already mostly known
 - `normal`: the default for most work
@@ -117,15 +117,14 @@ inference is wrong.
 
 ## Retro Closes The Sprint By Default
 
-The old split between `retro` and `retro --close` made the final step feel
-optional, but a sprint is only complete when it is closed. The current default is:
+A sprint is complete when it is closed, and `sfs retro` does that in one step:
 
 ```text
 sfs retro
 ```
 
 It refines `report.md` and `retro.md`, archives workbench evidence, closes the sprint state,
-and creates the local close commit. Use `sfs retro --draft` only when you want to
+and creates the local close commit. Use `sfs retro --draft` when you want to
 open the draft without closing.
 
 ## Documentation Shape
@@ -134,35 +133,31 @@ README is the map, not the warehouse. Details live in focused pages.
 
 ```text
 README.md
-docs/ko/index.md
-docs/en/index.md
-docs/ko/current-product-shape.md
-docs/en/current-product-shape.md
-docs/ko/10x-value.md
-10X-VALUE.md
 GUIDE.md
+docs/ko/index.md          docs/en/index.md
+docs/ko/current-product-shape.md   docs/en/current-product-shape.md
+docs/ko/10x-value.md       docs/en/10x-value.md
 docs/en/guide.md
 ```
 
-GitHub Markdown does not support native language tabs, so Solon uses a
-`Language` link at the top of each page.
+Each page has a `Language` link at the top to swap between Korean and English.
 
 ## Token / Harness Hygiene
 
-SFS does not install Claude plugins for every user. Instead, it absorbs the
-problems those plugins solve into the normal operating flow.
+SFS bakes token and attention hygiene into routed context so users do not need
+to install separate plugins. The normal operating flow absorbs four habits:
 
-- Session Report style: when token drain feels abnormal, inspect usage reports
+- Token usage check: when token drain feels abnormal, inspect the usage report
   before guessing.
-- CLAUDE.md Management style: keep adapter docs thin and move durable rules into
-  routed context or docs.
-- Serena style: in large codebases, prefer symbol/semantic search before broad
-  file reads.
-- Hookify style: turn repeated AI mistakes into guardrails, checks, hooks, or
-  short context rules.
+- Thin adapter docs: keep `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` slim and move
+  durable rules into routed context or docs.
+- Search-before-read in large codebases: prefer symbol or semantic search before
+  broad file reads.
+- Automate repeated mistakes: turn the same recurring AI mistake into a
+  guardrail, check, or hook instead of explaining it again.
 
-This is not Claude-only. Codex, Gemini, and other agents should use equivalent
-usage reports, LSP/index tools, and hook/check mechanisms.
+The same hygiene applies to Claude, Codex, Gemini, and any other agent through
+their equivalent usage reports, LSP/index tools, and hook mechanisms.
 
 ## Choosing A Mode
 

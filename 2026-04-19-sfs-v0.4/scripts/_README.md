@@ -52,10 +52,11 @@ bash scripts/cut-release.sh --version 0.3.0-mvp --apply --allow-dirty
 ```
 
 **Allowlist (현 hard-coded 파일/디렉토리)**:
-- VERSION · CHANGELOG.md · README.md · 10X-VALUE.md · CLAUDE.md · AGENTS.md · GUIDE.md · install.sh · install.ps1 · upgrade.sh · upgrade.ps1 · uninstall.sh · uninstall.ps1 · templates/ · bin/ · packaging/ · .github/ (recursive where directory)
+- VERSION · CHANGELOG.md · README.md · BEGINNER-GUIDE.md · CLAUDE.md · AGENTS.md · GUIDE.md · install.sh · install.ps1 · upgrade.sh · upgrade.ps1 · uninstall.sh · uninstall.ps1 · templates/ · bin/ · packaging/ · .github/ · docs/ (recursive where directory). `10x-value` 는 docs/en/10x-value.md · docs/ko/10x-value.md 로 통합 (WU-48).
 
-**Blocklist (1 파일, stable 잔존 시 leak 검출)**:
+**Blocklist (stable 잔존 시 leak 또는 legacy 위치 cleanup)**:
 - APPLY-INSTRUCTIONS.md (dev staging 전용 운영자 instruction)
+- 10X-VALUE.md (root legacy 위치 — WU-48 이후 docs/en/10x-value.md 로 통합)
 
 **Exit codes**: 0=성공 / 1=invalid usage 또는 allowlist 위반 / 2=dev missing / 3=stable missing / 4=stable git not clean (without `--allow-dirty`) / 5=TBD final_sha 검출 (release blocker — `final_sha: TBD_*` WU 잔존) / 99=unknown.
 

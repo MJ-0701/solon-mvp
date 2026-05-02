@@ -20,11 +20,13 @@
 #
 # Allowlist (WU-31 §2.3, hard-coded — `.visibility-rules.yaml`
 #   enforcement_active=true 는 후속 row 7 에서 활성):
-#     ✅ VERSION / CHANGELOG.md / README.md / BEGINNER-GUIDE.md / 10X-VALUE.md /
+#     ✅ VERSION / CHANGELOG.md / README.md / BEGINNER-GUIDE.md /
 #        CLAUDE.md / AGENTS.md / GUIDE.md /
 #        install.sh / install.ps1 / upgrade.sh / upgrade.ps1 /
 #        uninstall.sh / uninstall.ps1 / templates/ / bin/ / packaging/ / .github/ / docs/
+#        (10x-value 는 docs/en/10x-value.md / docs/ko/10x-value.md 로 통합 — WU-48)
 #     ❌ APPLY-INSTRUCTIONS.md (dev 운영자 전용, hard blocklist)
+#     ❌ 10X-VALUE.md (root legacy 위치 — WU-48 이후 stable 잔존분 제거)
 #
 # Usage:
 #   bash scripts/cut-release.sh --version 0.3.0-mvp           # dry-run default
@@ -69,7 +71,6 @@ ALLOWLIST=(
   "CHANGELOG.md"
   "README.md"
   "BEGINNER-GUIDE.md"
-  "10X-VALUE.md"
   "CLAUDE.md"
   "AGENTS.md"
   "GUIDE.md"
@@ -86,9 +87,11 @@ ALLOWLIST=(
   "docs"
 )
 
-# Hard blocklist (dev 전용)
+# Hard blocklist (dev 전용 + legacy stale cleanup)
+# 10X-VALUE.md: WU-48 에서 docs/en/10x-value.md 로 이동, root 잔존분 stable 에서 제거.
 BLOCKLIST=(
   "APPLY-INSTRUCTIONS.md"
+  "10X-VALUE.md"
 )
 
 # ── helper: 출력 ─────────────────────────────────────────────

@@ -1,6 +1,6 @@
 # Solon 10x 가치
 
-**Language**: 한국어 / [English](../../10X-VALUE.md)
+**Language**: 한국어 / [English](../en/10x-value.md)
 
 Solon 은 코드를 더 많이 생성해서 10x 를 만들려는 제품이 아닙니다. Solon 의 10x 는
 불명확한 의도를 공유 개념, 도메인 언어, 검증 가능한 계약, 작은 작업 단위, 독립 review signal 로

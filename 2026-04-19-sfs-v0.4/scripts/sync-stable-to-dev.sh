@@ -76,8 +76,10 @@ ALLOWLIST=(
 
 # Hard blocklist (dev 전용, stable → dev 시 reverse 흐름이라 적용 의미 거의 없지만
 # stable 잔존분 검증 차원)
+# 10X-VALUE.md: WU-48 에서 docs/en/10x-value.md 로 이동, root 잔존분 reverse drift 방지.
 BLOCKLIST=(
   "APPLY-INSTRUCTIONS.md"
+  "10X-VALUE.md"
 )
 
 # ── helper: 출력 ─────────────────────────────────────────────

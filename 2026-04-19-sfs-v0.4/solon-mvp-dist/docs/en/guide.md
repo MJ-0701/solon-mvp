@@ -126,7 +126,9 @@ the local close commit. Use `sfs retro --draft` only when you want to open the
 draft without closing the sprint.
 
 Use `sfs report` separately only when you want to preview or rebuild the report
-without closing the sprint.
+without closing the sprint. The full list of optional helpers
+(`report --sprint <id>`, `tidy`, `decision`, `adopt`, etc.) is in the Korean
+GUIDE §11.
 
 ## 8. Upgrade
 

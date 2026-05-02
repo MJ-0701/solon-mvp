@@ -1,6 +1,6 @@
 # Solon 10x Value
 
-**Language**: [한국어](./docs/ko/10x-value.md) / English
+**Language**: [한국어](../ko/10x-value.md) / English
 
 > Solon does not make code cheap by generating more of it.
 > Solon makes AI work safer by turning unclear intent into shared concepts,

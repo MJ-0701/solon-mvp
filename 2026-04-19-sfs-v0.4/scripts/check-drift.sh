@@ -70,8 +70,10 @@ ALLOWLIST=(
 )
 
 # Hard blocklist (dev 전용 — stable 잔존 시 leak)
+# 10X-VALUE.md: WU-48 에서 docs/en/10x-value.md 로 이동, root 잔존분 leak 검출.
 BLOCKLIST=(
   "APPLY-INSTRUCTIONS.md"
+  "10X-VALUE.md"
 )
 
 # ── helper: 출력 ─────────────────────────────────────────────
