@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T16:51:35+09:00
-session: "hotfix: Gate 6 review evidence excerpt prioritization implemented"
+last_overwrite: 2026-05-02T16:59:12+09:00
+session: "release: 0.5.75 Gate 6 review evidence prioritization verified"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: null
@@ -161,13 +161,13 @@ resume_hint:
   default_action: |
     1) Read `CLAUDE.md`, then `PROGRESS.md`.
     2) Run: `bash scripts/resume-session-check.sh` (expect exit 0).
-    3) Latest product release is `0.5.74-product`; ask user for the next
+    3) Latest product release is `0.5.75-product`; ask user for the next
        WU/domain unless they provide a direct task.
     4) For a direct task, start from clean `main` and create a fresh
        `feature/<slug>` or `hotfix/<slug>` branch before edits.
   on_skip_patterns: ["아니", "잠깐", "다른", "stop"]
   on_skip_action: "What do you want to do instead (1 line)?"
-  on_ambiguous: "0.5.74-product is released. What should Solon handle next?"
+  on_ambiguous: "0.5.75-product is released. What should Solon handle next?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
@@ -224,12 +224,13 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
   together as `0.5.74-product`: dev `ebf8a4a`; stable `2062971` / tag
   `v0.5.74-product`; Homebrew `7e00696`; Scoop `24f4aa8`; full release
   verifier passed and installed `sfs version --check` reports up to date.
-- Gate 6 review evidence excerpt-priority hotfix implemented locally as the
-  `0.5.75-product` candidate. The collector now separates full manifests from
-  bounded excerpt priority, promotes declared implement/plan target paths,
-  includes safe `.env.example`, compacts `.gitignore` product-owned hunks, and
-  separates same-tool review risk as warning metadata. Sandbox prompt-only
-  smoke verified backend first-class files enter the first 12 excerpts.
+- Gate 6 review evidence excerpt-priority hotfix shipped as
+  `0.5.75-product`: stable `b9e3276` / tag `v0.5.75-product`; Homebrew
+  `508162d`; Scoop `9d3eb60`; full release verifier passed and installed
+  `sfs version --check` reports up to date. Collector now separates full
+  manifests from bounded excerpt priority, promotes declared implement/plan
+  target paths, includes safe `.env.example`, compacts `.gitignore`
+  product-owned hunks, and separates same-tool review risk as warning metadata.
 
 ## ② In-Progress
 
@@ -237,10 +238,9 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ③ Next
 
-- Current truth is `0.5.74-product`; `0.5.75-product` Gate 6 evidence
-  prioritization candidate is implemented locally. Next action: release cut +
-  channel verification for `0.5.75-product`, or further review if the user
-  wants another pass before release.
+- Current truth is `0.5.75-product`; no active WU. Ask user for the next
+  WU/domain unless they provide a direct task. For a direct task, create a fresh
+  branch from clean `main` first (`feature/<slug>` or `hotfix/<slug>`).
 
 ## ④ Artifacts
 
@@ -275,5 +275,7 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
   `v0.5.73-product`; Homebrew `9a30c0b`; Scoop `be4134e`.
 - Product Gate 1~7 UX + review evidence bundle release: stable `2062971` /
   tag `v0.5.74-product`; Homebrew `7e00696`; Scoop `24f4aa8`.
+- Product Gate 6 review evidence prioritization release: stable `b9e3276` /
+  tag `v0.5.75-product`; Homebrew `508162d`; Scoop `9d3eb60`.
 - Study-note G4 validation: `.sfs-local/tmp/review-runs/2026-W18-sprint-5-G4-20260502T054452Z.result.md`
   returned `pass` after code-level rework.
