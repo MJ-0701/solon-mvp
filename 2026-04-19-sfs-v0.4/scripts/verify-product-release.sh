@@ -146,11 +146,13 @@ archive_root_dir() {
 }
 
 verify_context_router_targets_in_tree() {
-  local root="$1" label="$2" context_dir index rel count=0 missing=0
+  local root="$1" label="$2" context_dir index kernel rel count=0 missing=0
   context_dir="${root}/templates/.sfs-local-template/context"
   index="${context_dir}/_INDEX.md"
+  kernel="${context_dir}/kernel.md"
 
   [[ -f "${index}" ]] || fail "${label} missing context router index: ${index}" 5
+  [[ -f "${kernel}" ]] || fail "${label} missing context kernel: ${kernel}" 5
 
   while IFS= read -r rel; do
     [[ -n "${rel}" ]] || continue

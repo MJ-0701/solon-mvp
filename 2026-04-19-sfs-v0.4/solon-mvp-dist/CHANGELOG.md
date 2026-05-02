@@ -1,3 +1,15 @@
+## [0.5.78-product] - 2026-05-02
+
+### Fixed
+
+- **Context router same-version repair** — `sfs upgrade` now repairs
+  `.sfs-local/context/_INDEX.md` and `kernel.md` as first-class router files
+  when an already-latest project is missing its local context directory, and
+  fails closed if either core router file is absent after repair.
+- **Owner release guard** — product release verification now checks that both
+  `_INDEX.md` and `kernel.md` are packaged before validating routed command and
+  policy modules.
+
 ## [0.5.77-product] - 2026-05-02
 
 ### Changed
