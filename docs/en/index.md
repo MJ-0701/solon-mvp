@@ -5,17 +5,12 @@
 The README is the product overview and table of contents. These pages hold the
 deeper operating model, judgment rules, philosophy, and examples.
 
-GitHub Markdown does not provide native language-switch tabs. Solon uses a
-small `Language` link at the top of each page instead. Collapsible `<details>`
-sections are possible, but they are not real tabs and tend to make the README
-heavier than it should be.
-
 ## Start Here
 
 | Page | When to read it |
 |---|---|
 | [Current product shape](./current-product-shape.md) | To understand the latest Solon operating flow |
-| [Solon 10x value](../../10X-VALUE.md) | To understand why Solon trains judgment instead of only automating output |
+| [Solon 10x value](./10x-value.md) | To understand why Solon trains judgment instead of only automating output |
 | [30-minute guide](./guide.md) | To run the first sprint after install |
 | [Beginner guide](../../BEGINNER-GUIDE.md) | Korean beginner guide for Git, terminal, and CLI basics |
 | [Release notes](../../CHANGELOG.md) | Version-by-version changes |
@@ -47,9 +42,8 @@ you want to preview or rebuild the report separately.
 | default `normal` | Most new product exploration | 2-5 focused questions that help the user think before plan |
 | `--hard` | Ambiguity, product judgment, or system design matters | Relentless questioning about intent, contradictions, priority, sacrifice, validation, boundaries, and terms |
 
-`normal` is no longer just passive summarization. It is the default thinking
-scaffold. `hard` is the training mode that keeps pressing until owner decisions
-are clear enough to plan.
+`normal` is the default thinking scaffold: it asks focused questions before
+plan. `hard` keeps pressing until owner decisions are clear enough to plan.
 
 ## Documentation Policy
 

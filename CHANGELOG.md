@@ -1,3 +1,40 @@
+## [0.5.86-product] - 2026-05-02
+
+### Changed
+
+- **User-facing docs trimmed** — `README.md`, `GUIDE.md`, and the
+  `docs/ko` / `docs/en` pages no longer surface dev-internal rationale,
+  migration tone, internal implementation thresholds, or near-duplicate
+  sections. Onboarding readers now see only what they need to act on, while
+  deeper judgment material remains in the focused detail pages.
+- **`sfs guide` is now in the README Command Surface** — the in-terminal short
+  guide that BEGINNER-GUIDE already pointed users at is no longer absent from
+  the README command list, removing a quiet inconsistency.
+- **GUIDE first-sprint example replaced** — the §14 example was a
+  self-referential `README/GUIDE 정리` flow; it now uses a concrete
+  `todo 앱 v0` example that first-time readers can follow without context
+  about the Solon repo itself.
+- **`sfs retro --draft` repositioned** — the option moved from the §10 retro
+  onboarding body into the §11 "필요할 때만 쓰는 명령" reference table, so
+  retro stays a single clean default for new users while the option remains
+  documented.
+- **Token / harness hygiene reworded** — README and GUIDE now describe the
+  hygiene notices in one user-actionable line each, with the four-bullet
+  capability detail consolidated under the `docs/ko` / `docs/en`
+  current-product-shape pages and stripped of plugin-specific naming.
+
+### Moved
+
+- `solon-mvp-dist/10X-VALUE.md` is now `solon-mvp-dist/docs/en/10x-value.md`,
+  giving the 10x value page the same `docs/en/` location as every other
+  English doc and matching the Korean `docs/ko/10x-value.md` it pairs with.
+  All inbound `Language` links and the README Documentation Map were updated.
+- `solon-mvp-dist/APPLY-INSTRUCTIONS.md` was historical (the file itself
+  declared `historical 참조용. 다시 실행할 필요 없음.`) and has been moved
+  out of the OSS-facing `solon-mvp-dist/` tree into the docset archive. The
+  `cut-release.sh` blocklist now also cleans out the legacy root
+  `10X-VALUE.md` from the stable repo on the next `--apply`.
+
 ## [0.5.85-product] - 2026-05-02
 
 ### Changed
