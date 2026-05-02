@@ -114,10 +114,9 @@ Solon can infer lenses such as `docs`, `strategy`, `design`, `taxonomy`, `qa`,
 `ops`, or `release` from sprint evidence. Use `--lens` only when the inference
 is wrong.
 
-## 7. Report And Retro
+## 7. Retro
 
 ```bash
-sfs report
 sfs retro
 ```
 
@@ -125,6 +124,9 @@ sfs retro
 the report exists, archives workbench evidence, closes sprint state, and creates
 the local close commit. Use `sfs retro --draft` only when you want to open the
 draft without closing the sprint.
+
+Use `sfs report` separately only when you want to preview or rebuild the report
+without closing the sprint.
 
 ## 8. Upgrade
 
