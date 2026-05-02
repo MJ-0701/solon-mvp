@@ -1485,6 +1485,12 @@ if [ "${INSTALL_LAYOUT:-vendored}" != "thin" ] || [ "${SFS_INSTALL_AGENT_ADAPTER
   update_file ".gemini/commands/sfs.toml"   "templates/.gemini/commands/sfs.toml"   "Gemini CLI sfs command (TOML)"  "b"
   update_file ".agents/skills/sfs/SKILL.md" "templates/.agents/skills/sfs/SKILL.md" "Codex Skill (project-scoped)"  "b"
 fi
+if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ] && [ "${SFS_KEEP_PROJECT_RUNTIME_ASSETS:-0}" != "1" ]; then
+  rmdir "$TARGET/.sfs-local/scripts" \
+        "$TARGET/.sfs-local/sprint-templates" \
+        "$TARGET/.sfs-local/personas" \
+        "$TARGET/.sfs-local/decisions-template" 2>/dev/null || true
+fi
 finalize_runtime_upgrade_backup || die "runtime upgrade backup bundle failed"
 
 TODAY=$(date +%Y-%m-%d)

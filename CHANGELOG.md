@@ -1,3 +1,13 @@
+## [0.5.91-product] - 2026-05-03
+
+### Fixed
+
+- **Thin migration removes empty runtime directories too** — after a vendored
+  project is promoted to thin layout, upgrade now removes the empty
+  `.sfs-local/scripts`, `sprint-templates`, `personas`, and
+  `decisions-template` directories that were briefly recreated by the
+  compatibility update loop.
+
 ## [0.5.90-product] - 2026-05-03
 
 ### Fixed
