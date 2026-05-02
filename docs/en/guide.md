@@ -121,9 +121,12 @@ sfs retro
 ```
 
 `retro` is the normal sprint completion command. It refines the retro, ensures
-the report exists, archives workbench evidence, closes sprint state, and creates
-the local close commit. Use `sfs retro --draft` only when you want to open the
-draft without closing the sprint.
+the report exists, packs workbench evidence and temporary review scratch into
+one cold archive bundle, closes sprint state, and creates the local close
+commit. Use `sfs retro --draft` only when you want to open the draft without
+closing the sprint.
+Older loose sprint archives and separate review-run archives are compacted by
+`sfs upgrade` into compressed migration bundles.
 
 Use `sfs report` separately only when you want to preview or rebuild the report
 without closing the sprint. The full list of optional helpers

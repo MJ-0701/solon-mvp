@@ -4,9 +4,9 @@ Use Solon through the global `sfs` runtime. Keep this entry small.
 
 Read order:
 1. `SFS.md`
-2. `.sfs-local/context/kernel.md`
-3. `.sfs-local/context/_INDEX.md`
-4. Only the routed context module for the current command.
+2. `sfs context path kernel`
+3. `sfs context path index`
+4. Only the routed context module for the current command via `sfs context path ...`.
 
 Rules:
 - Run `sfs <command>` first; adapter stdout/stderr is SSoT and stays verbatim.

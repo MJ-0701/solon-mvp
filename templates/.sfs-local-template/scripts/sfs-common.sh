@@ -739,14 +739,89 @@ sfs_archive_sprint_tmp_artifacts() {
 }
 
 # sfs_compact_sprint_workbench <sprint-id> <iso-ts>
-# Moves verbose active-workbench docs to archive after a final report exists.
-# History belongs in retro/session logs and the local archive; decisions stay
-# intact. No redirect stubs are left in the sprint directory.
+# Packs verbose active-workbench docs and review scratch files into one cold
+# archive bundle after a final report exists. The sprint directory keeps only
+# report/retro/durable artifacts; raw prompts/logs stop living as loose hidden
+# files. Decisions stay intact.
+sfs_archive_sprint_cold_bundle() {
+  local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
+  local sdir="${SFS_SPRINTS_DIR}/${sid}"
+  local tmp_root="${SFS_LOCAL_DIR}/tmp"
+  local archive_dir archive_file manifest staging doc path rel dest count=0 tmp_count=0
+  local source_paths=()
+
+  [[ -d "${sdir}" ]] || return ${SFS_EXIT_NO_INIT}
+  archive_dir="$(sfs_workbench_archive_dir "${sid}" "${ts}")"
+  archive_file="${archive_dir}/sprint-evidence.tar.gz"
+  manifest="${archive_dir}/manifest.txt"
+  mkdir -p "${archive_dir}" || return ${SFS_EXIT_PERM}
+  staging="$(mktemp -d "${archive_dir}/.stage.XXXXXX")" || return ${SFS_EXIT_PERM}
+
+  for doc in brainstorm plan implement log review; do
+    path="${sdir}/${doc}.md"
+    [[ -f "${path}" ]] || continue
+    dest="sprints/${sid}/${doc}.md"
+    mkdir -p "$(dirname "${staging}/${dest}")" || return ${SFS_EXIT_PERM}
+    cp "${path}" "${staging}/${dest}" || return ${SFS_EXIT_PERM}
+    source_paths+=("${path}")
+    count=$((count + 1))
+  done
+
+  if [[ -d "${tmp_root}" ]]; then
+    while IFS= read -r path; do
+      [[ -f "${path}" ]] || continue
+      rel="${path#${SFS_LOCAL_DIR}/}"
+      dest="${rel}"
+      mkdir -p "$(dirname "${staging}/${dest}")" || return ${SFS_EXIT_PERM}
+      cp "${path}" "${staging}/${dest}" || return ${SFS_EXIT_PERM}
+      source_paths+=("${path}")
+      tmp_count=$((tmp_count + 1))
+    done < <(find "${tmp_root}" -type f -name "${sid}*" 2>/dev/null | sort)
+  fi
+
+  if [[ "${count}" -eq 0 && "${tmp_count}" -eq 0 ]]; then
+    rm -rf "${staging}" 2>/dev/null || true
+    rmdir "${archive_dir}" 2>/dev/null || true
+    return ${SFS_EXIT_OK}
+  fi
+
+  {
+    echo "SFS sprint cold archive"
+    echo "generated_at: ${ts}"
+    echo "sprint_id: ${sid}"
+    echo "archive: ${archive_file}"
+    echo "workbench_files: ${count}"
+    echo "tmp_review_scratch_files: ${tmp_count}"
+    echo
+    echo "policy:"
+    echo "- visible sprint entry remains report.md + retro.md"
+    echo "- raw brainstorm/plan/implement/log/review and review prompt/run scratch are cold history"
+    echo "- use this archive only for archaeology, dispute resolution, or deep handoff recovery"
+    echo
+    echo "items:"
+    find "${staging}" -type f 2>/dev/null | sort | while IFS= read -r staged; do
+      printf -- "- %s\n" "${staged#${staging}/}"
+    done
+  } > "${manifest}" || return ${SFS_EXIT_PERM}
+
+  tar -czf "${archive_file}" -C "${staging}" . || return ${SFS_EXIT_PERM}
+  rm -rf "${staging}" || return ${SFS_EXIT_PERM}
+
+  for path in "${source_paths[@]}"; do
+    rm -f "${path}" || return ${SFS_EXIT_PERM}
+  done
+  if [[ -d "${tmp_root}" ]]; then
+    find "${tmp_root}" -depth -type d -empty -exec rmdir {} \; 2>/dev/null || true
+  fi
+
+  printf '%s\n' "${archive_dir}"
+  return ${SFS_EXIT_OK}
+}
+
 sfs_compact_sprint_workbench() {
   local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
   local archive_dir
-  archive_dir="$(sfs_archive_sprint_workbench "${sid}" "${ts}")" || return ${SFS_EXIT_PERM}
-  sfs_archive_sprint_tmp_artifacts "${sid}" "${ts}" >/dev/null || return ${SFS_EXIT_PERM}
+  archive_dir="$(sfs_archive_sprint_cold_bundle "${sid}" "${ts}")" || return ${SFS_EXIT_PERM}
   : "${archive_dir:=}"
   return ${SFS_EXIT_OK}
 }
