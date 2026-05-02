@@ -23,7 +23,7 @@ wu_origin: WU-31            # 본 문서 자체는 WU-31 §7 row 8 산출물.
 | **cut-release.sh** | dev → stable 정방향 release sync (VERSION bump + CHANGELOG + tag) | release cut 직전 1회 | 중 (`--apply` 시 stable commit + tag 생성) | WU-31 §2 |
 | **sync-stable-to-dev.sh** | stable → dev 역방향 hotfix back-port | hotfix 발생 시 (드묾) | 저 (dev `git add` 까지만, commit 사용자) | WU-31 §3 |
 | **check-drift.sh** | dev↔stable diff preview (변경 0) | 매일 / release cut 직전 | 0 (read-only) | WU-31 §5 |
-| **verify-product-release.sh** | product tag + Homebrew tap + Scoop bucket + installed runtime 검증 | product channel push 후 1회 | 0 (read-only, fetch/download only) | WU-38 |
+| **verify-product-release.sh** | product tag + Homebrew tap + Scoop bucket + installed runtime + clean handoff 검증 | product channel push 후 1회 | 0 (read-only, fetch/download only) | WU-38 |
 | append-scheduled-task-log.sh | hourly cron 진입 시 PROGRESS scheduled_task_log 한 줄 append | scheduled run 매 시간 | 저 | (17번째 신설) |
 | resume-session-check.sh | 세션 진입 직후 sanity check (P-03 / sha / drift / TTL) | 매 세션 1회 | 0 (감지만) | (15번째 신설) |
 | snapshot.sh | 15분 / 이벤트 단위 file-level snapshot | 자동 cron / 수동 | 저 | (workflow v2 §10) |
@@ -178,7 +178,8 @@ git add bucket/sfs.json
 git commit -m "sfs <VERSION>"
 git push origin main
 
-# 4. 완료 전 확인: remote repo 뿐 아니라 실제 Homebrew tap clone / installed runtime 까지 검증
+# 4. 완료 전 확인: remote repo 뿐 아니라 실제 Homebrew tap clone / installed runtime /
+#    다음 세션 handoff clean state 까지 검증
 git -C ~/tmp/homebrew-solon-product ls-remote origin refs/heads/main
 git -C ~/tmp/scoop-solon-product ls-remote origin refs/heads/main
 bash scripts/verify-product-release.sh --version <VERSION>
@@ -187,7 +188,9 @@ bash scripts/verify-product-release.sh --version <VERSION>
 최소 검증 기준: product tag 원격 존재, Homebrew formula URL+sha 가 tag tarball 과 일치,
 Scoop manifest URL+hash 가 tag zip 과 일치, 두 channel repo `origin/main` 에 반영, release
 owner machine 의 Homebrew tap clone 이 stale 이 아니며 `sfs version --check` 가 같은 버전
-`up-to-date` 를 출력.
+`up-to-date` 를 출력. 마지막으로 dev repo / product stable repo / Homebrew tap repo /
+Scoop bucket repo 가 로컬에 있으면 모두 `main` 이고 dirty 변경 없이 `origin/main` 과
+동일해야 한다. 이 clean handoff check 가 실패하면 배포 완료로 보고하지 않는다.
 
 ### 2.3 Hotfix back-port (R-D1 예외 path)
 
