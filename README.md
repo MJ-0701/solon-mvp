@@ -601,7 +601,9 @@ identity 와 release suffix 는 product track 기준으로 운영합니다.
 
 Product release publish 는 Homebrew tap 과 Scoop bucket 을 같은 tag 로 갱신한 뒤 완료로
 간주합니다. Release owner 는 GitHub product tag, Homebrew formula URL/sha256, Scoop
-manifest URL/hash 가 모두 같은 `v<VERSION>` 을 가리키는지 확인합니다.
+manifest URL/hash 가 모두 같은 `v<VERSION>` 을 가리키는지 확인합니다. 완료 전에는 실제
+Homebrew tap clone 이 stale 이 아닌지와 `sfs version --check` 가 같은 버전 `up-to-date` 를
+출력하는지도 확인합니다.
 
 릴리스 기록은 [CHANGELOG.md](./CHANGELOG.md) 를 참조하세요.
 

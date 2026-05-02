@@ -1,3 +1,23 @@
+## [0.5.61-product] - 2026-05-02
+
+**Release-channel verification hotfix.** Prevents a product release from being
+called complete while a local Homebrew tap clone is still serving an older
+formula.
+
+### Added
+
+- **Product release verifier** — release owners can run
+  `scripts/verify-product-release.sh --version <VERSION>` to check the product
+  tag, Homebrew remote formula, local Homebrew tap clone freshness, Scoop remote
+  manifest, archive hashes, and installed `sfs version --check` result.
+
+### Fixed
+
+- **Homebrew self-upgrade freshness** — `sfs upgrade` now explicitly
+  fast-forwards the `MJ-0701/solon-product` Homebrew tap before upgrading the
+  fully qualified formula `MJ-0701/solon-product/sfs`, preventing stale tap
+  clones from stopping at older versions such as `0.5.57-product`.
+
 ## [0.5.60-product] - 2026-05-02
 
 **Implementation is now an execution contract, not a developer-only coding
