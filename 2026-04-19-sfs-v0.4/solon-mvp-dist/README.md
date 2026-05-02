@@ -236,10 +236,10 @@ cd C:\workspace\my-project
 iwr -useb https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.ps1 | iex
 ```
 
-설치 후 Solon 의 command shape 는 Claude/Gemini 에서는 `/sfs`, Codex 에서는 `$sfs` Skill
-mention 을 우선 사용합니다. Codex app/CLI 는 unknown leading slash 를 모델 전에 막고
-`커맨드 없음` / `Unrecognized command` 를 표시할 수 있으므로, Codex 에서는 `$sfs status`
-또는 자연어 요청이 실사용 1급 경로입니다. Runtime adaptor 는 각 vendor 의 입력면 차이를
+설치 후 Solon 의 command shape 는 Claude/Gemini 에서는 `/sfs`, Codex CLI 에서는 `$sfs` Skill
+mention 을 사용합니다. Codex CLI 는 unknown leading slash 를 모델 전에 막고
+`커맨드 없음` / `Unrecognized command` 를 표시할 수 있으므로, Codex CLI 에서는 `$sfs status`
+가 1급 경로입니다. Runtime adaptor 는 각 vendor 의 입력면 차이를
 흡수해서 같은 bash adapter 로 내려보내야 합니다. `sfs agent install ...` 은 다음 thin
 entry point 를 프로젝트에 설치/갱신합니다:
 `.claude/skills/sfs/SKILL.md` + `.claude/commands/sfs.md` +
@@ -264,27 +264,32 @@ entry point 를 프로젝트에 설치/갱신합니다:
 /sfs report
 /sfs retro --close
 
-# Codex app / Codex CLI
+# Codex CLI
 $sfs status
 $sfs start "첫 번째 sprint 목표"
 $sfs brainstorm "raw 요구사항과 아직 정리 안 된 맥락"
 $sfs plan
 $sfs implement "첫 구현 slice"
 $sfs report
+
+# Windows PowerShell direct shell
+sfs.cmd status
+sfs.cmd guide
 ```
 
-Codex app/CLI 에서 bare `/sfs` 를 입력했을 때 `커맨드 없음` 또는 `Unrecognized command`
+Codex CLI 에서 bare `/sfs` 를 입력했을 때 `커맨드 없음` 또는 `Unrecognized command`
 가 보이면 Solon Skill 이 실행된 것이 아닙니다. Host slash parser 가 메시지를 모델 전에
-차단한 상태입니다. 이때는 `$sfs status`, `$sfs plan`, `sfs status`, 자연어 요청, direct bash 를
-사용합니다. `/sfs ...` 텍스트가 실제로 모델/Skill 까지 도달하는 surface 에서는 Skill 이 즉시
-bash adapter 로 dispatch 해야 하지만, 현재 Codex app/CLI 에서 native slash 등록을 보장하지는
+차단한 상태입니다. 이때는 공식 Skill 호출인 `$sfs status`, `$sfs plan` 을 사용합니다.
+Windows PowerShell 에서 agent 밖 direct shell 로 실행할 때는 `sfs.cmd status` 를 사용합니다.
+`/sfs ...` 텍스트가 실제로 모델/Skill 까지 도달하는 Codex app surface 에서는 Skill 이 즉시
+bash adapter 로 dispatch 해야 하지만, 현재 Codex CLI 에서 native slash 등록을 보장하지는
 않습니다.
 
 세 환경 모두 같은 `sfs` runtime command 를 SSoT 로 호출합니다. `sfs` 는 packaged bash
 adapter 로 내려가며, 프로젝트의 `.sfs-local/` 은 sprint/decision/config/custom override 만
 담습니다. vendored layout 을 선택한 경우에만 `.sfs-local/scripts/sfs-*.sh` 가 프로젝트에 복사됩니다.
 
-Windows PowerShell 에서는 Git Bash/WSL 에서 global `sfs` 를 실행하는 경로를 우선 사용합니다.
+Windows PowerShell 에서는 global `sfs.cmd` 를 우선 사용합니다.
 vendored layout 에서 direct adapter 를 호출해야 하면:
 
 ```powershell
@@ -376,12 +381,13 @@ CLI 에서든 동등한 deterministic bash adapter SSoT 로 동작합니다.
 |---|---|---|
 | **Claude Code** | `.claude/skills/sfs/SKILL.md` (primary Skill) + `.claude/commands/sfs.md` (legacy fallback) | `/sfs status` |
 | **Gemini CLI** | `.gemini/commands/sfs.toml` (TOML slash) | `/sfs status` |
-| **Codex app / Codex CLI** | `.agents/skills/sfs/SKILL.md` (project-scoped Skill) | `$sfs status` / `sfs status` / 자연어 |
+| **Codex CLI** | `.agents/skills/sfs/SKILL.md` (project-scoped Skill) | `$sfs status` |
+| **Codex app** | `.agents/skills/sfs/SKILL.md` (project-scoped Skill) | `$sfs status` 또는 `/sfs status` 가 host 에서 모델까지 전달되는 경우 |
+| **Windows PowerShell shell** | `bin/sfs.cmd` (Scoop/PATH global wrapper) | `sfs.cmd status` |
 
-Codex app/CLI 에서 bare `/sfs` 가 native slash parser 에 막히면 **runtime adapter
-compatibility gap** 으로 분류합니다. Solon 이 설치되어 있지 않은 것이 아니라, host UI 가
-Skill 호출 전에 입력을 선점한 것입니다. Codex native slash registration 은 host 가 공식
-extension point 를 제공할 때 다시 1급 경로로 올립니다.
+Codex CLI 에서 bare `/sfs` 가 native slash parser 에 막히는 것은 Solon 설치 실패가 아니라
+host UI 가 Skill 호출 전에 입력을 선점한 것입니다. Codex CLI 의 공식 SFS entry 는 `$sfs` 이며,
+Codex native slash registration 은 host 가 공식 extension point 를 제공할 때만 다시 검토합니다.
 일부 Codex build 에서 user prompt fallback (`/prompts:sfs ...`, `~/.codex/prompts/sfs.md`) 을
 쓸 수 있지만, install.sh 는 user `$HOME` 에 자동 cp 하지 않습니다 (사용자 영역 보호).
 지원되는 build 에서만 manual cp:

@@ -1,3 +1,17 @@
+## [0.5.59-product] - 2026-05-02
+
+**Codex and Windows invocation docs alignment.** Clarifies the supported SFS
+entry points across Codex CLI, Codex app surfaces, and Windows PowerShell.
+
+### Changed
+
+- **Codex CLI entry shape** — product docs now describe `$sfs ...` as the
+  official Codex CLI Skill invocation instead of treating it as a temporary
+  fallback for bare `/sfs`.
+- **Windows PowerShell shell entry** — onboarding now shows `sfs.cmd ...` for
+  direct PowerShell usage, while keeping `sfs ...` for Git Bash/WSL/POSIX
+  shells.
+
 ## [0.5.57-product] - 2026-05-02
 
 **Windows Scoop one-shot upgrade hotfix.** Tightens the Windows wrapper path so

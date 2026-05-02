@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-01T22:56:13Z
-session: "doc-refactor: PROGRESS.md token-bloat compaction (full snapshot archived at archives/progress/PROGRESS-2026-05-01T181258Z-precompact.md)"
+last_overwrite: 2026-05-02T00:35:00Z
+session: "user-active: WU-34 close + 0.5.58-product release preparation"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: WU-34
@@ -11,7 +11,7 @@ current_wu_path: 2026-04-19-sfs-v0.4/sprints/WU-34.md
 
 # ── SESSION MUTEX (CLAUDE.md §1.12) ───────────────────────────────
 # Keep scalar form for tool compatibility (.sfs-local/scripts/sfs-loop.sh stop/status, auto-resume contract).
-current_wu_owner: null
+current_wu_owner: codex-sfs-release-20260502
 
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
@@ -162,14 +162,15 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ① Just-Finished
 
-- PROGRESS.md frontmatter/token-bloat compaction + archive snapshot.
+- WU-34 doc alignment: Codex CLI official entry = `$sfs ...`; Windows PowerShell direct shell = `sfs.cmd ...`; no Windows `/sfs` failure transcript needed.
 
 ## ② In-Progress
 
-- `current_wu`: `WU-34` (Codex CLI `/sfs` compatibility layer)
+- `current_wu`: `WU-34` (Codex CLI SFS invocation policy; small doc diff ready for review/commit)
 
 ## ③ Next
 
+- WU-34: review small doc diff, then close/commit.
 - Scheduled loop (mode=scheduled): `D-G-WU-25` (row 10) → `D-H-WU-26` (row 3)
 - User-active: follow `WU-34` §4, or choose `D-E` / `D-F` for small cleanup
 
