@@ -584,6 +584,7 @@ Uninstall 은 대화형으로 실행됩니다.
 | `templates/.gemini/commands/sfs.toml` | Gemini CLI slash command |
 | `templates/.agents/skills/sfs/SKILL.md` | Codex Skill (project-scoped) |
 | `templates/.codex/prompts/sfs.md` | Codex custom prompt fallback (optional/legacy) |
+| `templates/.sfs-local-template/context/` | short routed context modules loaded only when relevant |
 | `templates/.sfs-local-template/` | packaged runtime scripts, Windows `sfs.ps1` vendored fallback, sprint templates, decision templates |
 | `packaging/homebrew/sfs.rb.template` | Homebrew tap formula template (`url`/`sha256` fill-in on release cut) |
 | `packaging/scoop/sfs.json.template` | Scoop bucket manifest template (`url`/`hash`/`extract_dir` fill-in on release cut) |

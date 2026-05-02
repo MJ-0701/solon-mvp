@@ -1,86 +1,17 @@
-# SFS.md — `<PROJECT-NAME>` Solon SFS 운영 지침 (entry-lean)
+# SFS.md — `<PROJECT-NAME>` Solon SFS router
 
-> 본 파일은 Claude Code / Codex / Gemini CLI 가 **공통으로 참조하는** Solon SFS 지침입니다.
-> SFS = **Solo Founder System**. `solon-product` 설치로 생성됨 (`install.sh`).
-> 어떤 CLI 환경에서 호출하든 **`sfs` runtime (deterministic bash adapter)** 가 SSoT 입니다 (paraphrase 금지).
-> Solon 버전 갱신 후에는 uninstall/reinstall 대신 `sfs upgrade` 로 project adapter/docs 를 갱신합니다.
+Solon SFS = Solo Founder System. This file is the shared router for Claude,
+Codex, and Gemini.
 
-> Windows PowerShell 사용자는 Git for Windows 의 Git Bash 또는 WSL 에서 global `sfs` CLI 를 실행합니다.
-> vendored layout 에서만 `.sfs-local\\scripts\\sfs.ps1 <command>` wrapper 를 fallback 으로 씁니다.
+Read order:
+1. `.sfs-local/context/kernel.md`
+2. `.sfs-local/context/_INDEX.md`
+3. Only the matching module under `.sfs-local/context/commands/` or
+   `.sfs-local/context/policies/`
 
-## Entry (token-min) / Resume
+Default entry:
+- `sfs status`
+- current sprint `report.md`
+- expand to workbench/logs only when the routed context needs evidence
 
-- 최소 재개 경로: `sfs status` → current sprint `report.md`.
-- 필요할 때만 열기: `.sfs-local/events.jsonl`, 오래된 `scheduled_task_log`, 오래된 `review-runs`.
-- 막혔을 때만 확장: current sprint `retro.md` → 관련 ADR (`.sfs-local/decisions/`).
-
-## 프로젝트 개요
-
-- **이름**: `<PROJECT-NAME>`
-- **도메인**: `<DOMAIN>` (예: 관리자 페이지 / SaaS 대시보드 / API 서비스 / ...)
-- **단계**: MVP (Phase 1), greenfield, 7-step lightweight spike 운용.
-- **Stack**: `<STACK>` (예: Next.js 15 App Router + TypeScript)
-- **DB**: `<DB>` (예: Postgres + Prisma)
-- **배포**: `<DEPLOY>` (예: Vercel)
-
-## 운영 방식 — 7-step flow
-
-각 1 cycle = 1 Sprint = 5~7 일. 3 C-Level(CEO/CTO/CPO) 기준 순서:
-
-1. **CEO 요구사항 정리** (G0) — `sfs brainstorm` → `brainstorm.md`
-2. **CEO plan** (G1) — `sfs plan` → `plan.md` (+ sprint contract)
-3. **CTO 구현** (G2 entry) — `sfs implement "<slice>"` → 실제 작업 artifact + evidence (`implement.md`/`log.md`)
-4. **CPO review** (G4) — `sfs review --gate G4 ...` → `review.md` + verdict/action
-5. **CTO 확인/재구현** — partial/fail 범위만 재구현
-6. **회고 + 보고서 정리** (G5) — `retro.md` + `report.md` 로 압축, workbench/tmp 는 archive 로 이동
-
-> 해석 규칙: 7-step 은 full startup team-agent flow 의 lightweight projection. Discovery/PRD/Taxonomy/UX/Technical Design/Release Readiness 를 “없앴다”로 해석하지 말고, 필요하면 현재 sprint 산출물 안에 evidence 를 작게 남깁니다.
-
-## Artifact lifecycle — workbench → report
-
-- 진행 중 workbench: `brainstorm.md`, `plan.md`, `implement.md`, `log.md`, `review.md`
-- 완료 산출물: `report.md`(1-page 작업보고서), `retro.md`(history/learning)
-- close 정리: `sfs tidy --apply` 또는 `sfs retro --close` 가 workbench/tmp 를 archive 로 이동
-  - 기존 sprint 를 나중에 정리할 때는: `sfs report --sprint <id>` 확인 후 `sfs tidy --sprint <id> --apply`
-
-## AI execution contract (최소)
-
-1. **Think before execution**: 가정/성공기준/트레이드오프를 짧게 고정.
-2. **Simplicity first**: 한 번에 하나의 AC 를 증명하는 최소 slice.
-3. **Surgical changes**: 요청 slice 밖 cleanup 은 follow-up/risk 로 남김.
-4. **Evidence-first**: artifact + 검증(테스트/스모크/CLI/브라우저/review) evidence + review handoff 가 완료 조건.
-
-## 파일/경로 SSoT (필요할 때만)
-
-- Sprint: `.sfs-local/sprints/<sprint-id>/` (workbench + report/retro)
-- ADR: `.sfs-local/decisions/` (full ADR), sprint-local mini decision 은 sprint 폴더
-- Model profiles: `.sfs-local/model-profiles.yaml` (역할/런타임 매핑)
-- Divisions: `.sfs-local/divisions.yaml`
-- Event log: `.sfs-local/events.jsonl` (git ignore)
-
-## 명령 요약 (얇게)
-
-- 상태/재개: `sfs status`
-- sprint 시작: `sfs start "<goal>"`
-- G0/G1: `sfs brainstorm ...` → `sfs plan`
-- 구현: `sfs implement "<slice>"`
-- 리뷰: `sfs review --gate G4 --executor codex|gemini|claude` (executor/tool 강제 아님)
-- 보고서/정리: `sfs report` / `sfs tidy --apply` / `sfs retro`
-- 자율 루프: `sfs loop ...` (mutex 충돌이면 중단하고 lock owner/domain 보고)
-
-Full reference (필요할 때만):
-- `sfs help`
-- `sfs guide --print`
-- `sfs <command> --help`
-
-## 절대 금지
-
-- **외부 방법론 docset 의 경로/파일명 하드코딩** (사용자 개인 IP 가능)
-- **무차별 `git push origin *`**
-- **Gate hard-block** (ALT-INV-3 never-hard-block: gate 는 signal)
-- **bash adapter 출력 paraphrase**
-
-## Changelog (요약)
-
-- v0.3 (`<DATE>`): multi-adaptor 1급 정합 + 7-Gate enum + 핵심 산출물/ADR.
-- v0.2: runtime-neutral SFS 지침.
+Never paraphrase bash adapter output. Never hardcode external private docsets.
