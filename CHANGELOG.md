@@ -1,5 +1,15 @@
 ## [Unreleased]
 
+## [0.5.73-product] - 2026-05-02
+
+### Fixed
+
+- **Context router upgrade repair** — `sfs upgrade` now manages every context
+  module referenced by `.sfs-local/context/_INDEX.md`, including
+  `commands/start.md` and `commands/profile.md`, repairs missing router targets
+  even when the installed project already reports the latest version, and fails
+  closed if the router index still points at a missing module.
+
 ## [0.5.72-product] - 2026-05-02
 
 ### Fixed
