@@ -1,8 +1,19 @@
+## [0.5.64-product] - 2026-05-02
+
+**Audience wording cleanup.** Refines the beginner onboarding language so it
+describes users by CLI familiarity rather than by job title.
+
+### Changed
+
+- **Beginner guide audience** — public docs now say the guide is for people who
+  are not yet comfortable with development, terminal, or CLI workflows, avoiding
+  job-title generalizations.
+
 ## [0.5.63-product] - 2026-05-02
 
-**Beginner onboarding for non-developer users.** Adds a dedicated guide for
-designers and other users who are blocked before they understand terminal,
-Scoop, Homebrew, project folders, or the first `sfs status` success signal.
+**Beginner onboarding for CLI-unfamiliar users.** Adds a dedicated guide for
+people who are blocked before they understand terminal, Scoop, Homebrew,
+project folders, or the first `sfs status` success signal.
 
 ### Added
 
@@ -12,7 +23,7 @@ Scoop, Homebrew, project folders, or the first `sfs status` success signal.
 
 ### Changed
 
-- **README guide path** — the README now points first-time non-developer users
+- **README guide path** — the README now points first-time CLI-unfamiliar users
   to the beginner guide before the regular installation and product sections.
 
 ## [0.5.62-product] - 2026-05-02
@@ -28,7 +39,7 @@ them.
   mutex policy module with compact `summary` / `load_when` frontmatter.
 - **Unified README installation section** — the README now presents
   Windows/Scoop, Mac/Homebrew, source fallback, project init, and upgrade in
-  one install section so non-developer users can choose the right path quickly.
+  one install section so CLI-unfamiliar users can choose the right path quickly.
 
 ### Changed
 
