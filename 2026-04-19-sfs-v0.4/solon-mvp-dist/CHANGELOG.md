@@ -10,6 +10,9 @@
 - **G0/G1 questioning gate** — brainstorm keeps `status: draft` and asks 1-3
   blocking questions when shared understanding is missing; plan must not hide
   unresolved G0 questions behind assumptions.
+- **SFS naming** — README, GUIDE, and generated `SFS.md` now explain the dual
+  meaning: terminal-facing `sfs` is Sprint Flow System, while Solon Product's
+  broader SFS is Solo Founder System.
 
 ## [0.5.67-product] - 2026-05-02
 

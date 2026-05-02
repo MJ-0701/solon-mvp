@@ -2,7 +2,8 @@
 
 > install.sh 실행한 직후 30분 안에 첫 sprint 를 돌려보는 walk-through.
 > 본 가이드는 "왜 이런 file 이 생겼는지", "처음 어디부터 손대야 하는지", "내가 알아야 할 핵심 file 4개", 그리고 "내일도 이걸 쓸 이유" 까지 다룬다.
-> SFS 는 **Solo Founder System** 의 약자다. Sprint flow 는 SFS 안에서 돌아가는 실행 방식이다.
+> SFS 는 이중 의미다. 터미널에서 쓰는 `sfs` / `/sfs` 는 표면적으로 **Sprint Flow System** 이고,
+> Solon Product 전체의 SFS 는 **Solo Founder System** 이다.
 
 ---
 
