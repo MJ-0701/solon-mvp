@@ -1,3 +1,18 @@
+## [0.5.77-product] - 2026-05-02
+
+### Changed
+
+- **Dev backend architecture ladder** — `/sfs implement` now records the
+  default backend architecture path: clean layered monolith for MVP/small
+  projects, CQRS for non-initial backend work even on one DB, Hexagonal
+  transition guidance when domain seams grow, and MSA transition guidance only
+  after explicit approval for independent service boundaries.
+- **Non-Dev division policy ladders** — Strategy-PM, Taxonomy,
+  Design/Frontend, QA, and Infra guardrails now start with lightweight MVP
+  defaults, strengthen only when trigger evidence appears, and require user
+  acceptance/approval before large roadmap, rename/schema, redesign,
+  release-readiness, or infra/ops transitions.
+
 ## [0.5.76-product] - 2026-05-02
 
 ### Fixed
