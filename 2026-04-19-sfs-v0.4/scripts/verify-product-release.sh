@@ -196,7 +196,7 @@ verify_thin_surface_defaults_in_tree() {
 
   (
     cd "${proj}"
-    SFS_MODEL_PROFILE_PROMPT=0 bash "${root}/upgrade.sh" --yes >/dev/null
+    SFS_MODEL_PROFILE_PROMPT=0 SFS_UPGRADE_LAYOUT=thin bash "${root}/upgrade.sh" --yes >/dev/null
   ) || fail "${label} thin upgrade adapter migration smoke failed" 5
 
   for rel in \
@@ -211,6 +211,38 @@ verify_thin_surface_defaults_in_tree() {
   archive_count="$(find "${proj}/.sfs-local/archives/runtime-migrations" -name project-agent-adapters.tar.gz -type f 2>/dev/null | wc -l | tr -d '[:space:]')"
   [[ "${archive_count:-0}" -ge 1 ]] || fail "${label} thin upgrade did not create project-agent-adapters archive" 5
   log "  ok ${label} thin surface defaults"
+
+  local vendored_proj runtime_asset_count adapter_asset_count layout
+  vendored_proj="${TMP_DIR}/${label}-vendored-to-thin"
+  mkdir -p "${vendored_proj}"
+  git -C "${vendored_proj}" init --quiet || fail "${label} vendored-to-thin git init failed" 5
+  (
+    cd "${vendored_proj}"
+    SFS_MODEL_PROFILE_PROMPT=0 bash "${root}/install.sh" --yes --layout vendored --with-agent-adapters >/dev/null
+    sed -i.bak 's/^solon_mvp_version:.*/solon_mvp_version: 0.0.0-product/' .sfs-local/VERSION
+    rm -f .sfs-local/VERSION.bak
+    SFS_MODEL_PROFILE_PROMPT=0 SFS_UPGRADE_LAYOUT=thin bash "${root}/upgrade.sh" --yes >/dev/null
+  ) || fail "${label} vendored-to-thin upgrade smoke failed" 5
+
+  layout="$(awk '/^install_layout:/ {print $2; exit}' "${vendored_proj}/.sfs-local/VERSION" 2>/dev/null || true)"
+  [[ "${layout}" = "thin" ]] || fail "${label} vendored-to-thin did not rewrite install_layout to thin" 5
+  for rel in \
+    ".claude/commands/sfs.md" \
+    ".claude/skills/sfs/SKILL.md" \
+    ".gemini/commands/sfs.toml" \
+    ".agents/skills/sfs/SKILL.md" \
+    ".sfs-local/scripts" \
+    ".sfs-local/sprint-templates" \
+    ".sfs-local/personas" \
+    ".sfs-local/decisions-template"
+  do
+    [[ ! -e "${vendored_proj}/${rel}" ]] || fail "${label} vendored-to-thin left project asset ${rel}" 5
+  done
+  runtime_asset_count="$(find "${vendored_proj}/.sfs-local/archives/runtime-migrations" -name project-runtime-assets.tar.gz -type f 2>/dev/null | wc -l | tr -d '[:space:]')"
+  adapter_asset_count="$(find "${vendored_proj}/.sfs-local/archives/runtime-migrations" -name project-agent-adapters.tar.gz -type f 2>/dev/null | wc -l | tr -d '[:space:]')"
+  [[ "${runtime_asset_count:-0}" -ge 1 ]] || fail "${label} vendored-to-thin missing project-runtime-assets archive" 5
+  [[ "${adapter_asset_count:-0}" -ge 1 ]] || fail "${label} vendored-to-thin missing project-agent-adapters archive" 5
+  log "  ok ${label} vendored-to-thin surface migration"
 }
 
 verify_packaged_context_router_integrity() {

@@ -1,6 +1,9 @@
 param(
   [switch] $Yes,
-  [switch] $Help
+  [switch] $Help,
+  [ValidateSet("thin", "vendored")]
+  [string] $Layout = "thin",
+  [switch] $WithAgentAdapters
 )
 
 $ErrorActionPreference = "Stop"
@@ -46,6 +49,11 @@ if (-not $bash) {
 $argsForBash = @()
 if ($Yes) { $argsForBash += "--yes" }
 if ($Help) { $argsForBash += "--help" }
+if ($Layout) {
+  $argsForBash += "--layout"
+  $argsForBash += $Layout
+}
+if ($WithAgentAdapters) { $argsForBash += "--with-agent-adapters" }
 
 $scriptPath = $MyInvocation.MyCommand.Path
 $sourceDir = $null

@@ -1,3 +1,19 @@
+## [0.5.90-product] - 2026-05-03
+
+### Fixed
+
+- **Existing Windows/Scoop projects now convert to thin surface on upgrade** —
+  global `sfs` / `sfs.cmd upgrade` now requests thin layout explicitly, so old
+  projects recorded as `vendored` or missing layout metadata no longer preserve
+  project-local command/skill adapters by accident.
+- **Vendored runtime assets are migrated, not stranded** — when global upgrade
+  converts a project to thin layout, managed `.sfs-local/scripts`,
+  `sprint-templates`, `personas`, `decisions-template`, and `.sfs-local/GUIDE.md`
+  move into `project-runtime-assets.tar.gz` with a manifest.
+- **PowerShell wrapper parity** — `upgrade.ps1` now defaults to `-Layout thin`,
+  and `install.ps1` accepts `-Layout thin|vendored` plus optional
+  `-WithAgentAdapters`.
+
 ## [0.5.89-product] - 2026-05-03
 
 ### Fixed

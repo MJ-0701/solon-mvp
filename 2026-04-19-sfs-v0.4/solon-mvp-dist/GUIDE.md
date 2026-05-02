@@ -367,6 +367,8 @@ runtime 에 들어 있습니다. agent 는 필요할 때 `sfs context path ...` 
 loose archive/review-run 기록도 압축 migration 으로 정리합니다. runtime upgrade /
 agent install / profile rollback 백업도 loose 파일이 아니라 `*.tar.gz` + `manifest.txt`
 bundle 로 남습니다.
+기존 vendored 프로젝트도 global `sfs` / `sfs.cmd upgrade` 를 타면 thin surface 로 승격됩니다.
+프로젝트-local runtime 파일을 계속 보존해야 할 때만 `sfs upgrade --layout vendored` 를 씁니다.
 
 ### `/sfs` 가 인식되지 않는다.
 

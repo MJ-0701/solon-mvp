@@ -1,4 +1,9 @@
-param()
+param(
+  [ValidateSet("thin", "vendored")]
+  [string] $Layout = "thin",
+  [switch] $Yes,
+  [switch] $Help
+)
 
 $ErrorActionPreference = "Stop"
 $SolonRepo = "MJ-0701/solon-product"
@@ -61,7 +66,14 @@ try {
   }
 
   $upgradeSh = Join-Path $sourceDir "upgrade.sh"
-  & $bash (Convert-ToBashPath $upgradeSh)
+  $argsForBash = @()
+  if ($Yes) { $argsForBash += "--yes" }
+  if ($Help) { $argsForBash += "--help" }
+  if ($Layout) {
+    $argsForBash += "--layout"
+    $argsForBash += $Layout
+  }
+  & $bash (Convert-ToBashPath $upgradeSh) @argsForBash
   exit $LASTEXITCODE
 }
 finally {

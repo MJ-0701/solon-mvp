@@ -171,7 +171,7 @@ usage() {
   cat <<'EOF'
 Usage:
   sfs init [--yes] [--layout thin|vendored]
-  sfs upgrade [--skip-existing] [--no-self-upgrade] [--interactive]
+  sfs upgrade [--skip-existing] [--no-self-upgrade] [--interactive] [--layout thin|vendored]
   sfs update [--skip-existing]          # compatibility alias for upgrade
   sfs uninstall [--keep-artifacts|--remove-all] [--remove-docs|--keep-docs]
   sfs agent install <claude|gemini|codex|all> [--skip-existing]
@@ -269,7 +269,7 @@ EOF
 upgrade_usage() {
   cat <<'EOF'
 Usage:
-  sfs upgrade [--skip-existing] [--no-self-upgrade] [--interactive]
+  sfs upgrade [--skip-existing] [--no-self-upgrade] [--interactive] [--layout thin|vendored]
   sfs update [--skip-existing] [--no-self-upgrade]   # compatibility alias
 
 Updates the current project from the latest Solon runtime:
@@ -278,11 +278,13 @@ Updates the current project from the latest Solon runtime:
   - if this CLI is installed by Scoop, runs `scoop update` + `scoop update sfs` first
   - updates managed SFS runtime docs with backup safety
   - preserves sprint/decision/event history and project-specific docs
+  - global runtime upgrades default the project surface to thin
   - thin layout keeps Claude/Gemini/Codex command/skill files opt-in
 
 Use `--interactive` to run the project-file preview instead of the safe
-non-interactive default. Use `--no-self-upgrade` or `SFS_UPDATE_SELF=0` to skip
-the package-manager step.
+non-interactive default. Use `--layout vendored` to keep project-local runtime
+assets and command/skill adapters. Use `--no-self-upgrade` or `SFS_UPDATE_SELF=0`
+to skip the package-manager step.
 EOF
 }
 
@@ -757,6 +759,7 @@ upgrade_command() {
   local skip_existing=0
   local no_self_upgrade="${SFS_SKIP_SELF_UPGRADE:-0}"
   local interactive=0
+  local upgrade_layout="${SFS_UPGRADE_LAYOUT:-thin}"
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --skip-existing)
@@ -771,6 +774,18 @@ upgrade_command() {
         interactive=1
         shift
         ;;
+      --layout)
+        upgrade_layout="${2:-}"
+        if [[ -z "${upgrade_layout}" ]]; then
+          echo "missing value for --layout (thin|vendored)" >&2
+          return 1
+        fi
+        shift 2
+        ;;
+      --layout=*)
+        upgrade_layout="${1#--layout=}"
+        shift
+        ;;
       -h|--help)
         upgrade_usage
         return 0
@@ -782,16 +797,24 @@ upgrade_command() {
         ;;
     esac
   done
+  case "${upgrade_layout}" in
+    thin|vendored) ;;
+    *)
+      echo "unknown layout: ${upgrade_layout} (expected thin|vendored)" >&2
+      return 1
+      ;;
+  esac
 
   ensure_project_initialized upgrade || return $?
+  export SFS_UPGRADE_LAYOUT="${upgrade_layout}"
   if [[ "${no_self_upgrade}" != "1" && "${SFS_UPDATE_SELF:-1}" != "0" ]]; then
     self_upgrade_if_homebrew "${skip_existing}"
     self_upgrade_if_scoop "${skip_existing}"
   fi
   if [[ "${interactive}" == "1" ]]; then
-    bash "${DIST_DIR}/upgrade.sh"
+    SFS_UPGRADE_LAYOUT="${upgrade_layout}" bash "${DIST_DIR}/upgrade.sh"
   else
-    bash "${DIST_DIR}/upgrade.sh" --yes
+    SFS_UPGRADE_LAYOUT="${upgrade_layout}" bash "${DIST_DIR}/upgrade.sh" --yes
   fi
   local layout
   layout="$(sfs_project_layout "$(project_local_dir)")"

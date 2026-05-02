@@ -129,6 +129,8 @@ loose 파일 대신 `*.tar.gz` + `manifest.txt` bundle 로 남습니다.
 thin layout 에서는 project-local `.claude/`, `.gemini/`, `.agents/` command/skill adapter 도
 기본 표면에서 빠집니다. root adapter 문서가 global `sfs` runtime 을 안내하고, native
 slash/skill 파일이 필요한 프로젝트만 `sfs agent install all` 로 opt-in 설치합니다.
+global `sfs` / `sfs.cmd upgrade` 는 기존 vendored 프로젝트도 thin surface 로 승격합니다.
+runtime 파일을 프로젝트 안에 계속 두려면 `sfs upgrade --layout vendored` 를 명시합니다.
 
 ## 문서 구조
 
