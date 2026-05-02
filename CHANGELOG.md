@@ -1,3 +1,15 @@
+## [0.5.81-product] - 2026-05-02
+
+### Changed
+
+- **Retro close default** — `sfs retro` is now the normal sprint completion
+  command: it refines/opens `retro.md`, ensures `report.md`, archives workbench
+  evidence, closes the sprint, and creates the local close commit. `--close`
+  remains a backward-compatible alias, while `--draft` / `--no-close` keep the
+  old open-only behavior.
+- **Current README flow** — README and guide examples now end with `sfs retro`
+  instead of splitting completion across `retro` and `retro --close`.
+
 ## [0.5.80-product] - 2026-05-02
 
 ### Changed

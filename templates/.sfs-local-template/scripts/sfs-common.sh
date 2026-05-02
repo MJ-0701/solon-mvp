@@ -1893,7 +1893,7 @@ sprint_close() {
 
 # auto_commit_close <sprint-id> — sprint close 후 git add + commit.
 # Branch push/main merge/main push 는 AI runtime Git Flow lifecycle 책임.
-# WARNING: AI 자율 호출 금지 — 사용자가 `/sfs retro --close` 명시 호출 시에만 동작.
+# WARNING: AI 자율 호출 금지 — 사용자가 `/sfs retro` 명시 호출 시에만 동작.
 # git operation 들은 silent fail (`|| true`) — git 부재 / pre-commit hook 등 환경 차이 흡수.
 auto_commit_close() {
   local sid="${1:-}"

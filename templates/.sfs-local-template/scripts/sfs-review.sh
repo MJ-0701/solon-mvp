@@ -1877,7 +1877,7 @@ EOF
   cat <<'EOF'
 
 Next-action policy:
-- `pass`: name the close path, usually `/sfs report` then `/sfs retro --close`.
+- `pass`: name the close path, usually `/sfs report` then `/sfs retro`.
 - `partial`: name the smallest rework slice and whether to rerun `/sfs review`.
 - `fail`: name whether to return to `/sfs plan`, redo implementation, or escalate to the user.
 

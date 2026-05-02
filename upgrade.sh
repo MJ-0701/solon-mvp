@@ -772,7 +772,7 @@ update_file ".sfs-local/scripts/sfs-implement.sh" "templates/.sfs-local-template
 update_file ".sfs-local/scripts/sfs-review.sh"   "templates/.sfs-local-template/scripts/sfs-review.sh"   "sfs review"   "b"
 update_file ".sfs-local/scripts/sfs-decision.sh" "templates/.sfs-local-template/scripts/sfs-decision.sh" "sfs decision (WU-26)" "b"
 update_file ".sfs-local/scripts/sfs-report.sh"   "templates/.sfs-local-template/scripts/sfs-report.sh"   "sfs report (final report + compaction)" "b"
-update_file ".sfs-local/scripts/sfs-retro.sh"    "templates/.sfs-local-template/scripts/sfs-retro.sh"    "sfs retro --close (WU-26)" "b"
+update_file ".sfs-local/scripts/sfs-retro.sh"    "templates/.sfs-local-template/scripts/sfs-retro.sh"    "sfs retro close flow" "b"
 update_file ".sfs-local/scripts/sfs-commit.sh"   "templates/.sfs-local-template/scripts/sfs-commit.sh"   "sfs commit" "b"
 update_file ".sfs-local/scripts/sfs-loop.sh"     "templates/.sfs-local-template/scripts/sfs-loop.sh"     "sfs loop (WU-27 spec)" "b"
 chmod +x "$TARGET/.sfs-local/scripts"/*.sh 2>/dev/null || true
