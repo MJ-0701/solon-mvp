@@ -155,9 +155,15 @@ sfs version --check
 Windows:
 
 ```powershell
-sfs.cmd upgrade
+sfs.cmd update
 sfs.cmd version --check
 ```
+
+On Windows, `sfs.cmd update` is the one-shot command. It runs `scoop update` and
+`scoop update sfs`, reloads the updated runtime, and then continues into the
+current project upgrade. Direct `scoop update sfs` can still trigger the
+post-install project hook, but bucket metadata refresh remains Scoop-owned, so
+the user-facing command is `sfs.cmd update`.
 
 Recent upgrades also repair missing managed context-router files even when the
 project already reports the latest version.

@@ -99,13 +99,15 @@ sfs version --check
 Windows PowerShell/cmd:
 
 ```powershell
-sfs.cmd upgrade
+sfs.cmd update
 sfs.cmd version --check
 ```
 
-Windows Scoop 설치본은 프로젝트 루트에서 `scoop update sfs` 를 직접 실행해도,
-새 runtime 설치 직후 현재 Solon 프로젝트를 감지해 같은 project upgrade 를 이어서 수행합니다.
-프로젝트 밖에서 실행하면 runtime 만 갱신되고 프로젝트 파일은 그대로 둡니다.
+Windows 에서 완전한 한 방 명령은 `sfs.cmd update` 입니다. 이 명령이 내부에서
+`scoop update` + `scoop update sfs` 를 먼저 실행하고, 새 runtime 을 다시 로드한 뒤 현재
+프로젝트 upgrade 까지 이어갑니다. `scoop update sfs` 만 직접 실행해도 새 runtime 설치 뒤
+프로젝트 hook 이 돌지만, bucket metadata 갱신 전 단계는 Scoop 자체 정책을 따르므로
+사용자-facing 기본 명령은 `sfs.cmd update` 로 안내합니다.
 
 `sfs upgrade` 는 thin layout 프로젝트의 managed context 문서와 project-local
 command/skill adapter 파일을 global `sfs` runtime 으로 이관해 프로젝트 표면을 줄입니다.
