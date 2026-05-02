@@ -157,6 +157,9 @@ REVIEW_MD_EXCERPT_LINES="${SFS_REVIEW_MD_EXCERPT_LINES:-0}"
 REVIEW_FILE_EXCERPT_MAX="${SFS_REVIEW_FILE_EXCERPT_MAX:-12}"
 REVIEW_FILE_EXCERPT_LINES="${SFS_REVIEW_FILE_EXCERPT_LINES:-120}"
 REVIEW_DIFF_LINES="${SFS_REVIEW_DIFF_LINES:-180}"
+REVIEW_TARGET_EXCERPT_RADIUS="${SFS_REVIEW_TARGET_EXCERPT_RADIUS:-32}"
+REVIEW_INDEXED_TARGET_MAX="${SFS_REVIEW_INDEXED_TARGET_MAX:-80}"
+REVIEW_SMALL_FILE_EXCERPT_LINES="${SFS_REVIEW_SMALL_FILE_EXCERPT_LINES:-450}"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
@@ -289,6 +292,15 @@ esac
 case "${REVIEW_DIFF_LINES}" in
   ''|*[!0-9]*) REVIEW_DIFF_LINES=180 ;;
 esac
+case "${REVIEW_TARGET_EXCERPT_RADIUS}" in
+  ''|*[!0-9]*) REVIEW_TARGET_EXCERPT_RADIUS=32 ;;
+esac
+case "${REVIEW_INDEXED_TARGET_MAX}" in
+  ''|*[!0-9]*) REVIEW_INDEXED_TARGET_MAX=80 ;;
+esac
+case "${REVIEW_SMALL_FILE_EXCERPT_LINES}" in
+  ''|*[!0-9]*) REVIEW_SMALL_FILE_EXCERPT_LINES=450 ;;
+esac
 if (( REVIEW_FILE_EXCERPT_MAX > 40 )); then
   REVIEW_FILE_EXCERPT_MAX=40
 fi
@@ -297,6 +309,15 @@ if (( REVIEW_FILE_EXCERPT_LINES > 240 )); then
 fi
 if (( REVIEW_DIFF_LINES > 360 )); then
   REVIEW_DIFF_LINES=360
+fi
+if (( REVIEW_TARGET_EXCERPT_RADIUS > 80 )); then
+  REVIEW_TARGET_EXCERPT_RADIUS=80
+fi
+if (( REVIEW_INDEXED_TARGET_MAX > 200 )); then
+  REVIEW_INDEXED_TARGET_MAX=200
+fi
+if (( REVIEW_SMALL_FILE_EXCERPT_LINES > 800 )); then
+  REVIEW_SMALL_FILE_EXCERPT_LINES=800
 fi
 
 # ─────────────────────────────────────────────────────────────────────
@@ -474,23 +495,28 @@ if ! validate_gate_id "${GATE_ID}"; then
 fi
 
 normalize_inferred_executor_value() {
-  local value="$1" token low_value
+  local value="$1" token low_value session_hint
   value="$(printf '%s' "$value" \
     | sed -E 's/[`"*]//g; s/#.*$//; s/^[[:space:]-]+//; s/[[:space:]]+$//')"
   [[ -n "$value" ]] || return 1
   low_value="$(printf '%s\n' "$value" | tr '[:upper:]' '[:lower:]')"
-  case "$value" in
-    *" / "*)
-      return 1
-      ;;
-  esac
   case "$low_value" in
     *unknown*|*"current runtime model"*|*"current-runtime-model"*)
       return 1
       ;;
   esac
   case "$low_value" in
-    *codex*) printf 'codex\n'; return 0 ;;
+    *codex*)
+      session_hint="$(printf '%s\n' "$value" \
+        | sed -nE 's/.*[Ii]n[[:space:]]+this[[:space:]]+([^[:space:],.;]+)[[:space:]]+session.*/\1/p; s/.*same[[:space:]]+([^[:space:],.;]+)[[:space:]]+session.*/\1/p' \
+        | sed -n '1p')"
+      if [[ -n "$session_hint" ]]; then
+        printf 'codex, same %s session\n' "$session_hint"
+      else
+        printf 'codex\n'
+      fi
+      return 0
+      ;;
     *gemini*) printf 'gemini\n'; return 0 ;;
     *claude*) printf 'claude\n'; return 0 ;;
     *human*) printf 'human\n'; return 0 ;;
@@ -510,15 +536,17 @@ infer_generator_executor_from_file() {
     /^#{1,6}[[:space:]]+/ {
       low = tolower($0)
       in_self_validation = (low ~ /self-validation|self validation|cto 구현 메모/)
+      next
     }
     {
       low = tolower($0)
     }
     low ~ /generator_executor[[:space:]]*:/ ||
     low ~ /generator executor[[:space:]]*:/ ||
+    low ~ /generator executor\/tool[[:space:]*]*:/ ||
     low ~ /implementation executor[[:space:]]*:/ ||
     low ~ /implementation tool[[:space:]]*:/ ||
-    low ~ /구현 executor\/tool[[:space:]]*:/ ||
+    low ~ /구현 executor\/tool[[:space:]*]*:/ ||
     low ~ /구현 executor[[:space:]]*:/ ||
     (in_self_validation && low ~ /(generator|implementation|executor|tool|구현|codex|gemini|claude|human)/) {
       line = $0
@@ -657,17 +685,20 @@ indexed_review_evidence_paths() {
     [[ -n "$path" ]] || continue
     path="$(normalize_review_candidate_path "$path" || true)"
     [[ -n "$path" ]] || continue
-    if is_reviewable_project_path "$path"; then
+    if is_reviewable_project_path "$path" && is_auto_review_candidate_path "$path"; then
       printf '%s\n' "$path"
     fi
   done
 }
 
 review_evidence_paths() {
-  {
-    auto_review_evidence_paths
-    indexed_review_evidence_paths
-  } | awk '!seen[$0]++'
+  local indexed
+  indexed="$(indexed_review_evidence_paths || true)"
+  if [[ -n "$indexed" ]]; then
+    printf '%s\n' "$indexed" | awk '!seen[$0]++'
+  else
+    auto_review_evidence_paths | awk '!seen[$0]++'
+  fi
 }
 
 normalize_review_candidate_path() {
@@ -722,6 +753,89 @@ extract_indexed_evidence_paths() {
   done
 }
 
+is_review_path_token() {
+  local token="$1"
+  case "$token" in
+    ./*)
+      token="${token#./}"
+      ;;
+  esac
+  case "$token" in
+    ""|*/)
+      return 1
+      ;;
+  esac
+  case "$token" in
+    src/*|app/*|pages/*|components/*|scripts/*|test/*|tests/*|__tests__/*|public/*|styles/*|lib/*|server/*|client/*|config/*)
+      return 0
+      ;;
+    package.json|vite.config.ts|vite.config.js|vite.config.mjs|tsconfig*.json|playwright.config.ts|playwright.config.js)
+      return 0
+      ;;
+    *.[tT][sS]|*.[tT][sS][xX]|*.[jJ][sS]|*.[jJ][sS][xX]|*.mjs|*.cjs|*.css|*.scss|*.html|*.json|*.yml|*.yaml|*.sh|*.md)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+extract_indexed_evidence_targets_from_file() {
+  local file="$1" raw path lines line_no root
+  [[ -f "$file" ]] || return 0
+  while IFS= read -r raw || [[ -n "$raw" ]]; do
+    lines="$(printf '%s\n' "$raw" | grep -Eo 'line[[:space:]]+[0-9]+' | sed -E 's/line[[:space:]]+//' || true)"
+    [[ -n "$lines" ]] || continue
+    {
+      printf '%s\n' "$raw" | grep -Eo '([.]\/)?(src|app|pages|components|scripts|test|tests|__tests__|public|styles|lib|server|client|config)\/[A-Za-z0-9_.@%+=\/-]+' || true
+      for root in package.json vite.config.ts vite.config.js vite.config.mjs tsconfig.json playwright.config.ts playwright.config.js; do
+        case "$raw" in
+          *"$root"*) printf '%s\n' "$root" ;;
+        esac
+      done
+    } | awk '!seen[$0]++' | while IFS= read -r path; do
+      [[ -n "$path" ]] || continue
+      path="${path#./}"
+      is_review_path_token "$path" || continue
+      while IFS= read -r line_no; do
+        [[ -n "$line_no" ]] || continue
+        printf '%s:%s\n' "$path" "$line_no"
+      done <<< "$lines"
+    done
+  done < "$file"
+}
+
+extract_indexed_evidence_targets() {
+  {
+    extract_indexed_evidence_targets_from_file "${IMPLEMENT_PATH}"
+    extract_indexed_evidence_targets_from_file "${LOG_PATH}"
+  } | while IFS= read -r target; do
+    [[ -n "$target" ]] || continue
+    local path line_no
+    path="${target%:*}"
+    line_no="${target##*:}"
+    case "$line_no" in
+      ''|*[!0-9]*)
+        continue
+        ;;
+    esac
+    path="$(normalize_review_candidate_path "$path" || true)"
+    [[ -n "$path" ]] || continue
+    if is_reviewable_project_path "$path" && is_auto_review_candidate_path "$path"; then
+      printf '%s:%s\n' "$path" "$line_no"
+    fi
+  done | awk '!seen[$0]++'
+}
+
+is_indexed_review_evidence_path() {
+  local needle="$1" path
+  while IFS= read -r path; do
+    [[ "$path" == "$needle" ]] && return 0
+  done < <(indexed_review_evidence_paths || true)
+  return 1
+}
+
 is_ignored_review_path() {
   local path="$1"
   case "$path" in
@@ -764,22 +878,24 @@ is_ignored_review_path() {
 is_auto_review_candidate_path() {
   local path="$1"
   case "$path" in
+    ""|*/)
+      return 1
+      ;;
+  esac
+  case "$path" in
     src/*|app/*|pages/*|components/*|scripts/*|test/*|tests/*|__tests__/*|public/*|styles/*|lib/*|server/*|client/*|config/*)
       return 0
       ;;
     docs/*.md|docs/*/*.md|README.md|CHANGELOG.md)
       return 0
       ;;
-    package.json|vite.config.ts|vite.config.js|vite.config.mjs|vitest.config.ts|vitest.config.js|playwright.config.ts|playwright.config.js)
+    index.html|package.json|vite.config.ts|vite.config.js|vite.config.mjs|vitest.config.ts|vitest.config.js|playwright.config.ts|playwright.config.js)
       return 0
       ;;
     tsconfig.json|tsconfig.*.json|jsconfig.json|eslint.config.js|eslint.config.mjs|prettier.config.js|prettier.config.mjs)
       return 0
       ;;
     Dockerfile|docker-compose.yml|docker-compose.yaml|Makefile)
-      return 0
-      ;;
-    *.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs|*.css|*.scss|*.html|*.json|*.yml|*.yaml|*.sh)
       return 0
       ;;
     *)
@@ -797,10 +913,20 @@ is_reviewable_project_path() {
 }
 
 render_untracked_manifest() {
-  local paths
+  local candidate_paths paths
   printf '\n### untracked file manifest\n\n'
-  paths="$(git ls-files --others --exclude-standard 2>/dev/null \
-    | while IFS= read -r path; do
+  candidate_paths="$(review_evidence_paths || true)"
+  if [[ -n "$candidate_paths" ]]; then
+    paths="$(printf '%s\n' "$candidate_paths" \
+      | while IFS= read -r path; do
+          [[ -n "$path" ]] || continue
+          if git ls-files --others --exclude-standard -- "$path" 2>/dev/null | grep -Fxq "$path"; then
+            printf '%s\n' "$path"
+          fi
+        done || true)"
+  else
+    paths="$(git ls-files --others --exclude-standard 2>/dev/null \
+      | while IFS= read -r path; do
         [[ -n "$path" ]] || continue
         path="$(normalize_review_candidate_path "$path" || true)"
         [[ -n "$path" ]] || continue
@@ -808,6 +934,7 @@ render_untracked_manifest() {
           printf '%s\n' "$path"
         fi
       done || true)"
+  fi
   if [[ -n "$paths" ]]; then
     printf '%s\n' "$paths" | sed -n '1,200p'
   else
@@ -847,8 +974,90 @@ render_review_git_status() {
   fi
 }
 
+render_review_git_diff_stat() {
+  local paths=() path cached unstaged
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    if git ls-files --error-unmatch "$path" >/dev/null 2>&1; then
+      paths+=("$path")
+    fi
+  done < <(review_evidence_paths || true)
+
+  if (( ${#paths[@]} == 0 )); then
+    printf '(no reviewable tracked project diff; untracked sources are represented by manifest/excerpts below)\n'
+    return 0
+  fi
+
+  cached="$(git diff --cached --stat -- "${paths[@]}" 2>/dev/null || true)"
+  unstaged="$(git diff --stat -- "${paths[@]}" 2>/dev/null || true)"
+  if [[ -n "$cached" ]]; then
+    printf '#### staged reviewable diff stat\n\n%s\n' "$cached"
+  fi
+  if [[ -n "$unstaged" ]]; then
+    printf '#### working-tree reviewable diff stat\n\n%s\n' "$unstaged"
+  fi
+  if [[ -z "$cached" && -z "$unstaged" ]]; then
+    printf '(no tracked reviewable project diff; untracked sources are represented by manifest/excerpts below)\n'
+  fi
+}
+
+is_sfs_sprint_artifact_path() {
+  local path="$1"
+  case "$path" in
+    .sfs-local/sprints/*|.sfs-local/decisions/*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+render_sfs_scope_classification() {
+  local system_paths sprint_paths line path
+  printf '\n### SFS/system scope classification\n\n'
+  system_paths="$(git status --porcelain=v1 2>/dev/null | while IFS= read -r line; do
+    [[ -n "$line" ]] || continue
+    path="${line#???}"
+    if [[ "$line" == R* || "$line" == C* ]]; then
+      path="${path##* -> }"
+    fi
+    path="$(normalize_review_candidate_path "$path" || true)"
+    [[ -n "$path" ]] || continue
+    if is_sfs_managed_review_path "$path" && ! is_sfs_sprint_artifact_path "$path"; then
+      printf '%s\n' "$path"
+    fi
+  done | awk '!seen[$0]++' | sed -n '1,120p' || true)"
+  sprint_paths="$(git status --porcelain=v1 2>/dev/null | while IFS= read -r line; do
+    [[ -n "$line" ]] || continue
+    path="${line#???}"
+    if [[ "$line" == R* || "$line" == C* ]]; then
+      path="${path##* -> }"
+    fi
+    path="$(normalize_review_candidate_path "$path" || true)"
+    [[ -n "$path" ]] || continue
+    if is_sfs_sprint_artifact_path "$path"; then
+      printf '%s\n' "$path"
+    fi
+  done | awk '!seen[$0]++' | sed -n '1,120p' || true)"
+
+  printf 'SFS/runtime/adapter files are filtered out of product implementation diffs and should be treated as Solon system state, not as the sprint product slice, unless this sprint explicitly targets SFS itself.\n\n'
+  printf '#### SFS-managed system/runtime changes filtered from product scope\n\n'
+  if [[ -n "$system_paths" ]]; then
+    printf '%s\n' "$system_paths"
+  else
+    printf '(none detected)\n'
+  fi
+  printf '\n#### Sprint evidence artifacts embedded separately\n\n'
+  if [[ -n "$sprint_paths" ]]; then
+    printf '%s\n' "$sprint_paths"
+  else
+    printf '(none detected in git status; current sprint files are still embedded by path below when present)\n'
+  fi
+}
+
 render_review_file_excerpt() {
-  local file="$1" limit="${2:-120}" bytes
+  local file="$1" limit="${2:-120}" bytes line_count
   printf '\n### source excerpt: %s\n\n' "$file"
   if [[ ! -f "$file" ]]; then
     printf '(missing or not a regular file)\n'
@@ -863,10 +1072,52 @@ render_review_file_excerpt() {
     printf '(binary or non-text file skipped; %s bytes)\n' "$bytes"
     return 0
   fi
+  line_count="$(count_file_lines "$file")"
+  if is_indexed_review_evidence_path "$file" && (( line_count > 0 && line_count <= REVIEW_SMALL_FILE_EXCERPT_LINES )); then
+    limit="$line_count"
+    printf '(indexed review target; full file included: %s lines)\n\n' "$line_count"
+  fi
   if (( bytes > 131072 )); then
     printf '(large file: %s bytes; showing first %s lines)\n\n' "$bytes" "$limit"
   fi
   sed -n "1,${limit}p" "$file"
+}
+
+render_review_file_line_excerpt() {
+  local file="$1" line_no="$2" radius="${3:-32}" line_count start end bytes
+  printf '\n### indexed source excerpt: %s around line %s\n\n' "$file" "$line_no"
+  if [[ ! -f "$file" ]]; then
+    printf '(missing or not a regular file)\n'
+    return 0
+  fi
+  bytes="$(wc -c < "$file" 2>/dev/null | tr -d '[:space:]' || printf '0')"
+  if [[ "$bytes" == "0" ]]; then
+    printf '(empty file)\n'
+    return 0
+  fi
+  if ! LC_ALL=C grep -Iq . "$file" 2>/dev/null; then
+    printf '(binary or non-text file skipped; %s bytes)\n' "$bytes"
+    return 0
+  fi
+  line_count="$(count_file_lines "$file")"
+  if (( line_no < 1 )); then
+    line_no=1
+  fi
+  if (( line_count > 0 && line_no > line_count )); then
+    printf '(line %s is outside file length %s; showing tail)\n\n' "$line_no" "$line_count"
+    line_no="$line_count"
+  fi
+  start=$(( line_no - radius ))
+  end=$(( line_no + radius ))
+  if (( start < 1 )); then
+    start=1
+  fi
+  if (( line_count > 0 && end > line_count )); then
+    end="$line_count"
+  fi
+  printf '```text\n'
+  nl -ba "$file" | sed -n "${start},${end}p"
+  printf '```\n'
 }
 
 render_review_file_diff() {
@@ -935,6 +1186,29 @@ render_review_file_excerpts() {
   done
 }
 
+render_indexed_target_source_excerpts() {
+  local radius="${REVIEW_TARGET_EXCERPT_RADIUS}" max="${REVIEW_INDEXED_TARGET_MAX}" count=0 target path line_no targets
+  printf '\n### indexed target source excerpts\n\n'
+  targets="$(extract_indexed_evidence_targets || true)"
+  if [[ -z "$targets" ]]; then
+    printf '(no line-targeted source excerpts found in implement.md/log.md index)\n'
+    return 0
+  fi
+  printf '%s\n' "$targets" | while IFS= read -r target; do
+    [[ -n "$target" ]] || continue
+    count=$((count + 1))
+    if (( count > max )); then
+      if (( count == max + 1 )); then
+        printf '\n(indexed target excerpt limit reached: showing first %s targets)\n' "$max"
+      fi
+      continue
+    fi
+    path="${target%:*}"
+    line_no="${target##*:}"
+    render_review_file_line_excerpt "$path" "$line_no" "$radius"
+  done
+}
+
 render_evidence_bundle() {
   printf '## Embedded Evidence Bundle\n\n'
   printf 'The following evidence was collected by SFS before invoking the executor. Review this embedded evidence first; do not assume your CLI has project file/tool access. If evidence is insufficient, return partial/fail and list the missing evidence instead of calling unsupported tools.\n\n'
@@ -942,8 +1216,10 @@ render_evidence_bundle() {
   printf '### git status --short (review-filtered)\n\n'
   render_review_git_status
 
-  printf '\n### git diff --stat\n\n'
-  git diff --stat 2>/dev/null || printf '(git diff unavailable)\n'
+  printf '\n### git diff --stat (review-filtered)\n\n'
+  render_review_git_diff_stat
+
+  render_sfs_scope_classification
 
   render_untracked_manifest
   render_reviewable_file_manifest
@@ -953,6 +1229,7 @@ render_evidence_bundle() {
   render_evidence_file "${IMPLEMENT_PATH}" 420
   render_evidence_file "${LOG_PATH}" 260
   render_review_file_diffs
+  render_indexed_target_source_excerpts
   render_review_file_excerpts
   printf '\n### review.md note\n\n'
   printf 'Only the first 80 lines of review.md are embedded to prevent recursive prompt growth. Full CPO prompts live under .sfs-local/tmp/review-prompts/.\n'
@@ -1062,6 +1339,7 @@ Self-validation policy:
 - Prefer independent review evidence from Codex/Gemini/another agent instance when implementation was produced by Claude.
 - Separate implementation quality findings from evidence-bundle gaps. If the embedded bundle lacks required implementation files, build/smoke output, or untracked source excerpts, say that explicitly as an evidence packaging gap.
 - Treat File excerpt index paths as first-class review targets. The bundle should include bounded source diffs and excerpts for those paths when files are available.
+- Treat SFS/runtime/adapter files listed under SFS/system scope classification as Solon system state, not product implementation scope, unless this sprint explicitly targets SFS itself.
 
 Review the embedded evidence below. Do not rely on executor-specific tools being available.
 

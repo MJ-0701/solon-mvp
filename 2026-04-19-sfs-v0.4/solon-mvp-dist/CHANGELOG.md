@@ -1,5 +1,16 @@
 ## [Unreleased]
 
+## [0.5.71-product] - 2026-05-02
+
+### Fixed
+
+- **Targeted G4 code-review evidence** — `/sfs review` now follows
+  `implement.md` file excerpt index line numbers into bounded source snippets,
+  includes small indexed review targets in full, keeps indexed files ahead of
+  auto-discovered files, classifies SFS/runtime adapter changes outside the
+  product implementation scope, and preserves same-session generator executor
+  labels such as `codex, same study-note session`.
+
 ## [0.5.70-product] - 2026-05-02
 
 ### Fixed
