@@ -9,18 +9,22 @@ created_at: ""       # filled by /sfs start
 last_touched_at: ""  # filled by /sfs review (auto, ISO8601 + tz)
 evaluator_role: CPO
 evaluator_persona: ".sfs-local/personas/cpo-evaluator.md"
+review_lens: ""         # auto | artifact | code | docs | strategy | design | taxonomy | qa | ops | release
+review_lens_source: ""  # auto | explicit
 evaluator_executor: ""  # filled by /sfs review --executor <profile>
 generator_executor: ""  # optional, filled by /sfs review --generator <profile>
 ---
 
 # Review — <sprint title>
 
-> Sprint **CPO Evaluator review** 산출물. 사용자 표기는 Gate 1~7 이고, `gate_id` 는
+> Sprint **CPO Evaluator artifact acceptance review** 산출물. 사용자 표기는 Gate 1~7 이고, `gate_id` 는
 > 오래된 events/frontmatter 호환을 위해 runtime 이 내부적으로 관리한다.
 > 각 gate review 마다 `.sfs-local/events.jsonl` 의 `review_open` event append.
 > SSoT: `gates.md §1` (7-Gate enum) + `05-gate-framework.md §5.1` (매트릭스).
 > 동일 sprint 안에서 Gate 4~6 review 가 여러 번 발생할 경우 본 파일에 §2 섹션을 추가 append.
 > 자체검증 방지: CTO Generator 와 CPO Evaluator 는 같은 산출물을 같은 agent instance 가 통과시키지 않는다.
+> `review_lens` 는 runtime 이 자동 추론한다. 코드 변경이면 code review 가 되지만,
+> 문서/전략/디자인/릴리즈/운영/택소노미 작업은 해당 산출물 수용성 검토로 본다.
 > 생명주기: review 중에는 verdict evidence 를 기록하되, close 후 최종 verdict/action 만
 > `report.md` 에 남기고 본 파일은 compact stub 로 줄인다.
 
@@ -31,6 +35,7 @@ generator_executor: ""  # optional, filled by /sfs review --generator <profile>
 - **gate label**: Gate 1 (Intake) / Gate 2 (Brainstorm) / Gate 3 (Plan) / Gate 4 (Design) / Gate 5 (Handoff) / Gate 6 (Review) / Gate 7 (Retro)
 - **gate_id**: 위 label 의 마지막 내부 id 1개로 고정
 - **scope**: 본 review 가 평가하는 산출물 / 변경 범위 / 검증 방법
+- **review lens**: auto / artifact / code / docs / strategy / design / taxonomy / qa / ops / release
 - **trigger**: `/sfs review --gate <1..7>` 호출 시각
 - **CPO persona**: `.sfs-local/personas/cpo-evaluator.md`
 - **review executor/tool**: codex / gemini / claude / custom
@@ -50,7 +55,7 @@ generator_executor: ""  # optional, filled by /sfs review --generator <profile>
 - [ ] 핸드오프 받을 사람이 추가 컨텍스트 없이 진행 가능
 - [ ] verdict ∈ { pass, fail } only (partial 미사용 — `gates.md §2`)
 
-### Gate 6 — Review (해당 시, 5-Axis CPO)
+### Gate 6 — Review (해당 시, lens 기반 CPO acceptance)
 
 - [ ] 설계 vs 구현 gap (정량)
 - [ ] Gate 2/3 공유 design concept 와 실제 산출물이 어긋나지 않음
@@ -58,6 +63,7 @@ generator_executor: ""  # optional, filled by /sfs review --generator <profile>
 - [ ] feedback evidence 가 AC 의 `verify by ...` 와 연결됨
 - [ ] public interface / artifact boundary 와 gray-box 위임 경계가 지켜짐
 - [ ] 5-Axis (사용자가치 / 안정성 / 일정 / 비용 / 학습) 점수
+- [ ] review lens 가 산출물 종류와 맞음 (code 는 코드 변경일 때만, 그 외는 artifact acceptance)
 - [ ] partial 시 잔여 작업 → 다음 sprint 또는 별도 WU 로 분기
 
 ## §3. Verdict
@@ -66,6 +72,7 @@ generator_executor: ""  # optional, filled by /sfs review --generator <profile>
 - **근거 (정량)**: …
 - **근거 (정성)**: …
 - **partial 시 잔여 항목**: …
+- **next action**: …
 
 ## §4. 다음 액션
 

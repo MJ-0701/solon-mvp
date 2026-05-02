@@ -1,3 +1,16 @@
+## [0.5.79-product] - 2026-05-02
+
+### Changed
+
+- **Review lens routing** — `sfs review` now keeps the same user-facing command
+  while automatically selecting an artifact acceptance lens (`code`, `docs`,
+  `strategy`, `design`, `taxonomy`, `qa`, `ops`, `release`, or generic
+  `artifact`) from sprint evidence and changed artifact paths. `--lens` remains
+  available only as an override when inference is wrong.
+- **Review next action contract** — CPO prompts now ask for an explicit next
+  action alongside verdict/findings, and docs clarify that code review is only
+  the `code` lens, not the default meaning of review.
+
 ## [0.5.78-product] - 2026-05-02
 
 ### Fixed

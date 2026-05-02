@@ -71,7 +71,7 @@ fi
 # ─────────────────────────────────────────────────────────────────────
 usage_review() {
   cat <<'EOF'
-Usage: /sfs review [--gate <1..7>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
+Usage: /sfs review [--gate <1..7>] [--lens <auto|artifact|code|docs|strategy|design|taxonomy|qa|ops|release>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
 
 Open the active sprint's review.md as the CPO Evaluator review document.
   - --gate <n>    gate number, 1..7. Reports display this as Gate 1..7:
@@ -79,7 +79,15 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                   5 Handoff, 6 Review, 7 Retro.
                   Older ids are still accepted for compatibility.
                   If omitted, inferred from the most recent `review_open`
-                  event in events.jsonl. If inference fails, exit 6.
+                  event in events.jsonl. If no review history exists, SFS
+                  defaults to Gate 6 when implementation/artifact evidence is
+                  present, or Gate 3 when only plan evidence is present.
+  - --lens <name> review lens. Default: auto.
+                  auto chooses from artifact, code, docs, strategy, design,
+                  taxonomy, qa, ops, release using plan/implement/log text and
+                  changed artifact paths. Use an explicit lens only to override
+                  a wrong inference. `code` is one lens, not the default meaning
+                  of review.
   - --executor <profile|cmd>
                   CPO review tool/profile. Default: $SFS_REVIEW_EXECUTOR or codex.
                   Typical: codex, gemini, claude, or a custom command.
@@ -149,6 +157,7 @@ EOF
 # CLI parse (--gate <1..7> | --gate=<1..7> | -h | --help)
 # ─────────────────────────────────────────────────────────────────────
 GATE_ID=""
+REVIEW_LENS="${SFS_REVIEW_LENS:-auto}"
 EVALUATOR_EXECUTOR="${SFS_REVIEW_EXECUTOR:-codex}"
 GENERATOR_EXECUTOR="${SFS_GENERATOR_EXECUTOR:-unknown}"
 PERSONA_PATH="$(sfs_persona_file cpo-evaluator)"
@@ -182,6 +191,18 @@ while [[ $# -gt 0 ]]; do
       ;;
     --gate=*)
       GATE_ID="${1#--gate=}"
+      shift
+      ;;
+    --lens)
+      if [[ $# -lt 2 ]]; then
+        echo "--lens requires a value" >&2
+        exit "${SFS_EXIT_BADCLI}"
+      fi
+      REVIEW_LENS="$2"
+      shift 2
+      ;;
+    --lens=*)
+      REVIEW_LENS="${1#--lens=}"
       shift
       ;;
     --executor)
@@ -280,6 +301,31 @@ case "${ALLOW_EMPTY_REVIEW}" in
   true|1|yes|YES|y|Y) ALLOW_EMPTY_REVIEW=true ;;
   *) ALLOW_EMPTY_REVIEW=false ;;
 esac
+normalize_review_lens_value() {
+  local lens="$1"
+  lens="$(printf '%s\n' "$lens" | tr '[:upper:]' '[:lower:]')"
+  case "$lens" in
+    auto|"") printf 'auto\n' ;;
+    artifact|outcome|acceptance|general) printf 'artifact\n' ;;
+    code|source|implementation) printf 'code\n' ;;
+    doc|docs|documentation) printf 'docs\n' ;;
+    strategy|product|pm|planning) printf 'strategy\n' ;;
+    design|ux|ui) printf 'design\n' ;;
+    taxonomy|domain|glossary|naming) printf 'taxonomy\n' ;;
+    qa|test|tests|verification) printf 'qa\n' ;;
+    ops|infra|runbook|operations) printf 'ops\n' ;;
+    release|deploy|deployment) printf 'release\n' ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+_normalized_lens="$(normalize_review_lens_value "${REVIEW_LENS}" || true)"
+if [[ -z "${_normalized_lens}" ]]; then
+  echo "unknown review lens ${REVIEW_LENS}, valid: auto, artifact, code, docs, strategy, design, taxonomy, qa, ops, release" >&2
+  exit "${SFS_EXIT_BADCLI}"
+fi
+REVIEW_LENS="${_normalized_lens}"
 case "${REVIEW_MD_EXCERPT_LINES}" in
   ''|*[!0-9]*)
     echo "invalid SFS_REVIEW_MD_EXCERPT_LINES: ${REVIEW_MD_EXCERPT_LINES} (expected 0..80)" >&2
@@ -366,6 +412,179 @@ IMPLEMENT_PATH="${SPRINT_DIR}/implement.md"
 PLAN_PATH="${SPRINT_DIR}/plan.md"
 LOG_PATH="${SPRINT_DIR}/log.md"
 BRAINSTORM_PATH="${SPRINT_DIR}/brainstorm.md"
+
+review_signal_text() {
+  for file in "${IMPLEMENT_PATH}" "${PLAN_PATH}" "${LOG_PATH}" "${BRAINSTORM_PATH}"; do
+    [[ -f "$file" ]] && sed -n '1,260p' "$file"
+  done 2>/dev/null || true
+}
+
+review_changed_paths_for_lens() {
+  git status --porcelain=v1 2>/dev/null | while IFS= read -r line; do
+    [[ -n "$line" ]] || continue
+    local path
+    path="${line#???}"
+    case "$line" in
+      R*|C*) path="${path##* -> }" ;;
+    esac
+    path="${path#./}"
+    case "$path" in
+      .sfs-local|.sfs-local/*|.claude/commands/sfs.md|.claude/skills/sfs|.claude/skills/sfs/*|.gemini/commands/sfs.toml|.agents/skills/sfs/SKILL.md|.codex/prompts/sfs.md|SFS.md|CLAUDE.md|AGENTS.md|GEMINI.md)
+        continue
+        ;;
+    esac
+    [[ -n "$path" ]] && printf '%s\n' "$path"
+  done
+}
+
+review_path_lens_signal() {
+  local paths="$1"
+  case "$paths" in
+    *VERSION*|*CHANGELOG.md*|*packaging/*|*.github/*|*install.sh*|*upgrade.sh*|*uninstall.sh*|*bin/sfs*|*bin/sfs.ps1*|*bin/sfs.cmd*)
+      printf 'release\n'
+      return 0
+      ;;
+  esac
+  case "$paths" in
+    *Dockerfile*|*docker-compose*|*.github/workflows/*|*runbook*|*infra*|*deploy*|*.env.example*|*k8s*|*terraform*|*.tf)
+      printf 'ops\n'
+      return 0
+      ;;
+  esac
+  case "$paths" in
+    *figma*|*design*|*wireframe*|*ux*|*ui*|*component*|*.css|*.scss|*.html)
+      printf 'design\n'
+      return 0
+      ;;
+  esac
+  case "$paths" in
+    *glossary*|*taxonomy*|*schema*|*domain*|*enum*|*naming*)
+      printf 'taxonomy\n'
+      return 0
+      ;;
+  esac
+  case "$paths" in
+    *roadmap*|*pricing*|*strategy*|*prd*|*plan.md|*decision*)
+      printf 'strategy\n'
+      return 0
+      ;;
+  esac
+  case "$paths" in
+    *test*|*spec*|*playwright*|*cypress*|*vitest*|*jest*|*smoke*)
+      printf 'qa\n'
+      return 0
+      ;;
+  esac
+  case "$paths" in
+    *.ts|*.tsx|*.js|*.jsx|*.py|*.java|*.kt|*.go|*.rs|*.rb|*.php|*.cs|*.swift|*.sql|*src/*|*app/*|*lib/*)
+      printf 'code\n'
+      return 0
+      ;;
+  esac
+  case "$paths" in
+    *.md|*.mdx|*.rst|*.adoc|*docs/*|*README*)
+      printf 'docs\n'
+      return 0
+      ;;
+  esac
+  return 1
+}
+
+infer_review_lens() {
+  local text paths lowered path_signal
+  text="$(review_signal_text)"
+  lowered="$(printf '%s\n' "$text" | tr '[:upper:]' '[:lower:]')"
+  paths="$(review_changed_paths_for_lens | tr '\n' ' ' || true)"
+  path_signal="$(review_path_lens_signal "$paths" || true)"
+
+  if [[ -n "$path_signal" ]]; then
+    printf '%s\n' "$path_signal"
+    return 0
+  fi
+  case "$lowered" in
+    *"artifact types touched"*release*|*"release readiness"*|*"homebrew"*|*"scoop"*)
+      printf 'release\n'
+      return 0
+      ;;
+    *"artifact types touched"*infra*|*"runbook"*|*"rollback"*|*"observability"*|*"secret"*|*"ops"*)
+      printf 'ops\n'
+      return 0
+      ;;
+    *"artifact types touched"*design*|*"ux"*|*"ui"*|*"figma"*|*"wireframe"*)
+      printf 'design\n'
+      return 0
+      ;;
+    *"artifact types touched"*taxonomy*|*"glossary"*|*"domain terms touched"*|*"ubiquitous language"*|*"용어"*)
+      printf 'taxonomy\n'
+      return 0
+      ;;
+    *"artifact types touched"*strategy*|*"roadmap"*|*"pricing"*|*"positioning"*|*"prd"*|*"전략"*)
+      printf 'strategy\n'
+      return 0
+      ;;
+    *"artifact types touched"*qa*|*"qa / verification evidence"*|*"test plan"*|*"테스트"*)
+      printf 'qa\n'
+      return 0
+      ;;
+    *"artifact types touched"*docs*|*"docs / decisions"*|*"documentation"*|*"문서"*)
+      printf 'docs\n'
+      return 0
+      ;;
+  esac
+  if [[ "$lowered" == *"code"* || "$lowered" == *"source"* ]]; then
+    printf 'code\n'
+    return 0
+  fi
+  printf 'artifact\n'
+}
+
+review_lens_label() {
+  case "$1" in
+    code) printf 'code review lens' ;;
+    docs) printf 'documentation acceptance lens' ;;
+    strategy) printf 'strategy/product acceptance lens' ;;
+    design) printf 'design/UX acceptance lens' ;;
+    taxonomy) printf 'taxonomy/domain-language acceptance lens' ;;
+    qa) printf 'QA/verification acceptance lens' ;;
+    ops) printf 'ops/infra readiness lens' ;;
+    release) printf 'release readiness lens' ;;
+    *) printf 'artifact acceptance lens' ;;
+  esac
+}
+
+infer_default_review_gate_id() {
+  local inferred event_hit
+  inferred="$(infer_last_gate_id || true)"
+  if [[ -n "$inferred" ]]; then
+    printf '%s\n' "$inferred"
+    return 0
+  fi
+  if [[ -f "${SFS_EVENTS_FILE}" ]]; then
+    event_hit="$(grep -E '"type":"implement_open"' "${SFS_EVENTS_FILE}" 2>/dev/null \
+      | grep -F "\"sprint_id\":\"${SPRINT_ID}\"" \
+      | sed -n '1p' || true)"
+    if [[ -n "$event_hit" ]]; then
+      printf 'G4\n'
+      return 0
+    fi
+    event_hit="$(grep -E '"type":"plan_open|brainstorm_open|decision_created"' "${SFS_EVENTS_FILE}" 2>/dev/null \
+      | grep -F "\"sprint_id\":\"${SPRINT_ID}\"" \
+      | sed -n '1p' || true)"
+    if [[ -n "$event_hit" ]]; then
+      printf 'G1\n'
+      return 0
+    fi
+  fi
+  if [[ -s "${IMPLEMENT_PATH}" ]] && grep -Eiq 'ready-for-review|Ready for review\?\*\*[[:space:]]*yes|Build output|Smoke output|Verification|Non-code artifact review evidence|Artifact Changes Made|검증|산출물' "${IMPLEMENT_PATH}"; then
+    printf 'G4\n'
+    return 0
+  fi
+  if [[ -s "${PLAN_PATH}" ]]; then
+    printf 'G1\n'
+    return 0
+  fi
+  return 1
+}
 
 existing_result_excerpt() {
   local file="$1" limit="${2:-80}"
@@ -505,10 +724,10 @@ fi
 # Resolve gate id (either --gate <1..7> or infer from events.jsonl)
 # ─────────────────────────────────────────────────────────────────────
 if [[ -z "${GATE_ID}" ]]; then
-  GATE_ID="$(infer_last_gate_id)"
+  GATE_ID="$(infer_default_review_gate_id || true)"
 fi
 if [[ -z "${GATE_ID}" ]]; then
-  echo "gate number required: --gate <1..7>, valid: $(sfs_gate_valid_display_list)" >&2
+  echo "gate number required: --gate <1..7>, valid: $(sfs_gate_valid_display_list). SFS can infer it after /sfs plan or /sfs implement evidence exists." >&2
   exit "${SFS_EXIT_GATE}"
 fi
 _normalized_gate_id="$(sfs_normalize_gate_id "${GATE_ID}" || true)"
@@ -520,6 +739,12 @@ GATE_ID="${_normalized_gate_id}"
 GATE_DISPLAY="$(sfs_gate_display_label "${GATE_ID}")"
 GATE_NUMBER="$(sfs_gate_number "${GATE_ID}")"
 GATE_ARTIFACT_ID="gate${GATE_NUMBER}"
+REVIEW_LENS_SOURCE="explicit"
+if [[ "${REVIEW_LENS}" == "auto" ]]; then
+  REVIEW_LENS="$(infer_review_lens)"
+  REVIEW_LENS_SOURCE="auto"
+fi
+REVIEW_LENS_LABEL="$(review_lens_label "${REVIEW_LENS}")"
 
 normalize_inferred_executor_value() {
   local value="$1" token low_value session_hint
@@ -639,6 +864,14 @@ if ! update_frontmatter "${REVIEW_PATH}" "evaluator_role" "CPO" 2>/dev/null; the
   exit "${SFS_EXIT_PERM}"
 fi
 if ! update_frontmatter "${REVIEW_PATH}" "evaluator_persona" "\"${PERSONA_PATH//\"/\\\"}\"" 2>/dev/null; then
+  echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
+  exit "${SFS_EXIT_PERM}"
+fi
+if ! update_frontmatter "${REVIEW_PATH}" "review_lens" "\"${REVIEW_LENS//\"/\\\"}\"" 2>/dev/null; then
+  echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
+  exit "${SFS_EXIT_PERM}"
+fi
+if ! update_frontmatter "${REVIEW_PATH}" "review_lens_source" "\"${REVIEW_LENS_SOURCE//\"/\\\"}\"" 2>/dev/null; then
   echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
   exit "${SFS_EXIT_PERM}"
 fi
@@ -1058,18 +1291,18 @@ render_untracked_manifest() {
   if [[ -n "$paths" ]]; then
     printf '%s\n' "$paths" | sed -n '1,200p'
   else
-    printf '(no untracked project implementation files detected)\n'
+    printf '(no untracked project artifact/source files detected)\n'
   fi
 }
 
 render_reviewable_file_manifest() {
   local paths
-  printf '\n### reviewable implementation file manifest\n\n'
+  printf '\n### reviewable artifact/source file manifest\n\n'
   paths="$(all_reviewable_evidence_paths || true)"
   if [[ -n "$paths" ]]; then
     printf '%s\n' "$paths" | sed -n '1,200p'
   else
-    printf '(no project implementation files detected)\n'
+    printf '(no project artifact/source files detected)\n'
   fi
 }
 
@@ -1081,7 +1314,7 @@ render_excerpt_priority_manifest() {
   if [[ -n "$paths" ]]; then
     printf '%s\n' "$paths" | sed -n '1,200p'
   else
-    printf '(no project implementation files detected)\n'
+    printf '(no project artifact/source files detected)\n'
   fi
 }
 
@@ -1116,7 +1349,7 @@ render_review_git_diff_stat() {
   done < <(review_evidence_paths || true)
 
   if (( ${#paths[@]} == 0 )); then
-    printf '(no reviewable tracked project diff; untracked sources are represented by manifest/excerpts below)\n'
+    printf '(no reviewable tracked project diff; untracked artifacts/sources are represented by manifest/excerpts below)\n'
     return 0
   fi
 
@@ -1129,7 +1362,7 @@ render_review_git_diff_stat() {
     printf '#### working-tree reviewable diff stat\n\n%s\n' "$unstaged"
   fi
   if [[ -z "$cached" && -z "$unstaged" ]]; then
-    printf '(no tracked reviewable project diff; untracked sources are represented by manifest/excerpts below)\n'
+    printf '(no tracked reviewable project diff; untracked artifacts/sources are represented by manifest/excerpts below)\n'
   fi
 }
 
@@ -1189,7 +1422,7 @@ render_sfs_scope_classification() {
     fi
   done | awk '!seen[$0]++' | sed -n '1,120p' || true)"
 
-  printf 'SFS/runtime/adapter files are filtered out of product implementation diffs and should be treated as Solon system state, not as the sprint product slice, unless this sprint explicitly targets SFS itself.\n\n'
+  printf 'SFS/runtime/adapter files are filtered out of product artifact/source diffs and should be treated as Solon system state, not as the sprint product slice, unless this sprint explicitly targets SFS itself.\n\n'
   printf '#### SFS-managed system/runtime changes filtered from product scope\n\n'
   if [[ -n "$system_paths" ]]; then
     printf '%s\n' "$system_paths"
@@ -1377,10 +1610,10 @@ render_review_file_diff() {
 
 render_review_file_diffs() {
   local max="${REVIEW_FILE_EXCERPT_MAX}" lines="${REVIEW_DIFF_LINES}" count=0 path paths
-  printf '\n### bounded source diffs for reviewable files\n\n'
+  printf '\n### bounded artifact/source diffs for reviewable files\n\n'
   paths="$(review_excerpt_priority_paths || true)"
   if [[ -z "$paths" ]]; then
-    printf '(no project implementation files detected)\n'
+    printf '(no project artifact/source files detected)\n'
     return 0
   fi
   printf '%s\n' "$paths" | while IFS= read -r path; do
@@ -1398,10 +1631,10 @@ render_review_file_diffs() {
 
 render_review_file_excerpts() {
   local max="${REVIEW_FILE_EXCERPT_MAX}" lines="${REVIEW_FILE_EXCERPT_LINES}" count=0 path paths
-  printf '\n### bounded source excerpts for reviewable files\n\n'
+  printf '\n### bounded artifact/source excerpts for reviewable files\n\n'
   paths="$(review_excerpt_priority_paths || true)"
   if [[ -z "$paths" ]]; then
-    printf '(no project implementation files detected)\n'
+    printf '(no project artifact/source files detected)\n'
     return 0
   fi
   printf '%s\n' "$paths" | while IFS= read -r path; do
@@ -1420,7 +1653,7 @@ render_review_file_excerpts() {
 render_first_class_review_file_excerpts() {
   local max="${REVIEW_FIRST_CLASS_EXCERPT_MAX}" lines="${REVIEW_FILE_EXCERPT_LINES}" count=0 path paths
   printf '\n### declared first-class source/config excerpts\n\n'
-  printf 'Declared implement.md/plan.md/log.md source/config targets are included here before the generic first-N excerpt cap is applied. Build outputs, generated dist/build folders, SFS runtime files, examples, fixtures, and sample data are not first-class review excerpts.\n\n'
+  printf 'Declared implement.md/plan.md/log.md artifact/source/config targets are included here before the generic first-N excerpt cap is applied. Build outputs, generated dist/build folders, SFS runtime files, examples, fixtures, and sample data are not first-class review excerpts.\n\n'
   paths="$(first_class_review_evidence_paths || true)"
   if [[ -z "$paths" ]]; then
     printf '(no first-class source/config targets detected)\n'
@@ -1571,6 +1804,86 @@ has_review_items() {
   return 1
 }
 
+render_lens_guidance() {
+  cat <<EOF
+Review lens: ${REVIEW_LENS} (${REVIEW_LENS_LABEL}; source=${REVIEW_LENS_SOURCE})
+
+Lens policy:
+- sfs review is an artifact acceptance review. Code review is only the
+  code lens, not the default meaning of review.
+- Judge the produced artifact against the CEO plan, Gate 2/3 contract, evidence,
+  user value, scope, risk, and next action.
+- Do not force source-code findings when the selected lens is docs, strategy,
+  design, taxonomy, QA, ops, release, or generic artifact acceptance.
+
+Lens-specific checklist:
+EOF
+  case "${REVIEW_LENS}" in
+    code)
+      cat <<'EOF'
+- Check correctness, regressions, failure paths, interfaces, tests, and maintainability.
+- Use source diffs/excerpts as first-class evidence.
+EOF
+      ;;
+    docs)
+      cat <<'EOF'
+- Check whether the document is accurate, complete enough, navigable, and consistent with project terminology.
+- Treat unclear audience, stale instructions, missing examples, or misleading next steps as findings.
+EOF
+      ;;
+    strategy)
+      cat <<'EOF'
+- Check product intent, trade-offs, priority, non-goals, stakeholder/user impact, and decision clarity.
+- Treat unsupported assumptions or vague success metrics as findings.
+EOF
+      ;;
+    design)
+      cat <<'EOF'
+- Check interaction clarity, UX states, accessibility, design-system fit, and handoff completeness.
+- Treat visual or flow ambiguity as acceptance risk, even without code defects.
+EOF
+      ;;
+    taxonomy)
+      cat <<'EOF'
+- Check naming, glossary consistency, state/enum boundaries, aliases, schema implications, and migration notes.
+- Treat term drift as a product risk, not a cosmetic issue.
+EOF
+      ;;
+    qa)
+      cat <<'EOF'
+- Check AC-linked verification, regression coverage, boundary cases, evidence quality, and release confidence.
+- Treat missing reproducible checks as an evidence gap.
+EOF
+      ;;
+    ops)
+      cat <<'EOF'
+- Check deployability, secrets hygiene, rollback, observability, runbook clarity, and operational blast radius.
+- Treat missing recovery or environment evidence as an acceptance risk.
+EOF
+      ;;
+    release)
+      cat <<'EOF'
+- Check versioning, changelog clarity, packaged files, install/upgrade paths, Homebrew/Scoop or channel readiness, and rollback notes.
+- Treat channel drift or unverifiable install freshness as blocking release evidence.
+EOF
+      ;;
+    *)
+      cat <<'EOF'
+- Check the artifact's fitness for purpose, evidence, scope control, terminology, boundaries, and handoff clarity.
+- If the artifact type is unclear, return partial and request the smallest missing evidence.
+EOF
+      ;;
+  esac
+  cat <<'EOF'
+
+Next-action policy:
+- `pass`: name the close path, usually `/sfs report` then `/sfs retro --close`.
+- `partial`: name the smallest rework slice and whether to rerun `/sfs review`.
+- `fail`: name whether to return to `/sfs plan`, redo implementation, or escalate to the user.
+
+EOF
+}
+
 render_cpo_prompt() {
   local persona_note
   if [[ -f "${PERSONA_PATH}" ]]; then
@@ -1584,6 +1897,7 @@ You are the Solon CPO Evaluator.
 ${persona_note}
 
 Review gate: ${GATE_DISPLAY}
+Review lens: ${REVIEW_LENS} (${REVIEW_LENS_LABEL}; source=${REVIEW_LENS_SOURCE})
 Sprint: ${SPRINT_ID}
 Generator executor/tool: ${GENERATOR_EXECUTOR}
 Evaluator executor/tool: ${EVALUATOR_EXECUTOR}
@@ -1592,22 +1906,25 @@ Self-validation policy:
 - Do not rubber-stamp CTO Generator output.
 - If this review is running in the same tool/session that generated the implementation, explicitly call that out as a risk.
 - Prefer independent review evidence from Codex/Gemini/another agent instance when implementation was produced by Claude.
-- Treat same-tool review risk as review_independence_risk: warning unless the evidence proves a concrete product or evidence-bundle defect. Do not make same-tool risk the sole blocker for implementation quality.
-- Separate implementation quality findings from evidence-bundle gaps. If the embedded bundle lacks required implementation files, build/smoke output, or untracked source excerpts, say that explicitly as an evidence packaging gap.
+- Treat same-tool review risk as review_independence_risk: warning unless the evidence proves a concrete product or evidence-bundle defect. Do not make same-tool risk the sole blocker for artifact quality.
+- Separate artifact quality findings from evidence-bundle gaps. If the embedded bundle lacks required artifact files, acceptance evidence, build/smoke output, or source excerpts needed for this lens, say that explicitly as an evidence packaging gap.
 - Treat File excerpt index paths as first-class review targets. The bundle should include bounded source diffs and excerpts for those paths when files are available.
-- Treat the "declared first-class source/config excerpts" section as the primary implementation source evidence; the generic first-N excerpt cap should not hide declared source/config targets.
+- Treat the "declared first-class source/config excerpts" section as the primary artifact/source/config evidence; the generic first-N excerpt cap should not hide declared source/config targets.
 - Treat SFS/runtime/adapter files listed under SFS/system scope classification as Solon system state, not product implementation scope, unless this sprint explicitly targets SFS itself.
+- Code review is only the code lens. For every other lens, review the artifact/outcome without inventing code-level findings.
 
-Review the embedded evidence below. Do not rely on executor-specific tools being available.
+Review the lens guidance and embedded evidence below. Do not rely on executor-specific tools being available.
 
 EOF
+  render_lens_guidance
   render_evidence_bundle
   cat <<'EOF'
 
 Return exactly this shape:
 Verdict: pass | partial | fail
+Review lens: <lens>
 Review independence risk: none | warning | blocking
-Implementation quality verdict:
+Artifact quality verdict:
 - ...
 Evidence bundle verdict:
 - ...
@@ -1618,6 +1935,8 @@ Evidence gaps:
 Findings:
 - ...
 Required CTO actions:
+- ...
+Next action:
 - ...
 Final recommendation:
 - ...
@@ -1784,8 +2103,10 @@ if [[ "${RUN_REVIEW}" == "true" && "${ALLOW_EMPTY_REVIEW}" != "true" ]] && ! has
   _esc_eval="${_esc_eval//\"/\\\"}"
   _esc_gen="${GENERATOR_EXECUTOR//\\/\\\\}"
   _esc_gen="${_esc_gen//\"/\\\"}"
+  _esc_lens="${REVIEW_LENS//\\/\\\\}"
+  _esc_lens="${_esc_lens//\"/\\\"}"
   append_event "review_skip" \
-    "{\"sprint_id\":\"${_esc_sprint}\",\"gate_id\":\"${_esc_gate}\",\"path\":\"${_esc_path}\",\"evaluator_role\":\"CPO\",\"evaluator_executor\":\"${_esc_eval}\",\"generator_executor\":\"${_esc_gen}\",\"reason\":\"no_review_items\"}" \
+    "{\"sprint_id\":\"${_esc_sprint}\",\"gate_id\":\"${_esc_gate}\",\"path\":\"${_esc_path}\",\"review_lens\":\"${_esc_lens}\",\"evaluator_role\":\"CPO\",\"evaluator_executor\":\"${_esc_eval}\",\"generator_executor\":\"${_esc_gen}\",\"reason\":\"no_review_items\"}" \
     2>/dev/null || {
       echo "permission denied appending event to ${SFS_EVENTS_FILE}" >&2
       exit "${SFS_EXIT_PERM}"
@@ -1793,9 +2114,9 @@ if [[ "${RUN_REVIEW}" == "true" && "${ALLOW_EMPTY_REVIEW}" != "true" ]] && ! has
 
   _probe_executor="$(normalize_executor_profile "${EVALUATOR_EXECUTOR}")"
   if [[ "${_probe_executor}" == "custom" ]]; then
-    echo "리뷰할 항목이 없습니다: gate ${GATE_DISPLAY} | executor ${EVALUATOR_EXECUTOR} | use --allow-empty to force a custom executor"
+    echo "리뷰할 항목이 없습니다: gate ${GATE_DISPLAY} | lens ${REVIEW_LENS} (${REVIEW_LENS_SOURCE}) | executor ${EVALUATOR_EXECUTOR} | use --allow-empty to force a custom executor"
   else
-    echo "리뷰할 항목이 없습니다: gate ${GATE_DISPLAY} | executor ${EVALUATOR_EXECUTOR} | bridge test: /sfs auth probe --executor ${_probe_executor}"
+    echo "리뷰할 항목이 없습니다: gate ${GATE_DISPLAY} | lens ${REVIEW_LENS} (${REVIEW_LENS_SOURCE}) | executor ${EVALUATOR_EXECUTOR} | bridge test: /sfs auth probe --executor ${_probe_executor}"
   fi
   exit "${SFS_EXIT_OK}"
 fi
@@ -1819,6 +2140,7 @@ PROMPT_BYTES="$(count_file_bytes "${PROMPT_PATH}")"
   printf '\n### %s — CPO evaluator invocation (%s)\n\n' "${NOW}" "${GATE_DISPLAY}"
   printf -- '- evaluator_role: CPO\n'
   printf -- '- evaluator_persona: `%s`\n' "${PERSONA_PATH}"
+  printf -- '- review_lens: `%s` (%s, %s)\n' "${REVIEW_LENS}" "${REVIEW_LENS_LABEL}" "${REVIEW_LENS_SOURCE}"
   printf -- '- evaluator_executor: `%s`\n' "${EVALUATOR_EXECUTOR}"
   printf -- '- generator_executor: `%s`\n' "${GENERATOR_EXECUTOR}"
   printf -- '- prompt_path: `%s`\n' "${PROMPT_PATH}"
@@ -1900,6 +2222,7 @@ if [[ "${RUN_REVIEW}" == "true" ]]; then
 
   {
     printf '\n### %s — CPO evaluator result (%s)\n\n' "${NOW}" "${GATE_DISPLAY}"
+    printf -- '- review_lens: `%s` (%s, %s)\n' "${REVIEW_LENS}" "${REVIEW_LENS_LABEL}" "${REVIEW_LENS_SOURCE}"
     printf -- '- executor: `%s`\n' "${EVALUATOR_EXECUTOR}"
     printf -- '- executor_cmd: `%s`\n' "${EXECUTOR_CMD}"
     printf -- '- exit_code: `%s`\n' "${RUN_RC}"
@@ -1954,9 +2277,13 @@ _esc_persona="${PERSONA_PATH//\\/\\\\}"
 _esc_persona="${_esc_persona//\"/\\\"}"
 _esc_auth_mode="${AUTH_INTERACTIVE//\\/\\\\}"
 _esc_auth_mode="${_esc_auth_mode//\"/\\\"}"
+_esc_lens="${REVIEW_LENS//\\/\\\\}"
+_esc_lens="${_esc_lens//\"/\\\"}"
+_esc_lens_source="${REVIEW_LENS_SOURCE//\\/\\\\}"
+_esc_lens_source="${_esc_lens_source//\"/\\\"}"
 
 if ! append_event "review_open" \
-  "{\"sprint_id\":\"${_esc_sprint}\",\"gate_id\":\"${_esc_gate}\",\"path\":\"${_esc_path}\",\"prompt_path\":\"${_esc_prompt}\",\"evaluator_role\":\"CPO\",\"evaluator_executor\":\"${_esc_eval}\",\"generator_executor\":\"${_esc_gen}\",\"persona\":\"${_esc_persona}\",\"run_requested\":${RUN_REVIEW},\"auth_mode\":\"${_esc_auth_mode}\"}" \
+  "{\"sprint_id\":\"${_esc_sprint}\",\"gate_id\":\"${_esc_gate}\",\"path\":\"${_esc_path}\",\"prompt_path\":\"${_esc_prompt}\",\"review_lens\":\"${_esc_lens}\",\"review_lens_source\":\"${_esc_lens_source}\",\"evaluator_role\":\"CPO\",\"evaluator_executor\":\"${_esc_eval}\",\"generator_executor\":\"${_esc_gen}\",\"persona\":\"${_esc_persona}\",\"run_requested\":${RUN_REVIEW},\"auth_mode\":\"${_esc_auth_mode}\"}" \
   2>/dev/null; then
   echo "permission denied appending event to ${SFS_EVENTS_FILE}" >&2
   exit "${SFS_EXIT_PERM}"
@@ -1967,7 +2294,7 @@ if [[ "${RUN_REVIEW}" == "true" ]]; then
   _esc_out="${_esc_out//\"/\\\"}"
   _esc_rc="${RUN_RC:-0}"
   if ! append_event "review_run" \
-    "{\"sprint_id\":\"${_esc_sprint}\",\"gate_id\":\"${_esc_gate}\",\"path\":\"${_esc_path}\",\"output_path\":\"${_esc_out}\",\"evaluator_role\":\"CPO\",\"evaluator_executor\":\"${_esc_eval}\",\"generator_executor\":\"${_esc_gen}\",\"exit_code\":${_esc_rc}}" \
+    "{\"sprint_id\":\"${_esc_sprint}\",\"gate_id\":\"${_esc_gate}\",\"path\":\"${_esc_path}\",\"output_path\":\"${_esc_out}\",\"review_lens\":\"${_esc_lens}\",\"evaluator_role\":\"CPO\",\"evaluator_executor\":\"${_esc_eval}\",\"generator_executor\":\"${_esc_gen}\",\"exit_code\":${_esc_rc}}" \
     2>/dev/null; then
     echo "permission denied appending event to ${SFS_EVENTS_FILE}" >&2
     exit "${SFS_EXIT_PERM}"
@@ -1981,13 +2308,13 @@ if [[ "${PRINT_PROMPT}" == "true" ]]; then
   cat "${PROMPT_PATH}"
 elif [[ "${RUN_REVIEW}" == "true" ]]; then
   if [[ -n "${RUN_WARNING}" ]]; then
-    echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} CPO run complete with executor warning | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
+    echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} | lens ${REVIEW_LENS} (${REVIEW_LENS_SOURCE}) CPO run complete with executor warning | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
   else
-    echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} CPO run complete | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
+    echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} | lens ${REVIEW_LENS} (${REVIEW_LENS_SOURCE}) CPO run complete | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
   fi
   emit_result_excerpt_stdout "${RESULT_PATH}" 80
 else
-  echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} prompt ready | executor ${EVALUATOR_EXECUTOR} | prompt ${PROMPT_PATH}"
+  echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} | lens ${REVIEW_LENS} (${REVIEW_LENS_SOURCE}) prompt ready | executor ${EVALUATOR_EXECUTOR} | prompt ${PROMPT_PATH}"
 fi
 
 exit "${SFS_EXIT_OK}"

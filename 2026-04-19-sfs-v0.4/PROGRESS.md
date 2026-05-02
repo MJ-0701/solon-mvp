@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T18:41:34+09:00
-session: "release: 0.5.78 context router same-version repair verified"
+last_overwrite: 2026-05-02T21:10:43+09:00
+session: "review lens routing implementation ready"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: null
