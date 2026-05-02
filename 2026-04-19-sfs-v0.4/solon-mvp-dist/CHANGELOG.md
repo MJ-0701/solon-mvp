@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [0.5.68-product] - 2026-05-02
+
 ### Changed
 
 - **Cross-phase AI fundamentals** — brainstorm, plan, routed context, Codex
