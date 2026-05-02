@@ -1,3 +1,18 @@
+## [0.5.67-product] - 2026-05-02
+
+**Restore project profile command.** Reconnects the `sfs profile` public command
+that refreshes only `SFS.md` project overview from bounded project metadata.
+
+### Fixed
+
+- **`sfs profile` routing** — the global CLI and runtime dispatch table now
+  route `profile` to the packaged `sfs-profile.sh` adapter again.
+- **Project overview template** — generated `SFS.md` includes a
+  `## 프로젝트 개요` section for `sfs profile` to update.
+- **Agent/docs surface** — Claude, Codex, Gemini, README, GUIDE, and routed
+  context docs describe `profile` as a narrow hybrid command, not a broad
+  project scan.
+
 ## [0.5.66-product] - 2026-05-02
 
 **Start next-action UX.** Makes `sfs start` point directly to the next usable

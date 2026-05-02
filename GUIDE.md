@@ -93,6 +93,10 @@ Windows PowerShell/cmd 는 `sfs.cmd upgrade` 를 실행한다.
 
 `<DATE>` 와 `<SOLON-VERSION>` 은 install.sh 가 자동 치환했으므로 건드릴 필요 없음.
 
+자동으로 좁게 채우고 싶으면 AI runtime 에서는 `/sfs profile`, direct shell 에서는
+`sfs profile --apply` 를 실행한다. 이 명령은 허용된 설정/docs 파일만 보고 `SFS.md` 의
+`## 프로젝트 개요` 섹션만 수정한다.
+
 > ⚠️ **자주 빠지는 함정**: SFS.md 의 7-step / 7-Gate / 6 Division 본문은 **편집 금지** 가 아니라 **편집해도 되는 운영 약속** 이다. 본인 팀 이 4-Gate 만 운용하기로 했으면 `### Gate 운용` 섹션을 4-Gate 로 줄여도 된다. SFS.md 는 이 프로젝트의 Solon 운영 약속을 적어두는 곳.
 
 ---
@@ -373,6 +377,7 @@ deterministic fallback 이다.
 | `/sfs guide` | 처음 쓸 때 필요한 맥락과 다음 명령 확인 |
 | `/sfs guide --path` | 이 onboarding guide 경로만 확인 |
 | `/sfs guide --print` | 이 guide 본문을 터미널에 출력 |
+| `/sfs profile [--prompt-only|--apply]` | SFS.md 프로젝트 개요만 좁게 감지/보정 |
 | `/sfs auth status` | Codex/Claude/Gemini review executor 인증 확인 |
 | `/sfs auth login codex` | Codex CLI 인증 bootstrap |
 | `/sfs auth probe --executor gemini --timeout 20` | bridge request/response 더미 확인 |

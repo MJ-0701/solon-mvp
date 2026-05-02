@@ -3,6 +3,15 @@
 Solon SFS = Solo Founder System. This file is the shared router for Claude,
 Codex, and Gemini.
 
+## 프로젝트 개요
+
+- **이름**: `<PROJECT-NAME>`
+- **유형**: `<PROJECT-TYPE>`
+- **단계**: `<PROJECT-STAGE>`
+- **환경**: `<PROJECT-ENVIRONMENT>`
+- **핵심 산출물**: `<PROJECT-OUTPUT>`
+- **공유/운영 방식**: `<PROJECT-DELIVERY>`
+
 Read order:
 1. `.sfs-local/context/kernel.md`
 2. `.sfs-local/context/_INDEX.md`
@@ -13,6 +22,9 @@ Default entry:
 - `sfs status`
 - current sprint `report.md`
 - expand to workbench/logs only when the routed context needs evidence
+
+Project overview refresh:
+- `sfs profile` updates only this file's `## 프로젝트 개요` section.
 
 Never paraphrase bash adapter output. Bash-first commands may still surface one
 compact Next action after verbatim output. Never hardcode external private docsets.
