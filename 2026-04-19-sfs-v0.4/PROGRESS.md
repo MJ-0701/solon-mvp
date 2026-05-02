@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T00:44:00Z
-session: "user-active: WU-37 closed; 0.5.60-product release pending"
+last_overwrite: 2026-05-02T00:46:00Z
+session: "user-active: WU-37 sha backfilled; 0.5.60-product release pending"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: WU-37
