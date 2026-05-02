@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T22:48:00+09:00
-session: "codex: 0.5.84 ambient token harness hygiene released"
+last_overwrite: 2026-05-02T22:55:09+09:00
+session: "codex: 0.5.85 GUIDE/README close flow released"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: null
@@ -20,6 +20,11 @@ current_wu_owner:
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
 scheduled_task_log:
+  - ts: 2026-05-02T22:55:09+09:00
+    codename: release-0-5-85-guide-readme-close-flow
+    check_exit: 0
+    action: "release: 0.5.85 GUIDE/README close flow verified"
+    ahead_delta: "+1"
   - ts: 2026-05-02T22:48:00+09:00
     codename: release-0-5-84-ambient-token-harness-hygiene
     check_exit: 0
