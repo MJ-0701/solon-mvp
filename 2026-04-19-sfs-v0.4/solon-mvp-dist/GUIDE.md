@@ -40,7 +40,7 @@ my-project/
 ├── GEMINI.md                    ← Gemini CLI adapter (본인이 편집)
 ├── .claude/skills/sfs/SKILL.md  ← Claude Code /sfs Skill (배포판 관리, 건드리지 마)
 ├── .claude/commands/sfs.md      ← Claude Code 슬래시 (배포판 관리, 건드리지 마)
-├── .gemini/commands/sfs.toml    ← Gemini CLI 슬래시 (배포판 관리, 건드리지 마)
+├── .gemini/commands/sfs.toml    ← Gemini CLI sfs command (배포판 관리, 건드리지 마)
 ├── .agents/skills/sfs/SKILL.md  ← Codex Skill (배포판 관리, 건드리지 마)
 ├── .sfs-local/                  ← sprint / decision / event / config 가 쌓이는 곳
 └── .gitignore                   ← Solon 마커 블록 자동 추가
@@ -109,13 +109,13 @@ Windows PowerShell/cmd 는 `sfs.cmd upgrade` 를 실행한다.
 | 환경 | 첫 명령 |
 |:--|:--|
 | Claude Code | `/sfs status` (slash popup) |
-| Gemini CLI | `/sfs status` (slash popup) |
+| Gemini CLI | `sfs status` |
 | Codex CLI | `$sfs status` |
 | Codex app | `$sfs status` 또는 `/sfs status` 가 host 에서 모델까지 전달되는 경우 |
 | Windows PowerShell 직접 실행 | `sfs.cmd status` |
 
-아래 예시는 Solon 기준 `/sfs` 표기입니다. Claude Code 와 Gemini CLI 에서는 그대로 쓰면 된다.
-Codex CLI 의 공식 Skill 호출은 `$sfs ...` 다. bare `/sfs` 를 입력했을 때 `커맨드 없음` 또는
+아래 예시는 Claude Code 기준 `/sfs` 표기입니다. Gemini CLI 에서는 slash 없이 `sfs ...` 로,
+Codex CLI 에서는 `$sfs ...` 로 입력한다. bare `/sfs` 를 입력했을 때 `커맨드 없음` 또는
 `Unrecognized command` 가 뜨면 Solon 이 실행된 것이 아니라 host slash parser 가 메시지를 모델
 전에 차단한 것이다. Windows PowerShell 에서 agent 밖 direct shell 로 실행할 때는
 `sfs.cmd start ...`, `sfs.cmd plan` 처럼 쓴다.
@@ -317,11 +317,11 @@ CPO verdict 는 `pass` / `partial` / `fail` 로 기록한다. `partial` 또는
 prompt 를 Claude 에 연결된 Codex plugin 에 넘겨야 한다.
 
 Codex/Claude/Gemini CLI 는 인증 prompt 가 먼저 뜨면 SFS 가 넘긴 review prompt 를 auth 답변으로
-소비할 수 있다. 그래서 SFS 는 `.sfs-local/auth.env` 를 자동 로드하고 `/sfs auth` 로
-인증 상태를 먼저 확인한다. `.sfs-local/auth.env.example` 을 복사해서 API key 또는
+소비할 수 있다. 그래서 SFS 는 `.sfs-local/auth.env` 를 자동 로드하고, 각 runtime 의 SFS entry
+(`/sfs auth`, `sfs auth`, `$sfs auth`) 로 인증 상태를 먼저 확인한다. `.sfs-local/auth.env.example` 을 복사해서 API key 또는
 `SFS_CODEX_AUTH_READY=1` / `SFS_CLAUDE_AUTH_READY=1` / `SFS_GEMINI_AUTH_READY=1` 을 넣어라.
-real terminal 에서는 `/sfs auth login gemini` 또는 `/sfs auth login --executor gemini` 처럼 브라우저/터미널 인증을
-명시적으로 끝낼 수 있다. bridge 연결만 확인할 때는 `/sfs auth probe --executor gemini --timeout 20` 가
+direct shell 에서는 `sfs auth login gemini` 또는 `sfs auth login --executor gemini` 처럼 브라우저/터미널 인증을
+명시적으로 끝낼 수 있다. bridge 연결만 확인할 때는 `sfs auth probe --executor gemini --timeout 20` 가
 작은 dummy request/response 만 보낸다. 실제 `.sfs-local/auth.env` 는 gitignore 대상이다.
 
 Windows Store 로 설치된 Codex 는 `C:\Program Files\WindowsApps\OpenAI.Codex_...\app\resources\codex.exe`
@@ -372,14 +372,14 @@ Git Flow lifecycle 로 처리한다.
 
 ---
 
-## 5. 주요 슬래시 명령 cheatsheet
+## 5. 주요 SFS 명령 cheatsheet
 
-Claude/Gemini 에서는 `/sfs ...` 를 그대로 쓴다. Codex CLI 에서는 `$sfs ...` 가 공식 Skill
-호출이다. Codex app 에서는 `$sfs ...` 또는 `/sfs ...` 가 host 에서 모델까지 전달되는 경우를
+Claude Code 에서는 `/sfs ...`, Gemini CLI 에서는 `sfs ...`, Codex CLI 에서는 `$sfs ...` 가
+공식 호출이다. Codex app 에서는 `$sfs ...` 또는 `/sfs ...` 가 host 에서 모델까지 전달되는 경우를
 쓴다. Windows PowerShell direct shell 에서는 `sfs.cmd ...` 를 쓴다. direct bash 는 항상
 deterministic fallback 이다.
 
-| 명령 | 한 줄 설명 |
+| 명령 (Claude 표기) | 한 줄 설명 |
 |:--|:--|
 | `/sfs status` | 지금 어디까지 왔는지 1줄 |
 | `/sfs start <goal>` | 새 sprint workspace 초기화 |
@@ -412,7 +412,8 @@ deterministic fallback 이다.
 | `/sfs loop verify <task>` | claimed task 의 `## Verify` command 를 실행하고 done/failed 처리 |
 | `/sfs loop complete|fail|retry|abandon <task>` | queue lifecycle 수동 마무리 / 재시도 / 포기 |
 
-Codex 에서는 같은 명령을 `$sfs status`, `$sfs start ...`, `$sfs brainstorm ...` 처럼 입력한다.
+Gemini 에서는 같은 명령을 `sfs status`, `sfs start ...`, `sfs brainstorm ...` 처럼 입력한다.
+Codex 에서는 `$sfs status`, `$sfs start ...`, `$sfs brainstorm ...` 처럼 입력한다.
 
 각 명령 자체에 `--help` 있음. Windows PowerShell/cmd 에서는 `sfs.cmd` 로 바꿔 입력한다:
 

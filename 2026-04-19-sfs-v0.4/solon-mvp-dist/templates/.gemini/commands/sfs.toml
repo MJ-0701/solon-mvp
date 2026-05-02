@@ -1,7 +1,7 @@
-description = "Solon SFS command router: run `sfs` first, then load only routed context modules."
+description = "Solon SFS command router for `sfs <command>`: run the adapter first, then load routed context modules."
 
 prompt = """
-The user invoked `/sfs {{args}}`.
+The user invoked Gemini CLI command `sfs {{args}}`.
 
 1. Treat the first token as the Solon command.
 2. Run `sfs <command> <args>` first. Vendored fallback:

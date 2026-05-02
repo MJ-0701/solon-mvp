@@ -359,8 +359,9 @@ cd C:\workspace\my-project
 iwr -useb https://raw.githubusercontent.com/MJ-0701/solon-product/main/install.ps1 | iex
 ```
 
-설치 후 Solon 의 command shape 는 Claude/Gemini 에서는 `/sfs`, Codex CLI 에서는 `$sfs` Skill
-mention 을 사용합니다. Codex CLI 는 unknown leading slash 를 모델 전에 막고
+설치 후 Solon 의 agent command shape 는 runtime 마다 다릅니다. Claude Code 는 `/sfs ...`,
+Gemini CLI 는 slash 없이 `sfs ...`, Codex CLI 는 `$sfs ...` Skill mention 을 사용합니다.
+Codex CLI 는 unknown leading slash 를 모델 전에 막고
 `커맨드 없음` / `Unrecognized command` 를 표시할 수 있으므로, Codex CLI 에서는 `$sfs status`
 가 1급 경로입니다. Runtime adaptor 는 각 vendor 의 입력면 차이를
 흡수해서 같은 bash adapter 로 내려보내야 합니다. `sfs agent install ...` 은 다음 thin
@@ -374,7 +375,7 @@ entry point 를 프로젝트에 설치/갱신합니다:
 > 참조. "SFS.md 에 프로젝트 스택 적어도 되는지" 같은 자주 묻는 오해도 거기서 해소.
 
 ```text
-# Claude Code / Gemini CLI
+# Claude Code
 /sfs status
 /sfs guide
 /sfs auth status
@@ -387,6 +388,20 @@ entry point 를 프로젝트에 설치/갱신합니다:
 /sfs decision "초기 인증 방식은 세션 기반으로 시작한다"
 /sfs report
 /sfs retro --close
+
+# Gemini CLI
+sfs status
+sfs guide
+sfs auth status
+sfs profile
+sfs start "첫 번째 sprint 목표"
+sfs brainstorm "raw 요구사항과 아직 정리 안 된 맥락"
+sfs plan
+sfs implement "첫 실행 slice"
+sfs review --gate G4 --executor codex --generator gemini
+sfs decision "초기 인증 방식은 세션 기반으로 시작한다"
+sfs report
+sfs retro --close
 
 # Codex CLI
 $sfs status
@@ -450,8 +465,8 @@ vendored layout 에서 direct adapter 를 호출해야 하면:
 | `/sfs commit [status|plan|apply --group <name>]` | close 후 남은 working tree 를 의미 그룹으로 분리하고 branch preflight 안내 후 선택 그룹만 local commit. 메시지는 Git Flow-aware Conventional Commit 으로 자동 생성 (`-m` override). 이후 branch push/main 흡수는 AI runtime 이 수행 |
 | `/sfs loop [OPTIONS]` | queue-first + domain_locks fallback 으로 micro-step 단위 반복 실행을 돕는 자율 진행 모드 |
 
-17 명령 모두 동일 bash adapter SSoT 입니다. `/sfs` 는 Claude/Gemini 쪽 command shape 이고,
-Codex 에서는 `$sfs` Skill mention 이 같은 bash adapter 로 내려가는 command shape 입니다.
+17 명령 모두 동일 bash adapter SSoT 입니다. `/sfs` 는 Claude Code command shape,
+`sfs` 는 Gemini CLI/direct shell command shape, `$sfs` 는 Codex Skill mention 입니다.
 Skill/prompt/wrapper 는 이 API 를 runtime 별로 전달하는 adaptor surface 입니다.
 
 ### `/sfs loop` 자세히
@@ -506,7 +521,7 @@ CLI 에서든 동등한 deterministic bash adapter SSoT 로 동작합니다.
 | 런타임 | Entry point (자동 install) | 호출 방법 |
 |---|---|---|
 | **Claude Code** | `.claude/skills/sfs/SKILL.md` (primary Skill) + `.claude/commands/sfs.md` (legacy fallback) | `/sfs status` |
-| **Gemini CLI** | `.gemini/commands/sfs.toml` (TOML slash) | `/sfs status` |
+| **Gemini CLI** | `.gemini/commands/sfs.toml` (TOML command) | `sfs status` |
 | **Codex CLI** | `.agents/skills/sfs/SKILL.md` (project-scoped Skill) | `$sfs status` |
 | **Codex app** | `.agents/skills/sfs/SKILL.md` (project-scoped Skill) | `$sfs status` 또는 `/sfs status` 가 host 에서 모델까지 전달되는 경우 |
 | **Windows PowerShell shell** | `bin/sfs.cmd` (Scoop/PATH global wrapper) | `sfs.cmd status` |
@@ -594,7 +609,7 @@ powershell -ExecutionPolicy Bypass -File $env:TEMP\solon-product\install.ps1 -Ye
 | `GEMINI.md` | Gemini CLI adapter |
 | `.claude/skills/sfs/SKILL.md` | Claude Code `/sfs` Skill (primary) |
 | `.claude/commands/sfs.md` | Claude Code `/sfs` legacy slash command fallback |
-| `.gemini/commands/sfs.toml` | Gemini CLI `/sfs` slash command |
+| `.gemini/commands/sfs.toml` | Gemini CLI `sfs ...` command |
 | `.agents/skills/sfs/SKILL.md` | Codex Skill (project-scoped) |
 | `.sfs-local/` | sprint, decision, event, config, custom override 를 담는 로컬 운영 디렉토리 |
 | `.sfs-local/config.yaml` | runtime layout (`thin`/`vendored`) 과 override 경로 |
@@ -731,7 +746,7 @@ Uninstall 은 대화형으로 실행됩니다.
 | `templates/AGENTS.md.template` | Codex adapter template |
 | `templates/GEMINI.md.template` | Gemini CLI adapter template |
 | `templates/.claude/commands/sfs.md` | Claude Code Skill/legacy slash source |
-| `templates/.gemini/commands/sfs.toml` | Gemini CLI slash command |
+| `templates/.gemini/commands/sfs.toml` | Gemini CLI `sfs ...` command |
 | `templates/.agents/skills/sfs/SKILL.md` | Codex Skill (project-scoped) |
 | `templates/.codex/prompts/sfs.md` | Codex custom prompt fallback (optional/legacy) |
 | `templates/.sfs-local-template/context/` | short routed context modules loaded only when relevant |

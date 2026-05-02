@@ -1,7 +1,7 @@
 # GEMINI.md — Solon SFS adapter
 
-Use Solon through the global `sfs` runtime. Gemini CLI text `/sfs ...` maps to
-`sfs <command>` intent.
+Use Solon through the global `sfs` runtime. In Gemini CLI, invoke Solon as
+`sfs <command>` without a leading slash.
 
 Read order:
 1. `SFS.md`

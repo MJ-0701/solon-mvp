@@ -15,6 +15,9 @@
 - **SFS naming** — README, GUIDE, and generated `SFS.md` now explain the dual
   meaning: terminal-facing `sfs` is Sprint Flow System, while Solon Product's
   broader SFS is Solo Founder System.
+- **Runtime command shapes** — docs and installer output now spell out the
+  three agent-facing invocations: Claude Code uses `/sfs ...`, Gemini CLI uses
+  `sfs ...`, and Codex CLI uses `$sfs ...`.
 
 ## [0.5.67-product] - 2026-05-02
 
