@@ -1,3 +1,16 @@
+## [Unreleased]
+
+### Changed
+
+- **Cross-phase AI fundamentals** — brainstorm, plan, routed context, Codex
+  skill, README, and GUIDE now state that shared design concept, ubiquitous
+  language, feedback loops, deep-module/interface boundaries, and gray-box
+  delegation apply from G0 onward, not only during implementation; review and
+  report templates now preserve those checks through close.
+- **G0/G1 questioning gate** — brainstorm keeps `status: draft` and asks 1-3
+  blocking questions when shared understanding is missing; plan must not hide
+  unresolved G0 questions behind assumptions.
+
 ## [0.5.67-product] - 2026-05-02
 
 **Restore project profile command.** Reconnects the `sfs profile` public command

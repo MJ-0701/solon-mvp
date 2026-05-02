@@ -49,6 +49,10 @@ generator_executor: ""  # optional, filled by /sfs review --generator <profile>
 ### G4 — Check Gate (해당 시, 5-Axis CPO)
 
 - [ ] 설계 vs 구현 gap (정량)
+- [ ] G0/G1 공유 design concept 와 실제 산출물이 어긋나지 않음
+- [ ] domain language / glossary 가 코드, docs, UI, test, report 에 일관됨
+- [ ] feedback evidence 가 AC 의 `verify by ...` 와 연결됨
+- [ ] public interface / artifact boundary 와 gray-box 위임 경계가 지켜짐
 - [ ] 5-Axis (사용자가치 / 안정성 / 일정 / 비용 / 학습) 점수
 - [ ] partial 시 잔여 작업 → 다음 sprint 또는 별도 WU 로 분기
 

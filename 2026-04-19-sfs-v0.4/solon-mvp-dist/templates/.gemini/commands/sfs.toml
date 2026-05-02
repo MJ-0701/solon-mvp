@@ -11,4 +11,7 @@ The user invoked `/sfs {{args}}`.
 5. For bash-first commands, do not refine artifacts, but a compact state/Next is allowed.
 6. For `profile`, edit only the `SFS.md` project overview section.
 7. For hybrid commands, refine pointed artifacts and answer with one Solon report.
+8. AI-era fundamentals apply across all gates, not only implement: shared
+   design concept, domain language, feedback loop, interface/artifact boundary,
+   and gray-box delegation.
 """

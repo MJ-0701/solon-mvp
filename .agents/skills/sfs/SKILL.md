@@ -38,6 +38,10 @@ Command modes are explicit:
   merge/main push are handled by the AI runtime Git Flow lifecycle.
 
 Sprint mode guidance:
+- AI-era software fundamentals are cross-phase, not implement-only. Shared
+  design concept, ubiquitous language, tight feedback loops, deep-module
+  boundaries, and gray-box delegation must shape G0/G1/G4/report/retro as well
+  as implementation.
 - Do not treat every new sprint as a fresh discovery/planning sprint. If the
   user just closed a planning sprint whose `plan.md`, review, or ADR already
   defines the implementation backlog, the next sprint is an implementation
@@ -75,7 +79,7 @@ vendored layout).
 The bash adapter execution is **deterministic** and must NOT be
 re-interpreted by the model. Bash adapter is single source of truth (SSoT) for
 command I/O. Hybrid commands have documented AI-side follow-ups:
-project overview refinement for `profile`, Solon CEO refinement of `brainstorm.md` §1~§7, G1 plan + CTO/CPO sprint
+project overview refinement for `profile`, Solon CEO refinement of `brainstorm.md` §0~§7, G1 plan + CTO/CPO sprint
 contract refinement of `plan.md`, implementation execution for `implement`,
 ADR refinement for `decision`, final report refinement for `report`, and G5
 retro refinement for `retro`. Review
@@ -148,7 +152,7 @@ not create a new verdict in the current runtime.
 | `update [--skip-existing]` | `sfs update [--skip-existing]` | 하위 호환 alias. 새 문서/응답에서는 `upgrade` 를 권장 |
 | `version [--check]` (또는 "버전 확인", "새 버전 확인") | `sfs version [--check]` | 현재 설치 버전 출력. `--check` 는 GitHub 최신 product tag 와 비교 |
 | `adopt [--id legacy-baseline] [--apply]` (또는 "legacy 인수인계", "기존 프로젝트 SFS 도입") | `sfs adopt [--id legacy-baseline] [--apply]` | legacy 프로젝트를 report-first baseline 으로 인계. 문서 과잉이면 기존 sprint/archive tree 를 cold archive tarball 로 접고, 문서 0이면 git/code/test/docs 흔적에서 최소 baseline 복원. raw scan 은 archive 보존 |
-| `brainstorm [text|--stdin]` (또는 "브레인스토밍", "요구사항 정리") | `sfs brainstorm <raw context>` | G0 raw 요구사항/대화 맥락을 brainstorm.md 에 기록한 뒤 §1~§7을 Solon CEO로 정리. newline 허용 |
+| `brainstorm [text|--stdin]` (또는 "브레인스토밍", "요구사항 정리") | `sfs brainstorm <raw context>` | G0 raw 요구사항/대화 맥락을 brainstorm.md 에 기록한 뒤 §0~§7을 Solon CEO로 정리. newline 허용 |
 | `plan` (또는 "plan 작성", "이번 sprint 계획") | `sfs plan` | plan.md 진입 + plan_open event 후 brainstorm.md 기반 G1 plan/contract 작성 |
 | `implement [work slice|--stdin]` (또는 "구현", "코드 구현", "실제 작업") | `sfs implement <work slice>` | implement.md/log.md 진입 후 plan 기반 작업 slice 실행 + evidence 작성. 코드, taxonomy, design handoff, QA, infra/runbook, decision, docs 모두 implementation artifact 로 취급 |
 | `review --gate <id> [--executor <tool>] [--prompt-only]` / `review --show-last` (또는 "CPO review", "검증 기록", "이전 리뷰 확인") | `sfs review --gate <id> [--executor <tool>] [--generator <tool>] [--prompt-only]` 또는 `sfs review --show-last [--gate <id>]` | CPO Evaluator bridge run by default. `--prompt-only` creates prompt/log for manual handoff. `--show-last` prints compact metadata for the latest recorded result without rerunning executor. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
@@ -268,8 +272,10 @@ succeeds and stdout has been shown verbatim:
    `.sfs-local/sprints/<current-sprint>/brainstorm.md`.
 2. Read `brainstorm.md`, especially `§8. Append Log`. Treat the append log as
    user raw data and preserve it.
-3. Act as **Solon CEO**. Fill or update `§1` through `§6` from the raw input and
+3. Act as **Solon CEO**. Fill or update `§0` through `§6` from the raw input and
    existing context:
+   - `§0` cross-phase fundamentals: shared design, domain language, feedback
+     loop, boundary, and gray-box delegation.
    - `§1` concise raw brief / conversation notes.
    - `§2` problem owner, urgency, current pain, success state.
    - `§3` technical, deployment, cost/time, and user learning constraints.
@@ -278,9 +284,11 @@ succeeds and stdout has been shown verbatim:
    - `§6` goal, acceptance criteria candidates, major risks, CTO Generator
      deliverables, and CPO Evaluator review criteria.
 4. Update `§7` checklist based only on what is actually satisfied.
-5. If critical information is missing, add concise open questions inside `§6`
-   or immediately before `§7`, and ask up to 3 questions in the final response.
-   Still fill known sections with explicit assumptions and unknowns.
+5. If critical information is missing, especially shared intent, domain terms,
+   feedback checks, interface/artifact boundaries, or gray-box delegation, add
+   concise open questions inside `§6` or immediately before `§7`, and ask up to
+   3 questions in the final response. Still fill known sections with explicit
+   assumptions and unknowns.
 6. Set frontmatter `status: ready-for-plan` only when `§6` is usable for
    `/sfs plan`; otherwise keep `status: draft`.
 7. Do not implement code, choose a framework, or run `/sfs plan` automatically.
@@ -296,7 +304,7 @@ first run the bash adapter, then fill `plan.md` from the current G0 context.
 1. Resolve the active `plan.md` path from adapter stdout. If stdout cannot be
    parsed, read `.sfs-local/current-sprint` and open
    `.sfs-local/sprints/<current-sprint>/plan.md`.
-2. Open the same sprint's `brainstorm.md`. Treat `brainstorm.md` §1~§7 and
+2. Open the same sprint's `brainstorm.md`. Treat `brainstorm.md` §0~§7 and
    §8 Append Log as the source of truth.
 3. Act as **Solon CEO** for requirements and scope, then write the
    **CTO Generator ↔ CPO Evaluator** sprint contract:
@@ -437,7 +445,8 @@ artifacts into the canonical completed-sprint report.
    - `§1` goal, outcome, final verdict, one-line result.
    - `§2` delivered / not delivered / carried forward.
    - `§3` key decisions and why they matter.
-   - `§4` implementation summary and changed modules.
+   - `§4` cross-phase AI fundamentals carried through, implementation summary,
+     and changed modules.
    - `§5` verification evidence and result.
    - `§6` remaining risks, follow-ups, open questions.
    - `§7` artifact map stays short.

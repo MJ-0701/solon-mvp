@@ -19,6 +19,19 @@ status: draft        # draft | ready-for-plan | g0-reviewed
 
 ---
 
+## §0. AI-Era Fundamentals Gate
+
+이 gate 는 implement 전용이 아니다. AI 가 좋은 코드베이스/문서베이스에서만 잘 작동한다는
+전제 때문에, G0 부터 아래 다섯 가지를 확인한다.
+
+- 공유 design concept: 문제 주체, 현재 pain, 성공 상태, in/out scope.
+- 유비쿼터스 랭귀지: 같은 의미로 쓸 핵심 명사/행위자/상태/규칙.
+- 작은 feedback loop: test, smoke, preview, review, manual inspection 중 무엇으로 확인할지.
+- deep-module seed: 나중에 사람이 통제할 public interface / artifact boundary.
+- gray-box delegation: 사용자가 결정할 전략/인터페이스와 AI 가 채울 내부 구현의 경계.
+
+위 항목 중 plan 에 필요한 정보가 비어 있으면 `status: draft` 를 유지하고 1~3개 질문을 먼저 한다.
+
 ## §1. Raw Brief / Conversation Notes
 
 사용자가 처음 던진 긴 요구사항, AI 와 대화하며 나온 맥락, 아직 정제되지 않은 생각을 남긴다.
@@ -79,9 +92,14 @@ status: draft        # draft | ready-for-plan | g0-reviewed
 - [ ] 문제와 성공 상태가 한 줄로 설명된다
 - [ ] 대안 2개 이상을 비교했다
 - [ ] in/out scope seed 가 있다
+- [ ] 핵심 용어 / actor / 상태가 같은 단어로 정리됐다
+- [ ] 최소 feedback loop 후보가 있다
+- [ ] public interface / artifact boundary seed 가 있다
+- [ ] 사용자 결정 영역과 AI 위임 영역이 분리됐다
 - [ ] generator/evaluator 계약에 넘길 재료가 있다
 
-> checklist 가 대체로 채워지면 `/sfs plan` 으로 이동한다.
+> 위 checklist 중 plan seed 에 필요한 항목이 비어 있으면 `/sfs plan` 으로 이동하지 않는다.
+> 먼저 1~3개 blocking question 에 답하고, 그 답을 본 문서에 반영한다.
 
 ## §8. Append Log
 

@@ -38,6 +38,16 @@ closed_at: ""        # filled by /sfs report --compact / retro --close
 
 ## §4. Implementation Summary
 
+### AI-Era Fundamentals Carried Through
+
+- **Shared design concept**:
+- **Domain language / glossary**:
+- **Feedback evidence**:
+- **Interface / artifact boundary**:
+- **Gray-box delegation**:
+
+### Artifact / Behavior Summary
+
 - **Changed files/modules**:
 - **Behavior added/changed**:
 - **Compatibility notes**:

@@ -156,13 +156,18 @@ sprint - · WU - · gate -:- · ahead 0 · last_event -
 
 ---
 
-## 3. 다음 10분 — brainstorm → plan
+## 3. 다음 10분 — shared understanding → brainstorm → plan
 
 먼저 raw 요구사항과 대화 맥락을 `brainstorm.md` 에 남긴다. Claude/Codex/Gemini 같은
 AI runtime 에서 `/sfs brainstorm` 으로 실행하면 두 단계가 한 번에 이어진다.
 
 1. bash adapter 가 raw input 을 `§8 Append Log` 에 안전하게 기록한다.
-2. Solon CEO 가 그 raw 를 읽고 `§1~§7` 을 채운다. 부족한 정보가 있으면 1~3개 질문을 한다.
+2. Solon CEO 가 그 raw 를 읽고 `§0~§7` 을 채운다. 부족한 정보가 있으면 1~3개 질문을 한다.
+
+G0 의 목적은 raw 요구를 예쁘게 받아 적는 것이 아니라, plan 으로 넘기기 전에 공유 이해를
+만드는 것이다. AI 시대의 기본 guardrail 은 여기서 이미 시작된다: 공유 design concept,
+domain language, 작은 feedback loop, public interface/artifact boundary, gray-box 위임 경계.
+이 중 plan 에 필요한 항목이 비어 있으면 `/sfs plan` 으로 넘어가지 않고 질문부터 한다.
 
 ```text
 /sfs brainstorm "아직 정리 안 된 요구사항, 제약, 아이디어"
@@ -179,7 +184,8 @@ direct CLI 는 raw capture-only 이다. AI 없이 직접 실행했다면, 다음
 
 그 다음 brainstorm 을 plan 계약으로 바꾼다. AI runtime 에서 `/sfs plan` 은
 `plan.md ready` 만 출력하고 끝나는 명령이 아니라, bash adapter 로 G1 파일을 연 뒤
-`brainstorm.md` 를 읽어 요구사항/AC/scope 와 CTO/CPO sprint contract 를 채워야 한다:
+`brainstorm.md` 를 읽어 요구사항/AC/scope 와 CTO/CPO sprint contract 를 채워야 한다. G0 의
+blocking question 이 남아 있으면 추측으로 메우지 않고 질문을 유지한다:
 
 ```text
 /sfs plan
@@ -192,6 +198,7 @@ direct CLI 는 raw capture-only 이다. AI 없이 직접 실행했다면, 다음
 - **AC (Acceptance Criteria)**: 어떻게 동작하는 게 "끝" 인가? 3-5개 bullet.
 - **범위 (In/Out of scope)**: 이번에 할 것 / 안 할 것. "안 할 것" 이 더 중요.
 - **Sprint Contract**: CEO plan 을 바탕으로 CTO Generator 가 만들 것과 CPO Evaluator 가 검증할 것.
+- **AI-era fundamentals**: 용어, feedback loop, interface boundary, gray-box 위임 경계.
 - **G1 self-check**: plan 자체가 OK 한가? (1줄 verdict)
 
 > 💡 **plan 의 핵심 가치 = "안 할 것" 명시**. AI 가 plan 없이 코드 짜면 over-build 하기 쉽다. plan 에 "X 는 이번 sprint 에 안 한다" 고 적어두면 AI 가 그걸 읽고 안 한다.
@@ -224,6 +231,8 @@ Solon 에서 첫 구현은 "스펙을 던지고 코드가 나오길 기다리는
 산출물은 아니다. taxonomy, design handoff, QA evidence, infra/runbook, decision, docs 도
 implementation artifact 다. AI 는 눈앞의 변경에는 빠르지만, 전체 design concept / domain
 language / feedback loop 가 약하면 같은 프로젝트를 점점 더 바꾸기 어렵게 만들 수 있다.
+그래서 이 절의 guardrail 은 implement 에서 처음 등장하는 규칙이 아니라, G0/G1 에서 만든
+공유 이해와 계약을 실제 artifact 로 검증하는 규칙이다.
 
 첫 execution sprint 는 아래 순서로 작게 시작한다:
 
@@ -373,7 +382,7 @@ deterministic fallback 이다.
 |:--|:--|
 | `/sfs status` | 지금 어디까지 왔는지 1줄 |
 | `/sfs start <goal>` | 새 sprint workspace 초기화 |
-| `/sfs brainstorm [text]` | G0 raw 기록 + Solon CEO 맥락 정리 |
+| `/sfs brainstorm [text]` | G0 raw 기록 + 공유 design concept/domain language/feedback/boundary 정리, 부족하면 질문 |
 | `/sfs guide` | 처음 쓸 때 필요한 맥락과 다음 명령 확인 |
 | `/sfs guide --path` | 이 onboarding guide 경로만 확인 |
 | `/sfs guide --print` | 이 guide 본문을 터미널에 출력 |
@@ -385,7 +394,7 @@ deterministic fallback 이다.
 | `/sfs division activate design` | abstract 디자인 본부를 실행 가능한 active 본부로 승격하고 decision/event 기록 |
 | `/sfs division activate all` | 현재 abstract 인 모든 본부를 한 번에 active 로 승격 |
 | `/sfs adopt [--apply]` | legacy 프로젝트 인수인계 baseline 생성. 문서 과잉은 기존 sprint/archive tree 를 cold archive 로 접고, 문서 0은 report-first baseline 복원 |
-| `/sfs plan` | 현 sprint 의 의도/경계 + G1 요구사항/AC + CTO/CPO 계약 작성 |
+| `/sfs plan` | 현 sprint 의 의도/경계 + G1 요구사항/AC + CTO/CPO 계약 작성, G0 질문은 추측으로 덮지 않음 |
 | `/sfs implement [work slice]` | plan 기반 작업 slice 실행 + 하네스 4원칙 + 도메인/피드백 계약 + 6-division guardrail ledger + evidence 기록. 코드, taxonomy, design handoff, QA, infra/runbook, decision, docs 모두 artifact 로 취급 |
 | `/sfs review --gate G4 --executor codex` | 리뷰할 evidence 가 있을 때 CPO review bridge 실행 + 결과 기록 |
 | `/sfs review --show-last` | executor 재실행 없이 마지막 CPO review 결과를 요약/action report 로 확인 |
