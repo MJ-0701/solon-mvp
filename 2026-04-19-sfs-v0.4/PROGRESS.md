@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T00:26:02Z
-session: "user-active: WU-34 release handoff to parallel deployment session"
+last_overwrite: 2026-05-02T00:26:49Z
+session: "user-active: WU-34 closed + 0.5.59-product deployed to product/Homebrew/Scoop; scheduler paused"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: WU-34
@@ -146,14 +146,15 @@ resume_hint:
   default_action: |
     1) Read `CLAUDE.md`, then `PROGRESS.md`.
     2) Run: `bash scripts/resume-session-check.sh` (expect exit 0).
-    3) Continue `WU-34` next micro-step (see `sprints/WU-34.md` §4).
+    3) Do not auto-resume WU-34; it is closed and 0.5.59-product is deployed.
+       Ask user for the next WU/domain, unless they explicitly choose one.
   on_skip_patterns: ["아니", "잠깐", "다른", "stop"]
   on_skip_action: "What do you want to do instead (1 line)?"
-  on_ambiguous: "Proceed with WU-34, or pick a domain lock (D-*)?"
+  on_ambiguous: "WU-34 is closed/deployed. Pick next WU/domain, or wait?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
-  last_written: 2026-05-01T19:17:02Z
+  last_written: 2026-05-02T00:26:49Z
 ---
 
 # PROGRESS — compact
@@ -162,17 +163,15 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ① Just-Finished
 
-- WU-34 doc alignment: Codex CLI official entry = `$sfs ...`; Windows PowerShell direct shell = `sfs.cmd ...`; no Windows `/sfs` failure transcript needed.
+- WU-34 closed and released as `0.5.59-product`; product tag, Homebrew formula, and Scoop manifest pushed. Scheduler `overnight-sfs-loop-deploy` is paused.
 
 ## ② In-Progress
 
-- `current_wu`: `WU-34` (Codex CLI SFS invocation policy; small doc diff ready for review/commit)
+- None. Worktree cleanup/release verification only.
 
 ## ③ Next
 
-- WU-34: review small doc diff, then close/commit.
-- Scheduled loop (mode=scheduled): `D-G-WU-25` (row 10) → `D-H-WU-26` (row 3)
-- User-active: follow `WU-34` §4, or choose `D-E` / `D-F` for small cleanup
+- User chooses next WU/domain. Scheduled automation is paused, so no background loop should claim work.
 
 ## ④ Artifacts
 
