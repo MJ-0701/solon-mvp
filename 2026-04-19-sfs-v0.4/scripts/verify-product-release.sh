@@ -12,6 +12,9 @@ set -euo pipefail
 VERSION=""
 CHECK_INSTALLED=1
 CHECK_HANDOFF_CLEAN=1
+VERIFY_NETWORK_MAX_TIME_SEC="${SFS_VERIFY_NETWORK_MAX_TIME_SEC:-120}"
+VERIFY_GIT_LOW_SPEED_TIME_SEC="${SFS_VERIFY_GIT_LOW_SPEED_TIME_SEC:-30}"
+VERIFY_INSTALLED_TIMEOUT_SEC="${SFS_VERIFY_INSTALLED_TIMEOUT_SEC:-45}"
 
 usage() {
   cat <<'EOF'
@@ -76,6 +79,13 @@ if ! [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+-product$ ]]; then
   echo "invalid product version: ${VERSION}" >&2
   exit 1
 fi
+for _timeout_name in VERIFY_NETWORK_MAX_TIME_SEC VERIFY_GIT_LOW_SPEED_TIME_SEC VERIFY_INSTALLED_TIMEOUT_SEC; do
+  _timeout_value="${!_timeout_name}"
+  if ! [[ "${_timeout_value}" =~ ^[1-9][0-9]*$ ]]; then
+    echo "invalid ${_timeout_name}: ${_timeout_value} (expected positive integer seconds)" >&2
+    exit 1
+  fi
+done
 
 TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/sfs-release-verify.XXXXXX")"
 cleanup() {
@@ -91,7 +101,8 @@ fail() {
 
 fetch() {
   local url="$1" out="$2"
-  curl -fsSL "$url" -o "$out" || fail "download failed: $url" 2
+  curl -fsSL --connect-timeout 15 --max-time "${VERIFY_NETWORK_MAX_TIME_SEC}" --retry 2 --retry-delay 1 "$url" -o "$out" \
+    || fail "download failed or timed out: $url" 2
 }
 
 sha256_file() {
@@ -130,13 +141,15 @@ log "version = ${VERSION}"
 
 remote_main_sha() {
   local repo="$1" label="$2" sha
-  sha="$(git ls-remote "${repo}.git" refs/heads/main | awk '{print $1}' | head -1)"
+  sha="$(GIT_HTTP_LOW_SPEED_LIMIT=1 GIT_HTTP_LOW_SPEED_TIME="${VERIFY_GIT_LOW_SPEED_TIME_SEC}" \
+    git ls-remote "${repo}.git" refs/heads/main | awk '{print $1}' | head -1)"
   [[ -n "${sha}" ]] || fail "cannot resolve ${label} origin/main" 4
   printf '%s\n' "${sha}"
 }
 
 log "[1/6] product tag"
-if ! git ls-remote --tags "${PRODUCT_REPO}.git" "refs/tags/v${VERSION}" | grep -q "refs/tags/v${VERSION}$"; then
+if ! GIT_HTTP_LOW_SPEED_LIMIT=1 GIT_HTTP_LOW_SPEED_TIME="${VERIFY_GIT_LOW_SPEED_TIME_SEC}" \
+  git ls-remote --tags "${PRODUCT_REPO}.git" "refs/tags/v${VERSION}" | grep -q "refs/tags/v${VERSION}$"; then
   fail "missing product tag: v${VERSION}" 4
 fi
 log "  ok tag v${VERSION}"
@@ -159,7 +172,8 @@ log "[3/6] local Homebrew tap freshness"
 if command -v brew >/dev/null 2>&1; then
   TAP_REPO="$(brew --repo MJ-0701/solon-product 2>/dev/null || true)"
   if [[ -n "${TAP_REPO}" && -d "${TAP_REPO}/.git" ]]; then
-    git -C "${TAP_REPO}" fetch --quiet origin main || fail "local Homebrew tap fetch failed: ${TAP_REPO}" 6
+    GIT_HTTP_LOW_SPEED_LIMIT=1 GIT_HTTP_LOW_SPEED_TIME="${VERIFY_GIT_LOW_SPEED_TIME_SEC}" \
+      git -C "${TAP_REPO}" fetch --quiet origin main || fail "local Homebrew tap fetch failed: ${TAP_REPO}" 6
     TAP_HEAD="$(git -C "${TAP_REPO}" rev-parse HEAD)"
     TAP_ORIGIN="$(git -C "${TAP_REPO}" rev-parse refs/remotes/origin/main)"
     [[ "${TAP_HEAD}" = "${TAP_ORIGIN}" ]] || fail "local Homebrew tap is stale: ${TAP_REPO}" 6
@@ -194,7 +208,9 @@ log "  ok manifest URL + hash (${SCOOP_MAIN_SHA:0:7})"
 log "[5/6] installed runtime"
 if [[ "${CHECK_INSTALLED}" = "1" ]]; then
   command -v sfs >/dev/null 2>&1 || fail "installed sfs not found; rerun with --no-installed-check to skip" 7
-  VERSION_OUT="$(sfs version --check)"
+  if ! VERSION_OUT="$(SFS_COMMAND_TIMEOUT_SEC="${VERIFY_INSTALLED_TIMEOUT_SEC}" sfs version --check 2>&1)"; then
+    fail "installed sfs version check failed or timed out: ${VERSION_OUT}" 7
+  fi
   printf '%s\n' "${VERSION_OUT}" | grep -q "^sfs ${VERSION}$" || fail "installed sfs is not ${VERSION}" 7
   printf '%s\n' "${VERSION_OUT}" | grep -q "^latest ${VERSION}$" || fail "latest tag is not ${VERSION}" 7
   printf '%s\n' "${VERSION_OUT}" | grep -q "^status up-to-date$" || fail "installed sfs is not up-to-date" 7
@@ -225,7 +241,8 @@ check_clean_handoff_repo() {
     fail "${label} is on branch ${branch:-unknown}; switch back to main before handoff" 8
   fi
 
-  git -C "${repo}" fetch --quiet origin main || fail "${label} origin/main fetch failed" 8
+  GIT_HTTP_LOW_SPEED_LIMIT=1 GIT_HTTP_LOW_SPEED_TIME="${VERIFY_GIT_LOW_SPEED_TIME_SEC}" \
+    git -C "${repo}" fetch --quiet origin main || fail "${label} origin/main fetch failed" 8
   head="$(git -C "${repo}" rev-parse HEAD 2>/dev/null || true)"
   remote_head="$(git -C "${repo}" rev-parse refs/remotes/origin/main 2>/dev/null || true)"
   if [[ -z "${head}" || -z "${remote_head}" || "${head}" != "${remote_head}" ]]; then
