@@ -33,6 +33,12 @@ Hybrid refinement rules:
 - Use each artifact’s own guardrails (`plan.md`, `implement.md`, etc.) as SSoT for what to write.
 - Final user-facing response is a Solon report in a fenced `text` block (localized).
 - For `review`: summarize from recorded `review.md`/`result_path` metadata; do not dump raw executor markdown or create a new verdict.
+- For `implement`: do not stop at artifact creation. Execute the smallest work
+  slice and record evidence. Code may be the output, but taxonomy, design
+  handoff, QA evidence, infra/runbook, decisions, and docs are also valid
+  implementation artifacts. Use `implement.md` to classify artifact types,
+  division guardrails, domain terms, feedback checks, deferred work, and review
+  handoff. Code-specific DDD/TDD/transaction rules apply when code is touched.
 
 Minimal Solon report shape:
 ```text

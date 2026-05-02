@@ -3,8 +3,8 @@
 #
 # Solon SFS — `/sfs implement` command implementation.
 #
-# The bash adapter prepares deterministic implementation artifacts. AI runtimes
-# must then perform the actual code change, update evidence, and run checks.
+# The bash adapter prepares deterministic execution artifacts. AI runtimes must
+# then execute the requested work slice, update evidence, and run checks.
 
 set -euo pipefail
 
@@ -23,10 +23,10 @@ Open/update the active sprint's implement.md execution artifact.
   - Creates implement.md from sprint-templates/implement.md if missing.
   - Records the implementation request and appends an implement_open event.
   - Prints implement.md, plan.md, and log.md paths.
-  - AI runtimes must apply the implementation harness:
-    Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution.
-  - Direct bash does not edit product code. AI runtimes must continue with
-    actual code changes, tests, and evidence updates.
+  - AI runtimes must apply the execution harness:
+    Think Before Execution, Simplicity First, Surgical Changes, Goal-Driven Execution.
+  - Direct bash does not change product artifacts. AI runtimes must continue
+    with the actual artifact work, checks, and evidence updates.
 
 Exit codes:
   0  success
@@ -158,7 +158,7 @@ if ! append_event "implement_open" "${_payload}" 2>/dev/null; then
   exit "${SFS_EXIT_PERM}"
 fi
 
-echo "implement.md ready: ${IMPLEMENT_PATH} | plan.md: ${PLAN_PATH} | log.md: ${LOG_PATH} | AI runtime must implement code now"
+echo "implement.md ready: ${IMPLEMENT_PATH} | plan.md: ${PLAN_PATH} | log.md: ${LOG_PATH} | AI runtime must execute the work slice and record evidence now"
 
 exit "${SFS_EXIT_OK}"
 # End of sfs-implement.sh

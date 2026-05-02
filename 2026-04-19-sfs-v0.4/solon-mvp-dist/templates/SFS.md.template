@@ -29,7 +29,7 @@
 
 1. **CEO 요구사항 정리** (G0) — `sfs brainstorm` → `brainstorm.md`
 2. **CEO plan** (G1) — `sfs plan` → `plan.md` (+ sprint contract)
-3. **CTO 구현** (G2 entry) — `sfs implement "<slice>"` → 실제 코드 + evidence (`implement.md`/`log.md`)
+3. **CTO 구현** (G2 entry) — `sfs implement "<slice>"` → 실제 작업 artifact + evidence (`implement.md`/`log.md`)
 4. **CPO review** (G4) — `sfs review --gate G4 ...` → `review.md` + verdict/action
 5. **CTO 확인/재구현** — partial/fail 범위만 재구현
 6. **회고 + 보고서 정리** (G5) — `retro.md` + `report.md` 로 압축, workbench/tmp 는 archive 로 이동
@@ -43,12 +43,12 @@
 - close 정리: `sfs tidy --apply` 또는 `sfs retro --close` 가 workbench/tmp 를 archive 로 이동
   - 기존 sprint 를 나중에 정리할 때는: `sfs report --sprint <id>` 확인 후 `sfs tidy --sprint <id> --apply`
 
-## AI coding contract (최소)
+## AI execution contract (최소)
 
-1. **Think before coding**: 가정/성공기준/트레이드오프를 짧게 고정.
+1. **Think before execution**: 가정/성공기준/트레이드오프를 짧게 고정.
 2. **Simplicity first**: 한 번에 하나의 AC 를 증명하는 최소 slice.
 3. **Surgical changes**: 요청 slice 밖 cleanup 은 follow-up/risk 로 남김.
-4. **Evidence-first**: 코드 + 검증(테스트/스모크/CLI/브라우저) evidence + review handoff 가 완료 조건.
+4. **Evidence-first**: artifact + 검증(테스트/스모크/CLI/브라우저/review) evidence + review handoff 가 완료 조건.
 
 ## 파일/경로 SSoT (필요할 때만)
 

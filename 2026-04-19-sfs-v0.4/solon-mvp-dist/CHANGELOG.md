@@ -1,3 +1,24 @@
+## [0.5.60-product] - 2026-05-02
+
+**Implementation is now an execution contract, not a developer-only coding
+surface.** `/sfs implement` still supports code work, but it now treats
+taxonomy, design handoff, QA evidence, infra/runbook, decisions, and docs as
+first-class implementation artifacts.
+
+### Changed
+
+- **`/sfs implement` runtime handoff** — adapter output now tells AI runtimes to
+  execute the requested work slice and record evidence instead of saying they
+  must "implement code now".
+- **Implementation artifact template** — `implement.md` now records changed
+  artifact types, non-code review evidence, domain language, and feedback-first
+  plans while keeping code-specific DDD/TDD and backend transaction guardrails
+  conditional on code being touched.
+- **Product docs and Codex Skill** — README, GUIDE, 10X-VALUE, installed Codex
+  Skill, legacy Codex prompt, and implementation persona now describe
+  implementation as division-aware execution across code, taxonomy, design, QA,
+  infra, decisions, and docs.
+
 ## [0.5.59-product] - 2026-05-02
 
 **Codex and Windows invocation docs alignment.** Clarifies the supported SFS

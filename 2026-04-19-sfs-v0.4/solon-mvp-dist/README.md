@@ -49,9 +49,9 @@ Solon 의 10x 가치는 AI 가 코드를 더 많이 쓰게 하는 데 있지 않
 3. `/sfs start <goal>` 로 sprint workspace 를 만듭니다.
 4. 새 요구를 탐색하는 planning sprint 라면 `/sfs brainstorm` 으로 raw 요구사항을 G0 산출물에 남기고, Solon CEO 가 문제/제약/옵션/scope seed/plan seed 를 정리합니다.
 5. `/sfs plan` 에서 `plan.md ready` handshake 후 `brainstorm.md` 를 읽고 CEO plan 과 CTO/CPO sprint contract 를 남깁니다. 이때 공유 design concept, domain language, acceptance criteria, test contract 를 작은 구현 단위로 내립니다.
-   이미 통과한 plan/ADR 을 이어받는 implementation sprint 라면 G0/G1 을 다시 두껍게 돌리지 않습니다. `log.md` 또는 `plan.md` 에 `inherit-from: <prior sprint/ADR>` 와 이번 AC 만 얇게 남긴 뒤 바로 첫 구현 slice 로 들어갑니다.
-   sprint goal 이 repo scaffold, dev compose, DB schema, API boot, 테스트, UI 동작처럼 구체적인 구현 산출물을 말한다면 G1 계약만으로 sprint 완료가 아닙니다. 코드/설정 변경, smoke/test evidence, review, retro 까지가 완료 조건입니다.
-6. `/sfs implement "<첫 구현 slice>"` 에서 `implement.md` + `log.md` 를 열고, AI runtime 이 실제 코드 변경과 테스트/스모크 evidence 를 남깁니다. 구현 모드는 공유 design concept, DDD 용어, TDD/작은 verification loop, 기존 코드 규칙성을 지키는 것을 기본 guardrail 로 삼습니다. 또한 strategy-pm, taxonomy, design/frontend, dev/backend, QA, infra 6개 division 을 always-on / trigger-based / scale-gated 로 분류합니다. Backend Transaction discipline 은 항상 켜져 있고, Security / Infra / DevOps 는 sprint/project 단위 `light` / `full` / `skip` 질문으로만 확장하며, MVP-overkill 은 `deferred` 또는 `risk-accepted` 로 기록합니다.
+   이미 통과한 plan/ADR 을 이어받는 implementation sprint 라면 G0/G1 을 다시 두껍게 돌리지 않습니다. `log.md` 또는 `plan.md` 에 `inherit-from: <prior sprint/ADR>` 와 이번 AC 만 얇게 남긴 뒤 바로 첫 실행 slice 로 들어갑니다.
+   sprint goal 이 repo scaffold, dev compose, DB schema, API boot, 테스트, UI 동작, taxonomy 정리, design handoff, QA evidence, infra/runbook 처럼 구체적인 실행 산출물을 말한다면 G1 계약만으로 sprint 완료가 아닙니다. artifact 변경, smoke/test/review evidence, review, retro 까지가 완료 조건입니다.
+6. `/sfs implement "<첫 실행 slice>"` 에서 `implement.md` + `log.md` 를 열고, AI runtime 이 실제 작업 slice 와 검증 evidence 를 남깁니다. 코드 변경은 중요한 산출물이지만 유일한 산출물은 아닙니다. taxonomy, design handoff, QA evidence, infra/runbook, decision, docs 도 implementation artifact 입니다. 구현 모드는 공유 design concept, 도메인 용어, 작은 verification loop, 기존 프로젝트 규칙성을 기본 guardrail 로 삼습니다. 코드가 포함될 때 DDD/TDD 와 backend Transaction discipline 이 강하게 적용되고, Security / Infra / DevOps 는 sprint/project 단위 `light` / `full` / `skip` 질문으로만 확장하며, MVP-overkill 은 `deferred` 또는 `risk-accepted` 로 기록합니다.
 7. `/sfs review --gate G4 --executor codex|gemini|claude` 로 CPO Evaluator review 를 실행하고 verdict 를 남깁니다. 명령 출력은 result path/verdict 메타데이터만 짧게 보여주고, AI runtime 은 원문 result 를 사용자의 언어로 요약해 해야 할 일을 Solon report 로 보여줍니다. 수동 handoff 만 필요하면 `--prompt-only` 를, 기존 리뷰 확인은 `--show-last` 를 사용합니다.
 8. `/sfs report` 로 최종 작업보고서 `report.md` 를 만들고, `/sfs retro --close` 또는 `/sfs tidy --apply` 에서 workbench 문서를 archive 로 이동합니다. `brainstorm/plan/implement/log/review` 는 작업 중 화이트보드이고, 완료 후에는 `report.md` + `retro.md` 가 읽는 입구입니다.
 9. `/sfs status` 와 `.sfs-local/events.jsonl` 로 현재 상태를 확인합니다.
@@ -258,7 +258,7 @@ entry point 를 프로젝트에 설치/갱신합니다:
 /sfs start "첫 번째 sprint 목표"
 /sfs brainstorm "raw 요구사항과 아직 정리 안 된 맥락"
 /sfs plan
-/sfs implement "첫 구현 slice"
+/sfs implement "첫 실행 slice"
 /sfs review --gate G4 --executor codex --generator claude
 /sfs decision "초기 인증 방식은 세션 기반으로 시작한다"
 /sfs report
@@ -269,7 +269,7 @@ $sfs status
 $sfs start "첫 번째 sprint 목표"
 $sfs brainstorm "raw 요구사항과 아직 정리 안 된 맥락"
 $sfs plan
-$sfs implement "첫 구현 slice"
+$sfs implement "첫 실행 slice"
 $sfs report
 
 # Windows PowerShell direct shell
@@ -314,7 +314,7 @@ vendored layout 에서 direct adapter 를 호출해야 하면:
 | `/sfs adopt [--id legacy-baseline] [--apply]` | SFS 없이 진행된 legacy 프로젝트를 git/code/docs 기반으로 인계. 문서 과잉 프로젝트는 기존 visible sprint/archive tree 를 cold archive tarball 로 접고 `report.md` + `retro.md` 만 남김. 문서 0 프로젝트는 최소 baseline 을 복원. 기본은 dry-run |
 | `/sfs brainstorm [text|--stdin]` | G0 raw 요구사항/대화 맥락을 기록하고, AI runtime 에서 Solon CEO 가 §1~§7을 정리 |
 | `/sfs plan` | 현재 sprint 의 `plan.md` 작성 또는 갱신 + G1 요구사항/AC/scope + CTO/CPO sprint contract refinement |
-| `/sfs implement [work slice|--stdin]` | `implement.md`/`log.md` 를 열고 plan 기반 실제 코드 변경 + 테스트/스모크 evidence 기록. AI runtime 은 여기서 구현까지 진행하며, backend Transaction / `REQUIRES_NEW` guardrail 은 always-on, Security / Infra / DevOps 는 `light` / `full` / `skip`, 과한 항목은 `deferred` / `risk-accepted` 로 기록 |
+| `/sfs implement [work slice|--stdin]` | `implement.md`/`log.md` 를 열고 plan 기반 작업 slice 실행 + evidence 기록. 코드, taxonomy, design handoff, QA, infra/runbook, decision, docs 를 모두 artifact 로 취급하며, 코드가 포함될 때 backend Transaction / `REQUIRES_NEW` guardrail 을 always-on 으로 적용. Security / Infra / DevOps 는 `light` / `full` / `skip`, 과한 항목은 `deferred` / `risk-accepted` 로 기록 |
 | `/sfs review --gate <id> [--executor <tool>] [--prompt-only]` / `/sfs review --show-last` | CPO Evaluator review run. stdout 은 verdict/output path 메타데이터만 보여주고, AI runtime 이 result 를 사용자 언어의 요약+action report 로 렌더링. full prompt 는 tmp prompt file에 저장하며 `review.md`에는 compact log/result를 남김 (id ∈ G-1..G5) |
 | `/sfs decision <title>` | full ADR 생성 후 Context/Decision/Alternatives/Consequences 작성 |
 | `/sfs report [--sprint <id>] [--compact]` | 최종 작업보고서 `report.md` 생성/갱신. `--compact` 는 사용자 동의 후 workbench 문서를 archive 로 이동 |

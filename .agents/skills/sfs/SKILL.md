@@ -40,18 +40,19 @@ Sprint mode guidance:
   sprint by default.
 - For an implementation sprint, G0/G1 should be thin: record `inherit-from:
   <prior sprint/plan/ADR>`, scope, and binary AC only when useful, then proceed
-  to the first code slice and `log.md` evidence. Do not recommend repeating a
+  to the first execution slice and `log.md` evidence. Do not recommend repeating a
   full `brainstorm -> plan` loop unless the inherited contract is missing or
   ambiguous.
 - If the sprint goal names concrete build work such as repo scaffold, dev
-  compose, DB schema, API boot, tests, or UI behavior, do not recap G1 contract
-  completion as sprint completion. Sprint completion requires implementation
-  evidence, test/smoke evidence, review, and retro, unless the user explicitly
+  compose, DB schema, API boot, tests, UI behavior, taxonomy cleanup, design
+  handoff, QA evidence, or infra/runbook, do not recap G1 contract completion
+  as sprint completion. Sprint completion requires implementation evidence,
+  test/smoke/review evidence, review, and retro, unless the user explicitly
   scoped it as planning-only.
 - After `start`, a short recap is allowed and often useful. Its `Next` must be
   inferred from sprint mode: fresh discovery can point to `brainstorm`, while
-  inherited implementation work should point to the first code slice, `log.md`
-  evidence, and later G4 review.
+  inherited implementation work should point to the first execution slice,
+  `log.md` evidence, and later G4 review.
 
 Special close guard: if the user invokes `retro --close` in an AI runtime, do
 not run the close adapter first. Run `retro` without `--close`, refine
@@ -144,7 +145,7 @@ not create a new verdict in the current runtime.
 | `adopt [--id legacy-baseline] [--apply]` (또는 "legacy 인수인계", "기존 프로젝트 SFS 도입") | `sfs adopt [--id legacy-baseline] [--apply]` | legacy 프로젝트를 report-first baseline 으로 인계. 문서 과잉이면 기존 sprint/archive tree 를 cold archive tarball 로 접고, 문서 0이면 git/code/test/docs 흔적에서 최소 baseline 복원. raw scan 은 archive 보존 |
 | `brainstorm [text|--stdin]` (또는 "브레인스토밍", "요구사항 정리") | `sfs brainstorm <raw context>` | G0 raw 요구사항/대화 맥락을 brainstorm.md 에 기록한 뒤 §1~§7을 Solon CEO로 정리. newline 허용 |
 | `plan` (또는 "plan 작성", "이번 sprint 계획") | `sfs plan` | plan.md 진입 + plan_open event 후 brainstorm.md 기반 G1 plan/contract 작성 |
-| `implement [work slice|--stdin]` (또는 "구현", "코드 구현", "실제 작업") | `sfs implement <work slice>` | implement.md/log.md 진입 후 plan 기반으로 실제 코드 변경 + 테스트/스모크 evidence 작성. 여기서 멈추지 말고 구현까지 진행 |
+| `implement [work slice|--stdin]` (또는 "구현", "코드 구현", "실제 작업") | `sfs implement <work slice>` | implement.md/log.md 진입 후 plan 기반 작업 slice 실행 + evidence 작성. 코드, taxonomy, design handoff, QA, infra/runbook, decision, docs 모두 implementation artifact 로 취급 |
 | `review --gate <id> [--executor <tool>] [--prompt-only]` / `review --show-last` (또는 "CPO review", "검증 기록", "이전 리뷰 확인") | `sfs review --gate <id> [--executor <tool>] [--generator <tool>] [--prompt-only]` 또는 `sfs review --show-last [--gate <id>]` | CPO Evaluator bridge run by default. `--prompt-only` creates prompt/log for manual handoff. `--show-last` prints compact metadata for the latest recorded result without rerunning executor. id ∈ G-1, G0, G1, G2, G3, G4, G5 |
 | `decision <title>` (또는 "결정 기록", "ADR 추가") | `sfs decision "<title>" [--id <id>]` | ADR file 생성 후 Context/Decision/Alternatives/Consequences refinement |
 | `report [--sprint <id>] [--compact]` (또는 "보고서", "최종보고서") | `sfs report [--sprint <id>] [--compact]` | report.md 진입 후 최종 작업보고서 refinement. `--compact` 는 사용자 동의 후 workbench 를 archive 로 이동 |
@@ -306,14 +307,16 @@ first run the bash adapter, then fill `plan.md` from the current G0 context.
 6. Do not implement code, choose irreversible infrastructure, or run
    `/sfs review` automatically.
 7. Final response: render a Solon report. Include `plan.md` path in `Files`,
-   question count in `Questions`, and `Next: /sfs review --gate G1 ... then /sfs implement "<first code slice>"`
+   question count in `Questions`, and `Next: /sfs review --gate G1 ... then /sfs implement "<first execution slice>"`
    when ready; otherwise `Next: answer questions, then /sfs plan`.
 
 ## Implementation Execution
 
-`/sfs implement` is the command that turns plan into code. It is never
-artifact-only in AI runtimes. After the bash adapter succeeds and stdout has
-been shown verbatim, continue into actual implementation unless blocked.
+`/sfs implement` is the command that turns plan into a verified work slice. It
+is never artifact-only in AI runtimes. After the bash adapter succeeds and
+stdout has been shown verbatim, continue into actual execution unless blocked.
+Code may be the output, but taxonomy, design handoff, QA evidence, infra/runbook,
+decisions, and docs are also valid implementation artifacts.
 
 1. Resolve `implement.md`, `plan.md`, and `log.md` from adapter stdout. If
    stdout cannot be parsed, read `.sfs-local/current-sprint` and open those
@@ -321,18 +324,18 @@ been shown verbatim, continue into actual implementation unless blocked.
 2. Read `plan.md`, `implement.md`, `log.md`, and relevant project files. If the
    requested slice conflicts with the plan, state the conflict and ask before
    editing.
-3. Apply the harness guardrails from `implement.md` before editing code:
-   - **Think Before Coding**: state assumptions, trade-offs, and success
+3. Apply the harness guardrails from `implement.md` before editing artifacts:
+   - **Think Before Execution**: state assumptions, trade-offs, and success
      criteria; ask before editing if the slice is ambiguous.
-   - **Simplicity First**: implement the smallest code and document surface
-     that proves the acceptance criteria.
+   - **Simplicity First**: implement the smallest artifact surface that proves
+     the acceptance criteria.
    - **Surgical Changes**: every changed line must connect to the requested
      slice; record unrelated cleanup as a follow-up.
    - **Goal-Driven Execution**: completion requires verification evidence and
      a review handoff, not just changed files.
    Then preserve the supporting implementation discipline: shared design
-   concept, DDD language, TDD or the smallest useful verification loop, and
-   existing codebase regularity.
+   concept, domain language, TDD or the smallest useful verification loop when
+   code is touched, and existing project regularity.
 4. Classify Solon division guardrails before editing and record the result in
    `implement.md` / `log.md`. Use the same policy shape for all 6 divisions:
    always-on craft rules, trigger-based checks, and scale-gated `light` /
@@ -355,15 +358,16 @@ been shown verbatim, continue into actual implementation unless blocked.
    scope when that surface is relevant: `light`, `full`, or `skip`. Keep basic
    hygiene always-on; put skipped expensive reviews into the deferred /
    risk-accepted ledger with the reason.
-7. Implement the smallest coherent code slice. Prefer test-first when the
-   codebase has a usable test harness. If no test harness exists, create or run
-   the smallest practical smoke check and record the limitation.
-8. Update `implement.md` §1~§5 and `log.md` with changed files, guardrails
-   applied/skipped/deferred/risk-accepted, decisions, tests/commands, result,
-   and review handoff. Set `implement.md` frontmatter `status:
-   ready-for-review` only when code and verification evidence exist.
-9. Run relevant tests/checks. Do not claim success without evidence.
-10. Final response: render a Solon report with actual code files in `Files`,
+7. Implement the smallest coherent work slice. Prefer test-first when touching
+   code and the codebase has a usable test harness. For non-code work, run the
+   smallest practical review, smoke, or checklist and record the limitation.
+8. Update `implement.md` §1~§5 and `log.md` with changed files/artifacts,
+   artifact types, guardrails applied/skipped/deferred/risk-accepted,
+   decisions, tests/checks/review evidence, result, and review handoff. Set
+   `implement.md` frontmatter `status: ready-for-review` only when the work
+   slice and verification evidence exist.
+9. Run relevant tests/checks/reviews. Do not claim success without evidence.
+10. Final response: render a Solon report with changed artifacts in `Files`,
    checks in `Actions` or `Steps`, and `Next: /sfs review --gate G4` when ready.
 
 ## Decision ADR Refinement

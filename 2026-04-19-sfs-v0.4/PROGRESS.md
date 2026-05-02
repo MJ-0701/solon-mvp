@@ -2,16 +2,16 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-02T00:26:49Z
-session: "user-active: WU-34 closed + 0.5.59-product deployed to product/Homebrew/Scoop; scheduler paused"
+last_overwrite: 2026-05-02T00:44:00Z
+session: "user-active: WU-37 closed; 0.5.60-product release pending"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
-current_wu: WU-34
-current_wu_path: 2026-04-19-sfs-v0.4/sprints/WU-34.md
+current_wu: WU-37
+current_wu_path: 2026-04-19-sfs-v0.4/sprints/WU-37.md
 
 # ── SESSION MUTEX (CLAUDE.md §1.12) ───────────────────────────────
 # Keep scalar form for tool compatibility (.sfs-local/scripts/sfs-loop.sh stop/status, auto-resume contract).
-current_wu_owner: null
+current_wu_owner: codex-implement-contract-20260502
 
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
@@ -146,11 +146,12 @@ resume_hint:
   default_action: |
     1) Read `CLAUDE.md`, then `PROGRESS.md`.
     2) Run: `bash scripts/resume-session-check.sh` (expect exit 0).
-    3) Do not auto-resume WU-34; it is closed and 0.5.59-product is deployed.
-       Ask user for the next WU/domain, unless they explicitly choose one.
+    3) Continue WU-37 release packaging if this session resumes before final
+       status says 0.5.60-product is deployed. Otherwise ask user for the next
+       WU/domain.
   on_skip_patterns: ["아니", "잠깐", "다른", "stop"]
   on_skip_action: "What do you want to do instead (1 line)?"
-  on_ambiguous: "WU-34 is closed/deployed. Pick next WU/domain, or wait?"
+  on_ambiguous: "WU-37 is closed; 0.5.60 release may still be pending. Continue release?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
@@ -163,16 +164,17 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ① Just-Finished
 
-- WU-34 closed and released as `0.5.59-product`; product tag, Homebrew formula, and Scoop manifest pushed. Scheduler `overnight-sfs-loop-deploy` is paused.
+- WU-37 implementation contract hardening is functionally complete. `/sfs implement` now reads as division-aware execution, not code-only generation; syntax checks and sandbox smoke passed.
 
 ## ② In-Progress
 
-- None. Worktree cleanup/release verification only.
+- Release packaging for `0.5.60-product` is pending after WU-37 commit/backfill.
 
 ## ③ Next
 
-- User chooses next WU/domain. Scheduled automation is paused, so no background loop should claim work.
+- Commit WU-37, backfill final sha, cut `0.5.60-product`, then update Homebrew + Scoop to the same tag.
 
 ## ④ Artifacts
 
-- Archive: `archives/progress/PROGRESS-2026-05-01T181258Z-precompact.md`
+- Archive: `archives/progress/PROGRESS-2026-05-01T181258Z-precompact.md`.
+- Sandbox smoke: `/private/tmp/sfs-implement-contract-smoke2.9N6vXf`.

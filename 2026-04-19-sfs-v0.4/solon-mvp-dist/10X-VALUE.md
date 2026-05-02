@@ -4,10 +4,11 @@
 > Solon makes AI work safer by turning unclear intent into shared concepts,
 > domain language, testable contracts, small work units, and review signals.
 
-AI coding is fast when the codebase is easy to change. In a codebase with weak
+AI coding is fast when the codebase is easy to change. AI execution is safe
+when the whole project surface is easy to change. In a project with weak
 structure, unclear domain language, and slow feedback, AI often accelerates
-software entropy: local patches accumulate, design intent disappears, and each
-new change becomes harder to trust.
+entropy: local patches accumulate, design intent disappears, and each new
+change becomes harder to trust.
 
 Solon's 10x value is the operating loop that prevents that decay.
 
@@ -22,7 +23,7 @@ Fuzzy idea
 -> retro / next action
 ```
 
-## Why AI Coding Fails
+## Why AI Execution Fails
 
 Solon treats these as product problems, not prompt problems.
 
@@ -32,10 +33,10 @@ Solon treats these as product problems, not prompt problems.
 
 2. **No domain language**
    - The user, domain expert, developer, and AI use the same words differently.
-   - The result is verbose explanation, wrong abstraction, and code that does not match the real work.
+   - The result is verbose explanation, wrong abstraction, and artifacts that do not match the real work.
 
 3. **No tight feedback loop**
-   - The AI writes too much code before anything is tested.
+   - The AI changes too much before anything is tested or reviewed.
    - Bugs appear late, and the rework is broad instead of local.
 
 4. **No codebase regularity**
@@ -60,33 +61,36 @@ The non-developer does not need to learn software architecture first. Solon
 extracts the minimum structure needed for an AI and a developer to build the
 right thing.
 
-## Developer 10x Loop
+## Execution 10x Loop
 
-For coding work, Solon assumes DDD and TDD are defaults.
+For execution work, Solon assumes domain language and tight feedback are
+defaults. For code slices, that means DDD-lite and TDD-lite. For non-code
+slices, it means named terms, artifact boundaries, and the smallest useful
+review/check.
 
 They are not ceremony. They are AI safety rails.
 
 | Practice | Solon meaning | Why it matters for AI |
 |---|---|---|
-| Codebase analysis | ask what patterns already exist before editing | AI should follow the system, not invent a new one |
-| DDD-lite | name domain terms, entities, states, and invariants | AI uses the user's real language in code |
-| TDD contract | define behavior before implementation | AI must work in smaller feedback loops |
+| System analysis | ask what patterns already exist before editing | AI should follow the system, not invent a new one |
+| Domain language | name terms, entities, states, labels, and invariants | AI uses the user's real language across artifacts |
+| Feedback contract | define behavior, review, or smoke evidence before implementation | AI must work in smaller feedback loops |
 | Small slice | implement one bounded change | Local failure stays local |
 | Review gate | independent CPO verdict and CTO actions | The generator does not self-approve |
 
-Good code is code that remains easy to change. Good AI coding is coding that
+Good implementation artifacts remain easy to change. Good AI execution
 preserves that property.
 
-## Solon Coding Contract
+## Solon Execution Contract
 
-When Solon is used to build code, the default implementation sequence should be:
+When Solon is used to implement work, the default sequence should be:
 
-1. Analyze the existing codebase and name the dominant rules.
+1. Analyze the existing project surface and name the dominant rules.
 2. Extract or update the domain language.
-3. Write acceptance criteria and test candidates before implementation.
+3. Write acceptance criteria and feedback candidates before implementation.
 4. Choose the smallest implementation slice that can prove progress.
-5. Run tests or equivalent feedback before expanding scope.
-6. Review against domain intent, codebase regularity, and user-visible behavior.
+5. Run tests, review, smoke, or equivalent feedback before expanding scope.
+6. Review against domain intent, project regularity, and user-visible behavior.
 7. Record the decision, rework, or next action.
 
 This is the difference between "spec to code" and "intent to durable software".
