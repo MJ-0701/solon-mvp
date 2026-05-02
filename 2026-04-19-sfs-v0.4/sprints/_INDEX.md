@@ -2,7 +2,7 @@
 doc_id: sprints-index
 title: "sprints/ — WU (Work Unit) 파일 목록 (v2)"
 visibility: raw-internal
-updated: 2026-05-02   # WU-38 완료: release completion guard = Homebrew/Scoop channel + local tap/installed smoke 검증.
+updated: 2026-05-02   # WU-43 완료: `sfs start` next-action guidance.
 ---
 
 # sprints/ — WU 파일 인덱스
@@ -56,6 +56,11 @@ updated: 2026-05-02   # WU-38 완료: release completion guard = Homebrew/Scoop 
 | WU-34 | Codex CLI SFS invocation policy — Codex CLI official Skill entry = `$sfs ...`; Windows PowerShell direct shell = `sfs.cmd ...`; Codex app `/sfs ...` remains valid only when host passes prompt text through to the model/Skill. | `d359b9f` | 2026-04-30 | 2026-05-02 | codex-desktop-user-active-20260430 → codex-desktop-user-active-20260502 | [WU-34.md](WU-34.md) |
 | WU-37 | Implement execution contract hardening — `/sfs implement` now means executing the smallest verified work slice, with code, taxonomy, design handoff, QA evidence, infra/runbook, decisions, and docs all treated as implementation artifacts. | `583dcaf` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-37.md](WU-37.md) |
 | WU-38 | Release channel verification hotfix — Homebrew self-upgrade now refreshes the Solon tap and release owners must verify product tag, Homebrew formula/tap, Scoop manifest, hashes, and installed `sfs version --check` before calling deploy complete. | `9f7969b` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-38.md](WU-38.md) |
+| WU-39 | Context-routing structure for Solon adapters — entry docs are tiny routers and command/policy context lives under `.sfs-local/context/`. | `553739f` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-39.md](WU-39.md) |
+| WU-40 | Beginner guide for non-developer onboarding — plain-language Windows/Scoop and Mac/Homebrew guide for first successful `sfs status`. | `25f8bd7` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-40.md](WU-40.md) |
+| WU-41 | Neutral beginner guide audience wording — describe CLI/terminal familiarity instead of naming job categories. | `101f8b3` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-41.md](WU-41.md) |
+| WU-42 | Windows Scoop command docs alignment — PowerShell/cmd examples use `sfs.cmd`, Mac/Git Bash examples keep `sfs`, and source PowerShell installers are fallback. | `8f6bea9` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-42.md](WU-42.md) |
+| WU-43 | `sfs start` next-action guidance — start prints one readable `next: sfs brainstorm ...` line and routed docs clarify bash-first semantics. | `6c4ca93` | 2026-05-02 | 2026-05-02 | codex-desktop-user-active-20260502 | [WU-43.md](WU-43.md) |
 
 ## 완료 WU (status: done) — v1 → v2 이관 (WU-16 backfill)
 
