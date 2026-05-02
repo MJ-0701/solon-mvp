@@ -364,9 +364,10 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
   README stays a map/TOC, installer onboarding points through `review -> retro`,
   and `report`/`tidy` are documented as optional/special actions.
 - Docs trim + KO/EN sync shipped as `0.5.86-product`: dev `503c327` (release
-  handoff) + `62f7560` (work commit); tag `v0.5.86-product`; Homebrew tap
-  commit `8209ced`; Scoop bucket commit `5c681aa`; full release verifier 7/7
-  passed and installed `sfs version --check` reports up to date.
+  handoff) + `62f7560` (work commit); stable `1ff3df5` / tag
+  `v0.5.86-product`; Homebrew tap commit `8209ced`; Scoop bucket commit
+  `5c681aa`; full release verifier 7/7 passed and installed
+  `sfs version --check` reports up to date.
   README/GUIDE/`docs/ko`+`docs/en` no longer surface dev-internal rationale,
   migration tone, or near-duplicate sections; `sfs guide` added to README
   Command Surface; `sfs retro --draft` moved into the §11 reference table;
@@ -442,8 +443,8 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
   `v0.5.84-product`; Homebrew `c257847`; Scoop `376ee36`; dev `13fff19`.
 - Product GUIDE/README close-flow cleanup release: stable `4c1e1d0` / tag
   `v0.5.85-product`; Homebrew `b8bb937`; Scoop `dcf1790`; dev `77ebe55`.
-- Product docs trim + KO/EN sync release: tag `v0.5.86-product`; Homebrew
-  `8209ced`; Scoop `5c681aa`; dev `503c327` (release handoff) atop
-  `62f7560` (work commit).
+- Product docs trim + KO/EN sync release: stable `1ff3df5` / tag
+  `v0.5.86-product`; Homebrew `8209ced`; Scoop `5c681aa`; dev `503c327`
+  (release handoff) atop `62f7560` (work commit).
 - Study-note G4 validation: `.sfs-local/tmp/review-runs/2026-W18-sprint-5-G4-20260502T054452Z.result.md`
   returned `pass` after code-level rework.
