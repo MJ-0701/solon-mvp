@@ -23,5 +23,15 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
     worker may fill internally.
 - A plan is not ready just because it is long. It is ready when an evaluator can
   independently check pass/partial/fail without reading the generator's mind.
+- Load `policies/knowledge-pack-router.md` first and only proceed to division
+  packs from its mapping.
+- If backend/JVM/Spring/JPA/transaction/batch/integration/DevOps/AWS risk is in
+  scope, record matching ids from `policies/backend-knowledge-pack.md` only after
+  router selection.
+- If strategy-pm, QA, design/frontend, infra, or taxonomy signals are in scope,
+  record matching ids from the matching `policies/*-knowledge-pack.md` only after
+  router selection. These packs are activation routers, not full guidance.
+- Use the backend pack as a scale router: first MVP gets minimal guardrails;
+  money, PII, partner state, batch, MQ, or production exposure increases depth.
 - Do not run implementation automatically from Gate 3. If the contract is ready,
   final `Next` may point to review or the first explicit implementation slice.
