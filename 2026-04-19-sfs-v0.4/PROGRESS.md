@@ -2,18 +2,34 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-04T01:30:00+09:00
-session: "claude-cowork:wizardly-quirky-gauss — ✅ §4.E G1 review FINAL LOCK 2026-05-04T01:30+09:00 KST. 5 round cycle (Stage 1 AI-PROPOSED + Round 1~4 PARTIAL cross-instance + Round 5 quick verify PASS) + 44 CTO fix items + 10+ CEO ruling locks. plan.md status=ready-for-implement. session closing + mutex release. G2 implement~G6~G7~release cut = next sessions per user chain plan."
+last_overwrite: 2026-05-04T10:10:00+09:00
+session: "claude-cowork:amazing-keen-euler — ✅ §4.E G2 implement chunk 1 (Cowork batch) COMPLETE. AC1.1/AC1.2/AC1.3(structural)/AC7.1/AC7.2(structural)/AC7.3/AC7.7/anti-AC7 PASS. CLAUDE.md §1.29 신설 (Cowork ↔ Code mode work split rule). 본 세션 mutex release. **다음 세션 = (D) Code runtime (Claude Code or Codex CLI) batch — R-B/R-C/R-D/R-E/R-F/R-G(audit)/R-H/R-I 실 logic + tests/CI + brew/scoop sha256 + atomic 5-file commit + push origin/main + AC9 baseline diff 한 번에 끝내기**. Batch 3 (G6 review + G7 retro + release cut) = Code 끝난 후 Cowork 세션."
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
-current_wu: "§4.E 0.6.0-product implement sprint G1 review ✅ FINAL LOCK PASS 2026-05-04T01:30+09:00 KST. plan.md status=ready-for-implement. G2 implement entry = next session user 명시 명령."
-current_wu_path: "2026-04-19-sfs-v0.4/sprints/0-6-0-product-implement/plan.md"   # status=ready-for-implement, G2 entry 대기
+current_wu: "§4.E 0.6.0-product implement sprint G2 chunk 1 ✅ COMPLETE (Cowork batch). chunk 2 (Code batch) entry = (D) Claude Code/Codex CLI 세션 — R-B/R-C/R-D/R-E/R-F/R-G(audit)/R-H/R-I + atomic commit + push 한 번에. CLAUDE.md §1.29 split rule 정합."
+current_wu_path: "2026-04-19-sfs-v0.4/sprints/0-6-0-product-implement/implement.md"   # status=in-progress (chunk 1 PASS, chunk 2 대기)
 
 # ── SESSION MUTEX (CLAUDE.md §1.12) ───────────────────────────────
 # Keep scalar form for tool compatibility (.sfs-local/scripts/sfs-loop.sh stop/status, auto-resume contract).
-# Takeover 2026-05-03 KST: prev owner affectionate-trusting-thompson 가 자연 종료 (released_at=2026-05-03T22:50+09:00). 본 세션 wizardly-quirky-gauss 가 자유 claim (null → self).
-current_wu_owner: null   # session 자연 종료 (G1 review FINAL LOCK PASS 2026-05-04T01:30+09:00 KST, user chain plan G1 closure 달성). claimed_at=2026-05-03T23:10+09:00, released_at=2026-05-04T01:30+09:00. 다음 세션 자유 claim 가능 (G2 implement entry).
+# Released 2026-05-04T10:10+09:00 KST: amazing-keen-euler chunk 1 (Cowork batch) 완료 → null release.
+current_wu_owner: null   # session 자연 종료 (G2 chunk 1 Cowork batch 완료, 2026-05-04T10:10+09:00). claimed_at=2026-05-04T09:30+09:00, released_at=2026-05-04T10:10+09:00. 다음 세션 (D) Code runtime 자유 claim.
 last_session_owner_history:
+  - session_codename: amazing-keen-euler
+    claimed_at: 2026-05-04T09:30:00+09:00
+    released_at: 2026-05-04T10:10:00+09:00
+    last_heartbeat: 2026-05-04T10:10:00+09:00
+    work_done:
+      - "§4.E G2 implement ENTRY (user 'sfs implement --gate G2')"
+      - "implement.md + log.md skeleton 신설 (sprints/0-6-0-product-implement/)"
+      - "R-A AC1.1: 6 신규 bash script 작성 (sfs-storage-init / sfs-storage-precommit / sfs-archive-branch-sync / sfs-sprint-yml-validator / sfs-migrate-artifacts / sfs-migrate-artifacts-rollback). 모두 executable + shebang + set -euo pipefail + bash -n syntax OK. body = functional skeleton (arg parse + mode dispatch + TODO chunk N marker)"
+      - "R-A AC1.2: bin/sfs dispatch 5 신규 case (storage / migrate-artifacts / migrate-artifacts-rollback / archive-branch-sync|archive / sprint). grep -cE '(migrate-artifacts|storage|archive|sprint)' = 32 ≥ 5"
+      - "R-A AC1.3 structural: bin/sfs.ps1 + sfs.cmd thin forwarder 구조 정합 (5 신규 subcommand 자동 dispatch via bash bin/sfs forward). 실 smoke verify = AC4.5 다음 chunk"
+      - "R-G AC7.1: VERSION 0.5.96-product → 0.6.0 (suffix drop)"
+      - "R-G AC7.2 structural: bin/sfs version_command 가 VERSION head 그대로 출력 → sfs 0.6.0 (S2-N3 α Round 1 CEO ruling 정합)"
+      - "R-G AC7.3 + AC7.7: CHANGELOG.md ## [0.6.0] 첫 entry header + migration note 첫 line (Version naming hard cut: from 0.6.0 onwards no -product suffix. Historical 0.5.x-product tags preserved.)"
+      - "anti-AC7 PASS: grep -c '0.6.0-product' VERSION bin/sfs CHANGELOG.md = 0 (3 file all 0). 0.6.0 entry block 안 0.6.0-product literal = 0"
+      - "CLAUDE.md §1.29 신설 (Cowork ↔ Code mode work split rule, 180L → 181L ≤200). 사용자 발화 lock: 'claude 특성상 cowork에 최적화된 작업이랑 code에서 최적화된 작업이 나뉘잖아 ... 앞으로 claude에서 작업할때 이걸 나눠줘'"
+      - "본 G2 잔여 작업 §1.29 즉시 split: Batch 1 (C, 본 세션) = chunk 1~4 / Batch 2 (D, 다음 세션 Code runtime) = R-B~R-I 한 번에 끝내기 / Batch 3 (C, 다음 Cowork 세션) = G6 review + G7 retro + release cut"
   - session_codename: wizardly-quirky-gauss
     claimed_at: 2026-05-03T23:10:00+09:00
     released_at: 2026-05-04T01:30:00+09:00
@@ -419,30 +435,52 @@ domain_locks:
 
 resume_hint:
   default_action: |
-    1) Read `CLAUDE.md`, then `PROGRESS.md`.
+    1) Read `CLAUDE.md` (181L, §1.29 신설 — Cowork ↔ Code mode work split rule),
+       then `PROGRESS.md`, then `sprints/0-6-0-product-implement/implement.md`
+       + `log.md` (chunk 1 Cowork batch ✅ COMPLETE).
     2) Run: `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh` (expect exit 0).
-    3) Read in order:
-       - `2026-04-19-sfs-v0.4/sprints/0-6-0-product-implement/brainstorm.md`
-         (G0, 9/9 axes locked, ready-for-plan).
-       - `2026-04-19-sfs-v0.4/sprints/0-6-0-product-implement/plan.md`
-         (G1, ready-for-review, AC1~AC9 + 35+ sub-check + Sprint Contract).
+    3) **Mode determination first** (CLAUDE.md §1.29):
+       - 현 세션이 (C) Cowork → §1.28 sandbox git 금지 적용. Batch 2 (D Code) 작업
+         시도 금지 — user 에게 Claude Code/Codex CLI 진입 안내.
+       - 현 세션이 (D) Claude Code/Codex/Gemini → 정상 git lifecycle (§1.5) +
+         Batch 2 한 번에 끝내기 진행.
     4) Mutex claim: current_wu_owner=null → self claim (session_codename =
        basename of /sessions/<codename>/).
-    5) Check `tmp/handoff/0-6-0-product-implement-G1-PLAN-*.bundle` 존재 →
-       있으면 user host 가 push 해야 할 G1 plan commit. user 에게 push 안내
-       (없으면 본 세션이 commit + bundle 생성 + push 안내).
-    6) User 발화 분기:
-       - "/sfs review --gate G1" / "review 가자" / "G1 review" → G1 review
-         진입 (cross-instance P-17 패턴: Stage 1 claude same-instance
-         AI-PROPOSED + Stage 2 codex + Stage 3 gemini). review.md 신설.
-       - "implement 가자" / "G2 가자" → G1 review skip 결정 → G2 implement
-         직접 진입 (자동 승급 금지 정합 — user 명시 skip 으로만 가능).
-       - "다른거 먼저" → on_skip_action.
-    7) **자동 G1 review / G2 implement 승급 금지** (CLAUDE.md §1.3 + §1.20
-       + brainstorm precedent + spec sprint Round 1~4 cycle).
+    5) **Batch 2 (D Code runtime, 권장 — 한 mode 안에 한 번에 끝내기)**:
+       - R-B AC2.1~AC2.9 storage 실 logic (sfs-storage-init.sh + sfs-storage-precommit.sh body fill)
+       - R-C AC3.1~AC3.6 migrate-artifacts 실 logic (interactive wizard + Pass 1 Q-A~Q-F + Pass 2 + reject + rollback)
+       - R-E AC5.1~AC5.4 consumer compat (deprecation + opt-in + forced migrate + commit idempotence)
+       - R-F AC6.1~AC6.6 sprint.yml lifecycle (8-field schema + status FSM + close mode)
+       - R-H AC10.1~AC10.5 migration safety (--print-matrix JSON Lines + manifest 9 field + extension filter + rollback-from-snapshot + interrupted recovery + no-data-loss anti-AC10)
+       - R-D AC4.1~AC4.6 tests + CI workflow (sfs-pr-check.yml + sfs-0-6-storage.yml) + cross-instance verify + sentinel masking isolated step
+       - R-G AC7.4/AC7.5/AC7.8/AC7.9 packaging (brew sha256 + audit + scoop schema + release discovery + atomic 5-file commit)
+       - R-I AC11/AC12/AC13 release plumbing (sequence enforce + LF normalization + workflow permissions)
+       - AC9 spec sprint immutability verify (git diff 03f36de -- SFS-PHILOSOPHY.md = 0)
+       - Atomic 5-file commit + push origin/main
+    6) **Batch 3 (C Cowork, Code 끝난 후)**: G6 cross-instance review (P-17 Stage 1+2+3 parallel) +
+       G7 retro + P-17 learning-log update + 양채널 release cut (Homebrew + Scoop, §1.24).
+    7) **자동 G6 review / G7 retro / release cut 승급 금지** (CLAUDE.md §1.3 + §1.20).
   on_skip_patterns: ["아니", "잠깐", "다른", "stop", "다른거"]
-  on_skip_action: "§4.E G1 plan ready-for-review (AC1~AC9 + 35+ sub-check). G1 review 또는 G2 implement 진입 대기. pivot 가능 후순위 = §4.A dashboard / §4.B MD split / §4.C release-tooling polish."
-  on_ambiguous: "§4.E G1 plan ready-for-review. G1 review 진입 또는 G2 직접 진입 또는 pivot?"
+  on_skip_action: "§4.E G2 chunk 1 Cowork batch 완료. Batch 2 Code runtime 진입 대기 (R-B~R-I + atomic commit). pivot 가능 후순위 = §4.A dashboard / §4.B MD split / §4.C release-tooling polish."
+  on_ambiguous: "§4.E G2 chunk 1 ✅. Batch 2 (D Code runtime) 진입 또는 다른 작업 pivot?"
+  trigger_phrases:                # CLAUDE.md §1.29 정합 — mode 전환 마찰 최소화
+    batch_2_code_entry:           # (D) Claude Code/Codex CLI 진입 시 첫 발화
+      - "G2 batch 2 가자"
+      - "implement 이어서"
+      - "R-B 부터 가자"
+      - "code runtime 진입 / Batch 2 한 번에"
+      - "/sfs implement --gate G2 --resume"
+    batch_3_cowork_entry:         # (D) Code 끝난 후 다시 (C) Cowork 진입 시 첫 발화
+      - "G6 review 가자"
+      - "리뷰 가자"
+      - "cross-instance verify 가자"
+      - "/sfs review --gate G6"
+      - "P-17 pattern parallel 시작"
+    release_cut_entry:            # G7 retro 끝난 후 양채널 release cut 진입 시 발화
+      - "release cut 가자"
+      - "양채널 cut"
+      - "v0.6.0 ship"
+      - "/sfs report"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"

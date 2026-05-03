@@ -1,3 +1,50 @@
+## [0.6.0] - 2026-05-04
+
+> **Version naming hard cut: from 0.6.0 onwards no `-product` suffix. Historical 0.5.x-product tags preserved.**
+> 0.6.0 implement sprint chunk 1 — R-A scaffold (6 새 script + bin/sfs dispatch + Windows wrapper) +
+> R-G version bump (0.5.96-product → 0.6.0). R-B/R-C/R-D/R-E/R-F/R-H/R-I 실 기능 + tests + CI + brew/scoop
+> hash 갱신 = 후속 chunk (G6 review 전 까지 누적). 본 entry 는 chunk 1 시점 placeholder, G6 PASS 시 final wording.
+
+### Added
+
+- **6 new bash scripts under `solon-mvp-dist/scripts/`** (R-A AC1.1 — functional skeletons,
+  body logic 다음 chunk 에서 R-B/R-C/R-F/R-H spec 따라 채움):
+    - `sfs-storage-init.sh` — Layer 1 (`docs/<domain>/<sub>/<feat>/`) + Layer 2 (`.solon/sprints/<S-id>/<feat>/`) path schema 생성/검증.
+    - `sfs-storage-precommit.sh` — pre-commit / pre-merge storage validator (co-location + N:M + sprint.yml schema).
+    - `sfs-archive-branch-sync.sh` — closed sprint archive branch 자동 sync + flock(1) race 보호.
+    - `sfs-sprint-yml-validator.sh` — sprint.yml 8-field schema validator + close mode dispatch (validate / close 통합 — F6).
+    - `sfs-migrate-artifacts.sh` — interactive / `--apply` / `--auto` 3 surface + Pass 1/2 + reject + `--rollback` + `--rollback-from-snapshot` + `--print-matrix` + `--backfill-legacy` + `--snapshot-include-all` flags.
+    - `sfs-migrate-artifacts-rollback.sh` — git revert + Layer 1 atomic rollback helper (`--commit-sha` / `--from-snapshot`).
+- **5 new `bin/sfs` dispatch cases** (R-A AC1.2): `storage` (init / precommit subcommands), `migrate-artifacts`,
+  `migrate-artifacts-rollback`, `archive-branch-sync` (alias `archive`), `sprint` (validate / close subcommands).
+- Windows wrappers (`bin/sfs.ps1` + `bin/sfs.cmd`) automatically forward all 5 new subcommands to bash `bin/sfs` (R-A AC1.3 — 기존 thin forwarder 구조 정합, Smoke verify = AC4.5 다음 chunk).
+
+### Changed
+
+- **`solon-mvp-dist/VERSION`**: `0.5.96-product` → `0.6.0` (R-G G-1, G-2, AC7.1).
+  Suffix `-product` hard-cut from this release onwards.
+- **`bin/sfs version`** output remains `sfs <version>` pattern (S2-N3 = α — Round 1 CEO ruling lock).
+
+### Migration notes for 0.5.x consumers
+
+- 0.5.x consumer 는 6 mo grace (until 2026-11-03) 동안 deprecation warning 만 받음. 자동 migrate 없음.
+- 사용자 명시 `sfs upgrade --opt-in 0.6-storage` 또는 prompt confirm 후에만 backfill 실행.
+- Hard cut 이후 (2026-11-04~) `sfs upgrade` 가 0.5.x consumer 에서 자동 forced migrate (R-E E-4, AC5.4 — backup manifest default + `--commit` opt-in flag).
+- 0.5.x git tags (89개 추정) 모두 historical 보존 — 삭제 0.
+
+### In-progress (다음 chunk)
+
+- R-B AC2.1~AC2.9: Layer 1/2 실 mkdir + co-location validator + N:M conflict detect + sprint.yml schema enforcement + flock(1) race + `--backfill-legacy` idempotence + atomic Layer 1 movements.
+- R-C AC3.1~AC3.6: interactive wizard + Pass 1 deterministic CLI prompt (Q-A~Q-F) + Pass 2 file 별 confirm + reject granularity + git revert atomic.
+- R-D AC4.1~AC4.6: unit + smoke + CI matrix (mac/Ubuntu/Win) + cross-instance verify (P-17 codex/gemini secrets) + sentinel masking isolated step.
+- R-E AC5.1~AC5.4: deprecation warning + `--opt-in 0.6-storage` flag + forced migrate post-grace + commit idempotence guard.
+- R-F AC6.1~AC6.6: sprint.yml 8-field schema enforce + status FSM + close mode prompt + archive/delete branches.
+- R-G AC7.4/AC7.5/AC7.8/AC7.9: brew audit `--new-formula sfs` PASS + scoop manifest schema check PASS + release discovery 갱신 + atomic 5-file commit.
+- R-H AC10.1~AC10.5: source matrix `--print-matrix` JSON Lines schema + backup manifest 9 field + `--rollback-from-snapshot` 실 restore + interrupted-midway recovery + no-data-loss anti-AC10 verify.
+- R-I AC11/AC12/AC13: release sequence enforce + cross-platform hash parity + workflow permissions hardening.
+
+---
+
 ## [0.5.96-product] - 2026-05-03
 
 > Pre-staged entry. VERSION bump and final wording pinned in Phase 10

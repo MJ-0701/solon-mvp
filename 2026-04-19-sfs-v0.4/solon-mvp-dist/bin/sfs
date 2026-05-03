@@ -993,6 +993,72 @@ case "${1:-}" in
     shift
     exec bash "${DIST_DIR}/scripts/sfs-doctor.sh" "$@"
     ;;
+  storage)
+    shift
+    sub="${1:-}"
+    shift || true
+    case "${sub}" in
+      init)
+        exec bash "${DIST_DIR}/scripts/sfs-storage-init.sh" "$@"
+        ;;
+      precommit)
+        exec bash "${DIST_DIR}/scripts/sfs-storage-precommit.sh" "$@"
+        ;;
+      -h|--help|help|"")
+        cat <<'EOF'
+sfs storage <subcommand>
+
+Subcommands:
+  init        Layer 1/2 path schema 생성/검증 (sfs-storage-init.sh)
+  precommit   pre-commit / pre-merge storage validator (sfs-storage-precommit.sh)
+EOF
+        exit 0
+        ;;
+      *)
+        echo "unknown storage subcommand: ${sub}" >&2
+        exit 2
+        ;;
+    esac
+    ;;
+  migrate-artifacts)
+    shift
+    exec bash "${DIST_DIR}/scripts/sfs-migrate-artifacts.sh" "$@"
+    ;;
+  migrate-artifacts-rollback)
+    shift
+    exec bash "${DIST_DIR}/scripts/sfs-migrate-artifacts-rollback.sh" "$@"
+    ;;
+  archive-branch-sync|archive)
+    shift
+    exec bash "${DIST_DIR}/scripts/sfs-archive-branch-sync.sh" "$@"
+    ;;
+  sprint)
+    shift
+    sub="${1:-}"
+    shift || true
+    case "${sub}" in
+      validate)
+        exec bash "${DIST_DIR}/scripts/sfs-sprint-yml-validator.sh" --mode validate "$@"
+        ;;
+      close)
+        exec bash "${DIST_DIR}/scripts/sfs-sprint-yml-validator.sh" --mode close "$@"
+        ;;
+      -h|--help|help|"")
+        cat <<'EOF'
+sfs sprint <subcommand>
+
+Subcommands:
+  validate <sprint.yml-path>   schema check (8 required field, 0=OK 1=fail)
+  close    <sprint-id>         interactive close — archive (.sfs-local/archives/sprint-yml/) or delete
+EOF
+        exit 0
+        ;;
+      *)
+        echo "unknown sprint subcommand: ${sub}" >&2
+        exit 2
+        ;;
+    esac
+    ;;
   -h|--help|help)
     usage
     exit 0
