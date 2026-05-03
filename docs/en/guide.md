@@ -7,10 +7,18 @@ install. For beginner Git/terminal help, use the Korean [BEGINNER-GUIDE.md](../.
 
 ## 0. Install And Initialize
 
+> **Since 0.5.96-product**, `brew install` / `scoop install` is the only
+> install action you need. Slash command discovery for Claude Code (`/sfs`),
+> Gemini CLI (`sfs`), and Codex CLI (`$sfs`) is registered automatically by
+> the post-install hook — your project tree stays free of plugin/extension/
+> skill files.
+
 Mac:
 
 ```bash
 brew install MJ-0701/solon-product/sfs
+sfs doctor              # ✅ Claude / Gemini / Codex — three green lines
+
 cd ~/workspace/my-project
 sfs init --layout thin --yes
 sfs status
@@ -21,11 +29,16 @@ Windows PowerShell/cmd:
 ```powershell
 scoop bucket add solon https://github.com/MJ-0701/scoop-solon-product
 scoop install sfs
+sfs.cmd doctor          # same three-line check on Windows
+
 cd C:\workspace\my-project
 git init
 sfs.cmd init --layout thin --yes
 sfs.cmd status
 ```
+
+If any line in `sfs doctor` shows `⚠️`, the next line on screen prints the
+single-shot recovery command. The `sfs` binary itself is unaffected.
 
 ## 1. Mental Model
 

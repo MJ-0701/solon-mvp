@@ -16,6 +16,20 @@ class Sfs < Formula
     chmod 0755, bin/"sfs"
   end
 
+  def post_install
+    # 0.5.96-product slash-command zero-file discovery hook.
+    # Registers /sfs (Claude Code), sfs (Gemini CLI), $sfs (Codex CLI) under
+    # one umbrella — idempotent + graceful (D7=b: failure does not abort).
+    hook = libexec/"scripts/install-cli-discovery.sh"
+    if hook.exist?
+      ENV["SFS_DISCOVERY_SOURCE_DIR"] = libexec.to_s
+      system "bash", hook.to_s
+      ENV.delete("SFS_DISCOVERY_SOURCE_DIR")
+    else
+      opoo "cli-discovery hook not found at #{hook} — slash-command discovery skipped"
+    end
+  end
+
   def caveats
     <<~EOS
       First-time project setup:

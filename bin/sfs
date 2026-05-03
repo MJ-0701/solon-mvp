@@ -989,6 +989,10 @@ case "${1:-}" in
     shift
     exec bash "${DIST_DIR}/uninstall.sh" "$@"
     ;;
+  doctor)
+    shift
+    exec bash "${DIST_DIR}/scripts/sfs-doctor.sh" "$@"
+    ;;
   -h|--help|help)
     usage
     exit 0

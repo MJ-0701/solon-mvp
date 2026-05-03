@@ -79,10 +79,15 @@ scoop bucket add solon https://github.com/MJ-0701/scoop-solon-product
 scoop install sfs
 ```
 
+이 한 줄이 끝나면 Claude Code (`/sfs`), Gemini CLI (`sfs`), Codex CLI
+(`$sfs`) 세 곳 모두에 슬래시 명령이 자동 등록됩니다. 별도의 plugin
+install 명령을 따로 칠 필요가 없습니다.
+
 설치 확인:
 
 ```powershell
 sfs.cmd version --check
+sfs.cmd doctor      # ✅ 세 줄 (Claude / Gemini / Codex) 모두 보이면 OK
 ```
 
 성공하면 `sfs 0.x.x-product`, `status up-to-date` 같은 문장이 보입니다. Windows
@@ -125,7 +130,11 @@ brew --version
 ```bash
 brew install MJ-0701/solon-product/sfs
 sfs version --check
+sfs doctor              # ✅ Claude / Gemini / Codex 세 줄 모두 보이면 OK
 ```
+
+이 한 줄로 Claude Code (`/sfs`), Gemini CLI (`sfs`), Codex CLI (`$sfs`)
+세 곳 모두에 슬래시 명령이 자동 등록됩니다 (0.5.96-product 부터).
 
 ### 3. 테스트 프로젝트 폴더 만들기
 

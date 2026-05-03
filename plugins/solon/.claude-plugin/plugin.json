@@ -1,0 +1,17 @@
+{
+  "name": "solon",
+  "version": "0.5.96",
+  "description": "Solon SFS slash command for Claude Code. Routes `/sfs <command>` through the globally installed `sfs` binary (PATH); falls back to `bash .sfs-local/scripts/sfs-dispatch.sh` for project-vendored installs.",
+  "author": {
+    "name": "MJ-0701"
+  },
+  "homepage": "https://github.com/MJ-0701/solon-product",
+  "keywords": [
+    "sfs",
+    "solon",
+    "sprint",
+    "pdca",
+    "solo-founder",
+    "ai-native"
+  ]
+}

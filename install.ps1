@@ -79,8 +79,28 @@ try {
   }
 
   $installSh = Join-Path $sourceDir "install.sh"
+  # Skip the bash-side cli-discovery hook on Windows — the PS1 hook below runs
+  # natively for PowerShell-aware paths (settings.json, scoop layout, etc.)
+  $env:SFS_SKIP_CLI_DISCOVERY = "1"
   & $bash (Convert-ToBashPath $installSh) @argsForBash
-  exit $LASTEXITCODE
+  $installExit = $LASTEXITCODE
+
+  # 0.5.96-product CLI discovery hook (Windows-native PowerShell)
+  $discoveryPs1 = Join-Path $sourceDir "scripts\install-cli-discovery.ps1"
+  if (Test-Path $discoveryPs1) {
+    try {
+      $env:SFS_DISCOVERY_SOURCE_DIR = $sourceDir
+      & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $discoveryPs1
+    } catch {
+      Write-Warning "cli-discovery (Windows) hook failed: $($_.Exception.Message) — continuing"
+    } finally {
+      $env:SFS_DISCOVERY_SOURCE_DIR = $null
+    }
+  } else {
+    Write-Warning "cli-discovery hook not found at $discoveryPs1 — skip"
+  }
+
+  exit $installExit
 }
 finally {
   if ($tmp -and (Test-Path $tmp)) {
