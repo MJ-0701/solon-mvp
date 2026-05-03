@@ -85,6 +85,13 @@ ALLOWLIST=(
   "packaging"
   ".github"
   "docs"
+  # 0.5.96-product slash-command zero-file discovery (multi-CLI marketplace)
+  "scripts"             # install-cli-discovery.{sh,ps1}, sfs-doctor.sh — bin/sfs calls these
+  "tests"               # test-cli-discovery-{macos,windows} — runtime/CI verifiable
+  ".claude-plugin"      # Claude Code plugin marketplace metadata (root .claude-plugin/marketplace.json)
+  "plugins"             # Claude Code plugin source (plugins/solon/)
+  "gemini-extension.json"  # Gemini CLI extension descriptor (root)
+  "commands"            # Gemini CLI command definition (commands/sfs.toml)
 )
 
 # Hard blocklist (dev 전용 + legacy stale cleanup)

@@ -761,6 +761,28 @@ EOF
 ok "VERSION 기록: $SOLON_VERSION ($MODE @ $INSTALLED_AT)"
 
 # ============================================================================
+# 9.5. CLI discovery hook (0.5.96-product) — slash-command zero-file
+# ============================================================================
+# Register /sfs slash command in Claude Code, sfs command in Gemini CLI,
+# and ~/.codex/skills/sfs/SKILL.md for Codex — all three under one umbrella.
+# Idempotent + graceful (failure does not abort install).
+#
+# Skipped automatically when running in a context where SFS_SKIP_CLI_DISCOVERY=1
+# (CI / brew-bottle build / smoke tests).
+
+if [ "${SFS_SKIP_CLI_DISCOVERY:-0}" != "1" ]; then
+  CLI_DISCOVERY_HOOK="$SOURCE_DIR/scripts/install-cli-discovery.sh"
+  if [ -x "$CLI_DISCOVERY_HOOK" ] || [ -f "$CLI_DISCOVERY_HOOK" ]; then
+    SFS_DISCOVERY_SOURCE_DIR="$SOURCE_DIR" \
+      bash "$CLI_DISCOVERY_HOOK" || warn "cli-discovery hook returned non-zero (graceful — continuing)"
+  else
+    warn "cli-discovery hook not found at $CLI_DISCOVERY_HOOK — skip"
+  fi
+else
+  ok "cli-discovery hook skipped (SFS_SKIP_CLI_DISCOVERY=1)"
+fi
+
+# ============================================================================
 # 10. 완료
 # ============================================================================
 

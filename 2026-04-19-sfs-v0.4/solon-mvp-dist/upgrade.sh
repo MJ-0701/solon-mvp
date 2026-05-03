@@ -1639,6 +1639,24 @@ if [ -f "$TARGET/.sfs-local/model-profiles.yaml" ]; then
 fi
 
 # ============================================================================
+# 6.5. CLI discovery hook (0.5.96-product) — slash-command zero-file
+# ============================================================================
+# Re-runs the same hook used by install.sh so existing 0.5.89-95 installations
+# pick up the new global discovery surface on `sfs upgrade`. Idempotent.
+
+if [ "${SFS_SKIP_CLI_DISCOVERY:-0}" != "1" ]; then
+  CLI_DISCOVERY_HOOK="$SOURCE_DIR/scripts/install-cli-discovery.sh"
+  if [ -x "$CLI_DISCOVERY_HOOK" ] || [ -f "$CLI_DISCOVERY_HOOK" ]; then
+    SFS_DISCOVERY_SOURCE_DIR="$SOURCE_DIR" \
+      bash "$CLI_DISCOVERY_HOOK" || warn "cli-discovery hook returned non-zero (graceful — continuing)"
+  else
+    warn "cli-discovery hook not found at $CLI_DISCOVERY_HOOK — skip"
+  fi
+else
+  ok "cli-discovery hook skipped (SFS_SKIP_CLI_DISCOVERY=1)"
+fi
+
+# ============================================================================
 # 7. 완료
 # ============================================================================
 

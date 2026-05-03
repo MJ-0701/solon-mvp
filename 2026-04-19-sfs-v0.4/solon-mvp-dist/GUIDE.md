@@ -27,10 +27,17 @@ AI 시대에 Solon 이 주는 가치는 [Solon 10x 가치](./docs/ko/10x-value.m
 
 ## 1. 설치와 초기화
 
+> **0.5.96-product 부터** brew/scoop 한 줄이 곧 모든 CLI 슬래시 등록입니다.
+> 별도 `claude /plugin marketplace add ...` / `gemini extensions install ...`
+> 손이 필요 없습니다. 뒤에서 자동으로 돕니다.
+
 Mac:
 
 ```bash
 brew install MJ-0701/solon-product/sfs
+# /sfs (Claude), sfs (Gemini), $sfs (Codex) 모두 자동 등록 완료.
+sfs doctor   # 세 줄 모두 ✅ 면 OK
+
 cd ~/workspace/my-project
 sfs init --layout thin --yes
 sfs status
@@ -46,6 +53,8 @@ irm get.scoop.sh | iex
 
 scoop bucket add solon https://github.com/MJ-0701/scoop-solon-product
 scoop install sfs
+# 위 한 줄이 /sfs, sfs, $sfs 세 CLI 모두에 등록을 끝냅니다.
+sfs.cmd doctor
 
 cd C:\workspace\my-project
 git init
@@ -379,6 +388,26 @@ bundle 로 남습니다.
 
 Claude Code 에서는 `/sfs`, Gemini CLI 에서는 `sfs`, Codex CLI 에서는 `$sfs` 를 씁니다.
 Windows PowerShell/cmd 에서는 `sfs.cmd` 를 씁니다.
+
+0.5.96-product 부터는 brew/scoop 가 세 CLI 모두에 자동 등록합니다. 그래도
+`/sfs` 가 안 나오면:
+
+```bash
+sfs doctor   # ✅/⚠️ 줄별 상태 확인. 옆에 출력되는 한 줄 recovery 그대로 실행
+```
+
+대표적인 recovery (자주 쓰는 경우):
+
+```bash
+# Claude Code 측 등록을 다시:
+claude plugin marketplace add MJ-0701/solon-product
+
+# Gemini CLI 측 다시:
+gemini extensions install --consent https://github.com/MJ-0701/solon-product.git
+
+# Codex CLI 측 다시:
+sfs upgrade   # 또는 brew reinstall sfs / scoop update sfs
+```
 
 ### 완료된 sprint 는 무엇을 보면 되나?
 

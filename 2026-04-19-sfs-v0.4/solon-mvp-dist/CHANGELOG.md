@@ -1,3 +1,51 @@
+## [0.5.96-product] - 2026-05-03
+
+> Pre-staged entry. VERSION bump and final wording pinned in Phase 10
+> after Phase 8 (user-machine A-1/A-2 probe) finalizes the hook branch
+> logic and Phase 12 (Windows verification) lands.
+
+### Fixed
+
+- **Slash-command zero-file discovery** — `brew install
+  MJ-0701/solon-product/sfs` (macOS) and `scoop install sfs` (Windows) now
+  register `/sfs` (Claude Code), `sfs <command>` (Gemini CLI), and `$sfs`
+  (Codex CLI) automatically through their post-install hooks. The project
+  tree no longer needs `.claude/commands/sfs.md`, `.gemini/commands/sfs.toml`,
+  or `.agents/skills/sfs/SKILL.md`. Discovery surfaces live in the
+  user-home plugin/extension cellar and the Codex user-global skills
+  directory:
+    - Claude Code:  marketplace plugin under `MJ-0701/solon-product`
+    - Gemini CLI:   extension under `MJ-0701/solon-product`
+    - Codex CLI:    `~/.codex/skills/sfs/SKILL.md` (auto-discovered)
+  Hook is idempotent on `sfs upgrade`; failure of any single CLI surface
+  emits a warning with a one-shot recovery command and does NOT abort the
+  parent install.
+
+### Added
+
+- **`sfs doctor` subcommand** — print Solon runtime + slash-command
+  discovery health (Claude Code / Gemini CLI / Codex CLI), with
+  ✅/⚠️/❌ per check and concrete recovery line on warnings. Exit codes:
+  0 (all pass) / 1 (warnings only) / 2 (binary itself broken).
+
+- **GitHub Actions CI matrix for cli-discovery** — `sfs-cli-discovery.yml`
+  runs the sandbox tests (`tests/test-cli-discovery-{macos,windows}.{sh,ps1}`)
+  on macos-latest, ubuntu-latest, windows-latest, plus a Windows
+  end-to-end Scoop install verification (Codex skill landing).
+
+### Changed
+
+- `install.sh` / `upgrade.sh` / `install.ps1` / `upgrade.ps1` invoke the
+  cli-discovery hook after VERSION recording (skippable via
+  `SFS_SKIP_CLI_DISCOVERY=1` for CI/bottle-build paths). On Windows the
+  PS1 wrappers set `SFS_SKIP_CLI_DISCOVERY=1` for the bash-side run and
+  call `scripts/install-cli-discovery.ps1` natively.
+- `bin/sfs-scoop-post-install.ps1` runs cli-discovery unconditionally
+  early; suppresses double-run when project upgrade subsequently calls
+  `sfs upgrade`.
+- README / GUIDE / BEGINNER-GUIDE / docs/en/guide.md updated to lead with
+  the brew/scoop one-liner and `sfs doctor` 3-line verification.
+
 ## [0.5.95-product] - 2026-05-03
 
 ### Changed
