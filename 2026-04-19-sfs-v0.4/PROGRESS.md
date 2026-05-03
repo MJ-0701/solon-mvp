@@ -20,6 +20,11 @@ current_wu_owner:
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
 scheduled_task_log:
+  - ts: 2026-05-03T10:21:16+09:00
+    codename: claude-cowork-doc-audit-split
+    check_exit: 0
+    action: "session end: PROGRESS trim + audit done + resume_hint re-aimed at MD split queue (Tier 1)"
+    ahead_delta: "+0"
   - ts: 2026-05-03T02:52:38+09:00
     codename: claude-cowork-doc-audit-split
     check_exit: 99
@@ -115,34 +120,6 @@ scheduled_task_log:
     check_exit: 0
     action: "doc-refactor: CLAUDE.md entry token trim"
     ahead_delta: "+0"
-  - ts: 2026-05-02T07:49:37+09:00
-    codename: overnight-sfs-loop-deploy
-    check_exit: 0
-    action: "doc-refactor: slim solon-mvp-dist entry docs (templates)"
-    ahead_delta: "+0"
-  - ts: 2026-05-02T06:49:54+09:00
-    codename: overnight-sfs-loop-deploy
-    check_exit: 16
-    action: "resume-session-check: sched_log_drift repaired"
-    ahead_delta: "+0"
-  - ts: 2026-05-02T04:13:36+09:00
-    codename: overnight-sfs-loop-deploy
-    check_exit: 16
-    action: "resume-session-check: sched_log_drift detected (this run)"
-    ahead_delta: "+0"
-  - ts: 2026-05-02T02:38:27+09:00
-    codename: overnight-sfs-loop-deploy
-    check_exit: 0
-    action: "loop: WU-36 bookkeeping + loopq-9861/9920/9979 done (queue empty)"
-    ahead_delta: "+5"
-  - ts: 2026-05-02T02:14:34+09:00
-    codename: overnight-sfs-loop-deploy
-    check_exit: 0
-    action: "WU-36 bookkeeping (cycle-end division recommender WU file/index/progress)"
-    ahead_delta: "+0"
-
-# ── DOMAIN LOCKS (SSoT) ──────────────────────────────────────────
-# Keep only operational fields here; verbose history lives in the archive snapshot.
 
 domain_locks:
   D-A-WU-24:
@@ -267,8 +244,8 @@ resume_hint:
        - Frontmatter discipline (11 fields) is non-negotiable per user
          "절대 누락 0" constraint.
   on_skip_patterns: ["아니", "잠깐", "다른", "stop", "다른거"]
-  on_skip_action: "MD split queue is queued (Tier 1: 8 body chapters / Tier 2: 3 closed sprint files). What do you want to do instead?"
-  on_ambiguous: "MD split queue is ready. Start with Tier 1 (body chapters) `07-plugin-distribution.md` first, or pick another tier/file?"
+  on_skip_action: "MD split queue is queued (Tier 1: 8 body chapters / Tier 2: 3 closed sprint files). Latest product release is `0.5.95-product`. What do you want to do instead?"
+  on_ambiguous: "MD split queue is ready (Tier 1 first, `07-plugin-distribution.md`). Latest product release is `0.5.95-product`. Start the queue, or pick another tier/file?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
