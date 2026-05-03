@@ -2,17 +2,22 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-03T22:50:00+09:00
-session: "claude-cowork:affectionate-trusting-thompson — §4.E G0 brainstorm 9/9 locked + G1 plan 작성 완료. plan.md status=ready-for-review (R-A~G + AC1~AC9 + 9 lock 직접 expansion + Sprint Contract). 본 세션 종료 = user 명시 'plan까지 작성하고 다음 세션에서 나머지 이어서 작업'. 다음 세션 entry = G1 review (cross-instance, P-17 패턴) 또는 user 결정 timing."
+last_overwrite: 2026-05-03T23:15:00+09:00
+session: "claude-cowork:wizardly-quirky-gauss — §4.E G1 review Stage 1 SHIPPED + user scope lock '코덱스+제미나이 리뷰까지 받고 리뷰 종료 예정' = 본 세션 = G1 review 전체 (Stage 1 + Stage 2 codex + Stage 3 gemini + user CEO ruling final lock). G2 implement (6 신규 script + bin/sfs + VERSION 0.6.0 + tests + CI + brew/scoop) ~ G6 ~ G7 ~ release cut = next sessions. CLAUDE.md §1.20 sequential + §1.28 Cowork git 금지 strict."
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
-current_wu: "§4.E 0.6.0-product implement sprint (R2 storage + R3 migrate-artifacts) — G1 plan 작성 완료, G1 review 진입 대기 (다음 세션)"
-current_wu_path: "2026-04-19-sfs-v0.4/sprints/0-6-0-product-implement/plan.md"   # G1 ready-for-review, AC1~AC9 + Sprint Contract
+current_wu: "§4.E 0.6.0-product implement sprint G1 review Stage 1 진입 (claude same-instance AI-PROPOSED, self-val flag, P-17 패턴 Stage 2/3 prompt §6 제공 예정)"
+current_wu_path: "2026-04-19-sfs-v0.4/sprints/0-6-0-product-implement/review-g1.md"   # 신설 중 (Stage 1)
 
 # ── SESSION MUTEX (CLAUDE.md §1.12) ───────────────────────────────
 # Keep scalar form for tool compatibility (.sfs-local/scripts/sfs-loop.sh stop/status, auto-resume contract).
-# Takeover 2026-05-03 KST: prev owner elegant-hopeful-maxwell 가 user 명시 'dead' 선언 (heartbeat 21:35 KST 직후 끊김). user explicit authorization 으로 affectionate-trusting-thompson 가 takeover. spec sprint CLOSED + push 03f36de 후 implement sprint OPENED 동일 owner 유지.
-current_wu_owner: null   # session 자연 종료 (user 명시 "plan까지 작성하고 다음 세션에서 나머지 이어서 작업"). claimed_at=2026-05-03T21:55+09:00, released_at=2026-05-03T22:50+09:00. 다음 세션이 자유 claim 가능.
+# Takeover 2026-05-03 KST: prev owner affectionate-trusting-thompson 가 자연 종료 (released_at=2026-05-03T22:50+09:00). 본 세션 wizardly-quirky-gauss 가 자유 claim (null → self).
+current_wu_owner:
+  session_codename: wizardly-quirky-gauss
+  claimed_at: 2026-05-03T23:10:00+09:00
+  last_heartbeat: 2026-05-03T23:15:00+09:00
+  ttl_minutes: 15
+  scope: "G1 review Stage 1 + Stage 2 (codex) + Stage 3 (gemini) + user CEO ruling final lock — user 명시 'codex랑 gemini 리뷰까지 받고 리뷰 종료 예정'. G2~release cut = next sessions."
 last_session_owner_history:
   - session_codename: affectionate-trusting-thompson
     claimed_at: 2026-05-03T21:55:00+09:00
@@ -27,6 +32,16 @@ last_session_owner_history:
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
 scheduled_task_log:
+  - ts: 2026-05-03T23:15:00+09:00
+    codename: wizardly-quirky-gauss
+    check_exit: 0
+    action: "user 명시 본 세션 scope reduction: 'codex랑 gemini 리뷰까지 받고 리뷰 종료 예정' = G1 review Stage 2 (codex) + Stage 3 (gemini) + user CEO ruling final lock 까지가 본 세션. G2 implement (6 신규 script + bin/sfs + VERSION 0.6.0 + tests + CI + brew/scoop) ~ G6 review ~ G7 retro ~ release cut = next sessions. CLAUDE.md §1.20 sequential disclosure + spec sprint Round 1~4 precedent 정합. mutex 유지 (wizardly-quirky-gauss, TTL 갱신 23:15 KST). 다음 1 step = user host 에서 review-g1.md + PROGRESS.md commit/push (Cowork §1.28 정합 host 수동) → codex Stage 2 invoke (review-g1.md §6.1 prompt verbatim) → 본 conversation 에 verdict paste."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T23:10:00+09:00
+    codename: wizardly-quirky-gauss
+    check_exit: 0
+    action: "§4.E G1 review Stage 1 (claude same-instance AI-PROPOSED) 진입. user 첫 발화 chain plan = '/sfs review --gate G1, P-17 cross-instance → G2 implement (실 6 신규 script + bin/sfs dispatch + VERSION 0.6.0 + tests + CI + brew/scoop manifest) → G6 review → G7 retro → release cut (양채널, §1.24)'. CLAUDE.md §1.20 sequential disclosure 정합으로 본 세션 = G1 review Stage 1 만. Stage 2 codex / Stage 3 gemini = user host 수동, G2~G7 + release cut = next sessions. CLAUDE.md §1.28 Cowork sandbox git 금지 strict 적용. mutex self-claim (null → wizardly-quirky-gauss). 다음 1 step = review-g1.md 신설 + Stage 2/3 prompt §6 제공 + user host codex invoke 안내."
+    ahead_delta: "+0"
   - ts: 2026-05-03T22:55:00+09:00
     codename: affectionate-trusting-thompson
     check_exit: 0
@@ -420,11 +435,18 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ② In-Progress
 
-- **§4.E 0.6.0-product implement sprint G1 plan CLOSED → G1 review 진입 대기 (다음 세션)**.
-  본 세션 (claude-cowork:affectionate-trusting-thompson) 종료 + mutex release.
+- **§4.E 0.6.0-product implement sprint G1 review Stage 1 SHIPPED → Stage 2/3 cross-instance 진입 대기 (user host 수동)**.
+  본 세션 (claude-cowork:wizardly-quirky-gauss) Stage 1 authoring 완료.
+  AI-PROPOSED verdict = **PASS-with-flags** (8 review-grade flag F1~F8 + 1 minor F9).
+  self-validation flag = set, Stage 2 (codex) + Stage 3 (gemini) 으로 resolution.
+  user 첫 발화 chain plan = G1→G2→G6→G7→release cut. CLAUDE.md §1.20
+  sequential disclosure 정합으로 본 세션 = G1 review Stage 1 만.
+  다음 1 step = user host terminal 에서 codex Stage 2 invoke (review-g1.md §6.1 prompt).
+
+- **§4.E 0.6.0-product implement sprint G1 plan CLOSED → G1 review Stage 1 SHIPPED**.
+  prev 세션 (claude-cowork:affectionate-trusting-thompson) plan.md 작성 + 종료.
   G0 brainstorm 9/9 locked → G1 plan 작성 (ready-for-review, AC1~AC9 + Sprint
-  Contract + 5 implement-stage gotcha self-flag).
-  다음 세션 entry = `/sfs review --gate G1` 또는 user 결정 timing.
+  Contract + 5 implement-stage gotcha self-flag) → 본 세션 G1 review Stage 1.
 
 - **§4.D 0.6.0-product spec sprint — CLOSED 2026-05-03 (배포 03f36de origin/main)**.
   Cross-instance verify pattern P-17 canonical lock. 4 spec markdown ship 완료.
@@ -443,24 +465,30 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ③ Next
 
-**다음 세션 entry = `/sfs review --gate G1`** (또는 user 결정 timing).
+**다음 1 step = user host terminal 에서 codex Stage 2 invoke** (review-g1.md §6.1 prompt verbatim).
+PARTIAL/PASS/FAIL verdict + 8 flag 별 판정 + 3+ Stage 2 신규 발본 회수 → 본 conversation paste.
 
-본 세션 산출:
+본 세션 산출 (G1 review Stage 1):
+- review-g1.md (G1 Stage 1, AI-PROPOSED PASS-with-flags, 8 flags F1~F8 + 1 minor F9).
+- PROGRESS.md (heartbeat / mutex self-claim / scheduled_task_log).
+
+prev 세션 산출 (참고):
 - brainstorm.md (G0, 9/9 lock, ready-for-plan).
 - plan.md (G1, ready-for-review, AC1~AC9 + 35+ sub-check + Sprint Contract).
-- PROGRESS.md (heartbeat / mutex release / scheduled_task_log).
 
-다음 세션에서 처리할 것 (user 명시 timing):
-1. G1 review (cross-instance, P-17 패턴 권장: Stage 1 claude same-instance →
-   Stage 2 codex cross-runtime → Stage 3 gemini cross-runtime).
-2. review verdict PASS LOCK 후 G2 implement (실 6 신규 script 작성 +
-   bin/sfs dispatch 확장 + VERSION bump + tests + CI workflow).
-3. G2 implement → G6 review → G7 retro.
-4. release cut: VERSION 0.6.0 (G2-α suffix drop) + Homebrew tap 갱신 +
-   Scoop bucket 갱신 (§1.24 dual-channel 의무).
-5. 0.5.x consumer deprecation warning baseline 활성화 (E5 6 mo grace 시작).
+다음 처리 (user 명시 timing, sequential disclosure):
+1. **현재 step**: codex Stage 2 invoke → verdict 회수.
+2. Stage 2 PARTIAL 시 CTO fix → Stage 3 gemini.
+3. Stage 2 PASS 시 바로 Stage 3 gemini → verdict 회수.
+4. Stage 1+2+3 + user CEO ruling lock → plan.md status=ready-for-implement.
+5. user 명시 G2 implement 명령 후 진입 (자동 승급 금지).
+6. G2 implement (6 신규 script + bin/sfs dispatch + VERSION 0.6.0 + tests + CI + brew/scoop).
+7. G6 review (cross-instance) → G7 retro → release cut (Homebrew + Scoop dual-channel, §1.24).
+8. 0.5.x consumer deprecation warning baseline 활성화 (E5 6 mo grace, hard cut 2026-11-03).
 
-자동 G1 review 진입 금지 (CLAUDE.md §1.3 + §1.20). 다음 세션도 user 명시 명령.
+자동 진입 금지 (CLAUDE.md §1.3 + §1.20 + spec sprint Round 1~4 precedent).
+**Cowork 한정 §1.28 — sandbox git 금지, file-write only**.
+user host terminal 에서 review-g1.md + PROGRESS.md `git add` + commit + push 수동 실행 권장 (※ commit message 예: `wip(WU-§4.E/G1-review-stage1): review-g1.md AI-PROPOSED PASS-with-flags + PROGRESS heartbeat`).
 
 ### 후순위 (sprint complete 후 user timing 콜)
 
@@ -504,6 +532,29 @@ framework"` 부터 시작 — 7 deferred sub-question (HANDOFF §4.D.2) 정제.
 > 0.5.87-0.5.92 codex hotfix train: see git log `6111010..6322079` and
 > `solon-mvp-dist/CHANGELOG.md` (sha details not individually entered into
 > PROGRESS at release time).
+
+- **§4.E G1 review Stage 1 (claude same-instance AI-PROPOSED) — 2026-05-03T23:10+09:00**:
+    review-g1.md `sprints/0-6-0-product-implement/review-g1.md` (~340L)
+    flow         user chain plan first step → Stage 1 = claude same-instance
+                 (CLAUDE.md §1.20 sequential disclosure 정합).
+                 P-17 pattern: Stage 1 (claude) + Stage 2 (codex) + Stage 3 (gemini)
+                 + user CEO ruling final lock.
+    AI verdict   PASS-with-flags (AC plan-quality 9/9 + brainstorm 9/9→plan
+                 expansion 직접 carry + 6 철학 6/6 + cross-ref ✓ + anti-AC ✓)
+    8 flags      F1 AC1 grep ERE escape (`\|` literal),
+                 F2 AC ID 충돌 (본 plan AC8/AC9 vs spec sprint AC8 grep cross-ref),
+                 F3 R-E.E-4/AC5.4 vs §3 out-of-scope wording divergence (hard cut),
+                 F4 AC4.4 cross-instance CI fallback policy 부재 (Secrets/rate-limit/PR-block),
+                 F5 AC2.6 pre-merge hook 위치 `또는` ambiguity (.git/hooks vs CI workflow),
+                 F6 AC6.3 sfs sprint close subcommand R-A 6 script 미명시,
+                 F7 plan §6 self-flag 5 gotcha (idempotence/race/atomic) AC 미반영,
+                 F8 AC3.2/3.5 interactive prompt input 시뮬레이트 방식 unspecified.
+                 F9 (minor) brainstorm 9/9 vs frontmatter 7 항목 count terminology.
+    self-val     flag SET (Stage 2 codex + Stage 3 gemini 으로 resolution).
+    next 1 step  user host macOS terminal codex invoke (review-g1.md §6.1 prompt)
+                 → verdict 회수 후 본 conversation paste.
+    learning     P-17 강화 후보 — code sprint G1 review (spec sprint 의 spec G1
+                 review precedent 정합 vs code sprint plan-quality review focus 차이).
 
 - **§4.D G6 review Stage 1 self-review (2026-05-03T21:35+09:00)**:
     review-g6.md  `sprints/0-6-0-product-spec/review-g6.md` (221L)
