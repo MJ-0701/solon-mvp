@@ -23,6 +23,7 @@ content_policy: "topic/proposition only; read only this file first. Read a full 
 
 Use this router before opening long division packs.
 Default policy is minimum required checks by project size.
+This scope is limited to knowledge-pack documents; other documentation is unchanged unless explicitly requested.
 
 If Korean is requested, read `knowledge-pack-router.ko.md` first.
 

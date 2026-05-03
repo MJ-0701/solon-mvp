@@ -23,6 +23,7 @@ content_policy: "topic/proposition only; read only this file first. Read a full 
 
 Use this router before opening long division packs.
 Default policy is minimum required checks by project size.
+이 범위는 knowledge-pack 문서에 한정되며, 별도 요청이 없는 한 나머지 문서는 변경하지 않습니다.
 
 ## Division activation
 
