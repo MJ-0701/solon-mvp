@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-03T10:27:58+09:00
-session: "claude-cowork: handoff restructure — slash-command-global-stub hotfix promoted to priority 1"
+last_overwrite: 2026-05-03T10:34:12+09:00
+session: "claude-cowork: handoff re-restructure — slash discovery is research-first; plugin-per-CLI under brew-unified-umbrella"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: null
@@ -213,50 +213,59 @@ resume_hint:
     1) Read `CLAUDE.md`, then `PROGRESS.md`.
     2) Run: `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh` (expect exit 0).
     3) Read `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` — §4.A is the TOP
-       priority hotfix (slash-command-global-stub regression in 0.5.89-95).
-       §4.B (MD split queue) and §4.C (§1.14 generalization) are deferred
-       UNTIL §4.A lands and 0.5.96-product is verified 7/7.
-    4) **§4.A — slash-command-global-stub hotfix → release as `0.5.96-product`**:
-         a. Reproduce the regression: `cd ~/IdeaProjects/study-note && claude`
-            then `/sfs` should fail "No commands match" (or
-            `ls -la ~/.claude/commands/sfs.md` should show absent).
-         b. Branch from clean `main`: `hotfix/sfs-slash-command-global-stub`.
-         c. Reference scan first (see HANDOFF §4.A.4 step 1) to surface every
-            place that touches `.claude/commands/sfs.md`, agent install, etc.
-         d. Verify Codex CLI's user-global slash-discovery path BEFORE
-            implementing — do not guess. Claude Code uses
-            `~/.claude/commands/sfs.md`; Gemini CLI uses
-            `~/.gemini/commands/sfs.toml`; Codex path needs confirmation.
-         e. Implement helper `solon-mvp-dist/bin/install-global-adapter-stubs.sh`
-            (+ `.ps1` for Windows): idempotent; SFS-managed marker probe;
-            cross-platform HOME detection.
-         f. Wire into `install.sh` / `install.ps1` / `upgrade.sh` /
-            `upgrade.ps1` / Homebrew formula `post_install` / Scoop manifest
-            `installer.script`. Conceptually keep separate from
-            `sfs agent install all` (persona/skill domain).
-         g. Update `templates/.claude/commands/sfs.md` etc. if needed for
-            user-global stub usage.
-         h. Update GUIDE / BEGINNER-GUIDE / docs/ko / docs/en to mention `/sfs`
-            is globally available after install with no per-project setup.
-         i. CHANGELOG entry under `### Fixed` (text in HANDOFF §4.A.4 step 10).
-         j. Run `cut-release.sh --apply --version 0.5.96-product` flow,
-            push stable + tag + Homebrew + Scoop, verify 7/7.
-         k. Local verification: `cd ~/IdeaProjects/study-note && claude` then
-            `/sfs` autocompletes; same in `~/agent_architect`. Idempotency
-            test: `sfs upgrade` second run is a no-op for global stubs.
-    5) After §4.A 7/7 green, ask user before starting §4.B (MD split queue)
-       — that work is staged in HANDOFF §4.B and not auto-resumed.
+       priority and is RESEARCH-FIRST. Do not assume the implementation —
+       the previous "user-global stub" framing was withdrawn after the user
+       clarified intent. §4.B (MD split queue) and §4.C (§1.14 generalization)
+       remain DEFERRED until §4.A lands.
+    4) **§4.A — slash-command zero-file discovery research → user decision → 0.5.96-product hotfix**
+       Read HANDOFF §4.A.1 ~ §4.A.7 in full before any action. Key constraints
+       from §4.A.1.1:
+       - User design intent = plugin-per-CLI (reference: bkit pdca prior art).
+       - One brew/scoop install action covers ALL three CLIs (Claude Code +
+         Codex CLI + Gemini CLI). Per-CLI plugin install is invoked inside the
+         brew/scoop hook — NOT a separate user step.
+       - Project surface stays clean (no project-local files dropped).
+       - Plugin-internal user-home location (e.g. `~/.claude/plugins/solon/`)
+         is acceptable. User-curated config-file location
+         (e.g. `~/.claude/commands/sfs.md`) is NOT acceptable.
+       - `sfs upgrade` re-runs coverage idempotently.
+       Then:
+         a. Reproduce regression: `cd ~/IdeaProjects/study-note && claude` →
+            `/sfs` fails. `cd ~/IdeaProjects/product-image-studio && claude` →
+            `/sfs` works (because that project still has stale project-local
+            file from pre-0.5.89). Confirm with `ls -la
+            ~/IdeaProjects/{study-note,product-image-studio}/.claude/commands/sfs.md`.
+         b. Conduct per-CLI research per HANDOFF §4.A.3 — Claude Code, Codex
+            CLI, Gemini CLI. Reference bkit pdca plugin's mechanism for prior
+            art. Investigate non-interactive plugin install commands per CLI.
+         c. Write the research report at
+            `2026-04-19-sfs-v0.4/tmp/slash-command-discovery-research-2026-05-03.md`
+            with feasibility matrix per CLI + cross-CLI common umbrella + Scoop
+            equivalent + trade-off table.
+         d. STOP and present findings to user via §4.A.5 decision gate. Do NOT
+            implement autonomously.
+         e. Branch `hotfix/sfs-slash-command-discovery` from clean `main` only
+            after user picks the mechanism in §4.A.5.
+         f. Implement chosen mechanism: idempotent, cross-platform, separate
+            from `sfs agent install all` persona/skill domain.
+         g. Release flow: `cut-release.sh --apply --version 0.5.96-product`,
+            push stable + tag + Homebrew + Scoop, verifier 7/7.
+         h. CHANGELOG entry under `### Fixed`, written AFTER implementation
+            lands so it reflects the actual chosen mechanism.
+    5) After §4.A 7/7 green, ask user before starting §4.B.
   on_skip_patterns: ["아니", "잠깐", "다른", "stop", "다른거"]
-  on_skip_action: "Top priority is the slash-command-global-stub hotfix → 0.5.96-product (HANDOFF §4.A). MD split queue (§4.B) is deferred. Latest product release is `0.5.95-product`. What do you want to do instead?"
-  on_ambiguous: "Slash-command-global-stub hotfix is queued as top priority (HANDOFF §4.A). Latest product release is `0.5.95-product`. Start the hotfix, or different priority?"
+  on_skip_action: "Top priority is research-first §4.A — slash-command discovery zero-file feasibility (Claude Code + Codex CLI + Gemini CLI under unified brew/scoop install umbrella). Then user decides mechanism, then 0.5.96-product hotfix. MD split queue (§4.B) is deferred. Latest product release is `0.5.95-product`. What do you want to do instead?"
+  on_ambiguous: "Slash-command zero-file discovery research is queued as top priority (HANDOFF §4.A). Latest product release is `0.5.95-product`. Start the research phase, or different priority?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
-    - "Hotfix §4.A: verify Codex user-global path before writing — do not guess. Idempotent stub install only — never overwrite user-modified content. Keep separate from `sfs agent install all` persona/skill domain."
+    - "Hotfix §4.A: research-first — write report at tmp/slash-command-discovery-research-2026-05-03.md and STOP for user decision before implementing. Do NOT assume answer. The 'install user-global stub' framing was withdrawn — that was the wrong assumption."
+    - "Hotfix §4.A: brew/scoop is the unified umbrella — per-CLI plugin install runs inside the hook, NOT as separate user steps. Plugin-internal locations OK, user-config-file locations NOT OK."
+    - "Hotfix §4.A: separate from `sfs agent install all` persona/skill domain. Do NOT conflate."
     - "MD split (§4.B): never start until §4.A 0.5.96-product is verified 7/7."
     - "MD split (§4.B): pre-flight reference scan required + frontmatter 11 fields required + parent link stub required + atomic commit + resume-session-check exit 0 verification."
     - "MD split (§4.B): never touch DO NOT split list (CHANGELOG, templates/**, archives/**, root redirect stubs, .claude/agents/*, .agents/skills/*, .gemini/commands/*.toml, .sfs-local/**, recent-trim solon-mvp-dist/GUIDE.md/BEGINNER-GUIDE.md/README.md)."
-  last_written: 2026-05-03T01:27:58Z
+  last_written: 2026-05-03T01:34:12Z
 ---
 
 # PROGRESS — compact
