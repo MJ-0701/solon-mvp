@@ -2,24 +2,87 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-03T15:30:00+09:00
-session: "claude-cowork:determined-focused-galileo — 0.5.96-product shipped + §4.D 0.6.0-product spec brain-dump received (7 decisions resolved, 7 sub-questions queued for next brainstorm) · mutex released"
+last_overwrite: 2026-05-03T21:55:00+09:00
+session: "claude-cowork:affectionate-trusting-thompson (takeover from elegant-hopeful-maxwell) — §4.D G6 PASS LOCKED (cross-instance Stage 2 codex PASS 정정 + Stage 3 gemini ALL PASS + user CEO ruling: 비지니스 모델=later track, 공식 OSS-PUBLIC). review-g6.md §7 + frontmatter verdict_final lock 완료. plan.md AC6 wording backstamp (frontmatter/classification 기준만, body literal 옵션 설명 허용). 다음 1 step = G7 retro.md + P-17 learning-log + git commit/push (배포)."
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
-current_wu: null
-current_wu_path: null
+current_wu: "§4.D 0.6.0-product spec sprint (docset-design) — G6 PASS LOCKED, G7 retro 진입"
+current_wu_path: "2026-04-19-sfs-v0.4/sprints/0-6-0-product-spec/review-g6.md"   # PASS LOCKED, retro.md 다음 작성
 
 # ── SESSION MUTEX (CLAUDE.md §1.12) ───────────────────────────────
 # Keep scalar form for tool compatibility (.sfs-local/scripts/sfs-loop.sh stop/status, auto-resume contract).
+# Takeover 2026-05-03 KST: prev owner elegant-hopeful-maxwell 가 user 명시 'dead' 선언 (heartbeat 21:35 KST 직후 끊김). user explicit 1~5 step (review lock / plan backstamp / PROGRESS / retro / 배포) authorization 으로 affectionate-trusting-thompson 가 takeover.
 current_wu_owner:
-  session_codename: null
-  claimed_at: null
-  last_heartbeat: null
+  session_codename: affectionate-trusting-thompson
+  claimed_at: 2026-05-03T21:55:00+09:00
+  last_heartbeat: 2026-05-03T21:55:00+09:00
   ttl_minutes: 30
+  takeover_from: elegant-hopeful-maxwell
+  takeover_reason: "user explicit dead 선언 + 1~5 step 진행 권한"
 
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
 scheduled_task_log:
+  - ts: 2026-05-03T21:55:00+09:00
+    codename: affectionate-trusting-thompson
+    check_exit: 0
+    action: "§4.D G6 PASS LOCKED (cross-instance Stage 2 + Stage 3 + user CEO ruling). takeover from elegant-hopeful-maxwell (user 명시 dead 선언). user macOS terminal 에서 Stage 2 codex (initial PARTIAL → user CEO ruling 후 PASS 정정) + Stage 3 gemini (ALL PASS) 회수. user CEO ruling verbatim: '비지니스 모델 = later track, 비지니스 기능 얘기 꺼내기 전까지 공식적으로 OSS-PUBLIC'. AC6 contract clarification = frontmatter/classification 기준만 검증 대상, spec body 의 user-explicit restricted visibility 옵션 설명 (business-only literal 등장) 은 허용. Edits: review-g6.md §7 (Stage 2/3 verdict + CTO 응답 + final lock) + frontmatter verdict_round_2_codex / verdict_round_3_gemini / verdict_final / self_validation_resolution / ceo_ruling_business_visibility 추가. plan.md AC6 wording backstamp (verify scope 명확화 + ac6_contract_backstamp frontmatter 추가). PROGRESS mutex self-claim + ② In-Progress G6 PASS → G7 retro 갱신. 다음 1 step = G7 retro.md + P-17 learning-log + git commit/push (배포)."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T21:35:00+09:00
+    codename: elegant-hopeful-maxwell
+    check_exit: 0
+    action: "§4.D G6 review-g6.md Stage 1 (claude same-instance) authored 221L. user explicit 2-stage flow request: Stage 1 자체리뷰 + Stage 2 codex cross-instance. AI-PROPOSED Stage 1 verdict = PASS-with-flags. AC1~AC6+AC8 deterministic re-confirm: all PASS. AC7.1~AC7.6 review_high judgment: all PASS (AC7.4 yellow-flag — R5/R7 inline). 6 철학 self-application: 6/6. Cross-ref consistency: ✓ (4 spec ↔ plan ↔ brainstorm, dead link 0). anti-AC violations: 0. 5 review-grade flags for Stage 2 codex: (a) AC6 spec body grep 'business-only' = 2 (override 옵션 설명, frontmatter oss-public — strict 해석 시 ambiguous), (b) AC7.4 R5+R7 inline yellow-flag (Codex Round 2~4 도 동일 발본), (c) brainstorm.md L137 sprint.yaml 잔존 (lock = sprint.yml, workbench 초안 잔존), (d) SFS-PHILOSOPHY 9 § (§1~§6 6 철학 + §7~§9 R5+R7+ExtRef inline) scope, (e) Stage 1 verdict 자체 정합성. Stage 2 codex prompt review-g6.md §6 제공. 다음 1 step = user macOS terminal 에서 codex invoke → 본 conversation 회수."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T21:30:00+09:00
+    codename: elegant-hopeful-maxwell
+    check_exit: 0
+    action: "§4.D G2 implement EXECUTED. user explicit `/sfs implement` invocation. 4 신규 markdown spec 작성 + 2 file 수정 완료. SFS-PHILOSOPHY.md (98L, 6 철학 §1~§6 + R5 inline §7 1-line cross-ref + R7 inline §8 SFS-Local 3-Role analogy + §9 External Refs) / storage-architecture-spec.md (138L, Layer 1/2 + archive branch + co-location + N:M + sprint.yml + pre-merge hook + lock layer REJECTED) / migrate-artifacts-spec.md (129L, 2-pass propose-accept + algo + reject + rollback + 3 pseudo-code blocks) / improve-codebase-architecture-spec.md (171L, 3-pass + 3 surface + I/O contract). CLAUDE.md §1.27 SFS-PHILOSOPHY link 추가 (179L ≤200 ✓). .visibility-rules.yaml 4 oss-public entries. AC1~AC6+AC8 deterministic self-check PASS (2 mid-iter self-발본: tier 표 / anti-AC2 trigger 단어). AC7.1~AC7.6 review_high judgment = G6 review 위임. implement.md status=ready-for-review. learning: same-instance generator 가 자체 reviewing 도중 2 violations self-발본 — round 1~4 cycle 의 cross-instance 가치 retro-confirm. 다음 1 step = `/sfs review --gate G6` 또는 user explicit cross-instance verify."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T21:10:00+09:00
+    codename: elegant-hopeful-maxwell
+    check_exit: 0
+    action: "§4.D G1 Gate 3 (Plan) **PASS LOCKED** — Codex Round 4 cross-runtime cross-instance final verdict PASS. 4-round cycle: R1 claude same-instance AI-PROPOSED PASS (부정확, 3 항목 leak) → R2 codex PARTIAL (3 fix) → R2 fixes → R3 codex PARTIAL (3 follow-up) → R3 fixes → **R4 codex PASS**. Round 3 fix 3/3 confirmed: (1) §4 self-check 정합 (AC1~AC6+AC8 deterministic / AC7 review_high judgment), (2) §5 fail criteria AC8 hard failure (blog attribution / 인용 길이 / SSoT 이중화), (3) §6 historical phrase grep result 0 + redirect to review.md trace. Round 2 잔존 inconsistency = 0. AC7.1~AC7.6 ↔ §4 self-check contract 정합 confirm. blog source check: harness-assumption / re-evaluation 다룸 confirm, SFS 3-role mapping = SFS-local analogy. **plan.md status=ready-for-implement. G2 implement 진입 = user 명시 명령 후** (no-auto-advance rule: Codex Round 4 자체 명시 + CLAUDE.md §1.3 + harness 메타 철학). Cross-instance verify cycle = harness 메타 철학 self-application 의 strongest evidence (P-17 learning-log 후보, retro 시 작성)."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T20:55:00+09:00
+    codename: elegant-hopeful-maxwell
+    check_exit: 0
+    action: "§4.D G1 review Round 3 — Codex cross-runtime re-review PARTIAL received. Round 2 fix 평가: Fix 2 ACCEPTED, Fix 1 mostly fixed but 2 잔존 gap (plan.md §4 stale self-check + §5 fail criteria AC8 hard fail 누락), Fix 3 semantically fixed but literal phrase 잔존 (plan.md:164 historical blockquote + :179 paraphrase). 3 Round 3 follow-up fixes applied: (i) plan §4 self-check 갱신 → AC1~AC6+AC8 deterministic / AC7 review_high sub-check judgment, (ii) plan §5 fail criteria 에 AC8 hard failure 명시 (blog attribution 잔존 / 직접 인용 >15 단어 / SSoT 이중화), (iii) plan §6 Harness 섹션의 historical literal phrase 'Anthropic Planner/Generator/Evaluator 3-agent harness' 제거 → review.md §5.2 + §7.2 review trace 로 redirect. Cowork bash 검증: literal grep 결과 0. plan.md 201 → 209 lines / review.md 236 → 280+ lines. 다음 1 step = Round 4 re-review (codex strict 또는 user-direct PASS verdict)."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T20:35:00+09:00
+    codename: elegant-hopeful-maxwell
+    check_exit: 0
+    action: "§4.D G1 review round 2 — Codex cross-runtime cross-instance verdict PARTIAL received (user macOS terminal codex CLI invocation). 3 findings: (1) plan.md:126 §5 CPO verification + plan.md:134 pass/fail 에서 AC8 누락, (2) AC7 'verify by binary' wording 이 deterministic 인 척 — review_high judgment 로 relabel + 6 sub-check split 필요, (3) plan.md:22 frontmatter + plan.md:161 §6 mapping table 의 'Planner/Generator/Evaluator' attribution 부정확 — Codex 가 blog page 직접 조회 결과 해당 3-agent terms page 본문 부재 확인. 'harness-assumption reference (blog 메타 철학) + SFS-local CEO/CTO/CPO analogy (SFS 자체)' 둘로 framing 분리 요구. CTO 응답 (claude same-instance generator): 3 fix 적용 완료 — frontmatter 둘로 split / R7 wording reword / AC7 6 sub-check split + review_high label / AC8 SFS-local analogy grep 추가 / §5 CPO verification + pass/fail 에 AC1~AC8 + AC7 sub-check 명시 / §6 Harness 섹션 분리 (Anthropic blog vs SFS-local 명시). review.md §5/§7 round-2 verdict + CTO 응답 trace 기록. 다음 1 step = re-review (codex round-3 또는 user-direct verdict). harness 메타 철학 self-application 의 첫 실 사례."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T20:20:00+09:00
+    codename: elegant-hopeful-maxwell
+    check_exit: 0
+    action: "§4.D G1 review.md authored (183 lines, /sfs review --gate G1 user invocation). ⚠️ Self-validation flag (§2): evaluator instance = generator instance (same cowork conversation). plan.md §5 'instance/conversation 분리' contract 위배 case → Mitigation-γ (AI-proposed + user confirm) 채택. AI-PROPOSED verdict = **PASS** with 5 implement-stage concerns: (1) self-validation flag, (2) AC7 binary 안 됨 — implement 산출물 평가 필요, (3) R5 inline → AC5 검증 site collision (위반 X), (4) R7 1-line summary format ambiguity (Gray Box 위임 처리 가능), (5) plan §1 'In scope 5 spec' 잔존 문구 (4 markdown + R5 inline 정확). Anti-AC 위반 0. 다음 1 step = user direct verdict OR cross-instance verify (Mitigation-α/β) → G2 implement 진입 명령."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T20:15:00+09:00
+    codename: elegant-hopeful-maxwell
+    check_exit: 0
+    action: "§4.D G1 plan CLOSED → status=ready-for-review. user 3 결정 lock: (a) soft split APPROVED (R1~R5 통합 0.6.0 spec, implement sprint 만 0.6.0/0.6.1 분할), (b) oss-public default APPROVED (business-only 은 user-explicit only, 당분간 없음), (c) runtime split CORRECTION → default = current runtime (single-runtime, spec runtime-agnostic), self-validation 방지는 instance/conversation 분리로 충분, cross-runtime 은 user-explicit override only. 신규 R7 added: Anthropic harness blog (https://claude.com/ko-kr/blog/harnessing-claudes-intelligence) cross-ref in R1 SFS-PHILOSOPHY.md, Planner/Generator/Evaluator ↔ CEO/CTO/CPO 동형 mapping table 명시. AC8 추가 (저작권 가드 ≤15 단어 인용). plan.md 184 lines. 다음 1 step = /sfs review --gate G1 또는 user explicit G2 implement."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T19:55:00+09:00
+    codename: elegant-hopeful-maxwell
+    check_exit: 0
+    action: "§4.D G1 plan gate ENTERED. user explicit: '결정됐으면 작업 시작하자 ㄱㄱ 플랜부터'. plan.md 신설 140 lines (status=draft). R1~R6 (R1 SFS-PHILOSOPHY.md / R2 storage-architecture-spec / R3 migrate-artifacts-spec / R4 improve-codebase-architecture-spec / R5 cross-ref / R6 release split CEO call). AC1~AC7 binary 검증 가능 (grep / line-count / frontmatter). Sprint Contract: CTO Generator = claude strategic_high, CPO Evaluator = codex review_high (self-validation 방지). 3 user-pending decisions: (a) R6 0.6.0/0.6.1 split 비율, (b) 4 신규 spec visibility, (c) generator/evaluator runtime split 확정. 다음 1 step = user 가 위 3 결정 + plan AC 검토 → /sfs review --gate G1 또는 G2 implement 진입 명령."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T19:50:00+09:00
+    codename: elegant-hopeful-maxwell
+    check_exit: 0
+    action: "§4.D brainstorm gate CLOSED: 7/7 axes locked (round 1 = A4 / B3 500MB / C4 sprint.yml lock-REJ / D4 algo+file-reject; round 2 = E-cmd-γ 둘 다 / F4-γ defer + future scope KO+EN bilingual only / G-β validator depth divisions.yaml 위임 / G-ref-γ 의미 layer cross-ref). 6 철학 self-application 6/6 ✓. status: draft → ready-for-plan. plan gate (G1) 진입 = user 명시 명령 대기. brainstorm.md ~480 lines."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T19:25:00+09:00
+    codename: elegant-hopeful-maxwell
+    check_exit: 0
+    action: "§4.D grill round 1 closed: 4/7 Axis locked (A4 hybrid / B3 단계적 default 500MB warn / C4 폴더격리 + sprint.yml + lock layer REJECTED / D4 hybrid 2-pass with pass1 algo report-存→archive auto, 부재→AI 가 user 암묵지 질문 + file-level reject sprint-escalate exception). User uploaded model-profiles.yaml v1.1 (study-note 0.5.88-product) → G2 신규 필드 추가 redundant 확인 (strategic_high/review_high/execution_standard/helper_economy 4 tier 가 이미 interface/validator/implementer/helper 매핑). Round 2 grill posted: Q5 cmd surface (E-cmd-α/β/γ) / Q6 multilingual (F4-α/β/γ) / Q7 validator depth (G-α/β/γ) + cross-ref scope (G-ref-α/β/γ). brainstorm.md 350+ lines, status=draft (자동 승급 금지)."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T18:55:00+09:00
+    codename: elegant-hopeful-maxwell
+    check_exit: 16
+    action: "session start: §4.D 0.6.0-product spec sprint opened. sprints/0-6-0-product-spec/brainstorm.md G0 gate authored (depth=hard, 250 lines, status=draft, visibility=raw-internal). §0~§7 refined as Solon CEO from HANDOFF §4.D.0~D.4 (7 resolved decisions + 5-axis real frame). §8 Append Log = 7 grill questions (Axis A Feature retro→Sprint retro / B Archive LFS trigger / C N feature parallel conflict-free / D migrate-artifacts spec / E Deep Module subcommand / F philosophy codification 위치 / G interface vs implementer agent split). status=draft 유지 — user owner 결정 7 건 미해소. resume-session-check soft warning sched_log_drift:202m (now resolved by this entry)."
+    ahead_delta: "+0"
   - ts: 2026-05-03T15:30:00+09:00
     codename: determined-focused-galileo
     check_exit: 0
@@ -232,23 +295,23 @@ resume_hint:
   default_action: |
     1) Read `CLAUDE.md`, then `PROGRESS.md`.
     2) Run: `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh` (expect exit 0).
-    3) Read `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` §4.D in FULL —
-       this is the TOP priority. 7 user decisions (AS-D1~D6 +
-       AS-Migration) already resolved 2026-05-03. 7 sub-questions
-       deferred to next-session brainstorm gate (§4.D.2).
-    4) Confirm with user one-liner before launching: "§4.D
-       (0.6.0-product storage architecture + SFS identity codification +
-       Deep Module 설계) brainstorm gate 시작?" (default = yes per
-       prior decisions). User can pivot to §4.A/B/C if priorities
-       changed.
-    5) Once confirmed, run: `sfs brainstorm --hard "0.6.0-product
-       storage architecture redesign + SFS identity codification + Deep
-       Module 설계 framework"` and proceed through the 7-gate cycle on
-       the docset (NOT on a feature codebase — this is a docset-design
-       sprint).
+    3) Read `2026-04-19-sfs-v0.4/sprints/0-6-0-product-spec/retro.md`
+       (G7 retro, sprint 회고 + 7-step flow recap + cross-instance verify
+       pattern 학습 + 다음 sprint 제언).
+    4) `2026-04-19-sfs-v0.4/learning-logs/2026-05/P-17-cross-instance-verify-cycle.md`
+       확인 (P-17 신규 learning-log, multi-runtime cross-instance verify
+       canonical pattern).
+    5) git log 에서 §4.D commit (sprint artifact + learning-log 두 commit)
+       확인. 이미 push 완료 (origin/main 정합).
+    6) User 발화 분기:
+       - "0.6.0 implement 가자" / "다음 sprint" → 0.6.0-product implement
+         sprint 진입 (R1+R2+R3+R5+R7 first track). brainstorm/plan 부터
+         새 sprint dir.
+       - "다른거 먼저" → on_skip_action.
+    7) **자동 다음 sprint 진입 금지** (CLAUDE.md §1.3 + §1.20 sequential).
   on_skip_patterns: ["아니", "잠깐", "다른", "stop", "다른거"]
-  on_skip_action: "TOP priority is §4.D (0.6.0-product storage architecture redesign + SFS identity codification + Deep Module 설계 framework). 7 user decisions already resolved. Other candidates are §4.A 0.5.97 dashboard (서스테이닝), §4.B MD split queue, §4.C release-tooling polish. Pick one or describe a different priority."
-  on_ambiguous: "Latest product release `0.5.96-product` (2026-05-03). TOP queued = §4.D (0.6.0-product storage architecture + SFS identity codification + Deep Module 설계 framework, HANDOFF §4.D, 7 decisions already resolved). Start §4.D brainstorm gate, or pivot to §4.A/B/C?"
+  on_skip_action: "§4.D 0.6.0-product spec sprint = G0~G7 모두 close + 배포 완료 (PASS LOCKED + retro + git push). 다음 후보: §4.A dashboard (서스테이닝), §4.B MD split, §4.C release-tooling polish, 또는 0.6.0-product implement sprint (R1+R2+R3+R5+R7 first track) 시작."
+  on_ambiguous: "§4.D 0.6.0-product spec sprint CLOSED + 배포 완료. 다음 = 0.6.0 implement / §4.A~C 후순위 / 다른 axis?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
@@ -261,7 +324,7 @@ resume_hint:
     - "MD split (§4.B): never touch DO NOT split list (CHANGELOG, templates/**, archives/**, root redirect stubs, .claude/agents/*, .agents/skills/*, .gemini/commands/*.toml, .sfs-local/**, recent-trim solon-mvp-dist/GUIDE.md/BEGINNER-GUIDE.md/README.md, 0.5.96 surface above)."
     - "Release tooling polish (§4.C): verify-product-release.sh interactive prompts (need --yes), cut-release.sh default STABLE_REPO=~/workspace/solon-mvp stale (need ~/tmp/solon-product retarget), Brew/Scoop tap update manual ritual (need scripts/update-product-taps.sh). Lower priority than §4.D."
     - "§4.A 0.5.97 dashboard: 서스테이닝 — 우선순위 낮음 (user 2026-05-03)."
-  last_written: 2026-05-03T06:30:00Z
+  last_written: 2026-05-03T12:35:00Z
 ---
 
 # PROGRESS — compact
@@ -323,13 +386,34 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ② In-Progress
 
-- None.
+- **§4.D 0.6.0-product spec sprint G7 retro 작성 중** (claude-cowork:affectionate-trusting-thompson takeover).
+  G6 PASS LOCKED (Stage 1 claude PASS-with-flags + Stage 2 codex PASS 정정 +
+  Stage 3 gemini ALL PASS + user CEO ruling lock). user 명시 1~5 step
+  authorization: review lock / plan backstamp / PROGRESS / retro / 배포.
+  현재 step 4 (retro.md 작성) 진행. step 5 (git commit/push) 그 후.
+
+- **§4.D 0.6.0-product spec sprint (docset-design) — gate progression**:
+  G0 ✅ (brainstorm 7/7) → G1 plan ✅ → G1 review **PASS LOCKED** (Codex
+  Round 4) → G2 implement ✅ (4 신규 markdown + 2 수정) → G6 review
+  **PASS LOCKED 2026-05-03T21:55+09:00** (cross-instance Stage 1+2+3 +
+  CEO ruling) → G7 retro (작성 중).
+  Cross-instance verify pattern 강화: G1 Round 1~4 (4 cycle) + G6 Stage 1~3
+  (3 cycle) = P-17 learning-log 후보 confirm.
+  **다음 1 step**: G7 retro.md 작성 → P-17 learning-log → git commit/push.
 
 ## ③ Next
 
-**TOP = §4.D 0.6.0-product storage architecture redesign + SFS identity
-codification + Deep Module 설계 framework**. 7 user decisions resolved
-2026-05-03 KST (AS-D1~D6 + AS-Migration). Full spec at HANDOFF §4.D.
+**다음 1 step = G7 retro.md 작성 + P-17 learning-log + git commit/push (배포)**.
+
+Sequential per CLAUDE.md §1.20:
+1. ✅ review-g6.md §7 + frontmatter verdict_final lock.
+2. ✅ plan.md AC6 wording backstamp.
+3. ✅ PROGRESS mutex/heartbeat/log + ②/③/resume_hint 갱신.
+4. **(in progress)** retro.md + P-17 learning-log 작성.
+5. **(pending)** git add (path 격리, §1.25 cherry-pick) + commit + push to MJ-0701/solon main.
+
+배포 후: §4.D sprint 완전 close. 다음 axis = 0.6.0-product implement sprint
+(R1+R2+R3+R5+R7 first track) 또는 §4.A~C 후순위 — user timing 콜.
 
 §4.D 의 진짜 axis (user 답변 mid-session 발본):
 1. SFS 6 철학 codification (Grill Me / Ubiquitous Language / TDD 헤드라이트
@@ -353,6 +437,12 @@ framework"` 부터 시작 — 7 deferred sub-question (HANDOFF §4.D.2) 정제.
   retarget / scripts/update-product-taps.sh). 본 0.5.96 release 의 3
   retro item.
 
+### 후순위 candidates (§4.D landed 후 user 가 timing 콜)
+
+- **§4.A 0.5.97-product dashboard** (서스테이닝).
+- **§4.B MD split queue** (Tier 1 8 docs).
+- **§4.C release-tooling polish** (3 retro item).
+
 ## ④ Artifacts
 
 > 0.5.60-0.5.86 release ledger entries rotated to
@@ -360,6 +450,123 @@ framework"` 부터 시작 — 7 deferred sub-question (HANDOFF §4.D.2) 정제.
 > 0.5.87-0.5.92 codex hotfix train: see git log `6111010..6322079` and
 > `solon-mvp-dist/CHANGELOG.md` (sha details not individually entered into
 > PROGRESS at release time).
+
+- **§4.D G6 review Stage 1 self-review (2026-05-03T21:35+09:00)**:
+    review-g6.md  `sprints/0-6-0-product-spec/review-g6.md` (221L)
+    flow          user 명시 2-stage: Stage 1 claude same-instance +
+                  Stage 2 codex cross-instance (Round 1~4 precedent 정합)
+    AI verdict    PASS-with-flags (AC1~AC8 PASS / 6 철학 6/6 / Cross-ref ✓ /
+                  anti-AC 0 / AC7.4 yellow-flag)
+    5 flags       (a) AC6 spec body grep "business-only" = 2 ambiguity,
+                  (b) AC7.4 R5/R7 inline yellow,
+                  (c) brainstorm L137 sprint.yaml 잔존 (lock = sprint.yml),
+                  (d) SFS-PHILOSOPHY 9 § scope (§1~§6 + §7~§9 inline),
+                  (e) Stage 1 verdict 자체 정합성
+    next 1 step   user macOS codex invoke (review-g6.md §6 prompt)
+                  → 본 conversation 회수
+    learning      P-17 강화 — multi-stage cross-instance verify pattern
+
+- **§4.D G2 implement EXECUTED (2026-05-03T21:30+09:00)**:
+    sprint dir    `2026-04-19-sfs-v0.4/sprints/0-6-0-product-spec/`
+    implement.md  status=ready-for-review (AC1~AC6+AC8 deterministic PASS)
+    R1 SFS-PHILOSOPHY.md      `2026-04-19-sfs-v0.4/SFS-PHILOSOPHY.md` 98L
+                              (6 철학 + R5 inline + R7 inline, oss-public)
+    R2 storage spec           `2026-04-19-sfs-v0.4/storage-architecture-spec.md` 138L
+                              (Layer 1/2 + archive + N:M + sprint.yml + lock REJ)
+    R3 migrate-artifacts      `2026-04-19-sfs-v0.4/migrate-artifacts-spec.md` 129L
+                              (2-pass + algo + 3 pseudo-code blocks)
+    R4 improve-codebase       `2026-04-19-sfs-v0.4/improve-codebase-architecture-spec.md` 171L
+                              (3-pass + 3 surface + I/O contract)
+    CLAUDE.md §1.27           SFS-PHILOSOPHY link 추가 (178→179L ≤200 ✓)
+    .visibility-rules.yaml    4 oss-public entries 추가 (119→133L)
+    AC self-check             AC1~AC6+AC8 deterministic PASS,
+                              AC7.1~AC7.6 review_high G6 위임,
+                              AC6 spec body grep "business-only" = 2
+                              (user-explicit override 옵션 설명, frontmatter
+                              자체는 oss-public — review-grade 판정 G6)
+    self-발본                 mid-iter 2 violations 자체 발본 + fix:
+                              (i) SFS-PHILOSOPHY tier 표 잔존 → §7 1-line +
+                                  §8 tier column 제거,
+                              (ii) storage anti-AC2 trigger 단어 잔존 →
+                                   §7 reword (구체 단어 제거)
+    next 1 step               /sfs review --gate G6 (cross-instance 권장)
+    learning                  P-17 강화 — same-instance generator 자체
+                              self-reviewing 도중 2 발본 = round 1~4 cycle
+                              precedent retro-confirm
+
+- **§4.D G1 Gate 3 (Plan) PASS LOCKED (2026-05-03T21:10+09:00)**:
+    review.md     `sprints/0-6-0-product-spec/review.md` (~310 lines,
+                  Round 1+2+3+4 trace + §7.1~§7.5 CTO 응답 lock)
+    plan.md       `sprints/0-6-0-product-spec/plan.md` (206 lines,
+                  **status=ready-for-implement**, codex_round_4=PASS)
+    cycle         R1 claude same-instance PASS (부정확) → R2 codex PARTIAL
+                  → R2 fixes → R3 codex PARTIAL → R3 fixes → R4 codex PASS
+    R4 confirmed  Round 3 fix 3/3 정합 + Round 2 잔존 0 + AC7 ↔ §4 self-check
+                  contract 정합 + blog source check 정합
+    next 1 step   G2 implement = user 명시 명령 후 (no-auto-advance)
+    learning      P-17 cross-instance verify value (4-round cycle 사례)
+                  retro 시 강화 작성
+
+- **§4.D G1 review Round 3 + 3 follow-up fixes applied (2026-05-03T20:55+09:00)**:
+    round 3       **Codex cross-runtime re-review PARTIAL** (3 follow-up fix)
+    findings      (1) plan §4 stale self-check 잔존 (AC1~AC7 deterministic 문구),
+                  (2) plan §5 fail criteria 에 AC8 hard failure 누락,
+                  (3) plan §6 historical literal phrase ("Anthropic
+                      Planner/Generator/Evaluator 3-agent harness") 잔존
+                      — active attribution 아니지만 grep result 0 contract 시 fail.
+                  Round 2 Fix 2 (AC7 relabel + 6 sub-check) ACCEPTED.
+                  AC7.1~AC7.6 binary 평가 가능 confirm. blog page 본문
+                  Planner/Generator/Evaluator 부재 재confirm.
+    fixes applied (i) §4 self-check 갱신 → AC1~AC6+AC8 deterministic +
+                  AC7 review_high judgment, (ii) §5 fail criteria 에
+                  AC8 hard failure 명시, (iii) §6 historical literal
+                  phrase 제거 → review.md §5.2 + §7.2 review trace
+                  redirect. Cowork bash 검증 grep 결과 0.
+    next 1 step   Round 4 re-review (codex strict 또는 user-direct PASS)
+    learning      P-17 cross-instance verify value 후보 강화 (3 round
+                  까지 cross-runtime 발본 → same-instance 의 round trip 가치)
+
+- **§4.D G1 review Round 2 + 3 fixes applied (2026-05-03T20:35+09:00)**:
+    round 2       Codex cross-runtime PARTIAL (3 fix)
+    findings      AC8 inclusion / AC7 relabel / attribution 분리
+    fixes applied §5 CPO verification + AC7 6 sub-check + frontmatter
+                  split + R7/AC8/§6 reword
+    superseded by Round 3 발본 + Round 3 fixes
+
+- **§4.D G1 review round 1 (2026-05-03T20:20+09:00, superseded)**:
+    review.md     초안 183 lines, self-val flag, AI-PROPOSED PASS
+                  → round 2 Codex PARTIAL 로 supersede
+
+- **§4.D G1 plan CLOSED (2026-05-03T20:15+09:00)**:
+    sprint dir    `2026-04-19-sfs-v0.4/sprints/0-6-0-product-spec/`
+    plan.md       `sprints/0-6-0-product-spec/plan.md` (184 lines,
+                  status=ready-for-review)
+    R1~R7         R1~R5 spec docs + R6 soft split / R7 harness cross-ref
+    AC1~AC8       binary 검증 (grep / line-count / frontmatter / pseudo)
+    decisions     ✅ a soft-split / ✅ b oss-public default /
+                  ✅ c runtime current-runtime default (spec runtime-agnostic)
+    harness ref   https://claude.com/ko-kr/blog/harnessing-claudes-intelligence
+                  (Planner/Generator/Evaluator ↔ CEO/CTO/CPO 동형, paraphrase
+                  only, ≤15 단어 인용 가드)
+    next 1 step   `/sfs review --gate G1` 또는 user explicit G2 implement
+
+- **§4.D G0 brainstorm CLOSED (2026-05-03T19:50+09:00)**:
+    sprint dir    `2026-04-19-sfs-v0.4/sprints/0-6-0-product-spec/`
+    brainstorm    `sprints/0-6-0-product-spec/brainstorm.md`
+                  (422 lines, depth=hard, status=ready-for-plan)
+    7/7 locked    A4 / B3 (500MB) / C4 (sprint.yml + lock REJ) /
+                  D4 (pass1 algo + file-reject) /
+                  E-cmd-γ (옵션 + standalone 둘 다) /
+                  F4-γ (defer, future scope = KO+EN bilingual only) /
+                  G-β (validator depth → divisions.yaml) +
+                  G-ref-γ (의미 layer cross-ref)
+    6 철학 self  Grill Me / Ubiquitous Lang / TDD-no-overtake /
+                  Deep Module / Gray Box / Daily System Design — 6/6 ✓
+    attached      uploaded/model-profiles.yaml v1.1 (study-note
+                  0.5.88-product) — verified G2 신규 필드 redundant
+    inherited     HANDOFF §4.D (7 decisions resolved + 7 sub-questions)
+    session       claude-cowork:elegant-hopeful-maxwell
+    next gate     G1 plan = user 명시 명령 후 (자동 승급 금지)
 
 - **0.5.96-product release artifacts (2026-05-03)**:
     dev main      `5143cf6`  (merge of 11 hotfix commits)

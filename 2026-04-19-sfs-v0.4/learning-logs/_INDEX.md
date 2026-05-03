@@ -2,7 +2,7 @@
 doc_id: learning-logs-index
 title: "learning-logs/ — 장기 학습 패턴 자산 인덱스"
 visibility: raw-internal
-updated: 2026-05-01   # Codex cleanup session — P-15 claude-worktree-gitlink-committed 신설 + P-10/P-11/P-13/P-14 누락 row backfill. P-15 = `.claude/worktrees/<id>` 가 main HEAD 에 `160000` gitlink 로 커밋된 사고, `.gitignore` + `git rm --cached` 로 정리.
+updated: 2026-05-03   # affectionate-trusting-thompson session — P-16 (0.5.96-product hotfix multi-CLI plugin umbrella, captured but unindexed by determined-focused-galileo) backfill + P-17 (0.6.0-product spec sprint G1 4-round + G6 3-stage cross-instance verify cycle canonical pattern) 신설.
 ---
 
 # learning-logs/ — 학습 패턴 인덱스
@@ -42,6 +42,8 @@ updated: 2026-05-01   # Codex cleanup session — P-15 claude-worktree-gitlink-c
 | [P-13-dev-stable-divergence-on-cut](2026-05/P-13-dev-stable-divergence-on-cut.md) | dev-stable-divergence-on-cut | business-only | 26th-3 0.5.0-mvp cut 회귀 진단 | 0 | documented |
 | [P-14-mental-coupling-on-rename-fix](2026-05/P-14-mental-coupling-on-rename-fix.md) | mental-coupling-on-rename-fix | business-only | 26th-3 사용자 비판 + codex narrative sync-back | 0 | documented |
 | [P-15-claude-worktree-gitlink-committed](2026-05/P-15-claude-worktree-gitlink-committed.md) | claude-worktree-gitlink-committed | raw-internal | 2026-05-01 Codex cleanup session + commit `78ee0f0` | 1 | documented |
+| [P-16-multi-cli-plugin-umbrella](2026-05/P-16-multi-cli-plugin-umbrella.md) | 단일 brew/scoop install 이 Claude Code + Gemini CLI + Codex CLI 슬래시 명령을 한꺼번에 등록하는 multi-CLI plugin umbrella 패턴 | oss-public | 0.5.96-product hotfix (determined-focused-galileo, 2026-05-03) | 0 | documented |
+| [P-17-cross-instance-verify-cycle](2026-05/P-17-cross-instance-verify-cycle.md) | Multi-runtime multi-stage cross-instance verify cycle — SFS self-validation 회피 mechanism 운영 패턴 (G1 4-round + G6 3-stage canonical evidence) | oss-public | 0.6.0-product spec sprint G1+G6 (elegant-hopeful-maxwell + affectionate-trusting-thompson, 2026-05-03) | 0 | documented |
 
 ---
 

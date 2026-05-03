@@ -84,6 +84,20 @@ exclude:
     tier: oss-public
     reason: "sfs CLI 참조용 7-gate enum — OSS 동봉 OK (tier 명시 declaration only, exclude 효과 아님 — include_only_if.tier == oss-public 매칭으로 포함됨)"
 
+  # ── 0.6.0-product spec sprint 산출물 (G1 PASS LOCKED 2026-05-03) ──
+  - pattern: "SFS-PHILOSOPHY.md"
+    tier: oss-public
+    reason: "SFS 6 철학 SSoT — OSS 사용자가 entry 시 가장 먼저 읽는 single screen"
+  - pattern: "storage-architecture-spec.md"
+    tier: oss-public
+    reason: "0.6.0-product Layer 1/2 + archive branch + N:M mapping spec"
+  - pattern: "migrate-artifacts-spec.md"
+    tier: oss-public
+    reason: "0.6.0-product `sfs migrate-artifacts` 2-pass propose-accept flow spec"
+  - pattern: "improve-codebase-architecture-spec.md"
+    tier: oss-public
+    reason: "0.6.0-product `sfs improve-deep-modules` + `sfs implement --change-deep` 3-pass spec"
+
   # ── 22nd 신설 status report spec (WU-31 row 7 추가) ──
   - pattern: "solon-status-report.md"
     tier: raw-internal
