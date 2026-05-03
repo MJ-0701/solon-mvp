@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-03T13:30:00+09:00
-session: "claude-cowork:determined-focused-galileo — §4.A research-first phase: bkit prior art clone + per-CLI feasibility + research report → §4.A.5 user decision gate"
+last_overwrite: 2026-05-03T15:00:00+09:00
+session: "claude-cowork:determined-focused-galileo — 0.5.96-product slash-command zero-file discovery hotfix shipped 2026-05-03 KST · verify 7/7 green · mutex released"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: null
@@ -12,14 +12,19 @@ current_wu_path: null
 # ── SESSION MUTEX (CLAUDE.md §1.12) ───────────────────────────────
 # Keep scalar form for tool compatibility (.sfs-local/scripts/sfs-loop.sh stop/status, auto-resume contract).
 current_wu_owner:
-  session_codename: determined-focused-galileo
-  claimed_at: 2026-05-03T10:54:18+09:00
-  last_heartbeat: 2026-05-03T13:30:00+09:00
+  session_codename: null
+  claimed_at: null
+  last_heartbeat: null
   ttl_minutes: 30
 
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
 scheduled_task_log:
+  - ts: 2026-05-03T15:00:00+09:00
+    codename: determined-focused-galileo
+    check_exit: 0
+    action: "0.5.96-product slash-command zero-file discovery hotfix SHIPPED + verified 7/7 green. Stable=baa9e41 v0.5.96-product · Homebrew tap=97298a9 · Scoop bucket=939ddf9 · dev main=5143cf6. Phase 8 AC-01 PASS (study-note /sfs autocomplete restored). hotfix branch merged to main + deleted. Mutex released. Post-release retro items captured for 0.5.97-product candidates: (i) verify-product-release.sh interactive prompts (need --yes), (ii) cut-release.sh default STABLE_REPO=~/workspace/solon-mvp stale (need ~/tmp/solon-product retarget), (iii) Brew/Scoop tap update manual ritual (need scripts/update-product-taps.sh)."
+    ahead_delta: "+0"
   - ts: 2026-05-03T13:30:00+09:00
     codename: determined-focused-galileo
     check_exit: 0
@@ -222,62 +227,26 @@ resume_hint:
   default_action: |
     1) Read `CLAUDE.md`, then `PROGRESS.md`.
     2) Run: `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh` (expect exit 0).
-    3) Read `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` — §4.A is the TOP
-       priority and is RESEARCH-FIRST. Do not assume the implementation —
-       the previous "user-global stub" framing was withdrawn after the user
-       clarified intent. §4.B (MD split queue) and §4.C (§1.14 generalization)
-       remain DEFERRED until §4.A lands.
-    4) **§4.A — slash-command zero-file discovery research → user decision → 0.5.96-product hotfix**
-       Read HANDOFF §4.A.1 ~ §4.A.7 in full before any action. Key constraints
-       from §4.A.1.1:
-       - User design intent = plugin-per-CLI (reference: bkit pdca prior art).
-       - One brew/scoop install action covers ALL three CLIs (Claude Code +
-         Codex CLI + Gemini CLI). Per-CLI plugin install is invoked inside the
-         brew/scoop hook — NOT a separate user step.
-       - Project surface stays clean (no project-local files dropped).
-       - Plugin-internal user-home location (e.g. `~/.claude/plugins/solon/`)
-         is acceptable. User-curated config-file location
-         (e.g. `~/.claude/commands/sfs.md`) is NOT acceptable.
-       - `sfs upgrade` re-runs coverage idempotently.
-       Then:
-         a. Reproduce regression: `cd ~/IdeaProjects/study-note && claude` →
-            `/sfs` fails. `cd ~/IdeaProjects/product-image-studio && claude` →
-            `/sfs` works (because that project still has stale project-local
-            file from pre-0.5.89). Confirm with `ls -la
-            ~/IdeaProjects/{study-note,product-image-studio}/.claude/commands/sfs.md`.
-         b. Conduct per-CLI research per HANDOFF §4.A.3 — Claude Code, Codex
-            CLI, Gemini CLI. Reference bkit pdca plugin's mechanism for prior
-            art. Investigate non-interactive plugin install commands per CLI.
-         c. Write the research report at
-            `2026-04-19-sfs-v0.4/tmp/slash-command-discovery-research-2026-05-03.md`
-            with feasibility matrix per CLI + cross-CLI common umbrella + Scoop
-            equivalent + trade-off table.
-         d. STOP and present findings to user via §4.A.5 decision gate. Do NOT
-            implement autonomously.
-         e. Branch `hotfix/sfs-slash-command-discovery` from clean `main` only
-            after user picks the mechanism in §4.A.5.
-         f. Implement chosen mechanism: idempotent, cross-platform, separate
-            from `sfs agent install all` persona/skill domain.
-         g. Release flow: `cut-release.sh --apply --version 0.5.96-product`,
-            push stable + tag + Homebrew + Scoop, verifier 7/7.
-         h. CHANGELOG entry under `### Fixed`, written AFTER implementation
-            lands so it reflects the actual chosen mechanism.
-    5) After §4.A 7/7 green, ask user before starting §4.B.
+    3) Read `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` — §4 lists
+       three named candidates: §4.A (0.5.97-product dashboard, D1'
+       deferred from 0.5.96), §4.B (MD split queue, NOW UNLOCKED after
+       0.5.96 7/7), §4.C (release-tooling polish: verify --yes, cut-release
+       default retarget, scripts/update-product-taps.sh).
+    4) Ask user which candidate to proceed with. No autonomous pick —
+       all three are valid trade-offs (feature / docs hygiene / tooling
+       polish).
   on_skip_patterns: ["아니", "잠깐", "다른", "stop", "다른거"]
-  on_skip_action: "Top priority is research-first §4.A — slash-command discovery zero-file feasibility (Claude Code + Codex CLI + Gemini CLI under unified brew/scoop install umbrella). Then user decides mechanism, then 0.5.96-product hotfix. MD split queue (§4.B) is deferred. Latest product release is `0.5.95-product`. What do you want to do instead?"
-  on_ambiguous: "Slash-command zero-file discovery research is queued as top priority (HANDOFF §4.A). Latest product release is `0.5.95-product`. Start the research phase, or different priority?"
+  on_skip_action: "0.5.96-product slash-command zero-file discovery shipped 2026-05-03 (verify 7/7 green). Three queued candidates per HANDOFF §4: (A) 0.5.97-product dashboard (D1'), (B) MD split queue (now unlocked), (C) release-tooling polish (verify --yes / cut-release default retarget / update-product-taps.sh). Pick one or describe a different priority."
+  on_ambiguous: "Latest product release is `0.5.96-product` (shipped 2026-05-03). Three candidates queued per HANDOFF §4: 0.5.97 dashboard, MD split, release-tooling polish. Which one?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
-    - "Hotfix §4.A: spec is locked by user-provided bkit prior art (popup-studio-ai/bkit-claude-code marketplace + popup-studio-ai/bkit-gemini extension). Mirror those for solon-claude-code + solon-gemini. Codex CLI: shell-out works without plugin; SKILL.md location is user decision (§4.A.1.3 C-1/2/3/4)."
-    - "Hotfix §4.A: brew/scoop is the unified umbrella — per-CLI plugin install runs inside the hook, NOT as separate user steps. Plugin-internal locations OK, user-config-file locations NOT OK."
-    - "Hotfix §4.A: separate from `sfs agent install all` persona/skill domain. Do NOT conflate."
-    - "Hotfix §4.A: Windows is FIRST-CLASS, not phase-2. bkit pdca's Windows support is workaround-only — solon's official Windows support is the strategic differentiation. Scoop + PowerShell paths land together with macOS Homebrew + bash in 0.5.96-product. Verify §4.A.1.5's four Windows questions before release."
-    - "Hotfix §4.A: project-local stays project-local (work artifacts: SFS.md, CLAUDE.md, AGENTS.md, GEMINI.md, .sfs-local/, sprint workbench, decisions, events, docs/<gate>/). Plugin-mechanism files (.claude/commands/sfs.md, .gemini/commands/sfs.toml, .agents/skills/sfs/SKILL.md) move to plugin/extension areas. Multi-CLI continuity (Claude ↔ Codex ↔ Gemini on same project via git) is guaranteed by project-local artifacts."
-    - "MD split (§4.B): never start until §4.A 0.5.96-product is verified 7/7."
+    - "0.5.96-product surface (.claude-plugin/, plugins/, gemini-extension.json, commands/, scripts/install-cli-discovery.{sh,ps1}, scripts/sfs-doctor.sh, templates/codex-skill/, tests/test-cli-discovery-*, .github/workflows/sfs-cli-discovery.yml) is now baseline — do not remove without explicit follow-up release decision."
     - "MD split (§4.B): pre-flight reference scan required + frontmatter 11 fields required + parent link stub required + atomic commit + resume-session-check exit 0 verification."
-    - "MD split (§4.B): never touch DO NOT split list (CHANGELOG, templates/**, archives/**, root redirect stubs, .claude/agents/*, .agents/skills/*, .gemini/commands/*.toml, .sfs-local/**, recent-trim solon-mvp-dist/GUIDE.md/BEGINNER-GUIDE.md/README.md)."
-  last_written: 2026-05-03T01:50:35Z
+    - "MD split (§4.B): NOW UNLOCKED (§4.A 0.5.96-product 7/7 verified 2026-05-03)."
+    - "MD split (§4.B): never touch DO NOT split list (CHANGELOG, templates/**, archives/**, root redirect stubs, .claude/agents/*, .agents/skills/*, .gemini/commands/*.toml, .sfs-local/**, recent-trim solon-mvp-dist/GUIDE.md/BEGINNER-GUIDE.md/README.md, 0.5.96 surface above)."
+    - "Release tooling polish (§4.C): verify-product-release.sh interactive prompts (need --yes), cut-release.sh default STABLE_REPO=~/workspace/solon-mvp stale (need ~/tmp/solon-product retarget), Brew/Scoop tap update manual ritual (need scripts/update-product-taps.sh)."
+  last_written: 2026-05-03T06:00:00Z
 ---
 
 # PROGRESS — compact
@@ -291,6 +260,24 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 > (verbatim, frontmatter-tagged). 0.5.87-0.5.92 codex hotfix train was not
 > recorded in PROGRESS bullets at release time — see `solon-mvp-dist/CHANGELOG.md`
 > entries `^## \[0\.5\.(8[7-9]|9[0-2])\]` and git log `6111010..6322079`.
+
+- **0.5.96-product slash-command zero-file discovery hotfix shipped 2026-05-03 KST**
+  (claude-cowork:determined-focused-galileo session, 11 commits on
+  `hotfix/sfs-slash-command-discovery` then merged to main via `5143cf6`).
+  Single `brew install` / `scoop install` now registers `/sfs` (Claude Code
+  via `MJ-0701/solon-product` marketplace plugin), `sfs <command>` (Gemini
+  CLI extension), and `$sfs` (Codex CLI via `~/.codex/skills/sfs/SKILL.md`)
+  in one user-visible action. Project surface stays clean (zero
+  plugin-mechanism files in project tree). cc-thingz prior art mirrored
+  for the marketplace+extension dual-manifest single-repo layout. New
+  `sfs doctor` subcommand reports 3-CLI discovery health with recovery
+  commands. Sandbox tests T1-T4 4/4 pass on macOS+Ubuntu+Windows runners
+  via `sfs-cli-discovery.yml` workflow. macOS-side AC-01 verified in
+  user's `~/IdeaProjects/study-note` (regression project) — `/sfs`
+  autocomplete restored. verify-product-release 7/7 green:
+  dev=`5143cf6` · stable=`baa9e41` v0.5.96-product · Homebrew
+  tap=`97298a9` · Scoop bucket=`939ddf9`. P-16 learning log captured
+  the multi-CLI plugin umbrella pattern for reuse.
 
 - 0.5.87-product (codex, 2026-05-03): thin runtime context migration — thin
   installs no longer copy managed routed context docs into `.sfs-local/context`;
@@ -321,62 +308,37 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ② In-Progress
 
-- **0.5.96-product slash-command zero-file discovery hotfix** (HANDOFF §4.A) —
-  Phases 0-10a complete + Phase 8a (retarget) in flight on
-  `hotfix/sfs-slash-command-discovery` branch (10 commits pushed,
-  amend pending). Phase 8 first probe revealed:
-    - `MJ-0701/solon` = dev repo (this agent_architect)
-    - `MJ-0701/solon-product` = stable release repo (~/tmp/solon-product
-      clone, brew/scoop tap target)
-    - `~/tmp/homebrew-solon-product`, `~/tmp/scoop-solon-product` = tap channels
-  D3 user pick "solon" was meant as the *repo cluster identity*; the
-  marketplace plugin must live in stable (solon-product), not dev (solon).
-  Phase 8a amend retargets:
-    - 6 skeleton files moved from `2026-04-19-sfs-v0.4/external-repos/solon/`
-      to `solon-mvp-dist/` root (cut-release sync target)
-    - install-cli-discovery.{sh,ps1} + sfs-doctor.sh: SOLON_REPO default
-      `MJ-0701/solon` → `MJ-0701/solon-product`
-    - CHANGELOG/GUIDE/plugin README: marketplace add cmd + gemini install URL
-    - cut-release.sh ALLOWLIST extended with 6 entries (scripts, tests,
-      .claude-plugin, plugins, gemini-extension.json, commands) — without
-      this extension, none of the new dist files would sync to stable.
-  Awaiting user (afk):
-    - Push the amend commit
-    - Phase 11: `cut-release.sh --apply --version 0.5.96-product`
-      (sync to stable + tap update)
-    - Phase 8 retry: `claude plugin marketplace add MJ-0701/solon-product`
-      on user machine after cut-release lands marketplace.json in stable
-      main branch (this is when verify becomes possible)
-    - Phase 12: Windows end-to-end
+- None.
 
 ## ③ Next
 
-- User: `git push origin hotfix/sfs-slash-command-discovery` for Phase 8a
-  amend commit.
-- Phase 11 (user). Stable sync target = `/Users/mj/tmp/solon-product`
-  (NOT `~/workspace/solon-mvp` — that path is stale at v0.5.68).
-  cut-release.sh default still points at the stale path, so
-  `SOLON_STABLE_REPO` env override is REQUIRED on every release until the
-  default is fixed:
-    cd /Users/mj/agent_architect/2026-04-19-sfs-v0.4
-    SOLON_STABLE_REPO=/Users/mj/tmp/solon-product \
-      bash scripts/cut-release.sh --apply --version 0.5.96-product
-  Then verify (same env override):
-    SOLON_STABLE_REPO=/Users/mj/tmp/solon-product \
-      bash scripts/verify-product-release.sh --version 0.5.96-product
-  Tap clones are at `/Users/mj/tmp/{homebrew,scoop}-solon-product` and
-  `/opt/homebrew/Library/Taps/mj-0701/homebrew-solon-product` (live).
-- Phase 8 retry (user, after Phase 11): `claude plugin marketplace add
-  MJ-0701/solon-product` then `claude plugin install solon@solon` on user
-  machine. Outcome (success / A-1 unstable / settings.json auto-pickup
-  pattern) determines whether install-cli-discovery hook needs further
-  branch-logic amend (Phase 10b candidate).
-- Phase 10b (conditional) — VERSION bump 0.5.95 → 0.5.96-product +
-  CHANGELOG wording finalize per Phase 8 retry outcome + remove the
-  pre-staged note paragraph.
-- Phase 12 — Windows machine end-to-end + GitHub Actions
-  `sfs-cli-discovery.yml` `windows-end-to-end-scoop` CI green.
-- Phase 13 — Final handoff close + mutex release (`current_wu_owner: null`).
+User picks at next session entry. Three named candidates (ordered by
+prior decisions + this release's retro):
+
+1. **0.5.97-product dashboard** (D1' user-deferred during 0.5.96):
+   산출물 관리 dashboard surface. Surface candidates from research §11:
+   (i) `/sfs status` ASCII-grid extension, (ii) `sfs dashboard` separate
+   binary subcommand, (iii) HTML artifact written to
+   `.sfs-local/dashboard.html`, (iv) MCP server (rejected per token cost).
+   Spec writeup needed before implementation.
+
+2. **§4.B MD split queue** (HANDOFF §4.B was gated by §4.A 7/7 — now
+   unlocked). `MD-SIZE-AUDIT-2026-05-03.md` Tier 1 order:
+   `07-plugin-distribution.md` (1022) → `05-gate-framework.md` (956) →
+   `02-design-principles.md` (940) → `10-phase1-implementation.md` (827)
+   → `08-observability.md` (709) → `04-pdca-redef.md` (645) →
+   `03-c-level-matrix.md` (622) → `06-escalate-plan.md` (605). Per-split
+   flow + 11-field frontmatter discipline per audit doc.
+
+3. **0.5.97-product release-tooling polish** (3 retro items captured
+   this release, all 0.5.97 candidates):
+     a. `verify-product-release.sh --yes` flag — current script leaks
+        4-5 interactive prompts mid-run that block CI / one-shot release.
+     b. `cut-release.sh` default `STABLE_REPO=${HOME}/workspace/solon-mvp`
+        retarget to `${HOME}/tmp/solon-product` (the actual current path).
+        Today every release requires `SOLON_STABLE_REPO=...` env override.
+     c. `scripts/update-product-taps.sh` — automate the manual Brew
+        formula + Scoop manifest edit ritual (5-min/release manual cost).
 
 ## ④ Artifacts
 
@@ -385,6 +347,15 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 > 0.5.87-0.5.92 codex hotfix train: see git log `6111010..6322079` and
 > `solon-mvp-dist/CHANGELOG.md` (sha details not individually entered into
 > PROGRESS at release time).
+
+- **0.5.96-product release artifacts (2026-05-03)**:
+    dev main      `5143cf6`  (merge of 11 hotfix commits)
+    stable repo   `baa9e41` v`0.5.96-product` tag
+    Homebrew tap  `97298a9` (formula sha256 7e4ed13f...)
+    Scoop bucket  `939ddf9` (manifest hash b52e986f...)
+    research      `tmp/slash-command-discovery-research-2026-05-03.md`
+                  (271 lines; staging — to archive at retro per §1.23)
+    learning log  `learning-logs/2026-05/P-16-multi-cli-plugin-umbrella.md`
 
 - Pre-compaction snapshot: `archives/progress/PROGRESS-2026-05-01T181258Z-precompact.md`.
 - Pre-0.5.93 bullets archive: `archives/progress/PROGRESS-bullets-rotation-2026-05-03-pre-0.5.93.md`.

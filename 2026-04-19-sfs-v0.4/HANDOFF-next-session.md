@@ -1,412 +1,206 @@
 ---
 doc_id: handoff-next-session
-title: "Next session handoff — slash-command-zero-file discovery research + 0.5.96-product hotfix design"
-written_at: 2026-05-03T01:34:12Z
-written_at_kst: 2026-05-03T10:34:12+09:00
-last_known_main_commit: 30ff6ae
+title: "Next session handoff — 0.5.96-product shipped, three candidates queued"
+written_at: 2026-05-03T15:00:00+09:00
+written_at_kst: 2026-05-03T15:00:00+09:00
+last_known_main_commit: 5143cf6
 visibility: raw-internal
-source_task: claude-cowork-handoff-research-first-rewrite
-session_codename: modest-charming-keller
+source_task: claude-cowork-determined-focused-galileo
+session_codename: determined-focused-galileo
 ---
 
 # Next Session Handoff
 
 ## 1. Current Truth
 
-- Latest Solon Product release: **`0.5.95-product`** (codex hotfix train 0.5.87-95 shipped 2026-05-03).
-- Dev repo main commit at this handoff: `30ff6ae` atop `c3157e3` / `7bdf755` / `68ce1f5` / `e3c98ad`.
-- `solon-mvp-dist/VERSION` = `0.5.95-product`.
-- `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh` → exit 0 (clean).
+- Latest Solon Product release: **`0.5.96-product`** (2026-05-03 KST).
+- Dev repo main commit at this handoff: `5143cf6` (merge of 11
+  `hotfix/sfs-slash-command-discovery` commits via `--no-ff`).
+- `solon-mvp-dist/VERSION` = `0.5.96-product`.
+- `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh` → exit 0
+  (clean).
+- All four release artifacts in sync:
+    - dev main          `5143cf6`
+    - stable product    `baa9e41`  v`0.5.96-product`
+    - Homebrew tap      `97298a9`
+    - Scoop bucket      `939ddf9`
+- `verify-product-release.sh --version 0.5.96-product` → 7/7 OK
+  (with `SOLON_STABLE_REPO=/Users/mj/tmp/solon-product` env override).
 
-## 2. What Last Session (claude-cowork:modest-charming-keller) Did
+## 2. What Last Session (claude-cowork:determined-focused-galileo) Did
 
-- **Phase A** — recovered 0.5.87-95 codex hotfix-train drift in PROGRESS.md (frontmatter + scheduled_task_log + resume_hint + on_ambiguous + ③ Next).
-- **Phase B** — rotated PROGRESS.md ① + ④ pre-0.5.93 bullets to `archives/progress/PROGRESS-bullets-rotation-2026-05-03-pre-0.5.93.md` (verbatim, strict 11-field frontmatter). PROGRESS 463 → 324 lines.
-- **Phase C** — full repo MD line-count audit at `2026-04-19-sfs-v0.4/MD-SIZE-AUDIT-2026-05-03.md`. 7-tier classification with split recommendations + auto-load hard-no list + 11-field frontmatter standard.
-- **Phase D (deferred)** — splits NOT executed; queued for after §4.A hotfix lands.
-- **End-of-session diagnosis** — surfaced the slash-command regression (study-note `/sfs` not recognized) + corrected the misframed "user-global stub" fix idea after user clarified intent (zero file in project AND in user home, brew alone should provide discovery). HANDOFF restructured to research-first (this document).
+The full 13-phase 0.5.96-product slash-command zero-file discovery hotfix
+shipped in a single session:
+
+- Phases 0-7 + 9 + 10a: implementation on hotfix branch (single-repo
+  marketplace skeleton, install-cli-discovery hooks, brew/scoop wiring,
+  `sfs doctor`, sandbox tests + CI matrix, docs, CHANGELOG pre-stage).
+- Phase 8a (mid-flight amend): retargeted skeleton from docset to
+  `solon-mvp-dist/` root + retargeted `SOLON_REPO` defaults to
+  `MJ-0701/solon-product` (stable, NOT dev repo) + extended
+  `cut-release.sh` ALLOWLIST with 6 missing entries.
+- Phase 11: cut-release apply (with required `SOLON_STABLE_REPO` env
+  override), Brew formula update + push, Scoop manifest update + push.
+- Phase 8 retry (after stable sync): `claude plugin marketplace add
+  MJ-0701/solon-product` + `claude plugin install solon@solon` →
+  SUCCESS. AC-01 verified in user's regression project
+  `~/IdeaProjects/study-note` (`/sfs <command> [args]` autocomplete
+  restored).
+- Phase 12 (macOS side): verify 7/7 GREEN.
+- Phase 13: hotfix → main merge (`--no-ff 5143cf6`), main push, branch
+  delete, PROGRESS finalize, P-16 learning log captured, mutex released.
+
+8 user decisions resolved in §4.A.5 decision gate (D1 plugin / D1'
+dashboard 0.5.97 deferred / D2 Codex C-1 / D3 single repo
+`MJ-0701/solon-product` / D4 `/sfs` immutable / D5 (d) A-1/A-2 in-impl
+probe → A-1 SUCCESS / D6 (c)+(a) CI Win + user machine (macOS
+end-to-end PASS) / D7 (b) graceful warn).
+
+Sandbox tests T1-T4 (test-cli-discovery-{macos,windows}.{sh,ps1}) 4/4
+pass on macOS bash, ubuntu bash, windows pwsh runners + Windows
+end-to-end-scoop CI job. Codex skill installs via filesystem-direct copy
+to `~/.codex/skills/sfs/SKILL.md` (C-1, OpenAI's documented
+auto-discovery path).
 
 ## 3. Validation Evidence
 
-- PROGRESS.md trim verified by `wc -l` (463 → 324).
-- Archive file integrity: 222 lines, frontmatter compliant.
-- Auto-load chain unchanged this session (no entry stub touched).
-- `release_handoff_drift` check is clean (resume_hint and HANDOFF both reference `0.5.95-product`).
+- macOS Claude Code AC-01: study-note `/sfs <command> [args]` autocomplete
+  visible (user-supplied screenshot 2026-05-03).
+- All Phase 8 probe outputs PASS:
+    Successfully added marketplace: solon (declared in user settings)
+    Successfully installed plugin: solon@solon (scope: user)
+- `verify-product-release.sh` 7/7 OK end-to-end.
+- Sandbox tests local 4/4 (T1: codex skill install, T2: graceful no-CLI
+  exit 0, T3: idempotent re-run, T4: source-dir auto-detect).
 
 ## 4. Default Action for Next Session
 
-> Read this section in order. §4.A is a RESEARCH problem first; do not jump to implementation.
-
-### 4.A — TOP PRIORITY: slash-command zero-file discovery research → design → 0.5.96-product hotfix
-
-#### 4.A.1 The actual question (do not assume an answer)
-
-> Can a user who installed `sfs` via brew/scoop get the `/sfs` slash command in Claude Code AND `$sfs` in Codex CLI AND `sfs` (slash equivalent) in Gemini CLI, **without any new file appearing in either the project (`<project>/.claude/commands/`, `.gemini/commands/`, `.agents/skills/`) OR the user home (`~/.claude/commands/sfs.md`, `~/.gemini/commands/sfs.toml`, `~/.codex/.../sfs.md`)?**
->
-> If yes — by what mechanism (plugin / MCP / extension / built-in registration / something else)?
-> If no — what is the minimum-footprint trade-off, and what does the user need to decide?
-
-#### 4.A.1.1 User-stated design constraints
-
-The user's original design intent was **plugin-per-CLI** (concrete prior art:
-bkit pdca — they designed and shipped this themselves). Plugin pattern itself
-is acceptable. The objection is to the **multi-install friction**: if user
-runs Claude + Codex + Gemini-CLI all together, they should NOT need to run
-three separate plugin installs as separate user actions — but ONE user
-action triggering all three at install time IS acceptable.
-
-Therefore the constraint is:
-
-- **One user-visible install action** covers all three CLIs. `brew install
-  sfs` (and Scoop equivalent) is the unified entry point. Per-CLI plugin
-  install commands run *inside* the brew/scoop hook, not as separate user
-  steps.
-- **Project surface clean of plugin-mechanism files, but RICH with work
-  artifacts**. The dividing line is critical: see §4.A.1.4 below for the
-  hard list.
-- **Plugin-managed user-home location is acceptable** (e.g.,
-  `~/.claude/plugins/solon/` is plugin-internal, conceptually like brew's
-  Cellar — installed software, not user file). Direct config-style files at
-  `~/.claude/commands/sfs.md` are NOT acceptable.
-- `sfs upgrade` re-runs the same coverage idempotently.
-
-The "no file outside brew location" interpretation from the first handoff
-draft was wrong. The "user-global stub" interpretation from the second draft
-was also wrong. The right interpretation: **mirror the bkit pdca plugin
-pattern across Claude Code + Gemini CLI + Codex CLI under a single brew
-install umbrella.** See §4.A.1.2 for the concrete reference setup.
-
-#### 4.A.1.4 Project-local vs. plugin-internal — hard split (multi-CLI continuity)
-
-The user works across Codex / Claude / Gemini CLI on the same projects and
-must be able to **switch CLIs mid-work and resume** (per user 2026-05-03). For
-this, work artifacts MUST live in the project (git-tracked, portable across
-agents). Plugin/extension mechanism files MUST NOT live in the project (they
-are CLI-specific install state, not portable, and clutter the project).
-
-**Stays in project (git-tracked, never removed by `sfs init`/`upgrade`)**:
-
-- `SFS.md` — project operating identity (project-name, stack, deploy, domain).
-- `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` — thin agent adapter root files
-  (these are *adapter content*, not slash command definitions; analogous to
-  `AGENTS.md` being Codex's auto-loaded root file).
-- `.sfs-local/` — project state, sprint workbench, decisions, events,
-  VERSION, model-profiles, etc.
-- `.sfs-local/sprints/<sprint-id>/` — brainstorm.md / plan.md / implement.md
-  / log.md / review.md / retro.md / report.md (the 7-gate work artifacts).
-- `.sfs-local/decisions/` — ADR-style decisions.
-- `.sfs-local/events.jsonl` — append-only event log.
-- Any `docs/<gate-output>/...` style files the user creates (Solon doesn't
-  prescribe `docs/` location; user's `01-plan/features/...` style is fine).
-
-**Does NOT live in project (lives in plugin/extension areas under user-home;
-removed if currently present from old installs)**:
-
-- `.claude/commands/sfs.md` — slash command definition. Now lives in
-  `~/.claude/plugins/<solon-plugin>/commands/sfs.md` (plugin-internal).
-- `.gemini/commands/sfs.toml` — Gemini extension command. Now lives in
-  Gemini extension area (extension-internal).
-- `.agents/skills/sfs/SKILL.md` — Codex skill. Per §4.A.1.3 user decision,
-  either lives in `~/.codex/...` user-global or stays project-local
-  asymmetrically (decision deferred).
-
-**Multi-CLI continuity test**: user works in Claude Code, commits work
-artifacts (`.sfs-local/sprints/<id>/plan.md` etc.) to git, opens the same
-project in Codex CLI, runs `$sfs status` — Codex should see the same sprint
-state and continue without missing context. This works because:
-
-1. The sprint state files are project-local (git-tracked).
-2. The `sfs` binary (brew/scoop installed, in PATH) reads/writes the same
-   `.sfs-local/` regardless of which CLI invokes it.
-3. Plugin-mechanism files are not part of the work artifact surface — they
-   only provide command discovery for each CLI.
-
-#### 4.A.1.5 Windows first-class support — strategic differentiator (HARD)
-
-**bkit pdca is effectively Mac-only**: its Windows support is workaround-only
-with no official support (user-confirmed 2026-05-03). This is solon/sfs's
-strategic differentiation point.
-
-**HARD constraints**:
-
-- Every `§4.A.3` step must land Scoop / PowerShell equivalents at the same
-  time as macOS Homebrew / bash. Windows is **not** a "phase 2" or "best
-  effort" — it lands together with macOS in 0.5.96-product.
-- The bkit prior art repos (`bkit-claude-code`, `bkit-gemini`) may not have
-  Windows install logic. Solon's mirror repos (`solon-claude-code`,
-  `solon-gemini`) MUST add Windows install instructions and verified
-  command paths.
-- Test on actual Windows (or PowerShell-on-Mac via pwsh, WSL, or the user's
-  Windows machine if available) before release. Do NOT ship 0.5.96 with
-  unverified Windows path.
-- Documentation (README, GUIDE, BEGINNER-GUIDE) must show macOS and Windows
-  paths side-by-side, not Windows-as-fallback. Recent 0.5.94/0.5.95 work
-  already moved Windows docs to lead-with-Scoop — keep that direction.
-
-**Verification questions to answer in 0.5.96 release**:
-
-1. Does `/plugin marketplace add MJ-0701/solon-claude-code` work in Claude
-   Code on Windows (PowerShell/cmd terminal)? If Claude Code's plugin
-   marketplace is bash-host-dependent, document the actual Windows command.
-2. Does `gemini extensions install <git-url>` work in Gemini CLI on Windows
-   without workaround? If git CLI is required, ensure `winget install
-   --id Git.Git` (already in our docs) covers the dependency.
-3. Does the Scoop manifest's `installer.script` PowerShell hook reliably
-   call the above two install commands on Windows during `scoop install
-   sfs`? Idempotent on `scoop update sfs`?
-4. After `scoop install sfs` on a Windows test machine, does `claude` →
-   `/sfs` autocomplete work? Does `gemini` → `sfs` work? Does PowerShell
-   `$sfs status` (Codex) work?
-
-**Marketing/positioning copy** (record so docs writers can use this later,
-not for v0.5.96 itself):
-
-> Solon Product is the only AI-native solo founder system that ships
-> first-class Windows support across Claude Code, Codex CLI, and Gemini CLI.
-> No PowerShell workarounds, no WSL detours — `scoop install sfs` and
-> `/sfs` works in any project.
-
-This positioning is contingent on the technical claim being true at release.
-If any verification question above fails for Windows in 0.5.96, the
-positioning copy is held back until a follow-up release fixes the gap.
-
-#### 4.A.1.2 Concrete reference: bkit pdca install commands (user-provided 2026-05-03)
-
-This is the EXACT pattern that sfs/solon must replicate. Read these repos
-first; do not reinvent the manifest format.
-
-| CLI | bkit install command | sfs/solon equivalent (to create) |
-|---|---|---|
-| Claude Code | `/plugin marketplace add popup-studio-ai/bkit-claude-code` | New marketplace repo — recommend `MJ-0701/solon-claude-code` (matches Solon Product naming) |
-| Gemini CLI | `gemini extensions install https://github.com/popup-studio-ai/bkit-gemini.git` | New extension repo — recommend `MJ-0701/solon-gemini` |
-| Codex CLI | **미지원** (no plugin/extension marketplace mechanism in Codex CLI) | **DESIGN DECISION REQUIRED** — see §4.A.1.3 |
-
-**Pre-implementation reading list (mandatory)**:
-1. https://github.com/popup-studio-ai/bkit-claude-code — read manifest, plugin metadata, slash command definition format, file layout. Mirror this exactly for `solon-claude-code`.
-2. https://github.com/popup-studio-ai/bkit-gemini — read extension structure, install hook, command/extension declaration. Mirror for `solon-gemini`.
-
-**Goal output of plugin/extension installs**:
-- Claude Code: `/sfs <command>` (or `/solon <command>` — naming TBD with user) auto-completes in any directory.
-- Gemini CLI: `sfs <command>` (or `solon <command>`) auto-completes.
-- Project tree: zero plugin-mechanism files. Only `.sfs-local/` state and work artifacts.
-
-#### 4.A.1.3 Codex CLI strategy (user decision required)
-
-Codex has no plugin marketplace, but `sfs` works in Codex via shell-out:
-`$sfs status` invokes the `sfs` binary which brew installs to PATH. This
-**already works today** with zero Codex-specific install — as long as `sfs`
-is in PATH (brew handles this).
-
-The remaining question for Codex is workflow-context: how does Codex *know*
-that the current project uses SFS conventions (sprint structure, gate
-framework, retro semantics) so that `$sfs <command>` invocations get
-appropriate AI handling? Today this is provided by `.agents/skills/sfs/SKILL.md`
-project-local file. Options for the brew-umbrella + clean-project model:
-
-- **C-1**: User-global `~/.codex/skills/sfs/SKILL.md` (or whatever Codex
-  auto-loads from user-home). Verify Codex CLI's user-global discovery path
-  before implementing.
-- **C-2**: Accept that Codex requires project-local `.agents/skills/sfs/SKILL.md`
-  (asymmetry — Claude/Gemini have plugin, Codex has small project file).
-- **C-3**: Just shell-out — Codex users get `$sfs` invocation but no SKILL-mediated
-  workflow context. Acceptable if Codex CLI infers context from `AGENTS.md`
-  alone.
-- **C-4**: Use `AGENTS.md` (Codex auto-loaded root file) as the carrier — keep
-  AGENTS.md in project (already standard) but don't add additional files.
-
-User must pick C-1/2/3/4 in §4.A.5 decision gate.
-
-#### 4.A.2 Live witness data points (collected 2026-05-03 by user)
-
-- `cd ~/IdeaProjects/study-note && claude` → `/sfs` returns "No commands match `/sfs `". Project was upgraded 0.5.89-product → 0.5.95-product (thin migration removed project-local `.claude/commands/sfs.md`).
-- `cd ~/IdeaProjects/product-image-studio && claude` (IntelliJ terminal) → `/sfs <command> [args]` autocompletes. Hypothesis: this project still retains a project-local `.claude/commands/sfs.md` that pre-dates 0.5.89 thin migration (was never upgraded, or was opted in via `sfs agent install all`, or sfs-init pre-0.5.89). **Confirm at session start**:
-  ```bash
-  ls -la ~/IdeaProjects/product-image-studio/.claude/commands/sfs.md
-  ls -la ~/IdeaProjects/study-note/.claude/commands/sfs.md
-  ```
-  Expected: product-image-studio has the file (or some override), study-note doesn't.
-- `ls -la ~/.claude/commands/ ~/.gemini/commands/ ~/.codex/ 2>&1` to confirm the user-global state (likely empty or missing).
-
-The product-image-studio observation is **not** evidence that brew provides global discovery. It is a stale project-local artifact. The actual user goal — zero file in project AND zero file in home — is still unmet.
-
-#### 4.A.3 Implementation work (concrete after §4.A.1.2 / §4.A.1.3)
-
-The "research" framing of the previous handoff draft is mostly obsolete now —
-user provided concrete bkit install commands. The actual work is largely
-*replication* of bkit's pattern, not exploration of unknowns. Steps:
-
-##### 4.A.3.1 Read bkit prior art (mandatory first step, do not skip)
-
-```
-git clone https://github.com/popup-studio-ai/bkit-claude-code.git /tmp/bkit-claude-code
-git clone https://github.com/popup-studio-ai/bkit-gemini.git /tmp/bkit-gemini
-```
-
-Then for each repo, locate and study:
-- Plugin manifest / extension descriptor file (typically a JSON / TOML / YAML
-  at the repo root or in a known location).
-- Slash command definitions and where they live inside the plugin/extension.
-- Install-time scripts, if any.
-- Naming conventions, scope of commands exposed, error/help patterns.
-
-This determines the EXACT structure that `solon-claude-code` and
-`solon-gemini` repos must follow.
-
-##### 4.A.3.2 Decide naming with user
-
-Plugin name: `solon` vs `sfs` — user decision. Record their choice in the
-research report. Existing convention: the binary is `sfs` (Sprint Flow
-System), the product is "Solon Product." Recommendation to surface to user:
-plugin marketplace IDs use `solon` (product brand), slash commands inside
-the plugin still use `/sfs <subcommand>` (matches existing CLI surface and
-existing user muscle memory).
-
-##### 4.A.3.3 Create solon-claude-code marketplace repo
-
-- New repo: `MJ-0701/solon-claude-code` (or as user names).
-- Mirror bkit-claude-code's structure 1:1.
-- Inside the plugin: include slash command definitions equivalent to current
-  `solon-mvp-dist/templates/.claude/commands/sfs.md` (one definition per
-  exposed command if applicable, or a single dispatcher).
-- Plugin commands ultimately call the global `sfs` binary (brew/scoop
-  installed). The plugin's role is *discovery and routing*, not duplicating
-  business logic.
-- Verify install path: `/plugin marketplace add MJ-0701/solon-claude-code`
-  works in Claude Code v2.x test session.
-
-##### 4.A.3.4 Create solon-gemini extension repo
-
-- New repo: `MJ-0701/solon-gemini` (or as user names).
-- Mirror bkit-gemini's structure.
-- Verify install path:
-  `gemini extensions install https://github.com/MJ-0701/solon-gemini.git`.
-
-##### 4.A.3.5 Codex CLI handling (per user §4.A.1.3 decision)
-
-Implement the chosen option (C-1/2/3/4) from §4.A.1.3.
-
-##### 4.A.3.6 Brew umbrella wiring
-
-- `solon-mvp-dist/packaging/homebrew/sfs.rb.template` — add `post_install`
-  block that:
-  - Detects each CLI (claude, gemini, codex) on PATH.
-  - For each detected CLI, runs the corresponding install command
-    non-interactively (with `--yes` or equivalent if needed).
-  - Failure of one CLI's hook does NOT abort the brew install; degrade
-    gracefully + emit a warning summary at the end.
-- Idempotent on second run.
-
-##### 4.A.3.7 Scoop equivalent
-
-- `solon-mvp-dist/packaging/scoop/sfs.json.template` — `installer.script`
-  block runs PowerShell that mirrors §4.A.3.6.
-- Same idempotency + graceful-degrade behavior.
-
-##### 4.A.3.8 Update install/upgrade scripts
-
-- `solon-mvp-dist/install.sh`, `install.ps1`: trigger the same hook so users
-  who run install via curl-pipe or local install.sh also get plugin coverage.
-- `solon-mvp-dist/upgrade.sh`, `upgrade.ps1`: trigger the same hook so
-  existing 0.5.89-95 installations get the missing plugin coverage on next
-  upgrade.
-
-##### 4.A.3.9 Remove the project-local adapter templates from default install
-
-- `solon-mvp-dist/install.sh` thin layout: ensure `.claude/commands/sfs.md`,
-  `.gemini/commands/sfs.toml`, `.agents/skills/sfs/SKILL.md` are NOT created
-  in the project. (Already largely true since 0.5.89; confirm and document.)
-- `sfs agent install all` semantics: confirm this still does what it should
-  for *persona/skill* artifacts (CTO/CPO/CEO/evaluator/generator/planner) but
-  NOT for slash command discovery (different concern).
-
-##### 4.A.3.10 Update docs
-
-- `solon-mvp-dist/README.md`, `GUIDE.md`, `BEGINNER-GUIDE.md`,
-  `docs/ko/...`, `docs/en/...` — install instructions should show:
-  ```
-  brew install MJ-0701/solon-product/sfs
-  # → automatically registers /sfs slash command in Claude Code (via plugin)
-  #   and Gemini CLI (via extension). Codex CLI uses shell-out via $sfs.
-  ```
-- Make clear: project surface stays clean. No `.claude/commands/` etc. are
-  created by `sfs init`.
-
-#### 4.A.4 Output of research phase
-
-A short report at `2026-04-19-sfs-v0.4/tmp/slash-command-discovery-research-2026-05-03.md` with:
-
-- Per-CLI feasibility matrix: zero-file possible? with what mechanism? steps?
-- Common denominator across the three CLIs (if any).
-- Trade-off table: best vs. acceptable vs. unacceptable footprint per CLI.
-- Recommended approach AND acceptable fallback.
-
-#### 4.A.5 User decision gate
-
-After the research report, **stop and present findings to the user**. Do NOT proceed to implementation autonomously. The user will pick:
-
-- (i) Pursue zero-file approach (if research says feasible) — proceed to implementation.
-- (ii) Accept minimum-footprint trade-off (e.g., one-time `claude plugin install` is acceptable but `~/.claude/commands/sfs.md` is not, or the reverse) — proceed with the chosen footprint.
-- (iii) Revert 0.5.89's thin-surface decision — restore project-local `.claude/commands/sfs.md` as the install/upgrade default and treat "clean surface" as a different (later) concern.
-- (iv) Other.
-
-#### 4.A.6 Implementation (only after §4.A.5 user decision)
-
-Branch: `hotfix/sfs-slash-command-discovery`. Implementation steps depend on the chosen mechanism. Common requirements regardless of choice:
-
-- Idempotent (repeated `sfs upgrade` is a no-op for slash discovery).
-- Cross-platform (macOS Homebrew + Windows Scoop).
-- Conceptually separate from `sfs agent install all` (persona/skill domain). Do NOT conflate.
-- Clear diagnostic / verification command (e.g., `sfs doctor` or section in `sfs status` that says "slash command discovery: ✅ via <mechanism>").
-
-#### 4.A.7 Release as 0.5.96-product
-
-Standard `cut-release.sh --apply --version 0.5.96-product` flow, push stable + tag + Homebrew + Scoop, verifier 7/7. Local verification: `cd <any project> && claude` then `/sfs` autocompletes (if the chosen mechanism delivers global slash); `cd <any project> && $sfs` works in Codex CLI; same for Gemini.
-
-CHANGELOG entry under `### Fixed` written after implementation lands so it accurately describes the chosen mechanism (do not pre-write).
-
-### 4.B — DEFERRED (until §4.A 0.5.96-product is verified): MD split execution queue
-
-> Do not start until `bash 2026-04-19-sfs-v0.4/scripts/verify-product-release.sh --version 0.5.96-product` returns 7/7 OK.
-
-- Read [`MD-SIZE-AUDIT-2026-05-03.md`](MD-SIZE-AUDIT-2026-05-03.md) for per-file detail and the strict 11-field frontmatter standard.
-- Branch: `feature/md-size-split-tier1` from clean `main` (post-0.5.96).
-- **Tier 1 order**: 07-plugin-distribution.md (1022) → 05-gate-framework.md (956) → 02-design-principles.md (940) → 10-phase1-implementation.md (827) → 08-observability.md (709) → 04-pdca-redef.md (645) → 03-c-level-matrix.md (622) → 06-escalate-plan.md (605).
-- **Tier 2 order**: WU-23.md (406) → WU-20.md (340) → WU-26.md (312) into `sprints/WU-XX/` directories. Precedent: `sprints/WU-27/`.
-- **Per-split flow** (HARD):
-  1. Reference scan: `grep -rn '<target>' --include='*.md' --include='*.sh' --include='*.yaml' --include='*.toml' --exclude-dir='.git' --exclude-dir='archives' --exclude-dir='.claude/worktrees'`
-  2. Identify §-boundaries: `grep -n '^# §\|^## §' <file>`
-  3. Create subdir + sub-files with strict 11-field frontmatter (`doc_id` / `title` / `parent_doc` / `split_from_section` / `split_reason` / `split_at` / `split_by_session` / `visibility` / `auto_load_required` / `replaces_in_parent` / `last_updated`)
-  4. Replace each removed § in parent with 1-line link stub: `> §X moved to [<file>](<path>) — split: <reason>. <session>, <ISO>.`
-  5. Atomic commit per file.
-  6. Post-commit: `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh` → exit 0.
-- **DO NOT touch**: `solon-mvp-dist/CHANGELOG.md`, `WORK-LOG.md`, `archives/**`, `.sfs-local/**`, root CLAUDE/AGENTS/GEMINI redirect stubs, `.claude/agents/*`, `.agents/skills/*`, `.gemini/commands/*.toml`, `solon-mvp-dist/templates/**`, recently-trimmed `solon-mvp-dist/GUIDE.md` / `BEGINNER-GUIDE.md` / `README.md`.
-
-### 4.C — FURTHER DEFERRED (after §4.B lands): §1.14 generalization + automation
-
-After Tier 1+2 splits exercise the pattern:
-1. Generalize CLAUDE.md §1.14 from "CLAUDE.md ≤200" to "single-SSoT MD ≤200, accumulation files (CHANGELOG / WORK-LOG / sessions / learning-logs / scheduled_task_log) explicitly excepted."
-2. New `scripts/check-md-size.sh` + wire into `resume-session-check.sh` as check #9 (exit 18 = size warning).
-3. `cut-release.sh --apply` post-flight hook: rotate oldest ① + ④ release bullet to `archives/progress/PROGRESS-bullets-rotation-<period>.md` automatically per release.
-4. New learning log `learning-logs/2026-05/P-XX-md-rotation-pattern.md` companion to P-06 for the PROGRESS-style accumulation case.
-
-## 5. Guardrails
-
-- **§4.A is research-first.** Do not implement before the report and user decision in §4.A.5.
-- **Do not assume the answer.** "User-global stub" was the wrong assumption last session. Treat the question in §4.A.1 as genuinely open.
-- **Do not conflate slash-command discovery with `sfs agent install all`.** Persona/skill installation is a different domain.
-- **Do not start §4.B until §4.A 0.5.96-product is verified.**
-- Pre-flight reference scan before any split (§4.B) is non-negotiable.
-- Frontmatter discipline (11 fields) per `MD-SIZE-AUDIT-2026-05-03.md` is non-negotiable per user "절대 누락 0" constraint.
-- Do not modify auto-loaded files unless §4.A.6 implementation explicitly requires after user approval.
-- Do not undo recent 0.5.86 work on `solon-mvp-dist/GUIDE.md` / `BEGINNER-GUIDE.md` / `README.md`.
-- Do not bypass the `cut-release.sh` divergence guards or release verifier.
-- After branch merge into `main`, do not reuse for next task; fresh branch from `main`.
+User picks at session entry. Three named candidates queued:
+
+### 4.A — 0.5.97-product dashboard (D1' deferred from 0.5.96)
+
+User-set priority "다음 기능배포떄 추가할 예정" (D1' answer 2026-05-03).
+Dashboard surface candidates (research report §11):
+
+- (i) `/sfs status` ASCII-grid extension. Token cost = slash invocation
+  only (low). Visual richness = ASCII.
+- (ii) `sfs dashboard` separate binary subcommand. Token cost = 0.
+  Visual richness = ASCII or generated HTML/SVG.
+- (iii) HTML artifact written to `.sfs-local/dashboard.html`. User
+  opens in browser. Visual richness = high.
+- (iv) MCP server (REJECTED per D1 decision — Claude Code CLI MCP
+  context overhead 15-20K tokens/turn; ToolSearch deferred-loading not
+  default-on for user environment).
+
+Spec writeup needed before implementation. Suggested first step:
+`tmp/dashboard-design-2026-05-W?.md` covering surface choice, info
+schema (sprint/decisions/events/retro pulls), update model
+(generate-on-demand vs cached vs live).
+
+### 4.B — MD split execution (HANDOFF §4.B was gated by §4.A 7/7 — now unlocked)
+
+`MD-SIZE-AUDIT-2026-05-03.md` Tier 1 order (8 docs):
+1. `07-plugin-distribution.md` (1022 lines)
+2. `05-gate-framework.md` (956)
+3. `02-design-principles.md` (940)
+4. `10-phase1-implementation.md` (827)
+5. `08-observability.md` (709)
+6. `04-pdca-redef.md` (645)
+7. `03-c-level-matrix.md` (622)
+8. `06-escalate-plan.md` (605)
+
+Tier 2 (in `sprints/WU-XX/` directories):
+- `WU-23.md` (406) → `sprints/WU-23/`
+- `WU-20.md` (340) → `sprints/WU-20/`
+- `WU-26.md` (312) → `sprints/WU-26/`
+(Precedent: `sprints/WU-27/`)
+
+Per-split flow (HARD, from prior handoff):
+1. Reference scan: `grep -rn '<target>' --include='*.md' --include='*.sh' --include='*.yaml' --include='*.toml' --exclude-dir='.git' --exclude-dir='archives' --exclude-dir='.claude/worktrees'`
+2. Identify §-boundaries: `grep -n '^# §\|^## §' <file>`
+3. Create subdir + sub-files with strict 11-field frontmatter (`doc_id` /
+   `title` / `parent_doc` / `split_from_section` / `split_reason` /
+   `split_at` / `split_by_session` / `visibility` / `auto_load_required` /
+   `replaces_in_parent` / `last_updated`)
+4. Replace each removed § in parent with 1-line link stub: `> §X moved
+   to [<file>](<path>) — split: <reason>. <session>, <ISO>.`
+5. Atomic commit per file.
+6. Post-commit: `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh`
+   → exit 0.
+
+DO NOT touch: `solon-mvp-dist/CHANGELOG.md`, `WORK-LOG.md`,
+`archives/**`, `.sfs-local/**`, root CLAUDE/AGENTS/GEMINI redirect
+stubs, `.claude/agents/*`, `.agents/skills/*`,
+`.gemini/commands/*.toml`, `solon-mvp-dist/templates/**`,
+`solon-mvp-dist/{GUIDE,BEGINNER-GUIDE,README}.md` (recently trimmed),
+`solon-mvp-dist/.claude-plugin/**`, `solon-mvp-dist/plugins/**`,
+`solon-mvp-dist/scripts/install-cli-discovery.*`,
+`solon-mvp-dist/scripts/sfs-doctor.sh` (all 0.5.96-product surface).
+
+### 4.C — 0.5.97-product release-tooling polish (3 retro items)
+
+Captured from this release. All small-but-real friction sources:
+
+- **a. `verify-product-release.sh --yes` flag**. Current script leaks
+  4-5 interactive prompts mid-run (`계속 진행할까요? (y/N) [N]:`,
+  `업그레이드 진행? [y]:`) because internal calls to `sfs init` /
+  `sfs upgrade` propagate their own prompts. CI / one-shot release
+  blocks on these. Add `--yes` (or `-y`) flag that propagates
+  `SFS_INSTALL_YES=1` / equivalent down to subscript invocations.
+
+- **b. `cut-release.sh` default `STABLE_REPO=${HOME}/workspace/solon-mvp`
+  retarget to `${HOME}/tmp/solon-product`**. Old default points to a
+  stale clone (HEAD `v0.5.68-product`). Every release today requires
+  `SOLON_STABLE_REPO=/Users/mj/tmp/solon-product` env override or risks
+  cutting against the wrong clone. Single-line fix in cut-release.sh
+  `STABLE_REPO=...` line.
+
+- **c. `scripts/update-product-taps.sh`** — automate the manual Brew
+  formula + Scoop manifest edit ritual. Today: ~5 min/release manual
+  shasum + sed/python edit + commit + push for two repos. Script
+  inputs: `--version 0.5.96-product`, optional `--brew-tap-dir` /
+  `--scoop-bucket-dir`. Outputs: idempotent commits + push (push
+  optional with `--push` flag).
+
+## 5. Guardrails (carry-over)
+
+- Push lifecycle remains user-owned in cowork sandbox — sandbox cannot
+  reach GitHub directly. Pattern works fine; not a blocker.
+- FUSE bypass pattern (`cp -a .git /tmp/X/ → git --git-dir=... commit
+  → rsync --delete --exclude='index.lock' back`) is now battle-tested
+  this session — kept as standard sandbox commit recipe.
+- §1.18 copy-paste command blocks remain the primary user-side
+  delivery format.
+- Recent-trim docs (`solon-mvp-dist/{GUIDE,BEGINNER-GUIDE,README}.md`,
+  `docs/en/guide.md`) have NEW 0.5.96 sections — do not undo.
+- New 0.5.96 surface (`solon-mvp-dist/.claude-plugin/marketplace.json`,
+  `plugins/solon/`, `gemini-extension.json`, `commands/sfs.toml`,
+  `scripts/install-cli-discovery.{sh,ps1}`, `scripts/sfs-doctor.sh`,
+  `templates/codex-skill/SKILL.md`, `tests/test-cli-discovery-*`,
+  `.github/workflows/sfs-cli-discovery.yml`) is now baseline. Do not
+  remove without an explicit follow-up release decision.
 
 ## 6. Outstanding work the user asked about
 
-- ✅ PROGRESS.md slim (rotated pre-0.5.93 entries, last session).
-- ✅ Codex 0.5.87-95 drift recovery (last session).
-- ✅ Full repo MD audit (last session — `MD-SIZE-AUDIT-2026-05-03.md`).
-- ⏳ **§4.A slash-command zero-file discovery research → user decision → 0.5.96-product hotfix** (top priority next session).
-- ⏳ §4.B MD split execution (waits for §4.A).
-- ⏳ §4.C §1.14 generalization + check-md-size.sh + cut-release rotation hook + P-XX learning log.
+- ✅ §4.A slash-command zero-file discovery research → user decision →
+  0.5.96-product hotfix (top priority of last handoff — DONE).
+- ⏳ §4.B MD split execution (was gated, now unlocked).
+- ⏳ §4.C §1.14 generalization + check-md-size.sh + cut-release rotation
+  hook + P-XX learning log (waits for §4.B per prior plan).
+- ⏳ D1' 0.5.97-product dashboard (user-deferred 2026-05-03).
+- ⏳ 0.5.97 release-tooling polish (this release's retros — 4.C above).
+
+## 7. Quick session-entry recipe
+
+```bash
+# 1. Read current truth
+cd /Users/mj/agent_architect/2026-04-19-sfs-v0.4
+bash scripts/resume-session-check.sh   # expect exit 0
+
+# 2. Confirm release state (if curious)
+SOLON_STABLE_REPO=/Users/mj/tmp/solon-product \
+  bash scripts/verify-product-release.sh --version 0.5.96-product
+# expect 7/7 OK
+
+# 3. Pick path (4.A / 4.B / 4.C above) and proceed.
+```
