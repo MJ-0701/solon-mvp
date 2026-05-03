@@ -2,27 +2,51 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-03T21:55:00+09:00
-session: "claude-cowork:affectionate-trusting-thompson (takeover from elegant-hopeful-maxwell) — §4.D G6 PASS LOCKED (cross-instance Stage 2 codex PASS 정정 + Stage 3 gemini ALL PASS + user CEO ruling: 비지니스 모델=later track, 공식 OSS-PUBLIC). review-g6.md §7 + frontmatter verdict_final lock 완료. plan.md AC6 wording backstamp (frontmatter/classification 기준만, body literal 옵션 설명 허용). 다음 1 step = G7 retro.md + P-17 learning-log + git commit/push (배포)."
+last_overwrite: 2026-05-03T22:50:00+09:00
+session: "claude-cowork:affectionate-trusting-thompson — §4.E G0 brainstorm 9/9 locked + G1 plan 작성 완료. plan.md status=ready-for-review (R-A~G + AC1~AC9 + 9 lock 직접 expansion + Sprint Contract). 본 세션 종료 = user 명시 'plan까지 작성하고 다음 세션에서 나머지 이어서 작업'. 다음 세션 entry = G1 review (cross-instance, P-17 패턴) 또는 user 결정 timing."
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
-current_wu: "§4.D 0.6.0-product spec sprint (docset-design) — G6 PASS LOCKED, G7 retro 진입"
-current_wu_path: "2026-04-19-sfs-v0.4/sprints/0-6-0-product-spec/review-g6.md"   # PASS LOCKED, retro.md 다음 작성
+current_wu: "§4.E 0.6.0-product implement sprint (R2 storage + R3 migrate-artifacts) — G1 plan 작성 완료, G1 review 진입 대기 (다음 세션)"
+current_wu_path: "2026-04-19-sfs-v0.4/sprints/0-6-0-product-implement/plan.md"   # G1 ready-for-review, AC1~AC9 + Sprint Contract
 
 # ── SESSION MUTEX (CLAUDE.md §1.12) ───────────────────────────────
 # Keep scalar form for tool compatibility (.sfs-local/scripts/sfs-loop.sh stop/status, auto-resume contract).
-# Takeover 2026-05-03 KST: prev owner elegant-hopeful-maxwell 가 user 명시 'dead' 선언 (heartbeat 21:35 KST 직후 끊김). user explicit 1~5 step (review lock / plan backstamp / PROGRESS / retro / 배포) authorization 으로 affectionate-trusting-thompson 가 takeover.
-current_wu_owner:
-  session_codename: affectionate-trusting-thompson
-  claimed_at: 2026-05-03T21:55:00+09:00
-  last_heartbeat: 2026-05-03T21:55:00+09:00
-  ttl_minutes: 30
-  takeover_from: elegant-hopeful-maxwell
-  takeover_reason: "user explicit dead 선언 + 1~5 step 진행 권한"
+# Takeover 2026-05-03 KST: prev owner elegant-hopeful-maxwell 가 user 명시 'dead' 선언 (heartbeat 21:35 KST 직후 끊김). user explicit authorization 으로 affectionate-trusting-thompson 가 takeover. spec sprint CLOSED + push 03f36de 후 implement sprint OPENED 동일 owner 유지.
+current_wu_owner: null   # session 자연 종료 (user 명시 "plan까지 작성하고 다음 세션에서 나머지 이어서 작업"). claimed_at=2026-05-03T21:55+09:00, released_at=2026-05-03T22:50+09:00. 다음 세션이 자유 claim 가능.
+last_session_owner_history:
+  - session_codename: affectionate-trusting-thompson
+    claimed_at: 2026-05-03T21:55:00+09:00
+    released_at: 2026-05-03T22:50:00+09:00
+    last_heartbeat: 2026-05-03T22:50:00+09:00
+    takeover_from: elegant-hopeful-maxwell
+    work_done:
+      - "spec sprint G6 PASS LOCK + retro + P-17 learning-log + 배포 (commit 03f36de + push origin/main)"
+      - "implement sprint G0 brainstorm round 1+2+3 (9/9 axes locked)"
+      - "implement sprint G1 plan 작성 (ready-for-review, AC1~AC9 + Sprint Contract)"
 
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
 scheduled_task_log:
+  - ts: 2026-05-03T22:50:00+09:00
+    codename: affectionate-trusting-thompson
+    check_exit: 0
+    action: "§4.E G1 plan 작성 완료 + 본 세션 종료 mutex release. user 명시 'plan까지 작성하고 다음 세션에서 나머지 이어서 작업'. plan.md ~250L 작성: §1 R-A~G (7 R 정의) / §2 AC1~AC9 + 35+ sub-check (AC1=R-A repo layout / AC2=R-B 8 sub / AC3=R-C 6 sub / AC4=R-D 4 sub / AC5=R-E 4 sub / AC6=R-F 5 sub / AC7=R-G 7 sub + anti-AC7 / AC8=6 철학 6 sub review_high / AC9=spec sprint AC8 carry) / §3 in-scope/out-of-scope/dependencies / §4 G1 self-check / §5 Sprint Contract (CTO claude strategic_high / CPO cross-runtime P-17 패턴) / §6 plan self-note + 5 implement-stage gotcha (pre-merge hook 위치 / backfill idempotence / archive race / CI cost / VERSION cascade). status=ready-for-review. 다음 세션 entry = /sfs review --gate G1 (cross-instance, P-17 권장). brainstorm 9/9 lock + plan §4 self-check 통과 = review 진입 조건 충족. mutex release: current_wu_owner=null, 다음 세션 자유 claim."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T22:25:00+09:00
+    codename: affectionate-trusting-thompson
+    check_exit: 0
+    action: "§4.E G0 brainstorm round 1+2+3 CLOSE. 9/9 axes locked: A1 flat / B2 전체 backfill + (b) main migrate→closed archive / C4-γ interactive + --apply 양 단계 confirm + --auto fully unattended 3 surface / D4 unit+smoke+CI matrix+cross-instance verify (P-17 pattern) / E5 deprecation warning + 6 mo grace (hard cut 2026-11-03) + user 명시 승인 opt-in migrate / F4-with-lifecycle full structured yaml + close 시 user prompt (archive vs delete) / G2-α hard cut 0.6.0 부터 suffix drop. Round 1 user 회수 - A1/B2/C4(clarification 요청)/D(clarification 요청)/E E3+E1/F F4+삭제/G2. Round 2 clarification - C4 의미 3 옵션 (α/β/γ) → C4-γ / D scope (i)+(ii)+(iii)+cross-instance → D4 / E hybrid 정형화 → E5 (6 mo) / F4 close (a)/(b)/(c) → (c) user prompt / G2 cascade (α/β/γ) → G2-α / B2 archive policy (a)/(b)/(c) → (b). brainstorm.md ~310L, status=ready-for-plan, frontmatter brainstorm_decisions 9 항목 lock 기록. §6 Plan Seed 7 sub-section (§6.1 layout / §6.2 R2 / §6.3 R3 / §6.4 test / §6.5 consumer compat / §6.6 sprint.yml lifecycle / §6.7 version naming). §7 9-row lock table. §8 round 1+2+3 trace. 다음 1 step = user 명시 G1 plan 명령 (CLAUDE.md §1.3 + §1.20 자동 승급 금지)."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T22:15:00+09:00
+    codename: affectionate-trusting-thompson
+    check_exit: 0
+    action: "§4.D 0.6.0-product spec sprint CLOSED + 배포 완료 → §4.E 0.6.0-product implement sprint OPENED. user host 에서 03f36de origin/main push 회수 (rm .git/index.lock + bundle fetch + reset --hard + git push origin main, 4-step 정합 21:58 KST). user explicit 'implement sprint 이어서 진행' → 0.6.0-product 실 코딩 scope = R2 storage architecture (Layer 1/2 + co-location + N:M + sprint.yml + pre-merge hook + archive branch) + R3 sfs migrate-artifacts (2-pass propose-accept + algo + rollback). R1/R5/R7 = doc only ship 완료, R4 = 0.6.1 deferred (soft split lock). repo target = solon-mvp-dist/ (R-D1 dev-first per CLAUDE.md §1.13). brainstorm.md (G0 hard depth) 신설 — sprints/0-6-0-product-implement/brainstorm.md ~125L. §1 입력 요약 + §2 plan seed + §3 7 axes (A repo layout / B R2 backward compat / C migrate-artifacts UX / D test 전략 / E 0.5.x consumer compat / F sprint.yml scope / G version naming) round 1 grill + §4 6 철학 self-application + §5~§8 회수 후 채움. status=draft, 다음 1 step = user round 1 결정 회수."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T21:58:00+09:00
+    codename: affectionate-trusting-thompson
+    check_exit: 0
+    action: "spec sprint commit 03f36de pushed to origin/main (user host terminal manual, sandbox network 막힘 우회). 4-step: rm .git/index.lock (FUSE 잠금) → git fetch /Users/mj/agent_architect/tmp/handoff/0-6-0-product-spec-G6-PASS-2026-05-03T2155.bundle main → git reset --hard FETCH_HEAD (working tree=commit content 동등 → safe) → git push origin main (107f8c9..03f36de). §4.D 0.6.0-product spec sprint 완전 CLOSED."
+    ahead_delta: "+1 (already pushed to origin)"
   - ts: 2026-05-03T21:55:00+09:00
     codename: affectionate-trusting-thompson
     check_exit: 0
@@ -295,23 +319,28 @@ resume_hint:
   default_action: |
     1) Read `CLAUDE.md`, then `PROGRESS.md`.
     2) Run: `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh` (expect exit 0).
-    3) Read `2026-04-19-sfs-v0.4/sprints/0-6-0-product-spec/retro.md`
-       (G7 retro, sprint 회고 + 7-step flow recap + cross-instance verify
-       pattern 학습 + 다음 sprint 제언).
-    4) `2026-04-19-sfs-v0.4/learning-logs/2026-05/P-17-cross-instance-verify-cycle.md`
-       확인 (P-17 신규 learning-log, multi-runtime cross-instance verify
-       canonical pattern).
-    5) git log 에서 §4.D commit (sprint artifact + learning-log 두 commit)
-       확인. 이미 push 완료 (origin/main 정합).
+    3) Read in order:
+       - `2026-04-19-sfs-v0.4/sprints/0-6-0-product-implement/brainstorm.md`
+         (G0, 9/9 axes locked, ready-for-plan).
+       - `2026-04-19-sfs-v0.4/sprints/0-6-0-product-implement/plan.md`
+         (G1, ready-for-review, AC1~AC9 + 35+ sub-check + Sprint Contract).
+    4) Mutex claim: current_wu_owner=null → self claim (session_codename =
+       basename of /sessions/<codename>/).
+    5) Check `tmp/handoff/0-6-0-product-implement-G1-PLAN-*.bundle` 존재 →
+       있으면 user host 가 push 해야 할 G1 plan commit. user 에게 push 안내
+       (없으면 본 세션이 commit + bundle 생성 + push 안내).
     6) User 발화 분기:
-       - "0.6.0 implement 가자" / "다음 sprint" → 0.6.0-product implement
-         sprint 진입 (R1+R2+R3+R5+R7 first track). brainstorm/plan 부터
-         새 sprint dir.
+       - "/sfs review --gate G1" / "review 가자" / "G1 review" → G1 review
+         진입 (cross-instance P-17 패턴: Stage 1 claude same-instance
+         AI-PROPOSED + Stage 2 codex + Stage 3 gemini). review.md 신설.
+       - "implement 가자" / "G2 가자" → G1 review skip 결정 → G2 implement
+         직접 진입 (자동 승급 금지 정합 — user 명시 skip 으로만 가능).
        - "다른거 먼저" → on_skip_action.
-    7) **자동 다음 sprint 진입 금지** (CLAUDE.md §1.3 + §1.20 sequential).
+    7) **자동 G1 review / G2 implement 승급 금지** (CLAUDE.md §1.3 + §1.20
+       + brainstorm precedent + spec sprint Round 1~4 cycle).
   on_skip_patterns: ["아니", "잠깐", "다른", "stop", "다른거"]
-  on_skip_action: "§4.D 0.6.0-product spec sprint = G0~G7 모두 close + 배포 완료 (PASS LOCKED + retro + git push). 다음 후보: §4.A dashboard (서스테이닝), §4.B MD split, §4.C release-tooling polish, 또는 0.6.0-product implement sprint (R1+R2+R3+R5+R7 first track) 시작."
-  on_ambiguous: "§4.D 0.6.0-product spec sprint CLOSED + 배포 완료. 다음 = 0.6.0 implement / §4.A~C 후순위 / 다른 axis?"
+  on_skip_action: "§4.E G1 plan ready-for-review (AC1~AC9 + 35+ sub-check). G1 review 또는 G2 implement 진입 대기. pivot 가능 후순위 = §4.A dashboard / §4.B MD split / §4.C release-tooling polish."
+  on_ambiguous: "§4.E G1 plan ready-for-review. G1 review 진입 또는 G2 직접 진입 또는 pivot?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
@@ -386,34 +415,54 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ② In-Progress
 
-- **§4.D 0.6.0-product spec sprint G7 retro 작성 중** (claude-cowork:affectionate-trusting-thompson takeover).
-  G6 PASS LOCKED (Stage 1 claude PASS-with-flags + Stage 2 codex PASS 정정 +
-  Stage 3 gemini ALL PASS + user CEO ruling lock). user 명시 1~5 step
-  authorization: review lock / plan backstamp / PROGRESS / retro / 배포.
-  현재 step 4 (retro.md 작성) 진행. step 5 (git commit/push) 그 후.
+- **§4.E 0.6.0-product implement sprint G1 plan CLOSED → G1 review 진입 대기 (다음 세션)**.
+  본 세션 (claude-cowork:affectionate-trusting-thompson) 종료 + mutex release.
+  G0 brainstorm 9/9 locked → G1 plan 작성 (ready-for-review, AC1~AC9 + Sprint
+  Contract + 5 implement-stage gotcha self-flag).
+  다음 세션 entry = `/sfs review --gate G1` 또는 user 결정 timing.
 
-- **§4.D 0.6.0-product spec sprint (docset-design) — gate progression**:
-  G0 ✅ (brainstorm 7/7) → G1 plan ✅ → G1 review **PASS LOCKED** (Codex
-  Round 4) → G2 implement ✅ (4 신규 markdown + 2 수정) → G6 review
-  **PASS LOCKED 2026-05-03T21:55+09:00** (cross-instance Stage 1+2+3 +
-  CEO ruling) → G7 retro (작성 중).
-  Cross-instance verify pattern 강화: G1 Round 1~4 (4 cycle) + G6 Stage 1~3
-  (3 cycle) = P-17 learning-log 후보 confirm.
-  **다음 1 step**: G7 retro.md 작성 → P-17 learning-log → git commit/push.
+- **§4.D 0.6.0-product spec sprint — CLOSED 2026-05-03 (배포 03f36de origin/main)**.
+  Cross-instance verify pattern P-17 canonical lock. 4 spec markdown ship 완료.
+  **scope**: R2 storage architecture (Layer 1/2 + co-location + N:M +
+  sprint.yml + pre-merge hook + archive branch) + R3 sfs migrate-artifacts
+  (2-pass propose-accept + algo + rollback). R1/R5/R7 doc only ship 완료,
+  R4 = 0.6.1 deferred.
+  **repo target**: `2026-04-19-sfs-v0.4/solon-mvp-dist/` (R-D1 dev-first).
+
+- **§4.D 0.6.0-product spec sprint (docset-design) — CLOSED 2026-05-03**:
+  G0 ✅ → G1 plan ✅ → G1 review PASS LOCKED (Codex Round 4) → G2
+  implement ✅ (4 신규 markdown + 2 수정) → G6 review **PASS LOCKED
+  2026-05-03T21:55+09:00** (cross-instance Stage 1+2+3 + CEO ruling) →
+  G7 retro ✅ → 배포 (commit 03f36de + push origin/main 21:58 KST).
+  Cross-instance verify pattern P-17 canonical learning-log lock.
 
 ## ③ Next
 
-**다음 1 step = G7 retro.md 작성 + P-17 learning-log + git commit/push (배포)**.
+**다음 세션 entry = `/sfs review --gate G1`** (또는 user 결정 timing).
 
-Sequential per CLAUDE.md §1.20:
-1. ✅ review-g6.md §7 + frontmatter verdict_final lock.
-2. ✅ plan.md AC6 wording backstamp.
-3. ✅ PROGRESS mutex/heartbeat/log + ②/③/resume_hint 갱신.
-4. **(in progress)** retro.md + P-17 learning-log 작성.
-5. **(pending)** git add (path 격리, §1.25 cherry-pick) + commit + push to MJ-0701/solon main.
+본 세션 산출:
+- brainstorm.md (G0, 9/9 lock, ready-for-plan).
+- plan.md (G1, ready-for-review, AC1~AC9 + 35+ sub-check + Sprint Contract).
+- PROGRESS.md (heartbeat / mutex release / scheduled_task_log).
 
-배포 후: §4.D sprint 완전 close. 다음 axis = 0.6.0-product implement sprint
-(R1+R2+R3+R5+R7 first track) 또는 §4.A~C 후순위 — user timing 콜.
+다음 세션에서 처리할 것 (user 명시 timing):
+1. G1 review (cross-instance, P-17 패턴 권장: Stage 1 claude same-instance →
+   Stage 2 codex cross-runtime → Stage 3 gemini cross-runtime).
+2. review verdict PASS LOCK 후 G2 implement (실 6 신규 script 작성 +
+   bin/sfs dispatch 확장 + VERSION bump + tests + CI workflow).
+3. G2 implement → G6 review → G7 retro.
+4. release cut: VERSION 0.6.0 (G2-α suffix drop) + Homebrew tap 갱신 +
+   Scoop bucket 갱신 (§1.24 dual-channel 의무).
+5. 0.5.x consumer deprecation warning baseline 활성화 (E5 6 mo grace 시작).
+
+자동 G1 review 진입 금지 (CLAUDE.md §1.3 + §1.20). 다음 세션도 user 명시 명령.
+
+### 후순위 (sprint complete 후 user timing 콜)
+
+- §4.A 0.5.97 dashboard (서스테이닝, 우선순위 낮음).
+- §4.B MD split queue (Tier 1 8 docs, unlocked).
+- §4.C release-tooling polish (verify --yes / cut-release retarget /
+  scripts/update-product-taps.sh 신설).
 
 §4.D 의 진짜 axis (user 답변 mid-session 발본):
 1. SFS 6 철학 codification (Grill Me / Ubiquitous Language / TDD 헤드라이트
