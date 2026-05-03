@@ -48,16 +48,124 @@ session_codename: modest-charming-keller
 
 #### 4.A.1.1 User-stated design constraints
 
-The user's original design intent was **plugin-per-CLI** (reference: bkit pdca — a Claude Code plugin pattern they have designed before). Plugin pattern itself is acceptable. The objection is to the **multi-install friction**: if user runs Claude + Codex + Gemini-CLI all together, they should NOT need to run three separate plugin installs.
+The user's original design intent was **plugin-per-CLI** (concrete prior art:
+bkit pdca — they designed and shipped this themselves). Plugin pattern itself
+is acceptable. The objection is to the **multi-install friction**: if user
+runs Claude + Codex + Gemini-CLI all together, they should NOT need to run
+three separate plugin installs as separate user actions — but ONE user
+action triggering all three at install time IS acceptable.
 
 Therefore the constraint is:
 
-- **One user-visible install action** covers all three CLIs. `brew install sfs` (and its Scoop equivalent) is the unified entry point. Per-CLI plugin install commands run *inside* the brew/scoop hook, not as separate user steps.
-- **Project surface clean** — no project-local files dropped by install.
-- **Plugin-managed user-home location is acceptable** (e.g., `~/.claude/plugins/solon/` is plugin-internal, not "user file"). Direct config-style files at `~/.claude/commands/sfs.md` are less acceptable but **negotiable** if the trade-off is necessary.
-- `sfs upgrade` re-runs the same coverage idempotently for already-installed setups.
+- **One user-visible install action** covers all three CLIs. `brew install
+  sfs` (and Scoop equivalent) is the unified entry point. Per-CLI plugin
+  install commands run *inside* the brew/scoop hook, not as separate user
+  steps.
+- **Project surface clean of plugin-mechanism files, but RICH with work
+  artifacts**. The dividing line is critical: see §4.A.1.4 below for the
+  hard list.
+- **Plugin-managed user-home location is acceptable** (e.g.,
+  `~/.claude/plugins/solon/` is plugin-internal, conceptually like brew's
+  Cellar — installed software, not user file). Direct config-style files at
+  `~/.claude/commands/sfs.md` are NOT acceptable.
+- `sfs upgrade` re-runs the same coverage idempotently.
 
-The "no file outside brew location" interpretation from the previous handoff draft was wrong. The user accepts files in CLI-managed plugin areas (because those are "installed software," conceptually equivalent to brew's Cellar). They do **not** accept files in user-curated config-file areas (`~/.claude/commands/`).
+The "no file outside brew location" interpretation from the first handoff
+draft was wrong. The "user-global stub" interpretation from the second draft
+was also wrong. The right interpretation: **mirror the bkit pdca plugin
+pattern across Claude Code + Gemini CLI + Codex CLI under a single brew
+install umbrella.** See §4.A.1.2 for the concrete reference setup.
+
+#### 4.A.1.4 Project-local vs. plugin-internal — hard split (multi-CLI continuity)
+
+The user works across Codex / Claude / Gemini CLI on the same projects and
+must be able to **switch CLIs mid-work and resume** (per user 2026-05-03). For
+this, work artifacts MUST live in the project (git-tracked, portable across
+agents). Plugin/extension mechanism files MUST NOT live in the project (they
+are CLI-specific install state, not portable, and clutter the project).
+
+**Stays in project (git-tracked, never removed by `sfs init`/`upgrade`)**:
+
+- `SFS.md` — project operating identity (project-name, stack, deploy, domain).
+- `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` — thin agent adapter root files
+  (these are *adapter content*, not slash command definitions; analogous to
+  `AGENTS.md` being Codex's auto-loaded root file).
+- `.sfs-local/` — project state, sprint workbench, decisions, events,
+  VERSION, model-profiles, etc.
+- `.sfs-local/sprints/<sprint-id>/` — brainstorm.md / plan.md / implement.md
+  / log.md / review.md / retro.md / report.md (the 7-gate work artifacts).
+- `.sfs-local/decisions/` — ADR-style decisions.
+- `.sfs-local/events.jsonl` — append-only event log.
+- Any `docs/<gate-output>/...` style files the user creates (Solon doesn't
+  prescribe `docs/` location; user's `01-plan/features/...` style is fine).
+
+**Does NOT live in project (lives in plugin/extension areas under user-home;
+removed if currently present from old installs)**:
+
+- `.claude/commands/sfs.md` — slash command definition. Now lives in
+  `~/.claude/plugins/<solon-plugin>/commands/sfs.md` (plugin-internal).
+- `.gemini/commands/sfs.toml` — Gemini extension command. Now lives in
+  Gemini extension area (extension-internal).
+- `.agents/skills/sfs/SKILL.md` — Codex skill. Per §4.A.1.3 user decision,
+  either lives in `~/.codex/...` user-global or stays project-local
+  asymmetrically (decision deferred).
+
+**Multi-CLI continuity test**: user works in Claude Code, commits work
+artifacts (`.sfs-local/sprints/<id>/plan.md` etc.) to git, opens the same
+project in Codex CLI, runs `$sfs status` — Codex should see the same sprint
+state and continue without missing context. This works because:
+
+1. The sprint state files are project-local (git-tracked).
+2. The `sfs` binary (brew/scoop installed, in PATH) reads/writes the same
+   `.sfs-local/` regardless of which CLI invokes it.
+3. Plugin-mechanism files are not part of the work artifact surface — they
+   only provide command discovery for each CLI.
+
+#### 4.A.1.2 Concrete reference: bkit pdca install commands (user-provided 2026-05-03)
+
+This is the EXACT pattern that sfs/solon must replicate. Read these repos
+first; do not reinvent the manifest format.
+
+| CLI | bkit install command | sfs/solon equivalent (to create) |
+|---|---|---|
+| Claude Code | `/plugin marketplace add popup-studio-ai/bkit-claude-code` | New marketplace repo — recommend `MJ-0701/solon-claude-code` (matches Solon Product naming) |
+| Gemini CLI | `gemini extensions install https://github.com/popup-studio-ai/bkit-gemini.git` | New extension repo — recommend `MJ-0701/solon-gemini` |
+| Codex CLI | **미지원** (no plugin/extension marketplace mechanism in Codex CLI) | **DESIGN DECISION REQUIRED** — see §4.A.1.3 |
+
+**Pre-implementation reading list (mandatory)**:
+1. https://github.com/popup-studio-ai/bkit-claude-code — read manifest, plugin metadata, slash command definition format, file layout. Mirror this exactly for `solon-claude-code`.
+2. https://github.com/popup-studio-ai/bkit-gemini — read extension structure, install hook, command/extension declaration. Mirror for `solon-gemini`.
+
+**Goal output of plugin/extension installs**:
+- Claude Code: `/sfs <command>` (or `/solon <command>` — naming TBD with user) auto-completes in any directory.
+- Gemini CLI: `sfs <command>` (or `solon <command>`) auto-completes.
+- Project tree: zero plugin-mechanism files. Only `.sfs-local/` state and work artifacts.
+
+#### 4.A.1.3 Codex CLI strategy (user decision required)
+
+Codex has no plugin marketplace, but `sfs` works in Codex via shell-out:
+`$sfs status` invokes the `sfs` binary which brew installs to PATH. This
+**already works today** with zero Codex-specific install — as long as `sfs`
+is in PATH (brew handles this).
+
+The remaining question for Codex is workflow-context: how does Codex *know*
+that the current project uses SFS conventions (sprint structure, gate
+framework, retro semantics) so that `$sfs <command>` invocations get
+appropriate AI handling? Today this is provided by `.agents/skills/sfs/SKILL.md`
+project-local file. Options for the brew-umbrella + clean-project model:
+
+- **C-1**: User-global `~/.codex/skills/sfs/SKILL.md` (or whatever Codex
+  auto-loads from user-home). Verify Codex CLI's user-global discovery path
+  before implementing.
+- **C-2**: Accept that Codex requires project-local `.agents/skills/sfs/SKILL.md`
+  (asymmetry — Claude/Gemini have plugin, Codex has small project file).
+- **C-3**: Just shell-out — Codex users get `$sfs` invocation but no SKILL-mediated
+  workflow context. Acceptable if Codex CLI infers context from `AGENTS.md`
+  alone.
+- **C-4**: Use `AGENTS.md` (Codex auto-loaded root file) as the carrier — keep
+  AGENTS.md in project (already standard) but don't add additional files.
+
+User must pick C-1/2/3/4 in §4.A.5 decision gate.
 
 #### 4.A.2 Live witness data points (collected 2026-05-03 by user)
 
@@ -72,51 +180,107 @@ The "no file outside brew location" interpretation from the previous handoff dra
 
 The product-image-studio observation is **not** evidence that brew provides global discovery. It is a stale project-local artifact. The actual user goal — zero file in project AND zero file in home — is still unmet.
 
-#### 4.A.3 Research mechanisms to investigate (one section per CLI)
+#### 4.A.3 Implementation work (concrete after §4.A.1.2 / §4.A.1.3)
 
-The unifying question across all three CLIs:
+The "research" framing of the previous handoff draft is mostly obsolete now —
+user provided concrete bkit install commands. The actual work is largely
+*replication* of bkit's pattern, not exploration of unknowns. Steps:
 
-> Does this CLI have a non-interactive plugin/extension install command that a brew/scoop hook can invoke during `brew install sfs`? If yes, what does it accept as input (URL / local path / marketplace ID)? If no, what is the closest file-drop alternative inside a CLI-plugin-managed location (NOT user-curated config dirs)?
+##### 4.A.3.1 Read bkit prior art (mandatory first step, do not skip)
 
-##### Claude Code (v2.x)
+```
+git clone https://github.com/popup-studio-ai/bkit-claude-code.git /tmp/bkit-claude-code
+git clone https://github.com/popup-studio-ai/bkit-gemini.git /tmp/bkit-gemini
+```
 
-Reference: bkit pdca plugin (user has designed this pattern before — investigate its install/registration mechanism for prior art). Investigate, in priority order:
+Then for each repo, locate and study:
+- Plugin manifest / extension descriptor file (typically a JSON / TOML / YAML
+  at the repo root or in a known location).
+- Slash command definitions and where they live inside the plugin/extension.
+- Install-time scripts, if any.
+- Naming conventions, scope of commands exposed, error/help patterns.
 
-1. **Plugin system** — `claude plugin install <something>`: does it exist? Local path supported? Marketplace ID supported? URL supported? Does Claude Code load slash commands from a plugin's bundled `commands/` directory inside `~/.claude/plugins/<plugin>/` (plugin-internal, acceptable per §4.A.1.1)? Reference: `claude --help`, `claude plugin --help`, official Claude Code docs, plugin marketplace.
-2. **MCP server** — `claude mcp add` registers an MCP server with one config edit. Useful for the *tool* side (`@sfs.status` etc.), but a literal `/sfs` slash command from MCP is a separate question — investigate whether MCP servers can declare slash commands or if it's tool-only.
-3. **Skills / Agents path** — Claude Code subagent system (`.claude/agents/`). Does it have an analogous slash-from-skill mechanism that lives in a CLI-plugin-managed location?
-4. **Config-only registration** — does `~/.claude/settings.json` accept a `commands:` block that defines slash commands inline without separate files?
+This determines the EXACT structure that `solon-claude-code` and
+`solon-gemini` repos must follow.
 
-For each path, record: (a) feasibility, (b) what brew formula's `post_install` can call to set it up non-interactively, (c) what footprint appears in user filesystem (plugin-internal acceptable, user-config-file not), (d) idempotency on `sfs upgrade`.
+##### 4.A.3.2 Decide naming with user
 
-##### Codex CLI
+Plugin name: `solon` vs `sfs` — user decision. Record their choice in the
+research report. Existing convention: the binary is `sfs` (Sprint Flow
+System), the product is "Solon Product." Recommendation to surface to user:
+plugin marketplace IDs use `solon` (product brand), slash commands inside
+the plugin still use `/sfs <subcommand>` (matches existing CLI surface and
+existing user muscle memory).
 
-Investigate the equivalent landscape for Codex. Codex uses `AGENTS.md` for agent behavior + `~/.codex/prompts/<name>.md` (or similar) for prompts. Determine:
+##### 4.A.3.3 Create solon-claude-code marketplace repo
 
-1. Plugin/skill marketplace? Non-interactive install command?
-2. MCP server registration (Codex's MCP support)?
-3. Closest file-drop equivalent in a Codex-managed plugin/skill folder (NOT `~/.codex/prompts/` if that's user-curated)?
-4. What does `brew install codex` (or its install path) typically wire up?
+- New repo: `MJ-0701/solon-claude-code` (or as user names).
+- Mirror bkit-claude-code's structure 1:1.
+- Inside the plugin: include slash command definitions equivalent to current
+  `solon-mvp-dist/templates/.claude/commands/sfs.md` (one definition per
+  exposed command if applicable, or a single dispatcher).
+- Plugin commands ultimately call the global `sfs` binary (brew/scoop
+  installed). The plugin's role is *discovery and routing*, not duplicating
+  business logic.
+- Verify install path: `/plugin marketplace add MJ-0701/solon-claude-code`
+  works in Claude Code v2.x test session.
 
-##### Gemini CLI
+##### 4.A.3.4 Create solon-gemini extension repo
 
-Same questions as Codex, but for Gemini CLI. Gemini uses `~/.gemini/commands/*.toml` for slash commands per the existing solon templates. Investigate:
+- New repo: `MJ-0701/solon-gemini` (or as user names).
+- Mirror bkit-gemini's structure.
+- Verify install path:
+  `gemini extensions install https://github.com/MJ-0701/solon-gemini.git`.
 
-1. Gemini extension/plugin system (`gemini extension install`?). Non-interactive install?
-2. MCP server registration in Gemini config?
-3. Where do Gemini-managed extensions live vs. user-curated commands files?
+##### 4.A.3.5 Codex CLI handling (per user §4.A.1.3 decision)
 
-#### 4.A.3.1 Cross-CLI common path
+Implement the chosen option (C-1/2/3/4) from §4.A.1.3.
 
-After per-CLI research, identify the **common umbrella mechanism**:
+##### 4.A.3.6 Brew umbrella wiring
 
-- Best case: all three have a non-interactive plugin install command. brew formula `post_install` runs three lines, one per CLI, all silent. Failure of one CLI's hook does NOT block the others or the brew install itself (degrade gracefully + warn).
-- Acceptable: two of three have plugin-install CLIs; the third needs a file-drop into a CLI-managed location (not `~/.claude/commands/` etc.). Document the asymmetry.
-- Worst case: file-drop into user-curated config dirs is the only option for one or more CLIs. Surface the trade-off to user explicitly via §4.A.5.
+- `solon-mvp-dist/packaging/homebrew/sfs.rb.template` — add `post_install`
+  block that:
+  - Detects each CLI (claude, gemini, codex) on PATH.
+  - For each detected CLI, runs the corresponding install command
+    non-interactively (with `--yes` or equivalent if needed).
+  - Failure of one CLI's hook does NOT abort the brew install; degrade
+    gracefully + emit a warning summary at the end.
+- Idempotent on second run.
 
-#### 4.A.3.2 Scoop equivalent
+##### 4.A.3.7 Scoop equivalent
 
-For Windows Scoop the same logic applies. Scoop manifest's `installer.script` block runs at install time and can call PowerShell. Investigate whether Claude Code / Gemini CLI / Codex CLI have Windows-equivalent non-interactive plugin install paths.
+- `solon-mvp-dist/packaging/scoop/sfs.json.template` — `installer.script`
+  block runs PowerShell that mirrors §4.A.3.6.
+- Same idempotency + graceful-degrade behavior.
+
+##### 4.A.3.8 Update install/upgrade scripts
+
+- `solon-mvp-dist/install.sh`, `install.ps1`: trigger the same hook so users
+  who run install via curl-pipe or local install.sh also get plugin coverage.
+- `solon-mvp-dist/upgrade.sh`, `upgrade.ps1`: trigger the same hook so
+  existing 0.5.89-95 installations get the missing plugin coverage on next
+  upgrade.
+
+##### 4.A.3.9 Remove the project-local adapter templates from default install
+
+- `solon-mvp-dist/install.sh` thin layout: ensure `.claude/commands/sfs.md`,
+  `.gemini/commands/sfs.toml`, `.agents/skills/sfs/SKILL.md` are NOT created
+  in the project. (Already largely true since 0.5.89; confirm and document.)
+- `sfs agent install all` semantics: confirm this still does what it should
+  for *persona/skill* artifacts (CTO/CPO/CEO/evaluator/generator/planner) but
+  NOT for slash command discovery (different concern).
+
+##### 4.A.3.10 Update docs
+
+- `solon-mvp-dist/README.md`, `GUIDE.md`, `BEGINNER-GUIDE.md`,
+  `docs/ko/...`, `docs/en/...` — install instructions should show:
+  ```
+  brew install MJ-0701/solon-product/sfs
+  # → automatically registers /sfs slash command in Claude Code (via plugin)
+  #   and Gemini CLI (via extension). Codex CLI uses shell-out via $sfs.
+  ```
+- Make clear: project surface stays clean. No `.claude/commands/` etc. are
+  created by `sfs init`.
 
 #### 4.A.4 Output of research phase
 
