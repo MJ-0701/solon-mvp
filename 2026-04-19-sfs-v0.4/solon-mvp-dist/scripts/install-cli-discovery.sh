@@ -1,0 +1,218 @@
+#!/usr/bin/env bash
+# install-cli-discovery.sh — 0.5.96-product slash-command zero-file discovery hook
+#
+# Purpose: After `sfs` binary is on PATH (Homebrew/Scoop installed),
+#   register the three CLI discovery surfaces:
+#     1. Claude Code:  /plugin marketplace add MJ-0701/solon  (A-1)
+#                      OR  filesystem-direct deploy + settings.json edit  (A-2 fallback)
+#     2. Gemini CLI:   gemini extensions install --consent --auto-update <url>
+#     3. Codex CLI:    cp <bundle>/codex-skill/SKILL.md  ~/.codex/skills/sfs/SKILL.md  (C-1)
+#
+# Idempotent: re-runs as no-op when state already correct.
+# Graceful: failure of any single CLI hook prints a warning but does NOT
+#   abort the parent install (D7 = b).
+# Source of truth for decisions: HANDOFF §4.A + research report §5.
+
+set -u  # do not -e — graceful degrade per D7
+
+# ---------------------------------------------------------------------------
+# Defaults / config
+# ---------------------------------------------------------------------------
+SOLON_REPO="${SOLON_REPO:-MJ-0701/solon}"
+SOLON_PRODUCT_REPO="${SOLON_PRODUCT_REPO:-MJ-0701/solon-product}"
+SOURCE_DIR="${SFS_DISCOVERY_SOURCE_DIR:-}"  # caller may inject; we autodetect otherwise
+HOME_DIR="${HOME:-$USERPROFILE}"
+A1_FIRST="${SFS_DISCOVERY_A1_FIRST:-1}"   # set 0 to skip A-1 and go straight to A-2
+
+# Color helpers (no-op if not interactive)
+if [ -t 1 ]; then
+  C_GREEN=$'\033[32m'; C_YELLOW=$'\033[33m'; C_RED=$'\033[31m'
+  C_BOLD=$'\033[1m'; C_RESET=$'\033[0m'
+else
+  C_GREEN=''; C_YELLOW=''; C_RED=''; C_BOLD=''; C_RESET=''
+fi
+ok()    { printf "  ${C_GREEN}✓${C_RESET} %s\n" "$*"; }
+warn()  { printf "  ${C_YELLOW}!${C_RESET} %s\n" "$*"; }
+fail()  { printf "  ${C_RED}✗${C_RESET} %s\n" "$*"; }
+info()  { printf "  %s\n" "$*"; }
+
+# Find the bundle root (where templates/codex-skill/SKILL.md lives)
+discover_source_dir() {
+  if [ -n "$SOURCE_DIR" ] && [ -f "$SOURCE_DIR/templates/codex-skill/SKILL.md" ]; then
+    return 0
+  fi
+  # try: alongside this script's parent (solon-mvp-dist root)
+  local self_dir
+  self_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd 2>/dev/null)"
+  if [ -f "$self_dir/templates/codex-skill/SKILL.md" ]; then
+    SOURCE_DIR="$self_dir"
+    return 0
+  fi
+  # try: Homebrew Cellar share/sfs/
+  for cand in /opt/homebrew/share/sfs /usr/local/share/sfs "$HOME_DIR/.local/share/sfs"; do
+    if [ -f "$cand/templates/codex-skill/SKILL.md" ]; then
+      SOURCE_DIR="$cand"
+      return 0
+    fi
+  done
+  return 1
+}
+
+# ---------------------------------------------------------------------------
+# Step 1: Claude Code plugin discovery
+# ---------------------------------------------------------------------------
+install_claude_discovery() {
+  if ! command -v claude >/dev/null 2>&1; then
+    info "Claude Code: not on PATH — skip"
+    return 0
+  fi
+
+  local CLAUDE_VERSION
+  CLAUDE_VERSION="$(claude --version 2>/dev/null | head -1 || true)"
+  info "Claude Code detected: ${CLAUDE_VERSION:-unknown}"
+
+  if [ "$A1_FIRST" = "1" ]; then
+    # A-1: try CLI subcommand non-interactively. The exact subcommand name
+    # is uncertain across versions (issue #12999) — try multiple shapes.
+    local A1_OUT
+    A1_OUT="$(claude plugin marketplace add "$SOLON_REPO" 2>&1 || true)"
+    if echo "$A1_OUT" | grep -qiE "(added|already|registered|installed)"; then
+      ok "Claude Code: marketplace registered via 'claude plugin marketplace add' (A-1)"
+      claude plugin install "solon@solon" >/dev/null 2>&1 || true
+      ok "Claude Code: /sfs slash command should be discoverable on next session restart"
+      return 0
+    fi
+    # fall through to A-2
+    warn "Claude Code: A-1 CLI subcommand path unavailable on this version"
+    warn "  $(echo "$A1_OUT" | head -1)"
+  fi
+
+  # A-2: filesystem-direct deploy + settings.json merge
+  local PLUGIN_DEST="$HOME_DIR/.claude/plugins/solon"
+  mkdir -p "$PLUGIN_DEST/.claude-plugin" "$PLUGIN_DEST/commands"
+
+  if [ -n "$SOURCE_DIR" ] && [ -d "$SOURCE_DIR/templates" ]; then
+    # Bundle does not yet ship the marketplace repo files in dist-side; user
+    # must clone MJ-0701/solon during this step. We attempt a shallow clone
+    # to a temp dir and then copy the plugin contents into the cellar.
+    if command -v git >/dev/null 2>&1; then
+      local TMPCLONE
+      TMPCLONE="$(mktemp -d 2>/dev/null || mktemp -d -t solon)"
+      if git clone --depth 1 "https://github.com/$SOLON_REPO.git" "$TMPCLONE" >/dev/null 2>&1; then
+        if [ -d "$TMPCLONE/plugins/solon" ]; then
+          cp -R "$TMPCLONE/plugins/solon/." "$PLUGIN_DEST/"
+          ok "Claude Code: plugin filesystem-direct deployed at ~/.claude/plugins/solon (A-2)"
+        else
+          warn "Claude Code: cloned MJ-0701/solon but no plugins/solon/ — skip A-2"
+        fi
+        rm -rf "$TMPCLONE"
+      else
+        warn "Claude Code: git clone of $SOLON_REPO failed — A-2 skipped"
+      fi
+    else
+      warn "Claude Code: git not on PATH — A-2 cannot deploy plugin filesystem"
+    fi
+  fi
+
+  # Idempotent settings.json merge (extraKnownMarketplaces + enabledPlugins)
+  local SETTINGS="$HOME_DIR/.claude/settings.json"
+  if command -v jq >/dev/null 2>&1; then
+    if [ ! -f "$SETTINGS" ]; then echo '{}' > "$SETTINGS"; fi
+    local TMP
+    TMP="$(mktemp 2>/dev/null || mktemp -t settings)"
+    jq --arg name "solon" --arg src "https://github.com/$SOLON_REPO" \
+       '.extraKnownMarketplaces[$name] = {"source": $src}
+        | .enabledPlugins["solon@solon"] = true' \
+       "$SETTINGS" > "$TMP" && mv "$TMP" "$SETTINGS"
+    ok "Claude Code: ~/.claude/settings.json updated (extraKnownMarketplaces + enabledPlugins)"
+  else
+    warn "Claude Code: jq not on PATH — skip settings.json merge (manual edit may be needed)"
+    warn "  Manual recovery: claude plugin marketplace add $SOLON_REPO"
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# Step 2: Gemini CLI extension
+# ---------------------------------------------------------------------------
+install_gemini_discovery() {
+  if ! command -v gemini >/dev/null 2>&1; then
+    info "Gemini CLI: not on PATH — skip"
+    return 0
+  fi
+  if ! command -v git >/dev/null 2>&1; then
+    warn "Gemini CLI: git not on PATH — extension install requires git"
+    warn "  Manual recovery (after installing git):"
+    warn "    gemini extensions install --consent https://github.com/$SOLON_REPO.git"
+    return 0
+  fi
+
+  info "Gemini CLI detected"
+  # Idempotent: list current extensions, install only if not present
+  local LIST
+  LIST="$(gemini extensions list 2>/dev/null || true)"
+  if echo "$LIST" | grep -qiE "(^|/)solon\b|solon-gemini|MJ-0701/solon"; then
+    ok "Gemini CLI: solon extension already installed — skip"
+    return 0
+  fi
+
+  local OUT
+  OUT="$(gemini extensions install --consent --auto-update "https://github.com/$SOLON_REPO.git" 2>&1 || true)"
+  if echo "$OUT" | grep -qiE "(installed|already)"; then
+    ok "Gemini CLI: extension installed via 'gemini extensions install --consent'"
+  else
+    warn "Gemini CLI: extension install did not confirm success"
+    warn "  Output: $(echo "$OUT" | head -2 | tr '\n' ' ')"
+    warn "  Manual recovery: gemini extensions install --consent https://github.com/$SOLON_REPO.git"
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# Step 3: Codex CLI user-global skill (C-1)
+# ---------------------------------------------------------------------------
+install_codex_discovery() {
+  if ! discover_source_dir || [ ! -f "$SOURCE_DIR/templates/codex-skill/SKILL.md" ]; then
+    warn "Codex CLI: source bundle not found — skip"
+    warn "  (templates/codex-skill/SKILL.md missing)"
+    return 0
+  fi
+
+  local DEST_DIR="$HOME_DIR/.codex/skills/sfs"
+  mkdir -p "$DEST_DIR"
+  cp "$SOURCE_DIR/templates/codex-skill/SKILL.md" "$DEST_DIR/SKILL.md"
+  ok "Codex CLI: user-global skill installed at ~/.codex/skills/sfs/SKILL.md (C-1)"
+
+  # Codex CLI presence is informational — the SKILL is auto-discovered
+  # whenever Codex starts in any project.
+  if ! command -v codex >/dev/null 2>&1; then
+    info "  (Codex CLI not on PATH; skill ready for when it is installed)"
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+main() {
+  echo
+  echo "${C_BOLD}Solon CLI discovery (slash-command zero-file)${C_RESET}"
+  echo
+  install_claude_discovery
+  echo
+  install_gemini_discovery
+  echo
+  install_codex_discovery
+  echo
+
+  cat <<EOF
+Verify with:
+  ${C_BOLD}sfs doctor${C_RESET}            — check all three CLI discovery paths
+  ${C_BOLD}claude${C_RESET} → /sfs        — Claude Code slash command autocomplete
+  ${C_BOLD}gemini${C_RESET} → sfs status  — Gemini CLI command
+  ${C_BOLD}codex${C_RESET}  → \$sfs status — Codex CLI Skill invocation
+
+If any step warned above, the manual recovery line printed alongside is
+the one-shot fix. The brew/scoop install of \`sfs\` itself is unaffected.
+EOF
+  return 0  # always exit 0; failures are warnings (D7 = b graceful)
+}
+
+main "$@"
