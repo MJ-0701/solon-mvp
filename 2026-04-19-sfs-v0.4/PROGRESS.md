@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-03T10:19:24+09:00
-session: "claude-cowork: codex 0.5.87-95 drift recovery + PROGRESS trim + doc audit + resume_hint re-aim"
+last_overwrite: 2026-05-03T10:27:58+09:00
+session: "claude-cowork: handoff restructure — slash-command-global-stub hotfix promoted to priority 1"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: null
@@ -212,46 +212,51 @@ resume_hint:
   default_action: |
     1) Read `CLAUDE.md`, then `PROGRESS.md`.
     2) Run: `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh` (expect exit 0).
-    3) Read `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` §4 (MD split execution
-       queue) and `2026-04-19-sfs-v0.4/MD-SIZE-AUDIT-2026-05-03.md` for per-file
-       classification.
-    4) Create a fresh `feature/md-size-split-tier1` branch from clean `main`.
-    5) Start Tier 1 split work: `07-plugin-distribution.md` (1022 lines,
-       largest non-CHANGELOG). Per-split flow:
-         a. reference-scan: `grep -rn '07-plugin-distribution' --include='*.md'
-            --include='*.sh' --include='*.yaml' --include='*.toml'
-            --exclude-dir='.git' --exclude-dir='archives'
-            --exclude-dir='.claude/worktrees'`
-         b. identify §-major boundaries (`grep -n '^# §\|^## §' <file>`)
-         c. create `07-plugin-distribution/<sub-§-slug>.md` for each, with
-            the strict 11-field frontmatter defined in
-            MD-SIZE-AUDIT-2026-05-03.md "Frontmatter standard"
-         d. replace each §-block in the parent with a 1-line link stub
-         e. atomic commit `split: 07-plugin-distribution §X..§Y → 07-plugin-distribution/`
-         f. confirm `resume-session-check.sh` exit 0
-    6) After Tier 1 (8 files: 07 → 05 → 02 → 10 → 08 → 04 → 03 → 06 in size order),
-       move to Tier 2 (closed sprint files WU-23 → WU-20 → WU-26).
-    7) After Tier 1+2, generalize CLAUDE.md §1.14 + create
-       `scripts/check-md-size.sh` (resume-session-check check #9, exit 18) +
-       cut-release.sh post-flight auto-rotate hook + `learning-logs/2026-05/
-       P-XX-md-rotation-pattern.md`.
-    8) HARD rules (from MD-SIZE-AUDIT-2026-05-03.md):
-       - "DO NOT split" list (CHANGELOG, templates/**, archives/**, root
-         CLAUDE/AGENTS/GEMINI redirect stubs, .claude/agents/*,
-         .agents/skills/*, .gemini/commands/*.toml, .sfs-local/**) — never touch.
-       - solon-mvp-dist/GUIDE.md, BEGINNER-GUIDE.md, README.md — leave (just
-         trimmed in 0.5.86; do not undo).
-       - Frontmatter discipline (11 fields) is non-negotiable per user
-         "절대 누락 0" constraint.
+    3) Read `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` — §4.A is the TOP
+       priority hotfix (slash-command-global-stub regression in 0.5.89-95).
+       §4.B (MD split queue) and §4.C (§1.14 generalization) are deferred
+       UNTIL §4.A lands and 0.5.96-product is verified 7/7.
+    4) **§4.A — slash-command-global-stub hotfix → release as `0.5.96-product`**:
+         a. Reproduce the regression: `cd ~/IdeaProjects/study-note && claude`
+            then `/sfs` should fail "No commands match" (or
+            `ls -la ~/.claude/commands/sfs.md` should show absent).
+         b. Branch from clean `main`: `hotfix/sfs-slash-command-global-stub`.
+         c. Reference scan first (see HANDOFF §4.A.4 step 1) to surface every
+            place that touches `.claude/commands/sfs.md`, agent install, etc.
+         d. Verify Codex CLI's user-global slash-discovery path BEFORE
+            implementing — do not guess. Claude Code uses
+            `~/.claude/commands/sfs.md`; Gemini CLI uses
+            `~/.gemini/commands/sfs.toml`; Codex path needs confirmation.
+         e. Implement helper `solon-mvp-dist/bin/install-global-adapter-stubs.sh`
+            (+ `.ps1` for Windows): idempotent; SFS-managed marker probe;
+            cross-platform HOME detection.
+         f. Wire into `install.sh` / `install.ps1` / `upgrade.sh` /
+            `upgrade.ps1` / Homebrew formula `post_install` / Scoop manifest
+            `installer.script`. Conceptually keep separate from
+            `sfs agent install all` (persona/skill domain).
+         g. Update `templates/.claude/commands/sfs.md` etc. if needed for
+            user-global stub usage.
+         h. Update GUIDE / BEGINNER-GUIDE / docs/ko / docs/en to mention `/sfs`
+            is globally available after install with no per-project setup.
+         i. CHANGELOG entry under `### Fixed` (text in HANDOFF §4.A.4 step 10).
+         j. Run `cut-release.sh --apply --version 0.5.96-product` flow,
+            push stable + tag + Homebrew + Scoop, verify 7/7.
+         k. Local verification: `cd ~/IdeaProjects/study-note && claude` then
+            `/sfs` autocompletes; same in `~/agent_architect`. Idempotency
+            test: `sfs upgrade` second run is a no-op for global stubs.
+    5) After §4.A 7/7 green, ask user before starting §4.B (MD split queue)
+       — that work is staged in HANDOFF §4.B and not auto-resumed.
   on_skip_patterns: ["아니", "잠깐", "다른", "stop", "다른거"]
-  on_skip_action: "MD split queue is queued (Tier 1: 8 body chapters / Tier 2: 3 closed sprint files). Latest product release is `0.5.95-product`. What do you want to do instead?"
-  on_ambiguous: "MD split queue is ready (Tier 1 first, `07-plugin-distribution.md`). Latest product release is `0.5.95-product`. Start the queue, or pick another tier/file?"
+  on_skip_action: "Top priority is the slash-command-global-stub hotfix → 0.5.96-product (HANDOFF §4.A). MD split queue (§4.B) is deferred. Latest product release is `0.5.95-product`. What do you want to do instead?"
+  on_ambiguous: "Slash-command-global-stub hotfix is queued as top priority (HANDOFF §4.A). Latest product release is `0.5.95-product`. Start the hotfix, or different priority?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
-    - "MD split: pre-flight reference scan required + frontmatter 11 fields required + parent link stub required + atomic commit + resume-session-check exit 0 verification"
-    - "MD split: never touch DO NOT split list"
-  last_written: 2026-05-03T01:19:24Z
+    - "Hotfix §4.A: verify Codex user-global path before writing — do not guess. Idempotent stub install only — never overwrite user-modified content. Keep separate from `sfs agent install all` persona/skill domain."
+    - "MD split (§4.B): never start until §4.A 0.5.96-product is verified 7/7."
+    - "MD split (§4.B): pre-flight reference scan required + frontmatter 11 fields required + parent link stub required + atomic commit + resume-session-check exit 0 verification."
+    - "MD split (§4.B): never touch DO NOT split list (CHANGELOG, templates/**, archives/**, root redirect stubs, .claude/agents/*, .agents/skills/*, .gemini/commands/*.toml, .sfs-local/**, recent-trim solon-mvp-dist/GUIDE.md/BEGINNER-GUIDE.md/README.md)."
+  last_written: 2026-05-03T01:27:58Z
 ---
 
 # PROGRESS — compact
