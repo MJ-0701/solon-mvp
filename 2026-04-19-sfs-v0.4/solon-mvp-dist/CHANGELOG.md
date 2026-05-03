@@ -14,8 +14,8 @@
   or `.agents/skills/sfs/SKILL.md`. Discovery surfaces live in the
   user-home plugin/extension cellar and the Codex user-global skills
   directory:
-    - Claude Code:  marketplace plugin under `MJ-0701/solon`
-    - Gemini CLI:   extension under `MJ-0701/solon`
+    - Claude Code:  marketplace plugin under `MJ-0701/solon-product`
+    - Gemini CLI:   extension under `MJ-0701/solon-product`
     - Codex CLI:    `~/.codex/skills/sfs/SKILL.md` (auto-discovered)
   Hook is idempotent on `sfs upgrade`; failure of any single CLI surface
   emits a warning with a one-shot recovery command and does NOT abort the

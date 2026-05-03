@@ -10,7 +10,7 @@ param(
   [string]$A1First   = $env:SFS_DISCOVERY_A1_FIRST
 )
 
-if (-not $SolonRepo) { $SolonRepo = "MJ-0701/solon" }
+if (-not $SolonRepo) { $SolonRepo = "MJ-0701/solon-product" }
 if (-not $A1First)   { $A1First   = "1" }
 
 $HomeDir = $env:USERPROFILE
@@ -124,7 +124,7 @@ function Install-GeminiDiscovery {
 
   Write-Info "Gemini CLI detected"
   $list = (& gemini extensions list 2>$null | Out-String)
-  if ($list -match "solon|MJ-0701/solon") {
+  if ($list -match "solon|MJ-0701/solon-product") {
     Write-Ok "Gemini CLI: solon extension already installed — skip"
     return
   }

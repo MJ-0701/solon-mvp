@@ -10,7 +10,7 @@
 set -u
 
 HOME_DIR="${HOME:-$USERPROFILE}"
-SOLON_REPO="${SOLON_REPO:-MJ-0701/solon}"
+SOLON_REPO="${SOLON_REPO:-MJ-0701/solon-product}"
 
 if [ -t 1 ]; then
   C_GREEN=$'\033[32m'; C_YELLOW=$'\033[33m'; C_RED=$'\033[31m'
@@ -81,7 +81,7 @@ fi
 if command -v gemini >/dev/null 2>&1; then
   GM_VER="$(gemini --version 2>/dev/null | head -1 || echo unknown)"
   info "Gemini CLI detected: $GM_VER"
-  if gemini extensions list 2>/dev/null | grep -qiE "(^|/)solon\b|MJ-0701/solon"; then
+  if gemini extensions list 2>/dev/null | grep -qiE "(^|/)solon\b|MJ-0701/solon-product"; then
     ok "Gemini CLI: solon extension installed"
   else
     warn "Gemini CLI: solon extension NOT installed"

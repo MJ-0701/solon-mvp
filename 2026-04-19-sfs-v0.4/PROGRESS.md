@@ -2,7 +2,7 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-03T13:00:00+09:00
+last_overwrite: 2026-05-03T13:30:00+09:00
 session: "claude-cowork:determined-focused-galileo — §4.A research-first phase: bkit prior art clone + per-CLI feasibility + research report → §4.A.5 user decision gate"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
@@ -14,12 +14,17 @@ current_wu_path: null
 current_wu_owner:
   session_codename: determined-focused-galileo
   claimed_at: 2026-05-03T10:54:18+09:00
-  last_heartbeat: 2026-05-03T13:00:00+09:00
+  last_heartbeat: 2026-05-03T13:30:00+09:00
   ttl_minutes: 30
 
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
 scheduled_task_log:
+  - ts: 2026-05-03T13:30:00+09:00
+    codename: determined-focused-galileo
+    check_exit: 0
+    action: "Phase 8 first probe found dev/stable mismatch (MJ-0701/solon = dev, MJ-0701/solon-product = stable). Phase 8a amend retargets marketplace skeleton from 2026-04-19-sfs-v0.4/external-repos/solon/ to solon-mvp-dist/ root + retargets SOLON_REPO defaults to solon-product across hooks/doctor/docs + extends cut-release.sh ALLOWLIST (scripts, tests, .claude-plugin, plugins, gemini-extension.json, commands — 6 entries previously absent). User to push amend + run cut-release.sh --apply 0.5.96-product, then re-probe Phase 8."
+    ahead_delta: "+1"
   - ts: 2026-05-03T11:30:00+09:00
     codename: determined-focused-galileo
     check_exit: 0
@@ -317,32 +322,61 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 ## ② In-Progress
 
 - **0.5.96-product slash-command zero-file discovery hotfix** (HANDOFF §4.A) —
-  Phases 0-7 + 9 + 10a complete on `hotfix/sfs-slash-command-discovery`
-  branch (8 commits, +1100 LOC). Sandbox cli-discovery tests pass 4/4
-  locally. Awaiting user (afk haircut) to:
-    - Phase 8: A-1 vs A-2 probe on user machine (claude plugin marketplace
-      add subcommand stability + ~/.claude/settings.json user-level
-      auto-pickup) → finalize hook branch logic in install-cli-discovery.sh
-    - Phase 11: cut-release.sh apply + Homebrew + Scoop tap push (sandbox
-      proxy blocks GitHub egress; release flow needs user-side push)
-    - Phase 12: D6 (a) end-to-end Windows machine verify
-  PUSH PENDING: branch + 8 commits sit local-only on user macOS via FUSE
-  sync; sandbox cannot push (cowork-egress-blocked). User pushes once at
-  end of work (per user instruction "맨 마지막에 한번만").
+  Phases 0-10a complete + Phase 8a (retarget) in flight on
+  `hotfix/sfs-slash-command-discovery` branch (10 commits pushed,
+  amend pending). Phase 8 first probe revealed:
+    - `MJ-0701/solon` = dev repo (this agent_architect)
+    - `MJ-0701/solon-product` = stable release repo (~/tmp/solon-product
+      clone, brew/scoop tap target)
+    - `~/tmp/homebrew-solon-product`, `~/tmp/scoop-solon-product` = tap channels
+  D3 user pick "solon" was meant as the *repo cluster identity*; the
+  marketplace plugin must live in stable (solon-product), not dev (solon).
+  Phase 8a amend retargets:
+    - 6 skeleton files moved from `2026-04-19-sfs-v0.4/external-repos/solon/`
+      to `solon-mvp-dist/` root (cut-release sync target)
+    - install-cli-discovery.{sh,ps1} + sfs-doctor.sh: SOLON_REPO default
+      `MJ-0701/solon` → `MJ-0701/solon-product`
+    - CHANGELOG/GUIDE/plugin README: marketplace add cmd + gemini install URL
+    - cut-release.sh ALLOWLIST extended with 6 entries (scripts, tests,
+      .claude-plugin, plugins, gemini-extension.json, commands) — without
+      this extension, none of the new dist files would sync to stable.
+  Awaiting user (afk):
+    - Push the amend commit
+    - Phase 11: `cut-release.sh --apply --version 0.5.96-product`
+      (sync to stable + tap update)
+    - Phase 8 retry: `claude plugin marketplace add MJ-0701/solon-product`
+      on user machine after cut-release lands marketplace.json in stable
+      main branch (this is when verify becomes possible)
+    - Phase 12: Windows end-to-end
 
 ## ③ Next
 
-- Phase 8 (user-machine probe) — see HANDOFF §4.A + research report §4.A
-  for A-1/A-2 verification commands. Outcome dictates
-  install-cli-discovery.sh branch logic amend.
-- Phase 10b — VERSION bump 0.5.95→0.5.96 + CHANGELOG wording finalize per
-  A-1/A-2 outcome + remove the pre-staged note.
-- Phase 11 — `bash 2026-04-19-sfs-v0.4/scripts/cut-release.sh --apply
-  --version 0.5.96-product` (user-side; sandbox push-blocked).
+- User: `git push origin hotfix/sfs-slash-command-discovery` for Phase 8a
+  amend commit.
+- Phase 11 (user). Stable sync target = `/Users/mj/tmp/solon-product`
+  (NOT `~/workspace/solon-mvp` — that path is stale at v0.5.68).
+  cut-release.sh default still points at the stale path, so
+  `SOLON_STABLE_REPO` env override is REQUIRED on every release until the
+  default is fixed:
+    cd /Users/mj/agent_architect/2026-04-19-sfs-v0.4
+    SOLON_STABLE_REPO=/Users/mj/tmp/solon-product \
+      bash scripts/cut-release.sh --apply --version 0.5.96-product
+  Then verify (same env override):
+    SOLON_STABLE_REPO=/Users/mj/tmp/solon-product \
+      bash scripts/verify-product-release.sh --version 0.5.96-product
+  Tap clones are at `/Users/mj/tmp/{homebrew,scoop}-solon-product` and
+  `/opt/homebrew/Library/Taps/mj-0701/homebrew-solon-product` (live).
+- Phase 8 retry (user, after Phase 11): `claude plugin marketplace add
+  MJ-0701/solon-product` then `claude plugin install solon@solon` on user
+  machine. Outcome (success / A-1 unstable / settings.json auto-pickup
+  pattern) determines whether install-cli-discovery hook needs further
+  branch-logic amend (Phase 10b candidate).
+- Phase 10b (conditional) — VERSION bump 0.5.95 → 0.5.96-product +
+  CHANGELOG wording finalize per Phase 8 retry outcome + remove the
+  pre-staged note paragraph.
 - Phase 12 — Windows machine end-to-end + GitHub Actions
-  `sfs-cli-discovery.yml` windows-end-to-end-scoop CI green.
-- Phase 13 — Final handoff + P-XX-multi-cli-plugin-umbrella learning log
-  + mutex release.
+  `sfs-cli-discovery.yml` `windows-end-to-end-scoop` CI green.
+- Phase 13 — Final handoff close + mutex release (`current_wu_owner: null`).
 
 ## ④ Artifacts
 

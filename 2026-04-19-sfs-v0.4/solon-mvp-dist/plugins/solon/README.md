@@ -8,8 +8,8 @@ Three install mechanisms, one source of truth:
 
 | CLI | Mechanism | Install command |
 |---|---|---|
-| Claude Code | Plugin marketplace (`.claude-plugin/marketplace.json` + `plugins/solon/`) | `/plugin marketplace add MJ-0701/solon` then `/plugin install solon` |
-| Gemini CLI | Extension (`gemini-extension.json` + `commands/sfs.toml`) | `gemini extensions install --consent --auto-update https://github.com/MJ-0701/solon.git` |
+| Claude Code | Plugin marketplace (`.claude-plugin/marketplace.json` + `plugins/solon/`) | `/plugin marketplace add MJ-0701/solon-product` then `/plugin install solon` |
+| Gemini CLI | Extension (`gemini-extension.json` + `commands/sfs.toml`) | `gemini extensions install --consent --auto-update https://github.com/MJ-0701/solon-product.git` |
 | Codex CLI | User-global skill at `~/.codex/skills/sfs/SKILL.md` (auto-discovered) | Bundled with `sfs` Homebrew/Scoop install — no separate command needed |
 
 ## Why three at once

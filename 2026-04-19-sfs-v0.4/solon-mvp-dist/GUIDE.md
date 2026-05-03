@@ -400,10 +400,10 @@ sfs doctor   # ✅/⚠️ 줄별 상태 확인. 옆에 출력되는 한 줄 reco
 
 ```bash
 # Claude Code 측 등록을 다시:
-claude plugin marketplace add MJ-0701/solon
+claude plugin marketplace add MJ-0701/solon-product
 
 # Gemini CLI 측 다시:
-gemini extensions install --consent https://github.com/MJ-0701/solon.git
+gemini extensions install --consent https://github.com/MJ-0701/solon-product.git
 
 # Codex CLI 측 다시:
 sfs upgrade   # 또는 brew reinstall sfs / scoop update sfs

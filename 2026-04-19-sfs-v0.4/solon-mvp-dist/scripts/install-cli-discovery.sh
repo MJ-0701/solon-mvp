@@ -3,7 +3,7 @@
 #
 # Purpose: After `sfs` binary is on PATH (Homebrew/Scoop installed),
 #   register the three CLI discovery surfaces:
-#     1. Claude Code:  /plugin marketplace add MJ-0701/solon  (A-1)
+#     1. Claude Code:  /plugin marketplace add MJ-0701/solon-product  (A-1)
 #                      OR  filesystem-direct deploy + settings.json edit  (A-2 fallback)
 #     2. Gemini CLI:   gemini extensions install --consent --auto-update <url>
 #     3. Codex CLI:    cp <bundle>/codex-skill/SKILL.md  ~/.codex/skills/sfs/SKILL.md  (C-1)
@@ -18,7 +18,7 @@ set -u  # do not -e — graceful degrade per D7
 # ---------------------------------------------------------------------------
 # Defaults / config
 # ---------------------------------------------------------------------------
-SOLON_REPO="${SOLON_REPO:-MJ-0701/solon}"
+SOLON_REPO="${SOLON_REPO:-MJ-0701/solon-product}"
 SOLON_PRODUCT_REPO="${SOLON_PRODUCT_REPO:-MJ-0701/solon-product}"
 SOURCE_DIR="${SFS_DISCOVERY_SOURCE_DIR:-}"  # caller may inject; we autodetect otherwise
 HOME_DIR="${HOME:-$USERPROFILE}"
@@ -92,9 +92,9 @@ install_claude_discovery() {
   mkdir -p "$PLUGIN_DEST/.claude-plugin" "$PLUGIN_DEST/commands"
 
   if [ -n "$SOURCE_DIR" ] && [ -d "$SOURCE_DIR/templates" ]; then
-    # Bundle does not yet ship the marketplace repo files in dist-side; user
-    # must clone MJ-0701/solon during this step. We attempt a shallow clone
-    # to a temp dir and then copy the plugin contents into the cellar.
+    # 0.5.96-product onward: stable repo (MJ-0701/solon-product) hosts both
+    # dist tarball + marketplace skeleton at root. We shallow-clone the
+    # repo to a temp dir and copy plugins/solon/ into the cellar.
     if command -v git >/dev/null 2>&1; then
       local TMPCLONE
       TMPCLONE="$(mktemp -d 2>/dev/null || mktemp -d -t solon)"
@@ -103,7 +103,7 @@ install_claude_discovery() {
           cp -R "$TMPCLONE/plugins/solon/." "$PLUGIN_DEST/"
           ok "Claude Code: plugin filesystem-direct deployed at ~/.claude/plugins/solon (A-2)"
         else
-          warn "Claude Code: cloned MJ-0701/solon but no plugins/solon/ — skip A-2"
+          warn "Claude Code: cloned $SOLON_REPO but no plugins/solon/ at root — skip A-2"
         fi
         rm -rf "$TMPCLONE"
       else
@@ -150,7 +150,7 @@ install_gemini_discovery() {
   # Idempotent: list current extensions, install only if not present
   local LIST
   LIST="$(gemini extensions list 2>/dev/null || true)"
-  if echo "$LIST" | grep -qiE "(^|/)solon\b|solon-gemini|MJ-0701/solon"; then
+  if echo "$LIST" | grep -qiE "(^|/)solon\b|MJ-0701/solon-product"; then
     ok "Gemini CLI: solon extension already installed — skip"
     return 0
   fi
