@@ -121,6 +121,55 @@ state and continue without missing context. This works because:
 3. Plugin-mechanism files are not part of the work artifact surface — they
    only provide command discovery for each CLI.
 
+#### 4.A.1.5 Windows first-class support — strategic differentiator (HARD)
+
+**bkit pdca is effectively Mac-only**: its Windows support is workaround-only
+with no official support (user-confirmed 2026-05-03). This is solon/sfs's
+strategic differentiation point.
+
+**HARD constraints**:
+
+- Every `§4.A.3` step must land Scoop / PowerShell equivalents at the same
+  time as macOS Homebrew / bash. Windows is **not** a "phase 2" or "best
+  effort" — it lands together with macOS in 0.5.96-product.
+- The bkit prior art repos (`bkit-claude-code`, `bkit-gemini`) may not have
+  Windows install logic. Solon's mirror repos (`solon-claude-code`,
+  `solon-gemini`) MUST add Windows install instructions and verified
+  command paths.
+- Test on actual Windows (or PowerShell-on-Mac via pwsh, WSL, or the user's
+  Windows machine if available) before release. Do NOT ship 0.5.96 with
+  unverified Windows path.
+- Documentation (README, GUIDE, BEGINNER-GUIDE) must show macOS and Windows
+  paths side-by-side, not Windows-as-fallback. Recent 0.5.94/0.5.95 work
+  already moved Windows docs to lead-with-Scoop — keep that direction.
+
+**Verification questions to answer in 0.5.96 release**:
+
+1. Does `/plugin marketplace add MJ-0701/solon-claude-code` work in Claude
+   Code on Windows (PowerShell/cmd terminal)? If Claude Code's plugin
+   marketplace is bash-host-dependent, document the actual Windows command.
+2. Does `gemini extensions install <git-url>` work in Gemini CLI on Windows
+   without workaround? If git CLI is required, ensure `winget install
+   --id Git.Git` (already in our docs) covers the dependency.
+3. Does the Scoop manifest's `installer.script` PowerShell hook reliably
+   call the above two install commands on Windows during `scoop install
+   sfs`? Idempotent on `scoop update sfs`?
+4. After `scoop install sfs` on a Windows test machine, does `claude` →
+   `/sfs` autocomplete work? Does `gemini` → `sfs` work? Does PowerShell
+   `$sfs status` (Codex) work?
+
+**Marketing/positioning copy** (record so docs writers can use this later,
+not for v0.5.96 itself):
+
+> Solon Product is the only AI-native solo founder system that ships
+> first-class Windows support across Claude Code, Codex CLI, and Gemini CLI.
+> No PowerShell workarounds, no WSL detours — `scoop install sfs` and
+> `/sfs` works in any project.
+
+This positioning is contingent on the technical claim being true at release.
+If any verification question above fails for Windows in 0.5.96, the
+positioning copy is held back until a follow-up release fixes the gap.
+
 #### 4.A.1.2 Concrete reference: bkit pdca install commands (user-provided 2026-05-03)
 
 This is the EXACT pattern that sfs/solon must replicate. Read these repos

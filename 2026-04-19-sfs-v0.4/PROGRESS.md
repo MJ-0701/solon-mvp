@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-03T10:34:12+09:00
-session: "claude-cowork: handoff re-restructure — slash discovery is research-first; plugin-per-CLI under brew-unified-umbrella"
+last_overwrite: 2026-05-03T10:50:35+09:00
+session: "claude-cowork: handoff finalized — bkit prior art locked + project-vs-plugin split + Windows first-class differentiator"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: null
@@ -259,13 +259,15 @@ resume_hint:
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
-    - "Hotfix §4.A: research-first — write report at tmp/slash-command-discovery-research-2026-05-03.md and STOP for user decision before implementing. Do NOT assume answer. The 'install user-global stub' framing was withdrawn — that was the wrong assumption."
+    - "Hotfix §4.A: spec is locked by user-provided bkit prior art (popup-studio-ai/bkit-claude-code marketplace + popup-studio-ai/bkit-gemini extension). Mirror those for solon-claude-code + solon-gemini. Codex CLI: shell-out works without plugin; SKILL.md location is user decision (§4.A.1.3 C-1/2/3/4)."
     - "Hotfix §4.A: brew/scoop is the unified umbrella — per-CLI plugin install runs inside the hook, NOT as separate user steps. Plugin-internal locations OK, user-config-file locations NOT OK."
     - "Hotfix §4.A: separate from `sfs agent install all` persona/skill domain. Do NOT conflate."
+    - "Hotfix §4.A: Windows is FIRST-CLASS, not phase-2. bkit pdca's Windows support is workaround-only — solon's official Windows support is the strategic differentiation. Scoop + PowerShell paths land together with macOS Homebrew + bash in 0.5.96-product. Verify §4.A.1.5's four Windows questions before release."
+    - "Hotfix §4.A: project-local stays project-local (work artifacts: SFS.md, CLAUDE.md, AGENTS.md, GEMINI.md, .sfs-local/, sprint workbench, decisions, events, docs/<gate>/). Plugin-mechanism files (.claude/commands/sfs.md, .gemini/commands/sfs.toml, .agents/skills/sfs/SKILL.md) move to plugin/extension areas. Multi-CLI continuity (Claude ↔ Codex ↔ Gemini on same project via git) is guaranteed by project-local artifacts."
     - "MD split (§4.B): never start until §4.A 0.5.96-product is verified 7/7."
     - "MD split (§4.B): pre-flight reference scan required + frontmatter 11 fields required + parent link stub required + atomic commit + resume-session-check exit 0 verification."
     - "MD split (§4.B): never touch DO NOT split list (CHANGELOG, templates/**, archives/**, root redirect stubs, .claude/agents/*, .agents/skills/*, .gemini/commands/*.toml, .sfs-local/**, recent-trim solon-mvp-dist/GUIDE.md/BEGINNER-GUIDE.md/README.md)."
-  last_written: 2026-05-03T01:34:12Z
+  last_written: 2026-05-03T01:50:35Z
 ---
 
 # PROGRESS — compact
