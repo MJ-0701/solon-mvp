@@ -2,23 +2,30 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-03T23:15:00+09:00
-session: "claude-cowork:wizardly-quirky-gauss — §4.E G1 review Stage 1 SHIPPED + user scope lock '코덱스+제미나이 리뷰까지 받고 리뷰 종료 예정' = 본 세션 = G1 review 전체 (Stage 1 + Stage 2 codex + Stage 3 gemini + user CEO ruling final lock). G2 implement (6 신규 script + bin/sfs + VERSION 0.6.0 + tests + CI + brew/scoop) ~ G6 ~ G7 ~ release cut = next sessions. CLAUDE.md §1.20 sequential + §1.28 Cowork git 금지 strict."
+last_overwrite: 2026-05-04T01:30:00+09:00
+session: "claude-cowork:wizardly-quirky-gauss — ✅ §4.E G1 review FINAL LOCK 2026-05-04T01:30+09:00 KST. 5 round cycle (Stage 1 AI-PROPOSED + Round 1~4 PARTIAL cross-instance + Round 5 quick verify PASS) + 44 CTO fix items + 10+ CEO ruling locks. plan.md status=ready-for-implement. session closing + mutex release. G2 implement~G6~G7~release cut = next sessions per user chain plan."
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
-current_wu: "§4.E 0.6.0-product implement sprint G1 review Stage 1 진입 (claude same-instance AI-PROPOSED, self-val flag, P-17 패턴 Stage 2/3 prompt §6 제공 예정)"
-current_wu_path: "2026-04-19-sfs-v0.4/sprints/0-6-0-product-implement/review-g1.md"   # 신설 중 (Stage 1)
+current_wu: "§4.E 0.6.0-product implement sprint G1 review ✅ FINAL LOCK PASS 2026-05-04T01:30+09:00 KST. plan.md status=ready-for-implement. G2 implement entry = next session user 명시 명령."
+current_wu_path: "2026-04-19-sfs-v0.4/sprints/0-6-0-product-implement/plan.md"   # status=ready-for-implement, G2 entry 대기
 
 # ── SESSION MUTEX (CLAUDE.md §1.12) ───────────────────────────────
 # Keep scalar form for tool compatibility (.sfs-local/scripts/sfs-loop.sh stop/status, auto-resume contract).
 # Takeover 2026-05-03 KST: prev owner affectionate-trusting-thompson 가 자연 종료 (released_at=2026-05-03T22:50+09:00). 본 세션 wizardly-quirky-gauss 가 자유 claim (null → self).
-current_wu_owner:
-  session_codename: wizardly-quirky-gauss
-  claimed_at: 2026-05-03T23:10:00+09:00
-  last_heartbeat: 2026-05-03T23:15:00+09:00
-  ttl_minutes: 15
-  scope: "G1 review Stage 1 + Stage 2 (codex) + Stage 3 (gemini) + user CEO ruling final lock — user 명시 'codex랑 gemini 리뷰까지 받고 리뷰 종료 예정'. G2~release cut = next sessions."
+current_wu_owner: null   # session 자연 종료 (G1 review FINAL LOCK PASS 2026-05-04T01:30+09:00 KST, user chain plan G1 closure 달성). claimed_at=2026-05-03T23:10+09:00, released_at=2026-05-04T01:30+09:00. 다음 세션 자유 claim 가능 (G2 implement entry).
 last_session_owner_history:
+  - session_codename: wizardly-quirky-gauss
+    claimed_at: 2026-05-03T23:10:00+09:00
+    released_at: 2026-05-04T01:30:00+09:00
+    last_heartbeat: 2026-05-04T01:30:00+09:00
+    work_done:
+      - "G1 review Stage 1 (claude same-instance AI-PROPOSED PASS-with-flags + 8 flags F1~F8)"
+      - "G1 review Round 1 (codex PARTIAL + gemini PARTIAL Veto) + 16-item fix patch"
+      - "G1 review Round 2 (codex PARTIAL + gemini PASS) + 12-item fix patch (Q1 sfs 브랜드 + Q2 commit safety CEO ruling)"
+      - "G1 review Round 3 (codex PARTIAL + gemini PARTIAL Veto re-asserted) + 11-item fix patch (S3R3-N1 sentinel isolation + S3R3-N2 commit idempotence + S3R3-N3 snapshot ext filter + AC10/11/12/13 promotion + R-I 신설)"
+      - "G1 review Round 4 (codex PARTIAL + gemini PASS) + 5-item fix patch (user 직접 판단 — Q1 Sprint Contract AC scope + Q2 R-D log masking α + Q4 frontmatter + Q5 manifest 9 fields + Q6 anti-AC10 skipped[] + Q3 cosmetic skip + meta-rule)"
+      - "G1 review Round 5 quick verify (codex PASS + gemini PASS) — ✅ G1 PASS LOCKED FINAL 2026-05-04T01:30+09:00 KST"
+      - "44 CTO fix items 통합 + 10+ CEO ruling locks + P-17 cross-instance verify pattern canonical evidence"
   - session_codename: affectionate-trusting-thompson
     claimed_at: 2026-05-03T21:55:00+09:00
     released_at: 2026-05-03T22:50:00+09:00
@@ -32,6 +39,81 @@ last_session_owner_history:
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
 scheduled_task_log:
+  - ts: 2026-05-04T01:30:00+09:00
+    codename: wizardly-quirky-gauss
+    check_exit: 0
+    action: "✅ §4.E G1 review FINAL LOCK 2026-05-04T01:30+09:00 KST. Round 5 Stage 3 (gemini parallel third-eye quick verify) PASS — 'G1 PASS LOCKED ... fully validated and ready for execution'. Round 4 fix 5 items regression-free, prior Stage 3 PASS verdict stands firm. Round 5 둘 다 PASS (codex 01:25 + gemini 01:30). 5 round cycle 완료: Stage 1 AI-PROPOSED PASS-with-flags → Round 1 PARTIAL (16 fix) → Round 2 codex PARTIAL + gemini PASS (12 fix) → Round 3 PARTIAL Veto (11 fix) → Round 4 PARTIAL + PASS (5 fix user 직접) → Round 5 quick PASS+PASS. 44 CTO fix items 통합 + 10+ CEO ruling locks (S2-N3 α / Q1 sfs 브랜드 / Q2 commit safety / Q9 commit-existing-dirty 제거 / Q2 log masking α / Q1 AC scope expansion). plan.md status=ready-for-implement 전환 + frontmatter ceo_ruling_lock 5 lock. review-g1.md §7.10 G1 Review FINAL LOCK + §7.10.1 Round 1~5 Cycle Summary + §7.10.2 P-17 canonical evidence + §7.10.3 final verdict 작성. 본 세션 (claude-cowork:wizardly-quirky-gauss) closure: chain plan G1 review 종료 달성 (user 명시 'codex랑 gemini 리뷰까지 받고 리뷰 종료'). mutex release current_wu_owner=null. last_session_owner_history wizardly-quirky-gauss work_done 7 items 기록. G2 implement~G6~G7~release cut = next sessions per user chain plan."
+    ahead_delta: "+0"
+  - ts: 2026-05-04T01:25:00+09:00
+    codename: wizardly-quirky-gauss
+    check_exit: 0
+    action: "§4.E G1 review Round 5 Stage 2 (codex parallel quick verify) verdict 회수: **PASS**. Round 4 fix 5 items 모두 PASS — Q1 AC scope AC1~AC13 (plan §4/§5/AC8.3/recap 정합) / Q2 log masking scope (R-D D-4(iv)+AC4.4.4+AC4.6 정합, env var name OK, sentinel value mask) / Q4 review-g1 executor metadata (Round 4 + Round 5 pending) / Q5 manifest 9 fields (R-H.H-2 ↔ AC10.2 정합 + files[]/skipped[]/filter bool detail) / Q6 anti-AC10 skipped[] exclusion (R-H.H-4 + AC10 anti-AC + anti-AC summary 동기). Q3 cosmetic skip 정합. codex 자체 명시 'G1 can be treated as plan-review PASS from Stage 2 quick verify, with actual AC1~AC13 implementation evaluation deferred to G6'. review-g1.md §7.9.1 verbatim 기록 + frontmatter verdict_round_2_codex Round 5 PASS 갱신. Stage 3 gemini Round 5 quick verify 대기 — 회수 후 둘 다 PASS 시 final lock + plan.md status: ready-for-review-round-5 → ready-for-implement + 본 세션 closed."
+    ahead_delta: "+0"
+  - ts: 2026-05-04T01:15:00+09:00
+    codename: wizardly-quirky-gauss
+    check_exit: 0
+    action: "§4.E G1 review Round 4 CTO fix patch 5 items 적용 완료 — user 직접 항목별 판단 (codex blanket 거부, item-level review). Q1 (S2R4-N1) Sprint Contract §5 + §4 G1 self-check + AC8.3 update AC1~AC9 → AC1~AC13 (~66 sub-check) / Q2 (S2R4-N2) R-D D-4(iv) wording α — value-only mask, env var name CODEX_API_KEY/GEMINI_API_KEY 노출 OK (public convention, .github/workflows/*.yml 이미 visible). user 자체 'GEMINI_API_KEY는 당연히 노출 OK' 명시 / Q3 (S2R4-N3 cosmetic) skip + meta-rule (cosmetic 발본 제외 향후 prompt §6.9/§6.10 에 명시) / Q4 (S2R4-N4) review-g1 frontmatter executor_round_2/3 Round 4 verdict 갱신 / Q5 (S2R4-N5) R-H.H-2 manifest schema 9 fields enum (snapshot_id+created_at+source_repo_root+source_sha+files+total_count+total_bytes+skipped+extension_filter_applied) AC10.2 정합 / Q6 (S2R4-N6) anti-AC10 skipped[] allowed non-loss exclusion 명시 (R-H.H-4 + plan §2 anti-AC summary 동기). META-RULE 신규 (P-18 후보): AC scope 변경 시 Sprint Contract pass/fail criterion + §4 self-check 자동 update default rule (user 명시 '다른 세션 + 다른 작업에서도 당연히 추가돼야'). G7 retro 시점 learning pattern 으로 기록. plan.md 364L → 378L. plan.md frontmatter status=ready-for-review-round-5 + round_4_fix_patch_applied + Q9_S2R2_N3_commit_existing_dirty 제거 lock + Q2_S2R4_N2_log_masking_scope α lock. review-g1.md §7.8.5 fix applied trace + §6.9/§6.10 Round 5 quick verify prompts (cosmetic exclusion meta-rule 포함) + frontmatter metadata refresh. Task #15 closed, Task #16 in_progress. 다음 1 step = user host Round 5 parallel quick verify."
+    ahead_delta: "+0"
+  - ts: 2026-05-04T01:05:00+09:00
+    codename: wizardly-quirky-gauss
+    check_exit: 0
+    action: "§4.E G1 review Round 4 Stage 3 (gemini parallel third-eye) verdict 회수: **PASS (G1 PASS LOCKED 2026-05-04T00:50 KST self-stamp)**. Round 3 fix patch all 11 items confirmed: S3R3-N1 sentinel isolation PASS / S3R3-N2 commit idempotence PASS / S3R3-N3 snapshot ext filter PASS / advisory promotion AC11/12/13 PASS / supply-chain+security audit PASS. 3 advisory G2-time (S3R4-N1 nested .git safety / S3R4-N2 Homebrew formula alias / S3R4-N3 GHA Windows shell bash explicit) — plan-stage revisions 불필요. Stage 3 self-명시 'Proceed to G2 Implement. (G1 PASS LOCKED)'. **Round 4 divergence**: Stage 3 PASS vs Stage 2 PARTIAL (Round 2 동일 패턴). Stage 2 6 findings 영향도 분석: HIGH 2 (S2R4-N1 Sprint Contract AC10-13 skip risk / S2R4-N2 R-D ↔ AC4.4.4 wording conflict — review contract correctness blocker) / MEDIUM 2 (manifest field / skipped[]) / LOW 2 (cosmetic trace + frontmatter). 3 path 분기: (a) Round 5 6 fixes 적용 / (b) Stage 3 PASS 채택 + Stage 2 carry / (c) Hybrid HIGH 2 만 즉시 fix + MEDIUM/LOW 4 G2 carry-forward (권장, Option β + safety). user CEO ruling 대기. review-g1.md §7.8.2 verbatim + §7.8.3 post-hoc analysis + §7.8.4 final lock pending. Task #14 closed."
+    ahead_delta: "+0"
+  - ts: 2026-05-04T01:00:00+09:00
+    codename: wizardly-quirky-gauss
+    check_exit: 0
+    action: "§4.E G1 review Round 4 Stage 2 (codex parallel) verdict 회수: **PARTIAL** ('hard design fixes landed, but new AC10~AC13 layer not fully connected to evaluator contract, two live wording conflicts'). Round 3 fix verify 8 PASS / 3 PARTIAL (S3R3-N1 R-D log masking wording vs AC4.4.4/AC4.6 value-based 충돌 / AC10-13 promotion 不완전 — Sprint Contract + §4 G1 self-check still AC1~AC9 only / §4 status transition Round 3 → Round 4 누락). 6 신규 S2R4-N1~N6: Sprint Contract AC scope stale (AC10~13 contract skip risk) / R-D log masking wording conflict / 410L claim vs 364L actual / review-g1 frontmatter executor metadata stale / R-H.H-2 manifest schema fewer fields than AC10.2 9 required / anti-AC10 skipped[] handling 미명시. 6 CTO action items. Stage 3 gemini Round 4 대기 — Stage 2 + Stage 3 둘 다 PASS 시 final lock + 본 세션 closed, PARTIAL 잔존 시 Round 5 cycle (spec sprint Round 1~4 precedent 초과)."
+    ahead_delta: "+0"
+  - ts: 2026-05-04T00:40:00+09:00
+    codename: wizardly-quirky-gauss
+    check_exit: 0
+    action: "§4.E G1 review Round 3 CTO fix patch 11 items 적용 완료. user 'a' 선택 + Q9 default = --commit-existing-dirty 제거. Tier 1 critical (4): S3R3-N1 sentinel test isolation (AC4.4.4 + AC4.6 별 isolated step tests/test-sfs-log-masking.sh, real-auth verify 와 분리 — paradox 해소) / S3R3-N2 commit idempotence guard (AC5.4.1 신규 sub-bullet, 재실행 시 clean working tree → exit 0 no empty commit) / S3R3-N3 snapshot extension filter (R-H.H-2 default 11 SFS artifact ext + skipped[] 기록 + --snapshot-include-all opt-in) / AC10 R-H promotion + AC11/12/13 promotion (S3R2-N1+N2+N3 consensus → AC11 Release Sequence + AC12 Cross-Platform Hash Parity + AC13 Workflow Permissions Hardening + 신규 R-I Release Plumbing Safety §1). Tier 2 cleanup (7): plan §5 anti-AC8 잔존 → anti-AC10 / footer round-2 → round-4 / §8 Next Steps Round 4 parallel flow / sentinel pattern [0-9a-f]{16} regex + openssl rand -hex 8 / --commit-existing-dirty 제거 + 단일 --commit 통합 / review-g1.md §6.3-6 prompts 'Read these 4 files' → '3 files' replace_all / R-H.H-1 JSON null semantics (delete/skip null, archive snapshot sha256, migrate dest sha256) + §7.6.3 trace 470L → 340L 정정. plan.md ~340L → ~410L (AC10/11/12/13 + R-I 추가). AC sub-check 58 → ~75 + 4 anti-AC. plan.md frontmatter status=ready-for-review-round-4 + round_3_fix_patch_applied. review-g1.md §7.7.4 fix applied trace + §6.7/§6.8 Round 4 prompts + §8 Next Steps Round 4 갱신 + frontmatter metadata refresh. Task #13 closed, Task #14 in_progress. 다음 1 step = user host Round 4 parallel re-review (codex + gemini)."
+    ahead_delta: "+0"
+  - ts: 2026-05-04T00:30:00+09:00
+    codename: wizardly-quirky-gauss
+    check_exit: 0
+    action: "§4.E G1 review Round 3 Stage 2 (codex parallel) verdict 회수: **PARTIAL** ('quick CTO cleanup, but not yet a clean G2 handoff'). Round 2 fix verify 7 PASS / 4 PARTIAL (S2-N5 plan §5 anti-AC8 잔존 / S3-N2 sentinel pattern 16-hex 정확성 / S2R2-N3 --commit-existing-dirty 미정의 / S2R2-N6 §8 Next Steps + plan footer 잔존). 5 신규 S2R3-N1~N5 (footer drift / prompt 4 vs 3 file count / trace 470 vs 339L / Stage 3 advisory carry-forward / JSON null semantics). 6 CTO action items. Stage 2 + Stage 3 both PARTIAL → Round 4 cycle (spec sprint Round 1~4 precedent 정합). Consensus: S3R2-N1/N2/N3 advisory promotion to AC. Round 3 consolidated fix list 11 items (Tier 1 critical 4: S3R3-N1 sentinel test isolation / S3R3-N2 commit idempotence guard / S3R3-N3 snapshot extension filter / S3R2-N1+N2+N3 promotion to AC11+AC12+AC13. Tier 2 cleanup 7: anti-AC8 → anti-AC10 plan §5 / footer round-3 / §8 next steps / sentinel regex / --commit-existing-dirty / prompt 3 file / trace 470 → 340 + JSON null). review-g1.md §7.7.2 verbatim + §7.7.3 post-hoc analysis 작성. Task #12 closed. user 결정 대기: (a) Round 3 fix patch 11 items 적용 → Round 4 parallel re-review, (b) fix scope 축소, (c) 본 세션 종료."
+    ahead_delta: "+0"
+  - ts: 2026-05-04T00:25:00+09:00
+    codename: wizardly-quirky-gauss
+    check_exit: 0
+    action: "§4.E G1 review Round 3 Stage 3 (gemini parallel third-eye) verdict 회수: **PARTIAL (Veto re-asserted)**. Round 2 fixes 정합 통합 ✓. Round 2 advisory 3 items (S3R2-N1/N2/N3) stance 반전 — G2 carry-forward 아니라 formal AC sub-check 으로 promotion 필요 (CI/CD + cross-platform integrity critical). 3 신규 third-eye Round 3: S3R3-N1 ⚠️ Sentinel vs Real Auth Conflict (AC4.4.4 dummy sentinel inject 가 AC4.4 real-key cross-instance verify 와 logical paradox 401 fail — masking test isolated step 분리 필요) / S3R3-N2 Upgrade Commit Idempotence (AC5.4 --commit 재실행 시 clean working tree → exit 0 no empty commit guard 필요) / S3R3-N3 Snapshot Disk Exhaustion Risk (R-H.H-2 전수 snapshot 이 binary/deps 포함 시 disk exhaust — SFS artifact extensions filter .md/.yml/.jsonl 필요). 4 CTO Action Items: S3R3-N1 sentinel test redesign / S3R3-N2 idempotence guard / S3R3-N3 snapshot filter / Round 2 advisory 3 items AC promotion. review-g1.md §7.7.1 verbatim 기록 + frontmatter verdict_round_3_gemini Round 3 PARTIAL Veto 갱신. Stage 2 codex Round 3 대기."
+    ahead_delta: "+0"
+  - ts: 2026-05-04T00:10:00+09:00
+    codename: wizardly-quirky-gauss
+    check_exit: 0
+    action: "§4.E G1 review Round 2 CTO fix patch 12 items 적용 완료. user CEO ruling lock: Q1=α (sfs 브랜드 preserve, Formula/sfs.rb + bucket/sfs.json + command sfs) / Q2=α (forced migrate backup+prompt default + --commit opt-in) / Q3=a (Round 3 cycle). brainstorm.md §6.7 backstamp 추가 (Solon SFS v0.6.0 superseded by S2-N3=α + Q1=α). plan.md fix: solon.rb/json → sfs.rb/json 6 instance + brew audit --new-formula sfs / anti-AC8 → anti-AC10 일괄 rename (3 instance) + R-H.H-2 manifest schema enum (snapshot_id+source_repo_root+source_sha+files[]) / AC3.4 6 enumerated CLI questions Q-A~Q-F + smoke test-sfs-pass1-prompts.sh / AC4.4.4+AC4.6 sentinel pattern SFS_TEST_SENTINEL_dummy_codex/gemini_xxxxxxxx 16-hex random / AC5.4 forced migrate backup+prompt default + sfs upgrade --commit opt-in + dirty working tree detect exit non-zero / R-H.H-1 --print-matrix JSON 6 fields contract + action enum / AC2.6 local tests/test-bad-fixture.sh + workflow 동일 script call. plan.md ~440L → ~470L. plan.md frontmatter status=ready-for-review-round-3 + round_2_fix_patch_applied + ceo_ruling_lock Q1/Q2 추가. review-g1.md §7.6.2 verdict + §7.6.3 Round 2 fix applied trace + §6.5/§6.6 Round 3 parallel prompts (codex + gemini) + frontmatter metadata 갱신 (S2R2-N6). Task #11 closed, Task #12 in_progress. 다음 1 step = user host Round 3 parallel re-review."
+    ahead_delta: "+0"
+  - ts: 2026-05-04T00:00:00+09:00
+    codename: wizardly-quirky-gauss
+    check_exit: 0
+    action: "§4.E G1 review Round 2 Stage 2 (codex parallel) verdict 회수: **PARTIAL** (codex 자체 'run Round 3 cross-runtime review before G2'). Round 1 fix verification 11 PASS / 6 PARTIAL (S2-N3/N4/N5/N7 + S3-N1/N2) + 6 신규 발본 S2R2-N1~N6 (S2R2-N1 package identity regression sfs vs solon — current 0.5.96-product 가 sfs 브랜드인데 plan 이 solon.rb/json 작명 → 0.5.x consumer brew install sfs 실패 위험 / S2R2-N2 brainstorm §6.7 superseded marker / S2R2-N3 forced migrate commit safety — consumer repo dirty working tree 자동 commit data loss 위험, --commit opt-in 권장 / S2R2-N4 --print-matrix JSON contract 6 fields enum / S2R2-N5 local bad-fixture script + workflow 동일 호출 / S2R2-N6 review-g1.md metadata staleness). Stage 3 PASS (gemini, third-eye veto 해소) vs Stage 2 PARTIAL (codex, 12 fix items 권장) divergence — spec sprint Round 1~4 cycle precedent. user CEO ruling 필요: (a) Round 2 fix patch 12 items 적용 → Round 3 parallel re-review, (b) Stage 3 PASS 채택 + Stage 2 findings G2 carry-forward, (c) 본 세션 종료 + next session 결정."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T23:55:00+09:00
+    codename: wizardly-quirky-gauss
+    check_exit: 0
+    action: "§4.E G1 review Round 2 Stage 3 (gemini parallel third-eye) verdict 회수: **PASS** ('G1 PASS LOCKED' 자체 명시). third-eye veto 해소. Round 1 fix patch 16 items 모두 정확 통합 확인 — S3-N1 (AC7.4 brew audit + AC7.5 scoop schema) / S3-N2 (AC4.4.4 + AC4.6 log masking) / S3-N3 (AC2.9 + AC3.6 + R-H.H-5 atomic Layer 1 transactional) / F1 (AC1.2 ERE group-wrap) / F3 (R-E.E-4 + AC5.4 forced migrate default in-scope) / F4 (AC4.4.1~3 4-bullet) / F5 (AC2.6 mandatory + bad fixture) / F6 (AC6.6 validator+close mode 6-script preserve) / F7 (AC2.7 flock + AC2.8 idempotence binary) / S2-N3 α (AC7.2 sfs 0.6.0 preserve). 'plan density doubled 27 → 58 sub-checks, superior implementation headlights'. 3 advisory G2-implement-time items (plan-stage revisions 불필요): S3R2-N1 git tag sequencing race (release tool 가 git tag+push 후 brew audit) / S3R2-N2 cross-platform hash parity (Windows sfs.ps1 SHA256 = POSIX sha256sum, LF normalization) / S3R2-N3 workflow permissions hardening (.github/workflows/sfs-pr-check.yml 에 contents: read permissions block 필수). review-g1.md §7.6.1 verbatim 기록 + frontmatter verdict_round_3_gemini Round 2 PASS 갱신. Stage 2 codex Round 2 대기 — Stage 2 도 PASS 시 final lock + plan.md status=ready-for-implement 전환 + 본 세션 closed."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T23:50:00+09:00
+    codename: wizardly-quirky-gauss
+    check_exit: 0
+    action: "§4.E G1 review Round 1 CTO fix patch 16 items 적용 완료 (user 'a' 선택 + S2-N3 = α default 채택). brainstorm.md S2-N1 fix (0.6.0-product literal → 0.6.0 일괄 + L126 G1 option historical wording REJECTED marker restore). plan.md complete rewrite (~440L, 277 → 440, frontmatter round_1_fix_patch_applied + ceo_ruling_lock.S2_N3=α 추가, status=ready-for-review-round-2). 16 items 통합: F1 grep ERE group-wrap / F2 AC9 spec baseline commit 03f36de diff / F3 forced migrate default in-scope + config override out-of-scope / F4 AC4.4 4-bullet fallback / F5 AC2.6 CI mandatory + bad fixture validator fail / F6 sfs-sprint-yml-validator validate+close 두 mode (6-script preserve) / F7 race + idempotence + atomic 5-file commit / F8 AC3.2/3.5 deterministic printf + prompt order assert / S2-N1 brainstorm fix / S2-N2 AC8.1 reword (R7/R8 stale 제거) / S2-N3 α preserve sfs 0.6.0 / S2-N4 AC7.8 release discovery / S2-N5 R-H 신규 (migration source matrix + backup + rollback-from-snapshot + no-data-loss anti-AC8) / S2-N6 R-A.AC1.3 Windows wrapper bin/sfs.ps1+cmd + AC4.5 Scoop smoke / S2-N7 AC3.4 deterministic CLI prompt only / S3-N1 AC7.4 brew audit + AC7.5 scoop schema check / S3-N2 AC4.4.4 + AC4.6 log masking / S3-N3 AC2.9 + AC3.6 atomic Layer 1 movements + interrupted-midway recovery. AC sub-check 27 → 58 + 4 anti-AC. review-g1.md §7.4.4 fix applied trace + §6.3/§6.4 Round 2 parallel prompts (codex + gemini) 추가. Task #9 closed. 다음 1 step = user host 에서 Round 2 parallel re-review (codex + gemini 동시 invoke, §6.3/§6.4 prompt verbatim)."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T23:40:00+09:00
+    codename: wizardly-quirky-gauss
+    check_exit: 0
+    action: "§4.E G1 review Stage 2 (codex parallel) verdict 회수: **PARTIAL** + 8 F flag (F1~F8 모두 PARTIAL with concrete fix) + 7 신규 S2-N (S2-N1 brainstorm 0.6.0-product literal / S2-N2 plan AC8.1 stale / S2-N3 sfs version output string CEO call / S2-N4 release discovery / S2-N5 .sfs-local migration matrix + no-data-loss anti-AC / S2-N6 Windows parity bin/sfs.ps1+cmd / S2-N7 AC3.4 AI runtime contract gap). codex final: 'PARTIAL. The plan is close, but not ready for G2. ... rerun Stage 2/3 review.' Stage 2 + Stage 3 모두 PARTIAL 합의 → G1 plan NOT-READY-FOR-G2 → CTO fix patch 필수. review-g1.md §7.2 verbatim + §7.4 post-hoc consensus/divergence analysis + §7.4.3 Consolidated CTO Fix Patch List (16 items, Tier 1 8 / Tier 2 3 / Tier 3 5) 작성. Task #2 closed. 다음 1 step = user 결정: (a) §7.4.3 Tier 1+2+3 fix patch 적용 진행 (S2-N3 user CEO ruling 후) → Round 2 parallel re-review, (b) fix scope reduction (consensus 6 만 OR Tier 1 만), (c) 본 세션 종료 후 next session 에서 fix."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T23:30:00+09:00
+    codename: wizardly-quirky-gauss
+    check_exit: 0
+    action: "§4.E G1 review Stage 3 (gemini cross-runtime, parallel mode) verdict 회수: **PARTIAL (Independent Stage 3 Veto)**. 8 flag verdict — F1 PARTIAL (ERE grep escape fix) / F2 PASS / F3 PARTIAL (forced migrate default 명시) / F4 PARTIAL (Secrets fallback skip+warning AC4.4.1) / F5 PARTIAL (CI mandatory + local optional) / F6 PARTIAL (sprint close dispatch 명시) / F7 PARTIAL (idempotence + race binary sub-check) / F8 PASS. 3 신규 third-eye 발본: S3-N1 (artifact integrity audit, brew audit / scoop check-manifest), S3-N2 (secret leak prevention, log masking AC), S3-N3 (atomic rollback integrity, Layer 1 file movements interrupted mid-way). 5 CTO action items 명시. review-g1.md §7.3.1 ~ §7.3.3 verbatim 기록 + Task #3 closed. Stage 2 codex verdict 대기 — user 명시 '이어서 codex도 보내줄께'."
+    ahead_delta: "+0"
+  - ts: 2026-05-03T23:20:00+09:00
+    codename: wizardly-quirky-gauss
+    check_exit: 0
+    action: "Stage 2/3 mode change: user 명시 '병렬로 할거라 동시에 줘' → Stage 2 (codex) + Stage 3 (gemini) sequential → parallel mode 전환. review-g1.md §6.2 (Stage 3 prompt) reword: Stage 2 verdict input dependency 제거 + parallel mode independent third-runtime + third-eye veto 유지. §7.2/§7.3 trace 도 parallel mode 명시. Sequential 가정 (Stage 3 가 Stage 2 verdict 받아 합의/divergence 분석) → Parallel 가정 (Stage 1+2+3 모두 independent, 합의/divergence 는 본 conversation 에서 verdict 회수 후 post-hoc analysis). 두 terminal command (codex heredoc + gemini heredoc) 사용자 host 동시 invoke 대기."
+    ahead_delta: "+0"
   - ts: 2026-05-03T23:15:00+09:00
     codename: wizardly-quirky-gauss
     check_exit: 0
@@ -435,18 +517,15 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ② In-Progress
 
-- **§4.E 0.6.0-product implement sprint G1 review Stage 1 SHIPPED → Stage 2/3 cross-instance 진입 대기 (user host 수동)**.
-  본 세션 (claude-cowork:wizardly-quirky-gauss) Stage 1 authoring 완료.
-  AI-PROPOSED verdict = **PASS-with-flags** (8 review-grade flag F1~F8 + 1 minor F9).
-  self-validation flag = set, Stage 2 (codex) + Stage 3 (gemini) 으로 resolution.
-  user 첫 발화 chain plan = G1→G2→G6→G7→release cut. CLAUDE.md §1.20
-  sequential disclosure 정합으로 본 세션 = G1 review Stage 1 만.
-  다음 1 step = user host terminal 에서 codex Stage 2 invoke (review-g1.md §6.1 prompt).
-
-- **§4.E 0.6.0-product implement sprint G1 plan CLOSED → G1 review Stage 1 SHIPPED**.
-  prev 세션 (claude-cowork:affectionate-trusting-thompson) plan.md 작성 + 종료.
-  G0 brainstorm 9/9 locked → G1 plan 작성 (ready-for-review, AC1~AC9 + Sprint
-  Contract + 5 implement-stage gotcha self-flag) → 본 세션 G1 review Stage 1.
+- ✅ **§4.E 0.6.0-product implement sprint G1 review FINAL LOCK 2026-05-04T01:30+09:00 KST**.
+  본 세션 (claude-cowork:wizardly-quirky-gauss) closure 달성.
+  Round 5 codex + gemini 둘 다 PASS quick verify ("G1 PASS LOCKED ... fully validated and ready for execution").
+  5 round cycle (Round 1 16-fix / Round 2 12-fix / Round 3 11-fix / Round 4 5-fix user 직접 / Round 5 quick PASS) 완료.
+  44 CTO fix items 통합 + 10+ CEO ruling locks (S2-N3 α / Q1 sfs 브랜드 / Q2 commit safety / Q9 commit-existing-dirty 제거 / Q2 log masking α / Q1 AC scope expansion).
+  plan.md status=`ready-for-implement` 전환.
+  P-17 cross-instance verify pattern canonical evidence (Stage 2 vs Stage 3 divergence pattern + Stage 3 stance reversal + 5-round cycle).
+  본 세션 closing + mutex release.
+  G2 implement~G6~G7~release cut = next sessions per user chain plan.
 
 - **§4.D 0.6.0-product spec sprint — CLOSED 2026-05-03 (배포 03f36de origin/main)**.
   Cross-instance verify pattern P-17 canonical lock. 4 spec markdown ship 완료.
@@ -465,30 +544,29 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ③ Next
 
-**다음 1 step = user host terminal 에서 codex Stage 2 invoke** (review-g1.md §6.1 prompt verbatim).
-PARTIAL/PASS/FAIL verdict + 8 flag 별 판정 + 3+ Stage 2 신규 발본 회수 → 본 conversation paste.
+**다음 1 step (next session)** = user 명시 G2 implement 명령 (자동 승급 금지, CLAUDE.md §1.3 + §1.20 + Round 1~5 cycle precedent).
 
-본 세션 산출 (G1 review Stage 1):
-- review-g1.md (G1 Stage 1, AI-PROPOSED PASS-with-flags, 8 flags F1~F8 + 1 minor F9).
-- PROGRESS.md (heartbeat / mutex self-claim / scheduled_task_log).
+본 세션 (wizardly-quirky-gauss) 산출:
+- review-g1.md (G1 review 5 round cycle complete, ✅ PASS LOCKED 2026-05-04T01:30+09:00, ~1100L 추정).
+- plan.md (ready-for-implement, ~378L, AC1~AC13 + R-A~I + Sprint Contract + 5 CEO ruling locks).
+- brainstorm.md (G0, 9/9 lock + S2-N1 fix + §6.7 backstamp).
+- PROGRESS.md (heartbeat / mutex release / scheduled_task_log + last_session_owner_history wizardly work_done 7 items).
 
-prev 세션 산출 (참고):
-- brainstorm.md (G0, 9/9 lock, ready-for-plan).
-- plan.md (G1, ready-for-review, AC1~AC9 + 35+ sub-check + Sprint Contract).
+다음 처리 chain (user 명시 timing, sequential disclosure):
+1. ✅ G1 review FINAL LOCK (본 세션, 2026-05-04T01:30+09:00).
+2. user 명시 G2 implement 명령 → next session entry.
+3. G2 implement (R-A 6 신규 script + Windows wrapper sfs.ps1+cmd / R-B R2 storage / R-C migrate-artifacts / R-D tests + CI + cross-instance verify / R-E consumer compat / R-F sprint.yml lifecycle / R-G G-1~G-9 + R-I release plumbing / R-H migration safety / VERSION 0.6.0 / Homebrew sfs.rb + Scoop sfs.json).
+4. G6 review (cross-instance, P-17 패턴 — implement 산출물 actual AC1~AC13 evaluation).
+5. G7 retro + P-17 learning-log 강화 (5 round cycle precedent + Stage 2/3 divergence pattern + Stage 3 stance reversal + meta-rule P-18 후보 "AC scope auto-Sprint-Contract update").
+6. Release cut: VERSION 0.6.0 (suffix drop) + Homebrew tap (Formula/sfs.rb) + Scoop bucket (bucket/sfs.json) dual-channel (§1.24).
+7. 0.5.x consumer deprecation warning baseline 활성화 (E5 6 mo grace, hard cut 2026-11-03).
+8. G2 implement 시점 advisory carry-forward (Stage 3 R3 + R4):
+   - Round 2 advisory (now AC11/12/13 promoted): release sequence / hash parity / workflow permissions.
+   - Round 4 advisory (G2-time): nested .git safety (S3R4-N1) / Homebrew formula alias (S3R4-N2) / GHA Windows shell:bash explicit (S3R4-N3).
 
-다음 처리 (user 명시 timing, sequential disclosure):
-1. **현재 step**: codex Stage 2 invoke → verdict 회수.
-2. Stage 2 PARTIAL 시 CTO fix → Stage 3 gemini.
-3. Stage 2 PASS 시 바로 Stage 3 gemini → verdict 회수.
-4. Stage 1+2+3 + user CEO ruling lock → plan.md status=ready-for-implement.
-5. user 명시 G2 implement 명령 후 진입 (자동 승급 금지).
-6. G2 implement (6 신규 script + bin/sfs dispatch + VERSION 0.6.0 + tests + CI + brew/scoop).
-7. G6 review (cross-instance) → G7 retro → release cut (Homebrew + Scoop dual-channel, §1.24).
-8. 0.5.x consumer deprecation warning baseline 활성화 (E5 6 mo grace, hard cut 2026-11-03).
-
-자동 진입 금지 (CLAUDE.md §1.3 + §1.20 + spec sprint Round 1~4 precedent).
+자동 진입 금지 (CLAUDE.md §1.3 + §1.20 + 5 round cycle precedent).
 **Cowork 한정 §1.28 — sandbox git 금지, file-write only**.
-user host terminal 에서 review-g1.md + PROGRESS.md `git add` + commit + push 수동 실행 권장 (※ commit message 예: `wip(WU-§4.E/G1-review-stage1): review-g1.md AI-PROPOSED PASS-with-flags + PROGRESS heartbeat`).
+user host terminal 에서 commit + push 수동 (※ commit message 예: `feat(WU-§4.E/G1-final-lock): G1 review PASS LOCKED 2026-05-04T01:30 — 5 round cycle + 44 fix items + 10 CEO ruling`).
 
 ### 후순위 (sprint complete 후 user timing 콜)
 

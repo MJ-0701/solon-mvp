@@ -2,7 +2,7 @@
 phase: brainstorm
 gate_id: G0
 sprint_id: "0-6-0-product-implement"
-goal: "0.6.0-product spec sprint 의 R2 storage architecture + R3 migrate-artifacts 실 코드 구현 + Homebrew/Scoop dual-channel release"
+goal: "0.6.0 spec sprint 의 R2 storage architecture + R3 migrate-artifacts 실 코드 구현 + Homebrew/Scoop dual-channel release"
 visibility: raw-internal
 created_at: 2026-05-03T22:10:00+09:00
 last_touched_at: 2026-05-03T22:25:00+09:00
@@ -27,7 +27,7 @@ spec_source:
 in_scope:
   - "R2 storage architecture 실 코드 (file path schema + co-location + N:M + sprint.yml + pre-merge hook + archive branch 자동화)"
   - "R3 sfs migrate-artifacts --apply CLI 구현 (2-pass propose-accept + algorithm + reject granularity + rollback)"
-  - "VERSION bump 0.5.96-product → 0.6.0-product"
+  - "VERSION bump 0.5.96-product → 0.6.0"
   - "Homebrew tap + Scoop bucket dual-channel release (CLAUDE.md §1.24)"
   - "기존 sprint workbench backward compat (정도 = G0 axis B 결정)"
 out_of_scope:
@@ -38,9 +38,9 @@ out_of_scope:
 session: "claude-cowork:affectionate-trusting-thompson"
 ---
 
-# Brainstorm — 0.6.0-product implement sprint (G0, hard mode)
+# Brainstorm — 0.6.0 implement sprint (G0, hard mode)
 
-> Sprint **G0 — Brainstorm Gate (hard depth)**. 0.6.0-product **spec sprint** 의 7 lock 결정 + 4 신규 spec markdown 을 입력으로 받아, 실 code/script 구현 axis 들을 grill round 로 lock.
+> Sprint **G0 — Brainstorm Gate (hard depth)**. 0.6.0 **spec sprint** 의 7 lock 결정 + 4 신규 spec markdown 을 입력으로 받아, 실 code/script 구현 axis 들을 grill round 로 lock.
 > 6 철학 self-application: Grill Me (본 G0) / Ubiquitous Language (spec 의 Layer 1/2 / archive branch / sprint.yml / 2-pass propose-accept) / Deep Module (R2 + R3 = 각각 deep module 단위) / Gray Box (interface = user grill, 구현 = AI 통으로).
 
 ---
@@ -123,10 +123,10 @@ session: "claude-cowork:affectionate-trusting-thompson"
 
 ### Axis G — Release Version Naming
 
-- **G1**: `0.6.0-product` (semver + product suffix, 현 0.5.96-product 패턴 그대로).
+- **G1**: `0.6.0-product` (semver + product suffix, 현 0.5.96-product 패턴 그대로) — **REJECTED, G2-α lock 정합 (suffix drop hard cut)**.
 - **G2**: `0.6.0` (suffix 제거, semver only).
-- **G3**: `0.6.0-product` for R2+R3 → `0.6.1-product` for R4 follow-up (soft split 정합).
-- **G4**: `0.6.0-product-r2-r3` 명시 → `0.6.1-product-r4` (release name 에 R 명시).
+- **G3**: `0.6.0` for R2+R3 → `0.6.1-product` for R4 follow-up (soft split 정합).
+- **G4**: `0.6.0-r2-r3` 명시 → `0.6.1-product-r4` (release name 에 R 명시).
 
 ---
 
@@ -215,11 +215,13 @@ User 결정 회수 후 본 brainstorm.md §6~§8 Append Log + Plan Seed + Locked
 
 ### §6.7 Version Naming (G2-α 정합)
 
+> ⚠️ **Backstamp 2026-05-04T00:05+09:00 (Round 2 fix S2-N3 + S2R2-N2)**: 본 §6.7 의 "bin/sfs version 출력 = `Solon SFS v0.6.0`" wording 은 **superseded by CEO ruling S2-N3 = α** (preserve `sfs 0.6.0` 현 CLI pattern, 0.5.x consumer 호환 유지). 추가로 Q1 CEO ruling = α (sfs 브랜드 preserve) 정합으로 Homebrew formula = `Formula/sfs.rb`, Scoop manifest = `bucket/sfs.json`, package command = `sfs`. 본 §6.7 historical wording 은 Round 0 G0 brainstorm 기록 보존 목적으로 leave, 실 lock 은 `plan.md frontmatter ceo_ruling_lock` + `review-g1.md §7.6` 참조.
+
 - `solon-mvp-dist/VERSION` = `0.6.0` (single line, no suffix).
-- `bin/sfs version` 출력 = `Solon SFS v0.6.0`.
+- `bin/sfs version` 출력 = ~~`Solon SFS v0.6.0`~~ → **`sfs 0.6.0`** (CEO ruling S2-N3 α, Round 2).
 - CHANGELOG entry header = `## [0.6.0]` (no `-product` suffix).
-- Homebrew formula url tag = `v0.6.0`.
-- Scoop manifest version = `0.6.0`.
+- Homebrew formula url tag = `v0.6.0`, formula path = `Formula/sfs.rb` (Q1 α — sfs 브랜드 preserve).
+- Scoop manifest version = `0.6.0`, manifest path = `bucket/sfs.json` (Q1 α).
 - 0.5.x 태그는 historical 보존, hard cut. tap repo 의 옛 0.5.x-product 도 그대로 유지.
 
 ---
