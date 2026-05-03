@@ -15,12 +15,16 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - Review the whole contract, not only changed code: shared intent, domain
   language consistency, feedback evidence, interface/artifact boundaries, and
   gray-box delegation should still match the Gate 2/3 record.
-- Load `policies/knowledge-pack-router.md` first. Read matching full division
-  packs only when explicitly needed for review scope and from router mapping.
+- Load `policies/knowledge-pack-router.md` first, or
+  `policies/knowledge-pack-router.ko.md` for Korean preference. Read matching
+  full division packs only when explicitly needed for review scope and from router
+  mapping.
 - For backend/JVM/Spring/JPA/transaction/batch/integration/DevOps/AWS work,
-  check matching ids from `policies/backend-knowledge-pack.md`.
+  check matching ids from `policies/backend-knowledge-pack.md` or
+  `policies/backend-knowledge-pack.ko.md`.
   Flag both missing high-risk topics and over-activated topics for the project
   size.
 - For strategy-pm, QA, design/frontend, infra, or taxonomy work, read the
-  matching `policies/*-knowledge-pack.md` file and check only the matching ids.
+  matching `policies/*-knowledge-pack.md` or `policies/*-knowledge-pack.ko.md`
+  file and check only the matching ids.
   Flag both missing high-risk division topics and over-activated topics.

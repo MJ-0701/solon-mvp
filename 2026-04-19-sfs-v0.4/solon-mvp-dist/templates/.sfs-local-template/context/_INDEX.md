@@ -21,6 +21,7 @@ module:
 - `commands/loop.md` — loop / autonomous work / queue.
 - `policies/mutex.md` — lock conflict or concurrent session.
 - `policies/token-harness.md` — token/context hygiene, semantic search, repeated mistake guardrails.
-- `policies/knowledge-pack-router.md` — division activation router for
-  backend/infra/QA/design/strategy-pm/taxonomy packs; defaults to minimal
-  loading and points to full packs only when requested.
+- `policies/knowledge-pack-router.md` — division activation router (English).
+- `policies/knowledge-pack-router.ko.md` — division activation router (Korean).
+- `policies/*-knowledge-pack.md` — English seed inventories for each division.
+- `policies/*-knowledge-pack.ko.md` — Korean seed inventories for each division.

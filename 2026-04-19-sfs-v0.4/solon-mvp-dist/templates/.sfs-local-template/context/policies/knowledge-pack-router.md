@@ -1,6 +1,7 @@
 ---
 id: sfs-policy-knowledge-pack-router
 summary: Lightweight activation router for all division knowledge packs.
+language: en
 load_when:
   - knowledge pack
   - backend
@@ -23,6 +24,8 @@ content_policy: "topic/proposition only; read only this file first. Read a full 
 Use this router before opening long division packs.
 Default policy is minimum required checks by project size.
 
+If Korean is requested, read `knowledge-pack-router.ko.md` first.
+
 ## Division activation
 
 - Backend signals: `backend`, `JVM`, `Spring`, `JPA`, `transaction`, `batch`,
@@ -44,8 +47,14 @@ Default policy is minimum required checks by project size.
 ## On-demand full-pack mapping
 
 - `policies/backend-knowledge-pack.md`
+- `policies/backend-knowledge-pack.ko.md` (Korean, topic list)
 - `policies/strategy-pm-knowledge-pack.md`
+- `policies/strategy-pm-knowledge-pack.ko.md` (Korean, topic list)
 - `policies/qa-knowledge-pack.md`
+- `policies/qa-knowledge-pack.ko.md` (Korean, topic list)
 - `policies/design-knowledge-pack.md`
+- `policies/design-knowledge-pack.ko.md` (Korean, topic list)
 - `policies/infra-knowledge-pack.md`
+- `policies/infra-knowledge-pack.ko.md` (Korean, topic list)
 - `policies/taxonomy-knowledge-pack.md`
+- `policies/taxonomy-knowledge-pack.ko.md` (Korean, topic list)
