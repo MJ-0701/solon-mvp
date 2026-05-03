@@ -2,7 +2,7 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-03T11:30:00+09:00
+last_overwrite: 2026-05-03T13:00:00+09:00
 session: "claude-cowork:determined-focused-galileo — §4.A research-first phase: bkit prior art clone + per-CLI feasibility + research report → §4.A.5 user decision gate"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
@@ -14,7 +14,7 @@ current_wu_path: null
 current_wu_owner:
   session_codename: determined-focused-galileo
   claimed_at: 2026-05-03T10:54:18+09:00
-  last_heartbeat: 2026-05-03T11:30:00+09:00
+  last_heartbeat: 2026-05-03T13:00:00+09:00
   ttl_minutes: 30
 
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
@@ -316,27 +316,33 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ② In-Progress
 
-- **0.5.96-product slash-command zero-file discovery hotfix** (HANDOFF §4.A).
-  claude-cowork:determined-focused-galileo session — §4.A research-first phase
-  closed. 8/8 user decisions resolved (D1 plugin / D1' dashboard 0.5.97 deferred /
-  D2 Codex C-1 / D3 single repo `MJ-0701/solon` / D4 `/sfs` / D5 (d) A-1/A-2
-  in-impl probe / D6 (c)+(a) CI Windows + user machine / D7 (b) graceful warn).
-  Plan reviewed via §1.15 (planner+evaluator lens) → D8 user approved →
-  Phase 0 (this commit). Research artifact:
-  `2026-04-19-sfs-v0.4/tmp/slash-command-discovery-research-2026-05-03.md`
-  (271 lines, git-ignored per §3 — to archive at retro per §1.23).
+- **0.5.96-product slash-command zero-file discovery hotfix** (HANDOFF §4.A) —
+  Phases 0-7 + 9 + 10a complete on `hotfix/sfs-slash-command-discovery`
+  branch (8 commits, +1100 LOC). Sandbox cli-discovery tests pass 4/4
+  locally. Awaiting user (afk haircut) to:
+    - Phase 8: A-1 vs A-2 probe on user machine (claude plugin marketplace
+      add subcommand stability + ~/.claude/settings.json user-level
+      auto-pickup) → finalize hook branch logic in install-cli-discovery.sh
+    - Phase 11: cut-release.sh apply + Homebrew + Scoop tap push (sandbox
+      proxy blocks GitHub egress; release flow needs user-side push)
+    - Phase 12: D6 (a) end-to-end Windows machine verify
+  PUSH PENDING: branch + 8 commits sit local-only on user macOS via FUSE
+  sync; sandbox cannot push (cowork-egress-blocked). User pushes once at
+  end of work (per user instruction "맨 마지막에 한번만").
 
 ## ③ Next
 
-- Phase 1: clean main verify + `git checkout -b hotfix/sfs-slash-command-discovery`
-  (per HANDOFF §4.A.5e + CLAUDE.md §1.22 Git Flow branch-first).
-- Phase 2: `MJ-0701/solon` external repo skeleton bootstrap (6 file:
-  `.claude-plugin/marketplace.json` + `plugins/solon/.claude-plugin/plugin.json`
-  + `plugins/solon/commands/sfs.md` + `gemini-extension.json` +
-  `commands/sfs.toml` + `README.md`) — cc-thingz prior art schema mirror.
-- Phases 3-13: codex SKILL bundle → install hooks → brew/scoop wiring →
-  sfs doctor → tests+CI Windows → user-machine A-1/A-2 probe → docs →
-  VERSION 0.5.96-product → cut-release → Win verification → handoff+learning.
+- Phase 8 (user-machine probe) — see HANDOFF §4.A + research report §4.A
+  for A-1/A-2 verification commands. Outcome dictates
+  install-cli-discovery.sh branch logic amend.
+- Phase 10b — VERSION bump 0.5.95→0.5.96 + CHANGELOG wording finalize per
+  A-1/A-2 outcome + remove the pre-staged note.
+- Phase 11 — `bash 2026-04-19-sfs-v0.4/scripts/cut-release.sh --apply
+  --version 0.5.96-product` (user-side; sandbox push-blocked).
+- Phase 12 — Windows machine end-to-end + GitHub Actions
+  `sfs-cli-discovery.yml` windows-end-to-end-scoop CI green.
+- Phase 13 — Final handoff + P-XX-multi-cli-plugin-umbrella learning log
+  + mutex release.
 
 ## ④ Artifacts
 
