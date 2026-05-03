@@ -27,6 +27,11 @@ last_session_owner_history:
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
 scheduled_task_log:
+  - ts: 2026-05-03T22:55:00+09:00
+    codename: affectionate-trusting-thompson
+    check_exit: 0
+    action: "CLAUDE.md §1.28 신설 — 'Cowork sandbox git 작업 금지' 절대규칙 추가. user 명시 ('어차피 계속 실패되는거 그냥 나한테 수동으로 하라고 안내할것 토큰낭비 X'). Cowork 한정 예외, Codex/Claude Code 는 §1.5 그대로. CLAUDE.md 179L → 180L (≤200 ✓). 본 세션 이미 sandbox commit (b72c966) + bundle 생성 완료한 상태였으나, 본 rule 발효 후로는 sandbox git 시도 자체 0. host 측 commit/push 패턴: 모든 dirty file (PROGRESS / brainstorm / plan / CLAUDE.md / 본 PROGRESS log) 을 host 에서 직접 git add + commit + push (bundle 무시 가능, 또는 bundle apply 후 추가 commit). 다음 세션부터 본 rule strict 적용."
+    ahead_delta: "+0"
   - ts: 2026-05-03T22:50:00+09:00
     codename: affectionate-trusting-thompson
     check_exit: 0
