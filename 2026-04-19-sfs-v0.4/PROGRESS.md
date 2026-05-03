@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-03T02:52:38+09:00
-session: "claude-cowork: codex 0.5.87-95 drift recovery + PROGRESS trim + doc audit/split"
+last_overwrite: 2026-05-03T10:19:24+09:00
+session: "claude-cowork: codex 0.5.87-95 drift recovery + PROGRESS trim + doc audit + resume_hint re-aim"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: null
@@ -234,18 +234,47 @@ domain_locks:
 resume_hint:
   default_action: |
     1) Read `CLAUDE.md`, then `PROGRESS.md`.
-    2) Run: `bash scripts/resume-session-check.sh` (expect exit 0).
-    3) Latest product release is `0.5.95-product`; ask user for the next
-       WU/domain unless they provide a direct task.
-    4) For a direct task, start from clean `main` and create a fresh
-       `feature/<slug>` or `hotfix/<slug>` branch before edits.
-  on_skip_patterns: ["아니", "잠깐", "다른", "stop"]
-  on_skip_action: "What do you want to do instead (1 line)?"
-  on_ambiguous: "0.5.95-product is released. What should Solon handle next?"
+    2) Run: `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh` (expect exit 0).
+    3) Read `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` §4 (MD split execution
+       queue) and `2026-04-19-sfs-v0.4/MD-SIZE-AUDIT-2026-05-03.md` for per-file
+       classification.
+    4) Create a fresh `feature/md-size-split-tier1` branch from clean `main`.
+    5) Start Tier 1 split work: `07-plugin-distribution.md` (1022 lines,
+       largest non-CHANGELOG). Per-split flow:
+         a. reference-scan: `grep -rn '07-plugin-distribution' --include='*.md'
+            --include='*.sh' --include='*.yaml' --include='*.toml'
+            --exclude-dir='.git' --exclude-dir='archives'
+            --exclude-dir='.claude/worktrees'`
+         b. identify §-major boundaries (`grep -n '^# §\|^## §' <file>`)
+         c. create `07-plugin-distribution/<sub-§-slug>.md` for each, with
+            the strict 11-field frontmatter defined in
+            MD-SIZE-AUDIT-2026-05-03.md "Frontmatter standard"
+         d. replace each §-block in the parent with a 1-line link stub
+         e. atomic commit `split: 07-plugin-distribution §X..§Y → 07-plugin-distribution/`
+         f. confirm `resume-session-check.sh` exit 0
+    6) After Tier 1 (8 files: 07 → 05 → 02 → 10 → 08 → 04 → 03 → 06 in size order),
+       move to Tier 2 (closed sprint files WU-23 → WU-20 → WU-26).
+    7) After Tier 1+2, generalize CLAUDE.md §1.14 + create
+       `scripts/check-md-size.sh` (resume-session-check check #9, exit 18) +
+       cut-release.sh post-flight auto-rotate hook + `learning-logs/2026-05/
+       P-XX-md-rotation-pattern.md`.
+    8) HARD rules (from MD-SIZE-AUDIT-2026-05-03.md):
+       - "DO NOT split" list (CHANGELOG, templates/**, archives/**, root
+         CLAUDE/AGENTS/GEMINI redirect stubs, .claude/agents/*,
+         .agents/skills/*, .gemini/commands/*.toml, .sfs-local/**) — never touch.
+       - solon-mvp-dist/GUIDE.md, BEGINNER-GUIDE.md, README.md — leave (just
+         trimmed in 0.5.86; do not undo).
+       - Frontmatter discipline (11 fields) is non-negotiable per user
+         "절대 누락 0" constraint.
+  on_skip_patterns: ["아니", "잠깐", "다른", "stop", "다른거"]
+  on_skip_action: "MD split queue is queued (Tier 1: 8 body chapters / Tier 2: 3 closed sprint files). What do you want to do instead?"
+  on_ambiguous: "MD split queue is ready. Start with Tier 1 (body chapters) `07-plugin-distribution.md` first, or pick another tier/file?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
-  last_written: 2026-05-02T17:52:38Z
+    - "MD split: pre-flight reference scan required + frontmatter 11 fields required + parent link stub required + atomic commit + resume-session-check exit 0 verification"
+    - "MD split: never touch DO NOT split list"
+  last_written: 2026-05-03T01:19:24Z
 ---
 
 # PROGRESS — compact

@@ -1,9 +1,9 @@
 ---
 doc_id: handoff-next-session
 title: "Next session handoff — 0.5.95 current truth + MD-size split execution"
-written_at: 2026-05-02T17:52:38Z
-written_at_kst: 2026-05-03T02:52:38+09:00
-last_known_main_commit: e3c98ad
+written_at: 2026-05-03T01:19:24Z
+written_at_kst: 2026-05-03T10:19:24+09:00
+last_known_main_commit: 68ce1f5
 visibility: raw-internal
 source_task: claude-cowork-doc-audit-split (mid-flight handoff)
 session_codename: modest-charming-keller
