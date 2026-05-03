@@ -21,3 +21,9 @@ module:
 - `commands/loop.md` — loop / autonomous work / queue.
 - `policies/mutex.md` — lock conflict or concurrent session.
 - `policies/token-harness.md` — token/context hygiene, semantic search, repeated mistake guardrails.
+- `policies/backend-knowledge-pack.md` — backend/JVM/Spring/transaction/batch/DevOps topic ids and scale-based division activation router; read only when those signals appear.
+- `policies/strategy-pm-knowledge-pack.md` — strategy/PM topic ids for scope, roadmap, stakeholder, SLA, rollout, and business risk.
+- `policies/qa-knowledge-pack.md` — QA topic ids for test strategy, regression, evidence, defect, and release confidence.
+- `policies/design-knowledge-pack.md` — design/frontend topic ids for UX flow, UI states, accessibility, responsive fit, and design-system consistency.
+- `policies/infra-knowledge-pack.md` — infra/DevOps topic ids for deploy, secrets, observability, rollback, cloud, cost, and operations.
+- `policies/taxonomy-knowledge-pack.md` — taxonomy topic ids for canonical terms, naming, states, events, enums, and drift control.
