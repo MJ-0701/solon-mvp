@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-03T10:50:35+09:00
-session: "claude-cowork: handoff finalized — bkit prior art locked + project-vs-plugin split + Windows first-class differentiator"
+last_overwrite: 2026-05-03T11:30:00+09:00
+session: "claude-cowork:determined-focused-galileo — §4.A research-first phase: bkit prior art clone + per-CLI feasibility + research report → §4.A.5 user decision gate"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: null
@@ -12,14 +12,19 @@ current_wu_path: null
 # ── SESSION MUTEX (CLAUDE.md §1.12) ───────────────────────────────
 # Keep scalar form for tool compatibility (.sfs-local/scripts/sfs-loop.sh stop/status, auto-resume contract).
 current_wu_owner:
-  session_codename: null
-  claimed_at: null
-  last_heartbeat: null
+  session_codename: determined-focused-galileo
+  claimed_at: 2026-05-03T10:54:18+09:00
+  last_heartbeat: 2026-05-03T11:30:00+09:00
   ttl_minutes: 30
 
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
 scheduled_task_log:
+  - ts: 2026-05-03T11:30:00+09:00
+    codename: determined-focused-galileo
+    check_exit: 0
+    action: "§4.A.5 decision gate closed (8/8 user-resolved: D1 plugin / D1' dashboard 0.5.97 deferred / D2 Codex C-1 / D3 single MJ-0701/solon / D4 /sfs / D5 (d) probe / D6 (c)+(a) / D7 (b)) + §1.15 plan approved (D8 a) → Phase 0 entered: PROGRESS ②/③ updated for 0.5.96-product implementation phase"
+    ahead_delta: "+0"
   - ts: 2026-05-03T10:21:16+09:00
     codename: claude-cowork-doc-audit-split
     check_exit: 0
@@ -311,16 +316,27 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ② In-Progress
 
-- None.
+- **0.5.96-product slash-command zero-file discovery hotfix** (HANDOFF §4.A).
+  claude-cowork:determined-focused-galileo session — §4.A research-first phase
+  closed. 8/8 user decisions resolved (D1 plugin / D1' dashboard 0.5.97 deferred /
+  D2 Codex C-1 / D3 single repo `MJ-0701/solon` / D4 `/sfs` / D5 (d) A-1/A-2
+  in-impl probe / D6 (c)+(a) CI Windows + user machine / D7 (b) graceful warn).
+  Plan reviewed via §1.15 (planner+evaluator lens) → D8 user approved →
+  Phase 0 (this commit). Research artifact:
+  `2026-04-19-sfs-v0.4/tmp/slash-command-discovery-research-2026-05-03.md`
+  (271 lines, git-ignored per §3 — to archive at retro per §1.23).
 
 ## ③ Next
 
-- Current truth is `0.5.95-product`. claude-cowork session is mid-flight on
-  PROGRESS trim + full doc audit/split (TaskList #17~#21+). Codex hotfix
-  train 0.5.87-95 already shipped (see CHANGELOG.md `^## \[0\.5\.(8[7-9]|9[0-5])`)
-  but never recorded in PROGRESS bullets — drift surfaced via
-  `release_handoff_drift` from `resume-session-check.sh` and is being repaired
-  in this same commit chain.
+- Phase 1: clean main verify + `git checkout -b hotfix/sfs-slash-command-discovery`
+  (per HANDOFF §4.A.5e + CLAUDE.md §1.22 Git Flow branch-first).
+- Phase 2: `MJ-0701/solon` external repo skeleton bootstrap (6 file:
+  `.claude-plugin/marketplace.json` + `plugins/solon/.claude-plugin/plugin.json`
+  + `plugins/solon/commands/sfs.md` + `gemini-extension.json` +
+  `commands/sfs.toml` + `README.md`) — cc-thingz prior art schema mirror.
+- Phases 3-13: codex SKILL bundle → install hooks → brew/scoop wiring →
+  sfs doctor → tests+CI Windows → user-machine A-1/A-2 probe → docs →
+  VERSION 0.5.96-product → cut-release → Win verification → handoff+learning.
 
 ## ④ Artifacts
 
