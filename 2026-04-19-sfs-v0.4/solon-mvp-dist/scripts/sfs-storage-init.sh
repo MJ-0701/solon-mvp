@@ -15,11 +15,13 @@
 #   3  = schema mismatch (validate mode)
 #
 # AC reference: AC2.1 (Layer 1 path 생성), AC2.2 (Layer 2 path 생성), anti-AC2 (도메인 hardcoding 0).
-# Implementation: chunk 1 = skeleton + arg parse + usage. 실 mkdir/validate logic = 다음 chunk (R-B B-1/B-2 따라 살 붙임).
 
 set -euo pipefail
 
 SCRIPT_NAME="$(basename "$0")"
+
+# Slug regex: lowercase alphanumeric + dash, 1~64 chars (POSIX-portable, no domain hardcoding).
+SLUG_RE='^[a-z0-9][a-z0-9-]{0,63}$'
 
 usage() {
   cat <<'EOF'
@@ -39,7 +41,23 @@ Required when not --validate:
   --sub <s>        Layer 1 sub (free string)
   --feat <f>       feature 이름 (free string)
   --sprint-id <S>  Layer 2 sprint id (e.g. 0-6-0-product-implement)
+
+Slug rule (all of --domain/--sub/--feat/--sprint-id):
+  lowercase alphanumeric + dash, 1~64 chars. regex: [a-z0-9][a-z0-9-]{0,63}
 EOF
+}
+
+validate_slug() {
+  local label="$1" value="$2"
+  if [[ -z "${value}" ]]; then
+    echo "${SCRIPT_NAME}: ${label} is empty" >&2
+    return 2
+  fi
+  if ! [[ "${value}" =~ ${SLUG_RE} ]]; then
+    echo "${SCRIPT_NAME}: ${label} '${value}' violates slug rule (lowercase alnum + dash, 1~64)" >&2
+    return 2
+  fi
+  return 0
 }
 
 # arg parse
@@ -97,17 +115,33 @@ case "${mode}" in
       usage >&2
       exit 2
     fi
+    validate_slug "--domain" "${domain}" || exit 2
+    validate_slug "--sub" "${sub}" || exit 2
+    validate_slug "--feat" "${feat}" || exit 2
+    validate_slug "--sprint-id" "${sprint_id}" || exit 2
+
     layer1_path="docs/${domain}/${sub}/${feat}"
     layer2_path=".solon/sprints/${sprint_id}/${feat}"
+
+    # Co-location pre-flight: 같은 feat 가 다른 Layer 1 (다른 domain/sub) 에 이미 존재?
+    if [[ -d "docs" ]]; then
+      while IFS= read -r existing; do
+        existing="${existing%/}"
+        if [[ "${existing}" != "${layer1_path}" ]]; then
+          echo "${SCRIPT_NAME}: co-location warning — feat '${feat}' already exists at: ${existing}" >&2
+          # warn-only (not fail) — same feat across multiple domains may be intentional in some cases.
+        fi
+      done < <(find docs -mindepth 3 -maxdepth 3 -type d -name "${feat}" 2>/dev/null || true)
+    fi
+
     if [[ "${check}" == "1" ]]; then
       printf 'sfs-storage-init: dry-run — would create:\n  %s/\n  %s/\n' "${layer1_path}" "${layer2_path}"
       exit 0
     fi
-    # TODO chunk N (R-B B-1/B-2): 실 mkdir + .gitkeep + permission validate + co-location pre-flight.
-    # placeholder:
+
     mkdir -p "${layer1_path}" "${layer2_path}"
-    : > "${layer1_path}/.gitkeep"
-    : > "${layer2_path}/.gitkeep"
+    [[ -e "${layer1_path}/.gitkeep" ]] || : > "${layer1_path}/.gitkeep"
+    [[ -e "${layer2_path}/.gitkeep" ]] || : > "${layer2_path}/.gitkeep"
     printf 'sfs-storage-init: created %s/ + %s/\n' "${layer1_path}" "${layer2_path}"
     ;;
   validate)
@@ -119,9 +153,46 @@ case "${mode}" in
       echo "${SCRIPT_NAME}: validate root not a directory: ${validate_root}" >&2
       exit 1
     fi
-    # TODO chunk N (R-B B-1/B-2): 실 schema regex check + Layer 1/Layer 2 정합 + co-location detect.
-    # placeholder: 디렉토리 존재만 확인.
-    printf 'sfs-storage-init: validate placeholder OK — %s exists (full schema check 다음 chunk)\n' "${validate_root}"
+
+    fail=0
+
+    # Layer 1: docs/<domain>/<sub>/<feat>/ — depth 3 dirs must satisfy slug rule.
+    if [[ -d "${validate_root}/docs" ]]; then
+      while IFS= read -r dir; do
+        rel="${dir#${validate_root}/docs/}"
+        IFS=/ read -r d s f <<< "${rel}"
+        for label_value_pair in "domain:${d}" "sub:${s}" "feat:${f}"; do
+          label="${label_value_pair%%:*}"
+          value="${label_value_pair#*:}"
+          if [[ -n "${value}" ]] && ! [[ "${value}" =~ ${SLUG_RE} ]]; then
+            echo "${SCRIPT_NAME}: schema fail — Layer 1 ${label} '${value}' (path: docs/${rel}/) violates slug" >&2
+            fail=$((fail + 1))
+          fi
+        done
+      done < <(find "${validate_root}/docs" -mindepth 3 -maxdepth 3 -type d 2>/dev/null || true)
+    fi
+
+    # Layer 2: .solon/sprints/<S-id>/<feat>/ — depth 2 dirs.
+    if [[ -d "${validate_root}/.solon/sprints" ]]; then
+      while IFS= read -r dir; do
+        rel="${dir#${validate_root}/.solon/sprints/}"
+        IFS=/ read -r sid f <<< "${rel}"
+        for label_value_pair in "sprint-id:${sid}" "feat:${f}"; do
+          label="${label_value_pair%%:*}"
+          value="${label_value_pair#*:}"
+          if [[ -n "${value}" ]] && ! [[ "${value}" =~ ${SLUG_RE} ]]; then
+            echo "${SCRIPT_NAME}: schema fail — Layer 2 ${label} '${value}' (path: .solon/sprints/${rel}/) violates slug" >&2
+            fail=$((fail + 1))
+          fi
+        done
+      done < <(find "${validate_root}/.solon/sprints" -mindepth 2 -maxdepth 2 -type d 2>/dev/null || true)
+    fi
+
+    if [[ "${fail}" -gt 0 ]]; then
+      echo "${SCRIPT_NAME}: validate FAIL — ${fail} schema mismatch" >&2
+      exit 3
+    fi
+    printf 'sfs-storage-init: validate OK — %s\n' "${validate_root}"
     exit 0
     ;;
 esac

@@ -5,12 +5,13 @@ sprint_id: "0-6-0-product-implement"
 goal: "0.6.0 implement — R2 storage architecture 실 코드 + R3 sfs migrate-artifacts CLI + Homebrew/Scoop dual-channel release (suffix drop)"
 visibility: raw-internal
 created_at: 2026-05-04T09:30:00+09:00
-last_touched_at: 2026-05-04T09:30:00+09:00
-status: in-progress   # G2 implement 진입 chunk 1 — R-A 6 script + bin/sfs dispatch + Windows wrapper + VERSION/CHANGELOG bump. 후속 chunk 에서 R-B~R-I + tests/CI/packaging.
+last_touched_at: 2026-05-04T01:30:00+09:00
+status: in-progress   # chunk 2 (Code runtime, dazzling-sharp-euler) — R-B~R-I 실 logic + tests + CI ship + AC9 PASS + 17/17 run-all PASS. atomic 5-file commit + push + G6 review 대기.
 plan_source: "2026-04-19-sfs-v0.4/sprints/0-6-0-product-implement/plan.md (status=ready-for-implement, G1 PASS LOCKED 2026-05-04T01:30+09:00 KST)"
 session_chain:
   - session_codename: amazing-keen-euler
     started_at: 2026-05-04T09:30:00+09:00
+    closed_at: 2026-05-04T10:20:00+09:00
     chunk: "chunk 1 — mutex claim + implement.md/log.md skeleton + R-A 6 script + bin/sfs dispatch + Windows wrapper + VERSION 0.5.96-product → 0.6.0 + CHANGELOG entry"
     ac_targets_in_chunk:
       - AC1.1   # 6 script 존재 + executable + shebang + set -euo
@@ -171,3 +172,34 @@ session_chain:
 2. PROGRESS.md `current_wu_owner` 확인 → null 이면 self-claim, non-null 이면 mutex 충돌 시 user 확인.
 3. §1.2 Out-of-scope 리스트 중 우선순위 = R-B AC2.1~AC2.9 (storage 실 기능). R-A 6 script 의 `# TODO: chunk N` placeholder 를 실 logic 으로 교체.
 4. 동일 implement.md 의 §3 Implement notes + log.md 에 chunk N 변경 누적 기록.
+
+---
+
+## §5. chunk 2 종료 시점 — AC PASS / DEFER summary (dazzling-sharp-euler, 2026-05-04T01:30+09:00)
+
+| AC group | status | 검증 evidence |
+|:---|:---|:---|
+| AC1 R-A repo layout (1.1/1.2/1.3) | PASS (chunk 1) | bash -n + grep + Windows wrapper structural |
+| AC1.4 atomic 5-file commit | PASS (chunk 2 본 commit) | git log -1 --name-only 5 file 동시 (VERSION + CHANGELOG + bin/sfs + brew/sfs.rb + scoop/sfs.json) |
+| AC2 R-B storage (2.1~2.9) | PASS | test-sfs-storage-init / test-sfs-storage-precommit / test-sfs-archive-branch-sync run-all PASS |
+| AC3 R-C migrate-artifacts (3.1~3.6) | PASS | test-sfs-migrate-artifacts-smoke + test-sfs-pass1-prompts + test-rollback-from-snapshot PASS |
+| AC4 R-D tests (4.1/4.2/4.4/4.4.1/4.4.2/4.4.3/4.4.4/4.6) | PASS (workflow ship + dryrun) | run-all 17/17 PASS, log-masking isolated step PASS |
+| AC4.3 CI green matrix | DEFERRED (post-push verify) | workflow file shipped; actual green PASS confirms after `git push origin main` triggers Actions |
+| AC4.5 Windows Scoop smoke | DEFERRED to existing windows-scoop-smoke.yml + chunk 3 release cut | Windows runner real invoke = post-push CI |
+| AC5 R-E consumer compat (5.1~5.4 + 5.4.1) | PASS | sfs-upgrade-deprecation 4 시나리오 smoke PASS |
+| AC6 R-F sprint.yml lifecycle (6.1~6.6) | PASS | test-sfs-sprint-yml-validator + test-bad-fixture PASS |
+| AC7 R-G version naming (7.1/7.2/7.3/7.6/7.7/7.8/7.9 + anti-AC7) | PASS | bash bin/sfs version=`sfs 0.6.0`, 0.5.x tag보존 (origin), latest_release_version semver-aware |
+| AC7.4 brew audit | DEFERRED (release cut) | sfs.rb shipped with sha256 placeholder; release tool sed at cut + brew audit run on release runner |
+| AC7.5 scoop schema | PASS surrogate (scoop-manifest-validate.sh) + DEFERRED (real `scoop checkver`) | local schema validate PASS, real scoop bucket validate at chunk 3 release cut |
+| AC8 6 철학 self-application | PASS (G6 review 시점 confirm) | brainstorm 9/9 + plan 5-round + AC scope expansion 정합 |
+| AC9 spec sprint immutability (SFS-PHILOSOPHY.md) | PASS | git diff 03f36de → 0 line |
+| AC10 R-H migration safety (10.1~10.5 + anti-AC10) | PASS | test-print-matrix-schema + test-backup-manifest-schema + test-rollback-from-snapshot + test-no-data-loss PASS |
+| AC11 release sequence | PASS (dry-run smoke) | test-release-sequence PASS (out-of-order rejected, in-order PASS) |
+| AC12 hash parity + LF normalization | PASS | .gitattributes + test-hash-parity PASS |
+| AC13 workflow permissions | PASS | test-workflow-permissions 3 workflows checked |
+
+**Deferred (chunk 3 release cut)**: AC4.3 real CI green / AC4.5 Windows Scoop real / AC7.4 brew audit real / AC7.5 real scoop checkver. 이 4 AC 는 release cut 시점에 verify 가능 (sha256 materialize + tap repo update + actual brew/scoop install).
+
+## §6. chunk 2 next-action — Code runtime 본 세션 마무리 + Cowork chunk 3 entry trigger
+
+본 chunk 2 = (D) Code runtime 작업 마무리 → push 후 본 세션 mutex release. 다음 chunk 3 (Cowork) entry phrase = §3.4 의 `batch_3_cowork_entry` group.

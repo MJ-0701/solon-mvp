@@ -1,0 +1,27 @@
+# AC12 cross-platform hash parity — LF normalization for SFS artifact text formats.
+# Ensures Windows-checked-out files and POSIX-checked-out files produce identical SHA256.
+
+* text=auto
+
+*.yml      text eol=lf
+*.yaml     text eol=lf
+*.md       text eol=lf
+*.jsonl    text eol=lf
+*.json     text eol=lf
+*.toml     text eol=lf
+*.txt      text eol=lf
+*.sh       text eol=lf
+*.py       text eol=lf
+
+# Windows scripts may need CRLF — keep PS1/CMD as native (Scoop/Windows shell expectation).
+*.ps1      text eol=crlf
+*.cmd      text eol=crlf
+
+# Binary artifacts.
+*.gz       binary
+*.zip      binary
+*.tar      binary
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.pdf      binary

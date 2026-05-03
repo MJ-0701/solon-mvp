@@ -2,17 +2,17 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-04T10:10:00+09:00
-session: "claude-cowork:amazing-keen-euler — ✅ §4.E G2 implement chunk 1 (Cowork batch) COMPLETE. AC1.1/AC1.2/AC1.3(structural)/AC7.1/AC7.2(structural)/AC7.3/AC7.7/anti-AC7 PASS. CLAUDE.md §1.29 신설 (Cowork ↔ Code mode work split rule). 본 세션 mutex release. **다음 세션 = (D) Code runtime (Claude Code or Codex CLI) batch — R-B/R-C/R-D/R-E/R-F/R-G(audit)/R-H/R-I 실 logic + tests/CI + brew/scoop sha256 + atomic 5-file commit + push origin/main + AC9 baseline diff 한 번에 끝내기**. Batch 3 (G6 review + G7 retro + release cut) = Code 끝난 후 Cowork 세션."
+last_overwrite: 2026-05-04T01:30:00+09:00
+session: "claude-code:dazzling-sharp-euler — §4.E G2 implement chunk 2 (Code batch) IN-PROGRESS. user 첫 발화 'implement 이어서 / R-B 부터 가자' → implement.md §3.4 trigger phrase 매치 → §1.29 (D) Code runtime mutex claim. user 후속 발화: 'code 환경에서는 gemini-cli랑 codex한테 리뷰 받을 수 있잖아?? 그거까지 적용' → G6 cross-instance review 본 세션 scope 추가. 본 batch scope = R-B/R-C/R-D/R-E/R-F/R-G(audit defer)/R-H/R-I 실 logic + tests + CI workflows ship + AC9 verify + atomic 5-file commit + push origin/main + G6 review (codex + gemini-cli P-17 pattern). R-G AC7.4/7.5 (brew/scoop sha256) = release cut Batch 3 시점 deferred (advisor lock). AC4.3 CI green = post-push verify. anti-AC10 verifier first then incremental smoke per R. Batch 3 (Cowork) = G7 retro + release cut."
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
-current_wu: "§4.E 0.6.0-product implement sprint G2 chunk 1 ✅ COMPLETE (Cowork batch). chunk 2 (Code batch) entry = (D) Claude Code/Codex CLI 세션 — R-B/R-C/R-D/R-E/R-F/R-G(audit)/R-H/R-I + atomic commit + push 한 번에. CLAUDE.md §1.29 split rule 정합."
-current_wu_path: "2026-04-19-sfs-v0.4/sprints/0-6-0-product-implement/implement.md"   # status=in-progress (chunk 1 PASS, chunk 2 대기)
+current_wu: "§4.E 0.6.0-product implement sprint G2 chunk 2 IN-PROGRESS (Code batch, dazzling-sharp-euler). R-A chunk 1 ✅ done (skeleton + bin/sfs dispatch + Windows wrapper + VERSION 0.6.0 + CHANGELOG header). chunk 2 = R-B~R-I 실 logic + tests + CI + atomic 5-file commit + push."
+current_wu_path: "2026-04-19-sfs-v0.4/sprints/0-6-0-product-implement/implement.md"   # status=in-progress (chunk 1 PASS, chunk 2 dazzling-sharp-euler 작업 중)
 
 # ── SESSION MUTEX (CLAUDE.md §1.12) ───────────────────────────────
 # Keep scalar form for tool compatibility (.sfs-local/scripts/sfs-loop.sh stop/status, auto-resume contract).
-# Released 2026-05-04T10:10+09:00 KST: amazing-keen-euler chunk 1 (Cowork batch) 완료 → null release.
-current_wu_owner: null   # session 자연 종료 (G2 chunk 1 Cowork batch 완료, 2026-05-04T10:10+09:00). claimed_at=2026-05-04T09:30+09:00, released_at=2026-05-04T10:10+09:00. 다음 세션 (D) Code runtime 자유 claim.
+# Claimed 2026-05-04T00:50+09:00 KST: dazzling-sharp-euler (Claude Code host) — G2 chunk 2 진입 (R-B ~ R-I + atomic 5-file commit + push). scalar form preserved per sfs-loop.sh tool compat (CLAUDE.md §1.12 comment), structured owner metadata recorded in last_session_owner_history when session ends. session_codename=dazzling-sharp-euler, claimed_at=2026-05-04T00:50:00+09:00, ttl_minutes=15, task="G2 chunk 2 — R-B~R-I 실 logic + tests/CI + atomic 5-file commit + push".
+current_wu_owner: dazzling-sharp-euler
 last_session_owner_history:
   - session_codename: amazing-keen-euler
     claimed_at: 2026-05-04T09:30:00+09:00

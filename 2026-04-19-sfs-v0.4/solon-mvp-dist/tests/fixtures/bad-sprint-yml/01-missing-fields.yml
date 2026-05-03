@@ -1,0 +1,3 @@
+sprint_id: bad-01
+status: closed
+# expected fail reason: missing 6 required fields (features, dependencies, completion_criteria, milestones, created_at, closed_at)

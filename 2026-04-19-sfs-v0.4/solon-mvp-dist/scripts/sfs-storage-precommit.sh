@@ -14,7 +14,6 @@
 #   2  = invalid arg
 #
 # AC reference: AC2.3 (co-location), AC2.4 (N:M conflict), AC2.5 (sprint.yml schema), AC2.6 (CI mandatory).
-# Implementation: chunk 1 = skeleton + arg parse + script invoke pattern. 실 validator logic = 다음 chunk.
 
 set -euo pipefail
 
@@ -77,33 +76,117 @@ if [[ ! -d "${repo_root}" ]]; then
   exit 1
 fi
 
+cd "${repo_root}"
+
 fail=0
+checks_run=0
 
 # 1. co-location validator (Layer 1 docs/ + Layer 2 .solon/sprints/ 같은 feature paired)
-# TODO chunk N (R-B B-3): 실 co-location detect logic.
-printf 'sfs-storage-precommit: co-location validator placeholder (%s)\n' "${repo_root}"
+#    rule: 모든 Layer 2 feat 는 적어도 하나의 Layer 1 docs/<d>/<s>/<feat>/ 에 mirror 가 있어야.
+#    rationale: Layer 2 = 작업본, Layer 1 = 영구본. 작업했는데 영구 path 없으면 co-location 위반.
+if [[ -d ".solon/sprints" ]]; then
+  checks_run=$((checks_run + 1))
+  while IFS= read -r layer2_dir; do
+    rel="${layer2_dir#.solon/sprints/}"
+    IFS=/ read -r sid feat <<< "${rel}"
+    [[ -n "${feat}" ]] || continue
+    # check Layer 1 docs/<any>/<any>/<feat>/ 가 적어도 하나 존재.
+    if ! find docs -mindepth 3 -maxdepth 3 -type d -name "${feat}" 2>/dev/null | grep -q .; then
+      echo "${SCRIPT_NAME}: co-location FAIL — Layer 2 .solon/sprints/${sid}/${feat}/ has no Layer 1 docs/*/*/${feat}/ mirror" >&2
+      fail=$((fail + 1))
+    fi
+  done < <(find .solon/sprints -mindepth 2 -maxdepth 2 -type d 2>/dev/null || true)
+fi
 
 # 2. N:M 매핑 conflict (같은 feature 가 여러 sprint 에서 같은 file modify)
-# TODO chunk N (R-B B-4): 실 conflict detect logic.
-printf 'sfs-storage-precommit: N:M validator placeholder\n'
+#    static heuristic: 같은 feat 가 active (status != closed) sprint 2+ 개에서 같은 Layer 1 file 영향 → conflict.
+#    bash 3.2 호환: associative array 대신 newline-delimited string + grep.
+if [[ -d ".solon/sprints" ]]; then
+  checks_run=$((checks_run + 1))
+  # Build "feat<TAB>sid" lines for active sprints.
+  feat_sprint_lines=""
+  while IFS= read -r sprint_dir; do
+    sid="${sprint_dir##*/}"
+    yml="${sprint_dir}/sprint.yml"
+    status=""
+    if [[ -f "${yml}" ]]; then
+      status="$(awk '/^status:/ {print $2; exit}' "${yml}" 2>/dev/null | tr -d '"' || true)"
+    fi
+    case "${status}" in closed|abandoned) continue ;; esac
+    while IFS= read -r feat_dir; do
+      f="${feat_dir##*/}"
+      [[ -n "${f}" ]] || continue
+      feat_sprint_lines="${feat_sprint_lines}${f}	${sid}
+"
+    done < <(find "${sprint_dir}" -mindepth 1 -maxdepth 1 -type d 2>/dev/null || true)
+  done < <(find .solon/sprints -mindepth 1 -maxdepth 1 -type d 2>/dev/null || true)
+
+  # Distinct feats with 2+ active sprints.
+  if [[ -n "${feat_sprint_lines}" ]]; then
+    while IFS= read -r feat; do
+      [[ -n "${feat}" ]] || continue
+      sprint_list_csv="$(printf '%s\n' "${feat_sprint_lines}" | awk -F'\t' -v f="${feat}" '$1==f {print $2}' | sort -u | paste -sd, -)"
+      n_sprints="$(printf '%s' "${sprint_list_csv}" | tr ',' '\n' | grep -c .)"
+      [[ "${n_sprints}" -ge 2 ]] || continue
+      # Find Layer 1 dir.
+      layer1_dir="$(find docs -mindepth 3 -maxdepth 3 -type d -name "${feat}" 2>/dev/null | head -1 || true)"
+      [[ -n "${layer1_dir}" ]] || continue
+      # Build "layer1_path<TAB>sid" for each sprint that touches a file present in Layer 1.
+      file_sprint_lines=""
+      IFS=, read -ra sprint_list <<< "${sprint_list_csv}"
+      for sid in "${sprint_list[@]}"; do
+        [[ -n "${sid}" ]] || continue
+        while IFS= read -r touched; do
+          rel_in_layer2="${touched#.solon/sprints/${sid}/${feat}/}"
+          layer1_candidate="${layer1_dir}/${rel_in_layer2}"
+          if [[ -f "${layer1_candidate}" ]]; then
+            file_sprint_lines="${file_sprint_lines}${layer1_candidate}	${sid}
+"
+          fi
+        done < <(find ".solon/sprints/${sid}/${feat}" -type f 2>/dev/null || true)
+      done
+      if [[ -n "${file_sprint_lines}" ]]; then
+        # For each distinct file, count distinct sprints — 2+ = conflict.
+        while IFS= read -r conflicting_file; do
+          [[ -n "${conflicting_file}" ]] || continue
+          conflict_sprints="$(printf '%s\n' "${file_sprint_lines}" | awk -F'\t' -v f="${conflicting_file}" '$1==f {print $2}' | sort -u | paste -sd, -)"
+          conflict_count="$(printf '%s' "${conflict_sprints}" | tr ',' '\n' | grep -c .)"
+          if [[ "${conflict_count}" -ge 2 ]]; then
+            echo "${SCRIPT_NAME}: N:M FAIL — feat '${feat}' file '${conflicting_file}' modified by ${conflict_count} active sprints: ${conflict_sprints}" >&2
+            fail=$((fail + 1))
+          fi
+        done < <(printf '%s\n' "${file_sprint_lines}" | awk -F'\t' '{print $1}' | sort -u)
+      fi
+    done < <(printf '%s\n' "${feat_sprint_lines}" | awk -F'\t' '{print $1}' | sort -u)
+  fi
+fi
 
 # 3. sprint.yml schema (sfs-sprint-yml-validator.sh --mode validate 위임)
 validator="${SCRIPT_DIR}/sfs-sprint-yml-validator.sh"
 if [[ -x "${validator}" ]]; then
-  # TODO chunk N (R-F F-1 / R-B B-5): 실 sprint.yml file iterate + validator 호출.
-  printf 'sfs-storage-precommit: sprint.yml validator placeholder (%s)\n' "${validator}"
+  checks_run=$((checks_run + 1))
+  while IFS= read -r yml; do
+    if ! "${validator}" --mode validate "${yml}" >/dev/null 2>&1; then
+      echo "${SCRIPT_NAME}: sprint.yml schema FAIL — ${yml}" >&2
+      fail=$((fail + 1))
+    fi
+  done < <(find .solon/sprints sprints -name 'sprint.yml' -type f 2>/dev/null || true)
 else
   printf 'sfs-storage-precommit: sprint.yml validator missing (%s) — advisory skip\n' "${validator}" >&2
 fi
 
 if [[ "${fail}" -ne 0 ]]; then
   case "${mode}" in
-    strict) exit 1 ;;
+    strict)
+      printf 'sfs-storage-precommit: STRICT FAIL — %d issues across %d checks\n' "${fail}" "${checks_run}" >&2
+      exit 1
+      ;;
     advisory)
-      printf 'sfs-storage-precommit: advisory mode — exit 0 despite %d failures\n' "${fail}" >&2
+      printf 'sfs-storage-precommit: advisory mode — exit 0 despite %d failures across %d checks\n' "${fail}" "${checks_run}" >&2
       exit 0
       ;;
   esac
 fi
 
+printf 'sfs-storage-precommit: OK — %d checks, 0 failures (mode=%s, root=%s)\n' "${checks_run}" "${mode}" "${repo_root}"
 exit 0

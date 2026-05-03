@@ -6,8 +6,8 @@
 # partial commit / interrupted mid-way 시 working tree 자동 복구.
 #
 # Usage:
-#   sfs-migrate-artifacts-rollback.sh --commit-sha <sha> [--snapshot-iso <ISO>]
-#   sfs-migrate-artifacts-rollback.sh --from-snapshot <ISO>
+#   sfs-migrate-artifacts-rollback.sh --commit-sha <sha> [--snapshot-iso <ISO>] [--root <r>]
+#   sfs-migrate-artifacts-rollback.sh --from-snapshot <ISO> [--root <r>]
 #
 # Exit codes:
 #   0  = OK (working tree restored)
@@ -15,8 +15,8 @@
 #   2  = invalid arg
 #   3  = rollback fail (snapshot missing or git revert conflict)
 #
-# AC reference: AC3.6 (rollback git revert + atomic), AC10.4 (rollback-from-snapshot), AC10.5 (interrupted-midway recovery), AC2.9 (atomic Layer 1 movement).
-# Implementation: chunk 1 = skeleton + arg parse + git revert wrap. 실 atomic rollback + snapshot restore = 다음 chunk (R-H H-3, H-5).
+# AC reference: AC3.6 (rollback git revert + atomic), AC10.4 (rollback-from-snapshot),
+#               AC10.5 (interrupted-midway recovery), AC2.9 (atomic Layer 1 movement).
 
 set -euo pipefail
 
@@ -27,12 +27,12 @@ usage() {
 sfs-migrate-artifacts-rollback — git revert + Layer 1 atomic rollback helper
 
 Usage:
-  sfs-migrate-artifacts-rollback.sh --commit-sha <sha> [--snapshot-iso <ISO>]
-  sfs-migrate-artifacts-rollback.sh --from-snapshot <ISO>
+  sfs-migrate-artifacts-rollback.sh --commit-sha <sha> [--snapshot-iso <ISO>] [--root <r>]
+  sfs-migrate-artifacts-rollback.sh --from-snapshot <ISO> [--root <r>]
 
 Modes:
   --commit-sha <sha>             git revert <sha> + Layer 1 atomic rollback
-  --from-snapshot <ISO>          pre-migrate snapshot (.sfs-local/archives/pre-migrate-<ISO>/) 으로 restore
+  --from-snapshot <ISO>          pre-migrate snapshot (.sfs-local/archives/pre-migrate-<ISO>/) restore
 
 Atomic safety:
   - working tree dirty detect → exit 1 with stash 권장 message
@@ -44,6 +44,7 @@ EOF
 mode=""
 commit_sha=""
 snapshot_iso=""
+repo_root=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -65,6 +66,10 @@ while [[ $# -gt 0 ]]; do
       snapshot_iso="${2:-}"
       shift 2 || { echo "${SCRIPT_NAME}: --snapshot-iso requires <ISO>" >&2; exit 2; }
       ;;
+    --root)
+      repo_root="${2:-}"
+      shift 2 || { echo "${SCRIPT_NAME}: --root requires <path>" >&2; exit 2; }
+      ;;
     *)
       echo "${SCRIPT_NAME}: unknown arg: $1" >&2
       usage >&2
@@ -79,7 +84,13 @@ if [[ -z "${mode}" ]]; then
   exit 2
 fi
 
-# working tree dirty detect
+if [[ -z "${repo_root}" ]]; then
+  repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+fi
+[[ -d "${repo_root}" ]] || { echo "${SCRIPT_NAME}: repo_root not a directory: ${repo_root}" >&2; exit 1; }
+cd "${repo_root}"
+
+# working tree dirty detect (working tree must be clean for atomic rollback).
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
     echo "${SCRIPT_NAME}: working tree dirty — git stash 또는 commit 후 재실행" >&2
@@ -87,33 +98,61 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   fi
 fi
 
-# SIGINT/SIGTERM trap
+# SIGINT/SIGTERM trap: restore from snapshot if specified.
+SNAPSHOT_DIR_FOR_INT=""
 on_interrupt() {
-  echo "${SCRIPT_NAME}: SIGINT/SIGTERM received — restore from snapshot (placeholder, chunk N R-H H-5)" >&2
+  echo "${SCRIPT_NAME}: SIGINT/SIGTERM received — atomic snapshot restore" >&2
+  if [[ -n "${SNAPSHOT_DIR_FOR_INT}" ]] && [[ -d "${SNAPSHOT_DIR_FOR_INT}/files" ]]; then
+    cp -a "${SNAPSHOT_DIR_FOR_INT}/files/." "${repo_root}/"
+  fi
   exit 4
 }
 trap 'on_interrupt' INT TERM
 
+restore_from_snapshot_dir() {
+  local sd="$1"
+  if [[ ! -d "${sd}" ]]; then
+    echo "${SCRIPT_NAME}: snapshot dir not found: ${sd}" >&2
+    return 3
+  fi
+  local manifest="${sd}/manifest.json"
+  if [[ ! -f "${manifest}" ]]; then
+    echo "${SCRIPT_NAME}: snapshot manifest not found: ${manifest}" >&2
+    return 3
+  fi
+  if [[ ! -d "${sd}/files" ]]; then
+    echo "${SCRIPT_NAME}: snapshot files/ not found: ${sd}/files" >&2
+    return 3
+  fi
+  cp -a "${sd}/files/." "${repo_root}/"
+  printf 'sfs-migrate-artifacts-rollback: restored from %s (manifest: %s)\n' "${sd}" "${manifest}"
+}
+
 case "${mode}" in
   commit)
-    # TODO chunk N (R-C C-6):
-    #   1. git revert ${commit_sha} (--no-edit 권장 default)
-    #   2. revert conflict 시 snapshot_iso 있으면 snapshot restore + exit 0
-    #   3. snapshot 없고 conflict 시 git revert --abort + exit 3
-    printf 'sfs-migrate-artifacts-rollback: --commit-sha=%s placeholder (chunk N R-C C-6)\n' "${commit_sha}"
-    ;;
-  snapshot)
-    snapshot_dir=".sfs-local/archives/pre-migrate-${snapshot_iso}"
-    if [[ ! -d "${snapshot_dir}" ]]; then
-      echo "${SCRIPT_NAME}: snapshot dir not found: ${snapshot_dir}" >&2
+    # Locate snapshot if --snapshot-iso provided.
+    if [[ -n "${snapshot_iso}" ]]; then
+      SNAPSHOT_DIR_FOR_INT=".sfs-local/archives/pre-migrate-${snapshot_iso}"
+    fi
+    # git revert (no-edit) the migrate commit.
+    if ! git revert --no-edit "${commit_sha}" 2>&1; then
+      echo "${SCRIPT_NAME}: git revert ${commit_sha} failed" >&2
+      git revert --abort 2>/dev/null || true
+      if [[ -n "${SNAPSHOT_DIR_FOR_INT}" ]] && [[ -d "${SNAPSHOT_DIR_FOR_INT}" ]]; then
+        echo "${SCRIPT_NAME}: attempting snapshot restore" >&2
+        if restore_from_snapshot_dir "${SNAPSHOT_DIR_FOR_INT}"; then
+          exit 0
+        fi
+      fi
       exit 3
     fi
-    # TODO chunk N (R-H H-3):
-    #   1. snapshot manifest.json read (9 required fields)
-    #   2. files[] iterate → 원래 path 로 restore + sha256 verify
-    #   3. skipped[] 는 무시 (extension filter 거부 file)
-    #   4. anti-AC10 verify (file count + sha256 sum 정합)
-    printf 'sfs-migrate-artifacts-rollback: --from-snapshot=%s placeholder (chunk N R-H H-3)\n' "${snapshot_iso}"
+    printf 'sfs-migrate-artifacts-rollback: git revert %s OK\n' "${commit_sha}"
+    ;;
+
+  snapshot)
+    snapshot_dir=".sfs-local/archives/pre-migrate-${snapshot_iso}"
+    SNAPSHOT_DIR_FOR_INT="${snapshot_dir}"
+    restore_from_snapshot_dir "${snapshot_dir}" || exit 3
     ;;
 esac
 exit 0

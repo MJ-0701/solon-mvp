@@ -1,0 +1,9 @@
+sprint_id: bad-02
+status: BOGUS_STATUS
+features: []
+dependencies: []
+completion_criteria: []
+milestones: []
+created_at: 2026-05-04
+closed_at: null
+# expected fail reason: status not in enum (draft|in-progress|ready-for-*|closed|abandoned)
