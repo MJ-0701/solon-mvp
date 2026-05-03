@@ -2,8 +2,8 @@
 doc_id: sfs-v0.4-progress-live
 title: "PROGRESS — live single-frame snapshot (compact)"
 version: live
-last_overwrite: 2026-05-03T15:00:00+09:00
-session: "claude-cowork:determined-focused-galileo — 0.5.96-product slash-command zero-file discovery hotfix shipped 2026-05-03 KST · verify 7/7 green · mutex released"
+last_overwrite: 2026-05-03T15:30:00+09:00
+session: "claude-cowork:determined-focused-galileo — 0.5.96-product shipped + §4.D 0.6.0-product spec brain-dump received (7 decisions resolved, 7 sub-questions queued for next brainstorm) · mutex released"
 
 # ── ENTRY POINTERS (2-file entry) ────────────────────────────────
 current_wu: null
@@ -20,6 +20,11 @@ current_wu_owner:
 # ── SCHEDULED TRACE (scripts/append-scheduled-task-log.sh) ───────
 # newest-first. rolling tail is allowed to be shorter than N during compaction.
 scheduled_task_log:
+  - ts: 2026-05-03T15:30:00+09:00
+    codename: determined-focused-galileo
+    check_exit: 0
+    action: "Mid-session §4.D brain-dump received from user (mobile). 7 decisions resolved (AS-D1~D6 + AS-Migration) — see HANDOFF §4.D.1. 7 sub-questions deferred to next-session brainstorm gate (HANDOFF §4.D.2). HANDOFF §4 reordered: §4.D = TOP, §4.A 서스테이닝, §4.B/C lower. PROGRESS resume_hint + safety_locks rewritten for §4.D-first. Mutex re-released. Real axis = SFS 6 철학 codification + Deep Module 설계 framework + storage redesign — bigger than original storage-only framing."
+    ahead_delta: "+1"
   - ts: 2026-05-03T15:00:00+09:00
     codename: determined-focused-galileo
     check_exit: 0
@@ -227,26 +232,36 @@ resume_hint:
   default_action: |
     1) Read `CLAUDE.md`, then `PROGRESS.md`.
     2) Run: `bash 2026-04-19-sfs-v0.4/scripts/resume-session-check.sh` (expect exit 0).
-    3) Read `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` — §4 lists
-       three named candidates: §4.A (0.5.97-product dashboard, D1'
-       deferred from 0.5.96), §4.B (MD split queue, NOW UNLOCKED after
-       0.5.96 7/7), §4.C (release-tooling polish: verify --yes, cut-release
-       default retarget, scripts/update-product-taps.sh).
-    4) Ask user which candidate to proceed with. No autonomous pick —
-       all three are valid trade-offs (feature / docs hygiene / tooling
-       polish).
+    3) Read `2026-04-19-sfs-v0.4/HANDOFF-next-session.md` §4.D in FULL —
+       this is the TOP priority. 7 user decisions (AS-D1~D6 +
+       AS-Migration) already resolved 2026-05-03. 7 sub-questions
+       deferred to next-session brainstorm gate (§4.D.2).
+    4) Confirm with user one-liner before launching: "§4.D
+       (0.6.0-product storage architecture + SFS identity codification +
+       Deep Module 설계) brainstorm gate 시작?" (default = yes per
+       prior decisions). User can pivot to §4.A/B/C if priorities
+       changed.
+    5) Once confirmed, run: `sfs brainstorm --hard "0.6.0-product
+       storage architecture redesign + SFS identity codification + Deep
+       Module 설계 framework"` and proceed through the 7-gate cycle on
+       the docset (NOT on a feature codebase — this is a docset-design
+       sprint).
   on_skip_patterns: ["아니", "잠깐", "다른", "stop", "다른거"]
-  on_skip_action: "0.5.96-product slash-command zero-file discovery shipped 2026-05-03 (verify 7/7 green). Three queued candidates per HANDOFF §4: (A) 0.5.97-product dashboard (D1'), (B) MD split queue (now unlocked), (C) release-tooling polish (verify --yes / cut-release default retarget / update-product-taps.sh). Pick one or describe a different priority."
-  on_ambiguous: "Latest product release is `0.5.96-product` (shipped 2026-05-03). Three candidates queued per HANDOFF §4: 0.5.97 dashboard, MD split, release-tooling polish. Which one?"
+  on_skip_action: "TOP priority is §4.D (0.6.0-product storage architecture redesign + SFS identity codification + Deep Module 설계 framework). 7 user decisions already resolved. Other candidates are §4.A 0.5.97 dashboard (서스테이닝), §4.B MD split queue, §4.C release-tooling polish. Pick one or describe a different priority."
+  on_ambiguous: "Latest product release `0.5.96-product` (2026-05-03). TOP queued = §4.D (0.6.0-product storage architecture + SFS identity codification + Deep Module 설계 framework, HANDOFF §4.D, 7 decisions already resolved). Start §4.D brainstorm gate, or pivot to §4.A/B/C?"
   safety_locks:
     - "self-validation-forbidden: A/B/C 의미 결정은 사용자에게만"
     - "no destructive git"
     - "0.5.96-product surface (.claude-plugin/, plugins/, gemini-extension.json, commands/, scripts/install-cli-discovery.{sh,ps1}, scripts/sfs-doctor.sh, templates/codex-skill/, tests/test-cli-discovery-*, .github/workflows/sfs-cli-discovery.yml) is now baseline — do not remove without explicit follow-up release decision."
+    - "§4.D (0.6.0-product TOP): 7 decisions ALREADY resolved (AS-D1=b feature gate / AS-D2=b sprint retro only, '남겨야 될 것만 남긴다' / AS-D3=C hybrid co-location / AS-D4=a+d archive branch + future S3 / AS-D5=b feature folder accumulates sprints + 병렬 conflict-free 보장 / AS-D6=b 반자동 정제 / AS-Migration=반자동 AI propose+user accept). Do NOT re-open these decisions — only the 7 sub-questions in HANDOFF §4.D.2 are open."
+    - "§4.D real axis: SFS 6 철학 codification + Deep Module 설계 framework + storage redesign + N:M handling + improve-codebase-architecture subcommand. NOT a simple storage refactor."
+    - "§4.D Deep Module dogma: 인터페이스=user 직접 설계 (brainstorm), 구현=AI 통으로 (구현 agent 별도), 검증=interface 단위 (critical 도메인은 내부까지). Shallow module 금기 — context rot 야기."
     - "MD split (§4.B): pre-flight reference scan required + frontmatter 11 fields required + parent link stub required + atomic commit + resume-session-check exit 0 verification."
-    - "MD split (§4.B): NOW UNLOCKED (§4.A 0.5.96-product 7/7 verified 2026-05-03)."
+    - "MD split (§4.B): NOW UNLOCKED (§4.A 0.5.96-product 7/7 verified 2026-05-03). Lower priority than §4.D."
     - "MD split (§4.B): never touch DO NOT split list (CHANGELOG, templates/**, archives/**, root redirect stubs, .claude/agents/*, .agents/skills/*, .gemini/commands/*.toml, .sfs-local/**, recent-trim solon-mvp-dist/GUIDE.md/BEGINNER-GUIDE.md/README.md, 0.5.96 surface above)."
-    - "Release tooling polish (§4.C): verify-product-release.sh interactive prompts (need --yes), cut-release.sh default STABLE_REPO=~/workspace/solon-mvp stale (need ~/tmp/solon-product retarget), Brew/Scoop tap update manual ritual (need scripts/update-product-taps.sh)."
-  last_written: 2026-05-03T06:00:00Z
+    - "Release tooling polish (§4.C): verify-product-release.sh interactive prompts (need --yes), cut-release.sh default STABLE_REPO=~/workspace/solon-mvp stale (need ~/tmp/solon-product retarget), Brew/Scoop tap update manual ritual (need scripts/update-product-taps.sh). Lower priority than §4.D."
+    - "§4.A 0.5.97 dashboard: 서스테이닝 — 우선순위 낮음 (user 2026-05-03)."
+  last_written: 2026-05-03T06:30:00Z
 ---
 
 # PROGRESS — compact
@@ -312,33 +327,31 @@ Full pre-compaction snapshot (verbatim): `archives/progress/PROGRESS-2026-05-01T
 
 ## ③ Next
 
-User picks at next session entry. Three named candidates (ordered by
-prior decisions + this release's retro):
+**TOP = §4.D 0.6.0-product storage architecture redesign + SFS identity
+codification + Deep Module 설계 framework**. 7 user decisions resolved
+2026-05-03 KST (AS-D1~D6 + AS-Migration). Full spec at HANDOFF §4.D.
 
-1. **0.5.97-product dashboard** (D1' user-deferred during 0.5.96):
-   산출물 관리 dashboard surface. Surface candidates from research §11:
-   (i) `/sfs status` ASCII-grid extension, (ii) `sfs dashboard` separate
-   binary subcommand, (iii) HTML artifact written to
-   `.sfs-local/dashboard.html`, (iv) MCP server (rejected per token cost).
-   Spec writeup needed before implementation.
+§4.D 의 진짜 axis (user 답변 mid-session 발본):
+1. SFS 6 철학 codification (Grill Me / Ubiquitous Language / TDD 헤드라이트
+   추월 X / Deep Module / Gray Box / 매일 system 설계).
+2. Deep Module 설계 framework (인터페이스=user, 구현=AI 통으로,
+   검증=interface 단위).
+3. Storage redesign (Layer 1 영구 + Layer 2 작업 히스토리 분리).
+4. N:M sprint × feature 매핑 자연 표현 + 병렬 conflict-free 보장.
+5. 신규 subcommand `improve-codebase-architecture-to-deep-modules` 후보.
 
-2. **§4.B MD split queue** (HANDOFF §4.B was gated by §4.A 7/7 — now
-   unlocked). `MD-SIZE-AUDIT-2026-05-03.md` Tier 1 order:
-   `07-plugin-distribution.md` (1022) → `05-gate-framework.md` (956) →
-   `02-design-principles.md` (940) → `10-phase1-implementation.md` (827)
-   → `08-observability.md` (709) → `04-pdca-redef.md` (645) →
-   `03-c-level-matrix.md` (622) → `06-escalate-plan.md` (605). Per-split
-   flow + 11-field frontmatter discipline per audit doc.
+다음 session entry = `sfs brainstorm --hard "0.6.0-product storage
+architecture redesign + SFS identity codification + Deep Module 설계
+framework"` 부터 시작 — 7 deferred sub-question (HANDOFF §4.D.2) 정제.
 
-3. **0.5.97-product release-tooling polish** (3 retro items captured
-   this release, all 0.5.97 candidates):
-     a. `verify-product-release.sh --yes` flag — current script leaks
-        4-5 interactive prompts mid-run that block CI / one-shot release.
-     b. `cut-release.sh` default `STABLE_REPO=${HOME}/workspace/solon-mvp`
-        retarget to `${HOME}/tmp/solon-product` (the actual current path).
-        Today every release requires `SOLON_STABLE_REPO=...` env override.
-     c. `scripts/update-product-taps.sh` — automate the manual Brew
-        formula + Scoop manifest edit ritual (5-min/release manual cost).
+### 후순위 candidates (§4.D landed 후 user 가 timing 콜)
+
+- **§4.A 0.5.97-product dashboard** (D1' deferred). 우선순위 낮음
+  (서스테이닝, user 2026-05-03).
+- **§4.B MD split queue** (Tier 1 8 docs). HANDOFF §4.A 7/7 통과로 unlock.
+- **§4.C release-tooling polish** (verify --yes / cut-release default
+  retarget / scripts/update-product-taps.sh). 본 0.5.96 release 의 3
+  retro item.
 
 ## ④ Artifacts
 
