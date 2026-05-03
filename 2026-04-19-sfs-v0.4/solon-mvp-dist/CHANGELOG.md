@@ -43,6 +43,19 @@
 - R-H AC10.1~AC10.5: source matrix `--print-matrix` JSON Lines schema + backup manifest 9 field + `--rollback-from-snapshot` 실 restore + interrupted-midway recovery + no-data-loss anti-AC10 verify.
 - R-I AC11/AC12/AC13: release sequence enforce + cross-platform hash parity + workflow permissions hardening.
 
+### Chunk 2 (Code runtime, 2026-05-04 KST) — implementation lock
+
+- **R-B real logic** — `sfs-storage-init.sh` slug regex enforcement + Layer 1/2 atomic mkdir + co-location pre-flight; `sfs-storage-precommit.sh` 3 validators (co-location FAIL, N:M conflict via active-sprint cross-touch detect, sprint.yml schema delegate) with `--strict|--advisory` mode; `sfs-archive-branch-sync.sh` flock(1) primary + advisory PID lock fallback + atomic snapshot pre-mv. **bash 3.2 compatible** (no `declare -A`).
+- **R-C/R-H real logic** — `sfs-migrate-artifacts.sh` 7 modes (interactive / apply / auto / backfill / rollback / rollback-snapshot / print-matrix). 6 enumerated Pass 1 prompts (Q-A~Q-F deterministic). JSON Lines matrix (6 fields, action enum, null semantics for delete/skip). 9-field backup manifest + 11-extension default snapshot filter (`--snapshot-include-all` opt-in). SIGINT/SIGTERM atomic rollback trap. `sfs-migrate-artifacts-rollback.sh` git revert + snapshot fallback + working-tree dirty safety.
+- **R-E real logic** — `sfs-upgrade-deprecation.sh` consumer version classify (0.6.x silent / 0.5.x pre-grace warn + `--opt-in 0.6-storage` invoke / 0.5.x post-grace forced migrate + `--commit` opt-in + dirty WT guard + idempotence). `bin/sfs upgrade_command` extended with `--opt-in` and `--commit` flags + deprecation hook.
+- **R-F real logic** — `sfs-sprint-yml-validator.sh` validate (8 fields + status enum + dependencies semantics) and close (path resolution + interactive prompt or `--force-action` + gzip archive or delete) two-mode dispatch.
+- **R-G audit + release discovery** — `bin/sfs latest_release_version()` accepts both legacy `v*-product` and new suffix-drop `v[0-9]*` semver. `sfs_parse_product_version()` likewise. `packaging/homebrew/sfs.rb` and `packaging/scoop/sfs.json` materialized with `__SHA256_PLACEHOLDER_FOR_RELEASE_CUT__` (release tool sed at cut time).
+- **R-I real logic** — `sfs-release-sequence.sh` 3-phase enforcement (tag-push → audit → tap-update) with state markers. `.gitattributes` LF normalization for SFS artifact extensions.
+- **R-D tests + CI** — 16 `tests/test-*.sh` + `tests/run-all.sh` harness + 3 `tests/fixtures/bad-sprint-yml/*.yml` + `tests/scoop-manifest-validate.sh`. `.github/workflows/sfs-pr-check.yml` + `.github/workflows/sfs-0-6-storage.yml` shipped (AC2.6 mandatory + AC4.3 macOS+Ubuntu+Windows matrix + AC4.4 cross-instance verify + AC4.4.4/AC4.6 isolated log-masking + AC13 explicit `permissions: contents: read`). Existing `windows-scoop-smoke.yml` patched with permissions block.
+- **AC9 verified** — `git diff 03f36de -- 2026-04-19-sfs-v0.4/SFS-PHILOSOPHY.md` = 0 lines (spec sprint immutability preserved).
+- **`bash tests/run-all.sh`** = **17/17 PASS** locally.
+- **AC4.3 / AC4.5 / AC7.4 / AC7.5 (real toolchain runs)** explicitly deferred to chunk 3 release cut (see implement.md §5).
+
 ---
 
 ## [0.5.96-product] - 2026-05-03

@@ -1,1 +1,3 @@
 0.6.0
+# Released: 2026-05-04 (chunk 2 atomic 5-file commit — AC1.4 + AC7.9)
+# Hard-cut from -product suffix; consumers see semver only from 0.6.0 onwards.
