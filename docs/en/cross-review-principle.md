@@ -107,10 +107,39 @@ explicit about:
   surface.** This case is the proof: three models passing on one surface
   was weaker than one user dogfooding on macOS bash 3.2.
 
+## Receipts (observed cascade — 0.6.1 → 0.6.4 in under 24h)
+
+The principle was validated three times, not once — on the **same source
+line of the same release flow**. Each layer of the same blind-spot class
+(monocultural test surface against an external CLI / runtime dimension)
+peeled off, and the first real user's macOS shell caught the next layer.
+
+| Receipt | release | source | What broke | Which surface caught it |
+|---|---|---|---|---|
+| #1 | 0.6.1 → 0.6.2 | `bin/sfs:848` `dep_args[@]` | macOS bash 3.2 + `set -u` empty-array expansion | macOS Homebrew bash 3.2 (different nounset behavior from Linux CI bash 5.x) |
+| #2 | 0.6.2 → 0.6.3 | `scripts/sfs-release-sequence.sh:124` `brew audit --new-formula` | Homebrew removed the `--new-formula` flag | First real user's current Homebrew install (CI surface had no `brew`) |
+| #3 | 0.6.3 → 0.6.4 | same line — `brew audit "${formula}"` | Homebrew disabled path-form `brew audit` | Same macOS Homebrew, next layer |
+
+What the cascade reveals:
+
+- **The default-surface trap of monocultural CI is self-reinforcing.**
+  Fixing `--new-formula` immediately exposed the path-form removal in the
+  very next attempt — proof that "external CLI change" is a **continuous
+  surface**, not a one-off. Without a maintainer-macOS-shell evidence
+  trail in the release flow, every build/review pass hides another layer.
+- **Model diversity does not solve this.** None of the three receipts was
+  pre-empted by Codex / Claude / Gemini review alone. The structural fix
+  is to put a real macOS Homebrew step into the CI/release matrix
+  (= surface diversity).
+- **Round-trip time as a process signal.** The fact that receipts #1 → #2
+  → #3 fell within 24h shows the user-dogfood stage was already designed
+  into the release flow — cross-review isn't a process accident here, it's
+  an intended step.
+
 ## In one sentence
 
 > **Cross-review's value comes from surface diversity, not model count.
-> The 0.6.1 → 0.6.2 hotfix is the receipt for that claim.**
+> Receipts #1–#3 across 0.6.1 → 0.6.4 are the evidence for that claim.**
 
 ## See also
 

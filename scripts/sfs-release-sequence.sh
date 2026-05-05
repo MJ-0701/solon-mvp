@@ -116,20 +116,25 @@ case "${phase}" in
 
   audit)
     if [[ "${dry_run}" == "1" ]]; then
-      printf '[dry-run] brew audit --strict --online sfs + scoop manifest schema validate\n'
+      printf '[dry-run] brew style packaging/homebrew/sfs.rb + scoop manifest schema validate\n'
     else
       if command -v brew >/dev/null 2>&1; then
         formula="${DIST_DIR}/packaging/homebrew/sfs.rb"
         if [[ -f "${formula}" ]]; then
-          # 0.6.3 hotfix: the previously-used Homebrew flag was removed
-          # upstream (now exits with "invalid option"). The original intent
-          # was a strict + online release-time audit on a tap-private
-          # formula, which is exactly `--strict --online`. We deliberately
-          # do NOT use `--new`, because `--new` runs additional checks meant
-          # for first-time submission into Homebrew core, which would
-          # falsely fail tap-only formulas. Regression-guarded by
-          # tests/test-no-deprecated-cli-flags.sh.
-          brew audit --strict --online "${formula}" || { echo "brew audit FAIL"; exit 1; }
+          # 0.6.4 hotfix: Homebrew (a) removed the previously-used `--new-formula`
+          # flag (0.6.3 fix), and (b) disabled `brew audit [path ...]` entirely —
+          # `brew audit` now only accepts formula NAMES, not file paths. So the
+          # pre-publish (path-based) check at this phase has to use `brew style`,
+          # which is the path-friendly RuboCop linter. This catches style /
+          # syntax issues before tap-update.
+          # NOTE: the full strict + online audit (URL availability, license,
+          # license parity, etc.) can no longer run on a path. After tap-update
+          # publishes the formula, run `brew audit --strict --online sfs` (by
+          # name, against the installed tap) as a post-publish verification
+          # step. Tracked as a follow-up in CHANGELOG `[0.6.4]` Process
+          # learning.
+          # Regression-guarded by tests/test-no-deprecated-cli-flags.sh.
+          brew style "${formula}" || { echo "brew style FAIL"; exit 1; }
         else
           echo "${SCRIPT_NAME}: brew formula missing — using template (release-cut will materialize sha256)" >&2
         fi

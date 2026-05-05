@@ -108,10 +108,39 @@ surface** 위에 서기 때문이다.
   예시다. 셋 다 같은 surface 위에서 통과시킨 것보다, 한 명이라도 macOS
   bash 3.2 위에서 dogfood 하는 것이 강했다.
 
+## Receipts (실측 cascade — 0.6.1 → 0.6.4, 24h 이내)
+
+본 명제는 한 번이 아니라 **같은 release flow 의 한 source line 에서 연이어
+3 번** 검증되었다. 같은 blind-spot 클래스 (외부 CLI / runtime 환경 차원의
+monocultural test surface) 가 한 layer 씩 벗겨질 때마다 첫 실사용자의
+macOS shell 이 다음 layer 를 잡아냈다.
+
+| Receipt | release | 진단 source | 무엇이 죽었나 | 어느 surface 가 잡았나 |
+|---|---|---|---|---|
+| #1 | 0.6.1 → 0.6.2 | `bin/sfs:848` `dep_args[@]` | macOS bash 3.2 + `set -u` 의 빈 배열 expansion | macOS Homebrew bash 3.2 (Linux CI bash 5.x 와 다른 nounset 동작) |
+| #2 | 0.6.2 → 0.6.3 | `scripts/sfs-release-sequence.sh:124` `brew audit --new-formula` | Homebrew 가 `--new-formula` 옵션 제거 | 첫 실사용자의 최신 Homebrew 설치본 (CI 의 brew 미설치 surface 와 다름) |
+| #3 | 0.6.3 → 0.6.4 | 같은 라인 — `brew audit "${formula}"` | Homebrew 가 path-form `brew audit` 를 disable | 다시 같은 macOS Homebrew |
+
+이 cascade 가 보여주는 것:
+
+- **monocultural CI 가 미는 default surface 의 자기-강화 함정** — `--new-formula`
+  를 고친 후에도 다음 시도에서 곧바로 path-form 까지 막혔다는 사실은,
+  "외부 CLI 의 변경" 자체가 **연속 표면 (continuous surface)** 이라는 점.
+  release flow 가 maintainer 의 macOS 셸 위에서 진짜로 한 번 돌아 evidence
+  를 남기지 않으면, build/review 가 통과해도 다음 layer 에서 또 죽는다.
+- **모델 다양성으로 해결되지 않는다** — 본 cascade 의 어느 step 에서도
+  Codex / Claude / Gemini 의 review 만으로는 사전 차단이 안 됐다. CI matrix
+  에 macOS Homebrew 단계를 의도적으로 박는 것 (= surface 다양화) 이 본질적
+  fix.
+- **Diagnostic round-trip 비용** — receipt #1 → #2 → #3 사이의 시간이 짧을
+  수록 (24h) 사용자 dogfood 단계가 release process 의 design 에 박혀
+  있었다는 신호. cross-review 가 process 우연이 아니라 의도된 단계로
+  존재해서 가능한 일.
+
 ## 한 줄 정리
 
 > **Cross-review 의 가치는 모델의 수가 아니라 surface 의 다양성에서 나온다.
-> 0.6.1 → 0.6.2 의 hotfix 는 그 명제의 receipt 다.**
+> 0.6.1 → 0.6.4 의 receipt 3 개가 그 명제의 evidence 다.**
 
 ## 참고
 

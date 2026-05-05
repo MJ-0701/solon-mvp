@@ -1,3 +1,60 @@
+## [0.6.4] - 2026-05-05
+
+> **Hotfix.** 0.6.3 도 release-sequence audit phase 가 다음 wall 에 부딪힘:
+> Homebrew 가 `brew audit [path ...]` 자체를 disable 한 상태 (`Calling \`brew
+> audit [path ...]\` is disabled! Use \`brew audit [name ...]\` instead.`).
+> 즉 0.6.1 → 0.6.2 → 0.6.3 → 0.6.4 가 **같은 한 source line** 에서 외부 CLI
+> 의 서로 다른 deprecation layer 를 한 번에 하나씩 받아낸 cascade. 본 cascade
+> 자체가 cross-review-principle 의 강한 evidence — 자세한 정리는
+> [docs/ko/cross-review-principle.md](docs/ko/cross-review-principle.md)
+> ([English](docs/en/cross-review-principle.md)) 의 Receipts 섹션.
+
+### Fixed
+
+- **`scripts/sfs-release-sequence.sh` audit phase: path-form `brew audit`
+  교체** — Homebrew 가 path argument 형태를 disable. `brew audit` 는 이제
+  formula NAME 만 받음. 기존 호출 `brew audit --strict --online "${formula}"`
+  (path 변수) 는 즉시 fail.
+  - **Fix**: 동일 phase 의 path-based pre-publish 체크를 `brew style
+    "${formula}"` 로 교체. RuboCop 기반 style/syntax 린트 — 가장 path-friendly
+    한 등가물.
+  - **Loss**: URL 가용성 / 라이선스 / 라이선스 패리티 등의 strict + online
+    체크는 path 기반으로 더 이상 못 돌림. 이건 tap-update 이후 publish 된
+    name 에 대해 `brew audit --strict --online sfs` (이름 기준) 으로 돌려야
+    함. 본 release 는 그 단계를 doc 에만 남기고 phase 로 넣진 않음 (phase
+    재구성은 hotfix 범위 밖).
+
+### Added
+
+- **회귀 테스트 보강** — `tests/test-no-deprecated-cli-flags.sh` 에:
+  - `brew audit "${...}"` 처럼 path-like quoted 변수를 인자로 받는 호출 형
+    태가 다시 들어오면 fail.
+  - 반대로 `brew style ...` 가 audit phase 에 살아 있는지 positive check.
+  - 기존 `--new-formula` 검사도 같이 유지하되, **comment 라인은 스킵**
+    하도록 룰 보강 — 설명용 주석에서 deprecated flag 이름을 자유롭게 쓸 수
+    있게.
+
+### Process learning (3rd receipt for cross-review-principle)
+
+같은 release flow 가 24h 안에 외부 CLI 의 서로 다른 deprecation 3개를
+연이어 받아냈다 (`--new-formula` 제거 → path argument 제거 → ...). 이건
+"build agent 가 빌드/리뷰 다 통과시켰는데 첫 실사용자가 macOS 위에서
+처음 돌릴 때만 wall 이 보인다" 는 명제의 강한 receipt. 권장 follow-up:
+
+- **release-sequence 의 audit phase 를 사전 dogfood gate 로 격상**: CI 가
+  아니라 maintainer 의 macOS 셸에서 `--dry-run` + 실제 실행 둘 다 한 번씩
+  돌고 PASS 한 evidence 가 release 의 commit message 에 첨부되도록.
+- **post-publish full audit step 추가 (별도 sprint candidate)**: tap-update
+  이후 published formula name 에 대해 `brew audit --strict --online sfs`
+  를 자동 실행. 본 release 에는 포함하지 않음 — phase 재구성이 필요해
+  hotfix 범위 밖.
+
+### Verified
+
+- `tests/test-no-deprecated-cli-flags.sh` 단독 PASS (확장된 룰 포함).
+- `tests/test-nounset-empty-array-expansion.sh` 단독 PASS (regression
+  unaffected).
+
 ## [0.6.3] - 2026-05-05
 
 > **Hotfix.** 0.6.2 푸시 직후 사용자가 `bash scripts/sfs-release-sequence.sh
