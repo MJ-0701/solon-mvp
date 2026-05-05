@@ -1,3 +1,71 @@
+## [0.6.2] - 2026-05-05
+
+> **Hotfix.** 0.6.1 의 `sfs upgrade` (옵션 없이 실행 시) 가 macOS bash 3.2 +
+> `set -u` 환경에서 `dep_args[@]: unbound variable` 로 즉시 죽던 회귀를 수정.
+> 0.6.2 발견 경로 자체가 Solon cross-review 원칙의 canonical case study —
+> 자세한 내용은 [docs/ko/cross-review-principle.md](docs/ko/cross-review-principle.md)
+> ([English](docs/en/cross-review-principle.md)) 참조.
+
+### Fixed
+
+- **`sfs upgrade` empty-args crash on macOS bash 3.2** — `bin/sfs` 의
+  deprecation hook 이 빈 `dep_args` 배열을 `"${dep_args[@]}"` 로 펼치면서
+  bash 3.2 + `set -u` 의 nounset rule 에 걸려 죽던 문제. 0.6.1 release
+  pre-verification (`tests/run-all.sh` 30/30, `sfs doctor` 7/0/0) 은 Linux
+  bash 5.x 위에서만 돌아 본 클래스를 잡지 못했고, 첫 실사용자
+  (`brew install` 직후 `sfs upgrade` 실행) 시점에 Codex review 가 즉시 짚어
+  hotfix 로 이어짐.
+  - `${arr[@]+"${arr[@]}"}` parameter-expansion default idiom 으로 교체.
+    이미 `templates/.sfs-local-template/scripts/sfs-commit.sh` 가 같은 idiom
+    을 쓰고 있어 repo style 일치.
+- **`/sfs loop` worker spawn empty-flags crash (same class)** — 동일 패턴이
+  `templates/.sfs-local-template/scripts/sfs-loop.sh:1482` 에도 있었음.
+  `LOOP_DRY_RUN` / `LOOP_NO_MENTAL_COUPLING` 둘 다 미지정 시 `extra_flags`
+  가 비어 macOS bash 3.2 에서 같은 unbound variable 로 죽었을 케이스. 동일
+  idiom 적용.
+
+### Added
+
+- **`tests/test-nounset-empty-array-expansion.sh`** — 회귀 가드. (1) 두 fix
+  사이트의 idiom 정적 검증, (2) `set -u` 아래 빈 배열 expansion 의 런타임
+  검증, (3) `sfs upgrade` 호출 후 stderr 에 `dep_args[@]: unbound variable`
+  미출현 smoke check.
+
+### Audit notes
+
+다음 사이트들은 같은 패턴 (`<var>=()` + 후행 `"${var[@]}"` + `set -u`) 이지만
+호출 경로상 마스터 가드 (`[[ "${#arr[@]}" -eq 0 ]] && exit` 류) 가 막아서
+현재 reachable bug 없음. 그러나 스타일 불일치 — 후속 hardening PR 에서
+같은 idiom 으로 정리 권장:
+
+- `templates/.sfs-local-template/scripts/sfs-commit.sh` (SELECTED_PATHS 4 사이트)
+- `templates/.sfs-local-template/scripts/sfs-adopt.sh` (tar_items, count guard)
+- `templates/.sfs-local-template/scripts/sfs-common.sh` (source_paths, count guard)
+- `scripts/sfs-measure.sh` (REMAINING, parse_args guard)
+
+### Process learning
+
+- **Cross-review 의 본질은 "다른 모델" 이 아니라 "다른 evaluation surface"
+  의 다양성** — 0.6.1 의 build+review 파이프라인은 Codex / Claude / Gemini
+  모두 통과시켰지만 셋 다 동일한 CI runtime (Linux bash 5.x) 에서만 돌았다.
+  bash 3.2 idiom 호환성은 어떤 모델 review 로도 잡히지 않는 환경 차원이라
+  monocultural CI 에서 시스템적 blind spot 이었다. 첫 실사용자 (macOS
+  Homebrew + bash 3.2) 가 곧 cross-review 의 마지막 axis 였고, 이를
+  ‘process 의 우연’ 이 아니라 ‘design 으로 의도된 cross-review 단계’ 로 박아두는 것이 본
+  hotfix 가 남기는 evidence. 자세한 정리는 위의 cross-review-principle 문서.
+- **Test matrix 보강**: `tests/run-all.sh` 에 macOS bash 3.2 emulation 또는
+  `BASH_COMPAT=3.2` envelope 을 가진 별도 stage 추가는 후속 sprint candidate.
+
+### Verified
+
+- `tests/test-nounset-empty-array-expansion.sh` 단독 PASS (bin/sfs upgrade
+  smoke check 포함, stdin closed + timeout-safe).
+- 기존 `tests/run-all.sh` 의 실패 4건 (`test-hash-parity`,
+  `test-release-suffixless-hard-cut`, `test-sfs-archive-branch-sync`,
+  `test-sfs-migrate-quoted-paths`) 은 본 hotfix 와 무관 — 변경 파일 (`bin/sfs`,
+  `sfs-loop.sh`) 과 어휘적 / 호출 경로상 교집합 없음. 사용자 macOS 환경에서
+  release 전 30/30 재확인 권장.
+
 ## [0.6.1] - 2026-05-05
 
 ### Changed

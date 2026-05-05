@@ -845,7 +845,11 @@ upgrade_command() {
     local dep_args=()
     [[ -n "${opt_in}" ]] && dep_args+=(--opt-in "${opt_in}")
     [[ "${do_commit}" == "1" ]] && dep_args+=(--commit)
-    if ! bash "${deprecation_helper}" "${dep_args[@]}"; then
+    # 0.6.2 hotfix: macOS bash 3.2 + `set -u` crashes on `"${arr[@]}"` when arr
+    # is empty. The `${arr[@]+...}` parameter-expansion default keeps the
+    # invocation correct on bash 3.2 (substitute nothing) and bash 4.4+
+    # (substitute the expansion).
+    if ! bash "${deprecation_helper}" "${dep_args[@]+"${dep_args[@]}"}"; then
       echo "sfs upgrade: deprecation/forced-migrate step failed; resolve and retry." >&2
       return 1
     fi
