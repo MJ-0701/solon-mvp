@@ -2,9 +2,8 @@
 # .sfs-local/scripts/sfs-adopt.sh
 #
 # Solon SFS — `/sfs adopt [<brief>] [--apply]`.
-# Creates a compact legacy-baseline sprint for projects that already have code
-# and git history but no useful SFS sprint trail. The visible result is
-# report.md + retro.md only; raw scan evidence is kept under archives.
+# Creates one shared adoption summary for projects that already have code and
+# git history. Raw scan evidence and cold archives stay private under .sfs-local.
 
 set -euo pipefail
 
@@ -23,11 +22,11 @@ Adopt an existing legacy project into SFS without creating document sprawl.
   - Default is dry-run; it prints the baseline sprint and evidence sources.
   - Optional <brief> is a single-line user note, for example:
       /sfs adopt "docs cleanup and current-state handoff"
-  - --apply creates .sfs-local/sprints/<id>/report.md and retro.md only.
+  - --apply creates docs/solon/<id>-adoption-summary.md as the shared entry.
   - Existing visible sprint folders and expanded archive folders are collapsed
     into cold .tar.gz archives with short manifests.
   - Raw scan evidence is preserved in .sfs-local/archives/adopt/<id>/...
-  - The report separates evidence-backed facts from inferred next sprint ideas.
+  - The summary separates evidence-backed facts from inferred next sprint ideas.
   - Existing docs/sprint files are read as signals when present, but git/code
     history is the primary source because most legacy projects have no SFS docs.
 
@@ -414,16 +413,16 @@ if [[ -d "${SFS_SPRINTS_DIR}" ]]; then
 fi
 
 TARGET_DIR="${SFS_SPRINTS_DIR}/${SPRINT_ID}"
-REPORT_PATH="${TARGET_DIR}/report.md"
-RETRO_PATH="${TARGET_DIR}/retro.md"
 ARCHIVE_DIR="${SFS_ARCHIVES_DIR}/adopt/${SPRINT_ID}/${NOW//:/-}"
 ARCHIVE_DIR="${ARCHIVE_DIR//+/-}"
+SHARED_DOC_DIR="${SFS_SHARED_DOC_DIR:-docs/solon}"
+SHARED_DOC_PATH="${SHARED_DOC_DIR}/${SPRINT_ID}-adoption-summary.md"
 CURRENT_SPRINT=""
 if [[ -f "${SFS_CURRENT_SPRINT_FILE}" ]]; then
   CURRENT_SPRINT="$(sed -n '1p' "${SFS_CURRENT_SPRINT_FILE}" 2>/dev/null | tr -d '[:space:]' || true)"
 fi
 PRESERVE_CURRENT_SPRINT=0
-if [[ -d "${TARGET_DIR}" && -n "${CURRENT_SPRINT}" && "${CURRENT_SPRINT}" != "${SPRINT_ID}" ]]; then
+if [[ -n "${CURRENT_SPRINT}" && "${CURRENT_SPRINT}" != "${SPRINT_ID}" ]]; then
   PRESERVE_CURRENT_SPRINT=1
 fi
 EXISTING_SPRINT_IDS="$(existing_sprint_ids_for_adopt)"
@@ -459,8 +458,7 @@ if [[ "${APPLY}" -eq 0 ]]; then
     echo "  target: ${TARGET_DIR}"
   fi
   echo "  would_create:"
-  echo "    - ${REPORT_PATH}"
-  echo "    - ${RETRO_PATH}"
+  echo "    - ${SHARED_DOC_PATH}"
   echo "  would_archive:"
   echo "    - ${ARCHIVE_DIR}/source-summary.txt"
   print_cold_archive_plan "would_archive_existing_sprints" "${EXISTING_SPRINT_IDS}" "${SFS_SPRINTS_DIR}" "${EXISTING_SPRINTS_TARBALL}" "${EXISTING_SPRINTS_MANIFEST}"
@@ -471,12 +469,16 @@ if [[ "${APPLY}" -eq 0 ]]; then
     echo "    manifest: ${PREEXISTING_TARGET_MANIFEST}"
     echo "    - ${TARGET_DIR}"
   fi
-  echo "  visible_policy: report.md + retro.md only; raw scan evidence stays archived"
+  echo "  visible_policy: shared docs/solon summary only; .sfs-local stays private"
   exit "${SFS_EXIT_OK}"
 fi
 
 if [[ -d "${TARGET_DIR}" && "${FORCE}" -ne 1 ]]; then
   echo "sprint ${SPRINT_ID} already exists, use --force or choose --id" >&2
+  exit "${SFS_EXIT_NO_INIT}"
+fi
+if [[ -f "${SHARED_DOC_PATH}" && "${FORCE}" -ne 1 ]]; then
+  echo "shared adoption summary already exists: ${SHARED_DOC_PATH} (use --force or choose --id)" >&2
   exit "${SFS_EXIT_NO_INIT}"
 fi
 
@@ -488,8 +490,7 @@ fi
 
 collapse_dirs_to_cold_archive "${EXISTING_SPRINT_IDS}" "${SFS_SPRINTS_DIR}" "${EXISTING_SPRINTS_TARBALL}" "${EXISTING_SPRINTS_MANIFEST}" "SFS adopt preexisting sprint archive" || exit "${SFS_EXIT_PERM}"
 collapse_dirs_to_cold_archive "${EXISTING_ARCHIVE_IDS}" "${SFS_ARCHIVES_DIR}" "${EXISTING_ARCHIVES_TARBALL}" "${EXISTING_ARCHIVES_MANIFEST}" "SFS adopt preexisting expanded archive collapse" || exit "${SFS_EXIT_PERM}"
-
-mkdir -p "${TARGET_DIR}" || exit "${SFS_EXIT_PERM}"
+mkdir -p "${SHARED_DOC_DIR}" || exit "${SFS_EXIT_PERM}"
 
 RECENT_COMMITS="$(git log -n "${MAX_COMMITS}" --date=short --pretty=format:'- %h %ad %s' 2>/dev/null || true)"
 RECENT_PRODUCT_COMMITS="$(recent_product_commits "${MAX_COMMITS}" || true)"
@@ -557,24 +558,19 @@ REPORT_SOURCE_YAML="$(json_escape "${REPORT_SOURCE}")"
   printf '%s\n' "${RECENT_COMMITS:-  - none}"
 } > "${ARCHIVE_DIR}/source-summary.txt" || exit "${SFS_EXIT_PERM}"
 
-cat > "${REPORT_PATH}" <<EOF
+cat > "${SHARED_DOC_PATH}" <<EOF
 ---
-phase: report
+title: "Solon Adoption Summary"
 status: legacy-baseline
-sprint_id: "${SPRINT_ID}"
+adopt_id: "${SPRINT_ID}"
 goal: "${REPORT_GOAL_YAML}"
 created_at: "${NOW}"
 last_touched_at: "${NOW}"
-closed_at: ""
 source: "${REPORT_SOURCE_YAML}"
 confidence: "mixed"
 ---
 
-# Report — Legacy Baseline Intake
-
-> This is the first SFS reading entrance for a project that already had history
-> before SFS. It must help the next human/AI understand the project, not merely
-> prove that old files were moved.
+# Solon Adoption Summary — ${SPRINT_ID}
 
 ## §1. Project Snapshot
 
@@ -657,9 +653,9 @@ ${VERIFY_COMMANDS}
 
 ## §6. SFS Handoff
 
-- **Keep visible**: this \`report.md\` and \`retro.md\`.
-- **Archive evidence**: \`${ARCHIVE_DIR}/source-summary.txt\`.
-- **Cold archive policy**: old sprint/archive trees are stored as tarballs plus short manifests, not expanded as a second visible document tree.
+- **Shared document**: \`${SHARED_DOC_PATH}\`.
+- **Private evidence**: \`${ARCHIVE_DIR}/source-summary.txt\`.
+- **Cold archive policy**: old sprint/archive trees are stored as tarballs plus short manifests, not expanded as a visible document tree.
 - **Archived old sprint folders**: ${EXISTING_SPRINT_ARCHIVE_COUNT} in \`${EXISTING_SPRINTS_TARBALL}\`.
 - **Collapsed old archive folders**: ${EXISTING_ARCHIVE_COLLAPSE_COUNT} in \`${EXISTING_ARCHIVES_TARBALL}\`.
 
@@ -676,79 +672,18 @@ Do not start the next sprint by reading the cold archives. Use them only for
 archaeology, dispute resolution, or deep recovery.
 EOF
 
-cat > "${RETRO_PATH}" <<EOF
----
-phase: retro
-gate_number: 7
-gate_label: "Gate 7 (Retro)"
-gate_id: G5          # legacy storage id
-sprint_id: "${SPRINT_ID}"
-goal: "${REPORT_GOAL_YAML}"
-created_at: "${NOW}"
-last_touched_at: "${NOW}"
-closed_at: ""
----
-
-# Retro — Legacy Baseline Intake
-
-## §1. Why This Exists
-
-This retro records the adoption policy, not the whole old project history.
-
-User brief:
-
-\`\`\`text
-${ADOPT_BRIEF:-  - none}
-\`\`\`
-
-## §2. Keep
-
-- Keep \`report.md\` as the visible handoff entry.
-- Keep old sprint/archive trees as cold tarballs plus manifests.
-- Keep docs submodules as separate context; do not flatten them into the main SFS report.
-
-## §3. Problem
-
-- A legacy baseline report that only lists commits and path counts does not give
-  the next human/AI a useful project model.
-- Moving files into \`.sfs-local/archives/\` as loose hidden documents only moves
-  weight; it does not reduce project complexity.
-- Review prompts/runs are scratch evidence. They should not become a parallel
-  archive tree after sprint close.
-
-## §4. Try
-
-- Start the next sprint from \`report.md\` §7: component, acceptance criteria,
-  verification, and docs/submodule authority.
-- Treat cold archives as recovery material only.
-- Let \`review.md\` keep the durable verdict/actions; raw review scratch should
-  be discarded on superseding runs or bundled into the sprint cold archive.
-
-## §5. Artifact Map
-
-- \`report.md\` — durable baseline entry.
-- \`retro.md\` — why the baseline stays compact.
-- \`${ARCHIVE_DIR}/source-summary.txt\` — archived scan evidence.
-- \`${EXISTING_SPRINTS_TARBALL}\` — cold archive of pre-existing visible sprint folders, when any existed.
-- \`${EXISTING_ARCHIVES_TARBALL}\` — cold archive of pre-existing expanded archive folders, when any existed.
-EOF
-
-printf '%s\n' "${SPRINT_ID}" > "${SFS_CURRENT_SPRINT_FILE}" || exit "${SFS_EXIT_PERM}"
-
 _esc_sprint="$(json_escape "${SPRINT_ID}")"
-_esc_report="$(json_escape "${REPORT_PATH}")"
-_esc_retro="$(json_escape "${RETRO_PATH}")"
+_esc_shared_doc="$(json_escape "${SHARED_DOC_PATH}")"
 _esc_archive="$(json_escape "${ARCHIVE_DIR}/source-summary.txt")"
 _esc_brief="$(json_escape "${ADOPT_BRIEF}")"
-append_event "legacy_adopt" "{\"sprint_id\":\"${_esc_sprint}\",\"brief\":\"${_esc_brief}\",\"report\":\"${_esc_report}\",\"retro\":\"${_esc_retro}\",\"archive\":\"${_esc_archive}\",\"commits\":${COMMIT_COUNT},\"tracked_files\":${TRACKED_COUNT},\"docs_signals\":${DOC_COUNT},\"test_signals\":${TEST_COUNT},\"submodules\":${SUBMODULE_COUNT},\"nested_repos\":${NESTED_REPO_COUNT},\"archived_existing_sprints\":${EXISTING_SPRINT_ARCHIVE_COUNT},\"collapsed_existing_archives\":${EXISTING_ARCHIVE_COLLAPSE_COUNT}}"
+append_event "legacy_adopt" "{\"sprint_id\":\"${_esc_sprint}\",\"brief\":\"${_esc_brief}\",\"shared_doc\":\"${_esc_shared_doc}\",\"archive\":\"${_esc_archive}\",\"commits\":${COMMIT_COUNT},\"tracked_files\":${TRACKED_COUNT},\"docs_signals\":${DOC_COUNT},\"test_signals\":${TEST_COUNT},\"submodules\":${SUBMODULE_COUNT},\"nested_repos\":${NESTED_REPO_COUNT},\"archived_existing_sprints\":${EXISTING_SPRINT_ARCHIVE_COUNT},\"collapsed_existing_archives\":${EXISTING_ARCHIVE_COLLAPSE_COUNT}}"
 
 echo "adopted: ${SPRINT_ID}"
 if [[ -n "${ADOPT_BRIEF}" ]]; then
   echo "  brief: ${ADOPT_BRIEF}"
 fi
-echo "  report: ${REPORT_PATH}"
-echo "  retro: ${RETRO_PATH}"
-echo "  archive: ${ARCHIVE_DIR}/source-summary.txt"
+echo "  shared_doc: ${SHARED_DOC_PATH}"
+echo "  private_archive: ${ARCHIVE_DIR}/source-summary.txt"
 if [[ "${PRESERVE_CURRENT_SPRINT}" -eq 1 ]]; then
   echo "  preserved_current_sprint: ${CURRENT_SPRINT}"
 fi
@@ -760,7 +695,7 @@ echo "  collapsed_existing_archives: ${EXISTING_ARCHIVE_COLLAPSE_COUNT}"
 if [[ "${EXISTING_ARCHIVE_COLLAPSE_COUNT}" -gt 0 ]]; then
   echo "  existing_archives_archive: ${EXISTING_ARCHIVES_TARBALL}"
 fi
-echo "  visible_policy: report.md + retro.md only"
+echo "  visible_policy: shared docs/solon summary only; .sfs-local stays private"
 echo "  next: run baseline verification, then start the first real SFS sprint"
 
 exit "${SFS_EXIT_OK}"

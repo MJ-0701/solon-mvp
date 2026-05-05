@@ -27,7 +27,7 @@ AI 시대에 Solon 이 주는 가치는 [Solon 10x 가치](./docs/ko/10x-value.m
 
 ## 1. 설치와 초기화
 
-> **0.6.10 기준** brew/scoop 한 줄이면 Claude Code, Gemini CLI, Codex CLI 가 모두
+> **0.6.11 기준** brew/scoop 한 줄이면 Claude Code, Gemini CLI, Codex CLI 가 모두
 > Solon 을 찾습니다. 별도 plugin/extension 설치 명령을 기억하지 않아도 됩니다.
 
 Mac:
@@ -78,7 +78,7 @@ sfs.cmd status
 사용자가 읽을 문서와 작업 기록을 중심으로 남깁니다. AI 도구별 native 파일이 꼭 필요한 팀만
 `sfs agent install all` 로 추가 설치하면 됩니다.
 
-0.6.10 기준으로는 분야별 지식팩이 실제 안내로 채워져 있습니다. 사용자가 backend, QA, infra, 재무,
+0.6.11 기준으로는 분야별 지식팩이 실제 안내로 채워져 있습니다. 사용자가 backend, QA, infra, 재무,
 세무, 회계 같은 말을 정확히 몰라도 괜찮습니다. Solon 을 쓰는 AI 가 작업 성격을 보고 필요한
 관점만 읽고, 사용자에게는 평범한 질문과 판단 기준으로 풀어 설명하는 쪽이 기본입니다.
 
@@ -154,19 +154,11 @@ sprint - · WU - · gate -:- · ahead 0 · last_event -
 sfs start "todo 앱 v0 - 일정 추가/완료/삭제 + 저장"
 ```
 
-`start` 는 작업 공간을 만듭니다. 보통 아래 파일들이 `.sfs-local/sprints/<sprint-id>/` 아래에 생깁니다.
+`start` 는 sprint 포인터만 만들고 빈 문서를 우르르 만들지 않습니다. 각 단계 문서는
+해당 명령을 실행할 때 하나씩 생깁니다. 작업 전에는 노출을 최소화하고, 작업 중에는
+지금 읽어야 할 절차 문서만 남기는 방식입니다.
 
-| File | 역할 |
-|---|---|
-| `brainstorm.md` | 아직 정리되지 않은 생각과 질문 |
-| `plan.md` | 이번 작업의 목표, 범위, 완료 기준 |
-| `implement.md` | 실제 실행 조각과 변경 내용 |
-| `log.md` | 진행 로그와 검증 흔적 |
-| `review.md` | 검토 결과와 다음 조치 |
-| `retro.md` | 마무리 회고 |
-| `report.md` | 완료 시점에 만들어지는 짧은 보고서 |
-
-`start` 가 끝나면 다음 단계 선택지를 함께 출력합니다. 보통은 brainstorm 으로 이어집니다.
+`start` 가 끝나면 다음 단계 선택지를 출력합니다. 보통은 brainstorm 으로 이어집니다.
 
 ```text
 sfs brainstorm --simple "..."  # 이미 방향이 뚜렷할 때 빠른 정리
@@ -325,7 +317,7 @@ sfs retro
 
 - `retro.md` 를 회고로 정리
 - `report.md` 가 없으면 만들거나 최신 내용으로 정리
-- 길어진 임시 기록을 접어 다음 사람이 볼 표면을 정리
+- 길어진 임시 기록을 private archive 로 접어 다음 사람이 볼 표면을 정리
 - sprint 상태를 close
 - local close commit 생성
 
@@ -349,7 +341,7 @@ sfs retro
 | `sfs measure --alive -- <command>` | 오래 걸리는 명령이 멈춘 것처럼 보이지 않게 진행 신호를 남길 때 |
 | `sfs tidy --sprint <id> --apply` | 이미 끝난 sprint 의 긴 임시 기록을 접어둘 때 |
 | `sfs decision "<title>"` | 오래 남겨야 하는 결정을 ADR 로 기록할 때 |
-| `sfs adopt --apply` | 오래된 프로젝트를 Solon 으로 처음 들여올 때 |
+| `sfs adopt --apply` | 오래된 프로젝트를 요약하고 `docs/solon/` 공유 문서만 남길 때 |
 | `sfs profile --apply` | `SFS.md` 프로젝트 개요만 자동 보정할 때 |
 | `sfs upgrade` | 설치된 프로젝트를 최신 Solon 흐름으로 갱신할 때 |
 | `sfs version --check` | 현재 프로젝트와 Solon 버전 상태를 볼 때 |
@@ -411,7 +403,7 @@ AI 시대의 설계 원칙은 [현재 제품 흐름과 최근 변화](./docs/ko/
 Claude Code 에서는 `/sfs`, Gemini CLI 에서는 `sfs`, Codex CLI 에서는 `$sfs` 를 씁니다.
 Windows PowerShell/cmd 에서는 `sfs.cmd` 를 씁니다.
 
-0.6.10 기준 brew/scoop 가 세 CLI 모두에 자동 등록합니다. 그래도
+0.6.11 기준 brew/scoop 가 세 CLI 모두에 자동 등록합니다. 그래도
 `/sfs` 가 안 나오면:
 
 ```bash
@@ -433,8 +425,9 @@ sfs.cmd update
 
 ### 완료된 sprint 는 무엇을 보면 되나?
 
-가장 먼저 `.sfs-local/sprints/<sprint-id>/report.md` 를 봅니다. 더 자세한 배경과 학습은
-`retro.md`, 장기 결정은 `.sfs-local/decisions/` 를 봅니다.
+팀과 공유할 요약은 `docs/solon/` 를 봅니다. 진행 중인 private sprint 는
+`.sfs-local/sprints/<sprint-id>/report.md` 를 먼저 보고, 더 자세한 배경은 필요한 경우에만
+private archive 또는 retro 를 봅니다.
 
 ---
 

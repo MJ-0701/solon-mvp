@@ -52,9 +52,9 @@ required.
 
 ## Project state and continuity
 
-- Work artifacts (`.sfs-local/sprints/`, `decisions/`, `events.jsonl`,
-  `SFS.md`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`) are project-local and
-  git-tracked. Switch CLIs (Claude / Gemini / Codex) on the same project —
-  state is preserved.
-- This user-global skill provides only **discovery and routing**. The work
-  artifacts live in the project tree.
+- `.sfs-local/` is private local workbench state and is gitignored by default.
+  Do not ask the user to commit it unless the team explicitly opts into a
+  different policy.
+- Shared, durable Solon docs belong under `docs/solon/`. Workbench docs are
+  created only when a command needs them and are compacted when the slice closes.
+- This user-global skill provides only discovery and routing.

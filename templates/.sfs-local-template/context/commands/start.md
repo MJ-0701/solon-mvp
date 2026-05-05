@@ -16,6 +16,9 @@ Rules:
   short user-facing Solon recap/status after the verbatim adapter output.
 - For `start`, adapter stdout should include exactly one `next:` line. If that
   line is already enough, do not add a second multi-step plan.
+- Do not create or imply step-doc creation for `start`. `start` makes the
+  sprint pointer only; `brainstorm`, `plan`, `implement`, `review`, and `retro`
+  create their own workbench doc when that phase is actually needed.
 - Do not create or imply durable `report.md` creation for `start`. The durable
   sprint `report.md` lifecycle belongs to `report`, `retro`, or `tidy`.
 - After `start`, infer `Next` from sprint mode:
@@ -24,8 +27,8 @@ Rules:
     `sfs brainstorm --simple ...`, `sfs brainstorm ...`,
     `sfs brainstorm --hard ...` (recommend normal unless the goal is tiny or
     strategically ambiguous).
-  - inherited implementation sprint -> first implementation slice + `log.md`
-    evidence, then later `sfs review --gate 6` (Gate 6 Review)
+  - inherited implementation sprint -> first implementation slice, then later
+    `sfs review --gate 6` (Gate 6 Review)
   - unclear mode -> ask 1 blocking question or point to `sfs status`
 - A compact chat Solon report is allowed when it adds state or next action, but
   it must not paraphrase or contradict adapter stdout.

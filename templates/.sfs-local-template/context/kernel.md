@@ -8,7 +8,9 @@ load_when: ["always", "sfs", "entry"]
 
 - Run `sfs <command>` first; bash adapter output is SSoT and must be verbatim.
 - Bash-first means no AI-side artifact refinement; it does not mean "no Next".
-- Start from `sfs status` and current sprint `report.md`; avoid old logs unless needed.
+- Start from `sfs status`; read current sprint `report.md` only when one exists.
+- Shared durable Solon docs live under `docs/solon/`; `.sfs-local/` is private
+  local workbench state and should remain thin.
 - Stop on mutex conflicts and report owner/domain.
 - Ask only 1-3 blocking questions.
 - After adapter output, read only the context module routed by `_INDEX.md`.

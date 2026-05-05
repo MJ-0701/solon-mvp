@@ -366,6 +366,43 @@ read_last_event_ts() {
     | sed -nE 's/.*"ts"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p'
 }
 
+sfs_json_field_from_line() {
+  local key="${1:?key required}"
+  sed -nE 's/.*"'"${key}"'"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/p'
+}
+
+sfs_goal_for_sprint() {
+  local sid="${1:?sprint id required}" escaped_sid
+  [[ -f "${SFS_EVENTS_FILE}" ]] || return 0
+  escaped_sid="${sid//\\/\\\\}"
+  escaped_sid="${escaped_sid//\"/\\\"}"
+  reverse_lines "${SFS_EVENTS_FILE}" \
+    | grep -F '"type":"sprint_start"' \
+    | grep -F "\"sprint_id\":\"${escaped_sid}\"" \
+    | head -1 \
+    | sfs_json_field_from_line "goal" \
+    || true
+}
+
+sfs_yaml_quote() {
+  local value="${1:-}"
+  value="${value//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  printf '"%s"' "${value}"
+}
+
+sfs_update_sprint_doc_identity() {
+  local path="${1:?path required}" sid="${2:?sprint id required}" ts="${3:?timestamp required}"
+  local goal
+  [[ -f "${path}" ]] || return 1
+  update_frontmatter "${path}" "sprint_id" "$(sfs_yaml_quote "${sid}")" || return 1
+  update_frontmatter "${path}" "created_at" "$(sfs_yaml_quote "${ts}")" || return 1
+  goal="$(sfs_goal_for_sprint "${sid}" || true)"
+  if [[ -n "${goal}" ]]; then
+    update_frontmatter "${path}" "goal" "$(sfs_yaml_quote "${goal}")" || return 1
+  fi
+}
+
 # ─────────────────────────────────────────────────────────────────────
 # GENERATION
 # ─────────────────────────────────────────────────────────────────────
@@ -664,13 +701,18 @@ sfs_prepare_sprint_report() {
 
   update_frontmatter "${report_path}" "phase" "report" || return ${SFS_EXIT_PERM}
   update_frontmatter "${report_path}" "status" "${status}" || return ${SFS_EXIT_PERM}
-  update_frontmatter "${report_path}" "sprint_id" "${sid}" || return ${SFS_EXIT_PERM}
+  update_frontmatter "${report_path}" "sprint_id" "$(sfs_yaml_quote "${sid}")" || return ${SFS_EXIT_PERM}
   if [[ "${created_report}" -eq 1 ]]; then
-    update_frontmatter "${report_path}" "created_at" "${ts}" || return ${SFS_EXIT_PERM}
+    update_frontmatter "${report_path}" "created_at" "$(sfs_yaml_quote "${ts}")" || return ${SFS_EXIT_PERM}
   fi
-  update_frontmatter "${report_path}" "last_touched_at" "${ts}" || return ${SFS_EXIT_PERM}
+  update_frontmatter "${report_path}" "last_touched_at" "$(sfs_yaml_quote "${ts}")" || return ${SFS_EXIT_PERM}
+  local goal
+  goal="$(sfs_goal_for_sprint "${sid}" || true)"
+  if [[ -n "${goal}" ]]; then
+    update_frontmatter "${report_path}" "goal" "$(sfs_yaml_quote "${goal}")" || return ${SFS_EXIT_PERM}
+  fi
   if [[ "${status}" == "final" ]]; then
-    update_frontmatter "${report_path}" "closed_at" "${ts}" || return ${SFS_EXIT_PERM}
+    update_frontmatter "${report_path}" "closed_at" "$(sfs_yaml_quote "${ts}")" || return ${SFS_EXIT_PERM}
   fi
   printf '%s\n' "${report_path}"
 }

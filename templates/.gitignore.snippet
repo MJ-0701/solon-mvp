@@ -1,18 +1,5 @@
-# Solon Product (7-step flow) — 아래 블록은 solon-product 의 install.sh / upgrade.sh 가 관리.
-# 수동 수정 가능하지만 upgrade.sh 실행 시 교체되므로 consumer 측 커스텀은 블록 바깥에 배치.
-
-# .sfs-local/ 운영 규칙
-#   - sprints/ 산출물: commit 권장 (팀 누적 지식)
-#   - decisions/ (ADR mini): commit 권장
-#   - events.jsonl: PII/감사 로그 혼입 위험 → ignore
-#   - tmp/: 중간 산출물, ignore
-.sfs-local/events.jsonl
-.sfs-local/cache/
-.sfs-local/tmp/
-.sfs-local/archives/
-.sfs-local/*.env
-.sfs-local/**/*.env
-!.sfs-local/*.env.example
-!.sfs-local/**/*.env.example
-.sfs-local/*.local.*
-.sfs-local/**/*.bak-*
+# Solon Product — 아래 블록은 solon-product 의 install.sh / upgrade.sh 가 관리.
+# 기본 정책: Solon runtime/state 는 프로젝트 비공개 workbench 이다.
+# 공유할 문서는 project root 의 docs/solon/ 아래에 명시적으로 생성한다.
+# 팀이 .sfs-local 의 일부를 공유해야 한다면 이 marker 블록 바깥에서 별도 정책으로 opt-in 한다.
+.sfs-local/

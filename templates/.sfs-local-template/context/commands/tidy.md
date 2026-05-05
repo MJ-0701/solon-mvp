@@ -7,7 +7,8 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
 # Tidy / Report / Retro
 
 - Workbench files are temporary: brainstorm, plan, implement, log, review.
-- Durable close entry is `report.md` plus `retro.md`.
+- Private close entry is `report.md` plus `retro.md`; shared handoff belongs in
+  `docs/solon/` only when the team needs a durable shared document.
 - `tidy --apply` archives workbench only after report evidence exists.
 - `retro` is the normal final close command; refine report/retro before running
   it. Use `retro --draft` only when the user explicitly wants an open-only

@@ -23,7 +23,10 @@ $ARGUMENTS
 8. AI-era fundamentals apply across all gates, not only implement: shared
    design concept, domain language, feedback loop, interface/artifact boundary,
    and gray-box delegation.
-9. In Solon reports, show gates as `Gate N (Name)`, not naked ids:
+9. `.sfs-local/` is private workbench state. Shared durable docs belong under
+   `docs/solon/`; do not ask users to commit `.sfs-local` unless their team
+   explicitly opts in.
+10. In Solon reports, show gates as `Gate N (Name)`, not naked ids:
    Gate 1 (Intake), Gate 2 (Brainstorm), Gate 3 (Plan),
    Gate 4 (Design), Gate 5 (Handoff), Gate 6 (Review),
    Gate 7 (Retro). Use gate numbers 1..7 for new CLI examples.

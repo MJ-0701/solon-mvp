@@ -1609,6 +1609,30 @@ fi
 } >> "$TARGET/.gitignore"
 ok ".gitignore solon-product 블록 교체 완료"
 
+prune_empty_sfs_workbench_dirs() {
+  local dir entries
+  for dir in \
+    "$TARGET/.sfs-local/sprints" \
+    "$TARGET/.sfs-local/decisions" \
+    "$TARGET/.sfs-local/queue/pending" \
+    "$TARGET/.sfs-local/queue/claimed" \
+    "$TARGET/.sfs-local/queue/done" \
+    "$TARGET/.sfs-local/queue/failed" \
+    "$TARGET/.sfs-local/queue/abandoned" \
+    "$TARGET/.sfs-local/queue/runs"; do
+    [ -d "$dir" ] || continue
+    entries="$(find "$dir" -mindepth 1 ! -name .gitkeep -print -quit 2>/dev/null || true)"
+    if [ -z "$entries" ]; then
+      rm -f "$dir/.gitkeep" 2>/dev/null || true
+    fi
+  done
+  find "$TARGET/.sfs-local/queue" -depth -type d -empty -exec rmdir {} \; 2>/dev/null || true
+  rmdir "$TARGET/.sfs-local/sprints" "$TARGET/.sfs-local/decisions" 2>/dev/null || true
+  ok "빈 Solon workbench placeholder 정리 완료"
+}
+
+prune_empty_sfs_workbench_dirs
+
 # ============================================================================
 # 6. VERSION 갱신
 # ============================================================================
@@ -1661,10 +1685,10 @@ fi
 # ============================================================================
 
 if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ]; then
-  COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .sfs-local .claude .gemini .agents${C_RESET}"
+  COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .claude .gemini .agents docs/solon${C_RESET}"
   AGENT_HINT="project-local command/skill adapters 는 기본 제거되었습니다. 필요할 때만: sfs agent install all"
 else
-  COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .sfs-local .claude .gemini .agents${C_RESET}"
+  COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .claude .gemini .agents docs/solon${C_RESET}"
   AGENT_HINT="vendored layout 은 project-local command/skill adapters 를 계속 동기화합니다."
 fi
 

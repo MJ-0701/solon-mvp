@@ -638,18 +638,7 @@ if [ -f "$SOURCE_DIR/templates/.sfs-local-template/auth.env.example" ] \
   ok "  auth.env.example 생성 (Gemini/Codex/Claude bridge auth 안내)"
 fi
 
-# sprints/ + decisions/
-mkdir -p "$TARGET/.sfs-local/sprints" "$TARGET/.sfs-local/decisions"
-[ -f "$TARGET/.sfs-local/sprints/.gitkeep" ] || touch "$TARGET/.sfs-local/sprints/.gitkeep"
-[ -f "$TARGET/.sfs-local/decisions/.gitkeep" ] || touch "$TARGET/.sfs-local/decisions/.gitkeep"
-ok "  sprints/ + decisions/ 확보"
-
-# queue/ — file-backed loop queue state (preserve existing tasks).
-for qstate in pending claimed done failed abandoned runs; do
-  mkdir -p "$TARGET/.sfs-local/queue/$qstate"
-  [ -f "$TARGET/.sfs-local/queue/$qstate/.gitkeep" ] || touch "$TARGET/.sfs-local/queue/$qstate/.gitkeep"
-done
-ok "  queue/ 상태 디렉토리 확보 (pending/claimed/done/failed/abandoned/runs)"
+ok "  work dirs lazy mode: sprints/decisions/queue 는 필요할 때만 생성"
 
 if [ "$INSTALL_LAYOUT" = "vendored" ]; then
   # context/ — short, routed agent context modules. Thin layout keeps these in
@@ -794,11 +783,11 @@ if [ "$INSTALL_AGENT_ADAPTERS" = "1" ]; then
   COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore \\
         .claude/skills/sfs/SKILL.md .claude/commands/sfs.md \\
         .gemini/commands/sfs.toml \\
-        .agents/skills/sfs/SKILL.md .sfs-local/${C_RESET}"
+        .agents/skills/sfs/SKILL.md${C_RESET}"
 else
   ENTRY_HINT="global sfs runtime + root CLAUDE.md / AGENTS.md / GEMINI.md
                  project-local command/skill adapters are opt-in"
-  COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .sfs-local/${C_RESET}"
+  COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore${C_RESET}"
 fi
 
 cat <<EOF
@@ -808,7 +797,7 @@ ${C_BOLD}${C_GREEN}=== Solon Product 설치 완료 ===${C_RESET}
 설치 위치:       $TARGET
 Solon 버전:      $SOLON_VERSION
 layout:          $INSTALL_LAYOUT
-.sfs-local/:     state/config 스캐폴드 (${C_BOLD}기존 sprint 산출물은 보존됨${C_RESET})
+.sfs-local/:     private local state (${C_BOLD}gitignored by default; 기존 산출물은 보존됨${C_RESET})
 공통 지침:       SFS.md
 런타임 어댑터:   CLAUDE.md / AGENTS.md / GEMINI.md
 Entry 1급:       $ENTRY_HINT
@@ -841,7 +830,7 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
      모두 동일한 ${C_BOLD}sfs${C_RESET} runtime command 로 내려간 뒤 deterministic bash adapter 호출.
      설치 직후 가이드는 ${C_BLUE}/sfs guide${C_RESET}, ${C_BLUE}\$sfs guide${C_RESET}, 또는 shell 의 ${C_BLUE}sfs.cmd guide${C_RESET}/${C_BLUE}sfs guide${C_RESET}.
 
-  ${C_BOLD}4.${C_RESET} git commit + push (Solon 주입 자체를 기록):
+  ${C_BOLD}4.${C_RESET} git commit + push (공유 entry 문서만 기록; .sfs-local 은 기본 비공개):
      ${COMMIT_HINT}
      ${C_BLUE}git commit -m "chore: install solon-product $SOLON_VERSION"${C_RESET}
      ${C_BLUE}git push${C_RESET}

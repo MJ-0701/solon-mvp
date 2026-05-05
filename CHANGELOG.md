@@ -1,3 +1,35 @@
+## [0.6.11] - 2026-05-06
+
+> **Minimal residue release.** Solon now applies "남겨야 될 것만 남긴다" across
+> the project lifecycle, not just as a gitignore rule. The default surface is
+> private, lazy, and compact: nothing gets created before it is useful, and
+> shared output goes to `docs/solon/`.
+
+### Changed
+
+- **Private-by-default state** — installed `.gitignore` now ignores `.sfs-local/`
+  as private workbench state. Teams can opt into a different sharing policy
+  outside the managed marker block.
+- **Lazy sprint artifacts** — `sfs start` no longer creates blank
+  `brainstorm/plan/implement/log/review/retro` files. Each phase command creates
+  only the document it actually needs.
+- **Adopt writes shared summary only** — `sfs adopt --apply` now creates
+  `docs/solon/<id>-adoption-summary.md` and keeps raw scan/cold archive evidence
+  under `.sfs-local/archives/adopt/...`. It no longer leaves a fake active
+  baseline sprint.
+- **Lean generated templates** — sprint templates were reduced to working
+  fields only and localized for Korean owner-facing use.
+- **Install/upgrade surface** — new installs no longer pre-create empty
+  `sprints/`, `decisions/`, or `queue/` directories. Upgrade prunes empty legacy
+  `.gitkeep` placeholders without touching real user data.
+
+### Verified
+
+- Added `tests/test-sfs-start-lazy-artifacts.sh` for init/start/brainstorm
+  residue behavior and goal propagation.
+- Updated `tests/test-sfs-adopt-freeform.sh` for the `docs/solon` shared summary
+  contract and no active sprint pointer after adoption.
+
 ## [0.6.10] - 2026-05-05
 
 > **Report surface hotfix.** 0.6.9 made the command surface usable again, but

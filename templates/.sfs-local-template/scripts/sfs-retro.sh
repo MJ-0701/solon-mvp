@@ -142,6 +142,10 @@ fi
 # (b) frontmatter 갱신 + retro_open event
 # ─────────────────────────────────────────────────────────────────────
 NOW="$(date -u +%Y-%m-%dT%H:%M:%S+00:00)"
+if ! sfs_update_sprint_doc_identity "${RETRO_PATH}" "${SPRINT_ID}" "${NOW}" 2>/dev/null; then
+  echo "permission denied updating sprint metadata in ${RETRO_PATH}" >&2
+  exit "${SFS_EXIT_PERM}"
+fi
 update_frontmatter "${RETRO_PATH}" "phase" "retro"
 update_frontmatter "${RETRO_PATH}" "sprint_id" "${SPRINT_ID}"
 update_frontmatter "${RETRO_PATH}" "last_touched_at" "${NOW}"

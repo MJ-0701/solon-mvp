@@ -90,7 +90,7 @@ sfs.cmd version --check
 sfs.cmd doctor      # ✅ 세 줄 (Claude / Gemini / Codex) 모두 보이면 OK
 ```
 
-성공하면 `sfs 0.6.10`, `status up-to-date` 같은 문장이 보입니다. Windows
+성공하면 `sfs 0.6.11`, `status up-to-date` 같은 문장이 보입니다. Windows
 PowerShell 이나 cmd 에서는 `sfs.cmd` 를 쓰고, Git Bash/WSL 에서는 `sfs` 를 써도 됩니다.
 
 ### 4. 테스트 프로젝트 폴더 만들기
@@ -181,7 +181,8 @@ sfs status
 | 파일/폴더 | 뜻 |
 |---|---|
 | `SFS.md` | AI 가 읽는 프로젝트 운영 규칙 |
-| `.sfs-local/` | sprint, decision, review 기록 공간 |
+| `.sfs-local/` | git 에 올리지 않는 private 작업 공간 |
+| `docs/solon/` | 공유할 요약/인계 문서가 생기는 곳 |
 | `CLAUDE.md` | Claude 가 Solon 을 찾는 입구 |
 | `AGENTS.md` | Codex 가 Solon 을 찾는 입구 |
 | `GEMINI.md` | Gemini 가 Solon 을 찾는 입구 |

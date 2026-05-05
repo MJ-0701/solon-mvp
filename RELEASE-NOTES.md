@@ -7,6 +7,17 @@
 
 ---
 
+## 0.6.11
+
+이번 버전은 Solon 전체에 "남겨야 될 것만 남긴다" 원칙을 적용한 정리 릴리스입니다.
+
+- `.sfs-local/` 은 기본 비공개 작업 공간으로 gitignore 됩니다.
+- `sfs start` 는 더 이상 빈 절차 문서를 한 번에 만들지 않습니다. 각 단계 명령이 필요한 문서만 생성합니다.
+- `sfs adopt --apply` 는 기존 프로젝트를 요약해서 `docs/solon/<id>-adoption-summary.md` 하나를 공유 문서로 남깁니다.
+- adopt 의 raw scan, 과거 sprint, archive evidence 는 `.sfs-local/archives/` 에 private cold archive 로 접습니다.
+- 새로 생성되는 sprint 문서 템플릿은 설명문을 줄이고 실제로 채워야 할 칸만 남겼습니다.
+- 새 설치는 빈 `sprints/`, `decisions/`, `queue/` 디렉터리를 미리 만들지 않습니다.
+
 ## 0.6.10
 
 이번 버전은 Solon report 의 보이는 표면을 다시 손봤습니다.

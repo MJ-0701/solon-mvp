@@ -46,13 +46,13 @@ case "${applied}" in
   *) fail "apply did not echo free-form brief: ${applied}" ;;
 esac
 
-REPORT=".sfs-local/sprints/doc-cleanup/report.md"
-RETRO=".sfs-local/sprints/doc-cleanup/retro.md"
-[[ -f "${REPORT}" ]] || fail "missing report: ${REPORT}"
-[[ -f "${RETRO}" ]] || fail "missing retro: ${RETRO}"
-grep -Fq "goal: \"${brief}\"" "${REPORT}" || fail "report frontmatter did not store brief as goal"
-grep -Fq "${brief}" "${REPORT}" || fail "report body missing brief"
-grep -Fq "${brief}" "${RETRO}" || fail "retro body missing brief"
+SHARED_DOC="docs/solon/doc-cleanup-adoption-summary.md"
+[[ -f "${SHARED_DOC}" ]] || fail "missing shared adoption summary: ${SHARED_DOC}"
+[[ ! -d ".sfs-local/sprints/doc-cleanup" ]] || fail "adopt should not create a visible sprint workspace"
+[[ ! -f ".sfs-local/current-sprint" ]] || fail "adopt should not leave an active sprint pointer"
+grep -Fq "goal: \"${brief}\"" "${SHARED_DOC}" || fail "shared doc frontmatter did not store brief as goal"
+grep -Fq "${brief}" "${SHARED_DOC}" || fail "shared doc body missing brief"
 grep -Fq "\"brief\":\"${brief}\"" .sfs-local/events.jsonl || fail "events.jsonl missing brief"
+grep -Fq "\"shared_doc\":\"${SHARED_DOC}\"" .sfs-local/events.jsonl || fail "events.jsonl missing shared doc"
 
 echo "test-sfs-adopt-freeform: OK"

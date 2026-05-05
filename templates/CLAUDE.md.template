@@ -18,7 +18,9 @@ Rules:
 - `sfs brainstorm` has depth. `--simple` is quick requirement cleanup, default normal asks a few
   owner-thinking questions, and `--hard` keeps plan blocked while important
   owner decisions are unresolved.
-- Start from `sfs status` → current sprint `report.md`.
+- Start from `sfs status`; use current sprint `report.md` only when one exists.
+- Use `docs/solon/` for shared adoption/handoff summaries. `.sfs-local/` is
+  private local workbench state and should stay gitignored unless the team opts in.
 - Do not load old logs/history unless the routed context asks for them.
 - Stop on mutex conflicts and report owner/domain.
 - Treat `sfs review` as artifact acceptance review. Code review is only the

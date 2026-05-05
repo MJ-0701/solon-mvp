@@ -131,14 +131,13 @@ esac
 # ─────────────────────────────────────────────────────────────────────
 # Templates check (must exist before we touch sprints/)
 # ─────────────────────────────────────────────────────────────────────
-# Ensure all expected sprint template files exist.
-for tpl in brainstorm plan implement log review retro; do
-  tpl_path="$(sfs_sprint_template_file "${tpl}")"
-  if [[ ! -f "${tpl_path}" ]]; then
-    echo "templates not found: ${tpl_path}" >&2
-    exit "${SFS_EXIT_NO_TEMPLATES}"
-  fi
-done
+# `start` itself does not create workbench docs. It only verifies the first
+# actionable template so an empty sprint does not expose six blank files.
+tpl_path="$(sfs_sprint_template_file brainstorm)"
+if [[ ! -f "${tpl_path}" ]]; then
+  echo "templates not found: ${tpl_path}" >&2
+  exit "${SFS_EXIT_NO_TEMPLATES}"
+fi
 
 # ─────────────────────────────────────────────────────────────────────
 # Conflict check
@@ -152,34 +151,19 @@ if [[ -d "${SPRINT_DIR}" ]]; then
 fi
 
 # ─────────────────────────────────────────────────────────────────────
-# Scaffold sprint dir + copy templates
+# Scaffold the sprint dir only. Step docs are created by the step command that
+# actually needs them: brainstorm -> plan -> implement -> review -> retro/report.
 # ─────────────────────────────────────────────────────────────────────
 if ! mkdir -p "${SPRINT_DIR}" 2>/dev/null; then
   echo "permission denied creating ${SPRINT_DIR}" >&2
   exit "${SFS_EXIT_PERM}"
 fi
 
-for tpl in brainstorm plan implement log review retro; do
-  tpl_path="$(sfs_sprint_template_file "${tpl}")"
-  if ! cp -f "${tpl_path}" "${SPRINT_DIR}/${tpl}.md" 2>/dev/null; then
-    echo "permission denied copying ${tpl}.md to ${SPRINT_DIR}/" >&2
-    exit "${SFS_EXIT_PERM}"
-  fi
-done
-
 NOW="$(date +%Y-%m-%dT%H:%M:%S%z 2>/dev/null | sed -E 's/([0-9]{2})$/:\1/')"
 _yaml_sprint="${SPRINT_ID//\\/\\\\}"
 _yaml_sprint="${_yaml_sprint//\"/\\\"}"
 _yaml_goal="${GOAL//\\/\\\\}"
 _yaml_goal="${_yaml_goal//\"/\\\"}"
-
-for doc in brainstorm plan implement log review retro; do
-  update_frontmatter "${SPRINT_DIR}/${doc}.md" "sprint_id" "\"${_yaml_sprint}\"" || true
-  update_frontmatter "${SPRINT_DIR}/${doc}.md" "created_at" "\"${NOW}\"" || true
-  if [[ -n "${GOAL}" ]]; then
-    update_frontmatter "${SPRINT_DIR}/${doc}.md" "goal" "\"${_yaml_goal}\"" || true
-  fi
-done
 
 # ─────────────────────────────────────────────────────────────────────
 # Update current-sprint pointer + emit sprint_start event
@@ -225,12 +209,8 @@ quote_for_shell_double() {
 }
 
 echo "created: ${SPRINT_DIR}/"
-echo "  - brainstorm.md"
-echo "  - plan.md"
-echo "  - implement.md"
-echo "  - log.md"
-echo "  - review.md"
-echo "  - retro.md"
+echo "  - current-sprint pointer"
+echo "  - no step docs yet; each command creates only the doc it needs"
 if [[ -n "${GOAL}" ]]; then
   _next_goal="$(quote_for_shell_double "${GOAL}")"
 else

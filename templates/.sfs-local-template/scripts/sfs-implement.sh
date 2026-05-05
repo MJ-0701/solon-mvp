@@ -114,6 +114,10 @@ fi
 
 NOW="$(date +%Y-%m-%dT%H:%M:%S%z 2>/dev/null | sed -E 's/([0-9]{2})$/:\1/')"
 
+if ! sfs_update_sprint_doc_identity "${IMPLEMENT_PATH}" "${SPRINT_ID}" "${NOW}" 2>/dev/null; then
+  echo "permission denied updating sprint metadata in ${IMPLEMENT_PATH}" >&2
+  exit "${SFS_EXIT_PERM}"
+fi
 if ! update_frontmatter "${IMPLEMENT_PATH}" "phase" "implement" 2>/dev/null; then
   echo "permission denied updating frontmatter in ${IMPLEMENT_PATH}" >&2
   exit "${SFS_EXIT_PERM}"
