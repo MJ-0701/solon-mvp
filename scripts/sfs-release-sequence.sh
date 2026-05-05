@@ -116,12 +116,20 @@ case "${phase}" in
 
   audit)
     if [[ "${dry_run}" == "1" ]]; then
-      printf '[dry-run] brew audit --new-formula sfs + scoop manifest schema validate\n'
+      printf '[dry-run] brew audit --strict --online sfs + scoop manifest schema validate\n'
     else
       if command -v brew >/dev/null 2>&1; then
         formula="${DIST_DIR}/packaging/homebrew/sfs.rb"
         if [[ -f "${formula}" ]]; then
-          brew audit --new-formula "${formula}" || { echo "brew audit FAIL"; exit 1; }
+          # 0.6.3 hotfix: the previously-used Homebrew flag was removed
+          # upstream (now exits with "invalid option"). The original intent
+          # was a strict + online release-time audit on a tap-private
+          # formula, which is exactly `--strict --online`. We deliberately
+          # do NOT use `--new`, because `--new` runs additional checks meant
+          # for first-time submission into Homebrew core, which would
+          # falsely fail tap-only formulas. Regression-guarded by
+          # tests/test-no-deprecated-cli-flags.sh.
+          brew audit --strict --online "${formula}" || { echo "brew audit FAIL"; exit 1; }
         else
           echo "${SCRIPT_NAME}: brew formula missing — using template (release-cut will materialize sha256)" >&2
         fi

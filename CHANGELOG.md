@@ -1,3 +1,49 @@
+## [0.6.3] - 2026-05-05
+
+> **Hotfix.** 0.6.2 푸시 직후 사용자가 `bash scripts/sfs-release-sequence.sh
+> --phase audit --version 0.6.2` 를 돌리는 순간 Homebrew 가
+> `Error: invalid option: --new-formula` 로 거부 → audit phase 실패. 같은
+> blind-spot 클래스 (release-time external CLI 가 CI 에서 실행되지 않는
+> monocultural test surface) 가 한 번 더 잡혔다. 자세한 분석은
+> [docs/ko/cross-review-principle.md](docs/ko/cross-review-principle.md)
+> ([English](docs/en/cross-review-principle.md)) 의 0.6.2 case study 와 같은
+> 결.
+
+### Fixed
+
+- **`scripts/sfs-release-sequence.sh` audit phase: deprecated Homebrew flag
+  교체** — Homebrew 가 release 의 `--new-formula` 옵션을 제거 (이제 `Did
+  you mean? formula` 로 reject) 한 상태. 본 release-sequence 의 audit phase
+  가 그 옵션에 의존하고 있어 0.6.2 push 직후 실사용자 실행에서 즉시 실패.
+  - `brew audit --strict --online` 으로 교체. `--new` 는 일부러 사용하지 않음
+    — `--new` 는 "Homebrew core 에 처음 제출되는 formula 자격 심사" 용 추가
+    체크를 켜기 때문에 tap-only formula 가 falsely fail 한다.
+  - dry-run 출력 메시지도 같이 갱신.
+
+### Added
+
+- **`tests/test-no-deprecated-cli-flags.sh`** — `scripts/` 하위에서 외부
+  CLI 의 deprecated flag (현재 등록된 항목: `--new-formula`) 가 재유입되는
+  것을 막는 회귀 가드. 예전 release notes 가 그 flag 를 언급하는 건 의도된
+  history 라 CHANGELOG 는 스캔 대상에서 제외.
+
+### Process learning (continued from 0.6.2)
+
+- 본 release 는 0.6.2 의 cross-review-principle 문서가 주장한 명제의 두
+  번째 receipt 다 — **외부 CLI (Homebrew) 의 사양 변경은 어떤 LLM review
+  로도 일관되게 잡히지 않는 환경 차원**. 회피책은:
+  - release-sequence 의 `--phase audit` 를 ship-blocking gate 로 두고,
+    실사용자가 (CI 가 아니라) macOS 에서 진짜로 한 번 돌려본 결과를 evidence
+    로 남기는 것.
+  - 외부 CLI 의존도가 있는 step 은 deprecated-flag 회귀 가드 (본 release
+    의 새 test) 로 정적 검증 + 런타임 dogfood 둘 다 운영.
+
+### Verified
+
+- `tests/test-no-deprecated-cli-flags.sh` 단독 PASS.
+- 기존 `tests/test-nounset-empty-array-expansion.sh` 단독 PASS (regression
+  unaffected).
+
 ## [0.6.2] - 2026-05-05
 
 > **Hotfix.** 0.6.1 의 `sfs upgrade` (옵션 없이 실행 시) 가 macOS bash 3.2 +
