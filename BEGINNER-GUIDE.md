@@ -1,4 +1,4 @@
-# Solon SFS CLI Onboarding Guide
+# Solon SFS CLI 초보자 가이드
 
 이 문서는 개발, 터미널, CLI 환경에 아직 익숙하지 않은 분들이 Solon SFS 를 처음 설치하고
 첫 작업까지 가기 위한 안내서입니다. 모르는 용어를 하나씩 검색하지 않아도 되게, 필요한 말과

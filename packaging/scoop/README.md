@@ -1,37 +1,36 @@
-# Scoop Packaging
+# Scoop 패키징
 
-This directory contains the Scoop manifest template for the Solon Product SFS
-runtime.
+이 디렉터리는 Solon 제품 SFS runtime 의 Scoop manifest 템플릿을 담습니다.
 
-## Manifest Contract
+## Manifest 계약
 
-`sfs.json.template` uses release-time placeholders:
+`sfs.json.template` 는 릴리스 시점에 아래 placeholder 를 치환합니다.
 
-- `__VERSION__`: version without the leading `v`, for example `0.5.42-product`.
-- `__URL__`: archive URL, usually `https://github.com/MJ-0701/solon-product/archive/refs/tags/v__VERSION__.zip`.
-- `__SHA256__`: SHA256 of the exact archive Scoop will download.
-- `__EXTRACT_DIR__`: root directory inside the archive, for GitHub source zips usually `solon-product-__VERSION__`.
+- `__VERSION__`: 앞의 `v` 를 뺀 버전. 예: `0.6.8`
+- `__URL__`: archive URL. 보통 `https://github.com/MJ-0701/solon-product/archive/refs/tags/v__VERSION__.zip`
+- `__SHA256__`: Scoop 이 실제로 내려받을 archive 의 SHA256
+- `__EXTRACT_DIR__`: archive 내부 루트 디렉터리. GitHub source zip 기준 보통 `solon-product-__VERSION__`
 
-The manifest exposes `sfs` through `bin\\sfs.cmd`. The command wrapper locates
-Git for Windows Bash and delegates to the packaged Bash entrypoint at
-`bin/sfs`.
+manifest 는 `bin\\sfs.cmd` 를 통해 `sfs` 를 노출합니다. wrapper 는 Git for Windows Bash 를 찾고,
+패키지 안의 bash entrypoint `bin/sfs` 로 위임합니다.
 
-The manifest also runs `bin\\sfs-scoop-post-install.ps1` after install/update.
-When `scoop update sfs` is launched from an initialized Solon project, that hook
-runs `sfs.cmd upgrade --no-self-upgrade` from the detected project root so the
-runtime and project surface move together. The deterministic user-facing command
-is still `sfs.cmd update`: it runs `scoop update`, then `scoop update sfs`, then
-the project upgrade. Set `SFS_SCOOP_PROJECT_UPGRADE=0` to skip the manifest hook;
-`sfs.cmd update` / `sfs.cmd upgrade` set that variable internally while updating
-the Scoop runtime, then perform the project upgrade themselves.
+설치/업데이트 뒤에는 `bin\\sfs-scoop-post-install.ps1` 도 실행합니다. 초기화된 Solon 프로젝트에서
+`scoop update sfs` 를 실행하면 이 hook 이 프로젝트 루트를 감지하고
+`sfs.cmd upgrade --no-self-upgrade` 를 이어서 실행합니다. 그래서 runtime 과 프로젝트 표면이 함께
+움직입니다.
 
-In PowerShell/cmd examples, use `sfs.cmd ...` explicitly. Git Bash/WSL users can
-use `sfs ...`.
+사용자에게 안내할 결정적 명령은 여전히 `sfs.cmd update` 입니다. 이 명령은 `scoop update`,
+`scoop update sfs`, 프로젝트 upgrade 를 한 번에 처리합니다. manifest hook 을 건너뛰려면
+`SFS_SCOOP_PROJECT_UPGRADE=0` 을 설정합니다. `sfs.cmd update` / `sfs.cmd upgrade` 는 Scoop runtime 을
+업데이트하는 동안 이 값을 내부에서 설정한 뒤, 프로젝트 upgrade 를 직접 수행합니다.
 
-## Local Windows Smoke
+PowerShell/cmd 예시에서는 `sfs.cmd ...` 를 명시적으로 씁니다. Git Bash/WSL 사용자는 `sfs ...` 를
+써도 됩니다.
 
-The GitHub Actions workflow builds a local source zip from the checkout,
-renders a temporary bucket manifest with a `file:///` URL, and then runs:
+## 로컬 Windows 설치 검증
+
+GitHub Actions workflow 는 checkout 에서 로컬 source zip 을 만들고, `file:///` URL 을 가진 임시
+bucket manifest 를 렌더링한 뒤 아래 흐름을 실행합니다.
 
 ```text
 scoop bucket add solon <temporary-bucket-path>
@@ -47,16 +46,14 @@ sfs.cmd agent install all
 scoop update sfs --force
 ```
 
-The thin-layout assertion is important: project-local `.sfs-local/` must not
-receive runtime `scripts/`, `sprint-templates/`, `personas/`, or
-`decisions-template/` directories unless the user explicitly chooses vendored
-layout.
+thin layout 검증이 중요합니다. 사용자가 명시적으로 vendored layout 을 고르지 않는 한 프로젝트의
+`.sfs-local/` 에 runtime `scripts/`, `sprint-templates/`, `personas/`, `decisions-template/`
+디렉터리가 들어가면 안 됩니다.
 
-## Release Bucket Flow
+## 실제 bucket 릴리스 흐름
 
-For a real bucket release, render `bucket/sfs.json` in the own Scoop bucket repo
-after the GitHub tag exists and the downloadable archive hash is known. The
-bucket can then be tested with:
+실제 bucket 릴리스에서는 GitHub tag 가 생기고 다운로드 archive hash 를 확인한 뒤,
+별도 Scoop bucket repo 의 `bucket/sfs.json` 을 렌더링합니다. 이후 아래처럼 테스트합니다.
 
 ```text
 scoop bucket add solon https://github.com/MJ-0701/scoop-solon-product

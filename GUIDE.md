@@ -1,9 +1,9 @@
-# Solon Product - 사용 가이드
+# Solon 제품 사용 가이드
 
 > 목표: 설치 직후 30분 안에 첫 작업 묶음(sprint)을 시작하고, 생각 정리부터 마무리까지
 > 어떤 순서로 가야 하는지 감을 잡는 것.
 
-**Language**: 한국어 / [English](./docs/en/guide.md)
+**언어**: 한국어 / [영어 문서](./docs/en/guide.md)
 
 자세한 제품 철학과 최신 변화는 [현재 제품 흐름과 최근 변화](./docs/ko/current-product-shape.md),
 AI 시대에 Solon 이 주는 가치는 [Solon 10x 가치](./docs/ko/10x-value.md) 에서 이어서 볼 수 있습니다.
@@ -63,7 +63,7 @@ sfs.cmd status
 
 설치 뒤 프로젝트에는 대략 이런 파일이 생깁니다.
 
-| Path | 내가 알아야 할 역할 |
+| 경로 | 내가 알아야 할 역할 |
 |---|---|
 | `SFS.md` | 이 프로젝트의 운영 지침과 정체성 |
 | `CLAUDE.md` | Claude Code 가 Solon 을 찾는 입구 |
@@ -202,7 +202,7 @@ Solon 의 역할은 앱 generator 가 아니라, 이후 작업의 의도, 범위
 
 ---
 
-## 6. Brainstorm - 생각을 정리하는 단계
+## 6. Brainstorm - 생각 정리 단계
 
 `brainstorm` 은 요구사항을 받아 적는 명령이 아닙니다. plan 으로 넘어가기 전에 사용자의 의도,
 우선순위, 포기할 것, 성공 기준을 드러내는 단계입니다.
@@ -340,7 +340,7 @@ sfs retro
 일상적인 흐름은 `status -> start -> brainstorm -> plan -> implement -> review -> retro` 입니다.
 아래 명령은 필요할 때만 꺼내면 됩니다.
 
-| Command | 언제 쓰나 |
+| 명령 | 언제 쓰나 |
 |---|---|
 | `sfs report` | sprint 를 닫기 전에 보고서만 먼저 보고 싶을 때 |
 | `sfs report --sprint <id>` | 과거 sprint 의 보고서를 다시 만들거나 정리할 때 |
