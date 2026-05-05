@@ -32,6 +32,22 @@ load_when: ["brainstorm", "브레인스토밍", "requirements", "요구사항", 
     the non-code artifact boundary is named.
   - gray-box delegation: human-owned strategy/interface decisions are separated
     from AI-fillable internals.
+- Non-developer initial setup proposal:
+  - Do not require the user to know framework names such as Next.js, Spring,
+    FastAPI, NestJS, React, Vue, or Nuxt.
+  - Treat the user's plain-language goal as enough. They may never type a
+    bootstrap command or know what stack they need.
+  - If the brainstorm reveals that a new app/project skeleton would materially
+    reduce friction, ask one plain-language consent question before plan:
+    "초기 프로젝트 구성해드릴까요?"
+  - If the user agrees, infer the smallest useful setup size from the goal
+    (prototype/static page, small frontend app, app+API+persistence, or larger
+    only after scope discussion). Use `sfs bootstrap "<plain-language goal>"`
+    only as an agent-facing native-scaffolding handoff if it helps execution.
+    The AI chooses the stack/tooling; Solon records only the useful operating
+    context.
+  - This proposal is optional. Do not block `ready-for-plan` only because a
+    scaffold could exist; surface it when it would reduce user effort now.
 - In `simple`, ask at most 2 blocking questions. In `normal`, ask 2-5. In
   `hard`, ask a compact but demanding round (usually 4-7) and record unresolved
   owner decisions instead of guessing. Keep `status: draft`; final `Next` is

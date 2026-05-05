@@ -23,6 +23,8 @@ SOLON_PRODUCT_REPO="${SOLON_PRODUCT_REPO:-MJ-0701/solon-product}"
 SOURCE_DIR="${SFS_DISCOVERY_SOURCE_DIR:-}"  # caller may inject; we autodetect otherwise
 HOME_DIR="${HOME:-$USERPROFILE}"
 A1_FIRST="${SFS_DISCOVERY_A1_FIRST:-1}"   # set 0 to skip A-1 and go straight to A-2
+PROMOTE_FIRST="${SFS_DISCOVERY_PROMOTE_FIRST:-1}"   # set 0 to never reorder existing priority
+FORCE_PROMOTE="${SFS_DISCOVERY_FORCE_PROMOTE:-0}"   # set 1 to repair a user-managed order back to solon-first
 
 # Color helpers (no-op if not interactive)
 if [ -t 1 ]; then
@@ -35,6 +37,136 @@ ok()    { printf "  ${C_GREEN}✓${C_RESET} %s\n" "$*"; }
 warn()  { printf "  ${C_YELLOW}!${C_RESET} %s\n" "$*"; }
 fail()  { printf "  ${C_RED}✗${C_RESET} %s\n" "$*"; }
 info()  { printf "  %s\n" "$*"; }
+
+json_file_or_empty_object() {
+  local file="$1"
+  if [ -f "$file" ]; then
+    cat "$file"
+  else
+    printf '{}'
+  fi
+}
+
+priority_marker_file() {
+  printf '%s\n' "$HOME_DIR/.sfs/discovery-priority.json"
+}
+
+priority_marker_has() {
+  local key="$1"
+  local marker
+  marker="$(priority_marker_file)"
+  [ -f "$marker" ] || return 1
+  command -v jq >/dev/null 2>&1 || return 1
+  jq -e --arg key "$key" '(.promoted // {})[$key] == true' "$marker" >/dev/null 2>&1
+}
+
+mark_priority_promoted() {
+  local key="$1"
+  command -v jq >/dev/null 2>&1 || return 0
+  local marker tmp now
+  marker="$(priority_marker_file)"
+  mkdir -p "$(dirname "$marker")"
+  now="$(date -u '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || date '+%Y-%m-%dT%H:%M:%SZ')"
+  tmp="$(mktemp 2>/dev/null || mktemp -t sfs_discovery_priority)"
+  json_file_or_empty_object "$marker" |
+    jq --arg key "$key" --arg now "$now" '
+      .promoted[$key] = true
+      | .lastPromotedAt[$key] = $now
+      | .policy = "promote solon to first on install/update; if user later changes order, respect unless SFS_DISCOVERY_FORCE_PROMOTE=1"
+    ' > "$tmp" && mv "$tmp" "$marker"
+}
+
+should_promote_priority() {
+  local key="$1"
+  local current_first="$2"
+  local desired_first="$3"
+  local label="$4"
+
+  if [ "$PROMOTE_FIRST" != "1" ]; then
+    info "$label: priority promotion disabled by SFS_DISCOVERY_PROMOTE_FIRST=0"
+    return 1
+  fi
+  if [ "$FORCE_PROMOTE" = "1" ]; then
+    return 0
+  fi
+  if [ -z "$current_first" ] || [ "$current_first" = "$desired_first" ]; then
+    return 0
+  fi
+  if priority_marker_has "$key"; then
+    warn "$label: user-managed priority detected (first=$current_first) — respecting existing order"
+    warn "  To force Solon first again: SFS_DISCOVERY_FORCE_PROMOTE=1 sfs upgrade"
+    return 1
+  fi
+  return 0
+}
+
+promote_claude_priority() {
+  if ! command -v jq >/dev/null 2>&1; then
+    warn "Claude Code: jq not on PATH — skip priority reorder (manual settings edit may be needed)"
+    return 0
+  fi
+
+  local SETTINGS="$HOME_DIR/.claude/settings.json"
+  mkdir -p "$(dirname "$SETTINGS")"
+  local CURRENT_FIRST
+  CURRENT_FIRST="$(json_file_or_empty_object "$SETTINGS" | jq -r '(.enabledPlugins // {}) | keys_unsorted[0] // empty' 2>/dev/null || true)"
+  if ! should_promote_priority "claude" "$CURRENT_FIRST" "solon@solon" "Claude Code"; then
+    return 0
+  fi
+  local TMP
+  TMP="$(mktemp 2>/dev/null || mktemp -t settings)"
+  json_file_or_empty_object "$SETTINGS" |
+    jq --arg plugin "solon@solon" --arg market "solon" --arg repo "$SOLON_REPO" '
+      .enabledPlugins = ({($plugin): true} + ((.enabledPlugins // {}) | del(.[$plugin])))
+      | .extraKnownMarketplaces = ({($market): (((.extraKnownMarketplaces // {})[$market]) // {"source":{"source":"github","repo":$repo}})} + ((.extraKnownMarketplaces // {}) | del(.[$market])))
+    ' > "$TMP" && mv "$TMP" "$SETTINGS"
+  ok "Claude Code: solon promoted to first enabled plugin in ~/.claude/settings.json"
+
+  local INSTALLED="$HOME_DIR/.claude/plugins/installed_plugins.json"
+  if [ -f "$INSTALLED" ]; then
+    TMP="$(mktemp 2>/dev/null || mktemp -t installed_plugins)"
+    jq --arg plugin "solon@solon" '
+      if (.plugins // {})[$plugin] then
+        .plugins = ({($plugin): .plugins[$plugin]} + (.plugins | del(.[$plugin])))
+      else . end
+    ' "$INSTALLED" > "$TMP" && mv "$TMP" "$INSTALLED"
+    ok "Claude Code: solon promoted to first plugin registry entry"
+  fi
+
+  local KNOWN="$HOME_DIR/.claude/plugins/known_marketplaces.json"
+  if [ -f "$KNOWN" ]; then
+    TMP="$(mktemp 2>/dev/null || mktemp -t known_marketplaces)"
+    jq --arg market "solon" --arg repo "$SOLON_REPO" '
+      {($market): (.[$market] // {"source":{"source":"github","repo":$repo}})}
+      + (del(.[$market]))
+    ' "$KNOWN" > "$TMP" && mv "$TMP" "$KNOWN"
+    ok "Claude Code: solon promoted to first marketplace registry entry"
+  fi
+  mark_priority_promoted "claude"
+}
+
+promote_gemini_priority() {
+  if ! command -v jq >/dev/null 2>&1; then
+    warn "Gemini CLI: jq not on PATH — skip extension priority reorder"
+    return 0
+  fi
+  local ENABLE="$HOME_DIR/.gemini/extensions/extension-enablement.json"
+  mkdir -p "$(dirname "$ENABLE")"
+  local CURRENT_FIRST
+  CURRENT_FIRST="$(json_file_or_empty_object "$ENABLE" | jq -r 'keys_unsorted[0] // empty' 2>/dev/null || true)"
+  if ! should_promote_priority "gemini" "$CURRENT_FIRST" "solon" "Gemini CLI"; then
+    return 0
+  fi
+  local TMP
+  TMP="$(mktemp 2>/dev/null || mktemp -t gemini_extension_enablement)"
+  json_file_or_empty_object "$ENABLE" |
+    jq --arg name "solon" --arg home "$HOME_DIR" '
+      {($name): (.[$name] // {"overrides":[($home + "/*")]})}
+      + (del(.[$name]))
+    ' > "$TMP" && mv "$TMP" "$ENABLE"
+  ok "Gemini CLI: solon promoted to first extension enablement entry"
+  mark_priority_promoted "gemini"
+}
 
 # Find the bundle root (where templates/codex-skill/SKILL.md lives)
 discover_source_dir() {
@@ -80,6 +212,7 @@ install_claude_discovery() {
       ok "Claude Code: marketplace registered via 'claude plugin marketplace add' (A-1)"
       claude plugin install "solon@solon" >/dev/null 2>&1 || true
       ok "Claude Code: /sfs slash command should be discoverable on next session restart"
+      promote_claude_priority
       return 0
     fi
     # fall through to A-2
@@ -114,21 +247,9 @@ install_claude_discovery() {
     fi
   fi
 
-  # Idempotent settings.json merge (extraKnownMarketplaces + enabledPlugins)
-  local SETTINGS="$HOME_DIR/.claude/settings.json"
-  if command -v jq >/dev/null 2>&1; then
-    if [ ! -f "$SETTINGS" ]; then echo '{}' > "$SETTINGS"; fi
-    local TMP
-    TMP="$(mktemp 2>/dev/null || mktemp -t settings)"
-    jq --arg name "solon" --arg src "https://github.com/$SOLON_REPO" \
-       '.extraKnownMarketplaces[$name] = {"source": $src}
-        | .enabledPlugins["solon@solon"] = true' \
-       "$SETTINGS" > "$TMP" && mv "$TMP" "$SETTINGS"
-    ok "Claude Code: ~/.claude/settings.json updated (extraKnownMarketplaces + enabledPlugins)"
-  else
-    warn "Claude Code: jq not on PATH — skip settings.json merge (manual edit may be needed)"
-    warn "  Manual recovery: claude plugin marketplace add $SOLON_REPO"
-  fi
+  # Idempotent settings/registry merge + ordering. Install/update exposes SFS
+  # first, but later user-managed priority changes are respected unless forced.
+  promote_claude_priority
 }
 
 # ---------------------------------------------------------------------------
@@ -147,11 +268,19 @@ install_gemini_discovery() {
   fi
 
   info "Gemini CLI detected"
+  local GM_EXTENSION_DIR="$HOME_DIR/.gemini/extensions/solon"
+  if [ -f "$GM_EXTENSION_DIR/gemini-extension.json" ] || [ -f "$GM_EXTENSION_DIR/commands/sfs.toml" ]; then
+    ok "Gemini CLI: solon extension filesystem present at ~/.gemini/extensions/solon"
+    promote_gemini_priority
+    return 0
+  fi
+
   # Idempotent: list current extensions, install only if not present
   local LIST
   LIST="$(gemini extensions list 2>/dev/null || true)"
   if echo "$LIST" | grep -qiE "(^|/)solon\b|MJ-0701/solon-product"; then
     ok "Gemini CLI: solon extension already installed — skip"
+    promote_gemini_priority
     return 0
   fi
 
@@ -159,6 +288,7 @@ install_gemini_discovery() {
   OUT="$(gemini extensions install --consent --auto-update "https://github.com/$SOLON_REPO.git" 2>&1 || true)"
   if echo "$OUT" | grep -qiE "(installed|already)"; then
     ok "Gemini CLI: extension installed via 'gemini extensions install --consent'"
+    promote_gemini_priority
   else
     warn "Gemini CLI: extension install did not confirm success"
     warn "  Output: $(echo "$OUT" | head -2 | tr '\n' ' ')"
@@ -179,7 +309,7 @@ install_codex_discovery() {
   local DEST_DIR="$HOME_DIR/.codex/skills/sfs"
   mkdir -p "$DEST_DIR"
   cp "$SOURCE_DIR/templates/codex-skill/SKILL.md" "$DEST_DIR/SKILL.md"
-  ok "Codex CLI: user-global skill installed at ~/.codex/skills/sfs/SKILL.md (C-1)"
+  ok "Codex CLI: priority-1 user-global skill installed at ~/.codex/skills/sfs/SKILL.md (C-1)"
 
   # Codex CLI presence is informational — the SKILL is auto-discovered
   # whenever Codex starts in any project.

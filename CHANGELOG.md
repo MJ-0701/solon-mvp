@@ -1,3 +1,151 @@
+## [0.6.0] - 2026-05-04
+
+> **Version naming hard cut: from 0.6.0 onwards no `-product` suffix. Historical 0.5.x-product tags preserved.**
+> 0.6.0 implement sprint chunk 1 — R-A scaffold (6 새 script + bin/sfs dispatch + Windows wrapper) +
+> R-G version bump (0.5.96-product → 0.6.0). R-B/R-C/R-D/R-E/R-F/R-H/R-I 실 기능 + tests + CI + brew/scoop
+> hash 갱신 = 후속 chunk (G6 review 전 까지 누적). 본 entry 는 chunk 1 시점 placeholder, G6 PASS 시 final wording.
+
+### Added
+
+- **6 new bash scripts under `solon-mvp-dist/scripts/`** (R-A AC1.1 — functional skeletons,
+  body logic 다음 chunk 에서 R-B/R-C/R-F/R-H spec 따라 채움):
+    - `sfs-storage-init.sh` — Layer 1 (`docs/<domain>/<sub>/<feat>/`) + Layer 2 (`.solon/sprints/<S-id>/<feat>/`) path schema 생성/검증.
+    - `sfs-storage-precommit.sh` — pre-commit / pre-merge storage validator (co-location + N:M + sprint.yml schema).
+    - `sfs-archive-branch-sync.sh` — closed sprint archive branch 자동 sync + flock(1) race 보호.
+    - `sfs-sprint-yml-validator.sh` — sprint.yml 8-field schema validator + close mode dispatch (validate / close 통합 — F6).
+    - `sfs-migrate-artifacts.sh` — interactive / `--apply` / `--auto` 3 surface + Pass 1/2 + reject + `--rollback` + `--rollback-from-snapshot` + `--print-matrix` + `--backfill-legacy` + `--snapshot-include-all` flags.
+    - `sfs-migrate-artifacts-rollback.sh` — git revert + Layer 1 atomic rollback helper (`--commit-sha` / `--from-snapshot`).
+- **5 new `bin/sfs` dispatch cases** (R-A AC1.2): `storage` (init / precommit subcommands), `migrate-artifacts`,
+  `migrate-artifacts-rollback`, `archive-branch-sync` (alias `archive`), `sprint` (validate / close subcommands).
+- Windows wrappers (`bin/sfs.ps1` + `bin/sfs.cmd`) automatically forward all 5 new subcommands to bash `bin/sfs` (R-A AC1.3 — 기존 thin forwarder 구조 정합, Smoke verify = AC4.5 다음 chunk).
+
+### Changed
+
+- **`solon-mvp-dist/VERSION`**: `0.5.96-product` → `0.6.0` (R-G G-1, G-2, AC7.1).
+  Suffix `-product` hard-cut from this release onwards.
+- **`bin/sfs version`** output remains `sfs <version>` pattern (S2-N3 = α — Round 1 CEO ruling lock).
+
+### Migration notes for 0.5.x consumers
+
+- 0.5.x consumer 는 6 mo grace (until 2026-11-03) 동안 deprecation warning 만 받음. 자동 migrate 없음.
+- 사용자 명시 `sfs upgrade --opt-in 0.6-storage` 또는 prompt confirm 후에만 backfill 실행.
+- Hard cut 이후 (2026-11-04~) `sfs upgrade` 가 0.5.x consumer 에서 자동 forced migrate (R-E E-4, AC5.4 — backup manifest default + `--commit` opt-in flag).
+- 0.5.x git tags (89개 추정) 모두 historical 보존 — 삭제 0.
+
+### In-progress (다음 chunk)
+
+- R-B AC2.1~AC2.9: Layer 1/2 실 mkdir + co-location validator + N:M conflict detect + sprint.yml schema enforcement + flock(1) race + `--backfill-legacy` idempotence + atomic Layer 1 movements.
+- R-C AC3.1~AC3.6: interactive wizard + Pass 1 deterministic CLI prompt (Q-A~Q-F) + Pass 2 file 별 confirm + reject granularity + git revert atomic.
+- R-D AC4.1~AC4.6: unit + smoke + CI matrix (mac/Ubuntu/Win) + cross-instance verify (P-17 codex/gemini secrets) + sentinel masking isolated step.
+- R-E AC5.1~AC5.4: deprecation warning + `--opt-in 0.6-storage` flag + forced migrate post-grace + commit idempotence guard.
+- R-F AC6.1~AC6.6: sprint.yml 8-field schema enforce + status FSM + close mode prompt + archive/delete branches.
+- R-G AC7.4/AC7.5/AC7.8/AC7.9: brew audit `--new-formula sfs` PASS + scoop manifest schema check PASS + release discovery 갱신 + atomic 5-file commit.
+- R-H AC10.1~AC10.5: source matrix `--print-matrix` JSON Lines schema + backup manifest 9 field + `--rollback-from-snapshot` 실 restore + interrupted-midway recovery + no-data-loss anti-AC10 verify.
+- R-I AC11/AC12/AC13: release sequence enforce + cross-platform hash parity + workflow permissions hardening.
+
+### Chunk 2 (Code runtime, 2026-05-04 KST) — implementation lock
+
+- **R-B real logic** — `sfs-storage-init.sh` slug regex enforcement + Layer 1/2 atomic mkdir + co-location pre-flight; `sfs-storage-precommit.sh` 3 validators (co-location FAIL, N:M conflict via active-sprint cross-touch detect, sprint.yml schema delegate) with `--strict|--advisory` mode; `sfs-archive-branch-sync.sh` flock(1) primary + advisory PID lock fallback + atomic snapshot pre-mv. **bash 3.2 compatible** (no `declare -A`).
+- **R-C/R-H real logic** — `sfs-migrate-artifacts.sh` 7 modes (interactive / apply / auto / backfill / rollback / rollback-snapshot / print-matrix). 6 enumerated Pass 1 prompts (Q-A~Q-F deterministic). JSON Lines matrix (6 fields, action enum, null semantics for delete/skip). 9-field backup manifest + 11-extension default snapshot filter (`--snapshot-include-all` opt-in). SIGINT/SIGTERM atomic rollback trap. `sfs-migrate-artifacts-rollback.sh` git revert + snapshot fallback + working-tree dirty safety.
+- **R-E real logic** — `sfs-upgrade-deprecation.sh` consumer version classify (0.6.x silent / 0.5.x pre-grace warn + `--opt-in 0.6-storage` invoke / 0.5.x post-grace forced migrate + `--commit` opt-in + dirty WT guard + idempotence). `bin/sfs upgrade_command` extended with `--opt-in` and `--commit` flags + deprecation hook.
+- **R-F real logic** — `sfs-sprint-yml-validator.sh` validate (8 fields + status enum + dependencies semantics) and close (path resolution + interactive prompt or `--force-action` + gzip archive or delete) two-mode dispatch.
+- **R-G audit + release discovery** — `bin/sfs latest_release_version()` accepts both legacy `v*-product` and new suffix-drop `v[0-9]*` semver. `sfs_parse_product_version()` likewise. `packaging/homebrew/sfs.rb` and `packaging/scoop/sfs.json` materialized with `__SHA256_PLACEHOLDER_FOR_RELEASE_CUT__` (release tool sed at cut time).
+- **R-I real logic** — `sfs-release-sequence.sh` 3-phase enforcement (tag-push → audit → tap-update) with state markers. `.gitattributes` LF normalization for SFS artifact extensions.
+- **R-D tests + CI** — 16 `tests/test-*.sh` + `tests/run-all.sh` harness + 3 `tests/fixtures/bad-sprint-yml/*.yml` + `tests/scoop-manifest-validate.sh`. `.github/workflows/sfs-pr-check.yml` + `.github/workflows/sfs-0-6-storage.yml` shipped (AC2.6 mandatory + AC4.3 macOS+Ubuntu+Windows matrix + AC4.4 cross-instance verify + AC4.4.4/AC4.6 isolated log-masking + AC13 explicit `permissions: contents: read`). Existing `windows-scoop-smoke.yml` patched with permissions block.
+- **AC9 verified** — `git diff 03f36de -- 2026-04-19-sfs-v0.4/SFS-PHILOSOPHY.md` = 0 lines (spec sprint immutability preserved).
+- **`bash tests/run-all.sh`** = **17/17 PASS** locally.
+- **AC4.3 / AC4.5 / AC7.4 / AC7.5 (real toolchain runs)** explicitly deferred to chunk 3 release cut (see implement.md §5).
+
+### G6.1 fix patch (2026-05-04 KST, brave-focused-feynman D-Code session) — codex G6 PARTIAL flags HIGH 3 + MEDIUM 3
+
+> Option β step 2 — retro.md §9 plan 따라 G6 review codex Stage 2 PARTIAL findings 6 fix.
+
+- **HIGH F1 — `sfs-migrate-artifacts.sh` stdin contention fix** — interactive prompts now route through a `prompt_user()` helper that reads from `/dev/tty` (with timeout + default fallback). Matrix data flowing through stdin (`build_source_matrix | apply_migration`) is no longer drained by inner reads. New `--no-tty` flag forces default-only behaviour for CI / scripted contexts. AC3.2 / AC3.4 / AC3.5.
+- **HIGH F3 — SIGINT/SIGTERM atomic rollback** — every file op (migrate / archive / delete / skip) appended to a JSONL transaction journal at `.sfs-local/migrate-tx/<ts>.jsonl`. Trap handler now: (1) reverse-replays journal to remove created destinations + archive `.gz` blobs, (2) cp-restores sources from the pre-migrate snapshot, (3) reports working-tree status. Signal-aware exit codes: `130` for SIGINT, `143` for SIGTERM (legacy `4` retained as fallback). AC2.9.
+- **HIGH F4 — `verify_no_data_loss` real comparison** — replaces the prior count-only stub. For each manifest `files[]` entry the check resolves the current bytes via priority order (archive `.gz` blob → source path → migration dest), recomputes sha256 + size, and strict-compares against the manifest. Mismatch ≥ 1 → exit `3` (anti-AC10) + per-file mismatch report on stderr. New `--verify-snapshot <ISO>` flag runs the verifier standalone for negative tests + post-incident audits.
+- **MEDIUM F2 — `sfs-pr-check.yml` strict mode** — Option A (default per CLAUDE.md §1.4 minimal cleanup): the storage validator step now invokes `sfs-storage-precommit.sh --root . --strict`, replacing the prior `--advisory` invocation. Storage violations now fail PR checks instead of being silently logged.
+- **MEDIUM F6 — Windows hash parity (AC12)** — `tests/test-hash-parity.sh` extended: when running under bash on a Windows runner where `powershell.exe` (or `pwsh`) is on PATH, sample files are double-hashed via PowerShell `Get-FileHash -Algorithm SHA256` and compared strict-equal to POSIX `sha256sum` / `shasum -a 256`. New dedicated `hash-parity-windows` job in `.github/workflows/sfs-0-6-storage.yml` invokes the test on `windows-latest` runner.
+- **MEDIUM AC10.5 — interrupted-midway recovery** — new `--recover [<ts>]` mode reuses the journal-replay cleanup + snapshot-restore pipeline. Defaults to the latest journal under `.sfs-local/migrate-tx/`. After recovery the script checks tracked-file diff vs HEAD (`git diff --quiet HEAD --`); residual transient artifacts (snapshot dir + journal file) are left intact for audit.
+- **5 new negative tests + 1 extended test** — `tests/test-sfs-migrate-stdin-isolation.sh`, `tests/test-sfs-migrate-sigint-rollback.sh` (static contract + best-effort integration probe), `tests/test-no-data-loss-corruption-negative.sh`, `tests/test-sfs-pr-check-strict.sh`, `tests/test-sfs-migrate-recovery-clean.sh` + extended `tests/test-hash-parity.sh` Windows-PowerShell parity branch. **`bash tests/run-all.sh` = 22/22 PASS** locally post-fix.
+
+### G6.1.1 fix iteration (Schedule A, 2026-05-04 KST, brave-focused-feynman) — gemini cross-check PARTIAL veto V1+V2 + hidden-bug HB1+HB2
+
+> Schedule A 2nd round: G6.1 self CPO PASS 95/100 → gemini PARTIAL with 2 third-eye veto + 3 hidden-bug flags → fix all four → re-review.
+
+- **V1 — escape-aware JSONL parsing** — replaces fragile `sed -nE 's/.*"<field>":"([^"]*)".*/\1/p'` (which truncates at the first byte after `"<field>":"`, including escaped `\"` quotes inside the value) with a new awk state-machine helper `json_get_string()` that walks the value byte-by-byte and decodes `\\`, `\"`, `\n`, `\r`, `\t` correctly, stopping only at the first UNESCAPED `"`. Three call sites converted: `journal_replay_cleanup` (op / dest / archive) and `verify_no_data_loss` (path / sha256). `size_bytes` stays on the original sed pattern (numeric, no quote ambiguity). Effect: file paths containing `"` or `\` no longer silently truncate during rollback or anti-AC10 verification.
+- **V2 — rollback failure visibility** — `on_interrupt` no longer swallows `cp -a "${SNAPSHOT_FOR_INT}/files/." .` failures with `2>/dev/null || true`. cp's stderr is now inherited; on non-zero exit the trap prints a `SEVERE — snapshot restore failed; rollback INCOMPLETE — manual intervention required` message and exits with new exit code **5** (overrides the normal 130/143 signal exit). Header exit-code table updated.
+- **HB1 — empty parent dir cleanup** — after `rm -f "${dest}"` in journal_replay_cleanup, an idempotent `rmdir` cascade walks up the parent chain (stopping at first non-empty dir or `.` / `/`). No more "ghost" directory structures left behind under `.solon/sprints/<sid>/<feat>/`. Recovery test extended to assert `find .solon/sprints -mindepth 1 -type d -empty` count = 0 post-recover.
+- **HB2 — trap re-entrancy guard** — `on_interrupt` now sets `trap '' INT TERM` at the very first line, blocking a second SIGINT/SIGTERM from re-entering the handler mid-cleanup. Static contract enforced by extended `test-sfs-migrate-sigint-rollback.sh` (awk over `on_interrupt()` body asserts the early `trap ''` invocation).
+- **1 new regression test + 2 extended** — `tests/test-sfs-migrate-quoted-paths.sh` (V1: `"`/`\` filenames survive migrate→recover round-trip + json_get_string helper presence + sed `[^"]*` regex absence in fixed functions); extended `tests/test-sfs-migrate-sigint-rollback.sh` (V2: `cp -a ... || true` absence + exit code 5 reachable + SEVERE marker; HB2: `trap '' INT TERM` early in `on_interrupt`); extended `tests/test-sfs-migrate-recovery-clean.sh` (HB1: empty subdir count assertion + pipefail-safe find guards). **`bash tests/run-all.sh` = 23/23 PASS** locally post-G6.1.1.
+- New exit code: **`5`** = SEVERE rollback incomplete (snapshot restore cp failed during trap). Documented in script header. Distinguishes silent-rollback edge case from normal signal termination.
+
+### G6.1.2 fix (V1 follow-up — Schedule A round 2 gemini veto, 2026-05-04 KST, brave-focused-feynman)
+
+> Round 2 gemini PARTIAL: identified residual `grep -oE '\{"path":"[^"]*",...\}'` extraction in `verify_no_data_loss` (L594 + L597) — same escape-blind regex class that round 1 V1 hit. CPO round 2 PASS 96/100 missed this; gemini caught it.
+
+- **V1 manifest entry extraction** — replaced both escape-blind `grep -oE` invocations with new awk depth-tracker `emit_manifest_files_entries(manifest)`. The walker tracks string + escape + brace-depth state and emits one top-level `{...}` object per line from the `files[]` array, regardless of whether a path contains escaped quotes (`\"`) or backslashes. Without this, `verify_no_data_loss` would silently skip any manifest entry whose path contained `"` — causing files_count to under-report and corrupted-or-missing files to slip past anti-AC10.
+- **Test extension** — `tests/test-sfs-migrate-quoted-paths.sh` now also (a) parses `verify_no_data_loss: files=N` from `--auto` output and asserts `N >= src_count_pre`, and (b) re-runs `--verify-snapshot <ISO>` standalone and re-checks files=N. Together these close the round-2 gemini CTO action item.
+- `bash tests/run-all.sh` = **23/23 PASS** local (test count unchanged — extending the existing quoted-paths test rather than adding a new one). Helper line count: sfs-migrate-artifacts.sh +60 (911 → 971L) for the awk function.
+
+### Hotfix — claude code bootstrap performance (re-cut 2026-05-04)
+
+> Sprint `0-6-0-hotfix-re-cut-claude-bootstrap`, G2 chunk-2 (D-Code, `23rd-dazzling-sharp-euler` claude-code-local-host session).
+> User lock 2026-05-04T22:01+09:00 verbatim: `'γ + a 가자'` (JAR strategy γ + scripts split a) following spike-claude-code-baseline-1 PASS_WITH_DEFECT (manual claude code path 3min PASS + sfs orchestration path 16min ABORTED → 5.3x slowdown attributable to PDCA scaffold + skeleton review overhead, not LLM synthesis itself).
+> AC verified at chunk-2 commit: AC-func-1 (idempotency guard), AC-func-4 (4-case graceful degradation), AC-func-5 (skeleton autodetect → review skip), AC-func-6 (override flags), AC-func-7 (PowerShell auto-forward via thin wrapper), AC-perf-4 (file-level template inventory), AC-perf-5 (alive heartbeat ≤30s default), AC-rev-1 (cosmetic-exclusion meta-rule), AC-rev-2 (skeleton review skip), AC-rev-3 (carry note).
+> AC deferred to chunk-3 manual measurement: AC-func-2 (`./gradlew build`), AC-func-3 (`./gradlew test`), AC-perf-1 (≤30min wall-clock measurement), AC-spec-1/2 (philosophy + claude.md immutability via `git diff` post-chunk).
+> AC deferred to a later release: AC-perf-2 (3-run σ ≤5min), AC-perf-3 (token ≤100K soft, requires R-D timer/token sub-dim instrumentation per H5b priority 6).
+
+#### G6.1 Gemini Schedule A fix patch (2026-05-05 KST)
+
+- **`scripts/sfs-bootstrap.sh` `--refresh` semantics fixed** — Spring Initializr HTTP 4xx now hard-fails with exit 2 instead of falling back to stale cache, while 5xx / timeout / offline still warn and fall back to the local template cache. This closes the invalid-input ambiguity flagged by Gemini round 1.
+- **`scripts/sfs-measure.sh` signal cleanup hardened** — INT/TERM trap is registered before spawning the wrapped command, and the watcher now tracks/kills its foreground `sleep` via `sleep_pid` so signal cleanup cannot leave a sleeping watcher child behind.
+- **γ JAR UX hint added** — the experimental Spring/Kotlin bootstrap helper now emits a stderr hint to run `gradle wrapper --gradle-version 8.10.2` before `./gradlew build` / `./gradlew test`, matching the text-only template strategy without bundling JAR or wrapper scripts.
+- **R-E cosmetic boundary clarified** — public APIs, CLI flags/options, user- or automation-consumed paths, persisted data shapes, and domain ubiquitous terms are explicitly in-scope contract surfaces even when a diff appears to be "just naming".
+- **Tests expanded** — `test-sfs-bootstrap-graceful-degradation.sh` covers fake HTTP 400 hard-fail + fake HTTP 500 fallback; `test-sfs-bootstrap-quick.sh` asserts no non-empty `review-g6.md` skeleton artifact and checks the Gradle wrapper hint; `test-sfs-measure-alive.sh` adds static + runtime signal-cleanup checks; new `test-review-cosmetic-boundary.sh` guards the R-E contract-surface wording. `bash tests/run-all.sh` = **29/29 PASS** locally after this patch.
+
+#### Discovery priority hardening (2026-05-05 KST)
+
+- **SFS promoted to priority-1 across CLI discovery** — `scripts/install-cli-discovery.sh` and `.ps1` now promote `solon@solon` to the first Claude Code enabled plugin and marketplace entry on install/update. Gemini extension enablement is similarly promoted so `solon` is first, Codex skill text declares priority-1 routing for Solon/SFS sprint/PDCA work, and later user-managed priority changes are respected unless `SFS_DISCOVERY_FORCE_PROMOTE=1` is set.
+- **Doctor now verifies priority, not just installation** — `scripts/sfs-doctor.sh` checks whether Claude `enabledPlugins` starts with `solon@solon`, Gemini extension enablement starts with `solon`, and the Codex skill contains priority-1 routing text. The Claude `plugin list` probe is skipped unless `timeout(1)` exists, avoiding hangs on stale plugin/auth state.
+- **Regression guard added** — `test-cli-discovery-macos.sh` now seeds a fake non-Solon-first Claude settings/registry state and asserts the install hook rewrites it to solon-first on install/update, then respects a later user-managed reorder. Windows mirror test updated with the same priority scenario.
+
+#### Release hard-cut tooling guard (2026-05-05 KST)
+
+- **Suffixless `0.6.0` release tooling fixed** — `scripts/cut-release.sh` now accepts `X.Y.Z` in addition to legacy `X.Y.Z-mvp` / `X.Y.Z-product`; `scripts/verify-product-release.sh` accepts suffixless product versions plus legacy `-product`; Scoop checkver now matches `v0.6.0` as well as historical `v0.5.x-product`.
+- **Release regression test added** — new `tests/test-release-suffixless-hard-cut.sh` validates both owner scripts with `bash -n`, runs `cut-release.sh --version 0.6.0 --dry-run` against a temp stable repo, and checks Scoop suffixless discovery regex.
+- **Release dry-run verified** — `SOLON_STABLE_REPO=/Users/mj/tmp/solon-product bash scripts/cut-release.sh --version 0.6.0 --dry-run --allow-dirty --allow-divergence` = PASS. `bash tests/run-all.sh` = **30/30 PASS** and `bash tests/scoop-manifest-validate.sh` = PASS.
+
+#### Added
+
+- **Conversational initial-setup `bin/sfs bootstrap` handoff + experimental helper** (R-A) — not a generic app generator contract. Non-experimental `sfs bootstrap <plain-language goal...>` exits 0 with an agent action handoff: the user should be able to simply describe what they want, then the AI asks "초기 프로젝트 구성해드릴까요?", infers the smallest useful setup, creates the app through Claude/Codex/Gemini or native framework CLIs (FastAPI, NestJS, React, Next.js, Vue, Nuxt, Spring/Kotlin, etc.) after consent, then returns with `sfs init --layout thin --yes`. Experimental usage for the hotfix measurement helper is `sfs bootstrap --experimental spring-kotlin <name> --quick` or `sfs bootstrap --experimental --stack spring-kotlin <name> --quick`. Spring/Kotlin quick mode is backed by an offline template cache; `--refresh` re-fetches from Spring Initializr API with graceful degradation (API 2xx exit 0 / API 4xx hard fail exit 2 / API 5xx → cache fallback exit 0 / network OFF → cache fallback exit 0 / cache absent → exit 2). Override flags: `--java-version`, `--spring-boot`, `--package`. Idempotency guard: existing target dir → exit 1 default; `--force` confirm prompt; `--force --yes` CI-mode overwrite (also rejects non-tty without `--yes`). Body in `scripts/sfs-bootstrap.sh` (precedent-aligned with `sfs-storage-init.sh` / `sfs-migrate-artifacts.sh` thin-dispatch + extracted-script pattern).
+- **`bin/sfs measure --alive`** subcommand (R-D) — measurement wrapper for long-running steps. Spawns a watcher that emits `[alive] still in step: <name>` to stderr every `SFS_ALIVE_THRESHOLD_SECS` seconds (prod default 30, test override 2) while the wrapped command remains running. Forwards the wrapped command's exit code unchanged. Body in `scripts/sfs-measure.sh`. Timer / token sub-dimensions explicitly DEFER to a later release (H5b priority 6, requires PII review for token consumption instrumentation).
+- **`scripts/sfs-bootstrap-skeleton-signature.sh`** (R-C) — autodetect skeleton (zero-feature) signature: zero endpoint annotations + zero non-boilerplate `@Test` + zero source `.kt` files outside `Application.kt` / `ApplicationTests.kt`. Returns exit 0 for skeleton (G6 review auto-skip surface), exit 1 for featured project, exit 2 for invalid arg. Used by the experimental Spring/Kotlin helper to gate review docs synthesis (AC-rev-2: review-g6.md not generated for skeleton output).
+- **`templates/spring-kotlin-zero/`** offline template cache (R-B, γ scope: text-only) — 7 placeholder files: `build.gradle.kts` (Spring Boot starter-web + spring-boot-starter-test, Kotlin DSL), `settings.gradle.kts`, `gradle/wrapper/gradle-wrapper.properties` (Gradle 8.10.2 distribution URL), `src/main/kotlin/__PACKAGE_PATH__/Application.kt` (`@SpringBootApplication`), `src/main/resources/application.properties`, `src/test/kotlin/__PACKAGE_PATH__/ApplicationTests.kt` (`contextLoads()` only — skeleton signature input), `.gitignore`. Variable substitution: `<PROJECT-NAME>`, `<PACKAGE>`, `<PACKAGE_PATH>`, `<JAVA-VERSION>`, `<SPRING-BOOT-VERSION>`. **Gradle wrapper JAR + `gradlew` / `gradlew.bat` shell scripts intentionally omitted (γ)** — the experimental Spring/Kotlin helper emits the `gradle wrapper --gradle-version 8.10.2` hint, and chunk-3 manual measurement materializes wrappers post-copy or via `--refresh` Spring Initializr API tarball. AC-perf-4 file-level diff vs IntelliJ baseline accounts for the 3-file skew (gradlew + gradlew.bat + gradle-wrapper.jar) at chunk-3 measurement time.
+- **Review prompt cosmetic-exclusion meta-rule (R-E)** — added to `templates/.sfs-local-template/personas/cpo-evaluator.md` and `templates/.sfs-local-template/context/commands/review.md`. In-scope: functional correctness + consistency (cross-document SSoT, AC ↔ test ↔ impl, frontmatter ↔ body). Out-of-scope (auto-skip when meaning unchanged): identifier naming, formatting, line-count drift, wording variants, comment style. Boundary clarification: public APIs, CLI flags/options, user- or automation-consumed paths, persisted data shapes, and domain ubiquitous terms are functional contract surfaces; renames there stay in-scope. Surface a finding only when behaviour, traceability, or a documented contract changes. Long-term project-philosophy-level codification reserved for a later release (`SFS-PHILOSOPHY.md` body change = 0 lines this hotfix per AC-spec-1 / anti-AC1, anti-AC5).
+- **7 new tests under `tests/`** — `test-sfs-bootstrap-quick.sh` (non-experimental conversational setup trigger emits agent handoff, includes the plain-language consent question, and creates no framework files + explicit stack requirement + unsupported-stack guard + experimental Spring/Kotlin quick mode + override flags + file-level inventory + skeleton `review-g6.md` absent/0-byte assertion + Gradle wrapper hint), `test-sfs-bootstrap-skeleton-signature.sh` (skeleton dir → exit 0 + featured dir → exit 1), `test-sfs-measure-alive.sh` (`SFS_ALIVE_THRESHOLD_SECS=2` + 3s sleep → at least one `[alive] still in step:` stderr emit + signal cleanup smoke), `test-sfs-bootstrap-idempotency.sh` (existing dir → exit 1 + `--force --yes` overwrite + non-tty `--force` rejection), `test-sfs-bootstrap-graceful-degradation.sh` (cache absent → exit 2 + `--refresh` HTTP 400 hard-fail / HTTP 500 fallback / offline fallback mocks), `test-review-cosmetic-boundary.sh` (R-E public API / CLI flag / domain term contract boundary), `test-release-suffixless-hard-cut.sh` (0.6.0 owner release tooling and Scoop checkver guard). Existing `test-cli-discovery-macos.sh` now also verifies solon-first priority against a fake non-Solon-first Claude settings state. `bash tests/run-all.sh` = **30/30 PASS** locally after G6.1 + release hard-cut guard (23 baseline + 7 new).
+- **`RUNTIME-ABSTRACTION.md` §6.1 Claude Adapter** expanded — bootstrap workflow surface (R-A bin/sfs bootstrap + R-C skeleton autodetect + R-D alive heartbeat) + review prompt cosmetic-exclusion (R-E) detail level brought to symmetry with §6.2 Codex / §6.3 Gemini-CLI adapter sections. Two deferred SDK questions added (`.claude-plugin/agents/` future native slot for multi-instance evaluator + multi-stack expansion beyond Kotlin Spring).
+
+#### Changed
+
+- **`bin/sfs` dispatch** gains two new top-level cases: `bootstrap` → forwards to `scripts/sfs-bootstrap.sh`, `measure` → forwards to `scripts/sfs-measure.sh`. The `bootstrap` script treats non-experimental generic use as a conversational setup handoff: ask the user in plain language, infer a suitable starter, create the app through native tooling, then return to Solon. PowerShell wrapper (`bin/sfs.ps1`) and CMD wrapper (`bin/sfs.cmd`) auto-forward both via the existing thin `bash bin/sfs` shim — no native dispatch case needed (AC-func-7 structural, Windows scoop smoke verify deferred to a later release).
+
+#### Hypotheses priority reorder (spike-result.md §7.1 + plan.md §2)
+
+- **H1** (`--quick` / full PDCA bypass) — VERIFIED — promoted from priority 2 → 1. sfs orchestration overhead is the dominant runtime-agnostic contributor (5.3x slowdown ratio).
+- **H2** (review trigger guard) — PARTIAL — promoted from 3 → 2. PDCA 6-phase scaffold creates 6 empty `.md` per sprint regardless of feature presence; combined with H8/H9.
+- **H4** (template cache) — REJECTED — demoted from 1 → 4. Manual claude code path synthesised 9 files in 3 minutes → LLM synthesis itself is not the bottleneck. Template cache is now positioned as a marginal file-level baseline parity surface (R-B) rather than a perf primary.
+- **H5** split: H5a (alive UX, priority 3, VERIFIED via 14-min silent block in spike sfs path = 28x AC-perf-5 violation) ≠ H5b (timer/token budget instrumentation, priority 6, DEFER to a later release).
+- **H8** (review/doc synthesis cost) — ACCEPTED, integrated into H1.
+- **H9** (cosmetic review overhead) — ACCEPTED via G6.1 fix Round 3 cosmetic line-count drift (911→967→971 across 4 SSoT files) precedent, integrated into H2.
+
+#### Risks flagged (carry to a later release)
+
+- **R1** — R-D `bin/sfs measure --token` (ii) sub-dimension PII risk: token consumption instrumentation may capture LLM context windows that include user prompts. Decision deferred until R-D extension scope.
+- **R2** — `§9.3` D-Code path-level isolation guidance reinforcement (CLAUDE.md §1.25 + `.bkit/` + `.sfs-local/migrate-tx/` + `.claude/settings.local.json` exclusion explicit pattern). Picked up at chunk-2 commit instructions.
+- **R3** — plan.md §3 R-E target path was inaccurate (`.claude-plugin/agents/evaluator.md` does not exist on disk; actual consumer-facing prompt SSoT is `templates/.sfs-local-template/personas/cpo-evaluator.md`). Implement.md served as ground truth at chunk-2 entry. G7 retro will record the lesson — pre-G2 entry preflight should grep plan.md target paths against the working tree before chunk-1 scaffolding.
+
+---
+
 ## [0.5.96-product] - 2026-05-03
 
 > Pre-staged entry. VERSION bump and final wording pinned in Phase 10

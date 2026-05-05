@@ -21,7 +21,7 @@
   ],
   "checkver": {
     "github": "https://github.com/MJ-0701/solon-product",
-    "regex": "v([\\d.]+-product)"
+    "regex": "v([\\d.]+(?:-product)?)"
   },
   "autoupdate": {
     "architecture": {

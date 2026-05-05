@@ -182,6 +182,8 @@ Commands:
   agent install, upgrade, update, uninstall
   version [--check]
   status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, report, tidy, retro, commit, loop
+  bootstrap [<plain-language app idea>]   # agent-facing initial setup handoff
+  measure --alive -- <command>            # long-running command heartbeat
 
 Project state defaults to .sfs-local/. Override with SFS_LOCAL_DIR when needed.
 
@@ -270,7 +272,8 @@ upgrade_usage() {
   cat <<'EOF'
 Usage:
   sfs upgrade [--skip-existing] [--no-self-upgrade] [--interactive] [--layout thin|vendored]
-  sfs update [--skip-existing] [--no-self-upgrade]   # same one-shot flow
+              [--opt-in 0.6-storage] [--commit]
+  sfs update  [--skip-existing] [--no-self-upgrade]   # same one-shot flow
 
 Updates the current project from the latest Solon runtime:
   - if this CLI is installed by Homebrew, refreshes the Solon tap and runs
@@ -280,6 +283,13 @@ Updates the current project from the latest Solon runtime:
   - preserves sprint/decision/event history and project-specific docs
   - global runtime upgrades default the project surface to thin
   - thin layout keeps Claude/Gemini/Codex command/skill files opt-in
+
+R-E deprecation behavior (AC5.1~AC5.4):
+  - 0.6.x consumer → silent
+  - 0.5.x pre-grace (before 2026-11-03) → deprecation warning printed; pass
+    `--opt-in 0.6-storage` to invoke `sfs migrate-artifacts --backfill-legacy`
+  - 0.5.x post-grace (>= 2026-11-03) → forced migrate; pass `--commit` to
+    auto-commit, otherwise interactive prompt.
 
 Use `--interactive` to run the project-file preview instead of the safe
 non-interactive default. Use `--layout vendored` to keep project-local runtime
@@ -342,11 +352,19 @@ EOF
 }
 
 latest_release_version() {
+  # AC7.8 — semver-aware release discovery. Accepts both legacy `v*-product` (0.5.x)
+  # and new suffix-drop `vX.Y.Z` (0.6.0+). Returns the highest semver tag found.
   command -v git >/dev/null 2>&1 || return 1
   local repo="${SFS_RELEASE_REPO_URL:-https://github.com/MJ-0701/solon-product.git}"
   local refs line sha ref tag ver major minor patch
   local best="" best_major=-1 best_minor=-1 best_patch=-1
-  refs="$(git ls-remote --tags --refs "${repo}" 'refs/tags/v*-product' 2>/dev/null)" || return 1
+  # Glob captures both v*-product (legacy) and v[0-9]* (0.6.0+). git ls-remote will
+  # union both since we list refs separately.
+  local refs_legacy refs_new
+  refs_legacy="$(git ls-remote --tags --refs "${repo}" 'refs/tags/v*-product' 2>/dev/null || true)"
+  refs_new="$(git ls-remote --tags --refs "${repo}" 'refs/tags/v[0-9]*' 2>/dev/null || true)"
+  refs="${refs_legacy}
+${refs_new}"
   while IFS= read -r line; do
     [[ -n "${line}" ]] || continue
     sha="${line%%$'\t'*}"
@@ -355,6 +373,7 @@ latest_release_version() {
     tag="${ref##*/v}"
     case "${tag}" in
       *-product) ver="${tag%-product}" ;;
+      [0-9]*.[0-9]*.[0-9]*) ver="${tag}" ;;
       *) continue ;;
     esac
     IFS=. read -r major minor patch <<< "${ver}"
@@ -402,10 +421,12 @@ sfs_project_layout() {
 }
 
 sfs_parse_product_version() {
+  # AC7.8 — accept legacy *-product/*-mvp suffix AND new suffix-less semver (0.6.0+).
   local version="$1" base major minor patch
   case "${version}" in
     *-product) base="${version%-product}" ;;
     *-mvp) base="${version%-mvp}" ;;
+    [0-9]*.[0-9]*.[0-9]*) base="${version}" ;;
     *) return 1 ;;
   esac
   IFS=. read -r major minor patch <<< "${base}"
@@ -760,6 +781,8 @@ upgrade_command() {
   local no_self_upgrade="${SFS_SKIP_SELF_UPGRADE:-0}"
   local interactive=0
   local upgrade_layout="${SFS_UPGRADE_LAYOUT:-thin}"
+  local opt_in=""
+  local do_commit=0
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --skip-existing)
@@ -786,6 +809,22 @@ upgrade_command() {
         upgrade_layout="${1#--layout=}"
         shift
         ;;
+      --opt-in)
+        opt_in="${2:-}"
+        if [[ -z "${opt_in}" ]]; then
+          echo "missing value for --opt-in (e.g. 0.6-storage)" >&2
+          return 1
+        fi
+        shift 2
+        ;;
+      --opt-in=*)
+        opt_in="${1#--opt-in=}"
+        shift
+        ;;
+      --commit)
+        do_commit=1
+        shift
+        ;;
       -h|--help)
         upgrade_usage
         return 0
@@ -797,6 +836,20 @@ upgrade_command() {
         ;;
     esac
   done
+
+  # R-E deprecation hook (AC5.1~AC5.4): runs before main upgrade flow.
+  # 0.6.x consumer = silent; 0.5.x pre-grace = warn (+ opt-in 0.6-storage migrate);
+  # 0.5.x post-grace = forced migrate (+ --commit handling + idempotence guard).
+  local deprecation_helper="${DIST_DIR}/scripts/sfs-upgrade-deprecation.sh"
+  if [[ -x "${deprecation_helper}" ]]; then
+    local dep_args=()
+    [[ -n "${opt_in}" ]] && dep_args+=(--opt-in "${opt_in}")
+    [[ "${do_commit}" == "1" ]] && dep_args+=(--commit)
+    if ! bash "${deprecation_helper}" "${dep_args[@]}"; then
+      echo "sfs upgrade: deprecation/forced-migrate step failed; resolve and retry." >&2
+      return 1
+    fi
+  fi
   case "${upgrade_layout}" in
     thin|vendored) ;;
     *)
@@ -992,6 +1045,80 @@ case "${1:-}" in
   doctor)
     shift
     exec bash "${DIST_DIR}/scripts/sfs-doctor.sh" "$@"
+    ;;
+  storage)
+    shift
+    sub="${1:-}"
+    shift || true
+    case "${sub}" in
+      init)
+        exec bash "${DIST_DIR}/scripts/sfs-storage-init.sh" "$@"
+        ;;
+      precommit)
+        exec bash "${DIST_DIR}/scripts/sfs-storage-precommit.sh" "$@"
+        ;;
+      -h|--help|help|"")
+        cat <<'EOF'
+sfs storage <subcommand>
+
+Subcommands:
+  init        Layer 1/2 path schema 생성/검증 (sfs-storage-init.sh)
+  precommit   pre-commit / pre-merge storage validator (sfs-storage-precommit.sh)
+EOF
+        exit 0
+        ;;
+      *)
+        echo "unknown storage subcommand: ${sub}" >&2
+        exit 2
+        ;;
+    esac
+    ;;
+  migrate-artifacts)
+    shift
+    exec bash "${DIST_DIR}/scripts/sfs-migrate-artifacts.sh" "$@"
+    ;;
+  migrate-artifacts-rollback)
+    shift
+    exec bash "${DIST_DIR}/scripts/sfs-migrate-artifacts-rollback.sh" "$@"
+    ;;
+  archive-branch-sync|archive)
+    shift
+    exec bash "${DIST_DIR}/scripts/sfs-archive-branch-sync.sh" "$@"
+    ;;
+  bootstrap)
+    shift
+    exec bash "${DIST_DIR}/scripts/sfs-bootstrap.sh" "$@"
+    ;;
+  measure)
+    shift
+    exec bash "${DIST_DIR}/scripts/sfs-measure.sh" "$@"
+    ;;
+  sprint)
+    shift
+    sub="${1:-}"
+    shift || true
+    case "${sub}" in
+      validate)
+        exec bash "${DIST_DIR}/scripts/sfs-sprint-yml-validator.sh" --mode validate "$@"
+        ;;
+      close)
+        exec bash "${DIST_DIR}/scripts/sfs-sprint-yml-validator.sh" --mode close "$@"
+        ;;
+      -h|--help|help|"")
+        cat <<'EOF'
+sfs sprint <subcommand>
+
+Subcommands:
+  validate <sprint.yml-path>   schema check (8 required field, 0=OK 1=fail)
+  close    <sprint-id>         interactive close — archive (.sfs-local/archives/sprint-yml/) or delete
+EOF
+        exit 0
+        ;;
+      *)
+        echo "unknown sprint subcommand: ${sub}" >&2
+        exit 2
+        ;;
+    esac
     ;;
   -h|--help|help)
     usage

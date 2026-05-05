@@ -7,11 +7,9 @@ install. For beginner Git/terminal help, use the Korean [BEGINNER-GUIDE.md](../.
 
 ## 0. Install And Initialize
 
-> **Since 0.5.96-product**, `brew install` / `scoop install` is the only
-> install action you need. Slash command discovery for Claude Code (`/sfs`),
-> Gemini CLI (`sfs`), and Codex CLI (`$sfs`) is registered automatically by
-> the post-install hook — your project tree stays free of plugin/extension/
-> skill files.
+> **Since 0.6.0**, one `brew install` / `scoop install` lets Claude Code
+> (`/sfs`), Gemini CLI (`sfs`), and Codex CLI (`$sfs`) find Solon automatically.
+> Your project keeps the files you read and the records you create.
 
 Mac:
 
@@ -42,32 +40,30 @@ single-shot recovery command. The `sfs` binary itself is unaffected.
 
 ## 1. Mental Model
 
-Solon installs two things into a project:
+Solon gives a project two things:
 
-- a global `sfs` runtime
-- project-local operating state in `.sfs-local/`
+- the `sfs` command
+- project-local working records in `.sfs-local/`
 
 The files you normally edit are:
 
 | File | Role |
 |---|---|
 | `SFS.md` | Project operating identity |
-| `CLAUDE.md` | Claude Code adapter |
-| `AGENTS.md` | Codex adapter |
-| `GEMINI.md` | Gemini CLI adapter |
+| `CLAUDE.md` | Where Claude Code finds Solon |
+| `AGENTS.md` | Where Codex finds Solon |
+| `GEMINI.md` | Where Gemini CLI finds Solon |
 
 Project-local `.claude/`, `.gemini/`, and `.agents/` command/skill files are
-optional. In thin layout, the default surface is clean: root `CLAUDE.md`,
-`AGENTS.md`, and `GEMINI.md` point agents at the global `sfs` runtime. Install
-native slash/skill files only when a project needs them:
+optional. Install those native shortcuts only when a project needs them:
 
 ```bash
 sfs agent install all
 ```
 
-Global `sfs` / `sfs.cmd upgrade` promotes old vendored projects to the thin
-surface as well. Use `sfs upgrade --layout vendored` only when local runtime
-files must stay inside the project.
+Old projects can be upgraded into the lighter 0.6.0 shape. Use
+`sfs upgrade --layout vendored` only when Solon package files must stay inside
+the project.
 
 ## 2. Start A Sprint
 
@@ -83,6 +79,25 @@ requirements, that is usually brainstorm.
 sfs brainstorm --simple "..."  # quick cleanup
 sfs brainstorm "..."           # default normal thinking scaffold
 sfs brainstorm --hard "..."    # product-owner hard training
+```
+
+If a blank app would help before a sprint, the user should not need to know words
+like Next.js, Spring, Java, or API. The user can simply describe what they want
+to make. During brainstorm, the AI should infer when an initial project setup
+would help and ask in plain language:
+
+```text
+Would you like me to set up the initial project?
+```
+
+After consent, the current AI should choose the native setup path, create the app,
+then return to Solon. It may use `sfs bootstrap "small booking web app"` as an
+internal handoff trigger, but the user should not need to know that command:
+
+```bash
+cd my-new-app
+sfs init --layout thin --yes
+sfs start "first goal"
 ```
 
 ## 3. Brainstorm Before Plan
@@ -142,14 +157,9 @@ sfs retro
 ```
 
 `retro` is the normal sprint completion command. It refines the retro, ensures
-the report exists, packs workbench evidence and temporary review scratch into
-one cold archive bundle, closes sprint state, and creates the local close
-commit. Use `sfs retro --draft` only when you want to open the draft without
-closing the sprint.
-Older loose sprint archives and separate review-run archives are compacted by
-`sfs upgrade` into compressed migration bundles.
-Runtime upgrade, agent install, and profile rollback backups are also kept as
-`*.tar.gz` + `manifest.txt` bundles instead of loose project files.
+the report exists, folds away noisy temporary records, closes sprint state, and
+creates the local close commit. Use `sfs retro --draft` only when you want to
+open the draft without closing the sprint.
 
 Use `sfs report` separately only when you want to preview or rebuild the report
 without closing the sprint. The full list of optional helpers
@@ -172,11 +182,8 @@ sfs.cmd update
 sfs.cmd version --check
 ```
 
-On Windows, `sfs.cmd update` is the one-shot command. It runs `scoop update` and
-`scoop update sfs`, reloads the updated runtime, and then continues into the
-current project upgrade. Direct `scoop update sfs` can still trigger the
-post-install project hook, but bucket metadata refresh remains Scoop-owned, so
-the user-facing command is `sfs.cmd update`.
+On Windows, `sfs.cmd update` is the one-shot command. It updates Solon and then
+continues into the current project cleanup.
 
-Recent upgrades also repair missing managed context-router files even when the
-project already reports the latest version.
+Long-running commands can also be wrapped with `sfs measure --alive -- <command>`
+when you want visible progress instead of a silent terminal.

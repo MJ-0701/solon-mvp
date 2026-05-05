@@ -1,0 +1,61 @@
+---
+id: sfs-policy-knowledge-pack-router
+summary: Lightweight activation router for all division knowledge packs.
+language: en
+load_when:
+  - knowledge pack
+  - backend
+  - strategy-pm
+  - qa
+  - design
+  - infra
+  - taxonomy
+  - transaction
+  - batch
+  - integration
+  - API
+  - AWS
+status: seed-inventory
+content_policy: "topic/proposition only; read only this file first. Read a full division pack only on explicit scope request."
+---
+
+# Division Knowledge Pack Router
+
+Use this router before opening long division packs.
+Default policy is minimum required checks by project size.
+This scope is limited to knowledge-pack documents; other documentation is unchanged unless explicitly requested.
+
+If Korean is requested, read `knowledge-pack-router.ko.md` first.
+
+## Division activation
+
+- Backend signals: `backend`, `JVM`, `Spring`, `JPA`, `transaction`, `batch`,
+  `integration`, `DevOps`, `AWS`.
+- Strategy/PM signals: `strategy`, `PM`, `roadmap`, `SLA`, `rollout`, `partnership`.
+- QA signals: `qa`, `test`, `regression`, `release confidence`, `defect`.
+- Design/frontend signals: `design`, `UX`, `UI`, `operator`.
+- Infra/DevOps signals: `infra`, `deploy`, `release`, `observability`, `secrets`,
+  `cost`.
+- Taxonomy signals: `vocabulary`, `naming`, `state`, `event`, `enum`.
+
+## Read order
+
+1. Read only this file to decide coverage.
+2. Read exactly one matching division pack for AC/lens.
+3. Read deeper division pack only if the task explicitly asks for detail
+   (`deep`, `expand`, `full`, `evidence matrix`, or direct section reference).
+
+## On-demand full-pack mapping
+
+- `policies/backend-knowledge-pack.md`
+- `policies/backend-knowledge-pack.ko.md` (Korean, topic list)
+- `policies/strategy-pm-knowledge-pack.md`
+- `policies/strategy-pm-knowledge-pack.ko.md` (Korean, topic list)
+- `policies/qa-knowledge-pack.md`
+- `policies/qa-knowledge-pack.ko.md` (Korean, topic list)
+- `policies/design-knowledge-pack.md`
+- `policies/design-knowledge-pack.ko.md` (Korean, topic list)
+- `policies/infra-knowledge-pack.md`
+- `policies/infra-knowledge-pack.ko.md` (Korean, topic list)
+- `policies/taxonomy-knowledge-pack.md`
+- `policies/taxonomy-knowledge-pack.ko.md` (Korean, topic list)

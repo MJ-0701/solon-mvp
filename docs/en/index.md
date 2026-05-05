@@ -13,7 +13,8 @@ deeper operating model, judgment rules, philosophy, and examples.
 | [Solon 10x value](./10x-value.md) | To understand why Solon trains judgment instead of only automating output |
 | [30-minute guide](./guide.md) | To run the first sprint after install |
 | [Beginner guide](../../BEGINNER-GUIDE.md) | Korean beginner guide for Git, terminal, and CLI basics |
-| [Release notes](../../CHANGELOG.md) | Version-by-version changes |
+| [Release notes](../../RELEASE-NOTES.md) | User-facing version notes (Korean for now) |
+| [Detailed changelog](../../CHANGELOG.md) | Implementation-level version history |
 
 ## Current Flow
 

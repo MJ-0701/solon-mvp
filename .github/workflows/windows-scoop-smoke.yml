@@ -23,6 +23,9 @@ on:
       - "templates/**"
       - "VERSION"
 
+permissions:
+  contents: read
+
 jobs:
   scoop-smoke:
     runs-on: windows-latest

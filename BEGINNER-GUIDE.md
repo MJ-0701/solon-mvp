@@ -80,7 +80,7 @@ scoop install sfs
 ```
 
 이 한 줄이 끝나면 Claude Code (`/sfs`), Gemini CLI (`sfs`), Codex CLI
-(`$sfs`) 세 곳 모두에 슬래시 명령이 자동 등록됩니다. 별도의 plugin
+(`$sfs`) 세 곳 모두에서 Solon 명령을 찾을 수 있습니다. 별도의 plugin
 install 명령을 따로 칠 필요가 없습니다.
 
 설치 확인:
@@ -90,7 +90,7 @@ sfs.cmd version --check
 sfs.cmd doctor      # ✅ 세 줄 (Claude / Gemini / Codex) 모두 보이면 OK
 ```
 
-성공하면 `sfs 0.x.x-product`, `status up-to-date` 같은 문장이 보입니다. Windows
+성공하면 `sfs 0.6.0`, `status up-to-date` 같은 문장이 보입니다. Windows
 PowerShell 이나 cmd 에서는 `sfs.cmd` 를 쓰고, Git Bash/WSL 에서는 `sfs` 를 써도 됩니다.
 
 ### 4. 테스트 프로젝트 폴더 만들기
@@ -134,7 +134,7 @@ sfs doctor              # ✅ Claude / Gemini / Codex 세 줄 모두 보이면 O
 ```
 
 이 한 줄로 Claude Code (`/sfs`), Gemini CLI (`sfs`), Codex CLI (`$sfs`)
-세 곳 모두에 슬래시 명령이 자동 등록됩니다 (0.5.96-product 부터).
+세 곳 모두에서 Solon 을 바로 찾을 수 있습니다.
 
 ### 3. 테스트 프로젝트 폴더 만들기
 
@@ -182,9 +182,9 @@ sfs status
 |---|---|
 | `SFS.md` | AI 가 읽는 프로젝트 운영 규칙 |
 | `.sfs-local/` | sprint, decision, review 기록 공간 |
-| `CLAUDE.md` | Claude 용 진입 문서 |
-| `AGENTS.md` | Codex 용 진입 문서 |
-| `GEMINI.md` | Gemini 용 진입 문서 |
+| `CLAUDE.md` | Claude 가 Solon 을 찾는 입구 |
+| `AGENTS.md` | Codex 가 Solon 을 찾는 입구 |
+| `GEMINI.md` | Gemini 가 Solon 을 찾는 입구 |
 
 ---
 
@@ -192,12 +192,20 @@ sfs status
 
 Solon 은 혼자 일하지 않습니다. 프로젝트 폴더를 읽을 수 있는 AI 도구와 함께 씁니다.
 
-Claude 또는 Gemini 에서는:
+Claude Code 에서는:
 
 ```text
 /sfs status
 /sfs guide
 /sfs start "첫 번째 작업 목표"
+```
+
+Gemini CLI 에서는:
+
+```text
+sfs status
+sfs guide
+sfs start "첫 번째 작업 목표"
 ```
 
 Codex CLI 에서는:
@@ -244,6 +252,35 @@ $sfs plan
 코딩을 바로 시키지 않아도 됩니다. Solon 의 `implement` 는 코드만 뜻하지 않습니다. 화면 구조,
 문구, 디자인 handoff, QA 체크리스트, 운영 문서도 구현 산출물입니다.
 
+새로운 앱의 빈 틀부터 필요할 때도 Next.js, Spring, Java 같은 말을 알 필요는 없습니다.
+사용자는 그냥 만들고 싶은 것을 말하면 됩니다. 대화하다가 AI 가 "앱 뼈대가 먼저 필요하겠다"고
+판단하면 이렇게 물어보는 흐름이 좋습니다.
+
+```text
+초기 프로젝트 구성해드릴까요?
+```
+
+동의하면 AI 가 목적에 맞는 초기 구성을 고릅니다. 단순 페이지인지, 작은 웹앱인지, 서버와 저장소가
+필요한지 같은 크기 판단은 AI 가 먼저 잡고, 꼭 필요한 결정만 사용자에게 묻습니다. 내부적으로는
+`sfs bootstrap "<만들고 싶은 것>"` handoff 를 쓸 수 있지만, 사용자가 이 명령을 외울 필요는
+없습니다.
+
+Mac/Git Bash:
+
+```bash
+cd my-new-app
+sfs init --layout thin --yes
+sfs start "첫 작업 목표"
+```
+
+Windows PowerShell/cmd:
+
+```powershell
+cd C:\workspace\my-new-app
+sfs.cmd init --layout thin --yes
+sfs.cmd start "첫 작업 목표"
+```
+
 ---
 
 ## 업데이트
@@ -256,8 +293,8 @@ Windows PowerShell/cmd:
 sfs.cmd update
 ```
 
-Scoop 을 쓰는 Windows 에서는 `sfs.cmd update` 가 한 방 명령입니다. 내부에서 Scoop 패키지를
-최신화하고, 새 runtime 을 다시 로드한 뒤 현재 프로젝트 upgrade 까지 이어갑니다.
+Scoop 을 쓰는 Windows 에서는 `sfs.cmd update` 가 한 방 명령입니다. Solon 본체를
+최신화하고, 현재 프로젝트에 필요한 정리까지 이어갑니다.
 
 Mac/Git Bash:
 
@@ -265,9 +302,9 @@ Mac/Git Bash:
 sfs upgrade
 ```
 
-Windows Scoop 설치본은 프로젝트 폴더에서 `sfs.cmd update` 를 실행하면 runtime 과 현재
+Windows Scoop 설치본은 프로젝트 폴더에서 `sfs.cmd update` 를 실행하면 Solon 본체와 현재
 프로젝트 파일 갱신이 이어집니다.
-Mac Homebrew 설치본도 같은 방식으로 global runtime 을 먼저 최신화합니다.
+Mac Homebrew 설치본도 같은 방식으로 Solon 본체를 먼저 최신화합니다.
 
 ---
 

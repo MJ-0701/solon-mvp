@@ -62,11 +62,25 @@ if command -v claude >/dev/null 2>&1; then
   if [ -f "$CC_SETTINGS" ] && grep -q "solon" "$CC_SETTINGS" 2>/dev/null; then
     ok "Claude Code: settings.json references solon (extraKnownMarketplaces / enabledPlugins)"
     CC_OK=1
+    if command -v jq >/dev/null 2>&1; then
+      FIRST_PLUGIN="$(jq -r '(.enabledPlugins // {}) | keys_unsorted[0] // empty' "$CC_SETTINGS" 2>/dev/null || true)"
+      if [ "$FIRST_PLUGIN" = "solon@solon" ]; then
+        ok "Claude Code: solon is first enabled plugin (priority-1)"
+      elif [ -n "$FIRST_PLUGIN" ]; then
+        warn "Claude Code: solon is installed but not first enabled plugin (first=$FIRST_PLUGIN)"
+        warn "  If this was intentional, no action needed. To force Solon first again: SFS_DISCOVERY_FORCE_PROMOTE=1 sfs upgrade"
+      fi
+    fi
   fi
-  # Try CLI subcommand inspection (best-effort)
-  if claude plugin list 2>/dev/null | grep -qi "solon"; then
-    ok "Claude Code: 'claude plugin list' shows solon (A-1 path active)"
-    CC_OK=1
+  # Try CLI subcommand inspection (best-effort). Some Claude builds can hang
+  # here when plugin auth/state is stale, so only run it behind timeout(1).
+  if command -v timeout >/dev/null 2>&1; then
+    if timeout 5 claude plugin list 2>/dev/null | grep -qi "solon"; then
+      ok "Claude Code: 'claude plugin list' shows solon (A-1 path active)"
+      CC_OK=1
+    fi
+  else
+    info "Claude Code: skip 'claude plugin list' probe (timeout command unavailable)"
   fi
   if [ "$CC_OK" = "0" ]; then
     warn "Claude Code: solon plugin not registered"
@@ -81,8 +95,31 @@ fi
 if command -v gemini >/dev/null 2>&1; then
   GM_VER="$(gemini --version 2>/dev/null | head -1 || echo unknown)"
   info "Gemini CLI detected: $GM_VER"
-  if gemini extensions list 2>/dev/null | grep -qiE "(^|/)solon\b|MJ-0701/solon-product"; then
+  GM_EXTENSION_DIR="$HOME_DIR/.gemini/extensions/solon"
+  if [ -f "$GM_EXTENSION_DIR/gemini-extension.json" ] || [ -f "$GM_EXTENSION_DIR/commands/sfs.toml" ]; then
+    ok "Gemini CLI: solon extension filesystem present at ~/.gemini/extensions/solon"
+    GM_ENABLE="$HOME_DIR/.gemini/extensions/extension-enablement.json"
+    if [ -f "$GM_ENABLE" ] && command -v jq >/dev/null 2>&1; then
+      FIRST_EXT="$(jq -r 'keys_unsorted[0] // empty' "$GM_ENABLE" 2>/dev/null || true)"
+      if [ "$FIRST_EXT" = "solon" ]; then
+        ok "Gemini CLI: solon is first extension enablement entry (priority-1)"
+      elif [ -n "$FIRST_EXT" ]; then
+        warn "Gemini CLI: solon extension installed but not first enablement entry (first=$FIRST_EXT)"
+        warn "  If this was intentional, no action needed. To force Solon first again: SFS_DISCOVERY_FORCE_PROMOTE=1 sfs upgrade"
+      fi
+    fi
+  elif gemini extensions list 2>/dev/null | grep -qiE "(^|/)solon\b|MJ-0701/solon-product"; then
     ok "Gemini CLI: solon extension installed"
+    GM_ENABLE="$HOME_DIR/.gemini/extensions/extension-enablement.json"
+    if [ -f "$GM_ENABLE" ] && command -v jq >/dev/null 2>&1; then
+      FIRST_EXT="$(jq -r 'keys_unsorted[0] // empty' "$GM_ENABLE" 2>/dev/null || true)"
+      if [ "$FIRST_EXT" = "solon" ]; then
+        ok "Gemini CLI: solon is first extension enablement entry (priority-1)"
+      elif [ -n "$FIRST_EXT" ]; then
+        warn "Gemini CLI: solon extension installed but not first enablement entry (first=$FIRST_EXT)"
+        warn "  If this was intentional, no action needed. To force Solon first again: SFS_DISCOVERY_FORCE_PROMOTE=1 sfs upgrade"
+      fi
+    fi
   else
     warn "Gemini CLI: solon extension NOT installed"
     warn "  recovery: gemini extensions install --consent https://github.com/$SOLON_REPO.git"
@@ -95,6 +132,12 @@ fi
 CODEX_SKILL="$HOME_DIR/.codex/skills/sfs/SKILL.md"
 if [ -f "$CODEX_SKILL" ]; then
   ok "Codex CLI: user-global skill at ~/.codex/skills/sfs/SKILL.md (C-1)"
+  if grep -q "Priority-1 Solon SFS" "$CODEX_SKILL" 2>/dev/null; then
+    ok "Codex CLI: SFS skill advertises priority-1 routing"
+  else
+    warn "Codex CLI: SFS skill exists but lacks priority-1 routing text"
+    warn "  recovery: re-run 'sfs upgrade' to refresh ~/.codex/skills/sfs/SKILL.md"
+  fi
 else
   warn "Codex CLI: ~/.codex/skills/sfs/SKILL.md NOT found"
   warn "  recovery: re-run 'sfs upgrade' (or reinstall via brew/scoop)"

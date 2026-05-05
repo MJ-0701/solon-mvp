@@ -7,6 +7,8 @@
 #   T2  Hook exits 0 when claude/gemini/codex are NOT on PATH (graceful)
 #   T3  Idempotency: running hook twice does not error and ends in same state
 #   T4  Bundle source-dir auto-detection works when invoked from script dir
+#   T5  Claude plugin settings/registries promote solon to first on install/update
+#   T6  Later user-managed priority change is respected unless forced
 #
 # Exit: 0 = all pass, non-zero = first failure
 
@@ -83,6 +85,97 @@ if [ "$EXIT3" = "0" ] && cmp -s "$SKILL_SRC" "$TMPHOME/.codex/skills/sfs/SKILL.m
   report "T3 idempotent re-run" "PASS"
 else
   report "T3 idempotent re-run" "FAIL" "exit=$EXIT3"
+fi
+
+# T5 priority: fake Claude is present and reports plugin already installed.
+# The hook must still reorder settings/registry files so SFS is exposed first.
+FAKEBIN="$TMPHOME/fakebin"
+mkdir -p "$FAKEBIN"
+cat >"$FAKEBIN/claude" <<'EOF'
+#!/usr/bin/env bash
+case "${1:-}" in
+  --version) echo "claude fake 1.0.0"; exit 0 ;;
+  plugin) echo "already installed"; exit 0 ;;
+  *) echo "ok"; exit 0 ;;
+esac
+EOF
+chmod +x "$FAKEBIN/claude"
+mkdir -p "$TMPHOME/.claude/plugins"
+cat >"$TMPHOME/.claude/settings.json" <<'EOF'
+{
+  "enabledPlugins": {
+    "bkit@bkit-marketplace": true,
+    "solon@solon": true,
+    "other@market": true
+  },
+  "extraKnownMarketplaces": {
+    "bkit-marketplace": { "source": { "source": "github", "repo": "popup-studio-ai/bkit-claude-code" } },
+    "solon": { "source": { "source": "github", "repo": "MJ-0701/solon-product" } }
+  }
+}
+EOF
+cat >"$TMPHOME/.claude/plugins/installed_plugins.json" <<'EOF'
+{
+  "version": 2,
+  "plugins": {
+    "bkit@bkit-marketplace": [],
+    "solon@solon": [],
+    "other@market": []
+  }
+}
+EOF
+cat >"$TMPHOME/.claude/plugins/known_marketplaces.json" <<'EOF'
+{
+  "bkit-marketplace": { "source": { "source": "github", "repo": "popup-studio-ai/bkit-claude-code" } },
+  "solon": { "source": { "source": "github", "repo": "MJ-0701/solon-product" } }
+}
+EOF
+
+HOME="$TMPHOME" \
+  USERPROFILE="$TMPHOME" \
+  PATH="$FAKEBIN:/usr/bin:/bin" \
+  SFS_DISCOVERY_SOURCE_DIR="$DIST_DIR" \
+  bash "$HOOK" >"$TMPHOME/run4.log" 2>&1
+EXIT4=$?
+first_enabled="$(jq -r '.enabledPlugins | keys_unsorted[0]' "$TMPHOME/.claude/settings.json")"
+first_market="$(jq -r '.extraKnownMarketplaces | keys_unsorted[0]' "$TMPHOME/.claude/settings.json")"
+first_registry="$(jq -r '.plugins | keys_unsorted[0]' "$TMPHOME/.claude/plugins/installed_plugins.json")"
+first_known="$(jq -r 'keys_unsorted[0]' "$TMPHOME/.claude/plugins/known_marketplaces.json")"
+if [ "$EXIT4" = "0" ] &&
+   [ "$first_enabled" = "solon@solon" ] &&
+   [ "$first_market" = "solon" ] &&
+   [ "$first_registry" = "solon@solon" ] &&
+   [ "$first_known" = "solon" ]; then
+  report "T5 solon priority on install/update" "PASS"
+else
+  report "T5 solon priority on install/update" "FAIL" "exit=$EXIT4 enabled=$first_enabled market=$first_market registry=$first_registry known=$first_known"
+fi
+
+# T6 user-managed order: after T5 writes the marker, a later manual reorder
+# should be respected on normal install/update reruns.
+cat >"$TMPHOME/.claude/settings.json" <<'EOF'
+{
+  "enabledPlugins": {
+    "bkit@bkit-marketplace": true,
+    "solon@solon": true
+  },
+  "extraKnownMarketplaces": {
+    "bkit-marketplace": { "source": { "source": "github", "repo": "popup-studio-ai/bkit-claude-code" } },
+    "solon": { "source": { "source": "github", "repo": "MJ-0701/solon-product" } }
+  }
+}
+EOF
+HOME="$TMPHOME" \
+  USERPROFILE="$TMPHOME" \
+  PATH="$FAKEBIN:/usr/bin:/bin" \
+  SFS_DISCOVERY_SOURCE_DIR="$DIST_DIR" \
+  bash "$HOOK" >"$TMPHOME/run5.log" 2>&1
+EXIT5=$?
+first_after_user="$(jq -r '.enabledPlugins | keys_unsorted[0]' "$TMPHOME/.claude/settings.json")"
+if [ "$EXIT5" = "0" ] && [ "$first_after_user" = "bkit@bkit-marketplace" ]; then
+  report "T6 respect user-managed priority" "PASS"
+else
+  report "T6 respect user-managed priority" "FAIL" "exit=$EXIT5 first=$first_after_user"
 fi
 
 echo

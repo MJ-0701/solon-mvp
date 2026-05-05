@@ -15,11 +15,34 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - `sfs review` is an artifact acceptance review. Code review is only the
   `code` lens; docs, strategy, design, taxonomy, QA, ops, release, and generic
   artifacts use their own acceptance lens.
+- Review scope is functional correctness + consistency only. Functional means
+  the artifact delivers the declared behaviour (plan / Sprint Contract / AC).
+  Consistency means cross-document SSoT (plan ↔ implement ↔ tests ↔ frontmatter)
+  and AC ↔ test ↔ impl ↔ frontmatter alignment. Identifier naming, formatting,
+  line-count drift, wording variants, and comment style are out-of-scope and
+  must auto-skip when meaning is unchanged. Surface a finding only when it
+  changes behaviour, traceability, or a documented contract. Public APIs, CLI flags/options,
+  user- or automation-consumed paths, persisted data shapes, and domain ubiquitous terms
+  are documented contract surfaces; renames there are in-scope even if they look like
+  "just naming".
 - Let the adapter's `review_lens` stand unless it is clearly wrong. Use
   `--lens <name>` only as an override.
 - Review the whole contract, not only changed code: shared intent, domain
   language consistency, feedback evidence, interface/artifact boundaries, and
   gray-box delegation should still match the Gate 2/3 record.
+- Load `policies/knowledge-pack-router.md` first, or
+  `policies/knowledge-pack-router.ko.md` for Korean preference. Read matching full
+  division packs only when explicitly needed for review scope and from router
+  mapping.
+- For backend/JVM/Spring/JPA/transaction/batch/integration/DevOps/AWS work,
+  check matching ids from `policies/backend-knowledge-pack.md` or
+  `policies/backend-knowledge-pack.ko.md`.
+  Flag both missing high-risk topics and over-activated topics for the project
+  size.
+- For strategy-pm, QA, design/frontend, infra, or taxonomy work, read the
+  matching `policies/*-knowledge-pack.md` or `policies/*-knowledge-pack.ko.md`
+  file and check only the matching ids.
+  Flag both missing high-risk division topics and over-activated topics.
 - Surface the evaluator's next action. Pass should move toward report/retro;
   partial should name the smallest rework slice; fail should return to plan,
   implementation, or user escalation.

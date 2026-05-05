@@ -1,0 +1,58 @@
+name: SFS PR Check (storage validators)
+
+# AC2.6 — mandatory pre-merge storage validators (CI workflow path).
+# AC13   — explicit `permissions: contents: read` minimum.
+# Runs storage co-location, N:M, sprint.yml schema, and bad-fixture validators
+# on every PR + pushes to main.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/sfs-pr-check.yml"
+      - "bin/**"
+      - "scripts/**"
+      - "tests/**"
+      - "packaging/**"
+      - "VERSION"
+      - "CHANGELOG.md"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/sfs-pr-check.yml"
+      - "bin/**"
+      - "scripts/**"
+      - "tests/**"
+      - "packaging/**"
+      - "VERSION"
+      - "CHANGELOG.md"
+
+permissions:
+  contents: read
+
+jobs:
+  storage-precommit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: bash -n syntax check (scripts + tests)
+        run: |
+          set -e
+          for f in scripts/*.sh tests/*.sh; do
+            bash -n "$f"
+          done
+      - name: storage precommit (strict mode — G6.1 F2 / Option A)
+        run: |
+          bash scripts/sfs-storage-precommit.sh --root . --strict
+      - name: bad-fixture validator (must reject every misformed yml)
+        run: |
+          bash tests/test-bad-fixture.sh
+      - name: workflow permissions audit (AC13)
+        run: |
+          bash tests/test-workflow-permissions.sh
+      - name: scoop manifest schema (AC7.5 surrogate)
+        run: |
+          bash tests/scoop-manifest-validate.sh
+      - name: hash parity (AC12 LF normalization audit)
+        run: |
+          bash tests/test-hash-parity.sh

@@ -1,0 +1,9 @@
+sprint_id: bad-03
+status: closed
+features: []
+dependencies: this is not a list
+completion_criteria: []
+milestones: []
+created_at: 2026-05-04
+closed_at: null
+# expected fail reason: dependencies inline value should be [] / null / yaml list

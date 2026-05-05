@@ -26,6 +26,10 @@ Rules:
 - In `hard` brainstorm, interrogate intent, contradictions, tradeoffs,
   validation, boundaries, and terminology; do not promote to plan while important
   owner decisions remain unresolved.
+- For non-developer app starts, do not ask the user to pick a framework. When
+  the desired product implies a new app skeleton, ask "초기 프로젝트 구성해드릴까요?"
+  and, if approved, infer a small suitable starter yourself. Keep Solon focused
+  on leaving only useful decisions, context, and operating records.
 - Prefer one sprint that can close over an impressive plan that cannot close.
 
 Output shape:

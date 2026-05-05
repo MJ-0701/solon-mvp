@@ -5,6 +5,8 @@
 #   T2  Hook exits 0 when claude/gemini/codex NOT on PATH (graceful)
 #   T3  Idempotency: re-run yields identical state
 #   T4  Source-dir auto-detect when invoked from script dir
+#   T5  Claude plugin settings/registries promote solon to first on install/update
+#   T6  Later user-managed priority change is respected unless forced
 #
 # Exit: 0 = all pass, 1 = any failure
 
@@ -84,6 +86,100 @@ try {
     Report "T3 idempotent re-run" "PASS"
   } else {
     Report "T3 idempotent re-run" "FAIL" "exit=$exit3"
+  }
+
+  # Run 4: fake Claude present; hook must promote solon before existing entries.
+  $fakeBin = Join-Path $tmpHome "fakebin"
+  New-Item -ItemType Directory -Force -Path $fakeBin | Out-Null
+  $fakeClaude = Join-Path $fakeBin "claude.cmd"
+  @"
+@echo off
+if "%1"=="--version" (
+  echo claude fake 1.0.0
+  exit /b 0
+)
+echo already installed
+exit /b 0
+"@ | Set-Content -Encoding ASCII $fakeClaude
+
+  $claudeDir = Join-Path $tmpHome ".claude"
+  $pluginsDir = Join-Path $claudeDir "plugins"
+  New-Item -ItemType Directory -Force -Path $pluginsDir | Out-Null
+  @"
+{
+  "enabledPlugins": {
+    "bkit@bkit-marketplace": true,
+    "solon@solon": true,
+    "other@market": true
+  },
+  "extraKnownMarketplaces": {
+    "bkit-marketplace": { "source": { "source": "github", "repo": "popup-studio-ai/bkit-claude-code" } },
+    "solon": { "source": { "source": "github", "repo": "MJ-0701/solon-product" } }
+  }
+}
+"@ | Set-Content -Encoding UTF8 (Join-Path $claudeDir "settings.json")
+  @"
+{
+  "version": 2,
+  "plugins": {
+    "bkit@bkit-marketplace": [],
+    "solon@solon": [],
+    "other@market": []
+  }
+}
+"@ | Set-Content -Encoding UTF8 (Join-Path $pluginsDir "installed_plugins.json")
+  @"
+{
+  "bkit-marketplace": { "source": { "source": "github", "repo": "popup-studio-ai/bkit-claude-code" } },
+  "solon": { "source": { "source": "github", "repo": "MJ-0701/solon-product" } }
+}
+"@ | Set-Content -Encoding UTF8 (Join-Path $pluginsDir "known_marketplaces.json")
+
+  $env:PATH = "$fakeBin;$env:SystemRoot\System32;$env:SystemRoot"
+  $env:SFS_DISCOVERY_SOURCE_DIR = $distDir.Path
+  $log4 = Join-Path $tmpHome "run4.log"
+  & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $hook *> $log4
+  $exit4 = $LASTEXITCODE
+  $settings = Get-Content (Join-Path $claudeDir "settings.json") -Raw | ConvertFrom-Json
+  $installed = Get-Content (Join-Path $pluginsDir "installed_plugins.json") -Raw | ConvertFrom-Json
+  $known = Get-Content (Join-Path $pluginsDir "known_marketplaces.json") -Raw | ConvertFrom-Json
+  $firstEnabled = $settings.enabledPlugins.PSObject.Properties[0].Name
+  $firstMarket = $settings.extraKnownMarketplaces.PSObject.Properties[0].Name
+  $firstRegistry = $installed.plugins.PSObject.Properties[0].Name
+  $firstKnown = $known.PSObject.Properties[0].Name
+  if ($exit4 -eq 0 -and
+      $firstEnabled -eq "solon@solon" -and
+      $firstMarket -eq "solon" -and
+      $firstRegistry -eq "solon@solon" -and
+      $firstKnown -eq "solon") {
+    Report "T5 solon priority on install/update" "PASS"
+  } else {
+    Report "T5 solon priority on install/update" "FAIL" "exit=$exit4 enabled=$firstEnabled market=$firstMarket registry=$firstRegistry known=$firstKnown"
+  }
+
+  # Run 5: after T5 writes the marker, a later manual reorder should be
+  # respected on normal install/update reruns.
+  @"
+{
+  "enabledPlugins": {
+    "bkit@bkit-marketplace": true,
+    "solon@solon": true
+  },
+  "extraKnownMarketplaces": {
+    "bkit-marketplace": { "source": { "source": "github", "repo": "popup-studio-ai/bkit-claude-code" } },
+    "solon": { "source": { "source": "github", "repo": "MJ-0701/solon-product" } }
+  }
+}
+"@ | Set-Content -Encoding UTF8 (Join-Path $claudeDir "settings.json")
+  $log5 = Join-Path $tmpHome "run5.log"
+  & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $hook *> $log5
+  $exit5 = $LASTEXITCODE
+  $settingsAfterUser = Get-Content (Join-Path $claudeDir "settings.json") -Raw | ConvertFrom-Json
+  $firstAfterUser = $settingsAfterUser.enabledPlugins.PSObject.Properties[0].Name
+  if ($exit5 -eq 0 -and $firstAfterUser -eq "bkit@bkit-marketplace") {
+    Report "T6 respect user-managed priority" "PASS"
+  } else {
+    Report "T6 respect user-managed priority" "FAIL" "exit=$exit5 first=$firstAfterUser"
   }
 }
 finally {

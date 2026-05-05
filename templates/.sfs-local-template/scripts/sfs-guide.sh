@@ -145,6 +145,8 @@ Solon guide context
   Claude/Gemini: /sfs brainstorm "<아직 정리 안 된 요구사항>"
   Codex:         \$sfs brainstorm "<아직 정리 안 된 요구사항>"
   Brainstorm:    --simple 빠른 정리 · default normal 핵심 질문 · --hard 깊은 PO 훈련
+  Setup:         앱 뼈대가 필요해 보이면 AI 가 "초기 프로젝트 구성해드릴까요?"라고 묻고,
+                 동의 후 크기에 맞는 native 구성을 잡음 (bootstrap 은 AI handoff)
   Terminal:      sfs plan
   Claude/Gemini: /sfs plan
   Codex:         \$sfs plan
