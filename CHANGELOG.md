@@ -1,3 +1,27 @@
+## [0.6.10] - 2026-05-05
+
+> **Report surface hotfix.** 0.6.9 made the command surface usable again, but
+> dogfood showed the visible Solon report UI had become too flat after bkit
+> footer removal. The output was clean, but it looked like a bland bullet dump
+> instead of a product console.
+
+### Changed
+
+- **Solon report surface rule** — Claude/Gemini/Codex adapter instructions now
+  require compact console-dashboard shape: title/verdict strip, 2-4 labeled
+  status panels, one action rail, and at most 1-3 questions.
+- **Project templates aligned** — `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`,
+  `SFS.md`, Claude plugin command, Gemini command, and Codex skill template all
+  carry the same report-surface rule.
+- **Internal status report spec refreshed** — the user-local
+  `solon-status-report.md` spec moved from flat topic lines to a dashboard
+  layout with header, panels, action rail, questions, and sources.
+
+### Verified
+
+- Static syntax/manifest checks only; this release changes agent-facing
+  instructions and version metadata, not runtime bash behavior.
+
 ## [0.6.9] - 2026-05-05
 
 > **Usability hotfix.** 0.6.8 은 설치는 됐지만 실제 dogfood 에서 두 가지

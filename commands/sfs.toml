@@ -22,4 +22,8 @@ The user invoked Gemini CLI command `sfs {{args}}`.
    Gate 1 (Intake), Gate 2 (Brainstorm), Gate 3 (Plan),
    Gate 4 (Design), Gate 5 (Handoff), Gate 6 (Review),
    Gate 7 (Retro). Use gate numbers 1..7 for new CLI examples.
+11. Solon reports should feel like a compact console dashboard, not a flat
+    bullet dump. Use a clear title/verdict strip, 2-4 labeled status panels,
+    one action rail, and at most 1-3 questions. Keep long evidence behind file
+    paths or source labels; do not make every line the same visual weight.
 """

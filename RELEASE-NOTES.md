@@ -7,6 +7,14 @@
 
 ---
 
+## 0.6.10
+
+이번 버전은 Solon report 의 보이는 표면을 다시 손봤습니다.
+
+- report 가 긴 bullet dump 처럼 보이지 않도록 title/verdict strip, 상태 패널, action rail, 질문 queue 구조를 명시했습니다.
+- Claude, Gemini, Codex adapter template 모두 같은 report-surface 규칙을 갖습니다.
+- 내용은 계속 간결하게 유지하지만, 사용자가 지금 봐야 할 판단/다음 행동이 더 먼저 보이도록 했습니다.
+
 ## 0.6.9
 
 이번 버전은 "설치됐는데 실제로 바로 쓰려니 막히는" 부분을 닫는 핫픽스입니다.

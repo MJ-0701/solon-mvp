@@ -32,16 +32,20 @@ required.
    Gate 1 (Intake), Gate 2 (Brainstorm), Gate 3 (Plan),
    Gate 4 (Design), Gate 5 (Handoff), Gate 6 (Review),
    Gate 7 (Retro). Use gate numbers 1..7 for new CLI examples.
-11. For `brainstorm`, ask 1-3 blocking questions when shared understanding is
+11. Solon reports should feel like a compact console dashboard, not a flat
+    bullet dump. Use a clear title/verdict strip, 2-4 labeled status panels,
+    one action rail, and at most 1-3 questions. Keep long evidence behind file
+    paths or source labels; do not make every line the same visual weight.
+12. For `brainstorm`, ask 1-3 blocking questions when shared understanding is
     missing. Do not run or recommend `plan` as the next step until Gate 2 is
     `ready-for-plan`.
-12. For `plan`, derive the contract from `brainstorm.md`; unresolved Gate 2
+13. For `plan`, derive the contract from `brainstorm.md`; unresolved Gate 2
     questions stay visible instead of being hidden by assumptions.
-13. For `implement`, backend architecture follows the routed `implement.md`
+14. For `implement`, backend architecture follows the routed `implement.md`
     guardrail: clean layered monolith for MVP/small projects, CQRS for
     non-initial backend work even on one DB, Hexagonal transition only after
     user acceptance, and MSA transition only after explicit approval.
-14. For `implement`, non-Dev divisions also follow routed policy ladders:
+15. For `implement`, non-Dev divisions also follow routed policy ladders:
     strategy-pm, taxonomy, design/frontend, QA, and infra start lightweight,
     strengthen on trigger evidence, and require user acceptance/approval before
     large roadmap, rename, redesign, release-readiness, or infra transitions.
