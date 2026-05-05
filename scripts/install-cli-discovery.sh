@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install-cli-discovery.sh — 0.5.96-product slash-command zero-file discovery hook
+# install-cli-discovery.sh — slash-command zero-file discovery hook
 #
 # Purpose: After `sfs` binary is on PATH (Homebrew/Scoop installed),
 #   register the three CLI discovery surfaces:
@@ -65,15 +65,26 @@ mark_priority_promoted() {
   command -v jq >/dev/null 2>&1 || return 0
   local marker tmp now
   marker="$(priority_marker_file)"
-  mkdir -p "$(dirname "$marker")"
+  if ! mkdir -p "$(dirname "$marker")" 2>/dev/null; then
+    warn "priority marker: cannot create $(dirname "$marker") — skip marker update"
+    return 0
+  fi
   now="$(date -u '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || date '+%Y-%m-%dT%H:%M:%SZ')"
   tmp="$(mktemp 2>/dev/null || mktemp -t sfs_discovery_priority)"
-  json_file_or_empty_object "$marker" |
+  if json_file_or_empty_object "$marker" |
     jq --arg key "$key" --arg now "$now" '
       .promoted[$key] = true
       | .lastPromotedAt[$key] = $now
       | .policy = "promote solon to first on install/update; if user later changes order, respect unless SFS_DISCOVERY_FORCE_PROMOTE=1"
-    ' > "$tmp" && mv "$tmp" "$marker"
+    ' > "$tmp"; then
+    if ! mv "$tmp" "$marker" 2>/dev/null; then
+      warn "priority marker: cannot update $marker — continuing"
+      rm -f "$tmp"
+    fi
+  else
+    warn "priority marker: cannot render marker JSON — continuing"
+    rm -f "$tmp"
+  fi
 }
 
 should_promote_priority() {
@@ -115,32 +126,59 @@ promote_claude_priority() {
   fi
   local TMP
   TMP="$(mktemp 2>/dev/null || mktemp -t settings)"
-  json_file_or_empty_object "$SETTINGS" |
+  if json_file_or_empty_object "$SETTINGS" |
     jq --arg plugin "solon@solon" --arg market "solon" --arg repo "$SOLON_REPO" '
       .enabledPlugins = ({($plugin): true} + ((.enabledPlugins // {}) | del(.[$plugin])))
       | .extraKnownMarketplaces = ({($market): (((.extraKnownMarketplaces // {})[$market]) // {"source":{"source":"github","repo":$repo}})} + ((.extraKnownMarketplaces // {}) | del(.[$market])))
-    ' > "$TMP" && mv "$TMP" "$SETTINGS"
-  ok "Claude Code: solon promoted to first enabled plugin in ~/.claude/settings.json"
+    ' > "$TMP"; then
+    if mv "$TMP" "$SETTINGS" 2>/dev/null; then
+      ok "Claude Code: solon promoted to first enabled plugin in ~/.claude/settings.json"
+    else
+      warn "Claude Code: could not update ~/.claude/settings.json"
+      rm -f "$TMP"
+    fi
+  else
+    warn "Claude Code: could not render updated ~/.claude/settings.json"
+    rm -f "$TMP"
+  fi
 
   local INSTALLED="$HOME_DIR/.claude/plugins/installed_plugins.json"
   if [ -f "$INSTALLED" ]; then
     TMP="$(mktemp 2>/dev/null || mktemp -t installed_plugins)"
-    jq --arg plugin "solon@solon" '
+    if jq --arg plugin "solon@solon" '
       if (.plugins // {})[$plugin] then
         .plugins = ({($plugin): .plugins[$plugin]} + (.plugins | del(.[$plugin])))
       else . end
-    ' "$INSTALLED" > "$TMP" && mv "$TMP" "$INSTALLED"
-    ok "Claude Code: solon promoted to first plugin registry entry"
+    ' "$INSTALLED" > "$TMP"; then
+      if mv "$TMP" "$INSTALLED" 2>/dev/null; then
+        ok "Claude Code: solon promoted to first plugin registry entry"
+      else
+        warn "Claude Code: could not update installed_plugins.json"
+        rm -f "$TMP"
+      fi
+    else
+      warn "Claude Code: could not render installed_plugins.json"
+      rm -f "$TMP"
+    fi
   fi
 
   local KNOWN="$HOME_DIR/.claude/plugins/known_marketplaces.json"
   if [ -f "$KNOWN" ]; then
     TMP="$(mktemp 2>/dev/null || mktemp -t known_marketplaces)"
-    jq --arg market "solon" --arg repo "$SOLON_REPO" '
+    if jq --arg market "solon" --arg repo "$SOLON_REPO" '
       {($market): (.[$market] // {"source":{"source":"github","repo":$repo}})}
       + (del(.[$market]))
-    ' "$KNOWN" > "$TMP" && mv "$TMP" "$KNOWN"
-    ok "Claude Code: solon promoted to first marketplace registry entry"
+    ' "$KNOWN" > "$TMP"; then
+      if mv "$TMP" "$KNOWN" 2>/dev/null; then
+        ok "Claude Code: solon promoted to first marketplace registry entry"
+      else
+        warn "Claude Code: could not update known_marketplaces.json"
+        rm -f "$TMP"
+      fi
+    else
+      warn "Claude Code: could not render known_marketplaces.json"
+      rm -f "$TMP"
+    fi
   fi
   mark_priority_promoted "claude"
 }
@@ -159,12 +197,21 @@ promote_gemini_priority() {
   fi
   local TMP
   TMP="$(mktemp 2>/dev/null || mktemp -t gemini_extension_enablement)"
-  json_file_or_empty_object "$ENABLE" |
+  if json_file_or_empty_object "$ENABLE" |
     jq --arg name "solon" --arg home "$HOME_DIR" '
       {($name): (.[$name] // {"overrides":[($home + "/*")]})}
       + (del(.[$name]))
-    ' > "$TMP" && mv "$TMP" "$ENABLE"
-  ok "Gemini CLI: solon promoted to first extension enablement entry"
+    ' > "$TMP"; then
+    if mv "$TMP" "$ENABLE" 2>/dev/null; then
+      ok "Gemini CLI: solon promoted to first extension enablement entry"
+    else
+      warn "Gemini CLI: could not update extension-enablement.json"
+      rm -f "$TMP"
+    fi
+  else
+    warn "Gemini CLI: could not render extension-enablement.json"
+    rm -f "$TMP"
+  fi
   mark_priority_promoted "gemini"
 }
 
@@ -222,10 +269,12 @@ install_claude_discovery() {
 
   # A-2: filesystem-direct deploy + settings.json merge
   local PLUGIN_DEST="$HOME_DIR/.claude/plugins/solon"
-  mkdir -p "$PLUGIN_DEST/.claude-plugin" "$PLUGIN_DEST/commands"
+  if ! mkdir -p "$PLUGIN_DEST/.claude-plugin" "$PLUGIN_DEST/commands" 2>/dev/null; then
+    warn "Claude Code: cannot create ~/.claude/plugins/solon — A-2 filesystem deploy skipped"
+  fi
 
-  if [ -n "$SOURCE_DIR" ] && [ -d "$SOURCE_DIR/templates" ]; then
-    # 0.5.96-product onward: stable repo (MJ-0701/solon-product) hosts both
+  if [ -d "$PLUGIN_DEST" ] && [ -n "$SOURCE_DIR" ] && [ -d "$SOURCE_DIR/templates" ]; then
+    # Stable repo (MJ-0701/solon-product) hosts both
     # dist tarball + marketplace skeleton at root. We shallow-clone the
     # repo to a temp dir and copy plugins/solon/ into the cellar.
     if command -v git >/dev/null 2>&1; then
@@ -233,8 +282,11 @@ install_claude_discovery() {
       TMPCLONE="$(mktemp -d 2>/dev/null || mktemp -d -t solon)"
       if git clone --depth 1 "https://github.com/$SOLON_REPO.git" "$TMPCLONE" >/dev/null 2>&1; then
         if [ -d "$TMPCLONE/plugins/solon" ]; then
-          cp -R "$TMPCLONE/plugins/solon/." "$PLUGIN_DEST/"
-          ok "Claude Code: plugin filesystem-direct deployed at ~/.claude/plugins/solon (A-2)"
+          if cp -R "$TMPCLONE/plugins/solon/." "$PLUGIN_DEST/" 2>/dev/null; then
+            ok "Claude Code: plugin filesystem-direct deployed at ~/.claude/plugins/solon (A-2)"
+          else
+            warn "Claude Code: could not copy plugin files into ~/.claude/plugins/solon"
+          fi
         else
           warn "Claude Code: cloned $SOLON_REPO but no plugins/solon/ at root — skip A-2"
         fi
@@ -308,8 +360,11 @@ install_codex_discovery() {
 
   local DEST_DIR="$HOME_DIR/.codex/skills/sfs"
   mkdir -p "$DEST_DIR"
-  cp "$SOURCE_DIR/templates/codex-skill/SKILL.md" "$DEST_DIR/SKILL.md"
-  ok "Codex CLI: priority-1 user-global skill installed at ~/.codex/skills/sfs/SKILL.md (C-1)"
+  if cp "$SOURCE_DIR/templates/codex-skill/SKILL.md" "$DEST_DIR/SKILL.md" 2>/dev/null; then
+    ok "Codex CLI: priority-1 user-global skill installed at ~/.codex/skills/sfs/SKILL.md (C-1)"
+  else
+    warn "Codex CLI: could not update ~/.codex/skills/sfs/SKILL.md"
+  fi
 
   # Codex CLI presence is informational — the SKILL is auto-discovered
   # whenever Codex starts in any project.

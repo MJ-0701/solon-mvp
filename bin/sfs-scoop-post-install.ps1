@@ -23,7 +23,7 @@ function Find-SfsProjectRoot([string] $StartDir) {
   return $null
 }
 
-# 0.5.96-product slash-command zero-file discovery hook.
+# slash-command zero-file discovery hook.
 # Always runs on `scoop install sfs` and `scoop update sfs` (idempotent).
 # Project upgrade path below sets SFS_SKIP_CLI_DISCOVERY=1 to avoid running
 # the same hook twice when sfs upgrade also calls it.

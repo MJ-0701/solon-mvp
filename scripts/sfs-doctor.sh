@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # sfs-doctor.sh — diagnose Solon Product runtime health, with focus on
-# slash-command discovery (0.5.96-product addition).
+# slash-command discovery.
 #
 # Exit codes:
 #   0  all checks pass
@@ -44,9 +44,9 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 2. Slash-command discovery (0.5.96-product) — three CLI surfaces
+# 2. Slash-command discovery — three CLI surfaces
 # ---------------------------------------------------------------------------
-section "Slash-command discovery (0.5.96-product)"
+section "Slash-command discovery"
 
 # 2.1 Claude Code
 if command -v claude >/dev/null 2>&1; then

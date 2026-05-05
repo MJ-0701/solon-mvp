@@ -1,4 +1,4 @@
-# install-cli-discovery.ps1 — 0.5.96-product slash-command zero-file discovery hook (Windows)
+# install-cli-discovery.ps1 — slash-command zero-file discovery hook (Windows)
 #
 # Mirror of install-cli-discovery.sh. See that file for design rationale.
 # Idempotent + graceful (D7 = b).
