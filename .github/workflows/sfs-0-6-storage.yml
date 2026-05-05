@@ -1,44 +1,26 @@
-name: SFS 0.6 Storage Matrix
+name: SFS Extended Verification
 
-# AC4.3 — macOS + Ubuntu + Windows runner matrix for storage/migrate/rollback unit tests.
-# AC4.4 — cross-instance verify (codex + gemini) with 4-bullet fallback.
-# AC4.4.4 / AC4.6 — sentinel masking isolated step.
-# AC13  — explicit `permissions: contents: read` minimum.
+# Manual-only extended checks. Release-blocking CI lives in sfs-pr-check.yml
+# and Windows package-channel smoke lives in windows-scoop-smoke.yml.
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - ".github/workflows/sfs-0-6-storage.yml"
-      - "bin/**"
-      - "scripts/**"
-      - "tests/**"
-      - "packaging/**"
-      - "VERSION"
-      - "CHANGELOG.md"
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/sfs-0-6-storage.yml"
-      - "bin/**"
-      - "scripts/**"
-      - "tests/**"
-      - "packaging/**"
-      - "VERSION"
-      - "CHANGELOG.md"
-  schedule:
-    # nightly @ 09:00 UTC for AC4.4.2 release-grade verification with secrets.
-    - cron: "0 9 * * *"
+    inputs:
+      cross_instance:
+        description: "Run Codex/Gemini cross-instance verify with repository secrets"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
 
 jobs:
-  storage-matrix:
+  posix-run-all:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -49,21 +31,7 @@ jobs:
         run: |
           bash tests/run-all.sh
 
-  cross-instance-verify:
-    runs-on: ubuntu-latest
-    needs: storage-matrix
-    env:
-      CODEX_API_KEY: ${{ secrets.CODEX_API_KEY }}
-      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      SFS_CROSS_VERIFY_MODE: ${{ github.event_name == 'pull_request' && 'pr' || (github.event_name == 'schedule' && 'nightly' || 'main') }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: cross-instance verify (AC4.4 4-bullet fallback)
-        run: |
-          bash tests/test-sfs-cross-instance-verify.sh
-
   log-masking:
-    # AC4.4.4 + AC4.6 — isolated step. Real auth keys not used here (sentinel inject only).
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -72,15 +40,20 @@ jobs:
           unset CODEX_API_KEY GEMINI_API_KEY
           bash tests/test-sfs-log-masking.sh
 
-  hash-parity-windows:
-    # AC12 + G6.1 F6 — Windows PowerShell `Get-FileHash` vs POSIX `sha256sum` strict equality.
-    # Bash on Windows runner via Git Bash; powershell.exe must be on PATH for the parity assertion to fire.
-    runs-on: windows-latest
+  cross-instance-verify:
+    if: ${{ inputs.cross_instance }}
+    runs-on: ubuntu-latest
+    needs: posix-run-all
     defaults:
       run:
         shell: bash
+    env:
+      CODEX_API_KEY: ${{ secrets.CODEX_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      SFS_CROSS_VERIFY_MODE: release
+      SFS_CROSS_VERIFY_DRYRUN: "0"
     steps:
       - uses: actions/checkout@v4
-      - name: PowerShell vs POSIX sha256 parity
+      - name: cross-instance verify
         run: |
-          bash tests/test-hash-parity.sh
+          bash tests/test-sfs-cross-instance-verify.sh

@@ -23,26 +23,13 @@ class Sfs < Formula
 
   def install
     libexec.install Dir["*"]
+    libexec.install %w[.gitattributes .gitignore .github .claude-plugin].select { |path| File.exist?(path) }
     (bin/"sfs").write <<~SH
       #!/bin/bash
       export SFS_DIST_DIR="#{libexec}"
       exec "#{libexec}/bin/sfs" "$@"
     SH
     chmod 0755, bin/"sfs"
-  end
-
-  def post_install
-    # 0.5.96-product slash-command zero-file discovery hook.
-    # Registers /sfs (Claude Code), sfs (Gemini CLI), $sfs (Codex CLI) under
-    # one umbrella — idempotent + graceful (D7=b: failure does not abort).
-    hook = libexec/"scripts/install-cli-discovery.sh"
-    if hook.exist?
-      ENV["SFS_DISCOVERY_SOURCE_DIR"] = libexec.to_s
-      system "bash", hook.to_s
-      ENV.delete("SFS_DISCOVERY_SOURCE_DIR")
-    else
-      opoo "cli-discovery hook not found at #{hook} — slash-command discovery skipped"
-    end
   end
 
   def caveats
@@ -54,7 +41,8 @@ class Sfs < Formula
         sfs guide
 
       Homebrew installs the global sfs CLI. Run `sfs init --yes` once inside
-      each project where you want Solon files, state, and agent adapters.
+      each project where you want Solon files and state. Project-local
+      command/skill adapters are optional: `sfs agent install all`.
       Later, run `sfs upgrade` inside a project; it self-upgrades the Homebrew
       runtime first, then updates that project's Solon files.
 
@@ -68,6 +56,6 @@ class Sfs < Formula
   end
 
   test do
-    system "#{bin}/sfs", "--help"
+    system bin/"sfs", "--help"
   end
 end

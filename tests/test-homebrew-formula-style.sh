@@ -57,6 +57,16 @@ for f in "${universal_files[@]}"; do
   current line ${prev_line}: ${prev_content}
   rationale: Style/Documentation cop requires a YARD-style class comment."
   fi
+
+  if ! grep -qF '.gitattributes' "${f}" || ! grep -qF '.github' "${f}"; then
+    fail "${f}: formula install must preserve release-root dotfiles/directories.
+  rationale: Homebrew installs otherwise drop .gitattributes/.github, making installed verification tests fail."
+  fi
+
+  if grep -qE '^[[:space:]]*def[[:space:]]+post_install' "${f}"; then
+    fail "${f}: Homebrew formula must not run project/user-home discovery from post_install.
+  rationale: post_install can block or mutate host CLI config during brew install/reinstall; keep adapter setup explicit."
+  fi
 done
 
 # sfs.rb-specific structural checks.

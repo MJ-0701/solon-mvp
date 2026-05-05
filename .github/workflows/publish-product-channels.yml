@@ -1,0 +1,130 @@
+name: Publish Product Channels
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Product version to publish, without v prefix"
+        required: true
+        type: string
+      mode:
+        description: "Create channel PRs or push channel main directly"
+        required: true
+        default: pr
+        type: choice
+        options:
+          - pr
+          - push
+
+permissions:
+  contents: read
+
+jobs:
+  publish-channels:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.SOLON_RELEASE_BOT_TOKEN }}
+      VERSION: ${{ inputs.version }}
+      MODE: ${{ inputs.mode }}
+      PRODUCT_REPO: https://github.com/MJ-0701/solon-product
+      HOMEBREW_REPO: MJ-0701/homebrew-solon-product
+      SCOOP_REPO: MJ-0701/scoop-solon-product
+    steps:
+      - name: Checkout product
+        uses: actions/checkout@v4
+
+      - name: Validate release inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-product)?$ ]]; then
+            echo "invalid version: ${VERSION}" >&2
+            exit 1
+          fi
+          if [[ -z "${GH_TOKEN}" ]]; then
+            echo "missing SOLON_RELEASE_BOT_TOKEN secret with access to Homebrew and Scoop repos" >&2
+            exit 1
+          fi
+          git ls-remote --exit-code --tags "${PRODUCT_REPO}.git" "refs/tags/v${VERSION}" >/dev/null
+
+      - name: Compute archive hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL "${PRODUCT_REPO}/archive/refs/tags/v${VERSION}.tar.gz" -o product.tar.gz
+          curl -fsSL "${PRODUCT_REPO}/archive/refs/tags/v${VERSION}.zip" -o product.zip
+          {
+            echo "TAR_SHA=$(sha256sum product.tar.gz | awk '{print $1}')"
+            echo "ZIP_SHA=$(sha256sum product.zip | awk '{print $1}')"
+          } >> "${GITHUB_ENV}"
+
+      - name: Checkout Homebrew tap
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.HOMEBREW_REPO }}
+          token: ${{ secrets.SOLON_RELEASE_BOT_TOKEN }}
+          path: channels/homebrew
+
+      - name: Checkout Scoop bucket
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.SCOOP_REPO }}
+          token: ${{ secrets.SOLON_RELEASE_BOT_TOKEN }}
+          path: channels/scoop
+
+      - name: Render Homebrew formula
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp packaging/homebrew/sfs.rb.template channels/homebrew/Formula/sfs.rb
+          perl -0pi -e 's/vVERSION\.tar\.gz/v$ENV{VERSION}.tar.gz/g; s/sha256 "SHA256"/sha256 "$ENV{TAR_SHA}"/g' channels/homebrew/Formula/sfs.rb
+          grep -q "v${VERSION}.tar.gz" channels/homebrew/Formula/sfs.rb
+          grep -q "${TAR_SHA}" channels/homebrew/Formula/sfs.rb
+
+      - name: Render Scoop manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp packaging/scoop/sfs.json.template channels/scoop/bucket/sfs.json
+          export RELEASE_URL="${PRODUCT_REPO}/archive/refs/tags/v${VERSION}.zip"
+          export EXTRACT_DIR="solon-product-${VERSION}"
+          perl -0pi -e 's/__VERSION__/$ENV{VERSION}/g; s#__URL__#$ENV{RELEASE_URL}#g; s/__SHA256__/$ENV{ZIP_SHA}/g; s/__EXTRACT_DIR__/$ENV{EXTRACT_DIR}/g' channels/scoop/bucket/sfs.json
+          python3 -m json.tool channels/scoop/bucket/sfs.json >/dev/null
+          grep -q "v${VERSION}.zip" channels/scoop/bucket/sfs.json
+          grep -q "${ZIP_SHA}" channels/scoop/bucket/sfs.json
+
+      - name: Publish channel changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          publish_repo() {
+            local dir="$1" repo="$2" label="$3"
+            local branch="release/sfs-${VERSION}-${GITHUB_RUN_ID}"
+
+            git -C "${dir}" config user.email "actions@github.com"
+            git -C "${dir}" config user.name "github-actions"
+            git -C "${dir}" status --short
+            git -C "${dir}" add -A
+            if git -C "${dir}" diff --cached --quiet; then
+              echo "${label}: no changes"
+              return 0
+            fi
+
+            if [[ "${MODE}" == "pr" ]]; then
+              git -C "${dir}" switch -c "${branch}"
+              git -C "${dir}" commit -m "sfs ${VERSION}"
+              git -C "${dir}" push origin "${branch}"
+              gh pr create \
+                --repo "${repo}" \
+                --base main \
+                --head "${branch}" \
+                --title "sfs ${VERSION}" \
+                --body "Updates ${label} for solon-product v${VERSION}."
+            else
+              git -C "${dir}" commit -m "sfs ${VERSION}"
+              git -C "${dir}" push origin main
+            fi
+          }
+
+          publish_repo channels/homebrew "${HOMEBREW_REPO}" "Homebrew tap"
+          publish_repo channels/scoop "${SCOOP_REPO}" "Scoop bucket"
