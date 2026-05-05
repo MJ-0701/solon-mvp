@@ -1,3 +1,71 @@
+## [0.6.6] - 2026-05-05
+
+> **Structural fix release — cascade 종결.** 0.6.1 → 0.6.5 의 4 receipts cascade
+> 가 보여준 두 root cause (CI 의 macOS 시스템 bash 3.2 surface 부재, 외부 CLI
+> deprecation 을 사후가 아니라 사전 단계 안으로 끌어오지 못한 release flow)
+> 를 직접 닫는다. 본 release 부터는 같은 클래스의 다음 layer 가 ship 전에
+> CI 에서 잡힌다. 자세한 분석은
+> [docs/ko/cross-review-principle.md](docs/ko/cross-review-principle.md)
+> ([English](docs/en/cross-review-principle.md)) Receipts 섹션.
+
+### Added
+
+- **`.github/workflows/macos-bash-3-2-smoke.yml`** — macOS system bash 3.2
+  surface 를 명시적으로 cover 하는 새 CI workflow. `runs-on: macos-latest`
+  + `shell: /bin/bash {0}` 조합으로 (= brew bash 5.x 가 아니라 시스템 bash
+  3.2 강제) 회귀 테스트 3 개 + `tests/run-all.sh` + `bin/sfs upgrade
+  --no-self-upgrade --skip-existing --layout thin` smoke check 를 실행.
+  bash 3.2 nounset/empty-array 클래스의 다음 회귀가 ship 전에 잡힘.
+  - 워크플로 시작 부분에서 `/bin/bash --version` 출력으로 3.x 임을 sanity
+    check. 미래에 GitHub 가 macos-latest runner 의 시스템 bash 를 4+ 로
+    업그레이드하면 이 sanity check 가 fail 해서 surface 가 다시 단일화됐다는
+    걸 알려줌 (workflow 재구성 신호).
+- **`scripts/sfs-release-sequence.sh` `--phase post-audit` 추가** — release
+  sequence 에 phase 4. 순서: `tag-push → audit → tap-update → post-audit`.
+  `tap-update` 가 dev staging `cut-release.sh` 를 통해 published 된 다음,
+  `brew audit --strict --online sfs` 를 *이름 기준* 으로 실행해 path-form
+  `brew audit` 이 더 이상 못 돌리는 strict + online 항목 (URL 가용성, license
+  체크 등) 까지 cover. brew 미설치 / tap 미설치 시 informative hint + non-
+  zero exit (조작자에게 install 을 알림).
+
+### Changed
+
+- **`tap-update` phase 메시지 명확화** — 기존 `tap-update — invoke
+  tap-update helper (release tool integration point)` 라는 cryptic 메시지를,
+  "이 stub 는 release-cut output mirror 측 marker 이고 실제 tap 갱신은 dev
+  staging 의 `scripts/cut-release.sh` 에서 일어난다 + post-audit 으로 이어가는
+  방법" 을 명시한 안내문으로 교체. AGENTS.md 의 release flow 와 사용자
+  실제 워크플로 사이의 인지 격차 해소.
+- **docs/{ko,en}/index.md cross-review-principle 링크 설명 갱신** — 기존
+  "0.6.1→0.6.2 hotfix case study" 표현을 "0.6.1 → 0.6.5 cascade 의 4
+  receipts" 로 갱신 (실제 receipts 수 반영).
+
+### Process learning (5th release in the cascade — but the first one closing it)
+
+receipts 1~4 가 같은 한 source line 에서 외부 CLI 의 layer 를 한 겹씩
+받아냈던 반면, 본 release 는 그 cascade 의 root cause 두 개를 닫는다:
+
+- **CI surface 단일화 → 다양화**: macOS system bash 3.2 가 이제 명시적
+  CI surface 가 됨. 같은 클래스의 다음 회귀가 사용자가 아니라 CI 에서 먼저
+  울림.
+- **Pre-publish 만 하던 audit → post-publish 도 함**: published formula
+  name 에 대한 strict + online 검사가 release sequence 의 정식 phase 로
+  들어옴. 외부 CLI deprecation 변화는 막을 수 없지만, "release 가 끝났다고
+  선언하기 전에 published artifact 를 한 번 더 검증" 하는 단계가 정상화됨.
+
+이걸로 본 cascade 의 재발 trigger 두 개가 닫혔다고 판단. 다음 receipt 가
+또 발생하면 그건 새 클래스이지, 같은 cascade 의 연장이 아니다.
+
+### Verified
+
+- 기존 회귀 테스트 3 개 모두 PASS (test-nounset-empty-array-expansion,
+  test-no-deprecated-cli-flags, test-homebrew-formula-style).
+- 새 CI workflow `macos-bash-3-2-smoke.yml` 의 동작 자체는 GitHub macos-latest
+  runner 에서만 검증 가능 — 본 release 의 첫 push 시 CI run 에서 확인.
+- `scripts/sfs-release-sequence.sh` 의 `--phase post-audit` 호출은
+  brew + 설치된 tap 둘 다 필요하므로 sandbox 에서는 dry-run 만 검증
+  (`--dry-run` 출력 정확).
+
 ## [0.6.5] - 2026-05-05
 
 > **Hotfix.** 0.6.4 의 audit phase 가 `brew style` 단계에서 9 offenses 로

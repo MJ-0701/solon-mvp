@@ -11,7 +11,7 @@ deeper operating model, judgment rules, philosophy, and examples.
 |---|---|
 | [Current product shape](./current-product-shape.md) | To understand the latest Solon operating flow |
 | [Solon 10x value](./10x-value.md) | To understand why Solon trains judgment instead of only automating output |
-| [What cross-review is really about](./cross-review-principle.md) | Why Solon splits generator/evaluator and how cross-review still helps single-agent users — grounded in the 0.6.1→0.6.2 hotfix case study |
+| [What cross-review is really about](./cross-review-principle.md) | Why Solon splits generator/evaluator and how cross-review still helps single-agent users — grounded in the 0.6.1 → 0.6.5 cascade with 4 receipts |
 | [30-minute guide](./guide.md) | To run the first sprint after install |
 | [Beginner guide](../../BEGINNER-GUIDE.md) | Korean beginner guide for Git, terminal, and CLI basics |
 | [Release notes](../../RELEASE-NOTES.md) | User-facing version notes (Korean for now) |

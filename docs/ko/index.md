@@ -11,7 +11,7 @@ README 는 Solon Product 의 큰 흐름과 목차입니다. 이 디렉토리는 
 |---|---|
 | [현재 제품 흐름과 최근 변화](./current-product-shape.md) | 최신 Solon 이 어떤 사용 감각으로 바뀌었는지 알고 싶을 때 |
 | [Solon 10x 가치](./10x-value.md) | 왜 Solon 이 단순 자동화가 아니라 사고/설계 근육을 키우려 하는지 알고 싶을 때 |
-| [Cross-review 의 본질](./cross-review-principle.md) | 왜 Solon 이 sprint 마다 generator/evaluator 를 나누고, 단일 agent 사용자에게도 cross-review 가치를 주려 하는지 — 0.6.1→0.6.2 hotfix case study |
+| [Cross-review 의 본질](./cross-review-principle.md) | 왜 Solon 이 sprint 마다 generator/evaluator 를 나누고, 단일 agent 사용자에게도 cross-review 가치를 주려 하는지 — 0.6.1 → 0.6.5 cascade 의 4 receipts case study |
 | [30분 온보딩 가이드](../../GUIDE.md) | 설치 직후 첫 sprint 를 직접 돌려보고 싶을 때 |
 | [초보자 가이드](../../BEGINNER-GUIDE.md) | Git, 터미널, CLI 가 낯설 때 |
 | [릴리스 노트](../../RELEASE-NOTES.md) | 새 버전에서 사용자가 체감할 변화를 확인할 때 |

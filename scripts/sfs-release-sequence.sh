@@ -3,8 +3,14 @@
 #
 # Phases (must run in order):
 #   1. tag-push     git tag v<version> + push to origin
-#   2. audit        brew audit (AC7.4) + scoop schema check (AC7.5)
-#   3. tap-update   tap repo formula/manifest update + push (Homebrew + Scoop bucket)
+#   2. audit        path-based pre-publish style check (brew style, skipped on
+#                   placeholder sha256) + scoop schema check (AC7.5)
+#   3. tap-update   tap repo formula/manifest update + push (delegated to
+#                   scripts/cut-release.sh in dev staging — see AGENTS.md)
+#   4. post-audit   post-publish full audit by name against the installed tap
+#                   (`brew audit --strict --online sfs`). 0.6.6 addition —
+#                   covers the strict + online checks that path-form `brew
+#                   audit` could no longer perform after Homebrew disabled it.
 #
 # Out-of-order invocation exits non-zero.
 # Phase markers are written to .sfs-local/release-state/<version>/ for cross-script consumption.
@@ -20,13 +26,14 @@ usage() {
 sfs-release-sequence — AC11 release sequence enforcement
 
 Usage:
-  sfs-release-sequence.sh --phase <tag-push|audit|tap-update> --version <X.Y.Z>
+  sfs-release-sequence.sh --phase <tag-push|audit|tap-update|post-audit> --version <X.Y.Z>
                           [--dry-run] [--state-dir <path>]
 
 Phases (must run in order):
   1. tag-push     git tag v<version> + push to origin
-  2. audit        brew audit + scoop schema check
-  3. tap-update   tap repo update + push
+  2. audit        brew style (skipped on placeholder sha256) + scoop schema check
+  3. tap-update   tap repo update + push (delegated to dev staging cut-release)
+  4. post-audit   brew audit --strict --online sfs against published tap
 
 Phase markers persist in .sfs-local/release-state/<version>/ (no-cleanup default).
 EOF
@@ -61,7 +68,7 @@ done
 
 [[ -n "${phase}" && -n "${version}" ]] || { usage >&2; exit 2; }
 case "${phase}" in
-  tag-push|audit|tap-update) ;;
+  tag-push|audit|tap-update|post-audit) ;;
   *) echo "${SCRIPT_NAME}: unknown phase: ${phase}" >&2; exit 2 ;;
 esac
 
@@ -91,6 +98,12 @@ case "${phase}" in
   tap-update)
     if ! phase_done tag-push || ! phase_done audit; then
       echo "${SCRIPT_NAME}: AC11 ORDER FAIL — phase=tap-update requires tag-push + audit (state: ${state_dir})" >&2
+      exit 1
+    fi
+    ;;
+  post-audit)
+    if ! phase_done tag-push || ! phase_done audit || ! phase_done tap-update; then
+      echo "${SCRIPT_NAME}: AC11 ORDER FAIL — phase=post-audit requires tag-push + audit + tap-update (state: ${state_dir})" >&2
       exit 1
     fi
     ;;
@@ -156,13 +169,60 @@ case "${phase}" in
 
   tap-update)
     if [[ "${dry_run}" == "1" ]]; then
-      printf '[dry-run] update tap/Formula/sfs.rb + bucket/sfs.json + git push (Homebrew + Scoop)\n'
+      printf '[dry-run] tap-update is delegated to dev staging cut-release (this stub only marks the order gate)\n'
     else
-      echo "${SCRIPT_NAME}: tap-update — invoke tap-update helper (release tool integration point)"
-      # Real tap update lives in scripts/cut-release.sh / scripts/update-product-taps.sh.
-      # Here we only enforce the order; the actual push runs in the release tool.
+      # 0.6.6: this phase is intentionally a stub in the stable mirror repo.
+      # The real tap update (materialize sha256 in formula, push to homebrew
+      # tap repo + scoop bucket) is performed by `scripts/cut-release.sh` in
+      # dev staging (~/agent_architect — see AGENTS.md). The earlier message
+      # "invoke tap-update helper (release tool integration point)" was too
+      # cryptic; this version states the delegation explicitly so users
+      # don't expect the local script to push anything.
+      cat >&2 <<EOF
+${SCRIPT_NAME}: tap-update phase — stub (this repo is the release-cut output mirror).
+  Real tap update is performed by scripts/cut-release.sh in dev staging
+  (~/agent_architect/...). Run that next to publish v${version} to the
+  Homebrew tap and Scoop bucket. After publish, return here and run:
+
+    bash ${SCRIPT_NAME} --phase post-audit --version ${version}
+
+  to verify the published formula by name (brew audit --strict --online sfs).
+EOF
     fi
     mark_phase tap-update
+    ;;
+
+  post-audit)
+    # 0.6.6: post-publish full audit. Runs `brew audit --strict --online sfs`
+    # against the *installed tap formula* (by name). This is the strict +
+    # online audit that path-form `brew audit` could no longer perform after
+    # Homebrew disabled it. Graceful: if `brew` is missing or the tap is not
+    # installed, the phase emits a hint and exits non-zero so the operator
+    # knows to install the tap before running.
+    if [[ "${dry_run}" == "1" ]]; then
+      printf '[dry-run] brew audit --strict --online sfs (against installed tap)\n'
+    else
+      if ! command -v brew >/dev/null 2>&1; then
+        echo "${SCRIPT_NAME}: post-audit requires Homebrew; install brew or run on a macOS host" >&2
+        exit 1
+      fi
+      if ! brew list --formula sfs >/dev/null 2>&1; then
+        cat >&2 <<EOF
+${SCRIPT_NAME}: post-audit — sfs formula not installed in any tap.
+  Tap and install first, then re-run:
+
+    brew tap MJ-0701/solon-product
+    brew install sfs   # or: brew upgrade sfs
+
+  After install, re-run:
+
+    bash ${SCRIPT_NAME} --phase post-audit --version ${version}
+EOF
+        exit 1
+      fi
+      brew audit --strict --online sfs || { echo "post-audit: brew audit FAIL"; exit 1; }
+    fi
+    mark_phase post-audit
     ;;
 esac
 

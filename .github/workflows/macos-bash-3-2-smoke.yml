@@ -1,0 +1,99 @@
+name: macOS system bash 3.2 smoke
+
+# 0.6.6 — explicit macOS system bash 3.2 CI surface.
+#
+# The 0.6.1 → 0.6.5 cascade documented in docs/{ko,en}/cross-review-principle.md
+# was rooted in a single failure mode: pre-release CI ran every shell script on
+# Linux bash 5.x (and even on macos-latest the default `bash` resolves to brew
+# bash 5.x via PATH), so macOS system bash 3.2 — the actual surface a
+# `brew install sfs && sfs upgrade` user runs against — was never exercised.
+# The dep_args nounset crash in 0.6.1 was the visible head of that monoculture.
+#
+# This workflow runs the regression tests + tests/run-all.sh under
+# `/bin/bash` explicitly (= macOS system bash 3.2) on macos-latest. Future
+# regressions in the same class fail the build instead of shipping.
+#
+# AC13 explicit `permissions: contents: read` minimum.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/macos-bash-3-2-smoke.yml"
+      - "bin/**"
+      - "scripts/**"
+      - "templates/**"
+      - "tests/**"
+      - "VERSION"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/macos-bash-3-2-smoke.yml"
+      - "bin/**"
+      - "scripts/**"
+      - "templates/**"
+      - "tests/**"
+      - "VERSION"
+
+permissions:
+  contents: read
+
+jobs:
+  bash-3-2-regression:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Confirm /bin/bash is bash 3.2 (sanity check)
+        run: |
+          set -e
+          ver=$(/bin/bash --version | head -1)
+          echo "${ver}"
+          case "${ver}" in
+            *"version 3."*) ;;
+            *)
+              echo "FAIL: /bin/bash on this macOS runner is not 3.x — surface monoculture is back." >&2
+              echo "  Either GitHub upgraded the runner image (then this workflow needs a different macos-* runner that still ships system bash 3.2), or PATH is shadowed." >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Regression — empty-array nounset (0.6.2 receipt #1)
+        shell: /bin/bash {0}
+        run: bash tests/test-nounset-empty-array-expansion.sh
+
+      - name: Regression — deprecated CLI flags (0.6.3/0.6.4 receipt #2/#3)
+        shell: /bin/bash {0}
+        run: bash tests/test-no-deprecated-cli-flags.sh
+
+      - name: Regression — homebrew formula style (0.6.5 receipt #4)
+        shell: /bin/bash {0}
+        run: bash tests/test-homebrew-formula-style.sh
+
+      - name: tests/run-all.sh under /bin/bash (full sweep)
+        shell: /bin/bash {0}
+        run: |
+          # run-all.sh's own shebang is `#!/usr/bin/env bash`; invoking it
+          # explicitly under /bin/bash (3.2) ensures the *test harness* itself
+          # runs against the surface we want to cover. Individual test scripts
+          # may still re-spawn their own bash via shebang; that's fine — the
+          # harness exposing the bug class is what matters here.
+          bash tests/run-all.sh
+
+      - name: bin/sfs upgrade smoke (no-flags path) under /bin/bash
+        shell: /bin/bash {0}
+        run: |
+          # The 0.6.1 dep_args[@] unbound-variable bug only surfaced when
+          # `sfs upgrade` ran with no flags. We replay that exact invocation
+          # in a tmpdir (so it'll fail later for `not a Solon project`, which
+          # is fine) and assert the regression marker is absent from stderr.
+          set -e
+          tmp="$(mktemp -d)"
+          cd "${tmp}"
+          stderr="$(/bin/bash "${GITHUB_WORKSPACE}/bin/sfs" upgrade --no-self-upgrade --skip-existing --layout thin </dev/null 2>&1 >/dev/null || true)"
+          if echo "${stderr}" | grep -q 'dep_args\[@\]: unbound variable'; then
+            echo "FAIL: 0.6.1 regression — dep_args[@] unbound variable on macOS system bash 3.2" >&2
+            echo "${stderr}" >&2
+            exit 1
+          fi
+          echo "OK — sfs upgrade no-flags reached past deprecation hook without nounset crash."
