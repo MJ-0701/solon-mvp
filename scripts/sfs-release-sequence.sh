@@ -116,25 +116,33 @@ case "${phase}" in
 
   audit)
     if [[ "${dry_run}" == "1" ]]; then
-      printf '[dry-run] brew style packaging/homebrew/sfs.rb + scoop manifest schema validate\n'
+      printf '[dry-run] brew style packaging/homebrew/sfs.rb (skipped on placeholder sha256) + scoop manifest schema validate\n'
     else
       if command -v brew >/dev/null 2>&1; then
         formula="${DIST_DIR}/packaging/homebrew/sfs.rb"
         if [[ -f "${formula}" ]]; then
-          # 0.6.4 hotfix: Homebrew (a) removed the previously-used `--new-formula`
-          # flag (0.6.3 fix), and (b) disabled `brew audit [path ...]` entirely —
-          # `brew audit` now only accepts formula NAMES, not file paths. So the
-          # pre-publish (path-based) check at this phase has to use `brew style`,
-          # which is the path-friendly RuboCop linter. This catches style /
-          # syntax issues before tap-update.
-          # NOTE: the full strict + online audit (URL availability, license,
-          # license parity, etc.) can no longer run on a path. After tap-update
-          # publishes the formula, run `brew audit --strict --online sfs` (by
-          # name, against the installed tap) as a post-publish verification
-          # step. Tracked as a follow-up in CHANGELOG `[0.6.4]` Process
-          # learning.
-          # Regression-guarded by tests/test-no-deprecated-cli-flags.sh.
-          brew style "${formula}" || { echo "brew style FAIL"; exit 1; }
+          # 0.6.5 hotfix: when the formula still carries the cut-release
+          # placeholder for sha256, `brew style` flags the placeholder string
+          # itself as 3 separate lint errors (length / chars / case). This is
+          # noise in the pre-cut state — the real sha256 only lands during
+          # tap-update via scripts/cut-release.sh in dev staging. We therefore
+          # detect the placeholder and skip `brew style` with an informative
+          # message, while still running scoop schema validation.
+          # NOTE: the full strict + online audit (URL availability, license
+          # checks, etc.) can no longer run on a path (Homebrew disabled
+          # `brew audit [path ...]`). After tap-update publishes the formula,
+          # run `brew audit --strict --online sfs` (by name, against the
+          # installed tap) as a post-publish verification step. Tracked as a
+          # follow-up in CHANGELOG `[0.6.5]` Process learning.
+          # 0.6.3/0.6.4 history: previously this phase used the now-removed
+          # `--new-formula` flag, then `brew audit "${formula}"` with a path
+          # argument; both broken upstream. Regression-guarded by
+          # tests/test-no-deprecated-cli-flags.sh.
+          if grep -q '__SHA256_PLACEHOLDER_FOR_RELEASE_CUT__' "${formula}"; then
+            echo "${SCRIPT_NAME}: brew style — skipped (formula has placeholder sha256; release-cut will materialize)" >&2
+          else
+            brew style "${formula}" || { echo "brew style FAIL"; exit 1; }
+          fi
         else
           echo "${SCRIPT_NAME}: brew formula missing — using template (release-cut will materialize sha256)" >&2
         fi

@@ -1,3 +1,7 @@
+# typed: false
+# frozen_string_literal: true
+
+# Homebrew formula for the Solon Product SFS global CLI runtime.
 class Sfs < Formula
   desc "Solon Product SFS runtime for AI-native product work"
   homepage "https://github.com/MJ-0701/solon-product"

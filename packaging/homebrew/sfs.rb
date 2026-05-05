@@ -1,16 +1,23 @@
+# typed: false
+# frozen_string_literal: true
+
+# Homebrew formula for the Solon Product SFS global CLI runtime.
 class Sfs < Formula
   desc "Solon Product SFS runtime for AI-native product work"
   homepage "https://github.com/MJ-0701/solon-product"
 
-  # AC7.4 — 0.6.0 release. sha256 placeholder is materialized by scripts/cut-release.sh
-  # at release-cut time (see AC11 release sequence: tag-push → audit → tap-update).
+  # AC7.4 — release artifact. version + sha256 placeholders are materialized by
+  # scripts/cut-release.sh at release-cut time (see AC11 release sequence:
+  # tag-push → audit → tap-update). 0.6.5 hotfix: components order corrected
+  # (version before sha256) and livecheck regex broadened (\.t matches both
+  # \.tar\.gz and \.tgz mirrors) to satisfy `brew style`.
   url "https://github.com/MJ-0701/solon-product/archive/refs/tags/v0.6.0.tar.gz"
-  sha256 "__SHA256_PLACEHOLDER_FOR_RELEASE_CUT__"
   version "0.6.0"
+  sha256 "__SHA256_PLACEHOLDER_FOR_RELEASE_CUT__"
 
   livecheck do
     url :stable
-    regex(/v([\d.]+)\.tar\.gz/i)
+    regex(/v([\d.]+)\.t/i)
     strategy :github_latest
   end
 

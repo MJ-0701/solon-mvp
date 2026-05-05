@@ -1,3 +1,70 @@
+## [0.6.5] - 2026-05-05
+
+> **Hotfix.** 0.6.4 의 audit phase 가 `brew style` 단계에서 9 offenses 로
+> 즉시 fail. 그 중 6 개는 진짜 template style 결함 (sigils, frozen literal
+> 코멘트, class 문서 코멘트, components order, livecheck regex), 3 개는
+> cut-release placeholder sha256 형태 자체에서 발생한 noise. **Receipt #4 —
+> 같은 release flow 의 한 source line 에서 외부 CLI 의 다음 layer 가 또
+> 떨어진 cascade 의 4번째 evidence.** 자세한 정리는
+> [docs/ko/cross-review-principle.md](docs/ko/cross-review-principle.md)
+> ([English](docs/en/cross-review-principle.md)) 의 Receipts 섹션.
+
+### Fixed
+
+- **`packaging/homebrew/sfs.rb` + `sfs.rb.template` template style 보강** —
+  `brew style` 가 잡은 6 개 진짜 결함 모두 수정:
+  - `# typed: false` Sorbet sigil 추가 (Sorbet/StrictSigil + Sorbet/TrueSigil
+    cops).
+  - `# frozen_string_literal: true` Ruby magic comment 추가
+    (Style/FrozenStringLiteralComment cop).
+  - `class Sfs < Formula` 위에 YARD class 문서 코멘트 추가
+    (Style/Documentation cop).
+  - `sfs.rb`: `version` 을 `sha256` 위로 이동 (FormulaAudit/ComponentsOrder
+    cop).
+  - `sfs.rb`: livecheck regex `\.tar\.gz` → `\.t` 로 broaden
+    (FormulaAudit/LivecheckRegexExtension cop — `.tar.gz` 와 `.tgz` 미러
+    둘 다 매칭).
+- **`scripts/sfs-release-sequence.sh` audit phase: placeholder sha256 감지
+  + brew style skip** — formula 가 cut-release 의
+  `__SHA256_PLACEHOLDER_FOR_RELEASE_CUT__` 를 들고 있는 상태에서는
+  `brew style` 의 sha256 형태 cop 3 개가 noise 로 fail. release-cut 이
+  실제 sha256 을 채우기 전까지는 그 3 개를 건너뛰는 것이 정합. 감지 시
+  informative 메시지 + `brew style` skip + scoop schema validate 는 그대로
+  실행.
+
+### Added
+
+- **`tests/test-homebrew-formula-style.sh`** — formula 와 template 의
+  style 결함 회귀 가드. (1) Sorbet sigil 존재, (2) frozen literal comment
+  존재, (3) class 문서 comment 존재, (4) `sfs.rb` 의 components order
+  (version 이 sha256 위), (5) livecheck regex 에 `\.tar\.gz` 가 박혀있지
+  않음, (6) audit phase 의 placeholder skip 로직 존재. `brew` 미설치 호스트
+  에서도 정적 grep 으로 검증 가능.
+
+### Process learning (4th receipt for cross-review-principle)
+
+같은 release flow 의 한 audit phase 가 24h 안에 외부 CLI 의 deprecation /
+정책 변경 4 개를 연이어 받았다 (`--new-formula` 제거 → `brew audit [path]`
+disable → `brew style` 의 cop 검사 항목들). 본 cascade 가 굳히는 결론:
+
+- **외부 CLI 의 검사 surface 자체가 시간에 따라 enrich 된다.** 어제 통과
+  하던 동일 코드 / formula 가 오늘 fail 가능. CI 의 brew 미설치 surface
+  로는 영원히 못 잡음.
+- **사전 dogfood gate (= maintainer macOS 셸에서 한 번 진짜 실행)** 이
+  release 의 사전 단계로 박히지 않으면 cascade 는 계속됨. 본 release 들이
+  본인의 cascade 인 이유.
+- **Post-publish full audit step 추가가 다음 sprint 의 P0 candidate.**
+  본 hotfix 는 `--phase audit` 까지만 정합화 — `--phase tap-update` 가
+  실제 published formula name 에 대해 `brew audit --strict --online sfs`
+  를 호출하도록 phase 4 를 추가하는 건 후속 sprint.
+
+### Verified
+
+- `tests/test-homebrew-formula-style.sh` 단독 PASS.
+- 기존 `tests/test-no-deprecated-cli-flags.sh` 단독 PASS (regression
+  unaffected).
+- 기존 `tests/test-nounset-empty-array-expansion.sh` 단독 PASS.
+
 ## [0.6.4] - 2026-05-05
 
 > **Hotfix.** 0.6.3 도 release-sequence audit phase 가 다음 wall 에 부딪힘:

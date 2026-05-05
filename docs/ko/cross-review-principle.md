@@ -120,6 +120,7 @@ macOS shell 이 다음 layer 를 잡아냈다.
 | #1 | 0.6.1 → 0.6.2 | `bin/sfs:848` `dep_args[@]` | macOS bash 3.2 + `set -u` 의 빈 배열 expansion | macOS Homebrew bash 3.2 (Linux CI bash 5.x 와 다른 nounset 동작) |
 | #2 | 0.6.2 → 0.6.3 | `scripts/sfs-release-sequence.sh:124` `brew audit --new-formula` | Homebrew 가 `--new-formula` 옵션 제거 | 첫 실사용자의 최신 Homebrew 설치본 (CI 의 brew 미설치 surface 와 다름) |
 | #3 | 0.6.3 → 0.6.4 | 같은 라인 — `brew audit "${formula}"` | Homebrew 가 path-form `brew audit` 를 disable | 다시 같은 macOS Homebrew |
+| #4 | 0.6.4 → 0.6.5 | 같은 audit phase, 이번엔 `brew style` 단계 | Homebrew 의 `brew style` 가 (a) cut-release 의 sha256 placeholder 를 3 개 lint 로 fail, (b) template 의 진짜 style 결함 6 개 (sigils, frozen literal, 문서, components order, livecheck regex) 를 fail | 같은 maintainer macOS Homebrew |
 
 이 cascade 가 보여주는 것:
 
@@ -140,7 +141,7 @@ macOS shell 이 다음 layer 를 잡아냈다.
 ## 한 줄 정리
 
 > **Cross-review 의 가치는 모델의 수가 아니라 surface 의 다양성에서 나온다.
-> 0.6.1 → 0.6.4 의 receipt 3 개가 그 명제의 evidence 다.**
+> 0.6.1 → 0.6.5 의 receipt 4 개가 그 명제의 evidence 다.**
 
 ## 참고
 

@@ -119,6 +119,7 @@ peeled off, and the first real user's macOS shell caught the next layer.
 | #1 | 0.6.1 → 0.6.2 | `bin/sfs:848` `dep_args[@]` | macOS bash 3.2 + `set -u` empty-array expansion | macOS Homebrew bash 3.2 (different nounset behavior from Linux CI bash 5.x) |
 | #2 | 0.6.2 → 0.6.3 | `scripts/sfs-release-sequence.sh:124` `brew audit --new-formula` | Homebrew removed the `--new-formula` flag | First real user's current Homebrew install (CI surface had no `brew`) |
 | #3 | 0.6.3 → 0.6.4 | same line — `brew audit "${formula}"` | Homebrew disabled path-form `brew audit` | Same macOS Homebrew, next layer |
+| #4 | 0.6.4 → 0.6.5 | same audit phase, this time `brew style` | `brew style` flagged (a) cut-release sha256 placeholder as 3 lint errors, plus (b) 6 real template style issues (sigils, frozen literal, class doc, components order, livecheck regex) | Same maintainer macOS Homebrew |
 
 What the cascade reveals:
 
@@ -139,7 +140,7 @@ What the cascade reveals:
 ## In one sentence
 
 > **Cross-review's value comes from surface diversity, not model count.
-> Receipts #1–#3 across 0.6.1 → 0.6.4 are the evidence for that claim.**
+> Receipts #1–#4 across 0.6.1 → 0.6.5 are the evidence for that claim.**
 
 ## See also
 
