@@ -1,3 +1,46 @@
+## [0.6.8] - 2026-05-05
+
+> **Hotfix.** 0.6.7 의 `.gitattributes` 가 확장자 패턴 (`*.md`, `*.yml`, ...)
+> 만 등록하고 **확장자 없는 텍스트 파일 (`VERSION`, `bin/sfs`)** 를 누락. Windows
+> 러너의 `core.autocrlf=true` 가 그 둘에 적용돼 CRLF 로 checkout, `tests/
+> test-hash-parity.sh` 가 sample 하는 `VERSION` 에서 CRLF 검출 → `SFS 0.6
+> Storage Matrix` 의 `hash-parity-windows` job 14s 만에 FAIL. `.gitattributes`
+> 의 0.6.7 첫 도입이 부분적이었던 거고, 그 다음 layer 가 본 receipt.
+
+### Fixed
+
+- **`.gitattributes` extensionless 파일 명시 등록** — `VERSION` 과 `bin/sfs`
+  를 `text eol=lf` 로 명시. 양쪽 다 본질적으로 텍스트 (전자는 단일 라인 semver,
+  후자는 bash 스크립트) 라 LF 강제가 정합. 같은 맥락으로 `*.cmd` / `*.bat`
+  Windows 셸 파일도 `eol=crlf` 로 명시 (이전엔 누락).
+
+### Process learning (5번째 receipt)
+
+본 receipt 는 cascade 의 5번째 layer 지만 패턴이 약간 다르다:
+
+- 1~3 (dep_args / brew flag / brew path): 외부 CLI / runtime 의 deprecation
+  으로 외부에서 끌고 온 layer
+- 4 (brew style placeholder + template style): 우리 정합화 시 **부분적 fix**
+  로 다음 layer 노출
+- 5 (현재 - extensionless gitattributes): 0.6.7 의 `.gitattributes` 자체가
+  **부분적 fix** — 확장자 패턴만 등록하고 extensionless 케이스 누락
+
+즉 4, 5 는 "fix 본인의 incompleteness 가 다음 layer 를 만든" cascade. 외부
+원인이 아닌 내부 fix 의 surface 누락. 같은 클래스 회귀 가드는 정적 grep
+검사 (이미 0.6.6 에 있는 `tests/test-no-deprecated-cli-flags.sh` 같은 패턴)
+보다는 **CI runner 의 실제 cross-platform checkout + assert** 가 옳은 답.
+0.6.6 의 macOS bash 3.2 smoke + 0.6 storage matrix 의 windows-latest 가
+바로 그 역할 — 본 hotfix 는 그 axis 가 정상 작동했다는 증거이기도 하다.
+
+### Verified
+
+- `tests/run-all.sh` (Linux sandbox) → 33/33 PASS · FAIL 0 변동 없음
+- 기존 회귀 테스트 4 개 (`test-nounset-empty-array-expansion`,
+  `test-no-deprecated-cli-flags`, `test-homebrew-formula-style`,
+  `test-hash-parity`) 모두 PASS
+- Windows 결과는 0.6.8 push 후 `SFS 0.6 Storage Matrix` 의 `hash-parity-windows`
+  가 GREEN 으로 나와야 정상 — 본 hotfix 의 첫 evidence
+
 ## [0.6.7] - 2026-05-05
 
 > **Hotfix.** 0.6.6 의 새 macOS bash 3.2 CI workflow 가 `tests/run-all.sh`

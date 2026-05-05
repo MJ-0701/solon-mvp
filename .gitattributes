@@ -23,8 +23,16 @@
 *.rb     text eol=lf
 *.bash   text eol=lf
 
-# PowerShell — keep CRLF as the platform expects.
+# Extensionless text files (0.6.8 hotfix: previously uncovered → on Windows
+# runners `core.autocrlf=true` would emit CRLF for these and trip
+# tests/test-hash-parity.sh which samples VERSION).
+VERSION  text eol=lf
+bin/sfs  text eol=lf
+
+# PowerShell / Windows shell — keep CRLF as the platform expects.
 *.ps1    text eol=crlf
+*.cmd    text eol=crlf
+*.bat    text eol=crlf
 
 # Common binary types — don't normalize.
 *.png    binary
