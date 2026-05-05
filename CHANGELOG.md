@@ -1,3 +1,59 @@
+## [0.6.7] - 2026-05-05
+
+> **Hotfix.** 0.6.6 의 새 macOS bash 3.2 CI workflow 가 `tests/run-all.sh`
+> 실행 중 4 건 fail (`test-hash-parity`, `test-release-suffixless-hard-cut`,
+> `test-sfs-archive-branch-sync`, `test-sfs-migrate-quoted-paths`). 모두
+> **0.6.1 cascade 와 무관한 pre-existing 실패** 였고, 0.6.4 이후 PR Check 가
+> 빨개진 상태로 가려져 있다가 0.6.6 의 macOS smoke 가 처음으로 노출시킴.
+> 본 release 에서 4 건 다 닫는다. 이걸로 `tests/run-all.sh` 가 33/33 PASS.
+
+### Fixed
+
+- **`.gitattributes` 복원** — `test-hash-parity.sh` 가 require 하는
+  `.gitattributes` 파일이 stable mirror repo 에 부재. 7 ext (`yml/yaml/md/
+  jsonl/json/toml/txt`) + `sh/rb/bash` 에 LF 강제, `ps1` 는 CRLF, 흔한
+  바이너리는 normalize 안 함. cross-platform sha256 parity 복구.
+- **`scripts/sfs-migrate-artifacts.sh::sha256_of()` backslash escape 우회** —
+  GNU coreutils `sha256sum 'back\slash.md'` 는 hash 앞에 `\` 를 prefix 로
+  붙이고 파일명의 `\` 를 `\\` 로 escape 한 출력 (`\<hash>  back\\slash.md`)
+  을 emit. 기존 `sha256sum "${f}" | awk '{print $1}'` 가 `\<hash>` 를 그대로
+  캡쳐해서 `verify_no_data_loss` 가 mismatch 로 처리. **Fix**: filename 인자
+  대신 stdin form (`< "${f}"`) 으로 sha256sum 호출 — filename 이 출력
+  포맷터에 닿지 않음. 같은 fix 가 `shasum -a 256 < "${f}"` 분기에도 적용.
+- **`tests/test-sfs-archive-branch-sync.sh` race-lock setup 정정** — 기존
+  테스트가 `.archive-sync.lock` 에 PID 만 적어두고 스크립트가 그걸 detect
+  할 거라 가정. 그러나 `sfs-archive-branch-sync.sh` 는 flock(1) 가용 시
+  flock 으로 lock acquire 하고 파일 내용은 안 읽는 path. Linux runner 는
+  항상 flock 가 있어서 두 번째 invocation 이 lock 을 fresh 로 가져가버려
+  "graceful exit" 메시지 안 나옴. **Fix**: 테스트가 자기 셸에서 `exec 8>...
+  ; flock -n 8` 으로 진짜 flock 을 잡은 채로 스크립트 호출 → 스크립트의
+  flock fail → "graceful exit" 메시지 emit. flock 미가용 시 (macOS without
+  brew flock 등) 기존 PID-write fallback path 그대로.
+- **`tests/test-release-suffixless-hard-cut.sh` stable-mirror skip** —
+  본 테스트가 `${REPO_ROOT}/scripts/cut-release.sh` 와 `verify-product-release.sh`
+  를 require 하는데, 이 둘은 dev staging 전용 (~/agent_architect/...)
+  이라 stable mirror 에는 의도적으로 부재. 기존엔 `missing: ...` 로 즉시
+  exit 1. **Fix**: 둘 다 부재 시 informative SKIP 메시지 + exit 0 로
+  graceful pass. AGENTS.md 의 release-cut output mirror 정책과 정합.
+
+### Audit notes — not in scope
+
+`tests/run-all.sh` 의 4 fail 정찰 중 install.sh / upgrade.sh 의 model
+profile prompt 가 non-TTY 환경에서 hang 가능성을 의심했으나, 실제 코드는
+이미 `tty_available()` (install.sh) / `[ ! -t 0 ]` (upgrade.sh) 가드를
+가지고 있고 화면 캡쳐 재해석 결과 install 자체는 완료한 것으로 확인.
+receipt #5 후보 drop. 추후 같은 클래스 hang 신호가 다시 잡히면 그때
+별도 sprint.
+
+### Verified
+
+- `tests/run-all.sh` → **33/33 PASS** (이전 31/33 + 새로 통과한 archive-
+  branch-sync, migrate-quoted-paths). 0.6.6 의 macOS bash 3.2 CI workflow
+  도 다음 push 부터 같은 결과를 얻어야 정상.
+- 기존 회귀 테스트 3 개 (`test-nounset-empty-array-expansion`,
+  `test-no-deprecated-cli-flags`, `test-homebrew-formula-style`) 모두
+  PASS — 0.6.2~0.6.5 cascade fix 들 무회귀 확인.
+
 ## [0.6.6] - 2026-05-05
 
 > **Structural fix release — cascade 종결.** 0.6.1 → 0.6.5 의 4 receipts cascade

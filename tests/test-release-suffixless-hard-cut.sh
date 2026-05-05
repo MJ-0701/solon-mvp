@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 # tests/test-release-suffixless-hard-cut.sh — 0.6.0+ release tooling must accept suffixless versions.
+#
+# 0.6.7 update: this test exercises `scripts/cut-release.sh` and
+# `scripts/verify-product-release.sh`, both of which live in **dev staging**
+# (~/agent_architect/...) and are intentionally NOT mirrored into the stable
+# release-cut output repo (see AGENTS.md). When run inside the stable
+# mirror, REPO_ROOT resolves to the parent of the mirror checkout (e.g.
+# /Users/mj/tmp/) which has no scripts/ directory at all. Detect that and
+# skip with PASS so the stable mirror's `tests/run-all.sh` (and the macOS
+# CI workflow that re-runs it) doesn't carry a permanent FAIL for a test
+# that is structurally not its concern.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -8,6 +18,14 @@ REPO_ROOT="$(cd "${DIST_DIR}/.." && pwd)"
 CUT_RELEASE="${REPO_ROOT}/scripts/cut-release.sh"
 VERIFY_RELEASE="${REPO_ROOT}/scripts/verify-product-release.sh"
 SCOOP_TEMPLATE="${DIST_DIR}/packaging/scoop/sfs.json.template"
+
+# Stable-mirror skip: cut-release / verify-product-release tooling lives in
+# dev staging only. If neither is present in REPO_ROOT, we're not in a dev
+# checkout and there's nothing to validate from this side.
+if [[ ! -f "${CUT_RELEASE}" && ! -f "${VERIFY_RELEASE}" ]]; then
+  echo "test-release-suffixless-hard-cut: SKIP (stable mirror — cut-release.sh / verify-product-release.sh not present at ${REPO_ROOT}/scripts/; this test is dev-staging-only per AGENTS.md)"
+  exit 0
+fi
 
 [[ -f "${CUT_RELEASE}" ]] || { echo "missing: ${CUT_RELEASE}" >&2; exit 1; }
 [[ -f "${VERIFY_RELEASE}" ]] || { echo "missing: ${VERIFY_RELEASE}" >&2; exit 1; }

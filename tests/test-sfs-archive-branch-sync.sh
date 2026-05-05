@@ -34,14 +34,32 @@ out="$(bash "${SCRIPT}" --root . --dry-run 2>&1)"
 echo "${out}" | grep -q "would move 1 closed sprint" || { echo "AC2.7 dry-run FAIL"; echo "${out}"; exit 1; }
 
 # Verify race lock — second concurrent invocation must graceful-exit (exit 0, no error).
+#
+# 0.6.7 hotfix: the prior version of this test wrote `$$` into
+# `.archive-sync.lock` and assumed the script's PID-content advisory check
+# would detect it. But the script uses flock(1) when available (= almost
+# always on Linux) and never reads the lock file's contents in that path,
+# so the second invocation acquired its own flock cleanly and printed the
+# dry-run summary instead of "graceful exit". The fix exercises both
+# branches of the script's `acquire_lock`:
+#   - flock available → take a real exclusive flock in this shell (fd 8)
+#                       for the duration of the second invocation
+#   - flock missing   → fall back to PID-content lock (the previous behavior)
 mkdir -p .sfs-local
-echo "$$" > .sfs-local/.archive-sync.lock
-out2="$(bash "${SCRIPT}" --root . --dry-run 2>&1 || true)"
+if command -v flock >/dev/null 2>&1; then
+  exec 8>.sfs-local/.archive-sync.lock
+  flock -n 8 || { echo "AC2.7 setup FAIL — could not acquire test flock on .archive-sync.lock"; exit 1; }
+  out2="$(bash "${SCRIPT}" --root . --dry-run 2>&1 || true)"
+  flock -u 8
+  exec 8>&-
+  rm -f .sfs-local/.archive-sync.lock
+else
+  echo "$$" > .sfs-local/.archive-sync.lock
+  out2="$(bash "${SCRIPT}" --root . --dry-run 2>&1 || true)"
+  rm -f .sfs-local/.archive-sync.lock
+fi
 echo "${out2}" | grep -qE "(graceful exit|holds (flock|advisory lock))" || {
-  # If our PID-based lock check sees our own PID alive, second call should bail.
-  # Fallback: this verifies the script at least handles the lock file presence path.
   echo "AC2.7 race-lock 경로 mismatch:"; echo "${out2}"; exit 1
 }
-rm -f .sfs-local/.archive-sync.lock
 
 echo "test-sfs-archive-branch-sync: OK"

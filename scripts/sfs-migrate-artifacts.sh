@@ -98,11 +98,19 @@ EOF
 # ─── helpers ─────────────────────────────────────────────────────────────────
 
 sha256_of() {
+  # 0.6.7 hotfix: feed the file via stdin so the filename never reaches
+  # sha256sum's output formatter. GNU coreutils sha256sum (and shasum on some
+  # BSDs) prefixes the hash with `\` and double-escapes backslashes in the
+  # filename whenever the filename contains `\` or newlines, e.g.
+  #   sha256sum 'back\slash.md'  →  \<hash>  back\\slash.md
+  # The previous `sha256sum "${f}" | awk '{print $1}'` then captured `\<hash>`
+  # instead of `<hash>`, breaking verify_no_data_loss for any path containing
+  # `\`. Regression-guarded by tests/test-sfs-migrate-quoted-paths.sh.
   local f="$1"
   if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum "${f}" | awk '{print $1}'
+    sha256sum < "${f}" | awk '{print $1}'
   elif command -v shasum >/dev/null 2>&1; then
-    shasum -a 256 "${f}" | awk '{print $1}'
+    shasum -a 256 < "${f}" | awk '{print $1}'
   else
     echo "${SCRIPT_NAME}: no sha256sum/shasum available" >&2
     return 1

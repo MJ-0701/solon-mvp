@@ -1,0 +1,38 @@
+# .gitattributes — AC12 cross-platform SHA256 parity + LF normalization.
+#
+# Required by tests/test-hash-parity.sh. Without this file, every text file's
+# checksum becomes platform-dependent (CRLF on Windows checkouts, LF on
+# Unix), breaking any sha256-based release verification. Hard-pin LF for all
+# repo source / config / docs so checkouts are byte-identical across OSes.
+#
+# Restored in 0.6.7 hotfix — was missing from the stable mirror, causing
+# test-hash-parity.sh to fail on every CI run since 0.6.4 (visible as
+# `AC12 FAIL: .gitattributes missing`).
+
+# Source / config / data — explicit LF.
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.md     text eol=lf
+*.jsonl  text eol=lf
+*.json   text eol=lf
+*.toml   text eol=lf
+*.txt    text eol=lf
+
+# Shell / Ruby — LF (Unix-native).
+*.sh     text eol=lf
+*.rb     text eol=lf
+*.bash   text eol=lf
+
+# PowerShell — keep CRLF as the platform expects.
+*.ps1    text eol=crlf
+
+# Common binary types — don't normalize.
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.tar    binary
+*.tar.gz binary
+*.tgz    binary
+*.zip    binary
