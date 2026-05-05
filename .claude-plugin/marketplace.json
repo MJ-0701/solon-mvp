@@ -2,7 +2,7 @@
   "$schema": "https://anthropic.com/claude-code/marketplace.json",
   "name": "solon",
   "description": "Solon Product — solo founder's AI-native sprint flow system (SFS). Provides slash command discovery for Claude Code via the `solon` plugin. Companion `gemini-extension.json` (Gemini CLI) and Codex CLI skill (~/.codex/skills/sfs/) share the same `sfs` CLI surface.",
-  "version": "0.5.96-product",
+  "version": "0.6.8",
   "owner": {
     "name": "MJ-0701"
   },
@@ -11,7 +11,7 @@
       "name": "solon",
       "description": "Solon SFS slash command for Claude Code — routes `/sfs <command>` to the globally installed `sfs` binary (Homebrew/Scoop), falling back to project-vendored `bash .sfs-local/scripts/sfs-dispatch.sh` when needed.",
       "source": "./plugins/solon",
-      "version": "0.5.96",
+      "version": "0.6.8",
       "author": {
         "name": "MJ-0701"
       },

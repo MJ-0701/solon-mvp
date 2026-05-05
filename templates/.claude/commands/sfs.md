@@ -16,7 +16,7 @@ $ARGUMENTS
 2. Run `sfs <command> <args>`; vendored fallback:
    `bash .sfs-local/scripts/sfs-dispatch.sh <command> <args>`.
 3. Print stdout verbatim; on failure include stderr and exit code.
-4. Read `sfs context path kernel`, `sfs context path index`, then only the routed module via `sfs context path ...`.
+4. Read `sfs context path kernel`, `sfs context path index`, then only the routed module. Resolve command modules as `sfs context path commands/<command>.md` (for example, `commands/start.md`) or via the command alias (`sfs context path start`).
 5. For bash-first commands, do not refine artifacts, but a compact state/Next is allowed.
 6. For `profile`, edit only the `SFS.md` project overview section.
 7. For hybrid commands, refine pointed artifacts and answer with one Solon report.

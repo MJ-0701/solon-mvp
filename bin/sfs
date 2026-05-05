@@ -198,8 +198,8 @@ EOF
 context_usage() {
   cat <<'EOF'
 Usage:
-  sfs context path <kernel|index|commands/name.md|policies/name.md>
-  sfs context cat  <kernel|index|commands/name.md|policies/name.md>
+  sfs context path <kernel|index|command|commands/name[.md]|policies/name[.md]>
+  sfs context cat  <kernel|index|command|commands/name[.md]|policies/name[.md]>
 
 Read-only helper for agent adapters. In thin layout the managed context lives in
 the packaged global runtime; project-local .sfs-local/context files are optional
@@ -208,11 +208,33 @@ EOF
 }
 
 context_resolve_rel() {
-  local key="${1:-}"
+  local key="${1:-}" candidate
   case "${key}" in
     kernel) printf '%s\n' "kernel.md" ;;
     index|_INDEX.md) printf '%s\n' "_INDEX.md" ;;
     commands/*.md|policies/*.md) printf '%s\n' "${key}" ;;
+    commands/*)
+      candidate="${key}.md"
+      if [[ -f "$(project_local_dir)/context/${candidate}" || -f "${RUNTIME_DIR}/context/${candidate}" ]]; then
+        printf '%s\n' "${candidate}"
+      else
+        echo "unknown context key: ${key}" >&2
+        return 1
+      fi
+      ;;
+    policies/*)
+      candidate="${key}.md"
+      if [[ -f "$(project_local_dir)/context/${candidate}" || -f "${RUNTIME_DIR}/context/${candidate}" ]]; then
+        printf '%s\n' "${candidate}"
+      else
+        echo "unknown context key: ${key}" >&2
+        return 1
+      fi
+      ;;
+    start|intake|sprint) printf '%s\n' "commands/start.md" ;;
+    brainstorm|plan|implement|review|release|upgrade|profile|loop|tidy)
+      printf '%s\n' "commands/${key}.md"
+      ;;
     *)
       echo "unknown context key: ${key}" >&2
       return 1
