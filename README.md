@@ -209,7 +209,7 @@ runtime 별 호출 표기:
 | 30분 가이드 | [KO](./GUIDE.md) | [EN](./docs/en/guide.md) |
 | 초보자 가이드 | [KO](./BEGINNER-GUIDE.md) | 예정 |
 | 릴리스 노트 | [RELEASE-NOTES.md](./RELEASE-NOTES.md) | 예정 |
-| 상세 changelog | [CHANGELOG.md](./CHANGELOG.md) | [CHANGELOG.md](./CHANGELOG.md) |
+| 상세 변경 이력(archive) | [CHANGELOG.md](./CHANGELOG.md) | [CHANGELOG.md](./CHANGELOG.md) |
 
 ---
 
