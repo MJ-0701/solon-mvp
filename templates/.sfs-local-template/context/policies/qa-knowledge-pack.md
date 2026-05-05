@@ -9,15 +9,15 @@ load_when:
   - release confidence
   - defect
   - acceptance criteria
-status: seed-inventory
-content_policy: "topic/proposition only; do not expand into full guidance until a dedicated fill sprint"
+status: filled-v1
+content_policy: "compact operating guidance; apply only matching ids and keep QA depth proportional to blast radius"
 ---
 
 # QA Knowledge Pack Inventory
 
-This file is a topic/proposition inventory, not the filled knowledge base.
-Use it to decide which QA concepts are active for a sprint, review, or release.
-Record ids only unless the user asks for fill work.
+This file is a compact filled guidance pack for QA work. Use it to decide the
+right confidence evidence for a sprint, review, or release. Apply only the
+matching ids and keep the verification surface proportional to blast radius.
 
 ## Activation Rules
 
@@ -69,7 +69,73 @@ Record ids only unless the user asks for fill work.
 - QA-TX-004: Restartability and recovery tests must cover partial progress, duplicate delivery, and idempotency of effects.
 - QA-TX-005: Test data sets must include concurrent writes, lock contention, and rollback/retry interactions.
 
-## QA-GAP - Fill Slots For Later
+## QA-FILL - Operating Guidance
+
+### QA-FILL-AC - Evidence Mapping
+
+- Map each acceptance criterion to one evidence method: automated test, smoke
+  command, manual walkthrough, screenshot, fixture diff, log assertion, or
+  release verifier.
+- If an AC cannot be verified, rewrite the AC or record it as a product
+  judgment, not a test result.
+- Evidence belongs to the commit or artifact under review. Stale green checks
+  are not release confidence.
+
+### QA-FILL-RISK - Regression Selection
+
+- Start from changed behavior, then inspect adjacent contracts: public command,
+  file path, persisted data, API/event shape, user docs, install/update path,
+  and operator workflow.
+- Small docs changes need link/path/wording consistency checks. Small release
+  tooling changes need clean install/upgrade smoke, not just syntax.
+- High-risk domains such as money, PII, auth, partner state, migration, batch,
+  or public release artifacts require negative and recovery checks.
+
+### QA-FILL-CONTRACT - External And Cross-Boundary Checks
+
+- API/event/CLI contracts need compatibility checks for required fields, unknown
+  fields, versioning, errors, retry, and idempotency.
+- Contract tests are mandatory when another team, partner, runtime, package
+  manager, or automation consumes the surface.
+- If formal contract tooling is unavailable, record sample payloads, command
+  examples, expected outputs, and failure examples.
+
+### QA-FILL-STATE - Data, Batch, And Migration
+
+- Migration and backfill evidence should include before/after counts, sampled
+  record checks, idempotent rerun, reject list, rollback, and audit trail.
+- Batch QA needs restart, retry, skip, duplicate, partial progress, and limit
+  boundary scenarios.
+- Transactional semantics require real integration evidence when cache,
+  propagation, locking, flush, or commit timing matters.
+
+### QA-FILL-RELEASE - Confidence Report
+
+- A release confidence note should list what was tested, what was not tested,
+  why the untested risk is acceptable, rollback/fallback, and the artifact
+  identity.
+- Manual verification is acceptable when it is reproducible enough for a second
+  evaluator.
+- Flaky or environment-dependent checks must be labeled and either fixed,
+  quarantined, or excluded with a reason.
+
+## QA-REVIEW - Review Questions
+
+- Does every AC have current evidence?
+- Which adjacent behavior could regress even if the direct path works?
+- Did we test at least one negative path for each high-risk surface?
+- Can this verification be repeated by another agent or human?
+- What risk remains, and who accepted it?
+
+## QA-EVIDENCE - Suggested Evidence
+
+- AC-to-evidence matrix.
+- Test/smoke command output with commit/artifact identity.
+- Fixture samples for boundary and negative cases.
+- Manual walkthrough notes with exact path and expected observation.
+- Release confidence note with residual risk and rollback.
+
+## QA-GAP - Deepening Slots
 
 - QA-GAP-001: QA evidence matrix by artifact type.
 - QA-GAP-002: Regression selection heuristics for AI-generated changes.

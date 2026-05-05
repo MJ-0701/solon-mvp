@@ -92,6 +92,8 @@ In Solon, implementation artifacts include code, but also:
 - QA evidence
 - ops/runbooks
 - release packaging
+- management/admin evidence: invoices, receipts, cashflow, tax/accounting
+  questions, monthly close notes
 
 In the AI coding era, treating implementation as only code makes the workflow
 too narrow. Solon reviews the actual artifact that moved the product forward.
@@ -110,10 +112,26 @@ infers the right lens from sprint evidence and changed artifacts.
 | `taxonomy` | terms, categories, naming boundaries |
 | `qa` | coverage, smoke evidence, reproduction, residual risk |
 | `ops` | runbook, deployment, rollback, observability |
+| `management-admin` | finance records, bookkeeping, tax/accounting questions, cash evidence |
 | `release` | version, changelog, package channel, verification |
 
 The user can keep saying `sfs review`. `--lens` is only an override when the
 inference is wrong.
+
+## Division Knowledge Packs
+
+As of 0.6.1, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
+management/admin, and taxonomy packs are no longer placeholders. Each pack gives
+Solon a compact sense of what to watch, what to ask, and what evidence should
+count for that kind of work.
+
+The user should not need to memorize this list. Solon reads only the lens that
+fits the work. A small docs edit stays light. A release, architecture change, or
+risky workflow gets stronger questions and evidence checks. The criteria become
+richer while the user-facing surface stays simple.
+Taxonomy stays as a cross-cutting language/classification lens rather than a
+business department. Finance, bookkeeping, tax, and accounting live under the
+management/admin lens.
 
 ## Retro Closes The Sprint By Default
 

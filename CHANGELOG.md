@@ -1,3 +1,30 @@
+## [0.6.1] - 2026-05-05
+
+### Changed
+
+- **Knowledge packs filled beyond seed inventory** — official division packs for
+  backend, strategy/PM, QA, design/frontend, infra/DevOps, management/admin, and
+  taxonomy now provide compact operating guidance, review questions, and
+  evidence patterns in both English and Korean. The router and Gate 3/4/6
+  command context now describe the packs as scoped guidance, not placeholder
+  inventories.
+- **Management/admin pack added for solo-founder finance work** — new
+  `management-admin-knowledge-pack` covers finance, bookkeeping, tax,
+  accounting, invoices, cashflow, payroll/contractor payments, compliance
+  evidence, AI-safe financial data boundaries, and advisor escalation.
+- **User-facing docs refreshed for 0.6.1** — README, guides, product-shape docs,
+  and release notes now describe knowledge packs as practical guidance loaded
+  only when relevant, while keeping release notes separate from README.
+
+### Verified
+
+- Pre-release verification passed: placeholder scan found no seed-inventory
+  leftovers, active/template context mirror check passed, `git diff --check`
+  passed, `sfs doctor` reported pass 7 / warn 0 / fail 0, and
+  `tests/run-all.sh` reported 30/30 PASS.
+- Package-channel verification is performed after the Homebrew/Scoop cut so the
+  installed runtime can be checked against the published `v0.6.1` tag.
+
 ## [0.6.0] - 2026-05-04
 
 > **Version naming hard cut: from 0.6.0 onwards no `-product` suffix. Historical 0.5.x-product tags preserved.**

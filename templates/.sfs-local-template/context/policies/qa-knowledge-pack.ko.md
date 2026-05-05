@@ -10,15 +10,15 @@ load_when:
   - release confidence
   - defect
   - acceptance criteria
-status: seed-inventory
-content_policy: "topic/proposition only; do not expand into full guidance until a dedicated fill sprint"
+status: filled-v1
+content_policy: "compact operating guidance; apply only matching ids and keep QA depth proportional to blast radius"
 ---
 
 # QA Knowledge Pack Inventory
 
-This file is a topic/proposition inventory, not the filled knowledge base.
-Use it to decide which QA concepts are active for a sprint, review, or release.
-Record ids only unless the user asks for fill work.
+이 파일은 QA 작업을 위한 compact filled guidance pack 이다. sprint, review,
+release 에서 필요한 confidence evidence 를 고르고, matching id 만 blast radius 에
+비례해서 적용한다.
 
 ## Activation Rules
 
@@ -70,7 +70,66 @@ Record ids only unless the user asks for fill work.
 - QA-TX-004: Restartability and recovery tests must cover partial progress, duplicate delivery, and idempotency of effects.
 - QA-TX-005: Test data sets must include concurrent writes, lock contention, and rollback/retry interactions.
 
-## QA-GAP - Fill Slots For Later
+## QA-FILL - Operating Guidance
+
+### QA-FILL-AC - Evidence Mapping
+
+- 각 AC 를 하나의 evidence method 에 연결한다: automated test, smoke command,
+  manual walkthrough, screenshot, fixture diff, log assertion, release verifier.
+- 검증할 수 없는 AC 는 AC 를 다시 쓰거나 product judgment 로 기록한다. test result 로 위장하지 않는다.
+- evidence 는 review 대상 commit/artifact 에 묶여야 한다. 오래된 green check 는 release confidence 가 아니다.
+
+### QA-FILL-RISK - Regression Selection
+
+- changed behavior 에서 시작하고 adjacent contract 를 본다: public command,
+  file path, persisted data, API/event shape, user docs, install/update path,
+  operator workflow.
+- 작은 docs 변경은 link/path/wording consistency check 가 필요하다. 작은 release
+  tooling 변경은 syntax 만이 아니라 clean install/upgrade smoke 가 필요하다.
+- money, PII, auth, partner state, migration, batch, public release artifact 는
+  negative/recovery check 를 요구한다.
+
+### QA-FILL-CONTRACT - External And Cross-Boundary Checks
+
+- API/event/CLI contract 는 required fields, unknown fields, versioning,
+  errors, retry, idempotency compatibility 를 확인한다.
+- 다른 team, partner, runtime, package manager, automation 이 소비하는 surface 는
+  contract test 가 활성화된다.
+- formal contract tooling 이 없으면 sample payload, command example,
+  expected output, failure example 을 기록한다.
+
+### QA-FILL-STATE - Data, Batch, And Migration
+
+- migration/backfill evidence 는 before/after count, sampled record check,
+  idempotent rerun, reject list, rollback, audit trail 을 포함한다.
+- batch QA 는 restart, retry, skip, duplicate, partial progress, limit boundary scenario 를 본다.
+- cache, propagation, locking, flush, commit timing 이 중요하면 transactional semantics 는
+  real integration evidence 가 필요하다.
+
+### QA-FILL-RELEASE - Confidence Report
+
+- release confidence note 는 tested, not tested, untested risk 수용 이유,
+  rollback/fallback, artifact identity 를 적는다.
+- manual verification 은 두 번째 evaluator 가 반복할 수 있으면 허용된다.
+- flaky/environment-dependent check 는 고치거나 quarantine 하거나 제외 이유를 기록한다.
+
+## QA-REVIEW - Review Questions
+
+- 모든 AC 에 최신 evidence 가 있는가?
+- direct path 가 동작해도 adjacent behavior 중 회귀할 수 있는 것은 무엇인가?
+- high-risk surface 별 negative path 를 최소 하나 확인했는가?
+- 다른 agent/human 이 이 검증을 반복할 수 있는가?
+- 남는 risk 는 무엇이고 누가 수용했는가?
+
+## QA-EVIDENCE - Suggested Evidence
+
+- AC-to-evidence matrix.
+- commit/artifact identity 가 붙은 test/smoke command output.
+- boundary/negative case fixture sample.
+- exact path 와 expected observation 이 있는 manual walkthrough note.
+- residual risk 와 rollback 을 포함한 release confidence note.
+
+## QA-GAP - Deepening Slots
 
 - QA-GAP-001: QA evidence matrix by artifact type.
 - QA-GAP-002: Regression selection heuristics for AI-generated changes.

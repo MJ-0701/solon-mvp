@@ -28,10 +28,11 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
 - If backend/JVM/Spring/JPA/transaction/batch/integration/DevOps/AWS risk is in
   scope, record matching ids from `policies/backend-knowledge-pack.md` or
   `policies/backend-knowledge-pack.ko.md` only after router selection.
-- If strategy-pm, QA, design/frontend, infra, or taxonomy signals are in scope,
-  record matching ids from the matching `policies/*-knowledge-pack.md` or
-  `policies/*-knowledge-pack.ko.md` only after router selection. These packs are
-  activation routers, not full guidance.
+- If strategy-pm, QA, design/frontend, infra, management-admin, or taxonomy
+  signals are in scope, record matching ids from the matching
+  `policies/*-knowledge-pack.md` or `policies/*-knowledge-pack.ko.md` only after
+  router selection. Apply only the compact guidance for matching ids; do not
+  promote every pack into a blocker.
 - Use the backend pack as a scale router: first MVP gets minimal guardrails;
   money, PII, partner state, batch, MQ, or production exposure increases depth.
 - Do not run implementation automatically from Gate 3. If the contract is ready,

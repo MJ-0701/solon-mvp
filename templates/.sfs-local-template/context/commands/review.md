@@ -13,8 +13,8 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   internal id.
 - The generator does not self-approve its own implementation.
 - `sfs review` is an artifact acceptance review. Code review is only the
-  `code` lens; docs, strategy, design, taxonomy, QA, ops, release, and generic
-  artifacts use their own acceptance lens.
+  `code` lens; docs, strategy, design, taxonomy, QA, ops, management-admin,
+  release, and generic artifacts use their own acceptance lens.
 - Review scope is functional correctness + consistency only. Functional means
   the artifact delivers the declared behaviour (plan / Sprint Contract / AC).
   Consistency means cross-document SSoT (plan ↔ implement ↔ tests ↔ frontmatter)
@@ -39,9 +39,10 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   `policies/backend-knowledge-pack.ko.md`.
   Flag both missing high-risk topics and over-activated topics for the project
   size.
-- For strategy-pm, QA, design/frontend, infra, or taxonomy work, read the
-  matching `policies/*-knowledge-pack.md` or `policies/*-knowledge-pack.ko.md`
-  file and check only the matching ids.
+- For strategy-pm, QA, design/frontend, infra, management-admin, or taxonomy
+  work, read the matching `policies/*-knowledge-pack.md` or
+  `policies/*-knowledge-pack.ko.md` file and check only the matching ids and
+  compact guidance.
   Flag both missing high-risk division topics and over-activated topics.
 - Surface the evaluator's next action. Pass should move toward report/retro;
   partial should name the smallest rework slice; fail should return to plan,

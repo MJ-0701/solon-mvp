@@ -23,5 +23,5 @@ module:
 - `policies/token-harness.md` — token/context hygiene, semantic search, repeated mistake guardrails.
 - `policies/knowledge-pack-router.md` — division activation router (English).
 - `policies/knowledge-pack-router.ko.md` — division activation router (Korean).
-- `policies/*-knowledge-pack.md` — English seed inventories for each division.
-- `policies/*-knowledge-pack.ko.md` — Korean seed inventories for each division.
+- `policies/*-knowledge-pack.md` — English compact guidance packs for each division.
+- `policies/*-knowledge-pack.ko.md` — Korean compact guidance packs for each division.

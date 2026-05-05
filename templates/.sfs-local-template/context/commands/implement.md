@@ -8,7 +8,8 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 
 - Do not stop at artifact creation: execute the requested slice and record evidence.
 - Valid artifacts: code, taxonomy, design handoff, QA evidence, infra/runbook,
-  decisions, docs, workflow, research, or user-facing operating material.
+  management/admin evidence, decisions, docs, workflow, research, or
+  user-facing operating material.
 - If intent is not shared, ask 1-3 precise questions before changing files.
 - Use project/domain terms consistently; add or reuse a small glossary when terms drift.
 - Move only as fast as feedback: test, smoke, preview, or review the smallest useful slice.
@@ -23,16 +24,18 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - If backend/JVM/Spring/JPA/transaction/batch/integration/DevOps/AWS work is in
   scope, read `policies/backend-knowledge-pack.md` **or**
   `policies/backend-knowledge-pack.ko.md` **only** after router selection.
-- If strategy-pm, QA, design/frontend, infra, or taxonomy work is in scope,
-  read the matching `policies/*-knowledge-pack.md` or
+- If strategy-pm, QA, design/frontend, infra, management-admin, or taxonomy work
+  is in scope, read the matching `policies/*-knowledge-pack.md` or
   `policies/*-knowledge-pack.ko.md` only after router selection.
-  Do not fill the knowledge content during ordinary implementation.
+  Apply the compact guidance for matching ids only; ordinary implementation
+  should not broaden itself into a knowledge-pack deepening task.
 - Backend architecture ladder: clean layered monolith for MVP/small projects;
   CQRS for non-initial backend work even with one DB; propose Hexagonal
   transition when domain seams grow; propose MSA only when independent deploy,
   scale, ownership, resilience, or blast-radius needs justify it. Refactor only
   after user acceptance/approval and record the evidence.
-- Non-Dev policy ladders: strategy-pm, taxonomy, design/frontend, QA, and infra
-  start lightweight, strengthen when trigger evidence appears, and require user
-  acceptance/approval before large roadmap, rename/schema, redesign,
-  release-readiness, or infra/ops transitions.
+- Non-Dev policy ladders: strategy-pm, taxonomy, design/frontend, QA, infra, and
+  management-admin start lightweight, strengthen when trigger evidence appears,
+  and require user acceptance/approval before large roadmap, rename/schema,
+  redesign, release-readiness, finance/admin process, tax/accounting advisor
+  checkpoint, or infra/ops transitions.

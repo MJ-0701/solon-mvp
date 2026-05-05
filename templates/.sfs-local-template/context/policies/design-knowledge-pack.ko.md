@@ -11,15 +11,15 @@ load_when:
   - responsive
   - design system
   - operator screen
-status: seed-inventory
-content_policy: "topic/proposition only; do not expand into full guidance until a dedicated fill sprint"
+status: filled-v1
+content_policy: "compact operating guidance; apply only matching ids and keep design depth proportional to visible workflow risk"
 ---
 
 # Design/Frontend Knowledge Pack Inventory
 
-This file is a topic/proposition inventory, not the filled knowledge base.
-Use it to decide which design/frontend concepts are active for a sprint, review,
-or release. Record ids only unless the user asks for fill work.
+이 파일은 design/frontend 작업을 위한 compact filled guidance pack 이다. sprint,
+review, release 에서 workflow, layout, state, accessibility, copy check 중 무엇이
+활성화되는지 판단하고 matching id 만 적용한다.
 
 ## Activation Rules
 
@@ -61,7 +61,66 @@ or release. Record ids only unless the user asks for fill work.
 - DES-PROP-017: Mobile constraints must be checked for touch targets, wrapping, overflow, and hierarchy.
 - DES-PROP-018: User-facing language must avoid explaining implementation details inside the app.
 
-## DES-GAP - Fill Slots For Later
+## DES-FILL - Operating Guidance
+
+### DES-FILL-TASK - Primary Workflow
+
+- surface 를 만들기 전에 primary task 를 식별한다. 첫 relevant screen 에서 target
+  user 가 product doc 을 읽지 않고 task 를 시작하거나 이어갈 수 있어야 한다.
+- operational tool 은 scan, compare, decide, repeat 를 우선한다. 사용자가 work
+  surface 를 필요로 할 때 marketing-page composition 을 만들지 않는다.
+- empty, loading, error, partial, success state 에서도 user's next action 이 보여야 한다.
+
+### DES-FILL-LAYOUT - Information Architecture
+
+- layout 은 frequency 와 consequence 를 반영한다. 자주 쓰는 action 은 가까이,
+  destructive/rare action 은 guard 하고 덜 prominent 하게 둔다.
+- dense list 는 stable table/grid behavior 가 필요하다: sorting, filtering,
+  pagination 또는 virtualization, selection, bulk action policy, column visibility.
+- navigation 은 context 를 보존한다. detail 에서 list 로 돌아왔을 때 filter, scroll,
+  selected item, current task state 가 사라지면 안 된다.
+
+### DES-FILL-CONTROLS - Interaction And Forms
+
+- 익숙한 control 을 쓴다: command 는 button, binary state 는 toggle, option set 은
+  menu, peer view 는 tabs, value 는 input/slider/stepper, compact tool action 은 tooltip 있는 icon.
+- form 은 validation timing, field-level error placement, 필요 시 summary,
+  recovery path, unsaved-change behavior, disabled-state rationale 을 가져야 한다.
+- destructive action 은 permission, confirmation, consequence preview, state 가 중요할 때 audit trail 이 필요하다.
+
+### DES-FILL-RESPONSIVE - Fit And Accessibility
+
+- text 는 mobile/desktop 에서 parent 안에 들어가야 한다. viewport-scaled typography 보다
+  wrapping, stable constraints, content-aware sizing 을 선호한다.
+- accessibility 는 keyboard path, focus order, visible focus, label association,
+  contrast, reduced-motion tolerance, icon-only control 의 screen-reader name 을 포함한다.
+- responsive QA 는 smallest supported viewport, common desktop width,
+  long localized strings, empty/overflow data, modal/toolbar collision 을 확인한다.
+
+### DES-FILL-COPY - Domain Language And UX Writing
+
+- UI copy 는 canonical taxonomy term 을 쓰되, 필요한 경우 internal object name 보다 친절하게 표현한다.
+- 사용자가 행동해야 하는 정보가 아니라면 app 안에서 implementation mechanics 를 설명하지 않는다.
+- error copy 는 무슨 일이 있었는지, data 가 저장됐는지, 다음에 무엇을 할 수 있는지,
+  support/operator action 이 필요한지를 말해야 한다.
+
+## DES-REVIEW - Review Questions
+
+- target user 가 첫 relevant screen 에서 primary task 를 완료할 수 있는가?
+- happy path 말고 중요한 state 들이 설계되어 있는가?
+- layout 이 반복 작업을 방해하지 않는가?
+- 긴 label, mobile width, empty/error state 에서도 fit 이 유지되는가?
+- copy 가 canonical domain language 를 보존하는가?
+
+## DES-EVIDENCE - Suggested Evidence
+
+- desktop/mobile screenshot 또는 browser capture.
+- state matrix: empty/loading/error/partial/success/disabled.
+- interactive surface 의 keyboard/focus/contrast note.
+- taxonomy pack 기준 copy/terminology spot-check.
+- entry, decision, recovery, completion 을 담은 workflow note.
+
+## DES-GAP - Deepening Slots
 
 - DES-GAP-001: Operational-tool layout patterns.
 - DES-GAP-002: Admin/CS timeline and reconciliation UX.

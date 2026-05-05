@@ -11,15 +11,15 @@ load_when:
   - observability
   - rollback
   - cost
-status: seed-inventory
-content_policy: "topic/proposition only; do not expand into full guidance until a dedicated fill sprint"
+status: filled-v1
+content_policy: "compact operating guidance; apply only matching ids and keep infra depth proportional to runtime exposure"
 ---
 
 # Infra/DevOps Knowledge Pack Inventory
 
-This file is a topic/proposition inventory, not the filled knowledge base.
-Use it to decide which infra/DevOps concepts are active for a sprint, review,
-or release. Record ids only unless the user asks for fill work.
+This file is a compact filled guidance pack for infra/DevOps work. Use it to
+decide which deployment, secrets, observability, cloud, cost, and release
+checks are active for a sprint, review, or release. Apply only the matching ids.
 
 ## Activation Rules
 
@@ -75,7 +75,70 @@ or release. Record ids only unless the user asks for fill work.
 - INF-AWS-009: RDS/Aurora and cache metrics are part of operational SLO evidence before production.
 - INF-AWS-010: AWS service costs and scaling economics are part of release-readiness checks.
 
-## INF-GAP - Fill Slots For Later
+## INF-FILL - Operating Guidance
+
+### INF-FILL-ENV - Environment And Config
+
+- Runtime config needs a source of truth, owner, allowed environments, default
+  behavior, and drift detection path.
+- Secrets must not live in repo, logs, screenshots, command history, or sample
+  config. Document where they are stored, who can rotate them, and how a leaked
+  secret is revoked.
+- Environment parity should name what differs intentionally across local, dev,
+  stage, and prod.
+
+### INF-FILL-DEPLOY - CI/CD And Rollback
+
+- Build once, deploy the same artifact. If the release process rebuilds per
+  environment, record why and how equivalence is checked.
+- Deployment strategy should define health check, readiness, drain, partial
+  failure behavior, rollback trigger, and manual stop command.
+- Release tooling must verify package metadata, installed version, upgrade
+  path, and clean handoff state when packages are user-facing.
+
+### INF-FILL-OBS - Observability And Incident Response
+
+- Logs, metrics, traces, and domain counters should answer: what failed, who is
+  affected, whether data is safe, and what operator action is next.
+- Alerts need severity, threshold, owner, runbook, and noise policy.
+- Incident response should include mitigation, communication, escalation,
+  recovery validation, and retro/postmortem hook.
+
+### INF-FILL-DATA - Backup, Migration, And Recovery
+
+- Backup is incomplete until restore is tested. Record restore target,
+  frequency, retention, RPO/RTO, and last drill evidence when production data
+  is in scope.
+- Migration/backfill work needs dry-run, snapshot or backup, idempotent rerun,
+  rollback path, and audit trail.
+- Long-running jobs need resume/retry policy and interrupted-run cleanup.
+
+### INF-FILL-COST - Capacity And Cost
+
+- Capacity review starts with traffic/load shape, concurrency, bottleneck
+  hypothesis, limits, and safety margin.
+- Cost review needs budget owner, cost units, tag strategy, expected scaling
+  driver, and alert threshold.
+- Do not activate Kubernetes, service mesh, or complex IaC until runtime
+  ownership and repeatability needs justify the added system.
+
+## INF-REVIEW - Review Questions
+
+- What is the deployed artifact, and can it be traced to source?
+- Can we roll back or stop safely if the release partially fails?
+- Where are secrets stored and how are they rotated?
+- Would an operator know what happened from logs/metrics/alerts?
+- What cost or capacity assumption would break first?
+
+## INF-EVIDENCE - Suggested Evidence
+
+- CI/release command output tied to commit or tag.
+- Installed-version, upgrade, rollback, or package-manager smoke result.
+- Config/secrets matrix without secret values.
+- Health check, alert, and runbook notes.
+- Backup/restore or migration dry-run evidence when data is in scope.
+
+## INF-GAP - Deepening Slots
 
 - INF-GAP-001: MVP-to-production infra ladder.
 - INF-GAP-002: Cloud resource review by AWS service.

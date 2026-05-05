@@ -12,15 +12,15 @@ load_when:
   - observability
   - rollback
   - cost
-status: seed-inventory
-content_policy: "topic/proposition only; do not expand into full guidance until a dedicated fill sprint"
+status: filled-v1
+content_policy: "compact operating guidance; apply only matching ids and keep infra depth proportional to runtime exposure"
 ---
 
 # Infra/DevOps Knowledge Pack Inventory
 
-This file is a topic/proposition inventory, not the filled knowledge base.
-Use it to decide which infra/DevOps concepts are active for a sprint, review,
-or release. Record ids only unless the user asks for fill work.
+이 파일은 infra/DevOps 작업을 위한 compact filled guidance pack 이다. sprint,
+review, release 에서 deployment, secrets, observability, cloud, cost, release
+check 중 무엇이 활성화되는지 판단하고 matching id 만 적용한다.
 
 ## Activation Rules
 
@@ -76,7 +76,67 @@ or release. Record ids only unless the user asks for fill work.
 - INF-AWS-009: RDS/Aurora and cache metrics are part of operational SLO evidence before production.
 - INF-AWS-010: AWS service costs and scaling economics are part of release-readiness checks.
 
-## INF-GAP - Fill Slots For Later
+## INF-FILL - Operating Guidance
+
+### INF-FILL-ENV - Environment And Config
+
+- runtime config 는 source of truth, owner, allowed environments, default
+  behavior, drift detection path 를 가져야 한다.
+- secrets 는 repo, log, screenshot, command history, sample config 에 있으면 안 된다.
+  저장 위치, rotation owner, leak 시 revoke 방법을 기록한다.
+- environment parity 는 local/dev/stage/prod 사이에서 의도적으로 다른 점을 명명한다.
+
+### INF-FILL-DEPLOY - CI/CD And Rollback
+
+- 한 번 build 한 artifact 를 동일하게 deploy 한다. environment 별 rebuild 를 한다면
+  이유와 equivalence check 를 기록한다.
+- deployment strategy 는 health check, readiness, drain, partial failure behavior,
+  rollback trigger, manual stop command 를 정의한다.
+- user-facing package 라면 release tooling 은 package metadata, installed version,
+  upgrade path, clean handoff state 를 검증해야 한다.
+
+### INF-FILL-OBS - Observability And Incident Response
+
+- logs, metrics, traces, domain counters 는 무엇이 실패했는지, 누가 영향받는지,
+  data 가 안전한지, operator next action 이 무엇인지 답해야 한다.
+- alert 는 severity, threshold, owner, runbook, noise policy 를 가진다.
+- incident response 는 mitigation, communication, escalation, recovery validation,
+  retro/postmortem hook 을 포함한다.
+
+### INF-FILL-DATA - Backup, Migration, And Recovery
+
+- restore 를 테스트하기 전까지 backup 은 완료가 아니다. production data 가 scope 이면
+  restore target, frequency, retention, RPO/RTO, last drill evidence 를 기록한다.
+- migration/backfill 은 dry-run, snapshot 또는 backup, idempotent rerun,
+  rollback path, audit trail 이 필요하다.
+- long-running job 은 resume/retry policy 와 interrupted-run cleanup 을 가져야 한다.
+
+### INF-FILL-COST - Capacity And Cost
+
+- capacity review 는 traffic/load shape, concurrency, bottleneck hypothesis,
+  limits, safety margin 에서 시작한다.
+- cost review 는 budget owner, cost units, tag strategy, expected scaling driver,
+  alert threshold 를 가진다.
+- Kubernetes, service mesh, complex IaC 는 runtime ownership 과 repeatability 요구가
+  증명될 때 활성화한다.
+
+## INF-REVIEW - Review Questions
+
+- deployed artifact 는 무엇이며 source 와 trace 되는가?
+- release 가 부분 실패해도 rollback/stop 을 안전하게 할 수 있는가?
+- secret 은 어디 저장되고 어떻게 rotate 되는가?
+- operator 가 logs/metrics/alerts 만 보고 상황을 이해할 수 있는가?
+- 어떤 cost/capacity assumption 이 가장 먼저 깨질 수 있는가?
+
+## INF-EVIDENCE - Suggested Evidence
+
+- commit/tag 와 연결된 CI/release command output.
+- installed-version, upgrade, rollback, package-manager smoke result.
+- secret value 없는 config/secrets matrix.
+- health check, alert, runbook note.
+- data scope 일 때 backup/restore 또는 migration dry-run evidence.
+
+## INF-GAP - Deepening Slots
 
 - INF-GAP-001: MVP-to-production infra ladder.
 - INF-GAP-002: Cloud resource review by AWS service.

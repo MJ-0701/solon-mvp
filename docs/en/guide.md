@@ -7,7 +7,7 @@ install. For beginner Git/terminal help, use the Korean [BEGINNER-GUIDE.md](../.
 
 ## 0. Install And Initialize
 
-> **Since 0.6.0**, one `brew install` / `scoop install` lets Claude Code
+> **As of 0.6.1**, one `brew install` / `scoop install` lets Claude Code
 > (`/sfs`), Gemini CLI (`sfs`), and Codex CLI (`$sfs`) find Solon automatically.
 > Your project keeps the files you read and the records you create.
 
@@ -61,9 +61,14 @@ optional. Install those native shortcuts only when a project needs them:
 sfs agent install all
 ```
 
-Old projects can be upgraded into the lighter 0.6.0 shape. Use
+Old projects can be upgraded into the lighter 0.6.1 shape. Use
 `sfs upgrade --layout vendored` only when Solon package files must stay inside
 the project.
+
+0.6.1 also fills the division knowledge packs. The user does not need to choose
+"backend", "QA", "infra", "finance", "tax", "accounting", or "taxonomy"
+manually. The AI should read the relevant Solon lens when the work calls for it,
+then explain the judgment in plain language.
 
 ## 2. Start A Sprint
 

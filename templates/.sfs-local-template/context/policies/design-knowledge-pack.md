@@ -10,15 +10,15 @@ load_when:
   - responsive
   - design system
   - operator screen
-status: seed-inventory
-content_policy: "topic/proposition only; do not expand into full guidance until a dedicated fill sprint"
+status: filled-v1
+content_policy: "compact operating guidance; apply only matching ids and keep design depth proportional to visible workflow risk"
 ---
 
 # Design/Frontend Knowledge Pack Inventory
 
-This file is a topic/proposition inventory, not the filled knowledge base.
-Use it to decide which design/frontend concepts are active for a sprint, review,
-or release. Record ids only unless the user asks for fill work.
+This file is a compact filled guidance pack for design/frontend work. Use it
+to decide which workflow, layout, state, accessibility, and copy checks are
+active for a sprint, review, or release. Apply only the matching ids.
 
 ## Activation Rules
 
@@ -60,7 +60,72 @@ or release. Record ids only unless the user asks for fill work.
 - DES-PROP-017: Mobile constraints must be checked for touch targets, wrapping, overflow, and hierarchy.
 - DES-PROP-018: User-facing language must avoid explaining implementation details inside the app.
 
-## DES-GAP - Fill Slots For Later
+## DES-FILL - Operating Guidance
+
+### DES-FILL-TASK - Primary Workflow
+
+- Identify the primary task before designing surfaces. The first screen should
+  let the target user start or resume that task without reading product docs.
+- For operational tools, optimize for scan, compare, decide, and repeat. Avoid
+  marketing-page composition when the user needs a work surface.
+- Keep the user's next action visible in empty, loading, error, partial, and
+  success states.
+
+### DES-FILL-LAYOUT - Information Architecture
+
+- Layout should reflect frequency and consequence: frequent actions close at
+  hand, destructive or rare actions guarded and less prominent.
+- Dense lists need stable table/grid behavior: sorting, filtering, pagination or
+  virtualization, selection, bulk action policy, and column visibility.
+- Navigation should preserve context. Returning from detail to list should not
+  erase filters, scroll, selected item, or current task state.
+
+### DES-FILL-CONTROLS - Interaction And Forms
+
+- Use familiar controls: buttons for commands, toggles for binary state, menus
+  for option sets, tabs for peer views, inputs/sliders/steppers for values, and
+  icons with tooltips for compact tool actions.
+- Forms need validation timing, field-level error placement, summary where
+  useful, recovery path, unsaved-change behavior, and disabled-state rationale.
+- Destructive actions need permission, confirmation, consequence preview, and
+  audit trail when state matters.
+
+### DES-FILL-RESPONSIVE - Fit And Accessibility
+
+- Text must fit its parent across mobile and desktop. Prefer wrapping, stable
+  constraints, and content-aware sizing over viewport-scaled typography.
+- Accessibility includes keyboard path, focus order, visible focus, label
+  association, contrast, reduced-motion tolerance, and screen-reader names for
+  icon-only controls.
+- Responsive QA should check smallest supported viewport, common desktop width,
+  long localized strings, empty/overflow data, and modal/toolbar collisions.
+
+### DES-FILL-COPY - Domain Language And UX Writing
+
+- UI copy should use canonical taxonomy terms while staying friendlier than
+  internal object names when needed.
+- Do not explain implementation mechanics in the app unless the user must act
+  on them.
+- Error copy should state what happened, whether data was saved, what the user
+  can do next, and whether support/operator action is needed.
+
+## DES-REVIEW - Review Questions
+
+- Can the target user complete the primary task from the first relevant screen?
+- Are all important states designed, not only the happy path?
+- Does layout support repeated work without making the user hunt?
+- Do long labels, mobile widths, and empty/error states still fit?
+- Does copy preserve canonical domain language?
+
+## DES-EVIDENCE - Suggested Evidence
+
+- Screenshot or browser capture for desktop and mobile.
+- State matrix: empty/loading/error/partial/success/disabled.
+- Keyboard/focus/contrast notes for interactive surfaces.
+- Copy/terminology spot-check against taxonomy pack.
+- Workflow note covering entry, decision, recovery, and completion.
+
+## DES-GAP - Deepening Slots
 
 - DES-GAP-001: Operational-tool layout patterns.
 - DES-GAP-002: Admin/CS timeline and reconciliation UX.
