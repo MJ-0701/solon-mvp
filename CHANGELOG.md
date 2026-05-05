@@ -1,11 +1,16 @@
 ## [0.6.8] - 2026-05-05
 
-> **Hotfix.** 0.6.7 의 `.gitattributes` 가 확장자 패턴 (`*.md`, `*.yml`, ...)
-> 만 등록하고 **확장자 없는 텍스트 파일 (`VERSION`, `bin/sfs`)** 를 누락. Windows
-> 러너의 `core.autocrlf=true` 가 그 둘에 적용돼 CRLF 로 checkout, `tests/
-> test-hash-parity.sh` 가 sample 하는 `VERSION` 에서 CRLF 검출 → `SFS 0.6
-> Storage Matrix` 의 `hash-parity-windows` job 14s 만에 FAIL. `.gitattributes`
-> 의 0.6.7 첫 도입이 부분적이었던 거고, 그 다음 layer 가 본 receipt.
+> **Hotfix.** 두 가지 함께 정리:
+> (a) 0.6.7 의 `.gitattributes` 가 확장자 패턴만 등록하고 extensionless 텍스트
+>     (`VERSION`, `bin/sfs`) 를 누락 → Windows 의 `core.autocrlf=true` 가
+>     그 둘을 CRLF 로 checkout → `test-hash-parity.sh` FAIL.
+> (b) 0.6.6 에서 추가했던 `.github/workflows/macos-bash-3-2-smoke.yml`
+>     을 **scope-creep correction 으로 제거**. cascade hotfix 흐름 안에서
+>     architectural change 를 hotfix bundle 에 넣은 게 본인의 informed 한
+>     OK 가 아니라 momentum 이었고, 결과로 0.6.7/0.6.8 cycle 추가 발생.
+>     해당 workflow 가 의도했던 surface (macOS 시스템 bash 3.2) 는 이미
+>     사용자 dogfood 가 첫 receipt 로 cover 했고, 추가 CI surface 가 지금
+>     시점의 정합 비용 대비 가치가 낮다고 판단.
 
 ### Fixed
 
@@ -14,32 +19,43 @@
   후자는 bash 스크립트) 라 LF 강제가 정합. 같은 맥락으로 `*.cmd` / `*.bat`
   Windows 셸 파일도 `eol=crlf` 로 명시 (이전엔 누락).
 
-### Process learning (5번째 receipt)
+### Reverted
 
-본 receipt 는 cascade 의 5번째 layer 지만 패턴이 약간 다르다:
+- **`.github/workflows/macos-bash-3-2-smoke.yml` 제거 (0.6.6 scope-creep
+  correction)** — 본 workflow 는 0.6.6 에서 "cascade root cause 닫는 구조적
+  fix" 로 추가됐으나, hotfix bundle 에 architectural CI change 를 묶은 것
+  자체가 본인의 informed consent 영역 밖이었음. 결과적으로 그 workflow 가
+  처음 돌면서 pre-existing CI red (hash-parity 의 `.gitattributes missing`
+  외 3건) 를 surface 시켜 0.6.7 + 0.6.8 cycle 을 만든 부작용도 있었음.
+  surface-diversity 원칙 자체는 유효하지만 (사용자 macOS shell 이 receipt #1
+  의 catcher 였던 사실 그대로), 그 원칙을 *명시적 CI workflow* 로 강제하는
+  비용은 본 시점에 적정하지 않다는 판단으로 되돌림. 필요해지면 별도 sprint
+  에서 재논의.
 
-- 1~3 (dep_args / brew flag / brew path): 외부 CLI / runtime 의 deprecation
-  으로 외부에서 끌고 온 layer
-- 4 (brew style placeholder + template style): 우리 정합화 시 **부분적 fix**
-  로 다음 layer 노출
-- 5 (현재 - extensionless gitattributes): 0.6.7 의 `.gitattributes` 자체가
-  **부분적 fix** — 확장자 패턴만 등록하고 extensionless 케이스 누락
+### Process learning
 
-즉 4, 5 는 "fix 본인의 incompleteness 가 다음 layer 를 만든" cascade. 외부
-원인이 아닌 내부 fix 의 surface 누락. 같은 클래스 회귀 가드는 정적 grep
-검사 (이미 0.6.6 에 있는 `tests/test-no-deprecated-cli-flags.sh` 같은 패턴)
-보다는 **CI runner 의 실제 cross-platform checkout + assert** 가 옳은 답.
-0.6.6 의 macOS bash 3.2 smoke + 0.6 storage matrix 의 windows-latest 가
-바로 그 역할 — 본 hotfix 는 그 axis 가 정상 작동했다는 증거이기도 하다.
+이번 cycle 에서 굳히는 것 두 가지:
+
+1. **Hotfix bundle 의 경계를 더 명확히**. "구조적 fix" 라는 framing 으로
+   CI workflow 추가 같은 architectural change 를 hotfix 와 같이 ship 하는
+   건 옳지 않음. cascade 가 도는 시점일수록 변경 surface 를 작게 유지해야
+   다음 layer 를 만들지 않음. 본 release 의 reverted 항목이 그 evidence.
+2. **`.gitattributes` 같은 cross-platform 정합 surface 는 첫 도입 시 한
+   번에 완전히**. 확장자 패턴 + extensionless 명시 + Windows 셸 (`*.cmd` /
+   `*.bat`) 모두 같은 commit 에 들어가는 게 정석. 0.6.7 → 0.6.8 의 두
+   layer 가 그 누락의 receipt.
+
+cross-review-principle 문서의 Receipts 섹션에 본 cycle 을 추가 layer 로
+박는 건 별도 정리 (현 시점엔 doc 변경 안 함 — release 사이즈 작게).
 
 ### Verified
 
-- `tests/run-all.sh` (Linux sandbox) → 33/33 PASS · FAIL 0 변동 없음
+- `tests/run-all.sh` (Linux sandbox) → 33/33 PASS · FAIL 0
 - 기존 회귀 테스트 4 개 (`test-nounset-empty-array-expansion`,
   `test-no-deprecated-cli-flags`, `test-homebrew-formula-style`,
   `test-hash-parity`) 모두 PASS
 - Windows 결과는 0.6.8 push 후 `SFS 0.6 Storage Matrix` 의 `hash-parity-windows`
-  가 GREEN 으로 나와야 정상 — 본 hotfix 의 첫 evidence
+  가 GREEN 으로 나와야 정상 — `.gitattributes` extensionless 보강의 직접 검증.
 
 ## [0.6.7] - 2026-05-05
 
