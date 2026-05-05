@@ -1,13 +1,13 @@
 {
-  "version": "0.6.0",
+  "version": "0.6.9",
   "description": "Solon Product SFS runtime for AI-native product work",
   "homepage": "https://github.com/MJ-0701/solon-product",
   "license": "Proprietary",
   "architecture": {
     "64bit": {
-      "url": "https://github.com/MJ-0701/solon-product/archive/refs/tags/v0.6.0.zip",
+      "url": "https://github.com/MJ-0701/solon-product/archive/refs/tags/v0.6.9.zip",
       "hash": "__SHA256_PLACEHOLDER_FOR_RELEASE_CUT__",
-      "extract_dir": "solon-product-0.6.0"
+      "extract_dir": "solon-product-0.6.9"
     }
   },
   "bin": [
@@ -34,7 +34,7 @@
   "notes": [
     "Solon SFS on Windows requires Git for Windows/Git Bash. If bash.exe is not on PATH, set SFS_BASH to the full bash.exe path.",
     "First-time PowerShell/cmd setup: cd <project>; git init; sfs.cmd init --layout thin --yes; sfs.cmd status. Optional native adapters: sfs.cmd agent install all.",
-    "0.6.0 storage: run `sfs upgrade --opt-in 0.6-storage` to migrate 0.5.x sprints. Hard cut 2026-11-03.",
+    "Legacy 0.5.x storage: run `sfs upgrade --opt-in 0.6-storage` to migrate old sprints. Hard cut 2026-11-03.",
     "Beginner guide: https://github.com/MJ-0701/solon-product/blob/main/BEGINNER-GUIDE.md"
   ]
 }

@@ -7,6 +7,18 @@
 
 ---
 
+## 0.6.9
+
+이번 버전은 "설치됐는데 실제로 바로 쓰려니 막히는" 부분을 닫는 핫픽스입니다.
+
+- `sfs adopt "문서 정리좀 해야될거 같은데."` 처럼 기존 프로젝트를 정리하려는 자연어 brief 를 이제 정상으로 받습니다.
+- `adopt` 는 기본 dry-run 입니다. 실제 파일을 만들려면 `sfs adopt --apply "..."` 를 쓰면 됩니다.
+- `sfs context path adopt`, `sfs context path start`, `sfs context path sprint`, `sfs context path intake` 같은 agent routing 경로가 정상화됐습니다.
+- CLI discovery 진단이 실패를 성공처럼 보이지 않게 정리됐습니다.
+- Claude/Gemini/Codex 연결 메타데이터와 한국어 사용자 문서를 0.6.9 기준으로 맞췄습니다.
+
+이미 0.6.8 을 설치했다면 `brew reinstall MJ-0701/solon-product/sfs` 또는 `sfs upgrade` 로 받으면 됩니다.
+
 ## 0.6.1
 
 이번 버전은 Solon 이 "필요한 기준만 조용히 꺼내 쓰는" 감각을 더 또렷하게 만드는 작은 패치입니다.

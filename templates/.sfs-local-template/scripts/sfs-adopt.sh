@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # .sfs-local/scripts/sfs-adopt.sh
 #
-# Solon SFS — `/sfs adopt [--apply]`.
+# Solon SFS — `/sfs adopt [<brief>] [--apply]`.
 # Creates a compact legacy-baseline sprint for projects that already have code
 # and git history but no useful SFS sprint trail. The visible result is
 # report.md + retro.md only; raw scan evidence is kept under archives.
@@ -17,10 +17,12 @@ source "${SFS_SCRIPT_DIR}/sfs-common.sh"
 usage_adopt() {
   cat <<'EOF'
 Usage:
-  /sfs adopt [--id <sprint-id>] [--apply] [--force] [--max-commits <N>]
+  /sfs adopt [<brief>] [--id <sprint-id>] [--apply] [--force] [--max-commits <N>]
 
 Adopt an existing legacy project into SFS without creating document sprawl.
   - Default is dry-run; it prints the baseline sprint and evidence sources.
+  - Optional <brief> is a single-line user note, for example:
+      /sfs adopt "docs cleanup and current-state handoff"
   - --apply creates .sfs-local/sprints/<id>/report.md and retro.md only.
   - Existing visible sprint folders and expanded archive folders are collapsed
     into cold .tar.gz archives with short manifests.
@@ -291,6 +293,8 @@ SPRINT_ID="legacy-baseline"
 APPLY=0
 FORCE=0
 MAX_COMMITS=80
+BRIEF_PARTS=()
+ADOPT_BRIEF=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -336,21 +340,32 @@ while [[ $# -gt 0 ]]; do
       ;;
     --)
       shift
-      if [[ $# -gt 0 ]]; then
-        echo "unexpected extra args after --: $*" >&2
-        exit "${SFS_EXIT_BADCLI}"
-      fi
+      while [[ $# -gt 0 ]]; do
+        BRIEF_PARTS+=("$1")
+        shift
+      done
       ;;
     -*)
       echo "unknown flag: $1" >&2
       exit "${SFS_EXIT_BADCLI}"
       ;;
     *)
-      echo "unknown arg: $1" >&2
-      exit "${SFS_EXIT_BADCLI}"
+      BRIEF_PARTS+=("$1")
+      shift
       ;;
   esac
 done
+
+if [[ ${#BRIEF_PARTS[@]} -gt 0 ]]; then
+  ADOPT_BRIEF="${BRIEF_PARTS[*]}"
+fi
+
+case "${ADOPT_BRIEF}" in
+  *$'\n'*|*$'\r'*)
+    echo "invalid brief: newline not allowed" >&2
+    exit "${SFS_EXIT_BADCLI}"
+    ;;
+esac
 
 validate_sprint_id_arg "${SPRINT_ID}" || exit "$?"
 case "${MAX_COMMITS}" in
@@ -424,6 +439,9 @@ PREEXISTING_TARGET_MANIFEST="${ARCHIVE_DIR}/preexisting-target.manifest.txt"
 
 if [[ "${APPLY}" -eq 0 ]]; then
   echo "adopt dry-run: ${SPRINT_ID}"
+  if [[ -n "${ADOPT_BRIEF}" ]]; then
+    echo "  brief: ${ADOPT_BRIEF}"
+  fi
   echo "  root: ${ROOT}"
   echo "  branch: ${BRANCH:--} @ ${HEAD_SHA:--}"
   echo "  commits: ${COMMIT_COUNT} (first ${FIRST_COMMIT:--}, scan last ${MAX_COMMITS})"
@@ -481,10 +499,21 @@ PROJECT_IDENTITY="$(project_identity_excerpt || true)"
 COMPONENT_MAP="$(component_map || true)"
 DOC_TOPOLOGY="$(doc_topology || true)"
 SUBMODULE_SUMMARY="$(submodule_summary || true)"
+REPORT_GOAL="Adopt existing legacy project into SFS"
+REPORT_SOURCE="git/code/docs scan"
+if [[ -n "${ADOPT_BRIEF}" ]]; then
+  REPORT_GOAL="${ADOPT_BRIEF}"
+  REPORT_SOURCE="${REPORT_SOURCE} + user brief"
+fi
+REPORT_GOAL_YAML="$(json_escape "${REPORT_GOAL}")"
+REPORT_SOURCE_YAML="$(json_escape "${REPORT_SOURCE}")"
 
 {
   echo "SFS adopt source summary"
   echo "generated_at: ${NOW}"
+  if [[ -n "${ADOPT_BRIEF}" ]]; then
+    echo "adopt_brief: ${ADOPT_BRIEF}"
+  fi
   echo "root: ${ROOT}"
   echo "branch: ${BRANCH:--}"
   echo "head: ${HEAD_SHA:--}"
@@ -533,11 +562,11 @@ cat > "${REPORT_PATH}" <<EOF
 phase: report
 status: legacy-baseline
 sprint_id: "${SPRINT_ID}"
-goal: "Adopt existing legacy project into SFS"
+goal: "${REPORT_GOAL_YAML}"
 created_at: "${NOW}"
 last_touched_at: "${NOW}"
 closed_at: ""
-source: "git/code/docs scan"
+source: "${REPORT_SOURCE_YAML}"
 confidence: "mixed"
 ---
 
@@ -557,6 +586,12 @@ ${PROJECT_IDENTITY:-  - no README.md or SFS.md identity excerpt found}
 
 SFS did not infer product intent from archived notes. It created a compact
 handoff from current project files, git history, and documentation topology.
+
+User brief:
+
+\`\`\`text
+${ADOPT_BRIEF:-  - none}
+\`\`\`
 
 ## §2. Operating Facts
 
@@ -648,7 +683,7 @@ gate_number: 7
 gate_label: "Gate 7 (Retro)"
 gate_id: G5          # legacy storage id
 sprint_id: "${SPRINT_ID}"
-goal: "Adopt existing legacy project into SFS"
+goal: "${REPORT_GOAL_YAML}"
 created_at: "${NOW}"
 last_touched_at: "${NOW}"
 closed_at: ""
@@ -659,6 +694,12 @@ closed_at: ""
 ## §1. Why This Exists
 
 This retro records the adoption policy, not the whole old project history.
+
+User brief:
+
+\`\`\`text
+${ADOPT_BRIEF:-  - none}
+\`\`\`
 
 ## §2. Keep
 
@@ -698,9 +739,13 @@ _esc_sprint="$(json_escape "${SPRINT_ID}")"
 _esc_report="$(json_escape "${REPORT_PATH}")"
 _esc_retro="$(json_escape "${RETRO_PATH}")"
 _esc_archive="$(json_escape "${ARCHIVE_DIR}/source-summary.txt")"
-append_event "legacy_adopt" "{\"sprint_id\":\"${_esc_sprint}\",\"report\":\"${_esc_report}\",\"retro\":\"${_esc_retro}\",\"archive\":\"${_esc_archive}\",\"commits\":${COMMIT_COUNT},\"tracked_files\":${TRACKED_COUNT},\"docs_signals\":${DOC_COUNT},\"test_signals\":${TEST_COUNT},\"submodules\":${SUBMODULE_COUNT},\"nested_repos\":${NESTED_REPO_COUNT},\"archived_existing_sprints\":${EXISTING_SPRINT_ARCHIVE_COUNT},\"collapsed_existing_archives\":${EXISTING_ARCHIVE_COLLAPSE_COUNT}}"
+_esc_brief="$(json_escape "${ADOPT_BRIEF}")"
+append_event "legacy_adopt" "{\"sprint_id\":\"${_esc_sprint}\",\"brief\":\"${_esc_brief}\",\"report\":\"${_esc_report}\",\"retro\":\"${_esc_retro}\",\"archive\":\"${_esc_archive}\",\"commits\":${COMMIT_COUNT},\"tracked_files\":${TRACKED_COUNT},\"docs_signals\":${DOC_COUNT},\"test_signals\":${TEST_COUNT},\"submodules\":${SUBMODULE_COUNT},\"nested_repos\":${NESTED_REPO_COUNT},\"archived_existing_sprints\":${EXISTING_SPRINT_ARCHIVE_COUNT},\"collapsed_existing_archives\":${EXISTING_ARCHIVE_COLLAPSE_COUNT}}"
 
 echo "adopted: ${SPRINT_ID}"
+if [[ -n "${ADOPT_BRIEF}" ]]; then
+  echo "  brief: ${ADOPT_BRIEF}"
+fi
 echo "  report: ${REPORT_PATH}"
 echo "  retro: ${RETRO_PATH}"
 echo "  archive: ${ARCHIVE_DIR}/source-summary.txt"

@@ -90,7 +90,7 @@ sfs.cmd version --check
 sfs.cmd doctor      # ✅ 세 줄 (Claude / Gemini / Codex) 모두 보이면 OK
 ```
 
-성공하면 `sfs 0.6.1`, `status up-to-date` 같은 문장이 보입니다. Windows
+성공하면 `sfs 0.6.9`, `status up-to-date` 같은 문장이 보입니다. Windows
 PowerShell 이나 cmd 에서는 `sfs.cmd` 를 쓰고, Git Bash/WSL 에서는 `sfs` 를 써도 됩니다.
 
 ### 4. 테스트 프로젝트 폴더 만들기

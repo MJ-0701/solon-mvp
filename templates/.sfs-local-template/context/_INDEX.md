@@ -10,6 +10,7 @@ Always keep entry docs small. Read `kernel.md` first, then only the matching
 module:
 
 - `commands/start.md` — start / new sprint / bash-first Next.
+- `commands/adopt.md` — adopt existing project / compact baseline / documentation cleanup.
 - `commands/profile.md` — profile / SFS.md project overview only.
 - `commands/brainstorm.md` — Gate 2 shared understanding before plan.
 - `commands/plan.md` — Gate 3 sprint contract and cross-phase fundamentals.

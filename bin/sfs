@@ -232,7 +232,7 @@ context_resolve_rel() {
       fi
       ;;
     start|intake|sprint) printf '%s\n' "commands/start.md" ;;
-    brainstorm|plan|implement|review|release|upgrade|profile|loop|tidy)
+    adopt|brainstorm|plan|implement|review|release|upgrade|profile|loop|tidy)
       printf '%s\n' "commands/${key}.md"
       ;;
     *)

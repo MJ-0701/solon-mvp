@@ -6,7 +6,7 @@
 
 `sfs.json.template` 는 릴리스 시점에 아래 placeholder 를 치환합니다.
 
-- `__VERSION__`: 앞의 `v` 를 뺀 버전. 예: `0.6.8`
+- `__VERSION__`: 앞의 `v` 를 뺀 버전. 예: `0.6.9`
 - `__URL__`: archive URL. 보통 `https://github.com/MJ-0701/solon-product/archive/refs/tags/v__VERSION__.zip`
 - `__SHA256__`: Scoop 이 실제로 내려받을 archive 의 SHA256
 - `__EXTRACT_DIR__`: archive 내부 루트 디렉터리. GitHub source zip 기준 보통 `solon-product-__VERSION__`

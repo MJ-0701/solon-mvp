@@ -11,8 +11,8 @@ class Sfs < Formula
   # tag-push → audit → tap-update). 0.6.5 hotfix: components order corrected
   # (version before sha256) and livecheck regex broadened (\.t matches both
   # \.tar\.gz and \.tgz mirrors) to satisfy `brew style`.
-  url "https://github.com/MJ-0701/solon-product/archive/refs/tags/v0.6.0.tar.gz"
-  version "0.6.0"
+  url "https://github.com/MJ-0701/solon-product/archive/refs/tags/v0.6.9.tar.gz"
+  version "0.6.9"
   sha256 "__SHA256_PLACEHOLDER_FOR_RELEASE_CUT__"
 
   livecheck do
@@ -46,7 +46,7 @@ class Sfs < Formula
       Later, run `sfs upgrade` inside a project; it self-upgrades the Homebrew
       runtime first, then updates that project's Solon files.
 
-      0.6.0 storage migration:
+      Legacy 0.5.x storage migration:
         sfs upgrade --opt-in 0.6-storage   # migrate 0.5.x sprints to 0.6 schema
       Hard cut: 2026-11-03 (after that, `sfs upgrade` migrates 0.5.x by default).
 

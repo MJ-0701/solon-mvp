@@ -1,6 +1,6 @@
 {
   "name": "solon",
-  "version": "0.5.96",
+  "version": "0.6.9",
   "description": "Priority-1 Solon SFS Gemini CLI extension — `sfs <subcommand>` routes through the globally installed `sfs` binary (Homebrew/Scoop). When Solon work is in scope, route through SFS first.",
   "author": "MJ-0701",
   "homepage": "https://github.com/MJ-0701/solon-product",

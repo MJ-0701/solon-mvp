@@ -1,3 +1,42 @@
+## [0.6.9] - 2026-05-05
+
+> **Usability hotfix.** 0.6.8 은 설치는 됐지만 실제 dogfood 에서 두 가지
+> "쓸 수 있냐" 문제가 남았다. `sfs context path start/sprint/intake` alias
+> 와 `adopt "<brief>"` 자연어 인자 계약이 제품 문서/agent 기대와 어긋났고,
+> discovery hook 진단은 user-home write 실패를 성공처럼 보일 수 있었다.
+> 본 release 는 로컬 응급 패치로 끝내지 않고 Homebrew/Scoop 사용자가 같은
+> 수정본을 받도록 배포 메타데이터까지 맞추는 공개 핫픽스다.
+
+### Fixed
+
+- **`sfs adopt "<brief>"` free-form 인자 허용** — 기존 `adopt` 는 top-level
+  명령에 존재하고 가이드에도 있었지만, 위치 인자를 전부 `unknown arg` 로
+  처리했다. 이제 `sfs adopt "문서 정리좀 해야될거 같은데."` 같은 기존
+  프로젝트 문서 정리/현상 정리 brief 를 dry-run/apply 양쪽에서 받아 report,
+  retro, events evidence 에 남긴다.
+- **`adopt` routed context 추가** — `sfs context path adopt`,
+  `commands/adopt`, `commands/adopt.md` 가 모두 `commands/adopt.md` 로
+  해석된다. agent 는 adopt 를 bash-first로 실행한 뒤 compact baseline
+  정책만 읽으면 된다.
+- **context alias hotfix 정리** — `start`, `commands/start`, `sprint`,
+  `intake` alias 가 packaged runtime 과 installed Homebrew runtime 모두에서
+  `commands/start.md` 로 해석되도록 고정했다.
+- **discovery 진단 truthfulness** — Claude/Gemini/Codex discovery hook 이
+  user-home config write 실패를 `ok` 로 보이지 않고 `warn` 으로 보고한다.
+- **metadata drift 정리** — `VERSION`, Claude plugin metadata,
+  `gemini-extension.json`, README/GUIDE/BEGINNER-GUIDE, packaging 예시를
+  0.6.9 기준으로 맞췄다.
+
+### Verified
+
+- Local installed Homebrew runtime patched and dogfood verified:
+  `sfs context path adopt` → packaged `commands/adopt.md`,
+  `sfs adopt "문서 정리좀 해야될거 같은데."` → dry-run success.
+- `tests/test-sfs-adopt-freeform.sh` 추가 — Korean free-form brief dry-run/apply
+  round-trip, report/retro/events persistence 검증.
+- `tests/test-context-aliases.sh` 보강 — `adopt` alias 와 `commands/adopt(.md)`
+  path resolution 검증.
+
 ## [0.6.8] - 2026-05-05
 
 > **Hotfix.** 두 가지 함께 정리:

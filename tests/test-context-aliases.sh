@@ -18,4 +18,12 @@ for key in start commands/start commands/start.md sprint intake; do
   esac
 done
 
+for key in adopt commands/adopt commands/adopt.md; do
+  out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" context path "${key}")"
+  case "${out}" in
+    */context/commands/adopt.md) ;;
+    *) fail "context key ${key} resolved to unexpected path: ${out}" ;;
+  esac
+done
+
 echo "test-context-aliases: OK"
