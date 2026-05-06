@@ -813,7 +813,8 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
 
   ${C_BOLD}2.${C_RESET} agent 모델 설정 확인:
      ${C_BLUE}.sfs-local/model-profiles.yaml${C_RESET}
-     - Codex: model + reasoning_effort 조합 (예: gpt-5.5 + xhigh/very_high)
+     - Codex: C-Level/review 는 gpt-5.5, worker 는 gpt-5.3-codex, bounded helper 는 gpt-5.3-codex-spark
+       Spark 는 일반 구현 worker 가 아니라 scope/AC 가 잠긴 기계적 subtask 용도
      - Claude: opus-4.7 / opus-4.6 / sonnet / haiku 등 runtime 지원 모델명
      - Gemini/custom: 프로젝트가 쓰는 모델/profile 이름
      - 지금 설정 안 함: 현재 런타임 모델 그대로 사용 + 다음 upgrade 때 다시 질문

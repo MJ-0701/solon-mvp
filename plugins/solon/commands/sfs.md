@@ -36,6 +36,9 @@ $ARGUMENTS
     passes. Keep C-Level and worker/generator responsibilities separate:
     C-Level owns intent, architecture, AC, and review handoff; worker/generator
     owns fixed implementation slices.
+    Codex worker default is `gpt-5.3-codex`; `gpt-5.3-codex-spark` is helper-only
+    for bounded mechanical subtasks after scope/files_scope/AC are
+    locked. Complex shared behavior escalates to high reasoning before coding.
     Gate 3 review must self-review until PASS before cross review. Review round
     count, lens count, or "enough review" is not a PASS; partial/fail routes to
     rework and same-gate self-review.

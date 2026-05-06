@@ -18,6 +18,12 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   `.sfs-local/model-profiles.yaml`, not the C-Level planner/evaluator model.
   C-Level may define the contract, split files_scope, and handle escalation, but
   should not present itself as the normal direct coding option.
+- For Codex runtime, the recommended worker default is `gpt-5.3-codex`.
+  `gpt-5.3-codex-spark` is not the normal implementation owner; reserve Spark
+  for bounded mechanical subtasks after C-Level has locked scope, files_scope,
+  and AC. Escalate to strategic_high or an explicit high-end override before
+  coding if the slice touches architecture, public contracts, security,
+  privacy, data-loss risk, release gates, or repeated review failure.
 - Valid artifacts: code, taxonomy, design handoff, QA evidence, infra/runbook,
   management/admin evidence, decisions, docs, workflow, research, or
   user-facing operating material.

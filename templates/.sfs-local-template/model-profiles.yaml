@@ -6,7 +6,7 @@
 # cost-aware defaults, but does not block an "all high-end models" policy when
 # the project accepts the cost and latency.
 
-version: 1.3
+version: 1.4
 project: "<PROJECT-NAME>"
 created: "<DATE>"
 solon_mvp_version: "<SOLON-VERSION>"
@@ -64,6 +64,8 @@ reasoning_tiers:
   execution_standard:
     purpose: "Implementation worker after plan, architecture, acceptance criteria, and files_scope are fixed"
     cost_latency: "standard"
+    codex_default: "gpt-5.3-codex"
+    codex_spark_boundary: "Do not use gpt-5.3-codex-spark as the normal implementation worker. Use Spark only for bounded mechanical subtasks after scope and AC are locked."
     default_roles:
       - implementation-worker
       - division-worker
@@ -82,6 +84,8 @@ reasoning_tiers:
   helper_economy:
     purpose: "Parsing, formatting, grep summaries, JSON/YAML transforms, deterministic helpers"
     cost_latency: "lowest"
+    codex_default: "gpt-5.3-codex-spark"
+    guardrail: "Helper economy is for bounded mechanical chores, not plan interpretation, architecture decisions, or broad implementation."
     default_roles:
       - parser
       - formatter
@@ -166,11 +170,13 @@ runtime_model_settings:
       reasoning_effort: "high"
       reasoning_label: "high"
     execution_standard:
-      model: "gpt-5.5"
-      reasoning_effort: "medium"
+      model: "gpt-5.3-codex"
+      reasoning_effort: "high"
+      description: "Default Codex implementation worker for fixed slices. Escalate if the slice touches architecture, public contracts, security, privacy, data loss, release gates, or repeated review failure."
     helper_economy:
-      model: "gpt-5.5-mini"
-      reasoning_effort: "low"
+      model: "gpt-5.3-codex-spark"
+      reasoning_effort: "high"
+      description: "Fast Codex helper for bounded mechanical subtasks only after C-Level has locked scope and acceptance criteria."
 
   gemini:
     strategic_high:
@@ -267,6 +273,9 @@ resolution_rules:
   - "If selected_policy is all_high, resolve every agent through the highest configured tier/profile unless an explicit agent override exists."
   - "Solon recommendations are advisory. Higher-end overrides are allowed when cost/latency are intentional."
   - "Worker/helper outputs still require independent review; a stronger model does not approve its own work."
+  - "For Codex runtime, solon_recommended resolves implementation-worker and division-worker to gpt-5.3-codex, not gpt-5.5 and not gpt-5.3-codex-spark."
+  - "Use gpt-5.3-codex-spark only for helper_economy or explicitly bounded mechanical subtasks after C-Level scope, files_scope, and AC are locked."
+  - "If a Codex worker slice touches architecture, public API/contracts, security, privacy, data-loss risk, release gates, or repeated review failure, escalate to strategic_high or an explicit high-end override before coding."
 
 audit_fields:
   required:

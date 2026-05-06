@@ -7,6 +7,16 @@
 
 ---
 
+## 0.6.22
+
+이번 버전은 Codex 쪽 구현 worker 모델 기본값을 명확히 나누는 핫픽스입니다.
+
+- C-Level/review 는 계속 high reasoning 모델이 맡습니다.
+- Codex 구현 worker 기본값은 `gpt-5.3-codex` 입니다.
+- `gpt-5.3-codex-spark` 는 일반 구현 worker 가 아니라 scope/files_scope/AC 가 잠긴 기계적 helper subtask 용도입니다.
+- architecture, public contract, security, privacy, data-loss, release gate, 반복 실패 같은 위험이 있으면 worker 도 high reasoning 으로 승격합니다.
+- Claude 쪽 worker 기본값은 기존처럼 Sonnet 계열로 유지됩니다.
+
 ## 0.6.21
 
 이번 버전은 Gate 3 review 를 많이 돌렸다는 이유로 implement 여부를 묻던 흐름을 막는 핫픽스입니다.

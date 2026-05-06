@@ -1,3 +1,27 @@
+## [0.6.22] - 2026-05-07
+
+> **Codex worker model routing hotfix.** Real model handoff discussion showed
+> that Codex still looked like it might use the C-Level model for implementation
+> by default, or use the Spark model too broadly.
+
+### Fixed
+
+- Codex `execution_standard` now resolves to `gpt-5.3-codex` in the Solon
+  recommended profile.
+- Codex `helper_economy` now resolves to `gpt-5.3-codex-spark`, with explicit
+  helper-only boundaries.
+- Spark is reserved for bounded mechanical subtasks after C-Level has locked
+  scope, files_scope, and acceptance criteria.
+- Complex implementation slices that touch architecture, public contracts,
+  security, privacy, data-loss risk, release gates, or repeated review failure
+  escalate to strategic high reasoning before coding.
+
+### Verified
+
+- Expanded agent behavior guardrails so packaged model profiles, routed
+  context, and all Claude/Codex/Gemini adapters preserve the Codex worker
+  default and Spark boundary.
+
 ## [0.6.21] - 2026-05-07
 
 > **Self-before-cross review hotfix.** Real Gate 3 planning showed an Action

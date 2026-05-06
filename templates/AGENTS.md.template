@@ -28,6 +28,9 @@ Rules:
 - Keep C-Level and worker/generator responsibilities separate: C-Level owns
   intent, architecture, AC, and review handoff; worker/generator owns fixed
   implementation slices.
+- Codex worker default is `gpt-5.3-codex`; `gpt-5.3-codex-spark` is helper-only
+  for bounded mechanical subtasks after scope/files_scope/AC are locked.
+  Complex shared behavior escalates to high reasoning before coding.
 - `sfs brainstorm` has depth. `--simple` is quick requirement cleanup, default normal asks a few
   owner-thinking questions, and `--hard` keeps plan blocked while important
   owner decisions are unresolved.

@@ -54,6 +54,10 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   Do not frame C-Level direct implementation as a normal option; use it only
   when the user explicitly overrides the worker path or the slice is an
   emergency tiny patch, and record the cost/risk.
+- If the handoff names Codex implementation, the recommended worker default is
+  `gpt-5.3-codex`. Do not offer `gpt-5.3-codex-spark` as the normal worker;
+  reserve Spark for bounded mechanical subtasks after C-Level has locked scope,
+  files_scope, and acceptance criteria.
 - If a researcher pass produced findings, summarize only the durable result in
   the plan: sources checked, domain terms, contradictions, and remaining
   unknowns. Do not copy the full research transcript into the plan.

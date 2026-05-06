@@ -1945,7 +1945,8 @@ Agent model profile:
   Solon 권장은 C-Level/review high, worker standard, helper economy 입니다.
   프로젝트가 비용/지연을 감수한다면 worker/helper 도 high-end 모델로 설정해도 됩니다.
   설정을 안 하거나 거부하면 현재 런타임에서 사용자가 선택한 모델을 그대로 씁니다.
-  Codex 는 model + reasoning_effort 조합(예: gpt-5.5 + xhigh/very_high), Claude 는 opus/sonnet/haiku 계열,
+  Codex 권장은 C-Level/review gpt-5.5, worker gpt-5.3-codex, bounded helper gpt-5.3-codex-spark 입니다.
+  Spark 는 일반 구현 worker 가 아니라 scope/AC 가 잠긴 기계적 subtask 용도입니다. Claude 는 opus/sonnet/haiku 계열,
   Gemini/custom 은 프로젝트 runtime 이 지원하는 profile 이름으로 agent별 override 가능합니다.
 
 변경사항 git commit 권장:

@@ -51,6 +51,8 @@ assert_contains "${kernel}" "Gate order is a runtime contract" "kernel gate orde
 assert_contains "${kernel}" "Review verdicts are success criteria, not effort counters" "kernel review verdict"
 assert_contains "${kernel}" "Cross review comes after local self-review passes" "kernel self before cross"
 assert_contains "${kernel}" "Role split is invariant" "kernel role split"
+assert_contains "${kernel}" 'default worker/generator model is `gpt-5.3-codex`' "kernel codex worker default"
+assert_contains "${kernel}" '`gpt-5.3-codex-spark` is reserved' "kernel codex spark boundary"
 
 assert_contains "${brainstorm}" "docs/solon/domain-map.md" "brainstorm domain map"
 assert_contains "${brainstorm}" "read-only researcher" "brainstorm researcher"
@@ -65,6 +67,8 @@ assert_contains "${plan}" 'Do not offer `sfs implement`, worker delegation, or m
 assert_contains "${plan}" "plan until PASS first, then run cross review" "plan self before cross"
 assert_contains "${plan}" "Do not use review volume as a stopping rule" "plan no review volume stop"
 assert_contains "${plan}" "C-Level owns the contract" "plan C-Level boundary"
+assert_contains "${plan}" "recommended worker default is" "plan codex worker default"
+assert_contains "${plan}" 'Do not offer `gpt-5.3-codex-spark` as the normal worker' "plan codex spark boundary"
 assert_contains "${plan}" "docs/solon/domain-map.md" "plan domain map"
 assert_contains "${plan}" "do not end with" "plan decision clarity"
 assert_contains "${plan}" 'unexplained `Q1`' "plan unexplained Q1 guardrail"
@@ -79,6 +83,8 @@ assert_contains "${implement}" ".sfs-local/personas/researcher.md" "implement re
 assert_contains "${implement}" "files_scope explicit and disjoint" "implement worker scope"
 assert_contains "${implement}" "requires a Gate 3 Plan review PASS" "implement preflight review"
 assert_contains "${implement}" "default implementation owner is the worker/generator model" "implement worker model default"
+assert_contains "${implement}" 'recommended worker default is `gpt-5.3-codex`' "implement codex worker default"
+assert_contains "${implement}" '`gpt-5.3-codex-spark` is not the normal implementation owner' "implement codex spark boundary"
 assert_contains "${implement}" "Self-review must pass first; cross review follows" "implement self before cross"
 
 assert_contains "${review}" "Review actual diff, files, test output, and logs" "review evidence"
@@ -107,6 +113,9 @@ assert_contains "${model_profiles}" "researcher: research_high" "model profiles 
 assert_contains "${model_profiles}" ".sfs-local/personas/researcher.md" "model profiles researcher persona"
 assert_contains "${model_profiles}" "role_boundaries" "model profiles role boundaries"
 assert_contains "${model_profiles}" "Gate 3 Plan review must pass before worker/generator implementation starts" "model profiles gate invariant"
+assert_contains "${model_profiles}" 'model: "gpt-5.3-codex"' "model profiles codex worker model"
+assert_contains "${model_profiles}" 'model: "gpt-5.3-codex-spark"' "model profiles codex spark helper"
+assert_contains "${model_profiles}" "not gpt-5.5 and not gpt-5.3-codex-spark" "model profiles codex worker rule"
 
 adapter_files=(
   "${DIST_DIR}/templates/CLAUDE.md.template"
@@ -128,6 +137,8 @@ for file in "${adapter_files[@]}"; do
   assert_contains "${file}" 'Gate 3 (Plan) ready-for-implement routes to `sfs review --gate 3` first' "adapter plan review before implement ${file}"
   assert_contains "${file}" "Keep C-Level and worker/generator responsibilities separate" "adapter role split ${file}"
   assert_contains "${file}" "Gate 3 review must self-review until PASS before cross review" "adapter self before cross ${file}"
+  assert_contains "${file}" 'Codex worker default is `gpt-5.3-codex`' "adapter codex worker default ${file}"
+  assert_contains "${file}" '`gpt-5.3-codex-spark` is helper-only' "adapter codex spark boundary ${file}"
 done
 
 echo "test-agent-behavior-guardrails: OK"

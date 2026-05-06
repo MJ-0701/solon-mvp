@@ -55,6 +55,10 @@ load_when: ["always", "sfs", "entry"]
   criteria, and review orchestration; the worker/generator model owns fixed
   implementation slices. Do not present C-Level direct implementation as the
   normal default when a worker/generator profile exists.
+- Model routing must reflect that role split. In Codex, the default worker/generator model is `gpt-5.3-codex`; `gpt-5.3-codex-spark` is reserved
+  for bounded mechanical helper subtasks after C-Level has locked scope,
+  files_scope, and AC. Complex shared behavior escalates to strategic_high or
+  an explicit high-end override before coding.
 - Multi-agent work is thin supervision, not noisy coordination by default:
   use read-only research, fixed-scope worker slices, and independent review only
   when they reduce context pollution or self-validation risk. Share results
