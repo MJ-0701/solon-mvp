@@ -11,6 +11,8 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
 - If `brainstorm.md` is still draft or has unresolved blocking questions, do
   not smooth over them with assumptions. Ask 1-3 questions and keep the plan
   draft until shared intent is clear.
+- State material assumptions, tradeoffs, explicit non-goals, and a simpler path
+  when one exists. Do not hide unresolved decisions inside confident wording.
 - Gate 3 must carry the same AI-era fundamentals forward:
   - shared design concept becomes measurable requirements and explicit
     non-goals.
@@ -23,6 +25,10 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
     worker may fill internally.
 - A plan is not ready just because it is long. It is ready when an evaluator can
   independently check pass/partial/fail without reading the generator's mind.
+- Each implementation slice should carry a concrete checklist item and
+  `verify by ...` evidence. In SFS, that checklist belongs in sprint
+  workbench artifacts such as `plan.md` or `implement.md`, not as mandatory
+  root-level `checklist.md` / `context-notes.md` files.
 - Load `policies/knowledge-pack-router.md` first, or `policies/knowledge-pack-router.ko.md`
   for Korean preference. Proceed to matching division packs from its mapping.
 - If backend/JVM/Spring/JPA/transaction/batch/integration/DevOps/AWS risk is in

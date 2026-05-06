@@ -763,6 +763,244 @@ compact_legacy_tmp_artifacts() {
   return 0
 }
 
+json_escape_upgrade() {
+  printf '%s' "${1:-}" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+append_upgrade_event() {
+  local event_type="${1:?event type required}" fields="${2:-}"
+  local events_file="$TARGET/.sfs-local/events.jsonl"
+  local now
+  [ -f "$events_file" ] || return 0
+  now="$(date +%Y-%m-%dT%H:%M:%S%z 2>/dev/null | sed -E 's/([0-9]{2})$/:\1/')"
+  if [ -n "$fields" ]; then
+    fields=",${fields#,}"
+  fi
+  printf '{"ts":"%s","type":"%s"%s}\n' \
+    "$now" "$(json_escape_upgrade "$event_type")" "$fields" >> "$events_file" 2>/dev/null || return 5
+  return 0
+}
+
+strip_frontmatter_body() {
+  awk '
+    NR == 1 && $0 == "---" { in_fm=1; next }
+    in_fm && $0 == "---" { in_fm=0; next }
+    !in_fm { print }
+  ' "$1"
+}
+
+migrate_legacy_adopt_visible_sprints() {
+  local sprints_dir="$TARGET/.sfs-local/sprints"
+  local report sprint_dir sid now safe_ts shared_dir shared_doc archive_dir archive_file manifest staging
+  local current_sprint count=0 esc_sid esc_shared esc_archive
+  [ -d "$sprints_dir" ] || return 0
+
+  now="$(date +%Y-%m-%dT%H:%M:%S%z 2>/dev/null | sed -E 's/([0-9]{2})$/:\1/')"
+  safe_ts="${now//:/-}"
+  safe_ts="${safe_ts//+/-}"
+  current_sprint=""
+  if [ -f "$TARGET/.sfs-local/current-sprint" ]; then
+    current_sprint="$(sed -n '1p' "$TARGET/.sfs-local/current-sprint" 2>/dev/null | tr -d '[:space:]' || true)"
+  fi
+
+  for report in "$sprints_dir"/*/report.md; do
+    [ -f "$report" ] || continue
+    sprint_dir="$(dirname "$report")"
+    sid="$(basename "$sprint_dir")"
+    if [ "$sid" != "legacy-baseline" ] \
+      && ! grep -Eq 'status:[[:space:]]*"?legacy-baseline"?|Legacy Baseline Intake|Solon Adoption Summary' "$report" 2>/dev/null; then
+      continue
+    fi
+
+    shared_dir="$TARGET/docs/solon"
+    shared_doc="$shared_dir/${sid}-adoption-summary.md"
+    archive_dir="$TARGET/.sfs-local/archives/adopt/$sid/${safe_ts}-visible-sprint-migration"
+    archive_file="$archive_dir/visible-sprint-workspace.tar.gz"
+    manifest="$archive_dir/manifest.txt"
+
+    mkdir -p "$shared_dir" "$archive_dir" || return 5
+    if [ ! -f "$shared_doc" ]; then
+      {
+        echo "---"
+        echo "title: \"Solon Adoption Summary\""
+        echo "status: legacy-baseline"
+        echo "adopt_id: \"$(json_escape_upgrade "$sid")\""
+        echo "created_at: \"$now\""
+        echo "last_touched_at: \"$now\""
+        echo "source: \"legacy .sfs-local adoption report migration\""
+        echo "confidence: \"mixed\""
+        echo "---"
+        echo
+        echo "# Solon Adoption Summary - $sid"
+        echo
+        echo "> Migrated from \`.sfs-local/sprints/$sid/report.md\` during \`sfs upgrade\`."
+        echo "> Raw legacy sprint files are preserved in the private cold archive listed below."
+        echo
+        echo "- **Archive**: \`${archive_file#$TARGET/}\`"
+        echo "- **Manifest**: \`${manifest#$TARGET/}\`"
+        echo
+        echo "## Original Legacy Report"
+        echo
+        strip_frontmatter_body "$report"
+      } > "$shared_doc" || return 5
+    fi
+
+    staging="$(mktemp -d "$archive_dir/.stage.XXXXXX")" || return 5
+    mkdir -p "$staging/.sfs-local/sprints" || return 5
+    cp -R "$sprint_dir" "$staging/.sfs-local/sprints/$sid" || return 5
+    {
+      echo "SFS legacy adopt visible sprint migration"
+      echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      echo "sprint_id: $sid"
+      echo "shared_doc: ${shared_doc#$TARGET/}"
+      echo "archive: ${archive_file#$TARGET/}"
+      echo
+      echo "policy:"
+      echo "- shared adoption handoff lives in docs/solon"
+      echo "- old visible legacy-baseline workbench is private cold history"
+      echo
+      echo "items:"
+      find "$staging" -type f 2>/dev/null | sort | while IFS= read -r staged; do
+        printf -- "- %s\n" "${staged#$staging/}"
+      done
+    } > "$manifest" || return 5
+    tar -czf "$archive_file" -C "$staging" . || return 5
+    rm -rf "$staging" || return 5
+    rm -rf "$sprint_dir" || return 5
+    if [ "$current_sprint" = "$sid" ]; then
+      rm -f "$TARGET/.sfs-local/current-sprint" || return 5
+    fi
+
+    esc_sid="$(json_escape_upgrade "$sid")"
+    esc_shared="$(json_escape_upgrade "${shared_doc#$TARGET/}")"
+    esc_archive="$(json_escape_upgrade "${archive_file#$TARGET/}")"
+    append_upgrade_event "legacy_adopt_surface_migrated" "\"sprint_id\":\"$esc_sid\",\"shared_doc\":\"$esc_shared\",\"archive\":\"$esc_archive\"" || return 5
+    count=$((count + 1))
+  done
+
+  if [ "$count" -gt 0 ]; then
+    ok "legacy adopt visible sprint 이관: $count sprint(s) → docs/solon"
+  fi
+  return 0
+}
+
+sprint_has_phase_event() {
+  local sid="${1:?sprint id required}" events_file="$TARGET/.sfs-local/events.jsonl"
+  local esc
+  [ -f "$events_file" ] || return 1
+  esc="$(json_escape_upgrade "$sid")"
+  grep -E '"type":"(brainstorm_open|plan_open|implement_open|review_open|retro_open|report_ready|tidy_apply|sprint_close)"' "$events_file" 2>/dev/null \
+    | grep -F "\"sprint_id\":\"$esc\"" >/dev/null 2>&1
+}
+
+compact_prefilled_step_doc_residue() {
+  local sprints_dir="$TARGET/.sfs-local/sprints"
+  local now safe_ts archive_root sprint_dir sid report path doc staging archive_file manifest
+  local current_sprint count total=0 esc_sid esc_archive
+  local source_paths=()
+  [ -d "$sprints_dir" ] || return 0
+
+  now="$(date +%Y-%m-%dT%H:%M:%S%z 2>/dev/null | sed -E 's/([0-9]{2})$/:\1/')"
+  safe_ts="${now//:/-}"
+  safe_ts="${safe_ts//+/-}"
+  archive_root="$TARGET/.sfs-local/archives/runtime-migrations/${safe_ts}-prefilled-step-docs"
+  current_sprint=""
+  if [ -f "$TARGET/.sfs-local/current-sprint" ]; then
+    current_sprint="$(sed -n '1p' "$TARGET/.sfs-local/current-sprint" 2>/dev/null | tr -d '[:space:]' || true)"
+  fi
+
+  for sprint_dir in "$sprints_dir"/*; do
+    [ -d "$sprint_dir" ] || continue
+    sid="$(basename "$sprint_dir")"
+    [ "$sid" = "legacy-baseline" ] && continue
+    report="$sprint_dir/report.md"
+    [ ! -f "$report" ] || continue
+    if sprint_has_phase_event "$sid"; then
+      continue
+    fi
+
+    source_paths=()
+    for doc in brainstorm plan implement log review retro; do
+      path="$sprint_dir/$doc.md"
+      [ -f "$path" ] || continue
+      source_paths+=("$path")
+    done
+    count="${#source_paths[@]}"
+    [ "$count" -gt 0 ] || continue
+
+    mkdir -p "$archive_root" || return 5
+    staging="$(mktemp -d "$archive_root/.stage.${sid}.XXXXXX")" || return 5
+    mkdir -p "$staging/.sfs-local/sprints/$sid" || return 5
+    for path in "${source_paths[@]}"; do
+      cp "$path" "$staging/.sfs-local/sprints/$sid/$(basename "$path")" || return 5
+    done
+
+    archive_file="$archive_root/${sid}-step-docs.tar.gz"
+    manifest="$archive_root/${sid}-manifest.txt"
+    {
+      echo "SFS prefilled step-doc residue migration"
+      echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      echo "sprint_id: $sid"
+      echo "archive: ${archive_file#$TARGET/}"
+      echo "step_docs: $count"
+      echo
+      echo "reason:"
+      echo "- this sprint has no phase events and no report.md"
+      echo "- old runtimes pre-created step docs at start; new runtimes create them lazily"
+      echo "- archived files are recoverable cold history, not active reading surface"
+      echo
+      echo "items:"
+      find "$staging" -type f 2>/dev/null | sort | while IFS= read -r staged; do
+        printf -- "- %s\n" "${staged#$staging/}"
+      done
+    } > "$manifest" || return 5
+    tar -czf "$archive_file" -C "$staging" . || return 5
+    rm -rf "$staging" || return 5
+
+    for path in "${source_paths[@]}"; do
+      rm -f "$path" || return 5
+    done
+    if [ "$sid" != "$current_sprint" ]; then
+      rmdir "$sprint_dir" 2>/dev/null || true
+    fi
+
+    esc_sid="$(json_escape_upgrade "$sid")"
+    esc_archive="$(json_escape_upgrade "${archive_file#$TARGET/}")"
+    append_upgrade_event "prefilled_step_docs_compacted" "\"sprint_id\":\"$esc_sid\",\"archive\":\"$esc_archive\",\"step_docs\":$count" || return 5
+    total=$((total + count))
+  done
+
+  if [ "$total" -gt 0 ]; then
+    ok "prefilled step docs 정리: $total file(s) → ${archive_root#$TARGET/}"
+  else
+    rmdir "$archive_root" 2>/dev/null || true
+  fi
+  return 0
+}
+
+prune_legacy_gitkeep_placeholders() {
+  local dir count=0
+  for dir in \
+    "$TARGET/.sfs-local/sprints" \
+    "$TARGET/.sfs-local/decisions" \
+    "$TARGET/.sfs-local/queue/pending" \
+    "$TARGET/.sfs-local/queue/claimed" \
+    "$TARGET/.sfs-local/queue/done" \
+    "$TARGET/.sfs-local/queue/failed" \
+    "$TARGET/.sfs-local/queue/abandoned" \
+    "$TARGET/.sfs-local/queue/runs"; do
+    [ -f "$dir/.gitkeep" ] || continue
+    rm -f "$dir/.gitkeep" 2>/dev/null || return 5
+    count=$((count + 1))
+  done
+  find "$TARGET/.sfs-local/queue" -depth -type d -empty -exec rmdir {} \; 2>/dev/null || true
+  rmdir "$TARGET/.sfs-local/sprints" "$TARGET/.sfs-local/decisions" 2>/dev/null || true
+  if [ "$count" -gt 0 ]; then
+    ok "legacy .gitkeep placeholder 정리: $count file(s)"
+  fi
+  return 0
+}
+
 thin_project_agent_adapter_migration() {
   [ "${INSTALL_LAYOUT:-vendored}" = "thin" ] || return 0
   case "${SFS_KEEP_PROJECT_AGENT_ADAPTERS:-0}" in
@@ -904,6 +1142,9 @@ thin_project_runtime_asset_migration() {
 }
 
 project_surface_archive_migrations() {
+  migrate_legacy_adopt_visible_sprints || return 5
+  compact_prefilled_step_doc_residue || return 5
+  prune_legacy_gitkeep_placeholders || return 5
   compact_legacy_runtime_upgrade_archives || return 5
   compact_legacy_agent_install_archives || return 5
   compact_legacy_sprint_archive_dirs || return 5

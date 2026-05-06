@@ -13,6 +13,21 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - If intent is not shared, ask 1-3 precise questions before changing files.
 - Use project/domain terms consistently; add or reuse a small glossary when terms drift.
 - Move only as fast as feedback: test, smoke, preview, or review the smallest useful slice.
+- Keep changes surgical: touch only files and lines tied to the request, do not
+  refactor adjacent code, and remove only unused pieces created by this slice.
+- Prefer simple code over speculative flexibility. If the implementation grew
+  larger than the problem justifies, simplify before review.
+- Inspect the exact files and nearby call sites before editing. Treat dirty
+  worktree changes as user work unless you made them, and adapt rather than
+  reverting unrelated edits.
+- When a command fails, read the full error/log output and verify the cause
+  before applying a fix.
+- If code or executable artifacts changed, run the smallest relevant test,
+  build, typecheck, smoke, or scripted review before marking complete. Record
+  the command and result in the implementation evidence.
+- Use current sprint artifacts for plan/checklist/context notes. Create
+  root-level `checklist.md` or `context-notes.md` only when the user asks for
+  those exact files.
 - Token discipline: inspect the smallest relevant files, prefer symbol/semantic
   search or precise `rg` before broad reads, and do not carry old workbench
   history into the turn unless current report/plan evidence is insufficient.

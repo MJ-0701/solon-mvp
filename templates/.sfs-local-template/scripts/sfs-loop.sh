@@ -1468,10 +1468,6 @@ cmd_loop_coord() {
     if [[ "$LOOP_DRY_RUN" == "true" ]]; then extra_flags+=("--dry-run"); fi
     if [[ "$LOOP_NO_MENTAL_COUPLING" == "true" ]]; then extra_flags+=("--no-mental-coupling"); fi
 
-    # 0.6.2 hotfix: macOS bash 3.2 + `set -u` would crash on `"${extra_flags[@]}"`
-    # whenever both LOOP_DRY_RUN and LOOP_NO_MENTAL_COUPLING are unset. Use the
-    # `${arr[@]+...}` parameter-expansion default to stay correct on bash 3.2
-    # and bash 4.4+ alike.
     # COORD_ONLY mode means coordinator does no work itself; otherwise coordinator + workers
     "$SCRIPT_DIR/sfs-loop.sh" \
       --mode "$LOOP_MODE" \

@@ -12,3 +12,7 @@ Arguments: `$ARGUMENTS`
 5. AI-era fundamentals apply across all gates, not only implement: shared design
    concept, domain language, feedback loop, interface/artifact boundary, and
    gray-box delegation.
+6. For implementation and review work, follow the routed context guardrails:
+   surface material assumptions, choose the smallest useful slice, keep changes
+   surgical, read actual files/errors before fixing, verify before completion,
+   and report exact evidence.

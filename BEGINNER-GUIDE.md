@@ -90,7 +90,7 @@ sfs.cmd version --check
 sfs.cmd doctor      # ✅ 세 줄 (Claude / Gemini / Codex) 모두 보이면 OK
 ```
 
-성공하면 `sfs 0.6.11`, `status up-to-date` 같은 문장이 보입니다. Windows
+성공하면 `sfs 0.6.12`, `status up-to-date` 같은 문장이 보입니다. Windows
 PowerShell 이나 cmd 에서는 `sfs.cmd` 를 쓰고, Git Bash/WSL 에서는 `sfs` 를 써도 됩니다.
 
 ### 4. 테스트 프로젝트 폴더 만들기
@@ -301,6 +301,15 @@ Mac/Git Bash:
 
 ```bash
 sfs upgrade
+```
+
+Mac 에서 `sfs` 명령이 너무 오래됐거나 업데이트가 잘 안 되면 Homebrew 런타임을
+먼저 올린 뒤 다시 프로젝트 업데이트를 실행하세요.
+
+```bash
+brew upgrade MJ-0701/solon-product/sfs
+sfs upgrade
+sfs version --check
 ```
 
 Windows Scoop 설치본은 프로젝트 폴더에서 `sfs.cmd update` 를 실행하면 Solon 본체와 현재

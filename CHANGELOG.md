@@ -1,3 +1,47 @@
+## [0.6.12] - 2026-05-06
+
+> **Agent behavior guardrail release.** Solon now absorbs the useful parts of
+> the Claude/Codex "Karpathy-style" coding discipline without copying long
+> instruction files into every adapter. The durable rules live in SFS kernel and
+> routed command context; adapters only point agents back to that thin source.
+
+### Changed
+
+- **Kernel guardrails** — SFS now tells agents to surface material assumptions,
+  prefer the minimum useful slice, avoid speculative flexibility and adjacent
+  cleanup, read actual files/errors before fixing, verify before completion,
+  and report exact evidence.
+- **Plan/implement/review alignment** — `plan.md`, `implement.md`, and
+  `review.md` context now carry phase-specific checks for explicit non-goals,
+  `verify by ...` evidence, surgical changes, dirty worktree respect, full
+  error/log reading, overengineering review, and final verification evidence.
+- **SFS-shaped notes policy** — checklist/context-note guidance now maps to
+  current sprint workbench artifacts instead of forcing root-level
+  `checklist.md` / `context-notes.md` files that would fight minimal-residue
+  project surfaces.
+- **Korean project ergonomics** — kernel guidance covers Korean sentence-ending
+  style and Korean-first source-file role headers without making adapter files
+  heavy.
+- **Adapter hints refreshed** — Claude, Codex, Gemini, project-scoped skills,
+  plugin commands, and legacy prompt surfaces all point implementation/review
+  work back to the routed guardrails.
+- **Homebrew fallback docs** — README, GUIDE, and BEGINNER-GUIDE now state that
+  Mac users can run `brew upgrade MJ-0701/solon-product/sfs` before
+  `sfs upgrade` when the `sfs` runtime itself is stale or self-upgrade cannot
+  complete.
+- **Stable test parity** — dev staging now carries the release-channel guards
+  for deprecated external CLI flags and macOS bash 3.2 empty-array expansion;
+  the suffixless release test now skips gracefully in packaged trees where
+  owner-side release scripts are intentionally absent.
+
+### Verified
+
+- Added `tests/test-agent-behavior-guardrails.sh` to lock the guardrails into
+  kernel, plan, implement, review, and adapter surfaces.
+- Added `tests/test-no-deprecated-cli-flags.sh` and
+  `tests/test-nounset-empty-array-expansion.sh` to keep release tooling and
+  bash 3.2 compatibility checks in dev before stable cut.
+
 ## [0.6.11] - 2026-05-06
 
 > **Minimal residue release.** Solon now applies "남겨야 될 것만 남긴다" across
@@ -17,6 +61,10 @@
   `docs/solon/<id>-adoption-summary.md` and keeps raw scan/cold archive evidence
   under `.sfs-local/archives/adopt/...`. It no longer leaves a fake active
   baseline sprint.
+- **Same-version residue migration** — rerunning `sfs upgrade` now converts older
+  visible `legacy-baseline` sprint folders into `docs/solon/*-adoption-summary.md`
+  plus a private cold archive, and packs old pre-created step docs for sprints
+  with no phase events.
 - **Lean generated templates** — sprint templates were reduced to working
   fields only and localized for Korean owner-facing use.
 - **Install/upgrade surface** — new installs no longer pre-create empty
@@ -29,6 +77,8 @@
   residue behavior and goal propagation.
 - Updated `tests/test-sfs-adopt-freeform.sh` for the `docs/solon` shared summary
   contract and no active sprint pointer after adoption.
+- Added `tests/test-sfs-upgrade-minimal-residue-migration.sh` for same-version
+  upgrade cleanup of legacy adoption and old prefilled step-doc residue.
 
 ## [0.6.10] - 2026-05-05
 

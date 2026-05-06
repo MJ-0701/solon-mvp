@@ -11,6 +11,14 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - Summaries should list verdict, findings, required actions, evidence, and next gate.
   Show gates as `Gate N (Name)`, for example Gate 6 (Review), not a naked
   internal id.
+- Lead with bugs, regressions, missing acceptance evidence, or risky behavior
+  changes. Cosmetic drift is secondary unless it changes a documented contract.
+- Review actual diff, files, test output, and logs. Do not infer pass from
+  intent or from a familiar failure keyword.
+- Flag overengineering, speculative abstraction, unrelated refactors, and
+  adjacent cleanup when they are not traceable to the request.
+- Check that final evidence names the exact verification command/result, or
+  clearly explains why verification could not run.
 - The generator does not self-approve its own implementation.
 - `sfs review` is an artifact acceptance review. Code review is only the
   `code` lens; docs, strategy, design, taxonomy, QA, ops, management-admin,

@@ -14,6 +14,23 @@ load_when: ["always", "sfs", "entry"]
 - Stop on mutex conflicts and report owner/domain.
 - Ask only 1-3 blocking questions.
 - After adapter output, read only the context module routed by `_INDEX.md`.
+- Before work can branch, surface material assumptions, tradeoffs, and the
+  simpler path when it matters. If shared intent is still unclear, ask the
+  smallest blocking question instead of guessing.
+- Prefer the minimum useful slice. Do not add speculative flexibility,
+  abstractions, adjacent cleanup, or formatting churn that is not traceable to
+  the request.
+- Read actual files, command output, and error logs before fixing. Do not apply
+  memory-pattern fixes until the current evidence explains the failure.
+- If files changed, verify with the smallest relevant test, build, smoke, or
+  review check before saying complete. Report the exact check and result; if no
+  check can run, say why.
+- When answering in Korean, do not end Korean sentences with a closing colon.
+- For Korean-first projects, new source files should start with a one-line
+  Korean role comment directly after any required shebang or directive. Skip
+  config, generated, and lock files.
+- Keep plan/checklist/context notes inside the current SFS workbench artifacts
+  unless the user explicitly asks for root-level files.
 - Token/harness hygiene is ambient: keep adapter memory thin, prefer routed
   context and symbol/semantic search before broad reads, and convert repeated
   AI mistakes into guardrails/checks during review or retro.

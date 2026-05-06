@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# tests/test-sfs-upgrade-minimal-residue-migration.sh — same-version upgrade compacts legacy visible residue.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DIST_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+SFS_BIN="${DIST_DIR}/bin/sfs"
+TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/sfs-upgrade-min-residue.XXXXXX")"
+
+cleanup() {
+  rm -rf "${TMP_DIR}"
+}
+trap cleanup EXIT
+
+fail() {
+  echo "FAIL: $*" >&2
+  exit 1
+}
+
+cd "${TMP_DIR}"
+git init -q
+printf '# Legacy Residue Project\n' > README.md
+git add README.md
+git -c user.name='SFS Test' -c user.email='sfs-test@example.invalid' commit -qm 'initial'
+
+SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" init --layout thin --yes >/dev/null
+
+mkdir -p .sfs-local/sprints/legacy-baseline
+cat > .sfs-local/sprints/legacy-baseline/report.md <<'EOF'
+---
+phase: report
+status: legacy-baseline
+sprint_id: "legacy-baseline"
+---
+
+# Report — Legacy Baseline Intake
+
+Project facts that should become the shared adoption handoff.
+EOF
+printf '# Retro\n\nlegacy notes\n' > .sfs-local/sprints/legacy-baseline/retro.md
+
+mkdir -p .sfs-local/sprints/2026-W19-sprint-1
+touch .sfs-local/sprints/.gitkeep
+for doc in brainstorm plan implement log review retro; do
+  cat > ".sfs-local/sprints/2026-W19-sprint-1/${doc}.md" <<EOF
+---
+phase: ${doc}
+sprint_id: "2026-W19-sprint-1"
+last_touched_at: ""
+---
+
+# ${doc}
+
+Old runtime prefilled template residue.
+EOF
+done
+printf '2026-W19-sprint-1\n' > .sfs-local/current-sprint
+printf '{"ts":"2026-05-05T23:47:46+09:00","type":"sprint_start","sprint_id":"2026-W19-sprint-1","goal":"residue","by":"sfs-start"}\n' >> .sfs-local/events.jsonl
+
+SFS_MODEL_PROFILE_PROMPT=0 \
+SFS_SKIP_CLI_DISCOVERY=1 \
+SFS_COMMAND_TIMEOUT_SEC=0 \
+bash "${DIST_DIR}/upgrade.sh" --yes --layout thin >/tmp/sfs-upgrade-min-residue.out
+
+SHARED_DOC="docs/solon/legacy-baseline-adoption-summary.md"
+[[ -f "${SHARED_DOC}" ]] || fail "missing migrated shared adoption doc"
+grep -Fq "Project facts that should become the shared adoption handoff." "${SHARED_DOC}" \
+  || fail "shared adoption doc did not preserve legacy report body"
+[[ ! -d .sfs-local/sprints/legacy-baseline ]] || fail "legacy-baseline visible sprint should be archived away"
+find .sfs-local/archives/adopt/legacy-baseline -name visible-sprint-workspace.tar.gz -type f | grep -q . \
+  || fail "missing legacy-baseline visible sprint cold archive"
+
+for doc in brainstorm plan implement log review retro; do
+  [[ ! -e ".sfs-local/sprints/2026-W19-sprint-1/${doc}.md" ]] \
+    || fail "prefilled ${doc}.md should be archived away"
+done
+[[ ! -e .sfs-local/sprints/.gitkeep ]] || fail "legacy sprints .gitkeep should be removed"
+[[ "$(cat .sfs-local/current-sprint)" = "2026-W19-sprint-1" ]] || fail "active sprint pointer should remain"
+find .sfs-local/archives/runtime-migrations -name '2026-W19-sprint-1-step-docs.tar.gz' -type f | grep -q . \
+  || fail "missing prefilled step-doc cold archive"
+
+grep -Fq '"type":"legacy_adopt_surface_migrated"' .sfs-local/events.jsonl \
+  || fail "missing legacy adopt migration event"
+grep -Fq '"type":"prefilled_step_docs_compacted"' .sfs-local/events.jsonl \
+  || fail "missing prefilled step-doc compaction event"
+! grep -Eq '\}\}$' .sfs-local/events.jsonl || fail "events.jsonl contains a double-closing-brace line"
+
+status_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" status)"
+case "${status_out}" in
+  *"sprint 2026-W19-sprint-1"* ) ;;
+  *) fail "status did not preserve active sprint: ${status_out}" ;;
+esac
+
+echo "test-sfs-upgrade-minimal-residue-migration: OK"
