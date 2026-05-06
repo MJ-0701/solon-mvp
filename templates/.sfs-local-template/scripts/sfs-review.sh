@@ -1906,7 +1906,10 @@ EOF
   cat <<'EOF'
 
 Next-action policy:
-- `pass`: name the close path, usually `/sfs report` then `/sfs retro`.
+- `pass`: name `/sfs retro` as the normal close path. `retro` ensures
+  `report.md`, opens/refines `retro.md`, archives noisy workbench state, and
+  closes the sprint. Mention `/sfs report` only when the user explicitly wants
+  a report preview or wants to rebuild a past report without closing.
 - `partial`: name the smallest rework slice and whether to rerun `/sfs review`.
 - `fail`: name whether to return to `/sfs plan`, redo implementation, or escalate to the user.
 

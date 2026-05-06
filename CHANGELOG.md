@@ -1,3 +1,24 @@
+## [0.6.17] - 2026-05-06
+
+> **Retro close guidance hotfix.** Real use showed that the review prompt still
+> told passing reviews to run `/sfs report` and then `/sfs retro`, even though
+> `retro` already ensures `report.md` as part of the normal close flow.
+
+### Fixed
+
+- Changed the Gate 6 review next-action policy so PASS names `/sfs retro` as
+  the normal close path.
+- Clarified that `/sfs report` is optional and should be mentioned only for a
+  report preview or past-report rebuild without closing the sprint.
+- Updated tidy/review context so agents do not recommend `report` before
+  `retro` in the normal Gate 7 path.
+
+### Verified
+
+- Added a guardrail test that fails if the stale "`/sfs report` then
+  `/sfs retro`" wording returns.
+- `bash tests/test-agent-behavior-guardrails.sh` passed.
+
 ## [0.6.16] - 2026-05-06
 
 > **Decision report clarity hotfix.** Real Gate 3 usage showed that compact

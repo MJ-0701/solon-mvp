@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.17
+
+이번 버전은 review 통과 후 다음 액션 안내가 `sfs report` 를 불필요하게 먼저 권하던 문제를 바로잡은 핫픽스입니다.
+
+- 정상 마무리 경로는 `sfs retro` 하나입니다.
+- `retro` 는 이미 `report.md` 를 확인하거나 만들고, `retro.md` 를 정리하고, sprint close 까지 이어갑니다.
+- `sfs report` 는 보고서만 미리 보거나 과거 sprint 보고서를 다시 만들 때 쓰는 선택 명령으로 정리했습니다.
+- review/tidy context 와 CPO review prompt 에서 `report -> retro` 안내가 다시 나오지 않도록 테스트를 추가했습니다.
+
 ## 0.6.16
 
 이번 버전은 Gate 3 같은 계획 보고서에서 결정 질문이 너무 압축되어 보이던 문제를 바로잡은 핫픽스입니다.

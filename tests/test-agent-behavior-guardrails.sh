@@ -19,11 +19,24 @@ assert_contains() {
   grep -Fq "${needle}" "${file}" || fail "${label}: missing '${needle}'"
 }
 
+assert_not_contains() {
+  local file="$1"
+  local needle="$2"
+  local label="$3"
+
+  [[ -f "${file}" ]] || fail "${label}: missing file ${file}"
+  if grep -Fq "${needle}" "${file}"; then
+    fail "${label}: unexpected '${needle}'"
+  fi
+}
+
 kernel="${DIST_DIR}/templates/.sfs-local-template/context/kernel.md"
 brainstorm="${DIST_DIR}/templates/.sfs-local-template/context/commands/brainstorm.md"
 plan="${DIST_DIR}/templates/.sfs-local-template/context/commands/plan.md"
 implement="${DIST_DIR}/templates/.sfs-local-template/context/commands/implement.md"
 review="${DIST_DIR}/templates/.sfs-local-template/context/commands/review.md"
+tidy="${DIST_DIR}/templates/.sfs-local-template/context/commands/tidy.md"
+review_script="${DIST_DIR}/templates/.sfs-local-template/scripts/sfs-review.sh"
 model_profiles="${DIST_DIR}/templates/.sfs-local-template/model-profiles.yaml"
 researcher="${DIST_DIR}/templates/.sfs-local-template/personas/researcher.md"
 
@@ -60,6 +73,13 @@ assert_contains "${review}" "Review actual diff, files, test output, and logs" "
 assert_contains "${review}" "Flag overengineering" "review overengineering"
 assert_contains "${review}" "exact verification command/result" "review verification evidence"
 assert_contains "${review}" "self-validation risk" "review self-validation"
+assert_contains "${review}" 'Pass should name `sfs retro` as the' "review retro close path"
+assert_contains "${tidy}" 'Do not recommend `report` before `retro`' "tidy no report-before-retro"
+assert_contains "${review_script}" 'name `/sfs retro` as the normal close path' "review prompt retro close path"
+stale_report_cmd='/sfs report'
+stale_retro_cmd='/sfs retro'
+stale_close_phrase="usually \`${stale_report_cmd}\` then \`${stale_retro_cmd}\`"
+assert_not_contains "${review_script}" "${stale_close_phrase}" "review prompt no stale report-then-retro"
 
 assert_contains "${researcher}" "default_executor: gemini" "researcher default executor"
 assert_contains "${researcher}" "Do not edit production files" "researcher read-only"
