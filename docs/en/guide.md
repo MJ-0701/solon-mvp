@@ -7,7 +7,7 @@ install. For beginner Git/terminal help, use the Korean [BEGINNER-GUIDE.md](../.
 
 ## 0. Install And Initialize
 
-> **As of 0.6.12**, one `brew install` / `scoop install` lets Claude Code
+> **As of 0.6.13**, one `brew install` / `scoop install` lets Claude Code
 > (`/sfs`), Gemini CLI (`sfs`), and Codex CLI (`$sfs`) find Solon automatically.
 > Your project keeps the files you read and the records you create.
 
@@ -61,11 +61,11 @@ optional. Install those native shortcuts only when a project needs them:
 sfs agent install all
 ```
 
-Old projects can be upgraded into the lighter 0.6.12 shape. Use
+Old projects can be upgraded into the lighter 0.6.13 shape. Use
 `sfs upgrade --layout vendored` only when Solon package files must stay inside
 the project.
 
-0.6.12 also fills the division knowledge packs. The user does not need to choose
+0.6.13 also includes the filled division knowledge packs. The user does not need to choose
 "backend", "QA", "infra", "finance", "tax", "accounting", or "taxonomy"
 manually. The AI should read the relevant Solon lens when the work calls for it,
 then explain the judgment in plain language.
@@ -198,6 +198,19 @@ sfs.cmd version --check
 
 On Windows, `sfs.cmd update` is the one-shot command. It updates Solon and then
 continues into the current project cleanup.
+
+## 9. Optional Multi-Agent Use
+
+You can use Claude, Codex, and Gemini as a small team, but SFS keeps that pattern
+thin by default.
+
+- Use a read-only researcher when a large codebase, dependency change, or domain
+  map needs broad context before edits.
+- Use implementation workers only after the plan and files_scope are fixed.
+- Use an independent evaluator when the generator should not approve its own
+  work.
+- Share conclusions through the sprint workbench and `docs/solon/domain-map.md`,
+  not through long copied transcripts.
 
 Long-running commands can also be wrapped with `sfs measure --alive -- <command>`
 when you want visible progress instead of a silent terminal.

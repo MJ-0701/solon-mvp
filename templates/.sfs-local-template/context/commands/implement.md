@@ -10,6 +10,10 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - Valid artifacts: code, taxonomy, design handoff, QA evidence, infra/runbook,
   management/admin evidence, decisions, docs, workflow, research, or
   user-facing operating material.
+- If the codebase, dependency change, or domain model is unfamiliar, split off a
+  read-only research slice before editing. Use `.sfs-local/personas/researcher.md`
+  when available, prefer a long-context executor such as Gemini when configured,
+  and record only the compact findings in the current workbench.
 - If intent is not shared, ask 1-3 precise questions before changing files.
 - Use project/domain terms consistently; add or reuse a small glossary when terms drift.
 - Move only as fast as feedback: test, smoke, preview, or review the smallest useful slice.
@@ -33,6 +37,9 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   history into the turn unless current report/plan evidence is insufficient.
 - Prefer deep modules and gray-box delegation: design the public interface, then let AI fill internals.
 - Record artifact type, domain terms, divisions, feedback checks, design/interface notes, and review handoff in `implement.md`.
+- When delegating worker slices, keep files_scope explicit and disjoint. Workers
+  may implement fixed internals, but architecture, public API, domain terms, and
+  acceptance criteria stay with CEO/CTO/user decisions.
 - Use TDD/DDD/transaction guardrails when code or data consistency is touched.
 - Load `policies/knowledge-pack-router.md` first, or `policies/knowledge-pack-router.ko.md`
   for Korean preference. Apply only the matching division router ids.

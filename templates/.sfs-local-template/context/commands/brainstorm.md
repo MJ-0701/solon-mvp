@@ -26,12 +26,17 @@ load_when: ["brainstorm", "브레인스토밍", "requirements", "요구사항", 
     scope, and at least two options are explicit.
   - ubiquitous language: key domain nouns, actors, states, and overloaded terms
     are named in the same words the product/code/docs should use.
+    If those terms will outlive the sprint, seed or update
+    `docs/solon/domain-map.md`; otherwise keep the glossary in `brainstorm.md`.
   - feedback loop seed: the likely test, smoke, review, preview, or manual
     inspection signal is named before planning work.
   - deep-module seed: important boundaries or public interfaces are sketched, or
     the non-code artifact boundary is named.
   - gray-box delegation: human-owned strategy/interface decisions are separated
     from AI-fillable internals.
+- For unfamiliar domains or large existing codebases, a read-only researcher
+  pass may happen before plan. The researcher maps sources, domain terms,
+  contradictions, and unknowns; it does not implement or approve quality.
 - Non-developer initial setup proposal:
   - Do not require the user to know framework names such as Next.js, Spring,
     FastAPI, NestJS, React, Vue, or Nuxt.

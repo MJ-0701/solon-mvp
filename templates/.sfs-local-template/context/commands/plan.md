@@ -18,6 +18,9 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
     non-goals.
   - ubiquitous language becomes the terms used in AC, code, docs, UI labels,
     tests, and review notes.
+    If canonical terms, forbidden aliases, actors, states, or domain boundaries
+    will matter beyond this sprint, point the plan at `docs/solon/domain-map.md`
+    or add a small update to that file as an implementation artifact.
   - feedback loops become binary AC with `verify by ...` evidence.
   - deep-module boundaries become public interfaces, artifact boundaries, or
     ownership slices.
@@ -29,6 +32,13 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   `verify by ...` evidence. In SFS, that checklist belongs in sprint
   workbench artifacts such as `plan.md` or `implement.md`, not as mandatory
   root-level `checklist.md` / `context-notes.md` files.
+- For high-risk plans, large codebases, or unfamiliar domains, request a plan
+  review before implementation. Use `sfs review --gate 3` with the appropriate
+  lens and an independent executor when available; the plan author should not be
+  the only evaluator.
+- If a researcher pass produced findings, summarize only the durable result in
+  the plan: sources checked, domain terms, contradictions, and remaining
+  unknowns. Do not copy the full research transcript into the plan.
 - Load `policies/knowledge-pack-router.md` first, or `policies/knowledge-pack-router.ko.md`
   for Korean preference. Proceed to matching division packs from its mapping.
 - If backend/JVM/Spring/JPA/transaction/batch/integration/DevOps/AWS risk is in

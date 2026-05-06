@@ -20,6 +20,9 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - Check that final evidence names the exact verification command/result, or
   clearly explains why verification could not run.
 - The generator does not self-approve its own implementation.
+- If the evaluator executor equals the generator executor, call out the
+  self-validation risk and prefer a separate model or fresh agent context when
+  the change is user-facing, risky, or hard to verify.
 - `sfs review` is an artifact acceptance review. Code review is only the
   `code` lens; docs, strategy, design, taxonomy, QA, ops, management-admin,
   release, and generic artifacts use their own acceptance lens.

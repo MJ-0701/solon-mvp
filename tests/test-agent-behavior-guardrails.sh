@@ -20,20 +20,29 @@ assert_contains() {
 }
 
 kernel="${DIST_DIR}/templates/.sfs-local-template/context/kernel.md"
+brainstorm="${DIST_DIR}/templates/.sfs-local-template/context/commands/brainstorm.md"
 plan="${DIST_DIR}/templates/.sfs-local-template/context/commands/plan.md"
 implement="${DIST_DIR}/templates/.sfs-local-template/context/commands/implement.md"
 review="${DIST_DIR}/templates/.sfs-local-template/context/commands/review.md"
+model_profiles="${DIST_DIR}/templates/.sfs-local-template/model-profiles.yaml"
+researcher="${DIST_DIR}/templates/.sfs-local-template/personas/researcher.md"
 
 assert_contains "${kernel}" "surface material assumptions" "kernel assumptions"
 assert_contains "${kernel}" "minimum useful slice" "kernel simplicity"
 assert_contains "${kernel}" "Read actual files, command output, and error logs" "kernel evidence"
 assert_contains "${kernel}" "do not end Korean sentences with a closing colon" "kernel Korean output"
 assert_contains "${kernel}" "current SFS workbench artifacts" "kernel SFS notes"
+assert_contains "${kernel}" "Multi-agent work is thin supervision" "kernel thin supervision"
+
+assert_contains "${brainstorm}" "docs/solon/domain-map.md" "brainstorm domain map"
+assert_contains "${brainstorm}" "read-only researcher" "brainstorm researcher"
 
 assert_contains "${plan}" "explicit non-goals" "plan tradeoffs"
 assert_contains "${plan}" "verify by ..." "plan verification"
 assert_contains "${plan}" "mandatory" "plan no root notes"
 assert_contains "${plan}" "root-level" "plan no root notes"
+assert_contains "${plan}" "sfs review --gate 3" "plan pre-implementation review"
+assert_contains "${plan}" "docs/solon/domain-map.md" "plan domain map"
 
 assert_contains "${implement}" "Keep changes surgical" "implement surgical changes"
 assert_contains "${implement}" "speculative flexibility" "implement simplicity"
@@ -41,10 +50,21 @@ assert_contains "${implement}" "dirty" "implement worktree respect"
 assert_contains "${implement}" "worktree changes" "implement worktree respect"
 assert_contains "${implement}" "full error/log output" "implement read errors"
 assert_contains "${implement}" "smallest relevant test" "implement verification"
+assert_contains "${implement}" ".sfs-local/personas/researcher.md" "implement researcher"
+assert_contains "${implement}" "files_scope explicit and disjoint" "implement worker scope"
 
 assert_contains "${review}" "Review actual diff, files, test output, and logs" "review evidence"
 assert_contains "${review}" "Flag overengineering" "review overengineering"
 assert_contains "${review}" "exact verification command/result" "review verification evidence"
+assert_contains "${review}" "self-validation risk" "review self-validation"
+
+assert_contains "${researcher}" "default_executor: gemini" "researcher default executor"
+assert_contains "${researcher}" "Do not edit production files" "researcher read-only"
+assert_contains "${researcher}" "docs/solon/domain-map.md" "researcher domain map"
+
+assert_contains "${model_profiles}" "research_high" "model profiles research tier"
+assert_contains "${model_profiles}" "researcher: research_high" "model profiles researcher policy"
+assert_contains "${model_profiles}" ".sfs-local/personas/researcher.md" "model profiles researcher persona"
 
 adapter_files=(
   "${DIST_DIR}/templates/CLAUDE.md.template"

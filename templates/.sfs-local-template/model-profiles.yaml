@@ -6,7 +6,7 @@
 # cost-aware defaults, but does not block an "all high-end models" policy when
 # the project accepts the cost and latency.
 
-version: 1.1
+version: 1.2
 project: "<PROJECT-NAME>"
 created: "<DATE>"
 solon_mvp_version: "<SOLON-VERSION>"
@@ -41,6 +41,16 @@ reasoning_tiers:
       - "the implementation author must not approve their own work"
       - "release or user-facing quality risk is meaningful"
 
+  research_high:
+    purpose: "Read-only codebase/domain research, long-context synthesis, and source mapping before implementation"
+    cost_latency: "medium-high"
+    default_roles:
+      - researcher
+    use_when:
+      - "the codebase or domain is unfamiliar"
+      - "terms, architecture boundaries, dependencies, or prior decisions need mapping"
+      - "the generator would otherwise carry too much context into implementation"
+
   execution_standard:
     purpose: "Implementation worker after plan, architecture, acceptance criteria, and files_scope are fixed"
     cost_latency: "standard"
@@ -74,6 +84,7 @@ policies:
       ceo: current
       cto-generator: current
       cpo-evaluator: current
+      researcher: current
       implementation-worker: current
       division-worker: current
       parser: current
@@ -86,6 +97,7 @@ policies:
       ceo: strategic_high
       cto-generator: strategic_high
       cpo-evaluator: review_high
+      researcher: research_high
       implementation-worker: execution_standard
       division-worker: execution_standard
       parser: helper_economy
@@ -98,6 +110,7 @@ policies:
       ceo: strategic_high
       cto-generator: strategic_high
       cpo-evaluator: review_high
+      researcher: research_high
       implementation-worker: strategic_high
       division-worker: strategic_high
       parser: strategic_high
@@ -121,6 +134,9 @@ runtime_model_settings:
     review_high:
       model: "opus-4.7"
       fallback_model: "opus-4.6"
+    research_high:
+      model: "opus-4.7"
+      fallback_model: "opus-4.6"
     execution_standard:
       model: "sonnet"
     helper_economy:
@@ -135,6 +151,10 @@ runtime_model_settings:
       model: "gpt-5.5"
       reasoning_effort: "xhigh"
       reasoning_label: "very_high"
+    research_high:
+      model: "gpt-5.5"
+      reasoning_effort: "high"
+      reasoning_label: "high"
     execution_standard:
       model: "gpt-5.5"
       reasoning_effort: "medium"
@@ -149,6 +169,9 @@ runtime_model_settings:
     review_high:
       model: "gemini-high"
       reasoning_effort: "high"
+    research_high:
+      model: "gemini-high"
+      reasoning_effort: "high"
     execution_standard:
       model: "gemini-balanced"
       reasoning_effort: "medium"
@@ -161,6 +184,8 @@ runtime_model_settings:
       command_or_model: "<custom-high-reasoning-command-or-model>"
     review_high:
       command_or_model: "<custom-review-command-or-model>"
+    research_high:
+      command_or_model: "<custom-research-command-or-model>"
     execution_standard:
       command_or_model: "<custom-implementation-command-or-model>"
     helper_economy:
@@ -178,6 +203,10 @@ agent_defaults:
   cpo-evaluator:
     persona: ".sfs-local/personas/cpo-evaluator.md"
     recommended_tier: review_high
+    configured_tier: current
+  researcher:
+    persona: ".sfs-local/personas/researcher.md"
+    recommended_tier: research_high
     configured_tier: current
   implementation-worker:
     persona: ".sfs-local/personas/implementation-worker.md"
@@ -215,6 +244,7 @@ agent_model_overrides:
   ceo: {}
   cto-generator: {}
   cpo-evaluator: {}
+  researcher: {}
   implementation-worker: {}
   division-worker: {}
   parser: {}

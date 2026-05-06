@@ -38,6 +38,10 @@ load_when: ["always", "sfs", "entry"]
   rules: shared design concept, ubiquitous language, tight feedback loops,
   deep-module boundaries, and gray-box delegation must shape brainstorm, plan,
   implement, review, report, and retro.
+- Multi-agent work is thin supervision, not noisy coordination by default:
+  use read-only research, fixed-scope worker slices, and independent review only
+  when they reduce context pollution or self-validation risk. Share results
+  through current SFS workbench artifacts, not through long copied transcripts.
 - Do not advance a gate just because raw requirements exist. If shared intent,
   domain terms, acceptance checks, or interface boundaries are unclear, stop at
   the current gate and ask the smallest blocking questions before moving on.

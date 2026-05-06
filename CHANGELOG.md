@@ -1,3 +1,40 @@
+## [0.6.13] - 2026-05-06
+
+> **Thin multi-agent supervision release.** Solon now keeps the useful parts of
+> Claude/Codex/Gemini team workflows without making every project carry a heavy
+> supervisor system. Research, implementation, and review stay separated by
+> role, but the durable project surface remains compact.
+
+### Added
+
+- **Researcher persona** — added a read-only `researcher` persona for broad
+  codebase, domain, library, and migration mapping. The persona records compact
+  findings and does not edit production files, approve quality, or rewrite the
+  plan.
+- **Research model tier** — added `research_high` to `model-profiles.yaml`, with
+  Gemini-friendly defaults for large-context research while preserving Codex for
+  independent review and existing executor choices for implementation.
+
+### Changed
+
+- **Thin supervision context** — kernel, brainstorm, plan, implement, and review
+  context now describe multi-agent work as optional thin supervision: read-only
+  research first, fixed-scope worker slices when needed, and independent review
+  before risky implementation.
+- **Workbench memory guidance** — routed context now prefers compact workbench
+  notes and `docs/solon/domain-map.md` for durable domain terms instead of
+  copying full agent transcripts into the project.
+- **User docs** — Korean and English guides now explain when Claude, Codex, and
+  Gemini teamwork is useful, and when a single-agent flow is still the cleaner
+  choice.
+
+### Verified
+
+- Added guardrail coverage for researcher persona, research tier, domain-map
+  usage, plan review gating, thin supervision wording, fixed worker scope, and
+  self-validation review risk.
+- `bash tests/run-all.sh` passed before release preparation.
+
 ## [0.6.12] - 2026-05-06
 
 > **Agent behavior guardrail release.** Solon now absorbs the useful parts of
@@ -33,6 +70,9 @@
   for deprecated external CLI flags and macOS bash 3.2 empty-array expansion;
   the suffixless release test now skips gracefully in packaged trees where
   owner-side release scripts are intentionally absent.
+- **Homebrew audit cleanup** — packaged formula no longer emits an explicit
+  `version` line when the same version is already inferable from the GitHub tag
+  URL, matching `brew audit --strict --online` expectations.
 
 ### Verified
 

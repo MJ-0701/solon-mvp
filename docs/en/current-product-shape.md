@@ -118,9 +118,26 @@ infers the right lens from sprint evidence and changed artifacts.
 The user can keep saying `sfs review`. `--lens` is only an override when the
 inference is wrong.
 
+## Thin Multi-Agent Supervision
+
+SFS does not ask Claude, Codex, and Gemini to run at the same time by default.
+The default is one small work unit, with role separation only when it reduces
+context pollution or self-validation risk.
+
+- A researcher is useful when the codebase, domain, or dependency change needs
+  broad read-only mapping before edits.
+- A worker is useful after the plan and files_scope are fixed.
+- An evaluator is useful when the generator should not approve its own work.
+- Shared memory is not a long transcript. It is the sprint workbench,
+  `review.md`, `report.md`, and, when terminology needs to survive the sprint,
+  `docs/solon/domain-map.md`.
+
+This is a thin supervisor pattern that keeps the useful independence of
+multiple agents without making coordination the product.
+
 ## Division Knowledge Packs
 
-As of 0.6.1, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
+As of 0.6.13, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
 management/admin, and taxonomy packs are no longer placeholders. Each pack gives
 Solon a compact sense of what to watch, what to ask, and what evidence should
 count for that kind of work.
