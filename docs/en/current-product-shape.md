@@ -137,7 +137,7 @@ multiple agents without making coordination the product.
 
 ## Division Knowledge Packs
 
-As of 0.6.15, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
+As of 0.6.16, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
 management/admin, and taxonomy packs are no longer placeholders. Each pack gives
 Solon a compact sense of what to watch, what to ask, and what evidence should
 count for that kind of work.

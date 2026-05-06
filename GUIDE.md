@@ -27,7 +27,7 @@ AI 시대에 Solon 이 주는 가치는 [Solon 10x 가치](./docs/ko/10x-value.m
 
 ## 1. 설치와 초기화
 
-> **0.6.15 기준** brew/scoop 한 줄이면 Claude Code, Gemini CLI, Codex CLI 가 모두
+> **0.6.16 기준** brew/scoop 한 줄이면 Claude Code, Gemini CLI, Codex CLI 가 모두
 > Solon 을 찾습니다. 별도 plugin/extension 설치 명령을 기억하지 않아도 됩니다.
 
 Mac:
@@ -78,7 +78,7 @@ sfs.cmd status
 사용자가 읽을 문서와 작업 기록을 중심으로 남깁니다. AI 도구별 native 파일이 꼭 필요한 팀만
 `sfs agent install all` 로 추가 설치하면 됩니다.
 
-0.6.15 기준으로는 분야별 지식팩이 실제 안내로 채워져 있습니다. 사용자가 backend, QA, infra, 재무,
+0.6.16 기준으로는 분야별 지식팩이 실제 안내로 채워져 있습니다. 사용자가 backend, QA, infra, 재무,
 세무, 회계 같은 말을 정확히 몰라도 괜찮습니다. Solon 을 쓰는 AI 가 작업 성격을 보고 필요한
 관점만 읽고, 사용자에게는 평범한 질문과 판단 기준으로 풀어 설명하는 쪽이 기본입니다.
 
@@ -327,6 +327,9 @@ sfs retro
 보고 싶거나 sprint 를 닫지 않고 회고 초안만 열고 싶을 때 쓰는 옵션은 §11 에
 정리되어 있습니다.
 
+보고서가 사용자 결정을 요구할 때는 `Q1` 같은 번호만 던지지 않습니다. 무엇을 결정해야 하는지,
+왜 지금 필요한지, 권장 기본값과 각 선택지의 결과를 짧게 풀어 설명해야 합니다.
+
 ---
 
 ## 11. 필요할 때만 쓰는 명령
@@ -415,7 +418,7 @@ AI 시대의 설계 원칙은 [현재 제품 흐름과 최근 변화](./docs/ko/
 Claude Code 에서는 `/sfs`, Gemini CLI 에서는 `sfs`, Codex CLI 에서는 `$sfs` 를 씁니다.
 Windows PowerShell/cmd 에서는 `sfs.cmd` 를 씁니다.
 
-0.6.15 기준 brew/scoop 가 세 CLI 모두에 자동 등록합니다. 그래도
+0.6.16 기준 brew/scoop 가 세 CLI 모두에 자동 등록합니다. 그래도
 `/sfs` 가 안 나오면 아래 명령으로 상태를 확인해 주세요.
 
 ```bash

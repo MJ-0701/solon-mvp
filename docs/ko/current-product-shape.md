@@ -130,7 +130,7 @@ supervisor 패턴입니다.
 
 ## 분야별 지식팩
 
-0.6.15 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
+0.6.16 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
 더 이상 빈 자리표시자가 아닙니다. 각 지식팩은 "이 분야라면 무엇을 조심해야 하는가",
 "무엇을 물어봐야 하는가", "어떤 근거가 있으면 통과로 볼 수 있는가"를 짧게 담습니다.
 
@@ -150,6 +150,8 @@ sfs retro
 
 이 명령은 `report.md` 와 `retro.md` 를 정리하고, workbench 원문과 임시 review scratch 를 하나의
 cold archive bundle 로 압축한 뒤, sprint close 상태와 local close commit 까지 연결합니다.
+report 가 사용자 결정을 요구할 때는 `Q1` 같은 내부 번호만 남기지 않고, 결정의 의미와 선택지별
+결과를 짧게 풀어 설명합니다.
 초안만 열고 sprint 는 닫지 않고 싶을 때는 `sfs retro --draft` 를 씁니다.
 예전 설치본에 남아 있던 loose sprint archive 나 별도 review-run archive 는 `sfs upgrade` 때
 압축 migration 으로 정리됩니다. runtime upgrade / agent install / profile rollback 백업도

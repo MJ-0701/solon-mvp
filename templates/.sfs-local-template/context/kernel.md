@@ -13,6 +13,10 @@ load_when: ["always", "sfs", "entry"]
   local workbench state and should remain thin.
 - Stop on mutex conflicts and report owner/domain.
 - Ask only 1-3 blocking questions.
+- Decision questions must be self-contained: before any `Q1`, `D1`, or option
+  id, explain in plain user language what is being decided, why it matters,
+  the recommended default, and what each option changes. Labels are
+  cross-references, not the explanation.
 - After adapter output, read only the context module routed by `_INDEX.md`.
 - Before work can branch, surface material assumptions, tradeoffs, and the
   simpler path when it matters. If shared intent is still unclear, ask the

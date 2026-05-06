@@ -34,3 +34,7 @@ $ARGUMENTS
    Gate 1 (Intake), Gate 2 (Brainstorm), Gate 3 (Plan),
    Gate 4 (Design), Gate 5 (Handoff), Gate 6 (Review),
    Gate 7 (Retro). Use gate numbers 1..7 for new CLI examples.
+12. Decision questions must be self-contained: before any `Q1`, `D1`, or
+    option id, explain in plain user language what is being decided, why it
+    matters, the recommended default, and what each option changes. Labels are
+    cross-references, not the explanation.

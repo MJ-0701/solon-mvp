@@ -42,3 +42,7 @@ $ARGUMENTS
     bullet dump. Use a clear title/verdict strip, 2-4 labeled status panels,
     one action rail, and at most 1-3 questions. Keep long evidence behind file
     paths or source labels; do not make every line the same visual weight.
+14. Decision questions must be self-contained: before any `Q1`, `D1`, or
+    option id, explain in plain user language what is being decided, why it
+    matters, the recommended default, and what each option changes. Labels are
+    cross-references, not the explanation.

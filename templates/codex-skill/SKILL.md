@@ -40,16 +40,20 @@ required.
     bullet dump. Use a clear title/verdict strip, 2-4 labeled status panels,
     one action rail, and at most 1-3 questions. Keep long evidence behind file
     paths or source labels; do not make every line the same visual weight.
-13. For `brainstorm`, ask 1-3 blocking questions when shared understanding is
+13. Decision questions must be self-contained: before any `Q1`, `D1`, or
+    option id, explain in plain user language what is being decided, why it
+    matters, the recommended default, and what each option changes. Labels are
+    cross-references, not the explanation.
+14. For `brainstorm`, ask 1-3 blocking questions when shared understanding is
     missing. Do not run or recommend `plan` as the next step until Gate 2 is
     `ready-for-plan`.
-14. For `plan`, derive the contract from `brainstorm.md`; unresolved Gate 2
+15. For `plan`, derive the contract from `brainstorm.md`; unresolved Gate 2
     questions stay visible instead of being hidden by assumptions.
-15. For `implement`, backend architecture follows the routed `implement.md`
+16. For `implement`, backend architecture follows the routed `implement.md`
     guardrail: clean layered monolith for MVP/small projects, CQRS for
     non-initial backend work even on one DB, Hexagonal transition only after
     user acceptance, and MSA transition only after explicit approval.
-16. For `implement`, non-Dev divisions also follow routed policy ladders:
+17. For `implement`, non-Dev divisions also follow routed policy ladders:
     strategy-pm, taxonomy, design/frontend, QA, and infra start lightweight,
     strengthen on trigger evidence, and require user acceptance/approval before
     large roadmap, rename, redesign, release-readiness, or infra transitions.

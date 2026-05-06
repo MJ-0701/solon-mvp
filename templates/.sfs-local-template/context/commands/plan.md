@@ -11,6 +11,10 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
 - If `brainstorm.md` is still draft or has unresolved blocking questions, do
   not smooth over them with assumptions. Ask 1-3 questions and keep the plan
   draft until shared intent is clear.
+- If Gate 3 remains draft because the user must choose scope, do not end with
+  an unexplained `Q1`. Write a short decision-needed paragraph that restates the
+  user-facing choice, why the choice matters, the recommended default, and the
+  consequence of each option. The id is only a cross-reference for later logs.
 - State material assumptions, tradeoffs, explicit non-goals, and a simpler path
   when one exists. Do not hide unresolved decisions inside confident wording.
 - Gate 3 must carry the same AI-era fundamentals forward:

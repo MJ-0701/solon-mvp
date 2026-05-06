@@ -16,3 +16,7 @@ Arguments: `$ARGUMENTS`
    surface material assumptions, choose the smallest useful slice, keep changes
    surgical, read actual files/errors before fixing, verify before completion,
    and report exact evidence.
+7. Decision questions must be self-contained: before any `Q1`, `D1`, or option
+   id, explain in plain user language what is being decided, why it matters, the
+   recommended default, and what each option changes. Labels are
+   cross-references, not the explanation.

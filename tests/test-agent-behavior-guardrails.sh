@@ -33,6 +33,7 @@ assert_contains "${kernel}" "Read actual files, command output, and error logs" 
 assert_contains "${kernel}" "do not end Korean sentences with a closing colon" "kernel Korean output"
 assert_contains "${kernel}" "current SFS workbench artifacts" "kernel SFS notes"
 assert_contains "${kernel}" "Multi-agent work is thin supervision" "kernel thin supervision"
+assert_contains "${kernel}" "Decision questions must be self-contained" "kernel decision clarity"
 
 assert_contains "${brainstorm}" "docs/solon/domain-map.md" "brainstorm domain map"
 assert_contains "${brainstorm}" "read-only researcher" "brainstorm researcher"
@@ -43,6 +44,8 @@ assert_contains "${plan}" "mandatory" "plan no root notes"
 assert_contains "${plan}" "root-level" "plan no root notes"
 assert_contains "${plan}" "sfs review --gate 3" "plan pre-implementation review"
 assert_contains "${plan}" "docs/solon/domain-map.md" "plan domain map"
+assert_contains "${plan}" "do not end with" "plan decision clarity"
+assert_contains "${plan}" 'unexplained `Q1`' "plan unexplained Q1 guardrail"
 
 assert_contains "${implement}" "Keep changes surgical" "implement surgical changes"
 assert_contains "${implement}" "speculative flexibility" "implement simplicity"
@@ -82,6 +85,7 @@ adapter_files=(
 for file in "${adapter_files[@]}"; do
   assert_contains "${file}" "surface material assumptions" "adapter guardrail ${file}"
   assert_contains "${file}" "report exact evidence" "adapter evidence ${file}"
+  assert_contains "${file}" "Decision questions must be self-contained" "adapter decision clarity ${file}"
 done
 
 echo "test-agent-behavior-guardrails: OK"

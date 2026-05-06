@@ -39,5 +39,9 @@ numbers 1..7 for new CLI examples; legacy ids remain compatibility-only.
 Solon reports should feel like compact console dashboards, not flat bullet
 dumps: title/verdict strip, 2-4 labeled status panels, one action rail, and at
 most 1-3 questions.
+Decision questions must be self-contained: before any `Q1`, `D1`, or option
+id, explain in plain user language what is being decided, why it matters, the
+recommended default, and what each option changes. Labels are cross-references,
+not the explanation.
 Keep only what must remain: `.sfs-local/` is private local workbench state,
 shared durable docs live under `docs/solon/`, and step docs are created lazily.

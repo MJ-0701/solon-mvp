@@ -1,3 +1,27 @@
+## [0.6.16] - 2026-05-06
+
+> **Decision report clarity hotfix.** Real Gate 3 usage showed that compact
+> dashboard reports could compress unresolved scope choices into labels such as
+> `Q1` without enough user-facing context. That made the final confirmation
+> harder to understand even for a developer.
+
+### Changed
+
+- Added a report-surface guardrail that decision questions must be
+  self-contained: before any `Q1`, `D1`, or option id, the report must explain
+  what is being decided, why it matters, the recommended default, and what each
+  option changes.
+- Strengthened Gate 3 plan context so draft plans with scope questions end with
+  a short decision-needed paragraph instead of an unexplained id.
+- Updated the Solon Status Report SSoT from v0.6.10 to v0.6.16 to preserve the
+  compact dashboard shape while requiring clear decision briefs.
+
+### Verified
+
+- Added guardrail test coverage across kernel, Gate 3 plan context, and all
+  Claude/Gemini/Codex adapter templates.
+- `bash tests/test-agent-behavior-guardrails.sh` passed.
+
 ## [0.6.15] - 2026-05-06
 
 > **Release notes packaging hotfix.** 0.6.14 updated the dev release notes, but

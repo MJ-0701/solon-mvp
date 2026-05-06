@@ -25,16 +25,20 @@ description: Solon SFS command router for Codex. Dispatch `$sfs` / `sfs` / visib
    Gate 1 (Intake), Gate 2 (Brainstorm), Gate 3 (Plan),
    Gate 4 (Design), Gate 5 (Handoff), Gate 6 (Review),
    Gate 7 (Retro). Use gate numbers 1..7 for new CLI examples.
-11. For `brainstorm`, ask 1-3 blocking questions when shared understanding is
+11. Decision questions must be self-contained: before any `Q1`, `D1`, or
+   option id, explain in plain user language what is being decided, why it
+   matters, the recommended default, and what each option changes. Labels are
+   cross-references, not the explanation.
+12. For `brainstorm`, ask 1-3 blocking questions when shared understanding is
    missing. Do not run or recommend `plan` as the next step until Gate 2 is
    `ready-for-plan`.
-12. For `plan`, derive the contract from `brainstorm.md`; unresolved Gate 2
+13. For `plan`, derive the contract from `brainstorm.md`; unresolved Gate 2
     questions stay visible instead of being hidden by assumptions.
-13. For `implement`, backend architecture follows the routed `implement.md`
+14. For `implement`, backend architecture follows the routed `implement.md`
     guardrail: clean layered monolith for MVP/small projects, CQRS for
     non-initial backend work even on one DB, Hexagonal transition only after
     user acceptance, and MSA transition only after explicit approval.
-14. For `implement`, non-Dev divisions also follow routed policy ladders:
+15. For `implement`, non-Dev divisions also follow routed policy ladders:
     strategy-pm, taxonomy, design/frontend, QA, and infra start lightweight,
     strengthen on trigger evidence, and require user acceptance/approval before
     large roadmap, rename, redesign, release-readiness, or infra transitions.
