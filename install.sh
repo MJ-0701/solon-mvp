@@ -833,7 +833,8 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
 
   ${C_BOLD}4.${C_RESET} git commit + push (공유 entry 문서만 기록; .sfs-local 은 기본 비공개):
      ${COMMIT_HINT}
-     ${C_BLUE}git commit -m "chore: install solon-product $SOLON_VERSION"${C_RESET}
+     ${C_BLUE}git commit -m "설치: solon-product $SOLON_VERSION"${C_RESET}
+     ${C_YELLOW}커밋 메시지는 사용자 native/workspace 언어가 기본입니다. 영어는 repo 규칙이 요구할 때만 쓰세요.${C_RESET}
      ${C_BLUE}git push${C_RESET}
 
   ${C_BOLD}5.${C_RESET} 새 Solon 배포 확인 + project adapter/docs 갱신:

@@ -90,6 +90,7 @@ assert_contains "${implement}" "Agent mode is an implementation-time choice" "im
 assert_contains "${implement}" "Default to single-agent" "implement single default"
 assert_contains "${implement}" "--agent-mode parallel --agents codex,claude[,gemini]" "implement parallel option"
 assert_contains "${implement}" "one-sentence proposed commit" "implement commit unit guard"
+assert_contains "${implement}" "native/workspace language" "implement native commit language"
 assert_contains "${implement}" "After any implementation" "implement post review required"
 assert_contains "${implement}" "cross review between agents is required" "implement parallel cross review"
 
@@ -105,6 +106,7 @@ assert_contains "${review}" "self-validation risk" "review self-validation"
 assert_contains "${review}" "agent_mode: parallel" "review parallel mode"
 assert_contains "${review}" "disjoint files_scope per lane" "review parallel scope"
 assert_contains "${review}" "commit message per lane" "review parallel commit message"
+assert_contains "${review}" "native/workspace language" "review native commit language"
 assert_contains "${review}" "cross review" "review parallel cross review"
 assert_contains "${review}" 'Pass should name `sfs retro` as the' "review retro close path"
 assert_contains "${tidy}" 'Do not recommend `report` before `retro`' "tidy no report-before-retro"
@@ -152,6 +154,7 @@ for file in "${adapter_files[@]}"; do
   assert_contains "${file}" 'Codex worker default is `gpt-5.3-codex`' "adapter codex worker default ${file}"
   assert_contains "${file}" '`gpt-5.3-codex-spark` is helper-only' "adapter codex spark boundary ${file}"
   assert_contains "${file}" "Multi-agent implement is optional, never the default" "adapter multi-agent optional ${file}"
+  assert_contains "${file}" "clear native-language commit message" "adapter native commit message ${file}"
   assert_contains "${file}" "post-implement cross review is recorded before Gate 6" "adapter multi-agent cross review ${file}"
 done
 

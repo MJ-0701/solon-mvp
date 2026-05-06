@@ -7,6 +7,17 @@
 
 ---
 
+## 0.6.27
+
+이번 버전은 agent 가 커밋 메시지를 사용자의 native 언어 또는 workspace 언어로 쓰도록 기본 규칙을
+바꿉니다.
+
+- 한국어 사용자에게는 `수정: 로그인 오류 안내 개선` 처럼 한국어 커밋 메시지가 기본입니다.
+- 영어 커밋 메시지는 사용자의 native 언어가 영어이거나 repo 가 영어 커밋을 명시적으로 요구할 때만 기본값입니다.
+- `sfs implement` 의 병렬 lane commit message 도 같은 규칙을 따릅니다.
+- `sfs review` 는 proposed/actual commit message 가 사용자 언어와 맞는지도 확인합니다.
+- install/upgrade/uninstall 안내의 예시 커밋 메시지도 한국어 UX에서는 한국어로 보입니다.
+
 ## 0.6.26
 
 이번 버전은 디자인본부 시스템에 AI 슬롭 방지용 디자인 시스템 운영 규칙을 추가합니다.

@@ -110,6 +110,10 @@ already splits into independent lanes, each lane has disjoint files_scope, and
 each lane can name its one-sentence commit message. If that sentence is unclear,
 the work is not ready to split.
 
+That commit message should be written in the user's native or workspace
+language. English is the default only when English is the user/repo language;
+for a Korean user, Korean commit messages are the friendly default.
+
 ```text
 fixed plan
 -> commit-unit lanes

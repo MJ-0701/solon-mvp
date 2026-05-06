@@ -47,6 +47,7 @@ Claude workers use the Sonnet tier, Codex workers use `gpt-5.3-codex`, and
 --agents codex,claude[,gemini]` only when the plan splits into independent
 commit units with disjoint files_scope. Parallel implementation records cross
 review before Gate 6 review.
+Commit messages default to the user's native or workspace language.
 
 The normal close command is `sfs retro`. `sfs report` is an optional helper when
 you want to preview or rebuild the report separately.

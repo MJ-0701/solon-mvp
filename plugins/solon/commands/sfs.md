@@ -39,7 +39,7 @@ $ARGUMENTS
     Codex worker default is `gpt-5.3-codex`; `gpt-5.3-codex-spark` is helper-only
     for bounded mechanical subtasks after scope/files_scope/AC are
     locked. Complex shared behavior escalates to high reasoning before coding.
-    Multi-agent implement is optional, never the default: use single-agent mode unless the user selects parallel agents, each lane has disjoint files_scope and a clear commit message, and post-implement cross review is recorded before Gate 6.
+    Multi-agent implement is optional, never the default: use single-agent mode unless the user selects parallel agents, each lane has disjoint files_scope and a clear native-language commit message, and post-implement cross review is recorded before Gate 6. Commit messages default to the user's native/workspace language; English is only the default when that is the user or repo language.
     Gate 3 review must self-review until PASS before cross review. Review round
     count, lens count, or "enough review" is not a PASS; partial/fail routes to
     rework and same-gate self-review.

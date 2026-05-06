@@ -1,3 +1,25 @@
+## [0.6.27] - 2026-05-07
+
+> **Native-language commit messages.** SFS now tells agents to write commit
+> messages in the user's native or workspace language by default, instead of
+> silently falling back to English.
+
+### Changed
+
+- Added native/workspace-language commit message guidance to implement and
+  review contexts, including multi-agent lane commit units.
+- Updated Claude, Codex, Gemini, plugin, and command adapter templates so
+  future agent sessions inherit the same rule.
+- Changed install, upgrade, and uninstall completion examples from English
+  `chore:` messages to Korean examples when the surrounding UX is Korean.
+- Updated user docs to explain that English commit messages are correct only
+  when English is the user/repo language or the repo explicitly requires them.
+
+### Verified
+
+- Added guardrail coverage for native-language commit messages across context,
+  adapters, docs, and installer prompts.
+
 ## [0.6.26] - 2026-05-07
 
 > **Design-system anti-AI-slop guardrails.** The design/frontend division now

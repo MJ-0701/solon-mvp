@@ -101,6 +101,10 @@ DDD-lite, TDD-lite 에 가깝고, 비코드 slice 에서는 명명된 용어, ar
 각 lane 의 files_scope 가 겹치지 않으며, lane 별 commit message 를 한 문장으로 말할 수 있을 때만
 사용합니다. 그 문장을 못 쓰면 아직 나눌 준비가 안 된 것입니다.
 
+그 commit message 는 사용자의 native 언어 또는 workspace 언어로 써야 합니다. 한국어 사용자의
+작업이면 lane 이름과 커밋 메시지도 한국어로 읽혀야 하며, 영어 커밋은 repo 규칙이나 사용자의
+native 언어가 영어일 때만 기본값입니다.
+
 ```text
 fixed plan
 → commit-unit lanes

@@ -31,7 +31,7 @@ Open/update the active sprint's implement.md execution artifact.
   - Default agent mode is single. Use --agent-mode parallel with two or more
     named agents only when the plan already splits into clear commit units.
   - Parallel agent mode requires disjoint files_scope, a one-sentence proposed
-    commit message per lane, and cross review before Gate 6 can pass.
+    native-language commit message per lane, and cross review before Gate 6 can pass.
   - Prints implement.md, plan.md, and log.md paths.
   - AI runtimes must apply the execution harness:
     Think Before Execution, Simplicity First, Surgical Changes, Goal-Driven Execution.
@@ -307,6 +307,7 @@ fi
   if [[ "${AGENT_MODE}" == "parallel" ]]; then
     cat <<'EOF'
 - split rule: use multiple agents only when each lane has disjoint files_scope and a clear one-sentence proposed commit message.
+- commit language: proposed/actual commit messages default to the user's native/workspace language; English is correct only when English is the user/repo language or repo policy requires it.
 - commit-unit guard: if a lane cannot explain its commit message before coding, do not split it; merge it into the nearest coherent lane or return to single-agent mode.
 - lane contract: each agent records owner, files_scope, non-goals, verification command, result, and proposed commit message before handoff.
 - review rule: cross review between agents is required before Gate 6 review can pass, then run `sfs review --gate 6` for artifact acceptance.

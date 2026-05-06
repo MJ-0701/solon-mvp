@@ -480,6 +480,10 @@ data-loss, release gate, 반복 실패가 보이면 worker 도 high reasoning �
 병렬 구현이 끝난 뒤에는 agent 간 cross review 를 남기고, 그 다음 `sfs review --gate 6` 를
 통과해야 합니다. Single Agent 모드도 구현 직후 review 는 필수입니다.
 
+커밋 메시지는 사용자의 native 언어 또는 workspace 언어가 기본입니다. 한국어 사용자에게는
+`수정: 결제 실패 안내 문구 개선` 처럼 한국어로 제안하고 작성합니다. repo 가 영어 커밋을
+명시적으로 요구하거나 사용자의 native 언어가 영어일 때만 영어를 기본값으로 둡니다.
+
 ---
 
 ## 14. 첫 sprint 예시

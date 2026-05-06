@@ -1951,7 +1951,8 @@ Agent model profile:
 
 변경사항 git commit 권장:
   ${COMMIT_HINT}
-  ${C_BLUE}git commit -m "chore: upgrade solon-mvp $CUR_VER → $NEW_VER"${C_RESET}
+  ${C_BLUE}git commit -m "업그레이드: solon-mvp $CUR_VER → $NEW_VER"${C_RESET}
+  ${C_YELLOW}커밋 메시지는 사용자 native/workspace 언어가 기본입니다. 영어는 repo 규칙이 요구할 때만 쓰세요.${C_RESET}
 
 Agent adapter surface:
   ${AGENT_HINT}

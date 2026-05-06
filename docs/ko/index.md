@@ -44,6 +44,7 @@ sfs status
 `sfs implement` 는 기본적으로 Single Agent 입니다. plan 이 독립 커밋 단위로 나뉘고 agent 별
 files_scope 가 겹치지 않을 때만 `--agent-mode parallel --agents codex,claude[,gemini]` 를
 선택합니다. 병렬 구현은 agent 간 cross review 를 남긴 뒤 Gate 6 review 로 넘어갑니다.
+커밋 메시지는 사용자의 native 언어 또는 workspace 언어로 씁니다.
 
 일반적인 마무리는 `sfs retro` 입니다. `sfs report` 는 보고서만 먼저 보거나 과거 sprint 를
 다시 정리할 때 쓰는 보조 명령입니다.

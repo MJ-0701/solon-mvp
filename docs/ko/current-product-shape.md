@@ -152,6 +152,9 @@ Implement 의 실행 모드는 기본적으로 Single Agent 입니다. 사용자
 `sfs review --gate 6` 를 통과해야 하며, Single Agent 구현도 Gate 6 review 없이 완료로 보지
 않습니다.
 
+커밋 메시지는 사용자의 native 언어 또는 workspace 언어를 기본값으로 삼습니다. 한국어 사용자의
+작업이면 `문서: native 언어 커밋 규칙 추가` 처럼 한국어로 바로 이해되는 메시지를 씁니다.
+
 ## Design.md 와 AI 슬롭 방지
 
 0.6.26 기준 design/frontend 작업은 `design.md` 또는 `docs/solon/design.md` 를 AI 가 읽는

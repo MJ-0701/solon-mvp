@@ -161,6 +161,10 @@ sentence is unclear, do not split the work. Parallel agent implementation must
 record cross review evidence before `sfs review --gate 6` can pass, and Single
 Agent implementation still requires Gate 6 review before completion.
 
+Commit messages default to the user's native or workspace language. English is
+the default only when English is the user/repo language; otherwise agents should
+write the message in the language the user actually works in.
+
 ## Design.md And Anti-AI-Slop Guardrails
 
 As of 0.6.26, design/frontend work treats `design.md` or

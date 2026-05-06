@@ -239,6 +239,7 @@ ${C_BOLD}${C_GREEN}=== Uninstall 완료 ===${C_RESET}
 
 변경사항 git commit 권장:
   ${C_BLUE}git add -A${C_RESET}
-  ${C_BLUE}git commit -m "chore: uninstall solon-product"${C_RESET}
+  ${C_BLUE}git commit -m "제거: solon-product"${C_RESET}
+  ${C_YELLOW}커밋 메시지는 사용자 native/workspace 언어가 기본입니다. 영어는 repo 규칙이 요구할 때만 쓰세요.${C_RESET}
 
 EOF

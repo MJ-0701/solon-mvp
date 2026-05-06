@@ -177,7 +177,7 @@ Solon 의 강점은 앱 generator 가 아니라, 그 다음부터의 의도 정�
 필요할 때만 조용히 꺼내 plan 이나 review 에 반영합니다. 사용자가 모든 기준을 외우실 필요는
 없습니다.
 
-0.6.26 기준 디자인/frontend 지식팩은 AI 슬롭을 줄이기 위한 `design.md` 계약을 봅니다.
+0.6.27 기준 디자인/frontend 지식팩은 AI 슬롭을 줄이기 위한 `design.md` 계약을 봅니다.
 화면 작업은 색, 폰트, spacing, radius, icon style 을 매번 AI 가 새로 만들지 않게 하고,
 review 에서는 token drift 와 screenshot evidence 를 확인합니다. 원티드 몽타주식 컴포넌트,
 Coolicons, Pretendard 는 한국어 제품 starter set 으로 참고할 수 있지만, 기존 제품 design
@@ -205,6 +205,10 @@ worker 도 high reasoning 으로 승격합니다.
 한 문장짜리 commit message 를 말할 수 있어야 합니다. 구현이 끝나면 모든 모드에서
 `sfs review --gate 6` 가 필수이고, 병렬 agent 모드는 그 전에 agent 간 cross review evidence 도
 남겨야 합니다.
+
+커밋 메시지는 기본적으로 사용자의 native 언어 또는 workspace 언어로 씁니다. 사용자가 한국어로
+일한다면 `구현: 상품 이미지 프롬프트 치환 추가` 처럼 한국어 메시지가 기본이고, 영어는 사용자의
+native 언어이거나 repo 가 영어 커밋을 명시할 때만 기본값입니다.
 
 ---
 

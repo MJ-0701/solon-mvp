@@ -45,6 +45,9 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   by a different agent before the final artifact acceptance verdict.
 - If a parallel lane cannot be described as a clear commit unit, treat that as
   a split-design finding and require rework before PASS.
+- Review proposed or actual commit messages against the user's
+  native/workspace language. English commit messages are correct only when the
+  user/repo language is English or the repo explicitly requires English.
 - `sfs review` is an artifact acceptance review. Code review is only the
   `code` lens; docs, strategy, design, taxonomy, QA, ops, management-admin,
   release, and generic artifacts use their own acceptance lens.

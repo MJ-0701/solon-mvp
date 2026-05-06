@@ -69,6 +69,9 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   lane must have a disjoint files_scope and a one-sentence proposed commit
   message. If an agent cannot clearly name what its commit would say, do not
   split that lane.
+- Commit messages default to the user's native/workspace language. If the user
+  is Korean, write Korean commit messages; use English only when English is the
+  user's native/workspace language or the repo explicitly requires English.
 - Parallel agents must not edit the same files or silently absorb another
   agent's scope. If scopes overlap, return to single-agent mode or re-plan the
   split before editing.
