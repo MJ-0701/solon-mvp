@@ -38,6 +38,10 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   "just naming".
 - Let the adapter's `review_lens` stand unless it is clearly wrong. Use
   `--lens <name>` only as an override.
+- CLI review lens names are not always the same as division pack ids. Use
+  public lens names in commands: `strategy-pm` maps to `strategy`,
+  `design/frontend` maps to `design`, `infra` maps to `ops`, and
+  `finance`/`accounting` maps to `management-admin`.
 - Review the whole contract, not only changed code: shared intent, domain
   language consistency, feedback evidence, interface/artifact boundaries, and
   gray-box delegation should still match the Gate 2/3 record.

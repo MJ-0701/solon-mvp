@@ -71,7 +71,7 @@ fi
 # ─────────────────────────────────────────────────────────────────────
 usage_review() {
   cat <<'EOF'
-Usage: /sfs review [--gate <1..7>] [--lens <auto|artifact|code|docs|strategy|design|taxonomy|qa|ops|release>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
+Usage: /sfs review [--gate <1..7>] [--lens <auto|artifact|code|docs|strategy|design|taxonomy|qa|ops|management-admin|release>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
 
 Open the active sprint's review.md as the CPO Evaluator review document.
   - --gate <n>    gate number, 1..7. Reports display this as Gate 1..7:
@@ -84,10 +84,13 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                   present, or Gate 3 when only plan evidence is present.
   - --lens <name> review lens. Default: auto.
                   auto chooses from artifact, code, docs, strategy, design,
-                  taxonomy, qa, ops, release using plan/implement/log text and
-                  changed artifact paths. Use an explicit lens only to override
-                  a wrong inference. `code` is one lens, not the default meaning
-                  of review.
+                  taxonomy, qa, ops, management-admin, release using
+                  plan/implement/log text and changed artifact paths. Use an
+                  explicit lens only to override a wrong inference. `code` is
+                  one lens, not the default meaning of review.
+                  Common division aliases are accepted, for example
+                  strategy-pm -> strategy, design/frontend -> design,
+                  infra -> ops, and finance/accounting -> management-admin.
   - --executor <profile|cmd>
                   CPO review tool/profile. Default: $SFS_REVIEW_EXECUTOR or codex.
                   Typical: codex, gemini, claude, or a custom command.
@@ -305,16 +308,18 @@ esac
 normalize_review_lens_value() {
   local lens="$1"
   lens="$(printf '%s\n' "$lens" | tr '[:upper:]' '[:lower:]')"
+  lens="${lens//_/-}"
   case "$lens" in
     auto|"") printf 'auto\n' ;;
     artifact|outcome|acceptance|general) printf 'artifact\n' ;;
     code|source|implementation) printf 'code\n' ;;
     doc|docs|documentation) printf 'docs\n' ;;
-    strategy|product|pm|planning) printf 'strategy\n' ;;
-    design|ux|ui) printf 'design\n' ;;
+    strategy|strategy-pm|product|product-strategy|product-management|pm|planning) printf 'strategy\n' ;;
+    design|design/frontend|frontend-design|ux|ui) printf 'design\n' ;;
     taxonomy|domain|glossary|naming) printf 'taxonomy\n' ;;
     qa|test|tests|verification) printf 'qa\n' ;;
-    ops|infra|runbook|operations) printf 'ops\n' ;;
+    ops|infra|infra/devops|devops|runbook|operations) printf 'ops\n' ;;
+    management-admin|management/admin|management|admin-finance|finance|financial|bookkeeping|accounting|tax|cashflow|payroll) printf 'management-admin\n' ;;
     release|deploy|deployment) printf 'release\n' ;;
     *)
       return 1
@@ -323,7 +328,8 @@ normalize_review_lens_value() {
 }
 _normalized_lens="$(normalize_review_lens_value "${REVIEW_LENS}" || true)"
 if [[ -z "${_normalized_lens}" ]]; then
-  echo "unknown review lens ${REVIEW_LENS}, valid: auto, artifact, code, docs, strategy, design, taxonomy, qa, ops, release" >&2
+  echo "unknown review lens ${REVIEW_LENS}, valid: auto, artifact, code, docs, strategy, design, taxonomy, qa, ops, management-admin, release" >&2
+  echo "aliases: strategy-pm -> strategy, design/frontend -> design, infra -> ops, finance/accounting -> management-admin" >&2
   exit "${SFS_EXIT_BADCLI}"
 fi
 REVIEW_LENS="${_normalized_lens}"
@@ -471,6 +477,12 @@ review_path_lens_signal() {
       ;;
   esac
   case "$paths" in
+    *management-admin*|*finance*|*financial*|*accounting*|*bookkeeping*|*invoice*|*receipt*|*tax*|*cashflow*|*payroll*|*ledger*)
+      printf 'management-admin\n'
+      return 0
+      ;;
+  esac
+  case "$paths" in
     *test*|*spec*|*playwright*|*cypress*|*vitest*|*jest*|*smoke*)
       printf 'qa\n'
       return 0
@@ -523,6 +535,10 @@ infer_review_lens() {
       printf 'strategy\n'
       return 0
       ;;
+    *"artifact types touched"*management-admin*|*"management/admin evidence"*|*"finance"*|*"financial"*|*"bookkeeping"*|*"accounting"*|*"invoice"*|*"receipt"*|*"tax"*|*"cashflow"*|*"payroll"*)
+      printf 'management-admin\n'
+      return 0
+      ;;
     *"artifact types touched"*qa*|*"qa / verification evidence"*|*"test plan"*|*"테스트"*)
       printf 'qa\n'
       return 0
@@ -548,6 +564,7 @@ review_lens_label() {
     taxonomy) printf 'taxonomy/domain-language acceptance lens' ;;
     qa) printf 'QA/verification acceptance lens' ;;
     ops) printf 'ops/infra readiness lens' ;;
+    management-admin) printf 'management/admin finance evidence lens' ;;
     release) printf 'release readiness lens' ;;
     *) printf 'artifact acceptance lens' ;;
   esac
@@ -1819,7 +1836,8 @@ Lens policy:
 - Judge the produced artifact against the CEO plan, Gate 2/3 contract, evidence,
   user value, scope, risk, and next action.
 - Do not force source-code findings when the selected lens is docs, strategy,
-  design, taxonomy, QA, ops, release, or generic artifact acceptance.
+  design, taxonomy, QA, ops, management-admin, release, or generic artifact
+  acceptance.
 
 Lens-specific checklist:
 EOF
@@ -1864,6 +1882,12 @@ EOF
       cat <<'EOF'
 - Check deployability, secrets hygiene, rollback, observability, runbook clarity, and operational blast radius.
 - Treat missing recovery or environment evidence as an acceptance risk.
+EOF
+      ;;
+    management-admin)
+      cat <<'EOF'
+- Check finance/admin evidence, bookkeeping traceability, tax/accounting questions, cash impact, and advisor escalation boundaries.
+- Treat missing source documents, owner decisions, or compliance-sensitive assumptions as acceptance risk.
 EOF
       ;;
     release)

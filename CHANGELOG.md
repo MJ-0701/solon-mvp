@@ -1,3 +1,27 @@
+## [0.6.14] - 2026-05-06
+
+> **Review lens alias hotfix.** Real use showed that agents may naturally pass
+> division ids such as `strategy-pm` to `sfs review --lens`, while the CLI only
+> accepted the shorter public lens names. SFS now accepts those common aliases
+> and records the normalized public lens name.
+
+### Fixed
+
+- **Strategy/PM alias** — `sfs review --lens strategy-pm` and
+  `--lens strategy_pm` now normalize to the public `strategy` lens.
+- **Division alias bridge** — `design/frontend` maps to `design`, `infra` maps
+  to `ops`, and finance/accounting aliases map to `management-admin`.
+- **Management/admin lens** — `management-admin` is now a first-class review
+  lens with finance/admin evidence guidance.
+- **Invalid lens hint** — unknown lens errors now show the accepted alias
+  mappings so agents can recover without starting a long executor run.
+
+### Verified
+
+- Added `tests/test-review-lens-aliases.sh` to exercise alias normalization and
+  invalid-lens hinting through the real CLI.
+- `bash tests/run-all.sh` passed with PASS 39 / FAIL 0.
+
 ## [0.6.13] - 2026-05-06
 
 > **Thin multi-agent supervision release.** Solon now keeps the useful parts of
