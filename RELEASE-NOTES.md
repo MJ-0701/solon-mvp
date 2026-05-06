@@ -7,6 +7,16 @@
 
 ---
 
+## 0.6.19
+
+이번 버전은 Gate 3 계획이 끝났다고 바로 구현으로 넘어가며 사용자에게 모델 선택을 묻던 흐름을 막는 핫픽스입니다.
+
+- `sfs implement` 는 이제 Gate 3 Plan review PASS 없이는 시작하지 않습니다.
+- 정상 흐름은 `sfs plan` 다음 `sfs review --gate 3`, 그 다음 `sfs implement` 입니다.
+- C-Level 모델은 설계, 계약, AC, 검토 handoff 를 책임지고, worker/generator 모델이 고정된 구현 slice 를 맡는다는 역할 경계를 명시했습니다.
+- 예외적으로 사용자가 plan review 를 건너뛰라고 명시한 경우에만 `--allow-unreviewed-plan` 으로 진행할 수 있고, 그 waiver 는 기록됩니다.
+- 앞으로 Action Rail 이 ready plan 에서 바로 구현/모델 선택으로 뛰면 guardrail 테스트가 실패합니다.
+
 ## 0.6.18
 
 이번 버전은 UX가 있는 작업에서 Solon 이 "경고/차단"부터 말하지 않고, 사용자가 바로 고칠 수 있는 흐름을 먼저 설계하도록 바꾼 핫픽스입니다.

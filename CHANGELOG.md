@@ -1,3 +1,29 @@
+## [0.6.19] - 2026-05-06
+
+> **Plan review and worker split hotfix.** Real Gate 3 usage showed that a
+> ready-for-implement report could still ask the user to choose between
+> C-Level direct implementation and generator delegation, and could skip the
+> plan-review gate entirely.
+
+### Fixed
+
+- `sfs implement` now requires a passing Gate 3 Plan review
+  (`sfs review --gate 3`) before it opens the implementation artifact.
+- Added an explicit `--allow-unreviewed-plan` escape hatch for true user-waived
+  exceptions; the waiver is recorded in `events.jsonl`.
+- Strengthened kernel, plan, implement, review, personas, model profiles, and
+  adapter templates so C-Level owns intent/contract/review orchestration while
+  worker/generator owns fixed implementation slices.
+- Updated Action Rail guidance so a ready Gate 3 plan points to plan review
+  first, not implementation/model-choice options.
+
+### Verified
+
+- Added `tests/test-sfs-implement-plan-review-preflight.sh` for blocked,
+  waived, and passing-review paths.
+- Expanded `tests/test-agent-behavior-guardrails.sh` to keep plan-review and
+  C-Level/worker split guidance in packaged context and adapters.
+
 ## [0.6.18] - 2026-05-06
 
 > **Friendly UX contract hotfix.** Real planning feedback showed that an Action

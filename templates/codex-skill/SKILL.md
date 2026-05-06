@@ -32,6 +32,11 @@ required.
     surface material assumptions, choose the smallest useful slice, keep changes
     surgical, read actual files/errors before fixing, verify before completion,
     and report exact evidence.
+    Gate 3 (Plan) ready-for-implement routes to `sfs review --gate 3` first;
+    do not offer `sfs implement` or worker/model handoff until plan review
+    passes. Keep C-Level and worker/generator responsibilities separate:
+    C-Level owns intent, architecture, AC, and review handoff; worker/generator
+    owns fixed implementation slices.
 11. In Solon reports, show gates as `Gate N (Name)`, not naked ids:
    Gate 1 (Intake), Gate 2 (Brainstorm), Gate 3 (Plan),
    Gate 4 (Design), Gate 5 (Handoff), Gate 6 (Review),

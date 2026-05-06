@@ -16,6 +16,11 @@ Arguments: `$ARGUMENTS`
    surface material assumptions, choose the smallest useful slice, keep changes
    surgical, read actual files/errors before fixing, verify before completion,
    and report exact evidence.
+   Gate 3 (Plan) ready-for-implement routes to `sfs review --gate 3` first;
+   do not offer `sfs implement` or worker/model handoff until plan review
+   passes. Keep C-Level and worker/generator responsibilities separate: C-Level
+   owns intent, architecture, AC, and review handoff; worker/generator owns
+   fixed implementation slices.
 7. Decision questions must be self-contained: before any `Q1`, `D1`, or option
    id, explain in plain user language what is being decided, why it matters, the
    recommended default, and what each option changes. Labels are

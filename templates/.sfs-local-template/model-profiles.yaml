@@ -6,7 +6,7 @@
 # cost-aware defaults, but does not block an "all high-end models" policy when
 # the project accepts the cost and latency.
 
-version: 1.2
+version: 1.3
 project: "<PROJECT-NAME>"
 created: "<DATE>"
 solon_mvp_version: "<SOLON-VERSION>"
@@ -18,6 +18,16 @@ configuration:
   confirmed_by: ""
   confirmed_at: ""
   note: "If this stays unconfigured, Solon uses the user's current runtime/model. When asked about agent/model settings in this state, the AI must say it is unconfirmed fallback and ask which policy to apply."
+
+role_boundaries:
+  c_level:
+    owns: "intent, architecture, public contract, acceptance criteria, files_scope, escalation, and review orchestration"
+    cannot: "act as the normal implementation worker or approve its own output"
+  worker_generator:
+    owns: "fixed implementation slices after plan review passes"
+    cannot: "change architecture, AC, or files_scope silently"
+  gate_invariant:
+    before_implement: "Gate 3 Plan review must pass before worker/generator implementation starts; bypass requires an explicit user waiver."
 
 reasoning_tiers:
   strategic_high:

@@ -36,10 +36,17 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   `verify by ...` evidence. In SFS, that checklist belongs in sprint
   workbench artifacts such as `plan.md` or `implement.md`, not as mandatory
   root-level `checklist.md` / `context-notes.md` files.
-- For high-risk plans, large codebases, or unfamiliar domains, request a plan
-  review before implementation. Use `sfs review --gate 3` with the appropriate
-  lens and an independent executor when available; the plan author should not be
-  the only evaluator.
+- Gate 3 plan review is mandatory before implementation. Use
+  `sfs review --gate 3` with the appropriate lens and an independent executor
+  when available; the plan author should not be the only evaluator.
+- Do not offer `sfs implement`, worker delegation, or model-selection choices
+  from a ready Gate 3 report until Gate 3 review has a PASS/accepted result.
+  If the plan is ready, the final `Next` is the plan review command.
+- C-Level owns the contract, acceptance criteria, architecture boundaries, and
+  review handoff. The worker/generator model owns fixed implementation slices.
+  Do not frame C-Level direct implementation as a normal option; use it only
+  when the user explicitly overrides the worker path or the slice is an
+  emergency tiny patch, and record the cost/risk.
 - If a researcher pass produced findings, summarize only the durable result in
   the plan: sources checked, domain terms, contradictions, and remaining
   unknowns. Do not copy the full research transcript into the plan.
@@ -56,4 +63,4 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
 - Use the backend pack as a scale router: first MVP gets minimal guardrails;
   money, PII, partner state, batch, MQ, or production exposure increases depth.
 - Do not run implementation automatically from Gate 3. If the contract is ready,
-  final `Next` may point to review or the first explicit implementation slice.
+  final `Next` points to Gate 3 review, not to the first implementation slice.

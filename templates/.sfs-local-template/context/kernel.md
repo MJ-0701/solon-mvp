@@ -42,6 +42,13 @@ load_when: ["always", "sfs", "entry"]
   rules: shared design concept, ubiquitous language, tight feedback loops,
   deep-module boundaries, and gray-box delegation must shape brainstorm, plan,
   implement, review, report, and retro.
+- Gate order is a runtime contract, not presentation etiquette: after Gate 3
+  (Plan) says ready-for-implement, the default next step is Gate 3 review
+  (`sfs review --gate 3`) before any `sfs implement` handoff.
+- Role split is invariant: C-Level owns intent, architecture, acceptance
+  criteria, and review orchestration; the worker/generator model owns fixed
+  implementation slices. Do not present C-Level direct implementation as the
+  normal default when a worker/generator profile exists.
 - Multi-agent work is thin supervision, not noisy coordination by default:
   use read-only research, fixed-scope worker slices, and independent review only
   when they reduce context pollution or self-validation risk. Share results

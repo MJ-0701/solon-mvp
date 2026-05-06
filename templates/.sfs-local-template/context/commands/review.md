@@ -8,6 +8,13 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 
 - Adapter-run by default: run `sfs review ...` before summarizing.
 - Do not create a new verdict from memory; use `review.md` and recorded result paths.
+- Gate 3 plan review is the required bridge between plan and implement. When a
+  plan says ready-for-implement, review the plan contract first with
+  `sfs review --gate 3`; only a PASS/accepted result should route to
+  `sfs implement`.
+- For Gate 3 plan review, use the CPO/evaluator role and prefer an independent
+  executor or fresh agent context when available. The plan author, CTO, or
+  generator should not self-approve the plan it will execute.
 - Summaries should list verdict, findings, required actions, evidence, and next gate.
   Show gates as `Gate N (Name)`, for example Gate 6 (Review), not a naked
   internal id.

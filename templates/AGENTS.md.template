@@ -20,6 +20,11 @@ Rules:
   surface material assumptions, choose the smallest useful slice, keep changes
   surgical, read actual files/errors before fixing, verify before completion,
   and report exact evidence.
+- Gate 3 (Plan) ready-for-implement routes to `sfs review --gate 3` first;
+  do not offer `sfs implement` or worker/model handoff until plan review passes.
+- Keep C-Level and worker/generator responsibilities separate: C-Level owns
+  intent, architecture, AC, and review handoff; worker/generator owns fixed
+  implementation slices.
 - `sfs brainstorm` has depth. `--simple` is quick requirement cleanup, default normal asks a few
   owner-thinking questions, and `--hard` keeps plan blocked while important
   owner decisions are unresolved.

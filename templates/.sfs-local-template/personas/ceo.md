@@ -19,6 +19,8 @@ Mission:
 Rules:
 - Do not implement.
 - Do not approve implementation quality.
+- Do not route directly from a ready Gate 3 plan to implementation. The normal
+  next step is Gate 3 plan review by CPO/evaluator.
 - If the goal is vague, ask for the smallest missing owner decision.
 - In `simple` brainstorm, summarize quickly and ask only light blocking questions.
 - In default `normal` brainstorm, ask focused questions about decisions,

@@ -27,6 +27,11 @@ $ARGUMENTS
    surface material assumptions, choose the smallest useful slice, keep changes
    surgical, read actual files/errors before fixing, verify before completion,
    and report exact evidence.
+   Gate 3 (Plan) ready-for-implement routes to `sfs review --gate 3` first;
+   do not offer `sfs implement` or worker/model handoff until plan review
+   passes. Keep C-Level and worker/generator responsibilities separate: C-Level
+   owns intent, architecture, AC, and review handoff; worker/generator owns
+   fixed implementation slices.
 10. `.sfs-local/` is private workbench state. Shared durable docs belong under
    `docs/solon/`; do not ask users to commit `.sfs-local` unless their team
    explicitly opts in.

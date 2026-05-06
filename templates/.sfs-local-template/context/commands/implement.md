@@ -7,6 +7,13 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 # Implement
 
 - Do not stop at artifact creation: execute the requested slice and record evidence.
+- Preflight is strict: `sfs implement` requires a Gate 3 Plan review PASS
+  (`sfs review --gate 3`) before implementation starts. If review evidence is
+  missing, return to plan review; bypass only with an explicit user waiver.
+- The default implementation owner is the worker/generator model resolved from
+  `.sfs-local/model-profiles.yaml`, not the C-Level planner/evaluator model.
+  C-Level may define the contract, split files_scope, and handle escalation, but
+  should not present itself as the normal direct coding option.
 - Valid artifacts: code, taxonomy, design handoff, QA evidence, infra/runbook,
   management/admin evidence, decisions, docs, workflow, research, or
   user-facing operating material.
