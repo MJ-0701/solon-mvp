@@ -161,6 +161,24 @@ sentence is unclear, do not split the work. Parallel agent implementation must
 record cross review evidence before `sfs review --gate 6` can pass, and Single
 Agent implementation still requires Gate 6 review before completion.
 
+## Design.md And Anti-AI-Slop Guardrails
+
+As of 0.6.26, design/frontend work treats `design.md` or
+`docs/solon/design.md` as the AI-readable design-system contract. The file is a
+small contract for colors, typography, spacing, radius, shadow, component
+variants, icon style, forbidden values, and rationale.
+
+The common AI failure mode is regression toward average-looking UI. If every
+screen invents new colors, spacing, radius, icon weights, or generic SaaS
+gradients, the feature can work while the product loses taste and identity.
+Solon's design review treats that as AI-slop risk and checks token drift,
+Korean typography fit, and desktop/mobile screenshot evidence.
+
+Wanted Montage-style components, a coherent icon family such as Coolicons, and
+a Korean-capable font such as Pretendard can be useful starter references for
+Korean products. They are starting points, not vendor lock-in. If an existing
+product design system exists, it wins.
+
 ## Division Knowledge Packs
 
 As of 0.6.23, the backend, strategy/PM, QA, design/frontend, infra/DevOps,

@@ -91,6 +91,53 @@ DDD-lite, TDD-lite 에 가깝고, 비코드 slice 에서는 명명된 용어, ar
 
 좋은 implementation artifact 는 계속 바꾸기 쉽습니다. 좋은 AI execution 은 그 성질을 보존합니다.
 
+## 병렬 agent 10x 루프
+
+여러 agent 를 동시에 쓰는 것은 "많이 시키면 빨라진다"가 아닙니다. Solon 에서 병렬성의 10x 는
+작업을 **커밋 단위로 설명 가능한 lane** 으로 나누고, 서로 다른 agent 가 서로의 산출물을
+검토하게 만드는 데서 나옵니다.
+
+기본값은 Single Agent 입니다. `--agent-mode parallel` 은 plan 이 이미 독립 lane 으로 나뉘고,
+각 lane 의 files_scope 가 겹치지 않으며, lane 별 commit message 를 한 문장으로 말할 수 있을 때만
+사용합니다. 그 문장을 못 쓰면 아직 나눌 준비가 안 된 것입니다.
+
+```text
+fixed plan
+→ commit-unit lanes
+→ disjoint files_scope
+→ lane verification
+→ agent cross review
+→ Gate 6 review
+```
+
+이 구조가 있으면 Codex, Claude, Gemini 를 동시에 써도 작업 속도와 품질 체크가 같이 올라갑니다.
+구조가 없으면 병렬성은 충돌과 중복 review 만 늘립니다.
+
+## 디자인 시스템 10x 루프
+
+AI 시대에는 코드 작성 능력보다 화면의 일관성과 감도가 더 빨리 드러납니다. 사용자는 코드를
+보지 않아도 화면은 봅니다. 그래서 디자인본부의 10x 는 pixel 을 더 많이 그리는 것이 아니라,
+AI 가 따라야 할 디자인 시스템을 만들고 AI output 이 평균값으로 회귀하는 것을 잡아내는 데서
+나옵니다.
+
+Solon 은 visible UI 작업에서 `design.md` 또는 `docs/solon/design.md` 를 디자인 계약으로 봅니다.
+이 파일에는 색, 폰트, type scale, spacing, radius, shadow, component variant, icon style,
+금지값과 rationale 이 있어야 합니다. UI 를 구현할 때 AI 는 이 계약을 먼저 읽고, review 는
+계약 밖 token drift 를 찾습니다.
+
+| Design practice | Solon meaning | Why it matters for AI |
+|---|---|---|
+| `design.md` | AI 가 읽는 디자인 시스템 계약 | 매 화면마다 색, 간격, radius 를 새로 invent 하지 않음 |
+| Token drift check | 임의 hex, font-size, spacing, icon style 검사 | AI 슬롭 신호를 review finding 으로 잡음 |
+| Korean typography | 한글 font, line-height, 긴 label fit 검증 | 한국어 UI 가 영어 기준 레이아웃에 눌리지 않음 |
+| Coherent icon family | 하나의 icon system 또는 기존 product icon 유지 | 화면 톤이 섞이지 않음 |
+| Screenshot evidence | desktop/mobile 에서 실제 fit 확인 | "그럴듯함"이 아니라 사용 경험을 검증함 |
+
+원티드 몽타주식 컴포넌트, Coolicons 같은 단일 icon family, Pretendard 같은 Korean-capable font 는
+좋은 starter set 이 될 수 있습니다. 하지만 핵심은 vendor 가 아니라 시스템입니다. 기존 제품
+design system 이 있으면 그것이 우선이고, 없다면 작은 `design.md` seed 부터 만드는 것이 Solon 의
+권장 출발점입니다.
+
 ## Solon 이 약속하지 않는 것
 
 - 나쁜 코드베이스를 마법처럼 싸게 만들지 않습니다.

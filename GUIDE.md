@@ -274,6 +274,11 @@ Solon 에서 `implement` 는 코드만 뜻하지 않습니다. 제품을 앞으�
 - 바뀐 것을 어떻게 확인할 것인가?
 - 사용자가 직접 결정해야 하는 경계가 남아 있나?
 
+디자인/frontend 조각이면 `design.md` 또는 `docs/solon/design.md` 를 먼저 봅니다. 없다면 넓은 UI
+생성 전에 색, type scale, spacing, radius, icon style 의 작은 seed 를 만들거나 gap 으로
+기록합니다. review 에서는 token 밖 임의 색상, 임의 spacing, 섞인 icon weight, generic AI 슬롭
+느낌을 확인합니다.
+
 백엔드, 디자인, QA, 운영의 깊은 기준은 중요하지만 모든 사용자에게 첫 가이드에서 같은 무게로
 설명할 내용은 아닙니다. 필요할 때
 [현재 제품 흐름과 최근 변화](./docs/ko/current-product-shape.md) 를 참고하세요.

@@ -87,6 +87,12 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   `policies/*-knowledge-pack.ko.md` only after router selection.
   Apply the compact guidance for matching ids only; ordinary implementation
   should not broaden itself into a knowledge-pack deepening task.
+- For visible design/frontend implementation, read `design.md` or
+  `docs/solon/design.md` when present before editing. If neither exists and the
+  work creates reusable UI, record the design-system gap or create a compact
+  design.md seed before broad screen generation. After editing, check token
+  drift: colors, type sizes, spacing, radius, shadows, and icon styles should
+  come from the design contract or be explicitly justified.
 - Backend architecture ladder: clean layered monolith for MVP/small projects;
   CQRS for non-initial backend work even with one DB; propose Hexagonal
   transition when domain seams grow; propose MSA only when independent deploy,

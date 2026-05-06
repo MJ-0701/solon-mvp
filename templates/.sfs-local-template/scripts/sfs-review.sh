@@ -1901,6 +1901,7 @@ EOF
       cat <<'EOF'
 - Check interaction clarity, UX states, accessibility, design-system fit, and handoff completeness.
 - Treat visual or flow ambiguity as acceptance risk, even without code defects.
+- Check design.md/token adherence when a design contract exists. Treat token drift, mixed icon styles, arbitrary spacing/radius, and generic AI-slop visual language as review evidence.
 EOF
       ;;
     taxonomy)

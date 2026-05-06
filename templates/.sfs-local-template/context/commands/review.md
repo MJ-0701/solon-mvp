@@ -85,6 +85,12 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   `policies/*-knowledge-pack.ko.md` file and check only the matching ids and
   compact guidance.
   Flag both missing high-risk division topics and over-activated topics.
+- For design/frontend work, check `design.md` or `docs/solon/design.md` when it
+  exists. Treat token drift as review evidence: arbitrary colors, type sizes,
+  spacing, radius, shadows, icon weights, or screen-by-screen style changes can
+  be findings even when the UI is functional. If no design contract exists for
+  reusable UI, surface that as an AI-slop risk rather than silently accepting
+  average-looking output.
 - Surface the evaluator's next action. Pass should name `sfs retro` as the
   normal close path because `retro` ensures `report.md` before closing. Mention
   `sfs report` only for report preview or past-report rebuild. Partial should

@@ -29,6 +29,10 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - Data-dense product surfaces need scanning, hierarchy, states, and task flow,
   not decorative composition.
 - Accessibility and responsive fit are active whenever UI is user-facing.
+- AI generated UI activates design-system governance. If `design.md` or
+  `docs/solon/design.md` exists, read it before editing; if neither exists and
+  the work creates visible UI, record the gap or create a compact seed contract
+  before broad screen generation.
 
 ## DES-SCALE - Review Depth By Project Size
 
@@ -39,6 +43,7 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - DES-SCALE-005: Multi-screen products need information architecture, navigation, and state continuity.
 - DES-SCALE-006: Design-system work needs tokens, components, variants, usage rules, and migration plan.
 - DES-SCALE-007: Brand/marketing work needs first-viewport signal, real assets, and conversion/action clarity.
+- DES-SCALE-008: AI-generated UI needs `design.md`, token drift checks, and screenshot evidence, not only "looks good" judgment.
 
 ## DES-PROP - Proposition Inventory
 
@@ -61,6 +66,10 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - DES-PROP-017: Mobile constraints must be checked for touch targets, wrapping, overflow, and hierarchy.
 - DES-PROP-018: User-facing language must avoid explaining implementation details inside the app.
 - DES-PROP-019: Validation should coach repair before warning, blocking, or blaming the user.
+- DES-PROP-020: AI UI must not invent colors, type sizes, spacing, radius, shadows, or icon styles outside `design.md` without review.
+- DES-PROP-021: Korean typography needs one primary Korean-capable font, stable line-height, and `letter-spacing: 0` unless the existing design system explicitly overrides it.
+- DES-PROP-022: Iconography should come from one coherent icon family or the existing product icon system; do not mix random free icons.
+- DES-PROP-023: AI-slop signals include generic SaaS gradients, arbitrary card/radius choices, inconsistent palettes, mixed icon weights, and token values that differ screen by screen.
 
 ## DES-FILL - Operating Guidance
 
@@ -88,6 +97,31 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - form 은 validation timing, field-level error placement, 필요 시 summary,
   recovery path, unsaved-change behavior, disabled-state rationale 을 가져야 한다.
 - destructive action 은 permission, confirmation, consequence preview, state 가 중요할 때 audit trail 이 필요하다.
+
+### DES-FILL-SYSTEM - Design.md And Anti-AI-Slop Governance
+
+- `design.md` 는 AI 가 읽는 디자인 시스템 계약이다. 위쪽에는 machine-readable
+  token 을 두고, 아래쪽에는 왜 그런 선택을 했는지 짧은 rationale 을 둔다.
+  최소 seed 는 colors 5-6개, type scale 6단계, spacing 8단계, radius/shadow,
+  component variants, icon style, 금지값으로 충분하다.
+- AI 에게 UI 를 맡길 때는 "먼저 `design.md` 를 읽고 token 밖 값을 만들지 말라"는
+  지시를 implement 요청에 포함한다. 결과물 review 에서는 token drift 를 확인한다:
+  임의 hex, 임의 font-size, 임의 spacing, 임의 radius, 섞인 icon weight, 화면마다
+  다른 card treatment 가 있으면 finding 으로 본다.
+- 한국어 제품 starter set 으로는 원티드 몽타주 계열 컴포넌트, Coolicons 같은
+  단일 icon family, Pretendard 같은 Korean-capable font 를 참고할 수 있다. 단,
+  이것들은 고정 vendor 규칙이 아니라 출발점이다. 기존 제품의 design system 이
+  있으면 기존 system 이 우선한다.
+- 한국어 typography 는 폰트 하나를 고르는 것으로 끝나지 않는다. 본문 line-height 는
+  대체로 1.5-1.6 범위를 먼저 검토하고, letter-spacing 은 기본 0 으로 둔다.
+  긴 한국어 label, mobile width, 버튼 안 텍스트, table cell wrapping 을 screenshot 으로
+  확인한다.
+- reference page 를 분석해 `design.md` seed 를 뽑는 방식은 유효하다. 다만 protected
+  brand asset 이나 고유 trade dress 를 그대로 복제하지 말고, 색/간격/계층/컴포넌트
+  원리를 추출한 뒤 자기 product language 로 바꾼다.
+- 디자이너의 역할은 pixel 을 직접 많이 그리는 사람이 아니라 system 을 설계하고 AI
+  output 의 품질을 판정하는 사람으로 올라간다. 디자인본부 review 는 감상평이 아니라
+  system adherence, user task fit, token drift, AI-slop signal 을 evidence 로 판단한다.
 
 ### DES-FILL-REPAIR - Friendly Validation And Recovery
 
@@ -132,6 +166,10 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - copy 가 canonical domain language 를 보존하는가?
 - validation 이 실패했을 때 사용자가 무엇을, 어디서, 어떻게 고치면 되는지
   문서를 읽지 않고 알 수 있는가?
+- `design.md` 또는 equivalent design contract 를 읽고 적용했는가?
+- token 밖 색상, 폰트 크기, spacing, radius, shadow, icon style 이 생기지 않았는가?
+- 화면이 generic AI-slop 처럼 보이는 신호를 가진가, 아니면 product 고유의 규칙이 보이는가?
+- 한국어 typography 와 긴 label 이 mobile/desktop 에서 안정적으로 맞는가?
 
 ## DES-EVIDENCE - Suggested Evidence
 
@@ -142,6 +180,8 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - entry, decision, recovery, completion 을 담은 workflow note.
 - validation repair matrix: detected issue, field location, user action,
   server fallback, success-after-fix path.
+- design-system evidence: `design.md` excerpt, token usage note, token drift
+  grep/inspection result, desktop/mobile screenshot, icon/font consistency note.
 
 ## DES-GAP - Deepening Slots
 
@@ -154,3 +194,6 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - DES-GAP-007: Responsive QA viewport matrix.
 - DES-GAP-008: UX writing and domain-language alignment guide.
 - DES-GAP-009: Repair-first validation patterns.
+- DES-GAP-010: `design.md` schema and token drift checker.
+- DES-GAP-011: Korean typography and icon-family starter guide.
+- DES-GAP-012: AI-slop review rubric.

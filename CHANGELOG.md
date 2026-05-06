@@ -1,3 +1,29 @@
+## [0.6.26] - 2026-05-07
+
+> **Design-system anti-AI-slop guardrails.** The design/frontend division now
+> treats `design.md` as an AI-readable design-system contract and reviews token
+> drift as evidence, not taste-only commentary.
+
+### Added
+
+- Added `design.md` / `docs/solon/design.md` governance to the design/frontend
+  knowledge pack in English and Korean.
+- Added anti-AI-slop review criteria: arbitrary colors, type sizes, spacing,
+  radius, shadows, icon weights, generic SaaS visual language, and screen-level
+  token drift.
+- Added Korean product starter guidance for design-system seeds: small token
+  menus, coherent icon family, Korean-capable font, line-height checks, and
+  `letter-spacing: 0` by default.
+- Updated implement/review contexts so visible UI work reads the design
+  contract before editing and checks token drift after editing.
+- Updated 10x value docs so multi-agent implement and design-system governance
+  are framed as AI-era leverage, not side features.
+
+### Verified
+
+- Added guardrail coverage for `design.md`, anti-AI-slop criteria, token drift,
+  Korean typography, and 10x value documentation.
+
 ## [0.6.25] - 2026-05-07
 
 > **Optional multi-agent implement lane.** Users who operate Codex, Claude,

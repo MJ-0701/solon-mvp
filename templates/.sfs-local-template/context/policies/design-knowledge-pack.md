@@ -28,6 +28,10 @@ active for a sprint, review, or release. Apply only the matching ids.
 - Data-dense product surfaces need scanning, hierarchy, states, and task flow,
   not decorative composition.
 - Accessibility and responsive fit are active whenever UI is user-facing.
+- AI-generated UI activates design-system governance. If `design.md` or
+  `docs/solon/design.md` exists, read it before editing; if neither exists and
+  the work creates visible UI, record the gap or create a compact seed contract
+  before broad screen generation.
 
 ## DES-SCALE - Review Depth By Project Size
 
@@ -38,6 +42,7 @@ active for a sprint, review, or release. Apply only the matching ids.
 - DES-SCALE-005: Multi-screen products need information architecture, navigation, and state continuity.
 - DES-SCALE-006: Design-system work needs tokens, components, variants, usage rules, and migration plan.
 - DES-SCALE-007: Brand/marketing work needs first-viewport signal, real assets, and conversion/action clarity.
+- DES-SCALE-008: AI-generated UI needs `design.md`, token drift checks, and screenshot evidence, not only "looks good" judgment.
 
 ## DES-PROP - Proposition Inventory
 
@@ -60,6 +65,10 @@ active for a sprint, review, or release. Apply only the matching ids.
 - DES-PROP-017: Mobile constraints must be checked for touch targets, wrapping, overflow, and hierarchy.
 - DES-PROP-018: User-facing language must avoid explaining implementation details inside the app.
 - DES-PROP-019: Validation should coach repair before warning, blocking, or blaming the user.
+- DES-PROP-020: AI UI must not invent colors, type sizes, spacing, radius, shadows, or icon styles outside `design.md` without review.
+- DES-PROP-021: Korean typography needs one primary Korean-capable font, stable line-height, and `letter-spacing: 0` unless the existing design system explicitly overrides it.
+- DES-PROP-022: Iconography should come from one coherent icon family or the existing product icon system; do not mix random free icons.
+- DES-PROP-023: AI-slop signals include generic SaaS gradients, arbitrary card/radius choices, inconsistent palettes, mixed icon weights, and token values that differ screen by screen.
 
 ## DES-FILL - Operating Guidance
 
@@ -90,6 +99,31 @@ active for a sprint, review, or release. Apply only the matching ids.
   useful, recovery path, unsaved-change behavior, and disabled-state rationale.
 - Destructive actions need permission, confirmation, consequence preview, and
   audit trail when state matters.
+
+### DES-FILL-SYSTEM - Design.md And Anti-AI-Slop Governance
+
+- `design.md` is the design-system contract an AI can read. Put machine-readable
+  tokens at the top and short rationale below. A useful seed can be small:
+  5-6 colors, a 6-step type scale, 8 spacing steps, radius/shadow rules,
+  component variants, icon style, and forbidden values.
+- When asking AI to build UI, include "read `design.md` first and do not invent
+  values outside it" in the implementation request. Review the result for token
+  drift: arbitrary hex values, arbitrary font sizes, arbitrary spacing/radius,
+  mixed icon weights, or different card treatments across screens.
+- For Korean products, a practical starter set can be Wanted Montage-style
+  components, a single icon family such as Coolicons, and a Korean-capable font
+  such as Pretendard. These are starter references, not vendor lock-in. If the
+  product already has a design system, the existing system wins.
+- Korean typography is not solved by picking a font. Start body copy around
+  line-height 1.5-1.6, keep letter-spacing at 0 by default, and screenshot-check
+  long Korean labels, mobile widths, button text, and table cell wrapping.
+- Extracting a `design.md` seed from a reference page can work. Do not copy
+  protected brand assets or distinctive trade dress; extract principles such as
+  color relationships, spacing rhythm, hierarchy, and component structure, then
+  translate them into the product's own language.
+- The designer role moves upward: from drawing every pixel to designing the
+  system and judging AI output quality. Design review should judge system
+  adherence, user-task fit, token drift, and AI-slop signals with evidence.
 
 ### DES-FILL-REPAIR - Friendly Validation And Recovery
 
@@ -136,6 +170,13 @@ active for a sprint, review, or release. Apply only the matching ids.
 - Does copy preserve canonical domain language?
 - When validation fails, can the user see what to fix, where to fix it, and how
   to recover without reading documentation?
+- Did the implementer read and apply `design.md` or an equivalent design
+  contract?
+- Did any colors, font sizes, spacing, radius, shadow, or icon styles appear
+  outside the token contract?
+- Does the screen show generic AI-slop signals, or does the product's own
+  design language come through?
+- Does Korean typography and long-label fit hold across mobile and desktop?
 
 ## DES-EVIDENCE - Suggested Evidence
 
@@ -146,6 +187,9 @@ active for a sprint, review, or release. Apply only the matching ids.
 - Workflow note covering entry, decision, recovery, and completion.
 - Repair matrix for validation states: detected issue, field location, user
   action, server fallback, and success-after-fix path.
+- Design-system evidence: `design.md` excerpt, token usage note, token drift
+  grep/inspection result, desktop/mobile screenshot, and icon/font consistency
+  note.
 
 ## DES-GAP - Deepening Slots
 
@@ -158,3 +202,6 @@ active for a sprint, review, or release. Apply only the matching ids.
 - DES-GAP-007: Responsive QA viewport matrix.
 - DES-GAP-008: UX writing and domain-language alignment guide.
 - DES-GAP-009: Repair-first validation patterns.
+- DES-GAP-010: `design.md` schema and token drift checker.
+- DES-GAP-011: Korean typography and icon-family starter guide.
+- DES-GAP-012: AI-slop review rubric.

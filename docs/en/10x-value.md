@@ -98,6 +98,59 @@ They are not ceremony. They are AI safety rails.
 Good implementation artifacts remain easy to change. Good AI execution
 preserves that property.
 
+## Parallel Agent 10x Loop
+
+Using multiple agents is not valuable because "more agents means more output."
+In Solon, parallelism creates 10x value only when the work is split into
+commit-sized lanes that can be described clearly, verified locally, and reviewed
+by a different agent.
+
+Single Agent is the default. Use `--agent-mode parallel` only when the plan
+already splits into independent lanes, each lane has disjoint files_scope, and
+each lane can name its one-sentence commit message. If that sentence is unclear,
+the work is not ready to split.
+
+```text
+fixed plan
+-> commit-unit lanes
+-> disjoint files_scope
+-> lane verification
+-> agent cross review
+-> Gate 6 review
+```
+
+With that structure, Codex, Claude, and Gemini can increase both speed and
+quality control. Without it, parallelism mostly creates collisions and duplicate
+review work.
+
+## Design System 10x Loop
+
+In the AI coding era, code generation is no longer the moat. The user's first
+impression comes from the visible surface: rhythm, spacing, typography, icon
+style, and consistency. The design division's 10x value is not drawing more
+pixels. It is building the system that AI must follow and reviewing when AI
+regresses toward generic average output.
+
+For visible UI work, Solon treats `design.md` or `docs/solon/design.md` as the
+design contract. It should define colors, fonts, type scale, spacing, radius,
+shadow, component variants, icon style, forbidden values, and rationale. During
+implementation, AI reads that contract first. During review, the evaluator looks
+for token drift outside that contract.
+
+| Design practice | Solon meaning | Why it matters for AI |
+|---|---|---|
+| `design.md` | AI-readable design-system contract | Screens stop reinventing colors, spacing, and radius |
+| Token drift check | Inspect arbitrary hex values, font sizes, spacing, and icon styles | AI-slop signals become review findings |
+| Korean typography | Check Korean-capable fonts, line-height, and long-label fit | Korean UI is not squeezed into English defaults |
+| Coherent icon family | Use one icon system or the existing product icon system | The surface keeps one visual voice |
+| Screenshot evidence | Verify desktop/mobile fit visually | Review judges user experience, not plausibility |
+
+Wanted Montage-style components, a coherent icon family such as Coolicons, and
+a Korean-capable font such as Pretendard can be useful starter references for
+Korean products. The point is not vendor lock-in. The point is that the design
+system is the asset. If an existing product design system exists, it wins. If
+not, start with a small `design.md` seed.
+
 ## Solon Execution Contract
 
 When Solon is used to implement work, the default sequence should be:

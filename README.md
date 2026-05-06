@@ -177,6 +177,12 @@ Solon 의 강점은 앱 generator 가 아니라, 그 다음부터의 의도 정�
 필요할 때만 조용히 꺼내 plan 이나 review 에 반영합니다. 사용자가 모든 기준을 외우실 필요는
 없습니다.
 
+0.6.26 기준 디자인/frontend 지식팩은 AI 슬롭을 줄이기 위한 `design.md` 계약을 봅니다.
+화면 작업은 색, 폰트, spacing, radius, icon style 을 매번 AI 가 새로 만들지 않게 하고,
+review 에서는 token drift 와 screenshot evidence 를 확인합니다. 원티드 몽타주식 컴포넌트,
+Coolicons, Pretendard 는 한국어 제품 starter set 으로 참고할 수 있지만, 기존 제품 design
+system 이 있으면 기존 system 이 우선입니다.
+
 ## 모델 라우팅
 
 Solon 은 강한 모델을 무조건 모든 단계에 쓰는 방식보다, 역할별로 책임을 나누는 방식을 권장합니다.

@@ -7,6 +7,16 @@
 
 ---
 
+## 0.6.26
+
+이번 버전은 디자인본부 시스템에 AI 슬롭 방지용 디자인 시스템 운영 규칙을 추가합니다.
+
+- `design.md` 또는 `docs/solon/design.md` 를 AI 가 읽는 디자인 시스템 계약으로 봅니다.
+- 디자인/frontend 구현은 `design.md` 를 먼저 읽고, 구현 후 token drift 를 확인하도록 안내합니다.
+- review 는 임의 색상, 임의 type scale, 임의 spacing/radius, 섞인 icon style, generic AI 슬롭 느낌을 finding 으로 볼 수 있습니다.
+- 한국어 제품 starter set 으로 원티드 몽타주식 컴포넌트, Coolicons 같은 단일 icon family, Pretendard 같은 Korean-capable font 를 참고하되, 기존 design system 이 있으면 기존 system 을 우선합니다.
+- 10x value 문서에 multi-agent implement 와 design-system governance 를 AI 시대의 실행/품질 leverage 로 반영했습니다.
+
 ## 0.6.25
 
 이번 버전은 구현 작업량이 클 때 여러 agent 를 병렬로 쓰는 선택지를 추가합니다. 기본값은 그대로
