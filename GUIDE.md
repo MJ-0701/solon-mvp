@@ -468,6 +468,13 @@ private archive 또는 retro 를 봅니다.
 기계적 helper subtask 용도입니다. architecture, public contract, security, privacy,
 data-loss, release gate, 반복 실패가 보이면 worker 도 high reasoning 으로 승격합니다.
 
+`implement` 에서는 기본적으로 Single Agent 가 작업합니다. Claude, Codex, Gemini 를 동시에 쓰고
+싶다면 작업이 먼저 커밋 단위로 나뉘어야 합니다. 각 lane 이 "이 커밋은 무엇을 바꾸는가"를 한
+문장으로 설명하지 못하면 나누지 않습니다. 조건이 맞을 때만
+`sfs implement --agent-mode parallel --agents codex,claude[,gemini] "<work slice>"` 를 씁니다.
+병렬 구현이 끝난 뒤에는 agent 간 cross review 를 남기고, 그 다음 `sfs review --gate 6` 를
+통과해야 합니다. Single Agent 모드도 구현 직후 review 는 필수입니다.
+
 ---
 
 ## 14. 첫 sprint 예시

@@ -154,6 +154,13 @@ locked. If a slice touches architecture, public contracts, security, privacy,
 data-loss risk, release gates, or repeated review failure, escalate to high
 reasoning or send it back to C-Level.
 
+Implement execution defaults to Single Agent. Users can opt into multiple
+agents, but only after the plan is split into independent lanes. Each lane must
+have disjoint files_scope and a one-sentence proposed commit message. If that
+sentence is unclear, do not split the work. Parallel agent implementation must
+record cross review evidence before `sfs review --gate 6` can pass, and Single
+Agent implementation still requires Gate 6 review before completion.
+
 ## Division Knowledge Packs
 
 As of 0.6.23, the backend, strategy/PM, QA, design/frontend, infra/DevOps,

@@ -222,5 +222,12 @@ subtasks after scope, files_scope, and acceptance criteria are locked. Escalate
 to high reasoning when a slice touches architecture, public contracts, security,
 privacy, data-loss risk, release gates, or repeated review failure.
 
+Implementation starts in Single Agent mode. Use parallel agents only when the
+plan already splits into disjoint files_scope lanes and each lane can name its
+own one-sentence commit message. The explicit command is `sfs implement
+--agent-mode parallel --agents codex,claude[,gemini] "<work slice>"`. Parallel
+lanes need cross review before the final Gate 6 review. Single Agent work also
+needs `sfs review --gate 6` after implementation.
+
 Long-running commands can also be wrapped with `sfs measure --alive -- <command>`
 when you want visible progress instead of a silent terminal.

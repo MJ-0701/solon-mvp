@@ -43,6 +43,11 @@ Model routing follows the same split. C-Level/review uses high reasoning,
 Claude workers use the Sonnet tier, Codex workers use `gpt-5.3-codex`, and
 `gpt-5.3-codex-spark` is reserved for bounded helper subtasks.
 
+`sfs implement` defaults to Single Agent. Choose `--agent-mode parallel
+--agents codex,claude[,gemini]` only when the plan splits into independent
+commit units with disjoint files_scope. Parallel implementation records cross
+review before Gate 6 review.
+
 The normal close command is `sfs retro`. `sfs report` is an optional helper when
 you want to preview or rebuild the report separately.
 

@@ -61,6 +61,21 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - When delegating worker slices, keep files_scope explicit and disjoint. Workers
   may implement fixed internals, but architecture, public API, domain terms, and
   acceptance criteria stay with CEO/CTO/user decisions.
+- Agent mode is an implementation-time choice. Default to single-agent
+  execution. Offer optional parallel execution only as `sfs implement
+  --agent-mode parallel --agents codex,claude[,gemini] ...`, and only when the
+  plan already has independent lanes.
+- Multi-agent implementation requires commit-unit clarity before coding: every
+  lane must have a disjoint files_scope and a one-sentence proposed commit
+  message. If an agent cannot clearly name what its commit would say, do not
+  split that lane.
+- Parallel agents must not edit the same files or silently absorb another
+  agent's scope. If scopes overlap, return to single-agent mode or re-plan the
+  split before editing.
+- Implementation is not complete at artifact creation. After any implementation
+  mode, record verification evidence and run `sfs review --gate 6`. For
+  multi-agent mode, cross review between agents is required before Gate 6 review
+  can pass; each lane should review a different lane's diff/evidence.
 - Use TDD/DDD/transaction guardrails when code or data consistency is touched.
 - Load `policies/knowledge-pack-router.md` first, or `policies/knowledge-pack-router.ko.md`
   for Korean preference. Apply only the matching division router ids.

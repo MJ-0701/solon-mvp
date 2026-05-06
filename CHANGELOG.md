@@ -1,3 +1,27 @@
+## [0.6.25] - 2026-05-07
+
+> **Optional multi-agent implement lane.** Users who operate Codex, Claude,
+> Gemini, or other agents together can now choose a parallel implementation mode
+> without making it the default path.
+
+### Added
+
+- `sfs implement --agent-mode parallel --agents codex,claude[,gemini] ...`
+  records an explicit multi-agent execution contract in `implement.md`.
+- Default `sfs implement` output now advertises Single Agent as the default and
+  shows the optional parallel command before coding begins.
+- Parallel implement mode requires disjoint files_scope, lane-level
+  verification, a one-sentence proposed commit message per lane, and agent cross
+  review before Gate 6 can pass.
+- All implementation modes now print the mandatory next review handoff:
+  `sfs review --gate 6`.
+
+### Verified
+
+- Added CLI and guardrail tests for default Single Agent mode, optional parallel
+  mode, invalid parallel splits, post-implement review handoff, and multi-agent
+  cross-review requirements.
+
 ## [0.6.24] - 2026-05-07
 
 > **Installed docs test layout hotfix.** Homebrew installs the main README at

@@ -39,6 +39,12 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - If the evaluator executor equals the generator executor, call out the
   self-validation risk and prefer a separate model or fresh agent context when
   the change is user-facing, risky, or hard to verify.
+- If implement.md records `agent_mode: parallel`, Gate 6 review must verify the
+  multi-agent contract: disjoint files_scope per lane, one-sentence proposed
+  commit message per lane, lane-level verification evidence, and cross review
+  by a different agent before the final artifact acceptance verdict.
+- If a parallel lane cannot be described as a clear commit unit, treat that as
+  a split-design finding and require rework before PASS.
 - `sfs review` is an artifact acceptance review. Code review is only the
   `code` lens; docs, strategy, design, taxonomy, QA, ops, management-admin,
   release, and generic artifacts use their own acceptance lens.

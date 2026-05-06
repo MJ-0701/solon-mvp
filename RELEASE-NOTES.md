@@ -7,6 +7,17 @@
 
 ---
 
+## 0.6.25
+
+이번 버전은 구현 작업량이 클 때 여러 agent 를 병렬로 쓰는 선택지를 추가합니다. 기본값은 그대로
+Single Agent 입니다.
+
+- `sfs implement` 출력에서 기본 Single Agent 와 선택형 parallel agent 명령을 함께 안내합니다.
+- 병렬 모드는 `sfs implement --agent-mode parallel --agents codex,claude[,gemini] ...` 로 명시적으로 선택합니다.
+- 병렬 lane 은 files_scope 가 겹치지 않아야 하고, lane 별 commit message 를 한 문장으로 설명할 수 있어야 합니다.
+- 구현이 끝나면 Single Agent 도 `sfs review --gate 6` 가 필수입니다.
+- 병렬 agent 로 구현했다면 Gate 6 전에 agent 간 cross review evidence 도 필수입니다.
+
 ## 0.6.24
 
 이번 버전은 0.6.23 에 추가한 문서 테스트가 Homebrew 설치본에서도 그대로 통과하도록 고친 핫픽스입니다.

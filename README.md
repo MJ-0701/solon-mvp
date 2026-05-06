@@ -193,6 +193,13 @@ scope, files_scope, AC 가 잠긴 뒤의 bounded mechanical subtask 에만 씁�
 architecture, public contract, security, privacy, data-loss, release gate, 같은 실패 반복이 있으면
 worker 도 high reasoning 으로 승격합니다.
 
+`sfs implement` 의 기본값은 Single Agent 입니다. 작업량이 많고 plan 이 명확한 커밋 단위로
+나뉠 때만 `sfs implement --agent-mode parallel --agents codex,claude[,gemini] ...` 로
+병렬 agent 모드를 선택합니다. 병렬 모드는 lane 별 files_scope 가 겹치지 않아야 하고, 각 lane 이
+한 문장짜리 commit message 를 말할 수 있어야 합니다. 구현이 끝나면 모든 모드에서
+`sfs review --gate 6` 가 필수이고, 병렬 agent 모드는 그 전에 agent 간 cross review evidence 도
+남겨야 합니다.
+
 ---
 
 ## 명령어
@@ -204,7 +211,8 @@ worker 도 high reasoning 으로 승격합니다.
 | `sfs start <goal>` | 새 작업 묶음 시작 |
 | `sfs brainstorm [--simple|--hard] [text|--stdin]` | 만들기 전에 의도, 기준, 빠진 결정을 정리 |
 | `sfs plan` | 목표/범위/완료 기준 계약 작성 |
-| `sfs implement [slice|--stdin]` | 작은 실행 조각을 진행하고 근거를 남김 |
+| `sfs implement [slice|--stdin]` | 작은 실행 조각을 진행하고 근거를 남김. 기본은 Single Agent |
+| `sfs implement --agent-mode parallel --agents codex,claude[,gemini] [slice]` | 커밋 단위가 명확한 독립 lane 을 여러 agent 로 병렬 실행 |
 | `sfs review [--lens ...]` | 산출물이 받아들일 만한지 검토 |
 | `sfs report` | 필요할 때만 짧은 보고서를 먼저 확인 |
 | `sfs retro [--draft]` | 작업을 회고하고 마무리. 초안만 열려면 `--draft` |

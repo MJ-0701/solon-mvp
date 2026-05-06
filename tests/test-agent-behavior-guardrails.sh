@@ -16,7 +16,7 @@ assert_contains() {
   local label="$3"
 
   [[ -f "${file}" ]] || fail "${label}: missing file ${file}"
-  grep -Fq "${needle}" "${file}" || fail "${label}: missing '${needle}'"
+  grep -Fq -- "${needle}" "${file}" || fail "${label}: missing '${needle}'"
 }
 
 assert_not_contains() {
@@ -25,7 +25,7 @@ assert_not_contains() {
   local label="$3"
 
   [[ -f "${file}" ]] || fail "${label}: missing file ${file}"
-  if grep -Fq "${needle}" "${file}"; then
+  if grep -Fq -- "${needle}" "${file}"; then
     fail "${label}: unexpected '${needle}'"
   fi
 }
@@ -86,6 +86,12 @@ assert_contains "${implement}" "default implementation owner is the worker/gener
 assert_contains "${implement}" 'recommended worker default is `gpt-5.3-codex`' "implement codex worker default"
 assert_contains "${implement}" '`gpt-5.3-codex-spark` is not the normal implementation owner' "implement codex spark boundary"
 assert_contains "${implement}" "Self-review must pass first; cross review follows" "implement self before cross"
+assert_contains "${implement}" "Agent mode is an implementation-time choice" "implement agent mode choice"
+assert_contains "${implement}" "Default to single-agent" "implement single default"
+assert_contains "${implement}" "--agent-mode parallel --agents codex,claude[,gemini]" "implement parallel option"
+assert_contains "${implement}" "one-sentence proposed commit" "implement commit unit guard"
+assert_contains "${implement}" "After any implementation" "implement post review required"
+assert_contains "${implement}" "cross review between agents is required" "implement parallel cross review"
 
 assert_contains "${review}" "Review actual diff, files, test output, and logs" "review evidence"
 assert_contains "${review}" "Gate 3 plan review is the required bridge between plan and implement" "review plan-to-implement bridge"
@@ -96,6 +102,10 @@ assert_contains "${review}" "Repeated review for the same sprint/gate must conve
 assert_contains "${review}" "later auto reviews reuse that" "review auto lens lock"
 assert_contains "${review}" "exact verification command/result" "review verification evidence"
 assert_contains "${review}" "self-validation risk" "review self-validation"
+assert_contains "${review}" "agent_mode: parallel" "review parallel mode"
+assert_contains "${review}" "disjoint files_scope per lane" "review parallel scope"
+assert_contains "${review}" "commit message per lane" "review parallel commit message"
+assert_contains "${review}" "cross review" "review parallel cross review"
 assert_contains "${review}" 'Pass should name `sfs retro` as the' "review retro close path"
 assert_contains "${tidy}" 'Do not recommend `report` before `retro`' "tidy no report-before-retro"
 assert_contains "${review_script}" 'name `/sfs retro` as the normal close path' "review prompt retro close path"
@@ -113,6 +123,8 @@ assert_contains "${model_profiles}" "researcher: research_high" "model profiles 
 assert_contains "${model_profiles}" ".sfs-local/personas/researcher.md" "model profiles researcher persona"
 assert_contains "${model_profiles}" "role_boundaries" "model profiles role boundaries"
 assert_contains "${model_profiles}" "Gate 3 Plan review must pass before worker/generator implementation starts" "model profiles gate invariant"
+assert_contains "${model_profiles}" "Single-agent implementation is the default" "model profiles single default"
+assert_contains "${model_profiles}" "Multi-agent implementation is opt-in" "model profiles parallel opt-in"
 assert_contains "${model_profiles}" 'model: "gpt-5.3-codex"' "model profiles codex worker model"
 assert_contains "${model_profiles}" 'model: "gpt-5.3-codex-spark"' "model profiles codex spark helper"
 assert_contains "${model_profiles}" "not gpt-5.5 and not gpt-5.3-codex-spark" "model profiles codex worker rule"
@@ -139,6 +151,8 @@ for file in "${adapter_files[@]}"; do
   assert_contains "${file}" "Gate 3 review must self-review until PASS before cross review" "adapter self before cross ${file}"
   assert_contains "${file}" 'Codex worker default is `gpt-5.3-codex`' "adapter codex worker default ${file}"
   assert_contains "${file}" '`gpt-5.3-codex-spark` is helper-only' "adapter codex spark boundary ${file}"
+  assert_contains "${file}" "Multi-agent implement is optional, never the default" "adapter multi-agent optional ${file}"
+  assert_contains "${file}" "post-implement cross review is recorded before Gate 6" "adapter multi-agent cross review ${file}"
 done
 
 echo "test-agent-behavior-guardrails: OK"

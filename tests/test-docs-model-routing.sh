@@ -16,7 +16,7 @@ assert_contains() {
   local label="$3"
 
   [[ -f "${file}" ]] || fail "${label}: missing file ${file}"
-  grep -Fq "${needle}" "${file}" || fail "${label}: missing '${needle}'"
+  grep -Fq -- "${needle}" "${file}" || fail "${label}: missing '${needle}'"
 }
 
 assert_not_contains() {
@@ -25,7 +25,7 @@ assert_not_contains() {
   local label="$3"
 
   [[ -f "${file}" ]] || fail "${label}: missing file ${file}"
-  if grep -Fq "${needle}" "${file}"; then
+  if grep -Fq -- "${needle}" "${file}"; then
     fail "${label}: unexpected stale '${needle}'"
   fi
 }
@@ -52,10 +52,15 @@ for file in "${docs[@]}"; do
 done
 
 assert_contains "${docs[0]}" "Codex worker" "README model routing heading"
+assert_contains "${docs[0]}" "--agent-mode parallel --agents codex,claude[,gemini]" "README parallel implement option"
 assert_contains "${DIST_DIR}/GUIDE.md" "일반 구현 worker 가 아니라" "GUIDE spark helper boundary"
+assert_contains "${DIST_DIR}/GUIDE.md" "Single Agent 모드도 구현 직후 review 는 필수" "GUIDE post implement review"
 assert_contains "${DIST_DIR}/BEGINNER-GUIDE.md" "AI 모델 이름을 전부 외울 필요도 없습니다" "BEGINNER friendly model explanation"
 assert_contains "${DIST_DIR}/docs/ko/current-product-shape.md" "모델 라우팅과 책임 경계" "KO product shape model routing"
+assert_contains "${DIST_DIR}/docs/ko/current-product-shape.md" "병렬 agent 구현은 agent 간 cross review evidence" "KO product shape parallel cross review"
 assert_contains "${DIST_DIR}/docs/en/current-product-shape.md" "Model Routing And Responsibility Boundaries" "EN product shape model routing"
+assert_contains "${DIST_DIR}/docs/en/current-product-shape.md" "record cross review evidence" "EN product shape parallel cross review"
 assert_contains "${DIST_DIR}/docs/en/guide.md" '`gpt-5.3-codex-spark` is helper-only' "EN guide spark helper boundary"
+assert_contains "${DIST_DIR}/docs/en/guide.md" "Implementation starts in Single Agent mode" "EN guide single default"
 
 echo "test-docs-model-routing: OK"

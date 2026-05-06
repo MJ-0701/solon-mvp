@@ -17,7 +17,7 @@ source "${SFS_SCRIPT_DIR}/sfs-common.sh"
 usage_implement() {
   cat <<'EOF'
 Usage:
-  /sfs implement [<work slice>]
+  /sfs implement [--agent-mode single|parallel] [--agents codex,claude[,gemini]] [<work slice>]
   /sfs implement --stdin
   /sfs implement --allow-unreviewed-plan [<work slice>]
 
@@ -28,6 +28,10 @@ Open/update the active sprint's implement.md execution artifact.
     waives plan review; the waiver is recorded in events.jsonl.
   - Creates implement.md from sprint-templates/implement.md if missing.
   - Records the implementation request and appends an implement_open event.
+  - Default agent mode is single. Use --agent-mode parallel with two or more
+    named agents only when the plan already splits into clear commit units.
+  - Parallel agent mode requires disjoint files_scope, a one-sentence proposed
+    commit message per lane, and cross review before Gate 6 can pass.
   - Prints implement.md, plan.md, and log.md paths.
   - AI runtimes must apply the execution harness:
     Think Before Execution, Simplicity First, Surgical Changes, Goal-Driven Execution.
@@ -48,6 +52,8 @@ EOF
 
 USE_STDIN=false
 ALLOW_UNREVIEWED_PLAN="${SFS_IMPLEMENT_ALLOW_UNREVIEWED_PLAN:-false}"
+AGENT_MODE="${SFS_IMPLEMENT_AGENT_MODE:-single}"
+AGENTS_VALUE="${SFS_IMPLEMENT_AGENTS:-}"
 RAW_PARTS=()
 
 sfs_implement_bool() {
@@ -60,6 +66,28 @@ sfs_implement_bool() {
 sfs_implement_json_string_field() {
   local field="$1" line="$2"
   printf '%s\n' "${line}" | sed -nE 's/.*"'"${field}"'"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/p'
+}
+
+sfs_implement_normalize_agent_mode() {
+  case "${1:-single}" in
+    single|Single|SINGLE) printf 'single\n' ;;
+    parallel|Parallel|PARALLEL|multi|Multi|MULTI) printf 'parallel\n' ;;
+    *)
+      echo "unknown agent mode: ${1:-} (expected single or parallel)" >&2
+      return 1
+      ;;
+  esac
+}
+
+sfs_implement_agent_count() {
+  local raw="$1"
+  printf '%s\n' "${raw}" | tr ',' '\n' | awk '
+    {
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", $0)
+      if ($0 != "") count++
+    }
+    END { print count + 0 }
+  '
 }
 
 sfs_implement_extract_verdict() {
@@ -111,6 +139,30 @@ while [[ $# -gt 0 ]]; do
       ALLOW_UNREVIEWED_PLAN=true
       shift
       ;;
+    --agent-mode)
+      [[ $# -ge 2 ]] || {
+        echo "missing value for --agent-mode" >&2
+        exit "${SFS_EXIT_UNKNOWN}"
+      }
+      AGENT_MODE="$2"
+      shift 2
+      ;;
+    --agents)
+      [[ $# -ge 2 ]] || {
+        echo "missing value for --agents" >&2
+        exit "${SFS_EXIT_UNKNOWN}"
+      }
+      AGENTS_VALUE="$2"
+      shift 2
+      ;;
+    --parallel)
+      AGENT_MODE="parallel"
+      shift
+      ;;
+    --single)
+      AGENT_MODE="single"
+      shift
+      ;;
     -h|--help)
       usage_implement
       exit "${SFS_EXIT_OK}"
@@ -134,6 +186,16 @@ while [[ $# -gt 0 ]]; do
 done
 
 ALLOW_UNREVIEWED_PLAN="$(sfs_implement_bool "${ALLOW_UNREVIEWED_PLAN}")"
+AGENT_MODE="$(sfs_implement_normalize_agent_mode "${AGENT_MODE}")" || exit "${SFS_EXIT_UNKNOWN}"
+if [[ "${AGENT_MODE}" == "parallel" ]]; then
+  [[ -n "${AGENTS_VALUE}" ]] || AGENTS_VALUE="codex,claude,gemini"
+  if (( $(sfs_implement_agent_count "${AGENTS_VALUE}") < 2 )); then
+    echo "parallel agent mode requires at least two agents; use --agents codex,claude or keep --agent-mode single" >&2
+    exit "${SFS_EXIT_UNKNOWN}"
+  fi
+else
+  [[ -n "${AGENTS_VALUE}" ]] || AGENTS_VALUE="worker/generator-default"
+fi
 
 RAW_TEXT=""
 if [[ "${USE_STDIN}" == "true" ]]; then
@@ -238,6 +300,29 @@ if [[ -n "${RAW_TEXT}" ]]; then
   }
 fi
 
+{
+  printf '\n## %s — Execution Mode\n\n' "${NOW}"
+  printf -- '- agent_mode: %s\n' "${AGENT_MODE}"
+  printf -- '- agents: %s\n' "${AGENTS_VALUE}"
+  if [[ "${AGENT_MODE}" == "parallel" ]]; then
+    cat <<'EOF'
+- split rule: use multiple agents only when each lane has disjoint files_scope and a clear one-sentence proposed commit message.
+- commit-unit guard: if a lane cannot explain its commit message before coding, do not split it; merge it into the nearest coherent lane or return to single-agent mode.
+- lane contract: each agent records owner, files_scope, non-goals, verification command, result, and proposed commit message before handoff.
+- review rule: cross review between agents is required before Gate 6 review can pass, then run `sfs review --gate 6` for artifact acceptance.
+EOF
+  else
+    cat <<'EOF'
+- default lane: one worker/generator owns the fixed implementation slice.
+- optional parallel lane: rerun `sfs implement --agent-mode parallel --agents codex,claude[,gemini] ...` before coding only if the plan splits into clear commit units.
+- review rule: implementation is not complete until evidence is recorded and `sfs review --gate 6` runs; the generator cannot approve its own output.
+EOF
+  fi
+} >> "${IMPLEMENT_PATH}" || {
+  echo "permission denied appending execution mode to ${IMPLEMENT_PATH}" >&2
+  exit "${SFS_EXIT_PERM}"
+}
+
 _esc_sprint="${SPRINT_ID//\\/\\\\}"
 _esc_sprint="${_esc_sprint//\"/\\\"}"
 _esc_path="${IMPLEMENT_PATH//\\/\\\\}"
@@ -247,9 +332,13 @@ _esc_task="${_event_task//\\/\\\\}"
 _esc_task="${_esc_task//\"/\\\"}"
 
 if [[ -n "${RAW_TEXT}" ]]; then
-  _payload="{\"sprint_id\":\"${_esc_sprint}\",\"path\":\"${_esc_path}\",\"task\":\"${_esc_task}\"}"
+  _esc_agents="${AGENTS_VALUE//\\/\\\\}"
+  _esc_agents="${_esc_agents//\"/\\\"}"
+  _payload="{\"sprint_id\":\"${_esc_sprint}\",\"path\":\"${_esc_path}\",\"task\":\"${_esc_task}\",\"agent_mode\":\"${AGENT_MODE}\",\"agents\":\"${_esc_agents}\"}"
 else
-  _payload="{\"sprint_id\":\"${_esc_sprint}\",\"path\":\"${_esc_path}\"}"
+  _esc_agents="${AGENTS_VALUE//\\/\\\\}"
+  _esc_agents="${_esc_agents//\"/\\\"}"
+  _payload="{\"sprint_id\":\"${_esc_sprint}\",\"path\":\"${_esc_path}\",\"agent_mode\":\"${AGENT_MODE}\",\"agents\":\"${_esc_agents}\"}"
 fi
 
 if ! append_event "implement_open" "${_payload}" 2>/dev/null; then
@@ -258,9 +347,17 @@ if ! append_event "implement_open" "${_payload}" 2>/dev/null; then
 fi
 
 if [[ "${PLAN_REVIEW_VERDICT}" == "pass" ]]; then
-  echo "implement.md ready: ${IMPLEMENT_PATH} | plan.md: ${PLAN_PATH} | log.md: ${LOG_PATH} | plan review: pass (${PLAN_REVIEW_EVIDENCE}) | AI runtime must execute the work slice and record evidence now"
+  if [[ "${AGENT_MODE}" == "parallel" ]]; then
+    echo "implement.md ready: ${IMPLEMENT_PATH} | plan.md: ${PLAN_PATH} | log.md: ${LOG_PATH} | plan review: pass (${PLAN_REVIEW_EVIDENCE}) | agent mode: parallel (${AGENTS_VALUE}) | cross review required before Gate 6 PASS | after implementation run: sfs review --gate 6"
+  else
+    echo "implement.md ready: ${IMPLEMENT_PATH} | plan.md: ${PLAN_PATH} | log.md: ${LOG_PATH} | plan review: pass (${PLAN_REVIEW_EVIDENCE}) | agent mode: single (default) | optional parallel: sfs implement --agent-mode parallel --agents codex,claude[,gemini] | after implementation run: sfs review --gate 6"
+  fi
 else
-  echo "implement.md ready: ${IMPLEMENT_PATH} | plan.md: ${PLAN_PATH} | log.md: ${LOG_PATH} | plan review: waived | AI runtime must execute the work slice and record evidence now"
+  if [[ "${AGENT_MODE}" == "parallel" ]]; then
+    echo "implement.md ready: ${IMPLEMENT_PATH} | plan.md: ${PLAN_PATH} | log.md: ${LOG_PATH} | plan review: waived | agent mode: parallel (${AGENTS_VALUE}) | cross review required before Gate 6 PASS | after implementation run: sfs review --gate 6"
+  else
+    echo "implement.md ready: ${IMPLEMENT_PATH} | plan.md: ${PLAN_PATH} | log.md: ${LOG_PATH} | plan review: waived | agent mode: single (default) | optional parallel: sfs implement --agent-mode parallel --agents codex,claude[,gemini] | after implementation run: sfs review --gate 6"
+  fi
 fi
 
 exit "${SFS_EXIT_OK}"

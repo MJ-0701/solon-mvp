@@ -145,6 +145,13 @@ Spark 는 빠르지만 일반 구현 worker 기본값이 아닙니다. scope, fi
 data-loss, release gate, 또는 반복 실패를 건드리면 worker 를 high reasoning 으로 승격하거나
 C-Level 에 다시 넘깁니다.
 
+Implement 의 실행 모드는 기본적으로 Single Agent 입니다. 사용자가 여러 agent 를 선택할 수는
+있지만, 그 경우 plan 은 먼저 독립 lane 으로 나뉘어야 합니다. 각 lane 은 files_scope 가 겹치지
+않고 proposed commit message 를 한 문장으로 설명할 수 있어야 합니다. 이 기준을 만족하지 못하면
+병렬화하지 않습니다. 병렬 agent 구현은 agent 간 cross review evidence 를 남긴 뒤
+`sfs review --gate 6` 를 통과해야 하며, Single Agent 구현도 Gate 6 review 없이 완료로 보지
+않습니다.
+
 ## 분야별 지식팩
 
 0.6.23 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은

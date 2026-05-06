@@ -26,8 +26,15 @@ role_boundaries:
   worker_generator:
     owns: "fixed implementation slices after plan review passes"
     cannot: "change architecture, AC, or files_scope silently"
+  parallel_implement:
+    default_mode: "single"
+    optional_mode: "parallel"
+    allowed_when: "the plan splits into independent lanes with disjoint files_scope and a one-sentence proposed commit message per lane"
+    requires: "lane-level verification, agent cross review, and Gate 6 artifact acceptance review"
+    cannot: "split work that cannot be described as coherent commit units"
   gate_invariant:
     before_implement: "Gate 3 Plan review must pass before worker/generator implementation starts; bypass requires an explicit user waiver."
+    after_implement: "Every implementation path routes to Gate 6 review; parallel agent implementation must record cross review before Gate 6 can pass."
 
 reasoning_tiers:
   strategic_high:
@@ -273,6 +280,7 @@ resolution_rules:
   - "If selected_policy is all_high, resolve every agent through the highest configured tier/profile unless an explicit agent override exists."
   - "Solon recommendations are advisory. Higher-end overrides are allowed when cost/latency are intentional."
   - "Worker/helper outputs still require independent review; a stronger model does not approve its own work."
+  - "Single-agent implementation is the default. Multi-agent implementation is opt-in and requires disjoint files_scope, coherent commit-unit messages, lane verification, and cross review."
   - "For Codex runtime, solon_recommended resolves implementation-worker and division-worker to gpt-5.3-codex, not gpt-5.5 and not gpt-5.3-codex-spark."
   - "Use gpt-5.3-codex-spark only for helper_economy or explicitly bounded mechanical subtasks after C-Level scope, files_scope, and AC are locked."
   - "If a Codex worker slice touches architecture, public API/contracts, security, privacy, data-loss risk, release gates, or repeated review failure, escalate to strategic_high or an explicit high-end override before coding."
