@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.20
+
+이번 버전은 같은 Gate review 를 반복할 때 lens 가 `docs` 에서 `design` 처럼 바뀌어 review loop 가 수렴하지 않던 문제를 고친 핫픽스입니다.
+
+- 첫 `sfs review --lens auto` 는 기존처럼 작업 evidence 를 보고 lens 를 고릅니다.
+- 같은 sprint/gate 의 다음 auto review 는 이전 lens 를 재사용합니다.
+- 의도적으로 lens 를 바꾸려면 `--lens design` 처럼 명시적으로 지정해야 합니다.
+- 그래서 "pass 될 때까지" 반복의 의미가 같은 기준 안에서 유지됩니다.
+
 ## 0.6.19
 
 이번 버전은 Gate 3 계획이 끝났다고 바로 구현으로 넘어가며 사용자에게 모델 선택을 묻던 흐름을 막는 핫픽스입니다.

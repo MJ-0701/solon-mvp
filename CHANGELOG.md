@@ -1,3 +1,24 @@
+## [0.6.20] - 2026-05-06
+
+> **Review lens convergence hotfix.** Real Gate 3 review loops showed that
+> `--lens auto` could choose `docs` on one run and `design` on the next because
+> it re-inferred the lens from updated sprint artifacts every time.
+
+### Fixed
+
+- `sfs review --lens auto` now reuses the previous lens for the same sprint and
+  gate once a review lane has been established.
+- The source is recorded as `auto-locked` when a later auto review reuses the
+  prior lens.
+- Explicit `--lens <name>` still overrides the lane when the user intentionally
+  changes review scope.
+
+### Verified
+
+- Added a regression test where the first Gate 3 auto review chooses `docs`,
+  the plan text later changes to design/UX signals, and the second auto review
+  remains locked on `docs`.
+
 ## [0.6.19] - 2026-05-06
 
 > **Plan review and worker split hotfix.** Real Gate 3 usage showed that a

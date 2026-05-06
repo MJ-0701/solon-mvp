@@ -45,6 +45,10 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   "just naming".
 - Let the adapter's `review_lens` stand unless it is clearly wrong. Use
   `--lens <name>` only as an override.
+- Repeated review for the same sprint/gate must converge. If `--lens auto`
+  already selected a lens for that sprint/gate, later auto reviews reuse that
+  lens instead of rotating to a new one. To intentionally change lens, pass an
+  explicit `--lens <name>` and record why the review lane changed.
 - CLI review lens names are not always the same as division pack ids. Use
   public lens names in commands: `strategy-pm` maps to `strategy`,
   `design/frontend` maps to `design`, `infra` maps to `ops`, and

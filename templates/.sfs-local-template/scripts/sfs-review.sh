@@ -86,8 +86,10 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                   auto chooses from artifact, code, docs, strategy, design,
                   taxonomy, qa, ops, management-admin, release using
                   plan/implement/log text and changed artifact paths. Use an
-                  explicit lens only to override a wrong inference. `code` is
-                  one lens, not the default meaning of review.
+                  explicit lens only to override a wrong inference. For the
+                  same sprint/gate, later auto reviews reuse the previous lens
+                  so review loops converge; pass an explicit lens to change
+                  lanes. `code` is one lens, not the default meaning of review.
                   Common division aliases are accepted, for example
                   strategy-pm -> strategy, design/frontend -> design,
                   infra -> ops, and finance/accounting -> management-admin.
@@ -636,6 +638,35 @@ latest_review_output_path() {
   printf '%s\n' "$line" | sed -nE 's/.*"output_path":"([^"]*)".*/\1/p'
 }
 
+review_json_string_field() {
+  local field="$1" line="$2"
+  printf '%s\n' "$line" | sed -nE 's/.*"'"${field}"'"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/p'
+}
+
+latest_review_lens_for_gate() {
+  local gate_filter="${1:-}" line lens normalized
+  [[ -f "${SFS_EVENTS_FILE}" && -n "${gate_filter}" ]] || return 1
+  while IFS= read -r line; do
+    case "$line" in
+      *'"type":"review_open"'*|*'"type":"review_run"'*) ;;
+      *) continue ;;
+    esac
+    [[ "$line" == *"\"sprint_id\":\"${SPRINT_ID}\""* ]] || continue
+    [[ "$line" == *"\"gate_id\":\"${gate_filter}\""* ]] || continue
+    lens="$(review_json_string_field "review_lens" "$line")"
+    [[ -n "$lens" ]] || continue
+    normalized="$(normalize_review_lens_value "$lens" || true)"
+    case "$normalized" in
+      ""|auto) continue ;;
+      *)
+        printf '%s\n' "$normalized"
+        return 0
+        ;;
+    esac
+  done < <(reverse_lines "${SFS_EVENTS_FILE}")
+  return 1
+}
+
 latest_review_md_result_path() {
   [[ -f "${REVIEW_PATH}" ]] || return 1
   awk -F'`' '/^- result_path: `/ { path=$2 } END { if (path != "") print path; else exit 1 }' "${REVIEW_PATH}"
@@ -759,8 +790,14 @@ GATE_NUMBER="$(sfs_gate_number "${GATE_ID}")"
 GATE_ARTIFACT_ID="gate${GATE_NUMBER}"
 REVIEW_LENS_SOURCE="explicit"
 if [[ "${REVIEW_LENS}" == "auto" ]]; then
-  REVIEW_LENS="$(infer_review_lens)"
-  REVIEW_LENS_SOURCE="auto"
+  _previous_review_lens="$(latest_review_lens_for_gate "${GATE_ID}" || true)"
+  if [[ -n "${_previous_review_lens}" ]]; then
+    REVIEW_LENS="${_previous_review_lens}"
+    REVIEW_LENS_SOURCE="auto-locked"
+  else
+    REVIEW_LENS="$(infer_review_lens)"
+    REVIEW_LENS_SOURCE="auto"
+  fi
 fi
 REVIEW_LENS_LABEL="$(review_lens_label "${REVIEW_LENS}")"
 

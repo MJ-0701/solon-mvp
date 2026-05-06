@@ -79,6 +79,8 @@ assert_contains "${implement}" "default implementation owner is the worker/gener
 assert_contains "${review}" "Review actual diff, files, test output, and logs" "review evidence"
 assert_contains "${review}" "Gate 3 plan review is the required bridge between plan and implement" "review plan-to-implement bridge"
 assert_contains "${review}" "Flag overengineering" "review overengineering"
+assert_contains "${review}" "Repeated review for the same sprint/gate must converge" "review lens convergence"
+assert_contains "${review}" "later auto reviews reuse that" "review auto lens lock"
 assert_contains "${review}" "exact verification command/result" "review verification evidence"
 assert_contains "${review}" "self-validation risk" "review self-validation"
 assert_contains "${review}" 'Pass should name `sfs retro` as the' "review retro close path"
