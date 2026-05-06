@@ -4,7 +4,7 @@
 
 이 문서는 최근 Solon Product 패치들의 결과를 한 번에 이해하기 위한 문서입니다. 핵심은
 명령어를 더 많이 외우게 만드는 것이 아니라, 사용자가 AI 시대에도 product owner 로서
-생각의 근육을 잃지 않게 하는 흐름을 만드는 것입니다.
+생각과 판단의 주도권을 잃지 않게 돕는 흐름을 만드는 것입니다.
 
 ## 한 줄 요약
 
@@ -34,7 +34,7 @@ next: sfs brainstorm --simple "..."  # 빠른 정리
 ```
 
 사용자가 입력하는 명령어는 그대로 `sfs brainstorm` 입니다. Solon 이 지금 작업에 맞는
-depth 옵션을 함께 보여줄 뿐입니다.
+depth 옵션을 함께 보여드릴 뿐입니다.
 
 ## Brainstorm 3단계
 
@@ -53,7 +53,7 @@ depth 옵션을 함께 보여줄 뿐입니다.
 ## Hard Mode 의 목적
 
 `brainstorm --hard` 는 AI 가 "좋아, 바로 할게" 하고 달려가는 흐름을 일부러 늦춥니다.
-사용자에게 자잘하지만 중요한 질문을 계속 던져서 아래 항목을 드러냅니다.
+사용자에게 작지만 중요한 질문을 던져서 아래 항목을 드러냅니다.
 
 - 진짜 해결하려는 문제
 - 서로 충돌하는 욕구
@@ -111,12 +111,12 @@ AI coding 시대에는 "구현"이라는 말이 코드 파일만 가리키면 �
 | `management-admin` | finance records, bookkeeping, tax/accounting questions, cash evidence |
 | `release` | version, changelog, package channel, verification |
 
-사용자는 계속 `sfs review` 라고만 말하면 됩니다. `--lens` 는 Solon 의 추론이 틀렸을 때만 쓰는
+사용자는 계속 `sfs review` 라고만 말씀하시면 됩니다. `--lens` 는 Solon 의 추론이 틀렸을 때만 쓰는
 override 입니다.
 
 ## 분야별 지식팩
 
-0.6.1부터 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
+0.6.12 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
 더 이상 빈 자리표시자가 아닙니다. 각 지식팩은 "이 분야라면 무엇을 조심해야 하는가",
 "무엇을 물어봐야 하는가", "어떤 근거가 있으면 통과로 볼 수 있는가"를 짧게 담습니다.
 

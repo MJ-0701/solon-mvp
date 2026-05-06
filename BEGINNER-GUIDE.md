@@ -1,8 +1,8 @@
 # Solon SFS CLI 초보자 가이드
 
 이 문서는 개발, 터미널, CLI 환경에 아직 익숙하지 않은 분들이 Solon SFS 를 처음 설치하고
-첫 작업까지 가기 위한 안내서입니다. 모르는 용어를 하나씩 검색하지 않아도 되게, 필요한 말과
-명령을 순서대로 적었습니다.
+첫 작업까지 가기 위한 안내서입니다. 모르는 용어를 하나씩 검색하지 않아도 되도록, 필요한 말과
+명령을 차례대로 적었습니다.
 
 목표는 하나입니다.
 
@@ -39,7 +39,7 @@ Solon 은 Figma 나 Notion 처럼 앱 아이콘을 눌러 여는 제품이 아�
 | 이미 설치했는데 업데이트하고 싶음 | 업데이트 |
 | 설치 중 막힘 | 막혔을 때 |
 
-Windows 사용자는 Scoop 경로를 권장합니다. 친구에게 안내하거나 화면 공유를 받을 때도 이
+Windows 사용자는 Scoop 경로를 권장합니다. 다른 분께 안내하거나 화면 공유를 받을 때도 이
 경로가 가장 설명하기 쉽습니다.
 
 ---
@@ -83,7 +83,7 @@ scoop install sfs
 (`$sfs`) 세 곳 모두에서 Solon 명령을 찾을 수 있습니다. 별도의 plugin
 install 명령을 따로 칠 필요가 없습니다.
 
-설치 확인:
+설치는 아래 명령으로 확인합니다.
 
 ```powershell
 sfs.cmd version --check
@@ -91,11 +91,11 @@ sfs.cmd doctor      # ✅ 세 줄 (Claude / Gemini / Codex) 모두 보이면 OK
 ```
 
 성공하면 `sfs 0.6.12`, `status up-to-date` 같은 문장이 보입니다. Windows
-PowerShell 이나 cmd 에서는 `sfs.cmd` 를 쓰고, Git Bash/WSL 에서는 `sfs` 를 써도 됩니다.
+PowerShell 이나 cmd 에서는 `sfs.cmd` 를 쓰고, Git Bash/WSL 에서는 `sfs` 를 쓰셔도 됩니다.
 
 ### 4. 테스트 프로젝트 폴더 만들기
 
-처음에는 실제 중요한 폴더에서 바로 시작하지 말고 테스트 폴더에서 해보세요.
+처음에는 실제 중요한 폴더에서 바로 시작하지 말고 테스트 폴더에서 먼저 해보시는 것을 권장합니다.
 
 ```powershell
 mkdir $HOME\Desktop\solon-test
@@ -193,7 +193,7 @@ sfs status
 
 Solon 은 혼자 일하지 않습니다. 프로젝트 폴더를 읽을 수 있는 AI 도구와 함께 씁니다.
 
-Claude Code 에서는:
+Claude Code 에서는 아래처럼 입력합니다.
 
 ```text
 /sfs status
@@ -201,7 +201,7 @@ Claude Code 에서는:
 /sfs start "첫 번째 작업 목표"
 ```
 
-Gemini CLI 에서는:
+Gemini CLI 에서는 아래처럼 입력합니다.
 
 ```text
 sfs status
@@ -209,7 +209,7 @@ sfs guide
 sfs start "첫 번째 작업 목표"
 ```
 
-Codex CLI 에서는:
+Codex CLI 에서는 아래처럼 입력합니다.
 
 ```text
 $sfs status
@@ -286,7 +286,7 @@ sfs.cmd start "첫 작업 목표"
 
 ## 업데이트
 
-새 버전이 나왔을 때는 삭제 후 재설치하지 않습니다. 프로젝트 폴더에서 실행합니다.
+새 버전이 나왔을 때는 삭제 후 재설치하지 않으셔도 됩니다. 프로젝트 폴더에서 실행해 주세요.
 
 Windows PowerShell/cmd:
 
@@ -304,7 +304,8 @@ sfs upgrade
 ```
 
 Mac 에서 `sfs` 명령이 너무 오래됐거나 업데이트가 잘 안 되면 Homebrew 런타임을
-먼저 올린 뒤 다시 프로젝트 업데이트를 실행하세요.
+먼저 올린 뒤 다시 프로젝트 업데이트를 실행해 주세요.
+아래처럼 tap 이름까지 적으면 `sfs` 라는 짧은 이름이 안 잡힌 상태에서도 안전합니다.
 
 ```bash
 brew upgrade MJ-0701/solon-product/sfs
@@ -322,7 +323,7 @@ Mac Homebrew 설치본도 같은 방식으로 Solon 본체를 먼저 최신화�
 
 ### `sfs` 명령을 찾을 수 없다고 나올 때
 
-터미널이나 PowerShell 을 닫았다가 새로 열고 다시 실행합니다.
+터미널이나 PowerShell 을 닫았다가 새로 열고 다시 실행해 주세요.
 
 ```powershell
 sfs.cmd version --check
@@ -342,7 +343,7 @@ Windows 에 Git for Windows 가 없거나 PATH 에 잡히지 않은 상태입니
 winget install --id Git.Git -e --source winget
 ```
 
-설치 후 PowerShell 을 새로 열고 다시 시도하세요.
+설치 후 PowerShell 을 새로 열고 다시 시도해 주세요.
 
 ### PowerShell 에서 실행 정책 오류가 나올 때
 
@@ -350,7 +351,7 @@ winget install --id Git.Git -e --source winget
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-그 다음 막혔던 명령을 다시 실행합니다.
+그 다음 막혔던 명령을 다시 실행해 주세요.
 
 ### Git 이 없다고 나올 때
 
@@ -370,7 +371,7 @@ Mac 에서 설치 안내가 뜨면 안내에 따라 Xcode Command Line Tools 를
 
 ### 프로젝트 폴더가 어딘지 모르겠을 때
 
-처음에는 테스트 폴더를 쓰세요.
+처음에는 테스트 폴더를 사용해 주세요.
 
 Windows:
 
@@ -390,7 +391,7 @@ cd ~/Desktop/solon-test
 
 ## 도움 요청할 때 보내면 좋은 정보
 
-막힌 화면 전체 스크린샷과 아래 명령 결과를 같이 보내면 해결이 빠릅니다.
+막힌 화면 전체 스크린샷과 아래 명령 결과를 같이 보내주시면 해결이 빠릅니다.
 
 Windows:
 

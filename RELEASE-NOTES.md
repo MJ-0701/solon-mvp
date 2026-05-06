@@ -7,6 +7,19 @@
 
 ---
 
+## 0.6.12
+
+이번 버전은 AI 가 코딩이나 문서 작업을 할 때 자주 놓치는 안전장치를 SFS 흐름 안에 얇게 넣은 릴리스입니다.
+
+- agent 는 구현 전에 중요한 가정과 선택지를 먼저 드러냅니다. 불명확한 부분이 있으면 추측하지 않고 작은 질문으로 멈춥니다.
+- 구현은 최소 유용 단위로 시작합니다. 요청과 직접 관련된 파일과 줄만 조심스럽게 건드립니다.
+- 실제 파일, diff, 에러 로그, 테스트 출력을 읽고 판단하도록 kernel 과 command context 를 강화했습니다.
+- 완료 전에는 가능한 가장 작은 테스트, 빌드, smoke, review check 를 실행하고 그 결과를 보고하도록 명시했습니다.
+- `checklist.md` 와 `context-notes.md` 를 루트에 강제로 만들지 않습니다. 대신 SFS sprint workbench 문서 안에 계획, checklist, context note 를 남기도록 정리했습니다.
+- 한국어 응답의 문장 끝 콜론 금지와 Korean-first 프로젝트의 새 source file 역할 헤더 규칙도 kernel 에 들어갔습니다.
+- Claude, Codex, Gemini adapter 는 긴 규칙을 복제하지 않고 routed SFS context 를 따르도록 짧게 연결됩니다.
+- Mac 에서 `sfs upgrade` 가 본체 업데이트를 못 할 때는 `brew upgrade MJ-0701/solon-product/sfs` 를 먼저 실행하시면 됩니다. 짧은 `brew upgrade sfs` 가 기대대로 동작하지 않는 경우까지 README, GUIDE, BEGINNER-GUIDE 에 보강했습니다.
+
 ## 0.6.11
 
 이번 버전은 Solon 전체에 "남겨야 될 것만 남긴다" 원칙을 적용한 정리 릴리스입니다.
@@ -15,6 +28,7 @@
 - `sfs start` 는 더 이상 빈 절차 문서를 한 번에 만들지 않습니다. 각 단계 명령이 필요한 문서만 생성합니다.
 - `sfs adopt --apply` 는 기존 프로젝트를 요약해서 `docs/solon/<id>-adoption-summary.md` 하나를 공유 문서로 남깁니다.
 - adopt 의 raw scan, 과거 sprint, archive evidence 는 `.sfs-local/archives/` 에 private cold archive 로 접습니다.
+- 이미 0.6.11 인 프로젝트도 `sfs upgrade` 를 다시 실행하면 예전 `legacy-baseline` sprint 와 빈 단계 문서 잔여물을 더 접습니다.
 - 새로 생성되는 sprint 문서 템플릿은 설명문을 줄이고 실제로 채워야 할 칸만 남겼습니다.
 - 새 설치는 빈 `sprints/`, `decisions/`, `queue/` 디렉터리를 미리 만들지 않습니다.
 

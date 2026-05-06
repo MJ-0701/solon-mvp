@@ -1,8 +1,8 @@
 # Solon 제품
 
 > AI-native solo founder 를 위한 **Solo Founder System (SFS)**.
-> Solon 은 AI 가 일을 빠르게 만들 때, 사람이 놓치기 쉬운 의도, 결정, 검증, 마무리를
-> 프로젝트 안에 붙잡아 두는 작업 운영판입니다.
+> Solon 은 AI 와 함께 빠르게 일할 때도 의도, 결정, 검증, 마무리를 놓치지 않도록
+> 프로젝트 안에 차분한 작업 흐름을 만들어 주는 운영 시스템입니다.
 
 **언어**: 한국어 / [영어 문서](./docs/en/index.md)
 
@@ -37,7 +37,8 @@ sfs status
 → sfs retro
 ```
 
-Solon 의 흐름은 명령어를 많이 외우게 만들지 않습니다. 각 단계는 하나의 역할만 가집니다.
+Solon 의 흐름은 명령어를 많이 외우게 만들지 않습니다. 아래 단계만 천천히 따라가셔도
+첫 작업을 안전하게 시작할 수 있습니다.
 
 - `start` 는 새 작업 공간을 만들고, 다음 단계 선택지를 보여줍니다.
 - `brainstorm` 은 의도, 우선순위, 포기할 것, 성공 기준을 묻고 plan 으로 넘길 준비를 합니다.
@@ -49,7 +50,7 @@ Solon 의 흐름은 명령어를 많이 외우게 만들지 않습니다. 각 �
 `sfs report` 와 `sfs tidy` 는 기본 흐름의 필수 단계가 아닙니다. 보고서만 먼저 보고 싶거나,
 이미 끝난 sprint workbench 를 따로 정리할 때 쓰는 보조 명령입니다.
 
-상세 설명:
+자세한 내용은 아래 문서에서 이어서 보실 수 있습니다.
 
 - [현재 제품 흐름과 최근 변화](./docs/ko/current-product-shape.md)
 - [Solon 10x 가치](./docs/ko/10x-value.md)
@@ -59,7 +60,8 @@ Solon 의 흐름은 명령어를 많이 외우게 만들지 않습니다. 각 �
 
 ## 설치
 
-개발, 터미널, CLI 환경이 낯설다면 먼저 [BEGINNER-GUIDE.md](./BEGINNER-GUIDE.md) 를 보세요.
+개발, 터미널, CLI 환경이 낯설다면 먼저 [BEGINNER-GUIDE.md](./BEGINNER-GUIDE.md) 를
+보시면 됩니다. 처음 설치하는 분도 그대로 따라 할 수 있도록 더 천천히 설명해 두었습니다.
 
 > **0.6.12 기준**: `brew install` / `scoop install` 한 번으로 Claude Code (`/sfs`),
 > Gemini CLI (`sfs`), Codex CLI (`$sfs`) 가 모두 Solon 을 찾습니다.
@@ -101,20 +103,22 @@ sfs status
 sfs doctor    # ✅ Claude Code  /  ✅ Gemini CLI  /  ✅ Codex CLI
 ```
 
-세 줄 모두 ✅ 면 Claude, Gemini, Codex 에서 바로 Solon 을 쓸 수 있습니다.
-어떤 줄이 ⚠️ 면 그 옆에 출력되는 한 줄 안내를 그대로 실행하세요.
+세 줄 모두 ✅ 로 보이면 Claude, Gemini, Codex 에서 바로 Solon 을 쓰실 수 있습니다.
+어떤 줄이 ⚠️ 로 보이면 걱정하지 마시고, 그 옆에 출력되는 한 줄 안내를 그대로 실행해 주세요.
 
 ### 업데이트
 
-재설치하지 말고 프로젝트 루트에서 실행합니다.
+기존 프로젝트를 지우거나 다시 만들 필요는 없습니다. 먼저 프로젝트 루트에서 아래 명령을
+실행해 주세요.
 
 ```bash
 sfs upgrade
 sfs version --check
 ```
 
-Mac 에서 `sfs` 자체가 오래됐거나 `sfs upgrade` 가 본체 업데이트를 못 하면
-Homebrew 런타임을 먼저 직접 올린 뒤 프로젝트 업데이트를 다시 실행하세요.
+Mac 에서 `sfs` 자체가 오래됐거나 `sfs upgrade` 가 본체 업데이트를 못 하면,
+Homebrew 런타임을 먼저 직접 올린 뒤 프로젝트 업데이트를 다시 실행해 주세요.
+이때는 `brew upgrade sfs` 보다 tap 이름까지 적은 아래 명령을 권장합니다.
 
 ```bash
 brew upgrade MJ-0701/solon-product/sfs
@@ -129,11 +133,11 @@ sfs.cmd update
 sfs.cmd version --check
 ```
 
-Windows 에서는 `sfs.cmd update` 하나만 기억하면 됩니다. Solon 본체를 최신화하고,
+Windows 에서는 `sfs.cmd update` 하나만 기억하셔도 됩니다. Solon 본체를 최신화하고,
 현재 프로젝트에 필요한 정리까지 이어서 처리합니다.
 
 업데이트 후에도 사용하던 기록은 사라지지 않습니다. 오래된 설치 방식에서 생긴 파일은
-가능한 한 조용히 접고, 지금 사용자가 봐야 할 표면만 남기는 쪽으로 정리합니다.
+가능한 한 조용히 접고, 지금 보셔야 할 표면만 남기는 쪽으로 정리합니다.
 예전처럼 프로젝트 안에 Solon 본체 파일을 보관해야 하는 경우에만
 `sfs upgrade --layout vendored` 를 사용하세요.
 
@@ -170,7 +174,8 @@ Solon 의 강점은 앱 generator 가 아니라, 그 다음부터의 의도 정�
 
 0.6.12 기준으로는 backend, 전략/PM, QA, 디자인, 운영, 경영관리, taxonomy 같은 분야별 지식팩도
 실제 안내로 채워졌습니다. 재무, 경리, 세무, 회계처럼 solo founder 가 놓치기 쉬운 기준도
-필요할 때만 조용히 꺼내 review 나 plan 에 반영합니다.
+필요할 때만 조용히 꺼내 plan 이나 review 에 반영합니다. 사용자가 모든 기준을 외우실 필요는
+없습니다.
 
 ---
 
@@ -197,7 +202,7 @@ Solon 의 강점은 앱 generator 가 아니라, 그 다음부터의 의도 정�
 | `sfs division ...` | 분야별 역할 묶음 관리 |
 | `sfs loop ...` | 큰 작업을 여러 조각으로 길게 진행하는 고급 모드 |
 
-runtime 별 호출 표기:
+Runtime 별 진입 명령은 아래처럼 구분합니다.
 
 | Runtime | 진입 명령 |
 |---|---|
@@ -236,13 +241,13 @@ runtime 별 호출 표기:
 
 0.6.12 기준 기본 설치는 가볍습니다. Solon 본체는 패키지 쪽에 두고, 프로젝트에는
 공유 entry 문서와 private workbench 만 둡니다. AI 도구별 native 파일이 꼭 필요한 팀만
-`sfs agent install all` 로 추가 설치하면 됩니다.
+`sfs agent install all` 로 추가 설치하시면 됩니다.
 
 ---
 
 ## 안전 계약
 
-- install/upgrade/uninstall 은 consumer 프로젝트에 자동 push 하지 않습니다.
+- install, upgrade, uninstall 은 consumer 프로젝트에 자동 push 하지 않습니다.
 - `.sfs-local/` 은 기본 비공개이며 install/upgrade 과정에서 사용자 산출물을 덮어쓰지 않습니다.
 - 공유해야 하는 Solon 문서는 `docs/solon/` 아래에 명시적으로 남깁니다.
 - `sfs review` 는 만든 쪽이 스스로 통과시키지 않도록 검토 역할, 근거, 판정을 분리합니다.
