@@ -65,4 +65,23 @@ case "${passed_out}" in
   *) fail "passed review should allow implement: ${passed_out}" ;;
 esac
 
+setup_project "${TMP_DIR}/latest-partial-blocks"
+sprint_id="$(cat .sfs-local/current-sprint)"
+mkdir -p .sfs-local/tmp/review-runs
+pass_path=".sfs-local/tmp/review-runs/gate3-pass.md"
+partial_path=".sfs-local/tmp/review-runs/gate3-partial.md"
+printf 'Verdict: pass\nEvidence checked: old plan.md\n' > "${pass_path}"
+printf 'Verdict: partial\nRequired actions: rework plan\n' > "${partial_path}"
+printf '{"ts":"2026-05-07T00:01:00+09:00","type":"review_run","sprint_id":"%s","gate_id":"G1","output_path":"%s","evaluator_executor":"codex","generator_executor":"claude"}\n' "${sprint_id}" "${pass_path}" >> .sfs-local/events.jsonl
+printf '{"ts":"2026-05-07T00:02:00+09:00","type":"review_run","sprint_id":"%s","gate_id":"G1","output_path":"%s","evaluator_executor":"codex","generator_executor":"claude"}\n' "${sprint_id}" "${partial_path}" >> .sfs-local/events.jsonl
+set +e
+partial_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" implement "slice" 2>&1)"
+partial_rc=$?
+set -e
+[[ "${partial_rc}" -eq 8 ]] || fail "latest partial review should block implement, got ${partial_rc}: ${partial_out}"
+case "${partial_out}" in
+  *"latest Gate 3 review verdict: partial"* ) ;;
+  *) fail "blocked output should name latest partial verdict: ${partial_out}" ;;
+esac
+
 echo "test-sfs-implement-plan-review-preflight: OK"

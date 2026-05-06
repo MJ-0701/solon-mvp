@@ -45,6 +45,12 @@ load_when: ["always", "sfs", "entry"]
 - Gate order is a runtime contract, not presentation etiquette: after Gate 3
   (Plan) says ready-for-implement, the default next step is Gate 3 review
   (`sfs review --gate 3`) before any `sfs implement` handoff.
+- Review verdicts are success criteria, not effort counters. A high number of
+  review rounds, lenses, or advisor comments never substitutes for PASS.
+  Partial/fail routes to rework and same-gate review, not to implementation.
+- Cross review comes after local self-review passes. If cross review returns
+  partial/fail, rework the plan and return to self-review before another cross
+  review or implementation handoff.
 - Role split is invariant: C-Level owns intent, architecture, acceptance
   criteria, and review orchestration; the worker/generator model owns fixed
   implementation slices. Do not present C-Level direct implementation as the

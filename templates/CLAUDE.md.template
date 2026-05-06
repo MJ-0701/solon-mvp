@@ -21,6 +21,9 @@ Rules:
   and report exact evidence.
 - Gate 3 (Plan) ready-for-implement routes to `sfs review --gate 3` first;
   do not offer `sfs implement` or worker/model handoff until plan review passes.
+- Gate 3 review must self-review until PASS before cross review. Review round
+  count, lens count, or "enough review" is not a PASS; partial/fail routes to
+  rework and same-gate self-review.
 - Keep C-Level and worker/generator responsibilities separate: C-Level owns
   intent, architecture, AC, and review handoff; worker/generator owns fixed
   implementation slices.

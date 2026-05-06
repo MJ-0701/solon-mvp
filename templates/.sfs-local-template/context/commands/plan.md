@@ -42,6 +42,13 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
 - Do not offer `sfs implement`, worker delegation, or model-selection choices
   from a ready Gate 3 report until Gate 3 review has a PASS/accepted result.
   If the plan is ready, the final `Next` is the plan review command.
+- Gate 3 review sequencing follows verified-before-advance: self-review the
+  plan until PASS first, then run cross review. If any self or cross review
+  returns partial/fail, rework the plan and repeat self-review before offering
+  cross review or implementation.
+- Do not use review volume as a stopping rule. Phrases like "enough rounds",
+  "review-side 종료", or "same lens partial twice" are not pass criteria unless
+  the user explicitly records a waiver.
 - C-Level owns the contract, acceptance criteria, architecture boundaries, and
   review handoff. The worker/generator model owns fixed implementation slices.
   Do not frame C-Level direct implementation as a normal option; use it only

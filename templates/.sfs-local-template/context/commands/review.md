@@ -12,6 +12,15 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   plan says ready-for-implement, review the plan contract first with
   `sfs review --gate 3`; only a PASS/accepted result should route to
   `sfs implement`.
+- Gate 3 review has a sequence: local self-review until PASS, then cross
+  review. Cross review is independent confirmation after self-review, not a
+  replacement for self-review.
+- If self-review returns partial/fail, rework the plan and run self-review
+  again. If cross review returns partial/fail, rework the plan and return to
+  self-review before another cross review.
+- Do not treat review volume as completion. Number of lenses, rounds, advisor
+  comments, or elapsed time never unlocks `sfs implement`; only PASS or an
+  explicit user waiver does.
 - For Gate 3 plan review, use the CPO/evaluator role and prefer an independent
   executor or fresh agent context when available. The plan author, CTO, or
   generator should not self-approve the plan it will execute.
@@ -75,6 +84,9 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   `sfs report` only for report preview or past-report rebuild. Partial should
   name the smallest rework slice; fail should return to plan, implementation,
   or user escalation.
+- For Gate 3 Plan review, partial/fail should name the smallest plan rework and
+  the next self-review command. It must not ask whether to implement unless the
+  user explicitly asks to waive the gate.
 - If the review finds a repeated agent mistake, record the smallest harness
   improvement: guardrail/check/hook/context-rule. Claude users may map this to
   Hookify; other agents should use their equivalent hook or scripted check.

@@ -36,6 +36,9 @@ $ARGUMENTS
     passes. Keep C-Level and worker/generator responsibilities separate:
     C-Level owns intent, architecture, AC, and review handoff; worker/generator
     owns fixed implementation slices.
+    Gate 3 review must self-review until PASS before cross review. Review round
+    count, lens count, or "enough review" is not a PASS; partial/fail routes to
+    rework and same-gate self-review.
 11. `.sfs-local/` is private workbench state. Shared durable docs belong under
     `docs/solon/`; do not ask users to commit `.sfs-local` unless their team
     explicitly opts in.

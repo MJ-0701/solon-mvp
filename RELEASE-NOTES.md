@@ -7,6 +7,16 @@
 
 ---
 
+## 0.6.21
+
+이번 버전은 Gate 3 review 를 많이 돌렸다는 이유로 implement 여부를 묻던 흐름을 막는 핫픽스입니다.
+
+- self review 가 먼저 PASS 해야 합니다.
+- self review PASS 이후에 cross review 를 돌립니다.
+- cross review 가 partial/fail 이면 plan 을 고친 뒤 다시 self review 부터 시작합니다.
+- review round 수, lens 수, advisor 지적 수, “충분히 봄”은 PASS 를 대신할 수 없습니다.
+- 최신 Gate 3 review 가 partial/fail 이면 `sfs implement` 는 계속 막힙니다.
+
 ## 0.6.20
 
 이번 버전은 같은 Gate review 를 반복할 때 lens 가 `docs` 에서 `design` 처럼 바뀌어 review loop 가 수렴하지 않던 문제를 고친 핫픽스입니다.

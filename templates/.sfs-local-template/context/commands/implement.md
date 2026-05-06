@@ -10,6 +10,10 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - Preflight is strict: `sfs implement` requires a Gate 3 Plan review PASS
   (`sfs review --gate 3`) before implementation starts. If review evidence is
   missing, return to plan review; bypass only with an explicit user waiver.
+- Gate 3 review must have passed by outcome, not by effort. Do not enter
+  implementation because there were many review rounds, many lenses, or no new
+  categories. Self-review must pass first; cross review follows; any
+  partial/fail returns to plan rework and self-review.
 - The default implementation owner is the worker/generator model resolved from
   `.sfs-local/model-profiles.yaml`, not the C-Level planner/evaluator model.
   C-Level may define the contract, split files_scope, and handle escalation, but

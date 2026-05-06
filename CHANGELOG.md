@@ -1,3 +1,26 @@
+## [0.6.21] - 2026-05-07
+
+> **Self-before-cross review hotfix.** Real Gate 3 planning showed an Action
+> Rail could still ask whether to implement after many review rounds even when
+> the review outcome had not passed. That weakens Goal-Driven Execution.
+
+### Fixed
+
+- Gate 3 review guidance now requires self-review to PASS before cross review.
+- Cross review is independent confirmation after self-review, not a replacement
+  for it.
+- Any self or cross partial/fail routes back to plan rework and same-gate
+  self-review before cross review or implementation can be offered again.
+- Review volume, lens count, advisor count, or "enough review" no longer count
+  as implementation readiness.
+
+### Verified
+
+- Expanded agent behavior guardrails so packaged context and adapters preserve
+  self-before-cross, pass-before-advance, and no-round-count-as-pass rules.
+- Extended the plan-review preflight test so an older PASS followed by a later
+  partial still blocks `sfs implement`.
+
 ## [0.6.20] - 2026-05-06
 
 > **Review lens convergence hotfix.** Real Gate 3 review loops showed that

@@ -21,6 +21,9 @@ Arguments: `$ARGUMENTS`
    passes. Keep C-Level and worker/generator responsibilities separate: C-Level
    owns intent, architecture, AC, and review handoff; worker/generator owns
    fixed implementation slices.
+   Gate 3 review must self-review until PASS before cross review. Review round
+   count, lens count, or "enough review" is not a PASS; partial/fail routes to
+   rework and same-gate self-review.
 7. Decision questions must be self-contained: before any `Q1`, `D1`, or option
    id, explain in plain user language what is being decided, why it matters, the
    recommended default, and what each option changes. Labels are
