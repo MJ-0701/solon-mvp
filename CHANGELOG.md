@@ -1,3 +1,26 @@
+## [0.6.18] - 2026-05-06
+
+> **Friendly UX contract hotfix.** Real planning feedback showed that an Action
+> Rail could still frame user-facing validation as "UI warning + server 4xx",
+> which is technically safe but cold and unhelpful for a real user.
+
+### Changed
+
+- Added a repair-first validation rule to the design/frontend knowledge pack:
+  field-level location, friendly coaching copy, direct recovery action, and
+  server 4xx only as the final safety net.
+- Added implement-context guidance that visible UX validation needs an explicit
+  S0 repair contract before coding; warning/blocking alone is not a complete
+  UX.
+- Synchronized the active repo context and product template context so current
+  and newly installed Solon projects see the same guidance.
+
+### Verified
+
+- Added `tests/test-friendly-ux-contract.sh` so the repair-first UX contract
+  cannot silently disappear from packaged context.
+- `bash tests/test-friendly-ux-contract.sh` passed.
+
 ## [0.6.17] - 2026-05-06
 
 > **Retro close guidance hotfix.** Real use showed that the review prompt still

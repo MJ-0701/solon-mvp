@@ -19,6 +19,10 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - Move only as fast as feedback: test, smoke, preview, or review the smallest useful slice.
 - Keep changes surgical: touch only files and lines tied to the request, do not
   refactor adjacent code, and remove only unused pieces created by this slice.
+- For user-facing UX validation, add an explicit S0 repair contract before the
+  implementation slice: field-level location, friendly coaching copy, one-step
+  recovery action, and server-side fallback. Warning/blocking alone is not a
+  complete UX.
 - Prefer simple code over speculative flexibility. If the implementation grew
   larger than the problem justifies, simplify before review.
 - Inspect the exact files and nearby call sites before editing. Treat dirty

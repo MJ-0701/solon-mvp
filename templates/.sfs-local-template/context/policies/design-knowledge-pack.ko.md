@@ -60,6 +60,7 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - DES-PROP-016: Charts and dashboards need clear units, time range, thresholds, and drill-down path.
 - DES-PROP-017: Mobile constraints must be checked for touch targets, wrapping, overflow, and hierarchy.
 - DES-PROP-018: User-facing language must avoid explaining implementation details inside the app.
+- DES-PROP-019: Validation should coach repair before warning, blocking, or blaming the user.
 
 ## DES-FILL - Operating Guidance
 
@@ -88,6 +89,24 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
   recovery path, unsaved-change behavior, disabled-state rationale 을 가져야 한다.
 - destructive action 은 permission, confirmation, consequence preview, state 가 중요할 때 audit trail 이 필요하다.
 
+### DES-FILL-REPAIR - Friendly Validation And Recovery
+
+- user-facing validation 은 구현 전에 repair-first UX contract 를 먼저 잡는다.
+  목표는 입력이 틀렸다는 사실을 잡아내는 것이 아니라, 사용자가 바로 고칠 수
+  있게 돕는 것이다.
+- 어떤 field 의 어떤 item 이 문제인지 가까이에 보여준다. `[Product]`,
+  `[Scene]` 같은 미치환 placeholder 가 남았다면 token 을 input 주변에
+  chip/list 로 보여주고, focus, clear, replace, "AI 에게 맡기기" 같은
+  직접 회복 경로를 제공한다. 단 product risk 가 있으면 무시하고 진행은 숨기거나
+  2차 option 으로 낮춘다.
+- copy 는 "잘못된 입력" 이 아니라 "아직 실제 값으로 바꿔야 할 부분이 있어요"
+  같은 coaching tone 을 쓴다. helper text 는 scene, mood, background 처럼 더
+  좋은 결과를 만드는 입력을 알려주고, "8k", "cinematic", "시네마틱" 같은
+  render-order 단어가 결과를 더 AI 처럼 보이게 할 수 있음을 부드럽게 안내한다.
+- server-side 4xx validation 은 비용, abuse, data integrity 를 위한 마지막
+  안전망이다. UI 가 같은 field-level repair path 로 렌더링할 수 있도록
+  structured information 을 반환해야 하며 dead-end error 로 끝나면 안 된다.
+
 ### DES-FILL-RESPONSIVE - Fit And Accessibility
 
 - text 는 mobile/desktop 에서 parent 안에 들어가야 한다. viewport-scaled typography 보다
@@ -111,6 +130,8 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - layout 이 반복 작업을 방해하지 않는가?
 - 긴 label, mobile width, empty/error state 에서도 fit 이 유지되는가?
 - copy 가 canonical domain language 를 보존하는가?
+- validation 이 실패했을 때 사용자가 무엇을, 어디서, 어떻게 고치면 되는지
+  문서를 읽지 않고 알 수 있는가?
 
 ## DES-EVIDENCE - Suggested Evidence
 
@@ -119,6 +140,8 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - interactive surface 의 keyboard/focus/contrast note.
 - taxonomy pack 기준 copy/terminology spot-check.
 - entry, decision, recovery, completion 을 담은 workflow note.
+- validation repair matrix: detected issue, field location, user action,
+  server fallback, success-after-fix path.
 
 ## DES-GAP - Deepening Slots
 
@@ -130,3 +153,4 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - DES-GAP-006: Design-system component governance.
 - DES-GAP-007: Responsive QA viewport matrix.
 - DES-GAP-008: UX writing and domain-language alignment guide.
+- DES-GAP-009: Repair-first validation patterns.

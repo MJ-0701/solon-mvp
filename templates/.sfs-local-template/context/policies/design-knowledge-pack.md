@@ -59,6 +59,7 @@ active for a sprint, review, or release. Apply only the matching ids.
 - DES-PROP-016: Charts and dashboards need clear units, time range, thresholds, and drill-down path.
 - DES-PROP-017: Mobile constraints must be checked for touch targets, wrapping, overflow, and hierarchy.
 - DES-PROP-018: User-facing language must avoid explaining implementation details inside the app.
+- DES-PROP-019: Validation should coach repair before warning, blocking, or blaming the user.
 
 ## DES-FILL - Operating Guidance
 
@@ -90,6 +91,23 @@ active for a sprint, review, or release. Apply only the matching ids.
 - Destructive actions need permission, confirmation, consequence preview, and
   audit trail when state matters.
 
+### DES-FILL-REPAIR - Friendly Validation And Recovery
+
+- For user-facing validation, define a repair-first UX contract before
+  implementation. The primary goal is helping the user fix the input, not merely
+  detecting that it is invalid.
+- Show the exact field and item that need attention. For unresolved placeholders
+  such as `[Product]` or `[Scene]`, present the tokens near the input and offer a
+  direct edit path such as focus, clear, replace, or "let AI fill this" where
+  product risk allows.
+- Copy should sound like coaching: "This part still needs a real value" rather
+  than "Invalid input." Helper text should teach better results, for example
+  asking for scene, mood, or background and warning gently that render-order
+  words like "8k" or "cinematic" can make output feel more artificial.
+- Server-side 4xx validation is a final safety net for cost, abuse, or data
+  integrity. It must return structured information that the UI can render as the
+  same field-level repair path, not a dead-end error.
+
 ### DES-FILL-RESPONSIVE - Fit And Accessibility
 
 - Text must fit its parent across mobile and desktop. Prefer wrapping, stable
@@ -116,6 +134,8 @@ active for a sprint, review, or release. Apply only the matching ids.
 - Does layout support repeated work without making the user hunt?
 - Do long labels, mobile widths, and empty/error states still fit?
 - Does copy preserve canonical domain language?
+- When validation fails, can the user see what to fix, where to fix it, and how
+  to recover without reading documentation?
 
 ## DES-EVIDENCE - Suggested Evidence
 
@@ -124,6 +144,8 @@ active for a sprint, review, or release. Apply only the matching ids.
 - Keyboard/focus/contrast notes for interactive surfaces.
 - Copy/terminology spot-check against taxonomy pack.
 - Workflow note covering entry, decision, recovery, and completion.
+- Repair matrix for validation states: detected issue, field location, user
+  action, server fallback, and success-after-fix path.
 
 ## DES-GAP - Deepening Slots
 
@@ -135,3 +157,4 @@ active for a sprint, review, or release. Apply only the matching ids.
 - DES-GAP-006: Design-system component governance.
 - DES-GAP-007: Responsive QA viewport matrix.
 - DES-GAP-008: UX writing and domain-language alignment guide.
+- DES-GAP-009: Repair-first validation patterns.
