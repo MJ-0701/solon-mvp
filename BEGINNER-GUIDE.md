@@ -90,7 +90,7 @@ sfs.cmd version --check
 sfs.cmd doctor      # ✅ 세 줄 (Claude / Gemini / Codex) 모두 보이면 OK
 ```
 
-성공하면 `sfs 0.6.17`, `status up-to-date` 같은 문장이 보입니다. Windows
+성공하면 `sfs 0.6.23`, `status up-to-date` 같은 문장이 보입니다. Windows
 PowerShell 이나 cmd 에서는 `sfs.cmd` 를 쓰고, Git Bash/WSL 에서는 `sfs` 를 쓰셔도 됩니다.
 
 ### 4. 테스트 프로젝트 폴더 만들기
@@ -252,6 +252,12 @@ $sfs plan
 
 코딩을 바로 시키지 않아도 됩니다. Solon 의 `implement` 는 코드만 뜻하지 않습니다. 화면 구조,
 문구, 디자인 handoff, QA 체크리스트, 운영 문서도 구현 산출물입니다.
+
+AI 모델 이름을 전부 외울 필요도 없습니다. Solon 의 기본 생각은 간단합니다. 설계와 검토는 더
+강한 모델이 맡고, 구현은 범위가 정해진 작은 조각을 worker 가 맡습니다. Codex 쪽 구현 worker 는
+`gpt-5.3-codex` 가 기본이고, `gpt-5.3-codex-spark` 는 빠른 정리나 포맷 같은 helper 용도입니다.
+위험한 구조 변경이나 보안/데이터 손실 위험이 있으면 Solon 이 더 강한 판단 모델로 올리는 흐름을
+권장합니다.
 
 새로운 앱의 빈 틀부터 필요할 때도 Next.js, Spring, Java 같은 말을 알 필요는 없습니다.
 사용자는 그냥 만들고 싶은 것을 말하면 됩니다. 대화하다가 AI 가 "앱 뼈대가 먼저 필요하겠다"고

@@ -7,7 +7,7 @@ install. For beginner Git/terminal help, use the Korean [BEGINNER-GUIDE.md](../.
 
 ## 0. Install And Initialize
 
-> **As of 0.6.17**, one `brew install` / `scoop install` lets Claude Code
+> **As of 0.6.23**, one `brew install` / `scoop install` lets Claude Code
 > (`/sfs`), Gemini CLI (`sfs`), and Codex CLI (`$sfs`) find Solon automatically.
 > Your project keeps the files you read and the records you create.
 
@@ -61,11 +61,11 @@ optional. Install those native shortcuts only when a project needs them:
 sfs agent install all
 ```
 
-Old projects can be upgraded into the lighter 0.6.17 shape. Use
+Old projects can be upgraded into the lighter 0.6.23 shape. Use
 `sfs upgrade --layout vendored` only when Solon package files must stay inside
 the project.
 
-0.6.17 also includes the filled division knowledge packs. The user does not need to choose
+0.6.23 also includes the filled division knowledge packs. The user does not need to choose
 "backend", "QA", "infra", "finance", "tax", "accounting", or "taxonomy"
 manually. The AI should read the relevant Solon lens when the work calls for it,
 then explain the judgment in plain language.
@@ -214,6 +214,13 @@ thin by default.
   work.
 - Share conclusions through the sprint workbench and `docs/solon/domain-map.md`,
   not through long copied transcripts.
+
+Model routing follows that boundary. C-Level and review use high reasoning.
+Claude workers use the Sonnet tier. Codex implementation workers use
+`gpt-5.3-codex`. `gpt-5.3-codex-spark` is helper-only for bounded mechanical
+subtasks after scope, files_scope, and acceptance criteria are locked. Escalate
+to high reasoning when a slice touches architecture, public contracts, security,
+privacy, data-loss risk, release gates, or repeated review failure.
 
 Long-running commands can also be wrapped with `sfs measure --alive -- <command>`
 when you want visible progress instead of a silent terminal.

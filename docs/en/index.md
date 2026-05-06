@@ -32,12 +32,16 @@ The point is not to outsource all thinking to AI. Solon lets AI assist the work
 while the user keeps product ownership over intent, priority, tradeoffs,
 validation, boundaries, and language.
 
-As of 0.6.17, backend, strategy/PM, QA, design/frontend, infra/DevOps,
+As of 0.6.23, backend, strategy/PM, QA, design/frontend, infra/DevOps,
 management/admin, and taxonomy knowledge packs are filled with practical
 guidance. Finance, bookkeeping, tax, and accounting belong to the
 management/admin lens. The user does not need to memorize those labels. Solon
 reads the relevant lens and turns it into plain questions, plan criteria, or
 review judgment.
+
+Model routing follows the same split. C-Level/review uses high reasoning,
+Claude workers use the Sonnet tier, Codex workers use `gpt-5.3-codex`, and
+`gpt-5.3-codex-spark` is reserved for bounded helper subtasks.
 
 The normal close command is `sfs retro`. `sfs report` is an optional helper when
 you want to preview or rebuild the report separately.

@@ -128,9 +128,26 @@ SFS 는 Claude, Codex, Gemini 를 무조건 동시에 돌리는 제품이 아닙
 이 방식은 컨텍스트 오염을 줄이면서도 SFS 의 원칙인 "남길 것만 남긴다"를 지키기 위한 얇은
 supervisor 패턴입니다.
 
+## 모델 라우팅과 책임 경계
+
+역할 분리는 모델 선택에도 적용됩니다. Plan 을 만드는 모델과 코드를 쓰는 worker 는 같은 책임을
+지지 않습니다.
+
+| 역할 | 책임 | 기본 모델 흐름 |
+|---|---|---|
+| C-Level / review | 의도, architecture, AC, review, escalation | high reasoning. Codex 는 `gpt-5.5`, Claude 는 Opus 계열 |
+| Claude worker | 고정된 files_scope 구현 slice | Sonnet 계열 |
+| Codex worker | 고정된 files_scope 구현 slice | `gpt-5.3-codex` |
+| Codex helper | grep, formatting, sync 같은 기계적 보조 | `gpt-5.3-codex-spark` |
+
+Spark 는 빠르지만 일반 구현 worker 기본값이 아닙니다. scope, files_scope, AC 가 이미 잠긴 작은
+기계적 subtask 에만 씁니다. 작업이 architecture, public contract, security, privacy,
+data-loss, release gate, 또는 반복 실패를 건드리면 worker 를 high reasoning 으로 승격하거나
+C-Level 에 다시 넘깁니다.
+
 ## 분야별 지식팩
 
-0.6.17 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
+0.6.23 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
 더 이상 빈 자리표시자가 아닙니다. 각 지식팩은 "이 분야라면 무엇을 조심해야 하는가",
 "무엇을 물어봐야 하는가", "어떤 근거가 있으면 통과로 볼 수 있는가"를 짧게 담습니다.
 

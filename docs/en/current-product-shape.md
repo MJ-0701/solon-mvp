@@ -135,9 +135,28 @@ context pollution or self-validation risk.
 This is a thin supervisor pattern that keeps the useful independence of
 multiple agents without making coordination the product.
 
+## Model Routing And Responsibility Boundaries
+
+The same responsibility split applies to model selection. The model that plans
+the contract and the worker that implements a fixed slice do not have the same
+job.
+
+| Role | Responsibility | Default model route |
+|---|---|---|
+| C-Level / review | Intent, architecture, AC, review, escalation | High reasoning. Codex uses `gpt-5.5`; Claude uses the Opus tier |
+| Claude worker | Fixed files_scope implementation slice | Sonnet tier |
+| Codex worker | Fixed files_scope implementation slice | `gpt-5.3-codex` |
+| Codex helper | Mechanical grep, formatting, sync, and similar chores | `gpt-5.3-codex-spark` |
+
+Spark is fast, but it is not the normal implementation worker. Use it only for
+small mechanical subtasks after scope, files_scope, and acceptance criteria are
+locked. If a slice touches architecture, public contracts, security, privacy,
+data-loss risk, release gates, or repeated review failure, escalate to high
+reasoning or send it back to C-Level.
+
 ## Division Knowledge Packs
 
-As of 0.6.17, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
+As of 0.6.23, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
 management/admin, and taxonomy packs are no longer placeholders. Each pack gives
 Solon a compact sense of what to watch, what to ask, and what evidence should
 count for that kind of work.

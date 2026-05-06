@@ -1,3 +1,24 @@
+## [0.6.23] - 2026-05-07
+
+> **Model routing docs refresh.** After the Codex worker model routing hotfix,
+> user-facing docs still had stale 0.6.17 framing and did not clearly explain
+> the Codex worker versus Spark helper boundary.
+
+### Changed
+
+- Updated README, GUIDE, BEGINNER-GUIDE, Korean docs, and English docs to the
+  current 0.6.23 documentation surface.
+- Added user-facing model routing explanation: C-Level/review high reasoning,
+  Claude worker Sonnet tier, Codex worker `gpt-5.3-codex`, and Spark helper-only.
+- Documented escalation triggers for architecture, public contracts, security,
+  privacy, data-loss risk, release gates, and repeated review failure.
+
+### Verified
+
+- Added a docs guardrail test so key user docs mention the Codex worker model,
+  Spark helper boundary, and escalation triggers, while stale 0.6.17 doc claims
+  stay out of the current user documentation set.
+
 ## [0.6.22] - 2026-05-07
 
 > **Codex worker model routing hotfix.** Real model handoff discussion showed

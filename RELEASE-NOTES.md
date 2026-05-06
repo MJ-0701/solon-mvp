@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.23
+
+이번 버전은 0.6.22 의 Codex worker 모델 라우팅을 사용자 문서까지 맞춘 문서 핫픽스입니다.
+
+- README, GUIDE, BEGINNER-GUIDE, 한국어/영어 docs 의 오래된 0.6.17 기준 문구를 현재 기준으로 정리했습니다.
+- C-Level/review 는 high reasoning, Claude worker 는 Sonnet 계열, Codex worker 는 `gpt-5.3-codex` 라고 설명합니다.
+- `gpt-5.3-codex-spark` 는 일반 구현 worker 가 아니라 scope/files_scope/AC 가 잠긴 helper subtask 용도라고 명시했습니다.
+- architecture, public contract, security, privacy, data-loss, release gate, 반복 실패가 있으면 high reasoning 으로 승격한다고 문서화했습니다.
+
 ## 0.6.22
 
 이번 버전은 Codex 쪽 구현 worker 모델 기본값을 명확히 나누는 핫픽스입니다.
