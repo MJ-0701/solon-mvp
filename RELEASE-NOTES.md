@@ -7,6 +7,14 @@
 
 ---
 
+## 0.6.24
+
+이번 버전은 0.6.23 에 추가한 문서 테스트가 Homebrew 설치본에서도 그대로 통과하도록 고친 핫픽스입니다.
+
+- Homebrew 설치본은 `README.md` 를 Cellar 루트에 두고 runtime 파일은 `libexec` 아래에 둡니다.
+- 문서 테스트가 source layout 과 installed Homebrew layout 둘 다 이해하도록 수정했습니다.
+- 사용자 문서 내용은 0.6.23 의 모델 라우팅 최신화 그대로 유지됩니다.
+
 ## 0.6.23
 
 이번 버전은 0.6.22 의 Codex worker 모델 라우팅을 사용자 문서까지 맞춘 문서 핫픽스입니다.

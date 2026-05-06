@@ -41,13 +41,17 @@ docs=(
   "${DIST_DIR}/docs/en/guide.md"
 )
 
+if [[ ! -f "${docs[0]}" && -f "${DIST_DIR}/../README.md" ]]; then
+  docs[0]="${DIST_DIR}/../README.md"
+fi
+
 for file in "${docs[@]}"; do
   assert_contains "${file}" "gpt-5.3-codex" "docs codex worker ${file}"
   assert_contains "${file}" "gpt-5.3-codex-spark" "docs codex spark ${file}"
   assert_not_contains "${file}" "0.6.17" "docs no stale 0.6.17 ${file}"
 done
 
-assert_contains "${DIST_DIR}/README.md" "Codex worker" "README model routing heading"
+assert_contains "${docs[0]}" "Codex worker" "README model routing heading"
 assert_contains "${DIST_DIR}/GUIDE.md" "일반 구현 worker 가 아니라" "GUIDE spark helper boundary"
 assert_contains "${DIST_DIR}/BEGINNER-GUIDE.md" "AI 모델 이름을 전부 외울 필요도 없습니다" "BEGINNER friendly model explanation"
 assert_contains "${DIST_DIR}/docs/ko/current-product-shape.md" "모델 라우팅과 책임 경계" "KO product shape model routing"

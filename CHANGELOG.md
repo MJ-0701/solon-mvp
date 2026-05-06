@@ -1,3 +1,19 @@
+## [0.6.24] - 2026-05-07
+
+> **Installed docs test layout hotfix.** Homebrew installs the main README at
+> the Cellar root while runtime files live under `libexec`, so the new docs
+> routing test passed in source but failed when run from the installed package.
+
+### Fixed
+
+- `tests/test-docs-model-routing.sh` now resolves `README.md` from the source
+  root or the Homebrew Cellar root fallback.
+
+### Verified
+
+- Re-ran the docs model routing test in source and against the installed
+  Homebrew package layout.
+
 ## [0.6.23] - 2026-05-07
 
 > **Model routing docs refresh.** After the Codex worker model routing hotfix,
