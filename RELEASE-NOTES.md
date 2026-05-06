@@ -7,6 +7,35 @@
 
 ---
 
+## 0.6.15
+
+이번 버전은 릴리스 노트가 stable package 에 누락되던 배포 스크립트 문제를 바로잡은 핫픽스입니다.
+
+- dev 에서는 0.6.13, 0.6.14 릴리스 노트가 최신이었지만 stable tag 와 설치본에는 `RELEASE-NOTES.md` 가 오래된 상태로 남을 수 있었습니다.
+- `cut-release.sh` 가 이제 `RELEASE-NOTES.md` 를 stable 제품 저장소로 함께 동기화합니다.
+- 앞으로 release cutter allowlist 에서 릴리스 노트가 빠지면 테스트가 실패하도록 막았습니다.
+
+## 0.6.14
+
+이번 버전은 실사용 중 발견된 review lens 이름 불일치를 바로잡은 핫픽스입니다.
+
+- `sfs review --lens strategy-pm` 처럼 본부 이름을 넣어도 이제 `strategy` lens 로 정상 처리됩니다.
+- `strategy_pm`, `design/frontend`, `infra`, `finance`, `accounting` 같은 자주 나오는 표현도 공개 lens 이름으로 정규화됩니다.
+- `management-admin` 은 재무 기록, 경리, 세무/회계 질문, 현금 evidence 를 보는 review lens 로 직접 사용할 수 있습니다.
+- 잘못된 lens 를 넣었을 때 오류 메시지가 alias 예시를 함께 보여줍니다. agent 가 엉뚱한 lens 로 오래 기다리는 일을 줄이기 위한 조치입니다.
+
+## 0.6.13
+
+이번 버전은 Claude, Codex, Gemini 를 팀처럼 쓰는 방식을 Solon 답게 얇게 반영한 릴리스입니다.
+
+- 큰 조사나 마이그레이션 판단이 필요할 때 사용할 수 있는 read-only researcher 역할이 추가됐습니다.
+- researcher 는 코드를 직접 고치거나 품질 승인을 하지 않습니다. 넓게 읽고, 필요한 사실과 근거만 작게 남깁니다.
+- 모델 프로필에 `research_high` 단계가 추가되어 Gemini 처럼 긴 컨텍스트에 강한 도구를 조사 역할에 더 자연스럽게 배치할 수 있습니다.
+- 구현은 여전히 작은 파일 범위와 명확한 작업 단위로 나눕니다. 여러 에이전트를 쓰더라도 프로젝트 표면이 커지지 않도록 했습니다.
+- 리뷰는 작성자와 분리된 관점으로 보게 했습니다. 같은 agent 가 만든 코드를 같은 맥락에서 다시 승인하는 흐름은 위험 신호로 다룹니다.
+- 도메인 용어가 sprint 를 넘어 오래 살아야 할 때는 `docs/solon/domain-map.md` 같은 짧은 공유 문서로 남기는 방향을 안내합니다.
+- 사용자가 굳이 멀티 에이전트 구성을 몰라도 됩니다. 작업이 작으면 기존처럼 `sfs plan`, `sfs implement`, `sfs review` 흐름으로 충분합니다.
+
 ## 0.6.12
 
 이번 버전은 AI 가 코딩이나 문서 작업을 할 때 자주 놓치는 안전장치를 SFS 흐름 안에 얇게 넣은 릴리스입니다.

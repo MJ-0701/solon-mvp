@@ -1,3 +1,22 @@
+## [0.6.15] - 2026-05-06
+
+> **Release notes packaging hotfix.** 0.6.14 updated the dev release notes, but
+> the owner release cutter did not sync `RELEASE-NOTES.md` into the stable
+> product repo. Stable packages could therefore ship stale user-facing release
+> notes even while README, GUIDE, CHANGELOG, Homebrew, and Scoop were current.
+
+### Fixed
+
+- Added `RELEASE-NOTES.md` to the `cut-release.sh` allowlist so stable tags,
+  Homebrew archives, and Scoop archives carry the same user-facing notes as dev.
+- Added a release tooling regression check that fails if `RELEASE-NOTES.md` is
+  omitted from the allowlist again.
+
+### Verified
+
+- Confirmed dev, stable, and installed package docs carry current 0.6.15 release
+  notes after the hotfix release.
+
 ## [0.6.14] - 2026-05-06
 
 > **Review lens alias hotfix.** Real use showed that agents may naturally pass

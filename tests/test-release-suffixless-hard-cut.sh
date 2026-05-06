@@ -47,6 +47,11 @@ if ! grep -q 'X.Y.Z' "${CUT_RELEASE}"; then
   exit 1
 fi
 
+if ! grep -Fq '"RELEASE-NOTES.md"' "${CUT_RELEASE}"; then
+  echo "FAIL: cut-release.sh allowlist omits RELEASE-NOTES.md, so stable/packages can ship stale user-facing notes" >&2
+  exit 1
+fi
+
 if ! grep -Fq '(-product)?' "${VERIFY_RELEASE}"; then
   echo "FAIL: verify-product-release.sh does not accept suffixless product versions" >&2
   exit 1
