@@ -215,9 +215,22 @@ thin by default.
 - Share conclusions through the sprint workbench and `docs/solon/domain-map.md`,
   not through long copied transcripts.
 
-Model routing follows that boundary. C-Level and review use high reasoning.
-Claude workers use the Sonnet tier. Codex implementation workers use
-`gpt-5.3-codex`. `gpt-5.3-codex-spark` is helper-only for bounded mechanical
+Model routing follows that boundary and is applied by default. Helper-grade
+simple I/O uses lighter intake models; Codex maps that to `gpt-5.4-mini`.
+Question generation and facilitation use standard facilitator models; Codex maps
+that to `gpt-5.4`. C-Level and review use high reasoning. Claude workers use
+the Sonnet tier. Codex implementation workers use `gpt-5.3-codex`.
+Lower-model output that frames questions/options, interprets answers, or affects
+product identity, architecture, gate, AC, or files_scope requires top-model
+advisor review before gate advancement. Advisor means Claude Opus 4.7, Codex
+`gpt-5.5` with xhigh reasoning, Gemini `gemini-3.1-pro-preview`, or the custom
+high-end equivalent. Gemini helper-grade fallback uses `gemini-3-flash-preview`;
+SFS does not use 2.5 fallback names. Helper-grade simple relay and missing-argument prompts are
+advisor-exempt. Advisor calls do not replace self-CPO PASS. Before
+external/cross review, the author records a self-CPO mini-check covering
+requirements to AC to implementation slices to ADR/decision ids, every AC
+mapped to file/artifact/evidence, and SEED/placeholder/mock/fallback material
+kept as non-acceptance until replaced. `gpt-5.3-codex-spark` is helper-only for bounded mechanical
 subtasks after scope, files_scope, and acceptance criteria are locked. Escalate
 to high reasoning when a slice touches architecture, public contracts, security,
 privacy, data-loss risk, release gates, or repeated review failure.

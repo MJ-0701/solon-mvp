@@ -37,9 +37,16 @@ sfs status
 이름을 외울 필요가 없습니다. Solon 이 필요한 관점만 읽고, plan/review 에서는 사용자가 이해할 수
 있는 질문과 기준으로 풀어냅니다.
 
-모델 라우팅도 같은 원칙을 따릅니다. C-Level/review 는 high reasoning, Claude worker 는 Sonnet
-계열, Codex worker 는 `gpt-5.3-codex`, `gpt-5.3-codex-spark` 는 bounded helper subtask 로
-분리됩니다.
+모델 라우팅도 같은 원칙을 따르며 기본 적용됩니다. Helper-grade 단순 I/O 는 가벼운 intake 모델
+(Codex 는 `gpt-5.4-mini`), 질문 생성/facilitation 은 standard facilitator 모델(Codex 는
+`gpt-5.4`)이 맡습니다. 하위모델 출력이 질문/선택지/답변 해석이나 gate/plan 에 영향을 주면
+최상위 advisor 검토가 필수입니다. advisor 는 Claude Opus 4.7, Codex `gpt-5.5` xhigh,
+Gemini `gemini-3.1-pro-preview` 입니다. Gemini helper-grade fallback 은
+`gemini-3-flash-preview` 이며 2.5 fallback 은 쓰지 않습니다. Codex worker 는 `gpt-5.3-codex`,
+`gpt-5.3-codex-spark` 는 bounded helper subtask 로 분리됩니다.
+advisor 호출은 self-CPO PASS 가 아닙니다. cross review 전에 요구사항 → AC → 구현 slice →
+ADR/decision id, AC → file/artifact/evidence, SEED/placeholder/mock/fallback non-acceptance 를
+확인한 self-CPO mini-check 를 남겨야 합니다.
 
 `sfs implement` 는 기본적으로 Single Agent 입니다. plan 이 독립 커밋 단위로 나뉘고 agent 별
 files_scope 가 겹치지 않을 때만 `--agent-mode parallel --agents codex,claude[,gemini]` 를

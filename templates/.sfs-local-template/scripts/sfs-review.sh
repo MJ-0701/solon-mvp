@@ -110,11 +110,14 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                   Print the latest recorded CPO review result for the active
                   sprint without invoking an executor. Alias: --show, --last.
   - default run   Execute the CPO evaluator through a real bridge.
+                  For named executors, SFS first runs a tiny bridge probe
+                  (default timeout: 45s) so a broken CLI wrapper/auth path
+                  fails before the full CPO prompt is sent.
                   Named profiles:
                     codex        $SFS_REVIEW_CODEX_CMD, else `codex exec --full-auto --ephemeral --output-last-message <result> -`
                     codex-plugin $SFS_REVIEW_CODEX_PLUGIN_CMD only (Claude in-process plugins are not shell-callable)
                     gemini       $SFS_REVIEW_GEMINI_CMD, else `gemini --skip-trust --output-format text -p "Read stdin and perform the requested CPO review."`
-                    claude       $SFS_REVIEW_CLAUDE_CMD, else `claude -p --dangerously-skip-permissions`
+                    claude       $SFS_REVIEW_CLAUDE_CMD, else `claude -p "\$(cat)"`
                     claude-plugin unsupported; Codex is not a Claude plugin host
                   Custom executor strings are passed through as shell commands and receive the prompt on stdin.
   - --allow-empty
@@ -181,6 +184,8 @@ REVIEW_INDEXED_TARGET_MAX="${SFS_REVIEW_INDEXED_TARGET_MAX:-80}"
 REVIEW_SMALL_FILE_EXCERPT_LINES="${SFS_REVIEW_SMALL_FILE_EXCERPT_LINES:-450}"
 REVIEW_FIRST_CLASS_EXCERPT_MAX="${SFS_REVIEW_FIRST_CLASS_EXCERPT_MAX:-40}"
 REVIEW_EXECUTOR_TIMEOUT="${SFS_REVIEW_EXECUTOR_TIMEOUT_SEC:-${SFS_REVIEW_COMMAND_TIMEOUT_SEC:-1500}}"
+REVIEW_BRIDGE_PROBE="${SFS_REVIEW_BRIDGE_PROBE:-auto}"
+REVIEW_BRIDGE_PROBE_TIMEOUT="${SFS_REVIEW_BRIDGE_PROBE_TIMEOUT_SEC:-45}"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
@@ -356,6 +361,12 @@ esac
 case "${REVIEW_EXECUTOR_TIMEOUT}" in
   ''|*[!0-9]*)
     echo "invalid SFS_REVIEW_EXECUTOR_TIMEOUT_SEC: ${REVIEW_EXECUTOR_TIMEOUT} (expected integer seconds, 0 disables)" >&2
+    exit "${SFS_EXIT_BADCLI}"
+    ;;
+esac
+case "${REVIEW_BRIDGE_PROBE_TIMEOUT}" in
+  ''|*[!0-9]*)
+    echo "invalid SFS_REVIEW_BRIDGE_PROBE_TIMEOUT_SEC: ${REVIEW_BRIDGE_PROBE_TIMEOUT} (expected integer seconds)" >&2
     exit "${SFS_EXIT_BADCLI}"
     ;;
 esac
@@ -1966,6 +1977,11 @@ You are the Solon CPO Evaluator.
 
 ${persona_note}
 
+Model routing contract:
+- SFS model tiers are role/profile targets, not a requirement that the executor CLI supports a --model flag.
+- Act under the requested evaluator role using the highest configured host/runtime profile available for this review.
+- If the host/runtime cannot provide the required advisor/CPO profile, report that as an executor/auth/profile bridge issue instead of silently downgrading the gate verdict.
+
 Review gate: ${GATE_DISPLAY}
 Review lens: ${REVIEW_LENS} (${REVIEW_LENS_LABEL}; source=${REVIEW_LENS_SOURCE})
 Sprint: ${SPRINT_ID}
@@ -1976,6 +1992,7 @@ Self-validation policy:
 - Do not rubber-stamp CTO Generator output.
 - If this review is running in the same tool/session that generated the implementation, explicitly call that out as a risk.
 - Prefer independent review evidence from Codex/Gemini/another agent instance when implementation was produced by Claude.
+- Advisor calls are not a self-CPO PASS. For Gate 3 cross review, require local self-CPO evidence first: pass/partial/fail, requirements-to-AC-to-slice-to-ADR traceability, AC-to-file/artifact/evidence mapping, and SEED/placeholder/mock/fallback material treated as fail/partial/non-acceptance until replaced. If absent, return partial and request the self-CPO pass before external cross review.
 - Treat same-tool review risk as review_independence_risk: warning unless the evidence proves a concrete product or evidence-bundle defect. Do not make same-tool risk the sole blocker for artifact quality.
 - Separate artifact quality findings from evidence-bundle gaps. If the embedded bundle lacks required artifact files, acceptance evidence, build/smoke output, or source excerpts needed for this lens, say that explicitly as an evidence packaging gap.
 - Treat File excerpt index paths as first-class review targets. The bundle should include bounded source diffs and excerpts for those paths when files are available.
@@ -2066,7 +2083,7 @@ EOF
         printf '%s\n' "${SFS_REVIEW_CLAUDE_CMD}"
       elif command -v claude >/dev/null 2>&1; then
         prepare_executor_auth "claude" "${AUTH_INTERACTIVE}" || return "${SFS_EXIT_EXECUTOR}"
-        printf '%s\n' "claude -p --dangerously-skip-permissions"
+        printf '%s\n' 'claude -p "$(cat)"'
       else
         executor_cli_missing_hint "claude"
         return "${SFS_EXIT_EXECUTOR}"
@@ -2078,6 +2095,49 @@ EOF
       ;;
     *)
       printf '%s\n' "${EVALUATOR_EXECUTOR}"
+      ;;
+  esac
+}
+
+review_bridge_probe_enabled() {
+  local profile
+  case "${REVIEW_BRIDGE_PROBE}" in
+    0|false|FALSE|no|NO|off|OFF) return 1 ;;
+    1|true|TRUE|yes|YES|on|ON) return 0 ;;
+  esac
+  profile="$(normalize_executor_profile "${EVALUATOR_EXECUTOR}")"
+  case "${profile}" in
+    claude|codex|gemini) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+resolve_review_bridge_probe_cmd() {
+  local profile="$1" result_path="$2"
+  case "${profile}" in
+    codex)
+      if [[ -n "${SFS_REVIEW_CODEX_CMD:-}" ]]; then
+        printf '%s\n' "${SFS_REVIEW_CODEX_CMD}"
+      else
+        printf 'codex exec --full-auto --ephemeral --output-last-message "%s" -\n' "${result_path}"
+      fi
+      ;;
+    gemini)
+      if [[ -n "${SFS_REVIEW_GEMINI_CMD:-}" ]]; then
+        printf '%s\n' "${SFS_REVIEW_GEMINI_CMD}"
+      else
+        printf '%s\n' 'gemini --skip-trust --output-format text -p "Return exactly: SFS_REVIEW_BRIDGE_PROBE_OK"'
+      fi
+      ;;
+    claude)
+      if [[ -n "${SFS_REVIEW_CLAUDE_CMD:-}" ]]; then
+        printf '%s\n' "${SFS_REVIEW_CLAUDE_CMD}"
+      else
+        printf '%s\n' 'claude -p "$(cat)"'
+      fi
+      ;;
+    *)
+      return 1
       ;;
   esac
 }
@@ -2245,6 +2305,46 @@ if [[ "${RUN_REVIEW}" == "true" ]]; then
       printf -- '- reason: executor bridge missing\n'
     } >> "${REVIEW_PATH}" || true
     exit "${SFS_EXIT_EXECUTOR}"
+  fi
+
+  if review_bridge_probe_enabled; then
+    PROBE_PROFILE="$(normalize_executor_profile "${EVALUATOR_EXECUTOR}")"
+    PROBE_PROMPT="${RUN_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_TS}.bridge-probe.prompt.txt"
+    PROBE_OUT="${RUN_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_TS}.bridge-probe.stdout.txt"
+    PROBE_ERR="${RUN_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_TS}.bridge-probe.stderr.txt"
+    PROBE_RESULT="${RUN_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_TS}.bridge-probe.result.txt"
+    cat > "${PROBE_PROMPT}" <<EOF
+Solon SFS review bridge probe for ${PROBE_PROFILE}.
+Return exactly:
+SFS_REVIEW_BRIDGE_PROBE_OK
+EOF
+    PROBE_CMD="$(resolve_review_bridge_probe_cmd "${PROBE_PROFILE}" "${PROBE_RESULT}")"
+    {
+      echo "executor bridge probe: ${EVALUATOR_EXECUTOR}"
+      echo "  timeout: ${REVIEW_BRIDGE_PROBE_TIMEOUT}s"
+      echo "  stdout: ${PROBE_OUT}"
+      echo "  stderr: ${PROBE_ERR}"
+    } >&2
+    set +e
+    sfs_run_eval_with_timeout "${PROBE_CMD}" "${REVIEW_BRIDGE_PROBE_TIMEOUT}" "${PROBE_PROMPT}" "${PROBE_OUT}" "${PROBE_ERR}" "review executor bridge probe (${EVALUATOR_EXECUTOR})"
+    PROBE_RC=$?
+    set -e
+    if [[ -s "${PROBE_RESULT}" ]]; then
+      cat "${PROBE_RESULT}" >> "${PROBE_OUT}" 2>/dev/null || true
+    fi
+    if [[ "${PROBE_RC}" -ne 0 ]] || ! grep -q "SFS_REVIEW_BRIDGE_PROBE_OK" "${PROBE_OUT}" 2>/dev/null; then
+      {
+        printf '\n### %s — CPO evaluator bridge probe failed before full review\n\n' "${NOW}"
+        printf -- '- executor: `%s`\n' "${EVALUATOR_EXECUTOR}"
+        printf -- '- timeout: `%ss`\n' "${REVIEW_BRIDGE_PROBE_TIMEOUT}"
+        printf -- '- stdout_path: `%s`\n' "${PROBE_OUT}"
+        printf -- '- stderr_path: `%s`\n' "${PROBE_ERR}"
+        printf -- '- reason: named executor did not return SFS_REVIEW_BRIDGE_PROBE_OK before full CPO prompt\n'
+        printf -- '- next: run `/sfs auth probe --executor %s --timeout %s`, set SFS_REVIEW_%s_CMD to a known-good CLI path, or use --prompt-only for manual handoff.\n' "${PROBE_PROFILE}" "${REVIEW_BRIDGE_PROBE_TIMEOUT}" "$(printf '%s' "${PROBE_PROFILE}" | tr '[:lower:]' '[:upper:]')"
+      } >> "${REVIEW_PATH}" || true
+      echo "executor bridge probe failed: ${EVALUATOR_EXECUTOR} (exit ${PROBE_RC}); full CPO review not started; see ${PROBE_ERR}" >&2
+      exit "${SFS_EXIT_EXECUTOR}"
+    fi
   fi
 
   {

@@ -135,10 +135,23 @@ supervisor 패턴입니다.
 
 | 역할 | 책임 | 기본 모델 흐름 |
 |---|---|---|
+| Helper-grade intake | 단순 relay, 누락 인자 질문, 낮은 위험의 짧은 요약 | Claude 는 Haiku 계열, Codex 는 `gpt-5.4-mini` |
+| Facilitator / question | brainstorm 질문 생성, 선택지 framing, 답변 요약 | Claude 는 Sonnet 계열, Codex 는 `gpt-5.4` |
 | C-Level / review | 의도, architecture, AC, review, escalation | high reasoning. Codex 는 `gpt-5.5`, Claude 는 Opus 계열 |
 | Claude worker | 고정된 files_scope 구현 slice | Sonnet 계열 |
 | Codex worker | 고정된 files_scope 구현 slice | `gpt-5.3-codex` |
 | Codex helper | grep, formatting, sync 같은 기계적 보조 | `gpt-5.3-codex-spark` |
+
+이 라우팅은 기본값입니다. 사용자가 따로 설정하지 않아도 Solon recommended role routing 이
+적용됩니다. `current_model` 은 역할 분리를 끄고 현재 선택 모델을 그대로 쓰려는 명시적 opt-out 입니다.
+Helper-grade 단순 I/O 는 advisor 검토를 생략할 수 있습니다. 하위모델이 질문/선택지를 설계하거나
+답변을 해석하거나 product identity, architecture, gate, AC, files_scope 에 영향을 주면 최상위
+advisor 검토가 필수입니다. advisor 는 Claude Opus 4.7, Codex `gpt-5.5` xhigh,
+Gemini `gemini-3.1-pro-preview` 입니다. Gemini helper-grade fallback 은
+`gemini-3-flash-preview` 이며 2.5 fallback 은 쓰지 않습니다.
+advisor 호출은 self-CPO PASS 가 아닙니다. external/cross review 전에 작성자는 self-CPO
+mini-check 로 요구사항 → AC → 구현 slice → ADR/decision id 추적, 각 AC 의 file/artifact/evidence
+매핑, SEED/placeholder/mock/fallback non-acceptance 를 확인해야 합니다.
 
 Spark 는 빠르지만 일반 구현 worker 기본값이 아닙니다. scope, files_scope, AC 가 이미 잠긴 작은
 기계적 subtask 에만 씁니다. 작업이 architecture, public contract, security, privacy,

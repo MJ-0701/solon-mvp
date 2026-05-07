@@ -476,8 +476,20 @@ private archive 또는 retro 를 봅니다.
 - review 는 생성자와 다른 context, 가능하면 다른 executor 로 맡깁니다.
 - 공유할 내용은 긴 대화록이 아니라 sprint workbench 와 `docs/solon/domain-map.md` 에 짧게 남깁니다.
 
-모델도 같은 원칙으로 나눕니다. C-Level 과 review 는 강한 판단 모델이 맡고, 구현 worker 는
-고정된 slice 를 실행합니다. Codex 쪽 기본 구현 worker 는 `gpt-5.3-codex` 입니다.
+모델도 같은 원칙으로 나눕니다. 이 라우팅은 기본값이라 사용자가 따로 설정하지 않아도 적용됩니다.
+Helper-grade 단순 I/O 는 가벼운 intake 모델이 맡고, 질문 생성/facilitation 은 standard 모델이
+맡습니다. Codex 기준으로는 단순 intake 가 `gpt-5.4-mini`, 질문 생성이 `gpt-5.4` 입니다.
+C-Level 과 review 는 강한 판단 모델이 맡고, 구현 worker 는 고정된 slice 를 실행합니다.
+Codex 쪽 기본 구현 worker 는 `gpt-5.3-codex` 입니다.
+하위모델 출력이 질문/선택지를 설계하거나 답변을 해석하거나 product identity, architecture,
+gate, AC, files_scope 를 흔들면 최상위 advisor 검토가 필수입니다. advisor 는 Claude Opus 4.7,
+Codex `gpt-5.5` xhigh, Gemini `gemini-3.1-pro-preview` 입니다. Gemini helper-grade fallback 은
+`gemini-3-flash-preview` 이며 2.5 fallback 은 쓰지 않습니다. Helper-grade 단순 relay/누락 인자
+질문은 advisor 검토를 생략할 수 있습니다.
+advisor 호출은 self-CPO PASS 가 아닙니다. external/cross review 전에 작성자는 self-CPO
+mini-check 를 남깁니다: 요구사항 → AC → 구현 slice → ADR/decision id 추적, 각 AC 의
+file/artifact/evidence 매핑, SEED/placeholder/mock/fallback 이 실제 산출물 전에는
+non-acceptance 로 남는지 확인합니다.
 `gpt-5.3-codex-spark` 는 일반 구현 worker 가 아니라 grep, 포맷, 동기화처럼 범위가 잠긴
 기계적 helper subtask 용도입니다. architecture, public contract, security, privacy,
 data-loss, release gate, 반복 실패가 보이면 worker 도 high reasoning 으로 승격합니다.

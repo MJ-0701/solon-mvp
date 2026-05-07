@@ -39,9 +39,20 @@ management/admin lens. The user does not need to memorize those labels. Solon
 reads the relevant lens and turns it into plain questions, plan criteria, or
 review judgment.
 
-Model routing follows the same split. C-Level/review uses high reasoning,
-Claude workers use the Sonnet tier, Codex workers use `gpt-5.3-codex`, and
+Model routing follows the same split and applies by default. Helper-grade simple
+I/O uses lighter intake models (Codex `gpt-5.4-mini`), while question generation
+and facilitation use standard facilitator models (Codex `gpt-5.4`). Lower-model
+outputs that frame questions/options, interpret answers, or affect gate/plan
+artifacts require top-model advisor review: Claude Opus 4.7, Codex `gpt-5.5`
+xhigh, Gemini `gemini-3.1-pro-preview`, or the custom high-end equivalent.
+Gemini helper-grade fallback uses `gemini-3-flash-preview`; SFS does not use
+2.5 fallback names. Codex workers use `gpt-5.3-codex`, and
 `gpt-5.3-codex-spark` is reserved for bounded helper subtasks.
+Advisor calls do not replace self-CPO PASS. Before external/cross review, the
+author records a self-CPO mini-check covering requirements to AC to
+implementation slices to ADR/decision ids, every AC mapped to file/artifact/
+evidence, and SEED/placeholder/mock/fallback material kept as non-acceptance
+until replaced.
 
 `sfs implement` defaults to Single Agent. Choose `--agent-mode parallel
 --agents codex,claude[,gemini]` only when the plan splits into independent

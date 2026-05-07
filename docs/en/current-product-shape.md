@@ -143,10 +143,27 @@ job.
 
 | Role | Responsibility | Default model route |
 |---|---|---|
+| Helper-grade intake | Simple relay, missing-argument prompts, low-risk short summaries | Claude uses the Haiku tier; Codex uses `gpt-5.4-mini` |
+| Facilitator / question | Brainstorm question generation, option framing, answer summaries | Claude uses the Sonnet tier; Codex uses `gpt-5.4` |
 | C-Level / review | Intent, architecture, AC, review, escalation | High reasoning. Codex uses `gpt-5.5`; Claude uses the Opus tier |
 | Claude worker | Fixed files_scope implementation slice | Sonnet tier |
 | Codex worker | Fixed files_scope implementation slice | `gpt-5.3-codex` |
 | Codex helper | Mechanical grep, formatting, sync, and similar chores | `gpt-5.3-codex-spark` |
+
+This routing is the default. Users do not need to configure it separately.
+`current_model` is an explicit opt-out for projects that want the currently
+selected host model for every role. Helper-grade simple I/O is advisor-exempt.
+When a lower-model output frames questions/options, interprets answers, or
+affects product identity, architecture, gate, AC, or files_scope, top-model
+advisor review is required before gate advancement. Advisor means Claude Opus
+4.7, Codex `gpt-5.5` with xhigh reasoning, Gemini `gemini-3.1-pro-preview`,
+or the custom high-end equivalent. Gemini helper-grade fallback uses
+`gemini-3-flash-preview`; SFS does not use 2.5 fallback names.
+Advisor calls do not replace self-CPO PASS. Before external/cross review, the
+author records a self-CPO mini-check covering requirements to AC to
+implementation slices to ADR/decision ids, every AC mapped to file/artifact/
+evidence, and SEED/placeholder/mock/fallback material kept as non-acceptance
+until replaced.
 
 Spark is fast, but it is not the normal implementation worker. Use it only for
 small mechanical subtasks after scope, files_scope, and acceptance criteria are

@@ -7,6 +7,31 @@
 
 ---
 
+## 0.6.34
+
+이번 버전은 SFS 모델 라우팅을 사용자가 따로 설정하지 않아도 기본 적용되게 바꿉니다.
+
+- 단순 relay, 누락 인자 질문, 낮은 위험의 짧은 요약은 helper-grade intake 로 처리합니다.
+  Codex 기준 기본값은 `gpt-5.4-mini` 입니다.
+- brainstorm 질문 생성, 선택지 framing, 답변 요약은 facilitator tier 로 처리합니다.
+  Codex 기준 기본값은 `gpt-5.4` 입니다.
+- 하위모델 출력이 질문/선택지를 설계하거나 답변을 해석하거나 gate/plan 에 영향을 주면
+  최상위 advisor 검토가 필수입니다. Codex advisor 는 `gpt-5.5` xhigh 입니다.
+- 이 승격은 자동 content classifier 가 아니라 SFS role label 과 self-CPO/review 규칙으로 강제합니다.
+- Helper-grade 단순 I/O 는 advisor 검토를 생략할 수 있습니다.
+- advisor 호출은 self-CPO PASS 를 대체하지 않습니다. external/cross review 전에는 요구사항,
+  AC, 구현 slice, ADR/decision id, file/artifact/evidence, SEED/placeholder/mock/fallback
+  non-acceptance 를 확인한 self-CPO mini-check 를 남겨야 합니다.
+- review executor 는 full CPO prompt 전에 작은 bridge probe 를 먼저 실행합니다. Claude/Codex/Gemini
+  CLI 가 무출력으로 멈추면 full review 로 들어가지 않고 `/sfs auth probe` 또는
+  `SFS_REVIEW_<EXECUTOR>_CMD` 설정을 안내합니다.
+- Claude review bridge 기본값은 성공이 확인된 `claude -p "$(cat)"` prompt-argument 경로로 고정했습니다.
+  실패가 확인된 `claude -p --dangerously-skip-permissions` stdin 경로는 더 이상 기본값으로 쓰지 않습니다.
+- Gemini 는 facilitator/advisor/review 기본값으로 `gemini-3.1-pro-preview`, helper-grade fallback 으로
+  `gemini-3-flash-preview` 만 명시합니다. 2.5 fallback 은 쓰지 않습니다.
+- 구현 worker 는 그대로 `gpt-5.3-codex`, 기계적 helper 는 `gpt-5.3-codex-spark` 입니다.
+- 새 프로젝트와 fallback 상태의 기존 프로젝트는 `solon_recommended` role routing 을 기본값으로 씁니다.
+
 ## 0.6.33
 
 이번 버전은 Claude/Codex/Gemini SFS 어댑터가 사용자 언어와 SFS 용어를 섞어 이상한 선택지로

@@ -46,6 +46,13 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   plan until PASS first, then run cross review. If any self or cross review
   returns partial/fail, rework the plan and repeat self-review before offering
   cross review or implementation.
+- The self-review must be a self-CPO mini-check, not only advisor consultation.
+  Before calling Codex/Claude/Gemini or another external CPO, verify and record:
+  requirements ↔ AC ↔ implementation slices ↔ ADR/decision ids traceability;
+  every AC has an explicit file/artifact plus expected-content/evidence mapping;
+  and all SEED, placeholder, mock, or fallback material starts as fail,
+  partial, or explicit non-acceptance evidence until real deliverables replace
+  it. If this pass is missing, the plan is not ready for cross review.
 - Do not use review volume as a stopping rule. Phrases like "enough rounds",
   "review-side 종료", or "same lens partial twice" are not pass criteria unless
   the user explicitly records a waiver.

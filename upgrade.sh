@@ -132,7 +132,7 @@ sed_inplace() {
 }
 
 create_default_model_profile() {
-  local runtime="${1:-current}" policy="${2:-current_model}" status="${3:-current_model_fallback}"
+  local runtime="${1:-current}" policy="${2:-solon_recommended}" status="${3:-default_applied}"
   [ -f "$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml" ] || return 1
 
   local today project_name
@@ -153,12 +153,8 @@ create_default_model_profile() {
 model_profile_needs_prompt() {
   local file="$TARGET/.sfs-local/model-profiles.yaml"
   [ -f "$file" ] || return 0
-  grep -Eq '^[[:space:]]*status:[[:space:]]*"?current_model_fallback"?' "$file" 2>/dev/null && return 0
   grep -Eq '^[[:space:]]*status:[[:space:]]*"?review_required"?' "$file" 2>/dev/null && return 0
   grep -Eq '^[[:space:]]*status:[[:space:]]*"?unset"?' "$file" 2>/dev/null && return 0
-  grep -Eq '^[[:space:]]*selected_runtime:[[:space:]]*"?current"?' "$file" 2>/dev/null && return 0
-  grep -Eq '^[[:space:]]*selected_policy:[[:space:]]*"?current_model"?' "$file" 2>/dev/null && return 0
-  grep -Eq '^[[:space:]]*confirmed_by:[[:space:]]*"?[[:space:]]*"?$' "$file" 2>/dev/null && return 0
   return 1
 }
 
@@ -167,30 +163,31 @@ print_model_profile_question() {
 
 Agent model profile:
   이 질문은 Solon 의 역할별 agent 가 어떤 모델을 쓸지 정하는 단계입니다.
-  예: 설계/판단 agent 는 더 강한 모델, 코드 구현 agent 는 표준 모델, 단순 정리 helper 는 가벼운 모델.
+  기본값은 이미 적용됩니다. 사용자가 따로 설정하지 않아도 deterministic intake 는 가벼운 모델,
+  질문 생성/facilitation 은 standard 모델, product identity/architecture/gate 판단과 review 는
+  high reasoning, 코드 구현 worker 는 fixed-slice standard, 단순 helper 는 economy 로 라우팅합니다.
 
-  지금 꼭 정하지 않아도 됩니다.
-  건너뛰면 current_model fallback 을 유지하고, 현재 Claude/Codex/Gemini 에서 사용자가
-  선택한 모델을 그대로 씁니다. 나중에 다시 설정할 수 있고, 다음 upgrade 때도 다시 안내합니다.
+  current_model 은 명시적으로 opt-out 하고 현재 Claude/Codex/Gemini 에서 사용자가 선택한
+  모델을 모든 역할에 그대로 쓰고 싶을 때만 고릅니다.
 
   선택지:
-    1. Claude 권장: 설계/평가 Opus 4.7, 구현 Sonnet 4.6, helper Haiku
-    2. 지금 설정 안 함: current_model fallback 유지 (처음이면 이걸 골라도 안전)
+    1. Solon 기본값: 현재 runtime 에 맞춰 role routing 적용 (권장)
+    2. current_model: 역할 분리 없이 현재 선택 모델을 그대로 사용
     3. all_high: 모든 agent/helper 를 high-end 로 설정 (품질 우선, 비용/지연 증가 가능)
     4. custom/manual: 직접 모델 profile 작성
 
   Codex/Claude 가 대신 실행 중인 경우:
     위 설명과 선택지를 사용자에게 보여주고 번호를 물어보세요.
-    사용자가 "지금 설정 안 함" 이라고 하면 current_model fallback 으로 두고 계속 진행하면 됩니다.
+    사용자가 고르지 않으면 1번 Solon 기본값으로 계속 진행하면 됩니다.
 EOF
 }
 
 set_model_profile_fields() {
   local runtime="$1" policy="$2" status="$3" confirmed_by="$4" confirmed_at="$5"
   local file="$TARGET/.sfs-local/model-profiles.yaml"
-  [ -f "$file" ] || create_default_model_profile current current_model current_model_fallback
+  [ -f "$file" ] || create_default_model_profile current solon_recommended default_applied
   if ! sed_inplace \
-    -e "s@^[[:space:]]*status:.*@  status: \"$status\"        # current_model_fallback | selected_at_install | confirmed | review_required@g" \
+    -e "s@^[[:space:]]*status:.*@  status: \"$status\"        # default_applied | selected_at_install | confirmed | current_model_fallback | review_required@g" \
     -e "s@^[[:space:]]*selected_runtime:.*@  selected_runtime: \"$runtime\"   # current | claude | codex | gemini | custom@g" \
     -e "s@^[[:space:]]*selected_policy:.*@  selected_policy: \"$policy\"       # current_model | solon_recommended | all_high | custom@g" \
     -e "s@^[[:space:]]*confirmed_by:.*@  confirmed_by: \"$confirmed_by\"@g" \
@@ -204,9 +201,9 @@ set_model_profile_fields() {
 maybe_prompt_model_profile() {
   model_profile_needs_prompt || return 0
 
-  if [ "${SFS_MODEL_PROFILE_PROMPT:-1}" = "0" ]; then
-    warn "agent model profile fallback 상태 — SFS_MODEL_PROFILE_PROMPT=0 이라 이번 질문은 건너뜀"
-    warn "    current_model fallback 유지. 다음 upgrade 에서 다시 질문됩니다."
+  if [ "${SFS_MODEL_PROFILE_PROMPT:-0}" != "1" ]; then
+    warn "agent model profile review_required 상태 — 이번 질문은 건너뜀"
+    warn "    기본 role routing 은 이미 적용됩니다. 직접 설정이 필요하면 SFS_MODEL_PROFILE_PROMPT=1 로 다시 실행하세요."
     return 0
   fi
 
@@ -217,17 +214,17 @@ maybe_prompt_model_profile() {
 
   print_model_profile_question
   local choice runtime now
-  choice="$(prompt_always "agent model profile 선택? (1/2/3/4, 처음이면 2 권장)" "2")"
+  choice="$(prompt_always "agent model profile 선택? (1/2/3/4, 기본은 1)" "1")"
   now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
   case "$choice" in
     1)
-      set_model_profile_fields "claude" "solon_recommended" "confirmed" "sfs upgrade" "$now"
-      ok "agent model profile 확정: Claude 권장 (Opus 4.7 / Sonnet 4.6 / Haiku)"
+      set_model_profile_fields "current" "solon_recommended" "default_applied" "sfs upgrade" "$now"
+      ok "agent model profile 기본값 적용: solon_recommended role routing"
       ;;
     2|"")
-      set_model_profile_fields "current" "current_model" "current_model_fallback" "" ""
-      ok "agent model profile 미확정 유지: current_model fallback (다음 upgrade 때 다시 질문)"
+      set_model_profile_fields "current" "current_model" "selected_at_install" "sfs upgrade" "$now"
+      ok "agent model profile opt-out: current_model"
       ;;
     3)
       runtime="$(prompt_always "all_high 를 적용할 runtime? (claude/codex/gemini/custom/current)" "claude")"
@@ -244,8 +241,8 @@ maybe_prompt_model_profile() {
       warn "    status=review_required 로 남겨 다음 upgrade/사용자 발화 때 다시 안내됩니다."
       ;;
     *)
-      warn "알 수 없는 선택 '$choice' — current_model fallback 유지"
-      set_model_profile_fields "current" "current_model" "current_model_fallback" "" ""
+      warn "알 수 없는 선택 '$choice' — solon_recommended 기본값 적용"
+      set_model_profile_fields "current" "solon_recommended" "default_applied" "sfs upgrade" "$now"
       ;;
   esac
 }
@@ -1231,14 +1228,15 @@ if [ "$CUR_VER" = "$NEW_VER" ]; then
   MODEL_PROFILE_REPAIRED=0
   if [ ! -f "$TARGET/.sfs-local/model-profiles.yaml" ] \
      && [ -f "$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml" ]; then
-    create_default_model_profile current current_model current_model_fallback
-    ok "model-profiles.yaml 누락 감지 — current_model fallback 설정으로 생성"
+    create_default_model_profile current solon_recommended default_applied
+    ok "model-profiles.yaml 누락 감지 — solon_recommended 기본 role routing 으로 생성"
     MODEL_PROFILE_REPAIRED=1
   elif grep -q 'status: "current_model_fallback"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null \
-    || grep -q 'selected_runtime: "current"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null \
-    || grep -q 'status: "review_required"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null \
     || grep -q 'selected_runtime: "unset"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null; then
-    warn "agent model profile 이 current_model fallback 상태입니다."
+    set_model_profile_fields "current" "solon_recommended" "default_applied" "sfs upgrade" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    ok "agent model profile fallback 감지 — solon_recommended 기본 role routing 으로 전환"
+  elif grep -q 'status: "review_required"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null; then
+    warn "agent model profile 이 review_required 상태입니다."
   fi
   if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ]; then
     thin_context_runtime_migration || die "thin runtime context migration failed"
@@ -1622,8 +1620,8 @@ info "파일별 갱신..."
 
 PROJECT_NAME="$(basename "$TARGET")"
 MODEL_RUNTIME="current"
-MODEL_POLICY="current_model"
-MODEL_PROFILE_STATUS="current_model_fallback"
+MODEL_POLICY="solon_recommended"
+MODEL_PROFILE_STATUS="default_applied"
 MODEL_PROFILES_WAS_MISSING=0
 if [ ! -f "$TARGET/.sfs-local/model-profiles.yaml" ]; then
   MODEL_PROFILES_WAS_MISSING=1
@@ -1942,10 +1940,18 @@ ${C_BOLD}${C_GREEN}=== 업그레이드 완료 ===${C_RESET}
 Agent model profile:
   ${MODEL_PROFILE_NOTICE:-설정 파일 유지됨: .sfs-local/model-profiles.yaml}
 
-  Solon 권장은 C-Level/review high, worker standard, helper economy 입니다.
+  Solon recommended role routing 이 기본 적용됩니다. current_model 은 명시적 opt-out 입니다.
+  Codex 권장은 helper-grade intake gpt-5.4-mini, 질문 생성/facilitator gpt-5.4,
+  advisor/review gpt-5.5 xhigh, worker gpt-5.3-codex, bounded helper gpt-5.3-codex-spark 입니다.
+  Gemini 기본 advisor/review/facilitator 는 gemini-3.1-pro-preview, helper-grade fallback 은
+  gemini-3-flash-preview 이며 2.5 fallback 은 쓰지 않습니다.
+  모델명은 SFS role/profile contract 입니다. CLI --model flag 지원을 전제로 하지 않고,
+  기본 bridge 는 prompt 와 host/runtime 설정으로 해당 역할을 요청합니다.
+  하위모델이 질문/선택지/답변 해석/gate 를 흔들면 최상위 advisor 검토가 필수입니다.
+  helper-grade 단순 I/O 는 advisor 검토를 생략할 수 있습니다.
+  advisor 호출은 self-CPO PASS 가 아닙니다. external/cross review 전에는 요구사항-AC-slice-ADR 추적,
+  AC-file/artifact/evidence 매핑, SEED/placeholder/mock/fallback non-acceptance 를 self-CPO mini-check 로 남깁니다.
   프로젝트가 비용/지연을 감수한다면 worker/helper 도 high-end 모델로 설정해도 됩니다.
-  설정을 안 하거나 거부하면 현재 런타임에서 사용자가 선택한 모델을 그대로 씁니다.
-  Codex 권장은 C-Level/review gpt-5.5, worker gpt-5.3-codex, bounded helper gpt-5.3-codex-spark 입니다.
   Spark 는 일반 구현 worker 가 아니라 scope/AC 가 잠긴 기계적 subtask 용도입니다. Claude 는 opus/sonnet/haiku 계열,
   Gemini/custom 은 프로젝트 runtime 이 지원하는 profile 이름으로 agent별 override 가능합니다.
 

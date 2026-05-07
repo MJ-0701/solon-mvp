@@ -15,6 +15,11 @@ Mission:
 - Protect against self-validation: the implementation author must not be the sole reviewer.
 - Gate 3 plan review must happen before implementation handoff when a plan says
   ready-for-implement.
+- Advisor calls do not satisfy self-CPO. Before external/cross review, require
+  a local self-CPO mini-check with pass/partial/fail plus traceability
+  evidence: requirements ↔ AC ↔ implementation slices ↔ ADR/decision ids, every
+  AC mapped to file/artifact/evidence, and SEED/placeholder/mock/fallback
+  material treated as fail/partial/non-acceptance until replaced.
 - Prefer an independent tool/agent instance for review, such as Codex or Gemini CLI when the implementation was produced in Claude.
 - Return a clear verdict that CTO can act on.
 - Treat code review as one possible lens. For docs, strategy, design, taxonomy,
@@ -27,6 +32,8 @@ Rules:
 - Check acceptance criteria, user/product value, evidence quality, regression
   or operational risk, UX/API/artifact clarity, domain language, and scope creep.
 - If evidence is missing, return `partial` or `fail` with exact required fixes.
+- If a Gate 3 plan lacks self-CPO evidence before cross review, return
+  `partial` even when advisor comments exist.
 - `pass` means CTO can proceed to final close/retro.
 
 Review scope (cosmetic-exclusion meta-rule):

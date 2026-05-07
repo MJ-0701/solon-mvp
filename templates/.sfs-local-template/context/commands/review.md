@@ -15,6 +15,12 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - Gate 3 review has a sequence: local self-review until PASS, then cross
   review. Cross review is independent confirmation after self-review, not a
   replacement for self-review.
+- Local self-review means a self-CPO mini-check, not just an advisor call. It
+  must record pass/partial/fail and check requirements-to-AC-to-slice-to-ADR
+  traceability, AC-to-file/artifact/evidence mapping, and SEED/placeholder/mock/
+  fallback material as fail/partial/non-acceptance until replaced by real
+  deliverables. If that evidence is absent, return partial and ask for the
+  self-CPO pass before external cross review.
 - If self-review returns partial/fail, rework the plan and run self-review
   again. If cross review returns partial/fail, rework the plan and return to
   self-review before another cross review.

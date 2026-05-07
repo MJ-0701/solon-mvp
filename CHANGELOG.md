@@ -1,3 +1,48 @@
+## [0.6.34] - 2026-05-07
+
+> **Default facilitator model routing.** SFS now applies role-based model
+> routing by default instead of asking the user to configure it. Question
+> generation is separated from product-direction review, with Codex mapped to
+> `gpt-5.4-mini` for helper-grade intake, `gpt-5.4` for facilitator/question
+> work, `gpt-5.5` xhigh for top-model advisor review, `gpt-5.3-codex` for fixed
+> implementation slices, and `gpt-5.3-codex-spark` for bounded mechanical
+> helpers.
+
+### Fixed
+
+- New projects now default to `solon_recommended` role routing; `current_model`
+  is an explicit opt-out instead of the implicit fallback.
+- Upgrade now repairs missing or legacy fallback model profiles to the default
+  recommended role routing without requiring a user prompt.
+- Added `intake_economy` and `facilitator_standard` tiers to
+  `model-profiles.yaml`.
+- Helper-grade simple I/O remains advisor-exempt, while lower-model outputs
+  that frame questions/options, interpret answers, or affect brainstorm/plan/gate
+  artifacts require top-model advisor review before gate advancement.
+- Advisor calls no longer substitute for self-CPO. Before external/cross review,
+  the author must record self-CPO pass/partial/fail evidence covering
+  requirements-to-AC-to-slice-to-ADR traceability, AC-to-file/artifact/evidence
+  mapping, and SEED/placeholder/mock/fallback non-acceptance.
+- Named review executors now run a tiny bridge probe before the full CPO prompt.
+  If Claude/Codex/Gemini cannot return the marker within the bounded probe
+  timeout, SFS fails before spending the full review request and points the user
+  at `/sfs auth probe` or an explicit `SFS_REVIEW_<EXECUTOR>_CMD` path.
+- The default Claude review bridge now uses the known-good prompt-argument
+  shape `claude -p "$(cat)"` instead of the brittle
+  `claude -p --dangerously-skip-permissions` stdin bridge.
+- Gemini routing now names the allowed 3.x targets explicitly:
+  `gemini-3.1-pro-preview` for facilitator/advisor/review routes and
+  `gemini-3-flash-preview` for helper-grade fallback. 2.5 fallback names are
+  not used.
+- Claude/Codex/Gemini adapter surfaces and user docs now describe the same
+  default model map and advisor rule.
+
+### Verified
+
+- Expanded agent guardrail and docs model routing tests to assert default
+  `solon_recommended` routing, Codex `gpt-5.4-mini`/`gpt-5.4` facilitator
+  mapping, top-model advisor review, and self-CPO-before-cross-review evidence.
+
 ## [0.6.33] - 2026-05-07
 
 > **SFS adapter language hygiene hotfix.** Claude could render missing-argument

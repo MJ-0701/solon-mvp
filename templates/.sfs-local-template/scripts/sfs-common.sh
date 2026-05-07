@@ -1192,7 +1192,7 @@ EOF
 resolve_executor() {
   local executor="${1:-${SFS_EXECUTOR:-claude}}"
   case "$executor" in
-    claude) echo "claude -p --dangerously-skip-permissions" ;;
+    claude) echo 'claude -p "$(cat)"' ;;
     gemini) echo 'gemini --skip-trust --yolo --output-format text -p "Read stdin and execute the requested task."' ;;
     codex)  echo "codex exec --full-auto" ;;
     *)      echo "$executor" ;;   # custom string passthrough
@@ -1245,7 +1245,11 @@ sfs_run_eval_with_timeout() {
   case "${grace}" in ''|*[!0-9]*) grace=3 ;; esac
 
   (
-    eval "${cmd}" < "${prompt_path}" > "${out_path}" 2> "${err_path}"
+    # cmd is resolved from a named executor profile or explicit
+    # SFS_REVIEW_<EXECUTOR>_CMD override; do not widen this composition path.
+    # Replace the subshell with the executor so timeout kills the real CLI
+    # process, not only an intermediate shell wrapper.
+    eval "exec ${cmd}" < "${prompt_path}" > "${out_path}" 2> "${err_path}"
   ) &
   pid=$!
   elapsed=0

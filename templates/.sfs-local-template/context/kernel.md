@@ -57,6 +57,13 @@ load_when: ["always", "sfs", "entry"]
 - Review verdicts are success criteria, not effort counters. A high number of
   review rounds, lenses, or advisor comments never substitutes for PASS.
   Partial/fail routes to rework and same-gate review, not to implementation.
+- Advisor review is not a self-CPO PASS. Before asking for external/Codex/
+  Claude/Gemini cross review or using it as gate evidence, the current author
+  must run a local self-CPO mini-check and record pass/partial/fail. The check
+  must trace requirements to AC, work slices, and ADR/decision ids; verify every
+  AC has a file/artifact plus evidence mapping; and confirm SEED, placeholder,
+  mock, or fallback text starts as failing or explicitly non-acceptance
+  evidence. Missing self-CPO evidence is partial, not ready for cross review.
 - Cross review comes after local self-review passes. If cross review returns
   partial/fail, rework the plan and return to self-review before another cross
   review or implementation handoff.

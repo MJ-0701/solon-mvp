@@ -6,23 +6,35 @@
 # cost-aware defaults, but does not block an "all high-end models" policy when
 # the project accepts the cost and latency.
 
-version: 1.4
+version: 1.5
 project: "<PROJECT-NAME>"
 created: "<DATE>"
 solon_mvp_version: "<SOLON-VERSION>"
 
 configuration:
-  status: "<MODEL-PROFILE-STATUS>"        # current_model_fallback | selected_at_install | confirmed | review_required
+  status: "<MODEL-PROFILE-STATUS>"        # default_applied | selected_at_install | confirmed | current_model_fallback | review_required
   selected_runtime: "<DEFAULT-RUNTIME>"   # current | claude | codex | gemini | custom
   selected_policy: "<MODEL-POLICY>"       # current_model | solon_recommended | all_high | custom
   confirmed_by: ""
   confirmed_at: ""
-  note: "If this stays unconfigured, Solon uses the user's current runtime/model. When asked about agent/model settings in this state, the AI must say it is unconfirmed fallback and ask which policy to apply."
+  note: "Solon recommended role routing applies by default. `current` means infer the active host runtime where possible. Use selected_policy=current_model only when the project explicitly wants the host's currently selected model for every role."
+  invocation_note: "Model names are role/profile targets, not a requirement that every CLI supports a --model flag. Default bridges express the requested role/profile in the prompt and rely on the host/runtime configured model; set SFS_REVIEW_<EXECUTOR>_CMD only when a known-good CLI command needs an explicit override."
 
 role_boundaries:
+  intake_facilitator:
+    owns: "missing-argument prompts, user-answer relay, lightweight summaries, and focused brainstorm questions before plan"
+    cannot: "make product identity, architecture, gate, acceptance-criteria, or files_scope decisions without C-Level escalation and advisor review"
   c_level:
     owns: "intent, architecture, public contract, acceptance criteria, files_scope, escalation, and review orchestration"
     cannot: "act as the normal implementation worker or approve its own output"
+  advisor:
+    owns: "top-model review of lower-model question framing, answer interpretation, product direction, architecture, AC, files_scope, and gate advancement"
+    runtime_model: "the highest configured runtime tier: Claude Opus 4.7, Codex gpt-5.5/xhigh, Gemini gemini-3.1-pro-preview, or the custom high-end equivalent"
+    cannot: "be replaced by the lower model whose output is under review"
+  self_cpo_check:
+    owns: "local CPO mini-check before external/Codex/Claude/Gemini cross review"
+    requires: "pass/partial/fail plus requirements-to-AC-to-slice-to-ADR traceability, AC-to-file/artifact/evidence mapping, and SEED/placeholder/mock/fallback non-acceptance check"
+    cannot: "be replaced by advisor consultation, review count, or external cross review"
   worker_generator:
     owns: "fixed implementation slices after plan review passes"
     cannot: "change architecture, AC, or files_scope silently"
@@ -37,6 +49,27 @@ role_boundaries:
     after_implement: "Every implementation path routes to Gate 6 review; parallel agent implementation must record cross review before Gate 6 can pass."
 
 reasoning_tiers:
+  intake_economy:
+    purpose: "Deterministic user I/O relay, missing-argument prompts, short answer summaries, and low-risk status narration"
+    cost_latency: "low"
+    default_roles:
+      - relay-helper
+      - missing-argument-helper
+    guardrail: "Do not use intake_economy to decide product direction, architecture, gate status, AC, files_scope, or whether a question changes the plan. Helper-grade simple I/O such as verbatim relay, canned missing-argument prompts, and low-risk status narration is advisor-exempt. If intake_economy output is interpreted beyond that simple I/O boundary, advisor review is required before it can affect an SFS artifact or gate."
+
+  facilitator_standard:
+    purpose: "Focused question generation, brainstorm facilitation, option framing, and requirement summarization before plan"
+    cost_latency: "standard"
+    default_roles:
+      - intake-facilitator
+      - question-facilitator
+    requires_advisor_review: "Any facilitator_standard output that frames questions/options, interprets user answers, or changes brainstorm/plan/gate artifacts must be advisor-reviewed by the top-model strategic_high advisor before gate advancement."
+    escalate_to: strategic_high
+    escalate_when:
+      - "a user answer changes product identity, architecture, gate status, AC, files_scope, or an expensive-to-reverse decision"
+      - "the question is doing direction design rather than simple I/O"
+      - "the facilitator detects a rewrite, public contract change, or product-positioning shift"
+
   strategic_high:
     purpose: "C-Level direction, architecture, product/technical trade-offs, public contract changes"
     cost_latency: "highest"
@@ -52,9 +85,11 @@ reasoning_tiers:
     purpose: "Independent CPO/Evaluator review; fork/read-only where the runtime supports it"
     cost_latency: "high"
     default_roles:
+      - self-cpo-checker
       - cpo-evaluator
       - external-reviewer
     use_when:
+      - "Gate 3 needs a local self-CPO pass before external/cross review"
       - "the implementation author must not approve their own work"
       - "release or user-facing quality risk is meaningful"
 
@@ -100,10 +135,15 @@ reasoning_tiers:
 
 policies:
   current_model:
-    description: "Fallback when the project owner skips, refuses, or forgets model setup. Use the active model already selected in the current LLM runtime."
+    description: "Explicit opt-out from Solon role routing. Use the active model already selected in the current LLM runtime for every role."
     agent_tiers:
+      relay-helper: current
+      missing-argument-helper: current
+      intake-facilitator: current
+      question-facilitator: current
       ceo: current
       cto-generator: current
+      self-cpo-checker: current
       cpo-evaluator: current
       researcher: current
       implementation-worker: current
@@ -113,10 +153,15 @@ policies:
       sync-helper: current
 
   solon_recommended:
-    description: "Use high reasoning for C-Level/review, standard workers for fixed implementation, economy helpers for deterministic chores."
+    description: "Use low-cost intake for deterministic I/O, standard facilitators for question generation, high reasoning for C-Level/review, standard workers for fixed implementation, and economy helpers for deterministic chores."
     agent_tiers:
+      relay-helper: intake_economy
+      missing-argument-helper: intake_economy
+      intake-facilitator: facilitator_standard
+      question-facilitator: facilitator_standard
       ceo: strategic_high
       cto-generator: strategic_high
+      self-cpo-checker: review_high
       cpo-evaluator: review_high
       researcher: research_high
       implementation-worker: execution_standard
@@ -128,8 +173,13 @@ policies:
   all_high:
     description: "Allowed. Use high reasoning for every agent/helper when project cost and latency are acceptable."
     agent_tiers:
+      relay-helper: strategic_high
+      missing-argument-helper: strategic_high
+      intake-facilitator: strategic_high
+      question-facilitator: strategic_high
       ceo: strategic_high
       cto-generator: strategic_high
+      self-cpo-checker: review_high
       cpo-evaluator: review_high
       researcher: research_high
       implementation-worker: strategic_high
@@ -144,11 +194,17 @@ policies:
 runtime_model_settings:
   current:
     current:
-      model: "current runtime model"
-      reasoning_effort: "current runtime setting"
-      description: "Do not override. Use whatever model/reasoning setting the user has currently selected in Claude/Codex/Gemini/custom host."
+      model: "active runtime family"
+      reasoning_effort: "resolved by selected_policy"
+      description: "For solon_recommended, infer the active host runtime family (Claude/Codex/Gemini) and apply that runtime's tier map. For current_model, use whatever model/reasoning setting the user has currently selected."
 
   claude:
+    intake_economy:
+      model: "haiku"
+      description: "Use only for deterministic relay, missing-argument prompts, and low-risk summaries."
+    facilitator_standard:
+      model: "sonnet"
+      description: "Default for SFS question generation and brainstorm facilitation. Escalate to Opus when the question or answer changes product identity, architecture, gate status, AC, or files_scope."
     strategic_high:
       model: "opus-4.7"
       fallback_model: "opus-4.6"
@@ -164,6 +220,14 @@ runtime_model_settings:
       model: "haiku"
 
   codex:
+    intake_economy:
+      model: "gpt-5.4-mini"
+      reasoning_effort: "low"
+      description: "Use for deterministic relay, missing-argument prompts, and low-risk summaries. Do not use it for direction-setting questions."
+    facilitator_standard:
+      model: "gpt-5.4"
+      reasoning_effort: "medium"
+      description: "Default Codex route for SFS question generation, brainstorm facilitation, option framing, and user-answer summarization before plan. Escalate to gpt-5.5 when the question or answer changes product identity, architecture, gate status, AC, or files_scope."
     strategic_high:
       model: "gpt-5.5"
       reasoning_effort: "xhigh"
@@ -186,23 +250,35 @@ runtime_model_settings:
       description: "Fast Codex helper for bounded mechanical subtasks only after C-Level has locked scope and acceptance criteria."
 
   gemini:
+    intake_economy:
+      model: "gemini-3-flash-preview"
+      reasoning_effort: "low"
+      description: "Gemini helper-grade intake/fallback tier. Do not use Gemini 2.5 fallback names."
+    facilitator_standard:
+      model: "gemini-3.1-pro-preview"
+      reasoning_effort: "medium"
+      description: "Default Gemini facilitator/question route. Gemini 3.1 Pro preview is assumed when available."
     strategic_high:
-      model: "gemini-high"
+      model: "gemini-3.1-pro-preview"
       reasoning_effort: "very_high"
     review_high:
-      model: "gemini-high"
+      model: "gemini-3.1-pro-preview"
       reasoning_effort: "high"
     research_high:
-      model: "gemini-high"
+      model: "gemini-3.1-pro-preview"
       reasoning_effort: "high"
     execution_standard:
-      model: "gemini-balanced"
+      model: "gemini-3.1-pro-preview"
       reasoning_effort: "medium"
     helper_economy:
-      model: "gemini-flash"
+      model: "gemini-3-flash-preview"
       reasoning_effort: "low"
 
   custom:
+    intake_economy:
+      command_or_model: "<custom-low-cost-intake-command-or-model>"
+    facilitator_standard:
+      command_or_model: "<custom-facilitator-command-or-model>"
     strategic_high:
       command_or_model: "<custom-high-reasoning-command-or-model>"
     review_high:
@@ -215,6 +291,26 @@ runtime_model_settings:
       command_or_model: "<custom-helper-command-or-model>"
 
 agent_defaults:
+  relay-helper:
+    persona: ""
+    recommended_tier: intake_economy
+    configured_tier: current
+    escalation_tier: facilitator_standard
+  missing-argument-helper:
+    persona: ""
+    recommended_tier: intake_economy
+    configured_tier: current
+    escalation_tier: facilitator_standard
+  intake-facilitator:
+    persona: ""
+    recommended_tier: facilitator_standard
+    configured_tier: current
+    escalation_tier: strategic_high
+  question-facilitator:
+    persona: ""
+    recommended_tier: facilitator_standard
+    configured_tier: current
+    escalation_tier: strategic_high
   ceo:
     persona: ".sfs-local/personas/ceo.md"
     recommended_tier: strategic_high
@@ -222,6 +318,10 @@ agent_defaults:
   cto-generator:
     persona: ".sfs-local/personas/cto-generator.md"
     recommended_tier: strategic_high
+    configured_tier: current
+  self-cpo-checker:
+    persona: ".sfs-local/personas/cpo-evaluator.md"
+    recommended_tier: review_high
     configured_tier: current
   cpo-evaluator:
     persona: ".sfs-local/personas/cpo-evaluator.md"
@@ -264,8 +364,13 @@ agent_defaults:
 #     claude:
 #       model: "opus-4.7"
 agent_model_overrides:
+  relay-helper: {}
+  missing-argument-helper: {}
+  intake-facilitator: {}
+  question-facilitator: {}
   ceo: {}
   cto-generator: {}
+  self-cpo-checker: {}
   cpo-evaluator: {}
   researcher: {}
   implementation-worker: {}
@@ -275,13 +380,21 @@ agent_model_overrides:
   sync-helper: {}
 
 resolution_rules:
-  - "If selected_runtime is current, missing, or unrecognized, do not block. Use the user's current runtime/model setting."
-  - "If the project owner skips, refuses, or forgets model setup, selected_policy=current_model applies."
+  - "If selected_runtime is current, missing, or unrecognized, do not block. Infer the active host runtime family where possible; if it cannot be inferred, use the host's current model as a last-resort runtime fallback."
+  - "Default install and upgrade apply selected_policy=solon_recommended without asking the user; selected_policy=current_model is an explicit opt-out."
   - "If selected_policy is all_high, resolve every agent through the highest configured tier/profile unless an explicit agent override exists."
   - "Solon recommendations are advisory. Higher-end overrides are allowed when cost/latency are intentional."
+  - "Question routing is cost-aware: deterministic relay and missing-argument prompts use intake_economy; focused question generation and brainstorm facilitation use facilitator_standard; product identity, architecture, gate, AC, or files_scope shifts escalate to strategic_high."
+  - "Advisor means the highest configured model for the active runtime: Claude Opus 4.7, Codex gpt-5.5 with xhigh reasoning, Gemini gemini-3.1-pro-preview, or the custom high-end equivalent."
+  - "For Gemini runtime, assume gemini-3.1-pro-preview for facilitator/advisor/review/worker routes and gemini-3-flash-preview for helper-grade fallback; do not use Gemini 2.5 fallback names."
+  - "Do not assume the executor CLI can enforce a model through command-line flags. SFS routing is a prompt/profile contract by default; if a runtime needs explicit model selection, provide a known-good SFS_REVIEW_<EXECUTOR>_CMD or host configuration."
+  - "Lower-model advisor rule: helper-grade simple I/O is advisor-exempt. Any lower-model output beyond verbatim relay/canned missing-argument prompts/status narration that frames questions/options, interprets user answers, or affects brainstorm/plan/gate artifacts must be advisor-reviewed by the top-model strategic_high advisor before the gate advances. Lower-model output cannot approve itself."
+  - "Advisor consultation is not self-CPO. Before external/Codex/Claude/Gemini cross review, the current author must run self-cpo-checker and record pass/partial/fail with requirements-to-AC-to-slice-to-ADR traceability, AC-to-file/artifact/evidence mapping, and SEED/placeholder/mock/fallback non-acceptance. Missing self-CPO evidence is partial."
   - "Worker/helper outputs still require independent review; a stronger model does not approve its own work."
   - "Single-agent implementation is the default. Multi-agent implementation is opt-in and requires disjoint files_scope, coherent commit-unit messages, lane verification, and cross review."
+  - "For Codex runtime, solon_recommended resolves relay-helper and missing-argument-helper to gpt-5.4-mini, intake-facilitator and question-facilitator to gpt-5.4, C-Level/review to gpt-5.5, implementation-worker and division-worker to gpt-5.3-codex, and mechanical helpers to gpt-5.3-codex-spark."
   - "For Codex runtime, solon_recommended resolves implementation-worker and division-worker to gpt-5.3-codex, not gpt-5.5 and not gpt-5.3-codex-spark."
+  - "Do not use gpt-5.4-mini or gpt-5.4 as a substitute for gpt-5.5 when the question itself is direction design."
   - "Use gpt-5.3-codex-spark only for helper_economy or explicitly bounded mechanical subtasks after C-Level scope, files_scope, and AC are locked."
   - "If a Codex worker slice touches architecture, public API/contracts, security, privacy, data-loss risk, release gates, or repeated review failure, escalate to strategic_high or an explicit high-end override before coding."
 
