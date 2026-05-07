@@ -49,6 +49,8 @@ assert_contains "${cmd_wrapper}" "status\" goto native_powershell_readonly_dispa
 assert_contains "${cmd_wrapper}" "context\" goto native_powershell_readonly_dispatch" "cmd native context dispatch"
 assert_contains "${cmd_wrapper}" "version\" goto native_powershell_readonly_dispatch" "cmd native version dispatch"
 assert_contains "${cmd_wrapper}" ":native_powershell_readonly_dispatch" "cmd native powershell dispatch"
+assert_contains "${cmd_wrapper}" "set \"SFS_NATIVE_ARGS=%*\"" "cmd native argument capture"
+assert_contains "${cmd_wrapper}" "%SFS_NATIVE_ARGS%" "cmd native argument forwarding"
 assert_contains "${cmd_wrapper}" "sfs.cmd guide [--path^|--print]" "cmd native guide help"
 assert_contains "${ps_wrapper}" "Invoke-SfsNativeStatus" "ps1 native status"
 assert_contains "${ps_wrapper}" "Invoke-SfsNativeContext" "ps1 native context"

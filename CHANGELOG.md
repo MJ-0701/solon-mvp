@@ -1,3 +1,25 @@
+## [0.6.31] - 2026-05-07
+
+> **Windows native read-only argument forwarding hotfix.** The 0.6.30 Windows
+> wrapper correctly routed `status`, `version`, and `context` away from Git
+> Bash, but it invoked PowerShell after a batch subroutine jump using `%*`.
+> In Windows batch execution that can lose the original command arguments, so
+> `sfs.cmd status` and `sfs.cmd version --check` printed generic usage instead
+> of executing the requested native read-only command.
+
+### Fixed
+
+- `bin/sfs.cmd` now captures the original native read-only argument string before
+  dispatch and forwards that captured value into `sfs.ps1`.
+- The Windows fallback guard test now locks both argument capture and argument
+  forwarding so `status`, `version --check`, and `context cat ...` cannot
+  silently degrade to help output again.
+
+### Verified
+
+- Re-ran the Windows agent adapter fallback test and focused agent/doc routing
+  tests.
+
 ## [0.6.30] - 2026-05-07
 
 > **Windows Codex app native read-only hotfix.** Windows PowerShell could run

@@ -7,6 +7,14 @@
 
 ---
 
+## 0.6.31
+
+이번 버전은 0.6.30 의 Windows native read-only 경로에서 생긴 인자 전달 버그를 고칩니다.
+
+- `sfs.cmd status` 가 `status` 인자를 잃고 usage 만 출력하던 문제를 수정했습니다.
+- `sfs.cmd version --check` 가 `version --check` 인자를 잃고 usage 만 출력하던 문제를 수정했습니다.
+- `sfs.cmd context cat ...` 도 같은 캡처된 인자 전달 경로를 사용합니다.
+
 ## 0.6.30
 
 이번 버전은 Windows Codex 앱 또는 Git Bash 안에서 실행한 Codex 가 SFS 읽기 명령까지
