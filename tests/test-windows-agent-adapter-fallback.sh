@@ -27,6 +27,7 @@ line_number() {
 
 cmd_wrapper="${DIST_DIR}/bin/sfs.cmd"
 ps_wrapper="${DIST_DIR}/bin/sfs.ps1"
+windows_discovery="${DIST_DIR}/scripts/install-cli-discovery.ps1"
 codex_global_skill="${DIST_DIR}/templates/codex-skill/SKILL.md"
 codex_project_skill="${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md"
 adapter_files=(
@@ -43,6 +44,7 @@ adapter_files=(
 )
 
 assert_contains "${cmd_wrapper}" "call :maybe_native_readonly %*" "cmd native fallback hook"
+assert_contains "${cmd_wrapper}" "setlocal EnableExtensions EnableDelayedExpansion" "cmd delayed errorlevel expansion"
 if grep -Fq -- "call :maybe_self_upgrade" "${cmd_wrapper}"; then
   fail "cmd wrapper must not run Scoop self-upgrade from the batch file that Scoop replaces"
 fi
@@ -57,9 +59,12 @@ assert_contains "${cmd_wrapper}" "version\" goto native_powershell_readonly_disp
 assert_contains "${cmd_wrapper}" ":native_powershell_readonly_dispatch" "cmd native powershell dispatch"
 assert_contains "${cmd_wrapper}" "set \"SFS_ORIGINAL_ARGS=%*\"" "cmd top-level argument capture"
 assert_contains "${cmd_wrapper}" "-File \"%SCRIPT_DIR%sfs.ps1\" %SFS_ORIGINAL_ARGS%" "cmd powershell top-level argument forwarding"
-assert_contains "${cmd_wrapper}" "call :powershell_dispatch %* & call exit /b %%ERRORLEVEL%%" "cmd non-native powershell bridge exits on parsed line"
+assert_contains "${cmd_wrapper}" "call :powershell_dispatch %* & exit /b !ERRORLEVEL!" "cmd non-native powershell bridge exits on parsed line"
 assert_contains "${cmd_wrapper}" ":powershell_dispatch" "cmd powershell bridge label"
-assert_contains "${cmd_wrapper}" "-File \"%SCRIPT_DIR%sfs.ps1\" %SFS_ORIGINAL_ARGS% & call exit /b %%ERRORLEVEL%%" "cmd powershell dispatch exits on parsed line"
+assert_contains "${cmd_wrapper}" "-File \"%SCRIPT_DIR%sfs.ps1\" %SFS_ORIGINAL_ARGS% & exit /b !ERRORLEVEL!" "cmd powershell dispatch exits on parsed line"
+if grep -Fq -- "call exit /b %%ERRORLEVEL%%" "${cmd_wrapper}"; then
+  fail "cmd wrapper must not use unstable CALL+ERRORLEVEL double expansion for post-upgrade exit"
+fi
 assert_contains "${cmd_wrapper}" "sfs.cmd guide [--path^|--print]" "cmd native guide help"
 if grep -Fq -- "\"%BASH_EXE%\" \"%SFS_SH%\" %*" "${cmd_wrapper}"; then
   fail "cmd wrapper must not send mutating commands through the raw Git Bash %* bridge"
@@ -79,6 +84,7 @@ assert_contains "${ps_wrapper}" "\$env:LC_CTYPE = \"C.UTF-8\"" "ps1 bash utf8 lo
 assert_contains "${ps_wrapper}" "Invoke-SfsNativeStatus" "ps1 native status"
 assert_contains "${ps_wrapper}" "Invoke-SfsNativeContext" "ps1 native context"
 assert_contains "${ps_wrapper}" "Native read-only helper for Windows agents. It does not start Git Bash." "ps1 native context help"
+assert_contains "${windows_discovery}" "plugin filesystem-direct deploy failed" "Windows cli-discovery catches A-2 deploy errors"
 
 native_line="$(line_number "${cmd_wrapper}" "call :maybe_native_readonly %*")"
 bridge_line="$(line_number "${cmd_wrapper}" "call :powershell_dispatch %*")"
@@ -133,5 +139,10 @@ assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "TIVE_READONLY_DONE|LF_UPGRADE_DONE" "Windows CI batch tail-fragment rejection"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd start --id ci-korean-sprint-test" "Windows CI Korean sfs.cmd start smoke"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" '"goal":"스프린트 생성 테스트"' "Windows CI Korean sprint_start goal evidence"
+assert_contains "${DIST_DIR}/packaging/scoop/README.md" 'sfs.cmd -> sfs.ps1 -> bin/sfs' "Scoop README documents PowerShell bridge"
+assert_contains "${DIST_DIR}/packaging/scoop/README.md" 'sfs.cmd upgrade' "Scoop README documents wrapper-owned upgrade smoke"
+if grep -Fq -- "scoop update sfs --force" "${DIST_DIR}/packaging/scoop/README.md"; then
+  fail "Scoop README must not document the old direct scoop update smoke as the Windows wrapper proof"
+fi
 
 echo "test-windows-agent-adapter-fallback: OK"

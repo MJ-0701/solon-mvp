@@ -27,7 +27,7 @@ AI 시대에 Solon 이 주는 가치는 [Solon 10x 가치](./docs/ko/10x-value.m
 
 ## 1. 설치와 초기화
 
-> **0.6.39 기준** brew/scoop 한 줄이면 Claude Code, Gemini CLI, Codex CLI 가 모두
+> **0.6.40 기준** brew/scoop 한 줄이면 Claude Code, Gemini CLI, Codex CLI 가 모두
 > Solon 을 찾습니다. 별도 plugin/extension 설치 명령을 기억하지 않아도 됩니다.
 
 Mac:
@@ -78,7 +78,7 @@ sfs.cmd status
 사용자가 읽을 문서와 작업 기록을 중심으로 남깁니다. AI 도구별 native 파일이 꼭 필요한 팀만
 `sfs agent install all` 로 추가 설치하면 됩니다.
 
-0.6.39 기준으로는 분야별 지식팩이 실제 안내로 채워져 있습니다. 사용자가 backend, QA, infra, 재무,
+0.6.40 기준으로는 분야별 지식팩이 실제 안내로 채워져 있습니다. 사용자가 backend, QA, infra, 재무,
 세무, 회계 같은 말을 정확히 몰라도 괜찮습니다. Solon 을 쓰는 AI 가 작업 성격을 보고 필요한
 관점만 읽고, 사용자에게는 평범한 질문과 판단 기준으로 풀어 설명하는 쪽이 기본입니다.
 
@@ -434,17 +434,17 @@ PowerShell bridge 를 거쳐 Bash runtime 으로 내려갑니다. 그래도 상�
 "성공" 처리되면 성공이 아닙니다. PowerShell 에서 `sfs.cmd start "<목표>"` 를 직접 실행하고
 `sfs.cmd status` 로 확인하세요.
 이 장애의 증상, 실제 원인, 발견된 추가 문제점은
-[Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.39.md) 에 정리되어
+[Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.40.md) 에 정리되어
 있습니다.
 0.6.37 부터 `sfs.cmd upgrade` 도 실행 중인 batch 파일 안에서 직접 `scoop update sfs` 를 실행하지
 않고, `sfs.ps1` self-upgrade 경로로 넘깁니다. `TIVE_READONLY_DONE` 또는 `LF_UPGRADE_DONE` 같은
 조각 문자열이 명령처럼 보이면 0.6.36 self-update 경로에서 발견된 batch replacement 문제입니다.
-0.6.39 부터는 `sfs.ps1` 이 Windows PowerShell `-File` 호출 인자를 `$args` /
+0.6.40 부터는 `sfs.ps1` 이 Windows PowerShell `-File` 호출 인자를 `$args` /
 `$MyInvocation.UnboundArguments` 로 직접 읽고, `sfs.cmd` 가 PowerShell 호출 뒤 같은 parsed line 에서
 종료합니다. 그래서 `sfs.cmd context cat ...` 과 `sfs.cmd start ...` 가 usage 만 출력하던
 Windows wrapper 인자 손실을 막습니다.
 
-0.6.39 기준 brew/scoop 가 세 CLI 모두에 자동 등록합니다. 그래도
+0.6.40 기준 brew/scoop 가 세 CLI 모두에 자동 등록합니다. 그래도
 `/sfs` 가 안 나오면 아래 명령으로 상태를 확인해 주세요.
 
 ```bash

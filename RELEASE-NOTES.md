@@ -7,11 +7,27 @@
 
 ---
 
+## 0.6.40
+
+이번 버전은 0.6.39 배포 후 실제 GitHub Windows runner 에서 다시 잡힌 마지막 wrapper 문제를
+고칩니다. 목표는 그대로입니다. Windows PowerShell/cmd 에서 `sfs.cmd` 가 macOS 의 `sfs` 처럼
+명령 인자를 받고, upgrade 뒤에도 이상한 조각 명령을 실행하지 않아야 합니다.
+
+- `sfs.cmd` 의 same-line 종료 방식을 `exit /b !ERRORLEVEL!` 로 바꿨습니다. 0.6.39 의
+  `call exit /b %%ERRORLEVEL%%` 형태는 실제 Windows/Scoop shim 조합에서 안정적이지 않았습니다.
+- batch wrapper 는 delayed expansion 을 켜고, `sfs.ps1` 호출 뒤 같은 parsed line 에서 종료합니다.
+- Scoop post-install 의 `install-cli-discovery.ps1` 는 Claude filesystem-direct fallback 실패를
+  명시적으로 catch 한 뒤 cleanup 하도록 보강했습니다.
+- Windows CI 는 계속 이전 로컬 패키지 설치 -> `sfs.cmd upgrade` -> 한국어 `sfs.cmd start` 순서로
+  실제 Windows 동작을 검증합니다.
+
 ## 0.6.39
 
 이번 버전은 Windows PowerShell/cmd 에서 `sfs.cmd` 가 macOS 의 `sfs` 처럼 실제 명령을 받도록
 고칩니다. 0.6.38 설치 후에도 `sfs.cmd context cat ...` 과 `sfs.cmd start ...` 가 usage 만
 출력하던 문제를 수정했습니다.
+이 릴리스는 실제 Windows Scoop smoke 에서 추가 batch exit/parser 문제가 발견되어 0.6.40 으로
+후속 보강됐습니다.
 
 - `sfs.ps1` 이 Windows PowerShell 5.1 의 불안정한 script param catch-all 에 의존하지 않고
   `$args` / `$MyInvocation.UnboundArguments` 로 명령 인자를 직접 정규화합니다.
@@ -25,7 +41,7 @@
   `e`, `*`, `TIVE_READONLY_DONE`, `LF_UPGRADE_DONE` 같은 batch tail-fragment 가 나오지 않는지 확인합니다.
 - Windows smoke 가 한국어 goal `스프린트 생성 테스트` 도 `sfs.cmd start` 로 생성하고 이벤트 goal 까지
   확인합니다.
-- Windows wrapper 장애 보고서는 0.6.39 최종 기준선으로 최신화했습니다.
+- Windows wrapper 장애 보고서는 0.6.40 최종 기준선으로 최신화했습니다.
 
 ## 0.6.38
 
@@ -38,7 +54,7 @@ incident-report 문서 테스트가 `CHANGELOG.md` / `RELEASE-NOTES.md` 위치�
   이해하도록 고쳤습니다.
 - Windows 사용자는 0.6.37 에 들어간 `sfs.cmd upgrade` self-replacement 방지 수정을 그대로
   받습니다.
-- Windows wrapper 장애 보고서는 이후 0.6.39 기준 링크와 P1-P6 문제점 정리로 최신화했습니다.
+- Windows wrapper 장애 보고서는 이후 0.6.40 기준 링크와 P1-P6 문제점 정리로 최신화했습니다.
 
 ## 0.6.37
 
@@ -51,7 +67,7 @@ incident-report 문서 테스트가 `CHANGELOG.md` / `RELEASE-NOTES.md` 위치�
 - `sfs.cmd` 는 native read-only 확인 후 나머지 명령을 PowerShell entrypoint 로 넘기는 얇은 wrapper
   로 돌아갑니다.
 - 이번 Windows wrapper 장애 흐름과 발견된 문제점은
-  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.39.md) 에 정리했습니다.
+  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.40.md) 에 정리했습니다.
 
 ## 0.6.36
 
@@ -64,7 +80,7 @@ incident-report 문서 테스트가 `CHANGELOG.md` / `RELEASE-NOTES.md` 위치�
 - Windows 사용자는 0.6.35 에 들어간 `sfs.cmd -> sfs.ps1 -> Bash runtime` bridge 수정을 그대로
   받습니다.
 - Windows 에서 실제로 관찰된 usage-only, 빈 출력, 한국어 깨짐, Homebrew installed layout 문제는
-  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.39.md) 에 정리했습니다.
+  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.40.md) 에 정리했습니다.
 
 ## 0.6.35
 

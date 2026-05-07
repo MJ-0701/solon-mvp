@@ -19,8 +19,8 @@ assert_contains() {
   grep -Fq -- "${needle}" "${file}" || fail "${label}: missing '${needle}'"
 }
 
-ko_report="${DIST_DIR}/docs/ko/windows-wrapper-incident-0.6.39.md"
-en_report="${DIST_DIR}/docs/en/windows-wrapper-incident-0.6.39.md"
+ko_report="${DIST_DIR}/docs/ko/windows-wrapper-incident-0.6.40.md"
+en_report="${DIST_DIR}/docs/en/windows-wrapper-incident-0.6.40.md"
 changelog="${DIST_DIR}/CHANGELOG.md"
 release_notes="${DIST_DIR}/RELEASE-NOTES.md"
 
@@ -47,7 +47,7 @@ assert_contains "${ko_report}" "sprint 디렉터리가 비어 있는 것 자체�
 assert_contains "${ko_report}" "최종 문제점 정리" "KO report final issue summary"
 assert_contains "${ko_report}" "| P1 |" "KO report P1"
 assert_contains "${ko_report}" "| P6 |" "KO report P6"
-assert_contains "${ko_report}" "최종 기준선은 0.6.39" "KO report final baseline"
+assert_contains "${ko_report}" "최종 기준선은 0.6.40" "KO report final baseline"
 
 assert_contains "${en_report}" "fatal error - couldn't create signal pipe, Win32 error 5" "EN report Win32 error"
 assert_contains "${en_report}" "sfs.cmd -> sfs.ps1 -> Bash runtime" "EN report fixed bridge"
@@ -65,10 +65,10 @@ assert_contains "${en_report}" 'An empty sprint directory after `sfs start` is n
 assert_contains "${en_report}" "Final Issue Summary" "EN report final issue summary"
 assert_contains "${en_report}" "| P1 |" "EN report P1"
 assert_contains "${en_report}" "| P6 |" "EN report P6"
-assert_contains "${en_report}" "The final baseline is 0.6.39" "EN report final baseline"
+assert_contains "${en_report}" "The final baseline is 0.6.40" "EN report final baseline"
 
-assert_contains "${DIST_DIR}/docs/ko/index.md" "windows-wrapper-incident-0.6.39.md" "KO index report link"
-assert_contains "${DIST_DIR}/docs/en/index.md" "windows-wrapper-incident-0.6.39.md" "EN index report link"
+assert_contains "${DIST_DIR}/docs/ko/index.md" "windows-wrapper-incident-0.6.40.md" "KO index report link"
+assert_contains "${DIST_DIR}/docs/en/index.md" "windows-wrapper-incident-0.6.40.md" "EN index report link"
 assert_contains "${DIST_DIR}/docs/ko/current-product-shape.md" "Windows 래퍼 안정화" "KO product shape wrapper section"
 assert_contains "${DIST_DIR}/docs/en/current-product-shape.md" "Windows Wrapper Stabilization" "EN product shape wrapper section"
 assert_contains "${DIST_DIR}/GUIDE.md" "Windows SFS 래퍼 장애 요약 보고서" "GUIDE report link"

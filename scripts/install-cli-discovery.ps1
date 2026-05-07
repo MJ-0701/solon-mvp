@@ -265,6 +265,9 @@ function Install-ClaudeDiscovery {
       } else {
         Write-Warn "Claude Code: git clone of $SolonRepo failed or missing plugins/solon — A-2 skipped"
       }
+    } catch {
+      Write-Warn "Claude Code: plugin filesystem-direct deploy failed — A-2 skipped"
+      Write-Warn "  $($_.Exception.Message)"
     } finally {
       if (Test-Path $tmp) { Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue }
     }

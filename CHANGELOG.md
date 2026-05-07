@@ -1,9 +1,37 @@
+## [0.6.40] - 2026-05-08
+
+> **Windows `sfs.cmd` exit/parser follow-up.** The 0.6.39 source tests passed,
+> but the real GitHub Windows Scoop smoke still failed: `sfs version` printed
+> usage through the Scoop shim, and `install-cli-discovery.ps1` hit a Windows
+> PowerShell parser error during post-install.
+
+### Fixed
+
+- `bin/sfs.cmd` now enables delayed expansion and uses same-line
+  `exit /b !ERRORLEVEL!` after both the non-native PowerShell dispatch and the
+  actual `powershell.exe -File sfs.ps1 ...` call. This preserves the
+  self-upgrade tail-fragment fix without relying on unstable
+  `call exit /b %%ERRORLEVEL%%` double expansion.
+- `scripts/install-cli-discovery.ps1` now catches failures in the Claude
+  filesystem-direct deploy path before `finally` cleanup, avoiding the Windows
+  post-install parser failure seen in Actions.
+
+### Tests
+
+- Windows wrapper guardrails now require `EnableDelayedExpansion`, require the
+  `exit /b !ERRORLEVEL!` same-line contract, and reject the old
+  `call exit /b %%ERRORLEVEL%%` form.
+- The release verifier enforces the same packaged `sfs.cmd` contract for both
+  tarball and zip archives.
+
 ## [0.6.39] - 2026-05-08
 
 > **Windows `sfs.cmd` argument and start smoke hotfix.** A real Windows 0.6.38
 > install still printed generic usage for `sfs.cmd context cat ...` and
 > `sfs.cmd start ...`, and a 0.6.36 -> 0.6.38 wrapper upgrade could still leave
 > short batch tail fragments such as `e` and `*` after the successful install.
+> This release was superseded by 0.6.40 after the real Windows Scoop smoke
+> exposed an additional batch exit/parser issue.
 
 ### Fixed
 
@@ -33,7 +61,7 @@
 
 ### Docs
 
-- Refreshed the Windows wrapper incident report for the final 0.6.39 baseline,
+- Refreshed the Windows wrapper incident report for the 0.6.39 interim baseline,
   including the attached `sfs.cmd start "스프린트 생성 테스트"` usage-only report
   and the `e` / `*` tail-fragment evidence.
 
