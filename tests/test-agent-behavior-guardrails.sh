@@ -53,6 +53,10 @@ assert_contains "${kernel}" "Cross review comes after local self-review passes" 
 assert_contains "${kernel}" "Role split is invariant" "kernel role split"
 assert_contains "${kernel}" 'default worker/generator model is `gpt-5.3-codex`' "kernel codex worker default"
 assert_contains "${kernel}" '`gpt-5.3-codex-spark` is reserved' "kernel codex spark boundary"
+assert_contains "${kernel}" "Taxonomy is a product function" "kernel taxonomy function"
+assert_contains "${kernel}" "one plain-language question" "kernel missing arg question"
+assert_contains "${kernel}" 'Other` or `Type something`' "kernel placeholder labels"
+assert_contains "${kernel}" "이번 sprint 목표를 한 줄로 말해 주세요" "kernel Korean start question"
 
 assert_contains "${brainstorm}" "docs/solon/domain-map.md" "brainstorm domain map"
 assert_contains "${brainstorm}" "read-only researcher" "brainstorm researcher"
@@ -156,6 +160,12 @@ for file in "${adapter_files[@]}"; do
   assert_contains "${file}" "Multi-agent implement is optional, never the default" "adapter multi-agent optional ${file}"
   assert_contains "${file}" "clear native-language commit message" "adapter native commit message ${file}"
   assert_contains "${file}" "post-implement cross review is recorded before Gate 6" "adapter multi-agent cross review ${file}"
+  assert_contains "${file}" "Taxonomy is a product function" "adapter taxonomy function ${file}"
+  assert_contains "${file}" "machine-translate" "adapter no machine translation ${file}"
+  assert_contains "${file}" "SFS command/domain terms" "adapter taxonomy terms ${file}"
+  assert_contains "${file}" 'Other` or `Type something`' "adapter no placeholder UI ${file}"
+  assert_contains "${file}" "one plain-language question" "adapter plain missing-arg question ${file}"
+  assert_contains "${file}" "이번 sprint 목표를 한 줄로 말해 주세요" "adapter Korean start question ${file}"
 done
 
 echo "test-agent-behavior-guardrails: OK"

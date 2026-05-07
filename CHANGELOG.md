@@ -1,3 +1,30 @@
+## [0.6.33] - 2026-05-07
+
+> **SFS adapter language hygiene hotfix.** Claude could render missing-argument
+> prompts for `sfs start` as mixed Korean/English UI copy, including app
+> placeholder labels such as `Other` and `Type something`. SFS now treats
+> taxonomy/native-language hygiene as a product-function contract across the
+> kernel and Claude, Codex, and Gemini adapter surfaces.
+
+### Fixed
+
+- SFS runtime kernel now forbids machine-translating command/domain terms into
+  mixed phrases and forbids exposing app placeholder labels as product choices.
+- Claude, Codex, and Gemini project/global adapter templates now require one
+  plain-language question in the user's language when a command argument is
+  missing instead of opening a multi-choice prompt.
+- Korean `sfs start` guidance now gives a concrete one-line goal prompt:
+  `이번 sprint 목표를 한 줄로 말해 주세요. 예: "docker compose 구조 리디자인"`.
+- The taxonomy rule is explicit that taxonomy is a product function, not an org
+  division or copy polish.
+
+### Verified
+
+- Expanded the agent behavior guardrail test to assert the taxonomy/language
+  contract across the kernel and every Claude/Codex/Gemini adapter surface.
+- Re-ran focused adapter tests, Windows fallback tests, docs routing tests,
+  whitespace checks, and the full `tests/run-all.sh` suite before release.
+
 ## [0.6.32] - 2026-05-07
 
 > **Windows CMD top-level argument forwarding hotfix.** The 0.6.31 fix still

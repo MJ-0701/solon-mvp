@@ -7,6 +7,18 @@
 
 ---
 
+## 0.6.33
+
+이번 버전은 Claude/Codex/Gemini SFS 어댑터가 사용자 언어와 SFS 용어를 섞어 이상한 선택지로
+보여 주는 문제를 막는 핫픽스입니다.
+
+- 택소노미를 조직명이 아니라 SFS의 제품 기능 계약으로 명시했습니다.
+- `sfs start` 처럼 필수 인자가 빠졌을 때 `Other`, `Type something` 같은 앱 placeholder 를
+  선택지처럼 보여 주지 않도록 막았습니다.
+- 한국어 사용자가 `sfs start` goal 을 빼먹으면 한 문장 질문으로
+  `이번 sprint 목표를 한 줄로 말해 주세요. 예: "docker compose 구조 리디자인"` 를 쓰도록 했습니다.
+- 같은 guardrail 이 Claude, Codex, Gemini 어댑터와 SFS kernel 전체에 적용됩니다.
+
 ## 0.6.32
 
 이번 버전은 0.6.31 에서도 남아 있던 Windows CMD 인자 전달 문제를 다시 고칩니다.

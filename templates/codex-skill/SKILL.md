@@ -72,16 +72,24 @@ required.
     option id, explain in plain user language what is being decided, why it
     matters, the recommended default, and what each option changes. Labels are
     cross-references, not the explanation.
-16. For `brainstorm`, ask 1-3 blocking questions when shared understanding is
+16. Taxonomy is a product function, not an org division or copy polish. Match
+    the user's native/workspace language and project terms; do not
+    machine-translate SFS command/domain terms into mixed phrases or expose app
+    placeholder labels such as `Other` or `Type something` as product choices.
+17. If a required command argument is missing, ask one plain-language question
+    in the user's language instead of opening a multi-choice prompt. For Korean
+    `sfs start` with no goal, ask: `이번 sprint 목표를 한 줄로 말해 주세요. 예:
+    "docker compose 구조 리디자인"`.
+18. For `brainstorm`, ask 1-3 blocking questions when shared understanding is
     missing. Do not run or recommend `plan` as the next step until Gate 2 is
     `ready-for-plan`.
-17. For `plan`, derive the contract from `brainstorm.md`; unresolved Gate 2
+19. For `plan`, derive the contract from `brainstorm.md`; unresolved Gate 2
     questions stay visible instead of being hidden by assumptions.
-18. For `implement`, backend architecture follows the routed `implement.md`
+20. For `implement`, backend architecture follows the routed `implement.md`
     guardrail: clean layered monolith for MVP/small projects, CQRS for
     non-initial backend work even on one DB, Hexagonal transition only after
     user acceptance, and MSA transition only after explicit approval.
-19. For `implement`, non-Dev divisions also follow routed policy ladders:
+21. For `implement`, non-Dev divisions also follow routed policy ladders:
     strategy-pm, taxonomy, design/frontend, QA, and infra start lightweight,
     strengthen on trigger evidence, and require user acceptance/approval before
     large roadmap, rename, redesign, release-readiness, or infra transitions.

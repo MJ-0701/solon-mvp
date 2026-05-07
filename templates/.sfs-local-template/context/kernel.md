@@ -17,6 +17,15 @@ load_when: ["always", "sfs", "entry"]
   id, explain in plain user language what is being decided, why it matters,
   the recommended default, and what each option changes. Labels are
   cross-references, not the explanation.
+- Taxonomy is a product function, not an org division or copy polish. Match the
+  user's native/workspace language and project terms. Do not
+  machine-translate SFS command/domain terms into mixed phrases, and do not
+  expose app placeholder labels such as `Other` or `Type something` as product
+  choices.
+- If a required command argument is missing, ask one plain-language question in
+  the user's language instead of opening a multi-choice prompt. For Korean
+  `sfs start` with no goal, ask: `이번 sprint 목표를 한 줄로 말해 주세요. 예:
+  "docker compose 구조 리디자인"`.
 - After adapter output, read only the context module routed by `_INDEX.md`.
 - Before work can branch, surface material assumptions, tradeoffs, and the
   simpler path when it matters. If shared intent is still unclear, ask the

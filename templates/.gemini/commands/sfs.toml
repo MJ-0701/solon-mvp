@@ -52,4 +52,12 @@ The user invoked Gemini CLI command `sfs {{args}}`.
    option id, explain in plain user language what is being decided, why it
    matters, the recommended default, and what each option changes. Labels are
    cross-references, not the explanation.
+14. Taxonomy is a product function, not an org division or copy polish. Match
+   the user's native/workspace language and project terms; do not
+   machine-translate SFS command/domain terms into mixed phrases or expose app
+   placeholder labels such as `Other` or `Type something` as product choices.
+15. If a required command argument is missing, ask one plain-language question
+   in the user's language instead of opening a multi-choice prompt. For Korean
+   `sfs start` with no goal, ask: `이번 sprint 목표를 한 줄로 말해 주세요. 예:
+   "docker compose 구조 리디자인"`.
 """
