@@ -1,10 +1,51 @@
 param(
-  [Parameter(ValueFromRemainingArguments = $true)]
-  [string[]] $SfsArgs
+  [Parameter(Position = 0, ValueFromRemainingArguments = $true)]
+  [object[]] $SfsArgs
 )
 
 $ErrorActionPreference = "Stop"
 $CurrentScriptPath = $MyInvocation.MyCommand.Path
+
+function Expand-SfsArgItem([object] $Item) {
+  if ($null -eq $Item) { return @() }
+  if ($Item -is [System.Array]) {
+    $expanded = @()
+    foreach ($child in $Item) {
+      $expanded += @(Expand-SfsArgItem $child)
+    }
+    return $expanded
+  }
+  return @([string] $Item)
+}
+
+function Resolve-SfsArgs([object[]] $BoundArgs, [object[]] $AutomaticArgs) {
+  $resolved = @()
+  $source = if ($BoundArgs -and $BoundArgs.Count -gt 0) { $BoundArgs } else { $AutomaticArgs }
+  foreach ($item in @($source)) {
+    $resolved += @(Expand-SfsArgItem $item)
+  }
+  if ($resolved.Count -gt 0 -and $resolved[0] -eq "-SfsArgs") {
+    if ($resolved.Count -eq 1) { return [string[]] @() }
+    return [string[]] @($resolved[1..($resolved.Count - 1)])
+  }
+  return [string[]] $resolved
+}
+
+function Enable-SfsUtf8Bridge {
+  try {
+    $utf8 = New-Object System.Text.UTF8Encoding -ArgumentList $false
+    [Console]::InputEncoding = $utf8
+    [Console]::OutputEncoding = $utf8
+    $script:OutputEncoding = $utf8
+  } catch {
+    # Some constrained Windows hosts reject console encoding changes.
+  }
+  if (-not $env:LANG) { $env:LANG = "C.UTF-8" }
+  if (-not $env:LC_CTYPE) { $env:LC_CTYPE = "C.UTF-8" }
+}
+
+$SfsArgs = Resolve-SfsArgs $SfsArgs $args
+Enable-SfsUtf8Bridge
 
 function Find-SfsBash {
   if ($env:SFS_BASH) {

@@ -1,3 +1,31 @@
+## [0.6.35] - 2026-05-07
+
+> **Windows wrapper bridge hotfix.** A Windows Scoop install could still show
+> generic usage for `sfs.cmd status` / `sfs.cmd context cat ...`, and a
+> `sfs.cmd start "<Korean goal>"` run from an agent host could leave only the
+> sprint pointer/event behind while losing reliable output or UTF-8 text.
+
+### Fixed
+
+- `bin/sfs.ps1` now binds command arguments positionally, falls back to
+  PowerShell automatic `$args`, and normalizes accidental `-SfsArgs` array
+  shapes so direct `powershell.exe -File sfs.ps1 status` and
+  `context cat kernel` cannot degrade to generic usage.
+- `bin/sfs.cmd` now routes non-native commands through the packaged PowerShell
+  bridge instead of forwarding raw `%*` directly into Git Bash. PowerShell owns
+  the Unicode-safe argument array, then invokes the Bash SFS runtime.
+- The PowerShell bridge now sets UTF-8 console/native-command encoding and a
+  UTF-8 Git Bash locale when the host has not already chosen one.
+- The Windows adapter fallback test now locks the PowerShell bridge contract
+  and, on Windows runners, executes the exact `powershell.exe -File ... context
+  cat kernel` / `status` shapes that regressed.
+
+### Verified
+
+- Re-ran the Windows adapter fallback guard locally; Windows runtime execution
+  is also covered by the optional `powershell.exe` branch when the test runs on
+  a Windows host.
+
 ## [0.6.34] - 2026-05-07
 
 > **Default facilitator model routing.** SFS now applies role-based model

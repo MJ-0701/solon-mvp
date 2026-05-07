@@ -1,7 +1,6 @@
 @echo off
 setlocal
 
-set "BASH_EXE="
 set "SCRIPT_DIR=%~dp0"
 set "SFS_ORIGINAL_ARGS=%*"
 
@@ -12,38 +11,17 @@ if errorlevel 1 exit /b %ERRORLEVEL%
 call :maybe_native_readonly %*
 if defined SFS_NATIVE_READONLY_DONE exit /b %ERRORLEVEL%
 
-if defined SFS_BASH (
-  if exist "%SFS_BASH%" set "BASH_EXE=%SFS_BASH%"
-  if not defined BASH_EXE (
-    for /f "delims=" %%B in ('where "%SFS_BASH%" 2^>nul') do (
-      if not defined BASH_EXE set "BASH_EXE=%%B"
-    )
-  )
+call :powershell_dispatch %*
+exit /b %ERRORLEVEL%
+
+:powershell_dispatch
+set "SFS_NATIVE_POWERSHELL=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
+if not exist "%SFS_NATIVE_POWERSHELL%" set "SFS_NATIVE_POWERSHELL=powershell.exe"
+if not exist "%SCRIPT_DIR%sfs.ps1" (
+  echo missing packaged SFS PowerShell entrypoint: %SCRIPT_DIR%sfs.ps1 1>&2
+  exit /b 4
 )
-
-if not defined BASH_EXE if exist "%ProgramFiles%\Git\bin\bash.exe" set "BASH_EXE=%ProgramFiles%\Git\bin\bash.exe"
-if not defined BASH_EXE if exist "%ProgramFiles%\Git\usr\bin\bash.exe" set "BASH_EXE=%ProgramFiles%\Git\usr\bin\bash.exe"
-if not defined BASH_EXE if exist "%ProgramFiles(x86)%\Git\bin\bash.exe" set "BASH_EXE=%ProgramFiles(x86)%\Git\bin\bash.exe"
-if not defined BASH_EXE if exist "%ProgramFiles(x86)%\Git\usr\bin\bash.exe" set "BASH_EXE=%ProgramFiles(x86)%\Git\usr\bin\bash.exe"
-
-if not defined BASH_EXE (
-  for /f "delims=" %%B in ('where bash.exe 2^>nul') do (
-    if not defined BASH_EXE (
-      echo "%%B" | findstr /I "\\Windows\\System32\\bash.exe" >nul
-      if errorlevel 1 set "BASH_EXE=%%B"
-    )
-  )
-)
-
-if not defined BASH_EXE (
-  echo Solon SFS on Windows requires Git Bash. Install Git for Windows, or set SFS_BASH to a compatible bash.exe. 1>&2
-  exit /b 9
-)
-
-set "SFS_SH=%SCRIPT_DIR%sfs"
-set "SFS_SH=%SFS_SH:\=/%"
-
-"%BASH_EXE%" "%SFS_SH%" %*
+"%SFS_NATIVE_POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%sfs.ps1" %SFS_ORIGINAL_ARGS%
 exit /b %ERRORLEVEL%
 
 :maybe_self_upgrade

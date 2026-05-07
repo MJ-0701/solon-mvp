@@ -61,8 +61,7 @@ required.
     intake uses `gpt-5.4-mini`). Lower-model outputs that frame
     questions/options, interpret user answers, or affect product identity,
     architecture, gate, AC, or files_scope require top-model advisor review
-    before gate advancement (Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini
-    high).
+    before gate advancement (Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3.1-pro-preview`).
     Complex shared behavior escalates to high reasoning before coding.
     Multi-agent implement is optional, never the default: use single-agent mode unless the user selects parallel agents, each lane has disjoint files_scope and a clear native-language commit message, and post-implement cross review is recorded before Gate 6. Commit messages default to the user's native/workspace language; English is only the default when that is the user or repo language.
     Gate 3 review must self-review until PASS before cross review. Review round

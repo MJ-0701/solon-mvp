@@ -56,6 +56,13 @@ for file in "${docs[@]}"; do
   assert_contains "${file}" "self-CPO" "docs self CPO before cross ${file}"
   assert_contains "${file}" "non-acceptance" "docs seed placeholder non acceptance ${file}"
   assert_not_contains "${file}" "0.6.17" "docs no stale 0.6.17 ${file}"
+  assert_not_contains "${file}" "0.6.23" "docs no stale 0.6.23 ${file}"
+  assert_not_contains "${file}" "0.6.34" "docs no stale 0.6.34 ${file}"
+  assert_not_contains "${file}" "sfs 0.6.23" "docs no stale sfs 0.6.23 ${file}"
+  assert_not_contains "${file}" "0.6.23 기준" "docs no stale 0.6.23 기준 ${file}"
+  assert_not_contains "${file}" "As of 0.6.23" "docs no stale As of 0.6.23 ${file}"
+  assert_not_contains "${file}" "0.6.34 기준" "docs no stale 0.6.34 기준 ${file}"
+  assert_not_contains "${file}" "As of 0.6.34" "docs no stale As of 0.6.34 ${file}"
 done
 
 assert_contains "${docs[0]}" "Codex worker" "README model routing heading"

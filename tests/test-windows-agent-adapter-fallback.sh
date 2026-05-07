@@ -51,15 +51,49 @@ assert_contains "${cmd_wrapper}" "version\" goto native_powershell_readonly_disp
 assert_contains "${cmd_wrapper}" ":native_powershell_readonly_dispatch" "cmd native powershell dispatch"
 assert_contains "${cmd_wrapper}" "set \"SFS_ORIGINAL_ARGS=%*\"" "cmd top-level argument capture"
 assert_contains "${cmd_wrapper}" "-File \"%SCRIPT_DIR%sfs.ps1\" %SFS_ORIGINAL_ARGS%" "cmd powershell top-level argument forwarding"
+assert_contains "${cmd_wrapper}" "call :powershell_dispatch %*" "cmd non-native powershell bridge"
+assert_contains "${cmd_wrapper}" ":powershell_dispatch" "cmd powershell bridge label"
 assert_contains "${cmd_wrapper}" "sfs.cmd guide [--path^|--print]" "cmd native guide help"
+if grep -Fq -- "\"%BASH_EXE%\" \"%SFS_SH%\" %*" "${cmd_wrapper}"; then
+  fail "cmd wrapper must not send mutating commands through the raw Git Bash %* bridge"
+fi
+
+assert_contains "${ps_wrapper}" "[Parameter(Position = 0, ValueFromRemainingArguments = \$true)]" "ps1 positional catch-all args"
+assert_contains "${ps_wrapper}" "Resolve-SfsArgs \$SfsArgs \$args" "ps1 automatic args fallback"
+assert_contains "${ps_wrapper}" "Enable-SfsUtf8Bridge" "ps1 utf8 bridge"
+assert_contains "${ps_wrapper}" "\$env:LC_CTYPE = \"C.UTF-8\"" "ps1 bash utf8 locale"
 assert_contains "${ps_wrapper}" "Invoke-SfsNativeStatus" "ps1 native status"
 assert_contains "${ps_wrapper}" "Invoke-SfsNativeContext" "ps1 native context"
 assert_contains "${ps_wrapper}" "Native read-only helper for Windows agents. It does not start Git Bash." "ps1 native context help"
 
 native_line="$(line_number "${cmd_wrapper}" "call :maybe_native_readonly %*")"
-bash_line="$(line_number "${cmd_wrapper}" "if defined SFS_BASH")"
-[[ -n "${native_line}" && -n "${bash_line}" ]] || fail "missing native or bash probe line"
-(( native_line < bash_line )) || fail "native read-only fallback must run before Git Bash lookup"
+bridge_line="$(line_number "${cmd_wrapper}" "call :powershell_dispatch %*")"
+[[ -n "${native_line}" && -n "${bridge_line}" ]] || fail "missing native or PowerShell bridge line"
+(( native_line < bridge_line )) || fail "native read-only fallback must run before PowerShell bridge fallback"
+
+if command -v powershell.exe >/dev/null 2>&1; then
+  ps_script="${ps_wrapper}"
+  if command -v cygpath >/dev/null 2>&1; then
+    ps_script="$(cygpath -w "${ps_wrapper}")"
+  fi
+  context_out="$(powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${ps_script}" context cat kernel 2>&1)"
+  case "${context_out}" in
+    *"SFS Kernel"* ) ;;
+    *) fail "PowerShell -File context cat kernel did not receive args: ${context_out}" ;;
+  esac
+
+  tmp_status="$(mktemp -d "${TMPDIR:-/tmp}/sfs-ps-status.XXXXXX")"
+  set +e
+  status_out="$(cd "${tmp_status}" && powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${ps_script}" status 2>&1)"
+  status_rc=$?
+  set -e
+  rm -rf "${tmp_status}"
+  [[ "${status_rc}" -ne 0 ]] || fail "PowerShell -File status without .sfs-local should fail"
+  case "${status_out}" in
+    *"no .sfs-local found"* ) ;;
+    *) fail "PowerShell -File status fell back to usage or wrong output: ${status_out}" ;;
+  esac
+fi
 
 for adapter in "${adapter_files[@]}"; do
   assert_contains "${adapter}" "sfs.cmd <command>" "adapter Windows command ${adapter}"

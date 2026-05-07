@@ -7,6 +7,23 @@
 
 ---
 
+## 0.6.35
+
+이번 버전은 Windows Scoop 설치본에서 `sfs.cmd` 가 다시 usage 만 출력하거나,
+`sfs.cmd start "<한국어 목표>"` 후 출력/인코딩이 불안정해지는 문제를 고칩니다.
+
+- `sfs.cmd status`, `sfs.cmd context cat kernel` 같은 읽기 명령이 PowerShell entrypoint 에
+  인자를 확실히 넘기도록 다시 고정했습니다.
+- `sfs.ps1` 은 `powershell.exe -File ... status`, `... context cat kernel`, `-SfsArgs`
+  배열 호출 모양을 모두 같은 인자 목록으로 정규화합니다.
+- `sfs.cmd start "<목표>"` 같은 상태 변경 명령도 raw Git Bash 직행 대신 PowerShell bridge 를
+  거친 뒤 Bash runtime 으로 내려갑니다. 그래서 Windows 에서는 성공한 쪽, 즉 PowerShell 이
+  Unicode-safe 인자 배열을 들고 있는 경로로 고정됩니다.
+- PowerShell bridge 는 UTF-8 console/native-command encoding 과 Git Bash UTF-8 locale 을
+  기본으로 맞춥니다.
+- Windows 테스트는 가능하면 실제 `powershell.exe -File sfs.ps1 context cat kernel` 과
+  `status` 호출까지 실행해 usage-only 회귀를 잡습니다.
+
 ## 0.6.34
 
 이번 버전은 SFS 모델 라우팅을 사용자가 따로 설정하지 않아도 기본 적용되게 바꿉니다.

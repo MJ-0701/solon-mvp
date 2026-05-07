@@ -210,6 +210,8 @@ for file in "${adapter_files[@]}"; do
   assert_contains "${file}" "Helper-grade simple" "adapter helper-grade advisor exemption ${file}"
   assert_contains "${file}" '`gpt-5.4-mini`' "adapter codex intake model ${file}"
   assert_contains "${file}" '`gpt-5.4`' "adapter codex facilitator model ${file}"
+  assert_contains "${file}" '`gemini-3.1-pro-preview`' "adapter gemini 3.1 advisor ${file}"
+  assert_not_contains "${file}" "Gemini high" "adapter no stale gemini high abstraction ${file}"
   assert_contains "${file}" "top-model advisor review" "adapter top advisor rule ${file}"
   assert_contains "${file}" "Multi-agent implement is optional, never the default" "adapter multi-agent optional ${file}"
   assert_contains "${file}" "clear native-language commit message" "adapter native commit message ${file}"

@@ -90,7 +90,7 @@ sfs.cmd version --check
 sfs.cmd doctor      # ✅ 세 줄 (Claude / Gemini / Codex) 모두 보이면 OK
 ```
 
-성공하면 `sfs 0.6.23`, `status up-to-date` 같은 문장이 보입니다. Windows
+성공하면 `sfs 0.6.35`, `status up-to-date` 같은 문장이 보입니다. Windows
 PowerShell 이나 cmd 에서는 `sfs.cmd` 를 쓰고, Git Bash/WSL 에서는 `sfs` 를 쓰셔도 됩니다.
 
 ### 4. 테스트 프로젝트 폴더 만들기
@@ -223,8 +223,9 @@ Windows 의 Claude/Gemini/Codex 가 내부 명령을 실행할 때 Git Bash 시�
 `sfs.cmd context cat kernel`, `sfs.cmd context cat index` 는 Git Bash 없이 바로
 읽을 수 있습니다. 그때는 AI 에게 "Windows 니까 내부 확인은 native read-only 인
 `sfs.cmd status` 와 `sfs.cmd context cat ...` 로 해줘" 라고 말하면 됩니다.
-`sfs start` 처럼 상태를 바꾸는 명령이 "성공"이라고 나왔는데 출력이 비어 있으면 성공으로 보지 말고,
-PowerShell 에서 `sfs.cmd start "첫 번째 작업 목표"` 를 직접 실행한 뒤 `sfs.cmd status` 로 확인하세요.
+0.6.35 부터 상태를 바꾸는 `sfs.cmd start "첫 번째 작업 목표"` 도 PowerShell bridge 를
+거쳐 Bash runtime 으로 내려갑니다. 그래도 "성공"이라고 나왔는데 출력이 비어 있으면 성공으로
+보지 말고, PowerShell 에서 같은 명령을 직접 실행한 뒤 `sfs.cmd status` 로 확인하세요.
 
 처음 AI 에게 이렇게 말해도 됩니다.
 
