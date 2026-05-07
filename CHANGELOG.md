@@ -1,3 +1,33 @@
+## [0.6.37] - 2026-05-08
+
+> **Windows Scoop self-upgrade hotfix.** A real Windows 0.6.36 `sfs.cmd upgrade`
+> upgraded Scoop successfully, then `cmd.exe` resumed the replaced batch file at
+> an invalid offset and tried to execute tail fragments such as
+> `TIVE_READONLY_DONE` and `LF_UPGRADE_DONE`.
+
+### Fixed
+
+- `bin/sfs.cmd` no longer owns Scoop self-upgrade. It handles native read-only
+  dispatch, then hands all remaining commands to the packaged PowerShell
+  entrypoint.
+- `bin/sfs.ps1` remains the owner of `scoop update`, `scoop update sfs`, and
+  reloading the updated runtime, avoiding continued execution from the batch
+  file that Scoop replaces.
+
+### Docs
+
+- Added Korean and English Windows wrapper incident reports for the 0.6.35 /
+  0.6.37 sequence, covering the usage-only regression, empty-output partial
+  success risk, Korean mojibake, Homebrew installed docs layout finding, and
+  Scoop batch self-replacement failure.
+- Linked the incident report from the docs indexes, product-shape pages, GUIDE,
+  and release notes.
+
+### Verified
+
+- Added a documentation guard for the Windows wrapper incident report and linked
+  docs.
+
 ## [0.6.36] - 2026-05-08
 
 > **Installed docs test layout hotfix.** The 0.6.35 Windows wrapper fix shipped

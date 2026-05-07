@@ -37,6 +37,22 @@ next: sfs brainstorm --simple "..."  # quick cleanup
 The user still types `sfs brainstorm`. Solon simply exposes the available
 depth options for the shape of the work.
 
+## Windows Wrapper Stabilization
+
+The Windows PowerShell/cmd entrypoint is `sfs.cmd`. As of 0.6.37, the wrapper
+handles read-only commands through native PowerShell first, then sends mutating
+commands such as `start` through the `sfs.cmd -> sfs.ps1 -> Bash runtime` bridge.
+The raw Git Bash `%*` path is no longer the default for mutating commands because
+it already failed for sandbox startup, argument forwarding, and UTF-8 output.
+`sfs.cmd upgrade` also delegates Scoop self-upgrade to `sfs.ps1` instead of
+running `scoop update sfs` from the batch file that Scoop replaces.
+
+An empty sprint directory after `sfs start` can be normal. Step files are created
+later by `brainstorm`, `plan`, `review`, and `retro`. Empty command output,
+usage-only `sfs.cmd status`, or usage-only `sfs.cmd context cat kernel` is a
+failure signal. The full root cause and validation flow are in the
+[Windows SFS wrapper incident report](./windows-wrapper-incident-0.6.37.md).
+
 ## Three Brainstorm Depths
 
 | Mode | Aliases | Role |
@@ -202,7 +218,7 @@ product design system exists, it wins.
 
 ## Division Knowledge Packs
 
-As of 0.6.36, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
+As of 0.6.37, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
 management/admin, and taxonomy packs are no longer placeholders. Each pack gives
 Solon a compact sense of what to watch, what to ask, and what evidence should
 count for that kind of work.

@@ -4,12 +4,8 @@ setlocal
 set "SCRIPT_DIR=%~dp0"
 set "SFS_ORIGINAL_ARGS=%*"
 
-call :maybe_self_upgrade %*
-if defined SFS_SELF_UPGRADE_DONE exit /b %ERRORLEVEL%
-if errorlevel 1 exit /b %ERRORLEVEL%
-
 call :maybe_native_readonly %*
-if defined SFS_NATIVE_READONLY_DONE exit /b %ERRORLEVEL%
+if not "%SFS_NATIVE_READONLY_DONE%"=="" exit /b %ERRORLEVEL%
 
 call :powershell_dispatch %*
 exit /b %ERRORLEVEL%
@@ -22,70 +18,6 @@ if not exist "%SCRIPT_DIR%sfs.ps1" (
   exit /b 4
 )
 "%SFS_NATIVE_POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%sfs.ps1" %SFS_ORIGINAL_ARGS%
-exit /b %ERRORLEVEL%
-
-:maybe_self_upgrade
-if defined SFS_SKIP_SELF_UPGRADE exit /b 0
-if "%SFS_UPDATE_SELF%"=="0" exit /b 0
-
-set "SFS_CMD_ARG=%~1"
-if /I "%SFS_CMD_ARG%"=="/sfs" set "SFS_CMD_ARG=%~2"
-if /I "%SFS_CMD_ARG%"=="sfs" set "SFS_CMD_ARG=%~2"
-if /I "%SFS_CMD_ARG%"=="$sfs" set "SFS_CMD_ARG=%~2"
-
-set "SFS_IS_UPGRADE="
-if /I "%SFS_CMD_ARG%"=="upgrade" set "SFS_IS_UPGRADE=1"
-if /I "%SFS_CMD_ARG%"=="update" set "SFS_IS_UPGRADE=1"
-if not defined SFS_IS_UPGRADE exit /b 0
-
-set "SFS_NO_SELF="
-for %%A in (%*) do (
-  if /I "%%~A"=="--no-self-upgrade" set "SFS_NO_SELF=1"
-)
-if defined SFS_NO_SELF exit /b 0
-
-echo "%SCRIPT_DIR%" | findstr /I "\\scoop\\apps\\sfs\\" >nul
-if errorlevel 1 exit /b 0
-
-where scoop >nul 2>nul
-if errorlevel 1 (
-  echo scoop command not found; rerun with SFS_UPDATE_SELF=0 to use the current runtime only. 1>&2
-  exit /b 1
-)
-
-echo global runtime self-upgrade:
-echo   scoop update
-call scoop update
-if errorlevel 1 (
-  echo scoop update failed; rerun with SFS_UPDATE_SELF=0 to use the current runtime only. 1>&2
-  exit /b 1
-)
-
-echo   scoop update sfs
-set "SFS_OLD_SCOOP_PROJECT_UPGRADE=%SFS_SCOOP_PROJECT_UPGRADE%"
-set "SFS_SCOOP_PROJECT_UPGRADE=0"
-call scoop update sfs
-set "SFS_SCOOP_UPDATE_EXIT=%ERRORLEVEL%"
-if defined SFS_OLD_SCOOP_PROJECT_UPGRADE (
-  set "SFS_SCOOP_PROJECT_UPGRADE=%SFS_OLD_SCOOP_PROJECT_UPGRADE%"
-) else (
-  set "SFS_SCOOP_PROJECT_UPGRADE="
-)
-if not "%SFS_SCOOP_UPDATE_EXIT%"=="0" (
-  echo scoop update sfs failed; rerun with SFS_UPDATE_SELF=0 to use the current runtime only. 1>&2
-  exit /b 1
-)
-
-set "UPDATED_SFS_CMD="
-for /f "delims=" %%S in ('where sfs.cmd 2^>nul') do (
-  if not defined UPDATED_SFS_CMD set "UPDATED_SFS_CMD=%%S"
-)
-if not defined UPDATED_SFS_CMD set "UPDATED_SFS_CMD=%~f0"
-
-echo reloading installed sfs runtime...
-set "SFS_SKIP_SELF_UPGRADE=1"
-call "%UPDATED_SFS_CMD%" %*
-set "SFS_SELF_UPGRADE_DONE=1"
 exit /b %ERRORLEVEL%
 
 :maybe_native_readonly

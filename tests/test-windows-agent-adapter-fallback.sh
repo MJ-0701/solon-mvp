@@ -43,6 +43,12 @@ adapter_files=(
 )
 
 assert_contains "${cmd_wrapper}" "call :maybe_native_readonly %*" "cmd native fallback hook"
+if grep -Fq -- "call :maybe_self_upgrade" "${cmd_wrapper}"; then
+  fail "cmd wrapper must not run Scoop self-upgrade from the batch file that Scoop replaces"
+fi
+if grep -Fq -- "call scoop update" "${cmd_wrapper}"; then
+  fail "cmd wrapper must not call scoop update directly; sfs.ps1 owns the stable self-upgrade"
+fi
 assert_contains "${cmd_wrapper}" ":native_usage" "cmd native usage"
 assert_contains "${cmd_wrapper}" ":native_guide" "cmd native guide"
 assert_contains "${cmd_wrapper}" "status\" goto native_powershell_readonly_dispatch" "cmd native status dispatch"
@@ -61,6 +67,7 @@ fi
 assert_contains "${ps_wrapper}" "[Parameter(Position = 0, ValueFromRemainingArguments = \$true)]" "ps1 positional catch-all args"
 assert_contains "${ps_wrapper}" "Resolve-SfsArgs \$SfsArgs \$args" "ps1 automatic args fallback"
 assert_contains "${ps_wrapper}" "Enable-SfsUtf8Bridge" "ps1 utf8 bridge"
+assert_contains "${ps_wrapper}" "Invoke-ScoopSelfUpgrade" "ps1 owns Scoop self-upgrade"
 assert_contains "${ps_wrapper}" "\$env:LC_CTYPE = \"C.UTF-8\"" "ps1 bash utf8 locale"
 assert_contains "${ps_wrapper}" "Invoke-SfsNativeStatus" "ps1 native status"
 assert_contains "${ps_wrapper}" "Invoke-SfsNativeContext" "ps1 native context"

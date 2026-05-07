@@ -7,6 +7,19 @@
 
 ---
 
+## 0.6.37
+
+이번 버전은 Windows Scoop 설치본에서 `sfs.cmd upgrade` 가 자기 자신을 교체하는 batch 파일 안에서
+계속 실행되며 `TIVE_READONLY_DONE`, `LF_UPGRADE_DONE` 같은 조각 문자열을 명령처럼 실행하던
+문제를 고칩니다.
+
+- `sfs.cmd` 는 더 이상 `scoop update` / `scoop update sfs` 를 직접 실행하지 않습니다.
+- Windows self-upgrade 는 이미 인자를 정규화하고 메모리 실행에 더 안전한 `sfs.ps1` 이 맡습니다.
+- `sfs.cmd` 는 native read-only 확인 후 나머지 명령을 PowerShell entrypoint 로 넘기는 얇은 wrapper
+  로 돌아갑니다.
+- 이번 Windows wrapper 장애 흐름과 발견된 문제점은
+  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.37.md) 에 정리했습니다.
+
 ## 0.6.36
 
 이번 버전은 0.6.35 Windows 래퍼 수정 자체는 유지하면서, Homebrew 설치본의 문서 검증 테스트가
@@ -17,6 +30,8 @@
   고쳤습니다.
 - Windows 사용자는 0.6.35 에 들어간 `sfs.cmd -> sfs.ps1 -> Bash runtime` bridge 수정을 그대로
   받습니다.
+- Windows 에서 실제로 관찰된 usage-only, 빈 출력, 한국어 깨짐, Homebrew installed layout 문제는
+  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.37.md) 에 정리했습니다.
 
 ## 0.6.35
 
