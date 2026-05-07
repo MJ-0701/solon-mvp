@@ -1,16 +1,29 @@
 # GEMINI.md — Solon SFS adapter
 
-Use Solon through the global `sfs` runtime. In Gemini CLI, invoke Solon as
-`sfs <command>` without a leading slash.
+Use Solon through the global runtime. In Gemini CLI, invoke Solon as
+`sfs <command>` without a leading slash on macOS/Linux/Git Bash/WSL. On Windows
+PowerShell/cmd, execute the adapter as `sfs.cmd <command>`.
 
 Read order:
 1. `SFS.md`
-2. `sfs context path kernel`
-3. `sfs context path index`
-4. Only the routed context module for the current command via `sfs context path ...`.
+2. `sfs context path kernel` (`sfs.cmd context path kernel` on Windows PowerShell/cmd)
+3. `sfs context path index` (`sfs.cmd context path index` on Windows PowerShell/cmd)
+4. Only the routed context module for the current command via `sfs context path ...`
+   or `sfs.cmd context path ...`.
 
 Rules:
-- Run `sfs <command>` first; adapter stdout/stderr is SSoT and stays verbatim.
+- Run the platform adapter first: `sfs <command>` on macOS/Linux/Git Bash/WSL,
+  `sfs.cmd <command>` on Windows PowerShell/cmd. Adapter stdout/stderr is SSoT
+  and stays verbatim.
+- If Windows execution fails before SFS starts with Git Bash
+  `couldn't create signal pipe, Win32 error 5`, rerun the same command via
+  `sfs.cmd ...` outside the sandbox. If that run is empty or fails, report the
+  exact stdout/stderr and ask for `sfs.cmd --help`.
+- Empty adapter output is not success for visible SFS commands. `start`,
+  `brainstorm`, `plan`, `implement`, `review`, `retro`, `adopt`, `profile`,
+  `upgrade`, and `agent install` must print output or change their expected
+  artifact. For `start`, verify `.sfs-local/current-sprint` and the sprint
+  directory exist before reporting success.
 - `sfs profile` may refine only `SFS.md` `## 프로젝트 개요`.
 - Bash-first means no artifact refinement; it does not forbid a compact Next.
 - AI-era fundamentals apply across all gates, not only implement: shared design

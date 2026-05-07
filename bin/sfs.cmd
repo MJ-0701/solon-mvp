@@ -8,6 +8,9 @@ call :maybe_self_upgrade %*
 if defined SFS_SELF_UPGRADE_DONE exit /b %ERRORLEVEL%
 if errorlevel 1 exit /b %ERRORLEVEL%
 
+call :maybe_native_readonly %*
+if defined SFS_NATIVE_READONLY_DONE exit /b %ERRORLEVEL%
+
 if defined SFS_BASH (
   if exist "%SFS_BASH%" set "BASH_EXE=%SFS_BASH%"
   if not defined BASH_EXE (
@@ -105,3 +108,153 @@ set "SFS_SKIP_SELF_UPGRADE=1"
 call "%UPDATED_SFS_CMD%" %*
 set "SFS_SELF_UPGRADE_DONE=1"
 exit /b %ERRORLEVEL%
+
+:maybe_native_readonly
+set "SFS_NATIVE_READONLY_DONE="
+set "SFS_NATIVE_CMD=%~1"
+set "SFS_NATIVE_OPT=%~2"
+if /I "%SFS_NATIVE_CMD%"=="/sfs" (
+  set "SFS_NATIVE_CMD=%~2"
+  set "SFS_NATIVE_OPT=%~3"
+)
+if /I "%SFS_NATIVE_CMD%"=="sfs" (
+  set "SFS_NATIVE_CMD=%~2"
+  set "SFS_NATIVE_OPT=%~3"
+)
+if /I "%SFS_NATIVE_CMD%"=="$sfs" (
+  set "SFS_NATIVE_CMD=%~2"
+  set "SFS_NATIVE_OPT=%~3"
+)
+
+if not defined SFS_NATIVE_CMD (
+  call :native_usage
+  set "SFS_NATIVE_READONLY_DONE=1"
+  exit /b 0
+)
+if /I "%SFS_NATIVE_CMD%"=="help" (
+  call :native_usage
+  set "SFS_NATIVE_READONLY_DONE=1"
+  exit /b 0
+)
+if /I "%SFS_NATIVE_CMD%"=="--help" (
+  call :native_usage
+  set "SFS_NATIVE_READONLY_DONE=1"
+  exit /b 0
+)
+if /I "%SFS_NATIVE_CMD%"=="-h" (
+  call :native_usage
+  set "SFS_NATIVE_READONLY_DONE=1"
+  exit /b 0
+)
+if /I "%SFS_NATIVE_CMD%"=="guide" goto native_guide_dispatch
+exit /b 0
+
+:native_guide_dispatch
+call :native_guide "%SFS_NATIVE_OPT%"
+set "SFS_NATIVE_RC=%ERRORLEVEL%"
+set "SFS_NATIVE_READONLY_DONE=1"
+exit /b %SFS_NATIVE_RC%
+
+:native_dist_dir
+for %%I in ("%SCRIPT_DIR%..") do set "SFS_NATIVE_DIST=%%~fI"
+exit /b 0
+
+:native_usage
+echo Usage:
+echo   sfs.cmd init [--yes] [--layout thin^|vendored]
+echo   sfs.cmd upgrade [--skip-existing] [--no-self-upgrade] [--interactive] [--layout thin^|vendored]
+echo   sfs.cmd update [--skip-existing]
+echo   sfs.cmd uninstall [--keep-artifacts^|--remove-all] [--remove-docs^|--keep-docs]
+echo   sfs.cmd agent install ^<claude^|gemini^|codex^|all^> [--skip-existing]
+echo   sfs.cmd context path ^<kernel^|index^|commands/name.md^|policies/name.md^>
+echo   sfs.cmd ^<command^> [args]
+echo.
+echo Commands:
+echo   agent install, upgrade, update, uninstall
+echo   version [--check]
+echo   status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, report, tidy, retro, commit, loop
+echo   bootstrap [plain-language app idea]
+echo   measure --alive -- ^<command^>
+echo.
+echo Windows note:
+echo   PowerShell/cmd users should prefer sfs.cmd. Git Bash/WSL users can use sfs.
+exit /b 0
+
+:native_guide
+set "SFS_NATIVE_GUIDE_OPT=%~1"
+if /I "%SFS_NATIVE_GUIDE_OPT%"=="--help" (
+  call :native_guide_usage
+  exit /b 0
+)
+if /I "%SFS_NATIVE_GUIDE_OPT%"=="-h" (
+  call :native_guide_usage
+  exit /b 0
+)
+if defined SFS_NATIVE_GUIDE_OPT (
+  if /I not "%SFS_NATIVE_GUIDE_OPT%"=="--path" if /I not "%SFS_NATIVE_GUIDE_OPT%"=="--print" (
+    echo unknown arg for guide: %SFS_NATIVE_GUIDE_OPT% 1>&2
+    exit /b 99
+  )
+)
+
+call :native_resolve_guide_path
+if /I "%SFS_NATIVE_GUIDE_OPT%"=="--path" goto native_guide_path
+if /I "%SFS_NATIVE_GUIDE_OPT%"=="--print" goto native_guide_print
+
+echo Solon guide context
+echo.
+echo What this is:
+echo   Solon keeps sprint, decision, review, retro, and handoff state inside this repo.
+echo.
+echo First files:
+echo   SFS.md        project operating guide
+echo   CLAUDE.md     Claude Code entry
+echo   AGENTS.md     Codex entry
+echo   GEMINI.md     Gemini CLI entry
+echo.
+echo Command entrypoints:
+echo   PowerShell/cmd:        sfs.cmd ...
+echo   Git Bash/WSL/macOS:    sfs ...
+echo   Claude/Gemini agents:  /sfs ...
+echo   Codex agents:          $sfs ...
+echo.
+echo First flow:
+echo   sfs.cmd status
+echo   sfs.cmd auth status
+echo   sfs.cmd start "current sprint goal"
+echo   sfs.cmd brainstorm "raw requirements"
+echo   sfs.cmd plan
+echo   sfs.cmd implement "first slice"
+echo.
+echo Full guide:
+echo   sfs.cmd guide --print
+echo   path: %SFS_NATIVE_GUIDE_PATH%
+exit /b 0
+
+:native_guide_path
+echo %SFS_NATIVE_GUIDE_PATH%
+exit /b 0
+
+:native_guide_print
+if not exist "%SFS_NATIVE_GUIDE_PATH%" (
+  echo guide missing: %SFS_NATIVE_GUIDE_PATH% 1>&2
+  exit /b 4
+)
+type "%SFS_NATIVE_GUIDE_PATH%"
+set "SFS_NATIVE_TYPE_RC=%ERRORLEVEL%"
+exit /b %SFS_NATIVE_TYPE_RC%
+
+:native_guide_usage
+echo Usage:
+echo   sfs.cmd guide [--path^|--print]
+echo.
+echo Shows the Solon Product onboarding guide installed with this project.
+echo   --path   print only the guide path
+echo   --print  print the full guide contents
+exit /b 0
+
+:native_resolve_guide_path
+call :native_dist_dir
+set "SFS_NATIVE_GUIDE_PATH=%CD%\.sfs-local\GUIDE.md"
+if not exist "%SFS_NATIVE_GUIDE_PATH%" set "SFS_NATIVE_GUIDE_PATH=%SFS_NATIVE_DIST%\GUIDE.md"
+exit /b 0

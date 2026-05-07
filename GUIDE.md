@@ -423,6 +423,13 @@ AI 시대의 설계 원칙은 [현재 제품 흐름과 최근 변화](./docs/ko/
 Claude Code 에서는 `/sfs`, Gemini CLI 에서는 `sfs`, Codex CLI 에서는 `$sfs` 를 씁니다.
 Windows PowerShell/cmd 에서는 `sfs.cmd` 를 씁니다.
 
+Windows 의 Claude/Gemini/Codex 에서 Git Bash 시작 전
+`couldn't create signal pipe, Win32 error 5` 가 나오면 실행 sandbox 가 Bash 생성을 막은
+경우입니다. AI 에게 Windows 내부 확인은
+`sfs.cmd --help`, `sfs.cmd guide` 순서로 하라고 말해 주세요.
+`start` 같은 상태 변경 명령이 빈 출력으로 "성공" 처리되면 성공이 아닙니다.
+PowerShell 에서 `sfs.cmd start "<목표>"` 를 직접 실행하고 `sfs.cmd status` 로 확인하세요.
+
 0.6.23 기준 brew/scoop 가 세 CLI 모두에 자동 등록합니다. 그래도
 `/sfs` 가 안 나오면 아래 명령으로 상태를 확인해 주세요.
 

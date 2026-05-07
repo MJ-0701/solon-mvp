@@ -1,3 +1,32 @@
+## [0.6.29] - 2026-05-07
+
+> **Windows agent command hotfix.** Windows Claude, Gemini, and Codex adapter
+> surfaces could route SFS commands through Git Bash inside a sandbox that fails
+> before SFS starts with
+> `couldn't create signal pipe, Win32 error 5`. Some retries then reported
+> `exit 0` with empty stdout/stderr as success even though no SFS artifact was
+> created.
+
+### Fixed
+
+- `bin/sfs.cmd` now serves read-only `--help` and `guide` output before probing
+  Git Bash, so PowerShell/cmd users and Windows agent sanity checks have a
+  native fallback path.
+- Claude, Gemini, and Codex SFS adapter templates now route Windows
+  PowerShell/cmd execution through `sfs.cmd ...`, document the Git Bash
+  signal-pipe failure, and forbid treating empty adapter output as success.
+- `start` handling in agent guidance now requires `.sfs-local/current-sprint`
+  and the sprint directory to exist before reporting success.
+- Beginner and main guides now include the Windows agent recovery path and the
+  empty-output guardrail.
+
+### Verified
+
+- Added `tests/test-windows-agent-adapter-fallback.sh` to lock the wrapper and
+  Claude/Gemini/Codex guidance contract.
+- Ran focused Windows fallback, agent behavior, docs routing, Scoop manifest,
+  and whitespace checks.
+
 ## [0.6.28] - 2026-05-07
 
 > **Installed native-language test layout hotfix.** Homebrew keeps `README.md`

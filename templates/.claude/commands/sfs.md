@@ -1,6 +1,6 @@
 ---
 name: sfs
-description: Solon SFS command router. Run the deterministic `sfs` bash adapter first, then resolve routed context with `sfs context path ...`.
+description: Solon SFS command router. Run the deterministic platform adapter first (`sfs` on macOS/Linux/Git Bash/WSL, `sfs.cmd` on Windows PowerShell/cmd), then resolve routed context with `sfs context path ...` or `sfs.cmd context path ...`.
 argument-hint: "<command> [args]"
 allowed-tools: Bash, Read, Write, Edit, Grep, Glob
 ---
@@ -12,18 +12,29 @@ User arguments:
 $ARGUMENTS
 ```
 
-1. Verify `command -v sfs`.
-2. Run `sfs <command> <args>`; vendored fallback:
+1. Verify the platform adapter exists: `command -v sfs` on macOS/Linux/Git
+   Bash/WSL, or `where sfs.cmd` on Windows PowerShell/cmd.
+2. Run the platform adapter first: `sfs <command> <args>` on macOS/Linux/Git
+   Bash/WSL, `sfs.cmd <command> <args>` on Windows PowerShell/cmd. Vendored fallback:
    `bash .sfs-local/scripts/sfs-dispatch.sh <command> <args>`.
-3. Print stdout verbatim; on failure include stderr and exit code.
-4. Read `sfs context path kernel`, `sfs context path index`, then only the routed module. Resolve command modules as `sfs context path commands/<command>.md` (for example, `commands/start.md`) or via the command alias (`sfs context path start`).
-5. For bash-first commands, do not refine artifacts, but a compact state/Next is allowed.
-6. For `profile`, edit only the `SFS.md` project overview section.
-7. For hybrid commands, refine pointed artifacts and answer with one Solon report.
-8. AI-era fundamentals apply across all gates, not only implement: shared
+3. If Windows execution fails before SFS starts with Git Bash
+   `couldn't create signal pipe, Win32 error 5`, rerun the same command via
+   `sfs.cmd ...` outside the sandbox. If that run is empty or fails, report the
+   exact stdout/stderr and ask for `sfs.cmd --help`.
+4. Empty adapter output is not success for visible SFS commands. `start`,
+   `brainstorm`, `plan`, `implement`, `review`, `retro`, `adopt`, `profile`,
+   `upgrade`, and `agent install` must print output or change their expected
+   artifact. For `start`, verify `.sfs-local/current-sprint` and the sprint
+   directory exist before reporting success.
+5. Print stdout verbatim; on failure include stderr and exit code.
+6. Read `sfs context path kernel`, `sfs context path index`, then only the routed module. On Windows PowerShell/cmd use `sfs.cmd context path ...`. Resolve command modules as `sfs context path commands/<command>.md` (for example, `commands/start.md`) or via the command alias (`sfs context path start`).
+7. For bash-first commands, do not refine artifacts, but a compact state/Next is allowed.
+8. For `profile`, edit only the `SFS.md` project overview section.
+9. For hybrid commands, refine pointed artifacts and answer with one Solon report.
+10. AI-era fundamentals apply across all gates, not only implement: shared
    design concept, domain language, feedback loop, interface/artifact boundary,
    and gray-box delegation.
-9. For implementation and review work, follow the routed context guardrails:
+11. For implementation and review work, follow the routed context guardrails:
    surface material assumptions, choose the smallest useful slice, keep changes
    surgical, read actual files/errors before fixing, verify before completion,
    and report exact evidence.
@@ -39,14 +50,14 @@ $ARGUMENTS
    Gate 3 review must self-review until PASS before cross review. Review round
    count, lens count, or "enough review" is not a PASS; partial/fail routes to
    rework and same-gate self-review.
-10. `.sfs-local/` is private workbench state. Shared durable docs belong under
+12. `.sfs-local/` is private workbench state. Shared durable docs belong under
    `docs/solon/`; do not ask users to commit `.sfs-local` unless their team
    explicitly opts in.
-11. In Solon reports, show gates as `Gate N (Name)`, not naked ids:
+13. In Solon reports, show gates as `Gate N (Name)`, not naked ids:
    Gate 1 (Intake), Gate 2 (Brainstorm), Gate 3 (Plan),
    Gate 4 (Design), Gate 5 (Handoff), Gate 6 (Review),
    Gate 7 (Retro). Use gate numbers 1..7 for new CLI examples.
-12. Decision questions must be self-contained: before any `Q1`, `D1`, or
+14. Decision questions must be self-contained: before any `Q1`, `D1`, or
     option id, explain in plain user language what is being decided, why it
     matters, the recommended default, and what each option changes. Labels are
     cross-references, not the explanation.

@@ -7,6 +7,17 @@
 
 ---
 
+## 0.6.29
+
+이번 버전은 Windows 에서 Claude, Gemini, Codex 의 SFS 명령이 Git Bash 시작 전에
+`couldn't create signal pipe, Win32 error 5` 로 막히던 흐름을 고친 핫픽스입니다.
+
+- Windows PowerShell/cmd 에서는 `sfs.cmd --help`, `sfs.cmd guide` 가 Git Bash 없이도 바로 출력됩니다.
+- Claude, Gemini, Codex 용 SFS adapter 는 Windows 실행 시 `sfs.cmd ...` 를 우선 사용하도록 안내합니다.
+- `sfs start` 같은 상태 변경 명령이 빈 stdout/stderr 로 끝나면 성공으로 보지 않도록 guardrail 을 추가했습니다.
+- `start` 성공은 `.sfs-local/current-sprint` 와 sprint 폴더가 실제로 생겼을 때만 인정합니다.
+- Windows 사용자 가이드에 agent 실행 sandbox / Git Bash signal-pipe 에러 대응 절차를 추가했습니다.
+
 ## 0.6.28
 
 이번 버전은 0.6.27 에 추가한 native 언어 커밋 메시지 테스트가 Homebrew 설치본에서도 그대로

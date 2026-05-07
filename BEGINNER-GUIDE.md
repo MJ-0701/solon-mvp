@@ -217,6 +217,13 @@ $sfs guide
 $sfs start "첫 번째 작업 목표"
 ```
 
+Windows 의 Claude/Gemini/Codex 가 내부 명령을 실행할 때 Git Bash 시작 전에
+`couldn't create signal pipe, Win32 error 5` 를 내면 실행 sandbox 가 Git Bash 를 막은
+상태입니다. 그때는 AI 에게 "Windows 니까 내부 확인은 `sfs.cmd --help` 와
+`sfs.cmd guide` 로 해줘" 라고 말하면 됩니다.
+`sfs start` 처럼 상태를 바꾸는 명령이 "성공"이라고 나왔는데 출력이 비어 있으면 성공으로 보지 말고,
+PowerShell 에서 `sfs.cmd start "첫 번째 작업 목표"` 를 직접 실행한 뒤 `sfs.cmd status` 로 확인하세요.
+
 처음 AI 에게 이렇게 말해도 됩니다.
 
 ```text
@@ -402,6 +409,8 @@ cd ~/Desktop/solon-test
 Windows:
 
 ```powershell
+sfs.cmd --help
+sfs.cmd guide
 sfs.cmd version --check
 scoop list sfs
 git --version
