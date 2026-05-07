@@ -7,8 +7,8 @@ set "SFS_ORIGINAL_ARGS=%*"
 call :maybe_native_readonly %*
 if not "%SFS_NATIVE_READONLY_DONE%"=="" exit /b %ERRORLEVEL%
 
-call :powershell_dispatch %*
-exit /b %ERRORLEVEL%
+call :powershell_dispatch %* & call exit /b %%ERRORLEVEL%%
+goto :eof
 
 :powershell_dispatch
 set "SFS_NATIVE_POWERSHELL=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
@@ -17,8 +17,7 @@ if not exist "%SCRIPT_DIR%sfs.ps1" (
   echo missing packaged SFS PowerShell entrypoint: %SCRIPT_DIR%sfs.ps1 1>&2
   exit /b 4
 )
-"%SFS_NATIVE_POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%sfs.ps1" %SFS_ORIGINAL_ARGS%
-exit /b %ERRORLEVEL%
+"%SFS_NATIVE_POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%sfs.ps1" %SFS_ORIGINAL_ARGS% & call exit /b %%ERRORLEVEL%%
 
 :maybe_native_readonly
 set "SFS_NATIVE_READONLY_DONE="

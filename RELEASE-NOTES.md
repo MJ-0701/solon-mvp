@@ -7,6 +7,26 @@
 
 ---
 
+## 0.6.39
+
+이번 버전은 Windows PowerShell/cmd 에서 `sfs.cmd` 가 macOS 의 `sfs` 처럼 실제 명령을 받도록
+고칩니다. 0.6.38 설치 후에도 `sfs.cmd context cat ...` 과 `sfs.cmd start ...` 가 usage 만
+출력하던 문제를 수정했습니다.
+
+- `sfs.ps1` 이 Windows PowerShell 5.1 의 불안정한 script param catch-all 에 의존하지 않고
+  `$args` / `$MyInvocation.UnboundArguments` 로 명령 인자를 직접 정규화합니다.
+- `sfs.cmd` 는 self-upgrade 뒤 batch 파일이 교체되어도 다음 줄을 읽지 않도록 PowerShell 호출과
+  종료를 같은 parsed line 으로 고정했습니다. `e`, `*` 같은 조각 문자열이 명령처럼 실행되는 잔여
+  문제를 막습니다.
+- Windows Scoop smoke 가 이제 `sfs.cmd context cat kernel`, `sfs.cmd context cat commands/start.md`,
+  `sfs.cmd start --id ci-sprint-test "sprint-create-test"`, 이벤트 goal, `sfs.cmd status` 까지
+  검증합니다.
+- 같은 Windows smoke 가 로컬 이전 Scoop 패키지에서 현재 패키지로 `sfs.cmd upgrade` 를 실제 실행하고,
+  `e`, `*`, `TIVE_READONLY_DONE`, `LF_UPGRADE_DONE` 같은 batch tail-fragment 가 나오지 않는지 확인합니다.
+- Windows smoke 가 한국어 goal `스프린트 생성 테스트` 도 `sfs.cmd start` 로 생성하고 이벤트 goal 까지
+  확인합니다.
+- Windows wrapper 장애 보고서는 0.6.39 최종 기준선으로 최신화했습니다.
+
 ## 0.6.38
 
 이번 버전은 0.6.37 Windows Scoop self-upgrade 수정은 그대로 유지하면서, Homebrew 설치본에서 새
@@ -18,6 +38,7 @@ incident-report 문서 테스트가 `CHANGELOG.md` / `RELEASE-NOTES.md` 위치�
   이해하도록 고쳤습니다.
 - Windows 사용자는 0.6.37 에 들어간 `sfs.cmd upgrade` self-replacement 방지 수정을 그대로
   받습니다.
+- Windows wrapper 장애 보고서는 이후 0.6.39 기준 링크와 P1-P6 문제점 정리로 최신화했습니다.
 
 ## 0.6.37
 
@@ -30,7 +51,7 @@ incident-report 문서 테스트가 `CHANGELOG.md` / `RELEASE-NOTES.md` 위치�
 - `sfs.cmd` 는 native read-only 확인 후 나머지 명령을 PowerShell entrypoint 로 넘기는 얇은 wrapper
   로 돌아갑니다.
 - 이번 Windows wrapper 장애 흐름과 발견된 문제점은
-  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.37.md) 에 정리했습니다.
+  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.39.md) 에 정리했습니다.
 
 ## 0.6.36
 
@@ -43,7 +64,7 @@ incident-report 문서 테스트가 `CHANGELOG.md` / `RELEASE-NOTES.md` 위치�
 - Windows 사용자는 0.6.35 에 들어간 `sfs.cmd -> sfs.ps1 -> Bash runtime` bridge 수정을 그대로
   받습니다.
 - Windows 에서 실제로 관찰된 usage-only, 빈 출력, 한국어 깨짐, Homebrew installed layout 문제는
-  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.37.md) 에 정리했습니다.
+  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.39.md) 에 정리했습니다.
 
 ## 0.6.35
 

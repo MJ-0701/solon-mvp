@@ -57,15 +57,22 @@ assert_contains "${cmd_wrapper}" "version\" goto native_powershell_readonly_disp
 assert_contains "${cmd_wrapper}" ":native_powershell_readonly_dispatch" "cmd native powershell dispatch"
 assert_contains "${cmd_wrapper}" "set \"SFS_ORIGINAL_ARGS=%*\"" "cmd top-level argument capture"
 assert_contains "${cmd_wrapper}" "-File \"%SCRIPT_DIR%sfs.ps1\" %SFS_ORIGINAL_ARGS%" "cmd powershell top-level argument forwarding"
-assert_contains "${cmd_wrapper}" "call :powershell_dispatch %*" "cmd non-native powershell bridge"
+assert_contains "${cmd_wrapper}" "call :powershell_dispatch %* & call exit /b %%ERRORLEVEL%%" "cmd non-native powershell bridge exits on parsed line"
 assert_contains "${cmd_wrapper}" ":powershell_dispatch" "cmd powershell bridge label"
+assert_contains "${cmd_wrapper}" "-File \"%SCRIPT_DIR%sfs.ps1\" %SFS_ORIGINAL_ARGS% & call exit /b %%ERRORLEVEL%%" "cmd powershell dispatch exits on parsed line"
 assert_contains "${cmd_wrapper}" "sfs.cmd guide [--path^|--print]" "cmd native guide help"
 if grep -Fq -- "\"%BASH_EXE%\" \"%SFS_SH%\" %*" "${cmd_wrapper}"; then
   fail "cmd wrapper must not send mutating commands through the raw Git Bash %* bridge"
 fi
+if perl -0ne 'exit((/-File "%SCRIPT_DIR%sfs\.ps1" %SFS_ORIGINAL_ARGS%\r?\nexit \/b/) ? 0 : 1)' "${cmd_wrapper}"; then
+  fail "cmd wrapper must not put PowerShell dispatch and exit on separate parsed lines during self-upgrade"
+fi
 
-assert_contains "${ps_wrapper}" "[Parameter(Position = 0, ValueFromRemainingArguments = \$true)]" "ps1 positional catch-all args"
-assert_contains "${ps_wrapper}" "Resolve-SfsArgs \$SfsArgs \$args" "ps1 automatic args fallback"
+if grep -Fq -- "ValueFromRemainingArguments" "${ps_wrapper}"; then
+  fail "ps1 must not rely on ValueFromRemainingArguments; Windows PowerShell -File lost args in the field"
+fi
+assert_contains "${ps_wrapper}" 'Resolve-SfsArgs $args $MyInvocation.UnboundArguments' "ps1 automatic/unbound args fallback"
+assert_contains "${ps_wrapper}" '$resolved[0] -eq "--%"' "ps1 stop-parsing token normalization"
 assert_contains "${ps_wrapper}" "Enable-SfsUtf8Bridge" "ps1 utf8 bridge"
 assert_contains "${ps_wrapper}" "Invoke-ScoopSelfUpgrade" "ps1 owns Scoop self-upgrade"
 assert_contains "${ps_wrapper}" "\$env:LC_CTYPE = \"C.UTF-8\"" "ps1 bash utf8 locale"
@@ -117,5 +124,14 @@ assert_contains "${DIST_DIR}/BEGINNER-GUIDE.md" "sfs.cmd --help" "beginner Windo
 assert_contains "${DIST_DIR}/BEGINNER-GUIDE.md" "sfs.cmd context cat kernel" "beginner Windows native context"
 assert_contains "${DIST_DIR}/GUIDE.md" "couldn't create signal pipe, Win32 error 5" "guide Windows Codex troubleshooting"
 assert_contains "${DIST_DIR}/GUIDE.md" "sfs.cmd context cat kernel" "guide Windows native context"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd context cat kernel" "Windows CI sfs.cmd native context"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd start --id ci-sprint-test" "Windows CI sfs.cmd start smoke"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" '"goal":"sprint-create-test"' "Windows CI sprint_start goal evidence"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_TEST_PREVIOUS_VERSION" "Windows CI installs previous local Scoop package first"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" 'Join-Path $env:GITHUB_WORKSPACE "packaging/scoop/sfs.json.template"' "Windows CI reads Scoop template from checkout after Set-Location"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd upgrade" "Windows CI sfs.cmd self-upgrade smoke"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "TIVE_READONLY_DONE|LF_UPGRADE_DONE" "Windows CI batch tail-fragment rejection"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd start --id ci-korean-sprint-test" "Windows CI Korean sfs.cmd start smoke"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" '"goal":"스프린트 생성 테스트"' "Windows CI Korean sprint_start goal evidence"
 
 echo "test-windows-agent-adapter-fallback: OK"

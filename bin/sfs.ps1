@@ -1,8 +1,3 @@
-param(
-  [Parameter(Position = 0, ValueFromRemainingArguments = $true)]
-  [object[]] $SfsArgs
-)
-
 $ErrorActionPreference = "Stop"
 $CurrentScriptPath = $MyInvocation.MyCommand.Path
 
@@ -18,14 +13,17 @@ function Expand-SfsArgItem([object] $Item) {
   return @([string] $Item)
 }
 
-function Resolve-SfsArgs([object[]] $BoundArgs, [object[]] $AutomaticArgs) {
+function Resolve-SfsArgs([object[]] $AutomaticArgs, [object[]] $UnboundArgs) {
   $resolved = @()
-  $source = if ($BoundArgs -and $BoundArgs.Count -gt 0) { $BoundArgs } else { $AutomaticArgs }
+  $source = if ($AutomaticArgs -and $AutomaticArgs.Count -gt 0) { $AutomaticArgs } else { $UnboundArgs }
   foreach ($item in @($source)) {
     $resolved += @(Expand-SfsArgItem $item)
   }
   if ($resolved.Count -gt 0 -and $resolved[0] -eq "-SfsArgs") {
     if ($resolved.Count -eq 1) { return [string[]] @() }
+    return [string[]] @($resolved[1..($resolved.Count - 1)])
+  }
+  if ($resolved.Count -ge 2 -and $resolved[0] -eq "--%") {
     return [string[]] @($resolved[1..($resolved.Count - 1)])
   }
   return [string[]] $resolved
@@ -44,7 +42,7 @@ function Enable-SfsUtf8Bridge {
   if (-not $env:LC_CTYPE) { $env:LC_CTYPE = "C.UTF-8" }
 }
 
-$SfsArgs = Resolve-SfsArgs $SfsArgs $args
+$SfsArgs = Resolve-SfsArgs $args $MyInvocation.UnboundArguments
 Enable-SfsUtf8Bridge
 
 function Find-SfsBash {

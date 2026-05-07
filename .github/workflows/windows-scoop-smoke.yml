@@ -42,33 +42,62 @@ jobs:
           $version = (Get-Content VERSION -First 1).Trim()
           if (-not $version) { throw "VERSION is empty" }
 
+          function Convert-ToFileUrl([string] $Path) {
+            return "file:///" + (($Path -replace "\\", "/") -replace " ", "%20")
+          }
+
+          $template = Get-Content (Join-Path $env:GITHUB_WORKSPACE "packaging/scoop/sfs.json.template") -Raw
+          function New-SfsManifest([string] $PackageVersion, [string] $PackageUrl, [string] $PackageHash, [string] $PackageExtractDir) {
+            $manifest = $template.Replace("__VERSION__", $PackageVersion)
+            $manifest = $manifest.Replace("__URL__", $PackageUrl)
+            $manifest = $manifest.Replace("__SHA256__", $PackageHash)
+            $manifest = $manifest.Replace("__EXTRACT_DIR__", $PackageExtractDir)
+            return $manifest
+          }
+
           $extractDir = "solon-product-$version"
           $archive = Join-Path $env:RUNNER_TEMP "sfs-$version.zip"
           git archive --format=zip --output="$archive" --prefix="$extractDir/" HEAD
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
           $hash = (Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant()
-          $fileUrl = "file:///" + (($archive -replace "\\", "/") -replace " ", "%20")
+          $fileUrl = Convert-ToFileUrl $archive
+
+          $previousVersion = "0.0.0"
+          $previousExtractDir = "solon-product-$previousVersion"
+          $previousRawArchive = Join-Path $env:RUNNER_TEMP "sfs-$previousVersion.raw.zip"
+          $previousArchive = Join-Path $env:RUNNER_TEMP "sfs-$previousVersion.zip"
+          $previousRoot = Join-Path $env:RUNNER_TEMP "sfs-previous-package"
+          git archive --format=zip --output="$previousRawArchive" --prefix="$previousExtractDir/" HEAD
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Expand-Archive -Path $previousRawArchive -DestinationPath $previousRoot -Force
+          Set-Content -Path (Join-Path $previousRoot "$previousExtractDir\VERSION") -Value $previousVersion -Encoding UTF8
+          if (Test-Path $previousArchive) { Remove-Item $previousArchive -Force }
+          Compress-Archive -Path (Join-Path $previousRoot $previousExtractDir) -DestinationPath $previousArchive -Force
+          $previousHash = (Get-FileHash $previousArchive -Algorithm SHA256).Hash.ToLowerInvariant()
+          $previousFileUrl = Convert-ToFileUrl $previousArchive
 
           $bucket = Join-Path $env:RUNNER_TEMP "solon-scoop-bucket"
           $bucketDir = Join-Path $bucket "bucket"
           New-Item -ItemType Directory -Force -Path $bucketDir | Out-Null
 
-          $template = Get-Content "packaging/scoop/sfs.json.template" -Raw
-          $manifest = $template.Replace("__VERSION__", $version)
-          $manifest = $manifest.Replace("__URL__", $fileUrl)
-          $manifest = $manifest.Replace("__SHA256__", $hash)
-          $manifest = $manifest.Replace("__EXTRACT_DIR__", $extractDir)
+          $manifest = New-SfsManifest $previousVersion $previousFileUrl $previousHash $previousExtractDir
           Set-Content -Path (Join-Path $bucketDir "sfs.json") -Value $manifest -Encoding UTF8
 
           git -C $bucket init
           git -C $bucket config user.email "actions@github.com"
           git -C $bucket config user.name "github-actions"
           git -C $bucket add bucket/sfs.json
-          git -C $bucket commit -m "test bucket"
+          git -C $bucket commit -m "test bucket previous package"
 
-          $bucketUrl = "file:///" + (($bucket -replace "\\", "/") -replace " ", "%20")
+          $bucketUrl = Convert-ToFileUrl $bucket
           "SFS_TEST_BUCKET_URL=$bucketUrl" >> $env:GITHUB_ENV
+          "SFS_TEST_BUCKET_DIR=$bucket" >> $env:GITHUB_ENV
+          "SFS_TEST_VERSION=$version" >> $env:GITHUB_ENV
+          "SFS_TEST_PREVIOUS_VERSION=$previousVersion" >> $env:GITHUB_ENV
+          "SFS_TEST_CURRENT_URL=$fileUrl" >> $env:GITHUB_ENV
+          "SFS_TEST_CURRENT_SHA256=$hash" >> $env:GITHUB_ENV
+          "SFS_TEST_CURRENT_EXTRACT_DIR=$extractDir" >> $env:GITHUB_ENV
 
       - name: Install Scoop
         run: |
@@ -86,6 +115,10 @@ jobs:
           Get-Command sfs
           sfs version
           sfs --help
+          $installedVersion = ((sfs version).Trim() -replace "^sfs\s+", "")
+          if ($installedVersion -ne $env:SFS_TEST_PREVIOUS_VERSION) {
+            throw "expected initial test package $env:SFS_TEST_PREVIOUS_VERSION, got $installedVersion"
+          }
 
       - name: Smoke thin project in PowerShell
         run: |
@@ -98,6 +131,19 @@ jobs:
           sfs init --layout thin --yes
           sfs status
           sfs auth status codex
+          sfs.cmd context cat kernel | Out-String | Select-String "SFS Kernel" | Out-Null
+          sfs.cmd context cat commands/start.md | Out-String | Select-String "start" | Out-Null
+          sfs.cmd start --id ci-sprint-test "sprint-create-test"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $currentSprint = (Get-Content ".sfs-local\current-sprint" -First 1).Trim()
+          if ($currentSprint -ne "ci-sprint-test") {
+            throw "sfs.cmd start did not update current-sprint: $currentSprint"
+          }
+          $lastEvent = Get-Content ".sfs-local\events.jsonl" -Tail 1
+          if ($lastEvent -notmatch '"type":"sprint_start"' -or $lastEvent -notmatch '"goal":"sprint-create-test"') {
+            throw "sfs.cmd start did not append the expected sprint_start event: $lastEvent"
+          }
+          sfs.cmd status | Out-String | Select-String "ci-sprint-test" | Out-Null
 
           $required = @(
             "SFS.md",
@@ -136,21 +182,51 @@ jobs:
             if (-not (Test-Path $path)) { throw "missing expected opt-in adapter file: $path" }
           }
 
-          scoop update sfs --force
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $template = Get-Content (Join-Path $env:GITHUB_WORKSPACE "packaging/scoop/sfs.json.template") -Raw
+          $manifest = $template.Replace("__VERSION__", $env:SFS_TEST_VERSION)
+          $manifest = $manifest.Replace("__URL__", $env:SFS_TEST_CURRENT_URL)
+          $manifest = $manifest.Replace("__SHA256__", $env:SFS_TEST_CURRENT_SHA256)
+          $manifest = $manifest.Replace("__EXTRACT_DIR__", $env:SFS_TEST_CURRENT_EXTRACT_DIR)
+          Set-Content -Path (Join-Path $env:SFS_TEST_BUCKET_DIR "bucket\sfs.json") -Value $manifest -Encoding UTF8
+          git -C $env:SFS_TEST_BUCKET_DIR add bucket/sfs.json
+          git -C $env:SFS_TEST_BUCKET_DIR commit -m "test bucket current package"
+
+          $upgradeLines = & sfs.cmd upgrade 2>&1
+          $upgradeExit = $LASTEXITCODE
+          $upgradeOutput = ($upgradeLines | Out-String)
+          Write-Host $upgradeOutput
+          if ($upgradeExit -ne 0) { exit $upgradeExit }
+          if ($upgradeOutput -match "TIVE_READONLY_DONE|LF_UPGRADE_DONE|'e'.*(recognized|은\(는\))|'\*'.*(recognized|은\(는\))") {
+            throw "sfs.cmd upgrade printed batch tail-fragment evidence: $upgradeOutput"
+          }
 
           $projectVersion = (Select-String -Path ".sfs-local\VERSION" -Pattern "^solon_mvp_version:\s*(.+)$").Matches.Groups[1].Value.Trim()
           $runtimeVersion = ((sfs version).Trim() -replace "^sfs\s+", "")
+          if ($runtimeVersion -ne $env:SFS_TEST_VERSION) {
+            throw "sfs.cmd upgrade did not refresh runtime VERSION: runtime=$runtimeVersion expected=$env:SFS_TEST_VERSION"
+          }
           if ($projectVersion -ne $runtimeVersion) {
-            throw "Scoop update did not refresh project VERSION: project=$projectVersion runtime=$runtimeVersion"
+            throw "sfs.cmd upgrade did not refresh project VERSION: project=$projectVersion runtime=$runtimeVersion"
           }
           foreach ($path in $adapterFiles) {
-            if (Test-Path $path) { throw "Scoop project upgrade left thin adapter file: $path" }
+            if (Test-Path $path) { throw "sfs.cmd upgrade left thin adapter file: $path" }
           }
           $adapterArchives = Get-ChildItem ".sfs-local\archives\runtime-migrations" -Filter "project-agent-adapters.tar.gz" -Recurse -ErrorAction SilentlyContinue
           if (-not $adapterArchives) {
-            throw "Scoop project upgrade did not archive opt-in adapter files"
+            throw "sfs.cmd upgrade did not archive opt-in adapter files"
           }
+
+          sfs.cmd start --id ci-korean-sprint-test --force "스프린트 생성 테스트"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $currentSprint = (Get-Content ".sfs-local\current-sprint" -First 1).Trim()
+          if ($currentSprint -ne "ci-korean-sprint-test") {
+            throw "sfs.cmd Korean start did not update current-sprint: $currentSprint"
+          }
+          $lastEvent = Get-Content ".sfs-local\events.jsonl" -Tail 1
+          if ($lastEvent -notmatch '"type":"sprint_start"' -or $lastEvent -notmatch '"goal":"스프린트 생성 테스트"') {
+            throw "sfs.cmd Korean start did not append the expected Korean sprint_start event: $lastEvent"
+          }
+          sfs.cmd status | Out-String | Select-String "ci-korean-sprint-test" | Out-Null
 
       - name: Smoke cmd PATH
         run: |

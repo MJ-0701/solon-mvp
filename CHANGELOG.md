@@ -1,3 +1,42 @@
+## [0.6.39] - 2026-05-08
+
+> **Windows `sfs.cmd` argument and start smoke hotfix.** A real Windows 0.6.38
+> install still printed generic usage for `sfs.cmd context cat ...` and
+> `sfs.cmd start ...`, and a 0.6.36 -> 0.6.38 wrapper upgrade could still leave
+> short batch tail fragments such as `e` and `*` after the successful install.
+
+### Fixed
+
+- `bin/sfs.ps1` no longer relies on a `ValueFromRemainingArguments` script param,
+  which proved unreliable for Windows PowerShell 5.1 `powershell.exe -File ...`
+  field calls. It now normalizes automatic `$args`,
+  `$MyInvocation.UnboundArguments`, nested arrays, literal `-SfsArgs`, and `--%`
+  into the command argument list.
+- `bin/sfs.cmd` now exits on the same parsed batch line after non-native
+  PowerShell dispatch and after the actual `powershell.exe -File sfs.ps1 ...`
+  call, so a Scoop self-upgrade cannot return into arbitrary lines from a
+  replaced batch file.
+
+### Tests
+
+- Windows Scoop smoke now explicitly runs `sfs.cmd context cat kernel`,
+  `sfs.cmd context cat commands/start.md`, `sfs.cmd start --id ci-sprint-test
+  "sprint-create-test"`, verifies `.sfs-local/current-sprint`, checks the
+  `sprint_start` event goal, and confirms `sfs.cmd status` sees the new sprint.
+- The same Windows smoke now installs a local previous Scoop package first,
+  publishes the current package to the local bucket, runs `sfs.cmd upgrade`,
+  rejects batch tail-fragment output (`TIVE_READONLY_DONE`, `LF_UPGRADE_DONE`,
+  `e`, `*`), and then verifies a Korean free-text `sfs.cmd start --id
+  ci-korean-sprint-test --force "스프린트 생성 테스트"` event.
+- Windows wrapper guardrails now reject `ValueFromRemainingArguments` in
+  `sfs.ps1` and require the same-line batch exit contract.
+
+### Docs
+
+- Refreshed the Windows wrapper incident report for the final 0.6.39 baseline,
+  including the attached `sfs.cmd start "스프린트 생성 테스트"` usage-only report
+  and the `e` / `*` tail-fragment evidence.
+
 ## [0.6.38] - 2026-05-08
 
 > **Installed incident-report test layout hotfix.** The 0.6.37 Windows Scoop
@@ -11,6 +50,12 @@
   and `RELEASE-NOTES.md` from the source/runtime root first, then falls back to
   the Homebrew Cellar version root (`../CHANGELOG.md`, `../RELEASE-NOTES.md`)
   when running from `libexec/tests`.
+
+### Docs
+
+- The Windows wrapper incident reports now use the final 0.6.38 report links and
+  include a P1-P6 issue summary for the sandbox, argument forwarding, raw Bash
+  bridge, partial-success, Scoop self-upgrade, and installed-layout findings.
 
 ### Verified
 
@@ -36,7 +81,7 @@
 ### Docs
 
 - Added Korean and English Windows wrapper incident reports for the 0.6.35 /
-  0.6.37 sequence, covering the usage-only regression, empty-output partial
+  0.6.38 sequence, covering the usage-only regression, empty-output partial
   success risk, Korean mojibake, Homebrew installed docs layout finding, and
   Scoop batch self-replacement failure.
 - Linked the incident report from the docs indexes, product-shape pages, GUIDE,
