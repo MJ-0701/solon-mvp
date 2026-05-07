@@ -3,6 +3,7 @@ setlocal
 
 set "BASH_EXE="
 set "SCRIPT_DIR=%~dp0"
+set "SFS_ORIGINAL_ARGS=%*"
 
 call :maybe_self_upgrade %*
 if defined SFS_SELF_UPGRADE_DONE exit /b %ERRORLEVEL%
@@ -111,7 +112,6 @@ exit /b %ERRORLEVEL%
 
 :maybe_native_readonly
 set "SFS_NATIVE_READONLY_DONE="
-set "SFS_NATIVE_ARGS=%*"
 set "SFS_NATIVE_CMD=%~1"
 set "SFS_NATIVE_OPT=%~2"
 if /I "%SFS_NATIVE_CMD%"=="/sfs" (
@@ -171,7 +171,7 @@ if not exist "%SCRIPT_DIR%sfs.ps1" (
 )
 set "SFS_OLD_NATIVE_ONLY=%SFS_NATIVE_ONLY%"
 set "SFS_NATIVE_ONLY=1"
-"%SFS_NATIVE_POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%sfs.ps1" %SFS_NATIVE_ARGS%
+"%SFS_NATIVE_POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%sfs.ps1" %SFS_ORIGINAL_ARGS%
 set "SFS_NATIVE_RC=%ERRORLEVEL%"
 if defined SFS_OLD_NATIVE_ONLY (
   set "SFS_NATIVE_ONLY=%SFS_OLD_NATIVE_ONLY%"

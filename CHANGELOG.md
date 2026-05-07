@@ -1,3 +1,26 @@
+## [0.6.32] - 2026-05-07
+
+> **Windows CMD top-level argument forwarding hotfix.** The 0.6.31 fix still
+> captured arguments inside the `:maybe_native_readonly` batch subroutine.
+> Windows CMD can route into the PowerShell native read-only branch while leaving
+> that subroutine `%*` expansion empty, so `sfs.ps1` received no arguments and
+> printed generic usage for `sfs.cmd status` / `sfs.cmd version --check`.
+
+### Fixed
+
+- `bin/sfs.cmd` now captures the original command arguments at top-level before
+  any `call :label` subroutine dispatch.
+- Native read-only dispatch now forwards the top-level captured argument string
+  to PowerShell, while self-upgrade reload and the final Git Bash fallback keep
+  the pre-0.6 raw `%*` forwarding behavior.
+- The Windows fallback guard now asserts top-level argument capture and
+  PowerShell forwarding through `SFS_ORIGINAL_ARGS`.
+
+### Verified
+
+- Re-ran the Windows adapter fallback, agent guardrail, docs routing, and full
+  `tests/run-all.sh` suite before release.
+
 ## [0.6.31] - 2026-05-07
 
 > **Windows native read-only argument forwarding hotfix.** The 0.6.30 Windows

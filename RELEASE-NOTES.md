@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.32
+
+이번 버전은 0.6.31 에서도 남아 있던 Windows CMD 인자 전달 문제를 다시 고칩니다.
+
+- `sfs.cmd` 가 원본 인자를 batch subroutine 안이 아니라 파일 최상단에서 먼저 캡처합니다.
+- `sfs.cmd status`, `sfs.cmd version --check`, `sfs.cmd context cat ...` 이
+  PowerShell native 경로로 넘어갈 때 같은 원본 인자를 사용합니다.
+- 0.5.96 시절처럼 ordinary Git Bash command forwarding 은 기존 `%*` 전달 방식을 유지합니다.
+
 ## 0.6.31
 
 이번 버전은 0.6.30 의 Windows native read-only 경로에서 생긴 인자 전달 버그를 고칩니다.
