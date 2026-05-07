@@ -7,6 +7,18 @@
 
 ---
 
+## 0.6.38
+
+이번 버전은 0.6.37 Windows Scoop self-upgrade 수정은 그대로 유지하면서, Homebrew 설치본에서 새
+incident-report 문서 테스트가 `CHANGELOG.md` / `RELEASE-NOTES.md` 위치를 잘못 보는 문제를 고칩니다.
+
+- Homebrew 설치본에서는 런타임 테스트가 `libexec/tests` 에서 실행되고, 상위 문서는 Cellar 버전
+  루트에 있습니다.
+- `test-windows-wrapper-incident-report.sh` 가 source layout 과 Homebrew installed layout 둘 다
+  이해하도록 고쳤습니다.
+- Windows 사용자는 0.6.37 에 들어간 `sfs.cmd upgrade` self-replacement 방지 수정을 그대로
+  받습니다.
+
 ## 0.6.37
 
 이번 버전은 Windows Scoop 설치본에서 `sfs.cmd upgrade` 가 자기 자신을 교체하는 batch 파일 안에서

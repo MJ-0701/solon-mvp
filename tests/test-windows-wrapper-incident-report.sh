@@ -21,6 +21,15 @@ assert_contains() {
 
 ko_report="${DIST_DIR}/docs/ko/windows-wrapper-incident-0.6.37.md"
 en_report="${DIST_DIR}/docs/en/windows-wrapper-incident-0.6.37.md"
+changelog="${DIST_DIR}/CHANGELOG.md"
+release_notes="${DIST_DIR}/RELEASE-NOTES.md"
+
+if [[ ! -f "${changelog}" && -f "${DIST_DIR}/../CHANGELOG.md" ]]; then
+  changelog="${DIST_DIR}/../CHANGELOG.md"
+fi
+if [[ ! -f "${release_notes}" && -f "${DIST_DIR}/../RELEASE-NOTES.md" ]]; then
+  release_notes="${DIST_DIR}/../RELEASE-NOTES.md"
+fi
 
 assert_contains "${ko_report}" "fatal error - couldn't create signal pipe, Win32 error 5" "KO report Win32 error"
 assert_contains "${ko_report}" "sfs.cmd -> sfs.ps1 -> Bash runtime" "KO report fixed bridge"
@@ -48,7 +57,7 @@ assert_contains "${DIST_DIR}/docs/ko/current-product-shape.md" "Windows 래퍼 �
 assert_contains "${DIST_DIR}/docs/en/current-product-shape.md" "Windows Wrapper Stabilization" "EN product shape wrapper section"
 assert_contains "${DIST_DIR}/GUIDE.md" "Windows SFS 래퍼 장애 요약 보고서" "GUIDE report link"
 assert_contains "${DIST_DIR}/docs/en/guide.md" "Windows SFS wrapper incident report" "EN guide report link"
-assert_contains "${DIST_DIR}/RELEASE-NOTES.md" "Windows SFS 래퍼 장애 요약 보고서" "release notes report link"
-assert_contains "${DIST_DIR}/CHANGELOG.md" "Windows wrapper incident reports" "CHANGELOG report entry"
+assert_contains "${release_notes}" "Windows SFS 래퍼 장애 요약 보고서" "release notes report link"
+assert_contains "${changelog}" "Windows wrapper incident reports" "CHANGELOG report entry"
 
 echo "test-windows-wrapper-incident-report: OK"

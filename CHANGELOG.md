@@ -1,3 +1,22 @@
+## [0.6.38] - 2026-05-08
+
+> **Installed incident-report test layout hotfix.** The 0.6.37 Windows Scoop
+> runtime fix is unchanged, but the new incident-report documentation test
+> assumed `CHANGELOG.md` and `RELEASE-NOTES.md` lived under `libexec/` in
+> installed Homebrew packages.
+
+### Fixed
+
+- `tests/test-windows-wrapper-incident-report.sh` now resolves `CHANGELOG.md`
+  and `RELEASE-NOTES.md` from the source/runtime root first, then falls back to
+  the Homebrew Cellar version root (`../CHANGELOG.md`, `../RELEASE-NOTES.md`)
+  when running from `libexec/tests`.
+
+### Verified
+
+- Re-ran the focused installed Homebrew incident-report/docs/Windows tests
+  before cutting the follow-up release.
+
 ## [0.6.37] - 2026-05-08
 
 > **Windows Scoop self-upgrade hotfix.** A real Windows 0.6.36 `sfs.cmd upgrade`

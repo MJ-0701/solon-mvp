@@ -39,7 +39,7 @@ depth options for the shape of the work.
 
 ## Windows Wrapper Stabilization
 
-The Windows PowerShell/cmd entrypoint is `sfs.cmd`. As of 0.6.37, the wrapper
+The Windows PowerShell/cmd entrypoint is `sfs.cmd`. As of 0.6.38, the wrapper
 handles read-only commands through native PowerShell first, then sends mutating
 commands such as `start` through the `sfs.cmd -> sfs.ps1 -> Bash runtime` bridge.
 The raw Git Bash `%*` path is no longer the default for mutating commands because
@@ -218,7 +218,7 @@ product design system exists, it wins.
 
 ## Division Knowledge Packs
 
-As of 0.6.37, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
+As of 0.6.38, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
 management/admin, and taxonomy packs are no longer placeholders. Each pack gives
 Solon a compact sense of what to watch, what to ask, and what evidence should
 count for that kind of work.
