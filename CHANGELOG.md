@@ -1,3 +1,25 @@
+## [0.6.36] - 2026-05-08
+
+> **Installed docs test layout hotfix.** The 0.6.35 Windows wrapper fix shipped
+> correctly, but the installed Homebrew runtime exposed that
+> `test-docs-model-routing.sh` still assumed `CHANGELOG.md` lived under
+> `libexec/`. Homebrew keeps `CHANGELOG.md` at the Cellar version root.
+
+### Fixed
+
+- `tests/test-docs-model-routing.sh` now resolves `CHANGELOG.md` from the
+  source/runtime root first, then falls back to the Homebrew Cellar version root
+  (`../CHANGELOG.md`) when running from `libexec/tests`.
+- The same release-notes path resolution now supports source and installed
+  layouts consistently.
+- User-facing docs are refreshed to `0.6.36` while keeping the 0.6.35 Windows
+  wrapper behavior note.
+
+### Verified
+
+- Re-ran focused docs and Windows wrapper tests before cutting the follow-up
+  release.
+
 ## [0.6.35] - 2026-05-07
 
 > **Windows wrapper bridge hotfix.** A Windows Scoop install could still show

@@ -40,9 +40,17 @@ docs=(
   "${DIST_DIR}/docs/en/current-product-shape.md"
   "${DIST_DIR}/docs/en/guide.md"
 )
+changelog="${DIST_DIR}/CHANGELOG.md"
+release_notes="${DIST_DIR}/RELEASE-NOTES.md"
 
 if [[ ! -f "${docs[0]}" && -f "${DIST_DIR}/../README.md" ]]; then
   docs[0]="${DIST_DIR}/../README.md"
+fi
+if [[ ! -f "${changelog}" && -f "${DIST_DIR}/../CHANGELOG.md" ]]; then
+  changelog="${DIST_DIR}/../CHANGELOG.md"
+fi
+if [[ ! -f "${release_notes}" && -f "${DIST_DIR}/../RELEASE-NOTES.md" ]]; then
+  release_notes="${DIST_DIR}/../RELEASE-NOTES.md"
 fi
 
 for file in "${docs[@]}"; do
@@ -80,11 +88,11 @@ assert_contains "${DIST_DIR}/docs/en/current-product-shape.md" "advisor review i
 assert_contains "${DIST_DIR}/docs/en/current-product-shape.md" "record cross review evidence" "EN product shape parallel cross review"
 assert_contains "${DIST_DIR}/docs/en/guide.md" '`gpt-5.3-codex-spark` is helper-only' "EN guide spark helper boundary"
 assert_contains "${DIST_DIR}/docs/en/guide.md" "Implementation starts in Single Agent mode" "EN guide single default"
-assert_contains "${DIST_DIR}/CHANGELOG.md" "Advisor calls no longer substitute for self-CPO" "CHANGELOG self CPO"
-assert_contains "${DIST_DIR}/CHANGELOG.md" "gemini-3.1-pro-preview" "CHANGELOG gemini 3.1 pro"
-assert_contains "${DIST_DIR}/CHANGELOG.md" "2.5 fallback names are" "CHANGELOG no gemini 2.5 fallback"
-assert_contains "${DIST_DIR}/RELEASE-NOTES.md" "advisor 호출은 self-CPO PASS 를 대체하지 않습니다" "release notes self CPO"
-assert_contains "${DIST_DIR}/RELEASE-NOTES.md" "gemini-3.1-pro-preview" "release notes gemini 3.1 pro"
-assert_contains "${DIST_DIR}/RELEASE-NOTES.md" "2.5 fallback 은 쓰지 않습니다" "release notes no gemini 2.5 fallback"
+assert_contains "${changelog}" "Advisor calls no longer substitute for self-CPO" "CHANGELOG self CPO"
+assert_contains "${changelog}" "gemini-3.1-pro-preview" "CHANGELOG gemini 3.1 pro"
+assert_contains "${changelog}" "2.5 fallback names are" "CHANGELOG no gemini 2.5 fallback"
+assert_contains "${release_notes}" "advisor 호출은 self-CPO PASS 를 대체하지 않습니다" "release notes self CPO"
+assert_contains "${release_notes}" "gemini-3.1-pro-preview" "release notes gemini 3.1 pro"
+assert_contains "${release_notes}" "2.5 fallback 은 쓰지 않습니다" "release notes no gemini 2.5 fallback"
 
 echo "test-docs-model-routing: OK"

@@ -202,7 +202,7 @@ product design system exists, it wins.
 
 ## Division Knowledge Packs
 
-As of 0.6.35, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
+As of 0.6.36, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
 management/admin, and taxonomy packs are no longer placeholders. Each pack gives
 Solon a compact sense of what to watch, what to ask, and what evidence should
 count for that kind of work.

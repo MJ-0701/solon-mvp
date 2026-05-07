@@ -7,6 +7,17 @@
 
 ---
 
+## 0.6.36
+
+이번 버전은 0.6.35 Windows 래퍼 수정 자체는 유지하면서, Homebrew 설치본의 문서 검증 테스트가
+`CHANGELOG.md` 위치를 잘못 보는 문제를 고칩니다.
+
+- Homebrew 설치본에서는 `CHANGELOG.md` 가 `libexec` 안이 아니라 Cellar 버전 루트에 있습니다.
+- `test-docs-model-routing.sh` 가 source layout 과 Homebrew installed layout 둘 다 이해하도록
+  고쳤습니다.
+- Windows 사용자는 0.6.35 에 들어간 `sfs.cmd -> sfs.ps1 -> Bash runtime` bridge 수정을 그대로
+  받습니다.
+
 ## 0.6.35
 
 이번 버전은 Windows Scoop 설치본에서 `sfs.cmd` 가 다시 usage 만 출력하거나,
