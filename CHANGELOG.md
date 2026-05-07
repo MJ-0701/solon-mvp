@@ -1,3 +1,20 @@
+## [0.6.28] - 2026-05-07
+
+> **Installed native-language test layout hotfix.** Homebrew keeps `README.md`
+> at the Cellar root while runtime tests execute from `libexec`, so the new
+> native-language commit message guard test needed the same installed-layout
+> fallback as the model-routing docs test.
+
+### Fixed
+
+- `tests/test-native-language-commit-messages.sh` now resolves `README.md` from
+  the source root or the Homebrew Cellar root fallback.
+
+### Verified
+
+- Re-ran the native-language commit message test in source and installed
+  Homebrew layout.
+
 ## [0.6.27] - 2026-05-07
 
 > **Native-language commit messages.** SFS now tells agents to write commit

@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.28
+
+이번 버전은 0.6.27 에 추가한 native 언어 커밋 메시지 테스트가 Homebrew 설치본에서도 그대로
+통과하도록 고친 핫픽스입니다.
+
+- Homebrew 설치본은 `README.md` 를 Cellar 루트에 두고 runtime 테스트는 `libexec` 아래에서 실행합니다.
+- native 언어 커밋 메시지 테스트가 source layout 과 installed Homebrew layout 둘 다 이해하도록 수정했습니다.
+- 사용자-facing 규칙은 0.6.27 과 같습니다. 커밋 메시지는 사용자의 native/workspace 언어가 기본입니다.
+
 ## 0.6.27
 
 이번 버전은 agent 가 커밋 메시지를 사용자의 native 언어 또는 workspace 언어로 쓰도록 기본 규칙을

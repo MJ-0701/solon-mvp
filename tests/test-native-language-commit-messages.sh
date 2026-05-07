@@ -41,6 +41,10 @@ UPGRADE="${DIST_DIR}/upgrade.sh"
 UNINSTALL="${DIST_DIR}/uninstall.sh"
 IMPLEMENT_SCRIPT="${DIST_DIR}/templates/.sfs-local-template/scripts/sfs-implement.sh"
 
+if [[ ! -f "${README}" && -f "${DIST_DIR}/../README.md" ]]; then
+  README="${DIST_DIR}/../README.md"
+fi
+
 assert_contains "${IMPLEMENT}" "Commit messages default to the user's native/workspace language" "implement native language"
 assert_contains "${REVIEW}" "Review proposed or actual commit messages against the user's" "review native language"
 assert_contains "${README}" "커밋 메시지는 기본적으로 사용자의 native 언어" "README native language"
