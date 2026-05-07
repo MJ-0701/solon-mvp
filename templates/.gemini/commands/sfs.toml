@@ -1,4 +1,4 @@
-description = "Solon SFS command router for `sfs <command>`: run the platform adapter first (`sfs` on macOS/Linux/Git Bash/WSL, `sfs.cmd` on Windows PowerShell/cmd), then resolve routed context with `sfs context path ...` or `sfs.cmd context path ...`."
+description = "Solon SFS command router for `sfs <command>`: run the platform adapter first (`sfs` on macOS/Linux/Git Bash/WSL, `sfs.cmd` on Windows PowerShell/cmd), then read routed context with `sfs context cat ...` or native Windows `sfs.cmd context cat ...`."
 
 prompt = """
 The user invoked Gemini CLI command `sfs {{args}}`.
@@ -11,13 +11,17 @@ The user invoked Gemini CLI command `sfs {{args}}`.
    `couldn't create signal pipe, Win32 error 5`, rerun the same command via
    `sfs.cmd ...` outside the sandbox. If that run is empty or fails, report the
    exact stdout/stderr and ask for `sfs.cmd --help`.
+   For read-only fallback on Windows, `sfs.cmd status`, `sfs.cmd version`, and `sfs.cmd context path/cat`
+   are native read-only and must not start Git Bash. If a Codex/Claude/Gemini
+   runner cannot launch Git Bash, use those native read-only commands for
+   context/status and tell the user to run mutating commands in PowerShell/cmd.
 4. Empty adapter output is not success for visible SFS commands. `start`,
    `brainstorm`, `plan`, `implement`, `review`, `retro`, `adopt`, `profile`,
    `upgrade`, and `agent install` must print output or change their expected
    artifact. For `start`, verify `.sfs-local/current-sprint` and the sprint
    directory exist before reporting success.
 5. Print adapter stdout verbatim; on failure include stderr and exit code.
-6. Read `sfs context path kernel`, `sfs context path index`, then only the routed module via `sfs context path ...` or `sfs.cmd context path ...` on Windows PowerShell/cmd.
+6. Read `sfs context cat kernel`, `sfs context cat index`, then only the routed module via `sfs context cat ...` or native Windows `sfs.cmd context cat ...`.
 7. For bash-first commands, do not refine artifacts, but a compact state/Next is allowed.
 8. For `profile`, edit only the `SFS.md` project overview section.
 9. For hybrid commands, refine pointed artifacts and answer with one Solon report.

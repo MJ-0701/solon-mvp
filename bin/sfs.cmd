@@ -147,11 +147,37 @@ if /I "%SFS_NATIVE_CMD%"=="-h" (
   exit /b 0
 )
 if /I "%SFS_NATIVE_CMD%"=="guide" goto native_guide_dispatch
+if /I "%SFS_NATIVE_CMD%"=="status" goto native_powershell_readonly_dispatch
+if /I "%SFS_NATIVE_CMD%"=="context" goto native_powershell_readonly_dispatch
+if /I "%SFS_NATIVE_CMD%"=="version" goto native_powershell_readonly_dispatch
+if /I "%SFS_NATIVE_CMD%"=="--version" goto native_powershell_readonly_dispatch
+if /I "%SFS_NATIVE_CMD%"=="-v" goto native_powershell_readonly_dispatch
 exit /b 0
 
 :native_guide_dispatch
 call :native_guide "%SFS_NATIVE_OPT%"
 set "SFS_NATIVE_RC=%ERRORLEVEL%"
+set "SFS_NATIVE_READONLY_DONE=1"
+exit /b %SFS_NATIVE_RC%
+
+:native_powershell_readonly_dispatch
+set "SFS_NATIVE_POWERSHELL=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
+if not exist "%SFS_NATIVE_POWERSHELL%" set "SFS_NATIVE_POWERSHELL=powershell.exe"
+if not exist "%SCRIPT_DIR%sfs.ps1" (
+  echo missing packaged SFS PowerShell entrypoint: %SCRIPT_DIR%sfs.ps1 1>&2
+  set "SFS_NATIVE_READONLY_DONE=1"
+  exit /b 4
+)
+set "SFS_OLD_NATIVE_ONLY=%SFS_NATIVE_ONLY%"
+set "SFS_NATIVE_ONLY=1"
+"%SFS_NATIVE_POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%sfs.ps1" %*
+set "SFS_NATIVE_RC=%ERRORLEVEL%"
+if defined SFS_OLD_NATIVE_ONLY (
+  set "SFS_NATIVE_ONLY=%SFS_OLD_NATIVE_ONLY%"
+) else (
+  set "SFS_NATIVE_ONLY="
+)
+set "SFS_OLD_NATIVE_ONLY="
 set "SFS_NATIVE_READONLY_DONE=1"
 exit /b %SFS_NATIVE_RC%
 
@@ -167,6 +193,7 @@ echo   sfs.cmd update [--skip-existing]
 echo   sfs.cmd uninstall [--keep-artifacts^|--remove-all] [--remove-docs^|--keep-docs]
 echo   sfs.cmd agent install ^<claude^|gemini^|codex^|all^> [--skip-existing]
 echo   sfs.cmd context path ^<kernel^|index^|commands/name.md^|policies/name.md^>
+echo   sfs.cmd context cat  ^<kernel^|index^|commands/name.md^|policies/name.md^>
 echo   sfs.cmd ^<command^> [args]
 echo.
 echo Commands:
@@ -178,6 +205,8 @@ echo   measure --alive -- ^<command^>
 echo.
 echo Windows note:
 echo   PowerShell/cmd users should prefer sfs.cmd. Git Bash/WSL users can use sfs.
+echo   sfs.cmd status, version, guide, and context path/cat are native read-only.
+echo   Mutating commands still require Git for Windows/Git Bash.
 exit /b 0
 
 :native_guide

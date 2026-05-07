@@ -11,13 +11,18 @@ Arguments: `$ARGUMENTS`
    `couldn't create signal pipe, Win32 error 5`, rerun the same command via
    `sfs.cmd ...` outside the sandbox. If that run is empty or fails, report the
    exact stdout/stderr and ask for `sfs.cmd --help`.
+   For read-only fallback on Windows, `sfs.cmd status`, `sfs.cmd version`, and `sfs.cmd context path/cat`
+   are native read-only and must not start Git Bash. If a Codex/Claude/Gemini
+   runner cannot launch Git Bash, use those native read-only commands for
+   context/status and tell the user to run mutating commands in PowerShell/cmd.
 3. Empty adapter output is not success for visible SFS commands. `start`,
    `brainstorm`, `plan`, `implement`, `review`, `retro`, `adopt`, `profile`,
    `upgrade`, and `agent install` must print output or change their expected
    artifact. For `start`, verify `.sfs-local/current-sprint` and the sprint
    directory exist before reporting success.
 4. Print adapter stdout/stderr verbatim.
-5. Read `.sfs-local/context/kernel.md`, `_INDEX.md`, then only the routed module.
+5. Read `sfs context cat kernel`, `sfs context cat index`, then only the routed
+   module. On Windows PowerShell/cmd use native `sfs.cmd context cat ...`.
 6. For hybrid commands, refine pointed artifacts and answer with one Solon report.
 7. AI-era fundamentals apply across all gates, not only implement: shared design
    concept, domain language, feedback loop, interface/artifact boundary, and

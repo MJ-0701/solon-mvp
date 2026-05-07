@@ -1,6 +1,6 @@
 ---
 name: sfs
-description: Priority-1 Solon SFS command router. When `/sfs` or Solon work is in scope, run the deterministic platform adapter first (`sfs` on macOS/Linux/Git Bash/WSL, `sfs.cmd` on Windows PowerShell/cmd), then resolve routed context with `sfs context path ...` or `sfs.cmd context path ...`.
+description: Priority-1 Solon SFS command router. When `/sfs` or Solon work is in scope, run the deterministic platform adapter first (`sfs` on macOS/Linux/Git Bash/WSL, `sfs.cmd` on Windows PowerShell/cmd), then read routed context with `sfs context cat ...` or native Windows `sfs.cmd context cat ...`.
 argument-hint: "<command> [args]"
 allowed-tools: Bash, Read, Write, Edit, Grep, Glob
 ---
@@ -25,13 +25,17 @@ $ARGUMENTS
    `couldn't create signal pipe, Win32 error 5`, rerun the same command via
    `sfs.cmd ...` outside the sandbox. If that run is empty or fails, report the
    exact stdout/stderr and ask for `sfs.cmd --help`.
+   For read-only fallback on Windows, `sfs.cmd status`, `sfs.cmd version`, and `sfs.cmd context path/cat`
+   are native read-only and must not start Git Bash. If a Codex/Claude/Gemini
+   runner cannot launch Git Bash, use those native read-only commands for
+   context/status and tell the user to run mutating commands in PowerShell/cmd.
 5. Empty adapter output is not success for visible SFS commands. `start`,
    `brainstorm`, `plan`, `implement`, `review`, `retro`, `adopt`, `profile`,
    `upgrade`, and `agent install` must print output or change their expected
    artifact. For `start`, verify `.sfs-local/current-sprint` and the sprint
    directory exist before reporting success.
 6. Print stdout verbatim; on failure include stderr and exit code.
-7. Read `sfs context path kernel`, `sfs context path index`, then only the routed module. On Windows PowerShell/cmd use `sfs.cmd context path ...`. Resolve command modules as `sfs context path commands/<command>.md` (for example, `commands/start.md`) or via the command alias (`sfs context path start`).
+7. Read `sfs context cat kernel`, `sfs context cat index`, then only the routed module. On Windows PowerShell/cmd use native `sfs.cmd context cat ...` so Git Bash is not started. Resolve command modules as `sfs context cat commands/<command>.md` (for example, `commands/start.md`) or via the command alias (`sfs context cat start`).
 8. For bash-first commands, do not refine artifacts, but a compact state/Next is allowed.
 9. For `profile`, edit only the `SFS.md` project overview section.
 10. For hybrid commands, refine pointed artifacts and answer with one Solon report.

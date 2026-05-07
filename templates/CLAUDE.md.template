@@ -5,10 +5,10 @@ macOS/Linux/Git Bash/WSL and `sfs.cmd` on Windows PowerShell/cmd.
 
 Read order:
 1. `SFS.md`
-2. `sfs context path kernel` (`sfs.cmd context path kernel` on Windows PowerShell/cmd)
-3. `sfs context path index` (`sfs.cmd context path index` on Windows PowerShell/cmd)
-4. Only the routed context module for the current command via `sfs context path ...`
-   or `sfs.cmd context path ...`.
+2. `sfs context cat kernel` (`sfs.cmd context cat kernel` on Windows PowerShell/cmd)
+3. `sfs context cat index` (`sfs.cmd context cat index` on Windows PowerShell/cmd)
+4. Only the routed context module for the current command via `sfs context cat ...`
+   or native Windows `sfs.cmd context cat ...`.
 
 Rules:
 - Run the platform adapter first: `sfs <command>` on macOS/Linux/Git Bash/WSL,
@@ -18,6 +18,10 @@ Rules:
   `couldn't create signal pipe, Win32 error 5`, rerun the same command via
   `sfs.cmd ...` outside the sandbox. If that run is empty or fails, report the
   exact stdout/stderr and ask for `sfs.cmd --help`.
+- On Windows, `sfs.cmd status`, `sfs.cmd version`, and `sfs.cmd context path/cat`
+  are native read-only and must not start Git Bash. If a Codex/Claude/Gemini
+  runner cannot launch Git Bash, use those native read-only commands for
+  context/status and tell the user to run mutating commands in PowerShell/cmd.
 - Empty adapter output is not success for visible SFS commands. `start`,
   `brainstorm`, `plan`, `implement`, `review`, `retro`, `adopt`, `profile`,
   `upgrade`, and `agent install` must print output or change their expected

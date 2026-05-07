@@ -7,6 +7,19 @@
 
 ---
 
+## 0.6.30
+
+이번 버전은 Windows Codex 앱 또는 Git Bash 안에서 실행한 Codex 가 SFS 읽기 명령까지
+Git Bash 로 들어가며 멈추던 문제를 한 번 더 막는 핫픽스입니다.
+
+- `sfs.cmd status`, `sfs.cmd version`, `sfs.cmd context path ...`,
+  `sfs.cmd context cat ...` 는 이제 Git Bash 없이 Windows native 로 동작합니다.
+- Codex/Claude/Gemini adapter 는 Windows 에서 routed context 를 읽을 때
+  `sfs.cmd context cat ...` 를 우선 사용하도록 안내합니다.
+- agent runner 가 Git Bash 를 못 띄우면 읽기 명령은 native fallback 으로 처리하고,
+  `start` 같은 상태 변경 명령은 사용자가 PowerShell/cmd 에서 직접 실행하도록 안내합니다.
+- Windows 가이드에 Codex 앱/Git Bash sandbox 실패 대응 절차를 보강했습니다.
+
 ## 0.6.29
 
 이번 버전은 Windows 에서 Claude, Gemini, Codex 의 SFS 명령이 Git Bash 시작 전에

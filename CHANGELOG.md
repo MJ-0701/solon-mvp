@@ -1,3 +1,29 @@
+## [0.6.30] - 2026-05-07
+
+> **Windows Codex app native read-only hotfix.** Windows PowerShell could run
+> SFS successfully, but Codex launched from Git Bash or the Windows Codex app
+> could still fail when adapter recovery tried `sfs.cmd status` or
+> `sfs.cmd context path ...`: those commands still entered Git Bash after the
+> wrapper layer.
+
+### Fixed
+
+- `bin/sfs.cmd` now routes `status`, `version`, and `context path/cat` through
+  the packaged PowerShell entrypoint before probing Git Bash.
+- `bin/sfs.ps1` now has native read-only implementations for `status`,
+  `version`, and `context path/cat`, so Windows agents can read SFS state and
+  routed context without starting Git Bash.
+- Claude, Gemini, and Codex adapters now prefer `sfs.cmd context cat ...` for
+  Windows read-only context loading and explicitly tell users to run mutating
+  commands in PowerShell/cmd when the agent runner cannot launch Git Bash.
+- Beginner and main guides now document the Windows native read-only fallback
+  for Codex/Claude/Gemini sandbox failures.
+
+### Verified
+
+- Expanded `tests/test-windows-agent-adapter-fallback.sh` to lock the native
+  `status`/`version`/`context` wrapper contract and adapter guidance.
+
 ## [0.6.29] - 2026-05-07
 
 > **Windows agent command hotfix.** Windows Claude, Gemini, and Codex adapter
