@@ -20,9 +20,10 @@
   `SFS_ARGTRACE_PS_FINAL_ARGS=.*version` before accepting `sfs.cmd version`.
 - Guardrail tests and the release verifier now fail if the broken `$Args`
   predicate or `--% %SFS_NATIVE_RAW_ARGS%` dispatch returns.
-- `sfs.cmd upgrade` now imports `Microsoft.PowerShell.Utility` and verifies
-  `Get-FileHash` before calling Scoop self-upgrade, matching the Windows runner
-  path where `scoop update sfs` needs that cmdlet to validate the downloaded zip.
+- `sfs.cmd upgrade` now restores WindowsPowerShell module paths, imports
+  `Microsoft.PowerShell.Utility`, and installs a scoped `Get-FileHash` fallback
+  before calling Scoop self-upgrade, matching the Windows runner path where
+  `scoop update sfs` needs that cmdlet to validate the downloaded zip.
 
 ## [0.6.55] - 2026-05-08
 

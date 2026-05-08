@@ -322,11 +322,90 @@ function Test-ScoopRuntime([string] $ScriptPath) {
   return ($ScriptPath -match "\\scoop\\apps\\sfs\\")
 }
 
+function Add-SfsPowerShellModulePath([string] $ModuleRoot) {
+  if (-not $ModuleRoot) { return }
+  if (-not (Test-Path -LiteralPath $ModuleRoot -PathType Container)) { return }
+
+  $separator = [System.IO.Path]::PathSeparator
+  $items = @()
+  if ($env:PSModulePath) {
+    $items = @($env:PSModulePath -split [regex]::Escape([string] $separator) | Where-Object { $_ })
+  }
+  foreach ($item in $items) {
+    if ($item -ieq $ModuleRoot) { return }
+  }
+  $env:PSModulePath = (($items + @($ModuleRoot)) -join [string] $separator)
+}
+
+function Install-SfsGetFileHashFallback {
+  if (Get-Command Get-FileHash -ErrorAction SilentlyContinue) { return }
+
+  function global:Get-FileHash {
+    [CmdletBinding(DefaultParameterSetName = "Path")]
+    param(
+      [Parameter(ParameterSetName = "Path", Position = 0, Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+      [string[]] $Path,
+
+      [Parameter(ParameterSetName = "LiteralPath", Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+      [Alias("PSPath")]
+      [string[]] $LiteralPath,
+
+      [ValidateSet("SHA1", "SHA256", "SHA384", "SHA512", "MD5")]
+      [string] $Algorithm = "SHA256"
+    )
+
+    process {
+      $algorithmName = $Algorithm.ToUpperInvariant()
+      if ($PSCmdlet.ParameterSetName -eq "LiteralPath") {
+        $inputPaths = $LiteralPath
+      } else {
+        $inputPaths = $Path
+      }
+
+      foreach ($item in $inputPaths) {
+        $resolvedPaths = @()
+        if ($PSCmdlet.ParameterSetName -eq "LiteralPath") {
+          $resolvedPaths += @($ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($item))
+        } else {
+          foreach ($resolved in @(Resolve-Path -Path $item)) {
+            $resolvedPaths += @($resolved.ProviderPath)
+          }
+        }
+
+        foreach ($resolvedPath in $resolvedPaths) {
+          if (-not (Test-Path -LiteralPath $resolvedPath -PathType Leaf)) {
+            throw "Cannot find path '$resolvedPath' because it does not exist or is not a file."
+          }
+          $stream = [System.IO.File]::OpenRead($resolvedPath)
+          $hashAlgorithm = $null
+          try {
+            $hashAlgorithm = [System.Security.Cryptography.HashAlgorithm]::Create($algorithmName)
+            if (-not $hashAlgorithm) { throw "Unsupported hash algorithm: $Algorithm" }
+            $hashBytes = $hashAlgorithm.ComputeHash($stream)
+            [pscustomobject] @{
+              Algorithm = $algorithmName
+              Hash = ([System.BitConverter]::ToString($hashBytes) -replace "-", "")
+              Path = $resolvedPath
+            }
+          } finally {
+            if ($hashAlgorithm) { $hashAlgorithm.Dispose() }
+            $stream.Dispose()
+          }
+        }
+      }
+    }
+  }
+}
+
 function Enable-SfsPowerShellUtility {
+  Add-SfsPowerShellModulePath (Join-Path $PSHOME "Modules")
+  Add-SfsPowerShellModulePath (Join-Path $env:ProgramFiles "WindowsPowerShell\Modules")
+  Add-SfsPowerShellModulePath (Join-Path $HOME "Documents\WindowsPowerShell\Modules")
   try {
     Import-Module Microsoft.PowerShell.Utility -ErrorAction SilentlyContinue
   } catch {
   }
+  Install-SfsGetFileHashFallback
   if (-not (Get-Command Get-FileHash -ErrorAction SilentlyContinue)) {
     Write-Error "Get-FileHash is unavailable in this PowerShell session; Scoop self-upgrade cannot verify downloads."
     exit 1
