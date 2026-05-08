@@ -28,8 +28,8 @@
   `SFS_ARGTRACE_PS_FINAL_ARGS=.*version` 을 확인한 뒤에야 `sfs.cmd version` 을 통과시킵니다.
 - `sfs.cmd upgrade` 는 Scoop self-upgrade 전에 WindowsPowerShell module path 를 복원하고
   `Microsoft.PowerShell.Utility` 를 명시 로드하며, 그래도 없으면 현재 Scoop runspace 에
-  `Get-FileHash` fallback 을 주입합니다. GitHub Windows runner 에서 Scoop 이 zip hash 를
-  확인할 때 이 cmdlet 이 필요했습니다.
+  path/stream hashing 을 지원하는 `Get-FileHash` fallback 을 주입합니다. GitHub Windows
+  runner 에서 Scoop 이 zip hash 를 확인할 때 이 cmdlet 이 필요했습니다.
 - `SFS_WINDOWS_ARG_TRACE=1` 진단 모드도 추가되어, 다음 Windows runner 실패가 나면 batch `%*`,
   PowerShell `$args`, 최종 선택 source 를 로그에서 바로 볼 수 있습니다.
 - [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P23 으로 이

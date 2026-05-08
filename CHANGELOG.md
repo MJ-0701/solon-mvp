@@ -22,8 +22,9 @@
   predicate or `--% %SFS_NATIVE_RAW_ARGS%` dispatch returns.
 - `sfs.cmd upgrade` now restores WindowsPowerShell module paths, imports
   `Microsoft.PowerShell.Utility`, and installs a scoped `Get-FileHash` fallback
-  before calling Scoop self-upgrade, matching the Windows runner path where
-  `scoop update sfs` needs that cmdlet to validate the downloaded zip.
+  with path and stream hashing before calling Scoop self-upgrade, matching the
+  Windows runner path where `scoop update sfs` needs that cmdlet to validate
+  the downloaded zip.
 
 ## [0.6.55] - 2026-05-08
 

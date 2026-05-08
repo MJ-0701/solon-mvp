@@ -350,12 +350,32 @@ function Install-SfsGetFileHashFallback {
       [Alias("PSPath")]
       [string[]] $LiteralPath,
 
+      [Parameter(ParameterSetName = "InputStream", Mandatory = $true)]
+      [System.IO.Stream] $InputStream,
+
       [ValidateSet("SHA1", "SHA256", "SHA384", "SHA512", "MD5")]
       [string] $Algorithm = "SHA256"
     )
 
     process {
       $algorithmName = $Algorithm.ToUpperInvariant()
+      if ($PSCmdlet.ParameterSetName -eq "InputStream") {
+        $hashAlgorithm = $null
+        try {
+          $hashAlgorithm = [System.Security.Cryptography.HashAlgorithm]::Create($algorithmName)
+          if (-not $hashAlgorithm) { throw "Unsupported hash algorithm: $Algorithm" }
+          $hashBytes = $hashAlgorithm.ComputeHash($InputStream)
+          [pscustomobject] @{
+            Algorithm = $algorithmName
+            Hash = ([System.BitConverter]::ToString($hashBytes) -replace "-", "")
+            Path = ""
+          }
+        } finally {
+          if ($hashAlgorithm) { $hashAlgorithm.Dispose() }
+        }
+        return
+      }
+
       if ($PSCmdlet.ParameterSetName -eq "LiteralPath") {
         $inputPaths = $LiteralPath
       } else {

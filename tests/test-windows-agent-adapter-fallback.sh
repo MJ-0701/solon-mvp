@@ -154,6 +154,7 @@ assert_contains "${ps_wrapper}" "Enable-SfsPowerShellUtility" "ps1 prepares Powe
 assert_contains "${ps_wrapper}" "Add-SfsPowerShellModulePath" "ps1 restores WindowsPowerShell module paths before Scoop self-upgrade"
 assert_contains "${ps_wrapper}" "Install-SfsGetFileHashFallback" "ps1 installs a Get-FileHash fallback for Scoop self-upgrade"
 assert_contains "${ps_wrapper}" "function global:Get-FileHash" "ps1 fallback exposes Get-FileHash to Scoop scripts"
+assert_contains "${ps_wrapper}" "[System.IO.Stream] \$InputStream" "ps1 Get-FileHash fallback supports Scoop stream hashing"
 assert_contains "${ps_wrapper}" "Import-Module Microsoft.PowerShell.Utility" "ps1 imports Get-FileHash provider before Scoop self-upgrade"
 assert_contains "${ps_wrapper}" "Get-Command Get-FileHash" "ps1 verifies Get-FileHash exists before Scoop self-upgrade"
 assert_contains "${ps_wrapper}" "\$env:LC_CTYPE = \"C.UTF-8\"" "ps1 bash utf8 locale"
