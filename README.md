@@ -63,7 +63,7 @@ Solon 의 흐름은 명령어를 많이 외우게 만들지 않습니다. 아래
 개발, 터미널, CLI 환경이 낯설다면 먼저 [BEGINNER-GUIDE.md](./BEGINNER-GUIDE.md) 를
 보시면 됩니다. 처음 설치하는 분도 그대로 따라 할 수 있도록 더 천천히 설명해 두었습니다.
 
-> **0.6.54 기준**: `brew install` / `scoop install` 한 번으로 Claude Code (`/sfs`),
+> **0.6.56 기준**: `brew install` / `scoop install` 한 번으로 Claude Code (`/sfs`),
 > Gemini CLI (`sfs`), Codex CLI (`$sfs`) 가 모두 Solon 을 찾습니다.
 > 프로젝트 폴더에는 사용자가 읽고 고칠 문서와 작업 기록만 남도록 정리했습니다.
 
@@ -172,7 +172,7 @@ sfs start "첫 작업 목표"
 Solon 의 강점은 앱 generator 가 아니라, 그 다음부터의 의도 정리, 범위 결정, 실행 기록,
 검토, 회고를 프로젝트 안에 남기는 데 있습니다.
 
-0.6.54 기준으로는 backend, 전략/PM, QA, 디자인, 운영, 경영관리, taxonomy 같은 분야별 지식팩도
+0.6.56 기준으로는 backend, 전략/PM, QA, 디자인, 운영, 경영관리, taxonomy 같은 분야별 지식팩도
 실제 안내로 채워졌습니다. 재무, 경리, 세무, 회계처럼 solo founder 가 놓치기 쉬운 기준도
 필요할 때만 조용히 꺼내 plan 이나 review 에 반영합니다. 사용자가 모든 기준을 외우실 필요는
 없습니다.
@@ -291,7 +291,7 @@ Runtime 별 진입 명령은 아래처럼 구분합니다.
 | `docs/solon/` | 팀과 공유할 Solon 요약/인계 문서 |
 | `.claude/`, `.gemini/`, `.agents/` | 꼭 필요한 프로젝트에서만 추가로 설치하는 AI 도구별 바로가기 |
 
-0.6.54 기준 기본 설치는 가볍습니다. Solon 본체는 패키지 쪽에 두고, 프로젝트에는
+0.6.56 기준 기본 설치는 가볍습니다. Solon 본체는 패키지 쪽에 두고, 프로젝트에는
 공유 entry 문서와 private workbench 만 둡니다. AI 도구별 native 파일이 꼭 필요한 팀만
 `sfs agent install all` 로 추가 설치하시면 됩니다.
 

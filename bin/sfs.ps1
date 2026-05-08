@@ -14,6 +14,27 @@ function Expand-SfsArgItem([object] $Item) {
   return @([string] $Item)
 }
 
+function Convert-SfsArgTraceValue([object] $Value) {
+  if ($null -eq $Value) { return "<null>" }
+  if ($Value -is [System.Array]) {
+    $items = @()
+    foreach ($item in $Value) {
+      if ($null -eq $item) {
+        $items += "<null>"
+      } else {
+        $items += [string] $item
+      }
+    }
+    return "[" + ($items -join "|") + "]"
+  }
+  return [string] $Value
+}
+
+function Write-SfsArgTrace([string] $Label, [object] $Value) {
+  if (-not $env:SFS_WINDOWS_ARG_TRACE) { return }
+  [Console]::Error.WriteLine(("SFS_ARGTRACE_{0}={1}" -f $Label, (Convert-SfsArgTraceValue $Value)))
+}
+
 function Resolve-SfsArgs([object[]] $ParamArgs, [object[]] $AutomaticArgs, [object[]] $UnboundArgs) {
   $resolved = @()
   $source = @()
@@ -59,9 +80,9 @@ function Resolve-SfsRawArgs {
   return [string[]] (Split-SfsCommandLine $raw)
 }
 
-function Test-SfsUsableArgs([string[]] $Args) {
-  if (-not $Args -or $Args.Count -eq 0) { return $false }
-  foreach ($arg in $Args) {
+function Test-SfsUsableArgs([string[]] $Items) {
+  if (-not $Items -or $Items.Count -eq 0) { return $false }
+  foreach ($arg in $Items) {
     if ($null -ne $arg -and [string] $arg -ne "") { return $true }
   }
   return $false
@@ -177,8 +198,10 @@ function Resolve-SfsParentCmdLineArgs {
     if (-not $self -or -not $self.ParentProcessId) { return [string[]] @() }
     $parent = Get-CimInstance -ClassName Win32_Process -Filter "ProcessId = $($self.ParentProcessId)" -ErrorAction Stop
     if (-not $parent -or -not $parent.CommandLine) { return [string[]] @() }
+    Write-SfsArgTrace "PS_PARENT_CMDLINE" $parent.CommandLine
     return [string[]] (Resolve-SfsArgsFromCommandLine $parent.CommandLine)
   } catch {
+    Write-SfsArgTrace "PS_PARENT_CMDLINE_ERROR" $_.Exception.Message
     return [string[]] @()
   }
 }
@@ -202,26 +225,55 @@ function Enable-SfsUtf8Bridge {
 }
 
 $SfsEnvArgs = Resolve-SfsEnvArgs
+Write-SfsArgTrace "PS_AUTOMATIC_ARGS" $args
+Write-SfsArgTrace "PS_UNBOUND_ARGS" $MyInvocation.UnboundArguments
+Write-SfsArgTrace "PS_ENV_ARGC" ([Environment]::GetEnvironmentVariable("SFS_NATIVE_ARGC"))
+Write-SfsArgTrace "PS_ENV_RAW_ARGS" ([Environment]::GetEnvironmentVariable("SFS_NATIVE_RAW_ARGS"))
+Write-SfsArgTrace "PS_ENV_SAVED_CMDLINE" ([Environment]::GetEnvironmentVariable("SFS_NATIVE_CMDLINE"))
+Write-SfsArgTrace "PS_ENV_CMDCMDLINE" ([Environment]::GetEnvironmentVariable("CMDCMDLINE"))
+Write-SfsArgTrace "PS_ENV_ARGS" $SfsEnvArgs
+$SfsSelectedArgSource = "empty"
 $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsEnvArgs -AutomaticArgs $SfsParamArgs -UnboundArgs $args
+if (Test-SfsUsableArgs $SfsArgs) {
+  if (Test-SfsUsableArgs $SfsEnvArgs) {
+    $SfsSelectedArgSource = "env"
+  } elseif (Test-SfsUsableArgs $SfsParamArgs) {
+    $SfsSelectedArgSource = "param"
+  } else {
+    $SfsSelectedArgSource = "automatic"
+  }
+}
 if (-not (Test-SfsUsableArgs $SfsArgs)) {
   $SfsRawArgs = Resolve-SfsRawArgs
+  Write-SfsArgTrace "PS_RAW_ENV_ARGS" $SfsRawArgs
   $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsRawArgs -AutomaticArgs @() -UnboundArgs @()
+  if (Test-SfsUsableArgs $SfsArgs) { $SfsSelectedArgSource = "raw-env" }
 }
 if (-not (Test-SfsUsableArgs $SfsArgs)) {
   $SfsSavedCmdLineArgs = Resolve-SfsSavedCmdLineArgs
+  Write-SfsArgTrace "PS_SAVED_CMDLINE_ARGS" $SfsSavedCmdLineArgs
   $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsSavedCmdLineArgs -AutomaticArgs @() -UnboundArgs @()
+  if (Test-SfsUsableArgs $SfsArgs) { $SfsSelectedArgSource = "saved-cmdline" }
 }
 if (-not (Test-SfsUsableArgs $SfsArgs)) {
   $SfsParentCmdLineArgs = Resolve-SfsParentCmdLineArgs
+  Write-SfsArgTrace "PS_PARENT_CMDLINE_ARGS" $SfsParentCmdLineArgs
   $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsParentCmdLineArgs -AutomaticArgs @() -UnboundArgs @()
+  if (Test-SfsUsableArgs $SfsArgs) { $SfsSelectedArgSource = "parent-cmdline" }
 }
 if (-not (Test-SfsUsableArgs $SfsArgs)) {
   $SfsCmdLineArgs = Resolve-SfsCmdLineArgs
+  Write-SfsArgTrace "PS_CHILD_CMDLINE_ARGS" $SfsCmdLineArgs
   $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsCmdLineArgs -AutomaticArgs @() -UnboundArgs @()
+  if (Test-SfsUsableArgs $SfsArgs) { $SfsSelectedArgSource = "child-cmdline" }
 }
 if (-not (Test-SfsUsableArgs $SfsArgs)) {
   $SfsArgs = Resolve-SfsArgs -ParamArgs @() -AutomaticArgs @() -UnboundArgs $MyInvocation.UnboundArguments
+  if (Test-SfsUsableArgs $SfsArgs) { $SfsSelectedArgSource = "unbound" }
 }
+if (-not (Test-SfsUsableArgs $SfsArgs)) { $SfsSelectedArgSource = "empty" }
+Write-SfsArgTrace "PS_SELECTED_SOURCE" $SfsSelectedArgSource
+Write-SfsArgTrace "PS_FINAL_ARGS" $SfsArgs
 Enable-SfsUtf8Bridge
 
 function Find-SfsBash {

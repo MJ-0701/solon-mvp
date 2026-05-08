@@ -1,10 +1,10 @@
-# Windows SFS Wrapper Incident Report (0.6.35 -> 0.6.54)
+# Windows SFS Wrapper Incident Report (0.6.35 -> 0.6.56)
 
-**Language**: [한국어](../ko/windows-wrapper-incident-0.6.54.md) / English
+**Language**: [한국어](../ko/windows-wrapper-incident-0.6.56.md) / English
 
 This report summarizes the Windows `sfs.cmd` / `sfs.ps1` wrapper failures found
 while running `$sfs start 이미지 프롬프트 고도화` and `sfs.cmd upgrade` on a Windows PC.
-The final baseline is 0.6.54.
+The final baseline is 0.6.56.
 
 ## One-Line Conclusion
 
@@ -28,6 +28,18 @@ after child PowerShell changes its own `CMDCMDLINE`.
 where even that saved variable is empty. That fallback extracts the tail after
 the `sfs.cmd` command name before whitespace splitting, because a parent
 command line can contain spaces earlier in the wrapper path.
+The 0.6.55 candidate responded to the GitHub runner evidence that even with the
+parent fallback present, the first post-install `sfs.cmd version` could still
+print usage-only output, by trying to append `SFS_NATIVE_RAW_ARGS` after `--%`.
+The 0.6.55 trace run `25554923214` proved the batch side did not lose
+`version`; instead, `sfs.ps1` marked live env-bridge args as empty because
+`Test-SfsUsableArgs([string[]] $Args)` used the PowerShell-sensitive parameter
+name `$Args`. 0.6.56 renames that parameter to `$Items` and removes the
+`--% %SFS_NATIVE_RAW_ARGS%` experiment, which produced the wrong
+`--SFS_NATIVE_RAW_ARGS` token on the runner. It also keeps the opt-in
+`SFS_WINDOWS_ARG_TRACE=1` diagnostic mode, so the next Windows smoke failure
+shows batch `%*`, child PowerShell `$args`, env/raw/saved/parent sources, and
+the final selected source in the log.
 Windows
 PowerShell/cmd runtime scripts must also stay ASCII-safe so BOM-less UTF-8 is
 not mis-parsed by Windows PowerShell 5.1.
@@ -57,6 +69,8 @@ not mis-parsed by Windows PowerShell 5.1.
 | P19 | The `%*` positional fallback can be empty after `shift` consumes the batch args | The 0.6.51 GitHub Windows Scoop smoke run `25543802195` showed the hardened `sfs.cmd version` still printing usage-only output immediately after install | Save original `%*` as `SFS_NATIVE_RAW_ARGS` before `shift`, let `sfs.ps1` read that raw arg fallback after the env bridge, and treat empty resolved arg arrays as unusable |
 | P20 | Child PowerShell can expose `CMDCMDLINE` for `powershell.exe -File ...`, not the original wrapper invocation | The 0.6.52 GitHub Windows Scoop smoke run `25545120029` still made `sfs.cmd version` fall through to usage even though the shim contained `SFS_NATIVE_RAW_ARGS` | Save `!CMDCMDLINE!` as `SFS_NATIVE_CMDLINE` inside the delayed-expansion dispatch block, then let `sfs.ps1` parse that saved command line after the raw-arg fallback and trim `cmd.exe` shell-control tails |
 | P21 | Delayed expansion did not recover the wrapper command line on the GitHub runner | The 0.6.53 GitHub Windows Scoop smoke run `25546859759` still made the first `sfs.cmd version` print usage-only output | If env/raw/saved command line sources are empty, `sfs.ps1` queries the parent `cmd.exe` process command line through `Win32_Process`, extracts the tail after the `sfs.cmd` command name before whitespace splitting, and parses that before child `CMDCMDLINE` |
+| P22 | Child PowerShell can still start without real argv even after multiple fallback sources exist | The 0.6.54 GitHub Windows Scoop smoke run `25548381094` showed post-install hardening, but the first `sfs.cmd version` still printed usage-only output | The 0.6.55 candidate added a `--% %SFS_NATIVE_RAW_ARGS%` experiment, superseded by the P23 trace |
+| P23 | The usable-args guard used the PowerShell-sensitive `$Args` parameter name and treated live env-bridge args as empty | The 0.6.55 trace run `25554923214` showed `CMD_FIRST=version` and `PS_ENV_ARGS=version`, then fell through to `PS_SELECTED_SOURCE=empty` and `PS_FINAL_ARGS=--SFS_NATIVE_RAW_ARGS` | Rename the guard to `Test-SfsUsableArgs([string[]] $Items)` and remove `--% %SFS_NATIVE_RAW_ARGS%` dispatch. Windows smoke requires `SFS_ARGTRACE_PS_SELECTED_SOURCE=env` and `SFS_ARGTRACE_PS_FINAL_ARGS=.*version` |
 
 ## User-Visible Symptoms
 
@@ -256,6 +270,15 @@ The real bugs were:
   command line, extracts the original `sfs.cmd ...` tail before whitespace
   splitting so paths with spaces do not become fake args, and only then falls
   back to child PowerShell's own `CMDCMDLINE`.
+- The 0.6.55 candidate tried to carry the saved raw tail directly into the
+  PowerShell invocation after the 0.6.54 GitHub runner still produced
+  usage-only output. Trace run `25554923214` showed this produced the wrong
+  `--SFS_NATIVE_RAW_ARGS` token while the numbered env bridge still contained
+  `version`, so 0.6.56 supersedes it with the P23 root-cause fix.
+- 0.6.56 renames `Test-SfsUsableArgs([string[]] $Args)` to
+  `Test-SfsUsableArgs([string[]] $Items)`, allowing the live env bridge to be
+  accepted as the command. Windows smoke requires `SFS_ARGTRACE_PS_SELECTED_SOURCE=env`
+  and `SFS_ARGTRACE_PS_FINAL_ARGS=.*version`.
 
 ## Discovered Issues
 
@@ -275,9 +298,11 @@ The real bugs were:
   even if the source looks valid locally. Runtime `.ps1` / `.cmd` files should
   remain ASCII-only.
 - PowerShell CLI argv forwarding repeatedly failed under Windows/Scoop shims.
-  A single cached `%*` value is still forbidden, but when shim/PowerShell argv
-  forwarding is unstable, use a numbered env arg bridge (`SFS_NATIVE_ARGC`,
-  `SFS_NATIVE_ARG_N`) and let `sfs.ps1` read it immediately.
+  A single cached `%*` value is still forbidden, and the
+  `--% %SFS_NATIVE_RAW_ARGS%` experiment is also forbidden because the runner
+  turned it into the wrong token. The default contract is the numbered env arg
+  bridge (`SFS_NATIVE_ARGC`, `SFS_NATIVE_ARG_N`), with raw/saved/parent
+  fallbacks only when that bridge is empty.
 - Under generated Scoop shims, the target batch `%1..%n` can itself be empty.
   In that case, `CMDCMDLINE` is the final Windows-native recovery source.
 - The 0.6.45 failure showed that even `CMDCMDLINE` is not enough inside the
@@ -344,11 +369,17 @@ project folder.
 - The same Windows smoke creates a temporary `sfs.cmd` probe wrapper that clears
   env/raw/saved command-line sources, then verifies `version`, `context cat
   kernel`, and `start` through the parent `cmd.exe` command-line fallback.
-- `tests/test-windows-wrapper-incident-report.sh` verifies the P1-P21 issue
-  summary, the 0.6.54 report links, and the Homebrew installed-layout fallback.
+- The Windows smoke also checks that the post-install and direct-Scoop-recovery
+  hardened `sfs.cmd` shims preserve `SFS_NATIVE_RAW_ARGS` without using
+  `--% %SFS_NATIVE_RAW_ARGS%` dispatch.
+- The Windows smoke runs `SFS_WINDOWS_ARG_TRACE=1` and requires
+  `SFS_ARGTRACE_CMD_ARGC`, `SFS_ARGTRACE_PS_SELECTED_SOURCE=env`, and
+  `SFS_ARGTRACE_PS_FINAL_ARGS=.*version` before accepting `sfs.cmd version`.
+- `tests/test-windows-wrapper-incident-report.sh` verifies the P1-P23 issue
+  summary, the 0.6.56 report links, and the Homebrew installed-layout fallback.
 - `tests/test-docs-model-routing.sh` validates both source docs and Homebrew
   installed docs layout.
-- 0.6.54 is the final follow-up baseline that includes the Windows
+- 0.6.56 is the final follow-up baseline that includes the Windows
   `sfs.cmd upgrade` self-replacement fix, the installed incident-report test
   layout fix, the batch same-line exit hardening, ASCII-only Windows scripts,
   `SFS_ORIGINAL_ARGS` removal, call-label dispatch removal, single-channel
@@ -358,6 +389,7 @@ project folder.
   PowerShell/cmd `sfs.cmd` contract, the generated `sfs.cmd` shim failure
   learning, the post-install deterministic shim overwrite, the delayed-expansion
   saved-cmdline bridge, parent `cmd.exe` command-line fallback,
+  the usable-args `$Items` root-cause fix,
   shell-control tail trimming, the hardened shim
   env+positional dual forwarding, the braced PowerShell tag-refspec smoke fix,
   and the shift-before-raw-arg-capture fix.

@@ -130,7 +130,23 @@ jobs:
           $sfsCmd
           $shimText = Get-Content $sfsCmd.Source -Raw
           if ($shimText -notmatch "SFS_NATIVE_ARGC" -or $shimText -notmatch "SFS_NATIVE_RAW_ARGS" -or $shimText -notmatch "SFS_NATIVE_CMDLINE" -or $shimText -notmatch "%\*") {
-            throw "sfs.cmd shim was not hardened with env, raw positional, and cmdline forwarding: $($sfsCmd.Source)"
+            throw "sfs.cmd shim was not hardened with env, raw, and cmdline forwarding: $($sfsCmd.Source)"
+          }
+          if ($shimText -match "--% %SFS_NATIVE_RAW_ARGS%") {
+            throw "sfs.cmd shim still uses the broken --% raw-tail bridge: $($sfsCmd.Source)"
+          }
+          $env:SFS_WINDOWS_ARG_TRACE = "1"
+          $argTraceLines = & sfs.cmd version 2>&1
+          $argTraceExit = $LASTEXITCODE
+          $argTraceOutput = ($argTraceLines | Out-String)
+          Write-Host $argTraceOutput
+          Remove-Item Env:SFS_WINDOWS_ARG_TRACE -ErrorAction SilentlyContinue
+          if ($argTraceExit -ne 0) { exit $argTraceExit }
+          if ($argTraceOutput -notmatch "SFS_ARGTRACE_CMD_ARGC" -or $argTraceOutput -notmatch "SFS_ARGTRACE_PS_SELECTED_SOURCE=env" -or $argTraceOutput -notmatch "SFS_ARGTRACE_PS_FINAL_ARGS=.*version") {
+            throw "sfs.cmd arg trace did not prove version reached sfs.ps1: $argTraceOutput"
+          }
+          if ($argTraceOutput -notmatch "sfs $env:SFS_TEST_PREVIOUS_VERSION") {
+            throw "sfs.cmd arg trace did not recover previous runtime version: $argTraceOutput"
           }
           sfs.cmd version
           sfs.cmd --help
@@ -421,5 +437,18 @@ jobs:
           $sfsCmd = Get-Command sfs.cmd
           $shimText = Get-Content $sfsCmd.Source -Raw
           if ($shimText -notmatch "SFS_NATIVE_ARGC" -or $shimText -notmatch "SFS_NATIVE_RAW_ARGS" -or $shimText -notmatch "SFS_NATIVE_CMDLINE" -or $shimText -notmatch "%\*") {
-            throw "recovered sfs.cmd shim was not hardened with env, raw positional, and cmdline forwarding: $($sfsCmd.Source)"
+            throw "recovered sfs.cmd shim was not hardened with env, raw, and cmdline forwarding: $($sfsCmd.Source)"
+          }
+          if ($shimText -match "--% %SFS_NATIVE_RAW_ARGS%") {
+            throw "recovered sfs.cmd shim still uses the broken --% raw-tail bridge: $($sfsCmd.Source)"
+          }
+          $env:SFS_WINDOWS_ARG_TRACE = "1"
+          $argTraceLines = & sfs.cmd version 2>&1
+          $argTraceExit = $LASTEXITCODE
+          $argTraceOutput = ($argTraceLines | Out-String)
+          Write-Host $argTraceOutput
+          Remove-Item Env:SFS_WINDOWS_ARG_TRACE -ErrorAction SilentlyContinue
+          if ($argTraceExit -ne 0) { exit $argTraceExit }
+          if ($argTraceOutput -notmatch "SFS_ARGTRACE_CMD_ARGC" -or $argTraceOutput -notmatch "SFS_ARGTRACE_PS_SELECTED_SOURCE=env" -or $argTraceOutput -notmatch "SFS_ARGTRACE_PS_FINAL_ARGS=.*version") {
+            throw "recovered sfs.cmd arg trace did not prove version reached sfs.ps1: $argTraceOutput"
           }

@@ -7,6 +7,28 @@
 
 ---
 
+## 0.6.56
+
+이번 버전은 Windows `sfs.cmd version` 이 계속 usage-only 로 떨어지던 진짜 원인을 고칩니다.
+0.6.55 후보를 실제 Windows runner 에 trace 로 올려 보니 batch 쪽은 `version` 을 잃지 않았습니다.
+문제는 `sfs.ps1` 의 usable-args 판정 함수가 PowerShell 자동 변수와 충돌하기 쉬운 `$Args`
+파라미터명을 사용해, 살아 있는 env bridge 인자도 empty 로 판정한 데 있었습니다.
+
+- 0.6.54 smoke 실패 run: `25548381094`.
+- 0.6.55 trace 실패 run: `25554923214`.
+- `sfs.ps1` 의 `Test-SfsUsableArgs` 가 이제 `$Items` 파라미터를 사용해 `SFS_NATIVE_ARG_1=version`
+  같은 단일 인자를 정상 인자로 판정합니다.
+- `--% %SFS_NATIVE_RAW_ARGS%` 실험은 제거했습니다. runner 에서 이 경로는 `version` 이 아니라
+  `--SFS_NATIVE_RAW_ARGS` 토큰을 만들었습니다.
+- numbered env bridge, raw env fallback, saved command-line fallback, parent command-line fallback 은
+  그대로 유지해서 Windows/Scoop runner 의 다른 인자 전달 모양도 계속 회복합니다.
+- Windows smoke 와 release verifier 는 이제 `SFS_ARGTRACE_PS_SELECTED_SOURCE=env` 와
+  `SFS_ARGTRACE_PS_FINAL_ARGS=.*version` 을 확인한 뒤에야 `sfs.cmd version` 을 통과시킵니다.
+- `SFS_WINDOWS_ARG_TRACE=1` 진단 모드도 추가되어, 다음 Windows runner 실패가 나면 batch `%*`,
+  PowerShell `$args`, 최종 선택 source 를 로그에서 바로 볼 수 있습니다.
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P23 으로 이
+  설치 직후 usage-only 문제까지 기록합니다.
+
 ## 0.6.54
 
 이번 버전은 0.6.53 을 실제 GitHub Windows runner 에 올린 뒤에도 남은 usage-only 문제를
@@ -22,7 +44,7 @@ runner 에서는 최초 `sfs.cmd version` 이 여전히 usage 만 출력했습�
   parent command line 경로 중간에 공백이 있어도 `version`, `context cat`, `start` 인자를
   잃지 않습니다.
 - release verifier 와 Windows guardrail test 가 parent command-line fallback 계약을 회귀로 막습니다.
-- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.54.md) 는 P21 로 이
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P21 로 이
   설치 직후 usage-only 문제까지 기록합니다.
 
 ## 0.6.53
@@ -38,7 +60,7 @@ runner 에서는 최초 `sfs.cmd version` 이 여전히 usage 만 출력했습�
 - `sfs.ps1` 은 raw arg tail 다음, child PowerShell 의 `CMDCMDLINE` fallback 전에 saved cmdline 을 읽습니다.
 - saved cmdline 에 `&& sfs.cmd --help >NUL` 같은 tail 이 붙어도 첫 번째 `sfs.cmd` 명령만 인자로 해석합니다.
 - release verifier, Windows guardrail test, GitHub Windows smoke 가 saved-cmdline fallback 계약을 회귀로 막습니다.
-- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.54.md) 는 P20 으로 이
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P20 으로 이
   설치 직후 usage-only 문제까지 기록합니다.
 
 ## 0.6.52
@@ -53,7 +75,7 @@ runner 에서는 최초 `sfs.cmd version` 이 여전히 usage 만 출력했습�
 - `sfs.ps1` 은 numbered env bridge 다음, `CMDCMDLINE` fallback 전에 raw arg tail 을 읽고,
   비어 있는 arg 배열은 fallback 을 막지 못하게 처리합니다.
 - release verifier 와 Windows guardrail test 가 raw-arg fallback 계약을 회귀로 막습니다.
-- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.54.md) 는 P19 로 이
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P19 로 이
   설치 직후 usage-only 문제까지 기록합니다.
 
 ## 0.6.51
@@ -67,7 +89,7 @@ PowerShell `${brokenVersion}` braces 를 붙여 Windows CI가 복구 검증까�
   `refs/tags/v/tags/v0.6.49` 를 fetch 하려 했습니다.
 - Windows smoke 는 이제 `refs/tags/v${brokenVersion}:refs/tags/v${brokenVersion}` 를 사용합니다.
 - release verifier 와 Windows guardrail test 가 refspec 과 archive tag brace 계약을 회귀로 막습니다.
-- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.54.md) 는 P18 로 이
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P18 로 이
   release-smoke 문제까지 기록합니다.
 
 ## 0.6.50
@@ -83,7 +105,7 @@ numbered env bridge 와 `%*` positional fallback 을 함께 `sfs.ps1` 에 넘기
   `scoop update` 와 `scoop update sfs` 로 현재 runtime 까지 복구되는지 확인합니다.
 - `sfs.cmd version`, `sfs.cmd context cat kernel`, `sfs.cmd start ...`, `sfs.cmd upgrade`
   가 env-only shim 전달 실패에 막히지 않도록 두 경로를 동시에 열어 둡니다.
-- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.54.md) 는 P1-P17
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P1-P17
   문제 목록과 0.6.49 GitHub smoke run `25541086874` 실패 근거까지 포함합니다.
 
 ## 0.6.49
@@ -99,7 +121,7 @@ extensionless `sfs` 를 Solon 이 제어하는 deterministic wrapper 로 덮어�
 - Git Bash 에서는 extensionless `sfs` shim 이 packaged `bin/sfs` 를 실행합니다.
 - `sfs.ps1` 내부 인자 정규화도 named-array forwarding 으로 보강해 `context cat kernel` 같은
   여러 단어 명령이 내부 함수 호출에서 잘리지 않게 했습니다.
-- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.54.md) 는 P1-P16
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P1-P16
   문제 목록과 0.6.48 GitHub smoke run `25539387684` 실패 근거까지 포함합니다.
 
 ## 0.6.48
@@ -112,7 +134,7 @@ Windows 의 사용자 실행 경로와 CI 통과 기준을 `sfs.cmd` 로 고정�
   `sfs.cmd context cat ...`, `sfs.cmd start ...`, `sfs.cmd upgrade` 를 직접 확인합니다.
 - Git Bash/WSL 에서는 기존처럼 bare `sfs` 를 검증합니다.
 - 문서와 Scoop packaging guide 는 Windows 예시를 `sfs.cmd` 기준으로 정리했습니다.
-- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.54.md) 는 P1-P15
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P1-P15
   문제 목록과 0.6.47 GitHub smoke run `25535059980` 실패 근거까지 포함합니다.
 
 ## 0.6.47
@@ -128,7 +150,7 @@ usage-only 로 떨어졌습니다.
 - `sfs.cmd` 는 직접 실행/호환용 trampoline 으로 남아 env bridge 와 `%*` fallback 을 계속 제공합니다.
 - Windows guardrail 과 release verifier 는 이제 packaged `sfs.ps1` 안의 `ValueFromRemainingArguments` 를
   회귀로 보고 실패시킵니다.
-- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.54.md) 는 P1-P14
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P1-P14
   문제 목록과 0.6.46 GitHub smoke run `25534566676` 실패 근거까지 포함합니다.
 
 ## 0.6.46
@@ -145,7 +167,7 @@ primary shim 은 packaged `bin\sfs.cmd` 를 target 으로 삼으면 안 되고, 
   `sfs.ps1` 에 같이 넘깁니다.
 - Windows guardrail 과 release verifier 는 이제 Scoop manifest 가 `bin\sfs.ps1` 을 primary target 으로
   쓰는지 확인하고, generated shim -> packaged `.cmd` 경로를 기본값으로 되돌리면 실패합니다.
-- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.54.md) 는 P1-P13
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P1-P13
   문제 목록과 0.6.45 GitHub smoke run `25533332634` 실패 근거까지 포함합니다.
 
 ## 0.6.45
@@ -159,7 +181,7 @@ primary shim 은 packaged `bin\sfs.cmd` 를 target 으로 삼으면 안 되고, 
 - 이 fallback 은 `sfs` / `sfs.cmd` 뒤의 실제 명령 꼬리만 꺼내 같은 SFS 인자 목록으로 정규화합니다.
 - Windows guardrail 과 release verifier 는 이제 `CMDCMDLINE` fallback reader 와 command-line
   splitter 를 필수로 확인합니다.
-- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.54.md) 는 P1-P12
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P1-P12
   문제 목록과 `스프린트 생성 테스트` Windows smoke 기준으로 최신화했습니다.
 
 ## 0.6.44
@@ -175,7 +197,7 @@ argument binding 을 기본 신뢰 경로에서 제거합니다.
   `$args`, `$MyInvocation.UnboundArguments` 를 fallback 으로 정규화합니다.
 - Windows guardrail 과 release verifier 는 이제 예전 `-File ... %*` bridge 와
   `-Command "& $env:SFS_NATIVE_SCRIPT @args"` bridge 를 모두 실패로 봅니다.
-- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.54.md) 는 이후 P1-P12
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 이후 P1-P12
   문제 목록과 `스프린트 생성 테스트` Windows smoke 기준으로 최신화했습니다.
 
 ## 0.6.43
@@ -192,7 +214,7 @@ argument binding 을 기본 신뢰 경로에서 제거합니다.
   `$MyInvocation.UnboundArguments` 를 fallback 으로 정규화합니다.
 - Windows guardrail 과 release verifier 는 이제 예전 `-File ... %*` bridge 를 실패로 보고,
   `SFS_NATIVE_SCRIPT @args` 경로를 필수로 확인합니다.
-- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.54.md) 는 이후 P1-P12
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 이후 P1-P12
   문제 목록과 `스프린트 생성 테스트` Windows smoke 기준으로 최신화했습니다.
 
 ## 0.6.42
@@ -210,7 +232,7 @@ argument binding 을 기본 신뢰 경로에서 제거합니다.
   `SFS_ORIGINAL_ARGS`, batch-owned `scoop update` 를 모두 실패로 봅니다.
 - 현재 0.6.54 기준으로는 0.6.49 이하의 깨진 wrapper 때문에 `sfs.cmd update` 도 usage 만 출력하는
   경우 최초 1회 `scoop update` 후 `scoop update sfs`, 그리고 `sfs.cmd upgrade --no-self-upgrade` 로 복구합니다.
-- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.54.md) 는 이후
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 이후
   P10-P12 PowerShell shim 문제까지 포함하는 0.6.45 기준으로 최신화했습니다.
 
 ## 0.6.41
@@ -227,7 +249,7 @@ call-label `%*` 를 바로 `sfs.ps1` 에 전달합니다.
   `sfs version` 이 usage 만 출력하던 경로를 제거했습니다.
 - Windows guardrail 과 release verifier 가 `.ps1` / `.cmd` ASCII-only, direct `%*` forwarding,
   same-line `exit /b !ERRORLEVEL!` 계약을 함께 검사합니다.
-- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.54.md) 는 이후
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 이후
   P1-P12 문제 목록과 0.6.45 기준 검증 경로로 최신화했습니다.
 
 ## 0.6.40
@@ -292,7 +314,7 @@ incident-report 문서 테스트가 `CHANGELOG.md` / `RELEASE-NOTES.md` 위치�
 - `sfs.cmd` 는 native read-only 확인 후 나머지 명령을 PowerShell entrypoint 로 넘기는 얇은 wrapper
   로 돌아갑니다.
 - 이번 Windows wrapper 장애 흐름과 발견된 문제점은
-  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.54.md) 에 정리했습니다.
+  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 에 정리했습니다.
 
 ## 0.6.36
 
@@ -305,7 +327,7 @@ incident-report 문서 테스트가 `CHANGELOG.md` / `RELEASE-NOTES.md` 위치�
 - Windows 사용자는 0.6.35 에 들어간 `sfs.cmd -> sfs.ps1 -> Bash runtime` bridge 수정을 그대로
   받습니다.
 - Windows 에서 실제로 관찰된 usage-only, 빈 출력, 한국어 깨짐, Homebrew installed layout 문제는
-  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.54.md) 에 정리했습니다.
+  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 에 정리했습니다.
 
 ## 0.6.35
 

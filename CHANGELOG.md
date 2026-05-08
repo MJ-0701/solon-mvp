@@ -1,3 +1,49 @@
+## [0.6.56] - 2026-05-08
+
+> **Windows usable-args root cause fix.** A pre-release Windows trace run
+> (`25554923214`) proved the loop was not caused by batch losing `%1/%*`.
+> `sfs.cmd` delivered `version` through `SFS_NATIVE_ARGC`, `SFS_NATIVE_RAW_ARGS`,
+> and `SFS_NATIVE_ARG_1`, but `sfs.ps1` still marked the resolved command as
+> empty because `Test-SfsUsableArgs` used the PowerShell-sensitive parameter
+> name `$Args`.
+
+### Fixed
+
+- `bin/sfs.ps1` now names the usable-args guard parameter `$Items`, so a valid
+  one-item env bridge such as `version` is accepted instead of falling through
+  to usage-only output.
+- `bin/sfs.cmd` and the Scoop post-install hardened `sfs.cmd` shim reverted the
+  experimental `--% %SFS_NATIVE_RAW_ARGS%` bridge. The Windows trace showed it
+  reached `sfs.ps1` as `--SFS_NATIVE_RAW_ARGS`, which hid the real env-bridge
+  bug and made the wrapper more complex.
+- Windows smoke now requires `SFS_ARGTRACE_PS_SELECTED_SOURCE=env` and
+  `SFS_ARGTRACE_PS_FINAL_ARGS=.*version` before accepting `sfs.cmd version`.
+- Guardrail tests and the release verifier now fail if the broken `$Args`
+  predicate or `--% %SFS_NATIVE_RAW_ARGS%` dispatch returns.
+
+## [0.6.55] - 2026-05-08
+
+> **Windows raw-tail automatic args bridge.** The 0.6.54 GitHub Windows Scoop
+> smoke run `25548381094` still showed the first post-install `sfs.cmd version`
+> falling through to usage-only output. The hardened shim had the env/raw/saved
+> command-line contracts, but child PowerShell still reached `sfs.ps1` without a
+> usable direct argv source on that runner.
+
+### Fixed
+
+- `bin/sfs.cmd` and the Scoop post-install hardened `sfs.cmd` shim now call
+  `powershell.exe -File "%SFS_NATIVE_SCRIPT%" --% %SFS_NATIVE_RAW_ARGS%`, so the
+  raw tail saved before `shift` also reaches `sfs.ps1` as automatic `$args`.
+- The existing numbered env bridge, raw env fallback, saved command-line
+  fallback, parent `cmd.exe` command-line fallback, and child `CMDCMDLINE`
+  fallback stay in place; 0.6.55 adds a direct argv source instead of removing
+  recovery layers.
+- Windows guardrails, release verifier, Windows smoke shim text checks, and the
+  incident report now record P22 with run `25548381094`.
+- `sfs.cmd` / `sfs.ps1` now expose opt-in `SFS_WINDOWS_ARG_TRACE=1` diagnostics
+  so Windows smoke logs show batch args, PowerShell args, selected source, and
+  final resolved args before another usage-only failure can become guesswork.
+
 ## [0.6.54] - 2026-05-08
 
 > **Windows parent command-line fallback.** The 0.6.53 GitHub Windows Scoop
