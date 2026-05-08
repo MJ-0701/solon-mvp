@@ -33,7 +33,7 @@ PowerShell/cmd 예시에서는 `sfs.cmd ...` 를 명시적으로 씁니다. Git 
 ## 로컬 Windows 설치 검증
 
 GitHub Actions workflow 는 checkout 에서 로컬 source zip 을 만들고, `file:///` URL 을 가진 임시
-bucket manifest 를 렌더링한 뒤 아래 흐름을 실행합니다. 0.6.43 기준 smoke 는 먼저 로컬 이전
+bucket manifest 를 렌더링한 뒤 아래 흐름을 실행합니다. 0.6.44 기준 smoke 는 먼저 로컬 이전
 패키지를 설치하고, 같은 bucket 에 현재 패키지를 발행한 뒤 실제 `sfs.cmd upgrade` 로
 self-upgrade 를 검증합니다.
 

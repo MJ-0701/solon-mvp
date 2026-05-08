@@ -40,6 +40,22 @@ function Resolve-SfsArgs([object[]] $ParamArgs, [object[]] $AutomaticArgs, [obje
   return [string[]] $resolved
 }
 
+function Resolve-SfsEnvArgs {
+  $countRaw = [Environment]::GetEnvironmentVariable("SFS_NATIVE_ARGC")
+  if (-not $countRaw) { return [string[]] @() }
+  $count = 0
+  if (-not [int]::TryParse($countRaw, [ref] $count)) { return [string[]] @() }
+  if ($count -le 0) { return [string[]] @() }
+
+  $items = @()
+  for ($i = 1; $i -le $count; $i++) {
+    $value = [Environment]::GetEnvironmentVariable("SFS_NATIVE_ARG_$i")
+    if ($null -eq $value) { $value = "" }
+    $items += @([string] $value)
+  }
+  return [string[]] $items
+}
+
 function Enable-SfsUtf8Bridge {
   try {
     $utf8 = New-Object System.Text.UTF8Encoding -ArgumentList $false
@@ -53,7 +69,11 @@ function Enable-SfsUtf8Bridge {
   if (-not $env:LC_CTYPE) { $env:LC_CTYPE = "C.UTF-8" }
 }
 
-$SfsArgs = Resolve-SfsArgs $SfsParamArgs $args $MyInvocation.UnboundArguments
+$SfsEnvArgs = Resolve-SfsEnvArgs
+$SfsArgs = Resolve-SfsArgs $SfsEnvArgs $SfsParamArgs $args
+if (-not $SfsArgs -or $SfsArgs.Count -eq 0) {
+  $SfsArgs = Resolve-SfsArgs @() @() $MyInvocation.UnboundArguments
+}
 Enable-SfsUtf8Bridge
 
 function Find-SfsBash {

@@ -1,3 +1,30 @@
+## [0.6.44] - 2026-05-08
+
+> **Windows numbered env arg bridge.** The 0.6.43 GitHub Windows Scoop smoke
+> run `25532139459` proved that PowerShell `-Command @args` also lost shim
+> arguments: `sfs version` again fell through to generic usage. Windows now
+> avoids PowerShell CLI argument binding for the `sfs.cmd` -> `sfs.ps1` hop.
+
+### Fixed
+
+- `bin/sfs.cmd` now collects `%1..%n` into numbered environment variables
+  (`SFS_NATIVE_ARGC`, `SFS_NATIVE_ARG_N`) with delayed expansion disabled during
+  capture, then invokes packaged `sfs.ps1` through `powershell.exe -File`
+  without argv.
+- `bin/sfs.ps1` now reads the numbered env arg bridge before positional param
+  args, automatic `$args`, and `$MyInvocation.UnboundArguments`. This keeps the
+  older direct/agent-shaped fallbacks while making the Scoop shim path
+  independent of PowerShell CLI argument binding.
+
+### Tests
+
+- Windows guardrails and release verification now reject both old bridges:
+  `powershell.exe -File sfs.ps1 %*` and PowerShell
+  `-Command "& $env:SFS_NATIVE_SCRIPT @args"`.
+- Windows wrapper incident reports are refreshed to the 0.6.44 baseline with
+  the P11 `-Command @args`/Scoop shim finding and the existing
+  `ci-korean-sprint-test` smoke evidence.
+
 ## [0.6.43] - 2026-05-08
 
 > **Windows PowerShell `-Command @args` bridge hardening.** The 0.6.42
@@ -21,9 +48,10 @@
 
 - Windows guardrails and release verification now reject the old
   `powershell.exe -File sfs.ps1 %*` bridge and require the explicit
-  `SFS_NATIVE_SCRIPT @args` path.
-- Windows wrapper incident reports are refreshed to the 0.6.43 baseline with the
-  P10 PowerShell `-File`/Scoop shim finding, while keeping the Korean
+  `SFS_NATIVE_SCRIPT @args` path. This was superseded by 0.6.44 after the real
+  Windows smoke showed `-Command @args` also loses args under Scoop shims.
+- Windows wrapper incident reports are refreshed to the 0.6.44 baseline with the
+  P10/P11 PowerShell/Scoop shim findings, while keeping the Korean
   `ci-korean-sprint-test` smoke evidence.
 
 ## [0.6.42] - 2026-05-08

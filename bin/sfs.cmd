@@ -1,5 +1,5 @@
 @echo off
-setlocal EnableExtensions EnableDelayedExpansion
+setlocal EnableExtensions DisableDelayedExpansion
 
 set "SCRIPT_DIR=%~dp0"
 set "SFS_NATIVE_POWERSHELL=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
@@ -10,4 +10,14 @@ if not exist "%SFS_NATIVE_SCRIPT%" (
   exit /b 4
 )
 
-"%SFS_NATIVE_POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -Command "& $env:SFS_NATIVE_SCRIPT @args" %* & exit /b !ERRORLEVEL!
+set "SFS_NATIVE_ARGC=0"
+:sfs_collect_args
+if "%~1"=="" goto sfs_args_done
+set /a SFS_NATIVE_ARGC+=1 >NUL
+for %%I in (%SFS_NATIVE_ARGC%) do set "SFS_NATIVE_ARG_%%I=%~1"
+shift
+goto sfs_collect_args
+
+:sfs_args_done
+setlocal EnableDelayedExpansion
+"%SFS_NATIVE_POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%SFS_NATIVE_SCRIPT%" & exit /b !ERRORLEVEL!

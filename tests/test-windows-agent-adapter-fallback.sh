@@ -43,11 +43,17 @@ adapter_files=(
   "${DIST_DIR}/plugins/solon/commands/sfs.md"
 )
 
-assert_contains "${cmd_wrapper}" "setlocal EnableExtensions EnableDelayedExpansion" "cmd delayed errorlevel expansion"
+assert_contains "${cmd_wrapper}" "setlocal EnableExtensions DisableDelayedExpansion" "cmd collects args without delayed-expansion corruption"
 assert_contains "${cmd_wrapper}" "set \"SFS_NATIVE_SCRIPT=%SCRIPT_DIR%sfs.ps1\"" "cmd stores ps1 path for powershell command bridge"
-assert_contains "${cmd_wrapper}" "-Command \"& \$env:SFS_NATIVE_SCRIPT @args\" %* & exit /b !ERRORLEVEL!" "cmd powershell command bridge exits on parsed line"
+assert_contains "${cmd_wrapper}" "set \"SFS_NATIVE_ARGC=0\"" "cmd initializes env arg bridge"
+assert_contains "${cmd_wrapper}" ":sfs_collect_args" "cmd env arg collection loop"
+assert_contains "${cmd_wrapper}" "set \"SFS_NATIVE_ARG_%%I=%~1\"" "cmd stores numbered env args"
+assert_contains "${cmd_wrapper}" "-File \"%SFS_NATIVE_SCRIPT%\" & exit /b !ERRORLEVEL!" "cmd powershell env bridge exits on parsed line"
 if grep -Fq -- "-File \"%SCRIPT_DIR%sfs.ps1\" %*" "${cmd_wrapper}"; then
   fail "cmd wrapper must not use powershell -File for Scoop shim argument forwarding"
+fi
+if grep -Fq -- "-Command \"& \$env:SFS_NATIVE_SCRIPT @args\"" "${cmd_wrapper}"; then
+  fail "cmd wrapper must not rely on PowerShell -Command @args; Scoop shims lost args through that path"
 fi
 if grep -Fq -- "call :" "${cmd_wrapper}"; then
   fail "cmd wrapper must stay a thin direct PowerShell entrypoint; call-label forwarding lost args under Scoop shims"
@@ -75,7 +81,11 @@ if grep -Fq -- "ValueFromRemainingArguments" "${ps_wrapper}"; then
   fail "ps1 must not rely on ValueFromRemainingArguments; Windows PowerShell -File lost args in the field"
 fi
 assert_contains "${ps_wrapper}" '[object[]] $SfsParamArgs' "ps1 positional array args"
-assert_contains "${ps_wrapper}" 'Resolve-SfsArgs $SfsParamArgs $args $MyInvocation.UnboundArguments' "ps1 param/automatic/unbound args fallback"
+assert_contains "${ps_wrapper}" "Resolve-SfsEnvArgs" "ps1 env arg bridge"
+assert_contains "${ps_wrapper}" 'SFS_NATIVE_ARGC' "ps1 reads env arg count"
+assert_contains "${ps_wrapper}" 'SFS_NATIVE_ARG_$i' "ps1 reads numbered env args"
+assert_contains "${ps_wrapper}" 'Resolve-SfsArgs $SfsEnvArgs $SfsParamArgs $args' "ps1 env/param/automatic args fallback"
+assert_contains "${ps_wrapper}" 'Resolve-SfsArgs @() @() $MyInvocation.UnboundArguments' "ps1 unbound args final fallback"
 assert_contains "${ps_wrapper}" '$resolved[0] -eq "--%"' "ps1 stop-parsing token normalization"
 assert_contains "${ps_wrapper}" "Enable-SfsUtf8Bridge" "ps1 utf8 bridge"
 assert_contains "${ps_wrapper}" "Invoke-ScoopSelfUpgrade" "ps1 owns Scoop self-upgrade"
