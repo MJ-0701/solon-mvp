@@ -126,6 +126,27 @@ run_upgrade_command_with_timeout() {
   timeout="$(normalize_positive_timeout "$timeout" "45" "$label")"
   trace_upgrade "$label start timeout=${timeout}s"
 
+  if command -v timeout >/dev/null 2>&1 && timeout 1 sh -c 'exit 0' >/dev/null 2>&1; then
+    local rc=0
+    set +e
+    timeout "$timeout" "$@"
+    rc=$?
+    set -e
+    if [ "$rc" -eq 124 ]; then
+      warn "$label timed out after ${timeout}s — continuing"
+      trace_upgrade "$label timeout rc=${rc}"
+      return 124
+    fi
+    trace_upgrade "$label exit rc=${rc}"
+    return "$rc"
+  fi
+
+  if sfs_is_ci; then
+    warn "$label skipped: timeout(1) unavailable in CI, avoiding unbounded background watchdog"
+    trace_upgrade "$label skipped no-timeout-command-ci"
+    return 124
+  fi
+
   "$@" &
   local child=$!
   (

@@ -272,6 +272,8 @@ assert_contains "${upgrade_sh}" "trace_upgrade" "upgrade.sh has opt-in phase tra
 assert_contains "${upgrade_sh}" 'SFS_UPGRADE_TRACE' "upgrade.sh trace is gated behind SFS_UPGRADE_TRACE"
 assert_contains "${upgrade_sh}" 'SFS_CLI_DISCOVERY_TIMEOUT_SEC' "upgrade.sh bounds cli-discovery hook"
 assert_contains "${upgrade_sh}" 'run_upgrade_command_with_timeout "cli-discovery hook"' "upgrade.sh wraps cli-discovery hook in a watchdog"
+assert_contains "${upgrade_sh}" "timeout \"\$timeout\" \"\$@\"" "upgrade.sh uses timeout(1) before background watchdogs"
+assert_contains "${upgrade_sh}" 'timeout(1) unavailable in CI' "upgrade.sh skips background watchdogs in CI when timeout(1) is unavailable"
 assert_contains "${upgrade_sh}" 'trace_upgrade "cli-discovery hook before' "upgrade.sh traces cli-discovery entry"
 assert_contains "${upgrade_sh}" 'trace_upgrade "completion output after"' "upgrade.sh traces completion output exit"
 assert_contains "${upgrade_sh}" 'if ! sfs_is_ci && [ ! -t 0 ] && [ -e /dev/tty ]; then' "upgrade.sh does not block GitHub Actions on interactive tty prompts"
