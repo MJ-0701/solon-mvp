@@ -67,6 +67,23 @@ sfs_enter_call_depth() {
   export SFS_CALL_DEPTH="${depth}"
 }
 
+sfs_has_posix_timeout() {
+  command -v timeout >/dev/null 2>&1 || return 1
+  timeout 1 sh -c 'exit 0' >/dev/null 2>&1
+}
+
+sfs_timeout_supports_kill_after() {
+  timeout --help 2>&1 | grep -q -- '--kill-after'
+}
+
+sfs_emit_timeout_message() {
+  local cmd="$1" timeout="$2"
+  {
+    printf 'sfs safety timeout: command `%s` exceeded %ss and was stopped\n' "${cmd}" "${timeout}"
+    printf 'hint: set SFS_COMMAND_TIMEOUT_SEC=<seconds> to raise the cap, or 0 to disable for a trusted one-off run\n'
+  } >&2
+}
+
 sfs_run_self_with_watchdog() {
   local timeout="$1"
   shift
@@ -77,6 +94,18 @@ sfs_run_self_with_watchdog() {
   local child="" watchdog="" marker="" rc=0 grace
   grace="${SFS_WATCHDOG_KILL_GRACE_SEC:-3}"
   case "${grace}" in ''|*[!0-9]*) grace=3 ;; esac
+
+  if sfs_has_posix_timeout && sfs_timeout_supports_kill_after; then
+    set +e
+    SFS_WATCHDOG_CHILD=1 timeout -k "${grace}s" "${timeout}s" bash "${self}" "$@"
+    rc=$?
+    set -e
+    if [[ "${rc}" -eq 124 || "${rc}" -eq 137 ]]; then
+      sfs_emit_timeout_message "${cmd}" "${timeout}"
+      return 124
+    fi
+    return "${rc}"
+  fi
 
   marker="$(mktemp "${TMPDIR:-/tmp}/sfs-watchdog.XXXXXX")" || return 1
   rm -f "${marker}"
@@ -90,16 +119,12 @@ sfs_run_self_with_watchdog() {
   (
     sleep "${timeout}"
     if kill -0 "${child}" 2>/dev/null; then
-      {
-        printf 'sfs safety timeout: command `%s` exceeded %ss and was stopped\n' "${cmd}" "${timeout}"
-        printf 'hint: set SFS_COMMAND_TIMEOUT_SEC=<seconds> to raise the cap, or 0 to disable for a trusted one-off run\n'
-      } >&2
       printf 'timeout\n' > "${marker}" 2>/dev/null || true
       kill -TERM "${child}" 2>/dev/null || true
       sleep "${grace}"
       kill -KILL "${child}" 2>/dev/null || true
     fi
-  ) &
+  ) </dev/null >/dev/null 2>&1 &
   watchdog=$!
 
   trap 'kill "${child:-}" "${watchdog:-}" 2>/dev/null || true; rm -f "${marker:-}"; exit 130' INT TERM
@@ -110,6 +135,7 @@ sfs_run_self_with_watchdog() {
 
   if [[ -f "${marker}" ]]; then
     rc=124
+    sfs_emit_timeout_message "${cmd}" "${timeout}"
   fi
   rm -f "${marker}"
   return "${rc}"

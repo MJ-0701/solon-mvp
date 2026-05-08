@@ -56,6 +56,16 @@
   `claude`/`gemini`/`git clone` probes with `SFS_DISCOVERY_CMD_TIMEOUT_SEC`.
   Discovery failures now warn and continue instead of allowing self-upgrade to
   wait forever on an external CLI.
+- `bin/sfs` now uses POSIX `timeout(1)` with kill-after support before its
+  fallback background watchdog. The fallback watchdog redirects its own stdio
+  away from the caller, so a Windows Git Bash `sleep` child cannot keep a
+  PowerShell `Tee-Object` pipeline open after `upgrade.sh` has printed
+  `completion output after`.
+- `bin/sfs.ps1` now emits an opt-in
+  `SFS_ARGTRACE_PS_AFTER_BASH_BRIDGE_LASTEXITCODE` marker after the final
+  PowerShell-to-Git-Bash bridge returns. The Windows Scoop smoke requires that
+  marker for `sfs.cmd upgrade`, proving the wrapper returned from Bash instead
+  of only proving that Bash printed its final line.
 - The Windows Scoop smoke no longer assigns the `Tee-Object` upgrade pipeline
   to a variable. That assignment captured output and hid live trace lines until
   the command exited, so failures can now be traced from the last emitted line.

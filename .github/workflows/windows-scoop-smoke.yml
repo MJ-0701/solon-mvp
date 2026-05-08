@@ -246,6 +246,9 @@ jobs:
           if ($upgradeOutput -match "TIVE_READONLY_DONE|LF_UPGRADE_DONE|'e'.*(recognized|은\(는\))|'\*'.*(recognized|은\(는\))") {
             throw "sfs.cmd upgrade printed batch tail-fragment evidence: $upgradeOutput"
           }
+          if ($upgradeOutput -notmatch "SFS_ARGTRACE_PS_AFTER_BASH_BRIDGE_LASTEXITCODE=0") {
+            throw "sfs.cmd upgrade did not prove the final Bash bridge returned to PowerShell: $upgradeOutput"
+          }
 
           $projectVersion = (Select-String -Path ".sfs-local\VERSION" -Pattern "^solon_mvp_version:\s*(.+)$").Matches.Groups[1].Value.Trim()
           $runtimeVersion = ((sfs.cmd version).Trim() -replace "^sfs\s+", "")

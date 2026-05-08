@@ -176,6 +176,8 @@ fi
 assert_contains "${ps_wrapper}" '$bashArgs = [string[]] @($SfsArgs)' "ps1 bash bridge preserves whole arg tokens"
 assert_contains "${ps_wrapper}" 'Write-SfsArgTrace "PS_BASH_ARGS" $bashArgs' "ps1 traces final bash bridge args"
 assert_contains "${ps_wrapper}" '& $bash (Convert-ToBashPath $sfsSh) @bashArgs' "ps1 bash bridge splats normalized arg array"
+assert_contains "${ps_wrapper}" '$bashExitCode = $LASTEXITCODE' "ps1 captures final bash bridge exit code before exiting"
+assert_contains "${ps_wrapper}" 'Write-SfsArgTrace "PS_AFTER_BASH_BRIDGE_LASTEXITCODE" $bashExitCode' "ps1 traces final bash bridge return"
 if grep -Fq '& $bash (Convert-ToBashPath $sfsSh) @SfsArgs' "${ps_wrapper}"; then
   echo "ps1 bash bridge still splats possibly scalar SfsArgs directly" >&2
   exit 1
@@ -254,6 +256,7 @@ assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "Tee-Obj
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_UPGRADE_TRACE" "Windows CI enables opt-in Bash upgrade trace while diagnosing self-upgrade hangs"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_CLI_DISCOVERY_TIMEOUT_SEC" "Windows CI bounds upgrade cli-discovery hook"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_DISCOVERY_CMD_TIMEOUT_SEC" "Windows CI bounds external discovery probes"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_ARGTRACE_PS_AFTER_BASH_BRIDGE_LASTEXITCODE=0" "Windows CI proves sfs.cmd upgrade returned from the final Bash bridge"
 if grep -Fq '$upgradeLines = & sfs.cmd upgrade' "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml"; then
   fail "Windows CI must not assign the Tee-Object pipeline; assignment captures output and hides live trace logs"
 fi
@@ -280,6 +283,9 @@ assert_contains "${upgrade_sh}" 'if ! sfs_is_ci && [ ! -t 0 ] && [ -e /dev/tty ]
 assert_contains "${unix_discovery}" 'SFS_DISCOVERY_CMD_TIMEOUT_SEC' "install-cli-discovery bounds external CLI probes"
 assert_contains "${unix_discovery}" 'run_discovery_command "Claude Code marketplace add"' "install-cli-discovery wraps Claude marketplace add"
 assert_contains "${unix_discovery}" 'run_discovery_command "Gemini CLI extension install"' "install-cli-discovery wraps Gemini extension install"
+assert_contains "${sfs_bin}" "sfs_has_posix_timeout" "Bash sfs wrapper prefers timeout(1) over a background watchdog"
+assert_contains "${sfs_bin}" 'timeout -k "${grace}s" "${timeout}s" bash "${self}" "$@"' "Bash sfs wrapper uses bounded timeout with kill grace when available"
+assert_contains "${sfs_bin}" ') </dev/null >/dev/null 2>&1 &' "Bash sfs fallback watchdog cannot keep PowerShell pipeline handles open"
 assert_contains "${sfs_bin}" '-y|--yes)' "Bash sfs accepts wrapper-level yes flag as a compatibility no-op"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd agent install all" "Windows CI PowerShell sfs.cmd agent install"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd start --id ci-sprint-test" "Windows CI sfs.cmd start smoke"
