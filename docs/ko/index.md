@@ -10,7 +10,7 @@ README 는 Solon Product 의 큰 흐름과 목차입니다. 이 디렉토리는 
 | 문서 | 언제 읽나 |
 |---|---|
 | [현재 제품 흐름과 최근 변화](./current-product-shape.md) | 최신 Solon 이 어떤 사용 감각으로 바뀌었는지 알고 싶을 때 |
-| [Windows SFS 래퍼 장애 요약 보고서](./windows-wrapper-incident-0.6.48.md) | Windows 에서 `sfs.cmd` 가 usage 만 출력하거나 빈 출력/한글 깨짐/upgrade 후 batch 오류를 보였던 원인과 조치가 궁금할 때 |
+| [Windows SFS 래퍼 장애 요약 보고서](./windows-wrapper-incident-0.6.49.md) | Windows 에서 `sfs.cmd` 가 usage 만 출력하거나 빈 출력/한글 깨짐/upgrade 후 batch 오류를 보였던 원인과 조치가 궁금할 때 |
 | [Solon 10x 가치](./10x-value.md) | 왜 Solon 이 단순 자동화가 아니라 사고/설계 근육을 키우려 하는지 알고 싶을 때 |
 | [30분 온보딩 가이드](../../GUIDE.md) | 설치 직후 첫 sprint 를 직접 돌려보고 싶을 때 |
 | [초보자 가이드](../../BEGINNER-GUIDE.md) | Git, 터미널, CLI 가 낯설 때 |
@@ -33,7 +33,7 @@ sfs status
 사용자가 product owner 로서 의도, 우선순위, 포기할 것, 검증 방식, 용어를 계속 더 선명하게
 잡도록 돕습니다.
 
-0.6.48 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩이
+0.6.49 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩이
 실제 안내로 채워졌습니다. 재무, 경리, 세무, 회계도 경영관리 관점으로 다룹니다. 사용자는 분야
 이름을 외울 필요가 없습니다. Solon 이 필요한 관점만 읽고, plan/review 에서는 사용자가 이해할 수
 있는 질문과 기준으로 풀어냅니다.

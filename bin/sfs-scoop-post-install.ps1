@@ -23,11 +23,112 @@ function Find-SfsProjectRoot([string] $StartDir) {
   return $null
 }
 
+function Resolve-SfsScoopRoot([string] $ScriptDir) {
+  if ($env:SCOOP -and (Test-Path -LiteralPath $env:SCOOP -PathType Container)) {
+    return $env:SCOOP
+  }
+
+  $item = Get-Item -LiteralPath $ScriptDir -ErrorAction SilentlyContinue
+  while ($item) {
+    if ($item.Name -ieq "scoop" -and
+        (Test-Path -LiteralPath (Join-Path $item.FullName "apps") -PathType Container)) {
+      return $item.FullName
+    }
+    $item = $item.Parent
+  }
+
+  if ($env:USERPROFILE) {
+    $fallback = Join-Path $env:USERPROFILE "scoop"
+    if (Test-Path -LiteralPath $fallback -PathType Container) {
+      return $fallback
+    }
+  }
+
+  return $null
+}
+
+function Install-SfsScoopShims([string] $ScriptDir) {
+  $scoopRoot = Resolve-SfsScoopRoot $ScriptDir
+  if (-not $scoopRoot) {
+    Write-Warning "Scoop root not found; generated shim hardening skipped"
+    return
+  }
+
+  $shimDir = Join-Path $scoopRoot "shims"
+  if (-not (Test-Path -LiteralPath $shimDir -PathType Container)) {
+    Write-Warning "Scoop shims directory not found: $shimDir; generated shim hardening skipped"
+    return
+  }
+
+  $cmdShim = @'
+@echo off
+setlocal EnableExtensions DisableDelayedExpansion
+
+set "SCRIPT_DIR=%~dp0"
+set "SFS_NATIVE_POWERSHELL=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
+set "SFS_NATIVE_SCRIPT=%SCRIPT_DIR%..\apps\sfs\current\bin\sfs.ps1"
+if not exist "%SFS_NATIVE_POWERSHELL%" set "SFS_NATIVE_POWERSHELL=powershell.exe"
+if not exist "%SFS_NATIVE_SCRIPT%" (
+  echo missing packaged SFS PowerShell entrypoint: %SFS_NATIVE_SCRIPT% 1>&2
+  exit /b 4
+)
+
+set "SFS_NATIVE_ARGC=0"
+:sfs_collect_args
+if "%~1"=="" goto sfs_args_done
+set /a SFS_NATIVE_ARGC+=1 >NUL
+for %%I in (%SFS_NATIVE_ARGC%) do set "SFS_NATIVE_ARG_%%I=%~1"
+shift
+goto sfs_collect_args
+
+:sfs_args_done
+setlocal EnableDelayedExpansion
+"%SFS_NATIVE_POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%SFS_NATIVE_SCRIPT%" & exit /b !ERRORLEVEL!
+'@
+
+  $psShim = @'
+$ErrorActionPreference = "Stop"
+$target = Join-Path $PSScriptRoot "..\apps\sfs\current\bin\sfs.ps1"
+if (-not (Test-Path -LiteralPath $target -PathType Leaf)) {
+  Write-Error "missing packaged SFS PowerShell entrypoint: $target"
+  exit 4
+}
+& $target @args
+exit $LASTEXITCODE
+'@
+
+  $bashShim = @'
+#!/usr/bin/env bash
+set -e
+
+if [ -n "${USERPROFILE:-}" ]; then
+  _sfs_win="${USERPROFILE}\\scoop\\apps\\sfs\\current\\bin\\sfs"
+else
+  _sfs_win="$HOME/scoop/apps/sfs/current/bin/sfs"
+fi
+
+if command -v cygpath >/dev/null 2>&1; then
+  _sfs_path="$(cygpath -u "$_sfs_win")"
+else
+  _sfs_path="${_sfs_win//\\//}"
+fi
+
+exec bash "$_sfs_path" "$@"
+'@
+
+  Set-Content -LiteralPath (Join-Path $shimDir "sfs.cmd") -Value $cmdShim -Encoding ASCII
+  Set-Content -LiteralPath (Join-Path $shimDir "sfs.ps1") -Value $psShim -Encoding ASCII
+  Set-Content -LiteralPath (Join-Path $shimDir "sfs") -Value $bashShim -Encoding ASCII
+  Write-Host "  [OK]   Scoop shims hardened: sfs.cmd, sfs.ps1, sfs"
+}
+
 # slash-command zero-file discovery hook.
 # Always runs on `scoop install sfs` and `scoop update sfs` (idempotent).
 # Project upgrade path below sets SFS_SKIP_CLI_DISCOVERY=1 to avoid running
 # the same hook twice when sfs upgrade also calls it.
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+Install-SfsScoopShims $scriptDir
+
 $discoveryPs1 = Join-Path (Split-Path -Parent $scriptDir) "scripts\install-cli-discovery.ps1"
 if (Test-Path $discoveryPs1) {
   $oldDiscoverySource = $env:SFS_DISCOVERY_SOURCE_DIR

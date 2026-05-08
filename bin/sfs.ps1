@@ -113,13 +113,13 @@ function Enable-SfsUtf8Bridge {
 }
 
 $SfsEnvArgs = Resolve-SfsEnvArgs
-$SfsArgs = Resolve-SfsArgs $SfsEnvArgs $SfsParamArgs $args
+$SfsArgs = Resolve-SfsArgs -ParamArgs $SfsEnvArgs -AutomaticArgs $SfsParamArgs -UnboundArgs $args
 if (-not $SfsArgs -or $SfsArgs.Count -eq 0) {
   $SfsCmdLineArgs = Resolve-SfsCmdLineArgs
-  $SfsArgs = Resolve-SfsArgs $SfsCmdLineArgs @() @()
+  $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsCmdLineArgs -AutomaticArgs @() -UnboundArgs @()
 }
 if (-not $SfsArgs -or $SfsArgs.Count -eq 0) {
-  $SfsArgs = Resolve-SfsArgs @() @() $MyInvocation.UnboundArguments
+  $SfsArgs = Resolve-SfsArgs -ParamArgs @() -AutomaticArgs @() -UnboundArgs $MyInvocation.UnboundArguments
 }
 Enable-SfsUtf8Bridge
 
@@ -209,7 +209,7 @@ function Invoke-ScoopSelfUpgrade([string[]] $Args) {
   exit $LASTEXITCODE
 }
 
-Invoke-ScoopSelfUpgrade $SfsArgs | Out-Null
+Invoke-ScoopSelfUpgrade -Args $SfsArgs | Out-Null
 
 $script:SfsNativeHandled = $false
 $script:SfsNativeExitCode = 0
@@ -590,10 +590,10 @@ function Invoke-SfsNativeReadonly([string[]] $Args) {
     "--help" { Show-SfsNativeUsage; Set-SfsNativeExit 0; return }
     "-v" { Invoke-SfsNativeVersion @("--check"); return }
     "--version" { Invoke-SfsNativeVersion @(); return }
-    "version" { Invoke-SfsNativeVersion $invocation.Rest; return }
-    "status" { Invoke-SfsNativeStatus $invocation.Rest; return }
-    "guide" { Invoke-SfsNativeGuide $invocation.Rest; return }
-    "context" { Invoke-SfsNativeContext $invocation.Rest; return }
+    "version" { Invoke-SfsNativeVersion -Args $invocation.Rest; return }
+    "status" { Invoke-SfsNativeStatus -Args $invocation.Rest; return }
+    "guide" { Invoke-SfsNativeGuide -Args $invocation.Rest; return }
+    "context" { Invoke-SfsNativeContext -Args $invocation.Rest; return }
     default {
       if ($env:SFS_NATIVE_ONLY -eq "1") {
         Write-SfsNativeError "native read-only fallback does not handle command: $($invocation.Command)"
@@ -604,7 +604,7 @@ function Invoke-SfsNativeReadonly([string[]] $Args) {
   }
 }
 
-Invoke-SfsNativeReadonly $SfsArgs
+Invoke-SfsNativeReadonly -Args $SfsArgs
 if ($script:SfsNativeHandled) {
   exit $script:SfsNativeExitCode
 }

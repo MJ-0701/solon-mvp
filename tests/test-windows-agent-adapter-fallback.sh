@@ -27,6 +27,7 @@ line_number() {
 
 cmd_wrapper="${DIST_DIR}/bin/sfs.cmd"
 ps_wrapper="${DIST_DIR}/bin/sfs.ps1"
+scoop_post_install="${DIST_DIR}/bin/sfs-scoop-post-install.ps1"
 scoop_template="${DIST_DIR}/packaging/scoop/sfs.json.template"
 windows_discovery="${DIST_DIR}/scripts/install-cli-discovery.ps1"
 codex_global_skill="${DIST_DIR}/templates/codex-skill/SKILL.md"
@@ -54,6 +55,15 @@ assert_contains "${scoop_template}" '"bin\\sfs.ps1"' "Scoop manifest uses PowerS
 if grep -Fq -- '"bin\\sfs.cmd"' "${scoop_template}"; then
   fail "Scoop manifest must not shim through bin\\sfs.cmd; generated cmd shims lost args in the field"
 fi
+assert_contains "${scoop_post_install}" "Install-SfsScoopShims" "Scoop post-install hardens generated shims"
+assert_contains "${scoop_post_install}" 'Set-Content -LiteralPath (Join-Path $shimDir "sfs.cmd")' "Scoop post-install overwrites sfs.cmd shim"
+assert_contains "${scoop_post_install}" 'Set-Content -LiteralPath (Join-Path $shimDir "sfs.ps1")' "Scoop post-install overwrites sfs.ps1 shim"
+assert_contains "${scoop_post_install}" 'Set-Content -LiteralPath (Join-Path $shimDir "sfs")' "Scoop post-install installs Git Bash sfs shim"
+assert_contains "${scoop_post_install}" 'set "SFS_NATIVE_ARGC=0"' "Scoop sfs.cmd shim initializes env arg bridge"
+assert_contains "${scoop_post_install}" 'set "SFS_NATIVE_ARG_%%I=%~1"' "Scoop sfs.cmd shim stores numbered args"
+assert_contains "${scoop_post_install}" '-File "%SFS_NATIVE_SCRIPT%" & exit /b !ERRORLEVEL!' "Scoop sfs.cmd shim exits on the same parsed line"
+assert_contains "${scoop_post_install}" '& $target @args' "Scoop sfs.ps1 shim forwards PowerShell args"
+assert_contains "${scoop_post_install}" 'exec bash "$_sfs_path" "$@"' "Scoop Git Bash shim forwards args"
 if grep -Fq -- "-Command \"& \$env:SFS_NATIVE_SCRIPT @args\"" "${cmd_wrapper}"; then
   fail "cmd wrapper must not rely on PowerShell -Command @args; Scoop shims lost args through that path"
 fi
@@ -90,9 +100,11 @@ assert_contains "${ps_wrapper}" 'SFS_NATIVE_ARG_$i' "ps1 reads numbered env args
 assert_contains "${ps_wrapper}" "Resolve-SfsCmdLineArgs" "ps1 cmdcmdline fallback"
 assert_contains "${ps_wrapper}" "CMDCMDLINE" "ps1 reads original cmd command line"
 assert_contains "${ps_wrapper}" "Split-SfsCommandLine" "ps1 command-line splitter"
-assert_contains "${ps_wrapper}" 'Resolve-SfsArgs $SfsCmdLineArgs @() @()' "ps1 cmdcmdline args fallback order"
-assert_contains "${ps_wrapper}" 'Resolve-SfsArgs $SfsEnvArgs $SfsParamArgs $args' "ps1 env/param/automatic args fallback"
-assert_contains "${ps_wrapper}" 'Resolve-SfsArgs @() @() $MyInvocation.UnboundArguments' "ps1 unbound args final fallback"
+assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs $SfsCmdLineArgs -AutomaticArgs @() -UnboundArgs @()' "ps1 cmdcmdline args fallback order"
+assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs $SfsEnvArgs -AutomaticArgs $SfsParamArgs -UnboundArgs $args' "ps1 env/param/automatic args fallback"
+assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs @() -AutomaticArgs @() -UnboundArgs $MyInvocation.UnboundArguments' "ps1 unbound args final fallback"
+assert_contains "${ps_wrapper}" 'Invoke-SfsNativeReadonly -Args $SfsArgs' "ps1 passes resolved args as one array"
+assert_contains "${ps_wrapper}" 'Invoke-ScoopSelfUpgrade -Args $SfsArgs' "ps1 self-upgrade sees the full resolved arg array"
 assert_contains "${ps_wrapper}" '$resolved[0] -eq "--%"' "ps1 stop-parsing token normalization"
 assert_contains "${ps_wrapper}" "Enable-SfsUtf8Bridge" "ps1 utf8 bridge"
 assert_contains "${ps_wrapper}" "Invoke-ScoopSelfUpgrade" "ps1 owns Scoop self-upgrade"

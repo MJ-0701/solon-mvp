@@ -11,12 +11,15 @@
 - `__SHA256__`: Scoop 이 실제로 내려받을 archive 의 SHA256
 - `__EXTRACT_DIR__`: archive 내부 루트 디렉터리. GitHub source zip 기준 보통 `solon-product-__VERSION__`
 
-manifest 는 `bin\\sfs.ps1` 을 통해 `sfs` / `sfs.cmd` shim 을 노출합니다. Scoop 이 생성하는
-PowerShell shim 이 primary entrypoint 이고, packaged `sfs.cmd` 는 직접 실행/호환용 thin
-trampoline 입니다. Windows native read-only 명령(`version`, `status`, `context cat/path`, `guide`)은
-`sfs.ps1` 이 처리합니다. 나머지 명령도 `sfs.cmd -> sfs.ps1 -> bin/sfs` bridge 로 넘깁니다.
-raw Git Bash `%*` 직행 경로, batch label forwarding, generated shim -> packaged `.cmd` 경로는
-Windows 기본 경로가 아닙니다.
+manifest 는 `bin\\sfs.ps1` 을 통해 `sfs` / `sfs.cmd` shim 을 노출합니다. 단, Scoop 이 생성한
+`sfs.cmd` / `sfs.ps1` shim 이 실제 Windows runner 에서 인자를 버리는 경로가 확인되어,
+post-install hook 이 shims 디렉터리의 `sfs.cmd`, `sfs.ps1`, extensionless `sfs` 를 deterministic
+wrapper 로 덮어씁니다. Windows PowerShell/cmd 의 사용자 진입점은 `sfs.cmd` 입니다. packaged
+`sfs.cmd` 는 직접 실행/호환용 thin trampoline 입니다. Windows native read-only 명령(`version`,
+`status`, `context cat/path`, `guide`)은 `sfs.ps1` 이 처리합니다. 나머지 명령도
+`sfs.cmd -> sfs.ps1 -> bin/sfs` bridge 로 넘깁니다. raw Git Bash `%*` 직행 경로, batch label
+forwarding, generated shim -> packaged `.cmd` 경로, generated `sfs.cmd` shim 경로는 Windows 기본
+경로가 아닙니다.
 
 설치/업데이트 뒤에는 `bin\\sfs-scoop-post-install.ps1` 도 실행합니다. 초기화된 Solon 프로젝트에서
 `scoop update sfs` 를 실행하면 이 hook 이 프로젝트 루트를 감지하고
@@ -35,7 +38,7 @@ PowerShell/cmd 예시에서는 `sfs.cmd ...` 를 명시적으로 씁니다. Git 
 ## 로컬 Windows 설치 검증
 
 GitHub Actions workflow 는 checkout 에서 로컬 source zip 을 만들고, `file:///` URL 을 가진 임시
-bucket manifest 를 렌더링한 뒤 아래 흐름을 실행합니다. 0.6.48 기준 smoke 는 먼저 로컬 이전
+bucket manifest 를 렌더링한 뒤 아래 흐름을 실행합니다. 0.6.49 기준 smoke 는 먼저 로컬 이전
 패키지를 설치하고, 같은 bucket 에 현재 패키지를 발행한 뒤 실제 `sfs.cmd upgrade` 로
 self-upgrade 를 검증합니다.
 

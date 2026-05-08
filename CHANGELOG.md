@@ -1,3 +1,30 @@
+## [0.6.49] - 2026-05-08
+
+> **Windows Scoop shim hardening.** The 0.6.48 GitHub Windows Scoop smoke run
+> `25539387684` proved that pinning the workflow to `sfs.cmd` was not enough:
+> the generated `sfs.cmd` shim still dropped `version` before packaged
+> `bin\sfs.ps1` could see it. Scoop post-install now overwrites the generated
+> `sfs.cmd`, `sfs.ps1`, and extensionless `sfs` shims with deterministic
+> wrappers owned by Solon.
+
+### Fixed
+
+- `bin/sfs-scoop-post-install.ps1` now hardens the Scoop shims directory after
+  every install/update. The `sfs.cmd` shim stores `%1..%n` as the numbered env
+  bridge and invokes packaged `sfs.ps1` on the same parsed line; the PowerShell
+  shim forwards `$args`; the Git Bash shim executes packaged `bin/sfs`.
+- `bin/sfs.ps1` now passes resolved arrays to internal PowerShell functions via
+  named parameters so multi-word commands such as `context cat kernel` cannot be
+  truncated by implicit argument enumeration.
+
+### Tests
+
+- Windows guardrails now require post-install shim hardening and the named-array
+  forwarding path inside `sfs.ps1`.
+- Windows wrapper incident reports are refreshed to the 0.6.49 baseline with
+  the P16 generated `sfs.cmd` shim finding, run `25539387684` evidence, and the
+  existing `ci-korean-sprint-test` smoke contract.
+
 ## [0.6.48] - 2026-05-08
 
 > **Windows PowerShell/cmd contract pinned to `sfs.cmd`.** The 0.6.47 GitHub
