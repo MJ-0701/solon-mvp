@@ -106,9 +106,51 @@ function Trim-SfsShellControlTail([string[]] $Items) {
   return [string[]] $trimmed
 }
 
+function Test-SfsCommandBoundaryBefore([string] $Line, [int] $Index) {
+  if ($Index -le 0) { return $true }
+  $before = [string] $Line[$Index - 1]
+  return ([char]::IsWhiteSpace($Line[$Index - 1]) -or
+    $before -eq '"' -or $before -eq "'" -or $before -eq '\' -or $before -eq '/')
+}
+
+function Test-SfsCommandBoundaryAfter([string] $Line, [int] $Index) {
+  if ($Index -ge $Line.Length) { return $true }
+  $after = [string] $Line[$Index]
+  if ([char]::IsWhiteSpace($Line[$Index]) -or
+      $after -eq '"' -or $after -eq "'" -or
+      $after -in @("&", "|", "<", ">")) { return $true }
+  return ($after -eq '\' -and ($Index + 1) -lt $Line.Length -and [string] $Line[$Index + 1] -eq '"')
+}
+
+function Resolve-SfsArgsAfterCommandName([string] $Line, [string] $Command) {
+  foreach ($match in [regex]::Matches($Line, [regex]::Escape($Command), [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)) {
+    $afterIndex = $match.Index + $match.Length
+    if (-not (Test-SfsCommandBoundaryBefore -Line $Line -Index $match.Index)) { continue }
+    if (-not (Test-SfsCommandBoundaryAfter -Line $Line -Index $afterIndex)) { continue }
+
+    $tail = $Line.Substring($afterIndex).TrimStart()
+    while ($tail.Length -gt 0) {
+      if ($tail.StartsWith('\"')) {
+        $tail = $tail.Substring(2).TrimStart()
+        continue
+      }
+      if ($tail.StartsWith('"') -or $tail.StartsWith("'")) {
+        $tail = $tail.Substring(1).TrimStart()
+        continue
+      }
+      break
+    }
+    return [string[]] (Trim-SfsShellControlTail (Split-SfsCommandLine $tail))
+  }
+  return [string[]] @()
+}
+
 function Resolve-SfsArgsFromCommandLine([string] $Line) {
   $line = $Line
   if (-not $line) { return [string[]] @() }
+
+  $cmdTail = Resolve-SfsArgsAfterCommandName -Line $line -Command "sfs.cmd"
+  if (Test-SfsUsableArgs $cmdTail) { return [string[]] $cmdTail }
 
   $tokens = Split-SfsCommandLine $line
   for ($i = 0; $i -lt $tokens.Count; $i++) {
@@ -119,14 +161,26 @@ function Resolve-SfsArgsFromCommandLine([string] $Line) {
     }
   }
 
-  $match = [regex]::Match($line, '(?i)sfs(?:\.cmd)?(?:"|\s|$)(.*)$')
-  if (-not $match.Success) { return [string[]] @() }
-  return [string[]] (Trim-SfsShellControlTail (Split-SfsCommandLine $match.Groups[1].Value.Trim()))
+  $cmdTail = Resolve-SfsArgsAfterCommandName -Line $line -Command "sfs"
+  if (Test-SfsUsableArgs $cmdTail) { return [string[]] $cmdTail }
+  return [string[]] @()
 }
 
 function Resolve-SfsSavedCmdLineArgs {
   $line = [Environment]::GetEnvironmentVariable("SFS_NATIVE_CMDLINE")
   return [string[]] (Resolve-SfsArgsFromCommandLine $line)
+}
+
+function Resolve-SfsParentCmdLineArgs {
+  try {
+    $self = Get-CimInstance -ClassName Win32_Process -Filter "ProcessId = $PID" -ErrorAction Stop
+    if (-not $self -or -not $self.ParentProcessId) { return [string[]] @() }
+    $parent = Get-CimInstance -ClassName Win32_Process -Filter "ProcessId = $($self.ParentProcessId)" -ErrorAction Stop
+    if (-not $parent -or -not $parent.CommandLine) { return [string[]] @() }
+    return [string[]] (Resolve-SfsArgsFromCommandLine $parent.CommandLine)
+  } catch {
+    return [string[]] @()
+  }
 }
 
 function Resolve-SfsCmdLineArgs {
@@ -156,6 +210,10 @@ if (-not (Test-SfsUsableArgs $SfsArgs)) {
 if (-not (Test-SfsUsableArgs $SfsArgs)) {
   $SfsSavedCmdLineArgs = Resolve-SfsSavedCmdLineArgs
   $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsSavedCmdLineArgs -AutomaticArgs @() -UnboundArgs @()
+}
+if (-not (Test-SfsUsableArgs $SfsArgs)) {
+  $SfsParentCmdLineArgs = Resolve-SfsParentCmdLineArgs
+  $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsParentCmdLineArgs -AutomaticArgs @() -UnboundArgs @()
 }
 if (-not (Test-SfsUsableArgs $SfsArgs)) {
   $SfsCmdLineArgs = Resolve-SfsCmdLineArgs

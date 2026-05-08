@@ -299,6 +299,61 @@ jobs:
             throw "saved cmdline fallback start did not append expected event: $lastEvent"
           }
 
+      - name: Smoke parent cmdline fallback
+        run: |
+          $env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"
+          $project = Join-Path $env:RUNNER_TEMP "sfs parent-cmdline-project"
+          New-Item -ItemType Directory -Force -Path $project | Out-Null
+          Set-Location $project
+
+          git init
+          sfs.cmd init --layout thin --yes
+          $ps1 = Join-Path $env:USERPROFILE "scoop\apps\sfs\current\bin\sfs.ps1"
+          if (-not (Test-Path $ps1)) { throw "missing installed sfs.ps1: $ps1" }
+
+          $probeCmd = Join-Path $project "sfs.cmd"
+          $powershellExe = Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe"
+          $probe = @"
+          @echo off
+          setlocal EnableExtensions DisableDelayedExpansion
+          set "SFS_NATIVE_ARGC=0"
+          set "SFS_NATIVE_RAW_ARGS="
+          set "SFS_NATIVE_CMDLINE="
+          "$powershellExe" -NoProfile -ExecutionPolicy Bypass -File "$ps1"
+          exit /b %ERRORLEVEL%
+          "@
+          Set-Content -Path $probeCmd -Value $probe -Encoding ASCII
+
+          function Invoke-ParentCmdline([string] $tail) {
+            $lines = & cmd.exe /d /c "`"$probeCmd`" $tail && `"$probeCmd`" --help >NUL" 2>&1
+            $exitCode = $LASTEXITCODE
+            $output = ($lines | Out-String)
+            if ($exitCode -ne 0) {
+              throw "parent cmdline fallback failed with exit ${exitCode}: $tail`n$output"
+            }
+            return $output
+          }
+
+          $parentVersion = Invoke-ParentCmdline "version"
+          if ($parentVersion -notmatch "sfs $env:SFS_TEST_VERSION") {
+            throw "parent cmdline fallback did not recover version: $parentVersion"
+          }
+
+          $parentContext = Invoke-ParentCmdline "context cat kernel"
+          if ($parentContext -notmatch "SFS Kernel") {
+            throw "parent cmdline fallback did not recover context cat kernel: $parentContext"
+          }
+
+          Invoke-ParentCmdline "start --id ci-parent-cmdline-test --force parent-cmdline-start" | Out-Null
+          $currentSprint = (Get-Content ".sfs-local\current-sprint" -First 1).Trim()
+          if ($currentSprint -ne "ci-parent-cmdline-test") {
+            throw "parent cmdline fallback start did not update current-sprint: $currentSprint"
+          }
+          $lastEvent = Get-Content ".sfs-local\events.jsonl" -Tail 1
+          if ($lastEvent -notmatch '"type":"sprint_start"' -or $lastEvent -notmatch '"goal":"parent-cmdline-start"') {
+            throw "parent cmdline fallback start did not append expected event: $lastEvent"
+          }
+
       - name: Smoke cmd PATH
         run: |
           $env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"

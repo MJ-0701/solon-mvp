@@ -1,3 +1,25 @@
+## [0.6.54] - 2026-05-08
+
+> **Windows parent command-line fallback.** The 0.6.53 GitHub Windows Scoop
+> smoke run `25546859759` still showed the first `sfs.cmd version` falling
+> through to usage-only output. The delayed-expansion saved-cmdline bridge was
+> present in the hardened shim, but did not recover the original wrapper command
+> line on the runner.
+
+### Fixed
+
+- `bin/sfs.ps1` now falls back to the parent `cmd.exe` process command line via
+  `Get-CimInstance -ClassName Win32_Process` when env args, raw args, and
+  `SFS_NATIVE_CMDLINE` are all unusable.
+- The parent command-line fallback uses the same `sfs.cmd` tail parser and
+  shell-control tail trimming as the saved-cmdline fallback, so chained command
+  lines still stop before `&& sfs.cmd --help`.
+- The command-line parser now extracts the tail after the `sfs.cmd` command
+  name before whitespace splitting, so parent command lines with spaces before
+  `sfs.cmd` in the path do not get split into fake arguments.
+- Windows guardrails, release verifier, and the incident report now record P21
+  with run `25546859759`.
+
 ## [0.6.53] - 2026-05-08
 
 > **Windows saved command-line bridge.** The 0.6.52 GitHub Windows Scoop smoke
