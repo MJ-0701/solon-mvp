@@ -27,6 +27,7 @@ line_number() {
 
 cmd_wrapper="${DIST_DIR}/bin/sfs.cmd"
 ps_wrapper="${DIST_DIR}/bin/sfs.ps1"
+upgrade_sh="${DIST_DIR}/upgrade.sh"
 scoop_post_install="${DIST_DIR}/bin/sfs-scoop-post-install.ps1"
 scoop_template="${DIST_DIR}/packaging/scoop/sfs.json.template"
 windows_discovery="${DIST_DIR}/scripts/install-cli-discovery.ps1"
@@ -147,11 +148,18 @@ assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs $SfsEnvArgs -Automat
 assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs @() -AutomaticArgs @() -UnboundArgs $MyInvocation.UnboundArguments' "ps1 unbound args final fallback"
 assert_contains "${ps_wrapper}" 'Invoke-SfsNativeReadonly -InvocationArgs $SfsArgs' "ps1 passes resolved args as one array"
 assert_contains "${ps_wrapper}" 'Invoke-ScoopSelfUpgrade -InvocationArgs $SfsArgs' "ps1 self-upgrade sees the full resolved arg array"
+assert_contains "${ps_wrapper}" "Resolve-SfsScoopCurrentScriptPath" "ps1 reloads through Scoop current after self-upgrade"
 assert_contains "${ps_wrapper}" '$reloadArgs = [string[]] @($InvocationArgs)' "ps1 self-upgrade reload preserves whole arg tokens"
+assert_contains "${ps_wrapper}" '$reloadScriptPath = Resolve-SfsScoopCurrentScriptPath $CurrentScriptPath' "ps1 resolves the post-update current script before reload"
+assert_contains "${ps_wrapper}" 'Write-SfsArgTrace "PS_RELOAD_SCRIPT" $reloadScriptPath' "ps1 traces self-upgrade reload script path"
 assert_contains "${ps_wrapper}" 'Write-SfsArgTrace "PS_RELOAD_ARGS" $reloadArgs' "ps1 traces self-upgrade reload args"
-assert_contains "${ps_wrapper}" '& $CurrentScriptPath @reloadArgs' "ps1 self-upgrade reload splats normalized arg array"
+assert_contains "${ps_wrapper}" '& $reloadScriptPath @reloadArgs' "ps1 self-upgrade reload splats normalized arg array"
 if grep -Fq '& $CurrentScriptPath @InvocationArgs' "${ps_wrapper}"; then
   echo "ps1 self-upgrade reload still splats possibly scalar InvocationArgs directly" >&2
+  exit 1
+fi
+if grep -Fq '& $CurrentScriptPath @reloadArgs' "${ps_wrapper}"; then
+  echo "ps1 self-upgrade reload still targets the pre-update script path" >&2
   exit 1
 fi
 assert_contains "${ps_wrapper}" '$bashArgs = [string[]] @($SfsArgs)' "ps1 bash bridge preserves whole arg tokens"
@@ -232,12 +240,18 @@ assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_WIN
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_ARGTRACE_PS_SELECTED_SOURCE=env" "Windows CI proves env bridge selected source"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_ARGTRACE_PS_FINAL_ARGS=.*version" "Windows CI proves version reaches sfs.ps1"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "Tee-Object -Variable upgradeTrace" "Windows CI streams upgrade logs live"
+if grep -Fq '$upgradeLines = & sfs.cmd upgrade' "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml"; then
+  fail "Windows CI must not assign the Tee-Object pipeline; assignment captures output and hides live trace logs"
+fi
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd upgrade live trace" "Windows CI groups upgrade trace logs"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd upgrade --yes" "Windows CI avoids interactive upgrade prompts while testing self-upgrade"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "timeout-minutes: 15" "Windows CI bounds the self-upgrade smoke step"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_NATIVE_CMDLINE" "Windows CI verifies hardened sfs.cmd shim cmdline bridge"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" '$shimText -notmatch "%\*"' "Windows CI verifies hardened sfs.cmd shim positional fallback"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd version" "Windows CI PowerShell sfs.cmd version"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd init --layout thin --yes" "Windows CI PowerShell sfs.cmd init"
+assert_contains "${upgrade_sh}" "sfs_is_ci" "upgrade.sh detects CI before reopening /dev/tty"
+assert_contains "${upgrade_sh}" 'if ! sfs_is_ci && [ ! -t 0 ] && [ -e /dev/tty ]; then' "upgrade.sh does not block GitHub Actions on interactive tty prompts"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd agent install all" "Windows CI PowerShell sfs.cmd agent install"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd start --id ci-sprint-test" "Windows CI sfs.cmd start smoke"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" '"goal":"sprint-create-test"' "Windows CI sprint_start goal evidence"

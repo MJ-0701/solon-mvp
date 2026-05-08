@@ -95,8 +95,14 @@ warn()  { printf "  %s⚠%s %s\n" "$C_YELLOW" "$C_RESET" "$*"; }
 err()   { printf "  %s✗%s %s\n" "$C_RED" "$C_RESET" "$*" >&2; }
 die()   { err "$*"; exit 1; }
 
-# pipe 대응
-if [ ! -t 0 ] && [ -e /dev/tty ]; then
+sfs_is_ci() {
+  case "${CI:-}" in 1|true|TRUE|yes|YES) return 0 ;; esac
+  case "${GITHUB_ACTIONS:-}" in 1|true|TRUE|yes|YES) return 0 ;; esac
+  return 1
+}
+
+# pipe 대응. CI must keep stdin non-interactive so prompts fall back to defaults.
+if ! sfs_is_ci && [ ! -t 0 ] && [ -e /dev/tty ]; then
   if { : < /dev/tty; } 2>/dev/null; then
     exec < /dev/tty
   fi

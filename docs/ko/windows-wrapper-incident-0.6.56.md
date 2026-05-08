@@ -63,6 +63,7 @@ Windows PowerShell/cmd runtime script 는 BOM 없는 UTF-8 파서 오인을
 | P21 | delayed expansion 도 GitHub runner 에서 wrapper 명령행을 복구하지 못할 수 있음 | 0.6.53 GitHub Windows Scoop smoke run `25546859759` 에서 최초 `sfs.cmd version` 이 여전히 usage-only 로 실패 | env/raw/saved command line 이 모두 비면 `sfs.ps1` 이 `Win32_Process` 로 parent `cmd.exe` command line 을 조회하고, 공백 split 전에 `sfs.cmd` 명령명 뒤의 꼬리를 추출해 child `CMDCMDLINE` 전에 파싱 |
 | P22 | fallback source 를 여러 개 둬도 child PowerShell 이 실제 argv 없이 시작될 수 있음 | 0.6.54 GitHub Windows Scoop smoke run `25548381094` 에서 post-install hardening 은 보였지만 최초 `sfs.cmd version` 이 다시 usage-only 로 실패 | 0.6.55 후보에서 `--% %SFS_NATIVE_RAW_ARGS%` 실험을 추가했지만 P23 trace 에서 supersede |
 | P23 | PowerShell-sensitive `$Args` 파라미터명이 살아 있는 env bridge 를 함수 경계에서 empty/help 로 무너뜨림 | 0.6.55 trace run `25554923214` 에서 `CMD_FIRST=version`, `PS_ENV_ARGS=version` 이 보였지만 처음에는 `PS_SELECTED_SOURCE=empty`, 이후에는 `PS_SELECTED_SOURCE=env`, `PS_FINAL_ARGS=version` 뒤에도 native dispatch 가 usage 를 출력 | usable guard 는 `$Items`, native dispatch/self-upgrade helper 는 `$InvocationArgs` 로 변경하고, `--% %SFS_NATIVE_RAW_ARGS%` dispatch 제거. Windows smoke 는 `SFS_ARGTRACE_PS_SELECTED_SOURCE=env` 와 `SFS_ARGTRACE_PS_FINAL_ARGS=.*version` 을 요구 |
+| P24 | Windows CI self-upgrade smoke 가 실제 runtime 버그가 아니라 interactive upgrade prompt 에서 멈출 수 있고, live trace 도 assignment 에 잡혀 보이지 않을 수 있음 | 0.6.56 trace run `25557503623` 이 `Smoke thin project in PowerShell` 에서 진행되지 않았고, `Tee-Object` pipeline 이 `$upgradeLines =` assignment 에 잡혀 `SFS_ARGTRACE_*` 가 Actions 로그에 즉시 나오지 않았습니다. code trace 상 `upgrade.sh` 가 CI Git Bash 에서 `/dev/tty` 를 다시 열어 `업그레이드 진행?` read 를 기다릴 수도 있었습니다 | CI 에서는 `/dev/tty` 재연결을 금지하고, smoke 는 `sfs.cmd upgrade --yes` 로 self-upgrade 를 검증. `Tee-Object` 는 assignment 없이 직접 stream 하고, self-upgrade reload 는 Scoop `current\bin\sfs.ps1` 로 재해석하며 `PS_RELOAD_SCRIPT` 를 trace |
 
 ## 사용자가 본 증상
 
@@ -327,7 +328,7 @@ PowerShell 에서 `scoop update` 후 `scoop update sfs` 를 직접 실행한 뒤
 - Windows smoke 는 `SFS_WINDOWS_ARG_TRACE=1` 로 `SFS_ARGTRACE_CMD_ARGC`,
   `SFS_ARGTRACE_PS_SELECTED_SOURCE=env`, `SFS_ARGTRACE_PS_FINAL_ARGS=.*version` 을 확인한 뒤에야
   `sfs.cmd version` 을 통과로 봅니다.
-- `tests/test-windows-wrapper-incident-report.sh` 는 이 보고서의 P1-P23 문제 요약, 0.6.56 문서 링크,
+- `tests/test-windows-wrapper-incident-report.sh` 는 이 보고서의 P1-P24 문제 요약, 0.6.56 문서 링크,
   Homebrew installed layout fallback 을 검증합니다.
 - `tests/test-docs-model-routing.sh` 는 source layout 과 Homebrew installed layout 의 문서 위치를
   함께 검증합니다.

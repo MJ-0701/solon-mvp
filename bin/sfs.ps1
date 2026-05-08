@@ -322,6 +322,21 @@ function Test-ScoopRuntime([string] $ScriptPath) {
   return ($ScriptPath -match "\\scoop\\apps\\sfs\\")
 }
 
+function Resolve-SfsScoopCurrentScriptPath([string] $ScriptPath) {
+  if (-not $ScriptPath) { return $ScriptPath }
+  $normalized = ($ScriptPath -replace "/", "\")
+  $match = [regex]::Match(
+    $normalized,
+    "^(?<root>.*\\scoop\\apps\\sfs\\)(?<version>[^\\]+)(?<tail>\\bin\\sfs\.ps1)$",
+    [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+  )
+  if (-not $match.Success) { return $ScriptPath }
+
+  $candidate = $match.Groups["root"].Value + "current" + $match.Groups["tail"].Value
+  if (Test-Path -LiteralPath $candidate -PathType Leaf) { return $candidate }
+  return $ScriptPath
+}
+
 function Add-SfsPowerShellModulePath([string] $ModuleRoot) {
   if (-not $ModuleRoot) { return }
   if (-not (Test-Path -LiteralPath $ModuleRoot -PathType Container)) { return }
@@ -471,8 +486,10 @@ function Invoke-ScoopSelfUpgrade([string[]] $InvocationArgs) {
   Write-Host "reloading installed sfs runtime..."
   $env:SFS_SKIP_SELF_UPGRADE = "1"
   $reloadArgs = [string[]] @($InvocationArgs)
+  $reloadScriptPath = Resolve-SfsScoopCurrentScriptPath $CurrentScriptPath
+  Write-SfsArgTrace "PS_RELOAD_SCRIPT" $reloadScriptPath
   Write-SfsArgTrace "PS_RELOAD_ARGS" $reloadArgs
-  & $CurrentScriptPath @reloadArgs
+  & $reloadScriptPath @reloadArgs
   exit $LASTEXITCODE
 }
 

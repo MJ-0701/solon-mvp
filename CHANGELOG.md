@@ -28,6 +28,16 @@
 - The post-Scoop reload now normalizes `InvocationArgs` into an explicit
   `string[]` before splatting, preventing `upgrade` from being replayed as the
   single-letter command `u` after runtime self-upgrade.
+- The post-Scoop reload now resolves through Scoop's `current\bin\sfs.ps1`
+  before replaying the command, so self-upgrade does not return to the
+  pre-update package path.
+- `upgrade.sh` no longer reopens `/dev/tty` in CI, and the Windows Scoop smoke
+  runs `sfs.cmd upgrade --yes` while teeing live trace output. This prevents the
+  GitHub runner from waiting forever at the interactive "continue upgrade"
+  prompt during self-upgrade verification.
+- The Windows Scoop smoke no longer assigns the `Tee-Object` upgrade pipeline
+  to a variable. That assignment captured output and hid live trace lines until
+  the command exited, so failures can now be traced from the last emitted line.
 - The final PowerShell-to-Git-Bash bridge now also normalizes `SfsArgs` into an
   explicit `string[]`, covering the single-token `upgrade` path after reload.
 
