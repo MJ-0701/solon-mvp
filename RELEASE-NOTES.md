@@ -26,6 +26,9 @@
   그대로 유지해서 Windows/Scoop runner 의 다른 인자 전달 모양도 계속 회복합니다.
 - Windows smoke 와 release verifier 는 이제 `SFS_ARGTRACE_PS_SELECTED_SOURCE=env` 와
   `SFS_ARGTRACE_PS_FINAL_ARGS=.*version` 을 확인한 뒤에야 `sfs.cmd version` 을 통과시킵니다.
+- `sfs.cmd upgrade` 는 Scoop self-upgrade 전에 `Microsoft.PowerShell.Utility` 를 명시 로드하고
+  `Get-FileHash` 존재를 확인합니다. GitHub Windows runner 에서 Scoop 이 zip hash 를 확인할 때
+  이 cmdlet 이 필요했습니다.
 - `SFS_WINDOWS_ARG_TRACE=1` 진단 모드도 추가되어, 다음 Windows runner 실패가 나면 batch `%*`,
   PowerShell `$args`, 최종 선택 source 를 로그에서 바로 볼 수 있습니다.
 - [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P23 으로 이

@@ -322,6 +322,17 @@ function Test-ScoopRuntime([string] $ScriptPath) {
   return ($ScriptPath -match "\\scoop\\apps\\sfs\\")
 }
 
+function Enable-SfsPowerShellUtility {
+  try {
+    Import-Module Microsoft.PowerShell.Utility -ErrorAction SilentlyContinue
+  } catch {
+  }
+  if (-not (Get-Command Get-FileHash -ErrorAction SilentlyContinue)) {
+    Write-Error "Get-FileHash is unavailable in this PowerShell session; Scoop self-upgrade cannot verify downloads."
+    exit 1
+  }
+}
+
 function Invoke-ScoopSelfUpgrade([string[]] $InvocationArgs) {
   if (-not (Test-SfsUpgradeCommand $InvocationArgs)) { return $false }
   if (Test-NoSelfUpgrade $InvocationArgs) { return $false }
@@ -333,6 +344,7 @@ function Invoke-ScoopSelfUpgrade([string[]] $InvocationArgs) {
     exit 1
   }
 
+  Enable-SfsPowerShellUtility
   Write-Host "global runtime self-upgrade:"
   Write-Host "  scoop update"
   & scoop update
