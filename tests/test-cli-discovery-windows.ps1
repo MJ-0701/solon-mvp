@@ -1,4 +1,4 @@
-# test-cli-discovery-windows.ps1 — Windows-side mirror of test-cli-discovery-macos.sh
+# test-cli-discovery-windows.ps1 - Windows-side mirror of test-cli-discovery-macos.sh
 #
 # Tests:
 #   T1  Codex skill copied to $HOME\.codex\skills\sfs\SKILL.md

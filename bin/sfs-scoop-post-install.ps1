@@ -35,12 +35,12 @@ if (Test-Path $discoveryPs1) {
     $env:SFS_DISCOVERY_SOURCE_DIR = (Split-Path -Parent $scriptDir)
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $discoveryPs1
   } catch {
-    Write-Warning "cli-discovery (scoop) hook failed: $($_.Exception.Message) — continuing"
+    Write-Warning "cli-discovery (scoop) hook failed: $($_.Exception.Message) - continuing"
   } finally {
     Restore-SfsEnvValue "SFS_DISCOVERY_SOURCE_DIR" $oldDiscoverySource
   }
 } else {
-  Write-Host "cli-discovery hook not found at $discoveryPs1 — slash-command discovery skipped"
+  Write-Host "cli-discovery hook not found at $discoveryPs1 - slash-command discovery skipped"
 }
 
 if ($env:SFS_SCOOP_PROJECT_UPGRADE -eq "0") {
@@ -77,7 +77,7 @@ try {
   if (-not $env:SFS_UPGRADE_LAYOUT) {
     $env:SFS_UPGRADE_LAYOUT = "thin"
   }
-  # cli-discovery already ran above — skip in sfs upgrade to avoid double-run
+  # cli-discovery already ran above - skip in sfs upgrade to avoid double-run
   $env:SFS_SKIP_CLI_DISCOVERY = "1"
 
   & $sfsCmd upgrade --no-self-upgrade

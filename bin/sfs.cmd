@@ -2,7 +2,6 @@
 setlocal EnableExtensions EnableDelayedExpansion
 
 set "SCRIPT_DIR=%~dp0"
-set "SFS_ORIGINAL_ARGS=%*"
 
 call :maybe_native_readonly %*
 if defined SFS_NATIVE_READONLY_DONE exit /b !ERRORLEVEL!
@@ -17,7 +16,7 @@ if not exist "%SCRIPT_DIR%sfs.ps1" (
   echo missing packaged SFS PowerShell entrypoint: %SCRIPT_DIR%sfs.ps1 1>&2
   exit /b 4
 )
-"%SFS_NATIVE_POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%sfs.ps1" %SFS_ORIGINAL_ARGS% & exit /b !ERRORLEVEL!
+"%SFS_NATIVE_POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%sfs.ps1" %* & exit /b !ERRORLEVEL!
 
 :maybe_native_readonly
 set "SFS_NATIVE_READONLY_DONE="
@@ -80,7 +79,7 @@ if not exist "%SCRIPT_DIR%sfs.ps1" (
 )
 set "SFS_OLD_NATIVE_ONLY=%SFS_NATIVE_ONLY%"
 set "SFS_NATIVE_ONLY=1"
-"%SFS_NATIVE_POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%sfs.ps1" %SFS_ORIGINAL_ARGS%
+"%SFS_NATIVE_POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%sfs.ps1" %*
 set "SFS_NATIVE_RC=%ERRORLEVEL%"
 if defined SFS_OLD_NATIVE_ONLY (
   set "SFS_NATIVE_ONLY=%SFS_OLD_NATIVE_ONLY%"

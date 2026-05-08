@@ -1,4 +1,4 @@
-# install-cli-discovery.ps1 — slash-command zero-file discovery hook (Windows)
+# install-cli-discovery.ps1 - slash-command zero-file discovery hook (Windows)
 #
 # Mirror of install-cli-discovery.sh. See that file for design rationale.
 # Idempotent + graceful (D7 = b).
@@ -85,7 +85,7 @@ function Should-PromotePriority([string]$key, [string]$currentFirst, [string]$de
   if ($ForcePromote -eq "1") { return $true }
   if (-not $currentFirst -or $currentFirst -eq $desiredFirst) { return $true }
   if (Test-PriorityMarker $key) {
-    Write-Warn "$label`: user-managed priority detected (first=$currentFirst) — respecting existing order"
+    Write-Warn "$label`: user-managed priority detected (first=$currentFirst) - respecting existing order"
     Write-Warn "  To force Solon first again: `$env:SFS_DISCOVERY_FORCE_PROMOTE=1; sfs upgrade"
     return $false
   }
@@ -232,7 +232,7 @@ function Discover-SourceDir {
 # ---------------------------------------------------------------------------
 function Install-ClaudeDiscovery {
   if (-not (Test-CommandExists "claude")) {
-    Write-Info "Claude Code: not on PATH — skip"
+    Write-Info "Claude Code: not on PATH - skip"
     return
   }
   $cv = (& claude --version 2>$null | Select-Object -First 1)
@@ -263,16 +263,16 @@ function Install-ClaudeDiscovery {
         Copy-Item -Recurse -Force "$tmp\plugins\solon\*" $pluginDest
         Write-Ok "Claude Code: plugin filesystem-direct deployed at ~/.claude/plugins/solon (A-2)"
       } else {
-        Write-Warn "Claude Code: git clone of $SolonRepo failed or missing plugins/solon — A-2 skipped"
+        Write-Warn "Claude Code: git clone of $SolonRepo failed or missing plugins/solon - A-2 skipped"
       }
     } catch {
-      Write-Warn "Claude Code: plugin filesystem-direct deploy failed — A-2 skipped"
+      Write-Warn "Claude Code: plugin filesystem-direct deploy failed - A-2 skipped"
       Write-Warn "  $($_.Exception.Message)"
     } finally {
       if (Test-Path $tmp) { Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue }
     }
   } else {
-    Write-Warn "Claude Code: git not on PATH — A-2 cannot deploy plugin filesystem"
+    Write-Warn "Claude Code: git not on PATH - A-2 cannot deploy plugin filesystem"
     Write-Warn "  Install git: winget install --id Git.Git"
   }
 
@@ -286,11 +286,11 @@ function Install-ClaudeDiscovery {
 # ---------------------------------------------------------------------------
 function Install-GeminiDiscovery {
   if (-not (Test-CommandExists "gemini")) {
-    Write-Info "Gemini CLI: not on PATH — skip"
+    Write-Info "Gemini CLI: not on PATH - skip"
     return
   }
   if (-not (Test-CommandExists "git")) {
-    Write-Warn "Gemini CLI: git not on PATH — extension install requires git"
+    Write-Warn "Gemini CLI: git not on PATH - extension install requires git"
     Write-Warn "  Install git: winget install --id Git.Git"
     Write-Warn "  Then retry:  gemini extensions install --consent https://github.com/$SolonRepo.git"
     return
@@ -306,7 +306,7 @@ function Install-GeminiDiscovery {
 
   $list = (& gemini extensions list 2>$null | Out-String)
   if ($list -match "solon|MJ-0701/solon-product") {
-    Write-Ok "Gemini CLI: solon extension already installed — skip"
+    Write-Ok "Gemini CLI: solon extension already installed - skip"
     Promote-GeminiPriority
     return
   }
@@ -327,7 +327,7 @@ function Install-GeminiDiscovery {
 function Install-CodexDiscovery {
   Discover-SourceDir
   if (-not $SourceDir -or -not (Test-Path "$SourceDir\templates\codex-skill\SKILL.md")) {
-    Write-Warn "Codex CLI: source bundle not found — skip"
+    Write-Warn "Codex CLI: source bundle not found - skip"
     Write-Warn "  (templates\codex-skill\SKILL.md missing under SourceDir)"
     return
   }
@@ -355,10 +355,10 @@ Write-Host ""
 
 @"
 Verify with:
-  sfs doctor            — check all three CLI discovery paths
-  claude  → /sfs        — Claude Code slash command autocomplete
-  gemini  → sfs status  — Gemini CLI command
-  codex   → `$sfs status — Codex CLI Skill invocation
+  sfs doctor            - check all three CLI discovery paths
+  claude  -> /sfs        - Claude Code slash command autocomplete
+  gemini  -> sfs status  - Gemini CLI command
+  codex   -> `$sfs status - Codex CLI Skill invocation
 
 If any step warned above, the manual recovery line printed alongside is
 the one-shot fix. The scoop install of `sfs` itself is unaffected.

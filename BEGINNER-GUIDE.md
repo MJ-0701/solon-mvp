@@ -90,7 +90,7 @@ sfs.cmd version --check
 sfs.cmd doctor      # ✅ 세 줄 (Claude / Gemini / Codex) 모두 보이면 OK
 ```
 
-성공하면 `sfs 0.6.40`, `status up-to-date` 같은 문장이 보입니다. Windows
+성공하면 `sfs 0.6.41`, `status up-to-date` 같은 문장이 보입니다. Windows
 PowerShell 이나 cmd 에서는 `sfs.cmd` 를 쓰고, Git Bash/WSL 에서는 `sfs` 를 쓰셔도 됩니다.
 
 ### 4. 테스트 프로젝트 폴더 만들기
@@ -229,7 +229,7 @@ Windows 의 Claude/Gemini/Codex 가 내부 명령을 실행할 때 Git Bash 시�
 0.6.37 부터는 `sfs.cmd upgrade` 도 실행 중인 batch 파일 안에서 직접 `scoop update sfs` 를
 실행하지 않습니다. `TIVE_READONLY_DONE` 또는 `LF_UPGRADE_DONE` 같은 조각 문자열이 보이면
 0.6.36 self-update 경로에서 발견된 문제이므로 `sfs.cmd update` 후 다시 확인하세요.
-0.6.40 부터는 `sfs.cmd context cat ...` 이나 `sfs.cmd start ...` 가 인자를 잃고 usage 만 출력하던
+0.6.41 기준으로는 `sfs.cmd context cat ...` 이나 `sfs.cmd start ...` 가 인자를 잃고 usage 만 출력하던
 Windows PowerShell `-File` 문제도 고쳤습니다. `e` 또는 `*` 같은 짧은 조각 문자열이 보이던
 self-update 잔여 문제도 같은 버전에서 막았습니다.
 

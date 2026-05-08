@@ -73,7 +73,7 @@ try {
     $argsForBash += "--layout"
     $argsForBash += $Layout
   }
-  # Skip the bash-side cli-discovery hook on Windows — the PS1 hook below runs
+  # Skip the bash-side cli-discovery hook on Windows - the PS1 hook below runs
   # natively for PowerShell-aware paths (settings.json, scoop layout, etc.)
   $env:SFS_SKIP_CLI_DISCOVERY = "1"
   & $bash (Convert-ToBashPath $upgradeSh) @argsForBash
@@ -86,12 +86,12 @@ try {
       $env:SFS_DISCOVERY_SOURCE_DIR = $sourceDir
       & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $discoveryPs1
     } catch {
-      Write-Warning "cli-discovery (Windows) hook failed: $($_.Exception.Message) — continuing"
+      Write-Warning "cli-discovery (Windows) hook failed: $($_.Exception.Message) - continuing"
     } finally {
       $env:SFS_DISCOVERY_SOURCE_DIR = $null
     }
   } else {
-    Write-Warning "cli-discovery hook not found at $discoveryPs1 — skip"
+    Write-Warning "cli-discovery hook not found at $discoveryPs1 - skip"
   }
 
   exit $upgradeExit

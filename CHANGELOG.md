@@ -1,9 +1,40 @@
+## [0.6.41] - 2026-05-08
+
+> **Windows PowerShell 5.1 / Scoop shim hardening.** The 0.6.40 source and
+> package checks passed locally, but the real GitHub Windows Scoop smoke still
+> failed before project smoke: Scoop post-install parsed a BOM-less UTF-8
+> PowerShell script as legacy ANSI, and `sfs version` still fell through to
+> usage because cached batch arguments were empty under the Scoop shim path.
+
+### Fixed
+
+- Windows PowerShell/cmd scripts are now ASCII-only. This avoids Windows
+  PowerShell 5.1 parser corruption when BOM-less UTF-8 strings such as em
+  dashes or arrows are decoded through a legacy code page during Scoop
+  post-install.
+- `bin/sfs.cmd` no longer caches `%*` into `SFS_ORIGINAL_ARGS`. Both native
+  read-only dispatch and non-native PowerShell bridge calls forward the
+  call-label `%*` directly to `sfs.ps1`, matching the path that Windows/Scoop
+  actually preserves.
+
+### Tests
+
+- Windows wrapper guardrails now fail if any packaged `.ps1` / `.cmd` file
+  contains non-ASCII bytes.
+- Guardrails and release verification now reject `SFS_ORIGINAL_ARGS` and require
+  direct `%*` forwarding on the same parsed line as `exit /b !ERRORLEVEL!`.
+- The Windows wrapper incident report is updated to the 0.6.41 baseline with the
+  PowerShell 5.1 parser and Scoop shim argument findings.
+
 ## [0.6.40] - 2026-05-08
 
 > **Windows `sfs.cmd` exit/parser follow-up.** The 0.6.39 source tests passed,
 > but the real GitHub Windows Scoop smoke still failed: `sfs version` printed
 > usage through the Scoop shim, and `install-cli-discovery.ps1` hit a Windows
 > PowerShell parser error during post-install.
+> This release was superseded by 0.6.41 after the real Windows Scoop smoke
+> showed that BOM-less UTF-8 PowerShell scripts and cached batch args still
+> failed under Windows PowerShell 5.1 / Scoop shims.
 
 ### Fixed
 
