@@ -35,6 +35,7 @@ SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" init --la
 
 sprint_id="2026-W19-sprint-done"
 sprint_dir=".sfs-local/sprints/${sprint_id}"
+shared_report="docs/solon/retention/$(date +%Y%m%d)/report.md"
 mkdir -p "${sprint_dir}" .sfs-local/queue/pending .sfs-local/decisions
 touch .sfs-local/sprints/.gitkeep
 touch .sfs-local/queue/pending/.gitkeep
@@ -55,7 +56,8 @@ assert_contains "${apply_out}" "retention:" "apply retention summary"
 assert_contains "${apply_out}" "events: 4 historical line(s) pruned" "apply event pruning"
 assert_contains "${apply_out}" "residue:" "apply residue summary"
 
-[[ -f "${sprint_dir}/report.md" ]] || fail "report.md should remain as durable sprint outcome"
+[[ -f "${shared_report}" ]] || fail "shared report.md should remain as durable sprint outcome"
+[[ ! -e "${sprint_dir}/report.md" ]] || fail "private sprint report.md should not remain"
 [[ ! -e "${sprint_dir}/brainstorm.md" ]] || fail "brainstorm.md should be removed from visible sprint folder"
 [[ ! -e "${sprint_dir}/review.md" ]] || fail "review.md should be removed from visible sprint folder"
 [[ ! -e .sfs-local/events.jsonl ]] || fail "events.jsonl should be deleted when no active-state lines remain"

@@ -27,7 +27,7 @@ AI 시대에 Solon 이 주는 가치는 [Solon 10x 가치](./docs/ko/10x-value.m
 
 ## 1. 설치와 초기화
 
-> **0.6.58 기준** brew/scoop 한 줄이면 Claude Code, Gemini CLI, Codex CLI 가 모두
+> **0.6.59 기준** brew/scoop 한 줄이면 Claude Code, Gemini CLI, Codex CLI 가 모두
 > Solon 을 찾습니다. 별도 plugin/extension 설치 명령을 기억하지 않아도 됩니다.
 
 Mac:
@@ -78,7 +78,7 @@ sfs.cmd status
 사용자가 읽을 문서와 작업 기록을 중심으로 남깁니다. AI 도구별 native 파일이 꼭 필요한 팀만
 `sfs agent install all` 로 추가 설치하면 됩니다.
 
-0.6.58 기준으로는 분야별 지식팩이 실제 안내로 채워져 있습니다. 사용자가 backend, QA, infra, 재무,
+0.6.59 기준으로는 분야별 지식팩이 실제 안내로 채워져 있습니다. 사용자가 backend, QA, infra, 재무,
 세무, 회계 같은 말을 정확히 몰라도 괜찮습니다. Solon 을 쓰는 AI 가 작업 성격을 보고 필요한
 관점만 읽고, 사용자에게는 평범한 질문과 판단 기준으로 풀어 설명하는 쪽이 기본입니다.
 
@@ -322,11 +322,16 @@ sfs retro
 
 `retro` 는 sprint 를 마무리하는 명령입니다. 한 번 실행하면 다음을 함께 처리합니다.
 
-- `retro.md` 를 회고로 정리
-- `report.md` 가 없으면 만들거나 최신 내용으로 정리
+- `docs/solon/<workspace>/<yyyyMMdd>/retro.md` 를 회고로 정리
+- `docs/solon/<workspace>/<yyyyMMdd>/report.md` 가 없으면 만들거나 최신 내용으로 정리
 - 길어진 임시 기록을 private archive 로 접어 다음 사람이 볼 표면을 정리
 - sprint 상태를 close
 - local close commit 생성
+
+`<workspace>` 는 기본적으로 `sfs start "<goal>"` 의 goal 텍스트를 path-safe 하게 정리한 값입니다.
+예를 들어 `sfs start "결제 오류 수정"` 으로 시작한 작업은 `docs/solon/결제-오류-수정/<yyyyMMdd>/`
+아래에 인계 문서를 남깁니다. `report.md` 와 `retro.md` 본문은 커밋 메시지 규칙과 같이
+사용자의 native/workspace 언어로 작성해도 됩니다.
 
 그래서 일반적인 흐름은 `sfs review -> sfs retro` 두 단계로 끝납니다. 보고서만 먼저
 보고 싶거나 sprint 를 닫지 않고 회고 초안만 열고 싶을 때 쓰는 옵션은 §11 에
@@ -439,7 +444,7 @@ PowerShell bridge 를 거쳐 Bash runtime 으로 내려갑니다. 그래도 상�
 0.6.37 부터 `sfs.cmd upgrade` 도 실행 중인 batch 파일 안에서 직접 `scoop update sfs` 를 실행하지
 않고, `sfs.ps1` self-upgrade 경로로 넘깁니다. `TIVE_READONLY_DONE` 또는 `LF_UPGRADE_DONE` 같은
 조각 문자열이 명령처럼 보이면 0.6.36 self-update 경로에서 발견된 batch replacement 문제입니다.
-0.6.58 기준으로는 Windows PowerShell/cmd 의 성공 기준을 `sfs.cmd` 경로로 고정합니다.
+0.6.59 기준으로는 Windows PowerShell/cmd 의 성공 기준을 `sfs.cmd` 경로로 고정합니다.
 Scoop manifest 는 generated shim 을 packaged `bin\sfs.ps1` 로 직접 연결하지만, generated
 `sfs.cmd` / `sfs.ps1` shim 이 인자를 버리는 경로가 확인되어 post-install hook 이 shims
 디렉터리의 `sfs.cmd`, `sfs.ps1`, extensionless `sfs` 를 deterministic wrapper 로 덮어씁니다.
@@ -460,7 +465,7 @@ saved raw tail 도 automatic `$args` 로 함께 넘깁니다. 이는 generated S
 PowerShell 에서 `scoop update` 후 `scoop update sfs` 를 직접 실행한 뒤 프로젝트 폴더에서
 `sfs.cmd upgrade --no-self-upgrade` 를 실행하세요.
 
-0.6.58 기준 brew/scoop 가 세 CLI 모두에 자동 등록합니다. 그래도
+0.6.59 기준 brew/scoop 가 세 CLI 모두에 자동 등록합니다. 그래도
 `/sfs` 가 안 나오면 아래 명령으로 상태를 확인해 주세요.
 
 ```bash
@@ -490,9 +495,9 @@ sfs.cmd update
 
 ### 완료된 sprint 는 무엇을 보면 되나?
 
-팀과 공유할 요약은 `docs/solon/` 를 봅니다. 진행 중인 private sprint 는
-`.sfs-local/sprints/<sprint-id>/report.md` 를 먼저 보고, 더 자세한 배경은 필요한 경우에만
-private archive 또는 retro 를 봅니다.
+팀과 공유할 요약은 `docs/solon/<workspace>/<yyyyMMdd>/report.md` 와 `retro.md` 를 봅니다.
+진행 중인 private workbench 는 `.sfs-local/sprints/<sprint-id>/` 에 있고, 더 자세한 배경은
+필요한 경우에만 private archive 를 봅니다.
 
 ### Claude, Codex, Gemini 를 팀처럼 써도 되나?
 

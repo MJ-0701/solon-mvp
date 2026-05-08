@@ -4,6 +4,8 @@ gate_number: 7
 gate_label: "Gate 7 (Retro)"
 gate_id: G5
 sprint_id: ""
+workspace: ""
+handoff_dir: ""
 goal: ""
 created_at: ""
 last_touched_at: ""
@@ -11,6 +13,8 @@ closed_at: ""
 ---
 
 # 회고
+
+> 이 문서는 사용자의 native/workspace 언어로 작성한다.
 
 ## 1. 계속할 것
 

@@ -1,3 +1,34 @@
+## [0.6.59] - 2026-05-09
+
+> **Shared handoff docs under `docs/solon`.** Sprint close artifacts now live
+> in the repository's shared documentation surface instead of the private
+> `.sfs-local` sprint folder.
+
+### Changed
+
+- `sfs report` now creates or updates
+  `docs/solon/<workspace>/<yyyyMMdd>/report.md`. `<workspace>` defaults to the
+  path-safe form of the `sfs start "<goal>"` text, so `sfs start "결제 오류 수정"`
+  writes handoff docs under `docs/solon/결제-오류-수정/<yyyyMMdd>/`.
+- `sfs retro` and `sfs retro --draft` now create or update the matching
+  `docs/solon/<workspace>/<yyyyMMdd>/retro.md`.
+- Legacy `.sfs-local/sprints/<id>/report.md` or `retro.md` files are migrated
+  to the shared handoff location when possible; conflicting legacy copies are
+  moved into the sprint cold archive instead of staying as visible residue.
+- `sfs retro` close commits now stage the shared `docs/solon/` handoff docs
+  along with `.sfs-local` state cleanup.
+- Report/retro templates and routed tidy context now state that handoff prose
+  should use the user's native/workspace language, matching the commit-message
+  language rule.
+
+### Tests
+
+- Added `test-sfs-shared-handoff-docs.sh`, covering Korean `sfs start` goal
+  based path generation, shared report/retro creation, native-language template
+  guidance, and auto-close commit staging.
+- Extended tidy retention and native-language guardrail tests for the new
+  shared handoff location.
+
 ## [0.6.58] - 2026-05-09
 
 > **Strict `.sfs-local` retention for tidy.** `sfs tidy` now follows the

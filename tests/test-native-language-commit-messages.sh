@@ -40,6 +40,9 @@ INSTALL="${DIST_DIR}/install.sh"
 UPGRADE="${DIST_DIR}/upgrade.sh"
 UNINSTALL="${DIST_DIR}/uninstall.sh"
 IMPLEMENT_SCRIPT="${DIST_DIR}/templates/.sfs-local-template/scripts/sfs-implement.sh"
+TIDY_CONTEXT="${DIST_DIR}/templates/.sfs-local-template/context/commands/tidy.md"
+REPORT_TEMPLATE="${DIST_DIR}/templates/.sfs-local-template/sprint-templates/report.md"
+RETRO_TEMPLATE="${DIST_DIR}/templates/.sfs-local-template/sprint-templates/retro.md"
 
 if [[ ! -f "${README}" && -f "${DIST_DIR}/../README.md" ]]; then
   README="${DIST_DIR}/../README.md"
@@ -71,6 +74,9 @@ assert_contains "${INSTALL}" 'git commit -m "설치: solon-product $SOLON_VERSIO
 assert_contains "${UPGRADE}" 'git commit -m "업그레이드: solon-mvp $CUR_VER → $NEW_VER"' "upgrade Korean commit"
 assert_contains "${UNINSTALL}" 'git commit -m "제거: solon-product"' "uninstall Korean commit"
 assert_contains "${IMPLEMENT_SCRIPT}" "commit language: proposed/actual commit messages default" "implement script native language"
+assert_contains "${TIDY_CONTEXT}" "Report/retro prose should use the user's native/workspace language" "handoff native language"
+assert_contains "${REPORT_TEMPLATE}" "native/workspace 언어" "report native language"
+assert_contains "${RETRO_TEMPLATE}" "native/workspace 언어" "retro native language"
 
 assert_not_contains "${INSTALL}" 'git commit -m "chore: install solon-product' "install no English chore"
 assert_not_contains "${UPGRADE}" 'git commit -m "chore: upgrade solon-mvp' "upgrade no English chore"

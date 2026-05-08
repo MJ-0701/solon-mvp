@@ -34,6 +34,7 @@ SFS_VERSION_FILE="${SFS_LOCAL_DIR}/VERSION"
 SFS_SPRINTS_DIR="${SFS_LOCAL_DIR}/sprints"
 SFS_DECISIONS_DIR="${SFS_LOCAL_DIR}/decisions"
 SFS_ARCHIVES_DIR="${SFS_LOCAL_DIR}/archives"
+SFS_SHARED_DOCS_DIR="${SFS_SHARED_DOCS_DIR:-docs/solon}"
 SFS_PROJECT_TEMPLATES_DIR="${SFS_LOCAL_DIR}/sprint-templates"
 SFS_RUNTIME_TEMPLATES_DIR="${SFS_RUNTIME_DIR}/sprint-templates"
 SFS_PROJECT_DECISIONS_TEMPLATE_DIR="${SFS_LOCAL_DIR}/decisions-template"
@@ -391,6 +392,80 @@ sfs_yaml_quote() {
   printf '"%s"' "${value}"
 }
 
+sfs_path_segment_from_text() {
+  local text="${1:-}" fallback="${2:-workspace}" segment
+  segment="$(printf '%s' "${text}" \
+    | sed -E 's#[/\\:*?"<>|]+#-#g; s/[[:space:]]+/-/g; s/[.][.]+/-/g; s/^-+//; s/-+$//; s/^[.]+//; s/[.]+$//')"
+  if [[ -z "${segment}" ]]; then
+    segment="$(printf '%s' "${fallback}" \
+      | sed -E 's#[/\\:*?"<>|]+#-#g; s/[[:space:]]+/-/g; s/[.][.]+/-/g; s/^-+//; s/-+$//; s/^[.]+//; s/[.]+$//')"
+  fi
+  [[ -n "${segment}" ]] || segment="workspace"
+  printf '%s\n' "${segment}"
+}
+
+sfs_workspace_for_sprint() {
+  local sid="${1:?sprint id required}" goal workspace
+  goal="$(sfs_goal_for_sprint "${sid}" || true)"
+  if [[ -n "${goal}" ]]; then
+    workspace="$(sfs_path_segment_from_text "${goal}" "${sid}")"
+  else
+    workspace="$(sfs_path_segment_from_text "${sid}" "workspace")"
+  fi
+  printf '%s\n' "${workspace}"
+}
+
+sfs_date_dir_from_ts() {
+  local ts="${1:-}" date_dir
+  date_dir="$(printf '%s\n' "${ts}" | sed -nE 's/^([0-9]{4})-([0-9]{2})-([0-9]{2}).*/\1\2\3/p')"
+  if [[ -z "${date_dir}" ]]; then
+    date_dir="$(date +%Y%m%d 2>/dev/null || date -u +%Y%m%d)"
+  fi
+  printf '%s\n' "${date_dir}"
+}
+
+sfs_shared_handoff_dir() {
+  local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
+  local workspace date_dir
+  workspace="$(sfs_workspace_for_sprint "${sid}")"
+  date_dir="$(sfs_date_dir_from_ts "${ts}")"
+  printf '%s/%s/%s\n' "${SFS_SHARED_DOCS_DIR}" "${workspace}" "${date_dir}"
+}
+
+sfs_shared_sprint_doc_path() {
+  local sid="${1:?sprint id required}" ts="${2:?timestamp required}" doc="${3:?doc name required}"
+  case "${doc}" in
+    report|retro) ;;
+    *)
+      echo "invalid shared handoff doc: ${doc}" >&2
+      return ${SFS_EXIT_UNKNOWN}
+      ;;
+  esac
+  printf '%s/%s.md\n' "$(sfs_shared_handoff_dir "${sid}" "${ts}")" "${doc}"
+}
+
+sfs_move_legacy_sprint_doc_as_needed() {
+  local sid="${1:?sprint id required}" ts="${2:?timestamp required}" doc="${3:?doc name required}" shared_path="${4:?shared path required}"
+  local legacy_path="${SFS_SPRINTS_DIR}/${sid}/${doc}.md"
+  [[ -f "${legacy_path}" ]] || return 0
+
+  if [[ ! -f "${shared_path}" ]]; then
+    mkdir -p "$(dirname "${shared_path}")" || return ${SFS_EXIT_PERM}
+    mv "${legacy_path}" "${shared_path}" || return ${SFS_EXIT_PERM}
+    return 0
+  fi
+
+  if cmp -s "${legacy_path}" "${shared_path}" 2>/dev/null; then
+    rm -f "${legacy_path}" || return ${SFS_EXIT_PERM}
+    return 0
+  fi
+
+  local archive_dir
+  archive_dir="$(sfs_workbench_archive_dir "${sid}" "${ts}")"
+  mkdir -p "${archive_dir}" || return ${SFS_EXIT_PERM}
+  mv "${legacy_path}" "${archive_dir}/legacy-${doc}.md" || return ${SFS_EXIT_PERM}
+}
+
 sfs_update_sprint_doc_identity() {
   local path="${1:?path required}" sid="${2:?sprint id required}" ts="${3:?timestamp required}"
   local goal
@@ -676,25 +751,31 @@ update_frontmatter() {
 # ─────────────────────────────────────────────────────────────────────
 
 # sfs_prepare_sprint_report <sprint-id> <iso-ts> <status>
-# Ensures `<sprint>/report.md` exists and updates report frontmatter.
+# Ensures `docs/solon/<workspace>/<yyyyMMdd>/report.md` exists and updates
+# report frontmatter. Workspace defaults to the `sfs start "<goal>"` text.
 # stdout: report path
 sfs_prepare_sprint_report() {
   local sid="${1:?sprint id required}" ts="${2:?timestamp required}" status="${3:-draft}"
   local sdir="${SFS_SPRINTS_DIR}/${sid}"
-  local report_path="${sdir}/report.md"
+  local report_path
   local created_report=0
-  local template
+  local template workspace handoff_dir
   template="$(sfs_sprint_template_file report)"
+  report_path="$(sfs_shared_sprint_doc_path "${sid}" "${ts}" report)"
+  handoff_dir="$(dirname "${report_path}")"
+  workspace="$(sfs_workspace_for_sprint "${sid}")"
 
   if [[ ! -d "${sdir}" ]]; then
     echo "sprint not found: ${sid}" >&2
     return ${SFS_EXIT_NO_INIT}
   fi
+  sfs_move_legacy_sprint_doc_as_needed "${sid}" "${ts}" "report" "${report_path}" || return ${SFS_EXIT_PERM}
   if [[ ! -f "${report_path}" ]]; then
     if [[ ! -f "${template}" ]]; then
       echo "template missing: ${template}" >&2
       return ${SFS_EXIT_NO_TEMPLATES}
     fi
+    mkdir -p "${handoff_dir}" || return ${SFS_EXIT_PERM}
     cp "${template}" "${report_path}" || return ${SFS_EXIT_PERM}
     created_report=1
   fi
@@ -702,6 +783,8 @@ sfs_prepare_sprint_report() {
   update_frontmatter "${report_path}" "phase" "report" || return ${SFS_EXIT_PERM}
   update_frontmatter "${report_path}" "status" "${status}" || return ${SFS_EXIT_PERM}
   update_frontmatter "${report_path}" "sprint_id" "$(sfs_yaml_quote "${sid}")" || return ${SFS_EXIT_PERM}
+  update_frontmatter "${report_path}" "workspace" "$(sfs_yaml_quote "${workspace}")" || return ${SFS_EXIT_PERM}
+  update_frontmatter "${report_path}" "handoff_dir" "$(sfs_yaml_quote "${handoff_dir}")" || return ${SFS_EXIT_PERM}
   if [[ "${created_report}" -eq 1 ]]; then
     update_frontmatter "${report_path}" "created_at" "$(sfs_yaml_quote "${ts}")" || return ${SFS_EXIT_PERM}
   fi
@@ -715,6 +798,52 @@ sfs_prepare_sprint_report() {
     update_frontmatter "${report_path}" "closed_at" "$(sfs_yaml_quote "${ts}")" || return ${SFS_EXIT_PERM}
   fi
   printf '%s\n' "${report_path}"
+}
+
+# sfs_prepare_sprint_retro <sprint-id> <iso-ts>
+# Ensures `docs/solon/<workspace>/<yyyyMMdd>/retro.md` exists and updates
+# retro frontmatter. Document content is intentionally native/workspace language.
+# stdout: retro path
+sfs_prepare_sprint_retro() {
+  local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
+  local sdir="${SFS_SPRINTS_DIR}/${sid}"
+  local retro_path template workspace handoff_dir
+  template="$(sfs_sprint_template_file retro)"
+  retro_path="$(sfs_shared_sprint_doc_path "${sid}" "${ts}" retro)"
+  handoff_dir="$(dirname "${retro_path}")"
+  workspace="$(sfs_workspace_for_sprint "${sid}")"
+
+  if [[ ! -d "${sdir}" ]]; then
+    echo "sprint not found: ${sid}" >&2
+    return ${SFS_EXIT_NO_INIT}
+  fi
+  sfs_move_legacy_sprint_doc_as_needed "${sid}" "${ts}" "retro" "${retro_path}" || return ${SFS_EXIT_PERM}
+  if [[ ! -f "${retro_path}" ]]; then
+    if [[ ! -f "${template}" ]]; then
+      echo "template missing: ${template}" >&2
+      return ${SFS_EXIT_NO_TEMPLATES}
+    fi
+    mkdir -p "${handoff_dir}" || return ${SFS_EXIT_PERM}
+    cp "${template}" "${retro_path}" || return ${SFS_EXIT_PERM}
+    if grep -q '{{SPRINT_ID}}' "${retro_path}"; then
+      local local_tmp
+      local_tmp="$(mktemp "${retro_path}.XXXXXX")" || return ${SFS_EXIT_PERM}
+      awk -v sid="${sid}" '{ gsub(/\{\{SPRINT_ID\}\}/, sid); print }' "${retro_path}" > "${local_tmp}" \
+        && mv "${local_tmp}" "${retro_path}" || return ${SFS_EXIT_PERM}
+    fi
+  fi
+
+  update_frontmatter "${retro_path}" "phase" "retro" || return ${SFS_EXIT_PERM}
+  update_frontmatter "${retro_path}" "sprint_id" "$(sfs_yaml_quote "${sid}")" || return ${SFS_EXIT_PERM}
+  update_frontmatter "${retro_path}" "workspace" "$(sfs_yaml_quote "${workspace}")" || return ${SFS_EXIT_PERM}
+  update_frontmatter "${retro_path}" "handoff_dir" "$(sfs_yaml_quote "${handoff_dir}")" || return ${SFS_EXIT_PERM}
+  update_frontmatter "${retro_path}" "last_touched_at" "$(sfs_yaml_quote "${ts}")" || return ${SFS_EXIT_PERM}
+  local goal
+  goal="$(sfs_goal_for_sprint "${sid}" || true)"
+  if [[ -n "${goal}" ]]; then
+    update_frontmatter "${retro_path}" "goal" "$(sfs_yaml_quote "${goal}")" || return ${SFS_EXIT_PERM}
+  fi
+  printf '%s\n' "${retro_path}"
 }
 
 # sfs_workbench_archive_dir <sprint-id> <iso-ts>
@@ -837,8 +966,8 @@ sfs_archive_sprint_cold_bundle() {
     echo
     echo "policy:"
     echo "- visible files must have a one-line keep reason"
-    echo "- report.md remains because it is the final sprint outcome"
-    echo "- retro.md remains because it records close/learning notes when present"
+    echo "- report.md remains in docs/solon/<workspace>/<yyyyMMdd>/ because it is the final sprint outcome"
+    echo "- retro.md remains in docs/solon/<workspace>/<yyyyMMdd>/ because it records close/learning notes when present"
     echo "- raw brainstorm/plan/implement/log/review and review prompt/run scratch are cold history"
     echo "- use this archive only for archaeology, dispute resolution, or deep handoff recovery"
     echo
@@ -2137,6 +2266,7 @@ auto_commit_close() {
   [[ -n "${sid}" ]] || return 0
   git rev-parse --git-dir >/dev/null 2>&1 || return 0
   git add "${SFS_SPRINTS_DIR}/${sid}/" 2>/dev/null || true
+  git add "${SFS_SHARED_DOCS_DIR}/" 2>/dev/null || true
   git add "${SFS_EVENTS_FILE}" 2>/dev/null || true
   # current-sprint 가 방금 제거됐으므로 staged deletion 마킹
   git add -A "${SFS_LOCAL_DIR}/" 2>/dev/null || true

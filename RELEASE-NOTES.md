@@ -7,6 +7,21 @@
 
 ---
 
+## 0.6.59
+
+이번 버전은 작업 인계 문서 위치를 `.sfs-local` private workbench 에서 repo root 의
+공유 문서 표면으로 옮깁니다.
+
+- `sfs report` 는 이제 `docs/solon/<workspace>/<yyyyMMdd>/report.md` 를 만듭니다.
+- `sfs retro` 와 `sfs retro --draft` 는 같은 위치에 `retro.md` 를 만듭니다.
+- `<workspace>` 는 기본적으로 `sfs start "<goal>"` 의 goal 텍스트를 path-safe 하게 정리한
+  값입니다. 예를 들어 `sfs start "결제 오류 수정"` 은
+  `docs/solon/결제-오류-수정/<yyyyMMdd>/report.md` 와 `retro.md` 를 남깁니다.
+- 기존 `.sfs-local/sprints/<id>/report.md` / `retro.md` 가 있으면 가능한 경우 새 공유 위치로
+  옮기고, 충돌하는 legacy copy 는 cold archive 로 접어 visible residue 로 남기지 않습니다.
+- `report.md` / `retro.md` 본문은 커밋 메시지 규칙과 같이 사용자의 native/workspace 언어를
+  기본값으로 삼습니다.
+
 ## 0.6.58
 
 이번 버전은 `.sfs-local` 정리 기준을 더 엄격하게 맞춥니다. 이제 `sfs tidy --all

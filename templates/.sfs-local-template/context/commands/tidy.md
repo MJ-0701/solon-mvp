@@ -10,8 +10,12 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
   If the reason is not clear in one sentence, remove it or pack it into cold
   history after report evidence exists.
 - Workbench files are temporary: brainstorm, plan, implement, log, review.
-- Private close entry is `report.md` plus `retro.md`; shared handoff belongs in
-  `docs/solon/` only when the team needs a durable shared document.
+- Shared handoff docs are `docs/solon/<workspace>/<yyyyMMdd>/report.md` and
+  `docs/solon/<workspace>/<yyyyMMdd>/retro.md`. `<workspace>` defaults to the
+  `sfs start "<goal>"` text, sanitized as a path segment.
+- Report/retro prose should use the user's native/workspace language, matching
+  the native-language commit message rule. Do not force English when the work
+  conversation is Korean or another non-English language.
 - `tidy --apply` archives workbench only after report evidence exists.
 - `events.jsonl` is active state, not durable history. Closed-sprint event lines
   are pruned after `report.md`/archive evidence exists; an empty event ledger is

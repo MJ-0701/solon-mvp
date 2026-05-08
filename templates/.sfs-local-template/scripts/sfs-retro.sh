@@ -4,7 +4,7 @@
 # Solon SFS — `/sfs retro` command implementation.
 # WU-26 §2 spec implementation. WU-23 §1.6 정합:
 #   · 파일 path stdout 출력만 (에디터 launch 안 함).
-#   · 기본 `retro` 는 report.md ensure + workbench archive + sprint close + auto commit + stdout 3줄.
+#   · 기본 `retro` 는 docs/solon handoff report.md ensure + workbench archive + sprint close + auto commit + stdout 3줄.
 #   · `--close` 는 backward-compatible alias.
 #   · `--draft` / `--no-close` 지정 시 retro.md 진입만, stdout 1줄.
 #   · auto commit (sfs-common.sh::auto_commit_close) 은 사용자 명시 retro 호출 시에만 동작 (§1.5' 정합).
@@ -59,8 +59,9 @@ while [[ $# -gt 0 ]]; do
       cat <<EOF
 Usage: /sfs retro [--draft|--no-close|--close]
 
-Close the current sprint: open/create retro.md, ensure report.md exists,
-archive workbench evidence, mark the sprint closed, and commit the result.
+Close the current sprint: open/create docs/solon/<workspace>/<yyyyMMdd>/retro.md,
+ensure the matching report.md exists, archive workbench evidence, mark the
+sprint closed, and commit the result.
 The AI runtime owns branch push/main merge/main push after this local close commit.
 
 Options:
@@ -115,40 +116,18 @@ if [[ -z "${SPRINT_ID}" ]]; then
 fi
 
 SPRINT_DIR="${SFS_SPRINTS_DIR}/${SPRINT_ID}"
-RETRO_PATH="${SPRINT_DIR}/retro.md"
-REPORT_PATH="${SPRINT_DIR}/report.md"
-TEMPLATE="$(sfs_sprint_template_file retro)"
 
 # ─────────────────────────────────────────────────────────────────────
-# (a) retro.md 미존재 시 template cp + placeholder 치환
+# (a) shared retro.md ensure + frontmatter 갱신 + retro_open event
 # ─────────────────────────────────────────────────────────────────────
-if [[ ! -f "${RETRO_PATH}" ]]; then
-  if [[ ! -f "${TEMPLATE}" ]]; then
-    echo "template missing: ${TEMPLATE}" >&2
-    exit "${SFS_EXIT_TEMPLATE:-4}"
-  fi
-  mkdir -p "${SPRINT_DIR}"
-  cp "${TEMPLATE}" "${RETRO_PATH}"
-  # sprint_id placeholder 치환 (template 안의 `<sprint title>` / `{{SPRINT_ID}}` 양쪽 호환)
-  if grep -q '{{SPRINT_ID}}' "${RETRO_PATH}"; then
-    # awk-based atomic tmp+mv (BSD/GNU portable, sfs-decision.sh 패턴)
-    local_tmp=$(mktemp "${RETRO_PATH}.XXXXXX")
-    awk -v sid="${SPRINT_ID}" '{ gsub(/\{\{SPRINT_ID\}\}/, sid); print }' "${RETRO_PATH}" > "${local_tmp}"
-    mv "${local_tmp}" "${RETRO_PATH}"
-  fi
+NOW="$(date +%Y-%m-%dT%H:%M:%S%z 2>/dev/null | sed -E 's/([0-9]{2})$/:\1/')"
+set +e
+RETRO_PATH="$(sfs_prepare_sprint_retro "${SPRINT_ID}" "${NOW}")"
+_retro_prepare_rc=$?
+set -e
+if [[ "${_retro_prepare_rc}" -ne 0 ]]; then
+  exit "${_retro_prepare_rc}"
 fi
-
-# ─────────────────────────────────────────────────────────────────────
-# (b) frontmatter 갱신 + retro_open event
-# ─────────────────────────────────────────────────────────────────────
-NOW="$(date -u +%Y-%m-%dT%H:%M:%S+00:00)"
-if ! sfs_update_sprint_doc_identity "${RETRO_PATH}" "${SPRINT_ID}" "${NOW}" 2>/dev/null; then
-  echo "permission denied updating sprint metadata in ${RETRO_PATH}" >&2
-  exit "${SFS_EXIT_PERM}"
-fi
-update_frontmatter "${RETRO_PATH}" "phase" "retro"
-update_frontmatter "${RETRO_PATH}" "sprint_id" "${SPRINT_ID}"
-update_frontmatter "${RETRO_PATH}" "last_touched_at" "${NOW}"
 
 # WU-26 §2: append_event TYPE PAYLOAD 2-arg signature (sfs-decision.sh / sfs-plan.sh 패턴 정합).
 append_event "retro_open" "{\"sprint_id\":\"${SPRINT_ID}\",\"path\":\"${RETRO_PATH}\"}"
@@ -156,7 +135,7 @@ append_event "retro_open" "{\"sprint_id\":\"${SPRINT_ID}\",\"path\":\"${RETRO_PA
 echo "retro.md ready: ${RETRO_PATH}"
 
 # ─────────────────────────────────────────────────────────────────────
-# (c) close 분기 (default). --draft / --no-close keeps retro open-only.
+# (b) close 분기 (default). --draft / --no-close keeps retro open-only.
 # ─────────────────────────────────────────────────────────────────────
 if [[ "${CLOSE}" -eq 1 ]]; then
   # WU-26 §2.3 + smoke fix: events.jsonl 의 review_open event 가 sprint_id 매치로 있어야 close 가능.

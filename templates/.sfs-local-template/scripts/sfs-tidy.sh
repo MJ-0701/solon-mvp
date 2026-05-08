@@ -27,16 +27,18 @@ Clean up completed sprint workbench docs without leaving loose hidden files.
   - --apply creates report.md when missing, then packs
     brainstorm/plan/implement/log/review plus matching .sfs-local/tmp review
     prompt/run scratch into one cold .tar.gz bundle with a short manifest.
-  - The visible sprint folder keeps only artifacts with a one-line keep reason:
-    report.md, retro.md, decisions, and explicitly durable notes.
+  - Durable handoff docs live under docs/solon/<workspace>/<yyyyMMdd>/:
+    report.md and retro.md use the `sfs start "<goal>"` text as workspace.
+  - The visible sprint folder keeps only artifacts with a one-line keep reason.
   - Closed-sprint event ledger lines, broken current-sprint pointers, empty
     placeholder dirs, and stale workbench dust are removed when they no longer
     explain why they must stay visible.
   - When report.md was created from legacy workbench docs, AI runtimes should
     refine it into the final report immediately after the adapter returns.
-  - report.md, retro.md, and decision files are preserved. events.jsonl is kept
-    only while it backs an active sprint/current state; historical closed-sprint
-    events are pruned after report/archive evidence exists.
+  - report.md, retro.md, and decision files are preserved in their durable
+    locations. events.jsonl is kept only while it backs an active sprint/current
+    state; historical closed-sprint events are pruned after report/archive
+    evidence exists.
 
 Recommended close flow:
   1. /sfs tidy --sprint <id-or-ref>          # inspect legacy state
@@ -422,7 +424,7 @@ while IFS= read -r sid; do
     exit "${SFS_EXIT_NO_INIT}"
   fi
 
-  REPORT_PATH="${SPRINT_DIR}/report.md"
+  REPORT_PATH="$(sfs_shared_sprint_doc_path "${sid}" "${NOW}" report)"
   ARCHIVE_PATH="$(sfs_workbench_archive_dir "${sid}" "${NOW}")"
   COUNT="$(tidy_candidate_count "${sid}")"
   TMP_COUNT="$(tidy_tmp_candidate_count "${sid}")"

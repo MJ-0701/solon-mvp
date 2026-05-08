@@ -2,8 +2,9 @@
 # .sfs-local/scripts/sfs-report.sh
 #
 # Solon SFS — `/sfs report [--sprint <id>] [--compact]`.
-# Creates the compact final sprint report. With --compact, moves verbose
-# workbench artifacts into .sfs-local/archives/ after user/AI approval.
+# Creates the compact final sprint report under docs/solon/<workspace>/<yyyyMMdd>.
+# With --compact, moves verbose workbench artifacts into .sfs-local/archives/
+# after user/AI approval.
 
 set -euo pipefail
 
@@ -19,10 +20,13 @@ Usage:
   /sfs report [--sprint <id>] [--compact]
 
 Create or update the compact sprint report.
-  - Without --compact, prepares .sfs-local/sprints/<id>/report.md for AI/user refinement.
+  - Without --compact, prepares docs/solon/<workspace>/<yyyyMMdd>/report.md
+    for AI/user refinement.
   - With --compact, marks report.md final and moves verbose workbench docs
     (brainstorm/plan/implement/log/review) into .sfs-local/archives/.
-  - retro.md and decision files are preserved as history/learning.
+  - report.md/retro.md are shared handoff docs and may be written in the
+    user's native/workspace language, matching the commit-message rule.
+  - decision files are preserved as history/learning.
 
 Exit codes:
   0  ok
