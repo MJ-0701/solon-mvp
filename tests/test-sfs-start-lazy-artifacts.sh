@@ -24,6 +24,7 @@ git add README.md
 git -c user.name='SFS Test' -c user.email='sfs-test@example.invalid' commit -qm 'initial'
 
 SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" init --layout thin --yes >/dev/null
+[[ ! -e ".sfs-local/events.jsonl" ]] || fail "init should not create empty events.jsonl"
 [[ ! -d ".sfs-local/sprints" ]] || fail "init should not create empty sprints dir"
 [[ ! -d ".sfs-local/decisions" ]] || fail "init should not create empty decisions dir"
 [[ ! -d ".sfs-local/queue" ]] || fail "init should not create empty queue dir"
@@ -37,6 +38,7 @@ esac
 sprint_id="$(cat .sfs-local/current-sprint)"
 sprint_dir=".sfs-local/sprints/${sprint_id}"
 [[ -d "${sprint_dir}" ]] || fail "missing sprint dir: ${sprint_dir}"
+[[ -s ".sfs-local/events.jsonl" ]] || fail "start should create non-empty events.jsonl"
 for doc in brainstorm plan implement log review retro report; do
   [[ ! -e "${sprint_dir}/${doc}.md" ]] || fail "start should not create ${doc}.md"
 done

@@ -625,12 +625,11 @@ else
   ok "  divisions.yaml 기존 유지"
 fi
 
-# events.jsonl — 없으면 빈 파일
-if [ ! -f "$TARGET/.sfs-local/events.jsonl" ]; then
-  touch "$TARGET/.sfs-local/events.jsonl"
-  ok "  events.jsonl 생성 (빈 파일)"
-else
+# events.jsonl — event가 처음 발생할 때만 생성. 빈 workbench 로그는 남기지 않는다.
+if [ -f "$TARGET/.sfs-local/events.jsonl" ]; then
   ok "  events.jsonl 기존 유지"
+else
+  ok "  events.jsonl lazy mode: 첫 이벤트 발생 시 생성"
 fi
 
 # auth.env.example — local executor credentials template (actual auth.env is gitignored)

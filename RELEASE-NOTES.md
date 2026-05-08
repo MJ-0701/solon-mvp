@@ -7,6 +7,22 @@
 
 ---
 
+## 0.6.57
+
+이번 버전은 Windows 에서 검증된 0.6.56 `sfs.cmd` 패치셋을 macOS release cut 으로
+Homebrew/Scoop 채널에 게시하는 사용자-facing 버전입니다. 이미 push 된 `v0.6.56`
+태그는 Windows proof baseline 으로 남기고, 실제 패키지 배포 기준은 `v0.6.57` 로
+올립니다.
+
+- Windows `sfs.cmd version`, `context cat`, `start`, `upgrade` 가 usage-only/help 로
+  무너지는 인자 전달 문제를 고친 0.6.56 패치셋을 그대로 포함합니다.
+- `sfs.cmd upgrade` 는 self-upgrade 뒤 최종 PowerShell-to-Git-Bash bridge 에서 실제로
+  돌아왔는지 trace marker 로 확인하고, Git Bash watchdog 이 PowerShell pipeline 을
+  계속 붙잡는 경로를 막습니다.
+- 사용자 문서의 현재 버전 표기는 0.6.57 로 갱신했고, 세부 장애 분석은
+  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md)
+  에 0.6.56 proof baseline 으로 유지합니다.
+
 ## 0.6.56
 
 이번 버전은 Windows `sfs.cmd version` 이 계속 usage-only 로 떨어지던 진짜 원인을 고칩니다.

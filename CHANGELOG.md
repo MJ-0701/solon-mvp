@@ -1,3 +1,17 @@
+## [0.6.57] - 2026-05-09
+
+> **Mac-side release cut for the Windows wrapper fix.** The Windows-side
+> 0.6.56 proof commits are cut as 0.6.57 for Homebrew and Scoop publication,
+> keeping the already-pushed 0.6.56 tag as the proof baseline and using
+> 0.6.57 as the user-facing package version.
+
+### Changed
+
+- Cut the completed Windows `sfs.cmd version/context/start/upgrade` fix set as
+  the package-channel release version after origin sync on macOS.
+- User-facing current-version documentation now points at 0.6.57 while the
+  detailed Windows incident report remains the 0.6.56 baseline report.
+
 ## [0.6.56] - 2026-05-08
 
 > **Windows usable-args root cause fix.** A pre-release Windows trace run
