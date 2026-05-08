@@ -31,10 +31,14 @@
 - The post-Scoop reload now resolves through Scoop's `current\bin\sfs.ps1`
   before replaying the command, so self-upgrade does not return to the
   pre-update package path.
+- The Windows post-Scoop reload canonicalizes `upgrade` to `update` and strips
+  wrapper-level `--yes`/`-y` before entering the Bash runtime. This keeps
+  `sfs.cmd upgrade` as a compatibility spelling while executing the stable
+  one-command update path after the runtime refresh.
 - `upgrade.sh` no longer reopens `/dev/tty` in CI, and the Windows Scoop smoke
-  runs `sfs.cmd upgrade --yes` while teeing live trace output. This prevents the
-  GitHub runner from waiting forever at the interactive "continue upgrade"
-  prompt during self-upgrade verification.
+  runs user-facing `sfs.cmd upgrade` while teeing live trace output. This
+  prevents the GitHub runner from waiting forever at the interactive "continue
+  upgrade" prompt during self-upgrade verification.
 - The Windows Scoop smoke no longer assigns the `Tee-Object` upgrade pipeline
   to a variable. That assignment captured output and hid live trace lines until
   the command exited, so failures can now be traced from the last emitted line.

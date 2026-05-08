@@ -33,10 +33,12 @@
 - Scoop self-upgrade 뒤 새 runtime 을 다시 호출할 때 `upgrade` 가 문자 단위로 쪼개져
   `unknown command: u` 로 떨어지지 않도록 reload 와 최종 Git Bash bridge 인자를 명시
   `string[]` 로 고정했습니다.
-- reload 대상도 Scoop 의 `current\bin\sfs.ps1` 로 재해석해, self-upgrade 직후 옛 버전 경로로
-  돌아가지 않게 했습니다.
-- Windows CI 의 `sfs.cmd upgrade` smoke 는 이제 `--yes` 와 CI tty guard 를 함께 사용합니다.
-  Git Bash 가 `/dev/tty` 를 다시 열고 프롬프트에서 멈추는 상태도 trace 로 확인해 막았습니다.
+- reload 대상도 Scoop 의 `current\bin\sfs.ps1` 로 재해석하고, Windows 에서 들어온
+  `upgrade` spelling 은 canonical `update` 로 치환합니다. `sfs.cmd upgrade` 로 들어와도
+  self-update 후에는 `sfs update` 흐름으로 이어집니다.
+- Windows CI 의 `sfs.cmd upgrade` smoke 는 사용자-facing spelling 그대로 실행하고, 내부
+  runtime 만 non-interactive 로 움직입니다. Git Bash 가 `/dev/tty` 를 다시 열고 프롬프트에서
+  멈추는 상태도 trace 로 확인해 막았습니다.
 - upgrade trace pipeline 은 더 이상 assignment 로 감싸지 않습니다. `Tee-Object` 출력이 Actions
   로그에 즉시 보이도록 해서, 다음 실패는 마지막 trace 줄에서 바로 추적할 수 있습니다.
 - `SFS_WINDOWS_ARG_TRACE=1` 진단 모드도 추가되어, 다음 Windows runner 실패가 나면 batch `%*`,

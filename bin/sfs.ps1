@@ -337,6 +337,23 @@ function Resolve-SfsScoopCurrentScriptPath([string] $ScriptPath) {
   return $ScriptPath
 }
 
+function Normalize-SfsScoopReloadArgs([string[]] $InvocationArgs) {
+  $items = @()
+  foreach ($item in @($InvocationArgs)) {
+    if ($null -eq $item) { continue }
+    if ($item -in @("--yes", "-y")) { continue }
+    $items += @([string] $item)
+  }
+  if ($items.Count -eq 0) { return [string[]] @() }
+
+  $cmdIndex = 0
+  if ($items[0] -in @("/sfs", "sfs", '$sfs')) { $cmdIndex = 1 }
+  if ($items.Count -gt $cmdIndex -and $items[$cmdIndex] -eq "upgrade") {
+    $items[$cmdIndex] = "update"
+  }
+  return [string[]] $items
+}
+
 function Add-SfsPowerShellModulePath([string] $ModuleRoot) {
   if (-not $ModuleRoot) { return }
   if (-not (Test-Path -LiteralPath $ModuleRoot -PathType Container)) { return }
@@ -485,7 +502,7 @@ function Invoke-ScoopSelfUpgrade([string[]] $InvocationArgs) {
 
   Write-Host "reloading installed sfs runtime..."
   $env:SFS_SKIP_SELF_UPGRADE = "1"
-  $reloadArgs = [string[]] @($InvocationArgs)
+  $reloadArgs = Normalize-SfsScoopReloadArgs $InvocationArgs
   $reloadScriptPath = Resolve-SfsScoopCurrentScriptPath $CurrentScriptPath
   Write-SfsArgTrace "PS_RELOAD_SCRIPT" $reloadScriptPath
   Write-SfsArgTrace "PS_RELOAD_ARGS" $reloadArgs

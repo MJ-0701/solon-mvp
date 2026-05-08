@@ -819,6 +819,12 @@ upgrade_command() {
         interactive=1
         shift
         ;;
+      -y|--yes)
+        # sfs upgrade is non-interactive by default; accept this as a harmless
+        # compatibility no-op for Windows/Scoop callers that spell update flows
+        # like install/upgrade scripts.
+        shift
+        ;;
       --layout)
         upgrade_layout="${2:-}"
         if [[ -z "${upgrade_layout}" ]]; then
