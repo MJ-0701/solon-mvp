@@ -172,6 +172,8 @@ assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" '"goal":"sprint-create-test"' "Windows CI sprint_start goal evidence"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_TEST_PREVIOUS_VERSION" "Windows CI installs previous local Scoop package first"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_TEST_BROKEN_VERSION" "Windows CI installs known-broken package for recovery"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" 'refs/tags/v${brokenVersion}:refs/tags/v${brokenVersion}' "Windows CI braces PowerShell tag refspec interpolation"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" 'git archive --format=zip --output="$brokenArchive" --prefix="$brokenExtractDir/" "v${brokenVersion}"' "Windows CI braces PowerShell archive tag interpolation"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" 'Join-Path $env:GITHUB_WORKSPACE "packaging/scoop/sfs.json.template"' "Windows CI reads Scoop template from checkout after Set-Location"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd upgrade" "Windows CI sfs.cmd self-upgrade smoke"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "Scoop clones buckets when they are added" "Windows CI refreshes cloned bucket before broken package install"

@@ -80,9 +80,9 @@ jobs:
           $brokenVersion = "0.6.49"
           $brokenExtractDir = "solon-product-$brokenVersion"
           $brokenArchive = Join-Path $env:RUNNER_TEMP "sfs-$brokenVersion.zip"
-          git fetch --depth=1 origin "refs/tags/v$brokenVersion:refs/tags/v$brokenVersion"
+          git fetch --depth=1 origin "refs/tags/v${brokenVersion}:refs/tags/v${brokenVersion}"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          git archive --format=zip --output="$brokenArchive" --prefix="$brokenExtractDir/" "v$brokenVersion"
+          git archive --format=zip --output="$brokenArchive" --prefix="$brokenExtractDir/" "v${brokenVersion}"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $brokenHash = (Get-FileHash $brokenArchive -Algorithm SHA256).Hash.ToLowerInvariant()
           $brokenFileUrl = Convert-ToFileUrl $brokenArchive

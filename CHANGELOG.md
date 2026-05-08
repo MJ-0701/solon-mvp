@@ -1,3 +1,19 @@
+## [0.6.51] - 2026-05-08
+
+> **Windows smoke tag refspec fix.** The 0.6.50 GitHub Windows Scoop smoke run
+> `25542777986` failed before install because PowerShell parsed
+> `$brokenVersion:` inside the `git fetch` refspec as scoped variable syntax.
+> The known-broken package fetch now uses `${brokenVersion}` braces.
+
+### Fixed
+
+- `.github/workflows/windows-scoop-smoke.yml` now fetches and archives the real
+  known-broken `v0.6.49` package with `refs/tags/v${brokenVersion}` and
+  `v${brokenVersion}` so PowerShell cannot rewrite the refspec to
+  `refs/tags/v/tags/v0.6.49`.
+- Windows guardrails and the release verifier now assert the braced refspec and
+  archive-tag contract along with the cloned-bucket refresh contract.
+
 ## [0.6.50] - 2026-05-08
 
 > **Windows hardened shim dual forwarding.** The 0.6.49 GitHub Windows Scoop
