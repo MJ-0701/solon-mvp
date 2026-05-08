@@ -83,7 +83,7 @@ goto sfs_collect_args
 
 :sfs_args_done
 setlocal EnableDelayedExpansion
-"%SFS_NATIVE_POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%SFS_NATIVE_SCRIPT%" & exit /b !ERRORLEVEL!
+"%SFS_NATIVE_POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%SFS_NATIVE_SCRIPT%" %* & exit /b !ERRORLEVEL!
 '@
 
   $psShim = @'

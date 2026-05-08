@@ -1,3 +1,31 @@
+## [0.6.50] - 2026-05-08
+
+> **Windows hardened shim dual forwarding.** The 0.6.49 GitHub Windows Scoop
+> smoke run `25541086874` proved that post-install shim overwrite did run, but
+> the env-only hardened `sfs.cmd` shim still let `sfs.cmd version` fall through
+> to generic usage. The hardened shim now keeps the numbered env bridge and also
+> forwards `%*` to packaged `sfs.ps1`.
+
+### Fixed
+
+- `bin/sfs-scoop-post-install.ps1` now writes a hardened `sfs.cmd` shim that
+  calls `powershell.exe -File "%SFS_NATIVE_SCRIPT%" %*` after storing `%1..%n`
+  in `SFS_NATIVE_ARGC` / `SFS_NATIVE_ARG_N`. This gives `sfs.ps1` both the env
+  source and the PowerShell automatic-args source.
+- Windows Scoop smoke now checks the installed `sfs.cmd` shim text immediately
+  after install and fails if either `SFS_NATIVE_ARGC` or `%*` is missing.
+- Windows Scoop smoke now also installs the real known-broken `v0.6.49` archive,
+  confirms `sfs.cmd version` falls through to usage, and verifies direct
+  `scoop update` plus `scoop update sfs` recovers to the current runtime.
+
+### Tests
+
+- Windows guardrails and the release verifier now require env+positional
+  forwarding in the post-install hardened shim and require the broken-0.6.49
+  direct-Scoop recovery smoke.
+- Windows wrapper incident reports are refreshed to the 0.6.50 baseline with
+  the P17 env-only hardened shim finding and run `25541086874` evidence.
+
 ## [0.6.49] - 2026-05-08
 
 > **Windows Scoop shim hardening.** The 0.6.48 GitHub Windows Scoop smoke run

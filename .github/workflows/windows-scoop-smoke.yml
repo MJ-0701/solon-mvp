@@ -77,6 +77,16 @@ jobs:
           $previousHash = (Get-FileHash $previousArchive -Algorithm SHA256).Hash.ToLowerInvariant()
           $previousFileUrl = Convert-ToFileUrl $previousArchive
 
+          $brokenVersion = "0.6.49"
+          $brokenExtractDir = "solon-product-$brokenVersion"
+          $brokenArchive = Join-Path $env:RUNNER_TEMP "sfs-$brokenVersion.zip"
+          git fetch --depth=1 origin "refs/tags/v$brokenVersion:refs/tags/v$brokenVersion"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git archive --format=zip --output="$brokenArchive" --prefix="$brokenExtractDir/" "v$brokenVersion"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $brokenHash = (Get-FileHash $brokenArchive -Algorithm SHA256).Hash.ToLowerInvariant()
+          $brokenFileUrl = Convert-ToFileUrl $brokenArchive
+
           $bucket = Join-Path $env:RUNNER_TEMP "solon-scoop-bucket"
           $bucketDir = Join-Path $bucket "bucket"
           New-Item -ItemType Directory -Force -Path $bucketDir | Out-Null
@@ -95,9 +105,13 @@ jobs:
           "SFS_TEST_BUCKET_DIR=$bucket" >> $env:GITHUB_ENV
           "SFS_TEST_VERSION=$version" >> $env:GITHUB_ENV
           "SFS_TEST_PREVIOUS_VERSION=$previousVersion" >> $env:GITHUB_ENV
+          "SFS_TEST_BROKEN_VERSION=$brokenVersion" >> $env:GITHUB_ENV
           "SFS_TEST_CURRENT_URL=$fileUrl" >> $env:GITHUB_ENV
           "SFS_TEST_CURRENT_SHA256=$hash" >> $env:GITHUB_ENV
           "SFS_TEST_CURRENT_EXTRACT_DIR=$extractDir" >> $env:GITHUB_ENV
+          "SFS_TEST_BROKEN_URL=$brokenFileUrl" >> $env:GITHUB_ENV
+          "SFS_TEST_BROKEN_SHA256=$brokenHash" >> $env:GITHUB_ENV
+          "SFS_TEST_BROKEN_EXTRACT_DIR=$brokenExtractDir" >> $env:GITHUB_ENV
 
       - name: Install Scoop
         run: |
@@ -112,7 +126,12 @@ jobs:
           $env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"
           scoop bucket add solon $env:SFS_TEST_BUCKET_URL
           scoop install sfs
-          Get-Command sfs.cmd
+          $sfsCmd = Get-Command sfs.cmd
+          $sfsCmd
+          $shimText = Get-Content $sfsCmd.Source -Raw
+          if ($shimText -notmatch "SFS_NATIVE_ARGC" -or $shimText -notmatch "%\*") {
+            throw "sfs.cmd shim was not hardened with both env and positional forwarding: $($sfsCmd.Source)"
+          }
           sfs.cmd version
           sfs.cmd --help
           $installedVersion = ((sfs.cmd version).Trim() -replace "^sfs\s+", "")
@@ -245,3 +264,55 @@ jobs:
           }
           & $bash -lc "command -v sfs && sfs version && sfs --help >/dev/null"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Recover broken 0.6.49 shim
+        run: |
+          $env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"
+          scoop uninstall sfs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $template = Get-Content (Join-Path $env:GITHUB_WORKSPACE "packaging/scoop/sfs.json.template") -Raw
+          $manifest = $template.Replace("__VERSION__", $env:SFS_TEST_BROKEN_VERSION)
+          $manifest = $manifest.Replace("__URL__", $env:SFS_TEST_BROKEN_URL)
+          $manifest = $manifest.Replace("__SHA256__", $env:SFS_TEST_BROKEN_SHA256)
+          $manifest = $manifest.Replace("__EXTRACT_DIR__", $env:SFS_TEST_BROKEN_EXTRACT_DIR)
+          Set-Content -Path (Join-Path $env:SFS_TEST_BUCKET_DIR "bucket\sfs.json") -Value $manifest -Encoding UTF8
+          git -C $env:SFS_TEST_BUCKET_DIR add bucket/sfs.json
+          git -C $env:SFS_TEST_BUCKET_DIR commit -m "test bucket broken 0.6.49 package"
+
+          # Scoop clones buckets when they are added; refresh that clone after
+          # each temp-bucket commit so install/update sees the intended manifest.
+          scoop update
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          scoop install sfs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $brokenOutput = (sfs.cmd version 2>&1 | Out-String)
+          Write-Host $brokenOutput
+          if ($brokenOutput -notmatch "Usage:") {
+            throw "expected broken 0.6.49 sfs.cmd version to print usage before direct Scoop recovery"
+          }
+
+          $manifest = $template.Replace("__VERSION__", $env:SFS_TEST_VERSION)
+          $manifest = $manifest.Replace("__URL__", $env:SFS_TEST_CURRENT_URL)
+          $manifest = $manifest.Replace("__SHA256__", $env:SFS_TEST_CURRENT_SHA256)
+          $manifest = $manifest.Replace("__EXTRACT_DIR__", $env:SFS_TEST_CURRENT_EXTRACT_DIR)
+          Set-Content -Path (Join-Path $env:SFS_TEST_BUCKET_DIR "bucket\sfs.json") -Value $manifest -Encoding UTF8
+          git -C $env:SFS_TEST_BUCKET_DIR add bucket/sfs.json
+          git -C $env:SFS_TEST_BUCKET_DIR commit -m "test bucket current recovery package"
+
+          # Direct Scoop recovery must bypass the broken wrapper and refresh the
+          # cloned bucket before updating the app package.
+          scoop update
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          scoop update sfs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $recoveredVersion = ((sfs.cmd version).Trim() -replace "^sfs\s+", "")
+          if ($recoveredVersion -ne $env:SFS_TEST_VERSION) {
+            throw "direct Scoop recovery did not install current runtime: runtime=$recoveredVersion expected=$env:SFS_TEST_VERSION"
+          }
+          $sfsCmd = Get-Command sfs.cmd
+          $shimText = Get-Content $sfsCmd.Source -Raw
+          if ($shimText -notmatch "SFS_NATIVE_ARGC" -or $shimText -notmatch "%\*") {
+            throw "recovered sfs.cmd shim was not hardened with both env and positional forwarding: $($sfsCmd.Source)"
+          }
