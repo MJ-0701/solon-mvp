@@ -25,6 +25,9 @@
   with path and stream hashing before calling Scoop self-upgrade, matching the
   Windows runner path where `scoop update sfs` needs that cmdlet to validate
   the downloaded zip.
+- The post-Scoop reload now normalizes `InvocationArgs` into an explicit
+  `string[]` before splatting, preventing `upgrade` from being replayed as the
+  single-letter command `u` after runtime self-upgrade.
 
 ## [0.6.55] - 2026-05-08
 

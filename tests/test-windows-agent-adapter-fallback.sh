@@ -147,6 +147,12 @@ assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs $SfsEnvArgs -Automat
 assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs @() -AutomaticArgs @() -UnboundArgs $MyInvocation.UnboundArguments' "ps1 unbound args final fallback"
 assert_contains "${ps_wrapper}" 'Invoke-SfsNativeReadonly -InvocationArgs $SfsArgs' "ps1 passes resolved args as one array"
 assert_contains "${ps_wrapper}" 'Invoke-ScoopSelfUpgrade -InvocationArgs $SfsArgs' "ps1 self-upgrade sees the full resolved arg array"
+assert_contains "${ps_wrapper}" '$reloadArgs = [string[]] @($InvocationArgs)' "ps1 self-upgrade reload preserves whole arg tokens"
+assert_contains "${ps_wrapper}" '& $CurrentScriptPath @reloadArgs' "ps1 self-upgrade reload splats normalized arg array"
+if grep -Fq '& $CurrentScriptPath @InvocationArgs' "${ps_wrapper}"; then
+  echo "ps1 self-upgrade reload still splats possibly scalar InvocationArgs directly" >&2
+  exit 1
+fi
 assert_contains "${ps_wrapper}" '$resolved[0] -eq "--%"' "ps1 stop-parsing token normalization"
 assert_contains "${ps_wrapper}" "Enable-SfsUtf8Bridge" "ps1 utf8 bridge"
 assert_contains "${ps_wrapper}" "Invoke-ScoopSelfUpgrade" "ps1 owns Scoop self-upgrade"

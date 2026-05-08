@@ -469,7 +469,8 @@ function Invoke-ScoopSelfUpgrade([string[]] $InvocationArgs) {
 
   Write-Host "reloading installed sfs runtime..."
   $env:SFS_SKIP_SELF_UPGRADE = "1"
-  & $CurrentScriptPath @InvocationArgs
+  $reloadArgs = [string[]] @($InvocationArgs)
+  & $CurrentScriptPath @reloadArgs
   exit $LASTEXITCODE
 }
 
