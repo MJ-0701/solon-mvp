@@ -887,5 +887,6 @@ if (-not (Test-Path $sfsSh)) {
   exit 4
 }
 
-& $bash (Convert-ToBashPath $sfsSh) @SfsArgs
+$bashArgs = [string[]] @($SfsArgs)
+& $bash (Convert-ToBashPath $sfsSh) @bashArgs
 exit $LASTEXITCODE

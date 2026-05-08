@@ -28,6 +28,8 @@
 - The post-Scoop reload now normalizes `InvocationArgs` into an explicit
   `string[]` before splatting, preventing `upgrade` from being replayed as the
   single-letter command `u` after runtime self-upgrade.
+- The final PowerShell-to-Git-Bash bridge now also normalizes `SfsArgs` into an
+  explicit `string[]`, covering the single-token `upgrade` path after reload.
 
 ## [0.6.55] - 2026-05-08
 

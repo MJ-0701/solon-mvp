@@ -31,7 +31,8 @@
   path/stream hashing 을 지원하는 `Get-FileHash` fallback 을 주입합니다. GitHub Windows
   runner 에서 Scoop 이 zip hash 를 확인할 때 이 cmdlet 이 필요했습니다.
 - Scoop self-upgrade 뒤 새 runtime 을 다시 호출할 때 `upgrade` 가 문자 단위로 쪼개져
-  `unknown command: u` 로 떨어지지 않도록 reload 인자를 명시 `string[]` 로 고정했습니다.
+  `unknown command: u` 로 떨어지지 않도록 reload 와 최종 Git Bash bridge 인자를 명시
+  `string[]` 로 고정했습니다.
 - `SFS_WINDOWS_ARG_TRACE=1` 진단 모드도 추가되어, 다음 Windows runner 실패가 나면 batch `%*`,
   PowerShell `$args`, 최종 선택 source 를 로그에서 바로 볼 수 있습니다.
 - [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P23 으로 이

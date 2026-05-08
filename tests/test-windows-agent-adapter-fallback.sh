@@ -153,6 +153,12 @@ if grep -Fq '& $CurrentScriptPath @InvocationArgs' "${ps_wrapper}"; then
   echo "ps1 self-upgrade reload still splats possibly scalar InvocationArgs directly" >&2
   exit 1
 fi
+assert_contains "${ps_wrapper}" '$bashArgs = [string[]] @($SfsArgs)' "ps1 bash bridge preserves whole arg tokens"
+assert_contains "${ps_wrapper}" '& $bash (Convert-ToBashPath $sfsSh) @bashArgs' "ps1 bash bridge splats normalized arg array"
+if grep -Fq '& $bash (Convert-ToBashPath $sfsSh) @SfsArgs' "${ps_wrapper}"; then
+  echo "ps1 bash bridge still splats possibly scalar SfsArgs directly" >&2
+  exit 1
+fi
 assert_contains "${ps_wrapper}" '$resolved[0] -eq "--%"' "ps1 stop-parsing token normalization"
 assert_contains "${ps_wrapper}" "Enable-SfsUtf8Bridge" "ps1 utf8 bridge"
 assert_contains "${ps_wrapper}" "Invoke-ScoopSelfUpgrade" "ps1 owns Scoop self-upgrade"
