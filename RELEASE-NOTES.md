@@ -60,7 +60,7 @@
 - `.sfs-local/` 은 private workbench 로 유지합니다. `events.jsonl`, cache, tmp, archive, run log 는
   commit 대상이 아니고, 공유할 결론은 `docs/solon/` 또는 sprint `report.md` 로 남기는 정책을
   다시 명확히 했습니다.
-- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P25 로 이
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P27 로 이
   설치 직후 usage-only 문제까지 기록합니다.
 
 ## 0.6.54

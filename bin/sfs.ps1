@@ -955,4 +955,6 @@ if (-not (Test-Path $sfsSh)) {
 $bashArgs = [string[]] @($SfsArgs)
 Write-SfsArgTrace "PS_BASH_ARGS" $bashArgs
 & $bash (Convert-ToBashPath $sfsSh) @bashArgs
-exit $LASTEXITCODE
+$bashExitCode = $LASTEXITCODE
+Write-SfsArgTrace "PS_AFTER_BASH_BRIDGE_LASTEXITCODE" $bashExitCode
+exit $bashExitCode
