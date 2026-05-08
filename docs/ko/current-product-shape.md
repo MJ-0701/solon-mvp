@@ -38,16 +38,17 @@ depth 옵션을 함께 보여드릴 뿐입니다.
 
 ## Windows 래퍼 안정화
 
-Windows PowerShell/cmd 의 진입점은 `sfs.cmd` 입니다. 0.6.45 기준 Windows wrapper 는
-`sfs.cmd` 를 call-label dispatch 없는 thin PowerShell trampoline 으로 유지하고, `SFS_NATIVE_ARGC` /
+Windows PowerShell/cmd 의 사용자 진입점은 `sfs` / `sfs.cmd` 입니다. 0.6.46 기준 Scoop manifest 는
+generated shim 이 packaged `bin\sfs.ps1` 을 직접 호출하도록 고정합니다. packaged `sfs.cmd` 는
+직접 실행/호환용 thin PowerShell trampoline 으로 유지하고, `SFS_NATIVE_ARGC` /
 `SFS_NATIVE_ARG_N` 번호 환경 변수 bridge 로 `sfs.ps1` 에 인자를 넘깁니다. 이 값도 비면
-`sfs.ps1` 이 `CMDCMDLINE` 원본 명령행을 마지막 fallback 으로 읽습니다. `sfs.ps1` 이 read-only
+`sfs.ps1` 이 `CMDCMDLINE` 원본 명령행을 fallback 으로 읽습니다. `sfs.ps1` 이 read-only
 명령과 `start` 같은 상태 변경 명령을 모두 소유합니다. 상태 변경 명령은
 `sfs.cmd -> sfs.ps1 -> Bash runtime` bridge 로 내려갑니다. 실패 이력이 있는 raw Git Bash `%*`
-직행 경로, batch label forwarding, `-File ... %*`, `-Command @args`, empty `%1..%n` bridge 는 기본값으로 쓰지
-않습니다.
+직행 경로, batch label forwarding, `-File ... %*`, `-Command @args`, empty `%1..%n`, generated shim ->
+packaged `.cmd` 경로는 기본값으로 쓰지 않습니다.
 `sfs.cmd upgrade` 도 batch 파일이 직접 `scoop update sfs` 를 실행하지 않고 `sfs.ps1` self-upgrade
-경로로 넘깁니다. `sfs.ps1` 은 env bridge, positional param, `$args`, `CMDCMDLINE`,
+경로로 넘깁니다. `sfs.ps1` 은 Scoop PowerShell shim positional args, env bridge, `$args`, `CMDCMDLINE`,
 `$MyInvocation.UnboundArguments` 순서로 인자를 정규화하고, `version`, `status`, `guide`,
 `context`, Scoop self-upgrade, Bash fallback 을 모두 처리합니다. 또한 `sfs.cmd` 가 PowerShell 호출 뒤 같은 parsed line 에서 종료하고
 Windows runtime `.ps1` / `.cmd` 파일을 ASCII-safe 로 유지해 `context cat` / `start` usage-only
@@ -57,7 +58,7 @@ Windows runtime `.ps1` / `.cmd` 파일을 ASCII-safe 로 유지해 `context cat`
 `brainstorm`, `plan`, `review`, `retro` 에서 필요할 때 생성됩니다. 하지만 명령 출력이 비어 있거나
 `sfs.cmd status` / `sfs.cmd context cat kernel` 이 usage 만 출력하면 실패로 봐야 합니다.
 자세한 원인과 확인 절차는
-[Windows SFS 래퍼 장애 요약 보고서](./windows-wrapper-incident-0.6.45.md) 에 정리되어 있습니다.
+[Windows SFS 래퍼 장애 요약 보고서](./windows-wrapper-incident-0.6.46.md) 에 정리되어 있습니다.
 
 ## Brainstorm 3단계
 
@@ -208,7 +209,7 @@ AI 가 UI 를 만들 때 가장 흔한 실패는 평균값으로 회귀하는 �
 
 ## 분야별 지식팩
 
-0.6.45 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
+0.6.46 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
 더 이상 빈 자리표시자가 아닙니다. 각 지식팩은 "이 분야라면 무엇을 조심해야 하는가",
 "무엇을 물어봐야 하는가", "어떤 근거가 있으면 통과로 볼 수 있는가"를 짧게 담습니다.
 

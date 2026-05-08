@@ -12,7 +12,7 @@
   },
   "bin": [
     [
-      "bin\\sfs.cmd",
+      "bin\\sfs.ps1",
       "sfs"
     ]
   ],

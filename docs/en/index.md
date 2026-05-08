@@ -10,7 +10,7 @@ deeper operating model, judgment rules, philosophy, and examples.
 | Page | When to read it |
 |---|---|
 | [Current product shape](./current-product-shape.md) | To understand the latest Solon operating flow |
-| [Windows SFS wrapper incident report](./windows-wrapper-incident-0.6.45.md) | To understand the Windows `sfs.cmd` usage-only / empty-output / UTF-8 / upgrade fix |
+| [Windows SFS wrapper incident report](./windows-wrapper-incident-0.6.46.md) | To understand the Windows `sfs.cmd` usage-only / empty-output / UTF-8 / upgrade fix |
 | [Solon 10x value](./10x-value.md) | To understand why Solon trains judgment instead of only automating output |
 | [30-minute guide](./guide.md) | To run the first sprint after install |
 | [Beginner guide](../../BEGINNER-GUIDE.md) | Korean beginner guide for Git, terminal, and CLI basics |
@@ -33,7 +33,7 @@ The point is not to outsource all thinking to AI. Solon lets AI assist the work
 while the user keeps product ownership over intent, priority, tradeoffs,
 validation, boundaries, and language.
 
-As of 0.6.45, backend, strategy/PM, QA, design/frontend, infra/DevOps,
+As of 0.6.46, backend, strategy/PM, QA, design/frontend, infra/DevOps,
 management/admin, and taxonomy knowledge packs are filled with practical
 guidance. Finance, bookkeeping, tax, and accounting belong to the
 management/admin lens. The user does not need to memorize those labels. Solon

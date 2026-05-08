@@ -1,3 +1,30 @@
+## [0.6.46] - 2026-05-08
+
+> **Windows Scoop primary shim target.** The 0.6.45 GitHub Windows Scoop smoke
+> run `25533332634` proved that the `CMDCMDLINE` recovery was still too late
+> when the generated Scoop shim targeted packaged `bin\sfs.cmd`: the very first
+> `sfs version` call still fell through to generic usage. Scoop now targets
+> packaged `bin\sfs.ps1` directly.
+
+### Fixed
+
+- `packaging/scoop/sfs.json.template` now exposes `sfs` through `bin\sfs.ps1`
+  instead of `bin\sfs.cmd`, so Scoop's generated PowerShell shim is the primary
+  Windows path.
+- `bin/sfs.ps1` accepts `ValueFromRemainingArguments` positional args again for
+  the Scoop PowerShell shim path, while keeping the env bridge, `$args`,
+  `CMDCMDLINE`, and unbound-arg fallbacks.
+- `bin/sfs.cmd` remains a direct-run compatibility trampoline and passes `%*`
+  to `sfs.ps1` as an additional fallback while keeping the numbered env bridge.
+
+### Tests
+
+- Windows guardrails and release verification now require the Scoop manifest to
+  target `bin\sfs.ps1` and reject `bin\sfs.cmd` as the primary generated-shim
+  target.
+- Windows wrapper incident reports are refreshed to the 0.6.46 baseline with
+  the P13 generated shim -> packaged `.cmd` finding.
+
 ## [0.6.45] - 2026-05-08
 
 > **Windows `CMDCMDLINE` fallback.** The 0.6.44 GitHub Windows Scoop smoke

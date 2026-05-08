@@ -27,6 +27,7 @@ line_number() {
 
 cmd_wrapper="${DIST_DIR}/bin/sfs.cmd"
 ps_wrapper="${DIST_DIR}/bin/sfs.ps1"
+scoop_template="${DIST_DIR}/packaging/scoop/sfs.json.template"
 windows_discovery="${DIST_DIR}/scripts/install-cli-discovery.ps1"
 codex_global_skill="${DIST_DIR}/templates/codex-skill/SKILL.md"
 codex_project_skill="${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md"
@@ -48,9 +49,10 @@ assert_contains "${cmd_wrapper}" "set \"SFS_NATIVE_SCRIPT=%SCRIPT_DIR%sfs.ps1\""
 assert_contains "${cmd_wrapper}" "set \"SFS_NATIVE_ARGC=0\"" "cmd initializes env arg bridge"
 assert_contains "${cmd_wrapper}" ":sfs_collect_args" "cmd env arg collection loop"
 assert_contains "${cmd_wrapper}" "set \"SFS_NATIVE_ARG_%%I=%~1\"" "cmd stores numbered env args"
-assert_contains "${cmd_wrapper}" "-File \"%SFS_NATIVE_SCRIPT%\" & exit /b !ERRORLEVEL!" "cmd powershell env bridge exits on parsed line"
-if grep -Fq -- "-File \"%SCRIPT_DIR%sfs.ps1\" %*" "${cmd_wrapper}"; then
-  fail "cmd wrapper must not use powershell -File for Scoop shim argument forwarding"
+assert_contains "${cmd_wrapper}" "-File \"%SFS_NATIVE_SCRIPT%\" %* & exit /b !ERRORLEVEL!" "cmd powershell env/positional bridge exits on parsed line"
+assert_contains "${scoop_template}" '"bin\\sfs.ps1"' "Scoop manifest uses PowerShell shim entrypoint"
+if grep -Fq -- '"bin\\sfs.cmd"' "${scoop_template}"; then
+  fail "Scoop manifest must not shim through bin\\sfs.cmd; generated cmd shims lost args in the field"
 fi
 if grep -Fq -- "-Command \"& \$env:SFS_NATIVE_SCRIPT @args\"" "${cmd_wrapper}"; then
   fail "cmd wrapper must not rely on PowerShell -Command @args; Scoop shims lost args through that path"
@@ -77,9 +79,7 @@ if perl -0ne 'exit((/-File "%SCRIPT_DIR%sfs\.ps1" %\*\r?\nexit \/b/) ? 0 : 1)' "
   fail "cmd wrapper must not put PowerShell dispatch and exit on separate parsed lines during self-upgrade"
 fi
 
-if grep -Fq -- "ValueFromRemainingArguments" "${ps_wrapper}"; then
-  fail "ps1 must not rely on ValueFromRemainingArguments; Windows PowerShell -File lost args in the field"
-fi
+assert_contains "${ps_wrapper}" "ValueFromRemainingArguments" "ps1 accepts Scoop PowerShell shim positional args"
 assert_contains "${ps_wrapper}" '[object[]] $SfsParamArgs' "ps1 positional array args"
 assert_contains "${ps_wrapper}" "Resolve-SfsEnvArgs" "ps1 env arg bridge"
 assert_contains "${ps_wrapper}" 'SFS_NATIVE_ARGC' "ps1 reads env arg count"
