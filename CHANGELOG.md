@@ -1,3 +1,31 @@
+## [0.6.43] - 2026-05-08
+
+> **Windows PowerShell `-Command @args` bridge hardening.** The 0.6.42
+> label-free `sfs.cmd` package still failed in the real GitHub Windows Scoop
+> smoke: `sfs version` again fell through to generic usage under the Scoop shim.
+> That proved the remaining unstable bridge was `powershell.exe -File
+> sfs.ps1 %*`, not just batch labels.
+
+### Fixed
+
+- `bin/sfs.cmd` now invokes packaged `sfs.ps1` through PowerShell
+  `-Command "& $env:SFS_NATIVE_SCRIPT @args"` instead of `-File ... %*`.
+  This keeps `sfs.cmd` as a label-free trampoline while letting PowerShell pass
+  the shim arguments through `$args`.
+- `bin/sfs.ps1` now accepts a positional `[object[]] $SfsParamArgs` source before
+  falling back to automatic `$args` and `$MyInvocation.UnboundArguments`.
+  Direct script calls, `-Command @args` calls, and older agent-shaped arrays are
+  normalized into the same SFS argument list.
+
+### Tests
+
+- Windows guardrails and release verification now reject the old
+  `powershell.exe -File sfs.ps1 %*` bridge and require the explicit
+  `SFS_NATIVE_SCRIPT @args` path.
+- Windows wrapper incident reports are refreshed to the 0.6.43 baseline with the
+  P10 PowerShell `-File`/Scoop shim finding, while keeping the Korean
+  `ci-korean-sprint-test` smoke evidence.
+
 ## [0.6.42] - 2026-05-08
 
 > **Windows `sfs.cmd` thin trampoline hardening.** The 0.6.41 source/package

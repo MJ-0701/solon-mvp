@@ -38,23 +38,24 @@ depth 옵션을 함께 보여드릴 뿐입니다.
 
 ## Windows 래퍼 안정화
 
-Windows PowerShell/cmd 의 진입점은 `sfs.cmd` 입니다. 0.6.42 기준 Windows wrapper 는
-`sfs.cmd` 를 label 없는 thin PowerShell trampoline 으로 유지하고, `sfs.ps1` 이 read-only 명령과
-`start` 같은 상태 변경 명령을 모두 소유합니다. 상태 변경 명령은 `sfs.cmd -> sfs.ps1 -> Bash runtime`
-bridge 로 내려갑니다. 실패 이력이 있는 raw Git Bash `%*` 직행 경로와 batch label forwarding 은
-기본값으로 쓰지 않습니다.
+Windows PowerShell/cmd 의 진입점은 `sfs.cmd` 입니다. 0.6.43 기준 Windows wrapper 는
+`sfs.cmd` 를 label 없는 thin PowerShell trampoline 으로 유지하고, PowerShell
+`-Command "& $env:SFS_NATIVE_SCRIPT @args"` 로 `sfs.ps1` 에 진입합니다. `sfs.ps1` 이 read-only
+명령과 `start` 같은 상태 변경 명령을 모두 소유합니다. 상태 변경 명령은
+`sfs.cmd -> sfs.ps1 -> Bash runtime` bridge 로 내려갑니다. 실패 이력이 있는 raw Git Bash `%*`
+직행 경로, batch label forwarding, `-File ... %*` bridge 는 기본값으로 쓰지 않습니다.
 `sfs.cmd upgrade` 도 batch 파일이 직접 `scoop update sfs` 를 실행하지 않고 `sfs.ps1` self-upgrade
-경로로 넘깁니다. `sfs.ps1` 은 Windows PowerShell `-File` 인자를 `$args` /
-`$MyInvocation.UnboundArguments` 로 직접 읽고, `version`, `status`, `guide`, `context`, Scoop
-self-upgrade, Bash fallback 을 모두 처리합니다. 또한 `sfs.cmd` 가 PowerShell 호출 뒤 같은 parsed
-line 에서 종료하고 Windows runtime `.ps1` / `.cmd` 파일을 ASCII-safe 로 유지해 `context cat` /
-`start` usage-only 회귀, batch tail fragment, PowerShell 5.1 parser 회귀를 함께 막습니다.
+경로로 넘깁니다. `sfs.ps1` 은 positional array param, `$args`, `$MyInvocation.UnboundArguments`
+순서로 인자를 정규화하고, `version`, `status`, `guide`, `context`, Scoop self-upgrade, Bash
+fallback 을 모두 처리합니다. 또한 `sfs.cmd` 가 PowerShell 호출 뒤 같은 parsed line 에서 종료하고
+Windows runtime `.ps1` / `.cmd` 파일을 ASCII-safe 로 유지해 `context cat` / `start` usage-only
+회귀, batch tail fragment, PowerShell 5.1 parser 회귀를 함께 막습니다.
 
 `sfs start` 후 sprint 디렉터리가 비어 있는 것은 정상일 수 있습니다. 단계별 문서는
 `brainstorm`, `plan`, `review`, `retro` 에서 필요할 때 생성됩니다. 하지만 명령 출력이 비어 있거나
 `sfs.cmd status` / `sfs.cmd context cat kernel` 이 usage 만 출력하면 실패로 봐야 합니다.
 자세한 원인과 확인 절차는
-[Windows SFS 래퍼 장애 요약 보고서](./windows-wrapper-incident-0.6.42.md) 에 정리되어 있습니다.
+[Windows SFS 래퍼 장애 요약 보고서](./windows-wrapper-incident-0.6.43.md) 에 정리되어 있습니다.
 
 ## Brainstorm 3단계
 
@@ -205,7 +206,7 @@ AI 가 UI 를 만들 때 가장 흔한 실패는 평균값으로 회귀하는 �
 
 ## 분야별 지식팩
 
-0.6.42 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
+0.6.43 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
 더 이상 빈 자리표시자가 아닙니다. 각 지식팩은 "이 분야라면 무엇을 조심해야 하는가",
 "무엇을 물어봐야 하는가", "어떤 근거가 있으면 통과로 볼 수 있는가"를 짧게 담습니다.
 

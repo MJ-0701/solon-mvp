@@ -90,7 +90,7 @@ sfs.cmd version --check
 sfs.cmd doctor      # ✅ 세 줄 (Claude / Gemini / Codex) 모두 보이면 OK
 ```
 
-성공하면 `sfs 0.6.42`, `status up-to-date` 같은 문장이 보입니다. Windows
+성공하면 `sfs 0.6.43`, `status up-to-date` 같은 문장이 보입니다. Windows
 PowerShell 이나 cmd 에서는 `sfs.cmd` 를 쓰고, Git Bash/WSL 에서는 `sfs` 를 쓰셔도 됩니다.
 
 ### 4. 테스트 프로젝트 폴더 만들기
@@ -229,11 +229,12 @@ Windows 의 Claude/Gemini/Codex 가 내부 명령을 실행할 때 Git Bash 시�
 0.6.37 부터는 `sfs.cmd upgrade` 도 실행 중인 batch 파일 안에서 직접 `scoop update sfs` 를
 실행하지 않습니다. `TIVE_READONLY_DONE` 또는 `LF_UPGRADE_DONE` 같은 조각 문자열이 보이면
 0.6.36 self-update 경로에서 발견된 문제이므로 `sfs.cmd update` 후 다시 확인하세요.
-0.6.42 기준으로는 `sfs.cmd` 를 label 없는 thin PowerShell trampoline 으로 줄이고, `sfs.ps1` 이
-`version`, `status`, `guide`, `context`, 업데이트, Bash 실행을 맡습니다. 그래서
-`sfs.cmd context cat ...` 이나 `sfs.cmd start ...` 가 인자를 잃고 usage 만 출력하던 Windows
-PowerShell/Scoop 문제를 막습니다. `e` 또는 `*` 같은 짧은 조각 문자열이 보이던 self-update 잔여
-문제도 이 경로에서 막았습니다.
+0.6.43 기준으로는 `sfs.cmd` 를 label 없는 thin PowerShell trampoline 으로 줄이고,
+PowerShell `-Command ... @args` 경로로 `sfs.ps1` 에 들어갑니다. `sfs.ps1` 이 `version`,
+`status`, `guide`, `context`, 업데이트, Bash 실행을 맡습니다. 그래서 `sfs.cmd context cat ...`
+이나 `sfs.cmd start ...` 가 인자를 잃고 usage 만 출력하던 Windows PowerShell/Scoop 문제를
+막습니다. `e` 또는 `*` 같은 짧은 조각 문자열이 보이던 self-update 잔여 문제도 이 경로에서
+막았습니다.
 만약 이미 설치된 0.6.41 이하 wrapper 때문에 `sfs.cmd update` 도 usage 만 출력하면, PowerShell 에서
 `scoop update sfs` 를 먼저 실행하고, 그 다음 프로젝트 폴더에서
 `sfs.cmd upgrade --no-self-upgrade` 를 실행하면 됩니다.

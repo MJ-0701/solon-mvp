@@ -44,7 +44,11 @@ adapter_files=(
 )
 
 assert_contains "${cmd_wrapper}" "setlocal EnableExtensions EnableDelayedExpansion" "cmd delayed errorlevel expansion"
-assert_contains "${cmd_wrapper}" "-File \"%SCRIPT_DIR%sfs.ps1\" %* & exit /b !ERRORLEVEL!" "cmd direct powershell bridge exits on parsed line"
+assert_contains "${cmd_wrapper}" "set \"SFS_NATIVE_SCRIPT=%SCRIPT_DIR%sfs.ps1\"" "cmd stores ps1 path for powershell command bridge"
+assert_contains "${cmd_wrapper}" "-Command \"& \$env:SFS_NATIVE_SCRIPT @args\" %* & exit /b !ERRORLEVEL!" "cmd powershell command bridge exits on parsed line"
+if grep -Fq -- "-File \"%SCRIPT_DIR%sfs.ps1\" %*" "${cmd_wrapper}"; then
+  fail "cmd wrapper must not use powershell -File for Scoop shim argument forwarding"
+fi
 if grep -Fq -- "call :" "${cmd_wrapper}"; then
   fail "cmd wrapper must stay a thin direct PowerShell entrypoint; call-label forwarding lost args under Scoop shims"
 fi
@@ -70,7 +74,8 @@ fi
 if grep -Fq -- "ValueFromRemainingArguments" "${ps_wrapper}"; then
   fail "ps1 must not rely on ValueFromRemainingArguments; Windows PowerShell -File lost args in the field"
 fi
-assert_contains "${ps_wrapper}" 'Resolve-SfsArgs $args $MyInvocation.UnboundArguments' "ps1 automatic/unbound args fallback"
+assert_contains "${ps_wrapper}" '[object[]] $SfsParamArgs' "ps1 positional array args"
+assert_contains "${ps_wrapper}" 'Resolve-SfsArgs $SfsParamArgs $args $MyInvocation.UnboundArguments' "ps1 param/automatic/unbound args fallback"
 assert_contains "${ps_wrapper}" '$resolved[0] -eq "--%"' "ps1 stop-parsing token normalization"
 assert_contains "${ps_wrapper}" "Enable-SfsUtf8Bridge" "ps1 utf8 bridge"
 assert_contains "${ps_wrapper}" "Invoke-ScoopSelfUpgrade" "ps1 owns Scoop self-upgrade"

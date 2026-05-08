@@ -39,27 +39,28 @@ depth options for the shape of the work.
 
 ## Windows Wrapper Stabilization
 
-The Windows PowerShell/cmd entrypoint is `sfs.cmd`. As of 0.6.42, the wrapper
-keeps `sfs.cmd` as a label-free thin PowerShell trampoline, and `sfs.ps1` owns
+The Windows PowerShell/cmd entrypoint is `sfs.cmd`. As of 0.6.43, the wrapper
+keeps `sfs.cmd` as a label-free thin PowerShell trampoline and enters `sfs.ps1`
+through PowerShell `-Command "& $env:SFS_NATIVE_SCRIPT @args"`. `sfs.ps1` owns
 both read-only commands and mutating commands such as `start`. Mutating commands
 go through the `sfs.cmd -> sfs.ps1 -> Bash runtime` bridge. The raw Git Bash
-`%*` path and batch-label forwarding path are no longer defaults because they
-already failed for sandbox startup, argument forwarding, UTF-8 output, and Scoop
-shims. `sfs.cmd upgrade` also delegates Scoop self-upgrade to `sfs.ps1` instead
-of running `scoop update sfs` from the batch file that Scoop replaces. `sfs.ps1`
-reads Windows PowerShell `-File` arguments directly from `$args` /
-`$MyInvocation.UnboundArguments`, and owns `version`, `status`, `guide`,
-`context`, Scoop self-upgrade, and Bash fallback. `sfs.cmd` exits on the same
-parsed line after calling PowerShell, and Windows runtime `.ps1` / `.cmd` files
-stay ASCII-safe for Windows PowerShell 5.1. That covers the `context cat` /
-`start` usage-only regression, the batch tail-fragment regression, and the
+`%*` path, batch-label forwarding path, and `-File ... %*` bridge are no longer
+defaults because they already failed for sandbox startup, argument forwarding,
+UTF-8 output, and Scoop shims. `sfs.cmd upgrade` also delegates Scoop
+self-upgrade to `sfs.ps1` instead of running `scoop update sfs` from the batch
+file that Scoop replaces. `sfs.ps1` normalizes positional array param args,
+`$args`, and `$MyInvocation.UnboundArguments`, and owns `version`, `status`,
+`guide`, `context`, Scoop self-upgrade, and Bash fallback. `sfs.cmd` exits on the
+same parsed line after calling PowerShell, and Windows runtime `.ps1` / `.cmd`
+files stay ASCII-safe for Windows PowerShell 5.1. That covers the `context cat`
+/ `start` usage-only regression, the batch tail-fragment regression, and the
 PowerShell parser regression.
 
 An empty sprint directory after `sfs start` can be normal. Step files are created
 later by `brainstorm`, `plan`, `review`, and `retro`. Empty command output,
 usage-only `sfs.cmd status`, or usage-only `sfs.cmd context cat kernel` is a
 failure signal. The full root cause and validation flow are in the
-[Windows SFS wrapper incident report](./windows-wrapper-incident-0.6.42.md).
+[Windows SFS wrapper incident report](./windows-wrapper-incident-0.6.43.md).
 
 ## Three Brainstorm Depths
 
@@ -226,7 +227,7 @@ product design system exists, it wins.
 
 ## Division Knowledge Packs
 
-As of 0.6.42, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
+As of 0.6.43, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
 management/admin, and taxonomy packs are no longer placeholders. Each pack gives
 Solon a compact sense of what to watch, what to ask, and what evidence should
 count for that kind of work.
