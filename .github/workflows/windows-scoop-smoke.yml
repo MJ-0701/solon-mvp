@@ -156,6 +156,7 @@ jobs:
           }
 
       - name: Smoke thin project in PowerShell
+        timeout-minutes: 15
         run: |
           $env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"
           $project = Join-Path $env:RUNNER_TEMP "sfs test-project"
@@ -226,10 +227,15 @@ jobs:
           git -C $env:SFS_TEST_BUCKET_DIR add bucket/sfs.json
           git -C $env:SFS_TEST_BUCKET_DIR commit -m "test bucket current package"
 
-          $upgradeLines = & sfs.cmd upgrade 2>&1
+          Write-Host "::group::sfs.cmd upgrade live trace"
+          Write-Host "[sfs-trace] upgrade start $(Get-Date -Format o)"
+          $env:SFS_WINDOWS_ARG_TRACE = "1"
+          $upgradeLines = & sfs.cmd upgrade 2>&1 | Tee-Object -Variable upgradeTrace
           $upgradeExit = $LASTEXITCODE
-          $upgradeOutput = ($upgradeLines | Out-String)
-          Write-Host $upgradeOutput
+          Remove-Item Env:SFS_WINDOWS_ARG_TRACE -ErrorAction SilentlyContinue
+          Write-Host "[sfs-trace] upgrade exit=$upgradeExit $(Get-Date -Format o)"
+          Write-Host "::endgroup::"
+          $upgradeOutput = ($upgradeTrace | Out-String)
           if ($upgradeExit -ne 0) { exit $upgradeExit }
           if ($upgradeOutput -match "TIVE_READONLY_DONE|LF_UPGRADE_DONE|'e'.*(recognized|은\(는\))|'\*'.*(recognized|은\(는\))") {
             throw "sfs.cmd upgrade printed batch tail-fragment evidence: $upgradeOutput"

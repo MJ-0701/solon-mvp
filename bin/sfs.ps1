@@ -433,6 +433,7 @@ function Enable-SfsPowerShellUtility {
 }
 
 function Invoke-ScoopSelfUpgrade([string[]] $InvocationArgs) {
+  Write-SfsArgTrace "PS_SELF_UPGRADE_INVOCATION_ARGS" $InvocationArgs
   if (-not (Test-SfsUpgradeCommand $InvocationArgs)) { return $false }
   if (Test-NoSelfUpgrade $InvocationArgs) { return $false }
   if (-not (Test-ScoopRuntime $CurrentScriptPath)) { return $false }
@@ -470,6 +471,7 @@ function Invoke-ScoopSelfUpgrade([string[]] $InvocationArgs) {
   Write-Host "reloading installed sfs runtime..."
   $env:SFS_SKIP_SELF_UPGRADE = "1"
   $reloadArgs = [string[]] @($InvocationArgs)
+  Write-SfsArgTrace "PS_RELOAD_ARGS" $reloadArgs
   & $CurrentScriptPath @reloadArgs
   exit $LASTEXITCODE
 }
@@ -888,5 +890,6 @@ if (-not (Test-Path $sfsSh)) {
 }
 
 $bashArgs = [string[]] @($SfsArgs)
+Write-SfsArgTrace "PS_BASH_ARGS" $bashArgs
 & $bash (Convert-ToBashPath $sfsSh) @bashArgs
 exit $LASTEXITCODE

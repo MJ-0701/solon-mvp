@@ -148,12 +148,14 @@ assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs @() -AutomaticArgs @
 assert_contains "${ps_wrapper}" 'Invoke-SfsNativeReadonly -InvocationArgs $SfsArgs' "ps1 passes resolved args as one array"
 assert_contains "${ps_wrapper}" 'Invoke-ScoopSelfUpgrade -InvocationArgs $SfsArgs' "ps1 self-upgrade sees the full resolved arg array"
 assert_contains "${ps_wrapper}" '$reloadArgs = [string[]] @($InvocationArgs)' "ps1 self-upgrade reload preserves whole arg tokens"
+assert_contains "${ps_wrapper}" 'Write-SfsArgTrace "PS_RELOAD_ARGS" $reloadArgs' "ps1 traces self-upgrade reload args"
 assert_contains "${ps_wrapper}" '& $CurrentScriptPath @reloadArgs' "ps1 self-upgrade reload splats normalized arg array"
 if grep -Fq '& $CurrentScriptPath @InvocationArgs' "${ps_wrapper}"; then
   echo "ps1 self-upgrade reload still splats possibly scalar InvocationArgs directly" >&2
   exit 1
 fi
 assert_contains "${ps_wrapper}" '$bashArgs = [string[]] @($SfsArgs)' "ps1 bash bridge preserves whole arg tokens"
+assert_contains "${ps_wrapper}" 'Write-SfsArgTrace "PS_BASH_ARGS" $bashArgs' "ps1 traces final bash bridge args"
 assert_contains "${ps_wrapper}" '& $bash (Convert-ToBashPath $sfsSh) @bashArgs' "ps1 bash bridge splats normalized arg array"
 if grep -Fq '& $bash (Convert-ToBashPath $sfsSh) @SfsArgs' "${ps_wrapper}"; then
   echo "ps1 bash bridge still splats possibly scalar SfsArgs directly" >&2
@@ -229,6 +231,9 @@ assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_NAT
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_WINDOWS_ARG_TRACE" "Windows CI enables opt-in arg trace before accepting sfs.cmd version"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_ARGTRACE_PS_SELECTED_SOURCE=env" "Windows CI proves env bridge selected source"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_ARGTRACE_PS_FINAL_ARGS=.*version" "Windows CI proves version reaches sfs.ps1"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "Tee-Object -Variable upgradeTrace" "Windows CI streams upgrade logs live"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd upgrade live trace" "Windows CI groups upgrade trace logs"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "timeout-minutes: 15" "Windows CI bounds the self-upgrade smoke step"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_NATIVE_CMDLINE" "Windows CI verifies hardened sfs.cmd shim cmdline bridge"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" '$shimText -notmatch "%\*"' "Windows CI verifies hardened sfs.cmd shim positional fallback"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd version" "Windows CI PowerShell sfs.cmd version"
