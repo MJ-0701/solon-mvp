@@ -1,3 +1,28 @@
+## [0.6.42] - 2026-05-08
+
+> **Windows `sfs.cmd` thin trampoline hardening.** The 0.6.41 source/package
+> checks fixed the PowerShell parser issue, but the real GitHub Windows Scoop
+> smoke still showed `sfs version` falling through to usage under the Scoop shim.
+> The remaining unstable piece was batch-label forwarding itself.
+
+### Fixed
+
+- `bin/sfs.cmd` is now a label-free thin PowerShell trampoline. It forwards
+  `%*` directly to packaged `sfs.ps1` and exits on the same parsed line.
+- Native Windows read-only ownership moved fully into `sfs.ps1`: `version`,
+  `status`, `guide`, and `context` are handled there before Bash fallback.
+- Release verification and Windows guardrails now reject any `call :...` batch
+  labels in `sfs.cmd`, while continuing to reject raw Git Bash `%*`,
+  `SFS_ORIGINAL_ARGS`, direct batch-owned `scoop update`, and batch tail
+  fragments.
+
+### Tests
+
+- Windows wrapper incident reports are refreshed to the 0.6.42 baseline with the
+  P9 batch-label/Scoop shim finding.
+- `test-windows-agent-adapter-fallback.sh` and `verify-product-release.sh` now
+  enforce the thin `sfs.cmd -> sfs.ps1` contract.
+
 ## [0.6.41] - 2026-05-08
 
 > **Windows PowerShell 5.1 / Scoop shim hardening.** The 0.6.40 source and

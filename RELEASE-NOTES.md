@@ -7,6 +7,24 @@
 
 ---
 
+## 0.6.42
+
+이번 버전은 0.6.41 을 실제 GitHub Windows runner 에 올린 뒤 남아 있던 `sfs.cmd` 인자 손실을
+마저 제거합니다. 결론은 더 세게 단순해졌습니다. Windows 의 `sfs.cmd` 는 더 이상 batch label 로
+판단하거나 전달하지 않고, 곧장 `sfs.ps1` 로 들어가는 얇은 PowerShell trampoline 입니다.
+
+- `sfs.cmd` 안의 `call :...` label dispatch 를 제거했습니다. Scoop shim 아래에서 label forwarding
+  자체가 `sfs version` 을 usage-only 로 떨어뜨릴 수 있었기 때문입니다.
+- `sfs.ps1` 이 `version`, `status`, `guide`, `context`, Scoop self-upgrade, Bash fallback 을 모두
+  소유합니다. Windows PowerShell/cmd 에서도 macOS 의 `sfs` 처럼 명령 인자를 받아야 한다는 목표에
+  맞춘 고정 경로입니다.
+- Windows guardrail 과 release verifier 가 이제 `sfs.cmd` 안의 batch label, raw Git Bash `%*`,
+  `SFS_ORIGINAL_ARGS`, batch-owned `scoop update` 를 모두 실패로 봅니다.
+- 이미 0.6.41 이하의 깨진 wrapper 때문에 `sfs.cmd update` 도 usage 만 출력하는 경우에는 최초 1회
+  `scoop update sfs` 후 `sfs.cmd upgrade --no-self-upgrade` 로 복구할 수 있도록 안내를 추가했습니다.
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.42.md) 는 P1-P9
+  문제 목록과 0.6.42 기준 검증 경로로 최신화했습니다.
+
 ## 0.6.41
 
 이번 버전은 0.6.40 을 실제 GitHub Windows runner 에 올린 뒤 남아 있던 Windows 전용 문제를
@@ -21,7 +39,7 @@ call-label `%*` 를 바로 `sfs.ps1` 에 전달합니다.
   `sfs version` 이 usage 만 출력하던 경로를 제거했습니다.
 - Windows guardrail 과 release verifier 가 `.ps1` / `.cmd` ASCII-only, direct `%*` forwarding,
   same-line `exit /b !ERRORLEVEL!` 계약을 함께 검사합니다.
-- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.41.md) 는 P1-P8
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.42.md) 는 P1-P8
   문제 목록과 0.6.41 기준 검증 경로로 최신화했습니다.
 
 ## 0.6.40
@@ -86,7 +104,7 @@ incident-report 문서 테스트가 `CHANGELOG.md` / `RELEASE-NOTES.md` 위치�
 - `sfs.cmd` 는 native read-only 확인 후 나머지 명령을 PowerShell entrypoint 로 넘기는 얇은 wrapper
   로 돌아갑니다.
 - 이번 Windows wrapper 장애 흐름과 발견된 문제점은
-  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.41.md) 에 정리했습니다.
+  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.42.md) 에 정리했습니다.
 
 ## 0.6.36
 
@@ -99,7 +117,7 @@ incident-report 문서 테스트가 `CHANGELOG.md` / `RELEASE-NOTES.md` 위치�
 - Windows 사용자는 0.6.35 에 들어간 `sfs.cmd -> sfs.ps1 -> Bash runtime` bridge 수정을 그대로
   받습니다.
 - Windows 에서 실제로 관찰된 usage-only, 빈 출력, 한국어 깨짐, Homebrew installed layout 문제는
-  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.41.md) 에 정리했습니다.
+  [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.42.md) 에 정리했습니다.
 
 ## 0.6.35
 

@@ -43,31 +43,23 @@ adapter_files=(
   "${DIST_DIR}/plugins/solon/commands/sfs.md"
 )
 
-assert_contains "${cmd_wrapper}" "call :maybe_native_readonly %*" "cmd native fallback hook"
 assert_contains "${cmd_wrapper}" "setlocal EnableExtensions EnableDelayedExpansion" "cmd delayed errorlevel expansion"
+assert_contains "${cmd_wrapper}" "-File \"%SCRIPT_DIR%sfs.ps1\" %* & exit /b !ERRORLEVEL!" "cmd direct powershell bridge exits on parsed line"
+if grep -Fq -- "call :" "${cmd_wrapper}"; then
+  fail "cmd wrapper must stay a thin direct PowerShell entrypoint; call-label forwarding lost args under Scoop shims"
+fi
 if grep -Fq -- "call :maybe_self_upgrade" "${cmd_wrapper}"; then
   fail "cmd wrapper must not run Scoop self-upgrade from the batch file that Scoop replaces"
 fi
 if grep -Fq -- "call scoop update" "${cmd_wrapper}"; then
   fail "cmd wrapper must not call scoop update directly; sfs.ps1 owns the stable self-upgrade"
 fi
-assert_contains "${cmd_wrapper}" ":native_usage" "cmd native usage"
-assert_contains "${cmd_wrapper}" ":native_guide" "cmd native guide"
-assert_contains "${cmd_wrapper}" "status\" goto native_powershell_readonly_dispatch" "cmd native status dispatch"
-assert_contains "${cmd_wrapper}" "context\" goto native_powershell_readonly_dispatch" "cmd native context dispatch"
-assert_contains "${cmd_wrapper}" "version\" goto native_powershell_readonly_dispatch" "cmd native version dispatch"
-assert_contains "${cmd_wrapper}" ":native_powershell_readonly_dispatch" "cmd native powershell dispatch"
 if grep -Fq -- "SFS_ORIGINAL_ARGS" "${cmd_wrapper}"; then
   fail "cmd wrapper must forward the call-label %* directly; cached SFS_ORIGINAL_ARGS went empty under Scoop shims"
 fi
-assert_contains "${cmd_wrapper}" "-File \"%SCRIPT_DIR%sfs.ps1\" %*" "cmd powershell direct argument forwarding"
-assert_contains "${cmd_wrapper}" "call :powershell_dispatch %* & exit /b !ERRORLEVEL!" "cmd non-native powershell bridge exits on parsed line"
-assert_contains "${cmd_wrapper}" ":powershell_dispatch" "cmd powershell bridge label"
-assert_contains "${cmd_wrapper}" "-File \"%SCRIPT_DIR%sfs.ps1\" %* & exit /b !ERRORLEVEL!" "cmd powershell dispatch exits on parsed line"
 if grep -Fq -- "call exit /b %%ERRORLEVEL%%" "${cmd_wrapper}"; then
   fail "cmd wrapper must not use unstable CALL+ERRORLEVEL double expansion for post-upgrade exit"
 fi
-assert_contains "${cmd_wrapper}" "sfs.cmd guide [--path^|--print]" "cmd native guide help"
 if grep -Fq -- "\"%BASH_EXE%\" \"%SFS_SH%\" %*" "${cmd_wrapper}"; then
   fail "cmd wrapper must not send mutating commands through the raw Git Bash %* bridge"
 fi
@@ -85,6 +77,7 @@ assert_contains "${ps_wrapper}" "Invoke-ScoopSelfUpgrade" "ps1 owns Scoop self-u
 assert_contains "${ps_wrapper}" "\$env:LC_CTYPE = \"C.UTF-8\"" "ps1 bash utf8 locale"
 assert_contains "${ps_wrapper}" "Invoke-SfsNativeStatus" "ps1 native status"
 assert_contains "${ps_wrapper}" "Invoke-SfsNativeContext" "ps1 native context"
+assert_contains "${ps_wrapper}" "Invoke-SfsNativeGuide" "ps1 native guide"
 assert_contains "${ps_wrapper}" "Native read-only helper for Windows agents. It does not start Git Bash." "ps1 native context help"
 assert_contains "${windows_discovery}" "plugin filesystem-direct deploy failed" "Windows cli-discovery catches A-2 deploy errors"
 
@@ -95,11 +88,6 @@ while IFS= read -r -d '' windows_script; do
     fail "Windows PowerShell/cmd scripts must stay ASCII for BOM-less Windows PowerShell 5.1 parsing: ${windows_script}"
   fi
 done < <(find "${DIST_DIR}" -type f \( -name '*.ps1' -o -name '*.cmd' \) -print0)
-
-native_line="$(line_number "${cmd_wrapper}" "call :maybe_native_readonly %*")"
-bridge_line="$(line_number "${cmd_wrapper}" "call :powershell_dispatch %*")"
-[[ -n "${native_line}" && -n "${bridge_line}" ]] || fail "missing native or PowerShell bridge line"
-(( native_line < bridge_line )) || fail "native read-only fallback must run before PowerShell bridge fallback"
 
 if command -v powershell.exe >/dev/null 2>&1; then
   ps_script="${ps_wrapper}"

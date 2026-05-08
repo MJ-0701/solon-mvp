@@ -207,9 +207,12 @@ Commands:
   agent install, upgrade, update, uninstall
   version [--check]
   status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, report, tidy, retro, commit, loop
+  bootstrap [plain-language app idea]
+  measure --alive -- <command>
 
 Windows note:
-  sfs.cmd status, version, guide, and context path/cat are native read-only commands.
+  PowerShell/cmd users should prefer sfs.cmd. Git Bash/WSL users can use sfs.
+  sfs.cmd status, version, guide, and context path/cat are native read-only.
   Mutating commands still require Git for Windows/Git Bash.
 "@
 }
@@ -261,6 +264,89 @@ Usage:
 Prints the installed SFS runtime version. With --check, also checks the latest
 GitHub release when network access is available.
 "@
+}
+
+function Resolve-SfsGuidePath {
+  $localGuide = Join-Path (Get-SfsLocalDir) "GUIDE.md"
+  if (Test-Path -LiteralPath $localGuide -PathType Leaf) { return $localGuide }
+  return (Join-Path (Get-SfsDistDir) "GUIDE.md")
+}
+
+function Show-SfsNativeGuideUsage {
+  @"
+Usage:
+  sfs.cmd guide [--path|--print]
+
+Shows the Solon Product onboarding guide installed with this project.
+  --path   print only the guide path
+  --print  print the full guide contents
+"@
+}
+
+function Invoke-SfsNativeGuide([string[]] $Args) {
+  $mode = ""
+  foreach ($arg in $Args) {
+    switch ($arg) {
+      "-h" { Show-SfsNativeGuideUsage; Set-SfsNativeExit 0; return }
+      "--help" { Show-SfsNativeGuideUsage; Set-SfsNativeExit 0; return }
+      "--path" { $mode = "path" }
+      "--print" { $mode = "print" }
+      default {
+        Write-SfsNativeError "unknown arg for guide: $arg"
+        Set-SfsNativeExit 99
+        return
+      }
+    }
+  }
+
+  $guidePath = Resolve-SfsGuidePath
+  if ($mode -eq "path") {
+    Write-Output $guidePath
+    Set-SfsNativeExit 0
+    return
+  }
+  if ($mode -eq "print") {
+    if (-not (Test-Path -LiteralPath $guidePath -PathType Leaf)) {
+      Write-SfsNativeError "guide missing: $guidePath"
+      Set-SfsNativeExit 4
+      return
+    }
+    Get-Content -LiteralPath $guidePath -Raw
+    Set-SfsNativeExit 0
+    return
+  }
+
+  @"
+Solon guide context
+
+What this is:
+  Solon keeps sprint, decision, review, retro, and handoff state inside this repo.
+
+First files:
+  SFS.md        project operating guide
+  CLAUDE.md     Claude Code entry
+  AGENTS.md     Codex entry
+  GEMINI.md     Gemini CLI entry
+
+Command entrypoints:
+  PowerShell/cmd:        sfs.cmd ...
+  Git Bash/WSL/macOS:    sfs ...
+  Claude/Gemini agents:  /sfs ...
+  Codex agents:          `$sfs ...
+
+First flow:
+  sfs.cmd status
+  sfs.cmd auth status
+  sfs.cmd start "current sprint goal"
+  sfs.cmd brainstorm "raw requirements"
+  sfs.cmd plan
+  sfs.cmd implement "first slice"
+
+Full guide:
+  sfs.cmd guide --print
+  path: $guidePath
+"@
+  Set-SfsNativeExit 0
 }
 
 function Invoke-SfsNativeStatus([string[]] $Args) {
@@ -428,6 +514,7 @@ function Invoke-SfsNativeReadonly([string[]] $Args) {
     "--version" { Invoke-SfsNativeVersion @(); return }
     "version" { Invoke-SfsNativeVersion $invocation.Rest; return }
     "status" { Invoke-SfsNativeStatus $invocation.Rest; return }
+    "guide" { Invoke-SfsNativeGuide $invocation.Rest; return }
     "context" { Invoke-SfsNativeContext $invocation.Rest; return }
     default {
       if ($env:SFS_NATIVE_ONLY -eq "1") {
