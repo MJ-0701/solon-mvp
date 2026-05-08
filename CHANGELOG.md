@@ -1,3 +1,30 @@
+## [0.6.58] - 2026-05-09
+
+> **Strict `.sfs-local` retention for tidy.** `sfs tidy` now follows the
+> rule that visible `.sfs-local` residue must have a one-line keep reason.
+> Closed-sprint workbench evidence is recoverable in a cold archive, while
+> historical event ledger dust and placeholder files stop staying visible.
+
+### Changed
+
+- `sfs tidy --all --apply` now prunes `events.jsonl` when it no longer backs an
+  active sprint/current state. Closed-sprint event lines are removed after
+  `report.md` and the cold archive carry the durable evidence; an empty ledger
+  file is deleted instead of kept as residue.
+- Tidy now removes broken `current-sprint` pointers, empty placeholder
+  directories, and legacy `.gitkeep` dust from `.sfs-local`.
+- Tidy dry-run/apply output now reports the retention rule, event pruning, and
+  residue cleanup so Windows/macOS users can tell whether the strict cleanup
+  policy is actually active.
+- Sprint archive manifests now state the one-line keep-reason policy and the
+  reason `report.md`/`retro.md` may remain visible.
+
+### Tests
+
+- Added `test-sfs-tidy-retention.sh`, covering closed-sprint `events.jsonl`
+  pruning, broken `current-sprint` cleanup, placeholder removal, and cold
+  archive manifest retention text.
+
 ## [0.6.57] - 2026-05-09
 
 > **Mac-side release cut for the Windows wrapper fix.** The Windows-side

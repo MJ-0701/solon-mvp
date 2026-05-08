@@ -33,7 +33,7 @@ The point is not to outsource all thinking to AI. Solon lets AI assist the work
 while the user keeps product ownership over intent, priority, tradeoffs,
 validation, boundaries, and language.
 
-As of 0.6.57, backend, strategy/PM, QA, design/frontend, infra/DevOps,
+As of 0.6.58, backend, strategy/PM, QA, design/frontend, infra/DevOps,
 management/admin, and taxonomy knowledge packs are filled with practical
 guidance. Finance, bookkeeping, tax, and accounting belong to the
 management/admin lens. The user does not need to memorize those labels. Solon

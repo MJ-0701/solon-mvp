@@ -2,8 +2,8 @@
 # .sfs-local/scripts/sfs-tidy.sh
 #
 # Solon SFS — `/sfs tidy [--sprint <id>|--all] [--apply]`.
-# Moves existing workbench docs into archive so the sprint directory keeps only
-# report/retro/durable artifacts. Dry-run is the default; --apply is required
+# Moves existing workbench docs into archive so .sfs-local keeps only artifacts
+# that have a one-line keep reason. Dry-run is the default; --apply is required
 # for file changes.
 
 set -euo pipefail
@@ -27,11 +27,16 @@ Clean up completed sprint workbench docs without leaving loose hidden files.
   - --apply creates report.md when missing, then packs
     brainstorm/plan/implement/log/review plus matching .sfs-local/tmp review
     prompt/run scratch into one cold .tar.gz bundle with a short manifest.
-  - The visible sprint folder keeps report.md, retro.md, decisions, and other
-    durable artifacts; workbench dust leaves the main reading path.
+  - The visible sprint folder keeps only artifacts with a one-line keep reason:
+    report.md, retro.md, decisions, and explicitly durable notes.
+  - Closed-sprint event ledger lines, broken current-sprint pointers, empty
+    placeholder dirs, and stale workbench dust are removed when they no longer
+    explain why they must stay visible.
   - When report.md was created from legacy workbench docs, AI runtimes should
     refine it into the final report immediately after the adapter returns.
-  - report.md, retro.md, decision files, and events.jsonl are preserved.
+  - report.md, retro.md, and decision files are preserved. events.jsonl is kept
+    only while it backs an active sprint/current state; historical closed-sprint
+    events are pruned after report/archive evidence exists.
 
 Recommended close flow:
   1. /sfs tidy --sprint <id-or-ref>          # inspect legacy state
@@ -119,6 +124,170 @@ tidy_tmp_candidate_count() {
   local tmp_root="${SFS_LOCAL_DIR}/tmp"
   [[ -d "${tmp_root}" ]] || { printf '0\n'; return 0; }
   find "${tmp_root}" -type f -name "${sid}*" 2>/dev/null | wc -l | tr -d '[:space:]'
+}
+
+tidy_target_contains_sprint() {
+  local targets="${1:-}" sid="${2:-}"
+  [[ -n "${sid}" ]] || return 1
+  case $'\n'"${targets}" in
+    *$'\n'"${sid}"$'\n'*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+tidy_event_line_sprint_id() {
+  local line="${1:-}"
+  printf '%s\n' "${line}" | sed -nE 's/.*"sprint_id"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p'
+}
+
+tidy_should_prune_event_line() {
+  local line="${1:-}" targets="${2:-}" current_sprint="${3:-}" all="${4:-0}"
+  local sid
+  sid="$(tidy_event_line_sprint_id "${line}")"
+
+  # `tidy --all` with no valid active sprint means events.jsonl is purely
+  # historical scratch. report.md/retro.md/cold archives are the durable record.
+  if [[ "${all}" -eq 1 && -z "${current_sprint}" ]]; then
+    return 0
+  fi
+
+  if [[ -n "${sid}" ]] && tidy_target_contains_sprint "${targets}" "${sid}" \
+     && [[ "${sid}" != "${current_sprint}" ]]; then
+    return 0
+  fi
+  return 1
+}
+
+tidy_event_prune_stats() {
+  local targets="${1:-}" current_sprint="${2:-}" all="${3:-0}"
+  local line prune=0 keep=0
+  [[ -f "${SFS_EVENTS_FILE}" ]] || { printf '0 0 absent\n'; return 0; }
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    [[ -n "${line}" ]] || continue
+    if tidy_should_prune_event_line "${line}" "${targets}" "${current_sprint}" "${all}"; then
+      prune=$((prune + 1))
+    else
+      keep=$((keep + 1))
+    fi
+  done < "${SFS_EVENTS_FILE}"
+  printf '%s %s present\n' "${prune}" "${keep}"
+}
+
+tidy_prune_events() {
+  local targets="${1:-}" current_sprint="${2:-}" all="${3:-0}"
+  local line tmp pruned=0 kept=0
+  [[ -f "${SFS_EVENTS_FILE}" ]] || { printf '0\n'; return 0; }
+  tmp="$(mktemp "${SFS_EVENTS_FILE}.XXXXXX")" || return "${SFS_EXIT_PERM}"
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    [[ -n "${line}" ]] || continue
+    if tidy_should_prune_event_line "${line}" "${targets}" "${current_sprint}" "${all}"; then
+      pruned=$((pruned + 1))
+      continue
+    fi
+    printf '%s\n' "${line}" >> "${tmp}" || return "${SFS_EXIT_PERM}"
+    kept=$((kept + 1))
+  done < "${SFS_EVENTS_FILE}"
+
+  if [[ "${kept}" -eq 0 ]]; then
+    rm -f "${tmp}" "${SFS_EVENTS_FILE}" || return "${SFS_EXIT_PERM}"
+  else
+    mv -f "${tmp}" "${SFS_EVENTS_FILE}" || return "${SFS_EXIT_PERM}"
+  fi
+  printf '%s\n' "${pruned}"
+}
+
+tidy_count_local_residue() {
+  local count=0 path dir
+  for path in \
+    "${SFS_SPRINTS_DIR}/.gitkeep" \
+    "${SFS_LOCAL_DIR}/decisions/.gitkeep" \
+    "${SFS_LOCAL_DIR}/queue/pending/.gitkeep" \
+    "${SFS_LOCAL_DIR}/queue/claimed/.gitkeep" \
+    "${SFS_LOCAL_DIR}/queue/done/.gitkeep" \
+    "${SFS_LOCAL_DIR}/queue/failed/.gitkeep" \
+    "${SFS_LOCAL_DIR}/queue/abandoned/.gitkeep" \
+    "${SFS_LOCAL_DIR}/queue/runs/.gitkeep"; do
+    [[ -e "${path}" ]] || continue
+    count=$((count + 1))
+  done
+
+  for dir in \
+    "${SFS_LOCAL_DIR}/queue/pending" \
+    "${SFS_LOCAL_DIR}/queue/claimed" \
+    "${SFS_LOCAL_DIR}/queue/done" \
+    "${SFS_LOCAL_DIR}/queue/failed" \
+    "${SFS_LOCAL_DIR}/queue/abandoned" \
+    "${SFS_LOCAL_DIR}/queue/runs" \
+    "${SFS_LOCAL_DIR}/queue" \
+    "${SFS_LOCAL_DIR}/tmp" \
+    "${SFS_LOCAL_DIR}/cache" \
+    "${SFS_SPRINTS_DIR}" \
+    "${SFS_LOCAL_DIR}/decisions" \
+    "${SFS_ARCHIVES_DIR}/sprints" \
+    "${SFS_ARCHIVES_DIR}/runtime-migrations" \
+    "${SFS_ARCHIVES_DIR}"; do
+    [[ -d "${dir}" ]] || continue
+    if [[ -z "$(find "${dir}" -mindepth 1 -print -quit 2>/dev/null)" ]]; then
+      count=$((count + 1))
+    fi
+  done
+
+  if [[ -f "${SFS_CURRENT_SPRINT_FILE}" ]]; then
+    local current
+    current="$(read_current_sprint || true)"
+    if [[ -z "${current}" || ! -d "${SFS_SPRINTS_DIR}/${current}" ]]; then
+      count=$((count + 1))
+    fi
+  fi
+  printf '%s\n' "${count}"
+}
+
+tidy_cleanup_local_residue() {
+  local count=0 path dir current
+  for path in \
+    "${SFS_SPRINTS_DIR}/.gitkeep" \
+    "${SFS_LOCAL_DIR}/decisions/.gitkeep" \
+    "${SFS_LOCAL_DIR}/queue/pending/.gitkeep" \
+    "${SFS_LOCAL_DIR}/queue/claimed/.gitkeep" \
+    "${SFS_LOCAL_DIR}/queue/done/.gitkeep" \
+    "${SFS_LOCAL_DIR}/queue/failed/.gitkeep" \
+    "${SFS_LOCAL_DIR}/queue/abandoned/.gitkeep" \
+    "${SFS_LOCAL_DIR}/queue/runs/.gitkeep"; do
+    [[ -e "${path}" ]] || continue
+    rm -f "${path}" || return "${SFS_EXIT_PERM}"
+    count=$((count + 1))
+  done
+
+  if [[ -f "${SFS_CURRENT_SPRINT_FILE}" ]]; then
+    current="$(read_current_sprint || true)"
+    if [[ -z "${current}" || ! -d "${SFS_SPRINTS_DIR}/${current}" ]]; then
+      rm -f "${SFS_CURRENT_SPRINT_FILE}" || return "${SFS_EXIT_PERM}"
+      count=$((count + 1))
+    fi
+  fi
+
+  for dir in \
+    "${SFS_LOCAL_DIR}/queue/pending" \
+    "${SFS_LOCAL_DIR}/queue/claimed" \
+    "${SFS_LOCAL_DIR}/queue/done" \
+    "${SFS_LOCAL_DIR}/queue/failed" \
+    "${SFS_LOCAL_DIR}/queue/abandoned" \
+    "${SFS_LOCAL_DIR}/queue/runs" \
+    "${SFS_LOCAL_DIR}/queue" \
+    "${SFS_LOCAL_DIR}/tmp" \
+    "${SFS_LOCAL_DIR}/cache" \
+    "${SFS_SPRINTS_DIR}" \
+    "${SFS_LOCAL_DIR}/decisions" \
+    "${SFS_ARCHIVES_DIR}/sprints" \
+    "${SFS_ARCHIVES_DIR}/runtime-migrations" \
+    "${SFS_ARCHIVES_DIR}"; do
+    [[ -d "${dir}" ]] || continue
+    if [[ -z "$(find "${dir}" -mindepth 1 -print -quit 2>/dev/null)" ]]; then
+      rmdir "${dir}" 2>/dev/null || true
+      [[ -d "${dir}" ]] || count=$((count + 1))
+    fi
+  done
+  printf '%s\n' "${count}"
 }
 
 SPRINT_ID=""
@@ -210,7 +379,26 @@ if [[ -z "${TARGETS}" ]]; then
 fi
 
 NOW="$(date +%Y-%m-%dT%H:%M:%S%z 2>/dev/null | sed -E 's/([0-9]{2})$/:\1/')"
-CURRENT_SPRINT="$(read_current_sprint || true)"
+RAW_CURRENT_SPRINT="$(read_current_sprint || true)"
+CURRENT_SPRINT="${RAW_CURRENT_SPRINT}"
+if [[ -n "${CURRENT_SPRINT}" && ! -d "${SFS_SPRINTS_DIR}/${CURRENT_SPRINT}" ]]; then
+  CURRENT_SPRINT=""
+fi
+
+read -r EVENT_PRUNE_COUNT EVENT_KEEP_COUNT EVENT_STATE \
+  <<< "$(tidy_event_prune_stats "${TARGETS}" "${CURRENT_SPRINT}" "${ALL}")"
+RESIDUE_COUNT="$(tidy_count_local_residue)"
+
+if [[ "${APPLY}" -eq 0 ]]; then
+  echo "tidy retention dry-run:"
+  echo "  rule: keep only files with a one-line keep reason"
+  if [[ "${EVENT_STATE}" == "present" ]]; then
+    echo "  events: ${EVENT_PRUNE_COUNT} line(s) would prune; ${EVENT_KEEP_COUNT} active/state line(s) would remain"
+  else
+    echo "  events: absent"
+  fi
+  echo "  residue: ${RESIDUE_COUNT} placeholder/broken/empty item(s) would remove"
+fi
 
 # Apply preflight first so --all never half-applies before discovering a
 # missing or invalid target.
@@ -283,5 +471,14 @@ while IFS= read -r sid; do
   echo "  workbench: ${COUNT} file(s) packed"
   echo "  tmp: ${TMP_COUNT} file(s) packed"
 done <<< "${TARGETS}"
+
+if [[ "${APPLY}" -eq 1 ]]; then
+  EVENT_PRUNED="$(tidy_prune_events "${TARGETS}" "${CURRENT_SPRINT}" "${ALL}")"
+  RESIDUE_REMOVED="$(tidy_cleanup_local_residue)"
+  echo "retention:"
+  echo "  rule: kept files must have a one-line reason"
+  echo "  events: ${EVENT_PRUNED} historical line(s) pruned"
+  echo "  residue: ${RESIDUE_REMOVED} placeholder/broken/empty item(s) removed"
+fi
 
 exit "${SFS_EXIT_OK}"

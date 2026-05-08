@@ -836,7 +836,9 @@ sfs_archive_sprint_cold_bundle() {
     echo "tmp_review_scratch_files: ${tmp_count}"
     echo
     echo "policy:"
-    echo "- visible sprint entry remains report.md + retro.md"
+    echo "- visible files must have a one-line keep reason"
+    echo "- report.md remains because it is the final sprint outcome"
+    echo "- retro.md remains because it records close/learning notes when present"
     echo "- raw brainstorm/plan/implement/log/review and review prompt/run scratch are cold history"
     echo "- use this archive only for archaeology, dispute resolution, or deep handoff recovery"
     echo

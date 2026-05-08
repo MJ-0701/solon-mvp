@@ -7,6 +7,22 @@
 
 ---
 
+## 0.6.58
+
+이번 버전은 `.sfs-local` 정리 기준을 더 엄격하게 맞춥니다. 이제 `sfs tidy --all
+--apply` 는 “남겨야 하는 이유를 한 줄로 설명할 수 있는 것만 visible 상태로 둔다”는
+규칙을 실제 동작으로 적용합니다.
+
+- 닫힌 sprint 의 `brainstorm.md`, `plan.md`, `implement.md`, `log.md`, `review.md`
+  같은 workbench 문서는 계속 `.tar.gz` cold archive 로 묶어 복구 가능하게 둡니다.
+- `events.jsonl` 은 durable history 가 아니라 active state ledger 로 취급합니다.
+  active sprint/current state 를 뒷받침하지 않는 closed-sprint event line 은 tidy 후
+  제거되고, 남은 line 이 없으면 파일 자체도 삭제합니다.
+- 깨진 `current-sprint` 포인터, 빈 `.gitkeep` placeholder, 비어 있는 queue/decision/tmp/cache
+  디렉터리도 tidy apply 에서 함께 제거합니다.
+- dry-run/apply 출력에 event pruning 과 residue cleanup 요약이 나오므로, Windows 에서
+  `sfs.cmd tidy --all` 을 실행했을 때 새 규칙이 반영됐는지 바로 확인할 수 있습니다.
+
 ## 0.6.57
 
 이번 버전은 Windows 에서 검증된 0.6.56 `sfs.cmd` 패치셋을 macOS release cut 으로
