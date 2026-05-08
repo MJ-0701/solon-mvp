@@ -79,8 +79,11 @@ if perl -0ne 'exit((/-File "%SCRIPT_DIR%sfs\.ps1" %\*\r?\nexit \/b/) ? 0 : 1)' "
   fail "cmd wrapper must not put PowerShell dispatch and exit on separate parsed lines during self-upgrade"
 fi
 
-assert_contains "${ps_wrapper}" "ValueFromRemainingArguments" "ps1 accepts Scoop PowerShell shim positional args"
-assert_contains "${ps_wrapper}" '[object[]] $SfsParamArgs' "ps1 positional array args"
+if grep -Fq -- "ValueFromRemainingArguments" "${ps_wrapper}"; then
+  fail "ps1 must not rely on ValueFromRemainingArguments; Scoop PowerShell shims lost args through that path"
+fi
+assert_contains "${ps_wrapper}" '$SfsParamArgs = @()' "ps1 disables broken script-param arg source"
+assert_contains "${ps_wrapper}" '$args' "ps1 automatic args source"
 assert_contains "${ps_wrapper}" "Resolve-SfsEnvArgs" "ps1 env arg bridge"
 assert_contains "${ps_wrapper}" 'SFS_NATIVE_ARGC' "ps1 reads env arg count"
 assert_contains "${ps_wrapper}" 'SFS_NATIVE_ARG_$i' "ps1 reads numbered env args"

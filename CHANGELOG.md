@@ -1,3 +1,28 @@
+## [0.6.47] - 2026-05-08
+
+> **Windows Scoop PowerShell shim automatic args.** The 0.6.46 GitHub Windows
+> Scoop smoke run `25534566676` proved that the manifest target change did take
+> effect: `Get-Command sfs` pointed at `sfs.ps1`. But `sfs version` still fell
+> through to generic usage, so `ValueFromRemainingArguments` remained unreliable
+> under generated Scoop PowerShell shims.
+
+### Fixed
+
+- `bin/sfs.ps1` no longer declares a script param block. It reads PowerShell
+  automatic `$args` after the numbered env bridge and before `CMDCMDLINE` /
+  unbound fallback recovery.
+- `bin/sfs.cmd` remains a direct-run compatibility trampoline; direct `.cmd`
+  invocation still has the numbered env bridge and `%*` fallback into
+  PowerShell.
+
+### Tests
+
+- Windows guardrails and release verification now reject
+  `ValueFromRemainingArguments` in packaged `sfs.ps1` and require the explicit
+  `$SfsParamArgs = @()` disabled-param source.
+- Windows wrapper incident reports are refreshed to the 0.6.47 baseline with
+  the P14 generated Scoop PowerShell shim -> script-param finding.
+
 ## [0.6.46] - 2026-05-08
 
 > **Windows Scoop primary shim target.** The 0.6.45 GitHub Windows Scoop smoke

@@ -1,10 +1,6 @@
-param(
-  [Parameter(ValueFromRemainingArguments = $true)]
-  [object[]] $SfsParamArgs
-)
-
 $ErrorActionPreference = "Stop"
 $CurrentScriptPath = $MyInvocation.MyCommand.Path
+$SfsParamArgs = @()
 
 function Expand-SfsArgItem([object] $Item) {
   if ($null -eq $Item) { return @() }
