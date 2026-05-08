@@ -129,8 +129,8 @@ jobs:
           $sfsCmd = Get-Command sfs.cmd
           $sfsCmd
           $shimText = Get-Content $sfsCmd.Source -Raw
-          if ($shimText -notmatch "SFS_NATIVE_ARGC" -or $shimText -notmatch "%\*") {
-            throw "sfs.cmd shim was not hardened with both env and positional forwarding: $($sfsCmd.Source)"
+          if ($shimText -notmatch "SFS_NATIVE_ARGC" -or $shimText -notmatch "SFS_NATIVE_RAW_ARGS" -or $shimText -notmatch "%\*") {
+            throw "sfs.cmd shim was not hardened with env and raw positional forwarding: $($sfsCmd.Source)"
           }
           sfs.cmd version
           sfs.cmd --help

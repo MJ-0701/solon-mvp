@@ -53,6 +53,20 @@ function Resolve-SfsEnvArgs {
   return [string[]] $items
 }
 
+function Resolve-SfsRawArgs {
+  $raw = [Environment]::GetEnvironmentVariable("SFS_NATIVE_RAW_ARGS")
+  if (-not $raw) { return [string[]] @() }
+  return [string[]] (Split-SfsCommandLine $raw)
+}
+
+function Test-SfsUsableArgs([string[]] $Args) {
+  if (-not $Args -or $Args.Count -eq 0) { return $false }
+  foreach ($arg in $Args) {
+    if ($null -ne $arg -and [string] $arg -ne "") { return $true }
+  }
+  return $false
+}
+
 function Split-SfsCommandLine([string] $Text) {
   if (-not $Text) { return [string[]] @() }
   $items = @()
@@ -114,11 +128,15 @@ function Enable-SfsUtf8Bridge {
 
 $SfsEnvArgs = Resolve-SfsEnvArgs
 $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsEnvArgs -AutomaticArgs $SfsParamArgs -UnboundArgs $args
-if (-not $SfsArgs -or $SfsArgs.Count -eq 0) {
+if (-not (Test-SfsUsableArgs $SfsArgs)) {
+  $SfsRawArgs = Resolve-SfsRawArgs
+  $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsRawArgs -AutomaticArgs @() -UnboundArgs @()
+}
+if (-not (Test-SfsUsableArgs $SfsArgs)) {
   $SfsCmdLineArgs = Resolve-SfsCmdLineArgs
   $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsCmdLineArgs -AutomaticArgs @() -UnboundArgs @()
 }
-if (-not $SfsArgs -or $SfsArgs.Count -eq 0) {
+if (-not (Test-SfsUsableArgs $SfsArgs)) {
   $SfsArgs = Resolve-SfsArgs -ParamArgs @() -AutomaticArgs @() -UnboundArgs $MyInvocation.UnboundArguments
 }
 Enable-SfsUtf8Bridge

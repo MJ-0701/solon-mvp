@@ -1,3 +1,20 @@
+## [0.6.52] - 2026-05-08
+
+> **Windows raw arg tail hardening.** The 0.6.51 GitHub Windows Scoop smoke run
+> `25543802195` reached the runtime install but showed hardened `sfs.cmd version`
+> still falling through to usage-only output. The cmd shim now preserves the
+> original `%*` tail before `shift` and exposes it as `SFS_NATIVE_RAW_ARGS`.
+
+### Fixed
+
+- `bin/sfs.cmd` and the Scoop post-install hardened `sfs.cmd` shim now capture
+  `SFS_NATIVE_RAW_ARGS=%*` before the `%1..%n` collection loop consumes args.
+- `bin/sfs.ps1` now reads `SFS_NATIVE_RAW_ARGS` after the numbered env bridge
+  and before the `CMDCMDLINE` fallback; all-empty resolved arg arrays are treated
+  as unusable so fallback paths are not blocked by a broken bridge.
+- Windows guardrails, release verifier, and the Windows incident report now
+  assert the raw-arg fallback contract and record P19 with run `25543802195`.
+
 ## [0.6.51] - 2026-05-08
 
 > **Windows smoke tag refspec fix.** The 0.6.50 GitHub Windows Scoop smoke run

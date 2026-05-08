@@ -40,7 +40,7 @@ depth options for the shape of the work.
 ## Windows Wrapper Stabilization
 
 The Windows PowerShell/cmd user entrypoint is fixed to `sfs.cmd`. Git Bash/WSL
-keep using `sfs`, like macOS/Linux. As of 0.6.51, the Scoop manifest keeps the
+keep using `sfs`, like macOS/Linux. As of 0.6.52, the Scoop manifest keeps the
 generated shim target on packaged `bin\sfs.ps1`, but the post-install hook
 overwrites the shims-directory `sfs.cmd`, `sfs.ps1`, and extensionless `sfs`
 with deterministic wrappers because generated `sfs.cmd` / `sfs.ps1` shims can
@@ -72,7 +72,7 @@ An empty sprint directory after `sfs start` can be normal. Step files are create
 later by `brainstorm`, `plan`, `review`, and `retro`. Empty command output,
 usage-only `sfs.cmd status`, or usage-only `sfs.cmd context cat kernel` is a
 failure signal. The full root cause and validation flow are in the
-[Windows SFS wrapper incident report](./windows-wrapper-incident-0.6.51.md).
+[Windows SFS wrapper incident report](./windows-wrapper-incident-0.6.52.md).
 
 ## Three Brainstorm Depths
 
@@ -239,7 +239,7 @@ product design system exists, it wins.
 
 ## Division Knowledge Packs
 
-As of 0.6.51, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
+As of 0.6.52, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
 management/admin, and taxonomy packs are no longer placeholders. Each pack gives
 Solon a compact sense of what to watch, what to ask, and what evidence should
 count for that kind of work.

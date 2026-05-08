@@ -90,7 +90,7 @@ sfs.cmd version --check
 sfs.cmd doctor      # ✅ 세 줄 (Claude / Gemini / Codex) 모두 보이면 OK
 ```
 
-성공하면 `sfs 0.6.51`, `status up-to-date` 같은 문장이 보입니다. Windows
+성공하면 `sfs 0.6.52`, `status up-to-date` 같은 문장이 보입니다. Windows
 PowerShell 이나 cmd 에서는 `sfs.cmd` 를 쓰고, Git Bash/WSL 에서는 `sfs` 를 쓰셔도 됩니다.
 
 ### 4. 테스트 프로젝트 폴더 만들기
@@ -229,7 +229,7 @@ Windows 의 Claude/Gemini/Codex 가 내부 명령을 실행할 때 Git Bash 시�
 0.6.37 부터는 `sfs.cmd upgrade` 도 실행 중인 batch 파일 안에서 직접 `scoop update sfs` 를
 실행하지 않습니다. `TIVE_READONLY_DONE` 또는 `LF_UPGRADE_DONE` 같은 조각 문자열이 보이면
 0.6.36 self-update 경로에서 발견된 문제이므로 `sfs.cmd update` 후 다시 확인하세요.
-0.6.51 기준으로는 Windows PowerShell/cmd 안내와 smoke 를 `sfs.cmd` 경로로 고정합니다.
+0.6.52 기준으로는 Windows PowerShell/cmd 안내와 smoke 를 `sfs.cmd` 경로로 고정합니다.
 Scoop 이 만든 bare `sfs` shim 은 여전히 존재할 수 있지만, Windows 에서는 성공 기준으로 보지
 않습니다. `sfs.cmd` 는 직접 실행/호환용 thin PowerShell trampoline 으로 남고, 받은 인자를
 `SFS_NATIVE_ARGC` / `SFS_NATIVE_ARG_N` 번호 환경 변수로 `sfs.ps1` 에 넘깁니다. `sfs.ps1` 이
