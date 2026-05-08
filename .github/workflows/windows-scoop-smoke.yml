@@ -129,8 +129,8 @@ jobs:
           $sfsCmd = Get-Command sfs.cmd
           $sfsCmd
           $shimText = Get-Content $sfsCmd.Source -Raw
-          if ($shimText -notmatch "SFS_NATIVE_ARGC" -or $shimText -notmatch "SFS_NATIVE_RAW_ARGS" -or $shimText -notmatch "%\*") {
-            throw "sfs.cmd shim was not hardened with env and raw positional forwarding: $($sfsCmd.Source)"
+          if ($shimText -notmatch "SFS_NATIVE_ARGC" -or $shimText -notmatch "SFS_NATIVE_RAW_ARGS" -or $shimText -notmatch "SFS_NATIVE_CMDLINE" -or $shimText -notmatch "%\*") {
+            throw "sfs.cmd shim was not hardened with env, raw positional, and cmdline forwarding: $($sfsCmd.Source)"
           }
           sfs.cmd version
           sfs.cmd --help
@@ -247,6 +247,58 @@ jobs:
           }
           sfs.cmd status | Out-String | Select-String "ci-korean-sprint-test" | Out-Null
 
+      - name: Smoke saved cmdline fallback
+        run: |
+          $env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"
+          $project = Join-Path $env:RUNNER_TEMP "sfs saved-cmdline-project"
+          New-Item -ItemType Directory -Force -Path $project | Out-Null
+          Set-Location $project
+
+          git init
+          sfs.cmd init --layout thin --yes
+          $ps1 = Join-Path $env:USERPROFILE "scoop\apps\sfs\current\bin\sfs.ps1"
+          if (-not (Test-Path $ps1)) { throw "missing installed sfs.ps1: $ps1" }
+
+          function Clear-SfsArgBridge {
+            Remove-Item Env:SFS_NATIVE_ARGC -ErrorAction SilentlyContinue
+            Remove-Item Env:SFS_NATIVE_RAW_ARGS -ErrorAction SilentlyContinue
+            Remove-Item Env:SFS_NATIVE_CMDLINE -ErrorAction SilentlyContinue
+          }
+
+          function Invoke-SavedCmdline([string] $cmdline) {
+            $env:SFS_NATIVE_ARGC = "0"
+            Remove-Item Env:SFS_NATIVE_RAW_ARGS -ErrorAction SilentlyContinue
+            $env:SFS_NATIVE_CMDLINE = $cmdline
+            $lines = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $ps1 2>&1
+            $exitCode = $LASTEXITCODE
+            $output = ($lines | Out-String)
+            Clear-SfsArgBridge
+            if ($exitCode -ne 0) {
+              throw "saved cmdline fallback failed with exit ${exitCode}: $cmdline`n$output"
+            }
+            return $output
+          }
+
+          $versionOut = Invoke-SavedCmdline 'cmd.exe /d /c "sfs.cmd version && sfs.cmd --help >NUL"'
+          if ($versionOut -notmatch "sfs $env:SFS_TEST_VERSION") {
+            throw "saved cmdline fallback did not recover version before shell-control tail: $versionOut"
+          }
+
+          $contextOut = Invoke-SavedCmdline 'cmd.exe /d /c "sfs.cmd context cat kernel && sfs.cmd --help >NUL"'
+          if ($contextOut -notmatch "SFS Kernel") {
+            throw "saved cmdline fallback did not recover context cat kernel: $contextOut"
+          }
+
+          Invoke-SavedCmdline 'cmd.exe /d /c "sfs.cmd start --id ci-saved-cmdline-test --force saved-cmdline-start && sfs.cmd --help >NUL"' | Out-Null
+          $currentSprint = (Get-Content ".sfs-local\current-sprint" -First 1).Trim()
+          if ($currentSprint -ne "ci-saved-cmdline-test") {
+            throw "saved cmdline fallback start did not update current-sprint: $currentSprint"
+          }
+          $lastEvent = Get-Content ".sfs-local\events.jsonl" -Tail 1
+          if ($lastEvent -notmatch '"type":"sprint_start"' -or $lastEvent -notmatch '"goal":"saved-cmdline-start"') {
+            throw "saved cmdline fallback start did not append expected event: $lastEvent"
+          }
+
       - name: Smoke cmd PATH
         run: |
           $env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"
@@ -313,6 +365,6 @@ jobs:
           }
           $sfsCmd = Get-Command sfs.cmd
           $shimText = Get-Content $sfsCmd.Source -Raw
-          if ($shimText -notmatch "SFS_NATIVE_ARGC" -or $shimText -notmatch "%\*") {
-            throw "recovered sfs.cmd shim was not hardened with both env and positional forwarding: $($sfsCmd.Source)"
+          if ($shimText -notmatch "SFS_NATIVE_ARGC" -or $shimText -notmatch "SFS_NATIVE_RAW_ARGS" -or $shimText -notmatch "SFS_NATIVE_CMDLINE" -or $shimText -notmatch "%\*") {
+            throw "recovered sfs.cmd shim was not hardened with env, raw positional, and cmdline forwarding: $($sfsCmd.Source)"
           }

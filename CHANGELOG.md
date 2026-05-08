@@ -1,3 +1,24 @@
+## [0.6.53] - 2026-05-08
+
+> **Windows saved command-line bridge.** The 0.6.52 GitHub Windows Scoop smoke
+> run `25545120029` still showed `sfs.cmd version` falling through to
+> usage-only output even though the hardened shim contained `SFS_NATIVE_RAW_ARGS`.
+> The cmd shim now saves the batch process's original command line as
+> `SFS_NATIVE_CMDLINE` through delayed expansion before starting child PowerShell.
+
+### Fixed
+
+- `bin/sfs.cmd` and the Scoop post-install hardened `sfs.cmd` shim now capture
+  `SFS_NATIVE_CMDLINE=!CMDCMDLINE!` inside the delayed-expansion dispatch block,
+  avoiding raw `%CMDCMDLINE%` expansion on command lines that contain quotes,
+  shell operators, or redirection.
+- `bin/sfs.ps1` now reads `SFS_NATIVE_CMDLINE` after the raw-arg fallback and
+  before child PowerShell's own `CMDCMDLINE` fallback. The saved-command-line
+  parser also trims `cmd.exe` shell-control tails such as `&& sfs.cmd --help`.
+- Windows smoke, guardrails, release verifier, and the Windows incident report
+  now assert the saved-command-line bridge, force the env/raw-empty fallback
+  path, and record P20 with run `25545120029`.
+
 ## [0.6.52] - 2026-05-08
 
 > **Windows raw arg tail hardening.** The 0.6.51 GitHub Windows Scoop smoke run

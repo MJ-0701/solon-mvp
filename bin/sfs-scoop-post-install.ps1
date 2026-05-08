@@ -84,6 +84,7 @@ goto sfs_collect_args
 
 :sfs_args_done
 setlocal EnableDelayedExpansion
+set "SFS_NATIVE_CMDLINE=!CMDCMDLINE!"
 "%SFS_NATIVE_POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%SFS_NATIVE_SCRIPT%" & exit /b !ERRORLEVEL!
 '@
 

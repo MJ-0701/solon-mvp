@@ -95,8 +95,19 @@ function Split-SfsCommandLine([string] $Text) {
   return [string[]] $items
 }
 
-function Resolve-SfsCmdLineArgs {
-  $line = [Environment]::GetEnvironmentVariable("CMDCMDLINE")
+function Trim-SfsShellControlTail([string[]] $Items) {
+  if (-not $Items) { return [string[]] @() }
+  $trimmed = @()
+  foreach ($item in @($Items)) {
+    if ($item -in @("&", "&&", "||", "|")) { break }
+    if ($item -match "^[0-9]*[<>]") { break }
+    $trimmed += @($item)
+  }
+  return [string[]] $trimmed
+}
+
+function Resolve-SfsArgsFromCommandLine([string] $Line) {
+  $line = $Line
   if (-not $line) { return [string[]] @() }
 
   $tokens = Split-SfsCommandLine $line
@@ -104,13 +115,23 @@ function Resolve-SfsCmdLineArgs {
     $leaf = Split-Path -Leaf ($tokens[$i].Trim('"'))
     if ($leaf -ieq "sfs.cmd" -or $leaf -ieq "sfs") {
       if ($tokens.Count -le ($i + 1)) { return [string[]] @() }
-      return [string[]] @($tokens[($i + 1)..($tokens.Count - 1)])
+      return [string[]] (Trim-SfsShellControlTail @($tokens[($i + 1)..($tokens.Count - 1)]))
     }
   }
 
   $match = [regex]::Match($line, '(?i)sfs(?:\.cmd)?(?:"|\s|$)(.*)$')
   if (-not $match.Success) { return [string[]] @() }
-  return [string[]] (Split-SfsCommandLine $match.Groups[1].Value.Trim())
+  return [string[]] (Trim-SfsShellControlTail (Split-SfsCommandLine $match.Groups[1].Value.Trim()))
+}
+
+function Resolve-SfsSavedCmdLineArgs {
+  $line = [Environment]::GetEnvironmentVariable("SFS_NATIVE_CMDLINE")
+  return [string[]] (Resolve-SfsArgsFromCommandLine $line)
+}
+
+function Resolve-SfsCmdLineArgs {
+  $line = [Environment]::GetEnvironmentVariable("CMDCMDLINE")
+  return [string[]] (Resolve-SfsArgsFromCommandLine $line)
 }
 
 function Enable-SfsUtf8Bridge {
@@ -131,6 +152,10 @@ $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsEnvArgs -AutomaticArgs $SfsParamArgs -
 if (-not (Test-SfsUsableArgs $SfsArgs)) {
   $SfsRawArgs = Resolve-SfsRawArgs
   $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsRawArgs -AutomaticArgs @() -UnboundArgs @()
+}
+if (-not (Test-SfsUsableArgs $SfsArgs)) {
+  $SfsSavedCmdLineArgs = Resolve-SfsSavedCmdLineArgs
+  $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsSavedCmdLineArgs -AutomaticArgs @() -UnboundArgs @()
 }
 if (-not (Test-SfsUsableArgs $SfsArgs)) {
   $SfsCmdLineArgs = Resolve-SfsCmdLineArgs
