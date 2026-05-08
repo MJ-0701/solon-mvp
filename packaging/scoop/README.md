@@ -35,23 +35,23 @@ PowerShell/cmd 예시에서는 `sfs.cmd ...` 를 명시적으로 씁니다. Git 
 ## 로컬 Windows 설치 검증
 
 GitHub Actions workflow 는 checkout 에서 로컬 source zip 을 만들고, `file:///` URL 을 가진 임시
-bucket manifest 를 렌더링한 뒤 아래 흐름을 실행합니다. 0.6.47 기준 smoke 는 먼저 로컬 이전
+bucket manifest 를 렌더링한 뒤 아래 흐름을 실행합니다. 0.6.48 기준 smoke 는 먼저 로컬 이전
 패키지를 설치하고, 같은 bucket 에 현재 패키지를 발행한 뒤 실제 `sfs.cmd upgrade` 로
 self-upgrade 를 검증합니다.
 
 ```text
 scoop bucket add solon <temporary-bucket-path>
 scoop install sfs
-sfs version
-sfs --help
+sfs.cmd version
+sfs.cmd --help
 mkdir test-project
 cd test-project
 git init
-sfs init --layout thin --yes
+sfs.cmd init --layout thin --yes
 sfs.cmd context cat kernel
 sfs.cmd context cat commands/start.md
 sfs.cmd start --id ci-sprint-test "sprint-create-test"
-sfs agent install all
+sfs.cmd agent install all
 publish current package to the same temporary bucket
 sfs.cmd upgrade
 sfs.cmd start --id ci-korean-sprint-test --force "스프린트 생성 테스트"
@@ -59,7 +59,7 @@ sfs.cmd start --id ci-korean-sprint-test --force "스프린트 생성 테스트"
 
 thin layout 검증이 중요합니다. 사용자가 명시적으로 vendored layout 을 고르지 않는 한 프로젝트의
 `.sfs-local/` 에 runtime `scripts/`, `sprint-templates/`, `personas/`, `decisions-template/`
-디렉터리가 들어가면 안 됩니다. opt-in adapter 파일은 `sfs agent install all` 로 만든 뒤
+디렉터리가 들어가면 안 됩니다. opt-in adapter 파일은 `sfs.cmd agent install all` 로 만든 뒤
 `sfs.cmd upgrade` 가 thin surface 로 archive/remove 하는지도 확인합니다.
 
 ## 실제 bucket 릴리스 흐름

@@ -151,6 +151,9 @@ assert_contains "${DIST_DIR}/BEGINNER-GUIDE.md" "sfs.cmd context cat kernel" "be
 assert_contains "${DIST_DIR}/GUIDE.md" "couldn't create signal pipe, Win32 error 5" "guide Windows Codex troubleshooting"
 assert_contains "${DIST_DIR}/GUIDE.md" "sfs.cmd context cat kernel" "guide Windows native context"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd context cat kernel" "Windows CI sfs.cmd native context"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd version" "Windows CI PowerShell sfs.cmd version"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd init --layout thin --yes" "Windows CI PowerShell sfs.cmd init"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd agent install all" "Windows CI PowerShell sfs.cmd agent install"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd start --id ci-sprint-test" "Windows CI sfs.cmd start smoke"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" '"goal":"sprint-create-test"' "Windows CI sprint_start goal evidence"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_TEST_PREVIOUS_VERSION" "Windows CI installs previous local Scoop package first"
@@ -159,6 +162,14 @@ assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "TIVE_READONLY_DONE|LF_UPGRADE_DONE" "Windows CI batch tail-fragment rejection"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd start --id ci-korean-sprint-test" "Windows CI Korean sfs.cmd start smoke"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" '"goal":"스프린트 생성 테스트"' "Windows CI Korean sprint_start goal evidence"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" 'cmd /c "sfs.cmd version' "Windows CI cmd.exe uses sfs.cmd"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" 'command -v sfs && sfs version' "Windows CI Git Bash keeps bare sfs"
+if grep -Eq '^[[:space:]]+sfs (version|--help|init|status|auth|agent install)' "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml"; then
+  fail "Windows PowerShell smoke must not use bare sfs for PowerShell/cmd commands"
+fi
+if grep -Fq -- 'cmd /c "sfs version' "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml"; then
+  fail "Windows cmd.exe smoke must use sfs.cmd, not bare sfs"
+fi
 assert_contains "${DIST_DIR}/packaging/scoop/README.md" 'sfs.cmd -> sfs.ps1 -> bin/sfs' "Scoop README documents PowerShell bridge"
 assert_contains "${DIST_DIR}/packaging/scoop/README.md" 'sfs.cmd upgrade' "Scoop README documents wrapper-owned upgrade smoke"
 if grep -Fq -- "scoop update sfs --force" "${DIST_DIR}/packaging/scoop/README.md"; then

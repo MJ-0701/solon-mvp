@@ -1,3 +1,26 @@
+## [0.6.48] - 2026-05-08
+
+> **Windows PowerShell/cmd contract pinned to `sfs.cmd`.** The 0.6.47 GitHub
+> Windows Scoop smoke run `25535059980` proved that the generated bare `sfs`
+> shim can still drop arguments before the package sees them. The user-facing
+> Windows path is now treated as `sfs.cmd`; bare `sfs` remains for Git Bash/WSL.
+
+### Fixed
+
+- Windows Scoop smoke now uses `sfs.cmd version`, `sfs.cmd --help`,
+  `sfs.cmd init`, `sfs.cmd status`, `sfs.cmd auth`, `sfs.cmd agent install`,
+  `sfs.cmd upgrade`, and Korean `sfs.cmd start` for the PowerShell/cmd path.
+- Windows docs now state that PowerShell/cmd users should use `sfs.cmd`, while
+  Git Bash/WSL users can continue to use `sfs`.
+
+### Tests
+
+- Windows guardrails now check that the workflow's PowerShell/cmd and cmd.exe
+  smoke paths are pinned to `sfs.cmd`, while the Git Bash path still validates
+  bare `sfs`.
+- Windows wrapper incident reports are refreshed to the 0.6.48 baseline with
+  the P15 bare generated-shim finding and run `25535059980` evidence.
+
 ## [0.6.47] - 2026-05-08
 
 > **Windows Scoop PowerShell shim automatic args.** The 0.6.46 GitHub Windows

@@ -112,10 +112,10 @@ jobs:
           $env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"
           scoop bucket add solon $env:SFS_TEST_BUCKET_URL
           scoop install sfs
-          Get-Command sfs
-          sfs version
-          sfs --help
-          $installedVersion = ((sfs version).Trim() -replace "^sfs\s+", "")
+          Get-Command sfs.cmd
+          sfs.cmd version
+          sfs.cmd --help
+          $installedVersion = ((sfs.cmd version).Trim() -replace "^sfs\s+", "")
           if ($installedVersion -ne $env:SFS_TEST_PREVIOUS_VERSION) {
             throw "expected initial test package $env:SFS_TEST_PREVIOUS_VERSION, got $installedVersion"
           }
@@ -128,9 +128,9 @@ jobs:
           Set-Location $project
 
           git init
-          sfs init --layout thin --yes
-          sfs status
-          sfs auth status codex
+          sfs.cmd init --layout thin --yes
+          sfs.cmd status
+          sfs.cmd auth status codex
           sfs.cmd context cat kernel | Out-String | Select-String "SFS Kernel" | Out-Null
           sfs.cmd context cat commands/start.md | Out-String | Select-String "start" | Out-Null
           sfs.cmd start --id ci-sprint-test "sprint-create-test"
@@ -171,7 +171,7 @@ jobs:
             if (Test-Path $path) { throw "thin layout copied project-local asset unexpectedly: $path" }
           }
 
-          sfs agent install all
+          sfs.cmd agent install all
           $adapterFiles = @(
             ".claude\commands\sfs.md",
             ".claude\skills\sfs\SKILL.md",
@@ -201,7 +201,7 @@ jobs:
           }
 
           $projectVersion = (Select-String -Path ".sfs-local\VERSION" -Pattern "^solon_mvp_version:\s*(.+)$").Matches.Groups[1].Value.Trim()
-          $runtimeVersion = ((sfs version).Trim() -replace "^sfs\s+", "")
+          $runtimeVersion = ((sfs.cmd version).Trim() -replace "^sfs\s+", "")
           if ($runtimeVersion -ne $env:SFS_TEST_VERSION) {
             throw "sfs.cmd upgrade did not refresh runtime VERSION: runtime=$runtimeVersion expected=$env:SFS_TEST_VERSION"
           }
@@ -231,7 +231,7 @@ jobs:
       - name: Smoke cmd PATH
         run: |
           $env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"
-          cmd /c "sfs version && sfs --help >NUL"
+          cmd /c "sfs.cmd version && sfs.cmd --help >NUL"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Smoke Git Bash PATH
