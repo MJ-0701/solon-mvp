@@ -94,6 +94,10 @@ ok()    { printf "  %s✓%s %s\n" "$C_GREEN" "$C_RESET" "$*"; }
 warn()  { printf "  %s⚠%s %s\n" "$C_YELLOW" "$C_RESET" "$*"; }
 err()   { printf "  %s✗%s %s\n" "$C_RED" "$C_RESET" "$*" >&2; }
 die()   { err "$*"; exit 1; }
+trace_upgrade() {
+  [ "${SFS_UPGRADE_TRACE:-0}" = "1" ] || return 0
+  printf '[sfs-upgrade-trace] %s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2
+}
 
 sfs_is_ci() {
   case "${CI:-}" in 1|true|TRUE|yes|YES) return 0 ;; esac
@@ -1488,7 +1492,10 @@ cat <<EOF
 EOF
 
 echo ""
-if [ "$(prompt "업그레이드 진행?" "y")" != "y" ]; then
+trace_upgrade "confirm prompt before"
+UPGRADE_CONFIRM="$(prompt "업그레이드 진행?" "y")"
+trace_upgrade "confirm prompt after answer=${UPGRADE_CONFIRM}"
+if [ "$UPGRADE_CONFIRM" != "y" ]; then
   info "취소됨."
   exit 0
 fi
@@ -1623,6 +1630,7 @@ update_file() {
 
 info ""
 info "파일별 갱신..."
+trace_upgrade "file update phase start"
 
 PROJECT_NAME="$(basename "$TARGET")"
 MODEL_RUNTIME="current"
@@ -1633,7 +1641,9 @@ if [ ! -f "$TARGET/.sfs-local/model-profiles.yaml" ]; then
   MODEL_PROFILES_WAS_MISSING=1
 fi
 
+trace_upgrade "project_surface_archive_migrations before"
 project_surface_archive_migrations || die "legacy archive surface migration failed"
+trace_upgrade "project_surface_archive_migrations after"
 
 update_file "CLAUDE.md" "templates/CLAUDE.md.template" "Claude Code 어댑터" "s"
 update_file "SFS.md" "templates/SFS.md.template" "공통 SFS 지침" "b"
@@ -1653,7 +1663,9 @@ update_file ".sfs-local/auth.env.example" "templates/.sfs-local-template/auth.en
 update_file ".sfs-local/GUIDE.md" "GUIDE.md" "Solon onboarding guide (/sfs guide)" "b"
 
 if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ]; then
+  trace_upgrade "thin_context_runtime_migration before"
   thin_context_runtime_migration || die "thin runtime context migration failed"
+  trace_upgrade "thin_context_runtime_migration after"
 else
   # context/ — short, routed agent context modules for vendored installs.
   mkdir -p "$TARGET/.sfs-local/context/commands" "$TARGET/.sfs-local/context/policies"
@@ -1736,7 +1748,9 @@ if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ] && [ "${SFS_KEEP_PROJECT_RUNTIME_A
         "$TARGET/.sfs-local/personas" \
         "$TARGET/.sfs-local/decisions-template" 2>/dev/null || true
 fi
+trace_upgrade "finalize_runtime_upgrade_backup before"
 finalize_runtime_upgrade_backup || die "runtime upgrade backup bundle failed"
+trace_upgrade "finalize_runtime_upgrade_backup after"
 
 TODAY=$(date +%Y-%m-%d)
 if [ "$(uname)" = "Darwin" ]; then
@@ -1894,7 +1908,9 @@ source_repo: https://github.com/${SOLON_REPO}
 EOF
 ok "VERSION 갱신: $CUR_VER → $NEW_VER"
 
+trace_upgrade "maybe_prompt_model_profile before"
 maybe_prompt_model_profile
+trace_upgrade "maybe_prompt_model_profile after"
 
 MODEL_PROFILE_NOTICE=""
 if [ -f "$TARGET/.sfs-local/model-profiles.yaml" ]; then

@@ -15,6 +15,11 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   an unexplained `Q1`. Write a short decision-needed paragraph that restates the
   user-facing choice, why the choice matters, the recommended default, and the
   consequence of each option. The id is only a cross-reference for later logs.
+- Never show only the recommended column for scope/persona/provider/source
+  choices. Define labels such as `A/B/C/D` inline, show every viable option with
+  the practical tradeoff, and then name the recommended default. If the option
+  set is too wide for one compact view, ask the decisions sequentially instead
+  of hiding alternatives.
 - State material assumptions, tradeoffs, explicit non-goals, and a simpler path
   when one exists. Do not hide unresolved decisions inside confident wording.
 - Gate 3 must carry the same AI-era fundamentals forward:

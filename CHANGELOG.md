@@ -35,15 +35,30 @@
   wrapper-level `--yes`/`-y` before entering the Bash runtime. This keeps
   `sfs.cmd upgrade` as a compatibility spelling while executing the stable
   one-command update path after the runtime refresh.
+- The post-Scoop reload now rewrites the numbered env bridge before invoking the
+  new runtime. Trace run `25558767614` showed `PS_RELOAD_ARGS=update`, but the
+  stale parent `SFS_NATIVE_ARG_1=upgrade` still won source selection and replayed
+  `upgrade` into Bash. `Set-SfsNativeArgEnv` now clears stale numbered args,
+  writes canonical `update`, and preserves one-token arrays as `[update]`.
 - `upgrade.sh` no longer reopens `/dev/tty` in CI, and the Windows Scoop smoke
   runs user-facing `sfs.cmd upgrade` while teeing live trace output. This
   prevents the GitHub runner from waiting forever at the interactive "continue
   upgrade" prompt during self-upgrade verification.
+- `upgrade.sh` has an opt-in `SFS_UPGRADE_TRACE=1` phase trace for development
+  and CI diagnosis. Production remains quiet unless the variable is set.
 - The Windows Scoop smoke no longer assigns the `Tee-Object` upgrade pipeline
   to a variable. That assignment captured output and hid live trace lines until
   the command exited, so failures can now be traced from the last emitted line.
 - The final PowerShell-to-Git-Bash bridge now also normalizes `SfsArgs` into an
   explicit `string[]`, covering the single-token `upgrade` path after reload.
+- Decision-output guardrails now reject recommendation-only choice tables.
+  Agents must define option labels such as `A/B/C/D`, show every viable option
+  with meaning and consequence, and ask sequentially when the full option set is
+  too wide.
+- `.sfs-local/` is reaffirmed as private workbench state: runtime logs,
+  `events.jsonl`, cache, tmp, archives, and queue run logs stay ignored and
+  disposable; durable shared conclusions belong in `docs/solon/` or the sprint
+  close report.
 
 ## [0.6.55] - 2026-05-08
 

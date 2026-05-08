@@ -36,14 +36,25 @@
 - reload 대상도 Scoop 의 `current\bin\sfs.ps1` 로 재해석하고, Windows 에서 들어온
   `upgrade` spelling 은 canonical `update` 로 치환합니다. `sfs.cmd upgrade` 로 들어와도
   self-update 후에는 `sfs update` 흐름으로 이어집니다.
+- self-update reload 직전에는 오래 남은 `SFS_NATIVE_ARG_*` 환경 변수도 canonical `update`
+  배열로 다시 씁니다. trace run `25558767614` 처럼 `PS_RELOAD_ARGS=update` 인데도
+  stale `SFS_NATIVE_ARG_1=upgrade` 가 더 높은 우선순위로 선택되는 경로를 차단합니다.
 - Windows CI 의 `sfs.cmd upgrade` smoke 는 사용자-facing spelling 그대로 실행하고, 내부
   runtime 만 non-interactive 로 움직입니다. Git Bash 가 `/dev/tty` 를 다시 열고 프롬프트에서
   멈추는 상태도 trace 로 확인해 막았습니다.
+- `SFS_UPGRADE_TRACE=1` 은 개발/CI 에서만 upgrade phase 를 보여주는 opt-in 로그입니다.
+  운영 기본값은 조용하고, 문제가 생긴 경우에만 phase trace 를 켤 수 있습니다.
 - upgrade trace pipeline 은 더 이상 assignment 로 감싸지 않습니다. `Tee-Object` 출력이 Actions
   로그에 즉시 보이도록 해서, 다음 실패는 마지막 trace 줄에서 바로 추적할 수 있습니다.
 - `SFS_WINDOWS_ARG_TRACE=1` 진단 모드도 추가되어, 다음 Windows runner 실패가 나면 batch `%*`,
   PowerShell `$args`, 최종 선택 source 를 로그에서 바로 볼 수 있습니다.
-- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P23 으로 이
+- 질문/결정 출력 guardrail 도 보강했습니다. `Q1: persona scope, 추천 A` 처럼 추천값만 보여주는
+  표는 금지하고, 모든 선택지의 뜻과 결과를 설명한 뒤 추천을 default 로 표시합니다. 선택지가
+  많으면 숨기지 않고 한 번에 하나씩 묻습니다.
+- `.sfs-local/` 은 private workbench 로 유지합니다. `events.jsonl`, cache, tmp, archive, run log 는
+  commit 대상이 아니고, 공유할 결론은 `docs/solon/` 또는 sprint `report.md` 로 남기는 정책을
+  다시 명확히 했습니다.
+- [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P25 로 이
   설치 직후 usage-only 문제까지 기록합니다.
 
 ## 0.6.54

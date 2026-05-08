@@ -354,6 +354,25 @@ function Normalize-SfsScoopReloadArgs([string[]] $InvocationArgs) {
   return [string[]] $items
 }
 
+function Set-SfsNativeArgEnv([string[]] $InvocationArgs) {
+  $oldCount = 0
+  [void] [int]::TryParse([Environment]::GetEnvironmentVariable("SFS_NATIVE_ARGC"), [ref] $oldCount)
+  $newCount = if ($InvocationArgs) { $InvocationArgs.Count } else { 0 }
+  $limit = [Math]::Max($oldCount, $newCount)
+  for ($i = 1; $i -le $limit; $i++) {
+    Remove-Item "Env:SFS_NATIVE_ARG_$i" -ErrorAction SilentlyContinue
+  }
+
+  $env:SFS_NATIVE_ARGC = [string] $newCount
+  for ($i = 0; $i -lt $newCount; $i++) {
+    Set-Item "Env:SFS_NATIVE_ARG_$($i + 1)" ([string] $InvocationArgs[$i])
+  }
+
+  $rawArgs = if ($newCount -gt 0) { ($InvocationArgs -join " ") } else { "" }
+  $env:SFS_NATIVE_RAW_ARGS = $rawArgs
+  $env:SFS_NATIVE_CMDLINE = if ($rawArgs) { "sfs.cmd $rawArgs" } else { "sfs.cmd" }
+}
+
 function Add-SfsPowerShellModulePath([string] $ModuleRoot) {
   if (-not $ModuleRoot) { return }
   if (-not (Test-Path -LiteralPath $ModuleRoot -PathType Container)) { return }
@@ -502,7 +521,8 @@ function Invoke-ScoopSelfUpgrade([string[]] $InvocationArgs) {
 
   Write-Host "reloading installed sfs runtime..."
   $env:SFS_SKIP_SELF_UPGRADE = "1"
-  $reloadArgs = Normalize-SfsScoopReloadArgs $InvocationArgs
+  $reloadArgs = [string[]] @(Normalize-SfsScoopReloadArgs $InvocationArgs)
+  Set-SfsNativeArgEnv $reloadArgs
   $reloadScriptPath = Resolve-SfsScoopCurrentScriptPath $CurrentScriptPath
   Write-SfsArgTrace "PS_RELOAD_SCRIPT" $reloadScriptPath
   Write-SfsArgTrace "PS_RELOAD_ARGS" $reloadArgs

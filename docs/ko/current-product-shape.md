@@ -114,6 +114,10 @@ Windows runtime `.ps1` / `.cmd` 파일을 ASCII-safe 로 유지해 `context cat`
 중요한 owner decision 이 비어 있으면 plan 을 추측으로 채우지 않습니다. 질문을 유지하고,
 사용자의 판단을 기다립니다.
 
+결정 질문은 `Q1`, `A/B/C/D`, `추천 A` 같은 내부 표기만으로 끝내지 않습니다. 선택지가 있으면
+각 선택지의 뜻과 결과를 모두 보여주고, 추천은 기본값으로만 표시합니다. 한 화면에 다 담으면
+복잡해지는 경우에는 선택지를 숨기지 않고 결정을 하나씩 순차적으로 묻습니다.
+
 ## Implement 는 코드만 뜻하지 않는다
 
 `sfs implement` 의 산출물은 코드일 수도 있지만, Solon 에서는 아래도 모두 implementation artifact 입니다.

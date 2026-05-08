@@ -122,6 +122,11 @@ ownership before execution starts.
 If a key owner decision is missing, Solon should not fill it with a guess. It
 should keep the question open.
 
+Decision prompts do not end at opaque `Q1`, `A/B/C/D`, or "recommended A"
+labels. When options exist, Solon shows every viable option with its meaning
+and consequence, then marks the recommendation as the default. If that would be
+too dense, Solon asks the decisions one at a time instead of hiding choices.
+
 ## Implement Is Not Only Code
 
 In Solon, implementation artifacts include code, but also:

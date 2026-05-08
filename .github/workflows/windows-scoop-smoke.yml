@@ -230,9 +230,11 @@ jobs:
           Write-Host "::group::sfs.cmd upgrade live trace"
           Write-Host "[sfs-trace] upgrade start $(Get-Date -Format o)"
           $env:SFS_WINDOWS_ARG_TRACE = "1"
+          $env:SFS_UPGRADE_TRACE = "1"
           & sfs.cmd upgrade 2>&1 | Tee-Object -Variable upgradeTrace
           $upgradeExit = $LASTEXITCODE
           Remove-Item Env:SFS_WINDOWS_ARG_TRACE -ErrorAction SilentlyContinue
+          Remove-Item Env:SFS_UPGRADE_TRACE -ErrorAction SilentlyContinue
           Write-Host "[sfs-trace] upgrade exit=$upgradeExit $(Get-Date -Format o)"
           Write-Host "::endgroup::"
           $upgradeOutput = ($upgradeTrace | Out-String)

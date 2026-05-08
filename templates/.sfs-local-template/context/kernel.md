@@ -17,6 +17,10 @@ load_when: ["always", "sfs", "entry"]
   id, explain in plain user language what is being decided, why it matters,
   the recommended default, and what each option changes. Labels are
   cross-references, not the explanation.
+- Do not compress decisions into a question/recommendation-only table. If
+  options exist, show every viable option with its label, plain-language
+  meaning, and consequence; mark the recommendation as a default, not as the
+  only visible choice. If that would be noisy, ask one decision at a time.
 - Taxonomy is a product function, not an org division or copy polish. Match the
   user's native/workspace language and project terms. Do not
   machine-translate SFS command/domain terms into mixed phrases, and do not
