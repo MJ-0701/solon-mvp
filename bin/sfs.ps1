@@ -56,6 +56,52 @@ function Resolve-SfsEnvArgs {
   return [string[]] $items
 }
 
+function Split-SfsCommandLine([string] $Text) {
+  if (-not $Text) { return [string[]] @() }
+  $items = @()
+  $current = New-Object System.Text.StringBuilder
+  $inQuote = $false
+
+  for ($i = 0; $i -lt $Text.Length; $i++) {
+    $ch = $Text[$i]
+    if ($ch -eq '"') {
+      $inQuote = -not $inQuote
+      continue
+    }
+    if ([char]::IsWhiteSpace($ch) -and -not $inQuote) {
+      if ($current.Length -gt 0) {
+        $items += @($current.ToString())
+        $current.Length = 0
+      }
+      continue
+    }
+    [void] $current.Append($ch)
+  }
+
+  if ($current.Length -gt 0) {
+    $items += @($current.ToString())
+  }
+  return [string[]] $items
+}
+
+function Resolve-SfsCmdLineArgs {
+  $line = [Environment]::GetEnvironmentVariable("CMDCMDLINE")
+  if (-not $line) { return [string[]] @() }
+
+  $tokens = Split-SfsCommandLine $line
+  for ($i = 0; $i -lt $tokens.Count; $i++) {
+    $leaf = Split-Path -Leaf ($tokens[$i].Trim('"'))
+    if ($leaf -ieq "sfs.cmd" -or $leaf -ieq "sfs") {
+      if ($tokens.Count -le ($i + 1)) { return [string[]] @() }
+      return [string[]] @($tokens[($i + 1)..($tokens.Count - 1)])
+    }
+  }
+
+  $match = [regex]::Match($line, '(?i)sfs(?:\.cmd)?(?:"|\s|$)(.*)$')
+  if (-not $match.Success) { return [string[]] @() }
+  return [string[]] (Split-SfsCommandLine $match.Groups[1].Value.Trim())
+}
+
 function Enable-SfsUtf8Bridge {
   try {
     $utf8 = New-Object System.Text.UTF8Encoding -ArgumentList $false
@@ -71,6 +117,10 @@ function Enable-SfsUtf8Bridge {
 
 $SfsEnvArgs = Resolve-SfsEnvArgs
 $SfsArgs = Resolve-SfsArgs $SfsEnvArgs $SfsParamArgs $args
+if (-not $SfsArgs -or $SfsArgs.Count -eq 0) {
+  $SfsCmdLineArgs = Resolve-SfsCmdLineArgs
+  $SfsArgs = Resolve-SfsArgs $SfsCmdLineArgs @() @()
+}
 if (-not $SfsArgs -or $SfsArgs.Count -eq 0) {
   $SfsArgs = Resolve-SfsArgs @() @() $MyInvocation.UnboundArguments
 }

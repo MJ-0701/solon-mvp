@@ -1,3 +1,27 @@
+## [0.6.45] - 2026-05-08
+
+> **Windows `CMDCMDLINE` fallback.** The 0.6.44 GitHub Windows Scoop smoke
+> run `25532838102` proved that even the numbered `%1..%n` env bridge can start
+> empty under the generated Scoop shim: `sfs version` still fell through to
+> generic usage. `sfs.ps1` now has one last native Windows recovery source: the
+> original `CMDCMDLINE` command line.
+
+### Fixed
+
+- `bin/sfs.ps1` now parses `CMDCMDLINE` only when the numbered env bridge,
+  positional param args, and automatic `$args` are empty. It finds the `sfs` /
+  `sfs.cmd` invocation tail and converts it into the same SFS argument list.
+- The fallback keeps `sfs.cmd` as the thin batch trampoline while covering the
+  observed Scoop shim case where the target batch receives no `%1..%n`.
+
+### Tests
+
+- Windows guardrails and release verification now require the `CMDCMDLINE`
+  fallback reader and command-line splitter.
+- Windows wrapper incident reports are refreshed to the 0.6.45 baseline with
+  the P12 empty `%1..%n`/Scoop shim finding and the existing
+  `ci-korean-sprint-test` smoke evidence.
+
 ## [0.6.44] - 2026-05-08
 
 > **Windows numbered env arg bridge.** The 0.6.43 GitHub Windows Scoop smoke
@@ -21,7 +45,7 @@
 - Windows guardrails and release verification now reject both old bridges:
   `powershell.exe -File sfs.ps1 %*` and PowerShell
   `-Command "& $env:SFS_NATIVE_SCRIPT @args"`.
-- Windows wrapper incident reports are refreshed to the 0.6.44 baseline with
+- Windows wrapper incident reports are refreshed to the 0.6.45 baseline with
   the P11 `-Command @args`/Scoop shim finding and the existing
   `ci-korean-sprint-test` smoke evidence.
 
@@ -48,10 +72,10 @@
 
 - Windows guardrails and release verification now reject the old
   `powershell.exe -File sfs.ps1 %*` bridge and require the explicit
-  `SFS_NATIVE_SCRIPT @args` path. This was superseded by 0.6.44 after the real
+  `SFS_NATIVE_SCRIPT @args` path. This was superseded by 0.6.45 after the real
   Windows smoke showed `-Command @args` also loses args under Scoop shims.
-- Windows wrapper incident reports are refreshed to the 0.6.44 baseline with the
-  P10/P11 PowerShell/Scoop shim findings, while keeping the Korean
+- Windows wrapper incident reports are refreshed to the 0.6.45 baseline with the
+  P10-P12 PowerShell/Scoop shim findings, while keeping the Korean
   `ci-korean-sprint-test` smoke evidence.
 
 ## [0.6.42] - 2026-05-08
