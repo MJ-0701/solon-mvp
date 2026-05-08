@@ -1,3 +1,98 @@
+## [0.6.56] - 2026-05-08
+
+> **Windows usable-args root cause fix.** A pre-release Windows trace run
+> (`25554923214`) proved the loop was not caused by batch losing `%1/%*`.
+> `sfs.cmd` delivered `version` through `SFS_NATIVE_ARGC`, `SFS_NATIVE_RAW_ARGS`,
+> and `SFS_NATIVE_ARG_1`, but `sfs.ps1` repeatedly collapsed the command at
+> function boundaries that used the PowerShell-sensitive parameter name `$Args`.
+
+### Fixed
+
+- `bin/sfs.ps1` now avoids `$Args` as a function parameter, named call, or
+  runtime reload splat. `Test-SfsUsableArgs` uses `$Items`, and native
+  dispatch/self-upgrade helpers use `$InvocationArgs`, so a valid one-item env
+  bridge such as `version` survives into `Invoke-SfsNativeVersion`.
+- `bin/sfs.cmd` and the Scoop post-install hardened `sfs.cmd` shim reverted the
+  experimental `--% %SFS_NATIVE_RAW_ARGS%` bridge. The Windows trace showed it
+  reached `sfs.ps1` as `--SFS_NATIVE_RAW_ARGS`, which hid the real env-bridge
+  bug and made the wrapper more complex.
+- Windows smoke now requires `SFS_ARGTRACE_PS_SELECTED_SOURCE=env` and
+  `SFS_ARGTRACE_PS_FINAL_ARGS=.*version` before accepting `sfs.cmd version`.
+- Guardrail tests and the release verifier now fail if the broken `$Args`
+  predicate or `--% %SFS_NATIVE_RAW_ARGS%` dispatch returns.
+- `sfs.cmd upgrade` now restores WindowsPowerShell module paths, imports
+  `Microsoft.PowerShell.Utility`, and installs a scoped `Get-FileHash` fallback
+  with path and stream hashing before calling Scoop self-upgrade, matching the
+  Windows runner path where `scoop update sfs` needs that cmdlet to validate
+  the downloaded zip.
+- The post-Scoop reload now normalizes `InvocationArgs` into an explicit
+  `string[]` before splatting, preventing `upgrade` from being replayed as the
+  single-letter command `u` after runtime self-upgrade.
+- The post-Scoop reload now resolves through Scoop's `current\bin\sfs.ps1`
+  before replaying the command, so self-upgrade does not return to the
+  pre-update package path.
+- The Windows post-Scoop reload canonicalizes `upgrade` to `update` and strips
+  wrapper-level `--yes`/`-y` before entering the Bash runtime. This keeps
+  `sfs.cmd upgrade` as a compatibility spelling while executing the stable
+  one-command update path after the runtime refresh.
+- The post-Scoop reload now rewrites the numbered env bridge before invoking the
+  new runtime. Trace run `25558767614` showed `PS_RELOAD_ARGS=update`, but the
+  stale parent `SFS_NATIVE_ARG_1=upgrade` still won source selection and replayed
+  `upgrade` into Bash. `Set-SfsNativeArgEnv` now clears stale numbered args,
+  writes canonical `update`, and preserves one-token arrays as `[update]`.
+- `upgrade.sh` no longer reopens `/dev/tty` in CI, and the Windows Scoop smoke
+  runs user-facing `sfs.cmd upgrade` while teeing live trace output. This
+  prevents the GitHub runner from waiting forever at the interactive "continue
+  upgrade" prompt during self-upgrade verification.
+- `upgrade.sh` has an opt-in `SFS_UPGRADE_TRACE=1` phase trace for development
+  and CI diagnosis. Production remains quiet unless the variable is set.
+- The post-profile upgrade tail is now traceable through `model profile notice`,
+  `cli-discovery hook`, and `completion output` markers. Trace run
+  `25559894888` proved the Windows reload had reached Bash as `[update]`, then
+  stopped after `maybe_prompt_model_profile after`; the new markers make the
+  next phase boundary explicit.
+- `upgrade.sh` wraps the whole CLI discovery hook in a watchdog controlled by
+  `SFS_CLI_DISCOVERY_TIMEOUT_SEC`, and `install-cli-discovery.sh` wraps external
+  `claude`/`gemini`/`git clone` probes with `SFS_DISCOVERY_CMD_TIMEOUT_SEC`.
+  Discovery failures now warn and continue instead of allowing self-upgrade to
+  wait forever on an external CLI.
+- The Windows Scoop smoke no longer assigns the `Tee-Object` upgrade pipeline
+  to a variable. That assignment captured output and hid live trace lines until
+  the command exited, so failures can now be traced from the last emitted line.
+- The final PowerShell-to-Git-Bash bridge now also normalizes `SfsArgs` into an
+  explicit `string[]`, covering the single-token `upgrade` path after reload.
+- Decision-output guardrails now reject recommendation-only choice tables.
+  Agents must define option labels such as `A/B/C/D`, show every viable option
+  with meaning and consequence, and ask sequentially when the full option set is
+  too wide.
+- `.sfs-local/` is reaffirmed as private workbench state: runtime logs,
+  `events.jsonl`, cache, tmp, archives, and queue run logs stay ignored and
+  disposable; durable shared conclusions belong in `docs/solon/` or the sprint
+  close report.
+
+## [0.6.55] - 2026-05-08
+
+> **Windows raw-tail automatic args bridge.** The 0.6.54 GitHub Windows Scoop
+> smoke run `25548381094` still showed the first post-install `sfs.cmd version`
+> falling through to usage-only output. The hardened shim had the env/raw/saved
+> command-line contracts, but child PowerShell still reached `sfs.ps1` without a
+> usable direct argv source on that runner.
+
+### Fixed
+
+- `bin/sfs.cmd` and the Scoop post-install hardened `sfs.cmd` shim now call
+  `powershell.exe -File "%SFS_NATIVE_SCRIPT%" --% %SFS_NATIVE_RAW_ARGS%`, so the
+  raw tail saved before `shift` also reaches `sfs.ps1` as automatic `$args`.
+- The existing numbered env bridge, raw env fallback, saved command-line
+  fallback, parent `cmd.exe` command-line fallback, and child `CMDCMDLINE`
+  fallback stay in place; 0.6.55 adds a direct argv source instead of removing
+  recovery layers.
+- Windows guardrails, release verifier, Windows smoke shim text checks, and the
+  incident report now record P22 with run `25548381094`.
+- `sfs.cmd` / `sfs.ps1` now expose opt-in `SFS_WINDOWS_ARG_TRACE=1` diagnostics
+  so Windows smoke logs show batch args, PowerShell args, selected source, and
+  final resolved args before another usage-only failure can become guesswork.
+
 ## [0.6.54] - 2026-05-08
 
 > **Windows parent command-line fallback.** The 0.6.53 GitHub Windows Scoop

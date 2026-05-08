@@ -80,6 +80,10 @@ Rules:
   id, explain in plain user language what is being decided, why it matters, the
   recommended default, and what each option changes. Labels are
   cross-references, not the explanation.
+- Do not show a question/recommendation-only choice table. When multiple
+  options exist, show every viable option with its plain-language meaning and
+  consequence, then mark the recommendation as the default. If that is too much
+  for one view, ask one decision at a time instead of hiding alternatives.
 - Taxonomy is a product function, not an org division or copy polish. Match the
   user's native/workspace language and project terms; do not machine-translate
   SFS command/domain terms into mixed phrases or expose app placeholder labels

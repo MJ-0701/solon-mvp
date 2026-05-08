@@ -14,6 +14,27 @@ function Expand-SfsArgItem([object] $Item) {
   return @([string] $Item)
 }
 
+function Convert-SfsArgTraceValue([object] $Value) {
+  if ($null -eq $Value) { return "<null>" }
+  if ($Value -is [System.Array]) {
+    $items = @()
+    foreach ($item in $Value) {
+      if ($null -eq $item) {
+        $items += "<null>"
+      } else {
+        $items += [string] $item
+      }
+    }
+    return "[" + ($items -join "|") + "]"
+  }
+  return [string] $Value
+}
+
+function Write-SfsArgTrace([string] $Label, [object] $Value) {
+  if (-not $env:SFS_WINDOWS_ARG_TRACE) { return }
+  [Console]::Error.WriteLine(("SFS_ARGTRACE_{0}={1}" -f $Label, (Convert-SfsArgTraceValue $Value)))
+}
+
 function Resolve-SfsArgs([object[]] $ParamArgs, [object[]] $AutomaticArgs, [object[]] $UnboundArgs) {
   $resolved = @()
   $source = @()
@@ -59,9 +80,9 @@ function Resolve-SfsRawArgs {
   return [string[]] (Split-SfsCommandLine $raw)
 }
 
-function Test-SfsUsableArgs([string[]] $Args) {
-  if (-not $Args -or $Args.Count -eq 0) { return $false }
-  foreach ($arg in $Args) {
+function Test-SfsUsableArgs([string[]] $Items) {
+  if (-not $Items -or $Items.Count -eq 0) { return $false }
+  foreach ($arg in $Items) {
     if ($null -ne $arg -and [string] $arg -ne "") { return $true }
   }
   return $false
@@ -177,8 +198,10 @@ function Resolve-SfsParentCmdLineArgs {
     if (-not $self -or -not $self.ParentProcessId) { return [string[]] @() }
     $parent = Get-CimInstance -ClassName Win32_Process -Filter "ProcessId = $($self.ParentProcessId)" -ErrorAction Stop
     if (-not $parent -or -not $parent.CommandLine) { return [string[]] @() }
+    Write-SfsArgTrace "PS_PARENT_CMDLINE" $parent.CommandLine
     return [string[]] (Resolve-SfsArgsFromCommandLine $parent.CommandLine)
   } catch {
+    Write-SfsArgTrace "PS_PARENT_CMDLINE_ERROR" $_.Exception.Message
     return [string[]] @()
   }
 }
@@ -202,26 +225,55 @@ function Enable-SfsUtf8Bridge {
 }
 
 $SfsEnvArgs = Resolve-SfsEnvArgs
+Write-SfsArgTrace "PS_AUTOMATIC_ARGS" $args
+Write-SfsArgTrace "PS_UNBOUND_ARGS" $MyInvocation.UnboundArguments
+Write-SfsArgTrace "PS_ENV_ARGC" ([Environment]::GetEnvironmentVariable("SFS_NATIVE_ARGC"))
+Write-SfsArgTrace "PS_ENV_RAW_ARGS" ([Environment]::GetEnvironmentVariable("SFS_NATIVE_RAW_ARGS"))
+Write-SfsArgTrace "PS_ENV_SAVED_CMDLINE" ([Environment]::GetEnvironmentVariable("SFS_NATIVE_CMDLINE"))
+Write-SfsArgTrace "PS_ENV_CMDCMDLINE" ([Environment]::GetEnvironmentVariable("CMDCMDLINE"))
+Write-SfsArgTrace "PS_ENV_ARGS" $SfsEnvArgs
+$SfsSelectedArgSource = "empty"
 $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsEnvArgs -AutomaticArgs $SfsParamArgs -UnboundArgs $args
+if (Test-SfsUsableArgs $SfsArgs) {
+  if (Test-SfsUsableArgs $SfsEnvArgs) {
+    $SfsSelectedArgSource = "env"
+  } elseif (Test-SfsUsableArgs $SfsParamArgs) {
+    $SfsSelectedArgSource = "param"
+  } else {
+    $SfsSelectedArgSource = "automatic"
+  }
+}
 if (-not (Test-SfsUsableArgs $SfsArgs)) {
   $SfsRawArgs = Resolve-SfsRawArgs
+  Write-SfsArgTrace "PS_RAW_ENV_ARGS" $SfsRawArgs
   $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsRawArgs -AutomaticArgs @() -UnboundArgs @()
+  if (Test-SfsUsableArgs $SfsArgs) { $SfsSelectedArgSource = "raw-env" }
 }
 if (-not (Test-SfsUsableArgs $SfsArgs)) {
   $SfsSavedCmdLineArgs = Resolve-SfsSavedCmdLineArgs
+  Write-SfsArgTrace "PS_SAVED_CMDLINE_ARGS" $SfsSavedCmdLineArgs
   $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsSavedCmdLineArgs -AutomaticArgs @() -UnboundArgs @()
+  if (Test-SfsUsableArgs $SfsArgs) { $SfsSelectedArgSource = "saved-cmdline" }
 }
 if (-not (Test-SfsUsableArgs $SfsArgs)) {
   $SfsParentCmdLineArgs = Resolve-SfsParentCmdLineArgs
+  Write-SfsArgTrace "PS_PARENT_CMDLINE_ARGS" $SfsParentCmdLineArgs
   $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsParentCmdLineArgs -AutomaticArgs @() -UnboundArgs @()
+  if (Test-SfsUsableArgs $SfsArgs) { $SfsSelectedArgSource = "parent-cmdline" }
 }
 if (-not (Test-SfsUsableArgs $SfsArgs)) {
   $SfsCmdLineArgs = Resolve-SfsCmdLineArgs
+  Write-SfsArgTrace "PS_CHILD_CMDLINE_ARGS" $SfsCmdLineArgs
   $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsCmdLineArgs -AutomaticArgs @() -UnboundArgs @()
+  if (Test-SfsUsableArgs $SfsArgs) { $SfsSelectedArgSource = "child-cmdline" }
 }
 if (-not (Test-SfsUsableArgs $SfsArgs)) {
   $SfsArgs = Resolve-SfsArgs -ParamArgs @() -AutomaticArgs @() -UnboundArgs $MyInvocation.UnboundArguments
+  if (Test-SfsUsableArgs $SfsArgs) { $SfsSelectedArgSource = "unbound" }
 }
+if (-not (Test-SfsUsableArgs $SfsArgs)) { $SfsSelectedArgSource = "empty" }
+Write-SfsArgTrace "PS_SELECTED_SOURCE" $SfsSelectedArgSource
+Write-SfsArgTrace "PS_FINAL_ARGS" $SfsArgs
 Enable-SfsUtf8Bridge
 
 function Find-SfsBash {
@@ -254,25 +306,187 @@ function Convert-ToBashPath([string] $Path) {
   return ($Path -replace "\\", "/")
 }
 
-function Test-SfsUpgradeCommand([string[]] $Args) {
-  if (-not $Args -or $Args.Count -eq 0) { return $false }
+function Test-SfsUpgradeCommand([string[]] $InvocationArgs) {
+  if (-not $InvocationArgs -or $InvocationArgs.Count -eq 0) { return $false }
   $cmdIndex = 0
-  if ($Args[0] -in @("/sfs", "sfs", '$sfs')) { $cmdIndex = 1 }
-  if ($Args.Count -le $cmdIndex) { return $false }
-  return ($Args[$cmdIndex] -in @("upgrade", "update"))
+  if ($InvocationArgs[0] -in @("/sfs", "sfs", '$sfs')) { $cmdIndex = 1 }
+  if ($InvocationArgs.Count -le $cmdIndex) { return $false }
+  return ($InvocationArgs[$cmdIndex] -in @("upgrade", "update"))
 }
 
-function Test-NoSelfUpgrade([string[]] $Args) {
-  return (($Args -contains "--no-self-upgrade") -or $env:SFS_SKIP_SELF_UPGRADE -or ($env:SFS_UPDATE_SELF -eq "0"))
+function Test-NoSelfUpgrade([string[]] $InvocationArgs) {
+  return (($InvocationArgs -contains "--no-self-upgrade") -or $env:SFS_SKIP_SELF_UPGRADE -or ($env:SFS_UPDATE_SELF -eq "0"))
 }
 
 function Test-ScoopRuntime([string] $ScriptPath) {
   return ($ScriptPath -match "\\scoop\\apps\\sfs\\")
 }
 
-function Invoke-ScoopSelfUpgrade([string[]] $Args) {
-  if (-not (Test-SfsUpgradeCommand $Args)) { return $false }
-  if (Test-NoSelfUpgrade $Args) { return $false }
+function Resolve-SfsScoopCurrentScriptPath([string] $ScriptPath) {
+  if (-not $ScriptPath) { return $ScriptPath }
+  $normalized = ($ScriptPath -replace "/", "\")
+  $match = [regex]::Match(
+    $normalized,
+    "^(?<root>.*\\scoop\\apps\\sfs\\)(?<version>[^\\]+)(?<tail>\\bin\\sfs\.ps1)$",
+    [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+  )
+  if (-not $match.Success) { return $ScriptPath }
+
+  $candidate = $match.Groups["root"].Value + "current" + $match.Groups["tail"].Value
+  if (Test-Path -LiteralPath $candidate -PathType Leaf) { return $candidate }
+  return $ScriptPath
+}
+
+function Normalize-SfsScoopReloadArgs([string[]] $InvocationArgs) {
+  $items = @()
+  foreach ($item in @($InvocationArgs)) {
+    if ($null -eq $item) { continue }
+    if ($item -in @("--yes", "-y")) { continue }
+    $items += @([string] $item)
+  }
+  if ($items.Count -eq 0) { return [string[]] @() }
+
+  $cmdIndex = 0
+  if ($items[0] -in @("/sfs", "sfs", '$sfs')) { $cmdIndex = 1 }
+  if ($items.Count -gt $cmdIndex -and $items[$cmdIndex] -eq "upgrade") {
+    $items[$cmdIndex] = "update"
+  }
+  return [string[]] $items
+}
+
+function Set-SfsNativeArgEnv([string[]] $InvocationArgs) {
+  $oldCount = 0
+  [void] [int]::TryParse([Environment]::GetEnvironmentVariable("SFS_NATIVE_ARGC"), [ref] $oldCount)
+  $newCount = if ($InvocationArgs) { $InvocationArgs.Count } else { 0 }
+  $limit = [Math]::Max($oldCount, $newCount)
+  for ($i = 1; $i -le $limit; $i++) {
+    Remove-Item "Env:SFS_NATIVE_ARG_$i" -ErrorAction SilentlyContinue
+  }
+
+  $env:SFS_NATIVE_ARGC = [string] $newCount
+  for ($i = 0; $i -lt $newCount; $i++) {
+    Set-Item "Env:SFS_NATIVE_ARG_$($i + 1)" ([string] $InvocationArgs[$i])
+  }
+
+  $rawArgs = if ($newCount -gt 0) { ($InvocationArgs -join " ") } else { "" }
+  $env:SFS_NATIVE_RAW_ARGS = $rawArgs
+  $env:SFS_NATIVE_CMDLINE = if ($rawArgs) { "sfs.cmd $rawArgs" } else { "sfs.cmd" }
+}
+
+function Add-SfsPowerShellModulePath([string] $ModuleRoot) {
+  if (-not $ModuleRoot) { return }
+  if (-not (Test-Path -LiteralPath $ModuleRoot -PathType Container)) { return }
+
+  $separator = [System.IO.Path]::PathSeparator
+  $items = @()
+  if ($env:PSModulePath) {
+    $items = @($env:PSModulePath -split [regex]::Escape([string] $separator) | Where-Object { $_ })
+  }
+  foreach ($item in $items) {
+    if ($item -ieq $ModuleRoot) { return }
+  }
+  $env:PSModulePath = (($items + @($ModuleRoot)) -join [string] $separator)
+}
+
+function Install-SfsGetFileHashFallback {
+  if (Get-Command Get-FileHash -ErrorAction SilentlyContinue) { return }
+
+  function global:Get-FileHash {
+    [CmdletBinding(DefaultParameterSetName = "Path")]
+    param(
+      [Parameter(ParameterSetName = "Path", Position = 0, Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+      [string[]] $Path,
+
+      [Parameter(ParameterSetName = "LiteralPath", Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+      [Alias("PSPath")]
+      [string[]] $LiteralPath,
+
+      [Parameter(ParameterSetName = "InputStream", Mandatory = $true)]
+      [System.IO.Stream] $InputStream,
+
+      [ValidateSet("SHA1", "SHA256", "SHA384", "SHA512", "MD5")]
+      [string] $Algorithm = "SHA256"
+    )
+
+    process {
+      $algorithmName = $Algorithm.ToUpperInvariant()
+      if ($PSCmdlet.ParameterSetName -eq "InputStream") {
+        $hashAlgorithm = $null
+        try {
+          $hashAlgorithm = [System.Security.Cryptography.HashAlgorithm]::Create($algorithmName)
+          if (-not $hashAlgorithm) { throw "Unsupported hash algorithm: $Algorithm" }
+          $hashBytes = $hashAlgorithm.ComputeHash($InputStream)
+          [pscustomobject] @{
+            Algorithm = $algorithmName
+            Hash = ([System.BitConverter]::ToString($hashBytes) -replace "-", "")
+            Path = ""
+          }
+        } finally {
+          if ($hashAlgorithm) { $hashAlgorithm.Dispose() }
+        }
+        return
+      }
+
+      if ($PSCmdlet.ParameterSetName -eq "LiteralPath") {
+        $inputPaths = $LiteralPath
+      } else {
+        $inputPaths = $Path
+      }
+
+      foreach ($item in $inputPaths) {
+        $resolvedPaths = @()
+        if ($PSCmdlet.ParameterSetName -eq "LiteralPath") {
+          $resolvedPaths += @($ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($item))
+        } else {
+          foreach ($resolved in @(Resolve-Path -Path $item)) {
+            $resolvedPaths += @($resolved.ProviderPath)
+          }
+        }
+
+        foreach ($resolvedPath in $resolvedPaths) {
+          if (-not (Test-Path -LiteralPath $resolvedPath -PathType Leaf)) {
+            throw "Cannot find path '$resolvedPath' because it does not exist or is not a file."
+          }
+          $stream = [System.IO.File]::OpenRead($resolvedPath)
+          $hashAlgorithm = $null
+          try {
+            $hashAlgorithm = [System.Security.Cryptography.HashAlgorithm]::Create($algorithmName)
+            if (-not $hashAlgorithm) { throw "Unsupported hash algorithm: $Algorithm" }
+            $hashBytes = $hashAlgorithm.ComputeHash($stream)
+            [pscustomobject] @{
+              Algorithm = $algorithmName
+              Hash = ([System.BitConverter]::ToString($hashBytes) -replace "-", "")
+              Path = $resolvedPath
+            }
+          } finally {
+            if ($hashAlgorithm) { $hashAlgorithm.Dispose() }
+            $stream.Dispose()
+          }
+        }
+      }
+    }
+  }
+}
+
+function Enable-SfsPowerShellUtility {
+  Add-SfsPowerShellModulePath (Join-Path $PSHOME "Modules")
+  Add-SfsPowerShellModulePath (Join-Path $env:ProgramFiles "WindowsPowerShell\Modules")
+  Add-SfsPowerShellModulePath (Join-Path $HOME "Documents\WindowsPowerShell\Modules")
+  try {
+    Import-Module Microsoft.PowerShell.Utility -ErrorAction SilentlyContinue
+  } catch {
+  }
+  Install-SfsGetFileHashFallback
+  if (-not (Get-Command Get-FileHash -ErrorAction SilentlyContinue)) {
+    Write-Error "Get-FileHash is unavailable in this PowerShell session; Scoop self-upgrade cannot verify downloads."
+    exit 1
+  }
+}
+
+function Invoke-ScoopSelfUpgrade([string[]] $InvocationArgs) {
+  Write-SfsArgTrace "PS_SELF_UPGRADE_INVOCATION_ARGS" $InvocationArgs
+  if (-not (Test-SfsUpgradeCommand $InvocationArgs)) { return $false }
+  if (Test-NoSelfUpgrade $InvocationArgs) { return $false }
   if (-not (Test-ScoopRuntime $CurrentScriptPath)) { return $false }
 
   $scoop = Get-Command scoop -ErrorAction SilentlyContinue
@@ -281,6 +495,7 @@ function Invoke-ScoopSelfUpgrade([string[]] $Args) {
     exit 1
   }
 
+  Enable-SfsPowerShellUtility
   Write-Host "global runtime self-upgrade:"
   Write-Host "  scoop update"
   & scoop update
@@ -306,11 +521,16 @@ function Invoke-ScoopSelfUpgrade([string[]] $Args) {
 
   Write-Host "reloading installed sfs runtime..."
   $env:SFS_SKIP_SELF_UPGRADE = "1"
-  & $CurrentScriptPath @Args
+  $reloadArgs = [string[]] @(Normalize-SfsScoopReloadArgs $InvocationArgs)
+  Set-SfsNativeArgEnv $reloadArgs
+  $reloadScriptPath = Resolve-SfsScoopCurrentScriptPath $CurrentScriptPath
+  Write-SfsArgTrace "PS_RELOAD_SCRIPT" $reloadScriptPath
+  Write-SfsArgTrace "PS_RELOAD_ARGS" $reloadArgs
+  & $reloadScriptPath @reloadArgs
   exit $LASTEXITCODE
 }
 
-Invoke-ScoopSelfUpgrade -Args $SfsArgs | Out-Null
+Invoke-ScoopSelfUpgrade -InvocationArgs $SfsArgs | Out-Null
 
 $script:SfsNativeHandled = $false
 $script:SfsNativeExitCode = 0
@@ -324,19 +544,19 @@ function Write-SfsNativeError([string] $Message) {
   [Console]::Error.WriteLine($Message)
 }
 
-function Get-SfsNativeInvocation([string[]] $Args) {
+function Get-SfsNativeInvocation([string[]] $InvocationArgs) {
   $cmdIndex = 0
-  if ($Args -and $Args.Count -gt 0 -and ($Args[0] -in @("/sfs", "sfs", '$sfs'))) {
+  if ($InvocationArgs -and $InvocationArgs.Count -gt 0 -and ($InvocationArgs[0] -in @("/sfs", "sfs", '$sfs'))) {
     $cmdIndex = 1
   }
-  if (-not $Args -or $Args.Count -le $cmdIndex) {
+  if (-not $InvocationArgs -or $InvocationArgs.Count -le $cmdIndex) {
     return [pscustomobject]@{ Command = "help"; Rest = @() }
   }
   $rest = @()
-  if ($Args.Count -gt ($cmdIndex + 1)) {
-    $rest = @($Args[($cmdIndex + 1)..($Args.Count - 1)])
+  if ($InvocationArgs.Count -gt ($cmdIndex + 1)) {
+    $rest = @($InvocationArgs[($cmdIndex + 1)..($InvocationArgs.Count - 1)])
   }
-  return [pscustomobject]@{ Command = $Args[$cmdIndex]; Rest = $rest }
+  return [pscustomobject]@{ Command = $InvocationArgs[$cmdIndex]; Rest = $rest }
 }
 
 function Get-SfsDistDir {
@@ -396,9 +616,9 @@ Windows note:
 "@
 }
 
-function Invoke-SfsNativeVersion([string[]] $Args) {
+function Invoke-SfsNativeVersion([string[]] $InvocationArgs) {
   $check = $false
-  foreach ($arg in $Args) {
+  foreach ($arg in $InvocationArgs) {
     switch ($arg) {
       "--check" { $check = $true }
       "-h" { Show-SfsNativeVersionUsage; Set-SfsNativeExit 0; return }
@@ -462,9 +682,9 @@ Shows the Solon Product onboarding guide installed with this project.
 "@
 }
 
-function Invoke-SfsNativeGuide([string[]] $Args) {
+function Invoke-SfsNativeGuide([string[]] $InvocationArgs) {
   $mode = ""
-  foreach ($arg in $Args) {
+  foreach ($arg in $InvocationArgs) {
     switch ($arg) {
       "-h" { Show-SfsNativeGuideUsage; Set-SfsNativeExit 0; return }
       "--help" { Show-SfsNativeGuideUsage; Set-SfsNativeExit 0; return }
@@ -528,8 +748,8 @@ Full guide:
   Set-SfsNativeExit 0
 }
 
-function Invoke-SfsNativeStatus([string[]] $Args) {
-  foreach ($arg in $Args) {
+function Invoke-SfsNativeStatus([string[]] $InvocationArgs) {
+  foreach ($arg in $InvocationArgs) {
     if ($arg -eq "--") { continue }
     if ($arg -eq "-h" -or $arg -eq "--help") {
       Write-Output "Usage: sfs.cmd status [--color auto|always|never]"
@@ -606,10 +826,19 @@ function Invoke-SfsNativeStatus([string[]] $Args) {
   }
 
   $ahead = "0"
-  $upstream = (& git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>$null | Select-Object -First 1)
+  $upstream = ""
+  try {
+    $upstream = (& git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>$null | Select-Object -First 1)
+  } catch {
+    $upstream = ""
+  }
   if ($LASTEXITCODE -eq 0 -and $upstream) {
-    $count = (& git rev-list --count "$upstream..HEAD" 2>$null | Select-Object -First 1)
-    if ($LASTEXITCODE -eq 0 -and $count -match '^[0-9]+$') { $ahead = $count }
+    try {
+      $count = (& git rev-list --count "$upstream..HEAD" 2>$null | Select-Object -First 1)
+      if ($LASTEXITCODE -eq 0 -and $count -match '^[0-9]+$') { $ahead = $count }
+    } catch {
+      $ahead = "0"
+    }
   }
 
   if (-not $sprint) { $sprint = "-" }
@@ -645,8 +874,8 @@ function Resolve-SfsContextPath([string] $Key) {
   return $null
 }
 
-function Invoke-SfsNativeContext([string[]] $Args) {
-  if (-not $Args -or $Args.Count -eq 0 -or $Args[0] -in @("-h", "--help", "help")) {
+function Invoke-SfsNativeContext([string[]] $InvocationArgs) {
+  if (-not $InvocationArgs -or $InvocationArgs.Count -eq 0 -or $InvocationArgs[0] -in @("-h", "--help", "help")) {
     @"
 Usage:
   sfs.cmd context path <kernel|index|commands/name.md|policies/name.md>
@@ -657,20 +886,20 @@ Native read-only helper for Windows agents. It does not start Git Bash.
     Set-SfsNativeExit 0
     return
   }
-  $mode = $Args[0]
+  $mode = $InvocationArgs[0]
   if ($mode -notin @("path", "cat")) {
     Write-SfsNativeError "unknown context subcommand: $mode"
     Set-SfsNativeExit 1
     return
   }
-  if ($Args.Count -lt 2) {
+  if ($InvocationArgs.Count -lt 2) {
     Write-SfsNativeError "context $mode requires a key"
     Set-SfsNativeExit 1
     return
   }
-  $path = Resolve-SfsContextPath $Args[1]
+  $path = Resolve-SfsContextPath $InvocationArgs[1]
   if (-not $path) {
-    Write-SfsNativeError "context file not found: $($Args[1])"
+    Write-SfsNativeError "context file not found: $($InvocationArgs[1])"
     Set-SfsNativeExit 1
     return
   }
@@ -682,8 +911,8 @@ Native read-only helper for Windows agents. It does not start Git Bash.
   Set-SfsNativeExit 0
 }
 
-function Invoke-SfsNativeReadonly([string[]] $Args) {
-  $invocation = Get-SfsNativeInvocation $Args
+function Invoke-SfsNativeReadonly([string[]] $InvocationArgs) {
+  $invocation = Get-SfsNativeInvocation $InvocationArgs
   $cmd = $invocation.Command.ToLowerInvariant()
   switch ($cmd) {
     "help" { Show-SfsNativeUsage; Set-SfsNativeExit 0; return }
@@ -691,10 +920,10 @@ function Invoke-SfsNativeReadonly([string[]] $Args) {
     "--help" { Show-SfsNativeUsage; Set-SfsNativeExit 0; return }
     "-v" { Invoke-SfsNativeVersion @("--check"); return }
     "--version" { Invoke-SfsNativeVersion @(); return }
-    "version" { Invoke-SfsNativeVersion -Args $invocation.Rest; return }
-    "status" { Invoke-SfsNativeStatus -Args $invocation.Rest; return }
-    "guide" { Invoke-SfsNativeGuide -Args $invocation.Rest; return }
-    "context" { Invoke-SfsNativeContext -Args $invocation.Rest; return }
+    "version" { Invoke-SfsNativeVersion -InvocationArgs $invocation.Rest; return }
+    "status" { Invoke-SfsNativeStatus -InvocationArgs $invocation.Rest; return }
+    "guide" { Invoke-SfsNativeGuide -InvocationArgs $invocation.Rest; return }
+    "context" { Invoke-SfsNativeContext -InvocationArgs $invocation.Rest; return }
     default {
       if ($env:SFS_NATIVE_ONLY -eq "1") {
         Write-SfsNativeError "native read-only fallback does not handle command: $($invocation.Command)"
@@ -705,7 +934,7 @@ function Invoke-SfsNativeReadonly([string[]] $Args) {
   }
 }
 
-Invoke-SfsNativeReadonly -Args $SfsArgs
+Invoke-SfsNativeReadonly -InvocationArgs $SfsArgs
 if ($script:SfsNativeHandled) {
   exit $script:SfsNativeExitCode
 }
@@ -723,5 +952,7 @@ if (-not (Test-Path $sfsSh)) {
   exit 4
 }
 
-& $bash (Convert-ToBashPath $sfsSh) @SfsArgs
+$bashArgs = [string[]] @($SfsArgs)
+Write-SfsArgTrace "PS_BASH_ARGS" $bashArgs
+& $bash (Convert-ToBashPath $sfsSh) @bashArgs
 exit $LASTEXITCODE

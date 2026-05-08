@@ -40,7 +40,7 @@ depth options for the shape of the work.
 ## Windows Wrapper Stabilization
 
 The Windows PowerShell/cmd user entrypoint is fixed to `sfs.cmd`. Git Bash/WSL
-keep using `sfs`, like macOS/Linux. As of 0.6.54, the Scoop manifest keeps the
+keep using `sfs`, like macOS/Linux. As of 0.6.56, the Scoop manifest keeps the
 generated shim target on packaged `bin\sfs.ps1`, but the post-install hook
 overwrites the shims-directory `sfs.cmd`, `sfs.ps1`, and extensionless `sfs`
 with deterministic wrappers because generated `sfs.cmd` / `sfs.ps1` shims can
@@ -54,8 +54,9 @@ numbered env bridge. If that is also empty, `sfs.ps1` reads the original
 Saved command-line parsing also trims `cmd.exe` shell-control tails such as `&& sfs.cmd --help`.
 `sfs.ps1` owns both read-only commands and mutating commands such as
 `start`. Mutating commands go through the `sfs.cmd -> sfs.ps1 -> Bash runtime`
-bridge. The hardened Scoop `sfs.cmd` shim also keeps `%*` as a positional
-fallback after writing the numbered env bridge; that is different from the old
+bridge. The hardened Scoop `sfs.cmd` shim also carries the saved raw tail into
+the environment before writing the numbered env bridge; `sfs.ps1` reads it as a
+fallback when the env bridge is empty. That is different from the old
 single-source `-File ... %*` bridge that failed under generated Scoop shims. The
 raw Git Bash `%*` path, batch-label forwarding path,
 single-source `-File ... %*` bridge, `-Command @args` bridge, empty `%1..%n` path, generated bare
@@ -64,7 +65,7 @@ they already failed for sandbox startup, argument forwarding,
 UTF-8 output, and Scoop shims. `sfs.cmd upgrade` also delegates Scoop
 self-upgrade to `sfs.ps1` instead of running `scoop update sfs` from the batch
 file that Scoop replaces. `sfs.ps1` normalizes numbered env bridge args,
-the raw arg tail, the saved cmdline, the parent command line, PowerShell automatic `$args`, `CMDCMDLINE`, and `$MyInvocation.UnboundArguments`, and owns `version`,
+the raw arg tail, the saved cmdline, the parent command line, `CMDCMDLINE`, and `$MyInvocation.UnboundArguments`, and owns `version`,
 `status`, `guide`, `context`, Scoop self-upgrade, and Bash fallback. `sfs.cmd`
 exits on the same parsed line after calling PowerShell, and Windows runtime `.ps1` / `.cmd`
 files stay ASCII-safe for Windows PowerShell 5.1. That covers the `context cat`
@@ -75,7 +76,7 @@ An empty sprint directory after `sfs start` can be normal. Step files are create
 later by `brainstorm`, `plan`, `review`, and `retro`. Empty command output,
 usage-only `sfs.cmd status`, or usage-only `sfs.cmd context cat kernel` is a
 failure signal. The full root cause and validation flow are in the
-[Windows SFS wrapper incident report](./windows-wrapper-incident-0.6.54.md).
+[Windows SFS wrapper incident report](./windows-wrapper-incident-0.6.56.md).
 
 ## Three Brainstorm Depths
 
@@ -120,6 +121,11 @@ ownership before execution starts.
 
 If a key owner decision is missing, Solon should not fill it with a guess. It
 should keep the question open.
+
+Decision prompts do not end at opaque `Q1`, `A/B/C/D`, or "recommended A"
+labels. When options exist, Solon shows every viable option with its meaning
+and consequence, then marks the recommendation as the default. If that would be
+too dense, Solon asks the decisions one at a time instead of hiding choices.
 
 ## Implement Is Not Only Code
 
@@ -242,7 +248,7 @@ product design system exists, it wins.
 
 ## Division Knowledge Packs
 
-As of 0.6.54, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
+As of 0.6.56, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
 management/admin, and taxonomy packs are no longer placeholders. Each pack gives
 Solon a compact sense of what to watch, what to ask, and what evidence should
 count for that kind of work.

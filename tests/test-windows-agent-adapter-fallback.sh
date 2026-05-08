@@ -26,9 +26,12 @@ line_number() {
 }
 
 cmd_wrapper="${DIST_DIR}/bin/sfs.cmd"
+sfs_bin="${DIST_DIR}/bin/sfs"
 ps_wrapper="${DIST_DIR}/bin/sfs.ps1"
+upgrade_sh="${DIST_DIR}/upgrade.sh"
 scoop_post_install="${DIST_DIR}/bin/sfs-scoop-post-install.ps1"
 scoop_template="${DIST_DIR}/packaging/scoop/sfs.json.template"
+unix_discovery="${DIST_DIR}/scripts/install-cli-discovery.sh"
 windows_discovery="${DIST_DIR}/scripts/install-cli-discovery.ps1"
 codex_global_skill="${DIST_DIR}/templates/codex-skill/SKILL.md"
 codex_project_skill="${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md"
@@ -50,9 +53,14 @@ assert_contains "${cmd_wrapper}" "set \"SFS_NATIVE_SCRIPT=%SCRIPT_DIR%sfs.ps1\""
 assert_contains "${cmd_wrapper}" "set \"SFS_NATIVE_ARGC=0\"" "cmd initializes env arg bridge"
 assert_contains "${cmd_wrapper}" "set \"SFS_NATIVE_RAW_ARGS=%*\"" "cmd captures raw arg tail before shift"
 assert_contains "${cmd_wrapper}" "set \"SFS_NATIVE_CMDLINE=!CMDCMDLINE!\"" "cmd captures original cmd command line after delayed expansion is enabled"
+assert_contains "${cmd_wrapper}" "SFS_WINDOWS_ARG_TRACE" "cmd exposes opt-in Windows arg trace"
+assert_contains "${cmd_wrapper}" "SFS_ARGTRACE_CMD_ARGC" "cmd traces collected arg count"
 assert_contains "${cmd_wrapper}" ":sfs_collect_args" "cmd env arg collection loop"
 assert_contains "${cmd_wrapper}" "set \"SFS_NATIVE_ARG_%%I=%~1\"" "cmd stores numbered env args"
-assert_contains "${cmd_wrapper}" "-File \"%SFS_NATIVE_SCRIPT%\" & exit /b !ERRORLEVEL!" "cmd powershell env-only bridge exits on parsed line"
+assert_contains "${cmd_wrapper}" "-File \"%SFS_NATIVE_SCRIPT%\" & exit /b !ERRORLEVEL!" "cmd powershell env bridge exits on parsed line"
+if grep -Fq -- '--% %SFS_NATIVE_RAW_ARGS%' "${cmd_wrapper}"; then
+  fail "cmd wrapper must not pass raw args through PowerShell --%; GitHub runner converted it into --SFS_NATIVE_RAW_ARGS"
+fi
 assert_contains "${scoop_template}" '"bin\\sfs.ps1"' "Scoop manifest uses PowerShell shim entrypoint"
 if grep -Fq -- '"bin\\sfs.cmd"' "${scoop_template}"; then
   fail "Scoop manifest must not shim through bin\\sfs.cmd; generated cmd shims lost args in the field"
@@ -64,8 +72,13 @@ assert_contains "${scoop_post_install}" 'Set-Content -LiteralPath (Join-Path $sh
 assert_contains "${scoop_post_install}" 'set "SFS_NATIVE_ARGC=0"' "Scoop sfs.cmd shim initializes env arg bridge"
 assert_contains "${scoop_post_install}" 'set "SFS_NATIVE_RAW_ARGS=%*"' "Scoop sfs.cmd shim captures raw arg tail before shift"
 assert_contains "${scoop_post_install}" 'set "SFS_NATIVE_CMDLINE=!CMDCMDLINE!"' "Scoop sfs.cmd shim captures original cmd command line after delayed expansion is enabled"
+assert_contains "${scoop_post_install}" 'SFS_WINDOWS_ARG_TRACE' "Scoop sfs.cmd shim exposes opt-in Windows arg trace"
+assert_contains "${scoop_post_install}" 'SFS_ARGTRACE_CMD_ARGC' "Scoop sfs.cmd shim traces collected arg count"
 assert_contains "${scoop_post_install}" 'set "SFS_NATIVE_ARG_%%I=%~1"' "Scoop sfs.cmd shim stores numbered args"
-assert_contains "${scoop_post_install}" '-File "%SFS_NATIVE_SCRIPT%" & exit /b !ERRORLEVEL!' "Scoop sfs.cmd shim keeps env-only raw-arg fallback and exits on the same parsed line"
+assert_contains "${scoop_post_install}" '-File "%SFS_NATIVE_SCRIPT%" & exit /b !ERRORLEVEL!' "Scoop sfs.cmd shim keeps env bridge dispatch on the same parsed line"
+if grep -Fq -- '--% %SFS_NATIVE_RAW_ARGS%' "${scoop_post_install}"; then
+  fail "Scoop sfs.cmd shim must not pass raw args through PowerShell --%; GitHub runner converted it into --SFS_NATIVE_RAW_ARGS"
+fi
 assert_contains "${scoop_post_install}" '& $target @args' "Scoop sfs.ps1 shim forwards PowerShell args"
 assert_contains "${scoop_post_install}" 'exec bash "$_sfs_path" "$@"' "Scoop Git Bash shim forwards args"
 if grep -Fq -- 'set "SFS_NATIVE_CMDLINE=%CMDCMDLINE%"' "${cmd_wrapper}" "${scoop_post_install}"; then
@@ -106,6 +119,17 @@ assert_contains "${ps_wrapper}" 'SFS_NATIVE_ARGC' "ps1 reads env arg count"
 assert_contains "${ps_wrapper}" 'SFS_NATIVE_ARG_$i' "ps1 reads numbered env args"
 assert_contains "${ps_wrapper}" "Resolve-SfsRawArgs" "ps1 raw arg fallback"
 assert_contains "${ps_wrapper}" "SFS_NATIVE_RAW_ARGS" "ps1 reads raw arg tail"
+assert_contains "${ps_wrapper}" "Write-SfsArgTrace" "ps1 exposes opt-in Windows arg trace"
+assert_contains "${ps_wrapper}" "SFS_ARGTRACE_" "ps1 writes stable arg trace markers"
+assert_contains "${ps_wrapper}" "PS_SELECTED_SOURCE" "ps1 traces selected arg source"
+assert_contains "${ps_wrapper}" "PS_FINAL_ARGS" "ps1 traces final resolved args"
+assert_contains "${ps_wrapper}" 'function Test-SfsUsableArgs([string[]] $Items)' "ps1 usable-args guard avoids the broken Args parameter name"
+if grep -Fq -- 'function Test-SfsUsableArgs([string[]] $Args)' "${ps_wrapper}"; then
+  fail "ps1 usable-args guard must not name its parameter Args; that made env args look empty on the Windows runner"
+fi
+if grep -Eq '\[string\[\]\] \$Args|@Args|-Args \$SfsArgs' "${ps_wrapper}"; then
+  fail "ps1 must not use Args as a parameter/splat/named call; Windows PowerShell treated it like the automatic args variable"
+fi
 assert_contains "${ps_wrapper}" "Test-SfsUsableArgs" "ps1 treats empty env arg arrays as unusable"
 assert_contains "${ps_wrapper}" "Resolve-SfsSavedCmdLineArgs" "ps1 saved cmdline fallback"
 assert_contains "${ps_wrapper}" "SFS_NATIVE_CMDLINE" "ps1 reads batch-captured original cmd line"
@@ -124,11 +148,48 @@ assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs $SfsParentCmdLineArg
 assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs $SfsCmdLineArgs -AutomaticArgs @() -UnboundArgs @()' "ps1 cmdcmdline args fallback order"
 assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs $SfsEnvArgs -AutomaticArgs $SfsParamArgs -UnboundArgs $args' "ps1 env/param/automatic args fallback"
 assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs @() -AutomaticArgs @() -UnboundArgs $MyInvocation.UnboundArguments' "ps1 unbound args final fallback"
-assert_contains "${ps_wrapper}" 'Invoke-SfsNativeReadonly -Args $SfsArgs' "ps1 passes resolved args as one array"
-assert_contains "${ps_wrapper}" 'Invoke-ScoopSelfUpgrade -Args $SfsArgs' "ps1 self-upgrade sees the full resolved arg array"
+assert_contains "${ps_wrapper}" 'Invoke-SfsNativeReadonly -InvocationArgs $SfsArgs' "ps1 passes resolved args as one array"
+assert_contains "${ps_wrapper}" 'Invoke-ScoopSelfUpgrade -InvocationArgs $SfsArgs' "ps1 self-upgrade sees the full resolved arg array"
+assert_contains "${ps_wrapper}" "Resolve-SfsScoopCurrentScriptPath" "ps1 reloads through Scoop current after self-upgrade"
+assert_contains "${ps_wrapper}" "Normalize-SfsScoopReloadArgs" "ps1 canonicalizes Scoop self-upgrade reload args"
+assert_contains "${ps_wrapper}" '$items[$cmdIndex] = "update"' "ps1 maps Windows upgrade reloads to canonical update"
+assert_contains "${ps_wrapper}" '$item -in @("--yes", "-y")' "ps1 strips wrapper-level yes flags before Bash reload"
+assert_contains "${ps_wrapper}" 'function Set-SfsNativeArgEnv([string[]] $InvocationArgs)' "ps1 rewrites the env arg bridge before reloading updated runtime"
+assert_contains "${ps_wrapper}" 'Remove-Item "Env:SFS_NATIVE_ARG_$i"' "ps1 clears stale numbered env args before reload"
+assert_contains "${ps_wrapper}" 'Set-Item "Env:SFS_NATIVE_ARG_$($i + 1)"' "ps1 writes normalized numbered env args before reload"
+assert_contains "${ps_wrapper}" '$env:SFS_NATIVE_ARGC = [string] $newCount' "ps1 rewrites env argc before reload"
+assert_contains "${ps_wrapper}" '$env:SFS_NATIVE_CMDLINE = if ($rawArgs) { "sfs.cmd $rawArgs" } else { "sfs.cmd" }' "ps1 rewrites saved cmdline with normalized reload args"
+assert_contains "${ps_wrapper}" '$reloadArgs = [string[]] @(Normalize-SfsScoopReloadArgs $InvocationArgs)' "ps1 self-upgrade reload normalizes invocation args and preserves one-token arrays"
+assert_contains "${ps_wrapper}" 'Set-SfsNativeArgEnv $reloadArgs' "ps1 self-upgrade reload replaces stale env args with canonical update"
+assert_contains "${ps_wrapper}" '$reloadScriptPath = Resolve-SfsScoopCurrentScriptPath $CurrentScriptPath' "ps1 resolves the post-update current script before reload"
+assert_contains "${ps_wrapper}" 'Write-SfsArgTrace "PS_RELOAD_SCRIPT" $reloadScriptPath' "ps1 traces self-upgrade reload script path"
+assert_contains "${ps_wrapper}" 'Write-SfsArgTrace "PS_RELOAD_ARGS" $reloadArgs' "ps1 traces self-upgrade reload args"
+assert_contains "${ps_wrapper}" '& $reloadScriptPath @reloadArgs' "ps1 self-upgrade reload splats normalized arg array"
+if grep -Fq '& $CurrentScriptPath @InvocationArgs' "${ps_wrapper}"; then
+  echo "ps1 self-upgrade reload still splats possibly scalar InvocationArgs directly" >&2
+  exit 1
+fi
+if grep -Fq '& $CurrentScriptPath @reloadArgs' "${ps_wrapper}"; then
+  echo "ps1 self-upgrade reload still targets the pre-update script path" >&2
+  exit 1
+fi
+assert_contains "${ps_wrapper}" '$bashArgs = [string[]] @($SfsArgs)' "ps1 bash bridge preserves whole arg tokens"
+assert_contains "${ps_wrapper}" 'Write-SfsArgTrace "PS_BASH_ARGS" $bashArgs' "ps1 traces final bash bridge args"
+assert_contains "${ps_wrapper}" '& $bash (Convert-ToBashPath $sfsSh) @bashArgs' "ps1 bash bridge splats normalized arg array"
+if grep -Fq '& $bash (Convert-ToBashPath $sfsSh) @SfsArgs' "${ps_wrapper}"; then
+  echo "ps1 bash bridge still splats possibly scalar SfsArgs directly" >&2
+  exit 1
+fi
 assert_contains "${ps_wrapper}" '$resolved[0] -eq "--%"' "ps1 stop-parsing token normalization"
 assert_contains "${ps_wrapper}" "Enable-SfsUtf8Bridge" "ps1 utf8 bridge"
 assert_contains "${ps_wrapper}" "Invoke-ScoopSelfUpgrade" "ps1 owns Scoop self-upgrade"
+assert_contains "${ps_wrapper}" "Enable-SfsPowerShellUtility" "ps1 prepares PowerShell utility module before Scoop self-upgrade"
+assert_contains "${ps_wrapper}" "Add-SfsPowerShellModulePath" "ps1 restores WindowsPowerShell module paths before Scoop self-upgrade"
+assert_contains "${ps_wrapper}" "Install-SfsGetFileHashFallback" "ps1 installs a Get-FileHash fallback for Scoop self-upgrade"
+assert_contains "${ps_wrapper}" "function global:Get-FileHash" "ps1 fallback exposes Get-FileHash to Scoop scripts"
+assert_contains "${ps_wrapper}" "[System.IO.Stream] \$InputStream" "ps1 Get-FileHash fallback supports Scoop stream hashing"
+assert_contains "${ps_wrapper}" "Import-Module Microsoft.PowerShell.Utility" "ps1 imports Get-FileHash provider before Scoop self-upgrade"
+assert_contains "${ps_wrapper}" "Get-Command Get-FileHash" "ps1 verifies Get-FileHash exists before Scoop self-upgrade"
 assert_contains "${ps_wrapper}" "\$env:LC_CTYPE = \"C.UTF-8\"" "ps1 bash utf8 locale"
 assert_contains "${ps_wrapper}" "Invoke-SfsNativeStatus" "ps1 native status"
 assert_contains "${ps_wrapper}" "Invoke-SfsNativeContext" "ps1 native context"
@@ -186,10 +247,40 @@ assert_contains "${DIST_DIR}/GUIDE.md" "sfs.cmd context cat kernel" "guide Windo
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd context cat kernel" "Windows CI sfs.cmd native context"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_NATIVE_ARGC" "Windows CI verifies hardened sfs.cmd shim env bridge"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_NATIVE_RAW_ARGS" "Windows CI verifies hardened sfs.cmd shim raw arg bridge"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_WINDOWS_ARG_TRACE" "Windows CI enables opt-in arg trace before accepting sfs.cmd version"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_ARGTRACE_PS_SELECTED_SOURCE=env" "Windows CI proves env bridge selected source"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_ARGTRACE_PS_FINAL_ARGS=.*version" "Windows CI proves version reaches sfs.ps1"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "Tee-Object -Variable upgradeTrace" "Windows CI streams upgrade logs live"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_UPGRADE_TRACE" "Windows CI enables opt-in Bash upgrade trace while diagnosing self-upgrade hangs"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_CLI_DISCOVERY_TIMEOUT_SEC" "Windows CI bounds upgrade cli-discovery hook"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_DISCOVERY_CMD_TIMEOUT_SEC" "Windows CI bounds external discovery probes"
+if grep -Fq '$upgradeLines = & sfs.cmd upgrade' "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml"; then
+  fail "Windows CI must not assign the Tee-Object pipeline; assignment captures output and hides live trace logs"
+fi
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd upgrade live trace" "Windows CI groups upgrade trace logs"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd upgrade" "Windows CI tests user-facing upgrade spelling"
+if grep -Fq 'sfs.cmd upgrade --yes' "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml"; then
+  fail "Windows CI must not pass wrapper-level --yes through sfs.cmd upgrade; sfs.ps1 canonicalizes upgrade to update after self-upgrade"
+fi
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "timeout-minutes: 15" "Windows CI bounds the self-upgrade smoke step"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_NATIVE_CMDLINE" "Windows CI verifies hardened sfs.cmd shim cmdline bridge"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" '$shimText -notmatch "%\*"' "Windows CI verifies hardened sfs.cmd shim positional fallback"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd version" "Windows CI PowerShell sfs.cmd version"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd init --layout thin --yes" "Windows CI PowerShell sfs.cmd init"
+assert_contains "${upgrade_sh}" "sfs_is_ci" "upgrade.sh detects CI before reopening /dev/tty"
+assert_contains "${upgrade_sh}" "trace_upgrade" "upgrade.sh has opt-in phase trace for diagnosing CI hangs"
+assert_contains "${upgrade_sh}" 'SFS_UPGRADE_TRACE' "upgrade.sh trace is gated behind SFS_UPGRADE_TRACE"
+assert_contains "${upgrade_sh}" 'SFS_CLI_DISCOVERY_TIMEOUT_SEC' "upgrade.sh bounds cli-discovery hook"
+assert_contains "${upgrade_sh}" 'run_upgrade_command_with_timeout "cli-discovery hook"' "upgrade.sh wraps cli-discovery hook in a watchdog"
+assert_contains "${upgrade_sh}" "timeout \"\$timeout\" \"\$@\"" "upgrade.sh uses timeout(1) before background watchdogs"
+assert_contains "${upgrade_sh}" 'timeout(1) unavailable in CI' "upgrade.sh skips background watchdogs in CI when timeout(1) is unavailable"
+assert_contains "${upgrade_sh}" 'trace_upgrade "cli-discovery hook before' "upgrade.sh traces cli-discovery entry"
+assert_contains "${upgrade_sh}" 'trace_upgrade "completion output after"' "upgrade.sh traces completion output exit"
+assert_contains "${upgrade_sh}" 'if ! sfs_is_ci && [ ! -t 0 ] && [ -e /dev/tty ]; then' "upgrade.sh does not block GitHub Actions on interactive tty prompts"
+assert_contains "${unix_discovery}" 'SFS_DISCOVERY_CMD_TIMEOUT_SEC' "install-cli-discovery bounds external CLI probes"
+assert_contains "${unix_discovery}" 'run_discovery_command "Claude Code marketplace add"' "install-cli-discovery wraps Claude marketplace add"
+assert_contains "${unix_discovery}" 'run_discovery_command "Gemini CLI extension install"' "install-cli-discovery wraps Gemini extension install"
+assert_contains "${sfs_bin}" '-y|--yes)' "Bash sfs accepts wrapper-level yes flag as a compatibility no-op"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd agent install all" "Windows CI PowerShell sfs.cmd agent install"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd start --id ci-sprint-test" "Windows CI sfs.cmd start smoke"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" '"goal":"sprint-create-test"' "Windows CI sprint_start goal evidence"
@@ -200,6 +291,7 @@ assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" 'git arc
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" 'Join-Path $env:GITHUB_WORKSPACE "packaging/scoop/sfs.json.template"' "Windows CI reads Scoop template from checkout after Set-Location"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "sfs.cmd upgrade" "Windows CI sfs.cmd self-upgrade smoke"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_NATIVE_RAW_ARGS" "Windows CI verifies hardened shim raw arg bridge"
+assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "recovered sfs.cmd arg trace" "Windows CI traces recovered shim arg delivery"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "SFS_NATIVE_CMDLINE" "Windows CI verifies hardened shim saved cmdline bridge"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" "Smoke saved cmdline fallback" "Windows CI forces saved cmdline fallback"
 assert_contains "${DIST_DIR}/.github/workflows/windows-scoop-smoke.yml" 'cmd.exe /d /c "sfs.cmd version && sfs.cmd --help >NUL"' "Windows CI saved cmdline fallback includes shell-control tail"

@@ -7,7 +7,7 @@ install. For beginner Git/terminal help, use the Korean [BEGINNER-GUIDE.md](../.
 
 ## 0. Install And Initialize
 
-> **As of 0.6.54**, one `brew install` / `scoop install` lets Claude Code
+> **As of 0.6.56**, one `brew install` / `scoop install` lets Claude Code
 > (`/sfs`), Gemini CLI (`sfs`), and Codex CLI (`$sfs`) find Solon automatically.
 > Your project keeps the files you read and the records you create.
 
@@ -61,11 +61,11 @@ optional. Install those native shortcuts only when a project needs them:
 sfs agent install all
 ```
 
-Old projects can be upgraded into the lighter 0.6.54 shape. Use
+Old projects can be upgraded into the lighter 0.6.56 shape. Use
 `sfs upgrade --layout vendored` only when Solon package files must stay inside
 the project.
 
-0.6.54 also includes the filled division knowledge packs. The user does not need to choose
+0.6.56 also includes the filled division knowledge packs. The user does not need to choose
 "backend", "QA", "infra", "finance", "tax", "accounting", or "taxonomy"
 manually. The AI should read the relevant Solon lens when the work calls for it,
 then explain the judgment in plain language.
@@ -207,7 +207,7 @@ of real output, treat that as a wrapper regression. If `sfs.cmd start "<goal>"`
 exits 0 but prints nothing, verify `.sfs-local/current-sprint` and then run
 `sfs.cmd status`; empty output alone is not success. The incident summary and
 validation commands are in the
-[Windows SFS wrapper incident report](./windows-wrapper-incident-0.6.54.md).
+[Windows SFS wrapper incident report](./windows-wrapper-incident-0.6.56.md).
 
 ## 9. Optional Multi-Agent Use
 

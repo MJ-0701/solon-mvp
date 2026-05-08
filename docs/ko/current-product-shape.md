@@ -39,7 +39,7 @@ depth 옵션을 함께 보여드릴 뿐입니다.
 ## Windows 래퍼 안정화
 
 Windows PowerShell/cmd 의 사용자 진입점은 `sfs.cmd` 로 고정합니다. Git Bash/WSL 에서는
-macOS/Linux 처럼 `sfs` 를 씁니다. 0.6.54 기준 Scoop manifest 는 generated shim 이
+macOS/Linux 처럼 `sfs` 를 씁니다. 0.6.56 기준 Scoop manifest 는 generated shim 이
 packaged `bin\sfs.ps1` 을 직접 호출하도록 유지하지만, Scoop 이 생성한 `sfs.cmd` / `sfs.ps1`
 shim 이 인자를 버리는 경로가 확인되어 post-install hook 이 shims 디렉터리의 `sfs.cmd`,
 `sfs.ps1`, extensionless `sfs` 를 deterministic wrapper 로 덮어씁니다. PowerShell/cmd smoke 와
@@ -53,14 +53,15 @@ shell-control tail 도 잘라냅니다.
 `sfs.ps1` 이 read-only
 명령과 `start` 같은 상태 변경 명령을 모두 소유합니다. 상태 변경 명령은
 `sfs.cmd -> sfs.ps1 -> Bash runtime` bridge 로 내려갑니다. hardened Scoop `sfs.cmd` shim 은
-numbered env bridge 를 먼저 기록한 뒤 `%*` 도 positional fallback 으로 함께 넘깁니다. 이는
-generated Scoop shim 아래에서 실패했던 단일 `-File ... %*` bridge 와 다릅니다. 실패 이력이 있는 raw Git Bash `%*`
+numbered env bridge 를 먼저 기록하고, `sfs.ps1` 이 그 값이 비어 있을 때 saved raw tail 을
+fallback 으로 다시 읽습니다. 이는 generated Scoop shim 아래에서 실패했던 단일 `-File ... %*`
+bridge 와 다릅니다. 실패 이력이 있는 raw Git Bash `%*`
 직행 경로, batch label forwarding, 단일 `-File ... %*` bridge, `-Command @args`, empty `%1..%n`, generated bare
 `sfs` PowerShell shim 경로, generated shim -> packaged `.cmd` 경로, generated `sfs.cmd` shim
 경로는 기본값으로 쓰지 않습니다.
 `sfs.cmd upgrade` 도 batch 파일이 직접 `scoop update sfs` 를 실행하지 않고 `sfs.ps1` self-upgrade
 경로로 넘깁니다. `sfs.ps1` 은 numbered env bridge, raw arg tail, saved cmdline,
-parent command line, PowerShell 자동 `$args`, `CMDCMDLINE`, `$MyInvocation.UnboundArguments` 순서로 인자를 정규화하고, `version`, `status`, `guide`,
+parent command line, `CMDCMDLINE`, `$MyInvocation.UnboundArguments` 순서로 인자를 정규화하고, `version`, `status`, `guide`,
 `context`, Scoop self-upgrade, Bash fallback 을 모두 처리합니다. 또한 `sfs.cmd` 가 PowerShell 호출 뒤 같은 parsed line 에서 종료하고
 Windows runtime `.ps1` / `.cmd` 파일을 ASCII-safe 로 유지해 `context cat` / `start` usage-only
 회귀, batch tail fragment, PowerShell 5.1 parser 회귀를 함께 막습니다.
@@ -69,7 +70,7 @@ Windows runtime `.ps1` / `.cmd` 파일을 ASCII-safe 로 유지해 `context cat`
 `brainstorm`, `plan`, `review`, `retro` 에서 필요할 때 생성됩니다. 하지만 명령 출력이 비어 있거나
 `sfs.cmd status` / `sfs.cmd context cat kernel` 이 usage 만 출력하면 실패로 봐야 합니다.
 자세한 원인과 확인 절차는
-[Windows SFS 래퍼 장애 요약 보고서](./windows-wrapper-incident-0.6.54.md) 에 정리되어 있습니다.
+[Windows SFS 래퍼 장애 요약 보고서](./windows-wrapper-incident-0.6.56.md) 에 정리되어 있습니다.
 
 ## Brainstorm 3단계
 
@@ -112,6 +113,10 @@ Windows runtime `.ps1` / `.cmd` 파일을 ASCII-safe 로 유지해 `context cat`
 
 중요한 owner decision 이 비어 있으면 plan 을 추측으로 채우지 않습니다. 질문을 유지하고,
 사용자의 판단을 기다립니다.
+
+결정 질문은 `Q1`, `A/B/C/D`, `추천 A` 같은 내부 표기만으로 끝내지 않습니다. 선택지가 있으면
+각 선택지의 뜻과 결과를 모두 보여주고, 추천은 기본값으로만 표시합니다. 한 화면에 다 담으면
+복잡해지는 경우에는 선택지를 숨기지 않고 결정을 하나씩 순차적으로 묻습니다.
 
 ## Implement 는 코드만 뜻하지 않는다
 
@@ -220,7 +225,7 @@ AI 가 UI 를 만들 때 가장 흔한 실패는 평균값으로 회귀하는 �
 
 ## 분야별 지식팩
 
-0.6.54 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
+0.6.56 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
 더 이상 빈 자리표시자가 아닙니다. 각 지식팩은 "이 분야라면 무엇을 조심해야 하는가",
 "무엇을 물어봐야 하는가", "어떤 근거가 있으면 통과로 볼 수 있는가"를 짧게 담습니다.
 

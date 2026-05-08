@@ -1,10 +1,10 @@
-# Windows SFS 래퍼 장애 요약 보고서 (0.6.35 -> 0.6.54)
+# Windows SFS 래퍼 장애 요약 보고서 (0.6.35 -> 0.6.56)
 
-**Language**: 한국어 / [English](../en/windows-wrapper-incident-0.6.54.md)
+**Language**: 한국어 / [English](../en/windows-wrapper-incident-0.6.56.md)
 
 이 문서는 Windows PC 에서 `$sfs start 이미지 프롬프트 고도화` 와 `sfs.cmd upgrade` 를 실행했을 때
 드러난 `sfs.cmd` / `sfs.ps1` 래퍼 문제를 다음 세션과 다음 릴리스 검증자가 바로 이해하도록 남긴
-요약 보고서입니다. 최종 기준선은 0.6.54 입니다.
+요약 보고서입니다. 최종 기준선은 0.6.56 입니다.
 
 ## 한 줄 결론
 
@@ -23,6 +23,20 @@ PowerShell 쪽 raw-arg fallback 으로 다시 읽습니다. 0.6.53 에서는 bat
 command-line probe 를 마지막으로 추가했습니다. 이 fallback 은 parent command line 을 공백으로
 먼저 자르지 않고 `sfs.cmd` 명령명 뒤의 꼬리부터 추출합니다. wrapper 경로 중간에 공백이 있을 수
 있기 때문입니다.
+0.6.55 후보에서는 0.6.54 의 parent fallback 까지 둔 상태에서도 최초 설치 직후
+`sfs.cmd version` 이 usage-only 로 떨어진 GitHub runner 증거를 기준으로,
+`SFS_NATIVE_RAW_ARGS` 꼬리를 `--%` 뒤에 붙이는 실험을 했습니다. 하지만 0.6.55 trace run
+`25554923214` 는 batch 가 `version` 을 정상 수집했고, 문제는 `sfs.ps1` 의 여러 helper 가
+PowerShell-sensitive `$Args` 파라미터명을 사용해 살아 있는 env bridge 인자를 함수 경계에서
+empty/help 로 무너뜨린 데 있음을 보여줬습니다. 0.6.56 은 usable guard 를 `$Items`, native
+dispatch/self-upgrade helper 를 `$InvocationArgs` 로 바꾸고, runner 에서
+`--SFS_NATIVE_RAW_ARGS` 라는 잘못된 토큰을 만든 `--% %SFS_NATIVE_RAW_ARGS%` 실험을 제거합니다.
+또한 `SFS_WINDOWS_ARG_TRACE=1` 진단 모드로 Windows smoke 실패 시 batch `%*`, child PowerShell
+`$args`, env/raw/saved/parent source, 최종 선택 source 를 로그에서 바로 볼 수 있게 했습니다.
+후속 trace run `25559894888` 에서는 `upgrade -> update` 재실행과 stale env 문제는 해결됐고,
+Bash `upgrade.sh` 가 `maybe_prompt_model_profile after` 뒤 후반 훅에서 멈출 수 있음을 확인했습니다.
+따라서 0.6.56 기준선은 `SFS_UPGRADE_TRACE=1` 후반 trace 를 더 촘촘히 넣고, `cli-discovery`
+전체 훅과 내부 `claude`/`gemini`/`git clone` probe 를 timeout 으로 감싸 unbounded wait 를 금지합니다.
 Windows PowerShell/cmd runtime script 는 BOM 없는 UTF-8 파서 오인을
 피하도록 ASCII-safe 여야 합니다.
 
@@ -51,6 +65,11 @@ Windows PowerShell/cmd runtime script 는 BOM 없는 UTF-8 파서 오인을
 | P19 | `shift` 로 인자를 수집한 뒤 `%*` positional fallback 이 비어질 수 있음 | 0.6.51 GitHub Windows Scoop smoke run `25543802195` 에서 설치 직후 hardened `sfs.cmd version` 이 다시 usage-only 로 실패 | `sfs.cmd` 가 원본 `%*` 를 `SFS_NATIVE_RAW_ARGS` 로 shift 전에 저장하고, `sfs.ps1` 이 raw arg fallback 을 env bridge 다음에 읽으며 비어 있는 resolved arg 배열은 unusable 로 처리 |
 | P20 | child PowerShell 의 `CMDCMDLINE` 은 wrapper 호출 원문이 아니라 `powershell.exe -File ...` 로 바뀔 수 있음 | 0.6.52 GitHub Windows Scoop smoke run `25545120029` 에서 shim 이 `SFS_NATIVE_RAW_ARGS` 를 갖고도 `sfs.cmd version` 이 다시 usage-only 로 실패 | `sfs.cmd` 가 delayed-expansion dispatch block 안에서 `!CMDCMDLINE!` 을 `SFS_NATIVE_CMDLINE` 으로 저장하고, `sfs.ps1` 이 raw arg fallback 다음에 이 saved cmdline 을 파싱하며 `cmd.exe` shell-control tail 을 자름 |
 | P21 | delayed expansion 도 GitHub runner 에서 wrapper 명령행을 복구하지 못할 수 있음 | 0.6.53 GitHub Windows Scoop smoke run `25546859759` 에서 최초 `sfs.cmd version` 이 여전히 usage-only 로 실패 | env/raw/saved command line 이 모두 비면 `sfs.ps1` 이 `Win32_Process` 로 parent `cmd.exe` command line 을 조회하고, 공백 split 전에 `sfs.cmd` 명령명 뒤의 꼬리를 추출해 child `CMDCMDLINE` 전에 파싱 |
+| P22 | fallback source 를 여러 개 둬도 child PowerShell 이 실제 argv 없이 시작될 수 있음 | 0.6.54 GitHub Windows Scoop smoke run `25548381094` 에서 post-install hardening 은 보였지만 최초 `sfs.cmd version` 이 다시 usage-only 로 실패 | 0.6.55 후보에서 `--% %SFS_NATIVE_RAW_ARGS%` 실험을 추가했지만 P23 trace 에서 supersede |
+| P23 | PowerShell-sensitive `$Args` 파라미터명이 살아 있는 env bridge 를 함수 경계에서 empty/help 로 무너뜨림 | 0.6.55 trace run `25554923214` 에서 `CMD_FIRST=version`, `PS_ENV_ARGS=version` 이 보였지만 처음에는 `PS_SELECTED_SOURCE=empty`, 이후에는 `PS_SELECTED_SOURCE=env`, `PS_FINAL_ARGS=version` 뒤에도 native dispatch 가 usage 를 출력 | usable guard 는 `$Items`, native dispatch/self-upgrade helper 는 `$InvocationArgs` 로 변경하고, `--% %SFS_NATIVE_RAW_ARGS%` dispatch 제거. Windows smoke 는 `SFS_ARGTRACE_PS_SELECTED_SOURCE=env` 와 `SFS_ARGTRACE_PS_FINAL_ARGS=.*version` 을 요구 |
+| P24 | Windows CI self-upgrade smoke 가 실제 runtime 버그가 아니라 interactive upgrade prompt 에서 멈출 수 있고, live trace 도 assignment 에 잡혀 보이지 않을 수 있음 | 0.6.56 trace run `25557503623` 이 `Smoke thin project in PowerShell` 에서 진행되지 않았고, `Tee-Object` pipeline 이 `$upgradeLines =` assignment 에 잡혀 `SFS_ARGTRACE_*` 가 Actions 로그에 즉시 나오지 않았습니다. 다음 trace 에서는 `sfs.cmd upgrade --yes` 가 Bash runtime 까지 전달되어 `unknown arg: --yes` 를 만든 것도 확인했습니다 | CI 에서는 `/dev/tty` 재연결을 금지하고, smoke 는 사용자-facing `sfs.cmd upgrade` 를 그대로 검증. `Tee-Object` 는 assignment 없이 직접 stream 하고, self-upgrade reload 는 Scoop `current\bin\sfs.ps1` 로 재해석하며 `upgrade` 를 canonical `update` 로 치환하고 `PS_RELOAD_SCRIPT` 를 trace |
+| P25 | reload args 는 `update` 로 정규화됐지만 오래 남은 env bridge 가 다시 `upgrade` 를 선택함 | 0.6.56 trace run `25558767614` 에서 `PS_RELOAD_ARGS=update` 가 보였지만 one-token array 가 `PS_AUTOMATIC_ARGS=[u\|p\|d\|a\|t\|e]` 처럼 보였고, stale `PS_ENV_ARGS=upgrade` 가 `PS_SELECTED_SOURCE=env` 로 선택되어 Bash 에 `upgrade` 가 들어갔습니다 | `$reloadArgs = [string[]] @(Normalize-SfsScoopReloadArgs ...)` 로 one-token array 를 보존하고, `Set-SfsNativeArgEnv $reloadArgs` 로 `SFS_NATIVE_ARGC` / `SFS_NATIVE_ARG_N` / raw/cmdline env 를 canonical `update` 로 다시 써서 stale env 를 제거. CI 에서는 `SFS_UPGRADE_TRACE=1` 로 Bash upgrade phase 도 opt-in trace |
+| P26 | reload 는 정상 `update` 로 들어갔지만 upgrade 후반의 CLI discovery 훅이 unbounded wait 가 될 수 있음 | 0.6.56 trace run `25559894888` 에서 `PS_RELOAD_ARGS=[update]`, `PS_ENV_ARGS=update`, `PS_BASH_ARGS=[update]` 가 모두 정상으로 찍힌 뒤, `upgrade.sh` trace 가 `maybe_prompt_model_profile after` 다음에서 끊겼습니다 | `upgrade.sh` 에 `model profile notice`, `cli-discovery hook`, `completion output` trace 를 추가하고 `SFS_CLI_DISCOVERY_TIMEOUT_SEC` 로 전체 discovery 훅을 제한합니다. `install-cli-discovery.sh` 내부의 `claude`/`gemini`/`git clone` probe 도 `SFS_DISCOVERY_CMD_TIMEOUT_SEC` 로 제한해 특정 외부 CLI 가 멈춰도 upgrade 는 warning 후 계속됩니다 |
 
 ## 사용자가 본 증상
 
@@ -225,6 +244,15 @@ workspace 와 pointer 를 만들고, `brainstorm`, `plan`, `review`, `retro` 문
   `sfs.ps1` 이 parent `cmd.exe` 의 `Win32_Process.CommandLine` 을 읽어 원래 `sfs.cmd ...`
   꼬리를 공백 split 전에 추출합니다. 그래서 wrapper 경로 중간에 공백이 있어도 가짜 인자로
   쪼개지지 않습니다. 그래도 비면 child PowerShell 의 `CMDCMDLINE` fallback 으로 내려갑니다.
+- 0.6.55 후보에서는 0.6.54 GitHub runner 가 여전히 usage-only 를 낸 것을 근거로 `sfs.cmd` 의
+  PowerShell 호출 자체에도 saved raw tail 을 직접 싣는 실험을 했습니다. trace run `25554923214`
+  에서 이 경로는 `--SFS_NATIVE_RAW_ARGS` 라는 잘못된 토큰을 만들었고, 동시에 numbered env bridge
+  에는 `version` 이 살아 있음을 보여줘 0.6.56 의 P23 root-cause fix 로 supersede 됐습니다.
+- 0.6.56 에서는 `Test-SfsUsableArgs([string[]] $Args)` 를
+  `Test-SfsUsableArgs([string[]] $Items)` 로, native dispatch/self-upgrade helper 의 `$Args`
+  파라미터를 `$InvocationArgs` 로 바꿔 살아 있는 env bridge 를 정상 command 로 끝까지
+  인정합니다. Windows smoke 는 `SFS_ARGTRACE_PS_SELECTED_SOURCE=env` 와
+  `SFS_ARGTRACE_PS_FINAL_ARGS=.*version` 을 요구합니다.
 
 ## 발견된 문제점
 
@@ -242,8 +270,9 @@ workspace 와 pointer 를 만들고, `brainstorm`, `plan`, `review`, `retro` 문
 - Windows PowerShell 5.1 이 읽는 BOM-less script 에 non-ASCII 문자를 넣으면 주석/문자열이어도
   parser failure 로 이어질 수 있습니다. runtime `.ps1` / `.cmd` 는 ASCII-only 로 유지합니다.
 - PowerShell CLI argv forwarding 은 Windows/Scoop shim 아래에서 반복 실패했습니다. 단일 `%*` 캐시는
-  금지하지만, shim/PowerShell argv forwarding 이 불안정하면 numbered env arg bridge
-  (`SFS_NATIVE_ARGC`, `SFS_NATIVE_ARG_N`) 로 한 번만 전달하고 `sfs.ps1` 이 즉시 읽도록 고정합니다.
+  금지하고, `--% %SFS_NATIVE_RAW_ARGS%` 실험도 runner 에서 잘못된 토큰을 만들었으므로 금지합니다.
+  기본 계약은 numbered env arg bridge (`SFS_NATIVE_ARGC`, `SFS_NATIVE_ARG_N`) 를 `sfs.ps1` 이
+  즉시 읽고, 비어 있을 때만 raw/saved/parent fallback 으로 내려가는 것입니다.
 - generated Scoop shim 아래에서는 target batch 의 `%1..%n` 자체가 비어 있을 수 있습니다. 이때는
   `CMDCMDLINE` 원본 명령행 fallback 이 마지막 Windows-native recovery source 입니다.
 - 0.6.45 실패로 `CMDCMDLINE` 조차 target batch 안에서는 충분하지 않다는 점이 확인됐습니다.
@@ -300,18 +329,23 @@ PowerShell 에서 `scoop update` 후 `scoop update sfs` 를 직접 실행한 뒤
 - 같은 Windows smoke 는 임시 `sfs.cmd` probe wrapper 로 env/raw/saved command-line source 를
   모두 비운 뒤, parent `cmd.exe` command-line fallback 만으로 `version`, `context cat kernel`,
   `start` 가 복구되는지도 확인합니다.
-- `tests/test-windows-wrapper-incident-report.sh` 는 이 보고서의 P1-P21 문제 요약, 0.6.54 문서 링크,
+- Windows smoke 는 설치 직후와 direct Scoop recovery 후 hardened `sfs.cmd` shim 이
+  `SFS_NATIVE_RAW_ARGS` 를 보존하되 `--% %SFS_NATIVE_RAW_ARGS%` dispatch 를 쓰지 않는지도 확인합니다.
+- Windows smoke 는 `SFS_WINDOWS_ARG_TRACE=1` 로 `SFS_ARGTRACE_CMD_ARGC`,
+  `SFS_ARGTRACE_PS_SELECTED_SOURCE=env`, `SFS_ARGTRACE_PS_FINAL_ARGS=.*version` 을 확인한 뒤에야
+  `sfs.cmd version` 을 통과로 봅니다.
+- `tests/test-windows-wrapper-incident-report.sh` 는 이 보고서의 P1-P24 문제 요약, 0.6.56 문서 링크,
   Homebrew installed layout fallback 을 검증합니다.
 - `tests/test-docs-model-routing.sh` 는 source layout 과 Homebrew installed layout 의 문서 위치를
   함께 검증합니다.
-- 0.6.54 는 Windows `sfs.cmd upgrade` self-replacement 수정, 설치본 incident-report 테스트
+- 0.6.56 은 Windows `sfs.cmd upgrade` self-replacement 수정, 설치본 incident-report 테스트
   layout 보강, batch same-line exit, ASCII-only Windows script, `SFS_ORIGINAL_ARGS` 제거,
   call-label dispatch 제거, 단일 `-File ... %*` / `-Command @args` / empty `%1..%n` 실패 학습,
   numbered env arg bridge, `CMDCMDLINE` fallback, Scoop primary `bin\sfs.ps1` shim target,
   script param 제거, automatic `$args` primary path, Windows PowerShell/cmd `sfs.cmd` 계약 고정,
   generated `sfs.cmd` shim 실패 학습, post-install deterministic shim overwrite,
   delayed-expansion saved-cmdline bridge, parent `cmd.exe` command-line fallback,
-  shell-control tail trimming,
+  shell-control tail trimming, usable-args `$Items` root-cause fix,
   hardened shim env+positional dual forwarding, PowerShell tag-refspec braces smoke fix,
   shift-before-raw-arg-capture fix 까지
   포함한 최종 후속 기준선입니다.
