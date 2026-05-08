@@ -32,9 +32,10 @@ The 0.6.55 candidate responded to the GitHub runner evidence that even with the
 parent fallback present, the first post-install `sfs.cmd version` could still
 print usage-only output, by trying to append `SFS_NATIVE_RAW_ARGS` after `--%`.
 The 0.6.55 trace run `25554923214` proved the batch side did not lose
-`version`; instead, `sfs.ps1` marked live env-bridge args as empty because
-`Test-SfsUsableArgs([string[]] $Args)` used the PowerShell-sensitive parameter
-name `$Args`. 0.6.56 renames that parameter to `$Items` and removes the
+`version`; instead, multiple `sfs.ps1` helpers collapsed live env-bridge args
+to empty/help at function boundaries because they used the PowerShell-sensitive
+parameter name `$Args`. 0.6.56 renames the usable guard to `$Items`, native
+dispatch/self-upgrade helpers to `$InvocationArgs`, and removes the
 `--% %SFS_NATIVE_RAW_ARGS%` experiment, which produced the wrong
 `--SFS_NATIVE_RAW_ARGS` token on the runner. It also keeps the opt-in
 `SFS_WINDOWS_ARG_TRACE=1` diagnostic mode, so the next Windows smoke failure
@@ -70,7 +71,7 @@ not mis-parsed by Windows PowerShell 5.1.
 | P20 | Child PowerShell can expose `CMDCMDLINE` for `powershell.exe -File ...`, not the original wrapper invocation | The 0.6.52 GitHub Windows Scoop smoke run `25545120029` still made `sfs.cmd version` fall through to usage even though the shim contained `SFS_NATIVE_RAW_ARGS` | Save `!CMDCMDLINE!` as `SFS_NATIVE_CMDLINE` inside the delayed-expansion dispatch block, then let `sfs.ps1` parse that saved command line after the raw-arg fallback and trim `cmd.exe` shell-control tails |
 | P21 | Delayed expansion did not recover the wrapper command line on the GitHub runner | The 0.6.53 GitHub Windows Scoop smoke run `25546859759` still made the first `sfs.cmd version` print usage-only output | If env/raw/saved command line sources are empty, `sfs.ps1` queries the parent `cmd.exe` process command line through `Win32_Process`, extracts the tail after the `sfs.cmd` command name before whitespace splitting, and parses that before child `CMDCMDLINE` |
 | P22 | Child PowerShell can still start without real argv even after multiple fallback sources exist | The 0.6.54 GitHub Windows Scoop smoke run `25548381094` showed post-install hardening, but the first `sfs.cmd version` still printed usage-only output | The 0.6.55 candidate added a `--% %SFS_NATIVE_RAW_ARGS%` experiment, superseded by the P23 trace |
-| P23 | The usable-args guard used the PowerShell-sensitive `$Args` parameter name and treated live env-bridge args as empty | The 0.6.55 trace run `25554923214` showed `CMD_FIRST=version` and `PS_ENV_ARGS=version`, then fell through to `PS_SELECTED_SOURCE=empty` and `PS_FINAL_ARGS=--SFS_NATIVE_RAW_ARGS` | Rename the guard to `Test-SfsUsableArgs([string[]] $Items)` and remove `--% %SFS_NATIVE_RAW_ARGS%` dispatch. Windows smoke requires `SFS_ARGTRACE_PS_SELECTED_SOURCE=env` and `SFS_ARGTRACE_PS_FINAL_ARGS=.*version` |
+| P23 | The PowerShell-sensitive `$Args` parameter name collapsed live env-bridge args to empty/help at function boundaries | The 0.6.55 trace run `25554923214` showed `CMD_FIRST=version` and `PS_ENV_ARGS=version`; first it fell through to `PS_SELECTED_SOURCE=empty`, then after the guard fix it reached `PS_SELECTED_SOURCE=env` and `PS_FINAL_ARGS=version` but native dispatch still printed usage | Rename the guard to `$Items`, native dispatch/self-upgrade helpers to `$InvocationArgs`, and remove `--% %SFS_NATIVE_RAW_ARGS%` dispatch. Windows smoke requires `SFS_ARGTRACE_PS_SELECTED_SOURCE=env` and `SFS_ARGTRACE_PS_FINAL_ARGS=.*version` |
 
 ## User-Visible Symptoms
 
@@ -276,8 +277,9 @@ The real bugs were:
   `--SFS_NATIVE_RAW_ARGS` token while the numbered env bridge still contained
   `version`, so 0.6.56 supersedes it with the P23 root-cause fix.
 - 0.6.56 renames `Test-SfsUsableArgs([string[]] $Args)` to
-  `Test-SfsUsableArgs([string[]] $Items)`, allowing the live env bridge to be
-  accepted as the command. Windows smoke requires `SFS_ARGTRACE_PS_SELECTED_SOURCE=env`
+  `Test-SfsUsableArgs([string[]] $Items)` and native dispatch/self-upgrade
+  `$Args` parameters to `$InvocationArgs`, allowing the live env bridge to be
+  accepted as the command all the way to native handling. Windows smoke requires `SFS_ARGTRACE_PS_SELECTED_SOURCE=env`
   and `SFS_ARGTRACE_PS_FINAL_ARGS=.*version`.
 
 ## Discovered Issues

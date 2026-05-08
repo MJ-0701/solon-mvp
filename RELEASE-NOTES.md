@@ -11,13 +11,15 @@
 
 이번 버전은 Windows `sfs.cmd version` 이 계속 usage-only 로 떨어지던 진짜 원인을 고칩니다.
 0.6.55 후보를 실제 Windows runner 에 trace 로 올려 보니 batch 쪽은 `version` 을 잃지 않았습니다.
-문제는 `sfs.ps1` 의 usable-args 판정 함수가 PowerShell 자동 변수와 충돌하기 쉬운 `$Args`
-파라미터명을 사용해, 살아 있는 env bridge 인자도 empty 로 판정한 데 있었습니다.
+문제는 `sfs.ps1` 의 여러 helper 함수가 PowerShell 자동 변수와 충돌하기 쉬운 `$Args`
+파라미터명을 사용해, 살아 있는 env bridge 인자가 함수 경계를 지날 때마다 empty/help 로
+무너진 데 있었습니다.
 
 - 0.6.54 smoke 실패 run: `25548381094`.
 - 0.6.55 trace 실패 run: `25554923214`.
-- `sfs.ps1` 의 `Test-SfsUsableArgs` 가 이제 `$Items` 파라미터를 사용해 `SFS_NATIVE_ARG_1=version`
-  같은 단일 인자를 정상 인자로 판정합니다.
+- `sfs.ps1` 의 `Test-SfsUsableArgs` 는 이제 `$Items`, native dispatch/self-upgrade helper 는
+  `$InvocationArgs` 를 사용해 `SFS_NATIVE_ARG_1=version` 같은 단일 인자를 끝까지 정상 인자로
+  전달합니다.
 - `--% %SFS_NATIVE_RAW_ARGS%` 실험은 제거했습니다. runner 에서 이 경로는 `version` 이 아니라
   `--SFS_NATIVE_RAW_ARGS` 토큰을 만들었습니다.
 - numbered env bridge, raw env fallback, saved command-line fallback, parent command-line fallback 은

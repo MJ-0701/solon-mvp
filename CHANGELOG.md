@@ -3,15 +3,15 @@
 > **Windows usable-args root cause fix.** A pre-release Windows trace run
 > (`25554923214`) proved the loop was not caused by batch losing `%1/%*`.
 > `sfs.cmd` delivered `version` through `SFS_NATIVE_ARGC`, `SFS_NATIVE_RAW_ARGS`,
-> and `SFS_NATIVE_ARG_1`, but `sfs.ps1` still marked the resolved command as
-> empty because `Test-SfsUsableArgs` used the PowerShell-sensitive parameter
-> name `$Args`.
+> and `SFS_NATIVE_ARG_1`, but `sfs.ps1` repeatedly collapsed the command at
+> function boundaries that used the PowerShell-sensitive parameter name `$Args`.
 
 ### Fixed
 
-- `bin/sfs.ps1` now names the usable-args guard parameter `$Items`, so a valid
-  one-item env bridge such as `version` is accepted instead of falling through
-  to usage-only output.
+- `bin/sfs.ps1` now avoids `$Args` as a function parameter, named call, or
+  runtime reload splat. `Test-SfsUsableArgs` uses `$Items`, and native
+  dispatch/self-upgrade helpers use `$InvocationArgs`, so a valid one-item env
+  bridge such as `version` survives into `Invoke-SfsNativeVersion`.
 - `bin/sfs.cmd` and the Scoop post-install hardened `sfs.cmd` shim reverted the
   experimental `--% %SFS_NATIVE_RAW_ARGS%` bridge. The Windows trace showed it
   reached `sfs.ps1` as `--SFS_NATIVE_RAW_ARGS`, which hid the real env-bridge

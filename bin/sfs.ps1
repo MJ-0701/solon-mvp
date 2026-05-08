@@ -306,25 +306,25 @@ function Convert-ToBashPath([string] $Path) {
   return ($Path -replace "\\", "/")
 }
 
-function Test-SfsUpgradeCommand([string[]] $Args) {
-  if (-not $Args -or $Args.Count -eq 0) { return $false }
+function Test-SfsUpgradeCommand([string[]] $InvocationArgs) {
+  if (-not $InvocationArgs -or $InvocationArgs.Count -eq 0) { return $false }
   $cmdIndex = 0
-  if ($Args[0] -in @("/sfs", "sfs", '$sfs')) { $cmdIndex = 1 }
-  if ($Args.Count -le $cmdIndex) { return $false }
-  return ($Args[$cmdIndex] -in @("upgrade", "update"))
+  if ($InvocationArgs[0] -in @("/sfs", "sfs", '$sfs')) { $cmdIndex = 1 }
+  if ($InvocationArgs.Count -le $cmdIndex) { return $false }
+  return ($InvocationArgs[$cmdIndex] -in @("upgrade", "update"))
 }
 
-function Test-NoSelfUpgrade([string[]] $Args) {
-  return (($Args -contains "--no-self-upgrade") -or $env:SFS_SKIP_SELF_UPGRADE -or ($env:SFS_UPDATE_SELF -eq "0"))
+function Test-NoSelfUpgrade([string[]] $InvocationArgs) {
+  return (($InvocationArgs -contains "--no-self-upgrade") -or $env:SFS_SKIP_SELF_UPGRADE -or ($env:SFS_UPDATE_SELF -eq "0"))
 }
 
 function Test-ScoopRuntime([string] $ScriptPath) {
   return ($ScriptPath -match "\\scoop\\apps\\sfs\\")
 }
 
-function Invoke-ScoopSelfUpgrade([string[]] $Args) {
-  if (-not (Test-SfsUpgradeCommand $Args)) { return $false }
-  if (Test-NoSelfUpgrade $Args) { return $false }
+function Invoke-ScoopSelfUpgrade([string[]] $InvocationArgs) {
+  if (-not (Test-SfsUpgradeCommand $InvocationArgs)) { return $false }
+  if (Test-NoSelfUpgrade $InvocationArgs) { return $false }
   if (-not (Test-ScoopRuntime $CurrentScriptPath)) { return $false }
 
   $scoop = Get-Command scoop -ErrorAction SilentlyContinue
@@ -358,11 +358,11 @@ function Invoke-ScoopSelfUpgrade([string[]] $Args) {
 
   Write-Host "reloading installed sfs runtime..."
   $env:SFS_SKIP_SELF_UPGRADE = "1"
-  & $CurrentScriptPath @Args
+  & $CurrentScriptPath @InvocationArgs
   exit $LASTEXITCODE
 }
 
-Invoke-ScoopSelfUpgrade -Args $SfsArgs | Out-Null
+Invoke-ScoopSelfUpgrade -InvocationArgs $SfsArgs | Out-Null
 
 $script:SfsNativeHandled = $false
 $script:SfsNativeExitCode = 0
@@ -376,19 +376,19 @@ function Write-SfsNativeError([string] $Message) {
   [Console]::Error.WriteLine($Message)
 }
 
-function Get-SfsNativeInvocation([string[]] $Args) {
+function Get-SfsNativeInvocation([string[]] $InvocationArgs) {
   $cmdIndex = 0
-  if ($Args -and $Args.Count -gt 0 -and ($Args[0] -in @("/sfs", "sfs", '$sfs'))) {
+  if ($InvocationArgs -and $InvocationArgs.Count -gt 0 -and ($InvocationArgs[0] -in @("/sfs", "sfs", '$sfs'))) {
     $cmdIndex = 1
   }
-  if (-not $Args -or $Args.Count -le $cmdIndex) {
+  if (-not $InvocationArgs -or $InvocationArgs.Count -le $cmdIndex) {
     return [pscustomobject]@{ Command = "help"; Rest = @() }
   }
   $rest = @()
-  if ($Args.Count -gt ($cmdIndex + 1)) {
-    $rest = @($Args[($cmdIndex + 1)..($Args.Count - 1)])
+  if ($InvocationArgs.Count -gt ($cmdIndex + 1)) {
+    $rest = @($InvocationArgs[($cmdIndex + 1)..($InvocationArgs.Count - 1)])
   }
-  return [pscustomobject]@{ Command = $Args[$cmdIndex]; Rest = $rest }
+  return [pscustomobject]@{ Command = $InvocationArgs[$cmdIndex]; Rest = $rest }
 }
 
 function Get-SfsDistDir {
@@ -448,9 +448,9 @@ Windows note:
 "@
 }
 
-function Invoke-SfsNativeVersion([string[]] $Args) {
+function Invoke-SfsNativeVersion([string[]] $InvocationArgs) {
   $check = $false
-  foreach ($arg in $Args) {
+  foreach ($arg in $InvocationArgs) {
     switch ($arg) {
       "--check" { $check = $true }
       "-h" { Show-SfsNativeVersionUsage; Set-SfsNativeExit 0; return }
@@ -514,9 +514,9 @@ Shows the Solon Product onboarding guide installed with this project.
 "@
 }
 
-function Invoke-SfsNativeGuide([string[]] $Args) {
+function Invoke-SfsNativeGuide([string[]] $InvocationArgs) {
   $mode = ""
-  foreach ($arg in $Args) {
+  foreach ($arg in $InvocationArgs) {
     switch ($arg) {
       "-h" { Show-SfsNativeGuideUsage; Set-SfsNativeExit 0; return }
       "--help" { Show-SfsNativeGuideUsage; Set-SfsNativeExit 0; return }
@@ -580,8 +580,8 @@ Full guide:
   Set-SfsNativeExit 0
 }
 
-function Invoke-SfsNativeStatus([string[]] $Args) {
-  foreach ($arg in $Args) {
+function Invoke-SfsNativeStatus([string[]] $InvocationArgs) {
+  foreach ($arg in $InvocationArgs) {
     if ($arg -eq "--") { continue }
     if ($arg -eq "-h" -or $arg -eq "--help") {
       Write-Output "Usage: sfs.cmd status [--color auto|always|never]"
@@ -697,8 +697,8 @@ function Resolve-SfsContextPath([string] $Key) {
   return $null
 }
 
-function Invoke-SfsNativeContext([string[]] $Args) {
-  if (-not $Args -or $Args.Count -eq 0 -or $Args[0] -in @("-h", "--help", "help")) {
+function Invoke-SfsNativeContext([string[]] $InvocationArgs) {
+  if (-not $InvocationArgs -or $InvocationArgs.Count -eq 0 -or $InvocationArgs[0] -in @("-h", "--help", "help")) {
     @"
 Usage:
   sfs.cmd context path <kernel|index|commands/name.md|policies/name.md>
@@ -709,20 +709,20 @@ Native read-only helper for Windows agents. It does not start Git Bash.
     Set-SfsNativeExit 0
     return
   }
-  $mode = $Args[0]
+  $mode = $InvocationArgs[0]
   if ($mode -notin @("path", "cat")) {
     Write-SfsNativeError "unknown context subcommand: $mode"
     Set-SfsNativeExit 1
     return
   }
-  if ($Args.Count -lt 2) {
+  if ($InvocationArgs.Count -lt 2) {
     Write-SfsNativeError "context $mode requires a key"
     Set-SfsNativeExit 1
     return
   }
-  $path = Resolve-SfsContextPath $Args[1]
+  $path = Resolve-SfsContextPath $InvocationArgs[1]
   if (-not $path) {
-    Write-SfsNativeError "context file not found: $($Args[1])"
+    Write-SfsNativeError "context file not found: $($InvocationArgs[1])"
     Set-SfsNativeExit 1
     return
   }
@@ -734,8 +734,8 @@ Native read-only helper for Windows agents. It does not start Git Bash.
   Set-SfsNativeExit 0
 }
 
-function Invoke-SfsNativeReadonly([string[]] $Args) {
-  $invocation = Get-SfsNativeInvocation $Args
+function Invoke-SfsNativeReadonly([string[]] $InvocationArgs) {
+  $invocation = Get-SfsNativeInvocation $InvocationArgs
   $cmd = $invocation.Command.ToLowerInvariant()
   switch ($cmd) {
     "help" { Show-SfsNativeUsage; Set-SfsNativeExit 0; return }
@@ -743,10 +743,10 @@ function Invoke-SfsNativeReadonly([string[]] $Args) {
     "--help" { Show-SfsNativeUsage; Set-SfsNativeExit 0; return }
     "-v" { Invoke-SfsNativeVersion @("--check"); return }
     "--version" { Invoke-SfsNativeVersion @(); return }
-    "version" { Invoke-SfsNativeVersion -Args $invocation.Rest; return }
-    "status" { Invoke-SfsNativeStatus -Args $invocation.Rest; return }
-    "guide" { Invoke-SfsNativeGuide -Args $invocation.Rest; return }
-    "context" { Invoke-SfsNativeContext -Args $invocation.Rest; return }
+    "version" { Invoke-SfsNativeVersion -InvocationArgs $invocation.Rest; return }
+    "status" { Invoke-SfsNativeStatus -InvocationArgs $invocation.Rest; return }
+    "guide" { Invoke-SfsNativeGuide -InvocationArgs $invocation.Rest; return }
+    "context" { Invoke-SfsNativeContext -InvocationArgs $invocation.Rest; return }
     default {
       if ($env:SFS_NATIVE_ONLY -eq "1") {
         Write-SfsNativeError "native read-only fallback does not handle command: $($invocation.Command)"
@@ -757,7 +757,7 @@ function Invoke-SfsNativeReadonly([string[]] $Args) {
   }
 }
 
-Invoke-SfsNativeReadonly -Args $SfsArgs
+Invoke-SfsNativeReadonly -InvocationArgs $SfsArgs
 if ($script:SfsNativeHandled) {
   exit $script:SfsNativeExitCode
 }

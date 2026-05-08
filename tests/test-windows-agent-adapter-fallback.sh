@@ -124,6 +124,9 @@ assert_contains "${ps_wrapper}" 'function Test-SfsUsableArgs([string[]] $Items)'
 if grep -Fq -- 'function Test-SfsUsableArgs([string[]] $Args)' "${ps_wrapper}"; then
   fail "ps1 usable-args guard must not name its parameter Args; that made env args look empty on the Windows runner"
 fi
+if grep -Eq '\[string\[\]\] \$Args|@Args|-Args \$SfsArgs' "${ps_wrapper}"; then
+  fail "ps1 must not use Args as a parameter/splat/named call; Windows PowerShell treated it like the automatic args variable"
+fi
 assert_contains "${ps_wrapper}" "Test-SfsUsableArgs" "ps1 treats empty env arg arrays as unusable"
 assert_contains "${ps_wrapper}" "Resolve-SfsSavedCmdLineArgs" "ps1 saved cmdline fallback"
 assert_contains "${ps_wrapper}" "SFS_NATIVE_CMDLINE" "ps1 reads batch-captured original cmd line"
@@ -142,8 +145,8 @@ assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs $SfsParentCmdLineArg
 assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs $SfsCmdLineArgs -AutomaticArgs @() -UnboundArgs @()' "ps1 cmdcmdline args fallback order"
 assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs $SfsEnvArgs -AutomaticArgs $SfsParamArgs -UnboundArgs $args' "ps1 env/param/automatic args fallback"
 assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs @() -AutomaticArgs @() -UnboundArgs $MyInvocation.UnboundArguments' "ps1 unbound args final fallback"
-assert_contains "${ps_wrapper}" 'Invoke-SfsNativeReadonly -Args $SfsArgs' "ps1 passes resolved args as one array"
-assert_contains "${ps_wrapper}" 'Invoke-ScoopSelfUpgrade -Args $SfsArgs' "ps1 self-upgrade sees the full resolved arg array"
+assert_contains "${ps_wrapper}" 'Invoke-SfsNativeReadonly -InvocationArgs $SfsArgs' "ps1 passes resolved args as one array"
+assert_contains "${ps_wrapper}" 'Invoke-ScoopSelfUpgrade -InvocationArgs $SfsArgs' "ps1 self-upgrade sees the full resolved arg array"
 assert_contains "${ps_wrapper}" '$resolved[0] -eq "--%"' "ps1 stop-parsing token normalization"
 assert_contains "${ps_wrapper}" "Enable-SfsUtf8Bridge" "ps1 utf8 bridge"
 assert_contains "${ps_wrapper}" "Invoke-ScoopSelfUpgrade" "ps1 owns Scoop self-upgrade"
