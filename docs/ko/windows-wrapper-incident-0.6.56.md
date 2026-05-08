@@ -33,6 +33,10 @@ dispatch/self-upgrade helper 를 `$InvocationArgs` 로 바꾸고, runner 에서
 `--SFS_NATIVE_RAW_ARGS` 라는 잘못된 토큰을 만든 `--% %SFS_NATIVE_RAW_ARGS%` 실험을 제거합니다.
 또한 `SFS_WINDOWS_ARG_TRACE=1` 진단 모드로 Windows smoke 실패 시 batch `%*`, child PowerShell
 `$args`, env/raw/saved/parent source, 최종 선택 source 를 로그에서 바로 볼 수 있게 했습니다.
+후속 trace run `25559894888` 에서는 `upgrade -> update` 재실행과 stale env 문제는 해결됐고,
+Bash `upgrade.sh` 가 `maybe_prompt_model_profile after` 뒤 후반 훅에서 멈출 수 있음을 확인했습니다.
+따라서 0.6.56 기준선은 `SFS_UPGRADE_TRACE=1` 후반 trace 를 더 촘촘히 넣고, `cli-discovery`
+전체 훅과 내부 `claude`/`gemini`/`git clone` probe 를 timeout 으로 감싸 unbounded wait 를 금지합니다.
 Windows PowerShell/cmd runtime script 는 BOM 없는 UTF-8 파서 오인을
 피하도록 ASCII-safe 여야 합니다.
 
@@ -65,6 +69,7 @@ Windows PowerShell/cmd runtime script 는 BOM 없는 UTF-8 파서 오인을
 | P23 | PowerShell-sensitive `$Args` 파라미터명이 살아 있는 env bridge 를 함수 경계에서 empty/help 로 무너뜨림 | 0.6.55 trace run `25554923214` 에서 `CMD_FIRST=version`, `PS_ENV_ARGS=version` 이 보였지만 처음에는 `PS_SELECTED_SOURCE=empty`, 이후에는 `PS_SELECTED_SOURCE=env`, `PS_FINAL_ARGS=version` 뒤에도 native dispatch 가 usage 를 출력 | usable guard 는 `$Items`, native dispatch/self-upgrade helper 는 `$InvocationArgs` 로 변경하고, `--% %SFS_NATIVE_RAW_ARGS%` dispatch 제거. Windows smoke 는 `SFS_ARGTRACE_PS_SELECTED_SOURCE=env` 와 `SFS_ARGTRACE_PS_FINAL_ARGS=.*version` 을 요구 |
 | P24 | Windows CI self-upgrade smoke 가 실제 runtime 버그가 아니라 interactive upgrade prompt 에서 멈출 수 있고, live trace 도 assignment 에 잡혀 보이지 않을 수 있음 | 0.6.56 trace run `25557503623` 이 `Smoke thin project in PowerShell` 에서 진행되지 않았고, `Tee-Object` pipeline 이 `$upgradeLines =` assignment 에 잡혀 `SFS_ARGTRACE_*` 가 Actions 로그에 즉시 나오지 않았습니다. 다음 trace 에서는 `sfs.cmd upgrade --yes` 가 Bash runtime 까지 전달되어 `unknown arg: --yes` 를 만든 것도 확인했습니다 | CI 에서는 `/dev/tty` 재연결을 금지하고, smoke 는 사용자-facing `sfs.cmd upgrade` 를 그대로 검증. `Tee-Object` 는 assignment 없이 직접 stream 하고, self-upgrade reload 는 Scoop `current\bin\sfs.ps1` 로 재해석하며 `upgrade` 를 canonical `update` 로 치환하고 `PS_RELOAD_SCRIPT` 를 trace |
 | P25 | reload args 는 `update` 로 정규화됐지만 오래 남은 env bridge 가 다시 `upgrade` 를 선택함 | 0.6.56 trace run `25558767614` 에서 `PS_RELOAD_ARGS=update` 가 보였지만 one-token array 가 `PS_AUTOMATIC_ARGS=[u\|p\|d\|a\|t\|e]` 처럼 보였고, stale `PS_ENV_ARGS=upgrade` 가 `PS_SELECTED_SOURCE=env` 로 선택되어 Bash 에 `upgrade` 가 들어갔습니다 | `$reloadArgs = [string[]] @(Normalize-SfsScoopReloadArgs ...)` 로 one-token array 를 보존하고, `Set-SfsNativeArgEnv $reloadArgs` 로 `SFS_NATIVE_ARGC` / `SFS_NATIVE_ARG_N` / raw/cmdline env 를 canonical `update` 로 다시 써서 stale env 를 제거. CI 에서는 `SFS_UPGRADE_TRACE=1` 로 Bash upgrade phase 도 opt-in trace |
+| P26 | reload 는 정상 `update` 로 들어갔지만 upgrade 후반의 CLI discovery 훅이 unbounded wait 가 될 수 있음 | 0.6.56 trace run `25559894888` 에서 `PS_RELOAD_ARGS=[update]`, `PS_ENV_ARGS=update`, `PS_BASH_ARGS=[update]` 가 모두 정상으로 찍힌 뒤, `upgrade.sh` trace 가 `maybe_prompt_model_profile after` 다음에서 끊겼습니다 | `upgrade.sh` 에 `model profile notice`, `cli-discovery hook`, `completion output` trace 를 추가하고 `SFS_CLI_DISCOVERY_TIMEOUT_SEC` 로 전체 discovery 훅을 제한합니다. `install-cli-discovery.sh` 내부의 `claude`/`gemini`/`git clone` probe 도 `SFS_DISCOVERY_CMD_TIMEOUT_SEC` 로 제한해 특정 외부 CLI 가 멈춰도 upgrade 는 warning 후 계속됩니다 |
 
 ## 사용자가 본 증상
 

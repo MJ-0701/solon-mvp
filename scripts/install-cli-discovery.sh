@@ -25,6 +25,7 @@ HOME_DIR="${HOME:-$USERPROFILE}"
 A1_FIRST="${SFS_DISCOVERY_A1_FIRST:-1}"   # set 0 to skip A-1 and go straight to A-2
 PROMOTE_FIRST="${SFS_DISCOVERY_PROMOTE_FIRST:-1}"   # set 0 to never reorder existing priority
 FORCE_PROMOTE="${SFS_DISCOVERY_FORCE_PROMOTE:-0}"   # set 1 to repair a user-managed order back to solon-first
+DISCOVERY_CMD_TIMEOUT_SEC="${SFS_DISCOVERY_CMD_TIMEOUT_SEC:-15}"  # external CLI/git probes must not hang install/upgrade
 
 # Color helpers (no-op if not interactive)
 if [ -t 1 ]; then
@@ -35,8 +36,44 @@ else
 fi
 ok()    { printf "  ${C_GREEN}✓${C_RESET} %s\n" "$*"; }
 warn()  { printf "  ${C_YELLOW}!${C_RESET} %s\n" "$*"; }
+warn_err() { printf "  ${C_YELLOW}!${C_RESET} %s\n" "$*" >&2; }
 fail()  { printf "  ${C_RED}✗${C_RESET} %s\n" "$*"; }
 info()  { printf "  %s\n" "$*"; }
+
+discovery_positive_timeout() {
+  local raw="${1:-}" default="${2:-15}" label="${3:-discovery command}"
+  case "$raw" in
+    ""|*[!0-9]*|0)
+      warn_err "$label timeout value is invalid; using ${default}s: ${raw:-<empty>}"
+      printf '%s\n' "$default"
+      ;;
+    *)
+      printf '%s\n' "$raw"
+      ;;
+  esac
+}
+
+has_posix_timeout() {
+  command -v timeout >/dev/null 2>&1 || return 1
+  timeout 1 sh -c 'exit 0' >/dev/null 2>&1
+}
+
+run_discovery_command() {
+  local label="$1"
+  shift
+  local timeout_sec
+  timeout_sec="$(discovery_positive_timeout "$DISCOVERY_CMD_TIMEOUT_SEC" "15" "$label")"
+  if ! has_posix_timeout; then
+    warn_err "$label skipped: POSIX timeout(1) unavailable, avoiding unbounded CLI probe"
+    return 124
+  fi
+  timeout "$timeout_sec" "$@"
+  local rc=$?
+  if [ "$rc" -eq 124 ]; then
+    warn_err "$label timed out after ${timeout_sec}s — skip"
+  fi
+  return "$rc"
+}
 
 json_file_or_empty_object() {
   local file="$1"
@@ -247,17 +284,17 @@ install_claude_discovery() {
   fi
 
   local CLAUDE_VERSION
-  CLAUDE_VERSION="$(claude --version 2>/dev/null | head -1 || true)"
+  CLAUDE_VERSION="$(run_discovery_command "Claude Code version probe" claude --version 2>/dev/null | head -1 || true)"
   info "Claude Code detected: ${CLAUDE_VERSION:-unknown}"
 
   if [ "$A1_FIRST" = "1" ]; then
     # A-1: try CLI subcommand non-interactively. The exact subcommand name
     # is uncertain across versions (issue #12999) — try multiple shapes.
     local A1_OUT
-    A1_OUT="$(claude plugin marketplace add "$SOLON_REPO" 2>&1 || true)"
+    A1_OUT="$(run_discovery_command "Claude Code marketplace add" claude plugin marketplace add "$SOLON_REPO" 2>&1 || true)"
     if echo "$A1_OUT" | grep -qiE "(added|already|registered|installed)"; then
       ok "Claude Code: marketplace registered via 'claude plugin marketplace add' (A-1)"
-      claude plugin install "solon@solon" >/dev/null 2>&1 || true
+      run_discovery_command "Claude Code plugin install" claude plugin install "solon@solon" >/dev/null 2>&1 || true
       ok "Claude Code: /sfs slash command should be discoverable on next session restart"
       promote_claude_priority
       return 0
@@ -280,7 +317,7 @@ install_claude_discovery() {
     if command -v git >/dev/null 2>&1; then
       local TMPCLONE
       TMPCLONE="$(mktemp -d 2>/dev/null || mktemp -d -t solon)"
-      if git clone --depth 1 "https://github.com/$SOLON_REPO.git" "$TMPCLONE" >/dev/null 2>&1; then
+      if run_discovery_command "Claude Code plugin clone" git clone --depth 1 "https://github.com/$SOLON_REPO.git" "$TMPCLONE" >/dev/null 2>&1; then
         if [ -d "$TMPCLONE/plugins/solon" ]; then
           if cp -R "$TMPCLONE/plugins/solon/." "$PLUGIN_DEST/" 2>/dev/null; then
             ok "Claude Code: plugin filesystem-direct deployed at ~/.claude/plugins/solon (A-2)"
@@ -329,7 +366,7 @@ install_gemini_discovery() {
 
   # Idempotent: list current extensions, install only if not present
   local LIST
-  LIST="$(gemini extensions list 2>/dev/null || true)"
+  LIST="$(run_discovery_command "Gemini CLI extensions list" gemini extensions list 2>/dev/null || true)"
   if echo "$LIST" | grep -qiE "(^|/)solon\b|MJ-0701/solon-product"; then
     ok "Gemini CLI: solon extension already installed — skip"
     promote_gemini_priority
@@ -337,7 +374,7 @@ install_gemini_discovery() {
   fi
 
   local OUT
-  OUT="$(gemini extensions install --consent --auto-update "https://github.com/$SOLON_REPO.git" 2>&1 || true)"
+  OUT="$(run_discovery_command "Gemini CLI extension install" gemini extensions install --consent --auto-update "https://github.com/$SOLON_REPO.git" 2>&1 || true)"
   if echo "$OUT" | grep -qiE "(installed|already)"; then
     ok "Gemini CLI: extension installed via 'gemini extensions install --consent'"
     promote_gemini_priority

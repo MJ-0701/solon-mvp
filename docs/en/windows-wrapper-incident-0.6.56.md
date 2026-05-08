@@ -41,6 +41,12 @@ dispatch/self-upgrade helpers to `$InvocationArgs`, and removes the
 `SFS_WINDOWS_ARG_TRACE=1` diagnostic mode, so the next Windows smoke failure
 shows batch `%*`, child PowerShell `$args`, env/raw/saved/parent sources, and
 the final selected source in the log.
+The follow-up trace run `25559894888` proved that the `upgrade -> update`
+reload and stale-env fixes were working, then stopped after Bash `upgrade.sh`
+printed `maybe_prompt_model_profile after`. The 0.6.56 baseline therefore adds
+finer post-profile `SFS_UPGRADE_TRACE=1` markers and bounds the `cli-discovery`
+hook plus its internal `claude`/`gemini`/`git clone` probes with timeouts, so
+no external discovery command can create an unbounded wait during upgrade.
 Windows
 PowerShell/cmd runtime scripts must also stay ASCII-safe so BOM-less UTF-8 is
 not mis-parsed by Windows PowerShell 5.1.
@@ -74,6 +80,7 @@ not mis-parsed by Windows PowerShell 5.1.
 | P23 | The PowerShell-sensitive `$Args` parameter name collapsed live env-bridge args to empty/help at function boundaries | The 0.6.55 trace run `25554923214` showed `CMD_FIRST=version` and `PS_ENV_ARGS=version`; first it fell through to `PS_SELECTED_SOURCE=empty`, then after the guard fix it reached `PS_SELECTED_SOURCE=env` and `PS_FINAL_ARGS=version` but native dispatch still printed usage | Rename the guard to `$Items`, native dispatch/self-upgrade helpers to `$InvocationArgs`, and remove `--% %SFS_NATIVE_RAW_ARGS%` dispatch. Windows smoke requires `SFS_ARGTRACE_PS_SELECTED_SOURCE=env` and `SFS_ARGTRACE_PS_FINAL_ARGS=.*version` |
 | P24 | The Windows CI self-upgrade smoke can stall at the interactive upgrade prompt rather than a runtime loop, and live trace can be hidden by assignment | The 0.6.56 trace run `25557503623` stopped advancing in `Smoke thin project in PowerShell`; the `Tee-Object` pipeline was assigned to `$upgradeLines`, so `SFS_ARGTRACE_*` lines were not emitted live. The next trace also showed `sfs.cmd upgrade --yes` reaching Bash as `unknown arg: --yes` | Do not reconnect `/dev/tty` in CI, run the smoke as user-facing `sfs.cmd upgrade`, stream `Tee-Object` without assignment, resolve self-upgrade reloads through Scoop `current\bin\sfs.ps1`, canonicalize `upgrade` to `update`, and trace `PS_RELOAD_SCRIPT` |
 | P25 | Reload args were normalized to `update`, but the stale env bridge still selected `upgrade` | The 0.6.56 trace run `25558767614` showed `PS_RELOAD_ARGS=update`, while the one-token array appeared as `PS_AUTOMATIC_ARGS=[u\|p\|d\|a\|t\|e]`; stale `PS_ENV_ARGS=upgrade` then won `PS_SELECTED_SOURCE=env` and sent `upgrade` into Bash | Preserve one-token arrays with `$reloadArgs = [string[]] @(Normalize-SfsScoopReloadArgs ...)`, then call `Set-SfsNativeArgEnv $reloadArgs` so `SFS_NATIVE_ARGC`, `SFS_NATIVE_ARG_N`, raw args, and saved cmdline are rewritten to canonical `update`. CI also enables opt-in Bash phase tracing with `SFS_UPGRADE_TRACE=1` |
+| P26 | Reload now entered Bash as canonical `update`, but the post-upgrade CLI discovery hook could still wait without a bound | The 0.6.56 trace run `25559894888` showed `PS_RELOAD_ARGS=[update]`, `PS_ENV_ARGS=update`, and `PS_BASH_ARGS=[update]`, then Bash `upgrade.sh` stopped tracing after `maybe_prompt_model_profile after` | Add `model profile notice`, `cli-discovery hook`, and `completion output` trace markers to `upgrade.sh`; wrap the whole discovery hook with `SFS_CLI_DISCOVERY_TIMEOUT_SEC`; and wrap `claude`/`gemini`/`git clone` probes inside `install-cli-discovery.sh` with `SFS_DISCOVERY_CMD_TIMEOUT_SEC`, so upgrade warns and continues instead of waiting indefinitely |
 
 ## User-Visible Symptoms
 

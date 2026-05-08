@@ -826,10 +826,19 @@ function Invoke-SfsNativeStatus([string[]] $InvocationArgs) {
   }
 
   $ahead = "0"
-  $upstream = (& git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>$null | Select-Object -First 1)
+  $upstream = ""
+  try {
+    $upstream = (& git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>$null | Select-Object -First 1)
+  } catch {
+    $upstream = ""
+  }
   if ($LASTEXITCODE -eq 0 -and $upstream) {
-    $count = (& git rev-list --count "$upstream..HEAD" 2>$null | Select-Object -First 1)
-    if ($LASTEXITCODE -eq 0 -and $count -match '^[0-9]+$') { $ahead = $count }
+    try {
+      $count = (& git rev-list --count "$upstream..HEAD" 2>$null | Select-Object -First 1)
+      if ($LASTEXITCODE -eq 0 -and $count -match '^[0-9]+$') { $ahead = $count }
+    } catch {
+      $ahead = "0"
+    }
   }
 
   if (-not $sprint) { $sprint = "-" }

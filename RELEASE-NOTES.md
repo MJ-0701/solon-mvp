@@ -44,6 +44,12 @@
   멈추는 상태도 trace 로 확인해 막았습니다.
 - `SFS_UPGRADE_TRACE=1` 은 개발/CI 에서만 upgrade phase 를 보여주는 opt-in 로그입니다.
   운영 기본값은 조용하고, 문제가 생긴 경우에만 phase trace 를 켤 수 있습니다.
+- 추가 trace run `25559894888` 에서는 Windows reload 가 `[update]` 로 정상 진입한 뒤
+  `maybe_prompt_model_profile after` 다음에서 멈췄습니다. 그래서 upgrade 후반에
+  `model profile notice`, `cli-discovery hook`, `completion output` trace 를 더 넣었습니다.
+- CLI discovery 는 이제 무한 대기하지 않습니다. 전체 hook 은 `SFS_CLI_DISCOVERY_TIMEOUT_SEC`,
+  내부 `claude`/`gemini`/`git clone` probe 는 `SFS_DISCOVERY_CMD_TIMEOUT_SEC` 로 제한하고,
+  timeout 이 나면 warning 후 upgrade 를 계속합니다.
 - upgrade trace pipeline 은 더 이상 assignment 로 감싸지 않습니다. `Tee-Object` 출력이 Actions
   로그에 즉시 보이도록 해서, 다음 실패는 마지막 trace 줄에서 바로 추적할 수 있습니다.
 - `SFS_WINDOWS_ARG_TRACE=1` 진단 모드도 추가되어, 다음 Windows runner 실패가 나면 batch `%*`,

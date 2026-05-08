@@ -46,6 +46,16 @@
   upgrade" prompt during self-upgrade verification.
 - `upgrade.sh` has an opt-in `SFS_UPGRADE_TRACE=1` phase trace for development
   and CI diagnosis. Production remains quiet unless the variable is set.
+- The post-profile upgrade tail is now traceable through `model profile notice`,
+  `cli-discovery hook`, and `completion output` markers. Trace run
+  `25559894888` proved the Windows reload had reached Bash as `[update]`, then
+  stopped after `maybe_prompt_model_profile after`; the new markers make the
+  next phase boundary explicit.
+- `upgrade.sh` wraps the whole CLI discovery hook in a watchdog controlled by
+  `SFS_CLI_DISCOVERY_TIMEOUT_SEC`, and `install-cli-discovery.sh` wraps external
+  `claude`/`gemini`/`git clone` probes with `SFS_DISCOVERY_CMD_TIMEOUT_SEC`.
+  Discovery failures now warn and continue instead of allowing self-upgrade to
+  wait forever on an external CLI.
 - The Windows Scoop smoke no longer assigns the `Tee-Object` upgrade pipeline
   to a variable. That assignment captured output and hid live trace lines until
   the command exited, so failures can now be traced from the last emitted line.

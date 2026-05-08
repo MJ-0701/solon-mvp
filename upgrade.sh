@@ -37,6 +37,7 @@ Options:
 Environment:
   SFS_MODEL_PROFILE_PROMPT=0  agent/model fallback 질문을 이번 upgrade 에서 숨김
   SFS_UPGRADE_LAYOUT=thin|vendored
+  SFS_CLI_DISCOVERY_TIMEOUT_SEC=45  cli-discovery hook 최대 실행 시간
 EOF
 }
 
@@ -103,6 +104,57 @@ sfs_is_ci() {
   case "${CI:-}" in 1|true|TRUE|yes|YES) return 0 ;; esac
   case "${GITHUB_ACTIONS:-}" in 1|true|TRUE|yes|YES) return 0 ;; esac
   return 1
+}
+
+normalize_positive_timeout() {
+  local raw="$1" default="$2" label="$3"
+  case "$raw" in
+    ""|*[!0-9]*|0)
+      printf "  %s⚠%s %s timeout 값이 유효하지 않아 기본값 %ss 를 사용합니다: %s\n" \
+        "$C_YELLOW" "$C_RESET" "$label" "$default" "${raw:-<empty>}" >&2
+      printf '%s\n' "$default"
+      ;;
+    *)
+      printf '%s\n' "$raw"
+      ;;
+  esac
+}
+
+run_upgrade_command_with_timeout() {
+  local label="$1" timeout="$2"
+  shift 2
+  timeout="$(normalize_positive_timeout "$timeout" "45" "$label")"
+  trace_upgrade "$label start timeout=${timeout}s"
+
+  "$@" &
+  local child=$!
+  (
+    sleep "$timeout"
+    if kill -0 "$child" 2>/dev/null; then
+      trace_upgrade "$label timeout reached pid=${child}; terminating"
+      kill -TERM "$child" 2>/dev/null || true
+      sleep 2
+      kill -KILL "$child" 2>/dev/null || true
+    fi
+  ) &
+  local watcher=$!
+
+  local rc=0
+  set +e
+  wait "$child"
+  rc=$?
+  set -e
+
+  kill "$watcher" 2>/dev/null || true
+  wait "$watcher" 2>/dev/null || true
+
+  if [ "$rc" -eq 143 ] || [ "$rc" -eq 137 ]; then
+    warn "$label timed out after ${timeout}s — continuing"
+    trace_upgrade "$label timeout rc=${rc}"
+    return 124
+  fi
+  trace_upgrade "$label exit rc=${rc}"
+  return "$rc"
 }
 
 # pipe 대응. CI must keep stdin non-interactive so prompts fall back to defaults.
@@ -1912,6 +1964,7 @@ trace_upgrade "maybe_prompt_model_profile before"
 maybe_prompt_model_profile
 trace_upgrade "maybe_prompt_model_profile after"
 
+trace_upgrade "model profile notice before"
 MODEL_PROFILE_NOTICE=""
 if [ -f "$TARGET/.sfs-local/model-profiles.yaml" ]; then
   if model_profile_needs_prompt; then
@@ -1922,6 +1975,7 @@ if [ -f "$TARGET/.sfs-local/model-profiles.yaml" ]; then
     MODEL_PROFILE_NOTICE="기존 model-profiles.yaml 을 보존했습니다. 새 agent_defaults/agent_model_overrides 형식이 필요하면 배포 템플릿과 비교해 병합하세요."
   fi
 fi
+trace_upgrade "model profile notice after"
 
 # ============================================================================
 # 6.5. CLI discovery hook (0.5.96-product) — slash-command zero-file
@@ -1931,20 +1985,35 @@ fi
 
 if [ "${SFS_SKIP_CLI_DISCOVERY:-0}" != "1" ]; then
   CLI_DISCOVERY_HOOK="$SOURCE_DIR/scripts/install-cli-discovery.sh"
+  CLI_DISCOVERY_TIMEOUT="$(normalize_positive_timeout "${SFS_CLI_DISCOVERY_TIMEOUT_SEC:-45}" "45" "cli-discovery hook")"
+  trace_upgrade "cli-discovery hook before timeout=${CLI_DISCOVERY_TIMEOUT}s"
   if [ -x "$CLI_DISCOVERY_HOOK" ] || [ -f "$CLI_DISCOVERY_HOOK" ]; then
-    SFS_DISCOVERY_SOURCE_DIR="$SOURCE_DIR" \
-      bash "$CLI_DISCOVERY_HOOK" || warn "cli-discovery hook returned non-zero (graceful — continuing)"
+    OLD_SFS_DISCOVERY_SOURCE_DIR="${SFS_DISCOVERY_SOURCE_DIR-}"
+    OLD_SFS_DISCOVERY_SOURCE_DIR_SET=0
+    if [ "${SFS_DISCOVERY_SOURCE_DIR+x}" = "x" ]; then OLD_SFS_DISCOVERY_SOURCE_DIR_SET=1; fi
+    export SFS_DISCOVERY_SOURCE_DIR="$SOURCE_DIR"
+    run_upgrade_command_with_timeout "cli-discovery hook" "$CLI_DISCOVERY_TIMEOUT" \
+      bash "$CLI_DISCOVERY_HOOK" || warn "cli-discovery hook returned non-zero or timed out (graceful — continuing)"
+    if [ "$OLD_SFS_DISCOVERY_SOURCE_DIR_SET" -eq 1 ]; then
+      export SFS_DISCOVERY_SOURCE_DIR="$OLD_SFS_DISCOVERY_SOURCE_DIR"
+    else
+      unset SFS_DISCOVERY_SOURCE_DIR
+    fi
   else
     warn "cli-discovery hook not found at $CLI_DISCOVERY_HOOK — skip"
   fi
+  trace_upgrade "cli-discovery hook after"
 else
+  trace_upgrade "cli-discovery hook skipped before"
   ok "cli-discovery hook skipped (SFS_SKIP_CLI_DISCOVERY=1)"
+  trace_upgrade "cli-discovery hook skipped after"
 fi
 
 # ============================================================================
 # 7. 완료
 # ============================================================================
 
+trace_upgrade "completion hint render before"
 if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ]; then
   COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .claude .gemini .agents docs/solon${C_RESET}"
   AGENT_HINT="project-local command/skill adapters 는 기본 제거되었습니다. 필요할 때만: sfs agent install all"
@@ -1952,7 +2021,9 @@ else
   COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .claude .gemini .agents docs/solon${C_RESET}"
   AGENT_HINT="vendored layout 은 project-local command/skill adapters 를 계속 동기화합니다."
 fi
+trace_upgrade "completion hint render after"
 
+trace_upgrade "completion output before"
 cat <<EOF
 
 ${C_BOLD}${C_GREEN}=== 업그레이드 완료 ===${C_RESET}
@@ -1988,3 +2059,4 @@ Agent adapter surface:
 CHANGELOG: https://github.com/${SOLON_REPO}/blob/main/CHANGELOG.md
 
 EOF
+trace_upgrade "completion output after"
