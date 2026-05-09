@@ -1,3 +1,22 @@
+## [0.6.74] - 2026-05-09
+
+> **Retention policy docs refresh.** The user-facing docs, runtime entry
+> templates, Codex skill, and plugin command now describe `.sfs-local/` as an
+> active workbench, not a durable history stack.
+
+### Changed
+
+- Clarified that visible `.sfs-local` files must have a clear one-line keep
+  reason.
+- Documented `events.jsonl` as current-sprint active ledger state only; stale,
+  orphan, or closed-sprint-only events are removed or archived by
+  `sfs upgrade` / `sfs tidy --all --apply`.
+- Documented daily surface-cleanup bundling under
+  `.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz`.
+- Synced the policy across README, GUIDE, English/Korean current-shape docs,
+  `SFS.md` template, Claude/Codex/Gemini entry templates, Codex skill, and the
+  Solon plugin command.
+
 ## [0.6.73] - 2026-05-09
 
 > **Daily surface-cleanup verification.** Release and Windows smoke checks now

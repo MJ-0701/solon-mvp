@@ -123,6 +123,11 @@ required.
 - `.sfs-local/` is private local workbench state and is gitignored by default.
   Do not ask the user to commit it unless the team explicitly opts into a
   different policy.
+- `.sfs-local/` is active workbench state, not durable history. `events.jsonl`
+  stays visible only for the current sprint ledger; stale/orphan events should
+  be removed or archived by `sfs upgrade` / `sfs tidy --all --apply`. Repeated
+  cleanup evidence is date-bundled under
+  `.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz`.
 - Shared handoff/history docs belong under `docs/solon/<english-workspace>/<yyyyMMdd>/`.
   Project-wide Solon reference docs use named files under `docs/solon/` such as `domain-map.md`. Workbench docs are
   created only when a command needs them and are compacted when the slice closes.

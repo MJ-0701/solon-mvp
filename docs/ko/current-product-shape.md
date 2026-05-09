@@ -45,7 +45,7 @@ depth 옵션을 함께 보여드릴 뿐입니다.
 ## Windows 래퍼 안정화
 
 Windows PowerShell/cmd 의 사용자 진입점은 `sfs.cmd` 로 고정합니다. Git Bash/WSL 에서는
-macOS/Linux 처럼 `sfs` 를 씁니다. 0.6.73 기준 Scoop manifest 는 generated shim 이
+macOS/Linux 처럼 `sfs` 를 씁니다. 0.6.74 기준 Scoop manifest 는 generated shim 이
 packaged `bin\sfs.ps1` 을 직접 호출하도록 유지하지만, Scoop 이 생성한 `sfs.cmd` / `sfs.ps1`
 shim 이 인자를 버리는 경로가 확인되어 post-install hook 이 shims 디렉터리의 `sfs.cmd`,
 `sfs.ps1`, extensionless `sfs` 를 deterministic wrapper 로 덮어씁니다. PowerShell/cmd smoke 와
@@ -239,7 +239,7 @@ AI 가 UI 를 만들 때 가장 흔한 실패는 평균값으로 회귀하는 �
 
 ## 분야별 지식팩
 
-0.6.73 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
+0.6.74 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
 더 이상 빈 자리표시자가 아닙니다. 각 지식팩은 "이 분야라면 무엇을 조심해야 하는가",
 "무엇을 물어봐야 하는가", "어떤 근거가 있으면 통과로 볼 수 있는가"를 짧게 담습니다.
 
@@ -249,7 +249,7 @@ AI 가 UI 를 만들 때 가장 흔한 실패는 평균값으로 회귀하는 �
 taxonomy 는 본부라기보다 모든 본부에 걸치는 용어/분류 렌즈로 남기고, 재무/경리/세무/회계는
 경영관리 관점으로 다룹니다.
 
-0.6.73 에서는 agent-skills 벤치마크에서 유용한 discipline 도 같은 방식으로 흡수했습니다.
+0.6.74 에서는 agent-skills 벤치마크에서 유용한 discipline 도 같은 방식으로 흡수했습니다.
 공식 문서 기반 구현은 `implement` 와 `source-docs` review lens 로, stop-the-line 디버깅은
 `implement` 검증 정책으로, deprecation/migration 은 `adopt`/`tidy` 정리 기준으로, shipping
 check 는 `release` 정책으로 들어갑니다. 새 lifecycle command 를 늘리는 대신 기존 흐름의
@@ -271,6 +271,12 @@ report 가 사용자 결정을 요구할 때는 `Q1` 같은 내부 번호만 남
 예전 설치본에 남아 있던 loose sprint archive 나 별도 review-run archive 는 `sfs upgrade` 때
 압축 migration 으로 정리됩니다. runtime upgrade / agent install / profile rollback 백업도
 loose 파일 대신 `*.tar.gz` + `manifest.txt` bundle 로 남습니다.
+`events.jsonl` 은 영구 히스토리가 아니라 현재 sprint 를 이어가기 위한 active ledger 입니다.
+현재 sprint 가 없거나 오래된 sprint 이벤트만 남은 경우 upgrade/tidy 가 제거 또는 archive 합니다.
+영구 인수인계는 `docs/solon/<english-workspace>/<yyyyMMdd>/` 공유 문서와 git history 로 봅니다.
+반복 cleanup evidence 도 바깥에 같은 날 timestamp 폴더를 여러 개 남기지 않고
+`.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/manifest.txt` 와
+`surface-cleanup.tar.gz` 로 날짜별 묶음 처리합니다.
 thin layout 에서는 project-local `.claude/`, `.gemini/`, `.agents/` command/skill adapter 도
 기본 표면에서 빠집니다. root adapter 문서가 global `sfs` runtime 을 안내하고, native
 slash/skill 파일이 필요한 프로젝트만 `sfs agent install all` 로 opt-in 설치합니다.

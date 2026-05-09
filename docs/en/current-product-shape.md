@@ -47,7 +47,7 @@ native-language commit message rule.
 ## Windows Wrapper Stabilization
 
 The Windows PowerShell/cmd user entrypoint is fixed to `sfs.cmd`. Git Bash/WSL
-keep using `sfs`, like macOS/Linux. As of 0.6.73, the Scoop manifest keeps the
+keep using `sfs`, like macOS/Linux. As of 0.6.74, the Scoop manifest keeps the
 generated shim target on packaged `bin\sfs.ps1`, but the post-install hook
 overwrites the shims-directory `sfs.cmd`, `sfs.ps1`, and extensionless `sfs`
 with deterministic wrappers because generated `sfs.cmd` / `sfs.ps1` shims can
@@ -263,7 +263,7 @@ product design system exists, it wins.
 
 ## Division Knowledge Packs
 
-As of 0.6.73, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
+As of 0.6.74, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
 management/admin, and taxonomy packs are no longer placeholders. Each pack gives
 Solon a compact sense of what to watch, what to ask, and what evidence should
 count for that kind of work.
@@ -276,7 +276,7 @@ Taxonomy stays as a cross-cutting language/classification lens rather than a
 business department. Finance, bookkeeping, tax, and accounting live under the
 management/admin lens.
 
-As of 0.6.73, useful disciplines from the agent-skills benchmark are absorbed
+As of 0.6.74, useful disciplines from the agent-skills benchmark are absorbed
 the same way. Official-docs implementation flows through `implement` and the
 `source-docs` lens, stop-the-line debugging flows through implementation
 verification, deprecation/migration flows through `adopt` and `tidy`, and
@@ -299,6 +299,14 @@ Older installs that still have loose sprint archives or separate review-run
 archives are compacted by `sfs upgrade` into compressed migration bundles.
 Runtime upgrade, agent install, and profile rollback backups are also kept as
 `*.tar.gz` + `manifest.txt` bundles instead of loose project files.
+`events.jsonl` is not durable history. It is visible only as the current
+active-sprint ledger. Once there is no active sprint, or once stale events
+belong only to older sprints, upgrade/tidy removes or archives that residue.
+The durable handoff is the shared `docs/solon/<english-workspace>/<yyyyMMdd>/`
+document set plus git history.
+Repeated surface-cleanup runs are also compacted by date: the visible surface is
+`.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/manifest.txt` plus
+`surface-cleanup.tar.gz`, not a list of same-day timestamp directories.
 In thin layout, project-local `.claude/`, `.gemini/`, and `.agents/`
 command/skill adapters are also removed from the default surface. Root adapter
 docs point agents at the global `sfs` runtime, and projects that still need

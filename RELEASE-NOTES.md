@@ -7,6 +7,17 @@
 
 ---
 
+## 0.6.74
+
+이번 버전은 `.sfs-local` 보존 정책을 문서와 agent entry 전체에 맞춰 최신화합니다.
+
+- `.sfs-local/` 은 history stack 이 아니라 현재 sprint 를 위한 private active workbench 라고 명시했습니다.
+- `events.jsonl` 은 현재 sprint ledger 일 때만 남고, stale/orphan/closed-sprint-only 이벤트는
+  `sfs upgrade` / `sfs tidy --all --apply` 가 제거 또는 archive 한다고 정리했습니다.
+- 반복 cleanup evidence 는 날짜별
+  `.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz` 로 묶는다고
+  README/GUIDE/Claude/Codex/Gemini entry 문서에 반영했습니다.
+
 ## 0.6.73
 
 이번 버전은 0.6.72의 surface-cleanup 정리 정책을 Windows/릴리스 검증까지 맞춥니다.

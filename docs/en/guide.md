@@ -7,7 +7,7 @@ install. For beginner Git/terminal help, use the Korean [BEGINNER-GUIDE.md](../.
 
 ## 0. Install And Initialize
 
-> **As of 0.6.73**, one `brew install` / `scoop install` lets Claude Code
+> **As of 0.6.74**, one `brew install` / `scoop install` lets Claude Code
 > (`/sfs`), Gemini CLI (`sfs`), and Codex CLI (`$sfs`) find Solon automatically.
 > Your project keeps the files you read and the records you create.
 
@@ -43,7 +43,7 @@ single-shot recovery command. The `sfs` binary itself is unaffected.
 Solon gives a project two things:
 
 - the `sfs` command
-- project-local working records in `.sfs-local/`
+- project-local active workbench state in `.sfs-local/`
 
 The files you normally edit are:
 
@@ -61,19 +61,26 @@ optional. Install those native shortcuts only when a project needs them:
 sfs agent install all
 ```
 
-Old projects can be upgraded into the lighter 0.6.73 shape. Use
+Old projects can be upgraded into the lighter 0.6.74 shape. Use
 `sfs upgrade --layout vendored` only when Solon package files must stay inside
 the project.
 After adoption or upgrade, `sfs tidy --all --apply` can clean targetless
 surface residue: project-local cache notices, orphan logs, placeholder auth,
 and split archive buckets collapse back under `archives/adopt/surface-cleanup`.
+`.sfs-local/` is not a history stack. A file stays visible only when its
+one-line keep reason is clear. `events.jsonl` is an active-sprint ledger: keep
+it while the current sprint is open, then hand durable history to
+`docs/solon/<english-workspace>/<yyyyMMdd>/` and git history. Repeated cleanup
+evidence is date-bucketed as
+`.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz`
+instead of many visible timestamp folders.
 
-0.6.73 also includes the filled division knowledge packs. The user does not need to choose
+0.6.74 also includes the filled division knowledge packs. The user does not need to choose
 "backend", "QA", "infra", "finance", "tax", "accounting", or "taxonomy"
 manually. The AI should read the relevant Solon lens when the work calls for it,
 then explain the judgment in plain language.
 
-As of 0.6.73, agent-skills-style practices are absorbed into existing SFS
+As of 0.6.74, agent-skills-style practices are absorbed into existing SFS
 commands instead of becoming new lifecycle commands: source-driven
 implementation, stop-the-line debugging, deprecation/migration, shipping
 checks, and stronger review lenses.
