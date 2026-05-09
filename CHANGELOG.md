@@ -1,3 +1,26 @@
+## [0.6.71] - 2026-05-09
+
+> **Codex review routing is prompt/host-runtime based again.** 0.6.69/0.6.70
+> fixed the intended review_high profile but incorrectly reintroduced default
+> Codex CLI model flags. This release restores the prior bridge contract:
+> request review_high in the CPO prompt and rely on the host/runtime profile,
+> unless the user explicitly supplies a custom `SFS_REVIEW_CODEX_CMD`.
+
+### Fixed
+
+- Removed default `codex exec --model ... -c model_reasoning_effort=...` flags
+  from the built-in Codex review bridge and bridge probe.
+- Strengthened the CPO prompt so Codex review explicitly requests
+  `review_high` (`gpt-5.5` + xhigh) and rejects silent fallback to
+  `gpt-5.3-codex`/normal worker routing.
+- Kept `SFS_REVIEW_CODEX_CMD` as the explicit opt-in path for environments
+  where the user knows concrete Codex CLI model flags are supported.
+
+### Tests
+
+- Updated guardrail tests to require prompt/host-runtime routing and reject
+  default Codex model/reasoning CLI flags.
+
 ## [0.6.70] - 2026-05-09
 
 > **events.jsonl is current-sprint state only.** The active ledger now prunes
@@ -31,11 +54,11 @@
 
 ### Fixed
 
-- The default Codex review bridge now runs
-  `codex exec --model gpt-5.5 -c model_reasoning_effort="xhigh" ...`.
-- `SFS_REVIEW_CODEX_MODEL` and `SFS_REVIEW_CODEX_REASONING_EFFORT` can still
-  override the concrete command for a project, but the built-in default is
-  review_high, not execution_standard.
+- The default Codex review prompt now names the intended review_high profile
+  (`gpt-5.5` + xhigh), so the evaluator should not silently use worker routing.
+- Note: the 0.6.69/0.6.70 bridge implementation briefly tried concrete Codex
+  CLI model flags; 0.6.71 supersedes that with the prompt + host/runtime
+  contract and keeps `SFS_REVIEW_CODEX_CMD` as the explicit custom-command path.
 - Added guardrail coverage so future review routing cannot silently fall back
   to `gpt-5.3-codex` normal for CPO/cross-review work.
 

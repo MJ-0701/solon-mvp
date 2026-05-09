@@ -117,7 +117,7 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                   (default timeout: 45s) so a broken CLI wrapper/auth path
                   fails before the full CPO prompt is sent.
                   Named profiles:
-                    codex        $SFS_REVIEW_CODEX_CMD, else `codex exec --full-auto --ephemeral --model gpt-5.5 -c model_reasoning_effort="xhigh" --output-last-message <result> -`
+                    codex        $SFS_REVIEW_CODEX_CMD, else `codex exec --full-auto --ephemeral --output-last-message <result> -`
                     codex-plugin $SFS_REVIEW_CODEX_PLUGIN_CMD only (Claude in-process plugins are not shell-callable)
                     gemini       $SFS_REVIEW_GEMINI_CMD, else `gemini --skip-trust --output-format text -p "Read stdin and perform the requested CPO review."`
                     claude       $SFS_REVIEW_CLAUDE_CMD, else `claude -p "\$(cat)"`
@@ -2104,6 +2104,9 @@ Model routing contract:
 - SFS model tiers are role/profile targets, not a requirement that the executor CLI supports a --model flag.
 - Act under the requested evaluator role using the highest configured host/runtime profile available for this review.
 - If the host/runtime cannot provide the required advisor/CPO profile, report that as an executor/auth/profile bridge issue instead of silently downgrading the gate verdict.
+- For Codex CPO/cross review, the requested review_high profile is gpt-5.5 with xhigh reasoning.
+- Codex gpt-5.3-codex/gpt-5.3-codex normal is an implementation-worker profile and is not acceptable as the CPO/cross-review profile.
+- The default Codex shell bridge does not force model selection with CLI flags; configure the host/runtime profile, or set SFS_REVIEW_CODEX_CMD explicitly only if your Codex CLI supports those flags.
 
 Review gate: ${GATE_DISPLAY}
 Review lens: ${REVIEW_LENS} (${REVIEW_LENS_LABEL}; source=${REVIEW_LENS_SOURCE})
@@ -2165,7 +2168,7 @@ Windows commonly denies direct execution from:
   C:\Program Files\WindowsApps\OpenAI.Codex_...\app\resources\codex.exe
 
 Use the App Execution Alias or another accessible shim instead, for example:
-  SFS_REVIEW_CODEX_CMD='codex exec --full-auto --ephemeral --model gpt-5.5 -c '\''model_reasoning_effort="xhigh"'\'' --output-last-message "${RUN_RESULT}" -'
+  SFS_REVIEW_CODEX_CMD='codex exec --full-auto --ephemeral --output-last-message "${RUN_RESULT}" -'
 
 If the alias is not visible from Git Bash, use the per-user alias path:
   /c/Users/<you>/AppData/Local/Microsoft/WindowsApps/codex.exe
@@ -2176,7 +2179,7 @@ EOF
         printf '%s\n' "${SFS_REVIEW_CODEX_CMD}"
       elif command -v codex >/dev/null 2>&1; then
         prepare_executor_auth "codex" "${AUTH_INTERACTIVE}" || return "${SFS_EXIT_EXECUTOR}"
-        printf '%s\n' "codex exec --full-auto --ephemeral --model \"${SFS_REVIEW_CODEX_MODEL:-gpt-5.5}\" -c 'model_reasoning_effort=\"${SFS_REVIEW_CODEX_REASONING_EFFORT:-xhigh}\"' --output-last-message \"${RUN_RESULT}\" -"
+        printf '%s\n' "codex exec --full-auto --ephemeral --output-last-message \"${RUN_RESULT}\" -"
       else
         executor_cli_missing_hint "codex"
         return "${SFS_EXIT_EXECUTOR}"
@@ -2242,7 +2245,7 @@ resolve_review_bridge_probe_cmd() {
       if [[ -n "${SFS_REVIEW_CODEX_CMD:-}" ]]; then
         printf '%s\n' "${SFS_REVIEW_CODEX_CMD}"
       else
-        printf 'codex exec --full-auto --ephemeral --model "%s" -c '\''model_reasoning_effort="%s"'\'' --output-last-message "%s" -\n' "${SFS_REVIEW_CODEX_MODEL:-gpt-5.5}" "${SFS_REVIEW_CODEX_REASONING_EFFORT:-xhigh}" "${result_path}"
+        printf 'codex exec --full-auto --ephemeral --output-last-message "%s" -\n' "${result_path}"
       fi
       ;;
     gemini)

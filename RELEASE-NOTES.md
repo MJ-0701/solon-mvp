@@ -7,6 +7,18 @@
 
 ---
 
+## 0.6.71
+
+이번 버전은 Codex review 모델 라우팅을 원래 방식으로 되돌립니다.
+
+- 맞습니다. Codex CLI model flag 전달은 환경별로 신뢰할 수 없어서, 기본 bridge 는
+  `--model`/reasoning CLI flag 를 강제하지 않는 방식이어야 합니다.
+- `sfs review --executor codex` 기본값은 다시 prompt + host/runtime profile 계약입니다.
+  prompt 안에서 `review_high = gpt-5.5 + xhigh` 를 요청하고, `gpt-5.3-codex` normal/worker
+  fallback 으로 CPO/cross review PASS 를 내지 말라고 명시합니다.
+- CLI flag 방식이 되는 환경에서는 사용자가 `SFS_REVIEW_CODEX_CMD` 를 직접 지정할 수 있습니다.
+  built-in 기본값은 flag 강제가 아닙니다.
+
 ## 0.6.70
 
 이번 버전은 `events.jsonl` 기준을 더 빡세게 고정합니다.
@@ -15,18 +27,18 @@
   이미 닫힌 sprint, adoption/upgrade migration 로그, sprint_id 없는 로그성 줄은 visible state 로 남기지 않습니다.
 - `sfs tidy --all --apply` 는 닫힌 sprint 폴더가 이미 archive 되어 보이지 않아도, 그 sprint 의 event 줄을 prune 합니다.
 - `sfs upgrade --yes` 도 같은 규칙을 적용하므로 기존 프로젝트는 수동 삭제가 아니라 정상 SFS 명령으로 최신 정책에 수렴합니다.
-- Codex review bridge 기본값은 0.6.69와 동일하게 `gpt-5.5` + `xhigh` 입니다.
+- Codex review bridge 는 0.6.71에서 prompt + host/runtime profile 계약으로 정정되었습니다.
 
 ## 0.6.69
 
 이번 버전은 Codex cross review 모델 라우팅을 바로잡습니다.
 
-- `sfs review --executor codex` 기본 bridge 가 이제 Codex review tier 를 명시합니다:
+- `sfs review --executor codex` 기본 CPO prompt 가 Codex review tier 를 명시합니다:
   `gpt-5.5` + `xhigh`.
 - 구현 worker 기본값과 review/CPO 기본값을 분리했습니다. `gpt-5.3-codex` 는 고정된 구현 slice 용도이고,
   설계/review/cross review 같은 깊은 판단 작업의 기본값이 아닙니다.
-- 프로젝트가 꼭 다른 값을 써야 하면 `SFS_REVIEW_CODEX_MODEL`,
-  `SFS_REVIEW_CODEX_REASONING_EFFORT` 로 override 할 수 있지만, built-in 기본값은 high-end review 입니다.
+- 0.6.69/0.6.70의 CLI flag 방식은 0.6.71에서 정정되었습니다. built-in 기본값은 prompt + host/runtime profile 계약이고,
+  concrete CLI flag 는 `SFS_REVIEW_CODEX_CMD`로 명시 override 할 때만 씁니다.
 
 ## 0.6.68
 
