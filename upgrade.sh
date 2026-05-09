@@ -2454,8 +2454,9 @@ Agent model profile:
   ${MODEL_PROFILE_NOTICE:-설정 파일 유지됨: .sfs-local/model-profiles.yaml}
 
   Solon recommended role routing 이 기본 적용됩니다. current_model 은 명시적 opt-out 입니다.
-  Codex 권장은 helper-grade intake gpt-5.4-mini, 질문 생성/facilitator gpt-5.4,
-  advisor/review gpt-5.5 xhigh, worker gpt-5.3-codex, bounded helper gpt-5.3-codex-spark 입니다.
+  Codex 권장은 helper-grade intake/non-coding helper gpt-5.4-mini, 질문 생성/facilitator/일반 worker gpt-5.4,
+  advisor/review gpt-5.5 xhigh, bounded coding helper gpt-5.3-codex,
+  무판단 mechanical implementation helper gpt-5.3-codex-spark 입니다.
   Gemini 기본 advisor/review/facilitator 는 gemini-3.1-pro-preview, helper-grade fallback 은
   gemini-3-flash-preview 이며 2.5 fallback 은 쓰지 않습니다.
   모델명은 SFS role/profile contract 입니다. CLI --model flag 지원을 전제로 하지 않고,
@@ -2465,7 +2466,7 @@ Agent model profile:
   advisor 호출은 self-CPO PASS 가 아닙니다. external/cross review 전에는 요구사항-AC-slice-ADR 추적,
   AC-file/artifact/evidence 매핑, SEED/placeholder/mock/fallback non-acceptance 를 self-CPO mini-check 로 남깁니다.
   프로젝트가 비용/지연을 감수한다면 worker/helper 도 high-end 모델로 설정해도 됩니다.
-  Spark 는 일반 구현 worker 가 아니라 scope/AC 가 잠긴 기계적 subtask 용도입니다. Claude 는 opus/sonnet/haiku 계열,
+  Spark 는 일반 구현 worker 가 아니라 scope/files_scope/AC/정확한 수정 의도가 잠긴 무판단 기계적 구현 용도입니다. Claude 는 opus/sonnet/haiku 계열,
   Gemini/custom 은 프로젝트 runtime 이 지원하는 profile 이름으로 agent별 override 가능합니다.
 
 변경사항 sfs commit + push 권장:

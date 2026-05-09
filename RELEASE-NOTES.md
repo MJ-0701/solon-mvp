@@ -7,6 +7,19 @@
 
 ---
 
+## 0.6.82
+
+이번 버전은 Codex 쪽 단순 구현 위임 기준을 정확히 나눕니다.
+
+- Codex 일반 구현 worker 는 `gpt-5.4` 입니다.
+- Codex 단순 helper / non-coding helper 는 `gpt-5.4-mini` 입니다.
+- 범위가 좁지만 코드 판단이 조금 남은 repo-aware coding helper 는 `gpt-5.3-codex` 입니다.
+- scope, files_scope, AC, 정확한 수정 의도가 모두 잠겼고 판단이 필요 없는 단순 구현만
+  `gpt-5.3-codex-spark` 로 보냅니다.
+- Claude 와 Gemini 는 기존 tier family 설정을 그대로 유지합니다.
+- plan/implement/kernel, Codex/Claude/Gemini adapter, GUIDE/current-product/10x 문서를 같은 기준으로
+  맞췄습니다.
+
 ## 0.6.81
 
 이번 버전은 Gemini/Codex/Claude cross review 를 처음 실행할 때 인증 안내가 먼저 나오게 고칩니다.

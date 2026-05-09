@@ -56,8 +56,10 @@ outputs that frame questions/options, interpret answers, or affect gate/plan
 artifacts require top-model advisor review: Claude Opus 4.7, Codex `gpt-5.5`
 xhigh, Gemini `gemini-3.1-pro-preview`, or the custom high-end equivalent.
 Gemini helper-grade fallback uses `gemini-3-flash-preview`; SFS does not use
-2.5 fallback names. Codex workers use `gpt-5.3-codex`, and
-`gpt-5.3-codex-spark` is reserved for bounded helper subtasks.
+2.5 fallback names. Codex normal workers use `gpt-5.4`, simple helpers use
+`gpt-5.4-mini`, bounded coding helpers use `gpt-5.3-codex`, and judgment-free
+mechanical implementation helpers use `gpt-5.3-codex-spark`. Claude and Gemini
+keep their existing tier families.
 Advisor calls do not replace self-CPO PASS. Before external/cross review, the
 author records a self-CPO mini-check covering requirements to AC to
 implementation slices to ADR/decision ids, every AC mapped to file/artifact/

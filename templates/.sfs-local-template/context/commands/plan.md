@@ -44,8 +44,11 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
 - In the review-readiness checklist, avoid translationese such as `열린 결정이
   이름 붙어 있다`. Prefer concrete Korean checks: Gate 2 decisions are mapped
   to requirements and AC, files/artifacts are mapped per slice, and worker model
-  routing is explicit with Spark limited to locked mechanical implementation
-  helper work.
+  routing is explicit: Codex general worker uses `gpt-5.4`, helper-grade I/O and
+  non-coding helpers use `gpt-5.4-mini`, bounded repo-aware coding helpers use
+  `gpt-5.3-codex`, and Spark is limited to locked judgment-free mechanical
+  implementation helper work. Claude and Gemini keep their configured tier
+  families.
 - Each implementation slice should carry a concrete checklist item and
   `verify by ...` evidence. In SFS, that checklist belongs in sprint
   workbench artifacts such as `plan.md` or `implement.md`, not as mandatory
@@ -83,10 +86,12 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   Do not frame C-Level direct implementation as a normal option; use it only
   when the user explicitly overrides the worker path or the slice is an
   emergency tiny patch, and record the cost/risk.
-- If the handoff names Codex implementation, the recommended worker default is
-  `gpt-5.3-codex`. Do not offer `gpt-5.3-codex-spark` as the normal worker;
-  reserve Spark for bounded mechanical subtasks after C-Level has locked scope,
-  files_scope, and acceptance criteria.
+- If the handoff names Codex implementation, classify the lane by judgment:
+  use `gpt-5.4` for the normal implementation worker, `gpt-5.3-codex` for
+  bounded repo-aware coding helper work, and `gpt-5.3-codex-spark` only when
+  scope, files_scope, AC, and exact edit intent are already locked and no
+  product or code-design judgment remains. This Codex-specific split does not
+  change the Claude/Gemini tier mapping.
 - If a researcher pass produced findings, summarize only the durable result in
   the plan: sources checked, domain terms, contradictions, and remaining
   unknowns. Do not copy the full research transcript into the plan.

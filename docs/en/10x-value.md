@@ -150,10 +150,12 @@ role/profile contracts; SFS does not assume every CLI supports a `--model` flag.
 The default bridge requests the role through prompt and host/runtime settings.
 Use `SFS_REVIEW_<EXECUTOR>_CMD` only for a verified explicit override.
 
-For Codex, helper-grade intake maps to `gpt-5.4-mini`, question/facilitation to
-`gpt-5.4`, advisor/review to `gpt-5.5` xhigh, workers to `gpt-5.3-codex`, and
-bounded helpers to `gpt-5.3-codex-spark`. Claude follows the same responsibility
-split with Opus/Sonnet/Haiku families. Gemini advisor/review/facilitation uses
+For Codex, helper-grade intake and non-coding helpers map to `gpt-5.4-mini`,
+question/facilitation and normal workers map to `gpt-5.4`, advisor/review maps
+to `gpt-5.5` xhigh, bounded repo-aware coding helpers map to `gpt-5.3-codex`,
+and judgment-free mechanical implementation helpers map to
+`gpt-5.3-codex-spark`. Claude follows its existing Opus/Sonnet/Haiku
+responsibility split. Gemini advisor/review/facilitation uses
 `gemini-3.1-pro-preview`; helper-grade fallback uses `gemini-3-flash-preview`.
 SFS does not use 2.5 fallback names.
 
@@ -167,10 +169,12 @@ implementation slices -> ADR/decision ids, every AC mapped to file/artifact/
 evidence, and SEED/placeholder/mock/fallback material remaining
 non-acceptance until replaced by real deliverables.
 
-`gpt-5.3-codex-spark` is a fast helper, not a general implementation worker. Use
-it only for bounded mechanical subtasks after scope, files_scope, and AC are
-locked. If architecture, public contract, security, privacy, data-loss, release
-gate, or repeated failure risk appears, worker work escalates to high reasoning.
+`gpt-5.3-codex` is a narrow coding helper, not the normal worker default.
+`gpt-5.3-codex-spark` is narrower still: use it only for already-decided,
+judgment-free mechanical implementation chores after scope, files_scope, AC, and
+exact edit intent are locked. If architecture, public contract, security,
+privacy, data-loss, release gate, or repeated failure risk appears, worker work
+escalates to high reasoning.
 
 ## Design System 10x Loop
 

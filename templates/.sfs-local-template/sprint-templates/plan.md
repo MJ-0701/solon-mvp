@@ -51,4 +51,4 @@ last_touched_at: ""
 - [ ] 검증 방법이 있다
 - [ ] Gate 2 결정이 요구사항과 AC에 연결되어 있다
 - [ ] slice별 파일/산출물 매핑이 있다
-- [ ] worker 모델 라우팅이 명시되어 있고, Spark는 scope/files_scope/AC가 잠긴 기계적 구현 보조 작업에만 쓴다
+- [ ] worker 모델 라우팅이 명시되어 있다: Codex 일반 worker는 `gpt-5.4`, bounded coding helper는 `gpt-5.3-codex`, Spark는 scope/files_scope/AC/정확한 수정 의도가 잠긴 무판단 기계적 구현 보조 작업에만 쓴다

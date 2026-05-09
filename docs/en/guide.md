@@ -263,10 +263,11 @@ thin by default.
   not through long copied transcripts.
 
 Model routing follows that boundary and is applied by default. Helper-grade
-simple I/O uses lighter intake models; Codex maps that to `gpt-5.4-mini`.
-Question generation and facilitation use standard facilitator models; Codex maps
-that to `gpt-5.4`. C-Level and review use high reasoning. Claude workers use
-the Sonnet tier. Codex implementation workers use `gpt-5.3-codex`.
+simple I/O and non-coding helpers use lighter intake models; Codex maps that to
+`gpt-5.4-mini`. Question generation, facilitation, and normal implementation
+workers use standard models; Codex maps them to `gpt-5.4`. C-Level and review
+use high reasoning. Claude workers use the Sonnet tier, and Gemini keeps its
+configured tier family.
 Lower-model output that frames questions/options, interprets answers, or affects
 product identity, architecture, gate, AC, or files_scope requires top-model
 advisor review before gate advancement. Advisor means Claude Opus 4.7, Codex
@@ -277,10 +278,13 @@ advisor-exempt. Advisor calls do not replace self-CPO PASS. Before
 external/cross review, the author records a self-CPO mini-check covering
 requirements to AC to implementation slices to ADR/decision ids, every AC
 mapped to file/artifact/evidence, and SEED/placeholder/mock/fallback material
-kept as non-acceptance until replaced. `gpt-5.3-codex-spark` is helper-only for bounded mechanical
-subtasks after scope, files_scope, and acceptance criteria are locked. Escalate
-to high reasoning when a slice touches architecture, public contracts, security,
-privacy, data-loss risk, release gates, or repeated review failure.
+kept as non-acceptance until replaced. `gpt-5.3-codex` is the bounded
+repo-aware coding helper for narrow work that still needs code judgment.
+`gpt-5.3-codex-spark` is only for already-decided, judgment-free mechanical
+implementation chores after scope, files_scope, acceptance criteria, and exact
+edit intent are locked. Escalate to high reasoning when a slice touches
+architecture, public contracts, security, privacy, data-loss risk, release
+gates, or repeated review failure.
 
 Implementation starts in Single Agent mode. Use parallel agents only when the
 plan already splits into disjoint files_scope lanes and each lane can name its

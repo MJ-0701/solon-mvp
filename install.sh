@@ -808,9 +808,10 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
   ${C_BOLD}2.${C_RESET} agent 모델 설정 확인:
      ${C_BLUE}.sfs-local/model-profiles.yaml${C_RESET}
      - 기본값: solon_recommended role routing 이 자동 적용됩니다. current_model 은 명시적 opt-out 입니다.
-     - Codex: helper-grade intake 는 gpt-5.4-mini, 질문 생성/facilitator 는 gpt-5.4,
-       advisor/review 는 gpt-5.5 xhigh, worker 는 gpt-5.3-codex,
-       bounded helper 는 gpt-5.3-codex-spark
+     - Codex: helper-grade intake/non-coding helper 는 gpt-5.4-mini,
+       질문 생성/facilitator/일반 worker 는 gpt-5.4,
+       advisor/review 는 gpt-5.5 xhigh, bounded coding helper 는 gpt-5.3-codex,
+       무판단 mechanical implementation helper 는 gpt-5.3-codex-spark
      - Gemini: 기본 advisor/review/facilitator 는 gemini-3.1-pro-preview,
        helper-grade fallback 은 gemini-3-flash-preview 이며 2.5 fallback 은 쓰지 않습니다.
      - 모델명은 SFS role/profile contract 입니다. CLI --model flag 지원을 전제로 하지 않고,

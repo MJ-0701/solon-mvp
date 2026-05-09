@@ -2269,7 +2269,7 @@ Model routing contract:
 - Act under the requested evaluator role using the highest configured host/runtime profile available for this review.
 - If the host/runtime cannot provide the required advisor/CPO profile, report that as an executor/auth/profile bridge issue instead of silently downgrading the gate verdict.
 - For Codex CPO/cross review, the requested review_high profile is gpt-5.5 with xhigh reasoning.
-- Codex gpt-5.3-codex/gpt-5.3-codex normal is an implementation-worker profile and is not acceptable as the CPO/cross-review profile.
+- Codex gpt-5.4 worker, gpt-5.3-codex coding-helper, and gpt-5.3-codex-spark mechanical-helper profiles are not acceptable as the CPO/cross-review profile.
 - The default Codex shell bridge does not force model selection with CLI flags; configure the host/runtime profile, or set SFS_REVIEW_CODEX_CMD explicitly only if your Codex CLI supports those flags.
 
 Review gate: ${GATE_DISPLAY}

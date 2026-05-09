@@ -1,3 +1,32 @@
+## [0.6.82] - 2026-05-10
+
+> **Codex worker/helper routing now separates normal work, code helpers, and
+> Spark-only mechanical implementation.** Claude and Gemini keep their existing
+> tier families.
+
+### Changed
+
+- Codex `execution_standard` now resolves normal implementation workers to
+  `gpt-5.4`.
+- Added a bounded `code_helper` lane for repo-aware coding support that is
+  smaller than a normal worker slice but still needs code judgment; Codex maps
+  it to `gpt-5.3-codex`.
+- Added a dedicated `mechanical_implementation_economy` lane for already
+  decided, judgment-free implementation chores. Codex maps that lane to
+  `gpt-5.3-codex-spark` only after scope, files_scope, AC, and exact edit
+  intent are locked.
+- Kept Claude and Gemini runtime mappings on their existing tier families while
+  documenting the Codex-only split in kernel, plan, implement, adapter, install,
+  upgrade, and user docs.
+
+### Tests
+
+- Updated agent behavior guardrails to reject the stale
+  "`gpt-5.3-codex` is the Codex worker default" contract and require the new
+  `gpt-5.4` / `gpt-5.3-codex` / `gpt-5.3-codex-spark` role split.
+- Updated docs routing checks so user-facing docs describe Spark as the
+  judgment-free mechanical implementation helper, not a broad helper fallback.
+
 ## [0.6.81] - 2026-05-09
 
 > **Review executors authenticate before review starts.** First-time Gemini,

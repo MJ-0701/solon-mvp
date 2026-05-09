@@ -222,8 +222,10 @@ job.
 | Facilitator / question | Brainstorm question generation, option framing, answer summaries | Claude uses the Sonnet tier; Codex uses `gpt-5.4` |
 | C-Level / review | Intent, architecture, AC, review, escalation | High reasoning. Codex uses `gpt-5.5`; Claude uses the Opus tier |
 | Claude worker | Fixed files_scope implementation slice | Sonnet tier |
-| Codex worker | Fixed files_scope implementation slice | `gpt-5.3-codex` |
-| Codex helper | Mechanical grep, formatting, sync, and similar chores | `gpt-5.3-codex-spark` |
+| Codex worker | Fixed files_scope implementation slice that still needs code judgment | `gpt-5.4` |
+| Codex helper | Simple relay, grep summaries, formatting, and non-coding helper chores | `gpt-5.4-mini` |
+| Codex coding helper | Narrow repo-aware code support | `gpt-5.3-codex` |
+| Codex mechanical implementation helper | Already-decided, judgment-free simple implementation chores | `gpt-5.3-codex-spark` |
 
 This routing is the default. Users do not need to configure it separately.
 `current_model` is an explicit opt-out for projects that want the currently
@@ -240,11 +242,15 @@ implementation slices to ADR/decision ids, every AC mapped to file/artifact/
 evidence, and SEED/placeholder/mock/fallback material kept as non-acceptance
 until replaced.
 
-Spark is fast, but it is not the normal implementation worker. Use it only for
-small mechanical subtasks after scope, files_scope, and acceptance criteria are
-locked. If a slice touches architecture, public contracts, security, privacy,
-data-loss risk, release gates, or repeated review failure, escalate to high
-reasoning or send it back to C-Level.
+For Codex, the normal implementation worker is `gpt-5.4`. `gpt-5.3-codex` is a
+bounded repo-aware coding helper, not the normal worker default. Spark is
+narrower: use `gpt-5.3-codex-spark` only for already-decided mechanical
+implementation chores after scope, files_scope, acceptance criteria, and exact
+edit intent are locked. Examples include file moves, import/path rewrites,
+generated index sync, and deterministic test expectation updates. If a slice
+touches architecture, public contracts, security, privacy, data-loss risk,
+release gates, or repeated review failure, escalate to high reasoning or send
+it back to C-Level. Claude and Gemini keep their existing tier families.
 
 Implement execution defaults to Single Agent. Users can opt into multiple
 agents, but only after the plan is split into independent lanes. Each lane must

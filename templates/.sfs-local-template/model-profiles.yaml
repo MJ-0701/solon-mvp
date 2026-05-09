@@ -36,8 +36,14 @@ role_boundaries:
     requires: "pass/partial/fail plus requirements-to-AC-to-slice-to-ADR traceability, AC-to-file/artifact/evidence mapping, and SEED/placeholder/mock/fallback non-acceptance check"
     cannot: "be replaced by advisor consultation, review count, or external cross review"
   worker_generator:
-    owns: "fixed implementation slices after plan review passes"
-    cannot: "change architecture, AC, or files_scope silently"
+    owns: "fixed implementation slices after plan review passes when the slice still requires coding judgment or behavior shaping"
+    cannot: "change architecture, AC, or files_scope silently; absorb judgment-free mechanical fix-ups that should route to mechanical-implementation-helper"
+  coding_helper:
+    owns: "bounded repo-aware coding helpers when the task is smaller than a normal worker slice but still needs code judgment"
+    cannot: "own broad implementation, architecture, AC, public contracts, or files_scope decisions"
+  mechanical_implementation_helper:
+    owns: "file moves, import/path rewrites, generated index sync, formatting, deterministic test expectation updates, and other bounded implementation chores after C-Level locks scope, files_scope, and AC"
+    cannot: "interpret requirements, change behavior, expand files_scope, alter public contracts, or decide acceptance-criteria meaning"
   parallel_implement:
     default_mode: "single"
     optional_mode: "parallel"
@@ -104,10 +110,11 @@ reasoning_tiers:
       - "the generator would otherwise carry too much context into implementation"
 
   execution_standard:
-    purpose: "Implementation worker after plan, architecture, acceptance criteria, and files_scope are fixed"
+    purpose: "Implementation worker after plan, architecture, acceptance criteria, and files_scope are fixed, when the slice still requires coding judgment or behavior shaping"
     cost_latency: "standard"
-    codex_default: "gpt-5.3-codex"
-    codex_spark_boundary: "Do not use gpt-5.3-codex-spark as the normal implementation worker. Use Spark only for bounded mechanical subtasks after scope and AC are locked."
+    codex_default: "gpt-5.4"
+    codex_helper_boundary: "Codex uses gpt-5.3-codex for bounded repo-aware coding helpers, not as the normal worker default."
+    codex_spark_boundary: "Do not use gpt-5.3-codex-spark as the broad implementation worker. Do use Spark through mechanical_implementation_economy for judgment-free implementation chores after scope, files_scope, and AC are locked."
     default_roles:
       - implementation-worker
       - division-worker
@@ -123,15 +130,33 @@ reasoning_tiers:
       - "same test/review finding fails twice"
       - "files_scope needs to expand"
 
+  code_helper:
+    purpose: "Bounded repo-aware coding helper work that is smaller than a normal worker slice but still needs code judgment"
+    cost_latency: "standard-low"
+    codex_default: "gpt-5.3-codex"
+    guardrail: "Use code_helper for narrow coding support after scope/files_scope/AC are fixed. Escalate to execution_standard when the slice becomes broad, behavior-bearing, or coordination-heavy."
+    default_roles:
+      - coding-helper
+    escalate_to: execution_standard
+
   helper_economy:
-    purpose: "Parsing, formatting, grep summaries, JSON/YAML transforms, deterministic helpers"
+    purpose: "Deterministic relay helpers, parsing, grep summaries, JSON/YAML transforms, and non-coding mechanical chores"
     cost_latency: "lowest"
-    codex_default: "gpt-5.3-codex-spark"
-    guardrail: "Helper economy is for bounded mechanical chores, not plan interpretation, architecture decisions, or broad implementation."
+    codex_default: "gpt-5.4-mini"
+    guardrail: "Helper economy is for bounded non-coding helper chores, not plan interpretation, architecture decisions, behavior design, code judgment, or broad implementation."
     default_roles:
       - parser
       - formatter
       - sync-helper
+
+  mechanical_implementation_economy:
+    purpose: "Judgment-free mechanical implementation chores after C-Level scope, files_scope, AC, and exact edit intent are locked"
+    cost_latency: "lowest"
+    codex_default: "gpt-5.3-codex-spark"
+    guardrail: "Use only when no product or code-design judgment remains: file moves, import/path rewrites, generated index sync, deterministic test expectation updates, and equivalent fixed edits. Escalate to code_helper or execution_standard when interpretation appears."
+    default_roles:
+      - mechanical-implementation-helper
+    escalate_to: code_helper
 
 policies:
   current_model:
@@ -148,12 +173,14 @@ policies:
       researcher: current
       implementation-worker: current
       division-worker: current
+      coding-helper: current
+      mechanical-implementation-helper: current
       parser: current
       formatter: current
       sync-helper: current
 
   solon_recommended:
-    description: "Use low-cost intake for deterministic I/O, standard facilitators for question generation, high reasoning for C-Level/review, standard workers for fixed implementation, and economy helpers for deterministic chores."
+    description: "Use low-cost intake for deterministic I/O, standard facilitators for question generation, high reasoning for C-Level/review, standard workers for behavior-bearing fixed implementation, code helpers for bounded repo-aware coding support, economy helpers for non-coding chores, and Spark only for locked judgment-free mechanical implementation in Codex."
     agent_tiers:
       relay-helper: intake_economy
       missing-argument-helper: intake_economy
@@ -166,6 +193,8 @@ policies:
       researcher: research_high
       implementation-worker: execution_standard
       division-worker: execution_standard
+      coding-helper: code_helper
+      mechanical-implementation-helper: mechanical_implementation_economy
       parser: helper_economy
       formatter: helper_economy
       sync-helper: helper_economy
@@ -184,6 +213,8 @@ policies:
       researcher: research_high
       implementation-worker: strategic_high
       division-worker: strategic_high
+      coding-helper: strategic_high
+      mechanical-implementation-helper: strategic_high
       parser: strategic_high
       formatter: strategic_high
       sync-helper: strategic_high
@@ -216,7 +247,11 @@ runtime_model_settings:
       fallback_model: "opus-4.6"
     execution_standard:
       model: "sonnet"
+    code_helper:
+      model: "sonnet"
     helper_economy:
+      model: "haiku"
+    mechanical_implementation_economy:
       model: "haiku"
 
   codex:
@@ -241,13 +276,21 @@ runtime_model_settings:
       reasoning_effort: "high"
       reasoning_label: "high"
     execution_standard:
+      model: "gpt-5.4"
+      reasoning_effort: "medium"
+      description: "Default Codex implementation worker for fixed slices that still require coding judgment or behavior shaping. Use code_helper for bounded repo-aware coding support and mechanical_implementation_economy for judgment-free mechanical implementation helper work."
+    code_helper:
       model: "gpt-5.3-codex"
       reasoning_effort: "high"
-      description: "Default Codex implementation worker for fixed slices. Escalate if the slice touches architecture, public contracts, security, privacy, data loss, release gates, or repeated review failure."
+      description: "Codex helper for bounded repo-aware coding support after scope, files_scope, and AC are fixed, when some code judgment remains."
     helper_economy:
+      model: "gpt-5.4-mini"
+      reasoning_effort: "low"
+      description: "Fast Codex helper for deterministic relay, parsing, grep summaries, and non-coding mechanical chores."
+    mechanical_implementation_economy:
       model: "gpt-5.3-codex-spark"
       reasoning_effort: "high"
-      description: "Fast Codex helper for bounded mechanical subtasks only after C-Level has locked scope and acceptance criteria."
+      description: "Codex Spark route for judgment-free mechanical implementation fix-ups only after C-Level has locked scope, files_scope, acceptance criteria, and exact edit intent."
 
   gemini:
     intake_economy:
@@ -270,7 +313,13 @@ runtime_model_settings:
     execution_standard:
       model: "gemini-3.1-pro-preview"
       reasoning_effort: "medium"
+    code_helper:
+      model: "gemini-3.1-pro-preview"
+      reasoning_effort: "medium"
     helper_economy:
+      model: "gemini-3-flash-preview"
+      reasoning_effort: "low"
+    mechanical_implementation_economy:
       model: "gemini-3-flash-preview"
       reasoning_effort: "low"
 
@@ -287,8 +336,12 @@ runtime_model_settings:
       command_or_model: "<custom-research-command-or-model>"
     execution_standard:
       command_or_model: "<custom-implementation-command-or-model>"
+    code_helper:
+      command_or_model: "<custom-code-helper-command-or-model>"
     helper_economy:
       command_or_model: "<custom-helper-command-or-model>"
+    mechanical_implementation_economy:
+      command_or_model: "<custom-mechanical-implementation-helper-command-or-model>"
 
 agent_defaults:
   relay-helper:
@@ -341,6 +394,16 @@ agent_defaults:
     recommended_tier: execution_standard
     configured_tier: current
     escalation_tier: strategic_high
+  coding-helper:
+    persona: ".sfs-local/personas/implementation-worker.md"
+    recommended_tier: code_helper
+    configured_tier: current
+    escalation_tier: execution_standard
+  mechanical-implementation-helper:
+    persona: ".sfs-local/personas/implementation-worker.md"
+    recommended_tier: mechanical_implementation_economy
+    configured_tier: current
+    escalation_tier: code_helper
   parser:
     persona: ""
     recommended_tier: helper_economy
@@ -375,6 +438,8 @@ agent_model_overrides:
   researcher: {}
   implementation-worker: {}
   division-worker: {}
+  coding-helper: {}
+  mechanical-implementation-helper: {}
   parser: {}
   formatter: {}
   sync-helper: {}
@@ -392,10 +457,10 @@ resolution_rules:
   - "Advisor consultation is not self-CPO. Before external/Codex/Claude/Gemini cross review, the current author must run self-cpo-checker and record pass/partial/fail with requirements-to-AC-to-slice-to-ADR traceability, AC-to-file/artifact/evidence mapping, and SEED/placeholder/mock/fallback non-acceptance. Missing self-CPO evidence is partial."
   - "Worker/helper outputs still require independent review; a stronger model does not approve its own work."
   - "Single-agent implementation is the default. Multi-agent implementation is opt-in and requires disjoint files_scope, coherent commit-unit messages, lane verification, and cross review."
-  - "For Codex runtime, solon_recommended resolves relay-helper and missing-argument-helper to gpt-5.4-mini, intake-facilitator and question-facilitator to gpt-5.4, C-Level/review to gpt-5.5, implementation-worker and division-worker to gpt-5.3-codex, and mechanical helpers to gpt-5.3-codex-spark."
-  - "For Codex runtime, solon_recommended resolves implementation-worker and division-worker to gpt-5.3-codex, not gpt-5.5 and not gpt-5.3-codex-spark."
+  - "For Codex runtime, solon_recommended resolves relay-helper, missing-argument-helper, parser, formatter, and sync-helper to gpt-5.4-mini; intake-facilitator, question-facilitator, implementation-worker, and division-worker to gpt-5.4; C-Level/review/research to gpt-5.5; bounded repo-aware coding-helper to gpt-5.3-codex; and judgment-free mechanical-implementation-helper to gpt-5.3-codex-spark."
+  - "For Codex runtime, solon_recommended resolves implementation-worker and division-worker to gpt-5.4 when the slice still needs coding judgment; bounded code helper work resolves to gpt-5.3-codex; judgment-free mechanical implementation helper work resolves to gpt-5.3-codex-spark."
   - "Do not use gpt-5.4-mini or gpt-5.4 as a substitute for gpt-5.5 when the question itself is direction design."
-  - "Use gpt-5.3-codex-spark only for helper_economy or explicitly bounded mechanical subtasks after C-Level scope, files_scope, and AC are locked."
+  - "Use gpt-5.3-codex-spark only through mechanical_implementation_economy after C-Level scope, files_scope, AC, and exact edit intent are locked and no product or code-design judgment remains."
   - "If a Codex worker slice touches architecture, public API/contracts, security, privacy, data-loss risk, release gates, or repeated review failure, escalate to strategic_high or an explicit high-end override before coding."
 
 audit_fields:

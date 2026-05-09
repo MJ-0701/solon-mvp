@@ -137,11 +137,12 @@ role/profile contract 이며 모든 CLI 가 `--model` 같은 옵션을 지원한
 기본 bridge 는 prompt 와 host/runtime 설정으로 해당 역할을 요청하고, 명시 override 가 필요할 때만
 `SFS_REVIEW_<EXECUTOR>_CMD` 로 검증된 명령을 둡니다.
 
-Codex 기준으로 helper-grade intake 는 `gpt-5.4-mini`, 질문 생성/facilitator 는 `gpt-5.4`,
-advisor/review 는 `gpt-5.5` xhigh, worker 는 `gpt-5.3-codex`, bounded helper 는
-`gpt-5.3-codex-spark` 를 기본 계약으로 봅니다. Claude 는 Opus/Sonnet/Haiku 계열로 같은 책임
-분리를 따르고, Gemini advisor/review/facilitator 는 `gemini-3.1-pro-preview`, helper-grade
-fallback 은 `gemini-3-flash-preview` 입니다. 2.5 fallback 이름은 쓰지 않습니다.
+Codex 기준으로 helper-grade intake 와 non-coding helper 는 `gpt-5.4-mini`, 질문 생성/facilitator 와
+일반 worker 는 `gpt-5.4`, advisor/review 는 `gpt-5.5` xhigh, bounded repo-aware coding helper 는
+`gpt-5.3-codex`, 무판단 mechanical implementation helper 는 `gpt-5.3-codex-spark` 를 기본 계약으로
+봅니다. Claude 는 Opus/Sonnet/Haiku 계열 기존 책임 분리를 따르고, Gemini advisor/review/facilitator
+는 `gemini-3.1-pro-preview`, helper-grade fallback 은 `gemini-3-flash-preview` 입니다.
+2.5 fallback 이름은 쓰지 않습니다.
 
 Helper-grade 단순 I/O 는 advisor 검토를 생략할 수 있습니다. 하지만 하위모델 출력이 질문/선택지를
 설계하거나 사용자 답변을 해석하거나 product identity, architecture, gate, AC, files_scope 에
@@ -152,9 +153,12 @@ self-CPO mini-check 를 남깁니다: 요구사항 -> AC -> 구현 slice -> ADR/
 file/artifact/evidence 매핑, SEED/placeholder/mock/fallback 이 실제 산출물 전에는
 non-acceptance 로 남는지 확인합니다.
 
-`gpt-5.3-codex-spark` 는 빠른 helper 입니다. 일반 구현 worker 로 쓰지 않고, scope, files_scope,
-AC 가 잠긴 뒤의 bounded mechanical subtask 에만 씁니다. architecture, public contract, security,
-privacy, data-loss, release gate, 같은 실패 반복이 있으면 worker 도 high reasoning 으로 승격합니다.
+`gpt-5.3-codex` 는 일반 worker 가 아니라 좁은 code helper 입니다.
+`gpt-5.3-codex-spark` 는 더 좁은 mechanical implementation helper 입니다. 이미 결정된 사항에 대해
+판단이 필요 없고 scope, files_scope, AC, 정확한 수정 의도가 잠긴 file move, import/path rewrite,
+generated index sync, deterministic test expectation update 같은 작업에만 씁니다. architecture,
+public contract, security, privacy, data-loss, release gate, 같은 실패 반복이 있으면 worker 도 high
+reasoning 으로 승격합니다.
 
 ## 디자인 시스템 10x 루프
 

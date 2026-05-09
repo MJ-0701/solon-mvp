@@ -548,9 +548,9 @@ sfs.cmd update
 
 모델도 같은 원칙으로 나눕니다. 이 라우팅은 기본값이라 사용자가 따로 설정하지 않아도 적용됩니다.
 Helper-grade 단순 I/O 는 가벼운 intake 모델이 맡고, 질문 생성/facilitation 은 standard 모델이
-맡습니다. Codex 기준으로는 단순 intake 가 `gpt-5.4-mini`, 질문 생성이 `gpt-5.4` 입니다.
-C-Level 과 review 는 강한 판단 모델이 맡고, 구현 worker 는 고정된 slice 를 실행합니다.
-Codex 쪽 기본 구현 worker 는 `gpt-5.3-codex` 입니다.
+맡습니다. Codex 기준으로는 단순 intake 와 non-coding helper 가 `gpt-5.4-mini`, 질문 생성과
+일반 구현 worker 가 `gpt-5.4` 입니다. C-Level 과 review 는 강한 판단 모델이 맡고, 구현 worker 는
+고정된 slice 를 실행합니다.
 하위모델 출력이 질문/선택지를 설계하거나 답변을 해석하거나 product identity, architecture,
 gate, AC, files_scope 를 흔들면 최상위 advisor 검토가 필수입니다. advisor 는 Claude Opus 4.7,
 Codex `gpt-5.5` xhigh, Gemini `gemini-3.1-pro-preview` 입니다. Gemini helper-grade fallback 은
@@ -560,9 +560,13 @@ advisor 호출은 self-CPO PASS 가 아닙니다. external/cross review 전에 �
 mini-check 를 남깁니다: 요구사항 → AC → 구현 slice → ADR/decision id 추적, 각 AC 의
 file/artifact/evidence 매핑, SEED/placeholder/mock/fallback 이 실제 산출물 전에는
 non-acceptance 로 남는지 확인합니다.
-`gpt-5.3-codex-spark` 는 일반 구현 worker 가 아니라 grep, 포맷, 동기화처럼 범위가 잠긴
-기계적 helper subtask 용도입니다. architecture, public contract, security, privacy,
-data-loss, release gate, 반복 실패가 보이면 worker 도 high reasoning 으로 승격합니다.
+Codex 에서 `gpt-5.3-codex` 는 일반 worker 기본값이 아니라 bounded repo-aware coding helper 입니다.
+이미 범위가 잠겼지만 약간의 코드 판단이 남은 좁은 보조 작업에 씁니다.
+`gpt-5.3-codex-spark` 는 이미 결정된 사항에 대해 판단이 필요 없는 기계적 구현 보조 작업에만 씁니다.
+scope, files_scope, AC, 정확한 수정 의도가 모두 잠긴 file move, import/path rewrite, generated index
+sync, deterministic test expectation update 같은 작업이 여기에 해당합니다. architecture, public
+contract, security, privacy, data-loss, release gate, 반복 실패가 보이면 worker 를 high reasoning 으로
+승격합니다. Claude/Gemini 는 기존 tier family 를 그대로 따릅니다.
 
 `implement` 에서는 기본적으로 Single Agent 가 작업합니다. Claude, Codex, Gemini 를 동시에 쓰고
 싶다면 작업이 먼저 커밋 단위로 나뉘어야 합니다. 각 lane 이 "이 커밋은 무엇을 바꾸는가"를 한

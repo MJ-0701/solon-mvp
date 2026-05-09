@@ -286,9 +286,11 @@ facilitator 모델이 맡습니다(Codex 는 `gpt-5.4`). 설계와 검토, 그�
 방향을 바꾸는 경우는 최상위 advisor 가 봅니다. Codex advisor 는 `gpt-5.5` xhigh 이고,
 Gemini 는 `gemini-3.1-pro-preview` 를 기본 advisor/review/facilitator 로 씁니다. Gemini
 helper-grade fallback 은 `gemini-3-flash-preview` 이며 2.5 fallback 은 쓰지 않습니다. Codex 쪽
-구현 worker 는 `gpt-5.3-codex` 가 기본이고, `gpt-5.3-codex-spark` 는 빠른 정리나 포맷 같은
-helper 용도입니다. 위험한 구조 변경이나 보안/데이터 손실 위험이 있으면 Solon 이 더 강한 판단
-모델로 올리는 흐름을 권장합니다.
+일반 구현 worker 는 `gpt-5.4`, 단순 helper 는 `gpt-5.4-mini`, 좁은 code helper 는
+`gpt-5.3-codex` 입니다. 이미 결정된 사항을 그대로 옮기는 무판단 단순 구현일 때만
+`gpt-5.3-codex-spark` 를 씁니다. Claude/Gemini 는 기존 tier family 를 그대로 따릅니다.
+위험한 구조 변경이나 보안/데이터 손실 위험이 있으면 Solon 이 더 강한 판단 모델로 올리는 흐름을
+권장합니다.
 
 단, advisor 를 불렀다는 사실만으로 plan 이 통과되지는 않습니다. cross review 전에 self-CPO
 mini-check 로 요구사항, AC, 구현 slice, ADR/decision id 가 이어지는지와 각 AC 의
