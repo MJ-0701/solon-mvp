@@ -7,6 +7,16 @@
 
 ---
 
+## 0.6.67
+
+이번 버전은 0.6.65/0.6.66의 collapsed archive 정책에서 복구 evidence 를 더 안전하게 보존합니다.
+
+- 한 번의 upgrade 안에서 archive bucket collapse 가 여러 번 일어나도 같은
+  `archives/adopt/surface-cleanup/...` 경로를 덮어쓰지 않습니다.
+- vendored-to-thin upgrade 때 `project-runtime-assets`, `project-agent-adapters`,
+  `project-local-context` 백업 evidence 가 모두 cold archive 안에 남는지 회귀 테스트로 고정했습니다.
+- 사용자-facing 정리 기준은 그대로입니다: visible surface 에는 한 줄 이유가 있는 파일만 남깁니다.
+
 ## 0.6.66
 
 이번 버전은 0.6.65의 surface cleanup 정책에 맞춰 배포 검증도 같이 맞춥니다.

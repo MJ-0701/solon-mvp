@@ -1,3 +1,20 @@
+## [0.6.67] - 2026-05-09
+
+> **No-overwrite collapsed archive evidence.** Repeated surface-cleanup archive
+> collapses now create unique directories so one cold-evidence bundle cannot
+> overwrite another in the same second.
+
+### Fixed
+
+- `upgrade` now allocates a unique
+  `.sfs-local/archives/adopt/surface-cleanup/...` directory whenever multiple
+  archive-bucket collapses happen in one upgrade run.
+- `tidy --all --apply` uses the same unique-directory guard for targetless
+  surface cleanup.
+- Added regression coverage ensuring vendored-to-thin upgrade preserves
+  `project-runtime-assets.tar.gz`, `project-agent-adapters.tar.gz`, and
+  `project-local-context.tar.gz` inside collapsed cold archives.
+
 ## [0.6.66] - 2026-05-09
 
 > **Release guard parity for collapsed archives.** The Windows Scoop smoke and

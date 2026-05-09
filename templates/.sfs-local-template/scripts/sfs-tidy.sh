@@ -287,6 +287,13 @@ tidy_collapse_non_adopt_archives() {
   safe_ts="${now//:/-}"
   safe_ts="${safe_ts//+/-}"
   archive_dir="${SFS_ARCHIVES_DIR}/adopt/surface-cleanup/${safe_ts}"
+  if [[ -e "${archive_dir}" ]]; then
+    local i=2
+    while [[ -e "${archive_dir}-${i}" ]]; do
+      i=$((i + 1))
+    done
+    archive_dir="${archive_dir}-${i}"
+  fi
   archive_file="${archive_dir}/preexisting-archives.tar.gz"
   manifest="${archive_dir}/preexisting-archives.manifest.txt"
   mkdir -p "${archive_dir}" || return "${SFS_EXIT_PERM}"
