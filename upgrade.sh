@@ -874,8 +874,79 @@ archive_stale_auth_env_example() {
   return 0
 }
 
+auth_env_has_assignments() {
+  local file="${1:?file required}"
+  awk '
+    /^[[:space:]]*($|#)/ { next }
+    /^[[:space:]]*export[[:space:]]+[A-Za-z_][A-Za-z0-9_]*=/ { found=1; next }
+    /^[[:space:]]*[A-Za-z_][A-Za-z0-9_]*=/ { found=1; next }
+    END { exit(found ? 0 : 1) }
+  ' "$file" 2>/dev/null
+}
+
+cleanup_transient_cache_and_placeholder_auth() {
+  local count=0 auth_file="$TARGET/.sfs-local/auth.env"
+  if [ -d "$TARGET/.sfs-local/cache" ]; then
+    rm -rf "$TARGET/.sfs-local/cache" || return 5
+    count=$((count + 1))
+  fi
+  if [ -f "$auth_file" ] && ! auth_env_has_assignments "$auth_file"; then
+    rm -f "$auth_file" || return 5
+    count=$((count + 1))
+  fi
+  if [ "$count" -gt 0 ]; then
+    ok "transient cache/placeholder auth 정리: $count item(s)"
+  fi
+  return 0
+}
+
+cleanup_orphan_event_ledger() {
+  local events_file="$TARGET/.sfs-local/events.jsonl"
+  local current_sprint="" visible_sprint_count archive_dir backup_file manifest line_count
+  [ -f "$events_file" ] || return 0
+
+  if [ -f "$TARGET/.sfs-local/current-sprint" ]; then
+    current_sprint="$(sed -n '1p' "$TARGET/.sfs-local/current-sprint" 2>/dev/null | tr -d '[:space:]' || true)"
+  fi
+  if [ -n "$current_sprint" ] && [ -d "$TARGET/.sfs-local/sprints/$current_sprint" ]; then
+    return 0
+  fi
+
+  visible_sprint_count=0
+  if [ -d "$TARGET/.sfs-local/sprints" ]; then
+    visible_sprint_count="$(find "$TARGET/.sfs-local/sprints" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d '[:space:]')"
+  fi
+  [ "${visible_sprint_count:-0}" -eq 0 ] || return 0
+
+  line_count="$(wc -l < "$events_file" 2>/dev/null | tr -d '[:space:]' || printf '0')"
+  if [ "${line_count:-0}" -eq 0 ]; then
+    rm -f "$events_file" || return 5
+    ok "empty event ledger 제거: .sfs-local/events.jsonl"
+    return 0
+  fi
+
+  archive_dir="$TARGET/.sfs-local/archives/adopt/surface-cleanup/$(date +%Y%m%d-%H%M%S)-orphan-events"
+  backup_file="$archive_dir/events.jsonl"
+  manifest="$archive_dir/manifest.txt"
+  mkdir -p "$archive_dir" || return 5
+  cp "$events_file" "$backup_file" || return 5
+  {
+    echo "SFS orphan event ledger cleanup"
+    echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "reason: events.jsonl has no valid active sprint and is not durable handoff history"
+    echo "archive: ${backup_file#$TARGET/}"
+    echo "lines: $line_count"
+  } > "$manifest" || return 5
+  rm -f "$events_file" || return 5
+  ok "orphan event ledger 이관: $line_count line(s) → ${backup_file#$TARGET/}"
+  return 0
+}
+
 cleanup_empty_workbench_surface_dirs() {
-  local root dir count=0 removed
+  local root dir count=0 removed current_sprint=""
+  if [ -f "$TARGET/.sfs-local/current-sprint" ]; then
+    current_sprint="$(sed -n '1p' "$TARGET/.sfs-local/current-sprint" 2>/dev/null | tr -d '[:space:]' || true)"
+  fi
   while :; do
     removed=0
     for root in \
@@ -887,6 +958,9 @@ cleanup_empty_workbench_surface_dirs() {
       [ -d "$root" ] || continue
       while IFS= read -r dir; do
         [ -n "$dir" ] && [ -d "$dir" ] || continue
+        if [ -n "$current_sprint" ] && [ "$dir" = "$TARGET/.sfs-local/sprints/$current_sprint" ]; then
+          continue
+        fi
         rmdir "$dir" 2>/dev/null || true
         if [ ! -d "$dir" ]; then
           count=$((count + 1))
@@ -899,6 +973,60 @@ cleanup_empty_workbench_surface_dirs() {
   if [ "$count" -gt 0 ]; then
     ok "empty workbench surface dirs 정리: $count dir(s)"
   fi
+  return 0
+}
+
+non_adopt_archive_ids() {
+  local root="$TARGET/.sfs-local/archives" dir
+  [ -d "$root" ] || return 0
+  find "$root" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null \
+    | while IFS= read -r dir; do
+        [ "$(basename "$dir")" = "adopt" ] && continue
+        basename "$dir"
+      done \
+    | sort
+}
+
+collapse_non_adopt_archive_dirs() {
+  local root="$TARGET/.sfs-local/archives"
+  local ids count safe_ts archive_dir archive_file manifest item
+  local -a tar_items=()
+  [ -d "$root" ] || return 0
+  ids="$(non_adopt_archive_ids)"
+  count="$(printf '%s\n' "$ids" | sed '/^[[:space:]]*$/d' | wc -l | tr -d '[:space:]')"
+  [ "${count:-0}" -gt 0 ] || return 0
+
+  safe_ts="$(date +%Y%m%d-%H%M%S)"
+  archive_dir="$root/adopt/surface-cleanup/${safe_ts}-archive-buckets"
+  archive_file="$archive_dir/preexisting-archives.tar.gz"
+  manifest="$archive_dir/preexisting-archives.manifest.txt"
+  mkdir -p "$archive_dir" || return 5
+
+  {
+    echo "SFS non-adopt archive bucket collapse"
+    echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "reason: runtime migration/upgrade/sprint buckets are cold recovery evidence, not visible project surface"
+    echo "archive: ${archive_file#$TARGET/}"
+    echo "count: $count"
+    echo
+    echo "items:"
+    printf '%s\n' "$ids" | while IFS= read -r item; do
+      [ -n "$item" ] || continue
+      echo "- .sfs-local/archives/$item"
+    done
+  } > "$manifest" || return 5
+
+  while IFS= read -r item; do
+    [ -n "$item" ] || continue
+    tar_items+=("$item")
+  done <<< "$ids"
+  tar -czf "$archive_file" -C "$root" "${tar_items[@]}" || return 5
+
+  while IFS= read -r item; do
+    [ -n "$item" ] || continue
+    rm -rf "$root/$item" || return 5
+  done <<< "$ids"
+  ok "non-adopt archive buckets 접기: $count bucket(s) → ${archive_file#$TARGET/}"
   return 0
 }
 
@@ -1292,9 +1420,12 @@ project_surface_archive_migrations() {
   compact_legacy_review_run_archives || return 5
   compact_legacy_tmp_artifacts || return 5
   archive_stale_auth_env_example || return 5
+  cleanup_transient_cache_and_placeholder_auth || return 5
+  cleanup_orphan_event_ledger || return 5
   cleanup_empty_workbench_surface_dirs || return 5
   thin_project_runtime_asset_migration || return 5
   thin_project_agent_adapter_migration || return 5
+  collapse_non_adopt_archive_dirs || return 5
   return 0
 }
 
@@ -1885,6 +2016,11 @@ fi
 trace_upgrade "finalize_runtime_upgrade_backup before"
 finalize_runtime_upgrade_backup || die "runtime upgrade backup bundle failed"
 trace_upgrade "finalize_runtime_upgrade_backup after"
+trace_upgrade "post-update archive surface collapse before"
+cleanup_transient_cache_and_placeholder_auth || die "transient cache cleanup failed"
+collapse_non_adopt_archive_dirs || die "archive surface collapse failed"
+cleanup_empty_workbench_surface_dirs || die "empty workbench surface cleanup failed"
+trace_upgrade "post-update archive surface collapse after"
 
 TODAY=$(date +%Y-%m-%d)
 if [ "$(uname)" = "Darwin" ]; then

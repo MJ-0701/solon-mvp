@@ -33,6 +33,8 @@ Clean up completed sprint workbench docs without leaving loose hidden files.
   - Closed-sprint event ledger lines, broken current-sprint pointers, empty
     placeholder dirs, and stale workbench dust are removed when they no longer
     explain why they must stay visible.
+  - `--all --apply` also cleans targetless post-adopt surface residue such as
+    cache notice files, empty archive buckets, stale logs, and placeholder auth.
   - When report.md was created from legacy workbench docs, AI runtimes should
     refine it into the final report immediately after the adapter returns.
   - report.md, retro.md, and decision files are preserved in their durable
@@ -200,6 +202,12 @@ tidy_prune_events() {
 
 tidy_count_local_residue() {
   local count=0 path dir
+  if [[ -d "${SFS_LOCAL_DIR}/cache" ]]; then
+    count=$((count + 1))
+  fi
+  if [[ -f "${SFS_LOCAL_DIR}/auth.env" ]] && ! tidy_auth_env_has_assignments "${SFS_LOCAL_DIR}/auth.env"; then
+    count=$((count + 1))
+  fi
   for path in \
     "${SFS_SPRINTS_DIR}/.gitkeep" \
     "${SFS_LOCAL_DIR}/decisions/.gitkeep" \
@@ -227,6 +235,7 @@ tidy_count_local_residue() {
     "${SFS_LOCAL_DIR}/decisions" \
     "${SFS_ARCHIVES_DIR}/sprints" \
     "${SFS_ARCHIVES_DIR}/runtime-migrations" \
+    "${SFS_ARCHIVES_DIR}/runtime-upgrades" \
     "${SFS_ARCHIVES_DIR}"; do
     [[ -d "${dir}" ]] || continue
     if [[ -z "$(find "${dir}" -mindepth 1 -print -quit 2>/dev/null)" ]]; then
@@ -244,8 +253,81 @@ tidy_count_local_residue() {
   printf '%s\n' "${count}"
 }
 
+tidy_auth_env_has_assignments() {
+  local file="${1:?file required}"
+  awk '
+    /^[[:space:]]*($|#)/ { next }
+    /^[[:space:]]*export[[:space:]]+[A-Za-z_][A-Za-z0-9_]*=/ { found=1; next }
+    /^[[:space:]]*[A-Za-z_][A-Za-z0-9_]*=/ { found=1; next }
+    END { exit(found ? 0 : 1) }
+  ' "${file}" 2>/dev/null
+}
+
+tidy_non_adopt_archive_ids() {
+  [[ -d "${SFS_ARCHIVES_DIR}" ]] || return "${SFS_EXIT_OK}"
+  find "${SFS_ARCHIVES_DIR}" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null \
+    | while IFS= read -r dir; do
+        [[ "$(basename "${dir}")" == "adopt" ]] && continue
+        basename "${dir}"
+      done \
+    | sort
+}
+
+tidy_non_adopt_archive_count() {
+  tidy_non_adopt_archive_ids | sed '/^[[:space:]]*$/d' | wc -l | tr -d '[:space:]'
+}
+
+tidy_collapse_non_adopt_archives() {
+  local now="${1:?timestamp required}" ids count safe_ts archive_dir archive_file manifest item
+  local tar_items=()
+  ids="$(tidy_non_adopt_archive_ids)"
+  count="$(printf '%s\n' "${ids}" | sed '/^[[:space:]]*$/d' | wc -l | tr -d '[:space:]')"
+  [[ "${count}" -gt 0 ]] || { printf '0\n'; return "${SFS_EXIT_OK}"; }
+
+  safe_ts="${now//:/-}"
+  safe_ts="${safe_ts//+/-}"
+  archive_dir="${SFS_ARCHIVES_DIR}/adopt/surface-cleanup/${safe_ts}"
+  archive_file="${archive_dir}/preexisting-archives.tar.gz"
+  manifest="${archive_dir}/preexisting-archives.manifest.txt"
+  mkdir -p "${archive_dir}" || return "${SFS_EXIT_PERM}"
+
+  {
+    echo "SFS surface archive collapse"
+    echo "generated_at: ${now}"
+    echo "reason: non-adopt archive buckets are cold recovery evidence, not visible project surface"
+    echo "archive: ${archive_file}"
+    echo "count: ${count}"
+    echo
+    echo "items:"
+    printf '%s\n' "${ids}" | while IFS= read -r item; do
+      [[ -n "${item}" ]] || continue
+      echo "- ${SFS_ARCHIVES_DIR}/${item}"
+    done
+  } > "${manifest}" || return "${SFS_EXIT_PERM}"
+
+  while IFS= read -r item; do
+    [[ -n "${item}" ]] || continue
+    tar_items+=("${item}")
+  done <<< "${ids}"
+  tar -czf "${archive_file}" -C "${SFS_ARCHIVES_DIR}" "${tar_items[@]}" || return "${SFS_EXIT_PERM}"
+
+  while IFS= read -r item; do
+    [[ -n "${item}" ]] || continue
+    rm -rf "${SFS_ARCHIVES_DIR}/${item}" || return "${SFS_EXIT_PERM}"
+  done <<< "${ids}"
+  printf '%s\n' "${count}"
+}
+
 tidy_cleanup_local_residue() {
   local count=0 path dir current
+  if [[ -d "${SFS_LOCAL_DIR}/cache" ]]; then
+    rm -rf "${SFS_LOCAL_DIR}/cache" || return "${SFS_EXIT_PERM}"
+    count=$((count + 1))
+  fi
+  if [[ -f "${SFS_LOCAL_DIR}/auth.env" ]] && ! tidy_auth_env_has_assignments "${SFS_LOCAL_DIR}/auth.env"; then
+    rm -f "${SFS_LOCAL_DIR}/auth.env" || return "${SFS_EXIT_PERM}"
+    count=$((count + 1))
+  fi
   for path in \
     "${SFS_SPRINTS_DIR}/.gitkeep" \
     "${SFS_LOCAL_DIR}/decisions/.gitkeep" \
@@ -282,8 +364,12 @@ tidy_cleanup_local_residue() {
     "${SFS_LOCAL_DIR}/decisions" \
     "${SFS_ARCHIVES_DIR}/sprints" \
     "${SFS_ARCHIVES_DIR}/runtime-migrations" \
+    "${SFS_ARCHIVES_DIR}/runtime-upgrades" \
     "${SFS_ARCHIVES_DIR}"; do
     [[ -d "${dir}" ]] || continue
+    if [[ -n "${current:-}" && "${dir}" == "${SFS_SPRINTS_DIR}/${current}" ]]; then
+      continue
+    fi
     if [[ -z "$(find "${dir}" -mindepth 1 -print -quit 2>/dev/null)" ]]; then
       rmdir "${dir}" 2>/dev/null || true
       [[ -d "${dir}" ]] || count=$((count + 1))
@@ -359,10 +445,12 @@ fi
 
 TARGETS=""
 if [[ "${ALL}" -eq 1 ]]; then
-  for d in "${SFS_SPRINTS_DIR}"/*; do
-    [[ -d "${d}" ]] || continue
-    TARGETS="${TARGETS}${d##*/}"$'\n'
-  done
+  if [[ -d "${SFS_SPRINTS_DIR}" ]]; then
+    for d in "${SFS_SPRINTS_DIR}"/*; do
+      [[ -d "${d}" ]] || continue
+      TARGETS="${TARGETS}${d##*/}"$'\n'
+    done
+  fi
 else
   if [[ -z "${SPRINT_ID}" ]]; then
     SPRINT_ID="$(read_current_sprint)"
@@ -375,7 +463,10 @@ else
   TARGETS="${SPRINT_ID}"$'\n'
 fi
 
-if [[ -z "${TARGETS}" ]]; then
+TARGETLESS_SURFACE_CLEANUP=0
+if [[ -z "${TARGETS}" && "${ALL}" -eq 1 ]]; then
+  TARGETLESS_SURFACE_CLEANUP=1
+elif [[ -z "${TARGETS}" ]]; then
   echo "no sprint workspaces found" >&2
   exit "${SFS_EXIT_NO_INIT}"
 fi
@@ -390,16 +481,21 @@ fi
 read -r EVENT_PRUNE_COUNT EVENT_KEEP_COUNT EVENT_STATE \
   <<< "$(tidy_event_prune_stats "${TARGETS}" "${CURRENT_SPRINT}" "${ALL}")"
 RESIDUE_COUNT="$(tidy_count_local_residue)"
+ARCHIVE_COLLAPSE_COUNT="$(tidy_non_adopt_archive_count)"
 
 if [[ "${APPLY}" -eq 0 ]]; then
   echo "tidy retention dry-run:"
   echo "  rule: keep only files with a one-line keep reason"
+  if [[ "${TARGETLESS_SURFACE_CLEANUP}" -eq 1 ]]; then
+    echo "  sprints: none (surface cleanup only)"
+  fi
   if [[ "${EVENT_STATE}" == "present" ]]; then
     echo "  events: ${EVENT_PRUNE_COUNT} line(s) would prune; ${EVENT_KEEP_COUNT} active/state line(s) would remain"
   else
     echo "  events: absent"
   fi
   echo "  residue: ${RESIDUE_COUNT} placeholder/broken/empty item(s) would remove"
+  echo "  archives: ${ARCHIVE_COLLAPSE_COUNT} non-adopt archive bucket(s) would collapse"
 fi
 
 # Apply preflight first so --all never half-applies before discovering a
@@ -477,10 +573,12 @@ done <<< "${TARGETS}"
 if [[ "${APPLY}" -eq 1 ]]; then
   EVENT_PRUNED="$(tidy_prune_events "${TARGETS}" "${CURRENT_SPRINT}" "${ALL}")"
   RESIDUE_REMOVED="$(tidy_cleanup_local_residue)"
+  ARCHIVES_COLLAPSED="$(tidy_collapse_non_adopt_archives "${NOW}")"
   echo "retention:"
   echo "  rule: kept files must have a one-line reason"
   echo "  events: ${EVENT_PRUNED} historical line(s) pruned"
   echo "  residue: ${RESIDUE_REMOVED} placeholder/broken/empty item(s) removed"
+  echo "  archives: ${ARCHIVES_COLLAPSED} non-adopt bucket(s) collapsed"
 fi
 
 exit "${SFS_EXIT_OK}"

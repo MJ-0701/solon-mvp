@@ -25,6 +25,10 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
 - `events.jsonl` is active state, not durable history. Closed-sprint event lines
   are pruned after `report.md`/archive evidence exists; an empty event ledger is
   deleted instead of kept as residue.
+- Post-adopt surface cleanup is valid even when no sprint folders remain:
+  `sfs tidy --all --apply` removes project-local cache notice files, placeholder
+  `auth.env`, orphan `events.jsonl`, empty workbench dirs, and collapses
+  top-level non-adopt archive buckets into `archives/adopt/surface-cleanup/...`.
 - `retro` is the normal final close command and ensures `report.md` before
   closing. Do not recommend `report` before `retro` in the normal close path.
   Use `report` only for preview or past-report rebuild. Use `retro --draft`

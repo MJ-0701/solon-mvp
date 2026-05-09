@@ -7,6 +7,21 @@
 
 ---
 
+## 0.6.65
+
+이번 버전은 adopt 이후 다시 생기던 `.sfs-local` 표면 잔여물을 막습니다.
+
+- `sfs tidy --all --apply` 는 이제 sprint 폴더가 하나도 없어도 post-adopt surface cleanup 으로
+  동작합니다.
+- `.sfs-local/cache/*notice.env`, placeholder-only `auth.env`, orphan `events.jsonl` 은 visible
+  surface 에 남기지 않습니다.
+- `.sfs-local/archives/runtime-migrations`, `runtime-upgrades`, `sprints` 처럼 흩어진 archive
+  bucket 은 `archives/adopt/surface-cleanup/.../preexisting-archives.tar.gz` 로 접습니다.
+- version notice cache 는 프로젝트 `.sfs-local/cache` 가 아니라 사용자 SFS cache 로 이동했습니다.
+  그래서 `sfs status` 같은 일반 명령이 cache 폴더를 다시 만들지 않습니다.
+- 한 줄 이유 기준은 그대로입니다: `archives/adopt` 는 cleanup rollback/recovery evidence 이므로
+  남길 수 있고, cache/log/placeholder 파일은 남기지 않습니다.
+
 ## 0.6.64
 
 이번 버전은 `adopt` 이후에도 `.sfs-local`에 남아 보이던 잔여 파일/디렉터리를 더 강하게 정리합니다.

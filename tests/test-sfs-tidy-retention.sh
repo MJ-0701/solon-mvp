@@ -66,14 +66,14 @@ assert_contains "${apply_out}" "residue:" "apply residue summary"
 [[ ! -d .sfs-local/queue ]] || fail "empty queue placeholder tree should be removed"
 [[ ! -d .sfs-local/decisions ]] || fail "empty decisions placeholder dir should be removed"
 
-archive_file="$(find ".sfs-local/archives/sprints/${sprint_id}" -name sprint-evidence.tar.gz -type f 2>/dev/null | head -1)"
-[[ -n "${archive_file}" ]] || fail "missing sprint cold archive"
-tar -tzf "${archive_file}" | grep -Fq "sprints/${sprint_id}/brainstorm.md" \
-  || fail "archive missing brainstorm.md"
-tar -tzf "${archive_file}" | grep -Fq "sprints/${sprint_id}/review.md" \
-  || fail "archive missing review.md"
-manifest="$(dirname "${archive_file}")/manifest.txt"
-grep -Fq "visible files must have a one-line keep reason" "${manifest}" \
-  || fail "manifest missing retention reason"
+[[ ! -d .sfs-local/archives/sprints ]] || fail "sprint archive bucket should be collapsed under archives/adopt"
+archive_file="$(find ".sfs-local/archives/adopt/surface-cleanup" -name preexisting-archives.tar.gz -type f 2>/dev/null | head -1)"
+[[ -n "${archive_file}" ]] || fail "missing collapsed sprint cold archive"
+tar -tzf "${archive_file}" | grep -Fq "sprints/${sprint_id}/" \
+  || fail "collapsed archive missing sprint archive bucket"
+tar -tzf "${archive_file}" | grep -Fq "sprint-evidence.tar.gz" \
+  || fail "collapsed archive missing sprint evidence tarball"
+tar -tzf "${archive_file}" | grep -Fq "manifest.txt" \
+  || fail "collapsed archive missing sprint manifest"
 
 echo "test-sfs-tidy-retention: OK"

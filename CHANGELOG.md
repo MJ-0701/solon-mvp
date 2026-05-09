@@ -1,3 +1,33 @@
+## [0.6.65] - 2026-05-09
+
+> **Post-adopt surface residue cleanup.** `sfs tidy --all --apply` now works
+> even when no sprint folders remain, and `sfs upgrade` no longer leaves
+> project-local cache notices or split archive buckets visible.
+
+### Changed
+
+- `sfs tidy --all --apply` can run as a targetless surface cleanup after adopt:
+  it removes project-local cache notice files, placeholder-only `auth.env`,
+  orphan `events.jsonl`, empty workbench dirs, and visible non-adopt archive
+  buckets.
+- `tidy` collapses top-level `.sfs-local/archives/runtime-migrations`,
+  `.sfs-local/archives/runtime-upgrades`, and `.sfs-local/archives/sprints`
+  into `.sfs-local/archives/adopt/surface-cleanup/.../preexisting-archives.tar.gz`
+  so the visible archive surface remains one recovery lane.
+- `upgrade` now removes `.sfs-local/cache/*notice.env`, removes placeholder-only
+  `auth.env`, migrates orphan event ledgers, and folds runtime migration/upgrade
+  backup buckets under `archives/adopt/surface-cleanup/...` before completion.
+- Version stale-notice state moved out of the project workbench into the user's
+  SFS cache directory, so ordinary `sfs status`/command use no longer recreates
+  `.sfs-local/cache/version-notice.env`.
+
+### Tests
+
+- Added `test-sfs-tidy-targetless-surface-cleanup.sh` for post-adopt cleanup
+  with no visible sprint folders.
+- Extended upgrade/tidy retention tests so cache notices, placeholder auth,
+  orphan logs, and non-adopt archive buckets cannot remain visible.
+
 ## [0.6.64] - 2026-05-09
 
 > **Adopt visible residue + global handoff path hardening.** `sfs adopt --apply`

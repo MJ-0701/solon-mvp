@@ -57,7 +57,10 @@ done
 printf '2026-W19-sprint-1\n' > .sfs-local/current-sprint
 printf '{"ts":"2026-05-05T23:47:46+09:00","type":"sprint_start","sprint_id":"2026-W19-sprint-1","goal":"residue","by":"sfs-start"}\n' >> .sfs-local/events.jsonl
 mkdir -p .sfs-local/cache .sfs-local/tmp/empty-leftover .sfs-local/queue/pending
+printf 'last_checked_epoch=0\nlatest=0.0.0\n' > .sfs-local/cache/version-notice.env
+printf 'last_checked_epoch=0\n' > .sfs-local/cache/hygiene-notice.env
 printf '# old local auth sample\n' > .sfs-local/auth.env.example
+printf '# placeholder only\n' > .sfs-local/auth.env
 
 SFS_MODEL_PROFILE_PROMPT=0 \
 SFS_SKIP_CLI_DISCOVERY=1 \
@@ -78,14 +81,23 @@ for doc in brainstorm plan implement log review retro; do
 done
 [[ ! -e .sfs-local/sprints/.gitkeep ]] || fail "legacy sprints .gitkeep should be removed"
 [[ "$(cat .sfs-local/current-sprint)" = "2026-W19-sprint-1" ]] || fail "active sprint pointer should remain"
-find .sfs-local/archives/runtime-migrations -name '2026-W19-sprint-1-step-docs.tar.gz' -type f | grep -q . \
-  || fail "missing prefilled step-doc cold archive"
 [[ ! -e .sfs-local/auth.env.example ]] || fail "upgrade should remove project-local auth.env.example sample"
-find .sfs-local/archives/runtime-migrations -name 'auth-env-example.tar.gz' -type f | grep -q . \
-  || fail "missing auth.env.example cold archive"
+[[ ! -e .sfs-local/auth.env ]] || fail "placeholder auth.env should be removed"
 [[ ! -d .sfs-local/cache ]] || fail "empty cache dir should be removed"
 [[ ! -d .sfs-local/tmp ]] || fail "empty tmp dir should be removed"
 [[ ! -d .sfs-local/queue ]] || fail "empty queue dir should be removed"
+[[ ! -d .sfs-local/archives/runtime-migrations ]] || fail "runtime-migrations bucket should be collapsed under archives/adopt"
+[[ ! -d .sfs-local/archives/runtime-upgrades ]] || fail "runtime-upgrades bucket should be collapsed under archives/adopt"
+[[ ! -d .sfs-local/archives/sprints ]] || fail "sprints archive bucket should be collapsed under archives/adopt"
+
+archive_index="$(mktemp "${TMP_DIR}/archives.XXXXXX")"
+while IFS= read -r archive; do
+  tar -tzf "${archive}" >> "${archive_index}"
+done < <(find .sfs-local/archives/adopt -name preexisting-archives.tar.gz -type f | sort)
+grep -Fq '2026-W19-sprint-1-step-docs.tar.gz' "${archive_index}" \
+  || fail "missing prefilled step-doc cold archive inside collapsed archive bucket"
+grep -Fq 'auth-env-example.tar.gz' "${archive_index}" \
+  || fail "missing auth.env.example cold archive inside collapsed archive bucket"
 
 grep -Fq '"type":"legacy_adopt_surface_migrated"' .sfs-local/events.jsonl \
   || fail "missing legacy adopt migration event"

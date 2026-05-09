@@ -519,6 +519,24 @@ write_notice_state() {
   } > "${state_file}" 2>/dev/null || true
 }
 
+sfs_user_cache_dir() {
+  if [[ -n "${SFS_CACHE_DIR:-}" ]]; then
+    printf '%s\n' "${SFS_CACHE_DIR}"
+  elif [[ -n "${XDG_CACHE_HOME:-}" ]]; then
+    printf '%s\n' "${XDG_CACHE_HOME}/sfs"
+  elif [[ -n "${HOME:-}" ]]; then
+    printf '%s\n' "${HOME}/.cache/sfs"
+  else
+    printf '%s\n' "/tmp/sfs-cache-${UID:-0}"
+  fi
+}
+
+sfs_notice_state_file() {
+  local local_dir="$1" key
+  key="$(printf '%s' "${local_dir}" | cksum | awk '{print $1 "-" $2}' 2>/dev/null || printf 'unknown')"
+  printf '%s/version-notices/%s.env\n' "$(sfs_user_cache_dir)" "${key}"
+}
+
 maybe_show_stale_version_notice() {
   local cmd="${1:-command}"
   case "${SFS_VERSION_NOTICE:-1}" in 0|false|off|no) return 0 ;; esac
@@ -537,7 +555,7 @@ maybe_show_stale_version_notice() {
   case "${threshold}" in ''|*[!0-9]*) threshold=5 ;; esac
   case "${ttl}" in ''|*[!0-9]*) ttl=86400 ;; esac
 
-  state_file="${local_dir}/cache/version-notice.env"
+  state_file="$(sfs_notice_state_file "${local_dir}")"
   now="$(date +%s 2>/dev/null || printf '0')"
   last_checked="$(read_notice_state_value "${state_file}" last_checked_epoch || true)"
   if [[ "${SFS_VERSION_NOTICE_FORCE:-0}" != "1" && "${now}" != "0" && "${last_checked}" =~ ^[0-9]+$ ]]; then
