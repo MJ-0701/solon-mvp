@@ -22,6 +22,12 @@ load_when: ["always", "sfs", "entry"]
   options exist, show every viable option with its label, plain-language
   meaning, and consequence; mark the recommendation as a default, not as the
   only visible choice. If that would be noisy, ask one decision at a time.
+- Never ask the user to confirm a compact option bundle such as `A/A/A/C/C`,
+  and never answer "show the recommendation again" with only option labels or
+  only the recommended row. Re-present the decision in plain language: the
+  recommended default, what it commits to, and which alternatives would change
+  the plan. Confirmation phrases should be natural language such as
+  `권장안 그대로 확정`, not label bundles.
 - Taxonomy is a product function, not an org division or copy polish. Match the
   user's native/workspace language and project terms. Do not
   machine-translate SFS command/domain terms into mixed phrases, and do not

@@ -57,6 +57,11 @@ load_when: ["brainstorm", "브레인스토밍", "requirements", "요구사항", 
   `hard`, ask a compact but demanding round (usually 4-7) and record unresolved
   owner decisions instead of guessing. Keep `status: draft`; final `Next` is
   "answer questions, then brainstorm again".
+- For Gate 2 blocking choices, do not expose compact option bundles such as
+  `A/A/A/C/C 확정`. If the user asks "권장안 다시 보여줘", restate the
+  recommended path in plain language, include what would change under the
+  alternatives, and use a natural confirmation phrase such as `권장안 그대로
+  확정`.
 - Only set `status: ready-for-plan` when `§6 Plan Seed` can drive measurable
   requirements, AC, risks, generator deliverables, and evaluator criteria.
 - Never run `sfs plan` automatically from Gate 2. The user or next explicit command

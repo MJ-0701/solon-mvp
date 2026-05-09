@@ -7,6 +7,17 @@
 
 ---
 
+## 0.6.62
+
+이번 버전은 Claude, Codex, Gemini 모두에서 결정 질문 노출 방식을 다시 고정합니다.
+
+- `A/A/A/C/C 확정` 같은 내부 option bundle 을 사용자-facing 확정 문구로 쓰지 않습니다.
+- 사용자가 “권장안 다시 보여줘”라고 해도 추천 label 묶음이나 추천 row 하나만 다시 보여주지 않습니다.
+  권장 경로를 자연어로 설명하고, 어떤 대안이 plan 을 바꾸는지 같이 보여줍니다.
+- 확정 문구는 `권장안 그대로 확정`처럼 사람이 읽는 자연어를 씁니다.
+- Claude template, Gemini command, Codex skill/prompt, 공통 SFS.md, plugin command,
+  routed kernel/brainstorm/plan context 에 같은 규칙을 넣었습니다.
+
 ## 0.6.61
 
 이번 버전은 addyosmani/agent-skills 벤치마크에서 쓸 만한 practice 를 SFS 의 기존 명령 안으로

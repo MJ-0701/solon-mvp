@@ -81,11 +81,20 @@ $ARGUMENTS
     option id, explain in plain user language what is being decided, why it
     matters, the recommended default, and what each option changes. Labels are
     cross-references, not the explanation.
-15. Taxonomy is a product function, not an org division or copy polish. Match
+15. Do not show a question/recommendation-only choice table. When multiple
+    options exist, show every viable option with its plain-language meaning and
+    consequence, then mark the recommendation as the default. If that is too
+    much for one view, ask one decision at a time instead of hiding
+    alternatives.
+16. Never ask the user to confirm a compact option bundle such as `A/A/A/C/C`,
+    and never answer "show the recommendation again" with only option labels or
+    only the recommended row. Re-present the decision in plain language and use
+    a natural confirmation phrase such as `권장안 그대로 확정`, not a label bundle.
+17. Taxonomy is a product function, not an org division or copy polish. Match
     the user's native/workspace language and project terms; do not
     machine-translate SFS command/domain terms into mixed phrases or expose app
     placeholder labels such as `Other` or `Type something` as product choices.
-16. If a required command argument is missing, ask one plain-language question
+18. If a required command argument is missing, ask one plain-language question
     in the user's language instead of opening a multi-choice prompt. For Korean
     `sfs start` with no goal, ask: `이번 sprint 목표를 한 줄로 말해 주세요. 예:
     "docker compose 구조 리디자인"`.

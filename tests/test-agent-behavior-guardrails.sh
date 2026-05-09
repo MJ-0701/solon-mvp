@@ -61,6 +61,8 @@ assert_contains "${kernel}" "Decision questions must be self-contained" "kernel 
 assert_contains "${kernel}" "question/recommendation-only table" "kernel no recommendation-only choice table"
 assert_contains "${kernel}" "show every viable option" "kernel all options visible"
 assert_contains "${kernel}" "ask one decision at a time" "kernel sequential decision fallback"
+assert_contains "${kernel}" "compact option bundle" "kernel no compact option bundle"
+assert_contains "${kernel}" "권장안 그대로 확정" "kernel natural confirmation phrase"
 assert_contains "${kernel}" "Gate order is a runtime contract" "kernel gate order"
 assert_contains "${kernel}" "Review verdicts are success criteria, not effort counters" "kernel review verdict"
 assert_contains "${kernel}" "Advisor review is not a self-CPO PASS" "kernel advisor not self CPO"
@@ -76,6 +78,8 @@ assert_contains "${kernel}" "이번 sprint 목표를 한 줄로 말해 주세요
 
 assert_contains "${brainstorm}" "docs/solon/domain-map.md" "brainstorm domain map"
 assert_contains "${brainstorm}" "read-only researcher" "brainstorm researcher"
+assert_contains "${brainstorm}" "A/A/A/C/C 확정" "brainstorm no compact bundle confirmation"
+assert_contains "${brainstorm}" "권장안 다시 보여줘" "brainstorm recommendation replay guard"
 
 assert_contains "${plan}" "explicit non-goals" "plan tradeoffs"
 assert_contains "${plan}" "verify by ..." "plan verification"
@@ -97,6 +101,8 @@ assert_contains "${plan}" 'unexplained `Q1`' "plan unexplained Q1 guardrail"
 assert_contains "${plan}" "Never show only the recommended column" "plan no recommendation-only choices"
 assert_contains "${plan}" 'Define labels such as `A/B/C/D` inline' "plan option label definitions"
 assert_contains "${plan}" "ask the decisions sequentially" "plan sequential choices"
+assert_contains "${plan}" "compact bundle confirmations" "plan no compact bundle confirmation"
+assert_contains "${plan}" "권장안 다시 보여줘" "plan recommendation replay guard"
 
 assert_contains "${implement}" "Keep changes surgical" "implement surgical changes"
 assert_contains "${implement}" "speculative flexibility" "implement simplicity"
@@ -210,6 +216,8 @@ assert_not_contains "${claude_template}" "Use \`docs/solon/\` for shared adoptio
 assert_not_contains "${agents_template}" "Use \`docs/solon/\` for shared adoption/handoff summaries" "agents no stale docs/solon handoff"
 assert_not_contains "${gemini_template}" "Use \`docs/solon/\` for shared adoption/handoff summaries" "gemini no stale docs/solon handoff"
 assert_not_contains "${sfs_template}" "shared durable docs live under \`docs/solon/\`" "SFS no stale docs/solon handoff"
+assert_contains "${sfs_template}" "compact option bundle" "SFS no compact option bundle"
+assert_contains "${sfs_template}" "권장안 그대로 확정" "SFS natural confirmation phrase"
 
 adapter_files=(
   "${DIST_DIR}/templates/CLAUDE.md.template"
@@ -228,6 +236,9 @@ for file in "${adapter_files[@]}"; do
   assert_contains "${file}" "surface material assumptions" "adapter guardrail ${file}"
   assert_contains "${file}" "report exact evidence" "adapter evidence ${file}"
   assert_contains "${file}" "Decision questions must be self-contained" "adapter decision clarity ${file}"
+  assert_contains "${file}" "question/recommendation-only choice table" "adapter no recommendation-only table ${file}"
+  assert_contains "${file}" "compact option bundle" "adapter no compact option bundle ${file}"
+  assert_contains "${file}" "권장안 그대로 확정" "adapter natural confirmation phrase ${file}"
   assert_contains "${file}" 'Gate 3 (Plan) ready-for-implement routes to `sfs review --gate 3` first' "adapter plan review before implement ${file}"
   assert_contains "${file}" "Keep C-Level and worker/generator responsibilities separate" "adapter role split ${file}"
   assert_contains "${file}" "Gate 3 review must self-review until PASS before cross review" "adapter self before cross ${file}"

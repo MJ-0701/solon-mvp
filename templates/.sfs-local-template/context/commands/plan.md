@@ -20,6 +20,10 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   the practical tradeoff, and then name the recommended default. If the option
   set is too wide for one compact view, ask the decisions sequentially instead
   of hiding alternatives.
+- Do not ask for compact bundle confirmations such as `A/A/A/C/C 확정`, and do
+  not answer "권장안 다시 보여줘" with only labels or the recommended row.
+  Re-state the recommended path in plain language and make the confirmation
+  phrase natural, for example `권장안 그대로 확정`.
 - State material assumptions, tradeoffs, explicit non-goals, and a simpler path
   when one exists. Do not hide unresolved decisions inside confident wording.
 - Gate 3 must carry the same AI-era fundamentals forward:

@@ -94,6 +94,10 @@ $ARGUMENTS
     consequence, then mark the recommendation as the default. If that is too
     much for one view, ask one decision at a time instead of hiding
     alternatives.
+- Never ask the user to confirm a compact option bundle such as `A/A/A/C/C`,
+  and never answer "show the recommendation again" with only option labels or
+  only the recommended row. Re-present the decision in plain language and use a
+  natural confirmation phrase such as `권장안 그대로 확정`, not a label bundle.
 18. Taxonomy is a product function, not an org division or copy polish. Match
     the user's native/workspace language and project terms; do not
     machine-translate SFS command/domain terms into mixed phrases or expose app

@@ -1,3 +1,25 @@
+## [0.6.62] - 2026-05-09
+
+> **Decision prompt parity for Claude, Codex, and Gemini.** SFS now explicitly
+> bans compact option-bundle confirmations such as `A/A/A/C/C 확정` across all
+> packaged agent adapters and routed Gate 2/3 context.
+
+### Changed
+
+- Strengthened the kernel, brainstorm, and plan context so "show the
+  recommendation again" must re-present the recommended path in plain language,
+  not as internal option labels or a recommendation-only row.
+- Added the same compact-bundle guardrail to Claude templates, Gemini command
+  templates, Codex skill/prompt templates, SFS.md, plugin command text, and the
+  shared command adapter.
+- Updated GUIDE/current-product docs to state that confirmation uses natural
+  language such as `권장안 그대로 확정`, not label bundles.
+
+### Tests
+
+- Extended `test-agent-behavior-guardrails.sh` so kernel, brainstorm, plan, and
+  every Claude/Codex/Gemini adapter surface must carry the compact-bundle ban.
+
 ## [0.6.61] - 2026-05-09
 
 > **Agent-skills benchmark absorption.** SFS now absorbs useful
