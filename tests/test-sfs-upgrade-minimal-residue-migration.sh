@@ -62,7 +62,7 @@ SFS_SKIP_CLI_DISCOVERY=1 \
 SFS_COMMAND_TIMEOUT_SEC=0 \
 bash "${DIST_DIR}/upgrade.sh" --yes --layout thin >/tmp/sfs-upgrade-min-residue.out
 
-SHARED_DOC="docs/solon/legacy-baseline-adoption-summary.md"
+SHARED_DOC="docs/legacy-baseline/$(date +%Y%m%d)/handoff.md"
 [[ -f "${SHARED_DOC}" ]] || fail "missing migrated shared adoption doc"
 grep -Fq "Project facts that should become the shared adoption handoff." "${SHARED_DOC}" \
   || fail "shared adoption doc did not preserve legacy report body"

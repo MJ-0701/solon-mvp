@@ -38,7 +38,7 @@ The user still types `sfs brainstorm`. Solon simply exposes the available
 depth options for the shape of the work.
 
 When the work closes, `report.md` and `retro.md` are generated under
-`docs/solon/<workspace>/<yyyyMMdd>/` rather than inside `.sfs-local`.
+`docs/<workspace>/<yyyyMMdd>/` rather than inside `.sfs-local`.
 `<workspace>` defaults to a path-safe form of the `sfs start "<goal>"` text.
 The prose defaults to the user's native or workspace language, matching the
 native-language commit message rule.
@@ -46,7 +46,7 @@ native-language commit message rule.
 ## Windows Wrapper Stabilization
 
 The Windows PowerShell/cmd user entrypoint is fixed to `sfs.cmd`. Git Bash/WSL
-keep using `sfs`, like macOS/Linux. As of 0.6.59, the Scoop manifest keeps the
+keep using `sfs`, like macOS/Linux. As of 0.6.60, the Scoop manifest keeps the
 generated shim target on packaged `bin\sfs.ps1`, but the post-install hook
 overwrites the shims-directory `sfs.cmd`, `sfs.ps1`, and extensionless `sfs`
 with deterministic wrappers because generated `sfs.cmd` / `sfs.ps1` shims can
@@ -254,7 +254,7 @@ product design system exists, it wins.
 
 ## Division Knowledge Packs
 
-As of 0.6.59, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
+As of 0.6.60, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
 management/admin, and taxonomy packs are no longer placeholders. Each pack gives
 Solon a compact sense of what to watch, what to ask, and what evidence should
 count for that kind of work.

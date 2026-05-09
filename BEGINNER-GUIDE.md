@@ -182,7 +182,7 @@ sfs status
 |---|---|
 | `SFS.md` | AI 가 읽는 프로젝트 운영 규칙 |
 | `.sfs-local/` | git 에 올리지 않는 private 작업 공간 |
-| `docs/solon/` | 공유할 요약/인계 문서가 생기는 곳 |
+| `docs/<workspace>/<yyyyMMdd>/` | 공유할 요약/인계 문서가 생기는 곳 |
 | `CLAUDE.md` | Claude 가 Solon 을 찾는 입구 |
 | `AGENTS.md` | Codex 가 Solon 을 찾는 입구 |
 | `GEMINI.md` | Gemini 가 Solon 을 찾는 입구 |

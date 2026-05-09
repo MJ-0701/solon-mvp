@@ -13,8 +13,10 @@ Rules:
 - `adopt` is bash-first for the repository scan and archive policy; AI-side work is a compact interpretation of the adapter result, not a replacement for it.
 - A quoted free-text brief is valid: `sfs adopt "docs cleanup and current-state handoff"`.
 - Default mode is dry-run. If the user clearly wants files created, use `sfs adopt --apply "<brief>"`; otherwise show the dry-run result and ask before applying.
-- Shared visible output is intentionally one file under `docs/solon/`. Raw scan
-  evidence belongs under `.sfs-local/archives/adopt/...`.
+- Shared visible output is intentionally one handoff file under
+  `docs/<workspace>/<yyyyMMdd>/handoff.md`. For adopt, `<workspace>` is the
+  adopt id (`legacy-baseline` by default, or `--id <name>`). Raw scan evidence
+  belongs under `.sfs-local/archives/adopt/...`.
 - `adopt --apply` must not leave an active sprint pointer. It summarizes and
   cleans the legacy state; the first real sprint starts afterward.
 - Do not expand old sprint/archive material into the active working context unless the user asks for archaeology or recovery.

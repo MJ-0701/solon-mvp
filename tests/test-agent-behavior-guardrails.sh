@@ -43,6 +43,13 @@ researcher="${DIST_DIR}/templates/.sfs-local-template/personas/researcher.md"
 cpo="${DIST_DIR}/templates/.sfs-local-template/personas/cpo-evaluator.md"
 installer="${DIST_DIR}/install.sh"
 upgrader="${DIST_DIR}/upgrade.sh"
+claude_template="${DIST_DIR}/templates/CLAUDE.md.template"
+agents_template="${DIST_DIR}/templates/AGENTS.md.template"
+gemini_template="${DIST_DIR}/templates/GEMINI.md.template"
+sfs_template="${DIST_DIR}/templates/SFS.md.template"
+codex_skill_template="${DIST_DIR}/templates/codex-skill/SKILL.md"
+plugin_command="${DIST_DIR}/plugins/solon/commands/sfs.md"
+plugin_readme="${DIST_DIR}/plugins/solon/README.md"
 
 assert_contains "${kernel}" "surface material assumptions" "kernel assumptions"
 assert_contains "${kernel}" "minimum useful slice" "kernel simplicity"
@@ -187,6 +194,22 @@ assert_contains "${upgrader}" "solon_recommended 기본 role routing" "upgrade f
 assert_contains "${upgrader}" "gemini-3.1-pro-preview" "upgrade gemini 3.1 pro default"
 assert_contains "${upgrader}" "2.5 fallback 은 쓰지 않습니다" "upgrade no gemini 2.5 fallback"
 assert_contains "${upgrader}" "advisor 호출은 self-CPO PASS 가 아닙니다" "upgrade advisor not self CPO"
+
+for handoff_doc in \
+  "${claude_template}" \
+  "${agents_template}" \
+  "${gemini_template}" \
+  "${sfs_template}" \
+  "${codex_skill_template}" \
+  "${plugin_command}" \
+  "${plugin_readme}"
+do
+  assert_contains "${handoff_doc}" "docs/<workspace>/<yyyyMMdd>/" "handoff docs root path ${handoff_doc}"
+done
+assert_not_contains "${claude_template}" "Use \`docs/solon/\` for shared adoption/handoff summaries" "claude no stale docs/solon handoff"
+assert_not_contains "${agents_template}" "Use \`docs/solon/\` for shared adoption/handoff summaries" "agents no stale docs/solon handoff"
+assert_not_contains "${gemini_template}" "Use \`docs/solon/\` for shared adoption/handoff summaries" "gemini no stale docs/solon handoff"
+assert_not_contains "${sfs_template}" "shared durable docs live under \`docs/solon/\`" "SFS no stale docs/solon handoff"
 
 adapter_files=(
   "${DIST_DIR}/templates/CLAUDE.md.template"

@@ -1,3 +1,39 @@
+## [0.6.60] - 2026-05-09
+
+> **Strict adopt cleanup under `docs/<workspace>/<yyyyMMdd>`.** `sfs adopt`
+> now applies the same visible-file rule as tidy: if a file cannot be justified
+> in one line, it is archived or removed from the visible project surface.
+
+### Changed
+
+- `sfs adopt --apply` now writes the durable handoff to
+  `docs/<workspace>/<yyyyMMdd>/handoff.md`. For adopt, `<workspace>` defaults
+  to the adopt id (`legacy-baseline` by default, or `--id <name>`).
+- Legacy flat adoption docs such as
+  `docs/solon/<id>-adoption-summary.md` are cold-archived and removed from the
+  visible docs surface.
+- Adopt now cold-archives pre-existing sprints, pre-existing archive folders,
+  `.sfs-local/tmp`, old `events.jsonl`, `decisions/*.md`, adapter/runtime dust,
+  and other `.sfs-local` residue that does not have a one-line keep reason.
+- Existing `current-sprint` pointers are treated as legacy adoption state and
+  removed after archiving, so a freshly adopted project starts with no active
+  SFS sprint unless the user explicitly runs `sfs start`.
+- The only visible `.sfs-local` files left by baseline adoption are runtime
+  configuration files with one-line keep reasons: `VERSION`, `config.yaml`,
+  `divisions.yaml`, and `model-profiles.yaml`.
+- Shared report/retro/tidy docs now consistently use
+  `docs/<workspace>/<yyyyMMdd>/`; `docs/solon/` remains available for
+  project-wide Solon reference docs such as domain maps or design contracts.
+
+### Tests
+
+- Extended `test-sfs-adopt-freeform.sh` to cover strict adopt retention:
+  no visible `events.jsonl`, no preserved active sprint pointer, private cold
+  archives for tmp/decision/runtime residue, archived flat docs/solon adoption
+  summaries, and the new `docs/<workspace>/<yyyyMMdd>/handoff.md` location.
+- Updated upgrade, tidy, and shared-handoff tests for the root `docs/`
+  handoff path.
+
 ## [0.6.59] - 2026-05-09
 
 > **Shared handoff docs under `docs/solon`.** Sprint close artifacts now live
@@ -149,7 +185,7 @@
   too wide.
 - `.sfs-local/` is reaffirmed as private workbench state: runtime logs,
   `events.jsonl`, cache, tmp, archives, and queue run logs stay ignored and
-  disposable; durable shared conclusions belong in `docs/solon/` or the sprint
+  disposable; durable shared conclusions belong in `docs/<workspace>/<yyyyMMdd>/` or the sprint
   close report.
 
 ## [0.6.55] - 2026-05-08
@@ -1281,7 +1317,7 @@
 > **Minimal residue release.** Solon now applies "남겨야 될 것만 남긴다" across
 > the project lifecycle, not just as a gitignore rule. The default surface is
 > private, lazy, and compact: nothing gets created before it is useful, and
-> shared output goes to `docs/solon/`.
+> shared output goes to `docs/<workspace>/<yyyyMMdd>/`.
 
 ### Changed
 
@@ -1292,11 +1328,11 @@
   `brainstorm/plan/implement/log/review/retro` files. Each phase command creates
   only the document it actually needs.
 - **Adopt writes shared summary only** — `sfs adopt --apply` now creates
-  `docs/solon/<id>-adoption-summary.md` and keeps raw scan/cold archive evidence
+  `docs/<workspace>/<yyyyMMdd>/handoff.md` and keeps raw scan/cold archive evidence
   under `.sfs-local/archives/adopt/...`. It no longer leaves a fake active
   baseline sprint.
 - **Same-version residue migration** — rerunning `sfs upgrade` now converts older
-  visible `legacy-baseline` sprint folders into `docs/solon/*-adoption-summary.md`
+  visible `legacy-baseline` sprint folders into `docs/<workspace>/<yyyyMMdd>/handoff.md`
   plus a private cold archive, and packs old pre-created step docs for sprints
   with no phase events.
 - **Lean generated templates** — sprint templates were reduced to working

@@ -35,7 +35,7 @@ SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" init --la
 
 sprint_id="2026-W19-sprint-done"
 sprint_dir=".sfs-local/sprints/${sprint_id}"
-shared_report="docs/solon/retention/$(date +%Y%m%d)/report.md"
+shared_report="docs/retention/$(date +%Y%m%d)/report.md"
 mkdir -p "${sprint_dir}" .sfs-local/queue/pending .sfs-local/decisions
 touch .sfs-local/sprints/.gitkeep
 touch .sfs-local/queue/pending/.gitkeep

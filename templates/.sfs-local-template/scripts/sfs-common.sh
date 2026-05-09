@@ -34,7 +34,7 @@ SFS_VERSION_FILE="${SFS_LOCAL_DIR}/VERSION"
 SFS_SPRINTS_DIR="${SFS_LOCAL_DIR}/sprints"
 SFS_DECISIONS_DIR="${SFS_LOCAL_DIR}/decisions"
 SFS_ARCHIVES_DIR="${SFS_LOCAL_DIR}/archives"
-SFS_SHARED_DOCS_DIR="${SFS_SHARED_DOCS_DIR:-docs/solon}"
+SFS_SHARED_DOCS_DIR="${SFS_SHARED_DOCS_DIR:-docs}"
 SFS_PROJECT_TEMPLATES_DIR="${SFS_LOCAL_DIR}/sprint-templates"
 SFS_RUNTIME_TEMPLATES_DIR="${SFS_RUNTIME_DIR}/sprint-templates"
 SFS_PROJECT_DECISIONS_TEMPLATE_DIR="${SFS_LOCAL_DIR}/decisions-template"
@@ -751,7 +751,7 @@ update_frontmatter() {
 # ─────────────────────────────────────────────────────────────────────
 
 # sfs_prepare_sprint_report <sprint-id> <iso-ts> <status>
-# Ensures `docs/solon/<workspace>/<yyyyMMdd>/report.md` exists and updates
+# Ensures `docs/<workspace>/<yyyyMMdd>/report.md` exists and updates
 # report frontmatter. Workspace defaults to the `sfs start "<goal>"` text.
 # stdout: report path
 sfs_prepare_sprint_report() {
@@ -801,7 +801,7 @@ sfs_prepare_sprint_report() {
 }
 
 # sfs_prepare_sprint_retro <sprint-id> <iso-ts>
-# Ensures `docs/solon/<workspace>/<yyyyMMdd>/retro.md` exists and updates
+# Ensures `docs/<workspace>/<yyyyMMdd>/retro.md` exists and updates
 # retro frontmatter. Document content is intentionally native/workspace language.
 # stdout: retro path
 sfs_prepare_sprint_retro() {
@@ -966,8 +966,8 @@ sfs_archive_sprint_cold_bundle() {
     echo
     echo "policy:"
     echo "- visible files must have a one-line keep reason"
-    echo "- report.md remains in docs/solon/<workspace>/<yyyyMMdd>/ because it is the final sprint outcome"
-    echo "- retro.md remains in docs/solon/<workspace>/<yyyyMMdd>/ because it records close/learning notes when present"
+    echo "- report.md remains in docs/<workspace>/<yyyyMMdd>/ because it is the final sprint outcome"
+    echo "- retro.md remains in docs/<workspace>/<yyyyMMdd>/ because it records close/learning notes when present"
     echo "- raw brainstorm/plan/implement/log/review and review prompt/run scratch are cold history"
     echo "- use this archive only for archaeology, dispute resolution, or deep handoff recovery"
     echo

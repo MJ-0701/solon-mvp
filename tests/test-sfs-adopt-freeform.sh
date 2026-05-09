@@ -25,6 +25,21 @@ git -c user.name='SFS Test' -c user.email='sfs-test@example.invalid' commit -qm 
 
 SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" init --layout thin --yes >/dev/null
 
+mkdir -p .sfs-local/sprints/2026-W19-sprint-1
+printf '# Active Legacy Sprint\n\nThis sprint predates adoption and should be cold-archived.\n' \
+  > .sfs-local/sprints/2026-W19-sprint-1/plan.md
+printf '2026-W19-sprint-1\n' > .sfs-local/current-sprint
+mkdir -p .sfs-local/tmp/review-prompts
+printf 'legacy review prompt\n' > .sfs-local/tmp/review-prompts/2026-W19-sprint-1-gate3.txt
+mkdir -p .sfs-local/decisions
+printf '# Legacy Decision\n\nCold archive me after adopt.\n' > .sfs-local/decisions/0001-legacy.md
+printf '# Local auth example\n' > .sfs-local/auth.env.example
+printf '{"ts":"2026-05-09T00:00:00+09:00","type":"sprint_start","sprint_id":"2026-W19-sprint-1"}\n' \
+  > .sfs-local/events.jsonl
+mkdir -p docs/solon
+printf '# Old flat adopt summary\n' > docs/solon/legacy-baseline-adoption-summary.md
+printf '# Old flat adopt summary\n' > docs/solon/doc-cleanup-adoption-summary.md
+
 brief="문서 정리좀 해야될거 같은데."
 dry_run="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" adopt "${brief}")"
 case "${dry_run}" in
@@ -34,6 +49,37 @@ esac
 case "${dry_run}" in
   *"brief: ${brief}"* ) ;;
   *) fail "dry-run did not echo free-form brief: ${dry_run}" ;;
+esac
+case "${dry_run}" in
+  *"active_sprint_before_adopt: 2026-W19-sprint-1"* ) ;;
+  *) fail "dry-run did not mark active sprint for reset: ${dry_run}" ;;
+esac
+case "${dry_run}" in
+  *"would_remove_active_sprint_pointer: .sfs-local/current-sprint"* ) ;;
+  *) fail "dry-run did not mark active sprint pointer removal: ${dry_run}" ;;
+esac
+case "${dry_run}" in
+  *"preserve_current_sprint"* ) fail "dry-run should not preserve current sprint: ${dry_run}" ;;
+esac
+case "${dry_run}" in
+  *"would_archive_tmp_artifacts: 1"* ) ;;
+  *) fail "dry-run did not mark tmp scratch for archive: ${dry_run}" ;;
+esac
+case "${dry_run}" in
+  *"would_archive_event_ledger_lines: 1"* ) ;;
+  *) fail "dry-run did not mark event ledger reset: ${dry_run}" ;;
+esac
+case "${dry_run}" in
+  *"would_archive_nonessential_residue:"*".sfs-local/decisions/0001-legacy.md"* ) ;;
+  *) fail "dry-run did not mark decision residue for archive: ${dry_run}" ;;
+esac
+case "${dry_run}" in
+  *"would_archive_nonessential_residue:"*".sfs-local/auth.env.example"* ) ;;
+  *) fail "dry-run did not mark auth example residue for archive: ${dry_run}" ;;
+esac
+case "${dry_run}" in
+  *"would_archive_legacy_flat_shared_doc: 1"* ) ;;
+  *) fail "dry-run did not mark legacy flat shared doc for archive: ${dry_run}" ;;
 esac
 
 applied="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" adopt --id doc-cleanup --apply "${brief}")"
@@ -46,13 +92,46 @@ case "${applied}" in
   *) fail "apply did not echo free-form brief: ${applied}" ;;
 esac
 
-SHARED_DOC="docs/solon/doc-cleanup-adoption-summary.md"
-[[ -f "${SHARED_DOC}" ]] || fail "missing shared adoption summary: ${SHARED_DOC}"
+date_dir="$(date +%Y%m%d)"
+SHARED_DOC="docs/doc-cleanup/${date_dir}/handoff.md"
+[[ -f "${SHARED_DOC}" ]] || fail "missing shared handoff doc: ${SHARED_DOC}"
 [[ ! -d ".sfs-local/sprints/doc-cleanup" ]] || fail "adopt should not create a visible sprint workspace"
 [[ ! -f ".sfs-local/current-sprint" ]] || fail "adopt should not leave an active sprint pointer"
+[[ ! -d ".sfs-local/sprints/2026-W19-sprint-1" ]] || fail "adopt should cold-archive the active legacy sprint"
+find .sfs-local/archives/adopt/doc-cleanup -name existing-sprints.tar.gz -type f | grep -q . \
+  || fail "missing active legacy sprint cold archive"
+[[ ! -e ".sfs-local/tmp" ]] || fail "adopt should cold-archive old tmp scratch"
+find .sfs-local/archives/adopt/doc-cleanup -name preexisting-tmp.tar.gz -type f | grep -q . \
+  || fail "missing tmp scratch cold archive"
+find .sfs-local/archives/adopt/doc-cleanup -name preexisting-events.jsonl -type f | grep -q . \
+  || fail "missing previous event ledger backup"
+[[ ! -e ".sfs-local/decisions/0001-legacy.md" ]] || fail "adopt should archive legacy decision residue"
+[[ ! -e ".sfs-local/auth.env.example" ]] || fail "adopt should archive nonessential auth example residue"
+find .sfs-local/archives/adopt/doc-cleanup -name preexisting-residue.tar.gz -type f | grep -q . \
+  || fail "missing nonessential residue cold archive"
+[[ ! -e docs/solon/doc-cleanup-adoption-summary.md ]] || fail "legacy flat shared doc should be removed"
+find .sfs-local/archives/adopt/doc-cleanup -name preexisting-shared-adoption-summary.md -type f | grep -q . \
+  || fail "missing legacy flat shared doc archive"
+[[ -f ".sfs-local/config.yaml" ]] || fail "runtime config should remain"
+[[ -f ".sfs-local/VERSION" ]] || fail "runtime VERSION should remain"
+[[ -f ".sfs-local/model-profiles.yaml" ]] || fail "runtime model profiles should remain"
+[[ -f ".sfs-local/divisions.yaml" ]] || fail "runtime divisions config should remain"
 grep -Fq "goal: \"${brief}\"" "${SHARED_DOC}" || fail "shared doc frontmatter did not store brief as goal"
 grep -Fq "${brief}" "${SHARED_DOC}" || fail "shared doc body missing brief"
-grep -Fq "\"brief\":\"${brief}\"" .sfs-local/events.jsonl || fail "events.jsonl missing brief"
-grep -Fq "\"shared_doc\":\"${SHARED_DOC}\"" .sfs-local/events.jsonl || fail "events.jsonl missing shared doc"
+case "${applied}" in
+  *"event_ledger_after_adopt: none"* ) ;;
+  *) fail "apply should report no active event ledger after adopt: ${applied}" ;;
+esac
+[[ ! -e .sfs-local/events.jsonl ]] || fail "adopt should not leave events.jsonl log residue"
+source_summary="$(find .sfs-local/archives/adopt/doc-cleanup -name source-summary.txt -type f | sort | tail -1)"
+[[ -n "${source_summary}" && -f "${source_summary}" ]] || fail "missing source summary"
+grep -Fq "archived_tmp_artifact_count: 1" "${source_summary}" \
+  || fail "source summary missing tmp archive count"
+grep -Fq "archived_event_ledger_lines: 1" "${source_summary}" \
+  || fail "source summary missing event ledger archive count"
+grep -Fq "archived_nonessential_residue_count:" "${source_summary}" \
+  || fail "source summary missing residue archive count"
+grep -Fq ".sfs-local/decisions/0001-legacy.md" "${source_summary}" \
+  || fail "source summary missing decision residue path"
 
 echo "test-sfs-adopt-freeform: OK"

@@ -10,8 +10,8 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
   If the reason is not clear in one sentence, remove it or pack it into cold
   history after report evidence exists.
 - Workbench files are temporary: brainstorm, plan, implement, log, review.
-- Shared handoff docs are `docs/solon/<workspace>/<yyyyMMdd>/report.md` and
-  `docs/solon/<workspace>/<yyyyMMdd>/retro.md`. `<workspace>` defaults to the
+- Shared handoff docs are `docs/<workspace>/<yyyyMMdd>/report.md` and
+  `docs/<workspace>/<yyyyMMdd>/retro.md`. `<workspace>` defaults to the
   `sfs start "<goal>"` text, sanitized as a path segment.
 - Report/retro prose should use the user's native/workspace language, matching
   the native-language commit message rule. Do not force English when the work

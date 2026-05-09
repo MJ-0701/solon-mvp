@@ -892,8 +892,10 @@ migrate_legacy_adopt_visible_sprints() {
       continue
     fi
 
-    shared_dir="$TARGET/docs/solon"
-    shared_doc="$shared_dir/${sid}-adoption-summary.md"
+    date_dir="$(printf '%s\n' "$now" | sed -nE 's/^([0-9]{4})-([0-9]{2})-([0-9]{2}).*/\1\2\3/p')"
+    [ -n "$date_dir" ] || date_dir="$(date +%Y%m%d 2>/dev/null || date -u +%Y%m%d)"
+    shared_dir="$TARGET/docs/$sid/$date_dir"
+    shared_doc="$shared_dir/handoff.md"
     archive_dir="$TARGET/.sfs-local/archives/adopt/$sid/${safe_ts}-visible-sprint-migration"
     archive_file="$archive_dir/visible-sprint-workspace.tar.gz"
     manifest="$archive_dir/manifest.txt"
@@ -936,7 +938,7 @@ migrate_legacy_adopt_visible_sprints() {
       echo "archive: ${archive_file#$TARGET/}"
       echo
       echo "policy:"
-      echo "- shared adoption handoff lives in docs/solon"
+      echo "- shared adoption handoff lives in docs/<workspace>/<yyyyMMdd>"
       echo "- old visible legacy-baseline workbench is private cold history"
       echo
       echo "items:"
@@ -959,7 +961,7 @@ migrate_legacy_adopt_visible_sprints() {
   done
 
   if [ "$count" -gt 0 ]; then
-    ok "legacy adopt visible sprint 이관: $count sprint(s) → docs/solon"
+    ok "legacy adopt visible sprint 이관: $count sprint(s) → docs/<workspace>/<yyyyMMdd>"
   fi
   return 0
 }
@@ -2036,10 +2038,10 @@ fi
 
 trace_upgrade "completion hint render before"
 if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ]; then
-  COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .claude .gemini .agents docs/solon${C_RESET}"
+  COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .claude .gemini .agents docs${C_RESET}"
   AGENT_HINT="project-local command/skill adapters 는 기본 제거되었습니다. 필요할 때만: sfs agent install all"
 else
-  COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .claude .gemini .agents docs/solon${C_RESET}"
+  COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .claude .gemini .agents docs${C_RESET}"
   AGENT_HINT="vendored layout 은 project-local command/skill adapters 를 계속 동기화합니다."
 fi
 trace_upgrade "completion hint render after"

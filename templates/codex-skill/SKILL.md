@@ -115,6 +115,7 @@ required.
 - `.sfs-local/` is private local workbench state and is gitignored by default.
   Do not ask the user to commit it unless the team explicitly opts into a
   different policy.
-- Shared, durable Solon docs belong under `docs/solon/`. Workbench docs are
+- Shared handoff/history docs belong under `docs/<workspace>/<yyyyMMdd>/`.
+  `docs/solon/` is for project-wide Solon reference docs. Workbench docs are
   created only when a command needs them and are compacted when the slice closes.
 - This user-global skill provides only discovery and routing.

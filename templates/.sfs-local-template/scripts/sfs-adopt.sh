@@ -22,7 +22,8 @@ Adopt an existing legacy project into SFS without creating document sprawl.
   - Default is dry-run; it prints the baseline sprint and evidence sources.
   - Optional <brief> is a single-line user note, for example:
       /sfs adopt "docs cleanup and current-state handoff"
-  - --apply creates docs/solon/<id>-adoption-summary.md as the shared entry.
+  - --apply creates docs/<workspace>/<yyyyMMdd>/handoff.md as the shared entry;
+    for adopt, <workspace> defaults to the adopt id.
   - Existing visible sprint folders and expanded archive folders are collapsed
     into cold .tar.gz archives with short manifests.
   - Raw scan evidence is preserved in .sfs-local/archives/adopt/<id>/...
@@ -221,9 +222,6 @@ existing_sprint_ids_for_adopt() {
     | while IFS= read -r dir; do
         sid="$(basename "${dir}")"
         [[ "${sid}" == "${SPRINT_ID}" ]] && continue
-        if [[ "${PRESERVE_CURRENT_SPRINT:-0}" -eq 1 && "${sid}" == "${CURRENT_SPRINT:-}" ]]; then
-          continue
-        fi
         printf '%s\n' "${sid}"
       done \
     | sort
@@ -252,6 +250,47 @@ print_cold_archive_plan() {
     [[ -n "${item}" ]] || continue
     echo "    - ${base_dir}/${item}"
   done
+}
+
+tmp_artifact_count_for_adopt() {
+  [[ -d "${SFS_LOCAL_DIR}/tmp" ]] || { printf '0\n'; return "${SFS_EXIT_OK}"; }
+  find "${SFS_LOCAL_DIR}/tmp" -type f 2>/dev/null | wc -l | tr -d '[:space:]'
+}
+
+event_ledger_line_count_for_adopt() {
+  [[ -f "${SFS_EVENTS_FILE}" ]] || { printf '0\n'; return "${SFS_EXIT_OK}"; }
+  wc -l < "${SFS_EVENTS_FILE}" 2>/dev/null | tr -d '[:space:]'
+}
+
+is_adopt_runtime_keep_file() {
+  case "${1:-}" in
+    "${SFS_LOCAL_DIR}/config.yaml"|"${SFS_LOCAL_DIR}/VERSION"|"${SFS_LOCAL_DIR}/model-profiles.yaml"|"${SFS_LOCAL_DIR}/divisions.yaml")
+      return "${SFS_EXIT_OK}"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+residue_files_for_adopt() {
+  [[ -d "${SFS_LOCAL_DIR}" ]] || return "${SFS_EXIT_OK}"
+  find "${SFS_LOCAL_DIR}" -type f 2>/dev/null | sort \
+    | while IFS= read -r file; do
+        case "${file}" in
+          "${SFS_ARCHIVES_DIR}/"*|"${SFS_EVENTS_FILE}"|"${SFS_LOCAL_DIR}/tmp/"*)
+            continue
+            ;;
+        esac
+        if is_adopt_runtime_keep_file "${file}"; then
+          continue
+        fi
+        printf '%s\n' "${file}"
+      done
+}
+
+residue_file_count_for_adopt() {
+  residue_files_for_adopt | sed '/^[[:space:]]*$/d' | wc -l | tr -d '[:space:]'
 }
 
 collapse_dirs_to_cold_archive() {
@@ -285,6 +324,130 @@ collapse_dirs_to_cold_archive() {
     [[ -n "${item}" ]] || continue
     rm -rf "${base_dir}/${item}" || return "${SFS_EXIT_PERM}"
   done <<< "${ids}"
+  return "${SFS_EXIT_OK}"
+}
+
+collapse_tmp_to_cold_archive() {
+  local archive_path="${1:?archive path required}" manifest_path="${2:?manifest path required}"
+  local tmp_root="${SFS_LOCAL_DIR}/tmp" count staging file rel
+  [[ -d "${tmp_root}" ]] || return "${SFS_EXIT_OK}"
+  count="$(tmp_artifact_count_for_adopt)"
+  [[ "${count}" -gt 0 ]] || return "${SFS_EXIT_OK}"
+
+  mkdir -p "$(dirname "${archive_path}")" || return "${SFS_EXIT_PERM}"
+  staging="$(mktemp -d "$(dirname "${archive_path}")/.tmp-stage.XXXXXX")" || return "${SFS_EXIT_PERM}"
+  while IFS= read -r file; do
+    [[ -f "${file}" ]] || continue
+    rel="${file#${SFS_LOCAL_DIR}/}"
+    mkdir -p "${staging}/$(dirname "${rel}")" || return "${SFS_EXIT_PERM}"
+    cp "${file}" "${staging}/${rel}" || return "${SFS_EXIT_PERM}"
+  done < <(find "${tmp_root}" -type f 2>/dev/null | sort)
+
+  {
+    echo "SFS adopt preexisting tmp artifact archive"
+    echo "generated_at: ${NOW}"
+    echo "source_root: ${tmp_root}"
+    echo "archive: ${archive_path}"
+    echo "count: ${count}"
+    echo
+    echo "policy:"
+    echo "- adopt resets the active workbench; old tmp prompt/run scratch is cold history"
+    echo "- use this archive only for archaeology, dispute resolution, or deep recovery"
+    echo
+    echo "items:"
+    find "${staging}" -type f 2>/dev/null | sort | while IFS= read -r staged; do
+      printf -- "- %s\n" "${staged#${staging}/}"
+    done
+  } > "${manifest_path}" || return "${SFS_EXIT_PERM}"
+
+  tar -czf "${archive_path}" -C "${staging}" . || return "${SFS_EXIT_PERM}"
+  rm -rf "${staging}" || return "${SFS_EXIT_PERM}"
+  while IFS= read -r file; do
+    [[ -f "${file}" ]] || continue
+    rm -f "${file}" || return "${SFS_EXIT_PERM}"
+  done < <(find "${tmp_root}" -type f 2>/dev/null | sort)
+  find "${tmp_root}" -depth -type d -empty -exec rmdir {} \; 2>/dev/null || true
+  return "${SFS_EXIT_OK}"
+}
+
+collapse_residue_files_to_cold_archive() {
+  local archive_path="${1:?archive path required}" manifest_path="${2:?manifest path required}"
+  local files="${3:-}" count staging file rel
+  count="$(nonempty_line_count "${files}")"
+  [[ "${count}" -gt 0 ]] || return "${SFS_EXIT_OK}"
+
+  mkdir -p "$(dirname "${archive_path}")" || return "${SFS_EXIT_PERM}"
+  staging="$(mktemp -d "$(dirname "${archive_path}")/.residue-stage.XXXXXX")" || return "${SFS_EXIT_PERM}"
+  while IFS= read -r file; do
+    [[ -n "${file}" && -f "${file}" ]] || continue
+    rel="${file#${SFS_LOCAL_DIR}/}"
+    mkdir -p "${staging}/${SFS_LOCAL_DIR}/$(dirname "${rel}")" || return "${SFS_EXIT_PERM}"
+    cp "${file}" "${staging}/${SFS_LOCAL_DIR}/${rel}" || return "${SFS_EXIT_PERM}"
+  done <<< "${files}"
+
+  {
+    echo "SFS adopt nonessential residue archive"
+    echo "generated_at: ${NOW}"
+    echo "source_root: ${SFS_LOCAL_DIR}"
+    echo "archive: ${archive_path}"
+    echo "count: ${count}"
+    echo
+    echo "policy:"
+    echo "- adopt keeps only files with a clear one-line runtime reason visible"
+    echo "- archived files remain recoverable cold history, not active workbench surface"
+    echo
+    echo "retained_runtime_files:"
+    echo "- ${SFS_LOCAL_DIR}/config.yaml — workspace SFS runtime config"
+    echo "- ${SFS_LOCAL_DIR}/VERSION — installed SFS version/upgrade state"
+    echo "- ${SFS_LOCAL_DIR}/model-profiles.yaml — project model-routing config"
+    echo "- ${SFS_LOCAL_DIR}/divisions.yaml — project division activation config"
+    echo
+    echo "items:"
+    find "${staging}" -type f 2>/dev/null | sort | while IFS= read -r staged; do
+      printf -- "- %s\n" "${staged#${staging}/}"
+    done
+  } > "${manifest_path}" || return "${SFS_EXIT_PERM}"
+
+  tar -czf "${archive_path}" -C "${staging}" . || return "${SFS_EXIT_PERM}"
+  rm -rf "${staging}" || return "${SFS_EXIT_PERM}"
+  while IFS= read -r file; do
+    [[ -n "${file}" && -f "${file}" ]] || continue
+    rm -f "${file}" || return "${SFS_EXIT_PERM}"
+  done <<< "${files}"
+  find "${SFS_LOCAL_DIR}" -depth -type d -empty ! -path "${SFS_ARCHIVES_DIR}" ! -path "${SFS_ARCHIVES_DIR}/*" -exec rmdir {} \; 2>/dev/null || true
+  return "${SFS_EXIT_OK}"
+}
+
+archive_and_reset_event_ledger_for_adopt() {
+  local backup_path="${1:?backup path required}" line_count
+  [[ -f "${SFS_EVENTS_FILE}" ]] || { printf '0\n'; return "${SFS_EXIT_OK}"; }
+  line_count="$(event_ledger_line_count_for_adopt)"
+  [[ "${line_count}" -gt 0 ]] || { rm -f "${SFS_EVENTS_FILE}" 2>/dev/null || true; printf '0\n'; return "${SFS_EXIT_OK}"; }
+  mkdir -p "$(dirname "${backup_path}")" || return "${SFS_EXIT_PERM}"
+  cp "${SFS_EVENTS_FILE}" "${backup_path}" || return "${SFS_EXIT_PERM}"
+  rm -f "${SFS_EVENTS_FILE}" || return "${SFS_EXIT_PERM}"
+  printf '%s\n' "${line_count}"
+  return "${SFS_EXIT_OK}"
+}
+
+archive_legacy_shared_doc_for_adopt() {
+  local legacy_path="${1:?legacy path required}" archive_path="${2:?archive path required}" manifest_path="${3:?manifest path required}"
+  [[ -f "${legacy_path}" ]] || { printf '0\n'; return "${SFS_EXIT_OK}"; }
+  mkdir -p "$(dirname "${archive_path}")" || return "${SFS_EXIT_PERM}"
+  cp "${legacy_path}" "${archive_path}" || return "${SFS_EXIT_PERM}"
+  {
+    echo "SFS adopt legacy shared doc archive"
+    echo "generated_at: ${NOW}"
+    echo "legacy_path: ${legacy_path}"
+    echo "archive: ${archive_path}"
+    echo
+    echo "reason:"
+    echo "- previous runtimes wrote adopt handoff as a flat docs/solon summary"
+    echo "- current policy keeps handoff/history docs under docs/<workspace>/<yyyyMMdd>/"
+  } > "${manifest_path}" || return "${SFS_EXIT_PERM}"
+  rm -f "${legacy_path}" || return "${SFS_EXIT_PERM}"
+  rmdir "$(dirname "${legacy_path}")" 2>/dev/null || true
+  printf '1\n'
   return "${SFS_EXIT_OK}"
 }
 
@@ -415,15 +578,17 @@ fi
 TARGET_DIR="${SFS_SPRINTS_DIR}/${SPRINT_ID}"
 ARCHIVE_DIR="${SFS_ARCHIVES_DIR}/adopt/${SPRINT_ID}/${NOW//:/-}"
 ARCHIVE_DIR="${ARCHIVE_DIR//+/-}"
-SHARED_DOC_DIR="${SFS_SHARED_DOC_DIR:-docs/solon}"
-SHARED_DOC_PATH="${SHARED_DOC_DIR}/${SPRINT_ID}-adoption-summary.md"
+SHARED_DOC_ROOT="${SFS_SHARED_DOC_DIR:-${SFS_SHARED_DOCS_DIR:-docs}}"
+ADOPT_WORKSPACE="$(sfs_path_segment_from_text "${SPRINT_ID}" "legacy-baseline")"
+ADOPT_DATE_DIR="$(sfs_date_dir_from_ts "${NOW}")"
+SHARED_DOC_DIR="${SHARED_DOC_ROOT}/${ADOPT_WORKSPACE}/${ADOPT_DATE_DIR}"
+SHARED_DOC_PATH="${SHARED_DOC_DIR}/handoff.md"
+LEGACY_SHARED_DOC_PATH="docs/solon/${SPRINT_ID}-adoption-summary.md"
+LEGACY_SHARED_DOC_ARCHIVE="${ARCHIVE_DIR}/preexisting-shared-adoption-summary.md"
+LEGACY_SHARED_DOC_MANIFEST="${ARCHIVE_DIR}/preexisting-shared-adoption-summary.manifest.txt"
 CURRENT_SPRINT=""
 if [[ -f "${SFS_CURRENT_SPRINT_FILE}" ]]; then
   CURRENT_SPRINT="$(sed -n '1p' "${SFS_CURRENT_SPRINT_FILE}" 2>/dev/null | tr -d '[:space:]' || true)"
-fi
-PRESERVE_CURRENT_SPRINT=0
-if [[ -n "${CURRENT_SPRINT}" && "${CURRENT_SPRINT}" != "${SPRINT_ID}" ]]; then
-  PRESERVE_CURRENT_SPRINT=1
 fi
 EXISTING_SPRINT_IDS="$(existing_sprint_ids_for_adopt)"
 EXISTING_ARCHIVE_IDS="$(existing_archive_ids_for_adopt)"
@@ -435,6 +600,19 @@ EXISTING_ARCHIVES_TARBALL="${ARCHIVE_DIR}/preexisting-archives.tar.gz"
 EXISTING_ARCHIVES_MANIFEST="${ARCHIVE_DIR}/preexisting-archives.manifest.txt"
 PREEXISTING_TARGET_TARBALL="${ARCHIVE_DIR}/preexisting-target.tar.gz"
 PREEXISTING_TARGET_MANIFEST="${ARCHIVE_DIR}/preexisting-target.manifest.txt"
+TMP_ARTIFACT_COUNT="$(tmp_artifact_count_for_adopt)"
+TMP_ARTIFACTS_TARBALL="${ARCHIVE_DIR}/preexisting-tmp.tar.gz"
+TMP_ARTIFACTS_MANIFEST="${ARCHIVE_DIR}/preexisting-tmp.manifest.txt"
+EVENT_LEDGER_LINE_COUNT="$(event_ledger_line_count_for_adopt)"
+EVENT_LEDGER_BACKUP="${ARCHIVE_DIR}/preexisting-events.jsonl"
+RESIDUE_FILES="$(residue_files_for_adopt)"
+RESIDUE_FILE_COUNT="$(nonempty_line_count "${RESIDUE_FILES}")"
+RESIDUE_TARBALL="${ARCHIVE_DIR}/preexisting-residue.tar.gz"
+RESIDUE_MANIFEST="${ARCHIVE_DIR}/preexisting-residue.manifest.txt"
+LEGACY_SHARED_DOC_COUNT=0
+if [[ -f "${LEGACY_SHARED_DOC_PATH}" && "${LEGACY_SHARED_DOC_PATH}" != "${SHARED_DOC_PATH}" ]]; then
+  LEGACY_SHARED_DOC_COUNT=1
+fi
 
 if [[ "${APPLY}" -eq 0 ]]; then
   echo "adopt dry-run: ${SPRINT_ID}"
@@ -449,8 +627,9 @@ if [[ "${APPLY}" -eq 0 ]]; then
   echo "  test_signals: ${TEST_COUNT}"
   echo "  stack: ${STACK_SIGNALS}"
   echo "  submodules/subrepos: ${SUBREPO_SIGNAL_COUNT}"
-  if [[ "${PRESERVE_CURRENT_SPRINT}" -eq 1 ]]; then
-    echo "  preserve_current_sprint: ${CURRENT_SPRINT} (target exists; treating as post-adopt real sprint)"
+  if [[ -n "${CURRENT_SPRINT}" ]]; then
+    echo "  active_sprint_before_adopt: ${CURRENT_SPRINT} (will archive/reset; first real sprint starts after adopt)"
+    echo "  would_remove_active_sprint_pointer: ${SFS_CURRENT_SPRINT_FILE}"
   fi
   if [[ -d "${TARGET_DIR}" && "${FORCE}" -ne 1 ]]; then
     echo "  target: ${TARGET_DIR} (exists; --apply would require --force)"
@@ -463,13 +642,44 @@ if [[ "${APPLY}" -eq 0 ]]; then
   echo "    - ${ARCHIVE_DIR}/source-summary.txt"
   print_cold_archive_plan "would_archive_existing_sprints" "${EXISTING_SPRINT_IDS}" "${SFS_SPRINTS_DIR}" "${EXISTING_SPRINTS_TARBALL}" "${EXISTING_SPRINTS_MANIFEST}"
   print_cold_archive_plan "would_collapse_existing_archives" "${EXISTING_ARCHIVE_IDS}" "${SFS_ARCHIVES_DIR}" "${EXISTING_ARCHIVES_TARBALL}" "${EXISTING_ARCHIVES_MANIFEST}"
+  echo "  would_archive_tmp_artifacts: ${TMP_ARTIFACT_COUNT}"
+  if [[ "${TMP_ARTIFACT_COUNT}" -gt 0 ]]; then
+    echo "    cold_archive: ${TMP_ARTIFACTS_TARBALL}"
+    echo "    manifest: ${TMP_ARTIFACTS_MANIFEST}"
+    echo "    - ${SFS_LOCAL_DIR}/tmp"
+  fi
+  echo "  would_archive_event_ledger_lines: ${EVENT_LEDGER_LINE_COUNT}"
+  if [[ "${EVENT_LEDGER_LINE_COUNT}" -gt 0 ]]; then
+    echo "    backup: ${EVENT_LEDGER_BACKUP}"
+    echo "    reset: ${SFS_EVENTS_FILE}"
+  fi
+  echo "  would_archive_legacy_flat_shared_doc: ${LEGACY_SHARED_DOC_COUNT}"
+  if [[ "${LEGACY_SHARED_DOC_COUNT}" -gt 0 ]]; then
+    echo "    archive: ${LEGACY_SHARED_DOC_ARCHIVE}"
+    echo "    manifest: ${LEGACY_SHARED_DOC_MANIFEST}"
+    echo "    - ${LEGACY_SHARED_DOC_PATH}"
+  fi
+  echo "  would_archive_nonessential_residue: ${RESIDUE_FILE_COUNT}"
+  if [[ "${RESIDUE_FILE_COUNT}" -gt 0 ]]; then
+    echo "    cold_archive: ${RESIDUE_TARBALL}"
+    echo "    manifest: ${RESIDUE_MANIFEST}"
+    printf '%s\n' "${RESIDUE_FILES}" | while IFS= read -r item; do
+      [[ -n "${item}" ]] || continue
+      echo "    - ${item}"
+    done
+  fi
+  echo "  would_keep_runtime_files:"
+  echo "    - ${SFS_LOCAL_DIR}/config.yaml — workspace SFS runtime config"
+  echo "    - ${SFS_LOCAL_DIR}/VERSION — installed SFS version/upgrade state"
+  echo "    - ${SFS_LOCAL_DIR}/model-profiles.yaml — project model-routing config"
+  echo "    - ${SFS_LOCAL_DIR}/divisions.yaml — project division activation config"
   if [[ -d "${TARGET_DIR}" && "${FORCE}" -eq 1 ]]; then
     echo "  would_archive_existing_target: 1"
     echo "    cold_archive: ${PREEXISTING_TARGET_TARBALL}"
     echo "    manifest: ${PREEXISTING_TARGET_MANIFEST}"
     echo "    - ${TARGET_DIR}"
   fi
-  echo "  visible_policy: shared docs/solon summary only; .sfs-local stays private"
+  echo "  visible_policy: shared docs/<workspace>/<yyyyMMdd>/handoff.md only; .sfs-local stays private"
   exit "${SFS_EXIT_OK}"
 fi
 
@@ -490,6 +700,16 @@ fi
 
 collapse_dirs_to_cold_archive "${EXISTING_SPRINT_IDS}" "${SFS_SPRINTS_DIR}" "${EXISTING_SPRINTS_TARBALL}" "${EXISTING_SPRINTS_MANIFEST}" "SFS adopt preexisting sprint archive" || exit "${SFS_EXIT_PERM}"
 collapse_dirs_to_cold_archive "${EXISTING_ARCHIVE_IDS}" "${SFS_ARCHIVES_DIR}" "${EXISTING_ARCHIVES_TARBALL}" "${EXISTING_ARCHIVES_MANIFEST}" "SFS adopt preexisting expanded archive collapse" || exit "${SFS_EXIT_PERM}"
+collapse_tmp_to_cold_archive "${TMP_ARTIFACTS_TARBALL}" "${TMP_ARTIFACTS_MANIFEST}" || exit "${SFS_EXIT_PERM}"
+ACTIVE_SPRINT_POINTER_REMOVED=0
+if [[ -f "${SFS_CURRENT_SPRINT_FILE}" ]]; then
+  rm -f "${SFS_CURRENT_SPRINT_FILE}" || exit "${SFS_EXIT_PERM}"
+  ACTIVE_SPRINT_POINTER_REMOVED=1
+fi
+EVENT_LEDGER_ARCHIVED_LINES="$(archive_and_reset_event_ledger_for_adopt "${EVENT_LEDGER_BACKUP}")" || exit "${SFS_EXIT_PERM}"
+LEGACY_SHARED_DOC_ARCHIVED="$(archive_legacy_shared_doc_for_adopt "${LEGACY_SHARED_DOC_PATH}" "${LEGACY_SHARED_DOC_ARCHIVE}" "${LEGACY_SHARED_DOC_MANIFEST}")" || exit "${SFS_EXIT_PERM}"
+collapse_residue_files_to_cold_archive "${RESIDUE_TARBALL}" "${RESIDUE_MANIFEST}" "${RESIDUE_FILES}" || exit "${SFS_EXIT_PERM}"
+rmdir "${SFS_SPRINTS_DIR}" 2>/dev/null || true
 mkdir -p "${SHARED_DOC_DIR}" || exit "${SFS_EXIT_PERM}"
 
 RECENT_COMMITS="$(git log -n "${MAX_COMMITS}" --date=short --pretty=format:'- %h %ad %s' 2>/dev/null || true)"
@@ -525,12 +745,24 @@ REPORT_SOURCE_YAML="$(json_escape "${REPORT_SOURCE}")"
   echo "test_signals: ${TEST_COUNT}"
   echo "stack: ${STACK_SIGNALS}"
   echo "sfs_sprint_count_before_adopt: ${SFS_SPRINT_COUNT}"
-  echo "preserved_current_sprint: ${CURRENT_SPRINT:-}"
-  echo "preserved_current_sprint_applied: ${PRESERVE_CURRENT_SPRINT}"
+  echo "active_sprint_before_adopt: ${CURRENT_SPRINT:-}"
+  echo "active_sprint_pointer_removed: ${ACTIVE_SPRINT_POINTER_REMOVED}"
+  echo "preserved_current_sprint: "
+  echo "preserved_current_sprint_applied: 0"
   echo "archived_existing_sprint_count: ${EXISTING_SPRINT_ARCHIVE_COUNT}"
   echo "collapsed_existing_archive_count: ${EXISTING_ARCHIVE_COLLAPSE_COUNT}"
+  echo "archived_tmp_artifact_count: ${TMP_ARTIFACT_COUNT}"
+  echo "archived_event_ledger_lines: ${EVENT_LEDGER_ARCHIVED_LINES}"
+  echo "archived_legacy_flat_shared_doc: ${LEGACY_SHARED_DOC_ARCHIVED}"
+  echo "archived_nonessential_residue_count: ${RESIDUE_FILE_COUNT}"
   echo "submodule_count: ${SUBMODULE_COUNT}"
   echo "nested_repo_count: ${NESTED_REPO_COUNT}"
+  echo
+  echo "retained_runtime_files:"
+  echo "- ${SFS_LOCAL_DIR}/config.yaml — workspace SFS runtime config"
+  echo "- ${SFS_LOCAL_DIR}/VERSION — installed SFS version/upgrade state"
+  echo "- ${SFS_LOCAL_DIR}/model-profiles.yaml — project model-routing config"
+  echo "- ${SFS_LOCAL_DIR}/divisions.yaml — project division activation config"
   if [[ "${EXISTING_SPRINT_ARCHIVE_COUNT}" -gt 0 ]]; then
     echo
     echo "archived_existing_sprints:"
@@ -544,6 +776,20 @@ REPORT_SOURCE_YAML="$(json_escape "${REPORT_SOURCE}")"
     printf '%s\n' "${EXISTING_ARCHIVE_IDS}" | sed "s#^#- ${SFS_ARCHIVES_DIR}/#"
     echo "cold_archive: ${EXISTING_ARCHIVES_TARBALL}"
     echo "manifest: ${EXISTING_ARCHIVES_MANIFEST}"
+  fi
+  if [[ "${RESIDUE_FILE_COUNT}" -gt 0 ]]; then
+    echo
+    echo "archived_nonessential_residue:"
+    printf '%s\n' "${RESIDUE_FILES}" | sed 's#^#- #'
+    echo "cold_archive: ${RESIDUE_TARBALL}"
+    echo "manifest: ${RESIDUE_MANIFEST}"
+  fi
+  if [[ "${LEGACY_SHARED_DOC_ARCHIVED}" -gt 0 ]]; then
+    echo
+    echo "archived_legacy_flat_shared_doc:"
+    echo "- ${LEGACY_SHARED_DOC_PATH}"
+    echo "archive: ${LEGACY_SHARED_DOC_ARCHIVE}"
+    echo "manifest: ${LEGACY_SHARED_DOC_MANIFEST}"
   fi
   if [[ -n "${SUBMODULE_STATUS}" ]]; then
     echo
@@ -600,9 +846,18 @@ ${ADOPT_BRIEF:-  - none}
 - **Stack signals**: ${STACK_SIGNALS}
 - **Submodule/subrepo signals**: ${SUBREPO_SIGNAL_COUNT}
 - **Existing SFS sprint folders before adopt**: ${SFS_SPRINT_COUNT}
-- **Preserved current sprint during re-adopt**: ${CURRENT_SPRINT:-none}
+- **Active sprint before adopt**: ${CURRENT_SPRINT:-none}
+- **Active sprint pointer removed during adopt**: ${ACTIVE_SPRINT_POINTER_REMOVED}
 - **Archived existing SFS sprint folders during adopt**: ${EXISTING_SPRINT_ARCHIVE_COUNT}
 - **Collapsed pre-existing expanded archive folders**: ${EXISTING_ARCHIVE_COLLAPSE_COUNT}
+- **Archived tmp scratch files during adopt**: ${TMP_ARTIFACT_COUNT}
+- **Archived previous event ledger lines during adopt**: ${EVENT_LEDGER_ARCHIVED_LINES}
+- **Archived nonessential \`.sfs-local\` residue during adopt**: ${RESIDUE_FILE_COUNT}
+- **Retained runtime files and one-line reasons**:
+  - \`.sfs-local/config.yaml\` — workspace SFS runtime config.
+  - \`.sfs-local/VERSION\` — installed SFS version/upgrade state.
+  - \`.sfs-local/model-profiles.yaml\` — project model-routing config.
+  - \`.sfs-local/divisions.yaml\` — project division activation config.
 
 ## §3. Component Map
 
@@ -658,6 +913,12 @@ ${VERIFY_COMMANDS}
 - **Cold archive policy**: old sprint/archive trees are stored as tarballs plus short manifests, not expanded as a visible document tree.
 - **Archived old sprint folders**: ${EXISTING_SPRINT_ARCHIVE_COUNT} in \`${EXISTING_SPRINTS_TARBALL}\`.
 - **Collapsed old archive folders**: ${EXISTING_ARCHIVE_COLLAPSE_COUNT} in \`${EXISTING_ARCHIVES_TARBALL}\`.
+- **Archived old tmp scratch**: ${TMP_ARTIFACT_COUNT} files in \`${TMP_ARTIFACTS_TARBALL}\`.
+- **Archived old event ledger**: ${EVENT_LEDGER_ARCHIVED_LINES} lines in \`${EVENT_LEDGER_BACKUP}\`.
+- **Archived legacy flat shared doc**: ${LEGACY_SHARED_DOC_ARCHIVED} file in \`${LEGACY_SHARED_DOC_ARCHIVE}\`.
+- **Archived nonessential residue**: ${RESIDUE_FILE_COUNT} files in \`${RESIDUE_TARBALL}\`.
+- **Event ledger after adopt**: none. \`adopt\` leaves no active log file; the
+  shared summary and private source summary are the durable evidence.
 
 ## §7. Next Sprint Contract Seed
 
@@ -672,20 +933,17 @@ Do not start the next sprint by reading the cold archives. Use them only for
 archaeology, dispute resolution, or deep recovery.
 EOF
 
-_esc_sprint="$(json_escape "${SPRINT_ID}")"
-_esc_shared_doc="$(json_escape "${SHARED_DOC_PATH}")"
-_esc_archive="$(json_escape "${ARCHIVE_DIR}/source-summary.txt")"
-_esc_brief="$(json_escape "${ADOPT_BRIEF}")"
-append_event "legacy_adopt" "{\"sprint_id\":\"${_esc_sprint}\",\"brief\":\"${_esc_brief}\",\"shared_doc\":\"${_esc_shared_doc}\",\"archive\":\"${_esc_archive}\",\"commits\":${COMMIT_COUNT},\"tracked_files\":${TRACKED_COUNT},\"docs_signals\":${DOC_COUNT},\"test_signals\":${TEST_COUNT},\"submodules\":${SUBMODULE_COUNT},\"nested_repos\":${NESTED_REPO_COUNT},\"archived_existing_sprints\":${EXISTING_SPRINT_ARCHIVE_COUNT},\"collapsed_existing_archives\":${EXISTING_ARCHIVE_COLLAPSE_COUNT}}"
-
 echo "adopted: ${SPRINT_ID}"
 if [[ -n "${ADOPT_BRIEF}" ]]; then
   echo "  brief: ${ADOPT_BRIEF}"
 fi
 echo "  shared_doc: ${SHARED_DOC_PATH}"
 echo "  private_archive: ${ARCHIVE_DIR}/source-summary.txt"
-if [[ "${PRESERVE_CURRENT_SPRINT}" -eq 1 ]]; then
-  echo "  preserved_current_sprint: ${CURRENT_SPRINT}"
+if [[ -n "${CURRENT_SPRINT}" ]]; then
+  echo "  active_sprint_archived: ${CURRENT_SPRINT}"
+fi
+if [[ "${ACTIVE_SPRINT_POINTER_REMOVED}" -eq 1 ]]; then
+  echo "  removed_active_sprint_pointer: ${SFS_CURRENT_SPRINT_FILE}"
 fi
 echo "  archived_existing_sprints: ${EXISTING_SPRINT_ARCHIVE_COUNT}"
 if [[ "${EXISTING_SPRINT_ARCHIVE_COUNT}" -gt 0 ]]; then
@@ -695,7 +953,29 @@ echo "  collapsed_existing_archives: ${EXISTING_ARCHIVE_COLLAPSE_COUNT}"
 if [[ "${EXISTING_ARCHIVE_COLLAPSE_COUNT}" -gt 0 ]]; then
   echo "  existing_archives_archive: ${EXISTING_ARCHIVES_TARBALL}"
 fi
-echo "  visible_policy: shared docs/solon summary only; .sfs-local stays private"
+echo "  archived_tmp_artifacts: ${TMP_ARTIFACT_COUNT}"
+if [[ "${TMP_ARTIFACT_COUNT}" -gt 0 ]]; then
+  echo "  tmp_archive: ${TMP_ARTIFACTS_TARBALL}"
+fi
+echo "  archived_event_ledger_lines: ${EVENT_LEDGER_ARCHIVED_LINES}"
+if [[ "${EVENT_LEDGER_ARCHIVED_LINES}" -gt 0 ]]; then
+  echo "  event_ledger_backup: ${EVENT_LEDGER_BACKUP}"
+fi
+echo "  archived_legacy_flat_shared_doc: ${LEGACY_SHARED_DOC_ARCHIVED}"
+if [[ "${LEGACY_SHARED_DOC_ARCHIVED}" -gt 0 ]]; then
+  echo "  legacy_flat_shared_doc_archive: ${LEGACY_SHARED_DOC_ARCHIVE}"
+fi
+echo "  archived_nonessential_residue: ${RESIDUE_FILE_COUNT}"
+if [[ "${RESIDUE_FILE_COUNT}" -gt 0 ]]; then
+  echo "  residue_archive: ${RESIDUE_TARBALL}"
+fi
+echo "  kept_runtime_files:"
+echo "    - ${SFS_LOCAL_DIR}/config.yaml — workspace SFS runtime config"
+echo "    - ${SFS_LOCAL_DIR}/VERSION — installed SFS version/upgrade state"
+echo "    - ${SFS_LOCAL_DIR}/model-profiles.yaml — project model-routing config"
+echo "    - ${SFS_LOCAL_DIR}/divisions.yaml — project division activation config"
+echo "  event_ledger_after_adopt: none"
+echo "  visible_policy: shared docs/<workspace>/<yyyyMMdd>/handoff.md only; .sfs-local stays private"
 echo "  next: run baseline verification, then start the first real SFS sprint"
 
 exit "${SFS_EXIT_OK}"

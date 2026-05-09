@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# tests/test-sfs-shared-handoff-docs.sh — report/retro live under docs/solon/<workspace>/<yyyyMMdd>.
+# tests/test-sfs-shared-handoff-docs.sh — report/retro live under docs/<workspace>/<yyyyMMdd>.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -37,7 +37,7 @@ assert_contains "${start_out}" "created: .sfs-local/sprints/" "start output"
 
 sprint_id="$(cat .sfs-local/current-sprint)"
 date_dir="$(date +%Y%m%d)"
-shared_dir="docs/solon/여기작업내용/${date_dir}"
+shared_dir="docs/여기작업내용/${date_dir}"
 sprint_dir=".sfs-local/sprints/${sprint_id}"
 
 report_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" report)"

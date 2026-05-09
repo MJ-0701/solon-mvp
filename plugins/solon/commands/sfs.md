@@ -69,9 +69,10 @@ $ARGUMENTS
     a self-CPO mini-check: requirements to AC to implementation slices to
     ADR/decision ids, every AC mapped to file/artifact/evidence, and SEED/
     placeholder/mock/fallback material treated as non-acceptance until replaced.
-13. `.sfs-local/` is private workbench state. Shared durable docs belong under
-    `docs/solon/`; do not ask users to commit `.sfs-local` unless their team
-    explicitly opts in.
+13. `.sfs-local/` is private workbench state. Shared handoff/history docs
+    belong under `docs/<workspace>/<yyyyMMdd>/`; `docs/solon/` is for
+    project-wide Solon reference docs. Do not ask users to commit
+    `.sfs-local` unless their team explicitly opts in.
 14. In Solon reports, show gates as `Gate N (Name)`, not naked ids:
    Gate 1 (Intake), Gate 2 (Brainstorm), Gate 3 (Plan),
    Gate 4 (Design), Gate 5 (Handoff), Gate 6 (Review),

@@ -4,7 +4,7 @@
 # Solon SFS — `/sfs retro` command implementation.
 # WU-26 §2 spec implementation. WU-23 §1.6 정합:
 #   · 파일 path stdout 출력만 (에디터 launch 안 함).
-#   · 기본 `retro` 는 docs/solon handoff report.md ensure + workbench archive + sprint close + auto commit + stdout 3줄.
+#   · 기본 `retro` 는 docs/<workspace>/<yyyyMMdd> handoff report.md ensure + workbench archive + sprint close + auto commit + stdout 3줄.
 #   · `--close` 는 backward-compatible alias.
 #   · `--draft` / `--no-close` 지정 시 retro.md 진입만, stdout 1줄.
 #   · auto commit (sfs-common.sh::auto_commit_close) 은 사용자 명시 retro 호출 시에만 동작 (§1.5' 정합).
@@ -59,7 +59,7 @@ while [[ $# -gt 0 ]]; do
       cat <<EOF
 Usage: /sfs retro [--draft|--no-close|--close]
 
-Close the current sprint: open/create docs/solon/<workspace>/<yyyyMMdd>/retro.md,
+Close the current sprint: open/create docs/<workspace>/<yyyyMMdd>/retro.md,
 ensure the matching report.md exists, archive workbench evidence, mark the
 sprint closed, and commit the result.
 The AI runtime owns branch push/main merge/main push after this local close commit.
