@@ -45,7 +45,7 @@ depth 옵션을 함께 보여드릴 뿐입니다.
 ## Windows 래퍼 안정화
 
 Windows PowerShell/cmd 의 사용자 진입점은 `sfs.cmd` 로 고정합니다. Git Bash/WSL 에서는
-macOS/Linux 처럼 `sfs` 를 씁니다. 0.6.76 기준 Scoop manifest 는 generated shim 이
+macOS/Linux 처럼 `sfs` 를 씁니다. 0.6.77 기준 Scoop manifest 는 generated shim 이
 packaged `bin\sfs.ps1` 을 직접 호출하도록 유지하지만, Scoop 이 생성한 `sfs.cmd` / `sfs.ps1`
 shim 이 인자를 버리는 경로가 확인되어 post-install hook 이 shims 디렉터리의 `sfs.cmd`,
 `sfs.ps1`, extensionless `sfs` 를 deterministic wrapper 로 덮어씁니다. PowerShell/cmd smoke 와
@@ -174,6 +174,10 @@ grep 범위 누락, 실측 evidence 갱신, AC와 파일/산출물 매핑 누락
 다시 호출합니다. 사용자에게 묻는 경우는 범위, architecture, public contract, 보안/개인정보/data-loss,
 비용/지연/model policy, destructive action, AC 의미 변경처럼 제품 판단이 필요한 경우입니다.
 
+0.6.77 기준 `sfs review` 는 commit-aware 입니다. working tree 가 clean 이어도 직전 commit 의
+reviewable 파일, 현재 공유 handoff 문서, 작은 ADR/report 본문을 bounded evidence 안에 포함하므로
+commit 후 evidence prompt 가 비어서 partial 이 나는 상황을 막습니다.
+
 ## 얇은 멀티 에이전트 감독
 
 SFS 는 Claude, Codex, Gemini 를 무조건 동시에 돌리는 제품이 아닙니다. 기본값은 한 agent 가
@@ -249,7 +253,7 @@ AI 가 UI 를 만들 때 가장 흔한 실패는 평균값으로 회귀하는 �
 
 ## 분야별 지식팩
 
-0.6.76 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
+0.6.77 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
 더 이상 빈 자리표시자가 아닙니다. 각 지식팩은 "이 분야라면 무엇을 조심해야 하는가",
 "무엇을 물어봐야 하는가", "어떤 근거가 있으면 통과로 볼 수 있는가"를 짧게 담습니다.
 
@@ -259,7 +263,7 @@ AI 가 UI 를 만들 때 가장 흔한 실패는 평균값으로 회귀하는 �
 taxonomy 는 본부라기보다 모든 본부에 걸치는 용어/분류 렌즈로 남기고, 재무/경리/세무/회계는
 경영관리 관점으로 다룹니다.
 
-0.6.76 에서는 agent-skills 벤치마크에서 유용한 discipline 도 같은 방식으로 흡수했습니다.
+0.6.77 에서는 agent-skills 벤치마크에서 유용한 discipline 도 같은 방식으로 흡수했습니다.
 공식 문서 기반 구현은 `implement` 와 `source-docs` review lens 로, stop-the-line 디버깅은
 `implement` 검증 정책으로, deprecation/migration 은 `adopt`/`tidy` 정리 기준으로, shipping
 check 는 `release` 정책으로 들어갑니다. 새 lifecycle command 를 늘리는 대신 기존 흐름의

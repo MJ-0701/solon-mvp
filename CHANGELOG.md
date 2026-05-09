@@ -1,3 +1,30 @@
+## [0.6.77] - 2026-05-09
+
+> **Review evidence is commit-aware.** Gate reviews no longer lose ADR/report
+> evidence just because the sprint deliverables were already committed and the
+> working tree is clean.
+
+### Fixed
+
+- `sfs review` now adds a latest-commit reviewable file manifest and includes
+  reviewable files from `HEAD` alongside dirty/untracked evidence.
+- Current sprint shared handoff docs under
+  `docs/solon/<english-workspace>/<yyyyMMdd>/report.md` and `retro.md` are
+  included explicitly in review prompts.
+- Small first-class review documents such as `docs/solon/decisions/*.md` and
+  shared handoff reports are embedded in full up to the bounded small-file cap,
+  so late ADR sections such as operational assumptions are not cut away.
+- `review.md` frontmatter refreshes the sprint goal and workspace on each
+  review invocation, avoiding stale round-1 goal wording after the sprint scope
+  has been clarified.
+
+### Tests
+
+- Added `test-sfs-review-commit-aware-evidence.sh`, which creates a clean
+  committed ADR + shared report sprint and verifies `sfs review --gate 4
+  --prompt-only` contains the latest commit manifest, handoff manifest, full ADR
+  tail section, handoff report body, and refreshed review frontmatter.
+
 ## [0.6.76] - 2026-05-09
 
 > **SFS commit is the commit+push surface.** Solon commit guidance now points to

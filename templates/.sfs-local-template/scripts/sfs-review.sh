@@ -440,6 +440,8 @@ IMPLEMENT_PATH="${SPRINT_DIR}/implement.md"
 PLAN_PATH="${SPRINT_DIR}/plan.md"
 LOG_PATH="${SPRINT_DIR}/log.md"
 BRAINSTORM_PATH="${SPRINT_DIR}/brainstorm.md"
+SPRINT_GOAL="$(sfs_goal_for_sprint "${SPRINT_ID}" || true)"
+SPRINT_WORKSPACE="$(sfs_workspace_for_sprint "${SPRINT_ID}" || true)"
 
 review_signal_text() {
   for file in "${IMPLEMENT_PATH}" "${PLAN_PATH}" "${LOG_PATH}" "${BRAINSTORM_PATH}"; do
@@ -1005,6 +1007,18 @@ if ! update_frontmatter "${REVIEW_PATH}" "phase" "review" 2>/dev/null; then
   echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
   exit "${SFS_EXIT_PERM}"
 fi
+if [[ -n "${SPRINT_GOAL}" ]]; then
+  if ! update_frontmatter "${REVIEW_PATH}" "goal" "$(sfs_yaml_quote "${SPRINT_GOAL}")" 2>/dev/null; then
+    echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
+    exit "${SFS_EXIT_PERM}"
+  fi
+fi
+if [[ -n "${SPRINT_WORKSPACE}" ]]; then
+  if ! update_frontmatter "${REVIEW_PATH}" "workspace" "$(sfs_yaml_quote "${SPRINT_WORKSPACE}")" 2>/dev/null; then
+    echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
+    exit "${SFS_EXIT_PERM}"
+  fi
+fi
 if ! update_frontmatter "${REVIEW_PATH}" "gate_id" "${GATE_ID}" 2>/dev/null; then
   echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
   exit "${SFS_EXIT_PERM}"
@@ -1106,6 +1120,34 @@ auto_review_evidence_paths() {
   done
 }
 
+latest_commit_review_evidence_paths() {
+  git rev-parse --verify HEAD >/dev/null 2>&1 || return 0
+  git diff-tree --no-commit-id --name-only -r --diff-filter=ACMRT HEAD 2>/dev/null \
+    | while IFS= read -r path; do
+      [[ -n "$path" ]] || continue
+      path="$(normalize_review_candidate_path "$path" || true)"
+      [[ -n "$path" ]] || continue
+      if is_reviewable_project_path "$path" && is_auto_review_candidate_path "$path" && review_evidence_file_exists "$path"; then
+        printf '%s\n' "$path"
+      fi
+    done
+}
+
+current_sprint_handoff_evidence_paths() {
+  local handoff_dir path
+  handoff_dir="$(sfs_shared_handoff_dir "${SPRINT_ID}" "${NOW}" 2>/dev/null || true)"
+  [[ -n "$handoff_dir" ]] || return 0
+  for path in \
+    "${handoff_dir}/report.md" \
+    "${handoff_dir}/retro.md"; do
+    path="$(normalize_review_candidate_path "$path" || true)"
+    [[ -n "$path" ]] || continue
+    if is_reviewable_project_path "$path" && is_auto_review_candidate_path "$path" && review_evidence_file_exists "$path"; then
+      printf '%s\n' "$path"
+    fi
+  done
+}
+
 indexed_review_evidence_paths() {
   {
     extract_path_tokens_from_file "${IMPLEMENT_PATH}"
@@ -1128,6 +1170,12 @@ indexed_review_evidence_paths() {
 review_evidence_path_rank() {
   local path="$1"
   case "$path" in
+    docs/solon/*/*/report.md|docs/solon/*/*/retro.md)
+      printf '08\n'
+      ;;
+    docs/solon/decisions/*.md)
+      printf '09\n'
+      ;;
     .env.example|*/.env.example)
       printf '10\n'
       ;;
@@ -1158,6 +1206,18 @@ review_evidence_path_rank() {
   esac
 }
 
+is_full_small_review_evidence_path() {
+  local path="$1"
+  case "$path" in
+    docs/solon/*/*/report.md|docs/solon/*/*/retro.md|docs/solon/decisions/*.md)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 sort_review_evidence_paths() {
   local path rank seq=0
   while IFS= read -r path; do
@@ -1170,21 +1230,29 @@ sort_review_evidence_paths() {
 
 all_reviewable_evidence_paths() {
   {
+    current_sprint_handoff_evidence_paths || true
     indexed_review_evidence_paths || true
+    latest_commit_review_evidence_paths || true
     auto_review_evidence_paths || true
   } | awk '!seen[$0]++'
 }
 
 review_excerpt_priority_paths() {
   {
+    current_sprint_handoff_evidence_paths | sort_review_evidence_paths
     indexed_review_evidence_paths | sort_review_evidence_paths
+    latest_commit_review_evidence_paths | sort_review_evidence_paths
     auto_review_evidence_paths | sort_review_evidence_paths
   } | awk '!seen[$0]++'
 }
 
 first_class_review_evidence_paths() {
   local path rank
-  indexed_review_evidence_paths | sort_review_evidence_paths | while IFS= read -r path; do
+  {
+    current_sprint_handoff_evidence_paths
+    indexed_review_evidence_paths
+    latest_commit_review_evidence_paths
+  } | sort_review_evidence_paths | while IFS= read -r path; do
     [[ -n "$path" ]] || continue
     rank="$(review_evidence_path_rank "$path")"
     if (( rank < 85 )); then
@@ -1453,6 +1521,39 @@ render_untracked_manifest() {
   fi
 }
 
+render_latest_commit_manifest() {
+  local paths sha subject
+  printf '\n### latest commit reviewable file manifest\n\n'
+  if ! git rev-parse --verify HEAD >/dev/null 2>&1; then
+    printf '(no git HEAD commit detected)\n'
+    return 0
+  fi
+  sha="$(git rev-parse --short HEAD 2>/dev/null || echo "-")"
+  subject="$(git log -1 --pretty=%s 2>/dev/null || true)"
+  printf 'commit: %s %s\n\n' "$sha" "$subject"
+  paths="$(latest_commit_review_evidence_paths | awk '!seen[$0]++' || true)"
+  if [[ -n "$paths" ]]; then
+    printf '%s\n' "$paths" | sed -n '1,200p'
+  else
+    printf '(latest commit has no reviewable project artifact/source files)\n'
+  fi
+}
+
+render_current_sprint_handoff_manifest() {
+  local paths handoff_dir
+  printf '\n### current sprint shared handoff evidence manifest\n\n'
+  handoff_dir="$(sfs_shared_handoff_dir "${SPRINT_ID}" "${NOW}" 2>/dev/null || true)"
+  if [[ -n "$handoff_dir" ]]; then
+    printf 'handoff_dir: %s\n\n' "$handoff_dir"
+  fi
+  paths="$(current_sprint_handoff_evidence_paths | awk '!seen[$0]++' || true)"
+  if [[ -n "$paths" ]]; then
+    printf '%s\n' "$paths" | sed -n '1,200p'
+  else
+    printf '(no current sprint shared report/retro evidence detected)\n'
+  fi
+}
+
 render_reviewable_file_manifest() {
   local paths
   printf '\n### reviewable artifact/source file manifest\n\n'
@@ -1618,9 +1719,9 @@ render_review_file_excerpt() {
     return 0
   fi
   line_count="$(count_file_lines "$file")"
-  if is_indexed_review_evidence_path "$file" && (( line_count > 0 && line_count <= REVIEW_SMALL_FILE_EXCERPT_LINES )); then
+  if { is_indexed_review_evidence_path "$file" || is_full_small_review_evidence_path "$file"; } && (( line_count > 0 && line_count <= REVIEW_SMALL_FILE_EXCERPT_LINES )); then
     limit="$line_count"
-    printf '(indexed review target; full file included: %s lines)\n\n' "$line_count"
+    printf '(first-class review target; full file included: %s lines)\n\n' "$line_count"
   fi
   if (( bytes > 131072 )); then
     printf '(large file: %s bytes; showing first %s lines)\n\n' "$bytes" "$limit"
@@ -1866,6 +1967,8 @@ render_evidence_bundle() {
   render_sfs_scope_classification
 
   render_untracked_manifest
+  render_latest_commit_manifest
+  render_current_sprint_handoff_manifest
   render_reviewable_file_manifest
   render_excerpt_priority_manifest
   render_priority_evidence_sections "${IMPLEMENT_PATH}" 120

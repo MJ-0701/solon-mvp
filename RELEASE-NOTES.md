@@ -7,6 +7,17 @@
 
 ---
 
+## 0.6.77
+
+이번 버전은 commit 후 clean tree 상태에서 `sfs review` evidence 가 비어 보이던 문제를 고칩니다.
+
+- `sfs review` 가 이제 직전 커밋의 reviewable 파일도 evidence prompt 에 포함합니다.
+- `docs/solon/<english-workspace>/<yyyyMMdd>/report.md` / `retro.md` 같은 공유 인수인계 문서와
+  `docs/solon/decisions/*.md` ADR 을 first-class review evidence 로 다룹니다.
+- 작은 ADR/report 는 제한 안에서 전체 본문을 싣기 때문에 뒤쪽의 operational assumptions 같은 절이
+  cap 때문에 사라지지 않습니다.
+- `review.md` 의 goal/workspace frontmatter 도 review 실행 때마다 현재 sprint 기준으로 갱신합니다.
+
 ## 0.6.76
 
 이번 버전은 Solon 작업의 commit 안내를 `sfs commit`으로 고정합니다.
