@@ -92,7 +92,7 @@ assert_contains "${review_script}" "API/contract compatibility lens" "review lab
 
 assert_contains "${DIST_DIR}/templates/CLAUDE.md.template" "Benchmarked engineering practices strengthen existing commands" "claude adapter absorption"
 assert_contains "${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md" "Benchmarked engineering practices strengthen existing commands" "codex skill absorption"
-assert_contains "${DIST_DIR}/templates/.claude/commands/sfs.md" "docs/<workspace>/<yyyyMMdd>/" "claude command handoff path"
+assert_contains "${DIST_DIR}/templates/.claude/commands/sfs.md" "docs/solon/<english-workspace>/<yyyyMMdd>/" "claude command handoff path"
 assert_not_contains "${DIST_DIR}/templates/.claude/commands/sfs.md" "Shared durable docs belong under" "claude command stale handoff path"
 
 echo "test-agent-skills-benchmark-absorption: OK"

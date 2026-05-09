@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# tests/test-sfs-shared-handoff-docs.sh — report/retro live under docs/<workspace>/<yyyyMMdd>.
+# tests/test-sfs-shared-handoff-docs.sh — report/retro live under docs/solon/<english-workspace>/<yyyyMMdd>.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -32,26 +32,27 @@ git add README.md
 git -c user.name='SFS Test' -c user.email='sfs-test@example.invalid' commit -qm 'initial'
 
 SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" init --layout thin --yes >/dev/null
-start_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" start "여기작업내용")"
+start_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" start "여기작업내용" --workspace product-image-policy)"
 assert_contains "${start_out}" "created: .sfs-local/sprints/" "start output"
+assert_contains "${start_out}" "shared_docs: docs/solon/product-image-policy/<yyyyMMdd>/" "start shared docs output"
 
 sprint_id="$(cat .sfs-local/current-sprint)"
 date_dir="$(date +%Y%m%d)"
-shared_dir="docs/여기작업내용/${date_dir}"
+shared_dir="docs/solon/product-image-policy/${date_dir}"
 sprint_dir=".sfs-local/sprints/${sprint_id}"
 
 report_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" report)"
 assert_contains "${report_out}" "report.md ready: ${shared_dir}/report.md" "report stdout"
 [[ -f "${shared_dir}/report.md" ]] || fail "shared report.md missing"
 [[ ! -e "${sprint_dir}/report.md" ]] || fail "private sprint report.md should not remain"
-grep -Fq 'workspace: "여기작업내용"' "${shared_dir}/report.md" || fail "report missing workspace frontmatter"
+grep -Fq 'workspace: "product-image-policy"' "${shared_dir}/report.md" || fail "report missing workspace frontmatter"
 grep -Fq "native/workspace 언어" "${shared_dir}/report.md" || fail "report missing native language guidance"
 
 retro_draft_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" retro --draft)"
 assert_contains "${retro_draft_out}" "retro.md ready: ${shared_dir}/retro.md" "retro draft stdout"
 [[ -f "${shared_dir}/retro.md" ]] || fail "shared retro.md missing"
 [[ ! -e "${sprint_dir}/retro.md" ]] || fail "private sprint retro.md should not remain"
-grep -Fq 'workspace: "여기작업내용"' "${shared_dir}/retro.md" || fail "retro missing workspace frontmatter"
+grep -Fq 'workspace: "product-image-policy"' "${shared_dir}/retro.md" || fail "retro missing workspace frontmatter"
 grep -Fq "native/workspace 언어" "${shared_dir}/retro.md" || fail "retro missing native language guidance"
 
 printf '{"ts":"2026-05-09T01:20:00+09:00","type":"review_open","sprint_id":"%s"}\n' "${sprint_id}" >> .sfs-local/events.jsonl

@@ -68,8 +68,8 @@ Rules:
   owner-thinking questions, and `--hard` keeps plan blocked while important
   owner decisions are unresolved.
 - Start from `sfs status`; use current sprint `report.md` only when one exists.
-- Shared handoff/history docs live under `docs/<workspace>/<yyyyMMdd>/`.
-  `docs/solon/` is for project-wide Solon reference docs. `.sfs-local/` is
+- Shared handoff/history docs live under `docs/solon/<english-workspace>/<yyyyMMdd>/`.
+  Project-wide Solon reference docs use named files under `docs/solon/` such as `domain-map.md`. `.sfs-local/` is
   private local workbench state and should stay gitignored unless the team opts in.
 - Stop on mutex conflicts and report owner/domain.
 - Treat `sfs review` as artifact acceptance review. Code review is only the

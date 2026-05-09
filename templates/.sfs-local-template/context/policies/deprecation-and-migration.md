@@ -25,7 +25,7 @@ Principles:
   change.
 
 Adopt/tidy/upgrade application:
-- Create or update `docs/<workspace>/<yyyyMMdd>/handoff.md`, `report.md`, or
+- Create or update `docs/solon/<english-workspace>/<yyyyMMdd>/handoff.md`, `report.md`, or
   `retro.md` before removing visible workbench/history state.
 - Cold-archive recoverable evidence under `.sfs-local/archives/...`; do not
   expand it into active context unless the user asks for archaeology.

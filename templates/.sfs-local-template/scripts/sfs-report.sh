@@ -2,7 +2,7 @@
 # .sfs-local/scripts/sfs-report.sh
 #
 # Solon SFS — `/sfs report [--sprint <id>] [--compact]`.
-# Creates the compact final sprint report under docs/<workspace>/<yyyyMMdd>.
+# Creates the compact final sprint report under docs/solon/<english-workspace>/<yyyyMMdd>.
 # With --compact, moves verbose workbench artifacts into .sfs-local/archives/
 # after user/AI approval.
 
@@ -20,7 +20,7 @@ Usage:
   /sfs report [--sprint <id>] [--compact]
 
 Create or update the compact sprint report.
-  - Without --compact, prepares docs/<workspace>/<yyyyMMdd>/report.md
+  - Without --compact, prepares docs/solon/<english-workspace>/<yyyyMMdd>/report.md
     for AI/user refinement.
   - With --compact, marks report.md final and moves verbose workbench docs
     (brainstorm/plan/implement/log/review) into .sfs-local/archives/.

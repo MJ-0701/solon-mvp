@@ -6,7 +6,7 @@
 #   · ISO 8601 week sprint-id pattern (`<YYYY-Wxx>-sprint-<N>`).
 #
 # Usage:
-#   /sfs start [<goal>] [--id <sprint-id>] [--force]
+#   /sfs start [<goal>] [--id <sprint-id>] [--workspace <english-name>] [--force]
 #
 # Default sprint-id: <YYYY-Wxx>-sprint-<N>  (ISO week, auto-incremented).
 #
@@ -40,6 +40,7 @@ CUSTOM_ID=""
 GOAL=""
 FORCE=false
 GOAL_PARTS=()
+WORKSPACE_RAW=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -58,6 +59,19 @@ while [[ $# -gt 0 ]]; do
       ;;
     --id=*)
       CUSTOM_ID="${1#--id=}"
+      shift
+      ;;
+    --workspace)
+      shift
+      if [[ $# -eq 0 ]]; then
+        echo "missing value for --workspace" >&2
+        exit "${SFS_EXIT_UNKNOWN}"
+      fi
+      WORKSPACE_RAW="$1"
+      shift
+      ;;
+    --workspace=*)
+      WORKSPACE_RAW="${1#--workspace=}"
       shift
       ;;
     -h|--help)
@@ -116,6 +130,12 @@ fi
 case "${GOAL}" in
   *$'\n'*|*$'\r'*)
     echo "invalid goal: newline not allowed" >&2
+    exit "${SFS_EXIT_UNKNOWN}"
+    ;;
+esac
+case "${WORKSPACE_RAW}" in
+  *$'\n'*|*$'\r'*)
+    echo "invalid workspace: newline not allowed" >&2
     exit "${SFS_EXIT_UNKNOWN}"
     ;;
 esac
@@ -179,11 +199,20 @@ _esc_sprint="${SPRINT_ID//\\/\\\\}"
 _esc_sprint="${_esc_sprint//\"/\\\"}"
 _esc_goal="${GOAL//\\/\\\\}"
 _esc_goal="${_esc_goal//\"/\\\"}"
+if [[ -n "${WORKSPACE_RAW}" ]]; then
+  WORKSPACE="$(sfs_path_segment_from_text "${WORKSPACE_RAW}" "work-slice")"
+elif [[ -n "${GOAL}" ]]; then
+  WORKSPACE="$(sfs_path_segment_from_text "${GOAL}" "work-slice")"
+else
+  WORKSPACE="$(sfs_path_segment_from_text "" "work-slice")"
+fi
+_esc_workspace="${WORKSPACE//\\/\\\\}"
+_esc_workspace="${_esc_workspace//\"/\\\"}"
 
 if [[ -n "${GOAL}" ]]; then
-  _event_payload="{\"sprint_id\":\"${_esc_sprint}\",\"goal\":\"${_esc_goal}\",\"by\":\"sfs-start\"}"
+  _event_payload="{\"sprint_id\":\"${_esc_sprint}\",\"goal\":\"${_esc_goal}\",\"workspace\":\"${_esc_workspace}\",\"by\":\"sfs-start\"}"
 else
-  _event_payload="{\"sprint_id\":\"${_esc_sprint}\",\"by\":\"sfs-start\"}"
+  _event_payload="{\"sprint_id\":\"${_esc_sprint}\",\"workspace\":\"${_esc_workspace}\",\"by\":\"sfs-start\"}"
 fi
 
 if ! append_event "sprint_start" "${_event_payload}" 2>/dev/null; then
@@ -210,6 +239,7 @@ quote_for_shell_double() {
 
 echo "created: ${SPRINT_DIR}/"
 echo "  - current-sprint pointer"
+echo "  - shared_docs: ${SFS_SHARED_DOCS_DIR}/${WORKSPACE}/<yyyyMMdd>/"
 echo "  - no step docs yet; each command creates only the doc it needs"
 if [[ -n "${GOAL}" ]]; then
   _next_goal="$(quote_for_shell_double "${GOAL}")"

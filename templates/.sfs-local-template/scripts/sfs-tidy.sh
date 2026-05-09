@@ -27,7 +27,7 @@ Clean up completed sprint workbench docs without leaving loose hidden files.
   - --apply creates report.md when missing, then packs
     brainstorm/plan/implement/log/review plus matching .sfs-local/tmp review
     prompt/run scratch into one cold .tar.gz bundle with a short manifest.
-  - Durable handoff docs live under docs/<workspace>/<yyyyMMdd>/:
+  - Durable handoff docs live under docs/solon/<english-workspace>/<yyyyMMdd>/:
     report.md and retro.md use the `sfs start "<goal>"` text as workspace.
   - The visible sprint folder keeps only artifacts with a one-line keep reason.
   - Closed-sprint event ledger lines, broken current-sprint pointers, empty

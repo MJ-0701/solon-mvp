@@ -34,7 +34,7 @@ SFS_VERSION_FILE="${SFS_LOCAL_DIR}/VERSION"
 SFS_SPRINTS_DIR="${SFS_LOCAL_DIR}/sprints"
 SFS_DECISIONS_DIR="${SFS_LOCAL_DIR}/decisions"
 SFS_ARCHIVES_DIR="${SFS_LOCAL_DIR}/archives"
-SFS_SHARED_DOCS_DIR="${SFS_SHARED_DOCS_DIR:-docs}"
+SFS_SHARED_DOCS_DIR="${SFS_SHARED_DOCS_DIR:-docs/solon}"
 SFS_PROJECT_TEMPLATES_DIR="${SFS_LOCAL_DIR}/sprint-templates"
 SFS_RUNTIME_TEMPLATES_DIR="${SFS_RUNTIME_DIR}/sprint-templates"
 SFS_PROJECT_DECISIONS_TEMPLATE_DIR="${SFS_LOCAL_DIR}/decisions-template"
@@ -395,22 +395,51 @@ sfs_yaml_quote() {
 sfs_path_segment_from_text() {
   local text="${1:-}" fallback="${2:-workspace}" segment
   segment="$(printf '%s' "${text}" \
-    | sed -E 's#[/\\:*?"<>|]+#-#g; s/[[:space:]]+/-/g; s/[.][.]+/-/g; s/^-+//; s/-+$//; s/^[.]+//; s/[.]+$//')"
-  if [[ -z "${segment}" ]]; then
-    segment="$(printf '%s' "${fallback}" \
-      | sed -E 's#[/\\:*?"<>|]+#-#g; s/[[:space:]]+/-/g; s/[.][.]+/-/g; s/^-+//; s/-+$//; s/^[.]+//; s/[.]+$//')"
+    | tr '[:upper:]' '[:lower:]' \
+    | LC_ALL=C sed -E 's/[^a-z0-9]+/-/g; s/-+/-/g; s/^-+//; s/-+$//')"
+  if [[ "${segment}" =~ ^[0-9]{4}-w[0-9]{2}-sprint-[0-9]+$ ]]; then
+    segment=""
   fi
-  [[ -n "${segment}" ]] || segment="workspace"
+  if [[ -z "${segment}" ]]; then
+    if [[ "${fallback}" =~ ^[0-9]{4}-W[0-9]{2}-sprint-[0-9]+$ || "${fallback}" =~ ^[0-9]{4}-w[0-9]{2}-sprint-[0-9]+$ ]]; then
+      fallback="work-slice"
+    fi
+    segment="$(printf '%s' "${fallback}" \
+      | tr '[:upper:]' '[:lower:]' \
+      | LC_ALL=C sed -E 's/[^a-z0-9]+/-/g; s/-+/-/g; s/^-+//; s/-+$//')"
+  fi
+  if [[ -z "${segment}" || "${segment}" =~ ^[0-9]{4}-w[0-9]{2}-sprint-[0-9]+$ ]]; then
+    segment="work-slice"
+  fi
   printf '%s\n' "${segment}"
+}
+
+sfs_sprint_start_field() {
+  local sid="${1:?sprint id required}" key="${2:?field required}" escaped_sid
+  [[ -f "${SFS_EVENTS_FILE}" ]] || return 0
+  escaped_sid="${sid//\\/\\\\}"
+  escaped_sid="${escaped_sid//\"/\\\"}"
+  reverse_lines "${SFS_EVENTS_FILE}" \
+    | grep -F '"type":"sprint_start"' \
+    | grep -F "\"sprint_id\":\"${escaped_sid}\"" \
+    | head -1 \
+    | sfs_json_field_from_line "${key}" \
+    || true
 }
 
 sfs_workspace_for_sprint() {
   local sid="${1:?sprint id required}" goal workspace
+  workspace="$(sfs_sprint_start_field "${sid}" "workspace" || true)"
+  if [[ -n "${workspace}" ]]; then
+    workspace="$(sfs_path_segment_from_text "${workspace}" "work-slice")"
+    printf '%s\n' "${workspace}"
+    return 0
+  fi
   goal="$(sfs_goal_for_sprint "${sid}" || true)"
   if [[ -n "${goal}" ]]; then
-    workspace="$(sfs_path_segment_from_text "${goal}" "${sid}")"
+    workspace="$(sfs_path_segment_from_text "${goal}" "work-slice")"
   else
-    workspace="$(sfs_path_segment_from_text "${sid}" "workspace")"
+    workspace="$(sfs_path_segment_from_text "" "work-slice")"
   fi
   printf '%s\n' "${workspace}"
 }
@@ -751,8 +780,9 @@ update_frontmatter() {
 # ─────────────────────────────────────────────────────────────────────
 
 # sfs_prepare_sprint_report <sprint-id> <iso-ts> <status>
-# Ensures `docs/<workspace>/<yyyyMMdd>/report.md` exists and updates
-# report frontmatter. Workspace defaults to the `sfs start "<goal>"` text.
+# Ensures `docs/solon/<english-workspace>/<yyyyMMdd>/report.md` exists and
+# updates report frontmatter. Workspace defaults to the `sfs start --workspace`
+# value, or an English slug derived from the goal when possible.
 # stdout: report path
 sfs_prepare_sprint_report() {
   local sid="${1:?sprint id required}" ts="${2:?timestamp required}" status="${3:-draft}"
@@ -801,7 +831,7 @@ sfs_prepare_sprint_report() {
 }
 
 # sfs_prepare_sprint_retro <sprint-id> <iso-ts>
-# Ensures `docs/<workspace>/<yyyyMMdd>/retro.md` exists and updates
+# Ensures `docs/solon/<english-workspace>/<yyyyMMdd>/retro.md` exists and updates
 # retro frontmatter. Document content is intentionally native/workspace language.
 # stdout: retro path
 sfs_prepare_sprint_retro() {
@@ -966,8 +996,8 @@ sfs_archive_sprint_cold_bundle() {
     echo
     echo "policy:"
     echo "- visible files must have a one-line keep reason"
-    echo "- report.md remains in docs/<workspace>/<yyyyMMdd>/ because it is the final sprint outcome"
-    echo "- retro.md remains in docs/<workspace>/<yyyyMMdd>/ because it records close/learning notes when present"
+    echo "- report.md remains in docs/solon/<english-workspace>/<yyyyMMdd>/ because it is the final sprint outcome"
+    echo "- retro.md remains in docs/solon/<english-workspace>/<yyyyMMdd>/ because it records close/learning notes when present"
     echo "- raw brainstorm/plan/implement/log/review and review prompt/run scratch are cold history"
     echo "- use this archive only for archaeology, dispute resolution, or deep handoff recovery"
     echo
@@ -1292,10 +1322,12 @@ EOF
 
 usage_start() {
   cat <<'EOF'
-Usage: /sfs start [<goal>] [--id <sprint-id>] [--force]
+Usage: /sfs start [<goal>] [--id <sprint-id>] [--workspace <english-name>] [--force]
 
 Default sprint-id pattern: <YYYY-Wxx>-sprint-<N>  (ISO 8601 week)
 Goal is free text. Use --id only when you need a custom sprint id.
+Workspace is the English one-line folder name for shared docs under
+docs/solon/<workspace>/<yyyyMMdd>/.
 Use /sfs brainstorm for multiline/raw requirement context before /sfs plan.
 On success, start prints the created files and one next action that exposes
 brainstorm depth: --simple, default normal, or --hard.

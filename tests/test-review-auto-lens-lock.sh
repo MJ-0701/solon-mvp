@@ -83,4 +83,28 @@ case "${explicit_out}" in
   *) fail "explicit lens should still override lock: ${explicit_out}" ;;
 esac
 
+mkdir -p .sfs-local/tmp/review-runs
+result_path=".sfs-local/tmp/review-runs/${sprint_id}-gate3-pass.md"
+cat > "${result_path}" <<'RESULT'
+Verdict: pass
+
+Required items:
+- Carry reviewed requirements into the first implementation slice.
+RESULT
+cat >> "${review_path}" <<EOF
+
+### synthetic CPO evaluator result
+
+- result_path: \`${result_path}\`
+- result_verdict: \`pass\`
+EOF
+printf '{"ts":"2026-05-09T02:00:00+09:00","type":"review_run","sprint_id":"%s","gate_id":"G1","output_path":"%s","review_lens":"design","evaluator_executor":"codex","generator_executor":"claude","exit_code":0}\n' \
+  "${sprint_id}" "${result_path}" >> .sfs-local/events.jsonl
+
+last_out="$(run_sfs review --last --gate 3)"
+case "${last_out}" in
+  *"next: sfs implement (Gate 3 Plan PASS;"* ) ;;
+  *) fail "Gate 3 PASS review should surface implementation next action: ${last_out}" ;;
+esac
+
 echo "test-review-auto-lens-lock: OK"

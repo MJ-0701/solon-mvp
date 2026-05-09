@@ -17,7 +17,7 @@
 
 Solon 제품의 `sfs` CLI 는 Claude Code, Codex CLI, Gemini CLI 에서 같은 binary 를 씁니다.
 프로젝트 작업 기록은 기본적으로 gitignored private `.sfs-local/` 에 남고, 공유 요약은
-`docs/<workspace>/<yyyyMMdd>/` 에 명시적으로 생성됩니다. 이 repo 의
+`docs/solon/<english-workspace>/<yyyyMMdd>/` 에 명시적으로 생성됩니다. 이 repo 의
 plugin/extension/skill 파일들은 **CLI 쪽 discovery surface** 입니다. 모델이 `/sfs`(Claude),
 `sfs <subcommand>`(Gemini), `$sfs`(Codex) 를 같은 global binary 로 routing 하게 만듭니다.
 

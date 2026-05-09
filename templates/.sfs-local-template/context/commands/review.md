@@ -112,10 +112,16 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   reusable UI, surface that as an AI-slop risk rather than silently accepting
   average-looking output.
 - Surface the evaluator's next action. Pass should name `sfs retro` as the
-  normal close path because `retro` ensures `report.md` before closing. Mention
-  `sfs report` only for report preview or past-report rebuild. Partial should
-  name the smallest rework slice; fail should return to plan, implementation,
-  or user escalation.
+  normal close path for Gate 6/7 because `retro` ensures `report.md` before
+  closing. Gate 3 (Plan) PASS is different: name `sfs implement` or the
+  implementation handoff as the next action and carry required review items into
+  the first implementation slice. Mention `sfs report` only for report preview
+  or past-report rebuild. Partial should name the smallest rework slice; fail
+  should return to plan, implementation, or user escalation.
+- Adapter stdout is evidence, not the whole user-facing answer. Claude, Codex,
+  and Gemini must all render the same compact SFS action rail after review:
+  verdict, evidence/output path, required items, and exactly one `Next Action`.
+  Do not end on "PASS" without the next SFS command.
 - For Gate 3 Plan review, partial/fail should name the smallest plan rework and
   the next self-review command. It must not ask whether to implement unless the
   user explicitly asks to waive the gate.

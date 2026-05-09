@@ -843,6 +843,65 @@ compact_legacy_tmp_artifacts() {
   return 0
 }
 
+archive_stale_auth_env_example() {
+  local file="$TARGET/.sfs-local/auth.env.example"
+  local archive_dir archive_file manifest
+  [ -f "$file" ] || return 0
+
+  archive_dir="$TARGET/.sfs-local/archives/runtime-migrations/$(date +%Y%m%d-%H%M%S)-auth-env-example"
+  archive_file="$archive_dir/auth-env-example.tar.gz"
+  manifest="$archive_dir/manifest.txt"
+  mkdir -p "$archive_dir" || return 5
+
+  {
+    echo "SFS stale auth.env.example migration"
+    echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "reason: auth.env.example is a packaged sample, not active project state"
+    echo "archive: ${archive_file#$TARGET/}"
+    echo
+    echo "policy:"
+    echo "- project .sfs-local keeps only files with a one-line runtime reason"
+    echo "- actual local credentials, if any, belong in .sfs-local/auth.env or SFS_AUTH_ENV_FILE"
+    echo "- the sample template remains available in the packaged SFS runtime"
+    echo
+    echo "items:"
+    echo "- .sfs-local/auth.env.example"
+  } > "$manifest" || return 5
+
+  tar -czf "$archive_file" -C "$TARGET" ".sfs-local/auth.env.example" || return 5
+  rm -f "$file" || return 5
+  ok "stale auth.env.example 이관: ${archive_file#$TARGET/}"
+  return 0
+}
+
+cleanup_empty_workbench_surface_dirs() {
+  local root dir count=0 removed
+  while :; do
+    removed=0
+    for root in \
+      "$TARGET/.sfs-local/cache" \
+      "$TARGET/.sfs-local/tmp" \
+      "$TARGET/.sfs-local/queue" \
+      "$TARGET/.sfs-local/sprints" \
+      "$TARGET/.sfs-local/decisions"; do
+      [ -d "$root" ] || continue
+      while IFS= read -r dir; do
+        [ -n "$dir" ] && [ -d "$dir" ] || continue
+        rmdir "$dir" 2>/dev/null || true
+        if [ ! -d "$dir" ]; then
+          count=$((count + 1))
+          removed=$((removed + 1))
+        fi
+      done < <(find "$root" -depth -type d -empty -print 2>/dev/null)
+    done
+    [ "$removed" -gt 0 ] || break
+  done
+  if [ "$count" -gt 0 ]; then
+    ok "empty workbench surface dirs 정리: $count dir(s)"
+  fi
+  return 0
+}
+
 json_escape_upgrade() {
   printf '%s' "${1:-}" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
@@ -894,7 +953,7 @@ migrate_legacy_adopt_visible_sprints() {
 
     date_dir="$(printf '%s\n' "$now" | sed -nE 's/^([0-9]{4})-([0-9]{2})-([0-9]{2}).*/\1\2\3/p')"
     [ -n "$date_dir" ] || date_dir="$(date +%Y%m%d 2>/dev/null || date -u +%Y%m%d)"
-    shared_dir="$TARGET/docs/$sid/$date_dir"
+    shared_dir="$TARGET/docs/solon/$sid/$date_dir"
     shared_doc="$shared_dir/handoff.md"
     archive_dir="$TARGET/.sfs-local/archives/adopt/$sid/${safe_ts}-visible-sprint-migration"
     archive_file="$archive_dir/visible-sprint-workspace.tar.gz"
@@ -938,7 +997,7 @@ migrate_legacy_adopt_visible_sprints() {
       echo "archive: ${archive_file#$TARGET/}"
       echo
       echo "policy:"
-      echo "- shared adoption handoff lives in docs/<workspace>/<yyyyMMdd>"
+      echo "- shared adoption handoff lives in docs/solon/<english-workspace>/<yyyyMMdd>"
       echo "- old visible legacy-baseline workbench is private cold history"
       echo
       echo "items:"
@@ -961,7 +1020,7 @@ migrate_legacy_adopt_visible_sprints() {
   done
 
   if [ "$count" -gt 0 ]; then
-    ok "legacy adopt visible sprint 이관: $count sprint(s) → docs/<workspace>/<yyyyMMdd>"
+    ok "legacy adopt visible sprint 이관: $count sprint(s) → docs/solon/<english-workspace>/<yyyyMMdd>"
   fi
   return 0
 }
@@ -1232,6 +1291,8 @@ project_surface_archive_migrations() {
   compact_legacy_sprint_archive_dirs || return 5
   compact_legacy_review_run_archives || return 5
   compact_legacy_tmp_artifacts || return 5
+  archive_stale_auth_env_example || return 5
+  cleanup_empty_workbench_surface_dirs || return 5
   thin_project_runtime_asset_migration || return 5
   thin_project_agent_adapter_migration || return 5
   return 0
@@ -1400,7 +1461,7 @@ recommend_action() {
     "CLAUDE.md"|"AGENTS.md"|"GEMINI.md"|".sfs-local/divisions.yaml"|".sfs-local/model-profiles.yaml")
       printf "skip"
       ;;
-    ".sfs-local/auth.env.example"|.sfs-local/context/*.md|.sfs-local/context/commands/*.md|.sfs-local/context/policies/*.md)
+    .sfs-local/context/*.md|.sfs-local/context/commands/*.md|.sfs-local/context/policies/*.md)
       printf "backup+overwrite"
       ;;
     .sfs-local/scripts/*.sh|.sfs-local/scripts/*.ps1)
@@ -1431,7 +1492,7 @@ cat <<EOF
   - CLAUDE/AGENTS/GEMINI.md            → 자동 보존 (기존 프로젝트 지침 보호)
   - .sfs-local/divisions.yaml          → 자동 보존 (프로젝트별 운영값 보호)
   - .sfs-local/model-profiles.yaml     → 없으면 설치 + 설정 안내, 있으면 자동 보존 (agent별 모델 설정 보호)
-  - .sfs-local/auth.env.example        → backup+overwrite (로컬 auth 템플릿, 실제 auth.env 는 ignore)
+  - .sfs-local/auth.env.example        → project copy removed (샘플은 packaged runtime 에만 유지)
   - .sfs-local/context/**/*.md         → thin: packaged runtime 으로 이관, vendored: backup+overwrite
   - .claude/.gemini/.agents command/skill → thin: 압축 이관 후 제거, vendored/opt-in: backup+overwrite
   - .sfs-local/scripts/sfs-*.sh        → backup+overwrite (Solon-versioned bash)
@@ -1454,7 +1515,6 @@ declare -a CHECK_FILES=(
   ".claude/commands/sfs.md|templates/.claude/commands/sfs.md"
   ".sfs-local/divisions.yaml|templates/.sfs-local-template/divisions.yaml"
   ".sfs-local/model-profiles.yaml|templates/.sfs-local-template/model-profiles.yaml"
-  ".sfs-local/auth.env.example|templates/.sfs-local-template/auth.env.example"
   ".sfs-local/context/_INDEX.md|templates/.sfs-local-template/context/_INDEX.md"
   ".sfs-local/context/kernel.md|templates/.sfs-local-template/context/kernel.md"
   ".sfs-local/context/commands/start.md|templates/.sfs-local-template/context/commands/start.md"
@@ -1734,7 +1794,6 @@ else
 fi
 update_file ".sfs-local/divisions.yaml" "templates/.sfs-local-template/divisions.yaml" "본부 활성화" "s"
 update_file ".sfs-local/model-profiles.yaml" "templates/.sfs-local-template/model-profiles.yaml" "runtime model profiles" "s"
-update_file ".sfs-local/auth.env.example" "templates/.sfs-local-template/auth.env.example" "executor auth env example" "b"
 update_file ".sfs-local/GUIDE.md" "GUIDE.md" "Solon onboarding guide (/sfs guide)" "b"
 
 if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ]; then

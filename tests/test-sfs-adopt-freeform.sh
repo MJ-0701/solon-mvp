@@ -31,8 +31,12 @@ printf '# Active Legacy Sprint\n\nThis sprint predates adoption and should be co
 printf '2026-W19-sprint-1\n' > .sfs-local/current-sprint
 mkdir -p .sfs-local/tmp/review-prompts
 printf 'legacy review prompt\n' > .sfs-local/tmp/review-prompts/2026-W19-sprint-1-gate3.txt
+mkdir -p .sfs-local/tmp/empty-leftover
+mkdir -p .sfs-local/cache
+printf 'last_checked_epoch=0\n' > .sfs-local/cache/hygiene-notice.env
 mkdir -p .sfs-local/decisions
 printf '# Legacy Decision\n\nCold archive me after adopt.\n' > .sfs-local/decisions/0001-legacy.md
+printf '# Local auth placeholder\n' > .sfs-local/auth.env
 printf '# Local auth example\n' > .sfs-local/auth.env.example
 printf '{"ts":"2026-05-09T00:00:00+09:00","type":"sprint_start","sprint_id":"2026-W19-sprint-1"}\n' \
   > .sfs-local/events.jsonl
@@ -78,6 +82,14 @@ case "${dry_run}" in
   *) fail "dry-run did not mark auth example residue for archive: ${dry_run}" ;;
 esac
 case "${dry_run}" in
+  *"would_archive_nonessential_residue:"*".sfs-local/auth.env"* ) ;;
+  *) fail "dry-run did not mark auth env residue for archive: ${dry_run}" ;;
+esac
+case "${dry_run}" in
+  *"would_archive_nonessential_residue:"*".sfs-local/cache/hygiene-notice.env"* ) ;;
+  *) fail "dry-run did not mark cache residue for archive: ${dry_run}" ;;
+esac
+case "${dry_run}" in
   *"would_archive_legacy_flat_shared_doc: 1"* ) ;;
   *) fail "dry-run did not mark legacy flat shared doc for archive: ${dry_run}" ;;
 esac
@@ -93,7 +105,7 @@ case "${applied}" in
 esac
 
 date_dir="$(date +%Y%m%d)"
-SHARED_DOC="docs/doc-cleanup/${date_dir}/handoff.md"
+SHARED_DOC="docs/solon/doc-cleanup/${date_dir}/handoff.md"
 [[ -f "${SHARED_DOC}" ]] || fail "missing shared handoff doc: ${SHARED_DOC}"
 [[ ! -d ".sfs-local/sprints/doc-cleanup" ]] || fail "adopt should not create a visible sprint workspace"
 [[ ! -f ".sfs-local/current-sprint" ]] || fail "adopt should not leave an active sprint pointer"
@@ -106,7 +118,9 @@ find .sfs-local/archives/adopt/doc-cleanup -name preexisting-tmp.tar.gz -type f 
 find .sfs-local/archives/adopt/doc-cleanup -name preexisting-events.jsonl -type f | grep -q . \
   || fail "missing previous event ledger backup"
 [[ ! -e ".sfs-local/decisions/0001-legacy.md" ]] || fail "adopt should archive legacy decision residue"
+[[ ! -e ".sfs-local/auth.env" ]] || fail "adopt should archive nonessential auth env residue"
 [[ ! -e ".sfs-local/auth.env.example" ]] || fail "adopt should archive nonessential auth example residue"
+[[ ! -e ".sfs-local/cache" ]] || fail "adopt should remove stale cache residue"
 find .sfs-local/archives/adopt/doc-cleanup -name preexisting-residue.tar.gz -type f | grep -q . \
   || fail "missing nonessential residue cold archive"
 [[ ! -e docs/solon/doc-cleanup-adoption-summary.md ]] || fail "legacy flat shared doc should be removed"
@@ -131,6 +145,8 @@ grep -Fq "archived_event_ledger_lines: 1" "${source_summary}" \
   || fail "source summary missing event ledger archive count"
 grep -Fq "archived_nonessential_residue_count:" "${source_summary}" \
   || fail "source summary missing residue archive count"
+grep -Fq "removed_empty_surface_dir_count:" "${source_summary}" \
+  || fail "source summary missing empty surface dir cleanup count"
 grep -Fq ".sfs-local/decisions/0001-legacy.md" "${source_summary}" \
   || fail "source summary missing decision residue path"
 

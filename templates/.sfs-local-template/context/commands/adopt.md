@@ -14,7 +14,7 @@ Rules:
 - A quoted free-text brief is valid: `sfs adopt "docs cleanup and current-state handoff"`.
 - Default mode is dry-run. If the user clearly wants files created, use `sfs adopt --apply "<brief>"`; otherwise show the dry-run result and ask before applying.
 - Shared visible output is intentionally one handoff file under
-  `docs/<workspace>/<yyyyMMdd>/handoff.md`. For adopt, `<workspace>` is the
+  `docs/solon/<english-workspace>/<yyyyMMdd>/handoff.md`. For adopt, `<workspace>` is the
   adopt id (`legacy-baseline` by default, or `--id <name>`). Raw scan evidence
   belongs under `.sfs-local/archives/adopt/...`.
 - Apply `policies/deprecation-and-migration.md`: legacy visible state is a
@@ -23,5 +23,11 @@ Rules:
   evidence.
 - `adopt --apply` must not leave an active sprint pointer. It summarizes and
   cleans the legacy state; the first real sprint starts afterward.
+- Visible `.sfs-local` after adopt is intentionally tiny: keep only runtime
+  files with a one-line reason (`VERSION`, `config.yaml`, `divisions.yaml`,
+  `model-profiles.yaml`) plus private compressed recovery evidence under
+  `archives/adopt/` when evidence exists. Do not leave `events.jsonl`,
+  `current-sprint`, `tmp`, `cache`, empty `sprints`, `auth.env.example`, or
+  template/auth placeholder residue visible after adopt.
 - Do not expand old sprint/archive material into the active working context unless the user asks for archaeology or recovery.
 - After apply, the next useful move is usually `sfs start "<first real cleanup slice>"`, then Gate 2 (Brainstorm) if scope is still fuzzy.

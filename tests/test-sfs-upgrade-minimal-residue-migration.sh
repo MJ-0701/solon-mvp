@@ -56,13 +56,15 @@ EOF
 done
 printf '2026-W19-sprint-1\n' > .sfs-local/current-sprint
 printf '{"ts":"2026-05-05T23:47:46+09:00","type":"sprint_start","sprint_id":"2026-W19-sprint-1","goal":"residue","by":"sfs-start"}\n' >> .sfs-local/events.jsonl
+mkdir -p .sfs-local/cache .sfs-local/tmp/empty-leftover .sfs-local/queue/pending
+printf '# old local auth sample\n' > .sfs-local/auth.env.example
 
 SFS_MODEL_PROFILE_PROMPT=0 \
 SFS_SKIP_CLI_DISCOVERY=1 \
 SFS_COMMAND_TIMEOUT_SEC=0 \
 bash "${DIST_DIR}/upgrade.sh" --yes --layout thin >/tmp/sfs-upgrade-min-residue.out
 
-SHARED_DOC="docs/legacy-baseline/$(date +%Y%m%d)/handoff.md"
+SHARED_DOC="docs/solon/legacy-baseline/$(date +%Y%m%d)/handoff.md"
 [[ -f "${SHARED_DOC}" ]] || fail "missing migrated shared adoption doc"
 grep -Fq "Project facts that should become the shared adoption handoff." "${SHARED_DOC}" \
   || fail "shared adoption doc did not preserve legacy report body"
@@ -78,6 +80,12 @@ done
 [[ "$(cat .sfs-local/current-sprint)" = "2026-W19-sprint-1" ]] || fail "active sprint pointer should remain"
 find .sfs-local/archives/runtime-migrations -name '2026-W19-sprint-1-step-docs.tar.gz' -type f | grep -q . \
   || fail "missing prefilled step-doc cold archive"
+[[ ! -e .sfs-local/auth.env.example ]] || fail "upgrade should remove project-local auth.env.example sample"
+find .sfs-local/archives/runtime-migrations -name 'auth-env-example.tar.gz' -type f | grep -q . \
+  || fail "missing auth.env.example cold archive"
+[[ ! -d .sfs-local/cache ]] || fail "empty cache dir should be removed"
+[[ ! -d .sfs-local/tmp ]] || fail "empty tmp dir should be removed"
+[[ ! -d .sfs-local/queue ]] || fail "empty queue dir should be removed"
 
 grep -Fq '"type":"legacy_adopt_surface_migrated"' .sfs-local/events.jsonl \
   || fail "missing legacy adopt migration event"

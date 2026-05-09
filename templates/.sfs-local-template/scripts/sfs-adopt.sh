@@ -22,7 +22,7 @@ Adopt an existing legacy project into SFS without creating document sprawl.
   - Default is dry-run; it prints the baseline sprint and evidence sources.
   - Optional <brief> is a single-line user note, for example:
       /sfs adopt "docs cleanup and current-state handoff"
-  - --apply creates docs/<workspace>/<yyyyMMdd>/handoff.md as the shared entry;
+  - --apply creates docs/solon/<english-workspace>/<yyyyMMdd>/handoff.md as the shared entry;
     for adopt, <workspace> defaults to the adopt id.
   - Existing visible sprint folders and expanded archive folders are collapsed
     into cold .tar.gz archives with short manifests.
@@ -278,7 +278,7 @@ residue_files_for_adopt() {
   find "${SFS_LOCAL_DIR}" -type f 2>/dev/null | sort \
     | while IFS= read -r file; do
         case "${file}" in
-          "${SFS_ARCHIVES_DIR}/"*|"${SFS_EVENTS_FILE}"|"${SFS_LOCAL_DIR}/tmp/"*)
+          "${SFS_ARCHIVES_DIR}/"*|"${SFS_EVENTS_FILE}"|"${SFS_CURRENT_SPRINT_FILE}"|"${SFS_LOCAL_DIR}/tmp/"*)
             continue
             ;;
         esac
@@ -291,6 +291,37 @@ residue_files_for_adopt() {
 
 residue_file_count_for_adopt() {
   residue_files_for_adopt | sed '/^[[:space:]]*$/d' | wc -l | tr -d '[:space:]'
+}
+
+empty_surface_dirs_for_adopt() {
+  [[ -d "${SFS_LOCAL_DIR}" ]] || return "${SFS_EXIT_OK}"
+  local root
+  for root in \
+    "${SFS_LOCAL_DIR}/cache" \
+    "${SFS_LOCAL_DIR}/tmp" \
+    "${SFS_LOCAL_DIR}/queue" \
+    "${SFS_SPRINTS_DIR}" \
+    "${SFS_DECISIONS_DIR}"; do
+    [[ -d "${root}" ]] || continue
+    find "${root}" -depth -type d -empty -print 2>/dev/null
+  done
+}
+
+cleanup_empty_surface_dirs_for_adopt() {
+  local count=0 removed dir
+  while :; do
+    removed=0
+    while IFS= read -r dir; do
+      [[ -n "${dir}" && -d "${dir}" ]] || continue
+      rmdir "${dir}" 2>/dev/null || true
+      if [[ ! -d "${dir}" ]]; then
+        count=$((count + 1))
+        removed=$((removed + 1))
+      fi
+    done < <(empty_surface_dirs_for_adopt)
+    [[ "${removed}" -gt 0 ]] || break
+  done
+  printf '%s\n' "${count}"
 }
 
 collapse_dirs_to_cold_archive() {
@@ -443,7 +474,7 @@ archive_legacy_shared_doc_for_adopt() {
     echo
     echo "reason:"
     echo "- previous runtimes wrote adopt handoff as a flat docs/solon summary"
-    echo "- current policy keeps handoff/history docs under docs/<workspace>/<yyyyMMdd>/"
+    echo "- current policy keeps handoff/history docs under docs/solon/<english-workspace>/<yyyyMMdd>/"
   } > "${manifest_path}" || return "${SFS_EXIT_PERM}"
   rm -f "${legacy_path}" || return "${SFS_EXIT_PERM}"
   rmdir "$(dirname "${legacy_path}")" 2>/dev/null || true
@@ -578,7 +609,7 @@ fi
 TARGET_DIR="${SFS_SPRINTS_DIR}/${SPRINT_ID}"
 ARCHIVE_DIR="${SFS_ARCHIVES_DIR}/adopt/${SPRINT_ID}/${NOW//:/-}"
 ARCHIVE_DIR="${ARCHIVE_DIR//+/-}"
-SHARED_DOC_ROOT="${SFS_SHARED_DOC_DIR:-${SFS_SHARED_DOCS_DIR:-docs}}"
+SHARED_DOC_ROOT="${SFS_SHARED_DOC_DIR:-${SFS_SHARED_DOCS_DIR:-docs/solon}}"
 ADOPT_WORKSPACE="$(sfs_path_segment_from_text "${SPRINT_ID}" "legacy-baseline")"
 ADOPT_DATE_DIR="$(sfs_date_dir_from_ts "${NOW}")"
 SHARED_DOC_DIR="${SHARED_DOC_ROOT}/${ADOPT_WORKSPACE}/${ADOPT_DATE_DIR}"
@@ -609,6 +640,8 @@ RESIDUE_FILES="$(residue_files_for_adopt)"
 RESIDUE_FILE_COUNT="$(nonempty_line_count "${RESIDUE_FILES}")"
 RESIDUE_TARBALL="${ARCHIVE_DIR}/preexisting-residue.tar.gz"
 RESIDUE_MANIFEST="${ARCHIVE_DIR}/preexisting-residue.manifest.txt"
+EMPTY_SURFACE_DIRS="$(empty_surface_dirs_for_adopt)"
+EMPTY_SURFACE_DIR_COUNT="$(nonempty_line_count "${EMPTY_SURFACE_DIRS}")"
 LEGACY_SHARED_DOC_COUNT=0
 if [[ -f "${LEGACY_SHARED_DOC_PATH}" && "${LEGACY_SHARED_DOC_PATH}" != "${SHARED_DOC_PATH}" ]]; then
   LEGACY_SHARED_DOC_COUNT=1
@@ -668,6 +701,13 @@ if [[ "${APPLY}" -eq 0 ]]; then
       echo "    - ${item}"
     done
   fi
+  echo "  would_remove_empty_surface_dirs: ${EMPTY_SURFACE_DIR_COUNT}"
+  if [[ "${EMPTY_SURFACE_DIR_COUNT}" -gt 0 ]]; then
+    printf '%s\n' "${EMPTY_SURFACE_DIRS}" | while IFS= read -r item; do
+      [[ -n "${item}" ]] || continue
+      echo "    - ${item}"
+    done
+  fi
   echo "  would_keep_runtime_files:"
   echo "    - ${SFS_LOCAL_DIR}/config.yaml — workspace SFS runtime config"
   echo "    - ${SFS_LOCAL_DIR}/VERSION — installed SFS version/upgrade state"
@@ -679,7 +719,7 @@ if [[ "${APPLY}" -eq 0 ]]; then
     echo "    manifest: ${PREEXISTING_TARGET_MANIFEST}"
     echo "    - ${TARGET_DIR}"
   fi
-  echo "  visible_policy: shared docs/<workspace>/<yyyyMMdd>/handoff.md only; .sfs-local stays private"
+  echo "  visible_policy: shared docs/solon/<english-workspace>/<yyyyMMdd>/handoff.md only; .sfs-local stays private"
   exit "${SFS_EXIT_OK}"
 fi
 
@@ -710,6 +750,8 @@ EVENT_LEDGER_ARCHIVED_LINES="$(archive_and_reset_event_ledger_for_adopt "${EVENT
 LEGACY_SHARED_DOC_ARCHIVED="$(archive_legacy_shared_doc_for_adopt "${LEGACY_SHARED_DOC_PATH}" "${LEGACY_SHARED_DOC_ARCHIVE}" "${LEGACY_SHARED_DOC_MANIFEST}")" || exit "${SFS_EXIT_PERM}"
 collapse_residue_files_to_cold_archive "${RESIDUE_TARBALL}" "${RESIDUE_MANIFEST}" "${RESIDUE_FILES}" || exit "${SFS_EXIT_PERM}"
 rmdir "${SFS_SPRINTS_DIR}" 2>/dev/null || true
+EMPTY_SURFACE_DIRS_AFTER_RESIDUE="$(empty_surface_dirs_for_adopt)"
+EMPTY_SURFACE_DIRS_REMOVED="$(cleanup_empty_surface_dirs_for_adopt "${EMPTY_SURFACE_DIRS_AFTER_RESIDUE}")" || exit "${SFS_EXIT_PERM}"
 mkdir -p "${SHARED_DOC_DIR}" || exit "${SFS_EXIT_PERM}"
 
 RECENT_COMMITS="$(git log -n "${MAX_COMMITS}" --date=short --pretty=format:'- %h %ad %s' 2>/dev/null || true)"
@@ -755,6 +797,7 @@ REPORT_SOURCE_YAML="$(json_escape "${REPORT_SOURCE}")"
   echo "archived_event_ledger_lines: ${EVENT_LEDGER_ARCHIVED_LINES}"
   echo "archived_legacy_flat_shared_doc: ${LEGACY_SHARED_DOC_ARCHIVED}"
   echo "archived_nonessential_residue_count: ${RESIDUE_FILE_COUNT}"
+  echo "removed_empty_surface_dir_count: ${EMPTY_SURFACE_DIRS_REMOVED}"
   echo "submodule_count: ${SUBMODULE_COUNT}"
   echo "nested_repo_count: ${NESTED_REPO_COUNT}"
   echo
@@ -783,6 +826,11 @@ REPORT_SOURCE_YAML="$(json_escape "${REPORT_SOURCE}")"
     printf '%s\n' "${RESIDUE_FILES}" | sed 's#^#- #'
     echo "cold_archive: ${RESIDUE_TARBALL}"
     echo "manifest: ${RESIDUE_MANIFEST}"
+  fi
+  if [[ "${EMPTY_SURFACE_DIRS_REMOVED}" -gt 0 ]]; then
+    echo
+    echo "removed_empty_surface_dirs:"
+    printf '%s\n' "${EMPTY_SURFACE_DIRS_AFTER_RESIDUE}" | sed 's#^#- #'
   fi
   if [[ "${LEGACY_SHARED_DOC_ARCHIVED}" -gt 0 ]]; then
     echo
@@ -853,6 +901,7 @@ ${ADOPT_BRIEF:-  - none}
 - **Archived tmp scratch files during adopt**: ${TMP_ARTIFACT_COUNT}
 - **Archived previous event ledger lines during adopt**: ${EVENT_LEDGER_ARCHIVED_LINES}
 - **Archived nonessential \`.sfs-local\` residue during adopt**: ${RESIDUE_FILE_COUNT}
+- **Removed empty workbench surface dirs during adopt**: ${EMPTY_SURFACE_DIRS_REMOVED}
 - **Retained runtime files and one-line reasons**:
   - \`.sfs-local/config.yaml\` — workspace SFS runtime config.
   - \`.sfs-local/VERSION\` — installed SFS version/upgrade state.
@@ -917,6 +966,7 @@ ${VERIFY_COMMANDS}
 - **Archived old event ledger**: ${EVENT_LEDGER_ARCHIVED_LINES} lines in \`${EVENT_LEDGER_BACKUP}\`.
 - **Archived legacy flat shared doc**: ${LEGACY_SHARED_DOC_ARCHIVED} file in \`${LEGACY_SHARED_DOC_ARCHIVE}\`.
 - **Archived nonessential residue**: ${RESIDUE_FILE_COUNT} files in \`${RESIDUE_TARBALL}\`.
+- **Removed empty workbench surface dirs**: ${EMPTY_SURFACE_DIRS_REMOVED}.
 - **Event ledger after adopt**: none. \`adopt\` leaves no active log file; the
   shared summary and private source summary are the durable evidence.
 
@@ -969,13 +1019,14 @@ echo "  archived_nonessential_residue: ${RESIDUE_FILE_COUNT}"
 if [[ "${RESIDUE_FILE_COUNT}" -gt 0 ]]; then
   echo "  residue_archive: ${RESIDUE_TARBALL}"
 fi
+echo "  removed_empty_surface_dirs: ${EMPTY_SURFACE_DIRS_REMOVED}"
 echo "  kept_runtime_files:"
 echo "    - ${SFS_LOCAL_DIR}/config.yaml — workspace SFS runtime config"
 echo "    - ${SFS_LOCAL_DIR}/VERSION — installed SFS version/upgrade state"
 echo "    - ${SFS_LOCAL_DIR}/model-profiles.yaml — project model-routing config"
 echo "    - ${SFS_LOCAL_DIR}/divisions.yaml — project division activation config"
 echo "  event_ledger_after_adopt: none"
-echo "  visible_policy: shared docs/<workspace>/<yyyyMMdd>/handoff.md only; .sfs-local stays private"
+echo "  visible_policy: shared docs/solon/<english-workspace>/<yyyyMMdd>/handoff.md only; .sfs-local stays private"
 echo "  next: run baseline verification, then start the first real SFS sprint"
 
 exit "${SFS_EXIT_OK}"

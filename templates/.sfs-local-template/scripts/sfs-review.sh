@@ -772,14 +772,45 @@ extract_result_verdict() {
   ' "${file}"
 }
 
+review_next_action_line() {
+  local gate="${1:-}" verdict="${2:-unknown}" gate_display
+  gate_display="$(sfs_gate_display_label "${gate}" 2>/dev/null || printf '%s' "${gate:-Gate -}")"
+  case "${verdict}" in
+    pass)
+      case "${gate}" in
+        G1)
+          printf 'sfs implement (Gate 3 Plan PASS; carry required review items into the first implementation slice)\n'
+          ;;
+        G4|G5)
+          printf 'sfs retro (review PASS; close with report/retro evidence)\n'
+          ;;
+        *)
+          printf 'continue to the next SFS gate after recording this %s PASS\n' "${gate_display}"
+          ;;
+      esac
+      ;;
+    partial)
+      printf 'rework the smallest failing slice, then rerun sfs review --gate %s\n' "${gate#G}"
+      ;;
+    fail)
+      printf 'stop and return to the prior gate; do not hand off implementation from a FAIL review\n'
+      ;;
+    *)
+      printf 'inspect the review output path and record a clear pass/partial/fail before moving gates\n'
+      ;;
+  esac
+}
+
 emit_result_metadata_stdout() {
-  local file="$1" state="${2:-ready}" verdict
+  local file="$1" state="${2:-ready}" gate="${3:-}" verdict next_action
   verdict="$(extract_result_verdict "${file}" || true)"
   [[ -n "${verdict}" ]] || verdict="unknown"
+  next_action="$(review_next_action_line "${gate}" "${verdict}")"
   echo "review result ${state}:"
   echo "  verdict: ${verdict}"
   echo "  output: ${file}"
   echo "  display: 사용자 언어로 요약/해야 할 일 레포트 렌더링; 원문은 파일에 보관"
+  echo "  next: ${next_action}"
 }
 
 show_latest_review_result() {
@@ -809,13 +840,13 @@ show_latest_review_result() {
 
   if [[ -n "${result_path}" && -f "${result_path}" ]]; then
     echo "review.md ready: ${REVIEW_PATH}${gate_label} | latest CPO result | output ${result_path}"
-    emit_result_metadata_stdout "${result_path}" "ready"
+    emit_result_metadata_stdout "${result_path}" "ready" "${gate_filter}"
     return 0
   fi
 
   echo "review.md ready: ${REVIEW_PATH}${gate_label} | latest CPO result | output ${result_path:-not-found}"
   if latest_review_md_excerpt >/dev/null 2>&1; then
-    emit_result_metadata_stdout "${REVIEW_PATH}" "embedded"
+    emit_result_metadata_stdout "${REVIEW_PATH}" "embedded" "${gate_filter}"
   else
     echo "review result none:"
     echo "  verdict: unknown"
@@ -2569,6 +2600,7 @@ elif [[ "${RUN_REVIEW}" == "true" ]]; then
     echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} | lens ${REVIEW_LENS} (${REVIEW_LENS_SOURCE}) CPO run complete | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
   fi
   emit_result_excerpt_stdout "${RESULT_PATH}" 80
+  printf 'next: %s\n' "$(review_next_action_line "${GATE_ID}" "${RUN_VERDICT}")"
 else
   echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} | lens ${REVIEW_LENS} (${REVIEW_LENS_SOURCE}) prompt ready | executor ${EVALUATOR_EXECUTOR} | prompt ${PROMPT_PATH}"
 fi

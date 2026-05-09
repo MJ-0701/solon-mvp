@@ -218,12 +218,12 @@ for handoff_doc in \
   "${plugin_command}" \
   "${plugin_readme}"
 do
-  assert_contains "${handoff_doc}" "docs/<workspace>/<yyyyMMdd>/" "handoff docs root path ${handoff_doc}"
+  assert_contains "${handoff_doc}" "docs/solon/<english-workspace>/<yyyyMMdd>/" "handoff docs root path ${handoff_doc}"
 done
-assert_not_contains "${claude_template}" "Use \`docs/solon/\` for shared adoption/handoff summaries" "claude no stale docs/solon handoff"
-assert_not_contains "${agents_template}" "Use \`docs/solon/\` for shared adoption/handoff summaries" "agents no stale docs/solon handoff"
-assert_not_contains "${gemini_template}" "Use \`docs/solon/\` for shared adoption/handoff summaries" "gemini no stale docs/solon handoff"
-assert_not_contains "${sfs_template}" "shared durable docs live under \`docs/solon/\`" "SFS no stale docs/solon handoff"
+assert_not_contains "${claude_template}" "docs/<workspace>/<yyyyMMdd>/" "claude no stale root docs handoff"
+assert_not_contains "${agents_template}" "docs/<workspace>/<yyyyMMdd>/" "agents no stale root docs handoff"
+assert_not_contains "${gemini_template}" "docs/<workspace>/<yyyyMMdd>/" "gemini no stale root docs handoff"
+assert_not_contains "${sfs_template}" "docs/<workspace>/<yyyyMMdd>/" "SFS no stale root docs handoff"
 assert_contains "${sfs_template}" "compact option bundle" "SFS no compact option bundle"
 assert_contains "${sfs_template}" "권장안 그대로 확정" "SFS natural confirmation phrase"
 

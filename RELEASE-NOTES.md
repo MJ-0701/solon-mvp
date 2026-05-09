@@ -7,6 +7,23 @@
 
 ---
 
+## 0.6.64
+
+이번 버전은 `adopt` 이후에도 `.sfs-local`에 남아 보이던 잔여 파일/디렉터리를 더 강하게 정리합니다.
+
+- `sfs adopt --apply` 후 `events.jsonl`, `current-sprint`, `tmp`, `cache`, 빈 `sprints` 같은
+  active workbench 잔여물이 visible surface 에 남지 않도록 했습니다.
+- `.sfs-local/auth.env.example` 은 프로젝트에 복사하지 않습니다. 샘플은 packaged runtime 에만 두고,
+  실제 로컬 인증이 필요하면 `sfs auth path` 가 가리키는 `auth.env`를 명시적으로 씁니다.
+- 이미 생긴 `auth.env.example`, 빈 `cache`/`tmp`/`queue` 는 `sfs upgrade` 때 cold archive 하거나
+  삭제해서 최신 thin surface 로 수렴합니다.
+- adopt dry-run/apply 출력과 handoff 문서에 “비운 surface dir 정리” evidence 를 남깁니다.
+- 공유 인수인계/기록 문서는 `docs/solon/<english-workspace>/<yyyyMMdd>/` 아래에 남깁니다.
+  `sfs start "<목표>" --workspace <english-name>` 로 sprint id 대신 명확한 영어 한 줄 이름을
+  고정할 수 있습니다.
+- `sfs review` 결과 stdout 에도 global `next:`가 붙습니다. Gate 3 PASS 는 `sfs implement`,
+  이후 review PASS 는 닫기 흐름(`sfs retro`)으로 이어지도록 agent별 출력 차이를 줄였습니다.
+
 ## 0.6.63
 
 이번 버전은 Gate 3 plan 의 `리뷰 준비` 체크리스트 문구를 다듬습니다.
@@ -52,7 +69,7 @@
 visible surface 에 남기지 않는다”로 맞춥니다.
 
 - `sfs adopt --apply` 는 이제 공유 인수인계 문서를
-  `docs/<workspace>/<yyyyMMdd>/handoff.md` 에 만듭니다. adopt 의 `<workspace>` 는 기본적으로
+  `docs/solon/<english-workspace>/<yyyyMMdd>/handoff.md` 에 만듭니다. adopt 의 `<workspace>` 는 기본적으로
   `legacy-baseline` 이고, `--id <name>` 을 주면 그 이름을 path-safe 하게 씁니다.
 - 예전 `docs/solon/<id>-adoption-summary.md` 형식의 flat adoption summary 는 private cold
   archive 로 접고 visible docs 에 남기지 않습니다.
@@ -161,7 +178,7 @@ Homebrew/Scoop 채널에 게시하는 사용자-facing 버전입니다. 이미 p
   표는 금지하고, 모든 선택지의 뜻과 결과를 설명한 뒤 추천을 default 로 표시합니다. 선택지가
   많으면 숨기지 않고 한 번에 하나씩 묻습니다.
 - `.sfs-local/` 은 private workbench 로 유지합니다. `events.jsonl`, cache, tmp, archive, run log 는
-  commit 대상이 아니고, 공유할 결론은 `docs/<workspace>/<yyyyMMdd>/` 의 sprint `report.md` 로 남기는 정책을
+  commit 대상이 아니고, 공유할 결론은 `docs/solon/<english-workspace>/<yyyyMMdd>/` 의 sprint `report.md` 로 남기는 정책을
   다시 명확히 했습니다.
 - [Windows SFS 래퍼 장애 요약 보고서](./docs/ko/windows-wrapper-incident-0.6.56.md) 는 P27 로 이
   설치 직후 usage-only 문제까지 기록합니다.
@@ -735,7 +752,7 @@ Single Agent 입니다.
 
 - `.sfs-local/` 은 기본 비공개 작업 공간으로 gitignore 됩니다.
 - `sfs start` 는 더 이상 빈 절차 문서를 한 번에 만들지 않습니다. 각 단계 명령이 필요한 문서만 생성합니다.
-- `sfs adopt --apply` 는 기존 프로젝트를 요약해서 `docs/<workspace>/<yyyyMMdd>/handoff.md` 하나를 공유 문서로 남깁니다.
+- `sfs adopt --apply` 는 기존 프로젝트를 요약해서 `docs/solon/<english-workspace>/<yyyyMMdd>/handoff.md` 하나를 공유 문서로 남깁니다.
 - adopt 의 raw scan, 과거 sprint, archive evidence 는 `.sfs-local/archives/` 에 private cold archive 로 접습니다.
 - 이미 0.6.11 인 프로젝트도 `sfs upgrade` 를 다시 실행하면 예전 `legacy-baseline` sprint 와 빈 단계 문서 잔여물을 더 접습니다.
 - 새로 생성되는 sprint 문서 템플릿은 설명문을 줄이고 실제로 채워야 할 칸만 남겼습니다.

@@ -9,7 +9,7 @@ load_when: ["always", "sfs", "entry"]
 - Run `sfs <command>` first; bash adapter output is SSoT and must be verbatim.
 - Bash-first means no AI-side artifact refinement; it does not mean "no Next".
 - Start from `sfs status`; read current sprint `report.md` only when one exists.
-- Shared handoff/history docs live under `docs/<workspace>/<yyyyMMdd>/`;
+- Shared handoff/history docs live under `docs/solon/<english-workspace>/<yyyyMMdd>/`;
   project-wide Solon reference docs may live under `docs/solon/`.
   `.sfs-local/` is private local workbench state and should remain thin.
 - Stop on mutex conflicts and report owner/domain.

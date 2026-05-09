@@ -7,7 +7,7 @@ install. For beginner Git/terminal help, use the Korean [BEGINNER-GUIDE.md](../.
 
 ## 0. Install And Initialize
 
-> **As of 0.6.63**, one `brew install` / `scoop install` lets Claude Code
+> **As of 0.6.64**, one `brew install` / `scoop install` lets Claude Code
 > (`/sfs`), Gemini CLI (`sfs`), and Codex CLI (`$sfs`) find Solon automatically.
 > Your project keeps the files you read and the records you create.
 
@@ -61,26 +61,26 @@ optional. Install those native shortcuts only when a project needs them:
 sfs agent install all
 ```
 
-Old projects can be upgraded into the lighter 0.6.63 shape. Use
+Old projects can be upgraded into the lighter 0.6.64 shape. Use
 `sfs upgrade --layout vendored` only when Solon package files must stay inside
 the project.
 
-0.6.63 also includes the filled division knowledge packs. The user does not need to choose
+0.6.64 also includes the filled division knowledge packs. The user does not need to choose
 "backend", "QA", "infra", "finance", "tax", "accounting", or "taxonomy"
 manually. The AI should read the relevant Solon lens when the work calls for it,
 then explain the judgment in plain language.
 
-As of 0.6.63, agent-skills-style practices are absorbed into existing SFS
+As of 0.6.64, agent-skills-style practices are absorbed into existing SFS
 commands instead of becoming new lifecycle commands: source-driven
 implementation, stop-the-line debugging, deprecation/migration, shipping
 checks, and stronger review lenses.
 
 Sprint handoff documents are shared under
-`docs/<workspace>/<yyyyMMdd>/report.md` and
-`docs/<workspace>/<yyyyMMdd>/retro.md`. `<workspace>` defaults to the
-path-safe form of the `sfs start "<goal>"` text. The prose should use the
-user's native or workspace language, matching the native-language commit message
-rule.
+`docs/solon/<english-workspace>/<yyyyMMdd>/report.md` and
+`docs/solon/<english-workspace>/<yyyyMMdd>/retro.md`. Use
+`sfs start "<goal>" --workspace <english-name>` when the goal is not already a
+clear English folder name. The prose should use the user's native or workspace
+language, matching the native-language commit message rule.
 
 ## 2. Start A Sprint
 

@@ -25,6 +25,7 @@ git -c user.name='SFS Test' -c user.email='sfs-test@example.invalid' commit -qm 
 
 SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" init --layout thin --yes >/dev/null
 [[ ! -e ".sfs-local/events.jsonl" ]] || fail "init should not create empty events.jsonl"
+[[ ! -e ".sfs-local/auth.env.example" ]] || fail "init should not create project-local auth.env.example"
 [[ ! -d ".sfs-local/sprints" ]] || fail "init should not create empty sprints dir"
 [[ ! -d ".sfs-local/decisions" ]] || fail "init should not create empty decisions dir"
 [[ ! -d ".sfs-local/queue" ]] || fail "init should not create empty queue dir"

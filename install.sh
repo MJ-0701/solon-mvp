@@ -632,12 +632,8 @@ else
   ok "  events.jsonl lazy mode: 첫 이벤트 발생 시 생성"
 fi
 
-# auth.env.example — local executor credentials template (actual auth.env is gitignored)
-if [ -f "$SOURCE_DIR/templates/.sfs-local-template/auth.env.example" ] \
-   && [ ! -f "$TARGET/.sfs-local/auth.env.example" ]; then
-  cp "$SOURCE_DIR/templates/.sfs-local-template/auth.env.example" "$TARGET/.sfs-local/auth.env.example"
-  ok "  auth.env.example 생성 (Gemini/Codex/Claude bridge auth 안내)"
-fi
+# auth.env.example — keep the sample in the packaged runtime, not in project state.
+ok "  auth.env.example project copy skip (샘플은 packaged runtime 에만 유지; 필요 시 /sfs auth path)"
 
 ok "  work dirs lazy mode: sprints/decisions/queue 는 필요할 때만 생성"
 

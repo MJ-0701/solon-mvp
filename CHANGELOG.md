@@ -1,3 +1,38 @@
+## [0.6.64] - 2026-05-09
+
+> **Adopt visible residue + global handoff path hardening.** `sfs adopt --apply`
+> now removes remaining workbench clutter, and shared SFS docs use
+> `docs/solon/<english-workspace>/<yyyyMMdd>/`.
+
+### Changed
+
+- `adopt` now removes empty workbench surface directories such as
+  `.sfs-local/cache`, `.sfs-local/tmp`, empty `queue`, empty `sprints`, and empty
+  `decisions` after archiving their recoverable evidence.
+- `current-sprint` is treated only as an active pointer reset, not as a
+  nonessential residue file to double-count.
+- `install` and `upgrade` no longer create or refresh a project-local
+  `.sfs-local/auth.env.example`; the sample stays in the packaged runtime.
+- `upgrade` archives old project-local `auth.env.example` copies and removes
+  empty workbench dirs so already-adopted projects can converge to the same thin
+  surface after `sfs upgrade`.
+- Shared handoff/history docs now default to
+  `docs/solon/<english-workspace>/<yyyyMMdd>/`; `sfs start` accepts
+  `--workspace <english-name>` so agents can choose a clear English folder name
+  instead of leaking sprint ids such as `2026-W19-sprint-5`.
+- `sfs review --last` and review-run stdout now surface a global `next:` action;
+  Gate 3 PASS points to `sfs implement`, while later review PASS can point to
+  `sfs retro`.
+
+### Tests
+
+- Extended `test-sfs-adopt-freeform.sh` to cover `auth.env`, `auth.env.example`,
+  cache residue, and empty workbench dir cleanup after adopt.
+- Extended `test-sfs-upgrade-minimal-residue-migration.sh` to ensure upgrade
+  removes stale `auth.env.example` and empty `cache`/`tmp`/`queue` dirs.
+- Updated shared handoff tests for `docs/solon/<english-workspace>/<yyyyMMdd>/`
+  and added a Gate 3 review-next-action assertion.
+
 ## [0.6.63] - 2026-05-09
 
 > **Plan review-readiness wording cleanup.** The plan template no longer uses
@@ -73,14 +108,14 @@
 
 ## [0.6.60] - 2026-05-09
 
-> **Strict adopt cleanup under `docs/<workspace>/<yyyyMMdd>`.** `sfs adopt`
+> **Strict adopt cleanup under `docs/solon/<english-workspace>/<yyyyMMdd>`.** `sfs adopt`
 > now applies the same visible-file rule as tidy: if a file cannot be justified
 > in one line, it is archived or removed from the visible project surface.
 
 ### Changed
 
 - `sfs adopt --apply` now writes the durable handoff to
-  `docs/<workspace>/<yyyyMMdd>/handoff.md`. For adopt, `<workspace>` defaults
+  `docs/solon/<english-workspace>/<yyyyMMdd>/handoff.md`. For adopt, `<workspace>` defaults
   to the adopt id (`legacy-baseline` by default, or `--id <name>`).
 - Legacy flat adoption docs such as
   `docs/solon/<id>-adoption-summary.md` are cold-archived and removed from the
@@ -95,7 +130,7 @@
   configuration files with one-line keep reasons: `VERSION`, `config.yaml`,
   `divisions.yaml`, and `model-profiles.yaml`.
 - Shared report/retro/tidy docs now consistently use
-  `docs/<workspace>/<yyyyMMdd>/`; `docs/solon/` remains available for
+  `docs/solon/<english-workspace>/<yyyyMMdd>/`; `docs/solon/` remains available for
   project-wide Solon reference docs such as domain maps or design contracts.
 
 ### Tests
@@ -103,7 +138,7 @@
 - Extended `test-sfs-adopt-freeform.sh` to cover strict adopt retention:
   no visible `events.jsonl`, no preserved active sprint pointer, private cold
   archives for tmp/decision/runtime residue, archived flat docs/solon adoption
-  summaries, and the new `docs/<workspace>/<yyyyMMdd>/handoff.md` location.
+  summaries, and the new `docs/solon/<english-workspace>/<yyyyMMdd>/handoff.md` location.
 - Updated upgrade, tidy, and shared-handoff tests for the root `docs/`
   handoff path.
 
@@ -258,7 +293,7 @@
   too wide.
 - `.sfs-local/` is reaffirmed as private workbench state: runtime logs,
   `events.jsonl`, cache, tmp, archives, and queue run logs stay ignored and
-  disposable; durable shared conclusions belong in `docs/<workspace>/<yyyyMMdd>/` or the sprint
+  disposable; durable shared conclusions belong in `docs/solon/<english-workspace>/<yyyyMMdd>/` or the sprint
   close report.
 
 ## [0.6.55] - 2026-05-08
@@ -1390,7 +1425,7 @@
 > **Minimal residue release.** Solon now applies "남겨야 될 것만 남긴다" across
 > the project lifecycle, not just as a gitignore rule. The default surface is
 > private, lazy, and compact: nothing gets created before it is useful, and
-> shared output goes to `docs/<workspace>/<yyyyMMdd>/`.
+> shared output goes to `docs/solon/<english-workspace>/<yyyyMMdd>/`.
 
 ### Changed
 
@@ -1401,11 +1436,11 @@
   `brainstorm/plan/implement/log/review/retro` files. Each phase command creates
   only the document it actually needs.
 - **Adopt writes shared summary only** — `sfs adopt --apply` now creates
-  `docs/<workspace>/<yyyyMMdd>/handoff.md` and keeps raw scan/cold archive evidence
+  `docs/solon/<english-workspace>/<yyyyMMdd>/handoff.md` and keeps raw scan/cold archive evidence
   under `.sfs-local/archives/adopt/...`. It no longer leaves a fake active
   baseline sprint.
 - **Same-version residue migration** — rerunning `sfs upgrade` now converts older
-  visible `legacy-baseline` sprint folders into `docs/<workspace>/<yyyyMMdd>/handoff.md`
+  visible `legacy-baseline` sprint folders into `docs/solon/<english-workspace>/<yyyyMMdd>/handoff.md`
   plus a private cold archive, and packs old pre-created step docs for sprints
   with no phase events.
 - **Lean generated templates** — sprint templates were reduced to working
