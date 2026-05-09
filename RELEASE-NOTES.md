@@ -7,6 +7,18 @@
 
 ---
 
+## 0.6.79
+
+이번 버전은 README 와 제품 문서에서 본부, 지식팩, review lens 설명이 서로 어긋나던 부분을 맞춥니다.
+
+- `.sfs-local/divisions.yaml` 은 기존 프로젝트 호환을 위한 6개 activation slot 이고, 전체
+  지식팩/review lens registry 가 아니라고 명확히 적었습니다.
+- backend 는 dev specialization, management-admin 은 재무/경리/세무/회계 관점, taxonomy 는 독립
+  조직 본부가 아니라 모든 본부에 걸치는 언어/분류 lens 로 정리했습니다.
+- README, GUIDE, 한국어/영어 current-product 문서, index 문서, knowledge-pack router, 기본
+  `divisions.yaml` 템플릿을 같은 기준으로 맞췄습니다.
+- stale `0.6.26` / `0.6.27` 문장이 다시 들어오지 않도록 문서 싱크 테스트를 추가했습니다.
+
 ## 0.6.78
 
 이번 버전은 0.6.77의 commit-aware review evidence 를 실제 큰 프로젝트에서도 빠르게 끝나도록 보강합니다.

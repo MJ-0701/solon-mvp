@@ -1,6 +1,6 @@
 ---
 id: sfs-policy-design-knowledge-pack
-summary: Design/frontend topic and proposition inventory for SFS division activation.
+summary: Design/frontend topic and proposition inventory for SFS lens activation.
 load_when:
   - design
   - frontend

@@ -1,6 +1,6 @@
 ---
 id: sfs-policy-knowledge-pack-router-ko
-summary: 분과별 지식팩 라우터(한글 버전), 활성화 조건과 범위를 가볍게 제어.
+summary: 지식팩/review lens 라우터(한글 버전), 활성화 조건과 범위를 가볍게 제어.
 language: ko
 load_when:
   - knowledge pack
@@ -26,16 +26,18 @@ load_when:
   - API
   - AWS
 status: filled-v1
-content_policy: "read only this router first; read full division packs only when matching signals make them useful"
+content_policy: "read only this router first; read full packs only when matching signals make them useful"
 ---
 
-# Division Knowledge Pack Router
+# Knowledge Pack / Review Lens Router
 
-division pack 을 열기 전에 이 router 를 먼저 읽는다. 기본 정책은 project size 와
-risk 에 맞는 최소 check 만 활성화하는 것이다.
+knowledge pack 을 열기 전에 이 router 를 먼저 읽는다. 기본 정책은 project size 와
+risk 에 맞는 최소 check 만 활성화하는 것이다. 이 router 는 `.sfs-local/divisions.yaml` 과
+같은 표면이 아니다. `divisions.yaml` 은 6개 core activation slot 을 위한 호환성 설정이고,
+이 router 는 현재 guidance pack 과 review lens 를 고른다.
 이 범위는 knowledge-pack 문서에 한정되며, 별도 요청이 없는 한 나머지 문서는 변경하지 않습니다.
 
-## Division activation
+## Lens activation
 
 - Backend signals: `backend`, `JVM`, `Spring`, `JPA`, `transaction`, `batch`,
   `integration`, `DevOps`, `AWS`.
@@ -52,8 +54,8 @@ risk 에 맞는 최소 check 만 활성화하는 것이다.
 ## Read order
 
 1. Read only this file to decide coverage.
-2. Read exactly one matching division pack for AC/lens.
-3. Read deeper division pack only if the task explicitly asks for detail
+2. Read exactly one matching pack for AC/lens.
+3. Read deeper pack only if the task explicitly asks for detail
    (`deep`, `expand`, `full`, `evidence matrix`, or direct section reference).
 
 ## On-demand full-pack mapping

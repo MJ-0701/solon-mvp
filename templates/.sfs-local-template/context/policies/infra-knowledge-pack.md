@@ -1,6 +1,6 @@
 ---
 id: sfs-policy-infra-knowledge-pack
-summary: Infra/DevOps topic and proposition inventory for SFS division activation.
+summary: Infra/DevOps topic and proposition inventory for SFS lens activation.
 load_when:
   - infra
   - devops

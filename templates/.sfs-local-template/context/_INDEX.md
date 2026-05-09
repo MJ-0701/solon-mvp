@@ -26,7 +26,7 @@ module:
 - `policies/debugging-and-error-recovery.md` — stop-the-line failure triage and root-cause guardrails.
 - `policies/deprecation-and-migration.md` — legacy state/API cleanup with replacement, archive, and migration evidence.
 - `policies/shipping-and-launch.md` — reversible, observable release/deploy checklist.
-- `policies/knowledge-pack-router.md` — division activation router (English).
-- `policies/knowledge-pack-router.ko.md` — division activation router (Korean).
-- `policies/*-knowledge-pack.md` — English compact guidance packs for each division.
-- `policies/*-knowledge-pack.ko.md` — Korean compact guidance packs for each division.
+- `policies/knowledge-pack-router.md` — knowledge pack / review lens router (English).
+- `policies/knowledge-pack-router.ko.md` — knowledge pack / review lens router (Korean).
+- `policies/*-knowledge-pack.md` — English compact guidance packs for each lens/pack.
+- `policies/*-knowledge-pack.ko.md` — Korean compact guidance packs for each lens/pack.

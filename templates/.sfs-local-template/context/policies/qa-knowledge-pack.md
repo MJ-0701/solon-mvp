@@ -1,6 +1,6 @@
 ---
 id: sfs-policy-qa-knowledge-pack
-summary: QA topic and proposition inventory for SFS division activation.
+summary: QA topic and proposition inventory for SFS lens activation.
 load_when:
   - qa
   - test

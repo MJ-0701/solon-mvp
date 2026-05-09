@@ -1,3 +1,27 @@
+## [0.6.79] - 2026-05-09
+
+> **Product docs now keep divisions, knowledge packs, and review lenses in sync.**
+> README and current-product docs no longer mix stale 0.6.26/0.6.27 wording
+> with the current guidance-pack model.
+
+### Changed
+
+- Documented `.sfs-local/divisions.yaml` as the six-slot compatibility
+  activation state for existing projects, not the full knowledge-pack/review-lens
+  registry.
+- Clarified that backend is a `dev` specialization, management-admin covers
+  finance/bookkeeping/tax/accounting, and taxonomy is a cross-cutting
+  language/classification lens rather than an org division.
+- Updated README, GUIDE, Korean/English index docs, current-product-shape docs,
+  the knowledge-pack router, and the default `divisions.yaml` template with the
+  same terminology.
+
+### Tests
+
+- Added `test-docs-division-version-sync.sh` to block stale 0.6.26/0.6.27
+  version text and lock the division/lens boundary in docs and templates.
+- Extended model-routing docs tests to reject stale 0.6.26/0.6.27 references.
+
 ## [0.6.78] - 2026-05-09
 
 > **Review evidence stays bounded on real projects.** 0.6.77 made review

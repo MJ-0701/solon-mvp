@@ -47,7 +47,7 @@ native-language commit message rule.
 ## Windows Wrapper Stabilization
 
 The Windows PowerShell/cmd user entrypoint is fixed to `sfs.cmd`. Git Bash/WSL
-keep using `sfs`, like macOS/Linux. As of 0.6.78, the Scoop manifest keeps the
+keep using `sfs`, like macOS/Linux. As of 0.6.79, the Scoop manifest keeps the
 generated shim target on packaged `bin\sfs.ps1`, but the post-install hook
 overwrites the shims-directory `sfs.cmd`, `sfs.ps1`, and extensionless `sfs`
 with deterministic wrappers because generated `sfs.cmd` / `sfs.ps1` shims can
@@ -188,7 +188,7 @@ same cycle. Ask the user only when product judgment is required: scope,
 architecture, public contract, security/privacy/data-loss posture,
 cost/latency/model policy, destructive behavior, or changed AC meaning.
 
-As of 0.6.78, `sfs review` is commit-aware. A clean working tree no longer means
+As of 0.6.79, `sfs review` is commit-aware. A clean working tree no longer means
 the review prompt is empty: SFS includes reviewable files from the latest commit,
 current shared handoff docs, and small ADR/report documents in full within the
 bounded evidence cap.
@@ -263,7 +263,7 @@ Solon commit grouping belongs to the SFS command surface, not a host-local
 
 ## Design.md And Anti-AI-Slop Guardrails
 
-As of 0.6.26, design/frontend work treats `design.md` or
+Design/frontend work treats `design.md` or
 `docs/solon/design.md` as the AI-readable design-system contract. The file is a
 small contract for colors, typography, spacing, radius, shadow, component
 variants, icon style, forbidden values, and rationale.
@@ -279,22 +279,29 @@ a Korean-capable font such as Pretendard can be useful starter references for
 Korean products. They are starting points, not vendor lock-in. If an existing
 product design system exists, it wins.
 
-## Division Knowledge Packs
+## Divisions / Knowledge Packs / Review Lenses
 
-As of 0.6.78, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
-management/admin, and taxonomy packs are no longer placeholders. Each pack gives
-Solon a compact sense of what to watch, what to ask, and what evidence should
-count for that kind of work.
+As of 0.6.79, Solon documents divisions, knowledge packs, and review lenses as
+separate surfaces. `.sfs-local/divisions.yaml` is the six core activation slots
+for compatibility with existing projects: `dev`, `strategy-pm`, `qa`, `design`,
+`infra`, and `taxonomy`. It is runtime activation state, not the full
+knowledge-pack/review-lens registry.
+
+Current filled guidance is provided through the backend, strategy/PM, QA,
+design/frontend, infra/DevOps, management-admin, and taxonomy knowledge packs/
+review lenses. Each pack gives Solon a compact sense of what to watch, what to
+ask, and what evidence should count for that kind of work.
 
 The user should not need to memorize this list. Solon reads only the lens that
 fits the work. A small docs edit stays light. A release, architecture change, or
 risky workflow gets stronger questions and evidence checks. The criteria become
 richer while the user-facing surface stays simple.
-Taxonomy stays as a cross-cutting language/classification lens rather than a
-business department. Finance, bookkeeping, tax, and accounting live under the
-management/admin lens.
+Backend is a dev specialization, and management-admin covers finance,
+bookkeeping, tax, and accounting. The taxonomy slot remains in the legacy
+activation file for compatibility, but product guidance treats taxonomy as a
+cross-cutting language/classification lens rather than an org department.
 
-As of 0.6.78, useful disciplines from the agent-skills benchmark are absorbed
+As of 0.6.79, useful disciplines from the agent-skills benchmark are absorbed
 the same way. Official-docs implementation flows through `implement` and the
 `source-docs` lens, stop-the-line debugging flows through implementation
 verification, deprecation/migration flows through `adopt` and `tidy`, and

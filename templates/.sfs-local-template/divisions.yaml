@@ -1,10 +1,16 @@
 # .sfs-local/divisions.yaml
-# Solon MVP minimal divisions config (기본값).
-# Solon docset 쪽 divisions.schema.yaml v1.1 와 호환되는 subset.
-# 프로젝트 특성에 따라 각 본부 activation_state 를 조정하고, 변경 사유는
-# `.sfs-local/decisions/<N>-activate-<division>.md` 에 기록.
+# Solon MVP core activation config (compatibility surface).
+# 이 파일은 기존 프로젝트와 호환되는 6개 core activation slot 상태다.
+# 전체 지식팩/review lens registry 가 아니다.
+# Current guidance packs/lenses:
+# - backend: dev specialization
+# - strategy-pm, qa, design/frontend, infra/DevOps
+# - management-admin: finance/bookkeeping/tax/accounting lens
+# - taxonomy: cross-cutting language/classification lens, not an org division
+# 프로젝트 특성에 따라 activation_state 를 조정하고, 변경 사유는
+# `docs/solon/decisions/*.md` 또는 해당 sprint handoff 에 기록.
 
-version: 1.0-mvp-minimal
+version: 1.1-core-activation
 project: "<PROJECT-NAME>"
 runtime: claude-code   # (향후) codex / gemini-cli 전환 시 값 변경
 created: "<DATE>"
@@ -35,8 +41,8 @@ divisions:
 
   taxonomy:
     activation_state: abstract
-    reason: "도메인 taxonomy 는 cycle 2~3 누적 후 도입."
+    reason: "언어/분류 lens 는 cycle 2~3 누적 후 도입. 조직 본부가 아니라 cross-cutting 기능."
 
-# Phase 1 MVP 기본 활성 본부 = dev + strategy-pm 2 개.
+# Phase 1 MVP 기본 active slot = dev + strategy-pm 2 개.
 # 나머지 4 개는 abstract — 필요 시 대화에서 선언적으로 activate 승격.
-# 승격 기록은 .sfs-local/decisions/<N>-activate-<division>.md 에 남김.
+# backend 와 management-admin 은 별도 knowledge pack/review lens 로 라우팅한다.

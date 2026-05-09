@@ -431,7 +431,7 @@ collapse_residue_files_to_cold_archive() {
     echo "- ${SFS_LOCAL_DIR}/config.yaml — workspace SFS runtime config"
     echo "- ${SFS_LOCAL_DIR}/VERSION — installed SFS version/upgrade state"
     echo "- ${SFS_LOCAL_DIR}/model-profiles.yaml — project model-routing config"
-    echo "- ${SFS_LOCAL_DIR}/divisions.yaml — project division activation config"
+    echo "- ${SFS_LOCAL_DIR}/divisions.yaml — project core activation config"
     echo
     echo "items:"
     find "${staging}" -type f 2>/dev/null | sort | while IFS= read -r staged; do
@@ -712,7 +712,7 @@ if [[ "${APPLY}" -eq 0 ]]; then
   echo "    - ${SFS_LOCAL_DIR}/config.yaml — workspace SFS runtime config"
   echo "    - ${SFS_LOCAL_DIR}/VERSION — installed SFS version/upgrade state"
   echo "    - ${SFS_LOCAL_DIR}/model-profiles.yaml — project model-routing config"
-  echo "    - ${SFS_LOCAL_DIR}/divisions.yaml — project division activation config"
+  echo "    - ${SFS_LOCAL_DIR}/divisions.yaml — project core activation config"
   if [[ -d "${TARGET_DIR}" && "${FORCE}" -eq 1 ]]; then
     echo "  would_archive_existing_target: 1"
     echo "    cold_archive: ${PREEXISTING_TARGET_TARBALL}"
@@ -906,7 +906,7 @@ ${ADOPT_BRIEF:-  - none}
   - \`.sfs-local/config.yaml\` — workspace SFS runtime config.
   - \`.sfs-local/VERSION\` — installed SFS version/upgrade state.
   - \`.sfs-local/model-profiles.yaml\` — project model-routing config.
-  - \`.sfs-local/divisions.yaml\` — project division activation config.
+  - \`.sfs-local/divisions.yaml\` — project core activation config.
 
 ## §3. Component Map
 

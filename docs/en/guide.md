@@ -7,7 +7,7 @@ install. For beginner Git/terminal help, use the Korean [BEGINNER-GUIDE.md](../.
 
 ## 0. Install And Initialize
 
-> **As of 0.6.78**, one `brew install` / `scoop install` lets Claude Code
+> **As of 0.6.79**, one `brew install` / `scoop install` lets Claude Code
 > (`/sfs`), Gemini CLI (`sfs`), and Codex CLI (`$sfs`) find Solon automatically.
 > Your project keeps the files you read and the records you create.
 
@@ -61,7 +61,7 @@ optional. Install those native shortcuts only when a project needs them:
 sfs agent install all
 ```
 
-Old projects can be upgraded into the lighter 0.6.78 shape. Use
+Old projects can be upgraded into the lighter 0.6.79 shape. Use
 `sfs upgrade --layout vendored` only when Solon package files must stay inside
 the project.
 After adoption or upgrade, `sfs tidy --all --apply` can clean targetless
@@ -75,12 +75,17 @@ evidence is date-bucketed as
 `.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz`
 instead of many visible timestamp folders.
 
-0.6.78 also includes the filled division knowledge packs. The user does not need to choose
-"backend", "QA", "infra", "finance", "tax", "accounting", or "taxonomy"
-manually. The AI should read the relevant Solon lens when the work calls for it,
-then explain the judgment in plain language.
+0.6.79 separates divisions, knowledge packs, and review lenses. The local
+`.sfs-local/divisions.yaml` file is the six-slot compatibility activation state
+for older projects. Actual guidance is read from backend, strategy/PM, QA,
+design/frontend, infra/DevOps, management-admin, and taxonomy packs/lenses.
+Backend is a dev specialization, management-admin covers finance/bookkeeping/
+tax/accounting, and taxonomy is a cross-cutting language/classification lens.
+The user does not need to choose those labels manually. The AI should read the
+relevant Solon lens when the work calls for it, then explain the judgment in
+plain language.
 
-As of 0.6.78, agent-skills-style practices are absorbed into existing SFS
+As of 0.6.79, agent-skills-style practices are absorbed into existing SFS
 commands instead of becoming new lifecycle commands: source-driven
 implementation, stop-the-line debugging, deprecation/migration, shipping
 checks, and stronger review lenses.

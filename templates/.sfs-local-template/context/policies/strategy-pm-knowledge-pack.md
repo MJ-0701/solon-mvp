@@ -1,6 +1,6 @@
 ---
 id: sfs-policy-strategy-pm-knowledge-pack
-summary: Strategy/PM topic and proposition inventory for SFS division activation.
+summary: Strategy/PM topic and proposition inventory for SFS lens activation.
 load_when:
   - strategy-pm
   - product

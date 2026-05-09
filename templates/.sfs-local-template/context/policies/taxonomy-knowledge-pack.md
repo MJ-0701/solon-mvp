@@ -1,6 +1,6 @@
 ---
 id: sfs-policy-taxonomy-knowledge-pack
-summary: Taxonomy/domain-language topic and proposition inventory for SFS division activation.
+summary: Taxonomy/domain-language topic and proposition inventory for SFS lens activation.
 load_when:
   - taxonomy
   - vocabulary

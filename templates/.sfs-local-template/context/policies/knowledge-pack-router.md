@@ -1,6 +1,6 @@
 ---
 id: sfs-policy-knowledge-pack-router
-summary: Lightweight activation router for all division knowledge packs.
+summary: Lightweight activation router for knowledge packs and review lenses.
 language: en
 load_when:
   - knowledge pack
@@ -21,18 +21,20 @@ load_when:
   - API
   - AWS
 status: filled-v1
-content_policy: "read only this router first; read full division packs only when matching signals make them useful"
+content_policy: "read only this router first; read full packs only when matching signals make them useful"
 ---
 
-# Division Knowledge Pack Router
+# Knowledge Pack / Review Lens Router
 
-Use this router before opening division packs. Default policy is minimum
-required checks by project size and risk.
+Use this router before opening knowledge packs. Default policy is minimum
+required checks by project size and risk. This router is not the same surface as
+`.sfs-local/divisions.yaml`: that file is a six-slot compatibility activation
+state, while this router covers the current guidance packs and review lenses.
 This scope is limited to knowledge-pack documents; other documentation is unchanged unless explicitly requested.
 
 If Korean is requested, read `knowledge-pack-router.ko.md` first.
 
-## Division activation
+## Lens activation
 
 - Backend signals: `backend`, `JVM`, `Spring`, `JPA`, `transaction`, `batch`,
   `integration`, `DevOps`, `AWS`.
@@ -48,8 +50,8 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
 ## Read order
 
 1. Read only this file to decide coverage.
-2. Read exactly one matching division pack for AC/lens.
-3. Read deeper division pack only if the task explicitly asks for detail
+2. Read exactly one matching pack for AC/lens.
+3. Read deeper pack only if the task explicitly asks for detail
    (`deep`, `expand`, `full`, `evidence matrix`, or direct section reference).
 
 ## On-demand full-pack mapping

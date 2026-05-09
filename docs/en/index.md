@@ -33,14 +33,17 @@ The point is not to outsource all thinking to AI. Solon lets AI assist the work
 while the user keeps product ownership over intent, priority, tradeoffs,
 validation, boundaries, and language.
 
-As of 0.6.78, backend, strategy/PM, QA, design/frontend, infra/DevOps,
-management/admin, and taxonomy knowledge packs are filled with practical
-guidance. Finance, bookkeeping, tax, and accounting belong to the
-management/admin lens. The user does not need to memorize those labels. Solon
-reads the relevant lens and turns it into plain questions, plan criteria, or
-review judgment.
+As of 0.6.79, divisions, knowledge packs, and review lenses are documented as
+separate surfaces. `.sfs-local/divisions.yaml` is the six-slot compatibility
+activation state for older projects, while actual guidance is read from the
+backend, strategy/PM, QA, design/frontend, infra/DevOps, management-admin, and
+taxonomy knowledge packs/review lenses. Backend is a dev specialization,
+management-admin covers finance/bookkeeping/tax/accounting, and taxonomy is a
+cross-cutting language/classification lens. The user does not need to memorize
+those labels. Solon reads the relevant lens and turns it into plain questions,
+plan criteria, or review judgment.
 
-As of 0.6.78, useful agent-skills benchmark practices are absorbed into
+As of 0.6.79, useful agent-skills benchmark practices are absorbed into
 `implement`, `review`, `adopt`, `tidy`, and `release` instead of becoming new
 commands. This includes source-driven implementation, stop-the-line debugging,
 deprecation/migration cleanup, shipping checks, and the `source-docs`,
