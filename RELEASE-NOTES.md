@@ -7,6 +7,17 @@
 
 ---
 
+## 0.6.66
+
+이번 버전은 0.6.65의 surface cleanup 정책에 맞춰 배포 검증도 같이 맞춥니다.
+
+- Windows Scoop smoke 가 `runtime-migrations` top-level 폴더 대신
+  `archives/adopt/surface-cleanup/.../preexisting-archives.tar.gz` 안의 backup evidence 를
+  인식합니다.
+- owner-side release verifier 도 같은 collapsed archive 구조를 정상 release evidence 로 인정합니다.
+- 사용자-facing 동작은 0.6.65와 같습니다: cache/log/placeholder 파일은 visible surface 에 남기지 않고,
+  복구 evidence 는 `archives/adopt` 아래로 접습니다.
+
 ## 0.6.65
 
 이번 버전은 adopt 이후 다시 생기던 `.sfs-local` 표면 잔여물을 막습니다.

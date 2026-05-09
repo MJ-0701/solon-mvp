@@ -263,6 +263,16 @@ jobs:
           }
           $adapterArchives = Get-ChildItem ".sfs-local\archives\runtime-migrations" -Filter "project-agent-adapters.tar.gz" -Recurse -ErrorAction SilentlyContinue
           if (-not $adapterArchives) {
+            $collapsedArchives = Get-ChildItem ".sfs-local\archives\adopt" -Filter "preexisting-archives.tar.gz" -Recurse -ErrorAction SilentlyContinue
+            foreach ($archive in $collapsedArchives) {
+              $listing = & tar -tzf $archive.FullName 2>$null
+              if ($LASTEXITCODE -eq 0 -and ($listing -match "project-agent-adapters\.tar\.gz")) {
+                $adapterArchives = @($archive)
+                break
+              }
+            }
+          }
+          if (-not $adapterArchives) {
             throw "sfs.cmd upgrade did not archive opt-in adapter files"
           }
 

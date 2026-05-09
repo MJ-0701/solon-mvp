@@ -1,3 +1,18 @@
+## [0.6.66] - 2026-05-09
+
+> **Release guard parity for collapsed archives.** The Windows Scoop smoke and
+> owner-side release verifier now understand the 0.6.65 policy that runtime
+> migration/upgrade buckets are folded under `archives/adopt/surface-cleanup`.
+
+### Fixed
+
+- Updated the Windows Scoop smoke workflow so thin-upgrade adapter backup checks
+  pass when `project-agent-adapters.tar.gz` is inside the collapsed
+  `preexisting-archives.tar.gz` bundle.
+- Updated owner release verification to accept both legacy top-level
+  `archives/runtime-migrations/...` evidence and the new collapsed
+  `archives/adopt/surface-cleanup/...` evidence.
+
 ## [0.6.65] - 2026-05-09
 
 > **Post-adopt surface residue cleanup.** `sfs tidy --all --apply` now works
