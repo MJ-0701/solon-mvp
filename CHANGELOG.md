@@ -1,3 +1,16 @@
+## [0.6.73] - 2026-05-09
+
+> **Daily surface-cleanup verification.** Release and Windows smoke checks now
+> understand the new daily `surface-cleanup.tar.gz` bundle shape.
+
+### Fixed
+
+- Updated Windows Scoop smoke verification so opt-in adapter archives can be
+  found after they are nested under
+  `.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz`.
+- This keeps CI aligned with the 0.6.72 surface policy: one visible daily
+  directory, with recovery evidence preserved inside tar bundles.
+
 ## [0.6.72] - 2026-05-09
 
 > **Daily surface-cleanup bundle.** Same-day post-adopt/surface cleanup archive

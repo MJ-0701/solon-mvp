@@ -7,6 +7,14 @@
 
 ---
 
+## 0.6.73
+
+이번 버전은 0.6.72의 surface-cleanup 정리 정책을 Windows/릴리스 검증까지 맞춥니다.
+
+- `surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz` 안에 들어간 archive evidence 를
+  Windows Scoop Smoke 와 release verifier 가 제대로 찾습니다.
+- 실제 프로젝트 표면은 하루 단위 bundle 하나로 깔끔하게 유지하고, 복구 근거는 tar 내부에 보존합니다.
+
 ## 0.6.72
 
 이번 버전은 `.sfs-local/archives/adopt/surface-cleanup/` 을 더 보기 좋게 정리합니다.
