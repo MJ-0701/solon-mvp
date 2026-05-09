@@ -31,21 +31,19 @@ assert_not_contains() {
 }
 
 docs=(
-  "${DIST_DIR}/README.md"
   "${DIST_DIR}/GUIDE.md"
   "${DIST_DIR}/BEGINNER-GUIDE.md"
   "${DIST_DIR}/docs/ko/index.md"
   "${DIST_DIR}/docs/ko/current-product-shape.md"
+  "${DIST_DIR}/docs/ko/10x-value.md"
   "${DIST_DIR}/docs/en/index.md"
   "${DIST_DIR}/docs/en/current-product-shape.md"
+  "${DIST_DIR}/docs/en/10x-value.md"
   "${DIST_DIR}/docs/en/guide.md"
 )
 changelog="${DIST_DIR}/CHANGELOG.md"
 release_notes="${DIST_DIR}/RELEASE-NOTES.md"
 
-if [[ ! -f "${docs[0]}" && -f "${DIST_DIR}/../README.md" ]]; then
-  docs[0]="${DIST_DIR}/../README.md"
-fi
 if [[ ! -f "${changelog}" && -f "${DIST_DIR}/../CHANGELOG.md" ]]; then
   changelog="${DIST_DIR}/../CHANGELOG.md"
 fi
@@ -79,8 +77,13 @@ for file in "${docs[@]}"; do
   assert_not_contains "${file}" "As of 0.6.34" "docs no stale As of 0.6.34 ${file}"
 done
 
-assert_contains "${docs[0]}" "Codex worker" "README model routing heading"
-assert_contains "${docs[0]}" "--agent-mode parallel --agents codex,claude[,gemini]" "README parallel implement option"
+assert_not_contains "${DIST_DIR}/README.md" "gpt-5.3-codex" "README should not carry model routing detail"
+assert_not_contains "${DIST_DIR}/README.md" "--agent-mode parallel" "README should not carry parallel routing detail"
+assert_contains "${DIST_DIR}/README.md" "더 깊은 설명은 [Solon 10x 가치]" "README points deep value to 10x"
+assert_contains "${DIST_DIR}/docs/ko/10x-value.md" "## 모델 라우팅 10x 루프" "KO 10x model routing section"
+assert_contains "${DIST_DIR}/docs/ko/10x-value.md" "gpt-5.3-codex-spark" "KO 10x spark helper detail"
+assert_contains "${DIST_DIR}/docs/en/10x-value.md" "## Model Routing 10x Loop" "EN 10x model routing section"
+assert_contains "${DIST_DIR}/docs/en/10x-value.md" "gpt-5.3-codex-spark" "EN 10x spark helper detail"
 assert_contains "${DIST_DIR}/GUIDE.md" "일반 구현 worker 가 아니라" "GUIDE spark helper boundary"
 assert_contains "${DIST_DIR}/GUIDE.md" "Single Agent 모드도 구현 직후 review 는 필수" "GUIDE post implement review"
 assert_contains "${DIST_DIR}/BEGINNER-GUIDE.md" "AI 모델 이름을 전부 외울 필요도 없습니다" "BEGINNER friendly model explanation"

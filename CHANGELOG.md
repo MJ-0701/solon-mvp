@@ -1,3 +1,29 @@
+## [0.6.80] - 2026-05-09
+
+> **README is now a product introduction, not a release-note dump.** Detailed
+> value, model-routing, and operating-policy explanations moved to 10x/current
+> docs where they belong.
+
+### Changed
+
+- Rewrote `README.md` around the product promise: Solon turns AI speed into a
+  product operating loop with intent, scope, AC, implementation slices,
+  independent review, and handoff.
+- Removed release-version prose, division/lens registry details, model routing,
+  review evidence packaging, and other operating specs from README.
+- Added detailed model-routing explanation to Korean and English 10x value docs,
+  including default role routing, advisor boundaries, Spark helper limits, and
+  self-CPO requirements.
+- Replaced several current-doc "as of 0.6.79" phrasings with current-state
+  wording so guide pages do not read like release notes.
+
+### Tests
+
+- Added `test-readme-intro-hygiene.sh` to keep README short and free of
+  release/model/lens-registry detail.
+- Updated model-routing and division-sync docs tests so deep detail is required
+  in 10x/current docs, while README points readers there.
+
 ## [0.6.79] - 2026-05-09
 
 > **Product docs now keep divisions, knowledge packs, and review lenses in sync.**

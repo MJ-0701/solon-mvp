@@ -7,6 +7,16 @@
 
 ---
 
+## 0.6.80
+
+이번 버전은 README 를 제품 소개페이지답게 다시 줄입니다.
+
+- README 는 Solon 이 왜 좋은지, 어떻게 시작하는지, 어디서 더 읽으면 되는지만 짧게 보여줍니다.
+- 버전별 변경 설명, 본부/지식팩 세부 정책, review evidence, 모델 라우팅 같은 운영 스펙은
+  README 에서 빼고 GUIDE / current-product / 10x value 문서로 보냈습니다.
+- 모델 라우팅의 자세한 설명은 한국어/영어 10x value 문서에 추가했습니다.
+- README 가 다시 release note 처럼 길어지지 않도록 intro hygiene 테스트를 추가했습니다.
+
 ## 0.6.79
 
 이번 버전은 README 와 제품 문서에서 본부, 지식팩, review lens 설명이 서로 어긋나던 부분을 맞춥니다.

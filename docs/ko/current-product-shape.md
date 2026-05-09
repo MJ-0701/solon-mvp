@@ -45,7 +45,7 @@ depth 옵션을 함께 보여드릴 뿐입니다.
 ## Windows 래퍼 안정화
 
 Windows PowerShell/cmd 의 사용자 진입점은 `sfs.cmd` 로 고정합니다. Git Bash/WSL 에서는
-macOS/Linux 처럼 `sfs` 를 씁니다. 0.6.79 기준 Scoop manifest 는 generated shim 이
+macOS/Linux 처럼 `sfs` 를 씁니다. 현재 Scoop manifest 는 generated shim 이
 packaged `bin\sfs.ps1` 을 직접 호출하도록 유지하지만, Scoop 이 생성한 `sfs.cmd` / `sfs.ps1`
 shim 이 인자를 버리는 경로가 확인되어 post-install hook 이 shims 디렉터리의 `sfs.cmd`,
 `sfs.ps1`, extensionless `sfs` 를 deterministic wrapper 로 덮어씁니다. PowerShell/cmd smoke 와
@@ -174,7 +174,7 @@ grep 범위 누락, 실측 evidence 갱신, AC와 파일/산출물 매핑 누락
 다시 호출합니다. 사용자에게 묻는 경우는 범위, architecture, public contract, 보안/개인정보/data-loss,
 비용/지연/model policy, destructive action, AC 의미 변경처럼 제품 판단이 필요한 경우입니다.
 
-0.6.79 기준 `sfs review` 는 commit-aware 입니다. working tree 가 clean 이어도 직전 commit 의
+현재 `sfs review` 는 commit-aware 입니다. working tree 가 clean 이어도 직전 commit 의
 reviewable 파일, 현재 공유 handoff 문서, 작은 ADR/report 본문을 bounded evidence 안에 포함하므로
 commit 후 evidence prompt 가 비어서 partial 이 나는 상황을 막습니다.
 
@@ -253,7 +253,7 @@ AI 가 UI 를 만들 때 가장 흔한 실패는 평균값으로 회귀하는 �
 
 ## 본부 / 지식팩 / Review Lens
 
-0.6.79 기준 Solon 은 본부, 지식팩, review lens 를 같은 층위로 섞지 않습니다.
+현재 Solon 은 본부, 지식팩, review lens 를 같은 층위로 섞지 않습니다.
 `.sfs-local/divisions.yaml` 은 기존 프로젝트 호환을 위한 6개 core activation slot
 (`dev`, `strategy-pm`, `qa`, `design`, `infra`, `taxonomy`) 입니다. 이 파일은 activation 상태를
 읽기 위한 runtime 설정이지, 전체 지식팩/review lens registry 가 아닙니다.
@@ -270,7 +270,7 @@ backend 는 `dev` 의 기술 specialization 이고, management-admin 은 재무/
 taxonomy slot 은 legacy activation 호환성 때문에 남아 있지만, 제품 설명에서는 독립 조직 본부가
 아니라 모든 본부에 걸치는 용어/분류 lens 로 다룹니다.
 
-0.6.79 에서는 agent-skills 벤치마크에서 유용한 discipline 도 같은 방식으로 흡수했습니다.
+agent-skills 벤치마크에서 유용한 discipline 도 같은 방식으로 흡수했습니다.
 공식 문서 기반 구현은 `implement` 와 `source-docs` review lens 로, stop-the-line 디버깅은
 `implement` 검증 정책으로, deprecation/migration 은 `adopt`/`tidy` 정리 기준으로, shipping
 check 는 `release` 정책으로 들어갑니다. 새 lifecycle command 를 늘리는 대신 기존 흐름의

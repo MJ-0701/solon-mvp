@@ -31,12 +31,13 @@ assert_not_contains() {
 }
 
 docs=(
-  "${DIST_DIR}/README.md"
   "${DIST_DIR}/GUIDE.md"
   "${DIST_DIR}/docs/ko/index.md"
   "${DIST_DIR}/docs/ko/current-product-shape.md"
+  "${DIST_DIR}/docs/ko/10x-value.md"
   "${DIST_DIR}/docs/en/index.md"
   "${DIST_DIR}/docs/en/current-product-shape.md"
+  "${DIST_DIR}/docs/en/10x-value.md"
   "${DIST_DIR}/docs/en/guide.md"
 )
 
@@ -47,12 +48,12 @@ for file in "${docs[@]}"; do
   assert_not_contains "${file}" "0.6.27 기준" "docs no stale 0.6.27 기준 ${file}"
 done
 
-assert_contains "${DIST_DIR}/VERSION" "0.6.79" "version bumped"
-assert_contains "${DIST_DIR}/README.md" "0.6.79 기준으로는 본부, 지식팩, review lens 를 같은 말처럼 섞지 않습니다" "README division/lens split"
-assert_contains "${DIST_DIR}/README.md" "6개 core activation slot" "README core activation slots"
-assert_contains "${DIST_DIR}/README.md" 'backend 는 `dev` 의 기술' "README backend specialization"
-assert_contains "${DIST_DIR}/README.md" "management-admin 은 재무/경리/세무/회계" "README management admin"
-assert_contains "${DIST_DIR}/README.md" "언어/분류 lens" "README taxonomy lens"
+assert_contains "${DIST_DIR}/VERSION" "0.6.80" "version bumped"
+assert_not_contains "${DIST_DIR}/README.md" "0.6." "README no release-version prose"
+assert_not_contains "${DIST_DIR}/README.md" "divisions.yaml" "README no division registry detail"
+assert_not_contains "${DIST_DIR}/README.md" "management-admin" "README no lens registry detail"
+assert_contains "${DIST_DIR}/docs/ko/10x-value.md" "## 모델 라우팅 10x 루프" "KO 10x model routing detail"
+assert_contains "${DIST_DIR}/docs/en/10x-value.md" "## Model Routing 10x Loop" "EN 10x model routing detail"
 
 assert_contains "${DIST_DIR}/docs/ko/current-product-shape.md" "## 본부 / 지식팩 / Review Lens" "KO product shape split section"
 assert_contains "${DIST_DIR}/docs/ko/current-product-shape.md" "전체 지식팩/review lens registry 가 아닙니다" "KO product shape registry boundary"

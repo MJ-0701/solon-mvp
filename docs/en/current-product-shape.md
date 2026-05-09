@@ -47,7 +47,7 @@ native-language commit message rule.
 ## Windows Wrapper Stabilization
 
 The Windows PowerShell/cmd user entrypoint is fixed to `sfs.cmd`. Git Bash/WSL
-keep using `sfs`, like macOS/Linux. As of 0.6.79, the Scoop manifest keeps the
+keep using `sfs`, like macOS/Linux. Current Scoop manifests keep the
 generated shim target on packaged `bin\sfs.ps1`, but the post-install hook
 overwrites the shims-directory `sfs.cmd`, `sfs.ps1`, and extensionless `sfs`
 with deterministic wrappers because generated `sfs.cmd` / `sfs.ps1` shims can
@@ -188,7 +188,7 @@ same cycle. Ask the user only when product judgment is required: scope,
 architecture, public contract, security/privacy/data-loss posture,
 cost/latency/model policy, destructive behavior, or changed AC meaning.
 
-As of 0.6.79, `sfs review` is commit-aware. A clean working tree no longer means
+Current `sfs review` is commit-aware. A clean working tree no longer means
 the review prompt is empty: SFS includes reviewable files from the latest commit,
 current shared handoff docs, and small ADR/report documents in full within the
 bounded evidence cap.
@@ -281,7 +281,7 @@ product design system exists, it wins.
 
 ## Divisions / Knowledge Packs / Review Lenses
 
-As of 0.6.79, Solon documents divisions, knowledge packs, and review lenses as
+Current Solon documents divisions, knowledge packs, and review lenses as
 separate surfaces. `.sfs-local/divisions.yaml` is the six core activation slots
 for compatibility with existing projects: `dev`, `strategy-pm`, `qa`, `design`,
 `infra`, and `taxonomy`. It is runtime activation state, not the full
@@ -301,7 +301,7 @@ bookkeeping, tax, and accounting. The taxonomy slot remains in the legacy
 activation file for compatibility, but product guidance treats taxonomy as a
 cross-cutting language/classification lens rather than an org department.
 
-As of 0.6.79, useful disciplines from the agent-skills benchmark are absorbed
+Useful disciplines from the agent-skills benchmark are absorbed
 the same way. Official-docs implementation flows through `implement` and the
 `source-docs` lens, stop-the-line debugging flows through implementation
 verification, deprecation/migration flows through `adopt` and `tidy`, and

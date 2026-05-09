@@ -127,6 +127,51 @@ With that structure, Codex, Claude, and Gemini can increase both speed and
 quality control. Without it, parallelism mostly creates collisions and duplicate
 review work.
 
+## Model Routing 10x Loop
+
+Solon's model routing is not "use the most expensive model for everything." It
+is an operating principle: match the model to the weight of the decision. Fast
+helpers should stay fast. Product identity, architecture, acceptance criteria,
+and review decisions should escalate to the strongest advisor because they are
+expensive to reverse.
+
+| Role | Solon contract | 10x effect |
+|---|---|---|
+| Helper-grade intake | simple relay, missing-argument questions, low-risk short summaries | reduce waiting time |
+| Facilitator / question | brainstorm questions, option framing, answer summaries | sharpen scope through better questions |
+| C-Level / review | intent, architecture, AC, review, escalation judgment | spend reasoning on expensive decisions |
+| Worker | fixed implementation slices after plan and files_scope are locked | keep execution separate from approval |
+| Bounded helper | grep, formatting, sync, deterministic chores | avoid spending top-model time on mechanical work |
+
+This routing is the default. The user does not need to configure it first.
+`current_model` is an explicit opt-out for projects that want to keep the
+currently selected model without role separation. Model names are SFS
+role/profile contracts; SFS does not assume every CLI supports a `--model` flag.
+The default bridge requests the role through prompt and host/runtime settings.
+Use `SFS_REVIEW_<EXECUTOR>_CMD` only for a verified explicit override.
+
+For Codex, helper-grade intake maps to `gpt-5.4-mini`, question/facilitation to
+`gpt-5.4`, advisor/review to `gpt-5.5` xhigh, workers to `gpt-5.3-codex`, and
+bounded helpers to `gpt-5.3-codex-spark`. Claude follows the same responsibility
+split with Opus/Sonnet/Haiku families. Gemini advisor/review/facilitation uses
+`gemini-3.1-pro-preview`; helper-grade fallback uses `gemini-3-flash-preview`.
+SFS does not use 2.5 fallback names.
+
+Helper-grade simple I/O can skip advisor review. But if lower-model output
+frames questions/options, interprets user answers, or affects product identity,
+architecture, gates, AC, or files_scope, top-model advisor review is required.
+
+Advisor calls do not replace self-CPO PASS. Before external/cross review, the
+author records a self-CPO mini-check covering requirements -> AC ->
+implementation slices -> ADR/decision ids, every AC mapped to file/artifact/
+evidence, and SEED/placeholder/mock/fallback material remaining
+non-acceptance until replaced by real deliverables.
+
+`gpt-5.3-codex-spark` is a fast helper, not a general implementation worker. Use
+it only for bounded mechanical subtasks after scope, files_scope, and AC are
+locked. If architecture, public contract, security, privacy, data-loss, release
+gate, or repeated failure risk appears, worker work escalates to high reasoning.
+
 ## Design System 10x Loop
 
 In the AI coding era, code generation is no longer the moat. The user's first

@@ -117,6 +117,45 @@ fixed plan
 이 구조가 있으면 Codex, Claude, Gemini 를 동시에 써도 작업 속도와 품질 체크가 같이 올라갑니다.
 구조가 없으면 병렬성은 충돌과 중복 review 만 늘립니다.
 
+## 모델 라우팅 10x 루프
+
+Solon 의 모델 라우팅은 "비싼 모델을 항상 쓰자"가 아니라 "판단의 무게와 모델의 책임을 맞추자"는
+운영 원칙입니다. 빠른 helper 는 빠르게 쓰고, 제품 정체성, architecture, acceptance criteria,
+review 처럼 되돌리기 비싼 판단은 최상위 advisor 로 올립니다.
+
+| 역할 | Solon 기준 | 10x 효과 |
+|---|---|---|
+| Helper-grade intake | 단순 relay, 누락 인자 질문, 낮은 위험의 짧은 요약 | 사용자가 기다리는 시간을 줄임 |
+| Facilitator / question | brainstorm 질문 생성, 선택지 framing, 답변 요약 | 좋은 질문으로 scope 를 빠르게 선명하게 함 |
+| C-Level / review | 의도, 구조, AC, 검토, 승격 판단 | 되돌리기 비싼 결정을 더 깊게 봄 |
+| Worker | plan 과 files_scope 가 고정된 구현 slice | 실행과 판단 책임을 섞지 않음 |
+| Bounded helper | grep, 포맷, 동기화 같은 기계적 보조 작업 | 고급 모델 시간을 반복 작업에 태우지 않음 |
+
+이 라우팅은 기본값입니다. 사용자가 따로 설정하지 않아도 적용되고, `current_model` 은 명시적으로
+역할 분리를 끄고 현재 선택 모델을 그대로 쓰고 싶을 때만 선택합니다. 모델명은 SFS 의
+role/profile contract 이며 모든 CLI 가 `--model` 같은 옵션을 지원한다고 가정하지 않습니다.
+기본 bridge 는 prompt 와 host/runtime 설정으로 해당 역할을 요청하고, 명시 override 가 필요할 때만
+`SFS_REVIEW_<EXECUTOR>_CMD` 로 검증된 명령을 둡니다.
+
+Codex 기준으로 helper-grade intake 는 `gpt-5.4-mini`, 질문 생성/facilitator 는 `gpt-5.4`,
+advisor/review 는 `gpt-5.5` xhigh, worker 는 `gpt-5.3-codex`, bounded helper 는
+`gpt-5.3-codex-spark` 를 기본 계약으로 봅니다. Claude 는 Opus/Sonnet/Haiku 계열로 같은 책임
+분리를 따르고, Gemini advisor/review/facilitator 는 `gemini-3.1-pro-preview`, helper-grade
+fallback 은 `gemini-3-flash-preview` 입니다. 2.5 fallback 이름은 쓰지 않습니다.
+
+Helper-grade 단순 I/O 는 advisor 검토를 생략할 수 있습니다. 하지만 하위모델 출력이 질문/선택지를
+설계하거나 사용자 답변을 해석하거나 product identity, architecture, gate, AC, files_scope 에
+영향을 주면 최상위 advisor 검토가 필수입니다.
+
+advisor 호출은 self-CPO PASS 를 대체하지 않습니다. external/cross review 전에 작성자는
+self-CPO mini-check 를 남깁니다: 요구사항 -> AC -> 구현 slice -> ADR/decision id 추적, 각 AC 의
+file/artifact/evidence 매핑, SEED/placeholder/mock/fallback 이 실제 산출물 전에는
+non-acceptance 로 남는지 확인합니다.
+
+`gpt-5.3-codex-spark` 는 빠른 helper 입니다. 일반 구현 worker 로 쓰지 않고, scope, files_scope,
+AC 가 잠긴 뒤의 bounded mechanical subtask 에만 씁니다. architecture, public contract, security,
+privacy, data-loss, release gate, 같은 실패 반복이 있으면 worker 도 high reasoning 으로 승격합니다.
+
 ## 디자인 시스템 10x 루프
 
 AI 시대에는 코드 작성 능력보다 화면의 일관성과 감도가 더 빨리 드러납니다. 사용자는 코드를

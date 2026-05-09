@@ -27,7 +27,7 @@ AI 시대에 Solon 이 주는 가치는 [Solon 10x 가치](./docs/ko/10x-value.m
 
 ## 1. 설치와 초기화
 
-> **0.6.79 기준** brew/scoop 한 줄이면 Claude Code, Gemini CLI, Codex CLI 가 모두
+> brew/scoop 한 줄이면 Claude Code, Gemini CLI, Codex CLI 가 모두
 > Solon 을 찾습니다. 별도 plugin/extension 설치 명령을 기억하지 않아도 됩니다.
 
 Mac:
@@ -85,7 +85,7 @@ sfs.cmd status
 `.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz` 하나에 묶여
 바깥 파일 트리를 어지럽히지 않습니다.
 
-0.6.79 기준으로는 본부, 지식팩, review lens 를 같은 층위로 섞지 않습니다.
+현재 Solon 은 본부, 지식팩, review lens 를 같은 층위로 섞지 않습니다.
 `.sfs-local/divisions.yaml` 은 기존 프로젝트 호환을 위한 6개 core activation slot
 (`dev`, `strategy-pm`, `qa`, `design`, `infra`, `taxonomy`) 입니다. 실제 guidance 는
 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, management-admin, taxonomy 같은
@@ -94,7 +94,7 @@ backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, management-admin, taxo
 사용자가 이 이름을 정확히 몰라도 괜찮습니다. Solon 을 쓰는 AI 가 작업 성격을 보고 필요한
 관점만 읽고, 사용자에게는 평범한 질문과 판단 기준으로 풀어 설명하는 쪽이 기본입니다.
 
-또 0.6.79 기준으로 source-driven 구현, stop-the-line 디버깅, deprecation/migration, shipping
+또 source-driven 구현, stop-the-line 디버깅, deprecation/migration, shipping
 check 같은 agent-skills 류 practice 는 새 명령어가 아니라 기존 `implement`, `review`,
 `adopt`, `tidy`, `release` 안의 정책과 렌즈로 흡수됩니다.
 
@@ -340,7 +340,7 @@ review 결과가 partial/fail 이어도 모든 경우를 사용자에게 다시 
 public contract, 보안/개인정보/data-loss, 비용/지연/model policy, destructive action, AC 의미 변경처럼
 제품 판단이 들어가는 경우입니다.
 
-0.6.79 기준 `sfs review` 는 clean tree 에서도 직전 commit 의 reviewable 산출물을 evidence 로 싣습니다.
+현재 `sfs review` 는 clean tree 에서도 직전 commit 의 reviewable 산출물을 evidence 로 싣습니다.
 그래서 ADR 과 `docs/solon/<english-workspace>/<yyyyMMdd>/report.md` 를 commit 한 뒤 Gate review 를
 돌려도, review agent 가 "본문을 못 봤다"는 이유로 partial 을 내지 않도록 prompt 가 구성됩니다.
 
@@ -481,7 +481,7 @@ PowerShell bridge 를 거쳐 Bash runtime 으로 내려갑니다. 그래도 상�
 0.6.37 부터 `sfs.cmd upgrade` 도 실행 중인 batch 파일 안에서 직접 `scoop update sfs` 를 실행하지
 않고, `sfs.ps1` self-upgrade 경로로 넘깁니다. `TIVE_READONLY_DONE` 또는 `LF_UPGRADE_DONE` 같은
 조각 문자열이 명령처럼 보이면 0.6.36 self-update 경로에서 발견된 batch replacement 문제입니다.
-0.6.79 기준으로는 Windows PowerShell/cmd 의 성공 기준을 `sfs.cmd` 경로로 고정합니다.
+현재 Windows PowerShell/cmd 의 성공 기준은 `sfs.cmd` 경로로 고정합니다.
 Scoop manifest 는 generated shim 을 packaged `bin\sfs.ps1` 로 직접 연결하지만, generated
 `sfs.cmd` / `sfs.ps1` shim 이 인자를 버리는 경로가 확인되어 post-install hook 이 shims
 디렉터리의 `sfs.cmd`, `sfs.ps1`, extensionless `sfs` 를 deterministic wrapper 로 덮어씁니다.
@@ -502,7 +502,7 @@ saved raw tail 도 automatic `$args` 로 함께 넘깁니다. 이는 generated S
 PowerShell 에서 `scoop update` 후 `scoop update sfs` 를 직접 실행한 뒤 프로젝트 폴더에서
 `sfs.cmd upgrade --no-self-upgrade` 를 실행하세요.
 
-0.6.79 기준 brew/scoop 가 세 CLI 모두에 자동 등록합니다. 그래도
+현재 brew/scoop 가 세 CLI 모두에 자동 등록합니다. 그래도
 `/sfs` 가 안 나오면 아래 명령으로 상태를 확인해 주세요.
 
 ```bash

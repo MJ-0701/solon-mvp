@@ -44,13 +44,9 @@ TIDY_CONTEXT="${DIST_DIR}/templates/.sfs-local-template/context/commands/tidy.md
 REPORT_TEMPLATE="${DIST_DIR}/templates/.sfs-local-template/sprint-templates/report.md"
 RETRO_TEMPLATE="${DIST_DIR}/templates/.sfs-local-template/sprint-templates/retro.md"
 
-if [[ ! -f "${README}" && -f "${DIST_DIR}/../README.md" ]]; then
-  README="${DIST_DIR}/../README.md"
-fi
-
 assert_contains "${IMPLEMENT}" "Commit messages default to the user's native/workspace language" "implement native language"
 assert_contains "${REVIEW}" "Review proposed or actual commit messages against the user's" "review native language"
-assert_contains "${README}" "커밋 메시지는 기본적으로 사용자의 native 언어" "README native language"
+assert_not_contains "${README}" "커밋 메시지는 기본적으로 사용자의 native 언어" "README no detailed native commit policy"
 assert_contains "${GUIDE}" "커밋 메시지는 사용자의 native 언어" "GUIDE native language"
 assert_contains "${TENX_KO}" "commit message 는 사용자의 native 언어" "KO 10x native language"
 assert_contains "${TENX_EN}" "user's native or workspace" "EN 10x native language"
