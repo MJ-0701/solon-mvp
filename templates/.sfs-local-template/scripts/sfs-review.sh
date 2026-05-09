@@ -983,6 +983,58 @@ if [[ -z "${GENERATOR_EXECUTOR}" || "${GENERATOR_EXECUTOR}" == "unknown" ]]; the
     GENERATOR_EXECUTOR="${_inferred_generator}"
   fi
 fi
+
+preflight_review_executor_auth() {
+  local profile upper override_var override_value
+  [[ "${RUN_REVIEW}" == "true" ]] || return 0
+  profile="$(normalize_executor_profile "${EVALUATOR_EXECUTOR}")"
+  case "${profile}" in
+    claude|codex|gemini) ;;
+    *) return 0 ;;
+  esac
+
+  upper="$(printf '%s' "${profile}" | tr '[:lower:]' '[:upper:]')"
+  override_var="SFS_REVIEW_${upper}_CMD"
+  override_value="${!override_var:-}"
+  if [[ -n "${override_value}" ]]; then
+    return 0
+  fi
+  if ! command -v "${profile}" >/dev/null 2>&1; then
+    executor_cli_missing_hint "${profile}"
+    echo "review auth preflight stopped before CPO prompt generation." >&2
+    return "${SFS_EXIT_EXECUTOR}"
+  fi
+  if executor_auth_ready "${profile}"; then
+    return 0
+  fi
+  case "${AUTH_INTERACTIVE}" in
+    true)
+      if bootstrap_executor_interactive_auth "${profile}"; then
+        return 0
+      fi
+      ;;
+    auto)
+      if executor_interactive_tty_available && bootstrap_executor_interactive_auth "${profile}"; then
+        return 0
+      fi
+      ;;
+  esac
+
+  cat >&2 <<EOF
+review auth preflight required: ${profile}
+Review was not started, and no CPO prompt was generated.
+Next:
+  1. Run \`sfs auth login --executor ${profile}\` from a real terminal.
+  2. Run \`sfs auth probe --executor ${profile} --timeout ${REVIEW_BRIDGE_PROBE_TIMEOUT}\`.
+  3. Rerun the same \`sfs review ... --executor ${profile}\` command.
+Manual handoff: rerun with \`--prompt-only\` and paste the prompt into ${profile} yourself.
+EOF
+  return "${SFS_EXIT_EXECUTOR}"
+}
+
+if ! preflight_review_executor_auth; then
+  exit "${SFS_EXIT_EXECUTOR}"
+fi
 # ─────────────────────────────────────────────────────────────────────
 # Ensure review.md exists (copy from template if missing)
 # ─────────────────────────────────────────────────────────────────────

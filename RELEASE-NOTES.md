@@ -7,6 +7,18 @@
 
 ---
 
+## 0.6.81
+
+이번 버전은 Gemini/Codex/Claude cross review 를 처음 실행할 때 인증 안내가 먼저 나오게 고칩니다.
+
+- `sfs review --executor gemini` 같은 named executor review 는 full CPO prompt 를 만들기 전에
+  인증 상태를 먼저 확인합니다.
+- 인증이 안 되어 있으면 review 실패처럼 기록하지 않고, `sfs auth login --executor <tool>` →
+  `sfs auth probe --executor <tool>` → 같은 review 재시도 순서로 안내합니다.
+- Codex/Claude 같은 headless 세션에서 `/dev/tty: Device not configured` 로 interactive auth 가
+  뒤늦게 터지던 흐름을 막았습니다.
+- 외부 Gemini 앱에 직접 붙여넣고 싶을 때는 기존처럼 `--prompt-only` 를 쓰면 됩니다.
+
 ## 0.6.80
 
 이번 버전은 README 를 제품 소개페이지답게 다시 줄입니다.

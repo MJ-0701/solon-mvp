@@ -288,6 +288,15 @@ own one-sentence commit message. The explicit command is `sfs implement
 --agent-mode parallel --agents codex,claude[,gemini] "<work slice>"`. Parallel
 lanes need cross review before the final Gate 6 review. Single Agent work also
 needs `sfs review --gate 6` after implementation.
+
+When you first run review through a named executor such as Gemini, Codex, or
+Claude, SFS checks auth before it creates the full CPO prompt. If auth is
+missing, the review stops without recording a failed review run. Run
+`sfs auth login --executor gemini` in a real terminal, verify the bridge with
+`sfs auth probe --executor gemini`, then rerun the same
+`sfs review ... --executor gemini` command. Use `--prompt-only` for manual
+web/app handoff.
+
 Commit messages should use the user's native or workspace language unless the
 repo explicitly requires English.
 

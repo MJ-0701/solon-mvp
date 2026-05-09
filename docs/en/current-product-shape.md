@@ -253,6 +253,13 @@ sentence is unclear, do not split the work. Parallel agent implementation must
 record cross review evidence before `sfs review --gate 6` can pass, and Single
 Agent implementation still requires Gate 6 review before completion.
 
+Named executor review for Gemini, Codex, and Claude must pass auth preflight
+before SFS creates the full CPO prompt. On a new project or terminal, an
+unauthenticated `sfs review --executor gemini` stops without writing review
+artifacts. Run `sfs auth login --executor gemini` in a real terminal, verify the
+bridge with `sfs auth probe --executor gemini`, then rerun the same review
+command. Use `--prompt-only` for manual web/app handoff.
+
 Commit messages default to the user's native or workspace language. English is
 the default only when English is the user/repo language; otherwise agents should
 write the message in the language the user actually works in.

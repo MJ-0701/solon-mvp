@@ -571,6 +571,12 @@ data-loss, release gate, 반복 실패가 보이면 worker 도 high reasoning �
 병렬 구현이 끝난 뒤에는 agent 간 cross review 를 남기고, 그 다음 `sfs review --gate 6` 를
 통과해야 합니다. Single Agent 모드도 구현 직후 review 는 필수입니다.
 
+Gemini, Codex, Claude 같은 named executor 로 review 를 처음 실행할 때는 SFS 가 full CPO prompt 를
+만들기 전에 인증 상태를 먼저 봅니다. 인증이 없으면 review 기록을 남기지 않고 멈추므로, 실제
+터미널에서 `sfs auth login --executor gemini` 처럼 한 번 로그인한 뒤
+`sfs auth probe --executor gemini` 로 bridge 를 확인하고 같은 `sfs review ... --executor gemini`
+명령을 다시 실행하면 됩니다. 웹/앱에 직접 넘길 때는 `--prompt-only` 를 사용합니다.
+
 커밋 메시지는 사용자의 native 언어 또는 workspace 언어가 기본입니다. 한국어 사용자에게는
 `수정: 결제 실패 안내 문구 개선` 처럼 한국어로 제안하고 작성합니다. repo 가 영어 커밋을
 명시적으로 요구하거나 사용자의 native 언어가 영어일 때만 영어를 기본값으로 둡니다.

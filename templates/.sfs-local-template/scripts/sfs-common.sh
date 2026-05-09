@@ -1595,6 +1595,10 @@ executor_auth_ready() {
   esac
 }
 
+executor_interactive_tty_available() {
+  ( : < /dev/tty > /dev/tty ) >/dev/null 2>&1
+}
+
 ensure_executor_headless_auth() {
   local profile upper
   profile="$(normalize_executor_profile "$1")"
@@ -1604,7 +1608,9 @@ ensure_executor_headless_auth() {
   upper="$(printf '%s' "$profile" | tr '[:lower:]' '[:upper:]')"
   cat >&2 <<EOF
 executor bridge missing: ${profile} auth is not configured for headless SFS use.
-Set provider credentials in .sfs-local/auth.env, run `/sfs auth login --executor ${profile}` from a real terminal, or rerun review with --auth-interactive.
+Authenticate first, then rerun the executor request.
+Run `sfs auth login --executor ${profile}` from a real terminal, or set provider credentials in .sfs-local/auth.env.
+After login, run `sfs auth probe --executor ${profile}` once if you want to verify the bridge before review.
 Local place: .sfs-local/auth.env (gitignored) or SFS_AUTH_ENV_FILE=/absolute/path.
 EOF
   return 1
@@ -1641,7 +1647,7 @@ bootstrap_executor_interactive_auth() {
     executor_cli_missing_hint "$profile"
     return 1
   fi
-  if [[ ! -r /dev/tty || ! -w /dev/tty ]]; then
+  if ! executor_interactive_tty_available; then
     cat >&2 <<EOF
 executor bridge missing: interactive ${profile} auth requires a real terminal.
 Run the ${profile} CLI login flow once in your terminal, or set provider credentials in .sfs-local/auth.env.
@@ -1692,7 +1698,7 @@ prepare_executor_auth() {
       return $?
       ;;
     auto|AUTO)
-      if [[ -r /dev/tty && -w /dev/tty ]]; then
+      if executor_interactive_tty_available; then
         bootstrap_executor_interactive_auth "$profile"
         return $?
       fi

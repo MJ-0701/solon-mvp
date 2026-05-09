@@ -229,6 +229,12 @@ Implement 의 실행 모드는 기본적으로 Single Agent 입니다. 사용자
 `sfs review --gate 6` 를 통과해야 하며, Single Agent 구현도 Gate 6 review 없이 완료로 보지
 않습니다.
 
+Gemini, Codex, Claude 같은 named executor review 는 full CPO prompt 를 만들기 전에 auth preflight 를
+통과해야 합니다. 새 프로젝트나 새 터미널에서 처음 `sfs review --executor gemini` 를 실행했는데
+인증이 없으면 review artifact 를 남기지 않고 멈춥니다. 이때 실제 터미널에서
+`sfs auth login --executor gemini` 로 로그인하고 `sfs auth probe --executor gemini` 로 bridge 를
+확인한 뒤 같은 review 명령을 다시 실행합니다. 수동 handoff 는 `--prompt-only` 로 분리합니다.
+
 커밋 메시지는 사용자의 native 언어 또는 workspace 언어를 기본값으로 삼습니다. 한국어 사용자의
 작업이면 `문서: native 언어 커밋 규칙 추가` 처럼 한국어로 바로 이해되는 메시지를 씁니다.
 Solon 작업의 commit grouping 은 host-local `/commit` skill 이 아니라 `sfs commit` 이 담당합니다.

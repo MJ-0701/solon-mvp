@@ -1,3 +1,28 @@
+## [0.6.81] - 2026-05-09
+
+> **Review executors authenticate before review starts.** First-time Gemini,
+> Codex, and Claude review bridges now stop at auth preflight instead of
+> generating a full CPO prompt and then failing as if the review had run.
+
+### Fixed
+
+- `sfs review --executor gemini|codex|claude` now checks named executor auth
+  before creating `review.md`, full CPO prompt files, run scratch, or
+  `review_open` events.
+- Headless sessions now verify that `/dev/tty` is actually openable before
+  trying interactive auth, avoiding the `Device not configured` failure mode.
+- Missing auth now tells the user to run `sfs auth login --executor <tool>`,
+  optionally verify with `sfs auth probe --executor <tool>`, and then rerun the
+  same review command. `--prompt-only` remains the manual handoff path.
+
+### Tests
+
+- Added `test-review-auth-preflight.sh` to prove unauthenticated Gemini review
+  does not generate review artifacts, while an authenticated fake bridge still
+  probes and completes review normally.
+- Extended guardrail tests to keep auth preflight ahead of full prompt
+  generation.
+
 ## [0.6.80] - 2026-05-09
 
 > **README is now a product introduction, not a release-note dump.** Detailed
