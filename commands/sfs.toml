@@ -48,15 +48,16 @@ The user invoked Gemini CLI command `sfs {{args}}`.
     Codex routing is role-specific: normal worker slices use `gpt-5.4`,
     helper I/O and non-coding helpers use `gpt-5.4-mini`, bounded repo-aware
     coding helpers use `gpt-5.3-codex`, and only locked judgment-free
-    mechanical implementation helpers use `gpt-5.3-codex-spark`.
-    Claude/Gemini keep their configured tier families. Model routing applies by
-    default, no user setup required.
+    mechanical implementation helpers use `gpt-5.3-codex-spark`. Claude
+    coding-capable worker/helper lanes use Sonnet 4.6; Haiku is non-coding
+    helper-only. Gemini uses `gemini-3-pro-auto` for every role. Model routing
+    applies by default, no user setup required.
     Helper-grade simple I/O is advisor-exempt. Focused question generation uses
-    facilitator-standard models (Claude Sonnet, Codex `gpt-5.4`; Codex helper
+    facilitator-standard models (Claude Sonnet 4.6, Codex `gpt-5.4`; Codex helper
     intake uses `gpt-5.4-mini`). Lower-model outputs that frame
     questions/options, interpret user answers, or affect product identity,
     architecture, gate, AC, or files_scope require top-model advisor review
-    before gate advancement (Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3.1-pro-preview`).
+    before gate advancement (Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3-pro-auto`).
     Complex shared behavior escalates to high reasoning before coding.
     Multi-agent implement is optional, never the default: use single-agent mode unless the user selects parallel agents, each lane has disjoint files_scope and a clear native-language commit message, and post-implement cross review is recorded before Gate 6. Commit messages default to the user's native/workspace language; English is only the default when that is the user or repo language.
     Gate 3 review must self-review until PASS before cross review. Review round
@@ -72,6 +73,10 @@ The user invoked Gemini CLI command `sfs {{args}}`.
     a self-CPO mini-check: requirements to AC to implementation slices to
     ADR/decision ids, every AC mapped to file/artifact/evidence, and SEED/
     placeholder/mock/fallback material treated as non-acceptance until replaced.
+    After a work slice is implemented and verified, run self-agent top-model
+    CPO: Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3-pro-auto`, or
+    the configured custom top model. Partial/fail redirects the work and repeats
+    until PASS or explicit user waiver.
     For Solon commit grouping, guide users to `$sfs commit plan` or
     `sfs commit plan`, then `$sfs commit apply --group <name>` or
     `sfs commit apply --group <name>`. `sfs commit apply` commits and pushes

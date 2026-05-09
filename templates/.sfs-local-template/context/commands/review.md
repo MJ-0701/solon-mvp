@@ -74,6 +74,12 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   `code` lens; docs, source-docs, simplify, security, performance,
   api-contract, strategy, design, taxonomy, QA, ops, management-admin, release,
   and generic artifacts use their own acceptance lens.
+- Before a completed work slice can be reported as done, require self-agent
+  top-model CPO evidence. Claude self-CPO uses Opus 4.7, Codex self-CPO uses
+  `gpt-5.5` with xhigh reasoning, Gemini self-CPO uses `gemini-3-pro-auto`, and
+  custom runtimes use their configured top-model equivalent. Partial/fail is not
+  a stopping point: the CPO redirects the work, the author reworks it, verifies
+  again, and repeats self-CPO until PASS or an explicit user waiver.
 - Review scope is functional correctness + consistency only. Functional means
   the artifact delivers the declared behaviour (plan / Sprint Contract / AC).
   Consistency means cross-document SSoT (plan ↔ implement ↔ tests ↔ frontmatter)

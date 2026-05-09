@@ -7,6 +7,23 @@
 
 ---
 
+## 0.6.83
+
+이번 버전은 Claude/Gemini/Codex 의 모델 레벨 분리를 더 명확히 고정하고,
+작업 완료 조건에 self-agent top-model CPO PASS 루프를 추가합니다.
+
+- Claude 쪽 코딩 가능한 worker/facilitator/code helper/mechanical helper 는 Sonnet 4.6 입니다.
+- Haiku 는 코딩하지 않습니다. 단순 relay, 요약, 작은 read-only 보조 같은 non-coding helper 전용입니다.
+- 실질 research 는 가능하면 Gemini researcher executor 를 우선 사용하고, Gemini 는 모든 role 을
+  `gemini-3-pro-auto` 로 둡니다. Flash/2.5 fallback 은 쓰지 않습니다.
+- Codex 기준은 기존대로 유지됩니다: 일반 worker 는 `gpt-5.4`, 단순 non-coding helper 는
+  `gpt-5.4-mini`, bounded coding helper 는 `gpt-5.3-codex`, 무판단 mechanical implementation helper 는
+  `gpt-5.3-codex-spark` 입니다.
+- 작업을 끝냈다고 보고하기 전에는 self-agent top-model CPO evidence 가 필요합니다:
+  Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3-pro-auto`.
+- advisor 호출은 self-CPO PASS 를 대체하지 않습니다. partial/fail 이면 CPO 가 방향을 다시 잡고,
+  구현/검증/self-CPO 를 PASS 될 때까지 반복합니다.
+
 ## 0.6.82
 
 이번 버전은 Codex 쪽 단순 구현 위임 기준을 정확히 나눕니다.

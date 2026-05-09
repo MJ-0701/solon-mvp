@@ -218,10 +218,10 @@ job.
 
 | Role | Responsibility | Default model route |
 |---|---|---|
-| Helper-grade intake | Simple relay, missing-argument prompts, low-risk short summaries | Claude uses the Haiku tier; Codex uses `gpt-5.4-mini` |
-| Facilitator / question | Brainstorm question generation, option framing, answer summaries | Claude uses the Sonnet tier; Codex uses `gpt-5.4` |
+| Helper-grade intake | Simple relay, missing-argument prompts, low-risk short summaries, tiny read-only notes | Claude uses the Haiku tier for non-coding helpers only; Codex uses `gpt-5.4-mini` |
+| Facilitator / question | Brainstorm question generation, option framing, answer summaries | Claude uses the Sonnet 4.6 tier; Codex uses `gpt-5.4` |
 | C-Level / review | Intent, architecture, AC, review, escalation | High reasoning. Codex uses `gpt-5.5`; Claude uses the Opus tier |
-| Claude worker | Fixed files_scope implementation slice | Sonnet tier |
+| Claude worker | Fixed files_scope implementation slice | Sonnet 4.6 tier |
 | Codex worker | Fixed files_scope implementation slice that still needs code judgment | `gpt-5.4` |
 | Codex helper | Simple relay, grep summaries, formatting, and non-coding helper chores | `gpt-5.4-mini` |
 | Codex coding helper | Narrow repo-aware code support | `gpt-5.3-codex` |
@@ -233,9 +233,9 @@ selected host model for every role. Helper-grade simple I/O is advisor-exempt.
 When a lower-model output frames questions/options, interprets answers, or
 affects product identity, architecture, gate, AC, or files_scope, top-model
 advisor review is required before gate advancement. Advisor means Claude Opus
-4.7, Codex `gpt-5.5` with xhigh reasoning, Gemini `gemini-3.1-pro-preview`,
-or the custom high-end equivalent. Gemini helper-grade fallback uses
-`gemini-3-flash-preview`; SFS does not use 2.5 fallback names.
+4.7, Codex `gpt-5.5` with xhigh reasoning, Gemini `gemini-3-pro-auto`,
+or the custom high-end equivalent. Gemini uses `gemini-3-pro-auto` for every
+role; SFS does not use Gemini Flash or 2.5 fallback names.
 Advisor calls do not replace self-CPO PASS. Before external/cross review, the
 author records a self-CPO mini-check covering requirements to AC to
 implementation slices to ADR/decision ids, every AC mapped to file/artifact/
@@ -250,7 +250,9 @@ edit intent are locked. Examples include file moves, import/path rewrites,
 generated index sync, and deterministic test expectation updates. If a slice
 touches architecture, public contracts, security, privacy, data-loss risk,
 release gates, or repeated review failure, escalate to high reasoning or send
-it back to C-Level. Claude and Gemini keep their existing tier families.
+it back to C-Level. Claude coding-capable worker/helper lanes use Sonnet 4.6;
+Haiku must not write code. Substantive research should prefer a Gemini 3 Pro
+auto researcher when available.
 
 Implement execution defaults to Single Agent. Users can opt into multiple
 agents, but only after the plan is split into independent lanes. Each lane must

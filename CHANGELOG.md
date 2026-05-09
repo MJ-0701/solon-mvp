@@ -1,3 +1,33 @@
+## [0.6.83] - 2026-05-10
+
+> **Claude, Codex, and Gemini model routing now has explicit role boundaries,
+> and completed work requires a top-model self-CPO PASS loop.**
+
+### Changed
+
+- Claude coding-capable worker, facilitator, code-helper, and mechanical helper
+  lanes now resolve to Sonnet 4.6. Haiku is documented as a non-coding helper
+  tier only and must not write code or own implementation.
+- Gemini runtime routing now uses `gemini-3-pro-auto` for every SFS role.
+  Flash/2.5 fallback names are no longer part of the recommended routing
+  surface.
+- Substantive research now prefers the Gemini researcher executor with Gemini 3
+  Pro auto when available; Claude research remains a read-only Sonnet 4.6
+  fallback.
+- Work completion now requires self-agent top-model CPO evidence: Claude Opus
+  4.7, Codex `gpt-5.5` with xhigh reasoning, Gemini `gemini-3-pro-auto`, or
+  the configured custom top-model equivalent. Partial/fail redirects the work
+  and repeats verification plus self-CPO until PASS or explicit user waiver.
+
+### Tests
+
+- Extended agent behavior guardrails to verify Claude Sonnet 4.6 coding lanes,
+  Haiku non-coding boundaries, Gemini 3 Pro auto for every role, and the
+  post-work self-CPO loop.
+- Extended docs routing checks so GUIDE, beginner docs, current-product docs,
+  and 10x docs reject stale Gemini preview/Flash/2.5 model names and document
+  the Claude/Gemini/Codex responsibility split.
+
 ## [0.6.82] - 2026-05-10
 
 > **Codex worker/helper routing now separates normal work, code helpers, and

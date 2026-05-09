@@ -284,11 +284,11 @@ AI 모델 이름을 전부 외울 필요도 없습니다. Solon 의 기본 role 
 단순 입출력은 helper-grade intake 모델이 맡고(Codex 는 `gpt-5.4-mini`), 질문 생성은 standard
 facilitator 모델이 맡습니다(Codex 는 `gpt-5.4`). 설계와 검토, 그리고 하위모델이 만든 질문/해석이
 방향을 바꾸는 경우는 최상위 advisor 가 봅니다. Codex advisor 는 `gpt-5.5` xhigh 이고,
-Gemini 는 `gemini-3.1-pro-preview` 를 기본 advisor/review/facilitator 로 씁니다. Gemini
-helper-grade fallback 은 `gemini-3-flash-preview` 이며 2.5 fallback 은 쓰지 않습니다. Codex 쪽
+Gemini 는 모든 role 을 `gemini-3-pro-auto` 로 둡니다. Flash/2.5 fallback 은 쓰지 않습니다. Codex 쪽
 일반 구현 worker 는 `gpt-5.4`, 단순 helper 는 `gpt-5.4-mini`, 좁은 code helper 는
 `gpt-5.3-codex` 입니다. 이미 결정된 사항을 그대로 옮기는 무판단 단순 구현일 때만
-`gpt-5.3-codex-spark` 를 씁니다. Claude/Gemini 는 기존 tier family 를 그대로 따릅니다.
+`gpt-5.3-codex-spark` 를 씁니다. Claude 쪽 코딩 가능한 worker/helper 는 Sonnet 4.6이고,
+Haiku 는 코딩하지 않는 relay, 요약, 작은 read-only helper 전용입니다.
 위험한 구조 변경이나 보안/데이터 손실 위험이 있으면 Solon 이 더 강한 판단 모델로 올리는 흐름을
 권장합니다.
 

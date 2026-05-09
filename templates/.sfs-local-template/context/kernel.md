@@ -107,14 +107,23 @@ load_when: ["always", "sfs", "entry"]
   criteria, and review orchestration; the worker/generator model owns fixed
   implementation slices. Do not present C-Level direct implementation as the
   normal default when a worker/generator profile exists.
-- Model routing must reflect that role split. Claude and Gemini keep their
-  configured tier families; Codex has its own worker/helper split:
+- Model routing must reflect that role split. Claude coding-capable
+  worker/helper lanes use Sonnet 4.6; Haiku is non-coding helper-only and must
+  not write code. Substantive research should prefer a Gemini 3 Pro auto
+  researcher when available. Gemini uses `gemini-3-pro-auto` for every SFS role.
+  Codex has its own worker/helper split:
   general worker/generator slices use `gpt-5.4`, helper-grade I/O and
   non-coding helpers use `gpt-5.4-mini`, bounded repo-aware coding helpers use
   `gpt-5.3-codex`, and only judgment-free mechanical implementation helpers use
   `gpt-5.3-codex-spark` after C-Level has locked scope, files_scope, AC, and
   exact edit intent. Complex shared behavior escalates to strategic_high or an
   explicit high-end override before coding.
+- Work is not complete until the author runs a self-agent top-model CPO review
+  and records a PASS. Claude self-CPO uses Opus 4.7, Codex self-CPO uses
+  `gpt-5.5` with xhigh reasoning, Gemini self-CPO uses `gemini-3-pro-auto`, or
+  the configured custom top-model equivalent. Partial/fail means the CPO
+  redirects the work, the author reworks it, and the same self-CPO loop repeats
+  until PASS or an explicit user waiver.
 - Multi-agent work is thin supervision, not noisy coordination by default:
   use read-only research, fixed-scope worker slices, and independent review only
   when they reduce context pollution or self-validation risk. Share results

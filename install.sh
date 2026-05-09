@@ -812,8 +812,7 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
        질문 생성/facilitator/일반 worker 는 gpt-5.4,
        advisor/review 는 gpt-5.5 xhigh, bounded coding helper 는 gpt-5.3-codex,
        무판단 mechanical implementation helper 는 gpt-5.3-codex-spark
-     - Gemini: 기본 advisor/review/facilitator 는 gemini-3.1-pro-preview,
-       helper-grade fallback 은 gemini-3-flash-preview 이며 2.5 fallback 은 쓰지 않습니다.
+     - Gemini: 모든 role 은 gemini-3-pro-auto 입니다. Flash/2.5 fallback 은 쓰지 않습니다.
      - 모델명은 SFS role/profile contract 입니다. CLI --model flag 지원을 전제로 하지 않고,
        기본 bridge 는 prompt 와 host/runtime 설정으로 해당 역할을 요청합니다.
      - 하위모델이 질문/선택지/답변 해석/gate 를 흔들면 최상위 advisor 검토가 필수입니다.
@@ -821,7 +820,8 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
      - advisor 호출은 self-CPO PASS 가 아닙니다. external/cross review 전에는
        요구사항-AC-slice-ADR 추적, AC-file/artifact/evidence 매핑, SEED/placeholder/mock/fallback
        non-acceptance 를 self-CPO mini-check 로 남깁니다.
-     - Claude: advisor 는 opus-4.7, facilitator 는 sonnet, helper-grade intake 는 haiku
+     - Claude: advisor 는 Opus 4.7, worker/facilitator/code helper 는 Sonnet 4.6,
+       Haiku 는 코딩 금지 helper-grade relay/요약/read-only 보조 전용입니다.
      - Gemini/custom: 프로젝트가 쓰는 모델/profile 이름
      원하면 worker/helper 도 high-end 로 바꿔도 됩니다.
 

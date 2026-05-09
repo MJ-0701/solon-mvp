@@ -199,10 +199,10 @@ supervisor 패턴입니다.
 
 | 역할 | 책임 | 기본 모델 흐름 |
 |---|---|---|
-| Helper-grade intake | 단순 relay, 누락 인자 질문, 낮은 위험의 짧은 요약 | Claude 는 Haiku 계열, Codex 는 `gpt-5.4-mini` |
-| Facilitator / question | brainstorm 질문 생성, 선택지 framing, 답변 요약 | Claude 는 Sonnet 계열, Codex 는 `gpt-5.4` |
+| Helper-grade intake | 단순 relay, 누락 인자 질문, 낮은 위험의 짧은 요약, 작은 read-only 보조 | Claude 는 Haiku 계열(코딩 금지), Codex 는 `gpt-5.4-mini` |
+| Facilitator / question | brainstorm 질문 생성, 선택지 framing, 답변 요약 | Claude 는 Sonnet 4.6 계열, Codex 는 `gpt-5.4` |
 | C-Level / review | 의도, architecture, AC, review, escalation | high reasoning. Codex 는 `gpt-5.5`, Claude 는 Opus 계열 |
-| Claude worker | 고정된 files_scope 구현 slice | Sonnet 계열 |
+| Claude worker | 고정된 files_scope 구현 slice | Sonnet 4.6 계열 |
 | Codex worker | 고정된 files_scope 구현 slice 중 코드 판단이 남은 일반 작업 | `gpt-5.4` |
 | Codex helper | 단순 relay, grep summary, formatting 같은 non-coding helper | `gpt-5.4-mini` |
 | Codex coding helper | 좁은 repo-aware code 보조 작업 | `gpt-5.3-codex` |
@@ -213,8 +213,8 @@ supervisor 패턴입니다.
 Helper-grade 단순 I/O 는 advisor 검토를 생략할 수 있습니다. 하위모델이 질문/선택지를 설계하거나
 답변을 해석하거나 product identity, architecture, gate, AC, files_scope 에 영향을 주면 최상위
 advisor 검토가 필수입니다. advisor 는 Claude Opus 4.7, Codex `gpt-5.5` xhigh,
-Gemini `gemini-3.1-pro-preview` 입니다. Gemini helper-grade fallback 은
-`gemini-3-flash-preview` 이며 2.5 fallback 은 쓰지 않습니다.
+Gemini `gemini-3-pro-auto` 입니다. Gemini 는 모든 role 을 `gemini-3-pro-auto` 로 두며
+Flash/2.5 fallback 은 쓰지 않습니다.
 advisor 호출은 self-CPO PASS 가 아닙니다. external/cross review 전에 작성자는 self-CPO
 mini-check 로 요구사항 → AC → 구현 slice → ADR/decision id 추적, 각 AC 의 file/artifact/evidence
 매핑, SEED/placeholder/mock/fallback non-acceptance 를 확인해야 합니다.
@@ -224,8 +224,9 @@ bounded repo-aware coding helper 입니다. Spark 는 더 좁습니다. scope, f
 의도가 이미 잠겼고 판단이 필요 없는 file move, import/path rewrite, generated index sync,
 deterministic test expectation update 같은 기계적 구현 보조 작업에만 씁니다. 작업이 architecture,
 public contract, security, privacy, data-loss, release gate, 또는 반복 실패를 건드리면 worker 를
-high reasoning 으로 승격하거나 C-Level 에 다시 넘깁니다. Claude/Gemini 는 기존 tier family 를
-그대로 따릅니다.
+high reasoning 으로 승격하거나 C-Level 에 다시 넘깁니다. Claude 쪽 코딩 가능한 worker/helper 는
+Sonnet 4.6이고, Haiku 는 코딩하지 않습니다. 실질 research 는 가능하면 Gemini 3 Pro auto researcher 로
+보냅니다.
 
 Implement 의 실행 모드는 기본적으로 Single Agent 입니다. 사용자가 여러 agent 를 선택할 수는
 있지만, 그 경우 plan 은 먼저 독립 lane 으로 나뉘어야 합니다. 각 lane 은 files_scope 가 겹치지

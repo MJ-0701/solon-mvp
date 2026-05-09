@@ -140,9 +140,10 @@ role/profile contract 이며 모든 CLI 가 `--model` 같은 옵션을 지원한
 Codex 기준으로 helper-grade intake 와 non-coding helper 는 `gpt-5.4-mini`, 질문 생성/facilitator 와
 일반 worker 는 `gpt-5.4`, advisor/review 는 `gpt-5.5` xhigh, bounded repo-aware coding helper 는
 `gpt-5.3-codex`, 무판단 mechanical implementation helper 는 `gpt-5.3-codex-spark` 를 기본 계약으로
-봅니다. Claude 는 Opus/Sonnet/Haiku 계열 기존 책임 분리를 따르고, Gemini advisor/review/facilitator
-는 `gemini-3.1-pro-preview`, helper-grade fallback 은 `gemini-3-flash-preview` 입니다.
-2.5 fallback 이름은 쓰지 않습니다.
+봅니다. Claude 는 Opus/Sonnet 4.6/Haiku 책임 분리를 따릅니다. Claude 에서 코딩 가능한
+worker/helper 는 Sonnet 4.6이고, Haiku 는 코딩 금지 helper-grade relay/요약/read-only 보조 전용입니다.
+Gemini 는 모든 role 을 `gemini-3-pro-auto` 로 두며 Flash/2.5 fallback 이름은 쓰지 않습니다.
+실질 research 는 가능하면 Gemini 3 Pro auto researcher 로 보냅니다.
 
 Helper-grade 단순 I/O 는 advisor 검토를 생략할 수 있습니다. 하지만 하위모델 출력이 질문/선택지를
 설계하거나 사용자 답변을 해석하거나 product identity, architecture, gate, AC, files_scope 에

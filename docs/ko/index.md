@@ -49,10 +49,11 @@ agent-skills 벤치마크에서 쓸 만한 practice 는 새 명령으로 늘리�
 (Codex 는 `gpt-5.4-mini`), 질문 생성/facilitation 은 standard facilitator 모델(Codex 는
 `gpt-5.4`)이 맡습니다. 하위모델 출력이 질문/선택지/답변 해석이나 gate/plan 에 영향을 주면
 최상위 advisor 검토가 필수입니다. advisor 는 Claude Opus 4.7, Codex `gpt-5.5` xhigh,
-Gemini `gemini-3.1-pro-preview` 입니다. Gemini helper-grade fallback 은
-`gemini-3-flash-preview` 이며 2.5 fallback 은 쓰지 않습니다. Codex 일반 worker 는 `gpt-5.4`,
+Gemini `gemini-3-pro-auto` 입니다. Gemini 는 모든 role 을 `gemini-3-pro-auto` 로 두며
+Flash/2.5 fallback 은 쓰지 않습니다. Codex 일반 worker 는 `gpt-5.4`,
 단순 helper 는 `gpt-5.4-mini`, bounded coding helper 는 `gpt-5.3-codex`, 무판단 기계적 구현 helper 는
-`gpt-5.3-codex-spark` 로 분리됩니다. Claude/Gemini 는 기존 tier family 를 그대로 따릅니다.
+`gpt-5.3-codex-spark` 로 분리됩니다. Claude worker/facilitator/code helper 는 Sonnet 4.6,
+Haiku 는 코딩 금지 helper-grade relay/요약/read-only 보조 전용입니다.
 advisor 호출은 self-CPO PASS 가 아닙니다. cross review 전에 요구사항 → AC → 구현 slice →
 ADR/decision id, AC → file/artifact/evidence, SEED/placeholder/mock/fallback non-acceptance 를
 확인한 self-CPO mini-check 를 남겨야 합니다.

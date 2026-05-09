@@ -266,14 +266,14 @@ Model routing follows that boundary and is applied by default. Helper-grade
 simple I/O and non-coding helpers use lighter intake models; Codex maps that to
 `gpt-5.4-mini`. Question generation, facilitation, and normal implementation
 workers use standard models; Codex maps them to `gpt-5.4`. C-Level and review
-use high reasoning. Claude workers use the Sonnet tier, and Gemini keeps its
-configured tier family.
+use high reasoning. Claude workers and coding helpers use Sonnet 4.6; Haiku is
+non-coding helper-only. Gemini uses `gemini-3-pro-auto` for every role.
 Lower-model output that frames questions/options, interprets answers, or affects
 product identity, architecture, gate, AC, or files_scope requires top-model
 advisor review before gate advancement. Advisor means Claude Opus 4.7, Codex
-`gpt-5.5` with xhigh reasoning, Gemini `gemini-3.1-pro-preview`, or the custom
-high-end equivalent. Gemini helper-grade fallback uses `gemini-3-flash-preview`;
-SFS does not use 2.5 fallback names. Helper-grade simple relay and missing-argument prompts are
+`gpt-5.5` with xhigh reasoning, Gemini `gemini-3-pro-auto`, or the custom
+high-end equivalent. Gemini uses `gemini-3-pro-auto` for every role; SFS does
+not use Gemini Flash or 2.5 fallback names. Helper-grade simple relay and missing-argument prompts are
 advisor-exempt. Advisor calls do not replace self-CPO PASS. Before
 external/cross review, the author records a self-CPO mini-check covering
 requirements to AC to implementation slices to ADR/decision ids, every AC

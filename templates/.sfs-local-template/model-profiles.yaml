@@ -29,7 +29,7 @@ role_boundaries:
     cannot: "act as the normal implementation worker or approve its own output"
   advisor:
     owns: "top-model review of lower-model question framing, answer interpretation, product direction, architecture, AC, files_scope, and gate advancement"
-    runtime_model: "the highest configured runtime tier: Claude Opus 4.7, Codex gpt-5.5/xhigh, Gemini gemini-3.1-pro-preview, or the custom high-end equivalent"
+    runtime_model: "the highest configured runtime tier: Claude Opus 4.7, Codex gpt-5.5/xhigh, Gemini gemini-3-pro-auto, or the custom high-end equivalent"
     cannot: "be replaced by the lower model whose output is under review"
   self_cpo_check:
     owns: "local CPO mini-check before external/Codex/Claude/Gemini cross review"
@@ -232,9 +232,9 @@ runtime_model_settings:
   claude:
     intake_economy:
       model: "haiku"
-      description: "Use only for deterministic relay, missing-argument prompts, and low-risk summaries."
+      description: "Use only for deterministic relay, missing-argument prompts, low-risk summaries, and tiny read-only helper notes. Haiku must not write code or own implementation."
     facilitator_standard:
-      model: "sonnet"
+      model: "sonnet-4.6"
       description: "Default for SFS question generation and brainstorm facilitation. Escalate to Opus when the question or answer changes product identity, architecture, gate status, AC, or files_scope."
     strategic_high:
       model: "opus-4.7"
@@ -243,16 +243,20 @@ runtime_model_settings:
       model: "opus-4.7"
       fallback_model: "opus-4.6"
     research_high:
-      model: "opus-4.7"
-      fallback_model: "opus-4.6"
+      model: "sonnet-4.6"
+      description: "Claude read-only research fallback. Prefer the Gemini researcher executor with gemini-3-pro-auto for substantive research when available."
     execution_standard:
-      model: "sonnet"
+      model: "sonnet-4.6"
+      description: "Claude worker tier. This is the first Claude tier allowed to write code."
     code_helper:
-      model: "sonnet"
+      model: "sonnet-4.6"
+      description: "Claude bounded coding helper. Haiku must not be used for coding."
     helper_economy:
       model: "haiku"
+      description: "Non-coding helper only: relay, formatting summaries, simple extraction, and tiny read-only notes."
     mechanical_implementation_economy:
-      model: "haiku"
+      model: "sonnet-4.6"
+      description: "Claude has no Haiku coding lane; even judgment-free mechanical implementation uses Sonnet 4.6 or delegates to a configured Codex Spark lane."
 
   codex:
     intake_economy:
@@ -294,34 +298,35 @@ runtime_model_settings:
 
   gemini:
     intake_economy:
-      model: "gemini-3-flash-preview"
-      reasoning_effort: "low"
-      description: "Gemini helper-grade intake/fallback tier. Do not use Gemini 2.5 fallback names."
+      model: "gemini-3-pro-auto"
+      reasoning_effort: "auto"
+      description: "Gemini uses Gemini 3 Pro auto for every SFS role; no Flash or 2.5 fallback lane."
     facilitator_standard:
-      model: "gemini-3.1-pro-preview"
-      reasoning_effort: "medium"
-      description: "Default Gemini facilitator/question route. Gemini 3.1 Pro preview is assumed when available."
+      model: "gemini-3-pro-auto"
+      reasoning_effort: "auto"
+      description: "Default Gemini facilitator/question route."
     strategic_high:
-      model: "gemini-3.1-pro-preview"
-      reasoning_effort: "very_high"
+      model: "gemini-3-pro-auto"
+      reasoning_effort: "auto"
     review_high:
-      model: "gemini-3.1-pro-preview"
-      reasoning_effort: "high"
+      model: "gemini-3-pro-auto"
+      reasoning_effort: "auto"
     research_high:
-      model: "gemini-3.1-pro-preview"
-      reasoning_effort: "high"
+      model: "gemini-3-pro-auto"
+      reasoning_effort: "auto"
+      description: "Preferred substantive research route when a Gemini executor is available."
     execution_standard:
-      model: "gemini-3.1-pro-preview"
-      reasoning_effort: "medium"
+      model: "gemini-3-pro-auto"
+      reasoning_effort: "auto"
     code_helper:
-      model: "gemini-3.1-pro-preview"
-      reasoning_effort: "medium"
+      model: "gemini-3-pro-auto"
+      reasoning_effort: "auto"
     helper_economy:
-      model: "gemini-3-flash-preview"
-      reasoning_effort: "low"
+      model: "gemini-3-pro-auto"
+      reasoning_effort: "auto"
     mechanical_implementation_economy:
-      model: "gemini-3-flash-preview"
-      reasoning_effort: "low"
+      model: "gemini-3-pro-auto"
+      reasoning_effort: "auto"
 
   custom:
     intake_economy:
@@ -450,8 +455,10 @@ resolution_rules:
   - "If selected_policy is all_high, resolve every agent through the highest configured tier/profile unless an explicit agent override exists."
   - "Solon recommendations are advisory. Higher-end overrides are allowed when cost/latency are intentional."
   - "Question routing is cost-aware: deterministic relay and missing-argument prompts use intake_economy; focused question generation and brainstorm facilitation use facilitator_standard; product identity, architecture, gate, AC, or files_scope shifts escalate to strategic_high."
-  - "Advisor means the highest configured model for the active runtime: Claude Opus 4.7, Codex gpt-5.5 with xhigh reasoning, Gemini gemini-3.1-pro-preview, or the custom high-end equivalent."
-  - "For Gemini runtime, assume gemini-3.1-pro-preview for facilitator/advisor/review/worker routes and gemini-3-flash-preview for helper-grade fallback; do not use Gemini 2.5 fallback names."
+  - "Advisor means the highest configured model for the active runtime: Claude Opus 4.7, Codex gpt-5.5 with xhigh reasoning, Gemini gemini-3-pro-auto, or the custom high-end equivalent."
+  - "For Claude runtime, solon_recommended resolves implementation-worker, division-worker, coding-helper, and mechanical-implementation-helper to sonnet-4.6. Haiku is a non-coding helper tier only and must not write code."
+  - "For substantive research, prefer a Gemini researcher executor with gemini-3-pro-auto when available; Claude research_high is a Sonnet 4.6 fallback."
+  - "For Gemini runtime, assume gemini-3-pro-auto for every SFS role. Do not use Gemini Flash or 2.5 fallback names."
   - "Do not assume the executor CLI can enforce a model through command-line flags. SFS routing is a prompt/profile contract by default; if a runtime needs explicit model selection, provide a known-good SFS_REVIEW_<EXECUTOR>_CMD or host configuration."
   - "Lower-model advisor rule: helper-grade simple I/O is advisor-exempt. Any lower-model output beyond verbatim relay/canned missing-argument prompts/status narration that frames questions/options, interprets user answers, or affects brainstorm/plan/gate artifacts must be advisor-reviewed by the top-model strategic_high advisor before the gate advances. Lower-model output cannot approve itself."
   - "Advisor consultation is not self-CPO. Before external/Codex/Claude/Gemini cross review, the current author must run self-cpo-checker and record pass/partial/fail with requirements-to-AC-to-slice-to-ADR traceability, AC-to-file/artifact/evidence mapping, and SEED/placeholder/mock/fallback non-acceptance. Missing self-CPO evidence is partial."

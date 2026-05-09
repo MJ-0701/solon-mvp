@@ -54,12 +54,12 @@ I/O uses lighter intake models (Codex `gpt-5.4-mini`), while question generation
 and facilitation use standard facilitator models (Codex `gpt-5.4`). Lower-model
 outputs that frame questions/options, interpret answers, or affect gate/plan
 artifacts require top-model advisor review: Claude Opus 4.7, Codex `gpt-5.5`
-xhigh, Gemini `gemini-3.1-pro-preview`, or the custom high-end equivalent.
-Gemini helper-grade fallback uses `gemini-3-flash-preview`; SFS does not use
+xhigh, Gemini `gemini-3-pro-auto`, or the custom high-end equivalent.
+Gemini uses `gemini-3-pro-auto` for every role; SFS does not use Gemini Flash or
 2.5 fallback names. Codex normal workers use `gpt-5.4`, simple helpers use
 `gpt-5.4-mini`, bounded coding helpers use `gpt-5.3-codex`, and judgment-free
-mechanical implementation helpers use `gpt-5.3-codex-spark`. Claude and Gemini
-keep their existing tier families.
+mechanical implementation helpers use `gpt-5.3-codex-spark`. Claude coding-capable
+workers/helpers use Sonnet 4.6; Haiku is non-coding helper-only.
 Advisor calls do not replace self-CPO PASS. Before external/cross review, the
 author records a self-CPO mini-check covering requirements to AC to
 implementation slices to ADR/decision ids, every AC mapped to file/artifact/

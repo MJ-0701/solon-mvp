@@ -22,8 +22,9 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   `gpt-5.3-codex` for bounded repo-aware coding helper work when the task is
   smaller than a worker slice but still needs code judgment. Use
   `gpt-5.3-codex-spark` only for judgment-free mechanical implementation after
-  C-Level has locked scope, files_scope, AC, and exact edit intent. Claude and
-  Gemini keep their configured tier mapping. Escalate to strategic_high or an
+  C-Level has locked scope, files_scope, AC, and exact edit intent. Claude
+  coding-capable worker/helper lanes use Sonnet 4.6, and Haiku must not write
+  code. Gemini uses `gemini-3-pro-auto` for every SFS role. Escalate to strategic_high or an
   explicit high-end override before coding if the slice touches architecture,
   public contracts, security, privacy, data-loss risk, release gates, or
   repeated review failure.
@@ -69,6 +70,11 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - If code or executable artifacts changed, run the smallest relevant test,
   build, typecheck, smoke, or scripted review before marking complete. Record
   the command and result in the implementation evidence.
+- After tests/smokes pass, run a self-agent top-model CPO review before marking
+  the work done. Claude routes that self-CPO to Opus 4.7, Codex routes it to
+  `gpt-5.5` with xhigh reasoning, and Gemini routes it to `gemini-3-pro-auto`.
+  If the verdict is partial/fail, let the CPO redirect the slice, rework it,
+  rerun verification, and repeat self-CPO until PASS or an explicit user waiver.
 - Use current sprint artifacts for plan/checklist/context notes. Create
   root-level `checklist.md` or `context-notes.md` only when the user asks for
   those exact files.

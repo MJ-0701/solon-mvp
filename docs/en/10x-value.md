@@ -154,10 +154,11 @@ For Codex, helper-grade intake and non-coding helpers map to `gpt-5.4-mini`,
 question/facilitation and normal workers map to `gpt-5.4`, advisor/review maps
 to `gpt-5.5` xhigh, bounded repo-aware coding helpers map to `gpt-5.3-codex`,
 and judgment-free mechanical implementation helpers map to
-`gpt-5.3-codex-spark`. Claude follows its existing Opus/Sonnet/Haiku
-responsibility split. Gemini advisor/review/facilitation uses
-`gemini-3.1-pro-preview`; helper-grade fallback uses `gemini-3-flash-preview`.
-SFS does not use 2.5 fallback names.
+`gpt-5.3-codex-spark`. Claude follows an Opus/Sonnet 4.6/Haiku responsibility
+split: coding-capable worker/helper lanes use Sonnet 4.6, and Haiku is
+non-coding helper-only. Gemini uses `gemini-3-pro-auto` for every role; SFS
+does not use Gemini Flash or 2.5 fallback names. Substantive research should
+prefer a Gemini 3 Pro auto researcher when available.
 
 Helper-grade simple I/O can skip advisor review. But if lower-model output
 frames questions/options, interprets user answers, or affects product identity,
