@@ -7,7 +7,7 @@
 #
 # Output:
 #   status/plan: grouped git working tree summary
-#   apply: local git commit summary (push is never run)
+#   apply: local git commit + push summary
 #
 # Exit codes:
 #   0  ok
@@ -31,11 +31,12 @@ usage() {
   cat <<'EOF'
 Usage:
   sfs commit [status|plan]
-  sfs commit apply --group <product-code|sprint-meta|runtime-upgrade|ambiguous> [-m <message>] [--dry-run]
+  sfs commit apply --group <product-code|sprint-meta|runtime-upgrade|ambiguous> [-m <message>] [--no-push] [--dry-run]
 
 What it does:
   status/plan  Show unstaged, staged, and untracked files grouped by meaning.
-  apply        Stage every file in the selected group, then run one local git commit.
+  apply        Stage every file in the selected group, then run one local git commit
+               and push the current branch by default.
                A Conventional Commit message is generated automatically from
                selected files and the current Git Flow branch; -m overrides it.
 
@@ -49,13 +50,17 @@ Safety:
   - Includes untracked and unstaged files in the selected group.
   - Aborts if unrelated files are already staged.
   - Shows Git Flow branch preflight guidance before commit planning/apply.
-  - This helper never runs git push; the AI runtime owns branch push/main merge/main push after local commit.
+  - Push is part of `sfs commit apply` for normal user projects.
+  - If no upstream exists, pushes with `git push -u origin <branch>`.
+  - Use --no-push only for local sandbox/release testing or explicitly offline work.
 
 Options for apply:
   -g, --group <name>      Group to commit.
   -m, --message <text>    Override generated commit message.
       --include <path>    Add a path to the selected set.
       --exclude <path>    Remove a path from the selected set.
+      --push              Push after commit (default).
+      --no-push           Commit locally but skip push; for sandbox/offline use.
       --dry-run           Print what would be committed without changing git state.
   -h, --help              Show this help.
 
@@ -64,6 +69,7 @@ Examples:
   sfs commit plan
   sfs commit apply --group product-code
   sfs commit apply --group product-code -m "feat: add first landing page"
+  sfs commit apply --group product-code --no-push
   sfs commit apply --group runtime-upgrade
 
 Exit codes:
@@ -154,7 +160,7 @@ classify_path() {
     .sfs-local/sprints/*|.sfs-local/decisions/*|.sfs-local/events.jsonl|.sfs-local/current-sprint|.sfs-local/current-wu)
       echo "sprint-meta"
       ;;
-    SFS.md|.sfs-local/VERSION|.sfs-local/GUIDE.md|.sfs-local/auth.env.example|.sfs-local/scripts/*|.sfs-local/sprint-templates/*|.sfs-local/personas/*|.sfs-local/decisions-template/*|.claude/skills/sfs/SKILL.md|.claude/commands/sfs.md|.agents/skills/sfs/SKILL.md|.gemini/commands/sfs.toml|.codex/prompts/sfs.md)
+    SFS.md|CLAUDE.md|AGENTS.md|GEMINI.md|.gitignore|.sfs-local/VERSION|.sfs-local/GUIDE.md|.sfs-local/auth.env.example|.sfs-local/scripts/*|.sfs-local/sprint-templates/*|.sfs-local/personas/*|.sfs-local/decisions-template/*|.claude/skills/sfs/SKILL.md|.claude/commands/sfs.md|.agents/skills/sfs/SKILL.md|.gemini/commands/sfs.toml|.codex/prompts/sfs.md)
       echo "runtime-upgrade"
       ;;
     .sfs-local/*)
@@ -362,6 +368,41 @@ render_branch_prework() {
     printf '  guidance: branch is not Git Flow-shaped. Prefer feature/*, bugfix/*, hotfix/*, release/*, or support/*.\n'
   fi
   printf '  solon-branch-helper: AI runtime should create/switch feature/* or hotfix/* before product-code commits when needed.\n'
+}
+
+ensure_push_ready() {
+  local branch
+  branch="$(current_branch)"
+  if [[ -z "${branch}" ]]; then
+    cat >&2 <<'EOF'
+push preflight failed: detached HEAD
+
+`sfs commit apply` commits and pushes as one user-project operation. Switch to a
+branch first, or pass --no-push only for local sandbox/offline work.
+EOF
+    exit "${SFS_EXIT_COMMIT_FAILED}"
+  fi
+
+  if ! git remote get-url origin >/dev/null 2>&1; then
+    cat >&2 <<'EOF'
+push preflight failed: remote `origin` is missing
+
+`sfs commit apply` commits and pushes as one user-project operation. Add an
+origin remote first, or pass --no-push only for local sandbox/offline work.
+EOF
+    exit "${SFS_EXIT_COMMIT_FAILED}"
+  fi
+}
+
+push_current_branch() {
+  local branch upstream
+  branch="$(current_branch)"
+  upstream="$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)"
+  if [[ -n "${upstream}" ]]; then
+    git push
+  else
+    git push -u origin "${branch}"
+  fi
 }
 
 format_subject() {
@@ -616,7 +657,13 @@ print_selected() {
 }
 
 apply_group() {
-  local group="" message="" message_body="" dry_run=0 auto_message=0
+  local group="" message="" message_body="" dry_run=0 auto_message=0 push_enabled
+  push_enabled="${SFS_COMMIT_PUSH:-1}"
+  case "${push_enabled}" in
+    1|true|TRUE|yes|YES|y|Y) push_enabled=1 ;;
+    0|false|FALSE|no|NO|n|N) push_enabled=0 ;;
+    *) push_enabled=1 ;;
+  esac
   INCLUDE_PATHS=()
   EXCLUDE_PATHS=()
 
@@ -658,6 +705,14 @@ apply_group() {
         EXCLUDE_PATHS+=("${1#--exclude=}")
         shift
         ;;
+      --push)
+        push_enabled=1
+        shift
+        ;;
+      --no-push)
+        push_enabled=0
+        shift
+        ;;
       --dry-run)
         dry_run=1
         shift
@@ -697,7 +752,11 @@ apply_group() {
   else
     printf 'message-source: user\n'
   fi
-  printf 'push: not run\n'
+  if [[ "${push_enabled}" -eq 1 ]]; then
+    printf 'push: pending\n'
+  else
+    printf 'push: disabled (--no-push)\n'
+  fi
 
   if [[ "${dry_run}" -eq 1 ]]; then
     printf 'dry-run: no git state changed\n'
@@ -705,6 +764,9 @@ apply_group() {
   fi
 
   assert_no_unrelated_staged
+  if [[ "${push_enabled}" -eq 1 ]]; then
+    ensure_push_ready
+  fi
 
   git add -- "${SELECTED_PATHS[@]}"
   if git diff --cached --quiet --exit-code; then
@@ -725,7 +787,16 @@ apply_group() {
   local sha
   sha="$(git rev-parse --short HEAD 2>/dev/null || echo "-")"
   printf 'committed: %s\n' "${sha}"
-  printf 'push: not run\n'
+  if [[ "${push_enabled}" -eq 1 ]]; then
+    if push_current_branch; then
+      printf 'pushed: %s\n' "$(current_branch)"
+    else
+      echo "git push failed after commit ${sha}" >&2
+      exit "${SFS_EXIT_COMMIT_FAILED}"
+    fi
+  else
+    printf 'push: skipped (--no-push)\n'
+  fi
 }
 
 main() {

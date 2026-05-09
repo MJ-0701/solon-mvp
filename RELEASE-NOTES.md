@@ -7,6 +7,18 @@
 
 ---
 
+## 0.6.76
+
+이번 버전은 Solon 작업의 commit 안내를 `sfs commit`으로 고정합니다.
+
+- `sfs commit apply --group <name>` 은 이제 선택한 그룹을 stage, commit 한 뒤 현재 branch 를
+  기본으로 push 합니다. upstream 이 없으면 `git push -u origin <branch>` 로 연결합니다.
+- 로컬 sandbox, SFS release 테스트, offline 작업처럼 push 하면 안 되는 경우에만 `--no-push` 를 씁니다.
+- Claude/Codex/Gemini entry 와 SFS.md 는 Solon 작업에서 host-local `/commit` skill 을 안내하지 말고
+  `sfs commit plan` → `sfs commit apply --group <name>` 을 안내하도록 고정했습니다.
+- install/upgrade/uninstall 완료 안내도 raw `git add` / `git commit` / `git push` 대신 `sfs commit` 을
+  보여줍니다.
+
 ## 0.6.75
 
 이번 버전은 review partial/fail 이후의 자동 rework 기준을 명확히 합니다.

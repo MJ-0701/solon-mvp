@@ -7,7 +7,7 @@ install. For beginner Git/terminal help, use the Korean [BEGINNER-GUIDE.md](../.
 
 ## 0. Install And Initialize
 
-> **As of 0.6.75**, one `brew install` / `scoop install` lets Claude Code
+> **As of 0.6.76**, one `brew install` / `scoop install` lets Claude Code
 > (`/sfs`), Gemini CLI (`sfs`), and Codex CLI (`$sfs`) find Solon automatically.
 > Your project keeps the files you read and the records you create.
 
@@ -61,7 +61,7 @@ optional. Install those native shortcuts only when a project needs them:
 sfs agent install all
 ```
 
-Old projects can be upgraded into the lighter 0.6.75 shape. Use
+Old projects can be upgraded into the lighter 0.6.76 shape. Use
 `sfs upgrade --layout vendored` only when Solon package files must stay inside
 the project.
 After adoption or upgrade, `sfs tidy --all --apply` can clean targetless
@@ -75,12 +75,12 @@ evidence is date-bucketed as
 `.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz`
 instead of many visible timestamp folders.
 
-0.6.75 also includes the filled division knowledge packs. The user does not need to choose
+0.6.76 also includes the filled division knowledge packs. The user does not need to choose
 "backend", "QA", "infra", "finance", "tax", "accounting", or "taxonomy"
 manually. The AI should read the relevant Solon lens when the work calls for it,
 then explain the judgment in plain language.
 
-As of 0.6.75, agent-skills-style practices are absorbed into existing SFS
+As of 0.6.76, agent-skills-style practices are absorbed into existing SFS
 commands instead of becoming new lifecycle commands: source-driven
 implementation, stop-the-line debugging, deprecation/migration, shipping
 checks, and stronger review lenses.
@@ -200,6 +200,10 @@ Use `sfs report` separately only when you want to preview or rebuild the report
 without closing the sprint. The full list of optional helpers
 (`report --sprint <id>`, `tidy`, `decision`, `adopt`, etc.) is in the Korean
 GUIDE §11.
+For committing Solon work, use `sfs commit plan` to inspect groups, then
+`sfs commit apply --group <name>`. `apply` commits and pushes the current branch
+by default; use `--no-push` only for local sandbox/release testing or offline
+work. Do not route SFS work to a host-local `/commit` skill.
 When a report asks for a decision, the `Q1` label is only a cross-reference. The
 report should spell out what is being decided, why it matters now, the default
 recommendation, and what each option changes. Confirmation should use natural

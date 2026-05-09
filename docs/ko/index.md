@@ -33,12 +33,12 @@ sfs status
 사용자가 product owner 로서 의도, 우선순위, 포기할 것, 검증 방식, 용어를 계속 더 선명하게
 잡도록 돕습니다.
 
-0.6.75 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩이
+0.6.76 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩이
 실제 안내로 채워졌습니다. 재무, 경리, 세무, 회계도 경영관리 관점으로 다룹니다. 사용자는 분야
 이름을 외울 필요가 없습니다. Solon 이 필요한 관점만 읽고, plan/review 에서는 사용자가 이해할 수
 있는 질문과 기준으로 풀어냅니다.
 
-0.6.75 에서는 agent-skills 벤치마크에서 쓸 만한 practice 를 새 명령으로 늘리지 않고
+0.6.76 에서는 agent-skills 벤치마크에서 쓸 만한 practice 를 새 명령으로 늘리지 않고
 `implement`, `review`, `adopt`, `tidy`, `release` 의 정책과 렌즈로 흡수했습니다.
 공식 문서 기반 구현, stop-the-line debugging, deprecation/migration cleanup, shipping check,
 `source-docs`/`simplify`/`security`/`performance`/`api-contract` review lens 가 포함됩니다.

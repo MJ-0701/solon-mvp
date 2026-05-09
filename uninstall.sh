@@ -13,7 +13,7 @@
 #      (a) 전부 제거 (sprints/decisions 산출물 포함)
 #      (b) scaffold 만 제거, 산출물 (sprints/decisions/events.jsonl) 보존
 #      (c) 취소
-#   3. 설치 취소 기록은 git commit 권장 (스크립트가 자동 commit 하지 않음)
+#   3. 설치 취소 기록은 `sfs commit apply` 권장 (기본 commit + push)
 
 set -euo pipefail
 
@@ -237,9 +237,10 @@ cat <<EOF
 
 ${C_BOLD}${C_GREEN}=== Uninstall 완료 ===${C_RESET}
 
-변경사항 git commit 권장:
-  ${C_BLUE}git add -A${C_RESET}
-  ${C_BLUE}git commit -m "제거: solon-product"${C_RESET}
+변경사항 sfs commit + push 권장:
+  ${C_BLUE}sfs commit plan${C_RESET}
+  ${C_BLUE}sfs commit apply --group runtime-upgrade -m "제거: solon-product"${C_RESET}
+  ${C_YELLOW}sfs commit apply 는 기본적으로 현재 branch 를 push 합니다. 로컬 sandbox 에서만 --no-push 를 쓰세요.${C_RESET}
   ${C_YELLOW}커밋 메시지는 사용자 native/workspace 언어가 기본입니다. 영어는 repo 규칙이 요구할 때만 쓰세요.${C_RESET}
 
 EOF

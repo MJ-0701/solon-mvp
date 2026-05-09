@@ -1,3 +1,34 @@
+## [0.6.76] - 2026-05-09
+
+> **SFS commit is the commit+push surface.** Solon commit guidance now points to
+> `sfs commit`, not host-local `/commit` skills, and `sfs commit apply` pushes
+> the current branch by default for user projects.
+
+### Changed
+
+- `sfs commit apply --group <name>` now stages the selected group, commits it,
+  and pushes the current branch by default. If the branch has no upstream, it
+  runs `git push -u origin <branch>`.
+- Added `--no-push` for local sandbox/release testing and explicitly offline
+  work. Push preflight now stops before commit when the repo is detached or has
+  no `origin` remote.
+- Runtime-upgrade grouping now includes root SFS entry files such as `SFS.md`,
+  `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, and `.gitignore`.
+- Claude/Codex/Gemini templates, plugin command, kernel, and `SFS.md` now
+  explicitly forbid routing Solon commit guidance to a host-local `/commit`
+  skill. The portable command is `sfs commit plan` followed by
+  `sfs commit apply --group <name>`.
+- Install/upgrade/uninstall completion hints now recommend `sfs commit` instead
+  of raw `git add` / `git commit` / `git push` sequences.
+
+### Tests
+
+- Added `test-sfs-commit-push.sh`, which uses a local bare remote to verify
+  that `sfs commit apply` updates the remote branch and that `--no-push` leaves
+  the remote untouched.
+- Extended agent guardrail and native commit-message tests to lock the SFS
+  commit surface and reject stale raw-git or host-local commit guidance.
+
 ## [0.6.75] - 2026-05-09
 
 > **Same-cycle review micro-rework.** Agents should not bounce deterministic

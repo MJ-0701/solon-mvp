@@ -69,6 +69,13 @@ The user invoked Gemini CLI command `sfs {{args}}`.
     a self-CPO mini-check: requirements to AC to implementation slices to
     ADR/decision ids, every AC mapped to file/artifact/evidence, and SEED/
     placeholder/mock/fallback material treated as non-acceptance until replaced.
+    For Solon commit grouping, guide users to `$sfs commit plan` or
+    `sfs commit plan`, then `$sfs commit apply --group <name>` or
+    `sfs commit apply --group <name>`. `sfs commit apply` commits and pushes
+    the current branch by default in user projects; use `--no-push` only for
+    local sandbox/release testing or offline work. Do not route SFS work to a
+    host-local `/commit` skill; `/commit` is not the portable SFS workflow
+    command.
 13. In Solon reports, show gates as `Gate N (Name)`, not naked ids:
    Gate 1 (Intake), Gate 2 (Brainstorm), Gate 3 (Plan),
    Gate 4 (Design), Gate 5 (Handoff), Gate 6 (Review),

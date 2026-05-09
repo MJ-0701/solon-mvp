@@ -70,9 +70,14 @@ for adapter in \
   assert_contains "${adapter}" "native/workspace language" "adapter native language ${adapter}"
 done
 
-assert_contains "${INSTALL}" 'git commit -m "설치: solon-product $SOLON_VERSION"' "install Korean commit"
-assert_contains "${UPGRADE}" 'git commit -m "업그레이드: solon-mvp $CUR_VER → $NEW_VER"' "upgrade Korean commit"
-assert_contains "${UNINSTALL}" 'git commit -m "제거: solon-product"' "uninstall Korean commit"
+assert_contains "${INSTALL}" 'sfs commit apply --group runtime-upgrade -m' "install sfs commit command"
+assert_contains "${INSTALL}" '설치: solon-product $SOLON_VERSION' "install Korean sfs commit"
+assert_contains "${UPGRADE}" 'sfs commit apply --group runtime-upgrade -m' "upgrade sfs commit command"
+assert_contains "${UPGRADE}" '업그레이드: solon-mvp $CUR_VER → $NEW_VER' "upgrade Korean sfs commit"
+assert_contains "${UNINSTALL}" 'sfs commit apply --group runtime-upgrade -m "제거: solon-product"' "uninstall Korean sfs commit"
+assert_contains "${INSTALL}" "기본적으로 현재 branch 를 push" "install sfs commit pushes"
+assert_contains "${UPGRADE}" "기본적으로 현재 branch 를 push" "upgrade sfs commit pushes"
+assert_contains "${UNINSTALL}" "기본적으로 현재 branch 를 push" "uninstall sfs commit pushes"
 assert_contains "${IMPLEMENT_SCRIPT}" "commit language: proposed/actual commit messages default" "implement script native language"
 assert_contains "${TIDY_CONTEXT}" "Report/retro prose should use the user's native/workspace language" "handoff native language"
 assert_contains "${REPORT_TEMPLATE}" "native/workspace 언어" "report native language"
@@ -81,5 +86,8 @@ assert_contains "${RETRO_TEMPLATE}" "native/workspace 언어" "retro native lang
 assert_not_contains "${INSTALL}" 'git commit -m "chore: install solon-product' "install no English chore"
 assert_not_contains "${UPGRADE}" 'git commit -m "chore: upgrade solon-mvp' "upgrade no English chore"
 assert_not_contains "${UNINSTALL}" 'git commit -m "chore: uninstall solon-product' "uninstall no English chore"
+assert_not_contains "${INSTALL}" 'git commit -m "설치: solon-product' "install no raw git commit guidance"
+assert_not_contains "${UPGRADE}" 'git commit -m "업그레이드: solon-mvp' "upgrade no raw git commit guidance"
+assert_not_contains "${UNINSTALL}" 'git commit -m "제거: solon-product' "uninstall no raw git commit guidance"
 
 echo "test-native-language-commit-messages: OK"

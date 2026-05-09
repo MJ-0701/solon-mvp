@@ -75,6 +75,13 @@ $ARGUMENTS
    a self-CPO mini-check: requirements to AC to implementation slices to
    ADR/decision ids, every AC mapped to file/artifact/evidence, and SEED/
    placeholder/mock/fallback material treated as non-acceptance until replaced.
+   For Solon commit grouping, guide users to `sfs commit plan` and
+   `sfs commit apply --group <name>` (or `/sfs commit ...` only when this SFS
+   slash router is active). `sfs commit apply` commits and pushes the current
+   branch by default in user projects; use `--no-push` only for local
+   sandbox/release testing or offline work. Do not route SFS work to a
+   host-local `/commit` skill; `/commit` is not the portable SFS workflow
+   command.
 12. `.sfs-local/` is private workbench state. Shared handoff/history docs
    belong under `docs/solon/<english-workspace>/<yyyyMMdd>/`; project-wide
    Solon reference docs use named files under `docs/solon/`. Do not ask users

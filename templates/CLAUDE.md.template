@@ -76,6 +76,13 @@ Rules:
 - Shared handoff/history docs live under `docs/solon/<english-workspace>/<yyyyMMdd>/`.
   Project-wide Solon reference docs use named files under `docs/solon/` such as `domain-map.md`. `.sfs-local/` is
   private local workbench state and should stay gitignored unless the team opts in.
+- For Solon commit grouping, guide users to `sfs commit plan` and
+  `sfs commit apply --group <name>` (or `/sfs commit ...` only when the Claude
+  SFS slash router is active). `sfs commit apply` commits and pushes the
+  current branch by default in user projects; use `--no-push` only for local
+  sandbox/release testing or offline work. Do not route SFS work to a
+  host-local `/commit` skill; `/commit` is not the portable SFS workflow
+  command.
 - `.sfs-local/` is active workbench state, not durable history. `events.jsonl`
   stays visible only for the current sprint ledger; stale/orphan events should
   be removed or archived by `sfs upgrade` / `sfs tidy --all --apply`. Repeated

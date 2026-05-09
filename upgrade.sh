@@ -2435,12 +2435,12 @@ fi
 
 trace_upgrade "completion hint render before"
 if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ]; then
-  COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .claude .gemini .agents docs${C_RESET}"
   AGENT_HINT="project-local command/skill adapters 는 기본 제거되었습니다. 필요할 때만: sfs agent install all"
 else
-  COMMIT_HINT="${C_BLUE}git add SFS.md CLAUDE.md AGENTS.md GEMINI.md .gitignore .claude .gemini .agents docs${C_RESET}"
   AGENT_HINT="vendored layout 은 project-local command/skill adapters 를 계속 동기화합니다."
 fi
+COMMIT_HINT="${C_BLUE}sfs commit plan${C_RESET}
+  ${C_BLUE}sfs commit apply --group runtime-upgrade -m \"업그레이드: solon-mvp $CUR_VER → $NEW_VER\"${C_RESET}"
 trace_upgrade "completion hint render after"
 
 trace_upgrade "completion output before"
@@ -2468,9 +2468,9 @@ Agent model profile:
   Spark 는 일반 구현 worker 가 아니라 scope/AC 가 잠긴 기계적 subtask 용도입니다. Claude 는 opus/sonnet/haiku 계열,
   Gemini/custom 은 프로젝트 runtime 이 지원하는 profile 이름으로 agent별 override 가능합니다.
 
-변경사항 git commit 권장:
+변경사항 sfs commit + push 권장:
   ${COMMIT_HINT}
-  ${C_BLUE}git commit -m "업그레이드: solon-mvp $CUR_VER → $NEW_VER"${C_RESET}
+  ${C_YELLOW}sfs commit apply 는 기본적으로 현재 branch 를 push 합니다. 로컬 sandbox 에서만 --no-push 를 쓰세요.${C_RESET}
   ${C_YELLOW}커밋 메시지는 사용자 native/workspace 언어가 기본입니다. 영어는 repo 규칙이 요구할 때만 쓰세요.${C_RESET}
 
 Agent adapter surface:

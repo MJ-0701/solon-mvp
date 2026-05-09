@@ -58,6 +58,13 @@ wording/document consistency in the same cycle, verify, then run the same-gate
 review again. Ask the user only for product judgment: scope, architecture,
 public contract, security/privacy/data-loss, cost/latency/model policy,
 destructive behavior, or changed AC meaning.
+For Solon commit grouping, guide users to the SFS command surface:
+`sfs commit plan` and `sfs commit apply --group <name>` (Codex may use
+`$sfs commit ...`; Claude slash routing may use `/sfs commit ...`). `sfs commit
+apply` commits and pushes the current branch by default in user projects; use
+`--no-push` only for local sandbox/release testing or offline work. Do not tell
+users to use a host-local `/commit` skill for SFS work; `/commit` is not the
+portable SFS workflow command.
 Keep only what must remain: `.sfs-local/` is private active workbench state,
 not durable history. `events.jsonl` stays visible only for the current sprint
 ledger; stale/orphan events should be removed or archived by `sfs upgrade` /

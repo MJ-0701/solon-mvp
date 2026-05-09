@@ -86,6 +86,13 @@ load_when: ["always", "sfs", "entry"]
   architecture change, public contract change, security/privacy/data-loss risk
   tradeoff, cost/latency policy, destructive action, unclear acceptance, or a
   repeated partial/fail after the bounded micro-rework loop.
+- SFS commit guidance must use the SFS command surface: `sfs commit plan` and
+  `sfs commit apply --group <name>` (or `$sfs commit ...` in Codex / `/sfs
+  commit ...` only when a slash router is explicitly active). `sfs commit apply`
+  commits and pushes the current branch by default in user projects; use
+  `--no-push` only for local sandbox/release testing or offline work. Do not
+  route Solon commit guidance to a host-local `/commit` skill; `/commit` is not
+  the portable SFS workflow command.
 - Advisor review is not a self-CPO PASS. Before asking for external/Codex/
   Claude/Gemini cross review or using it as gate evidence, the current author
   must run a local self-CPO mini-check and record pass/partial/fail. The check

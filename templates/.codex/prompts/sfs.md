@@ -64,6 +64,13 @@ Arguments: `$ARGUMENTS`
    a self-CPO mini-check: requirements to AC to implementation slices to
    ADR/decision ids, every AC mapped to file/artifact/evidence, and SEED/
    placeholder/mock/fallback material treated as non-acceptance until replaced.
+   For Solon commit grouping, guide users to `$sfs commit plan` or
+   `sfs commit plan`, then `$sfs commit apply --group <name>` or
+   `sfs commit apply --group <name>`. `sfs commit apply` commits and pushes
+   the current branch by default in user projects; use `--no-push` only for
+   local sandbox/release testing or offline work. Do not route SFS work to a
+   host-local `/commit` skill; `/commit` is not the portable SFS workflow
+   command.
 9. Decision questions must be self-contained: before any `Q1`, `D1`, or option
    id, explain in plain user language what is being decided, why it matters, the
    recommended default, and what each option changes. Labels are
