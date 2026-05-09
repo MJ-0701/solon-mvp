@@ -25,7 +25,7 @@ git -C "${RELEASE_REPO}" init -q
 printf '# releases\n' > "${RELEASE_REPO}/README.md"
 git -C "${RELEASE_REPO}" add README.md
 git -C "${RELEASE_REPO}" -c user.name='SFS Test' -c user.email='sfs-test@example.invalid' commit -qm 'initial'
-git -C "${RELEASE_REPO}" tag v0.6.75
+git -C "${RELEASE_REPO}" tag v0.6.76
 
 cd "${PROJECT_DIR}"
 git init -q
@@ -47,7 +47,7 @@ bash "${SFS_BIN}" status >/tmp/sfs-version-notice.out 2>/tmp/sfs-version-notice.
 [[ ! -d .sfs-local/cache ]] || fail "version notice must not create project-local .sfs-local/cache"
 find "${TMP_DIR}/user-cache/version-notices" -name '*.env' -type f | grep -q . \
   || fail "version notice should write state to user SFS cache"
-grep -Fq 'latest is 0.6.75' /tmp/sfs-version-notice.err \
+grep -Fq 'latest is 0.6.76' /tmp/sfs-version-notice.err \
   || fail "expected stale version notice on stderr"
 
 echo "test-sfs-version-notice-cache-global: OK"

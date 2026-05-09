@@ -1,3 +1,24 @@
+## [0.6.75] - 2026-05-09
+
+> **Same-cycle review micro-rework.** Agents should not bounce deterministic
+> tiny review findings back to the user. They should patch, verify, and rerun
+> the same gate review unless product judgment is required.
+
+### Changed
+
+- Added a same-cycle micro-rework rule to the SFS kernel, Gate 3 plan context,
+  review context, `SFS.md` template, Claude/Codex/Gemini entry templates,
+  Codex skill, plugin command, README/GUIDE, and English/Korean current-shape
+  docs.
+- Deterministic low-risk findings such as grep scope holes, stale measured
+  evidence, missing AC/file/artifact mapping, evidence path typos, and
+  meaning-preserving documentation consistency now route to automatic patch,
+  smallest verification, and same-gate review rerun.
+- User escalation is reserved for product judgment: scope, architecture, public
+  contract, security/privacy/data-loss posture, cost/latency/model policy,
+  destructive behavior, changed AC meaning, or repeated partial/fail on the same
+  micro-fix.
+
 ## [0.6.74] - 2026-05-09
 
 > **Retention policy docs refresh.** The user-facing docs, runtime entry

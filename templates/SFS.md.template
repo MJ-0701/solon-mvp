@@ -51,6 +51,13 @@ Never ask the user to confirm a compact option bundle such as `A/A/A/C/C`, and
 never answer "show the recommendation again" with only option labels or only
 the recommended row. Re-present the decision in plain language and use a natural
 confirmation phrase such as `권장안 그대로 확정`, not a label bundle.
+When review returns partial/fail for a deterministic low-risk issue, complete
+the loop instead of asking the user to request the next review: patch grep
+scope, stale evidence, missing AC/file mapping, evidence path typos, and bounded
+wording/document consistency in the same cycle, verify, then run the same-gate
+review again. Ask the user only for product judgment: scope, architecture,
+public contract, security/privacy/data-loss, cost/latency/model policy,
+destructive behavior, or changed AC meaning.
 Keep only what must remain: `.sfs-local/` is private active workbench state,
 not durable history. `events.jsonl` stays visible only for the current sprint
 ledger; stale/orphan events should be removed or archived by `sfs upgrade` /

@@ -24,6 +24,18 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - If self-review returns partial/fail, rework the plan and run self-review
   again. If cross review returns partial/fail, rework the plan and return to
   self-review before another cross review.
+- If the finding is deterministic, narrow, and does not require product owner
+  judgment, complete the rework loop in the same cycle: patch the artifact, run
+  the smallest verification, and invoke the same-gate review again before
+  returning. Typical auto-rework findings include grep/file coverage holes,
+  stale measured evidence, missing AC/file/artifact mapping, wrong evidence
+  path, bounded wording cleanup, or documentation consistency that preserves
+  meaning. Do not ask the user to trigger the next review for these cases.
+- Escalate to the user instead of auto-reworking when the finding changes scope,
+  architecture, public API/schema/CLI contract, security/privacy/data-loss
+  posture, cost/latency/model policy, destructive behavior, or acceptance
+  criteria meaning; also escalate after repeated partial/fail on the same
+  micro-fix.
 - Do not treat review volume as completion. Number of lenses, rounds, advisor
   comments, or elapsed time never unlocks `sfs implement`; only PASS or an
   explicit user waiver does.

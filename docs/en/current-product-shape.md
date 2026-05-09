@@ -47,7 +47,7 @@ native-language commit message rule.
 ## Windows Wrapper Stabilization
 
 The Windows PowerShell/cmd user entrypoint is fixed to `sfs.cmd`. Git Bash/WSL
-keep using `sfs`, like macOS/Linux. As of 0.6.74, the Scoop manifest keeps the
+keep using `sfs`, like macOS/Linux. As of 0.6.75, the Scoop manifest keeps the
 generated shim target on packaged `bin\sfs.ps1`, but the post-install hook
 overwrites the shims-directory `sfs.cmd`, `sfs.ps1`, and extensionless `sfs`
 with deterministic wrappers because generated `sfs.cmd` / `sfs.ps1` shims can
@@ -179,6 +179,15 @@ The user can keep saying `sfs review`. Agent-skills-style judgment stays inside
 existing review lenses rather than becoming new commands. `--lens` is only an
 override when the inference is wrong.
 
+Review loops should close small deterministic findings without bouncing work
+back to the user. If a partial/fail result points at grep scope, stale measured
+evidence, missing AC-to-file/artifact mapping, an evidence path typo, or
+documentation consistency that preserves meaning, the agent should patch it,
+run the smallest verification, and invoke the same gate review again in the
+same cycle. Ask the user only when product judgment is required: scope,
+architecture, public contract, security/privacy/data-loss posture,
+cost/latency/model policy, destructive behavior, or changed AC meaning.
+
 ## Thin Multi-Agent Supervision
 
 SFS does not ask Claude, Codex, and Gemini to run at the same time by default.
@@ -263,7 +272,7 @@ product design system exists, it wins.
 
 ## Division Knowledge Packs
 
-As of 0.6.74, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
+As of 0.6.75, the backend, strategy/PM, QA, design/frontend, infra/DevOps,
 management/admin, and taxonomy packs are no longer placeholders. Each pack gives
 Solon a compact sense of what to watch, what to ask, and what evidence should
 count for that kind of work.
@@ -276,7 +285,7 @@ Taxonomy stays as a cross-cutting language/classification lens rather than a
 business department. Finance, bookkeeping, tax, and accounting live under the
 management/admin lens.
 
-As of 0.6.74, useful disciplines from the agent-skills benchmark are absorbed
+As of 0.6.75, useful disciplines from the agent-skills benchmark are absorbed
 the same way. Official-docs implementation flows through `implement` and the
 `source-docs` lens, stop-the-line debugging flows through implementation
 verification, deprecation/migration flows through `adopt` and `tidy`, and

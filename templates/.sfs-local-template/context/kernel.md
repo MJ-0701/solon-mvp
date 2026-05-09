@@ -76,6 +76,16 @@ load_when: ["always", "sfs", "entry"]
 - Review verdicts are success criteria, not effort counters. A high number of
   review rounds, lenses, or advisor comments never substitutes for PASS.
   Partial/fail routes to rework and same-gate review, not to implementation.
+- Same-cycle micro-rework is mandatory when the finding is deterministic and
+  low-risk: missing grep/file coverage, traceability mapping, evidence refresh,
+  stale command output, wording that does not change product meaning, or a
+  narrowly scoped artifact consistency fix. Apply the patch, run the smallest
+  verification, and invoke the same gate review again before returning to the
+  user. Do not ask the user to request the next review in these cases.
+- Ask the user only when the finding requires product judgment: scope or
+  architecture change, public contract change, security/privacy/data-loss risk
+  tradeoff, cost/latency policy, destructive action, unclear acceptance, or a
+  repeated partial/fail after the bounded micro-rework loop.
 - Advisor review is not a self-CPO PASS. Before asking for external/Codex/
   Claude/Gemini cross review or using it as gate evidence, the current author
   must run a local self-CPO mini-check and record pass/partial/fail. The check

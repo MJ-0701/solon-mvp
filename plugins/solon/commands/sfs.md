@@ -69,6 +69,12 @@ $ARGUMENTS
     Gate 3 review must self-review until PASS before cross review. Review round
     count, lens count, or "enough review" is not a PASS; partial/fail routes to
     rework and same-gate self-review.
+    If a partial/fail finding is deterministic and low-risk, such as grep
+    scope, stale evidence, missing AC/file mapping, evidence path typo, or
+    bounded wording/document consistency, patch it and run the same-gate review again
+    in the same cycle. Ask the user only when product judgment is needed:
+    scope, architecture, public contract, security/privacy/data-loss,
+    cost/latency/model policy, destructive behavior, or changed AC meaning.
     Advisor calls do not count as self-CPO. Before external cross review, record
     a self-CPO mini-check: requirements to AC to implementation slices to
     ADR/decision ids, every AC mapped to file/artifact/evidence, and SEED/

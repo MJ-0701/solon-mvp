@@ -60,6 +60,14 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   plan until PASS first, then run cross review. If any self or cross review
   returns partial/fail, rework the plan and repeat self-review before offering
   cross review or implementation.
+- If a Gate 3 partial/fail finding is a deterministic micro-fix, do not hand it
+  back to the user as "fixed; please run review again." Examples: AC grep scope,
+  missing docs/file inclusion, stale measured command output, traceability row
+  omission, evidence path typo, or a narrow wording fix that does not change
+  product judgment. Apply the patch in the same cycle, run the smallest
+  verification, and call the same Gate 3 self-review again. Escalate to the user only when
+  the fix changes scope, architecture, public contract, security/
+  privacy/data-loss risk, cost/latency policy, or acceptance criteria meaning.
 - The self-review must be a self-CPO mini-check, not only advisor consultation.
   Before calling Codex/Claude/Gemini or another external CPO, verify and record:
   requirements ↔ AC ↔ implementation slices ↔ ADR/decision ids traceability;

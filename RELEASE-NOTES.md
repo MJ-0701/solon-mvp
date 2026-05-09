@@ -7,6 +7,18 @@
 
 ---
 
+## 0.6.75
+
+이번 버전은 review partial/fail 이후의 자동 rework 기준을 명확히 합니다.
+
+- grep 범위, stale evidence, AC와 파일/산출물 매핑, evidence path 오타, 의미 보존 문서 일관성처럼
+  작은 결정론적 finding 은 agent 가 같은 cycle 안에서 patch, 최소 검증, same-gate review 재호출까지
+  이어갑니다.
+- 사용자에게 묻는 경우는 범위, architecture, public contract, 보안/개인정보/data-loss,
+  비용/지연/model policy, destructive action, AC 의미 변경처럼 제품 판단이 필요한 경우로 좁혔습니다.
+- Claude/Codex/Gemini entry, Codex skill, plugin command, routed plan/review context, README/GUIDE 에
+  같은 규칙을 반영했습니다.
+
 ## 0.6.74
 
 이번 버전은 `.sfs-local` 보존 정책을 문서와 agent entry 전체에 맞춰 최신화합니다.
