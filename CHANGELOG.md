@@ -1,3 +1,28 @@
+## [0.6.78] - 2026-05-09
+
+> **Review evidence stays bounded on real projects.** 0.6.77 made review
+> evidence commit-aware; this release fixes the real-project prompt generation
+> cost when plan evidence names broad source directories.
+
+### Fixed
+
+- `sfs review` now caps directory/glob expansion with `SFS_REVIEW_DIR_EXPANSION_MAX`
+  (default 80, max 200) so broad tokens such as `backend/src` do not make
+  prompt-only review look stuck.
+- Indexed evidence path extraction is cached during prompt rendering instead of
+  being recomputed for every excerpt.
+- Full-file embedding is now reserved for small first-class durable documents
+  such as shared handoff reports and ADRs; source/config targets remain bounded
+  excerpts.
+
+### Tests
+
+- Extended guardrails to lock bounded directory expansion and indexed evidence
+  caching.
+- Verified the patched review command against the real `study-note` sprint:
+  `sfs review --gate 4 --prompt-only` completed and produced a full prompt with
+  latest-commit, shared-handoff, and first-class evidence sections.
+
 ## [0.6.77] - 2026-05-09
 
 > **Review evidence is commit-aware.** Gate reviews no longer lose ADR/report

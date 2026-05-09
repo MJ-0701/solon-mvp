@@ -172,6 +172,8 @@ assert_contains "${review_script}" "SFS_REVIEW_BRIDGE_PROBE_OK" "review bridge p
 assert_contains "${review_script}" "latest commit reviewable file manifest" "review latest commit evidence manifest"
 assert_contains "${review_script}" "current sprint shared handoff evidence manifest" "review shared handoff evidence manifest"
 assert_contains "${review_script}" "first-class review target; full file included" "review full small first-class evidence"
+assert_contains "${review_script}" "SFS_REVIEW_DIR_EXPANSION_MAX" "review bounded directory expansion"
+assert_contains "${review_script}" "INDEXED_REVIEW_EVIDENCE_PATHS_CACHE" "review cached indexed evidence paths"
 assert_contains "${review_script}" 'update_frontmatter "${REVIEW_PATH}" "goal"' "review goal refresh"
 assert_contains "${review_script}" 'update_frontmatter "${REVIEW_PATH}" "workspace"' "review workspace refresh"
 assert_contains "${review_script}" 'claude -p "$(cat)"' "review claude prompt-argument bridge"

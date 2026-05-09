@@ -7,6 +7,16 @@
 
 ---
 
+## 0.6.78
+
+이번 버전은 0.6.77의 commit-aware review evidence 를 실제 큰 프로젝트에서도 빠르게 끝나도록 보강합니다.
+
+- `backend/src` 같은 넓은 디렉터리 토큰을 review evidence 로 확장할 때 기본 80개까지만 bounded 확장합니다.
+- indexed evidence 경로를 prompt 생성 중 반복 계산하지 않고 cache 합니다.
+- ADR/report 같은 작은 durable 문서는 전체 본문을 싣고, source/config 파일은 bounded excerpt 로 유지합니다.
+- `study-note` 실제 sprint 에서 `sfs review --gate 4 --prompt-only`가 완료되고 evidence prompt 가 끝까지
+  생성되는 것을 확인했습니다.
+
 ## 0.6.77
 
 이번 버전은 commit 후 clean tree 상태에서 `sfs review` evidence 가 비어 보이던 문제를 고칩니다.

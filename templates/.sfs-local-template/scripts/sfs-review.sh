@@ -186,6 +186,7 @@ REVIEW_TARGET_EXCERPT_RADIUS="${SFS_REVIEW_TARGET_EXCERPT_RADIUS:-32}"
 REVIEW_INDEXED_TARGET_MAX="${SFS_REVIEW_INDEXED_TARGET_MAX:-80}"
 REVIEW_SMALL_FILE_EXCERPT_LINES="${SFS_REVIEW_SMALL_FILE_EXCERPT_LINES:-450}"
 REVIEW_FIRST_CLASS_EXCERPT_MAX="${SFS_REVIEW_FIRST_CLASS_EXCERPT_MAX:-40}"
+REVIEW_DIR_EXPANSION_MAX="${SFS_REVIEW_DIR_EXPANSION_MAX:-80}"
 REVIEW_EXECUTOR_TIMEOUT="${SFS_REVIEW_EXECUTOR_TIMEOUT_SEC:-${SFS_REVIEW_COMMAND_TIMEOUT_SEC:-1500}}"
 REVIEW_BRIDGE_PROBE="${SFS_REVIEW_BRIDGE_PROBE:-auto}"
 REVIEW_BRIDGE_PROBE_TIMEOUT="${SFS_REVIEW_BRIDGE_PROBE_TIMEOUT_SEC:-45}"
@@ -390,6 +391,9 @@ esac
 case "${REVIEW_FIRST_CLASS_EXCERPT_MAX}" in
   ''|*[!0-9]*) REVIEW_FIRST_CLASS_EXCERPT_MAX=40 ;;
 esac
+case "${REVIEW_DIR_EXPANSION_MAX}" in
+  ''|*[!0-9]*) REVIEW_DIR_EXPANSION_MAX=80 ;;
+esac
 if (( REVIEW_FILE_EXCERPT_MAX > 40 )); then
   REVIEW_FILE_EXCERPT_MAX=40
 fi
@@ -410,6 +414,9 @@ if (( REVIEW_SMALL_FILE_EXCERPT_LINES > 800 )); then
 fi
 if (( REVIEW_FIRST_CLASS_EXCERPT_MAX > 80 )); then
   REVIEW_FIRST_CLASS_EXCERPT_MAX=80
+fi
+if (( REVIEW_DIR_EXPANSION_MAX > 200 )); then
+  REVIEW_DIR_EXPANSION_MAX=200
 fi
 
 # ─────────────────────────────────────────────────────────────────────
@@ -1148,7 +1155,7 @@ current_sprint_handoff_evidence_paths() {
   done
 }
 
-indexed_review_evidence_paths() {
+indexed_review_evidence_paths_uncached() {
   {
     extract_path_tokens_from_file "${IMPLEMENT_PATH}"
     extract_path_tokens_from_file "${PLAN_PATH}"
@@ -1165,6 +1172,18 @@ indexed_review_evidence_paths() {
       fi
     done
   done | awk '!seen[$0]++'
+}
+
+INDEXED_REVIEW_EVIDENCE_PATHS_CACHE_READY=false
+INDEXED_REVIEW_EVIDENCE_PATHS_CACHE=""
+indexed_review_evidence_paths() {
+  if [[ "${INDEXED_REVIEW_EVIDENCE_PATHS_CACHE_READY}" != "true" ]]; then
+    INDEXED_REVIEW_EVIDENCE_PATHS_CACHE="$(indexed_review_evidence_paths_uncached || true)"
+    INDEXED_REVIEW_EVIDENCE_PATHS_CACHE_READY=true
+  fi
+  if [[ -n "${INDEXED_REVIEW_EVIDENCE_PATHS_CACHE}" ]]; then
+    printf '%s\n' "${INDEXED_REVIEW_EVIDENCE_PATHS_CACHE}"
+  fi
 }
 
 review_evidence_path_rank() {
@@ -1317,7 +1336,7 @@ expand_review_candidate_path() {
   esac
 
   if [[ -n "${prefix:-}" && -d "$prefix" ]]; then
-    find "$prefix" -type f 2>/dev/null | sort | sed 's#^\./##'
+    find "$prefix" -type f 2>/dev/null | sed 's#^\./##' | sed -n "1,${REVIEW_DIR_EXPANSION_MAX}p"
   else
     printf '%s\n' "$path"
   fi
@@ -1352,17 +1371,7 @@ extract_path_tokens_from_file() {
 }
 
 extract_indexed_evidence_paths() {
-  {
-    extract_path_tokens_from_file "${IMPLEMENT_PATH}"
-    extract_path_tokens_from_file "${PLAN_PATH}"
-    extract_path_tokens_from_file "${LOG_PATH}"
-  } | while IFS= read -r path; do
-    path="$(normalize_review_candidate_path "$path" || true)"
-    [[ -n "$path" ]] || continue
-    expand_review_candidate_path "$path" | while IFS= read -r expanded; do
-      normalize_review_candidate_path "$expanded" || true
-    done
-  done | awk '!seen[$0]++'
+  indexed_review_evidence_paths
 }
 
 is_review_path_token() {
@@ -1719,7 +1728,7 @@ render_review_file_excerpt() {
     return 0
   fi
   line_count="$(count_file_lines "$file")"
-  if { is_indexed_review_evidence_path "$file" || is_full_small_review_evidence_path "$file"; } && (( line_count > 0 && line_count <= REVIEW_SMALL_FILE_EXCERPT_LINES )); then
+  if is_full_small_review_evidence_path "$file" && (( line_count > 0 && line_count <= REVIEW_SMALL_FILE_EXCERPT_LINES )); then
     limit="$line_count"
     printf '(first-class review target; full file included: %s lines)\n\n' "$line_count"
   fi
