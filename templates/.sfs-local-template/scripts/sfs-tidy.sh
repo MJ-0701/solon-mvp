@@ -200,6 +200,45 @@ tidy_prune_events() {
   printf '%s\n' "${pruned}"
 }
 
+tidy_compact_events() {
+  local line existing etype sid gate division decision wu tmp next before after compacted
+  [[ -f "${SFS_EVENTS_FILE}" ]] || { printf '0\n'; return 0; }
+  before="$(wc -l < "${SFS_EVENTS_FILE}" 2>/dev/null | tr -d '[:space:]' || printf '0')"
+  tmp="$(mktemp "${SFS_EVENTS_FILE}.compact.XXXXXX")" || return "${SFS_EXIT_PERM}"
+  : > "${tmp}" || return "${SFS_EXIT_PERM}"
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    [[ -n "${line}" ]] || continue
+    etype="$(sfs_event_json_string_field "type" "${line}")"
+    sid="$(sfs_event_json_string_field "sprint_id" "${line}")"
+    gate="$(sfs_event_json_string_field "gate_id" "${line}")"
+    division="$(sfs_event_json_string_field "division" "${line}")"
+    decision="$(sfs_event_json_string_field "decision_id" "${line}")"
+    wu="$(sfs_event_json_string_field "wu_id" "${line}")"
+    if [[ -n "${etype}" ]]; then
+      next="$(mktemp "${SFS_EVENTS_FILE}.compact-next.XXXXXX")" || return "${SFS_EXIT_PERM}"
+      : > "${next}" || return "${SFS_EXIT_PERM}"
+      while IFS= read -r existing || [[ -n "${existing}" ]]; do
+        [[ -n "${existing}" ]] || continue
+        if sfs_event_same_compaction_key "${existing}" "${etype}" "${sid}" "${gate}" "${division}" "${decision}" "${wu}"; then
+          continue
+        fi
+        printf '%s\n' "${existing}" >> "${next}" || return "${SFS_EXIT_PERM}"
+      done < "${tmp}"
+      mv -f "${next}" "${tmp}" || return "${SFS_EXIT_PERM}"
+    fi
+    printf '%s\n' "${line}" >> "${tmp}" || return "${SFS_EXIT_PERM}"
+  done < "${SFS_EVENTS_FILE}"
+  after="$(wc -l < "${tmp}" 2>/dev/null | tr -d '[:space:]' || printf '0')"
+  if [[ "${after:-0}" -eq 0 ]]; then
+    rm -f "${tmp}" "${SFS_EVENTS_FILE}" || return "${SFS_EXIT_PERM}"
+  else
+    mv -f "${tmp}" "${SFS_EVENTS_FILE}" || return "${SFS_EXIT_PERM}"
+  fi
+  compacted=$((before - after))
+  [[ "${compacted}" -lt 0 ]] && compacted=0
+  printf '%s\n' "${compacted}"
+}
+
 tidy_count_local_residue() {
   local count=0 path dir
   if [[ -d "${SFS_LOCAL_DIR}/cache" ]]; then
@@ -579,11 +618,12 @@ done <<< "${TARGETS}"
 
 if [[ "${APPLY}" -eq 1 ]]; then
   EVENT_PRUNED="$(tidy_prune_events "${TARGETS}" "${CURRENT_SPRINT}" "${ALL}")"
+  EVENT_COMPACTED="$(tidy_compact_events)"
   RESIDUE_REMOVED="$(tidy_cleanup_local_residue)"
   ARCHIVES_COLLAPSED="$(tidy_collapse_non_adopt_archives "${NOW}")"
   echo "retention:"
   echo "  rule: kept files must have a one-line reason"
-  echo "  events: ${EVENT_PRUNED} historical line(s) pruned"
+  echo "  events: ${EVENT_PRUNED} historical line(s) pruned; ${EVENT_COMPACTED} duplicate active line(s) compacted"
   echo "  residue: ${RESIDUE_REMOVED} placeholder/broken/empty item(s) removed"
   echo "  archives: ${ARCHIVES_COLLAPSED} non-adopt bucket(s) collapsed"
 fi

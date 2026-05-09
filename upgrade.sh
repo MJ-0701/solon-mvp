@@ -1041,17 +1041,93 @@ json_escape_upgrade() {
   printf '%s' "${1:-}" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
 
+upgrade_event_json_string_field() {
+  local field="${1:?field required}" line="${2:-}"
+  printf '%s\n' "$line" | sed -nE 's/.*"'"$field"'"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/p'
+}
+
+upgrade_event_same_compaction_key() {
+  local existing="${1:-}" event_type="${2:?event type required}" sid="${3:-}" gate="${4:-}" division="${5:-}" decision="${6:-}" wu="${7:-}"
+  case "$existing" in
+    *"\"type\":\"$event_type\""*) ;;
+    *) return 1 ;;
+  esac
+  if [ -n "$sid" ]; then
+    case "$existing" in *"\"sprint_id\":\"$sid\""*) ;; *) return 1 ;; esac
+  fi
+  if [ -n "$gate" ]; then
+    case "$existing" in *"\"gate_id\":\"$gate\""*) ;; *) return 1 ;; esac
+  fi
+  if [ -n "$division" ]; then
+    case "$existing" in *"\"division\":\"$division\""*) ;; *) return 1 ;; esac
+  fi
+  if [ -n "$decision" ]; then
+    case "$existing" in *"\"decision_id\":\"$decision\""*) ;; *) return 1 ;; esac
+  fi
+  if [ -n "$wu" ]; then
+    case "$existing" in *"\"wu_id\":\"$wu\""*) ;; *) return 1 ;; esac
+  fi
+  return 0
+}
+
+write_compact_upgrade_event_line() {
+  local events_file="${1:?events file required}" line="${2:?line required}"
+  local event_type sid gate division decision wu tmp existing
+  event_type="$(upgrade_event_json_string_field "type" "$line")"
+  sid="$(upgrade_event_json_string_field "sprint_id" "$line")"
+  gate="$(upgrade_event_json_string_field "gate_id" "$line")"
+  division="$(upgrade_event_json_string_field "division" "$line")"
+  decision="$(upgrade_event_json_string_field "decision_id" "$line")"
+  wu="$(upgrade_event_json_string_field "wu_id" "$line")"
+  tmp="${events_file}.tmp.$$"
+  : > "$tmp" || return 5
+  if [ -f "$events_file" ]; then
+    while IFS= read -r existing || [ -n "$existing" ]; do
+      [ -n "$existing" ] || continue
+      if [ -n "$event_type" ] && upgrade_event_same_compaction_key "$existing" "$event_type" "$sid" "$gate" "$division" "$decision" "$wu"; then
+        continue
+      fi
+      printf '%s\n' "$existing" >> "$tmp" || return 5
+    done < "$events_file"
+  fi
+  printf '%s\n' "$line" >> "$tmp" || return 5
+  mv -f "$tmp" "$events_file" || return 5
+}
+
+compact_upgrade_event_ledger() {
+  local events_file="$TARGET/.sfs-local/events.jsonl" tmp line before after compacted
+  [ -f "$events_file" ] || return 0
+  before="$(wc -l < "$events_file" 2>/dev/null | tr -d '[:space:]' || printf '0')"
+  tmp="${events_file}.compact.$$"
+  : > "$tmp" || return 5
+  while IFS= read -r line || [ -n "$line" ]; do
+    [ -n "$line" ] || continue
+    write_compact_upgrade_event_line "$tmp" "$line" || return 5
+  done < "$events_file"
+  after="$(wc -l < "$tmp" 2>/dev/null | tr -d '[:space:]' || printf '0')"
+  if [ "${after:-0}" -eq 0 ]; then
+    rm -f "$tmp" "$events_file" || return 5
+  else
+    mv -f "$tmp" "$events_file" || return 5
+  fi
+  compacted=$((before - after))
+  if [ "$compacted" -gt 0 ]; then
+    ok "active event ledger 압축: $compacted duplicate line(s) 제거"
+  fi
+  return 0
+}
+
 append_upgrade_event() {
   local event_type="${1:?event type required}" fields="${2:-}"
   local events_file="$TARGET/.sfs-local/events.jsonl"
-  local now
+  local now line
   [ -f "$events_file" ] || return 0
   now="$(date +%Y-%m-%dT%H:%M:%S%z 2>/dev/null | sed -E 's/([0-9]{2})$/:\1/')"
   if [ -n "$fields" ]; then
     fields=",${fields#,}"
   fi
-  printf '{"ts":"%s","type":"%s"%s}\n' \
-    "$now" "$(json_escape_upgrade "$event_type")" "$fields" >> "$events_file" 2>/dev/null || return 5
+  line="$(printf '{"ts":"%s","type":"%s"%s}' "$now" "$(json_escape_upgrade "$event_type")" "$fields")"
+  write_compact_upgrade_event_line "$events_file" "$line" || return 5
   return 0
 }
 
@@ -1429,6 +1505,7 @@ project_surface_archive_migrations() {
   archive_stale_auth_env_example || return 5
   cleanup_transient_cache_and_placeholder_auth || return 5
   cleanup_orphan_event_ledger || return 5
+  compact_upgrade_event_ledger || return 5
   cleanup_empty_workbench_surface_dirs || return 5
   thin_project_runtime_asset_migration || return 5
   thin_project_agent_adapter_migration || return 5

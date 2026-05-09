@@ -7,6 +7,18 @@
 
 ---
 
+## 0.6.68
+
+이번 버전은 `events.jsonl` 기준을 다시 정확히 고정합니다.
+
+- `events.jsonl` 은 sprint 진행 중에만 남길 수 있습니다. 한 줄 이유는
+  “현재 sprint 의 status/gate/review 라우팅에 필요한 active ledger” 입니다.
+- 같은 명령을 여러 번 열어도 내용이 stack 처럼 계속 쌓이지 않습니다. 같은 sprint/gate/type 의
+  오래된 줄은 새 줄로 교체됩니다.
+- sprint 가 닫혔거나 active sprint 가 없으면 `docs/solon/.../report.md`, private archive,
+  git history 가 durable record 이므로 `events.jsonl` 은 `sfs tidy --all --apply` 때 제거됩니다.
+- `sfs upgrade` 도 기존 프로젝트의 오래 쌓인 event ledger 를 compact 해서 최신 정책으로 수렴시킵니다.
+
 ## 0.6.67
 
 이번 버전은 0.6.65/0.6.66의 collapsed archive 정책에서 복구 evidence 를 더 안전하게 보존합니다.

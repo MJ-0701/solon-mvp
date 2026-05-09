@@ -1,3 +1,26 @@
+## [0.6.68] - 2026-05-09
+
+> **Compact active event ledger.** `events.jsonl` is no longer treated as
+> append-only history. It may remain only while it has a one-line active-sprint
+> reason: current sprint status/gate/review routing.
+
+### Changed
+
+- `append_event` now rewrites `events.jsonl` as a compact active ledger:
+  repeated command opens replace the previous line for the same natural key
+  such as sprint, gate, division, decision, or WU.
+- `sfs tidy --all --apply` compacts duplicate active event lines, prunes closed
+  sprint event lines after report/archive evidence exists, and removes
+  `events.jsonl` when no active sprint needs it.
+- `sfs upgrade` compacts legacy event ledgers during surface migration so
+  already-running projects converge when the user runs normal SFS commands.
+
+### Tests
+
+- Added `test-sfs-events-active-ledger-compaction.sh` covering repeated
+  brainstorm/plan opens and removal after no active sprint remains.
+- Full source test suite: `tests/run-all.sh` PASS 55/0.
+
 ## [0.6.67] - 2026-05-09
 
 > **No-overwrite collapsed archive evidence.** Repeated surface-cleanup archive

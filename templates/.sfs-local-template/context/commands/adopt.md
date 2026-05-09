@@ -29,9 +29,11 @@ Rules:
   `archives/adopt/` when evidence exists. Do not leave `events.jsonl`,
   `current-sprint`, `tmp`, `cache`, empty `sprints`, `auth.env.example`, or
   template/auth placeholder residue visible after adopt.
-- If a later upgrade or status command leaves `cache/*notice.env`,
-  `events.jsonl`, or top-level `archives/runtime-*`/`archives/sprints` buckets,
-  treat that as surface residue and run `sfs tidy --all --apply` to collapse it
-  back under `archives/adopt/surface-cleanup/...` or remove it.
+- If a later upgrade or status command leaves `cache/*notice.env` or top-level
+  `archives/runtime-*`/`archives/sprints` buckets, treat that as surface
+  residue and run `sfs tidy --all --apply` to collapse it back under
+  `archives/adopt/surface-cleanup/...` or remove it. `events.jsonl` is different:
+  it may exist only for an active sprint's compact status/gate/review state; no
+  active sprint means it is residue.
 - Do not expand old sprint/archive material into the active working context unless the user asks for archaeology or recovery.
 - After apply, the next useful move is usually `sfs start "<first real cleanup slice>"`, then Gate 2 (Brainstorm) if scope is still fuzzy.

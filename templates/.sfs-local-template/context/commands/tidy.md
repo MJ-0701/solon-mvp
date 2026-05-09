@@ -22,9 +22,12 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
   replacement/handoff reason, cold archive path, or explicit user decision.
   Advisory cleanup may wait; compulsory cleanup needs risk such as stale state,
   data loss, security, or automation breakage.
-- `events.jsonl` is active state, not durable history. Closed-sprint event lines
-  are pruned after `report.md`/archive evidence exists; an empty event ledger is
-  deleted instead of kept as residue.
+- `events.jsonl` is allowed only while it has a one-line active-sprint reason:
+  current sprint status/gate/review routing. It must be compact, not append-only
+  history; repeated command opens replace older lines for the same sprint/gate.
+  After the sprint closes, `report.md`/archive evidence and git history are the
+  durable record, so closed-sprint event lines are pruned and an empty ledger is
+  deleted.
 - Post-adopt surface cleanup is valid even when no sprint folders remain:
   `sfs tidy --all --apply` removes project-local cache notice files, placeholder
   `auth.env`, orphan `events.jsonl`, empty workbench dirs, and collapses
