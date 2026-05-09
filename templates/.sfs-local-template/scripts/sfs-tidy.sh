@@ -374,6 +374,93 @@ tidy_collapse_non_adopt_archives() {
   printf '%s\n' "${count}"
 }
 
+tidy_surface_cleanup_date_key() {
+  local name="${1:-}"
+  if [[ "${name}" =~ ^([0-9]{4})-([0-9]{2})-([0-9]{2}) ]]; then
+    printf '%s%s%s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}"
+    return 0
+  fi
+  if [[ "${name}" =~ ^([0-9]{8}) ]]; then
+    printf '%s\n' "${BASH_REMATCH[1]}"
+    return 0
+  fi
+  return 1
+}
+
+tidy_consolidate_surface_cleanup_archives() {
+  local root="${SFS_ARCHIVES_DIR}/adopt/surface-cleanup"
+  local dates date dir name key staging bundle_dir bundle_file manifest moved total=0
+  [[ -d "${root}" ]] || { printf '0\n'; return "${SFS_EXIT_OK}"; }
+
+  dates="$(
+    find "${root}" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null \
+      | while IFS= read -r dir; do
+          name="$(basename "${dir}")"
+          [[ "${name}" =~ ^[0-9]{8}$ ]] && continue
+          key="$(tidy_surface_cleanup_date_key "${name}" || true)"
+          [[ -n "${key}" ]] && printf '%s\n' "${key}"
+        done \
+      | sort -u
+  )"
+  [[ -n "${dates}" ]] || { printf '0\n'; return "${SFS_EXIT_OK}"; }
+
+  while IFS= read -r date; do
+    [[ -n "${date}" ]] || continue
+    staging="$(mktemp -d "${root}/.consolidate-${date}.XXXXXX")" || return "${SFS_EXIT_PERM}"
+    bundle_dir="${root}/${date}"
+    bundle_file="${bundle_dir}/surface-cleanup.tar.gz"
+    manifest="${bundle_dir}/manifest.txt"
+    moved=0
+
+    if [[ -f "${bundle_file}" ]]; then
+      tar -xzf "${bundle_file}" -C "${staging}" || {
+        rm -rf "${staging}"
+        return "${SFS_EXIT_PERM}"
+      }
+    fi
+
+    for dir in "${root}"/*; do
+      [[ -d "${dir}" ]] || continue
+      name="$(basename "${dir}")"
+      [[ "${name}" == "${date}" ]] && continue
+      key="$(tidy_surface_cleanup_date_key "${name}" || true)"
+      [[ "${key}" == "${date}" ]] || continue
+      mv "${dir}" "${staging}/${name}" || {
+        rm -rf "${staging}"
+        return "${SFS_EXIT_PERM}"
+      }
+      moved=$((moved + 1))
+    done
+
+    if [[ "${moved}" -gt 0 ]]; then
+      mkdir -p "${bundle_dir}" || {
+        rm -rf "${staging}"
+        return "${SFS_EXIT_PERM}"
+      }
+      tar -czf "${bundle_file}" -C "${staging}" . || {
+        rm -rf "${staging}"
+        return "${SFS_EXIT_PERM}"
+      }
+      {
+        echo "SFS daily surface cleanup bundle"
+        echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        echo "date: ${date}"
+        echo "reason: small same-day surface-cleanup evidence is consolidated to avoid visible archive clutter"
+        echo "archive: ${bundle_file}"
+        echo "new_run_dirs_consolidated: ${moved}"
+        echo "contents: run directories inside surface-cleanup.tar.gz"
+      } > "${manifest}" || {
+        rm -rf "${staging}"
+        return "${SFS_EXIT_PERM}"
+      }
+      total=$((total + moved))
+    fi
+    rm -rf "${staging}" || return "${SFS_EXIT_PERM}"
+  done <<< "${dates}"
+
+  printf '%s\n' "${total}"
+}
+
 tidy_cleanup_local_residue() {
   local count=0 path dir current
   if [[ -d "${SFS_LOCAL_DIR}/cache" ]]; then
@@ -633,11 +720,13 @@ if [[ "${APPLY}" -eq 1 ]]; then
   EVENT_COMPACTED="$(tidy_compact_events)"
   RESIDUE_REMOVED="$(tidy_cleanup_local_residue)"
   ARCHIVES_COLLAPSED="$(tidy_collapse_non_adopt_archives "${NOW}")"
+  SURFACE_CONSOLIDATED="$(tidy_consolidate_surface_cleanup_archives)"
   echo "retention:"
   echo "  rule: kept files must have a one-line reason"
   echo "  events: ${EVENT_PRUNED} historical line(s) pruned; ${EVENT_COMPACTED} duplicate active line(s) compacted"
   echo "  residue: ${RESIDUE_REMOVED} placeholder/broken/empty item(s) removed"
   echo "  archives: ${ARCHIVES_COLLAPSED} non-adopt bucket(s) collapsed"
+  echo "  surface_cleanup: ${SURFACE_CONSOLIDATED} run dir(s) consolidated by date"
 fi
 
 exit "${SFS_EXIT_OK}"

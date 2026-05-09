@@ -51,6 +51,7 @@ assert_contains "${dry_run}" "archives: 3 non-adopt archive bucket(s) would coll
 apply_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" tidy --all --apply)"
 assert_contains "${apply_out}" "events: 1 historical line(s) pruned" "apply orphan events"
 assert_contains "${apply_out}" "archives: 3 non-adopt bucket(s) collapsed" "apply archive collapse"
+assert_contains "${apply_out}" "surface_cleanup: 1 run dir(s) consolidated by date" "apply daily surface cleanup consolidation"
 
 [[ ! -e .sfs-local/events.jsonl ]] || fail "orphan events.jsonl should be removed"
 [[ ! -d .sfs-local/cache ]] || fail "cache notice files should be removed"
@@ -59,8 +60,15 @@ assert_contains "${apply_out}" "archives: 3 non-adopt bucket(s) collapsed" "appl
 [[ ! -d .sfs-local/archives/runtime-upgrades ]] || fail "runtime-upgrades should be collapsed"
 [[ ! -d .sfs-local/archives/sprints ]] || fail "sprints archive bucket should be collapsed"
 
-archive_file="$(find .sfs-local/archives/adopt/surface-cleanup -name preexisting-archives.tar.gz -type f | head -1)"
-[[ -n "${archive_file}" ]] || fail "missing collapsed preexisting archive bundle"
+top_count="$(find .sfs-local/archives/adopt/surface-cleanup -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d '[:space:]')"
+[[ "${top_count}" = "1" ]] || fail "surface-cleanup should expose one daily directory, got ${top_count}"
+surface_bundle="$(find .sfs-local/archives/adopt/surface-cleanup -mindepth 2 -maxdepth 2 -name surface-cleanup.tar.gz -type f | head -1)"
+[[ -n "${surface_bundle}" ]] || fail "missing daily surface-cleanup bundle"
+extract_dir="${TMP_DIR}/surface-extract"
+mkdir -p "${extract_dir}"
+tar -xzf "${surface_bundle}" -C "${extract_dir}"
+archive_file="$(find "${extract_dir}" -name preexisting-archives.tar.gz -type f | head -1)"
+[[ -n "${archive_file}" ]] || fail "missing nested preexisting archive bundle"
 tar -tzf "${archive_file}" | grep -Fq 'runtime-migrations/legacy/evidence.txt' \
   || fail "collapsed archive missing runtime migration evidence"
 tar -tzf "${archive_file}" | grep -Fq 'runtime-upgrades/old/evidence.txt' \

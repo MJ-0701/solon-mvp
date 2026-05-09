@@ -1037,6 +1037,98 @@ collapse_non_adopt_archive_dirs() {
   return 0
 }
 
+surface_cleanup_date_key_upgrade() {
+  local name="${1:-}"
+  case "$name" in
+    [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*)
+      printf '%s\n' "$(printf '%s' "$name" | sed -E 's/^([0-9]{4})-([0-9]{2})-([0-9]{2}).*/\1\2\3/')"
+      return 0
+      ;;
+    [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]*)
+      printf '%s\n' "$(printf '%s' "$name" | sed -E 's/^([0-9]{8}).*/\1/')"
+      return 0
+      ;;
+  esac
+  return 1
+}
+
+consolidate_surface_cleanup_archives() {
+  local root="$TARGET/.sfs-local/archives/adopt/surface-cleanup"
+  local dates date dir name key staging bundle_dir bundle_file manifest moved total=0
+  [ -d "$root" ] || return 0
+
+  dates="$(
+    find "$root" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null \
+      | while IFS= read -r dir; do
+          name="$(basename "$dir")"
+          printf '%s\n' "$name" | grep -Eq '^[0-9]{8}$' && continue
+          key="$(surface_cleanup_date_key_upgrade "$name" || true)"
+          [ -n "$key" ] && printf '%s\n' "$key"
+        done \
+      | sort -u
+  )"
+  [ -n "$dates" ] || return 0
+
+  while IFS= read -r date; do
+    [ -n "$date" ] || continue
+    staging="$(mktemp -d "$root/.consolidate-${date}.XXXXXX")" || return 5
+    bundle_dir="$root/$date"
+    bundle_file="$bundle_dir/surface-cleanup.tar.gz"
+    manifest="$bundle_dir/manifest.txt"
+    moved=0
+
+    if [ -f "$bundle_file" ]; then
+      tar -xzf "$bundle_file" -C "$staging" || {
+        rm -rf "$staging"
+        return 5
+      }
+    fi
+
+    for dir in "$root"/*; do
+      [ -d "$dir" ] || continue
+      name="$(basename "$dir")"
+      [ "$name" = "$date" ] && continue
+      key="$(surface_cleanup_date_key_upgrade "$name" || true)"
+      [ "$key" = "$date" ] || continue
+      mv "$dir" "$staging/$name" || {
+        rm -rf "$staging"
+        return 5
+      }
+      moved=$((moved + 1))
+    done
+
+    if [ "$moved" -gt 0 ]; then
+      mkdir -p "$bundle_dir" || {
+        rm -rf "$staging"
+        return 5
+      }
+      tar -czf "$bundle_file" -C "$staging" . || {
+        rm -rf "$staging"
+        return 5
+      }
+      {
+        echo "SFS daily surface cleanup bundle"
+        echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        echo "date: $date"
+        echo "reason: small same-day surface-cleanup evidence is consolidated to avoid visible archive clutter"
+        echo "archive: ${bundle_file#$TARGET/}"
+        echo "new_run_dirs_consolidated: $moved"
+        echo "contents: run directories inside surface-cleanup.tar.gz"
+      } > "$manifest" || {
+        rm -rf "$staging"
+        return 5
+      }
+      total=$((total + moved))
+    fi
+    rm -rf "$staging" || return 5
+  done <<< "$dates"
+
+  if [ "$total" -gt 0 ]; then
+    ok "surface-cleanup daily bundle 정리: $total run dir(s) → .sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz"
+  fi
+  return 0
+}
+
 json_escape_upgrade() {
   printf '%s' "${1:-}" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
@@ -1534,6 +1626,7 @@ project_surface_archive_migrations() {
   thin_project_runtime_asset_migration || return 5
   thin_project_agent_adapter_migration || return 5
   collapse_non_adopt_archive_dirs || return 5
+  consolidate_surface_cleanup_archives || return 5
   return 0
 }
 
@@ -2127,6 +2220,7 @@ trace_upgrade "finalize_runtime_upgrade_backup after"
 trace_upgrade "post-update archive surface collapse before"
 cleanup_transient_cache_and_placeholder_auth || die "transient cache cleanup failed"
 collapse_non_adopt_archive_dirs || die "archive surface collapse failed"
+consolidate_surface_cleanup_archives || die "surface-cleanup consolidation failed"
 cleanup_empty_workbench_surface_dirs || die "empty workbench surface cleanup failed"
 trace_upgrade "post-update archive surface collapse after"
 

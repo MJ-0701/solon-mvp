@@ -1,3 +1,27 @@
+## [0.6.72] - 2026-05-09
+
+> **Daily surface-cleanup bundle.** Same-day post-adopt/surface cleanup archive
+> evidence no longer leaves many timestamp directories visible under
+> `.sfs-local/archives/adopt/surface-cleanup/`.
+
+### Changed
+
+- `sfs tidy --all --apply` and `sfs upgrade --yes` now consolidate direct
+  `surface-cleanup` run directories into
+  `.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz`
+  with a small `manifest.txt`.
+- Recovery evidence is preserved inside the daily bundle, but the visible
+  archive surface is date-bucketed so repeated same-day cleanup runs do not
+  make the project tree noisy.
+- Existing same-day run directories are compacted on the next normal
+  `sfs tidy --all --apply` or `sfs upgrade --yes`; no manual deletion is
+  required.
+
+### Tests
+
+- Updated tidy/upgrade surface-cleanup tests to require a single visible daily
+  directory and verify nested cold evidence is still recoverable.
+
 ## [0.6.71] - 2026-05-09
 
 > **Codex review routing is prompt/host-runtime based again.** 0.6.69/0.6.70

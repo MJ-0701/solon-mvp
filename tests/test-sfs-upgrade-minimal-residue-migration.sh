@@ -94,9 +94,19 @@ done
 [[ ! -d .sfs-local/archives/sprints ]] || fail "sprints archive bucket should be collapsed under archives/adopt"
 
 archive_index="$(mktemp "${TMP_DIR}/archives.XXXXXX")"
+surface_extract="${TMP_DIR}/surface-extract"
+mkdir -p "${surface_extract}"
+while IFS= read -r bundle; do
+  tar -xzf "${bundle}" -C "${surface_extract}"
+done < <(find .sfs-local/archives/adopt/surface-cleanup -name surface-cleanup.tar.gz -type f | sort)
 while IFS= read -r archive; do
   tar -tzf "${archive}" >> "${archive_index}"
-done < <(find .sfs-local/archives/adopt -name preexisting-archives.tar.gz -type f | sort)
+done < <(
+  {
+    find .sfs-local/archives/adopt -path '*/surface-cleanup/*' -prune -o -name preexisting-archives.tar.gz -type f -print
+    find "${surface_extract}" -name preexisting-archives.tar.gz -type f -print
+  } | sort
+)
 grep -Fq '2026-W19-sprint-1-step-docs.tar.gz' "${archive_index}" \
   || fail "missing prefilled step-doc cold archive inside collapsed archive bucket"
 grep -Fq 'auth-env-example.tar.gz' "${archive_index}" \

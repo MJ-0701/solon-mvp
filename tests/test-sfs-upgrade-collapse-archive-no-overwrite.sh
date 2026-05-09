@@ -36,9 +36,16 @@ bash "${DIST_DIR}/upgrade.sh" --yes >/tmp/sfs-upgrade-collapse.out
 
 archive_index="${TMP_DIR}/collapsed-index.txt"
 : > "${archive_index}"
+top_count="$(find .sfs-local/archives/adopt/surface-cleanup -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d '[:space:]')"
+[[ "${top_count}" = "1" ]] || fail "surface-cleanup should expose one daily directory, got ${top_count}"
+surface_extract="${TMP_DIR}/surface-extract"
+mkdir -p "${surface_extract}"
+surface_bundle="$(find .sfs-local/archives/adopt/surface-cleanup -mindepth 2 -maxdepth 2 -name surface-cleanup.tar.gz -type f | head -1)"
+[[ -n "${surface_bundle}" ]] || fail "missing daily surface-cleanup bundle"
+tar -xzf "${surface_bundle}" -C "${surface_extract}"
 while IFS= read -r archive; do
   tar -tzf "${archive}" >> "${archive_index}"
-done < <(find .sfs-local/archives/adopt/surface-cleanup -name preexisting-archives.tar.gz -type f | sort)
+done < <(find "${surface_extract}" -name preexisting-archives.tar.gz -type f | sort)
 
 grep -Fq 'project-runtime-assets.tar.gz' "${archive_index}" \
   || fail "collapsed archives lost project-runtime-assets.tar.gz"

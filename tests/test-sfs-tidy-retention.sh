@@ -55,6 +55,7 @@ apply_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BI
 assert_contains "${apply_out}" "retention:" "apply retention summary"
 assert_contains "${apply_out}" "events: 3 historical line(s) pruned" "apply event pruning"
 assert_contains "${apply_out}" "residue:" "apply residue summary"
+assert_contains "${apply_out}" "surface_cleanup: 1 run dir(s) consolidated by date" "apply surface cleanup consolidation"
 
 [[ -f "${shared_report}" ]] || fail "shared report.md should remain as durable sprint outcome"
 [[ ! -e "${sprint_dir}/report.md" ]] || fail "private sprint report.md should not remain"
@@ -67,7 +68,12 @@ assert_contains "${apply_out}" "residue:" "apply residue summary"
 [[ ! -d .sfs-local/decisions ]] || fail "empty decisions placeholder dir should be removed"
 
 [[ ! -d .sfs-local/archives/sprints ]] || fail "sprint archive bucket should be collapsed under archives/adopt"
-archive_file="$(find ".sfs-local/archives/adopt/surface-cleanup" -name preexisting-archives.tar.gz -type f 2>/dev/null | head -1)"
+surface_bundle="$(find ".sfs-local/archives/adopt/surface-cleanup" -mindepth 2 -maxdepth 2 -name surface-cleanup.tar.gz -type f 2>/dev/null | head -1)"
+[[ -n "${surface_bundle}" ]] || fail "missing daily surface cleanup bundle"
+extract_dir="${TMP_DIR}/surface-extract"
+mkdir -p "${extract_dir}"
+tar -xzf "${surface_bundle}" -C "${extract_dir}"
+archive_file="$(find "${extract_dir}" -name preexisting-archives.tar.gz -type f 2>/dev/null | head -1)"
 [[ -n "${archive_file}" ]] || fail "missing collapsed sprint cold archive"
 tar -tzf "${archive_file}" | grep -Fq "sprints/${sprint_id}/" \
   || fail "collapsed archive missing sprint archive bucket"

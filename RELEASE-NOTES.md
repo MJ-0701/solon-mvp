@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.72
+
+이번 버전은 `.sfs-local/archives/adopt/surface-cleanup/` 을 더 보기 좋게 정리합니다.
+
+- 같은 날 생긴 surface-cleanup run directory 들을
+  `surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz` 하나로 묶습니다.
+- 복구 evidence 는 tar 안에 그대로 남기고, 바깥에서 보이는 폴더는 날짜 단위로 줄입니다.
+- 기존 프로젝트도 수동 삭제가 아니라 `sfs upgrade --yes` 또는 `sfs tidy --all --apply` 만으로 수렴합니다.
+
 ## 0.6.71
 
 이번 버전은 Codex review 모델 라우팅을 원래 방식으로 되돌립니다.
