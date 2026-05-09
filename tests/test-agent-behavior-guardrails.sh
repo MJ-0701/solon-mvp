@@ -197,6 +197,8 @@ assert_contains "${model_profiles}" 'model: "gemini-3.1-pro-preview"' "model pro
 assert_contains "${model_profiles}" 'model: "gemini-3-flash-preview"' "model profiles gemini 3 flash fallback"
 assert_not_contains "${model_profiles}" "gemini-2.5" "model profiles no gemini 2.5 fallback"
 assert_contains "${model_profiles}" "not gpt-5.5 and not gpt-5.3-codex-spark" "model profiles codex worker rule"
+assert_contains "${review_script}" '--model \"${SFS_REVIEW_CODEX_MODEL:-gpt-5.5}\"' "review codex top model default"
+assert_contains "${review_script}" 'model_reasoning_effort=\"${SFS_REVIEW_CODEX_REASONING_EFFORT:-xhigh}\"' "review codex xhigh default"
 assert_contains "${installer}" 'MODEL_POLICY="${SFS_MODEL_POLICY:-solon_recommended}"' "install recommended default"
 assert_contains "${installer}" '[ "$MODEL_POLICY" != "solon_recommended" ]' "install preserves default-applied status"
 assert_contains "${installer}" "agent model profile 기본값 적용" "install no prompt default"

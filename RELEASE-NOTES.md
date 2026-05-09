@@ -7,6 +7,17 @@
 
 ---
 
+## 0.6.69
+
+이번 버전은 Codex cross review 모델 라우팅을 바로잡습니다.
+
+- `sfs review --executor codex` 기본 bridge 가 이제 Codex review tier 를 명시합니다:
+  `gpt-5.5` + `xhigh`.
+- 구현 worker 기본값과 review/CPO 기본값을 분리했습니다. `gpt-5.3-codex` 는 고정된 구현 slice 용도이고,
+  설계/review/cross review 같은 깊은 판단 작업의 기본값이 아닙니다.
+- 프로젝트가 꼭 다른 값을 써야 하면 `SFS_REVIEW_CODEX_MODEL`,
+  `SFS_REVIEW_CODEX_REASONING_EFFORT` 로 override 할 수 있지만, built-in 기본값은 high-end review 입니다.
+
 ## 0.6.68
 
 이번 버전은 `events.jsonl` 기준을 다시 정확히 고정합니다.

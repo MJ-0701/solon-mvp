@@ -1,3 +1,19 @@
+## [0.6.69] - 2026-05-09
+
+> **Codex review bridge uses the review tier.** `sfs review --executor codex`
+> now invokes Codex with the review/advisor profile by default instead of
+> relying on the CLI's worker-oriented default model.
+
+### Fixed
+
+- The default Codex review bridge now runs
+  `codex exec --model gpt-5.5 -c model_reasoning_effort="xhigh" ...`.
+- `SFS_REVIEW_CODEX_MODEL` and `SFS_REVIEW_CODEX_REASONING_EFFORT` can still
+  override the concrete command for a project, but the built-in default is
+  review_high, not execution_standard.
+- Added guardrail coverage so future review routing cannot silently fall back
+  to `gpt-5.3-codex` normal for CPO/cross-review work.
+
 ## [0.6.68] - 2026-05-09
 
 > **Compact active event ledger.** `events.jsonl` is no longer treated as
