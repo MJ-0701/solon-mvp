@@ -7,6 +7,17 @@
 
 ---
 
+## 0.6.63
+
+이번 버전은 Gate 3 plan 의 `리뷰 준비` 체크리스트 문구를 다듬습니다.
+
+- 어색한 `열린 결정이 이름 붙어 있다` 문구를 제거했습니다.
+- 대신 `Gate 2 결정이 요구사항과 AC에 연결되어 있다`, `slice별 파일/산출물 매핑이 있다`,
+  `worker 모델 라우팅이 명시되어 있고, Spark는 scope/files_scope/AC가 잠긴 기계적 구현 보조
+  작업에만 쓴다`로 바꿨습니다.
+- plan context 에도 같은 기준을 넣어 Claude, Codex, Gemini 가 번역투 review-readiness 문구를
+  다시 만들지 않도록 했습니다.
+
 ## 0.6.62
 
 이번 버전은 Claude, Codex, Gemini 모두에서 결정 질문 노출 방식을 다시 고정합니다.

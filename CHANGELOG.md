@@ -1,3 +1,23 @@
+## [0.6.63] - 2026-05-09
+
+> **Plan review-readiness wording cleanup.** The plan template no longer uses
+> the awkward literal phrase `열린 결정이 이름 붙어 있다`.
+
+### Changed
+
+- Replaced the Gate 3 `## 7. 리뷰 준비` checklist with concrete checks:
+  Gate 2 decisions are mapped to requirements/AC, files/artifacts are mapped
+  per slice, and worker model routing is explicit with Spark limited to locked
+  mechanical implementation helper work.
+- Added plan-context guidance to avoid translationese in review-readiness
+  Korean output.
+
+### Tests
+
+- Extended `test-agent-behavior-guardrails.sh` to reject the awkward
+  open-decision wording and require the new Gate 2/AC, slice artifact, and
+  Spark-boundary checklist items.
+
 ## [0.6.62] - 2026-05-09
 
 > **Decision prompt parity for Claude, Codex, and Gemini.** SFS now explicitly

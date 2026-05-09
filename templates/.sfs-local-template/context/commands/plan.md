@@ -41,6 +41,11 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
     worker may fill internally.
 - A plan is not ready just because it is long. It is ready when an evaluator can
   independently check pass/partial/fail without reading the generator's mind.
+- In the review-readiness checklist, avoid translationese such as `열린 결정이
+  이름 붙어 있다`. Prefer concrete Korean checks: Gate 2 decisions are mapped
+  to requirements and AC, files/artifacts are mapped per slice, and worker model
+  routing is explicit with Spark limited to locked mechanical implementation
+  helper work.
 - Each implementation slice should carry a concrete checklist item and
   `verify by ...` evidence. In SFS, that checklist belongs in sprint
   workbench artifacts such as `plan.md` or `implement.md`, not as mandatory
