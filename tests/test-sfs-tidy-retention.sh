@@ -53,7 +53,7 @@ assert_contains "${dry_run}" "events: 3 line(s) would prune" "dry-run event prun
 
 apply_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" tidy --all --apply)"
 assert_contains "${apply_out}" "retention:" "apply retention summary"
-assert_contains "${apply_out}" "events: 4 historical line(s) pruned" "apply event pruning"
+assert_contains "${apply_out}" "events: 3 historical line(s) pruned" "apply event pruning"
 assert_contains "${apply_out}" "residue:" "apply residue summary"
 
 [[ -f "${shared_report}" ]] || fail "shared report.md should remain as durable sprint outcome"

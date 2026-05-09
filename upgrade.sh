@@ -1070,20 +1070,44 @@ upgrade_event_same_compaction_key() {
   return 0
 }
 
+upgrade_active_event_ledger_sprint() {
+  local current_sprint=""
+  if [ -f "$TARGET/.sfs-local/current-sprint" ]; then
+    current_sprint="$(sed -n '1p' "$TARGET/.sfs-local/current-sprint" 2>/dev/null | tr -d '[:space:]' || true)"
+  fi
+  if [ -n "$current_sprint" ] && [ -d "$TARGET/.sfs-local/sprints/$current_sprint" ]; then
+    printf '%s\n' "$current_sprint"
+  fi
+}
+
+upgrade_event_line_belongs_to_active_sprint() {
+  local line="${1:-}" active_sid="${2:-}" sid
+  [ -n "$active_sid" ] || return 1
+  sid="$(upgrade_event_json_string_field "sprint_id" "$line")"
+  [ -n "$sid" ] && [ "$sid" = "$active_sid" ]
+}
+
 write_compact_upgrade_event_line() {
   local events_file="${1:?events file required}" line="${2:?line required}"
-  local event_type sid gate division decision wu tmp existing
+  local event_type sid gate division decision wu active_sid tmp existing
   event_type="$(upgrade_event_json_string_field "type" "$line")"
   sid="$(upgrade_event_json_string_field "sprint_id" "$line")"
   gate="$(upgrade_event_json_string_field "gate_id" "$line")"
   division="$(upgrade_event_json_string_field "division" "$line")"
   decision="$(upgrade_event_json_string_field "decision_id" "$line")"
   wu="$(upgrade_event_json_string_field "wu_id" "$line")"
+  active_sid="$(upgrade_active_event_ledger_sprint)"
+  if ! upgrade_event_line_belongs_to_active_sprint "$line" "$active_sid"; then
+    return 0
+  fi
   tmp="${events_file}.tmp.$$"
   : > "$tmp" || return 5
   if [ -f "$events_file" ]; then
     while IFS= read -r existing || [ -n "$existing" ]; do
       [ -n "$existing" ] || continue
+      if ! upgrade_event_line_belongs_to_active_sprint "$existing" "$active_sid"; then
+        continue
+      fi
       if [ -n "$event_type" ] && upgrade_event_same_compaction_key "$existing" "$event_type" "$sid" "$gate" "$division" "$decision" "$wu"; then
         continue
       fi
@@ -1095,7 +1119,7 @@ write_compact_upgrade_event_line() {
 }
 
 compact_upgrade_event_ledger() {
-  local events_file="$TARGET/.sfs-local/events.jsonl" tmp line before after compacted
+  local events_file="$TARGET/.sfs-local/events.jsonl" tmp line before after removed
   [ -f "$events_file" ] || return 0
   before="$(wc -l < "$events_file" 2>/dev/null | tr -d '[:space:]' || printf '0')"
   tmp="${events_file}.compact.$$"
@@ -1110,9 +1134,9 @@ compact_upgrade_event_ledger() {
   else
     mv -f "$tmp" "$events_file" || return 5
   fi
-  compacted=$((before - after))
-  if [ "$compacted" -gt 0 ]; then
-    ok "active event ledger 압축: $compacted duplicate line(s) 제거"
+  removed=$((before - after))
+  if [ "$removed" -gt 0 ]; then
+    ok "active event ledger 정리: $removed stale/duplicate line(s) 제거"
   fi
   return 0
 }

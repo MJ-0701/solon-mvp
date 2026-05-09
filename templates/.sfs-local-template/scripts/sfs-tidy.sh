@@ -155,6 +155,16 @@ tidy_should_prune_event_line() {
     return 0
   fi
 
+  # With an active sprint, events.jsonl is an active-state ledger only. Any
+  # sprint-scoped line outside the current sprint is historical scratch and no
+  # longer has a visible keep reason.
+  if [[ -n "${current_sprint}" ]]; then
+    if [[ -z "${sid}" || "${sid}" != "${current_sprint}" ]]; then
+      return 0
+    fi
+    return 1
+  fi
+
   if [[ -n "${sid}" ]] && tidy_target_contains_sprint "${targets}" "${sid}" \
      && [[ "${sid}" != "${current_sprint}" ]]; then
     return 0
@@ -602,7 +612,9 @@ while IFS= read -r sid; do
   _esc_report="${_esc_report//\"/\\\"}"
   _esc_archive="${ARCHIVE_PATH//\\/\\\\}"
   _esc_archive="${_esc_archive//\"/\\\"}"
-  append_event "tidy_apply" "{\"sprint_id\":\"${_esc_sprint}\",\"report\":\"${_esc_report}\",\"archive\":\"${_esc_archive}\",\"workbench_files\":${COUNT},\"tmp_files\":${TMP_COUNT},\"report_created\":${REPORT_CREATED}}"
+  if [[ "${sid}" == "${CURRENT_SPRINT}" ]]; then
+    append_event "tidy_apply" "{\"sprint_id\":\"${_esc_sprint}\",\"report\":\"${_esc_report}\",\"archive\":\"${_esc_archive}\",\"workbench_files\":${COUNT},\"tmp_files\":${TMP_COUNT},\"report_created\":${REPORT_CREATED}}"
+  fi
 
   echo "tidied: ${sid}"
   if [[ "${REPORT_CREATED}" -eq 1 ]]; then

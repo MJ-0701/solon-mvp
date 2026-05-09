@@ -55,6 +55,9 @@ Old runtime prefilled template residue.
 EOF
 done
 printf '2026-W19-sprint-1\n' > .sfs-local/current-sprint
+printf '{"ts":"2026-05-05T22:40:00+09:00","type":"sprint_start","sprint_id":"2026-W18-sprint-9","goal":"closed"}\n' >> .sfs-local/events.jsonl
+printf '{"ts":"2026-05-05T22:41:00+09:00","type":"plan_open","sprint_id":"2026-W18-sprint-9","path":".sfs-local/sprints/2026-W18-sprint-9/plan.md"}\n' >> .sfs-local/events.jsonl
+printf '{"ts":"2026-05-05T22:42:00+09:00","type":"sprint_close","sprint_id":"2026-W18-sprint-9"}\n' >> .sfs-local/events.jsonl
 printf '{"ts":"2026-05-05T23:47:46+09:00","type":"sprint_start","sprint_id":"2026-W19-sprint-1","goal":"residue","by":"sfs-start"}\n' >> .sfs-local/events.jsonl
 mkdir -p .sfs-local/cache .sfs-local/tmp/empty-leftover .sfs-local/queue/pending
 printf 'last_checked_epoch=0\nlatest=0.0.0\n' > .sfs-local/cache/version-notice.env
@@ -99,8 +102,10 @@ grep -Fq '2026-W19-sprint-1-step-docs.tar.gz' "${archive_index}" \
 grep -Fq 'auth-env-example.tar.gz' "${archive_index}" \
   || fail "missing auth.env.example cold archive inside collapsed archive bucket"
 
-grep -Fq '"type":"legacy_adopt_surface_migrated"' .sfs-local/events.jsonl \
-  || fail "missing legacy adopt migration event"
+! grep -Fq '"sprint_id":"2026-W18-sprint-9"' .sfs-local/events.jsonl \
+  || fail "closed sprint event lines should not remain after upgrade"
+! grep -Fq '"type":"legacy_adopt_surface_migrated"' .sfs-local/events.jsonl \
+  || fail "legacy adopt migration event should be archive/doc evidence, not active ledger residue"
 grep -Fq '"type":"prefilled_step_docs_compacted"' .sfs-local/events.jsonl \
   || fail "missing prefilled step-doc compaction event"
 ! grep -Eq '\}\}$' .sfs-local/events.jsonl || fail "events.jsonl contains a double-closing-brace line"

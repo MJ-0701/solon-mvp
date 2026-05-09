@@ -7,6 +7,16 @@
 
 ---
 
+## 0.6.70
+
+이번 버전은 `events.jsonl` 기준을 더 빡세게 고정합니다.
+
+- `events.jsonl` 은 이제 “현재 sprint 상태 라우팅”만 남기는 active ledger 입니다.
+  이미 닫힌 sprint, adoption/upgrade migration 로그, sprint_id 없는 로그성 줄은 visible state 로 남기지 않습니다.
+- `sfs tidy --all --apply` 는 닫힌 sprint 폴더가 이미 archive 되어 보이지 않아도, 그 sprint 의 event 줄을 prune 합니다.
+- `sfs upgrade --yes` 도 같은 규칙을 적용하므로 기존 프로젝트는 수동 삭제가 아니라 정상 SFS 명령으로 최신 정책에 수렴합니다.
+- Codex review bridge 기본값은 0.6.69와 동일하게 `gpt-5.5` + `xhigh` 입니다.
+
 ## 0.6.69
 
 이번 버전은 Codex cross review 모델 라우팅을 바로잡습니다.

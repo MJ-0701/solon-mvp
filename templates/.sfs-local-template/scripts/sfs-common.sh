@@ -637,16 +637,36 @@ sfs_event_same_compaction_key() {
   return 0
 }
 
+sfs_active_event_ledger_sprint() {
+  local event_type="${1:-}" line_sid="${2:-}" current_sprint=""
+  if [[ "${event_type}" == "sprint_start" && -n "${line_sid}" ]]; then
+    printf '%s\n' "${line_sid}"
+    return 0
+  fi
+  current_sprint="$(read_current_sprint 2>/dev/null || true)"
+  if [[ -n "${current_sprint}" && -d "${SFS_SPRINTS_DIR}/${current_sprint}" ]]; then
+    printf '%s\n' "${current_sprint}"
+  fi
+}
+
+sfs_event_line_belongs_to_active_sprint() {
+  local line="${1:-}" active_sid="${2:-}" sid
+  [[ -n "${active_sid}" ]] || return 1
+  sid="$(sfs_event_json_string_field "sprint_id" "${line}")"
+  [[ -n "${sid}" && "${sid}" == "${active_sid}" ]]
+}
+
 # append_event TYPE JSON_PAYLOAD — update the compact active-state JSONL ledger.
 # JSON_PAYLOAD must already be a valid JSON object (e.g. '{"k":"v"}').
 # Auto-injects `ts` (ISO8601 +TZ) and `type` if not present in payload.
 # The ledger is intentionally not append-only: repeated command opens replace
 # the previous line for the same type + natural key (sprint/gate/division/etc.),
-# so events.jsonl remains a bounded active state file rather than a history log.
+# and only the current sprint's state lines remain visible. Closed-sprint
+# history belongs in shared report/archive evidence and git history.
 append_event() {
   local etype="${1:?type required}"
   local payload="${2:-{\}}"
-  local ts sid gate division decision wu tmp existing
+  local ts sid gate division decision wu active_sid tmp existing
   ts="$(date +%Y-%m-%dT%H:%M:%S%z 2>/dev/null | sed -E 's/([0-9]{2})$/:\1/')"
 
   # Strip outer braces from payload, reconstruct with ts/type prepended.
@@ -669,12 +689,35 @@ append_event() {
   division="$(sfs_event_json_string_field "division" "${line}")"
   decision="$(sfs_event_json_string_field "decision_id" "${line}")"
   wu="$(sfs_event_json_string_field "wu_id" "${line}")"
+  active_sid="$(sfs_active_event_ledger_sprint "${etype}" "${sid}")"
+
+  if [[ -z "${active_sid}" || -z "${sid}" || "${sid}" != "${active_sid}" ]]; then
+    if [[ -f "${SFS_EVENTS_FILE}" ]]; then
+      tmp="${SFS_EVENTS_FILE}.tmp.$$"
+      : > "${tmp}" || return 1
+      while IFS= read -r existing || [[ -n "${existing}" ]]; do
+        [[ -n "${existing}" ]] || continue
+        if sfs_event_line_belongs_to_active_sprint "${existing}" "${active_sid}"; then
+          printf '%s\n' "${existing}" >> "${tmp}" || return 1
+        fi
+      done < "${SFS_EVENTS_FILE}"
+      if [[ -s "${tmp}" ]]; then
+        mv -f "${tmp}" "${SFS_EVENTS_FILE}" || return 1
+      else
+        rm -f "${tmp}" "${SFS_EVENTS_FILE}" || return 1
+      fi
+    fi
+    return 0
+  fi
 
   tmp="${SFS_EVENTS_FILE}.tmp.$$"
   : > "${tmp}" || return 1
   if [[ -f "${SFS_EVENTS_FILE}" ]]; then
     while IFS= read -r existing || [[ -n "${existing}" ]]; do
       [[ -n "${existing}" ]] || continue
+      if ! sfs_event_line_belongs_to_active_sprint "${existing}" "${active_sid}"; then
+        continue
+      fi
       if sfs_event_same_compaction_key "${existing}" "${etype}" "${sid}" "${gate}" "${division}" "${decision}" "${wu}"; then
         continue
       fi

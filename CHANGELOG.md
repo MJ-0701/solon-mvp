@@ -1,3 +1,28 @@
+## [0.6.70] - 2026-05-09
+
+> **events.jsonl is current-sprint state only.** The active ledger now prunes
+> closed-sprint and no-sprint log residue during normal event writes, tidy, and
+> upgrade.
+
+### Fixed
+
+- `append_event` now keeps only event lines that belong to the current sprint;
+  closed-sprint lines and global log-like lines no longer survive as visible
+  `.sfs-local/events.jsonl` history.
+- `sfs tidy --all --apply` prunes event lines for any non-current sprint even
+  when that sprint folder has already been archived and is no longer part of
+  the visible `--all` target set.
+- `sfs upgrade` applies the same current-sprint-only ledger rule to existing
+  projects, so rerunning the normal upgrade command removes stale historical
+  event lines without manual deletion.
+
+### Tests
+
+- Extended `test-sfs-events-active-ledger-compaction.sh` to cover closed-sprint
+  event pruning while a new sprint remains active.
+- Extended `test-sfs-upgrade-minimal-residue-migration.sh` so upgrade removes
+  stale closed-sprint/adoption migration events from the active ledger.
+
 ## [0.6.69] - 2026-05-09
 
 > **Codex review bridge uses the review tier.** `sfs review --executor codex`
