@@ -155,6 +155,21 @@ Korean products. The point is not vendor lock-in. The point is that the design
 system is the asset. If an existing product design system exists, it wins. If
 not, start with a small `design.md` seed.
 
+## Benchmark Absorption 10x Loop
+
+The useful part of agent-skills-style repositories is not more buttons. It is
+capturing the judgment AI repeatedly misses as compact practices. Solon absorbs
+those practices into the existing loop rather than cloning them as new lifecycle
+commands.
+
+| Practice | Solon absorption point | 10x effect |
+|---|---|---|
+| Source-driven implementation | `implement`, `source-docs` review lens | Framework/API guesses are replaced by official evidence |
+| Stop-the-line debugging | `implement` debugging policy | Repeated failures turn into cause/evidence work |
+| Deprecation/migration cleanup | `adopt`, `tidy` | Log/history files without a clear reason do not stay visible |
+| Shipping discipline | `release` | Version/channel/install checks and rollback notes happen before deploy |
+| Focused review lenses | `review` | Security, performance, and API-contract risk do not hide under generic code review |
+
 ## Solon Execution Contract
 
 When Solon is used to implement work, the default sequence should be:

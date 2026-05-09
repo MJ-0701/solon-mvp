@@ -142,6 +142,20 @@ Solon 은 visible UI 작업에서 `design.md` 또는 `docs/solon/design.md` 를 
 design system 이 있으면 그것이 우선이고, 없다면 작은 `design.md` seed 부터 만드는 것이 Solon 의
 권장 출발점입니다.
 
+## 벤치마크 흡수 10x 루프
+
+agent-skills 류 repo 의 좋은 점은 "새 버튼"이 아니라 AI 가 반복해서 놓치는 판단을 짧은
+practice 로 고정한다는 데 있습니다. Solon 은 이것을 새 lifecycle command 로 복제하지 않고,
+기존 루프 안의 기준으로 흡수합니다.
+
+| Practice | Solon 흡수 위치 | 10x 효과 |
+|---|---|---|
+| Source-driven implementation | `implement`, `source-docs` review lens | framework/API 추측을 공식 근거로 줄임 |
+| Stop-the-line debugging | `implement` debugging policy | 같은 실패를 반복하지 않고 원인/evidence 로 전환 |
+| Deprecation/migration cleanup | `adopt`, `tidy` | 남길 이유 없는 로그/히스토리 파일을 visible state 에 두지 않음 |
+| Shipping discipline | `release` | version/channel/install 검증과 rollback 감각을 배포 전 확인 |
+| Focused review lenses | `review` | 보안, 성능, API contract 같은 위험을 코드리뷰 한 단어에 묻지 않음 |
+
 ## Solon 이 약속하지 않는 것
 
 - 나쁜 코드베이스를 마법처럼 싸게 만들지 않습니다.

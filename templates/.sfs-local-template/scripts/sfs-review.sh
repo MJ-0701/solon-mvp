@@ -71,7 +71,7 @@ fi
 # ─────────────────────────────────────────────────────────────────────
 usage_review() {
   cat <<'EOF'
-Usage: /sfs review [--gate <1..7>] [--lens <auto|artifact|code|docs|strategy|design|taxonomy|qa|ops|management-admin|release>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
+Usage: /sfs review [--gate <1..7>] [--lens <auto|artifact|code|docs|source-docs|simplify|security|performance|api-contract|strategy|design|taxonomy|qa|ops|management-admin|release>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
 
 Open the active sprint's review.md as the CPO Evaluator review document.
   - --gate <n>    gate number, 1..7. Reports display this as Gate 1..7:
@@ -83,8 +83,9 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                   defaults to Gate 6 when implementation/artifact evidence is
                   present, or Gate 3 when only plan evidence is present.
   - --lens <name> review lens. Default: auto.
-                  auto chooses from artifact, code, docs, strategy, design,
-                  taxonomy, qa, ops, management-admin, release using
+                  auto chooses from artifact, code, docs, source-docs,
+                  simplify, security, performance, api-contract, strategy,
+                  design, taxonomy, qa, ops, management-admin, release using
                   plan/implement/log text and changed artifact paths. Use an
                   explicit lens only to override a wrong inference. For the
                   same sprint/gate, later auto reviews reuse the previous lens
@@ -92,7 +93,9 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                   lanes. `code` is one lens, not the default meaning of review.
                   Common division aliases are accepted, for example
                   strategy-pm -> strategy, design/frontend -> design,
-                  infra -> ops, and finance/accounting -> management-admin.
+                  infra -> ops, source-driven -> source-docs, perf ->
+                  performance, api/schema -> api-contract, and
+                  finance/accounting -> management-admin.
   - --executor <profile|cmd>
                   CPO review tool/profile. Default: $SFS_REVIEW_EXECUTOR or codex.
                   Typical: codex, gemini, claude, or a custom command.
@@ -321,6 +324,11 @@ normalize_review_lens_value() {
     artifact|outcome|acceptance|general) printf 'artifact\n' ;;
     code|source|implementation) printf 'code\n' ;;
     doc|docs|documentation) printf 'docs\n' ;;
+    source-docs|source-driven|source-driven-development|official-docs|official-documentation|docs-source|source-verification|framework-docs) printf 'source-docs\n' ;;
+    simplify|simplification|code-simplify|cleanup|dead-code|deadcode|reduce-complexity) printf 'simplify\n' ;;
+    security|hardening|auth|authorization|authentication|pii|secrets|secret) printf 'security\n' ;;
+    performance|perf|latency|benchmark|benchmarks|lighthouse|memory|bundle) printf 'performance\n' ;;
+    api-contract|api|interface|contract|schema|schemas|openapi|public-api|compatibility) printf 'api-contract\n' ;;
     strategy|strategy-pm|product|product-strategy|product-management|pm|planning) printf 'strategy\n' ;;
     design|design/frontend|frontend-design|ux|ui) printf 'design\n' ;;
     taxonomy|domain|glossary|naming) printf 'taxonomy\n' ;;
@@ -335,8 +343,8 @@ normalize_review_lens_value() {
 }
 _normalized_lens="$(normalize_review_lens_value "${REVIEW_LENS}" || true)"
 if [[ -z "${_normalized_lens}" ]]; then
-  echo "unknown review lens ${REVIEW_LENS}, valid: auto, artifact, code, docs, strategy, design, taxonomy, qa, ops, management-admin, release" >&2
-  echo "aliases: strategy-pm -> strategy, design/frontend -> design, infra -> ops, finance/accounting -> management-admin" >&2
+  echo "unknown review lens ${REVIEW_LENS}, valid: auto, artifact, code, docs, source-docs, simplify, security, performance, api-contract, strategy, design, taxonomy, qa, ops, management-admin, release" >&2
+  echo "aliases: strategy-pm -> strategy, design/frontend -> design, infra -> ops, source-driven -> source-docs, perf -> performance, api/schema -> api-contract, finance/accounting -> management-admin" >&2
   exit "${SFS_EXIT_BADCLI}"
 fi
 REVIEW_LENS="${_normalized_lens}"
@@ -472,6 +480,30 @@ review_path_lens_signal() {
       ;;
   esac
   case "$paths" in
+    *auth*|*oauth*|*token*|*secret*|*security*|*permission*|*permissions*|*pii*|*privacy*|*upload*|*webhook*|*.pem|*.key)
+      printf 'security\n'
+      return 0
+      ;;
+  esac
+  case "$paths" in
+    *perf*|*performance*|*benchmark*|*benchmarks*|*lighthouse*|*latency*|*memory*|*bundle*|*load-test*)
+      printf 'performance\n'
+      return 0
+      ;;
+  esac
+  case "$paths" in
+    *openapi*|*api*|*controller*|*controllers*|*route*|*routes*|*schema*|*schemas*|*dto*|*interface*|*contract*)
+      printf 'api-contract\n'
+      return 0
+      ;;
+  esac
+  case "$paths" in
+    *cleanup*|*simplif*|*dead-code*|*deadcode*|*deprecat*|*migration*)
+      printf 'simplify\n'
+      return 0
+      ;;
+  esac
+  case "$paths" in
     *figma*|*design*|*wireframe*|*ux*|*ui*|*component*|*.css|*.scss|*.html)
       printf 'design\n'
       return 0
@@ -528,6 +560,26 @@ infer_review_lens() {
     return 0
   fi
   case "$lowered" in
+    *"source-driven"*|*"official docs"*|*"official documentation"*|*"framework docs"*|*"primary source"*|*"upstream docs"*)
+      printf 'source-docs\n'
+      return 0
+      ;;
+    *"security"*|*"hardening"*|*"auth"*|*"authorization"*|*"authentication"*|*"pii"*|*"secret"*|*"token"*|*"untrusted input"*)
+      printf 'security\n'
+      return 0
+      ;;
+    *"performance"*|*"perf"*|*"latency"*|*"benchmark"*|*"lighthouse"*|*"memory"*|*"bundle size"*)
+      printf 'performance\n'
+      return 0
+      ;;
+    *"api contract"*|*"public api"*|*"openapi"*|*"schema"*|*"interface compatibility"*|*"backward compatibility"*)
+      printf 'api-contract\n'
+      return 0
+      ;;
+    *"simplify"*|*"simplification"*|*"dead code"*|*"deprecation"*|*"migration"*)
+      printf 'simplify\n'
+      return 0
+      ;;
     *"artifact types touched"*release*|*"release readiness"*|*"homebrew"*|*"scoop"*)
       printf 'release\n'
       return 0
@@ -572,6 +624,11 @@ review_lens_label() {
   case "$1" in
     code) printf 'code review lens' ;;
     docs) printf 'documentation acceptance lens' ;;
+    source-docs) printf 'source-driven documentation evidence lens' ;;
+    simplify) printf 'behavior-preserving simplification lens' ;;
+    security) printf 'security/threat-model acceptance lens' ;;
+    performance) printf 'performance evidence lens' ;;
+    api-contract) printf 'API/contract compatibility lens' ;;
     strategy) printf 'strategy/product acceptance lens' ;;
     design) printf 'design/UX acceptance lens' ;;
     taxonomy) printf 'taxonomy/domain-language acceptance lens' ;;
@@ -1883,9 +1940,9 @@ Lens policy:
   code lens, not the default meaning of review.
 - Judge the produced artifact against the CEO plan, Gate 2/3 contract, evidence,
   user value, scope, risk, and next action.
-- Do not force source-code findings when the selected lens is docs, strategy,
-  design, taxonomy, QA, ops, management-admin, release, or generic artifact
-  acceptance.
+- Do not force source-code findings when the selected lens is docs, source-docs,
+  simplify, security, performance, api-contract, strategy, design, taxonomy,
+  QA, ops, management-admin, release, or generic artifact acceptance.
 
 Lens-specific checklist:
 EOF
@@ -1900,6 +1957,41 @@ EOF
       cat <<'EOF'
 - Check whether the document is accurate, complete enough, navigable, and consistent with project terminology.
 - Treat unclear audience, stale instructions, missing examples, or misleading next steps as findings.
+EOF
+      ;;
+    source-docs)
+      cat <<'EOF'
+- Check whether implementation or guidance claims are grounded in official/current upstream docs, release notes, schemas, or source-of-truth files.
+- Treat unsourced framework/library assumptions, stale copied recipes, and missing version/date evidence as findings.
+- Prefer the smallest cited primary source that proves the behavior; do not ask for broad research when one official source would settle it.
+EOF
+      ;;
+    simplify)
+      cat <<'EOF'
+- Check whether the change removes accidental complexity without changing behavior, public contracts, or needed observability.
+- Treat needless abstractions, duplicate branches, dead code left behind, and migration paths without a rollback/compatibility note as findings.
+- Require evidence that the simplification is behavior-preserving, such as focused tests, unchanged outputs, or explicit non-goals.
+EOF
+      ;;
+    security)
+      cat <<'EOF'
+- Check auth boundaries, secret handling, untrusted input, PII exposure, permission scope, and failure modes.
+- Treat missing threat assumptions, overly broad privileges, logging of sensitive values, or absent negative tests as findings.
+- Keep findings concrete: identify the attacker/input, affected surface, and required mitigation or evidence.
+EOF
+      ;;
+    performance)
+      cat <<'EOF'
+- Check baseline evidence, target metric, hot path realism, resource use, and regression risk.
+- Treat unmeasured optimization claims, synthetic-only proof, bundle/runtime growth, or missing rollback thresholds as findings.
+- Prefer measurement-backed recommendations over speculative micro-optimizations.
+EOF
+      ;;
+    api-contract)
+      cat <<'EOF'
+- Check public interfaces, request/response schemas, error semantics, backward compatibility, versioning, and migration notes.
+- Treat breaking changes without explicit version/migration handling, ambiguous nullability, or undocumented error behavior as findings.
+- Verify generated docs, examples, and tests agree with the actual contract.
 EOF
       ;;
     strategy)

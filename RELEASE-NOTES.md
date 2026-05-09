@@ -7,6 +7,23 @@
 
 ---
 
+## 0.6.61
+
+이번 버전은 addyosmani/agent-skills 벤치마크에서 쓸 만한 practice 를 SFS 의 기존 명령 안으로
+흡수합니다. 새 명령어를 늘리는 대신 `implement`, `review`, `adopt`, `tidy`, `release` 의
+판단 기준이 더 선명해집니다.
+
+- `implement` 는 framework/library/API 작업에서 공식 문서나 실제 source-of-truth 근거를 더
+  강하게 요구하고, 반복 실패는 stop-the-line debugging 으로 원인/evidence 를 먼저 잡습니다.
+- `review` 는 `source-docs`, `simplify`, `security`, `performance`, `api-contract` 렌즈를
+  추가로 이해합니다. 보안/성능/API contract 같은 위험을 generic code review 에 묻지 않습니다.
+- `adopt` 와 `tidy` 는 deprecation/migration 정리 기준을 공유합니다. 남길 이유를 한 줄 이상으로
+  설명할 수 없는 로그성/히스토리성 파일은 visible surface 에 남기지 않습니다.
+- `release` 는 배포 전 version/channel/install 검증, rollback/reversibility, observable release
+  evidence 를 더 분명하게 확인합니다.
+- README, GUIDE, current product docs, 10x docs 에 “agent-skills류 practice 는 기존 SFS 명령
+  강화로 흡수한다”는 기준을 반영했습니다.
+
 ## 0.6.60
 
 이번 버전은 adoption 정리 기준을 “남겨야 하는 이유를 한 줄 이상으로 설명할 수 없으면

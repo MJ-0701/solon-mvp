@@ -44,7 +44,7 @@ depth 옵션을 함께 보여드릴 뿐입니다.
 ## Windows 래퍼 안정화
 
 Windows PowerShell/cmd 의 사용자 진입점은 `sfs.cmd` 로 고정합니다. Git Bash/WSL 에서는
-macOS/Linux 처럼 `sfs` 를 씁니다. 0.6.60 기준 Scoop manifest 는 generated shim 이
+macOS/Linux 처럼 `sfs` 를 씁니다. 0.6.61 기준 Scoop manifest 는 generated shim 이
 packaged `bin\sfs.ps1` 을 직접 호출하도록 유지하지만, Scoop 이 생성한 `sfs.cmd` / `sfs.ps1`
 shim 이 인자를 버리는 경로가 확인되어 post-install hook 이 shims 디렉터리의 `sfs.cmd`,
 `sfs.ps1`, extensionless `sfs` 를 deterministic wrapper 로 덮어씁니다. PowerShell/cmd smoke 와
@@ -148,6 +148,11 @@ AI coding 시대에는 "구현"이라는 말이 코드 파일만 가리키면 �
 |---|---|
 | `code` | correctness, tests, regressions, maintainability |
 | `docs` | reader flow, accuracy, stale claims, missing links |
+| `source-docs` | official docs/source/version evidence |
+| `simplify` | behavior-preserving simplification, dead-code removal |
+| `security` | auth, secrets, PII, untrusted input boundaries |
+| `performance` | baseline, target metric, measured regression risk |
+| `api-contract` | public interface, schema, errors, compatibility |
 | `strategy` | decision quality, tradeoffs, feasibility, next action |
 | `design` | user flow, consistency, visual/interaction evidence |
 | `taxonomy` | terms, categories, naming boundaries |
@@ -156,8 +161,9 @@ AI coding 시대에는 "구현"이라는 말이 코드 파일만 가리키면 �
 | `management-admin` | finance records, bookkeeping, tax/accounting questions, cash evidence |
 | `release` | version, changelog, package channel, verification |
 
-사용자는 계속 `sfs review` 라고만 말씀하시면 됩니다. `--lens` 는 Solon 의 추론이 틀렸을 때만 쓰는
-override 입니다.
+사용자는 계속 `sfs review` 라고만 말씀하시면 됩니다. 새 agent-skills류 판단 기준도 새 명령어가
+아니라 기존 review lens 로 흡수됩니다. `--lens` 는 Solon 의 추론이 틀렸을 때만 쓰는 override
+입니다.
 
 ## 얇은 멀티 에이전트 감독
 
@@ -230,7 +236,7 @@ AI 가 UI 를 만들 때 가장 흔한 실패는 평균값으로 회귀하는 �
 
 ## 분야별 지식팩
 
-0.6.60 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
+0.6.61 기준 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, 경영관리, taxonomy 지식팩은
 더 이상 빈 자리표시자가 아닙니다. 각 지식팩은 "이 분야라면 무엇을 조심해야 하는가",
 "무엇을 물어봐야 하는가", "어떤 근거가 있으면 통과로 볼 수 있는가"를 짧게 담습니다.
 
@@ -239,6 +245,12 @@ AI 가 UI 를 만들 때 가장 흔한 실패는 평균값으로 회귀하는 �
 봅니다. 기준은 늘어나지만, 사용자가 마주하는 표면은 그대로 가볍게 유지하는 것이 방향입니다.
 taxonomy 는 본부라기보다 모든 본부에 걸치는 용어/분류 렌즈로 남기고, 재무/경리/세무/회계는
 경영관리 관점으로 다룹니다.
+
+0.6.61 에서는 agent-skills 벤치마크에서 유용한 discipline 도 같은 방식으로 흡수했습니다.
+공식 문서 기반 구현은 `implement` 와 `source-docs` review lens 로, stop-the-line 디버깅은
+`implement` 검증 정책으로, deprecation/migration 은 `adopt`/`tidy` 정리 기준으로, shipping
+check 는 `release` 정책으로 들어갑니다. 새 lifecycle command 를 늘리는 대신 기존 흐름의
+판단 기준을 더 선명하게 만든 것입니다.
 
 ## Retro 는 기본적으로 sprint close
 

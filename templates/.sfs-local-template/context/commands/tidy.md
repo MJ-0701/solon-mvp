@@ -17,6 +17,10 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
   the native-language commit message rule. Do not force English when the work
   conversation is Korean or another non-English language.
 - `tidy --apply` archives workbench only after report evidence exists.
+- Apply `policies/deprecation-and-migration.md`: every visible leftover needs a
+  replacement/handoff reason, cold archive path, or explicit user decision.
+  Advisory cleanup may wait; compulsory cleanup needs risk such as stale state,
+  data loss, security, or automation breakage.
 - `events.jsonl` is active state, not durable history. Closed-sprint event lines
   are pruned after `report.md`/archive evidence exists; an empty event ledger is
   deleted instead of kept as residue.

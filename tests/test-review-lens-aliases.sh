@@ -32,7 +32,7 @@ run_sfs start "review lens aliases" >/dev/null
 
 assert_alias() {
   local alias="$1" expected="$2" out review_path
-  out="$(run_sfs review --gate 6 --lens "${alias}" --prompt-only)"
+  out="$(run_sfs review --gate 6 --lens "${alias}" --prompt-only --allow-empty)"
   case "${out}" in
     *"lens ${expected} (explicit) prompt ready"*) ;;
     *) fail "--lens ${alias} did not normalize to ${expected}: ${out}" ;;
@@ -47,6 +47,16 @@ assert_alias strategy-pm strategy
 assert_alias strategy_pm strategy
 assert_alias design/frontend design
 assert_alias infra ops
+assert_alias source-driven source-docs
+assert_alias official-docs source-docs
+assert_alias perf performance
+assert_alias benchmark performance
+assert_alias security security
+assert_alias auth security
+assert_alias simplify simplify
+assert_alias dead-code simplify
+assert_alias api api-contract
+assert_alias schema api-contract
 assert_alias management-admin management-admin
 assert_alias finance management-admin
 assert_alias accounting management-admin
@@ -56,5 +66,9 @@ if run_sfs review --gate 6 --lens not-a-lens --prompt-only >"${TMP_DIR}/invalid.
 fi
 grep -Fq "strategy-pm -> strategy" "${TMP_DIR}/invalid.err" \
   || fail "invalid lens error should show strategy-pm alias hint"
+grep -Fq "source-driven -> source-docs" "${TMP_DIR}/invalid.err" \
+  || fail "invalid lens error should show source-docs alias hint"
+grep -Fq "api/schema -> api-contract" "${TMP_DIR}/invalid.err" \
+  || fail "invalid lens error should show api-contract alias hint"
 
 echo "test-review-lens-aliases: OK"

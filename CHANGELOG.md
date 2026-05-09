@@ -1,3 +1,34 @@
+## [0.6.61] - 2026-05-09
+
+> **Agent-skills benchmark absorption.** SFS now absorbs useful
+> agent-skills-style practices as routed policies and review lenses instead of
+> adding more lifecycle commands.
+
+### Changed
+
+- Added source-driven implementation, stop-the-line debugging,
+  deprecation/migration cleanup, and shipping-launch policies to packaged SFS
+  context.
+- Strengthened `implement`, `review`, `adopt`, `tidy`, and `release` routed
+  context so those practices run inside existing commands.
+- Added public review lenses and aliases for `source-docs`, `simplify`,
+  `security`, `performance`, and `api-contract`.
+- Added review severity language (`Critical`, `Required`, `Important`,
+  `Optional`, `FYI`) so findings can separate blocking risk from advisory
+  cleanup.
+- Updated Claude/Codex/Gemini adapter docs plus README/GUIDE/current-product
+  and 10x docs to state that benchmarked practices strengthen existing SFS
+  commands rather than becoming new commands.
+- Added the benchmark report under
+  `docs/agent-skills-benchmark/20260509/report.md`.
+
+### Tests
+
+- Added `test-agent-skills-benchmark-absorption.sh` for packaged context,
+  policy files, adapter text, and review lens exposure.
+- Extended `test-review-lens-aliases.sh` to exercise the new review lenses and
+  aliases.
+
 ## [0.6.60] - 2026-05-09
 
 > **Strict adopt cleanup under `docs/<workspace>/<yyyyMMdd>`.** `sfs adopt`

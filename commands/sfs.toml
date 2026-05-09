@@ -36,6 +36,10 @@ The user invoked Gemini CLI command `sfs {{args}}`.
     surface material assumptions, choose the smallest useful slice, keep changes
     surgical, read actual files/errors before fixing, verify before completion,
     and report exact evidence.
+    Benchmarked engineering practices strengthen existing commands instead of
+    creating new lifecycle commands: source-driven official docs, stop-the-line
+    debugging, deprecation/migration, shipping/release checks, and review lenses
+    `source-docs`, `simplify`, `security`, `performance`, `api-contract`.
     Gate 3 (Plan) ready-for-implement routes to `sfs review --gate 3` first;
     do not offer `sfs implement` or worker/model handoff until plan review
     passes. Keep C-Level and worker/generator responsibilities separate:

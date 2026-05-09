@@ -7,7 +7,7 @@ install. For beginner Git/terminal help, use the Korean [BEGINNER-GUIDE.md](../.
 
 ## 0. Install And Initialize
 
-> **As of 0.6.60**, one `brew install` / `scoop install` lets Claude Code
+> **As of 0.6.61**, one `brew install` / `scoop install` lets Claude Code
 > (`/sfs`), Gemini CLI (`sfs`), and Codex CLI (`$sfs`) find Solon automatically.
 > Your project keeps the files you read and the records you create.
 
@@ -61,14 +61,19 @@ optional. Install those native shortcuts only when a project needs them:
 sfs agent install all
 ```
 
-Old projects can be upgraded into the lighter 0.6.60 shape. Use
+Old projects can be upgraded into the lighter 0.6.61 shape. Use
 `sfs upgrade --layout vendored` only when Solon package files must stay inside
 the project.
 
-0.6.60 also includes the filled division knowledge packs. The user does not need to choose
+0.6.61 also includes the filled division knowledge packs. The user does not need to choose
 "backend", "QA", "infra", "finance", "tax", "accounting", or "taxonomy"
 manually. The AI should read the relevant Solon lens when the work calls for it,
 then explain the judgment in plain language.
+
+As of 0.6.61, agent-skills-style practices are absorbed into existing SFS
+commands instead of becoming new lifecycle commands: source-driven
+implementation, stop-the-line debugging, deprecation/migration, shipping
+checks, and stronger review lenses.
 
 Sprint handoff documents are shared under
 `docs/<workspace>/<yyyyMMdd>/report.md` and
@@ -158,9 +163,10 @@ sfs review
 ```
 
 Review is artifact acceptance review. Code review is only the `code` lens.
-Solon can infer lenses such as `docs`, `strategy`, `design`, `taxonomy`, `qa`,
-`ops`, or `release` from sprint evidence. Use `--lens` only when the inference
-is wrong.
+Solon can infer lenses such as `docs`, `source-docs`, `simplify`, `security`,
+`performance`, `api-contract`, `strategy`, `design`, `taxonomy`, `qa`, `ops`,
+or `release` from sprint evidence. Use `--lens` only when the inference is
+wrong.
 
 ## 7. Retro
 

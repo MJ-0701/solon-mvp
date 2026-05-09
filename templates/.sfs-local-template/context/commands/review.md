@@ -35,6 +35,10 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   internal id.
 - Lead with bugs, regressions, missing acceptance evidence, or risky behavior
   changes. Cosmetic drift is secondary unless it changes a documented contract.
+- Label findings by action pressure: `Critical` for security/data-loss/release
+  blockers, `Required` for must-fix acceptance gaps, `Important` for risks that
+  should be handled now, `Optional` for non-blocking improvement, and `FYI` for
+  context only. Do not make every comment feel equally mandatory.
 - Review actual diff, files, test output, and logs. Do not infer pass from
   intent or from a familiar failure keyword.
 - Flag overengineering, speculative abstraction, unrelated refactors, and
@@ -55,8 +59,9 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   native/workspace language. English commit messages are correct only when the
   user/repo language is English or the repo explicitly requires English.
 - `sfs review` is an artifact acceptance review. Code review is only the
-  `code` lens; docs, strategy, design, taxonomy, QA, ops, management-admin,
-  release, and generic artifacts use their own acceptance lens.
+  `code` lens; docs, source-docs, simplify, security, performance,
+  api-contract, strategy, design, taxonomy, QA, ops, management-admin, release,
+  and generic artifacts use their own acceptance lens.
 - Review scope is functional correctness + consistency only. Functional means
   the artifact delivers the declared behaviour (plan / Sprint Contract / AC).
   Consistency means cross-document SSoT (plan ↔ implement ↔ tests ↔ frontmatter)
@@ -77,6 +82,12 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   public lens names in commands: `strategy-pm` maps to `strategy`,
   `design/frontend` maps to `design`, `infra` maps to `ops`, and
   `finance`/`accounting` maps to `management-admin`.
+- Additional public lens names strengthen the existing review command rather
+  than creating new commands: `source-docs` checks official-source evidence for
+  framework/library/API patterns, `simplify` checks behavior-preserving
+  simplification, `security` checks untrusted input/secrets/auth/PII risk,
+  `performance` checks measurement-backed optimization, and `api-contract`
+  checks public interface and error semantics.
 - Review the whole contract, not only changed code: shared intent, domain
   language consistency, feedback evidence, interface/artifact boundaries, and
   gray-box delegation should still match the Gate 2/3 record.

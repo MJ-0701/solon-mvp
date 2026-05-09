@@ -31,6 +31,12 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   read-only research slice before editing. Use `.sfs-local/personas/researcher.md`
   when available, prefer a long-context executor such as Gemini when configured,
   and record only the compact findings in the current workbench.
+- Do not create new lifecycle commands for borrowed engineering practices.
+  Strengthen this existing implement rail with routed policies:
+  `policies/source-driven-development.md` for framework/library/API patterns,
+  `policies/debugging-and-error-recovery.md` when anything fails,
+  `policies/deprecation-and-migration.md` for legacy cleanup/migration, and
+  `policies/shipping-and-launch.md` for release/deploy slices.
 - If intent is not shared, ask 1-3 precise questions before changing files.
 - Use project/domain terms consistently; add or reuse a small glossary when terms drift.
 - Move only as fast as feedback: test, smoke, preview, or review the smallest useful slice.
@@ -47,6 +53,16 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   reverting unrelated edits.
 - When a command fails, read the full error/log output and verify the cause
   before applying a fix.
+- Stop-the-line on failures: preserve exact evidence, reproduce or document why
+  reproduction is not yet possible, localize the smallest failing layer, fix the
+  root cause, add a guard, and resume only after verification passes.
+- Framework-specific code must be source-driven: detect stack/version from the
+  repo, check the smallest relevant official documentation or standard, cite the
+  source in evidence for non-trivial decisions, and mark unverified patterns
+  instead of hiding them.
+- Bug fixes should use the prove-it pattern: create a failing regression test or
+  minimal repro first when practical, then make it pass. If no automated guard
+  is practical, record the exact manual repro and smoke check.
 - If code or executable artifacts changed, run the smallest relevant test,
   build, typecheck, smoke, or scripted review before marking complete. Record
   the command and result in the implementation evidence.

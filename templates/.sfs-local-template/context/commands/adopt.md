@@ -17,6 +17,10 @@ Rules:
   `docs/<workspace>/<yyyyMMdd>/handoff.md`. For adopt, `<workspace>` is the
   adopt id (`legacy-baseline` by default, or `--id <name>`). Raw scan evidence
   belongs under `.sfs-local/archives/adopt/...`.
+- Apply `policies/deprecation-and-migration.md`: legacy visible state is a
+  liability unless it still earns its place. Archive or remove residue only
+  after the durable handoff path exists, and report how to recover cold
+  evidence.
 - `adopt --apply` must not leave an active sprint pointer. It summarizes and
   cleans the legacy state; the first real sprint starts afterward.
 - Do not expand old sprint/archive material into the active working context unless the user asks for archaeology or recovery.
