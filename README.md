@@ -206,3 +206,7 @@ Solon 의 강점은 앱을 대신 찍어내는 것이 아니라, 앱을 만든 �
 - 공유해야 하는 기록은 `docs/solon/...` 아래에 남깁니다.
 - 검토는 작성자와 독립된 역할로 분리합니다.
 - 최종 제품 판단은 항상 사용자에게 남깁니다.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
