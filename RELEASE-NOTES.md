@@ -7,6 +7,14 @@
 
 ---
 
+## 0.6.85
+
+이번 버전은 release verifier 출력 소음을 줄입니다.
+
+- `scripts/verify-product-release.sh` 가 내부 install/upgrade smoke 로그를 성공 시 숨깁니다.
+- smoke 가 실패하면 숨긴 stdout/stderr 를 `[verify-product-release]` prefix 로 다시 출력하므로 원인 추적성은 유지됩니다.
+- 결과적으로 릴리스 확인 로그는 짧아지고, 실패 증거는 사라지지 않습니다.
+
 ## 0.6.84
 
 이번 버전은 SFS Token Diet 를 추가합니다. 목표는 단순히 짧게 말하는 것이 아니라,

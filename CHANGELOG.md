@@ -1,3 +1,21 @@
+## [0.6.85] - 2026-05-13
+
+> **Release verifier smoke output is quieter on success while preserving full
+> failure evidence.**
+
+### Changed
+
+- `scripts/verify-product-release.sh` now captures internal install/upgrade
+  smoke output and replays it only if that smoke fails. Successful release
+  verification stays compact, and failed verification still prints the captured
+  stdout/stderr lines with `[verify-product-release]` evidence prefixes.
+
+### Tests
+
+- Added `test-release-verifier-quiet-smokes.sh` to keep the quiet-success /
+  evidence-on-failure contract from regressing.
+- Full source regression passed with 65 tests.
+
 ## [0.6.84] - 2026-05-13
 
 > **Token Diet adds opt-in compact command output while preserving evidence,
@@ -42,7 +60,7 @@
   retaining source and verification traces.
 - Negative fixtures fail when compact text drops review evidence, data-loss
   warning severity, or decision alternatives.
-- Full source regression passed with 63 tests.
+- Full source regression passed with 64 tests.
 
 ## [0.6.83] - 2026-05-10
 

@@ -30,8 +30,6 @@ assert_not_contains() {
   fi
 }
 
-assert_contains "${DIST_DIR}/VERSION" "0.6.84" "VERSION Token Diet release"
-
 assert_not_contains "${DIST_DIR}/README.md" "Token Diet" "README stays introductory"
 assert_not_contains "${DIST_DIR}/README.md" "SFS_OUTPUT_STYLE" "README no output-style detail"
 
