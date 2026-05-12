@@ -117,6 +117,23 @@ fixed plan
 이 구조가 있으면 Codex, Claude, Gemini 를 동시에 써도 작업 속도와 품질 체크가 같이 올라갑니다.
 구조가 없으면 병렬성은 충돌과 중복 review 만 늘립니다.
 
+## Token Diet 10x 루프
+
+AI agent 를 오래 쓰면 비용보다 먼저 맥락 품질이 흔들립니다. 짧은 답변이 도움이 되는 이유는
+단어 수 자체가 아니라, 사용자가 볼 필요 없는 장식을 줄이고 판단에 필요한 trace 를 더 빨리 찾게
+하기 때문입니다.
+
+| Token Diet practice | Solon 의미 | 10x 효과 |
+|---|---|---|
+| Professional compact output | routine status/start/report 를 한 줄 필드로 출력 | 기다리는 시간과 읽는 비용을 줄임 |
+| Evidence-preserving floor | warning, decision, evidence, source trace, verification 은 유지 | 짧아져도 review 품질이 무너지지 않음 |
+| Raw-text fallback | compact 판단이 애매하면 원문/경로를 다시 확인 | 잘못 요약한 상태로 구현하지 않음 |
+| Context Diet | routed context, stable search vocabulary, concept-grained artifact 우선 | 입력 토큰을 broad read 로 태우지 않음 |
+| Persona opt-in | Caveman/persona 말투는 기본값이 아님 | 제품 출력 톤을 장난으로 만들지 않음 |
+
+Token Diet 의 성공 조건은 "짧아짐"이 아닙니다. 짧아져도 evidence/risk/raw traceability 가 살아 있어야
+성공입니다. 그 조건이 흔들리면 Solon 은 full clarity 로 돌아갑니다.
+
 ## 모델 라우팅 10x 루프
 
 Solon 의 모델 라우팅은 "비싼 모델을 항상 쓰자"가 아니라 "판단의 무게와 모델의 책임을 맞추자"는

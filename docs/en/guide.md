@@ -120,6 +120,21 @@ sfs brainstorm "..."           # default normal thinking scaffold
 sfs brainstorm --hard "..."    # product-owner hard training
 ```
 
+Use Token Diet compact output when you want routine command output in fewer
+tokens without dropping traceability:
+
+```bash
+SFS_OUTPUT_STYLE=compact sfs status
+sfs status --compact
+sfs start "first goal" --output-style compact
+SFS_OUTPUT_STYLE=compact sfs report
+```
+
+Compact output keeps paths, next actions, alternative modes, archive paths, and
+verification fields. Destructive/security/privacy/data-loss warnings, user
+decisions, review findings, and raw-source traceability stay in full clarity
+when shortening would lower quality. Caveman/persona speech is not the default.
+
 If a blank app would help before a sprint, the user should not need to know words
 like Next.js, Spring, Java, or API. The user can simply describe what they want
 to make. During brainstorm, the AI should infer when an initial project setup
@@ -205,6 +220,10 @@ Use `sfs report` separately only when you want to preview or rebuild the report
 without closing the sprint. The full list of optional helpers
 (`report --sprint <id>`, `tidy`, `decision`, `adopt`, etc.) is in the Korean
 GUIDE §11.
+For compact routine output, use `sfs status --compact`,
+`sfs start "..." --output-style compact`, or `sfs report --output-style
+compact`. `sfs report --compact` still means finalize/archive the workbench; it
+is separate from output style.
 For committing Solon work, use `sfs commit plan` to inspect groups, then
 `sfs commit apply --group <name>`. `apply` commits and pushes the current branch
 by default; use `--no-push` only for local sandbox/release testing or offline

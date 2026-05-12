@@ -36,6 +36,30 @@ next: sfs brainstorm --simple "..."  # 빠른 정리
 사용자가 입력하는 명령어는 그대로 `sfs brainstorm` 입니다. Solon 이 지금 작업에 맞는
 depth 옵션을 함께 보여드릴 뿐입니다.
 
+## Token Diet / Compact I/O
+
+Token Diet 는 AI 응답을 무조건 짧게 만드는 모드가 아닙니다. routine 상태/인계 출력에서
+불필요한 장식을 줄이되, 판단과 검증에 필요한 필드는 남기는 compact I/O 계약입니다.
+
+```bash
+SFS_OUTPUT_STYLE=compact sfs status
+sfs status --compact
+sfs start "첫 작업 목표" --output-style compact
+SFS_OUTPUT_STYLE=compact sfs report
+```
+
+compact `status` 는 `sprint`, `wu`, `gate`, `verdict`, `ahead`, `last_event` 를 보존합니다.
+compact `start` 는 생성된 sprint path, shared docs path, lazy step-doc 상태, 권장 brainstorm 명령,
+`--simple` / `--hard` 대안, `recommended=normal` 을 보존합니다. compact `report` 는 report path,
+archive path, compact/finalization 상태를 보존합니다.
+
+반대로 destructive/security/privacy/data-loss warning, 사용자 decision, review finding,
+raw-source traceability, verification evidence 는 줄이면 품질이 낮아질 수 있으므로 full clarity 를
+유지합니다. Caveman/persona 말투는 기본값이 아니며, SFS 기본값은 professional compact output 입니다.
+품질 기준은 evidence/risk/raw traceability 먼저, 짧아짐은 그 다음입니다.
+filefunc 에서 흡수한 것은 one-file-one-function 규칙이 아니라 precise routed context, stable search
+vocabulary, raw-text fallback, verification 같은 Context Diet 원칙입니다.
+
 작업을 닫을 때 `report.md` 와 `retro.md` 는 `.sfs-local` 안이 아니라
 `docs/solon/<english-workspace>/<yyyyMMdd>/` 아래에 생성됩니다. 목표가 영어 폴더명으로
 명확하지 않으면 `sfs start "<goal>" --workspace <english-name>` 으로 한 줄 영어 이름을

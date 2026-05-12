@@ -1,3 +1,49 @@
+## [0.6.84] - 2026-05-13
+
+> **Token Diet adds opt-in compact command output while preserving evidence,
+> warnings, decisions, source traceability, and verification fields.**
+
+### Added
+
+- Added a quality-preserving compact-output contract to SFS agent surfaces:
+  compactness is never a pass condition by itself, and full clarity remains the
+  fallback when evidence, risk, raw-source traceability, or decision context
+  would weaken.
+- Added `SFS_OUTPUT_STYLE=compact` and `--output-style compact` for routine
+  `sfs start` and `sfs report` stdout. `sfs start` compact output keeps the
+  created sprint path, current sprint pointer, shared-doc path, lazy step-doc
+  state, recommended brainstorm command, simple/hard alternatives, and
+  `recommended=normal`. `sfs report` compact output keeps report/archive paths
+  and the compact/finalization state.
+- Added compact `sfs status` output through `SFS_OUTPUT_STYLE=compact`,
+  `sfs status --compact`, and `sfs status --output-style compact`, preserving
+  `sprint`, `wu`, `gate`, `verdict`, `ahead`, and `last_event`.
+- Added Windows native `sfs.cmd status` parity for the compact status output
+  shape.
+- Added Token Diet benchmark fixtures and runtime tests:
+  `test-token-diet-compact-output.sh`,
+  `test-token-diet-runtime-compact-status.sh`, and
+  `test-token-diet-runtime-compact-next-report.sh`.
+
+### Changed
+
+- Documented Context Diet guidance inspired by `park-jun-woo/filefunc`:
+  prefer precise routed context, concept-grained artifacts, stable search
+  vocabulary, one-line summaries, raw-text fallback, and verification.
+- Explicitly rejected direct filefunc transplantation into SFS: no SFS-wide
+  one-file-one-function/type rule, no mandatory annotation campaign, and no
+  automatic SSoT compression before proof.
+- Kept Caveman/persona-style output as an opt-in concept only; SFS defaults to
+  professional compact output, not joke/persona speech.
+
+### Tests
+
+- Routine compact fixtures show 69%, 70%, and 72% character reduction while
+  retaining source and verification traces.
+- Negative fixtures fail when compact text drops review evidence, data-loss
+  warning severity, or decision alternatives.
+- Full source regression passed with 63 tests.
+
 ## [0.6.83] - 2026-05-10
 
 > **Claude, Codex, and Gemini model routing now has explicit role boundaries,

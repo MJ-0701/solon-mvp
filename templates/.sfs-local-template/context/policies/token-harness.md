@@ -15,6 +15,18 @@ load_when: ["token", "harness", "context", "Claude", "Codex", "Gemini", "MCP", "
 - Prefer context routing before broad reads: start from `sfs status`, current
   `report.md`/`retro.md`, `_INDEX.md`, and the command module, then inspect only
   files needed for the slice.
+- Apply Context Diet before output compression: prefer concept-grained context
+  modules, stable searchable terms, and one-line summaries that let agents
+  decide whether a full read is needed. If compact text and raw text might
+  diverge, read the raw source first; if meaning-loss risk remains, ask the
+  user instead of guessing.
+- Token savings is secondary to quality. If compression would lower answer
+  quality, hide evidence, weaken a risk warning, or break raw-source
+  traceability, do not compress; return to full clarity.
+- Absorb filefunc-style benchmark lessons only when they reduce irrelevant
+  reads. Do not force SFS-wide one-file-one-function/type rules, mandatory
+  annotations, or policy-file rewrites when that would add churn or hide safety
+  rules.
 - Prefer symbol/semantic navigation for large codebases. Claude users may use
   Serena; other agents should use LSP, IDE index, repo graph, or precise `rg`
   before reading entire directories.

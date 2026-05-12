@@ -37,6 +37,33 @@ next: sfs brainstorm --simple "..."  # quick cleanup
 The user still types `sfs brainstorm`. Solon simply exposes the available
 depth options for the shape of the work.
 
+## Token Diet / Compact I/O
+
+Token Diet is not "make every AI answer short." It is a compact I/O contract
+for routine status and handoff output: remove decorative filler, keep the
+fields needed for judgment and verification.
+
+```bash
+SFS_OUTPUT_STYLE=compact sfs status
+sfs status --compact
+sfs start "first goal" --output-style compact
+SFS_OUTPUT_STYLE=compact sfs report
+```
+
+Compact `status` keeps `sprint`, `wu`, `gate`, `verdict`, `ahead`, and
+`last_event`. Compact `start` keeps the created sprint path, shared-docs path,
+lazy step-doc state, recommended brainstorm command, `--simple` / `--hard`
+alternatives, and `recommended=normal`. Compact `report` keeps the report path,
+archive path, and compact/finalization state.
+
+Destructive/security/privacy/data-loss warnings, user decisions, review
+findings, raw-source traceability, and verification evidence stay in full
+clarity when shortening would lower quality. Caveman/persona speech is not the
+default; SFS defaults to professional compact output. The quality floor is
+evidence, risk, and raw traceability first; shorter text comes second. The filefunc benchmark
+influenced Context Diet principles such as precise routed context, stable
+search vocabulary, raw-text fallback, and verification. It is not a broad one-file-one-function rule.
+
 When the work closes, `report.md` and `retro.md` are generated under
 `docs/solon/<english-workspace>/<yyyyMMdd>/` rather than inside `.sfs-local`.
 Use `sfs start "<goal>" --workspace <english-name>` when the goal is not already

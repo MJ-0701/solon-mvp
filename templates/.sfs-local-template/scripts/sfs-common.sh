@@ -604,6 +604,30 @@ render_status_line() {
     "${t_disp}"
 }
 
+# render_status_compact_line SPRINT WU GATE VERDICT AHEAD TS — compact status.
+# Keeps every status field explicit while removing decorative separators.
+render_status_compact_line() {
+  local sprint="${1:-}"
+  local wu="${2:-}"
+  local gate="${3:-}"
+  local verdict="${4:-}"
+  local ahead="${5:-0}"
+  local ts="${6:-}"
+
+  local s_disp="${sprint:--}"
+  local w_disp="${wu:--}"
+  local g_disp="${gate:--}"
+  if [[ -n "${gate}" ]]; then
+    g_disp="$(sfs_gate_display_label "${gate}")"
+  fi
+  local v_disp="${verdict:--}"
+  local a_disp="${ahead:-0}"
+  local t_disp="${ts:--}"
+
+  printf 'sprint=%s wu=%s gate=%s verdict=%s ahead=%s last_event=%s\n' \
+    "${s_disp}" "${w_disp}" "${g_disp}" "${v_disp}" "${a_disp}" "${t_disp}"
+}
+
 # ─────────────────────────────────────────────────────────────────────
 # EVENT APPEND
 # ─────────────────────────────────────────────────────────────────────
@@ -1399,10 +1423,14 @@ sfs_write_cycle_end_division_recommendations() {
 
 usage_status() {
   cat <<'EOF'
-Usage: /sfs status [--color=auto|always|never]
+Usage: /sfs status [--color=auto|always|never] [--compact|--output-style compact]
 
 Print one line:
   sprint <id> · WU <wu_id> · gate <last_gate>:<verdict> · ahead <N> · last_event <ISO8601_ts>
+
+Compact mode:
+  SFS_OUTPUT_STYLE=compact /sfs status
+  /sfs status --compact
 
 Exit codes:
   0  success
@@ -1415,7 +1443,7 @@ EOF
 
 usage_start() {
   cat <<'EOF'
-Usage: /sfs start [<goal>] [--id <sprint-id>] [--workspace <english-name>] [--force]
+Usage: /sfs start [<goal>] [--id <sprint-id>] [--workspace <english-name>] [--force] [--output-style compact]
 
 Default sprint-id pattern: <YYYY-Wxx>-sprint-<N>  (ISO 8601 week)
 Goal is free text. Use --id only when you need a custom sprint id.
@@ -1424,6 +1452,9 @@ docs/solon/<workspace>/<yyyyMMdd>/.
 Use /sfs brainstorm for multiline/raw requirement context before /sfs plan.
 On success, start prints the created files and one next action that exposes
 brainstorm depth: --simple, default normal, or --hard.
+Compact output keeps the same path/next-action evidence in one line:
+  SFS_OUTPUT_STYLE=compact /sfs start "goal"
+  /sfs start "goal" --output-style compact
 
 Exit codes:
   0  success

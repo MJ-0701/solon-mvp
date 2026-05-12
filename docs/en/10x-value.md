@@ -127,6 +127,24 @@ With that structure, Codex, Claude, and Gemini can increase both speed and
 quality control. Without it, parallelism mostly creates collisions and duplicate
 review work.
 
+## Token Diet 10x Loop
+
+Long AI-agent sessions often fail on context quality before they fail on raw
+cost. Short answers help only when they remove decorative filler and make the
+important trace easier to find.
+
+| Token Diet practice | Solon meaning | 10x effect |
+|---|---|---|
+| Professional compact output | routine status/start/report output as one-line fields | reduce waiting and reading cost |
+| Evidence-preserving floor | keep warnings, decisions, evidence, source trace, and verification | review quality survives compression |
+| Raw-text fallback | reread the source/path when compact judgment is unclear | avoid implementing from a bad summary |
+| Context Diet | prefer routed context, stable search vocabulary, concept-grained artifacts | avoid burning input tokens on broad reads |
+| Persona opt-in | Caveman/persona speech is not the default | keep product output professional |
+
+The success condition is not "shorter." It is shorter while evidence, risk, and
+raw traceability remain visible. When that condition is not met, Solon returns
+to full clarity.
+
 ## Model Routing 10x Loop
 
 Solon's model routing is not "use the most expensive model for everything." It

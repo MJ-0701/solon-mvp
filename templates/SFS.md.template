@@ -33,7 +33,10 @@ Project overview refresh:
 - `sfs profile` updates only this file's `## 프로젝트 개요` section.
 
 Never paraphrase bash adapter output. Bash-first commands may still surface one
-compact Next action after verbatim output. Never hardcode external private docsets.
+compact Next action after verbatim output. Compact output is quality-preserving only:
+never compress evidence, risk warnings, decisions, source links/paths, or
+raw-source traceability. If compactness would weaken quality, use full clarity.
+Never hardcode external private docsets.
 In Solon reports, show gates as `Gate N (Name)`, not naked ids. Use gate
 numbers 1..7 for new CLI examples; legacy ids remain compatibility-only.
 Solon reports should feel like compact console dashboards, not flat bullet

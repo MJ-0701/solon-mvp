@@ -749,17 +749,41 @@ Full guide:
 }
 
 function Invoke-SfsNativeStatus([string[]] $InvocationArgs) {
-  foreach ($arg in $InvocationArgs) {
+  $outputStyle = "normal"
+  if ($env:SFS_OUTPUT_STYLE) { $outputStyle = [string] $env:SFS_OUTPUT_STYLE }
+  for ($i = 0; $i -lt $InvocationArgs.Count; $i++) {
+    $arg = $InvocationArgs[$i]
     if ($arg -eq "--") { continue }
     if ($arg -eq "-h" -or $arg -eq "--help") {
-      Write-Output "Usage: sfs.cmd status [--color auto|always|never]"
+      Write-Output "Usage: sfs.cmd status [--color auto|always|never] [--compact|--output-style compact]"
       Set-SfsNativeExit 0
       return
+    }
+    if ($arg -eq "--compact") { $outputStyle = "compact"; continue }
+    if ($arg -like "--output-style=*") {
+      $outputStyle = $arg.Substring("--output-style=".Length)
+      continue
+    }
+    if ($arg -eq "--output-style") {
+      if (($i + 1) -ge $InvocationArgs.Count) {
+        Write-SfsNativeError "missing value for --output-style (expected normal|compact)"
+        Set-SfsNativeExit 99
+        return
+      }
+      $i += 1
+      $outputStyle = $InvocationArgs[$i]
+      continue
     }
     if ($arg -eq "--color") { continue }
     if ($arg -like "--color=*") { continue }
     if ($arg -in @("auto", "always", "never")) { continue }
     Write-SfsNativeError "unknown arg for status: $arg"
+    Set-SfsNativeExit 99
+      return
+  }
+
+  if ($outputStyle -notin @("normal", "compact")) {
+    Write-SfsNativeError "invalid output style: $outputStyle (expected normal|compact)"
     Set-SfsNativeExit 99
     return
   }
@@ -846,7 +870,11 @@ function Invoke-SfsNativeStatus([string[]] $InvocationArgs) {
   if (-not $verdict) { $verdict = "-" }
   if (-not $lastEvent) { $lastEvent = "-" }
   $gateLabel = Get-SfsGateLabel $gate
-  Write-Output "sprint $sprint - WU $wu - gate $($gateLabel):$verdict - ahead $ahead - last_event $lastEvent"
+  if ($outputStyle -eq "compact") {
+    Write-Output "sprint=$sprint wu=$wu gate=$gateLabel verdict=$verdict ahead=$ahead last_event=$lastEvent"
+  } else {
+    Write-Output "sprint $sprint - WU $wu - gate $($gateLabel):$verdict - ahead $ahead - last_event $lastEvent"
+  }
   Set-SfsNativeExit 0
 }
 

@@ -29,6 +29,10 @@ Rules:
   directory exist before reporting success.
 - `sfs profile` may refine only `SFS.md` `## 프로젝트 개요`.
 - Bash-first means no artifact refinement; it does not forbid a compact Next.
+- Compact output is quality-preserving only: remove filler in summaries/Next,
+  but never compress adapter stdout/stderr, evidence, risk warnings, decisions,
+  source links/paths, or raw-source traceability. If compactness would weaken
+  quality, use full clarity.
 - AI-era fundamentals apply across all gates, not only implement: shared design
   concept, domain language, feedback loop, interface/artifact boundary, and
   gray-box delegation.

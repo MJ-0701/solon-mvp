@@ -41,9 +41,8 @@ Solon 을 쓰면 AI 는 더 멀리 혼자 달리는 대신, 사용자가 이해�
 
 SFS 는 두 가지 의미를 함께 가집니다.
 
-- **Sprint Flow System**: `start → brainstorm → plan → review (Gate 3) → implement → review (Gate 6) → retro`
-  로 생각과 실행을 통과시키는 매일의 작업 흐름입니다. review 는 plan 직후와 implement 직후
-  두 번 등장합니다.
+- **Sprint Flow System**: `start → brainstorm → plan → implement → review → retro` 로 생각과 실행을
+  통과시키는 매일의 작업 흐름입니다.
 - **Solo Founder System**: 혼자 제품을 만드는 사람이 여러 AI agent 를 팀처럼 쓰기 위한 운영
   시스템입니다. 역할, 결정, 검토, 회고, 인수인계를 프로젝트 안에 고정합니다.
 
@@ -62,7 +61,6 @@ sfs status
 -> sfs start "<goal>"
 -> sfs brainstorm [--simple|--hard] "<raw context>"
 -> sfs plan
--> sfs review --gate 3
 -> sfs implement "<first slice>"
 -> sfs review
 -> sfs retro
@@ -73,12 +71,8 @@ sfs status
 - `start`: 지금부터 어떤 작업 묶음을 진행할지 엽니다.
 - `brainstorm`: 의도, 우선순위, 포기할 것, 성공 기준을 정리합니다.
 - `plan`: 목표, 범위, 완료 기준, 검증 방법을 한 sprint 안에서 닫히는 계약으로 만듭니다.
-- `review --gate 3`: 구현으로 넘어가기 전에 plan 자체를 독립 검토합니다. PASS 가 나야
-  `implement` 가 열립니다. (정말 건너뛰어야 할 때만 `--allow-unreviewed-plan`.)
 - `implement`: 코드, 문서, 전략, 디자인 handoff, QA evidence, 운영/runbook 중 필요한 산출물을 만듭니다.
-- `review`: 만든 쪽이 스스로 통과시키지 않도록 검토 역할과 근거를 분리합니다. 구현 완료 후의
-  artifact acceptance review (Gate 6) 가 기본값이고, `--gate 3` 으로 plan review 도 같은 명령에서
-  수행됩니다.
+- `review`: 만든 쪽이 스스로 통과시키지 않도록 검토 역할과 근거를 분리합니다.
 - `retro`: 결과, 배운 점, 다음 action 을 남기고 sprint 를 닫습니다.
 
 ---
@@ -174,9 +168,8 @@ Solon 의 강점은 앱을 대신 찍어내는 것이 아니라, 앱을 만든 �
 | `sfs start <goal>` | 새 작업 묶음 시작 |
 | `sfs brainstorm [--simple|--hard] [text|--stdin]` | 만들기 전에 의도와 기준 정리 |
 | `sfs plan` | 목표/범위/완료 기준 계약 작성 |
-| `sfs review --gate 3 [--lens ...]` | plan 자체를 implement 전에 독립 검토 (PASS 필수) |
 | `sfs implement [slice|--stdin]` | 작은 실행 조각 진행 |
-| `sfs review [--lens ...]` | 구현 산출물 검토 (기본 Gate 6 / artifact acceptance) |
+| `sfs review [--lens ...]` | 산출물 검토 |
 | `sfs retro [--draft]` | 회고와 마무리 |
 | `sfs commit plan` | 변경 그룹 확인 |
 | `sfs commit apply --group <name>` | 선택 그룹을 commit 하고 현재 branch push |

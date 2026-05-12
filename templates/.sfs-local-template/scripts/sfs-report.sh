@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # .sfs-local/scripts/sfs-report.sh
 #
-# Solon SFS — `/sfs report [--sprint <id>] [--compact]`.
+# Solon SFS — `/sfs report [--sprint <id>] [--compact] [--output-style compact]`.
 # Creates the compact final sprint report under docs/solon/<english-workspace>/<yyyyMMdd>.
 # With --compact, moves verbose workbench artifacts into .sfs-local/archives/
 # after user/AI approval.
@@ -17,7 +17,7 @@ source "${SFS_SCRIPT_DIR}/sfs-common.sh"
 usage_report() {
   cat <<'EOF'
 Usage:
-  /sfs report [--sprint <id>] [--compact]
+  /sfs report [--sprint <id>] [--compact] [--output-style compact]
 
 Create or update the compact sprint report.
   - Without --compact, prepares docs/solon/<english-workspace>/<yyyyMMdd>/report.md
@@ -27,6 +27,8 @@ Create or update the compact sprint report.
   - report.md/retro.md are shared handoff docs and may be written in the
     user's native/workspace language, matching the commit-message rule.
   - decision files are preserved as history/learning.
+  - SFS_OUTPUT_STYLE=compact or --output-style compact prints one line while
+    preserving report/archive paths and the compact archive flag.
 
 Exit codes:
   0  ok
@@ -40,6 +42,7 @@ EOF
 
 SPRINT_ID=""
 COMPACT=0
+OUTPUT_STYLE="${SFS_OUTPUT_STYLE:-normal}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -63,6 +66,18 @@ while [[ $# -gt 0 ]]; do
       COMPACT=1
       shift
       ;;
+    --output-style)
+      if [[ $# -lt 2 ]]; then
+        echo "missing value for --output-style (expected normal|compact)" >&2
+        exit "${SFS_EXIT_UNKNOWN}"
+      fi
+      OUTPUT_STYLE="$2"
+      shift 2
+      ;;
+    --output-style=*)
+      OUTPUT_STYLE="${1#--output-style=}"
+      shift
+      ;;
     -h|--help)
       usage_report
       exit "${SFS_EXIT_OK}"
@@ -84,6 +99,14 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+case "${OUTPUT_STYLE}" in
+  normal|compact) ;;
+  *)
+    echo "invalid output style: ${OUTPUT_STYLE} (expected normal|compact)" >&2
+    exit "${SFS_EXIT_UNKNOWN}"
+    ;;
+esac
 
 set +e
 validate_sfs_local
@@ -128,13 +151,24 @@ _esc_path="${REPORT_PATH//\\/\\\\}"
 _esc_path="${_esc_path//\"/\\\"}"
 append_event "report_ready" "{\"sprint_id\":\"${_esc_sprint}\",\"path\":\"${_esc_path}\",\"compact\":${COMPACT}}"
 
-echo "report.md ready: ${REPORT_PATH}"
-
 if [[ "${COMPACT}" -eq 1 ]]; then
   ARCHIVE_PATH="$(sfs_workbench_archive_dir "${SPRINT_ID}" "${NOW}")"
   sfs_compact_sprint_workbench "${SPRINT_ID}" "${NOW}"
-  echo "archive: ${ARCHIVE_PATH}"
-  echo "workbench archived: ${SPRINT_ID}"
+fi
+
+if [[ "${OUTPUT_STYLE}" == "compact" ]]; then
+  if [[ "${COMPACT}" -eq 1 ]]; then
+    printf 'report=%s compact=1 archive=%s workbench_archived=%s\n' \
+      "${REPORT_PATH}" "${ARCHIVE_PATH}" "${SPRINT_ID}"
+  else
+    printf 'report=%s compact=0\n' "${REPORT_PATH}"
+  fi
+else
+  echo "report.md ready: ${REPORT_PATH}"
+  if [[ "${COMPACT}" -eq 1 ]]; then
+    echo "archive: ${ARCHIVE_PATH}"
+    echo "workbench archived: ${SPRINT_ID}"
+  fi
 fi
 
 exit "${SFS_EXIT_OK}"

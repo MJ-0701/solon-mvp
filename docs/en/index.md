@@ -49,6 +49,13 @@ commands. This includes source-driven implementation, stop-the-line debugging,
 deprecation/migration cleanup, shipping checks, and the `source-docs`,
 `simplify`, `security`, `performance`, and `api-contract` review lenses.
 
+Token Diet reduces routine output tokens without dropping evidence, risk, or
+raw traceability. Use `SFS_OUTPUT_STYLE=compact`, `sfs status --compact`,
+`sfs start --output-style compact`, or `sfs report --output-style compact` for
+compact routine output. Warnings, decisions, reviews, and source evidence stay
+in full clarity when compression would lower quality. Caveman/persona speech is
+not the default.
+
 Model routing follows the same split and applies by default. Helper-grade simple
 I/O uses lighter intake models (Codex `gpt-5.4-mini`), while question generation
 and facilitation use standard facilitator models (Codex `gpt-5.4`). Lower-model

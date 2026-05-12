@@ -44,12 +44,14 @@ source_policy="${context}/policies/source-driven-development.md"
 debug_policy="${context}/policies/debugging-and-error-recovery.md"
 deprecation_policy="${context}/policies/deprecation-and-migration.md"
 shipping_policy="${context}/policies/shipping-and-launch.md"
+token_policy="${context}/policies/token-harness.md"
 
 for policy in \
   "${source_policy}" \
   "${debug_policy}" \
   "${deprecation_policy}" \
-  "${shipping_policy}"
+  "${shipping_policy}" \
+  "${token_policy}"
 do
   [[ -f "${policy}" ]] || fail "missing policy ${policy}"
 done
@@ -66,6 +68,34 @@ assert_contains "${source_policy}" "Cite source URLs" "source policy citation"
 assert_contains "${debug_policy}" "Stop-the-line rule" "debug policy stop line"
 assert_contains "${deprecation_policy}" "keep reason cannot be stated in one sentence" "deprecation policy retention"
 assert_contains "${shipping_policy}" "reversible, observable, and verified across channels" "shipping policy release"
+assert_contains "${token_policy}" "Context Diet" "token policy context diet"
+assert_contains "${token_policy}" "raw source first" "token policy raw source fallback"
+assert_contains "${token_policy}" "user instead of guessing" "token policy ask-user boundary"
+assert_contains "${token_policy}" "Token savings is secondary to quality" "token policy quality floor"
+assert_contains "${token_policy}" "do not compress; return to full clarity" "token policy no low-quality compression"
+assert_contains "${token_policy}" "Do not force SFS-wide one-file-one-function/type rules" "token policy no filefunc transplant"
+assert_contains "${kernel}" "Compactness is never a pass condition" "kernel token diet quality floor"
+
+token_contract="Compact output is quality-preserving only"
+adapter_files=(
+  "${DIST_DIR}/templates/CLAUDE.md.template"
+  "${DIST_DIR}/templates/AGENTS.md.template"
+  "${DIST_DIR}/templates/GEMINI.md.template"
+  "${DIST_DIR}/templates/SFS.md.template"
+  "${DIST_DIR}/templates/codex-skill/SKILL.md"
+  "${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md"
+  "${DIST_DIR}/templates/.claude/commands/sfs.md"
+  "${DIST_DIR}/templates/.gemini/commands/sfs.toml"
+  "${DIST_DIR}/templates/.codex/prompts/sfs.md"
+  "${DIST_DIR}/commands/sfs.toml"
+  "${DIST_DIR}/plugins/solon/commands/sfs.md"
+)
+
+for file in "${adapter_files[@]}"; do
+  assert_contains "${file}" "${token_contract}" "adapter token diet quality contract ${file}"
+  assert_contains "${file}" "raw-source traceability" "adapter token diet traceability ${file}"
+  assert_contains "${file}" "use full clarity" "adapter token diet full clarity fallback ${file}"
+done
 
 assert_contains "${implement}" "policies/source-driven-development.md" "implement source policy load"
 assert_contains "${implement}" "Stop-the-line" "implement debug stop line"

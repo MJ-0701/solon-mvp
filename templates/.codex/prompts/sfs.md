@@ -21,6 +21,10 @@ Arguments: `$ARGUMENTS`
    artifact. For `start`, verify `.sfs-local/current-sprint` and the sprint
    directory exist before reporting success.
 4. Print adapter stdout/stderr verbatim.
+   Compact output is quality-preserving only: remove filler in summaries/Next,
+   but never compress adapter stdout/stderr, evidence, risk warnings,
+   decisions, source links/paths, or raw-source traceability. If compactness
+   would weaken quality, use full clarity.
 5. Read `sfs context cat kernel`, `sfs context cat index`, then only the routed
    module. On Windows PowerShell/cmd use native `sfs.cmd context cat ...`.
 6. For hybrid commands, refine pointed artifacts and answer with one Solon report.

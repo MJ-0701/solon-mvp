@@ -7,6 +7,9 @@
 #
 # Output (one line):
 #   sprint <id> · WU <wu_id> · gate <last_gate>:<verdict> · ahead <N> · last_event <ISO8601_ts>
+# Compact opt-in:
+#   SFS_OUTPUT_STYLE=compact /sfs status
+#   /sfs status --compact
 #
 # Exit codes (WU-23 §1.1 정합):
 #   0  success
@@ -33,9 +36,26 @@ source "${SFS_SCRIPT_DIR}/sfs-common.sh"
 # CLI parse
 # ─────────────────────────────────────────────────────────────────────
 COLOR_MODE="auto"
+OUTPUT_STYLE="${SFS_OUTPUT_STYLE:-normal}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --compact)
+      OUTPUT_STYLE="compact"
+      shift
+      ;;
+    --output-style=*)
+      OUTPUT_STYLE="${1#*=}"
+      shift
+      ;;
+    --output-style)
+      if [[ $# -lt 2 ]]; then
+        echo "missing value for --output-style (expected normal|compact)" >&2
+        exit "${SFS_EXIT_UNKNOWN}"
+      fi
+      OUTPUT_STYLE="$2"
+      shift 2
+      ;;
     --color=*)
       COLOR_MODE="${1#*=}"
       shift
@@ -72,6 +92,15 @@ case "${COLOR_MODE}" in
   auto|always|never) ;;
   *)
     echo "invalid --color value: ${COLOR_MODE} (expected auto|always|never)" >&2
+    exit "${SFS_EXIT_UNKNOWN}"
+    ;;
+esac
+
+# Validate output style. Compact is opt-in and must preserve every status field.
+case "${OUTPUT_STYLE}" in
+  normal|compact) ;;
+  *)
+    echo "invalid output style: ${OUTPUT_STYLE} (expected normal|compact)" >&2
     exit "${SFS_EXIT_UNKNOWN}"
     ;;
 esac
@@ -116,14 +145,24 @@ fi
 # ─────────────────────────────────────────────────────────────────────
 # Render
 # ─────────────────────────────────────────────────────────────────────
-render_status_line \
-  "${COLOR_MODE}" \
-  "${SPRINT_ID}" \
-  "${WU_ID}" \
-  "${LAST_GATE}" \
-  "${VERDICT}" \
-  "${AHEAD}" \
-  "${LAST_EVENT_TS}"
+if [[ "${OUTPUT_STYLE}" == "compact" ]]; then
+  render_status_compact_line \
+    "${SPRINT_ID}" \
+    "${WU_ID}" \
+    "${LAST_GATE}" \
+    "${VERDICT}" \
+    "${AHEAD}" \
+    "${LAST_EVENT_TS}"
+else
+  render_status_line \
+    "${COLOR_MODE}" \
+    "${SPRINT_ID}" \
+    "${WU_ID}" \
+    "${LAST_GATE}" \
+    "${VERDICT}" \
+    "${AHEAD}" \
+    "${LAST_EVENT_TS}"
+fi
 
 exit "${SFS_EXIT_OK}"
 # End of sfs-status.sh

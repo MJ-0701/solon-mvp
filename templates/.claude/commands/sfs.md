@@ -33,6 +33,10 @@ $ARGUMENTS
 5. Print stdout verbatim; on failure include stderr and exit code.
 6. Read `sfs context cat kernel`, `sfs context cat index`, then only the routed module. On Windows PowerShell/cmd use native `sfs.cmd context cat ...` so Git Bash is not started. Resolve command modules as `sfs context cat commands/<command>.md` (for example, `commands/start.md`) or via the command alias (`sfs context cat start`).
 7. For bash-first commands, do not refine artifacts, but a compact state/Next is allowed.
+   Compact output is quality-preserving only: remove filler in summaries/Next,
+   but never compress adapter stdout/stderr, evidence, risk warnings,
+   decisions, source links/paths, or raw-source traceability. If compactness
+   would weaken quality, use full clarity.
 8. For `profile`, edit only the `SFS.md` project overview section.
 9. For hybrid commands, refine pointed artifacts and answer with one Solon report.
 10. AI-era fundamentals apply across all gates, not only implement: shared

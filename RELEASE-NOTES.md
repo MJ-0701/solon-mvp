@@ -7,6 +7,22 @@
 
 ---
 
+## 0.6.84
+
+이번 버전은 SFS Token Diet 를 추가합니다. 목표는 단순히 짧게 말하는 것이 아니라,
+짧아져도 evidence, warning, decision, source trace, verification 이 사라지지 않게 하는 것입니다.
+
+- `SFS_OUTPUT_STYLE=compact sfs status` 또는 `sfs status --compact` 로 상태를 한 줄 compact 형식으로 볼 수 있습니다.
+- `sfs start "목표" --output-style compact` 는 생성 경로, shared docs 경로, 권장 brainstorm 명령,
+  `--simple` / `--hard` 대안, `recommended=normal` 을 한 줄로 보존합니다.
+- `SFS_OUTPUT_STYLE=compact sfs report` 와 `sfs report --output-style compact` 는 report/archive 경로와
+  compact/finalization 상태를 한 줄로 보존합니다. 기존 `sfs report --compact` 는 그대로 workbench archive/finalize 의미입니다.
+- destructive/security/privacy/data-loss warning, user decision, review finding, raw-source traceability 는 compact 대상이 아닙니다.
+  줄이면 품질이나 추적성이 낮아지는 경우 SFS 는 full clarity 를 유지합니다.
+- Caveman/persona 말투는 기본값이 아닙니다. SFS 기본값은 professional compact output 입니다.
+- filefunc 벤치마크에서는 Context Diet 만 흡수했습니다: precise routed context, stable search vocabulary,
+  raw-text fallback, verification. SFS 전체에 one-file-one-function/type 규칙이나 mandatory annotation 을 강제하지 않습니다.
+
 ## 0.6.83
 
 이번 버전은 Claude/Gemini/Codex 의 모델 레벨 분리를 더 명확히 고정하고,

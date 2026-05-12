@@ -66,6 +66,9 @@ load_when: ["always", "sfs", "entry"]
 - Token/harness hygiene is ambient: keep adapter memory thin, prefer routed
   context and symbol/semantic search before broad reads, and convert repeated
   AI mistakes into guardrails/checks during review or retro.
+- Compactness is never a pass condition. Use compact wording only when evidence,
+  risk warnings, decisions, source links/paths, raw-source traceability, and
+  verification results stay intact; otherwise use full clarity.
 - AI-era software fundamentals are all-phase guardrails, not only implement
   rules: shared design concept, ubiquitous language, tight feedback loops,
   deep-module boundaries, and gray-box delegation must shape brainstorm, plan,

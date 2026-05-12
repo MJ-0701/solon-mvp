@@ -128,6 +128,20 @@ sfs status
 - `sfs start "..."`: 새 작업 묶음 시작
 - `sfs brainstorm "..."`: 바로 만들기 전에 의도와 기준 정리
 
+출력을 짧게 보고 싶을 때는 Token Diet compact output 을 켤 수 있습니다.
+
+```bash
+SFS_OUTPUT_STYLE=compact sfs status
+sfs status --compact
+sfs start "첫 작업 목표" --output-style compact
+SFS_OUTPUT_STYLE=compact sfs report
+```
+
+compact output 은 path, next action, alternative mode, archive path,
+verification 같은 추적 필드를 없애지 않습니다. destructive/security/privacy/data-loss warning,
+사용자 decision, review finding, raw-source traceability 는 짧게 줄여 품질이 낮아질 수 있으면
+full clarity 로 남깁니다. Caveman/persona 말투는 기본값이 아닙니다.
+
 ---
 
 ## 3. 어디서 어떻게 입력하나
@@ -385,6 +399,9 @@ sfs retro
 |---|---|
 | `sfs report` | sprint 를 닫기 전에 보고서만 먼저 보고 싶을 때 |
 | `sfs report --sprint <id>` | 과거 sprint 의 보고서를 다시 만들거나 정리할 때 |
+| `sfs status --compact` | routine status 를 한 줄로 보되 sprint/wu/gate/verdict/ahead/last_event 를 유지할 때 |
+| `sfs start "..." --output-style compact` | 생성 경로와 brainstorm 대안을 한 줄로 보고 싶을 때 |
+| `sfs report --output-style compact` | report/archive 경로를 한 줄로 보고 싶을 때 |
 | `sfs retro --draft` | sprint 를 닫지 않고 회고 초안만 열어두고 싶을 때 |
 | `sfs bootstrap "<만들고 싶은 것>"` | AI 가 동의받은 초기 프로젝트 구성을 이어가기 위한 handoff trigger |
 | `sfs measure --alive -- <command>` | 오래 걸리는 명령이 멈춘 것처럼 보이지 않게 진행 신호를 남길 때 |

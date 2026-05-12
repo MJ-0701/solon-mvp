@@ -45,6 +45,11 @@ agent-skills 벤치마크에서 쓸 만한 practice 는 새 명령으로 늘리�
 공식 문서 기반 구현, stop-the-line debugging, deprecation/migration cleanup, shipping check,
 `source-docs`/`simplify`/`security`/`performance`/`api-contract` review lens 가 포함됩니다.
 
+Token Diet 는 routine 출력 토큰을 줄이되 evidence/risk/raw traceability 를 없애지 않는 compact I/O
+계약입니다. `SFS_OUTPUT_STYLE=compact`, `sfs status --compact`, `sfs start --output-style compact`,
+`sfs report --output-style compact` 를 쓸 수 있지만, warning/decision/review/source evidence 는
+줄이면 품질이 낮아질 때 full clarity 로 유지합니다. Caveman/persona 말투는 기본값이 아닙니다.
+
 모델 라우팅도 같은 원칙을 따르며 기본 적용됩니다. Helper-grade 단순 I/O 는 가벼운 intake 모델
 (Codex 는 `gpt-5.4-mini`), 질문 생성/facilitation 은 standard facilitator 모델(Codex 는
 `gpt-5.4`)이 맡습니다. 하위모델 출력이 질문/선택지/답변 해석이나 gate/plan 에 영향을 주면

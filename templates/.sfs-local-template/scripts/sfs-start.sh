@@ -6,7 +6,7 @@
 #   · ISO 8601 week sprint-id pattern (`<YYYY-Wxx>-sprint-<N>`).
 #
 # Usage:
-#   /sfs start [<goal>] [--id <sprint-id>] [--workspace <english-name>] [--force]
+#   /sfs start [<goal>] [--id <sprint-id>] [--workspace <english-name>] [--force] [--output-style compact]
 #
 # Default sprint-id: <YYYY-Wxx>-sprint-<N>  (ISO week, auto-incremented).
 #
@@ -41,6 +41,7 @@ GOAL=""
 FORCE=false
 GOAL_PARTS=()
 WORKSPACE_RAW=""
+OUTPUT_STYLE="${SFS_OUTPUT_STYLE:-normal}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -74,6 +75,19 @@ while [[ $# -gt 0 ]]; do
       WORKSPACE_RAW="${1#--workspace=}"
       shift
       ;;
+    --output-style=*)
+      OUTPUT_STYLE="${1#--output-style=}"
+      shift
+      ;;
+    --output-style)
+      shift
+      if [[ $# -eq 0 ]]; then
+        echo "missing value for --output-style (expected normal|compact)" >&2
+        exit "${SFS_EXIT_UNKNOWN}"
+      fi
+      OUTPUT_STYLE="$1"
+      shift
+      ;;
     -h|--help)
       usage_start
       exit "${SFS_EXIT_OK}"
@@ -95,6 +109,14 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+case "${OUTPUT_STYLE}" in
+  normal|compact) ;;
+  *)
+    echo "invalid output style: ${OUTPUT_STYLE} (expected normal|compact)" >&2
+    exit "${SFS_EXIT_UNKNOWN}"
+    ;;
+esac
 
 if [[ ${#GOAL_PARTS[@]} -gt 0 ]]; then
   GOAL="${GOAL_PARTS[*]}"
@@ -237,16 +259,27 @@ quote_for_shell_double() {
   printf '"%s"' "${value}"
 }
 
-echo "created: ${SPRINT_DIR}/"
-echo "  - current-sprint pointer"
-echo "  - shared_docs: ${SFS_SHARED_DOCS_DIR}/${WORKSPACE}/<yyyyMMdd>/"
-echo "  - no step docs yet; each command creates only the doc it needs"
 if [[ -n "${GOAL}" ]]; then
   _next_goal="$(quote_for_shell_double "${GOAL}")"
 else
   _next_goal='"<raw goal/context>"'
 fi
-printf 'next: choose brainstorm depth: simple=sfs brainstorm --simple %s | normal=sfs brainstorm %s | hard=sfs brainstorm --hard %s (recommended: normal)\n' "${_next_goal}" "${_next_goal}" "${_next_goal}"
+
+if [[ "${OUTPUT_STYLE}" == "compact" ]]; then
+  printf 'created=%s/ current_sprint=%s shared_docs=%s/<yyyyMMdd>/ step_docs=lazy next=%s alt_simple=%s alt_hard=%s recommended=normal\n' \
+    "${SPRINT_DIR}" \
+    "${SPRINT_ID}" \
+    "${SFS_SHARED_DOCS_DIR}/${WORKSPACE}" \
+    "sfs brainstorm ${_next_goal}" \
+    "sfs brainstorm --simple ${_next_goal}" \
+    "sfs brainstorm --hard ${_next_goal}"
+else
+  echo "created: ${SPRINT_DIR}/"
+  echo "  - current-sprint pointer"
+  echo "  - shared_docs: ${SFS_SHARED_DOCS_DIR}/${WORKSPACE}/<yyyyMMdd>/"
+  echo "  - no step docs yet; each command creates only the doc it needs"
+  printf 'next: choose brainstorm depth: simple=sfs brainstorm --simple %s | normal=sfs brainstorm %s | hard=sfs brainstorm --hard %s (recommended: normal)\n' "${_next_goal}" "${_next_goal}" "${_next_goal}"
+fi
 
 exit "${SFS_EXIT_OK}"
 # End of sfs-start.sh
