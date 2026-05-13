@@ -7,6 +7,16 @@
 
 ---
 
+## 0.6.86
+
+이번 버전은 Token Diet 를 더 짧게 만드는 릴리스가 아니라, 짧아져도 품질이 떨어지지 않게 고정하는 릴리스입니다.
+
+- compact 출력은 검증된 routine 표면에만 머뭅니다: status, start, report.
+- review, decision, safety, source trace, verification evidence 는 줄였을 때 추적성이 흔들리면 full clarity 를 유지합니다.
+- quiet release verifier 는 실패 시 숨긴 stdout/stderr 를 다시 보여준다는 사실을 더 명확히 출력합니다.
+- status dashboard, MD split audit, release helper, session retro/index 정리를 테스트로 묶어 다음 릴리스 작업의 증거를 더 쉽게 추적할 수 있게 했습니다.
+- 0.6.86 검증은 `run-all.sh` 70/0 PASS 와 self-CPO R6 PASS 로 기록됐습니다.
+
 ## 0.6.85
 
 이번 버전은 release verifier 출력 소음을 줄입니다.

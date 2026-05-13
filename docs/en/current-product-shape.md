@@ -64,6 +64,11 @@ evidence, risk, and raw traceability first; shorter text comes second. The filef
 influenced Context Diet principles such as precise routed context, stable
 search vocabulary, raw-text fallback, and verification. It is not a broad one-file-one-function rule.
 
+As of 0.6.85, the release verifier applies the same quality floor to release
+checks. Successful internal install/upgrade smoke logs stay quiet; failed
+smokes replay captured stdout and stderr with `[verify-product-release]`
+prefixes. Release logs get shorter, but release evidence remains traceable.
+
 When the work closes, `report.md` and `retro.md` are generated under
 `docs/solon/<english-workspace>/<yyyyMMdd>/` rather than inside `.sfs-local`.
 Use `sfs start "<goal>" --workspace <english-name>` when the goal is not already

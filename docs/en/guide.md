@@ -135,6 +135,10 @@ verification fields. Destructive/security/privacy/data-loss warnings, user
 decisions, review findings, and raw-source traceability stay in full clarity
 when shortening would lower quality. Caveman/persona speech is not the default.
 
+As of 0.6.85, the release verifier follows the same evidence floor: successful
+internal install/upgrade smoke logs stay quiet, while failures replay captured
+stdout/stderr so the original cause remains traceable.
+
 If a blank app would help before a sprint, the user should not need to know words
 like Next.js, Spring, Java, or API. The user can simply describe what they want
 to make. During brainstorm, the AI should infer when an initial project setup

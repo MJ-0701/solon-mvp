@@ -50,6 +50,9 @@ Token Diet 는 routine 출력 토큰을 줄이되 evidence/risk/raw traceability
 `sfs report --output-style compact` 를 쓸 수 있지만, warning/decision/review/source evidence 는
 줄이면 품질이 낮아질 때 full clarity 로 유지합니다. Caveman/persona 말투는 기본값이 아닙니다.
 
+0.6.85에서는 release verifier 도 같은 방향으로 정리됐습니다. 성공한 내부 install/upgrade
+smoke 로그는 숨기고, 실패하면 캡처한 stdout/stderr 를 다시 출력해 원인 추적성을 보존합니다.
+
 모델 라우팅도 같은 원칙을 따르며 기본 적용됩니다. Helper-grade 단순 I/O 는 가벼운 intake 모델
 (Codex 는 `gpt-5.4-mini`), 질문 생성/facilitation 은 standard facilitator 모델(Codex 는
 `gpt-5.4`)이 맡습니다. 하위모델 출력이 질문/선택지/답변 해석이나 gate/plan 에 영향을 주면

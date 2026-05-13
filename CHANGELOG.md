@@ -1,3 +1,39 @@
+## [0.6.86] - 2026-05-13
+
+> **Token Diet now has an explicit quality-audit release: compact output stays
+> bounded to proven routine surfaces, while evidence-heavy paths keep full
+> traceability.**
+
+### Added
+
+- Added `test-token-diet-quality-audit.sh` to prove Token Diet compact output
+  stays scoped to routine status/start/report surfaces and does not shrink
+  review, decision, safety, source, or verification evidence when that would
+  weaken traceability.
+- Added `test-status-dashboard-contract.sh` so the Solon status dashboard can
+  stay compact without dropping source, evidence, decision, or next-action
+  fields.
+- Added read-only Markdown split audit tooling with
+  `scripts/md-split-audit.sh`, `test-md-split-audit.sh`, and the current
+  `md-split-queue.md` backlog artifact. Historical evidence docs are audited,
+  not rewritten.
+
+### Changed
+
+- Clarified quiet release-verifier failure replay: failed internal smokes now
+  state that captured stdout/stderr is being replayed before emitting prefixed
+  evidence lines.
+- Updated owner release tooling so stable clone defaults consistently point to
+  `~/tmp/solon-product`, matching the current Homebrew/Scoop release ritual.
+- Completed the April 19/20 historical session retro/index cleanup and closed
+  the D-E meta-retro queue in the operating record.
+
+### Tests
+
+- Full source regression passed with 70 tests.
+- Self-CPO review reached PASS at R6 after stale/future-dated handoff evidence
+  was removed and current 0.6.86 artifact pointers were restored.
+
 ## [0.6.85] - 2026-05-13
 
 > **Release verifier smoke output is quieter on success while preserving full

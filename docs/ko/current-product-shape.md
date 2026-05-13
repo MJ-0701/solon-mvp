@@ -60,6 +60,11 @@ raw-source traceability, verification evidence 는 줄이면 품질이 낮아질
 filefunc 에서 흡수한 것은 one-file-one-function 규칙이 아니라 precise routed context, stable search
 vocabulary, raw-text fallback, verification 같은 Context Diet 원칙입니다.
 
+0.6.85 release verifier 는 이 quality floor 를 배포 확인에도 적용합니다. 성공한 내부
+install/upgrade smoke 로그는 조용히 접고, 실패하면 캡처한 stdout/stderr 를
+`[verify-product-release]` prefix 로 다시 보여줍니다. 배포 로그는 짧아져도 실패 원문과
+증거 경로는 사라지지 않습니다.
+
 작업을 닫을 때 `report.md` 와 `retro.md` 는 `.sfs-local` 안이 아니라
 `docs/solon/<english-workspace>/<yyyyMMdd>/` 아래에 생성됩니다. 목표가 영어 폴더명으로
 명확하지 않으면 `sfs start "<goal>" --workspace <english-name>` 으로 한 줄 영어 이름을

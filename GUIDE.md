@@ -142,6 +142,10 @@ verification 같은 추적 필드를 없애지 않습니다. destructive/securit
 사용자 decision, review finding, raw-source traceability 는 짧게 줄여 품질이 낮아질 수 있으면
 full clarity 로 남깁니다. Caveman/persona 말투는 기본값이 아닙니다.
 
+0.6.85부터 release verifier 도 같은 원칙을 따릅니다. 내부 install/upgrade smoke 로그는
+성공하면 조용히 접고, 실패하면 캡처한 stdout/stderr 를 `[verify-product-release]` prefix 로
+다시 보여줍니다. 배포 확인 로그는 짧아지지만 실패 원문 추적은 사라지지 않습니다.
+
 ---
 
 ## 3. 어디서 어떻게 입력하나

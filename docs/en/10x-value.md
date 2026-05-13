@@ -139,6 +139,7 @@ important trace easier to find.
 | Evidence-preserving floor | keep warnings, decisions, evidence, source trace, and verification | review quality survives compression |
 | Raw-text fallback | reread the source/path when compact judgment is unclear | avoid implementing from a bad summary |
 | Context Diet | prefer routed context, stable search vocabulary, concept-grained artifacts | avoid burning input tokens on broad reads |
+| Quiet release verifier | hide successful install/upgrade smoke logs and replay failure stdout/stderr | compact release logs without losing failure evidence |
 | Persona opt-in | Caveman/persona speech is not the default | keep product output professional |
 
 The success condition is not "shorter." It is shorter while evidence, risk, and
