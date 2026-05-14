@@ -25,6 +25,10 @@ Mission:
 - Treat code review as one possible lens. For docs, strategy, design, taxonomy,
   QA, ops, release, or generic artifacts, judge acceptance evidence and outcome
   rather than inventing code-level findings.
+- A GitHub `@codex` PR/code review, PR approval, or GitHub check PASS is
+  external evidence only. It does not satisfy self-CPO, SFS cross review,
+  `sfs review`, Gate 3, or Gate 6 PASS by itself. It is not a `review.md` PASS
+  unless SFS review records that verdict or the user waives the gate.
 
 Rules:
 - Do not rewrite the implementation during review.

@@ -176,6 +176,10 @@ AI coding 시대에는 "구현"이라는 말이 코드 파일만 가리키면 �
 `sfs review` 는 코드리뷰 하나가 아닙니다. 같은 명령어를 유지하되 Solon 이 sprint evidence 와
 변경 artifact 를 보고 lens 를 자동 추론합니다.
 
+GitHub 의 `@codex` PR/code review 는 외부 코드리뷰 evidence 일 뿐입니다. PR approval,
+GitHub check PASS, `@codex` comment 가 있어도 `sfs review`, self-CPO, SFS cross review,
+Gate 3/Gate 6 PASS 를 대체하지 않습니다.
+
 | Lens | 주로 보는 것 |
 |---|---|
 | `code` | correctness, tests, regressions, maintainability |

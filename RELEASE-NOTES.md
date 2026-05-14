@@ -7,6 +7,17 @@
 
 ---
 
+## 0.6.87
+
+이번 버전은 GitHub PR 코드리뷰와 SFS review gate 를 명확히 분리합니다.
+
+- GitHub 의 `@codex` PR/code review, PR approval, GitHub check PASS 는 외부 evidence 일 뿐입니다.
+- 이런 GitHub 신호는 self-CPO, SFS cross review, `sfs review`, Gate 3, Gate 6 PASS 를 대체하지 않습니다.
+- `sfs review` prompt/run scratch 는 실행별 디렉터리에 격리되어, 설치된 구버전 runtime 이 동시에 probe 되어도 현재 prompt/result 파일을 지우지 않습니다.
+- tidy/retro close 는 새 nested review scratch 도 sprint cold archive 로 묶고 `.sfs-local/tmp` 에서 제거합니다.
+- explicit review lens override 는 prompt/executor side effect 뒤에도 `review.md` frontmatter 에 다시 고정됩니다.
+- 0.6.87 검증은 `run-all.sh` 72/0 PASS 와 Codex `gpt-5.5` xhigh self-CPO PASS 로 기록됐습니다.
+
 ## 0.6.86
 
 이번 버전은 Token Diet 를 더 짧게 만드는 릴리스가 아니라, 짧아져도 품질이 떨어지지 않게 고정하는 릴리스입니다.

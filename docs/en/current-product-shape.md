@@ -190,6 +190,10 @@ too narrow. Solon reviews the actual artifact that moved the product forward.
 `sfs review` is not always code review. The command stays the same, while Solon
 infers the right lens from sprint evidence and changed artifacts.
 
+GitHub `@codex` PR/code review is external evidence only. A PR approval,
+GitHub check PASS, or `@codex` comment does not replace `sfs review`,
+self-CPO, SFS cross review, or Gate 3/Gate 6 PASS.
+
 | Lens | Primary concern |
 |---|---|
 | `code` | correctness, tests, regressions, maintainability |

@@ -139,12 +139,12 @@ Open the active sprint's review.md as the CPO Evaluator review document.
   - Writes the full CPO prompt to .sfs-local/tmp/review-prompts/.
   - Appends a compact CPO Evaluator invocation log to review.md. The full
     prompt body is not embedded by default to prevent recursive token growth.
-  - Stores only the latest full executor result set for the same sprint/gate
-    under .sfs-local/tmp/review-runs/. Older same sprint/gate prompt/run scratch
-    is discarded when a newer review starts. The durable review record is
-    review.md; the latest scratch is bundled into the sprint cold archive on
-    tidy/retro close. review.md keeps only compact result metadata by default. Set
-    SFS_REVIEW_MD_EXCERPT_LINES=1..80 to embed a bounded excerpt.
+  - Stores full executor result sets under .sfs-local/tmp/review-runs/. Scratch
+    directories include a timestamp and pid so nested/reentrant review invocations
+    cannot clobber each other. The durable review record is review.md; scratch is
+    bundled into the sprint cold archive on tidy/retro close. review.md keeps
+    only compact result metadata by default. Set SFS_REVIEW_MD_EXCERPT_LINES=1..80
+    to embed a bounded excerpt.
   - Appends events.jsonl `review_open` event.
   - Prints the resolved review.md path + gate id + executor to stdout (no editor launch).
   - When review runs, prints compact result metadata only. AI runtimes should
@@ -2133,6 +2133,9 @@ Review lens: ${REVIEW_LENS} (${REVIEW_LENS_LABEL}; source=${REVIEW_LENS_SOURCE})
 Lens policy:
 - sfs review is an artifact acceptance review. Code review is only the
   code lens, not the default meaning of review.
+- GitHub @codex PR/code review is external code-review evidence only. A PR
+  approval, GitHub check PASS, or @codex comment does not satisfy self-CPO,
+  SFS cross review, sfs review, Gate 3, or Gate 6 PASS by itself.
 - Judge the produced artifact against the CEO plan, Gate 2/3 contract, evidence,
   user value, scope, risk, and next action.
 - Do not force source-code findings when the selected lens is docs, source-docs,
@@ -2283,6 +2286,7 @@ Self-validation policy:
 - If this review is running in the same tool/session that generated the implementation, explicitly call that out as a risk.
 - Prefer independent review evidence from Codex/Gemini/another agent instance when implementation was produced by Claude.
 - Advisor calls are not a self-CPO PASS. For Gate 3 cross review, require local self-CPO evidence first: pass/partial/fail, requirements-to-AC-to-slice-to-ADR traceability, AC-to-file/artifact/evidence mapping, and SEED/placeholder/mock/fallback material treated as fail/partial/non-acceptance until replaced. If absent, return partial and request the self-CPO pass before external cross review.
+- GitHub PR/@codex code review is not an SFS gate verdict. Treat GitHub review comments, PR approvals, and GitHub check PASS as external evidence only; they do not satisfy self-CPO, SFS cross review, `sfs review`, Gate 3, or Gate 6 PASS unless SFS review explicitly records that verdict or the user waives the gate.
 - Treat same-tool review risk as review_independence_risk: warning unless the evidence proves a concrete product or evidence-bundle defect. Do not make same-tool risk the sole blocker for artifact quality.
 - Separate artifact quality findings from evidence-bundle gaps. If the embedded bundle lacks required artifact files, acceptance evidence, build/smoke output, or source excerpts needed for this lens, say that explicitly as an evidence packaging gap.
 - Treat File excerpt index paths as first-class review targets. The bundle should include bounded source diffs and excerpts for those paths when files are available.
@@ -2439,15 +2443,24 @@ fi
 PROMPT_DIR="${SFS_LOCAL_DIR}/tmp/review-prompts"
 RUN_DIR="${SFS_LOCAL_DIR}/tmp/review-runs"
 PROMPT_TS="$(date -u +%Y%m%dT%H%M%SZ)"
-PROMPT_PATH="${PROMPT_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_TS}.txt"
+PROMPT_ID="${PROMPT_TS}-$$"
+PROMPT_INVOCATION_DIR="${PROMPT_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_ID}"
+RUN_INVOCATION_DIR="${RUN_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_ID}"
+PROMPT_PATH="${PROMPT_INVOCATION_DIR}/prompt.txt"
 
 discard_prior_review_scratch() {
   local prefix="${SPRINT_ID}-${GATE_ARTIFACT_ID}-"
   local path
 
+  [[ "${SFS_REVIEW_CLEAN_SCRATCH:-false}" == "true" ]] || return "${SFS_EXIT_OK}"
   for path in "${PROMPT_DIR}/${prefix}"* "${RUN_DIR}/${prefix}"*; do
-    [[ -f "${path}" ]] || continue
-    rm -f "${path}" || return "${SFS_EXIT_PERM}"
+    [[ -e "${path}" ]] || continue
+    [[ "${path}" == "${PROMPT_INVOCATION_DIR}" || "${path}" == "${RUN_INVOCATION_DIR}" ]] && continue
+    if [[ -d "${path}" ]]; then
+      rm -rf "${path}" || return "${SFS_EXIT_PERM}"
+    else
+      rm -f "${path}" || return "${SFS_EXIT_PERM}"
+    fi
   done
   return "${SFS_EXIT_OK}"
 }
@@ -2535,8 +2548,8 @@ if [[ "${RUN_REVIEW}" == "true" && "${ALLOW_EMPTY_REVIEW}" != "true" ]] && ! has
   exit "${SFS_EXIT_OK}"
 fi
 
-if ! mkdir -p "${PROMPT_DIR}" "${RUN_DIR}" 2>/dev/null; then
-  echo "permission denied creating ${PROMPT_DIR} / ${RUN_DIR}" >&2
+if ! mkdir -p "${PROMPT_INVOCATION_DIR}" "${RUN_INVOCATION_DIR}" 2>/dev/null; then
+  echo "permission denied creating ${PROMPT_INVOCATION_DIR} / ${RUN_INVOCATION_DIR}" >&2
   exit "${SFS_EXIT_PERM}"
 fi
 if ! discard_prior_review_scratch; then
@@ -2579,9 +2592,9 @@ RESULT_PATH=""
 RUN_RC=""
 RUN_WARNING=""
 if [[ "${RUN_REVIEW}" == "true" ]]; then
-  RUN_OUT="${RUN_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_TS}.stdout.md"
-  RUN_ERR="${RUN_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_TS}.stderr.txt"
-  RUN_RESULT="${RUN_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_TS}.result.md"
+  RUN_OUT="${RUN_INVOCATION_DIR}/stdout.md"
+  RUN_ERR="${RUN_INVOCATION_DIR}/stderr.txt"
+  RUN_RESULT="${RUN_INVOCATION_DIR}/result.md"
 
   set +e
   EXECUTOR_CMD="$(resolve_review_executor_cmd)"
@@ -2599,10 +2612,10 @@ if [[ "${RUN_REVIEW}" == "true" ]]; then
 
   if review_bridge_probe_enabled; then
     PROBE_PROFILE="$(normalize_executor_profile "${EVALUATOR_EXECUTOR}")"
-    PROBE_PROMPT="${RUN_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_TS}.bridge-probe.prompt.txt"
-    PROBE_OUT="${RUN_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_TS}.bridge-probe.stdout.txt"
-    PROBE_ERR="${RUN_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_TS}.bridge-probe.stderr.txt"
-    PROBE_RESULT="${RUN_DIR}/${SPRINT_ID}-${GATE_ARTIFACT_ID}-${PROMPT_TS}.bridge-probe.result.txt"
+    PROBE_PROMPT="${RUN_INVOCATION_DIR}/bridge-probe.prompt.txt"
+    PROBE_OUT="${RUN_INVOCATION_DIR}/bridge-probe.stdout.txt"
+    PROBE_ERR="${RUN_INVOCATION_DIR}/bridge-probe.stderr.txt"
+    PROBE_RESULT="${RUN_INVOCATION_DIR}/bridge-probe.result.txt"
     cat > "${PROBE_PROMPT}" <<EOF
 Solon SFS review bridge probe for ${PROBE_PROFILE}.
 Return exactly:
@@ -2708,6 +2721,23 @@ EOF
     echo "executor failed: ${EVALUATOR_EXECUTOR} (exit ${RUN_RC}); see ${RUN_ERR}" >&2
     exit "${SFS_EXIT_EXECUTOR}"
   fi
+fi
+
+# Prompt rendering may inspect review evidence while another installed runtime is
+# present on the host. Reassert the current invocation metadata after all prompt
+# and executor side effects so review.md frontmatter matches the command that
+# produced the reported prompt/result.
+if ! update_frontmatter "${REVIEW_PATH}" "review_lens" "\"${REVIEW_LENS//\"/\\\"}\"" 2>/dev/null; then
+  echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
+  exit "${SFS_EXIT_PERM}"
+fi
+if ! update_frontmatter "${REVIEW_PATH}" "review_lens_source" "\"${REVIEW_LENS_SOURCE//\"/\\\"}\"" 2>/dev/null; then
+  echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
+  exit "${SFS_EXIT_PERM}"
+fi
+if ! update_frontmatter "${REVIEW_PATH}" "evaluator_persona" "\"${PERSONA_PATH//\"/\\\"}\"" 2>/dev/null; then
+  echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
+  exit "${SFS_EXIT_PERM}"
 fi
 
 # ─────────────────────────────────────────────────────────────────────

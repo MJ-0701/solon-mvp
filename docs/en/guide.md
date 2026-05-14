@@ -204,6 +204,9 @@ sfs review
 ```
 
 Review is artifact acceptance review. Code review is only the `code` lens.
+GitHub `@codex` PR/code review is external evidence only; a PR approval,
+GitHub check PASS, or `@codex` comment does not replace `sfs review`,
+self-CPO, SFS cross review, or Gate 3/Gate 6 PASS.
 Solon can infer lenses such as `docs`, `source-docs`, `simplify`, `security`,
 `performance`, `api-contract`, `strategy`, `design`, `taxonomy`, `qa`, `ops`,
 or `release` from sprint evidence. Use `--lens` only when the inference is

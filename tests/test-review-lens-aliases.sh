@@ -18,7 +18,8 @@ fail() {
 }
 
 run_sfs() {
-  SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" "$@"
+  SFS_COMMAND_TIMEOUT_SEC=0 SFS_REVIEW_BRIDGE_PROBE_TIMEOUT_SEC=1 \
+    SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" "$@"
 }
 
 cd "${TMP_DIR}"

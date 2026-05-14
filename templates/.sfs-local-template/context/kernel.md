@@ -103,6 +103,11 @@ load_when: ["always", "sfs", "entry"]
   AC has a file/artifact plus evidence mapping; and confirm SEED, placeholder,
   mock, or fallback text starts as failing or explicitly non-acceptance
   evidence. Missing self-CPO evidence is partial, not ready for cross review.
+- GitHub PR/code review is separate from SFS review. A GitHub `@codex` review,
+  PR approval, or GitHub check PASS may be useful external evidence, but it
+  does not satisfy self-CPO, SFS cross review, `sfs review`, Gate 3, or
+  Gate 6 PASS by itself. Record it as evidence, then run or record the SFS
+  review gate.
 - Cross review comes after local self-review passes. If cross review returns
   partial/fail, rework the plan and return to self-review before another cross
   review or implementation handoff.

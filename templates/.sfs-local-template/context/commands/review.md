@@ -74,6 +74,12 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   `code` lens; docs, source-docs, simplify, security, performance,
   api-contract, strategy, design, taxonomy, QA, ops, management-admin, release,
   and generic artifacts use their own acceptance lens.
+- GitHub `@codex` PR/code review is external code-review evidence only. Do not
+  convert a PR approval, GitHub check PASS, or `@codex` comment into an SFS
+  verdict. Such evidence does not satisfy self-CPO, SFS cross review,
+  `sfs review`, Gate 3, or Gate 6 PASS by itself; `review.md` must still
+  contain the SFS gate verdict from `sfs review`, or the user must explicitly
+  waive that gate.
 - Before a completed work slice can be reported as done, require self-agent
   top-model CPO evidence. Claude self-CPO uses Opus 4.7, Codex self-CPO uses
   `gpt-5.5` with xhigh reasoning, Gemini self-CPO uses `gemini-3-pro-auto`, and

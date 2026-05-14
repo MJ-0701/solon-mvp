@@ -328,6 +328,10 @@ sfs review
 `review` 는 항상 코드리뷰라는 뜻이 아닙니다. 코드 작업이면 코드리뷰가 맞고, 문서 작업이면 문서
 검토, 전략 작업이면 전략 검토, 디자인 작업이면 디자인 검토가 됩니다.
 
+GitHub 의 `@codex` PR/code review 는 외부 코드리뷰 evidence 일 뿐입니다. PR approval,
+GitHub check PASS, `@codex` comment 가 있어도 `sfs review`, self-CPO, SFS cross review,
+Gate 3/Gate 6 PASS 를 대체하지 않습니다.
+
 Solon 은 sprint evidence 와 변경 산출물을 보고 review lens 를 자동으로 고릅니다.
 
 | Lens | 보는 것 |

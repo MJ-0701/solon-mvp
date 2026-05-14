@@ -104,6 +104,10 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   mode, record verification evidence and run `sfs review --gate 6`. For
   multi-agent mode, cross review between agents is required before Gate 6 review
   can pass; each lane should review a different lane's diff/evidence.
+- A GitHub `@codex` PR/code review, PR approval, or GitHub check PASS does not
+  satisfy self-CPO, SFS cross review, `sfs review`, Gate 3, or Gate 6 PASS by
+  itself, and it does not replace `sfs review --gate 6`. Treat GitHub review as
+  external code-review evidence to attach, not as the SFS gate result.
 - Use TDD/DDD/transaction guardrails when code or data consistency is touched.
 - Load `policies/knowledge-pack-router.md` first, or `policies/knowledge-pack-router.ko.md`
   for Korean preference. Apply only the matching division router ids.

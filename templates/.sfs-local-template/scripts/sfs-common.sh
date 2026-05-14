@@ -1033,6 +1033,25 @@ sfs_archive_sprint_workbench() {
 # sfs_archive_sprint_tmp_artifacts <sprint-id> <iso-ts>
 # Moves ignored tmp artifacts for the sprint into the same local archive root.
 # stdout: moved file count.
+sfs_sprint_tmp_artifact_files() {
+  local sid="${1:?sprint id required}"
+  local tmp_root="${2:-${SFS_LOCAL_DIR}/tmp}"
+  local path rel base
+  [[ -n "${sid}" && -d "${tmp_root}" ]] || return ${SFS_EXIT_OK}
+
+  while IFS= read -r path; do
+    [[ -f "${path}" ]] || continue
+    rel="${path#${tmp_root}/}"
+    base="${path##*/}"
+    if [[ "${base}" == "${sid}"* \
+       || "${rel}" == "${sid}"*/* \
+       || "${rel}" == */"${sid}"*/* ]]; then
+      printf '%s\n' "${path}"
+    fi
+  done < <(find "${tmp_root}" -type f 2>/dev/null | sort)
+  return ${SFS_EXIT_OK}
+}
+
 sfs_archive_sprint_tmp_artifacts() {
   local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
   local tmp_root="${SFS_LOCAL_DIR}/tmp"
@@ -1047,7 +1066,7 @@ sfs_archive_sprint_tmp_artifacts() {
     mkdir -p "$(dirname "${dest}")" || return ${SFS_EXIT_PERM}
     mv "${path}" "${dest}" || return ${SFS_EXIT_PERM}
     count=$((count + 1))
-  done < <(find "${tmp_root}" -type f -name "${sid}*" 2>/dev/null | sort)
+  done < <(sfs_sprint_tmp_artifact_files "${sid}" "${tmp_root}")
 
   if [[ "${count}" -gt 0 ]]; then
     find "${tmp_root}" -depth -type d -empty -exec rmdir {} \; 2>/dev/null || true
@@ -1094,7 +1113,7 @@ sfs_archive_sprint_cold_bundle() {
       cp "${path}" "${staging}/${dest}" || return ${SFS_EXIT_PERM}
       source_paths+=("${path}")
       tmp_count=$((tmp_count + 1))
-    done < <(find "${tmp_root}" -type f -name "${sid}*" 2>/dev/null | sort)
+    done < <(sfs_sprint_tmp_artifact_files "${sid}" "${tmp_root}")
   fi
 
   if [[ "${count}" -eq 0 && "${tmp_count}" -eq 0 ]]; then

@@ -89,6 +89,10 @@ required.
     a self-CPO mini-check: requirements to AC to implementation slices to
     ADR/decision ids, every AC mapped to file/artifact/evidence, and SEED/
     placeholder/mock/fallback material treated as non-acceptance until replaced.
+    A GitHub `@codex` PR/code review, PR approval, or GitHub check PASS is
+    external evidence only. It does not satisfy self-CPO, SFS cross review,
+    `sfs review`, Gate 3, or Gate 6 PASS by itself. Record it as evidence, then
+    still run or record the SFS review gate.
     After a work slice is implemented and verified, run self-agent top-model
     CPO: Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3-pro-auto`, or
     the configured custom top model. Partial/fail redirects the work and repeats

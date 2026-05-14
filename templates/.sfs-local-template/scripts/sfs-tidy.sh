@@ -127,7 +127,7 @@ tidy_tmp_candidate_count() {
   local sid="${1:?sprint id required}"
   local tmp_root="${SFS_LOCAL_DIR}/tmp"
   [[ -d "${tmp_root}" ]] || { printf '0\n'; return 0; }
-  find "${tmp_root}" -type f -name "${sid}*" 2>/dev/null | wc -l | tr -d '[:space:]'
+  sfs_sprint_tmp_artifact_files "${sid}" "${tmp_root}" | wc -l | tr -d '[:space:]'
 }
 
 tidy_target_contains_sprint() {

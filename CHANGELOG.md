@@ -1,3 +1,40 @@
+## [0.6.87] - 2026-05-14
+
+> **GitHub `@codex` PR/code review is now explicitly separate from SFS review
+> gates, and review scratch files are isolated per invocation.**
+
+### Added
+
+- Added `test-review-github-codex-boundary.sh` to prove GitHub `@codex`
+  PR/code review, PR approval, and GitHub check PASS stay external evidence
+  only and do not satisfy self-CPO, SFS cross review, `sfs review`, Gate 3, or
+  Gate 6 PASS.
+- Added `test-review-scratch-tidy-retention.sh` to prove per-invocation review
+  prompt/run scratch is still packed into the sprint cold archive and removed
+  from `.sfs-local/tmp` on tidy close.
+
+### Changed
+
+- Updated SFS kernel, review/implement routed context, review prompt, CPO
+  persona, model profiles, adapter templates, plugin command surface, and
+  Korean/English docs with the GitHub/SFS review boundary.
+- Isolated `sfs review` prompt/run scratch under per-invocation directories so
+  nested or installed-runtime review probes cannot clobber the current prompt or
+  result files.
+- Updated tidy/retro scratch selection to archive both legacy `sprint-id*`
+  scratch files and the new nested per-invocation review scratch directories.
+- Reasserted review lens frontmatter after prompt/executor side effects so an
+  explicit lens override remains visible in `review.md`.
+- Shortened the lens alias regression's bridge-probe timeout so prompt-only
+  alias normalization remains a fast deterministic test even when a host has an
+  installed review bridge.
+
+### Tests
+
+- Full source regression passed with 72 tests.
+- Codex `gpt-5.5` xhigh self-CPO review returned PASS for the GitHub/SFS review
+  boundary change.
+
 ## [0.6.86] - 2026-05-13
 
 > **Token Diet now has an explicit quality-audit release: compact output stays
