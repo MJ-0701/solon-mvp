@@ -495,6 +495,37 @@ sfs_move_legacy_sprint_doc_as_needed() {
   mv "${legacy_path}" "${archive_dir}/legacy-${doc}.md" || return ${SFS_EXIT_PERM}
 }
 
+sfs_move_sprint_id_shared_doc_as_needed() {
+  local sid="${1:?sprint id required}" ts="${2:?timestamp required}" doc="${3:?doc name required}" shared_path="${4:?shared path required}"
+  local workspace date_dir legacy_path archive_dir
+  workspace="$(sfs_workspace_for_sprint "${sid}")"
+  [[ -n "${workspace}" && "${workspace}" != "${sid}" ]] || return 0
+  date_dir="$(sfs_date_dir_from_ts "${ts}")"
+  legacy_path="${SFS_SHARED_DOCS_DIR}/${sid}/${date_dir}/${doc}.md"
+  [[ "${legacy_path}" != "${shared_path}" && -f "${legacy_path}" ]] || return 0
+
+  if [[ ! -f "${shared_path}" ]]; then
+    mkdir -p "$(dirname "${shared_path}")" || return ${SFS_EXIT_PERM}
+    mv "${legacy_path}" "${shared_path}" || return ${SFS_EXIT_PERM}
+    rmdir "$(dirname "${legacy_path}")" 2>/dev/null || true
+    rmdir "${SFS_SHARED_DOCS_DIR}/${sid}" 2>/dev/null || true
+    return 0
+  fi
+
+  if cmp -s "${legacy_path}" "${shared_path}" 2>/dev/null; then
+    rm -f "${legacy_path}" || return ${SFS_EXIT_PERM}
+    rmdir "$(dirname "${legacy_path}")" 2>/dev/null || true
+    rmdir "${SFS_SHARED_DOCS_DIR}/${sid}" 2>/dev/null || true
+    return 0
+  fi
+
+  archive_dir="$(sfs_workbench_archive_dir "${sid}" "${ts}")"
+  mkdir -p "${archive_dir}" || return ${SFS_EXIT_PERM}
+  mv "${legacy_path}" "${archive_dir}/legacy-shared-${doc}.md" || return ${SFS_EXIT_PERM}
+  rmdir "$(dirname "${legacy_path}")" 2>/dev/null || true
+  rmdir "${SFS_SHARED_DOCS_DIR}/${sid}" 2>/dev/null || true
+}
+
 sfs_update_sprint_doc_identity() {
   local path="${1:?path required}" sid="${2:?sprint id required}" ts="${3:?timestamp required}"
   local goal
@@ -916,6 +947,7 @@ sfs_prepare_sprint_report() {
     echo "sprint not found: ${sid}" >&2
     return ${SFS_EXIT_NO_INIT}
   fi
+  sfs_move_sprint_id_shared_doc_as_needed "${sid}" "${ts}" "report" "${report_path}" || return ${SFS_EXIT_PERM}
   sfs_move_legacy_sprint_doc_as_needed "${sid}" "${ts}" "report" "${report_path}" || return ${SFS_EXIT_PERM}
   if [[ ! -f "${report_path}" ]]; then
     if [[ ! -f "${template}" ]]; then
@@ -964,6 +996,7 @@ sfs_prepare_sprint_retro() {
     echo "sprint not found: ${sid}" >&2
     return ${SFS_EXIT_NO_INIT}
   fi
+  sfs_move_sprint_id_shared_doc_as_needed "${sid}" "${ts}" "retro" "${retro_path}" || return ${SFS_EXIT_PERM}
   sfs_move_legacy_sprint_doc_as_needed "${sid}" "${ts}" "retro" "${retro_path}" || return ${SFS_EXIT_PERM}
   if [[ ! -f "${retro_path}" ]]; then
     if [[ ! -f "${template}" ]]; then

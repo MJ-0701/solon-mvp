@@ -65,4 +65,25 @@ git ls-files --error-unmatch "${shared_dir}/report.md" >/dev/null 2>&1 \
 git ls-files --error-unmatch "${shared_dir}/retro.md" >/dev/null 2>&1 \
   || fail "auto close commit should include shared retro.md"
 
+custom_sid="2026-W21-security-audit"
+SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" start \
+  "dependabot security audit" \
+  --id "${custom_sid}" \
+  --workspace security-audit >/dev/null
+wrong_shared_dir="docs/solon/${custom_sid}/${date_dir}"
+canonical_shared_dir="docs/solon/security-audit/${date_dir}"
+mkdir -p "${wrong_shared_dir}"
+printf '# Wrong report location\n' > "${wrong_shared_dir}/report.md"
+printf '# Wrong retro location\n' > "${wrong_shared_dir}/retro.md"
+
+custom_report_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" report)"
+assert_contains "${custom_report_out}" "report.md ready: ${canonical_shared_dir}/report.md" "custom id report stdout"
+[[ -f "${canonical_shared_dir}/report.md" ]] || fail "custom id report was not moved to canonical workspace"
+[[ ! -e "${wrong_shared_dir}/report.md" ]] || fail "custom id report stayed under sprint id workspace"
+
+custom_retro_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" retro --draft)"
+assert_contains "${custom_retro_out}" "retro.md ready: ${canonical_shared_dir}/retro.md" "custom id retro stdout"
+[[ -f "${canonical_shared_dir}/retro.md" ]] || fail "custom id retro was not moved to canonical workspace"
+[[ ! -e "${wrong_shared_dir}/retro.md" ]] || fail "custom id retro stayed under sprint id workspace"
+
 echo "test-sfs-shared-handoff-docs: OK"

@@ -7,6 +7,17 @@
 
 ---
 
+## 0.6.88
+
+이번 버전은 수동/retroactive close 가 shared docs 를 sprint id 폴더에 잘못 놓아도
+다음 공식 `sfs report` 또는 `sfs retro` 실행에서 workspace 폴더로 회복합니다.
+
+- 예: `2026-W21-security-audit` sprint id 와 `--workspace security-audit` 를 같이 쓴 경우,
+  잘못 놓인 `docs/solon/2026-W21-security-audit/<date>/report.md` 는
+  `docs/solon/security-audit/<date>/report.md` 로 이동됩니다.
+- 기존 `sfs start --workspace <english-name>` 계약은 그대로 유지됩니다.
+- 회귀 테스트는 week-prefixed custom sprint id 와 별도 workspace 조합을 직접 검증합니다.
+
 ## 0.6.87
 
 이번 버전은 GitHub PR 코드리뷰와 SFS review gate 를 명확히 분리합니다.

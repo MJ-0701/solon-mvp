@@ -1,3 +1,20 @@
+## [0.6.88] - 2026-05-16
+
+> **Shared report/retro docs now recover from manual sprint-id folders back to
+> the intended workspace folder.**
+
+### Fixed
+
+- `sfs report` and `sfs retro` now recover manually misplaced shared docs from
+  `docs/solon/<sprint-id>/<yyyyMMdd>/` into the canonical
+  `docs/solon/<workspace>/<yyyyMMdd>/` path when a custom week-prefixed sprint
+  id was used with a separate workspace name.
+
+### Tests
+
+- Extended `test-sfs-shared-handoff-docs.sh` to cover custom sprint ids such as
+  `2026-W21-security-audit` with `--workspace security-audit`.
+
 ## [0.6.87] - 2026-05-14
 
 > **GitHub `@codex` PR/code review is now explicitly separate from SFS review
