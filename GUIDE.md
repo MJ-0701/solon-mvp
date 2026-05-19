@@ -332,6 +332,12 @@ GitHub 의 `@codex` PR/code review 는 외부 코드리뷰 evidence 일 뿐입�
 GitHub check PASS, `@codex` comment 가 있어도 `sfs review`, self-CPO, SFS cross review,
 Gate 3/Gate 6 PASS 를 대체하지 않습니다.
 
+외부 리뷰/check PASS 는 continuation trigger 이며, 멈추라는 신호가 아니라 다음 SFS review 단계로
+이어가라는 신호입니다.
+Codex, Claude, Gemini, 기타 LLM Agent 모두 self-CPO 를 먼저 실행하고, self-CPO PASS 뒤에
+정해진 cross-review 순서로 넘어갑니다. 닫힌 sprint 라면 `.sfs-local/current-sprint` 를 손으로
+복구하지 말고 `sfs review --sprint <id> --gate <n>` 를 사용합니다.
+
 Solon 은 sprint evidence 와 변경 산출물을 보고 review lens 를 자동으로 고릅니다.
 
 | Lens | 보는 것 |

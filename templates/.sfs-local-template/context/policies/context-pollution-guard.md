@@ -16,6 +16,9 @@ load_when: ["context", "token", "capture", "review", "tidy", "release", "prompt"
 - Natural-language flow belongs in compact `sfs capture` checkpoints. Keep the
   smallest decision/evidence sentence plus exact artifact path when the source
   is bulky.
+- Review continuation state belongs in compact checkpoints too. Store the
+  external PASS evidence and exact next SFS command, not the whole PR review
+  transcript or prompt thread.
 - Prompt/run scratch belongs in `.sfs-local/tmp/...` while active and in cold
   archives after report/retro. Shared docs should point to evidence paths and
   summarize accepted conclusions, not replay the source text.

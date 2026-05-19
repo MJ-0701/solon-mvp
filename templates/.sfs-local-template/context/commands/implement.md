@@ -117,6 +117,11 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   satisfy self-CPO, SFS cross review, `sfs review`, Gate 3, or Gate 6 PASS by
   itself, and it does not replace `sfs review --gate 6`. Treat GitHub review as
   external code-review evidence to attach, not as the SFS gate result.
+- If an external GitHub/@codex/PR/check PASS arrives before self-CPO or
+  Gate 6, treat it as a continuation trigger. Record the evidence, then run the
+  next unmet SFS review step: self-CPO first with `sfs review --gate 6` or
+  `sfs review --sprint <id> --gate 6` for a closed sprint, followed by the
+  configured Codex/Claude/Gemini cross-review order after self-CPO PASS.
 - Use TDD/DDD/transaction guardrails when code or data consistency is touched.
 - Load `policies/knowledge-pack-router.md` first, or `policies/knowledge-pack-router.ko.md`
   for Korean preference. Apply only the matching division router ids.

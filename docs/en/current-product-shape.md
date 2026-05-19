@@ -215,6 +215,11 @@ GitHub `@codex` PR/code review is external evidence only. A PR approval,
 GitHub check PASS, or `@codex` comment does not replace `sfs review`,
 self-CPO, SFS cross review, or Gate 3/Gate 6 PASS.
 
+External review/check PASS is a continuation trigger, not a stopping point.
+Codex, Claude, Gemini, and future LLM agents do not end at PASS; they continue
+with the next unmet SFS review command: self-CPO first, then the configured
+cross-review order after self-CPO PASS.
+
 | Lens | Primary concern |
 |---|---|
 | `code` | correctness, tests, regressions, maintainability |

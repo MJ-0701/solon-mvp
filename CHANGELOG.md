@@ -1,3 +1,33 @@
+## [0.6.91] - 2026-05-19
+
+> **External review PASS now resumes the SFS gate instead of becoming a quiet
+> stopping point.**
+
+### Added
+
+- Added a Gate continuation guard: GitHub/@codex/PR/check PASS is a trigger to
+  continue to the next unmet SFS review step, not a final verdict.
+- Added explicit all-agent wording for Codex, Claude, Gemini, and future LLM
+  agents: self-CPO runs first, then the configured cross-review order after
+  self-CPO PASS.
+- Added `test-review-gate-continuation.sh` to lock the continuation contract
+  across kernel context, review/implement/capture guidance, CPO persona,
+  model profiles, generated adapters, and user docs.
+
+### Changed
+
+- Review guidance now tells agents to use `sfs review --sprint <id> --gate <n>`
+  when a closed sprint id is known, instead of manually restoring
+  `.sfs-local/current-sprint` or extracting archives.
+- Context Pollution Guard now treats review continuation as a compact
+  checkpoint: store the external PASS evidence and exact next SFS command, not
+  the whole review transcript or prompt thread.
+
+### Tests
+
+- Added `test-review-gate-continuation.sh`.
+- Full source regression passed with 78 tests.
+
 ## [0.6.90] - 2026-05-19
 
 > **Natural-language flow checkpoints and Context Pollution Guard keep SFS

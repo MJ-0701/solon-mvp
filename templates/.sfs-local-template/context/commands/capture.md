@@ -9,6 +9,10 @@ load_when: ["capture", "note", "natural language", "decision", "review order", "
 - Use `sfs capture` when a natural-language turn changes implementation
   direction, acceptance meaning, review order, exception/waiver status,
   blocker state, or evidence that later gates must remember.
+- If a natural-language turn says an external GitHub/@codex/PR/check review
+  passed, capture the accepted evidence plus the next SFS command. Do not store
+  the full review transcript; the durable fact is the PASS evidence and the
+  continuation rule, for example self-CPO next, then cross-review.
 - `sfs note "..."` is an alias for `sfs capture --kind note "..."`.
 - Prefer specific kinds when the meaning is clear:
   `decision`, `scope-change`, `review-order`, `exception`, `evidence`,
@@ -31,6 +35,7 @@ Examples:
 
 ```sh
 sfs capture --kind review-order --gate 6 "Run Codex self-CPO first, then Gemini, then Claude."
+sfs capture --kind review-order --gate 6 "GitHub @codex PASS is external evidence; next run SFS self-CPO with sfs review --sprint 2026-W21-sprint-3 --gate 6."
 sfs capture --kind scope-change "Do not add automatic transcript recording in this sprint."
 sfs note "GitHub @codex review passed, but it is external evidence only."
 ```

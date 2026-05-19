@@ -78,6 +78,11 @@ description: Solon SFS command router for Codex. Dispatch `$sfs` / `sfs` / visib
    a self-CPO mini-check: requirements to AC to implementation slices to
    ADR/decision ids, every AC mapped to file/artifact/evidence, and SEED/
    placeholder/mock/fallback material treated as non-acceptance until replaced.
+   External review/check PASS is a continuation trigger, not a stopping point.
+   Codex, Claude, Gemini, and future LLM agents must continue with the next
+   unmet SFS review command: self-CPO first via `sfs review --gate <n>` or
+   `sfs review --sprint <id> --gate <n>` for a closed sprint, then configured
+   cross review after self-CPO PASS.
    After a work slice is implemented and verified, run self-agent top-model
    CPO: Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3-pro-auto`, or
    the configured custom top model. Partial/fail redirects the work and repeats

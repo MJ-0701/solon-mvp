@@ -197,6 +197,10 @@ GitHub 의 `@codex` PR/code review 는 외부 코드리뷰 evidence 일 뿐입�
 GitHub check PASS, `@codex` comment 가 있어도 `sfs review`, self-CPO, SFS cross review,
 Gate 3/Gate 6 PASS 를 대체하지 않습니다.
 
+외부 리뷰/check PASS 는 continuation trigger 이며 stopping point 가 아닙니다. Codex, Claude,
+Gemini, 기타 LLM Agent 는 PASS 라고 말하고 끝내지 않고 다음 미충족 SFS review 명령을 이어갑니다:
+self-CPO 먼저, self-CPO PASS 뒤에 설정된 cross-review 순서입니다.
+
 | Lens | 주로 보는 것 |
 |---|---|
 | `code` | correctness, tests, regressions, maintainability |

@@ -7,6 +7,20 @@
 
 ---
 
+## 0.6.91
+
+이번 버전은 GitHub/@codex/PR/check PASS 를 SFS gate 종료로 오해하는 흐름을 막습니다.
+
+- 외부 review/check PASS 는 continuation trigger 입니다. PASS 라고 말하고 멈추지 않고, 다음
+  미충족 SFS review 명령으로 이어갑니다.
+- Codex, Claude, Gemini, 기타 LLM Agent 모두 같은 규칙을 따릅니다: self-CPO 먼저, self-CPO
+  PASS 뒤에 설정된 cross-review 순서입니다.
+- 닫힌 sprint 에 대해 review 를 이어갈 때는 `.sfs-local/current-sprint` 를 손으로 복구하지 않고
+  `sfs review --sprint <id> --gate <n>` 를 사용합니다.
+- Context Pollution Guard 는 전체 review transcript/prompt 를 core context 에 남기지 않고, 외부
+  PASS evidence 와 정확한 next SFS command 만 capture 하도록 고정합니다.
+- 0.6.91 검증은 `run-all.sh` 78/0 PASS 로 기록됐습니다.
+
 ## 0.6.90
 
 이번 버전은 자연어로 오간 중요한 결정을 SFS flow 안에 짧게 남기고, 반대로 prompt/transcript/

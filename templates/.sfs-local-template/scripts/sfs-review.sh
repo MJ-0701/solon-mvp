@@ -2248,6 +2248,11 @@ Lens policy:
 - GitHub @codex PR/code review is external code-review evidence only. A PR
   approval, GitHub check PASS, or @codex comment does not satisfy self-CPO,
   SFS cross review, sfs review, Gate 3, or Gate 6 PASS by itself.
+- External GitHub/@codex/PR/check PASS is a continuation trigger, not a
+  stopping point. Record the evidence, then name the next unmet SFS command:
+  self-CPO first with sfs review --gate <n> or sfs review --sprint <id>
+  --gate <n> for a closed sprint, then configured cross review after self-CPO
+  PASS.
 - Judge the produced artifact against the CEO plan, Gate 2/3 contract, evidence,
   user value, scope, risk, and next action.
 - Do not force source-code findings when the selected lens is docs, source-docs,
@@ -2405,6 +2410,7 @@ Self-validation policy:
 - Prefer independent review evidence from Codex/Gemini/another agent instance when implementation was produced by Claude.
 - Advisor calls are not a self-CPO PASS. For Gate 3 cross review, require local self-CPO evidence first: pass/partial/fail, requirements-to-AC-to-slice-to-ADR traceability, AC-to-file/artifact/evidence mapping, and SEED/placeholder/mock/fallback material treated as fail/partial/non-acceptance until replaced. If absent, return partial and request the self-CPO pass before external cross review.
 - GitHub PR/@codex code review is not an SFS gate verdict. Treat GitHub review comments, PR approvals, and GitHub check PASS as external evidence only; they do not satisfy self-CPO, SFS cross review, `sfs review`, Gate 3, or Gate 6 PASS unless SFS review explicitly records that verdict or the user waives the gate.
+- External GitHub/@codex/PR/check PASS is a continuation trigger, not a stopping point. Require the next unmet SFS command: self-CPO first with `sfs review --gate <n>` or `sfs review --sprint <id> --gate <n>` for a closed sprint, then configured cross review after self-CPO PASS.
 - Treat same-tool review risk as review_independence_risk: warning unless the evidence proves a concrete product or evidence-bundle defect. Do not make same-tool risk the sole blocker for artifact quality.
 - Separate artifact quality findings from evidence-bundle gaps. If the embedded bundle lacks required artifact files, acceptance evidence, build/smoke output, or source excerpts needed for this lens, say that explicitly as an evidence packaging gap.
 - Treat File excerpt index paths as first-class review targets. The bundle should include bounded source diffs and excerpts for those paths when files are available.

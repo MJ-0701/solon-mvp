@@ -76,6 +76,8 @@ author records a self-CPO mini-check covering requirements to AC to
 implementation slices to ADR/decision ids, every AC mapped to file/artifact/
 evidence, and SEED/placeholder/mock/fallback material kept as non-acceptance
 until replaced.
+External review/check PASS is a continuation trigger, not a stopping point. All
+LLM agents continue from PASS to self-CPO first, then cross review.
 
 `sfs implement` defaults to Single Agent. Choose `--agent-mode parallel
 --agents codex,claude[,gemini]` only when the plan splits into independent

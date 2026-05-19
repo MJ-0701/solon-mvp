@@ -65,6 +65,8 @@ Haiku 는 코딩 금지 helper-grade relay/요약/read-only 보조 전용입니�
 advisor 호출은 self-CPO PASS 가 아닙니다. cross review 전에 요구사항 → AC → 구현 slice →
 ADR/decision id, AC → file/artifact/evidence, SEED/placeholder/mock/fallback non-acceptance 를
 확인한 self-CPO mini-check 를 남겨야 합니다.
+외부 리뷰/check PASS 는 continuation trigger 이며 stopping point 가 아닙니다. 모든 LLM Agent 는
+PASS 에서 멈추지 않고 self-CPO 먼저, 그 다음 cross review 로 이어갑니다.
 
 `sfs implement` 는 기본적으로 Single Agent 입니다. plan 이 독립 커밋 단위로 나뉘고 agent 별
 files_scope 가 겹치지 않을 때만 `--agent-mode parallel --agents codex,claude[,gemini]` 를

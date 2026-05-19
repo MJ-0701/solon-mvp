@@ -13,6 +13,12 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   editing `.sfs-local/current-sprint` or extracting tarballs. The command
   restores the latest cold archive into the active workbench and refuses to
   overwrite existing visible workbench files.
+- After any external GitHub/@codex/PR/check PASS, do not stop at PASS. Record
+  the evidence, then continue the review gate: self-CPO first, cross-review
+  after self-CPO PASS. If the sprint is closed but the id is known, the next
+  command is `sfs review --sprint <id> --gate <n>`; if the id is unknown, ask
+  for that id instead of creating a new sprint or manually restoring
+  `.sfs-local/current-sprint`.
 - Gate 3 plan review is the required bridge between plan and implement. When a
   plan says ready-for-implement, review the plan contract first with
   `sfs review --gate 3`; only a PASS/accepted result should route to
@@ -97,6 +103,11 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   `sfs review`, Gate 3, or Gate 6 PASS by itself; `review.md` must still
   contain the SFS gate verdict from `sfs review`, or the user must explicitly
   waive that gate.
+- External review/check PASS is a continuation trigger, not a stopping point.
+  Codex, Claude, Gemini, and future LLM agents must name the next unmet SFS
+  command instead of ending the turn at "PASS": run/record self-CPO first with
+  `sfs review --gate <n>` or `sfs review --sprint <id> --gate <n>`, then run
+  the configured cross-review sequence after self-CPO PASS.
 - Before a completed work slice can be reported as done, require self-agent
   top-model CPO evidence. Claude self-CPO uses Opus 4.7, Codex self-CPO uses
   `gpt-5.5` with xhigh reasoning, Gemini self-CPO uses `gemini-3-pro-auto`, and

@@ -91,6 +91,11 @@ $ARGUMENTS
     external evidence only. It does not satisfy self-CPO, SFS cross review,
     `sfs review`, Gate 3, or Gate 6 PASS by itself. Record it as evidence, then
     still run or record the SFS review gate.
+    External review/check PASS is a continuation trigger, not a stopping point.
+    Codex, Claude, Gemini, and future LLM agents must continue with the next
+    unmet SFS review command: self-CPO first via `sfs review --gate <n>` or
+    `sfs review --sprint <id> --gate <n>` for a closed sprint, then configured
+    cross review after self-CPO PASS.
     After a work slice is implemented and verified, run self-agent top-model
     CPO: Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3-pro-auto`, or
     the configured custom top model. Partial/fail redirects the work and repeats

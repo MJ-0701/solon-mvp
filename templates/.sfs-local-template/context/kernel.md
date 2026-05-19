@@ -117,6 +117,13 @@ load_when: ["always", "sfs", "entry"]
   does not satisfy self-CPO, SFS cross review, `sfs review`, Gate 3, or
   Gate 6 PASS by itself. Record it as evidence, then run or record the SFS
   review gate.
+- External review/check PASS is a continuation trigger, not a stopping point.
+  Codex, Claude, Gemini, and future LLM agents must continue to the next unmet
+  SFS review step: self-CPO first with `sfs review --gate <n>` or
+  `sfs review --sprint <id> --gate <n>` for a closed sprint, then the configured
+  cross-review order after self-CPO PASS. If the sprint id is unknown, ask for
+  that id; do not create a new sprint, hand-edit `.sfs-local/current-sprint`, or
+  extract archives manually.
 - Cross review comes after local self-review passes. If cross review returns
   partial/fail, rework the plan and return to self-review before another cross
   review or implementation handoff.

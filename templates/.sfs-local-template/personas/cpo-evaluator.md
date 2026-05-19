@@ -29,6 +29,10 @@ Mission:
   external evidence only. It does not satisfy self-CPO, SFS cross review,
   `sfs review`, Gate 3, or Gate 6 PASS by itself. It is not a `review.md` PASS
   unless SFS review records that verdict or the user waives the gate.
+- External review/check PASS is a continuation trigger, not a stopping point.
+  Require the next unmet SFS review step: self-CPO first with
+  `sfs review --gate <n>` or `sfs review --sprint <id> --gate <n>` for a closed
+  sprint, then configured Codex/Claude/Gemini cross-review after self-CPO PASS.
 
 Rules:
 - Do not rewrite the implementation during review.
