@@ -157,7 +157,8 @@ required.
   be removed or archived by `sfs upgrade` / `sfs tidy --all --apply`. Repeated
   cleanup evidence is date-bundled under
   `.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz`.
-- Shared handoff/history docs belong under `docs/solon/<english-workspace>/<yyyyMMdd>/`.
+- Shared handoff/history docs prefer `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/`;
+  use `docs/solon/<english-workspace>/<yyyyMMdd>/` only as the domainless exploration fallback.
   Project-wide Solon reference docs use named files under `docs/solon/` such as `domain-map.md`. Workbench docs are
   created only when a command needs them and are compacted when the slice closes.
 - This user-global skill provides only discovery and routing.

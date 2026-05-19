@@ -20,6 +20,13 @@ load_when: ["token", "harness", "context", "Claude", "Codex", "Gemini", "MCP", "
   decide whether a full read is needed. If compact text and raw text might
   diverge, read the raw source first; if meaning-loss risk remains, ask the
   user instead of guessing.
+- Apply Runtime Token Firewall before delegating work: worker/review handoff is
+  a small capsule with goal, AC, files_scope, commands, output paths, and compact
+  evidence. Never forward full conversation history, hidden chain, unrelated
+  prior turns, or old workbench transcripts to a cheaper worker or reviewer.
+- Poll run artifacts instead of chat state. Workers should write status/result/
+  evidence files; leads should inspect those files rather than repeatedly
+  rereading source, diffs, build logs, or the main thread while waiting.
 - Token savings is secondary to quality. If compression would lower answer
   quality, hide evidence, weaken a risk warning, or break raw-source
   traceability, do not compress; return to full clarity.

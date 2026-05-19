@@ -95,9 +95,11 @@ $ARGUMENTS
    host-local `/commit` skill; `/commit` is not the portable SFS workflow
    command.
 12. `.sfs-local/` is private workbench state. Shared handoff/history docs
-   belong under `docs/solon/<english-workspace>/<yyyyMMdd>/`; project-wide
-   Solon reference docs use named files under `docs/solon/`. Do not ask users
-   to commit `.sfs-local` unless their team explicitly opts in.
+   prefer `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` and fall back
+   to `docs/solon/<english-workspace>/<yyyyMMdd>/` only for domainless
+   exploration; project-wide Solon reference docs use named files under
+   `docs/solon/`. Do not ask users to commit `.sfs-local` unless their team
+   explicitly opts in.
 13. In Solon reports, show gates as `Gate N (Name)`, not naked ids:
    Gate 1 (Intake), Gate 2 (Brainstorm), Gate 3 (Plan),
    Gate 4 (Design), Gate 5 (Handoff), Gate 6 (Review),

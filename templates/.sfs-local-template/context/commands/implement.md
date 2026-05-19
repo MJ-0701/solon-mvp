@@ -86,6 +86,15 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - When delegating worker slices, keep files_scope explicit and disjoint. Workers
   may implement fixed internals, but architecture, public API, domain terms, and
   acceptance criteria stay with CEO/CTO/user decisions.
+- Worker handoff must follow Runtime Token Firewall: give each worker a compact
+  capsule with goal, AC, files_scope, allowed edits, exact commands, expected
+  result/evidence paths, and current artifact references. Do not forward the
+  lead agent's full conversation history or old workbench transcript into a
+  worker, plugin wrapper, rescue subagent, or cheaper-model helper.
+- Poll worker artifacts, not the main chat. A worker should write status/result/
+  evidence and touched-file manifests; the lead should read those compact files
+  instead of repeatedly rereading broad diffs, source files, build logs, or the
+  current conversation while waiting.
 - Agent mode is an implementation-time choice. Default to single-agent
   execution. Offer optional parallel execution only as `sfs implement
   --agent-mode parallel --agents codex,claude[,gemini] ...`, and only when the

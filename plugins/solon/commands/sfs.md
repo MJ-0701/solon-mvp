@@ -107,10 +107,12 @@ $ARGUMENTS
     orphan events are removed/archived by `sfs upgrade` / `sfs tidy --all --apply`.
     Repeated cleanup evidence is date-bundled under
     `.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz`.
-    Shared handoff/history docs belong under
-    `docs/solon/<english-workspace>/<yyyyMMdd>/`; project-wide Solon reference
-    docs use named files under `docs/solon/`. Do not ask users to commit
-    `.sfs-local` unless their team explicitly opts in.
+    Shared handoff/history docs prefer
+    `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` and fall back to
+    `docs/solon/<english-workspace>/<yyyyMMdd>/` only for domainless
+    exploration; project-wide Solon reference docs use named files under
+    `docs/solon/`. Do not ask users to commit `.sfs-local` unless their team
+    explicitly opts in.
 14. In Solon reports, show gates as `Gate N (Name)`, not naked ids:
    Gate 1 (Intake), Gate 2 (Brainstorm), Gate 3 (Plan),
    Gate 4 (Design), Gate 5 (Handoff), Gate 6 (Review),

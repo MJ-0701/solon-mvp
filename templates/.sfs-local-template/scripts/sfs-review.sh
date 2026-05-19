@@ -118,7 +118,7 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                   fails before the full CPO prompt is sent.
                   Named profiles:
                     codex        $SFS_REVIEW_CODEX_CMD, else `codex exec --full-auto --ephemeral --output-last-message <result> -`
-                    codex-plugin $SFS_REVIEW_CODEX_PLUGIN_CMD only (Claude in-process plugins are not shell-callable)
+                    codex-plugin unsupported: Claude in-process Codex wrappers are blocked by Runtime Token Firewall
                     gemini       $SFS_REVIEW_GEMINI_CMD, else `gemini --skip-trust --output-format text -p "Read stdin and perform the requested CPO review."`
                     claude       $SFS_REVIEW_CLAUDE_CMD, else `claude -p "\$(cat)"`
                     claude-plugin unsupported; Codex is not a Claude plugin host
@@ -2274,6 +2274,12 @@ Model routing contract:
 - For Codex CPO/cross review, the requested review_high profile is gpt-5.5 with xhigh reasoning.
 - Codex gpt-5.4 worker, gpt-5.3-codex coding-helper, and gpt-5.3-codex-spark mechanical-helper profiles are not acceptable as the CPO/cross-review profile.
 - The default Codex shell bridge does not force model selection with CLI flags; configure the host/runtime profile, or set SFS_REVIEW_CODEX_CMD explicitly only if your Codex CLI supports those flags.
+- Runtime Token Firewall applies to this review: the executor receives this
+  capsule prompt and embedded evidence only. Do not use a Claude in-process
+  Codex/Gemini plugin, rescue subagent, forked context, or wrapper that forwards
+  the lead agent's full conversation history. If this capsule is insufficient,
+  return partial/fail and list the missing artifact instead of asking for the
+  whole chat.
 
 Review gate: ${GATE_DISPLAY}
 Review lens: ${REVIEW_LENS} (${REVIEW_LENS_LABEL}; source=${REVIEW_LENS_SOURCE})
@@ -2324,10 +2330,41 @@ Final recommendation:
 EOF
 }
 
+history_forwarding_executor_cmd() {
+  local cmd="${1:-}"
+  case "${cmd}" in
+    *codex-rescue*|*codex:codex*|*claude*plugin*codex*|*claude*codex*plugin*|*fork_context=true*|*fork_context[=:]true*|*full-history*|*full_history*|*conversation-history*|*conversation_history*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+reject_history_forwarding_executor() {
+  local source="${1:-executor command}"
+  cat >&2 <<EOF
+history-forwarding review bridge rejected: ${source}
+Runtime Token Firewall requires capsule-only executor handoff.
+
+Do not route SFS review through Claude in-process Codex/Gemini plugin wrappers,
+rescue subagents, forked contexts, or commands that forward the lead
+conversation history. Use one of:
+  - sfs review --gate <1..7> --executor codex
+  - SFS_REVIEW_CODEX_CMD='codex exec --full-auto --ephemeral --output-last-message "\${RUN_RESULT}" -'
+  - sfs review --gate <1..7> --executor codex --prompt-only
+EOF
+}
+
 resolve_review_executor_cmd() {
   case "${EVALUATOR_EXECUTOR}" in
     codex|codex-cli)
       if [[ -n "${SFS_REVIEW_CODEX_CMD:-}" ]]; then
+        if history_forwarding_executor_cmd "${SFS_REVIEW_CODEX_CMD}"; then
+          reject_history_forwarding_executor "SFS_REVIEW_CODEX_CMD"
+          return "${SFS_EXIT_EXECUTOR}"
+        fi
         case "${SFS_REVIEW_CODEX_CMD}" in
           *WindowsApps*OpenAI.Codex*app*resources*codex.exe*)
             cat >&2 <<'EOF'
@@ -2354,12 +2391,16 @@ EOF
       fi
       ;;
     codex-plugin)
-      if [[ -n "${SFS_REVIEW_CODEX_PLUGIN_CMD:-}" ]]; then
-        printf '%s\n' "${SFS_REVIEW_CODEX_PLUGIN_CMD}"
-      else
-        echo "executor bridge missing: codex-plugin is a Claude runtime plugin, not shell-callable; set SFS_REVIEW_CODEX_PLUGIN_CMD or run --print-prompt and invoke the plugin from Claude" >&2
-        return "${SFS_EXIT_EXECUTOR}"
-      fi
+      cat >&2 <<'EOF'
+executor bridge unsupported: codex-plugin/Claude in-process Codex wrappers are blocked by Runtime Token Firewall.
+They can forward main-thread conversation history and make review cost scale
+with the lead Claude session instead of the SFS evidence capsule.
+
+Use `--executor codex` with the Codex CLI, set SFS_REVIEW_CODEX_CMD to a
+capsule-only stdin/file bridge, or run `--prompt-only` and paste the generated
+prompt into Codex manually.
+EOF
+      return "${SFS_EXIT_EXECUTOR}"
       ;;
     gemini)
       if [[ -n "${SFS_REVIEW_GEMINI_CMD:-}" ]]; then

@@ -36,10 +36,15 @@ SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" init --la
 sprint_id="2026-W19-sprint-done"
 sprint_dir=".sfs-local/sprints/${sprint_id}"
 shared_report="docs/solon/retention/$(date +%Y%m%d)/report.md"
+flat_shared_dir="docs/solon/order-items-quantity-update/$(date +%Y%m%d)"
+domain_shared_dir="docs/solon/order/order-items/quantity-update/$(date +%Y%m%d)"
 mkdir -p "${sprint_dir}" .sfs-local/queue/pending .sfs-local/decisions
+mkdir -p "${flat_shared_dir}"
 touch .sfs-local/sprints/.gitkeep
 touch .sfs-local/queue/pending/.gitkeep
 touch .sfs-local/decisions/.gitkeep
+printf '# Flat Report\n' > "${flat_shared_dir}/report.md"
+printf '# Flat Retro\n' > "${flat_shared_dir}/retro.md"
 printf 'missing-sprint\n' > .sfs-local/current-sprint
 printf '# Brainstorm\n\nraw notes\n' > "${sprint_dir}/brainstorm.md"
 printf '# Review\n\nraw review\n' > "${sprint_dir}/review.md"
@@ -50,14 +55,19 @@ printf '{"ts":"2026-05-09T00:02:00+09:00","type":"legacy_probe"}\n' >> .sfs-loca
 dry_run="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" tidy --all)"
 assert_contains "${dry_run}" "rule: keep only files with a one-line keep reason" "dry-run retention rule"
 assert_contains "${dry_run}" "events: 3 line(s) would prune" "dry-run event pruning"
+assert_contains "${dry_run}" "shared_docs: 1 flat handoff dir(s) would rehome" "dry-run shared docs rehome"
 
 apply_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" tidy --all --apply)"
 assert_contains "${apply_out}" "retention:" "apply retention summary"
 assert_contains "${apply_out}" "events: 3 historical line(s) pruned" "apply event pruning"
 assert_contains "${apply_out}" "residue:" "apply residue summary"
 assert_contains "${apply_out}" "surface_cleanup: 1 run dir(s) consolidated by date" "apply surface cleanup consolidation"
+assert_contains "${apply_out}" "shared_docs: 1 flat handoff dir(s) rehomed; 0 skipped" "apply shared docs rehome"
 
 [[ -f "${shared_report}" ]] || fail "shared report.md should remain as durable sprint outcome"
+[[ -f "${domain_shared_dir}/report.md" ]] || fail "flat report should move to domain shared dir"
+[[ -f "${domain_shared_dir}/retro.md" ]] || fail "flat retro should move to domain shared dir"
+[[ ! -d docs/solon/order-items-quantity-update ]] || fail "flat shared workspace dir should be removed"
 [[ ! -e "${sprint_dir}/report.md" ]] || fail "private sprint report.md should not remain"
 [[ ! -e "${sprint_dir}/brainstorm.md" ]] || fail "brainstorm.md should be removed from visible sprint folder"
 [[ ! -e "${sprint_dir}/review.md" ]] || fail "review.md should be removed from visible sprint folder"

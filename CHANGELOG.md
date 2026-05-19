@@ -1,3 +1,50 @@
+## [0.6.89] - 2026-05-19
+
+> **Shared sprint handoff docs can now use a domain-first path instead of a
+> flat feature workspace slug, and worker/review handoff now has a runtime
+> token firewall.**
+
+### Added
+
+- `sfs start "<goal>"` now infers high-confidence domain metadata from the
+  natural-language goal and prepares `report.md` and `retro.md` under
+  `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/`.
+- `--domain`, `--subdomain`/`--sub`, and `--feature`/`--feat` remain available
+  as explicit override levers when inference needs correction.
+- `sfs tidy --all --apply` now rehomes high-confidence legacy flat shared docs
+  such as `docs/solon/order-items-quantity-update/<yyyyMMdd>/` into the
+  inferred domain-first path without overwriting existing files.
+- Added `policies/runtime-token-firewall.md` to make worker/review handoff
+  capsule-only: goal, AC, files_scope, commands, expected output paths, and
+  compact evidence instead of full lead-agent conversation history.
+- Added `test-runtime-token-firewall.sh` to lock the no-full-history forwarding
+  contract.
+
+### Changed
+
+- Updated start routing guidance and adapter templates so agents do not ask
+  users to type domain flags for normal work; `--workspace` is retained as a
+  fallback for early exploration.
+- Updated tidy routing guidance to describe automatic flat-doc rehoming and the
+  skip-on-conflict behavior.
+- Updated kernel, token-harness, implement, and review context so worker,
+  plugin, rescue-subagent, and external-review handoffs are capsule-only and
+  poll artifacts instead of main-thread chat state.
+- `sfs review --executor codex-plugin` is now blocked by Runtime Token Firewall;
+  Claude in-process Codex/Gemini wrappers must use `--prompt-only` or a real
+  CLI bridge instead of forwarding lead conversation history.
+- `SFS_REVIEW_CODEX_CMD` now rejects known history-forwarding bridge patterns
+  such as `codex-rescue`, `codex:codex`, forked context, and full-history
+  wrappers.
+
+### Tests
+
+- Extended `test-sfs-shared-handoff-docs.sh` to cover automatic inference of
+  the `order/order-items/quantity-update` handoff path and frontmatter.
+- Extended `test-sfs-tidy-retention.sh` to cover rehoming an existing flat
+  `order-items-quantity-update` shared-doc folder during `tidy --all --apply`.
+- Full source regression passed with 73 tests.
+
 ## [0.6.88] - 2026-05-16
 
 > **Shared report/retro docs now recover from manual sprint-id folders back to

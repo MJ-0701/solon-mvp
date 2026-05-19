@@ -26,7 +26,9 @@ project document surface.
 Default entry:
 - `sfs status`
 - current sprint `report.md` when one exists
-- `docs/solon/<english-workspace>/<yyyyMMdd>/` for shared adoption or handoff summaries
+- `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` for domain-first
+  shared adoption or handoff summaries when the product domain is known
+- `docs/solon/<english-workspace>/<yyyyMMdd>/` as the legacy flat fallback
 - expand to private workbench/logs only when the routed context needs evidence
 
 Project overview refresh:
@@ -71,8 +73,9 @@ portable SFS workflow command.
 Keep only what must remain: `.sfs-local/` is private active workbench state,
 not durable history. `events.jsonl` stays visible only for the current sprint
 ledger; stale/orphan events should be removed or archived by `sfs upgrade` /
-`sfs tidy --all --apply`. Shared handoff/history docs live under
-`docs/solon/<english-workspace>/<yyyyMMdd>/`, project-wide Solon reference docs
-may live under `docs/solon/`, and step docs are created lazily. Repeated cleanup
-evidence is date-bundled under
+`sfs tidy --all --apply`. Shared handoff/history docs prefer
+`docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` and fall back to
+`docs/solon/<english-workspace>/<yyyyMMdd>/` only when the domain labels are
+unclear. Project-wide Solon reference docs may live under `docs/solon/`, and
+step docs are created lazily. Repeated cleanup evidence is date-bundled under
 `.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz`.

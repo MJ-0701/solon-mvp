@@ -306,7 +306,8 @@ for handoff_doc in \
   "${plugin_command}" \
   "${plugin_readme}"
 do
-  assert_contains "${handoff_doc}" "docs/solon/<english-workspace>/<yyyyMMdd>/" "handoff docs root path ${handoff_doc}"
+  assert_contains "${handoff_doc}" "docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/" "domain handoff docs root path ${handoff_doc}"
+  assert_contains "${handoff_doc}" "docs/solon/<english-workspace>/<yyyyMMdd>/" "legacy fallback handoff docs path ${handoff_doc}"
 done
 assert_not_contains "${claude_template}" "docs/<workspace>/<yyyyMMdd>/" "claude no stale root docs handoff"
 assert_not_contains "${agents_template}" "docs/<workspace>/<yyyyMMdd>/" "agents no stale root docs handoff"

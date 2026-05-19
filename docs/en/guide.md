@@ -70,7 +70,9 @@ and split archive buckets collapse back under `archives/adopt/surface-cleanup`.
 `.sfs-local/` is not a history stack. A file stays visible only when its
 one-line keep reason is clear. `events.jsonl` is an active-sprint ledger: keep
 it while the current sprint is open, then hand durable history to
-`docs/solon/<english-workspace>/<yyyyMMdd>/` and git history. Repeated cleanup
+`docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` and git history.
+Domainless exploration may still use the legacy
+`docs/solon/<english-workspace>/<yyyyMMdd>/` fallback. Repeated cleanup
 evidence is date-bucketed as
 `.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz`
 instead of many visible timestamp folders.
@@ -98,11 +100,13 @@ security/privacy/data-loss, cost/latency/model policy, destructive behavior, or
 changed AC meaning.
 
 Sprint handoff documents are shared under
-`docs/solon/<english-workspace>/<yyyyMMdd>/report.md` and
-`docs/solon/<english-workspace>/<yyyyMMdd>/retro.md`. Use
-`sfs start "<goal>" --workspace <english-name>` when the goal is not already a
-clear English folder name. The prose should use the user's native or workspace
-language, matching the native-language commit message rule.
+`docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/report.md` and
+`docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/retro.md`. Users normally
+run `sfs start "<goal>"`; SFS infers high-confidence labels from the natural
+goal. `--domain`, `--subdomain`, and `--feature` are override levers when the
+inference is wrong, while `--workspace <english-name>` remains the legacy
+fallback for early exploration. The prose should use the user's native or
+workspace language, matching the native-language commit message rule.
 
 ## 2. Start A Sprint
 

@@ -66,9 +66,11 @@ install/upgrade smoke 로그는 조용히 접고, 실패하면 캡처한 stdout/
 증거 경로는 사라지지 않습니다.
 
 작업을 닫을 때 `report.md` 와 `retro.md` 는 `.sfs-local` 안이 아니라
-`docs/solon/<english-workspace>/<yyyyMMdd>/` 아래에 생성됩니다. 목표가 영어 폴더명으로
-명확하지 않으면 `sfs start "<goal>" --workspace <english-name>` 으로 한 줄 영어 이름을
-고정합니다. 본문 언어는
+`docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` 아래에 생성됩니다. 예를 들어 주문 도메인의
+주문상품 수량 변경은 `order/order-items/quantity-update` 처럼 도메인 → 서브도메인 → 기능 순서로
+둡니다. 일반 사용자는 `sfs start "<goal>"` 처럼 자연어 목표만 주면 되고, SFS 가 높은 확신의
+도메인 신호를 자동 추론합니다. 목표가 아직 도메인으로 분류되지 않는 탐색 작업만
+`--workspace <english-name>` 으로 legacy fallback 폴더를 고정합니다. 본문 언어는
 커밋 메시지와 같이 사용자의 native/workspace 언어를 기본값으로 둡니다.
 
 ## Windows 래퍼 안정화
@@ -339,7 +341,7 @@ report 가 사용자 결정을 요구할 때는 `Q1` 같은 내부 번호만 남
 loose 파일 대신 `*.tar.gz` + `manifest.txt` bundle 로 남습니다.
 `events.jsonl` 은 영구 히스토리가 아니라 현재 sprint 를 이어가기 위한 active ledger 입니다.
 현재 sprint 가 없거나 오래된 sprint 이벤트만 남은 경우 upgrade/tidy 가 제거 또는 archive 합니다.
-영구 인수인계는 `docs/solon/<english-workspace>/<yyyyMMdd>/` 공유 문서와 git history 로 봅니다.
+영구 인수인계는 `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` 공유 문서와 git history 로 봅니다.
 반복 cleanup evidence 도 바깥에 같은 날 timestamp 폴더를 여러 개 남기지 않고
 `.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/manifest.txt` 와
 `surface-cleanup.tar.gz` 로 날짜별 묶음 처리합니다.

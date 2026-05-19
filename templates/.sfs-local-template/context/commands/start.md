@@ -16,11 +16,20 @@ Rules:
   short user-facing Solon recap/status after the verbatim adapter output.
 - For `start`, adapter stdout should include exactly one `next:` line. If that
   line is already enough, do not add a second multi-step plan.
-- Shared report/retro/handoff docs use
-  `docs/solon/<english-workspace>/<yyyyMMdd>/...`. When the user's goal is not
-  already a clear English folder name, pass `--workspace <english-name>` to
-  `sfs start`; do not let the workspace collapse to a sprint id such as
-  `2026-W19-sprint-5`.
+- Shared report/retro/handoff docs should be domain-first when the product
+  domain is known:
+  `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/...`.
+  For example, order work should look like
+  `docs/solon/order/order-items/quantity-update/<yyyyMMdd>/...`, not a flat
+  folder such as `order-items-quantity-update`.
+- Users should not have to type domain flags. Run `sfs start "<goal>"` with the
+  natural goal; the adapter performs deterministic high-confidence inference,
+  and the agent should silently add/override labels only when it has stronger
+  project context. `--domain`, `--subdomain`, and `--feature` are override
+  levers, not the normal user-facing workflow.
+- If the domain is genuinely unclear, allow the legacy `--workspace
+  <english-name>` fallback. Do not let the workspace collapse to a sprint id
+  such as `2026-W19-sprint-5`.
 - Do not create or imply step-doc creation for `start`. `start` makes the
   sprint pointer only; `brainstorm`, `plan`, `implement`, `review`, and `retro`
   create their own workbench doc when that phase is actually needed.

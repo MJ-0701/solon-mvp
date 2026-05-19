@@ -7,6 +7,20 @@
 
 ---
 
+## 0.6.89
+
+이번 버전은 SFS 인수인계 문서 경로를 도메인 우선 구조로 바꾸고, Claude main thread 가
+Codex/worker wrapper 에 대화 전체를 넘기며 토큰을 태우는 경로를 Runtime Token Firewall 로 막습니다.
+
+- `sfs start "<goal>"` 는 자연어 목표에서 높은 확신의 domain/subdomain/feature 를 추론해
+  `docs/solon/<domain>/<subdomain>/<feature>/<date>/` 아래에 `report.md` 와 `retro.md` 를 준비합니다.
+- `--domain`, `--subdomain`, `--feature` 는 명시 override 로 남고, `--workspace` 는 초기 탐색용 legacy fallback 입니다.
+- `sfs tidy --all --apply` 는 기존 flat shared docs 를 안전하게 domain-first 경로로 옮기며, 충돌하면 덮어쓰지 않습니다.
+- worker/review handoff 는 이제 capsule-only 입니다: goal, AC, files_scope, 명령, 결과 경로, compact evidence 만 넘깁니다.
+- Claude in-process Codex/Gemini plugin wrapper, rescue subagent, forked context, full-history bridge 는 기본 review 경로에서 차단됩니다.
+- `sfs review --executor codex-plugin` 대신 Codex CLI bridge, `SFS_REVIEW_CODEX_CMD`, 또는 `--prompt-only` 수동 handoff 를 사용합니다.
+- 0.6.89 검증은 `run-all.sh` 73/0 PASS 로 기록됐습니다.
+
 ## 0.6.88
 
 이번 버전은 수동/retroactive close 가 shared docs 를 sprint id 폴더에 잘못 놓아도

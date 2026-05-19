@@ -6,7 +6,9 @@
 #   · ISO 8601 week sprint-id pattern (`<YYYY-Wxx>-sprint-<N>`).
 #
 # Usage:
-#   /sfs start [<goal>] [--id <sprint-id>] [--workspace <english-name>] [--force] [--output-style compact]
+#   /sfs start [<goal>] [--id <sprint-id>] [--workspace <english-name>]
+#             [--domain <domain>] [--subdomain <sub>] [--feature <feature>]
+#             [--force] [--output-style compact]
 #
 # Default sprint-id: <YYYY-Wxx>-sprint-<N>  (ISO week, auto-incremented).
 #
@@ -41,6 +43,9 @@ GOAL=""
 FORCE=false
 GOAL_PARTS=()
 WORKSPACE_RAW=""
+DOMAIN_RAW=""
+SUBDOMAIN_RAW=""
+FEATURE_RAW=""
 OUTPUT_STYLE="${SFS_OUTPUT_STYLE:-normal}"
 
 while [[ $# -gt 0 ]]; do
@@ -73,6 +78,45 @@ while [[ $# -gt 0 ]]; do
       ;;
     --workspace=*)
       WORKSPACE_RAW="${1#--workspace=}"
+      shift
+      ;;
+    --domain)
+      shift
+      if [[ $# -eq 0 ]]; then
+        echo "missing value for --domain" >&2
+        exit "${SFS_EXIT_UNKNOWN}"
+      fi
+      DOMAIN_RAW="$1"
+      shift
+      ;;
+    --domain=*)
+      DOMAIN_RAW="${1#--domain=}"
+      shift
+      ;;
+    --subdomain|--sub)
+      shift
+      if [[ $# -eq 0 ]]; then
+        echo "missing value for --subdomain" >&2
+        exit "${SFS_EXIT_UNKNOWN}"
+      fi
+      SUBDOMAIN_RAW="$1"
+      shift
+      ;;
+    --subdomain=*|--sub=*)
+      SUBDOMAIN_RAW="${1#*=}"
+      shift
+      ;;
+    --feature|--feat)
+      shift
+      if [[ $# -eq 0 ]]; then
+        echo "missing value for --feature" >&2
+        exit "${SFS_EXIT_UNKNOWN}"
+      fi
+      FEATURE_RAW="$1"
+      shift
+      ;;
+    --feature=*|--feat=*)
+      FEATURE_RAW="${1#*=}"
       shift
       ;;
     --output-style=*)
@@ -161,6 +205,20 @@ case "${WORKSPACE_RAW}" in
     exit "${SFS_EXIT_UNKNOWN}"
     ;;
 esac
+for _sfs_labeled_value in \
+  "domain:${DOMAIN_RAW}" \
+  "subdomain:${SUBDOMAIN_RAW}" \
+  "feature:${FEATURE_RAW}"
+do
+  _sfs_label="${_sfs_labeled_value%%:*}"
+  _sfs_value="${_sfs_labeled_value#*:}"
+  case "${_sfs_value}" in
+    *$'\n'*|*$'\r'*)
+      echo "invalid ${_sfs_label}: newline not allowed" >&2
+      exit "${SFS_EXIT_UNKNOWN}"
+      ;;
+  esac
+done
 
 # Validate sprint-id shape (no path traversal, no whitespace, no leading dot).
 case "${SPRINT_ID}" in
@@ -228,14 +286,43 @@ elif [[ -n "${GOAL}" ]]; then
 else
   WORKSPACE="$(sfs_path_segment_from_text "" "work-slice")"
 fi
+if [[ -n "${FEATURE_RAW}" && -z "${WORKSPACE_RAW}" ]]; then
+  WORKSPACE="$(sfs_path_segment_from_text "${FEATURE_RAW}" "work-slice")"
+fi
+DOMAIN=""
+SUBDOMAIN=""
+FEATURE=""
+if [[ -n "${DOMAIN_RAW}" ]]; then
+  DOMAIN="$(sfs_path_segment_from_text "${DOMAIN_RAW}" "domain")"
+  SUBDOMAIN="$(sfs_path_segment_from_text "${SUBDOMAIN_RAW}" "general")"
+  if [[ -n "${FEATURE_RAW}" ]]; then
+    FEATURE="$(sfs_path_segment_from_text "${FEATURE_RAW}" "work-slice")"
+  else
+    FEATURE="${WORKSPACE}"
+  fi
+elif [[ -z "${WORKSPACE_RAW}" ]]; then
+  _inferred_domain_line="$(sfs_infer_domain_metadata "${GOAL} ${FEATURE_RAW}" "${WORKSPACE}" || true)"
+  if [[ -n "${_inferred_domain_line}" ]]; then
+    IFS=$'\t' read -r DOMAIN SUBDOMAIN FEATURE <<< "${_inferred_domain_line}"
+  fi
+fi
 _esc_workspace="${WORKSPACE//\\/\\\\}"
 _esc_workspace="${_esc_workspace//\"/\\\"}"
+_esc_domain="${DOMAIN//\\/\\\\}"
+_esc_domain="${_esc_domain//\"/\\\"}"
+_esc_subdomain="${SUBDOMAIN//\\/\\\\}"
+_esc_subdomain="${_esc_subdomain//\"/\\\"}"
+_esc_feature="${FEATURE//\\/\\\\}"
+_esc_feature="${_esc_feature//\"/\\\"}"
 
+_event_payload="{\"sprint_id\":\"${_esc_sprint}\",\"workspace\":\"${_esc_workspace}\""
 if [[ -n "${GOAL}" ]]; then
-  _event_payload="{\"sprint_id\":\"${_esc_sprint}\",\"goal\":\"${_esc_goal}\",\"workspace\":\"${_esc_workspace}\",\"by\":\"sfs-start\"}"
-else
-  _event_payload="{\"sprint_id\":\"${_esc_sprint}\",\"workspace\":\"${_esc_workspace}\",\"by\":\"sfs-start\"}"
+  _event_payload="${_event_payload},\"goal\":\"${_esc_goal}\""
 fi
+if [[ -n "${DOMAIN}" ]]; then
+  _event_payload="${_event_payload},\"domain\":\"${_esc_domain}\",\"subdomain\":\"${_esc_subdomain}\",\"feature\":\"${_esc_feature}\""
+fi
+_event_payload="${_event_payload},\"by\":\"sfs-start\"}"
 
 if ! append_event "sprint_start" "${_event_payload}" 2>/dev/null; then
   echo "permission denied appending event to ${SFS_EVENTS_FILE}" >&2
@@ -264,19 +351,24 @@ if [[ -n "${GOAL}" ]]; then
 else
   _next_goal='"<raw goal/context>"'
 fi
+if [[ -n "${DOMAIN}" ]]; then
+  SHARED_DOCS_PATH="${SFS_SHARED_DOCS_DIR}/${DOMAIN}/${SUBDOMAIN}/${FEATURE}"
+else
+  SHARED_DOCS_PATH="${SFS_SHARED_DOCS_DIR}/${WORKSPACE}"
+fi
 
 if [[ "${OUTPUT_STYLE}" == "compact" ]]; then
   printf 'created=%s/ current_sprint=%s shared_docs=%s/<yyyyMMdd>/ step_docs=lazy next=%s alt_simple=%s alt_hard=%s recommended=normal\n' \
     "${SPRINT_DIR}" \
     "${SPRINT_ID}" \
-    "${SFS_SHARED_DOCS_DIR}/${WORKSPACE}" \
+    "${SHARED_DOCS_PATH}" \
     "sfs brainstorm ${_next_goal}" \
     "sfs brainstorm --simple ${_next_goal}" \
     "sfs brainstorm --hard ${_next_goal}"
 else
   echo "created: ${SPRINT_DIR}/"
   echo "  - current-sprint pointer"
-  echo "  - shared_docs: ${SFS_SHARED_DOCS_DIR}/${WORKSPACE}/<yyyyMMdd>/"
+  echo "  - shared_docs: ${SHARED_DOCS_PATH}/<yyyyMMdd>/"
   echo "  - no step docs yet; each command creates only the doc it needs"
   printf 'next: choose brainstorm depth: simple=sfs brainstorm --simple %s | normal=sfs brainstorm %s | hard=sfs brainstorm --hard %s (recommended: normal)\n' "${_next_goal}" "${_next_goal}" "${_next_goal}"
 fi

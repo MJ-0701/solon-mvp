@@ -22,6 +22,7 @@ module:
 - `commands/loop.md` — loop / autonomous work / queue.
 - `policies/mutex.md` — lock conflict or concurrent session.
 - `policies/token-harness.md` — token/context hygiene, semantic search, repeated mistake guardrails.
+- `policies/runtime-token-firewall.md` — capsule-only worker/review handoff and no full-history forwarding.
 - `policies/source-driven-development.md` — official-source verification for framework/library patterns.
 - `policies/debugging-and-error-recovery.md` — stop-the-line failure triage and root-cause guardrails.
 - `policies/deprecation-and-migration.md` — legacy state/API cleanup with replacement, archive, and migration evidence.

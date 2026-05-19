@@ -363,7 +363,7 @@ public contract, 보안/개인정보/data-loss, 비용/지연/model policy, dest
 제품 판단이 들어가는 경우입니다.
 
 현재 `sfs review` 는 clean tree 에서도 직전 commit 의 reviewable 산출물을 evidence 로 싣습니다.
-그래서 ADR 과 `docs/solon/<english-workspace>/<yyyyMMdd>/report.md` 를 commit 한 뒤 Gate review 를
+그래서 ADR 과 `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/report.md` 를 commit 한 뒤 Gate review 를
 돌려도, review agent 가 "본문을 못 봤다"는 이유로 partial 을 내지 않도록 prompt 가 구성됩니다.
 
 ---
@@ -376,15 +376,17 @@ sfs retro
 
 `retro` 는 sprint 를 마무리하는 명령입니다. 한 번 실행하면 다음을 함께 처리합니다.
 
-- `docs/solon/<english-workspace>/<yyyyMMdd>/retro.md` 를 회고로 정리
-- `docs/solon/<english-workspace>/<yyyyMMdd>/report.md` 가 없으면 만들거나 최신 내용으로 정리
+- `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/retro.md` 를 회고로 정리
+- `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/report.md` 가 없으면 만들거나 최신 내용으로 정리
 - 길어진 임시 기록을 private archive 로 접어 다음 사람이 볼 표면을 정리
 - sprint 상태를 close
 - local close commit 생성
 
-`<english-workspace>` 는 `sfs start "<goal>" --workspace <english-name>` 로 고정하는 한 줄
-영어 이름입니다. 예를 들어 `sfs start "결제 오류 수정" --workspace payment-error-fix` 로
-시작한 작업은 `docs/solon/payment-error-fix/<yyyyMMdd>/` 아래에 인계 문서를 남깁니다.
+일반 사용자는 도메인 플래그를 직접 줄 필요가 없습니다. 예를 들어
+`sfs start "주문상품 수량 수정"` 처럼 자연어 목표만 주면 SFS 가 높은 확신의 도메인 신호를 추론해
+인계 문서를 `docs/solon/order/order-items/quantity-update/<yyyyMMdd>/` 아래에 남깁니다.
+`--domain`, `--subdomain`, `--feature` 는 추론이 틀렸을 때의 override 용도입니다. 도메인이 아직
+불명확한 탐색 작업만 `--workspace <english-name>` fallback 을 씁니다.
 `report.md` 와 `retro.md` 본문은 커밋 메시지 규칙과 같이
 사용자의 native/workspace 언어로 작성해도 됩니다.
 
@@ -557,7 +559,8 @@ sfs.cmd update
 
 ### 완료된 sprint 는 무엇을 보면 되나?
 
-팀과 공유할 요약은 `docs/solon/<english-workspace>/<yyyyMMdd>/report.md` 와 `retro.md` 를 봅니다.
+팀과 공유할 요약은 `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/report.md` 와
+`retro.md` 를 봅니다.
 진행 중인 private workbench 는 `.sfs-local/sprints/<sprint-id>/` 에 있고, 더 자세한 배경은
 필요한 경우에만 private archive 를 봅니다.
 

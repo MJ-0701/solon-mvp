@@ -70,9 +70,12 @@ smokes replay captured stdout and stderr with `[verify-product-release]`
 prefixes. Release logs get shorter, but release evidence remains traceable.
 
 When the work closes, `report.md` and `retro.md` are generated under
-`docs/solon/<english-workspace>/<yyyyMMdd>/` rather than inside `.sfs-local`.
-Use `sfs start "<goal>" --workspace <english-name>` when the goal is not already
-a clear English folder name.
+`docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` rather than inside
+`.sfs-local`. For example, order item quantity work belongs under
+`order/order-items/quantity-update`. Users normally run `sfs start "<goal>"`;
+SFS infers high-confidence domain labels from that natural goal. Use the legacy
+`--workspace <english-name>` fallback only while the work is still exploration
+without stable domain labels.
 The prose defaults to the user's native or workspace language, matching the
 native-language commit message rule.
 
@@ -378,8 +381,9 @@ Runtime upgrade, agent install, and profile rollback backups are also kept as
 `events.jsonl` is not durable history. It is visible only as the current
 active-sprint ledger. Once there is no active sprint, or once stale events
 belong only to older sprints, upgrade/tidy removes or archives that residue.
-The durable handoff is the shared `docs/solon/<english-workspace>/<yyyyMMdd>/`
-document set plus git history.
+The durable handoff is the shared
+`docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` document set plus git
+history.
 Repeated surface-cleanup runs are also compacted by date: the visible surface is
 `.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/manifest.txt` plus
 `surface-cleanup.tar.gz`, not a list of same-day timestamp directories.

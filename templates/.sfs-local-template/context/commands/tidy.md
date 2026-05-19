@@ -10,10 +10,13 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
   If the reason is not clear in one sentence, remove it or pack it into cold
   history after report evidence exists.
 - Workbench files are temporary: brainstorm, plan, implement, log, review.
-- Shared handoff docs are `docs/solon/<english-workspace>/<yyyyMMdd>/report.md` and
-  `docs/solon/<english-workspace>/<yyyyMMdd>/retro.md`. `<english-workspace>` is
-  a clear one-line English slug, preferably passed at `sfs start` with
-  `--workspace <english-name>`.
+- Shared handoff docs prefer
+  `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/report.md` and
+  `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/retro.md`.
+  Legacy `docs/solon/<english-workspace>/<yyyyMMdd>/` folders are fallback
+  only. `tidy --all --apply` may rehome high-confidence flat legacy folders
+  into the domain-first path without overwriting existing files; ambiguous or
+  conflicting folders stay visible for review.
 - Report/retro prose should use the user's native/workspace language, matching
   the native-language commit message rule. Do not force English when the work
   conversation is Korean or another non-English language.

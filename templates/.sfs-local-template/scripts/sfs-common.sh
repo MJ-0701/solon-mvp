@@ -414,6 +414,69 @@ sfs_path_segment_from_text() {
   printf '%s\n' "${segment}"
 }
 
+sfs_infer_domain_metadata() {
+  local raw="${1:-}" workspace="${2:-work-slice}" text domain="" subdomain="" feature=""
+  text="$(printf '%s' "${raw}" | tr '[:upper:]' '[:lower:]')"
+
+  case "${text}" in
+    *주문상품*|*주문\ 상품*|*order-items*|*orderitem*|*order-item*|*order\ item*|*line-item*|*line\ item*)
+      domain="order"; subdomain="order-items" ;;
+    *주문*|*order*)
+      domain="order"; subdomain="orders" ;;
+    *장바구니*|*cart*)
+      domain="order"; subdomain="cart" ;;
+    *결제*|*payment*|*checkout*)
+      domain="payment"; subdomain="payments" ;;
+    *환불*|*refund*)
+      domain="payment"; subdomain="refunds" ;;
+    *배송*|*배달*|*shipping*|*shipment*|*delivery*)
+      domain="fulfillment"; subdomain="shipping" ;;
+    *상품*|*product*|*catalog*)
+      domain="catalog"; subdomain="products" ;;
+    *재고*|*inventory*|*stock*)
+      domain="catalog"; subdomain="inventory" ;;
+    *회원*|*사용자*|*고객*|*user*|*member*|*customer*)
+      domain="user"; subdomain="accounts" ;;
+    *인증*|*로그인*|*auth*|*login*|*sign-in*|*signup*|*sign-up*)
+      domain="identity"; subdomain="auth" ;;
+    *관리자*|*admin*|*dashboard*)
+      domain="admin"; subdomain="dashboard" ;;
+    *보안*|*security*|*audit*)
+      domain="security"; subdomain="audit" ;;
+    *디자인*|*design*)
+      domain="design"; subdomain="system" ;;
+    *pdf*)
+      domain="document"; subdomain="pdf" ;;
+  esac
+
+  case "${text}" in
+    *수량*|*quantity*) feature="quantity-update" ;;
+    *검색*|*search*) feature="search" ;;
+    *필터*|*filter*) feature="filter" ;;
+    *페이지*|*pagination*) feature="pagination" ;;
+    *대시보드*|*dashboard*) feature="dashboard" ;;
+    *업로드*|*upload*) feature="upload" ;;
+    *검증*|*validation*) feature="validation" ;;
+    *알림*|*공지*|*notice*|*notification*) feature="notice" ;;
+    *권한*|*permission*|*role*) feature="permissions" ;;
+    *레이아웃*|*layout*) feature="layout" ;;
+    *뷰어*|*viewer*) feature="viewer" ;;
+    *저장*|*persistence*|*storage*) feature="persistence" ;;
+    *인계*|*handoff*) feature="handoff" ;;
+    *쿠키*|*cookie*) feature="cookie" ;;
+    *가입*|*signup*|*sign-up*) feature="sign-up" ;;
+    *수정*|*변경*|*update*) feature="update" ;;
+  esac
+
+  if [[ -n "${domain}" ]]; then
+    [[ -n "${subdomain}" ]] || subdomain="general"
+    if [[ -z "${feature}" ]]; then
+      feature="$(sfs_path_segment_from_text "${workspace}" "work-slice")"
+    fi
+    printf '%s\t%s\t%s\n' "${domain}" "${subdomain}" "${feature}"
+  fi
+}
+
 sfs_sprint_start_field() {
   local sid="${1:?sprint id required}" key="${2:?field required}" escaped_sid
   [[ -f "${SFS_EVENTS_FILE}" ]] || return 0
@@ -444,6 +507,23 @@ sfs_workspace_for_sprint() {
   printf '%s\n' "${workspace}"
 }
 
+sfs_domain_path_for_sprint() {
+  local sid="${1:?sprint id required}" domain subdomain feature workspace
+  domain="$(sfs_sprint_start_field "${sid}" "domain" || true)"
+  [[ -n "${domain}" ]] || return 1
+  domain="$(sfs_path_segment_from_text "${domain}" "domain")"
+  subdomain="$(sfs_sprint_start_field "${sid}" "subdomain" || true)"
+  subdomain="$(sfs_path_segment_from_text "${subdomain}" "general")"
+  feature="$(sfs_sprint_start_field "${sid}" "feature" || true)"
+  if [[ -n "${feature}" ]]; then
+    feature="$(sfs_path_segment_from_text "${feature}" "work-slice")"
+  else
+    workspace="$(sfs_workspace_for_sprint "${sid}")"
+    feature="$(sfs_path_segment_from_text "${workspace}" "work-slice")"
+  fi
+  printf '%s/%s/%s\n' "${domain}" "${subdomain}" "${feature}"
+}
+
 sfs_date_dir_from_ts() {
   local ts="${1:-}" date_dir
   date_dir="$(printf '%s\n' "${ts}" | sed -nE 's/^([0-9]{4})-([0-9]{2})-([0-9]{2}).*/\1\2\3/p')"
@@ -455,10 +535,10 @@ sfs_date_dir_from_ts() {
 
 sfs_shared_handoff_dir() {
   local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
-  local workspace date_dir
-  workspace="$(sfs_workspace_for_sprint "${sid}")"
+  local workspace_path date_dir
+  workspace_path="$(sfs_domain_path_for_sprint "${sid}" || sfs_workspace_for_sprint "${sid}")"
   date_dir="$(sfs_date_dir_from_ts "${ts}")"
-  printf '%s/%s/%s\n' "${SFS_SHARED_DOCS_DIR}" "${workspace}" "${date_dir}"
+  printf '%s/%s/%s\n' "${SFS_SHARED_DOCS_DIR}" "${workspace_path}" "${date_dir}"
 }
 
 sfs_shared_sprint_doc_path() {
@@ -928,20 +1008,23 @@ update_frontmatter() {
 # ─────────────────────────────────────────────────────────────────────
 
 # sfs_prepare_sprint_report <sprint-id> <iso-ts> <status>
-# Ensures `docs/solon/<english-workspace>/<yyyyMMdd>/report.md` exists and
-# updates report frontmatter. Workspace defaults to the `sfs start --workspace`
-# value, or an English slug derived from the goal when possible.
+# Ensures `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/report.md`
+# exists when domain metadata is present; otherwise it falls back to the legacy
+# `docs/solon/<english-workspace>/<yyyyMMdd>/report.md` path.
 # stdout: report path
 sfs_prepare_sprint_report() {
   local sid="${1:?sprint id required}" ts="${2:?timestamp required}" status="${3:-draft}"
   local sdir="${SFS_SPRINTS_DIR}/${sid}"
   local report_path
   local created_report=0
-  local template workspace handoff_dir
+  local template workspace handoff_dir domain subdomain feature
   template="$(sfs_sprint_template_file report)"
   report_path="$(sfs_shared_sprint_doc_path "${sid}" "${ts}" report)"
   handoff_dir="$(dirname "${report_path}")"
   workspace="$(sfs_workspace_for_sprint "${sid}")"
+  domain="$(sfs_sprint_start_field "${sid}" "domain" || true)"
+  subdomain="$(sfs_sprint_start_field "${sid}" "subdomain" || true)"
+  feature="$(sfs_sprint_start_field "${sid}" "feature" || true)"
 
   if [[ ! -d "${sdir}" ]]; then
     echo "sprint not found: ${sid}" >&2
@@ -963,6 +1046,15 @@ sfs_prepare_sprint_report() {
   update_frontmatter "${report_path}" "status" "${status}" || return ${SFS_EXIT_PERM}
   update_frontmatter "${report_path}" "sprint_id" "$(sfs_yaml_quote "${sid}")" || return ${SFS_EXIT_PERM}
   update_frontmatter "${report_path}" "workspace" "$(sfs_yaml_quote "${workspace}")" || return ${SFS_EXIT_PERM}
+  if [[ -n "${domain}" ]]; then
+    update_frontmatter "${report_path}" "domain" "$(sfs_yaml_quote "$(sfs_path_segment_from_text "${domain}" "domain")")" || return ${SFS_EXIT_PERM}
+    update_frontmatter "${report_path}" "subdomain" "$(sfs_yaml_quote "$(sfs_path_segment_from_text "${subdomain}" "general")")" || return ${SFS_EXIT_PERM}
+    if [[ -n "${feature}" ]]; then
+      update_frontmatter "${report_path}" "feature" "$(sfs_yaml_quote "$(sfs_path_segment_from_text "${feature}" "work-slice")")" || return ${SFS_EXIT_PERM}
+    else
+      update_frontmatter "${report_path}" "feature" "$(sfs_yaml_quote "${workspace}")" || return ${SFS_EXIT_PERM}
+    fi
+  fi
   update_frontmatter "${report_path}" "handoff_dir" "$(sfs_yaml_quote "${handoff_dir}")" || return ${SFS_EXIT_PERM}
   if [[ "${created_report}" -eq 1 ]]; then
     update_frontmatter "${report_path}" "created_at" "$(sfs_yaml_quote "${ts}")" || return ${SFS_EXIT_PERM}
@@ -980,17 +1072,21 @@ sfs_prepare_sprint_report() {
 }
 
 # sfs_prepare_sprint_retro <sprint-id> <iso-ts>
-# Ensures `docs/solon/<english-workspace>/<yyyyMMdd>/retro.md` exists and updates
-# retro frontmatter. Document content is intentionally native/workspace language.
+# Ensures `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/retro.md`
+# exists when domain metadata is present; otherwise it falls back to the legacy
+# `docs/solon/<english-workspace>/<yyyyMMdd>/retro.md` path.
 # stdout: retro path
 sfs_prepare_sprint_retro() {
   local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
   local sdir="${SFS_SPRINTS_DIR}/${sid}"
-  local retro_path template workspace handoff_dir
+  local retro_path template workspace handoff_dir domain subdomain feature
   template="$(sfs_sprint_template_file retro)"
   retro_path="$(sfs_shared_sprint_doc_path "${sid}" "${ts}" retro)"
   handoff_dir="$(dirname "${retro_path}")"
   workspace="$(sfs_workspace_for_sprint "${sid}")"
+  domain="$(sfs_sprint_start_field "${sid}" "domain" || true)"
+  subdomain="$(sfs_sprint_start_field "${sid}" "subdomain" || true)"
+  feature="$(sfs_sprint_start_field "${sid}" "feature" || true)"
 
   if [[ ! -d "${sdir}" ]]; then
     echo "sprint not found: ${sid}" >&2
@@ -1016,6 +1112,15 @@ sfs_prepare_sprint_retro() {
   update_frontmatter "${retro_path}" "phase" "retro" || return ${SFS_EXIT_PERM}
   update_frontmatter "${retro_path}" "sprint_id" "$(sfs_yaml_quote "${sid}")" || return ${SFS_EXIT_PERM}
   update_frontmatter "${retro_path}" "workspace" "$(sfs_yaml_quote "${workspace}")" || return ${SFS_EXIT_PERM}
+  if [[ -n "${domain}" ]]; then
+    update_frontmatter "${retro_path}" "domain" "$(sfs_yaml_quote "$(sfs_path_segment_from_text "${domain}" "domain")")" || return ${SFS_EXIT_PERM}
+    update_frontmatter "${retro_path}" "subdomain" "$(sfs_yaml_quote "$(sfs_path_segment_from_text "${subdomain}" "general")")" || return ${SFS_EXIT_PERM}
+    if [[ -n "${feature}" ]]; then
+      update_frontmatter "${retro_path}" "feature" "$(sfs_yaml_quote "$(sfs_path_segment_from_text "${feature}" "work-slice")")" || return ${SFS_EXIT_PERM}
+    else
+      update_frontmatter "${retro_path}" "feature" "$(sfs_yaml_quote "${workspace}")" || return ${SFS_EXIT_PERM}
+    fi
+  fi
   update_frontmatter "${retro_path}" "handoff_dir" "$(sfs_yaml_quote "${handoff_dir}")" || return ${SFS_EXIT_PERM}
   update_frontmatter "${retro_path}" "last_touched_at" "$(sfs_yaml_quote "${ts}")" || return ${SFS_EXIT_PERM}
   local goal
@@ -1495,11 +1600,16 @@ EOF
 
 usage_start() {
   cat <<'EOF'
-Usage: /sfs start [<goal>] [--id <sprint-id>] [--workspace <english-name>] [--force] [--output-style compact]
+Usage: /sfs start [<goal>] [--id <sprint-id>] [--workspace <english-name>]
+       [--domain <domain>] [--subdomain <subdomain>] [--feature <feature>]
+       [--force] [--output-style compact]
 
 Default sprint-id pattern: <YYYY-Wxx>-sprint-<N>  (ISO 8601 week)
 Goal is free text. Use --id only when you need a custom sprint id.
-Workspace is the English one-line folder name for shared docs under
+SFS infers high-confidence domain metadata from the goal so shared docs land at:
+docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/.
+Use --domain/--subdomain/--feature only to override that inference.
+Workspace remains the legacy English one-line folder fallback:
 docs/solon/<workspace>/<yyyyMMdd>/.
 Use /sfs brainstorm for multiline/raw requirement context before /sfs plan.
 On success, start prints the created files and one next action that exposes

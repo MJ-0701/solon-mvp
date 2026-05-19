@@ -42,6 +42,14 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - For Gate 3 plan review, use the CPO/evaluator role and prefer an independent
   executor or fresh agent context when available. The plan author, CTO, or
   generator should not self-approve the plan it will execute.
+- Review handoff must follow Runtime Token Firewall: send a capsule containing
+  the gate, lens, AC, files/artifacts, exact evidence paths, and bounded
+  excerpts. Do not invoke Claude in-process plugin wrappers, rescue subagents,
+  or forked contexts that forward the lead conversation history as the default
+  review path.
+- If the capsule is insufficient, return partial/fail and name the missing
+  evidence. Do not request full chat history or repeatedly poll the lead thread
+  to compensate for an underspecified review bundle.
 - Summaries should list verdict, findings, required actions, evidence, and next gate.
   Show gates as `Gate N (Name)`, for example Gate 6 (Review), not a naked
   internal id.

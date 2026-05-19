@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# tests/test-sfs-shared-handoff-docs.sh — report/retro live under docs/solon/<english-workspace>/<yyyyMMdd>.
+# tests/test-sfs-shared-handoff-docs.sh — report/retro live under shared docs paths.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -85,5 +85,26 @@ custom_retro_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "$
 assert_contains "${custom_retro_out}" "retro.md ready: ${canonical_shared_dir}/retro.md" "custom id retro stdout"
 [[ -f "${canonical_shared_dir}/retro.md" ]] || fail "custom id retro was not moved to canonical workspace"
 [[ ! -e "${wrong_shared_dir}/retro.md" ]] || fail "custom id retro stayed under sprint id workspace"
+
+domain_sid="2026-W21-order-items"
+domain_start_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" start \
+  "주문상품 수량 변경" \
+  --id "${domain_sid}")"
+domain_shared_dir="docs/solon/order/order-items/quantity-update/${date_dir}"
+assert_contains "${domain_start_out}" "shared_docs: docs/solon/order/order-items/quantity-update/<yyyyMMdd>/" "auto domain start stdout"
+
+domain_report_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" report)"
+assert_contains "${domain_report_out}" "report.md ready: ${domain_shared_dir}/report.md" "domain report stdout"
+[[ -f "${domain_shared_dir}/report.md" ]] || fail "domain report missing"
+grep -Fq 'domain: "order"' "${domain_shared_dir}/report.md" || fail "domain report missing domain frontmatter"
+grep -Fq 'subdomain: "order-items"' "${domain_shared_dir}/report.md" || fail "domain report missing subdomain frontmatter"
+grep -Fq 'feature: "quantity-update"' "${domain_shared_dir}/report.md" || fail "domain report missing feature frontmatter"
+
+domain_retro_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" retro --draft)"
+assert_contains "${domain_retro_out}" "retro.md ready: ${domain_shared_dir}/retro.md" "domain retro stdout"
+[[ -f "${domain_shared_dir}/retro.md" ]] || fail "domain retro missing"
+grep -Fq 'domain: "order"' "${domain_shared_dir}/retro.md" || fail "domain retro missing domain frontmatter"
+grep -Fq 'subdomain: "order-items"' "${domain_shared_dir}/retro.md" || fail "domain retro missing subdomain frontmatter"
+grep -Fq 'feature: "quantity-update"' "${domain_shared_dir}/retro.md" || fail "domain retro missing feature frontmatter"
 
 echo "test-sfs-shared-handoff-docs: OK"

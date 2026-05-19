@@ -66,6 +66,10 @@ load_when: ["always", "sfs", "entry"]
 - Token/harness hygiene is ambient: keep adapter memory thin, prefer routed
   context and symbol/semantic search before broad reads, and convert repeated
   AI mistakes into guardrails/checks during review or retro.
+- Runtime Token Firewall is ambient: worker/review/executor handoffs are
+  capsule-only. Do not forward the lead agent's full conversation history to a
+  worker, plugin wrapper, rescue subagent, or external reviewer; pass only goal,
+  AC, files_scope, commands, expected output paths, and compact evidence.
 - Compactness is never a pass condition. Use compact wording only when evidence,
   risk warnings, decisions, source links/paths, raw-source traceability, and
   verification results stay intact; otherwise use full clarity.

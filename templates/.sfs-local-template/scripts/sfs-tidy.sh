@@ -35,6 +35,10 @@ Clean up completed sprint workbench docs without leaving loose hidden files.
     explain why they must stay visible.
   - `--all --apply` also cleans targetless post-adopt surface residue such as
     cache notice files, empty archive buckets, stale logs, and placeholder auth.
+  - `--all --apply` also rehomes high-confidence legacy flat shared docs such as
+    docs/solon/order-items-quantity-update/<yyyyMMdd>/ into
+    docs/solon/order/order-items/quantity-update/<yyyyMMdd>/ without overwriting
+    existing files. Ambiguous folders stay put for manual review.
   - When report.md was created from legacy workbench docs, AI runtimes should
     refine it into the final report immediately after the adapter returns.
   - report.md, retro.md, and decision files are preserved in their durable
@@ -324,6 +328,72 @@ tidy_non_adopt_archive_ids() {
 
 tidy_non_adopt_archive_count() {
   tidy_non_adopt_archive_ids | sed '/^[[:space:]]*$/d' | wc -l | tr -d '[:space:]'
+}
+
+tidy_flat_shared_handoff_target() {
+  local dir="${1:?shared doc dir required}" date_dir workspace_dir workspace inferred domain subdomain feature workspace_segment
+  [[ -d "${dir}" ]] || return 1
+  date_dir="$(basename "${dir}")"
+  case "${date_dir}" in
+    [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]) ;;
+    *) return 1 ;;
+  esac
+  workspace_dir="$(dirname "${dir}")"
+  [[ "$(dirname "${workspace_dir}")" == "${SFS_SHARED_DOCS_DIR}" ]] || return 1
+  workspace="$(basename "${workspace_dir}")"
+  inferred="$(sfs_infer_domain_metadata "${workspace}" "${workspace}" || true)"
+  [[ -n "${inferred}" ]] || return 1
+  IFS=$'\t' read -r domain subdomain feature <<< "${inferred}"
+  workspace_segment="$(sfs_path_segment_from_text "${workspace}" "work-slice")"
+
+  # Avoid over-eager migrations of broad buckets like docs/solon/order/<date>/.
+  [[ -n "${feature}" && "${feature}" != "${workspace_segment}" ]] || return 1
+  printf '%s/%s/%s/%s/%s\n' "${SFS_SHARED_DOCS_DIR}" "${domain}" "${subdomain}" "${feature}" "${date_dir}"
+}
+
+tidy_shared_handoff_rehome_count() {
+  local dir target count=0
+  [[ -d "${SFS_SHARED_DOCS_DIR}" ]] || { printf '0\n'; return 0; }
+  while IFS= read -r dir; do
+    target="$(tidy_flat_shared_handoff_target "${dir}" || true)"
+    [[ -n "${target}" && "${target}" != "${dir}" ]] || continue
+    count=$((count + 1))
+  done < <(find "${SFS_SHARED_DOCS_DIR}" -mindepth 2 -maxdepth 2 -type d 2>/dev/null || true)
+  printf '%s\n' "${count}"
+}
+
+tidy_rehome_flat_shared_handoffs() {
+  local dir target parent base item conflict moved=0 skipped=0
+  [[ -d "${SFS_SHARED_DOCS_DIR}" ]] || { printf '0 0\n'; return 0; }
+  while IFS= read -r dir; do
+    target="$(tidy_flat_shared_handoff_target "${dir}" || true)"
+    [[ -n "${target}" && "${target}" != "${dir}" ]] || continue
+    conflict=0
+    if [[ -e "${target}" ]]; then
+      for item in "${dir}"/*; do
+        [[ -e "${item}" ]] || continue
+        base="$(basename "${item}")"
+        if [[ -e "${target}/${base}" ]]; then
+          conflict=1
+          break
+        fi
+      done
+    fi
+    if [[ "${conflict}" -eq 1 ]]; then
+      skipped=$((skipped + 1))
+      continue
+    fi
+    mkdir -p "${target}" || return "${SFS_EXIT_PERM}"
+    for item in "${dir}"/*; do
+      [[ -e "${item}" ]] || continue
+      mv "${item}" "${target}/" || return "${SFS_EXIT_PERM}"
+    done
+    rmdir "${dir}" 2>/dev/null || true
+    parent="$(dirname "${dir}")"
+    rmdir "${parent}" 2>/dev/null || true
+    moved=$((moved + 1))
+  done < <(find "${SFS_SHARED_DOCS_DIR}" -mindepth 2 -maxdepth 2 -type d 2>/dev/null || true)
+  printf '%s %s\n' "${moved}" "${skipped}"
 }
 
 tidy_collapse_non_adopt_archives() {
@@ -625,6 +695,7 @@ read -r EVENT_PRUNE_COUNT EVENT_KEEP_COUNT EVENT_STATE \
   <<< "$(tidy_event_prune_stats "${TARGETS}" "${CURRENT_SPRINT}" "${ALL}")"
 RESIDUE_COUNT="$(tidy_count_local_residue)"
 ARCHIVE_COLLAPSE_COUNT="$(tidy_non_adopt_archive_count)"
+SHARED_REHOME_COUNT="$(tidy_shared_handoff_rehome_count)"
 
 if [[ "${APPLY}" -eq 0 ]]; then
   echo "tidy retention dry-run:"
@@ -639,6 +710,7 @@ if [[ "${APPLY}" -eq 0 ]]; then
   fi
   echo "  residue: ${RESIDUE_COUNT} placeholder/broken/empty item(s) would remove"
   echo "  archives: ${ARCHIVE_COLLAPSE_COUNT} non-adopt archive bucket(s) would collapse"
+  echo "  shared_docs: ${SHARED_REHOME_COUNT} flat handoff dir(s) would rehome"
 fi
 
 # Apply preflight first so --all never half-applies before discovering a
@@ -721,12 +793,14 @@ if [[ "${APPLY}" -eq 1 ]]; then
   RESIDUE_REMOVED="$(tidy_cleanup_local_residue)"
   ARCHIVES_COLLAPSED="$(tidy_collapse_non_adopt_archives "${NOW}")"
   SURFACE_CONSOLIDATED="$(tidy_consolidate_surface_cleanup_archives)"
+  read -r SHARED_REHOMED SHARED_REHOME_SKIPPED <<< "$(tidy_rehome_flat_shared_handoffs)"
   echo "retention:"
   echo "  rule: kept files must have a one-line reason"
   echo "  events: ${EVENT_PRUNED} historical line(s) pruned; ${EVENT_COMPACTED} duplicate active line(s) compacted"
   echo "  residue: ${RESIDUE_REMOVED} placeholder/broken/empty item(s) removed"
   echo "  archives: ${ARCHIVES_COLLAPSED} non-adopt bucket(s) collapsed"
   echo "  surface_cleanup: ${SURFACE_CONSOLIDATED} run dir(s) consolidated by date"
+  echo "  shared_docs: ${SHARED_REHOMED} flat handoff dir(s) rehomed; ${SHARED_REHOME_SKIPPED} skipped"
 fi
 
 exit "${SFS_EXIT_OK}"
