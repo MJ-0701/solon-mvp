@@ -78,6 +78,10 @@ evidence, and SEED/placeholder/mock/fallback material kept as non-acceptance
 until replaced.
 External review/check PASS is a continuation trigger, not a stopping point. All
 LLM agents continue from PASS to self-CPO first, then cross review.
+Session Continuation Guard also applies: `sfs upgrade` updates runtime/project
+context, but it cannot shrink an already-open Claude/Codex/Gemini conversation.
+At 30% token meter before a new WU/sprint action, or 50% before a new
+gate/loop/cross-review, create a compact handoff and resume in a fresh session.
 
 `sfs implement` defaults to Single Agent. Choose `--agent-mode parallel
 --agents codex,claude[,gemini]` only when the plan splits into independent

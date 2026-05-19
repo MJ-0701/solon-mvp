@@ -1,3 +1,35 @@
+## [0.6.92] - 2026-05-19
+
+> **Session Continuation Guard stops long-running agent chats from becoming the
+> hidden token budget.**
+
+### Added
+
+- Added `policies/session-continuation-guard.md` and routed it through the
+  context index, kernel, token-harness, runtime-token-firewall, loop, implement,
+  review, model profiles, adapters, and docs.
+- Added explicit host-token thresholds: if the token meter is 30% or higher
+  before the first implementation/review action of a new WU/sprint, or 50% or
+  higher before a new gate, loop wakeup, worker handoff, or cross-review, agents
+  must stop and create a compact fresh-session handoff.
+- Added the upgrade boundary: `sfs upgrade` updates runtime/project context but
+  cannot shrink an already-open Claude/Codex/Gemini conversation.
+- Added `test-session-continuation-token-guard.sh`.
+
+### Changed
+
+- Runtime Token Firewall now separates bridge budget from host-session budget.
+  Full-history workers/reviewers remain blocked, and long host sessions must
+  hand off through artifacts instead of spawning another history-forwarding
+  helper.
+- Loop guidance now stops repeated wakeups in the same chat after more than two
+  wakeups or when the token meter crosses the handoff threshold.
+
+### Tests
+
+- Added `test-session-continuation-token-guard.sh`.
+- Full source regression target is 79 tests.
+
 ## [0.6.91] - 2026-05-19
 
 > **External review PASS now resumes the SFS gate instead of becoming a quiet

@@ -66,6 +66,12 @@ load_when: ["always", "sfs", "entry"]
 - Token/harness hygiene is ambient: keep adapter memory thin, prefer routed
   context and symbol/semantic search before broad reads, and convert repeated
   AI mistakes into guardrails/checks during review or retro.
+- Session Continuation Guard is ambient: `sfs upgrade` cannot shrink an already
+  open LLM conversation. If the host token meter is 30% or higher before a new
+  WU/sprint action, 50% or higher before a new gate/loop/review handoff, or the
+  same session has spanned multiple WUs/sprints or repeated loop wakeups, stop
+  and create a compact fresh-session handoff instead of continuing in the same
+  chat.
 - Runtime Token Firewall is ambient: worker/review/executor handoffs are
   capsule-only. Do not forward the lead agent's full conversation history to a
   worker, plugin wrapper, rescue subagent, or external reviewer; pass only goal,

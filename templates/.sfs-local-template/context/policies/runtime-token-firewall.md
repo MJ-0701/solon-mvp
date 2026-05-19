@@ -31,3 +31,7 @@ load_when: ["token", "harness", "worker", "review", "executor", "bridge", "Claud
 - Budget failure is a product finding. If a worker/review bridge repeatedly
   exceeds the expected token or wall-clock budget, record a harness finding and
   tighten the capsule, files_scope, or executor bridge before another run.
+- Session continuation budget is separate from bridge budget. If the host
+  session itself is already large, do not hide that by spawning another
+  full-history worker or reviewer. Stop, capture a fresh-session handoff, and
+  resume from artifacts in a new session.

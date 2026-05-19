@@ -146,6 +146,13 @@ full clarity 로 남깁니다. Caveman/persona 말투는 기본값이 아닙니�
 성공하면 조용히 접고, 실패하면 캡처한 stdout/stderr 를 `[verify-product-release]` prefix 로
 다시 보여줍니다. 배포 확인 로그는 짧아지지만 실패 원문 추적은 사라지지 않습니다.
 
+Session Continuation Guard 는 compact output 과 다른 문제를 다룹니다. `sfs upgrade` 는 runtime 과
+project-local context 를 최신화하지만, 이미 열린 Claude/Codex/Gemini 대화의 누적 토큰을 지우지는
+못합니다. 새 WU/sprint 첫 구현·review 전에 host token meter 가 30% 이상이거나, 새 gate/loop/
+cross-review 시작 전에 50% 이상이면 같은 대화를 더 끌지 말고 `report.md`, `review.md`, capture id,
+commit/branch, 다음 SFS 명령만 남긴 뒤 fresh session 으로 이어가야 합니다. `.sfs-local/` 크기는
+tidy 신호일 뿐 token meter 대체값은 아닙니다.
+
 ---
 
 ## 3. 어디서 어떻게 입력하나

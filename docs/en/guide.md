@@ -143,6 +143,15 @@ As of 0.6.85, the release verifier follows the same evidence floor: successful
 internal install/upgrade smoke logs stay quiet, while failures replay captured
 stdout/stderr so the original cause remains traceable.
 
+Session Continuation Guard covers a different budget. `sfs upgrade` updates the
+runtime and project-local context, but it cannot shrink an already-open
+Claude/Codex/Gemini conversation. If the host token meter is 30% or higher
+before the first implementation/review action of a new WU/sprint, or 50% or
+higher before a new gate, loop wakeup, or cross-review handoff, stop and create
+a fresh session handoff with `report.md`, `review.md`, capture ids,
+commit/branch, and the next SFS command. `.sfs-local/` size is a tidy signal,
+not a token-meter substitute.
+
 If a blank app would help before a sprint, the user should not need to know words
 like Next.js, Spring, Java, or API. The user can simply describe what they want
 to make. During brainstorm, the AI should infer when an initial project setup

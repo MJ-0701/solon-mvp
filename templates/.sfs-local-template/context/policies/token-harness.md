@@ -47,6 +47,12 @@ load_when: ["token", "harness", "context", "Claude", "Codex", "Gemini", "MCP", "
 - Use usage reports when token drain feels abnormal. Claude users may use
   Session Report; other agents should use their own usage dashboard/logs. Do
   not guess blindly from vibes.
+- Apply Session Continuation Guard when usage is abnormal. `sfs upgrade` updates
+  runtime/project context, but it cannot shrink the already-open LLM
+  conversation. If the token meter is 30% or higher before a new WU/sprint
+  action, 50% or higher before a new gate/loop/review handoff, or one session
+  spans multiple WUs/sprints or repeated loop wakeups, write a compact handoff
+  and restart in a fresh session.
 - CLAUDE.md Management is useful as audit/report input, but do not auto-apply
   its suggestions to SFS adapter docs. Propose only small, stable, high-signal
   edits.

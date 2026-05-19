@@ -201,6 +201,12 @@ Gate 3/Gate 6 PASS 를 대체하지 않습니다.
 Gemini, 기타 LLM Agent 는 PASS 라고 말하고 끝내지 않고 다음 미충족 SFS review 명령을 이어갑니다:
 self-CPO 먼저, self-CPO PASS 뒤에 설정된 cross-review 순서입니다.
 
+Session Continuation Guard 는 긴 host 대화 자체를 다룹니다. `sfs upgrade` 가 최신이어도 이미 열린
+Claude/Codex/Gemini conversation history 는 그대로 남아 token meter 를 태웁니다. 새 WU/sprint 의
+첫 구현·review 전에 30% 이상, 새 gate/loop/cross-review 전 50% 이상, 또는 같은 chat 이 여러
+WU/sprint·반복 wakeup 을 지나면 agent 는 `report.md`, `review.md`, capture id, commit/branch,
+다음 SFS 명령만 남기고 fresh session 으로 전환해야 합니다.
+
 | Lens | 주로 보는 것 |
 |---|---|
 | `code` | correctness, tests, regressions, maintainability |

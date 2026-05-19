@@ -24,6 +24,7 @@ module:
 - `policies/mutex.md` — lock conflict or concurrent session.
 - `policies/token-harness.md` — token/context hygiene, semantic search, repeated mistake guardrails.
 - `policies/runtime-token-firewall.md` — capsule-only worker/review handoff and no full-history forwarding.
+- `policies/session-continuation-guard.md` — stop long-session token bleed with fresh-session handoff.
 - `policies/context-pollution-guard.md` — keep core docs/context free of prompt bodies, transcripts, and scratch residue.
 - `policies/source-driven-development.md` — official-source verification for framework/library patterns.
 - `policies/debugging-and-error-recovery.md` — stop-the-line failure triage and root-cause guardrails.

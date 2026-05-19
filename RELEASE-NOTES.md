@@ -7,6 +7,21 @@
 
 ---
 
+## 0.6.92
+
+이번 버전은 같은 Claude/Codex/Gemini 세션을 오래 이어 쓰면서 token meter 가 비정상적으로 빨리
+차는 문제를 SFS flow 안에서 멈추게 합니다.
+
+- `sfs upgrade` 는 runtime 과 project-local context 를 최신화하지만, 이미 열린 LLM 대화의 누적
+  토큰을 지우지는 못한다는 경계를 명확히 했습니다.
+- 새 WU/sprint 첫 구현·review 전에 token meter 가 30% 이상이면 fresh session 으로 넘깁니다.
+- 새 gate, autonomous loop wakeup, worker handoff, cross-review 전에 token meter 가 50% 이상이면
+  같은 대화를 계속 쓰지 않고 compact handoff 를 남깁니다.
+- 같은 chat 이 여러 WU/sprint 를 지나거나 loop wakeup 이 2회를 넘으면 fresh-session handoff 로
+  전환합니다.
+- handoff 에는 `report.md`, `review.md`, capture id, commit/branch, 실패 명령, 다음 SFS 명령만
+  남기고 전체 chat transcript 는 복사하지 않습니다.
+
 ## 0.6.91
 
 이번 버전은 GitHub/@codex/PR/check PASS 를 SFS gate 종료로 오해하는 흐름을 막습니다.

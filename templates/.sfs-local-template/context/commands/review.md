@@ -58,6 +58,10 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   excerpts. Do not invoke Claude in-process plugin wrappers, rescue subagents,
   or forked contexts that forward the lead conversation history as the default
   review path.
+- Review handoff must also follow Session Continuation Guard. If the current
+  host session is already token-heavy, do not start cross-review in the same
+  conversation. Record the review capsule and resume the review from a fresh
+  session or real CLI bridge.
 - Review durable product/context artifacts for Context Pollution Guard:
   prompt bodies, full transcripts, bridge probe output, `.sfs-local/tmp/...`
   scratch paths, and old review blobs in core docs are findings because they

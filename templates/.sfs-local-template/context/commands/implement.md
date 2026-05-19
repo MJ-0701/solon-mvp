@@ -70,6 +70,11 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - If code or executable artifacts changed, run the smallest relevant test,
   build, typecheck, smoke, or scripted review before marking complete. Record
   the command and result in the implementation evidence.
+- Before starting a new implementation slice in a long host conversation, apply
+  Session Continuation Guard. If the token meter is already 30% or higher at
+  the start of a new WU/sprint, or 50% or higher before a new gate/worker
+  handoff, stop and create a compact fresh-session handoff instead of spending
+  another slice inside the same chat.
 - After tests/smokes pass, run a self-agent top-model CPO review before marking
   the work done. Claude routes that self-CPO to Opus 4.7, Codex routes it to
   `gpt-5.5` with xhigh reasoning, and Gemini routes it to `gemini-3-pro-auto`.

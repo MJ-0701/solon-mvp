@@ -67,6 +67,10 @@ ADR/decision id, AC → file/artifact/evidence, SEED/placeholder/mock/fallback n
 확인한 self-CPO mini-check 를 남겨야 합니다.
 외부 리뷰/check PASS 는 continuation trigger 이며 stopping point 가 아닙니다. 모든 LLM Agent 는
 PASS 에서 멈추지 않고 self-CPO 먼저, 그 다음 cross review 로 이어갑니다.
+Session Continuation Guard 도 적용됩니다. `sfs upgrade` 는 runtime/project context 를 바꾸지만
+이미 열린 Claude/Codex/Gemini 대화의 토큰 누적을 지우지 못합니다. 새 WU/sprint 첫 작업 전에
+token meter 가 30% 이상이거나 새 gate/loop/cross-review 전에 50% 이상이면 compact handoff 를
+남기고 fresh session 으로 이어갑니다.
 
 `sfs implement` 는 기본적으로 Single Agent 입니다. plan 이 독립 커밋 단위로 나뉘고 agent 별
 files_scope 가 겹치지 않을 때만 `--agent-mode parallel --agents codex,claude[,gemini]` 를

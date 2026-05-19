@@ -220,6 +220,14 @@ Codex, Claude, Gemini, and future LLM agents do not end at PASS; they continue
 with the next unmet SFS review command: self-CPO first, then the configured
 cross-review order after self-CPO PASS.
 
+Session Continuation Guard covers the host conversation itself. Even when
+`sfs upgrade` is current, an already-open Claude/Codex/Gemini conversation
+keeps its history and token meter. At 30% before the first implementation or
+review action of a new WU/sprint, 50% before a new gate/loop/cross-review, or
+after multiple WUs/sprints or loop wakeups in the same chat, agents write a
+compact handoff with `report.md`, `review.md`, capture ids, commit/branch, and
+the next SFS command, then resume in a fresh session.
+
 | Lens | Primary concern |
 |---|---|
 | `code` | correctness, tests, regressions, maintainability |
