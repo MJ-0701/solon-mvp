@@ -1,3 +1,60 @@
+## [0.6.90] - 2026-05-19
+
+> **Natural-language flow checkpoints and Context Pollution Guard keep SFS
+> continuity durable without turning prompts, transcripts, or scratch output
+> into permanent product context.**
+
+### Added
+
+- Added `sfs capture` and `sfs note` so natural-language decisions, review
+  order, scope changes, exceptions, blockers, and evidence can be recorded in
+  the active sprint before the next command loses that flow state.
+- Added non-collapsing `flow_capture` events with `capture_id` so multiple
+  conversation checkpoints survive active-ledger compaction.
+- Added `sfs review --sprint <id>` restore support for closed sprint archives,
+  letting a review gate resume from the latest cold `sprint-evidence.tar.gz`
+  without manually editing `.sfs-local/current-sprint`.
+- Added `policies/context-pollution-guard.md` and wired it through the context
+  router, kernel, token-harness, review, tidy, capture, README/GUIDE, and
+  current-product-shape docs.
+- Added a `sfs capture` text budget guard. Captures default to 2000 bytes and
+  reject prompt/transcript dumps unless `SFS_CAPTURE_ALLOW_LONG=1` is used for
+  an explicit local exception.
+- Added release guidance that separates "no surprise push" from "no push":
+  when the user explicitly authorizes autonomous deploy, SFS agents may push
+  source, stable, tag, Homebrew, and Scoop refs and record that evidence. The
+  rule applies to all LLM agents, including Codex, Claude, Gemini, and future
+  adapters.
+
+### Changed
+
+- Runtime dispatch now exposes `capture` and the `note` alias from Bash and
+  Windows entrypoints.
+- Capture guidance now treats bulky prompt/run output as an artifact/archive
+  pointer plus accepted conclusion, not as durable flow text.
+- Review and tidy guidance now flag prompt bodies, raw transcripts, bridge/run
+  scratch, `.sfs-local/tmp/...` residue, and long review blobs in core docs as
+  product findings before release.
+- `cut-release.sh` now supports `--push` for user-authorized stable main/tag
+  publishing while retaining no-push as the default safety mode.
+
+### Fixed
+
+- CPO review prompt rendering now uses quoted static heredocs plus explicit
+  variable printing so Markdown backticks such as `sfs review` stay text and do
+  not execute hidden shell commands while building the prompt.
+- `test-review-auth-preflight.sh` now forces the missing-auth case through
+  headless preflight and disables bridge probing for the fake authenticated
+  executor, avoiding accidental installed-runtime recursion during tests.
+
+### Tests
+
+- Added `test-sfs-capture-flow.sh`.
+- Added `test-sfs-review-closed-sprint-restore.sh`.
+- Added `test-context-pollution-guard.sh`.
+- Added `test-release-authorized-push-policy.sh`.
+- Full source regression passed with 77 tests.
+
 ## [0.6.89] - 2026-05-19
 
 > **Shared sprint handoff docs can now use a domain-first path instead of a

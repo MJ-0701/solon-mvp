@@ -157,6 +157,21 @@ Windows runtime `.ps1` / `.cmd` 파일을 ASCII-safe 로 유지해 `context cat`
 같은 option bundle 은 사용자-facing 확정 문구로 쓰지 않고, `권장안 그대로 확정`처럼 자연어로
 받습니다.
 
+## Capture 는 자연어 flow checkpoint
+
+SFS 작업 중 구현 방향, 리뷰 순서, 예외/waiver, blocker, evidence 는 자연어 대화로 바뀔 수 있습니다.
+그런 말은 다음 명령 전에 `sfs capture` 로 현재 sprint `log.md` 와 `events.jsonl` 에 남깁니다.
+
+```sh
+sfs capture --kind review-order --gate 6 "Codex self-CPO first, then Gemini, then Claude."
+sfs note "GitHub @codex review passed, but it is external evidence only."
+```
+
+`capture` 는 전체 대화 녹화기가 아닙니다. 나중에 review/retro 가 잃으면 안 되는 가장 작은
+flow checkpoint 만 남깁니다. 긴 prompt, 전체 대화, bridge/review scratch, command log 는
+temporary artifact 나 cold archive 에 두고, core product context 에는 결론과 evidence path 만
+남깁니다.
+
 ## Implement 는 코드만 뜻하지 않는다
 
 `sfs implement` 의 산출물은 코드일 수도 있지만, Solon 에서는 아래도 모두 implementation artifact 입니다.
@@ -212,6 +227,10 @@ grep 범위 누락, 실측 evidence 갱신, AC와 파일/산출물 매핑 누락
 현재 `sfs review` 는 commit-aware 입니다. working tree 가 clean 이어도 직전 commit 의
 reviewable 파일, 현재 공유 handoff 문서, 작은 ADR/report 본문을 bounded evidence 안에 포함하므로
 commit 후 evidence prompt 가 비어서 partial 이 나는 상황을 막습니다.
+
+이미 닫힌 sprint 의 review 를 다시 이어가야 할 때는 `.sfs-local/current-sprint` 를 손으로 복구하지
+않고 `sfs review --sprint <id> --gate <n>` 를 사용합니다. SFS 는 최신 cold archive 를 workbench 로
+복원하되, 이미 visible workbench 문서가 있으면 그것을 덮어쓰지 않습니다.
 
 ## 얇은 멀티 에이전트 감독
 

@@ -16,6 +16,7 @@ module:
 - `commands/plan.md` — Gate 3 sprint contract and cross-phase fundamentals.
 - `commands/implement.md` — implement / build / execute work.
 - `commands/review.md` — review / CPO / verdict.
+- `commands/capture.md` — natural-language flow checkpoint / note / decision capture.
 - `commands/release.md` — release / deploy / Homebrew / Scoop.
 - `commands/upgrade.md` — upgrade / update / install freshness.
 - `commands/tidy.md` — tidy / report / retro / archive.
@@ -23,6 +24,7 @@ module:
 - `policies/mutex.md` — lock conflict or concurrent session.
 - `policies/token-harness.md` — token/context hygiene, semantic search, repeated mistake guardrails.
 - `policies/runtime-token-firewall.md` — capsule-only worker/review handoff and no full-history forwarding.
+- `policies/context-pollution-guard.md` — keep core docs/context free of prompt bodies, transcripts, and scratch residue.
 - `policies/source-driven-development.md` — official-source verification for framework/library patterns.
 - `policies/debugging-and-error-recovery.md` — stop-the-line failure triage and root-cause guardrails.
 - `policies/deprecation-and-migration.md` — legacy state/API cleanup with replacement, archive, and migration evidence.

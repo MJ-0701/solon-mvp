@@ -83,7 +83,7 @@ chmod +x "${fake_bin}/gemini"
 set +e
 env -u GEMINI_API_KEY -u GOOGLE_API_KEY -u GOOGLE_APPLICATION_CREDENTIALS -u SFS_GEMINI_AUTH_READY \
   PATH="${fake_bin}:$PATH" SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" \
-  bash "${SFS_BIN}" review --gate 3 --executor gemini >"${TMP_DIR}/missing.out" 2>"${TMP_DIR}/missing.err"
+  bash "${SFS_BIN}" review --gate 3 --executor gemini --no-auth-interactive >"${TMP_DIR}/missing.out" 2>"${TMP_DIR}/missing.err"
 missing_rc=$?
 set -e
 [[ "${missing_rc}" == "9" ]] || {
@@ -109,7 +109,7 @@ if [[ -f .sfs-local/events.jsonl ]] && grep -Fq '"type":"review_open"' .sfs-loca
 fi
 
 review_out="$(
-  PATH="${fake_bin}:$PATH" SFS_GEMINI_AUTH_READY=1 SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" \
+  PATH="${fake_bin}:$PATH" SFS_GEMINI_AUTH_READY=1 SFS_REVIEW_BRIDGE_PROBE=0 SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" \
     bash "${SFS_BIN}" review --gate 3 --executor gemini
 )"
 case "${review_out}" in

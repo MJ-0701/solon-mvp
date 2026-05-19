@@ -207,7 +207,7 @@ Usage:
 Commands:
   agent install, upgrade, update, uninstall
   version [--check]
-  status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, report, tidy, retro, commit, loop
+  status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, capture, note, report, tidy, retro, commit, loop
   bootstrap [<plain-language app idea>]   # agent-facing initial setup handoff
   measure --alive -- <command>            # long-running command heartbeat
 
@@ -260,6 +260,9 @@ context_resolve_rel() {
     start|intake|sprint) printf '%s\n' "commands/start.md" ;;
     adopt|brainstorm|plan|implement|review|release|upgrade|profile|loop|tidy)
       printf '%s\n' "commands/${key}.md"
+      ;;
+    capture|note)
+      printf '%s\n' "commands/capture.md"
       ;;
     *)
       echo "unknown context key: ${key}" >&2
@@ -1203,7 +1206,7 @@ EOF
 esac
 
 case "${1:-}" in
-  status|start|guide|auth|profile|division|adopt|brainstorm|plan|implement|review|decision|report|tidy|retro|commit|loop)
+  status|start|guide|auth|profile|division|adopt|brainstorm|plan|implement|review|decision|capture|note|report|tidy|retro|commit|loop)
     if ! ensure_project_initialized "${1:-command}"; then
       exit 1
     fi

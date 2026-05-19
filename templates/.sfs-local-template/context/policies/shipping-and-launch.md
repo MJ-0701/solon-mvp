@@ -20,6 +20,11 @@ Release rules:
 - Monitoring/evidence must be named. For SFS, that includes GitHub Actions,
   package archive hash parity, installed `sfs version --check`, and the release
   verifier.
+- Publishing must avoid surprise pushes, not all pushes. If the user explicitly
+  authorizes autonomous deploy and credentials are available, the agent may push
+  source, stable, tag, Homebrew tap, and Scoop bucket refs; record each pushed
+  repo/ref in the release evidence. This applies to all LLM agents, including
+  Codex, Claude, Gemini, and future adapters.
 - Feature flags or kill switches are preferred for application features. For
   CLI/package releases, equivalent safety is conservative defaults, backward
   compatible flags, and verified downgrade/recovery notes.

@@ -7,6 +7,28 @@
 
 ---
 
+## 0.6.90
+
+이번 버전은 자연어로 오간 중요한 결정을 SFS flow 안에 짧게 남기고, 반대로 prompt/transcript/
+scratch 로그가 Solon 제품 문맥에 눌러앉아 토큰을 태우는 경로를 막습니다.
+
+- `sfs capture` 와 `sfs note` 로 구현 방향, 리뷰 순서, 예외/waiver, blocker, evidence 를
+  현재 sprint `log.md` 와 `events.jsonl` 에 기록할 수 있습니다.
+- `flow_capture` event 는 capture 별로 남아 active ledger compaction 중에도 여러 checkpoint 가
+  사라지지 않습니다.
+- 닫힌 sprint 는 `sfs review --sprint <id> --gate <n>` 로 최신 cold archive 에서 복원해 review 를
+  재개할 수 있습니다.
+- Context Pollution Guard 가 core docs/context 에 남길 것은 결론과 evidence path 로 제한하고,
+  prompt body, 전체 대화, bridge/review scratch, 긴 command log 는 tmp/archive 쪽에 두도록 고정합니다.
+- `sfs capture` 는 기본 2000 bytes budget 으로 prompt/transcript dump 를 막고, 명시적인 local 예외만
+  `SFS_CAPTURE_ALLOW_LONG=1` 로 허용합니다.
+- release push 정책은 "무조건 금지"가 아니라 "surprise push 금지"로 정리했습니다. 사용자가 자동
+  배포를 명시 승인하면 source/stable/tag/Homebrew/Scoop push 를 진행하고 evidence 로 남길 수 있습니다.
+  이 규칙은 Codex 뿐 아니라 Claude, Gemini, 기타 LLM Agent 모두에 동일하게 적용됩니다.
+- CPO review prompt 안의 Markdown backtick 이 Bash 명령으로 실행되던 위험을 막아, 문서 속
+  `sfs review` 같은 예시가 숨은 재귀 실행으로 번지지 않습니다.
+- 0.6.90 검증은 `run-all.sh` 77/0 PASS 로 기록됐습니다.
+
 ## 0.6.89
 
 이번 버전은 SFS 인수인계 문서 경로를 도메인 우선 구조로 바꾸고, Claude main thread 가

@@ -71,7 +71,7 @@ fi
 # ─────────────────────────────────────────────────────────────────────
 usage_review() {
   cat <<'EOF'
-Usage: /sfs review [--gate <1..7>] [--lens <auto|artifact|code|docs|source-docs|simplify|security|performance|api-contract|strategy|design|taxonomy|qa|ops|management-admin|release>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
+Usage: /sfs review [--sprint <id>] [--gate <1..7>] [--lens <auto|artifact|code|docs|source-docs|simplify|security|performance|api-contract|strategy|design|taxonomy|qa|ops|management-admin|release>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
 
 Open the active sprint's review.md as the CPO Evaluator review document.
   - --gate <n>    gate number, 1..7. Reports display this as Gate 1..7:
@@ -82,6 +82,12 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                   event in events.jsonl. If no review history exists, SFS
                   defaults to Gate 6 when implementation/artifact evidence is
                   present, or Gate 3 when only plan evidence is present.
+  - --sprint <id> Review a specific sprint. If there is no active sprint and
+                  the sprint workbench was already compacted into
+                  .sfs-local/archives/sprints/<id>/.../sprint-evidence.tar.gz,
+                  SFS restores the latest cold archive into .sfs-local/sprints/<id>/
+                  and sets current-sprint before rendering the review. Existing
+                  visible workbench files are never overwritten.
   - --lens <name> review lens. Default: auto.
                   auto chooses from artifact, code, docs, source-docs,
                   simplify, security, performance, api-contract, strategy,
@@ -169,6 +175,7 @@ EOF
 # CLI parse (--gate <1..7> | --gate=<1..7> | -h | --help)
 # ─────────────────────────────────────────────────────────────────────
 GATE_ID=""
+REVIEW_SPRINT_ID=""
 REVIEW_LENS="${SFS_REVIEW_LENS:-auto}"
 EVALUATOR_EXECUTOR="${SFS_REVIEW_EXECUTOR:-codex}"
 GENERATOR_EXECUTOR="${SFS_GENERATOR_EXECUTOR:-unknown}"
@@ -190,6 +197,7 @@ REVIEW_DIR_EXPANSION_MAX="${SFS_REVIEW_DIR_EXPANSION_MAX:-80}"
 REVIEW_EXECUTOR_TIMEOUT="${SFS_REVIEW_EXECUTOR_TIMEOUT_SEC:-${SFS_REVIEW_COMMAND_TIMEOUT_SEC:-1500}}"
 REVIEW_BRIDGE_PROBE="${SFS_REVIEW_BRIDGE_PROBE:-auto}"
 REVIEW_BRIDGE_PROBE_TIMEOUT="${SFS_REVIEW_BRIDGE_PROBE_TIMEOUT_SEC:-45}"
+SFS_REVIEW_RESTORE_NOTICE=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
@@ -206,6 +214,18 @@ while [[ $# -gt 0 ]]; do
       ;;
     --gate=*)
       GATE_ID="${1#--gate=}"
+      shift
+      ;;
+    --sprint)
+      if [[ $# -lt 2 ]]; then
+        echo "--sprint requires a value" >&2
+        exit "${SFS_EXIT_BADCLI}"
+      fi
+      REVIEW_SPRINT_ID="$2"
+      shift 2
+      ;;
+    --sprint=*)
+      REVIEW_SPRINT_ID="${1#--sprint=}"
       shift
       ;;
     --lens)
@@ -432,8 +452,100 @@ if [[ "${_validate_rc}" -ne 0 ]]; then
 fi
 
 # ─────────────────────────────────────────────────────────────────────
-# Resolve active sprint
+# Resolve active or explicit sprint
 # ─────────────────────────────────────────────────────────────────────
+sfs_validate_review_sprint_id() {
+  local sid="${1:-}"
+  case "${sid}" in
+    ""|*..*|*/*|*\\*|*$'\n'*|*$'\t'*|*' '*|.*)
+      return 1
+      ;;
+  esac
+  return 0
+}
+
+sfs_latest_sprint_archive_bundle() {
+  local sid="${1:?sprint id required}" archive_root="${SFS_ARCHIVES_DIR}/sprints/${sid}"
+  [[ -d "${archive_root}" ]] || return 1
+  find "${archive_root}" -path '*/sprint-evidence.tar.gz' -type f 2>/dev/null | sort | tail -n 1
+}
+
+sfs_restore_sprint_for_review() {
+  local sid="${1:?sprint id required}" current sdir archive stage doc src dest restored=0
+  if ! sfs_validate_review_sprint_id "${sid}"; then
+    echo "invalid sprint-id: '${sid}' (no slashes / whitespace / leading dot)" >&2
+    return "${SFS_EXIT_BADCLI}"
+  fi
+
+  current="$(read_current_sprint || true)"
+  if [[ -n "${current}" && "${current}" != "${sid}" ]]; then
+    echo "active sprint is ${current}; refusing to switch to ${sid} during review" >&2
+    echo "finish or clear the active sprint first, then rerun: sfs review --sprint ${sid}" >&2
+    return "${SFS_EXIT_NO_INIT}"
+  fi
+
+  sdir="${SFS_SPRINTS_DIR}/${sid}"
+  if [[ -d "${sdir}" ]] && find "${sdir}" -maxdepth 1 -type f \
+      \( -name 'brainstorm.md' -o -name 'plan.md' -o -name 'implement.md' -o -name 'log.md' -o -name 'review.md' \) \
+      -print -quit 2>/dev/null | grep -q .; then
+    printf '%s\n' "${sid}" > "${SFS_CURRENT_SPRINT_FILE}" || return "${SFS_EXIT_PERM}"
+    return "${SFS_EXIT_OK}"
+  fi
+
+  archive="$(sfs_latest_sprint_archive_bundle "${sid}" || true)"
+  if [[ -z "${archive}" ]]; then
+    echo "sprint not found or no cold archive available: ${sid}" >&2
+    return "${SFS_EXIT_NO_INIT}"
+  fi
+
+  mkdir -p "${SFS_LOCAL_DIR}/tmp" "${sdir}" || return "${SFS_EXIT_PERM}"
+  stage="$(mktemp -d "${SFS_LOCAL_DIR}/tmp/review-restore.${sid}.XXXXXX")" || return "${SFS_EXIT_PERM}"
+  if ! tar -xzf "${archive}" -C "${stage}" 2>/dev/null; then
+    rm -rf "${stage}" 2>/dev/null || true
+    echo "cannot extract sprint cold archive: ${archive}" >&2
+    return "${SFS_EXIT_CORRUPT}"
+  fi
+
+  for doc in brainstorm plan implement log review; do
+    src="${stage}/sprints/${sid}/${doc}.md"
+    [[ -f "${src}" ]] || continue
+    dest="${sdir}/${doc}.md"
+    if [[ -e "${dest}" ]]; then
+      rm -rf "${stage}" 2>/dev/null || true
+      echo "restore conflict: ${dest} already exists; not overwriting archived ${doc}.md" >&2
+      return "${SFS_EXIT_PERM}"
+    fi
+    cp "${src}" "${dest}" || {
+      rm -rf "${stage}" 2>/dev/null || true
+      return "${SFS_EXIT_PERM}"
+    }
+    restored=$((restored + 1))
+  done
+  rm -rf "${stage}" 2>/dev/null || true
+
+  if [[ "${restored}" -eq 0 ]]; then
+    echo "cold archive has no reviewable workbench docs for sprint: ${sid}" >&2
+    return "${SFS_EXIT_CORRUPT}"
+  fi
+
+  printf '%s\n' "${sid}" > "${SFS_CURRENT_SPRINT_FILE}" || return "${SFS_EXIT_PERM}"
+  _esc_sprint="$(sfs_json_escape "${sid}")"
+  _esc_archive="$(sfs_json_escape "${archive}")"
+  append_event "sprint_restore" "{\"sprint_id\":\"${_esc_sprint}\",\"archive\":\"${_esc_archive}\",\"restored_files\":${restored}}" 2>/dev/null || true
+  SFS_REVIEW_RESTORE_NOTICE="review restored sprint: ${sid} from ${archive}"
+  return "${SFS_EXIT_OK}"
+}
+
+if [[ -n "${REVIEW_SPRINT_ID}" ]]; then
+  set +e
+  sfs_restore_sprint_for_review "${REVIEW_SPRINT_ID}"
+  _restore_rc=$?
+  set -e
+  if [[ "${_restore_rc}" -ne 0 ]]; then
+    exit "${_restore_rc}"
+  fi
+fi
+
 SPRINT_ID="$(read_current_sprint)"
 if [[ -z "${SPRINT_ID}" ]]; then
   echo "no active sprint, run /sfs start first" >&2
@@ -2262,11 +2374,9 @@ render_cpo_prompt() {
   else
     persona_note="Persona file missing: ${PERSONA_PATH}. Use built-in CPO Evaluator policy from review.md."
   fi
-  cat <<EOF
-You are the Solon CPO Evaluator.
-
-${persona_note}
-
+  printf 'You are the Solon CPO Evaluator.\n\n'
+  printf '%s\n\n' "${persona_note}"
+  cat <<'EOF'
 Model routing contract:
 - SFS model tiers are role/profile targets, not a requirement that the executor CLI supports a --model flag.
 - Act under the requested evaluator role using the highest configured host/runtime profile available for this review.
@@ -2281,11 +2391,13 @@ Model routing contract:
   return partial/fail and list the missing artifact instead of asking for the
   whole chat.
 
-Review gate: ${GATE_DISPLAY}
-Review lens: ${REVIEW_LENS} (${REVIEW_LENS_LABEL}; source=${REVIEW_LENS_SOURCE})
-Sprint: ${SPRINT_ID}
-Generator executor/tool: ${GENERATOR_EXECUTOR}
-Evaluator executor/tool: ${EVALUATOR_EXECUTOR}
+EOF
+  printf 'Review gate: %s\n' "${GATE_DISPLAY}"
+  printf 'Review lens: %s (%s; source=%s)\n' "${REVIEW_LENS}" "${REVIEW_LENS_LABEL}" "${REVIEW_LENS_SOURCE}"
+  printf 'Sprint: %s\n' "${SPRINT_ID}"
+  printf 'Generator executor/tool: %s\n' "${GENERATOR_EXECUTOR}"
+  printf 'Evaluator executor/tool: %s\n\n' "${EVALUATOR_EXECUTOR}"
+  cat <<'EOF'
 
 Self-validation policy:
 - Do not rubber-stamp CTO Generator output.
@@ -2830,8 +2942,14 @@ fi
 # Stdout (V-1 conditions #4 / WU-25 §2.1 — path + gate id, no editor launch)
 # ─────────────────────────────────────────────────────────────────────
 if [[ "${PRINT_PROMPT}" == "true" ]]; then
+  if [[ -n "${SFS_REVIEW_RESTORE_NOTICE}" ]]; then
+    echo "${SFS_REVIEW_RESTORE_NOTICE}" >&2
+  fi
   cat "${PROMPT_PATH}"
 elif [[ "${RUN_REVIEW}" == "true" ]]; then
+  if [[ -n "${SFS_REVIEW_RESTORE_NOTICE}" ]]; then
+    echo "${SFS_REVIEW_RESTORE_NOTICE}" >&2
+  fi
   if [[ -n "${RUN_WARNING}" ]]; then
     echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} | lens ${REVIEW_LENS} (${REVIEW_LENS_SOURCE}) CPO run complete with executor warning | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
   else
@@ -2840,6 +2958,9 @@ elif [[ "${RUN_REVIEW}" == "true" ]]; then
   emit_result_excerpt_stdout "${RESULT_PATH}" 80
   printf 'next: %s\n' "$(review_next_action_line "${GATE_ID}" "${RUN_VERDICT}")"
 else
+  if [[ -n "${SFS_REVIEW_RESTORE_NOTICE}" ]]; then
+    echo "${SFS_REVIEW_RESTORE_NOTICE}" >&2
+  fi
   echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} | lens ${REVIEW_LENS} (${REVIEW_LENS_SOURCE}) prompt ready | executor ${EVALUATOR_EXECUTOR} | prompt ${PROMPT_PATH}"
 fi
 

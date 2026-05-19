@@ -8,6 +8,11 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 
 - Adapter-run by default: run `sfs review ...` before summarizing.
 - Do not create a new verdict from memory; use `review.md` and recorded result paths.
+- If the relevant sprint was already compacted/closed and `current-sprint` is
+  missing, use `sfs review --sprint <id> --gate <n>` instead of manually
+  editing `.sfs-local/current-sprint` or extracting tarballs. The command
+  restores the latest cold archive into the active workbench and refuses to
+  overwrite existing visible workbench files.
 - Gate 3 plan review is the required bridge between plan and implement. When a
   plan says ready-for-implement, review the plan contract first with
   `sfs review --gate 3`; only a PASS/accepted result should route to
@@ -47,6 +52,10 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   excerpts. Do not invoke Claude in-process plugin wrappers, rescue subagents,
   or forked contexts that forward the lead conversation history as the default
   review path.
+- Review durable product/context artifacts for Context Pollution Guard:
+  prompt bodies, full transcripts, bridge probe output, `.sfs-local/tmp/...`
+  scratch paths, and old review blobs in core docs are findings because they
+  dilute the SSoT and burn future token budget.
 - If the capsule is insufficient, return partial/fail and name the missing
   evidence. Do not request full chat history or repeatedly poll the lead thread
   to compensate for an underspecified review bundle.

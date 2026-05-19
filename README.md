@@ -171,13 +171,18 @@ Solon 의 강점은 앱을 대신 찍어내는 것이 아니라, 앱을 만든 �
 | `sfs start <goal>` | 새 작업 묶음 시작 |
 | `sfs brainstorm [--simple|--hard] [text|--stdin]` | 만들기 전에 의도와 기준 정리 |
 | `sfs plan` | 목표/범위/완료 기준 계약 작성 |
+| `sfs capture [--kind ...] <text>` | 자연어로 바뀐 결정/리뷰순서/예외를 현재 sprint 기록에 남김 |
+| `sfs note <text>` | 짧은 자연어 flow note 를 남기는 capture alias |
 | `sfs implement [slice|--stdin]` | 작은 실행 조각 진행 |
-| `sfs review [--lens ...]` | 산출물 검토 |
+| `sfs review [--sprint <id>] [--lens ...]` | 산출물 검토, 닫힌 sprint review 복구 |
 | `sfs retro [--draft]` | 회고와 마무리 |
 | `sfs commit plan` | 변경 그룹 확인 |
 | `sfs commit apply --group <name>` | 선택 그룹을 commit 하고 현재 branch push |
 | `sfs upgrade` | 프로젝트의 Solon 파일과 흐름 최신화 |
 | `sfs tidy [--apply]` | 끝난 작업의 임시 기록 정리 |
+
+`sfs capture` 는 짧은 checkpoint 전용입니다. 긴 prompt, 전체 대화, bridge/review scratch,
+command log 는 core docs 에 복사하지 말고 archive/evidence path 만 남기세요.
 
 ---
 
@@ -198,7 +203,9 @@ Solon 의 강점은 앱을 대신 찍어내는 것이 아니라, 앱을 만든 �
 ## 안전 계약
 
 - Solon 은 사용자 산출물을 조용히 덮어쓰지 않습니다.
-- commit/push 는 `sfs commit apply` 로 묶어 수행합니다.
+- commit/push 는 `sfs commit apply` 또는 명시 승인된 release flow 로 묶어 수행합니다.
+  이 push 허용 계약은 Codex, Claude, Gemini 등 모든 LLM Agent 에 동일하게 적용됩니다.
 - 공유해야 하는 기록은 `docs/solon/...` 아래에 남깁니다.
+- core docs/context 에는 stable rule 과 결론만 남기고 prompt body, transcript, tmp scratch 는 남기지 않습니다.
 - 검토는 작성자와 독립된 역할로 분리합니다.
 - 최종 제품 판단은 항상 사용자에게 남깁니다.

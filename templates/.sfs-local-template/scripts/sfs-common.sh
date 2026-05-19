@@ -392,6 +392,16 @@ sfs_yaml_quote() {
   printf '"%s"' "${value}"
 }
 
+sfs_json_escape() {
+  local value="${1:-}"
+  value="${value//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  value="${value//$'\t'/\\t}"
+  value="${value//$'\r'/\\r}"
+  value="${value//$'\n'/\\n}"
+  printf '%s' "${value}"
+}
+
 sfs_path_segment_from_text() {
   local text="${1:-}" fallback="${2:-workspace}" segment
   segment="$(printf '%s' "${text}" \
@@ -752,7 +762,7 @@ sfs_event_json_string_field() {
 }
 
 sfs_event_same_compaction_key() {
-  local existing="${1:-}" etype="${2:?type required}" sid="${3:-}" gate="${4:-}" division="${5:-}" decision="${6:-}" wu="${7:-}"
+  local existing="${1:-}" etype="${2:?type required}" sid="${3:-}" gate="${4:-}" division="${5:-}" decision="${6:-}" wu="${7:-}" capture="${8:-}"
   [[ "${existing}" == *"\"type\":\"${etype}\""* ]] || return 1
   if [[ -n "${sid}" && "${existing}" != *"\"sprint_id\":\"${sid}\""* ]]; then
     return 1
@@ -769,12 +779,19 @@ sfs_event_same_compaction_key() {
   if [[ -n "${wu}" && "${existing}" != *"\"wu_id\":\"${wu}\""* ]]; then
     return 1
   fi
+  if [[ -n "${capture}" && "${existing}" != *"\"capture_id\":\"${capture}\""* ]]; then
+    return 1
+  fi
   return 0
 }
 
 sfs_active_event_ledger_sprint() {
   local event_type="${1:-}" line_sid="${2:-}" current_sprint=""
   if [[ "${event_type}" == "sprint_start" && -n "${line_sid}" ]]; then
+    printf '%s\n' "${line_sid}"
+    return 0
+  fi
+  if [[ "${event_type}" == "flow_capture" && -n "${line_sid}" ]]; then
     printf '%s\n' "${line_sid}"
     return 0
   fi
@@ -801,7 +818,7 @@ sfs_event_line_belongs_to_active_sprint() {
 append_event() {
   local etype="${1:?type required}"
   local payload="${2:-{\}}"
-  local ts sid gate division decision wu active_sid tmp existing
+  local ts sid gate division decision wu capture active_sid tmp existing
   ts="$(date +%Y-%m-%dT%H:%M:%S%z 2>/dev/null | sed -E 's/([0-9]{2})$/:\1/')"
 
   # Strip outer braces from payload, reconstruct with ts/type prepended.
@@ -824,6 +841,7 @@ append_event() {
   division="$(sfs_event_json_string_field "division" "${line}")"
   decision="$(sfs_event_json_string_field "decision_id" "${line}")"
   wu="$(sfs_event_json_string_field "wu_id" "${line}")"
+  capture="$(sfs_event_json_string_field "capture_id" "${line}")"
   active_sid="$(sfs_active_event_ledger_sprint "${etype}" "${sid}")"
 
   if [[ -z "${active_sid}" || -z "${sid}" || "${sid}" != "${active_sid}" ]]; then
@@ -853,7 +871,7 @@ append_event() {
       if ! sfs_event_line_belongs_to_active_sprint "${existing}" "${active_sid}"; then
         continue
       fi
-      if sfs_event_same_compaction_key "${existing}" "${etype}" "${sid}" "${gate}" "${division}" "${decision}" "${wu}"; then
+      if sfs_event_same_compaction_key "${existing}" "${etype}" "${sid}" "${gate}" "${division}" "${decision}" "${wu}" "${capture}"; then
         continue
       fi
       printf '%s\n' "${existing}" >> "${tmp}" || return 1

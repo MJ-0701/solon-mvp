@@ -24,6 +24,10 @@ load_when: ["token", "harness", "context", "Claude", "Codex", "Gemini", "MCP", "
   a small capsule with goal, AC, files_scope, commands, output paths, and compact
   evidence. Never forward full conversation history, hidden chain, unrelated
   prior turns, or old workbench transcripts to a cheaper worker or reviewer.
+- Apply Context Pollution Guard before editing durable docs: core product and
+  adapter context keeps accepted conclusions, not prompt bodies, raw chat,
+  bridge probe output, `.sfs-local/tmp/...` scratch paths, or long review blobs.
+  Prompt/context bloat is a product finding, not harmless documentation.
 - Poll run artifacts instead of chat state. Workers should write status/result/
   evidence files; leads should inspect those files rather than repeatedly
   rereading source, diffs, build logs, or the main thread while waiting.

@@ -18,7 +18,7 @@ SFS_EXIT_UNKNOWN=99
 usage() {
   cat <<'EOF'
 Usage: /sfs <command> [args]
-Commands: status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, report, tidy, retro, commit, loop
+Commands: status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, capture, note, report, tidy, retro, commit, loop
 Help: bash .sfs-local/scripts/sfs-<command>.sh --help
 EOF
 }
@@ -50,6 +50,10 @@ case "${cmd}" in
   status|start|guide|auth|profile|division|adopt|brainstorm|plan|implement|review|decision|report|tidy|retro|commit|loop)
     target="${SFS_SCRIPT_DIR}/sfs-${cmd}.sh"
     ;;
+  capture|note)
+    target="${SFS_SCRIPT_DIR}/sfs-capture.sh"
+    export SFS_CAPTURE_COMMAND="${cmd}"
+    ;;
   *)
     echo "unknown command: ${cmd}" >&2
     usage >&2
@@ -68,7 +72,7 @@ if [[ ! -x "${target}" ]]; then
 fi
 
 for arg in "$@"; do
-  if [[ "${cmd}" != "brainstorm" && "${arg}" == *$'\n'* ]]; then
+  if [[ "${cmd}" != "brainstorm" && "${cmd}" != "capture" && "${cmd}" != "note" && "${arg}" == *$'\n'* ]]; then
     echo "unknown arg: newline not allowed" >&2
     exit "${SFS_EXIT_UNKNOWN}"
   fi

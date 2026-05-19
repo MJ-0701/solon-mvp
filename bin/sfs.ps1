@@ -605,7 +605,7 @@ Usage:
 Commands:
   agent install, upgrade, update, uninstall
   version [--check]
-  status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, report, tidy, retro, commit, loop
+  status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, capture, note, report, tidy, retro, commit, loop
   bootstrap [plain-language app idea]
   measure --alive -- <command>
 
@@ -888,6 +888,7 @@ function Resolve-SfsContextRel([string] $Key) {
     '^policies/.+' { return "$keyNorm.md" }
     '^(start|intake|sprint)$' { return "commands/start.md" }
     '^(adopt|brainstorm|plan|implement|review|release|upgrade|profile|loop|tidy)$' { return "commands/$keyNorm.md" }
+    '^(capture|note)$' { return "commands/capture.md" }
     default { return $null }
   }
 }

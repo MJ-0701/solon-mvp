@@ -171,6 +171,24 @@ too dense, Solon asks the decisions one at a time instead of hiding choices.
 Compact bundles such as `A/A/A/C/C confirmed` are not user-facing confirmation
 phrases; use natural language such as "confirm the recommended path".
 
+## Capture Is A Natural-Language Flow Checkpoint
+
+During SFS work, implementation direction, review order, exceptions/waivers,
+blockers, and evidence can change in natural conversation. Before the next
+command, record those turns with `sfs capture` so the current sprint `log.md`
+and `events.jsonl` keep the flow state.
+
+```sh
+sfs capture --kind review-order --gate 6 "Codex self-CPO first, then Gemini, then Claude."
+sfs note "GitHub @codex review passed, but it is external evidence only."
+```
+
+`capture` is not a full transcript recorder. Store only the smallest checkpoint
+that review or retro would lose if it stayed in chat memory. Prompt bodies,
+raw transcripts, bridge/review scratch, and long command logs stay in temporary
+artifacts or cold archives; core product context keeps conclusions and evidence
+paths only.
+
 ## Implement Is Not Only Code
 
 In Solon, implementation artifacts include code, but also:
@@ -231,6 +249,11 @@ Current `sfs review` is commit-aware. A clean working tree no longer means
 the review prompt is empty: SFS includes reviewable files from the latest commit,
 current shared handoff docs, and small ADR/report documents in full within the
 bounded evidence cap.
+
+When a closed sprint needs another review, do not hand-edit
+`.sfs-local/current-sprint` or extract archives manually. Use
+`sfs review --sprint <id> --gate <n>`. SFS restores the latest cold archive into
+the workbench and does not overwrite already visible workbench docs.
 
 ## Thin Multi-Agent Supervision
 

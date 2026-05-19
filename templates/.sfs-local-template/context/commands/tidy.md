@@ -9,6 +9,10 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
 - Retention rule: keep only artifacts with a one-line reason to remain visible.
   If the reason is not clear in one sentence, remove it or pack it into cold
   history after report evidence exists.
+- Context Pollution Guard applies while closing: prompt bodies, raw transcripts,
+  bridge/run scratch, `.sfs-local/tmp/...` review prompt paths, and long logs
+  must not remain in core product docs or routed context. Keep a short
+  conclusion plus archive/evidence pointer instead.
 - Workbench files are temporary: brainstorm, plan, implement, log, review.
 - Shared handoff docs prefer
   `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/report.md` and

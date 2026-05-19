@@ -411,7 +411,10 @@ sfs retro
 | `sfs report --sprint <id>` | 과거 sprint 의 보고서를 다시 만들거나 정리할 때 |
 | `sfs status --compact` | routine status 를 한 줄로 보되 sprint/wu/gate/verdict/ahead/last_event 를 유지할 때 |
 | `sfs start "..." --output-style compact` | 생성 경로와 brainstorm 대안을 한 줄로 보고 싶을 때 |
+| `sfs capture --kind review-order "..."` | 자연어 대화에서 바뀐 리뷰 순서/예외/결정을 다음 명령 전에 남길 때 |
+| `sfs note "..."` | 짧은 flow note 를 현재 sprint `log.md` 에 남길 때 |
 | `sfs report --output-style compact` | report/archive 경로를 한 줄로 보고 싶을 때 |
+| `sfs review --sprint <id> --gate <n>` | 닫힌 sprint 의 cold archive 를 복원해 review 를 재개할 때 |
 | `sfs retro --draft` | sprint 를 닫지 않고 회고 초안만 열어두고 싶을 때 |
 | `sfs bootstrap "<만들고 싶은 것>"` | AI 가 동의받은 초기 프로젝트 구성을 이어가기 위한 handoff trigger |
 | `sfs measure --alive -- <command>` | 오래 걸리는 명령이 멈춘 것처럼 보이지 않게 진행 신호를 남길 때 |
@@ -425,6 +428,10 @@ sfs retro
 | `sfs upgrade` | 설치된 프로젝트를 최신 Solon 흐름으로 갱신할 때 |
 | `sfs version --check` | 현재 프로젝트와 Solon 버전 상태를 볼 때 |
 | `sfs loop ...` | 큰 작업을 queue 로 나누어 장시간 진행할 때 |
+
+`sfs capture` 는 flow checkpoint 이지 prompt/transcript 저장소가 아닙니다. 긴 prompt,
+전체 대화, bridge/review scratch, command log 는 archive 나 evidence path 로만 참조하고,
+core product docs 와 routed context 에는 결론과 현재 계약만 남깁니다.
 
 ---
 

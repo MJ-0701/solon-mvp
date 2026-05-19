@@ -70,6 +70,11 @@ load_when: ["always", "sfs", "entry"]
   capsule-only. Do not forward the lead agent's full conversation history to a
   worker, plugin wrapper, rescue subagent, or external reviewer; pass only goal,
   AC, files_scope, commands, expected output paths, and compact evidence.
+- Context Pollution Guard is ambient: core product docs and routed context keep
+  durable conclusions only. Prompt bodies, full transcripts, bridge/run scratch,
+  `.sfs-local/tmp/...` paths, and old workbench bulk stay in temporary files,
+  cold archives, or compact capture/report pointers; treat residue as a review
+  finding before release.
 - Compactness is never a pass condition. Use compact wording only when evidence,
   risk warnings, decisions, source links/paths, raw-source traceability, and
   verification results stay intact; otherwise use full clarity.
