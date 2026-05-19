@@ -272,7 +272,7 @@ context_resolve_rel() {
 }
 
 context_command() {
-  local mode="${1:-}" rel path
+  local mode="${1:-}" rel path local_path runtime_path
   shift || true
   case "${mode}" in
     path|cat) ;;
@@ -287,10 +287,15 @@ context_command() {
       ;;
   esac
   rel="$(context_resolve_rel "${1:-}")" || return 1
-  if [[ -f "$(project_local_dir)/context/${rel}" ]]; then
-    path="$(project_local_dir)/context/${rel}"
+  local_path="$(project_local_dir)/context/${rel}"
+  runtime_path="${RUNTIME_DIR}/context/${rel}"
+
+  if context_should_prefer_runtime "${local_path}" "${runtime_path}"; then
+    path="${runtime_path}"
+  elif [[ -f "${local_path}" ]]; then
+    path="${local_path}"
   else
-    path="${RUNTIME_DIR}/context/${rel}"
+    path="${runtime_path}"
   fi
   [[ -f "${path}" ]] || {
     echo "context file not found: ${rel}" >&2
@@ -301,6 +306,23 @@ context_command() {
   else
     cat "${path}"
   fi
+}
+
+context_should_prefer_runtime() {
+  local local_path="$1" runtime_path="$2"
+  local local_dir project_ver runtime_ver lag
+
+  [[ "${SFS_CONTEXT_PREFER_PROJECT:-0}" == "1" ]] && return 1
+  [[ -f "${runtime_path}" ]] || return 1
+  [[ -f "${local_path}" ]] || return 0
+
+  local_dir="$(project_local_dir)"
+  project_ver="$(sfs_project_version "${local_dir}" 2>/dev/null || true)"
+  runtime_ver="$(sfs_runtime_version)"
+  [[ -n "${project_ver}" && -n "${runtime_ver}" && "${runtime_ver}" != "unknown" ]] || return 1
+
+  lag="$(sfs_version_lag_steps "${project_ver}" "${runtime_ver}" 2>/dev/null || true)"
+  [[ -n "${lag}" && "${lag}" != "0" ]]
 }
 
 agent_usage() {

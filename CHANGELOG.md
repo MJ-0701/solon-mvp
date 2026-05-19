@@ -1,3 +1,28 @@
+## [0.6.93] - 2026-05-19
+
+> **Stale project-local context no longer hides freshly shipped token guards.**
+
+### Fixed
+
+- `sfs context cat/path` now prefers packaged runtime context when a project
+  still records an older SFS version, so old `.sfs-local/context/kernel.md`
+  files cannot shadow newly released safety policies such as Session
+  Continuation Guard.
+- `sfs upgrade --layout vendored` now syncs every managed context module found
+  under `templates/.sfs-local-template/context/` instead of relying on a
+  hard-coded list, preventing new routed policy files from being missed.
+- Vendored context verification now checks the full managed context module set,
+  including `.ko.md` knowledge-pack routes and newly added policies.
+
+### Added
+
+- Added `test-context-stale-project-runtime-precedence.sh`.
+- Added `test-sfs-upgrade-vendored-context-sync.sh`.
+
+### Tests
+
+- Full source regression target is 81 tests.
+
 ## [0.6.92] - 2026-05-19
 
 > **Session Continuation Guard stops long-running agent chats from becoming the

@@ -412,12 +412,19 @@ EOF
 
 check_local_source_freshness
 
+list_managed_context_rels() {
+  local context_root="$SOURCE_DIR/templates/.sfs-local-template/context"
+  [ -d "$context_root" ] || return 0
+  (
+    cd "$context_root" || exit 0
+    find . -type f -name '*.md' -print 2>/dev/null | sed 's#^\./##' | sort
+  )
+}
+
 repair_missing_context_router_targets() {
-  local source_index="$SOURCE_DIR/templates/.sfs-local-template/context/_INDEX.md"
   local target_context="$TARGET/.sfs-local/context"
   local rel src dst repaired=0
 
-  [ -f "$source_index" ] || return 0
   mkdir -p "$target_context/commands" "$target_context/policies"
 
   while IFS= read -r rel; do
@@ -431,12 +438,7 @@ repair_missing_context_router_targets() {
       ok "context router 누락 target 수리: $rel"
       repaired=1
     fi
-  done < <(
-    {
-      printf '%s\n' "_INDEX.md" "kernel.md"
-      grep -Eo 'commands/[a-z-]+\.md|policies/[a-z-]+\.md' "$source_index" || true
-    } | sort -u
-  )
+  done < <(list_managed_context_rels)
 
   [ "$repaired" -eq 0 ] || warn "새 context 파일을 추가했으니 프로젝트 repo 에서 commit 여부를 확인하세요: .sfs-local/context/"
 }
@@ -462,7 +464,7 @@ verify_context_router_targets() {
       err "context router target missing: $rel"
       missing=1
     fi
-  done < <(grep -Eo 'commands/[a-z-]+\.md|policies/[a-z-]+\.md' "$target_index" | sort -u)
+  done < <(list_managed_context_rels)
 
   [ "$missing" -eq 0 ] || return 1
   ok "context router targets complete"
@@ -471,7 +473,6 @@ verify_context_router_targets() {
 thin_context_runtime_migration() {
   [ "${INSTALL_LAYOUT:-vendored}" = "thin" ] || return 0
   local target_context="$TARGET/.sfs-local/context"
-  local source_index="$SOURCE_DIR/templates/.sfs-local-template/context/_INDEX.md"
   local rel src dst archive_dir archive_file manifest staging count remaining
 
   if [ ! -d "$target_context" ]; then
@@ -486,12 +487,7 @@ thin_context_runtime_migration() {
   staging=$(mktemp -d "$archive_dir/.stage.XXXXXX") || return 5
   count=0
 
-  {
-    printf '%s\n' "_INDEX.md" "kernel.md"
-    if [ -f "$source_index" ]; then
-      grep -Eo 'commands/[a-z-]+\.md|policies/[a-z-]+\.md' "$source_index" || true
-    fi
-  } | sort -u | while IFS= read -r rel; do
+  list_managed_context_rels | while IFS= read -r rel; do
     [ -n "$rel" ] || continue
     dst="$target_context/$rel"
     [ -f "$dst" ] || continue
@@ -1847,20 +1843,8 @@ declare -a CHECK_FILES=(
   ".claude/commands/sfs.md|templates/.claude/commands/sfs.md"
   ".sfs-local/divisions.yaml|templates/.sfs-local-template/divisions.yaml"
   ".sfs-local/model-profiles.yaml|templates/.sfs-local-template/model-profiles.yaml"
-  ".sfs-local/context/_INDEX.md|templates/.sfs-local-template/context/_INDEX.md"
-  ".sfs-local/context/kernel.md|templates/.sfs-local-template/context/kernel.md"
-  ".sfs-local/context/commands/start.md|templates/.sfs-local-template/context/commands/start.md"
-  ".sfs-local/context/commands/profile.md|templates/.sfs-local-template/context/commands/profile.md"
-  ".sfs-local/context/commands/brainstorm.md|templates/.sfs-local-template/context/commands/brainstorm.md"
-  ".sfs-local/context/commands/plan.md|templates/.sfs-local-template/context/commands/plan.md"
-  ".sfs-local/context/commands/implement.md|templates/.sfs-local-template/context/commands/implement.md"
-  ".sfs-local/context/commands/review.md|templates/.sfs-local-template/context/commands/review.md"
-  ".sfs-local/context/commands/release.md|templates/.sfs-local-template/context/commands/release.md"
-  ".sfs-local/context/commands/upgrade.md|templates/.sfs-local-template/context/commands/upgrade.md"
-  ".sfs-local/context/commands/tidy.md|templates/.sfs-local-template/context/commands/tidy.md"
-  ".sfs-local/context/commands/loop.md|templates/.sfs-local-template/context/commands/loop.md"
-  ".sfs-local/context/policies/mutex.md|templates/.sfs-local-template/context/policies/mutex.md"
-  ".sfs-local/context/policies/token-harness.md|templates/.sfs-local-template/context/policies/token-harness.md"
+  # context/ modules are appended dynamically from templates/.sfs-local-template/context
+  # below so new routed policies cannot be missed by a hard-coded upgrade list.
   ".sfs-local/GUIDE.md|GUIDE.md"
   # scripts/ — Solon-versioned bash adapters (executable, user 수정 영역 아님)
   ".sfs-local/scripts/sfs-dispatch.sh|templates/.sfs-local-template/scripts/sfs-dispatch.sh"
@@ -1901,6 +1885,11 @@ declare -a CHECK_FILES=(
   ".gemini/commands/sfs.toml|templates/.gemini/commands/sfs.toml"
   ".agents/skills/sfs/SKILL.md|templates/.agents/skills/sfs/SKILL.md"
 )
+
+while IFS= read -r rel; do
+  [ -n "$rel" ] || continue
+  CHECK_FILES+=(".sfs-local/context/${rel}|templates/.sfs-local-template/context/${rel}")
+done < <(list_managed_context_rels)
 
 for pair in "${CHECK_FILES[@]}"; do
   dst_rel="${pair%%|*}"
@@ -2135,20 +2124,10 @@ if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ]; then
 else
   # context/ — short, routed agent context modules for vendored installs.
   mkdir -p "$TARGET/.sfs-local/context/commands" "$TARGET/.sfs-local/context/policies"
-  update_file ".sfs-local/context/_INDEX.md" "templates/.sfs-local-template/context/_INDEX.md" "context router index" "b"
-  update_file ".sfs-local/context/kernel.md" "templates/.sfs-local-template/context/kernel.md" "context kernel" "b"
-  update_file ".sfs-local/context/commands/start.md" "templates/.sfs-local-template/context/commands/start.md" "context start module" "b"
-  update_file ".sfs-local/context/commands/profile.md" "templates/.sfs-local-template/context/commands/profile.md" "context profile module" "b"
-  update_file ".sfs-local/context/commands/brainstorm.md" "templates/.sfs-local-template/context/commands/brainstorm.md" "context brainstorm module" "b"
-  update_file ".sfs-local/context/commands/plan.md" "templates/.sfs-local-template/context/commands/plan.md" "context plan module" "b"
-  update_file ".sfs-local/context/commands/implement.md" "templates/.sfs-local-template/context/commands/implement.md" "context implement module" "b"
-  update_file ".sfs-local/context/commands/review.md" "templates/.sfs-local-template/context/commands/review.md" "context review module" "b"
-  update_file ".sfs-local/context/commands/release.md" "templates/.sfs-local-template/context/commands/release.md" "context release module" "b"
-  update_file ".sfs-local/context/commands/upgrade.md" "templates/.sfs-local-template/context/commands/upgrade.md" "context upgrade module" "b"
-  update_file ".sfs-local/context/commands/tidy.md" "templates/.sfs-local-template/context/commands/tidy.md" "context tidy module" "b"
-  update_file ".sfs-local/context/commands/loop.md" "templates/.sfs-local-template/context/commands/loop.md" "context loop module" "b"
-  update_file ".sfs-local/context/policies/mutex.md" "templates/.sfs-local-template/context/policies/mutex.md" "context mutex policy" "b"
-  update_file ".sfs-local/context/policies/token-harness.md" "templates/.sfs-local-template/context/policies/token-harness.md" "context token/harness policy" "b"
+  while IFS= read -r rel; do
+    [ -n "$rel" ] || continue
+    update_file ".sfs-local/context/${rel}" "templates/.sfs-local-template/context/${rel}" "context routed module" "b"
+  done < <(list_managed_context_rels)
   verify_context_router_targets || die "context router index references missing files"
 fi
 

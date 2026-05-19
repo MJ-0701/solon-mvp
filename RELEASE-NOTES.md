@@ -7,6 +7,20 @@
 
 ---
 
+## 0.6.93
+
+이번 버전은 프로젝트 안에 남은 오래된 `.sfs-local/context` 가 최신 runtime guard 를 가려서
+토큰/세션 보호 규칙이 실제 SFS flow 에 적용되지 않는 문제를 막습니다.
+
+- 프로젝트 VERSION 이 runtime 보다 오래된 경우 `sfs context cat/path` 는 packaged runtime context 를
+  우선 읽습니다.
+- 꼭 project-local context override 를 확인해야 할 때만 `SFS_CONTEXT_PREFER_PROJECT=1` 로 명시합니다.
+- vendored upgrade 는 context policy 파일을 하드코딩 목록이 아니라 실제 runtime context 디렉터리에서
+  전부 동기화합니다.
+- 그래서 `session-continuation-guard.md`, `context-pollution-guard.md`,
+  `runtime-token-firewall.md` 같은 새 guard 가 추가되어도 낡은 프로젝트가 조용히 빠뜨리지 않습니다.
+- 0.6.93 검증 목표는 `run-all.sh` 81/0 PASS 입니다.
+
 ## 0.6.92
 
 이번 버전은 같은 Claude/Codex/Gemini 세션을 오래 이어 쓰면서 token meter 가 비정상적으로 빨리
