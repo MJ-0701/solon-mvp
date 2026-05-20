@@ -43,8 +43,8 @@ setup_project() {
   sprint_id="$(cat .sfs-local/current-sprint)"
   mkdir -p .sfs-local/tmp/review-runs
   result_path=".sfs-local/tmp/review-runs/gate3-plan-review.md"
-  printf 'Verdict: pass\nEvidence checked: plan.md\n' > "${result_path}"
-  printf '{"ts":"2026-05-07T01:30:00+09:00","type":"review_run","sprint_id":"%s","gate_id":"G1","output_path":"%s","evaluator_executor":"codex","generator_executor":"claude"}\n' "${sprint_id}" "${result_path}" >> .sfs-local/events.jsonl
+  printf 'Verdict: pass\nReview stage: cross\nEvidence checked: plan.md\n' > "${result_path}"
+  printf '{"ts":"2026-05-07T01:30:00+09:00","type":"review_run","sprint_id":"%s","gate_id":"G1","output_path":"%s","review_stage":"cross","cross_review":true,"evaluator_executor":"codex","generator_executor":"claude"}\n' "${sprint_id}" "${result_path}" >> .sfs-local/events.jsonl
 }
 
 setup_project "${TMP_DIR}/single"

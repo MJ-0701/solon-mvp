@@ -1,3 +1,32 @@
+## [0.6.94] - 2026-05-21
+
+> **Gate 3 implement preflight now respects cross review and realistic
+> self-CPO fallback, while frontend UI work gets browser evidence before user
+> inspection.**
+
+### Fixed
+
+- `sfs implement` no longer treats a bare Gate 3 self-CPO PASS as enough to
+  start implementation. Gate 3 now requires cross-review evidence, a recorded
+  self-CPO fallback reason for no other agent subscription / external agent
+  token exhaustion / cross-review bridge unavailability, or an explicit user
+  waiver.
+- `sfs review` now records Gate 3 review run events with `review_stage` and
+  `cross_review` metadata so `sfs implement` can distinguish cross review from
+  self-only review evidence.
+
+### Added
+
+- Added a regression case proving self-CPO-only Gate 3 PASS blocks
+  implementation, while a documented self-CPO fallback PASS can proceed.
+- Added visible frontend/UI implementation guidance requiring Playwright,
+  Cypress, Storybook, or equivalent browser automation evidence before asking
+  the user to inspect the UI.
+
+### Tests
+
+- Full source regression passed with 81 tests.
+
 ## [0.6.93] - 2026-05-19
 
 > **Stale project-local context no longer hides freshly shipped token guards.**

@@ -9,11 +9,14 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - Do not stop at artifact creation: execute the requested slice and record evidence.
 - Preflight is strict: `sfs implement` requires a Gate 3 Plan review PASS
   (`sfs review --gate 3`) before implementation starts. If review evidence is
-  missing, return to plan review; bypass only with an explicit user waiver.
+  missing, return to plan review; bypass only with an explicit user waiver or
+  recorded self-CPO fallback evidence for no other agent subscription, external
+  agent token exhaustion, or cross-review bridge unavailability.
 - Gate 3 review must have passed by outcome, not by effort. Do not enter
   implementation because there were many review rounds, many lenses, or no new
-  categories. Self-review must pass first; cross review follows; any
-  partial/fail returns to plan rework and self-review.
+  categories. Self-review must pass first; cross review follows unless the
+  review evidence records a valid self-CPO fallback reason; any partial/fail
+  returns to plan rework and self-review.
 - The default implementation owner is the worker/generator model resolved from
   `.sfs-local/model-profiles.yaml`, not the C-Level planner/evaluator model.
   C-Level may define the contract, split files_scope, and handle escalation, but
@@ -70,6 +73,15 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - If code or executable artifacts changed, run the smallest relevant test,
   build, typecheck, smoke, or scripted review before marking complete. Record
   the command and result in the implementation evidence.
+- If visible frontend/UI changed, run browser automation before asking the user
+  to inspect it. Prefer the project's Playwright/Cypress/Storybook smoke; if no
+  project script exists, use available Playwright or browser automation against
+  the local app. Check at least one desktop and one mobile/small viewport,
+  primary workflow interaction, text fit/overflow, responsive layout, and
+  console/runtime errors. Attach screenshot/trace paths or a compact browser
+  evidence note. If browser verification is impossible, record the exact
+  blocker and smallest alternate evidence; do not call the UI ready without an
+  explicit user waiver.
 - Before starting a new implementation slice in a long host conversation, apply
   Session Continuation Guard. If the token meter is already 30% or higher at
   the start of a new WU/sprint, or 50% or higher before a new gate/worker

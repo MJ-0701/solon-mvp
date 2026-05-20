@@ -133,6 +133,11 @@ load_when: ["always", "sfs", "entry"]
 - Cross review comes after local self-review passes. If cross review returns
   partial/fail, rework the plan and return to self-review before another cross
   review or implementation handoff.
+- If no other agent subscription exists, external agent tokens are exhausted,
+  or the cross-review bridge is unavailable, a recorded self-CPO fallback PASS
+  may satisfy the cross-review slot. The fallback must name the constraint;
+  a bare self-CPO PASS still blocks implementation unless the user explicitly
+  waives the gate.
 - Role split is invariant: C-Level owns intent, architecture, acceptance
   criteria, and review orchestration; the worker/generator model owns fixed
   implementation slices. Do not present C-Level direct implementation as the

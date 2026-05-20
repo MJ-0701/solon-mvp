@@ -51,7 +51,10 @@ required.
 12. For implementation and review work, follow the routed context guardrails:
     surface material assumptions, choose the smallest useful slice, keep changes
     surgical, read actual files/errors before fixing, verify before completion,
-    and report exact evidence.
+    and report exact evidence. For visible frontend/UI work, verify with
+    Playwright or equivalent browser automation before asking the user to inspect
+    it; record desktop/mobile evidence, primary interaction, responsive fit, and
+    console/runtime error checks, or an explicit blocker/waiver.
     Benchmarked engineering practices strengthen existing commands instead of
     creating new lifecycle commands: source-driven official docs, stop-the-line
     debugging, deprecation/migration, shipping/release checks, and review lenses
@@ -78,7 +81,11 @@ required.
     Multi-agent implement is optional, never the default: use single-agent mode unless the user selects parallel agents, each lane has disjoint files_scope and a clear native-language commit message, and post-implement cross review is recorded before Gate 6. Commit messages default to the user's native/workspace language; English is only the default when that is the user or repo language.
     Gate 3 review must self-review until PASS before cross review. Review round
     count, lens count, or "enough review" is not a PASS; partial/fail routes to
-    rework and same-gate self-review.
+    rework and same-gate self-review. If no other agent subscription exists,
+    external agent tokens are exhausted, or the cross-review bridge is
+    unavailable, a recorded self-CPO fallback PASS may satisfy the cross-review
+    slot; a bare self-CPO PASS still blocks implementation unless the user
+    explicitly waives the gate.
     If a partial/fail finding is deterministic and low-risk, such as grep
     scope, stale evidence, missing AC/file mapping, evidence path typo, or
     bounded wording/document consistency, patch it and run the same-gate review again
@@ -97,7 +104,9 @@ required.
     Codex, Claude, Gemini, and future LLM agents must continue with the next
     unmet SFS review command: self-CPO first via `sfs review --gate <n>` or
     `sfs review --sprint <id> --gate <n>` for a closed sprint, then configured
-    cross review after self-CPO PASS.
+    cross review after self-CPO PASS unless a recorded self-CPO fallback reason
+    covers no other agent subscription, external agent token exhaustion, or
+    cross-review bridge unavailability.
     Session Continuation Guard: `sfs upgrade` updates runtime/project context
     but cannot shrink an already-open LLM conversation. If the host token meter
     is 30%+ before a new WU/sprint action, 50%+ before a new gate/loop/review

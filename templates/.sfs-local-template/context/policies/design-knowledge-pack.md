@@ -28,6 +28,9 @@ active for a sprint, review, or release. Apply only the matching ids.
 - Data-dense product surfaces need scanning, hierarchy, states, and task flow,
   not decorative composition.
 - Accessibility and responsive fit are active whenever UI is user-facing.
+- Visible frontend implementation activates pre-user browser verification:
+  Playwright or equivalent browser automation must run before asking the user
+  to inspect the UI.
 - AI-generated UI activates design-system governance. If `design.md` or
   `docs/solon/design.md` exists, read it before editing; if neither exists and
   the work creates visible UI, record the gap or create a compact seed contract
@@ -43,6 +46,7 @@ active for a sprint, review, or release. Apply only the matching ids.
 - DES-SCALE-006: Design-system work needs tokens, components, variants, usage rules, and migration plan.
 - DES-SCALE-007: Brand/marketing work needs first-viewport signal, real assets, and conversion/action clarity.
 - DES-SCALE-008: AI-generated UI needs `design.md`, token drift checks, and screenshot evidence, not only "looks good" judgment.
+- DES-SCALE-009: Frontend implementation needs automated browser evidence before user inspection, scaled to risk.
 
 ## DES-PROP - Proposition Inventory
 
@@ -69,6 +73,7 @@ active for a sprint, review, or release. Apply only the matching ids.
 - DES-PROP-021: Korean typography needs one primary Korean-capable font, stable line-height, and `letter-spacing: 0` unless the existing design system explicitly overrides it.
 - DES-PROP-022: Iconography should come from one coherent icon family or the existing product icon system; do not mix random free icons.
 - DES-PROP-023: AI-slop signals include generic SaaS gradients, arbitrary card/radius choices, inconsistent palettes, mixed icon weights, and token values that differ screen by screen.
+- DES-PROP-024: Visible frontend changes need pre-user browser QA with desktop and mobile/small viewport evidence, primary interaction coverage, and console/runtime error checks.
 
 ## DES-FILL - Operating Guidance
 
@@ -152,6 +157,23 @@ active for a sprint, review, or release. Apply only the matching ids.
 - Responsive QA should check smallest supported viewport, common desktop width,
   long localized strings, empty/overflow data, and modal/toolbar collisions.
 
+### DES-FILL-BROWSER-QA - Pre-User Browser Verification
+
+- Before presenting a changed UI for user inspection, run the app and inspect it
+  through browser automation. Prefer the repo's existing Playwright, Cypress,
+  Storybook, or e2e smoke command; otherwise use available Playwright/browser
+  automation against the local dev server or static file.
+- Cover at least one desktop viewport and one mobile/small viewport. For
+  higher-risk flows, add the smallest relevant state matrix: empty, loading,
+  error, success, disabled, overflow, or modal/toolbar collision.
+- Exercise the primary workflow or the changed control, not only page load.
+  Check screenshots/traces for blank render, overlap, clipping, horizontal
+  overflow, unreadable text, broken focus path, and console/runtime errors.
+- Record command/result plus screenshot, trace, or browser-capture paths in the
+  implementation evidence. If automation cannot run, record the exact blocker,
+  the smallest alternate evidence, and whether the user explicitly waived the
+  browser check.
+
 ### DES-FILL-COPY - Domain Language And UX Writing
 
 - UI copy should use canonical taxonomy terms while staying friendlier than
@@ -177,6 +199,8 @@ active for a sprint, review, or release. Apply only the matching ids.
 - Does the screen show generic AI-slop signals, or does the product's own
   design language come through?
 - Does Korean typography and long-label fit hold across mobile and desktop?
+- Did the implementer run Playwright or equivalent browser automation before
+  user inspection, with desktop/mobile evidence and console/runtime checks?
 
 ## DES-EVIDENCE - Suggested Evidence
 
@@ -190,6 +214,9 @@ active for a sprint, review, or release. Apply only the matching ids.
 - Design-system evidence: `design.md` excerpt, token usage note, token drift
   grep/inspection result, desktop/mobile screenshot, and icon/font consistency
   note.
+- Browser QA evidence: Playwright/Cypress/Storybook/browser command and result,
+  desktop/mobile screenshots or traces, primary interaction note, and console
+  error summary.
 
 ## DES-GAP - Deepening Slots
 
@@ -205,3 +232,4 @@ active for a sprint, review, or release. Apply only the matching ids.
 - DES-GAP-010: `design.md` schema and token drift checker.
 - DES-GAP-011: Korean typography and icon-family starter guide.
 - DES-GAP-012: AI-slop review rubric.
+- DES-GAP-013: Playwright/browser QA smoke matrix for frontend handoff.

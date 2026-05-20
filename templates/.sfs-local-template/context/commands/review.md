@@ -26,6 +26,11 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - Gate 3 review has a sequence: local self-review until PASS, then cross
   review. Cross review is independent confirmation after self-review, not a
   replacement for self-review.
+- Gate 3 may use self-CPO fallback instead of cross review only when the
+  evidence records a concrete operational constraint: no other agent
+  subscription, external agent token exhaustion, or cross-review bridge
+  unavailability. A bare self-CPO PASS is not enough unless the user explicitly
+  waives the gate.
 - Local self-review means a self-CPO mini-check, not just an advisor call. It
   must record pass/partial/fail and check requirements-to-AC-to-slice-to-ADR
   traceability, AC-to-file/artifact/evidence mapping, and SEED/placeholder/mock/
@@ -167,6 +172,12 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   be findings even when the UI is functional. If no design contract exists for
   reusable UI, surface that as an AI-slop risk rather than silently accepting
   average-looking output.
+- For visible frontend/UI implementation, missing pre-user browser evidence is
+  a review finding. Look for Playwright/Cypress/Storybook/browser automation
+  evidence, desktop and mobile/small viewport screenshots or traces, primary
+  workflow interaction, text fit/overflow and responsive layout checks, and a
+  console/runtime error note. If browser verification could not run, require
+  an exact blocker plus alternate evidence or an explicit user waiver.
 - Surface the evaluator's next action. Pass should name `sfs retro` as the
   normal close path for Gate 6/7 because `retro` ensures `report.md` before
   closing. Gate 3 (Plan) PASS is different: name `sfs implement` or the

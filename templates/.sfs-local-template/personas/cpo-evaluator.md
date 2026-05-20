@@ -32,7 +32,10 @@ Mission:
 - External review/check PASS is a continuation trigger, not a stopping point.
   Require the next unmet SFS review step: self-CPO first with
   `sfs review --gate <n>` or `sfs review --sprint <id> --gate <n>` for a closed
-  sprint, then configured Codex/Claude/Gemini cross-review after self-CPO PASS.
+  sprint, then configured Codex/Claude/Gemini cross-review after self-CPO PASS
+  unless the review records a self-CPO fallback reason for no other agent
+  subscription, external agent token exhaustion, or cross-review bridge
+  unavailability.
 
 Rules:
 - Do not rewrite the implementation during review.

@@ -109,8 +109,34 @@ sfs_implement_extract_verdict() {
   ' "${file}"
 }
 
+sfs_implement_has_cross_review_evidence() {
+  local line="$1" out_path="$2"
+  case "${line}" in
+    *'"review_stage":"cross"'*|*'"cross_review":true'*|*'"review_kind":"cross-review"'*|*'"review_kind":"cross_review"'*)
+      return 0
+      ;;
+  esac
+  if [[ -n "${out_path}" && -f "${out_path}" ]]; then
+    grep -Eiq '(^|[[:space:]-])(review[ _-]?stage|review[ _-]?kind)[[:space:]]*:[[:space:]]*cross|cross[ -]?review[[:space:]]*:[[:space:]]*(pass|passed|true)|SFS cross review[[:space:]]*(PASS|pass|passed)' "${out_path}" && return 0
+  fi
+  return 1
+}
+
+sfs_implement_has_self_cpo_fallback_evidence() {
+  local line="$1" out_path="$2"
+  case "${line}" in
+    *'"self_cpo_fallback":true'*|*'"cross_review_unavailable":true'*|*'"fallback_reason":"no_other_agent_subscription"'*|*'"fallback_reason":"external_agent_tokens_exhausted"'*|*'"fallback_reason":"cross_review_unavailable"'*)
+      return 0
+      ;;
+  esac
+  if [[ -n "${out_path}" && -f "${out_path}" ]]; then
+    grep -Eiq 'self[ -]?CPO fallback[[:space:]]*:[[:space:]]*(pass|passed|true)|cross[ -]?review unavailable|no other agent subscription|external agent tokens? exhausted|other agent tokens? exhausted|다른[[:space:]]*Agent.*구독.*없|다른[[:space:]]*Agent.*토큰.*소진' "${out_path}" && return 0
+  fi
+  return 1
+}
+
 sfs_implement_latest_gate3_plan_review_record() {
-  local line out_path verdict
+  local line out_path verdict cross_review self_fallback
   [[ -f "${SFS_EVENTS_FILE}" ]] || return 1
   while IFS= read -r line; do
     [[ "${line}" == *'"type":"review_run"'* ]] || continue
@@ -123,7 +149,15 @@ sfs_implement_latest_gate3_plan_review_record() {
       verdict=""
     fi
     [[ -n "${verdict}" ]] || verdict="unknown"
-    printf '%s\t%s\n' "${verdict}" "${out_path}"
+    cross_review="false"
+    if sfs_implement_has_cross_review_evidence "${line}" "${out_path}"; then
+      cross_review="true"
+    fi
+    self_fallback="false"
+    if sfs_implement_has_self_cpo_fallback_evidence "${line}" "${out_path}"; then
+      self_fallback="true"
+    fi
+    printf '%s\t%s\t%s\t%s\n' "${verdict}" "${out_path}" "${cross_review}" "${self_fallback}"
     return 0
   done < <(reverse_lines "${SFS_EVENTS_FILE}")
   return 1
@@ -227,14 +261,30 @@ TEMPLATE="$(sfs_sprint_template_file implement)"
 PLAN_REVIEW_RECORD="$(sfs_implement_latest_gate3_plan_review_record || true)"
 PLAN_REVIEW_VERDICT=""
 PLAN_REVIEW_EVIDENCE=""
+PLAN_REVIEW_CROSS_REVIEW=""
+PLAN_REVIEW_SELF_FALLBACK=""
 if [[ -n "${PLAN_REVIEW_RECORD}" ]]; then
   PLAN_REVIEW_VERDICT="$(printf '%s\n' "${PLAN_REVIEW_RECORD}" | awk -F '	' '{print $1; exit}')"
   PLAN_REVIEW_EVIDENCE="$(printf '%s\n' "${PLAN_REVIEW_RECORD}" | awk -F '	' '{print $2; exit}')"
+  PLAN_REVIEW_CROSS_REVIEW="$(printf '%s\n' "${PLAN_REVIEW_RECORD}" | awk -F '	' '{print $3; exit}')"
+  PLAN_REVIEW_SELF_FALLBACK="$(printf '%s\n' "${PLAN_REVIEW_RECORD}" | awk -F '	' '{print $4; exit}')"
 fi
 
+PLAN_REVIEW_BLOCK_REASON=""
 if [[ "${PLAN_REVIEW_VERDICT}" != "pass" ]]; then
+  PLAN_REVIEW_BLOCK_REASON="verdict"
+elif [[ "${PLAN_REVIEW_CROSS_REVIEW}" != "true" && "${PLAN_REVIEW_SELF_FALLBACK}" != "true" ]]; then
+  PLAN_REVIEW_BLOCK_REASON="cross_review_or_self_fallback"
+fi
+
+if [[ -n "${PLAN_REVIEW_BLOCK_REASON}" ]]; then
   if [[ "${ALLOW_UNREVIEWED_PLAN}" != "true" ]]; then
-    echo "Gate 3 Plan review required before implement: run /sfs review --gate 3 and continue only after verdict: pass" >&2
+    if [[ "${PLAN_REVIEW_BLOCK_REASON}" == "cross_review_or_self_fallback" ]]; then
+      echo "Gate 3 cross review or valid self-CPO fallback evidence required before implement: latest Gate 3 PASS lacks both" >&2
+      echo "Run external/cross review after self-CPO PASS, or record self-CPO fallback evidence for no other agent subscription, external agent token exhaustion, or cross-review bridge unavailability." >&2
+    else
+      echo "Gate 3 Plan review required before implement: run /sfs review --gate 3 and continue only after verdict: pass" >&2
+    fi
     if [[ -n "${PLAN_REVIEW_VERDICT}" ]]; then
       echo "latest Gate 3 review verdict: ${PLAN_REVIEW_VERDICT} (${PLAN_REVIEW_EVIDENCE:-output not found})" >&2
     else
@@ -247,7 +297,7 @@ if [[ "${PLAN_REVIEW_VERDICT}" != "pass" ]]; then
   _esc_sprint_for_waiver="${SPRINT_ID//\\/\\\\}"
   _esc_sprint_for_waiver="${_esc_sprint_for_waiver//\"/\\\"}"
   if ! append_event "implement_unreviewed_plan_waiver" \
-    "{\"sprint_id\":\"${_esc_sprint_for_waiver}\",\"reason\":\"explicit_user_waiver_required\",\"required_gate\":\"Gate 3 (Plan)\",\"required_command\":\"sfs review --gate 3\"}" \
+    "{\"sprint_id\":\"${_esc_sprint_for_waiver}\",\"reason\":\"explicit_user_waiver_required\",\"block_reason\":\"${PLAN_REVIEW_BLOCK_REASON}\",\"required_gate\":\"Gate 3 (Plan)\",\"required_command\":\"sfs review --gate 3\"}" \
     2>/dev/null; then
     echo "permission denied appending event to ${SFS_EVENTS_FILE}" >&2
     exit "${SFS_EXIT_PERM}"

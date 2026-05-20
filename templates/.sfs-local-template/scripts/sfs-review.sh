@@ -2924,9 +2924,17 @@ _esc_lens="${REVIEW_LENS//\\/\\\\}"
 _esc_lens="${_esc_lens//\"/\\\"}"
 _esc_lens_source="${REVIEW_LENS_SOURCE//\\/\\\\}"
 _esc_lens_source="${_esc_lens_source//\"/\\\"}"
+REVIEW_STAGE="artifact"
+REVIEW_CROSS_REVIEW=false
+if [[ "${GATE_ID}" == "G1" ]]; then
+  REVIEW_STAGE="cross"
+  REVIEW_CROSS_REVIEW=true
+fi
+_esc_review_stage="${REVIEW_STAGE//\\/\\\\}"
+_esc_review_stage="${_esc_review_stage//\"/\\\"}"
 
 if ! append_event "review_open" \
-  "{\"sprint_id\":\"${_esc_sprint}\",\"gate_id\":\"${_esc_gate}\",\"path\":\"${_esc_path}\",\"prompt_path\":\"${_esc_prompt}\",\"review_lens\":\"${_esc_lens}\",\"review_lens_source\":\"${_esc_lens_source}\",\"evaluator_role\":\"CPO\",\"evaluator_executor\":\"${_esc_eval}\",\"generator_executor\":\"${_esc_gen}\",\"persona\":\"${_esc_persona}\",\"run_requested\":${RUN_REVIEW},\"auth_mode\":\"${_esc_auth_mode}\"}" \
+  "{\"sprint_id\":\"${_esc_sprint}\",\"gate_id\":\"${_esc_gate}\",\"path\":\"${_esc_path}\",\"prompt_path\":\"${_esc_prompt}\",\"review_lens\":\"${_esc_lens}\",\"review_lens_source\":\"${_esc_lens_source}\",\"review_stage\":\"${_esc_review_stage}\",\"cross_review\":${REVIEW_CROSS_REVIEW},\"evaluator_role\":\"CPO\",\"evaluator_executor\":\"${_esc_eval}\",\"generator_executor\":\"${_esc_gen}\",\"persona\":\"${_esc_persona}\",\"run_requested\":${RUN_REVIEW},\"auth_mode\":\"${_esc_auth_mode}\"}" \
   2>/dev/null; then
   echo "permission denied appending event to ${SFS_EVENTS_FILE}" >&2
   exit "${SFS_EXIT_PERM}"
@@ -2937,7 +2945,7 @@ if [[ "${RUN_REVIEW}" == "true" ]]; then
   _esc_out="${_esc_out//\"/\\\"}"
   _esc_rc="${RUN_RC:-0}"
   if ! append_event "review_run" \
-    "{\"sprint_id\":\"${_esc_sprint}\",\"gate_id\":\"${_esc_gate}\",\"path\":\"${_esc_path}\",\"output_path\":\"${_esc_out}\",\"review_lens\":\"${_esc_lens}\",\"evaluator_role\":\"CPO\",\"evaluator_executor\":\"${_esc_eval}\",\"generator_executor\":\"${_esc_gen}\",\"exit_code\":${_esc_rc}}" \
+    "{\"sprint_id\":\"${_esc_sprint}\",\"gate_id\":\"${_esc_gate}\",\"path\":\"${_esc_path}\",\"output_path\":\"${_esc_out}\",\"review_lens\":\"${_esc_lens}\",\"review_stage\":\"${_esc_review_stage}\",\"cross_review\":${REVIEW_CROSS_REVIEW},\"evaluator_role\":\"CPO\",\"evaluator_executor\":\"${_esc_eval}\",\"generator_executor\":\"${_esc_gen}\",\"exit_code\":${_esc_rc}}" \
     2>/dev/null; then
     echo "permission denied appending event to ${SFS_EVENTS_FILE}" >&2
     exit "${SFS_EXIT_PERM}"

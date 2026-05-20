@@ -21,18 +21,27 @@ assert_contains() {
 
 assert_contains "${DESIGN_EN}" "DES-PROP-019"
 assert_contains "${DESIGN_EN}" "DES-FILL-REPAIR"
+assert_contains "${DESIGN_EN}" "DES-PROP-024"
+assert_contains "${DESIGN_EN}" "DES-FILL-BROWSER-QA"
 assert_contains "${DESIGN_EN}" "repair-first UX contract"
 assert_contains "${DESIGN_EN}" "Server-side 4xx validation is a final safety net"
 assert_contains "${DESIGN_EN}" "Repair matrix for validation states"
+assert_contains "${DESIGN_EN}" "Playwright or equivalent browser automation"
 
 assert_contains "${DESIGN_KO}" "DES-FILL-REPAIR"
+assert_contains "${DESIGN_KO}" "DES-PROP-024"
+assert_contains "${DESIGN_KO}" "DES-FILL-BROWSER-QA"
 assert_contains "${DESIGN_KO}" "repair-first UX contract"
 assert_contains "${DESIGN_KO}" "[Product]"
 assert_contains "${DESIGN_KO}" "AI 에게 맡기기"
 assert_contains "${DESIGN_KO}" "시네마틱"
 assert_contains "${DESIGN_KO}" "structured information"
+assert_contains "${DESIGN_KO}" "사용자 확인 전에 browser 검증"
 
 assert_contains "${IMPLEMENT}" "S0 repair contract"
 assert_contains "${IMPLEMENT}" "Warning/blocking alone is not a"
+assert_contains "${IMPLEMENT}" "If visible frontend/UI changed"
+assert_contains "${IMPLEMENT}" "Playwright/Cypress/Storybook"
+assert_contains "${IMPLEMENT}" "explicit user waiver"
 
 echo "friendly UX contract guardrails present"

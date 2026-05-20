@@ -29,6 +29,8 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - Data-dense product surfaces need scanning, hierarchy, states, and task flow,
   not decorative composition.
 - Accessibility and responsive fit are active whenever UI is user-facing.
+- visible frontend 구현은 사용자 확인 전에 browser 검증을 활성화한다. Playwright
+  또는 동등한 browser automation evidence 없이 UI 를 ready 로 넘기지 않는다.
 - AI generated UI activates design-system governance. If `design.md` or
   `docs/solon/design.md` exists, read it before editing; if neither exists and
   the work creates visible UI, record the gap or create a compact seed contract
@@ -44,6 +46,7 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - DES-SCALE-006: Design-system work needs tokens, components, variants, usage rules, and migration plan.
 - DES-SCALE-007: Brand/marketing work needs first-viewport signal, real assets, and conversion/action clarity.
 - DES-SCALE-008: AI-generated UI needs `design.md`, token drift checks, and screenshot evidence, not only "looks good" judgment.
+- DES-SCALE-009: Frontend 구현은 위험도에 맞는 자동 browser evidence 를 사용자 확인 전에 남겨야 한다.
 
 ## DES-PROP - Proposition Inventory
 
@@ -70,6 +73,7 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - DES-PROP-021: Korean typography needs one primary Korean-capable font, stable line-height, and `letter-spacing: 0` unless the existing design system explicitly overrides it.
 - DES-PROP-022: Iconography should come from one coherent icon family or the existing product icon system; do not mix random free icons.
 - DES-PROP-023: AI-slop signals include generic SaaS gradients, arbitrary card/radius choices, inconsistent palettes, mixed icon weights, and token values that differ screen by screen.
+- DES-PROP-024: Visible frontend 변경은 desktop/mobile viewport evidence, primary interaction coverage, console/runtime error check 를 포함한 pre-user browser QA 가 필요하다.
 
 ## DES-FILL - Operating Guidance
 
@@ -150,6 +154,22 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - responsive QA 는 smallest supported viewport, common desktop width,
   long localized strings, empty/overflow data, modal/toolbar collision 을 확인한다.
 
+### DES-FILL-BROWSER-QA - Pre-User Browser Verification
+
+- 변경된 UI 를 사용자에게 확인 요청하기 전에 app 을 실행하고 browser automation 으로
+  먼저 본다. repo 의 Playwright, Cypress, Storybook, e2e smoke 가 있으면 그것을
+  우선하고, 없으면 사용 가능한 Playwright/browser automation 으로 local dev server
+  또는 static file 을 확인한다.
+- 최소 desktop viewport 1개와 mobile/small viewport 1개를 확인한다. 위험도가 높은
+  flow 는 empty, loading, error, success, disabled, overflow, modal/toolbar
+  collision 중 해당 state matrix 를 추가한다.
+- page load 만 보지 말고 primary workflow 또는 변경된 control 을 실제로 조작한다.
+  screenshot/trace 에서 blank render, overlap, clipping, horizontal overflow,
+  unreadable text, broken focus path, console/runtime error 를 확인한다.
+- 구현 evidence 에 command/result 와 screenshot, trace, browser-capture path 를 남긴다.
+  automation 이 불가능하면 정확한 blocker, 최소 대체 evidence, 사용자 explicit waiver
+  여부를 기록한다.
+
 ### DES-FILL-COPY - Domain Language And UX Writing
 
 - UI copy 는 canonical taxonomy term 을 쓰되, 필요한 경우 internal object name 보다 친절하게 표현한다.
@@ -170,6 +190,8 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - token 밖 색상, 폰트 크기, spacing, radius, shadow, icon style 이 생기지 않았는가?
 - 화면이 generic AI-slop 처럼 보이는 신호를 가진가, 아니면 product 고유의 규칙이 보이는가?
 - 한국어 typography 와 긴 label 이 mobile/desktop 에서 안정적으로 맞는가?
+- 사용자 확인 전에 Playwright 또는 동등한 browser automation 을 실행했고,
+  desktop/mobile evidence 와 console/runtime check 가 남아 있는가?
 
 ## DES-EVIDENCE - Suggested Evidence
 
@@ -182,6 +204,8 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
   server fallback, success-after-fix path.
 - design-system evidence: `design.md` excerpt, token usage note, token drift
   grep/inspection result, desktop/mobile screenshot, icon/font consistency note.
+- browser QA evidence: Playwright/Cypress/Storybook/browser command 와 result,
+  desktop/mobile screenshot 또는 trace, primary interaction note, console error summary.
 
 ## DES-GAP - Deepening Slots
 
@@ -197,3 +221,4 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - DES-GAP-010: `design.md` schema and token drift checker.
 - DES-GAP-011: Korean typography and icon-family starter guide.
 - DES-GAP-012: AI-slop review rubric.
+- DES-GAP-013: frontend handoff 용 Playwright/browser QA smoke matrix.

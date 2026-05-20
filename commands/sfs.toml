@@ -81,7 +81,9 @@ The user invoked Gemini CLI command `sfs {{args}}`.
     Codex, Claude, Gemini, and future LLM agents must continue with the next
     unmet SFS review command: self-CPO first via `sfs review --gate <n>` or
     `sfs review --sprint <id> --gate <n>` for a closed sprint, then configured
-    cross review after self-CPO PASS.
+    cross review after self-CPO PASS unless a recorded self-CPO fallback reason
+    covers no other agent subscription, external agent token exhaustion, or
+    cross-review bridge unavailability.
     Session Continuation Guard: `sfs upgrade` updates runtime/project context
     but cannot shrink an already-open LLM conversation. If the host token meter
     is 30%+ before a new WU/sprint action, 50%+ before a new gate/loop/review

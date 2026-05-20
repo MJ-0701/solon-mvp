@@ -7,6 +7,24 @@
 
 ---
 
+## 0.6.94
+
+이번 버전은 Gate 3 review 가 self-CPO PASS 만 보고 구현으로 넘어가는 문제를 막되,
+다른 Agent 를 구독하지 않았거나 외부 Agent 토큰이 소진된 사용자까지 막지는 않도록
+fallback evidence 경로를 분리합니다. 또한 보이는 frontend/UI 변경은 사용자가 직접
+확인하기 전에 agent 가 browser automation 으로 먼저 확인하도록 개발본부 guard 를 강화했습니다.
+
+- `sfs implement` 는 Gate 3 PASS 를 볼 때 cross review evidence 또는 유효한 self-CPO fallback
+  evidence 를 확인합니다.
+- bare self-CPO PASS 만으로는 구현 진입이 막히지만, no other agent subscription, external agent
+  token exhaustion, cross-review bridge unavailable 같은 이유가 기록된 self-CPO fallback PASS 는
+  통과할 수 있습니다.
+- `sfs review` 는 Gate 3 run event 에 `review_stage` 와 `cross_review` metadata 를 기록합니다.
+- visible frontend/UI 구현은 사용자 확인 전에 Playwright/Cypress/Storybook 또는 동등한 browser
+  automation 으로 desktop/mobile viewport, primary interaction, responsive fit, console/runtime
+  error evidence 를 남기도록 했습니다.
+- 0.6.94 검증은 `run-all.sh` 81/0 PASS 입니다.
+
 ## 0.6.93
 
 이번 버전은 프로젝트 안에 남은 오래된 `.sfs-local/context` 가 최신 runtime guard 를 가려서
