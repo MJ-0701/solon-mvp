@@ -1,3 +1,34 @@
+## [0.6.95] - 2026-05-21
+
+> **Gate 3 review PASS no longer substitutes for the user's product approval
+> when a plan changes product intent, IA, acceptance criteria, or another
+> decision boundary.**
+
+### Fixed
+
+- `sfs implement` now blocks plans marked `user_approval_required: true` or
+  `user_approval_status: pending`, even when Gate 3 cross review has already
+  passed. Agents must capture the user's approval or waiver before entering
+  implementation.
+- Gate 3 review next-action guidance now routes approval-pending plans to
+  `sfs capture --kind user-approval --gate 3 ...` instead of telling the agent
+  to implement.
+- Plan guidance now treats product meaning, IA, visible UI, acceptance-criteria
+  meaning, public contract, security/privacy/data, cost/latency/model policy,
+  and destructive behavior changes as user approval boundaries.
+
+### Added
+
+- Added `user-approval` / `approval` capture kinds so the active sprint ledger
+  can record explicit user approval before implementation.
+- Added a plan template approval boundary section that makes user review status
+  visible instead of hiding it behind Gate 3 review results.
+
+### Tests
+
+- Added regression coverage for capture flow, Gate 3 implement preflight
+  blocking, and Gate 3 review next-action routing when user approval is pending.
+
 ## [0.6.94] - 2026-05-21
 
 > **Gate 3 implement preflight now respects cross review and realistic

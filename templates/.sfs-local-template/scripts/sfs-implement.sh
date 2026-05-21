@@ -13,6 +13,7 @@ SFS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SFS_SCRIPT_DIR}/sfs-common.sh"
 
 : "${SFS_EXIT_PLAN_REVIEW:=8}"
+: "${SFS_EXIT_USER_APPROVAL:=10}"
 
 usage_implement() {
   cat <<'EOF'
@@ -24,6 +25,8 @@ Usage:
 Open/update the active sprint's implement.md execution artifact.
   - Intended flow: /sfs plan -> /sfs review --gate 3 -> /sfs implement -> /sfs review --gate 6.
   - Requires a passing Gate 3 Plan review before implementation starts.
+  - If plan.md marks user_approval_required=true, implementation is blocked
+    until user approval is captured after the latest plan open.
   - --allow-unreviewed-plan bypasses the preflight only when the user explicitly
     waives plan review; the waiver is recorded in events.jsonl.
   - Creates implement.md from sprint-templates/implement.md if missing.
@@ -46,6 +49,7 @@ Exit codes:
   4  sprint-templates/implement.md missing
   5  permission denied
   8  Gate 3 Plan review PASS missing (run /sfs review --gate 3 first)
+  10 user approval required by plan.md but not captured
   99 unknown (CLI args, etc.)
 EOF
 }
@@ -132,6 +136,37 @@ sfs_implement_has_self_cpo_fallback_evidence() {
   if [[ -n "${out_path}" && -f "${out_path}" ]]; then
     grep -Eiq 'self[ -]?CPO fallback[[:space:]]*:[[:space:]]*(pass|passed|true)|cross[ -]?review unavailable|no other agent subscription|external agent tokens? exhausted|other agent tokens? exhausted|다른[[:space:]]*Agent.*구독.*없|다른[[:space:]]*Agent.*토큰.*소진' "${out_path}" && return 0
   fi
+  return 1
+}
+
+sfs_implement_plan_requires_user_approval() {
+  local file="$1"
+  [[ -f "${file}" ]] || return 1
+  grep -Eiq '^[[:space:]]*user_approval_required:[[:space:]]*(true|yes|required)[[:space:]]*$|^[[:space:]]*user_approval_status:[[:space:]]*"?pending"?[[:space:]]*$|^[[:space:]]*user_approval_status:[[:space:]]*"?required"?[[:space:]]*$' "${file}"
+}
+
+sfs_implement_latest_gate3_user_approval_record() {
+  local line kind
+  [[ -f "${SFS_EVENTS_FILE}" ]] || return 1
+  while IFS= read -r line; do
+    [[ "${line}" == *"\"sprint_id\":\"${SPRINT_ID}\""* ]] || continue
+    case "${line}" in
+      *'"type":"flow_capture"'*)
+        kind="$(sfs_implement_json_string_field "kind" "${line}")"
+        case "${kind}" in
+          user-approval|approval|waiver)
+            if [[ "${line}" == *'"gate_id":"G1"'* || "${line}" != *'"gate_id":'* ]]; then
+              printf '%s\n' "${line}"
+              return 0
+            fi
+            ;;
+        esac
+        ;;
+      *'"type":"plan_open"'*)
+        return 1
+        ;;
+    esac
+  done < <(reverse_lines "${SFS_EVENTS_FILE}")
   return 1
 }
 
@@ -301,6 +336,17 @@ if [[ -n "${PLAN_REVIEW_BLOCK_REASON}" ]]; then
     2>/dev/null; then
     echo "permission denied appending event to ${SFS_EVENTS_FILE}" >&2
     exit "${SFS_EXIT_PERM}"
+  fi
+fi
+
+if sfs_implement_plan_requires_user_approval "${PLAN_PATH}"; then
+  PLAN_USER_APPROVAL_RECORD="$(sfs_implement_latest_gate3_user_approval_record || true)"
+  if [[ -z "${PLAN_USER_APPROVAL_RECORD}" ]]; then
+    echo "User approval required before implement: plan.md marks user_approval_required=true or user_approval_status=pending." >&2
+    echo "Gate 3 review PASS is not user approval. Ask the user to approve the plan, then record it with:" >&2
+    echo "  sfs capture --kind user-approval --gate 3 \"User approved this Gate 3 plan for implementation.\"" >&2
+    echo "If the user waives approval instead, record that waiver with sfs capture --kind waiver --gate 3 ..." >&2
+    exit "${SFS_EXIT_USER_APPROVAL}"
   fi
 fi
 

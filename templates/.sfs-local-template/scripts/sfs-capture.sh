@@ -14,7 +14,7 @@ source "${SCRIPT_DIR}/sfs-common.sh"
 usage_capture() {
   cat <<'EOF'
 Usage:
-  sfs capture [--kind <note|decision|scope-change|review-order|exception|evidence|blocker|waiver>] [--gate <1..7>] [--sprint <id>] <text>
+  sfs capture [--kind <note|decision|scope-change|user-approval|review-order|exception|evidence|blocker|waiver>] [--gate <1..7>] [--sprint <id>] <text>
   sfs capture --stdin [--kind <kind>] [--gate <1..7>] [--sprint <id>]
   sfs note <text>
 
@@ -111,7 +111,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 case "${CAPTURE_KIND}" in
-  note|decision|scope-change|review-order|exception|evidence|blocker|waiver) ;;
+  note|decision|scope-change|user-approval|approval|review-order|exception|evidence|blocker|waiver) ;;
   *)
     echo "invalid capture kind: ${CAPTURE_KIND}" >&2
     usage_capture >&2

@@ -832,6 +832,37 @@ review_json_string_field() {
   printf '%s\n' "$line" | sed -nE 's/.*"'"${field}"'"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/p'
 }
 
+review_plan_requires_user_approval() {
+  local file="$1"
+  [[ -f "${file}" ]] || return 1
+  grep -Eiq '^[[:space:]]*user_approval_required:[[:space:]]*(true|yes|required)[[:space:]]*$|^[[:space:]]*user_approval_status:[[:space:]]*"?pending"?[[:space:]]*$|^[[:space:]]*user_approval_status:[[:space:]]*"?required"?[[:space:]]*$' "${file}"
+}
+
+review_latest_gate3_user_approval_record() {
+  local line kind
+  [[ -f "${SFS_EVENTS_FILE}" ]] || return 1
+  while IFS= read -r line; do
+    [[ "${line}" == *"\"sprint_id\":\"${SPRINT_ID}\""* ]] || continue
+    case "${line}" in
+      *'"type":"flow_capture"'*)
+        kind="$(review_json_string_field "kind" "${line}")"
+        case "${kind}" in
+          user-approval|approval|waiver)
+            if [[ "${line}" == *'"gate_id":"G1"'* || "${line}" != *'"gate_id":'* ]]; then
+              printf '%s\n' "${line}"
+              return 0
+            fi
+            ;;
+        esac
+        ;;
+      *'"type":"plan_open"'*)
+        return 1
+        ;;
+    esac
+  done < <(reverse_lines "${SFS_EVENTS_FILE}")
+  return 1
+}
+
 latest_review_lens_for_gate() {
   local gate_filter="${1:-}" line lens normalized
   [[ -f "${SFS_EVENTS_FILE}" && -n "${gate_filter}" ]] || return 1
@@ -900,7 +931,11 @@ review_next_action_line() {
     pass)
       case "${gate}" in
         G1)
-          printf 'sfs implement (Gate 3 Plan PASS; carry required review items into the first implementation slice)\n'
+          if review_plan_requires_user_approval "${PLAN_PATH}" && ! review_latest_gate3_user_approval_record >/dev/null; then
+            printf 'ask user to approve the Gate 3 plan, then record: sfs capture --kind user-approval --gate 3 "User approved this Gate 3 plan for implementation."\n'
+          else
+            printf 'sfs implement (Gate 3 Plan PASS; carry required review items into the first implementation slice)\n'
+          fi
           ;;
         G4|G5)
           printf 'sfs retro (review PASS; close with report/retro evidence)\n'

@@ -104,6 +104,14 @@ load_when: ["always", "sfs", "entry"]
   architecture change, public contract change, security/privacy/data-loss risk
   tradeoff, cost/latency policy, destructive action, unclear acceptance, or a
   repeated partial/fail after the bounded micro-rework loop.
+- Gate PASS is not user approval. When a plan introduces or changes product
+  meaning, acceptance criteria meaning, IA, visible UI/workflow, public
+  contract, security/privacy/data-loss posture, cost/model policy, or
+  destructive behavior, mark `user_approval_required: true` and
+  `user_approval_status: "pending"` in `plan.md`. Stop before implementation
+  until the user approves or waives it, then record that with
+  `sfs capture --kind user-approval --gate 3 "..."` or `sfs capture --kind
+  waiver --gate 3 "..."`.
 - SFS commit guidance must use the SFS command surface: `sfs commit plan` and
   `sfs commit apply --group <name>` (or `$sfs commit ...` in Codex / `/sfs
   commit ...` only when a slash router is explicitly active). `sfs commit apply`

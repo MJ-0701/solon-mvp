@@ -7,6 +7,18 @@
 
 ---
 
+## 0.6.95
+
+이번 버전은 Gate 3 review PASS 를 사용자 승인처럼 취급하던 흐름을 막습니다.
+계획이 제품 의도, IA, acceptance 기준, 보이는 UI, public contract, 보안/데이터, 비용/지연,
+파괴적 동작 같은 경계를 바꾸면 agent 는 바로 구현하지 않고 사용자 승인을 먼저 받아야 합니다.
+
+- `plan.md` 에 사용자 승인 필요 상태가 표시되면 `sfs implement` 는 Gate 3 PASS 가 있어도 멈춥니다.
+- 다음 단계는 구현이 아니라 `sfs capture --kind user-approval --gate 3 ...` 로 사용자 승인 또는 waiver 를 기록하는 것입니다.
+- `sfs review --gate 3` 의 next action 도 approval pending 상태에서는 implement 가 아니라 사용자 승인 capture 로 안내합니다.
+- `sfs capture` 는 `user-approval` / `approval` kind 를 받아 sprint ledger 에 명시 승인 evidence 를 남깁니다.
+- 회귀 테스트는 capture flow, implement preflight block, review next-action routing 을 직접 검증합니다.
+
 ## 0.6.94
 
 이번 버전은 Gate 3 review 가 self-CPO PASS 만 보고 구현으로 넘어가는 문제를 막되,

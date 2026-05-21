@@ -26,6 +26,18 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   phrase natural, for example `권장안 그대로 확정`.
 - State material assumptions, tradeoffs, explicit non-goals, and a simpler path
   when one exists. Do not hide unresolved decisions inside confident wording.
+- Gate 3 is a contract proposal, not user approval. If the plan introduces or
+  changes product meaning, acceptance criteria meaning, IA, visible UI/workflow,
+  public contract, security/privacy/data-loss posture, cost/model policy, or
+  destructive behavior, set `user_approval_required: true` and
+  `user_approval_status: "pending"` in plan frontmatter and fill the
+  "사용자 검토 / 승인 경계" section with the exact reason. Do not write
+  "사용자 결정 지점: 없음" for a plan that redefines what the product should do.
+  The next step after review is user approval capture, not implementation.
+- User approval must be natural-language evidence from the user, recorded with
+  `sfs capture --kind user-approval --gate 3 "..."`. `sfs review --gate 3`
+  PASS, self-CPO PASS, cross review PASS, or CI PASS never counts as that
+  approval.
 - Gate 3 must carry the same AI-era fundamentals forward:
   - shared design concept becomes measurable requirements and explicit
     non-goals.

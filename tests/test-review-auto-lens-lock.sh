@@ -107,4 +107,22 @@ case "${last_out}" in
   *) fail "Gate 3 PASS review should surface implementation next action: ${last_out}" ;;
 esac
 
+cat >> "${sprint_dir}/plan.md" <<'PLAN'
+
+user_approval_required: true
+user_approval_status: "pending"
+PLAN
+approval_needed_out="$(run_sfs review --last --gate 3)"
+case "${approval_needed_out}" in
+  *"next: ask user to approve the Gate 3 plan, then record: sfs capture --kind user-approval --gate 3"* ) ;;
+  *) fail "Gate 3 PASS with pending user approval should not route to implement: ${approval_needed_out}" ;;
+esac
+
+run_sfs capture --kind user-approval --gate 3 "User approved this Gate 3 plan for implementation." >/dev/null
+approval_recorded_out="$(run_sfs review --last --gate 3)"
+case "${approval_recorded_out}" in
+  *"next: sfs implement (Gate 3 Plan PASS;"* ) ;;
+  *) fail "Gate 3 PASS with captured user approval should route to implement: ${approval_recorded_out}" ;;
+esac
+
 echo "test-review-auto-lens-lock: OK"

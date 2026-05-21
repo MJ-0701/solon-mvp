@@ -93,6 +93,39 @@ case "${passed_out}" in
   *) fail "passed review should allow implement: ${passed_out}" ;;
 esac
 
+setup_project "${TMP_DIR}/user-approval-blocked"
+sprint_id="$(cat .sfs-local/current-sprint)"
+mkdir -p .sfs-local/tmp/review-runs
+approval_result_path=".sfs-local/tmp/review-runs/gate3-plan-review.md"
+cat >> ".sfs-local/sprints/${sprint_id}/plan.md" <<'PLAN'
+
+user_approval_required: true
+user_approval_status: "pending"
+
+## 사용자 검토 / 승인 경계
+
+- required: true
+- status: pending
+- reason: Visible IA and acceptance criteria meaning changed.
+PLAN
+printf 'Verdict: pass\nReview stage: cross\nEvidence checked: plan.md\n' > "${approval_result_path}"
+printf '{"ts":"2026-05-08T01:00:00+09:00","type":"review_run","sprint_id":"%s","gate_id":"G1","output_path":"%s","review_stage":"cross","cross_review":true,"evaluator_executor":"codex","generator_executor":"claude"}\n' "${sprint_id}" "${approval_result_path}" >> .sfs-local/events.jsonl
+set +e
+approval_block_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" implement "slice" 2>&1)"
+approval_block_rc=$?
+set -e
+[[ "${approval_block_rc}" -eq 10 ]] || fail "pending user approval should block implement, got ${approval_block_rc}: ${approval_block_out}"
+case "${approval_block_out}" in
+  *"Gate 3 review PASS is not user approval"* ) ;;
+  *) fail "pending approval block should explain review PASS is not approval: ${approval_block_out}" ;;
+esac
+SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" capture --kind user-approval --gate 3 "User approved this Gate 3 plan for implementation." >/dev/null
+approval_passed_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" implement "slice")"
+case "${approval_passed_out}" in
+  *"plan review: pass"* ) ;;
+  *) fail "captured user approval should allow implement: ${approval_passed_out}" ;;
+esac
+
 setup_project "${TMP_DIR}/latest-partial-blocks"
 sprint_id="$(cat .sfs-local/current-sprint)"
 mkdir -p .sfs-local/tmp/review-runs

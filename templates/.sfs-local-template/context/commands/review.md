@@ -23,6 +23,18 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   plan says ready-for-implement, review the plan contract first with
   `sfs review --gate 3`; only a PASS/accepted result should route to
   `sfs implement`.
+- Gate 3 review PASS does not approve product judgment. If a plan introduces
+  or changes product meaning, acceptance criteria meaning, IA, visible
+  UI/workflow, public contract, security/privacy/data-loss posture, cost/model
+  policy, or destructive behavior, the plan must mark
+  `user_approval_required: true` and `user_approval_status: "pending"` until
+  the user approves. If the plan claims no user decision is needed while
+  redefining that meaning, return partial and require a user approval boundary
+  instead of routing to implementation.
+- When a Gate 3 result is PASS but user approval is still pending, the next
+  action is not `sfs implement`; ask the user to approve/waive and record it
+  with `sfs capture --kind user-approval --gate 3 "..."` or `sfs capture
+  --kind waiver --gate 3 "..."`.
 - Gate 3 review has a sequence: local self-review until PASS, then cross
   review. Cross review is independent confirmation after self-review, not a
   replacement for self-review.

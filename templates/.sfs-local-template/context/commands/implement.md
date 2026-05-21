@@ -12,6 +12,11 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   missing, return to plan review; bypass only with an explicit user waiver or
   recorded self-CPO fallback evidence for no other agent subscription, external
   agent token exhaustion, or cross-review bridge unavailability.
+- Gate 3 Plan review PASS is not user approval. If `plan.md` marks
+  `user_approval_required: true` or `user_approval_status: "pending"`,
+  `sfs implement` must stop until the user approves or waives implementation
+  and that evidence is captured with `sfs capture --kind user-approval --gate 3
+  "..."` or `sfs capture --kind waiver --gate 3 "..."`.
 - Gate 3 review must have passed by outcome, not by effort. Do not enter
   implementation because there were many review rounds, many lenses, or no new
   categories. Self-review must pass first; cross review follows unless the

@@ -15,8 +15,12 @@ load_when: ["capture", "note", "natural language", "decision", "review order", "
   continuation rule, for example self-CPO next, then cross-review.
 - `sfs note "..."` is an alias for `sfs capture --kind note "..."`.
 - Prefer specific kinds when the meaning is clear:
-  `decision`, `scope-change`, `review-order`, `exception`, `evidence`,
-  `blocker`, `waiver`, or `note`.
+  `decision`, `scope-change`, `user-approval`, `review-order`, `exception`,
+  `evidence`, `blocker`, `waiver`, or `note`.
+- Use `user-approval` specifically when the user approves implementation after
+  a Gate 3 plan that marked `user_approval_required: true`. Gate 3 review PASS
+  is not that approval; capture the user's natural-language approval before
+  running `sfs implement`.
 - Capture before the next SFS command. The point is to move important chat
   state into the sprint workbench, not to summarize it after the flow already
   drifted.
@@ -36,6 +40,7 @@ Examples:
 ```sh
 sfs capture --kind review-order --gate 6 "Run Codex self-CPO first, then Gemini, then Claude."
 sfs capture --kind review-order --gate 6 "GitHub @codex PASS is external evidence; next run SFS self-CPO with sfs review --sprint 2026-W21-sprint-3 --gate 6."
+sfs capture --kind user-approval --gate 3 "User approved this Gate 3 plan for implementation."
 sfs capture --kind scope-change "Do not add automatic transcript recording in this sprint."
 sfs note "GitHub @codex review passed, but it is external evidence only."
 ```

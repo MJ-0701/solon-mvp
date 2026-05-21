@@ -56,7 +56,12 @@ $ARGUMENTS
     `source-docs`, `simplify`, `security`, `performance`, `api-contract`.
     Gate 3 (Plan) ready-for-implement routes to `sfs review --gate 3` first;
     do not offer `sfs implement` or worker/model handoff until plan review
-    passes. Keep C-Level and worker/generator responsibilities separate:
+    passes. Gate 3 PASS is still not user product approval: if the plan changes
+    product meaning, AC meaning, IA, visible UI/workflow, public contract,
+    security/privacy/data-loss posture, cost/model policy, or destructive
+    behavior, mark user approval pending and record approval with
+    `sfs capture --kind user-approval --gate 3` before implementation.
+    Keep C-Level and worker/generator responsibilities separate:
     C-Level owns intent, architecture, AC, and review handoff; worker/generator
     owns fixed implementation slices.
     Codex routing is role-specific: normal worker slices use `gpt-5.4`,

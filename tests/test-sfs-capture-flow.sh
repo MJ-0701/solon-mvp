@@ -59,11 +59,18 @@ case "${note_out}" in
   *) fail "unexpected note output: ${note_out}" ;;
 esac
 
+approval_out="$(run_sfs capture --kind user-approval --gate 3 "User approved this Gate 3 plan for implementation.")"
+case "${approval_out}" in
+  *"capture recorded:"*"kind user-approval"*) ;;
+  *) fail "unexpected user approval capture output: ${approval_out}" ;;
+esac
+
 log_path=".sfs-local/sprints/${sprint_id}/log.md"
 assert_contains "${log_path}" "## 자연어 플로우 캡처" "capture section"
 assert_contains "${log_path}" "review-order" "review-order entry"
 assert_contains "${log_path}" "Codex self-CPO first, then Gemini, then Claude." "review-order text"
 assert_contains "${log_path}" "GitHub @codex review is external evidence only." "note text"
+assert_contains "${log_path}" "User approved this Gate 3 plan for implementation." "user approval text"
 
 long_capture_text="full prompt dump and raw transcript residue that should be summarized before capture"
 set +e
@@ -79,9 +86,9 @@ SFS_CAPTURE_TEXT_MAX_CHARS=40 SFS_CAPTURE_ALLOW_LONG=1 SFS_COMMAND_TIMEOUT_SEC=0
 assert_contains "${log_path}" "${long_capture_text}" "explicit long capture override"
 
 flow_count="$(grep -c '"type":"flow_capture"' .sfs-local/events.jsonl || true)"
-[[ "${flow_count}" == "3" ]] || fail "flow_capture events should not collapse; got ${flow_count}"
+[[ "${flow_count}" == "4" ]] || fail "flow_capture events should not collapse; got ${flow_count}"
 capture_id_count="$(grep -o '"capture_id":"' .sfs-local/events.jsonl | wc -l | tr -d '[:space:]')"
-[[ "${capture_id_count}" == "3" ]] || fail "capture_id count mismatch: ${capture_id_count}"
+[[ "${capture_id_count}" == "4" ]] || fail "capture_id count mismatch: ${capture_id_count}"
 
 rm -f .sfs-local/current-sprint
 set +e
@@ -94,7 +101,7 @@ assert_contains "${TMP_DIR}/missing.err" "--sprint <id>" "missing active sprint 
 
 run_sfs capture --sprint "${sprint_id}" --kind decision "Explicit sprint capture still records to the named sprint." >/dev/null
 flow_count="$(grep -c '"type":"flow_capture"' .sfs-local/events.jsonl || true)"
-[[ "${flow_count}" == "4" ]] || fail "explicit sprint capture should append fourth event; got ${flow_count}"
+[[ "${flow_count}" == "5" ]] || fail "explicit sprint capture should append fifth event; got ${flow_count}"
 assert_contains "${log_path}" "Explicit sprint capture still records to the named sprint." "explicit sprint capture text"
 
 echo "test-sfs-capture-flow: OK"
