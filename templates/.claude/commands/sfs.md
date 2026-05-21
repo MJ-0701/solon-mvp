@@ -83,11 +83,14 @@ $ARGUMENTS
    a self-CPO mini-check: requirements to AC to implementation slices to
    ADR/decision ids, every AC mapped to file/artifact/evidence, and SEED/
    placeholder/mock/fallback material treated as non-acceptance until replaced.
+   GitHub `@codex` PR/code review is external evidence only and
+   post-implementation only; do not request, trigger, or count it during
+   brainstorm or Gate 3 plan review.
    External review/check PASS is a continuation trigger, not a stopping point.
    Codex, Claude, Gemini, and future LLM agents must continue with the next
-   unmet SFS review command: self-CPO first via `sfs review --gate <n>` or
-   `sfs review --sprint <id> --gate <n>` for a closed sprint, then configured
-   cross review after self-CPO PASS.
+   unmet SFS review command. For Gate 6 implementation review, run
+   `sfs review --gate 6 --stage self`, then `sfs review --gate 6 --stage cross`,
+   then GitHub `@codex` as final external evidence when available.
    Session Continuation Guard: `sfs upgrade` updates runtime/project context
    but cannot shrink an already-open LLM conversation. If the host token meter
    is 30%+ before a new WU/sprint action, 50%+ before a new gate/loop/review

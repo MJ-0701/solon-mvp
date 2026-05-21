@@ -23,7 +23,7 @@ Usage:
   /sfs implement --allow-unreviewed-plan [<work slice>]
 
 Open/update the active sprint's implement.md execution artifact.
-  - Intended flow: /sfs plan -> /sfs review --gate 3 -> /sfs implement -> /sfs review --gate 6.
+  - Intended flow: /sfs plan -> /sfs review --gate 3 -> /sfs implement -> /sfs review --gate 6 --stage self -> /sfs review --gate 6 --stage cross -> push/GitHub @codex evidence if available.
   - Requires a passing Gate 3 Plan review before implementation starts.
   - If plan.md marks user_approval_required=true, implementation is blocked
     until user approval is captured after the latest plan open.
@@ -445,15 +445,15 @@ fi
 
 if [[ "${PLAN_REVIEW_VERDICT}" == "pass" ]]; then
   if [[ "${AGENT_MODE}" == "parallel" ]]; then
-    echo "implement.md ready: ${IMPLEMENT_PATH} | plan.md: ${PLAN_PATH} | log.md: ${LOG_PATH} | plan review: pass (${PLAN_REVIEW_EVIDENCE}) | agent mode: parallel (${AGENTS_VALUE}) | cross review required before Gate 6 PASS | after implementation run: sfs review --gate 6"
+    echo "implement.md ready: ${IMPLEMENT_PATH} | plan.md: ${PLAN_PATH} | log.md: ${LOG_PATH} | plan review: pass (${PLAN_REVIEW_EVIDENCE}) | agent mode: parallel (${AGENTS_VALUE}) | cross review required before Gate 6 PASS | after implementation run: sfs review --gate 6 --stage self"
   else
-    echo "implement.md ready: ${IMPLEMENT_PATH} | plan.md: ${PLAN_PATH} | log.md: ${LOG_PATH} | plan review: pass (${PLAN_REVIEW_EVIDENCE}) | agent mode: single (default) | optional parallel: sfs implement --agent-mode parallel --agents codex,claude[,gemini] | after implementation run: sfs review --gate 6"
+    echo "implement.md ready: ${IMPLEMENT_PATH} | plan.md: ${PLAN_PATH} | log.md: ${LOG_PATH} | plan review: pass (${PLAN_REVIEW_EVIDENCE}) | agent mode: single (default) | optional parallel: sfs implement --agent-mode parallel --agents codex,claude[,gemini] | after implementation run: sfs review --gate 6 --stage self"
   fi
 else
   if [[ "${AGENT_MODE}" == "parallel" ]]; then
-    echo "implement.md ready: ${IMPLEMENT_PATH} | plan.md: ${PLAN_PATH} | log.md: ${LOG_PATH} | plan review: waived | agent mode: parallel (${AGENTS_VALUE}) | cross review required before Gate 6 PASS | after implementation run: sfs review --gate 6"
+    echo "implement.md ready: ${IMPLEMENT_PATH} | plan.md: ${PLAN_PATH} | log.md: ${LOG_PATH} | plan review: waived | agent mode: parallel (${AGENTS_VALUE}) | cross review required before Gate 6 PASS | after implementation run: sfs review --gate 6 --stage self"
   else
-    echo "implement.md ready: ${IMPLEMENT_PATH} | plan.md: ${PLAN_PATH} | log.md: ${LOG_PATH} | plan review: waived | agent mode: single (default) | optional parallel: sfs implement --agent-mode parallel --agents codex,claude[,gemini] | after implementation run: sfs review --gate 6"
+    echo "implement.md ready: ${IMPLEMENT_PATH} | plan.md: ${PLAN_PATH} | log.md: ${LOG_PATH} | plan review: waived | agent mode: single (default) | optional parallel: sfs implement --agent-mode parallel --agents codex,claude[,gemini] | after implementation run: sfs review --gate 6 --stage self"
   fi
 fi
 

@@ -30,7 +30,11 @@ module:
 - `policies/debugging-and-error-recovery.md` — stop-the-line failure triage and root-cause guardrails.
 - `policies/deprecation-and-migration.md` — legacy state/API cleanup with replacement, archive, and migration evidence.
 - `policies/shipping-and-launch.md` — reversible, observable release/deploy checklist.
+- `policies/review-lens-routing.md` — review lens aliases and split knowledge-pack loading.
 - `policies/knowledge-pack-router.md` — knowledge pack / review lens router (English).
 - `policies/knowledge-pack-router.ko.md` — knowledge pack / review lens router (Korean).
 - `policies/*-knowledge-pack.md` — English compact guidance packs for each lens/pack.
 - `policies/*-knowledge-pack.ko.md` — Korean compact guidance packs for each lens/pack.
+- `policies/*-knowledge-pack-*.md` — split child packs loaded only after a parent pack activates matching ids.
+- Backend split children: `backend-knowledge-pack-runtime*`, `backend-knowledge-pack-transactions*`, `backend-knowledge-pack-integration*`, `backend-knowledge-pack-operating*`.
+- Design split children: `design-knowledge-pack-operating*`.

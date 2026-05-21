@@ -97,16 +97,17 @@ required.
     ADR/decision ids, every AC mapped to file/artifact/evidence, and SEED/
     placeholder/mock/fallback material treated as non-acceptance until replaced.
     A GitHub `@codex` PR/code review, PR approval, or GitHub check PASS is
-    external evidence only. It does not satisfy self-CPO, SFS cross review,
-    `sfs review`, Gate 3, or Gate 6 PASS by itself. Record it as evidence, then
-    still run or record the SFS review gate.
+    external evidence only and post-implementation only. Do not request,
+    trigger, or count it during brainstorm or Gate 3 plan review. It does not
+    satisfy self-CPO, SFS cross review, `sfs review`, Gate 3, or Gate 6 PASS by
+    itself.
     External review/check PASS is a continuation trigger, not a stopping point.
     Codex, Claude, Gemini, and future LLM agents must continue with the next
-    unmet SFS review command: self-CPO first via `sfs review --gate <n>` or
-    `sfs review --sprint <id> --gate <n>` for a closed sprint, then configured
-    cross review after self-CPO PASS unless a recorded self-CPO fallback reason
-    covers no other agent subscription, external agent token exhaustion, or
-    cross-review bridge unavailability.
+    unmet SFS review command. For Gate 6 implementation review, run
+    `sfs review --gate 6 --stage self`, then `sfs review --gate 6 --stage cross`,
+    then GitHub `@codex` as final external evidence when available unless a
+    recorded self-CPO fallback reason covers no other agent subscription,
+    external agent token exhaustion, or cross-review bridge unavailability.
     Session Continuation Guard: `sfs upgrade` updates runtime/project context
     but cannot shrink an already-open LLM conversation. If the host token meter
     is 30%+ before a new WU/sprint action, 50%+ before a new gate/loop/review

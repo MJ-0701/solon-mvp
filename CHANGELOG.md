@@ -1,3 +1,32 @@
+## [0.6.96] - 2026-05-21
+
+> **Implementation review now runs self-CPO, cross CPO, then GitHub @codex
+> last.**
+
+### Fixed
+
+- `sfs review --gate 6` now separates implementation review stages:
+  self-CPO first, cross CPO second, and GitHub @codex only as final
+  post-implementation PR/code review evidence.
+- GitHub @codex review is no longer requested, triggered, or counted during
+  brainstorm or Gate 3 plan review.
+- `sfs commit apply --group product-code` blocks product-code push after
+  implementation until Gate 6 self-CPO PASS and cross CPO PASS exist, while
+  still allowing a recorded self-CPO fallback for users who only have self-CPO.
+
+### Changed
+
+- SFS kernel, review/implement/capture contexts, and agent adapter prompts now
+  share the same GitHub/SFS review boundary.
+- Backend and design knowledge packs are split into routed child docs so active
+  context stays under 200 lines with frontmatter-based loading.
+
+### Tests
+
+- Added `test-review-implementation-sequence.sh` and
+  `test-context-md-split-frontmatter.sh`.
+- Full source regression passed with 83 tests.
+
 ## [0.6.95] - 2026-05-21
 
 > **Gate 3 review PASS no longer substitutes for the user's product approval

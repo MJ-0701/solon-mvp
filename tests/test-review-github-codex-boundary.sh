@@ -64,10 +64,14 @@ ko_shape="${DIST_DIR}/docs/ko/current-product-shape.md"
 en_shape="${DIST_DIR}/docs/en/current-product-shape.md"
 
 assert_contains "${kernel}" 'GitHub PR/code review is separate from SFS review' "kernel boundary"
+assert_contains "${kernel}" 'post-implementation' "kernel GitHub post implementation only"
 assert_contains "${review_context}" 'GitHub `@codex` PR/code review is external code-review evidence only' "review context boundary"
+assert_contains "${review_context}" 'GitHub @codex review is post-implementation only' "review context post implementation"
 assert_contains "${implement_context}" 'A GitHub `@codex` PR/code review, PR approval, or GitHub check PASS does not' "implement context boundary"
+assert_contains "${implement_context}" 'GitHub @codex applies only after implementation' "implement context post implementation"
 assert_contains "${review_script}" 'GitHub @codex PR/code review is external code-review evidence only' "review prompt lens boundary"
 assert_contains "${review_script}" 'GitHub PR/@codex code review is not an SFS gate verdict' "review prompt verdict boundary"
+assert_contains "${review_script}" 'GitHub @codex review is post-implementation only' "review prompt post implementation"
 assert_contains "${cpo_persona}" 'A GitHub `@codex` PR/code review, PR approval, or GitHub check PASS is' "CPO persona boundary"
 assert_contains "${model_profiles}" 'GitHub @codex PR/code review, PR approval, or GitHub check PASS is external evidence only' "model profile boundary"
 assert_contains "${guide}" 'GitHub 의 `@codex` PR/code review 는 외부 코드리뷰 evidence 일 뿐입니다' "Korean guide boundary"
@@ -96,6 +100,7 @@ adapter_files=(
 
 for file in "${adapter_files[@]}"; do
   assert_contains "${file}" 'A GitHub `@codex` PR/code review, PR approval, or GitHub check PASS is' "adapter boundary ${file}"
+  assert_contains "${file}" 'post-implementation only' "adapter post implementation ${file}"
   assert_does_not_satisfy_matrix "${file}" "adapter boundary ${file}"
 done
 

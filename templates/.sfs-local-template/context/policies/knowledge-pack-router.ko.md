@@ -54,20 +54,31 @@ risk 에 맞는 최소 check 만 활성화하는 것이다. 이 router 는 `.sfs
 ## Read order
 
 1. Read only this file to decide coverage.
-2. Read exactly one matching pack for AC/lens.
-3. Read deeper pack only if the task explicitly asks for detail
+2. AC/lens 에 맞는 parent pack 을 읽는다.
+3. Split pack 은 parent 가 지정한 child 중 active ids 와 matching 되는 파일만 읽는다.
+4. Read deeper pack only if the task explicitly asks for detail
    (`deep`, `expand`, `full`, `evidence matrix`, or direct section reference).
 
 ## On-demand full-pack mapping
 
 - `policies/backend-knowledge-pack.md`
 - `policies/backend-knowledge-pack.ko.md`
+- `policies/backend-knowledge-pack-runtime.md`
+- `policies/backend-knowledge-pack-runtime.ko.md`
+- `policies/backend-knowledge-pack-transactions.md`
+- `policies/backend-knowledge-pack-transactions.ko.md`
+- `policies/backend-knowledge-pack-integration.md`
+- `policies/backend-knowledge-pack-integration.ko.md`
+- `policies/backend-knowledge-pack-operating.md`
+- `policies/backend-knowledge-pack-operating.ko.md`
 - `policies/strategy-pm-knowledge-pack.md`
 - `policies/strategy-pm-knowledge-pack.ko.md`
 - `policies/qa-knowledge-pack.md`
 - `policies/qa-knowledge-pack.ko.md`
 - `policies/design-knowledge-pack.md`
 - `policies/design-knowledge-pack.ko.md`
+- `policies/design-knowledge-pack-operating.md`
+- `policies/design-knowledge-pack-operating.ko.md`
 - `policies/infra-knowledge-pack.md`
 - `policies/infra-knowledge-pack.ko.md`
 - `policies/management-admin-knowledge-pack.md`

@@ -126,18 +126,20 @@ load_when: ["always", "sfs", "entry"]
   AC has a file/artifact plus evidence mapping; and confirm SEED, placeholder,
   mock, or fallback text starts as failing or explicitly non-acceptance
   evidence. Missing self-CPO evidence is partial, not ready for cross review.
-- GitHub PR/code review is separate from SFS review. A GitHub `@codex` review,
-  PR approval, or GitHub check PASS may be useful external evidence, but it
-  does not satisfy self-CPO, SFS cross review, `sfs review`, Gate 3, or
-  Gate 6 PASS by itself. Record it as evidence, then run or record the SFS
-  review gate.
+- GitHub PR/code review is separate from SFS review and is post-implementation
+  only. Do not request, trigger, or count GitHub `@codex` review during
+  brainstorm or Gate 3 plan review. A GitHub `@codex` review, PR approval, or
+  GitHub check PASS may be useful external evidence, but it does not satisfy
+  self-CPO, SFS cross review, `sfs review`, Gate 3, or Gate 6 PASS by itself.
 - External review/check PASS is a continuation trigger, not a stopping point.
   Codex, Claude, Gemini, and future LLM agents must continue to the next unmet
-  SFS review step: self-CPO first with `sfs review --gate <n>` or
-  `sfs review --sprint <id> --gate <n>` for a closed sprint, then the configured
-  cross-review order after self-CPO PASS. If the sprint id is unknown, ask for
-  that id; do not create a new sprint, hand-edit `.sfs-local/current-sprint`, or
-  extract archives manually.
+  SFS review step. For Gate 6 implementation review, run
+  `sfs review --gate 6 --stage self`, then `sfs review --gate 6 --stage cross`,
+  then GitHub `@codex` as final external evidence when available. If the sprint
+  is closed, use `sfs review --sprint <id> --gate <n>` instead of restoring
+  state by hand. If the sprint id is unknown, ask for that id; do not create a
+  new sprint, hand-edit `.sfs-local/current-sprint`, or extract archives
+  manually.
 - Cross review comes after local self-review passes. If cross review returns
   partial/fail, rework the plan and return to self-review before another cross
   review or implementation handoff.

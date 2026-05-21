@@ -50,20 +50,32 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
 ## Read order
 
 1. Read only this file to decide coverage.
-2. Read exactly one matching pack for AC/lens.
-3. Read deeper pack only if the task explicitly asks for detail
+2. Read the matching parent pack for AC/lens.
+3. For split packs, read only the child file named by the parent and matching
+   the active ids.
+4. Read deeper pack only if the task explicitly asks for detail
    (`deep`, `expand`, `full`, `evidence matrix`, or direct section reference).
 
 ## On-demand full-pack mapping
 
 - `policies/backend-knowledge-pack.md`
+- `policies/backend-knowledge-pack-runtime.md`
+- `policies/backend-knowledge-pack-transactions.md`
+- `policies/backend-knowledge-pack-integration.md`
+- `policies/backend-knowledge-pack-operating.md`
 - `policies/backend-knowledge-pack.ko.md` (Korean)
+- `policies/backend-knowledge-pack-runtime.ko.md` (Korean)
+- `policies/backend-knowledge-pack-transactions.ko.md` (Korean)
+- `policies/backend-knowledge-pack-integration.ko.md` (Korean)
+- `policies/backend-knowledge-pack-operating.ko.md` (Korean)
 - `policies/strategy-pm-knowledge-pack.md`
 - `policies/strategy-pm-knowledge-pack.ko.md` (Korean)
 - `policies/qa-knowledge-pack.md`
 - `policies/qa-knowledge-pack.ko.md` (Korean)
 - `policies/design-knowledge-pack.md`
+- `policies/design-knowledge-pack-operating.md`
 - `policies/design-knowledge-pack.ko.md` (Korean)
+- `policies/design-knowledge-pack-operating.ko.md` (Korean)
 - `policies/infra-knowledge-pack.md`
 - `policies/infra-knowledge-pack.ko.md` (Korean)
 - `policies/management-admin-knowledge-pack.md`

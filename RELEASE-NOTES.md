@@ -7,6 +7,19 @@
 
 ---
 
+## 0.6.96
+
+이번 버전은 구현 이후 리뷰 순서를 `self-CPO PASS -> cross CPO PASS -> GitHub @codex`
+로 고정합니다. GitHub @codex 는 이제 구현 후 최종 PR/code review evidence 로만 쓰이며,
+brainstorm 이나 Gate 3 plan review 에서는 동작하지 않습니다.
+
+- `sfs review --gate 6` 은 self 단계와 cross 단계를 분리해서 기록합니다.
+- Gate 6 기본 흐름은 self-CPO PASS 전에는 self, self PASS 후에는 cross 로 이어집니다.
+- `sfs commit apply --group product-code` 는 구현 후 self-CPO PASS 와 cross CPO PASS 가 없으면 push 를 막습니다.
+- self-CPO 만 사용할 수 있는 사용자는 fallback reason 을 기록한 self-CPO PASS 로 진행할 수 있습니다.
+- backend/design knowledge pack 은 200줄 이하 routed child doc 으로 분리되어 frontmatter 기반으로 정확히 불립니다.
+- 0.6.96 검증은 `run-all.sh` 83/0 PASS 입니다.
+
 ## 0.6.95
 
 이번 버전은 Gate 3 review PASS 를 사용자 승인처럼 취급하던 흐름을 막습니다.

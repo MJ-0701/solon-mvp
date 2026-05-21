@@ -92,8 +92,8 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   the start of a new WU/sprint, or 50% or higher before a new gate/worker
   handoff, stop and create a compact fresh-session handoff instead of spending
   another slice inside the same chat.
-- After tests/smokes pass, run a self-agent top-model CPO review before marking
-  the work done. Claude routes that self-CPO to Opus 4.7, Codex routes it to
+- After tests/smokes pass, run a self-agent top-model CPO review before pushing
+  product code or marking the work done. Claude routes that self-CPO to Opus 4.7, Codex routes it to
   `gpt-5.5` with xhigh reasoning, and Gemini routes it to `gemini-3-pro-auto`.
   If the verdict is partial/fail, let the CPO redirect the slice, rework it,
   rerun verification, and repeat self-CPO until PASS or an explicit user waiver.
@@ -132,7 +132,11 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   agent's scope. If scopes overlap, return to single-agent mode or re-plan the
   split before editing.
 - Implementation is not complete at artifact creation. After any implementation
-  mode, record verification evidence and run `sfs review --gate 6`. For
+  mode, record verification evidence and run `sfs review --gate 6 --stage self`,
+  then `sfs review --gate 6 --stage cross`, before any GitHub push/PR review.
+  GitHub @codex applies only after implementation, never during brainstorm or
+  Gate 3 plan review. Users with only self-CPO available may record that
+  constraint and use the self-only path. For
   multi-agent mode, cross review between agents is required before Gate 6 review
   can pass; each lane should review a different lane's diff/evidence.
 - A GitHub `@codex` PR/code review, PR approval, or GitHub check PASS does not
@@ -141,9 +145,10 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   external code-review evidence to attach, not as the SFS gate result.
 - If an external GitHub/@codex/PR/check PASS arrives before self-CPO or
   Gate 6, treat it as a continuation trigger. Record the evidence, then run the
-  next unmet SFS review step: self-CPO first with `sfs review --gate 6` or
-  `sfs review --sprint <id> --gate 6` for a closed sprint, followed by the
-  configured Codex/Claude/Gemini cross-review order after self-CPO PASS.
+  next unmet SFS review step: self-CPO first with `sfs review --gate 6 --stage
+  self` or `sfs review --sprint <id> --gate 6 --stage self` for a closed
+  sprint, followed by `sfs review --gate 6 --stage cross`. GitHub @codex comes
+  only after that SFS cross CPO pass, as external PR/code review evidence.
 - Use TDD/DDD/transaction guardrails when code or data consistency is touched.
 - Load `policies/knowledge-pack-router.md` first, or `policies/knowledge-pack-router.ko.md`
   for Korean preference. Apply only the matching division router ids.

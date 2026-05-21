@@ -405,6 +405,138 @@ push_current_branch() {
   fi
 }
 
+sfs_commit_extract_verdict() {
+  local file="$1"
+  [[ -f "${file}" ]] || return 1
+  awk '
+    {
+      low = tolower($0)
+      if (low ~ /^[[:space:]>-]*verdict:[[:space:]]*(pass|partial|fail)[[:space:]]*$/) {
+        line = $0
+        sub(/^[[:space:]>-]*[Vv][Ee][Rr][Dd][Ii][Cc][Tt]:[[:space:]]*/, "", line)
+        sub(/[[:space:]]*$/, "", line)
+        print tolower(line)
+        found = 1
+        exit
+      }
+    }
+    END { if (!found) exit 1 }
+  ' "${file}"
+}
+
+sfs_commit_sprint_has_implement_open() {
+  local sid="$1" line
+  [[ -f "${SFS_EVENTS_FILE}" ]] || return 1
+  while IFS= read -r line; do
+    [[ "${line}" == *'"type":"implement_open"'* ]] || continue
+    [[ "${line}" == *"\"sprint_id\":\"${sid}\""* ]] || continue
+    return 0
+  done < "${SFS_EVENTS_FILE}"
+  return 1
+}
+
+sfs_commit_latest_gate6_self_pass_after_implement() {
+  local sid="$1" line out_path verdict
+  [[ -f "${SFS_EVENTS_FILE}" ]] || return 1
+  while IFS= read -r line; do
+    [[ "${line}" == *"\"sprint_id\":\"${sid}\""* ]] || continue
+    if [[ "${line}" == *'"type":"implement_open"'* ]]; then
+      return 1
+    fi
+    [[ "${line}" == *'"type":"review_run"'* ]] || continue
+    [[ "${line}" == *'"gate_id":"G4"'* ]] || continue
+    [[ "${line}" == *'"review_stage":"self"'* ]] || continue
+    out_path="$(sfs_event_json_string_field "output_path" "${line}" 2>/dev/null || true)"
+    [[ -n "${out_path}" && -f "${out_path}" ]] || continue
+    verdict="$(sfs_commit_extract_verdict "${out_path}" || true)"
+    [[ "${verdict}" == "pass" ]] || continue
+    printf '%s\n' "${out_path}"
+    return 0
+  done < <(reverse_lines "${SFS_EVENTS_FILE}")
+  return 1
+}
+
+sfs_commit_has_self_cpo_fallback_evidence() {
+  local line="$1" out_path="$2"
+  case "${line}" in
+    *'"self_cpo_fallback":true'*|*'"cross_review_unavailable":true'*|*'"fallback_reason":"no_other_agent_subscription"'*|*'"fallback_reason":"external_agent_tokens_exhausted"'*|*'"fallback_reason":"cross_review_unavailable"'*)
+      return 0
+      ;;
+  esac
+  if [[ -n "${out_path}" && -f "${out_path}" ]]; then
+    grep -Eiq 'self[ -]?CPO fallback[[:space:]]*:[[:space:]]*(pass|passed|true)|cross[ -]?review unavailable|no other agent subscription|external agent tokens? exhausted|other agent tokens? exhausted|다른[[:space:]]*Agent.*구독.*없|다른[[:space:]]*Agent.*토큰.*소진' "${out_path}" && return 0
+  fi
+  return 1
+}
+
+sfs_commit_latest_gate6_cross_pass_or_fallback_after_implement() {
+  local sid="$1" line out_path verdict
+  [[ -f "${SFS_EVENTS_FILE}" ]] || return 1
+  while IFS= read -r line; do
+    [[ "${line}" == *"\"sprint_id\":\"${sid}\""* ]] || continue
+    if [[ "${line}" == *'"type":"implement_open"'* ]]; then
+      return 1
+    fi
+    [[ "${line}" == *'"type":"review_run"'* ]] || continue
+    [[ "${line}" == *'"gate_id":"G4"'* ]] || continue
+    out_path="$(sfs_event_json_string_field "output_path" "${line}" 2>/dev/null || true)"
+    [[ -n "${out_path}" && -f "${out_path}" ]] || continue
+    verdict="$(sfs_commit_extract_verdict "${out_path}" || true)"
+    [[ "${verdict}" == "pass" ]] || continue
+    if [[ "${line}" == *'"review_stage":"cross"'* ]]; then
+      printf '%s\n' "${out_path}"
+      return 0
+    fi
+    if sfs_commit_has_self_cpo_fallback_evidence "${line}" "${out_path}"; then
+      printf '%s\n' "${out_path}"
+      return 0
+    fi
+  done < <(reverse_lines "${SFS_EVENTS_FILE}")
+  return 1
+}
+
+require_gate6_self_review_before_push() {
+  local group="$1" push_enabled="$2" sid self_evidence cross_evidence
+  [[ "${group}" == "product-code" && "${push_enabled}" -eq 1 ]] || return 0
+  sid="$(read_current_sprint 2>/dev/null || true)"
+  [[ -n "${sid}" ]] || return 0
+  sfs_commit_sprint_has_implement_open "${sid}" || return 0
+  self_evidence="$(sfs_commit_latest_gate6_self_pass_after_implement "${sid}" || true)"
+  if [[ -z "${self_evidence}" ]]; then
+    cat >&2 <<'EOF'
+push preflight failed: Gate 6 self-CPO review required before pushing product-code
+
+Implementation review order is:
+  1. self-CPO: sfs review --gate 6 --stage self
+  2. cross CPO: sfs review --gate 6 --stage cross
+  3. GitHub @codex PR/code review as the final external evidence when available
+
+Users with only self-CPO available may proceed after a recorded Gate 6 self-CPO
+fallback PASS that names the operational constraint.
+EOF
+    exit "${SFS_EXIT_COMMIT_FAILED}"
+  fi
+  cross_evidence="$(sfs_commit_latest_gate6_cross_pass_or_fallback_after_implement "${sid}" || true)"
+  if [[ -n "${cross_evidence}" ]]; then
+    printf 'pre-push review: Gate 6 self-CPO PASS (%s)\n' "${self_evidence}"
+    printf 'pre-push review: Gate 6 cross/fallback PASS (%s)\n' "${cross_evidence}"
+    return 0
+  fi
+  cat >&2 <<'EOF'
+push preflight failed: Gate 6 cross CPO review or valid self-CPO fallback required before pushing product-code
+
+Implementation review order is:
+  1. self-CPO: sfs review --gate 6 --stage self
+  2. cross CPO: sfs review --gate 6 --stage cross
+  3. GitHub @codex PR/code review as the final external evidence when available
+
+Users with only self-CPO available may proceed only when the self-CPO PASS also
+records a fallback reason such as no other agent subscription, external agent
+token exhaustion, or cross-review bridge unavailability.
+EOF
+  exit "${SFS_EXIT_COMMIT_FAILED}"
+}
+
 format_subject() {
   local type="$1" scope="$2" description="$3"
   if [[ -n "${scope}" ]]; then
@@ -766,6 +898,7 @@ apply_group() {
   assert_no_unrelated_staged
   if [[ "${push_enabled}" -eq 1 ]]; then
     ensure_push_ready
+    require_gate6_self_review_before_push "${group}" "${push_enabled}"
   fi
 
   git add -- "${SELECTED_PATHS[@]}"

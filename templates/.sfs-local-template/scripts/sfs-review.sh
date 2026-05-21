@@ -71,7 +71,7 @@ fi
 # ─────────────────────────────────────────────────────────────────────
 usage_review() {
   cat <<'EOF'
-Usage: /sfs review [--sprint <id>] [--gate <1..7>] [--lens <auto|artifact|code|docs|source-docs|simplify|security|performance|api-contract|strategy|design|taxonomy|qa|ops|management-admin|release>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
+Usage: /sfs review [--sprint <id>] [--gate <1..7>] [--stage <auto|self|cross|artifact>] [--lens <auto|artifact|code|docs|source-docs|simplify|security|performance|api-contract|strategy|design|taxonomy|qa|ops|management-admin|release>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
 
 Open the active sprint's review.md as the CPO Evaluator review document.
   - --gate <n>    gate number, 1..7. Reports display this as Gate 1..7:
@@ -88,6 +88,11 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                   SFS restores the latest cold archive into .sfs-local/sprints/<id>/
                   and sets current-sprint before rendering the review. Existing
                   visible workbench files are never overwritten.
+  - --stage <name> review stage: auto, self, cross, or artifact.
+                  For Gate 6 implementation review, auto resolves to self until
+                  a Gate 6 self-CPO PASS exists, then to cross. GitHub @codex
+                  PR review stays external evidence and should be captured
+                  between self and cross when available.
   - --lens <name> review lens. Default: auto.
                   auto chooses from artifact, code, docs, source-docs,
                   simplify, security, performance, api-contract, strategy,
@@ -176,6 +181,7 @@ EOF
 # ─────────────────────────────────────────────────────────────────────
 GATE_ID=""
 REVIEW_SPRINT_ID=""
+REVIEW_STAGE_REQUEST="${SFS_REVIEW_STAGE:-auto}"
 REVIEW_LENS="${SFS_REVIEW_LENS:-auto}"
 EVALUATOR_EXECUTOR="${SFS_REVIEW_EXECUTOR:-codex}"
 GENERATOR_EXECUTOR="${SFS_GENERATOR_EXECUTOR:-unknown}"
@@ -226,6 +232,18 @@ while [[ $# -gt 0 ]]; do
       ;;
     --sprint=*)
       REVIEW_SPRINT_ID="${1#--sprint=}"
+      shift
+      ;;
+    --stage)
+      if [[ $# -lt 2 ]]; then
+        echo "--stage requires a value" >&2
+        exit "${SFS_EXIT_BADCLI}"
+      fi
+      REVIEW_STAGE_REQUEST="$2"
+      shift 2
+      ;;
+    --stage=*)
+      REVIEW_STAGE_REQUEST="${1#--stage=}"
       shift
       ;;
     --lens)
@@ -362,6 +380,26 @@ normalize_review_lens_value() {
       ;;
   esac
 }
+normalize_review_stage_value() {
+  local stage="$1"
+  stage="$(printf '%s\n' "$stage" | tr '[:upper:]' '[:lower:]')"
+  stage="${stage//_/-}"
+  case "$stage" in
+    auto|"") printf 'auto\n' ;;
+    self|self-cpo|self-review|local|local-self) printf 'self\n' ;;
+    cross|cross-review|external-cross|independent) printf 'cross\n' ;;
+    artifact|acceptance|outcome) printf 'artifact\n' ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+_normalized_stage="$(normalize_review_stage_value "${REVIEW_STAGE_REQUEST}" || true)"
+if [[ -z "${_normalized_stage}" ]]; then
+  echo "unknown review stage ${REVIEW_STAGE_REQUEST}, valid: auto, self, cross, artifact" >&2
+  exit "${SFS_EXIT_BADCLI}"
+fi
+REVIEW_STAGE_REQUEST="${_normalized_stage}"
 _normalized_lens="$(normalize_review_lens_value "${REVIEW_LENS}" || true)"
 if [[ -z "${_normalized_lens}" ]]; then
   echo "unknown review lens ${REVIEW_LENS}, valid: auto, artifact, code, docs, source-docs, simplify, security, performance, api-contract, strategy, design, taxonomy, qa, ops, management-admin, release" >&2
@@ -924,8 +962,49 @@ extract_result_verdict() {
   ' "${file}"
 }
 
+latest_gate_review_stage_pass() {
+  local gate="$1" stage="$2" line out_path verdict
+  [[ -f "${SFS_EVENTS_FILE}" ]] || return 1
+  while IFS= read -r line; do
+    [[ "${line}" == *'"type":"review_run"'* ]] || continue
+    [[ "${line}" == *"\"sprint_id\":\"${SPRINT_ID}\""* ]] || continue
+    [[ "${line}" == *"\"gate_id\":\"${gate}\""* ]] || continue
+    [[ "${line}" == *"\"review_stage\":\"${stage}\""* ]] || continue
+    out_path="$(review_json_string_field "output_path" "${line}" 2>/dev/null || true)"
+    [[ -n "${out_path}" && -f "${out_path}" ]] || continue
+    verdict="$(extract_result_verdict "${out_path}" || true)"
+    [[ "${verdict}" == "pass" ]] || continue
+    printf '%s\n' "${out_path}"
+    return 0
+  done < <(reverse_lines "${SFS_EVENTS_FILE}")
+  return 1
+}
+
+resolve_review_stage() {
+  local requested="$1" gate="$2"
+  if [[ "${requested}" != "auto" ]]; then
+    printf '%s\n' "${requested}"
+    return 0
+  fi
+  case "${gate}" in
+    G4)
+      if latest_gate_review_stage_pass "${gate}" "self" >/dev/null 2>&1; then
+        printf 'cross\n'
+      else
+        printf 'self\n'
+      fi
+      ;;
+    G1)
+      printf 'cross\n'
+      ;;
+    *)
+      printf 'artifact\n'
+      ;;
+  esac
+}
+
 review_next_action_line() {
-  local gate="${1:-}" verdict="${2:-unknown}" gate_display
+  local gate="${1:-}" verdict="${2:-unknown}" stage="${3:-artifact}" gate_display
   gate_display="$(sfs_gate_display_label "${gate}" 2>/dev/null || printf '%s' "${gate:-Gate -}")"
   case "${verdict}" in
     pass)
@@ -937,7 +1016,20 @@ review_next_action_line() {
             printf 'sfs implement (Gate 3 Plan PASS; carry required review items into the first implementation slice)\n'
           fi
           ;;
-        G4|G5)
+        G4)
+          case "${stage}" in
+            self)
+              printf 'run cross CPO next: sfs review --gate 6 --stage cross; do not push for GitHub @codex yet\n'
+              ;;
+            cross)
+              printf 'after cross PASS, commit/push for GitHub @codex if available, then capture @codex evidence; otherwise record self/cross-only constraint before retro\n'
+              ;;
+            *)
+              printf 'sfs retro (review PASS; close with report/retro evidence)\n'
+              ;;
+          esac
+          ;;
+        G5)
           printf 'sfs retro (review PASS; close with report/retro evidence)\n'
           ;;
         *)
@@ -958,10 +1050,10 @@ review_next_action_line() {
 }
 
 emit_result_metadata_stdout() {
-  local file="$1" state="${2:-ready}" gate="${3:-}" verdict next_action
+  local file="$1" state="${2:-ready}" gate="${3:-}" stage="${4:-artifact}" verdict next_action
   verdict="$(extract_result_verdict "${file}" || true)"
   [[ -n "${verdict}" ]] || verdict="unknown"
-  next_action="$(review_next_action_line "${gate}" "${verdict}")"
+  next_action="$(review_next_action_line "${gate}" "${verdict}" "${stage}")"
   echo "review result ${state}:"
   echo "  verdict: ${verdict}"
   echo "  output: ${file}"
@@ -1043,6 +1135,11 @@ GATE_ID="${_normalized_gate_id}"
 GATE_DISPLAY="$(sfs_gate_display_label "${GATE_ID}")"
 GATE_NUMBER="$(sfs_gate_number "${GATE_ID}")"
 GATE_ARTIFACT_ID="gate${GATE_NUMBER}"
+REVIEW_STAGE="$(resolve_review_stage "${REVIEW_STAGE_REQUEST}" "${GATE_ID}")"
+REVIEW_CROSS_REVIEW=false
+if [[ "${REVIEW_STAGE}" == "cross" ]]; then
+  REVIEW_CROSS_REVIEW=true
+fi
 REVIEW_LENS_SOURCE="explicit"
 if [[ "${REVIEW_LENS}" == "auto" ]]; then
   _previous_review_lens="$(latest_review_lens_for_gate "${GATE_ID}" || true)"
@@ -1250,6 +1347,10 @@ if ! update_frontmatter "${REVIEW_PATH}" "review_lens" "\"${REVIEW_LENS//\"/\\\"
   exit "${SFS_EXIT_PERM}"
 fi
 if ! update_frontmatter "${REVIEW_PATH}" "review_lens_source" "\"${REVIEW_LENS_SOURCE//\"/\\\"}\"" 2>/dev/null; then
+  echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
+  exit "${SFS_EXIT_PERM}"
+fi
+if ! update_frontmatter "${REVIEW_PATH}" "review_stage" "\"${REVIEW_STAGE//\"/\\\"}\"" 2>/dev/null; then
   echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
   exit "${SFS_EXIT_PERM}"
 fi
@@ -2433,6 +2534,7 @@ Model routing contract:
 
 EOF
   printf 'Review gate: %s\n' "${GATE_DISPLAY}"
+  printf 'Review stage: %s\n' "${REVIEW_STAGE}"
   printf 'Review lens: %s (%s; source=%s)\n' "${REVIEW_LENS}" "${REVIEW_LENS_LABEL}" "${REVIEW_LENS_SOURCE}"
   printf 'Sprint: %s\n' "${SPRINT_ID}"
   printf 'Generator executor/tool: %s\n' "${GENERATOR_EXECUTOR}"
@@ -2443,6 +2545,17 @@ Self-validation policy:
 - Do not rubber-stamp CTO Generator output.
 - If this review is running in the same tool/session that generated the implementation, explicitly call that out as a risk.
 - Prefer independent review evidence from Codex/Gemini/another agent instance when implementation was produced by Claude.
+- GitHub @codex review is post-implementation only; do not request, trigger, or
+  count it during brainstorm or Gate 3 plan review.
+- For Gate 6 implementation review, the required order is self-CPO PASS, then
+  cross CPO PASS, then GitHub @codex PR/code review as the last external code
+  review when available. Users with only self-CPO available may record that
+  constraint and stop at self; users with Codex/Claude/Gemini/GitHub review
+  capacity should choose the full stack and use it.
+- If Review stage is `self`, judge the work as the author's self-CPO and do not
+  require prior cross-review evidence.
+- If Review stage is `cross`, require a prior self-CPO PASS; if missing, return
+  partial and ask for `sfs review --gate 6 --stage self` first.
 - Advisor calls are not a self-CPO PASS. For Gate 3 cross review, require local self-CPO evidence first: pass/partial/fail, requirements-to-AC-to-slice-to-ADR traceability, AC-to-file/artifact/evidence mapping, and SEED/placeholder/mock/fallback material treated as fail/partial/non-acceptance until replaced. If absent, return partial and request the self-CPO pass before external cross review.
 - GitHub PR/@codex code review is not an SFS gate verdict. Treat GitHub review comments, PR approvals, and GitHub check PASS as external evidence only; they do not satisfy self-CPO, SFS cross review, `sfs review`, Gate 3, or Gate 6 PASS unless SFS review explicitly records that verdict or the user waives the gate.
 - External GitHub/@codex/PR/check PASS is a continuation trigger, not a stopping point. Require the next unmet SFS command: self-CPO first with `sfs review --gate <n>` or `sfs review --sprint <id> --gate <n>` for a closed sprint, then configured cross review after self-CPO PASS.
@@ -2929,6 +3042,10 @@ if ! update_frontmatter "${REVIEW_PATH}" "review_lens_source" "\"${REVIEW_LENS_S
   echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
   exit "${SFS_EXIT_PERM}"
 fi
+if ! update_frontmatter "${REVIEW_PATH}" "review_stage" "\"${REVIEW_STAGE//\"/\\\"}\"" 2>/dev/null; then
+  echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
+  exit "${SFS_EXIT_PERM}"
+fi
 if ! update_frontmatter "${REVIEW_PATH}" "evaluator_persona" "\"${PERSONA_PATH//\"/\\\"}\"" 2>/dev/null; then
   echo "permission denied updating frontmatter in ${REVIEW_PATH}" >&2
   exit "${SFS_EXIT_PERM}"
@@ -2959,12 +3076,6 @@ _esc_lens="${REVIEW_LENS//\\/\\\\}"
 _esc_lens="${_esc_lens//\"/\\\"}"
 _esc_lens_source="${REVIEW_LENS_SOURCE//\\/\\\\}"
 _esc_lens_source="${_esc_lens_source//\"/\\\"}"
-REVIEW_STAGE="artifact"
-REVIEW_CROSS_REVIEW=false
-if [[ "${GATE_ID}" == "G1" ]]; then
-  REVIEW_STAGE="cross"
-  REVIEW_CROSS_REVIEW=true
-fi
 _esc_review_stage="${REVIEW_STAGE//\\/\\\\}"
 _esc_review_stage="${_esc_review_stage//\"/\\\"}"
 
@@ -3000,17 +3111,17 @@ elif [[ "${RUN_REVIEW}" == "true" ]]; then
     echo "${SFS_REVIEW_RESTORE_NOTICE}" >&2
   fi
   if [[ -n "${RUN_WARNING}" ]]; then
-    echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} | lens ${REVIEW_LENS} (${REVIEW_LENS_SOURCE}) CPO run complete with executor warning | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
+    echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} | stage ${REVIEW_STAGE} | lens ${REVIEW_LENS} (${REVIEW_LENS_SOURCE}) CPO run complete with executor warning | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
   else
-    echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} | lens ${REVIEW_LENS} (${REVIEW_LENS_SOURCE}) CPO run complete | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
+    echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} | stage ${REVIEW_STAGE} | lens ${REVIEW_LENS} (${REVIEW_LENS_SOURCE}) CPO run complete | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"
   fi
   emit_result_excerpt_stdout "${RESULT_PATH}" 80
-  printf 'next: %s\n' "$(review_next_action_line "${GATE_ID}" "${RUN_VERDICT}")"
+  printf 'next: %s\n' "$(review_next_action_line "${GATE_ID}" "${RUN_VERDICT}" "${REVIEW_STAGE}")"
 else
   if [[ -n "${SFS_REVIEW_RESTORE_NOTICE}" ]]; then
     echo "${SFS_REVIEW_RESTORE_NOTICE}" >&2
   fi
-  echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} | lens ${REVIEW_LENS} (${REVIEW_LENS_SOURCE}) prompt ready | executor ${EVALUATOR_EXECUTOR} | prompt ${PROMPT_PATH}"
+  echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} | stage ${REVIEW_STAGE} | lens ${REVIEW_LENS} (${REVIEW_LENS_SOURCE}) prompt ready | executor ${EVALUATOR_EXECUTOR} | prompt ${PROMPT_PATH}"
 fi
 
 exit "${SFS_EXIT_OK}"

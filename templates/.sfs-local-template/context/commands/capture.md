@@ -13,6 +13,8 @@ load_when: ["capture", "note", "natural language", "decision", "review order", "
   passed, capture the accepted evidence plus the next SFS command. Do not store
   the full review transcript; the durable fact is the PASS evidence and the
   continuation rule, for example self-CPO next, then cross-review.
+- GitHub @codex evidence is only for post-implementation/Gate 6 code review.
+  Do not capture it as brainstorm, Gate 2, or Gate 3 plan-review completion.
 - `sfs note "..."` is an alias for `sfs capture --kind note "..."`.
 - Prefer specific kinds when the meaning is clear:
   `decision`, `scope-change`, `user-approval`, `review-order`, `exception`,
@@ -38,8 +40,8 @@ load_when: ["capture", "note", "natural language", "decision", "review order", "
 Examples:
 
 ```sh
-sfs capture --kind review-order --gate 6 "Run Codex self-CPO first, then Gemini, then Claude."
-sfs capture --kind review-order --gate 6 "GitHub @codex PASS is external evidence; next run SFS self-CPO with sfs review --sprint 2026-W21-sprint-3 --gate 6."
+sfs capture --kind review-order --gate 6 "Run Codex self-CPO first, then Gemini/Claude cross CPO, then GitHub @codex as final external PR review."
+sfs capture --kind review-order --gate 6 "GitHub @codex PASS is final external evidence after self and cross CPO; next run sfs retro if no new finding appeared."
 sfs capture --kind user-approval --gate 3 "User approved this Gate 3 plan for implementation."
 sfs capture --kind scope-change "Do not add automatic transcript recording in this sprint."
 sfs note "GitHub @codex review passed, but it is external evidence only."

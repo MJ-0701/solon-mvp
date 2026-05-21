@@ -11,6 +11,7 @@ evaluator_role: CPO
 evaluator_persona: ".sfs-local/personas/cpo-evaluator.md"
 review_lens: ""
 review_lens_source: ""
+review_stage: ""
 evaluator_executor: ""
 generator_executor: ""
 ---

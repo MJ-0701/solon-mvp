@@ -19,6 +19,8 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   command is `sfs review --sprint <id> --gate <n>`; if the id is unknown, ask
   for that id instead of creating a new sprint or manually restoring
   `.sfs-local/current-sprint`.
+- GitHub @codex review is post-implementation only. Do not request, trigger, or
+  count GitHub @codex review during brainstorm or Gate 3 plan review.
 - Gate 3 plan review is the required bridge between plan and implement. When a
   plan says ready-for-implement, review the plan contract first with
   `sfs review --gate 3`; only a PASS/accepted result should route to
@@ -129,6 +131,12 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   command instead of ending the turn at "PASS": run/record self-CPO first with
   `sfs review --gate <n>` or `sfs review --sprint <id> --gate <n>`, then run
   the configured cross-review sequence after self-CPO PASS.
+- Gate 6 implementation review order is self-CPO first, then cross CPO, then
+  GitHub @codex PR/code review as final external evidence when
+  available. Use `sfs review --gate 6 --stage self`, then
+  `sfs review --gate 6 --stage cross`, and only then push/PR for @codex. If the
+  user only has self-CPO available, record that constraint and use the self-only
+  path.
 - Before a completed work slice can be reported as done, require self-agent
   top-model CPO evidence. Claude self-CPO uses Opus 4.7, Codex self-CPO uses
   `gpt-5.5` with xhigh reasoning, Gemini self-CPO uses `gemini-3-pro-auto`, and
@@ -151,33 +159,16 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   already selected a lens for that sprint/gate, later auto reviews reuse that
   lens instead of rotating to a new one. To intentionally change lens, pass an
   explicit `--lens <name>` and record why the review lane changed.
-- CLI review lens names are not always the same as division pack ids. Use
-  public lens names in commands: `strategy-pm` maps to `strategy`,
-  `design/frontend` maps to `design`, `infra` maps to `ops`, and
-  `finance`/`accounting` maps to `management-admin`.
-- Additional public lens names strengthen the existing review command rather
-  than creating new commands: `source-docs` checks official-source evidence for
-  framework/library/API patterns, `simplify` checks behavior-preserving
-  simplification, `security` checks untrusted input/secrets/auth/PII risk,
-  `performance` checks measurement-backed optimization, and `api-contract`
-  checks public interface and error semantics.
+- Lens aliases and knowledge-pack paths are split to
+  `policies/review-lens-routing.md`. Public lens names include `source-docs`,
+  `simplify`, `security`, `performance`, `api-contract`, `strategy`, `design`,
+  `taxonomy`, `qa`, `ops`, `management-admin`, and `release`.
 - Review the whole contract, not only changed code: shared intent, domain
   language consistency, feedback evidence, interface/artifact boundaries, and
   gray-box delegation should still match the Gate 2/3 record.
 - Load `policies/knowledge-pack-router.md` first, or
-  `policies/knowledge-pack-router.ko.md` for Korean preference. Read matching full
-  division packs only when explicitly needed for review scope and from router
-  mapping.
-- For backend/JVM/Spring/JPA/transaction/batch/integration/DevOps/AWS work,
-  check matching ids from `policies/backend-knowledge-pack.md` or
-  `policies/backend-knowledge-pack.ko.md`.
-  Flag both missing high-risk topics and over-activated topics for the project
-  size.
-- For strategy-pm, QA, design/frontend, infra, management-admin, or taxonomy
-  work, read the matching `policies/*-knowledge-pack.md` or
-  `policies/*-knowledge-pack.ko.md` file and check only the matching ids and
-  compact guidance.
-  Flag both missing high-risk division topics and over-activated topics.
+  `policies/knowledge-pack-router.ko.md` for Korean preference. Read matching
+  split packs only when the router maps the current review scope to them.
 - For design/frontend work, check `design.md` or `docs/solon/design.md` when it
   exists. Treat token drift as review evidence: arbitrary colors, type sizes,
   spacing, radius, shadows, icon weights, or screen-by-screen style changes can
