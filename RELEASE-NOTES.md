@@ -7,6 +7,21 @@
 
 ---
 
+## 0.6.98
+
+이번 버전은 이미 코드가 있는 프로젝트를 SFS 로 받아들일 때 DDD/TDD retrofit 경로를 같이 심습니다.
+기존 구조가 DDD 로 잡혀 있지 않다면 바로 대규모 파일 이동을 하지 않고, 현재 코드 shape 를 진단한 뒤
+다음 sprint 가 characterization/TDD evidence 로 한 behavior slice 씩 refactor 하도록 안내합니다.
+
+- `sfs adopt --ddd-tdd-retrofit --apply` 가 source path 를 스캔해 DDD-lite boundary 상태를
+  `missing`, `partial`, `present`, `no-code` 로 판정합니다.
+- adoption handoff 에 DDD 상태, layer counts, hotspot, 다음 refactor action 이 들어갑니다.
+- `ddd-tdd-retrofit.md` 와 `docs/solon/domain-map.md` 가 생성되어 durable product/domain language 를
+  다음 sprint 에 이어갈 수 있습니다.
+- TDD 는 legacy code 에 retroactive 로 붙이지 않고, 다음 실제 refactor sprint 부터
+  characterization/failing/smoke evidence 로 시작하도록 고정했습니다.
+- 0.6.98 검증은 `run-all.sh` 85/0 PASS 입니다.
+
 ## 0.6.97
 
 이번 버전은 DDD/TDD 를 backend 전용 설계 취향이 아니라 product behavior 전체의 기본 규칙으로 올립니다.

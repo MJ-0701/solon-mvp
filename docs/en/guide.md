@@ -64,6 +64,10 @@ sfs agent install all
 Old projects can be upgraded into the lighter thin-runtime shape. Use
 `sfs upgrade --layout vendored` only when Solon package files must stay inside
 the project.
+When adopting an existing codebase, `sfs adopt --ddd-tdd-retrofit --apply`
+scans source paths for DDD-lite boundaries, writes a retrofit plan, and seeds
+the next sprint so legacy refactor work starts with characterization/TDD
+evidence before code moves.
 After adoption or upgrade, `sfs tidy --all --apply` can clean targetless
 surface residue: project-local cache notices, orphan logs, placeholder auth,
 and split archive buckets collapse back under `archives/adopt/surface-cleanup`.

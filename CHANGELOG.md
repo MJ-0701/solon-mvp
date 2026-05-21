@@ -1,3 +1,34 @@
+## [0.6.98] - 2026-05-22
+
+> **Existing projects can now enter SFS with a DDD/TDD retrofit path instead of
+> treating legacy structure as fixed.**
+
+### Added
+
+- `sfs adopt --ddd-tdd-retrofit` scans tracked source paths for DDD-lite
+  boundaries and classifies the current code shape as `no-code`, `missing`,
+  `partial`, or `present`.
+- Adoption now writes a focused `ddd-tdd-retrofit.md` plan and seeds
+  `docs/solon/domain-map.md` so durable product/domain terms have a home from
+  the first real sprint.
+- The generated handoff records the retrofit status, layer counts, hotspots,
+  and next DDD refactor actions.
+
+### Changed
+
+- Legacy code adoption now explicitly says old code was not retroactively
+  test-first. If DDD is missing, the next real sprint must pick one behavior
+  slice, add characterization/failing/smoke evidence, and then move only that
+  slice behind `domain`, `application`, `interfaces`, and `infrastructure`.
+- User-facing guides and adopt command context now expose the retrofit option
+  as part of the product-level DDD/TDD flow.
+
+### Tests
+
+- Added `test-sfs-adopt-ddd-tdd-retrofit.sh`.
+- Extended `test-ddd-tdd-guardrails.sh` for the adopt retrofit context.
+- Full source regression passed with 85 tests.
+
 ## [0.6.97] - 2026-05-22
 
 > **DDD/TDD guardrails are now product-level SFS rules, not backend-only

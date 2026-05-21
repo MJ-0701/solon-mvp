@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # .sfs-local/scripts/sfs-adopt.sh
 #
-# Solon SFS — `/sfs adopt [<brief>] [--apply]`.
+# Solon SFS — `/sfs adopt [<brief>] [--apply] [--ddd-tdd-retrofit]`.
 # Creates one shared adoption summary for projects that already have code and
 # git history. Raw scan evidence and cold archives stay private under .sfs-local.
 
@@ -16,7 +16,7 @@ source "${SFS_SCRIPT_DIR}/sfs-common.sh"
 usage_adopt() {
   cat <<'EOF'
 Usage:
-  /sfs adopt [<brief>] [--id <sprint-id>] [--apply] [--force] [--max-commits <N>]
+  /sfs adopt [<brief>] [--id <sprint-id>] [--apply] [--force] [--max-commits <N>] [--ddd-tdd-retrofit]
 
 Adopt an existing legacy project into SFS without creating document sprawl.
   - Default is dry-run; it prints the baseline sprint and evidence sources.
@@ -30,6 +30,10 @@ Adopt an existing legacy project into SFS without creating document sprawl.
   - The summary separates evidence-backed facts from inferred next sprint ideas.
   - Existing docs/sprint files are read as signals when present, but git/code
     history is the primary source because most legacy projects have no SFS docs.
+  - --ddd-tdd-retrofit scans existing code for DDD-lite boundaries, writes a
+    DDD/TDD retrofit plan, and seeds the next sprint so DDD refactor starts
+    with characterization/TDD evidence instead of retroactively claiming old
+    code was test-first.
 
 Exit codes:
   0  ok
@@ -169,6 +173,101 @@ component_map() {
       }
     ' \
     | sort -nr | head -12 | sed 's/^/  - /'
+}
+
+code_paths_for_ddd_retrofit() {
+  git ls-files 2>/dev/null \
+    | { grep -E '\.(kt|kts|java|ts|tsx|js|jsx|py|go|rs|rb|php|cs|swift)$' || true; } \
+    | { grep -Ev '^(\.sfs-local/|\.claude/|\.agents/|\.gemini/|node_modules/|build/|dist/|out/|target/|vendor/|coverage/)' || true; } \
+    | { grep -Ev '(^|/)(test|tests|spec|specs|__tests__)(/|$)|(^|/)src/test(/|$)|(_test|\.spec|\.test)\.' || true; }
+}
+
+count_code_paths_for_ddd_retrofit() {
+  code_paths_for_ddd_retrofit | wc -l | tr -d '[:space:]'
+}
+
+count_code_paths_matching() {
+  local pattern="$1"
+  code_paths_for_ddd_retrofit | { grep -E "${pattern}" || true; } | wc -l | tr -d '[:space:]'
+}
+
+ddd_retrofit_status() {
+  local source_count="$1" domain_count="$2" app_count="$3" interface_count="$4" infra_count="$5"
+  if [[ "${source_count}" -eq 0 ]]; then
+    printf 'no-code\n'
+  elif [[ "${domain_count}" -gt 0 && "${app_count}" -gt 0 && "${interface_count}" -gt 0 && "${infra_count}" -gt 0 ]]; then
+    printf 'present\n'
+  elif [[ "${domain_count}" -gt 0 || "${app_count}" -gt 0 || "${interface_count}" -gt 0 || "${infra_count}" -gt 0 ]]; then
+    printf 'partial\n'
+  else
+    printf 'missing\n'
+  fi
+}
+
+ddd_retrofit_hotspots() {
+  code_paths_for_ddd_retrofit \
+    | awk -F/ '
+      NF >= 3 { key=$1"/"$2 }
+      NF == 2 { key=$1"/"$2 }
+      NF < 2 { key="root" }
+      { c[key]++ }
+      END {
+        for (k in c) printf "%6d %s\n", c[k], k
+      }
+    ' \
+    | sort -nr | head -10 | sed 's/^/  - /'
+}
+
+ddd_retrofit_next_actions() {
+  local status="$1"
+  case "${status}" in
+    missing)
+      cat <<'EOF'
+- Create DDD-lite boundary skeleton: domain, application, interfaces, infrastructure.
+- Pick one behavior slice from the hotspot list; do not move the whole codebase at once.
+- Write a characterization test or smoke that freezes current behavior before moving files.
+- Move only that slice's product rule behind a named domain term/use case.
+EOF
+      ;;
+    partial)
+      cat <<'EOF'
+- Identify the strongest existing boundary and name it as the first bounded context.
+- Move only rules that already have characterization/smoke evidence.
+- Add missing layer directories only when a concrete behavior slice needs them.
+- Convert ambiguous Service/Manager/Helper names into product/domain terms as the slice moves.
+EOF
+      ;;
+    present)
+      cat <<'EOF'
+- Keep the existing DDD shape; audit whether product rules are still leaking into adapters.
+- Start the next sprint with a failing or characterization test for the next behavior change.
+- Update docs/solon/domain-map.md when a term or boundary will survive beyond the sprint.
+EOF
+      ;;
+    *)
+      cat <<'EOF'
+- No source-code surface was detected. Start with product/domain language and a smoke check before adding code.
+EOF
+      ;;
+  esac
+}
+
+domain_map_seed_body() {
+  cat <<EOF
+## Adoption DDD/TDD Retrofit Seed - ${SPRINT_ID} (${ADOPT_DATE_DIR})
+
+- Source scan: ${DDD_SOURCE_COUNT} source files.
+- DDD status: ${DDD_STATUS}.
+- Layer counts: domain=${DDD_DOMAIN_COUNT}, application=${DDD_APPLICATION_COUNT}, interfaces=${DDD_INTERFACE_COUNT}, infrastructure=${DDD_INFRASTRUCTURE_COUNT}.
+- TDD policy: next real sprint starts with characterization/failing/smoke evidence before DDD refactor moves.
+- Retrofit evidence: ${RETROFIT_DOC_PATH}.
+
+First behavior slice candidates:
+
+\`\`\`text
+${DDD_HOTSPOTS:-  - none}
+\`\`\`
+EOF
 }
 
 doc_topology() {
@@ -485,6 +584,7 @@ archive_legacy_shared_doc_for_adopt() {
 SPRINT_ID="legacy-baseline"
 APPLY=0
 FORCE=0
+DDD_TDD_RETROFIT=0
 MAX_COMMITS=80
 BRIEF_PARTS=()
 ADOPT_BRIEF=""
@@ -513,6 +613,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --force)
       FORCE=1
+      shift
+      ;;
+    --ddd-tdd-retrofit|--ddd-retrofit|--retrofit-ddd)
+      DDD_TDD_RETROFIT=1
       shift
       ;;
     --max-commits)
@@ -596,6 +700,14 @@ DOC_COUNT="$(count_paths '(^|/)(docs?|README|CHANGELOG|AGENTS|CLAUDE|GEMINI|SFS)
 TEST_COUNT="$(count_paths '(^|/)(test|tests|spec|specs|__tests__|src/test)(/|$)|(_test|\.spec|\.test)\.')"
 STACK_SIGNALS="$(detect_stack_signals)"
 SUBMODULE_STATUS="$(git submodule status --recursive 2>/dev/null || true)"
+DDD_SOURCE_COUNT="$(count_code_paths_for_ddd_retrofit)"
+DDD_DOMAIN_COUNT="$(count_code_paths_matching '(^|/)(domain|domains)(/|$)')"
+DDD_APPLICATION_COUNT="$(count_code_paths_matching '(^|/)(application|app|usecase|use-case|usecases|service|services)(/|$)')"
+DDD_INTERFACE_COUNT="$(count_code_paths_matching '(^|/)(interfaces|interface|adapter|adapters|controller|controllers|api|web|routes?)(/|$)')"
+DDD_INFRASTRUCTURE_COUNT="$(count_code_paths_matching '(^|/)(infrastructure|infra|repository|repositories|persistence|db|database|client|clients|external)(/|$)')"
+DDD_STATUS="$(ddd_retrofit_status "${DDD_SOURCE_COUNT}" "${DDD_DOMAIN_COUNT}" "${DDD_APPLICATION_COUNT}" "${DDD_INTERFACE_COUNT}" "${DDD_INFRASTRUCTURE_COUNT}")"
+DDD_HOTSPOTS="$(ddd_retrofit_hotspots || true)"
+DDD_NEXT_ACTIONS="$(ddd_retrofit_next_actions "${DDD_STATUS}")"
 SUBMODULE_COUNT="$(git ls-files --stage 2>/dev/null | awk '$1 == "160000" {c++} END {print c+0}')"
 NESTED_REPO_COUNT="$(find . -mindepth 2 -maxdepth 3 \
   \( -path './.git' -o -path "./${SFS_LOCAL_DIR}" -o -path './node_modules' -o -path './frontend/node_modules' -o -path './build' -o -path './dist' \) -prune \
@@ -614,6 +726,8 @@ ADOPT_WORKSPACE="$(sfs_path_segment_from_text "${SPRINT_ID}" "legacy-baseline")"
 ADOPT_DATE_DIR="$(sfs_date_dir_from_ts "${NOW}")"
 SHARED_DOC_DIR="${SHARED_DOC_ROOT}/${ADOPT_WORKSPACE}/${ADOPT_DATE_DIR}"
 SHARED_DOC_PATH="${SHARED_DOC_DIR}/handoff.md"
+RETROFIT_DOC_PATH="${SHARED_DOC_DIR}/ddd-tdd-retrofit.md"
+DOMAIN_MAP_PATH="${SHARED_DOC_ROOT}/domain-map.md"
 LEGACY_SHARED_DOC_PATH="docs/solon/${SPRINT_ID}-adoption-summary.md"
 LEGACY_SHARED_DOC_ARCHIVE="${ARCHIVE_DIR}/preexisting-shared-adoption-summary.md"
 LEGACY_SHARED_DOC_MANIFEST="${ARCHIVE_DIR}/preexisting-shared-adoption-summary.manifest.txt"
@@ -660,6 +774,13 @@ if [[ "${APPLY}" -eq 0 ]]; then
   echo "  test_signals: ${TEST_COUNT}"
   echo "  stack: ${STACK_SIGNALS}"
   echo "  submodules/subrepos: ${SUBREPO_SIGNAL_COUNT}"
+  if [[ "${DDD_TDD_RETROFIT}" -eq 1 ]]; then
+    echo "  ddd_tdd_retrofit: enabled"
+    echo "    ddd_status: ${DDD_STATUS}"
+    echo "    source_files: ${DDD_SOURCE_COUNT}"
+    echo "    layer_counts: domain=${DDD_DOMAIN_COUNT} application=${DDD_APPLICATION_COUNT} interfaces=${DDD_INTERFACE_COUNT} infrastructure=${DDD_INFRASTRUCTURE_COUNT}"
+    echo "    tdd_next_sprint_required: yes"
+  fi
   if [[ -n "${CURRENT_SPRINT}" ]]; then
     echo "  active_sprint_before_adopt: ${CURRENT_SPRINT} (will archive/reset; first real sprint starts after adopt)"
     echo "  would_remove_active_sprint_pointer: ${SFS_CURRENT_SPRINT_FILE}"
@@ -671,6 +792,11 @@ if [[ "${APPLY}" -eq 0 ]]; then
   fi
   echo "  would_create:"
   echo "    - ${SHARED_DOC_PATH}"
+  if [[ "${DDD_TDD_RETROFIT}" -eq 1 ]]; then
+    echo "    - ${RETROFIT_DOC_PATH}"
+    echo "  would_create_or_update:"
+    echo "    - ${DOMAIN_MAP_PATH}"
+  fi
   echo "  would_archive:"
   echo "    - ${ARCHIVE_DIR}/source-summary.txt"
   print_cold_archive_plan "would_archive_existing_sprints" "${EXISTING_SPRINT_IDS}" "${SFS_SPRINTS_DIR}" "${EXISTING_SPRINTS_TARBALL}" "${EXISTING_SPRINTS_MANIFEST}"
@@ -770,6 +896,33 @@ if [[ -n "${ADOPT_BRIEF}" ]]; then
 fi
 REPORT_GOAL_YAML="$(json_escape "${REPORT_GOAL}")"
 REPORT_SOURCE_YAML="$(json_escape "${REPORT_SOURCE}")"
+RETROFIT_HANDOFF_SECTION=""
+if [[ "${DDD_TDD_RETROFIT}" -eq 1 ]]; then
+  RETROFIT_HANDOFF_SECTION="$(cat <<EOF
+
+## §5. DDD/TDD Retrofit Scan
+
+- **DDD status**: ${DDD_STATUS}
+- **Source files scanned**: ${DDD_SOURCE_COUNT}
+- **Layer counts**: domain=${DDD_DOMAIN_COUNT}, application=${DDD_APPLICATION_COUNT}, interfaces=${DDD_INTERFACE_COUNT}, infrastructure=${DDD_INFRASTRUCTURE_COUNT}
+- **Retrofit plan**: \`${RETROFIT_DOC_PATH}\`
+- **Domain map seed**: \`${DOMAIN_MAP_PATH}\`
+- **TDD policy**: do not claim old code was test-first. The next real sprint starts with characterization, failing, smoke, or review evidence before DDD refactor moves.
+
+Largest code hotspots:
+
+\`\`\`text
+${DDD_HOTSPOTS:-  - none}
+\`\`\`
+
+Next DDD refactor actions:
+
+\`\`\`text
+${DDD_NEXT_ACTIONS}
+\`\`\`
+EOF
+)"
+fi
 
 {
   echo "SFS adopt source summary"
@@ -786,6 +939,10 @@ REPORT_SOURCE_YAML="$(json_escape "${REPORT_SOURCE}")"
   echo "docs_signals: ${DOC_COUNT}"
   echo "test_signals: ${TEST_COUNT}"
   echo "stack: ${STACK_SIGNALS}"
+  echo "ddd_tdd_retrofit_enabled: ${DDD_TDD_RETROFIT}"
+  echo "ddd_status: ${DDD_STATUS}"
+  echo "ddd_source_files: ${DDD_SOURCE_COUNT}"
+  echo "ddd_layer_counts: domain=${DDD_DOMAIN_COUNT} application=${DDD_APPLICATION_COUNT} interfaces=${DDD_INTERFACE_COUNT} infrastructure=${DDD_INFRASTRUCTURE_COUNT}"
   echo "sfs_sprint_count_before_adopt: ${SFS_SPRINT_COUNT}"
   echo "active_sprint_before_adopt: ${CURRENT_SPRINT:-}"
   echo "active_sprint_pointer_removed: ${ACTIVE_SPRINT_POINTER_REMOVED}"
@@ -847,6 +1004,12 @@ REPORT_SOURCE_YAML="$(json_escape "${REPORT_SOURCE}")"
   echo
   echo "top_changed_paths:"
   printf '%s\n' "${TOP_CHANGED:-  - none}"
+  echo
+  echo "ddd_hotspots:"
+  printf '%s\n' "${DDD_HOTSPOTS:-  - none}"
+  echo
+  echo "ddd_next_actions:"
+  printf '%s\n' "${DDD_NEXT_ACTIONS}"
   echo
   echo "recent_commits:"
   printf '%s\n' "${RECENT_COMMITS:-  - none}"
@@ -946,8 +1109,9 @@ Recent non-SFS commits:
 \`\`\`text
 ${RECENT_PRODUCT_COMMITS:-  - none}
 \`\`\`
+${RETROFIT_HANDOFF_SECTION}
 
-## §5. Verification Starting Points
+## §6. Verification Starting Points
 
 Suggested checks to confirm the current baseline:
 
@@ -955,7 +1119,7 @@ Suggested checks to confirm the current baseline:
 ${VERIFY_COMMANDS}
 \`\`\`
 
-## §6. SFS Handoff
+## §7. SFS Handoff
 
 - **Shared document**: \`${SHARED_DOC_PATH}\`.
 - **Private evidence**: \`${ARCHIVE_DIR}/source-summary.txt\`.
@@ -970,7 +1134,7 @@ ${VERIFY_COMMANDS}
 - **Event ledger after adopt**: none. \`adopt\` leaves no active log file; the
   shared summary and private source summary are the durable evidence.
 
-## §7. Next Sprint Contract Seed
+## §8. Next Sprint Contract Seed
 
 Before implementation, choose one:
 
@@ -978,16 +1142,87 @@ Before implementation, choose one:
 - acceptance criteria that prove the slice is done.
 - verification command or manual smoke path.
 - whether docs/submodule history is authoritative for this slice.
+- if DDD/TDD retrofit is active, the first code-moving sprint must begin with a
+  characterization, failing, smoke, or review evidence path.
 
 Do not start the next sprint by reading the cold archives. Use them only for
 archaeology, dispute resolution, or deep recovery.
 EOF
+
+if [[ "${DDD_TDD_RETROFIT}" -eq 1 ]]; then
+  cat > "${RETROFIT_DOC_PATH}" <<EOF
+---
+title: "DDD/TDD Retrofit Plan"
+status: retrofit-seed
+adopt_id: "${SPRINT_ID}"
+created_at: "${NOW}"
+source: "sfs adopt --ddd-tdd-retrofit"
+ddd_status: "${DDD_STATUS}"
+tdd_policy: "next-sprint"
+---
+
+# DDD/TDD Retrofit Plan — ${SPRINT_ID}
+
+## Current Shape
+
+- Source files scanned: ${DDD_SOURCE_COUNT}
+- DDD status: ${DDD_STATUS}
+- Layer counts: domain=${DDD_DOMAIN_COUNT}, application=${DDD_APPLICATION_COUNT}, interfaces=${DDD_INTERFACE_COUNT}, infrastructure=${DDD_INFRASTRUCTURE_COUNT}
+- Test signals: ${TEST_COUNT}
+
+## Code Hotspots
+
+\`\`\`text
+${DDD_HOTSPOTS:-  - none}
+\`\`\`
+
+## Retrofit Rule
+
+Adopt does not move arbitrary project code. The first real refactor sprint
+chooses one product behavior slice, writes characterization/failing/smoke
+evidence, then moves only that slice into DDD-lite boundaries.
+
+## Next Actions
+
+\`\`\`text
+${DDD_NEXT_ACTIONS}
+\`\`\`
+
+## Suggested Next Sprint
+
+\`\`\`sh
+sfs start "DDD retrofit: choose one behavior slice, add characterization evidence, then move it behind domain/application/interfaces/infrastructure boundaries"
+\`\`\`
+EOF
+
+  mkdir -p "${SHARED_DOC_ROOT}" || exit "${SFS_EXIT_PERM}"
+  if [[ ! -f "${DOMAIN_MAP_PATH}" ]]; then
+    {
+      echo "# Domain Map"
+      echo
+      echo "> Seeded by \`sfs adopt --ddd-tdd-retrofit\`. Keep only durable product/domain language here."
+      echo
+      domain_map_seed_body
+    } > "${DOMAIN_MAP_PATH}" || exit "${SFS_EXIT_PERM}"
+  else
+    {
+      echo
+      domain_map_seed_body
+    } >> "${DOMAIN_MAP_PATH}" || exit "${SFS_EXIT_PERM}"
+  fi
+fi
 
 echo "adopted: ${SPRINT_ID}"
 if [[ -n "${ADOPT_BRIEF}" ]]; then
   echo "  brief: ${ADOPT_BRIEF}"
 fi
 echo "  shared_doc: ${SHARED_DOC_PATH}"
+if [[ "${DDD_TDD_RETROFIT}" -eq 1 ]]; then
+  echo "  ddd_tdd_retrofit_doc: ${RETROFIT_DOC_PATH}"
+  echo "  domain_map: ${DOMAIN_MAP_PATH}"
+  echo "  ddd_status: ${DDD_STATUS}"
+  echo "  tdd_next_sprint_required: yes"
+fi
 echo "  private_archive: ${ARCHIVE_DIR}/source-summary.txt"
 if [[ -n "${CURRENT_SPRINT}" ]]; then
   echo "  active_sprint_archived: ${CURRENT_SPRINT}"

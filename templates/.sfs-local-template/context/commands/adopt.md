@@ -12,6 +12,17 @@ Rules:
 - Run the adapter first and keep stdout/stderr verbatim.
 - `adopt` is bash-first for the repository scan and archive policy; AI-side work is a compact interpretation of the adapter result, not a replacement for it.
 - A quoted free-text brief is valid: `sfs adopt "docs cleanup and current-state handoff"`.
+- For existing codebase retrofit, use
+  `sfs adopt --ddd-tdd-retrofit --apply "<brief>"`. It scans source paths for
+  DDD-lite boundaries, writes `ddd-tdd-retrofit.md`, and seeds
+  `docs/solon/domain-map.md`.
+- Retrofit adoption does not move arbitrary project code. If DDD is missing,
+  the next real sprint should choose one product behavior slice, write
+  characterization/failing/smoke evidence first, then move that slice behind
+  `domain`, `application`, `interfaces`, and `infrastructure` boundaries.
+- TDD for legacy code starts from the next sprint; do not claim old code was
+  test-first. The first refactor sprint must name the behavior and evidence
+  path before code moves.
 - Default mode is dry-run. If the user clearly wants files created, use `sfs adopt --apply "<brief>"`; otherwise show the dry-run result and ask before applying.
 - Shared visible output is intentionally one handoff file under
   `docs/solon/<english-workspace>/<yyyyMMdd>/handoff.md`. For adopt, `<workspace>` is the

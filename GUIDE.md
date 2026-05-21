@@ -437,6 +437,7 @@ sfs retro
 | `sfs commit plan` | 남은 변경을 의미별 commit 그룹으로 확인할 때 |
 | `sfs commit apply --group <name>` | 선택 그룹을 commit 하고 현재 branch 를 push 할 때. 로컬 sandbox 에서만 `--no-push` |
 | `sfs adopt --apply` | 오래된 프로젝트를 요약하고 `docs/solon/<english-workspace>/<yyyyMMdd>/handoff.md` 공유 문서만 남길 때 |
+| `sfs adopt --ddd-tdd-retrofit --apply` | 기존 코드 구조를 DDD 관점으로 진단하고 다음 sprint 의 characterization/TDD 기반 refactor 계약을 심을 때 |
 | `sfs profile --apply` | `SFS.md` 프로젝트 개요만 자동 보정할 때 |
 | `sfs upgrade` | 설치된 프로젝트를 최신 Solon 흐름으로 갱신할 때 |
 | `sfs version --check` | 현재 프로젝트와 Solon 버전 상태를 볼 때 |

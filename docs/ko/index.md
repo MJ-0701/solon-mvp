@@ -45,6 +45,9 @@ agent-skills 벤치마크에서 쓸 만한 practice 는 새 명령으로 늘리�
 `implement`, `review`, `adopt`, `tidy`, `release` 의 정책과 렌즈로 흡수했습니다.
 공식 문서 기반 구현, stop-the-line debugging, deprecation/migration cleanup, shipping check,
 `source-docs`/`simplify`/`security`/`performance`/`api-contract` review lens 가 포함됩니다.
+기존 코드베이스를 받아들일 때는 `sfs adopt --ddd-tdd-retrofit --apply` 로 DDD-lite 경계
+상태를 진단하고, 다음 sprint 가 characterization/TDD evidence 를 먼저 만든 뒤 한 behavior
+slice 만 refactor 하도록 계약을 심을 수 있습니다.
 
 Token Diet 는 routine 출력 토큰을 줄이되 evidence/risk/raw traceability 를 없애지 않는 compact I/O
 계약입니다. `SFS_OUTPUT_STYLE=compact`, `sfs status --compact`, `sfs start --output-style compact`,
