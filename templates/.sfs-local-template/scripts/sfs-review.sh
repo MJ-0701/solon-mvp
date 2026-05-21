@@ -71,7 +71,7 @@ fi
 # ─────────────────────────────────────────────────────────────────────
 usage_review() {
   cat <<'EOF'
-Usage: /sfs review [--sprint <id>] [--gate <1..7>] [--stage <auto|self|cross|artifact>] [--lens <auto|artifact|code|docs|source-docs|simplify|security|performance|api-contract|strategy|design|taxonomy|qa|ops|management-admin|release>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
+Usage: /sfs review [--sprint <id>] [--gate <1..7>] [--stage <auto|self|cross|artifact>] [--lens <auto|artifact|code|docs|source-docs|simplify|security|performance|api-contract|strategy|design|taxonomy|ddd-tdd|qa|ops|management-admin|release>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
 
 Open the active sprint's review.md as the CPO Evaluator review document.
   - --gate <n>    gate number, 1..7. Reports display this as Gate 1..7:
@@ -91,12 +91,12 @@ Open the active sprint's review.md as the CPO Evaluator review document.
   - --stage <name> review stage: auto, self, cross, or artifact.
                   For Gate 6 implementation review, auto resolves to self until
                   a Gate 6 self-CPO PASS exists, then to cross. GitHub @codex
-                  PR review stays external evidence and should be captured
-                  between self and cross when available.
+                  PR review stays external evidence and belongs last, after
+                  both self-CPO PASS and cross CPO PASS when available.
   - --lens <name> review lens. Default: auto.
                   auto chooses from artifact, code, docs, source-docs,
                   simplify, security, performance, api-contract, strategy,
-                  design, taxonomy, qa, ops, management-admin, release using
+                  design, taxonomy, ddd-tdd, qa, ops, management-admin, release using
                   plan/implement/log text and changed artifact paths. Use an
                   explicit lens only to override a wrong inference. For the
                   same sprint/gate, later auto reviews reuse the previous lens
@@ -106,7 +106,8 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                   strategy-pm -> strategy, design/frontend -> design,
                   infra -> ops, source-driven -> source-docs, perf ->
                   performance, api/schema -> api-contract, and
-                  finance/accounting -> management-admin.
+                  finance/accounting -> management-admin. DDD/TDD aliases
+                  map to ddd-tdd.
   - --executor <profile|cmd>
                   CPO review tool/profile. Default: $SFS_REVIEW_EXECUTOR or codex.
                   Typical: codex, gemini, claude, or a custom command.
@@ -371,6 +372,7 @@ normalize_review_lens_value() {
     strategy|strategy-pm|product|product-strategy|product-management|pm|planning) printf 'strategy\n' ;;
     design|design/frontend|frontend-design|ux|ui) printf 'design\n' ;;
     taxonomy|domain|glossary|naming) printf 'taxonomy\n' ;;
+    ddd-tdd|ddd|tdd|domain-model|test-first|red-green|red-green-refactor) printf 'ddd-tdd\n' ;;
     qa|test|tests|verification) printf 'qa\n' ;;
     ops|infra|infra/devops|devops|runbook|operations) printf 'ops\n' ;;
     management-admin|management/admin|management|admin-finance|finance|financial|bookkeeping|accounting|tax|cashflow|payroll) printf 'management-admin\n' ;;
@@ -402,8 +404,8 @@ fi
 REVIEW_STAGE_REQUEST="${_normalized_stage}"
 _normalized_lens="$(normalize_review_lens_value "${REVIEW_LENS}" || true)"
 if [[ -z "${_normalized_lens}" ]]; then
-  echo "unknown review lens ${REVIEW_LENS}, valid: auto, artifact, code, docs, source-docs, simplify, security, performance, api-contract, strategy, design, taxonomy, qa, ops, management-admin, release" >&2
-  echo "aliases: strategy-pm -> strategy, design/frontend -> design, infra -> ops, source-driven -> source-docs, perf -> performance, api/schema -> api-contract, finance/accounting -> management-admin" >&2
+  echo "unknown review lens ${REVIEW_LENS}, valid: auto, artifact, code, docs, source-docs, simplify, security, performance, api-contract, strategy, design, taxonomy, ddd-tdd, qa, ops, management-admin, release" >&2
+  echo "aliases: strategy-pm -> strategy, design/frontend -> design, infra -> ops, source-driven -> source-docs, perf -> performance, api/schema -> api-contract, DDD/TDD -> ddd-tdd, finance/accounting -> management-admin" >&2
   exit "${SFS_EXIT_BADCLI}"
 fi
 REVIEW_LENS="${_normalized_lens}"
@@ -669,6 +671,12 @@ review_path_lens_signal() {
       ;;
   esac
   case "$paths" in
+    *ddd*|*tdd*|*domain-model*|*src/main/*/domain*|*src/main/*/application*|*src/main/*/infrastructure*|*src/main/*/interfaces*)
+      printf 'ddd-tdd\n'
+      return 0
+      ;;
+  esac
+  case "$paths" in
     *glossary*|*taxonomy*|*schema*|*domain*|*enum*|*naming*)
       printf 'taxonomy\n'
       return 0
@@ -751,6 +759,10 @@ infer_review_lens() {
       printf 'design\n'
       return 0
       ;;
+    *"ddd"*|*"tdd"*|*"domain model"*|*"test-first"*|*"failing test"*|*"characterization test"*|*"red-green"*|*"aggregate"*|*"value object"*)
+      printf 'ddd-tdd\n'
+      return 0
+      ;;
     *"artifact types touched"*taxonomy*|*"glossary"*|*"domain terms touched"*|*"ubiquitous language"*|*"용어"*)
       printf 'taxonomy\n'
       return 0
@@ -791,6 +803,7 @@ review_lens_label() {
     strategy) printf 'strategy/product acceptance lens' ;;
     design) printf 'design/UX acceptance lens' ;;
     taxonomy) printf 'taxonomy/domain-language acceptance lens' ;;
+    ddd-tdd) printf 'product-level DDD/TDD acceptance lens' ;;
     qa) printf 'QA/verification acceptance lens' ;;
     ops) printf 'ops/infra readiness lens' ;;
     management-admin) printf 'management/admin finance evidence lens' ;;
@@ -2393,7 +2406,7 @@ Lens policy:
   user value, scope, risk, and next action.
 - Do not force source-code findings when the selected lens is docs, source-docs,
   simplify, security, performance, api-contract, strategy, design, taxonomy,
-  QA, ops, management-admin, release, or generic artifact acceptance.
+  ddd-tdd, QA, ops, management-admin, release, or generic artifact acceptance.
 
 Lens-specific checklist:
 EOF
@@ -2462,6 +2475,13 @@ EOF
       cat <<'EOF'
 - Check naming, glossary consistency, state/enum boundaries, aliases, schema implications, and migration notes.
 - Treat term drift as a product risk, not a cosmetic issue.
+EOF
+      ;;
+    ddd-tdd)
+      cat <<'EOF'
+- Check product-level DDD/TDD: canonical domain language, behavior boundaries, AC-to-evidence mapping, and first failing/characterization/smoke/review evidence.
+- When code is touched, check DDD-lite boundaries: domain/application/interfaces/infrastructure responsibilities, aggregate/invariant placement, and adapter dependency direction.
+- Treat product rules hidden in controllers, repositories, DTO mappers, jobs, external adapters, UI labels, CLI flags, docs wording, migrations, or workflow glue as findings.
 EOF
       ;;
     qa)

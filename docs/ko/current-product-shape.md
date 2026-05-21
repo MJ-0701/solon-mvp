@@ -334,10 +334,11 @@ AI 가 UI 를 만들 때 가장 흔한 실패는 평균값으로 회귀하는 �
 (`dev`, `strategy-pm`, `qa`, `design`, `infra`, `taxonomy`) 입니다. 이 파일은 activation 상태를
 읽기 위한 runtime 설정이지, 전체 지식팩/review lens registry 가 아닙니다.
 
-현재 filled guidance 는 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps,
-management-admin, taxonomy 지식팩/review lens 로 제공됩니다. 각 지식팩은 "이 분야라면 무엇을
-조심해야 하는가", "무엇을 물어봐야 하는가", "어떤 근거가 있으면 통과로 볼 수 있는가"를 짧게
-담습니다.
+현재 filled guidance 는 product-level DDD/TDD, backend, 전략/PM, QA, 디자인/frontend,
+infra/DevOps, management-admin, taxonomy 지식팩/review lens 로 제공됩니다. DDD/TDD 는
+backend 전용이 아니라 모든 product behavior 에 걸리는 기본선이고, backend 는 그 specialization
+중 하나입니다. 각 지식팩은 "이 분야라면 무엇을 조심해야 하는가", "무엇을 물어봐야 하는가",
+"어떤 근거가 있으면 통과로 볼 수 있는가"를 짧게 담습니다.
 
 중요한 점은 사용자가 이 목록을 외우지 않아도 된다는 것입니다. Solon 은 작업 성격을 보고 필요한
 관점만 읽습니다. 작은 문서 수정은 작게 보고, 배포나 구조 변경처럼 위험이 큰 작업은 더 단단하게

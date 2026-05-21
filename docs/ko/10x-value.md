@@ -77,9 +77,10 @@ ownership 을 더 강하게 만드는 모드입니다.
 
 ## 실행 10x 루프
 
-개발자에게 Solon 은 domain language 와 tight feedback 을 기본값으로 둡니다. 코드 slice 에서는
-DDD-lite, TDD-lite 에 가깝고, 비코드 slice 에서는 명명된 용어, artifact boundary, 가장 작은
-검증 루프를 뜻합니다.
+개발자에게 Solon 은 domain language 와 tight feedback 을 기본값으로 둡니다. DDD-lite,
+TDD-lite 는 제품 수준 규칙입니다. product behavior, domain term, boundary, evidence 를 구현
+전에 이름 붙입니다. 코드가 바뀌면 이것이 코드 구조로도 내려가고, 비코드 slice 에서는 명명된
+용어, artifact boundary, 가장 작은 검증 루프를 뜻합니다.
 
 | Practice | Solon meaning | Why it matters for AI |
 |---|---|---|

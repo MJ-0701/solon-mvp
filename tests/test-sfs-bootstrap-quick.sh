@@ -64,8 +64,16 @@ expected_files=(
   "myproject/settings.gradle.kts"
   "myproject/gradle/wrapper/gradle-wrapper.properties"
   "myproject/src/main/kotlin/com/example/demo/Application.kt"
+  "myproject/src/main/kotlin/com/example/demo/domain/.gitkeep"
+  "myproject/src/main/kotlin/com/example/demo/application/.gitkeep"
+  "myproject/src/main/kotlin/com/example/demo/interfaces/.gitkeep"
+  "myproject/src/main/kotlin/com/example/demo/infrastructure/.gitkeep"
   "myproject/src/main/resources/application.properties"
   "myproject/src/test/kotlin/com/example/demo/ApplicationTests.kt"
+  "myproject/src/test/kotlin/com/example/demo/domain/.gitkeep"
+  "myproject/src/test/kotlin/com/example/demo/application/.gitkeep"
+  "myproject/src/test/kotlin/com/example/demo/interfaces/.gitkeep"
+  "myproject/src/test/kotlin/com/example/demo/infrastructure/.gitkeep"
   "myproject/.gitignore"
 )
 for f in "${expected_files[@]}"; do
@@ -119,5 +127,9 @@ grep -q 'version "3.2.0"' alt/build.gradle.kts \
   || { echo "FAIL: --spring-boot 3.2.0 override not substituted" >&2; exit 1; }
 [[ -f alt/src/main/kotlin/com/foo/bar/Application.kt ]] \
   || { echo "FAIL: --package com.foo.bar package path not created" >&2; exit 1; }
+for layer in domain application interfaces infrastructure; do
+  [[ -f "alt/src/main/kotlin/com/foo/bar/${layer}/.gitkeep" ]] \
+    || { echo "FAIL: --package com.foo.bar DDD layer missing: ${layer}" >&2; exit 1; }
+done
 
 echo "test-sfs-bootstrap-quick: OK"

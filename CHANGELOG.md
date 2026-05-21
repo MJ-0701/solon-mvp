@@ -1,3 +1,32 @@
+## [0.6.97] - 2026-05-22
+
+> **DDD/TDD guardrails are now product-level SFS rules, not backend-only
+> reminders.**
+
+### Changed
+
+- The DDD/TDD knowledge pack now activates for product behavior, acceptance
+  criteria, UI/API/CLI/docs/data/workflow changes, and backend scaffolds.
+- Brainstorm, plan, implement, kernel, bootstrap, and adapter prompts now ask
+  for product behavior boundaries, canonical domain language, and a first
+  failing/characterization/smoke/review evidence path before implementation
+  proceeds.
+- The DDD/TDD review lens now checks product rules that hide in UI labels,
+  CLI flags, docs wording, migrations, workflow glue, adapters, controllers,
+  repositories, or jobs instead of treating DDD as a backend package layout.
+- GitHub @codex help text now keeps the corrected order: self-CPO PASS, cross
+  CPO PASS, then GitHub @codex as final external evidence.
+
+### Tests
+
+- `test-ddd-tdd-guardrails.sh` now verifies the real `sfs context cat` command
+  surface for product-level DDD/TDD context loading.
+- `test-review-implementation-sequence.sh` now guards against the old
+  "between self and cross" GitHub @codex wording.
+- `test-sfs-version-notice-cache-global.sh` is non-interactive in unattended
+  full-suite runs.
+- Full source regression passed with 84 tests.
+
 ## [0.6.96] - 2026-05-21
 
 > **Implementation review now runs self-CPO, cross CPO, then GitHub @codex

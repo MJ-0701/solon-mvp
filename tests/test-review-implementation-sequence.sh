@@ -37,6 +37,13 @@ assert_file_contains() {
     || fail "${label}: missing '${needle}'"
 }
 
+assert_file_not_contains() {
+  local file="$1" needle="$2" label="$3"
+  [[ -f "${file}" ]] || fail "${label}: missing file ${file}"
+  ! grep -Fq -- "${needle}" "${file}" \
+    || fail "${label}: unexpected '${needle}'"
+}
+
 run_sfs() {
   SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" "$@"
 }
@@ -92,6 +99,9 @@ assert_file_contains "${review_context}" "count GitHub @codex review during brai
 assert_file_contains "${implement_context}" "sfs review --gate 6 --stage self" "implement context self stage"
 assert_file_contains "${implement_context}" "sfs review --gate 6 --stage cross" "implement context cross stage"
 assert_file_contains "${implement_context}" "GitHub @codex applies only after implementation" "implement context GitHub boundary"
+assert_file_contains "${review_script}" "belongs last, after" "review help GitHub last"
+assert_file_contains "${review_script}" "both self-CPO PASS and cross CPO PASS when available" "review help GitHub after cross"
+assert_file_not_contains "${review_script}" "between self and cross when available" "review help no old GitHub order"
 assert_file_contains "${review_script}" "GitHub @codex review is post-implementation only" "review prompt GitHub boundary"
 assert_file_contains "${commit_script}" "Gate 6 self-CPO review required before pushing product-code" "commit guard self"
 assert_file_contains "${commit_script}" "Gate 6 cross CPO review or valid self-CPO fallback required before pushing product-code" "commit guard cross"

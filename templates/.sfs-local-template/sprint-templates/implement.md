@@ -30,6 +30,11 @@ last_touched_at: ""
 - 가장 작은 유효 변경:
 - 따를 기존 패턴:
 - 건드리는 용어/이름:
+- product behavior boundary:
+- DDD boundary: domain / application / interfaces / infrastructure / n/a
+- domain invariant / aggregate:
+- TDD first check / product evidence:
+- TDD waiver / alternate evidence:
 - 피할 위험:
 
 ## 3. 변경
@@ -41,6 +46,7 @@ last_touched_at: ""
 
 ## 4. 검증
 
+- first failing/characterization/smoke/review evidence:
 - 명령:
 ```text
 ```

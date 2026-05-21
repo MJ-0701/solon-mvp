@@ -17,6 +17,11 @@ load_when:
   - tax
   - transaction
   - batch
+  - DDD
+  - TDD
+  - domain model
+  - product behavior
+  - acceptance criteria
   - integration
   - API
   - AWS
@@ -46,6 +51,9 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
 - Management/admin signals: `management-admin`, `finance`, `accounting`,
   `bookkeeping`, `tax`, `invoice`, `cashflow`, `payroll`, `compliance`.
 - Taxonomy signals: `vocabulary`, `naming`, `state`, `event`, `enum`.
+- DDD/TDD signals: `DDD`, `TDD`, `domain model`, `product behavior`,
+  `acceptance criteria`, `aggregate`, `value object`, `test-first`, `failing
+  test`, `red-green`.
 
 ## Read order
 
@@ -82,6 +90,8 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
 - `policies/management-admin-knowledge-pack.ko.md` (Korean)
 - `policies/taxonomy-knowledge-pack.md`
 - `policies/taxonomy-knowledge-pack.ko.md` (Korean)
+- `policies/ddd-tdd-knowledge-pack.md`
+- `policies/ddd-tdd-knowledge-pack.ko.md` (Korean)
 
 ## Depth Rules
 

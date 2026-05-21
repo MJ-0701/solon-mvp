@@ -377,10 +377,12 @@ for compatibility with existing projects: `dev`, `strategy-pm`, `qa`, `design`,
 `infra`, and `taxonomy`. It is runtime activation state, not the full
 knowledge-pack/review-lens registry.
 
-Current filled guidance is provided through the backend, strategy/PM, QA,
-design/frontend, infra/DevOps, management-admin, and taxonomy knowledge packs/
-review lenses. Each pack gives Solon a compact sense of what to watch, what to
-ask, and what evidence should count for that kind of work.
+Current filled guidance is provided through the product-level DDD/TDD, backend,
+strategy/PM, QA, design/frontend, infra/DevOps, management-admin, and taxonomy
+knowledge packs/review lenses. DDD/TDD is a cross-cutting product behavior
+floor; backend is one specialization. Each pack gives Solon a compact sense of
+what to watch, what to ask, and what evidence should count for that kind of
+work.
 
 The user should not need to memorize this list. Solon reads only the lens that
 fits the work. A small docs edit stays light. A release, architecture change, or

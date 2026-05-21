@@ -30,6 +30,7 @@ module:
 - `policies/debugging-and-error-recovery.md` — stop-the-line failure triage and root-cause guardrails.
 - `policies/deprecation-and-migration.md` — legacy state/API cleanup with replacement, archive, and migration evidence.
 - `policies/shipping-and-launch.md` — reversible, observable release/deploy checklist.
+- `policies/ddd-tdd-knowledge-pack.md` — DDD/TDD baseline for project scaffolds and implementation.
 - `policies/review-lens-routing.md` — review lens aliases and split knowledge-pack loading.
 - `policies/knowledge-pack-router.md` — knowledge pack / review lens router (English).
 - `policies/knowledge-pack-router.ko.md` — knowledge pack / review lens router (Korean).

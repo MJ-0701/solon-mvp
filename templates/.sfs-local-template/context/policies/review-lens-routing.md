@@ -18,7 +18,8 @@ content_policy: "read only when review lens aliases or knowledge-pack mapping ar
 
 Use public lens names in commands. `strategy-pm` maps to `strategy`,
 `design/frontend` maps to `design`, `infra` maps to `ops`, and
-`finance`/`accounting` maps to `management-admin`.
+`finance`/`accounting` maps to `management-admin`. `DDD`, `TDD`,
+`domain-model`, and `test-first` map to `ddd-tdd`.
 
 Additional public lens names strengthen `sfs review` instead of creating new
 commands:
@@ -30,6 +31,8 @@ commands:
 - `performance`: measurement-backed latency, memory, bundle, or throughput
   review.
 - `api-contract`: public interface, schema, compatibility, and error semantics.
+- `ddd-tdd`: product-level domain language, behavior boundaries, DDD-lite code
+  boundaries when code is touched, and test-first or evidence-first proof.
 
 Read order:
 
@@ -47,4 +50,5 @@ Backend/JVM/Spring/JPA/transaction/batch/integration/DevOps/AWS work should
 check matching ids from the backend split packs and flag both missing high-risk
 topics and over-activated topics for the project size. Strategy, QA, design,
 taxonomy, ops, and management/admin work should do the same with their matching
-division packs.
+division packs. Project scaffold and any product behavior change should check
+`policies/ddd-tdd-knowledge-pack.md` or `.ko.md`.

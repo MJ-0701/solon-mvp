@@ -81,9 +81,10 @@ right thing.
 ## Execution 10x Loop
 
 For execution work, Solon assumes domain language and tight feedback are
-defaults. For code slices, that means DDD-lite and TDD-lite. For non-code
-slices, it means named terms, artifact boundaries, and the smallest useful
-review/check.
+defaults. DDD-lite and TDD-lite are product-level rules: product behavior,
+domain terms, boundaries, and evidence are named before implementation. When
+code is touched, that also becomes code structure; for non-code slices, it means
+named terms, artifact boundaries, and the smallest useful review/check.
 
 They are not ceremony. They are AI safety rails.
 

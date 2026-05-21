@@ -48,6 +48,10 @@ required.
 11. AI-era software fundamentals are cross-phase, not implement-only. Before a
    gate advances, check shared design concept, domain language, feedback loop,
    interface/artifact boundary, and gray-box delegation.
+   DDD/TDD is a product-level engineering floor: name product behavior, domain
+   language, and first evidence before worker handoff; use DDD-lite boundaries
+   when code is touched; keep invariants out of adapters; prefer failing,
+   characterization, smoke, or review evidence before implementation.
 12. For implementation and review work, follow the routed context guardrails:
     surface material assumptions, choose the smallest useful slice, keep changes
     surgical, read actual files/errors before fixing, verify before completion,
@@ -58,7 +62,8 @@ required.
     Benchmarked engineering practices strengthen existing commands instead of
     creating new lifecycle commands: source-driven official docs, stop-the-line
     debugging, deprecation/migration, shipping/release checks, and review lenses
-    `source-docs`, `simplify`, `security`, `performance`, `api-contract`.
+    `source-docs`, `simplify`, `security`, `performance`, `api-contract`,
+    `ddd-tdd`.
     Gate 3 (Plan) ready-for-implement routes to `sfs review --gate 3` first;
     do not offer `sfs implement` or worker/model handoff until plan review
     passes. Keep C-Level and worker/generator responsibilities separate:

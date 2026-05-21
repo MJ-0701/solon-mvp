@@ -88,6 +88,11 @@ load_when: ["always", "sfs", "entry"]
   rules: shared design concept, ubiquitous language, tight feedback loops,
   deep-module boundaries, and gray-box delegation must shape brainstorm, plan,
   implement, review, report, and retro.
+- DDD/TDD is a product-level engineering floor, not a backend-only topic:
+  product behavior changes name domain language, behavior boundaries, and first
+  evidence before worker handoff. Backend code still uses DDD-lite boundaries,
+  domain invariants stay out of adapters, and implementation prefers failing or
+  characterization tests before code.
 - Gate order is a runtime contract, not presentation etiquette: after Gate 3
   (Plan) says ready-for-implement, the default next step is Gate 3 review
   (`sfs review --gate 3`) before any `sfs implement` handoff.

@@ -46,6 +46,10 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
     If canonical terms, forbidden aliases, actors, states, or domain boundaries
     will matter beyond this sprint, point the plan at `docs/solon/domain-map.md`
     or add a small update to that file as an implementation artifact.
+  - DDD/TDD becomes an explicit product-level engineering floor:
+    name the product behavior, domain boundary, aggregate/invariant or waiver,
+    and first failing, characterization, smoke, or review evidence before
+    implementation.
   - feedback loops become binary AC with `verify by ...` evidence.
   - deep-module boundaries become public interfaces, artifact boundaries, or
     ownership slices.
@@ -113,6 +117,8 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
 - If backend/JVM/Spring/JPA/transaction/batch/integration/DevOps/AWS risk is in
   scope, record matching ids from `policies/backend-knowledge-pack.md` or
   `policies/backend-knowledge-pack.ko.md` only after router selection.
+- If project scaffolding or product behavior is in scope, record the
+  DDD/TDD floor from `policies/ddd-tdd-knowledge-pack.md` or `.ko.md`.
 - If strategy-pm, QA, design/frontend, infra, management-admin, or taxonomy
   signals are in scope, record matching ids from the matching
   `policies/*-knowledge-pack.md` or `policies/*-knowledge-pack.ko.md` only after

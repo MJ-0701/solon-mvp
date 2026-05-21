@@ -7,6 +7,19 @@
 
 ---
 
+## 0.6.97
+
+이번 버전은 DDD/TDD 를 backend 전용 설계 취향이 아니라 product behavior 전체의 기본 규칙으로 올립니다.
+SFS 는 이제 UI, API, CLI, 문서, 데이터, workflow glue, backend scaffold 모두에서 도메인 언어,
+제품 행동 경계, 첫 evidence 경로를 요구하도록 안내합니다.
+
+- DDD/TDD knowledge pack 은 `product behavior` 와 acceptance criteria 변경에도 로드됩니다.
+- plan/implement/bootstrap/agent adapter 문구가 product-level DDD/TDD 기준으로 맞춰졌습니다.
+- review lens 는 product rule 이 UI label, CLI flag, docs wording, migration, adapter, controller,
+  repository, job 같은 곳에 숨어 있으면 finding 으로 잡도록 바뀌었습니다.
+- GitHub @codex help 문구도 `self-CPO PASS -> cross CPO PASS -> GitHub @codex last` 순서로 정리됐습니다.
+- 0.6.97 검증은 `run-all.sh` 84/0 PASS 입니다.
+
 ## 0.6.96
 
 이번 버전은 구현 이후 리뷰 순서를 `self-CPO PASS -> cross CPO PASS -> GitHub @codex`

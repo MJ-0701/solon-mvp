@@ -36,8 +36,9 @@ validation, boundaries, and language.
 Current Solon documents divisions, knowledge packs, and review lenses as
 separate surfaces. `.sfs-local/divisions.yaml` is the six-slot compatibility
 activation state for older projects, while actual guidance is read from the
-backend, strategy/PM, QA, design/frontend, infra/DevOps, management-admin, and
-taxonomy knowledge packs/review lenses. Backend is a dev specialization,
+product-level DDD/TDD, backend, strategy/PM, QA, design/frontend, infra/DevOps,
+management-admin, and taxonomy knowledge packs/review lenses. DDD/TDD is the
+cross-cutting product behavior floor. Backend is a dev specialization,
 management-admin covers finance/bookkeeping/tax/accounting, and taxonomy is a
 cross-cutting language/classification lens. The user does not need to memorize
 those labels. Solon reads the relevant lens and turns it into plain questions,

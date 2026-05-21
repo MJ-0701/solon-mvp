@@ -202,10 +202,14 @@ Agent action:
   4. Choose the native scaffold path yourself:
        - official framework CLI when appropriate
        - or direct file edits by Claude/Codex/Gemini when that is simpler
-  5. Do not add Solon-owned framework template files.
-  6. cd into the generated app.
-  7. Run `sfs init --layout thin --yes`.
-  8. Run `sfs start "<first useful goal>"` or continue the user's requested task.
+  5. Default product scaffolds to product-level DDD/TDD:
+       - product/domain behavior boundaries before framework details
+       - domain/application/interfaces/infrastructure boundaries when code is created
+       - a first failing, characterization, smoke, or review evidence path
+  6. Do not add Solon-owned framework template files.
+  7. cd into the generated app.
+  8. Run `sfs init --layout thin --yes`.
+  9. Run `sfs start "<first useful goal>"` or continue the user's requested task.
 
 Experimental measurement helper, not public default:
   sfs bootstrap --experimental spring-kotlin <project-name> --quick

@@ -34,10 +34,11 @@ sfs status
 잡도록 돕습니다.
 
 현재 본부, 지식팩, review lens 는 분리해서 설명합니다. `.sfs-local/divisions.yaml` 은
-기존 프로젝트 호환용 6개 core activation slot 이고, 실제 안내는 backend, 전략/PM, QA,
-디자인/frontend, infra/DevOps, management-admin, taxonomy 지식팩/review lens 로 읽습니다.
-backend 는 dev specialization, management-admin 은 재무/경리/세무/회계 관점, taxonomy 는 모든
-본부에 걸치는 언어/분류 lens 입니다. 사용자는 분야 이름을 외울 필요가 없습니다. Solon 이 필요한
+기존 프로젝트 호환용 6개 core activation slot 이고, 실제 안내는 product-level DDD/TDD,
+backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, management-admin, taxonomy 지식팩/review
+lens 로 읽습니다. DDD/TDD 는 모든 product behavior 에 걸리는 기본선이고, backend 는 dev
+specialization, management-admin 은 재무/경리/세무/회계 관점, taxonomy 는 모든 본부에 걸치는
+언어/분류 lens 입니다. 사용자는 분야 이름을 외울 필요가 없습니다. Solon 이 필요한
 관점만 읽고, plan/review 에서는 사용자가 이해할 수 있는 질문과 기준으로 풀어냅니다.
 
 agent-skills 벤치마크에서 쓸 만한 practice 는 새 명령으로 늘리지 않고

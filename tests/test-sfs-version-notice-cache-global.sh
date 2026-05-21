@@ -39,6 +39,7 @@ git -c user.name='SFS Test' -c user.email='sfs-test@example.invalid' commit -qm 
 SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" init --layout thin --yes >/dev/null
 
 SFS_VERSION_NOTICE_FORCE=1 \
+SFS_VERSION_NOTICE_PROMPT=0 \
 SFS_VERSION_NOTICE_TTL_SEC=0 \
 SFS_VERSION_NOTICE_THRESHOLD=1 \
 SFS_RELEASE_REPO_URL="${RELEASE_REPO}" \

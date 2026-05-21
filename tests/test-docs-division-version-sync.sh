@@ -48,17 +48,21 @@ for file in "${docs[@]}"; do
   assert_not_contains "${file}" "0.6.27 기준" "docs no stale 0.6.27 기준 ${file}"
 done
 
-assert_contains "${DIST_DIR}/VERSION" "0.6.95" "version bumped"
+assert_contains "${DIST_DIR}/VERSION" "0.6.97" "version bumped"
 assert_not_contains "${DIST_DIR}/README.md" "0.6." "README no release-version prose"
 assert_not_contains "${DIST_DIR}/README.md" "divisions.yaml" "README no division registry detail"
 assert_not_contains "${DIST_DIR}/README.md" "management-admin" "README no lens registry detail"
 assert_contains "${DIST_DIR}/docs/ko/10x-value.md" "## 모델 라우팅 10x 루프" "KO 10x model routing detail"
+assert_contains "${DIST_DIR}/docs/ko/10x-value.md" "TDD-lite 는 제품 수준 규칙입니다" "KO 10x product-level DDD/TDD"
 assert_contains "${DIST_DIR}/docs/en/10x-value.md" "## Model Routing 10x Loop" "EN 10x model routing detail"
+assert_contains "${DIST_DIR}/docs/en/10x-value.md" "DDD-lite and TDD-lite are product-level rules" "EN 10x product-level DDD/TDD"
 
 assert_contains "${DIST_DIR}/docs/ko/current-product-shape.md" "## 본부 / 지식팩 / Review Lens" "KO product shape split section"
 assert_contains "${DIST_DIR}/docs/ko/current-product-shape.md" "전체 지식팩/review lens registry 가 아닙니다" "KO product shape registry boundary"
+assert_contains "${DIST_DIR}/docs/ko/current-product-shape.md" "backend 전용이 아니라 모든 product behavior" "KO product shape DDD/TDD boundary"
 assert_contains "${DIST_DIR}/docs/en/current-product-shape.md" "## Divisions / Knowledge Packs / Review Lenses" "EN product shape split section"
 assert_contains "${DIST_DIR}/docs/en/current-product-shape.md" "not the full" "EN product shape registry boundary"
+assert_contains "${DIST_DIR}/docs/en/current-product-shape.md" "DDD/TDD is a cross-cutting product behavior" "EN product shape DDD/TDD boundary"
 
 assert_contains "${DIST_DIR}/templates/.sfs-local-template/divisions.yaml" "compatibility surface" "divisions yaml compatibility surface"
 assert_contains "${DIST_DIR}/templates/.sfs-local-template/divisions.yaml" "전체 지식팩/review lens registry 가 아니다" "divisions yaml registry boundary"

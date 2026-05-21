@@ -22,6 +22,11 @@ load_when:
   - 회계
   - transaction
   - batch
+  - DDD
+  - TDD
+  - domain model
+  - product behavior
+  - acceptance criteria
   - integration
   - API
   - AWS
@@ -50,6 +55,9 @@ risk 에 맞는 최소 check 만 활성화하는 것이다. 이 router 는 `.sfs
   `bookkeeping`, `tax`, `invoice`, `cashflow`, `payroll`, `compliance`,
   `경영관리`, `재무`, `경리`, `세무`, `회계`.
 - Taxonomy signals: `vocabulary`, `naming`, `state`, `event`, `enum`.
+- DDD/TDD signals: `DDD`, `TDD`, `domain model`, `product behavior`,
+  `acceptance criteria`, `aggregate`, `value object`, `test-first`, `failing
+  test`, `red-green`.
 
 ## Read order
 
@@ -85,6 +93,8 @@ risk 에 맞는 최소 check 만 활성화하는 것이다. 이 router 는 `.sfs
 - `policies/management-admin-knowledge-pack.ko.md`
 - `policies/taxonomy-knowledge-pack.md`
 - `policies/taxonomy-knowledge-pack.ko.md`
+- `policies/ddd-tdd-knowledge-pack.md`
+- `policies/ddd-tdd-knowledge-pack.ko.md`
 
 ## Depth Rules
 

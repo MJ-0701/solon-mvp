@@ -58,6 +58,10 @@ assert_alias simplify simplify
 assert_alias dead-code simplify
 assert_alias api api-contract
 assert_alias schema api-contract
+assert_alias ddd ddd-tdd
+assert_alias tdd ddd-tdd
+assert_alias domain-model ddd-tdd
+assert_alias test-first ddd-tdd
 assert_alias management-admin management-admin
 assert_alias finance management-admin
 assert_alias accounting management-admin
@@ -71,5 +75,7 @@ grep -Fq "source-driven -> source-docs" "${TMP_DIR}/invalid.err" \
   || fail "invalid lens error should show source-docs alias hint"
 grep -Fq "api/schema -> api-contract" "${TMP_DIR}/invalid.err" \
   || fail "invalid lens error should show api-contract alias hint"
+grep -Fq "DDD/TDD -> ddd-tdd" "${TMP_DIR}/invalid.err" \
+  || fail "invalid lens error should show DDD/TDD alias hint"
 
 echo "test-review-lens-aliases: OK"

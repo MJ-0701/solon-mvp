@@ -79,10 +79,11 @@ instead of many visible timestamp folders.
 
 Current Solon separates divisions, knowledge packs, and review lenses. The local
 `.sfs-local/divisions.yaml` file is the six-slot compatibility activation state
-for older projects. Actual guidance is read from backend, strategy/PM, QA,
-design/frontend, infra/DevOps, management-admin, and taxonomy packs/lenses.
-Backend is a dev specialization, management-admin covers finance/bookkeeping/
-tax/accounting, and taxonomy is a cross-cutting language/classification lens.
+for older projects. Actual guidance is read from product-level DDD/TDD, backend,
+strategy/PM, QA, design/frontend, infra/DevOps, management-admin, and taxonomy
+packs/lenses. DDD/TDD is the cross-cutting product behavior floor. Backend is a
+dev specialization, management-admin covers finance/bookkeeping/tax/accounting,
+and taxonomy is a cross-cutting language/classification lens.
 The user does not need to choose those labels manually. The AI should read the
 relevant Solon lens when the work calls for it, then explain the judgment in
 plain language.

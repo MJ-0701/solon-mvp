@@ -149,7 +149,13 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   self` or `sfs review --sprint <id> --gate 6 --stage self` for a closed
   sprint, followed by `sfs review --gate 6 --stage cross`. GitHub @codex comes
   only after that SFS cross CPO pass, as external PR/code review evidence.
-- Use TDD/DDD/transaction guardrails when code or data consistency is touched.
+- Use DDD/TDD guardrails whenever product behavior changes, not only backend
+  code. Load `policies/ddd-tdd-knowledge-pack.md` or `.ko.md`: preserve product
+  domain language and behavior boundaries across UI/API/CLI/docs/data; keep
+  business invariants in domain/use-case logic for code; preserve
+  `domain/application/interfaces/infrastructure` boundaries for app/backend
+  code; and start with failing, characterization, smoke, or review evidence
+  when practical.
 - Load `policies/knowledge-pack-router.md` first, or `policies/knowledge-pack-router.ko.md`
   for Korean preference. Apply only the matching division router ids.
 - If backend/JVM/Spring/JPA/transaction/batch/integration/DevOps/AWS work is in

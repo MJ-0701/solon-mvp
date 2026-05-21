@@ -41,7 +41,10 @@ $ARGUMENTS
 9. For hybrid commands, refine pointed artifacts and answer with one Solon report.
 10. AI-era fundamentals apply across all gates, not only implement: shared
    design concept, domain language, feedback loop, interface/artifact boundary,
-   and gray-box delegation.
+   and gray-box delegation. DDD/TDD is a product-level engineering floor:
+   product behavior, domain language, behavior boundary, and first evidence are
+   named before worker handoff; DDD-lite code boundaries apply when code is
+   touched.
 11. For implementation and review work, follow the routed context guardrails:
    surface material assumptions, choose the smallest useful slice, keep changes
    surgical, read actual files/errors before fixing, verify before completion,
@@ -49,7 +52,8 @@ $ARGUMENTS
    Benchmarked engineering practices strengthen existing commands instead of
    creating new lifecycle commands: source-driven official docs, stop-the-line
    debugging, deprecation/migration, shipping/release checks, and review lenses
-   `source-docs`, `simplify`, `security`, `performance`, `api-contract`.
+   `source-docs`, `simplify`, `security`, `performance`, `api-contract`,
+   `ddd-tdd`.
    Gate 3 (Plan) ready-for-implement routes to `sfs review --gate 3` first;
    do not offer `sfs implement` or worker/model handoff until plan review
    passes. Keep C-Level and worker/generator responsibilities separate: C-Level
