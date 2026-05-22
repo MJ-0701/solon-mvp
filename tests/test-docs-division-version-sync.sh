@@ -10,13 +10,15 @@ fail() {
   exit 1
 }
 
+. "${SCRIPT_DIR}/helpers/doc-search.sh"
+
 assert_contains() {
   local file="$1"
   local needle="$2"
   local label="$3"
 
   [[ -f "${file}" ]] || fail "${label}: missing file ${file}"
-  grep -Fq -- "${needle}" "${file}" || fail "${label}: missing '${needle}'"
+  sfs_doc_contains "${file}" "${needle}" || fail "${label}: missing '${needle}'"
 }
 
 assert_not_contains() {
@@ -25,7 +27,7 @@ assert_not_contains() {
   local label="$3"
 
   [[ -f "${file}" ]] || fail "${label}: missing file ${file}"
-  if grep -Fq -- "${needle}" "${file}"; then
+  if ! sfs_doc_not_contains "${file}" "${needle}"; then
     fail "${label}: unexpected stale '${needle}'"
   fi
 }
@@ -48,7 +50,7 @@ for file in "${docs[@]}"; do
   assert_not_contains "${file}" "0.6.27 기준" "docs no stale 0.6.27 기준 ${file}"
 done
 
-assert_contains "${DIST_DIR}/VERSION" "0.6.98" "version bumped"
+assert_contains "${DIST_DIR}/VERSION" "0.6.99" "version bumped"
 assert_not_contains "${DIST_DIR}/README.md" "0.6." "README no release-version prose"
 assert_not_contains "${DIST_DIR}/README.md" "divisions.yaml" "README no division registry detail"
 assert_not_contains "${DIST_DIR}/README.md" "management-admin" "README no lens registry detail"

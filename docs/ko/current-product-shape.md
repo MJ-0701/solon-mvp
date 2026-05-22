@@ -1,4 +1,34 @@
+---
+doc_id: sfs-current-product-shape-ko
+title: "현재 제품 흐름과 최근 변화"
+visibility: oss-public
+doc_type: product-reference
+language: ko
+updated: 2026-05-22
+summary: "Thin index for 현재 제품 흐름과 최근 변화"
+load_when: "Start here, then load only the child section needed."
+split_children:
+  - docs/ko/current-product-shape/01-section.md
+  - docs/ko/current-product-shape/02-start.md
+  - docs/ko/current-product-shape/03-token-diet-compact-i-o.md
+  - docs/ko/current-product-shape/04-windows.md
+  - docs/ko/current-product-shape/05-brainstorm-3.md
+  - docs/ko/current-product-shape/06-hard-mode.md
+  - docs/ko/current-product-shape/07-plan-transcript.md
+  - docs/ko/current-product-shape/08-capture-flow-checkpoint.md
+  - docs/ko/current-product-shape/09-implement.md
+  - docs/ko/current-product-shape/10-review-artifact-acceptance-review.md
+  - docs/ko/current-product-shape/11-section.md
+  - docs/ko/current-product-shape/12-section.md
+  - docs/ko/current-product-shape/13-design-md-ai.md
+  - docs/ko/current-product-shape/14-review-lens.md
+  - docs/ko/current-product-shape/15-retro-sprint-close.md
+  - docs/ko/current-product-shape/16-section.md
+  - docs/ko/current-product-shape/17-token-harness-hygiene.md
+  - docs/ko/current-product-shape/18-section.md
+---
 # 현재 제품 흐름과 최근 변화
+
 
 **Language**: 한국어 / [English](../en/current-product-shape.md)
 
@@ -6,419 +36,25 @@
 명령어를 더 많이 외우게 만드는 것이 아니라, 사용자가 AI 시대에도 product owner 로서
 생각과 판단의 주도권을 잃지 않게 돕는 흐름을 만드는 것입니다.
 
-## 한 줄 요약
-
-Solon 은 `start → brainstorm → plan → implement → review → retro` 를 통해
-모호한 의도를 검증 가능한 작업 계약으로 바꾸고, AI 가 빠르게 실행하더라도 사람의 판단,
-용어, 설계, 검증 흐름이 사라지지 않게 합니다.
-
-```text
-fuzzy intent
-→ shared understanding
-→ plan contract
-→ small implementation slice
-→ artifact acceptance review
-→ retro close with report
-```
-
-## Start 이후의 인계
-
-`sfs start "<goal>"` 는 sprint workspace 를 만들고 끝나는 명령입니다. 다만 새 요구 탐색에는
-대부분 brainstorm 이 필요하므로, start 성공 출력은 사용자가 가이드를 읽지 않았어도 다음 선택지를
-볼 수 있게 안내합니다.
-
-```text
-next: sfs brainstorm --simple "..."  # 빠른 정리
-      sfs brainstorm "..."           # 기본값, normal thinking scaffold
-      sfs brainstorm --hard "..."    # product owner hard training
-```
-
-사용자가 입력하는 명령어는 그대로 `sfs brainstorm` 입니다. Solon 이 지금 작업에 맞는
-depth 옵션을 함께 보여드릴 뿐입니다.
-
-## Token Diet / Compact I/O
-
-Token Diet 는 AI 응답을 무조건 짧게 만드는 모드가 아닙니다. routine 상태/인계 출력에서
-불필요한 장식을 줄이되, 판단과 검증에 필요한 필드는 남기는 compact I/O 계약입니다.
-
-```bash
-SFS_OUTPUT_STYLE=compact sfs status
-sfs status --compact
-sfs start "첫 작업 목표" --output-style compact
-SFS_OUTPUT_STYLE=compact sfs report
-```
-
-compact `status` 는 `sprint`, `wu`, `gate`, `verdict`, `ahead`, `last_event` 를 보존합니다.
-compact `start` 는 생성된 sprint path, shared docs path, lazy step-doc 상태, 권장 brainstorm 명령,
-`--simple` / `--hard` 대안, `recommended=normal` 을 보존합니다. compact `report` 는 report path,
-archive path, compact/finalization 상태를 보존합니다.
-
-반대로 destructive/security/privacy/data-loss warning, 사용자 decision, review finding,
-raw-source traceability, verification evidence 는 줄이면 품질이 낮아질 수 있으므로 full clarity 를
-유지합니다. Caveman/persona 말투는 기본값이 아니며, SFS 기본값은 professional compact output 입니다.
-품질 기준은 evidence/risk/raw traceability 먼저, 짧아짐은 그 다음입니다.
-filefunc 에서 흡수한 것은 one-file-one-function 규칙이 아니라 precise routed context, stable search
-vocabulary, raw-text fallback, verification 같은 Context Diet 원칙입니다.
-
-0.6.85 release verifier 는 이 quality floor 를 배포 확인에도 적용합니다. 성공한 내부
-install/upgrade smoke 로그는 조용히 접고, 실패하면 캡처한 stdout/stderr 를
-`[verify-product-release]` prefix 로 다시 보여줍니다. 배포 로그는 짧아져도 실패 원문과
-증거 경로는 사라지지 않습니다.
-
-작업을 닫을 때 `report.md` 와 `retro.md` 는 `.sfs-local` 안이 아니라
-`docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` 아래에 생성됩니다. 예를 들어 주문 도메인의
-주문상품 수량 변경은 `order/order-items/quantity-update` 처럼 도메인 → 서브도메인 → 기능 순서로
-둡니다. 일반 사용자는 `sfs start "<goal>"` 처럼 자연어 목표만 주면 되고, SFS 가 높은 확신의
-도메인 신호를 자동 추론합니다. 목표가 아직 도메인으로 분류되지 않는 탐색 작업만
-`--workspace <english-name>` 으로 legacy fallback 폴더를 고정합니다. 본문 언어는
-커밋 메시지와 같이 사용자의 native/workspace 언어를 기본값으로 둡니다.
-
-## Windows 래퍼 안정화
-
-Windows PowerShell/cmd 의 사용자 진입점은 `sfs.cmd` 로 고정합니다. Git Bash/WSL 에서는
-macOS/Linux 처럼 `sfs` 를 씁니다. 현재 Scoop manifest 는 generated shim 이
-packaged `bin\sfs.ps1` 을 직접 호출하도록 유지하지만, Scoop 이 생성한 `sfs.cmd` / `sfs.ps1`
-shim 이 인자를 버리는 경로가 확인되어 post-install hook 이 shims 디렉터리의 `sfs.cmd`,
-`sfs.ps1`, extensionless `sfs` 를 deterministic wrapper 로 덮어씁니다. PowerShell/cmd smoke 와
-사용자 안내는 인자 전달이 확인된 `sfs.cmd` 경로만 통과 조건으로 봅니다. packaged `sfs.cmd` 는
-직접 실행/호환용 thin PowerShell trampoline 으로 유지하고, `SFS_NATIVE_ARGC` /
-`SFS_NATIVE_ARG_N` 번호 환경 변수 bridge 로 `sfs.ps1` 에 인자를 넘깁니다. 이 값도 비면
-`sfs.ps1` 이 `SFS_NATIVE_RAW_ARGS`, delayed-expansion `SFS_NATIVE_CMDLINE`,
-parent `cmd.exe` command line, `CMDCMDLINE` 순서로
-fallback 을 읽습니다. command-line parser 는 `&& sfs.cmd --help` 같은 `cmd.exe`
-shell-control tail 도 잘라냅니다.
-`sfs.ps1` 이 read-only
-명령과 `start` 같은 상태 변경 명령을 모두 소유합니다. 상태 변경 명령은
-`sfs.cmd -> sfs.ps1 -> Bash runtime` bridge 로 내려갑니다. hardened Scoop `sfs.cmd` shim 은
-numbered env bridge 를 먼저 기록하고, `sfs.ps1` 이 그 값이 비어 있을 때 saved raw tail 을
-fallback 으로 다시 읽습니다. 이는 generated Scoop shim 아래에서 실패했던 단일 `-File ... %*`
-bridge 와 다릅니다. 실패 이력이 있는 raw Git Bash `%*`
-직행 경로, batch label forwarding, 단일 `-File ... %*` bridge, `-Command @args`, empty `%1..%n`, generated bare
-`sfs` PowerShell shim 경로, generated shim -> packaged `.cmd` 경로, generated `sfs.cmd` shim
-경로는 기본값으로 쓰지 않습니다.
-`sfs.cmd upgrade` 도 batch 파일이 직접 `scoop update sfs` 를 실행하지 않고 `sfs.ps1` self-upgrade
-경로로 넘깁니다. `sfs.ps1` 은 numbered env bridge, raw arg tail, saved cmdline,
-parent command line, `CMDCMDLINE`, `$MyInvocation.UnboundArguments` 순서로 인자를 정규화하고, `version`, `status`, `guide`,
-`context`, Scoop self-upgrade, Bash fallback 을 모두 처리합니다. 또한 `sfs.cmd` 가 PowerShell 호출 뒤 같은 parsed line 에서 종료하고
-Windows runtime `.ps1` / `.cmd` 파일을 ASCII-safe 로 유지해 `context cat` / `start` usage-only
-회귀, batch tail fragment, PowerShell 5.1 parser 회귀를 함께 막습니다.
-
-`sfs start` 후 sprint 디렉터리가 비어 있는 것은 정상일 수 있습니다. 단계별 문서는
-`brainstorm`, `plan`, `review`, `retro` 에서 필요할 때 생성됩니다. 하지만 명령 출력이 비어 있거나
-`sfs.cmd status` / `sfs.cmd context cat kernel` 이 usage 만 출력하면 실패로 봐야 합니다.
-자세한 원인과 확인 절차는
-[Windows SFS 래퍼 장애 요약 보고서](./windows-wrapper-incident-0.6.56.md) 에 정리되어 있습니다.
-
-## Brainstorm 3단계
-
-| Mode | 별칭 | 역할 |
-|---|---|---|
-| `--simple` | `--easy`, `--quick` | 이미 방향이 뚜렷한 작업을 빠르게 정리하고 plan seed 로 넘김 |
-| 기본 `normal` | 없음 | 요구사항을 정리하면서도 핵심 모순, 우선순위, 성공 기준, 검증 방식을 몇 가지 질문함 |
-| `--hard` | 없음 | 사용자가 product owner 로 깊게 생각하도록 의도, 포기할 것, 경계, 용어를 집요하게 캐물음 |
-
-세 모드는 단순 요약 → 사고 scaffold → 강도 있는 훈련 순으로 압력이 올라갑니다.
-
-- `simple`: 이미 답이 있을 때 빠른 정리
-- `normal`: 대부분의 작업에 맞는 기본 사고 scaffold
-- `hard`: 제품 판단과 설계가 흐릿할 때 쓰는 hard training
-
-## Hard Mode 의 목적
-
-`brainstorm --hard` 는 AI 가 "좋아, 바로 할게" 하고 달려가는 흐름을 일부러 늦춥니다.
-사용자에게 작지만 중요한 질문을 던져서 아래 항목을 드러냅니다.
-
-- 진짜 해결하려는 문제
-- 서로 충돌하는 욕구
-- 우선순위와 포기할 것
-- 성공/실패를 판정할 방식
-- 작업의 경계와 하지 않을 것
-- 프로젝트 안에서 써야 하는 용어
-
-이 모드는 AI 도움을 줄이는 기능이 아니라, AI 가 일을 시작하기 전에 사용자의 소유권과 판단력을
-더 강하게 세우는 기능입니다.
-
-## Plan 은 transcript 가 아니라 계약
-
-`sfs plan` 은 brainstorm 대화를 예쁘게 옮기는 단계가 아닙니다. plan 은 다음 항목을 포함해야 합니다.
-
-- measurable acceptance criteria
-- 이번 sprint 에 포함할 scope 와 제외할 scope
-- feedback loop 또는 smoke/test/review 방식
-- evaluator 가 어떤 기준으로 통과/보류/실패를 판단할지
-- 다음 구현 slice 가 무엇인지
-
-중요한 owner decision 이 비어 있으면 plan 을 추측으로 채우지 않습니다. 질문을 유지하고,
-사용자의 판단을 기다립니다.
-
-결정 질문은 `Q1`, `A/B/C/D`, `추천 A` 같은 내부 표기만으로 끝내지 않습니다. 선택지가 있으면
-각 선택지의 뜻과 결과를 모두 보여주고, 추천은 기본값으로만 표시합니다. 한 화면에 다 담으면
-복잡해지는 경우에는 선택지를 숨기지 않고 결정을 하나씩 순차적으로 묻습니다. `A/A/A/C/C 확정`
-같은 option bundle 은 사용자-facing 확정 문구로 쓰지 않고, `권장안 그대로 확정`처럼 자연어로
-받습니다.
-
-## Capture 는 자연어 flow checkpoint
-
-SFS 작업 중 구현 방향, 리뷰 순서, 예외/waiver, blocker, evidence 는 자연어 대화로 바뀔 수 있습니다.
-그런 말은 다음 명령 전에 `sfs capture` 로 현재 sprint `log.md` 와 `events.jsonl` 에 남깁니다.
-
-```sh
-sfs capture --kind review-order --gate 6 "Codex self-CPO first, then Gemini, then Claude."
-sfs note "GitHub @codex review passed, but it is external evidence only."
-```
-
-`capture` 는 전체 대화 녹화기가 아닙니다. 나중에 review/retro 가 잃으면 안 되는 가장 작은
-flow checkpoint 만 남깁니다. 긴 prompt, 전체 대화, bridge/review scratch, command log 는
-temporary artifact 나 cold archive 에 두고, core product context 에는 결론과 evidence path 만
-남깁니다.
-
-## Implement 는 코드만 뜻하지 않는다
-
-`sfs implement` 의 산출물은 코드일 수도 있지만, Solon 에서는 아래도 모두 implementation artifact 입니다.
-
-- documentation update
-- strategy memo
-- design handoff
-- taxonomy 또는 domain language 정리
-- QA evidence
-- ops/runbook
-- release packaging
-- 경영관리 evidence: 인보이스, 영수증, 현금 흐름, 세무/회계 질문, 월마감 note
-
-AI coding 시대에는 "구현"이라는 말이 코드 파일만 가리키면 작업 흐름이 좁아집니다. Solon 은
-사용자가 만든 실제 artifact 를 기준으로 다음 review lens 를 정합니다.
-
-## Review 는 artifact acceptance review
-
-`sfs review` 는 코드리뷰 하나가 아닙니다. 같은 명령어를 유지하되 Solon 이 sprint evidence 와
-변경 artifact 를 보고 lens 를 자동 추론합니다.
-
-GitHub 의 `@codex` PR/code review 는 외부 코드리뷰 evidence 일 뿐입니다. PR approval,
-GitHub check PASS, `@codex` comment 가 있어도 `sfs review`, self-CPO, SFS cross review,
-Gate 3/Gate 6 PASS 를 대체하지 않습니다.
-
-외부 리뷰/check PASS 는 continuation trigger 이며 stopping point 가 아닙니다. Codex, Claude,
-Gemini, 기타 LLM Agent 는 PASS 라고 말하고 끝내지 않고 다음 미충족 SFS review 명령을 이어갑니다:
-self-CPO 먼저, self-CPO PASS 뒤에 설정된 cross-review 순서입니다.
-
-Session Continuation Guard 는 긴 host 대화 자체를 다룹니다. `sfs upgrade` 가 최신이어도 이미 열린
-Claude/Codex/Gemini conversation history 는 그대로 남아 token meter 를 태웁니다. 새 WU/sprint 의
-첫 구현·review 전에 30% 이상, 새 gate/loop/cross-review 전 50% 이상, 또는 같은 chat 이 여러
-WU/sprint·반복 wakeup 을 지나면 agent 는 `report.md`, `review.md`, capture id, commit/branch,
-다음 SFS 명령만 남기고 fresh session 으로 전환해야 합니다.
-
-| Lens | 주로 보는 것 |
-|---|---|
-| `code` | correctness, tests, regressions, maintainability |
-| `docs` | reader flow, accuracy, stale claims, missing links |
-| `source-docs` | official docs/source/version evidence |
-| `simplify` | behavior-preserving simplification, dead-code removal |
-| `security` | auth, secrets, PII, untrusted input boundaries |
-| `performance` | baseline, target metric, measured regression risk |
-| `api-contract` | public interface, schema, errors, compatibility |
-| `strategy` | decision quality, tradeoffs, feasibility, next action |
-| `design` | user flow, consistency, visual/interaction evidence |
-| `taxonomy` | terms, categories, naming boundaries |
-| `qa` | coverage, smoke evidence, reproduction, residual risk |
-| `ops` | runbook, deployment, rollback, observability |
-| `management-admin` | finance records, bookkeeping, tax/accounting questions, cash evidence |
-| `release` | version, changelog, package channel, verification |
-
-사용자는 계속 `sfs review` 라고만 말씀하시면 됩니다. 새 agent-skills류 판단 기준도 새 명령어가
-아니라 기존 review lens 로 흡수됩니다. `--lens` 는 Solon 의 추론이 틀렸을 때만 쓰는 override
-입니다.
-
-review loop 는 작은 결정론적 finding 을 사용자에게 다시 넘기지 않고 같은 cycle 안에서 닫아야 합니다.
-grep 범위 누락, 실측 evidence 갱신, AC와 파일/산출물 매핑 누락, evidence path 오타, 의미가
-바뀌지 않는 문서 일관성 문제라면 agent 가 patch 하고 가장 작은 검증을 실행한 뒤 같은 gate review 를
-다시 호출합니다. 사용자에게 묻는 경우는 범위, architecture, public contract, 보안/개인정보/data-loss,
-비용/지연/model policy, destructive action, AC 의미 변경처럼 제품 판단이 필요한 경우입니다.
-
-현재 `sfs review` 는 commit-aware 입니다. working tree 가 clean 이어도 직전 commit 의
-reviewable 파일, 현재 공유 handoff 문서, 작은 ADR/report 본문을 bounded evidence 안에 포함하므로
-commit 후 evidence prompt 가 비어서 partial 이 나는 상황을 막습니다.
-
-이미 닫힌 sprint 의 review 를 다시 이어가야 할 때는 `.sfs-local/current-sprint` 를 손으로 복구하지
-않고 `sfs review --sprint <id> --gate <n>` 를 사용합니다. SFS 는 최신 cold archive 를 workbench 로
-복원하되, 이미 visible workbench 문서가 있으면 그것을 덮어쓰지 않습니다.
-
-## 얇은 멀티 에이전트 감독
-
-SFS 는 Claude, Codex, Gemini 를 무조건 동시에 돌리는 제품이 아닙니다. 기본값은 한 agent 가
-작은 작업 단위를 끝내고, 필요한 순간에만 역할을 분리하는 방식입니다.
-
-- 리서처는 넓은 코드베이스, 낯선 도메인, 의존성 변경처럼 먼저 읽어야 할 것이 많을 때만 씁니다.
-- 구현자는 plan 과 files_scope 가 고정된 뒤 작은 내부 조각을 맡습니다.
-- 평가자는 생성자가 스스로 승인하지 않도록 별도 context 에서 검토합니다.
-- 공유 메모리는 긴 대화록이 아니라 sprint workbench, `review.md`, `report.md`, 그리고 필요한 경우
-  `docs/solon/domain-map.md` 입니다.
-
-이 방식은 컨텍스트 오염을 줄이면서도 SFS 의 원칙인 "남길 것만 남긴다"를 지키기 위한 얇은
-supervisor 패턴입니다.
-
-## 모델 라우팅과 책임 경계
-
-역할 분리는 모델 선택에도 적용됩니다. Plan 을 만드는 모델과 코드를 쓰는 worker 는 같은 책임을
-지지 않습니다.
-
-| 역할 | 책임 | 기본 모델 흐름 |
-|---|---|---|
-| Helper-grade intake | 단순 relay, 누락 인자 질문, 낮은 위험의 짧은 요약, 작은 read-only 보조 | Claude 는 Haiku 계열(코딩 금지), Codex 는 `gpt-5.4-mini` |
-| Facilitator / question | brainstorm 질문 생성, 선택지 framing, 답변 요약 | Claude 는 Sonnet 4.6 계열, Codex 는 `gpt-5.4` |
-| C-Level / review | 의도, architecture, AC, review, escalation | high reasoning. Codex 는 `gpt-5.5`, Claude 는 Opus 계열 |
-| Claude worker | 고정된 files_scope 구현 slice | Sonnet 4.6 계열 |
-| Codex worker | 고정된 files_scope 구현 slice 중 코드 판단이 남은 일반 작업 | `gpt-5.4` |
-| Codex helper | 단순 relay, grep summary, formatting 같은 non-coding helper | `gpt-5.4-mini` |
-| Codex coding helper | 좁은 repo-aware code 보조 작업 | `gpt-5.3-codex` |
-| Codex mechanical implementation helper | 이미 결정된 무판단 단순 구현 보조 작업 | `gpt-5.3-codex-spark` |
-
-이 라우팅은 기본값입니다. 사용자가 따로 설정하지 않아도 Solon recommended role routing 이
-적용됩니다. `current_model` 은 역할 분리를 끄고 현재 선택 모델을 그대로 쓰려는 명시적 opt-out 입니다.
-Helper-grade 단순 I/O 는 advisor 검토를 생략할 수 있습니다. 하위모델이 질문/선택지를 설계하거나
-답변을 해석하거나 product identity, architecture, gate, AC, files_scope 에 영향을 주면 최상위
-advisor 검토가 필수입니다. advisor 는 Claude Opus 4.7, Codex `gpt-5.5` xhigh,
-Gemini `gemini-3-pro-auto` 입니다. Gemini 는 모든 role 을 `gemini-3-pro-auto` 로 두며
-Flash/2.5 fallback 은 쓰지 않습니다.
-advisor 호출은 self-CPO PASS 가 아닙니다. external/cross review 전에 작성자는 self-CPO
-mini-check 로 요구사항 → AC → 구현 slice → ADR/decision id 추적, 각 AC 의 file/artifact/evidence
-매핑, SEED/placeholder/mock/fallback non-acceptance 를 확인해야 합니다.
-
-Codex 기준 일반 구현 worker 는 `gpt-5.4` 입니다. `gpt-5.3-codex` 는 일반 worker 기본값이 아니라
-bounded repo-aware coding helper 입니다. Spark 는 더 좁습니다. scope, files_scope, AC, 정확한 수정
-의도가 이미 잠겼고 판단이 필요 없는 file move, import/path rewrite, generated index sync,
-deterministic test expectation update 같은 기계적 구현 보조 작업에만 씁니다. 작업이 architecture,
-public contract, security, privacy, data-loss, release gate, 또는 반복 실패를 건드리면 worker 를
-high reasoning 으로 승격하거나 C-Level 에 다시 넘깁니다. Claude 쪽 코딩 가능한 worker/helper 는
-Sonnet 4.6이고, Haiku 는 코딩하지 않습니다. 실질 research 는 가능하면 Gemini 3 Pro auto researcher 로
-보냅니다.
-
-Implement 의 실행 모드는 기본적으로 Single Agent 입니다. 사용자가 여러 agent 를 선택할 수는
-있지만, 그 경우 plan 은 먼저 독립 lane 으로 나뉘어야 합니다. 각 lane 은 files_scope 가 겹치지
-않고 proposed commit message 를 한 문장으로 설명할 수 있어야 합니다. 이 기준을 만족하지 못하면
-병렬화하지 않습니다. 병렬 agent 구현은 agent 간 cross review evidence 를 남긴 뒤
-`sfs review --gate 6` 를 통과해야 하며, Single Agent 구현도 Gate 6 review 없이 완료로 보지
-않습니다.
-
-Gemini, Codex, Claude 같은 named executor review 는 full CPO prompt 를 만들기 전에 auth preflight 를
-통과해야 합니다. 새 프로젝트나 새 터미널에서 처음 `sfs review --executor gemini` 를 실행했는데
-인증이 없으면 review artifact 를 남기지 않고 멈춥니다. 이때 실제 터미널에서
-`sfs auth login --executor gemini` 로 로그인하고 `sfs auth probe --executor gemini` 로 bridge 를
-확인한 뒤 같은 review 명령을 다시 실행합니다. 수동 handoff 는 `--prompt-only` 로 분리합니다.
-
-커밋 메시지는 사용자의 native 언어 또는 workspace 언어를 기본값으로 삼습니다. 한국어 사용자의
-작업이면 `문서: native 언어 커밋 규칙 추가` 처럼 한국어로 바로 이해되는 메시지를 씁니다.
-Solon 작업의 commit grouping 은 host-local `/commit` skill 이 아니라 `sfs commit` 이 담당합니다.
-`sfs commit plan` 으로 그룹을 확인하고 `sfs commit apply --group <name>` 으로 선택 그룹을
-commit + push 합니다. push 하면 안 되는 SFS release sandbox 나 offline 작업에서만 `--no-push` 를
-씁니다.
-
-## Design.md 와 AI 슬롭 방지
-
-design/frontend 작업은 `design.md` 또는 `docs/solon/design.md` 를 AI 가 읽는
-디자인 시스템 계약으로 취급합니다. 이 파일은 colors, typography, spacing, radius, shadow,
-component variants, icon style, forbidden values, rationale 을 담는 작은 계약입니다.
-
-AI 가 UI 를 만들 때 가장 흔한 실패는 평균값으로 회귀하는 것입니다. 화면마다 다른 색, 다른
-간격, 다른 radius, 섞인 icon weight, generic SaaS gradient 가 생기면 기능은 동작해도 제품의
-감도가 사라집니다. Solon 의 디자인본부 review 는 이것을 AI 슬롭 리스크로 보고 token drift,
-한국어 typography fit, desktop/mobile screenshot evidence 를 확인합니다.
-
-원티드 몽타주식 컴포넌트, Coolicons 같은 단일 icon family, Pretendard 같은 Korean-capable font 는
-한국어 제품의 좋은 starter set 이 될 수 있습니다. 단 이것들은 절대 vendor 규칙이 아니라 출발점입니다.
-기존 제품 design system 이 있으면 기존 system 이 우선입니다.
-
-## 본부 / 지식팩 / Review Lens
-
-현재 Solon 은 본부, 지식팩, review lens 를 같은 층위로 섞지 않습니다.
-`.sfs-local/divisions.yaml` 은 기존 프로젝트 호환을 위한 6개 core activation slot
-(`dev`, `strategy-pm`, `qa`, `design`, `infra`, `taxonomy`) 입니다. 이 파일은 activation 상태를
-읽기 위한 runtime 설정이지, 전체 지식팩/review lens registry 가 아닙니다.
-
-현재 filled guidance 는 product-level DDD/TDD, backend, 전략/PM, QA, 디자인/frontend,
-infra/DevOps, management-admin, taxonomy 지식팩/review lens 로 제공됩니다. DDD/TDD 는
-backend 전용이 아니라 모든 product behavior 에 걸리는 기본선이고, backend 는 그 specialization
-중 하나입니다. 각 지식팩은 "이 분야라면 무엇을 조심해야 하는가", "무엇을 물어봐야 하는가",
-"어떤 근거가 있으면 통과로 볼 수 있는가"를 짧게 담습니다.
-
-중요한 점은 사용자가 이 목록을 외우지 않아도 된다는 것입니다. Solon 은 작업 성격을 보고 필요한
-관점만 읽습니다. 작은 문서 수정은 작게 보고, 배포나 구조 변경처럼 위험이 큰 작업은 더 단단하게
-봅니다. 기준은 늘어나지만, 사용자가 마주하는 표면은 그대로 가볍게 유지하는 것이 방향입니다.
-backend 는 `dev` 의 기술 specialization 이고, management-admin 은 재무/경리/세무/회계 관점입니다.
-taxonomy slot 은 legacy activation 호환성 때문에 남아 있지만, 제품 설명에서는 독립 조직 본부가
-아니라 모든 본부에 걸치는 용어/분류 lens 로 다룹니다.
-
-agent-skills 벤치마크에서 유용한 discipline 도 같은 방식으로 흡수했습니다.
-공식 문서 기반 구현은 `implement` 와 `source-docs` review lens 로, stop-the-line 디버깅은
-`implement` 검증 정책으로, deprecation/migration 은 `adopt`/`tidy` 정리 기준으로, shipping
-check 는 `release` 정책으로 들어갑니다. 새 lifecycle command 를 늘리는 대신 기존 흐름의
-판단 기준을 더 선명하게 만든 것입니다.
-
-## Retro 는 기본적으로 sprint close
-
-`sfs retro` 한 명령이 sprint 를 close 까지 마무리합니다.
-
-```text
-sfs retro
-```
-
-이 명령은 `report.md` 와 `retro.md` 를 정리하고, workbench 원문과 임시 review scratch 를 하나의
-cold archive bundle 로 압축한 뒤, sprint close 상태와 local close commit 까지 연결합니다.
-report 가 사용자 결정을 요구할 때는 `Q1` 같은 내부 번호만 남기지 않고, 결정의 의미와 선택지별
-결과를 짧게 풀어 설명합니다.
-초안만 열고 sprint 는 닫지 않고 싶을 때는 `sfs retro --draft` 를 씁니다.
-예전 설치본에 남아 있던 loose sprint archive 나 별도 review-run archive 는 `sfs upgrade` 때
-압축 migration 으로 정리됩니다. runtime upgrade / agent install / profile rollback 백업도
-loose 파일 대신 `*.tar.gz` + `manifest.txt` bundle 로 남습니다.
-`events.jsonl` 은 영구 히스토리가 아니라 현재 sprint 를 이어가기 위한 active ledger 입니다.
-현재 sprint 가 없거나 오래된 sprint 이벤트만 남은 경우 upgrade/tidy 가 제거 또는 archive 합니다.
-영구 인수인계는 `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` 공유 문서와 git history 로 봅니다.
-반복 cleanup evidence 도 바깥에 같은 날 timestamp 폴더를 여러 개 남기지 않고
-`.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/manifest.txt` 와
-`surface-cleanup.tar.gz` 로 날짜별 묶음 처리합니다.
-thin layout 에서는 project-local `.claude/`, `.gemini/`, `.agents/` command/skill adapter 도
-기본 표면에서 빠집니다. root adapter 문서가 global `sfs` runtime 을 안내하고, native
-slash/skill 파일이 필요한 프로젝트만 `sfs agent install all` 로 opt-in 설치합니다.
-global `sfs` / `sfs.cmd upgrade` 는 기존 vendored 프로젝트도 thin surface 로 승격합니다.
-runtime 파일을 프로젝트 안에 계속 두려면 `sfs upgrade --layout vendored` 를 명시합니다.
-
-## 문서 구조
-
-README 는 전체 설명을 다 담는 파일이 아니라 큰 흐름과 목차입니다. 자세한 철학과 판단 기준은
-별도 문서로 분리합니다.
-
-```text
-README.md
-GUIDE.md
-docs/ko/index.md          docs/en/index.md
-docs/ko/current-product-shape.md   docs/en/current-product-shape.md
-docs/ko/10x-value.md       docs/en/10x-value.md
-docs/en/guide.md
-```
-
-각 문서 상단의 `Language` 링크로 한국어/영어 짝을 오갈 수 있습니다.
-
-## Token / Harness Hygiene
-
-SFS 는 토큰과 어텐션 낭비를 줄이는 운영 규칙을 routed context 안에 자동으로 깔아둡니다.
-사용자가 별도 plugin 을 설치하지 않아도 같은 효과를 얻도록 다음 원칙을 흐름 안에 흡수합니다.
-
-- 토큰 사용량 점검: 토큰이 빨리 닳는 느낌이 있으면 추측보다 usage report 를 먼저 확인한다.
-- 어댑터 문서 슬림: `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` 같은 어댑터는 얇게 유지하고,
-  긴 규칙은 routed context 또는 docs 로 분리한다.
-- 큰 코드베이스 검색 우선순위: 전체 파일을 읽기 전에 symbol / semantic search 를 먼저 쓴다.
-- 반복 실수의 자동화: 같은 실수를 말로 다시 설명하지 않고 guardrail / check / hook 으로 바꾼다.
-
-이 원칙은 특정 agent 에 묶이지 않습니다. Claude, Codex, Gemini 등 각 agent 의 usage report,
-LSP/index, hook 수단으로 동일하게 적용할 수 있습니다.
-
-## 언제 어떤 모드를 고르나
-
-| 상황 | 추천 |
-|---|---|
-| 이미 구현할 범위가 분명함 | `sfs brainstorm --simple` 또는 바로 `sfs plan` |
-| 새 기능을 처음 정의함 | `sfs brainstorm` |
-| 사용자의 의도와 우선순위가 흔들림 | `sfs brainstorm --hard` |
-| 설계/용어/검증 기준이 불명확함 | `sfs brainstorm --hard` |
-| 이전 sprint 의 plan/ADR 을 이어받음 | inherit 기록 후 바로 `sfs implement` |
-
-Solon 의 좋은 사용감은 빠르게 달리는 것이 아니라, 피드백 없이 너무 멀리 달리지 않는 것입니다.
+## 문서 지도
+
+이 파일은 기존 경로를 유지하는 얇은 진입점입니다. 상세 본문은 아래 child 문서로 분리되어 있고, 각 child 문서는 독립 frontmatter 를 가집니다.
+
+- [한 줄 요약](./current-product-shape/01-section.md)
+- [Start 이후의 인계](./current-product-shape/02-start.md)
+- [Token Diet / Compact I/O](./current-product-shape/03-token-diet-compact-i-o.md)
+- [Windows 래퍼 안정화](./current-product-shape/04-windows.md)
+- [Brainstorm 3단계](./current-product-shape/05-brainstorm-3.md)
+- [Hard Mode 의 목적](./current-product-shape/06-hard-mode.md)
+- [Plan 은 transcript 가 아니라 계약](./current-product-shape/07-plan-transcript.md)
+- [Capture 는 자연어 flow checkpoint](./current-product-shape/08-capture-flow-checkpoint.md)
+- [Implement 는 코드만 뜻하지 않는다](./current-product-shape/09-implement.md)
+- [Review 는 artifact acceptance review](./current-product-shape/10-review-artifact-acceptance-review.md)
+- [얇은 멀티 에이전트 감독](./current-product-shape/11-section.md)
+- [모델 라우팅과 책임 경계](./current-product-shape/12-section.md)
+- [Design.md 와 AI 슬롭 방지](./current-product-shape/13-design-md-ai.md)
+- [본부 / 지식팩 / Review Lens](./current-product-shape/14-review-lens.md)
+- [Retro 는 기본적으로 sprint close](./current-product-shape/15-retro-sprint-close.md)
+- [문서 구조](./current-product-shape/16-section.md)
+- [Token / Harness Hygiene](./current-product-shape/17-token-harness-hygiene.md)
+- [언제 어떤 모드를 고르나](./current-product-shape/18-section.md)

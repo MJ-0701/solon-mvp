@@ -10,16 +10,12 @@ fail() {
   exit 1
 }
 
+. "${SCRIPT_DIR}/helpers/doc-search.sh"
+
 assert_contains() {
   local file="$1" needle="$2" label="$3"
-  local normalized
   [[ -f "${file}" ]] || fail "${label}: missing file ${file}"
-  grep -Fq -- "${needle}" "${file}" \
-    || {
-      normalized="$(tr '\n' ' ' <"${file}" | sed 's/[[:space:]][[:space:]]*/ /g')"
-      printf '%s' "${normalized}" | grep -Fq -- "${needle}"
-    } \
-    || fail "${label}: missing '${needle}' in ${file}"
+  sfs_doc_contains "${file}" "${needle}" || fail "${label}: missing '${needle}' in ${file}"
 }
 
 assert_boundary_matrix() {

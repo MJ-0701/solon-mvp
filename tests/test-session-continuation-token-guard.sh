@@ -10,19 +10,15 @@ fail() {
   exit 1
 }
 
+. "${SCRIPT_DIR}/helpers/doc-search.sh"
+
 assert_contains() {
   local file="$1"
   local needle="$2"
   local label="$3"
-  local normalized
 
   [[ -f "${file}" ]] || fail "${label}: missing file ${file}"
-  grep -Fq -- "${needle}" "${file}" \
-    || {
-      normalized="$(tr '\n' ' ' <"${file}" | sed 's/[[:space:]][[:space:]]*/ /g')"
-      printf '%s' "${normalized}" | grep -Fq -- "${needle}"
-    } \
-    || fail "${label}: missing '${needle}'"
+  sfs_doc_contains "${file}" "${needle}" || fail "${label}: missing '${needle}'"
 }
 
 context="${DIST_DIR}/templates/.sfs-local-template/context"

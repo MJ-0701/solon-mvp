@@ -1,3 +1,29 @@
+## [0.6.99] - 2026-05-22
+
+> **Product markdown is now frontmatter-loadable, split below the active
+> 200-line budget, and covered by harness tests that follow split child docs.**
+
+### Changed
+
+- Long active product docs were split into thin index files plus routed child
+  markdown files, keeping active docs below the 200-line harness budget.
+- Active user, agent, packaging, plugin, and prompt docs now carry explicit
+  frontmatter so doc loaders can classify them consistently.
+- Doc content assertions now search both a parent `.md` file and its sibling
+  split-doc directory, so model-routing and product-contract checks still bind
+  after the split.
+- Release packaging now includes top-level split-doc payload directories
+  (`README/`, `GUIDE/`, and `BEGINNER-GUIDE/`) instead of shipping only their
+  thin parent index files.
+
+### Tests
+
+- Added `test-product-md-frontmatter-line-budget.sh` for frontmatter, 200-line
+  budget, and release allowlist coverage.
+- Added negative harness probes for missing frontmatter, over-budget markdown,
+  and split-child doc search during release verification.
+- Full source regression passed with 86 tests.
+
 ## [0.6.98] - 2026-05-22
 
 > **Existing projects can now enter SFS with a DDD/TDD retrofit path instead of

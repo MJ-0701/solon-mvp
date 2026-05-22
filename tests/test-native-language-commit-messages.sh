@@ -10,13 +10,15 @@ fail() {
   exit 1
 }
 
+. "${SCRIPT_DIR}/helpers/doc-search.sh"
+
 assert_contains() {
   local file="$1"
   local needle="$2"
   local label="$3"
 
   [[ -f "${file}" ]] || fail "${label}: missing file ${file}"
-  grep -Fq -- "${needle}" "${file}" || fail "${label}: missing '${needle}'"
+  sfs_doc_contains "${file}" "${needle}" || fail "${label}: missing '${needle}'"
 }
 
 assert_not_contains() {
@@ -25,7 +27,7 @@ assert_not_contains() {
   local label="$3"
 
   [[ -f "${file}" ]] || fail "${label}: missing file ${file}"
-  if grep -Fq -- "${needle}" "${file}"; then
+  if ! sfs_doc_not_contains "${file}" "${needle}"; then
     fail "${label}: unexpected '${needle}'"
   fi
 }

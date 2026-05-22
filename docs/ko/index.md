@@ -1,3 +1,13 @@
+---
+doc_id: sfs-docs-index-ko
+title: "Solon Product 문서"
+visibility: oss-public
+doc_type: docs-index
+language: ko
+updated: 2026-05-22
+summary: "Solon Product 문서 entry document"
+load_when: "Read when this product document is directly relevant."
+---
 # Solon Product 문서
 
 **Language**: 한국어 / [English](../en/index.md)

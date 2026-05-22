@@ -10,13 +10,15 @@ fail() {
   exit 1
 }
 
+. "${SCRIPT_DIR}/helpers/doc-search.sh"
+
 assert_contains() {
   local file="$1"
   local needle="$2"
   local label="$3"
 
   [[ -f "${file}" ]] || fail "${label}: missing file ${file}"
-  grep -Fq -- "${needle}" "${file}" || fail "${label}: missing '${needle}'"
+  sfs_doc_contains "${file}" "${needle}" || fail "${label}: missing '${needle}'"
 }
 
 DESIGN_EN="${DIST_DIR}/templates/.sfs-local-template/context/policies/design-knowledge-pack.md"

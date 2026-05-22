@@ -1,357 +1,43 @@
+---
+doc_id: sfs-product-guide-en
+title: "Solon Product - 30-Minute Guide"
+visibility: oss-public
+doc_type: user-guide
+language: en
+updated: 2026-05-22
+summary: "Thin index for Solon Product - 30-Minute Guide"
+load_when: "Start here, then load only the child section needed."
+split_children:
+  - docs/en/guide/01-0-install-and-initialize.md
+  - docs/en/guide/02-1-mental-model.md
+  - docs/en/guide/03-2-start-a-sprint.md
+  - docs/en/guide/04-3-brainstorm-before-plan.md
+  - docs/en/guide/05-4-plan-as-contract.md
+  - docs/en/guide/06-5-implement-one-slice.md
+  - docs/en/guide/07-6-review-the-artifact.md
+  - docs/en/guide/08-7-retro.md
+  - docs/en/guide/09-8-upgrade.md
+  - docs/en/guide/10-9-optional-multi-agent-use.md
+---
 # Solon Product - 30-Minute Guide
+
 
 **Language**: [한국어](../../GUIDE.md) / English
 
 This guide is the short English path for running a first Solon sprint after
 install. For beginner Git/terminal help, use the Korean [BEGINNER-GUIDE.md](../../BEGINNER-GUIDE.md).
 
-## 0. Install And Initialize
-
-> One `brew install` / `scoop install` lets Claude Code
-> (`/sfs`), Gemini CLI (`sfs`), and Codex CLI (`$sfs`) find Solon automatically.
-> Your project keeps the files you read and the records you create.
-
-Mac:
-
-```bash
-brew install MJ-0701/solon-product/sfs
-sfs doctor              # ✅ Claude / Gemini / Codex — three green lines
-
-cd ~/workspace/my-project
-sfs init --layout thin --yes
-sfs status
-```
-
-Windows PowerShell/cmd:
-
-```powershell
-scoop bucket add solon https://github.com/MJ-0701/scoop-solon-product
-scoop install sfs
-sfs.cmd doctor          # same three-line check on Windows
-
-cd C:\workspace\my-project
-git init
-sfs.cmd init --layout thin --yes
-sfs.cmd status
-```
-
-If any line in `sfs doctor` shows `⚠️`, the next line on screen prints the
-single-shot recovery command. The `sfs` binary itself is unaffected.
-
-## 1. Mental Model
-
-Solon gives a project two things:
-
-- the `sfs` command
-- project-local active workbench state in `.sfs-local/`
-
-The files you normally edit are:
-
-| File | Role |
-|---|---|
-| `SFS.md` | Project operating identity |
-| `CLAUDE.md` | Where Claude Code finds Solon |
-| `AGENTS.md` | Where Codex finds Solon |
-| `GEMINI.md` | Where Gemini CLI finds Solon |
-
-Project-local `.claude/`, `.gemini/`, and `.agents/` command/skill files are
-optional. Install those native shortcuts only when a project needs them:
-
-```bash
-sfs agent install all
-```
-
-Old projects can be upgraded into the lighter thin-runtime shape. Use
-`sfs upgrade --layout vendored` only when Solon package files must stay inside
-the project.
-When adopting an existing codebase, `sfs adopt --ddd-tdd-retrofit --apply`
-scans source paths for DDD-lite boundaries, writes a retrofit plan, and seeds
-the next sprint so legacy refactor work starts with characterization/TDD
-evidence before code moves.
-After adoption or upgrade, `sfs tidy --all --apply` can clean targetless
-surface residue: project-local cache notices, orphan logs, placeholder auth,
-and split archive buckets collapse back under `archives/adopt/surface-cleanup`.
-`.sfs-local/` is not a history stack. A file stays visible only when its
-one-line keep reason is clear. `events.jsonl` is an active-sprint ledger: keep
-it while the current sprint is open, then hand durable history to
-`docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` and git history.
-Domainless exploration may still use the legacy
-`docs/solon/<english-workspace>/<yyyyMMdd>/` fallback. Repeated cleanup
-evidence is date-bucketed as
-`.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz`
-instead of many visible timestamp folders.
-
-Current Solon separates divisions, knowledge packs, and review lenses. The local
-`.sfs-local/divisions.yaml` file is the six-slot compatibility activation state
-for older projects. Actual guidance is read from product-level DDD/TDD, backend,
-strategy/PM, QA, design/frontend, infra/DevOps, management-admin, and taxonomy
-packs/lenses. DDD/TDD is the cross-cutting product behavior floor. Backend is a
-dev specialization, management-admin covers finance/bookkeeping/tax/accounting,
-and taxonomy is a cross-cutting language/classification lens.
-The user does not need to choose those labels manually. The AI should read the
-relevant Solon lens when the work calls for it, then explain the judgment in
-plain language.
-
-Agent-skills-style practices are absorbed into existing SFS
-commands instead of becoming new lifecycle commands: source-driven
-implementation, stop-the-line debugging, deprecation/migration, shipping
-checks, and stronger review lenses.
-Small deterministic review findings stay inside the same cycle. For grep
-scope, stale evidence, missing AC/file mapping, evidence path typos, or
-meaning-preserving doc consistency, the agent patches, verifies, and reruns the
-same gate review without asking the user to trigger it. User input is reserved
-for product judgment: scope, architecture, public contract,
-security/privacy/data-loss, cost/latency/model policy, destructive behavior, or
-changed AC meaning.
-
-Sprint handoff documents are shared under
-`docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/report.md` and
-`docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/retro.md`. Users normally
-run `sfs start "<goal>"`; SFS infers high-confidence labels from the natural
-goal. `--domain`, `--subdomain`, and `--feature` are override levers when the
-inference is wrong, while `--workspace <english-name>` remains the legacy
-fallback for early exploration. The prose should use the user's native or
-workspace language, matching the native-language commit message rule.
-
-## 2. Start A Sprint
-
-```bash
-sfs status
-sfs start "todo app v0 - add, complete, delete, persist"
-```
-
-`start` creates the sprint workspace and shows the useful next step. For new
-requirements, that is usually brainstorm.
-
-```text
-sfs brainstorm --simple "..."  # quick cleanup
-sfs brainstorm "..."           # default normal thinking scaffold
-sfs brainstorm --hard "..."    # product-owner hard training
-```
-
-Use Token Diet compact output when you want routine command output in fewer
-tokens without dropping traceability:
-
-```bash
-SFS_OUTPUT_STYLE=compact sfs status
-sfs status --compact
-sfs start "first goal" --output-style compact
-SFS_OUTPUT_STYLE=compact sfs report
-```
-
-Compact output keeps paths, next actions, alternative modes, archive paths, and
-verification fields. Destructive/security/privacy/data-loss warnings, user
-decisions, review findings, and raw-source traceability stay in full clarity
-when shortening would lower quality. Caveman/persona speech is not the default.
-
-As of 0.6.85, the release verifier follows the same evidence floor: successful
-internal install/upgrade smoke logs stay quiet, while failures replay captured
-stdout/stderr so the original cause remains traceable.
-
-Session Continuation Guard covers a different budget. `sfs upgrade` updates the
-runtime and project-local context, but it cannot shrink an already-open
-Claude/Codex/Gemini conversation. If the host token meter is 30% or higher
-before the first implementation/review action of a new WU/sprint, or 50% or
-higher before a new gate, loop wakeup, or cross-review handoff, stop and create
-a fresh session handoff with `report.md`, `review.md`, capture ids,
-commit/branch, and the next SFS command. `.sfs-local/` size is a tidy signal,
-not a token-meter substitute.
-
-If a blank app would help before a sprint, the user should not need to know words
-like Next.js, Spring, Java, or API. The user can simply describe what they want
-to make. During brainstorm, the AI should infer when an initial project setup
-would help and ask in plain language:
-
-```text
-Would you like me to set up the initial project?
-```
-
-After consent, the current AI should choose the native setup path, create the app,
-then return to Solon. It may use `sfs bootstrap "small booking web app"` as an
-internal handoff trigger, but the user should not need to know that command:
-
-```bash
-cd my-new-app
-sfs init --layout thin --yes
-sfs start "first goal"
-```
-
-## 3. Brainstorm Before Plan
-
-Use `brainstorm` to turn raw context into shared understanding.
-
-| Mode | Use it when |
-|---|---|
-| `--simple` | The direction is already clear and you only need cleanup |
-| default `normal` | You are exploring a normal product change |
-| `--hard` | Intent, tradeoffs, validation, or terms are still blurry |
-
-Normal brainstorm should ask a few focused questions. Hard brainstorm should
-keep pressing until important owner decisions are clear enough to plan.
-
-## 4. Plan As Contract
-
-```bash
-sfs plan
-```
-
-A good plan is not a transcript. It should contain:
-
-- measurable acceptance criteria
-- in-scope and out-of-scope boundaries
-- feedback or verification method
-- evaluator criteria
-- first implementation slice
-
-If a key decision is missing, keep the question open instead of guessing.
-
-## 5. Implement One Slice
-
-```bash
-sfs implement "first slice"
-```
-
-Implementation can mean code, docs, strategy, design handoff, taxonomy, QA
-evidence, ops/runbook, or release packaging. The artifact that moved the
-product forward determines the review lens.
-
-## 6. Review The Artifact
-
-```bash
-sfs review
-```
-
-Review is artifact acceptance review. Code review is only the `code` lens.
-GitHub `@codex` PR/code review is external evidence only; a PR approval,
-GitHub check PASS, or `@codex` comment does not replace `sfs review`,
-self-CPO, SFS cross review, or Gate 3/Gate 6 PASS.
-External review/check PASS is a continuation trigger, not a stopping point.
-Codex, Claude, Gemini, and future LLM agents continue with self-CPO first, then
-the configured cross-review order after self-CPO PASS. For a closed sprint, use
-`sfs review --sprint <id> --gate <n>` instead of hand-editing
-`.sfs-local/current-sprint`.
-Solon can infer lenses such as `docs`, `source-docs`, `simplify`, `security`,
-`performance`, `api-contract`, `strategy`, `design`, `taxonomy`, `qa`, `ops`,
-or `release` from sprint evidence. Use `--lens` only when the inference is
-wrong.
-
-## 7. Retro
-
-```bash
-sfs retro
-```
-
-`retro` is the normal sprint completion command. It refines the retro, ensures
-the report exists, folds away noisy temporary records, closes sprint state, and
-creates the local close commit. Use `sfs retro --draft` only when you want to
-open the draft without closing the sprint.
-
-Use `sfs report` separately only when you want to preview or rebuild the report
-without closing the sprint. The full list of optional helpers
-(`report --sprint <id>`, `tidy`, `decision`, `adopt`, etc.) is in the Korean
-GUIDE §11.
-For compact routine output, use `sfs status --compact`,
-`sfs start "..." --output-style compact`, or `sfs report --output-style
-compact`. `sfs report --compact` still means finalize/archive the workbench; it
-is separate from output style.
-For committing Solon work, use `sfs commit plan` to inspect groups, then
-`sfs commit apply --group <name>`. `apply` commits and pushes the current branch
-by default; use `--no-push` only for local sandbox/release testing or offline
-work. Do not route SFS work to a host-local `/commit` skill.
-When a report asks for a decision, the `Q1` label is only a cross-reference. The
-report should spell out what is being decided, why it matters now, the default
-recommendation, and what each option changes. Confirmation should use natural
-language, not internal option bundles such as `A/A/A/C/C confirmed`.
-
-## 8. Upgrade
-
-Do not reinstall a project to update Solon. Run:
-
-```bash
-sfs upgrade
-sfs version --check
-```
-
-On Mac, if the `sfs` command itself is outdated or `sfs upgrade` cannot update
-the runtime, run the tap-qualified Homebrew command first:
-
-```bash
-brew upgrade MJ-0701/solon-product/sfs
-sfs upgrade
-sfs version --check
-```
-
-Windows:
-
-```powershell
-sfs.cmd update
-sfs.cmd version --check
-```
-
-On Windows, `sfs.cmd update` is the one-shot command. It updates Solon and then
-continues into the current project cleanup.
-
-If `sfs.cmd status` or `sfs.cmd context cat kernel` prints generic usage instead
-of real output, treat that as a wrapper regression. If `sfs.cmd start "<goal>"`
-exits 0 but prints nothing, verify `.sfs-local/current-sprint` and then run
-`sfs.cmd status`; empty output alone is not success. The incident summary and
-validation commands are in the
-[Windows SFS wrapper incident report](./windows-wrapper-incident-0.6.56.md).
-
-## 9. Optional Multi-Agent Use
-
-You can use Claude, Codex, and Gemini as a small team, but SFS keeps that pattern
-thin by default.
-
-- Use a read-only researcher when a large codebase, dependency change, or domain
-  map needs broad context before edits.
-- Use implementation workers only after the plan and files_scope are fixed.
-- Use an independent evaluator when the generator should not approve its own
-  work.
-- Share conclusions through the sprint workbench and `docs/solon/domain-map.md`,
-  not through long copied transcripts.
-
-Model routing follows that boundary and is applied by default. Helper-grade
-simple I/O and non-coding helpers use lighter intake models; Codex maps that to
-`gpt-5.4-mini`. Question generation, facilitation, and normal implementation
-workers use standard models; Codex maps them to `gpt-5.4`. C-Level and review
-use high reasoning. Claude workers and coding helpers use Sonnet 4.6; Haiku is
-non-coding helper-only. Gemini uses `gemini-3-pro-auto` for every role.
-Lower-model output that frames questions/options, interprets answers, or affects
-product identity, architecture, gate, AC, or files_scope requires top-model
-advisor review before gate advancement. Advisor means Claude Opus 4.7, Codex
-`gpt-5.5` with xhigh reasoning, Gemini `gemini-3-pro-auto`, or the custom
-high-end equivalent. Gemini uses `gemini-3-pro-auto` for every role; SFS does
-not use Gemini Flash or 2.5 fallback names. Helper-grade simple relay and missing-argument prompts are
-advisor-exempt. Advisor calls do not replace self-CPO PASS. Before
-external/cross review, the author records a self-CPO mini-check covering
-requirements to AC to implementation slices to ADR/decision ids, every AC
-mapped to file/artifact/evidence, and SEED/placeholder/mock/fallback material
-kept as non-acceptance until replaced. `gpt-5.3-codex` is the bounded
-repo-aware coding helper for narrow work that still needs code judgment.
-`gpt-5.3-codex-spark` is only for already-decided, judgment-free mechanical
-implementation chores after scope, files_scope, acceptance criteria, and exact
-edit intent are locked. Escalate to high reasoning when a slice touches
-architecture, public contracts, security, privacy, data-loss risk, release
-gates, or repeated review failure.
-
-Implementation starts in Single Agent mode. Use parallel agents only when the
-plan already splits into disjoint files_scope lanes and each lane can name its
-own one-sentence commit message. The explicit command is `sfs implement
---agent-mode parallel --agents codex,claude[,gemini] "<work slice>"`. Parallel
-lanes need cross review before the final Gate 6 review. Single Agent work also
-needs `sfs review --gate 6` after implementation.
-
-When you first run review through a named executor such as Gemini, Codex, or
-Claude, SFS checks auth before it creates the full CPO prompt. If auth is
-missing, the review stops without recording a failed review run. Run
-`sfs auth login --executor gemini` in a real terminal, verify the bridge with
-`sfs auth probe --executor gemini`, then rerun the same
-`sfs review ... --executor gemini` command. Use `--prompt-only` for manual
-web/app handoff.
-
-Commit messages should use the user's native or workspace language unless the
-repo explicitly requires English.
-
-Long-running commands can also be wrapped with `sfs measure --alive -- <command>`
-when you want visible progress instead of a silent terminal.
+## Document Map
+
+This file keeps the original route as a thin entry point. Detailed body sections are split into the child documents below, and each child carries standalone frontmatter.
+
+- [0. Install And Initialize](./guide/01-0-install-and-initialize.md)
+- [1. Mental Model](./guide/02-1-mental-model.md)
+- [2. Start A Sprint](./guide/03-2-start-a-sprint.md)
+- [3. Brainstorm Before Plan](./guide/04-3-brainstorm-before-plan.md)
+- [4. Plan As Contract](./guide/05-4-plan-as-contract.md)
+- [5. Implement One Slice](./guide/06-5-implement-one-slice.md)
+- [6. Review The Artifact](./guide/07-6-review-the-artifact.md)
+- [7. Retro](./guide/08-7-retro.md)
+- [8. Upgrade](./guide/09-8-upgrade.md)
+- [9. Optional Multi-Agent Use](./guide/10-9-optional-multi-agent-use.md)

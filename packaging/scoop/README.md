@@ -1,3 +1,13 @@
+---
+doc_id: sfs-scoop-packaging-readme
+title: "Scoop 패키징"
+visibility: oss-public
+doc_type: packaging-doc
+language: ko
+updated: 2026-05-22
+summary: "Scoop 패키징 entry document"
+load_when: "Read when this product document is directly relevant."
+---
 # Scoop 패키징
 
 이 디렉터리는 Solon 제품 SFS runtime 의 Scoop manifest 템플릿을 담습니다.

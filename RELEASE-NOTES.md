@@ -7,6 +7,18 @@
 
 ---
 
+## 0.6.99
+
+이번 버전은 제품 문서 하네스를 다시 꽉 조였습니다. 긴 active markdown 은 parent index 와 child 문서로
+분리했고, frontmatter 가 빠지거나 200줄 budget 을 넘거나 분리된 child 문서를 테스트가 못 따라가면
+바로 실패하도록 확인했습니다.
+
+- active 제품 문서는 frontmatter 로 로드 가능한 상태를 유지합니다.
+- `README`, `GUIDE`, `BEGINNER-GUIDE`, 영문/국문 제품 문서와 incident 문서를 200줄 이하 child 문서로 분리했습니다.
+- 문서 테스트는 parent `.md` 뿐 아니라 sibling child directory 까지 검색합니다.
+- release cut allowlist 에 top-level split child directory 를 포함해 배포 산출물에서도 문서가 빠지지 않게 했습니다.
+- 0.6.99 검증은 음성 하네스 3건과 `run-all.sh` 86/0 PASS 입니다.
+
 ## 0.6.98
 
 이번 버전은 이미 코드가 있는 프로젝트를 SFS 로 받아들일 때 DDD/TDD retrofit 경로를 같이 심습니다.

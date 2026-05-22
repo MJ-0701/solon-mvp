@@ -1,4 +1,34 @@
+---
+doc_id: sfs-current-product-shape-en
+title: "Current Product Shape"
+visibility: oss-public
+doc_type: product-reference
+language: en
+updated: 2026-05-22
+summary: "Thin index for Current Product Shape"
+load_when: "Start here, then load only the child section needed."
+split_children:
+  - docs/en/current-product-shape/01-one-line-summary.md
+  - docs/en/current-product-shape/02-handoff-after-start.md
+  - docs/en/current-product-shape/03-token-diet-compact-i-o.md
+  - docs/en/current-product-shape/04-windows-wrapper-stabilization.md
+  - docs/en/current-product-shape/05-three-brainstorm-depths.md
+  - docs/en/current-product-shape/06-purpose-of-hard-mode.md
+  - docs/en/current-product-shape/07-plan-is-a-contract.md
+  - docs/en/current-product-shape/08-capture-is-a-natural-language-flow-checkpoint.md
+  - docs/en/current-product-shape/09-implement-is-not-only-code.md
+  - docs/en/current-product-shape/10-review-is-artifact-acceptance.md
+  - docs/en/current-product-shape/11-thin-multi-agent-supervision.md
+  - docs/en/current-product-shape/12-model-routing-and-responsibility-boundaries.md
+  - docs/en/current-product-shape/13-design-md-and-anti-ai-slop-guardrails.md
+  - docs/en/current-product-shape/14-divisions-knowledge-packs-review-lenses.md
+  - docs/en/current-product-shape/15-retro-closes-the-sprint-by-default.md
+  - docs/en/current-product-shape/16-documentation-shape.md
+  - docs/en/current-product-shape/17-token-harness-hygiene.md
+  - docs/en/current-product-shape/18-choosing-a-mode.md
+---
 # Current Product Shape
+
 
 **Language**: [한국어](../ko/current-product-shape.md) / English
 
@@ -6,474 +36,25 @@ This page explains the recent Solon Product changes as one operating model. The
 goal is not to make users memorize more commands. The goal is to help the user
 keep product-owner judgment strong in an AI-assisted workflow.
 
-## One-Line Summary
-
-Solon turns `start -> brainstorm -> plan -> implement -> review -> retro`
-into a loop that converts fuzzy intent into a verifiable work contract. AI can
-move quickly, but the user's judgment, language, design intent, and validation
-loop stay visible.
-
-```text
-fuzzy intent
--> shared understanding
--> plan contract
--> small implementation slice
--> artifact acceptance review
--> retro close with report
-```
-
-## Handoff After Start
-
-`sfs start "<goal>"` creates the sprint workspace. For new product exploration,
-brainstorm is usually the next useful step, so the successful start output shows
-the depth options even if the user has not read the guide.
-
-```text
-next: sfs brainstorm --simple "..."  # quick cleanup
-      sfs brainstorm "..."           # default normal thinking scaffold
-      sfs brainstorm --hard "..."    # product-owner hard training
-```
-
-The user still types `sfs brainstorm`. Solon simply exposes the available
-depth options for the shape of the work.
-
-## Token Diet / Compact I/O
-
-Token Diet is not "make every AI answer short." It is a compact I/O contract
-for routine status and handoff output: remove decorative filler, keep the
-fields needed for judgment and verification.
-
-```bash
-SFS_OUTPUT_STYLE=compact sfs status
-sfs status --compact
-sfs start "first goal" --output-style compact
-SFS_OUTPUT_STYLE=compact sfs report
-```
-
-Compact `status` keeps `sprint`, `wu`, `gate`, `verdict`, `ahead`, and
-`last_event`. Compact `start` keeps the created sprint path, shared-docs path,
-lazy step-doc state, recommended brainstorm command, `--simple` / `--hard`
-alternatives, and `recommended=normal`. Compact `report` keeps the report path,
-archive path, and compact/finalization state.
-
-Destructive/security/privacy/data-loss warnings, user decisions, review
-findings, raw-source traceability, and verification evidence stay in full
-clarity when shortening would lower quality. Caveman/persona speech is not the
-default; SFS defaults to professional compact output. The quality floor is
-evidence, risk, and raw traceability first; shorter text comes second. The filefunc benchmark
-influenced Context Diet principles such as precise routed context, stable
-search vocabulary, raw-text fallback, and verification. It is not a broad one-file-one-function rule.
-
-As of 0.6.85, the release verifier applies the same quality floor to release
-checks. Successful internal install/upgrade smoke logs stay quiet; failed
-smokes replay captured stdout and stderr with `[verify-product-release]`
-prefixes. Release logs get shorter, but release evidence remains traceable.
-
-When the work closes, `report.md` and `retro.md` are generated under
-`docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` rather than inside
-`.sfs-local`. For example, order item quantity work belongs under
-`order/order-items/quantity-update`. Users normally run `sfs start "<goal>"`;
-SFS infers high-confidence domain labels from that natural goal. Use the legacy
-`--workspace <english-name>` fallback only while the work is still exploration
-without stable domain labels.
-The prose defaults to the user's native or workspace language, matching the
-native-language commit message rule.
-
-## Windows Wrapper Stabilization
-
-The Windows PowerShell/cmd user entrypoint is fixed to `sfs.cmd`. Git Bash/WSL
-keep using `sfs`, like macOS/Linux. Current Scoop manifests keep the
-generated shim target on packaged `bin\sfs.ps1`, but the post-install hook
-overwrites the shims-directory `sfs.cmd`, `sfs.ps1`, and extensionless `sfs`
-with deterministic wrappers because generated `sfs.cmd` / `sfs.ps1` shims can
-drop arguments before the package sees them. The PowerShell/cmd smoke and user
-guidance only treat the verified `sfs.cmd` route as the Windows pass condition.
-Packaged `sfs.cmd` remains a direct-run compatibility trampoline and passes
-arguments to `sfs.ps1` through the `SFS_NATIVE_ARGC` / `SFS_NATIVE_ARG_N`
-numbered env bridge. If that is also empty, `sfs.ps1` reads the original
-`SFS_NATIVE_RAW_ARGS`, delayed-expansion `SFS_NATIVE_CMDLINE`, the parent
-`cmd.exe` command line, and `CMDCMDLINE` as fallbacks.
-Saved command-line parsing also trims `cmd.exe` shell-control tails such as `&& sfs.cmd --help`.
-`sfs.ps1` owns both read-only commands and mutating commands such as
-`start`. Mutating commands go through the `sfs.cmd -> sfs.ps1 -> Bash runtime`
-bridge. The hardened Scoop `sfs.cmd` shim also carries the saved raw tail into
-the environment before writing the numbered env bridge; `sfs.ps1` reads it as a
-fallback when the env bridge is empty. That is different from the old
-single-source `-File ... %*` bridge that failed under generated Scoop shims. The
-raw Git Bash `%*` path, batch-label forwarding path,
-single-source `-File ... %*` bridge, `-Command @args` bridge, empty `%1..%n` path, generated bare
-`sfs` PowerShell shim path, generated shim -> packaged `.cmd` path, and generated `sfs.cmd` shim path are no longer defaults because
-they already failed for sandbox startup, argument forwarding,
-UTF-8 output, and Scoop shims. `sfs.cmd upgrade` also delegates Scoop
-self-upgrade to `sfs.ps1` instead of running `scoop update sfs` from the batch
-file that Scoop replaces. `sfs.ps1` normalizes numbered env bridge args,
-the raw arg tail, the saved cmdline, the parent command line, `CMDCMDLINE`, and `$MyInvocation.UnboundArguments`, and owns `version`,
-`status`, `guide`, `context`, Scoop self-upgrade, and Bash fallback. `sfs.cmd`
-exits on the same parsed line after calling PowerShell, and Windows runtime `.ps1` / `.cmd`
-files stay ASCII-safe for Windows PowerShell 5.1. That covers the `context cat`
-/ `start` usage-only regression, the batch tail-fragment regression, and the
-PowerShell parser regression.
-
-An empty sprint directory after `sfs start` can be normal. Step files are created
-later by `brainstorm`, `plan`, `review`, and `retro`. Empty command output,
-usage-only `sfs.cmd status`, or usage-only `sfs.cmd context cat kernel` is a
-failure signal. The full root cause and validation flow are in the
-[Windows SFS wrapper incident report](./windows-wrapper-incident-0.6.56.md).
-
-## Three Brainstorm Depths
-
-| Mode | Aliases | Role |
-|---|---|---|
-| `--simple` | `--easy`, `--quick` | Quickly clean up an already clear direction and prepare a plan seed |
-| default `normal` | none | Summarize requirements while asking focused questions about contradictions, priority, success criteria, and validation |
-| `--hard` | none | Press the user to think like a product owner about intent, sacrifices, boundaries, and terms |
-
-The three modes step up in pressure: quick cleanup, thinking scaffold, hard
-training.
-
-- `simple`: fast cleanup when the answer is already mostly known
-- `normal`: the default for most work
-- `hard`: hard training when product judgment or system design is blurry
-
-## Purpose Of Hard Mode
-
-`brainstorm --hard` intentionally slows down the "sure, I will just build it"
-motion. It keeps asking small but important questions until these things are
-visible:
-
-- the real problem being solved
-- conflicting desires
-- priority and sacrifice
-- how success or failure will be judged
-- the boundary of the work
-- the terms the project should use
-
-This is not less AI assistance. It is AI assistance that strengthens user
-ownership before execution starts.
-
-## Plan Is A Contract
-
-`sfs plan` is not a pretty transcript of the brainstorm. The plan should contain:
-
-- measurable acceptance criteria
-- in-scope and out-of-scope boundaries for the sprint
-- feedback loop, smoke test, review, or validation method
-- evaluator criteria for pass, hold, or fail
-- the next implementation slice
-
-If a key owner decision is missing, Solon should not fill it with a guess. It
-should keep the question open.
-
-Decision prompts do not end at opaque `Q1`, `A/B/C/D`, or "recommended A"
-labels. When options exist, Solon shows every viable option with its meaning
-and consequence, then marks the recommendation as the default. If that would be
-too dense, Solon asks the decisions one at a time instead of hiding choices.
-Compact bundles such as `A/A/A/C/C confirmed` are not user-facing confirmation
-phrases; use natural language such as "confirm the recommended path".
-
-## Capture Is A Natural-Language Flow Checkpoint
-
-During SFS work, implementation direction, review order, exceptions/waivers,
-blockers, and evidence can change in natural conversation. Before the next
-command, record those turns with `sfs capture` so the current sprint `log.md`
-and `events.jsonl` keep the flow state.
-
-```sh
-sfs capture --kind review-order --gate 6 "Codex self-CPO first, then Gemini, then Claude."
-sfs note "GitHub @codex review passed, but it is external evidence only."
-```
-
-`capture` is not a full transcript recorder. Store only the smallest checkpoint
-that review or retro would lose if it stayed in chat memory. Prompt bodies,
-raw transcripts, bridge/review scratch, and long command logs stay in temporary
-artifacts or cold archives; core product context keeps conclusions and evidence
-paths only.
-
-## Implement Is Not Only Code
-
-In Solon, implementation artifacts include code, but also:
-
-- documentation updates
-- strategy memos
-- design handoffs
-- taxonomy or domain language work
-- QA evidence
-- ops/runbooks
-- release packaging
-- management/admin evidence: invoices, receipts, cashflow, tax/accounting
-  questions, monthly close notes
-
-In the AI coding era, treating implementation as only code makes the workflow
-too narrow. Solon reviews the actual artifact that moved the product forward.
-
-## Review Is Artifact Acceptance
-
-`sfs review` is not always code review. The command stays the same, while Solon
-infers the right lens from sprint evidence and changed artifacts.
-
-GitHub `@codex` PR/code review is external evidence only. A PR approval,
-GitHub check PASS, or `@codex` comment does not replace `sfs review`,
-self-CPO, SFS cross review, or Gate 3/Gate 6 PASS.
-
-External review/check PASS is a continuation trigger, not a stopping point.
-Codex, Claude, Gemini, and future LLM agents do not end at PASS; they continue
-with the next unmet SFS review command: self-CPO first, then the configured
-cross-review order after self-CPO PASS.
-
-Session Continuation Guard covers the host conversation itself. Even when
-`sfs upgrade` is current, an already-open Claude/Codex/Gemini conversation
-keeps its history and token meter. At 30% before the first implementation or
-review action of a new WU/sprint, 50% before a new gate/loop/cross-review, or
-after multiple WUs/sprints or loop wakeups in the same chat, agents write a
-compact handoff with `report.md`, `review.md`, capture ids, commit/branch, and
-the next SFS command, then resume in a fresh session.
-
-| Lens | Primary concern |
-|---|---|
-| `code` | correctness, tests, regressions, maintainability |
-| `docs` | reader flow, accuracy, stale claims, missing links |
-| `source-docs` | official docs/source/version evidence |
-| `simplify` | behavior-preserving simplification, dead-code removal |
-| `security` | auth, secrets, PII, untrusted input boundaries |
-| `performance` | baseline, target metric, measured regression risk |
-| `api-contract` | public interface, schema, errors, compatibility |
-| `strategy` | decision quality, tradeoffs, feasibility, next action |
-| `design` | user flow, consistency, visual/interaction evidence |
-| `taxonomy` | terms, categories, naming boundaries |
-| `qa` | coverage, smoke evidence, reproduction, residual risk |
-| `ops` | runbook, deployment, rollback, observability |
-| `management-admin` | finance records, bookkeeping, tax/accounting questions, cash evidence |
-| `release` | version, changelog, package channel, verification |
-
-The user can keep saying `sfs review`. Agent-skills-style judgment stays inside
-existing review lenses rather than becoming new commands. `--lens` is only an
-override when the inference is wrong.
-
-Review loops should close small deterministic findings without bouncing work
-back to the user. If a partial/fail result points at grep scope, stale measured
-evidence, missing AC-to-file/artifact mapping, an evidence path typo, or
-documentation consistency that preserves meaning, the agent should patch it,
-run the smallest verification, and invoke the same gate review again in the
-same cycle. Ask the user only when product judgment is required: scope,
-architecture, public contract, security/privacy/data-loss posture,
-cost/latency/model policy, destructive behavior, or changed AC meaning.
-
-Current `sfs review` is commit-aware. A clean working tree no longer means
-the review prompt is empty: SFS includes reviewable files from the latest commit,
-current shared handoff docs, and small ADR/report documents in full within the
-bounded evidence cap.
-
-When a closed sprint needs another review, do not hand-edit
-`.sfs-local/current-sprint` or extract archives manually. Use
-`sfs review --sprint <id> --gate <n>`. SFS restores the latest cold archive into
-the workbench and does not overwrite already visible workbench docs.
-
-## Thin Multi-Agent Supervision
-
-SFS does not ask Claude, Codex, and Gemini to run at the same time by default.
-The default is one small work unit, with role separation only when it reduces
-context pollution or self-validation risk.
-
-- A researcher is useful when the codebase, domain, or dependency change needs
-  broad read-only mapping before edits.
-- A worker is useful after the plan and files_scope are fixed.
-- An evaluator is useful when the generator should not approve its own work.
-- Shared memory is not a long transcript. It is the sprint workbench,
-  `review.md`, `report.md`, and, when terminology needs to survive the sprint,
-  `docs/solon/domain-map.md`.
-
-This is a thin supervisor pattern that keeps the useful independence of
-multiple agents without making coordination the product.
-
-## Model Routing And Responsibility Boundaries
-
-The same responsibility split applies to model selection. The model that plans
-the contract and the worker that implements a fixed slice do not have the same
-job.
-
-| Role | Responsibility | Default model route |
-|---|---|---|
-| Helper-grade intake | Simple relay, missing-argument prompts, low-risk short summaries, tiny read-only notes | Claude uses the Haiku tier for non-coding helpers only; Codex uses `gpt-5.4-mini` |
-| Facilitator / question | Brainstorm question generation, option framing, answer summaries | Claude uses the Sonnet 4.6 tier; Codex uses `gpt-5.4` |
-| C-Level / review | Intent, architecture, AC, review, escalation | High reasoning. Codex uses `gpt-5.5`; Claude uses the Opus tier |
-| Claude worker | Fixed files_scope implementation slice | Sonnet 4.6 tier |
-| Codex worker | Fixed files_scope implementation slice that still needs code judgment | `gpt-5.4` |
-| Codex helper | Simple relay, grep summaries, formatting, and non-coding helper chores | `gpt-5.4-mini` |
-| Codex coding helper | Narrow repo-aware code support | `gpt-5.3-codex` |
-| Codex mechanical implementation helper | Already-decided, judgment-free simple implementation chores | `gpt-5.3-codex-spark` |
-
-This routing is the default. Users do not need to configure it separately.
-`current_model` is an explicit opt-out for projects that want the currently
-selected host model for every role. Helper-grade simple I/O is advisor-exempt.
-When a lower-model output frames questions/options, interprets answers, or
-affects product identity, architecture, gate, AC, or files_scope, top-model
-advisor review is required before gate advancement. Advisor means Claude Opus
-4.7, Codex `gpt-5.5` with xhigh reasoning, Gemini `gemini-3-pro-auto`,
-or the custom high-end equivalent. Gemini uses `gemini-3-pro-auto` for every
-role; SFS does not use Gemini Flash or 2.5 fallback names.
-Advisor calls do not replace self-CPO PASS. Before external/cross review, the
-author records a self-CPO mini-check covering requirements to AC to
-implementation slices to ADR/decision ids, every AC mapped to file/artifact/
-evidence, and SEED/placeholder/mock/fallback material kept as non-acceptance
-until replaced.
-
-For Codex, the normal implementation worker is `gpt-5.4`. `gpt-5.3-codex` is a
-bounded repo-aware coding helper, not the normal worker default. Spark is
-narrower: use `gpt-5.3-codex-spark` only for already-decided mechanical
-implementation chores after scope, files_scope, acceptance criteria, and exact
-edit intent are locked. Examples include file moves, import/path rewrites,
-generated index sync, and deterministic test expectation updates. If a slice
-touches architecture, public contracts, security, privacy, data-loss risk,
-release gates, or repeated review failure, escalate to high reasoning or send
-it back to C-Level. Claude coding-capable worker/helper lanes use Sonnet 4.6;
-Haiku must not write code. Substantive research should prefer a Gemini 3 Pro
-auto researcher when available.
-
-Implement execution defaults to Single Agent. Users can opt into multiple
-agents, but only after the plan is split into independent lanes. Each lane must
-have disjoint files_scope and a one-sentence proposed commit message. If that
-sentence is unclear, do not split the work. Parallel agent implementation must
-record cross review evidence before `sfs review --gate 6` can pass, and Single
-Agent implementation still requires Gate 6 review before completion.
-
-Named executor review for Gemini, Codex, and Claude must pass auth preflight
-before SFS creates the full CPO prompt. On a new project or terminal, an
-unauthenticated `sfs review --executor gemini` stops without writing review
-artifacts. Run `sfs auth login --executor gemini` in a real terminal, verify the
-bridge with `sfs auth probe --executor gemini`, then rerun the same review
-command. Use `--prompt-only` for manual web/app handoff.
-
-Commit messages default to the user's native or workspace language. English is
-the default only when English is the user/repo language; otherwise agents should
-write the message in the language the user actually works in.
-Solon commit grouping belongs to the SFS command surface, not a host-local
-`/commit` skill. Use `sfs commit plan` to inspect groups and
-`sfs commit apply --group <name>` to commit and push the selected group. Use
-`--no-push` only for SFS release sandboxes or explicitly offline work.
-
-## Design.md And Anti-AI-Slop Guardrails
-
-Design/frontend work treats `design.md` or
-`docs/solon/design.md` as the AI-readable design-system contract. The file is a
-small contract for colors, typography, spacing, radius, shadow, component
-variants, icon style, forbidden values, and rationale.
-
-The common AI failure mode is regression toward average-looking UI. If every
-screen invents new colors, spacing, radius, icon weights, or generic SaaS
-gradients, the feature can work while the product loses taste and identity.
-Solon's design review treats that as AI-slop risk and checks token drift,
-Korean typography fit, and desktop/mobile screenshot evidence.
-
-Wanted Montage-style components, a coherent icon family such as Coolicons, and
-a Korean-capable font such as Pretendard can be useful starter references for
-Korean products. They are starting points, not vendor lock-in. If an existing
-product design system exists, it wins.
-
-## Divisions / Knowledge Packs / Review Lenses
-
-Current Solon documents divisions, knowledge packs, and review lenses as
-separate surfaces. `.sfs-local/divisions.yaml` is the six core activation slots
-for compatibility with existing projects: `dev`, `strategy-pm`, `qa`, `design`,
-`infra`, and `taxonomy`. It is runtime activation state, not the full
-knowledge-pack/review-lens registry.
-
-Current filled guidance is provided through the product-level DDD/TDD, backend,
-strategy/PM, QA, design/frontend, infra/DevOps, management-admin, and taxonomy
-knowledge packs/review lenses. DDD/TDD is a cross-cutting product behavior
-floor; backend is one specialization. Each pack gives Solon a compact sense of
-what to watch, what to ask, and what evidence should count for that kind of
-work.
-
-The user should not need to memorize this list. Solon reads only the lens that
-fits the work. A small docs edit stays light. A release, architecture change, or
-risky workflow gets stronger questions and evidence checks. The criteria become
-richer while the user-facing surface stays simple.
-Backend is a dev specialization, and management-admin covers finance,
-bookkeeping, tax, and accounting. The taxonomy slot remains in the legacy
-activation file for compatibility, but product guidance treats taxonomy as a
-cross-cutting language/classification lens rather than an org department.
-
-Useful disciplines from the agent-skills benchmark are absorbed
-the same way. Official-docs implementation flows through `implement` and the
-`source-docs` lens, stop-the-line debugging flows through implementation
-verification, deprecation/migration flows through `adopt` and `tidy`, and
-shipping checks flow through `release`. SFS strengthens the existing flow
-instead of adding more lifecycle commands.
-
-## Retro Closes The Sprint By Default
-
-A sprint is complete when it is closed, and `sfs retro` does that in one step:
-
-```text
-sfs retro
-```
-
-It refines `report.md` and `retro.md`, packs workbench evidence and temporary
-review scratch into one cold archive bundle, closes the sprint state, and
-creates the local close commit. Use `sfs retro --draft` when you want to open
-the draft without closing.
-Older installs that still have loose sprint archives or separate review-run
-archives are compacted by `sfs upgrade` into compressed migration bundles.
-Runtime upgrade, agent install, and profile rollback backups are also kept as
-`*.tar.gz` + `manifest.txt` bundles instead of loose project files.
-`events.jsonl` is not durable history. It is visible only as the current
-active-sprint ledger. Once there is no active sprint, or once stale events
-belong only to older sprints, upgrade/tidy removes or archives that residue.
-The durable handoff is the shared
-`docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` document set plus git
-history.
-Repeated surface-cleanup runs are also compacted by date: the visible surface is
-`.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/manifest.txt` plus
-`surface-cleanup.tar.gz`, not a list of same-day timestamp directories.
-In thin layout, project-local `.claude/`, `.gemini/`, and `.agents/`
-command/skill adapters are also removed from the default surface. Root adapter
-docs point agents at the global `sfs` runtime, and projects that still need
-native slash/skill files can opt in with `sfs agent install all`.
-Global `sfs` / `sfs.cmd upgrade` also promotes existing vendored projects to
-the thin surface. Use `sfs upgrade --layout vendored` only when a project must
-keep runtime files locally.
-
-## Documentation Shape
-
-README is the map, not the warehouse. Details live in focused pages.
-
-```text
-README.md
-GUIDE.md
-docs/ko/index.md          docs/en/index.md
-docs/ko/current-product-shape.md   docs/en/current-product-shape.md
-docs/ko/10x-value.md       docs/en/10x-value.md
-docs/en/guide.md
-```
-
-Each page has a `Language` link at the top to swap between Korean and English.
-
-## Token / Harness Hygiene
-
-SFS bakes token and attention hygiene into routed context so users do not need
-to install separate plugins. The normal operating flow absorbs four habits:
-
-- Token usage check: when token drain feels abnormal, inspect the usage report
-  before guessing.
-- Thin adapter docs: keep `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` slim and move
-  durable rules into routed context or docs.
-- Search-before-read in large codebases: prefer symbol or semantic search before
-  broad file reads.
-- Automate repeated mistakes: turn the same recurring AI mistake into a
-  guardrail, check, or hook instead of explaining it again.
-
-The same hygiene applies to Claude, Codex, Gemini, and any other agent through
-their equivalent usage reports, LSP/index tools, and hook mechanisms.
-
-## Choosing A Mode
-
-| Situation | Recommendation |
-|---|---|
-| Scope is already clear | `sfs brainstorm --simple` or go straight to `sfs plan` |
-| Defining a new feature | `sfs brainstorm` |
-| Intent and priority are unstable | `sfs brainstorm --hard` |
-| Design, language, or validation is unclear | `sfs brainstorm --hard` |
-| Continuing a previous plan/ADR | Record inheritance and start with `sfs implement` |
-
-The point is not to move slowly. The point is to avoid moving faster than the
-feedback loop can illuminate.
+## Document Map
+
+This file keeps the original route as a thin entry point. Detailed body sections are split into the child documents below, and each child carries standalone frontmatter.
+
+- [One-Line Summary](./current-product-shape/01-one-line-summary.md)
+- [Handoff After Start](./current-product-shape/02-handoff-after-start.md)
+- [Token Diet / Compact I/O](./current-product-shape/03-token-diet-compact-i-o.md)
+- [Windows Wrapper Stabilization](./current-product-shape/04-windows-wrapper-stabilization.md)
+- [Three Brainstorm Depths](./current-product-shape/05-three-brainstorm-depths.md)
+- [Purpose Of Hard Mode](./current-product-shape/06-purpose-of-hard-mode.md)
+- [Plan Is A Contract](./current-product-shape/07-plan-is-a-contract.md)
+- [Capture Is A Natural-Language Flow Checkpoint](./current-product-shape/08-capture-is-a-natural-language-flow-checkpoint.md)
+- [Implement Is Not Only Code](./current-product-shape/09-implement-is-not-only-code.md)
+- [Review Is Artifact Acceptance](./current-product-shape/10-review-is-artifact-acceptance.md)
+- [Thin Multi-Agent Supervision](./current-product-shape/11-thin-multi-agent-supervision.md)
+- [Model Routing And Responsibility Boundaries](./current-product-shape/12-model-routing-and-responsibility-boundaries.md)
+- [Design.md And Anti-AI-Slop Guardrails](./current-product-shape/13-design-md-and-anti-ai-slop-guardrails.md)
+- [Divisions / Knowledge Packs / Review Lenses](./current-product-shape/14-divisions-knowledge-packs-review-lenses.md)
+- [Retro Closes The Sprint By Default](./current-product-shape/15-retro-closes-the-sprint-by-default.md)
+- [Documentation Shape](./current-product-shape/16-documentation-shape.md)
+- [Token / Harness Hygiene](./current-product-shape/17-token-harness-hygiene.md)
+- [Choosing A Mode](./current-product-shape/18-choosing-a-mode.md)

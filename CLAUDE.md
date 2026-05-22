@@ -1,3 +1,13 @@
+---
+doc_id: sfs-product-claude
+title: "CLAUDE.md — `solon-mvp` distribution repo 유지보수 지침"
+visibility: oss-public
+doc_type: agent-entry
+language: ko
+updated: 2026-05-22
+summary: "CLAUDE.md — `solon-mvp` distribution repo 유지보수 지침 entry document"
+load_when: "Read when this product document is directly relevant."
+---
 # CLAUDE.md — `solon-mvp` distribution repo 유지보수 지침
 
 > 본 파일은 **`solon-mvp` repo 자체** (distribution) 를 다룰 때 Claude Code 세션이 참조하는 지침.

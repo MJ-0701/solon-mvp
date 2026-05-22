@@ -1,3 +1,13 @@
+---
+doc_id: sfs-plugin-readme
+title: "Solon multi-CLI 마켓플레이스"
+visibility: oss-public
+doc_type: plugin-doc
+language: ko
+updated: 2026-05-22
+summary: "Solon multi-CLI 마켓플레이스 entry document"
+load_when: "Read when this product document is directly relevant."
+---
 # Solon multi-CLI 마켓플레이스
 
 > Solon SFS 를 Claude Code, Gemini CLI, Codex CLI 에서 같은 방식으로 발견하게 만드는

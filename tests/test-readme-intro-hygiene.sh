@@ -11,14 +11,16 @@ fail() {
   exit 1
 }
 
+. "${SCRIPT_DIR}/helpers/doc-search.sh"
+
 assert_contains() {
   local needle="$1"
-  grep -Fq -- "${needle}" "${README}" || fail "README missing '${needle}'"
+  sfs_doc_contains "${README}" "${needle}" || fail "README missing '${needle}'"
 }
 
 assert_not_contains() {
   local needle="$1"
-  if grep -Fq -- "${needle}" "${README}"; then
+  if ! sfs_doc_not_contains "${README}" "${needle}"; then
     fail "README should not contain release/spec detail '${needle}'"
   fi
 }

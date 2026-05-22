@@ -1,3 +1,13 @@
+---
+doc_id: sfs-product-agents
+title: "AGENTS.md — `solon-mvp` distribution repo (Codex/Cowork entry)"
+visibility: oss-public
+doc_type: agent-entry
+language: en
+updated: 2026-05-22
+summary: "AGENTS.md — `solon-mvp` distribution repo (Codex/Cowork entry) entry document"
+load_when: "Read when this product document is directly relevant."
+---
 # AGENTS.md — `solon-mvp` distribution repo (Codex/Cowork entry)
 
 > 본 파일은 **`solon-mvp` repo 자체** (distribution) 를 다룰 때 Codex / Cowork 세션이

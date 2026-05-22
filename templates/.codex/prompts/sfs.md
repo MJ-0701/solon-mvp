@@ -1,3 +1,13 @@
+---
+doc_id: sfs-codex-legacy-prompt
+title: "Solon SFS — Codex legacy prompt"
+visibility: oss-public
+doc_type: agent-template
+language: en
+updated: 2026-05-22
+summary: "Solon SFS — Codex legacy prompt entry document"
+load_when: "Read when this product document is directly relevant."
+---
 # Solon SFS — Codex legacy prompt
 
 Prefer project `.agents/skills/sfs/SKILL.md`. This fallback keeps the same
