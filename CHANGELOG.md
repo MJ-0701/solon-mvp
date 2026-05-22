@@ -1,3 +1,37 @@
+## [0.6.100] - 2026-05-22
+
+> **SFS now recommends an Obsidian LLM wiki continuity layer for new and
+> existing SFS projects without making Obsidian a hard dependency.**
+
+### Added
+
+- Added an Obsidian LLM wiki policy for SFS projects. New projects can create a
+  repo-root vault plus `llm-wiki/` baseline after scaffold; existing projects
+  can migrate docs by reference after `sfs adopt` before the next sprint relies
+  on retrieval context.
+- Added English and Korean current-product-shape docs describing the Obsidian
+  continuity rule and its non-blocking fallback.
+- Added product template guidance for Codex, Claude, Gemini, and project-local
+  SFS agents so future installs can surface the same recommendation.
+- Added `test-obsidian-llm-wiki-guidance.sh` to guard policy routing,
+  non-coercive wording, new/existing project hooks, `.gitignore` boundaries,
+  adapter template guidance, and product docs.
+
+### Changed
+
+- `start`, `adopt`, `plan`, `implement`, kernel, and knowledge-pack routing now
+  know when to recommend or update an Obsidian-backed LLM wiki.
+- Obsidian workspace/cache/plugin payloads are excluded from generated project
+  `.gitignore` guidance while shared vault settings remain allowed.
+- Root project guidance now points non-trivial work through the Obsidian LLM
+  wiki TopicHub/index workflow without replacing source files as SSoT.
+
+### Tests
+
+- Full source regression passed with 87 tests.
+- Wiki link checking, Obsidian JSON parsing, and `git diff --check` passed
+  before release preparation.
+
 ## [0.6.99] - 2026-05-22
 
 > **Product markdown is now frontmatter-loadable, split below the active

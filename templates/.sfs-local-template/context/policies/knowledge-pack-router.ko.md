@@ -30,6 +30,11 @@ load_when:
   - integration
   - API
   - AWS
+  - Obsidian
+  - 옵시디언
+  - llm wiki
+  - 위키
+  - 문서 이관
 status: filled-v1
 content_policy: "read only this router first; read full packs only when matching signals make them useful"
 ---
@@ -58,6 +63,9 @@ risk 에 맞는 최소 check 만 활성화하는 것이다. 이 router 는 `.sfs
 - DDD/TDD signals: `DDD`, `TDD`, `domain model`, `product behavior`,
   `acceptance criteria`, `aggregate`, `value object`, `test-first`, `failing
   test`, `red-green`.
+- Obsidian/wiki signals: `Obsidian`, `옵시디언`, `llm-wiki`, `위키`,
+  `knowledge base`, `문서 이관`, `existing project`, `new project`,
+  `sprint continuity`.
 
 ## Read order
 
@@ -95,6 +103,8 @@ risk 에 맞는 최소 check 만 활성화하는 것이다. 이 router 는 `.sfs
 - `policies/taxonomy-knowledge-pack.ko.md`
 - `policies/ddd-tdd-knowledge-pack.md`
 - `policies/ddd-tdd-knowledge-pack.ko.md`
+- `policies/obsidian-llm-wiki.md`
+- `policies/obsidian-llm-wiki.ko.md`
 
 ## Depth Rules
 

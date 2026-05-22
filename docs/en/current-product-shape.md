@@ -26,6 +26,7 @@ split_children:
   - docs/en/current-product-shape/16-documentation-shape.md
   - docs/en/current-product-shape/17-token-harness-hygiene.md
   - docs/en/current-product-shape/18-choosing-a-mode.md
+  - docs/en/current-product-shape/19-obsidian-llm-wiki-continuity.md
 ---
 # Current Product Shape
 
@@ -58,3 +59,4 @@ This file keeps the original route as a thin entry point. Detailed body sections
 - [Documentation Shape](./current-product-shape/16-documentation-shape.md)
 - [Token / Harness Hygiene](./current-product-shape/17-token-harness-hygiene.md)
 - [Choosing A Mode](./current-product-shape/18-choosing-a-mode.md)
+- [Obsidian LLM Wiki Continuity](./current-product-shape/19-obsidian-llm-wiki-continuity.md)

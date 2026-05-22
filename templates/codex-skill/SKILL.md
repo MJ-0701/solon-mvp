@@ -52,6 +52,9 @@ required.
    language, and first evidence before worker handoff; use DDD-lite boundaries
    when code is touched; keep invariants out of adapters; prefer failing,
    characterization, smoke, or review evidence before implementation.
+   Obsidian LLM wiki is a recommended companion for SFS continuity, not a hard
+   dependency; load `policies/obsidian-llm-wiki.md` when setup/adoption/docs
+   migration or multi-sprint retrieval is in scope.
 12. For implementation and review work, follow the routed context guardrails:
     surface material assumptions, choose the smallest useful slice, keep changes
     surgical, read actual files/errors before fixing, verify before completion,

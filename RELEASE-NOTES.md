@@ -7,6 +7,19 @@
 
 ---
 
+## 0.6.100
+
+이번 버전은 SFS 프로젝트가 Obsidian LLM wiki 를 함께 쓰는 기본 흐름을 추가합니다. 무료이고
+Markdown 기반인 Obsidian 을 권고 기본값으로 삼되, 사용자가 원하지 않거나 환경상 쓸 수 없으면
+기존 SFS 문서 산출물로 계속 진행합니다.
+
+- 신규 SFS 프로젝트는 scaffold 뒤 repo root vault 와 `llm-wiki/` baseline 을 권장합니다.
+- 기존 프로젝트는 `sfs adopt` 이후 기존 문서를 복사하지 않고 source link 중심으로 wiki 에 이관하도록 안내합니다.
+- 다음 sprint 부터는 broad repo scan 전에 wiki map 을 먼저 읽는 retrieval 흐름을 권장합니다.
+- Codex/Claude/Gemini/SFS agent template 과 product docs 에 같은 정책을 반영했습니다.
+- Obsidian workspace/cache/plugin payload 는 commit 에 들어가지 않도록 `.gitignore` guidance 를 추가했습니다.
+- 0.6.100 검증은 `run-all.sh` 87/0 PASS, wiki link check, Obsidian JSON parse, `git diff --check` PASS 입니다.
+
 ## 0.6.99
 
 이번 버전은 제품 문서 하네스를 다시 꽉 조였습니다. 긴 active markdown 은 parent index 와 child 문서로

@@ -16,6 +16,10 @@ Rules:
   `sfs adopt --ddd-tdd-retrofit --apply "<brief>"`. It scans source paths for
   DDD-lite boundaries, writes `ddd-tdd-retrofit.md`, and seeds
   `docs/solon/domain-map.md`.
+- For existing projects with meaningful docs, recommend an Obsidian LLM wiki
+  migration by reference after `adopt --apply`: preserve source docs as SSoT,
+  create `llm-wiki/` maps/indexes, and start the next real sprint with that
+  wiki as retrieval context. Do not block adoption if the user declines.
 - Retrofit adoption does not move arbitrary project code. If DDD is missing,
   the next real sprint should choose one product behavior slice, write
   characterization/failing/smoke evidence first, then move that slice behind
@@ -48,3 +52,5 @@ Rules:
   active sprint means it is residue.
 - Do not expand old sprint/archive material into the active working context unless the user asks for archaeology or recovery.
 - After apply, the next useful move is usually `sfs start "<first real cleanup slice>"`, then Gate 2 (Brainstorm) if scope is still fuzzy.
+- If wiki migration is accepted, the cleanup slice may be
+  `sfs start "Obsidian LLM wiki baseline"` before feature implementation.

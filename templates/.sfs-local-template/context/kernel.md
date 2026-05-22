@@ -12,6 +12,9 @@ load_when: ["always", "sfs", "entry"]
 - Shared handoff/history docs live under `docs/solon/<english-workspace>/<yyyyMMdd>/`;
   project-wide Solon reference docs may live under `docs/solon/`.
   `.sfs-local/` is private local workbench state and should remain thin.
+- Obsidian LLM wiki is a recommended companion, not a hard dependency. For
+  non-trivial SFS projects, prefer repo-root vault + `llm-wiki/` maps; if the
+  user declines or the repo cannot use Obsidian, record the gap and continue.
 - Stop on mutex conflicts and report owner/domain.
 - Ask only 1-3 blocking questions.
 - Decision questions must be self-contained: before any `Q1`, `D1`, or option

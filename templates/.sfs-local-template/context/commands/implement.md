@@ -100,6 +100,9 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - Use current sprint artifacts for plan/checklist/context notes. Create
   root-level `checklist.md` or `context-notes.md` only when the user asks for
   those exact files.
+- If `llm-wiki/` exists and the slice changes core design, domain language,
+  docs, tests, CI, release flow, package/runtime components, or knowledge-pack
+  semantics, update the relevant wiki map or record a follow-up gap.
 - Token discipline: inspect the smallest relevant files, prefer symbol/semantic
   search or precise `rg` before broad reads, and do not carry old workbench
   history into the turn unless current report/plan evidence is insufficient.
@@ -158,6 +161,9 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   when practical.
 - Load `policies/knowledge-pack-router.md` first, or `policies/knowledge-pack-router.ko.md`
   for Korean preference. Apply only the matching division router ids.
+- Load `policies/obsidian-llm-wiki.md` when the slice creates/migrates project
+  docs, begins an existing-project adoption, or needs durable retrieval across
+  future sprints.
 - If backend/JVM/Spring/JPA/transaction/batch/integration/DevOps/AWS work is in
   scope, read `policies/backend-knowledge-pack.md` **or**
   `policies/backend-knowledge-pack.ko.md` **only** after router selection.

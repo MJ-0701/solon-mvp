@@ -113,6 +113,8 @@ Rules:
   use `docs/solon/<english-workspace>/<yyyyMMdd>/` only as the domainless exploration fallback.
   Project-wide Solon reference docs use named files under `docs/solon/` such as `domain-map.md`. `.sfs-local/` is
   private local workbench state and should stay gitignored unless the team opts in.
+- Obsidian LLM wiki is recommended for multi-sprint retrieval when useful:
+  repo-root vault + `llm-wiki/` maps by reference, not copied source docs.
 - For Solon commit grouping, guide users to `sfs commit plan` and
   `sfs commit apply --group <name>`. `sfs commit apply` commits and pushes the
   current branch by default in user projects; use `--no-push` only for local

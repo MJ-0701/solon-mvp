@@ -1,5 +1,11 @@
 # Solon Product — 아래 블록은 solon-product 의 install.sh / upgrade.sh 가 관리.
 # 기본 정책: Solon runtime/state 는 프로젝트 비공개 workbench 이다.
 # 공유할 문서는 project root 의 docs/solon/ 아래에 명시적으로 생성한다.
+# Obsidian 을 쓰는 경우 llm-wiki/ 와 공유 가능한 .obsidian 설정은 선택적으로 track 하되,
+# 개인 workspace/cache/plugin payload 는 제외한다.
 # 팀이 .sfs-local 의 일부를 공유해야 한다면 이 marker 블록 바깥에서 별도 정책으로 opt-in 한다.
 .sfs-local/
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache/
+.obsidian/plugins/

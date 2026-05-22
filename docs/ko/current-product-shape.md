@@ -26,6 +26,7 @@ split_children:
   - docs/ko/current-product-shape/16-section.md
   - docs/ko/current-product-shape/17-token-harness-hygiene.md
   - docs/ko/current-product-shape/18-section.md
+  - docs/ko/current-product-shape/19-obsidian-llm-wiki-continuity.md
 ---
 # 현재 제품 흐름과 최근 변화
 
@@ -58,3 +59,4 @@ split_children:
 - [문서 구조](./current-product-shape/16-section.md)
 - [Token / Harness Hygiene](./current-product-shape/17-token-harness-hygiene.md)
 - [언제 어떤 모드를 고르나](./current-product-shape/18-section.md)
+- [Obsidian LLM Wiki Continuity](./current-product-shape/19-obsidian-llm-wiki-continuity.md)

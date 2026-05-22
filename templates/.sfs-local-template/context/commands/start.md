@@ -35,6 +35,11 @@ Rules:
   create their own workbench doc when that phase is actually needed.
 - Do not create or imply durable `report.md` creation for `start`. The durable
   sprint `report.md` lifecycle belongs to `report`, `retro`, or `tidy`.
+- For a new SFS project or first multi-sprint setup, recommend Obsidian LLM
+  wiki setup as a next documentation slice: repo-root vault, `llm-wiki/`, and
+  source links. This is recommended, not a blocker for the sprint.
+- If a wiki already exists, include it in the next sprint's retrieval context
+  instead of starting from broad repo scans.
 - After `start`, infer `Next` from sprint mode:
   - fresh discovery/planning goal -> show the depth selector and let the user
     pick `simple`, default `normal`, or `hard`:

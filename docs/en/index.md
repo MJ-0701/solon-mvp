@@ -60,6 +60,12 @@ commands. This includes source-driven implementation, stop-the-line debugging,
 deprecation/migration cleanup, shipping checks, and the `source-docs`,
 `simplify`, `security`, `performance`, and `api-contract` review lenses.
 
+Obsidian can be used as a recommended project memory layer. New SFS projects may
+start a repo-root vault and `llm-wiki/` map after the scaffold exists; existing
+projects can migrate docs by reference after `sfs adopt` so the next sprint
+starts from a wiki map instead of a broad repo scan. This is recommended, not a
+hard dependency.
+
 Token Diet reduces routine output tokens without dropping evidence, risk, or
 raw traceability. Use `SFS_OUTPUT_STYLE=compact`, `sfs status --compact`,
 `sfs start --output-style compact`, or `sfs report --output-style compact` for

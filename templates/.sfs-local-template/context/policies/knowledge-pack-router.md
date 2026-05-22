@@ -25,6 +25,10 @@ load_when:
   - integration
   - API
   - AWS
+  - Obsidian
+  - llm wiki
+  - wiki
+  - docs migration
 status: filled-v1
 content_policy: "read only this router first; read full packs only when matching signals make them useful"
 ---
@@ -54,6 +58,8 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
 - DDD/TDD signals: `DDD`, `TDD`, `domain model`, `product behavior`,
   `acceptance criteria`, `aggregate`, `value object`, `test-first`, `failing
   test`, `red-green`.
+- Obsidian/wiki signals: `Obsidian`, `llm-wiki`, `knowledge base`, `docs
+  migration`, `existing project`, `new project`, `sprint continuity`.
 
 ## Read order
 
@@ -92,6 +98,8 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
 - `policies/taxonomy-knowledge-pack.ko.md` (Korean)
 - `policies/ddd-tdd-knowledge-pack.md`
 - `policies/ddd-tdd-knowledge-pack.ko.md` (Korean)
+- `policies/obsidian-llm-wiki.md`
+- `policies/obsidian-llm-wiki.ko.md` (Korean)
 
 ## Depth Rules
 

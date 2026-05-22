@@ -59,6 +59,11 @@ agent-skills 벤치마크에서 쓸 만한 practice 는 새 명령으로 늘리�
 상태를 진단하고, 다음 sprint 가 characterization/TDD evidence 를 먼저 만든 뒤 한 behavior
 slice 만 refactor 하도록 계약을 심을 수 있습니다.
 
+Obsidian 은 권장 프로젝트 기억 layer 로 쓸 수 있습니다. 신규 SFS 프로젝트는 scaffold 이후 repo root
+vault 와 `llm-wiki/` map 을 만들 수 있고, 기존 프로젝트는 `sfs adopt` 이후 문서를 by-reference 로
+wiki 에 이관해 다음 sprint 가 broad repo scan 대신 wiki map 에서 시작하게 할 수 있습니다. 이것은
+권고이지 hard dependency 는 아닙니다.
+
 Token Diet 는 routine 출력 토큰을 줄이되 evidence/risk/raw traceability 를 없애지 않는 compact I/O
 계약입니다. `SFS_OUTPUT_STYLE=compact`, `sfs status --compact`, `sfs start --output-style compact`,
 `sfs report --output-style compact` 를 쓸 수 있지만, warning/decision/review/source evidence 는
