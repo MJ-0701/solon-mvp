@@ -7,6 +7,19 @@
 
 ---
 
+## 0.6.102
+
+이번 버전은 Obsidian wiki 를 구성하다가 host-local 도구 묶음이나 user-home 폴더를 프로젝트 SoT 로
+오인하는 흐름을 막습니다. SFS 에 이미 흡수된 개념은 SFS command/policy surface 로 처리하고,
+외부 도구는 사용자가 명시 요청한 경우에만 external environment evidence 로 남깁니다.
+
+- Obsidian wiki policy, runtime kernel, Codex/Claude/Gemini/SFS template 에 host-local 경계를 추가했습니다.
+- Obsidian 적용 프로젝트 runtime notice 도 host-local 도구는 project SSoT 나 wiki install target 이 아니라고 안내합니다.
+- 새 하네스 `test-obsidian-host-local-boundary.sh` 는 active guidance 에 named host-local 도구나 user-home 폴더가
+  project SoT, wiki root, install target, migration source 로 재유입되지 않는지 검증합니다.
+- 이 변경은 Obsidian 권고를 약하게 만드는 것이 아니라, 필요한 것만 남긴다는 SFS 원칙에 맞춰 wiki 이관 범위를 조입니다.
+- 0.6.102 검증은 `run-all.sh` 89/0 PASS 와 wiki link check, shell syntax, `git diff --check` PASS 입니다.
+
 ## 0.6.101
 
 이번 버전은 이미 Obsidian 또는 `llm-wiki/` 가 적용된 SFS 프로젝트를 agent 가 놓치지 않도록

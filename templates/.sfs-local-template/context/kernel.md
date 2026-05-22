@@ -19,6 +19,11 @@ load_when: ["always", "sfs", "entry"]
   context: read `llm-wiki/README.md` and `llm-wiki/ddd/README.md` before broad
   scans, then update the relevant map or record a gap/waiver when the slice
   changes domain language, release flow, tests, or core components.
+- Host-local tool/skill bundles and user-home folders are external environment,
+  not project SSoT, wiki roots, install targets, or migration sources. Do not
+  install, clone, scaffold, or promote them while building an Obsidian wiki
+  unless the user explicitly asks; when referenced, record them as external
+  environment evidence only.
 - Stop on mutex conflicts and report owner/domain.
 - Ask only 1-3 blocking questions.
 - Decision questions must be self-contained: before any `Q1`, `D1`, or option

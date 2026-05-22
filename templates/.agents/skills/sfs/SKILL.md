@@ -48,6 +48,11 @@ description: Solon SFS command router for Codex. Dispatch `$sfs` / `sfs` / visib
    `llm-wiki/README.md` and `llm-wiki/ddd/README.md` before broad scans, then
    update the relevant map or record a gap/waiver when the slice changes domain
    language, release flow, tests, or core components.
+   Host-local tool/skill bundles and user-home folders are external
+   environment, not project SSoT, wiki roots, install targets, or migration
+   sources. Do not install, clone, scaffold, or promote them while building an
+   Obsidian wiki unless the user explicitly asks; when referenced, record them
+   as external environment evidence only.
 11. For implementation and review work, follow the routed context guardrails:
    surface material assumptions, choose the smallest useful slice, keep changes
    surgical, read actual files/errors before fixing, verify before completion,

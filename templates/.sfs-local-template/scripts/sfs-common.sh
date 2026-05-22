@@ -264,6 +264,7 @@ sfs_maybe_emit_obsidian_wiki_notice() {
   printf '  - Treat %s/ as the active retrieval map before broad scans when it exists.\n' "${wiki_dir}" >&2
   printf '  - DDD wiki boundary expected: %s/ddd/.\n' "${wiki_dir}" >&2
   printf '  - Taxonomy stays domain language/classification lens, not a standalone wiki or org division.\n' >&2
+  printf '  - Host-local tools/user-home folders are external environment, not project SSoT or wiki install targets.\n' >&2
   printf '  - If this sprint changes domain language, release flow, tests, or core components, update the relevant wiki map or record a gap/waiver.\n' >&2
   if [[ "${has_obsidian}" == "1" && "${has_wiki}" != "1" ]]; then
     printf '  - Gap: .obsidian/ exists but %s/ is missing; create a by-reference wiki in a documentation slice or record a waiver.\n' "${wiki_dir}" >&2

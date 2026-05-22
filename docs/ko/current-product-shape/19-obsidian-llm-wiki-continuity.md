@@ -26,5 +26,9 @@ wiki map 을 먼저 읽습니다.
 agent 는 `llm-wiki/README.md` 와 `llm-wiki/ddd/README.md` 를 먼저 확인하고, 관련 map 이 없으면
 작업을 막기보다 gap 또는 waiver 를 남깁니다.
 
+host-local tool/skill bundle 과 user-home folder 는 외부 실행 환경이지 project source truth 가 아닙니다.
+Obsidian wiki 작업은 사용자가 명시적으로 요청하지 않는 한 이런 외부 도구를 wiki root, SFS 개념,
+install target, migration source 로 설치, clone, scaffold, 승격하지 않습니다.
+
 이것은 권고 기본값이지 hard dependency 가 아닙니다. 사용자가 거절하거나 Obsidian 을 쓸 수 없거나 repo 에
 vault 를 둘 수 없으면 SFS 는 `docs/solon/` 산출물로 계속 진행하고 gap 또는 waiver 를 기록합니다.

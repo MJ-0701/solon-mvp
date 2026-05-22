@@ -28,6 +28,11 @@ Obsidian-applied. Agents should check `llm-wiki/README.md` and
 `llm-wiki/ddd/README.md` first, and record a gap or waiver when the expected map
 is missing instead of blocking the work.
 
+Host-local tool/skill bundles and user-home folders are external environment,
+not project source truth. Obsidian wiki work must not install, clone, scaffold,
+or promote them as wiki roots, SFS concepts, install targets, or migration
+sources unless the user explicitly asks.
+
 This is a recommended default, not a hard dependency. If the user declines,
 Obsidian is unavailable, or the repository cannot carry a vault, SFS continues
 with `docs/solon/` artifacts and records the gap or waiver.

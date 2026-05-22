@@ -44,6 +44,10 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
 - wiki page 는 TopicHub, retrieval path, DDD context map, upgrade map, generated index 로 쓴다.
 - Taxonomy 는 독립 wiki 나 조직 본부가 아니다. domain language/classification lens 로 보고
   `llm-wiki/ddd/` 와 관련 TopicHub 에 연결한다.
+- host-local tool/skill bundle 과 user-home folder 는 외부 실행 환경이지 project SSoT, wiki root,
+  install target, migration source 가 아니다. 사용자가 명시적으로 요청하지 않는 한 wiki 구축 중
+  설치, clone, scaffold, 승격을 하지 않는다. 참조가 필요하면 external environment evidence 로만
+  기록한다. 이미 SFS 에 흡수된 개념은 host-local tool 대신 SFS command/policy surface 를 쓴다.
 - 프로젝트가 원할 때만 공유 가능한 `.obsidian/` 설정을 둔다. 개인 workspace, cache, community plugin
   payload 는 커밋하지 않는다.
 
@@ -67,6 +71,8 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
 - Obsidian/wiki 상태가 recommended, declined, blocked, already present 중 무엇인가?
 - `.obsidian/` 또는 `llm-wiki/` 가 있으면 agent 가 이를 active project context 로 취급했는가?
 - wiki 가 큰 문서 복사본이 아니라 source truth 링크를 제공하는가?
+- agent 가 host-local tool, skill, user-home folder 를 wiki/project SSoT, install target,
+  migration source 로 취급하지 않았는가?
 - active wiki 에 `llm-wiki/README.md` 와 `llm-wiki/ddd/README.md` 가 있거나 gap/waiver 가
   기록되어 있는가?
 - 기존 프로젝트라면 다음 sprint 가 의존하기 전에 old docs 와 core component 를 색인했는가?
@@ -78,5 +84,7 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
 - `llm-wiki/README.md` 또는 동등한 wiki home.
 - `llm-wiki/ddd/README.md` 또는 기록된 DDD wiki gap/waiver.
 - source docs/components 로 이어지는 retrieval guide 또는 TopicHub.
+- host-local tool 을 사용자가 명시 요청했다면 project source truth 가 아니라 external environment
+  evidence 라는 기록.
 - Obsidian workspace/cache/plugin payload 를 제외하는 `.gitignore` 항목.
 - 기존 프로젝트라면 adoption handoff 와 wiki migration note.

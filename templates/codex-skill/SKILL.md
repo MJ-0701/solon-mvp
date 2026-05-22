@@ -59,6 +59,10 @@ required.
    `llm-wiki/README.md` and `llm-wiki/ddd/README.md` before broad scans, then
    update the relevant map or record a gap/waiver when the slice changes domain
    language, release flow, tests, or core components.
+   Host-local tool/skill bundles and user-home folders are external
+   environment, not project SSoT, wiki roots, install targets, or migration
+   sources; do not install, clone, scaffold, or promote them while building an
+   Obsidian wiki unless explicitly asked, and record references as external evidence.
 12. For implementation and review work, follow the routed context guardrails:
     surface material assumptions, choose the smallest useful slice, keep changes
     surgical, read actual files/errors before fixing, verify before completion,

@@ -48,6 +48,12 @@ Obsidian, or the repository policy forbids a vault, continue SFS with ordinary
 - Taxonomy is not a standalone wiki or org division. Treat it as a domain
   language/classification lens linked from `llm-wiki/ddd/` and the relevant
   TopicHubs.
+- Host-local tool/skill bundles and user-home folders are external environment,
+  not project SSoT, wiki roots, install targets, or migration sources. Do not
+  install, clone, scaffold, or promote them while building the wiki unless the
+  user explicitly asks; when referenced, record them as external environment
+  evidence only. If a concept has already been absorbed by SFS, use the SFS
+  command/policy surface instead of the host-local tool.
 - Add or preserve `.obsidian/` shared settings only when the project wants
   them. Never commit personal workspace state, cache, or community plugin
   payloads.
@@ -74,6 +80,8 @@ Obsidian, or the repository policy forbids a vault, continue SFS with ordinary
 - If `.obsidian/` or `llm-wiki/` exists, did the agent treat it as active
   project context instead of skipping it?
 - Did the wiki point to source truth instead of copying large documents?
+- Did the agent avoid treating host-local tools, skills, or user-home folders as
+  wiki/project SSoT, install targets, or migration sources?
 - Does the active wiki have `llm-wiki/README.md` and `llm-wiki/ddd/README.md`,
   or a recorded gap/waiver?
 - For an existing project, were old docs and core components indexed before the
@@ -86,6 +94,8 @@ Obsidian, or the repository policy forbids a vault, continue SFS with ordinary
 - `llm-wiki/README.md` or equivalent wiki home.
 - `llm-wiki/ddd/README.md` or a recorded DDD wiki gap/waiver.
 - Retrieval guide or TopicHub links to source docs/components.
+- If a host-local tool was explicitly requested, a note that marks it as
+  external environment evidence, not project source truth.
 - `.gitignore` entries that keep Obsidian workspace/cache/plugin payloads out
   of commits.
 - For existing projects, an adoption handoff plus wiki migration note.

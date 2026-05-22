@@ -1,3 +1,35 @@
+## [0.6.102] - 2026-05-22
+
+> **Obsidian wiki adoption now keeps host-local tool bundles out of project
+> source truth, install flow, and migration scope unless the user explicitly
+> asks for that external environment reference.**
+
+### Added
+
+- Added host-local/user-home boundary guidance to the Obsidian LLM wiki policy,
+  runtime kernel, Codex/Claude/Gemini/SFS templates, and current-product-shape
+  docs.
+- Added `test-obsidian-host-local-boundary.sh` to verify Obsidian wiki guidance
+  does not promote named host-local tools or user-home folders into project SoT,
+  wiki roots, install targets, or migration sources.
+- Extended the Obsidian applied-project runtime harness so the ambient notice
+  reminds agents that host-local tools are external environment, not project
+  SSoT.
+
+### Changed
+
+- Obsidian wiki migration now explicitly says concepts already absorbed by SFS
+  should use the SFS command/policy surface instead of a host-local tool.
+- The project wiki working guideline now carries the same boundary for this
+  repository's own Obsidian workflow.
+
+### Tests
+
+- Full source regression passed with 89 tests.
+- Focused Obsidian host-local, active-project, guidance, docs/version, shell
+  syntax, zero named host-local tool reference, wiki index, wiki link, and
+  `git diff --check` verification passed before release preparation.
+
 ## [0.6.101] - 2026-05-22
 
 > **SFS now detects projects that already have Obsidian or `llm-wiki/` and

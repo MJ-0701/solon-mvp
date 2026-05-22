@@ -63,6 +63,7 @@ assert_contains status.err "Obsidian project surface detected" "active wiki dete
 assert_contains status.err "llm-wiki/" "active wiki root"
 assert_contains status.err "DDD wiki boundary expected: llm-wiki/ddd/" "active wiki DDD boundary"
 assert_contains status.err "Taxonomy stays domain language/classification lens" "active wiki taxonomy boundary"
+assert_contains status.err "Host-local tools/user-home folders are external environment" "active wiki host-local boundary"
 assert_contains status.err "update the relevant wiki map or record a gap/waiver" "active wiki update gap"
 
 rm -f llm-wiki/ddd/README.md
