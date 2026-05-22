@@ -51,6 +51,8 @@ shape_ko="${DIST_DIR}/docs/ko/current-product-shape.md"
 
 assert_contains "${index}" "context-pollution-guard.md" "index routes guard"
 assert_contains "${policy}" "Core product and adapter context stays thin" "policy core docs"
+assert_contains "${policy}" "Update each document according to its job" "policy document purpose"
+assert_contains "${policy}" "README is a product overview and" "policy readme purpose"
 assert_contains "${policy}" "Do not copy prompt bodies" "policy prompt bodies"
 assert_contains "${policy}" "Release is not clean" "policy release blocker"
 

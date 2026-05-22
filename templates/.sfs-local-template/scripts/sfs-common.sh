@@ -226,6 +226,57 @@ sfs_maybe_emit_hygiene_notice() {
   fi
 }
 
+sfs_maybe_emit_obsidian_wiki_notice() {
+  local cmd="${1:-command}"
+  case "${SFS_OBSIDIAN_NOTICE:-1}" in 0|false|off|no) return 0 ;; esac
+  case "${cmd}" in help|-h|--help|init|install|upgrade|update|uninstall|agent|version|-v|--version|auth) return 0 ;; esac
+  [[ -d "${SFS_LOCAL_DIR}" ]] || return 0
+
+  local wiki_dir="${SFS_OBSIDIAN_WIKI_DIR:-llm-wiki}"
+  local has_obsidian=0 has_wiki=0
+  [[ -d ".obsidian" ]] && has_obsidian=1
+  [[ -d "${wiki_dir}" ]] && has_wiki=1
+  (( has_obsidian == 1 || has_wiki == 1 )) || return 0
+
+  if [[ "${SFS_OBSIDIAN_NOTICE_FORCE:-0}" != "1" && ! -t 2 ]]; then
+    return 0
+  fi
+
+  local ttl now state_file last_checked
+  ttl="${SFS_OBSIDIAN_NOTICE_TTL_SEC:-3600}"
+  case "${ttl}" in ''|*[!0-9]*) ttl=3600 ;; esac
+  state_file="${SFS_CACHE_DIR}/obsidian-wiki-notice.env"
+  now="$(date +%s 2>/dev/null || printf '0')"
+  last_checked="$(sfs_state_value "${state_file}" last_checked_epoch || true)"
+  if [[ "${SFS_OBSIDIAN_NOTICE_FORCE:-0}" != "1" && "${now}" != "0" && "${last_checked}" =~ ^[0-9]+$ ]]; then
+    if (( now - last_checked < ttl )); then
+      return 0
+    fi
+  fi
+  sfs_write_hygiene_state "${state_file}" "${now}"
+
+  local surface=""
+  [[ "${has_obsidian}" == "1" ]] && surface="${surface}.obsidian/ "
+  [[ "${has_wiki}" == "1" ]] && surface="${surface}${wiki_dir}/"
+
+  printf 'sfs obsidian notice:\n' >&2
+  printf '  - Obsidian project surface detected: %s\n' "${surface}" >&2
+  printf '  - Treat %s/ as the active retrieval map before broad scans when it exists.\n' "${wiki_dir}" >&2
+  printf '  - DDD wiki boundary expected: %s/ddd/.\n' "${wiki_dir}" >&2
+  printf '  - Taxonomy stays domain language/classification lens, not a standalone wiki or org division.\n' >&2
+  printf '  - If this sprint changes domain language, release flow, tests, or core components, update the relevant wiki map or record a gap/waiver.\n' >&2
+  if [[ "${has_obsidian}" == "1" && "${has_wiki}" != "1" ]]; then
+    printf '  - Gap: .obsidian/ exists but %s/ is missing; create a by-reference wiki in a documentation slice or record a waiver.\n' "${wiki_dir}" >&2
+  fi
+  if [[ "${has_wiki}" == "1" && ! -f "${wiki_dir}/README.md" ]]; then
+    printf '  - Gap: %s/README.md missing; add the wiki home/retrieval entry or record a waiver.\n' "${wiki_dir}" >&2
+  fi
+  if [[ "${has_wiki}" == "1" && ! -f "${wiki_dir}/ddd/README.md" ]]; then
+    printf '  - Gap: %s/ddd/README.md missing; add the DDD operating model entry or record a waiver.\n' "${wiki_dir}" >&2
+  fi
+  printf '  - Disable: SFS_OBSIDIAN_NOTICE=0; force check: SFS_OBSIDIAN_NOTICE_FORCE=1.\n' >&2
+}
+
 # ─────────────────────────────────────────────────────────────────────
 # RUNTIME / PROJECT-LOCAL ASSET RESOLUTION
 # ─────────────────────────────────────────────────────────────────────

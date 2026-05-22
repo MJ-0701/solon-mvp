@@ -131,4 +131,5 @@ human or AI session quickly understand:
 - what should happen next
 
 That is why README stays as a map, GUIDE stays as a practical walkthrough, and
-`docs/ko` / `docs/en` hold deeper explanations.
+RELEASE-NOTES stays for user-facing version changes, CHANGELOG stays for
+implementation-level history, and `docs/ko` / `docs/en` hold deeper explanations.

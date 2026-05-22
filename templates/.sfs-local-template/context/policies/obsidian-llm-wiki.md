@@ -29,6 +29,9 @@ Obsidian, or the repository policy forbids a vault, continue SFS with ordinary
   navigation layer during setup or the first documentation sprint.
 - Existing project: during `sfs adopt`, recommend migrating existing docs into
   an Obsidian-readable wiki by reference before the next real sprint.
+- Applied project: if `.obsidian/` or `llm-wiki/` exists, treat Obsidian as
+  active context. Check `llm-wiki/README.md` and `llm-wiki/ddd/README.md`
+  before broad scans, and record a gap/waiver when the expected map is missing.
 - Multi-sprint or agent-heavy work: use the wiki as a retrieval map for core
   design, domain language, tests, CI, release paths, and decision history.
 - Do not delay urgent implementation only because the wiki is missing. Capture
@@ -38,9 +41,13 @@ Obsidian, or the repository policy forbids a vault, continue SFS with ordinary
 
 - Vault root: repository root.
 - Wiki root: `llm-wiki/`.
+- DDD operating model root: `llm-wiki/ddd/`.
 - Keep source truth in existing docs, code, tests, and scripts.
 - Wiki pages are TopicHubs, retrieval paths, DDD context maps, upgrade maps,
   and generated indexes.
+- Taxonomy is not a standalone wiki or org division. Treat it as a domain
+  language/classification lens linked from `llm-wiki/ddd/` and the relevant
+  TopicHubs.
 - Add or preserve `.obsidian/` shared settings only when the project wants
   them. Never commit personal workspace state, cache, or community plugin
   payloads.
@@ -64,7 +71,11 @@ Obsidian, or the repository policy forbids a vault, continue SFS with ordinary
 ## Review Questions
 
 - Is Obsidian/wiki setup recommended, declined, blocked, or already present?
+- If `.obsidian/` or `llm-wiki/` exists, did the agent treat it as active
+  project context instead of skipping it?
 - Did the wiki point to source truth instead of copying large documents?
+- Does the active wiki have `llm-wiki/README.md` and `llm-wiki/ddd/README.md`,
+  or a recorded gap/waiver?
 - For an existing project, were old docs and core components indexed before the
   next sprint relies on them?
 - If a sprint changes domain language, release flow, tests, or core runtime
@@ -73,6 +84,7 @@ Obsidian, or the repository policy forbids a vault, continue SFS with ordinary
 ## Evidence
 
 - `llm-wiki/README.md` or equivalent wiki home.
+- `llm-wiki/ddd/README.md` or a recorded DDD wiki gap/waiver.
 - Retrieval guide or TopicHub links to source docs/components.
 - `.gitignore` entries that keep Obsidian workspace/cache/plugin payloads out
   of commits.

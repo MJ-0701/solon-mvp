@@ -79,5 +79,6 @@ for arg in "$@"; do
 done
 
 sfs_maybe_emit_hygiene_notice "${cmd}"
+sfs_maybe_emit_obsidian_wiki_notice "${cmd}"
 
 exec bash "${target}" "$@"

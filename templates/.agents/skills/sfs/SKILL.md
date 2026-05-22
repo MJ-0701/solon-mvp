@@ -43,7 +43,11 @@ description: Solon SFS command router for Codex. Dispatch `$sfs` / `sfs` / visib
    characterization, smoke, or review evidence before implementation.
    Obsidian LLM wiki is a recommended companion for SFS continuity, not a hard
    dependency; load `policies/obsidian-llm-wiki.md` when setup/adoption/docs
-   migration or multi-sprint retrieval is in scope.
+   migration or multi-sprint retrieval is in scope. If `.obsidian/` or
+   `llm-wiki/` exists, treat the wiki as active project context: check
+   `llm-wiki/README.md` and `llm-wiki/ddd/README.md` before broad scans, then
+   update the relevant map or record a gap/waiver when the slice changes domain
+   language, release flow, tests, or core components.
 11. For implementation and review work, follow the routed context guardrails:
    surface material assumptions, choose the smallest useful slice, keep changes
    surgical, read actual files/errors before fixing, verify before completion,

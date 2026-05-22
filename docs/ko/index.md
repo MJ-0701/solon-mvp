@@ -19,7 +19,7 @@ README 는 Solon Product 의 큰 흐름과 목차입니다. 이 디렉토리는 
 
 | 문서 | 언제 읽나 |
 |---|---|
-| [현재 제품 흐름과 최근 변화](./current-product-shape.md) | 최신 Solon 이 어떤 사용 감각으로 바뀌었는지 알고 싶을 때 |
+| [현재 제품 구조와 운영 흐름](./current-product-shape.md) | 현재 Solon 의 운영 모델과 판단 기준을 이해하고 싶을 때 |
 | [Windows SFS 래퍼 장애 요약 보고서](./windows-wrapper-incident-0.6.56.md) | Windows 에서 `sfs.cmd` 가 usage 만 출력하거나 빈 출력/한글 깨짐/upgrade 후 batch 오류를 보였던 원인과 조치가 궁금할 때 |
 | [Solon 10x 가치](./10x-value.md) | 왜 Solon 이 단순 자동화가 아니라 사고/설계 근육을 키우려 하는지 알고 싶을 때 |
 | [30분 온보딩 가이드](../../GUIDE.md) | 설치 직후 첫 sprint 를 직접 돌려보고 싶을 때 |
@@ -122,4 +122,5 @@ Solon 문서는 많이 쓰는 것이 목표가 아닙니다. 좋은 문서는 �
 - 어떻게 검증했는가
 - 다음 action 은 무엇인가
 
-그래서 README 는 큰 지도, GUIDE 는 실제 시작 흐름, `docs/ko` / `docs/en` 는 깊은 설명을 맡습니다.
+그래서 README 는 큰 지도, GUIDE 는 실제 시작 흐름, RELEASE-NOTES 는 버전별 체감 변화,
+CHANGELOG 는 구현 단위 변경 기록, `docs/ko` / `docs/en` 는 깊은 설명을 맡습니다.

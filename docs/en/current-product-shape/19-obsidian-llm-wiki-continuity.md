@@ -23,6 +23,11 @@ For an existing project, `sfs adopt` may recommend a by-reference wiki migration
 keep the original docs as source truth, index the important docs/components, and
 start the next real sprint by reading the wiki map before broad repo scans.
 
+If `.obsidian/` or `llm-wiki/` already exists, SFS treats the project as
+Obsidian-applied. Agents should check `llm-wiki/README.md` and
+`llm-wiki/ddd/README.md` first, and record a gap or waiver when the expected map
+is missing instead of blocking the work.
+
 This is a recommended default, not a hard dependency. If the user declines,
 Obsidian is unavailable, or the repository cannot carry a vault, SFS continues
 with `docs/solon/` artifacts and records the gap or waiver.

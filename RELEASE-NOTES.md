@@ -7,6 +7,20 @@
 
 ---
 
+## 0.6.101
+
+이번 버전은 이미 Obsidian 또는 `llm-wiki/` 가 적용된 SFS 프로젝트를 agent 가 놓치지 않도록
+런타임 notice 와 테스트 하네스를 추가합니다.
+
+- `.obsidian/` 또는 `llm-wiki/` 가 있으면 SFS 가 Obsidian 적용 프로젝트로 감지합니다.
+- 감지된 프로젝트에서는 broad scan 전에 `llm-wiki/README.md` 와 `llm-wiki/ddd/README.md` 를
+  확인하도록 안내합니다.
+- `llm-wiki/ddd/` 가 빠져 있거나 `.obsidian/` 만 있고 `llm-wiki/` 가 없으면 gap/waiver 를 남기도록
+  notice 를 출력합니다.
+- taxonomy 는 독립 wiki 나 조직 본부가 아니라 domain language/classification lens 라는 경계를 다시 고정했습니다.
+- 새 하네스는 active wiki 감지, DDD wiki gap, `.obsidian/`-only gap, notice opt-out 을 직접 검증합니다.
+- 0.6.101 검증은 `run-all.sh` 88/0 PASS 와 wiki link check, shell syntax, `git diff --check` PASS 입니다.
+
 ## 0.6.100
 
 이번 버전은 SFS 프로젝트가 Obsidian LLM wiki 를 함께 쓰는 기본 흐름을 추가합니다. 무료이고

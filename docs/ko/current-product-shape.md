@@ -1,11 +1,11 @@
 ---
 doc_id: sfs-current-product-shape-ko
-title: "현재 제품 흐름과 최근 변화"
+title: "현재 제품 구조와 운영 흐름"
 visibility: oss-public
 doc_type: product-reference
 language: ko
 updated: 2026-05-22
-summary: "Thin index for 현재 제품 흐름과 최근 변화"
+summary: "Thin index for 현재 제품 구조와 운영 흐름"
 load_when: "Start here, then load only the child section needed."
 split_children:
   - docs/ko/current-product-shape/01-section.md
@@ -28,14 +28,15 @@ split_children:
   - docs/ko/current-product-shape/18-section.md
   - docs/ko/current-product-shape/19-obsidian-llm-wiki-continuity.md
 ---
-# 현재 제품 흐름과 최근 변화
+# 현재 제품 구조와 운영 흐름
 
 
 **Language**: 한국어 / [English](../en/current-product-shape.md)
 
-이 문서는 최근 Solon Product 패치들의 결과를 한 번에 이해하기 위한 문서입니다. 핵심은
+이 문서는 Solon Product 의 현재 운영 모델을 한 번에 이해하기 위한 문서입니다. 버전별
+체감 변화는 RELEASE-NOTES, 구현 단위 변경 기록은 CHANGELOG 가 맡습니다. 여기의 핵심은
 명령어를 더 많이 외우게 만드는 것이 아니라, 사용자가 AI 시대에도 product owner 로서
-생각과 판단의 주도권을 잃지 않게 돕는 흐름을 만드는 것입니다.
+생각과 판단의 주도권을 잃지 않게 돕는 흐름을 정리하는 것입니다.
 
 ## 문서 지도
 

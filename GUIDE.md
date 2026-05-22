@@ -32,7 +32,7 @@ split_children:
 
 **언어**: 한국어 / [영어 문서](./docs/en/guide.md)
 
-자세한 제품 철학과 최신 변화는 [현재 제품 흐름과 최근 변화](./docs/ko/current-product-shape.md),
+자세한 제품 철학과 운영 구조는 [현재 제품 구조와 운영 흐름](./docs/ko/current-product-shape.md),
 AI 시대에 Solon 이 주는 가치는 [Solon 10x 가치](./docs/ko/10x-value.md) 에서 이어서 볼 수 있습니다.
 
 ---

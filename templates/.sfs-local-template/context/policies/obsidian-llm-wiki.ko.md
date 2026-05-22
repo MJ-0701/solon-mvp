@@ -28,6 +28,9 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
   navigation layer 를 권장한다.
 - 기존 프로젝트: `sfs adopt` 시 기존 문서를 Obsidian 에서 읽을 수 있는 wiki 로 by-reference
   이관하는 것을 권장하고, 다음 실제 sprint 부터 그 wiki 를 함께 읽는다.
+- 적용 프로젝트: `.obsidian/` 또는 `llm-wiki/` 가 있으면 Obsidian 을 active context 로 본다.
+  broad scan 전 `llm-wiki/README.md` 와 `llm-wiki/ddd/README.md` 를 확인하고, 기대 map 이
+  없으면 gap/waiver 를 기록한다.
 - 여러 sprint 또는 여러 agent 가 이어서 작업하는 프로젝트는 core design, domain language, tests,
   CI, release path, decision history 를 wiki 로 찾을 수 있게 한다.
 - 긴급 구현을 wiki 부재만으로 막지 않는다. gap 을 기록하고 follow-up 문서 slice 로 구축한다.
@@ -36,8 +39,11 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
 
 - Vault root: repository root.
 - Wiki root: `llm-wiki/`.
+- DDD 운영 모델 root: `llm-wiki/ddd/`.
 - source truth 는 기존 docs, code, tests, scripts 에 남긴다.
 - wiki page 는 TopicHub, retrieval path, DDD context map, upgrade map, generated index 로 쓴다.
+- Taxonomy 는 독립 wiki 나 조직 본부가 아니다. domain language/classification lens 로 보고
+  `llm-wiki/ddd/` 와 관련 TopicHub 에 연결한다.
 - 프로젝트가 원할 때만 공유 가능한 `.obsidian/` 설정을 둔다. 개인 workspace, cache, community plugin
   payload 는 커밋하지 않는다.
 
@@ -59,7 +65,10 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
 ## Review Questions
 
 - Obsidian/wiki 상태가 recommended, declined, blocked, already present 중 무엇인가?
+- `.obsidian/` 또는 `llm-wiki/` 가 있으면 agent 가 이를 active project context 로 취급했는가?
 - wiki 가 큰 문서 복사본이 아니라 source truth 링크를 제공하는가?
+- active wiki 에 `llm-wiki/README.md` 와 `llm-wiki/ddd/README.md` 가 있거나 gap/waiver 가
+  기록되어 있는가?
 - 기존 프로젝트라면 다음 sprint 가 의존하기 전에 old docs 와 core component 를 색인했는가?
 - sprint 가 domain language, release flow, tests, core runtime component 를 바꿨다면 관련 wiki map 을
   갱신했거나 follow-up gap 을 기록했는가?
@@ -67,6 +76,7 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
 ## Evidence
 
 - `llm-wiki/README.md` 또는 동등한 wiki home.
+- `llm-wiki/ddd/README.md` 또는 기록된 DDD wiki gap/waiver.
 - source docs/components 로 이어지는 retrieval guide 또는 TopicHub.
 - Obsidian workspace/cache/plugin payload 를 제외하는 `.gitignore` 항목.
 - 기존 프로젝트라면 adoption handoff 와 wiki migration note.

@@ -114,6 +114,10 @@ Rules:
   private local workbench state and should stay gitignored unless the team opts in.
 - Obsidian LLM wiki is recommended for multi-sprint retrieval when useful:
   repo-root vault + `llm-wiki/` maps by reference, not copied source docs.
+  If `.obsidian/` or `llm-wiki/` exists, treat it as active project context:
+  read `llm-wiki/README.md` and `llm-wiki/ddd/README.md` before broad scans,
+  then update the relevant map or record a gap/waiver when domain language,
+  release flow, tests, or core components change.
 - For Solon commit grouping, guide users to `sfs commit plan` and
   `sfs commit apply --group <name>` (or `/sfs commit ...` only when the Claude
   SFS slash router is active). `sfs commit apply` commits and pushes the

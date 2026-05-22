@@ -72,3 +72,7 @@ sfs init --layout thin --yes
 sfs start "first goal"
 ```
 
+For multi-sprint work, the AI may also recommend a repo-root Obsidian
+`llm-wiki/` map after the scaffold exists. That map is optional; it points to
+source docs and components so the next sprint starts from retrieval context
+instead of a broad repo scan.

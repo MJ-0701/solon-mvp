@@ -45,7 +45,6 @@ Solon 에서 `implement` 는 코드만 뜻하지 않습니다. 제품을 앞으�
 
 백엔드, 디자인, QA, 운영의 깊은 기준은 중요하지만 모든 사용자에게 첫 가이드에서 같은 무게로
 설명할 내용은 아닙니다. 필요할 때
-[현재 제품 흐름과 최근 변화](./docs/ko/current-product-shape.md) 를 참고하세요.
+[현재 제품 구조와 운영 흐름](./docs/ko/current-product-shape.md) 를 참고하세요.
 
 ---
-

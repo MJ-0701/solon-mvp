@@ -33,9 +33,11 @@ split_children:
 
 **Language**: [한국어](../ko/current-product-shape.md) / English
 
-This page explains the recent Solon Product changes as one operating model. The
-goal is not to make users memorize more commands. The goal is to help the user
-keep product-owner judgment strong in an AI-assisted workflow.
+This page explains the current Solon Product operating model. Version-by-version
+user-facing changes belong in RELEASE-NOTES, and implementation-level history
+belongs in CHANGELOG. The goal here is not to make users memorize more commands.
+The goal is to help the user keep product-owner judgment strong in an
+AI-assisted workflow.
 
 ## Document Map
 

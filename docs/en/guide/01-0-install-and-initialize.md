@@ -42,3 +42,6 @@ sfs.cmd status
 If any line in `sfs doctor` shows `⚠️`, the next line on screen prints the
 single-shot recovery command. The `sfs` binary itself is unaffected.
 
+For multi-sprint projects or existing projects with meaningful docs, the AI may
+recommend an Obsidian `llm-wiki/` map. It is optional and does not copy source
+docs; it gives future sprints a faster navigation layer over the source files.

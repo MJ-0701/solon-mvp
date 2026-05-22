@@ -10,6 +10,11 @@ load_when: ["context", "token", "capture", "review", "tidy", "release", "prompt"
   `AGENTS.md`, `GEMINI.md`, `kernel.md`, `_INDEX.md`, README/GUIDE, and
   current-product-shape docs hold stable rules, product contracts, and durable
   conclusions.
+- Update each document according to its job. README is a product overview and
+  map, GUIDE is a practical walkthrough, RELEASE-NOTES is for user-facing
+  version changes, CHANGELOG is implementation-level history, and deeper docs
+  carry durable operating models. If a document's purpose does not need a
+  change, skip it instead of stuffing release-note prose into it.
 - Do not copy prompt bodies, raw chat transcripts, review scratch, bridge probe
   stdout/stderr, long command logs, `.sfs-local/tmp/...` paths, or whole
   workbench history into core product docs.

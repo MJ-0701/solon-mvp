@@ -46,5 +46,8 @@ sfs status
 | `AGENTS.md` | Codex 가 Solon 을 찾는 입구 |
 | `GEMINI.md` | Gemini 가 Solon 을 찾는 입구 |
 
----
+큰 프로젝트나 기존 문서가 많은 프로젝트에서는 AI 가 Obsidian 용 `llm-wiki/` 지도를 권장할 수
+있습니다. 필수는 아니고, 원문 문서를 복사하는 공간도 아닙니다. 나중에 다시 찾기 쉽게
+source link 와 읽는 순서를 모아두는 선택지입니다.
 
+---

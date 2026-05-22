@@ -1,3 +1,34 @@
+## [0.6.101] - 2026-05-22
+
+> **SFS now detects projects that already have Obsidian or `llm-wiki/` and
+> reminds agents to use the wiki as active retrieval context instead of missing
+> it during broad scans.**
+
+### Added
+
+- Added an ambient Obsidian wiki runtime notice for SFS projects. When
+  `.obsidian/` or `llm-wiki/` exists, SFS points agents to `llm-wiki/`,
+  `llm-wiki/ddd/`, taxonomy-as-domain-language, and the expected map/gap update
+  rule.
+- Added `test-obsidian-applied-project-harness.sh` to verify active wiki
+  detection, missing DDD wiki gap reporting, `.obsidian/`-only gap reporting,
+  and opt-out behavior.
+- Added policy and template guidance so Codex, Claude, Gemini, and project-local
+  SFS agents treat existing Obsidian/wiki surfaces as active project context.
+
+### Changed
+
+- The Obsidian LLM wiki policy now distinguishes new project, existing project,
+  and already-applied project flows.
+- `llm-wiki/` documentation and generated indexes now include the runtime notice
+  harness and quality map references.
+
+### Tests
+
+- Full source regression passed with 88 tests.
+- Focused Obsidian, agent behavior, DDD/TDD, shell syntax, wiki link, and
+  `git diff --check` verification passed before release preparation.
+
 ## [0.6.100] - 2026-05-22
 
 > **SFS now recommends an Obsidian LLM wiki continuity layer for new and

@@ -15,6 +15,10 @@ load_when: ["always", "sfs", "entry"]
 - Obsidian LLM wiki is a recommended companion, not a hard dependency. For
   non-trivial SFS projects, prefer repo-root vault + `llm-wiki/` maps; if the
   user declines or the repo cannot use Obsidian, record the gap and continue.
+  If `.obsidian/` or `llm-wiki/` exists, treat the wiki as active project
+  context: read `llm-wiki/README.md` and `llm-wiki/ddd/README.md` before broad
+  scans, then update the relevant map or record a gap/waiver when the slice
+  changes domain language, release flow, tests, or core components.
 - Stop on mutex conflicts and report owner/domain.
 - Ask only 1-3 blocking questions.
 - Decision questions must be self-contained: before any `Q1`, `D1`, or option
