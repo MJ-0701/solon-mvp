@@ -7,6 +7,20 @@
 
 ---
 
+## 0.6.103
+
+이번 버전은 AI Agent 가 만드는 문서의 기본 포맷을 더 분명히 나눕니다. 에이전트가 참고하는
+운영 문서, SSoT, 로그, 스키마, README 는 Markdown 을 유지하고, 실제 사용자나 외부 독자가 읽는
+가이드, 보고서, 핸드북, 온보딩 문서, 랜딩성 문서는 HTML 을 기본 산출물로 삼습니다.
+
+- 이 규칙을 product maintenance guide, 설치되는 `CLAUDE.md`, runtime kernel, Codex/Claude/Gemini/SFS
+  command surface 에 반영했습니다.
+- HTML-first 이유는 사용자 문서가 브라우저 내비게이션, 시각 위계, 접근성, 배포 후 렌더링 검수까지
+  포함해야 하기 때문입니다.
+- 새 하네스 `test-user-facing-docs-html-first.sh` 는 규칙이 source SSoT 와 product agent entry surface 에
+  빠짐없이 들어있는지 검증합니다.
+- 0.6.103 검증은 `run-all.sh` 90/0 PASS, focused docs guard, shell syntax, `git diff --check` PASS 입니다.
+
 ## 0.6.102
 
 이번 버전은 Obsidian wiki 를 구성하다가 host-local 도구 묶음이나 user-home 폴더를 프로젝트 SoT 로

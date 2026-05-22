@@ -53,6 +53,8 @@ $ARGUMENTS
     surface material assumptions, choose the smallest useful slice, keep changes
     surgical, read actual files/errors before fixing, verify before completion,
     and report exact evidence.
+    User-facing docs HTML-first: agent docs/logs/SSoT stay Markdown; real-user
+    guides, reports, handbooks, onboarding, and landing docs default to HTML.
     Benchmarked engineering practices strengthen existing commands instead of
     creating new lifecycle commands: source-driven official docs, stop-the-line
     debugging, deprecation/migration, shipping/release checks, and review lenses

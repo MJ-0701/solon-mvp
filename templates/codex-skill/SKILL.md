@@ -64,12 +64,12 @@ required.
    sources; do not install, clone, scaffold, or promote them while building an
    Obsidian wiki unless explicitly asked, and record references as external evidence.
 12. For implementation and review work, follow the routed context guardrails:
-    surface material assumptions, choose the smallest useful slice, keep changes
-    surgical, read actual files/errors before fixing, verify before completion,
-    and report exact evidence. For visible frontend/UI work, verify with
-    Playwright or equivalent browser automation before asking the user to inspect
-    it; record desktop/mobile evidence, primary interaction, responsive fit, and
-    console/runtime error checks, or an explicit blocker/waiver.
+   surface material assumptions, choose the smallest useful slice, keep changes
+   surgical, read actual files/errors before fixing, verify before completion,
+   and report exact evidence. User-facing docs HTML-first: agent docs/logs/SSoT
+   stay Markdown; real-user guides, reports, handbooks, onboarding, and landing
+   docs default to HTML. For visible frontend/UI work, verify with Playwright
+   or equivalent browser automation before asking the user to inspect it.
     Benchmarked engineering practices strengthen existing commands instead of
     creating new lifecycle commands: source-driven official docs, stop-the-line
     debugging, deprecation/migration, shipping/release checks, and review lenses

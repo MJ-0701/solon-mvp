@@ -29,6 +29,8 @@ load_when: "Read when this product document is directly relevant."
 2. **templates/** 하위는 consumer 에게 그대로 배포되는 파일. 수정 시 하위 호환성 고려.
 3. **VERSION** 은 semver `X.Y.Z-mvp` 또는 `X.Y.Z`. mvp suffix 는 풀스펙 수렴 전까지 유지.
 4. **CHANGELOG.md** 는 모든 릴리스를 기록. upgrade.sh 가 이 파일을 consumer 에게 안내.
+5. **User-facing docs HTML-first** — AI Agent 참고용 운영 문서/SSoT/로그/스키마/README 는 Markdown 을 유지하되,
+   실제 사용자·외부 독자·온보딩 대상이 읽는 설명서/가이드/보고서/핸드북/랜딩성 문서는 기본 산출물을 HTML 로 작성.
 
 ## 수정 시 체크리스트
 

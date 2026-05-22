@@ -1,3 +1,30 @@
+## [0.6.103] - 2026-05-22
+
+> **Agent instructions now distinguish agent-facing Markdown from real
+> user-facing documents, which should default to HTML for browser-grade reading
+> and visual verification.**
+
+### Added
+
+- Added a User-facing docs HTML-first rule to the source SSoT, product
+  maintenance guide, installed `CLAUDE.md` template, runtime kernel, Codex
+  skill templates, Claude slash command template, Gemini command templates, and
+  shipped plugin command prompt.
+- Added `test-user-facing-docs-html-first.sh` to verify the rule is present in
+  every agent entry surface that can create or guide documentation work.
+
+### Changed
+
+- Bumped product docs/version checks to `0.6.103` so release verification covers
+  the new documentation rule instead of shipping only the source docset change.
+
+### Tests
+
+- Full source regression passed with 90 tests.
+- Focused user-facing docs HTML-first guard, docs/version sync, product
+  Markdown budget, shell syntax, and `git diff --check` verification passed
+  before release preparation.
+
 ## [0.6.102] - 2026-05-22
 
 > **Obsidian wiki adoption now keeps host-local tool bundles out of project

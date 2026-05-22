@@ -42,6 +42,9 @@ Rules:
   surface material assumptions, choose the smallest useful slice, keep changes
   surgical, read actual files/errors before fixing, verify before completion,
   and report exact evidence.
+- User-facing docs HTML-first: keep agent-facing operations docs, SSoT, logs,
+  schemas, and README surfaces in Markdown, but write guides, reports,
+  handbooks, onboarding docs, and landing-style docs for real users as HTML.
 - Benchmarked engineering practices strengthen existing commands instead of
   creating new lifecycle commands: source-driven official docs, stop-the-line
   debugging, deprecation/migration, shipping/release checks, and review lenses

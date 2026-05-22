@@ -69,6 +69,8 @@ load_when: ["always", "sfs", "entry"]
 - If files changed, verify with the smallest relevant test, build, smoke, or
   review check before saying complete. Report the exact check and result; if no
   check can run, say why.
+- User-facing docs HTML-first: agent-facing docs/logs/SSoT stay Markdown, but
+  real-user guides, reports, handbooks, onboarding, and landing docs default to HTML.
 - When answering in Korean, do not end Korean sentences with a closing colon.
 - For Korean-first projects, new source files should start with a one-line
   Korean role comment directly after any required shebang or directive. Skip
