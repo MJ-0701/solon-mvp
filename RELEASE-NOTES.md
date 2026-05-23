@@ -7,6 +7,16 @@
 
 ---
 
+## 0.6.104
+
+이번 버전은 사용자가 Agent 에게 "배포해줘" 라고 말했을 때의 의미를 제품 계약으로 고정합니다.
+이 말은 단순 publish 가 아니라 "배포 프로세스 쭉 진행해줘" 입니다.
+
+- Agent 는 release context 를 읽고 readiness check, 관련 테스트, review/검수, release cut,
+  stable tag, Homebrew/Scoop 채널 반영, 설치 runtime 검증, evidence 보고까지 이어갑니다.
+- Codex/Claude/Gemini/SFS entry surface 에 같은 규칙을 넣어 특정 Agent 만 다르게 멈추지 않게 했습니다.
+- 새 회귀 테스트는 "배포해줘" 가 publish-only 로 축소되지 않고 검수와 설치 검증까지 요구하는지 확인합니다.
+
 ## 0.6.103
 
 이번 버전은 AI Agent 가 만드는 문서의 기본 포맷을 더 분명히 나눕니다. 에이전트가 참고하는

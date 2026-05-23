@@ -1,3 +1,25 @@
+## [0.6.104] - 2026-05-23
+
+> **Korean "배포해줘" now means the full release process, including tests,
+> review/검수, channel publication, installed-runtime verification, and
+> evidence reporting.**
+
+### Added
+
+- Added the Korean deploy trigger contract to the routed release context:
+  "배포해줘" is interpreted as "배포 프로세스 쭉 진행해줘", not as publish-only.
+- Added release-trigger guidance to the Codex/Claude/Gemini/SFS adapter surfaces
+  so every LLM agent loads the release context and runs readiness checks, tests,
+  review/검수, release cut, stable tag, Homebrew, Scoop, installed runtime
+  verification, and evidence reporting end to end.
+- Added documentation coverage in README and product docs for the new natural
+  language release trigger.
+
+### Tests
+
+- Added release policy and adapter guardrail assertions for the Korean deploy
+  trigger, review/검수, and installed runtime verification.
+
 ## [0.6.103] - 2026-05-22
 
 > **Agent instructions now distinguish agent-facing Markdown from real

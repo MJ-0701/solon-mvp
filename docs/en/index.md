@@ -4,7 +4,7 @@ title: "Solon Product Docs"
 visibility: oss-public
 doc_type: docs-index
 language: en
-updated: 2026-05-22
+updated: 2026-05-23
 summary: "Solon Product Docs entry document"
 load_when: "Read when this product document is directly relevant."
 ---
@@ -76,6 +76,10 @@ not the default.
 As of 0.6.85, the release verifier follows the same rule. Successful internal
 install/upgrade smoke logs stay quiet, while failures replay captured stdout and
 stderr so release evidence remains traceable.
+When the user tells an agent "배포해줘", Solon treats it as "배포 프로세스 쭉
+진행해줘", not as publish-only. The release is complete only after readiness
+checks, relevant tests, review/검수, release cut, stable tag, Homebrew/Scoop
+channel updates, installed runtime verification, and evidence reporting.
 
 Model routing follows the same split and applies by default. Helper-grade simple
 I/O uses lighter intake models (Codex `gpt-5.4-mini`), while question generation

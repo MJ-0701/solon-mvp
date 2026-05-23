@@ -4,7 +4,7 @@ title: "자주 쓰는 명령"
 visibility: oss-public
 doc_type: product-intro
 language: ko
-updated: 2026-05-22
+updated: 2026-05-23
 parent: README.md
 summary: "자주 쓰는 명령"
 load_when: "Read when README.md routes to this section."
@@ -28,8 +28,11 @@ load_when: "Read when README.md routes to this section."
 | `sfs upgrade` | 프로젝트의 Solon 파일과 흐름 최신화 |
 | `sfs tidy [--apply]` | 끝난 작업의 임시 기록 정리 |
 
+Agent 에게 "배포해줘" 라고 말하면 단순 publish 가 아니라 "배포 프로세스 쭉 진행해줘" 로
+해석합니다. 이 흐름은 release readiness check, 관련 테스트, review/검수, release cut,
+stable tag, Homebrew/Scoop 배포, 설치 runtime 검증, evidence 보고까지 포함합니다.
+
 `sfs capture` 는 짧은 checkpoint 전용입니다. 긴 prompt, 전체 대화, bridge/review scratch,
 command log 는 core docs 에 복사하지 말고 archive/evidence path 만 남기세요.
 
 ---
-

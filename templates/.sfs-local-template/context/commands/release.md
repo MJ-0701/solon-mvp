@@ -1,12 +1,17 @@
 ---
 id: sfs-command-release
 summary: Product release is complete only after stable tag, Homebrew, Scoop, and installed runtime verification.
-load_when: ["release", "deploy", "배포", "Homebrew", "Scoop"]
+load_when: ["release", "deploy", "배포", "배포해줘", "배포 프로세스", "배포프로세스", "Homebrew", "Scoop"]
 ---
 
 # Release
 
 - Product deploy = stable tag + Homebrew tap + Scoop bucket at the same version.
+- Korean deploy trigger contract: when the user says "배포해줘", interpret it as
+  "배포 프로세스 쭉 진행해줘". This is not a publish-only command: run release
+  readiness checks, relevant tests, SFS review/검수, release cut, stable tag,
+  Homebrew, Scoop, installed runtime verification, and final evidence reporting
+  end to end.
 - Apply `policies/shipping-and-launch.md`: release must be reversible,
   observable, and verified. Know the rollback path before publishing.
 - Use `cut-release.sh`, push stable main/tag, update both channel repos.

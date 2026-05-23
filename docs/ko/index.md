@@ -4,7 +4,7 @@ title: "Solon Product 문서"
 visibility: oss-public
 doc_type: docs-index
 language: ko
-updated: 2026-05-22
+updated: 2026-05-23
 summary: "Solon Product 문서 entry document"
 load_when: "Read when this product document is directly relevant."
 ---
@@ -71,6 +71,9 @@ Token Diet 는 routine 출력 토큰을 줄이되 evidence/risk/raw traceability
 
 0.6.85에서는 release verifier 도 같은 방향으로 정리됐습니다. 성공한 내부 install/upgrade
 smoke 로그는 숨기고, 실패하면 캡처한 stdout/stderr 를 다시 출력해 원인 추적성을 보존합니다.
+사용자가 Agent 에게 "배포해줘" 라고 말하면 Solon 은 이를 "배포 프로세스 쭉 진행해줘" 로
+해석합니다. 즉 release readiness check, 관련 테스트, review/검수, release cut, stable tag,
+Homebrew/Scoop 채널 반영, 설치 runtime 검증, evidence 보고까지 끝내야 배포가 완료됩니다.
 
 모델 라우팅도 같은 원칙을 따르며 기본 적용됩니다. Helper-grade 단순 I/O 는 가벼운 intake 모델
 (Codex 는 `gpt-5.4-mini`), 질문 생성/facilitation 은 standard facilitator 모델(Codex 는

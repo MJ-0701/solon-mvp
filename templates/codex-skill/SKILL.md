@@ -5,12 +5,9 @@ description: Priority-1 Solon SFS command router for Codex CLI. When SFS/Solon/s
 
 # Solon SFS — Codex Router (user-global)
 
-This priority-1 skill provides Codex CLI with the SFS workflow context (sprint, gate,
-retro, decision conventions) for every project, regardless of whether the
-project has a `.agents/skills/sfs/` adapter. It is installed by
-`brew install MJ-0701/solon-product/sfs` (macOS) or `scoop install sfs`
-(Windows) into `~/.codex/skills/sfs/SKILL.md`. No project-local file is
-required.
+This priority-1 skill gives Codex CLI the SFS workflow context for every
+project, even without a `.agents/skills/sfs/` adapter. It is installed by
+Homebrew/Scoop into `~/.codex/skills/sfs/SKILL.md`.
 
 1. Prefer `$sfs <command>` or `sfs <command>`; `/sfs` is valid only if the text
    reaches the model. When executing the adapter on Windows PowerShell/cmd, use
@@ -75,6 +72,8 @@ required.
     debugging, deprecation/migration, shipping/release checks, and review lenses
     `source-docs`, `simplify`, `security`, `performance`, `api-contract`,
     `ddd-tdd`.
+    Release trigger contract: if the user says `배포해줘`, treat it as `배포 프로세스 쭉 진행해줘`, not a publish-only command.
+    Load release context and run readiness checks, relevant tests, review/검수, release cut, stable tag, Homebrew, Scoop, installed runtime verification, and evidence reporting end to end.
     Gate 3 (Plan) ready-for-implement routes to `sfs review --gate 3` first;
     do not offer `sfs implement` or worker/model handoff until plan review
     passes. Keep C-Level and worker/generator responsibilities separate:

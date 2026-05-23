@@ -336,6 +336,10 @@ adapter_files=(
 for file in "${adapter_files[@]}"; do
   assert_contains "${file}" "surface material assumptions" "adapter guardrail ${file}"
   assert_contains "${file}" "report exact evidence" "adapter evidence ${file}"
+  assert_contains "${file}" "배포해줘" "adapter Korean deploy trigger ${file}"
+  assert_contains "${file}" "배포 프로세스 쭉 진행해줘" "adapter full release trigger ${file}"
+  assert_contains "${file}" "review/검수" "adapter release review before done ${file}"
+  assert_contains "${file}" "installed runtime verification" "adapter release installed runtime verification ${file}"
   assert_contains "${file}" "Decision questions must be self-contained" "adapter decision clarity ${file}"
   assert_contains "${file}" "question/recommendation-only choice table" "adapter no recommendation-only table ${file}"
   assert_contains "${file}" "compact option bundle" "adapter no compact option bundle ${file}"
