@@ -78,6 +78,16 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - If code or executable artifacts changed, run the smallest relevant test,
   build, typecheck, smoke, or scripted review before marking complete. Record
   the command and result in the implementation evidence.
+- Execute approved runnable steps yourself: when shell/tool/auth context and
+  approval are available, run the operation and record evidence. Give commands
+  only when the user explicitly asked for them or a true blocker remains.
+- Treat approval gates and true blockers differently: if the user grants
+  autonomous execution for the current scope, record session authorization and
+  proceed. Stop again only for new destructive/data-loss/public-contract scope,
+  missing auth, unavailable tooling/runtime, sandbox denial, or true failure.
+- For secrets or production-write flows, enforce approval first; once
+  authorized and tooled, execute one-shot inline env with masked output. Do not ask the user to export variables,
+  switch terminals, or rerun commands because shell state would not persist.
 - If visible frontend/UI changed, run browser automation before asking the user
   to inspect it. Prefer the project's Playwright/Cypress/Storybook smoke; if no
   project script exists, use available Playwright or browser automation against

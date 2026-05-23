@@ -105,8 +105,8 @@ Homebrew/Scoop into `~/.codex/skills/sfs/SKILL.md`.
     scope, stale evidence, missing AC/file mapping, evidence path typo, or
     bounded wording/document consistency, patch it and run the same-gate review again
     in the same cycle. Ask the user only when product judgment is needed:
-    scope, architecture, public contract, security/privacy/data-loss,
-    cost/latency/model policy, destructive behavior, or changed AC meaning.
+    scope, architecture, public contract, security/privacy/data-loss, cost/latency/model policy, destructive behavior, or changed AC meaning.
+    Executable Action Ownership: run executable steps yourself when shell/tool/auth context and approval are available; give copy-paste commands only when the user explicitly asks for them or when truly blocked by missing auth/tooling/sandbox/uncaptured approval/broader scope; session-scoped authorization such as `알아서 해` carries approval-gated work in scope until a true blocker; Shell state is agent-owned: use one-shot inline env and mask secrets instead of asking the user to export variables across terminals.
     Advisor calls do not count as self-CPO. Before external cross review, record
     a self-CPO mini-check: requirements to AC to implementation slices to
     ADR/decision ids, every AC mapped to file/artifact/evidence, and SEED/

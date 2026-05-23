@@ -69,6 +69,9 @@ load_when: ["always", "sfs", "entry"]
 - If files changed, verify with the smallest relevant test, build, smoke, or
   review check before saying complete. Report the exact check and result; if no
   check can run, say why.
+- Executable Action Ownership is ambient: run runnable shell/tool steps yourself when auth, runtime, and approval are available. Do not hand the user copy-paste commands unless explicitly requested or a true blocker prevents execution.
+- Distinguish true blockers from approval gates: true blockers are missing auth, unavailable tooling/runtime, sandbox or permission denial, uncaptured destructive/data-loss/public-contract approval, or broader scope; session-scoped authorization such as `알아서 해` lets same-scope gated work continue until scope changes or a true blocker appears.
+- Shell state is not a user problem: use one-shot commands with explicit working directory and inline environment, mask secrets, and do not ask the user to export variables, switch terminals, or rerun commands because shell state would not persist.
 - User-facing docs HTML-first: agent-facing docs/logs/SSoT stay Markdown, but
   real-user guides, reports, handbooks, onboarding, and landing docs default to HTML.
 - When answering in Korean, do not end Korean sentences with a closing colon.

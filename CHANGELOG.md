@@ -1,3 +1,28 @@
+## [0.6.106] - 2026-05-23
+
+> **Agents now own runnable execution steps and distinguish true blockers from
+> approval gates, including session-scoped authorization such as "알아서 해".**
+
+### Added
+
+- Added Executable Action Ownership to the runtime kernel, implementation
+  context, SFS project router, and Claude/Codex/Gemini adapter surfaces.
+- Agents must run executable shell/tool steps themselves when auth, runtime, and
+  approval are available, instead of handing users copy-paste commands for work
+  the agent can perform.
+- Added a session-scoped authorization rule: when the user grants autonomous
+  execution for the current scope, approval-gated steps such as pushes or
+  deploy/release operations continue in that session until scope changes or a
+  true blocker appears.
+- Shell state is now explicitly agent-owned: use one-shot inline environment,
+  mask secrets, and do not ask the user to export variables across terminals.
+
+### Tests
+
+- Extended `test-agent-behavior-guardrails.sh` to verify executable action
+  ownership, true-blocker/approval-gate separation, session authorization, and
+  shell-state ownership across runtime and adapter surfaces.
+
 ## [0.6.105] - 2026-05-23
 
 > **Freshness and upgrade summaries now keep the parallel-agent implementation

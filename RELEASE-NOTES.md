@@ -7,6 +7,17 @@
 
 ---
 
+## 0.6.106
+
+이번 버전은 Agent 가 실행할 수 있는 일을 사용자에게 다시 맡기는 흐름을 조입니다.
+사용자가 원하는 결과가 있고 shell/tool/auth/approval 이 갖춰져 있으면 Agent 가 직접 실행하고 evidence 를 남겨야 합니다.
+
+- copy-paste 명령 전달은 사용자가 명시적으로 명령을 원했거나 진짜 블로커가 있을 때만 허용합니다.
+- 진짜 블로커와 승인 게이트를 분리합니다: `알아서 해`, `이번 세션은 진행`, autonomous deploy 같은 세션 승인 후에는 같은 범위의 approval-gated step 을 계속 진행합니다.
+- 새 destructive/data-loss/public-contract 범위, missing auth, unavailable tooling/runtime, sandbox/permission denial 은 계속 멈춤 조건입니다.
+- secrets/prod write 흐름은 승인 경계를 먼저 지키고, 승인 뒤에는 one-shot inline env + masked output 으로 Agent 가 직접 실행합니다.
+- 새 하네스는 kernel, implement context, Claude/Codex/Gemini/SFS adapter surface 에 이 규칙이 빠지지 않는지 확인합니다.
+
 ## 0.6.105
 
 이번 버전은 Agent 가 "최신 적용됐어?" 라고 답할 때 최신 릴리즈 headline 만 반복하다가

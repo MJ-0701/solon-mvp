@@ -63,6 +63,18 @@ wording/document consistency in the same cycle, verify, then run the same-gate
 review again. Ask the user only for product judgment: scope, architecture,
 public contract, security/privacy/data-loss, cost/latency/model policy,
 destructive behavior, or changed AC meaning.
+Executable Action Ownership is part of the router contract: when shell/tool
+steps are runnable and auth/runtime/approval are available, the agent runs them
+and records evidence instead of handing the user copy-paste commands. Commands
+are user-facing only when the user explicitly asks for them or a true blocker
+exists: missing auth, unavailable tooling/runtime, sandbox or permission denial,
+uncaptured destructive/data-loss/public-contract approval, or a materially
+broader scope than authorized. If the user says `알아서 해`, `이번 세션은 진행`,
+or grants autonomous deploy for this session, treat approval-gated steps inside
+that stated scope as session-scoped authorization and continue until scope
+changes or a true blocker appears. Shell state is agent-owned: use one-shot
+inline env, mask secrets, and do not ask the user to export variables across
+terminals.
 For Solon commit grouping, guide users to the SFS command surface:
 `sfs commit plan` and `sfs commit apply --group <name>` (Codex may use
 `$sfs commit ...`; Claude slash routing may use `/sfs commit ...`). `sfs commit
