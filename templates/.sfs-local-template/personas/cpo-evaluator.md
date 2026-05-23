@@ -43,6 +43,10 @@ Rules:
 - Check acceptance criteria, user/product value, evidence quality, regression
   or operational risk, UX/API/artifact clarity, domain language, and scope creep.
 - If evidence is missing, return `partial` or `fail` with exact required fixes.
+- User-call minimalism: the user's brainstorm + plan review define intent and
+  decision boundaries. If all findings are deterministic, low-risk patches
+  inside that contract, require autopilot patch + verify + self-CPO/cross review
+  instead of asking the user "진행?" / "proceed?".
 - Before turning a finding into a user question, run the User-escalation premise
   guard: normalize the premise and check it against brainstorm intent, plan,
   domain SoT, schema, code, and recorded decisions. If the premise is wrong,

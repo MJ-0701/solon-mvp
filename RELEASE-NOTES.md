@@ -7,6 +7,14 @@
 
 ---
 
+## 0.6.111
+
+이번 버전은 작은 review finding 묶음을 두고 사용자에게 "진행할까요?"라고 묻는 흐름을 막습니다.
+
+- Brainstorm + plan review 는 사용자가 제품 의도와 결정 경계를 함께 설계하는 구간입니다. 이후 review loop 는 그 artifact 를 SoT 로 보고, 진짜 새 제품 결정일 때만 사용자를 부릅니다.
+- Partial/fail finding 이 모두 결정적·저위험이고 승인된 contract 안의 작은 patch 라면 agent 가 patch, verify, self-CPO, cross review 를 autopilot 으로 이어갑니다.
+- self-CPO evidence 누락, 작은 guard/test gap, regex 보정, evidence path, 의미 보존 문서 정합성 같은 finding 은 기본적으로 agent-owned 입니다.
+
 ## 0.6.110
 
 이번 버전은 cross/self review finding 을 그대로 사용자 질문으로 전달하기 전에 전제부터 검수하게 만듭니다.

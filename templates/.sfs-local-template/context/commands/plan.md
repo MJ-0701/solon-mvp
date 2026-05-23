@@ -80,14 +80,18 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   plan until PASS first, then run cross review. If any self or cross review
   returns partial/fail, rework the plan and repeat self-review before offering
   cross review or implementation.
-- If a Gate 3 partial/fail finding is a deterministic micro-fix, do not hand it
-  back to the user as "fixed; please run review again." Examples: AC grep scope,
-  missing docs/file inclusion, stale measured command output, traceability row
-  omission, evidence path typo, or a narrow wording fix that does not change
-  product judgment. Apply the patch in the same cycle, run the smallest
-  verification, and call the same Gate 3 self-review again. Escalate to the user only when
-  the fix changes scope, architecture, public contract, security/
-  privacy/data-loss risk, cost/latency policy, or acceptance criteria meaning.
+- If a Gate 3 partial/fail finding is deterministic and inside the approved
+  contract, autopilot the micro-fix. Do not ask "진행?" / "proceed?" and do not
+  hand it back as "fixed; please run review again." Examples: missing self-CPO
+  evidence, AC grep scope, docs/file inclusion, stale command output,
+  traceability, evidence path typo, small guard/test or regex gap, or wording
+  that preserves product judgment. Patch, verify, rerun self-CPO and cross
+  review. Escalate only when the fix changes scope, architecture, public
+  contract, security/privacy/data-loss risk, cost/latency policy, or AC meaning.
+- User-call minimalism: the user already co-designed intent and decision
+  boundaries in brainstorm + plan review. Treat those artifacts as SoT and call
+  the user only for a genuinely new product decision, not for executing a small
+  review patch sequence.
 - Before escalating a self/cross-review finding as a user question, run a
   premise check. State the finding's premise, then compare it with Gate 2
   intent, the current plan, domain SoT, schema/code ownership, and recorded

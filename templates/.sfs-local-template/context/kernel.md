@@ -116,10 +116,11 @@ load_when: ["always", "sfs", "entry"]
 - Review verdicts are success criteria, not effort counters. A high number of
   review rounds, lenses, or advisor comments never substitutes for PASS.
   Partial/fail routes to rework and same-gate review, not to implementation.
-- Same-cycle micro-rework is mandatory for deterministic low-risk findings:
-  grep/file coverage, traceability, stale evidence, or meaning-preserving
-  wording. Patch, verify, and invoke the same gate review again; do not ask the
-  user to request the next review.
+- Same-cycle micro-rework is autopilot for deterministic low-risk findings
+  inside the brainstorm/plan contract: missing self-CPO evidence, grep/file
+  coverage, small guard/test or regex gaps, traceability, stale evidence, or
+  meaning-preserving wording. Patch, verify, rerun self-CPO/cross review, and do
+  not ask "진행?" / "proceed?" or ask the user to request the next review.
 - User-escalation premise guard is mandatory before turning any self/cross
   review finding into a user question. Normalize the premise; check brainstorm,
   plan, domain SoT, schema, code, and decisions. Cross-review findings are
@@ -129,18 +130,17 @@ load_when: ["always", "sfs", "entry"]
   APIs, ownership columns, or migration policy unless the contract requires it.
   Prefer the smallest data-preserving policy: reject delete while dependent
   records exist; ask only when that contract is a real product choice.
-- Ask the user only when the finding requires product judgment: scope or
-  architecture change, public contract change, security/privacy/data-loss risk
-  tradeoff, cost/latency policy, destructive action, unclear acceptance, or a
-  repeated partial/fail after the bounded micro-rework loop.
-- Gate PASS is not user approval. When a plan introduces or changes product
-  meaning, acceptance criteria meaning, IA, visible UI/workflow, public
-  contract, security/privacy/data-loss posture, cost/model policy, or
-  destructive behavior, mark `user_approval_required: true` and
-  `user_approval_status: "pending"` in `plan.md`. Stop before implementation
-  until the user approves or waives it, then record that with
-  `sfs capture --kind user-approval --gate 3 "..."` or `sfs capture --kind
-  waiver --gate 3 "..."`.
+- User-call minimalism is mandatory: brainstorm + plan review define user intent
+  and decision boundaries. Later loops treat them as SoT and call the user only
+  for new product judgment: scope/architecture, public contract, security/
+  privacy/data-loss, cost/latency/model policy, destructive action, unclear AC,
+  or repeated partial/fail after rework.
+- Gate PASS is not user approval. If a plan changes product meaning, AC, IA,
+  visible UI/workflow, public contract, security/privacy/data-loss, cost/model
+  policy, or destructive behavior, mark `user_approval_required: true` and
+  `user_approval_status: "pending"` in `plan.md`; stop before implementation
+  until approval/waiver is recorded with `sfs capture --kind user-approval` or
+  `sfs capture --kind waiver`.
 - SFS commit guidance must use the SFS command surface: `sfs commit plan` and
   `sfs commit apply --group <name>` (or `$sfs commit ...` in Codex / `/sfs
   commit ...` only when a slash router is explicitly active). `sfs commit apply`

@@ -1,3 +1,28 @@
+## [0.6.111] - 2026-05-23
+
+> **Legit small review findings now stay on autopilot instead of calling the
+> user for permission.**
+
+### Added
+
+- Added User-call minimalism as an SFS review invariant: brainstorm and plan
+  review are where the user co-designs product intent and decision boundaries;
+  later review loops must treat those artifacts as SoT and call the user only
+  for genuinely new product decisions.
+- Strengthened bounded micro-rework autopilot: when a partial/fail review has
+  only deterministic, low-risk findings inside the approved contract, agents
+  must patch, verify, rerun self-CPO, and rerun cross review without asking a
+  generic "proceed?" question.
+- Made common small review findings agent-owned by default, including missing
+  self-CPO evidence, narrow guard/test gaps, regex fixes, evidence path gaps,
+  and meaning-preserving artifact consistency fixes.
+
+### Tests
+
+- Extended agent behavior guardrail coverage to reject user-confirmation
+  handoffs for autopilot micro-rework and to require the user-call-minimalism
+  contract across kernel, plan, review, CPO, prompt, and adapter surfaces.
+
 ## [0.6.110] - 2026-05-23
 
 > **Review findings now pass a premise check before they become user

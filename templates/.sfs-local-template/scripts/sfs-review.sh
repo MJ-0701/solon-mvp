@@ -2582,6 +2582,10 @@ Self-validation policy:
 - Treat same-tool review risk as review_independence_risk: warning unless the evidence proves a concrete product or evidence-bundle defect. Do not make same-tool risk the sole blocker for artifact quality.
 - Separate artifact quality findings from evidence-bundle gaps. If the embedded bundle lacks required artifact files, acceptance evidence, build/smoke output, or source excerpts needed for this lens, say that explicitly as an evidence packaging gap.
 - Before turning a self/cross-review finding into a user question, apply the
+  User-call minimalism: brainstorm + plan review define user-approved intent and
+  decision boundaries. If all findings are deterministic, low-risk patches
+  inside that contract, require autopilot patch + verify + self-CPO/cross review
+  instead of asking the user "진행?" / "proceed?".
   User-escalation premise guard: normalize the premise and check it against the
   brainstorm, plan, domain SoT, schema, code, and recorded decisions. If the
   premise is wrong, stale, already answered, or over-modeled, require artifact

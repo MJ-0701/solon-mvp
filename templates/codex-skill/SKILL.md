@@ -98,11 +98,11 @@ Homebrew/Scoop into `~/.codex/skills/sfs/SKILL.md`.
     volume is not PASS; partial/fail routes to rework. If no other agent,
     external tokens, or bridge exists, a recorded self-CPO fallback PASS may
     satisfy cross-review; bare self-CPO PASS still blocks without user waiver.
-    If a partial/fail finding is deterministic and low-risk, such as grep
-    scope, stale evidence, missing AC/file mapping, evidence path typo, or
-    bounded wording/document consistency, patch it and run the same-gate review again
-    in the same cycle. Ask the user only when product judgment is needed:
-    scope, architecture, public contract, security/privacy/data-loss, cost/latency/model policy, destructive behavior, or changed AC meaning.
+    If a partial/fail finding is deterministic and low-risk inside the brainstorm/plan contract, autopilot patch+verify+self-CPO/cross review.
+    Never ask "진행?" / "proceed?" for missing self-CPO evidence, small guard/test/regex gaps, evidence paths, stale evidence, or meaning-preserving consistency.
+    User-call minimalism: brainstorm + plan review define intent and decision boundaries.
+    Ask only for new product judgment: scope, architecture, public contract, security/privacy/data-loss,
+    cost/latency/model policy, destructive behavior, or changed AC meaning.
     User-escalation premise guard: before relaying any self/cross-review finding
     as a user question, check the premise against brainstorm, plan, domain SoT,
     schema, code, and decisions. Wrong/stale/answered/over-modeled means

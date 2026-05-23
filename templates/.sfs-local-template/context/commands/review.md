@@ -54,11 +54,11 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - If self-review returns partial/fail, rework the plan and run self-review
   again. If cross review returns partial/fail, rework the plan and return to
   self-review before another cross review.
-- If a deterministic, narrow finding needs no product owner judgment, complete
-  the rework loop in the same cycle: patch, run the smallest verification, and
-  invoke same-gate review again. Examples: grep/file coverage holes, stale
-  evidence, AC/file/artifact mapping, wrong path, or meaning-preserving wording.
-  Do not ask the user to trigger the next review for these cases.
+- If deterministic, narrow findings need no product owner judgment, autopilot
+  the rework loop: patch, run the smallest verification, rerun self-CPO/cross
+  review, and do not ask "진행?" / "proceed?". Examples: missing self-CPO
+  evidence, grep/file coverage, stale evidence, AC/file/artifact mapping, wrong
+  path, small guard/test or regex gap, or meaning-preserving wording.
 - User-escalation premise guard: before converting a self/cross finding into a
   user question, name its premise, compare brainstorm, plan, domain SoT, schema,
   code, and decisions, and decide whether the reviewer frame is valid. Wrong,
@@ -68,11 +68,12 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   aggregate ownership, cascade soft-delete, restore APIs, or migration policy,
   prefer the smaller contract: reject delete while dependents exist; leave
   cascade/restore for explicit product approval.
-- Escalate to the user instead of auto-reworking when the finding changes scope,
-  architecture, public API/schema/CLI contract, security/privacy/data-loss
-  posture, cost/latency/model policy, destructive behavior, or acceptance
-  criteria meaning; also escalate after repeated partial/fail on the same
-  micro-fix.
+- User-call minimalism: brainstorm + plan review are where the user co-designs
+  intent and decision boundaries; later loops treat those artifacts as SoT.
+  Escalate instead of auto-reworking only when findings change scope,
+  architecture, public API/schema/CLI contract, security/privacy/data-loss,
+  cost/latency/model policy, destructive behavior, acceptance criteria meaning,
+  or after repeated partial/fail on the same micro-fix.
 - Do not treat review volume as completion. Number of lenses, rounds, advisor
   comments, or elapsed time never unlocks `sfs implement`; only PASS or an
   explicit user waiver does.
