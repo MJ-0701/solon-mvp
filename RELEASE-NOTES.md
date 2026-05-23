@@ -7,6 +7,14 @@
 
 ---
 
+## 0.6.109
+
+이번 버전은 `sfs version` / `sfs --version` / `sfs.cmd version` 의 단일 줄 버전 출력 계약을 복구합니다.
+
+- `installed_release_headline` 은 `sfs version --check` 에서만 출력됩니다.
+- 자동화나 CI 가 plain version 명령을 `sfs 0.6.109` 한 줄로 파싱하던 흐름을 다시 안전하게 유지합니다.
+- 최신 릴리스 요약 앵커는 유지하되, evidence 출력과 machine version 출력을 분리합니다.
+
 ## 0.6.108
 
 이번 버전은 설치된 Homebrew/Scoop payload 에 큰 `CHANGELOG.md` 가 빠지고 `RELEASE-NOTES.md` 만 있을 때도

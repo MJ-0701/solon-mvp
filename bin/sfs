@@ -405,8 +405,8 @@ EOF
     version="${version:-unknown}"
   fi
   printf 'sfs %s\n' "${version}"
-  sfs_print_installed_release_headline "${version}"
   if [[ "${check_latest}" == "1" ]]; then
+    sfs_print_installed_release_headline "${version}"
     local latest
     if latest="$(latest_release_version 2>/dev/null)" && [[ -n "${latest}" ]]; then
       printf 'latest %s\n' "${latest}"

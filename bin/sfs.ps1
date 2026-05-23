@@ -635,10 +635,10 @@ function Invoke-SfsNativeVersion([string[]] $InvocationArgs) {
   $version = Get-SfsFirstLine $versionPath
   if (-not $version) { $version = "unknown" }
   Write-Output "sfs $version"
-  $headline = Get-SfsReleaseHeadline $version
-  if ($headline) { Write-Output "installed_release_headline $headline" }
 
   if ($check) {
+    $headline = Get-SfsReleaseHeadline $version
+    if ($headline) { Write-Output "installed_release_headline $headline" }
     try {
       $release = Invoke-RestMethod -UseBasicParsing -Uri "https://api.github.com/repos/MJ-0701/solon-product/releases/latest" -TimeoutSec 10
       $latest = ($release.tag_name -replace "^v", "")

@@ -1,3 +1,20 @@
+## [0.6.109] - 2026-05-23
+
+> **Plain version commands keep their single-line contract while
+> `sfs version --check` carries the installed release headline evidence.**
+
+### Fixed
+
+- Restored `sfs version`, `sfs --version`, and native Windows `sfs.cmd version`
+  to the pre-existing single-line `sfs X.Y.Z` output contract.
+- Kept `installed_release_headline` scoped to `sfs version --check`, where it
+  is used as freshness/evidence metadata rather than a machine-version string.
+
+### Tests
+
+- Extended version-headline coverage so plain version output cannot accidentally
+  gain the headline field again.
+
 ## [0.6.108] - 2026-05-23
 
 > **Installed version summaries now fall back to release notes when packaged
