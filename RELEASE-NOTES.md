@@ -7,6 +7,19 @@
 
 ---
 
+## 0.6.105
+
+이번 버전은 Agent 가 "최신 적용됐어?" 라고 답할 때 최신 릴리즈 headline 만 반복하다가
+이미 설치된 핵심 기능을 놓치는 문제를 막습니다. 특히 병렬 sub-agent / multi-agent 구현을 물었으면
+그 계약을 바로 보여줘야 합니다.
+
+- `sfs upgrade` context 는 이제 latest headline 과 installed capability surface 를 구분하라고 안내합니다.
+- sub-agent, 병렬 작업, multi-agent 구현, worker lane 을 물으면 Agent 는 single-agent 기본값과
+  `sfs implement --agent-mode parallel --agents codex,claude[,gemini]` 선택 경로를 함께 설명합니다.
+- 병렬 lane 의 조건도 같이 노출합니다: disjoint files_scope, lane-level verification,
+  native/workspace-language 한 문장 commit message, Gate 6 PASS 전 agent cross review.
+- install/upgrade 완료 안내에도 같은 구현 모드 계약을 넣어 "최신 적용" 확인이 모델 라우팅 설명에서 멈추지 않게 했습니다.
+
 ## 0.6.104
 
 이번 버전은 사용자가 Agent 에게 "배포해줘" 라고 말했을 때의 의미를 제품 계약으로 고정합니다.

@@ -1,3 +1,29 @@
+## [0.6.105] - 2026-05-23
+
+> **Freshness and upgrade summaries now keep the parallel-agent implementation
+> contract visible instead of collapsing "latest" into the newest release
+> headline.**
+
+### Fixed
+
+- Added upgrade-context guidance so agents distinguish the latest release
+  headline from the installed capability surface when users ask what is current,
+  latest, or applied.
+- When the user asks about sub-agents, parallel work, multi-agent
+  implementation, or worker lanes, agents now must explicitly name the
+  implementation mode contract: single-agent default, optional
+  `sfs implement --agent-mode parallel --agents codex,claude[,gemini]`,
+  disjoint files_scope, lane verification, native/workspace-language lane commit
+  message, and agent cross review before Gate 6 PASS.
+- Added the same implementation-mode summary to install and upgrade completion
+  output so "latest applied" reports do not hide the already-shipped parallel
+  agent contract.
+
+### Tests
+
+- Added `test-upgrade-freshness-summary.sh` to guard the upgrade context and
+  install/upgrade completion surfaces.
+
 ## [0.6.104] - 2026-05-23
 
 > **Korean "배포해줘" now means the full release process, including tests,

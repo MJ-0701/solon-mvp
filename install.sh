@@ -825,6 +825,13 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
      - Gemini/custom: 프로젝트가 쓰는 모델/profile 이름
      원하면 worker/helper 도 high-end 로 바꿔도 됩니다.
 
+     Agent implementation mode:
+     - 기본 구현 모드는 single-agent 입니다.
+     - 병렬 agent 구현은 명시적으로 선택할 때만 사용합니다:
+       ${C_BLUE}sfs implement --agent-mode parallel --agents codex,claude[,gemini] "<work slice>"${C_RESET}
+     - parallel lane 은 disjoint files_scope, lane-level verification,
+       native/workspace-language one-sentence commit message, 그리고 Gate 6 PASS 전 agent cross review 가 필요합니다.
+
   ${C_BOLD}3.${C_RESET} 선호 런타임에서 시작:
      ${C_BLUE}legacy repo${C_RESET} → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs adopt --apply${C_RESET} → ${C_BLUE}/sfs start${C_RESET}
      ${C_BLUE}claude${C_RESET}     → ${C_BLUE}/sfs status${C_RESET} → ${C_BLUE}/sfs start${C_RESET} → ${C_BLUE}/sfs brainstorm${C_RESET} → ${C_BLUE}/sfs plan${C_RESET} → ${C_BLUE}/sfs implement${C_RESET} → ${C_BLUE}/sfs review${C_RESET} → ${C_BLUE}/sfs retro${C_RESET}

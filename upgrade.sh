@@ -1686,6 +1686,17 @@ case "$INSTALL_LAYOUT" in
     ;;
 esac
 
+print_agent_implementation_mode_contract() {
+  cat <<EOF
+Agent implementation mode:
+  기본 구현 모드는 single-agent 입니다.
+  병렬 agent 구현은 명시적으로 선택할 때만 사용합니다:
+  ${C_BLUE}sfs implement --agent-mode parallel --agents codex,claude[,gemini] "<work slice>"${C_RESET}
+  parallel lane 은 disjoint files_scope, lane-level verification,
+  native/workspace-language one-sentence commit message, 그리고 Gate 6 PASS 전 agent cross review 가 필요합니다.
+EOF
+}
+
 cat <<EOF
 
 ${C_BOLD}=== Solon Product Upgrade ===${C_RESET}
@@ -1720,6 +1731,7 @@ if [ "$CUR_VER" = "$NEW_VER" ]; then
   fi
   project_surface_archive_migrations || die "legacy archive surface migration failed"
   maybe_prompt_model_profile
+  print_agent_implementation_mode_contract
   ok "이미 최신 버전. 업그레이드 불필요."
   if [ "$MODEL_PROFILE_REPAIRED" -eq 1 ]; then
     warn "새 파일을 추가했으니 프로젝트 repo 에서 commit 여부를 확인하세요: .sfs-local/model-profiles.yaml"
@@ -2448,6 +2460,8 @@ Agent model profile:
   Claude: advisor 는 Opus 4.7, worker/facilitator/code helper 는 Sonnet 4.6,
   Haiku 는 코딩 금지 helper-grade relay/요약/read-only 보조 전용입니다.
   Gemini/custom 은 프로젝트 runtime 이 지원하는 profile 이름으로 agent별 override 가능합니다.
+
+$(print_agent_implementation_mode_contract)
 
 변경사항 sfs commit + push 권장:
   ${COMMIT_HINT}
