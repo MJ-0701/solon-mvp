@@ -1,3 +1,22 @@
+## [0.6.108] - 2026-05-23
+
+> **Installed version summaries now fall back to release notes when packaged
+> runtimes omit the large CHANGELOG file.**
+
+### Fixed
+
+- `sfs version --check` now reads `RELEASE-NOTES.md` when `CHANGELOG.md` is not
+  present in the installed Homebrew/Scoop payload, so `installed_release_headline`
+  is emitted from the actual packaged runtime.
+- The product release verifier now fails if the installed runtime lacks
+  `installed_release_headline`, preventing a channel release from passing while
+  the headline anchor is missing.
+
+### Tests
+
+- Extended version-headline coverage to simulate an installed payload with
+  `RELEASE-NOTES.md` but no `CHANGELOG.md`.
+
 ## [0.6.107] - 2026-05-23
 
 > **Version and freshness summaries now anchor to the exact release headline

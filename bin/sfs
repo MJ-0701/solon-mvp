@@ -426,8 +426,17 @@ EOF
 }
 
 sfs_print_installed_release_headline() {
-  local version="$1" changelog="${DIST_DIR}/CHANGELOG.md"
-  [[ -f "${changelog}" && "${version}" != "unknown" ]] || return 0
+  local version="$1" changelog="${DIST_DIR}/CHANGELOG.md" notes="${DIST_DIR}/RELEASE-NOTES.md"
+  [[ "${version}" != "unknown" ]] || return 0
+  if [[ -f "${changelog}" ]]; then
+    sfs_print_changelog_release_headline "${version}" "${changelog}"
+  elif [[ -f "${notes}" ]]; then
+    sfs_print_release_notes_headline "${version}" "${notes}"
+  fi
+}
+
+sfs_print_changelog_release_headline() {
+  local version="$1" changelog="$2"
   awk -v version="${version}" '
     $0 ~ "^## \\[" version "\\]" { in_entry=1; next }
     in_entry && /^## / { exit }
@@ -448,6 +457,22 @@ sfs_print_installed_release_headline() {
       }
     }
   ' "${changelog}"
+}
+
+sfs_print_release_notes_headline() {
+  local version="$1" notes="$2"
+  awk -v version="${version}" '
+    $0 == "## " version { in_entry=1; next }
+    in_entry && /^## / { exit }
+    in_entry && $0 != "" {
+      line=$0
+      gsub(/[[:space:]]+/, " ", line)
+      sub(/^[[:space:]]+/, "", line)
+      sub(/[[:space:]]+$/, "", line)
+      print "installed_release_headline " line
+      exit
+    }
+  ' "${notes}"
 }
 
 latest_release_version() {

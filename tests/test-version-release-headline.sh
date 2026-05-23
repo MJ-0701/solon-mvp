@@ -32,11 +32,27 @@ output="$(
   "${DIST_DIR}/bin/sfs" version --check
 )"
 
-assert_contains_text "${output}" "sfs 0.6.107" "version output"
-assert_contains_text "${output}" "latest 0.6.107" "latest output"
+assert_contains_text "${output}" "sfs 0.6.108" "version output"
+assert_contains_text "${output}" "latest 0.6.108" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Version and freshness summaries now anchor to the exact release headline" "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Installed version summaries now fall back to release notes" "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
+
+fallback_dist="${tmpdir}/dist-without-changelog"
+mkdir -p "${fallback_dist}"
+cp -R "${DIST_DIR}/bin" "${fallback_dist}/bin"
+mkdir -p "${fallback_dist}/templates/.sfs-local-template/scripts"
+cp "${DIST_DIR}/VERSION" "${fallback_dist}/VERSION"
+cp "${DIST_DIR}/RELEASE-NOTES.md" "${fallback_dist}/RELEASE-NOTES.md"
+
+fallback_output="$(
+  SFS_DIST_DIR="${fallback_dist}" \
+  SFS_RELEASE_REPO_URL="${repo}" \
+  SFS_VERSION_COMMAND_TIMEOUT_SEC=0 \
+  "${fallback_dist}/bin/sfs" version --check
+)"
+
+assert_contains_text "${fallback_output}" "installed_release_headline 이번 버전은 설치된 Homebrew/Scoop payload" "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

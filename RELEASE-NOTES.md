@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.108
+
+이번 버전은 설치된 Homebrew/Scoop payload 에 큰 `CHANGELOG.md` 가 빠지고 `RELEASE-NOTES.md` 만 있을 때도
+`sfs version --check` 가 `installed_release_headline` 을 출력하도록 보강합니다.
+
+- `CHANGELOG.md` 가 있으면 기존처럼 CHANGELOG headline 을 사용합니다.
+- 설치 payload 에 `CHANGELOG.md` 가 없으면 `RELEASE-NOTES.md` 의 해당 버전 첫 문단을 headline 으로 사용합니다.
+- release verifier 는 설치 runtime 의 `installed_release_headline` 출력까지 확인합니다.
+
 ## 0.6.107
 
 이번 버전은 Agent 가 `sfs version --check` 로 최신 번호만 확인한 뒤 이전 release 내용을 최신 변경처럼

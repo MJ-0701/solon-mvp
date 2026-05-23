@@ -660,24 +660,41 @@ function Get-SfsReleaseHeadline {
   param([string]$Version)
   if (-not $Version -or $Version -eq "unknown") { return $null }
   $changelog = Join-Path (Get-SfsDistDir) "CHANGELOG.md"
-  if (-not (Test-Path -LiteralPath $changelog)) { return $null }
+  if (Test-Path -LiteralPath $changelog) {
+    $capture = $false
+    $parts = @()
+    foreach ($line in Get-Content -LiteralPath $changelog) {
+      if ($line -match ("^## \[" + [regex]::Escape($Version) + "\]")) {
+        $capture = $true
+        continue
+      }
+      if ($capture -and $line -match "^## ") { break }
+      if ($capture -and $line.StartsWith("> ")) {
+        $part = $line.Substring(2).Replace("**", "").Trim()
+        if ($part) { $parts += $part }
+        continue
+      }
+      if ($capture -and $parts.Count -gt 0) { break }
+    }
+    if ($parts.Count -gt 0) {
+      return (($parts -join " ") -replace "\s+", " ").Trim()
+    }
+  }
+
+  $notes = Join-Path (Get-SfsDistDir) "RELEASE-NOTES.md"
+  if (-not (Test-Path -LiteralPath $notes)) { return $null }
   $capture = $false
-  $parts = @()
-  foreach ($line in Get-Content -LiteralPath $changelog) {
-    if ($line -match ("^## \[" + [regex]::Escape($Version) + "\]")) {
+  foreach ($line in Get-Content -LiteralPath $notes) {
+    if ($line -eq "## $Version") {
       $capture = $true
       continue
     }
     if ($capture -and $line -match "^## ") { break }
-    if ($capture -and $line.StartsWith("> ")) {
-      $part = $line.Substring(2).Replace("**", "").Trim()
-      if ($part) { $parts += $part }
-      continue
+    if ($capture -and $line.Trim()) {
+      return (($line.Trim()) -replace "\s+", " ")
     }
-    if ($capture -and $parts.Count -gt 0) { break }
   }
-  if ($parts.Count -eq 0) { return $null }
-  return (($parts -join " ") -replace "\s+", " ").Trim()
+  return $null
 }
 
 function Show-SfsNativeVersionUsage {
