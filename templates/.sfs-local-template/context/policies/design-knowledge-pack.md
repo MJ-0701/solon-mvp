@@ -28,9 +28,13 @@ active for a sprint, review, or release. Apply only the matching ids.
 - Data-dense product surfaces need scanning, hierarchy, states, and task flow,
   not decorative composition.
 - Accessibility and responsive fit are active whenever UI is user-facing.
-- Visible frontend implementation activates pre-user browser verification:
+- Visible UI implementation activates pre-user browser verification:
   Playwright or equivalent browser automation must run before asking the user
   to inspect the UI.
+- Visible UI product behavior also activates product-level DDD/TDD: session/
+  auth/workflow, permission, and product-state rules need a named
+  domain/use-case/state boundary, not only a component, hook, store, router, or
+  bootstrap edit.
 - AI-generated UI activates design-system governance. If `design.md` or
   `docs/solon/design.md` exists, read it before editing; if neither exists and
   the work creates visible UI, record the gap or create a compact seed contract
@@ -73,7 +77,11 @@ active for a sprint, review, or release. Apply only the matching ids.
 - DES-PROP-021: Korean typography needs one primary Korean-capable font, stable line-height, and `letter-spacing: 0` unless the existing design system explicitly overrides it.
 - DES-PROP-022: Iconography should come from one coherent icon family or the existing product icon system; do not mix random free icons.
 - DES-PROP-023: AI-slop signals include generic SaaS gradients, arbitrary card/radius choices, inconsistent palettes, mixed icon weights, and token values that differ screen by screen.
-- DES-PROP-024: Visible frontend changes need pre-user browser QA with desktop and mobile/small viewport evidence, primary interaction coverage, and console/runtime error checks.
+- DES-PROP-024: Visible UI changes need pre-user browser QA with desktop and mobile/small viewport evidence, primary interaction coverage, and console/runtime error checks.
+- DES-PROP-025: Visible UI product logic should live in named
+  domain/use-case/state logic; bootstraps, routers, root components, pages,
+  hooks, stores, effects, HTTP clients, cookies, and localStorage are
+  composition/presentation/adapter surfaces unless a waiver is recorded.
 
 ## Split Operating Guidance
 
@@ -104,6 +112,8 @@ DES-FILL operating sections:
 - Does Korean typography and long-label fit hold across mobile and desktop?
 - Did the implementer run Playwright or equivalent browser automation before
   user inspection, with desktop/mobile evidence and console/runtime checks?
+- Did frontend behavior preserve DDD/TDD boundaries, with product rules named in
+  UI domain/use-case/state logic and verified by unit/component/browser evidence?
 
 ## DES-EVIDENCE - Suggested Evidence
 
@@ -120,6 +130,8 @@ DES-FILL operating sections:
 - Browser QA evidence: Playwright/Cypress/Storybook/browser command and result,
   desktop/mobile screenshots or traces, primary interaction note, and console
   error summary.
+- Visible UI DDD/TDD evidence: state/use-case transition test, component test,
+  browser smoke, or explicit waiver mapping each affected AC to evidence.
 
 ## DES-GAP - Deepening Slots
 

@@ -36,10 +36,22 @@ generator_executor: ""
 
 - [ ]
 
-## 4. 다음
+## 4. Implementation Acceptance Ledger
+
+| AC/ADR/decision | status | files/artifacts | tests/evidence | gap/follow-up |
+|---|---|---|---|---|
+|  |  |  |  |  |
+
+## 5. Wiki QA/QC Ledger
+
+| problem/root cause/fix | local tests | project-applied result | production/applied status | follow-up/waiver |
+|---|---|---|---|---|
+|  |  |  |  |  |
+
+## 6. 다음
 
 - pass:
 - partial:
 - fail:
 
-## 5. 호출 기록
+## 7. 호출 기록

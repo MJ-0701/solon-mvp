@@ -8,11 +8,9 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 
 - Adapter-run by default: run `sfs review ...` before summarizing.
 - Do not create a new verdict from memory; use `review.md` and recorded result paths.
-- If the relevant sprint was already compacted/closed and `current-sprint` is
-  missing, use `sfs review --sprint <id> --gate <n>` instead of manually
-  editing `.sfs-local/current-sprint` or extracting tarballs. The command
-  restores the latest cold archive into the active workbench and refuses to
-  overwrite existing visible workbench files.
+- If the relevant sprint was compacted/closed and `current-sprint` is missing,
+  use `sfs review --sprint <id> --gate <n>`; do not edit `.sfs-local/current-sprint`
+  or extract tarballs manually.
 - After any external GitHub/@codex/PR/check PASS, do not stop at PASS. Record
   the evidence, then continue the review gate: self-CPO first, cross-review
   after self-CPO PASS. If the sprint is closed but the id is known, the next
@@ -25,32 +23,18 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   plan says ready-for-implement, review the plan contract first with
   `sfs review --gate 3`; only a PASS/accepted result should route to
   `sfs implement`.
-- Gate 3 review PASS does not approve product judgment. If a plan introduces
-  or changes product meaning, acceptance criteria meaning, IA, visible
-  UI/workflow, public contract, security/privacy/data-loss posture, cost/model
-  policy, or destructive behavior, the plan must mark
-  `user_approval_required: true` and `user_approval_status: "pending"` until
-  the user approves. If the plan claims no user decision is needed while
-  redefining that meaning, return partial and require a user approval boundary
-  instead of routing to implementation.
-- When a Gate 3 result is PASS but user approval is still pending, the next
-  action is not `sfs implement`; ask the user to approve/waive and record it
-  with `sfs capture --kind user-approval --gate 3 "..."` or `sfs capture
-  --kind waiver --gate 3 "..."`.
-- Gate 3 review has a sequence: local self-review until PASS, then cross
-  review. Cross review is independent confirmation after self-review, not a
-  replacement for self-review.
-- Gate 3 may use self-CPO fallback instead of cross review only when the
-  evidence records a concrete operational constraint: no other agent
-  subscription, external agent token exhaustion, or cross-review bridge
-  unavailability. A bare self-CPO PASS is not enough unless the user explicitly
-  waives the gate.
-- Local self-review means a self-CPO mini-check, not just an advisor call. It
-  must record pass/partial/fail and check requirements-to-AC-to-slice-to-ADR
-  traceability, AC-to-file/artifact/evidence mapping, and SEED/placeholder/mock/
-  fallback material as fail/partial/non-acceptance until replaced by real
-  deliverables. If that evidence is absent, return partial and ask for the
-  self-CPO pass before external cross review.
+- Gate 3 review PASS does not approve product judgment. If a plan changes
+  product meaning, AC meaning, IA, visible UI/workflow, public contract,
+  security/privacy/data-loss, cost/model policy, or destructive behavior, require
+  `user_approval_required: true` and pending status until approval/waiver is
+  captured with `sfs capture --kind user-approval --gate 3 "..."` or waiver.
+- Gate 3 review has a sequence: local self-review until PASS, then independent
+  cross review. Gate 3 may use self-CPO fallback only with operational evidence:
+  no other agent subscription, external token exhaustion, or bridge unavailability.
+- Local self-review means a self-CPO mini-check, not an advisor call: record
+  pass/partial/fail, requirements-to-AC-to-slice-to-ADR traceability,
+  AC-to-file/artifact/evidence mapping, and SEED/placeholder/mock/fallback as
+  fail/partial/non-acceptance until real deliverables replace it. If that evidence is absent, return partial.
 - If self-review returns partial/fail, rework the plan and run self-review
   again. If cross review returns partial/fail, rework the plan and return to
   self-review before another cross review.
@@ -80,22 +64,14 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - For Gate 3 plan review, use the CPO/evaluator role and prefer an independent
   executor or fresh agent context when available. The plan author, CTO, or
   generator should not self-approve the plan it will execute.
-- Review handoff must follow Runtime Token Firewall: send a capsule containing
-  the gate, lens, AC, files/artifacts, exact evidence paths, and bounded
-  excerpts. Do not invoke Claude in-process plugin wrappers, rescue subagents,
-  or forked contexts that forward the lead conversation history as the default
-  review path.
-- Review handoff must also follow Session Continuation Guard. If the current
-  host session is already token-heavy, do not start cross-review in the same
-  conversation. Record the review capsule and resume the review from a fresh
-  session or real CLI bridge.
-- Review durable product/context artifacts for Context Pollution Guard:
-  prompt bodies, full transcripts, bridge probe output, `.sfs-local/tmp/...`
-  scratch paths, and old review blobs in core docs are findings because they
-  dilute the SSoT and burn future token budget.
-- If the capsule is insufficient, return partial/fail and name the missing
-  evidence. Do not request full chat history or repeatedly poll the lead thread
-  to compensate for an underspecified review bundle.
+- Review handoff must follow Runtime Token Firewall; avoid rescue subagents and
+  send bounded excerpts with gate/lens/AC/files/evidence.
+- Review handoff must also follow Session Continuation Guard: use a fresh
+  session/CLI bridge when token-heavy.
+- Review durable product/context artifacts for Context Pollution Guard: prompt
+  bodies, transcripts, bridge probes, `.sfs-local/tmp/...`, and old review blobs
+  burn future token budget. If insufficient, Do not request full chat history;
+  name missing evidence.
 - Summaries should list verdict, findings, required actions, evidence, and next gate.
   Show gates as `Gate N (Name)`, for example Gate 6 (Review), not a naked
   internal id.
@@ -115,12 +91,10 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - If the evaluator executor equals the generator executor, call out the
   self-validation risk and prefer a separate model or fresh agent context when
   the change is user-facing, risky, or hard to verify.
-- If implement.md records `agent_mode: parallel`, Gate 6 review must verify the
-  multi-agent contract: disjoint files_scope per lane, one-sentence proposed
-  commit message per lane, lane-level verification evidence, and cross review
-  by a different agent before the final artifact acceptance verdict.
-- If a parallel lane cannot be described as a clear commit unit, treat that as
-  a split-design finding and require rework before PASS.
+- If implement.md records `agent_mode: parallel`, Gate 6 verifies lane contract:
+  disjoint files_scope per lane, AC/ADR subset ownership, expected tests/
+  evidence, output report path, merge/conflict policy, native/workspace-language
+  commit message per lane, lane-level verification, and different-agent cross review.
 - Review proposed or actual commit messages against the user's
   native/workspace language. English commit messages are correct only when the
   user/repo language is English or the repo explicitly requires English.
@@ -170,6 +144,16 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - Review the whole contract, not only changed code: shared intent, domain
   language consistency, feedback evidence, interface/artifact boundaries, and
   gray-box delegation should still match the Gate 2/3 record.
+- Cross-layer DDD/TDD is in scope. Return partial when product behavior,
+  policy, workflow, permissions, ownership, lifecycle, data semantics, or state
+  transitions hide in broad entrypoints without a named boundary and evidence.
+- Gate 6 review must build an implementation acceptance ledger from plan.md,
+  implement.md, log.md, diffs, and evidence; PASS only when every planned
+  AC/ADR/decision is implemented, user-approved deferred/waived, or removed by
+  approved plan update. Small deterministic gaps route to autopilot rework.
+- If `llm-wiki/` exists and the sprint uncovers repeated harness/product
+  failure, record problem, root cause, fix, local tests, project-applied QA/QC,
+  production/applied status if relevant, and follow-up/waiver.
 - Load `policies/knowledge-pack-router.md` first, or
   `policies/knowledge-pack-router.ko.md` for Korean preference. Read matching
   split packs only when the router maps the current review scope to them.
@@ -178,11 +162,8 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   per-screen styling) can be findings; missing reusable UI contract is an
   AI-slop risk.
 - For visible frontend/UI implementation, missing pre-user browser evidence is
-  a review finding. Look for Playwright/Cypress/Storybook/browser automation
-  evidence, desktop and mobile/small viewport screenshots or traces, primary
-  workflow interaction, text fit/overflow and responsive layout checks, and a
-  console/runtime error note. If browser verification could not run, require
-  an exact blocker plus alternate evidence or an explicit user waiver.
+  a finding. Look for automation, desktop/mobile evidence, primary interaction,
+  text/responsive checks, console note, or exact blocker plus alternate evidence.
 - Surface the evaluator's next action. Pass names `sfs retro` for Gate 6/7
   close; Gate 3 (Plan) PASS names `sfs implement`/handoff and carries review
   items into the first slice. Mention `sfs report` only for report preview or

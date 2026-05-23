@@ -1692,7 +1692,8 @@ Agent implementation mode:
   기본 구현 모드는 single-agent 입니다.
   병렬 agent 구현은 명시적으로 선택할 때만 사용합니다:
   ${C_BLUE}sfs implement --agent-mode parallel --agents codex,claude[,gemini] "<work slice>"${C_RESET}
-  parallel lane 은 disjoint files_scope, lane-level verification,
+  parallel lane 은 disjoint files_scope, AC/ADR subset ownership, expected tests/evidence,
+  output report path, merge/conflict policy, lane-level verification,
   native/workspace-language one-sentence commit message, 그리고 Gate 6 PASS 전 agent cross review 가 필요합니다.
 EOF
 }

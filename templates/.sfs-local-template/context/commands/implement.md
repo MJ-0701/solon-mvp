@@ -89,14 +89,9 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   authorized and tooled, execute one-shot inline env with masked output. Do not ask the user to export variables,
   switch terminals, or rerun commands because shell state would not persist.
 - If visible frontend/UI changed, run browser automation before asking the user
-  to inspect it. Prefer the project's Playwright/Cypress/Storybook smoke; if no
-  project script exists, use available Playwright or browser automation against
-  the local app. Check at least one desktop and one mobile/small viewport,
-  primary workflow interaction, text fit/overflow, responsive layout, and
-  console/runtime errors. Attach screenshot/trace paths or a compact browser
-  evidence note. If browser verification is impossible, record the exact
-  blocker and smallest alternate evidence; do not call the UI ready without an
-  explicit user waiver.
+  to inspect it. Prefer Playwright/Cypress/Storybook; cover desktop plus mobile,
+  primary interaction, text fit/overflow, responsive layout, and console/runtime
+  errors; attach evidence or exact blocker plus alternate evidence/explicit user waiver.
 - Before starting a new implementation slice in a long host conversation, apply
   Session Continuation Guard. If the token meter is already 30% or higher at
   the start of a new WU/sprint, or 50% or higher before a new gate/worker
@@ -135,9 +130,8 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   --agent-mode parallel --agents codex,claude[,gemini] ...`, and only when the
   plan already has independent lanes.
 - Multi-agent implementation requires commit-unit clarity before coding: every
-  lane must have a disjoint files_scope and a one-sentence proposed commit
-  message. If an agent cannot clearly name what its commit would say, do not
-  split that lane.
+  lane has disjoint files_scope, AC/ADR subset, non-goals, expected tests/
+  evidence, output report path, merge/conflict policy, and a one-sentence proposed commit message. If not, do not split that lane.
 - Commit messages default to the user's native/workspace language. If the user
   is Korean, write Korean commit messages; use English only when English is the
   user's native/workspace language or the repo explicitly requires English.
@@ -163,31 +157,35 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   sprint, followed by `sfs review --gate 6 --stage cross`. GitHub @codex comes
   only after that SFS cross CPO pass, as external PR/code review evidence.
 - Use DDD/TDD guardrails whenever product behavior changes, not only backend
-  code. Load `policies/ddd-tdd-knowledge-pack.md` or `.ko.md`: preserve product
-  domain language and behavior boundaries across UI/API/CLI/docs/data; keep
-  business invariants in domain/use-case logic for code; preserve
-  `domain/application/interfaces/infrastructure` boundaries for app/backend
-  code; and start with failing, characterization, smoke, or review evidence
-  when practical.
+  code. Load `policies/ddd-tdd-knowledge-pack.md` or `.ko.md`: preserve domain
+  language/boundaries across UI/API/CLI/docs/data, keep invariants in domain/
+  use-case logic, preserve code boundaries, and start with evidence when practical.
+- Before editing broad entrypoints, name the product-policy owner and adapter
+  boundary. UI bootstraps/router/root components/hooks/stores/effects,
+  controllers, jobs, repositories, DTO mappers, CLI flags, scripts, migrations,
+  docs wording, observability glue, and external adapters wire/transport/
+  describe behavior; they must not silently own auth/session, permission,
+  ownership, lifecycle, workflow, or data semantics. Prove behavior with unit/
+  characterization, component/API/CLI/browser smoke, migration/backfill dry run,
+  review evidence, or explicit waiver plus follow-up guard.
+- Keep an implementation acceptance ledger while coding: map every AC/ADR/
+  decision to implemented/missing/deferred/waived with files/artifacts and
+  evidence. Missing self-CPO, stale evidence, small guard/test gaps, and path
+  issues are autopilot patch+verify+review work, not user questions.
 - Load `policies/knowledge-pack-router.md` first, or `policies/knowledge-pack-router.ko.md`
   for Korean preference. Apply only the matching division router ids.
 - Load `policies/obsidian-llm-wiki.md` when the slice creates/migrates project
   docs, begins an existing-project adoption, or needs durable retrieval across
   future sprints.
 - If backend/JVM/Spring/JPA/transaction/batch/integration/DevOps/AWS work is in
-  scope, read `policies/backend-knowledge-pack.md` **or**
-  `policies/backend-knowledge-pack.ko.md` **only** after router selection.
+  scope, read the backend pack only after router selection.
 - If strategy-pm, QA, design/frontend, infra, management-admin, or taxonomy work
-  is in scope, read the matching `policies/*-knowledge-pack.md` or
-  `policies/*-knowledge-pack.ko.md` only after router selection.
-  Apply the compact guidance for matching ids only; ordinary implementation
-  should not broaden itself into a knowledge-pack deepening task.
+  is in scope, read matching packs only after router selection and do not broaden
+  ordinary implementation into a knowledge-pack deepening task.
 - For visible design/frontend implementation, read `design.md` or
-  `docs/solon/design.md` when present before editing. If neither exists and the
-  work creates reusable UI, record the design-system gap or create a compact
-  design.md seed before broad screen generation. After editing, check token
-  drift: colors, type sizes, spacing, radius, shadows, and icon styles should
-  come from the design contract or be explicitly justified.
+  `docs/solon/design.md` when present; otherwise record the design-system gap or
+  seed. After editing, check token drift: colors, type, spacing, radius, shadows,
+  and icons.
 - Backend architecture ladder: clean layered monolith for MVP/small projects;
   CQRS for non-initial backend work even with one DB; propose Hexagonal
   transition when domain seams grow; propose MSA only when independent deploy,

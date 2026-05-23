@@ -12,13 +12,10 @@ load_when: ["always", "sfs", "entry"]
 - Shared handoff/history docs live under `docs/solon/<english-workspace>/<yyyyMMdd>/`;
   project-wide Solon reference docs may live under `docs/solon/`.
   `.sfs-local/` is private local workbench state and should remain thin.
-- Obsidian LLM wiki is a recommended companion, not a hard dependency. For
-  non-trivial SFS projects, prefer repo-root vault + `llm-wiki/` maps; if the
-  user declines or the repo cannot use Obsidian, record the gap and continue.
-  If `.obsidian/` or `llm-wiki/` exists, treat the wiki as active project
-  context: read `llm-wiki/README.md` and `llm-wiki/ddd/README.md` before broad
-  scans, then update the relevant map or record a gap/waiver when the slice
-  changes domain language, release flow, tests, or core components.
+- Obsidian LLM wiki is a recommended companion, not a hard dependency. If `.obsidian/` or `llm-wiki/` exists, treat it as active context: read
+  `llm-wiki/README.md` and `llm-wiki/ddd/README.md` before broad scans, then
+  update the relevant map or record a gap/waiver when domain, release, tests, or
+  core components change.
 - Host-local tool/skill bundles and user-home folders are external environment,
   not project SSoT, wiki roots, install targets, or migration sources. Do not
   install, clone, scaffold, or promote them while building an Obsidian wiki
@@ -27,13 +24,9 @@ load_when: ["always", "sfs", "entry"]
 - Stop on mutex conflicts and report owner/domain.
 - Ask only 1-3 blocking questions.
 - Decision questions must be self-contained: before any `Q1`, `D1`, or option
-  id, explain in plain user language what is being decided, why it matters,
-  the recommended default, and what each option changes. Labels are
-  cross-references, not the explanation.
-- Do not compress decisions into a question/recommendation-only table. If
-  options exist, show every viable option with its label, plain-language
-  meaning, and consequence; mark the recommendation as a default, not as the
-  only visible choice. If that would be noisy, ask one decision at a time.
+  id, explain what is decided, why it matters, the recommended default, and what
+  each option changes. Labels are cross-references, not the explanation.
+- Do not compress decisions into a question/recommendation-only table: show every viable option with meaning/consequence, or ask one decision at a time.
 - Never ask the user to confirm a compact option bundle such as `A/A/A/C/C`,
   and never answer "show the recommendation again" with only option labels or
   only the recommended row. Re-present the decision in plain language: the
@@ -84,11 +77,9 @@ load_when: ["always", "sfs", "entry"]
   context and symbol/semantic search before broad reads, and convert repeated
   AI mistakes into guardrails/checks during review or retro.
 - Session Continuation Guard is ambient: `sfs upgrade` cannot shrink an already
-  open LLM conversation. If the host token meter is 30% or higher before a new
-  WU/sprint action, 50% or higher before a new gate/loop/review handoff, or the
-  same session has spanned multiple WUs/sprints or repeated loop wakeups, stop
-  and create a compact fresh-session handoff instead of continuing in the same
-  chat.
+  open LLM conversation. If token meter is 30% or higher before a new WU/sprint,
+  50% or higher before a new gate/loop/review handoff, or the same session spans
+  multiple WUs/sprints, stop and create a compact fresh-session handoff.
 - Runtime Token Firewall is ambient: worker/review/executor handoffs are
   capsule-only. Do not forward the lead agent's full conversation history to a
   worker, plugin wrapper, rescue subagent, or external reviewer; pass only goal,
@@ -107,9 +98,16 @@ load_when: ["always", "sfs", "entry"]
   implement, review, report, and retro.
 - DDD/TDD is a product-level engineering floor, not a backend-only topic:
   product behavior changes name domain language, behavior boundaries, and first
-  evidence before worker handoff. Backend code still uses DDD-lite boundaries,
-  domain invariants stay out of adapters, and implementation prefers failing or
+  evidence before worker handoff. Code still uses DDD-lite boundaries, domain
+  invariants stay out of adapters, and implementation prefers failing or
   characterization tests before code.
+- Broad entrypoints are never default product-policy homes. UI bootstraps,
+  routers, hooks/stores/effects, controllers, jobs, repositories, DTO mappers,
+  CLI flags, scripts, migrations, docs wording, observability glue, and external
+  adapters need a named boundary or waiver when product rules change.
+- Gate 6 closes only with an implementation acceptance ledger: every planned
+  AC/ADR/decision is implemented, missing, deferred, or waived; implemented rows
+  point to files/evidence, and gaps cite approval or follow-up owner.
 - Gate order is a runtime contract, not presentation etiquette: after Gate 3
   (Plan) says ready-for-implement, the default next step is Gate 3 review
   (`sfs review --gate 3`) before any `sfs implement` handoff.
@@ -142,12 +140,8 @@ load_when: ["always", "sfs", "entry"]
   until approval/waiver is recorded with `sfs capture --kind user-approval` or
   `sfs capture --kind waiver`.
 - SFS commit guidance must use the SFS command surface: `sfs commit plan` and
-  `sfs commit apply --group <name>` (or `$sfs commit ...` in Codex / `/sfs
-  commit ...` only when a slash router is explicitly active). `sfs commit apply`
-  commits and pushes the current branch by default in user projects; use
-  `--no-push` only for local sandbox/release testing or offline work. Do not
-  route Solon commit guidance to a host-local `/commit` skill; `/commit` is not
-  the portable SFS workflow command.
+  `sfs commit apply --group <name>`; it commits and pushes the current branch by default in user projects. Use `--no-push` only for sandbox/offline work. Do
+  not route Solon commit guidance to a host-local `/commit` skill.
 - Advisor review is not a self-CPO PASS. Before asking for external/Codex/
   Claude/Gemini cross review or using it as gate evidence, the current author
   must run a local self-CPO mini-check and record pass/partial/fail. The check
@@ -180,13 +174,9 @@ load_when: ["always", "sfs", "entry"]
 - Role split is invariant: C-Level owns intent, architecture, AC, and review;
   worker/generator owns fixed implementation slices. Do not present C-Level
   direct implementation as the normal default when a worker profile exists.
-- Model routing must reflect that role split. Claude coding-capable lanes use
-  Sonnet 4.6; Haiku is non-coding helper-only and must not write code.
-  Substantive research should prefer a Gemini 3 Pro auto researcher when available.
-  Gemini uses `gemini-3-pro-auto` for every SFS role. Codex:
-  general worker/generator slices use `gpt-5.4`, helper-grade I/O uses
-  `gpt-5.4-mini`, bounded repo-aware coding helpers use `gpt-5.3-codex`, and
-  judgment-free mechanical implementation helpers use `gpt-5.3-codex-spark`.
+- Model routing reflects role split. Claude coding-capable lanes use Sonnet 4.6;
+  Haiku is non-coding helper-only. Substantive research should prefer Gemini 3 Pro auto. Gemini uses `gemini-3-pro-auto` for every SFS role. Codex general worker/generator slices use `gpt-5.4`, helper I/O uses `gpt-5.4-mini`,
+  bounded repo-aware coding helpers use `gpt-5.3-codex`, and judgment-free mechanical implementation helpers use `gpt-5.3-codex-spark`.
 - Work is not complete until the author runs a self-agent top-model CPO review
   and records a PASS. Claude self-CPO uses Opus 4.7, Codex self-CPO uses
   `gpt-5.5` with xhigh reasoning, Gemini self-CPO uses `gemini-3-pro-auto`, or

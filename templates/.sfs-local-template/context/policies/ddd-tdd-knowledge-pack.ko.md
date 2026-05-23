@@ -53,6 +53,14 @@ scope 자체가 backend 로 제한되지 않는다.
   presentation mapping 을 소유한다.
 - `infrastructure` 는 persistence, external client, queue, clock, file,
   framework-specific adapter 를 소유한다.
+- product behavior 를 담는 모든 layer 가 같은 규율을 따른다. UI
+  domain/use-case/state model, backend domain/application service, CLI use
+  case, migration/backfill policy, docs/workflow policy owner 는 product rule
+  을 담을 때 이름이 있어야 한다. UI bootstrap, router, root component,
+  hook/store/effect, controller, job, repository, DTO mapper, CLI flag, script,
+  migration, docs wording, observability glue, external adapter 같은 broad
+  entrypoint 가 policy 의 조용한 집이 되면 안 된다. 예외는 작은 scope
+  waiver 로 이유를 남긴다.
 - core business rule 은 controller, job, repository, external adapter 에
   묻히면 안 된다.
 - product rule 은 UI label, docs wording, CLI flag, migration, seed script,
@@ -85,6 +93,10 @@ scope 자체가 backend 로 제한되지 않는다.
   아니라 domain/use-case logic 에 있는가?
 - backend code 가 아닌 artifact 라면 product rule 은 어디에 이름 붙었고 어떻게
   검증되는가?
+- broad entrypoint 가 변경됐다면 product behavior 가 UI bootstrap, router,
+  root component, hook/store/effect, controller, job, repository, DTO mapper,
+  CLI flag, script, migration, docs wording, observability glue, external
+  adapter 가 아니라 named domain/use-case/state boundary 에 있는가?
 - canonical term, aggregate/entity/value-object/event 이름이 일관적인가?
 - code 작성 전 또는 작성과 함께 failing/characterization test 가 있었는가?
 - TDD 를 waive 했다면 이유와 alternate evidence 가 명시됐는가?
@@ -96,5 +108,7 @@ scope 자체가 backend 로 제한되지 않는다.
   없으면 partial.
 - product behavior 변경에 test-first, characterization, smoke, explicit
   alternate evidence 가 없으면 partial.
+- product rule 이 named domain/use-case/state boundary 와 evidence 없이 broad
+  entrypoint 에 묻혀 있으면 partial.
 - business invariant 가 adapter 에 묻혀 money, PII, data-loss, partner-state
   risk 를 만들면 fail.

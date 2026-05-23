@@ -50,6 +50,11 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
     name the product behavior, domain boundary, aggregate/invariant or waiver,
     and first failing, characterization, smoke, or review evidence before
     implementation.
+    For any broad entrypoint slice, name the policy owner and adapter boundary:
+    UI bootstraps/router/root components/hooks/stores/effects, controllers,
+    jobs, repositories, DTO mappers, CLI flags, scripts, migrations, docs
+    wording, observability glue, and external adapters are not sufficient
+    architecture plans for product behavior unless an explicit waiver says why.
   - feedback loops become binary AC with `verify by ...` evidence.
   - deep-module boundaries become public interfaces, artifact boundaries, or
     ownership slices.
@@ -139,6 +144,12 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   `policies/backend-knowledge-pack.ko.md` only after router selection.
 - If project scaffolding or product behavior is in scope, record the
   DDD/TDD floor from `policies/ddd-tdd-knowledge-pack.md` or `.ko.md`.
+- If any broad entrypoint carries product behavior, record the same DDD/TDD
+  floor for that layer: the domain/use-case/state boundary, adapter/composition
+  boundary, and test/smoke/review evidence. Do not let UI bootstraps, routers,
+  root components, hooks/stores/effects, controllers, jobs, repositories, DTO
+  mappers, CLI flags, scripts, migrations, docs wording, observability glue, or
+  external adapters become the product-policy home by default.
 - If strategy-pm, QA, design/frontend, infra, management-admin, or taxonomy
   signals are in scope, record matching ids from the matching
   `policies/*-knowledge-pack.md` or `policies/*-knowledge-pack.ko.md` only after

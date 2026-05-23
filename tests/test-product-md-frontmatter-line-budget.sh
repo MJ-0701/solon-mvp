@@ -41,6 +41,11 @@ while IFS= read -r file; do
   sed -n '2,40p' "${file}" | grep -Fxq -- "---" || fail "${file} missing closing frontmatter"
 done < <(find "${DIST_DIR}" -name '*.md' -type f | sort)
 
+while IFS= read -r file; do
+  lines="$(wc -l <"${file}" | tr -d '[:space:]')"
+  [[ "${lines}" -le 200 ]] || fail "${file} exceeds 200 lines: ${lines}"
+done < <(find "${DIST_DIR}/templates" -name '*.md.template' -type f | sort)
+
 cut_release="${REPO_ROOT}/scripts/cut-release.sh"
 [[ -f "${cut_release}" ]] || fail "missing cut-release script: ${cut_release}"
 

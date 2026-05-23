@@ -1,3 +1,32 @@
+## [0.6.112] - 2026-05-23
+
+> **Gate 6 now proves the plan across every product-bearing layer.**
+
+### Added
+
+- Made DDD/TDD explicit across all product-bearing entrypoints, not only
+  backend or frontend code. UI bootstraps, routers, controllers, jobs,
+  repositories, DTO mappers, CLI flags, scripts, migrations, docs wording,
+  observability glue, and external adapters are not default homes for product
+  policy without a named boundary, evidence, or explicit waiver.
+- Added a Gate 6 Implementation Acceptance Ledger requirement. Review must map
+  every planned AC/ADR/decision to implemented, missing, deferred, or waived,
+  with files/artifacts plus tests/evidence before PASS.
+- Added a wiki QA/QC closure expectation when `llm-wiki/` exists: repeated
+  harness/product failures must record problem, root cause, product fix, local
+  tests, project-applied result, production/applied status when relevant, and
+  follow-up/waiver.
+- Tightened parallel sub-agent lanes: each lane now needs AC/ADR subset
+  ownership, expected tests/evidence, output report path, merge/conflict policy,
+  disjoint files_scope, and a native-language commit message before coding.
+
+### Tests
+
+- Extended guardrails to assert cross-layer DDD/TDD coverage, Gate 6 acceptance
+  ledger output, wiki QA/QC evidence closure, and richer parallel sub-agent lane
+  contracts across runtime context, policy packs, review, implementation, and
+  adapter surfaces.
+
 ## [0.6.111] - 2026-05-23
 
 > **Legit small review findings now stay on autopilot instead of calling the

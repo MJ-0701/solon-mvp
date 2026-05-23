@@ -29,8 +29,12 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - Data-dense product surfaces need scanning, hierarchy, states, and task flow,
   not decorative composition.
 - Accessibility and responsive fit are active whenever UI is user-facing.
-- visible frontend 구현은 사용자 확인 전에 browser 검증을 활성화한다. Playwright
+- visible UI 구현은 사용자 확인 전에 browser 검증을 활성화한다. Playwright
   또는 동등한 browser automation evidence 없이 UI 를 ready 로 넘기지 않는다.
+- visible UI product behavior 도 product-level DDD/TDD 를 활성화한다.
+  session/auth/workflow, permission, product-state rule 은 component, hook,
+  store, router, bootstrap 수정만으로 충분하지 않고 named
+  domain/use-case/state boundary 를 가져야 한다.
 - AI generated UI activates design-system governance. If `design.md` or
   `docs/solon/design.md` exists, read it before editing; if neither exists and
   the work creates visible UI, record the gap or create a compact seed contract
@@ -73,7 +77,11 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
 - DES-PROP-021: Korean typography needs one primary Korean-capable font, stable line-height, and `letter-spacing: 0` unless the existing design system explicitly overrides it.
 - DES-PROP-022: Iconography should come from one coherent icon family or the existing product icon system; do not mix random free icons.
 - DES-PROP-023: AI-slop signals include generic SaaS gradients, arbitrary card/radius choices, inconsistent palettes, mixed icon weights, and token values that differ screen by screen.
-- DES-PROP-024: Visible frontend 변경은 desktop/mobile viewport evidence, primary interaction coverage, console/runtime error check 를 포함한 pre-user browser QA 가 필요하다.
+- DES-PROP-024: Visible UI 변경은 desktop/mobile viewport evidence, primary interaction coverage, console/runtime error check 를 포함한 pre-user browser QA 가 필요하다.
+- DES-PROP-025: Visible UI product logic 은 named domain/use-case/state logic
+  에 있어야 한다. bootstrap, router, root component, page, hook, store,
+  effect, HTTP client, cookie, localStorage 는 waiver 가 없으면
+  composition/presentation/adapter 표면이다.
 
 ## Split Operating Guidance
 
@@ -97,6 +105,9 @@ responsive/accessibility, browser QA, copy guidance 가 필요할 때만 child p
 - 한국어 typography 와 긴 label 이 mobile/desktop 에서 안정적으로 맞는가?
 - 사용자 확인 전에 Playwright 또는 동등한 browser automation 을 실행했고,
   desktop/mobile evidence 와 console/runtime check 가 남아 있는가?
+- frontend behavior 가 DDD/TDD boundary 를 보존하는가? product rule 이 UI
+  domain/use-case/state logic 에 이름 붙어 있고 unit/component/browser evidence
+  로 검증됐는가?
 
 ## DES-EVIDENCE - Suggested Evidence
 
@@ -111,6 +122,8 @@ responsive/accessibility, browser QA, copy guidance 가 필요할 때만 child p
   grep/inspection result, desktop/mobile screenshot, icon/font consistency note.
 - browser QA evidence: Playwright/Cypress/Storybook/browser command 와 result,
   desktop/mobile screenshot 또는 trace, primary interaction note, console error summary.
+- frontend DDD/TDD evidence: state/use-case transition test, component test,
+  browser smoke, 또는 각 AC 와 연결된 explicit waiver.
 
 ## DES-GAP - Deepening Slots
 

@@ -53,6 +53,14 @@ evidence. Backend package layout is one application of this pack, not its scope.
   presentation mapping.
 - `infrastructure` owns persistence, external clients, queues, clocks, files,
   and framework-specific adapters.
+- Every product-bearing layer uses the same discipline. UI domain/use-case/
+  state models, backend domain/application services, CLI use cases, migration or
+  backfill policies, and document/workflow policy owners must be named when they
+  carry product behavior. Broad entrypoints such as UI bootstraps, routers, root
+  components, hooks/stores/effects, controllers, jobs, repositories, DTO
+  mappers, CLI flags, scripts, migrations, docs wording, observability glue, and
+  external adapters must not become the quiet home for policy unless a
+  small-scope waiver says why.
 - Controllers, jobs, repositories, and external adapters must not become the
   place where core business rules live.
 - Product rules must also not disappear into UI labels, docs wording, CLI flags,
@@ -85,6 +93,10 @@ evidence. Backend package layout is one application of this pack, not its scope.
   repositories, DTO mappers, jobs, or external adapters?
 - If the artifact is not backend code, where is the product rule named and how
   is it verified?
+- If broad entrypoints changed, is product behavior in a named domain/use-case/
+  state boundary rather than hidden in UI bootstraps/router/root components/
+  hooks/stores/effects, controllers, jobs, repositories, DTO mappers, CLI flags,
+  scripts, migrations, docs wording, observability glue, or external adapters?
 - Are canonical terms, aggregate/entity/value-object/event names consistent?
 - Was a failing or characterization test written before or with the code?
 - If TDD was waived, is the reason explicit and is there alternate evidence?
@@ -96,5 +108,7 @@ evidence. Backend package layout is one application of this pack, not its scope.
   behavior boundaries and no waiver explains why.
 - Return partial when product behavior changes have no test-first,
   characterization, smoke, or explicit alternate verification evidence.
+- Return partial when product rules are buried in broad entrypoints without a
+  named domain/use-case/state boundary and evidence.
 - Return fail when business invariants are buried in adapters and that creates
   data-loss, money, PII, or partner-state risk.

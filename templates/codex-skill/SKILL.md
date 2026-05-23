@@ -49,13 +49,13 @@ Homebrew/Scoop into `~/.codex/skills/sfs/SKILL.md`.
    language, and first evidence before worker handoff; use DDD-lite boundaries
    when code is touched; keep invariants out of adapters; prefer failing,
    characterization, smoke, or review evidence before implementation.
-   Obsidian LLM wiki is a recommended companion for SFS continuity, not a hard
-   dependency; load `policies/obsidian-llm-wiki.md` when setup/adoption/docs
-   migration or multi-sprint retrieval is in scope. If `.obsidian/` or
-   `llm-wiki/` exists, treat the wiki as active project context: check
-   `llm-wiki/README.md` and `llm-wiki/ddd/README.md` before broad scans, then
-   update the relevant map or record a gap/waiver when the slice changes domain
-   language, release flow, tests, or core components.
+   All product-bearing entrypoints are included: UI bootstraps, routers, root
+   components, hooks/stores/effects, controllers, jobs, repositories, DTO
+   mappers, CLI flags, scripts, migrations, docs wording, observability glue,
+   and external adapters are not default homes for product policy without a
+   named boundary, evidence, or explicit waiver.
+   Obsidian LLM wiki is a recommended companion, not a hard dependency; load its policy for setup/adoption/docs migration or multi-sprint retrieval. If `.obsidian/` or
+   `llm-wiki/` exists, treat wiki as active project context: check README/DDD map before broad scans, then update the relevant map or record a gap/waiver.
    Host-local tool/skill bundles and user-home folders are external
    environment, not project SSoT, wiki roots, install targets, or migration
    sources; do not install, clone, scaffold, or promote them while building an
@@ -93,7 +93,7 @@ Homebrew/Scoop into `~/.codex/skills/sfs/SKILL.md`.
     architecture, gate, AC, or files_scope require top-model advisor review
     before gate advancement (Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3-pro-auto`).
     Complex shared behavior escalates to high reasoning before coding.
-    Multi-agent implement is optional, never the default: use single-agent mode unless the user selects parallel agents, each lane has disjoint files_scope and a clear native-language commit message, and post-implement cross review is recorded before Gate 6. Commit messages default to the user's native/workspace language; English is only the default when that is the user or repo language.
+    Multi-agent implement is optional, never the default: use single-agent mode unless the user selects parallel agents, each lane has disjoint files_scope, AC/ADR subset ownership, expected tests/evidence, output report path, merge/conflict policy, and a clear native-language commit message, and post-implement cross review is recorded before Gate 6. Commit messages default to the user's native/workspace language; English is only the default when that is the user or repo language.
     Gate 3 review must self-review until PASS before cross review. Review
     volume is not PASS; partial/fail routes to rework. If no other agent,
     external tokens, or bridge exists, a recorded self-CPO fallback PASS may
@@ -125,11 +125,7 @@ Homebrew/Scoop into `~/.codex/skills/sfs/SKILL.md`.
     then GitHub `@codex` as final external evidence when available unless a
     recorded self-CPO fallback reason covers no other agent subscription,
     external agent token exhaustion, or cross-review bridge unavailability.
-    Session Continuation Guard: `sfs upgrade` updates runtime/project context
-    but cannot shrink an already-open LLM conversation. If the host token meter
-    is 30%+ before a new WU/sprint action, 50%+ before a new gate/loop/review
-    handoff, or the same chat has spanned multiple WUs/sprints or repeated loop
-    wakeups, stop and hand off to a fresh session using compact artifacts.
+    Session Continuation Guard: `sfs upgrade` cannot shrink an already-open LLM conversation. If the host token meter is 30%+ before a new WU/sprint action, 50%+ before a new gate/loop/review handoff, or the chat spans multiple WUs/sprints, hand off to a fresh session.
     After a work slice is implemented and verified, run self-agent top-model
     CPO: Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3-pro-auto`, or
     the configured custom top model. Partial/fail redirects the work and repeats

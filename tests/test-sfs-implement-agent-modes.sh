@@ -47,6 +47,25 @@ setup_project() {
   printf '{"ts":"2026-05-07T01:30:00+09:00","type":"review_run","sprint_id":"%s","gate_id":"G1","output_path":"%s","review_stage":"cross","cross_review":true,"evaluator_executor":"codex","generator_executor":"claude"}\n' "${sprint_id}" "${result_path}" >> .sfs-local/events.jsonl
 }
 
+setup_project "${TMP_DIR}/help"
+help_out="$(run_sfs implement --help)"
+case "${help_out}" in
+  *"AC/ADR subset ownership"* ) ;;
+  *) fail "implement help should name AC/ADR subset ownership: ${help_out}" ;;
+esac
+case "${help_out}" in
+  *"expected tests/evidence"* ) ;;
+  *) fail "implement help should name expected tests/evidence: ${help_out}" ;;
+esac
+case "${help_out}" in
+  *"lane output report path"* ) ;;
+  *) fail "implement help should name lane output report path: ${help_out}" ;;
+esac
+case "${help_out}" in
+  *"merge/conflict policy"* ) ;;
+  *) fail "implement help should name merge/conflict policy: ${help_out}" ;;
+esac
+
 setup_project "${TMP_DIR}/single"
 single_out="$(run_sfs implement "single slice")"
 case "${single_out}" in
@@ -65,6 +84,7 @@ sprint_id="$(cat .sfs-local/current-sprint)"
 single_impl=".sfs-local/sprints/${sprint_id}/implement.md"
 assert_contains "${single_impl}" "agent_mode: single" "single implement mode"
 assert_contains "${single_impl}" "optional parallel lane" "single optional lane guidance"
+assert_contains "${single_impl}" "acceptance ledger" "single acceptance ledger guidance"
 assert_contains "${single_impl}" 'sfs review --gate 6' "single review handoff"
 assert_contains .sfs-local/events.jsonl '"agent_mode":"single"' "single event mode"
 
@@ -86,6 +106,10 @@ sprint_id="$(cat .sfs-local/current-sprint)"
 parallel_impl=".sfs-local/sprints/${sprint_id}/implement.md"
 assert_contains "${parallel_impl}" "agent_mode: parallel" "parallel implement mode"
 assert_contains "${parallel_impl}" "split rule: use multiple agents only when each lane has disjoint files_scope" "parallel split rule"
+assert_contains "${parallel_impl}" "lane AC/ADR subset" "parallel AC/ADR ownership"
+assert_contains "${parallel_impl}" "expected tests/evidence" "parallel expected evidence"
+assert_contains "${parallel_impl}" "output report path" "parallel output report path"
+assert_contains "${parallel_impl}" "merge/conflict policy" "parallel merge conflict policy"
 assert_contains "${parallel_impl}" "proposed commit message" "parallel commit message guard"
 assert_contains "${parallel_impl}" "native/workspace language" "parallel native commit language"
 assert_contains "${parallel_impl}" "cross review between agents is required" "parallel cross review"

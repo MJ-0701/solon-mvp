@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.112
+
+이번 버전은 구현 단계에서 plan AC/ADR 이 흐려지지 않도록 Gate 6 를 ledger 기반으로 조입니다.
+
+- DDD/TDD 기본선은 backend/frontend 구분이 아니라 product-bearing entrypoint 전체에 적용됩니다. UI bootstrap/router, controller/job/repository, CLI/script/migration, docs wording, observability glue 도 product policy 의 임시 거처가 될 수 없습니다.
+- Gate 6 review 는 Implementation Acceptance Ledger 로 every AC/ADR/decision 을 `implemented / missing / deferred / waived` 로 매핑하고, 파일/산출물과 테스트/evidence 가 없으면 PASS 하지 않습니다.
+- `llm-wiki/` 가 있는 프로젝트에서 반복 하네스/제품 실패가 발견되면 problem, root cause, product fix, local tests, project-applied QA/QC, production/applied status, follow-up/waiver 를 기록해야 합니다.
+- parallel sub-agent 구현 lane 은 disjoint files_scope 뿐 아니라 AC/ADR subset, expected tests/evidence, output report path, merge/conflict policy, native-language commit message 를 갖고 시작합니다.
+
 ## 0.6.111
 
 이번 버전은 작은 review finding 묶음을 두고 사용자에게 "진행할까요?"라고 묻는 흐름을 막습니다.

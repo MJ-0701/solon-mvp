@@ -33,8 +33,10 @@ Open/update the active sprint's implement.md execution artifact.
   - Records the implementation request and appends an implement_open event.
   - Default agent mode is single. Use --agent-mode parallel with two or more
     named agents only when the plan already splits into clear commit units.
-  - Parallel agent mode requires disjoint files_scope, a one-sentence proposed
-    native-language commit message per lane, and cross review before Gate 6 can pass.
+  - Parallel agent mode requires disjoint files_scope, AC/ADR subset ownership,
+    expected tests/evidence, lane output report path, merge/conflict policy,
+    a one-sentence proposed native-language commit message per lane, and cross
+    review before Gate 6 can pass.
   - Prints implement.md, plan.md, and log.md paths.
   - AI runtimes must apply the execution harness:
     Think Before Execution, Simplicity First, Surgical Changes, Goal-Driven Execution.
@@ -403,15 +405,18 @@ fi
   if [[ "${AGENT_MODE}" == "parallel" ]]; then
     cat <<'EOF'
 - split rule: use multiple agents only when each lane has disjoint files_scope and a clear one-sentence proposed commit message.
+- lane AC/ADR subset: each lane owns explicit plan AC/ADR/decision rows and records how they will be accepted.
 - commit language: proposed/actual commit messages default to the user's native/workspace language; English is correct only when English is the user/repo language or repo policy requires it.
 - commit-unit guard: if a lane cannot explain its commit message before coding, do not split it; merge it into the nearest coherent lane or return to single-agent mode.
-- lane contract: each agent records owner, files_scope, non-goals, verification command, result, and proposed commit message before handoff.
+- lane contract: each agent records owner, AC/ADR subset, files_scope, non-goals, expected tests/evidence, output report path, verification command, result, and proposed commit message before handoff.
+- merge/conflict policy: overlapping files_scope, hidden dependency, or conflicting evidence routes back to single-agent ownership or an explicit re-plan before editing.
 - review rule: cross review between agents is required before Gate 6 review can pass, then run `sfs review --gate 6` for artifact acceptance.
 EOF
   else
     cat <<'EOF'
 - default lane: one worker/generator owns the fixed implementation slice.
 - optional parallel lane: rerun `sfs implement --agent-mode parallel --agents codex,claude[,gemini] ...` before coding only if the plan splits into clear commit units.
+- acceptance ledger: map every planned AC/ADR/decision to implemented, missing, deferred, or waived with files/artifacts and tests/evidence.
 - review rule: implementation is not complete until evidence is recorded and `sfs review --gate 6` runs; the generator cannot approve its own output.
 EOF
   fi

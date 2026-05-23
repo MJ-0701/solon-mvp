@@ -25,5 +25,6 @@ load_when: ["upgrade", "update", "install", "freshness", "업그레이드"]
   include the implementation mode contract: default is single-agent;
   optional parallel mode is `sfs implement --agent-mode parallel --agents
   codex,claude[,gemini]`; parallel lanes require disjoint files_scope,
-  lane-level verification, a one-sentence native/workspace-language commit
-  message, and agent cross review before Gate 6 PASS.
+  AC/ADR subset ownership, expected tests/evidence, output report path,
+  merge/conflict policy, lane-level verification, a one-sentence
+  native/workspace-language commit message, and agent cross review before Gate 6 PASS.

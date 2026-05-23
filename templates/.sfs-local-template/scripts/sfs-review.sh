@@ -2480,8 +2480,9 @@ EOF
     ddd-tdd)
       cat <<'EOF'
 - Check product-level DDD/TDD: canonical domain language, behavior boundaries, AC-to-evidence mapping, and first failing/characterization/smoke/review evidence.
-- When code is touched, check DDD-lite boundaries: domain/application/interfaces/infrastructure responsibilities, aggregate/invariant placement, and adapter dependency direction.
-- Treat product rules hidden in controllers, repositories, DTO mappers, jobs, external adapters, UI labels, CLI flags, docs wording, migrations, or workflow glue as findings.
+- When code is touched, check DDD-lite boundaries: domain/application/interfaces/infrastructure responsibilities, aggregate/invariant placement, state/use-case ownership, and adapter dependency direction.
+- Treat product rules hidden in broad entrypoints as findings: UI bootstraps/router/root components/hooks/stores/effects, controllers, repositories, DTO mappers, jobs, external adapters, UI labels, CLI flags, scripts, docs wording, migrations, observability glue, or workflow glue.
+- For Gate 6, build the Implementation Acceptance Ledger from plan AC/ADR/decision rows and verify every required row has implementation files plus evidence, or an explicit user-approved defer/waiver.
 EOF
       ;;
     qa)
@@ -2599,6 +2600,28 @@ Self-validation policy:
 - Treat the "declared first-class source/config excerpts" section as the primary artifact/source/config evidence; the generic first-N excerpt cap should not hide declared source/config targets.
 - Treat SFS/runtime/adapter files listed under SFS/system scope classification as Solon system state, not product implementation scope, unless this sprint explicitly targets SFS itself.
 - Code review is only the code lens. For every other lens, review the artifact/outcome without inventing code-level findings.
+- Gate 6 implementation acceptance is ledger-based, not effort-based. Build an
+  Implementation Acceptance Ledger from plan.md, implement.md, log.md, diffs,
+  source excerpts, and evidence:
+  AC/ADR/decision | status implemented/missing/deferred/waived | files/artifacts | tests/evidence | gap/follow-up.
+  Do not mark Gate 6 PASS unless every required AC/ADR/decision is implemented
+  with evidence, explicitly deferred/waived with user approval, or removed by an
+  approved plan update. A GitHub check, @codex review, high review count, or
+  "looks done" summary is not a substitute for this ledger.
+- If implement.md records `agent_mode: parallel`, Gate 6 must prove the lane
+  contract before PASS: disjoint files_scope, AC/ADR subset ownership, expected
+  tests/evidence, output report path, merge/conflict policy, native/workspace-
+  language commit message, lane-level verification, and different-agent cross
+  review.
+- If a project has `llm-wiki/` and the review exposes a repeated harness,
+  architecture, DDD/TDD, QA, release, or product-process failure, require a wiki
+  evidence ledger update before close: problem, root cause, product fix, local
+  tests, project-applied QA/QC result, production/applied status when relevant,
+  and remaining follow-up or waiver.
+- Missing self-CPO evidence, stale version/context evidence, small guard/test
+  gaps, evidence path issues, or meaning-preserving consistency fixes are
+  deterministic rework candidates. Require autopilot patch + verify +
+  self-CPO/cross review instead of asking the user whether to proceed.
 
 Review the lens guidance and embedded evidence below. Do not rely on executor-specific tools being available.
 
@@ -2619,6 +2642,10 @@ Evidence checked:
 - ...
 Evidence gaps:
 - ...
+Implementation acceptance ledger:
+- AC/ADR/decision | status | files/artifacts | tests/evidence | gap/follow-up
+Wiki QA/QC ledger:
+- problem/root cause/fix | local tests | project-applied result | production/applied status | follow-up/waiver
 Findings:
 - ...
 Required CTO actions:

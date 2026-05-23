@@ -39,6 +39,12 @@ compact Next action after verbatim output. Compact output is quality-preserving 
 never compress evidence, risk warnings, decisions, source links/paths, or
 raw-source traceability. If compactness would weaken quality, use full clarity.
 Never hardcode external private docsets.
+DDD/TDD is a product-level engineering floor, not backend-only. All
+product-bearing entrypoints are included: UI bootstraps, routers, root
+components, hooks/stores/effects, controllers, jobs, repositories, DTO mappers,
+CLI flags, scripts, migrations, docs wording, observability glue, and external
+adapters are not default homes for product policy without a named boundary,
+evidence, or explicit waiver.
 In Solon reports, show gates as `Gate N (Name)`, not naked ids. Use gate
 numbers 1..7 for new CLI examples; legacy ids remain compatibility-only.
 Solon reports should feel like compact console dashboards, not flat bullet

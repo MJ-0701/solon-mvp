@@ -45,6 +45,11 @@ $ARGUMENTS
    product behavior, domain language, behavior boundary, and first evidence are
    named before worker handoff; DDD-lite code boundaries apply when code is
    touched.
+   All product-bearing entrypoints are included: UI bootstraps, routers, root
+   components, hooks/stores/effects, controllers, jobs, repositories, DTO mappers,
+   CLI flags, scripts, migrations, docs wording, observability glue, and external
+   adapters are not default homes for product policy without a named boundary,
+   evidence, or explicit waiver.
 11. For implementation and review work, follow the routed context guardrails:
    surface material assumptions, choose the smallest useful slice, keep changes
    surgical, read actual files/errors before fixing, verify before completion,
@@ -80,7 +85,7 @@ $ARGUMENTS
    files_scope require top-model advisor review before gate advancement
    (Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3-pro-auto`).
    Complex shared behavior escalates to high reasoning before coding.
-   Multi-agent implement is optional, never the default: use single-agent mode unless the user selects parallel agents, each lane has disjoint files_scope and a clear native-language commit message, and post-implement cross review is recorded before Gate 6. Commit messages default to the user's native/workspace language; English is only the default when that is the user or repo language.
+   Multi-agent implement is optional, never the default: use single-agent mode unless the user selects parallel agents, each lane has disjoint files_scope, AC/ADR subset ownership, expected tests/evidence, output report path, merge/conflict policy, and a clear native-language commit message, and post-implement cross review is recorded before Gate 6. Commit messages default to the user's native/workspace language; English is only the default when that is the user or repo language.
    Gate 3 review must self-review until PASS before cross review. Review round
    count, lens count, or "enough review" is not a PASS; partial/fail routes to
    rework and same-gate self-review.
