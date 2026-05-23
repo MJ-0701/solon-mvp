@@ -1,3 +1,27 @@
+## [0.6.110] - 2026-05-23
+
+> **Review findings now pass a premise check before they become user
+> questions.**
+
+### Added
+
+- Added a User-escalation premise guard across kernel, plan, review, CPO, and
+  agent adapter surfaces. Before relaying a self/cross-review finding to the
+  user, agents must normalize the finding's premise and check it against the
+  brainstorm, plan, domain SoT, schema, code, and recorded decisions.
+- Findings whose premise is contradicted by the SoT, already answered by the
+  artifact, or just over-modeled must be patched and re-reviewed in the same
+  cycle instead of being escalated as a product question.
+- Lifecycle/delete proposals now default to the smallest data-preserving
+  policy: do not invent cascade soft-delete/restore flows unless the product
+  contract requires them; prefer rejecting delete while dependents exist.
+
+### Tests
+
+- Extended agent behavior guardrail coverage to require the premise guard and
+  the data-preserving delete-policy default across runtime context, CPO prompt,
+  and adapter surfaces.
+
 ## [0.6.109] - 2026-05-23
 
 > **Plain version commands keep their single-line contract while

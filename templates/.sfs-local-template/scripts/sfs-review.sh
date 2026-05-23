@@ -2581,6 +2581,16 @@ Self-validation policy:
 - External GitHub/@codex/PR/check PASS is a continuation trigger, not a stopping point. Require the next unmet SFS command: self-CPO first with `sfs review --gate <n>` or `sfs review --sprint <id> --gate <n>` for a closed sprint, then configured cross review after self-CPO PASS.
 - Treat same-tool review risk as review_independence_risk: warning unless the evidence proves a concrete product or evidence-bundle defect. Do not make same-tool risk the sole blocker for artifact quality.
 - Separate artifact quality findings from evidence-bundle gaps. If the embedded bundle lacks required artifact files, acceptance evidence, build/smoke output, or source excerpts needed for this lens, say that explicitly as an evidence packaging gap.
+- Before turning a self/cross-review finding into a user question, apply the
+  User-escalation premise guard: normalize the premise and check it against the
+  brainstorm, plan, domain SoT, schema, code, and recorded decisions. If the
+  premise is wrong, stale, already answered, or over-modeled, require artifact
+  rework plus same-gate review instead of forwarding the reviewer frame to the
+  user.
+- Do not accept invented ownership columns, cascade soft-delete, restore APIs,
+  or migration policy unless the product contract requires them. With dependent
+  records and no explicit product choice, prefer reject-delete-with-dependents
+  over cascade/restore complexity.
 - Treat File excerpt index paths as first-class review targets. The bundle should include bounded source diffs and excerpts for those paths when files are available.
 - Treat the "declared first-class source/config excerpts" section as the primary artifact/source/config evidence; the generic first-N excerpt cap should not hide declared source/config targets.
 - Treat SFS/runtime/adapter files listed under SFS/system scope classification as Solon system state, not product implementation scope, unless this sprint explicitly targets SFS itself.

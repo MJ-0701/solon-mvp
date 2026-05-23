@@ -116,12 +116,19 @@ load_when: ["always", "sfs", "entry"]
 - Review verdicts are success criteria, not effort counters. A high number of
   review rounds, lenses, or advisor comments never substitutes for PASS.
   Partial/fail routes to rework and same-gate review, not to implementation.
-- Same-cycle micro-rework is mandatory when the finding is deterministic and
-  low-risk: missing grep/file coverage, traceability mapping, evidence refresh,
-  stale command output, wording that does not change product meaning, or a
-  narrowly scoped artifact consistency fix. Apply the patch, run the smallest
-  verification, and invoke the same gate review again before returning to the
-  user. Do not ask the user to request the next review in these cases.
+- Same-cycle micro-rework is mandatory for deterministic low-risk findings:
+  grep/file coverage, traceability, stale evidence, or meaning-preserving
+  wording. Patch, verify, and invoke the same gate review again; do not ask the
+  user to request the next review.
+- User-escalation premise guard is mandatory before turning any self/cross
+  review finding into a user question. Normalize the premise; check brainstorm,
+  plan, domain SoT, schema, code, and decisions. Cross-review findings are
+  evidence to triage, not questions to forward. Contradicted, already answered
+  by the artifact, or over-modeled premise means patch and re-review.
+- For lifecycle/delete proposals, do not invent cascade soft-delete, restore
+  APIs, ownership columns, or migration policy unless the contract requires it.
+  Prefer the smallest data-preserving policy: reject delete while dependent
+  records exist; ask only when that contract is a real product choice.
 - Ask the user only when the finding requires product judgment: scope or
   architecture change, public contract change, security/privacy/data-loss risk
   tradeoff, cost/latency policy, destructive action, unclear acceptance, or a
@@ -170,31 +177,24 @@ load_when: ["always", "sfs", "entry"]
   may satisfy the cross-review slot. The fallback must name the constraint;
   a bare self-CPO PASS still blocks implementation unless the user explicitly
   waives the gate.
-- Role split is invariant: C-Level owns intent, architecture, acceptance
-  criteria, and review orchestration; the worker/generator model owns fixed
-  implementation slices. Do not present C-Level direct implementation as the
-  normal default when a worker/generator profile exists.
-- Model routing must reflect that role split. Claude coding-capable
-  worker/helper lanes use Sonnet 4.6; Haiku is non-coding helper-only and must
-  not write code. Substantive research should prefer a Gemini 3 Pro auto
-  researcher when available. Gemini uses `gemini-3-pro-auto` for every SFS role.
-  Codex has its own worker/helper split:
-  general worker/generator slices use `gpt-5.4`, helper-grade I/O and
-  non-coding helpers use `gpt-5.4-mini`, bounded repo-aware coding helpers use
-  `gpt-5.3-codex`, and only judgment-free mechanical implementation helpers use
-  `gpt-5.3-codex-spark` after C-Level has locked scope, files_scope, AC, and
-  exact edit intent. Complex shared behavior escalates to strategic_high or an
-  explicit high-end override before coding.
+- Role split is invariant: C-Level owns intent, architecture, AC, and review;
+  worker/generator owns fixed implementation slices. Do not present C-Level
+  direct implementation as the normal default when a worker profile exists.
+- Model routing must reflect that role split. Claude coding-capable lanes use
+  Sonnet 4.6; Haiku is non-coding helper-only and must not write code.
+  Substantive research should prefer a Gemini 3 Pro auto researcher when available.
+  Gemini uses `gemini-3-pro-auto` for every SFS role. Codex:
+  general worker/generator slices use `gpt-5.4`, helper-grade I/O uses
+  `gpt-5.4-mini`, bounded repo-aware coding helpers use `gpt-5.3-codex`, and
+  judgment-free mechanical implementation helpers use `gpt-5.3-codex-spark`.
 - Work is not complete until the author runs a self-agent top-model CPO review
   and records a PASS. Claude self-CPO uses Opus 4.7, Codex self-CPO uses
   `gpt-5.5` with xhigh reasoning, Gemini self-CPO uses `gemini-3-pro-auto`, or
   the configured custom top-model equivalent. Partial/fail means the CPO
   redirects the work, the author reworks it, and the same self-CPO loop repeats
   until PASS or an explicit user waiver.
-- Multi-agent work is thin supervision, not noisy coordination by default:
-  use read-only research, fixed-scope worker slices, and independent review only
-  when they reduce context pollution or self-validation risk. Share results
-  through current SFS workbench artifacts, not through long copied transcripts.
-- Do not advance a gate just because raw requirements exist. If shared intent,
-  domain terms, acceptance checks, or interface boundaries are unclear, stop at
-  the current gate and ask the smallest blocking questions before moving on.
+- Multi-agent work is thin supervision: use read-only research, fixed-scope
+  worker slices, and independent review when they reduce context pollution or
+  self-validation risk. Share results through SFS artifacts, not transcripts.
+- Do not advance a gate on raw requirements; if intent, terms, checks, or
+  boundaries are unclear, stop and ask the smallest blockers.

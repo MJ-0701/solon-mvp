@@ -88,6 +88,18 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   verification, and call the same Gate 3 self-review again. Escalate to the user only when
   the fix changes scope, architecture, public contract, security/
   privacy/data-loss risk, cost/latency policy, or acceptance criteria meaning.
+- Before escalating a self/cross-review finding as a user question, run a
+  premise check. State the finding's premise, then compare it with Gate 2
+  intent, the current plan, domain SoT, schema/code ownership, and recorded
+  decisions. If the premise is stale, contradicted, already answered, or
+  over-modeled, update the plan and rerun Gate 3 review instead of asking the
+  user to adjudicate the reviewer frame.
+- Do not add ownership, cascade delete, soft-delete, restore API, or migration
+  policy because a reviewer asked a hypothetical question. If the domain SoT
+  says the entity is metadata-only or the data owner sits at another aggregate,
+  remove the wrong premise. For delete flows with child data, the minimal
+  default is reject delete while dependents exist unless the product contract
+  explicitly chooses cascade/restore behavior.
 - The self-review must be a self-CPO mini-check, not only advisor consultation.
   Before calling Codex/Claude/Gemini or another external CPO, verify and record:
   requirements ↔ AC ↔ implementation slices ↔ ADR/decision ids traceability;

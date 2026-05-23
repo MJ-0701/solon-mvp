@@ -94,18 +94,20 @@ Homebrew/Scoop into `~/.codex/skills/sfs/SKILL.md`.
     before gate advancement (Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3-pro-auto`).
     Complex shared behavior escalates to high reasoning before coding.
     Multi-agent implement is optional, never the default: use single-agent mode unless the user selects parallel agents, each lane has disjoint files_scope and a clear native-language commit message, and post-implement cross review is recorded before Gate 6. Commit messages default to the user's native/workspace language; English is only the default when that is the user or repo language.
-    Gate 3 review must self-review until PASS before cross review. Review round
-    count, lens count, or "enough review" is not a PASS; partial/fail routes to
-    rework and same-gate self-review. If no other agent subscription exists,
-    external agent tokens are exhausted, or the cross-review bridge is
-    unavailable, a recorded self-CPO fallback PASS may satisfy the cross-review
-    slot; a bare self-CPO PASS still blocks implementation unless the user
-    explicitly waives the gate.
+    Gate 3 review must self-review until PASS before cross review. Review
+    volume is not PASS; partial/fail routes to rework. If no other agent,
+    external tokens, or bridge exists, a recorded self-CPO fallback PASS may
+    satisfy cross-review; bare self-CPO PASS still blocks without user waiver.
     If a partial/fail finding is deterministic and low-risk, such as grep
     scope, stale evidence, missing AC/file mapping, evidence path typo, or
     bounded wording/document consistency, patch it and run the same-gate review again
     in the same cycle. Ask the user only when product judgment is needed:
     scope, architecture, public contract, security/privacy/data-loss, cost/latency/model policy, destructive behavior, or changed AC meaning.
+    User-escalation premise guard: before relaying any self/cross-review finding
+    as a user question, check the premise against brainstorm, plan, domain SoT,
+    schema, code, and decisions. Wrong/stale/answered/over-modeled means
+    patch/re-review; do not invent ownership columns, cascade soft-delete,
+    restore APIs, or migration policy unless the product contract requires it.
     Executable Action Ownership: run executable steps yourself when shell/tool/auth context and approval are available; give copy-paste commands only when the user explicitly asks for them or when truly blocked by missing auth/tooling/sandbox/uncaptured approval/broader scope; session-scoped authorization such as `알아서 해` carries approval-gated work in scope until a true blocker; Shell state is agent-owned: use one-shot inline env and mask secrets instead of asking the user to export variables across terminals.
     Advisor calls do not count as self-CPO. Before external cross review, record
     a self-CPO mini-check: requirements to AC to implementation slices to
@@ -196,4 +198,3 @@ Homebrew/Scoop into `~/.codex/skills/sfs/SKILL.md`.
   use `docs/solon/<english-workspace>/<yyyyMMdd>/` only as the domainless exploration fallback.
   Project-wide Solon reference docs use named files under `docs/solon/` such as `domain-map.md`. Workbench docs are
   created only when a command needs them and are compacted when the slice closes.
-- This user-global skill provides only discovery and routing.

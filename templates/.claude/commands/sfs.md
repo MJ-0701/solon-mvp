@@ -90,6 +90,14 @@ $ARGUMENTS
    in the same cycle. Ask the user only when product judgment is needed:
    scope, architecture, public contract, security/privacy/data-loss,
    cost/latency/model policy, destructive behavior, or changed AC meaning.
+   User-escalation premise guard: before relaying any self/cross-review
+   finding as a user question, normalize the premise and check it against
+   brainstorm, plan, domain SoT, schema, code, and recorded decisions. If the
+   premise is wrong, stale, already answered, or over-modeled, patch the
+   artifact and re-review instead of forwarding the reviewer frame to the user.
+   Do not invent ownership columns, cascade soft-delete, restore APIs, or
+   migration policy unless the product contract requires them; prefer
+   reject-delete-with-dependents when child records exist.
    Executable Action Ownership: when shell/tool/auth context and approval are
    available, run executable steps yourself and record evidence. Give
    copy-paste commands only when the user explicitly asks for them or when

@@ -54,13 +54,20 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - If self-review returns partial/fail, rework the plan and run self-review
   again. If cross review returns partial/fail, rework the plan and return to
   self-review before another cross review.
-- If the finding is deterministic, narrow, and does not require product owner
-  judgment, complete the rework loop in the same cycle: patch the artifact, run
-  the smallest verification, and invoke the same-gate review again before
-  returning. Typical auto-rework findings include grep/file coverage holes,
-  stale measured evidence, missing AC/file/artifact mapping, wrong evidence
-  path, bounded wording cleanup, or documentation consistency that preserves
-  meaning. Do not ask the user to trigger the next review for these cases.
+- If a deterministic, narrow finding needs no product owner judgment, complete
+  the rework loop in the same cycle: patch, run the smallest verification, and
+  invoke same-gate review again. Examples: grep/file coverage holes, stale
+  evidence, AC/file/artifact mapping, wrong path, or meaning-preserving wording.
+  Do not ask the user to trigger the next review for these cases.
+- User-escalation premise guard: before converting a self/cross finding into a
+  user question, name its premise, compare brainstorm, plan, domain SoT, schema,
+  code, and decisions, and decide whether the reviewer frame is valid. Wrong,
+  stale, answered, or over-modeled premise means artifact rework plus same-gate
+  review, not user escalation.
+- Treat over-modeled ownership/lifecycle as a finding: if the artifact invents
+  aggregate ownership, cascade soft-delete, restore APIs, or migration policy,
+  prefer the smaller contract: reject delete while dependents exist; leave
+  cascade/restore for explicit product approval.
 - Escalate to the user instead of auto-reworking when the finding changes scope,
   architecture, public API/schema/CLI contract, security/privacy/data-loss
   posture, cost/latency/model policy, destructive behavior, or acceptance
@@ -143,16 +150,12 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   custom runtimes use their configured top-model equivalent. Partial/fail is not
   a stopping point: the CPO redirects the work, the author reworks it, verifies
   again, and repeats self-CPO until PASS or an explicit user waiver.
-- Review scope is functional correctness + consistency only. Functional means
-  the artifact delivers the declared behaviour (plan / Sprint Contract / AC).
-  Consistency means cross-document SSoT (plan ↔ implement ↔ tests ↔ frontmatter)
-  and AC ↔ test ↔ impl ↔ frontmatter alignment. Identifier naming, formatting,
-  line-count drift, wording variants, and comment style are out-of-scope and
-  must auto-skip when meaning is unchanged. Surface a finding only when it
-  changes behaviour, traceability, or a documented contract. Public APIs, CLI flags/options,
-  user- or automation-consumed paths, persisted data shapes, and domain ubiquitous terms
-  are documented contract surfaces; renames there are in-scope even if they look like
-  "just naming".
+- Review scope is functional correctness + consistency only: declared behaviour,
+  cross-document SSoT, and AC ↔ test ↔ impl ↔ frontmatter alignment. Naming,
+  formatting, line-count drift, wording, and comment style auto-skip when
+  meaning is unchanged. Surface findings only when behaviour, traceability, or a
+  documented contract changes; public APIs, CLI flags, consumed paths, persisted
+  data shapes, and domain ubiquitous terms are contract surfaces and in-scope.
 - Let the adapter's `review_lens` stand unless it is clearly wrong. Use
   `--lens <name>` only as an override.
 - Repeated review for the same sprint/gate must converge. If `--lens auto`
@@ -169,25 +172,21 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - Load `policies/knowledge-pack-router.md` first, or
   `policies/knowledge-pack-router.ko.md` for Korean preference. Read matching
   split packs only when the router maps the current review scope to them.
-- For design/frontend work, check `design.md` or `docs/solon/design.md` when it
-  exists. Treat token drift as review evidence: arbitrary colors, type sizes,
-  spacing, radius, shadows, icon weights, or screen-by-screen style changes can
-  be findings even when the UI is functional. If no design contract exists for
-  reusable UI, surface that as an AI-slop risk rather than silently accepting
-  average-looking output.
+- For design/frontend work, check `design.md` or `docs/solon/design.md` when
+  present. Token drift (arbitrary colors, type, spacing, radius, shadows, icons,
+  per-screen styling) can be findings; missing reusable UI contract is an
+  AI-slop risk.
 - For visible frontend/UI implementation, missing pre-user browser evidence is
   a review finding. Look for Playwright/Cypress/Storybook/browser automation
   evidence, desktop and mobile/small viewport screenshots or traces, primary
   workflow interaction, text fit/overflow and responsive layout checks, and a
   console/runtime error note. If browser verification could not run, require
   an exact blocker plus alternate evidence or an explicit user waiver.
-- Surface the evaluator's next action. Pass should name `sfs retro` as the
-  normal close path for Gate 6/7 because `retro` ensures `report.md` before
-  closing. Gate 3 (Plan) PASS is different: name `sfs implement` or the
-  implementation handoff as the next action and carry required review items into
-  the first implementation slice. Mention `sfs report` only for report preview
-  or past-report rebuild. Partial should name the smallest rework slice; fail
-  should return to plan, implementation, or user escalation.
+- Surface the evaluator's next action. Pass names `sfs retro` for Gate 6/7
+  close; Gate 3 (Plan) PASS names `sfs implement`/handoff and carries review
+  items into the first slice. Mention `sfs report` only for report preview or
+  past-report rebuild. Partial names the smallest rework; fail returns to plan,
+  implementation, or user escalation.
 - Adapter stdout is evidence, not the whole user-facing answer. Claude, Codex,
   and Gemini must all render the same compact SFS action rail after review:
   verdict, evidence/output path, required items, and exactly one `Next Action`.

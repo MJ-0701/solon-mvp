@@ -63,6 +63,13 @@ wording/document consistency in the same cycle, verify, then run the same-gate
 review again. Ask the user only for product judgment: scope, architecture,
 public contract, security/privacy/data-loss, cost/latency/model policy,
 destructive behavior, or changed AC meaning.
+Before forwarding a self/cross-review finding as a user question, run the
+User-escalation premise guard: normalize the premise and check brainstorm,
+plan, domain SoT, schema, code, and recorded decisions. Wrong, stale, answered,
+or over-modeled premises are artifact rework, not user escalation. Do not
+invent ownership columns, cascade soft-delete, restore APIs, or migration
+policy unless the product contract requires them; prefer
+reject-delete-with-dependents when child records exist.
 Executable Action Ownership is part of the router contract: when shell/tool
 steps are runnable and auth/runtime/approval are available, the agent runs them
 and records evidence instead of handing the user copy-paste commands. Commands

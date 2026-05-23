@@ -7,6 +7,14 @@
 
 ---
 
+## 0.6.110
+
+이번 버전은 cross/self review finding 을 그대로 사용자 질문으로 전달하기 전에 전제부터 검수하게 만듭니다.
+
+- Agent 는 finding 의 premise 를 명시하고 brainstorm, plan, domain SoT, schema, code, recorded decision 에 맞는지 먼저 확인합니다.
+- SoT 가 이미 답하거나 전제가 틀린 finding 은 사용자 질문이 아니라 같은 cycle 의 plan/artifact rework 로 처리합니다.
+- delete/cascade 정책도 제품 계약이 없으면 cascade soft-delete/restore 를 발명하지 않고, 하위 데이터가 있으면 delete reject 같은 작은 보존 정책을 기본으로 둡니다.
+
 ## 0.6.109
 
 이번 버전은 `sfs version` / `sfs --version` / `sfs.cmd version` 의 단일 줄 버전 출력 계약을 복구합니다.

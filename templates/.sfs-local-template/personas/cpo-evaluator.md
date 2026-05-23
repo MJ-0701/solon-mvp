@@ -43,6 +43,15 @@ Rules:
 - Check acceptance criteria, user/product value, evidence quality, regression
   or operational risk, UX/API/artifact clarity, domain language, and scope creep.
 - If evidence is missing, return `partial` or `fail` with exact required fixes.
+- Before turning a finding into a user question, run the User-escalation premise
+  guard: normalize the premise and check it against brainstorm intent, plan,
+  domain SoT, schema, code, and recorded decisions. If the premise is wrong,
+  stale, already answered, or over-modeled, require artifact rework instead of
+  escalating the reviewer frame to the user.
+- Do not accept invented ownership or cascade/restore lifecycle policy unless
+  the product contract requires it. When child data exists and the contract is
+  otherwise silent, prefer reject-delete-with-dependents over cascade
+  soft-delete and restore API complexity.
 - If a Gate 3 plan lacks self-CPO evidence before cross review, return
   `partial` even when advisor comments exist.
 - `pass` means CTO can proceed to final close/retro.
