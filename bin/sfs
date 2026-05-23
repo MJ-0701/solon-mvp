@@ -405,6 +405,7 @@ EOF
     version="${version:-unknown}"
   fi
   printf 'sfs %s\n' "${version}"
+  sfs_print_installed_release_headline "${version}"
   if [[ "${check_latest}" == "1" ]]; then
     local latest
     if latest="$(latest_release_version 2>/dev/null)" && [[ -n "${latest}" ]]; then
@@ -422,6 +423,31 @@ EOF
       return 2
     fi
   fi
+}
+
+sfs_print_installed_release_headline() {
+  local version="$1" changelog="${DIST_DIR}/CHANGELOG.md"
+  [[ -f "${changelog}" && "${version}" != "unknown" ]] || return 0
+  awk -v version="${version}" '
+    $0 ~ "^## \\[" version "\\]" { in_entry=1; next }
+    in_entry && /^## / { exit }
+    in_entry && /^> / {
+      line=$0
+      sub(/^> /, "", line)
+      gsub(/\*\*/, "", line)
+      headline = headline (headline ? " " : "") line
+      next
+    }
+    in_entry && headline != "" { exit }
+    END {
+      if (headline != "") {
+        gsub(/[[:space:]]+/, " ", headline)
+        sub(/^[[:space:]]+/, "", headline)
+        sub(/[[:space:]]+$/, "", headline)
+        print "installed_release_headline " headline
+      }
+    }
+  ' "${changelog}"
 }
 
 latest_release_version() {

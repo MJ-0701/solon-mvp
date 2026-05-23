@@ -635,6 +635,8 @@ function Invoke-SfsNativeVersion([string[]] $InvocationArgs) {
   $version = Get-SfsFirstLine $versionPath
   if (-not $version) { $version = "unknown" }
   Write-Output "sfs $version"
+  $headline = Get-SfsReleaseHeadline $version
+  if ($headline) { Write-Output "installed_release_headline $headline" }
 
   if ($check) {
     try {
@@ -652,6 +654,30 @@ function Invoke-SfsNativeVersion([string[]] $InvocationArgs) {
     }
   }
   Set-SfsNativeExit 0
+}
+
+function Get-SfsReleaseHeadline {
+  param([string]$Version)
+  if (-not $Version -or $Version -eq "unknown") { return $null }
+  $changelog = Join-Path (Get-SfsDistDir) "CHANGELOG.md"
+  if (-not (Test-Path -LiteralPath $changelog)) { return $null }
+  $capture = $false
+  $parts = @()
+  foreach ($line in Get-Content -LiteralPath $changelog) {
+    if ($line -match ("^## \[" + [regex]::Escape($Version) + "\]")) {
+      $capture = $true
+      continue
+    }
+    if ($capture -and $line -match "^## ") { break }
+    if ($capture -and $line.StartsWith("> ")) {
+      $part = $line.Substring(2).Replace("**", "").Trim()
+      if ($part) { $parts += $part }
+      continue
+    }
+    if ($capture -and $parts.Count -gt 0) { break }
+  }
+  if ($parts.Count -eq 0) { return $null }
+  return (($parts -join " ") -replace "\s+", " ").Trim()
 }
 
 function Show-SfsNativeVersionUsage {

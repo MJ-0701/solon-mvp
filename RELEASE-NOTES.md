@@ -7,6 +7,16 @@
 
 ---
 
+## 0.6.107
+
+이번 버전은 Agent 가 `sfs version --check` 로 최신 번호만 확인한 뒤 이전 release 내용을 최신 변경처럼
+붙이는 문제를 막습니다.
+
+- `sfs version --check` 출력에 local CHANGELOG 에서 읽은 `installed_release_headline` 을 추가합니다.
+- 최신/적용/현재 버전 답변은 반드시 그 exact version 의 `VERSION` + `CHANGELOG` / `RELEASE-NOTES` entry 에 anchor 해야 합니다.
+- 대화 기억이나 직전 릴리스 요약으로 현재 릴리스 의미를 추론하지 않도록 upgrade/freshness context 를 조였습니다.
+- exact version entry 확인 전에는 "큰 invariant 변화 없음" 같은 판단형 요약을 하지 않습니다.
+
 ## 0.6.106
 
 이번 버전은 Agent 가 실행할 수 있는 일을 사용자에게 다시 맡기는 흐름을 조입니다.

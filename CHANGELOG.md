@@ -1,3 +1,23 @@
+## [0.6.107] - 2026-05-23
+
+> **Version and freshness summaries now anchor to the exact release headline
+> instead of reusing older release facts from conversation memory.**
+
+### Fixed
+
+- Added an `installed_release_headline` line to `sfs version --check` so agents
+  can pair the observed runtime version with the matching local CHANGELOG entry.
+- Strengthened upgrade/freshness guidance: when reporting what is current,
+  agents must use the exact version's `VERSION` + `CHANGELOG` / `RELEASE-NOTES`
+  entry and must not infer from previous release summaries.
+- Added a guard against saying "no major invariant changed" without checking
+  the exact version entry.
+
+### Tests
+
+- Added version-headline coverage so `sfs version --check` proves the installed
+  runtime summary is anchored to the exact release entry.
+
 ## [0.6.106] - 2026-05-23
 
 > **Agents now own runnable execution steps and distinguish true blockers from
