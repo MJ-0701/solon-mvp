@@ -1,3 +1,29 @@
+## [0.6.115] - 2026-05-24
+
+> **Handoff-only requests now stop instead of quietly continuing review loops.**
+
+### Fixed
+
+- Added a handoff-only stop contract: when the user asks only for a handoff,
+  next-session brief, session report, or `인계문서`, the agent writes the
+  artifact, records current state/blockers/first next command, cleans
+  heartbeat/automation evidence when relevant, and stops.
+- Made the stop contract override continuation triggers: external review/check
+  PASS does not justify PR polling, review retriggers, merges, implementation,
+  deploy, or monitor loops unless the same user request explicitly says to
+  continue.
+- Propagated the rule through kernel, loop/review context, session continuation
+  guard, SFS template, Claude/Codex/Gemini/Solon adapter surfaces, and Solon
+  plugin docs.
+
+### Tests
+
+- Extended agent behavior guardrails so the handoff-only stop contract is
+  asserted across runtime context, adapter surfaces, SFS template, and plugin
+  README.
+- Verified with focused guardrail/context/line-budget checks plus the full SFS
+  test suite.
+
 ## [0.6.114] - 2026-05-24
 
 > **Monitor checkpoints now classify progress instead of vague watching.**

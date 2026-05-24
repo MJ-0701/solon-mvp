@@ -7,6 +7,16 @@
 
 ---
 
+## 0.6.115
+
+이번 버전은 사용자가 `인계문서`나 다음 세션용 handoff 만 요청했을 때 agent 가 그 뒤로 PR polling, review retrigger, merge, deploy, monitor loop 를 몰래 이어가지 못하게 막습니다.
+
+- Handoff-only 요청은 이제 stop contract 입니다.
+- Agent 는 handoff artifact 를 작성하고, 현재 상태/blocker/첫 다음 명령을 남긴 뒤 멈춰야 합니다.
+- External review/check PASS 같은 continuation trigger 도 handoff-only 범위를 덮어쓸 수 없습니다.
+- 같은 사용자 요청 안에서 계속 진행하라고 명시한 경우에만 PR/review/merge/deploy/monitor loop 를 이어갈 수 있습니다.
+- 이 규칙은 Claude/Codex/Gemini/Solon adapter surface 와 runtime context 에 모두 배포됩니다.
+
 ## 0.6.114
 
 이번 버전은 장시간 monitor 가 막연히 "계속 보는 중"이라고 말하지 않고, 실제 진행 상태를 evidence 로 분류하게 만듭니다.

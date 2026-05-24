@@ -100,6 +100,12 @@ workspace/user content, and persist only status/category/timestamp/redacted
 error class; do not persist raw stdout/stderr, bearer/auth tokens, env vars,
 prompt bodies, model responses, workspace/user content, or PII. Close only
 after heartbeat/automation cleanup and durable wiki/report evidence.
+Handoff-only scope is a stop contract: if the user asks only for a handoff,
+next-session brief, session report, or `인계문서`, write/update that artifact,
+record current state/blockers/first next command, clean heartbeat/automation
+evidence when relevant, then stop. Do not start PR polling, review retriggers,
+merges, implementation, deploy, or monitor loops unless the same user request
+explicitly asks to continue that work.
 For Solon commit grouping, guide users to the SFS command surface:
 `sfs commit plan` and `sfs commit apply --group <name>` (Codex may use
 `$sfs commit ...`; Claude slash routing may use `/sfs commit ...`). `sfs commit

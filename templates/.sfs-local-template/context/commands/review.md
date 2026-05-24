@@ -17,6 +17,7 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   command is `sfs review --sprint <id> --gate <n>`; if the id is unknown, ask
   for that id instead of creating a new sprint or manually restoring
   `.sfs-local/current-sprint`.
+- Handoff-only scope is a stop contract and overrides continuation triggers: if the user asks only for a handoff, next-session brief, session report, or `인계문서`, record review/PR status as next-session evidence and stop. External review/check PASS does not override handoff-only scope; do not start PR polling, review retriggers, merges, implementation, deploy, or monitor loops unless the same request explicitly asks to continue.
 - GitHub @codex review is post-implementation only. Do not request, trigger, or
   count GitHub @codex review during brainstorm or Gate 3 plan review.
 - Gate 3 plan review is the required bridge between plan and implement. When a

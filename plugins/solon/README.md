@@ -47,6 +47,13 @@ model responses, workspace/user content, and PII are not durable evidence. A
 monitor closes only after heartbeat/automation cleanup and durable wiki/report
 evidence.
 
+Handoff-only scope is a stop contract: if the user asks only for a handoff,
+next-session brief, session report, or `인계문서`, write/update that artifact,
+record current state/blockers/first next command, clean heartbeat/automation
+evidence when relevant, then stop. Do not start PR polling, review retriggers,
+merges, implementation, deploy, or monitor loops unless the same user request
+explicitly asks to continue that work.
+
 ## 실제 설치 진입점
 
 이 repo 를 직접 `git clone` 해서 설치하지 않습니다. macOS 는 Homebrew, Windows 는 Scoop 으로

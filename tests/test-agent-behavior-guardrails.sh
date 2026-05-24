@@ -37,6 +37,7 @@ implement="${DIST_DIR}/templates/.sfs-local-template/context/commands/implement.
 loop="${DIST_DIR}/templates/.sfs-local-template/context/commands/loop.md"
 review="${DIST_DIR}/templates/.sfs-local-template/context/commands/review.md"
 tidy="${DIST_DIR}/templates/.sfs-local-template/context/commands/tidy.md"
+session_guard="${DIST_DIR}/templates/.sfs-local-template/context/policies/session-continuation-guard.md"
 plan_template="${DIST_DIR}/templates/.sfs-local-template/sprint-templates/plan.md"
 review_script="${DIST_DIR}/templates/.sfs-local-template/scripts/sfs-review.sh"
 common_script="${DIST_DIR}/templates/.sfs-local-template/scripts/sfs-common.sh"
@@ -73,6 +74,10 @@ assert_contains "${kernel}" "status/category/timestamp/redacted error class" "ke
 assert_contains "${kernel}" "do not persist raw" "kernel monitor no raw persistence"
 assert_contains "${kernel}" "stdout/stderr, bearer/auth tokens, env vars, prompt bodies, model responses" "kernel monitor no sensitive evidence"
 assert_contains "${kernel}" "heartbeat/automation cleanup and durable wiki/report evidence" "kernel monitor close evidence"
+assert_contains "${kernel}" "Handoff-only scope is a stop contract" "kernel handoff-only stop contract"
+assert_contains "${kernel}" "Do not start PR polling, review retriggers, merges, implementation, deploy, or monitor loops" "kernel handoff-only forbids continuation"
+assert_contains "${session_guard}" "Handoff-only scope is a stop contract" "session guard handoff-only stop contract"
+assert_contains "${session_guard}" "unless the same user request explicitly asks to continue" "session guard handoff-only same-request continuation"
 assert_contains "${kernel}" "do not end Korean sentences with a closing colon" "kernel Korean output"
 assert_contains "${kernel}" "current SFS workbench artifacts" "kernel SFS notes"
 assert_contains "${kernel}" "Multi-agent work is thin supervision" "kernel thin supervision"
@@ -238,6 +243,8 @@ assert_contains "${loop}" "status/category/timestamp/redacted" "loop monitor red
 assert_contains "${loop}" "raw stdout/stderr, bearer/auth tokens, env vars" "loop monitor no raw secrets"
 assert_contains "${loop}" "prompt bodies, model responses, workspace/user content, or PII" "loop monitor no raw model/user data"
 assert_contains "${loop}" "heartbeat/automation cleanup and durable" "loop monitor close evidence"
+assert_contains "${loop}" "Handoff-only scope is a stop contract" "loop handoff-only stop contract"
+assert_contains "${loop}" "do not start PR polling, review retriggers, merges, implementation, deploy, or monitor loops" "loop handoff-only forbids continuation"
 assert_contains "${review}" 'progressing`, `slow`, `stalled`, `dead`, or `auth_blocked`' "review monitor state vocabulary"
 assert_contains "${review}" "commit delta, PR/head delta, local dirty state" "review monitor evidence fields"
 assert_contains "${review}" "lane-utilization evidence or" "review monitor lane evidence"
@@ -246,6 +253,8 @@ assert_contains "${review}" "static benign payload" "review monitor static probe
 assert_contains "${review}" "status/category/timestamp/redacted error class" "review monitor redacted evidence"
 assert_contains "${review}" "Raw stdout/stderr" "review monitor no raw stdout"
 assert_contains "${review}" "heartbeat/automation cleanup plus durable wiki/report evidence" "review monitor close evidence"
+assert_contains "${review}" "Handoff-only scope is a stop contract" "review handoff-only stop contract"
+assert_contains "${review}" "External review/check PASS does not override handoff-only scope" "review handoff-only overrides external PASS"
 assert_contains "${review}" "Number of lenses, rounds, advisor" "review no volume pass"
 assert_contains "${review}" "Flag overengineering" "review overengineering"
 assert_contains "${review}" "Repeated review for the same sprint/gate must converge" "review lens convergence"
@@ -400,6 +409,8 @@ assert_contains "${sfs_template}" "권장안 그대로 확정" "SFS natural conf
 assert_contains "${sfs_template}" "Executable Action Ownership" "SFS executable action ownership"
 assert_contains "${sfs_template}" "session-scoped authorization" "SFS session authorization"
 assert_contains "${sfs_template}" "Shell state is agent-owned" "SFS shell state ownership"
+assert_contains "${sfs_template}" "Handoff-only scope is a stop contract" "SFS handoff-only stop contract"
+assert_contains "${sfs_template}" "Do not start PR polling, review retriggers" "SFS handoff-only forbids continuation"
 
 adapter_files=(
   "${DIST_DIR}/templates/CLAUDE.md.template"
@@ -489,6 +500,9 @@ for file in "${adapter_files[@]}"; do
   assert_contains "${file}" "workspace/user content, or PII" "adapter monitor no user/PII persistence ${file}"
   assert_contains "${file}" "heartbeat/automation cleanup" "adapter monitor cleanup ${file}"
   assert_contains "${file}" "durable wiki/report evidence" "adapter monitor durable evidence ${file}"
+  assert_contains "${file}" "Handoff-only scope is a stop contract" "adapter handoff-only stop contract ${file}"
+  assert_contains "${file}" "do not start PR polling, review retriggers, merges, implementation, deploy, or monitor loops" "adapter handoff-only forbids continuation ${file}"
+  assert_contains "${file}" "same user request explicitly asks to continue" "adapter handoff-only same-request continuation ${file}"
 done
 
 assert_contains "${plugin_readme}" 'classifies state as `progressing`, `slow`' "plugin readme monitor state vocabulary"
@@ -499,5 +513,7 @@ assert_contains "${plugin_readme}" "static benign payload" "plugin readme monito
 assert_contains "${plugin_readme}" "status/category/timestamp/redacted" "plugin readme monitor redacted evidence"
 assert_contains "${plugin_readme}" "raw stdout/stderr, bearer/auth tokens, env vars" "plugin readme monitor no raw sensitive evidence"
 assert_contains "${plugin_readme}" "heartbeat/automation cleanup and durable wiki/report" "plugin readme monitor close evidence"
+assert_contains "${plugin_readme}" "Handoff-only scope is a stop contract" "plugin readme handoff-only stop contract"
+assert_contains "${plugin_readme}" "Do not start PR polling, review retriggers" "plugin readme handoff-only forbids continuation"
 
 echo "test-agent-behavior-guardrails: OK"

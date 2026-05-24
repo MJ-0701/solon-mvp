@@ -121,6 +121,7 @@ Arguments: `$ARGUMENTS`
    error class; do not persist raw stdout/stderr, bearer/auth tokens, env vars,
    prompt bodies, model responses, workspace/user content, or PII. Close only
    after heartbeat/automation cleanup and durable wiki/report evidence.
+   Handoff-only scope is a stop contract: if the user asks only for a handoff, next-session brief, session report, or `인계문서`, write/update that artifact, record current state/blockers/first next command, clean heartbeat/automation evidence when relevant, then stop; do not start PR polling, review retriggers, merges, implementation, deploy, or monitor loops unless the same user request explicitly asks to continue.
    Advisor calls do not count as self-CPO. Before external cross review, record
    a self-CPO mini-check: requirements to AC to implementation slices to
    ADR/decision ids, every AC mapped to file/artifact/evidence, and SEED/

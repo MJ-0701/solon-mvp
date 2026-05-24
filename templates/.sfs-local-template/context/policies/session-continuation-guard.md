@@ -24,6 +24,7 @@ load_when: ["token", "session", "continuation", "loop", "wakeup", "resume", "upg
 - The handoff is compact: write or reference the current sprint `report.md`,
   `review.md`, latest capture ids, exact commit/branch, failing command, and
   next SFS command. Do not copy the chat transcript.
+- Handoff-only scope is a stop contract: a request only for handoff, next-session brief, session report, or `인계문서` means write/update that artifact and stop after recording current state, blockers, first next command, and cleanup evidence. Do not start PR polling, review retriggers, merges, implementation, deploy, or monitor loops unless the same user request explicitly asks to continue.
 - After handoff, tell the user to open a new session and start from
   `sfs status`, `sfs context cat kernel`, `_INDEX.md`, and the routed command
   module. The new session should read artifacts, not the old conversation.
