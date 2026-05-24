@@ -101,11 +101,14 @@ error class; do not persist raw stdout/stderr, bearer/auth tokens, env vars,
 prompt bodies, model responses, workspace/user content, or PII. Close only
 after heartbeat/automation cleanup and durable wiki/report evidence.
 Handoff-only scope is a stop contract: if the user asks only for a handoff,
-next-session brief, session report, or `인계문서`, write/update that artifact,
-record current state/blockers/first next command, clean heartbeat/automation
-evidence when relevant, then stop. Do not start PR polling, review retriggers,
-merges, implementation, deploy, or monitor loops unless the same user request
-explicitly asks to continue that work.
+next-session brief, session report, or `인계문서`, immediately write/update that
+artifact, record current state/blockers/first next command, clean
+heartbeat/automation evidence when relevant, then stop. Do not start or
+continue PR polling, review retriggers, merges, implementation, deploy, or
+monitor loops; interrupt active or queued batches and do not finish current PRs
+first unless the same user request explicitly asks to continue that work. If
+post-request PR/review/merge work already happened, report it as a scope breach,
+not as a justification.
 For Solon commit grouping, guide users to the SFS command surface:
 `sfs commit plan` and `sfs commit apply --group <name>` (Codex may use
 `$sfs commit ...`; Claude slash routing may use `/sfs commit ...`). `sfs commit

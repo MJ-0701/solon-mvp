@@ -1,3 +1,23 @@
+## [0.6.116] - 2026-05-25
+
+> **Handoff-only requests now interrupt active PR/review loops.**
+
+### Fixed
+
+- Tightened the handoff-only stop contract so it applies to already active or
+  queued PR/review/merge/deploy/monitor batches, not only newly started work.
+- Required agents to write the handoff artifact immediately and never "finish
+  the current PRs first" unless the same user request explicitly says to
+  continue.
+- Added a violation-reporting rule: if post-request PR/review/merge work already
+  happened, the agent must report it as a scope breach, not justify the delay.
+
+### Tests
+
+- Extended agent behavior guardrails to assert active-loop interruption, no
+  current-PR batch completion, and no justification framing across kernel,
+  loop/review context, adapter surfaces, SFS template, and plugin README.
+
 ## [0.6.115] - 2026-05-24
 
 > **Handoff-only requests now stop instead of quietly continuing review loops.**

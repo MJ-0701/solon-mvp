@@ -22,7 +22,7 @@ load_when: ["loop", "queue", "autonomous", "자율", "반복"]
   prompt bodies, model responses, workspace/user content, or PII.
 - A monitor is not closed until heartbeat/automation cleanup and durable
   wiki/report evidence are recorded.
-- Handoff-only scope is a stop contract. When asked only for a handoff, next-session brief, session report, or `인계문서`, write current state, blockers, first next command, and cleanup evidence, then stop; do not start PR polling, review retriggers, merges, implementation, deploy, or monitor loops unless the same user request explicitly asks to continue.
+- Handoff-only scope is a stop contract. When asked only for a handoff, next-session brief, session report, or `인계문서`, write current state, blockers, first next command, and cleanup evidence, then stop; do not start or continue PR polling, review retriggers, merges, implementation, deploy, or monitor loops; interrupt active or queued batches and do not finish current PRs first unless the same user request explicitly asks to continue. If post-request PR/review/merge work already happened, report it as a scope breach, not as a justification.
 - Long loops must not keep waking the same host conversation forever. Before
   each loop wakeup or next queue item, check the host token meter/session
   report. At 50% or higher, or after more than two wakeups in the same chat,

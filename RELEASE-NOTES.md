@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.116
+
+이번 버전은 `인계문서` 요청이 이미 돌고 있던 PR/review loop 까지 즉시 끊는다는 점을 명확히 합니다.
+
+- Handoff-only 요청은 새 작업만 막는 규칙이 아니라 active/queued loop interrupt 입니다.
+- Agent 는 현재 PR batch 를 마저 끝내고 인계문서를 쓰면 안 됩니다.
+- 이미 post-request PR/review/merge 작업을 했다면 지연 사유가 아니라 scope breach 로 보고해야 합니다.
+- 이 규칙은 kernel, loop/review context, session guard, Claude/Codex/Gemini/Solon adapter surface, plugin README 에 모두 적용됩니다.
+
 ## 0.6.115
 
 이번 버전은 사용자가 `인계문서`나 다음 세션용 handoff 만 요청했을 때 agent 가 그 뒤로 PR polling, review retrigger, merge, deploy, monitor loop 를 몰래 이어가지 못하게 막습니다.
