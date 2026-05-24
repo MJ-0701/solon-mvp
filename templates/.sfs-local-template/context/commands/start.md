@@ -12,6 +12,10 @@ exists.
 
 Rules:
 - Run the adapter first and show stdout/stderr verbatim.
+- Natural-language SFS activation is real SFS. If the user starts SFS in prose
+  (`SFS로`, `DDD 적용 확인`, `이번 세션은 ...였잖아`, etc.), reconcile the current
+  wording with latest handoff/docs, active sprint state, and wiki/DDD maps
+  before choosing or continuing a sprint.
 - "Bash-first" means no AI-side artifact refinement. It does not forbid a
   short user-facing Solon recap/status after the verbatim adapter output.
 - For `start`, adapter stdout should include exactly one `next:` line. If that
@@ -40,6 +44,9 @@ Rules:
   source links. This is recommended, not a blocker for the sprint.
 - If a wiki already exists, include it in the next sprint's retrieval context
   instead of starting from broad repo scans.
+- If handoff/user intent conflicts with the active sprint, treat the active
+  sprint as stale or mis-scoped; report the evidence-backed scope and next SFS
+  action instead of asking the user to choose between already-documented facts.
 - After `start`, infer `Next` from sprint mode:
   - fresh discovery/planning goal -> show the depth selector and let the user
     pick `simple`, default `normal`, or `hard`:

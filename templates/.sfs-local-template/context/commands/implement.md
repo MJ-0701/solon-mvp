@@ -156,8 +156,10 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   self` or `sfs review --sprint <id> --gate 6 --stage self` for a closed
   sprint, followed by `sfs review --gate 6 --stage cross`. GitHub @codex comes
   only after that SFS cross CPO pass, as external PR/code review evidence.
-- Use DDD/TDD guardrails whenever product behavior changes, not only backend
-  code. Load `policies/ddd-tdd-knowledge-pack.md` or `.ko.md`: preserve domain
+- Use DDD/TDD guardrails whenever product behavior changes, not only backend code. Natural-language SFS activation is real SFS: before using current
+  sprint artifacts, compare them with latest handoff/user intent and wiki/DDD
+  maps; a conflict means stop, classify mis-scoped work, and re-plan or hand off.
+  Load `policies/ddd-tdd-knowledge-pack.md` or `.ko.md`: preserve domain
   language/boundaries across UI/API/CLI/docs/data, keep invariants in domain/
   use-case logic, preserve code boundaries, and start with evidence when practical.
 - Before editing broad entrypoints, name the product-policy owner and adapter
@@ -167,7 +169,7 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   describe behavior; they must not silently own auth/session, permission,
   ownership, lifecycle, workflow, or data semantics. Prove behavior with unit/
   characterization, component/API/CLI/browser smoke, migration/backfill dry run,
-  review evidence, or explicit waiver plus follow-up guard.
+  review evidence, or explicit waiver plus follow-up guard. Broad-entrypoint line-count or behavior growth during DDD/TDD work needs boundary extraction evidence or approved deferral; otherwise Gate 6 is partial.
 - Keep an implementation acceptance ledger while coding: map every AC/ADR/
   decision to implemented/missing/deferred/waived with files/artifacts and
   evidence. Missing self-CPO, stale evidence, small guard/test gaps, and path

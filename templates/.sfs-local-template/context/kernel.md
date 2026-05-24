@@ -101,6 +101,11 @@ load_when: ["always", "sfs", "entry"]
   rules: shared design concept, ubiquitous language, tight feedback loops,
   deep-module boundaries, and gray-box delegation must shape brainstorm, plan,
   implement, review, report, and retro.
+- Natural-language SFS activation is real SFS: when the user says SFS/DDD/TDD/sprint/review intent in prose, load routed SFS context and reconcile current
+  user wording, latest handoff/docs, active sprint plan, and wiki/DDD maps.
+- Approved sprint state never overrides a newer handoff or user intent. If
+  evidence shows a mismatch, classify mis-scoped work and re-plan or hand off;
+  do not ask the user to restate what the available record already proves.
 - DDD/TDD is a product-level engineering floor, not a backend-only topic:
   product behavior changes name domain language, behavior boundaries, and first
   evidence before worker handoff. Code still uses DDD-lite boundaries, domain
@@ -109,7 +114,7 @@ load_when: ["always", "sfs", "entry"]
 - Broad entrypoints are never default product-policy homes. UI bootstraps,
   routers, hooks/stores/effects, controllers, jobs, repositories, DTO mappers,
   CLI flags, scripts, migrations, docs wording, observability glue, and external
-  adapters need a named boundary or waiver when product rules change.
+  adapters need a named boundary or waiver when product rules change. Broad-entrypoint growth that adds product behavior during DDD/TDD work is a Gate 6 finding unless boundary extraction or approved deferral is recorded.
 - Gate 6 closes only with an implementation acceptance ledger: every planned
   AC/ADR/decision is implemented, missing, deferred, or waived; implemented rows
   point to files/evidence, and gaps cite approval or follow-up owner.

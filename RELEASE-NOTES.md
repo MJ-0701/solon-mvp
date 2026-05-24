@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.117
+
+이번 버전은 자연어로 “SFS로”, “DDD 적용 확인”, “이 세션은 그 작업이었잖아”처럼 시작해도 SFS가 장식이 아니라 실제 컨텍스트/증거 조정으로 작동하게 만듭니다.
+
+- 자연어 SFS 요청도 `sfs context`, handoff/docs, active sprint, wiki/DDD map 을 대조해야 합니다.
+- 이미 승인된 sprint 가 있어도 최신 handoff 나 user intent 를 덮어쓸 수 없습니다.
+- 기록이 의도를 증명하면 agent 는 사용자에게 다시 묻지 않고 mis-scoped work 로 판정하고 re-plan 또는 handoff 해야 합니다.
+- DDD/TDD 작업 중 broad entrypoint 가 product behavior 를 더 품으면 Gate 6 finding 입니다.
+
 ## 0.6.116
 
 이번 버전은 `인계문서` 요청이 이미 돌고 있던 PR/review loop 까지 즉시 끊는다는 점을 명확히 합니다.

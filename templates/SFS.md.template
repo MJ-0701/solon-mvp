@@ -44,7 +44,12 @@ product-bearing entrypoints are included: UI bootstraps, routers, root
 components, hooks/stores/effects, controllers, jobs, repositories, DTO mappers,
 CLI flags, scripts, migrations, docs wording, observability glue, and external
 adapters are not default homes for product policy without a named boundary,
-evidence, or explicit waiver.
+evidence, or explicit waiver. Natural-language SFS activation is real SFS:
+reconcile current user wording, latest handoff/docs, active sprint plan, and
+wiki/DDD maps; Approved sprint state never overrides a newer handoff or user
+intent, so evidence-backed conflicts are mis-scoped work, not user questions.
+Broad-entrypoint growth that adds product behavior during DDD/TDD work is a
+Gate 6 finding unless boundary extraction or approved deferral is recorded.
 In Solon reports, show gates as `Gate N (Name)`, not naked ids. Use gate
 numbers 1..7 for new CLI examples; legacy ids remain compatibility-only.
 Solon reports should feel like compact console dashboards, not flat bullet

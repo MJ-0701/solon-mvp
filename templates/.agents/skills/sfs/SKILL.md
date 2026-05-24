@@ -45,7 +45,7 @@ description: Solon SFS command router for Codex. Dispatch `$sfs` / `sfs` / visib
    components, hooks/stores/effects, controllers, jobs, repositories, DTO
    mappers, CLI flags, scripts, migrations, docs wording, observability glue,
    and external adapters are not default homes for product policy without a
-   named boundary, evidence, or explicit waiver.
+   named boundary, evidence, or explicit waiver. Natural-language SFS activation is real SFS: reconcile current user wording, latest handoff/docs, active sprint plan, and wiki/DDD maps; Approved sprint state never overrides a newer handoff or user intent, so evidence-backed conflicts are mis-scoped work, not user questions. Broad-entrypoint growth that adds product behavior during DDD/TDD work is a Gate 6 finding unless boundary extraction or approved deferral is recorded.
    Obsidian LLM wiki is a recommended companion for SFS continuity, not a hard
    dependency; load `policies/obsidian-llm-wiki.md` when setup/adoption/docs
    migration or multi-sprint retrieval is in scope. If `.obsidian/` or

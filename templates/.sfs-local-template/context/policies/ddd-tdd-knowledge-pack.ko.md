@@ -61,6 +61,11 @@ scope 자체가 backend 로 제한되지 않는다.
   migration, docs wording, observability glue, external adapter 같은 broad
   entrypoint 가 policy 의 조용한 집이 되면 안 된다. 예외는 작은 scope
   waiver 로 이유를 남긴다.
+- 자연어 SFS/DDD/TDD 요청도 같은 floor 를 켠다. user wording, 최신 handoff/
+  docs, active sprint, wiki/DDD map 을 대조한다. stale approved sprint state 는
+  증거로 확인된 session intent 를 덮어쓰지 못한다.
+- DDD/TDD 작업 중 broad-entrypoint growth 가 product behavior 를 추가하면
+  boundary extraction 또는 approved deferral 증거 없이는 review finding 이다.
 - core business rule 은 controller, job, repository, external adapter 에
   묻히면 안 된다.
 - product rule 은 UI label, docs wording, CLI flag, migration, seed script,
@@ -97,6 +102,7 @@ scope 자체가 backend 로 제한되지 않는다.
   root component, hook/store/effect, controller, job, repository, DTO mapper,
   CLI flag, script, migration, docs wording, observability glue, external
   adapter 가 아니라 named domain/use-case/state boundary 에 있는가?
+- handoff/user-intent 와 active-sprint 충돌을 구현 계속 전에 감지했는가?
 - canonical term, aggregate/entity/value-object/event 이름이 일관적인가?
 - code 작성 전 또는 작성과 함께 failing/characterization test 가 있었는가?
 - TDD 를 waive 했다면 이유와 alternate evidence 가 명시됐는가?
@@ -110,5 +116,7 @@ scope 자체가 backend 로 제한되지 않는다.
   alternate evidence 가 없으면 partial.
 - product rule 이 named domain/use-case/state boundary 와 evidence 없이 broad
   entrypoint 에 묻혀 있으면 partial.
+- 자연어 SFS가 장식으로만 쓰였거나, handoff/user-intent conflict 가 증거로
+  판정 가능한데도 user 에게 되물어졌으면 partial.
 - business invariant 가 adapter 에 묻혀 money, PII, data-loss, partner-state
   risk 를 만들면 fail.

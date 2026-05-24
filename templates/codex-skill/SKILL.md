@@ -53,7 +53,7 @@ Homebrew/Scoop into `~/.codex/skills/sfs/SKILL.md`.
    components, hooks/stores/effects, controllers, jobs, repositories, DTO
    mappers, CLI flags, scripts, migrations, docs wording, observability glue,
    and external adapters are not default homes for product policy without a
-   named boundary, evidence, or explicit waiver.
+   named boundary, evidence, or explicit waiver. Natural-language SFS activation is real SFS: reconcile current user wording, latest handoff/docs, active sprint plan, and wiki/DDD maps; Approved sprint state never overrides a newer handoff or user intent, so evidence-backed conflicts are mis-scoped work, not user questions. Broad-entrypoint growth that adds product behavior during DDD/TDD work is a Gate 6 finding unless boundary extraction or approved deferral is recorded.
    Obsidian LLM wiki is a recommended companion, not a hard dependency; load its policy for setup/adoption/docs migration or multi-sprint retrieval. If `.obsidian/` or
    `llm-wiki/` exists, treat wiki as active project context: check README/DDD map before broad scans, then update the relevant map or record a gap/waiver.
    Host-local tool/skill bundles and user-home folders are external

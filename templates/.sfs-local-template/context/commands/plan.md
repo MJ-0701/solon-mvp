@@ -39,6 +39,11 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   PASS, self-CPO PASS, cross review PASS, or CI PASS never counts as that
   approval.
 - Gate 3 must carry the same AI-era fundamentals forward:
+  - natural-language SFS activation is real SFS: before accepting an existing
+    approved plan as the current contract, compare current user wording, latest
+    handoff/docs, active sprint artifacts, and wiki/DDD maps. If handoff/user
+    intent conflicts with the active sprint, the plan is mis-scoped until the
+    conflict is resolved by evidence-backed re-plan or explicit waiver.
   - shared design concept becomes measurable requirements and explicit
     non-goals.
   - ubiquitous language becomes the terms used in AC, code, docs, UI labels,

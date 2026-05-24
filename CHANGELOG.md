@@ -1,3 +1,24 @@
+## [0.6.117] - 2026-05-25
+
+> **Natural-language SFS activation now binds to real SFS intent evidence.**
+
+### Fixed
+
+- Natural-language SFS/DDD/TDD/sprint/review requests now require routed SFS
+  context plus reconciliation of current user wording, latest handoff/docs,
+  active sprint plan, and wiki/DDD maps.
+- Approved sprint state no longer overrides newer handoff or user intent; when
+  the record proves a conflict, agents must classify mis-scoped work and
+  re-plan or hand off instead of asking the user to restate documented facts.
+- DDD/TDD review now treats broad-entrypoint growth that adds product behavior
+  as a Gate 6 finding unless boundary extraction evidence or approved deferral
+  is recorded.
+
+### Tests
+
+- Extended agent behavior and DDD/TDD guardrails across runtime context,
+  Claude/Codex/Gemini/Solon adapter surfaces, SFS template, and plugin README.
+
 ## [0.6.116] - 2026-05-25
 
 > **Handoff-only requests now interrupt active PR/review loops.**

@@ -47,6 +47,12 @@ model responses, workspace/user content, and PII are not durable evidence. A
 monitor closes only after heartbeat/automation cleanup and durable wiki/report
 evidence.
 
+Natural-language SFS activation is real SFS: prose like `SFS로`, DDD/TDD
+review intent, or “this session was for ...” still requires routed SFS context,
+handoff/docs, active sprint, and wiki/DDD map reconciliation. Approved sprint
+state never overrides a newer handoff or user intent; evidence-backed conflicts
+are mis-scoped work, not user questions.
+
 Handoff-only scope is a stop contract: if the user asks only for a handoff,
 next-session brief, session report, or `인계문서`, immediately write/update that
 artifact, record current state/blockers/first next command, clean

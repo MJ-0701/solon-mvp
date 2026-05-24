@@ -53,7 +53,7 @@ $ARGUMENTS
    components, hooks/stores/effects, controllers, jobs, repositories, DTO mappers,
    CLI flags, scripts, migrations, docs wording, observability glue, and external
    adapters are not default homes for product policy without a named boundary,
-   evidence, or explicit waiver.
+   evidence, or explicit waiver. Natural-language SFS activation is real SFS: reconcile current user wording, latest handoff/docs, active sprint plan, and wiki/DDD maps; Approved sprint state never overrides a newer handoff or user intent, so evidence-backed conflicts are mis-scoped work, not user questions. Broad-entrypoint growth that adds product behavior during DDD/TDD work is a Gate 6 finding unless boundary extraction or approved deferral is recorded.
 12. For implementation and review work, follow the routed context guardrails:
     surface material assumptions, choose the smallest useful slice, keep changes
     surgical, read actual files/errors before fixing, verify before completion,

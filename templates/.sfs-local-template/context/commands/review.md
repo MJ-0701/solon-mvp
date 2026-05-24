@@ -157,9 +157,15 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - Review the whole contract, not only changed code: shared intent, domain
   language consistency, feedback evidence, interface/artifact boundaries, and
   gray-box delegation should still match the Gate 2/3 record.
+- Natural-language SFS activation is real SFS. Return partial for facade-only SFS: SFS terms were used but routed context, active sprint status, handoff/
+  user intent, plan/review artifacts, or wiki/DDD maps were not reconciled.
+- If handoff/user intent conflicts with the active sprint and the evidence
+  already answers the intended scope, return partial when the agent asks the
+  user to restate it instead of classifying the work as mis-scoped.
 - Cross-layer DDD/TDD is in scope. Return partial when product behavior,
   policy, workflow, permissions, ownership, lifecycle, data semantics, or state
   transitions hide in broad entrypoints without a named boundary and evidence.
+  Broad-entrypoint growth that adds product behavior during a DDD/TDD session is partial unless extraction evidence or approved deferral is recorded.
 - Gate 6 review must build an implementation acceptance ledger from plan.md,
   implement.md, log.md, diffs, and evidence; PASS only when every planned
   AC/ADR/decision is implemented, user-approved deferred/waived, or removed by
