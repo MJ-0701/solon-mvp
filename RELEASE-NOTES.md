@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.118
+
+이번 버전은 review 단계에서 모델 증명을 LLM 자기진술에 맡기지 않도록 고칩니다.
+
+- Codex review bridge probe stderr/stdout 에서 `model: gpt-5.5`, `reasoning effort: xhigh` 같은 profile banner 를 SFS가 직접 추출합니다.
+- CPO review prompt 에 `SFS Executor Profile Bridge Evidence` 섹션을 자동으로 붙입니다.
+- matched bridge evidence 가 있으면 reviewer 는 자기 모델명을 직접 말하지 못했다는 이유만으로 partial 을 내면 안 됩니다.
+- mismatch 또는 not-detected 는 artifact defect 가 아니라 profile bridge evidence gap 으로 분리합니다.
+
 ## 0.6.117
 
 이번 버전은 자연어로 “SFS로”, “DDD 적용 확인”, “이 세션은 그 작업이었잖아”처럼 시작해도 SFS가 장식이 아니라 실제 컨텍스트/증거 조정으로 작동하게 만듭니다.

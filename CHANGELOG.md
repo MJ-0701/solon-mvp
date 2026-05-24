@@ -1,3 +1,24 @@
+## [0.6.118] - 2026-05-25
+
+> **Review profile evidence now comes from SFS bridge metadata, not LLM self-attestation.**
+
+### Fixed
+
+- SFS review now extracts sanitized executor profile evidence from the bridge
+  probe banner, including Codex `model: gpt-5.5` and `reasoning effort: xhigh`
+  when present.
+- The generated CPO review capsule now includes an explicit "SFS Executor
+  Profile Bridge Evidence" section before the full review runs.
+- Reviewers must treat matched SFS-collected bridge evidence as profile
+  attestation and must not block solely because the reviewer LLM cannot
+  self-attest its own runtime model.
+
+### Tests
+
+- Added a regression test with a fake Codex bridge that emits `gpt-5.5` /
+  `xhigh` on stderr and fails unless the full review prompt includes the
+  matched SFS profile evidence.
+
 ## [0.6.117] - 2026-05-25
 
 > **Natural-language SFS activation now binds to real SFS intent evidence.**

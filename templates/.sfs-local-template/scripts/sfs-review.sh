@@ -2804,6 +2804,74 @@ resolve_review_bridge_probe_cmd() {
   esac
 }
 
+extract_bridge_probe_field() {
+  local field="$1" err_path="$2" out_path="$3"
+  awk -v field="${field}" '
+    {
+      clean=$0
+      gsub(/\033\[[0-9;?]*[ -\/]*[@-~]/, "", clean)
+      low=tolower(clean)
+      wanted="^[[:space:]]*" tolower(field) ":[[:space:]]*"
+      if (low ~ wanted) {
+        sub(/^[[:space:]]*[A-Za-z ]+:[[:space:]]*/, "", clean)
+        print clean
+        exit
+      }
+    }
+  ' "${err_path}" "${out_path}" 2>/dev/null | sed -n '1p'
+}
+
+write_bridge_profile_evidence() {
+  local profile="$1" out_path="$2" err_path="$3" dest="$4"
+  local model reasoning model_lc reasoning_lc status expected_model expected_reasoning
+
+  model="$(extract_bridge_probe_field "model" "${err_path}" "${out_path}")"
+  reasoning="$(extract_bridge_probe_field "reasoning effort" "${err_path}" "${out_path}")"
+  model_lc="$(printf '%s' "${model}" | tr '[:upper:]' '[:lower:]')"
+  reasoning_lc="$(printf '%s' "${reasoning}" | tr '[:upper:]' '[:lower:]')"
+  status="not-detected"
+  expected_model=""
+  expected_reasoning=""
+
+  case "${profile}" in
+    codex)
+      expected_model="gpt-5.5"
+      expected_reasoning="xhigh"
+      if [[ "${model_lc}" == "${expected_model}" && "${reasoning_lc}" == "${expected_reasoning}" ]]; then
+        status="matched"
+      elif [[ -n "${model}" || -n "${reasoning}" ]]; then
+        status="mismatch"
+      fi
+      ;;
+    *)
+      status="not-applicable"
+      ;;
+  esac
+
+  {
+    printf 'SFS Executor Profile Bridge Evidence\n'
+    printf 'Source: SFS bridge probe stderr/stdout banner, sanitized and whitelisted by SFS; not LLM self-attestation.\n'
+    printf 'Evaluator executor/profile: %s\n' "${profile}"
+    printf 'Requested review profile: review_high\n'
+    printf 'Expected model: %s\n' "${expected_model:-not-specified}"
+    printf 'Expected reasoning effort: %s\n' "${expected_reasoning:-not-specified}"
+    printf 'Detected model: %s\n' "${model:-not-detected}"
+    printf 'Detected reasoning effort: %s\n' "${reasoning:-not-detected}"
+    printf 'Match status: %s\n' "${status}"
+    printf 'Instruction: treat matched SFS-collected bridge evidence as executor profile attestation; do not require the reviewer LLM to self-attest its own model. If mismatch/not-detected, report a profile bridge evidence gap rather than an artifact-quality defect.\n'
+  } > "${dest}"
+}
+
+append_bridge_profile_evidence_to_prompt() {
+  local evidence_path="$1" prompt_path="$2"
+  [[ -s "${evidence_path}" ]] || return 0
+  {
+    printf '\n## SFS Executor Profile Bridge Evidence\n\n'
+    cat "${evidence_path}"
+    printf '\n'
+  } >> "${prompt_path}"
+}
+
 if [[ -n "${EVALUATOR_EXECUTOR}" && -n "${GENERATOR_EXECUTOR}" && "${EVALUATOR_EXECUTOR}" == "${GENERATOR_EXECUTOR}" ]]; then
   echo "warning: evaluator executor equals generator executor (${EVALUATOR_EXECUTOR}); self-validation risk" >&2
 fi
@@ -3016,6 +3084,18 @@ EOF
       echo "executor bridge probe failed: ${EVALUATOR_EXECUTOR} (exit ${PROBE_RC}); full CPO review not started; see ${PROBE_ERR}" >&2
       exit "${SFS_EXIT_EXECUTOR}"
     fi
+    PROFILE_EVIDENCE="${RUN_INVOCATION_DIR}/executor-profile-evidence.txt"
+    write_bridge_profile_evidence "${PROBE_PROFILE}" "${PROBE_OUT}" "${PROBE_ERR}" "${PROFILE_EVIDENCE}"
+    append_bridge_profile_evidence_to_prompt "${PROFILE_EVIDENCE}" "${PROMPT_PATH}"
+    PROMPT_LINES="$(count_file_lines "${PROMPT_PATH}")"
+    PROMPT_BYTES="$(count_file_bytes "${PROMPT_PATH}")"
+    {
+      printf '\n### %s — SFS executor profile bridge evidence\n\n' "${NOW}"
+      printf -- '- executor: `%s`\n' "${EVALUATOR_EXECUTOR}"
+      printf -- '- profile_evidence_path: `%s`\n' "${PROFILE_EVIDENCE}"
+      printf -- '- profile_evidence_status: `%s`\n' "$(sed -nE 's/^Match status:[[:space:]]*//p' "${PROFILE_EVIDENCE}" | sed -n '1p')"
+      printf -- '- profile_evidence_policy: SFS-collected bridge metadata is profile evidence; do not require LLM self-attestation.\n'
+    } >> "${REVIEW_PATH}" || true
   fi
 
   {
