@@ -50,6 +50,8 @@ lens 로 읽습니다. DDD/TDD 는 모든 product behavior 에 걸리는 기본�
 specialization, management-admin 은 재무/경리/세무/회계 관점, taxonomy 는 모든 본부에 걸치는
 언어/분류 lens 입니다. 사용자는 분야 이름을 외울 필요가 없습니다. Solon 이 필요한
 관점만 읽고, plan/review 에서는 사용자가 이해할 수 있는 질문과 기준으로 풀어냅니다.
+동시에 6개 core division 은 항상 conceptual sub-agent council 로 참여합니다. activation 은
+참여 여부가 아니라 read-depth 와 escalation 을 조절합니다.
 
 agent-skills 벤치마크에서 쓸 만한 practice 는 새 명령으로 늘리지 않고
 `implement`, `review`, `adopt`, `tidy`, `release` 의 정책과 렌즈로 흡수했습니다.

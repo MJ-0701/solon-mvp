@@ -4,7 +4,7 @@ title: "CLAUDE.md — `solon-mvp` distribution repo 유지보수 지침"
 visibility: oss-public
 doc_type: agent-entry
 language: ko
-updated: 2026-05-22
+updated: 2026-05-25
 summary: "CLAUDE.md — `solon-mvp` distribution repo 유지보수 지침 entry document"
 load_when: "Read when this product document is directly relevant."
 ---
@@ -31,6 +31,8 @@ load_when: "Read when this product document is directly relevant."
 4. **CHANGELOG.md** 는 모든 릴리스를 기록. upgrade.sh 가 이 파일을 consumer 에게 안내.
 5. **User-facing docs HTML-first** — AI Agent 참고용 운영 문서/SSoT/로그/스키마/README 는 Markdown 을 유지하되,
    실제 사용자·외부 독자·온보딩 대상이 읽는 설명서/가이드/보고서/핸드북/랜딩성 문서는 기본 산출물을 HTML 로 작성.
+6. **Fresh-session transfer autopilot** — Session Continuation Guard 가 걸리면 같은 세션/새 세션 선택을 묻지 말고 compact handoff/report 후 host clear/new-session 또는 exact next-session prompt 로 넘긴다.
+7. **6본부 council always-on** — strategy-pm/dev/QA/design/infra/taxonomy 는 brainstorm 부터 Gate 6 까지 개념적 sub-agent 로 evidence/waiver 를 남긴다. parallel worker 는 별도 opt-in 이다.
 
 ## 수정 시 체크리스트
 

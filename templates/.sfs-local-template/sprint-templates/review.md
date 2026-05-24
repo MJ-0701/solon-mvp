@@ -42,16 +42,27 @@ generator_executor: ""
 |---|---|---|---|---|
 |  |  |  |  |  |
 
-## 5. Wiki QA/QC Ledger
+## 5. Division Sub-agent Ledger
+
+| division | status | finding/evidence/waiver | reviewer verdict |
+|---|---|---|---|
+| strategy-pm |  |  |  |
+| dev |  |  |  |
+| QA |  |  |  |
+| design |  |  |  |
+| infra |  |  |  |
+| taxonomy |  |  |  |
+
+## 6. Wiki QA/QC Ledger
 
 | problem/root cause/fix | local tests | project-applied result | production/applied status | follow-up/waiver |
 |---|---|---|---|---|
 |  |  |  |  |  |
 
-## 6. 다음
+## 7. 다음
 
 - pass:
 - partial:
 - fail:
 
-## 7. 호출 기록
+## 8. 호출 기록

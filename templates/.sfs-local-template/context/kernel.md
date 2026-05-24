@@ -83,8 +83,8 @@ load_when: ["always", "sfs", "entry"]
   AI mistakes into guardrails/checks during review or retro.
 - Session Continuation Guard is ambient: `sfs upgrade` cannot shrink an already
   open LLM conversation. If token meter is 30% or higher before a new WU/sprint,
-  50% or higher before a new gate/loop/review handoff, or the same session spans
-  multiple WUs/sprints, stop and create a compact fresh-session handoff.
+  50% or higher before a new gate/loop/review handoff, repeated wakeups, or multiple WUs/sprints in one chat,
+  fresh-session transfer is autopilot: write handoff, use host clear/new-session when available, otherwise stop with the exact next-session prompt.
 - Runtime Token Firewall is ambient: worker/review/executor handoffs are
   capsule-only. Do not forward the lead agent's full conversation history to a
   worker, plugin wrapper, rescue subagent, or external reviewer; pass only goal,
@@ -193,8 +193,8 @@ load_when: ["always", "sfs", "entry"]
   the configured custom top-model equivalent. Partial/fail means the CPO
   redirects the work, the author reworks it, and the same self-CPO loop repeats
   until PASS or an explicit user waiver.
-- Multi-agent work is thin supervision: use read-only research, fixed-scope
-  worker slices, and independent review when they reduce context pollution or
-  self-validation risk. Share results through SFS artifacts, not transcripts.
+- Multi-agent work is thin supervision; Division sub-agent council is always-on:
+  strategy-pm, dev, QA, design, infra, and taxonomy each records finding/evidence/
+  waiver in SFS artifacts. Actual parallel worker lanes remain opt-in.
 - Do not advance a gate on raw requirements; if intent, terms, checks, or
   boundaries are unclear, stop and ask the smallest blockers.

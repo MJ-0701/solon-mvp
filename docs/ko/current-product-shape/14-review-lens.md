@@ -4,7 +4,7 @@ title: "본부 / 지식팩 / Review Lens"
 visibility: oss-public
 doc_type: product-reference
 language: ko
-updated: 2026-05-22
+updated: 2026-05-25
 parent: docs/ko/current-product-shape.md
 summary: "본부 / 지식팩 / Review Lens"
 load_when: "Read when docs/ko/current-product-shape.md routes to this section."
@@ -15,6 +15,9 @@ load_when: "Read when docs/ko/current-product-shape.md routes to this section."
 `.sfs-local/divisions.yaml` 은 기존 프로젝트 호환을 위한 6개 core activation slot
 (`dev`, `strategy-pm`, `qa`, `design`, `infra`, `taxonomy`) 입니다. 이 파일은 activation 상태를
 읽기 위한 runtime 설정이지, 전체 지식팩/review lens registry 가 아닙니다.
+다만 6개 core division 은 brainstorm 부터 Gate 6 까지 always-on conceptual sub-agent
+council 로 참여합니다. `activation_state` 는 read-depth/escalation 을 뜻하며, division 이
+참여하지 않아도 된다는 뜻이 아닙니다.
 
 현재 filled guidance 는 product-level DDD/TDD, backend, 전략/PM, QA, 디자인/frontend,
 infra/DevOps, management-admin, taxonomy 지식팩/review lens 로 제공됩니다. DDD/TDD 는
@@ -34,4 +37,3 @@ agent-skills 벤치마크에서 유용한 discipline 도 같은 방식으로 흡
 `implement` 검증 정책으로, deprecation/migration 은 `adopt`/`tidy` 정리 기준으로, shipping
 check 는 `release` 정책으로 들어갑니다. 새 lifecycle command 를 늘리는 대신 기존 흐름의
 판단 기준을 더 선명하게 만든 것입니다.
-

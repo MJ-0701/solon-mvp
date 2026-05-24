@@ -112,7 +112,7 @@ Rules:
   cannot shrink an already-open LLM conversation. If the host token meter is
   30%+ before a new WU/sprint action, 50%+ before a new gate/loop/review
   handoff, or the same chat has spanned multiple WUs/sprints or repeated loop
-  wakeups, stop and hand off to a fresh session using compact artifacts.
+  wakeups, stop and hand off to a fresh session using compact artifacts. Fresh-session transfer is autopilot: write handoff, use host clear/new-session when available, otherwise stop with exact next-session prompt instead of asking same-session vs fresh-session.
 - After a work slice is implemented and verified, run self-agent top-model CPO:
   Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3-pro-auto`, or the
   configured custom top model. Partial/fail redirects the work and repeats until
@@ -134,7 +134,7 @@ Rules:
   files_scope require top-model advisor review before gate advancement
   (Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3-pro-auto`).
   Complex shared behavior escalates to high reasoning before coding.
-  Multi-agent implement is optional, never the default: use single-agent mode unless the user selects parallel agents, each lane has disjoint files_scope, AC/ADR subset ownership, expected tests/evidence, output report path, merge/conflict policy, and a clear native-language commit message, and post-implement cross review is recorded before Gate 6. Commit messages default to the user's native/workspace language; English is only the default when that is the user or repo language.
+  Division sub-agent council is always-on from brainstorm through Gate 6: strategy-pm, dev, QA, design, infra, and taxonomy each records finding/evidence/waiver; actual parallel worker lanes remain opt-in. Multi-agent implement is optional, never the default: use single-agent mode unless the user selects parallel agents, each lane has disjoint files_scope, AC/ADR subset ownership, expected tests/evidence, output report path, merge/conflict policy, and a clear native-language commit message, and post-implement cross review is recorded before Gate 6. Commit messages default to the user's native/workspace language; English is only the default when that is the user or repo language.
 - `sfs brainstorm` has depth. `--simple` is quick requirement cleanup, default normal asks a few
   owner-thinking questions, and `--hard` keeps plan blocked while important
   owner decisions are unresolved.

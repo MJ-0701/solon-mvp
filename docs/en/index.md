@@ -53,6 +53,9 @@ management-admin covers finance/bookkeeping/tax/accounting, and taxonomy is a
 cross-cutting language/classification lens. The user does not need to memorize
 those labels. Solon reads the relevant lens and turns it into plain questions,
 plan criteria, or review judgment.
+At the same time, the six core divisions always participate as a conceptual
+sub-agent council. Activation controls read depth and escalation, not whether a
+division participates.
 
 Useful agent-skills benchmark practices are absorbed into
 `implement`, `review`, `adopt`, `tidy`, and `release` instead of becoming new

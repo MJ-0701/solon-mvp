@@ -4,7 +4,7 @@ title: "Review Is Artifact Acceptance"
 visibility: oss-public
 doc_type: product-reference
 language: en
-updated: 2026-05-22
+updated: 2026-05-25
 parent: docs/en/current-product-shape.md
 summary: "Review Is Artifact Acceptance"
 load_when: "Read when docs/en/current-product-shape.md routes to this section."
@@ -29,7 +29,9 @@ keeps its history and token meter. At 30% before the first implementation or
 review action of a new WU/sprint, 50% before a new gate/loop/cross-review, or
 after multiple WUs/sprints or loop wakeups in the same chat, agents write a
 compact handoff with `report.md`, `review.md`, capture ids, commit/branch, and
-the next SFS command, then resume in a fresh session.
+the next SFS command, then resume in a fresh session. This is autopilot, not a
+same-session-vs-fresh-session question: use host clear/new-session when
+available, otherwise stop with the exact next-session prompt/command.
 
 | Lens | Primary concern |
 |---|---|
@@ -70,4 +72,3 @@ When a closed sprint needs another review, do not hand-edit
 `.sfs-local/current-sprint` or extract archives manually. Use
 `sfs review --sprint <id> --gate <n>`. SFS restores the latest cold archive into
 the workbench and does not overwrite already visible workbench docs.
-

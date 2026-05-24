@@ -1,3 +1,26 @@
+## [0.6.119] - 2026-05-25
+
+> **Division sub-agent council and fresh-session transfer are now enforced by the harness.**
+
+### Fixed
+
+- Session Continuation Guard now treats fresh-session transfer as autopilot:
+  write compact handoff/report, use host clear/new-session when available, and
+  otherwise stop with the exact next-session prompt instead of asking the user
+  to choose same-session vs fresh-session continuation.
+- The six core divisions now participate as an always-on conceptual sub-agent
+  council from brainstorm through Gate 6: strategy-pm, dev, QA, design, infra,
+  and taxonomy must record finding/evidence/waiver or not-applicable status.
+- `.sfs-local/divisions.yaml` activation now controls read depth/escalation,
+  not whether a division participates. Actual parallel worker lanes remain
+  opt-in and separate from division council review.
+
+### Tests
+
+- Added regression coverage for division council policy routing, sprint
+  templates, model profile boundaries, adapter surfaces, SFS.md, and
+  fresh-session autopilot wording.
+
 ## [0.6.118] - 2026-05-25
 
 > **Review profile evidence now comes from SFS bridge metadata, not LLM self-attestation.**

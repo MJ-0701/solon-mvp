@@ -4,7 +4,7 @@ title: "Review 는 artifact acceptance review"
 visibility: oss-public
 doc_type: product-reference
 language: ko
-updated: 2026-05-22
+updated: 2026-05-25
 parent: docs/ko/current-product-shape.md
 summary: "Review 는 artifact acceptance review"
 load_when: "Read when docs/ko/current-product-shape.md routes to this section."
@@ -26,7 +26,9 @@ Session Continuation Guard 는 긴 host 대화 자체를 다룹니다. `sfs upgr
 Claude/Codex/Gemini conversation history 는 그대로 남아 token meter 를 태웁니다. 새 WU/sprint 의
 첫 구현·review 전에 30% 이상, 새 gate/loop/cross-review 전 50% 이상, 또는 같은 chat 이 여러
 WU/sprint·반복 wakeup 을 지나면 agent 는 `report.md`, `review.md`, capture id, commit/branch,
-다음 SFS 명령만 남기고 fresh session 으로 전환해야 합니다.
+다음 SFS 명령만 남기고 fresh session 으로 전환해야 합니다. 이 전환은 사용자에게 같은 세션/새
+세션 선택을 묻는 질문이 아니라 autopilot 입니다. host 가 clear/new-session 을 지원하면 직접
+넘기고, 지원하지 않으면 다음 세션용 정확한 prompt/command 를 남기고 멈춥니다.
 
 | Lens | 주로 보는 것 |
 |---|---|
@@ -62,4 +64,3 @@ commit 후 evidence prompt 가 비어서 partial 이 나는 상황을 막습니�
 이미 닫힌 sprint 의 review 를 다시 이어가야 할 때는 `.sfs-local/current-sprint` 를 손으로 복구하지
 않고 `sfs review --sprint <id> --gate <n>` 를 사용합니다. SFS 는 최신 cold archive 를 workbench 로
 복원하되, 이미 visible workbench 문서가 있으면 그것을 덮어쓰지 않습니다.
-

@@ -52,4 +52,15 @@ status: draft
 - 사용자가 결정할 것:
 - AI 가 채울 수 있는 것:
 
-## 8. 추가 기록
+## 8. Division Sub-agent Ledger
+
+| division | status | finding/question | evidence/waiver |
+|---|---|---|---|
+| strategy-pm |  |  |  |
+| dev |  |  |  |
+| QA |  |  |  |
+| design |  |  |  |
+| infra |  |  |  |
+| taxonomy |  |  |  |
+
+## 9. 추가 기록

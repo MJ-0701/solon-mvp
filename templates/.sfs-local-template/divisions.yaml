@@ -1,5 +1,7 @@
 # .sfs-local/divisions.yaml
-# Solon MVP core activation config (compatibility surface).
+# Solon MVP core activation/depth config (compatibility surface).
+# 6본부 sub-agent council 은 항상 개입한다. activation_state controls depth,
+# not whether a division participates.
 # 이 파일은 기존 프로젝트와 호환되는 6개 core activation slot 상태다.
 # 전체 지식팩/review lens registry 가 아니다.
 # Current guidance packs/lenses:
@@ -10,7 +12,7 @@
 # 프로젝트 특성에 따라 activation_state 를 조정하고, 변경 사유는
 # `docs/solon/decisions/*.md` 또는 해당 sprint handoff 에 기록.
 
-version: 1.1-core-activation
+version: 1.2-division-council
 project: "<PROJECT-NAME>"
 runtime: claude-code   # (향후) codex / gemini-cli 전환 시 값 변경
 created: "<DATE>"
@@ -44,5 +46,6 @@ divisions:
     reason: "언어/분류 lens 는 cycle 2~3 누적 후 도입. 조직 본부가 아니라 cross-cutting 기능."
 
 # Phase 1 MVP 기본 active slot = dev + strategy-pm 2 개.
-# 나머지 4 개는 abstract — 필요 시 대화에서 선언적으로 activate 승격.
+# 나머지 4 개는 abstract — lightweight lens 로는 항상 참여하고, 필요 시
+# 대화에서 선언적으로 activate 승격.
 # backend 와 management-admin 은 별도 knowledge pack/review lens 로 라우팅한다.

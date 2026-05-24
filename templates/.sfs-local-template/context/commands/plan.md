@@ -65,6 +65,10 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
     ownership slices.
   - gray-box delegation marks what the user/CEO must decide and what the AI
     worker may fill internally.
+- Gate 3 must include a `division_subagent_ledger`: strategy-pm, dev, QA,
+  design, infra, and taxonomy map to AC/files/evidence or record a waiver/
+  not-applicable. Actual parallel implementation is optional; this council
+  review is mandatory.
 - A plan is not ready just because it is long. It is ready when an evaluator can
   independently check pass/partial/fail without reading the generator's mind.
 - In the review-readiness checklist, avoid translationese such as `열린 결정이

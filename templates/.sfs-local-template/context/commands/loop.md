@@ -26,4 +26,6 @@ load_when: ["loop", "queue", "autonomous", "자율", "반복"]
 - Long loops must not keep waking the same host conversation forever. Before
   each loop wakeup or next queue item, check the host token meter/session
   report. At 50% or higher, or after more than two wakeups in the same chat,
-  write a compact handoff and resume the queue from a fresh session.
+  perform fresh-session transfer automatically: write compact handoff, invoke
+  host clear/new-session when available, otherwise stop with the exact resume
+  prompt. Do not ask same-session vs fresh-session.

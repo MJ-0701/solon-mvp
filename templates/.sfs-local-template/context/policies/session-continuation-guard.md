@@ -25,9 +25,10 @@ load_when: ["token", "session", "continuation", "loop", "wakeup", "resume", "upg
   `review.md`, latest capture ids, exact commit/branch, failing command, and
   next SFS command. Do not copy the chat transcript.
 - Handoff-only scope is a stop contract: a request only for handoff, next-session brief, session report, or `인계문서` means write/update that artifact and stop after recording current state, blockers, first next command, and cleanup evidence. Do not start or continue PR polling, review retriggers, merges, implementation, deploy, or monitor loops; interrupt active or queued batches and do not finish current PRs first unless the same user request explicitly asks to continue. If post-request PR/review/merge work already happened, report it as a scope breach, not as a justification.
-- After handoff, tell the user to open a new session and start from
-  `sfs status`, `sfs context cat kernel`, `_INDEX.md`, and the routed command
-  module. The new session should read artifacts, not the old conversation.
+- Fresh-session transfer is autopilot after a trigger: write/update the
+  handoff/report, record the first next command plus exact next-session prompt,
+  then use host clear/new-session when the host exposes it. If not available,
+  stop after the prompt. Do not ask the user to choose same-session vs fresh-session continuation unless they explicitly override this guard.
 - If `sfs --version` is current but routed context looks stale, run
   `sfs upgrade` in that project and then start a fresh agent session. A runtime
   upgrade without fresh session/context reload does not change the host's

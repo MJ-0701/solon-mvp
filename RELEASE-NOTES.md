@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.119
+
+이번 버전은 fresh session 전환과 6본부 개입을 agent 재량이 아니라 SFS 하네스 계약으로 조입니다.
+
+- Session Continuation Guard 가 걸리면 agent 는 같은 세션에서 계속할지 묻지 않고 compact handoff 를 만들고, host 가 지원하면 clear/new-session 으로 넘깁니다.
+- host 전환 기능이 없으면 사용자가 다음 세션에 붙일 정확한 prompt/command 를 남기고 멈춥니다.
+- strategy-pm, dev, QA, design, infra, taxonomy 는 brainstorm 부터 Gate 6 까지 always-on conceptual sub-agent council 로 참여합니다.
+- 실제 parallel worker 는 여전히 opt-in 이지만, 6본부 council ledger 는 plan/implement/review evidence 로 남아야 합니다.
+
 ## 0.6.118
 
 이번 버전은 review 단계에서 모델 증명을 LLM 자기진술에 맡기지 않도록 고칩니다.

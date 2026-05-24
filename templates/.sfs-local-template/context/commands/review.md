@@ -104,10 +104,9 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - If the evaluator executor equals the generator executor, call out the
   self-validation risk and prefer a separate model or fresh agent context when
   the change is user-facing, risky, or hard to verify.
-- If implement.md records `agent_mode: parallel`, Gate 6 verifies lane contract:
-  disjoint files_scope per lane, AC/ADR subset ownership, expected tests/
-  evidence, output report path, merge/conflict policy, native/workspace-language
-  commit message per lane, lane-level verification, and different-agent cross review.
+- Gate 6 verifies `division_subagent_ledger` across strategy-pm, dev, QA,
+  design, infra, and taxonomy; missing relevant finding/evidence/waiver is
+  partial. If implement.md records `agent_mode: parallel`, Gate 6 also verifies disjoint files_scope per lane, AC/ADR subset ownership, expected tests/evidence, output report path, merge/conflict policy, native/workspace-language commit message per lane, lane verification, and cross review.
 - Review proposed or actual commit messages against the user's
   native/workspace language. English commit messages are correct only when the
   user/repo language is English or the repo explicitly requires English.

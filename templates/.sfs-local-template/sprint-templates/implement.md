@@ -65,14 +65,25 @@ last_touched_at: ""
 |---|---|---|---|---|
 |  |  |  |  |  |
 
-## 6. 리뷰 인계
+## 6. Division Sub-agent Ledger
+
+| division | status | finding/evidence/waiver | next action |
+|---|---|---|---|
+| strategy-pm |  |  |  |
+| dev |  |  |  |
+| QA |  |  |  |
+| design |  |  |  |
+| infra |  |  |  |
+| taxonomy |  |  |  |
+
+## 7. 리뷰 인계
 
 - 리뷰 준비: no
 - 알려진 위험:
 - 다음 명령: `sfs review --gate 6`
 - 리뷰 규칙: 구현 후 review 는 필수입니다. parallel agent 로 구현했다면 Gate 6 전 agent 간 cross review 도 필수입니다.
 
-## 7. Commit Unit Plan
+## 8. Commit Unit Plan
 
 - lane:
   - agent:

@@ -40,6 +40,9 @@ required checks by project size and risk. This router is not the same surface as
 `.sfs-local/divisions.yaml`: that file is a six-slot compatibility activation
 state, while this router covers the current guidance packs and review lenses.
 This scope is limited to knowledge-pack documents; other documentation is unchanged unless explicitly requested.
+The six core divisions are an always-on Division sub-agent council across
+brainstorm, plan, implement, and review. activation_state controls read-depth
+and escalation, not whether strategy-pm/dev/QA/design/infra/taxonomy participate.
 
 If Korean is requested, read `knowledge-pack-router.ko.md` first.
 

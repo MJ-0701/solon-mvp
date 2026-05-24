@@ -114,6 +114,18 @@ monitor loops; interrupt active or queued batches and do not finish current PRs
 first unless the same user request explicitly asks to continue that work. If
 post-request PR/review/merge work already happened, report it as a scope breach,
 not as a justification.
+Session Continuation Guard is also a router contract. `sfs upgrade` cannot
+shrink an already-open LLM conversation. At 30%+ before a new WU/sprint, 50%+
+before a new gate/loop/review handoff, repeated wakeups, or multiple WUs/sprints
+in one chat, fresh-session transfer is autopilot: write compact handoff, use
+host clear/new-session when available, otherwise stop with the exact
+next-session prompt instead of asking same-session vs fresh-session.
+Division sub-agent council is always-on from brainstorm through Gate 6:
+strategy-pm, dev, QA, design, infra, and taxonomy each records finding/evidence/
+waiver or not-applicable in `division_subagent_ledger`. Actual parallel worker
+lanes remain opt-in and require disjoint files_scope, AC/ADR subset ownership,
+expected tests/evidence, output report path, merge/conflict policy, lane
+verification, and cross review.
 For Solon commit grouping, guide users to the SFS command surface:
 `sfs commit plan` and `sfs commit apply --group <name>` (Codex may use
 `$sfs commit ...`; Claude slash routing may use `/sfs commit ...`). `sfs commit
