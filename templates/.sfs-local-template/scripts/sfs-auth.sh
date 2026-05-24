@@ -214,6 +214,40 @@ run_probe_command_with_timeout() {
   wait "$pid"
 }
 
+redact_auth_probe_artifact() {
+  local path="$1" tmp name value
+  [[ -f "$path" ]] || return 0
+
+  tmp="${path}.redacted.$$"
+  awk '
+    {
+      line = $0
+      gsub(/[Aa]uthorization:[^\r\n]*/, "Authorization: [redacted]", line)
+      gsub(/[Bb]earer[[:space:]]+[A-Za-z0-9._~+\/=-]+/, "Bearer [redacted]", line)
+      print line
+    }
+  ' "$path" > "$tmp" && mv "$tmp" "$path"
+
+  while IFS='=' read -r name value; do
+    [[ -n "${value:-}" ]] || continue
+    [[ "${#value}" -ge 8 ]] || continue
+    case "$name" in
+      *API_KEY*|*TOKEN*|*SECRET*|*PASSWORD*)
+        tmp="${path}.redacted.$$"
+        awk -v secret="$value" '
+          {
+            line = $0
+            while ((idx = index(line, secret)) > 0) {
+              line = substr(line, 1, idx - 1) "[redacted]" substr(line, idx + length(secret))
+            }
+            print line
+          }
+        ' "$path" > "$tmp" && mv "$tmp" "$path"
+        ;;
+    esac
+  done < <(env)
+}
+
 AUTH_ENV_FILE_PATH="$(get_sfs_auth_env_file)"
 
 case "$ACTION" in
@@ -293,7 +327,13 @@ SFS_AUTH_PROBE_OK ${profile}
 EOF
     case "$profile" in
       codex)  PROBE_CMD="${SFS_REVIEW_CODEX_CMD:-codex exec --full-auto}" ;;
-      claude) PROBE_CMD="${SFS_REVIEW_CLAUDE_CMD:-claude -p --dangerously-skip-permissions}" ;;
+      claude)
+        if [[ -n "${SFS_REVIEW_CLAUDE_CMD:-}" ]]; then
+          PROBE_CMD="${SFS_REVIEW_CLAUDE_CMD}"
+        else
+          PROBE_CMD='claude -p "$(cat)"'
+        fi
+        ;;
       gemini) PROBE_CMD="${SFS_REVIEW_GEMINI_CMD:-gemini --skip-trust --output-format text -p \"Return exactly: SFS_AUTH_PROBE_OK ${profile}\"}" ;;
       *)
         echo "unknown executor: ${profile}" >&2
@@ -309,6 +349,8 @@ EOF
     run_probe_command_with_timeout "$PROBE_CMD" "$PROBE_TIMEOUT" "$PROMPT_PATH" "$OUT_PATH" "$ERR_PATH" "SFS_AUTH_PROBE_OK"
     rc=$?
     set -e
+    redact_auth_probe_artifact "$OUT_PATH"
+    redact_auth_probe_artifact "$ERR_PATH"
     if [[ "$rc" -ne 0 ]]; then
       echo "auth probe failed: ${profile} (exit ${rc}); see ${ERR_PATH}" >&2
       exit "${SFS_EXIT_EXECUTOR}"

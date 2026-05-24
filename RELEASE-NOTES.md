@@ -7,6 +7,16 @@
 
 ---
 
+## 0.6.113
+
+이번 버전은 Claude/Codex 같은 실행 agent 가 "로그인돼 있음"만 보고 실제 작업 가능한 상태라고 착각하지 않도록 auth probe 를 조입니다.
+
+- Claude probe 는 이제 작은 request-response worker 호출로 실제 응답 가능성을 확인합니다.
+- 오래 살아 있는 로컬 프로세스, CLI login status, doctor/auth status 만으로는 PASS evidence 로 보지 않습니다.
+- Claude 기본 probe 에서 `--dangerously-skip-permissions` 를 제거했습니다. 필요한 경우 기존 환경 override 로 명시할 수 있습니다.
+- Probe stdout/stderr 에 남을 수 있는 bearer header 와 secret-like 환경값은 `.sfs-local/tmp` 저장 전에 redaction 됩니다.
+- 새 하네스는 성공 호출, 401 fail-closed, 위험 bridge 재유입 방지, prompt 최소화, artifact redaction 을 검증합니다.
+
 ## 0.6.112
 
 이번 버전은 구현 단계에서 plan AC/ADR 이 흐려지지 않도록 Gate 6 를 ledger 기반으로 조입니다.

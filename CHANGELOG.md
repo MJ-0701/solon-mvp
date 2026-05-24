@@ -1,3 +1,26 @@
+## [0.6.113] - 2026-05-24
+
+> **Auth probes now prove worker liveness, not just CLI login state.**
+
+### Fixed
+
+- Changed the Claude executor auth probe to perform a tiny request-response
+  worker call instead of trusting a stale CLI process, `claude doctor`, or local
+  login state as sufficient liveness evidence.
+- Removed the default `--dangerously-skip-permissions` probe bridge from the
+  Claude path; explicit executor overrides remain available through the
+  existing environment override contract.
+- Redacted auth probe stdout/stderr artifacts so bearer headers and common
+  secret-like environment values are not persisted in `.sfs-local/tmp`.
+
+### Tests
+
+- Added auth probe liveness coverage for successful worker calls, 401/fail-closed
+  behavior, dangerous-bridge rejection, prompt minimization, and persisted
+  artifact redaction.
+- Extended agent behavior guardrails so stale Claude probe defaults cannot
+  re-enter the product runtime.
+
 ## [0.6.112] - 2026-05-23
 
 > **Gate 6 now proves the plan across every product-bearing layer.**
