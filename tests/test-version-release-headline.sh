@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.6.113" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.6.113" "version output"
-assert_contains_text "${output}" "latest 0.6.113" "latest output"
+[[ "${plain_output}" == "sfs 0.6.114" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.6.114" "version output"
+assert_contains_text "${output}" "latest 0.6.114" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Auth probes now prove worker liveness, not just CLI login state" "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Monitor checkpoints now classify progress instead of vague watching" "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline 이번 버전은 Claude/Codex 같은 실행 agent" "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline 이번 버전은 장시간 monitor" "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

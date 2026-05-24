@@ -1,3 +1,37 @@
+## [0.6.114] - 2026-05-24
+
+> **Monitor checkpoints now classify progress instead of vague watching.**
+
+### Added
+
+- Added a monitor checkpoint contract for long-running SFS watch/monitor work:
+  every checkpoint must classify state as `progressing`, `slow`, `stalled`,
+  `dead`, or `auth_blocked`.
+- Required checkpoint evidence now includes commit delta, PR/head delta, local
+  dirty state, test/check delta, review status delta, worker liveness probe
+  result, lane-utilization evidence or waiver, and next action `wait`, `probe`,
+  `revive`, or `close`.
+- Monitor close now requires heartbeat/automation cleanup plus durable
+  wiki/report evidence.
+
+### Fixed
+
+- Worker liveness for monitor purposes must use a request-response probe, not
+  process presence, CLI login state, or auth-status output alone.
+- Probe evidence is now security-bounded: static benign payload only, no
+  workspace/user content, and durable evidence limited to
+  status/category/timestamp/redacted error class.
+- Raw stdout/stderr, bearer/auth tokens, env vars, prompt bodies, model
+  responses, workspace/user content, and PII are forbidden as durable monitor
+  evidence.
+
+### Tests
+
+- Extended agent behavior guardrails across runtime context and CLI adapter
+  surfaces so the monitor state/evidence/probe/close contract cannot disappear.
+- Rechecked context/product markdown line budgets after compacting the new
+  monitor guidance.
+
 ## [0.6.113] - 2026-05-24
 
 > **Auth probes now prove worker liveness, not just CLI login state.**

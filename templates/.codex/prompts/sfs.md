@@ -110,6 +110,17 @@ Arguments: `$ARGUMENTS`
    executing until scope changes or a true blocker appears. Shell state is
    agent-owned: use one-shot inline env and mask secrets instead of asking the
    user to export variables across terminals.
+   Monitor checkpoint classification is mandatory for long-running monitor
+   work: classify each checkpoint as `progressing`, `slow`, `stalled`, `dead`,
+   or `auth_blocked`; record commit delta, PR/head delta, local dirty state,
+   test/check delta, review status delta, worker liveness probe result,
+   lane-utilization evidence or waiver, and next action `wait`, `probe`,
+   `revive`, or `close`. Worker liveness requires a request-response probe,
+   never process/auth-status alone. Use a static benign payload only, never
+   workspace/user content, and persist only status/category/timestamp/redacted
+   error class; do not persist raw stdout/stderr, bearer/auth tokens, env vars,
+   prompt bodies, model responses, workspace/user content, or PII. Close only
+   after heartbeat/automation cleanup and durable wiki/report evidence.
    Advisor calls do not count as self-CPO. Before external cross review, record
    a self-CPO mini-check: requirements to AC to implementation slices to
    ADR/decision ids, every AC mapped to file/artifact/evidence, and SEED/

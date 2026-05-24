@@ -32,6 +32,21 @@ Solon 제품의 `sfs` CLI 는 Claude Code, Codex CLI, Gemini CLI 에서 같은 b
 plugin/extension/skill 파일들은 **CLI 쪽 discovery surface** 입니다. 모델이 `/sfs`(Claude),
 `sfs <subcommand>`(Gemini), `$sfs`(Codex) 를 같은 global binary 로 routing 하게 만듭니다.
 
+## Monitor checkpoint contract
+
+Long-running monitor work must not report vague "still watching" status.
+Each checkpoint classifies state as `progressing`, `slow`, `stalled`, `dead`,
+or `auth_blocked`; records commit delta, PR/head delta, local dirty state,
+test/check delta, review status delta, worker liveness probe result,
+lane-utilization evidence or waiver, and next action `wait`, `probe`,
+`revive`, or `close`. Worker liveness requires a request-response probe, never
+process/auth-status alone. Probes use a static benign payload only, never
+workspace/user content, and persist only status/category/timestamp/redacted
+error class; raw stdout/stderr, bearer/auth tokens, env vars, prompt bodies,
+model responses, workspace/user content, and PII are not durable evidence. A
+monitor closes only after heartbeat/automation cleanup and durable wiki/report
+evidence.
+
 ## 실제 설치 진입점
 
 이 repo 를 직접 `git clone` 해서 설치하지 않습니다. macOS 는 Homebrew, Windows 는 Scoop 으로

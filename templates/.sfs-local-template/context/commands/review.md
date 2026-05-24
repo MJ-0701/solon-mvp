@@ -58,6 +58,18 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   architecture, public API/schema/CLI contract, security/privacy/data-loss,
   cost/latency/model policy, destructive behavior, acceptance criteria meaning,
   or after repeated partial/fail on the same micro-fix.
+- For long-running monitor/review work, require monitor checkpoint
+  classification evidence before accepting "still monitoring" or "done":
+  state `progressing`, `slow`, `stalled`, `dead`, or `auth_blocked`; include
+  commit delta, PR/head delta, local dirty state, test/check delta, review
+  status delta, worker liveness probe result, lane-utilization evidence or
+  waiver, and next action `wait`, `probe`, `revive`, or `close`. Worker
+  liveness needs a request-response probe, never process/auth-status alone;
+  probes use a static benign payload, never workspace/user content, and persist
+  only status/category/timestamp/redacted error class. Raw stdout/stderr,
+  bearer/auth tokens, env vars, prompt bodies, model responses, workspace/user
+  content, and PII are not durable monitor evidence. Gate close also checks
+  heartbeat/automation cleanup plus durable wiki/report evidence.
 - Do not treat review volume as completion. Number of lenses, rounds, advisor
   comments, or elapsed time never unlocks `sfs implement`; only PASS or an
   explicit user waiver does.

@@ -7,6 +7,18 @@
 
 ---
 
+## 0.6.114
+
+이번 버전은 장시간 monitor 가 막연히 "계속 보는 중"이라고 말하지 않고, 실제 진행 상태를 evidence 로 분류하게 만듭니다.
+
+- Monitor checkpoint 는 이제 `progressing`, `slow`, `stalled`, `dead`, `auth_blocked` 중 하나를 명시합니다.
+- 각 checkpoint 는 commit delta, PR/head delta, local dirty state, test/check delta, review status delta, worker liveness probe result, lane-utilization evidence/waiver 를 남깁니다.
+- 다음 행동도 `wait`, `probe`, `revive`, `close` 중 하나로 기록해야 합니다.
+- Worker liveness 는 process/login/auth-status 만으로는 충분하지 않고 request-response probe 로 확인해야 합니다.
+- Probe 는 static benign payload 만 사용하고, durable evidence 는 status/category/timestamp/redacted error class 로 제한합니다.
+- Raw stdout/stderr, token/env, prompt body, model response, workspace/user content, PII 는 monitor evidence 로 보존하지 않습니다.
+- Monitor close 는 heartbeat/automation cleanup 과 durable wiki/report evidence 를 함께 요구합니다.
+
 ## 0.6.113
 
 이번 버전은 Claude/Codex 같은 실행 agent 가 "로그인돼 있음"만 보고 실제 작업 가능한 상태라고 착각하지 않도록 auth probe 를 조입니다.

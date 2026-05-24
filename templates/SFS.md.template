@@ -89,6 +89,17 @@ that stated scope as session-scoped authorization and continue until scope
 changes or a true blocker appears. Shell state is agent-owned: use one-shot
 inline env, mask secrets, and do not ask the user to export variables across
 terminals.
+Monitor checkpoint classification is mandatory for long-running monitor work:
+classify each checkpoint as `progressing`, `slow`, `stalled`, `dead`, or
+`auth_blocked`; record commit delta, PR/head delta, local dirty state,
+test/check delta, review status delta, worker liveness probe result,
+lane-utilization evidence or waiver, and next action `wait`, `probe`, `revive`,
+or `close`. Worker liveness requires a request-response probe, never
+process/auth-status alone. Use a static benign payload only, never
+workspace/user content, and persist only status/category/timestamp/redacted
+error class; do not persist raw stdout/stderr, bearer/auth tokens, env vars,
+prompt bodies, model responses, workspace/user content, or PII. Close only
+after heartbeat/automation cleanup and durable wiki/report evidence.
 For Solon commit grouping, guide users to the SFS command surface:
 `sfs commit plan` and `sfs commit apply --group <name>` (Codex may use
 `$sfs commit ...`; Claude slash routing may use `/sfs commit ...`). `sfs commit
