@@ -1,6 +1,11 @@
 name: Publish Product Channels
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/publish-product-channels.yml"
   workflow_dispatch:
     inputs:
       version:
@@ -20,7 +25,17 @@ permissions:
   contents: read
 
 jobs:
+  workflow-file-push-validation:
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain manual-only workflow
+        run: |
+          echo "publish-product-channels.yml is manual-only channel automation."
+          echo "Push validation is intentionally a no-op so optional missing channel auth does not leave a red release check."
+
   publish-channels:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.SOLON_RELEASE_BOT_TOKEN }}

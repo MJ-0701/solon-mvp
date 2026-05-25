@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.126
+
+이번 버전은 product repo push 때 optional channel workflow 가 빨간 zero-job check 로 남는 문제를 막습니다.
+
+- `publish-product-channels.yml` 파일 변경 push 는 설명만 출력하는 no-op validation job 으로 성공 처리합니다.
+- 실제 Homebrew/Scoop channel publish job 은 `workflow_dispatch` 에서만 실행됩니다.
+- `SOLON_RELEASE_BOT_TOKEN` 이 없는 현재 운영에서는 preflight 의 `manual_required` 결과대로 로컬 Homebrew/Scoop push 를 사용합니다.
+- 즉, optional 자동화 lane 이 준비되지 않았다는 이유로 release Actions 가 실패처럼 보이지 않습니다.
+
 ## 0.6.125
 
 이번 버전은 Homebrew/Scoop channel publish workflow 의 토큰 누락을 release 후반에야 발견하는 문제를 줄입니다.

@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.6.125" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.6.125" "version output"
-assert_contains_text "${output}" "latest 0.6.125" "latest output"
+[[ "${plain_output}" == "sfs 0.6.126" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.6.126" "version output"
+assert_contains_text "${output}" "latest 0.6.126" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Release channel workflow auth is preflighted before dispatch." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Release channel workflow push validation is no-op safe." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 Homebrew/Scoop channel publish workflow 의 토큰 누락을 release 후반에야 발견하는 문제를 줄입니다.' "release notes fallback headline"
+assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 product repo push 때 optional channel workflow 가 빨간 zero-job check 로 남는 문제를 막습니다.' "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

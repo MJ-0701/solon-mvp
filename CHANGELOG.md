@@ -1,3 +1,22 @@
+## [0.6.126] - 2026-05-25
+
+> **Release channel workflow push validation is no-op safe.**
+
+### Fixed
+
+- Added a push-validation no-op job to `publish-product-channels.yml` for
+  workflow-file changes on product `main`, so optional missing channel
+  automation auth does not leave a red zero-job release check during normal
+  stable product pushes.
+- Gated the real Homebrew/Scoop channel publish job to `workflow_dispatch` only.
+  Local channel publish remains the release path when preflight reports
+  `manual_required`.
+
+### Tests
+
+- Extended `test-release-channel-auth-preflight.sh` to verify the manual-only
+  publish job gate and the push no-op guard.
+
 ## [0.6.125] - 2026-05-25
 
 > **Release channel workflow auth is preflighted before dispatch.**
