@@ -22,10 +22,17 @@ load_when: ["division", "sub-agent", "6본부", "Gate 2", "Gate 3", "Gate 6"]
 - Plan: every relevant division maps AC/files/artifacts/evidence or records a
   waiver. Missing division evidence is plan partial when the division clearly
   affects acceptance.
+- Enterprise plan council: for non-trivial product-bearing work, plan is a
+  design phase. Load `enterprise-plan-council-pack.md` and record risk flags,
+  selected child packs, and AC/files/evidence mapping before Gate 3 review.
+  Do not produce empty six-division ceremony; each row needs a finding, evidence,
+  waiver, or concrete not-applicable reason.
 - Implement: actual parallel worker lanes remain optional. Division council
   review is not optional; the lead may record the six lenses directly, or route
   read-only/fixed-scope capsules when the bridge supports sub-agents.
 - Review: Gate 6 checks the division ledger along with the implementation
-  acceptance ledger. A deterministic division finding routes to autopilot
-  patch+verify+review; escalate only for genuinely new product judgment or new
-  approval-required risk.
+  acceptance ledger. Load `enterprise-evidence-pack.md` when QA/QC or project
+  applied evidence is in scope, and `enterprise-performance-review-pack.md`
+  when hot-path or algorithm/runtime cost changes. A deterministic division
+  finding routes to autopilot patch+verify+review; escalate only for genuinely
+  new product judgment or new approval-required risk.

@@ -2,39 +2,7 @@
 id: sfs-policy-knowledge-pack-router-ko
 summary: 지식팩/review lens 라우터(한글 버전), 활성화 조건과 범위를 가볍게 제어.
 language: ko
-load_when:
-  - knowledge pack
-  - backend
-  - strategy-pm
-  - qa
-  - design
-  - infra
-  - management-admin
-  - taxonomy
-  - finance
-  - accounting
-  - bookkeeping
-  - tax
-  - 경영관리
-  - 재무
-  - 경리
-  - 세무
-  - 회계
-  - transaction
-  - batch
-  - DDD
-  - TDD
-  - domain model
-  - product behavior
-  - acceptance criteria
-  - integration
-  - API
-  - AWS
-  - Obsidian
-  - 옵시디언
-  - llm wiki
-  - 위키
-  - 문서 이관
+load_when: [knowledge pack, backend, strategy-pm, qa, design, infra, management-admin, taxonomy, finance, accounting, bookkeeping, tax, 경영관리, 재무, 경리, 세무, 회계, transaction, batch, DDD, TDD, domain model, product behavior, acceptance criteria, integration, API, AWS, Obsidian, 옵시디언, llm wiki, 위키, 문서 이관, enterprise, agent team, 6본부, 대기업급, performance, algorithm, QA/QC]
 status: filled-v1
 content_policy: "read only this router first; read full packs only when matching signals make them useful"
 ---
@@ -69,6 +37,10 @@ Division sub-agent council 이다. `activation_state` 는 read-depth 와 escalat
 - Obsidian/wiki signals: `Obsidian`, `옵시디언`, `llm-wiki`, `위키`,
   `knowledge base`, `문서 이관`, `existing project`, `new project`,
   `sprint continuity`.
+- Enterprise team signals: `enterprise`, `agent team`, `6본부`, `sub-agent`,
+  `대기업급`, `team agentic coding`, `QA/QC`, `metrics`.
+- Performance/algorithm signals: `performance`, `algorithm`, `optimization`,
+  `hot path`, `query plan`, `Core Web Vitals`, `memory`, `concurrency`.
 
 ## Read order
 
@@ -108,6 +80,14 @@ Division sub-agent council 이다. `activation_state` 는 read-depth 와 escalat
 - `policies/ddd-tdd-knowledge-pack.ko.md`
 - `policies/obsidian-llm-wiki.md`
 - `policies/obsidian-llm-wiki.ko.md`
+- `policies/enterprise-agent-team-pack.md`
+- `policies/enterprise-agent-team-pack.ko.md`
+- `policies/enterprise-plan-council-pack.md`
+- `policies/enterprise-plan-council-pack.ko.md`
+- `policies/enterprise-evidence-pack.md`
+- `policies/enterprise-evidence-pack.ko.md`
+- `policies/enterprise-performance-review-pack.md`
+- `policies/enterprise-performance-review-pack.ko.md`
 
 ## Depth Rules
 
@@ -115,6 +95,8 @@ Division sub-agent council 이다. `activation_state` 는 read-depth 와 escalat
 - multi-division work 는 AC 또는 risk evidence 가 여러 division 을 실제로 건드릴 때만 여러 pack 을 읽는다.
 - 모든 pack 을 blocker 로 승격하지 않는다. 각 pack 은 matching scope, evidence,
   review question 을 고르는 decision aid 다.
+- non-trivial product-bearing work 의 plan 은 enterprise plan council pack 을 연다.
+  review 는 현재 risk/AC 가 닿을 때만 enterprise evidence/performance pack 을 연다.
 - pack 이 MSA, 대형 redesign, release-readiness escalation, finance/admin process,
   tax/accounting advisor checkpoint, governance process 같은 큰 전환을 제안하면
   조용히 scope 를 넓히지 말고 user/product decision 으로 surface 한다.

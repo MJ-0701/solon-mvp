@@ -7,6 +7,16 @@
 
 ---
 
+## 0.6.121
+
+이번 버전은 SFS 를 “무늬만 SFS”가 아니라 6본부 agent team 이 실제로 계획과 검수에 개입하는 방향으로 강화합니다.
+
+- enterprise agent-team knowledge pack 을 split 구조로 추가했습니다.
+- Gate 3 plan 은 non-trivial product-bearing 작업에서 risk flag, selected pack, 6본부 finding/evidence/waiver 를 기록해야 합니다.
+- Gate 6 review 는 SFS/harness 정책 변경의 project-applied QA/QC 와 hot path 성능/알고리즘 evidence 를 확인합니다.
+- 성능/알고리즘 PASS 는 측정, bounded input proof, 또는 explicit N/A waiver 없이 통과할 수 없습니다.
+- Gemini 는 3.x 이상 route 로 고정합니다: strategy/research/review 는 `gemini-3.1-pro-preview`, agentic coding/bounded helper 는 `gemini-3-flash-preview`, relay/probe/economy helper 는 `gemini-3.1-flash-lite` 입니다.
+
 ## 0.6.120
 
 이번 버전은 fresh session 전환을 사용자의 `/clear` 입력이 아니라 host/agent 소유의 무손실 즉시 재개로 고정합니다.
@@ -451,12 +461,12 @@ Codex/worker wrapper 에 대화 전체를 넘기며 토큰을 태우는 경로�
 - Claude 쪽 코딩 가능한 worker/facilitator/code helper/mechanical helper 는 Sonnet 4.6 입니다.
 - Haiku 는 코딩하지 않습니다. 단순 relay, 요약, 작은 read-only 보조 같은 non-coding helper 전용입니다.
 - 실질 research 는 가능하면 Gemini researcher executor 를 우선 사용하고, Gemini 는 모든 role 을
-  `gemini-3-pro-auto` 로 둡니다. Flash/2.5 fallback 은 쓰지 않습니다.
+  strategy/research/review 는 `gemini-3.1-pro-preview`, agentic coding/bounded 구현 helper 는 `gemini-3-flash-preview`, relay/probe/economy helper 는 `gemini-3.1-flash-lite` 로 둡니다. 3.x 미만 fallback 은 쓰지 않습니다.
 - Codex 기준은 기존대로 유지됩니다: 일반 worker 는 `gpt-5.4`, 단순 non-coding helper 는
   `gpt-5.4-mini`, bounded coding helper 는 `gpt-5.3-codex`, 무판단 mechanical implementation helper 는
   `gpt-5.3-codex-spark` 입니다.
 - 작업을 끝냈다고 보고하기 전에는 self-agent top-model CPO evidence 가 필요합니다:
-  Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3-pro-auto`.
+  Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3.1-pro-preview`.
 - advisor 호출은 self-CPO PASS 를 대체하지 않습니다. partial/fail 이면 CPO 가 방향을 다시 잡고,
   구현/검증/self-CPO 를 PASS 될 때까지 반복합니다.
 
@@ -1175,7 +1185,7 @@ incident-report 문서 테스트가 `CHANGELOG.md` / `RELEASE-NOTES.md` 위치�
 - Claude review bridge 기본값은 성공이 확인된 `claude -p "$(cat)"` prompt-argument 경로로 고정했습니다.
   실패가 확인된 `claude -p --dangerously-skip-permissions` stdin 경로는 더 이상 기본값으로 쓰지 않습니다.
 - Gemini 는 facilitator/advisor/review 기본값으로 `gemini-3.1-pro-preview`, helper-grade fallback 으로
-  `gemini-3-flash-preview` 만 명시합니다. 2.5 fallback 은 쓰지 않습니다.
+  `gemini-3-flash-preview` 만 명시합니다. 3.x 미만 fallback 은 쓰지 않습니다.
 - 구현 worker 는 그대로 `gpt-5.3-codex`, 기계적 helper 는 `gpt-5.3-codex-spark` 입니다.
 - 새 프로젝트와 fallback 상태의 기존 프로젝트는 `solon_recommended` role routing 을 기본값으로 씁니다.
 

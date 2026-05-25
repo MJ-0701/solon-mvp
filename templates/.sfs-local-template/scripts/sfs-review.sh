@@ -104,8 +104,8 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                   lanes. `code` is one lens, not the default meaning of review.
                   Common division aliases are accepted, for example
                   strategy-pm -> strategy, design/frontend -> design,
-                  infra -> ops, source-driven -> source-docs, perf ->
-                  performance, api/schema -> api-contract, and
+                  infra -> ops, source-driven -> source-docs, perf -> performance,
+                  performance-algorithm -> performance, api/schema -> api-contract, and
                   finance/accounting -> management-admin. DDD/TDD aliases
                   map to ddd-tdd.
   - --executor <profile|cmd>
@@ -131,7 +131,7 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                   Named profiles:
                     codex        $SFS_REVIEW_CODEX_CMD, else `codex exec --full-auto --ephemeral --output-last-message <result> -`
                     codex-plugin unsupported: Claude in-process Codex wrappers are blocked by Runtime Token Firewall
-                    gemini       $SFS_REVIEW_GEMINI_CMD, else `gemini --skip-trust --output-format text -p "Read stdin and perform the requested CPO review."`
+                    gemini       $SFS_REVIEW_GEMINI_CMD, else a compatibility bridge that uses `--model gemini-3.1-pro-preview` only when the installed Gemini CLI advertises `--model`
                     claude       $SFS_REVIEW_CLAUDE_CMD, else `claude -p "\$(cat)"`
                     claude-plugin unsupported; Codex is not a Claude plugin host
                   Custom executor strings are passed through as shell commands and receive the prompt on stdin.
@@ -367,7 +367,7 @@ normalize_review_lens_value() {
     source-docs|source-driven|source-driven-development|official-docs|official-documentation|docs-source|source-verification|framework-docs) printf 'source-docs\n' ;;
     simplify|simplification|code-simplify|cleanup|dead-code|deadcode|reduce-complexity) printf 'simplify\n' ;;
     security|hardening|auth|authorization|authentication|pii|secrets|secret) printf 'security\n' ;;
-    performance|perf|latency|benchmark|benchmarks|lighthouse|memory|bundle) printf 'performance\n' ;;
+    performance|performance-algorithm|algorithm|algorithms|perf|latency|benchmark|benchmarks|lighthouse|memory|bundle) printf 'performance\n' ;;
     api-contract|api|interface|contract|schema|schemas|openapi|public-api|compatibility) printf 'api-contract\n' ;;
     strategy|strategy-pm|product|product-strategy|product-management|pm|planning) printf 'strategy\n' ;;
     design|design/frontend|frontend-design|ux|ui) printf 'design\n' ;;
@@ -405,7 +405,7 @@ REVIEW_STAGE_REQUEST="${_normalized_stage}"
 _normalized_lens="$(normalize_review_lens_value "${REVIEW_LENS}" || true)"
 if [[ -z "${_normalized_lens}" ]]; then
   echo "unknown review lens ${REVIEW_LENS}, valid: auto, artifact, code, docs, source-docs, simplify, security, performance, api-contract, strategy, design, taxonomy, ddd-tdd, qa, ops, management-admin, release" >&2
-  echo "aliases: strategy-pm -> strategy, design/frontend -> design, infra -> ops, source-driven -> source-docs, perf -> performance, api/schema -> api-contract, DDD/TDD -> ddd-tdd, finance/accounting -> management-admin" >&2
+  echo "aliases: strategy-pm -> strategy, design/frontend -> design, infra -> ops, source-driven -> source-docs, perf -> performance, performance-algorithm -> performance, api/schema -> api-contract, DDD/TDD -> ddd-tdd, finance/accounting -> management-admin" >&2
   exit "${SFS_EXIT_BADCLI}"
 fi
 REVIEW_LENS="${_normalized_lens}"
@@ -647,7 +647,7 @@ review_path_lens_signal() {
       ;;
   esac
   case "$paths" in
-    *perf*|*performance*|*benchmark*|*benchmarks*|*lighthouse*|*latency*|*memory*|*bundle*|*load-test*)
+    *perf*|*performance*|*algorithm*|*hot-path*|*hot_path*|*query*|*payload*|*concurrency*|*benchmark*|*benchmarks*|*lighthouse*|*latency*|*memory*|*bundle*|*load-test*)
       printf 'performance\n'
       return 0
       ;;
@@ -735,7 +735,7 @@ infer_review_lens() {
       printf 'security\n'
       return 0
       ;;
-    *"performance"*|*"perf"*|*"latency"*|*"benchmark"*|*"lighthouse"*|*"memory"*|*"bundle size"*)
+    *"performance"*|*"perf"*|*"algorithm"*|*"hot path"*|*"hot-path"*|*"query"*|*"payload"*|*"concurrency"*|*"latency"*|*"benchmark"*|*"lighthouse"*|*"memory"*|*"bundle size"*)
       printf 'performance\n'
       return 0
       ;;
@@ -1281,9 +1281,10 @@ preflight_review_executor_auth() {
 review auth preflight required: ${profile}
 Review was not started, and no CPO prompt was generated.
 Next:
-  1. Run \`sfs auth login --executor ${profile}\` from a real terminal.
-  2. Run \`sfs auth probe --executor ${profile} --timeout ${REVIEW_BRIDGE_PROBE_TIMEOUT}\`.
-  3. Rerun the same \`sfs review ... --executor ${profile}\` command.
+  1. Agent-owned first: retry from an approved real-terminal/unsandboxed host runner when available.
+  2. Manual recovery only for true host blockers: run \`sfs auth login --executor ${profile}\` from a real terminal.
+  3. Run \`sfs auth probe --executor ${profile} --timeout ${REVIEW_BRIDGE_PROBE_TIMEOUT}\`.
+  4. Rerun the same \`sfs review ... --executor ${profile}\` command.
 Manual handoff: rerun with \`--prompt-only\` and paste the prompt into ${profile} yourself.
 EOF
   return "${SFS_EXIT_EXECUTOR}"
@@ -2734,7 +2735,7 @@ EOF
         printf '%s\n' "${SFS_REVIEW_GEMINI_CMD}"
       elif command -v gemini >/dev/null 2>&1; then
         prepare_executor_auth "gemini" "${AUTH_INTERACTIVE}" || return "${SFS_EXIT_EXECUTOR}"
-        printf '%s\n' 'gemini --skip-trust --output-format text -p "Read stdin and perform the requested CPO review."'
+        sfs_gemini_default_cmd "gemini-3.1-pro-preview" "Read stdin and perform the requested CPO review."
       else
         executor_cli_missing_hint "gemini"
         return "${SFS_EXIT_EXECUTOR}"
@@ -2788,7 +2789,7 @@ resolve_review_bridge_probe_cmd() {
       if [[ -n "${SFS_REVIEW_GEMINI_CMD:-}" ]]; then
         printf '%s\n' "${SFS_REVIEW_GEMINI_CMD}"
       else
-        printf '%s\n' 'gemini --skip-trust --output-format text -p "Return exactly: SFS_REVIEW_BRIDGE_PROBE_OK"'
+        sfs_gemini_default_cmd "gemini-3.1-flash-lite" "Return exactly: SFS_REVIEW_BRIDGE_PROBE_OK"
       fi
       ;;
     claude)

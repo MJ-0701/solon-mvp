@@ -49,6 +49,10 @@ for file in "${router}" "${router_ko}" "${index}"; do
   assert_contains "${file}" "backend-knowledge-pack-operating" "backend operating split routing ${file}"
   assert_contains "${file}" "design-knowledge-pack-operating" "design split routing ${file}"
   assert_contains "${file}" "ddd-tdd-knowledge-pack" "DDD/TDD pack routing ${file}"
+  assert_contains "${file}" "enterprise-agent-team-pack" "enterprise parent routing ${file}"
+  assert_contains "${file}" "enterprise-plan-council-pack" "enterprise plan routing ${file}"
+  assert_contains "${file}" "enterprise-evidence-pack" "enterprise evidence routing ${file}"
+  assert_contains "${file}" "enterprise-performance-review-pack" "enterprise performance routing ${file}"
 done
 
 assert_contains "${CONTEXT_DIR}/policies/backend-knowledge-pack.md" "split_children:" "backend parent split metadata"

@@ -1,3 +1,30 @@
+## [0.6.121] - 2026-05-25
+
+> **Enterprise 6-division agent-team planning and measurable review packs.**
+
+### Added
+
+- Added split enterprise knowledge packs for the 6-division agent team:
+  `enterprise-agent-team-pack`, `enterprise-plan-council-pack`,
+  `enterprise-evidence-pack`, and `enterprise-performance-review-pack`, with
+  Korean mirrors and frontmatter routing.
+- Gate 3 planning now treats non-trivial product-bearing work as an enterprise
+  council design step: strategy-pm, dev, QA, design, infra, and taxonomy must
+  record risk flags plus finding/evidence/waiver rows instead of empty ceremony.
+- Gate 6 review now requires enterprise evidence ledgers for SFS/harness policy
+  changes and performance/algorithm evidence when hot paths, queries, browser
+  runtime, payload, memory, or concurrency can change.
+- Gemini runtime routing now uses current Gemini 3.x routes: `gemini-3.1-pro-preview`
+  for strategic/research/review, `gemini-3-flash-preview` for agentic coding and
+  bounded implementation helpers, and `gemini-3.1-flash-lite` for relay/probe/
+  economy helper work.
+
+### Tests
+
+- Added `test-enterprise-agent-team-knowledge-packs.sh` and updated context,
+  behavior, and docs tests so the new packs are routed, line-budgeted, and
+  regression-checked.
+
 ## [0.6.120] - 2026-05-25
 
 > **Fresh-session transfer is host-owned, lossless, and resumes immediately without user `/clear`.**
@@ -1053,24 +1080,23 @@
 - Claude coding-capable worker, facilitator, code-helper, and mechanical helper
   lanes now resolve to Sonnet 4.6. Haiku is documented as a non-coding helper
   tier only and must not write code or own implementation.
-- Gemini runtime routing now uses `gemini-3-pro-auto` for every SFS role.
-  Flash/2.5 fallback names are no longer part of the recommended routing
+- Gemini runtime routing now uses `gemini-3.1-pro-preview` for strategic/research/review, `gemini-3-flash-preview` for agentic coding/bounded implementation helpers, and `gemini-3.1-flash-lite` for relay/probe/economy helpers. Gemini models below 3.x are not part of recommended routing
   surface.
 - Substantive research now prefers the Gemini researcher executor with Gemini 3
   Pro auto when available; Claude research remains a read-only Sonnet 4.6
   fallback.
 - Work completion now requires self-agent top-model CPO evidence: Claude Opus
-  4.7, Codex `gpt-5.5` with xhigh reasoning, Gemini `gemini-3-pro-auto`, or
+  4.7, Codex `gpt-5.5` with xhigh reasoning, Gemini `gemini-3.1-pro-preview`, or
   the configured custom top-model equivalent. Partial/fail redirects the work
   and repeats verification plus self-CPO until PASS or explicit user waiver.
 
 ### Tests
 
 - Extended agent behavior guardrails to verify Claude Sonnet 4.6 coding lanes,
-  Haiku non-coding boundaries, Gemini 3 Pro auto for every role, and the
+  Haiku non-coding boundaries, Gemini 3.x role-specific routing, and the
   post-work self-CPO loop.
 - Extended docs routing checks so GUIDE, beginner docs, current-product docs,
-  and 10x docs reject stale Gemini preview/Flash/2.5 model names and document
+  and 10x docs reject stale Gemini preview/models-below-3.x names and document
   the Claude/Gemini/Codex responsibility split.
 
 ## [0.6.82] - 2026-05-10
@@ -2355,7 +2381,7 @@
   `claude -p --dangerously-skip-permissions` stdin bridge.
 - Gemini routing now names the allowed 3.x targets explicitly:
   `gemini-3.1-pro-preview` for facilitator/advisor/review routes and
-  `gemini-3-flash-preview` for helper-grade fallback. 2.5 fallback names are
+  `gemini-3-flash-preview` for helper-grade fallback. 3.x 미만 fallback names are
   not used.
 - Claude/Codex/Gemini adapter surfaces and user docs now describe the same
   default model map and advisor rule.

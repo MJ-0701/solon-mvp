@@ -7,6 +7,7 @@ load_when:
   - knowledge pack
   - source-docs
   - api-contract
+  - performance-algorithm
 status: filled-v1
 parent_doc: commands/review.md
 split_from_section: "Review lens aliases and knowledge-pack loading"
@@ -30,6 +31,9 @@ commands:
 - `security`: untrusted input, secrets, auth, PII, or permission risk.
 - `performance`: measurement-backed latency, memory, bundle, or throughput
   review.
+- `performance-algorithm`: alias of `performance` that must load
+  `enterprise-performance-review-pack.md` for hot-path, query, algorithm,
+  browser runtime, memory, concurrency, or payload risk.
 - `api-contract`: public interface, schema, compatibility, and error semantics.
 - `ddd-tdd`: product-level domain language, behavior boundaries, DDD-lite code
   boundaries when code is touched, and test-first or evidence-first proof.
@@ -52,3 +56,6 @@ topics and over-activated topics for the project size. Strategy, QA, design,
 taxonomy, ops, and management/admin work should do the same with their matching
 division packs. Project scaffold and any product behavior change should check
 `policies/ddd-tdd-knowledge-pack.md` or `.ko.md`.
+Non-trivial product-bearing work should check the enterprise plan/evidence
+packs. Performance and algorithm claims are partial unless backed by measurement,
+bounded input reasoning, or explicit N/A waiver.

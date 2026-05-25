@@ -29,6 +29,11 @@ load_when:
   - llm wiki
   - wiki
   - docs migration
+  - enterprise
+  - agent team
+  - performance
+  - algorithm
+  - QA/QC
 status: filled-v1
 content_policy: "read only this router first; read full packs only when matching signals make them useful"
 ---
@@ -63,6 +68,10 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
   test`, `red-green`.
 - Obsidian/wiki signals: `Obsidian`, `llm-wiki`, `knowledge base`, `docs
   migration`, `existing project`, `new project`, `sprint continuity`.
+- Enterprise team signals: `enterprise`, `agent team`, `6 divisions`,
+  `sub-agent`, `대기업급`, `team agentic coding`, `QA/QC`, `metrics`.
+- Performance/algorithm signals: `performance`, `algorithm`, `optimization`,
+  `hot path`, `query plan`, `Core Web Vitals`, `memory`, `concurrency`.
 
 ## Read order
 
@@ -103,6 +112,14 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
 - `policies/ddd-tdd-knowledge-pack.ko.md` (Korean)
 - `policies/obsidian-llm-wiki.md`
 - `policies/obsidian-llm-wiki.ko.md` (Korean)
+- `policies/enterprise-agent-team-pack.md`
+- `policies/enterprise-agent-team-pack.ko.md` (Korean)
+- `policies/enterprise-plan-council-pack.md`
+- `policies/enterprise-plan-council-pack.ko.md` (Korean)
+- `policies/enterprise-evidence-pack.md`
+- `policies/enterprise-evidence-pack.ko.md` (Korean)
+- `policies/enterprise-performance-review-pack.md`
+- `policies/enterprise-performance-review-pack.ko.md` (Korean)
 
 ## Depth Rules
 
@@ -111,6 +128,9 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
   several divisions.
 - Do not promote every pack into a blocker. Each pack is a decision aid for
   matching scope, evidence, and review questions.
+- For non-trivial product-bearing work, plan should load the enterprise plan
+  council pack; review should load enterprise evidence/performance packs only
+  when the current risk or AC touches them.
 - If a pack suggests a large transition such as MSA, heavy redesign,
   release-readiness escalation, finance/admin process, tax/accounting advisor
   checkpoint, or governance process, surface it as a user or product decision

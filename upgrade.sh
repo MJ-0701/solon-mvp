@@ -2449,7 +2449,7 @@ Agent model profile:
   Codex 권장은 helper-grade intake/non-coding helper gpt-5.4-mini, 질문 생성/facilitator/일반 worker gpt-5.4,
   advisor/review gpt-5.5 xhigh, bounded coding helper gpt-5.3-codex,
   무판단 mechanical implementation helper gpt-5.3-codex-spark 입니다.
-  Gemini 모든 role 은 gemini-3-pro-auto 입니다. Flash/2.5 fallback 은 쓰지 않습니다.
+  Gemini 는 strategy/research/review 를 gemini-3.1-pro-preview, agentic coding/bounded 구현 helper 를 gemini-3-flash-preview, relay/probe/economy helper 를 gemini-3.1-flash-lite 로 라우팅합니다. 3.x 미만 fallback 은 쓰지 않습니다.
   모델명은 SFS role/profile contract 입니다. CLI --model flag 지원을 전제로 하지 않고,
   기본 bridge 는 prompt 와 host/runtime 설정으로 해당 역할을 요청합니다.
   하위모델이 질문/선택지/답변 해석/gate 를 흔들면 최상위 advisor 검토가 필수입니다.

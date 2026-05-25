@@ -36,6 +36,10 @@ module:
 - `policies/review-lens-routing.md` — review lens aliases and split knowledge-pack loading.
 - `policies/knowledge-pack-router.md` — knowledge pack / review lens router (English).
 - `policies/knowledge-pack-router.ko.md` — knowledge pack / review lens router (Korean).
+- `policies/enterprise-agent-team-pack.md` — enterprise 6-division agent team parent pack.
+- `policies/enterprise-plan-council-pack.md` — plan-stage 6-division council contract.
+- `policies/enterprise-evidence-pack.md` — QA/QC evidence and project-applied validation.
+- `policies/enterprise-performance-review-pack.md` — performance and algorithm review lens.
 - `policies/*-knowledge-pack.md` — English compact guidance packs for each lens/pack.
 - `policies/*-knowledge-pack.ko.md` — Korean compact guidance packs for each lens/pack.
 - `policies/*-knowledge-pack-*.md` — split child packs loaded only after a parent pack activates matching ids.

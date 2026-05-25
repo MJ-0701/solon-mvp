@@ -69,6 +69,11 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   design, infra, and taxonomy map to AC/files/evidence or record a waiver/
   not-applicable. Actual parallel implementation is optional; this council
   review is mandatory.
+- For non-trivial product-bearing work, load
+  `policies/enterprise-plan-council-pack.md` or `.ko.md` before Gate 3 review.
+  Plan must record risk flags, selected child packs, and an enterprise council
+  row for each relevant division. Empty six-division ceremony is not PASS; each
+  row needs a finding, evidence, waiver, or concrete not-applicable reason.
 - A plan is not ready just because it is long. It is ready when an evaluator can
   independently check pass/partial/fail without reading the generator's mind.
 - In the review-readiness checklist, avoid translationese such as `열린 결정이
@@ -79,7 +84,8 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   `gpt-5.3-codex`, and Spark is limited to locked judgment-free mechanical
   implementation helper work. Claude coding-capable worker/helper lanes use
   Sonnet 4.6, Haiku is non-coding helper-only, substantive research prefers
-  Gemini, and Gemini uses `gemini-3-pro-auto` for every SFS role.
+  Gemini `gemini-3.1-pro-preview`; Gemini coding/helper routes use
+  `gemini-3-flash-preview` and `gemini-3.1-flash-lite` by role.
 - Each implementation slice should carry a concrete checklist item and
   `verify by ...` evidence. In SFS, that checklist belongs in sprint
   workbench artifacts such as `plan.md` or `implement.md`, not as mandatory
@@ -138,7 +144,7 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   bounded repo-aware coding helper work, and `gpt-5.3-codex-spark` only when
   scope, files_scope, AC, and exact edit intent are already locked and no
   product or code-design judgment remains. This Codex-specific split does not
-  change the Claude Sonnet 4.6 coding lane or Gemini 3 Pro auto mapping.
+  change the Claude Sonnet 4.6 coding lane or Gemini 3.x role routing.
 - If a researcher pass produced findings, summarize only the durable result in
   the plan: sources checked, domain terms, contradictions, and remaining
   unknowns. Do not copy the full research transcript into the plan.
@@ -148,6 +154,10 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   a non-blocking wiki setup or record why it is skipped.
 - Load `policies/knowledge-pack-router.md` first, or `policies/knowledge-pack-router.ko.md`
   for Korean preference. Proceed to matching division packs from its mapping.
+- If enterprise, agent-team, QA/QC, performance, algorithm, or large-project
+  signals are present, route through `policies/enterprise-agent-team-pack.md`
+  and its matching child pack instead of treating the division ledger as a
+  cosmetic table.
 - If backend/JVM/Spring/JPA/transaction/batch/integration/DevOps/AWS risk is in
   scope, record matching ids from `policies/backend-knowledge-pack.md` or
   `policies/backend-knowledge-pack.ko.md` only after router selection.

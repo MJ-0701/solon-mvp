@@ -50,7 +50,10 @@ for file in "${docs[@]}"; do
   assert_not_contains "${file}" "0.6.27 기준" "docs no stale 0.6.27 기준 ${file}"
 done
 
-assert_contains "${DIST_DIR}/VERSION" "0.6.120" "version bumped"
+expected_version="0.6.121"
+assert_contains "${DIST_DIR}/VERSION" "${expected_version}" "version bumped"
+assert_contains "${DIST_DIR}/CHANGELOG.md" "## [${expected_version}]" "changelog current version"
+assert_contains "${DIST_DIR}/RELEASE-NOTES.md" "## ${expected_version}" "release notes current version"
 assert_not_contains "${DIST_DIR}/README.md" "0.6." "README no release-version prose"
 assert_not_contains "${DIST_DIR}/README.md" "divisions.yaml" "README no division registry detail"
 assert_not_contains "${DIST_DIR}/README.md" "management-admin" "README no lens registry detail"

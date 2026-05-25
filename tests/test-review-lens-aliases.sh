@@ -31,6 +31,19 @@ git -c user.name='SFS Test' -c user.email='sfs-test@example.invalid' commit -qm 
 run_sfs init --layout thin --yes >/dev/null
 run_sfs start "review lens aliases" >/dev/null
 
+assert_auto_lens() {
+  local expected="$1" out review_path
+  out="$(run_sfs review --gate 6 --lens auto --prompt-only --allow-empty)"
+  case "${out}" in
+    *"lens ${expected} (auto) prompt ready"*) ;;
+    *) fail "--lens auto did not infer ${expected}: ${out}" ;;
+  esac
+  review_path="$(printf '%s\n' "${out}" | sed -nE 's/^review\.md ready: ([^|]+) \|.*/\1/p')"
+  [[ -f "${review_path}" ]] || fail "review path missing for auto ${expected}: ${review_path}"
+  grep -Fq "review_lens: \"${expected}\"" "${review_path}" \
+    || fail "review.md frontmatter missing inferred lens ${expected}"
+}
+
 assert_alias() {
   local alias="$1" expected="$2" out review_path
   out="$(run_sfs review --gate 6 --lens "${alias}" --prompt-only --allow-empty)"
@@ -44,6 +57,14 @@ assert_alias() {
     || fail "review.md frontmatter missing normalized lens ${expected} for ${alias}"
 }
 
+sprint_id="$(cat .sfs-local/current-sprint)"
+plan_path=".sfs-local/sprints/${sprint_id}/plan.md"
+{
+  printf '\nAlgorithm verification trigger:\n'
+  printf 'Gate 6 must inspect algorithm complexity, hot path query behavior, payload size, and concurrency behavior.\n'
+} >> "${plan_path}"
+assert_auto_lens performance
+
 assert_alias strategy-pm strategy
 assert_alias strategy_pm strategy
 assert_alias design/frontend design
@@ -51,6 +72,8 @@ assert_alias infra ops
 assert_alias source-driven source-docs
 assert_alias official-docs source-docs
 assert_alias perf performance
+assert_alias performance-algorithm performance
+assert_alias algorithm performance
 assert_alias benchmark performance
 assert_alias security security
 assert_alias auth security
@@ -75,6 +98,8 @@ grep -Fq "source-driven -> source-docs" "${TMP_DIR}/invalid.err" \
   || fail "invalid lens error should show source-docs alias hint"
 grep -Fq "api/schema -> api-contract" "${TMP_DIR}/invalid.err" \
   || fail "invalid lens error should show api-contract alias hint"
+grep -Fq "performance-algorithm -> performance" "${TMP_DIR}/invalid.err" \
+  || fail "invalid lens error should show performance-algorithm alias hint"
 grep -Fq "DDD/TDD -> ddd-tdd" "${TMP_DIR}/invalid.err" \
   || fail "invalid lens error should show DDD/TDD alias hint"
 

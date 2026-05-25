@@ -1704,6 +1704,24 @@ EOF
 # ─────────────────────────────────────────────────────────────────────
 
 # ─── EXECUTOR (WU-27 §3.1 Solon-wide convention) ────────────────────────────
+sfs_gemini_supports_model_flag() {
+  command -v gemini >/dev/null 2>&1 || return 1
+  local help_output
+  help_output="$(gemini --help 2>&1 || true)"
+  grep -Fq -- '--model' <<<"${help_output}"
+}
+
+sfs_gemini_default_cmd() {
+  local model="$1" prompt="$2" extra="${3:-}" model_flag=""
+  if sfs_gemini_supports_model_flag; then
+    model_flag=" --model ${model}"
+  fi
+  if [[ -n "${extra}" ]]; then
+    extra=" ${extra}"
+  fi
+  printf 'gemini --skip-trust%s%s --output-format text -p "%s"\n' "${model_flag}" "${extra}" "${prompt}"
+}
+
 # resolve_executor — given profile or custom cmd, echo resolved cmd line.
 # CLI flag > env > "claude" fallback. Unknown profile → passthrough as custom string.
 # stdout: resolved cmd
@@ -1712,7 +1730,7 @@ resolve_executor() {
   local executor="${1:-${SFS_EXECUTOR:-claude}}"
   case "$executor" in
     claude) echo 'claude -p "$(cat)"' ;;
-    gemini) echo 'gemini --skip-trust --yolo --output-format text -p "Read stdin and execute the requested task."' ;;
+    gemini) sfs_gemini_default_cmd "gemini-3-flash-preview" "Read stdin and execute the requested task." "--yolo" ;;
     codex)  echo "codex exec --full-auto" ;;
     *)      echo "$executor" ;;   # custom string passthrough
   esac
@@ -1872,7 +1890,8 @@ ensure_executor_headless_auth() {
   cat >&2 <<EOF
 executor bridge missing: ${profile} auth is not configured for headless SFS use.
 Authenticate first, then rerun the executor request.
-Run `sfs auth login --executor ${profile}` from a real terminal, or set provider credentials in .sfs-local/auth.env.
+Executable Action Ownership: agents should retry from an approved real terminal or unsandboxed host runner when available before handing commands to the user.
+Manual recovery: run `sfs auth login --executor ${profile}` from a real terminal, or set provider credentials in .sfs-local/auth.env.
 After login, run `sfs auth probe --executor ${profile}` once if you want to verify the bridge before review.
 Local place: .sfs-local/auth.env (gitignored) or SFS_AUTH_ENV_FILE=/absolute/path.
 EOF
@@ -1913,7 +1932,7 @@ bootstrap_executor_interactive_auth() {
   if ! executor_interactive_tty_available; then
     cat >&2 <<EOF
 executor bridge missing: interactive ${profile} auth requires a real terminal.
-Run the ${profile} CLI login flow once in your terminal, or set provider credentials in .sfs-local/auth.env.
+Executable Action Ownership: the agent should use a host real-terminal/unsandboxed retry when available. Manual recovery is only for true host blockers: run the ${profile} CLI login flow once in your terminal, or set provider credentials in .sfs-local/auth.env.
 EOF
     return 1
   fi
@@ -1931,7 +1950,7 @@ EOF
       rc=$?
       ;;
     gemini)
-      gemini --skip-trust --output-format text -p "Return exactly: SFS_GEMINI_AUTH_OK" \
+      eval "$(sfs_gemini_default_cmd "gemini-3.1-flash-lite" "Return exactly: SFS_GEMINI_AUTH_OK")" \
         < /dev/tty > /dev/tty 2> /dev/tty
       rc=$?
       ;;

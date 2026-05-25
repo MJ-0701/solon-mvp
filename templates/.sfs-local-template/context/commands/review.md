@@ -104,9 +104,13 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - If the evaluator executor equals the generator executor, call out the
   self-validation risk and prefer a separate model or fresh agent context when
   the change is user-facing, risky, or hard to verify.
-- Gate 6 verifies `division_subagent_ledger` across strategy-pm, dev, QA,
-  design, infra, and taxonomy; missing relevant finding/evidence/waiver is
-  partial. If implement.md records `agent_mode: parallel`, Gate 6 also verifies disjoint files_scope per lane, AC/ADR subset ownership, expected tests/evidence, output report path, merge/conflict policy, native/workspace-language commit message per lane, lane verification, and cross review.
+- Gate 6 verifies `division_subagent_ledger`; missing relevant finding/evidence/
+  waiver is partial. For `agent_mode: parallel`, also verify disjoint files_scope,
+  AC/ADR subset ownership, expected tests/evidence, output report path,
+  merge/conflict policy, native/workspace-language commit message, lane verification,
+  and cross review.
+- Enterprise/non-trivial Gate 6 checks selected packs, QA/QC ledger, project-
+  applied result for SFS/harness policy changes, and performance/algorithm ledger.
 - Review proposed or actual commit messages against the user's
   native/workspace language. English commit messages are correct only when the
   user/repo language is English or the repo explicitly requires English.
@@ -125,18 +129,14 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   command instead of ending the turn at "PASS": run/record self-CPO first with
   `sfs review --gate <n>` or `sfs review --sprint <id> --gate <n>`, then run
   the configured cross-review sequence after self-CPO PASS.
-- Gate 6 implementation review order is self-CPO first, then cross CPO, then
-  GitHub @codex PR/code review as final external evidence when
-  available. Use `sfs review --gate 6 --stage self`, then
-  `sfs review --gate 6 --stage cross`, and only then push/PR for @codex. If the
-  user only has self-CPO available, record that constraint and use the self-only
-  path.
-- Before a completed work slice can be reported as done, require self-agent
-  top-model CPO evidence. Claude self-CPO uses Opus 4.7, Codex self-CPO uses
-  `gpt-5.5` with xhigh reasoning, Gemini self-CPO uses `gemini-3-pro-auto`, and
-  custom runtimes use their configured top-model equivalent. Partial/fail is not
-  a stopping point: the CPO redirects the work, the author reworks it, verifies
-  again, and repeats self-CPO until PASS or an explicit user waiver.
+- Gate 6 implementation review order is self-CPO first, then cross CPO, then GitHub @codex
+  PR/code review as final external evidence when available. Use
+  `sfs review --gate 6 --stage self`, then `--stage cross`, then push/PR for
+  @codex. If only self-CPO is available, record the constraint.
+- Before done, require self-agent top-model CPO evidence. Claude uses Opus 4.7,
+  Codex uses `gpt-5.5` with xhigh reasoning, Gemini uses
+  `gemini-3.1-pro-preview`, and custom runtimes use their top equivalent.
+  Partial/fail repeats rework + self-CPO until PASS or waiver.
 - Review scope is functional correctness + consistency only: declared behaviour,
   cross-document SSoT, and AC ↔ test ↔ impl ↔ frontmatter alignment. Naming,
   formatting, line-count drift, wording, and comment style auto-skip when
@@ -169,31 +169,31 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   implement.md, log.md, diffs, and evidence; PASS only when every planned
   AC/ADR/decision is implemented, user-approved deferred/waived, or removed by
   approved plan update. Small deterministic gaps route to autopilot rework.
-- If `llm-wiki/` exists and the sprint uncovers repeated harness/product
-  failure, record problem, root cause, fix, local tests, project-applied QA/QC,
-  production/applied status if relevant, and follow-up/waiver.
+- Performance/algorithm PASS needs measurement, bounded input reasoning, or N/A
+  waiver. Pure text confidence is partial when hot path, query, browser runtime,
+  payload, memory, or concurrency behavior changed.
+- If `llm-wiki/` exists and the sprint uncovers repeated harness/product failure,
+  record root cause, fix, local tests, project-applied QA/QC, status, follow-up.
 - Load `policies/knowledge-pack-router.md` first, or
   `policies/knowledge-pack-router.ko.md` for Korean preference. Read matching
   split packs only when the router maps the current review scope to them.
+- Load `policies/enterprise-evidence-pack.md` for QA/QC, metrics, applied project
+  behavior, or wiki evidence. Load `policies/enterprise-performance-review-pack.md`
+  for `performance`, `performance-algorithm`, hot-path, query, algorithm, memory,
+  browser runtime, payload, or concurrency.
 - For design/frontend work, check `design.md` or `docs/solon/design.md` when
-  present. Token drift (arbitrary colors, type, spacing, radius, shadows, icons,
-  per-screen styling) can be findings; missing reusable UI contract is an
-  AI-slop risk.
+  present. AI-slop risk such as arbitrary colors, token drift, or missing reusable UI contract can be findings.
 - For visible frontend/UI implementation, missing pre-user browser evidence is
   a finding. Look for automation, desktop/mobile evidence, primary interaction,
   text/responsive checks, console note, or exact blocker plus alternate evidence.
-- Surface the evaluator's next action. Pass names `sfs retro` for Gate 6/7
-  close; Gate 3 (Plan) PASS names `sfs implement`/handoff and carries review
-  items into the first slice. Mention `sfs report` only for report preview or
-  past-report rebuild. Partial names the smallest rework; fail returns to plan,
-  implementation, or user escalation.
-- Adapter stdout is evidence, not the whole user-facing answer. Claude, Codex,
-  and Gemini must all render the same compact SFS action rail after review:
-  verdict, evidence/output path, required items, and exactly one `Next Action`.
+- Surface next action. Pass names `sfs retro` for Gate 6/7 close; Gate 3 PASS
+  names `sfs implement`/handoff and carries items into the first slice. Partial
+  names the smallest rework; fail returns to plan, implementation, or escalation.
+- Adapter stdout is evidence, not the whole answer. Claude/Codex/Gemini must
+  render verdict, evidence/output path, required items, and one `Next Action`.
   Do not end on "PASS" without the next SFS command.
 - For Gate 3 Plan review, partial/fail should name the smallest plan rework and
   the next self-review command. It must not ask whether to implement unless the
   user explicitly asks to waive the gate.
-- If the review finds a repeated agent mistake, record the smallest harness
-  improvement: guardrail/check/hook/context-rule. Claude users may map this to
-  Hookify; other agents should use their equivalent hook or scripted check.
+- If review finds a repeated agent mistake, record the smallest harness
+  improvement: guardrail/check/hook/context-rule or equivalent scripted check.

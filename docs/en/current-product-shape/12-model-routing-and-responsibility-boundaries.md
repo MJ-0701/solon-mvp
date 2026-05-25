@@ -32,9 +32,11 @@ selected host model for every role. Helper-grade simple I/O is advisor-exempt.
 When a lower-model output frames questions/options, interprets answers, or
 affects product identity, architecture, gate, AC, or files_scope, top-model
 advisor review is required before gate advancement. Advisor means Claude Opus
-4.7, Codex `gpt-5.5` with xhigh reasoning, Gemini `gemini-3-pro-auto`,
-or the custom high-end equivalent. Gemini uses `gemini-3-pro-auto` for every
-role; SFS does not use Gemini Flash or 2.5 fallback names.
+4.7, Codex `gpt-5.5` with xhigh reasoning, Gemini `gemini-3.1-pro-preview`,
+or the custom high-end equivalent. Gemini routes strategic/research/review to
+`gemini-3.1-pro-preview`, agentic coding/bounded implementation helpers to
+`gemini-3-flash-preview`, and relay/probe/economy helpers to
+`gemini-3.1-flash-lite`; SFS does not use Gemini models below 3.x.
 Advisor calls do not replace self-CPO PASS. Before external/cross review, the
 author records a self-CPO mini-check covering requirements to AC to
 implementation slices to ADR/decision ids, every AC mapped to file/artifact/
@@ -50,8 +52,8 @@ generated index sync, and deterministic test expectation updates. If a slice
 touches architecture, public contracts, security, privacy, data-loss risk,
 release gates, or repeated review failure, escalate to high reasoning or send
 it back to C-Level. Claude coding-capable worker/helper lanes use Sonnet 4.6;
-Haiku must not write code. Substantive research should prefer a Gemini 3 Pro
-auto researcher when available.
+Haiku must not write code. Substantive research should prefer a Gemini 3.1 Pro Preview
+researcher when available.
 
 Implement execution defaults to Single Agent. Users can opt into multiple
 agents, but only after the plan is split into independent lanes. Each lane must
@@ -74,4 +76,3 @@ Solon commit grouping belongs to the SFS command surface, not a host-local
 `/commit` skill. Use `sfs commit plan` to inspect groups and
 `sfs commit apply --group <name>` to commit and push the selected group. Use
 `--no-push` only for SFS release sandboxes or explicitly offline work.
-

@@ -38,9 +38,9 @@ to `gpt-5.5` xhigh, bounded repo-aware coding helpers map to `gpt-5.3-codex`,
 and judgment-free mechanical implementation helpers map to
 `gpt-5.3-codex-spark`. Claude follows an Opus/Sonnet 4.6/Haiku responsibility
 split: coding-capable worker/helper lanes use Sonnet 4.6, and Haiku is
-non-coding helper-only. Gemini uses `gemini-3-pro-auto` for every role; SFS
-does not use Gemini Flash or 2.5 fallback names. Substantive research should
-prefer a Gemini 3 Pro auto researcher when available.
+non-coding helper-only. Gemini routes strategic/research/review to `gemini-3.1-pro-preview`, agentic coding/bounded implementation helpers to `gemini-3-flash-preview`, and relay/probe/economy helpers to `gemini-3.1-flash-lite`; supported Gemini routes stay on 3.x or newer, and SFS
+does not use unsupported fallback names such as 2.x, 2.5, or unavailable auto aliases. Substantive research should
+prefer a Gemini 3.1 Pro Preview researcher when available.
 
 Helper-grade simple I/O can skip advisor review. But if lower-model output
 frames questions/options, interprets user answers, or affects product identity,
@@ -58,4 +58,3 @@ judgment-free mechanical implementation chores after scope, files_scope, AC, and
 exact edit intent are locked. If architecture, public contract, security,
 privacy, data-loss, release gate, or repeated failure risk appears, worker work
 escalates to high reasoning.
-

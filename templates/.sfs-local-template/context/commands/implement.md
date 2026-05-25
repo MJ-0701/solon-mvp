@@ -26,23 +26,21 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   `.sfs-local/model-profiles.yaml`, not the C-Level planner/evaluator model.
   C-Level may define the contract, split files_scope, and handle escalation, but
   should not present itself as the normal direct coding option.
-- For Codex runtime, the normal implementation worker is `gpt-5.4`. Use
-  `gpt-5.3-codex` for bounded repo-aware coding helper work when the task is
-  smaller than a worker slice but still needs code judgment. Use
-  `gpt-5.3-codex-spark` only for judgment-free mechanical implementation after
-  C-Level has locked scope, files_scope, AC, and exact edit intent. Claude
-  coding-capable worker/helper lanes use Sonnet 4.6, and Haiku must not write
-  code. Gemini uses `gemini-3-pro-auto` for every SFS role. Escalate to strategic_high or an
-  explicit high-end override before coding if the slice touches architecture,
-  public contracts, security, privacy, data-loss risk, release gates, or
-  repeated review failure.
+- For Codex runtime, the normal implementation worker is `gpt-5.4`; use
+  `gpt-5.3-codex` for bounded repo-aware coding helper work and
+  `gpt-5.3-codex-spark` only for locked judgment-free mechanical implementation.
+  Claude worker/helper lanes use Sonnet 4.6; Haiku must not write code. Gemini
+  routes strategy/research/review to `gemini-3.1-pro-preview`, coding/bounded
+  implementation to `gemini-3-flash-preview`, and relay/probe/economy helpers to
+  `gemini-3.1-flash-lite`. Escalate to strategic_high before coding if the slice
+  touches architecture, public contracts, security, privacy, data-loss,
+  release gates, or repeated review failure.
 - Valid artifacts: code, taxonomy, design handoff, QA evidence, infra/runbook,
   management/admin evidence, decisions, docs, workflow, research, or
   user-facing operating material.
 - If the codebase, dependency change, or domain model is unfamiliar, split off a
-  read-only research slice before editing. Use `.sfs-local/personas/researcher.md`
-  when available, prefer a long-context executor such as Gemini when configured,
-  and record only the compact findings in the current workbench.
+  read-only research slice with `.sfs-local/personas/researcher.md`; prefer
+  Gemini when configured and record only compact findings in the workbench.
 - Do not create new lifecycle commands for borrowed engineering practices.
   Strengthen this existing implement rail with routed policies:
   `policies/source-driven-development.md` for framework/library/API patterns,
@@ -78,6 +76,9 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - If code or executable artifacts changed, run the smallest relevant test,
   build, typecheck, smoke, or scripted review before marking complete. Record
   the command and result in the implementation evidence.
+- If the plan selected enterprise packs, keep council evidence live while
+  coding: update AC/files/evidence rows, record project-applied QA/QC for SFS/
+  harness policy changes, and collect performance evidence for triggered hot paths.
 - Execute approved runnable steps yourself: when shell/tool/auth context and
   approval are available, run the operation and record evidence. Give commands
   only when the user explicitly asked for them or a true blocker remains.
@@ -93,21 +94,18 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   primary interaction, text fit/overflow, responsive layout, and console/runtime
   errors; attach evidence or exact blocker plus alternate evidence/explicit user waiver.
 - Before starting a new implementation slice in a long host conversation, apply
-  Session Continuation Guard. If the token meter is already 30% or higher at
-  the start of a new WU/sprint, or 50% or higher before a new gate/worker
-  handoff, stop and create a compact fresh-session handoff instead of spending
-  another slice inside the same chat.
+  Session Continuation Guard: at 30%+ before new WU/sprint or 50%+ before gate/worker handoff, create
+  compact fresh-session handoff instead of spending another slice in-chat.
 - After tests/smokes pass, run a self-agent top-model CPO review before pushing
-  product code or marking the work done. Claude routes that self-CPO to Opus 4.7, Codex routes it to
-  `gpt-5.5` with xhigh reasoning, and Gemini routes it to `gemini-3-pro-auto`.
+  product code or marking done. Claude routes self-CPO to Opus 4.7, Codex to
+  `gpt-5.5` with xhigh reasoning, and Gemini routes it to `gemini-3.1-pro-preview`.
   If the verdict is partial/fail, let the CPO redirect the slice, rework it,
   rerun verification, and repeat self-CPO until PASS or an explicit user waiver.
 - Use current sprint artifacts for plan/checklist/context notes. Create
   root-level `checklist.md` or `context-notes.md` only when the user asks for
   those exact files.
 - If `llm-wiki/` exists and the slice changes core design, domain language,
-  docs, tests, CI, release flow, package/runtime components, or knowledge-pack
-  semantics, update the relevant wiki map or record a follow-up gap.
+  docs, tests, CI, release, runtime, or pack semantics, update wiki or gap.
 - Token discipline: inspect the smallest relevant files, prefer symbol/semantic
   search or precise `rg` before broad reads, and do not carry old workbench
   history into the turn unless current report/plan evidence is insufficient.
@@ -176,6 +174,9 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   issues are autopilot patch+verify+review work, not user questions.
 - Load `policies/knowledge-pack-router.md` first, or `policies/knowledge-pack-router.ko.md`
   for Korean preference. Apply only the matching division router ids.
+- Load `policies/enterprise-evidence-pack.md` for harness/product-policy QA/QC
+  and `policies/enterprise-performance-review-pack.md` for hot-path, algorithm,
+  query, browser runtime, memory, payload, or concurrency changes.
 - Load `policies/obsidian-llm-wiki.md` when the slice creates/migrates project
   docs, begins an existing-project adoption, or needs durable retrieval across
   future sprints.
@@ -193,8 +194,6 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   transition when domain seams grow; propose MSA only when independent deploy,
   scale, ownership, resilience, or blast-radius needs justify it. Refactor only
   after user acceptance/approval and record the evidence.
-- Non-Dev policy ladders: strategy-pm, taxonomy, design/frontend, QA, infra, and
-  management-admin start lightweight, strengthen when trigger evidence appears,
-  and require user acceptance/approval before large roadmap, rename/schema,
-  redesign, release-readiness, finance/admin process, tax/accounting advisor
-  checkpoint, or infra/ops transitions.
+- Non-Dev policy ladders start lightweight, strengthen on trigger evidence, and
+  require approval before large roadmap, rename/schema, redesign, release-
+  readiness, finance/admin, tax/accounting advisor, or infra/ops transitions.

@@ -62,7 +62,22 @@ user_approval_evidence: ""
 | infra |  |  |
 | taxonomy |  |  |
 
-## 8. 사용자 검토 / 승인 경계
+## 8. Enterprise Plan Council
+
+- risk flags:
+- selected knowledge packs:
+- enterprise_council_ledger:
+
+| division | risk flag | finding | AC/files/evidence | waiver/N/A |
+|---|---|---|---|---|
+| strategy-pm |  |  |  |  |
+| dev |  |  |  |  |
+| QA |  |  |  |  |
+| design |  |  |  |  |
+| infra |  |  |  |  |
+| taxonomy |  |  |  |  |
+
+## 9. 사용자 검토 / 승인 경계
 
 - required: false
 - status: not-required
@@ -74,12 +89,12 @@ user_approval_evidence: ""
 Gate 3 review PASS 는 사용자 승인으로 간주하지 않는다. 사용자가 구현 진입을 승인하면
 `sfs capture --kind user-approval --gate 3 "..."` 로 evidence 를 남긴다.
 
-## 9. 위험
+## 10. 위험
 
 - 위험:
 - 대응:
 
-## 10. 리뷰 준비
+## 11. 리뷰 준비
 
 - [ ] 완료 기준이 측정 가능하다
 - [ ] 한 sprint 안에서 닫힌다
@@ -87,6 +102,7 @@ Gate 3 review PASS 는 사용자 승인으로 간주하지 않는다. 사용자�
 - [ ] Gate 2 결정이 요구사항과 AC에 연결되어 있다
 - [ ] product behavior 변경이면 DDD boundary 와 TDD evidence 또는 waiver 가 있다
 - [ ] strategy-pm/dev/QA/design/infra/taxonomy division ledger 가 AC/files/evidence 또는 waiver 로 채워져 있다
+- [ ] non-trivial product-bearing work 이면 Enterprise Plan Council risk flag / selected pack / AC evidence row 가 있다
 - [ ] 제품 의미/IA/visible UI/workflow/public contract/AC 의미 변경이면 사용자 승인 경계가 pending 으로 표시되어 있다
 - [ ] slice별 파일/산출물 매핑이 있다
 - [ ] worker 모델 라우팅이 명시되어 있다: Codex 일반 worker는 `gpt-5.4`, bounded coding helper는 `gpt-5.3-codex`, Spark는 scope/files_scope/AC/정확한 수정 의도가 잠긴 무판단 기계적 구현 보조 작업에만 쓴다

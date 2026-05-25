@@ -59,10 +59,22 @@ generator_executor: ""
 |---|---|---|---|---|
 |  |  |  |  |  |
 
-## 7. 다음
+## 7. Performance / Algorithm Ledger
+
+| hot path / surface | input bound | evidence command/artifact | result | residual risk/waiver |
+|---|---|---|---|---|
+|  |  |  |  |  |
+
+## 8. Enterprise Evidence Ledger
+
+| selected pack | trigger | evidence | project-applied QA/QC | verdict |
+|---|---|---|---|---|
+|  |  |  |  |  |
+
+## 9. 다음
 
 - pass:
 - partial:
 - fail:
 
-## 8. 호출 기록
+## 10. 호출 기록

@@ -81,8 +81,7 @@ Homebrew/Scoop 채널 반영, 설치 runtime 검증, evidence 보고까지 끝�
 (Codex 는 `gpt-5.4-mini`), 질문 생성/facilitation 은 standard facilitator 모델(Codex 는
 `gpt-5.4`)이 맡습니다. 하위모델 출력이 질문/선택지/답변 해석이나 gate/plan 에 영향을 주면
 최상위 advisor 검토가 필수입니다. advisor 는 Claude Opus 4.7, Codex `gpt-5.5` xhigh,
-Gemini `gemini-3-pro-auto` 입니다. Gemini 는 모든 role 을 `gemini-3-pro-auto` 로 두며
-Flash/2.5 fallback 은 쓰지 않습니다. Codex 일반 worker 는 `gpt-5.4`,
+Gemini `gemini-3.1-pro-preview` 입니다. Gemini 는 strategy/research/review 를 `gemini-3.1-pro-preview`, agentic coding/bounded 구현 helper 를 `gemini-3-flash-preview`, relay/probe/economy helper 를 `gemini-3.1-flash-lite` 로 라우팅하며 3.x 미만 fallback 은 쓰지 않습니다. Codex 일반 worker 는 `gpt-5.4`,
 단순 helper 는 `gpt-5.4-mini`, bounded coding helper 는 `gpt-5.3-codex`, 무판단 기계적 구현 helper 는
 `gpt-5.3-codex-spark` 로 분리됩니다. Claude worker/facilitator/code helper 는 Sonnet 4.6,
 Haiku 는 코딩 금지 helper-grade relay/요약/read-only 보조 전용입니다.

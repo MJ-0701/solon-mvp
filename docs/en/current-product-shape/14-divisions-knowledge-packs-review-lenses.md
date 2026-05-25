@@ -22,15 +22,18 @@ read depth and escalation; it does not decide whether a division participates.
 
 Current filled guidance is provided through the product-level DDD/TDD, backend,
 strategy/PM, QA, design/frontend, infra/DevOps, management-admin, and taxonomy
-knowledge packs/review lenses. DDD/TDD is a cross-cutting product behavior
-floor; backend is one specialization. Each pack gives Solon a compact sense of
-what to watch, what to ask, and what evidence should count for that kind of
-work.
+knowledge packs/review lenses, plus enterprise agent-team packs for non-trivial
+product-bearing work. DDD/TDD is a cross-cutting product behavior floor; backend
+is one specialization. Enterprise plan council, evidence, and performance packs
+make plan a real design phase and make Gate 6 claims measurable.
 
 The user should not need to memorize this list. Solon reads only the lens that
 fits the work. A small docs edit stays light. A release, architecture change, or
 risky workflow gets stronger questions and evidence checks. The criteria become
 richer while the user-facing surface stays simple.
+For enterprise-triggered work, each relevant division records risk flags plus a
+finding, evidence path, waiver, or concrete not-applicable reason. Performance
+and algorithm PASS requires measurement, bounded proof, or explicit N/A waiver.
 Backend is a dev specialization, and management-admin covers finance,
 bookkeeping, tax, and accounting. The taxonomy slot remains in the legacy
 activation file for compatibility, but product guidance treats taxonomy as a

@@ -170,28 +170,30 @@ load_when: ["always", "sfs", "entry"]
   state by hand. If the sprint id is unknown, ask for that id; do not create a
   new sprint, hand-edit `.sfs-local/current-sprint`, or extract archives
   manually.
-- Cross review comes after local self-review passes. If cross review returns
-  partial/fail, rework the plan and return to self-review before another cross
-  review or implementation handoff.
-- If no other agent subscription exists, external agent tokens are exhausted,
-  or the cross-review bridge is unavailable, a recorded self-CPO fallback PASS
-  may satisfy the cross-review slot. The fallback must name the constraint;
-  a bare self-CPO PASS still blocks implementation unless the user explicitly
-  waives the gate.
+- Cross review comes after local self-review passes; partial/fail returns to
+  rework and self-review before another cross review or implementation handoff.
+- If no other agent subscription exists, tokens are exhausted, or the bridge is
+  unavailable, recorded self-CPO fallback PASS may satisfy cross-review. The
+  fallback names the constraint; bare self-CPO PASS still blocks implementation without waiver.
 - Role split is invariant: C-Level owns intent, architecture, AC, and review;
   worker/generator owns fixed implementation slices. Do not present C-Level
   direct implementation as the normal default when a worker profile exists.
 - Model routing reflects role split. Claude coding-capable lanes use Sonnet 4.6;
-  Haiku is non-coding helper-only. Substantive research should prefer Gemini 3 Pro auto. Gemini uses `gemini-3-pro-auto` for every SFS role. Codex general worker/generator slices use `gpt-5.4`, helper I/O uses `gpt-5.4-mini`,
-  bounded repo-aware coding helpers use `gpt-5.3-codex`, and judgment-free mechanical implementation helpers use `gpt-5.3-codex-spark`.
-- Work is not complete until the author runs a self-agent top-model CPO review
-  and records a PASS. Claude self-CPO uses Opus 4.7, Codex self-CPO uses
-  `gpt-5.5` with xhigh reasoning, Gemini self-CPO uses `gemini-3-pro-auto`, or
-  the configured custom top-model equivalent. Partial/fail means the CPO
-  redirects the work, the author reworks it, and the same self-CPO loop repeats
-  until PASS or an explicit user waiver.
+  Haiku is non-coding helper-only. Substantive research should prefer Gemini
+  `gemini-3.1-pro-preview`; Gemini agentic coding routes to `gemini-3-flash-preview`;
+  relay/probe/economy helpers route to `gemini-3.1-flash-lite`. Codex uses
+  `gpt-5.4` for general workers, `gpt-5.4-mini` for helper I/O,
+  `gpt-5.3-codex` for bounded coding helpers, and
+  `gpt-5.3-codex-spark` for judgment-free mechanical implementation.
+- Work is not complete until self-agent top-model CPO records PASS: Claude
+  Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3.1-pro-preview`, or custom
+  top-model equivalent. Partial/fail repeats rework + self-CPO until PASS/waiver.
 - Multi-agent work is thin supervision; Division sub-agent council is always-on:
   strategy-pm, dev, QA, design, infra, and taxonomy each records finding/evidence/
   waiver in SFS artifacts. Actual parallel worker lanes remain opt-in.
+- For non-trivial product-bearing work, plan is an enterprise council design
+  step: load the routed enterprise plan pack, record risk flags, map AC to
+  files/evidence per relevant division, and reserve user calls for real product
+  judgment. Gate 6 performance claims need measurement, bounded proof, or waiver.
 - Do not advance a gate on raw requirements; if intent, terms, checks, or
   boundaries are unclear, stop and ask the smallest blockers.

@@ -83,7 +83,17 @@ last_touched_at: ""
 - 다음 명령: `sfs review --gate 6`
 - 리뷰 규칙: 구현 후 review 는 필수입니다. parallel agent 로 구현했다면 Gate 6 전 agent 간 cross review 도 필수입니다.
 
-## 8. Commit Unit Plan
+## 8. Enterprise QA/QC And Performance
+
+- selected enterprise packs:
+- project-applied QA/QC:
+- performance/algorithm trigger:
+
+| surface | evidence command/artifact | result | waiver/follow-up |
+|---|---|---|---|
+|  |  |  |  |
+
+## 9. Commit Unit Plan
 
 - lane:
   - agent:

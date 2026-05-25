@@ -30,8 +30,7 @@ load_when: "Read when docs/ko/current-product-shape.md routes to this section."
 Helper-grade 단순 I/O 는 advisor 검토를 생략할 수 있습니다. 하위모델이 질문/선택지를 설계하거나
 답변을 해석하거나 product identity, architecture, gate, AC, files_scope 에 영향을 주면 최상위
 advisor 검토가 필수입니다. advisor 는 Claude Opus 4.7, Codex `gpt-5.5` xhigh,
-Gemini `gemini-3-pro-auto` 입니다. Gemini 는 모든 role 을 `gemini-3-pro-auto` 로 두며
-Flash/2.5 fallback 은 쓰지 않습니다.
+Gemini `gemini-3.1-pro-preview` 입니다. Gemini 는 strategy/research/review 를 `gemini-3.1-pro-preview`, agentic coding/bounded 구현 helper 를 `gemini-3-flash-preview`, relay/probe/economy helper 를 `gemini-3.1-flash-lite` 로 라우팅하며 3.x 미만 fallback 은 쓰지 않습니다.
 advisor 호출은 self-CPO PASS 가 아닙니다. external/cross review 전에 작성자는 self-CPO
 mini-check 로 요구사항 → AC → 구현 slice → ADR/decision id 추적, 각 AC 의 file/artifact/evidence
 매핑, SEED/placeholder/mock/fallback non-acceptance 를 확인해야 합니다.
@@ -42,7 +41,7 @@ bounded repo-aware coding helper 입니다. Spark 는 더 좁습니다. scope, f
 deterministic test expectation update 같은 기계적 구현 보조 작업에만 씁니다. 작업이 architecture,
 public contract, security, privacy, data-loss, release gate, 또는 반복 실패를 건드리면 worker 를
 high reasoning 으로 승격하거나 C-Level 에 다시 넘깁니다. Claude 쪽 코딩 가능한 worker/helper 는
-Sonnet 4.6이고, Haiku 는 코딩하지 않습니다. 실질 research 는 가능하면 Gemini 3 Pro auto researcher 로
+Sonnet 4.6이고, Haiku 는 코딩하지 않습니다. 실질 research 는 가능하면 Gemini 3.1 Pro Preview researcher 로
 보냅니다.
 
 Implement 의 실행 모드는 기본적으로 Single Agent 입니다. 사용자가 여러 agent 를 선택할 수는

@@ -334,7 +334,7 @@ EOF
           PROBE_CMD='claude -p "$(cat)"'
         fi
         ;;
-      gemini) PROBE_CMD="${SFS_REVIEW_GEMINI_CMD:-gemini --skip-trust --output-format text -p \"Return exactly: SFS_AUTH_PROBE_OK ${profile}\"}" ;;
+      gemini) PROBE_CMD="${SFS_REVIEW_GEMINI_CMD:-$(sfs_gemini_default_cmd "gemini-3.1-flash-lite" "Return exactly: SFS_AUTH_PROBE_OK ${profile}")}" ;;
       *)
         echo "unknown executor: ${profile}" >&2
         exit "${SFS_EXIT_BADCLI}"
