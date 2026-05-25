@@ -72,8 +72,8 @@ Production open 을 수반하면 Release Readiness evidence(secret/auth/data/mon
 
 ## 절대 금지
 
-- **사용자 개인 Solon docset 의 경로 / 파일명 / 내용 유출** (예: `agent_architect` / `sfs-v0.4` / `solon-docset`).
-  단 "solon" 단독 키워드 (repo 이름 포함) 는 허용.
+- **사용자 개인 Solon docset 의 경로 / 파일명 / 내용 유출** 금지. Active 제품 파일에는 private dev staging checkout 이름이나 절대경로를 쓰지 않는다.
+  단 "solon" 단독 키워드 (repo 이름 포함) 와 historical changelog / handoff evidence 의 최소 맥락은 허용.
 - **install.sh 가 자동으로 git push / commit** — consumer 의 git 은 consumer 가 관리.
 - **templates/ 에 프로젝트-특화 placeholder 없이 고정값** 넣기.
 

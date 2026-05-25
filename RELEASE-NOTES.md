@@ -7,6 +7,13 @@
 
 ---
 
+## 0.6.131
+
+이번 버전은 제품에 포함되는 active 문서와 release-sequence 출력에서 private dev staging 경로명이 새지 않도록 막습니다.
+
+- release cut 안내는 구체적인 개인 checkout 이름 대신 `private dev staging checkout` 으로 설명합니다.
+- private path hygiene 회귀 테스트를 추가해 같은 문자열이 다시 active 제품 표면에 들어오면 실패합니다.
+
 ## 0.6.130
 
 이번 버전은 `메모   앱 검색`처럼 공백이 흔들린 한국어 note 앱 요청도 올바르게 note CLI 작업으로 분류합니다.

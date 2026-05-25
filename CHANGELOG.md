@@ -1,3 +1,17 @@
+## [0.6.131] - 2026-05-26
+
+> **Private dev staging path stays out of active product surfaces.**
+
+### Fixed
+
+- Removed private dev staging checkout names from active product entry docs and
+  release-sequence output while preserving generic release delegation guidance.
+
+### Tests
+
+- Added a private-dev-path hygiene regression so active product surfaces cannot
+  reintroduce the private checkout name or absolute path.
+
 ## [0.6.130] - 2026-05-25
 
 > **Korean memo app intent tolerates extra spaces.**
@@ -3324,7 +3338,7 @@ cross-review-principle 문서의 Receipts 섹션에 본 cycle 을 추가 layer �
   brew flock 등) 기존 PID-write fallback path 그대로.
 - **`tests/test-release-suffixless-hard-cut.sh` stable-mirror skip** —
   본 테스트가 `${REPO_ROOT}/scripts/cut-release.sh` 와 `verify-product-release.sh`
-  를 require 하는데, 이 둘은 dev staging 전용 (~/agent_architect/...)
+  를 require 하는데, 이 둘은 dev staging 전용 (`<private-dev-staging>/...`)
   이라 stable mirror 에는 의도적으로 부재. 기존엔 `missing: ...` 로 즉시
   exit 1. **Fix**: 둘 다 부재 시 informative SKIP 메시지 + exit 0 로
   graceful pass. AGENTS.md 의 release-cut output mirror 정책과 정합.
@@ -5375,7 +5389,7 @@ install/upgrade source 로 쓰므로, GitHub release 와 이 clone 이 어긋나
 - **local clone stale guard** — `upgrade.sh` local mode 에서 source clone 이
   `MJ-0701/solon-product` GitHub main 보다 뒤처졌는지 `git fetch` 로 먼저 확인하고, 뒤처졌으면
   `git -C <clone> pull --ff-only --tags` 후 재실행하라고 중단한다.
-- **consumer/developer path separation** — README/GUIDE 에 `~/agent_architect` (dev SSoT),
+- **consumer/developer path separation** — README/GUIDE 에 `<private-dev-staging>` (dev SSoT),
   `~/workspace/solon-mvp` (owner stable release clone), `~/tmp/solon-product` (사용자 install/upgrade
   source clone) 역할을 혼동하지 않도록 local clone upgrade 전 최신화 절차를 명시.
 

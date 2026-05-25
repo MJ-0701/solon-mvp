@@ -174,14 +174,14 @@ case "${phase}" in
       # 0.6.6: this phase is intentionally a stub in the stable mirror repo.
       # The real tap update (materialize sha256 in formula, push to homebrew
       # tap repo + scoop bucket) is performed by `scripts/cut-release.sh` in
-      # dev staging (~/agent_architect — see AGENTS.md). The earlier message
+      # the private dev staging checkout (see AGENTS.md). The earlier message
       # "invoke tap-update helper (release tool integration point)" was too
       # cryptic; this version states the delegation explicitly so users
       # don't expect the local script to push anything.
       cat >&2 <<EOF
 ${SCRIPT_NAME}: tap-update phase — stub (this repo is the release-cut output mirror).
-  Real tap update is performed by scripts/cut-release.sh in dev staging
-  (~/agent_architect/...). Before dispatching publish-product-channels.yml,
+  Real tap update is performed by scripts/cut-release.sh in the private dev
+  staging checkout. Before dispatching publish-product-channels.yml,
   run scripts/sfs-channel-publish-preflight.sh. If it reports manual_required,
   skip the workflow and publish v${version} through the local Homebrew tap and
   Scoop bucket repos instead. After publish, return here and run:
