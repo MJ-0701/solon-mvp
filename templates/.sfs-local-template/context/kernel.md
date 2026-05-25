@@ -75,6 +75,12 @@ load_when: ["always", "sfs", "entry"]
   agents, repos, monitors, releases, or user says issues may blur. Create or
   update a wiki/workbench checklist, move items `[ ] -> [~] -> [x]` as evidence
   appears, and reconcile open items before final answer.
+- Post-development external review is evidence, not a gate replacement: after
+  self-CPO/SFS cross, use Claude Cowork, Gemini, GitHub `@codex`, or future
+  reviewers when available; unavailable optional reviewers are recorded, not
+  turned into user chores.
+- Lean procedure review is ambient for SFS itself: keep safety invariants, but
+  shrink, automate, or remove steps that only add ceremony or bottlenecks.
 - Session Continuation Guard is ambient: `sfs upgrade` cannot shrink an already-open LLM conversation. If token meter is 30%+ before a new WU/sprint, 50%+ before a new gate/loop/review handoff, repeated wakeups, or multiple WUs/sprints in one chat, fresh-session transfer is lossless autopilot: write durable handoff/transfer capsule first, then invoke host-owned transfer/new-session/archive/clear+resume and resume immediately when available, otherwise stop with exact prompt. Do not call bare clear. Do not ask the user to type `/clear`.
 - Runtime Token Firewall is ambient: worker/review/executor handoffs are
   capsule-only. Do not forward the lead agent's full conversation history to a

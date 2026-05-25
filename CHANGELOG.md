@@ -1,3 +1,26 @@
+## [0.6.123] - 2026-05-25
+
+> **Post-development Claude/Gemini review lanes and lean procedure refactoring.**
+
+### Added
+
+- Added post-development external review guidance for Claude Cowork, Gemini,
+  GitHub `@codex`, and future reviewer bridges after implementation evidence
+  exists. External reviews remain evidence and do not replace self-CPO, SFS
+  cross review, Gate 3, or Gate 6.
+- Added lean procedure refactor guidance so SFS can identify process
+  bottlenecks, shrink or remove unnecessary ceremony, and preserve the safety
+  invariant with automated evidence instead of user-visible ritual.
+- Added the `process-lean` review lens and aliases for process/ceremony/
+  bottleneck review.
+
+### Tests
+
+- Added `test-postdev-review-lean-guardrails.sh` and extended review lens alias
+  coverage for `process-lean`. Focused guardrail tests verify routing through
+  kernel, router, review/implement/release contexts, agent templates, and the
+  review CLI lens normalizer.
+
 ## [0.6.122] - 2026-05-25
 
 > **Mainline focus, Gate 6 data validation, OWASP/logging evidence, and checklist closure.**

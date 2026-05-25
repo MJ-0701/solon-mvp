@@ -30,6 +30,10 @@ Mainline focus, Gate 6 data validation, agentic security/logging, and
 wiki-mission checklist packs prevent auxiliary setup, mock-only evidence,
 OWASP/Datadog gaps, or long-context drift from passing review as if the main
 objective were complete.
+Post-development external review packs attach Claude Cowork, Gemini, and
+GitHub Codex as evidence lanes after implementation, while lean procedure packs
+shrink, automate, or remove ceremony when process bottlenecks do not protect
+quality.
 
 The user should not need to memorize this list. Solon reads only the lens that
 fits the work. A small docs edit stays light. A release, architecture change, or

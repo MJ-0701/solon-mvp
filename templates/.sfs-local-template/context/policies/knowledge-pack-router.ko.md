@@ -2,7 +2,7 @@
 id: sfs-policy-knowledge-pack-router-ko
 summary: 지식팩/review lens 라우터(한글 버전), 활성화 조건과 범위를 가볍게 제어.
 language: ko
-load_when: [knowledge pack, backend, strategy-pm, qa, design, infra, management-admin, taxonomy, finance, accounting, bookkeeping, tax, 경영관리, 재무, 경리, 세무, 회계, transaction, batch, DDD, TDD, domain model, product behavior, acceptance criteria, integration, API, AWS, Obsidian, 옵시디언, llm wiki, 위키, 문서 이관, enterprise, agent team, 6본부, 대기업급, performance, algorithm, QA/QC, mainline, focus, data validation, mock, fixture, seed, OWASP, Datadog, console.log, checklist, long context]
+load_when: [knowledge pack, backend, strategy-pm, qa, design, infra, management-admin, taxonomy, finance, accounting, bookkeeping, tax, 경영관리, 재무, 경리, 세무, 회계, transaction, batch, DDD, TDD, domain model, product behavior, acceptance criteria, integration, API, AWS, Obsidian, 옵시디언, llm wiki, 위키, 문서 이관, enterprise, agent team, 6본부, 대기업급, performance, algorithm, QA/QC, mainline, focus, data validation, mock, fixture, seed, OWASP, Datadog, console.log, checklist, long context, external review, Claude Cowork, Gemini review, 병목, ceremony, lean gate]
 status: filled-v1
 content_policy: "read only this router first; read full packs only when matching signals make them useful"
 ---
@@ -49,6 +49,10 @@ Division sub-agent council 이다. `activation_state` 는 read-depth 와 escalat
   prompt injection, tool permissions, `console.log`, Datadog, observability.
 - Checklist signals: long context, multi-step, 반복 product bug, monitor,
   release, 문제가 흐려질 수 있다는 사용자 지적, 프로젝트/agent 를 넘나드는 작업.
+- Post-dev external review signals: 구현 완료 후 외부 review, Claude Cowork,
+  Gemini review, GitHub `@codex`, PR review evidence.
+- Lean procedure signals: 병목, 느린 review loop, ceremony, 반복 manual step,
+  절차적 기능, 과한 process, flow 가 느리다는 user 지적.
 
 ## Read order
 
@@ -104,6 +108,10 @@ Division sub-agent council 이다. `activation_state` 는 read-depth 와 escalat
 - `policies/agentic-security-logging-pack.ko.md`
 - `policies/wiki-mission-checklist-skill.md`
 - `policies/wiki-mission-checklist-skill.ko.md`
+- `policies/postdev-external-review-pack.md`
+- `policies/postdev-external-review-pack.ko.md`
+- `policies/lean-procedure-refactor-pack.md`
+- `policies/lean-procedure-refactor-pack.ko.md`
 
 ## Depth Rules
 
@@ -124,6 +132,10 @@ Division sub-agent council 이다. `activation_state` 는 read-depth 와 escalat
   관련 finding 을 OWASP 계열 + logging/Datadog evidence 로 매핑한다.
 - Long-context 작업은 `wiki-mission-checklist-skill.ko.md` 를 로드한다. checklist 는
   final 에 몰아서가 아니라 evidence 가 생길 때마다 상태를 갱신한다.
+- 구현 evidence 이후 외부 review 는 `postdev-external-review-pack.ko.md` 를
+  로드한다. Claude Cowork/Gemini/Codex 부재는 user chore 가 아니라 상태 기록이다.
+- 느리거나 장식적인 절차는 `lean-procedure-refactor-pack.ko.md` 를 로드한다.
+  invariant 는 유지하고 보이는 ceremony 만 축소/제거한다.
 - pack 이 MSA, 대형 redesign, release-readiness escalation, finance/admin process,
   tax/accounting advisor checkpoint, governance process 같은 큰 전환을 제안하면
   조용히 scope 를 넓히지 말고 user/product decision 으로 surface 한다.

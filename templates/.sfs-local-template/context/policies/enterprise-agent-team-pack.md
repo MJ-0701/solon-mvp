@@ -14,6 +14,8 @@ split_children:
   - enterprise-plan-council-pack.md
   - enterprise-evidence-pack.md
   - enterprise-performance-review-pack.md
+  - postdev-external-review-pack.md
+  - lean-procedure-refactor-pack.md
 ---
 
 # Enterprise Agent Team Pack
@@ -33,6 +35,8 @@ contract. It applies to any product-bearing work, not only frontend or backend.
   artifact, diff, test, trace, screenshot, or explicit waiver is not enough.
 - Optimize for modern product teams: small slices, trunk-friendly commits,
   observable rollouts, stable domain language, and fast feedback.
+- Optimize the process too: when a gate becomes ceremony, keep the invariant
+  but shrink, automate, or remove the visible step.
 
 ## Enterprise Sources Absorbed
 
@@ -67,6 +71,9 @@ Do not import heavyweight or stale rituals as universal blockers:
   wiki evidence, or applied project behavior is in scope.
 - Load `enterprise-performance-review-pack.md` when code, queries, UI runtime,
   batch, network, storage, algorithm, bundle, memory, or concurrency changes.
+- Load `postdev-external-review-pack.md` after implementation for optional
+  Claude Cowork/Gemini/Codex evidence.
+- Load `lean-procedure-refactor-pack.md` when process itself becomes a bottleneck.
 
 ## PASS Shape
 

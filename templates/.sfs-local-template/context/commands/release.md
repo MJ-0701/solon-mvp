@@ -30,3 +30,8 @@ load_when: ["release", "deploy", "배포", "배포해줘", "배포 프로세스"
 - Name GitHub Actions run ids, package archive hash parity, installed runtime
   freshness, and any intentionally skipped clean-handoff check in the release
   evidence.
+- Post-development Claude Cowork/Gemini/GitHub review evidence is welcome after
+  SFS self/cross review, but unavailable optional reviewers do not block release
+  unless a real unresolved risk remains.
+- Release retros should flag slow or duplicate SFS procedure as refactor work;
+  do not preserve ceremony that does not protect quality.

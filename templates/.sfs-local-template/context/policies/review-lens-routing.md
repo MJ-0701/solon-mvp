@@ -28,6 +28,8 @@ commands:
 - `source-docs`: official-source evidence for frameworks, libraries, APIs, or
   standards.
 - `simplify`: behavior-preserving simplification.
+- `process-lean`: simplify SFS/process ceremony and bottlenecks while keeping
+  quality invariants.
 - `security`: untrusted input, secrets, auth, PII, permission, observability, or
   agent-tool risk; load `agentic-security-logging-pack.md` for OWASP/Datadog
   release evidence.
@@ -65,3 +67,5 @@ Data shape, fixture/mock/seed, UI state, auth/session, migration/cache, or
 analytics/log shape changes should also load `gate6-data-validation-pack.md`.
 Tool/auth/model setup drift should load `mainline-focus-guard.md`; long-context
 or multi-defect work should load `wiki-mission-checklist-skill.md`.
+Post-development external review should load `postdev-external-review-pack.md`.
+Repeated process bottlenecks or ceremony should load `lean-procedure-refactor-pack.md`.

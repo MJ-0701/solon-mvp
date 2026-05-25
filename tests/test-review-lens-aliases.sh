@@ -79,6 +79,9 @@ assert_alias security security
 assert_alias auth security
 assert_alias simplify simplify
 assert_alias dead-code simplify
+assert_alias process process-lean
+assert_alias ceremony process-lean
+assert_alias bottleneck process-lean
 assert_alias api api-contract
 assert_alias schema api-contract
 assert_alias ddd ddd-tdd
@@ -100,6 +103,8 @@ grep -Fq "api/schema -> api-contract" "${TMP_DIR}/invalid.err" \
   || fail "invalid lens error should show api-contract alias hint"
 grep -Fq "performance-algorithm -> performance" "${TMP_DIR}/invalid.err" \
   || fail "invalid lens error should show performance-algorithm alias hint"
+grep -Fq "process/ceremony -> process-lean" "${TMP_DIR}/invalid.err" \
+  || fail "invalid lens error should show process-lean alias hint"
 grep -Fq "DDD/TDD -> ddd-tdd" "${TMP_DIR}/invalid.err" \
   || fail "invalid lens error should show DDD/TDD alias hint"
 

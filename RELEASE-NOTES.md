@@ -7,6 +7,17 @@
 
 ---
 
+## 0.6.123
+
+이번 버전은 제품 개발 완료 후 Claude Cowork/Gemini/GitHub Codex 리뷰를 증거로 붙이되, SFS 절차가 느린 의식으로 변하면 과감히 줄이도록 만듭니다.
+
+- Claude Cowork, Gemini, GitHub `@codex` 는 구현 완료 후 external review evidence 로 기록할 수 있습니다.
+- 이 외부 리뷰들은 self-CPO, SFS cross review, Gate 3, Gate 6 를 대체하지 않습니다.
+- CLI bridge 가 인증되어 있으면 agent 가 직접 실행하고, Claude Cowork 처럼 UI/host 제어가 필요한 lane 은 compact review capsule 과 상태로 기록합니다.
+- optional reviewer 가 unavailable 이라는 이유만으로 release 를 막지 않습니다. 실제 unresolved risk 만 blocker 입니다.
+- `process-lean` review lens 를 추가해 SFS 절차의 병목, 반복 review loop, ceremony, user chore 를 검토합니다.
+- 품질 invariant 는 유지하되, 불필요한 절차는 자동화, 축소, 인접 gate 통합, waiver 로 정리합니다.
+
 ## 0.6.122
 
 이번 버전은 agent 가 본론을 놓치고 Gemini/Claude/Codex 같은 보조 도구 설정으로 빠지는 문제를 SFS 제품 버그로 막습니다.

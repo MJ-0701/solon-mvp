@@ -44,6 +44,8 @@ module:
 - `policies/gate6-data-validation-pack.md` — mock/fixture/seed/data validation at Gate 6.
 - `policies/agentic-security-logging-pack.md` — OWASP-style security, console-log, and Datadog evidence guard.
 - `policies/wiki-mission-checklist-skill.md` — live wiki checklist for long-context follow-through.
+- `policies/postdev-external-review-pack.md` — post-development Claude/Gemini/Codex review evidence.
+- `policies/lean-procedure-refactor-pack.md` — keep/shrink/remove procedural bottleneck review.
 - `policies/*-knowledge-pack.md` — English compact guidance packs for each lens/pack.
 - `policies/*-knowledge-pack.ko.md` — Korean compact guidance packs for each lens/pack.
 - `policies/*-knowledge-pack-*.md` — split child packs loaded only after a parent pack activates matching ids.

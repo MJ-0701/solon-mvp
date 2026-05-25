@@ -71,7 +71,7 @@ fi
 # ─────────────────────────────────────────────────────────────────────
 usage_review() {
   cat <<'EOF'
-Usage: /sfs review [--sprint <id>] [--gate <1..7>] [--stage <auto|self|cross|artifact>] [--lens <auto|artifact|code|docs|source-docs|simplify|security|performance|api-contract|strategy|design|taxonomy|ddd-tdd|qa|ops|management-admin|release>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
+Usage: /sfs review [--sprint <id>] [--gate <1..7>] [--stage <auto|self|cross|artifact>] [--lens <auto|artifact|code|docs|source-docs|simplify|process-lean|security|performance|api-contract|strategy|design|taxonomy|ddd-tdd|qa|ops|management-admin|release>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
 
 Open the active sprint's review.md as the CPO Evaluator review document.
   - --gate <n>    gate number, 1..7. Reports display this as Gate 1..7:
@@ -95,7 +95,7 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                   both self-CPO PASS and cross CPO PASS when available.
   - --lens <name> review lens. Default: auto.
                   auto chooses from artifact, code, docs, source-docs,
-                  simplify, security, performance, api-contract, strategy,
+                  simplify, process-lean, security, performance, api-contract, strategy,
                   design, taxonomy, ddd-tdd, qa, ops, management-admin, release using
                   plan/implement/log text and changed artifact paths. Use an
                   explicit lens only to override a wrong inference. For the
@@ -105,7 +105,8 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                   Common division aliases are accepted, for example
                   strategy-pm -> strategy, design/frontend -> design,
                   infra -> ops, source-driven -> source-docs, perf -> performance,
-                  performance-algorithm -> performance, api/schema -> api-contract, and
+                  performance-algorithm -> performance, process/ceremony -> process-lean,
+                  api/schema -> api-contract, and
                   finance/accounting -> management-admin. DDD/TDD aliases
                   map to ddd-tdd.
   - --executor <profile|cmd>
@@ -366,6 +367,7 @@ normalize_review_lens_value() {
     doc|docs|documentation) printf 'docs\n' ;;
     source-docs|source-driven|source-driven-development|official-docs|official-documentation|docs-source|source-verification|framework-docs) printf 'source-docs\n' ;;
     simplify|simplification|code-simplify|cleanup|dead-code|deadcode|reduce-complexity) printf 'simplify\n' ;;
+    process-lean|lean|lean-gate|process|process-refactor|procedure|procedural|ceremony|bottleneck|slow-loop|reduce-process) printf 'process-lean\n' ;;
     security|hardening|auth|authorization|authentication|pii|secrets|secret) printf 'security\n' ;;
     performance|performance-algorithm|algorithm|algorithms|perf|latency|benchmark|benchmarks|lighthouse|memory|bundle) printf 'performance\n' ;;
     api-contract|api|interface|contract|schema|schemas|openapi|public-api|compatibility) printf 'api-contract\n' ;;
@@ -404,8 +406,8 @@ fi
 REVIEW_STAGE_REQUEST="${_normalized_stage}"
 _normalized_lens="$(normalize_review_lens_value "${REVIEW_LENS}" || true)"
 if [[ -z "${_normalized_lens}" ]]; then
-  echo "unknown review lens ${REVIEW_LENS}, valid: auto, artifact, code, docs, source-docs, simplify, security, performance, api-contract, strategy, design, taxonomy, ddd-tdd, qa, ops, management-admin, release" >&2
-  echo "aliases: strategy-pm -> strategy, design/frontend -> design, infra -> ops, source-driven -> source-docs, perf -> performance, performance-algorithm -> performance, api/schema -> api-contract, DDD/TDD -> ddd-tdd, finance/accounting -> management-admin" >&2
+  echo "unknown review lens ${REVIEW_LENS}, valid: auto, artifact, code, docs, source-docs, simplify, process-lean, security, performance, api-contract, strategy, design, taxonomy, ddd-tdd, qa, ops, management-admin, release" >&2
+  echo "aliases: strategy-pm -> strategy, design/frontend -> design, infra -> ops, source-driven -> source-docs, perf -> performance, performance-algorithm -> performance, process/ceremony -> process-lean, api/schema -> api-contract, DDD/TDD -> ddd-tdd, finance/accounting -> management-admin" >&2
   exit "${SFS_EXIT_BADCLI}"
 fi
 REVIEW_LENS="${_normalized_lens}"
@@ -665,6 +667,12 @@ review_path_lens_signal() {
       ;;
   esac
   case "$paths" in
+    *lean-procedure*|*process-lean*|*bottleneck*|*ceremony*|*procedure*)
+      printf 'process-lean\n'
+      return 0
+      ;;
+  esac
+  case "$paths" in
     *figma*|*design*|*wireframe*|*ux*|*ui*|*component*|*.css|*.scss|*.html)
       printf 'design\n'
       return 0
@@ -747,6 +755,10 @@ infer_review_lens() {
       printf 'simplify\n'
       return 0
       ;;
+    *"process bottleneck"*|*"procedural"*|*"ceremony"*|*"review loop"*|*"too slow"*|*"병목"*|*"절차"*)
+      printf 'process-lean\n'
+      return 0
+      ;;
     *"artifact types touched"*release*|*"release readiness"*|*"homebrew"*|*"scoop"*)
       printf 'release\n'
       return 0
@@ -797,6 +809,7 @@ review_lens_label() {
     docs) printf 'documentation acceptance lens' ;;
     source-docs) printf 'source-driven documentation evidence lens' ;;
     simplify) printf 'behavior-preserving simplification lens' ;;
+    process-lean) printf 'lean procedure and bottleneck review lens' ;;
     security) printf 'security/threat-model acceptance lens' ;;
     performance) printf 'performance evidence lens' ;;
     api-contract) printf 'API/contract compatibility lens' ;;
@@ -2406,7 +2419,7 @@ Lens policy:
 - Judge the produced artifact against the CEO plan, Gate 2/3 contract, evidence,
   user value, scope, risk, and next action.
 - Do not force source-code findings when the selected lens is docs, source-docs,
-  simplify, security, performance, api-contract, strategy, design, taxonomy,
+  simplify, process-lean, security, performance, api-contract, strategy, design, taxonomy,
   ddd-tdd, QA, ops, management-admin, release, or generic artifact acceptance.
 
 Lens-specific checklist:
@@ -2436,6 +2449,13 @@ EOF
 - Check whether the change removes accidental complexity without changing behavior, public contracts, or needed observability.
 - Treat needless abstractions, duplicate branches, dead code left behind, and migration paths without a rollback/compatibility note as findings.
 - Require evidence that the simplification is behavior-preserving, such as focused tests, unchanged outputs, or explicit non-goals.
+EOF
+      ;;
+    process-lean)
+      cat <<'EOF'
+- Check whether SFS/process steps are preventing quality problems or only adding ceremony, waits, context load, or user chores.
+- Keep safety invariants for security, data-loss, public contracts, release, DDD/TDD, and user approval.
+- Prefer automation, narrower triggers, merged ledgers, or explicit N/A over repeated manual review loops.
 EOF
       ;;
     security)

@@ -2,7 +2,7 @@
 id: sfs-policy-knowledge-pack-router
 summary: Lightweight activation router for knowledge packs and review lenses.
 language: en
-load_when: [knowledge pack, backend, strategy-pm, qa, design, infra, management-admin, taxonomy, finance, accounting, bookkeeping, tax, transaction, batch, DDD, TDD, domain model, product behavior, acceptance criteria, integration, API, AWS, Obsidian, llm wiki, wiki, docs migration, enterprise, agent team, performance, algorithm, QA/QC, mainline, focus, data validation, mock, fixture, seed, OWASP, Datadog, console.log, checklist, long context]
+load_when: [knowledge pack, backend, strategy-pm, qa, design, infra, management-admin, taxonomy, finance, accounting, bookkeeping, tax, transaction, batch, DDD, TDD, domain model, product behavior, acceptance criteria, integration, API, AWS, Obsidian, llm wiki, wiki, docs migration, enterprise, agent team, performance, algorithm, QA/QC, mainline, focus, data validation, mock, fixture, seed, OWASP, Datadog, console.log, checklist, long context, external review, Claude Cowork, Gemini review, bottleneck, ceremony, lean gate]
 status: filled-v1
 content_policy: "read only this router first; read full packs only when matching signals make them useful"
 ---
@@ -49,6 +49,10 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
   prompt injection, tool permissions, `console.log`, Datadog, observability.
 - Checklist signals: long context, multi-step, repeated product bug, monitor,
   release, user says issues may blur, or work crosses projects/agents.
+- Post-dev external review signals: completed implementation, external review,
+  Claude Cowork, Gemini review, GitHub `@codex`, PR review evidence.
+- Lean procedure signals: bottleneck, slow review loop, ceremony, repeated
+  manual step, procedural feature, over-process, user says the flow is too slow.
 
 ## Read order
 
@@ -105,6 +109,10 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
 - `policies/agentic-security-logging-pack.ko.md` (Korean)
 - `policies/wiki-mission-checklist-skill.md`
 - `policies/wiki-mission-checklist-skill.ko.md` (Korean)
+- `policies/postdev-external-review-pack.md`
+- `policies/postdev-external-review-pack.ko.md` (Korean)
+- `policies/lean-procedure-refactor-pack.md`
+- `policies/lean-procedure-refactor-pack.ko.md` (Korean)
 
 ## Depth Rules
 
@@ -127,6 +135,11 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
   maps relevant findings to OWASP-style families plus logging/Datadog evidence.
 - Long-context work loads `wiki-mission-checklist-skill.md`; update checklist
   statuses as evidence is produced, not only at the final summary.
+- After implementation evidence exists, load `postdev-external-review-pack.md`
+  for Claude Cowork/Gemini/Codex lanes; unavailable optional reviewers are
+  recorded, not turned into user chores.
+- Repeated slow or decorative process loads `lean-procedure-refactor-pack.md`;
+  keep the invariant, shrink or remove the visible ceremony.
 - If a pack suggests a large transition such as MSA, heavy redesign,
   release-readiness escalation, finance/admin process, tax/accounting advisor
   checkpoint, or governance process, surface it as a user or product decision

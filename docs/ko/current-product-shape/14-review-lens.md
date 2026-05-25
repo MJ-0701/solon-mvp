@@ -27,6 +27,9 @@ performance pack 은 plan 을 실제 설계 단계로 만들고 Gate 6 주장을
 mainline focus, Gate 6 data validation, agentic security/logging,
 wiki-mission checklist pack 은 보조 도구 설정, mock-only evidence,
 OWASP/Datadog gap, long-context drift 가 본작업 완료처럼 통과되는 것을 막습니다.
+postdev external review pack 은 구현 완료 후 Claude Cowork/Gemini/GitHub Codex 를
+증거 lane 으로 붙이고, lean procedure pack 은 병목이나 ceremony 가 품질을 높이지 못할 때
+절차를 자동화·축소·제거하게 합니다.
 
 중요한 점은 사용자가 이 목록을 외우지 않아도 된다는 것입니다. Solon 은 작업 성격을 보고 필요한
 관점만 읽습니다. 작은 문서 수정은 작게 보고, 배포나 구조 변경처럼 위험이 큰 작업은 더 단단하게

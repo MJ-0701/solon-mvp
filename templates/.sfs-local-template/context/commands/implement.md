@@ -89,6 +89,11 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - For high-context work, update the wiki/workbench mission checklist at audit,
   edit, test, review, and release boundaries. Do not rely on chat memory to
   remember user-reported defects.
+- If implementation completes and extra reviewers are available, use
+  `postdev-external-review-pack.md` to attach Claude Cowork/Gemini/Codex
+  evidence after SFS self/cross review without replacing the gate.
+- If implementation flow itself is the problem, use `lean-procedure-refactor-pack.md`:
+  remove ceremony only when equivalent or stronger evidence remains.
 - Execute approved runnable steps yourself: when shell/tool/auth context and
   approval are available, run the operation and record evidence. Give commands
   only when the user explicitly asked for them or a true blocker remains.
@@ -175,7 +180,7 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   `policies/gate6-data-validation-pack.md` for mock/fixture/seed/data changes,
   `policies/agentic-security-logging-pack.md` for OWASP/security/logging/
   Datadog concerns, and `policies/wiki-mission-checklist-skill.md` for long
-  context or multi-defect work.
+  context or multi-defect work; add postdev/lean packs for external review or process bottlenecks.
 - Load `policies/obsidian-llm-wiki.md` when the slice creates/migrates project
   docs, begins an existing-project adoption, or needs durable retrieval across
   future sprints.

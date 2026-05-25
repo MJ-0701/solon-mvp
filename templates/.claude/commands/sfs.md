@@ -60,7 +60,12 @@ $ARGUMENTS
    creating new lifecycle commands: source-driven official docs, stop-the-line
    debugging, deprecation/migration, shipping/release checks, and review lenses
    `source-docs`, `simplify`, `security`, `performance`, `api-contract`,
-   `ddd-tdd`.
+   `ddd-tdd`, `process-lean`.
+   postdev external review is evidence only: Claude Cowork, Gemini,
+   GitHub `@codex`, and future reviewer bridges attach after self/cross review;
+   unavailable optional lanes are recorded instead of blocking. lean procedure review
+   shrinks or removes ceremony only when equivalent or stronger evidence
+   preserves the safety invariant.
    Release trigger contract: if the user says `배포해줘`, treat it as
    `배포 프로세스 쭉 진행해줘`, not a publish-only command. Load the release
    context and run readiness checks, relevant tests, review/검수, release cut,
@@ -130,14 +135,16 @@ $ARGUMENTS
    a self-CPO mini-check: requirements to AC to implementation slices to
    ADR/decision ids, every AC mapped to file/artifact/evidence, and SEED/
    placeholder/mock/fallback material treated as non-acceptance until replaced.
-   GitHub `@codex` PR/code review is external evidence only and
-   post-implementation only; do not request, trigger, or count it during
-   brainstorm or Gate 3 plan review.
+   A GitHub `@codex` PR/code review, PR approval, or GitHub check PASS is
+   external evidence only and post-implementation only; Claude Cowork, Gemini,
+   and future external reviews follow the same boundary. Do not request,
+   trigger, or count them during brainstorm or Gate 3 plan review. They do not satisfy self-CPO,
+   SFS cross review, `sfs review`, Gate 3, or Gate 6 PASS by themselves.
    External review/check PASS is a continuation trigger, not a stopping point.
    Codex, Claude, Gemini, and future LLM agents must continue with the next
    unmet SFS review command. For Gate 6 implementation review, run
    `sfs review --gate 6 --stage self`, then `sfs review --gate 6 --stage cross`,
-   then GitHub `@codex` as final external evidence when available.
+   then attach available Claude Cowork/Gemini/GitHub `@codex` evidence.
    Session Continuation Guard: `sfs upgrade` updates runtime/project context
    but cannot shrink an already-open LLM conversation. If the host token meter
    is 30%+ before a new WU/sprint action, 50%+ before a new gate/loop/review

@@ -27,6 +27,13 @@ split_children:
 This guide is the short English path for running a first Solon sprint after
 install. For beginner Git/terminal help, use the Korean [BEGINNER-GUIDE.md](../../BEGINNER-GUIDE.md).
 
+## Review Boundary
+
+GitHub `@codex` PR/code review is external evidence only; a PR approval,
+GitHub check PASS, or `@codex` comment does not replace `sfs review`,
+self-CPO, SFS cross review, or Gate 3/Gate 6 PASS. Claude Cowork, Gemini, and
+future external reviews follow the same post-development evidence boundary.
+
 ## Document Map
 
 This file keeps the original route as a thin entry point. Detailed body sections are split into the child documents below, and each child carries standalone frontmatter.

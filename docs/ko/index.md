@@ -56,7 +56,9 @@ specialization, management-admin 은 재무/경리/세무/회계 관점, taxonom
 agent-skills 벤치마크에서 쓸 만한 practice 는 새 명령으로 늘리지 않고
 `implement`, `review`, `adopt`, `tidy`, `release` 의 정책과 렌즈로 흡수했습니다.
 공식 문서 기반 구현, stop-the-line debugging, deprecation/migration cleanup, shipping check,
-`source-docs`/`simplify`/`security`/`performance`/`api-contract` review lens 가 포함됩니다.
+post-development external review, lean procedure review,
+`source-docs`/`simplify`/`security`/`performance`/`api-contract`/`process-lean`
+review lens 가 포함됩니다.
 기존 코드베이스를 받아들일 때는 `sfs adopt --ddd-tdd-retrofit --apply` 로 DDD-lite 경계
 상태를 진단하고, 다음 sprint 가 characterization/TDD evidence 를 먼저 만든 뒤 한 behavior
 slice 만 refactor 하도록 계약을 심을 수 있습니다.

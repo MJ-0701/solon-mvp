@@ -108,6 +108,9 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   equivalent observability/redaction evidence or waiver.
 - Gate 6 checklist review checks that high-context wiki/workbench checklist
   items are all reconciled with evidence or explicit follow-up.
+- Post-development external review can attach Claude Cowork/Gemini/GitHub `@codex`
+  evidence after self-CPO/SFS cross; unavailable lanes record blocked/not-applicable.
+- Lean procedure review keeps safety invariants but shrinks/removes ceremony.
 - Review proposed or actual commit messages against the user's
   native/workspace language. English commit messages are correct only when the
   user/repo language is English or the repo explicitly requires English.
@@ -121,8 +124,8 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   `sfs review`, Gate 3, or Gate 6 PASS by itself; `review.md` must still
   contain the SFS gate verdict from `sfs review`, or the user must explicitly
   waive that gate.
-- External review/check PASS is a continuation trigger, not a stopping point: name the next unmet SFS
-  command, run/record self-CPO first, then configured cross-review after PASS.
+- External review/check PASS is a continuation trigger, not a stopping point:
+  name the next unmet SFS command, run/record self-CPO first, then configured cross-review after PASS.
 - Gate 6 implementation review order is self-CPO first, then cross CPO, then
   GitHub @codex PR/code review as
   external evidence when available: `sfs review --gate 6 --stage self`, then
@@ -176,8 +179,9 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   `enterprise-performance-review-pack.md` for performance, algorithms, hot paths,
   queries, memory, browser runtime, payloads, or concurrency.
 - Load `mainline-focus-guard.md`, `gate6-data-validation-pack.md`,
-  `agentic-security-logging-pack.md`, and `wiki-mission-checklist-skill.md` for
-  tool/setup drift, data validation, OWASP/Datadog logging, and checklist review.
+  `agentic-security-logging-pack.md`, `wiki-mission-checklist-skill.md`,
+  `postdev-external-review-pack.md`, and `lean-procedure-refactor-pack.md` for
+  tool/setup drift, data/security/checklist, external review, and process lean review.
 - For design/frontend work, check `design.md` or `docs/solon/design.md` when
   present. AI-slop risk such as arbitrary colors, token drift, or missing reusable UI contract can be findings.
 - For visible frontend/UI implementation, missing pre-user browser evidence is

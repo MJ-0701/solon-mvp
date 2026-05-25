@@ -64,7 +64,9 @@ $ARGUMENTS
     creating new lifecycle commands: source-driven official docs, stop-the-line
     debugging, deprecation/migration, shipping/release checks, and review lenses
     `source-docs`, `simplify`, `security`, `performance`, `api-contract`,
-    `ddd-tdd`.
+    `ddd-tdd`, `process-lean`.
+    postdev external review evidence lanes: Claude Cowork, Gemini, GitHub
+    `@codex`, future bridges after self/cross; unavailable optional lanes are recorded. lean procedure review shrinks ceremony only with equivalent/stronger evidence.
     Release trigger contract: if the user says `배포해줘`, treat it as
     `배포 프로세스 쭉 진행해줘`, not a publish-only command. Load the release
     context and run readiness checks, relevant tests, review/검수, release cut,
@@ -130,18 +132,14 @@ $ARGUMENTS
     a self-CPO mini-check: requirements to AC to implementation slices to
     ADR/decision ids, every AC mapped to file/artifact/evidence, and SEED/
     placeholder/mock/fallback material treated as non-acceptance until replaced.
-    A GitHub `@codex` PR/code review, PR approval, or GitHub check PASS is
-    external evidence only and post-implementation only. Do not request,
-    trigger, or count it during brainstorm or Gate 3 plan review. It does not
-    satisfy self-CPO, SFS cross review, `sfs review`, Gate 3, or Gate 6 PASS by
-    itself.
+    A GitHub `@codex` PR/code review, PR approval, or GitHub check PASS is external evidence only and post-implementation only; Claude Cowork, Gemini, and future external reviews follow the same boundary.
+    Do not count them during brainstorm/Gate 3.
+    This evidence does not satisfy self-CPO, SFS cross review, `sfs review`, Gate 3, or Gate 6 PASS by itself.
     External review/check PASS is a continuation trigger, not a stopping point.
     Codex, Claude, Gemini, and future LLM agents must continue with the next
     unmet SFS review command. For Gate 6 implementation review, run
     `sfs review --gate 6 --stage self`, then `sfs review --gate 6 --stage cross`,
-    then GitHub `@codex` as final external evidence when available unless a
-    recorded self-CPO fallback reason covers no other agent subscription,
-    external agent token exhaustion, or cross-review bridge unavailability.
+    then attach available Claude Cowork/Gemini/GitHub `@codex` evidence unless a recorded self-CPO fallback covers no subscription, token exhaustion, or bridge unavailability.
     Session Continuation Guard: `sfs upgrade` updates runtime/project context
     but cannot shrink an already-open LLM conversation. If the host token meter
     is 30%+ before a new WU/sprint action, 50%+ before a new gate/loop/review
