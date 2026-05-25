@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.128
+
+이번 버전은 Gate 6 cross review 가 최신 self-CPO PASS 를 못 봐서 partial loop 에 빠지는 문제를 막습니다.
+
+- cross review prompt 안에 같은 Gate 의 최신 self-CPO PASS 결과와 excerpt 를 별도 캡슐로 직접 넣습니다.
+- Gate 6 partial next action 이 내부 id 때문에 `--gate 4` 로 안내되던 출력 버그를 고쳤습니다.
+- `production` 단어가 `product` 로 오인되어 note CLI 작업이 상품/검색 도메인으로 분류되는 문제를 막았습니다.
+- 테스트가 0개 실행된 명령 출력은 exit 0 이어도 acceptance evidence 로 인정하지 않도록 Gate 6 검수 문구를 추가했습니다.
+
 ## 0.6.127
 
 이번 버전은 channel publish workflow 파일 자체가 GitHub Actions 에서 invalid YAML 로 거절되던 문제를 막습니다.

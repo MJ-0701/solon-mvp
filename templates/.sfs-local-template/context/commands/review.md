@@ -102,6 +102,7 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   for changed data/API/UI/auth/session/migration/cache/persistence/log shapes;
   mock-only evidence is partial without fixture name, invariant, boundary/
   negative coverage, and command/result.
+- Test output with zero tests run is not acceptance evidence, even when exit code is 0; require corrected discovery/selector evidence or an explicit waiver before PASS.
 - Gate 6 security/logging review maps touched surfaces to OWASP-style web/API/
   LLM/MCP risks, checks authz/secrets/PII/prompt-injection/tool-scope, rejects
   stray production `console.log`/`debugger`/probe logs, and requires Datadog or
@@ -196,5 +197,4 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - For Gate 3 Plan review, partial/fail should name the smallest plan rework and
   the next self-review command. It must not ask whether to implement unless the
   user explicitly asks to waive the gate.
-- If review finds a repeated agent mistake, record the smallest harness
-  improvement: guardrail/check/hook/context-rule or equivalent scripted check.
+- If review finds a repeated agent mistake, record the smallest harness improvement: guardrail/check/hook/context-rule or equivalent scripted check.

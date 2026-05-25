@@ -1030,8 +1030,9 @@ resolve_review_stage() {
 }
 
 review_next_action_line() {
-  local gate="${1:-}" verdict="${2:-unknown}" stage="${3:-artifact}" gate_display
+  local gate="${1:-}" verdict="${2:-unknown}" stage="${3:-artifact}" gate_display gate_number
   gate_display="$(sfs_gate_display_label "${gate}" 2>/dev/null || printf '%s' "${gate:-Gate -}")"
+  gate_number="$(sfs_gate_number "${gate}" 2>/dev/null || printf '%s' "${gate#G}")"
   case "${verdict}" in
     pass)
       case "${gate}" in
@@ -1064,7 +1065,7 @@ review_next_action_line() {
       esac
       ;;
     partial)
-      printf 'rework the smallest failing slice, then rerun sfs review --gate %s\n' "${gate#G}"
+      printf 'rework the smallest failing slice, then rerun sfs review --gate %s\n' "${gate_number}"
       ;;
     fail)
       printf 'stop and return to the prior gate; do not hand off implementation from a FAIL review\n'
@@ -2290,6 +2291,30 @@ render_indexed_target_source_excerpts() {
   done
 }
 
+render_same_gate_self_cpo_pass_evidence() {
+  local self_result_path verdict
+  [[ "${REVIEW_STAGE}" == "cross" ]] || return 0
+
+  printf '\n### same-gate self-CPO PASS evidence for cross review\n\n'
+  self_result_path="$(latest_gate_review_stage_pass "${GATE_ID}" "self" || true)"
+  if [[ -z "${self_result_path}" ]]; then
+    printf '(no prior same-gate self-CPO PASS found in SFS review_run events)\n'
+    return 0
+  fi
+
+  verdict="$(extract_result_verdict "${self_result_path}" || true)"
+  printf -- '- gate: `%s`\n' "${GATE_DISPLAY}"
+  printf -- '- review_stage: `self`\n'
+  printf -- '- result_path: `%s`\n' "${self_result_path}"
+  printf -- '- result_verdict: `%s`\n' "${verdict:-unknown}"
+  printf -- '- policy: this SFS-collected same-gate self-CPO PASS satisfies the prior-self-PASS ordering evidence for cross review; review artifact quality separately.\n\n'
+  if [[ -f "${self_result_path}" ]]; then
+    printf '```text\n'
+    sed -n '1,80p' "${self_result_path}"
+    printf '\n```\n'
+  fi
+}
+
 render_evidence_bundle() {
   printf '## Embedded Evidence Bundle\n\n'
   printf 'The following evidence was collected by SFS before invoking the executor. Review this embedded evidence first; do not assume your CLI has project file/tool access. If evidence is insufficient, return partial/fail and list the missing evidence instead of calling unsupported tools.\n\n'
@@ -2316,6 +2341,7 @@ render_evidence_bundle() {
   render_indexed_target_source_excerpts
   render_first_class_review_file_excerpts
   render_review_file_excerpts
+  render_same_gate_self_cpo_pass_evidence
   printf '\n### review.md note\n\n'
   printf 'Only the first 80 lines of review.md are embedded to prevent recursive prompt growth. Full CPO prompts live under .sfs-local/tmp/review-prompts/.\n'
   render_evidence_file "${REVIEW_PATH}" 80
@@ -2629,6 +2655,9 @@ Self-validation policy:
   with evidence, explicitly deferred/waived with user approval, or removed by an
   approved plan update. A GitHub check, @codex review, high review count, or
   "looks done" summary is not a substitute for this ledger.
+- Test command output that reports zero tests run is non-acceptance evidence,
+  even when the process exits 0. Return partial unless the artifact provides a
+  corrected command, explicit test discovery/selector, or a valid waiver.
 - If implement.md records `agent_mode: parallel`, Gate 6 must prove the lane
   contract before PASS: disjoint files_scope, AC/ADR subset ownership, expected
   tests/evidence, output report path, merge/conflict policy, native/workspace-
@@ -2963,7 +2992,7 @@ append_result_excerpt() {
 
 emit_result_excerpt_stdout() {
   local file="$1"
-  emit_result_metadata_stdout "${file}" "ready"
+  emit_result_metadata_stdout "${file}" "ready" "${GATE_ID}" "${REVIEW_STAGE}"
 }
 
 if [[ "${RUN_REVIEW}" == "true" && "${ALLOW_EMPTY_REVIEW}" != "true" ]] && ! has_review_items; then

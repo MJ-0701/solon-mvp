@@ -1,3 +1,30 @@
+## [0.6.128] - 2026-05-25
+
+> **Gate 6 cross review sees the latest self-CPO PASS.**
+
+### Fixed
+
+- Embedded the latest same-gate self-CPO PASS metadata and result excerpt
+  directly into cross-review prompts. Gate 6 cross review no longer depends on
+  the first 80 lines of `review.md` to discover prior self-CPO PASS evidence.
+- Fixed review next-action rendering so partial Gate 6 reviews point back to
+  `sfs review --gate 6`, not the internal `G4` artifact id or a placeholder
+  gate label.
+- Refined `sfs start` natural-language domain inference so `production` is not
+  mistaken for `product`, and note CLI goals route to
+  `tooling/cli/note-cli` instead of `catalog/products/search`.
+- Added explicit Gate 6 guidance that zero-test command output is not
+  acceptance evidence even when the command exits 0.
+
+### Tests
+
+- Added `test-sfs-review-cross-self-pass-capsule.sh` to reproduce the Gate 6
+  cross-review self-PASS evidence gap and the bad next-action formatting.
+- Extended shared handoff/domain inference tests with a note CLI goal that
+  contains both `production` and `search` words.
+- Extended behavior guardrail tests for zero-test evidence and same-gate
+  self-CPO cross-review capsule guidance.
+
 ## [0.6.127] - 2026-05-25
 
 > **Release channel workflow YAML is syntax-guarded.**

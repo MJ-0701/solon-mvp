@@ -477,10 +477,13 @@ sfs_path_segment_from_text() {
 }
 
 sfs_infer_domain_metadata() {
-  local raw="${1:-}" workspace="${2:-work-slice}" text domain="" subdomain="" feature=""
+  local raw="${1:-}" workspace="${2:-work-slice}" text text_words domain="" subdomain="" feature=""
   text="$(printf '%s' "${raw}" | tr '[:upper:]' '[:lower:]')"
+  text_words="$(printf '%s' "${text}" | LC_ALL=C sed -E 's/[^a-z0-9]+/ /g; s/[[:space:]]+/ /g; s/^/ /; s/$/ /')"
 
   case "${text}" in
+    *notecli*|*note\ cli*|*노트*|*메모*)
+      domain="tooling"; subdomain="cli" ;;
     *주문상품*|*주문\ 상품*|*order-items*|*orderitem*|*order-item*|*order\ item*|*line-item*|*line\ item*)
       domain="order"; subdomain="order-items" ;;
     *주문*|*order*)
@@ -493,25 +496,37 @@ sfs_infer_domain_metadata() {
       domain="payment"; subdomain="refunds" ;;
     *배송*|*배달*|*shipping*|*shipment*|*delivery*)
       domain="fulfillment"; subdomain="shipping" ;;
-    *상품*|*product*|*catalog*)
+    *상품*)
       domain="catalog"; subdomain="products" ;;
-    *재고*|*inventory*|*stock*)
-      domain="catalog"; subdomain="inventory" ;;
-    *회원*|*사용자*|*고객*|*user*|*member*|*customer*)
-      domain="user"; subdomain="accounts" ;;
-    *인증*|*로그인*|*auth*|*login*|*sign-in*|*signup*|*sign-up*)
-      domain="identity"; subdomain="auth" ;;
-    *관리자*|*admin*|*dashboard*)
-      domain="admin"; subdomain="dashboard" ;;
-    *보안*|*security*|*audit*)
-      domain="security"; subdomain="audit" ;;
-    *디자인*|*design*)
-      domain="design"; subdomain="system" ;;
-    *pdf*)
-      domain="document"; subdomain="pdf" ;;
+    *)
+      case "${text_words}" in
+        *" product "*|*" products "*|*" catalog "*)
+          domain="catalog"; subdomain="products" ;;
+      esac
+      ;;
   esac
 
+  if [[ -z "${domain}" ]]; then
+    case "${text}" in
+      *재고*|*inventory*|*stock*)
+        domain="catalog"; subdomain="inventory" ;;
+      *회원*|*사용자*|*고객*|*user*|*member*|*customer*)
+        domain="user"; subdomain="accounts" ;;
+      *인증*|*로그인*|*auth*|*login*|*sign-in*|*signup*|*sign-up*)
+        domain="identity"; subdomain="auth" ;;
+      *관리자*|*admin*|*dashboard*)
+        domain="admin"; subdomain="dashboard" ;;
+      *보안*|*security*|*audit*)
+        domain="security"; subdomain="audit" ;;
+      *디자인*|*design*)
+        domain="design"; subdomain="system" ;;
+      *pdf*)
+        domain="document"; subdomain="pdf" ;;
+    esac
+  fi
+
   case "${text}" in
+    *notecli*|*note\ cli*|*노트*|*메모*) feature="note-cli" ;;
     *수량*|*quantity*) feature="quantity-update" ;;
     *검색*|*search*) feature="search" ;;
     *필터*|*filter*) feature="filter" ;;

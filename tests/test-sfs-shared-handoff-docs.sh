@@ -107,4 +107,25 @@ grep -Fq 'domain: "order"' "${domain_shared_dir}/retro.md" || fail "domain retro
 grep -Fq 'subdomain: "order-items"' "${domain_shared_dir}/retro.md" || fail "domain retro missing subdomain frontmatter"
 grep -Fq 'feature: "quantity-update"' "${domain_shared_dir}/retro.md" || fail "domain retro missing feature frontmatter"
 
+note_sid="2026-W21-note-cli"
+note_start_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" start \
+  "local note CLI MVP with add/list/search, JSONL storage, tests, and no production debug logs" \
+  --id "${note_sid}")"
+assert_contains "${note_start_out}" "shared_docs: docs/solon/tooling/cli/note-cli/<yyyyMMdd>/" "note CLI start stdout"
+case "${note_start_out}" in
+  *"docs/solon/catalog/products/search"*)
+    fail "note CLI goal should not be inferred as catalog/products/search because of production/search words"
+    ;;
+esac
+
+note_auth_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" start \
+  "note CLI user auth MVP with local JSONL storage" \
+  --id "2026-W21-note-cli-auth")"
+assert_contains "${note_auth_out}" "shared_docs: docs/solon/tooling/cli/note-cli/<yyyyMMdd>/" "note CLI auth should preserve first-match domain"
+
+order_inventory_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" start \
+  "order item inventory quantity update" \
+  --id "2026-W21-order-inventory")"
+assert_contains "${order_inventory_out}" "shared_docs: docs/solon/order/order-items/quantity-update/<yyyyMMdd>/" "order-item inventory should preserve first-match domain"
+
 echo "test-sfs-shared-handoff-docs: OK"
