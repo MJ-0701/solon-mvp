@@ -14,6 +14,13 @@ WF_DIR="${DIST_DIR}/.github/workflows"
 fail=0
 for wf in "${WF_DIR}"/*.yml; do
   [[ -f "${wf}" ]] || continue
+  # GitHub rejects malformed workflow YAML before creating jobs; syntax failures
+  # otherwise show up as zero-job red release checks.
+  if ! ruby -ryaml -e 'YAML.load_file(ARGV.fetch(0))' "${wf}" >/dev/null 2>&1; then
+    echo "AC13 FAIL: ${wf} is not valid YAML"
+    fail=$((fail + 1))
+    continue
+  fi
   if ! grep -qE "^permissions:" "${wf}"; then
     echo "AC13 FAIL: ${wf} missing top-level 'permissions:' block"
     fail=$((fail + 1))

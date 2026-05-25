@@ -1,3 +1,20 @@
+## [0.6.127] - 2026-05-25
+
+> **Release channel workflow YAML is syntax-guarded.**
+
+### Fixed
+
+- Replaced an unindented heredoc inside `publish-product-channels.yml` with
+  YAML-safe `printf` lines. The previous file parsed in humans' editors but
+  GitHub Actions rejected it before job creation, leaving zero-job failed
+  release checks.
+
+### Tests
+
+- Extended `test-workflow-permissions.sh` to parse every packaged workflow with
+  Ruby YAML before checking permissions, so malformed workflow files fail before
+  release.
+
 ## [0.6.126] - 2026-05-25
 
 > **Release channel workflow push validation is no-op safe.**

@@ -7,6 +7,14 @@
 
 ---
 
+## 0.6.127
+
+이번 버전은 channel publish workflow 파일 자체가 GitHub Actions 에서 invalid YAML 로 거절되던 문제를 막습니다.
+
+- workflow 안의 token 누락 안내를 YAML-safe `printf` 방식으로 바꿨습니다.
+- 릴리스 테스트가 `.github/workflows/*.yml` 전체를 YAML 로 파싱해 syntax failure 를 먼저 잡습니다.
+- product push 에서 optional channel workflow 가 jobs=0 빨간 check 로 남는 문제를 실제 원인까지 닫습니다.
+
 ## 0.6.126
 
 이번 버전은 product repo push 때 optional channel workflow 가 빨간 zero-job check 로 남는 문제를 막습니다.
