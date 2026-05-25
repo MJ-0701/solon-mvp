@@ -7,6 +7,17 @@
 
 ---
 
+## 0.6.122
+
+이번 버전은 agent 가 본론을 놓치고 Gemini/Claude/Codex 같은 보조 도구 설정으로 빠지는 문제를 SFS 제품 버그로 막습니다.
+
+- Mainline Focus Guard 를 추가해 tool/auth/model setup 을 `mainline`, `unblocker`, `deferred_followup`, `blocked`, `out_of_scope` 로 분류하게 했습니다.
+- 진짜 unblocker 가 아니면 보조 설정이 sprint 본문을 가로챌 수 없습니다.
+- Gate 6 에 mock/fixture/seed/data validation evidence 를 추가했습니다. 이름 붙은 fixture, invariant, boundary/negative case, command/result 없이 mock 만으로 PASS 할 수 없습니다.
+- OWASP Web/API/LLM/MCP 관점의 agentic security/logging 검수와 Datadog 또는 동등한 redacted telemetry evidence/waiver 를 release readiness 에 포함했습니다.
+- production `console.log`, `debugger`, 임시 probe log 는 배포 전 제거 또는 명시 waiver 가 필요합니다.
+- 긴 작업은 wiki/workbench checklist 를 만들고 audit/edit/test/review/release 마다 상태를 갱신해야 합니다.
+
 ## 0.6.121
 
 이번 버전은 SFS 를 “무늬만 SFS”가 아니라 6본부 agent team 이 실제로 계획과 검수에 개입하는 방향으로 강화합니다.

@@ -26,6 +26,7 @@ module:
 - `policies/runtime-token-firewall.md` — capsule-only worker/review handoff and no full-history forwarding.
 - `policies/session-continuation-guard.md` — stop long-session token bleed with fresh-session handoff.
 - `policies/division-subagent-council.md` — six core divisions as always-on conceptual sub-agents.
+- `policies/mainline-focus-guard.md` — keep helper tool/setup work subordinate to the main objective.
 - `policies/context-pollution-guard.md` — keep core docs/context free of prompt bodies, transcripts, and scratch residue.
 - `policies/source-driven-development.md` — official-source verification for framework/library patterns.
 - `policies/debugging-and-error-recovery.md` — stop-the-line failure triage and root-cause guardrails.
@@ -40,6 +41,9 @@ module:
 - `policies/enterprise-plan-council-pack.md` — plan-stage 6-division council contract.
 - `policies/enterprise-evidence-pack.md` — QA/QC evidence and project-applied validation.
 - `policies/enterprise-performance-review-pack.md` — performance and algorithm review lens.
+- `policies/gate6-data-validation-pack.md` — mock/fixture/seed/data validation at Gate 6.
+- `policies/agentic-security-logging-pack.md` — OWASP-style security, console-log, and Datadog evidence guard.
+- `policies/wiki-mission-checklist-skill.md` — live wiki checklist for long-context follow-through.
 - `policies/*-knowledge-pack.md` — English compact guidance packs for each lens/pack.
 - `policies/*-knowledge-pack.ko.md` — Korean compact guidance packs for each lens/pack.
 - `policies/*-knowledge-pack-*.md` — split child packs loaded only after a parent pack activates matching ids.

@@ -74,6 +74,21 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   Plan must record risk flags, selected child packs, and an enterprise council
   row for each relevant division. Empty six-division ceremony is not PASS; each
   row needs a finding, evidence, waiver, or concrete not-applicable reason.
+- Load `policies/mainline-focus-guard.md` when tool/auth/model setup appears
+  beside the user's real objective. Plan must classify side work as mainline,
+  unblocker, deferred_followup, blocked, or out_of_scope and define the return
+  condition to the main objective.
+- Load `policies/gate6-data-validation-pack.md` when the plan changes data
+  shape, fixture/mock/seed, API payload, UI state, auth/session, migration/
+  backfill, cache, persistence, or observable log/analytics shape. Add data
+  validation AC with named fixture/invariant/command/result expectation.
+- Load `policies/agentic-security-logging-pack.md` when auth, permissions,
+  secrets, PII, untrusted input/output, agent tools, dependencies, release,
+  logs, console output, Datadog, or observability is in scope. Add OWASP family,
+  no-stray-console-log, redaction, and Datadog/equivalent evidence expectations.
+- Load `policies/wiki-mission-checklist-skill.md` for long-context/multi-defect/
+  multi-agent/release/monitor work or when the user says issues may blur. Name
+  the checklist path and make checklist reconciliation part of Gate 6.
 - A plan is not ready just because it is long. It is ready when an evaluator can
   independently check pass/partial/fail without reading the generator's mind.
 - In the review-readiness checklist, avoid translationese such as `열린 결정이
@@ -158,6 +173,10 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   signals are present, route through `policies/enterprise-agent-team-pack.md`
   and its matching child pack instead of treating the division ledger as a
   cosmetic table.
+- If mainline focus, data validation, OWASP/security/logging, Datadog, console
+  log cleanup, or checklist signals are present, route through the matching
+  packs before Gate 3 review. These are product behavior requirements, not
+  optional polish.
 - If backend/JVM/Spring/JPA/transaction/batch/integration/DevOps/AWS risk is in
   scope, record matching ids from `policies/backend-knowledge-pack.md` or
   `policies/backend-knowledge-pack.ko.md` only after router selection.

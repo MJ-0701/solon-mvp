@@ -24,6 +24,9 @@ infra/DevOps, management-admin, taxonomy 지식팩/review lens 와 enterprise ag
 팩으로 제공됩니다. DDD/TDD 는 backend 전용이 아니라 모든 product behavior 에 걸리는
 기본선이고, backend 는 그 specialization 중 하나입니다. enterprise plan council/evidence/
 performance pack 은 plan 을 실제 설계 단계로 만들고 Gate 6 주장을 측정 가능하게 만듭니다.
+mainline focus, Gate 6 data validation, agentic security/logging,
+wiki-mission checklist pack 은 보조 도구 설정, mock-only evidence,
+OWASP/Datadog gap, long-context drift 가 본작업 완료처럼 통과되는 것을 막습니다.
 
 중요한 점은 사용자가 이 목록을 외우지 않아도 된다는 것입니다. Solon 은 작업 성격을 보고 필요한
 관점만 읽습니다. 작은 문서 수정은 작게 보고, 배포나 구조 변경처럼 위험이 큰 작업은 더 단단하게

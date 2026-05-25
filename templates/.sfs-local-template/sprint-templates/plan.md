@@ -42,6 +42,17 @@ user_approval_evidence: ""
 - 사용자 결정 지점:
 - AI 위임 범위:
 
+## 5.1 Mainline Focus Ledger
+
+- main objective:
+- current step:
+- side-work classification: mainline / unblocker / deferred_followup / blocked / out_of_scope
+- return condition:
+- evidence:
+
+보조 도구/인증/모델 설정은 본 objective 를 막는 진짜 unblocker 일 때만 interrupt 한다.
+그 외에는 본론 종료 후 follow-up 으로 남긴다.
+
 ## 6. DDD/TDD 기준
 
 - canonical domain terms:
@@ -77,7 +88,18 @@ user_approval_evidence: ""
 | infra |  |  |  |  |
 | taxonomy |  |  |  |  |
 
-## 9. 사용자 검토 / 승인 경계
+## 9. Data Validation / Security / Checklist Plan
+
+- data validation trigger: none / fixture / mock / seed / API payload / UI state / auth-session / migration / persistence / logs
+- representative data set:
+- fixture/mock/seed invariant:
+- expected validation command/result:
+- OWASP/security families:
+- production console/debug log policy:
+- Datadog/equivalent observability evidence:
+- mission checklist path:
+
+## 10. 사용자 검토 / 승인 경계
 
 - required: false
 - status: not-required
@@ -89,18 +111,22 @@ user_approval_evidence: ""
 Gate 3 review PASS 는 사용자 승인으로 간주하지 않는다. 사용자가 구현 진입을 승인하면
 `sfs capture --kind user-approval --gate 3 "..."` 로 evidence 를 남긴다.
 
-## 10. 위험
+## 11. 위험
 
 - 위험:
 - 대응:
 
-## 11. 리뷰 준비
+## 12. 리뷰 준비
 
 - [ ] 완료 기준이 측정 가능하다
 - [ ] 한 sprint 안에서 닫힌다
 - [ ] 검증 방법이 있다
+- [ ] main objective 와 보조 작업 분류/복귀 조건이 적혀 있다
 - [ ] Gate 2 결정이 요구사항과 AC에 연결되어 있다
 - [ ] product behavior 변경이면 DDD boundary 와 TDD evidence 또는 waiver 가 있다
+- [ ] data/mock/fixture/seed/API/UI/auth/session/persistence 변경이면 대표 데이터와 invariant 검증 계획이 있다
+- [ ] security/logging/deploy 변경이면 OWASP family, console/debug log 정책, Datadog/equivalent evidence 가 있다
+- [ ] 긴 컨텍스트/멀티 결함이면 wiki/workbench mission checklist 경로가 있다
 - [ ] strategy-pm/dev/QA/design/infra/taxonomy division ledger 가 AC/files/evidence 또는 waiver 로 채워져 있다
 - [ ] non-trivial product-bearing work 이면 Enterprise Plan Council risk flag / selected pack / AC evidence row 가 있다
 - [ ] 제품 의미/IA/visible UI/workflow/public contract/AC 의미 변경이면 사용자 승인 경계가 pending 으로 표시되어 있다

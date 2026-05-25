@@ -71,10 +71,20 @@ generator_executor: ""
 |---|---|---|---|---|
 |  |  |  |  |  |
 
-## 9. 다음
+## 9. Mainline / Data / Security / Checklist Ledger
+
+| area | trigger | evidence | verdict | follow-up/waiver |
+|---|---|---|---|---|
+| mainline focus |  |  |  |  |
+| data validation |  |  |  |  |
+| OWASP/security/logging |  |  |  |  |
+| Datadog/equivalent observability |  |  |  |  |
+| wiki/workbench checklist |  |  |  |  |
+
+## 10. 다음
 
 - pass:
 - partial:
 - fail:
 
-## 10. 호출 기록
+## 11. 호출 기록

@@ -28,7 +28,9 @@ commands:
 - `source-docs`: official-source evidence for frameworks, libraries, APIs, or
   standards.
 - `simplify`: behavior-preserving simplification.
-- `security`: untrusted input, secrets, auth, PII, or permission risk.
+- `security`: untrusted input, secrets, auth, PII, permission, observability, or
+  agent-tool risk; load `agentic-security-logging-pack.md` for OWASP/Datadog
+  release evidence.
 - `performance`: measurement-backed latency, memory, bundle, or throughput
   review.
 - `performance-algorithm`: alias of `performance` that must load
@@ -59,3 +61,7 @@ division packs. Project scaffold and any product behavior change should check
 Non-trivial product-bearing work should check the enterprise plan/evidence
 packs. Performance and algorithm claims are partial unless backed by measurement,
 bounded input reasoning, or explicit N/A waiver.
+Data shape, fixture/mock/seed, UI state, auth/session, migration/cache, or
+analytics/log shape changes should also load `gate6-data-validation-pack.md`.
+Tool/auth/model setup drift should load `mainline-focus-guard.md`; long-context
+or multi-defect work should load `wiki-mission-checklist-skill.md`.

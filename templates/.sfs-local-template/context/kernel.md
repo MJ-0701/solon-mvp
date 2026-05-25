@@ -13,9 +13,7 @@ load_when: ["always", "sfs", "entry"]
   project-wide Solon reference docs may live under `docs/solon/`.
   `.sfs-local/` is private local workbench state and should remain thin.
 - Obsidian LLM wiki is a recommended companion, not a hard dependency. If `.obsidian/` or `llm-wiki/` exists, treat it as active context: read
-  `llm-wiki/README.md` and `llm-wiki/ddd/README.md` before broad scans, then
-  update the relevant map or record a gap/waiver when domain, release, tests, or
-  core components change.
+  `llm-wiki/README.md` and `llm-wiki/ddd/README.md` before broad scans, then update the relevant map or gap/waiver when domain, release, tests, or core components change.
 - Host-local tool/skill bundles and user-home folders are external environment,
   not project SSoT, wiki roots, install targets, or migration sources. Do not
   install, clone, scaffold, or promote them while building an Obsidian wiki
@@ -23,16 +21,8 @@ load_when: ["always", "sfs", "entry"]
   environment evidence only.
 - Stop on mutex conflicts and report owner/domain.
 - Ask only 1-3 blocking questions.
-- Decision questions must be self-contained: before any `Q1`, `D1`, or option
-  id, explain what is decided, why it matters, the recommended default, and what
-  each option changes. Labels are cross-references, not the explanation.
-- Do not compress decisions into a question/recommendation-only table: show every viable option with meaning/consequence, or ask one decision at a time.
-- Never ask the user to confirm a compact option bundle such as `A/A/A/C/C`,
-  and never answer "show the recommendation again" with only option labels or
-  only the recommended row. Re-present the decision in plain language: the
-  recommended default, what it commits to, and which alternatives would change
-  the plan. Confirmation phrases should be natural language such as
-  `권장안 그대로 확정`, not label bundles.
+- Decision questions must be self-contained: before any `Q1`, `D1`, or option id, explain what is decided, why it matters, the recommended default, and what each option changes. Labels are cross-references, not the explanation.
+- Do not compress decisions into question/recommendation-only tables or compact option bundle values such as `A/A/A/C/C`; show every viable option or ask one decision at a time, then re-present the default, commitment, and alternatives in plain language. Use natural confirmation such as `권장안 그대로 확정`.
 - Taxonomy is a product function, not an org division or copy polish. Match the
   user's native/workspace language and project terms. Do not
   machine-translate SFS command/domain terms into mixed phrases, and do not
@@ -65,10 +55,8 @@ load_when: ["always", "sfs", "entry"]
 - Executable Action Ownership is ambient: run runnable shell/tool steps yourself when auth, runtime, and approval are available. Do not hand the user copy-paste commands unless explicitly requested or a true blocker prevents execution.
 - Distinguish true blockers from approval gates: true blockers are missing auth, unavailable tooling/runtime, sandbox or permission denial, uncaptured destructive/data-loss/public-contract approval, or broader scope; session-scoped authorization such as `알아서 해` lets same-scope gated work continue until scope changes or a true blocker appears.
 - Shell state is not a user problem: use one-shot commands with explicit working directory and inline environment, mask secrets, and do not ask the user to export variables, switch terminals, or rerun commands because shell state would not persist.
-- Monitor checkpoint classification is mandatory for long-running watch/monitor work: classify each checkpoint as `progressing`, `slow`, `stalled`, `dead`, or `auth_blocked`.
-  Record commit delta, PR/head delta, local dirty state, test/check delta, review status delta, worker liveness probe result, lane-utilization evidence or waiver, and next action `wait`, `probe`, `revive`, or `close`.
-  Worker liveness for monitor purposes requires a request-response probe, never process/auth-status alone. Probes use a static benign payload only, never workspace/user content, and persist only status/category/timestamp/redacted error class.
-  do not persist raw stdout/stderr, bearer/auth tokens, env vars, prompt bodies, model responses, workspace/user content, or PII. Closing a monitor requires heartbeat/automation cleanup and durable wiki/report evidence.
+- Monitor checkpoint classification is mandatory for long-running watch/monitor work: classify `progressing`, `slow`, `stalled`, `dead`, or `auth_blocked`; record commit delta, PR/head delta, local dirty state, test/check/review deltas, worker request-response liveness probe, lane-utilization evidence or waiver, next action, heartbeat/automation cleanup and durable wiki/report evidence.
+  Worker liveness requires request-response probe, never process/auth-status alone. Probes use a static benign payload only; persist only status/category/timestamp/redacted error class; do not persist raw stdout/stderr, bearer/auth tokens, env vars, prompt bodies, model responses, workspace/user content, or PII.
 - Handoff-only scope is a stop contract: if the user asks only to create/update a handoff, next-session brief, session report, or `인계문서`, immediately write the artifact, record current state/blockers/first next command, clean heartbeat/automation evidence when relevant, then stop. Do not start or continue PR polling, review retriggers, merges, implementation, deploy, or monitor loops; interrupt active or queued batches and do not finish current PRs first unless the same user request explicitly asks to continue that work. If post-request PR/review/merge work already happened, report it as a scope breach, not as a justification.
 - User-facing docs HTML-first: agent-facing docs/logs/SSoT stay Markdown, but
   real-user guides, reports, handbooks, onboarding, and landing docs default to HTML.
@@ -81,6 +69,12 @@ load_when: ["always", "sfs", "entry"]
 - Token/harness hygiene is ambient: keep adapter memory thin, prefer routed
   context and symbol/semantic search before broad reads, and convert repeated
   AI mistakes into guardrails/checks during review or retro.
+- Mainline Focus Guard is ambient: restate the main objective before meaningful side work. Tool/auth/model/connector setup is `mainline`, `unblocker`, `deferred_followup`, `blocked`, or `out_of_scope`; only true `unblocker` setup may interrupt, and then only for the minimum viable setup before returning to the main objective.
+  If helper setup consumes the sprint while the user's requested outcome remains unverified, Gate 6 is partial and the drift becomes a product defect.
+- Long-context checklist skill is ambient when work spans multiple defects,
+  agents, repos, monitors, releases, or user says issues may blur. Create or
+  update a wiki/workbench checklist, move items `[ ] -> [~] -> [x]` as evidence
+  appears, and reconcile open items before final answer.
 - Session Continuation Guard is ambient: `sfs upgrade` cannot shrink an already-open LLM conversation. If token meter is 30%+ before a new WU/sprint, 50%+ before a new gate/loop/review handoff, repeated wakeups, or multiple WUs/sprints in one chat, fresh-session transfer is lossless autopilot: write durable handoff/transfer capsule first, then invoke host-owned transfer/new-session/archive/clear+resume and resume immediately when available, otherwise stop with exact prompt. Do not call bare clear. Do not ask the user to type `/clear`.
 - Runtime Token Firewall is ambient: worker/review/executor handoffs are
   capsule-only. Do not forward the lead agent's full conversation history to a
@@ -115,6 +109,10 @@ load_when: ["always", "sfs", "entry"]
 - Gate 6 closes only with an implementation acceptance ledger: every planned
   AC/ADR/decision is implemented, missing, deferred, or waived; implemented rows
   point to files/evidence, and gaps cite approval or follow-up owner.
+- Gate 6 data validation is mandatory when data shape, fixture/mock/seed, API payload, UI state, auth/session, migration/backfill, cache, persistence, or log/analytics shape changes. Mock data is not acceptance evidence unless it is a named synthetic fixture with invariant assertions and boundary/negative coverage or waiver.
+  Prefer failing/regression or characterization evidence before the fix; record validation command, result, sample/count, and waiver if real integration is not practical.
+- Security/logging is a release gate when auth, permissions, secrets, PII, untrusted input/output, agent tools, dependencies, observability, or deploy is in scope. Map risks to OWASP-style web/API/LLM/MCP families, verify unauthorized/cross-owner and masking cases where applicable, reject stray production `console.log`/`debugger`/probe logs, and route errors through Datadog or equivalent observability with redaction.
+  Absence of Datadog or equivalent evidence needs waiver/follow-up.
 - Gate order is a runtime contract, not presentation etiquette: after Gate 3
   (Plan) says ready-for-implement, the default next step is Gate 3 review
   (`sfs review --gate 3`) before any `sfs implement` handoff.
@@ -149,27 +147,14 @@ load_when: ["always", "sfs", "entry"]
 - SFS commit guidance must use the SFS command surface: `sfs commit plan` and
   `sfs commit apply --group <name>`; it commits and pushes the current branch by default in user projects. Use `--no-push` only for sandbox/offline work. Do
   not route Solon commit guidance to a host-local `/commit` skill.
-- Advisor review is not a self-CPO PASS. Before asking for external/Codex/
-  Claude/Gemini cross review or using it as gate evidence, the current author
-  must run a local self-CPO mini-check and record pass/partial/fail. The check
-  must trace requirements to AC, work slices, and ADR/decision ids; verify every
-  AC has a file/artifact plus evidence mapping; and confirm SEED, placeholder,
-  mock, or fallback text starts as failing or explicitly non-acceptance
-  evidence. Missing self-CPO evidence is partial, not ready for cross review.
+- Advisor review is not a self-CPO PASS. Before external/Codex/Claude/Gemini cross review or gate use, the author records local self-CPO pass/partial/fail tracing requirements to AC, slices, ADR/decisions, file/artifact/evidence, and SEED/placeholder/mock/fallback non-acceptance. Missing self-CPO evidence is partial.
 - GitHub PR/code review is separate from SFS review and is post-implementation
   only. Do not request, trigger, or count GitHub `@codex` review during
   brainstorm or Gate 3 plan review. A GitHub `@codex` review, PR approval, or
   GitHub check PASS may be useful external evidence, but it does not satisfy
   self-CPO, SFS cross review, `sfs review`, Gate 3, or Gate 6 PASS by itself.
-- External review/check PASS is a continuation trigger, not a stopping point.
-  Codex, Claude, Gemini, and future LLM agents must continue to the next unmet
-  SFS review step. For Gate 6 implementation review, run
-  `sfs review --gate 6 --stage self`, then `sfs review --gate 6 --stage cross`,
-  then GitHub `@codex` as final external evidence when available. If the sprint
-  is closed, use `sfs review --sprint <id> --gate <n>` instead of restoring
-  state by hand. If the sprint id is unknown, ask for that id; do not create a
-  new sprint, hand-edit `.sfs-local/current-sprint`, or extract archives
-  manually.
+- External review/check PASS is a continuation trigger, not a stopping point. Codex, Claude, Gemini, and future LLM agents continue to the next unmet SFS review step: Gate 6 self, cross, then GitHub `@codex` when available; closed sprints use `sfs review --sprint <id> --gate <n>` instead of restoring state by hand.
+  If the sprint id is unknown, ask for that id; do not create a new sprint, hand-edit `.sfs-local/current-sprint`, or extract archives manually.
 - Cross review comes after local self-review passes; partial/fail returns to
   rework and self-review before another cross review or implementation handoff.
 - If no other agent subscription exists, tokens are exhausted, or the bridge is
@@ -178,13 +163,8 @@ load_when: ["always", "sfs", "entry"]
 - Role split is invariant: C-Level owns intent, architecture, AC, and review;
   worker/generator owns fixed implementation slices. Do not present C-Level
   direct implementation as the normal default when a worker profile exists.
-- Model routing reflects role split. Claude coding-capable lanes use Sonnet 4.6;
-  Haiku is non-coding helper-only. Substantive research should prefer Gemini
-  `gemini-3.1-pro-preview`; Gemini agentic coding routes to `gemini-3-flash-preview`;
-  relay/probe/economy helpers route to `gemini-3.1-flash-lite`. Codex uses
-  `gpt-5.4` for general workers, `gpt-5.4-mini` for helper I/O,
-  `gpt-5.3-codex` for bounded coding helpers, and
-  `gpt-5.3-codex-spark` for judgment-free mechanical implementation.
+- Model routing reflects role split. Claude coding-capable lanes use Sonnet 4.6; Haiku is non-coding helper-only. Substantive research should prefer Gemini `gemini-3.1-pro-preview`; Gemini agentic coding routes to `gemini-3-flash-preview`; helper/probe lanes use `gemini-3.1-flash-lite`.
+  Codex uses `gpt-5.4` for general workers, `gpt-5.4-mini` for helper I/O, `gpt-5.3-codex` for bounded coding helpers, and `gpt-5.3-codex-spark` for judgment-free mechanical implementation.
 - Work is not complete until self-agent top-model CPO records PASS: Claude
   Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3.1-pro-preview`, or custom
   top-model equivalent. Partial/fail repeats rework + self-CPO until PASS/waiver.

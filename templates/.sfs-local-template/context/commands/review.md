@@ -8,22 +8,15 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 
 - Adapter-run by default: run `sfs review ...` before summarizing.
 - Do not create a new verdict from memory; use `review.md` and recorded result paths.
-- If the relevant sprint was compacted/closed and `current-sprint` is missing,
-  use `sfs review --sprint <id> --gate <n>`; do not edit `.sfs-local/current-sprint`
-  or extract tarballs manually.
+- If the relevant sprint was compacted/closed and `current-sprint` is missing, use `sfs review --sprint <id> --gate <n>`; do not edit `.sfs-local/current-sprint` or extract tarballs manually.
 - After any external GitHub/@codex/PR/check PASS, do not stop at PASS. Record
-  the evidence, then continue the review gate: self-CPO first, cross-review
-  after self-CPO PASS. If the sprint is closed but the id is known, the next
-  command is `sfs review --sprint <id> --gate <n>`; if the id is unknown, ask
-  for that id instead of creating a new sprint or manually restoring
-  `.sfs-local/current-sprint`.
+  evidence and continue the gate: self-CPO first, cross-review after self-CPO PASS. Closed sprint with known id uses
+  `sfs review --sprint <id> --gate <n>`; unknown id means ask for it, not restore
+  `.sfs-local/current-sprint` or create a new sprint.
 - Handoff-only scope is a stop contract and overrides continuation triggers: if the user asks only for a handoff, next-session brief, session report, or `인계문서`, immediately record review/PR status as next-session evidence and stop. External review/check PASS does not override handoff-only scope; do not start or continue PR polling, review retriggers, merges, implementation, deploy, or monitor loops; interrupt active or queued batches and do not finish current PRs first unless the same request explicitly asks to continue. If post-request PR/review/merge work already happened, report it as a scope breach, not as a justification.
 - GitHub @codex review is post-implementation only. Do not request, trigger, or
   count GitHub @codex review during brainstorm or Gate 3 plan review.
-- Gate 3 plan review is the required bridge between plan and implement. When a
-  plan says ready-for-implement, review the plan contract first with
-  `sfs review --gate 3`; only a PASS/accepted result should route to
-  `sfs implement`.
+- Gate 3 plan review is the required bridge between plan and implement. When a plan says ready-for-implement, review the plan contract first with `sfs review --gate 3`; only PASS/accepted routes to `sfs implement`.
 - Gate 3 review PASS does not approve product judgment. If a plan changes
   product meaning, AC meaning, IA, visible UI/workflow, public contract,
   security/privacy/data-loss, cost/model policy, or destructive behavior, require
@@ -31,14 +24,11 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   captured with `sfs capture --kind user-approval --gate 3 "..."` or waiver.
 - Gate 3 review has a sequence: local self-review until PASS, then independent
   cross review. Gate 3 may use self-CPO fallback only with operational evidence:
-  no other agent subscription, external token exhaustion, or bridge unavailability.
-- Local self-review means a self-CPO mini-check, not an advisor call: record
-  pass/partial/fail, requirements-to-AC-to-slice-to-ADR traceability,
-  AC-to-file/artifact/evidence mapping, and SEED/placeholder/mock/fallback as
-  fail/partial/non-acceptance until real deliverables replace it. If that evidence is absent, return partial.
-- If self-review returns partial/fail, rework the plan and run self-review
-  again. If cross review returns partial/fail, rework the plan and return to
-  self-review before another cross review.
+  no other agent, external token exhaustion, or bridge unavailability.
+- Local self-review means a self-CPO mini-check, not advisor chat: record pass/
+  partial/fail, requirement-to-AC/slice/ADR traceability, AC-to-file/artifact/
+  evidence mapping, and SEED/placeholder/mock/fallback as non-acceptance until replaced. If that evidence is absent, return partial.
+- If self-review returns partial/fail, rework and rerun self-review. If cross review returns partial/fail, rework and return to self-review before another cross review.
 - If deterministic, narrow findings need no product owner judgment, autopilot
   the rework loop: patch, run the smallest verification, rerun self-CPO/cross
   review, and do not ask "진행?" / "proceed?". Examples: missing self-CPO
@@ -59,18 +49,13 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   architecture, public API/schema/CLI contract, security/privacy/data-loss,
   cost/latency/model policy, destructive behavior, acceptance criteria meaning,
   or after repeated partial/fail on the same micro-fix.
-- For long-running monitor/review work, require monitor checkpoint
-  classification evidence before accepting "still monitoring" or "done":
-  state `progressing`, `slow`, `stalled`, `dead`, or `auth_blocked`; include
-  commit delta, PR/head delta, local dirty state, test/check delta, review
-  status delta, worker liveness probe result, lane-utilization evidence or
-  waiver, and next action `wait`, `probe`, `revive`, or `close`. Worker
-  liveness needs a request-response probe, never process/auth-status alone;
-  probes use a static benign payload, never workspace/user content, and persist
-  only status/category/timestamp/redacted error class. Raw stdout/stderr,
-  bearer/auth tokens, env vars, prompt bodies, model responses, workspace/user
-  content, and PII are not durable monitor evidence. Gate close also checks
-  heartbeat/automation cleanup plus durable wiki/report evidence.
+- Long monitor/review work needs checkpoint classification before "still
+  monitoring" or "done": `progressing`, `slow`, `stalled`, `dead`, or `auth_blocked`;
+  include commit delta, PR/head delta, local dirty state, test/check/review
+  deltas, request-response probe, never process/auth-status alone,
+  lane-utilization evidence or waiver, next action, heartbeat/automation cleanup plus durable wiki/report evidence. Probe with static benign payload and
+  persist status/category/timestamp/redacted error class only. Raw stdout/stderr,
+  tokens/env vars/prompts/model output/workspace/user content/PII are not durable evidence.
 - Do not treat review volume as completion. Number of lenses, rounds, advisor
   comments, or elapsed time never unlocks `sfs implement`; only PASS or an
   explicit user waiver does.
@@ -104,13 +89,25 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - If the evaluator executor equals the generator executor, call out the
   self-validation risk and prefer a separate model or fresh agent context when
   the change is user-facing, risky, or hard to verify.
-- Gate 6 verifies `division_subagent_ledger`; missing relevant finding/evidence/
-  waiver is partial. For `agent_mode: parallel`, also verify disjoint files_scope,
+- Gate 6 verifies `division_subagent_ledger`; missing finding/evidence/waiver is
+  partial. For `agent_mode: parallel`, also verify disjoint files_scope,
   AC/ADR subset ownership, expected tests/evidence, output report path,
-  merge/conflict policy, native/workspace-language commit message, lane verification,
-  and cross review.
+  merge/conflict policy, native commit message, lane verification, and cross review.
 - Enterprise/non-trivial Gate 6 checks selected packs, QA/QC ledger, project-
   applied result for SFS/harness policy changes, and performance/algorithm ledger.
+- Gate 6 mainline review checks whether auxiliary tool/auth/model setup stayed
+  subordinate to the main objective; unclassified side work or helper setup that
+  consumes the sprint while the outcome is unverified is partial.
+- Gate 6 data review checks representative mock/fixture/seed/data validation
+  for changed data/API/UI/auth/session/migration/cache/persistence/log shapes;
+  mock-only evidence is partial without fixture name, invariant, boundary/
+  negative coverage, and command/result.
+- Gate 6 security/logging review maps touched surfaces to OWASP-style web/API/
+  LLM/MCP risks, checks authz/secrets/PII/prompt-injection/tool-scope, rejects
+  stray production `console.log`/`debugger`/probe logs, and requires Datadog or
+  equivalent observability/redaction evidence or waiver.
+- Gate 6 checklist review checks that high-context wiki/workbench checklist
+  items are all reconciled with evidence or explicit follow-up.
 - Review proposed or actual commit messages against the user's
   native/workspace language. English commit messages are correct only when the
   user/repo language is English or the repo explicitly requires English.
@@ -124,15 +121,12 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   `sfs review`, Gate 3, or Gate 6 PASS by itself; `review.md` must still
   contain the SFS gate verdict from `sfs review`, or the user must explicitly
   waive that gate.
-- External review/check PASS is a continuation trigger, not a stopping point.
-  Codex, Claude, Gemini, and future LLM agents must name the next unmet SFS
-  command instead of ending the turn at "PASS": run/record self-CPO first with
-  `sfs review --gate <n>` or `sfs review --sprint <id> --gate <n>`, then run
-  the configured cross-review sequence after self-CPO PASS.
-- Gate 6 implementation review order is self-CPO first, then cross CPO, then GitHub @codex
-  PR/code review as final external evidence when available. Use
-  `sfs review --gate 6 --stage self`, then `--stage cross`, then push/PR for
-  @codex. If only self-CPO is available, record the constraint.
+- External review/check PASS is a continuation trigger, not a stopping point: name the next unmet SFS
+  command, run/record self-CPO first, then configured cross-review after PASS.
+- Gate 6 implementation review order is self-CPO first, then cross CPO, then
+  GitHub @codex PR/code review as
+  external evidence when available: `sfs review --gate 6 --stage self`, then
+  `--stage cross`, then push/PR for @codex. Record constraints.
 - Before done, require self-agent top-model CPO evidence. Claude uses Opus 4.7,
   Codex uses `gpt-5.5` with xhigh reasoning, Gemini uses
   `gemini-3.1-pro-preview`, and custom runtimes use their top equivalent.
@@ -156,19 +150,20 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - Review the whole contract, not only changed code: shared intent, domain
   language consistency, feedback evidence, interface/artifact boundaries, and
   gray-box delegation should still match the Gate 2/3 record.
-- Natural-language SFS activation is real SFS. Return partial for facade-only SFS: SFS terms were used but routed context, active sprint status, handoff/
-  user intent, plan/review artifacts, or wiki/DDD maps were not reconciled.
+- Natural-language SFS activation is real SFS. Return partial for facade-only SFS:
+  SFS terms were used but routed context, active sprint status, handoff/user
+  intent, plan/review artifacts, or wiki/DDD maps were not reconciled.
 - If handoff/user intent conflicts with the active sprint and the evidence
   already answers the intended scope, return partial when the agent asks the
   user to restate it instead of classifying the work as mis-scoped.
-- Cross-layer DDD/TDD is in scope. Return partial when product behavior,
-  policy, workflow, permissions, ownership, lifecycle, data semantics, or state
-  transitions hide in broad entrypoints without a named boundary and evidence.
-  Broad-entrypoint growth that adds product behavior during a DDD/TDD session is partial unless extraction evidence or approved deferral is recorded.
-- Gate 6 review must build an implementation acceptance ledger from plan.md,
-  implement.md, log.md, diffs, and evidence; PASS only when every planned
-  AC/ADR/decision is implemented, user-approved deferred/waived, or removed by
-  approved plan update. Small deterministic gaps route to autopilot rework.
+- Cross-layer DDD/TDD is in scope. Product behavior, policy, workflow,
+  permissions, ownership, lifecycle, data semantics, or state transitions hidden
+  in broad entrypoints without boundary/evidence are partial; broad-entrypoint
+  growth during DDD/TDD also needs extraction evidence or approved deferral.
+- Gate 6 review builds an implementation acceptance ledger from plan.md,
+  implement.md, log.md, diffs, and evidence. PASS only when every planned
+  AC/ADR/decision is implemented, approved deferred/waived, or removed by
+  approved plan update; small deterministic gaps route to autopilot rework.
 - Performance/algorithm PASS needs measurement, bounded input reasoning, or N/A
   waiver. Pure text confidence is partial when hot path, query, browser runtime,
   payload, memory, or concurrency behavior changed.
@@ -177,10 +172,12 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - Load `policies/knowledge-pack-router.md` first, or
   `policies/knowledge-pack-router.ko.md` for Korean preference. Read matching
   split packs only when the router maps the current review scope to them.
-- Load `policies/enterprise-evidence-pack.md` for QA/QC, metrics, applied project
-  behavior, or wiki evidence. Load `policies/enterprise-performance-review-pack.md`
-  for `performance`, `performance-algorithm`, hot-path, query, algorithm, memory,
-  browser runtime, payload, or concurrency.
+- Load `enterprise-evidence-pack.md` for QA/QC/metrics/applied/wiki evidence and
+  `enterprise-performance-review-pack.md` for performance, algorithms, hot paths,
+  queries, memory, browser runtime, payloads, or concurrency.
+- Load `mainline-focus-guard.md`, `gate6-data-validation-pack.md`,
+  `agentic-security-logging-pack.md`, and `wiki-mission-checklist-skill.md` for
+  tool/setup drift, data validation, OWASP/Datadog logging, and checklist review.
 - For design/frontend work, check `design.md` or `docs/solon/design.md` when
   present. AI-slop risk such as arbitrary colors, token drift, or missing reusable UI contract can be findings.
 - For visible frontend/UI implementation, missing pre-user browser evidence is

@@ -46,3 +46,6 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
 - Final report/retro should preserve the cross-phase fundamentals that mattered:
   shared design concept, glossary/domain language, feedback evidence, boundary
   decisions, and any gray-box delegation still risky or deferred.
+- If a wiki/workbench mission checklist exists, reconcile every item to evidence,
+  waiver, or follow-up before `retro` close; unresolved checklist rows keep the
+  close partial.

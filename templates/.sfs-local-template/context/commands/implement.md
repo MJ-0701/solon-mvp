@@ -36,26 +36,21 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   touches architecture, public contracts, security, privacy, data-loss,
   release gates, or repeated review failure.
 - Valid artifacts: code, taxonomy, design handoff, QA evidence, infra/runbook,
-  management/admin evidence, decisions, docs, workflow, research, or
-  user-facing operating material.
+  admin evidence, decisions, docs, workflow, research, or user-facing material.
 - If the codebase, dependency change, or domain model is unfamiliar, split off a
   read-only research slice with `.sfs-local/personas/researcher.md`; prefer
   Gemini when configured and record only compact findings in the workbench.
-- Do not create new lifecycle commands for borrowed engineering practices.
-  Strengthen this existing implement rail with routed policies:
-  `policies/source-driven-development.md` for framework/library/API patterns,
-  `policies/debugging-and-error-recovery.md` when anything fails,
-  `policies/deprecation-and-migration.md` for legacy cleanup/migration, and
-  `policies/shipping-and-launch.md` for release/deploy slices.
+- Do not create new lifecycle commands for borrowed practices; route source-
+  docs, debugging, migration/deprecation, and release/deploy through policies.
+  Load `policies/source-driven-development.md` and debugging/deprecation/shipping
+  packs when those practices are triggered.
 - If intent is not shared, ask 1-3 precise questions before changing files.
 - Use project/domain terms consistently; add or reuse a small glossary when terms drift.
 - Move only as fast as feedback: test, smoke, preview, or review the smallest useful slice.
 - Keep changes surgical: touch only files and lines tied to the request, do not
   refactor adjacent code, and remove only unused pieces created by this slice.
-- For user-facing UX validation, add an explicit S0 repair contract before the
-  implementation slice: field-level location, friendly coaching copy, one-step
-  recovery action, and server-side fallback. Warning/blocking alone is not a
-  complete UX.
+- For user-facing UX validation, add S0 repair contract: field location,
+  coaching copy, one-step recovery, and server-side fallback. Warning/blocking alone is not a repair.
 - Prefer simple code over speculative flexibility. If the implementation grew
   larger than the problem justifies, simplify before review.
 - Inspect the exact files and nearby call sites before editing. Treat dirty
@@ -79,6 +74,21 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - If the plan selected enterprise packs, keep council evidence live while
   coding: update AC/files/evidence rows, record project-applied QA/QC for SFS/
   harness policy changes, and collect performance evidence for triggered hot paths.
+- Keep a mainline ledger live while coding. If a tool/auth/model setup issue
+  appears, classify it first; do only minimum viable unblocker work, then return
+  to the user's main objective. Do not let helper setup become the sprint unless
+  the plan says it is the deliverable.
+- For data-affecting work, create or reuse representative synthetic fixtures:
+  happy path, boundary, negative/unauthorized/cross-owner, legacy/null, and
+  idempotent rerun where relevant. Mock/seed/fallback evidence must name the
+  fixture, assert invariants, and record the validation command/result.
+- For security/logging work, map touched surfaces to OWASP-style families,
+  verify authz/masking/secret handling where relevant, remove or justify stray
+  production `console.log`/`debugger`/temporary traces, and route errors to
+  Datadog or the configured observability path with redaction.
+- For high-context work, update the wiki/workbench mission checklist at audit,
+  edit, test, review, and release boundaries. Do not rely on chat memory to
+  remember user-reported defects.
 - Execute approved runnable steps yourself: when shell/tool/auth context and
   approval are available, run the operation and record evidence. Give commands
   only when the user explicitly asked for them or a true blocker remains.
@@ -114,22 +124,12 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - When delegating worker slices, keep files_scope explicit and disjoint. Workers
   may implement fixed internals, but architecture, public API, domain terms, and
   acceptance criteria stay with CEO/CTO/user decisions.
-- Worker handoff must follow Runtime Token Firewall: give each worker a compact
-  capsule with goal, AC, files_scope, allowed edits, exact commands, expected
-  result/evidence paths, and current artifact references. Do not forward the
-  lead agent's full conversation history or old workbench transcript into a
-  worker, plugin wrapper, rescue subagent, or cheaper-model helper.
-- Poll worker artifacts, not the main chat. A worker should write status/result/
-  evidence and touched-file manifests; the lead should read those compact files
-  instead of repeatedly rereading broad diffs, source files, build logs, or the
-  current conversation while waiting.
-- Agent mode is an implementation-time choice. Default to single-agent
-  execution. Offer optional parallel execution only as `sfs implement
-  --agent-mode parallel --agents codex,claude[,gemini] ...`, and only when the
-  plan already has independent lanes.
-- Multi-agent implementation requires commit-unit clarity before coding: every
-  lane has disjoint files_scope, AC/ADR subset, non-goals, expected tests/
-  evidence, output report path, merge/conflict policy, and a one-sentence proposed commit message. If not, do not split that lane.
+- Worker handoff must follow Runtime Token Firewall: compact capsule only with
+  goal, AC, files_scope, commands, and expected evidence; no full lead-chat history, plugin wrapper, rescue subagent. Poll worker artifacts/status manifests, not the main chat.
+- Agent mode is an implementation-time choice. Default to single-agent. Use
+  `--agent-mode parallel --agents codex,claude[,gemini]` only when plan lanes are
+  independent and every lane has disjoint files_scope, AC/ADR subset, non-goals,
+  evidence, output path, merge policy, and one-sentence proposed commit message.
 - Commit messages default to the user's native/workspace language. If the user
   is Korean, write Korean commit messages; use English only when English is the
   user's native/workspace language or the repo explicitly requires English.
@@ -139,6 +139,7 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - Implementation is not complete at artifact creation. After any implementation
   mode, record verification evidence and run `sfs review --gate 6 --stage self`,
   then `sfs review --gate 6 --stage cross`, before any GitHub push/PR review.
+  GitHub @codex comes after cross review as final external evidence.
   GitHub @codex applies only after implementation, never during brainstorm or
   Gate 3 plan review. Users with only self-CPO available may record that
   constraint and use the self-only path. For
@@ -148,18 +149,11 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   satisfy self-CPO, SFS cross review, `sfs review`, Gate 3, or Gate 6 PASS by
   itself, and it does not replace `sfs review --gate 6`. Treat GitHub review as
   external code-review evidence to attach, not as the SFS gate result.
-- If an external GitHub/@codex/PR/check PASS arrives before self-CPO or
-  Gate 6, treat it as a continuation trigger. Record the evidence, then run the
-  next unmet SFS review step: self-CPO first with `sfs review --gate 6 --stage
-  self` or `sfs review --sprint <id> --gate 6 --stage self` for a closed
-  sprint, followed by `sfs review --gate 6 --stage cross`. GitHub @codex comes
-  only after that SFS cross CPO pass, as external PR/code review evidence.
-- Use DDD/TDD guardrails whenever product behavior changes, not only backend code. Natural-language SFS activation is real SFS: before using current
-  sprint artifacts, compare them with latest handoff/user intent and wiki/DDD
-  maps; a conflict means stop, classify mis-scoped work, and re-plan or hand off.
-  Load `policies/ddd-tdd-knowledge-pack.md` or `.ko.md`: preserve domain
-  language/boundaries across UI/API/CLI/docs/data, keep invariants in domain/
-  use-case logic, preserve code boundaries, and start with evidence when practical.
+- If GitHub/@codex/check PASS arrives before SFS Gate 6, treat it as a
+  continuation trigger: run self-CPO, then cross, then attach PR review.
+- Load `policies/ddd-tdd-knowledge-pack.md` and use DDD/TDD guardrails whenever product behavior changes, not only backend code. Reconcile latest handoff/user intent and wiki/DDD maps before using current
+  sprint artifacts; conflicts are mis-scoped work. Preserve domain language/
+  boundaries across UI/API/CLI/docs/data and start with evidence when practical.
 - Before editing broad entrypoints, name the product-policy owner and adapter
   boundary. UI bootstraps/router/root components/hooks/stores/effects,
   controllers, jobs, repositories, DTO mappers, CLI flags, scripts, migrations,
@@ -177,14 +171,16 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - Load `policies/enterprise-evidence-pack.md` for harness/product-policy QA/QC
   and `policies/enterprise-performance-review-pack.md` for hot-path, algorithm,
   query, browser runtime, memory, payload, or concurrency changes.
+- Load `policies/mainline-focus-guard.md` for tool/setup drift risk,
+  `policies/gate6-data-validation-pack.md` for mock/fixture/seed/data changes,
+  `policies/agentic-security-logging-pack.md` for OWASP/security/logging/
+  Datadog concerns, and `policies/wiki-mission-checklist-skill.md` for long
+  context or multi-defect work.
 - Load `policies/obsidian-llm-wiki.md` when the slice creates/migrates project
   docs, begins an existing-project adoption, or needs durable retrieval across
   future sprints.
-- If backend/JVM/Spring/JPA/transaction/batch/integration/DevOps/AWS work is in
-  scope, read the backend pack only after router selection.
-- If strategy-pm, QA, design/frontend, infra, management-admin, or taxonomy work
-  is in scope, read matching packs only after router selection and do not broaden
-  ordinary implementation into a knowledge-pack deepening task.
+- Read backend, strategy-pm, QA, design/frontend, infra, management-admin, or
+  taxonomy packs only after router selection; do not broaden ordinary work.
 - For visible design/frontend implementation, read `design.md` or
   `docs/solon/design.md` when present; otherwise record the design-system gap or
   seed. After editing, check token drift: colors, type, spacing, radius, shadows,

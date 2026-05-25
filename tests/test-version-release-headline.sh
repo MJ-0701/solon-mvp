@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.6.121" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.6.121" "version output"
-assert_contains_text "${output}" "latest 0.6.121" "latest output"
+[[ "${plain_output}" == "sfs 0.6.122" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.6.122" "version output"
+assert_contains_text "${output}" "latest 0.6.122" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Enterprise 6-division agent-team planning and measurable review packs." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Mainline focus, Gate 6 data validation, OWASP/logging evidence, and checklist closure." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 SFS 를 “무늬만 SFS”가 아니라 6본부 agent team 이 실제로 계획과 검수에 개입하는 방향으로 강화합니다.' "release notes fallback headline"
+assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 agent 가 본론을 놓치고 Gemini/Claude/Codex 같은 보조 도구 설정으로 빠지는 문제를 SFS 제품 버그로 막습니다.' "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

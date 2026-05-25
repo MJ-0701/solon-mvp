@@ -14,6 +14,10 @@ load_when: ["release", "deploy", "배포", "배포해줘", "배포 프로세스"
   end to end.
 - Apply `policies/shipping-and-launch.md`: release must be reversible,
   observable, and verified. Know the rollback path before publishing.
+- Release readiness inherits Gate 6 data/security evidence: representative
+  fixture/mock validation where data changes, OWASP-style risk notes for touched
+  surfaces, no stray production `console.log`/`debugger`/probe logs, and
+  Datadog or equivalent redacted error telemetry evidence or waiver.
 - Use `cut-release.sh`, push stable main/tag, update both channel repos.
 - Push is not categorically forbidden. Default safe mode may stop at exact
   push instructions, but if the user explicitly asks for autonomous deploy or

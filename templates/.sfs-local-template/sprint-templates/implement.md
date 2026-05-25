@@ -31,6 +31,9 @@ last_touched_at: ""
 ## 2. 가드레일
 
 - 가장 작은 유효 변경:
+- main objective:
+- side-work classification:
+- return condition:
 - 따를 기존 패턴:
 - 건드리는 용어/이름:
 - product behavior boundary:
@@ -41,6 +44,16 @@ last_touched_at: ""
 - TDD first check / product evidence:
 - TDD waiver / alternate evidence:
 - 피할 위험:
+
+## 2.1 Data / Security / Checklist Guard
+
+- representative data fixtures:
+- fixture/mock/seed invariant assertions:
+- data validation command/result:
+- OWASP/security family:
+- production console/debug log cleanup:
+- Datadog/equivalent observability evidence:
+- mission checklist status:
 
 ## 3. 변경
 
@@ -88,6 +101,8 @@ last_touched_at: ""
 - selected enterprise packs:
 - project-applied QA/QC:
 - performance/algorithm trigger:
+- data validation trigger:
+- security/logging trigger:
 
 | surface | evidence command/artifact | result | waiver/follow-up |
 |---|---|---|---|

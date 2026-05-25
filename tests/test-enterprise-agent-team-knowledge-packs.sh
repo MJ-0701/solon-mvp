@@ -34,6 +34,14 @@ packs=(
   enterprise-evidence-pack.ko.md
   enterprise-performance-review-pack.md
   enterprise-performance-review-pack.ko.md
+  mainline-focus-guard.md
+  mainline-focus-guard.ko.md
+  gate6-data-validation-pack.md
+  gate6-data-validation-pack.ko.md
+  agentic-security-logging-pack.md
+  agentic-security-logging-pack.ko.md
+  wiki-mission-checklist-skill.md
+  wiki-mission-checklist-skill.ko.md
 )
 
 for pack in "${packs[@]}"; do

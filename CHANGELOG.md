@@ -1,3 +1,31 @@
+## [0.6.122] - 2026-05-25
+
+> **Mainline focus, Gate 6 data validation, OWASP/logging evidence, and checklist closure.**
+
+### Fixed
+
+- Added a Mainline Focus Guard so helper/tool/auth/model setup cannot hijack the
+  user's real objective. Side work must be classified as `mainline`,
+  `unblocker`, `deferred_followup`, `blocked`, or `out_of_scope`; only true
+  unblockers may interrupt mainline work.
+- Added Gate 6 data validation policy for data shape, fixture/mock/seed, API
+  payload, UI state, auth/session, migration/backfill, cache, persistence, and
+  log/analytics changes. Mock-only evidence is partial unless named fixtures,
+  invariants, boundary/negative coverage, and command results are recorded.
+- Added agentic security/logging policy mapped to OWASP-style web/API/LLM/MCP
+  risks, with release checks for authz, secrets/PII, prompt/tool scope, stray
+  production `console.log`/`debugger`/probe logs, and Datadog or equivalent
+  redacted telemetry evidence/waiver.
+- Added a wiki/workbench mission checklist skill for high-context work so
+  repeated user findings are tracked from audit through edit, test, review,
+  release, and final evidence instead of being lost in chat context.
+
+### Tests
+
+- Added `test-mainline-data-security-guardrails.sh` and extended existing
+  context, behavior, line-budget, DDD/TDD, review-order, runtime-token-firewall,
+  and enterprise-pack tests. Full product suite: `PASS: 98`, `FAIL: 0`.
+
 ## [0.6.121] - 2026-05-25
 
 > **Enterprise 6-division agent-team planning and measurable review packs.**

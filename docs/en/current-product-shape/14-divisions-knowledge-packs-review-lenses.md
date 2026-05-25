@@ -26,6 +26,10 @@ knowledge packs/review lenses, plus enterprise agent-team packs for non-trivial
 product-bearing work. DDD/TDD is a cross-cutting product behavior floor; backend
 is one specialization. Enterprise plan council, evidence, and performance packs
 make plan a real design phase and make Gate 6 claims measurable.
+Mainline focus, Gate 6 data validation, agentic security/logging, and
+wiki-mission checklist packs prevent auxiliary setup, mock-only evidence,
+OWASP/Datadog gaps, or long-context drift from passing review as if the main
+objective were complete.
 
 The user should not need to memorize this list. Solon reads only the lens that
 fits the work. A small docs edit stays light. A release, architecture change, or

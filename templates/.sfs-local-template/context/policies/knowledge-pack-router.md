@@ -2,38 +2,7 @@
 id: sfs-policy-knowledge-pack-router
 summary: Lightweight activation router for knowledge packs and review lenses.
 language: en
-load_when:
-  - knowledge pack
-  - backend
-  - strategy-pm
-  - qa
-  - design
-  - infra
-  - management-admin
-  - taxonomy
-  - finance
-  - accounting
-  - bookkeeping
-  - tax
-  - transaction
-  - batch
-  - DDD
-  - TDD
-  - domain model
-  - product behavior
-  - acceptance criteria
-  - integration
-  - API
-  - AWS
-  - Obsidian
-  - llm wiki
-  - wiki
-  - docs migration
-  - enterprise
-  - agent team
-  - performance
-  - algorithm
-  - QA/QC
+load_when: [knowledge pack, backend, strategy-pm, qa, design, infra, management-admin, taxonomy, finance, accounting, bookkeeping, tax, transaction, batch, DDD, TDD, domain model, product behavior, acceptance criteria, integration, API, AWS, Obsidian, llm wiki, wiki, docs migration, enterprise, agent team, performance, algorithm, QA/QC, mainline, focus, data validation, mock, fixture, seed, OWASP, Datadog, console.log, checklist, long context]
 status: filled-v1
 content_policy: "read only this router first; read full packs only when matching signals make them useful"
 ---
@@ -72,6 +41,14 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
   `sub-agent`, `대기업급`, `team agentic coding`, `QA/QC`, `metrics`.
 - Performance/algorithm signals: `performance`, `algorithm`, `optimization`,
   `hot path`, `query plan`, `Core Web Vitals`, `memory`, `concurrency`.
+- Mainline focus signals: `mainline`, `focus`, `본론`, `삼천포`, tool/auth/
+  model setup, helper setup, or user says the agent missed the real request.
+- Data validation signals: `mock`, `fixture`, `seed`, `sample data`,
+  migration, backfill, API payload, UI state, persistence, auth/session data.
+- Security/logging signals: `OWASP`, security, authz, PII, secrets,
+  prompt injection, tool permissions, `console.log`, Datadog, observability.
+- Checklist signals: long context, multi-step, repeated product bug, monitor,
+  release, user says issues may blur, or work crosses projects/agents.
 
 ## Read order
 
@@ -120,6 +97,14 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
 - `policies/enterprise-evidence-pack.ko.md` (Korean)
 - `policies/enterprise-performance-review-pack.md`
 - `policies/enterprise-performance-review-pack.ko.md` (Korean)
+- `policies/mainline-focus-guard.md`
+- `policies/mainline-focus-guard.ko.md` (Korean)
+- `policies/gate6-data-validation-pack.md`
+- `policies/gate6-data-validation-pack.ko.md` (Korean)
+- `policies/agentic-security-logging-pack.md`
+- `policies/agentic-security-logging-pack.ko.md` (Korean)
+- `policies/wiki-mission-checklist-skill.md`
+- `policies/wiki-mission-checklist-skill.ko.md` (Korean)
 
 ## Depth Rules
 
@@ -131,6 +116,17 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
 - For non-trivial product-bearing work, plan should load the enterprise plan
   council pack; review should load enterprise evidence/performance packs only
   when the current risk or AC touches them.
+- Tool/model/auth setup is not automatically product work. If setup appears
+  while another objective is active, load `mainline-focus-guard.md`, classify
+  the setup as mainline/unblocker/deferred_followup/blocked/out_of_scope, and
+  return to the main objective as soon as the unblocker is satisfied.
+- Gate 6 loads `gate6-data-validation-pack.md` when data, fixture, mock, seed,
+  API payload, UI state, migration, auth/session, or persistence behavior
+  changes.
+- Security/logging/deploy work loads `agentic-security-logging-pack.md` and
+  maps relevant findings to OWASP-style families plus logging/Datadog evidence.
+- Long-context work loads `wiki-mission-checklist-skill.md`; update checklist
+  statuses as evidence is produced, not only at the final summary.
 - If a pack suggests a large transition such as MSA, heavy redesign,
   release-readiness escalation, finance/admin process, tax/accounting advisor
   checkpoint, or governance process, surface it as a user or product decision

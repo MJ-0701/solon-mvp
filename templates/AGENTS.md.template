@@ -34,16 +34,9 @@ Rules:
   but never compress adapter stdout/stderr, evidence, risk warnings, decisions,
   source links/paths, or raw-source traceability. If compactness would weaken
   quality, use full clarity.
-- AI-era fundamentals apply across all gates, not only implement: shared design
-  concept, domain language, feedback loop, interface/artifact boundary, and
-  gray-box delegation. DDD/TDD is a product-level engineering floor: product
-  behavior, domain language, behavior boundary, and first evidence are named
-  before worker handoff; DDD-lite code boundaries apply when code is touched.
-  All product-bearing entrypoints are included: UI bootstraps, routers, root
-  components, hooks/stores/effects, controllers, jobs, repositories, DTO mappers,
-  CLI flags, scripts, migrations, docs wording, observability glue, and external
-  adapters are not default homes for product policy without a named boundary,
-  evidence, or explicit waiver. Natural-language SFS activation is real SFS: reconcile current user wording, latest handoff/docs, active sprint plan, and wiki/DDD maps; Approved sprint state never overrides a newer handoff or user intent, so evidence-backed conflicts are mis-scoped work, not user questions. Broad-entrypoint growth that adds product behavior during DDD/TDD work is a Gate 6 finding unless boundary extraction or approved deferral is recorded.
+- AI-era fundamentals apply across all gates: shared design concept, domain language, feedback loop, interface/artifact boundary, and gray-box delegation. DDD/TDD is a product-level engineering floor: product behavior, domain language, behavior boundary, and first evidence are named before worker handoff; DDD-lite boundaries apply when code is touched.
+  All product-bearing entrypoints are included: UI bootstraps, routers, hooks/stores/effects, controllers, jobs, repositories, DTO mappers, CLI flags, scripts, migrations, docs wording, observability glue, and external adapters are not default homes for product policy without boundary/evidence/waiver.
+  Natural-language SFS activation is real SFS: reconcile current user wording, latest handoff/docs, active sprint plan, and wiki/DDD maps; Approved sprint state never overrides a newer handoff or user intent, so conflicts are mis-scoped work, not user questions. Broad-entrypoint growth that adds product behavior during DDD/TDD work is a Gate 6 finding unless extraction or deferral is recorded.
 - For implementation and review work, follow the routed context guardrails:
   surface material assumptions, choose the smallest useful slice, keep changes
   surgical, read actual files/errors before fixing, verify before completion,
@@ -94,6 +87,13 @@ Rules:
   the current session and continue executing until scope changes or a true
   blocker appears. Shell state is agent-owned: use one-shot inline env and mask
   secrets instead of asking the user to export variables across terminals.
+- Mainline Focus Guard: tool/auth/model setup is not the product objective
+  unless the user made it the objective. Classify setup as mainline, unblocker,
+  deferred_followup, blocked, or out_of_scope; only a true unblocker may
+  interrupt, and then return to the main objective immediately. Gate 6 also
+  checks data validation for mock/fixture/seed/API/UI/auth/session/persistence
+  changes, OWASP-style security/logging/Datadog evidence, and wiki/workbench
+  checklist reconciliation for long-context work.
 - Monitor checkpoint classification is mandatory for long-running monitor work: classify each checkpoint as `progressing`, `slow`, `stalled`, `dead`, or `auth_blocked`; record commit delta, PR/head delta, local dirty state, test/check delta, review status delta, worker liveness probe result, lane-utilization evidence or waiver, and next action `wait`, `probe`, `revive`, or `close`. Worker liveness requires a request-response probe, never process/auth-status alone; use a static benign payload only, never workspace/user content, and persist only status/category/timestamp/redacted error class. Do not persist raw stdout/stderr, bearer/auth tokens, env vars, prompt bodies, model responses, workspace/user content, or PII. Close only after heartbeat/automation cleanup and durable wiki/report evidence.
 - Handoff-only scope is a stop contract: if the user asks only for a handoff, next-session brief, session report, or `인계문서`, immediately write/update that artifact, record current state/blockers/first next command, clean heartbeat/automation evidence when relevant, then stop; do not start or continue PR polling, review retriggers, merges, implementation, deploy, or monitor loops; interrupt active or queued batches and do not finish current PRs first unless the same user request explicitly asks to continue. If post-request PR/review/merge work already happened, report it as a scope breach, not as a justification.
 - Advisor calls do not count as self-CPO. Before external cross review, record a self-CPO mini-check: requirements to AC to implementation slices to ADR/decision ids, every AC mapped to file/artifact/evidence, and SEED/placeholder/mock/fallback material treated as non-acceptance until replaced.
