@@ -476,35 +476,55 @@ sfs_path_segment_from_text() {
   printf '%s\n' "${segment}"
 }
 
+sfs_mentions_note_cli_intent() {
+  local text="${1:-}" text_words="${2:-}"
+  case "${text}" in
+    *notecli*|*note-cli*|*note\ cli*|*notes\ cli*)
+      return 0 ;;
+  esac
+  case "${text_words}" in
+    *" note cli "*|*" notes cli "*)
+      return 0 ;;
+  esac
+  case "${text}" in
+    *노트\ cli*|*노트-cli*|*노트\ 앱*|*노트앱*|*노트\ mvp*|*노트\ 도구*|*노트\ 저장*|*노트\ 검색*|*노트\ 추가*|\
+    *메모\ cli*|*메모-cli*|*메모\ 앱*|*메모앱*|*메모장*|*메모\ mvp*|*메모\ 도구*|*메모\ 저장*|*메모\ 검색*|*메모\ 추가*)
+      return 0 ;;
+  esac
+  return 1
+}
+
 sfs_infer_domain_metadata() {
   local raw="${1:-}" workspace="${2:-work-slice}" text text_words domain="" subdomain="" feature=""
   text="$(printf '%s' "${raw}" | tr '[:upper:]' '[:lower:]')"
   text_words="$(printf '%s' "${text}" | LC_ALL=C sed -E 's/[^a-z0-9]+/ /g; s/[[:space:]]+/ /g; s/^/ /; s/$/ /')"
 
-  case "${text}" in
-    *notecli*|*note\ cli*|*노트*|*메모*)
-      domain="tooling"; subdomain="cli" ;;
-    *주문상품*|*주문\ 상품*|*order-items*|*orderitem*|*order-item*|*order\ item*|*line-item*|*line\ item*)
-      domain="order"; subdomain="order-items" ;;
-    *주문*|*order*)
-      domain="order"; subdomain="orders" ;;
-    *장바구니*|*cart*)
-      domain="order"; subdomain="cart" ;;
-    *결제*|*payment*|*checkout*)
-      domain="payment"; subdomain="payments" ;;
-    *환불*|*refund*)
-      domain="payment"; subdomain="refunds" ;;
-    *배송*|*배달*|*shipping*|*shipment*|*delivery*)
-      domain="fulfillment"; subdomain="shipping" ;;
-    *상품*)
-      domain="catalog"; subdomain="products" ;;
-    *)
-      case "${text_words}" in
-        *" product "*|*" products "*|*" catalog "*)
-          domain="catalog"; subdomain="products" ;;
-      esac
-      ;;
-  esac
+  if sfs_mentions_note_cli_intent "${text}" "${text_words}"; then
+    domain="tooling"; subdomain="cli"
+  else
+    case "${text}" in
+      *주문상품*|*주문\ 상품*|*order-items*|*orderitem*|*order-item*|*order\ item*|*line-item*|*line\ item*)
+        domain="order"; subdomain="order-items" ;;
+      *주문*|*order*)
+        domain="order"; subdomain="orders" ;;
+      *장바구니*|*cart*)
+        domain="order"; subdomain="cart" ;;
+      *결제*|*payment*|*checkout*)
+        domain="payment"; subdomain="payments" ;;
+      *환불*|*refund*)
+        domain="payment"; subdomain="refunds" ;;
+      *배송*|*배달*|*shipping*|*shipment*|*delivery*)
+        domain="fulfillment"; subdomain="shipping" ;;
+      *상품*)
+        domain="catalog"; subdomain="products" ;;
+      *)
+        case "${text_words}" in
+          *" product "*|*" products "*|*" catalog "*)
+            domain="catalog"; subdomain="products" ;;
+        esac
+        ;;
+    esac
+  fi
 
   if [[ -z "${domain}" ]]; then
     case "${text}" in
@@ -525,25 +545,28 @@ sfs_infer_domain_metadata() {
     esac
   fi
 
-  case "${text}" in
-    *notecli*|*note\ cli*|*노트*|*메모*) feature="note-cli" ;;
-    *수량*|*quantity*) feature="quantity-update" ;;
-    *검색*|*search*) feature="search" ;;
-    *필터*|*filter*) feature="filter" ;;
-    *페이지*|*pagination*) feature="pagination" ;;
-    *대시보드*|*dashboard*) feature="dashboard" ;;
-    *업로드*|*upload*) feature="upload" ;;
-    *검증*|*validation*) feature="validation" ;;
-    *알림*|*공지*|*notice*|*notification*) feature="notice" ;;
-    *권한*|*permission*|*role*) feature="permissions" ;;
-    *레이아웃*|*layout*) feature="layout" ;;
-    *뷰어*|*viewer*) feature="viewer" ;;
-    *저장*|*persistence*|*storage*) feature="persistence" ;;
-    *인계*|*handoff*) feature="handoff" ;;
-    *쿠키*|*cookie*) feature="cookie" ;;
-    *가입*|*signup*|*sign-up*) feature="sign-up" ;;
-    *수정*|*변경*|*update*) feature="update" ;;
-  esac
+  if sfs_mentions_note_cli_intent "${text}" "${text_words}"; then
+    feature="note-cli"
+  else
+    case "${text}" in
+      *수량*|*quantity*) feature="quantity-update" ;;
+      *검색*|*search*) feature="search" ;;
+      *필터*|*filter*) feature="filter" ;;
+      *페이지*|*pagination*) feature="pagination" ;;
+      *대시보드*|*dashboard*) feature="dashboard" ;;
+      *업로드*|*upload*) feature="upload" ;;
+      *검증*|*validation*) feature="validation" ;;
+      *알림*|*공지*|*notice*|*notification*) feature="notice" ;;
+      *권한*|*permission*|*role*) feature="permissions" ;;
+      *레이아웃*|*layout*) feature="layout" ;;
+      *뷰어*|*viewer*) feature="viewer" ;;
+      *저장*|*persistence*|*storage*) feature="persistence" ;;
+      *인계*|*handoff*) feature="handoff" ;;
+      *쿠키*|*cookie*) feature="cookie" ;;
+      *가입*|*signup*|*sign-up*) feature="sign-up" ;;
+      *수정*|*변경*|*update*) feature="update" ;;
+    esac
+  fi
 
   if [[ -n "${domain}" ]]; then
     [[ -n "${subdomain}" ]] || subdomain="general"

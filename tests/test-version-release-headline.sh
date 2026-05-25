@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.6.128" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.6.128" "version output"
-assert_contains_text "${output}" "latest 0.6.128" "latest output"
+[[ "${plain_output}" == "sfs 0.6.129" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.6.129" "version output"
+assert_contains_text "${output}" "latest 0.6.129" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Gate 6 cross review sees the latest self-CPO PASS." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Korean memo matching no longer catches memory leaks." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 Gate 6 cross review 가 최신 self-CPO PASS 를 못 봐서 partial loop 에 빠지는 문제를 막습니다.' "release notes fallback headline"
+assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 `메모리 누수 수정` 같은 한국어 일반 작업이 note CLI 작업으로 잘못 분류되는 문제를 막습니다.' "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

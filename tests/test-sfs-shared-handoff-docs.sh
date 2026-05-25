@@ -123,6 +123,20 @@ note_auth_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SF
   --id "2026-W21-note-cli-auth")"
 assert_contains "${note_auth_out}" "shared_docs: docs/solon/tooling/cli/note-cli/<yyyyMMdd>/" "note CLI auth should preserve first-match domain"
 
+memo_app_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" start \
+  "메모 앱 MVP 검색 기능" \
+  --id "2026-W21-memo-app")"
+assert_contains "${memo_app_out}" "shared_docs: docs/solon/tooling/cli/note-cli/<yyyyMMdd>/" "Korean memo app should infer note CLI"
+
+memory_leak_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" start \
+  "메모리 누수 수정" \
+  --id "2026-W21-memory-leak")"
+case "${memory_leak_out}" in
+  *"docs/solon/tooling/cli/note-cli"*)
+    fail "memory leak goal should not be inferred as Korean memo/note CLI"
+    ;;
+esac
+
 order_inventory_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" start \
   "order item inventory quantity update" \
   --id "2026-W21-order-inventory")"

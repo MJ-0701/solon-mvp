@@ -1,3 +1,19 @@
+## [0.6.129] - 2026-05-25
+
+> **Korean memo matching no longer catches memory leaks.**
+
+### Fixed
+
+- Narrowed note CLI natural-language inference so Korean `메모리` words, such
+  as `메모리 누수 수정`, are not misclassified as `tooling/cli/note-cli`.
+  Korean note/memo app intents still route to note CLI when the goal explicitly
+  says `메모 앱`, `메모장`, `노트 앱`, or similar note-tool phrases.
+
+### Tests
+
+- Extended shared handoff/domain inference tests with a Korean memo-app
+  positive case and a `메모리 누수 수정` negative case.
+
 ## [0.6.128] - 2026-05-25
 
 > **Gate 6 cross review sees the latest self-CPO PASS.**
