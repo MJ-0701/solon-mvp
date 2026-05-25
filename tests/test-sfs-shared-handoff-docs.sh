@@ -128,6 +128,11 @@ memo_app_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS
   --id "2026-W21-memo-app")"
 assert_contains "${memo_app_out}" "shared_docs: docs/solon/tooling/cli/note-cli/<yyyyMMdd>/" "Korean memo app should infer note CLI"
 
+memo_app_spaced_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" start \
+  "메모   앱 MVP 검색 기능" \
+  --id "2026-W21-memo-app-spaced")"
+assert_contains "${memo_app_spaced_out}" "shared_docs: docs/solon/tooling/cli/note-cli/<yyyyMMdd>/" "Korean memo app should tolerate extra whitespace"
+
 memory_leak_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" start \
   "메모리 누수 수정" \
   --id "2026-W21-memory-leak")"

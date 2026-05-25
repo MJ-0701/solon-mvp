@@ -1,3 +1,18 @@
+## [0.6.130] - 2026-05-25
+
+> **Korean memo app intent tolerates extra spaces.**
+
+### Fixed
+
+- Normalized Korean note/memo intent spacing before matching, so valid note
+  app requests such as `메모   앱 검색` still route to `tooling/cli/note-cli`
+  without reintroducing broad `메모리` substring matching.
+
+### Tests
+
+- Extended shared handoff/domain inference tests with an extra-whitespace
+  Korean memo-app positive case.
+
 ## [0.6.129] - 2026-05-25
 
 > **Korean memo matching no longer catches memory leaks.**

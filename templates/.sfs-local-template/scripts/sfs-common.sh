@@ -477,7 +477,10 @@ sfs_path_segment_from_text() {
 }
 
 sfs_mentions_note_cli_intent() {
-  local text="${1:-}" text_words="${2:-}"
+  local text="${1:-}" text_words="${2:-}" text_spaced="${3:-}"
+  if [[ -z "${text_spaced}" ]]; then
+    text_spaced="$(printf '%s' "${text}" | sed -E 's/[[:space:]]+/ /g; s/^/ /; s/$/ /')"
+  fi
   case "${text}" in
     *notecli*|*note-cli*|*note\ cli*|*notes\ cli*)
       return 0 ;;
@@ -486,20 +489,25 @@ sfs_mentions_note_cli_intent() {
     *" note cli "*|*" notes cli "*)
       return 0 ;;
   esac
+  case "${text_spaced}" in
+    *노트\ cli*|*노트\ 앱*|*노트\ mvp*|*노트\ 도구*|*노트\ 저장*|*노트\ 검색*|*노트\ 추가*|\
+    *메모\ cli*|*메모\ 앱*|*메모\ mvp*|*메모\ 도구*|*메모\ 저장*|*메모\ 검색*|*메모\ 추가*)
+      return 0 ;;
+  esac
   case "${text}" in
-    *노트\ cli*|*노트-cli*|*노트\ 앱*|*노트앱*|*노트\ mvp*|*노트\ 도구*|*노트\ 저장*|*노트\ 검색*|*노트\ 추가*|\
-    *메모\ cli*|*메모-cli*|*메모\ 앱*|*메모앱*|*메모장*|*메모\ mvp*|*메모\ 도구*|*메모\ 저장*|*메모\ 검색*|*메모\ 추가*)
+    *노트-cli*|*노트앱*|*메모-cli*|*메모앱*|*메모장*)
       return 0 ;;
   esac
   return 1
 }
 
 sfs_infer_domain_metadata() {
-  local raw="${1:-}" workspace="${2:-work-slice}" text text_words domain="" subdomain="" feature=""
+  local raw="${1:-}" workspace="${2:-work-slice}" text text_words text_spaced domain="" subdomain="" feature=""
   text="$(printf '%s' "${raw}" | tr '[:upper:]' '[:lower:]')"
   text_words="$(printf '%s' "${text}" | LC_ALL=C sed -E 's/[^a-z0-9]+/ /g; s/[[:space:]]+/ /g; s/^/ /; s/$/ /')"
+  text_spaced="$(printf '%s' "${text}" | sed -E 's/[[:space:]]+/ /g; s/^/ /; s/$/ /')"
 
-  if sfs_mentions_note_cli_intent "${text}" "${text_words}"; then
+  if sfs_mentions_note_cli_intent "${text}" "${text_words}" "${text_spaced}"; then
     domain="tooling"; subdomain="cli"
   else
     case "${text}" in
@@ -545,7 +553,7 @@ sfs_infer_domain_metadata() {
     esac
   fi
 
-  if sfs_mentions_note_cli_intent "${text}" "${text_words}"; then
+  if sfs_mentions_note_cli_intent "${text}" "${text_words}" "${text_spaced}"; then
     feature="note-cli"
   else
     case "${text}" in
