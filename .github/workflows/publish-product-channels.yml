@@ -42,7 +42,16 @@ jobs:
             exit 1
           fi
           if [[ -z "${GH_TOKEN}" ]]; then
-            echo "missing SOLON_RELEASE_BOT_TOKEN secret with access to Homebrew and Scoop repos" >&2
+            cat >&2 <<'EOF'
+missing SOLON_RELEASE_BOT_TOKEN secret with access to Homebrew and Scoop repos
+
+Before dispatching this workflow, run:
+  scripts/sfs-channel-publish-preflight.sh --repo MJ-0701/solon-product --version <VERSION> --mode <pr|push>
+
+If it reports status manual_required, do not dispatch this workflow for the
+current release. Publish the Homebrew tap and Scoop bucket locally, push those
+channel repos, then run scripts/verify-product-release.sh --version <VERSION>.
+EOF
             exit 1
           fi
           git ls-remote --exit-code --tags "${PRODUCT_REPO}.git" "refs/tags/v${VERSION}" >/dev/null

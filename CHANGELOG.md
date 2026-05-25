@@ -1,3 +1,32 @@
+## [0.6.125] - 2026-05-25
+
+> **Release channel workflow auth is preflighted before dispatch.**
+
+### Added
+
+- Added `scripts/sfs-channel-publish-preflight.sh` to classify the optional
+  `publish-product-channels.yml` automation lane before dispatch. It reports
+  `workflow_ready` when `SOLON_RELEASE_BOT_TOKEN` is configured and
+  `manual_required` when the release should skip the workflow and use the local
+  Homebrew/Scoop channel-publish fallback.
+
+### Changed
+
+- Updated release and shipping policy context so missing workflow automation
+  auth is not treated as a user blocker when local channel credentials are
+  already available.
+- Updated `publish-product-channels.yml` failure guidance to point to the
+  preflight and manual channel publish fallback instead of failing as a vague
+  missing-secret dead procedure.
+- Updated release sequence and owner docs to run channel workflow preflight
+  before dispatching cross-repo channel automation.
+
+### Tests
+
+- Added `test-release-channel-auth-preflight.sh` covering secret-present,
+  secret-missing, and `gh secret list` failure classifications plus routed docs
+  and workflow guidance.
+
 ## [0.6.124] - 2026-05-25
 
 > **Capture is an evidence primitive, not a lifecycle flow step.**

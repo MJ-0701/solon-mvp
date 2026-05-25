@@ -181,8 +181,10 @@ case "${phase}" in
       cat >&2 <<EOF
 ${SCRIPT_NAME}: tap-update phase — stub (this repo is the release-cut output mirror).
   Real tap update is performed by scripts/cut-release.sh in dev staging
-  (~/agent_architect/...). Run that next to publish v${version} to the
-  Homebrew tap and Scoop bucket. After publish, return here and run:
+  (~/agent_architect/...). Before dispatching publish-product-channels.yml,
+  run scripts/sfs-channel-publish-preflight.sh. If it reports manual_required,
+  skip the workflow and publish v${version} through the local Homebrew tap and
+  Scoop bucket repos instead. After publish, return here and run:
 
     bash ${SCRIPT_NAME} --phase post-audit --version ${version}
 

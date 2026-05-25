@@ -19,6 +19,14 @@ load_when: ["release", "deploy", "배포", "배포해줘", "배포 프로세스"
   surfaces, no stray production `console.log`/`debugger`/probe logs, and
   Datadog or equivalent redacted error telemetry evidence or waiver.
 - Use `cut-release.sh`, push stable main/tag, update both channel repos.
+- Before dispatching `publish-product-channels.yml`, run
+  `scripts/sfs-channel-publish-preflight.sh --version <VERSION> --mode <pr|push>`.
+  `workflow_ready` means the workflow can publish the Homebrew/Scoop repos.
+  `manual_required` means do not dispatch the workflow for this release; publish
+  the channel repos locally, push them, then run the release verifier. Missing
+  `SOLON_RELEASE_BOT_TOKEN` is an optional workflow-automation gap, not a user
+  blocker or release blocker when local channel credentials are already
+  available.
 - Push is not categorically forbidden. Default safe mode may stop at exact
   push instructions, but if the user explicitly asks for autonomous deploy or
   grants push permission, run the necessary `git push` steps for source,

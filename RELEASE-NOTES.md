@@ -7,6 +7,16 @@
 
 ---
 
+## 0.6.125
+
+이번 버전은 Homebrew/Scoop channel publish workflow 의 토큰 누락을 release 후반에야 발견하는 문제를 줄입니다.
+
+- `publish-product-channels.yml` 을 실행하기 전에 `sfs-channel-publish-preflight.sh` 로 workflow lane 을 먼저 분류합니다.
+- `workflow_ready` 면 GitHub Actions workflow 로 Homebrew/Scoop repo 를 갱신할 수 있습니다.
+- `manual_required` 면 workflow 를 누르지 않고 로컬 Homebrew tap / Scoop bucket repo 를 직접 갱신한 뒤 release verifier 로 검증합니다.
+- `SOLON_RELEASE_BOT_TOKEN` 은 cross-repo workflow 자동화용 optional secret 입니다. 로컬 channel push 권한이 있으면 release blocker 가 아닙니다.
+- workflow 자체도 token 누락 시 preflight/fallback 안내를 출력하도록 바꿨습니다.
+
 ## 0.6.124
 
 이번 버전은 `sfs capture` 가 SFS 기본 flow 단계처럼 보이던 설계를 줄입니다.

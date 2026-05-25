@@ -25,6 +25,12 @@ Release rules:
   source, stable, tag, Homebrew tap, and Scoop bucket refs; record each pushed
   repo/ref in the release evidence. This applies to all LLM agents, including
   Codex, Claude, Gemini, and future adapters.
+- Cross-repo channel workflow auth is a lane, not the release objective. Run
+  `scripts/sfs-channel-publish-preflight.sh` before dispatching
+  `publish-product-channels.yml`. If it returns `manual_required`, skip the
+  workflow, publish Homebrew/Scoop through the local channel repos, and verify
+  with `scripts/verify-product-release.sh`; do not ask the user for a token
+  unless they choose workflow automation as the objective.
 - Feature flags or kill switches are preferred for application features. For
   CLI/package releases, equivalent safety is conservative defaults, backward
   compatible flags, and verified downgrade/recovery notes.
