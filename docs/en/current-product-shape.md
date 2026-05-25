@@ -15,7 +15,7 @@ split_children:
   - docs/en/current-product-shape/05-three-brainstorm-depths.md
   - docs/en/current-product-shape/06-purpose-of-hard-mode.md
   - docs/en/current-product-shape/07-plan-is-a-contract.md
-  - docs/en/current-product-shape/08-capture-is-a-natural-language-flow-checkpoint.md
+  - docs/en/current-product-shape/08-capture-is-an-evidence-primitive.md
   - docs/en/current-product-shape/09-implement-is-not-only-code.md
   - docs/en/current-product-shape/10-review-is-artifact-acceptance.md
   - docs/en/current-product-shape/11-thin-multi-agent-supervision.md
@@ -50,7 +50,7 @@ This file keeps the original route as a thin entry point. Detailed body sections
 - [Three Brainstorm Depths](./current-product-shape/05-three-brainstorm-depths.md)
 - [Purpose Of Hard Mode](./current-product-shape/06-purpose-of-hard-mode.md)
 - [Plan Is A Contract](./current-product-shape/07-plan-is-a-contract.md)
-- [Capture Is A Natural-Language Flow Checkpoint](./current-product-shape/08-capture-is-a-natural-language-flow-checkpoint.md)
+- [Capture Is An Evidence Primitive](./current-product-shape/08-capture-is-an-evidence-primitive.md)
 - [Implement Is Not Only Code](./current-product-shape/09-implement-is-not-only-code.md)
 - [Review Is Artifact Acceptance](./current-product-shape/10-review-is-artifact-acceptance.md)
 - [Thin Multi-Agent Supervision](./current-product-shape/11-thin-multi-agent-supervision.md)

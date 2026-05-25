@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.6.123" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.6.123" "version output"
-assert_contains_text "${output}" "latest 0.6.123" "latest output"
+[[ "${plain_output}" == "sfs 0.6.124" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.6.124" "version output"
+assert_contains_text "${output}" "latest 0.6.124" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Post-development Claude/Gemini review lanes and lean procedure refactoring." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Capture is an evidence primitive, not a lifecycle flow step." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 제품 개발 완료 후 Claude Cowork/Gemini/GitHub Codex 리뷰를 증거로 붙이되, SFS 절차가 느린 의식으로 변하면 과감히 줄이도록 만듭니다.' "release notes fallback headline"
+assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 `sfs capture` 가 SFS 기본 flow 단계처럼 보이던 설계를 줄입니다.' "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

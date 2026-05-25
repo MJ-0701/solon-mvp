@@ -71,7 +71,7 @@ assert_contains "${tidy}" "Context Pollution Guard applies while closing" "tidy 
 assert_contains "${tidy}" "archive/evidence pointer instead" "tidy pointer"
 
 assert_contains "${readme}" "긴 prompt, 전체 대화" "readme capture boundary"
-assert_contains "${guide}" "flow checkpoint 이지 prompt/transcript 저장소가 아닙니다" "guide capture boundary"
+assert_contains "${guide}" "lifecycle 단계가 아니라 evidence primitive" "guide capture boundary"
 assert_contains "${shape_en}" "Prompt bodies" "english product shape guard"
 assert_contains "${shape_ko}" "core product context 에는 결론과 evidence path 만" "korean product shape guard"
 

@@ -15,7 +15,7 @@ split_children:
   - docs/ko/current-product-shape/05-brainstorm-3.md
   - docs/ko/current-product-shape/06-hard-mode.md
   - docs/ko/current-product-shape/07-plan-transcript.md
-  - docs/ko/current-product-shape/08-capture-flow-checkpoint.md
+  - docs/ko/current-product-shape/08-capture-evidence-primitive.md
   - docs/ko/current-product-shape/09-implement.md
   - docs/ko/current-product-shape/10-review-artifact-acceptance-review.md
   - docs/ko/current-product-shape/11-section.md
@@ -49,7 +49,7 @@ split_children:
 - [Brainstorm 3단계](./current-product-shape/05-brainstorm-3.md)
 - [Hard Mode 의 목적](./current-product-shape/06-hard-mode.md)
 - [Plan 은 transcript 가 아니라 계약](./current-product-shape/07-plan-transcript.md)
-- [Capture 는 자연어 flow checkpoint](./current-product-shape/08-capture-flow-checkpoint.md)
+- [Capture 는 evidence primitive](./current-product-shape/08-capture-evidence-primitive.md)
 - [Implement 는 코드만 뜻하지 않는다](./current-product-shape/09-implement.md)
 - [Review 는 artifact acceptance review](./current-product-shape/10-review-artifact-acceptance-review.md)
 - [얇은 멀티 에이전트 감독](./current-product-shape/11-section.md)

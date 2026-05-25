@@ -153,7 +153,7 @@ sfs_implement_latest_gate3_user_approval_record() {
   while IFS= read -r line; do
     [[ "${line}" == *"\"sprint_id\":\"${SPRINT_ID}\""* ]] || continue
     case "${line}" in
-      *'"type":"flow_capture"'*)
+      *'"type":"evidence_capture"'*|*'"type":"flow_capture"'*)
         kind="$(sfs_implement_json_string_field "kind" "${line}")"
         case "${kind}" in
           user-approval|approval|waiver)

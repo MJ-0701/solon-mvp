@@ -1,3 +1,26 @@
+## [0.6.124] - 2026-05-25
+
+> **Capture is an evidence primitive, not a lifecycle flow step.**
+
+### Changed
+
+- Reframed `sfs capture` and `sfs note` as minimal evidence primitives for
+  explicit approval, waiver, decision, blocker, review-order override, scope
+  change, and accepted external evidence.
+- Updated current product docs, user guide, context router, kernel, and command
+  context so capture is not presented as a default SFS lifecycle step or routine
+  next action.
+- `sfs capture` now writes non-collapsing `evidence_capture` events. Review and
+  implement readers still accept legacy `flow_capture` events for existing
+  projects.
+- Renamed the focused capture regression to
+  `test-sfs-capture-evidence-primitive.sh`.
+
+### Tests
+
+- Updated capture, context-pollution, version, and docs sync tests to verify the
+  new evidence-primitive contract and version metadata.
+
 ## [0.6.123] - 2026-05-25
 
 > **Post-development Claude/Gemini review lanes and lean procedure refactoring.**

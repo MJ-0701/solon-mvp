@@ -1,14 +1,19 @@
 ---
 id: sfs-command-capture
-summary: Record natural-language flow changes before the next command loses context.
-load_when: ["capture", "note", "natural language", "decision", "review order", "waiver", "blocker"]
+summary: Record minimal approval, waiver, decision, blocker, or evidence facts without making capture a lifecycle step.
+load_when: ["capture", "note", "decision", "review order", "waiver", "blocker", "approval", "evidence"]
 ---
 
-# Capture / Note
+# Capture / Note Evidence Primitive
 
-- Use `sfs capture` when a natural-language turn changes implementation
-  direction, acceptance meaning, review order, exception/waiver status,
-  blocker state, or evidence that later gates must remember.
+- `sfs capture` is an evidence primitive, not an SFS lifecycle gate, phase, or
+  default next step. Do not add it to normal flow just because a command ran.
+- Use it only when a later gate would otherwise lose a durable fact: explicit
+  user approval, waiver, decision, scope change, review-order override, blocker
+  classification, or accepted external evidence.
+- Prefer the normal artifact first. Brainstorm, plan, implement, review, retro,
+  wiki checklist, and report artifacts are the home for their own content;
+  capture records only small cross-turn facts that do not already belong there.
 - If a natural-language turn says an external GitHub/@codex/PR/check review
   passed, capture the accepted evidence plus the next SFS command. Do not store
   the full review transcript; the durable fact is the PASS evidence and the
@@ -23,11 +28,12 @@ load_when: ["capture", "note", "natural language", "decision", "review order", "
   a Gate 3 plan that marked `user_approval_required: true`. Gate 3 review PASS
   is not that approval; capture the user's natural-language approval before
   running `sfs implement`.
-- Capture before the next SFS command. The point is to move important chat
-  state into the sprint workbench, not to summarize it after the flow already
-  drifted.
+- Capture before the next dependent command only when the fact affects that
+  command. The point is to keep an approval/evidence fact available to the
+  workbench, not to create an extra ritual between every SFS step.
 - The command appends a timestamped entry to the sprint `log.md` and records a
-  `flow_capture` event in `events.jsonl`.
+  non-collapsing `evidence_capture` event in `events.jsonl`. Readers still
+  accept legacy `flow_capture` events for existing projects.
 - If there is no active sprint, pass `--sprint <id>` only when you are
   intentionally writing to that sprint; otherwise start or restore the sprint
   first.

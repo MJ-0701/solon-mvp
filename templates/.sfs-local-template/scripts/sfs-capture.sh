@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 자연어 플로우 캡처: 대화 중 확정된 결정/리뷰순서/예외를 sprint log 와 active ledger 에 남긴다.
+# 증거 캡처: 승인/waiver/결정/리뷰순서/예외를 sprint log 와 active ledger 에 남긴다.
 #
 # Solon SFS — `/sfs capture` / `/sfs note` command implementation.
 
@@ -18,9 +18,10 @@ Usage:
   sfs capture --stdin [--kind <kind>] [--gate <1..7>] [--sprint <id>]
   sfs note <text>
 
-Records a natural-language flow checkpoint into the current sprint's log.md and
-events.jsonl. Use it when chat changes implementation direction, acceptance
-meaning, review order, exception/waiver status, blocker state, or evidence.
+Records a compact evidence fact into the current sprint's log.md and
+events.jsonl. Capture is an evidence primitive, not a lifecycle gate or default
+next step. Use it only for approval, waiver, decision, review-order override,
+blocker, scope-change, or external evidence that a later gate must remember.
 
 Capture is intentionally compact. SFS_CAPTURE_TEXT_MAX_CHARS defaults to 2000
 bytes; set SFS_CAPTURE_ALLOW_LONG=1 only for an explicit local exception.
@@ -221,10 +222,10 @@ if [[ ! -f "${LOG_PATH}" ]]; then
 fi
 update_frontmatter "${LOG_PATH}" "last_touched_at" "$(sfs_yaml_quote "${NOW}")" || true
 
-if ! grep -Fq "## 자연어 플로우 캡처" "${LOG_PATH}" 2>/dev/null; then
+if ! grep -Fq "## Evidence Capture" "${LOG_PATH}" 2>/dev/null; then
   {
-    printf '\n## 자연어 플로우 캡처\n\n'
-    printf '자연어 대화 중 확정된 flow checkpoint 를 명령 실행 전에 남긴다.\n'
+    printf '\n## Evidence Capture\n\n'
+    printf '승인/waiver/결정/외부 evidence 처럼 gate 가 잃으면 안 되는 최소 사실만 남긴다. Capture 는 lifecycle 단계가 아니다.\n'
   } >> "${LOG_PATH}" || {
     echo "permission denied appending capture section to ${LOG_PATH}" >&2
     exit "${SFS_EXIT_PERM}"
@@ -237,7 +238,7 @@ fi
   if [[ -n "${GATE_ID}" ]]; then
     printf -- '- gate: `%s`\n' "$(sfs_gate_display_label "${GATE_ID}")"
   fi
-  printf -- '- source: natural-language\n'
+  printf -- '- source: evidence-primitive\n'
   printf -- '- text:\n'
   while IFS= read -r line || [[ -n "${line}" ]]; do
     printf '  > %s\n' "${line}"
@@ -260,7 +261,7 @@ if [[ -n "${GATE_ID}" ]]; then
   _esc_gate="$(sfs_json_escape "${GATE_ID}")"
   _payload="${_payload},\"gate_id\":\"${_esc_gate}\""
 fi
-if ! append_event "flow_capture" "{${_payload}}" 2>/dev/null; then
+if ! append_event "evidence_capture" "{${_payload}}" 2>/dev/null; then
   echo "permission denied appending event to ${SFS_EVENTS_FILE}" >&2
   exit "${SFS_EXIT_PERM}"
 fi

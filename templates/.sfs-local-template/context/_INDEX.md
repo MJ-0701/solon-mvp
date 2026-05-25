@@ -16,7 +16,7 @@ module:
 - `commands/plan.md` — Gate 3 sprint contract and cross-phase fundamentals.
 - `commands/implement.md` — implement / build / execute work.
 - `commands/review.md` — review / CPO / verdict.
-- `commands/capture.md` — natural-language flow checkpoint / note / decision capture.
+- `commands/capture.md` — minimal evidence primitive for approval / waiver / decision / blocker / external evidence; not a lifecycle step.
 - `commands/release.md` — release / deploy / Homebrew / Scoop.
 - `commands/upgrade.md` — upgrade / update / install freshness.
 - `commands/tidy.md` — tidy / report / retro / archive.

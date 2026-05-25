@@ -81,6 +81,9 @@ load_when: ["always", "sfs", "entry"]
   turned into user chores.
 - Lean procedure review is ambient for SFS itself: keep safety invariants, but
   shrink, automate, or remove steps that only add ceremony or bottlenecks.
+- Capture is not a lifecycle step: use `sfs capture` only as a minimal evidence
+  primitive for approval, waiver, decision, blocker, or external evidence that a
+  later gate must remember. Do not ask the user to run capture as routine flow.
 - Session Continuation Guard is ambient: `sfs upgrade` cannot shrink an already-open LLM conversation. If token meter is 30%+ before a new WU/sprint, 50%+ before a new gate/loop/review handoff, repeated wakeups, or multiple WUs/sprints in one chat, fresh-session transfer is lossless autopilot: write durable handoff/transfer capsule first, then invoke host-owned transfer/new-session/archive/clear+resume and resume immediately when available, otherwise stop with exact prompt. Do not call bare clear. Do not ask the user to type `/clear`.
 - Runtime Token Firewall is ambient: worker/review/executor handoffs are
   capsule-only. Do not forward the lead agent's full conversation history to a

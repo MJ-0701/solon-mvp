@@ -843,7 +843,7 @@ sfs_active_event_ledger_sprint() {
     printf '%s\n' "${line_sid}"
     return 0
   fi
-  if [[ "${event_type}" == "flow_capture" && -n "${line_sid}" ]]; then
+  if [[ ( "${event_type}" == "evidence_capture" || "${event_type}" == "flow_capture" ) && -n "${line_sid}" ]]; then
     printf '%s\n' "${line_sid}"
     return 0
   fi

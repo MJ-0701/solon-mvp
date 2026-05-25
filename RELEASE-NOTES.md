@@ -7,6 +7,17 @@
 
 ---
 
+## 0.6.124
+
+이번 버전은 `sfs capture` 가 SFS 기본 flow 단계처럼 보이던 설계를 줄입니다.
+승인, waiver, 결정, 외부 evidence 를 잃지 않기 위한 기능은 유지하지만, 기본 절차에 끼워 넣는 의식은 아닙니다.
+
+- `capture` 를 lifecycle/gate 가 아니라 evidence primitive 로 재정의했습니다.
+- 정상 산출물은 `brainstorm.md`, `plan.md`, `implement.md`, `review.md`, `retro.md`, wiki/report 가 계속 소유합니다.
+- `capture` 는 explicit user approval, waiver, 결정, blocker, review-order override, 외부 PASS evidence 같은 최소 사실에만 씁니다.
+- 새 runtime event 는 `evidence_capture` 를 기록하고, 기존 프로젝트의 `flow_capture` 는 계속 읽습니다.
+- 사용자 가이드와 current-product-shape 문서에서 `flow checkpoint` 표현을 제거했습니다.
+
 ## 0.6.123
 
 이번 버전은 제품 개발 완료 후 Claude Cowork/Gemini/GitHub Codex 리뷰를 증거로 붙이되, SFS 절차가 느린 의식으로 변하면 과감히 줄이도록 만듭니다.
