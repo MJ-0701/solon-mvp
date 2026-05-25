@@ -8,7 +8,8 @@ load_when: ["token", "session", "continuation", "loop", "wakeup", "resume", "upg
 
 - SFS upgrades runtime files and project-local context; it cannot shrink the
   already-open Claude/Codex/Gemini conversation. Existing session history stays
-  in the host runtime until the user opens a fresh session or clears it.
+  in the host runtime until the host or session supervisor opens a fresh session
+  or clears it.
 - Treat the host runtime's token meter, session report, or usage dashboard as
   authoritative. Do not infer safety from `sfs --version` alone.
 - Stop and hand off to a fresh session when any trigger appears:
@@ -25,10 +26,18 @@ load_when: ["token", "session", "continuation", "loop", "wakeup", "resume", "upg
   `review.md`, latest capture ids, exact commit/branch, failing command, and
   next SFS command. Do not copy the chat transcript.
 - Handoff-only scope is a stop contract: a request only for handoff, next-session brief, session report, or `인계문서` means write/update that artifact and stop after recording current state, blockers, first next command, and cleanup evidence. Do not start or continue PR polling, review retriggers, merges, implementation, deploy, or monitor loops; interrupt active or queued batches and do not finish current PRs first unless the same user request explicitly asks to continue. If post-request PR/review/merge work already happened, report it as a scope breach, not as a justification.
-- Fresh-session transfer is autopilot after a trigger: write/update the
-  handoff/report, record the first next command plus exact next-session prompt,
-  then use host clear/new-session when the host exposes it. If not available,
-  stop after the prompt. Do not ask the user to choose same-session vs fresh-session continuation unless they explicitly override this guard.
+- Fresh-session transfer is lossless autopilot after a trigger: durably
+  write/update the handoff/report or transfer capsule first, including current
+  branch/commit/status, latest evidence paths, first next command, and exact
+  next-session prompt.
+- Only after that durable capsule exists, invoke a host-owned transfer,
+  new-session, archive, or clear+resume control that preserves or injects the
+  prompt and resumes immediately in the fresh session. Do not call a bare clear
+  that cannot resume from the capsule. If no host-owned transition+resume
+  control exists, stop after the prompt. Do not ask the user to choose
+  same-session vs fresh-session continuation, and do not ask the user to type
+  `/clear`; manual clear input is a host capability gap, not an acceptable SFS
+  next action.
 - If `sfs --version` is current but routed context looks stale, run
   `sfs upgrade` in that project and then start a fresh agent session. A runtime
   upgrade without fresh session/context reload does not change the host's

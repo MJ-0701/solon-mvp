@@ -25,10 +25,13 @@ self-CPO 먼저, self-CPO PASS 뒤에 설정된 cross-review 순서입니다.
 Session Continuation Guard 는 긴 host 대화 자체를 다룹니다. `sfs upgrade` 가 최신이어도 이미 열린
 Claude/Codex/Gemini conversation history 는 그대로 남아 token meter 를 태웁니다. 새 WU/sprint 의
 첫 구현·review 전에 30% 이상, 새 gate/loop/cross-review 전 50% 이상, 또는 같은 chat 이 여러
-WU/sprint·반복 wakeup 을 지나면 agent 는 `report.md`, `review.md`, capture id, commit/branch,
-다음 SFS 명령만 남기고 fresh session 으로 전환해야 합니다. 이 전환은 사용자에게 같은 세션/새
-세션 선택을 묻는 질문이 아니라 autopilot 입니다. host 가 clear/new-session 을 지원하면 직접
-넘기고, 지원하지 않으면 다음 세션용 정확한 prompt/command 를 남기고 멈춥니다.
+WU/sprint·반복 wakeup 을 지나면 agent 는 `report.md`, `review.md`, capture id,
+commit/branch/status, 정확한 next prompt 를 담은 durable transfer capsule 을 먼저 남깁니다.
+그 다음 host 가 transfer/new-session/archive/clear+resume 제어를 지원하면 직접 호출해 fresh
+session 에서 즉시 이어갑니다. 이 전환은 사용자에게 같은 세션/새 세션 선택을 묻는 질문이 아니라
+autopilot 입니다. resume 없는 bare clear 는 금지이고, host 전환+재개 제어가 없으면 다음 세션용
+정확한 prompt/command 만 남기고 멈춥니다. 사용자에게 `/clear` 입력을 요구하는 것은 SFS next
+action 이 아니라 host capability gap 입니다.
 
 | Lens | 주로 보는 것 |
 |---|---|

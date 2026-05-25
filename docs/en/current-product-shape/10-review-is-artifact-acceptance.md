@@ -27,11 +27,14 @@ Session Continuation Guard covers the host conversation itself. Even when
 `sfs upgrade` is current, an already-open Claude/Codex/Gemini conversation
 keeps its history and token meter. At 30% before the first implementation or
 review action of a new WU/sprint, 50% before a new gate/loop/cross-review, or
-after multiple WUs/sprints or loop wakeups in the same chat, agents write a
-compact handoff with `report.md`, `review.md`, capture ids, commit/branch, and
-the next SFS command, then resume in a fresh session. This is autopilot, not a
-same-session-vs-fresh-session question: use host clear/new-session when
-available, otherwise stop with the exact next-session prompt/command.
+after multiple WUs/sprints or loop wakeups in the same chat, agents first write
+a durable transfer capsule with `report.md`, `review.md`, capture ids,
+commit/branch/status, and the exact next prompt. Then they resume in a fresh
+session through host-owned transfer/new-session/archive/clear+resume when
+available. This is autopilot, not a same-session-vs-fresh-session question.
+Bare clear without resume is forbidden; if no host-owned transition+resume
+control exists, stop with the exact next-session prompt/command. Asking the user
+to type `/clear` is a capability gap, not a valid SFS next action.
 
 | Lens | Primary concern |
 |---|---|

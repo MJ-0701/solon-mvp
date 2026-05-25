@@ -117,9 +117,11 @@ not as a justification.
 Session Continuation Guard is also a router contract. `sfs upgrade` cannot
 shrink an already-open LLM conversation. At 30%+ before a new WU/sprint, 50%+
 before a new gate/loop/review handoff, repeated wakeups, or multiple WUs/sprints
-in one chat, fresh-session transfer is autopilot: write compact handoff, use
-host clear/new-session when available, otherwise stop with the exact
-next-session prompt instead of asking same-session vs fresh-session.
+in one chat, fresh-session transfer is lossless autopilot: write a durable
+handoff/transfer capsule first, then invoke host-owned
+transfer/new-session/archive/clear+resume when available and resume immediately.
+Otherwise stop with the exact next-session prompt. Never ask the user to type
+`/clear`, choose same-session vs fresh-session, or call bare clear.
 Division sub-agent council is always-on from brainstorm through Gate 6:
 strategy-pm, dev, QA, design, infra, and taxonomy each records finding/evidence/
 waiver or not-applicable in `division_subagent_ledger`. Actual parallel worker

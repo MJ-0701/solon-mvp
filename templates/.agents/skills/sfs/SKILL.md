@@ -148,7 +148,7 @@ description: Solon SFS command router for Codex. Dispatch `$sfs` / `sfs` / visib
    but cannot shrink an already-open LLM conversation. If the host token meter
    is 30%+ before a new WU/sprint action, 50%+ before a new gate/loop/review
    handoff, or the same chat has spanned multiple WUs/sprints or repeated loop
-   wakeups, stop and hand off to a fresh session using compact artifacts. Fresh-session transfer is autopilot: write handoff, use host clear/new-session when available, otherwise stop with exact next-session prompt instead of asking same-session vs fresh-session.
+   wakeups, stop and hand off to a fresh session using compact artifacts. Fresh-session transfer is lossless autopilot: write durable handoff/transfer capsule, invoke host-owned transfer/new-session/archive/clear+resume when available, and resume immediately; otherwise stop with exact prompt. Never ask user to type `/clear` or choose same-session vs fresh-session, and never call bare clear.
    After a work slice is implemented and verified, run self-agent top-model
    CPO: Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3-pro-auto`, or
    the configured custom top model. Partial/fail redirects the work and repeats

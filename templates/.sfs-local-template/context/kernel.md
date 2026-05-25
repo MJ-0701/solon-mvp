@@ -81,10 +81,7 @@ load_when: ["always", "sfs", "entry"]
 - Token/harness hygiene is ambient: keep adapter memory thin, prefer routed
   context and symbol/semantic search before broad reads, and convert repeated
   AI mistakes into guardrails/checks during review or retro.
-- Session Continuation Guard is ambient: `sfs upgrade` cannot shrink an already
-  open LLM conversation. If token meter is 30% or higher before a new WU/sprint,
-  50% or higher before a new gate/loop/review handoff, repeated wakeups, or multiple WUs/sprints in one chat,
-  fresh-session transfer is autopilot: write handoff, use host clear/new-session when available, otherwise stop with the exact next-session prompt.
+- Session Continuation Guard is ambient: `sfs upgrade` cannot shrink an already-open LLM conversation. If token meter is 30%+ before a new WU/sprint, 50%+ before a new gate/loop/review handoff, repeated wakeups, or multiple WUs/sprints in one chat, fresh-session transfer is lossless autopilot: write durable handoff/transfer capsule first, then invoke host-owned transfer/new-session/archive/clear+resume and resume immediately when available, otherwise stop with exact prompt. Do not call bare clear. Do not ask the user to type `/clear`.
 - Runtime Token Firewall is ambient: worker/review/executor handoffs are
   capsule-only. Do not forward the lead agent's full conversation history to a
   worker, plugin wrapper, rescue subagent, or external reviewer; pass only goal,

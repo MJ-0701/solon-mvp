@@ -31,7 +31,7 @@ load_when: "Read when this product document is directly relevant."
 4. **CHANGELOG.md** 는 모든 릴리스를 기록. upgrade.sh 가 이 파일을 consumer 에게 안내.
 5. **User-facing docs HTML-first** — AI Agent 참고용 운영 문서/SSoT/로그/스키마/README 는 Markdown 을 유지하되,
    실제 사용자·외부 독자·온보딩 대상이 읽는 설명서/가이드/보고서/핸드북/랜딩성 문서는 기본 산출물을 HTML 로 작성.
-6. **Fresh-session transfer autopilot** — Session Continuation Guard 가 걸리면 같은 세션/새 세션 선택을 묻지 말고 compact handoff/report 후 host clear/new-session 또는 exact next-session prompt 로 넘긴다.
+6. **Fresh-session transfer autopilot** — Session Continuation Guard 가 걸리면 같은 세션/새 세션 선택이나 `/clear` 입력을 묻지 않는다. 먼저 current branch/commit/status/evidence/next prompt 를 담은 durable handoff/report 를 남긴 뒤, host-native transfer/new-session/archive/clear+resume 제어가 있으면 직접 호출해 새 세션에서 즉시 이어간다. resume 없는 bare clear 는 금지한다. host 제어가 없으면 exact next-session prompt 만 남기고 멈춘다.
 7. **6본부 council always-on** — strategy-pm/dev/QA/design/infra/taxonomy 는 brainstorm 부터 Gate 6 까지 개념적 sub-agent 로 evidence/waiver 를 남긴다. parallel worker 는 별도 opt-in 이다.
 
 ## 수정 시 체크리스트

@@ -1,3 +1,28 @@
+## [0.6.120] - 2026-05-25
+
+> **Fresh-session transfer is host-owned, lossless, and resumes immediately without user `/clear`.**
+
+### Fixed
+
+- Session Continuation Guard now separates host-owned session transition from
+  user copy-paste work: agents must first write a durable handoff/transfer
+  capsule with current branch/commit/status, evidence paths, and the exact
+  resume prompt.
+- Host-owned transfer must then resume immediately in the fresh session via
+  transfer/new-session/archive/clear+resume. Bare clear without resume is not
+  allowed because it can lose continuity.
+- If no host-owned transition+resume control exists, agents must stop with the
+  exact next-session prompt only. They must not repeatedly tell the user to type
+  `/clear` or frame manual clear input as the required next step.
+- Adapter and documentation wording now treats manual `/clear` instructions as
+  a product bug, not as an acceptable fresh-session autopilot fallback.
+
+### Tests
+
+- Tightened Session Continuation Guard regression tests so policy, adapter
+  surfaces, and docs reject user-owned `/clear` fallback wording, bare clear,
+  missing durable transfer capsule, and missing immediate resume wording.
+
 ## [0.6.119] - 2026-05-25
 
 > **Division sub-agent council and fresh-session transfer are now enforced by the harness.**
@@ -5,9 +30,10 @@
 ### Fixed
 
 - Session Continuation Guard now treats fresh-session transfer as autopilot:
-  write compact handoff/report, use host clear/new-session when available, and
-  otherwise stop with the exact next-session prompt instead of asking the user
-  to choose same-session vs fresh-session continuation.
+  write compact handoff/report, use a host transition control when available,
+  and otherwise stop with the exact next-session prompt instead of asking the
+  user to choose same-session vs fresh-session continuation. SFS 0.6.120 later
+  tightened this to forbid user-owned `/clear` instructions.
 - The six core divisions now participate as an always-on conceptual sub-agent
   council from brainstorm through Gate 6: strategy-pm, dev, QA, design, infra,
   and taxonomy must record finding/evidence/waiver or not-applicable status.

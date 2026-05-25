@@ -21,6 +21,17 @@ assert_contains() {
   sfs_doc_contains "${file}" "${needle}" || fail "${label}: missing '${needle}'"
 }
 
+assert_not_contains() {
+  local file="$1"
+  local needle="$2"
+  local label="$3"
+
+  [[ -f "${file}" ]] || fail "${label}: missing file ${file}"
+  if ! sfs_doc_not_contains "${file}" "${needle}"; then
+    fail "${label}: unexpected '${needle}'"
+  fi
+}
+
 context="${DIST_DIR}/templates/.sfs-local-template/context"
 index="${context}/_INDEX.md"
 kernel="${context}/kernel.md"
@@ -41,16 +52,30 @@ assert_contains "${policy}" "token meter reaches 50%" "policy 50 percent thresho
 assert_contains "${policy}" "autonomous loop resumes" "policy loop wakeup trigger"
 assert_contains "${policy}" "full conversation history" "policy full history bridge trigger"
 assert_contains "${policy}" "fresh session" "policy fresh session handoff"
+assert_contains "${policy}" "host-owned transition+resume control" "policy host-owned transfer"
+assert_contains "${policy}" "lossless autopilot" "policy lossless transfer"
+assert_contains "${policy}" "durably" "policy durable handoff"
+assert_contains "${policy}" "host-owned transition+resume control" "policy transition resume"
+assert_contains "${policy}" "resumes immediately in the fresh session" "policy immediate resume"
+assert_contains "${policy}" "Do not call a bare clear" "policy no bare clear"
+assert_contains "${policy}" "do not ask the user to type" "policy no user clear"
+assert_not_contains "${policy}" "until the user opens a fresh session or clears it" "policy no user-owned clear"
 assert_contains "${policy}" '`.sfs-local/` size is a tidy signal' "policy workbench size boundary"
 
 assert_contains "${kernel}" "Session Continuation Guard is ambient" "kernel ambient guard"
 assert_contains "${kernel}" '`sfs upgrade` cannot shrink an already' "kernel upgrade cannot shrink"
-assert_contains "${kernel}" "30% or higher before a new" "kernel 30 threshold"
-assert_contains "${kernel}" "50% or higher before a new gate/loop/review handoff" "kernel 50 threshold"
+assert_contains "${kernel}" "30%+ before a new" "kernel 30 threshold"
+assert_contains "${kernel}" "50%+ before a new gate/loop/review handoff" "kernel 50 threshold"
+assert_contains "${kernel}" "lossless autopilot" "kernel lossless transfer"
+assert_contains "${kernel}" "resume immediately" "kernel immediate resume"
+assert_contains "${kernel}" "Do not call bare clear" "kernel no bare clear"
+assert_contains "${kernel}" 'Do not ask the user to type `/clear`' "kernel no user clear"
 
 assert_contains "${token_policy}" "Apply Session Continuation Guard" "token policy applies guard"
 assert_contains "${token_policy}" "cannot shrink the already-open LLM conversation" "token policy cannot shrink"
 assert_contains "${token_policy}" "write a compact handoff" "token policy compact handoff"
+assert_not_contains "${DIST_DIR}/RELEASE-NOTES.md" "clear/new-session" "release notes no stale clear/new-session"
+assert_not_contains "${DIST_DIR}/CHANGELOG.md" "clear/new-session" "changelog no stale clear/new-session"
 
 assert_contains "${firewall}" "Session continuation budget is separate from bridge budget" "firewall session budget"
 assert_contains "${firewall}" "Stop, capture a fresh-session handoff" "firewall fresh handoff"
@@ -62,6 +87,9 @@ assert_contains "${review}" "Review handoff must also follow Session Continuatio
 
 assert_contains "${model_profiles}" "Session Continuation Guard" "model profiles guard"
 assert_contains "${model_profiles}" "30%+ before a new WU/sprint action" "model profiles 30 threshold"
+assert_contains "${model_profiles}" "lossless autopilot" "model profiles lossless transfer"
+assert_contains "${model_profiles}" "resume immediately" "model profiles immediate resume"
+assert_contains "${model_profiles}" "never call bare clear" "model profiles no bare clear"
 
 docs=(
   "${DIST_DIR}/GUIDE.md"
@@ -99,6 +127,11 @@ for file in "${adapter_files[@]}"; do
   assert_contains "${file}" "30%+ before a new WU/sprint action" "adapter 30 threshold ${file}"
   assert_contains "${file}" "50%+ before a new gate/loop/review" "adapter 50 threshold ${file}"
   assert_contains "${file}" "fresh session" "adapter fresh session ${file}"
+  assert_contains "${file}" "lossless autopilot" "adapter lossless transfer ${file}"
+  assert_contains "${file}" "resume immediately" "adapter immediate resume ${file}"
+  assert_contains "${file}" "never call bare clear" "adapter no bare clear ${file}"
+  assert_contains "${file}" 'Never ask user to type `/clear`' "adapter no user clear ${file}"
+  assert_not_contains "${file}" "use host clear/new-session" "adapter no stale host clear ${file}"
 done
 
 echo "test-session-continuation-token-guard: OK"
