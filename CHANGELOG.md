@@ -1,3 +1,23 @@
+## [0.6.133] - 2026-05-26
+
+> **Linux/GNU residual QA failures are closed.**
+
+### Fixed
+
+- Normalized GNU `sha256sum` escaped digest prefixes so filenames containing
+  backslashes do not produce false no-data-loss mismatches.
+- Aligned archive branch sync locking across `flock` and advisory PID-lock
+  environments, so race-lock checks graceful-exit on both paths.
+- Added a non-interactive review executor timeout guard so an unbounded Gemini
+  review cannot hang headless QA.
+
+### Tests
+
+- Extended quoted-path migration coverage with a fake GNU-style `sha256sum`.
+- Reworked archive race-lock coverage to hold a real `flock` when available.
+- Added a non-interactive hanging Gemini regression to `test-review-auth-preflight.sh`.
+- Verified full product suite PASS 102 / FAIL 0.
+
 ## [0.6.132] - 2026-05-26
 
 > **Stable product tests are part of release verification.**

@@ -35,13 +35,22 @@ echo "${out}" | grep -q "would move 1 closed sprint" || { echo "AC2.7 dry-run FA
 
 # Verify race lock — second concurrent invocation must graceful-exit (exit 0, no error).
 mkdir -p .sfs-local
-echo "$$" > .sfs-local/.archive-sync.lock
+if command -v flock >/dev/null 2>&1; then
+  exec 8>.sfs-local/.archive-sync.lock
+  flock -n 8 || { echo "AC2.7 setup FAIL: could not hold flock"; exit 1; }
+else
+  echo "$$" > .sfs-local/.archive-sync.lock
+fi
 out2="$(bash "${SCRIPT}" --root . --dry-run 2>&1 || true)"
 echo "${out2}" | grep -qE "(graceful exit|holds (flock|advisory lock))" || {
   # If our PID-based lock check sees our own PID alive, second call should bail.
   # Fallback: this verifies the script at least handles the lock file presence path.
   echo "AC2.7 race-lock 경로 mismatch:"; echo "${out2}"; exit 1
 }
+if command -v flock >/dev/null 2>&1; then
+  flock -u 8 || true
+  exec 8>&-
+fi
 rm -f .sfs-local/.archive-sync.lock
 
 echo "test-sfs-archive-branch-sync: OK"

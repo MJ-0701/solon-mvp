@@ -100,7 +100,8 @@ EOF
 sha256_of() {
   local f="$1"
   if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum "${f}" | awk '{print $1}'
+    # GNU sha256sum prefixes the digest with "\" when it escapes a filename.
+    sha256sum "${f}" | awk '{sub(/^\\/, "", $1); print $1}'
   elif command -v shasum >/dev/null 2>&1; then
     shasum -a 256 "${f}" | awk '{print $1}'
   else
@@ -111,7 +112,8 @@ sha256_of() {
 
 sha256_of_stream() {
   if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum | awk '{print $1}'
+    # Keep stream/file digests normalized through the same parser.
+    sha256sum | awk '{sub(/^\\/, "", $1); print $1}'
   elif command -v shasum >/dev/null 2>&1; then
     shasum -a 256 | awk '{print $1}'
   else

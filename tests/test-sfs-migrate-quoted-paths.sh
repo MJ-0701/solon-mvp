@@ -97,6 +97,46 @@ if [[ -n "${snap_iso}" ]]; then
     echo "  full output: ${vs_out}"
     exit 1
   fi
+
+  # GNU sha256sum prefixes the digest with "\" when the filename needs escaping.
+  # The manifest was captured before this fake GNU-style parser is injected; a
+  # normalizer regression shows up as actual=\<sha> for backslash filenames.
+  real_sha256sum="$(command -v sha256sum || true)"
+  fake_bin="${tmp}/fake-bin"
+  mkdir -p "${fake_bin}"
+  cat > "${fake_bin}/sha256sum" <<FAKE_SHA256SUM
+#!/usr/bin/env bash
+real_sha256sum='${real_sha256sum}'
+hash_file() {
+  if [[ -n "\${real_sha256sum}" && "\${real_sha256sum}" != "\$0" ]]; then
+    "\${real_sha256sum}" "\$1" | awk '{sub(/^\\\\/, "", \$1); print \$1}'
+  else
+    shasum -a 256 "\$1" | awk '{print \$1}'
+  fi
+}
+if [[ "\$#" -eq 0 ]]; then
+  if [[ -n "\${real_sha256sum}" && "\${real_sha256sum}" != "\$0" ]]; then
+    "\${real_sha256sum}"
+  else
+    shasum -a 256
+  fi
+  exit \$?
+fi
+for f in "\$@"; do
+  sum="\$(hash_file "\$f")"
+  case "\$f" in
+    *\\\\*) printf '\\\\%s  %s\n' "\${sum}" "\$f" ;;
+    *) printf '%s  %s\n' "\${sum}" "\$f" ;;
+  esac
+done
+FAKE_SHA256SUM
+  chmod +x "${fake_bin}/sha256sum"
+  vs_gnu_out="$(PATH="${fake_bin}:$PATH" bash "${MIGRATE}" --verify-snapshot "${snap_iso}" --root . 2>&1)"
+  printf '%s' "${vs_gnu_out}" | grep -q '^verify_no_data_loss:' || {
+    echo "V1 FAIL: GNU escaped sha256sum verification did not reach verify output"
+    echo "  full output: ${vs_gnu_out}"
+    exit 1
+  }
 fi
 
 # ─── (C) --recover MUST clean BOTH dests (pre-fix would leave the quoted one) ────

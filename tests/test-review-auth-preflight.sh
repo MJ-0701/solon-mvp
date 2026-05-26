@@ -17,6 +17,18 @@ fail() {
   exit 1
 }
 
+run_with_timeout() {
+  local seconds="$1"
+  shift
+  if command -v timeout >/dev/null 2>&1; then
+    timeout "${seconds}s" "$@"
+  elif command -v gtimeout >/dev/null 2>&1; then
+    gtimeout "${seconds}s" "$@"
+  else
+    perl -e 'alarm shift @ARGV; exec @ARGV' "${seconds}" "$@"
+  fi
+}
+
 run_sfs() {
   SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" "$@"
 }
@@ -128,5 +140,39 @@ grep -Fq "CPO evaluator result" "${sprint_dir}/review.md" \
   || fail "review.md should record result after auth preflight passes"
 grep -Fq '"type":"review_open"' .sfs-local/events.jsonl \
   || fail "review_open event should be recorded after auth preflight passes"
+
+cat > "${fake_bin}/hanging-gemini" <<'HANGING_GEMINI'
+#!/usr/bin/env bash
+while IFS= read -r _line; do :; done
+sleep 60
+HANGING_GEMINI
+chmod +x "${fake_bin}/hanging-gemini"
+
+set +e
+run_with_timeout 8 env \
+  PATH="${fake_bin}:$PATH" \
+  SFS_FORCE_NONINTERACTIVE=1 \
+  SFS_GEMINI_AUTH_READY=1 \
+  SFS_REVIEW_BRIDGE_PROBE=0 \
+  SFS_REVIEW_GEMINI_CMD="${fake_bin}/hanging-gemini" \
+  SFS_REVIEW_EXECUTOR_TIMEOUT_SEC=0 \
+  SFS_NONINTERACTIVE_REVIEW_EXECUTOR_TIMEOUT_SEC=2 \
+  SFS_COMMAND_TIMEOUT_SEC=0 \
+  SFS_DIST_DIR="${DIST_DIR}" \
+  bash "${SFS_BIN}" review --gate 3 --executor gemini \
+    >"${TMP_DIR}/hang.out" 2>"${TMP_DIR}/hang.err"
+hang_rc=$?
+set -e
+[[ "${hang_rc}" == "9" ]] || {
+  echo "stdout:" >&2
+  cat "${TMP_DIR}/hang.out" >&2
+  echo "stderr:" >&2
+  cat "${TMP_DIR}/hang.err" >&2
+  fail "non-interactive unbounded Gemini review should fail via SFS guard before outer timeout, got ${hang_rc}"
+}
+grep -Fq 'timeout_guard: `non-interactive review cannot use unbounded executor timeout; using 2s`' "${sprint_dir}/review.md" \
+  || fail "review.md should record non-interactive timeout guard"
+grep -Fq 'exit_code: `124`' "${sprint_dir}/review.md" \
+  || fail "review.md should record bounded timeout exit code"
 
 echo "test-review-auth-preflight: OK"

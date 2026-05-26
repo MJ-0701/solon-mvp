@@ -91,6 +91,7 @@ acquire_lock() {
       printf 'sfs-archive-branch-sync: another process holds flock(%s) — graceful exit\n' "${lock_file}" >&2
       exit 0   # AC2.7 second process graceful exit no-op
     fi
+    echo "$$" >&9
     # flock holds via fd 9 until process exits.
     return 0
   fi

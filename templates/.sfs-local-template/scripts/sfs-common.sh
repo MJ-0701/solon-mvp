@@ -1923,6 +1923,9 @@ executor_auth_ready() {
 }
 
 executor_interactive_tty_available() {
+  case "${SFS_FORCE_NONINTERACTIVE:-0}" in
+    1|true|TRUE|yes|YES|on|ON) return 1 ;;
+  esac
   ( : < /dev/tty > /dev/tty ) >/dev/null 2>&1
 }
 

@@ -7,6 +7,14 @@
 
 ---
 
+## 0.6.133
+
+이번 버전은 Linux/GNU 환경에서 남던 migration, archive lock, review auth QA 실패를 닫습니다.
+
+- 백슬래시가 들어간 파일명도 GNU `sha256sum` escaping 때문에 data-loss mismatch 로 오진하지 않습니다.
+- `flock` 이 있는 환경과 advisory PID lock 환경 모두에서 archive race-lock 테스트가 같은 계약을 검증합니다.
+- 비대화 review 실행에서 timeout 을 무제한으로 둬도 SFS 가 안전한 bounded timeout 으로 막아 hang 을 방지합니다.
+
 ## 0.6.132
 
 이번 버전은 source dist 가 아니라 실제 stable product artifact 기준으로 테스트가 깨지는 문제를 막습니다.

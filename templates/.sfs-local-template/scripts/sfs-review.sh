@@ -205,6 +205,7 @@ REVIEW_DIR_EXPANSION_MAX="${SFS_REVIEW_DIR_EXPANSION_MAX:-80}"
 REVIEW_EXECUTOR_TIMEOUT="${SFS_REVIEW_EXECUTOR_TIMEOUT_SEC:-${SFS_REVIEW_COMMAND_TIMEOUT_SEC:-1500}}"
 REVIEW_BRIDGE_PROBE="${SFS_REVIEW_BRIDGE_PROBE:-auto}"
 REVIEW_BRIDGE_PROBE_TIMEOUT="${SFS_REVIEW_BRIDGE_PROBE_TIMEOUT_SEC:-45}"
+REVIEW_TIMEOUT_GUARD_NOTE=""
 SFS_REVIEW_RESTORE_NOTICE=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -435,6 +436,17 @@ case "${REVIEW_EXECUTOR_TIMEOUT}" in
     exit "${SFS_EXIT_BADCLI}"
     ;;
 esac
+if [[ "${RUN_REVIEW}" == "true" && "${REVIEW_EXECUTOR_TIMEOUT}" == "0" && "${SFS_REVIEW_ALLOW_UNBOUNDED_NONINTERACTIVE:-0}" != "1" ]] \
+  && ! executor_interactive_tty_available; then
+  REVIEW_EXECUTOR_TIMEOUT="${SFS_NONINTERACTIVE_REVIEW_EXECUTOR_TIMEOUT_SEC:-30}"
+  case "${REVIEW_EXECUTOR_TIMEOUT}" in
+    ''|*[!0-9]*|0)
+      echo "invalid SFS_NONINTERACTIVE_REVIEW_EXECUTOR_TIMEOUT_SEC: ${REVIEW_EXECUTOR_TIMEOUT} (expected positive integer seconds)" >&2
+      exit "${SFS_EXIT_BADCLI}"
+      ;;
+  esac
+  REVIEW_TIMEOUT_GUARD_NOTE="non-interactive review cannot use unbounded executor timeout; using ${REVIEW_EXECUTOR_TIMEOUT}s"
+fi
 case "${REVIEW_BRIDGE_PROBE_TIMEOUT}" in
   ''|*[!0-9]*)
     echo "invalid SFS_REVIEW_BRIDGE_PROBE_TIMEOUT_SEC: ${REVIEW_BRIDGE_PROBE_TIMEOUT} (expected integer seconds)" >&2
@@ -3061,6 +3073,9 @@ PROMPT_BYTES="$(count_file_bytes "${PROMPT_PATH}")"
     printf -- '- run_requested: true\n'
   else
     printf -- '- run_requested: false\n'
+  fi
+  if [[ -n "${REVIEW_TIMEOUT_GUARD_NOTE}" ]]; then
+    printf -- '- timeout_guard: `%s`\n' "${REVIEW_TIMEOUT_GUARD_NOTE}"
   fi
   printf -- '- auth_mode: `%s`\n' "${AUTH_INTERACTIVE}"
   printf -- '- prompt_size: `%s bytes / %s lines`\n' "${PROMPT_BYTES}" "${PROMPT_LINES}"
