@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.6.134" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.6.134" "version output"
-assert_contains_text "${output}" "latest 0.6.134" "latest output"
+[[ "${plain_output}" == "sfs 0.6.135" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.6.135" "version output"
+assert_contains_text "${output}" "latest 0.6.135" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Review auth hang regression coverage is CI-stable." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Clarify packaging channel authority." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 review auth hang 회귀 테스트가 느린 CI 에서도 안정적으로 PASS 하도록 보강합니다.' "release notes fallback headline"
+assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 packaging fixture 와 실제 Homebrew/Scoop 배포 채널의 권위 경계를 명확히 문서화합니다.' "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

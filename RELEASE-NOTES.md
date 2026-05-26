@@ -7,6 +7,13 @@
 
 ---
 
+## 0.6.135
+
+이번 버전은 packaging fixture 와 실제 Homebrew/Scoop 배포 채널의 권위 경계를 명확히 문서화합니다.
+
+- 제품 repo 의 `packaging/homebrew/sfs.rb` 와 `packaging/scoop/sfs.json` 이 최신 배포 SoT 가 아니라 source-side fixture 임을 명시합니다.
+- Homebrew/Scoop 최신 상태 확인 경로를 `sfs version --check`, 외부 tap/bucket, release verifier 로 정리합니다.
+
 ## 0.6.134
 
 이번 버전은 review auth hang 회귀 테스트가 느린 CI 에서도 안정적으로 PASS 하도록 보강합니다.

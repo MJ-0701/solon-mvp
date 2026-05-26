@@ -1,3 +1,20 @@
+## [0.6.135] - 2026-05-26
+
+> **Clarify packaging channel authority.**
+
+### Fixed
+
+- Clarified that product repo `packaging/homebrew/sfs.rb` and
+  `packaging/scoop/sfs.json` are source-side fixtures, not the latest
+  Homebrew/Scoop channel source of truth.
+- Added a packaging channel map and regression coverage so maintainers can
+  distinguish templates, fixtures, external tap/bucket repos, and installed
+  runtime verification.
+
+### Tests
+
+- Added `test-packaging-channel-map.sh`.
+
 ## [0.6.134] - 2026-05-26
 
 > **Review auth hang regression coverage is CI-stable.**
