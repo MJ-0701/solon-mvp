@@ -47,14 +47,14 @@ while IFS= read -r file; do
 done < <(find "${DIST_DIR}/templates" -name '*.md.template' -type f | sort)
 
 cut_release="${REPO_ROOT}/scripts/cut-release.sh"
-[[ -f "${cut_release}" ]] || fail "missing cut-release script: ${cut_release}"
-
-while IFS= read -r file; do
-  stem="${file%.md}"
-  [[ -d "${stem}" ]] || continue
-  item="${stem#"${DIST_DIR}/"}"
-  grep -Fxq "  \"${item}\"" "${cut_release}" || \
-    fail "split doc payload missing from cut-release allowlist: ${item}"
-done < <(find "${DIST_DIR}" -maxdepth 1 -name '*.md' -type f | sort)
+if [[ -f "${cut_release}" ]]; then
+  while IFS= read -r file; do
+    stem="${file%.md}"
+    [[ -d "${stem}" ]] || continue
+    item="${stem#"${DIST_DIR}/"}"
+    grep -Fxq "  \"${item}\"" "${cut_release}" || \
+      fail "split doc payload missing from cut-release allowlist: ${item}"
+  done < <(find "${DIST_DIR}" -maxdepth 1 -name '*.md' -type f | sort)
+fi
 
 echo "test-product-md-frontmatter-line-budget: OK"

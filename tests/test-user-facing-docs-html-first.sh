@@ -21,7 +21,6 @@ assert_contains() {
 }
 
 agent_surfaces=(
-  "${DOCSET_ROOT}/CLAUDE.md"
   "${DIST_DIR}/CLAUDE.md"
   "${DIST_DIR}/templates/CLAUDE.md.template"
   "${DIST_DIR}/templates/.sfs-local-template/context/kernel.md"
@@ -32,6 +31,10 @@ agent_surfaces=(
   "${DIST_DIR}/commands/sfs.toml"
   "${DIST_DIR}/plugins/solon/commands/sfs.md"
 )
+
+if [[ -f "${DOCSET_ROOT}/CLAUDE.md" ]]; then
+  agent_surfaces=("${DOCSET_ROOT}/CLAUDE.md" "${agent_surfaces[@]}")
+fi
 
 for file in "${agent_surfaces[@]}"; do
   assert_contains "${file}" "User-facing docs HTML-first" "${file}"

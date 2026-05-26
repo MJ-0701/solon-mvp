@@ -36,6 +36,10 @@ cut_release="${REPO_ROOT}/scripts/cut-release.sh"
 scripts_readme="${REPO_ROOT}/scripts/_README.md"
 squash_wu="${REPO_ROOT}/scripts/squash-wu.sh"
 sync_stable="${REPO_ROOT}/scripts/sync-stable-to-dev.sh"
+source_layout=0
+if [[ -f "${cut_release}" || -f "${scripts_readme}" || -f "${squash_wu}" || -f "${sync_stable}" ]]; then
+  source_layout=1
+fi
 
 assert_contains "${release_context}" "Push is not categorically forbidden" "release context no absolute push ban"
 assert_contains "${release_context}" "explicitly asks for autonomous deploy" "release context authorized deploy"
@@ -62,17 +66,27 @@ assert_contains "${changelog}" "all LLM agents" "changelog all LLM agents"
 assert_contains "${release_notes}" "무조건 금지" "release note push policy"
 assert_contains "${release_notes}" "Claude, Gemini" "release note all agent examples"
 
-assert_contains "${cut_release}" "--push" "cut-release push flag"
-assert_contains "${cut_release}" "authorized push requested" "cut-release authorized push log"
-assert_contains "${cut_release}" "stable push not run by default" "cut-release no surprise default"
-assert_contains "${scripts_readme}" "모든 LLM Agent" "scripts readme all LLM agents"
-assert_contains "${scripts_readme}" "자동 배포를" "scripts readme authorized deploy"
-assert_contains "${squash_wu}" "LLM Agent 도 push 가능" "squash helper authorized agent push"
-assert_contains "${sync_stable}" "any LLM Agent may run" "sync helper authorized agent push"
-assert_not_contains "${cut_release}" "push 는 안 함 (§1.5)" "cut-release no stale absolute push ban"
-assert_not_contains "${cut_release}" "push 는 사용자 터미널" "cut-release no stale terminal-only push"
-assert_not_contains "${scripts_readme}" 'host repo `git add/commit/push` 는 모두 사용자 터미널 manual' "scripts readme no stale manual-only"
-assert_not_contains "${squash_wu}" "사용자 터미널에서만" "squash helper no terminal-only"
-assert_not_contains "${sync_stable}" "AI commit 권한 회수" "sync helper no revoked agent commit"
+if [[ "${source_layout}" = "1" ]]; then
+  [[ -f "${cut_release}" ]] || fail "source layout missing ${cut_release}"
+  [[ -f "${scripts_readme}" ]] || fail "source layout missing ${scripts_readme}"
+  [[ -f "${squash_wu}" ]] || fail "source layout missing ${squash_wu}"
+  [[ -f "${sync_stable}" ]] || fail "source layout missing ${sync_stable}"
+  assert_contains "${cut_release}" "--push" "cut-release push flag"
+  assert_contains "${cut_release}" "authorized push requested" "cut-release authorized push log"
+  assert_contains "${cut_release}" "stable push not run by default" "cut-release no surprise default"
+  assert_contains "${scripts_readme}" "모든 LLM Agent" "scripts readme all LLM agents"
+  assert_contains "${scripts_readme}" "자동 배포를" "scripts readme authorized deploy"
+  assert_contains "${squash_wu}" "LLM Agent 도 push 가능" "squash helper authorized agent push"
+  assert_contains "${sync_stable}" "any LLM Agent may run" "sync helper authorized agent push"
+  assert_not_contains "${cut_release}" "push 는 안 함 (§1.5)" "cut-release no stale absolute push ban"
+  assert_not_contains "${cut_release}" "push 는 사용자 터미널" "cut-release no stale terminal-only push"
+  assert_not_contains "${scripts_readme}" 'host repo `git add/commit/push` 는 모두 사용자 터미널 manual' "scripts readme no stale manual-only"
+  assert_not_contains "${squash_wu}" "사용자 터미널에서만" "squash helper no terminal-only"
+  assert_not_contains "${sync_stable}" "AI commit 권한 회수" "sync helper no revoked agent commit"
+else
+  release_sequence="${DIST_DIR}/scripts/sfs-release-sequence.sh"
+  assert_contains "${release_sequence}" "sfs-channel-publish-preflight.sh" "standalone release sequence preflight"
+  assert_contains "${release_sequence}" "manual_required" "standalone release sequence manual channel route"
+fi
 
 echo "test-release-authorized-push-policy: OK"

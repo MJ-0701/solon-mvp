@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.132
+
+이번 버전은 source dist 가 아니라 실제 stable product artifact 기준으로 테스트가 깨지는 문제를 막습니다.
+
+- release cut 이 삭제된 테스트/문서 파일을 stable product 에 남기지 않습니다.
+- maintainer 전용 handoff/archive 파일은 제품 릴리스에서 제거합니다.
+- standalone product layout 에서도 제품 테스트가 부모 docset 부재만으로 실패하지 않습니다.
+- release verifier 가 local stable product `tests/run-all.sh` PASS 를 확인합니다.
+
 ## 0.6.131
 
 이번 버전은 제품에 포함되는 active 문서와 release-sequence 출력에서 private dev staging 경로명이 새지 않도록 막습니다.

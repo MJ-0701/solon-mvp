@@ -1,3 +1,24 @@
+## [0.6.132] - 2026-05-26
+
+> **Stable product tests are part of release verification.**
+
+### Fixed
+
+- Made release cuts delete stale files inside allowlisted product directories,
+  so removed tests and docs cannot survive in `solon-product` artifacts.
+- Removed maintainer-only `HANDOFF-*.md` and `archives/` files from stable
+  product releases.
+- Made owner-docset tests portable in standalone product layout instead of
+  failing only because parent maintainer scripts are absent.
+- Added local stable product `tests/run-all.sh` to the release verifier.
+
+### Tests
+
+- Reproduced the 0.6.131 stable-product failures for private path hygiene,
+  stale capture-flow, handoff line budget, and standalone layout tests.
+- Verified the product test suite and release verifier close those failures
+  before channel publish.
+
 ## [0.6.131] - 2026-05-26
 
 > **Private dev staging path stays out of active product surfaces.**

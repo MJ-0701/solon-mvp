@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.6.131" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.6.131" "version output"
-assert_contains_text "${output}" "latest 0.6.131" "latest output"
+[[ "${plain_output}" == "sfs 0.6.132" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.6.132" "version output"
+assert_contains_text "${output}" "latest 0.6.132" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Private dev staging path stays out of active product surfaces." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Stable product tests are part of release verification." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 제품에 포함되는 active 문서와 release-sequence 출력에서 private dev staging 경로명이 새지 않도록 막습니다.' "release notes fallback headline"
+assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 source dist 가 아니라 실제 stable product artifact 기준으로 테스트가 깨지는 문제를 막습니다.' "release notes fallback headline"
 
 echo "test-version-release-headline: OK"
