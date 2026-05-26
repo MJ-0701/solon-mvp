@@ -21,6 +21,10 @@ load_when: ["brainstorm", "브레인스토밍", "requirements", "요구사항", 
     vague agreement into plan readiness when decisions are unresolved.
 - Gate 2 exists to prevent spec-to-code drift. Do not accept raw requirements as a
   finished plan; interrogate intent until the next gate has enough shape.
+- Apply `policies/ai-work-intake-routing.md` before drafting questions. Gate 2
+  should expose goal, materials, ask-back rule, and output format, then classify
+  one-off, repeated, or batch workspace scope so the user is not forced to
+  restate context or endure unnecessary ceremony.
 - Apply AI-era fundamentals before setting `status: ready-for-plan`:
   - shared design concept: problem owner, current pain, success state, in/out
     scope, and at least two options are explicit.

@@ -22,6 +22,14 @@ Markdown 기반이라 원문 문서를 대체하지 않는 LLM retrieval layer �
 source truth 로 유지하고, 중요한 docs/component 를 색인한 뒤 다음 실제 sprint 부터 broad repo scan 전에
 wiki map 을 먼저 읽습니다.
 
+운영 모델은 raw data source, wiki, harness 의 3계층입니다. raw source 는 docs, code, tests, scripts,
+capture, external evidence 에 남깁니다. wiki 는 write-time compile 된 concept/navigation layer 입니다.
+새 source material 이나 수용된 agent 답변이 들어오면 durable conclusion 을 source link 가 붙은 TopicHub,
+context map, index entry, gap note 로 정리합니다.
+
+RAG/vector search 는 계속 쓸 수 있지만 curated source/wiki metadata 위의 query-time accelerator 입니다.
+다음 agent 가 처음부터 의미를 재조립해야 하는 임의 chunk 더미가 되어서는 안 됩니다.
+
 이미 `.obsidian/` 또는 `llm-wiki/` 가 있으면 SFS 는 Obsidian 적용 프로젝트로 취급합니다. 이 경우
 agent 는 `llm-wiki/README.md` 와 `llm-wiki/ddd/README.md` 를 먼저 확인하고, 관련 map 이 없으면
 작업을 막기보다 gap 또는 waiver 를 남깁니다.
@@ -29,6 +37,9 @@ agent 는 `llm-wiki/README.md` 와 `llm-wiki/ddd/README.md` 를 먼저 확인하
 host-local tool/skill bundle 과 user-home folder 는 외부 실행 환경이지 project source truth 가 아닙니다.
 Obsidian wiki 작업은 사용자가 명시적으로 요청하지 않는 한 이런 외부 도구를 wiki root, SFS 개념,
 install target, migration source 로 설치, clone, scaffold, 승격하지 않습니다.
+
+agent 는 승격, 통합, 충돌 해결 patch 를 제안할 수 있지만 shared knowledge 변경, 삭제, 민감 권한,
+private material 이동은 merge 전 사람 review 를 요구합니다.
 
 이것은 권고 기본값이지 hard dependency 가 아닙니다. 사용자가 거절하거나 Obsidian 을 쓸 수 없거나 repo 에
 vault 를 둘 수 없으면 SFS 는 `docs/solon/` 산출물로 계속 진행하고 gap 또는 waiver 를 기록합니다.

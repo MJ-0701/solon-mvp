@@ -18,6 +18,13 @@ user_approval_evidence: ""
 
 -
 
+## 1.1 AI Work Intake Carryover
+
+- materials:
+- ask-back rule:
+- output format:
+- work size: one-off / repeated / batch workspace
+
 ## 2. 요구사항
 
 - [ ] R1:
@@ -121,6 +128,7 @@ Gate 3 review PASS 는 사용자 승인으로 간주하지 않는다. 사용자�
 - [ ] 완료 기준이 측정 가능하다
 - [ ] 한 sprint 안에서 닫힌다
 - [ ] 검증 방법이 있다
+- [ ] AI work intake 의 goal/materials/ask-back/output format/work size 가 계획에 반영되어 있다
 - [ ] main objective 와 보조 작업 분류/복귀 조건이 적혀 있다
 - [ ] Gate 2 결정이 요구사항과 AC에 연결되어 있다
 - [ ] product behavior 변경이면 DDD boundary 와 TDD evidence 또는 waiver 가 있다

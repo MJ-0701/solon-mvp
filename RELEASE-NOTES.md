@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.136
+
+이번 버전은 LLM Wiki 와 AI 업무 지시 원칙을 SOLON 제품 플로우 안에 직접 넣습니다.
+
+- LLM Wiki 와 RAG 의 역할을 분리해, 문서가 들어올 때 정리되는 지식과 질문 시점 검색을 함께 쓰도록 정리합니다.
+- `목표`, `재료`, `먼저 물어볼 조건`, `결과 형식`을 `start`, `brainstorm`, `plan` 흐름과 sprint template 에 반영합니다.
+- 작업 크기를 one-off, repeated, batch workspace 로 나눠 불필요한 ceremony 없이 적절한 제품 플로우로 라우팅합니다.
+- 관련 제품 문서와 LLM Wiki 인덱스를 함께 갱신해 이후 업그레이드에서도 같은 경계를 유지합니다.
+
 ## 0.6.135
 
 이번 버전은 packaging fixture 와 실제 Homebrew/Scoop 배포 채널의 권위 경계를 명확히 문서화합니다.

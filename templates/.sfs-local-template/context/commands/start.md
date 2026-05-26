@@ -34,6 +34,10 @@ Rules:
 - If the domain is genuinely unclear, allow the legacy `--workspace
   <english-name>` fallback. Do not let the workspace collapse to a sprint id
   such as `2026-W19-sprint-5`.
+- For AI work intake, load `policies/ai-work-intake-routing.md`: identify
+  goal, materials, ask-back rule, and output format, then classify whether the
+  work is one-off chat, repeated project memory, or a batch workspace before
+  opening more SFS ceremony.
 - Do not create or imply step-doc creation for `start`. `start` makes the
   sprint pointer only; `brainstorm`, `plan`, `implement`, `review`, and `retro`
   create their own workbench doc when that phase is actually needed.

@@ -8,9 +8,8 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
 
 - Adapter-first: run `sfs plan`, then read the same sprint's `brainstorm.md`.
   Treat Gate 2 `§1-§8` as source material, not decoration.
-- If `brainstorm.md` is still draft or has unresolved blocking questions, do
-  not smooth over them with assumptions. Ask 1-3 questions and keep the plan
-  draft until shared intent is clear.
+- If `brainstorm.md` is still draft or has unresolved blocking questions, do not smooth over them with assumptions. Ask 1-3 questions and keep the plan draft until shared intent is clear.
+- Carry Gate 2 AI work intake forward: goal, materials, ask-back rule, and output format become requirements, AC, evidence, and artifact shape.
 - If Gate 3 remains draft because the user must choose scope, do not end with
   an unexplained `Q1`. Write a short decision-needed paragraph that restates the
   user-facing choice, why the choice matters, the recommended default, and the

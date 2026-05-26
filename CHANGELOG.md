@@ -1,3 +1,24 @@
+## [0.6.136] - 2026-05-26
+
+> **LLM Wiki and AI work intake routing are productized.**
+
+### Changed
+
+- Added an LLM Wiki/RAG boundary policy so write-time curated knowledge and
+  query-time retrieval stay complementary instead of collapsing into one
+  ungoverned document pile.
+- Added an AI work intake routing policy that carries goal, materials,
+  ask-back rule, output format, and work-size classification through
+  `start`, `brainstorm`, `plan`, and sprint templates.
+- Updated product-shape docs and LLM Wiki maps/indexes so these knowledge and
+  work-intake harnesses are visible in the current product flow.
+
+### Tests
+
+- Added focused regressions for LLM Wiki/RAG boundary routing and AI work
+  intake routing.
+- Verified the full product suite at 104 PASS / 0 FAIL before release prep.
+
 ## [0.6.135] - 2026-05-26
 
 > **Clarify packaging channel authority.**

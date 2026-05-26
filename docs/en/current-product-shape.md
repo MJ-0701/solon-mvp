@@ -4,7 +4,7 @@ title: "Current Product Shape"
 visibility: oss-public
 doc_type: product-reference
 language: en
-updated: 2026-05-22
+updated: 2026-05-26
 summary: "Thin index for Current Product Shape"
 load_when: "Start here, then load only the child section needed."
 split_children:
@@ -27,6 +27,7 @@ split_children:
   - docs/en/current-product-shape/17-token-harness-hygiene.md
   - docs/en/current-product-shape/18-choosing-a-mode.md
   - docs/en/current-product-shape/19-obsidian-llm-wiki-continuity.md
+  - docs/en/current-product-shape/20-ai-work-intake-routing.md
 ---
 # Current Product Shape
 
@@ -62,3 +63,4 @@ This file keeps the original route as a thin entry point. Detailed body sections
 - [Token / Harness Hygiene](./current-product-shape/17-token-harness-hygiene.md)
 - [Choosing A Mode](./current-product-shape/18-choosing-a-mode.md)
 - [Obsidian LLM Wiki Continuity](./current-product-shape/19-obsidian-llm-wiki-continuity.md)
+- [AI Work Intake Routing](./current-product-shape/20-ai-work-intake-routing.md)

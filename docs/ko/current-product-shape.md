@@ -4,7 +4,7 @@ title: "현재 제품 구조와 운영 흐름"
 visibility: oss-public
 doc_type: product-reference
 language: ko
-updated: 2026-05-22
+updated: 2026-05-26
 summary: "Thin index for 현재 제품 구조와 운영 흐름"
 load_when: "Start here, then load only the child section needed."
 split_children:
@@ -27,6 +27,7 @@ split_children:
   - docs/ko/current-product-shape/17-token-harness-hygiene.md
   - docs/ko/current-product-shape/18-section.md
   - docs/ko/current-product-shape/19-obsidian-llm-wiki-continuity.md
+  - docs/ko/current-product-shape/20-ai-work-intake-routing.md
 ---
 # 현재 제품 구조와 운영 흐름
 
@@ -61,3 +62,4 @@ split_children:
 - [Token / Harness Hygiene](./current-product-shape/17-token-harness-hygiene.md)
 - [언제 어떤 모드를 고르나](./current-product-shape/18-section.md)
 - [Obsidian LLM Wiki Continuity](./current-product-shape/19-obsidian-llm-wiki-continuity.md)
+- [AI Work Intake Routing](./current-product-shape/20-ai-work-intake-routing.md)

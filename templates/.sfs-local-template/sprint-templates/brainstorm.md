@@ -16,6 +16,14 @@ status: draft
 
 ## 1. 원문 입력
 
+## 1.1 AI Work Intake
+
+- 목표:
+- 재료:
+- 먼저 물어볼 조건:
+- 결과 형식:
+- 작업 크기: one-off / repeated / batch workspace
+
 ## 2. 문제
 
 - 사용자/주체:

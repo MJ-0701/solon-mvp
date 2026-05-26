@@ -28,6 +28,7 @@ module:
 - `policies/division-subagent-council.md` — six core divisions as always-on conceptual sub-agents.
 - `policies/mainline-focus-guard.md` — keep helper tool/setup work subordinate to the main objective.
 - `policies/context-pollution-guard.md` — keep core docs/context free of prompt bodies, transcripts, and scratch residue.
+- `policies/ai-work-intake-routing.md` — four-part AI work intake and one-off/repeated/batch routing.
 - `policies/source-driven-development.md` — official-source verification for framework/library patterns.
 - `policies/debugging-and-error-recovery.md` — stop-the-line failure triage and root-cause guardrails.
 - `policies/deprecation-and-migration.md` — legacy state/API cleanup with replacement, archive, and migration evidence.

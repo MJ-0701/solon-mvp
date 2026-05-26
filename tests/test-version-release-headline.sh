@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.6.135" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.6.135" "version output"
-assert_contains_text "${output}" "latest 0.6.135" "latest output"
+[[ "${plain_output}" == "sfs 0.6.136" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.6.136" "version output"
+assert_contains_text "${output}" "latest 0.6.136" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Clarify packaging channel authority." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline LLM Wiki and AI work intake routing are productized." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 packaging fixture 와 실제 Homebrew/Scoop 배포 채널의 권위 경계를 명확히 문서화합니다.' "release notes fallback headline"
+assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 LLM Wiki 와 AI 업무 지시 원칙을 SOLON 제품 플로우 안에 직접 넣습니다.' "release notes fallback headline"
 
 echo "test-version-release-headline: OK"
