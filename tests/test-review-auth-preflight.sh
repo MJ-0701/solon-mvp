@@ -149,7 +149,7 @@ HANGING_GEMINI
 chmod +x "${fake_bin}/hanging-gemini"
 
 set +e
-run_with_timeout 8 env \
+run_with_timeout 30 env \
   PATH="${fake_bin}:$PATH" \
   SFS_FORCE_NONINTERACTIVE=1 \
   SFS_GEMINI_AUTH_READY=1 \

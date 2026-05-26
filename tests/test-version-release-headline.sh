@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.6.133" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.6.133" "version output"
-assert_contains_text "${output}" "latest 0.6.133" "latest output"
+[[ "${plain_output}" == "sfs 0.6.134" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.6.134" "version output"
+assert_contains_text "${output}" "latest 0.6.134" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Linux/GNU residual QA failures are closed." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Review auth hang regression coverage is CI-stable." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 Linux/GNU 환경에서 남던 migration, archive lock, review auth QA 실패를 닫습니다.' "release notes fallback headline"
+assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 review auth hang 회귀 테스트가 느린 CI 에서도 안정적으로 PASS 하도록 보강합니다.' "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

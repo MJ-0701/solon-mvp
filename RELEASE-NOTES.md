@@ -7,6 +7,13 @@
 
 ---
 
+## 0.6.134
+
+이번 버전은 review auth hang 회귀 테스트가 느린 CI 에서도 안정적으로 PASS 하도록 보강합니다.
+
+- 비대화 review timeout guard 자체는 0.6.133 과 동일하게 유지합니다.
+- 테스트의 바깥쪽 안전 timeout 만 여유 있게 늘려, SFS 내부 bounded timeout 결과를 기다립니다.
+
 ## 0.6.133
 
 이번 버전은 Linux/GNU 환경에서 남던 migration, archive lock, review auth QA 실패를 닫습니다.

@@ -1,3 +1,18 @@
+## [0.6.134] - 2026-05-26
+
+> **Review auth hang regression coverage is CI-stable.**
+
+### Fixed
+
+- Relaxed the outer wall-clock timeout in the non-interactive review-auth hang
+  regression so slower CI runners do not fail before SFS can return its bounded
+  executor error path.
+
+### Tests
+
+- Re-ran the review-auth focused regression and full product suite after the
+  GitHub Codex P2 finding on 0.6.133.
+
 ## [0.6.133] - 2026-05-26
 
 > **Linux/GNU residual QA failures are closed.**
