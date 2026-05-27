@@ -38,11 +38,11 @@ Arguments: `$ARGUMENTS`
 5. Read `sfs context cat kernel`, `sfs context cat index`, then only the routed
    module. On Windows PowerShell/cmd use native `sfs.cmd context cat ...`.
 6. For hybrid commands, refine pointed artifacts and answer with one Solon report.
-7. AI-era fundamentals apply across all gates, not only implement: shared design
-   concept, domain language, feedback loop, interface/artifact boundary, and
-   gray-box delegation. DDD/TDD is a product-level engineering floor: product
-   behavior, domain language, behavior boundary, and first evidence are named
-   before worker handoff; DDD-lite code boundaries apply when code is touched.
+7. AI-era fundamentals and Harness Engineering apply across all gates: shared
+   design, domain language, feedback, interface/artifact boundary, gray-box
+   delegation, narrow tool surface, project-as-prompt, and automated checks.
+   DDD/TDD is a product-level engineering floor: behavior, domain language,
+   boundary, and first evidence are named before worker handoff; DDD-lite code boundaries apply when code is touched.
    All product-bearing entrypoints are included: UI bootstraps, routers, root
    components, hooks/stores/effects, controllers, jobs, repositories, DTO mappers,
    CLI flags, scripts, migrations, docs wording, observability glue, and external

@@ -1,3 +1,26 @@
+## [0.6.137] - 2026-05-28
+
+> **Harness Engineering guardrails are productized.**
+
+### Changed
+
+- Added Harness Engineering guardrails so SFS raises an agent's ceiling with
+  structure, verification, and bounded tool surfaces instead of relying on
+  prompt-only persuasion.
+- Routed structure-over-pleading, active tool-surface budget,
+  project-as-prompt audits, verification automation, and human-owned
+  understanding/design boundaries through the token harness, plan, implement,
+  and review contexts.
+- Updated Claude/Codex/Gemini/SFS adapter surfaces, EN/KO product docs, and
+  LLM Wiki maps/indexes so the same harness contract is ambient project
+  context for future work.
+
+### Tests
+
+- Added `test-harness-engineering-guardrails.sh`.
+- Regenerated LLM Wiki indexes and verified focused regressions plus the full
+  product suite at 105 PASS / 0 FAIL before release prep.
+
 ## [0.6.136] - 2026-05-26
 
 > **LLM Wiki and AI work intake routing are productized.**

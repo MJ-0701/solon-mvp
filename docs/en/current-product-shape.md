@@ -4,7 +4,7 @@ title: "Current Product Shape"
 visibility: oss-public
 doc_type: product-reference
 language: en
-updated: 2026-05-26
+updated: 2026-05-28
 summary: "Thin index for Current Product Shape"
 load_when: "Start here, then load only the child section needed."
 split_children:

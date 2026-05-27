@@ -4,7 +4,7 @@ title: "현재 제품 구조와 운영 흐름"
 visibility: oss-public
 doc_type: product-reference
 language: ko
-updated: 2026-05-26
+updated: 2026-05-28
 summary: "Thin index for 현재 제품 구조와 운영 흐름"
 load_when: "Start here, then load only the child section needed."
 split_children:

@@ -62,8 +62,8 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   - feedback loops become binary AC with `verify by ...` evidence.
   - deep-module boundaries become public interfaces, artifact boundaries, or
     ownership slices.
-  - gray-box delegation marks what the user/CEO must decide and what the AI
-    worker may fill internally.
+  - gray-box delegation and Harness Engineering mark human-owned understanding/
+    design, AI-owned execution, narrow tool surface, project-as-prompt structure, and verification checks.
 - Gate 3 must include a `division_subagent_ledger`: strategy-pm, dev, QA,
   design, infra, and taxonomy map to AC/files/evidence or record a waiver/
   not-applicable. Actual parallel implementation is optional; this council

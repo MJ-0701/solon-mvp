@@ -151,9 +151,9 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   `policies/review-lens-routing.md`. Public lens names include `source-docs`,
   `simplify`, `security`, `performance`, `api-contract`, `strategy`, `design`,
   `taxonomy`, `qa`, `ops`, `management-admin`, and `release`.
-- Review the whole contract, not only changed code: shared intent, domain
-  language consistency, feedback evidence, interface/artifact boundaries, and
-  gray-box delegation should still match the Gate 2/3 record.
+- Review the whole Harness Engineering contract, not only changed code: shared intent, domain
+  language, human-owned design, narrow active tool surface, project-as-prompt
+  consistency, feedback evidence, and boundaries match the Gate 2/3 record.
 - Natural-language SFS activation is real SFS. Return partial for facade-only SFS:
   SFS terms were used but routed context, active sprint status, handoff/user
   intent, plan/review artifacts, or wiki/DDD maps were not reconciled.

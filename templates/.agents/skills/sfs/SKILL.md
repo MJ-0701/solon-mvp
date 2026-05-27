@@ -34,9 +34,9 @@ description: Solon SFS command router for Codex. Dispatch `$sfs` / `sfs` / visib
    would weaken quality, use full clarity.
 8. For `profile`, edit only the `SFS.md` project overview section.
 9. For hybrid commands, refine pointed artifacts and answer with one Solon report.
-10. AI-era software fundamentals are cross-phase, not implement-only. Before a
-   gate advances, check shared design concept, domain language, feedback loop,
-   interface/artifact boundary, and gray-box delegation.
+10. AI-era fundamentals and Harness Engineering are cross-phase. Before a gate
+   advances, check shared design, domain language, feedback, boundaries,
+   gray-box delegation, narrow tools, project-as-prompt, and automated checks.
    DDD/TDD is a product-level engineering floor: name product behavior, domain
    language, and first evidence before worker handoff; use DDD-lite boundaries
    when code is touched; keep invariants out of adapters; prefer failing,

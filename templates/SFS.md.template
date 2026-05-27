@@ -39,6 +39,8 @@ compact Next action after verbatim output. Compact output is quality-preserving 
 never compress evidence, risk warnings, decisions, source links/paths, or
 raw-source traceability. If compactness would weaken quality, use full clarity.
 Never hardcode external private docsets.
+Harness Engineering is structure over pleading: keep active tools narrow,
+project-as-prompt structure coherent, verification automated, and product understanding/design human-owned.
 DDD/TDD is a product-level engineering floor, not backend-only. All
 product-bearing entrypoints are included: UI bootstraps, routers, root
 components, hooks/stores/effects, controllers, jobs, repositories, DTO mappers,

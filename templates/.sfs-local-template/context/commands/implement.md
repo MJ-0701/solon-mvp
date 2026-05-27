@@ -124,8 +124,8 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - Token discipline: inspect the smallest relevant files, prefer symbol/semantic
   search or precise `rg` before broad reads, and do not carry old workbench
   history into the turn unless current report/plan evidence is insufficient.
-- Prefer deep modules and gray-box delegation: design the public interface, then let AI fill internals.
-- Record artifact type, domain terms, feedback checks, design/interface notes, review handoff, and a `division_subagent_ledger`: strategy-pm/dev/QA/design/infra/taxonomy finding/evidence/waiver.
+- Prefer deep modules and Harness Engineering: design the public interface, narrow active tools, project-as-prompt structure, and checks so AI can fill internals.
+- Record artifact type, domain terms, human-owned design decisions, feedback checks, design/interface notes, review handoff, and a `division_subagent_ledger`: strategy-pm/dev/QA/design/infra/taxonomy finding/evidence/waiver.
 - When delegating worker slices, keep files_scope explicit and disjoint. Workers
   may implement fixed internals, but architecture, public API, domain terms, and
   acceptance criteria stay with CEO/CTO/user decisions.

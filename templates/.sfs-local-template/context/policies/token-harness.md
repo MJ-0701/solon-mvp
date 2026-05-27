@@ -28,6 +28,21 @@ load_when: ["token", "harness", "context", "Claude", "Codex", "Gemini", "MCP", "
   adapter context keeps accepted conclusions, not prompt bodies, raw chat,
   bridge probe output, `.sfs-local/tmp/...` scratch paths, or long review blobs.
   Prompt/context bloat is a product finding, not harmless documentation.
+- Harness Engineering raises the AI ceiling by structure, not pleading. Prefer a
+  small active tool surface, project-as-prompt consistency, automated checks, and
+  human-owned understanding/design boundaries over longer prompts.
+- Tool-surface budget: give agents the few tools, skills, MCPs, and routed
+  context modules needed for the current slice. Defer or remove attractive but
+  irrelevant tools so selection cost does not steal attention from the work.
+- Project-as-prompt audit: folder shape, filenames, domain terms, test names,
+  adapters, docs, and style are all prompts. If repeated AI mistakes trace to a
+  messy structure, fix the structure or routing instead of restating warnings.
+- Verification automation: when a result must be trusted repeatedly, turn the
+  check into a test, smoke, hook, review prompt, or release gate. A reminder in
+  chat is only a temporary mitigation.
+- Human understanding boundary: AI may analyze, code, review, and execute, but
+  humans still own why the product exists, what tradeoff is acceptable, and what
+  exception changes the design contract.
 - Poll run artifacts instead of chat state. Workers should write status/result/
   evidence files; leads should inspect those files rather than repeatedly
   rereading source, diffs, build logs, or the main thread while waiting.

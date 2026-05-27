@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.6.136" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.6.136" "version output"
-assert_contains_text "${output}" "latest 0.6.136" "latest output"
+[[ "${plain_output}" == "sfs 0.6.137" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.6.137" "version output"
+assert_contains_text "${output}" "latest 0.6.137" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline LLM Wiki and AI work intake routing are productized." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Harness Engineering guardrails are productized." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 LLM Wiki 와 AI 업무 지시 원칙을 SOLON 제품 플로우 안에 직접 넣습니다.' "release notes fallback headline"
+assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 하네스 엔지니어링 원칙을 SFS 제품 흐름 안에 직접 넣습니다.' "release notes fallback headline"
 
 echo "test-version-release-headline: OK"
