@@ -1,5 +1,38 @@
 ## [Unreleased]
 
+## [0.6.145] - 2026-05-28
+
+> **User-facing docs policy softened from HTML-first to HTML-encouraged — current docs/ stays MD by explicit choice.**
+
+### Changed
+
+- Reworded the rule from "User-facing docs HTML-first" to "User-facing docs
+  HTML-encouraged" across all eight agent surfaces (`CLAUDE.md`,
+  `templates/.sfs-local-template/context/kernel.md`,
+  `commands/sfs.toml`, `templates/.claude/commands/sfs.md`,
+  `templates/.gemini/commands/sfs.toml`, `plugins/solon/commands/sfs.md`,
+  `templates/codex-skill/SKILL.md`, `templates/.agents/skills/sfs/SKILL.md`).
+  The rule now explicitly allows Markdown when GitHub-rendered MD is the
+  primary read surface, which matches the actual state of `docs/`, `GUIDE/`,
+  `README/`, and `BEGINNER-GUIDE/` (104 MD files, zero HTML).
+- Closes the policy-vs-implementation gap flagged in
+  `QA-REPORT-2026-05-28.md` §2.3: the previous wording would have required
+  an HTML build pipeline that the thin distribution intentionally avoids.
+- Synced source-side packaging fixtures (`packaging/scoop/sfs.json`,
+  `packaging/homebrew/sfs.rb`) from the stale `v0.6.17` reference up to
+  `v0.6.145`. The fixtures are not channel SoT — per
+  `packaging/README.md`, the authoritative homebrew tap and scoop bucket
+  live in external repos — but keeping the source-side copy current
+  reduces grep/onboarding confusion 127 releases later. SHA256 stays at
+  the cut-release placeholder.
+
+### Tests
+
+- `tests/test-user-facing-docs-html-first.sh` now asserts the
+  HTML-encouraged wording AND the presence of the `MD remains acceptable`
+  clause. Prevents the policy from quietly drifting back to HTML-first
+  without an accompanying build pipeline.
+
 ## [0.6.144] - 2026-05-28
 
 > **Test harness noise floor + nounset static-check coverage both tightened.**

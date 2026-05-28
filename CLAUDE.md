@@ -29,8 +29,9 @@ load_when: "Read when this product document is directly relevant."
 2. **templates/** 하위는 consumer 에게 그대로 배포되는 파일. 수정 시 하위 호환성 고려.
 3. **VERSION** 은 semver `X.Y.Z-mvp` 또는 `X.Y.Z`. mvp suffix 는 풀스펙 수렴 전까지 유지.
 4. **CHANGELOG.md** 는 모든 릴리스를 기록. upgrade.sh 가 이 파일을 consumer 에게 안내.
-5. **User-facing docs HTML-first** — AI Agent 참고용 운영 문서/SSoT/로그/스키마/README 는 Markdown 을 유지하되,
-   실제 사용자·외부 독자·온보딩 대상이 읽는 설명서/가이드/보고서/핸드북/랜딩성 문서는 기본 산출물을 HTML 로 작성.
+5. **User-facing docs HTML-encouraged** — AI Agent 참고용 운영 문서/SSoT/로그/스키마/README 는 Markdown 을 유지한다.
+   실제 사용자·외부 독자·온보딩 대상이 읽는 설명서/가이드/보고서/핸드북/랜딩성 문서는 HTML 산출을 권장하지만,
+   GitHub 안 렌더링 MD 가 이미 주 읽기 표면이라면 MD 유지도 허용한다 (현 docs/ 는 전부 MD 유지 선택).
 6. **Fresh-session transfer autopilot** — Session Continuation Guard 가 걸리면 같은 세션/새 세션 선택이나 `/clear` 입력을 묻지 않는다. 먼저 current branch/commit/status/evidence/next prompt 를 담은 durable handoff/report 를 남긴 뒤, host-native transfer/new-session/archive/clear+resume 제어가 있으면 직접 호출해 새 세션에서 즉시 이어간다. resume 없는 bare clear 는 금지한다. host 제어가 없으면 exact next-session prompt 만 남기고 멈춘다.
 7. **6본부 council always-on** — strategy-pm/dev/QA/design/infra/taxonomy 는 brainstorm 부터 Gate 6 까지 개념적 sub-agent 로 evidence/waiver 를 남긴다. parallel worker 는 별도 opt-in 이다.
 8. **Mainline-first + Gate 6 data/security** — 보조 도구/인증/모델 설정은 본 작업의 `unblocker` 일 때만 최소 처리하고 즉시 본론으로 복귀한다. Gate 6 는 mock/fixture/seed/API/UI/auth/session/persistence 데이터 검증, OWASP-style security/logging, production console/debug log 제거, Datadog/equivalent evidence, 긴 컨텍스트 wiki checklist reconciliation, postdev external review, lean procedure review, `process-lean` lens 를 확인한다.

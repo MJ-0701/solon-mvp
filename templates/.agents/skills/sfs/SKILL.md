@@ -52,9 +52,10 @@ description: Solon SFS command router for Codex. Dispatch `$sfs` / `sfs` / visib
 11. For implementation and review work, follow the routed context guardrails:
    surface material assumptions, choose the smallest useful slice, keep changes
    surgical, read actual files/errors before fixing, verify before completion,
-   and report exact evidence. User-facing docs HTML-first: agent docs/logs/SSoT
+   and report exact evidence. User-facing docs HTML-encouraged: agent docs/logs/SSoT
    stay Markdown; real-user guides, reports, handbooks, onboarding, and landing
-   docs default to HTML. For visible frontend/UI work, verify with Playwright
+   docs render well in HTML but MD remains acceptable when GitHub-rendered MD is
+   the primary read surface. For visible frontend/UI work, verify with Playwright
    or equivalent browser automation before asking the user to inspect it.
    Benchmarked engineering practices strengthen existing commands instead of
    creating new lifecycle commands: source-driven official docs, stop-the-line

@@ -7,6 +7,22 @@
 
 ---
 
+## 0.6.145
+
+이번 버전은 user-facing docs 정책을 "HTML-first" 에서 "HTML-encouraged" 로
+약화하여 정책 문구와 실제 docs/ 산출물 형식 사이의 격차를 닫고, 동시에
+source-side packaging fixture 의 stale 한 v0.6.17 참조를 현재 버전으로
+sync 합니다.
+
+- 8개 agent surface 의 정책 표현을 일관되게 갱신.
+- 현재 docs/, GUIDE/, README/, BEGINNER-GUIDE/ 의 104개 MD 산출물은 GitHub
+  렌더링 표면을 기준으로 의도적으로 MD 유지로 명시.
+- 정책-실태 격차 회귀를 막기 위해 test 가 "MD 허용" 문구의 존재까지 검증.
+- `packaging/scoop/sfs.json` 과 `packaging/homebrew/sfs.rb` 의 버전/URL/
+  extract_dir 을 v0.6.17 → v0.6.145 로 갱신. 채널 SoT 는 여전히 외부
+  tap/bucket repo 이지만, source-side fixture 가 127 release 차이로 벌어진
+  상태를 정리해 onboarding 시 혼동을 줄임.
+
 ## 0.6.144
 
 이번 버전은 테스트 하네스의 stdout 신호-대-소음 비율과 macOS bash 3.2 +

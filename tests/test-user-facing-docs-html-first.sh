@@ -36,8 +36,11 @@ if [[ -f "${DOCSET_ROOT}/CLAUDE.md" ]]; then
 fi
 
 for file in "${agent_surfaces[@]}"; do
-  assert_contains "${file}" "User-facing docs HTML-first" "${file}"
+  assert_contains "${file}" "User-facing docs HTML-encouraged" "${file}"
   assert_contains "${file}" "HTML" "${file}"
+  # 0.6.145 약화: HTML 권장이지만 MD 도 허용한다는 문구가 함께 들어가야 한다.
+  # 단순히 HTML-first 만 남겨두면 정책-실태 격차가 재발한다.
+  assert_contains "${file}" "MD" "${file}"
 done
 
 echo "test-user-facing-docs-html-first: OK"
