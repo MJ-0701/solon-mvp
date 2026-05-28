@@ -448,6 +448,7 @@ collapse_dirs_to_cold_archive() {
     [[ -n "${item}" ]] || continue
     tar_items+=("${item}")
   done <<< "${ids}"
+  (( ${#tar_items[@]} > 0 )) || return "${SFS_EXIT_OK}"
   tar -czf "${archive_path}" -C "${base_dir}" "${tar_items[@]}" || return "${SFS_EXIT_PERM}"
 
   while IFS= read -r item; do

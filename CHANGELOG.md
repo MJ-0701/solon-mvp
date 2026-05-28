@@ -1,5 +1,38 @@
 ## [Unreleased]
 
+## [0.6.144] - 2026-05-28
+
+> **Test harness noise floor + nounset static-check coverage both tightened.**
+
+### Fixed
+
+- `install.sh` `confirm()` no longer emits the `"<question> (y/N) [N]: y"`
+  Korean prompt line when `ASSUME_YES=1`. The previous behavior pushed this
+  line to stderr; whenever a test runner merged stderr into stdout (notably
+  `run-all.sh`'s default), the Korean prompt leaked into integration test
+  output and made progress lines harder to read. `SFS_INSTALL_VERBOSE_CONFIRM=1`
+  preserves the old verbose behavior as an opt-in.
+
+### Added
+
+- `tests/test-nounset-empty-array-expansion.sh` gained a coverage section
+  that scans every bash script under `scripts/` and
+  `templates/.sfs-local-template/scripts/` for unsafe `"${arr[@]}"`
+  expansions. Each site must either use the `${arr[@]+"${arr[@]}"}` idiom,
+  keep an explicit `${#arr[@]}` length-guard somewhere in the file, or be
+  explicitly annotated with `# nounset-safe: <reason>` on the line above.
+  Reduces the chance of recurring the 0.6.2 macOS bash 3.2 + `set -u`
+  empty-array crash class in newly-introduced scripts.
+- Hardened 11 call sites flagged by the new coverage check:
+  `scripts/sfs-harness.sh`, `scripts/sfs-storage-precommit.sh`,
+  `scripts/sfs-bootstrap.sh`, `scripts/sfs-sprint-yml-validator.sh`,
+  `scripts/sfs-migrate-artifacts.sh` (x2),
+  `templates/.sfs-local-template/scripts/sfs-adopt.sh`,
+  `templates/.sfs-local-template/scripts/sfs-common.sh`,
+  `templates/.sfs-local-template/scripts/sfs-tidy.sh`. Sites that are
+  always populated by construction got `# nounset-safe:` annotations;
+  sites that can legitimately be empty got explicit length guards.
+
 ## [0.6.143] - 2026-05-28
 
 > **Maintainer-side dev-staging label removed from active product surfaces.**

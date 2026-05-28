@@ -124,9 +124,11 @@ detect_test_surface() {
   if [ -n "${SFS_HARNESS_EXTRA_TEST_DIRS:-}" ]; then
     local _td
     IFS=':' read -ra _SFS_HARNESS_TEST_DIRS <<< "${SFS_HARNESS_EXTRA_TEST_DIRS}"
-    for _td in "${_SFS_HARNESS_TEST_DIRS[@]}"; do
-      [ -n "${_td}" ] && [ -d "${_td}" ] && return 0
-    done
+    if (( ${#_SFS_HARNESS_TEST_DIRS[@]} > 0 )); then
+      for _td in "${_SFS_HARNESS_TEST_DIRS[@]}"; do
+        [ -n "${_td}" ] && [ -d "${_td}" ] && return 0
+      done
+    fi
   fi
   return 1
 }
@@ -140,9 +142,11 @@ detect_release_surface() {
   if [ -n "${SFS_HARNESS_EXTRA_RELEASE_FILES:-}" ]; then
     local _rf
     IFS=':' read -ra _SFS_HARNESS_RELEASE_FILES <<< "${SFS_HARNESS_EXTRA_RELEASE_FILES}"
-    for _rf in "${_SFS_HARNESS_RELEASE_FILES[@]}"; do
-      [ -n "${_rf}" ] && [ -f "${_rf}" ] && return 0
-    done
+    if (( ${#_SFS_HARNESS_RELEASE_FILES[@]} > 0 )); then
+      for _rf in "${_SFS_HARNESS_RELEASE_FILES[@]}"; do
+        [ -n "${_rf}" ] && [ -f "${_rf}" ] && return 0
+      done
+    fi
   fi
   return 1
 }

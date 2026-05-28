@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.6.143" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.6.143" "version output"
-assert_contains_text "${output}" "latest 0.6.143" "latest output"
+[[ "${plain_output}" == "sfs 0.6.144" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.6.144" "version output"
+assert_contains_text "${output}" "latest 0.6.144" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Maintainer-side dev-staging label removed from active product surfaces." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Test harness noise floor + nounset static-check coverage both tightened." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline 이번 버전은 0.6.142 에서 잠시 grandfathered 됐던 maintainer 측 dev-staging" "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline 이번 버전은 테스트 하네스의 stdout 신호-대-소음 비율과 macOS bash 3.2 +" "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

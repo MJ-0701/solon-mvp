@@ -1400,6 +1400,7 @@ sfs_archive_sprint_cold_bundle() {
   tar -czf "${archive_file}" -C "${staging}" . || return ${SFS_EXIT_PERM}
   rm -rf "${staging}" || return ${SFS_EXIT_PERM}
 
+  # nounset-safe: by this line both `count` and `tmp_count` are > 0 (the (count==0 && tmp_count==0) branch above returns early), so source_paths has at least one element.
   for path in "${source_paths[@]}"; do
     rm -f "${path}" || return ${SFS_EXIT_PERM}
   done

@@ -166,7 +166,16 @@ confirm() {
   # confirm "질문" → y/Y/yes → 0, 나머지 → 1
   local ans
   if [ "$ASSUME_YES" -eq 1 ]; then
-    printf "%s (y/N) [N]: y\n" "$1" >&2
+    # ASSUME_YES 분기에서는 prompt 자체를 묵음으로 — 비대화 모드의 정의 그대로.
+    # 0.6.143 이전엔 "<질문> (y/N) [N]: y" 한 줄을 stderr 로 흘려서
+    # test runner stderr 가 stdout 으로 합류할 때 한국어 prompt 가 결과에
+    # 누설되는 부작용이 있었다 (run-all.sh 스트림 통합). SFS_INSTALL_VERBOSE_CONFIRM=1
+    # 로 명시적 opt-in 시에만 prompt 를 보여준다.
+    case "${SFS_INSTALL_VERBOSE_CONFIRM:-0}" in
+      1|true|TRUE|yes|YES|on|ON)
+        printf "%s (y/N) [N]: y\n" "$1" >&2
+        ;;
+    esac
     return 0
   fi
   ans=$(prompt "$1 (y/N)" "N")

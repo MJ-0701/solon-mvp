@@ -435,6 +435,7 @@ tidy_collapse_non_adopt_archives() {
     [[ -n "${item}" ]] || continue
     tar_items+=("${item}")
   done <<< "${ids}"
+  (( ${#tar_items[@]} > 0 )) || return "${SFS_EXIT_OK}"
   tar -czf "${archive_file}" -C "${SFS_ARCHIVES_DIR}" "${tar_items[@]}" || return "${SFS_EXIT_PERM}"
 
   while IFS= read -r item; do

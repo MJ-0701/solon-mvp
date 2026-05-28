@@ -345,6 +345,7 @@ substitute_placeholders() {
     sed_inplace=(-i)
   fi
   while IFS= read -r -d '' file; do
+    # nounset-safe: sed_inplace is unconditionally initialized to (-i '') or (-i) above; never empty.
     sed "${sed_inplace[@]}" \
       -e "s|<PROJECT-NAME>|${PROJECT_NAME}|g" \
       -e "s|<PACKAGE>|${PACKAGE}|g" \

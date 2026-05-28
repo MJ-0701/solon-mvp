@@ -102,6 +102,7 @@ case "${mode}" in
     fail=0
 
     # 1. 8 required fields.
+    # nounset-safe: REQUIRED_FIELDS is a top-level constant with 8 fields; never empty.
     for f in "${REQUIRED_FIELDS[@]}"; do
       if ! grep -qE "^${f}:" "${target}"; then
         echo "${SCRIPT_NAME}: validate FAIL — missing required field: ${f}" >&2

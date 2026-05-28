@@ -127,6 +127,7 @@ is_filtered_ext() {
   local f="$1" ext
   ext="${f##*.}"
   [[ "${ext}" != "${f}" ]] || { printf '1'; return; }   # no extension
+  # nounset-safe: SNAPSHOT_DEFAULT_EXTS is a top-level constant with 11 elements; never empty.
   for e in "${SNAPSHOT_DEFAULT_EXTS[@]}"; do
     if [[ "${ext}" == "${e}" ]]; then printf '0'; return; fi
   done
@@ -442,6 +443,7 @@ make_snapshot() {
 
   # Walk migration sources (Source A + Source B).
   local search_dirs=(.sfs-local/sprints sprints)
+  # nounset-safe: search_dirs is initialized with two literal entries on the line above; never empty.
   for d in "${search_dirs[@]}"; do
     [[ -d "${d}" ]] || continue
     while IFS= read -r f; do

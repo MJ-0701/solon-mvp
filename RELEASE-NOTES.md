@@ -7,6 +7,20 @@
 
 ---
 
+## 0.6.144
+
+이번 버전은 테스트 하네스의 stdout 신호-대-소음 비율과 macOS bash 3.2 +
+`set -u` 회귀 방지의 정적 검출 범위를 동시에 조여줍니다.
+
+- `install.sh` 의 confirm() 가 `--yes` (비대화) 모드에서 한국어 prompt 한 줄을
+  더 이상 stderr 로 흘리지 않습니다. `SFS_INSTALL_VERBOSE_CONFIRM=1` 로 명시적
+  opt-in 시에만 옛 동작이 유지됩니다.
+- `test-nounset-empty-array-expansion` 이 `scripts/` 와 template scripts 의
+  모든 bash 스크립트를 정적으로 스캔해 unsafe `"${arr[@]}"` 사용지점을
+  찾아냅니다. 새 스크립트가 들어와도 0.6.2 류 회귀가 사전에 차단됩니다.
+- 새 정적 체크가 발견한 11개 call site 에 안전 idiom / 길이 가드 / nounset-safe
+  주석을 일괄 적용.
+
 ## 0.6.143
 
 이번 버전은 0.6.142 에서 잠시 grandfathered 됐던 maintainer 측 dev-staging

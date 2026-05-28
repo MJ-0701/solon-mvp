@@ -134,6 +134,7 @@ if [[ -d ".solon/sprints" ]]; then
       # Build "layer1_path<TAB>sid" for each sprint that touches a file present in Layer 1.
       file_sprint_lines=""
       IFS=, read -ra sprint_list <<< "${sprint_list_csv}"
+      (( ${#sprint_list[@]} > 0 )) || continue
       for sid in "${sprint_list[@]}"; do
         [[ -n "${sid}" ]] || continue
         while IFS= read -r touched; do

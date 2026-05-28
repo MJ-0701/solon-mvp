@@ -87,4 +87,66 @@ if echo "${stderr}" | grep -q 'dep_args\[@\]: unbound variable'; then
   stderr: ${stderr}"
 fi
 
+# ─────────────────────────────────────────────────────────────────────
+# 5) Coverage check (0.6.144): every shell script under scripts/ and
+#    templates/.sfs-local-template/scripts/ that expands "${arr[@]}" must
+#    EITHER use the nounset-safe `${arr[@]+...}` idiom AT THAT SITE, OR
+#    keep an explicit `${#arr[@]}` length check somewhere in the same file
+#    so the unsafe path can be reasoned about. Sites without either guard
+#    are likely to recur as 0.6.2-style crashes on macOS bash 3.2 + set -u.
+#
+#    This is a static heuristic, not a proof — it flags sites that warrant
+#    a human review rather than failing on every legitimate use. To
+#    silence a legitimate site without adding a guard, add a `# nounset-safe:`
+#    comment on the line above the expansion (rare; use sparingly).
+# ─────────────────────────────────────────────────────────────────────
+coverage_dirs=(
+  "${DIST_DIR}/scripts"
+  "${DIST_DIR}/templates/.sfs-local-template/scripts"
+)
+unsafe_hits=""
+for dir in "${coverage_dirs[@]}"; do
+  [[ -d "${dir}" ]] || continue
+  while IFS= read -r -d '' f; do
+    # Skip non-bash scripts (only first-line shebang matching bash counts).
+    head -n1 "${f}" | grep -qE '^#!.*bash' || continue
+    # Find every "${name[@]}" expansion that is NOT already the safe idiom.
+    # The idiom looks like:  ${name[@]+"${name[@]}"}
+    while IFS=: read -r lineno line; do
+      [[ -n "${line}" ]] || continue
+      # Skip lines that contain the safe idiom literally.
+      if [[ "${line}" == *'[@]+"${'* ]]; then
+        continue
+      fi
+      # Skip lines explicitly marked safe by the maintainer.
+      prev_line=$(awk -v n="${lineno}" 'NR == n-1 { print; exit }' "${f}")
+      if [[ "${prev_line}" == *'# nounset-safe:'* ]]; then
+        continue
+      fi
+      # Extract the array name from the first "${name[@]}" match on the line.
+      name="$(printf '%s\n' "${line}" \
+        | grep -oE '"\$\{[A-Za-z_][A-Za-z0-9_]*\[@\]\}"' \
+        | head -1 \
+        | sed -E 's/.*\{([A-Za-z_][A-Za-z0-9_]*)\[@\]\}.*/\1/')"
+      [[ -n "${name}" ]] || continue
+      # Pass if the same file contains a `${#name[@]}` length check
+      # anywhere — author at least reasoned about empty-array boundary.
+      if grep -qE "\\\$\\{#${name}\\[@\\]\\}" "${f}"; then
+        continue
+      fi
+      unsafe_hits+="  ${f}:${lineno}: ${line}"$'\n'
+    done < <(grep -nE '"\$\{[A-Za-z_][A-Za-z0-9_]*\[@\]\}"' "${f}" || true)
+  done < <(find "${dir}" -maxdepth 1 -type f -name '*.sh' -print0)
+done
+
+if [[ -n "${unsafe_hits}" ]]; then
+  fail "nounset coverage: unsafe \"\${arr[@]}\" expansion without idiom or length-guard
+${unsafe_hits}
+  Fix options:
+    1. Replace with idiom:  \"\${arr[@]+\"\${arr[@]}\"}\"
+    2. Add an explicit  (( \${#arr[@]} == 0 ))  guard somewhere in the file
+    3. If you have audited the call site and it cannot be reached with an empty
+       array on bash 3.2, add  # nounset-safe: <reason>  on the line above."
+fi
+
 echo "test-nounset-empty-array-expansion: OK"
