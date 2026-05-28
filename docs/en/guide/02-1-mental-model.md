@@ -35,6 +35,10 @@ sfs agent install all
 If root agent docs accumulated SFS policy text, run `sfs agent doctor --fix`.
 It archives recognized SFS adapters and rewrites them as frontmatter-only
 pointers.
+Before long autonomous work, run `sfs harness doctor` to check the project
+harness around the model: agent entry, routed context, division council, memory,
+tests, and release/check rails. Run `sfs harness map --write` to write that
+operating design to `.sfs-local/harness/harness-map.md`.
 
 Old projects can be upgraded into the lighter thin-runtime shape. Use
 `sfs upgrade --layout vendored` only when Solon package files must stay inside

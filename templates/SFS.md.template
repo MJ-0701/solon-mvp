@@ -50,6 +50,12 @@ In thin layout, managed context lives in the packaged global `sfs` runtime.
 
 `sfs profile` updates only this file's `## 프로젝트 개요` section.
 
+## Harness Check
+
+Use `sfs harness doctor` before long autonomous work. Use
+`sfs harness map --write` when project structure, agent roles, evidence loops,
+or parallel-worker plans need an inspectable harness map.
+
 ## Output Contract
 
 Never paraphrase bash adapter output. Bash-first commands may add one compact

@@ -29,6 +29,7 @@ split_children:
   - docs/en/current-product-shape/19-obsidian-llm-wiki-continuity.md
   - docs/en/current-product-shape/20-ai-work-intake-routing.md
   - docs/en/current-product-shape/21-domain-knowledge-assets.md
+  - docs/en/current-product-shape/22-project-harness-map.md
 ---
 # Current Product Shape
 
@@ -66,3 +67,4 @@ This file keeps the original route as a thin entry point. Detailed body sections
 - [Obsidian LLM Wiki Continuity](./current-product-shape/19-obsidian-llm-wiki-continuity.md)
 - [AI Work Intake Routing](./current-product-shape/20-ai-work-intake-routing.md)
 - [Domain Knowledge Assets](./current-product-shape/21-domain-knowledge-assets.md)
+- [Project Harness Map](./current-product-shape/22-project-harness-map.md)

@@ -20,6 +20,8 @@ load_when: "Read when README.md routes to this section."
 | `sfs plan` | 목표/범위/완료 기준 계약 작성 |
 | `sfs capture [--kind ...] <text>` | 승인/waiver/결정/외부 evidence 같은 최소 사실만 현재 sprint 기록에 남김 |
 | `sfs note <text>` | 짧은 evidence note 를 남기는 capture alias |
+| `sfs harness doctor` | 긴 자율 작업 전에 프로젝트 하네스 준비 상태 점검 |
+| `sfs harness map --write` | agent 역할, artifact, memory, test, release loop 설계도 작성 |
 | `sfs implement [slice|--stdin]` | 작은 실행 조각 진행 |
 | `sfs review [--sprint <id>] [--lens ...]` | 산출물 검토, 닫힌 sprint review 복구 |
 | `sfs retro [--draft]` | 회고와 마무리 |

@@ -22,6 +22,7 @@ assert_contains() {
 context="${DIST_DIR}/templates/.sfs-local-template/context"
 kernel="${context}/kernel.md"
 token_policy="${context}/policies/token-harness.md"
+harness_policy="${context}/policies/harness-autonomy.md"
 plan="${context}/commands/plan.md"
 implement="${context}/commands/implement.md"
 review="${context}/commands/review.md"
@@ -32,12 +33,19 @@ assert_contains "${kernel}" "Harness Engineering is ambient" "kernel ambient har
 assert_contains "${kernel}" "active tool surface narrow" "kernel tool-surface narrowing"
 assert_contains "${kernel}" "project-as-prompt" "kernel project-as-prompt"
 assert_contains "${kernel}" "design decisions human-owned" "kernel human-owned design"
+assert_contains "${kernel}" "sfs harness doctor" "kernel harness doctor"
+assert_contains "${kernel}" "sfs harness map --write" "kernel harness map"
 
 assert_contains "${token_policy}" "structure, not pleading" "token policy structure over pleading"
 assert_contains "${token_policy}" "Tool-surface budget" "token policy tool budget"
 assert_contains "${token_policy}" "Project-as-prompt audit" "token policy project prompt"
 assert_contains "${token_policy}" "Verification automation" "token policy verification automation"
 assert_contains "${token_policy}" "Human understanding boundary" "token policy human boundary"
+assert_contains "${token_policy}" "Project harness commands" "token policy harness commands"
+assert_contains "${harness_policy}" "Project Harness Autonomy" "harness autonomy policy title"
+assert_contains "${harness_policy}" "sfs harness doctor" "harness autonomy doctor"
+assert_contains "${harness_policy}" "sfs harness map --write" "harness autonomy map"
+assert_contains "${harness_policy}" "Multi-agent execution remains opt-in" "harness autonomy opt-in"
 
 assert_contains "${plan}" "human-owned understanding" "plan human understanding"
 assert_contains "${plan}" "AI-owned execution" "plan AI execution"
@@ -68,6 +76,7 @@ for file in "${adapter_files[@]}"; do
 done
 
 assert_contains "${DIST_DIR}/templates/SFS.md.template" "sfs context cat kernel" "SFS template routes harness context"
+assert_contains "${DIST_DIR}/templates/SFS.md.template" "sfs harness doctor" "SFS template harness command"
 assert_contains "${kernel}" "Harness Engineering is ambient" "kernel harness body"
 
 echo "test-harness-engineering-guardrails: OK"

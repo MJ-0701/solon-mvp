@@ -46,6 +46,8 @@ load_when: ["always", "sfs", "entry"]
   pleading. Keep the active tool surface narrow, treat project layout/docs/tests
   as project-as-prompt, automate verification, and keep product understanding
   and design decisions human-owned.
+- Before long autonomous or parallel-agent work, use `sfs harness doctor` and
+  `sfs harness map --write` as evidence for roles, memory, gates, and boundaries.
 - Benchmarked engineering disciplines are absorbed as routed policies and
   review lenses, not new lifecycle commands. Use existing `brainstorm`, `plan`,
   `implement`, `review`, `adopt`, `tidy`, `upgrade`, and `release` rails while

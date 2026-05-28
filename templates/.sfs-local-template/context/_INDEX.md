@@ -19,10 +19,12 @@ module:
 - `commands/capture.md` — minimal evidence primitive for approval / waiver / decision / blocker / external evidence; not a lifecycle step.
 - `commands/release.md` — release / deploy / Homebrew / Scoop.
 - `commands/upgrade.md` — upgrade / update / install freshness.
+- `commands/harness.md` — harness doctor/map for project autonomy readiness.
 - `commands/tidy.md` — tidy / report / retro / archive.
 - `commands/loop.md` — loop / autonomous work / queue.
 - `policies/mutex.md` — lock conflict or concurrent session.
 - `policies/token-harness.md` — token/context hygiene, semantic search, repeated mistake guardrails.
+- `policies/harness-autonomy.md` — project harness diagnosis, map, artifacts, human boundary, and autonomy loop.
 - `policies/agent-adapter-doc-refactor.md` — keep root LLM agent docs frontmatter-only and auto-refactor recognized SFS adapter bloat.
 - `policies/sfs-router-doc-refactor.md` — keep `SFS.md` as a thin router and auto-refactor recognized policy dumps.
 - `policies/runtime-token-firewall.md` — capsule-only worker/review handoff and no full-history forwarding.

@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.141
+
+이번 버전은 하네스 엔지니어링을 원칙에서 프로젝트 점검 기능으로 끌어올립니다.
+
+- `sfs harness doctor` 로 현재 프로젝트가 AI 에게 오래 맡길 수 있는 환경인지 점검합니다.
+- 점검 대상은 얇은 진입 문서, routed context, 활성 6본부 council, artifact/memory, wiki 또는 bug recurrence memory, test, release/check rail 입니다.
+- `sfs harness map` 은 agent 역할, skill/policy, orchestrator rail, artifact, memory, test, release loop, human-owned boundary 를 한 번에 보여줍니다.
+- `sfs harness map --write` 는 `.sfs-local/harness/harness-map.md` 를 만들어 긴 자율 작업이나 선택적 parallel-agent 작업 전에 운영 설계를 확인할 수 있게 합니다.
+
 ## 0.6.140
 
 이번 버전은 0.6.139 의 `SFS.md` thin router 기능을 test-clean artifact 로 다시 배포합니다.

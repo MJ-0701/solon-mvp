@@ -1,5 +1,33 @@
 ## [Unreleased]
 
+## [0.6.141] - 2026-05-28
+
+> **Project harness maps make the AI work environment inspectable.**
+
+### Added
+
+- Added `sfs harness doctor` to diagnose the current project as the environment
+  around the model: thin entry docs, routed context, six-division council,
+  artifacts/memory, wiki/bug recurrence memory, tests, and release/check rails.
+- Added `sfs harness map` and `sfs harness map --write`, which print or write
+  `.sfs-local/harness/harness-map.md` with agent roles, inputs, outputs,
+  quality gates, autonomy loop, and human-owned product boundaries.
+- Added routed `commands/harness.md` and `policies/harness-autonomy.md` so
+  agents can load the harness contract without bloating `SFS.md` or root agent
+  docs.
+
+### Changed
+
+- Routed Harness Engineering from ambient principle into explicit project
+  readiness evidence before long autonomous or optional parallel-agent work.
+- Updated EN/KO product docs, README, GUIDE, SFS template, kernel, and token
+  harness policy to expose the new harness doctor/map surface.
+
+### Tests
+
+- Added `test-sfs-harness-command.sh` and extended harness guardrails to cover
+  CLI usage, context routing, map output, write path, docs, and SFS template.
+
 ## [0.6.140] - 2026-05-28
 
 > **SFS.md router release artifact is test-clean.**
