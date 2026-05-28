@@ -7,6 +7,14 @@
 
 ---
 
+## 0.6.140
+
+이번 버전은 0.6.139 의 `SFS.md` thin router 기능을 test-clean artifact 로 다시 배포합니다.
+
+- 0.6.139 에서 기능과 채널 업데이트는 올라갔지만, stable artifact 안의 version regression 두 개가 이전 버전을 기대해 release verifier 에서 실패했습니다.
+- 0.6.140 은 같은 `SFS.md` router refactor 기능에 version test 동기화를 포함해 tar.gz, zip, local stable 제품 테스트가 통과하도록 재컷합니다.
+- 사용자가 체감하는 기능은 0.6.139 와 동일합니다. `SFS.md` 는 얇은 router 로 유지되고, `sfs doctor --fix` 는 기존 프로젝트의 비대한 `SFS.md` 를 archive 후 `## 프로젝트 개요` 보존 rewrite 합니다.
+
 ## 0.6.139
 
 이번 버전은 `SFS.md` 를 정책 덤프가 아니라 얇은 프로젝트 router 로 되돌립니다.

@@ -1,5 +1,20 @@
 ## [Unreleased]
 
+## [0.6.140] - 2026-05-28
+
+> **SFS.md router release artifact is test-clean.**
+
+### Fixed
+
+- Re-cut the thin `SFS.md` router release with version-regression tests synced
+  to the released version, superseding the partial 0.6.139 artifact whose
+  packaged test suite still expected 0.6.138.
+
+### Tests
+
+- Updated version-headline and docs/version-sync regressions to the release
+  version before cutting the stable artifact.
+
 ## [0.6.139] - 2026-05-28
 
 > **SFS.md is back to a thin router.**
