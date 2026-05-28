@@ -18,6 +18,18 @@ is_append_only_release_log() {
   esac
 }
 
+# Evidence documents (one-shot QA reports, integration verification
+# reports) are size-agnostic frontmatter-loadable docs. They neither must
+# exceed 200 lines (like CHANGELOG) nor must stay under 200 (like routed
+# context modules). Treat them as off-budget — but the frontmatter check
+# still applies so the LLM-loadable shape is preserved.
+is_evidence_doc() {
+  case "$1" in
+    "${DIST_DIR}"/QA-REPORT-*.md|"${DIST_DIR}"/INTEGRATION-VERIFY-*.md) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 is_test_fixture() {
   case "$1" in
     "${DIST_DIR}/tests/"*) return 0 ;;
@@ -31,6 +43,15 @@ while IFS= read -r file; do
   lines="$(wc -l <"${file}" | tr -d '[:space:]')"
   if is_append_only_release_log "${file}"; then
     [[ "${lines}" -gt 200 ]] || fail "${file} should remain the explicit append-only release-log exception"
+    continue
+  fi
+
+  if is_evidence_doc "${file}"; then
+    # Evidence docs are size-agnostic. Still check frontmatter so LLMs can
+    # route them.
+    first_line="$(sed -n '1p' "${file}")"
+    [[ "${first_line}" == "---" ]] || fail "${file} missing opening frontmatter"
+    sed -n '2,40p' "${file}" | grep -Fxq -- "---" || fail "${file} missing closing frontmatter"
     continue
   fi
 

@@ -48,15 +48,20 @@ audit framing) and will land in follow-up patches.
 
 ## Install
 
-You need a working `sfs` CLI on `PATH` first. Then install the bridge:
+You need a working `sfs` CLI on `PATH` first. Then install the bridge.
+
+> ℹ️ **Source-clone is the only path supported in 0.7.x.** The
+> `pipx install solon-mcp` command below is the *target shape* once
+> `solon-mcp` is published to PyPI, which is tracked as a 0.7.x follow-up.
+> Until then, use the source-clone path.
 
 ```bash
-# Recommended — isolated env, no global pip noise.
-pipx install solon-mcp
-
-# Or, from a source clone:
+# 0.7.x — source clone (the only currently supported path):
 cd /path/to/solon-product/mcp-server
 pip install -e .
+
+# Future (post-PyPI publish; do not run until announced):
+# pipx install solon-mcp
 ```
 
 The package exposes a `solon-mcp` console script. Verify with:

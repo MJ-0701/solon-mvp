@@ -229,11 +229,72 @@ context_usage() {
 Usage:
   sfs context path <kernel|index|command|commands/name[.md]|policies/name[.md]>
   sfs context cat  <kernel|index|command|commands/name[.md]|policies/name[.md]>
+  sfs context list [commands|policies|all]
 
 Read-only helper for agent adapters. In thin layout the managed context lives in
 the packaged global runtime; project-local .sfs-local/context files are optional
-overrides only.
+overrides only. `list` is a discoverability helper added in 0.7.1: it prints
+every command / policy slug an agent can target with `cat` or `path`, so new
+routed modules (agent-build-review-lens, solon-safe-permissions, ...) are
+findable without grepping _INDEX.md.
 EOF
+}
+
+context_list() {
+  local scope="${1:-all}"
+  case "${scope}" in
+    commands|policies|all) ;;
+    -h|--help|help|"") scope="all" ;;
+    *)
+      echo "unknown context list scope: ${scope} (expected: commands, policies, all)" >&2
+      return 1
+      ;;
+  esac
+
+  local local_ctx runtime_ctx subdir kind
+  local_ctx="$(project_local_dir)/context"
+  runtime_ctx="${RUNTIME_DIR}/context"
+
+  _context_list_section() {
+    # 0.7.1: this helper is intentionally set-e tolerant. The bare
+    # `[[ -d ]] && find` / `while read` pattern returns rc=1 on legitimate
+    # empty-directory / EOF conditions, which trips the script-wide
+    # `set -euo pipefail` and aborts the whole `sfs context list` call.
+    # The `|| true` tails and the `+:-` parameter defaults below keep the
+    # function rc=0 for any reachable input shape.
+    local kind="$1"
+    echo "# ${kind}"
+    local out=""
+    if [[ -d "${runtime_ctx}/${kind}" ]]; then
+      out+="$(find "${runtime_ctx}/${kind}" -maxdepth 1 -name '*.md' -printf '%f\n' 2>/dev/null || true)"
+      [[ -n "${out}" ]] && out+=$'\n'
+    fi
+    if [[ -d "${local_ctx}/${kind}" ]]; then
+      out+="$(find "${local_ctx}/${kind}" -maxdepth 1 -name '*.md' -printf '%f\n' 2>/dev/null || true)"
+    fi
+    if [[ -n "${out}" ]]; then
+      printf '%s\n' "${out}" \
+        | sed '/^$/d' \
+        | sort -u \
+        | sed -e "s|^|  ${kind}/|" -e 's|\.md$||' || true
+    fi
+  }
+
+  if [[ "${scope}" == "all" ]]; then
+    echo "# top-level"
+    [[ -f "${runtime_ctx}/kernel.md" || -f "${local_ctx}/kernel.md" ]] && echo "  kernel"
+    [[ -f "${runtime_ctx}/_INDEX.md" || -f "${local_ctx}/_INDEX.md" ]] && echo "  index"
+  fi
+
+  if [[ "${scope}" == "commands" || "${scope}" == "all" ]]; then
+    _context_list_section commands
+  fi
+
+  if [[ "${scope}" == "policies" || "${scope}" == "all" ]]; then
+    _context_list_section policies
+  fi
+
+  return 0
 }
 
 context_resolve_rel() {
@@ -279,6 +340,10 @@ context_command() {
   shift || true
   case "${mode}" in
     path|cat) ;;
+    list)
+      context_list "$@"
+      return $?
+      ;;
     -h|--help|help|"")
       context_usage
       return 0

@@ -747,6 +747,18 @@ infer_review_lens() {
     printf '%s\n' "$path_signal"
     return 0
   fi
+  # 0.7.1: agent-build is checked FIRST. Its keywords ("agent sdk", "mcp
+  # server", "sub-agent") are highly specific; the broader-substring patterns
+  # below ("ui" matching "build", "ops" matching "develops") would otherwise
+  # false-positive into design/ops before agent-build is reached. The same
+  # branch is kept at the tail of the chain too in case future edits invert
+  # the order — defensive duplication is cheap here.
+  case "$lowered" in
+    *"agent sdk"*|*"claude agent sdk"*|*"agent-sdk"*|*"mcp server"*|*"mcp-server"*|*"mcp tool"*|*"mcp tools"*|*"sub-agent"*|*"subagent"*|*"하위 에이전트"*|*"에이전트 sdk"*|*"에이전트 빌드"*|*"agent build"*)
+      printf 'agent-build\n'
+      return 0
+      ;;
+  esac
   case "$lowered" in
     *"source-driven"*|*"official docs"*|*"official documentation"*|*"framework docs"*|*"primary source"*|*"upstream docs"*)
       printf 'source-docs\n'
@@ -776,11 +788,20 @@ infer_review_lens() {
       printf 'release\n'
       return 0
       ;;
-    *"artifact types touched"*infra*|*"runbook"*|*"rollback"*|*"observability"*|*"secret"*|*"ops"*)
+    *"artifact types touched"*infra*|*"runbook"*|*"rollback"*|*"observability"*|*" ops "*|*" ops:"*|*" ops/"*|*"ops/"*|*"devops"*|*"sre"*)
+      # 0.7.1: tightened from the old `*"ops"*` substring (which matched
+      # "develops", "ops" inside hashes, etc.) to word-boundary forms.
+      # "secret" was removed from this branch because the security branch
+      # above already catches it, and the duplication caused noisy routing.
       printf 'ops\n'
       return 0
       ;;
-    *"artifact types touched"*design*|*"ux"*|*"ui"*|*"figma"*|*"wireframe"*)
+    *"artifact types touched"*design*|*" ux "*|*" ui "*|*"ui/"*|*"/ui"*|*"figma"*|*"wireframe"*|*"design system"*)
+      # 0.7.1: tightened from the old `*"ui"*` / `*"ux"*` substrings (which
+      # matched "build", "guide", "fluid", "auxiliary", etc.) to word-
+      # boundary forms. Real design plans almost always mention "design
+      # system", figma, or wireframe explicitly, so the loss of false
+      # positives does not lose true signal.
       printf 'design\n'
       return 0
       ;;

@@ -7,6 +7,29 @@
 
 ---
 
+## 0.7.1
+
+이번 버전은 0.7.0 통합 검증 (`INTEGRATION-VERIFY-2026-05-28.md`) 에서
+발견된 4개 항목을 한 patch 로 닫습니다. 기존 flow signature 0건 변경 —
+전부 additive.
+
+- **agent-build lens 자동 라우팅 회귀 수정**: case chain 안 broader-
+  substring 패턴 (`*"ui"*` 가 "**bui**ld" 매칭) 에 outrank 되던 문제를
+  agent-build 분기를 case 맨 앞으로 옮겨 해결. 이제 plan/brainstorm 에
+  "MCP server", "Claude Agent SDK", "sub-agent" 가 등장하면 `--lens auto`
+  로 agent-build 가 정상 라우팅됩니다.
+- **broad-substring lens 패턴 좁힘**: `*"ui"*` / `*"ux"*` / `*"ops"*` 를
+  word-boundary 형태 (`*" ui "*`, `*"ui/"*`, `*" ops "*`, `*"ops/"*` 등)
+  로 좁히고, `devops`/`sre`/`design system` 같은 high-signal alternative
+  를 추가. "guide", "build", "fluid", "auxiliary" 같은 흔한 영어 단어가
+  더 이상 false positive 를 일으키지 않습니다.
+- **`sfs context list [commands|policies|all]` 신설**: routed module 슬러그
+  색인을 한 줄로 보여주는 discoverability helper. 0.7.0 의 신규 정책
+  (`policies/agent-build-review-lens`) 도 즉시 발견됩니다.
+- **MCP server install 안내 명확화**: 0.7.x 는 source clone 만 지원하고
+  `pipx install solon-mcp` 는 PyPI publish 후의 미래 shape 임을 README
+  서두에 명시.
+
 ## 0.7.0
 
 이번 버전은 Solon 을 host-agnostic 하게 확장하는 첫 minor bump 입니다.

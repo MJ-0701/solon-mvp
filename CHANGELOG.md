@@ -1,5 +1,55 @@
 ## [Unreleased]
 
+## [0.7.1] - 2026-05-28
+
+> **0.7.0 flow integration patch — agent-build auto-routing rescued, broad-substring lens patterns tightened, `sfs context list` shipped, MCP install path clarified.**
+
+This patch closes the four findings from the 0.7.0 integration verification
+(`INTEGRATION-VERIFY-2026-05-28.md`) without changing any existing flow
+signature. Every change is additive: existing CLI signatures, routed
+context module list, test surfaces, and release cadence are preserved.
+
+### Fixed
+
+- **agent-build lens auto-routing** was outranked by broader-substring
+  patterns earlier in the `infer_review_lens` case chain. A plan containing
+  the word "build" was matching `*"ui"*` ("**bui**ld") and routing to
+  `design`; a plan containing "develops" was matching `*"ops"*` and routing
+  to `ops`. The agent-build keyword branch is now checked **first**, before
+  any other lens, so the 0.7.0 routing for "MCP server", "Claude Agent SDK",
+  and "sub-agent" actually fires under `--lens auto`.
+- **Broad-substring lens patterns tightened**. `*"ui"*` / `*"ux"*` /
+  `*"ops"*` in the `design` and `ops` branches are now word-boundary forms
+  (`*" ui "*`, `*" ops "*`, `*"ui/"*`, `*"ops/"*`, etc.) plus a few
+  high-signal alternatives (`devops`, `sre`, `design system`, `figma`,
+  `wireframe`). The duplicated `*"secret"*` entry was removed from the
+  `ops` branch — the `security` branch above already catches it. False
+  positives from common English words like "guide", "build", "fluid",
+  "develops", "auxiliary" no longer route real plans into the wrong lens.
+
+### Added
+
+- `sfs context list [commands|policies|all]` — discoverability helper that
+  prints every routed module slug an agent can target with `sfs context
+  cat` / `sfs context path`. New routed modules introduced in 0.7.0
+  (`policies/agent-build-review-lens`, `presets/solon-safe-permissions`,
+  ...) are now findable without grepping `_INDEX.md`. Implementation is
+  intentionally `set -e` tolerant; the bare `[[ -d ]] && find` /
+  `while read` pattern was returning rc=1 on legitimate empty-directory /
+  EOF cases.
+- `tests/test-context-list-command.sh` — locks the contract: top-level /
+  commands / policies sections, agent-build-review-lens visible under
+  policies, bad scope rejected with a clear error, usage banner advertises
+  the new subcommand.
+
+### Changed
+
+- `mcp-server/README.md` now leads with a callout that 0.7.x only supports
+  the source-clone install path. `pipx install solon-mcp` is documented as
+  the **target shape** post-PyPI publish, not a currently working command.
+  Removes the trap of users running `pipx install solon-mcp` and being
+  surprised by a missing package.
+
 ## [0.7.0] - 2026-05-28
 
 > **Agent SDK / MCP / sub-agent integration surface — Solon goes host-agnostic without giving up bash SSoT.**
