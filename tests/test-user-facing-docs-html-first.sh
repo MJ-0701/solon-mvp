@@ -20,8 +20,14 @@ assert_contains() {
   grep -Fq -- "${needle}" "${file}" || fail "${label}: missing '${needle}'"
 }
 
+# 0.7.2: top-level CLAUDE.md is no longer one of the policy-text surfaces.
+# It became a thin agent entry that cross-links to docs/maintenance/
+# release-policy.md, which is the new canonical location for the
+# "User-facing docs HTML-encouraged" rule. The remaining agent surfaces
+# (routed kernel/context, agent adapter commands, host plugin command)
+# still inline the rule, because those are the surfaces an agent actually
+# reads when running.
 agent_surfaces=(
-  "${DIST_DIR}/CLAUDE.md"
   "${DIST_DIR}/templates/.sfs-local-template/context/kernel.md"
   "${DIST_DIR}/templates/codex-skill/SKILL.md"
   "${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md"
@@ -42,5 +48,16 @@ for file in "${agent_surfaces[@]}"; do
   # 단순히 HTML-first 만 남겨두면 정책-실태 격차가 재발한다.
   assert_contains "${file}" "MD" "${file}"
 done
+
+# 0.7.2: canonical maintainer-side rule body moved to docs/maintenance/
+# release-policy.md. Assert it explicitly here so a future cleanup of
+# release-policy.md does not silently delete the rule.
+dist_release_policy="${DIST_DIR}/docs/maintenance/release-policy.md"
+assert_contains "${dist_release_policy}" "User-facing docs HTML-encouraged" "release-policy HTML-encouraged"
+assert_contains "${dist_release_policy}" "MD" "release-policy MD allowance"
+
+# CLAUDE.md must still cross-link to the new canonical location so the
+# rule is discoverable from the agent entry.
+assert_contains "${DIST_DIR}/CLAUDE.md" "docs/maintenance/release-policy.md" "CLAUDE.md cross-link to release-policy"
 
 echo "test-user-facing-docs-html-first: OK"

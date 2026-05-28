@@ -1,82 +1,76 @@
 ---
 doc_id: sfs-product-claude
-title: "CLAUDE.md — `solon-mvp` distribution repo 유지보수 지침"
+title: "CLAUDE.md — solon-mvp distribution repo agent entry"
 visibility: oss-public
 doc_type: agent-entry
+agent: claude-code
 language: ko
-updated: 2026-05-25
-summary: "CLAUDE.md — `solon-mvp` distribution repo 유지보수 지침 entry document"
-load_when: "Read when this product document is directly relevant."
+updated: 2026-05-28
+summary: "Thin agent entry for the solon-mvp distribution repo. Project state / release policy / dev checklists / methodology live in docs/maintenance/."
+load_when: "Read at agent boot when working on this repo (the distribution itself, not a consumer project)."
+detail_sources:
+  - docs/maintenance/project-identity.md
+  - docs/maintenance/release-policy.md
+  - docs/maintenance/contributing.md
+  - docs/maintenance/methodology-7-step.md
+  - docs/maintenance/policies/
+  - CHANGELOG.md
+  - VERSION
+do_not_inline:
+  - project identity / IP / domain boundary
+  - distribution / release policy details
+  - install.sh / upgrade.sh / templates/ modification checklists
+  - 7-step / Gate label reference
+  - routed context module bodies
+maintenance:
+  detect_or_fix_bloat: "sfs agent doctor --fix"
 ---
-# CLAUDE.md — `solon-mvp` distribution repo 유지보수 지침
 
-> 본 파일은 **`solon-mvp` repo 자체** (distribution) 를 다룰 때 Claude Code 세션이 참조하는 지침.
-> Consumer 프로젝트에 설치될 `CLAUDE.md` 와는 별개 (그건 `templates/CLAUDE.md.template`).
+# CLAUDE.md — `solon-mvp` distribution repo agent entry
 
-## Repo 정체성
+본 파일은 **`solon-mvp` repo 자체** (distribution) 를 다룰 때 Claude Code
+세션이 먼저 읽는 thin agent entry 다. **운영 문서 / 프로젝트 상태 /
+아키텍처 / 인프라 / 방법론 reference 는 본 파일에 넣지 않는다** — 그런
+내용은 `docs/maintenance/` 의 dedicated doc 으로 분리돼 있고, 본 파일은
+frontmatter 의 `detail_sources` 로만 연결한다.
 
-- **이름**: `solon-mvp` (Solon 방법론의 설치 가능한 MVP 배포판)
-- **목적**: 사용자 개인 / 회사 프로젝트에 **Solon 7-step flow** 스캐폴드를 `install.sh` 로 주입
-- **해석 경계**: 7-step 은 full startup team-agent artifact chain 의 lightweight projection 이다. templates 수정 시 Discovery/PRD/Taxonomy/UX/Technical Design/Release Readiness 를 제거한 것으로 오해시키면 안 된다.
-- **IP**: 사용자 (채명정) 개인 자산. 공개 범위는 TBD (현재 private 권장).
-- **연계**: 풀스펙 방법론은 사용자 개인 Solon docset 에 있음 (본 repo 에는 경로 / 내용 미반영).
+Consumer 프로젝트에 설치되는 어댑터는 `templates/CLAUDE.md.template`
+이며 본 파일과 무관하다.
 
-## 배포 원칙
+## 작업 전 읽을 것
 
-1. **install.sh / upgrade.sh / uninstall.sh** 는 **bash 호환** (macOS zsh / Linux bash / WSL 공통). POSIX 친화.
-   Windows PowerShell 사용자는 `install.ps1` / `upgrade.ps1` / `uninstall.ps1` wrapper 를 쓴다
-   (내부 실행은 Git Bash 기반 bash adapter SSoT).
-2. **templates/** 하위는 consumer 에게 그대로 배포되는 파일. 수정 시 하위 호환성 고려.
-3. **VERSION** 은 semver `X.Y.Z-mvp` 또는 `X.Y.Z`. mvp suffix 는 풀스펙 수렴 전까지 유지.
-4. **CHANGELOG.md** 는 모든 릴리스를 기록. upgrade.sh 가 이 파일을 consumer 에게 안내.
-5. **User-facing docs HTML-encouraged** — AI Agent 참고용 운영 문서/SSoT/로그/스키마/README 는 Markdown 을 유지한다.
-   실제 사용자·외부 독자·온보딩 대상이 읽는 설명서/가이드/보고서/핸드북/랜딩성 문서는 HTML 산출을 권장하지만,
-   GitHub 안 렌더링 MD 가 이미 주 읽기 표면이라면 MD 유지도 허용한다 (현 docs/ 는 전부 MD 유지 선택).
-6. **Fresh-session transfer autopilot** — Session Continuation Guard 가 걸리면 같은 세션/새 세션 선택이나 `/clear` 입력을 묻지 않는다. 먼저 current branch/commit/status/evidence/next prompt 를 담은 durable handoff/report 를 남긴 뒤, host-native transfer/new-session/archive/clear+resume 제어가 있으면 직접 호출해 새 세션에서 즉시 이어간다. resume 없는 bare clear 는 금지한다. host 제어가 없으면 exact next-session prompt 만 남기고 멈춘다.
-7. **6본부 council always-on** — strategy-pm/dev/QA/design/infra/taxonomy 는 brainstorm 부터 Gate 6 까지 개념적 sub-agent 로 evidence/waiver 를 남긴다. parallel worker 는 별도 opt-in 이다.
-8. **Mainline-first + Gate 6 data/security** — 보조 도구/인증/모델 설정은 본 작업의 `unblocker` 일 때만 최소 처리하고 즉시 본론으로 복귀한다. Gate 6 는 mock/fixture/seed/API/UI/auth/session/persistence 데이터 검증, OWASP-style security/logging, production console/debug log 제거, Datadog/equivalent evidence, 긴 컨텍스트 wiki checklist reconciliation, postdev external review, lean procedure review, `process-lean` lens 를 확인한다.
+1. [`docs/maintenance/project-identity.md`](docs/maintenance/project-identity.md)
+   — repo 정체성 / IP / 도메인 경계.
+2. [`docs/maintenance/release-policy.md`](docs/maintenance/release-policy.md)
+   — 8개 배포 원칙 (bash 호환 / templates 호환성 / VERSION semver /
+   CHANGELOG / HTML-encouraged docs / session transfer / 6본부 council /
+   mainline-first + Gate 6).
+3. 작업 영역별 체크리스트는
+   [`docs/maintenance/contributing.md`](docs/maintenance/contributing.md)
+   (`install.sh` / `upgrade.sh` / `templates/` / `mcp-server/` /
+   `packaging/` / release cut).
+4. 7-step / Gate 표기 빠른 참조는
+   [`docs/maintenance/methodology-7-step.md`](docs/maintenance/methodology-7-step.md).
+   실제 SSoT 는 routed context (`sfs context cat kernel` / `index` /
+   `commands/*` / `policies/*`).
 
-## 수정 시 체크리스트
+## Agent 가 절대 하지 말 것
 
-### install.sh 변경 시
-- [ ] 로컬 모드 (`./install.sh`) 동작 확인
-- [ ] 원격 모드 (`curl | bash`) 동작 확인 — 특히 `read < /dev/tty` 처리
-- [ ] Windows PowerShell wrapper (`install.ps1`) 가 Git Bash 로 `install.sh` 를 호출하는 경로 확인
-- [ ] 멱등성 — 재실행해도 기존 산출물 파괴 안 함
-- [ ] 대화형 충돌 처리 4 옵션 (s/b/o/d) 전부 동작
+본 섹션은 agent 직접 행동 규칙이라 thin agent entry 에 유지한다.
 
-### templates/ 변경 시
-- [ ] placeholder 형식 유지 (`<PROJECT-NAME>` / `<DATE>` / `<STACK>` / `<DEPLOY>` / `<DOMAIN>` 등)
-- [ ] 도메인 특화 제거 — `solon-mvp` 는 도메인 중립 (관리자페이지/SaaS 등 특정 도메인 기술 금지)
-- [ ] 외부 Solon docset 경로 / 파일명 하드코딩 금지
-
-### upgrade.sh 변경 시
-- [ ] `.sfs-local/VERSION` 형식 하위 호환
-- [ ] dry-run 프리뷰 단계 유지 (파일 쓰기 전 사용자 확인)
-- [ ] Windows PowerShell wrapper (`upgrade.ps1`) 와 `.sfs-local/scripts/sfs.ps1` 갱신 경로 확인
-
-## 7-step flow 요약 (본 repo 자체 개발에도 적용)
-
-1. CEO 요구사항 정리 — Gate 2 (Brainstorm)
-2. CEO plan — Gate 3 (Plan)
-3. CTO Generator ↔ CPO Evaluator sprint contract
-4. `/sfs implement` 로 CTO 구현 — Gate 4 (Design/Entry) — 실제 코드 + `implement.md`/`log.md` evidence
-5. CPO review — Gate 6 (Review)
-6. CTO review 확인 + 사용자 최종 통과
-7. 회고 / 문서화
-
-Gate 는 all signal-only (ALT-INV-3 never-hard-block). 단 CPO review 자체는 sprint flow 의 필수 단계이며,
-review executor/tool 은 Codex/Gemini/Claude/custom 중 선택 가능하다. `/sfs review` 는 artifact
-acceptance review 이고, code review 는 자동/명시 `code` lens 일 때만 적용한다.
-Solon report 에서는 Gate 1~7 표시를 쓰고, 새 CLI 예시는 `--gate 6` 처럼 1~7 숫자를 쓴다.
-Production open 을 수반하면 Release Readiness evidence(secret/auth/data/monitoring/rollback/cost) 를 review 또는 retro-light 에 남긴다.
-
-## 절대 금지
-
-- **사용자 개인 Solon docset 의 경로 / 파일명 / 내용 유출** 금지. Active 제품 파일에는 private dev staging checkout 이름이나 절대경로를 쓰지 않는다.
-  단 "solon" 단독 키워드 (repo 이름 포함) 와 historical changelog / handoff evidence 의 최소 맥락은 허용.
-- **install.sh 가 자동으로 git push / commit** — consumer 의 git 은 consumer 가 관리.
-- **templates/ 에 프로젝트-특화 placeholder 없이 고정값** 넣기.
+- **사용자 개인 Solon docset 의 경로 / 파일명 / 내용 유출 금지**. Active
+  제품 파일에는 private dev staging checkout 이름이나 절대경로를 쓰지
+  않는다. 단 "solon" 단독 키워드 (repo 이름 포함) 와 historical
+  changelog / handoff evidence 의 최소 맥락은 허용. 회귀 잠금:
+  `tests/test-private-dev-path-hygiene.sh`.
+- **install.sh 가 자동으로 `git push` 또는 `git commit` 하지 않음** —
+  consumer 의 git 은 consumer 가 관리.
+- **`templates/` 에 프로젝트-특화 placeholder 없이 고정값 넣기 금지**.
+- **본 CLAUDE.md 본문에 프로젝트 운영 내용을 다시 박지 않음**. 새로
+  추가하고 싶은 정책 / 체크리스트 / 방법론 설명은
+  `docs/maintenance/` 또는 routed context 에 넣고, 본 파일은
+  frontmatter `detail_sources` + body 의 짧은 cross-link 로만 연결.
+  회귀 잠금: `tests/test-agent-entry-doc-hygiene.sh` (0.7.2+).
 
 ## Changelog
 

@@ -7,6 +7,27 @@
 
 ---
 
+## 0.7.2
+
+이번 버전은 사용자가 보고한 문서 관심사 미분리 제품 버그를 해결합니다.
+top-level `CLAUDE.md` / `AGENTS.md` 같은 agent 지침서에 프로젝트 정체성,
+배포 원칙, 수정 체크리스트, 방법론 reference 같은 운영 문서 내용이 박혀
+있던 문제를 분리하고, hygiene test 로 재발을 잠급니다.
+
+- `CLAUDE.md` 본문에서 프로젝트 정체성 / 배포 원칙 / 수정 체크리스트 /
+  방법론 요약 6 섹션을 떼어 `docs/maintenance/` 의 5개 dedicated doc 으로
+  이주. 본문은 agent 직접 행동 룰 (절대 금지) 과 짧은 cross-link 만 남김.
+- `AGENTS.md` 의 dev-staging 관계 절도 `docs/maintenance/release-policy.md`
+  § R-D1 으로 이주.
+- 신규 hygiene test (`test-agent-entry-doc-hygiene.sh`) 가 향후 동일 유형
+  의 오염 (forbidden H2 / 100 line 초과 / frontmatter_only 마커 손실) 을
+  잠급니다.
+- 기존 consumer 의 polluted CLAUDE.md 는 `sfs upgrade` 또는 `sfs agent
+  doctor --fix` 가 이미 (0.6.139+) 자동으로 frontmatter-only template 로
+  refactor 합니다. 본 버전은 그 capability 를 변경하지 않습니다 — 단지
+  maintainer 측에서도 같은 hygiene shape 을 강제해 upstream 오염이
+  재발하지 않도록 합니다.
+
 ## 0.7.1
 
 이번 버전은 0.7.0 통합 검증 (`INTEGRATION-VERIFY-2026-05-28.md`) 에서

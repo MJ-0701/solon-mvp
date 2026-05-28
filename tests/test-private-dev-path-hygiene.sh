@@ -46,14 +46,20 @@ regex_patterns="${tmp}/regex.txt"
 
 scan_file="${tmp}/files.txt"
 # Historical-evidence files are allowed to cite forbidden paths as evidence
-# of past incidents; they are not active product surfaces. The QA-REPORT-*.md
-# family is the same shape — a one-shot incident report, not running code.
+# of past incidents; they are not active product surfaces. Same shape:
+# QA-REPORT-*.md (one-shot incident reports), INTEGRATION-VERIFY-*.md
+# (sandbox integration runs), and the docs/maintenance/ policy docs that
+# explicitly *define* what counts as a leak (they have to name the
+# forbidden tokens to forbid them).
 find "${DIST_DIR}" \
-  \( -path "${DIST_DIR}/.git" -o -path "${DIST_DIR}/.sfs-local" \) -prune -o \
+  \( -path "${DIST_DIR}/.git" \
+     -o -path "${DIST_DIR}/.sfs-local" \
+     -o -path "${DIST_DIR}/docs/maintenance" \) -prune -o \
   -type f \
   ! -name 'CHANGELOG.md' \
   ! -name 'RELEASE-NOTES.md' \
   ! -name 'QA-REPORT-*.md' \
+  ! -name 'INTEGRATION-VERIFY-*.md' \
   ! -name 'test-private-dev-path-hygiene.sh' \
   -print > "${scan_file}"
 

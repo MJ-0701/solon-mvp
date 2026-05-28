@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.7.1" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.7.1" "version output"
-assert_contains_text "${output}" "latest 0.7.1" "latest output"
+[[ "${plain_output}" == "sfs 0.7.2" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.7.2" "version output"
+assert_contains_text "${output}" "latest 0.7.2" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline 0.7.0 flow integration patch" "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Doc concern separation" "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline 이번 버전은 0.7.0 통합 검증" "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline 이번 버전은 사용자가 보고한 문서 관심사 미분리" "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

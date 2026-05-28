@@ -78,11 +78,21 @@ assert_contains "${script}" "process-lean" "script lens support"
 assert_contains "${script}" "process/ceremony -> process-lean" "script alias hint"
 assert_contains "${script}" "lean procedure and bottleneck review lens" "script label"
 
-for file in "${codex_skill}" "${claude_command}" "${gemini_command}" "${legacy_gemini_command}" "${plugin_command}" "${codex_prompt}" "${dist_claude}"; do
+for file in "${codex_skill}" "${claude_command}" "${gemini_command}" "${legacy_gemini_command}" "${plugin_command}" "${codex_prompt}"; do
   assert_contains "${file}" "postdev external review" "template postdev ${file}"
   assert_contains "${file}" "lean procedure review" "template lean ${file}"
   assert_contains "${file}" "process-lean" "template process-lean ${file}"
 done
+
+# 0.7.2: substantive postdev/lean policy text moved out of the thin
+# top-level CLAUDE.md into docs/maintenance/release-policy.md as part of
+# the doc concern separation. Assert the new canonical location plus the
+# cross-link from CLAUDE.md so the rule remains discoverable.
+dist_release_policy="${DIST_DIR}/docs/maintenance/release-policy.md"
+assert_contains "${dist_release_policy}" "postdev external review" "release-policy postdev"
+assert_contains "${dist_release_policy}" "lean procedure review" "release-policy lean"
+assert_contains "${dist_release_policy}" "process-lean" "release-policy process-lean"
+assert_contains "${dist_claude}" "docs/maintenance/release-policy.md" "dist CLAUDE cross-link to release policy"
 
 source_surfaces=(
   "${SOURCE_ROOT}/.claude/commands/sfs.md"

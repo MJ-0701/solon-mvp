@@ -55,6 +55,11 @@ agents_template="${DIST_DIR}/templates/AGENTS.md.template"
 gemini_template="${DIST_DIR}/templates/GEMINI.md.template"
 codex_skill="${DIST_DIR}/templates/codex-skill/SKILL.md"
 dist_claude="${DIST_DIR}/CLAUDE.md"
+# 0.7.2: § 배포 원칙 8 ("Mainline-first + Gate 6 data/security") moved out
+# of CLAUDE.md body into docs/maintenance/release-policy.md as part of the
+# doc concern separation. CLAUDE.md is now a thin agent entry that
+# cross-links to it. The canonical assertion target shifted accordingly.
+dist_release_policy="${DIST_DIR}/docs/maintenance/release-policy.md"
 
 for file in "${index}" "${router}" "${router_ko}" "${plan}" "${implement}" "${review}"; do
   assert_contains "${file}" "mainline-focus-guard" "mainline routing ${file}"
@@ -102,6 +107,10 @@ for file in "${codex_skill}"; do
   assert_contains "${file}" "checklist reconciliation" "agent template checklist ${file}"
 done
 
-assert_contains "${dist_claude}" "Mainline-first + Gate 6 data/security" "dist CLAUDE product checklist"
+# 0.7.2: canonical location for the § 배포 원칙 8 text moved.
+assert_contains "${dist_release_policy}" "Mainline-first + Gate 6 data/security" "dist release-policy product checklist"
+# CLAUDE.md must still cross-link to the new canonical location so agents
+# discover the rule even after the body was moved.
+assert_contains "${dist_claude}" "docs/maintenance/release-policy.md" "dist CLAUDE cross-link to release policy"
 
 echo "test-mainline-data-security-guardrails: OK"

@@ -25,13 +25,6 @@ load_when: "Read when this product document is directly relevant."
    - **`templates/` 변경** → consumer 호환성 영향 평가, placeholder 형식 유지.
    - **새 release cut** → private dev staging checkout 의 `scripts/cut-release.sh` 에서 진행 (본 repo 에는 cut tooling 없음).
 
-## 본 repo 와 dev staging 관계
-
-- 본 `solon-mvp` 는 maintainer 측 dev staging 의 **MVP 배포판 (stable mirror)**.
-- 실 개발은 maintainer 의 private dev staging 에서 일어나고, 본 repo 는 release cut 결과물의 mirror 다.
-- 따라서 본 repo 에서는 직접 commit 하지 말고, dev staging 에서 변경 후 release cut 으로 sync 받는 것을 권장 (R-D1 dev-first 원칙).
-- 예외 (R-D1 hotfix path): 사용 중 stable 에서 발견된 critical bug 만 stable 직접 수정 허용. 단 같은 사이클 안 dev staging 에 동일 변경 반영 (`sync(stable): <sha>` commit message 패턴).
-
 ## 비동작 (Non-Goals)
 
 - 본 stub 에 `CLAUDE.md` 본문을 복제하지 말 것.
@@ -40,7 +33,10 @@ load_when: "Read when this product document is directly relevant."
 
 ## 참고
 
-- 실제 SSoT: [`CLAUDE.md`](CLAUDE.md)
+- 실제 agent 지침 SSoT: [`CLAUDE.md`](CLAUDE.md)
+- repo 정체성 / IP / 도메인 경계: [`docs/maintenance/project-identity.md`](docs/maintenance/project-identity.md)
+- 배포 원칙 / dev staging 관계 (R-D1): [`docs/maintenance/release-policy.md`](docs/maintenance/release-policy.md)
+- 영역별 수정 체크리스트: [`docs/maintenance/contributing.md`](docs/maintenance/contributing.md)
 - 변경 이력: [`CHANGELOG.md`](CHANGELOG.md)
 - 현재 배포 버전: [`VERSION`](VERSION)
 - Consumer 어댑터 템플릿: `templates/AGENTS.md.template` (별도 파일, 혼동 주의)

@@ -1,5 +1,63 @@
 ## [Unreleased]
 
+## [0.7.2] - 2026-05-28
+
+> **Doc concern separation — agent entry docs are now agent guidance only; project state / release policy / dev checklists / methodology live in docs/maintenance/.**
+
+This patch closes a documented product bug: the top-level `CLAUDE.md`
+(and to a lesser extent `AGENTS.md`) had accumulated project content
+(repo identity, deployment policy, modification checklists, methodology
+reference) that should never have lived inside an agent entry document.
+0.7.2 separates those concerns and locks them with a new hygiene test
+so the pollution cannot recur.
+
+### Changed
+
+- `CLAUDE.md` slimmed from 83 lines to a thin agent entry (~77 lines)
+  whose body is now: a one-paragraph framing, a 4-item "작업 전 읽을 것"
+  cross-link block, and the genuinely agent-rule "Agent 가 절대 하지 말
+  것" section. Everything else moved to `docs/maintenance/`.
+- `AGENTS.md` dropped its embedded "본 repo 와 dev staging 관계" section
+  (R-D1 content moved to `docs/maintenance/release-policy.md` § R-D1).
+  Cross-links in § 참고 now point at the new maintenance docs.
+
+### Added
+
+- `docs/maintenance/` directory — top-level repo's own maintenance docs.
+  Five files:
+  - `project-identity.md` — repo identity / IP / domain boundary (was
+    CLAUDE.md § Repo 정체성).
+  - `release-policy.md` — 8 release-policy principles + R-D1 dev-first
+    (was CLAUDE.md § 배포 원칙).
+  - `contributing.md` — install.sh / upgrade.sh / templates/ / mcp-server/
+    / packaging/ / release-cut checklists (was CLAUDE.md § 수정 시
+    체크리스트).
+  - `methodology-7-step.md` — 7-step + Gate label reference (was
+    CLAUDE.md § 7-step flow 요약).
+  - `policies/session-transfer-autopilot.md` — full Continuation Guard
+    transfer protocol (was CLAUDE.md § 배포 원칙 6).
+  - `policies/six-division-council.md` — maintainer-facing pointer to
+    the routed 6-division council policies (was CLAUDE.md § 배포 원칙 7).
+- `tests/test-agent-entry-doc-hygiene.sh` — regression lock. Fails if:
+  1. top-level `CLAUDE.md` / `AGENTS.md` exceed 100 lines or contain
+     forbidden project-content H2 (`## Repo 정체성`, `## 배포 원칙`,
+     `## 수정 시 체크리스트`, `## 7-step flow 요약`, …);
+  2. consumer adapter templates lose their `frontmatter_only: true`
+     marker;
+  3. `SFS.md.template` loses its `router_doc: true` marker;
+  4. any of the five new `docs/maintenance/` doc paths goes missing.
+
+### Notes — AS for existing consumer projects
+
+The existing `sfs agent doctor --fix` capability (shipped in 0.6.139)
+already covers the AS path for already-installed consumer projects: it
+detects polluted root adapter docs (anything beyond frontmatter) and
+overwrites them with the clean `frontmatter_only: true` template,
+backing up the prior body under `.sfs-local/archives/agent-doc-refactor/`.
+0.7.2 does not change that flow — it only locks the same hygiene shape
+inside the maintainer's own repo, so the pollution does not get
+re-introduced upstream.
+
 ## [0.7.1] - 2026-05-28
 
 > **0.7.0 flow integration patch — agent-build auto-routing rescued, broad-substring lens patterns tightened, `sfs context list` shipped, MCP install path clarified.**
