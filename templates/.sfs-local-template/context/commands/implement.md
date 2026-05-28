@@ -86,9 +86,8 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   verify authz/masking/secret handling where relevant, remove or justify stray
   production `console.log`/`debugger`/temporary traces, and route errors to
   Datadog or the configured observability path with redaction.
-- For high-context work, update the wiki/workbench mission checklist at audit,
-  edit, test, review, and release boundaries. Do not rely on chat memory to
-  remember user-reported defects.
+- For high-context work, update the wiki/workbench mission checklist at audit, edit, test, review, and release boundaries. Do not rely on chat memory to remember user-reported defects.
+- For expert/domain know-how work, implement the smallest useful asset named in `policies/domain-knowledge-assets.md`: glossary/domain map, playbook, skill/knowledge pack, checklist, wiki TopicHub, fixture/test, or review question. Update the Domain Asset Implementation Ledger with raw source, owner/confidence/gaps, artifact path, and behavior check.
 - If implementation completes and extra reviewers are available, use
   `postdev-external-review-pack.md` to attach Claude Cowork/Gemini/Codex
   evidence after SFS self/cross review without replacing the gate.
@@ -125,7 +124,7 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   search or precise `rg` before broad reads, and do not carry old workbench
   history into the turn unless current report/plan evidence is insufficient.
 - Prefer deep modules and Harness Engineering: design the public interface, narrow active tools, project-as-prompt structure, and checks so AI can fill internals.
-- Record artifact type, domain terms, human-owned design decisions, feedback checks, design/interface notes, review handoff, and a `division_subagent_ledger`: strategy-pm/dev/QA/design/infra/taxonomy finding/evidence/waiver.
+- Record artifact type, domain terms, human-owned design decisions, feedback checks, design/interface notes, review handoff, and a `division_subagent_ledger`: strategy-pm/dev/QA/design/infra/taxonomy finding/evidence/waiver plus `asset_candidate`.
 - When delegating worker slices, keep files_scope explicit and disjoint. Workers
   may implement fixed internals, but architecture, public API, domain terms, and
   acceptance criteria stay with CEO/CTO/user decisions.

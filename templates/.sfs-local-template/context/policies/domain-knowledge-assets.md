@@ -1,0 +1,118 @@
+---
+id: sfs-policy-domain-knowledge-assets
+summary: Turn expert domain know-how into AI-usable project assets.
+language: en
+load_when:
+  - domain knowledge
+  - domain expertise
+  - expert know-how
+  - SME
+  - playbook
+  - heuristic
+  - craft
+  - skill
+  - knowledge asset
+  - domain moat
+status: filled-v1
+content_policy: "compile expert judgment into small reviewable assets; do not publish or share private know-how without human approval"
+---
+
+# Domain Knowledge Assets Policy
+
+AI makes generic coding and scaffolding more evenly available. The durable moat
+is expert domain judgment made legible enough for AI to reuse: terms, rules,
+heuristics, examples, counterexamples, checks, and taste boundaries.
+
+## Activation Rules
+
+- The user provides field notes, specialist critique, craft vocabulary, domain
+  rules, or "we always do this here" guidance.
+- The same explanation has been repeated across sprints, reviews, or agents.
+- A plan depends on tacit expertise such as finance, operations, medical,
+  legal, design, video, music, marketing, support, or internal company process.
+- A user asks to turn notes into a skill, playbook, knowledge pack, checklist,
+  wiki page, fixture, test, or agent prompt.
+- A review finds that generic AI output missed domain-specific judgment.
+
+## Asset Shapes
+
+- Raw source: original note, capture, interview, example, support ticket, PR
+  comment, meeting note, or expert review. Preserve it by reference.
+- Ubiquitous language: canonical terms, forbidden aliases, actor/state names,
+  domain boundaries, and source links.
+- Playbook/checklist: when-to-use rules, step order, risk signs, recovery steps,
+  and "do not do this" constraints.
+- Skill/knowledge pack/review lens: compact reusable guidance that an agent can
+  load for a recurring domain or craft judgment.
+- Fixture/test/smoke: example and counterexample pairs that prove the guidance
+  is executable, not decorative.
+- Wiki TopicHub/index: retrieval map that points to the source truth and the
+  compiled asset.
+
+## Six-Division Asset Loop
+
+The six-division council is the default collector for domain assets. Each row
+asks what human know-how should be reused next time:
+
+- Strategy-PM: market, positioning, priority, rollout, and decision-boundary
+  judgment becomes roadmap/playbook/AC guidance.
+- Taxonomy: vocabulary, states, events, aliases, and classification judgment
+  becomes glossary, domain map, naming rule, or review lens.
+- Design: workflow, taste, interaction, accessibility, copy, and visible craft
+  judgment becomes `design.md`, checklist, example/counterexample, screenshot,
+  or browser-review heuristic.
+- Dev: architecture, runtime, invariant, API, migration, and implementation
+  judgment becomes boundary notes, interface contracts, fixtures, tests, or
+  source-driven implementation guidance.
+- QA: defect, risk, regression, edge-case, and acceptance judgment becomes
+  fixture sets, smoke checks, acceptance ledgers, or review questions.
+- Infra: deploy, observability, security, reliability, rollback, and cost
+  judgment becomes runbook, monitor, shipping check, or operations evidence.
+
+Each division ledger row should record `asset_candidate`: reuse an existing
+asset, create a new one, or mark a concrete gap/waiver.
+
+## Compile Flow
+
+1. Keep the raw source in its source location. Do not paste large private notes
+   into core context.
+2. Extract the smallest reusable unit: terms, heuristic, decision rule, example,
+   counterexample, or review question.
+3. Choose the narrowest asset shape. Prefer docs/solon, llm-wiki, checklist,
+   fixture, or review lens before adding a new command or tool.
+4. Record source, owner/expert, confidence, gaps, and promotion status.
+5. Add a feedback check: review question, test, fixture assertion, smoke run,
+   or dry-run prompt.
+6. If the asset will be shared outside the private project, require explicit
+   human approval for IP, privacy, attribution, and commercial boundary.
+
+## Boundaries
+
+- Do not flatten craft into generic advice. Preserve the domain words and the
+  reason the rule matters.
+- Do not treat AI confidence as expert authority. AI can package, compare, and
+  test; humans own meaning, taste, public contract, and publish/share decisions.
+- Do not hard-code one expert's preference as universal product law without
+  scope, counterexamples, and review.
+- A "skill" is an output shape, not a mandatory lifecycle command. Use the SFS
+  command/policy surface unless a real tool boundary is needed.
+
+## Review Questions
+
+- What raw source or expert signal produced the asset?
+- Which terms, heuristics, examples, and counterexamples became reusable?
+- Is the asset small enough for an agent to load at the right moment?
+- Is there a check that proves the knowledge changes behavior?
+- Are privacy, IP, attribution, and publication status explicit?
+- Did the work avoid turning private notes or host-local skill bundles into
+  project SSoT without approval?
+- If the domain knowledge affects product behavior, is it tied to AC, files,
+  docs, tests, wiki, or review evidence?
+
+## Evidence
+
+- Source link, capture id, interview/note path, or expert review reference.
+- Compiled glossary/domain-map/playbook/skill/knowledge-pack/checklist/wiki path.
+- Example/counterexample fixture or review prompt that exercises the rule.
+- Verification command/result, dry-run transcript excerpt, or reviewer verdict.
+- Human approval/waiver for shared-public, paid, or cross-team publication.

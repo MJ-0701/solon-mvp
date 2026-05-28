@@ -7,6 +7,15 @@
 
 ---
 
+## 0.6.138
+
+이번 버전은 AI 시대의 도메인 지식 해자를 SFS 실행 흐름 안에 넣습니다.
+
+- 전문가 노하우, 반복 설명, craft rule 을 AI 가 재사용할 수 있는 glossary, playbook, skill, fixture, review lens, wiki map 으로 승격하는 기준을 추가합니다.
+- 6본부 council 을 domain-asset capture loop 로 명시해 strategy-PM, taxonomy, design, dev, QA, infra 가 각자 발견한 실무 판단을 `asset_candidate` 로 남깁니다.
+- plan/implement/review 템플릿에 Domain Asset Promotion/Implementation/Review Ledger 를 추가해 source, owner, artifact path, verification, publication boundary 가 검수되게 합니다.
+- 관련 EN/KO 제품 문서와 회귀 테스트를 갱신해 6본부 지식팩이 장식용 표가 아니라 재사용 가능한 AI 지식 자산 수집 장치로 동작하도록 고정합니다.
+
 ## 0.6.137
 
 이번 버전은 하네스 엔지니어링 원칙을 SFS 제품 흐름 안에 직접 넣습니다.

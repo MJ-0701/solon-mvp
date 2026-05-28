@@ -71,14 +71,20 @@ user_approval_evidence: ""
 
 ## 7. Division Sub-agent Ledger
 
-| division | AC/files/evidence mapping | status/finding/waiver |
-|---|---|---|
-| strategy-pm |  |  |
-| dev |  |  |
-| QA |  |  |
-| design |  |  |
-| infra |  |  |
-| taxonomy |  |  |
+| division | AC/files/evidence mapping | asset_candidate | status/finding/waiver |
+|---|---|---|---|
+| strategy-pm |  |  |  |
+| dev |  |  |  |
+| QA |  |  |  |
+| design |  |  |  |
+| infra |  |  |  |
+| taxonomy |  |  |  |
+
+## 7.1 Domain Asset Promotion Ledger
+
+| source/ref | owner/expert | division | asset_candidate | promotion action | behavior check |
+|---|---|---|---|---|---|
+|  |  |  | reuse / create / gap / waiver |  |  |
 
 ## 8. Enterprise Plan Council
 
@@ -86,14 +92,14 @@ user_approval_evidence: ""
 - selected knowledge packs:
 - enterprise_council_ledger:
 
-| division | risk flag | finding | AC/files/evidence | waiver/N/A |
-|---|---|---|---|---|
-| strategy-pm |  |  |  |  |
-| dev |  |  |  |  |
-| QA |  |  |  |  |
-| design |  |  |  |  |
-| infra |  |  |  |  |
-| taxonomy |  |  |  |  |
+| division | risk flag | finding | AC/files/evidence | asset_candidate | waiver/N/A |
+|---|---|---|---|---|---|
+| strategy-pm |  |  |  |  |  |
+| dev |  |  |  |  |  |
+| QA |  |  |  |  |  |
+| design |  |  |  |  |  |
+| infra |  |  |  |  |  |
+| taxonomy |  |  |  |  |  |
 
 ## 9. Data Validation / Security / Checklist Plan
 
@@ -135,8 +141,9 @@ Gate 3 review PASS 는 사용자 승인으로 간주하지 않는다. 사용자�
 - [ ] data/mock/fixture/seed/API/UI/auth/session/persistence 변경이면 대표 데이터와 invariant 검증 계획이 있다
 - [ ] security/logging/deploy 변경이면 OWASP family, console/debug log 정책, Datadog/equivalent evidence 가 있다
 - [ ] 긴 컨텍스트/멀티 결함이면 wiki/workbench mission checklist 경로가 있다
-- [ ] strategy-pm/dev/QA/design/infra/taxonomy division ledger 가 AC/files/evidence 또는 waiver 로 채워져 있다
-- [ ] non-trivial product-bearing work 이면 Enterprise Plan Council risk flag / selected pack / AC evidence row 가 있다
+- [ ] strategy-pm/dev/QA/design/infra/taxonomy division ledger 가 AC/files/evidence, `asset_candidate`, 또는 waiver 로 채워져 있다
+- [ ] 재사용 가능한 도메인 노하우가 있으면 Domain Asset Promotion Ledger 에 source/owner/promotion/check 가 있다
+- [ ] non-trivial product-bearing work 이면 Enterprise Plan Council risk flag / selected pack / AC evidence / asset row 가 있다
 - [ ] 제품 의미/IA/visible UI/workflow/public contract/AC 의미 변경이면 사용자 승인 경계가 pending 으로 표시되어 있다
 - [ ] slice별 파일/산출물 매핑이 있다
 - [ ] worker 모델 라우팅이 명시되어 있다: Codex 일반 worker는 `gpt-5.4`, bounded coding helper는 `gpt-5.3-codex`, Spark는 scope/files_scope/AC/정확한 수정 의도가 잠긴 무판단 기계적 구현 보조 작업에만 쓴다

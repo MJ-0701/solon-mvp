@@ -22,8 +22,8 @@ Gate 2 brainstorm 이후, Gate 3 review 전에 사용한다. 목적은 plan 을 
 
 1. brainstorm, 최신 handoff/user intent, active sprint, wiki/domain map 을 확인한다.
 2. 가장 작은 유용한 work slice 와 AC 를 만든다.
-3. 각 본부마다 finding, risk flag, AC/files/evidence mapping, waiver/N/A,
-   next action 을 기록한다.
+3. 각 본부마다 finding, risk flag, AC/files/evidence mapping,
+   `asset_candidate`, waiver/N/A, next action 을 기록한다.
 4. 해당 row 에 트리거가 있을 때만 deep pack 을 연다.
 5. 관련 본부의 finding/evidence/waiver 가 없으면 Gate 3 는 partial 이다.
 
@@ -38,6 +38,9 @@ Gate 2 brainstorm 이후, Gate 3 review 전에 사용한다. 목적은 plan 을 
 | infra | runtime, deploy, data, secret, observability, cost/latency, rollback |
 | taxonomy | canonical terms, states/events, forbidden aliases, UI/API/docs/log wording |
 
+각 row 는 재사용할 domain asset 도 함께 이름 붙인다. 기존 asset 재사용, 신규 asset 생성,
+명시적 gap/waiver 중 하나를 적는다. 이것이 6본부 council 의 존재 이유다.
+
 ## Risk Flag
 
 - security/privacy/auth/permission/PII/payment/finance/production write
@@ -50,6 +53,7 @@ Gate 2 brainstorm 이후, Gate 3 review 전에 사용한다. 목적은 plan 을 
 
 - `enterprise_council_ledger` 또는 확장 `division_subagent_ledger`
 - risk flags 와 선택된 child pack
+- 본부별 asset candidate 또는 concrete N/A reason
 - AC to file/artifact/evidence mapping
 - 모든 product-bearing entrypoint 의 DDD/TDD boundary
 - 진짜 제품 판단에만 user approval boundary

@@ -23,7 +23,7 @@ to make plan a real design phase.
    domain maps when present.
 2. Build the smallest useful work slice and AC list.
 3. For each division, record one row: finding, risk flags, AC/files/evidence
-   mapping, waiver or N/A reason, and next action.
+   mapping, `asset_candidate`, waiver or N/A reason, and next action.
 4. Load deeper knowledge packs only when that row has a real trigger.
 5. If any relevant division lacks finding/evidence/waiver, Gate 3 is partial.
 
@@ -37,6 +37,9 @@ to make plan a real design phase.
 | design | workflow, interaction state, accessibility, copy, visible risk or N/A waiver |
 | infra | runtime, deploy, data, secret, observability, cost/latency, rollback risk |
 | taxonomy | canonical terms, states/events, forbidden aliases, UI/API/docs/log wording |
+
+Each row also names the reusable domain asset it touches: existing asset reused,
+new asset to create, or explicit gap/waiver. This is why the council exists.
 
 ## Risk Flags
 
@@ -54,6 +57,7 @@ Gate 3 plan must include:
 
 - `enterprise_council_ledger` or extended `division_subagent_ledger`;
 - risk flags and selected child packs;
+- per-division asset candidates or concrete N/A reasons;
 - AC to file/artifact/evidence mapping;
 - DDD/TDD boundary for every product-bearing entrypoint;
 - user approval boundary only for real product judgment;

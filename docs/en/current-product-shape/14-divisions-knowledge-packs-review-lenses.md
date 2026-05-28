@@ -47,6 +47,15 @@ bookkeeping, tax, and accounting. The taxonomy slot remains in the legacy
 activation file for compatibility, but product guidance treats taxonomy as a
 cross-cutting language/classification lens rather than an org department.
 
+This is also why the six-division pack matters in the AI era: it is the default
+domain-asset capture loop. Strategy-PM, taxonomy, design, dev, QA, and infra
+each notice a different kind of practitioner judgment. When a row exposes a
+repeatable rule, edge case, taste call, or operating constraint, the council
+records `asset_candidate`: reuse an existing glossary/playbook/review lens/test,
+create a new one, or explain why no durable asset should be promoted. The
+division table therefore turns expert know-how into AI-usable product memory
+instead of leaving it inside one person's head.
+
 Useful disciplines from the agent-skills benchmark are absorbed
 the same way. Official-docs implementation flows through `implement` and the
 `source-docs` lens, stop-the-line debugging flows through implementation

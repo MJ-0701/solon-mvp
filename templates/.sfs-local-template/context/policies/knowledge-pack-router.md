@@ -2,7 +2,7 @@
 id: sfs-policy-knowledge-pack-router
 summary: Lightweight activation router for knowledge packs and review lenses.
 language: en
-load_when: [knowledge pack, backend, strategy-pm, qa, design, infra, management-admin, taxonomy, finance, accounting, bookkeeping, tax, transaction, batch, DDD, TDD, domain model, product behavior, acceptance criteria, integration, API, AWS, Obsidian, llm wiki, wiki, docs migration, enterprise, agent team, performance, algorithm, QA/QC, mainline, focus, data validation, mock, fixture, seed, OWASP, Datadog, console.log, checklist, long context, external review, Claude Cowork, Gemini review, bottleneck, ceremony, lean gate]
+load_when: [knowledge pack, backend, strategy-pm, qa, design, infra, management-admin, taxonomy, finance, accounting, bookkeeping, tax, transaction, batch, DDD, TDD, domain model, product behavior, acceptance criteria, integration, API, AWS, Obsidian, llm wiki, wiki, docs migration, domain knowledge, expert know-how, SME, playbook, heuristic, skill, domain moat, enterprise, agent team, performance, algorithm, QA/QC, mainline, focus, data validation, mock, fixture, seed, OWASP, Datadog, console.log, checklist, long context, external review, Claude Cowork, Gemini review, bottleneck, ceremony, lean gate]
 status: filled-v1
 content_policy: "read only this router first; read full packs only when matching signals make them useful"
 ---
@@ -32,6 +32,10 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
 - Management/admin signals: `management-admin`, `finance`, `accounting`,
   `bookkeeping`, `tax`, `invoice`, `cashflow`, `payroll`, `compliance`.
 - Taxonomy signals: `vocabulary`, `naming`, `state`, `event`, `enum`.
+- Domain knowledge asset signals: `domain knowledge`, `expertise`, `SME`,
+  `expert know-how`, `playbook`, `heuristic`, `craft`, `skill`,
+  `knowledge asset`, `domain moat`, or user asks to turn notes into reusable
+  AI guidance.
 - DDD/TDD signals: `DDD`, `TDD`, `domain model`, `product behavior`,
   `acceptance criteria`, `aggregate`, `value object`, `test-first`, `failing
   test`, `red-green`.
@@ -93,6 +97,8 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
 - `policies/ddd-tdd-knowledge-pack.ko.md` (Korean)
 - `policies/obsidian-llm-wiki.md`
 - `policies/obsidian-llm-wiki.ko.md` (Korean)
+- `policies/domain-knowledge-assets.md`
+- `policies/domain-knowledge-assets.ko.md` (Korean)
 - `policies/enterprise-agent-team-pack.md`
 - `policies/enterprise-agent-team-pack.ko.md` (Korean)
 - `policies/enterprise-plan-council-pack.md`
@@ -140,6 +146,9 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
   recorded, not turned into user chores.
 - Repeated slow or decorative process loads `lean-procedure-refactor-pack.md`;
   keep the invariant, shrink or remove the visible ceremony.
+- Expert/domain know-how loads `domain-knowledge-assets.md`; compile the
+  smallest reusable asset and require source/owner/confidence/gaps plus a
+  behavior check before treating the knowledge as reusable.
 - If a pack suggests a large transition such as MSA, heavy redesign,
   release-readiness escalation, finance/admin process, tax/accounting advisor
   checkpoint, or governance process, surface it as a user or product decision

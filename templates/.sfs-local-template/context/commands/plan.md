@@ -64,6 +64,7 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
     ownership slices.
   - gray-box delegation and Harness Engineering mark human-owned understanding/
     design, AI-owned execution, narrow tool surface, project-as-prompt structure, and verification checks.
+- If expert/domain know-how becomes reusable project memory, load `policies/domain-knowledge-assets.md` and fill the Domain Asset Promotion Ledger: raw source, owner/expert, `asset_candidate`, promotion boundary, and behavior check before worker handoff.
 - Gate 3 must include a `division_subagent_ledger`: strategy-pm, dev, QA,
   design, infra, and taxonomy map to AC/files/evidence or record a waiver/
   not-applicable. Actual parallel implementation is optional; this council
@@ -72,7 +73,7 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   `policies/enterprise-plan-council-pack.md` or `.ko.md` before Gate 3 review.
   Plan must record risk flags, selected child packs, and an enterprise council
   row for each relevant division. Empty six-division ceremony is not PASS; each
-  row needs a finding, evidence, waiver, or concrete not-applicable reason.
+  row needs a finding, evidence, `asset_candidate`, waiver, or concrete N/A reason.
 - Load `policies/mainline-focus-guard.md` when tool/auth/model setup appears
   beside the user's real objective. Plan must classify side work as mainline,
   unblocker, deferred_followup, blocked, or out_of_scope and define the return

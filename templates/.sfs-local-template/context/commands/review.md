@@ -89,8 +89,8 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - If the evaluator executor equals the generator executor, call out the
   self-validation risk and prefer a separate model or fresh agent context when
   the change is user-facing, risky, or hard to verify.
-- Gate 6 verifies `division_subagent_ledger`; missing finding/evidence/waiver is
-  partial. For `agent_mode: parallel`, also verify disjoint files_scope,
+- Gate 6 verifies `division_subagent_ledger`; missing finding/evidence/waiver or
+  `asset_candidate` is partial. For `agent_mode: parallel`, also verify disjoint files_scope,
   AC/ADR subset ownership, expected tests/evidence, output report path,
   merge/conflict policy, native commit message, lane verification, and cross review.
 - Enterprise/non-trivial Gate 6 checks selected packs, QA/QC ledger, project-
@@ -151,9 +151,8 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   `policies/review-lens-routing.md`. Public lens names include `source-docs`,
   `simplify`, `security`, `performance`, `api-contract`, `strategy`, `design`,
   `taxonomy`, `qa`, `ops`, `management-admin`, and `release`.
-- Review the whole Harness Engineering contract, not only changed code: shared intent, domain
-  language, human-owned design, narrow active tool surface, project-as-prompt
-  consistency, feedback evidence, and boundaries match the Gate 2/3 record.
+- Review the whole Harness Engineering contract, not only changed code: shared intent, domain language, human-owned design, narrow active tool surface, project-as-prompt consistency, feedback evidence, and boundaries match the Gate 2/3 record.
+- Review domain-knowledge assets when expert notes or skills are in scope: Domain Asset Review Ledger names source/owner/confidence/gaps, raw notes by reference, small loadable asset, behavior check, and publication approval/waiver.
 - Natural-language SFS activation is real SFS. Return partial for facade-only SFS:
   SFS terms were used but routed context, active sprint status, handoff/user
   intent, plan/review artifacts, or wiki/DDD maps were not reconciled.

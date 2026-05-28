@@ -27,6 +27,9 @@ contract. It applies to any product-bearing work, not only frontend or backend.
 
 - Six divisions are conceptual sub-agents from brainstorm through Gate 6:
   strategy-pm, dev, QA, design, infra, and taxonomy.
+- The six divisions are also the default domain-asset loop: each division turns
+  its expert judgment into reusable terms, playbooks, checks, fixtures, review
+  questions, wiki maps, or skill/knowledge-pack material.
 - Plan is a design phase, not a post-brainstorm contract stamp. The team must
   expose risks, missing evidence, and files/artifact boundaries before coding.
 - Load context just in time. Every division participates, but deep packs load
@@ -75,11 +78,28 @@ Do not import heavyweight or stale rituals as universal blockers:
   Claude Cowork/Gemini/Codex evidence.
 - Load `lean-procedure-refactor-pack.md` when process itself becomes a bottleneck.
 
+## Division Asset Duties
+
+- strategy-pm captures market/user/business judgment as prioritization, rollout,
+  and decision-boundary assets.
+- taxonomy captures language judgment as canonical terms, aliases, states,
+  events, and classification assets.
+- design captures craft judgment as workflow, interaction, copy, accessibility,
+  and visual-review assets.
+- dev captures engineering judgment as boundaries, contracts, fixtures, and
+  implementation checks.
+- QA captures risk judgment as edge cases, regression checks, and acceptance
+  evidence assets.
+- infra captures operating judgment as deploy, observability, rollback, cost,
+  and security runbook assets.
+
 ## PASS Shape
 
 An enterprise PASS means:
 
 - each relevant division has a finding, evidence path, or explicit waiver;
+- each relevant division has an `asset_candidate` or a concrete reason it is not
+  creating/reusing one;
 - AC maps to files/artifacts and a verification signal;
 - hot paths have measured or bounded performance evidence;
 - project-applied QA/QC is recorded when the change is harness/product policy;

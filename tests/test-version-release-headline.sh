@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.6.137" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.6.137" "version output"
-assert_contains_text "${output}" "latest 0.6.137" "latest output"
+[[ "${plain_output}" == "sfs 0.6.138" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.6.138" "version output"
+assert_contains_text "${output}" "latest 0.6.138" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Harness Engineering guardrails are productized." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Domain knowledge assets now flow through six-division ledgers." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 하네스 엔지니어링 원칙을 SFS 제품 흐름 안에 직접 넣습니다.' "release notes fallback headline"
+assert_contains_text "${fallback_output}" 'installed_release_headline 이번 버전은 AI 시대의 도메인 지식 해자를 SFS 실행 흐름 안에 넣습니다.' "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

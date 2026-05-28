@@ -37,6 +37,7 @@ Rules:
 - AI-era fundamentals and Harness Engineering apply across all gates: shared design, domain language, feedback, boundaries, gray-box delegation, narrow active tools, project-as-prompt consistency, and automated verification. DDD/TDD is a product-level engineering floor: behavior, domain language, boundary, and first evidence are named before worker handoff; DDD-lite boundaries apply when code is touched.
   All product-bearing entrypoints are included: UI bootstraps, routers, hooks/stores/effects, controllers, jobs, repositories, DTO mappers, CLI flags, scripts, migrations, docs wording, observability glue, and external adapters are not default homes for product policy without boundary/evidence/waiver.
   Natural-language SFS activation is real SFS: reconcile current user wording, latest handoff/docs, active sprint plan, and wiki/DDD maps; Approved sprint state never overrides a newer handoff or user intent, so conflicts are mis-scoped work, not user questions. Broad-entrypoint growth that adds product behavior during DDD/TDD work is a Gate 6 finding unless extraction or deferral is recorded.
+  Domain knowledge assets are first-class: compile expert know-how into source-linked glossaries/playbooks/skills/fixtures/wiki maps with owner/confidence/gaps and human-reviewed publication boundaries.
 - For implementation and review work, follow the routed context guardrails:
   surface material assumptions, choose the smallest useful slice, keep changes
   surgical, read actual files/errors before fixing, verify before completion,

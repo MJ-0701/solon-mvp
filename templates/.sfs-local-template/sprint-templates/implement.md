@@ -80,14 +80,20 @@ last_touched_at: ""
 
 ## 6. Division Sub-agent Ledger
 
-| division | status | finding/evidence/waiver | next action |
-|---|---|---|---|
-| strategy-pm |  |  |  |
-| dev |  |  |  |
-| QA |  |  |  |
-| design |  |  |  |
-| infra |  |  |  |
-| taxonomy |  |  |  |
+| division | status | finding/evidence/waiver | asset_candidate | next action |
+|---|---|---|---|---|
+| strategy-pm |  |  |  |  |
+| dev |  |  |  |  |
+| QA |  |  |  |  |
+| design |  |  |  |  |
+| infra |  |  |  |  |
+| taxonomy |  |  |  |  |
+
+## 6.1 Domain Asset Implementation Ledger
+
+| asset_candidate | source/ref | artifact path | owner/confidence/gaps | verification |
+|---|---|---|---|---|
+|  |  |  |  |  |
 
 ## 7. 리뷰 인계
 

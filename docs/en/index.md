@@ -69,6 +69,12 @@ projects can migrate docs by reference after `sfs adopt` so the next sprint
 starts from a wiki map instead of a broad repo scan. This is recommended, not a
 hard dependency.
 
+Domain expertise becomes leverage when it is compiled into AI-usable assets:
+glossaries, domain maps, playbooks, checklists, knowledge packs, review lenses,
+skills, fixtures, tests, or wiki TopicHubs. Solon keeps raw source by reference,
+records owner/confidence/gaps, and requires human approval before private
+know-how becomes shared, public, paid, or cross-team material.
+
 Token Diet reduces routine output tokens without dropping evidence, risk, or
 raw traceability. Use `SFS_OUTPUT_STYLE=compact`, `sfs status --compact`,
 `sfs start --output-style compact`, or `sfs report --output-style compact` for

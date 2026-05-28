@@ -44,14 +44,20 @@ generator_executor: ""
 
 ## 5. Division Sub-agent Ledger
 
-| division | status | finding/evidence/waiver | reviewer verdict |
-|---|---|---|---|
-| strategy-pm |  |  |  |
-| dev |  |  |  |
-| QA |  |  |  |
-| design |  |  |  |
-| infra |  |  |  |
-| taxonomy |  |  |  |
+| division | status | finding/evidence/waiver | asset_candidate | reviewer verdict |
+|---|---|---|---|---|
+| strategy-pm |  |  |  |  |
+| dev |  |  |  |  |
+| QA |  |  |  |  |
+| design |  |  |  |  |
+| infra |  |  |  |  |
+| taxonomy |  |  |  |  |
+
+## 5.1 Domain Asset Review Ledger
+
+| asset_candidate | source/owner/confidence/gaps | loadable artifact | behavior check | publication approval/waiver | verdict |
+|---|---|---|---|---|---|
+|  |  |  |  |  |  |
 
 ## 6. Wiki QA/QC Ledger
 

@@ -28,6 +28,7 @@ split_children:
   - docs/ko/current-product-shape/18-section.md
   - docs/ko/current-product-shape/19-obsidian-llm-wiki-continuity.md
   - docs/ko/current-product-shape/20-ai-work-intake-routing.md
+  - docs/ko/current-product-shape/21-domain-knowledge-assets.md
 ---
 # 현재 제품 구조와 운영 흐름
 
@@ -63,3 +64,4 @@ split_children:
 - [언제 어떤 모드를 고르나](./current-product-shape/18-section.md)
 - [Obsidian LLM Wiki Continuity](./current-product-shape/19-obsidian-llm-wiki-continuity.md)
 - [AI Work Intake Routing](./current-product-shape/20-ai-work-intake-routing.md)
+- [도메인 지식 자산](./current-product-shape/21-domain-knowledge-assets.md)

@@ -1,3 +1,26 @@
+## [0.6.138] - 2026-05-28
+
+> **Domain knowledge assets now flow through six-division ledgers.**
+
+### Changed
+
+- Added a domain-knowledge-assets policy so expert know-how, repeated
+  explanations, and craft rules can become AI-usable glossaries, playbooks,
+  skills, knowledge packs, fixtures, tests, review questions, or wiki TopicHubs.
+- Connected the six-division council to that asset loop so strategy-PM,
+  taxonomy, design, dev, QA, and infra rows record reusable `asset_candidate`
+  decisions instead of acting as decorative review ceremony.
+- Promoted `asset_candidate` into executable plan, implement, and review
+  ledgers so domain know-how moves from raw source to reusable artifact path,
+  verification, and publication boundary.
+- Routed the policy through brainstorm, plan, implement, review, the context
+  index, knowledge-pack routers, kernel, agent adapters, and EN/KO product docs.
+
+### Tests
+
+- Added focused regression coverage for the domain knowledge asset surface,
+  six-division `asset_candidate` loop, and sprint artifact ledgers.
+
 ## [0.6.137] - 2026-05-28
 
 > **Harness Engineering guardrails are productized.**

@@ -25,6 +25,10 @@ load_when: ["brainstorm", "브레인스토밍", "requirements", "요구사항", 
   should expose goal, materials, ask-back rule, and output format, then classify
   one-off, repeated, or batch workspace scope so the user is not forced to
   restate context or endure unnecessary ceremony.
+- If the raw input contains expert notes, craft vocabulary, repeated "we do it
+  this way" guidance, or a request to make a skill/playbook, load
+  `policies/domain-knowledge-assets.md`. Gate 2 should identify the smallest
+  reusable domain asset candidate and the source/owner/gap before planning.
 - Apply AI-era fundamentals before setting `status: ready-for-plan`:
   - shared design concept: problem owner, current pain, success state, in/out
     scope, and at least two options are explicit.

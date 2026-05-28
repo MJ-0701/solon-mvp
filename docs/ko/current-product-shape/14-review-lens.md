@@ -41,6 +41,13 @@ backend 는 `dev` 의 기술 specialization 이고, management-admin 은 재무/
 taxonomy slot 은 legacy activation 호환성 때문에 남아 있지만, 제품 설명에서는 독립 조직 본부가
 아니라 모든 본부에 걸치는 용어/분류 lens 로 다룹니다.
 
+이것이 AI 시대에 6본부 지식팩이 필요한 이유이기도 합니다. 6본부는 기본 domain-asset capture
+loop 입니다. 전략/PM, taxonomy, design, dev, QA, infra 는 각각 다른 종류의 실무 판단을
+발견합니다. row 안에서 반복 가능한 규칙, 예외, taste 판단, 운영 제약이 나오면 council 은
+`asset_candidate` 를 기록합니다. 기존 glossary/playbook/review lens/test 를 재사용할지, 새로
+만들지, durable asset 으로 승격하지 않을 이유가 있는지를 남깁니다. 그래서 본부 표는 장식이
+아니라 사람 머릿속 노하우를 AI 가 다시 쓸 수 있는 제품 기억으로 바꾸는 장치입니다.
+
 agent-skills 벤치마크에서 유용한 discipline 도 같은 방식으로 흡수했습니다.
 공식 문서 기반 구현은 `implement` 와 `source-docs` review lens 로, stop-the-line 디버깅은
 `implement` 검증 정책으로, deprecation/migration 은 `adopt`/`tidy` 정리 기준으로, shipping

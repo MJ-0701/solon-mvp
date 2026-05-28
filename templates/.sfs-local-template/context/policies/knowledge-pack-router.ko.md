@@ -2,7 +2,7 @@
 id: sfs-policy-knowledge-pack-router-ko
 summary: 지식팩/review lens 라우터(한글 버전), 활성화 조건과 범위를 가볍게 제어.
 language: ko
-load_when: [knowledge pack, backend, strategy-pm, qa, design, infra, management-admin, taxonomy, finance, accounting, bookkeeping, tax, 경영관리, 재무, 경리, 세무, 회계, transaction, batch, DDD, TDD, domain model, product behavior, acceptance criteria, integration, API, AWS, Obsidian, 옵시디언, llm wiki, 위키, 문서 이관, enterprise, agent team, 6본부, 대기업급, performance, algorithm, QA/QC, mainline, focus, data validation, mock, fixture, seed, OWASP, Datadog, console.log, checklist, long context, external review, Claude Cowork, Gemini review, 병목, ceremony, lean gate]
+load_when: [knowledge pack, backend, strategy-pm, qa, design, infra, management-admin, taxonomy, finance, accounting, bookkeeping, tax, 경영관리, 재무, 경리, 세무, 회계, transaction, batch, DDD, TDD, domain model, product behavior, acceptance criteria, integration, API, AWS, Obsidian, 옵시디언, llm wiki, 위키, 문서 이관, 도메인 지식, 전문가 노하우, 노하우, 스킬화, 플레이북, 휴리스틱, 해자, enterprise, agent team, 6본부, 대기업급, performance, algorithm, QA/QC, mainline, focus, data validation, mock, fixture, seed, OWASP, Datadog, console.log, checklist, long context, external review, Claude Cowork, Gemini review, 병목, ceremony, lean gate]
 status: filled-v1
 content_policy: "read only this router first; read full packs only when matching signals make them useful"
 ---
@@ -31,6 +31,9 @@ Division sub-agent council 이다. `activation_state` 는 read-depth 와 escalat
   `bookkeeping`, `tax`, `invoice`, `cashflow`, `payroll`, `compliance`,
   `경영관리`, `재무`, `경리`, `세무`, `회계`.
 - Taxonomy signals: `vocabulary`, `naming`, `state`, `event`, `enum`.
+- Domain knowledge asset signals: `도메인 지식`, `전문가 노하우`, `노하우`,
+  `스킬화`, `플레이북`, `휴리스틱`, `업무 규칙`, `지식 자산`, `해자`, 또는
+  사용자가 노트를 AI 가 쓸 수 있는 지침으로 바꾸자고 하는 경우.
 - DDD/TDD signals: `DDD`, `TDD`, `domain model`, `product behavior`,
   `acceptance criteria`, `aggregate`, `value object`, `test-first`, `failing
   test`, `red-green`.
@@ -92,6 +95,8 @@ Division sub-agent council 이다. `activation_state` 는 read-depth 와 escalat
 - `policies/ddd-tdd-knowledge-pack.ko.md`
 - `policies/obsidian-llm-wiki.md`
 - `policies/obsidian-llm-wiki.ko.md`
+- `policies/domain-knowledge-assets.md`
+- `policies/domain-knowledge-assets.ko.md`
 - `policies/enterprise-agent-team-pack.md`
 - `policies/enterprise-agent-team-pack.ko.md`
 - `policies/enterprise-plan-council-pack.md`
@@ -136,6 +141,9 @@ Division sub-agent council 이다. `activation_state` 는 read-depth 와 escalat
   로드한다. Claude Cowork/Gemini/Codex 부재는 user chore 가 아니라 상태 기록이다.
 - 느리거나 장식적인 절차는 `lean-procedure-refactor-pack.ko.md` 를 로드한다.
   invariant 는 유지하고 보이는 ceremony 만 축소/제거한다.
+- 전문가/도메인 노하우는 `domain-knowledge-assets.ko.md` 를 로드한다. 가장 작은
+  reusable asset 으로 컴파일하고, source/owner/confidence/gap 과 behavior check 를
+  기록해야 재사용 가능한 지식으로 본다.
 - pack 이 MSA, 대형 redesign, release-readiness escalation, finance/admin process,
   tax/accounting advisor checkpoint, governance process 같은 큰 전환을 제안하면
   조용히 scope 를 넓히지 말고 user/product decision 으로 surface 한다.

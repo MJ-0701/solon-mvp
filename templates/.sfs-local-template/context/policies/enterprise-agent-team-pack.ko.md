@@ -27,6 +27,8 @@ entrypoint 에 적용한다.
 
 - strategy-pm, dev, QA, design, infra, taxonomy 는 brainstorm 부터 Gate 6 까지
   항상 참여한다.
+- 6본부는 기본 domain-asset loop 이기도 하다. 각 본부는 자기 전문 판단을 재사용 가능한 용어,
+  playbook, check, fixture, review question, wiki map, skill/knowledge-pack 재료로 바꾼다.
 - plan 은 brainstorm 직후 계약서가 아니라 설계 단계다. 코딩 전 위험,
   증거, 파일/산출물 경계를 드러내야 한다.
 - 모든 본부가 참여하지만 deep pack 은 AC/risk/artifact 가 닿을 때만 연다.
@@ -61,9 +63,19 @@ entrypoint 에 적용한다.
 - algorithm/query/UI runtime/batch/network/storage/performance:
   `enterprise-performance-review-pack.ko.md`
 
+## 본부별 자산화 역할
+
+- strategy-pm 은 시장/사용자/비즈니스 판단을 priority, rollout, decision-boundary 자산으로 만든다.
+- taxonomy 는 언어 판단을 canonical term, alias, state, event, classification 자산으로 만든다.
+- design 은 craft 판단을 workflow, interaction, copy, accessibility, visual-review 자산으로 만든다.
+- dev 는 engineering 판단을 boundary, contract, fixture, implementation check 로 만든다.
+- QA 는 risk 판단을 edge case, regression check, acceptance evidence 로 만든다.
+- infra 는 operating 판단을 deploy, observability, rollback, cost, security runbook 으로 만든다.
+
 ## PASS 모양
 
 - 관련 본부마다 finding/evidence/waiver 가 있다.
+- 관련 본부마다 `asset_candidate` 가 있거나 생성/재사용하지 않는 concrete reason 이 있다.
 - AC 가 file/artifact/evidence 에 연결된다.
 - hot path 는 측정 또는 bounded proof 가 있다.
 - SFS 제품 정책이면 실제 프로젝트 적용 QA/QC 를 남긴다.

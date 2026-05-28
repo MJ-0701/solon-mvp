@@ -15,7 +15,8 @@ load_when: ["division", "sub-agent", "6본부", "Gate 2", "Gate 3", "Gate 6"]
 - Each non-trivial SFS artifact should record a `division_subagent_ledger` or
   equivalent table with: phase, division, status (`involved`,
   `not-applicable`, `blocked`, `waived`), finding/question, evidence path, and
-  next action.
+  next action. When domain know-how is in scope, also record `asset_candidate`
+  as existing asset reused, new asset to create, or concrete gap/waiver.
 - Brainstorm: strategy-pm checks product intent/scope, taxonomy checks terms,
   design checks user workflow, dev checks boundary feasibility, QA checks first
   feedback signal, and infra checks deploy/data/runtime risk.
@@ -26,7 +27,7 @@ load_when: ["division", "sub-agent", "6본부", "Gate 2", "Gate 3", "Gate 6"]
   design phase. Load `enterprise-plan-council-pack.md` and record risk flags,
   selected child packs, and AC/files/evidence mapping before Gate 3 review.
   Do not produce empty six-division ceremony; each row needs a finding, evidence,
-  waiver, or concrete not-applicable reason.
+  asset candidate, waiver, or concrete not-applicable reason.
 - Implement: actual parallel worker lanes remain optional. Division council
   review is not optional; the lead may record the six lenses directly, or route
   read-only/fixed-scope capsules when the bridge supports sub-agents.
