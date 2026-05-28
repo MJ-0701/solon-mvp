@@ -58,9 +58,6 @@ for adapter in \
   "${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md" \
   "${DIST_DIR}/templates/.claude/commands/sfs.md" \
   "${DIST_DIR}/templates/.gemini/commands/sfs.toml" \
-  "${DIST_DIR}/templates/AGENTS.md.template" \
-  "${DIST_DIR}/templates/CLAUDE.md.template" \
-  "${DIST_DIR}/templates/GEMINI.md.template" \
   "${DIST_DIR}/templates/.codex/prompts/sfs.md" \
   "${DIST_DIR}/plugins/solon/commands/sfs.md" \
   "${DIST_DIR}/commands/sfs.toml"; do

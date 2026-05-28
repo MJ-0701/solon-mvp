@@ -7,6 +7,16 @@
 
 ---
 
+## 0.6.139
+
+이번 버전은 `SFS.md` 를 정책 덤프가 아니라 얇은 프로젝트 router 로 되돌립니다.
+
+- `SFS.md.template` 는 frontmatter, `## 프로젝트 개요`, read order, default entry, output contract, maintenance pointer 만 담습니다.
+- 상세 SFS 규칙은 `kernel.md`, routed command/policy context, skills, command adapter 에 남기고 `SFS.md` 에 복제하지 않습니다.
+- `sfs doctor --fix` 는 기존 프로젝트의 비대한 `SFS.md` 를 감지해 archive 하고, `## 프로젝트 개요` 를 보존한 채 thin router 로 되돌립니다.
+- `sfs upgrade` 는 runtime 이 이미 최신이라도 `SFS.md router refactor` post-step 을 실행해 study-note 같은 적용 프로젝트에서 같은 문제가 재발하지 않도록 합니다.
+- LLM Wiki bug report 와 `test-sfs-router-doc-refactor.sh` 로 발견일, 원인, 수정 경로, 재발 확인 항목을 추적합니다.
+
 ## 0.6.138
 
 이번 버전은 AI 시대의 도메인 지식 해자를 SFS 실행 흐름 안에 넣습니다.

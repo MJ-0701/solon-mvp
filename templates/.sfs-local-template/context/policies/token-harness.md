@@ -12,6 +12,9 @@ load_when: ["token", "harness", "context", "Claude", "Codex", "Gemini", "MCP", "
   should hold entry rules and project identity, not changelog, long history, or
   full API docs. Move durable detail to routed context modules, docs, reports,
   or ADRs.
+- Root LLM agent docs are stricter than ordinary entry docs: `CLAUDE.md`,
+  `AGENTS.md`, and `GEMINI.md` should be frontmatter-only SFS pointers. Use
+  `sfs agent doctor --fix` to archive and rewrite recognized SFS adapter bloat.
 - Prefer context routing before broad reads: start from `sfs status`, current
   `report.md`/`retro.md`, `_INDEX.md`, and the command module, then inspect only
   files needed for the slice.

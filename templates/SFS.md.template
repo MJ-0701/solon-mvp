@@ -1,8 +1,21 @@
+---
+doc_id: sfs-project-router
+title: "SFS.md — `<PROJECT-NAME>` Solon SFS router"
+doc_type: solon-router
+router_doc: true
+managed_by: sfs
+detail_sources:
+  - packaged-sfs-runtime-context
+  - .sfs-local/context/
+maintenance:
+  bloat_check: "sfs doctor"
+  bloat_fix: "sfs doctor --fix"
+---
+
 # SFS.md — `<PROJECT-NAME>` Solon SFS router
 
-Solon SFS has two meanings. The terminal-facing `sfs` command is the Sprint Flow
-System; the full Solon SFS is the Solo Founder System. This file is the shared
-router for Claude, Codex, and Gemini.
+This file is the small shared entry for Claude, Codex, Gemini, and the
+terminal-facing `sfs` command. Keep detailed policy in routed context, not here.
 
 ## 프로젝트 개요
 
@@ -13,139 +26,40 @@ router for Claude, Codex, and Gemini.
 - **핵심 산출물**: `<PROJECT-OUTPUT>`
 - **공유/운영 방식**: `<PROJECT-DELIVERY>`
 
-Read order:
+## Read Order
+
 1. `sfs context cat kernel`
 2. `sfs context cat index`
-3. Only the matching module from `sfs context cat commands/<name>.md` or
+3. Only the matching routed module, such as
+   `sfs context cat commands/<name>.md` or
    `sfs context cat policies/<name>.md`
 
 In thin layout, managed context lives in the packaged global `sfs` runtime.
-`.sfs-local/context/` is optional project-local override space, not a normal
-project document surface.
+`.sfs-local/context/` is optional project-local override space.
 
-Default entry:
+## Default Entry
+
 - `sfs status`
 - current sprint `report.md` when one exists
-- `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` for domain-first
-  shared adoption or handoff summaries when the product domain is known
+- `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` for shared adoption
+  or handoff summaries when product domain labels are known
 - `docs/solon/<english-workspace>/<yyyyMMdd>/` as the legacy flat fallback
-- expand to private workbench/logs only when the routed context needs evidence
+- private workbench/log expansion only when routed context needs evidence
 
-Project overview refresh:
-- `sfs profile` updates only this file's `## 프로젝트 개요` section.
+## Project Overview Refresh
 
-Never paraphrase bash adapter output. Bash-first commands may still surface one
-compact Next action after verbatim output. Compact output is quality-preserving only:
+`sfs profile` updates only this file's `## 프로젝트 개요` section.
+
+## Output Contract
+
+Never paraphrase bash adapter output. Bash-first commands may add one compact
+Next action after verbatim output. Compact output is quality-preserving only:
 never compress evidence, risk warnings, decisions, source links/paths, or
 raw-source traceability. If compactness would weaken quality, use full clarity.
-Never hardcode external private docsets.
-Harness Engineering is structure over pleading: keep active tools narrow,
-project-as-prompt structure coherent, verification automated, and product understanding/design human-owned.
-Domain knowledge assets are first-class: compile expert know-how into source-linked
-glossaries, playbooks, skills, fixtures, tests, review questions, or wiki maps
-with owner/confidence/gaps and human-reviewed publication boundaries.
-DDD/TDD is a product-level engineering floor, not backend-only. All
-product-bearing entrypoints are included: UI bootstraps, routers, root
-components, hooks/stores/effects, controllers, jobs, repositories, DTO mappers,
-CLI flags, scripts, migrations, docs wording, observability glue, and external
-adapters are not default homes for product policy without a named boundary,
-evidence, or explicit waiver. Natural-language SFS activation is real SFS:
-reconcile current user wording, latest handoff/docs, active sprint plan, and
-wiki/DDD maps; Approved sprint state never overrides a newer handoff or user
-intent, so evidence-backed conflicts are mis-scoped work, not user questions.
-Broad-entrypoint growth that adds product behavior during DDD/TDD work is a
-Gate 6 finding unless boundary extraction or approved deferral is recorded.
-In Solon reports, show gates as `Gate N (Name)`, not naked ids. Use gate
-numbers 1..7 for new CLI examples; legacy ids remain compatibility-only.
-Solon reports should feel like compact console dashboards, not flat bullet
-dumps: title/verdict strip, 2-4 labeled status panels, one action rail, and at
-most 1-3 questions.
-Decision questions must be self-contained: before any `Q1`, `D1`, or option
-id, explain in plain user language what is being decided, why it matters, the
-recommended default, and what each option changes. Labels are cross-references,
-not the explanation.
-Do not show a question/recommendation-only choice table. When multiple options
-exist, show every viable option with its plain-language meaning and consequence,
-then mark the recommendation as the default. If that is too much for one view,
-ask one decision at a time instead of hiding alternatives.
-Never ask the user to confirm a compact option bundle such as `A/A/A/C/C`, and
-never answer "show the recommendation again" with only option labels or only
-the recommended row. Re-present the decision in plain language and use a natural
-confirmation phrase such as `권장안 그대로 확정`, not a label bundle.
-When review returns partial/fail only for deterministic low-risk issues inside
-the brainstorm/plan contract, autopilot patch + verify + self-CPO/cross review.
-Do not ask "진행?" / "proceed?" for missing self-CPO evidence, small guard/test
-or regex gaps, evidence paths, stale evidence, or meaning-preserving consistency.
-User-call minimalism: brainstorm + plan review define intent and decision
-boundaries; call the user only for new product judgment: scope, architecture,
-public contract, security/privacy/data-loss, cost/latency/model policy,
-destructive behavior, or changed AC meaning.
-Before forwarding a self/cross-review finding as a user question, run the
-User-escalation premise guard: normalize the premise and check brainstorm,
-plan, domain SoT, schema, code, and recorded decisions. Wrong, stale, answered,
-or over-modeled premises are artifact rework, not user escalation. Do not
-invent ownership columns, cascade soft-delete, restore APIs, or migration
-policy unless the product contract requires them; prefer
-reject-delete-with-dependents when child records exist.
-Executable Action Ownership is part of the router contract: when shell/tool
-steps are runnable and auth/runtime/approval are available, the agent runs them
-and records evidence instead of handing the user copy-paste commands. Commands
-are user-facing only when the user explicitly asks for them or a true blocker
-exists: missing auth, unavailable tooling/runtime, sandbox or permission denial,
-uncaptured destructive/data-loss/public-contract approval, or a materially
-broader scope than authorized. If the user says `알아서 해`, `이번 세션은 진행`,
-or grants autonomous deploy for this session, treat approval-gated steps inside
-that stated scope as session-scoped authorization and continue until scope
-changes or a true blocker appears. Shell state is agent-owned: use one-shot
-inline env, mask secrets, and do not ask the user to export variables across
-terminals.
-Monitor checkpoint classification is mandatory for long-running monitor work:
-classify each checkpoint as `progressing`, `slow`, `stalled`, `dead`, or
-`auth_blocked`; record commit delta, PR/head delta, local dirty state,
-test/check delta, review status delta, worker liveness probe result,
-lane-utilization evidence or waiver, and next action `wait`, `probe`, `revive`,
-or `close`. Worker liveness requires a request-response probe, never
-process/auth-status alone. Use a static benign payload only, never
-workspace/user content, and persist only status/category/timestamp/redacted
-error class; do not persist raw stdout/stderr, bearer/auth tokens, env vars,
-prompt bodies, model responses, workspace/user content, or PII. Close only
-after heartbeat/automation cleanup and durable wiki/report evidence.
-Handoff-only scope is a stop contract: if the user asks only for a handoff,
-next-session brief, session report, or `인계문서`, immediately write/update that
-artifact, record current state/blockers/first next command, clean
-heartbeat/automation evidence when relevant, then stop. Do not start or
-continue PR polling, review retriggers, merges, implementation, deploy, or
-monitor loops; interrupt active or queued batches and do not finish current PRs
-first unless the same user request explicitly asks to continue that work. If
-post-request PR/review/merge work already happened, report it as a scope breach,
-not as a justification.
-Session Continuation Guard is also a router contract. `sfs upgrade` cannot
-shrink an already-open LLM conversation. At 30%+ before a new WU/sprint, 50%+
-before a new gate/loop/review handoff, repeated wakeups, or multiple WUs/sprints
-in one chat, fresh-session transfer is lossless autopilot: write a durable
-handoff/transfer capsule first, then invoke host-owned
-transfer/new-session/archive/clear+resume when available and resume immediately.
-Otherwise stop with the exact next-session prompt. Never ask the user to type
-`/clear`, choose same-session vs fresh-session, or call bare clear.
-Division sub-agent council is always-on from brainstorm through Gate 6:
-strategy-pm, dev, QA, design, infra, and taxonomy each records finding/evidence/
-waiver or not-applicable in `division_subagent_ledger`. Actual parallel worker
-lanes remain opt-in and require disjoint files_scope, AC/ADR subset ownership,
-expected tests/evidence, output report path, merge/conflict policy, lane
-verification, and cross review.
-For Solon commit grouping, guide users to the SFS command surface:
-`sfs commit plan` and `sfs commit apply --group <name>` (Codex may use
-`$sfs commit ...`; Claude slash routing may use `/sfs commit ...`). `sfs commit
-apply` commits and pushes the current branch by default in user projects; use
-`--no-push` only for local sandbox/release testing or offline work. Do not tell
-users to use a host-local `/commit` skill for SFS work; `/commit` is not the
-portable SFS workflow command.
-Keep only what must remain: `.sfs-local/` is private active workbench state,
-not durable history. `events.jsonl` stays visible only for the current sprint
-ledger; stale/orphan events should be removed or archived by `sfs upgrade` /
-`sfs tidy --all --apply`. Shared handoff/history docs prefer
-`docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` and fall back to
-`docs/solon/<english-workspace>/<yyyyMMdd>/` only when the domain labels are
-unclear. Project-wide Solon reference docs may live under `docs/solon/`, and
-step docs are created lazily. Repeated cleanup evidence is date-bundled under
-`.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz`.
+
+## Maintenance
+
+`SFS.md` is a router, not a policy archive. If detailed command tables, gate
+rules, model routing, review policy, monitor policy, or long agent instructions
+accumulate here, run `sfs doctor --fix`; it archives the old file and restores
+this thin router while preserving `## 프로젝트 개요`.

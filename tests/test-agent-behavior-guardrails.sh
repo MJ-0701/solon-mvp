@@ -53,6 +53,7 @@ claude_template="${DIST_DIR}/templates/CLAUDE.md.template"
 agents_template="${DIST_DIR}/templates/AGENTS.md.template"
 gemini_template="${DIST_DIR}/templates/GEMINI.md.template"
 sfs_template="${DIST_DIR}/templates/SFS.md.template"
+router_policy="${DIST_DIR}/templates/.sfs-local-template/context/policies/sfs-router-doc-refactor.md"
 codex_skill_template="${DIST_DIR}/templates/codex-skill/SKILL.md"
 plugin_command="${DIST_DIR}/plugins/solon/commands/sfs.md"
 plugin_readme="${DIST_DIR}/plugins/solon/README.md"
@@ -431,9 +432,6 @@ assert_contains "${upgrader}" "advisor 호출은 self-CPO PASS 가 아닙니다"
 assert_contains "${upgrader}" "self-CPO mini-check" "upgrade self CPO mini check"
 
 for handoff_doc in \
-  "${claude_template}" \
-  "${agents_template}" \
-  "${gemini_template}" \
   "${sfs_template}" \
   "${codex_skill_template}" \
   "${plugin_command}" \
@@ -446,21 +444,21 @@ assert_not_contains "${claude_template}" "docs/<workspace>/<yyyyMMdd>/" "claude 
 assert_not_contains "${agents_template}" "docs/<workspace>/<yyyyMMdd>/" "agents no stale root docs handoff"
 assert_not_contains "${gemini_template}" "docs/<workspace>/<yyyyMMdd>/" "gemini no stale root docs handoff"
 assert_not_contains "${sfs_template}" "docs/<workspace>/<yyyyMMdd>/" "SFS no stale root docs handoff"
-assert_contains "${sfs_template}" "compact option bundle" "SFS no compact option bundle"
-assert_contains "${sfs_template}" "권장안 그대로 확정" "SFS natural confirmation phrase"
-assert_contains "${sfs_template}" "Executable Action Ownership" "SFS executable action ownership"
-assert_contains "${sfs_template}" "session-scoped authorization" "SFS session authorization"
-assert_contains "${sfs_template}" "Shell state is agent-owned" "SFS shell state ownership"
-assert_contains "${sfs_template}" "Handoff-only scope is a stop contract" "SFS handoff-only stop contract"
-assert_contains "${sfs_template}" "Do not start or" "SFS handoff-only forbids starting continuation"
-assert_contains "${sfs_template}" "continue PR polling, review retriggers" "SFS handoff-only forbids continuing loops"
-assert_contains "${sfs_template}" "do not finish current PRs" "SFS handoff-only interrupts active loops"
+assert_contains "${kernel}" "compact option bundle" "kernel no compact option bundle"
+assert_contains "${kernel}" "권장안 그대로 확정" "kernel natural confirmation phrase"
+assert_contains "${kernel}" "Executable Action Ownership" "kernel executable action ownership"
+assert_contains "${kernel}" "session-scoped authorization" "kernel session authorization"
+assert_contains "${kernel}" "Shell state is not a user problem" "kernel shell state ownership"
+assert_contains "${kernel}" "Handoff-only scope is a stop contract" "kernel handoff-only stop contract"
+assert_contains "${kernel}" "Do not start or" "kernel handoff-only forbids starting continuation"
+assert_contains "${kernel}" "continue PR polling, review retriggers" "kernel handoff-only forbids continuing loops"
+assert_contains "${kernel}" "do not finish current PRs" "kernel handoff-only interrupts active loops"
+assert_not_contains "${sfs_template}" "Executable Action Ownership" "SFS template no executable policy body"
+assert_not_contains "${sfs_template}" "Handoff-only scope is a stop contract" "SFS template no handoff policy body"
 assert_not_contains "${sfs_template}" "Do not start PR polling" "SFS no stale 0.6.115 handoff wording"
+assert_contains "${router_policy}" '`SFS.md` is the project entry router' "SFS router policy exists"
 
 adapter_files=(
-  "${DIST_DIR}/templates/CLAUDE.md.template"
-  "${DIST_DIR}/templates/AGENTS.md.template"
-  "${DIST_DIR}/templates/GEMINI.md.template"
   "${DIST_DIR}/templates/codex-skill/SKILL.md"
   "${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md"
   "${DIST_DIR}/templates/.claude/commands/sfs.md"

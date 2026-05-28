@@ -13,7 +13,7 @@ load_when: "Read when README.md routes to this section."
 
 | 경로 | 역할 |
 |---|---|
-| `SFS.md` | 프로젝트 운영 지침 |
+| `SFS.md` | 프로젝트 개요와 routed context 로 가는 얇은 운영 입구 |
 | `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` | 각 AI 도구가 Solon 을 찾는 입구 |
 | `.sfs-local/` | gitignored private active workbench/state |
 | `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/report.md` | 도메인 중심 공유 작업 결과 인계 문서 |
@@ -22,6 +22,10 @@ load_when: "Read when README.md routes to this section."
 
 `.sfs-local/` 은 영구 히스토리 폴더가 아닙니다. 현재 sprint 를 진행하는 데 필요한 상태만 보이고,
 팀이나 미래의 내가 읽어야 할 내용은 `docs/solon/...` 공유 문서와 git history 로 남깁니다.
+SFS root agent 문서가 비대해졌다면 `sfs agent doctor --fix` 가 SFS adapter 여부를 감지해
+백업 후 frontmatter-only 입구로 되돌립니다.
+`SFS.md` 자체가 정책 덤프가 됐다면 `sfs doctor --fix` 가 백업 후 `## 프로젝트 개요` 를
+보존한 thin router 로 되돌립니다.
 `sfs start "<goal>"` 이 자연어 목표에서 높은 확신의 도메인 신호를 자동 추론합니다. 도메인이 아직
 불명확한 early exploration 만 legacy `docs/solon/<english-workspace>/<yyyyMMdd>/` 폴더를 fallback 으로
 씁니다.

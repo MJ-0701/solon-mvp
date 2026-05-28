@@ -109,9 +109,6 @@ for file in "${docs[@]}"; do
 done
 
 adapter_files=(
-  "${DIST_DIR}/templates/AGENTS.md.template"
-  "${DIST_DIR}/templates/CLAUDE.md.template"
-  "${DIST_DIR}/templates/GEMINI.md.template"
   "${DIST_DIR}/templates/codex-skill/SKILL.md"
   "${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md"
   "${DIST_DIR}/templates/.claude/commands/sfs.md"

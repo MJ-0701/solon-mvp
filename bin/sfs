@@ -201,11 +201,13 @@ Usage:
   sfs update [--skip-existing]          # one-shot runtime + project update
   sfs uninstall [--keep-artifacts|--remove-all] [--remove-docs|--keep-docs]
   sfs agent install <claude|gemini|codex|all> [--skip-existing]
+  sfs agent doctor [--fix]
+  sfs doctor [--fix]
   sfs context path <kernel|index|commands/name.md|policies/name.md>
   sfs <command> [args]
 
 Commands:
-  agent install, upgrade, update, uninstall
+  agent install, doctor, upgrade, update, uninstall
   version [--check]
   status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, capture, note, report, tidy, retro, commit, loop
   bootstrap [<plain-language app idea>]   # agent-facing initial setup handoff
@@ -329,6 +331,7 @@ agent_usage() {
   cat <<'EOF'
 Usage:
   sfs agent install <claude|gemini|codex|all> [--skip-existing]
+  sfs agent doctor [--fix]
 
 Optionally installs project-scoped LLM-agent adapter files:
   claude  -> .claude/skills/sfs/SKILL.md + .claude/commands/sfs.md
@@ -338,6 +341,10 @@ Optionally installs project-scoped LLM-agent adapter files:
 Thin layout does not install these by default. Root CLAUDE.md / AGENTS.md /
 GEMINI.md use the global `sfs` runtime without adding command files. Existing
 changed adapter files are archived under .sfs-local/archives/agent-install-backups/.
+
+`sfs agent doctor` scans root CLAUDE.md / AGENTS.md / GEMINI.md. With --fix it
+archives recognized SFS adapter docs that contain body text, then rewrites them
+as frontmatter-only pointers to SFS.md and routed runtime context.
 EOF
 }
 
@@ -801,6 +808,323 @@ finalize_agent_backup() {
   AGENT_BACKUP_REL=""
 }
 
+AGENT_DOC_REFACTOR_DIR=""
+AGENT_DOC_REFACTOR_STAGE=""
+AGENT_DOC_REFACTOR_LIST=""
+SFS_ROUTER_DOC_REFACTOR_DIR=""
+
+sfs_router_doc_is_sfs() {
+  local file="$1"
+  [[ -f "${file}" ]] || return 1
+  grep -Fq "doc_type: solon-router" "${file}" && return 0
+  grep -Fq "Solon SFS has two meanings" "${file}" && return 0
+  grep -Fq "sfs context cat kernel" "${file}" && return 0
+  grep -Fq "Project overview refresh" "${file}" && return 0
+  return 1
+}
+
+sfs_router_doc_needs_refactor() {
+  local file="$1" marker lines
+  sfs_router_doc_is_sfs "${file}" || return 1
+  for marker in \
+    "SFS commands —" \
+    "Executable Action Ownership" \
+    "Monitor checkpoint classification" \
+    "Handoff-only scope is a stop contract" \
+    "Session Continuation Guard" \
+    "Division sub-agent council is always-on" \
+    "User-escalation premise guard" \
+    "DDD/TDD is a product-level engineering floor" \
+    "compact option bundle"; do
+    grep -Fq "${marker}" "${file}" && return 0
+  done
+  lines="$(wc -l < "${file}" 2>/dev/null | tr -d '[:space:]')"
+  case "${lines:-0}" in ''|*[!0-9]*) return 1 ;; esac
+  [[ "${lines}" -gt 90 ]]
+}
+
+sfs_router_extract_overview() {
+  local src="$1" out="$2"
+  awk '
+    $0 == "## 프로젝트 개요" {
+      in_section = 1
+      found = 1
+      seen_bullet = 0
+      print
+      next
+    }
+    in_section && /^## / {
+      exit
+    }
+    in_section && /^-/ {
+      seen_bullet = 1
+      print
+      next
+    }
+    in_section && seen_bullet && /^[[:space:]]/ {
+      print
+      next
+    }
+    in_section && seen_bullet {
+      exit
+    }
+    in_section {
+      print
+    }
+    END {
+      exit found ? 0 : 1
+    }
+  ' "${src}" > "${out}"
+}
+
+write_sfs_router_template() {
+  local dst="$1" overview="$2" template="${DIST_DIR}/templates/SFS.md.template"
+  local tmp today project_name
+  [[ -f "${template}" ]] || {
+    echo "missing packaged SFS router template: ${template}" >&2
+    return 4
+  }
+  tmp="${dst}.tmp.$$"
+  today="$(date +%F)"
+  project_name="$(basename "${PWD}")"
+  awk -v block_file="${overview}" '
+    BEGIN {
+      while ((getline line < block_file) > 0) {
+        block = block line "\n"
+      }
+      close(block_file)
+      in_profile = 0
+      replaced = 0
+    }
+    $0 == "## 프로젝트 개요" && block != "" {
+      printf "%s", block
+      in_profile = 1
+      replaced = 1
+      next
+    }
+    in_profile && /^## / {
+      in_profile = 0
+      print
+      next
+    }
+    !in_profile {
+      print
+    }
+    END {
+      if (!replaced && block != "") {
+        print ""
+        printf "%s", block
+      }
+    }
+  ' "${template}" | sed \
+    -e "s|<PROJECT-NAME>|${project_name}|g" \
+    -e "s|<DATE>|${today}|g" > "${tmp}" || return 5
+  mv "${tmp}" "${dst}" || return 5
+}
+
+sfs_router_doc_refactor_one() {
+  local fix="${1:-0}" rel="SFS.md" dst="${PWD}/SFS.md"
+  local archive_dir archive_file manifest staging overview
+  if [[ ! -f "${dst}" ]]; then
+    echo "missing: ${rel}"
+    return 0
+  fi
+  if ! sfs_router_doc_is_sfs "${dst}"; then
+    echo "skip non-sfs: ${rel}"
+    return 0
+  fi
+  if ! sfs_router_doc_needs_refactor "${dst}"; then
+    echo "ok thin-router: ${rel}"
+    return 0
+  fi
+  if [[ "${fix}" != "1" ]]; then
+    echo "needs-refactor: ${rel}"
+    return 0
+  fi
+
+  archive_dir="${PWD}/.sfs-local/archives/sfs-router-doc-refactor/$(date +%Y%m%d-%H%M%S)"
+  archive_file="${archive_dir}/SFS.md.tar.gz"
+  manifest="${archive_dir}/manifest.txt"
+  mkdir -p "${archive_dir}" || return 5
+  staging="$(mktemp -d "${archive_dir}/.stage.XXXXXX")" || return 5
+  overview="$(mktemp "${TMPDIR:-/tmp}/sfs-router-overview.XXXXXX")" || return 5
+  cp "${dst}" "${staging}/SFS.md" || return 5
+  if ! sfs_router_extract_overview "${dst}" "${overview}"; then
+    sfs_router_extract_overview "${DIST_DIR}/templates/SFS.md.template" "${overview}" || return 5
+  fi
+  write_sfs_router_template "${dst}" "${overview}" || return $?
+  rm -f "${overview}"
+  {
+    echo "SFS router doc refactor backup"
+    echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "reason: recognized SFS.md contained routed policy body; SFS.md must stay a thin router"
+    echo "archive: ${archive_file}"
+    echo "items:"
+    echo "- SFS.md"
+  } > "${manifest}" || return 5
+  tar -czf "${archive_file}" -C "${staging}" . || return 5
+  rm -rf "${staging}" || return 5
+  echo "refactored: ${rel} (backup: ${archive_file#${PWD}/})"
+}
+
+agent_root_doc_template() {
+  case "$1" in
+    CLAUDE.md) printf '%s\n' "${DIST_DIR}/templates/CLAUDE.md.template" ;;
+    AGENTS.md) printf '%s\n' "${DIST_DIR}/templates/AGENTS.md.template" ;;
+    GEMINI.md) printf '%s\n' "${DIST_DIR}/templates/GEMINI.md.template" ;;
+    *) return 1 ;;
+  esac
+}
+
+agent_root_doc_is_sfs_adapter() {
+  local file="$1"
+  [[ -f "${file}" ]] || return 1
+  grep -Fq "doc_type: agent-adapter-bootstrap" "${file}" && return 0
+  grep -Fq "sfs_detail_sources:" "${file}" && return 0
+  grep -Fq "frontmatter_only: true" "${file}" && return 0
+  grep -Fq "SFS commands —" "${file}" && return 0
+  if grep -Fq "Solon SFS" "${file}" && grep -Fq "sfs context cat" "${file}"; then
+    return 0
+  fi
+  if grep -Fq "This project uses Solon Product SFS" "${file}"; then
+    return 0
+  fi
+  return 1
+}
+
+agent_root_doc_has_frontmatter() {
+  local file="$1"
+  [[ -f "${file}" ]] || return 1
+  [[ "$(sed -n '1p' "${file}")" == "---" ]] || return 1
+  sed -n '2,120p' "${file}" | grep -Fxq -- "---"
+}
+
+agent_root_doc_body_has_content() {
+  local file="$1"
+  awk '
+    NR == 1 && $0 == "---" { in_fm = 1; next }
+    in_fm && $0 == "---" { in_fm = 0; seen_close = 1; next }
+    seen_close && $0 ~ /[^[:space:]]/ { found = 1 }
+    END { exit found ? 0 : 1 }
+  ' "${file}"
+}
+
+agent_root_doc_is_frontmatter_only() {
+  local file="$1"
+  agent_root_doc_has_frontmatter "${file}" || return 1
+  if agent_root_doc_body_has_content "${file}"; then
+    return 1
+  fi
+  return 0
+}
+
+agent_doc_refactor_backup_file() {
+  local dst="$1" dst_rel="$2"
+  local ts rel_dir
+  if [[ -z "${AGENT_DOC_REFACTOR_DIR}" ]]; then
+    ts="$(date +%Y%m%d-%H%M%S)"
+    AGENT_DOC_REFACTOR_DIR="${PWD}/.sfs-local/archives/agent-doc-refactor/${ts}"
+    AGENT_DOC_REFACTOR_STAGE="${AGENT_DOC_REFACTOR_DIR}/.stage"
+    AGENT_DOC_REFACTOR_LIST="${AGENT_DOC_REFACTOR_DIR}/.items"
+    mkdir -p "${AGENT_DOC_REFACTOR_STAGE}" || return 5
+  fi
+
+  rel_dir="$(dirname "${dst_rel}")"
+  mkdir -p "${AGENT_DOC_REFACTOR_STAGE}/${rel_dir}" || return 5
+  cp "${dst}" "${AGENT_DOC_REFACTOR_STAGE}/${dst_rel}" || return 5
+  printf '%s\n' "${dst_rel}" >> "${AGENT_DOC_REFACTOR_LIST}" || return 5
+}
+
+finalize_agent_doc_refactor_backup() {
+  local archive_file manifest count
+  [[ -n "${AGENT_DOC_REFACTOR_DIR}" && -d "${AGENT_DOC_REFACTOR_STAGE}" ]] || return 0
+  archive_file="${AGENT_DOC_REFACTOR_DIR}/root-agent-docs.tar.gz"
+  manifest="${AGENT_DOC_REFACTOR_DIR}/manifest.txt"
+  count="$(find "${AGENT_DOC_REFACTOR_STAGE}" -type f 2>/dev/null | wc -l | tr -d '[:space:]')"
+  if [[ "${count:-0}" == "0" ]]; then
+    rm -rf "${AGENT_DOC_REFACTOR_STAGE}" "${AGENT_DOC_REFACTOR_LIST}" 2>/dev/null || true
+    rmdir "${AGENT_DOC_REFACTOR_DIR}" 2>/dev/null || true
+    AGENT_DOC_REFACTOR_DIR=""
+    AGENT_DOC_REFACTOR_STAGE=""
+    AGENT_DOC_REFACTOR_LIST=""
+    return 0
+  fi
+
+  {
+    echo "SFS root agent doc refactor backup"
+    echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "reason: recognized SFS adapter doc had body text; frontmatter-only root docs keep policy in SFS.md/context"
+    echo "archive: ${archive_file}"
+    echo "count: ${count}"
+    echo
+    echo "items:"
+    if [[ -f "${AGENT_DOC_REFACTOR_LIST}" ]]; then
+      sort -u "${AGENT_DOC_REFACTOR_LIST}" | sed 's/^/- /'
+    else
+      find "${AGENT_DOC_REFACTOR_STAGE}" -type f 2>/dev/null | sort | while IFS= read -r staged; do
+        printf -- "- %s\n" "${staged#${AGENT_DOC_REFACTOR_STAGE}/}"
+      done
+    fi
+  } > "${manifest}" || return 5
+
+  tar -czf "${archive_file}" -C "${AGENT_DOC_REFACTOR_STAGE}" . || return 5
+  rm -rf "${AGENT_DOC_REFACTOR_STAGE}" "${AGENT_DOC_REFACTOR_LIST}" || return 5
+  echo "agent doc refactor backup: ${archive_file#${PWD}/} (${count} files)"
+  AGENT_DOC_REFACTOR_DIR=""
+  AGENT_DOC_REFACTOR_STAGE=""
+  AGENT_DOC_REFACTOR_LIST=""
+}
+
+write_agent_root_doc_template() {
+  local src="$1" dst="$2" today tmp
+  [[ -f "${src}" ]] || {
+    echo "missing packaged root adapter template: ${src}" >&2
+    return 4
+  }
+  today="$(date +%F)"
+  tmp="${dst}.tmp.$$"
+  sed "s|<DATE>|${today}|g" "${src}" > "${tmp}" || return 5
+  mv "${tmp}" "${dst}" || return 5
+}
+
+agent_root_doc_refactor_one() {
+  local rel="$1" fix="${2:-0}"
+  local dst="${PWD}/${rel}" src
+  src="$(agent_root_doc_template "${rel}")" || return 1
+
+  if [[ ! -f "${dst}" ]]; then
+    echo "missing: ${rel}"
+    return 0
+  fi
+  if ! agent_root_doc_is_sfs_adapter "${dst}"; then
+    echo "skip non-sfs: ${rel}"
+    return 0
+  fi
+  if agent_root_doc_is_frontmatter_only "${dst}"; then
+    echo "ok frontmatter-only: ${rel}"
+    return 0
+  fi
+  if [[ "${fix}" != "1" ]]; then
+    echo "needs-refactor: ${rel}"
+    return 0
+  fi
+
+  agent_doc_refactor_backup_file "${dst}" "${rel}" || return 5
+  write_agent_root_doc_template "${src}" "${dst}" || return $?
+  echo "refactored: ${rel}"
+}
+
+agent_root_doc_doctor() {
+  local fix="${1:-0}" rel status=0
+  for rel in CLAUDE.md AGENTS.md GEMINI.md; do
+    agent_root_doc_refactor_one "${rel}" "${fix}" || status=$?
+  done
+  if [[ "${fix}" == "1" ]]; then
+    finalize_agent_doc_refactor_backup || return $?
+  fi
+  return "${status}"
+}
+
 backup_and_copy() {
   local src="$1"
   local dst_rel="$2"
@@ -906,6 +1230,27 @@ agent_command() {
         return 1
       fi
       install_agent_adapter "${target}" "${skip_existing}"
+      ;;
+    doctor|check)
+      local fix=0
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          --fix|--apply)
+            fix=1
+            shift
+            ;;
+          -h|--help)
+            agent_usage
+            return 0
+            ;;
+          *)
+            echo "unknown arg: $1" >&2
+            agent_usage >&2
+            return 1
+            ;;
+        esac
+      done
+      agent_root_doc_doctor "${fix}"
       ;;
     -h|--help|help|"")
       agent_usage
@@ -1020,6 +1365,20 @@ upgrade_command() {
     SFS_UPGRADE_LAYOUT="${upgrade_layout}" bash "${DIST_DIR}/upgrade.sh"
   else
     SFS_UPGRADE_LAYOUT="${upgrade_layout}" bash "${DIST_DIR}/upgrade.sh" --yes
+  fi
+  if [[ "${SFS_ROUTER_DOC_REFACTOR:-1}" == "0" ]]; then
+    echo "SFS.md router refactor: skipped (SFS_ROUTER_DOC_REFACTOR=0)"
+    sfs_router_doc_refactor_one 0
+  else
+    echo "SFS.md router refactor:"
+    sfs_router_doc_refactor_one 1
+  fi
+  if [[ "${SFS_AGENT_DOC_REFACTOR:-1}" == "0" ]]; then
+    echo "root agent docs refactor: skipped (SFS_AGENT_DOC_REFACTOR=0)"
+    agent_root_doc_doctor 0
+  else
+    echo "root agent docs refactor:"
+    agent_root_doc_doctor 1
   fi
   local layout
   layout="$(sfs_project_layout "$(project_local_dir)")"

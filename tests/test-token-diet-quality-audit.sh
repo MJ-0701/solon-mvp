@@ -113,9 +113,6 @@ assert_contains "${token_policy}" "do not compress; return to full clarity" "tok
 assert_contains "${token_policy}" "Do not force SFS-wide one-file-one-function/type rules" "token policy no filefunc transplant"
 
 for adapter in \
-  "${DIST_DIR}/templates/CLAUDE.md.template" \
-  "${DIST_DIR}/templates/AGENTS.md.template" \
-  "${DIST_DIR}/templates/GEMINI.md.template" \
   "${DIST_DIR}/templates/SFS.md.template" \
   "${DIST_DIR}/templates/codex-skill/SKILL.md" \
   "${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md" \

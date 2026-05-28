@@ -86,9 +86,6 @@ for file in "${template_files[@]}"; do
 done
 
 adapter_files=(
-  "${DIST_DIR}/templates/AGENTS.md.template"
-  "${DIST_DIR}/templates/CLAUDE.md.template"
-  "${DIST_DIR}/templates/GEMINI.md.template"
   "${DIST_DIR}/templates/codex-skill/SKILL.md"
   "${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md"
   "${DIST_DIR}/templates/.claude/commands/sfs.md"
@@ -107,10 +104,12 @@ for file in "${adapter_files[@]}"; do
   assert_not_contains "${file}" "use host clear/new-session" "adapter no stale host clear ${file}"
 done
 
-assert_contains "${DIST_DIR}/templates/SFS.md.template" "Division sub-agent council is always-on" "SFS template division council"
-assert_contains "${DIST_DIR}/templates/SFS.md.template" "fresh-session transfer is lossless autopilot" "SFS template fresh transfer"
-assert_contains "${DIST_DIR}/templates/SFS.md.template" "handoff/transfer capsule" "SFS template durable transfer"
-assert_contains "${DIST_DIR}/templates/SFS.md.template" "resume immediately" "SFS template immediate resume"
-assert_contains "${DIST_DIR}/templates/SFS.md.template" 'Never ask the user to type' "SFS template no user clear"
+assert_not_contains "${DIST_DIR}/templates/SFS.md.template" "Division sub-agent council is always-on" "SFS template no division policy body"
+assert_not_contains "${DIST_DIR}/templates/SFS.md.template" "fresh-session transfer is lossless autopilot" "SFS template no session policy body"
+assert_contains "${kernel}" "Division sub-agent council is always-on" "kernel division council policy body"
+assert_contains "${kernel}" "fresh-session transfer is lossless autopilot" "kernel fresh transfer policy body"
+assert_contains "${kernel}" "handoff/transfer capsule" "kernel durable transfer policy body"
+assert_contains "${kernel}" "resume immediately" "kernel immediate resume policy body"
+assert_contains "${kernel}" 'Do not ask the user to type `/clear`' "kernel no user clear"
 
 echo "test-division-subagent-continuation-guard: OK"

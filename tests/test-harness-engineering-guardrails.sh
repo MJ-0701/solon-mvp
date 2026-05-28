@@ -56,10 +56,6 @@ assert_contains "${docs_ko}" "제품 이해와 설계 판단은" "KO docs human 
 adapter_files=(
   "${DIST_DIR}/commands/sfs.toml"
   "${DIST_DIR}/plugins/solon/commands/sfs.md"
-  "${DIST_DIR}/templates/CLAUDE.md.template"
-  "${DIST_DIR}/templates/AGENTS.md.template"
-  "${DIST_DIR}/templates/GEMINI.md.template"
-  "${DIST_DIR}/templates/SFS.md.template"
   "${DIST_DIR}/templates/codex-skill/SKILL.md"
   "${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md"
   "${DIST_DIR}/templates/.claude/commands/sfs.md"
@@ -70,5 +66,8 @@ adapter_files=(
 for file in "${adapter_files[@]}"; do
   assert_contains "${file}" "Harness Engineering" "adapter harness ${file}"
 done
+
+assert_contains "${DIST_DIR}/templates/SFS.md.template" "sfs context cat kernel" "SFS template routes harness context"
+assert_contains "${kernel}" "Harness Engineering is ambient" "kernel harness body"
 
 echo "test-harness-engineering-guardrails: OK"

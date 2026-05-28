@@ -32,6 +32,10 @@ optional. Install those native shortcuts only when a project needs them:
 sfs agent install all
 ```
 
+If root agent docs accumulated SFS policy text, run `sfs agent doctor --fix`.
+It archives recognized SFS adapters and rewrites them as frontmatter-only
+pointers.
+
 Old projects can be upgraded into the lighter thin-runtime shape. Use
 `sfs upgrade --layout vendored` only when Solon package files must stay inside
 the project.
@@ -83,4 +87,3 @@ goal. `--domain`, `--subdomain`, and `--feature` are override levers when the
 inference is wrong, while `--workspace <english-name>` remains the legacy
 fallback for early exploration. The prose should use the user's native or
 workspace language, matching the native-language commit message rule.
-

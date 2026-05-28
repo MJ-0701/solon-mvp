@@ -16,8 +16,12 @@ not need to install separate plugins. The normal operating flow absorbs these ha
 
 - Token usage check: when token drain feels abnormal, inspect the usage report
   before guessing.
-- Thin adapter docs: keep `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` slim and move
-  durable rules into routed context or docs.
+- Thin adapter docs: keep `CLAUDE.md` / `AGENTS.md` / `GEMINI.md`
+  frontmatter-only and move durable rules into routed context or docs.
+  `sfs agent doctor --fix` archives and rewrites recognized SFS adapter bloat.
+- Thin `SFS.md`: keep it as the project router and editable overview, not a
+  policy archive. `sfs doctor --fix` preserves `## 프로젝트 개요` while
+  restoring the packaged thin router.
 - Harness Engineering: raise the AI ceiling with structure, not pleading.
   Keep the active tool surface small, treat the project as the prompt, automate
   verification, and leave product understanding/design choices human-owned.

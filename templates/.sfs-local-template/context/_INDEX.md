@@ -23,6 +23,8 @@ module:
 - `commands/loop.md` — loop / autonomous work / queue.
 - `policies/mutex.md` — lock conflict or concurrent session.
 - `policies/token-harness.md` — token/context hygiene, semantic search, repeated mistake guardrails.
+- `policies/agent-adapter-doc-refactor.md` — keep root LLM agent docs frontmatter-only and auto-refactor recognized SFS adapter bloat.
+- `policies/sfs-router-doc-refactor.md` — keep `SFS.md` as a thin router and auto-refactor recognized policy dumps.
 - `policies/runtime-token-firewall.md` — capsule-only worker/review handoff and no full-history forwarding.
 - `policies/session-continuation-guard.md` — stop long-session token bleed with fresh-session handoff.
 - `policies/division-subagent-council.md` — six core divisions as always-on conceptual sub-agents.

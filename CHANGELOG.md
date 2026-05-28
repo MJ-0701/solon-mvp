@@ -1,3 +1,38 @@
+## [Unreleased]
+
+## [0.6.139] - 2026-05-28
+
+> **SFS.md is back to a thin router.**
+
+### Fixed
+
+- Rebuilt `SFS.md.template` as a thin project router instead of a policy
+  archive. Detailed SFS behavior now stays in routed runtime context, while
+  `SFS.md` keeps frontmatter, project overview, read order, default entry,
+  output contract, and maintenance pointers.
+- Added `sfs doctor --fix` and an upgrade post-step that detect recognized
+  bloated `SFS.md` files, archive the old file, rewrite the thin router, and
+  preserve the `## 프로젝트 개요` section even when `sfs upgrade` exits early
+  because the runtime is already current.
+- Restored `CLAUDE.md`, `AGENTS.md`, and `GEMINI.md` project templates to thin
+  frontmatter-backed agent bootstraps. Durable SFS policy now stays routed
+  through packaged runtime context and optional `.sfs-local/context/` overrides
+  instead of being copied into every root agent file.
+- Tightened those root agent templates to frontmatter-only pointers and added
+  `sfs agent doctor --fix`, which detects recognized SFS adapter bloat, archives
+  the old file, and rewrites it to the packaged frontmatter-only template.
+
+### Tests
+
+- Added `test-thin-agent-adapter-docs.sh` and updated policy regressions so
+  root agent adapters are checked for routing/frontmatter/size, while detailed
+  SFS rules are checked in skills, commands, and routed context.
+- Added `test-sfs-router-doc-refactor.sh` for `SFS.md` bloat detection,
+  archive, rewrite, upgrade post-step coverage, and project overview
+  preservation.
+- Added `test-agent-doc-refactor.sh` for detection, archive, rewrite, and
+  non-SFS skip behavior.
+
 ## [0.6.138] - 2026-05-28
 
 > **Domain knowledge assets now flow through six-division ledgers.**

@@ -9,6 +9,12 @@ load_when: ["upgrade", "update", "install", "freshness", "업그레이드"]
 - `sfs upgrade` self-upgrades Homebrew/Scoop runtimes unless explicitly skipped.
 - Homebrew path must refresh the Solon tap and upgrade `MJ-0701/solon-product/sfs`.
 - Preserve project-specific `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, divisions, and model profiles.
+- Preserve `SFS.md` project overview. If recognized policy bloat is found,
+  archive and rewrite it as a thin router; set `SFS_ROUTER_DOC_REFACTOR=0` to
+  audit without rewriting.
+- Recognized SFS root agent docs with body text are safe-refactored to
+  frontmatter-only pointers with an archive backup. Set `SFS_AGENT_DOC_REFACTOR=0`
+  when the upgrade should audit without rewriting those files.
 - Managed runtime docs, adapters, templates, personas, decisions, and context modules use backup+overwrite.
 - Freshness reports must distinguish the latest release headline from the
   installed capability surface. When the user asks what is current, latest, or

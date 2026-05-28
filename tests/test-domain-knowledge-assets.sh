@@ -19,6 +19,7 @@ assert_contains() {
 
 policy="${CONTEXT_DIR}/policies/domain-knowledge-assets.md"
 policy_ko="${CONTEXT_DIR}/policies/domain-knowledge-assets.ko.md"
+kernel="${CONTEXT_DIR}/kernel.md"
 
 assert_contains "${policy}" "AI makes generic coding and scaffolding more evenly available" "EN policy premise"
 assert_contains "${policy}" "expert domain judgment made legible enough for AI to reuse" "EN policy moat"
@@ -67,10 +68,6 @@ assert_contains "${DIST_DIR}/templates/.sfs-local-template/sprint-templates/revi
 adapter_files=(
   "${DIST_DIR}/commands/sfs.toml"
   "${DIST_DIR}/plugins/solon/commands/sfs.md"
-  "${DIST_DIR}/templates/CLAUDE.md.template"
-  "${DIST_DIR}/templates/AGENTS.md.template"
-  "${DIST_DIR}/templates/GEMINI.md.template"
-  "${DIST_DIR}/templates/SFS.md.template"
   "${DIST_DIR}/templates/codex-skill/SKILL.md"
   "${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md"
   "${DIST_DIR}/templates/.claude/commands/sfs.md"
@@ -82,5 +79,9 @@ for file in "${adapter_files[@]}"; do
   assert_contains "${file}" "Domain knowledge assets are first-class" "adapter domain assets ${file}"
   assert_contains "${file}" "owner/confidence/gaps" "adapter evidence boundary ${file}"
 done
+
+assert_contains "${DIST_DIR}/templates/SFS.md.template" "sfs context cat kernel" "SFS template routes domain policy through context"
+assert_contains "${kernel}" "Domain knowledge is an AI-era moat" "kernel domain assets"
+assert_contains "${kernel}" "expert/owner, confidence, gaps" "kernel domain evidence boundary"
 
 echo "test-domain-knowledge-assets: OK"

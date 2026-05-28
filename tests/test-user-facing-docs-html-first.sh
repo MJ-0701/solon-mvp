@@ -22,7 +22,6 @@ assert_contains() {
 
 agent_surfaces=(
   "${DIST_DIR}/CLAUDE.md"
-  "${DIST_DIR}/templates/CLAUDE.md.template"
   "${DIST_DIR}/templates/.sfs-local-template/context/kernel.md"
   "${DIST_DIR}/templates/codex-skill/SKILL.md"
   "${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md"

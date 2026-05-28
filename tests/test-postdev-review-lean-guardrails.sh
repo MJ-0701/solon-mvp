@@ -78,7 +78,7 @@ assert_contains "${script}" "process-lean" "script lens support"
 assert_contains "${script}" "process/ceremony -> process-lean" "script alias hint"
 assert_contains "${script}" "lean procedure and bottleneck review lens" "script label"
 
-for file in "${claude_template}" "${agents_template}" "${gemini_template}" "${codex_skill}" "${claude_command}" "${gemini_command}" "${legacy_gemini_command}" "${plugin_command}" "${codex_prompt}" "${dist_claude}"; do
+for file in "${codex_skill}" "${claude_command}" "${gemini_command}" "${legacy_gemini_command}" "${plugin_command}" "${codex_prompt}" "${dist_claude}"; do
   assert_contains "${file}" "postdev external review" "template postdev ${file}"
   assert_contains "${file}" "lean procedure review" "template lean ${file}"
   assert_contains "${file}" "process-lean" "template process-lean ${file}"

@@ -96,7 +96,7 @@ assert_contains "${plan_template}" "Data Validation / Security / Checklist Plan"
 assert_contains "${implement_template}" "Data / Security / Checklist Guard" "implement template data security"
 assert_contains "${review_template}" "Mainline / Data / Security / Checklist Ledger" "review template combined ledger"
 
-for file in "${claude_template}" "${agents_template}" "${gemini_template}" "${codex_skill}"; do
+for file in "${codex_skill}"; do
   assert_contains "${file}" "Mainline Focus Guard" "agent template mainline ${file}"
   assert_contains "${file}" "OWASP-style security/logging/Datadog evidence" "agent template security ${file}"
   assert_contains "${file}" "checklist reconciliation" "agent template checklist ${file}"

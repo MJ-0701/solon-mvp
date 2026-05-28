@@ -87,9 +87,6 @@ assert_korean_replacement_matrix "${ko_shape}" "Korean product shape"
 assert_does_not_replace_matrix "${en_shape}" "English product shape"
 
 adapter_files=(
-  "${DIST_DIR}/templates/AGENTS.md.template"
-  "${DIST_DIR}/templates/CLAUDE.md.template"
-  "${DIST_DIR}/templates/GEMINI.md.template"
   "${DIST_DIR}/templates/codex-skill/SKILL.md"
   "${DIST_DIR}/plugins/solon/commands/sfs.md"
 )

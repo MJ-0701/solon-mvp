@@ -1796,8 +1796,11 @@ recommend_action() {
   fi
 
   case "$dst_rel" in
-    "SFS.md"|".claude/skills/sfs/SKILL.md"|".claude/commands/sfs.md"|".gemini/commands/sfs.toml"|".agents/skills/sfs/SKILL.md"|".sfs-local/GUIDE.md")
+    ".claude/skills/sfs/SKILL.md"|".claude/commands/sfs.md"|".gemini/commands/sfs.toml"|".agents/skills/sfs/SKILL.md"|".sfs-local/GUIDE.md")
       printf "backup+overwrite"
+      ;;
+    "SFS.md")
+      printf "thin-router refactor"
       ;;
     "CLAUDE.md"|"AGENTS.md"|"GEMINI.md"|".sfs-local/divisions.yaml"|".sfs-local/model-profiles.yaml")
       printf "skip"
@@ -1829,7 +1832,7 @@ cat <<EOF
 자동 처리 정책:
   - 신규 파일                          → 자동 설치
   - checksum 동일                      → 변경 없음
-  - SFS.md                             → backup+overwrite (공통 SFS core 최신화)
+  - SFS.md                             → 비대화 감지 시 archive+thin-router refactor (프로젝트 개요 보존)
   - CLAUDE/AGENTS/GEMINI.md            → 자동 보존 (기존 프로젝트 지침 보호)
   - .sfs-local/divisions.yaml          → 자동 보존 (프로젝트별 운영값 보호)
   - .sfs-local/model-profiles.yaml     → 없으면 설치 + 설정 안내, 있으면 자동 보존 (agent별 모델 설정 보호)
@@ -2097,6 +2100,281 @@ update_file() {
   esac
 }
 
+sfs_router_doc_is_sfs() {
+  local file="$1"
+  [ -f "$file" ] || return 1
+  grep -Fq "doc_type: solon-router" "$file" && return 0
+  grep -Fq "Solon SFS has two meanings" "$file" && return 0
+  grep -Fq "sfs context cat kernel" "$file" && return 0
+  grep -Fq "Project overview refresh" "$file" && return 0
+  return 1
+}
+
+sfs_router_doc_needs_refactor() {
+  local file="$1" marker lines
+  sfs_router_doc_is_sfs "$file" || return 1
+  for marker in \
+    "SFS commands —" \
+    "Executable Action Ownership" \
+    "Monitor checkpoint classification" \
+    "Handoff-only scope is a stop contract" \
+    "Session Continuation Guard" \
+    "Division sub-agent council is always-on" \
+    "User-escalation premise guard" \
+    "DDD/TDD is a product-level engineering floor" \
+    "compact option bundle"; do
+    grep -Fq "$marker" "$file" && return 0
+  done
+  lines="$(wc -l < "$file" 2>/dev/null | tr -d '[:space:]')"
+  case "${lines:-0}" in ''|*[!0-9]*) return 1 ;; esac
+  [ "$lines" -gt 90 ]
+}
+
+sfs_router_extract_overview() {
+  local src="$1" out="$2"
+  awk '
+    $0 == "## 프로젝트 개요" {
+      in_section = 1
+      found = 1
+      seen_bullet = 0
+      print
+      next
+    }
+    in_section && /^## / {
+      exit
+    }
+    in_section && /^-/ {
+      seen_bullet = 1
+      print
+      next
+    }
+    in_section && seen_bullet && /^[[:space:]]/ {
+      print
+      next
+    }
+    in_section && seen_bullet {
+      exit
+    }
+    in_section {
+      print
+    }
+    END {
+      exit found ? 0 : 1
+    }
+  ' "$src" > "$out"
+}
+
+write_sfs_router_template() {
+  local dst="$1" overview="$2" template="$SOURCE_DIR/templates/SFS.md.template"
+  local tmp today project_name
+  [ -f "$template" ] || { err "source 없음: templates/SFS.md.template"; return 1; }
+  tmp="$dst.tmp.$$"
+  today="$(date +%F)"
+  project_name="${PROJECT_NAME:-$(basename "$TARGET")}"
+  awk -v block_file="$overview" '
+    BEGIN {
+      while ((getline line < block_file) > 0) {
+        block = block line "\n"
+      }
+      close(block_file)
+      in_profile = 0
+      replaced = 0
+    }
+    $0 == "## 프로젝트 개요" && block != "" {
+      printf "%s", block
+      in_profile = 1
+      replaced = 1
+      next
+    }
+    in_profile && /^## / {
+      in_profile = 0
+      print
+      next
+    }
+    !in_profile {
+      print
+    }
+    END {
+      if (!replaced && block != "") {
+        print ""
+        printf "%s", block
+      }
+    }
+  ' "$template" | sed \
+    -e "s|<PROJECT-NAME>|$project_name|g" \
+    -e "s|<DATE>|$today|g" > "$tmp" || return 5
+  mv "$tmp" "$dst" || return 5
+}
+
+auto_refactor_sfs_router_doc() {
+  local dst="$TARGET/SFS.md" src="$SOURCE_DIR/templates/SFS.md.template"
+  local archive_dir archive_file manifest staging overview
+  [ -f "$src" ] || { err "source 없음: templates/SFS.md.template"; return 1; }
+
+  if [ ! -f "$dst" ]; then
+    cp "$src" "$dst" || return 5
+    ok "신규 설치: SFS.md"
+    return 0
+  fi
+
+  if ! sfs_router_doc_is_sfs "$dst"; then
+    ok "SFS.md skip non-SFS router"
+    return 0
+  fi
+
+  if ! sfs_router_doc_needs_refactor "$dst"; then
+    ok "SFS.md thin router: preserved"
+    return 0
+  fi
+
+  case "${SFS_ROUTER_DOC_REFACTOR:-1}" in
+    0|false|FALSE|no|NO)
+      warn "SFS.md thin-router refactor needed but skipped: SFS_ROUTER_DOC_REFACTOR=${SFS_ROUTER_DOC_REFACTOR}"
+      return 0
+      ;;
+  esac
+
+  archive_dir="$TARGET/.sfs-local/archives/sfs-router-doc-refactor/$(date +%Y%m%d-%H%M%S)"
+  archive_file="$archive_dir/SFS.md.tar.gz"
+  manifest="$archive_dir/manifest.txt"
+  mkdir -p "$archive_dir" || return 5
+  staging="$(mktemp -d "$archive_dir/.stage.XXXXXX")" || return 5
+  overview="$(mktemp "${TMPDIR:-/tmp}/sfs-router-overview.XXXXXX")" || return 5
+  cp "$dst" "$staging/SFS.md" || return 5
+  if ! sfs_router_extract_overview "$dst" "$overview"; then
+    sfs_router_extract_overview "$src" "$overview" || return 5
+  fi
+  write_sfs_router_template "$dst" "$overview" || return $?
+  rm -f "$overview"
+  {
+    echo "SFS router doc refactor backup"
+    echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "reason: recognized SFS.md contained routed policy body; SFS.md must stay a thin router"
+    echo "archive: $archive_file"
+    echo "items:"
+    echo "- SFS.md"
+  } > "$manifest" || return 5
+  tar -czf "$archive_file" -C "$staging" . || return 5
+  rm -rf "$staging" || return 5
+  ok "SFS.md thin-router refactor: ${archive_file#$TARGET/}"
+}
+
+root_agent_doc_template() {
+  case "$1" in
+    CLAUDE.md) printf '%s\n' "$SOURCE_DIR/templates/CLAUDE.md.template" ;;
+    AGENTS.md) printf '%s\n' "$SOURCE_DIR/templates/AGENTS.md.template" ;;
+    GEMINI.md) printf '%s\n' "$SOURCE_DIR/templates/GEMINI.md.template" ;;
+    *) return 1 ;;
+  esac
+}
+
+root_agent_doc_is_sfs_adapter() {
+  local file="$1"
+  [ -f "$file" ] || return 1
+  grep -Fq "doc_type: agent-adapter-bootstrap" "$file" && return 0
+  grep -Fq "sfs_detail_sources:" "$file" && return 0
+  grep -Fq "frontmatter_only: true" "$file" && return 0
+  grep -Fq "SFS commands —" "$file" && return 0
+  if grep -Fq "Solon SFS" "$file" && grep -Fq "sfs context cat" "$file"; then
+    return 0
+  fi
+  if grep -Fq "This project uses Solon Product SFS" "$file"; then
+    return 0
+  fi
+  return 1
+}
+
+root_agent_doc_has_frontmatter() {
+  local file="$1"
+  [ -f "$file" ] || return 1
+  [ "$(sed -n '1p' "$file")" = "---" ] || return 1
+  sed -n '2,120p' "$file" | grep -Fxq -- "---"
+}
+
+root_agent_doc_body_has_content() {
+  local file="$1"
+  awk '
+    NR == 1 && $0 == "---" { in_fm = 1; next }
+    in_fm && $0 == "---" { in_fm = 0; seen_close = 1; next }
+    seen_close && $0 ~ /[^[:space:]]/ { found = 1 }
+    END { exit found ? 0 : 1 }
+  ' "$file"
+}
+
+root_agent_doc_is_frontmatter_only() {
+  local file="$1"
+  root_agent_doc_has_frontmatter "$file" || return 1
+  if root_agent_doc_body_has_content "$file"; then
+    return 1
+  fi
+  return 0
+}
+
+write_root_agent_doc_template() {
+  local src="$1" dst="$2" today tmp
+  [ -f "$src" ] || { err "source 없음: $src"; return 1; }
+  today="$(date +%F)"
+  tmp="$dst.tmp.$$"
+  sed "s|<DATE>|$today|g" "$src" > "$tmp" || return 5
+  mv "$tmp" "$dst" || return 5
+}
+
+auto_refactor_root_agent_docs() {
+  case "${SFS_AGENT_DOC_REFACTOR:-1}" in
+    0|false|FALSE|no|NO)
+      ok "root agent docs refactor skip: SFS_AGENT_DOC_REFACTOR=${SFS_AGENT_DOC_REFACTOR}"
+      return 0
+      ;;
+  esac
+
+  local rel dst src archive_dir archive_file manifest staging count=0
+  for rel in CLAUDE.md AGENTS.md GEMINI.md; do
+    dst="$TARGET/$rel"
+    [ -f "$dst" ] || continue
+    if ! root_agent_doc_is_sfs_adapter "$dst"; then
+      ok "root agent doc skip non-SFS: $rel"
+      continue
+    fi
+    if root_agent_doc_is_frontmatter_only "$dst"; then
+      ok "root agent doc frontmatter-only: $rel"
+      continue
+    fi
+
+    if [ -z "${archive_dir:-}" ]; then
+      archive_dir="$TARGET/.sfs-local/archives/agent-doc-refactor/$(date +%Y%m%d-%H%M%S)"
+      archive_file="$archive_dir/root-agent-docs.tar.gz"
+      manifest="$archive_dir/manifest.txt"
+      mkdir -p "$archive_dir" || return 5
+      staging="$(mktemp -d "$archive_dir/.stage.XXXXXX")" || return 5
+    fi
+
+    mkdir -p "$staging/$(dirname "$rel")" || return 5
+    cp "$dst" "$staging/$rel" || return 5
+    src="$(root_agent_doc_template "$rel")" || return 1
+    write_root_agent_doc_template "$src" "$dst" || return $?
+    ok "root agent doc frontmatter-only refactor: $rel"
+    count=$((count + 1))
+  done
+
+  [ "${count:-0}" -gt 0 ] || return 0
+  {
+    echo "SFS root agent doc refactor backup"
+    echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "reason: recognized SFS adapter doc had body text; frontmatter-only root docs keep policy in SFS.md/context"
+    echo "archive: $archive_file"
+    echo "count: $count"
+    echo
+    echo "items:"
+    find "$staging" -type f 2>/dev/null | sort | while IFS= read -r staged; do
+      printf -- "- %s\n" "${staged#$staging/}"
+    done
+  } > "$manifest" || return 5
+  tar -czf "$archive_file" -C "$staging" . || return 5
+  rm -rf "$staging" || return 5
+  ok "root agent docs refactor archive: ${archive_file#$TARGET/}"
+  return 0
+}
+
 info ""
 info "파일별 갱신..."
 trace_upgrade "file update phase start"
@@ -2115,9 +2393,10 @@ project_surface_archive_migrations || die "legacy archive surface migration fail
 trace_upgrade "project_surface_archive_migrations after"
 
 update_file "CLAUDE.md" "templates/CLAUDE.md.template" "Claude Code 어댑터" "s"
-update_file "SFS.md" "templates/SFS.md.template" "공통 SFS 지침" "b"
+auto_refactor_sfs_router_doc || die "SFS.md thin-router refactor failed"
 update_file "AGENTS.md" "templates/AGENTS.md.template" "Codex 어댑터" "s"
 update_file "GEMINI.md" "templates/GEMINI.md.template" "Gemini CLI 어댑터" "s"
+auto_refactor_root_agent_docs || die "root agent doc refactor failed"
 if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ] && [ "${SFS_INSTALL_AGENT_ADAPTERS:-0}" != "1" ]; then
   ok "thin runtime 사용 — project-local agent adapters skip (.claude/.gemini/.agents). opt-in: sfs agent install all"
 else

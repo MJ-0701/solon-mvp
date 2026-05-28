@@ -11,6 +11,9 @@ set -u
 
 HOME_DIR="${HOME:-$USERPROFILE}"
 SOLON_REPO="${SOLON_REPO:-MJ-0701/solon-product}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DIST_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+FIX_MODE=0
 
 if [ -t 1 ]; then
   C_GREEN=$'\033[32m'; C_YELLOW=$'\033[33m'; C_RED=$'\033[31m'
@@ -28,6 +31,218 @@ warn() { printf "  ${C_YELLOW}⚠️${C_RESET}  %s\n" "$*"; WARN_COUNT=$((WARN_C
 fail() { printf "  ${C_RED}❌${C_RESET} %s\n" "$*"; FAIL_COUNT=$((FAIL_COUNT+1)); }
 info() { printf "  ${C_DIM}%s${C_RESET}\n" "$*"; }
 section() { printf "\n${C_BOLD}%s${C_RESET}\n" "$*"; }
+
+usage() {
+  cat <<'EOF'
+Usage:
+  sfs doctor [--fix]
+
+Checks global Solon runtime discovery plus current-project SFS surfaces.
+With --fix, recognized SFS.md router bloat is archived and rewritten as a thin
+router while preserving the "## 프로젝트 개요" section. Root LLM agent docs are
+delegated to "sfs agent doctor --fix".
+EOF
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --fix|--apply)
+      FIX_MODE=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      printf "unknown arg: %s\n" "$1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+sfs_router_doc_is_sfs() {
+  local file="$1"
+  [ -f "$file" ] || return 1
+  grep -Fq "doc_type: solon-router" "$file" 2>/dev/null && return 0
+  grep -Fq "Solon SFS has two meanings" "$file" 2>/dev/null && return 0
+  grep -Fq "sfs context cat kernel" "$file" 2>/dev/null && return 0
+  grep -Fq "Project overview refresh" "$file" 2>/dev/null && return 0
+  return 1
+}
+
+sfs_router_doc_needs_refactor() {
+  local file="$1" marker lines
+  sfs_router_doc_is_sfs "$file" || return 1
+  for marker in \
+    "SFS commands —" \
+    "Executable Action Ownership" \
+    "Monitor checkpoint classification" \
+    "Handoff-only scope is a stop contract" \
+    "Session Continuation Guard" \
+    "Division sub-agent council is always-on" \
+    "User-escalation premise guard" \
+    "DDD/TDD is a product-level engineering floor" \
+    "compact option bundle"; do
+    grep -Fq "$marker" "$file" 2>/dev/null && return 0
+  done
+  lines="$(wc -l < "$file" 2>/dev/null | tr -d '[:space:]')"
+  case "${lines:-0}" in
+    ''|*[!0-9]*) return 1 ;;
+  esac
+  [ "$lines" -gt 90 ]
+}
+
+sfs_router_extract_overview() {
+  local src="$1" out="$2"
+  awk '
+    $0 == "## 프로젝트 개요" {
+      in_section = 1
+      found = 1
+      seen_bullet = 0
+      print
+      next
+    }
+    in_section && /^## / {
+      exit
+    }
+    in_section && /^-/ {
+      seen_bullet = 1
+      print
+      next
+    }
+    in_section && seen_bullet && /^[[:space:]]/ {
+      print
+      next
+    }
+    in_section && seen_bullet {
+      exit
+    }
+    in_section {
+      print
+    }
+    END {
+      exit found ? 0 : 1
+    }
+  ' "$src" > "$out"
+}
+
+sfs_router_write_template() {
+  local dst="$1" overview="$2" template="$DIST_DIR/templates/SFS.md.template"
+  local tmp project_name today
+  [ -f "$template" ] || return 4
+  tmp="$dst.tmp.$$"
+  project_name="$(basename "$PWD")"
+  today="$(date +%F)"
+  awk -v block_file="$overview" '
+    BEGIN {
+      while ((getline line < block_file) > 0) {
+        block = block line "\n"
+      }
+      close(block_file)
+      in_profile = 0
+      replaced = 0
+    }
+    $0 == "## 프로젝트 개요" && block != "" {
+      printf "%s", block
+      in_profile = 1
+      replaced = 1
+      next
+    }
+    in_profile && /^## / {
+      in_profile = 0
+      print
+      next
+    }
+    !in_profile {
+      print
+    }
+    END {
+      if (!replaced && block != "") {
+        print ""
+        printf "%s", block
+      }
+    }
+  ' "$template" | sed \
+    -e "s|<PROJECT-NAME>|$project_name|g" \
+    -e "s|<DATE>|$today|g" > "$tmp" || return 5
+  mv "$tmp" "$dst"
+}
+
+sfs_router_refactor() {
+  local file="$1" ts backup_dir stage archive overview manifest
+  ts="$(date +%Y%m%d-%H%M%S)"
+  backup_dir="$PWD/.sfs-local/archives/sfs-router-doc-refactor/$ts"
+  stage="$backup_dir/.stage"
+  archive="$backup_dir/SFS.md.tar.gz"
+  overview="$(mktemp "${TMPDIR:-/tmp}/sfs-router-overview.XXXXXX")" || return 5
+  mkdir -p "$stage" || return 5
+  cp "$file" "$stage/SFS.md" || return 5
+  if ! sfs_router_extract_overview "$file" "$overview"; then
+    sed -n '/^## 프로젝트 개요$/,/^## /p' "$DIST_DIR/templates/SFS.md.template" > "$overview"
+  fi
+  sfs_router_write_template "$file" "$overview" || return $?
+  rm -f "$overview"
+  manifest="$backup_dir/manifest.txt"
+  {
+    echo "SFS router doc refactor backup"
+    echo "generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "reason: recognized SFS.md contained routed policy body; SFS.md must stay a thin router"
+    echo "archive: $archive"
+    echo "items:"
+    echo "- SFS.md"
+  } > "$manifest" || return 5
+  tar -czf "$archive" -C "$stage" . || return 5
+  rm -rf "$stage" || return 5
+  printf "%s\n" "${archive#$PWD/}"
+}
+
+check_project_docs() {
+  local file="SFS.md" archive_out agent_out agent_rc
+  if [ ! -f "$file" ]; then
+    info "SFS.md not found in current directory"
+    return 0
+  fi
+  if ! sfs_router_doc_is_sfs "$file"; then
+    warn "SFS.md exists but does not look like an SFS router; skipped automatic refactor"
+    return 0
+  fi
+  if sfs_router_doc_needs_refactor "$file"; then
+    if [ "$FIX_MODE" = "1" ]; then
+      archive_out="$(sfs_router_refactor "$file" 2>/dev/null || true)"
+      if [ -n "$archive_out" ]; then
+        ok "SFS.md thin-router refactor applied (backup: $archive_out)"
+      else
+        fail "SFS.md thin-router refactor failed"
+      fi
+    else
+      warn "SFS.md needs thin-router refactor — run 'sfs doctor --fix'"
+    fi
+  else
+    ok "SFS.md is a thin router"
+  fi
+
+  if [ "$FIX_MODE" = "1" ] && command -v sfs >/dev/null 2>&1; then
+    agent_out="$(sfs agent doctor --fix 2>&1)"
+    agent_rc=$?
+    if [ "$agent_rc" = "0" ]; then
+      ok "root agent docs checked/fixed by sfs agent doctor --fix"
+      [ -n "$agent_out" ] && info "$agent_out"
+    else
+      warn "root agent doc doctor returned $agent_rc"
+      [ -n "$agent_out" ] && info "$agent_out"
+    fi
+  elif [ "$FIX_MODE" != "1" ] && command -v sfs >/dev/null 2>&1; then
+    agent_out="$(sfs agent doctor 2>&1)"
+    agent_rc=$?
+    if printf "%s\n" "$agent_out" | grep -Fq "needs-refactor:"; then
+      warn "root agent docs need frontmatter-only refactor — run 'sfs agent doctor --fix'"
+    else
+      ok "root agent docs are thin or not SFS-owned"
+    fi
+  fi
+}
 
 # ---------------------------------------------------------------------------
 # 1. sfs binary
@@ -154,6 +369,7 @@ section "Project state (current dir)"
 if [ -f "SFS.md" ] && [ -f ".sfs-local/VERSION" ]; then
   PROJ_VER="$(grep -E '^solon_(mvp|product)_version:' .sfs-local/VERSION 2>/dev/null | head -1 | awk -F: '{gsub(/ /,"",$2); print $2}')"
   ok "project initialized (SFS.md + .sfs-local/VERSION present, $PROJ_VER)"
+  check_project_docs
 else
   info "no Solon project at current directory (skip — run 'sfs init' to initialize)"
 fi

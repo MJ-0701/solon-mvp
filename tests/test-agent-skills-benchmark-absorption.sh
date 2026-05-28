@@ -78,9 +78,6 @@ assert_contains "${kernel}" "Compactness is never a pass condition" "kernel toke
 
 token_contract="Compact output is quality-preserving only"
 adapter_files=(
-  "${DIST_DIR}/templates/CLAUDE.md.template"
-  "${DIST_DIR}/templates/AGENTS.md.template"
-  "${DIST_DIR}/templates/GEMINI.md.template"
   "${DIST_DIR}/templates/SFS.md.template"
   "${DIST_DIR}/templates/codex-skill/SKILL.md"
   "${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md"
@@ -120,7 +117,6 @@ assert_contains "${review_script}" "security/threat-model acceptance lens" "revi
 assert_contains "${review_script}" "performance evidence lens" "review label performance"
 assert_contains "${review_script}" "API/contract compatibility lens" "review label api-contract"
 
-assert_contains "${DIST_DIR}/templates/CLAUDE.md.template" "Benchmarked engineering practices strengthen existing commands" "claude adapter absorption"
 assert_contains "${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md" "Benchmarked engineering practices strengthen existing commands" "codex skill absorption"
 assert_contains "${DIST_DIR}/templates/.claude/commands/sfs.md" "docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/" "claude command domain handoff path"
 assert_contains "${DIST_DIR}/templates/.claude/commands/sfs.md" "docs/solon/<english-workspace>/<yyyyMMdd>/" "claude command fallback handoff path"

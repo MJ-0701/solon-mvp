@@ -31,9 +31,6 @@ boundary_files=(
   "${CONTEXT_DIR}/policies/obsidian-llm-wiki.ko.md"
   "${DIST_DIR}/templates/codex-skill/SKILL.md"
   "${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md"
-  "${DIST_DIR}/templates/AGENTS.md.template"
-  "${DIST_DIR}/templates/CLAUDE.md.template"
-  "${DIST_DIR}/templates/GEMINI.md.template"
   "${DIST_DIR}/docs/en/current-product-shape/19-obsidian-llm-wiki-continuity.md"
   "${DIST_DIR}/docs/ko/current-product-shape/19-obsidian-llm-wiki-continuity.md"
 )

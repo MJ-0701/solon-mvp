@@ -47,10 +47,6 @@ assert_contains "${SPEC}" "details/source" "dashboard source folding"
 assert_contains "${SPEC}" "Sources" "dashboard source section"
 
 for adapter in \
-  "${DIST_DIR}/templates/CLAUDE.md.template" \
-  "${DIST_DIR}/templates/AGENTS.md.template" \
-  "${DIST_DIR}/templates/GEMINI.md.template" \
-  "${DIST_DIR}/templates/SFS.md.template" \
   "${DIST_DIR}/templates/codex-skill/SKILL.md" \
   "${DIST_DIR}/plugins/solon/commands/sfs.md" \
   "${DIST_DIR}/commands/sfs.toml"
@@ -58,6 +54,8 @@ do
   assert_contains "${adapter}" "compact console dashboard" "adapter dashboard style ${adapter}"
   assert_contains "${adapter}" "Compact output is quality-preserving only" "adapter token diet contract ${adapter}"
 done
+assert_contains "${DIST_DIR}/templates/SFS.md.template" "Compact output is quality-preserving only" "SFS router keeps output contract"
+assert_contains "${DIST_DIR}/templates/SFS.md.template" "sfs context cat kernel" "SFS router delegates dashboard style"
 
 assert_not_contains "${SPEC}" "📊 bkit Feature Usage" "dashboard no bkit usage footer"
 
