@@ -5,3 +5,19 @@ Thumbs.db
 *.swp
 /tmp/
 *.bak-*
+
+# Python build / cache (mcp-server/ ships a Python MCP bridge; sandbox + local
+# import generate __pycache__ which must not be tracked).
+__pycache__/
+*.py[cod]
+*$py.class
+mcp-server/*.egg-info/
+mcp-server/build/
+mcp-server/dist/
+
+# Pytest cache (smoke runs of templates/claude-agent-sdk-zero/).
+.pytest_cache/
+
+# Sandbox / local env files that should not ship.
+.venv/
+venv/

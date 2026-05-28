@@ -1,5 +1,59 @@
 ## [Unreleased]
 
+## [0.7.3] - 2026-05-28
+
+> **Consumer-side AS surface + PyPI publishing recipe + sandbox build artifact hygiene.**
+
+0.7.2 fixed the doc-concern-separation bug inside this distribution repo
+and locked the maintainer-side regression. 0.7.3 closes the consumer-side
+loop: a polluted root adapter doc in an installed Solon project now
+surfaces itself the next time the user runs `sfs status`, with a one-line
+hint pointing at the existing `sfs agent doctor --fix` AS path.
+
+### Added
+
+- `sfs status` (and other interactive commands) now emit a single-line
+  hygiene notice when a root adapter doc (`CLAUDE.md`, `AGENTS.md`,
+  `GEMINI.md`) declares `frontmatter_only: true` in its frontmatter but
+  carries body content. The notice names the polluted files and points
+  the user at `sfs agent doctor --fix`. The detection lives in
+  `sfs_maybe_emit_hygiene_notice` (templates/.sfs-local-template/scripts/
+  sfs-common.sh) and respects the existing `SFS_HYGIENE_NOTICE` /
+  `SFS_HYGIENE_NOTICE_TTL_SEC` gates.
+- `mcp-server/PUBLISHING.md` — maintainer-side recipe for cutting a
+  `solon-mcp` release to PyPI. Until that publish workflow lands,
+  the recipe documents the manual cut path step by step (`build`,
+  `twine check`, TestPyPI smoke, real PyPI upload, tag namespace
+  `mcp-server-v*`). `mcp-server/README.md` cross-links to it so users
+  who hit the documented "future shape" `pipx install solon-mcp` have a
+  clear pointer to the cut schedule.
+- `tests/test-polluted-adapter-hygiene-notice.sh` — regression lock.
+  Materializes a polluted CLAUDE.md (frontmatter_only:true marker +
+  bleed body containing "프로젝트 개요" / "배포 원칙" / "수정 시 체크리스트"
+  H2s), runs `sfs status` with `SFS_HYGIENE_NOTICE_FORCE=1`, and asserts
+  the WARN + `sfs agent doctor --fix` hint appear in stderr.
+
+### Changed
+
+- `.gitignore` extended to cover Python build artifacts that sandbox or
+  local imports generate from the new 0.7.0 MCP server scaffold:
+  `__pycache__/`, `*.py[cod]`, `*.egg-info/`, `build/`, `dist/`,
+  `.pytest_cache/`, `.venv/`. The 0.7.2 release added a
+  `mcp-server/__pycache__/` to the working tree as an untracked file —
+  0.7.3 closes that hole.
+
+### AS path recap (no code change)
+
+The actual refactor flow for already-polluted consumer projects has not
+changed; it has been working since 0.6.139:
+
+- `sfs upgrade` automatically runs `auto_refactor_root_agent_docs` and
+  archives the old body under `.sfs-local/archives/agent-doc-refactor/`.
+- `sfs agent doctor --fix` can be run manually anytime.
+
+0.7.3's contribution is purely making this AS discoverable to consumers
+who do not know the doctor command exists.
+
 ## [0.7.2] - 2026-05-28
 
 > **Doc concern separation — agent entry docs are now agent guidance only; project state / release policy / dev checklists / methodology live in docs/maintenance/.**

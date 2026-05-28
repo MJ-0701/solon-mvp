@@ -185,7 +185,7 @@ sfs_maybe_emit_hygiene_notice() {
   fi
   sfs_write_hygiene_state "${state_file}" "${now}"
 
-  local notices=0 file lines source_count sprint workbench_lines
+  local notices=0 file lines source_count sprint workbench_lines polluted_adapters=""
   for file in SFS.md CLAUDE.md AGENTS.md GEMINI.md; do
     [[ -f "${file}" ]] || continue
     lines="$(wc -l < "${file}" 2>/dev/null | tr -d '[:space:]' || printf '0')"
@@ -197,7 +197,36 @@ sfs_maybe_emit_hygiene_notice() {
       printf '  - %s is %s lines; keep adapter memory thin and move stable detail to routed context/docs.\n' "${file}" "${lines}" >&2
       notices=$((notices + 1))
     fi
+
+    # 0.7.3: structural pollution detection. If the adapter file declares
+    # `frontmatter_only: true` (i.e. it is supposed to be a thin pointer
+    # only), but actually carries body content after the closing frontmatter
+    # fence, the consumer hit the 0.7.2-grade pollution class — project
+    # state, architecture, infra, or methodology has been inlined into the
+    # agent entry doc. Surface it so the user can run
+    # `sfs agent doctor --fix` (which is the AS path that already exists).
+    if [[ "${file}" == "CLAUDE.md" || "${file}" == "AGENTS.md" || "${file}" == "GEMINI.md" ]]; then
+      if grep -qE '^frontmatter_only:[[:space:]]*true' "${file}" 2>/dev/null; then
+        if awk '
+          /^---$/ { fence++; next }
+          fence >= 2 && NF > 0 { count++ }
+          END { exit (count > 2) ? 0 : 1 }
+        ' "${file}"; then
+          polluted_adapters="${polluted_adapters}${file} "
+        fi
+      fi
+    fi
   done
+
+  if [[ -n "${polluted_adapters}" ]]; then
+    if (( notices == 0 )); then
+      printf 'sfs hygiene notice:\n' >&2
+    fi
+    printf '  - polluted agent adapter doc detected: %s\n' "${polluted_adapters% }" >&2
+    printf '    these files declare frontmatter_only:true but carry body content (project state / architecture / infra / methodology bleed).\n' >&2
+    printf '    run `sfs agent doctor --fix` to refactor back to the frontmatter-only template (the original body is archived under .sfs-local/archives/agent-doc-refactor/).\n' >&2
+    notices=$((notices + 1))
+  fi
 
   source_count="$(sfs_count_source_files_capped "${source_threshold}" || printf '0')"
   case "${source_count}" in ''|*[!0-9]*) source_count=0 ;; esac

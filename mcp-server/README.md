@@ -52,8 +52,9 @@ You need a working `sfs` CLI on `PATH` first. Then install the bridge.
 
 > ℹ️ **Source-clone is the only path supported in 0.7.x.** The
 > `pipx install solon-mcp` command below is the *target shape* once
-> `solon-mcp` is published to PyPI, which is tracked as a 0.7.x follow-up.
-> Until then, use the source-clone path.
+> `solon-mcp` is published to PyPI. See [`PUBLISHING.md`](PUBLISHING.md)
+> for the maintainer-side cut recipe; the current schedule is that PyPI
+> publish lands in a 0.7.x follow-up patch.
 
 ```bash
 # 0.7.x — source clone (the only currently supported path):

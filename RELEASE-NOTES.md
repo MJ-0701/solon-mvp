@@ -7,6 +7,25 @@
 
 ---
 
+## 0.7.3
+
+이번 버전은 0.7.2 doc-separation 작업의 consumer-side 후속입니다. 이미
+polluted CLAUDE.md / AGENTS.md / GEMINI.md 를 가진 consumer 가
+sfs status 를 칠 때 한 줄 WARN 으로 자동 인지 + `sfs agent doctor --fix`
+한 줄 안내로 AS 경로가 표면화됩니다.
+
+- `sfs status` 가 polluted root adapter doc 을 감지하면 한 줄 hygiene
+  notice + `sfs agent doctor --fix` hint 출력. AS path 자체는 0.6.139
+  부터 작동하던 것이고, 0.7.3 은 *발견* 표면을 추가.
+- `mcp-server/PUBLISHING.md` 신설 — `solon-mcp` PyPI cut 매뉴얼 recipe.
+  README 의 `pipx install solon-mcp` 가 미래 명령임을 다시 명시하면서
+  cut 일정 / 단계를 PUBLISHING.md 로 연결.
+- `.gitignore` 확장 — `mcp-server/__pycache__/`, `.pytest_cache/`,
+  `*.egg-info/`, `build/`, `dist/`, `.venv/` 등 0.7.0 이후 자주 등장하는
+  Python 부산물 일괄 차단.
+- `test-polluted-adapter-hygiene-notice.sh` 신규 — 0.7.3 의 detection
+  + AS hint 가 회귀하지 않도록 잠금.
+
 ## 0.7.2
 
 이번 버전은 사용자가 보고한 문서 관심사 미분리 제품 버그를 해결합니다.
