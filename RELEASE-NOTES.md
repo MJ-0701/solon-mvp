@@ -7,6 +7,32 @@
 
 ---
 
+## 0.7.0
+
+이번 버전은 Solon 을 host-agnostic 하게 확장하는 첫 minor bump 입니다.
+bash SSoT 원칙은 그대로 두고, non-bash 호스트(Claude Desktop, Claude in
+Chrome, Cursor, Claude Agent SDK 등)에서 Solon 을 구동할 4가지 경로를
+추가합니다.
+
+- **Solon MCP server (`mcp-server/`)** — `sfs` 7-step flow 를 12개 MCP
+  tool 로 노출하는 Python stdio 서버. bash stdout 을 verbatim forward
+  하여 kernel.md SSoT 룰을 어기지 않습니다. `pipx install solon-mcp` 로
+  설치 후 호스트의 MCP config 에 `solon-mcp` 등록만 하면 끝.
+- **Solon-safe permission preset** — CLAUDE.md "절대 금지" 룰을
+  runtime-agnostic YAML 로 export. Claude Code / Agent SDK / Codex
+  / Cursor 가 모두 받아쓸 수 있는 형식. auto-push, destructive bash,
+  hard reset 은 기본 denied.
+- **`agent-build` review lens** — agent / MCP / sub-agent 를 ship 하는
+  sprint 에 자동 라우팅되는 review lens. tool surface scope, permission
+  posture, sub-agent isolation, system prompt drift, SSoT, evidence,
+  failure modes 7개 subsection 을 CPO 가 점검합니다.
+- **`claude-agent-sdk-zero` template** — Python Claude Agent SDK 프로젝트
+  scaffold. solon-mcp + solon-safe permission preset 가 기본으로 wired
+  됩니다.
+- 신규 test 4개로 회귀 방지: `test-mcp-server-contract`,
+  `test-solon-safe-permissions-preset`, `test-agent-build-review-lens`,
+  `test-claude-agent-sdk-zero-template`.
+
 ## 0.6.145
 
 이번 버전은 user-facing docs 정책을 "HTML-first" 에서 "HTML-encouraged" 로

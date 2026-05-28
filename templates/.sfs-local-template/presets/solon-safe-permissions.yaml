@@ -1,0 +1,168 @@
+# solon-safe-permissions.yaml
+#
+# Runtime-agnostic permission preset for the Solon Product `sfs` workflow.
+#
+# This file is an executable summary of the CLAUDE.md "절대 금지" rules and
+# the kernel.md mainline-first / Gate 6 contract, written in a shape that
+# Claude Code, the Claude Agent SDK, Codex CLI, Cursor, and similar
+# permission-gated agent runtimes can load directly.
+#
+# Adopt by copying the relevant section into the host's permission config
+# (each runtime has its own format; the keys below are the lingua franca):
+#
+#   - Claude Code:            settings.json → permissions
+#   - Claude Agent SDK:       AgentOptions(permissions=...)
+#   - Codex CLI:              codex.toml → [permissions]
+#   - Cursor MCP:             mcp.json → permissions
+#
+# Versioning: this preset is part of the Solon distribution; it bumps with
+# the project VERSION. Consumers may pin to a specific version by copying
+# this file into their project as
+# `.sfs-local/presets/solon-safe-permissions.yaml`.
+
+version: "0.7.0"
+
+description: |
+  Solon-safe defaults. Read tools, version queries, and the routed context
+  surfaces are pre-approved because they cannot mutate consumer state.
+  Anything that writes to the working tree, the .sfs-local/ state, or git
+  must go through an explicit approval step. Anything that talks to a
+  remote (push, publish, deploy) is denied by default — Solon's policy is
+  that human pushes the release.
+
+# ─────────────────────────────────────────────────────────────────────
+# Tool-level rules
+# ─────────────────────────────────────────────────────────────────────
+
+tools:
+  pre_approved:
+    # File reads are safe; never mutate.
+    - read
+    - read_file
+    - list_directory
+    - glob
+    - grep
+
+    # Web fetch / search — read-only network egress.
+    - web_fetch
+    - web_search
+    - WebFetch
+    - WebSearch
+
+    # Solon read-only surfaces (Solon MCP server).
+    - solon.sfs_status
+    - solon.sfs_version
+    - solon.sfs_report
+    - solon.sfs_harness_doctor
+
+    # Read-only sfs subcommands when invoked directly via the host's
+    # shell wrapper (some hosts route `sfs status` through a generic
+    # bash tool rather than the MCP server).
+    - "bash:sfs status"
+    - "bash:sfs version"
+    - "bash:sfs version --check"
+    - "bash:sfs report"
+    - "bash:sfs harness doctor"
+    - "bash:sfs harness map"
+    - "bash:sfs context cat *"
+
+  ask_approval:
+    # 7-step flow surfaces — they mutate `.sfs-local/` state and should
+    # be confirmed once per session or per call (host's choice).
+    - solon.sfs_start
+    - solon.sfs_brainstorm
+    - solon.sfs_plan
+    - solon.sfs_implement
+    - solon.sfs_review
+    - solon.sfs_retro
+    - solon.sfs_decision
+    - solon.sfs_capture
+
+    # General write surfaces.
+    - write
+    - edit
+    - Edit
+    - Write
+    - MultiEdit
+
+    # Bash invocations that are not in the explicit allowlist/denylist.
+    - bash
+    - shell
+
+  denied:
+    # Solon's "절대 금지" rule: install.sh / upgrade.sh never auto-push;
+    # MCP server / Agent SDK must not push for the user either. The host
+    # is the human's review surface.
+    - "bash:git push*"
+    - "bash:git push -*"
+    - "bash:git push --*"
+
+    # Destructive recursive removes inside the working tree.
+    - "bash:rm -rf *"
+    - "bash:rm -r -f *"
+    - "bash:rm -fr *"
+
+    # Force-resets that can lose uncommitted work.
+    - "bash:git reset --hard*"
+    - "bash:git clean -fd*"
+    - "bash:git clean -fdx*"
+
+    # History rewrites that invalidate other people's checkouts.
+    - "bash:git push --force*"
+    - "bash:git push -f *"
+    - "bash:git push --force-with-lease*"
+
+    # Direct edits to managed Solon state outside the `sfs` adapters.
+    # Consumers who need to mutate `.sfs-local/` should go through the
+    # CLI / MCP server so events.jsonl + sprint state stays consistent.
+    - "edit:.sfs-local/sprints/**"
+    - "edit:.sfs-local/decisions/**"
+    - "edit:.sfs-local/events.jsonl"
+    - "write:.sfs-local/sprints/**"
+    - "write:.sfs-local/decisions/**"
+    - "write:.sfs-local/events.jsonl"
+
+# ─────────────────────────────────────────────────────────────────────
+# Workflow rules (advisory; hosts may map these to system prompt hints)
+# ─────────────────────────────────────────────────────────────────────
+
+workflow:
+  # Mainline-first. The host should not start auxiliary tooling/auth/model
+  # configuration unless it directly unblocks the user's current request.
+  mainline_first: true
+
+  # Gate 6 must run before declaring a sprint complete, even for single-
+  # agent implementation paths.
+  require_gate_6: true
+
+  # Production releases must add Release Readiness evidence (secret/auth/
+  # data/monitoring/rollback/cost) to the review or retro-light.
+  require_release_readiness_when_production: true
+
+  # Handoff-only requests are a stop contract. If the user asks only for
+  # an artifact (handoff, next-session brief, session report, 인계문서),
+  # the host writes it and STOPS — no follow-on polling, merges, deploys.
+  handoff_is_stop_contract: true
+
+  # Korean-first projects: source files start with a one-line Korean role
+  # comment after any required shebang or directive. Skip config /
+  # generated / lock files.
+  korean_role_comment_for_new_source: true
+
+# ─────────────────────────────────────────────────────────────────────
+# Evidence + audit (hosts that support audit logging)
+# ─────────────────────────────────────────────────────────────────────
+
+audit:
+  log_tool_calls: true
+  redact_in_logs:
+    - "**/auth.env"
+    - "**/.env"
+    - "ANTHROPIC_API_KEY"
+    - "OPENAI_API_KEY"
+    - "GEMINI_API_KEY"
+    - "GOOGLE_API_KEY"
+    - "CLAUDE_API_KEY"
+    - "CLAUDE_CODE_OAUTH_TOKEN"
+    - "CODEX_API_KEY"
+    - "GOOGLE_APPLICATION_CREDENTIALS"

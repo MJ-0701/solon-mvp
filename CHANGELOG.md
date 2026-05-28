@@ -1,5 +1,90 @@
 ## [Unreleased]
 
+## [0.7.0] - 2026-05-28
+
+> **Agent SDK / MCP / sub-agent integration surface — Solon goes host-agnostic without giving up bash SSoT.**
+
+This minor bump adds the first set of host-agnostic agent-building
+surfaces to Solon. The 0.6.x line stayed bash-first and runtime-neutral
+across Claude / Codex / Gemini. 0.7.0 keeps that invariant and adds
+four new ways to drive a Solon project from non-bash hosts: an MCP
+server, a portable permission preset, a review lens that catches
+agent-build failure modes, and a Claude Agent SDK starter template.
+
+### Added — Solon MCP server (0.7.0-A)
+
+- New `mcp-server/` directory with a Python MCP server
+  (`solon_mcp_server.py`) that wraps the `sfs` 7-step flow as MCP tools.
+  Compatible with Claude Desktop, Claude in Chrome, Cursor, the
+  Claude Agent SDK, and any other stdio-MCP host.
+- Twelve tools shipped in the MVP: `sfs_status`, `sfs_version`,
+  `sfs_report`, `sfs_harness_doctor`, `sfs_start`, `sfs_brainstorm`,
+  `sfs_plan`, `sfs_implement`, `sfs_review`, `sfs_retro`,
+  `sfs_decision`, `sfs_capture`. Mutating tools that need new UX
+  patterns (`sfs commit`, `sfs loop`, `sfs tidy`) are intentionally
+  deferred to follow-up patches.
+- The server shells out to the installed `sfs` binary and forwards
+  stdout **verbatim**, per kernel.md SSoT. No JSON reshaping, no
+  helpful reformatting. `$SOLON_MCP_SFS_PATH` and
+  `$SOLON_MCP_TIMEOUT_SEC` are the only configuration knobs.
+- `mcp-server/pyproject.toml` exposes a `solon-mcp` console script
+  with a sane `mcp>=1.0.0` dep pin; the rest of Solon takes no Python
+  runtime dependency.
+- `mcp-server/README.md` covers registration for Claude Desktop,
+  Claude in Chrome, Cursor, Claude Code, and the Claude Agent SDK,
+  plus an explicit "what it does NOT do" section.
+- New `tests/test-mcp-server-contract.sh` statically verifies the
+  server file shape and the README's registration coverage.
+
+### Added — Solon-safe permission preset (0.7.0-B)
+
+- New `templates/.sfs-local-template/presets/solon-safe-permissions.yaml`
+  translates the CLAUDE.md "절대 금지" rules + kernel.md
+  mainline-first / Gate 6 contract into a runtime-agnostic permission
+  shape. Auto-push, destructive bash, hard resets, and history
+  rewrites are denied by default; the `.sfs-local/` mutation surface
+  must go through `sfs` rather than direct edit.
+- New `tests/test-solon-safe-permissions-preset.sh` locks the
+  preset's load-bearing rules so a future edit cannot quietly weaken
+  the safety contract.
+
+### Added — `agent-build` review lens (0.7.0-C)
+
+- `sfs review --lens agent-build` (aliases: `agent`, `agents`,
+  `agent-sdk`, `mcp`, `mcp-server`, `sub-agent`) registered in
+  `sfs-review.sh`'s lens normalizer, label resolver, and
+  infer-review-lens heuristic. The lens auto-routes when the diff
+  touches `mcp-server/`, `templates/claude-agent-sdk-zero/`, or
+  `agents/skills/`, or when the plan/log text mentions agent SDK /
+  MCP / sub-agent keywords (EN + KO).
+- New routed policy
+  `templates/.sfs-local-template/context/policies/agent-build-review-lens.md`
+  lists the seven CPO subsections (tool surface scope, permission
+  posture, sub-agent isolation, system prompt drift, bash adapter
+  SSoT, evidence + audit, failure modes specific to agent-build),
+  with concrete failure examples drawn from the 0.6.142 stdin-hang
+  regression and the 0.6.143 dev-staging-label leak.
+- New `tests/test-agent-build-review-lens.sh` end-to-end contract test
+  for the lens registration.
+
+### Added — `claude-agent-sdk-zero` template (0.7.0-D)
+
+- New `templates/claude-agent-sdk-zero/` scaffold: minimal Python
+  project that ships an `agent.py` entrypoint, a version-controlled
+  `system_prompt.md`, a pinned copy of `solon-safe-permissions.yaml`,
+  and a `pyproject.toml` that pulls `claude-agent-sdk` and
+  `solon-mcp` as runtime deps. Consumers materialize via
+  `sfs bootstrap --template claude-agent-sdk-zero <name>`.
+- Smoke pytest (`tests/test_agent_smoke.py`) inside the template
+  verifies system-prompt principles, preset shape, MCP registration,
+  and that no obvious secret material was committed. Runs without
+  an API key.
+- New top-level `tests/test-claude-agent-sdk-zero-template.sh`
+  statically verifies the template's required files, placeholders,
+  Solon principle coverage in the system prompt, and that the
+  template's preset stays in sync with the upstream preset's
+  load-bearing rules.
+
 ## [0.6.145] - 2026-05-28
 
 > **User-facing docs policy softened from HTML-first to HTML-encouraged — current docs/ stays MD by explicit choice.**

@@ -380,6 +380,7 @@ normalize_review_lens_value() {
     ops|infra|infra/devops|devops|runbook|operations) printf 'ops\n' ;;
     management-admin|management/admin|management|admin-finance|finance|financial|bookkeeping|accounting|tax|cashflow|payroll) printf 'management-admin\n' ;;
     release|deploy|deployment) printf 'release\n' ;;
+    agent-build|agent|agents|agent-sdk|mcp|mcp-server|agent-tool|sub-agent|subagent) printf 'agent-build\n' ;;
     *)
       return 1
       ;;
@@ -407,8 +408,8 @@ fi
 REVIEW_STAGE_REQUEST="${_normalized_stage}"
 _normalized_lens="$(normalize_review_lens_value "${REVIEW_LENS}" || true)"
 if [[ -z "${_normalized_lens}" ]]; then
-  echo "unknown review lens ${REVIEW_LENS}, valid: auto, artifact, code, docs, source-docs, simplify, process-lean, security, performance, api-contract, strategy, design, taxonomy, ddd-tdd, qa, ops, management-admin, release" >&2
-  echo "aliases: strategy-pm -> strategy, design/frontend -> design, infra -> ops, source-driven -> source-docs, perf -> performance, performance-algorithm -> performance, process/ceremony -> process-lean, api/schema -> api-contract, DDD/TDD -> ddd-tdd, finance/accounting -> management-admin" >&2
+  echo "unknown review lens ${REVIEW_LENS}, valid: auto, artifact, code, docs, source-docs, simplify, process-lean, security, performance, api-contract, strategy, design, taxonomy, ddd-tdd, qa, ops, management-admin, release, agent-build" >&2
+  echo "aliases: strategy-pm -> strategy, design/frontend -> design, infra -> ops, source-driven -> source-docs, perf -> performance, performance-algorithm -> performance, process/ceremony -> process-lean, api/schema -> api-contract, DDD/TDD -> ddd-tdd, finance/accounting -> management-admin, agent/agent-sdk/mcp/mcp-server/sub-agent -> agent-build" >&2
   exit "${SFS_EXIT_BADCLI}"
 fi
 REVIEW_LENS="${_normalized_lens}"
@@ -807,7 +808,15 @@ infer_review_lens() {
       printf 'docs\n'
       return 0
       ;;
+    *"agent sdk"*|*"claude agent sdk"*|*"agent-sdk"*|*"mcp server"*|*"mcp-server"*|*"mcp tool"*|*"mcp tools"*|*"sub-agent"*|*"subagent"*|*"하위 에이전트"*|*"에이전트 sdk"*|*"에이전트 빌드"*|*"agent build"*)
+      printf 'agent-build\n'
+      return 0
+      ;;
   esac
+  if [[ "$paths" == *"mcp-server/"* || "$paths" == *"claude-agent-sdk-zero/"* || "$paths" == *"agents/skills/"* ]]; then
+    printf 'agent-build\n'
+    return 0
+  fi
   if [[ "$lowered" == *"code"* || "$lowered" == *"source"* ]]; then
     printf 'code\n'
     return 0
@@ -833,6 +842,7 @@ review_lens_label() {
     ops) printf 'ops/infra readiness lens' ;;
     management-admin) printf 'management/admin finance evidence lens' ;;
     release) printf 'release readiness lens' ;;
+    agent-build) printf 'AI agent / MCP server build review lens' ;;
     *) printf 'artifact acceptance lens' ;;
   esac
 }

@@ -1,0 +1,99 @@
+# solon-safe-permissions.yaml — pinned copy for <PROJECT-NAME>.
+#
+# This file is materialized from
+# `templates/.sfs-local-template/presets/solon-safe-permissions.yaml`
+# at scaffold time. After scaffolding, edit this copy freely — your
+# changes will NOT be overwritten by future `sfs upgrade` runs.
+#
+# To re-sync to the latest upstream preset, run:
+#
+#     sfs upgrade --preset solon-safe-permissions
+#
+# (or copy the upstream file by hand).
+
+version: "0.7.0"
+
+description: |
+  Solon-safe defaults for <PROJECT-NAME>. Read tools, version queries,
+  and routed context surfaces are pre-approved. Mutating tools require
+  per-call approval. Remote-mutation operations (git push, deploy,
+  publish) are denied by default.
+
+tools:
+  pre_approved:
+    - read
+    - read_file
+    - list_directory
+    - glob
+    - grep
+    - web_fetch
+    - web_search
+    - WebFetch
+    - WebSearch
+    - solon.sfs_status
+    - solon.sfs_version
+    - solon.sfs_report
+    - solon.sfs_harness_doctor
+    - "bash:sfs status"
+    - "bash:sfs version"
+    - "bash:sfs report"
+    - "bash:sfs harness doctor"
+    - "bash:sfs context cat *"
+
+  ask_approval:
+    - solon.sfs_start
+    - solon.sfs_brainstorm
+    - solon.sfs_plan
+    - solon.sfs_implement
+    - solon.sfs_review
+    - solon.sfs_retro
+    - solon.sfs_decision
+    - solon.sfs_capture
+    - write
+    - edit
+    - Edit
+    - Write
+    - MultiEdit
+    - bash
+    - shell
+
+  denied:
+    - "bash:git push*"
+    - "bash:git push -*"
+    - "bash:git push --*"
+    - "bash:rm -rf *"
+    - "bash:rm -r -f *"
+    - "bash:rm -fr *"
+    - "bash:git reset --hard*"
+    - "bash:git clean -fd*"
+    - "bash:git clean -fdx*"
+    - "bash:git push --force*"
+    - "bash:git push -f *"
+    - "bash:git push --force-with-lease*"
+    - "edit:.sfs-local/sprints/**"
+    - "edit:.sfs-local/decisions/**"
+    - "edit:.sfs-local/events.jsonl"
+    - "write:.sfs-local/sprints/**"
+    - "write:.sfs-local/decisions/**"
+    - "write:.sfs-local/events.jsonl"
+
+workflow:
+  mainline_first: true
+  require_gate_6: true
+  require_release_readiness_when_production: true
+  handoff_is_stop_contract: true
+  korean_role_comment_for_new_source: true
+
+audit:
+  log_tool_calls: true
+  redact_in_logs:
+    - "**/auth.env"
+    - "**/.env"
+    - "ANTHROPIC_API_KEY"
+    - "OPENAI_API_KEY"
+    - "GEMINI_API_KEY"
+    - "GOOGLE_API_KEY"
+    - "CLAUDE_API_KEY"
+    - "CLAUDE_CODE_OAUTH_TOKEN"
+    - "CODEX_API_KEY"
+    - "GOOGLE_APPLICATION_CREDENTIALS"

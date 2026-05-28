@@ -1,0 +1,21 @@
+# 한국어 역할 주석: Python 빌드/캐시 산출물과 로컬 비밀을 git 추적에서 제외한다.
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+
+# Editor / OS noise.
+.DS_Store
+.vscode/
+.idea/
+
+# Solon workbench scratch (events live under .sfs-local/, not here).
+.sfs-local/tmp/
+
+# Local secrets.
+.env
+auth.env
