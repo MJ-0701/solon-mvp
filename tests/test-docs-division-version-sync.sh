@@ -50,7 +50,7 @@ for file in "${docs[@]}"; do
   assert_not_contains "${file}" "0.6.27 기준" "docs no stale 0.6.27 기준 ${file}"
 done
 
-expected_version="0.6.141"
+expected_version="0.6.142"
 assert_contains "${DIST_DIR}/VERSION" "${expected_version}" "version bumped"
 assert_contains "${DIST_DIR}/CHANGELOG.md" "## [${expected_version}]" "changelog current version"
 assert_contains "${DIST_DIR}/RELEASE-NOTES.md" "## ${expected_version}" "release notes current version"

@@ -7,6 +7,24 @@
 
 ---
 
+## 0.6.142
+
+이번 버전은 0.6.139 thin-router 리팩토링 이후 발견된 review executor stdin
+hang 회귀와, 0.6.141 harness 추가 시 함께 들어간 maintainer-private dev path
+누설을 정리합니다.
+
+- `sfs review --executor gemini` 가 authenticated 분기에서 `gemini --help`
+  capability probe 의 stdin 을 닫지 않아 일부 CLI 환경에서 무한 대기하던
+  문제를 수정했습니다. 같은 방식으로 `claude auth status` / `codex login
+  status` 점검도 stdin 을 닫습니다.
+- `scripts/sfs-harness.sh` 안의 dated docset 경로 두 곳을 제거하고, 비표준
+  test/release 위치를 쓰는 프로젝트는 `SFS_HARNESS_EXTRA_TEST_DIRS` /
+  `SFS_HARNESS_EXTRA_RELEASE_FILES` 환경변수로 선언하도록 일반화했습니다.
+- `install.sh` 가 `.sfs-local/divisions.yaml` 생성 시 `<PROJECT-NAME>` 도
+  치환합니다. `model-profiles.yaml` 과 일관성이 맞춰집니다.
+- private-dev-path hygiene 테스트가 dated docset 패턴 (`YYYY-MM-DD-sfs-v\d`)
+  과 `phase1-mvp-templates` 를 직접 검출하도록 강화됐습니다.
+
 ## 0.6.141
 
 이번 버전은 하네스 엔지니어링을 원칙에서 프로젝트 점검 기능으로 끌어올립니다.

@@ -1,5 +1,39 @@
 ## [Unreleased]
 
+## [0.6.142] - 2026-05-28
+
+> **Review executor capability probe no longer hangs on caller stdin; project harness paths drop maintainer-private docset names.**
+
+### Fixed
+
+- Review executor capability probe (`sfs_gemini_supports_model_flag`) now
+  redirects `gemini --help` stdin to `/dev/null`. The 0.6.139 thin-router
+  refactor left the probe inheriting its caller's stdin, so any executor
+  (real or fake bridge in tests) that reads stdin would block until the
+  outer process gave up. `test-review-auth-preflight` reproduced this as
+  a 35s+ hang in the authenticated branch.
+- Same `</dev/null` close applied to `claude auth status` and
+  `codex login status` capability checks in `executor_auth_ready` so future
+  CLI versions that read stdin on `status` cannot reintroduce the same
+  silent hang.
+- Removed two hardcoded maintainer-private dev-staging paths
+  (`2026-04-19-sfs-v0.4/...`) from `scripts/sfs-harness.sh` `detect_test_surface`
+  and `detect_release_surface`. Replaced with documented
+  `SFS_HARNESS_EXTRA_TEST_DIRS` / `SFS_HARNESS_EXTRA_RELEASE_FILES`
+  environment variables for consumers that want to declare non-standard
+  test/release homes.
+- `install.sh` now substitutes `<PROJECT-NAME>` in `divisions.yaml` to match
+  the existing substitution in `model-profiles.yaml`. Consumer
+  `.sfs-local/divisions.yaml` no longer ships the raw placeholder.
+
+### Tests
+
+- Strengthened `test-private-dev-path-hygiene.sh` patterns to fail loudly on
+  dated docset directories (`YYYY-MM-DD-sfs-v\d`) and `phase1-mvp-templates`
+  references — the 0.6.141 leak slipped through because the prior pattern set
+  only watched the canonical workdir name. `QA-REPORT-*.md` historical
+  evidence files are exempted alongside `CHANGELOG.md` / `RELEASE-NOTES.md`.
+
 ## [0.6.141] - 2026-05-28
 
 > **Project harness maps make the AI work environment inspectable.**

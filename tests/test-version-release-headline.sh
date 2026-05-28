@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.6.141" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.6.141" "version output"
-assert_contains_text "${output}" "latest 0.6.141" "latest output"
+[[ "${plain_output}" == "sfs 0.6.142" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.6.142" "version output"
+assert_contains_text "${output}" "latest 0.6.142" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Project harness maps make the AI work environment inspectable." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Review executor capability probe no longer hangs on caller stdin; project harness paths drop maintainer-private docset names." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline 이번 버전은 하네스 엔지니어링을 원칙에서 프로젝트 점검 기능으로 끌어올립니다." "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline 이번 버전은 0.6.139 thin-router 리팩토링 이후 발견된 review executor stdin" "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

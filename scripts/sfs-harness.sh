@@ -113,21 +113,37 @@ division_state() {
 
 detect_test_surface() {
   [ -d "tests" ] && return 0
-  [ -d "2026-04-19-sfs-v0.4/solon-mvp-dist/tests" ] && return 0
   [ -f "package.json" ] && grep -Eq '"(test|smoke|build)"[[:space:]]*:' package.json 2>/dev/null && return 0
   [ -f "pnpm-lock.yaml" ] && return 0
   [ -f "pom.xml" ] && return 0
   [ -f "build.gradle" ] && return 0
   [ -f "build.gradle.kts" ] && return 0
   [ -x "./gradlew" ] && return 0
+  # Allow projects with non-standard test homes to declare them without
+  # leaking maintainer-private paths into shipped product code.
+  if [ -n "${SFS_HARNESS_EXTRA_TEST_DIRS:-}" ]; then
+    local _td
+    IFS=':' read -ra _SFS_HARNESS_TEST_DIRS <<< "${SFS_HARNESS_EXTRA_TEST_DIRS}"
+    for _td in "${_SFS_HARNESS_TEST_DIRS[@]}"; do
+      [ -n "${_td}" ] && [ -d "${_td}" ] && return 0
+    done
+  fi
   return 1
 }
 
 detect_release_surface() {
-  [ -f "2026-04-19-sfs-v0.4/scripts/verify-product-release.sh" ] && return 0
   [ -f "scripts/verify-product-release.sh" ] && return 0
   [ -f ".github/workflows/sfs-pr-check.yml" ] && return 0
   [ -f ".github/workflows/windows-scoop-smoke.yml" ] && return 0
+  # Allow projects with non-standard release verifiers to declare them
+  # without leaking maintainer-private paths into shipped product code.
+  if [ -n "${SFS_HARNESS_EXTRA_RELEASE_FILES:-}" ]; then
+    local _rf
+    IFS=':' read -ra _SFS_HARNESS_RELEASE_FILES <<< "${SFS_HARNESS_EXTRA_RELEASE_FILES}"
+    for _rf in "${_SFS_HARNESS_RELEASE_FILES[@]}"; do
+      [ -n "${_rf}" ] && [ -f "${_rf}" ] && return 0
+    done
+  fi
   return 1
 }
 

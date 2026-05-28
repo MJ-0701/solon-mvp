@@ -615,12 +615,14 @@ fi
 # divisions.yaml — 기존 있으면 skip (사용자 수정분 보호)
 if [ ! -f "$TARGET/.sfs-local/divisions.yaml" ]; then
   cp "$SOURCE_DIR/templates/.sfs-local-template/divisions.yaml" "$TARGET/.sfs-local/divisions.yaml"
-  # 자동 치환
+  # 자동 치환 — model-profiles.yaml 와 일치시켜 <PROJECT-NAME> 도 함께 치환한다.
+  # <DEPLOY> 는 consumer 수동 치환 대상 (안내문 안의 도메인 힌트라 자동 치환 위험).
   "${SED_INPLACE[@]}" \
     -e "s|<DATE>|$TODAY|g" \
     -e "s|<SOLON-VERSION>|$SOLON_VERSION_VAL|g" \
+    -e "s|<PROJECT-NAME>|$PROJECT_NAME|g" \
     "$TARGET/.sfs-local/divisions.yaml" 2>/dev/null || true
-  ok "  divisions.yaml 생성 (auto-sub: <DATE>, <SOLON-VERSION>)"
+  ok "  divisions.yaml 생성 (auto-sub: <DATE>, <SOLON-VERSION>, <PROJECT-NAME>)"
 else
   ok "  divisions.yaml 기존 유지"
 fi

@@ -1753,7 +1753,10 @@ EOF
 sfs_gemini_supports_model_flag() {
   command -v gemini >/dev/null 2>&1 || return 1
   local help_output
-  help_output="$(gemini --help 2>&1 || true)"
+  # Capability probe must not inherit the caller's stdin; without `</dev/null`
+  # CLIs (or fake test bridges) that read stdin will block forever waiting on
+  # EOF when sfs review is invoked from an interactive parent shell.
+  help_output="$(gemini --help </dev/null 2>&1 || true)"
   grep -Fq -- '--model' <<<"${help_output}"
 }
 
@@ -1907,11 +1910,11 @@ executor_auth_ready() {
   case "$profile" in
     claude)
       [[ -n "${ANTHROPIC_API_KEY:-}" || -n "${CLAUDE_API_KEY:-}" || -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" || "${SFS_CLAUDE_AUTH_READY:-0}" == "1" ]] && return 0
-      command -v claude >/dev/null 2>&1 && claude auth status 2>/dev/null | grep -q '"loggedIn"[[:space:]]*:[[:space:]]*true'
+      command -v claude >/dev/null 2>&1 && claude auth status </dev/null 2>/dev/null | grep -q '"loggedIn"[[:space:]]*:[[:space:]]*true'
       ;;
     codex)
       [[ -n "${OPENAI_API_KEY:-}" || -n "${CODEX_API_KEY:-}" || "${SFS_CODEX_AUTH_READY:-0}" == "1" ]] && return 0
-      command -v codex >/dev/null 2>&1 && codex login status >/dev/null 2>&1
+      command -v codex >/dev/null 2>&1 && codex login status </dev/null >/dev/null 2>&1
       ;;
     gemini)
       [[ -n "${GEMINI_API_KEY:-}" || -n "${GOOGLE_API_KEY:-}" || -n "${GOOGLE_APPLICATION_CREDENTIALS:-}" || "${SFS_GEMINI_AUTH_READY:-0}" == "1" ]]
