@@ -7,6 +7,22 @@
 
 ---
 
+## 0.6.143
+
+이번 버전은 0.6.142 에서 잠시 grandfathered 됐던 maintainer 측 dev-staging
+라벨을 active 제품 표면에서 일괄 제거하고, hygiene 테스트가 이 누설을
+차단하도록 잠급니다.
+
+- 8 개 template script 의 header banner 에서 `solon-mvp-dist/...` 경로 prefix
+  를 제거하고 `Path note` 와 `Visibility` 표기를 도메인 중립 버전으로 갱신.
+- `AGENTS.md` 의 maintainer 측 dev workflow 설명에서 private staging workdir
+  이름을 제거.
+- `scripts/install-cli-discovery.sh` comment 와 `tests/fixtures/token-diet/*.md`
+  review-finding sample, 그리고 `tests/test-md-split-audit.sh` assertion 의
+  `solon-mvp-dist` 인용 제거.
+- private-dev-path hygiene 테스트가 이제 `solon-mvp-dist` 등장 자체를
+  실패 신호로 본다.
+
 ## 0.6.142
 
 이번 버전은 0.6.139 thin-router 리팩토링 이후 발견된 review executor stdin

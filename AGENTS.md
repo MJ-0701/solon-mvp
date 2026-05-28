@@ -25,11 +25,11 @@ load_when: "Read when this product document is directly relevant."
    - **`templates/` 변경** → consumer 호환성 영향 평가, placeholder 형식 유지.
    - **새 release cut** → private dev staging checkout 의 `scripts/cut-release.sh` 에서 진행 (본 repo 에는 cut tooling 없음).
 
-## 본 repo 와 docset 관계
+## 본 repo 와 dev staging 관계
 
-- 본 `solon-mvp` 는 private dev staging docset 의 **MVP 배포판**.
-- 실 개발 (dev staging) = docset 안 `solon-mvp-dist/`. **본 repo (stable) = release cut 결과물 mirror**.
-- 따라서 본 repo 에서는 직접 commit 하지 말고, dev staging 에서 변경 후 `cut-release.sh` 로 sync 받는 것을 권장 (R-D1 dev-first 원칙).
+- 본 `solon-mvp` 는 maintainer 측 dev staging 의 **MVP 배포판 (stable mirror)**.
+- 실 개발은 maintainer 의 private dev staging 에서 일어나고, 본 repo 는 release cut 결과물의 mirror 다.
+- 따라서 본 repo 에서는 직접 commit 하지 말고, dev staging 에서 변경 후 release cut 으로 sync 받는 것을 권장 (R-D1 dev-first 원칙).
 - 예외 (R-D1 hotfix path): 사용 중 stable 에서 발견된 critical bug 만 stable 직접 수정 허용. 단 같은 사이클 안 dev staging 에 동일 변경 반영 (`sync(stable): <sha>` commit message 패턴).
 
 ## 비동작 (Non-Goals)

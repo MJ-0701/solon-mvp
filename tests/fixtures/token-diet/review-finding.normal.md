@@ -7,7 +7,7 @@ understand the concern. However, the compact version still has to retain the
 machine-checkable acceptance fields because those fields are how SFS prevents a
 short answer from becoming an unverifiable answer.
 
-file: `solon-mvp-dist/templates/.sfs-local-template/context/kernel.md`
+file: `templates/.sfs-local-template/context/kernel.md`
 line: 68
 verdict: PARTIAL if compactness is treated as success by itself
 evidence: compactness must preserve warnings, decisions, source links/paths,

@@ -257,7 +257,7 @@ discover_source_dir() {
   if [ -n "$SOURCE_DIR" ] && [ -f "$SOURCE_DIR/templates/codex-skill/SKILL.md" ]; then
     return 0
   fi
-  # try: alongside this script's parent (solon-mvp-dist root)
+  # try: alongside this script's parent (distribution root)
   local self_dir
   self_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd 2>/dev/null)"
   if [ -f "$self_dir/templates/codex-skill/SKILL.md" ]; then

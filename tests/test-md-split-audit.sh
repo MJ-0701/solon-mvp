@@ -43,7 +43,7 @@ assert_contains_file "${SCRIPT}" "does not split, rewrite, move, or delete files
 out="$(bash "${SCRIPT}" --root "${REPO_ROOT}" --threshold 400 --limit 5)"
 assert_contains_text "${out}" "# MD split audit" "audit header"
 assert_contains_text "${out}" "threshold=400" "audit threshold"
-assert_contains_text "${out}" 'solon-mvp-dist/CHANGELOG.md' "top oversized doc"
+assert_contains_text "${out}" 'CHANGELOG.md' "top oversized doc"
 
 set +e
 bad="$(bash "${SCRIPT}" --threshold nope 2>&1)"

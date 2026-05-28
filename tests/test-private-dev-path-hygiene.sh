@@ -30,17 +30,18 @@ fixed_patterns="${tmp}/patterns.txt"
 printf '%s\n%s\n%s\n' "${private_name}" "${absolute_path}" "${home_path}" \
   > "${fixed_patterns}"
 
-# Regex patterns: dated docset directories (e.g. 2026-04-19-sfs-v0.4) and
-# the docset-internal phase template directory. The unqualified
-# `solon-mvp-dist` label is grandfathered for now — it appears in script
-# header banners and test fixtures as legacy dev-provenance metadata and is
-# tracked as a separate cleanup. New leaks of dated docset directories,
-# absolute /Users/mj/ paths, or `phase1-mvp-templates` references will fail
-# this hygiene test immediately.
+# Regex patterns: dated docset directories (e.g. 2026-04-19-sfs-v0.4), the
+# docset-internal phase template directory, and the dev-staging workdir name
+# (`solon-mvp-dist`). 0.6.142 unblocked the dated-docset class; 0.6.143
+# closes the residual `solon-mvp-dist` label leaks across script header
+# banners, AGENTS.md, install-cli-discovery.sh, and test fixtures.
+# `CHANGELOG.md`, `RELEASE-NOTES.md`, and `QA-REPORT-*.md` are historical
+# evidence and exempt via the find filter below.
 regex_patterns="${tmp}/regex.txt"
 {
   printf '%s\n' '[0-9]{4}-[0-9]{2}-[0-9]{2}-sfs-v[0-9]'
   printf '%s\n' 'phase1-mvp-templates'
+  printf '%s\n' 'solon-mvp-dist'
 } > "${regex_patterns}"
 
 scan_file="${tmp}/files.txt"

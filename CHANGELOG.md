@@ -1,5 +1,35 @@
 ## [Unreleased]
 
+## [0.6.143] - 2026-05-28
+
+> **Maintainer-side dev-staging label removed from active product surfaces.**
+
+### Fixed
+
+- Stripped the `solon-mvp-dist/...` path prefix from the header banners of
+  the eight template scripts (`sfs-plan`, `sfs-retro`, `sfs-decision`,
+  `sfs-review`, `sfs-common`, `sfs-start`, `sfs-loop`, `sfs-status`). Header
+  `Path note` now points at the in-repo path
+  (`templates/.sfs-local-template/scripts/sfs-X.sh`) and `Visibility` reads
+  `distribution template` instead of `business-only (solon-mvp-dist staging
+  asset)`.
+- Reworded `AGENTS.md` §"본 repo 와 dev staging 관계" to describe the
+  maintainer-side dev workflow without naming the private staging workdir.
+- Replaced the `solon-mvp-dist root` comment in `install-cli-discovery.sh`
+  with the generic `distribution root` wording.
+- Cleaned three `tests/fixtures/token-diet/*.md` review-finding samples to
+  cite the in-repo template path instead of the private staging path.
+- Relaxed `tests/test-md-split-audit.sh`'s assertion from the
+  `solon-mvp-dist/CHANGELOG.md` substring to plain `CHANGELOG.md` — the
+  audit still asserts that the largest file is the changelog, but no longer
+  pins the maintainer-side dev path.
+
+### Tests
+
+- Extended `test-private-dev-path-hygiene.sh` regex patterns with
+  `solon-mvp-dist`. The leak class that was grandfathered in 0.6.142 is now
+  blocked at the source.
+
 ## [0.6.142] - 2026-05-28
 
 > **Review executor capability probe no longer hangs on caller stdin; project harness paths drop maintainer-private docset names.**
