@@ -28,6 +28,7 @@ module:
 - `policies/agent-adapter-doc-refactor.md` — keep root LLM agent docs frontmatter-only and auto-refactor recognized SFS adapter bloat.
 - `policies/sfs-router-doc-refactor.md` — keep `SFS.md` as a thin router and auto-refactor recognized policy dumps.
 - `policies/runtime-token-firewall.md` — capsule-only worker/review handoff and no full-history forwarding.
+- `policies/sub-agent-capsule-contract.md` — structured field contract (goal/ac/files_scope/tools_allowed/output_paths/token_budget/timeout/pii_rules) for that capsule handoff.
 - `policies/session-continuation-guard.md` — stop long-session token bleed with fresh-session handoff.
 - `policies/division-subagent-council.md` — six core divisions as always-on conceptual sub-agents.
 - `policies/mainline-focus-guard.md` — keep helper tool/setup work subordinate to the main objective.
