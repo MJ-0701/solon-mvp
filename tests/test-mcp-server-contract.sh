@@ -44,6 +44,8 @@ expected_tools=(
   sfs_status
   sfs_version
   sfs_report
+  sfs_report_bug
+  sfs_flowcheck
   sfs_harness_doctor
   sfs_start
   sfs_brainstorm

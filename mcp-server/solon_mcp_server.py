@@ -27,7 +27,7 @@
 #
 #   sfs_status, sfs_version, sfs_start, sfs_brainstorm, sfs_plan,
 #   sfs_implement, sfs_review, sfs_retro, sfs_decision, sfs_capture,
-#   sfs_report, sfs_harness_doctor
+#   sfs_report, sfs_report_bug, sfs_flowcheck, sfs_harness_doctor
 #
 # Tools intentionally excluded from MVP:
 #
@@ -130,6 +130,26 @@ def sfs_report() -> str:
     """Print the active sprint's report.md (and route docs/solon/ shared
     handoff entries) without launching an editor."""
     return _run_sfs(["report"])
+
+
+@mcp.tool()
+def sfs_report_bug() -> str:
+    """File an SFS-PRODUCT bug to the official GitHub Issues channel
+    (MJ-0701/solon-product, label `bug`), then gate fix work on explicit
+    user confirmation. Prints the official channel + report procedure +
+    confirm-gate contract; distinct from `sfs_report` (the sprint report)."""
+    return _run_sfs(["report-bug"])
+
+
+@mcp.tool()
+def sfs_flowcheck(sprint: str = "") -> str:
+    """Run `sfs flowcheck` — Flow-Conformance Postflight self-check that SFS
+    executed per its documented flow. Reads the sprint's non-collapsing flow
+    events + capture ledger and asserts the FCP invariants (model-tier,
+    conflict-surfaced, gate-order, stop-the-line, pr-reviewed). A critical
+    invariant unresolved exits nonzero (blocking). Methodology-conformance,
+    not Gate 6 product acceptance."""
+    return _run_sfs(["flowcheck", "--sprint", sprint] if sprint else ["flowcheck"])
 
 
 @mcp.tool()

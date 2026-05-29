@@ -28,6 +28,10 @@ load_when: ["capture", "note", "decision", "review order", "waiver", "blocker", 
   a Gate 3 plan that marked `user_approval_required: true`. Gate 3 review PASS
   is not that approval; capture the user's natural-language approval before
   running `sfs implement`.
+- `--scope <wu|sprint|until-revoked>` records how long a user override/decision
+  is authoritative. Every product-affecting override of an SFS default (model
+  tier, flow deviation) carries one (`policies/user-override-precedence.md`);
+  flowcheck reads it to decide whether a default deviation is covered.
 - Capture before the next dependent command only when the fact affects that
   command. The point is to keep an approval/evidence fact available to the
   workbench, not to create an extra ritual between every SFS step.

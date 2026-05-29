@@ -1008,6 +1008,38 @@ append_event() {
   mv -f "${tmp}" "${SFS_EVENTS_FILE}" || return 1
 }
 
+# append_flow_event TYPE [key=value ...] — NON-COLLAPSING flow-conformance event.
+# Flow-Conformance Postflight (FCP) needs every emission preserved so flowcheck
+# can assert gate ORDER and per-role model resolution; append_event compacts by
+# type+identifier and would purge duplicates, so flow events use this pure-append
+# path instead. The active sprint_id is always stamped because append_event's
+# compaction rewrite drops any events.jsonl line lacking the active sprint_id —
+# without it a later regular capture would silently delete the flow record.
+# Contract types: model_resolved | worker_dispatched | gate_passed | conflict_surfaced.
+append_flow_event() {
+  local etype="${1:?type required}"
+  shift || true
+  local ts sid body="" kv k v
+  ts="$(date +%Y-%m-%dT%H:%M:%S%z 2>/dev/null | sed -E 's/([0-9]{2})$/:\1/')"
+  sid="$(read_current_sprint 2>/dev/null || true)"
+  for kv in "$@"; do
+    k="${kv%%=*}"
+    v="${kv#*=}"
+    [[ -n "${k}" ]] || continue
+    # sprint_id is auto-stamped below; ignore a caller-supplied one to avoid a
+    # duplicate JSON key.
+    [[ "${k}" == "sprint_id" ]] && continue
+    body+=",\"$(sfs_json_escape "${k}")\":\"$(sfs_json_escape "${v}")\""
+  done
+  local line="{\"ts\":\"${ts}\",\"type\":\"$(sfs_json_escape "${etype}")\""
+  if [[ -n "${sid}" ]]; then
+    line+=",\"sprint_id\":\"$(sfs_json_escape "${sid}")\""
+  fi
+  line+="${body}}"
+  mkdir -p "${SFS_LOCAL_DIR}"
+  printf '%s\n' "${line}" >> "${SFS_EVENTS_FILE}" || return 1
+}
+
 # ─────────────────────────────────────────────────────────────────────
 # GATE ID HELPERS (WU-25 §3 추가, gates.md §1 7-enum SSoT 정합)
 # ─────────────────────────────────────────────────────────────────────

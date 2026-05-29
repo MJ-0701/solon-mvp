@@ -107,7 +107,7 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   root-level `checklist.md` / `context-notes.md` files.
 - Gate 3 plan review is mandatory before implementation. Use
   `sfs review --gate 3` with the appropriate lens and an independent executor
-  when available; the plan author should not be the only evaluator.
+  when available; the plan author should not be the only evaluator. On a Gate 3 PASS emit `sfs event gate_passed gate=G3 order_index=<n> self_cpo=pass` so flowcheck sees the gate sequence (`fcp-gate-order`).
 - Do not offer `sfs implement`, worker delegation, or model-selection choices
   from a ready Gate 3 report until Gate 3 review has a PASS/accepted result.
   If the plan is ready, the final `Next` is the plan review command.

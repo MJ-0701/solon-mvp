@@ -6,7 +6,7 @@
 # cost-aware defaults, but does not block an "all high-end models" policy when
 # the project accepts the cost and latency.
 
-version: 1.6
+version: 1.7
 project: "<PROJECT-NAME>"
 created: "<DATE>"
 solon_mvp_version: "<SOLON-VERSION>"
@@ -466,6 +466,8 @@ resolution_rules:
   - "Question routing is cost-aware: deterministic relay and missing-argument prompts use intake_economy; focused question generation and brainstorm facilitation use facilitator_standard; product identity, architecture, gate, AC, or files_scope shifts escalate to strategic_high."
   - "Advisor means the highest configured model for the active runtime: Claude Opus 4.7, Codex gpt-5.5 with xhigh reasoning, Gemini gemini-3.1-pro-preview, or the custom high-end equivalent."
   - "For Claude runtime, solon_recommended resolves implementation-worker, division-worker, coding-helper, and mechanical-implementation-helper to sonnet-4.6. Haiku is a non-coding helper tier only and must not write code."
+  - "Named-policy precedence (#4): when selected_policy is a named policy (solon_recommended or all_high), policies.<selected_policy>.agent_tiers is authoritative for every agent whose agent_defaults.<agent>.configured_tier is `current`. A per-agent configured_tier set to an explicit non-`current` tier overrides the policy map for that agent only; `current` defers to the selected policy's agent_tiers. selected_policy=current_model resolves every role to the host current model regardless of configured_tier. This closes the worker-tiering leak where every-agent configured_tier=current allowed a worker to resolve to the host model instead of the policy worker tier."
+  - "Config-drift validation (warn-only, #4): install, upgrade, and flowcheck must WARN when an agent's tier resolved via selected_policy.agent_tiers differs from what agent_defaults.<agent>.configured_tier would produce (e.g. a worker resolving to the host model instead of the policy worker tier). Do not auto-rewrite configured_tier; surface the divergence and let the project owner decide."
   - "For substantive research, prefer a Gemini researcher executor with gemini-3.1-pro-preview when available; Claude research_high is a Sonnet 4.6 fallback."
   - "For Gemini runtime, use only Gemini 3.x-or-newer route names: gemini-3.1-pro-preview for strategic/research/review, gemini-3-flash-preview for agentic coding and bounded implementation helpers, and gemini-3.1-flash-lite for relay/probe/economy helpers. Do not use the old auto alias, models below 3.x, or unsupported generic aliases."
   - "Do not assume the executor CLI can enforce a model through command-line flags. SFS routing is a prompt/profile contract by default; if a runtime needs explicit model selection, provide a known-good SFS_REVIEW_<EXECUTOR>_CMD or host configuration."

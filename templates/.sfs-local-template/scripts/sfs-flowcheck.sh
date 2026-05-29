@@ -1,0 +1,310 @@
+#!/usr/bin/env bash
+# .sfs-local/scripts/sfs-flowcheck.sh
+#
+# Solon SFS — `sfs flowcheck [--sprint <id>]` Flow-Conformance Postflight (FCP).
+# At work-unit close, assert that SFS executed per its documented default flow by
+# reading the non-collapsing flow events (model_resolved / worker_dispatched /
+# gate_passed / conflict_surfaced) plus the capture ledger (waiver / exception
+# override) from events.jsonl. This is methodology-conformance, NOT product
+# acceptance (Gate 6) and NOT a visible-failure triage (debugging-and-error-
+# recovery): it catches silent divergence that ran without error.
+#
+# Enforcement is hybrid. Critical invariant unresolved -> nonzero exit (blocking);
+# advisory-only -> warn + exit 0. A `sfs capture --kind waiver` whose text names
+# the invariant id (or a bare flowcheck waiver) downgrades that critical to waived.
+# Invariant SSoT: policies/flow-conformance-postflight.md.
+
+set -euo pipefail
+
+SFS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./sfs-common.sh
+source "${SFS_SCRIPT_DIR}/sfs-common.sh"
+
+: "${SFS_EXIT_OK:=0}"
+: "${SFS_EXIT_BADCLI:=7}"
+SFS_EXIT_NO_SPRINT=1
+SFS_EXIT_CRITICAL=8
+
+usage_flowcheck() {
+  cat <<'EOF'
+Usage:
+  sfs flowcheck [--sprint <id>]
+
+Postflight self-check that SFS ran per the documented flow. Reads the current
+(or named) sprint's flow events + capture ledger from events.jsonl and asserts
+the Flow-Conformance invariant registry.
+
+Critical invariants (blocking unless PASS or a naming waiver):
+  fcp-model-tier        implementation/worker model == policy worker tier
+                        (source policy|configured ok; current/user-override needs
+                        a live-scoped override capture or waiver)  [#4]
+  fcp-conflict-surfaced default deviation (user-override) requires a
+                        conflict_surfaced event                    [#3]
+  fcp-gate-order        gate_passed order_index never regresses
+  fcp-stop-the-line     no gate_passed with self_cpo=fail
+  fcp-pr-reviewed       ship/done blocked unless an SFS review gate_passed
+                        (self_cpo=pass) exists; GitHub PR approval does NOT
+                        satisfy this on its own
+
+Advisory invariants (warn, exit 0):
+  fcp-self-cpo          every gate_passed self_cpo=pass (partial warns)
+  fcp-worker-lane       parallel worker_dispatched declares its lanes
+
+Exit codes: 0 conformant / advisory-only | 1 no sprint | 7 usage
+            8 unresolved critical (blocking).
+EOF
+}
+
+FLOWCHECK_SPRINT=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help|help)
+      usage_flowcheck
+      exit "${SFS_EXIT_OK}"
+      ;;
+    --sprint)
+      [[ $# -ge 2 ]] || { echo "--sprint requires a value" >&2; exit "${SFS_EXIT_BADCLI}"; }
+      FLOWCHECK_SPRINT="$2"; shift 2 ;;
+    --sprint=*)
+      FLOWCHECK_SPRINT="${1#--sprint=}"; shift ;;
+    *)
+      echo "unknown flag: $1" >&2; exit "${SFS_EXIT_BADCLI}" ;;
+  esac
+done
+
+[[ -n "${FLOWCHECK_SPRINT}" ]] || FLOWCHECK_SPRINT="$(read_current_sprint 2>/dev/null || true)"
+if [[ -z "${FLOWCHECK_SPRINT}" ]]; then
+  echo "flowcheck: no current sprint (run inside a sprint or pass --sprint <id>)" >&2
+  exit "${SFS_EXIT_NO_SPRINT}"
+fi
+
+# ── load this sprint's events into in-memory arrays ────────────────────────
+_jf() { sfs_event_json_string_field "$1" "$2"; }
+
+declare -a EV_LINES=()
+if [[ -f "${SFS_EVENTS_FILE}" ]]; then
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    [[ -n "${line}" ]] || continue
+    [[ "$(_jf sprint_id "${line}")" == "${FLOWCHECK_SPRINT}" ]] || continue
+    EV_LINES+=("${line}")
+  done < "${SFS_EVENTS_FILE}"
+fi
+
+# capture ledger signals
+has_waiver=0
+waiver_text=""
+override_scoped=0
+for line in "${EV_LINES[@]:-}"; do
+  [[ -n "${line}" ]] || continue
+  case "$(_jf type "${line}")" in
+    evidence_capture)
+      k="$(_jf kind "${line}")"
+      case "${k}" in
+        waiver)
+          has_waiver=1
+          waiver_text+=" $(_jf text_preview "${line}")"
+          ;;
+        exception|user-approval)
+          # a live-scoped user override is an exception/approval carrying a scope
+          [[ -n "$(_jf scope "${line}")" ]] && override_scoped=1
+          ;;
+      esac
+      ;;
+  esac
+done
+
+# waived_by ID — return 0 if a waiver names this invariant (or is a bare flowcheck waiver)
+waived_by() {
+  local id="$1"
+  [[ "${has_waiver}" -eq 1 ]] || return 1
+  case "${waiver_text}" in
+    *"${id}"*) return 0 ;;
+    *flowcheck*|*"flow-conformance"*|*"flow conformance"*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+declare -a CRIT=()      # blocking findings (text)
+declare -a CRIT_WAIVED=()
+declare -a ADV=()
+declare -a PASS_NOTES=()
+
+is_worker_role() {
+  case "$1" in
+    *worker*|*implement*|*generator*|*executor*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+# ── fcp-model-tier (critical) ──────────────────────────────────────────────
+mt_ok=1
+for line in "${EV_LINES[@]:-}"; do
+  [[ "$(_jf type "${line}")" == "model_resolved" ]] || continue
+  role="$(_jf agent_role "${line}")"
+  src="$(_jf source "${line}")"
+  model="$(_jf resolved_model "${line}")"
+  is_worker_role "${role}" || continue
+  case "${src}" in
+    policy|configured) ;;   # authoritative or explicit per-agent override — ok
+    user-override)
+      if [[ "${override_scoped}" -ne 1 ]]; then
+        mt_ok=0
+        CRIT+=("fcp-model-tier: worker '${role}' claims source=user-override but no live-scoped override capture (sfs capture --kind exception --scope ...) exists")
+      fi
+      ;;
+    current)
+      mt_ok=0
+      CRIT+=("fcp-model-tier: worker '${role}' resolved to host current model '${model:-?}' (source=current) — policy worker tier not applied and no scoped user-override [#4]")
+      ;;
+    *)
+      mt_ok=0
+      CRIT+=("fcp-model-tier: worker '${role}' has unknown model_resolved.source='${src:-empty}'")
+      ;;
+  esac
+done
+[[ "${mt_ok}" -eq 1 ]] && PASS_NOTES+=("fcp-model-tier: worker model resolution conformant")
+
+# ── fcp-conflict-surfaced (critical) ───────────────────────────────────────
+deviation=0
+conflict_count=0
+for line in "${EV_LINES[@]:-}"; do
+  t="$(_jf type "${line}")"
+  case "${t}" in
+    model_resolved)
+      [[ "$(_jf source "${line}")" == "user-override" ]] && deviation=1 ;;
+    conflict_surfaced) conflict_count=$((conflict_count + 1)) ;;
+  esac
+done
+[[ "${override_scoped}" -eq 1 ]] && deviation=1
+if [[ "${deviation}" -eq 1 && "${conflict_count}" -eq 0 ]]; then
+  CRIT+=("fcp-conflict-surfaced: a default deviation (user-override) occurred with no conflict_surfaced event — silent override [#3]")
+else
+  PASS_NOTES+=("fcp-conflict-surfaced: deviations (if any) were surfaced")
+fi
+
+# ── fcp-gate-order (critical) ──────────────────────────────────────────────
+prev_idx=-1
+order_ok=1
+gate_pass_count=0
+review_passed=0
+stop_line_ok=1
+for line in "${EV_LINES[@]:-}"; do
+  [[ "$(_jf type "${line}")" == "gate_passed" ]] || continue
+  gate_pass_count=$((gate_pass_count + 1))
+  oi="$(_jf order_index "${line}")"
+  cpo="$(_jf self_cpo "${line}")"
+  case "${oi}" in
+    ''|*[!0-9]*) ADV+=("fcp-gate-order: gate_passed has non-numeric order_index '${oi}' (skipped)") ;;
+    *)
+      if (( oi < prev_idx )); then
+        order_ok=0
+        CRIT+=("fcp-gate-order: gate_passed order_index ${oi} regressed below ${prev_idx} — out-of-order gate")
+      fi
+      (( oi > prev_idx )) && prev_idx="${oi}"
+      ;;
+  esac
+  case "${cpo}" in
+    pass) review_passed=1 ;;
+    partial) ADV+=("fcp-self-cpo: gate_passed (order ${oi:-?}) recorded self_cpo=partial") ;;
+    fail)
+      stop_line_ok=0
+      CRIT+=("fcp-stop-the-line: gate_passed (order ${oi:-?}) recorded self_cpo=fail — a gate cannot pass on a failed self-CPO")
+      ;;
+  esac
+done
+[[ "${order_ok}" -eq 1 ]] && PASS_NOTES+=("fcp-gate-order: gate order non-regressing")
+[[ "${stop_line_ok}" -eq 1 ]] && PASS_NOTES+=("fcp-stop-the-line: no gate passed on a failed self-CPO")
+
+# ── fcp-pr-reviewed (critical) — the pr-review guard ───────────────────────
+if [[ "${review_passed}" -ne 1 ]]; then
+  CRIT+=("fcp-pr-reviewed: ship/done blocked — no SFS review gate_passed with self_cpo=pass in this sprint. A GitHub PR approval / @codex review does NOT satisfy this on its own (kernel: GitHub review is separate from SFS review).")
+else
+  PASS_NOTES+=("fcp-pr-reviewed: an SFS review gate passed (self_cpo=pass)")
+fi
+
+# ── fcp-worker-lane (advisory) ─────────────────────────────────────────────
+for line in "${EV_LINES[@]:-}"; do
+  [[ "$(_jf type "${line}")" == "worker_dispatched" ]] || continue
+  if [[ "$(_jf parallel "${line}")" == "true" && -z "$(_jf lanes "${line}")" ]]; then
+    ADV+=("fcp-worker-lane: parallel worker_dispatched did not declare lanes")
+  fi
+done
+
+# ── apply waivers: move named/blanket-waived criticals out of blocking set ──
+declare -a CRIT_BLOCKING=()
+for finding in "${CRIT[@]:-}"; do
+  [[ -n "${finding}" ]] || continue
+  inv_id="${finding%%:*}"
+  if waived_by "${inv_id}"; then
+    CRIT_WAIVED+=("${finding}")
+  else
+    CRIT_BLOCKING+=("${finding}")
+  fi
+done
+
+# ── verdict ────────────────────────────────────────────────────────────────
+blocking_n="${#CRIT_BLOCKING[@]}"
+waived_n="${#CRIT_WAIVED[@]}"
+adv_n="${#ADV[@]}"
+if (( blocking_n > 0 )); then
+  verdict="FAIL"
+elif (( adv_n > 0 || waived_n > 0 )); then
+  verdict="WARN"
+else
+  verdict="PASS"
+fi
+
+# ── write verdict artifact ─────────────────────────────────────────────────
+SPRINT_DIR="${SFS_SPRINTS_DIR}/${FLOWCHECK_SPRINT}"
+ART_DIR="${SPRINT_DIR}/workbench"
+ART="${ART_DIR}/flowcheck.md"
+ts_now="$(date +%Y-%m-%dT%H:%M:%S%z 2>/dev/null | sed -E 's/([0-9]{2})$/:\1/')"
+if mkdir -p "${ART_DIR}" 2>/dev/null; then
+  {
+    printf '# Flow-Conformance Postflight — %s\n\n' "${FLOWCHECK_SPRINT}"
+    printf -- '- verdict: **%s** (%s critical-blocking, %s waived, %s advisory)\n' \
+      "${verdict}" "${blocking_n}" "${waived_n}" "${adv_n}"
+    printf -- '- checked: %s\n\n' "${ts_now}"
+    if (( blocking_n > 0 )); then
+      printf '## Critical — blocking\n'
+      for f in "${CRIT_BLOCKING[@]}"; do printf -- '- ❌ %s\n' "${f}"; done
+      printf '\n'
+    fi
+    if (( waived_n > 0 )); then
+      printf '## Critical — waived\n'
+      for f in "${CRIT_WAIVED[@]}"; do printf -- '- ⚠️ (waived) %s\n' "${f}"; done
+      printf '\n'
+    fi
+    if (( adv_n > 0 )); then
+      printf '## Advisory\n'
+      for f in "${ADV[@]}"; do printf -- '- ⚠️ %s\n' "${f}"; done
+      printf '\n'
+    fi
+    if (( ${#PASS_NOTES[@]} > 0 )); then
+      printf '## Conformant\n'
+      for f in "${PASS_NOTES[@]}"; do printf -- '- ✅ %s\n' "${f}"; done
+      printf '\n'
+    fi
+    if (( blocking_n > 0 )); then
+      printf '> Blocking: resolve the findings, or record `sfs capture --kind waiver "<invariant-id>: reason"` to proceed.\n'
+    fi
+  } > "${ART}" 2>/dev/null || true
+fi
+
+# ── emit flow_conformance event (non-collapsing) ───────────────────────────
+append_flow_event flow_conformance \
+  "verdict=${verdict}" "critical_blocking=${blocking_n}" \
+  "waived=${waived_n}" "advisory=${adv_n}" 2>/dev/null || true
+
+# ── report to stdout ───────────────────────────────────────────────────────
+echo "flowcheck: ${FLOWCHECK_SPRINT} — ${verdict} (critical-blocking=${blocking_n}, waived=${waived_n}, advisory=${adv_n})"
+for f in "${CRIT_BLOCKING[@]:-}"; do [[ -n "${f}" ]] && echo "  CRITICAL: ${f}"; done
+for f in "${CRIT_WAIVED[@]:-}"; do [[ -n "${f}" ]] && echo "  waived:   ${f}"; done
+for f in "${ADV[@]:-}"; do [[ -n "${f}" ]] && echo "  advisory: ${f}"; done
+[[ -f "${ART}" ]] && echo "  verdict artifact: ${ART}"
+
+if (( blocking_n > 0 )); then
+  echo "flowcheck: BLOCKING — work unit cannot close until critical invariants PASS or are waived." >&2
+  exit "${SFS_EXIT_CRITICAL}"
+fi
+exit "${SFS_EXIT_OK}"

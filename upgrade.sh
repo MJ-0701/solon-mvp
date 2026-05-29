@@ -281,6 +281,35 @@ set_model_profile_fields() {
   fi
 }
 
+# model-profiles drift WARN (#4) — config-time half of the model-tier lock.
+# configured_tier=current defers to the selected policy's agent_tiers; an
+# explicit configured_tier that differs from the policy-recommended tier is
+# surfaced (never auto-rewritten — owner decides).
+warn_model_profiles_drift() {
+  local mp="$1" policy="${2:-}"
+  [ -f "$mp" ] || return 0
+  case "$policy" in
+    solon_recommended|all_high) ;;
+    *) return 0 ;;
+  esac
+  local drift
+  drift="$(awk '
+    /^agent_defaults:/ {in_ad=1; next}
+    in_ad && /^[A-Za-z]/ {in_ad=0}
+    in_ad && /^  [A-Za-z0-9_-]+:/ {agent=$1; sub(/:$/,"",agent); rec=""; next}
+    in_ad && /recommended_tier:/ {rec=$2}
+    in_ad && /configured_tier:/ {
+      cfg=$2
+      if (cfg != "current" && rec != "" && cfg != rec)
+        print agent " (configured_tier=" cfg " vs policy " rec ")"
+    }
+  ' "$mp" 2>/dev/null)"
+  if [ -n "$drift" ]; then
+    warn "model-profiles drift — selected_policy '$policy' 와 어긋나는 configured_tier (auto-rewrite 안 함; 의도와 다르면 직접 수정):"
+    printf '%s\n' "$drift" | while IFS= read -r d; do warn "  - $d"; done
+  fi
+}
+
 maybe_prompt_model_profile() {
   model_profile_needs_prompt || return 0
 
@@ -1724,6 +1753,7 @@ if [ "$CUR_VER" = "$NEW_VER" ]; then
   elif grep -q 'status: "review_required"' "$TARGET/.sfs-local/model-profiles.yaml" 2>/dev/null; then
     warn "agent model profile 이 review_required 상태입니다."
   fi
+  warn_model_profiles_drift "$TARGET/.sfs-local/model-profiles.yaml" "solon_recommended"
   if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ]; then
     thin_context_runtime_migration || die "thin runtime context migration failed"
   else
@@ -2407,6 +2437,7 @@ else
 fi
 update_file ".sfs-local/divisions.yaml" "templates/.sfs-local-template/divisions.yaml" "본부 활성화" "s"
 update_file ".sfs-local/model-profiles.yaml" "templates/.sfs-local-template/model-profiles.yaml" "runtime model profiles" "s"
+warn_model_profiles_drift "$TARGET/.sfs-local/model-profiles.yaml" "$MODEL_POLICY"
 update_file ".sfs-local/GUIDE.md" "GUIDE.md" "Solon onboarding guide (/sfs guide)" "b"
 
 if [ "${INSTALL_LAYOUT:-vendored}" = "thin" ]; then

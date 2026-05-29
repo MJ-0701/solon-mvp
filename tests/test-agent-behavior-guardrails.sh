@@ -576,4 +576,24 @@ assert_contains "${plugin_readme}" "scope breach" "plugin readme handoff-only no
 assert_contains "${plugin_readme}" "not as a justification" "plugin readme handoff-only justification wording"
 assert_not_contains "${plugin_readme}" "Do not start PR polling" "plugin readme no stale 0.6.115 handoff wording"
 
+# ── 0.8.0: #4 model-profiles precedence + config-drift WARN ───────────────
+assert_contains "${model_profiles}" "Named-policy precedence" "model-profiles #4 precedence rule"
+assert_contains "${model_profiles}" "configured_tier is \`current\`" "model-profiles #4 current defers to policy"
+assert_contains "${model_profiles}" "explicit non-\`current\` tier overrides the policy map for that agent only" "model-profiles #4 explicit override scope"
+assert_contains "${model_profiles}" "Config-drift validation (warn-only" "model-profiles #4 drift warn-only rule"
+assert_contains "${model_profiles}" "Do not auto-rewrite configured_tier" "model-profiles #4 no auto-rewrite"
+assert_contains "${model_profiles}" "version: 1.7" "model-profiles version bumped to 1.7"
+assert_contains "${installer}" "model-profiles drift" "install.sh drift WARN path"
+assert_contains "${installer}" "auto-rewrite 안 함" "install.sh drift no auto-rewrite"
+assert_contains "${upgrader}" "model-profiles drift" "upgrade.sh drift WARN path"
+
+# ── 0.8.0: user-override precedence (#3 guard) ────────────────────────────
+user_override="${DIST_DIR}/templates/.sfs-local-template/context/policies/user-override-precedence.md"
+assert_contains "${user_override}" "explicit user command > SFS product default" "override precedence rule"
+assert_contains "${user_override}" "wu\` | \`sprint\` | \`until-revoked\`" "override scope enum"
+assert_contains "${user_override}" "silent auto-revert 금지" "override no silent auto-revert"
+assert_contains "${user_override}" "inherited stored policy" "override inherited-stored advisory"
+assert_contains "${implement}" "sfs capture --kind exception --scope" "implement live-scoped override gate"
+assert_contains "${kernel}" "sfs flowcheck" "kernel flowcheck close contract"
+
 echo "test-agent-behavior-guardrails: OK"

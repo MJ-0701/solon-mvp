@@ -32,6 +32,8 @@ read-only and evidence surfaces:
 | `sfs_status`          | `sfs status`           | Current sprint / gate / divisions         |
 | `sfs_version`         | `sfs version --check`  | Installed version + latest headline       |
 | `sfs_report`          | `sfs report`           | Active sprint `report.md`                 |
+| `sfs_report_bug`      | `sfs report-bug`       | File SFS-product bug to gh, confirm gate  |
+| `sfs_flowcheck`       | `sfs flowcheck`        | Flow-Conformance Postflight self-check    |
 | `sfs_harness_doctor`  | `sfs harness doctor`   | Project readiness diagnosis               |
 | `sfs_start`           | `sfs start <slug>`     | Open a new sprint                         |
 | `sfs_brainstorm`      | `sfs brainstorm`       | Gate 2 (Brainstorm)                       |

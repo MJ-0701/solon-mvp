@@ -605,6 +605,35 @@ else
   ok "  config.yaml 기존 유지"
 fi
 
+# model-profiles drift WARN (#4) — config-time half of the model-tier lock.
+# Under named-policy precedence, configured_tier=current defers to the policy
+# agent_tiers; an explicit configured_tier that differs from the policy-
+# recommended tier is surfaced (never auto-rewritten — owner decides).
+sfs_warn_model_profiles_drift() {
+  local mp="$1" policy="${2:-}"
+  [ -f "$mp" ] || return 0
+  case "$policy" in
+    solon_recommended|all_high) ;;
+    *) return 0 ;;
+  esac
+  local drift
+  drift="$(awk '
+    /^agent_defaults:/ {in_ad=1; next}
+    in_ad && /^[A-Za-z]/ {in_ad=0}
+    in_ad && /^  [A-Za-z0-9_-]+:/ {agent=$1; sub(/:$/,"",agent); rec=""; next}
+    in_ad && /recommended_tier:/ {rec=$2}
+    in_ad && /configured_tier:/ {
+      cfg=$2
+      if (cfg != "current" && rec != "" && cfg != rec)
+        print agent " (configured_tier=" cfg " vs policy " rec ")"
+    }
+  ' "$mp" 2>/dev/null)"
+  if [ -n "$drift" ]; then
+    warn "model-profiles drift — selected_policy '$policy' 와 어긋나는 configured_tier (auto-rewrite 안 함; 의도와 다르면 직접 수정):"
+    printf '%s\n' "$drift" | while IFS= read -r d; do warn "  - $d"; done
+  fi
+}
+
 # model-profiles.yaml — reasoning tier registry, 기존 있으면 skip (사용자 설정 보호)
 if [ ! -f "$TARGET/.sfs-local/model-profiles.yaml" ]; then
   cp "$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml" "$TARGET/.sfs-local/model-profiles.yaml"
@@ -620,6 +649,7 @@ if [ ! -f "$TARGET/.sfs-local/model-profiles.yaml" ]; then
 else
   ok "  model-profiles.yaml 기존 유지"
 fi
+sfs_warn_model_profiles_drift "$TARGET/.sfs-local/model-profiles.yaml" "$MODEL_POLICY"
 
 # divisions.yaml — 기존 있으면 skip (사용자 수정분 보호)
 if [ ! -f "$TARGET/.sfs-local/divisions.yaml" ]; then

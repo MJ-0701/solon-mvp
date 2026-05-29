@@ -1,5 +1,53 @@
 ## [Unreleased]
 
+## [0.8.0] - 2026-05-30
+
+> **공식 버그리포트 flow + Flow-Conformance Postflight 탐지층 + #4 model-tier 잠금 + 사용자 명령 우선(scoped override).**
+
+SFS 제품 결함을 공식 GitHub Issues 채널로 모으는 반응형 보고 flow(`report-bug`)와,
+작업단위 종료 시 SFS 가 문서대로 실행됐는지 스스로 점검하는 능동 탐지층
+(`flowcheck` / Flow-Conformance Postflight)을 함께 넣었다. 탐지가 제품버그를
+판정하면 report-bug confirm gate 로 자동 연결된다. 같은 cut 에 #4(model-profiles
+resolution 우선순위)와 #3(사용자 명령 우선·scoped override)를 config-time + runtime
+이중 잠금으로 닫았다. 모두 routed command/policy + 검증 스크립트로 흡수했다.
+
+### Added
+
+- **`commands/report-bug.md` + `policies/bug-report-lifecycle.md`** — SFS 제품
+  결함(kernel/commands/policies/CLI/model-profiles/installer)을 공식 채널
+  `MJ-0701/solon-product` label `bug` 으로 제출하는 보고 primitive. 분류 → 환경수집
+  (repo 이름만, private docset 경로 금지) → dedup → 작성 → 제출(gh, 불가 시 host
+  인계) → evidence → **confirm gate**(사용자 확정 전 fix 진입 금지). fix routing =
+  dev-first 기본 + critical stable hotfix 예외.
+- **`commands/flowcheck.md` + `policies/flow-conformance-postflight.md` +
+  `scripts/sfs-flowcheck.sh`** — Flow-Conformance Postflight 탐지층. non-collapsing
+  flow event(`model_resolved`/`worker_dispatched`/`gate_passed`/`conflict_surfaced`,
+  `sfs event` 로 emit)와 capture 원장을 읽어 invariant assert. critical
+  (fcp-model-tier #4 / fcp-conflict-surfaced #3 / fcp-gate-order / fcp-stop-the-line /
+  **fcp-pr-reviewed** = SFS review gate 통과 필수, GitHub PR 승인 단독 불충족) 위반은
+  blocking(nonzero exit), advisory 는 warn. waiver(invariant id 명시)로 강등 가능.
+- **`policies/user-override-precedence.md`** (#3 guard 정식 landing) — explicit user
+  command > SFS default. 모든 override 는 scope(`wu`|`sprint`|`until-revoked`) 보유,
+  전이(시작/만료/충돌) 항상 surface, SFS default 로 silent auto-revert 금지. inherited
+  stored 정책은 advisory(충돌 시 재-surface).
+- **`sfs event <type> [k=v...]`** — bounded agent-facing emit of the four
+  non-collapsing FCP contract events; `append_flow_event` 가 active sprint_id 를
+  stamp 해 후속 capture compaction 에서 살아남게 한다.
+- **`sfs capture --scope <wu|sprint|until-revoked>`** — override/decision capture 에
+  scope 필드. flowcheck override-coverage 판정의 근거.
+- **MCP tools `sfs_report_bug`, `sfs_flowcheck`** — solon_mcp_server.py + README + 계약 테스트.
+
+### Fixed
+
+- **#4 model-profiles resolution 우선순위** — `resolution_rules` 에 named-policy
+  precedence(`configured_tier: current` 는 selected_policy.agent_tiers 로 defer,
+  명시 non-current 값만 per-agent override) + config-drift warn-only(auto-rewrite
+  금지)를 명문화. worker 가 host 모델로 새던 누수 차단. `version: 1.6 → 1.7`.
+  install.sh/upgrade.sh 가 drift 를 stderr WARN 으로 surface(auto-rewrite 안 함).
+- **#3 silent override** — kernel 작업단위 close 계약 + implement entry 의
+  model_resolved/worker_dispatched/conflict_surfaced emit 지시 + flowcheck 런타임
+  잠금으로, project-local 정책↔SFS default 이탈이 조용히 통과하던 사각지대 차단.
+
 ## [0.7.12] - 2026-05-29
 
 > **강의-driven 고도화 + 인계 회귀방지 — handoff entry-dir guard, sandbox→dev-runtime 라우팅, ontology review lens, sub-agent capsule 계약, mcp-tool-zero scaffold.**

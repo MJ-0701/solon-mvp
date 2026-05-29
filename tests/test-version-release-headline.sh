@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.7.12" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.7.12" "version output"
-assert_contains_text "${output}" "latest 0.7.12" "latest output"
+[[ "${plain_output}" == "sfs 0.8.0" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.0" "version output"
+assert_contains_text "${output}" "latest 0.8.0" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline 강의-driven 고도화 + 인계 회귀방지" "installed release headline"
+assert_contains_text "${output}" "installed_release_headline 공식 버그리포트 flow + Flow-Conformance Postflight 탐지층" "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline 강의 요약에서 뽑은 고도화 백로그" "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline SFS 제품 결함을 공식 채널로 모으고" "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

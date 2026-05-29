@@ -25,7 +25,7 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - The default implementation owner is the worker/generator model resolved from
   `.sfs-local/model-profiles.yaml`, not the C-Level planner/evaluator model.
   C-Level may define the contract, split files_scope, and handle escalation, but
-  should not present itself as the normal direct coding option.
+  should not present itself as the normal direct coding option. At implement entry emit `sfs event model_resolved agent_role=implementation-worker resolved_tier=.. resolved_model=.. source=policy|configured|current|user-override` and `sfs event worker_dispatched role=.. model=.. parallel=true|false [lanes=..]` so flowcheck can verify the runtime model-tier (#4). A top-model/direct-coding deviation from this default needs an explicit fresh user command with a live scope (`sfs capture --kind exception --scope wu|sprint|until-revoked`); on any project-local-policy ↔ SFS-default fork emit `sfs event conflict_surfaced kind=.. detail=.. resolved_by=user|capture` and surface before the dependent gate — never silent (#3, `policies/user-override-precedence.md`).
 - For Codex runtime, the normal implementation worker is `gpt-5.4`; use
   `gpt-5.3-codex` for bounded repo-aware coding helper work and
   `gpt-5.3-codex-spark` only for locked judgment-free mechanical implementation.

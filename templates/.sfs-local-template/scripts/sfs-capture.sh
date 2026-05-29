@@ -14,8 +14,8 @@ source "${SCRIPT_DIR}/sfs-common.sh"
 usage_capture() {
   cat <<'EOF'
 Usage:
-  sfs capture [--kind <note|decision|scope-change|user-approval|review-order|exception|evidence|blocker|waiver>] [--gate <1..7>] [--sprint <id>] <text>
-  sfs capture --stdin [--kind <kind>] [--gate <1..7>] [--sprint <id>]
+  sfs capture [--kind <note|decision|scope-change|user-approval|review-order|exception|evidence|blocker|waiver>] [--gate <1..7>] [--scope <wu|sprint|until-revoked>] [--sprint <id>] <text>
+  sfs capture --stdin [--kind <kind>] [--gate <1..7>] [--scope <wu|sprint|until-revoked>] [--sprint <id>]
   sfs note <text>
 
 Records a compact evidence fact into the current sprint's log.md and
@@ -40,6 +40,7 @@ CAPTURE_COMMAND="${SFS_CAPTURE_COMMAND:-capture}"
 CAPTURE_KIND="note"
 SPRINT_ID=""
 GATE_ID=""
+CAPTURE_SCOPE=""
 READ_STDIN=false
 TEXT_PARTS=()
 
@@ -89,6 +90,18 @@ while [[ $# -gt 0 ]]; do
       GATE_ID="${1#--gate=}"
       shift
       ;;
+    --scope)
+      if [[ $# -lt 2 ]]; then
+        echo "--scope requires a value" >&2
+        exit "${SFS_EXIT_BADCLI}"
+      fi
+      CAPTURE_SCOPE="$2"
+      shift 2
+      ;;
+    --scope=*)
+      CAPTURE_SCOPE="${1#--scope=}"
+      shift
+      ;;
     --stdin)
       READ_STDIN=true
       shift
@@ -119,6 +132,20 @@ case "${CAPTURE_KIND}" in
     exit "${SFS_EXIT_BADCLI}"
     ;;
 esac
+
+# --scope marks how long a user override / decision is authoritative. Required
+# shape for user-override-precedence (policies/user-override-precedence.md):
+# every override capture carries one. Valid for any kind; meaningful for
+# exception / decision / user-approval (override ledger that flowcheck reads).
+if [[ -n "${CAPTURE_SCOPE}" ]]; then
+  case "${CAPTURE_SCOPE}" in
+    wu|sprint|until-revoked) ;;
+    *)
+      echo "invalid capture scope: ${CAPTURE_SCOPE} (expected: wu, sprint, until-revoked)" >&2
+      exit "${SFS_EXIT_BADCLI}"
+      ;;
+  esac
+fi
 
 if [[ -n "${GATE_ID}" ]]; then
   _normalized_gate_id="$(sfs_normalize_gate_id "${GATE_ID}" || true)"
@@ -238,6 +265,9 @@ fi
   if [[ -n "${GATE_ID}" ]]; then
     printf -- '- gate: `%s`\n' "$(sfs_gate_display_label "${GATE_ID}")"
   fi
+  if [[ -n "${CAPTURE_SCOPE}" ]]; then
+    printf -- '- scope: `%s`\n' "${CAPTURE_SCOPE}"
+  fi
   printf -- '- source: evidence-primitive\n'
   printf -- '- text:\n'
   while IFS= read -r line || [[ -n "${line}" ]]; do
@@ -260,6 +290,9 @@ _payload="\"sprint_id\":\"${_esc_sprint}\",\"kind\":\"${_esc_kind}\",\"capture_i
 if [[ -n "${GATE_ID}" ]]; then
   _esc_gate="$(sfs_json_escape "${GATE_ID}")"
   _payload="${_payload},\"gate_id\":\"${_esc_gate}\""
+fi
+if [[ -n "${CAPTURE_SCOPE}" ]]; then
+  _payload="${_payload},\"scope\":\"$(sfs_json_escape "${CAPTURE_SCOPE}")\""
 fi
 if ! append_event "evidence_capture" "{${_payload}}" 2>/dev/null; then
   echo "permission denied appending event to ${SFS_EVENTS_FILE}" >&2

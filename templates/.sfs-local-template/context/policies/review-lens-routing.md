@@ -46,6 +46,11 @@ commands:
   triggers when a diff touches `domain-knowledge-assets` or `llm-wiki/ddd/`.
   Load `domain-ontology-discipline.md` for the entity-change checklist and the
   reconciliation gate across assets, wiki, and tests.
+- `flow-conformance`: postflight methodology-conformance lens; calls
+  `sfs flowcheck` and loads `flow-conformance-postflight.md` to assert the FCP
+  invariants (model-tier / conflict-surfaced / gate-order / stop-the-line /
+  pr-reviewed) over the sprint's non-collapsing flow events. Catches silent
+  divergence that ran without error; distinct from Gate 6 product acceptance.
 
 Read order:
 

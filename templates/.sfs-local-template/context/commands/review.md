@@ -7,7 +7,7 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 # Review
 
 - Adapter-run by default: run `sfs review ...` before summarizing.
-- Do not create a new verdict from memory; use `review.md` and recorded result paths.
+- Do not create a new verdict from memory; use `review.md` and recorded result paths. When a gate review concludes, emit `sfs event gate_passed gate=<G-1..G5> order_index=<n> self_cpo=pass|partial|fail` so flowcheck can verify gate order, stop-the-line, and the pr-review guard (a passing SFS review gate is what `fcp-pr-reviewed` requires; a GitHub PR/@codex PASS does not substitute).
 - If the relevant sprint was compacted/closed and `current-sprint` is missing, use `sfs review --sprint <id> --gate <n>`; do not edit `.sfs-local/current-sprint` or extract tarballs manually.
 - After any external GitHub/@codex/PR/check PASS, do not stop at PASS. Record
   evidence and continue the gate: self-CPO first, cross-review after self-CPO PASS. Closed sprint with known id uses

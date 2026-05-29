@@ -211,7 +211,7 @@ Usage:
 Commands:
   agent install, doctor, upgrade, update, uninstall
   version [--check]
-  status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, capture, note, report, tidy, retro, commit, loop, harness, handoff
+  status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, capture, note, report, report-bug, flowcheck, event, tidy, retro, commit, loop, harness, handoff
   bootstrap [<plain-language app idea>]   # agent-facing initial setup handoff
   measure --alive -- <command>            # long-running command heartbeat
 
@@ -323,7 +323,7 @@ context_resolve_rel() {
       fi
       ;;
     start|intake|sprint) printf '%s\n' "commands/start.md" ;;
-    adopt|brainstorm|plan|implement|review|release|upgrade|profile|loop|tidy)
+    adopt|brainstorm|plan|implement|review|release|upgrade|profile|loop|tidy|report-bug|flowcheck)
       printf '%s\n' "commands/${key}.md"
       ;;
     capture|note)
@@ -1741,7 +1741,7 @@ EOF
 esac
 
 case "${1:-}" in
-  status|start|guide|auth|profile|division|adopt|brainstorm|plan|implement|review|decision|capture|note|report|tidy|retro|commit|loop)
+  status|start|guide|auth|profile|division|adopt|brainstorm|plan|implement|review|decision|capture|note|report|flowcheck|event|tidy|retro|commit|loop)
     if ! ensure_project_initialized "${1:-command}"; then
       exit 1
     fi

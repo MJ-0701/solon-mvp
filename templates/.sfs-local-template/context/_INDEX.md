@@ -17,12 +17,17 @@ module:
 - `commands/implement.md` — implement / build / execute work.
 - `commands/review.md` — review / CPO / verdict.
 - `commands/capture.md` — minimal evidence primitive for approval / waiver / decision / blocker / external evidence; not a lifecycle step.
+- `commands/report-bug.md` — file an SFS-product bug to the official gh channel; confirm gate before fix.
+- `commands/flowcheck.md` — postflight self-check that SFS ran per documented flow; classify divergence and route product bugs to report-bug.
 - `commands/release.md` — release / deploy / Homebrew / Scoop.
 - `commands/upgrade.md` — upgrade / update / install freshness.
 - `commands/harness.md` — harness doctor/map for project autonomy readiness.
 - `commands/tidy.md` — tidy / report / retro / archive.
 - `commands/loop.md` — loop / autonomous work / queue.
 - `policies/mutex.md` — lock conflict or concurrent session.
+- `policies/bug-report-lifecycle.md` — official bug channel, report template, confirm gate, dev-first|hotfix fix routing.
+- `policies/flow-conformance-postflight.md` — flowcheck invariant registry + non-collapsing event contract; critical vs advisory + divergence classification.
+- `policies/user-override-precedence.md` — explicit user command > SFS default; scoped overrides (wu|sprint|until-revoked) with always-surfaced transitions (#3 guard).
 - `policies/token-harness.md` — token/context hygiene, semantic search, repeated mistake guardrails.
 - `policies/harness-autonomy.md` — project harness diagnosis, map, artifacts, human boundary, and autonomy loop.
 - `policies/agent-adapter-doc-refactor.md` — keep root LLM agent docs frontmatter-only and auto-refactor recognized SFS adapter bloat.
