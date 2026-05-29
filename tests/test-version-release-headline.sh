@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.7.11" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.7.11" "version output"
-assert_contains_text "${output}" "latest 0.7.11" "latest output"
+[[ "${plain_output}" == "sfs 0.7.12" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.7.12" "version output"
+assert_contains_text "${output}" "latest 0.7.12" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline handoff verify dual-repo layout" "installed release headline"
+assert_contains_text "${output}" "installed_release_headline 강의-driven 고도화 + 인계 회귀방지" "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline 이번 버전은 듀얼 레포 인계 검증" "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline 강의 요약에서 뽑은 고도화 백로그" "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

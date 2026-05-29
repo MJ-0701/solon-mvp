@@ -1,32 +1,44 @@
 ## [Unreleased]
 
-> **handoff entry-dir guard — `sfs handoff verify` item 9 + 수신측 cwd guard 로 cross-repo silent non-pickup 차단.**
+## [0.7.12] - 2026-05-29
 
-handoff 가 docset 에 쓰였는데 다음 세션이 distribution repo (또는 그 반대) 에서
-열리면 `PROGRESS`/`sprints`/`CLAUDE.md` 가 없어 trigger 진입 체인이 파일 부재를
-"할 일 없음" 으로 오인하고 조용히 실패했다. 0.7.11 dual-repo handoff verify 의
-sibling gap (그땐 verify 의 단일 `--dir` 가정, 이번엔 resume 의 cwd 가정).
+> **강의-driven 고도화 + 인계 회귀방지 — handoff entry-dir guard, sandbox→dev-runtime 라우팅, ontology review lens, sub-agent capsule 계약, mcp-tool-zero scaffold.**
+
+강의 요약(ontology / Agent SDK / ast-grep)에서 도출한 SFS 고도화 백로그
+(C1/B1/B3/B4)와, cross-repo 인계가 조용히 실패하던 버그픽스를 한 release 로
+묶었다. 모두 routed policy / review lens / template 형태로 흡수하고 새 lifecycle
+command 는 만들지 않았다.
 
 ### Added
 
-- `sfs handoff verify` 에 **item 9** 신규 — HANDOFF frontmatter 가
-  `entry_working_dir` + `entry_repo` 를 선언했는지, 그 dir 에서 resume target
-  (`PROGRESS.md` / `sprints/` / `CLAUDE.md`) 이 실제 resolve 되는지 검증.
-  미선언 = WARN(backward-compat, exit 0), 선언했으나 dir 부재/resume target 부재
-  = MISMATCH(exit 1). mandatory sync surface 8 → 9 item.
-- `tests/test-handoff-entry-dir.sh` — resolves(PASS) / no-target(MISMATCH) /
-  missing-dir(MISMATCH) / no-field(WARN backward-compat) 4케이스 잠금.
+- **ontology / entity-change review lens** — domain entity/relationship·
+  ubiquitous-language 변경용. `domain-knowledge-assets` 나 `llm-wiki/ddd/` 를
+  건드리는 diff 에서 자동 추론(ddd-tdd/taxonomy 보다 우선), text·alias 정규화.
+  `policies/domain-ontology-discipline.md`(+ `.ko.md`) 가 entity-change
+  체크리스트 + 재정합 게이트(assets/wiki/tests)를 담는다. (lecture B1)
+- **`policies/sub-agent-capsule-contract.md`**(+ `.ko.md`) — kernel·
+  runtime-token-firewall 가 prose 로 두던 capsule-only 핸드오프를 검사 가능한
+  필드 계약으로 (goal/acceptance_criteria/files_scope/tools_allowed/
+  output_paths/token_budget/timeout/pii_rules). agent-build lens 가 검증. (B3)
+- **`templates/mcp-tool-zero/`** — 좁은 custom MCP tool 1개를 출하하는 Solon-safe
+  scaffold (FastMCP server + typed/bounded input + default-deny permission preset
+  + smoke pytest). (B4)
+- `sfs handoff verify` **item 9** — HANDOFF frontmatter 의 `entry_working_dir` +
+  `entry_repo` 선언 + 그 dir 에서 resume target resolve 검증. 미선언 = WARN
+  (backward-compat), 선언했으나 미해결 = MISMATCH. mandatory sync surface 8 → 9.
+- contract tests: `test-domain-ontology-lens-lock.sh`,
+  `test-sub-agent-capsule-contract.sh`, `test-mcp-tool-zero-template.sh`,
+  `test-handoff-entry-dir.sh`.
 
 ### Changed
 
-- `docs/maintenance/policies/session-transfer-autopilot.md` — durable handoff
-  필수 정보에 `entry_working_dir` + `entry_repo` 추가, mandatory sync surface
-  item 9 명문화 (SSoT).
-- `templates/.sfs-local-template/context/policies/session-continuation-guard.md`
-  + `context/kernel.md` — transfer capsule 은 `entry_working_dir`/`entry_repo`
-  를 선언하고, 수신 runtime 은 세션 진입 시 cwd 가 일치하는지 확인 후 claim,
-  불일치면 어느 dir 을 열어야 하는지 안내하고 멈춘다 (silent pickup 금지).
-  docset↔distribution 경계 명시.
+- `kernel.md` true-blocker 절 — runtime sandbox 차단은 copy-paste trigger 가
+  아니라 routing signal: 막힌 작업을 full shell+git lifecycle 을 가진 dev runtime
+  으로 라우팅(+ durable handoff), copy-paste 는 dev runtime 부재 시 fallback. (C1)
+- `session-transfer-autopilot.md` + `session-continuation-guard.md` + `kernel.md`
+  — transfer capsule 은 `entry_working_dir`/`entry_repo` 를 선언하고 수신 runtime
+  은 cwd 일치 확인 후 claim, 불일치면 멈춘다 (silent pickup 금지). docset↔
+  distribution 경계 명시.
 
 ## [0.7.11] - 2026-05-29
 
