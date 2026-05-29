@@ -36,7 +36,10 @@ Arguments: `$ARGUMENTS`
    decisions, source links/paths, or raw-source traceability. If compactness
    would weaken quality, use full clarity.
 5. Read `sfs context cat kernel`, `sfs context cat index`, then only the routed
-   module. On Windows PowerShell/cmd use native `sfs.cmd context cat ...`.
+   module. On Windows PowerShell/cmd use native `sfs.cmd context cat ...`. For
+   code/text/evidence search default to `rg` (ripgrep) instead of recursive
+   `grep`; use plain `grep` only when `rg` is absent (see routed
+   `policies/search-tooling`).
 6. For hybrid commands, refine pointed artifacts and answer with one Solon report.
 7. AI-era fundamentals and Harness Engineering apply across all gates: shared
    design, domain language, feedback, interface/artifact boundary, gray-box

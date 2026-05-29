@@ -31,7 +31,7 @@ $ARGUMENTS
    artifact. For `start`, verify `.sfs-local/current-sprint` and the sprint
    directory exist before reporting success.
 5. Print stdout verbatim; on failure include stderr and exit code.
-6. Read `sfs context cat kernel`, `sfs context cat index`, then only the routed module. On Windows PowerShell/cmd use native `sfs.cmd context cat ...` so Git Bash is not started. Resolve command modules as `sfs context cat commands/<command>.md` (for example, `commands/start.md`) or via the command alias (`sfs context cat start`).
+6. Read `sfs context cat kernel`, `sfs context cat index`, then only the routed module. On Windows PowerShell/cmd use native `sfs.cmd context cat ...` so Git Bash is not started. Resolve command modules as `sfs context cat commands/<command>.md` (for example, `commands/start.md`) or via the command alias (`sfs context cat start`). For code/text/evidence search default to `rg` (ripgrep) instead of recursive `grep`; use plain `grep` only when `rg` is absent (see routed `policies/search-tooling`).
 7. For bash-first commands, do not refine artifacts, but a compact state/Next is allowed.
    Compact output is quality-preserving only: remove filler in summaries/Next,
    but never compress adapter stdout/stderr, evidence, risk warnings,

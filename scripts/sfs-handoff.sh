@@ -25,18 +25,35 @@ PASS_COUNT=0
 MISMATCH_COUNT=0
 NA_COUNT=0
 
-ROOT="."
+# Dual-repo layout: items 1-2 (VERSION / CHANGELOG) read from the product repo;
+# items 3-8 (PROGRESS / HANDOFF / sessions / line budget) read from the docset.
+# Both default to "."; --dir sets both (backward compat); --product-dir /
+# --docset-dir set each independently; PROGRESS.md frontmatter
+# `product_repo_path:` is the fallback product pointer when --product-dir is
+# unset (so `sfs handoff verify --dir <docset>` resolves the product on its own).
+PRODUCT_DIR="."
+DOCSET_DIR="."
+PRODUCT_DIR_EXPLICIT=0
+DOCSET_DIR_EXPLICIT=0
+DIR_VALUE=""
 
 usage() {
   cat <<'EOF'
 Usage:
-  sfs handoff verify [--dir <docset-root>]
+  sfs handoff verify [--dir <root>] [--product-dir <path>] [--docset-dir <path>]
 
 Verifies the durable-handoff mandatory sync surface (8 items) from
-session-transfer-autopilot.md against the docset in <docset-root> (default:
-current directory). Operational logs (PROGRESS.md, HANDOFF-next-session.md,
-sessions/_INDEX.md) often live in a workspace docset rather than the product
-repo root — point --dir at that docset.
+session-transfer-autopilot.md. The product VERSION/CHANGELOG (items 1-2) and the
+operational ledger (PROGRESS.md, HANDOFF-next-session.md, sessions/_INDEX.md,
+items 3-8) frequently live in *different* repos under the R-D1 dual-repo layout.
+
+  --dir <root>         set both product and docset roots (default: ".")
+  --product-dir <path> product repo holding VERSION + CHANGELOG.md
+  --docset-dir <path>  workspace docset holding PROGRESS / HANDOFF / sessions
+
+If --product-dir is omitted, a `product_repo_path:` key in the docset's
+PROGRESS.md frontmatter is used as the product root (relative paths resolve
+against the docset). With no options at all, both roots are ".".
 
 Each item is marked PASS / MISMATCH / N/A. Any MISMATCH exits 1.
 EOF
@@ -57,39 +74,58 @@ item_na() {
 
 # ── helpers ─────────────────────────────────────────────────────────
 version_value() {
-  [ -f "${ROOT}/VERSION" ] || return 1
-  head -1 "${ROOT}/VERSION" | tr -d '[:space:]'
+  [ -f "${PRODUCT_DIR}/VERSION" ] || return 1
+  head -1 "${PRODUCT_DIR}/VERSION" | tr -d '[:space:]'
 }
 
 changelog_headline_version() {
   # First "## [X.Y.Z]" section in CHANGELOG (skip Unreleased).
-  [ -f "${ROOT}/CHANGELOG.md" ] || return 1
+  [ -f "${PRODUCT_DIR}/CHANGELOG.md" ] || return 1
   awk '
     match($0, /^## \[[0-9]+\.[0-9]+\.[0-9]+\]/) {
       v = $0
       sub(/^## \[/, "", v); sub(/\].*/, "", v)
       print v; exit
     }
-  ' "${ROOT}/CHANGELOG.md"
+  ' "${PRODUCT_DIR}/CHANGELOG.md"
 }
 
 changelog_has_headline_line() {
   # The first numbered section must carry a "> **...**" summary line.
-  [ -f "${ROOT}/CHANGELOG.md" ] || return 1
+  [ -f "${PRODUCT_DIR}/CHANGELOG.md" ] || return 1
   awk '
     /^## \[[0-9]+\.[0-9]+\.[0-9]+\]/ { if (seen) exit; seen=1; next }
     seen && /^> / { found=1; exit }
     END { exit (found ? 0 : 1) }
-  ' "${ROOT}/CHANGELOG.md"
+  ' "${PRODUCT_DIR}/CHANGELOG.md"
 }
 
 progress_path() {
   local p
-  for p in "${ROOT}/PROGRESS.md" "${ROOT}"/docs/solon/*/PROGRESS.md \
-           "${ROOT}/.sfs-local/PROGRESS.md"; do
+  for p in "${DOCSET_DIR}/PROGRESS.md" "${DOCSET_DIR}"/docs/solon/*/PROGRESS.md \
+           "${DOCSET_DIR}/.sfs-local/PROGRESS.md"; do
     [ -f "$p" ] && { printf '%s' "$p"; return 0; }
   done
   return 1
+}
+
+# product_repo_path frontmatter pointer — top-level YAML key inside the leading
+# `---` fence of PROGRESS.md. Used only when --product-dir is unset.
+progress_product_repo_path() {
+  local file="$1"
+  [ -f "$file" ] || return 1
+  awk '
+    NR == 1 && $0 != "---" { exit 1 }
+    NR == 1 { next }
+    $0 == "---" { exit 1 }
+    /^product_repo_path:[[:space:]]*/ {
+      v = $0
+      sub(/^product_repo_path:[[:space:]]*/, "", v)
+      gsub(/^["'\'']|["'\'']$/, "", v)
+      sub(/[[:space:]]+$/, "", v)
+      if (v != "") { print v; exit 0 }
+    }
+  ' "$file"
 }
 
 progress_block_value() {
@@ -127,17 +163,45 @@ budget_state() {
 # ── arg parse ───────────────────────────────────────────────────────
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --dir) ROOT="${2:-}"; [ -n "$ROOT" ] || { echo "missing value for --dir" >&2; exit 2; }; shift 2 ;;
-    --dir=*) ROOT="${1#*=}"; shift ;;
+    --dir) DIR_VALUE="${2:-}"; [ -n "$DIR_VALUE" ] || { echo "missing value for --dir" >&2; exit 2; }; shift 2 ;;
+    --dir=*) DIR_VALUE="${1#*=}"; shift ;;
+    --product-dir) PRODUCT_DIR="${2:-}"; [ -n "$PRODUCT_DIR" ] || { echo "missing value for --product-dir" >&2; exit 2; }; PRODUCT_DIR_EXPLICIT=1; shift 2 ;;
+    --product-dir=*) PRODUCT_DIR="${1#*=}"; PRODUCT_DIR_EXPLICIT=1; shift ;;
+    --docset-dir) DOCSET_DIR="${2:-}"; [ -n "$DOCSET_DIR" ] || { echo "missing value for --docset-dir" >&2; exit 2; }; DOCSET_DIR_EXPLICIT=1; shift 2 ;;
+    --docset-dir=*) DOCSET_DIR="${1#*=}"; DOCSET_DIR_EXPLICIT=1; shift ;;
     -h|--help|help) usage; exit 0 ;;
     verify) shift ;;
     *) echo "unknown arg for handoff verify: $1" >&2; usage >&2; exit 2 ;;
   esac
 done
 
-[ -d "$ROOT" ] || { echo "docset root not found: $ROOT" >&2; exit 2; }
+# Resolve roots. --dir is the base default for whichever side was not set
+# explicitly; with no --dir the base default stays ".".
+if [ -n "$DIR_VALUE" ]; then
+  [ "$DOCSET_DIR_EXPLICIT" -eq 1 ] || DOCSET_DIR="$DIR_VALUE"
+  [ "$PRODUCT_DIR_EXPLICIT" -eq 1 ] || PRODUCT_DIR="$DIR_VALUE"
+fi
 
-printf "\n${C_BOLD}Durable Handoff Verify${C_RESET}  (docset: %s)\n" "$ROOT"
+[ -d "$DOCSET_DIR" ] || { echo "docset root not found: $DOCSET_DIR" >&2; exit 2; }
+
+# Frontmatter product pointer fallback (only when --product-dir not given).
+PRODUCT_SOURCE="--product-dir/--dir"
+if [ "$PRODUCT_DIR_EXPLICIT" -eq 0 ]; then
+  PP="$(progress_product_repo_path "$(progress_path || true)" 2>/dev/null || true)"
+  if [ -n "$PP" ]; then
+    case "$PP" in
+      /*) PRODUCT_DIR="$PP" ;;
+      *)  PRODUCT_DIR="${DOCSET_DIR%/}/${PP}" ;;
+    esac
+    PRODUCT_SOURCE="PROGRESS.md product_repo_path"
+  fi
+fi
+
+[ -d "$PRODUCT_DIR" ] || { echo "product root not found: $PRODUCT_DIR (source: ${PRODUCT_SOURCE})" >&2; exit 2; }
+
+printf "\n${C_BOLD}Durable Handoff Verify${C_RESET}\n"
+printf "${C_DIM}  product: %s   docset: %s${C_RESET}\n" "$PRODUCT_DIR" "$DOCSET_DIR"
+printf "${C_DIM}  product source: %s${C_RESET}\n" "$PRODUCT_SOURCE"
 printf "${C_DIM}SSoT: session-transfer-autopilot.md — mandatory sync surface${C_RESET}\n\n"
 
 VERSION_VAL="$(version_value || true)"
@@ -148,7 +212,7 @@ PROGRESS="$(progress_path || true)"
 if [ -n "$VERSION_VAL" ]; then
   item_pass "1" "product VERSION present: ${VERSION_VAL}"
 else
-  item_mismatch "1" "VERSION file missing or empty at ${ROOT}/VERSION"
+  item_mismatch "1" "VERSION file missing or empty at ${PRODUCT_DIR}/VERSION"
 fi
 
 # 2. CHANGELOG headline
@@ -175,7 +239,7 @@ if [ -n "$PROGRESS" ]; then
     item_pass "3" "last_completed_release.version ${LCR_VER} matches VERSION"
   fi
 else
-  item_na "3" "no PROGRESS.md found under ${ROOT}; ledger items skipped"
+  item_na "3" "no PROGRESS.md found under ${DOCSET_DIR}; ledger items skipped"
 fi
 
 # 4. recent_session_owner_history present
@@ -207,7 +271,7 @@ fi
 
 # 6. HANDOFF-next-session.md present and non-empty
 HANDOFF=""
-for p in "${ROOT}/HANDOFF-next-session.md" "${ROOT}"/docs/solon/*/HANDOFF-next-session.md; do
+for p in "${DOCSET_DIR}/HANDOFF-next-session.md" "${DOCSET_DIR}"/docs/solon/*/HANDOFF-next-session.md; do
   [ -f "$p" ] && { HANDOFF="$p"; break; }
 done
 if [ -n "$HANDOFF" ]; then
@@ -217,12 +281,12 @@ if [ -n "$HANDOFF" ]; then
     item_mismatch "6" "${HANDOFF} present but missing branch/sha/WU/mode handoff content"
   fi
 else
-  item_mismatch "6" "HANDOFF-next-session.md not found under ${ROOT}"
+  item_mismatch "6" "HANDOFF-next-session.md not found under ${DOCSET_DIR}"
 fi
 
 # 7. sessions/_INDEX.md present with updated: frontmatter
 SESS=""
-for p in "${ROOT}/sessions/_INDEX.md" "${ROOT}"/docs/solon/*/sessions/_INDEX.md; do
+for p in "${DOCSET_DIR}/sessions/_INDEX.md" "${DOCSET_DIR}"/docs/solon/*/sessions/_INDEX.md; do
   [ -f "$p" ] && { SESS="$p"; break; }
 done
 if [ -n "$SESS" ]; then
@@ -232,7 +296,7 @@ if [ -n "$SESS" ]; then
     item_mismatch "7" "${SESS} missing updated: frontmatter date"
   fi
 else
-  item_na "7" "no sessions/_INDEX.md under ${ROOT}; ledger index skipped"
+  item_na "7" "no sessions/_INDEX.md under ${DOCSET_DIR}; ledger index skipped"
 fi
 
 # 8. 200-line policy compliance on (3)(6)(7) files

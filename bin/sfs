@@ -1640,9 +1640,16 @@ case "${1:-}" in
 sfs handoff <subcommand>
 
 Subcommands:
-  verify [--dir <docset-root>]   Check the 8-item durable-handoff sync surface
-                                 from session-transfer-autopilot.md. Any
-                                 mismatch exits 1. Run before transferring a
+  verify [--dir <root>] [--product-dir <path>] [--docset-dir <path>]
+                                 Check the 8-item durable-handoff sync surface
+                                 from session-transfer-autopilot.md. Items 1-2
+                                 (VERSION/CHANGELOG) read from the product repo,
+                                 items 3-8 (PROGRESS/HANDOFF/sessions) from the
+                                 docset. --dir sets both (default ".");
+                                 --product-dir / --docset-dir split the R-D1
+                                 dual-repo layout; PROGRESS.md frontmatter
+                                 `product_repo_path:` is the product fallback.
+                                 Any mismatch exits 1. Run before transferring a
                                  session so the next one starts in sync.
 EOF
         exit 0

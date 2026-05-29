@@ -37,6 +37,7 @@ module:
 - `policies/source-driven-development.md` — official-source verification for framework/library patterns.
 - `policies/writing-discipline.md` — user-facing artifact writing discipline (no preamble / hedging / self-congratulation / re-statement / filler conclusions); ko mirror at `policies/writing-discipline.ko.md`.
 - `policies/md-line-budget.md` — 200-line ceiling for loadable md (routed context / top-level docs / operational logs / user long-form); warn(180)/partial(200)/fail(250) + archive rotation + harness `md-line-budget-violation`/`operational-log-lag` detectors; ko mirror at `policies/md-line-budget.ko.md`.
+- `policies/search-tooling.md` — agents default to `rg` (ripgrep) for code/text search, `grep` only as fallback; ast-grep / Aider evaluated PASS for the SFS core (bash+Markdown majority) and stay opt-in consumer-project extensions; ko mirror at `policies/search-tooling.ko.md`.
 - `policies/debugging-and-error-recovery.md` — stop-the-line failure triage and root-cause guardrails.
 - `policies/deprecation-and-migration.md` — legacy state/API cleanup with replacement, archive, and migration evidence.
 - `policies/shipping-and-launch.md` — reversible, observable release/deploy checklist.

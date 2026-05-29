@@ -1,5 +1,43 @@
 ## [Unreleased]
 
+## [0.7.11] - 2026-05-29
+
+> **handoff verify dual-repo layout (`--product-dir` / `--docset-dir` + `product_repo_path` fallback) + search-tooling routed policy (rg baseline; ast-grep / Aider PASS).**
+
+두 주제가 같은 search / verification harness 표면을 건드려 한 release cut 으로
+묶였다. (A) `sfs handoff verify` 가 단일 `--dir` 만 가정해, docset 과 stable
+product 가 분리된 R-D1 dual-repo 환경에서 item 1(VERSION) + item 2(CHANGELOG)
+를 docset 에서 찾다 false-MISMATCH 했다. (B) ast-grep / Aider 평가 결과를
+routed policy 로 못 박고 `rg` 를 agent 검색 baseline 으로 명시한다.
+
+### Added
+
+- `sfs handoff verify` 에 `--product-dir <path>` / `--docset-dir <path>` 옵션
+  신규. item 1~2(VERSION / CHANGELOG)는 product repo, item 3~8(PROGRESS /
+  HANDOFF / sessions / 200줄 budget)은 docset 에서 읽는다. `--dir` 는 양쪽을
+  같은 값으로 두는 backward-compat 경로로 유지.
+- docset `PROGRESS.md` frontmatter 의 `product_repo_path:` 포인터 인식 —
+  `--product-dir` 미지정 시 product root fallback. 상대경로는 docset 기준,
+  절대경로는 그대로 해석.
+- `templates/.sfs-local-template/context/policies/search-tooling.md`
+  (+ `.ko.md`) — agent 가 `rg`(ripgrep)를 코드/텍스트 검색 baseline 으로 쓰고
+  `grep` 은 fallback 으로만 쓰도록 routed policy 화. ast-grep / Aider 는 SFS
+  core(bash + Markdown 다수)에서 PASS 로 평가, consumer 프로젝트 opt-in
+  확장으로 분류. `_INDEX.md` 에 라우팅 등록.
+- `tests/test-handoff-verify-dual-repo.sh` — synthetic dual-repo fixture 로
+  split / frontmatter pointer(절대·상대) / `--dir` backward-compat / 원래 버그
+  shape(docset 단독 → item 1~2 MISMATCH) 5케이스 잠금.
+- `tests/test-search-tooling-rg-baseline.sh` — policy 문서 routable + budget +
+  ast-grep/Aider 결정 + 3개 router adapter 의 `rg` baseline 명시 / `grep -r`·
+  `grep -R` 직접 권장 부재 잠금.
+
+### Changed
+
+- router adapter docs (`templates/.claude/commands/sfs.md`,
+  `templates/.codex/prompts/sfs.md`,
+  `templates/.agents/skills/sfs/SKILL.md`) 의 routed-context step 에 `rg`
+  baseline 한 줄 추가 (routed `policies/search-tooling` 로 연결).
+
 ## [0.7.10] - 2026-05-29
 
 > **Session-transfer durable-handoff enumeration + 200-line md routed policy + harness operational-log-lag / md-line-budget detectors + `sfs handoff verify`.**

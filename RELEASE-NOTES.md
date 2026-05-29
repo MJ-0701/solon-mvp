@@ -7,6 +7,29 @@
 
 ---
 
+## 0.7.11
+
+이번 버전은 듀얼 레포 인계 검증과 검색 도구 기준을 같은 search / verification
+표면으로 묶어 정리합니다. 이전에는 `sfs handoff verify` 가 단일 디렉터리만
+가정해, 작업 docset 과 안정 product 저장소가 분리된 환경에서 VERSION /
+CHANGELOG 를 엉뚱한 쪽에서 찾아 실제로는 멀쩡한 인계를 어긋남으로 잘못
+보고했습니다.
+
+체감 변화:
+
+- **`sfs handoff verify` 가 듀얼 레포를 이해합니다.** `--product-dir` /
+  `--docset-dir` 로 VERSION·CHANGELOG(product)와 PROGRESS·HANDOFF·세션
+  인덱스(docset)를 각각 다른 저장소에서 읽습니다. `--dir` 만 쓰던 기존
+  방식은 그대로 동작합니다. docset 의 `PROGRESS.md` 앞부분에
+  `product_repo_path:` 를 적어 두면 옵션 없이도 product 위치를 찾습니다.
+- **검색 도구 기준이 정책이 됐습니다.** 에이전트는 코드/텍스트 검색에
+  `rg`(ripgrep)를 기본으로 쓰고, 없을 때만 `grep` 으로 내려갑니다. ast-grep
+  과 Aider 는 SFS 본체(대부분 bash + Markdown)에는 득이 적어 도입 보류로
+  평가하고, 언어별 consumer 프로젝트의 선택 확장으로 남겼습니다.
+
+contract test 2건이 듀얼 레포 검증 동작과 검색 정책/어댑터 문구를 잠가,
+이 표면이 다시 어긋나면 즉시 fail 합니다.
+
 ## 0.7.10
 
 이번 버전은 세션 인계 누락과 운영 로그 비대화를 같은 뿌리 문제로 보고
