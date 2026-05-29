@@ -1,0 +1,56 @@
+# solon-safe-permissions.yaml — pinned copy for <PROJECT-NAME> mcp-tool.
+#
+# Default-deny posture for a custom MCP tool server. Read/query surfaces are
+# pre-approved; mutating tools ask approval; remote-mutation (git push, deploy,
+# rm -rf) is denied. After scaffolding, edit this copy freely.
+
+version: "0.7.0"
+
+description: |
+  Solon-safe defaults for the <PROJECT-NAME> MCP tool in the <DOMAIN> domain.
+  The custom tool itself should declare a narrow files_scope and tools_allowed
+  per policies/sub-agent-capsule-contract.md.
+
+tools:
+  pre_approved:
+    - read
+    - read_file
+    - list_directory
+    - glob
+    - grep
+
+  ask_approval:
+    - write
+    - edit
+    - Edit
+    - Write
+    - bash
+    - shell
+
+  denied:
+    - "bash:git push*"
+    - "bash:git push -*"
+    - "bash:git push --*"
+    - "bash:git push --force*"
+    - "bash:rm -rf *"
+    - "bash:rm -r -f *"
+    - "bash:rm -fr *"
+    - "bash:git reset --hard*"
+    - "bash:git clean -fd*"
+
+workflow:
+  mainline_first: true
+  require_gate_6: true
+  require_release_readiness_when_production: true
+  handoff_is_stop_contract: true
+  korean_role_comment_for_new_source: true
+
+audit:
+  log_tool_calls: true
+  redact_in_logs:
+    - "**/auth.env"
+    - "**/.env"
+    - "ANTHROPIC_API_KEY"
+    - "OPENAI_API_KEY"
+    - "GEMINI_API_KEY"
+    - "CLAUDE_CODE_OAUTH_TOKEN"
