@@ -21,3 +21,6 @@ mcp-server/dist/
 # Sandbox / local env files that should not ship.
 .venv/
 venv/
+
+# Claude Code local session settings (per-machine permissions, must not ship).
+.claude/
