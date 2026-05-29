@@ -7,6 +7,39 @@
 
 ---
 
+## 0.7.9
+
+이번 버전은 0.7.1 의 `*"ui"*` / `*"ops"*` 좁힘에 이어 review lens 의
+형제 broad-substring 패턴을 일괄 sweep 한 사전 회귀 방지 patch 입니다.
+회귀 보고가 들어오기 전에 미리 막는 차원의 quality cleanup — 회귀 0건,
+타이트 함수.
+
+infer_review_lens TEXT 와 review_path_lens_signal PATH 양쪽에서:
+
+- **security**: `*"auth"*` (→ "author") / `*"secret"*` (→ "secretary")
+  / `*"token"*` (→ "tokenize") 를 word-boundary + 고-신호 phrase 로 좁힘.
+- **performance**: `*"perf"*` 는 `*"performance"*` 와 중복이고
+  "perfect"/"perform" 을 false-positive 매칭하므로 제거. `*"memory"*`
+  → `memory leak` / `out of memory` 등. `*"query"*` → `sql query` /
+  `slow query`.
+- **ddd-tdd**: `*"aggregate"*` (→ "aggregated data") 를 `aggregate
+  root` / `aggregate boundary` 로 좁힘. PATH 의 `*ddd*` / `*tdd*` (→
+  "daddy") 도 `ddd/` / `-ddd-` 형태로.
+- **management-admin**: `*"tax"*` (→ "taxonomy" / "syntax") 를 `tax
+  form` / `taxpayer` 등으로 좁힘.
+- **api-contract**: bare `*api*` (→ "rapid" / "scrappy") 와 bare
+  `*interface*` 를 dir-style 로.
+- **design**: bare `*ui*` (→ "guide" / "build" / "library") 와 bare
+  `*ux*` (→ "auxiliary") 를 `ui/` / `-ui-` / `react-ui` / `ui-kit`
+  형태로.
+
+`test-review-lens-false-positive-rejection` 신규 contract test 가 각
+rejection 케이스를 짝지어진 positive 케이스와 함께 잠금. 향후 누가
+패턴을 다시 넓히면 즉시 fail.
+
+기존 6개 review test 모두 그대로 통과 — sweep 가 정당한 routing 결정을
+하나도 깨지 않음.
+
 ## 0.7.8
 
 이번 버전은 사용자용 산출물 (README / GUIDE / RELEASE-NOTES / 보고서

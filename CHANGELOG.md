@@ -1,5 +1,66 @@
 ## [Unreleased]
 
+## [0.7.9] - 2026-05-29
+
+> **Broad-substring sibling sweep — `auth` / `perf` / `tax` / `aggregate` / `memory` / `query` / `api` / `ui` / `ddd` / `tdd` patterns tightened in both text and path branches of infer_review_lens.**
+
+0.7.1 fixed the `*"ui"*` (→ "build") and `*"ops"*` (→ "develops")
+false-positive routings but did not sweep the sibling patterns in the
+same case chain. 0.7.9 is the proactive cleanup: each remaining bare
+substring that risked matching a common English word or path fragment
+is tightened to word-boundary / dir-style / high-signal phrase form,
+or dropped when it duplicated another pattern in the same branch.
+
+### Changed
+
+- `infer_review_lens` TEXT branches tightened:
+  - **security**: `*"auth"*` → word-boundary + `authn` / `authz` /
+    high-signal phrases. `*"secret"*` → `secret key` / `secret token` /
+    `secret manager` / `secret rotation` / `secret storage` / `secrets/`.
+    `*"token"*` → `api token` / `bearer token` / `access token` /
+    `oauth token` / `refresh token`.
+  - **performance**: dropped `*"perf"*` (redundant with `*"performance"*`,
+    matched "perfect" / "perform"). `*"query"*` → `sql query` /
+    `db query` / `slow query` / `queries`. `*"memory"*` → `memory leak`
+    / `memory usage` / `out of memory` / `oom` / `heap usage`.
+  - **ddd-tdd**: `*"aggregate"*` → ` aggregate ` / `aggregate root` /
+    `aggregate boundary` / `ddd aggregate`.
+  - **management-admin**: `*"tax"*` → ` tax ` / `tax form` / `taxpayer`
+    / `taxation` / `taxes` / `tax record`.
+- `review_path_lens_signal` PATH branches tightened:
+  - **security**: bare `*auth*` / `*token*` / `*secret*` / `*pii*` →
+    dir-style + high-signal forms (`auth/`, `authn`, `authz`, `oauth*`,
+    `secrets/`, `secret-manager`, `tokens/`, `api-token`, `pii-*`).
+  - **performance**: dropped bare `*perf*` (redundant with `*performance*`).
+    Compound forms required for `*query*` and `*memory*` (`sql-query`,
+    `slow-query`, `memory-leak`, `memory-profile`, `heap-profile`).
+    `*bundle*` → `*bundle-size*`.
+  - **api-contract**: bare `*api*` → `api/` / `apis/` / `public-api` /
+    `restapi`. bare `*interface*` → `src/main/*/interfaces` /
+    `interface.py` / `interfaces.py`.
+  - **design**: bare `*ui*` / `*ux*` / `*design*` → dir-style
+    (`ui/`, `ux/`, `-ui-`, `-ux-`, `react-ui`, `ui-kit`, `design-system`).
+  - **ddd-tdd**: bare `*ddd*` / `*tdd*` (3-char substring matched
+    "daddy", "boundaddyd") → `ddd/` / `-ddd-` / `tdd/` / `-tdd-`.
+
+### Tests
+
+- `tests/test-review-lens-false-positive-rejection.sh` pairs each
+  rejection case with the legitimate positive case. Every formerly-loose
+  substring is probed against a common English word that previously
+  triggered it ("author", "perfect", "taxonomy", "aggregated data",
+  "queryable", "guide", "build", "library", "auxiliary", "rapid",
+  "scrappy", "daddy") and asserted to NOT match; the high-signal
+  form (e.g. "authentication", "out of memory", "sql query", "src/ui/",
+  "src/api/users.py", "src/main/*/domain") is asserted to STILL match.
+  A regression that re-broadens any pattern fails immediately with a
+  pointer to the offending case.
+- The six existing review tests (`agent-build-review-lens`,
+  `review-auto-lens-lock`, `review-lens-aliases`,
+  `review-auth-preflight`, `review-cosmetic-boundary`,
+  `review-implementation-sequence`) continue to pass — the sweep
+  preserved every legitimate routing decision.
+
 ## [0.7.8] - 2026-05-29
 
 > **Writing discipline policy — the compactness floor in kernel.md now has a ceiling: no preamble, hedging, self-congratulation, re-statement, or filler conclusions in user-facing artifacts.**

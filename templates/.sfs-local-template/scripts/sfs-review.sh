@@ -656,19 +656,28 @@ review_path_lens_signal() {
       ;;
   esac
   case "$paths" in
-    *auth*|*oauth*|*token*|*secret*|*security*|*permission*|*permissions*|*pii*|*privacy*|*upload*|*webhook*|*.pem|*.key)
+    *auth/*|*authn*|*authz*|*oauth*|*security*|*permission*|*permissions*|*privacy*|*upload*|*webhook*|*.pem|*.key|*tokens/*|*api-token*|*access-token*|*refresh-token*|*bearer-token*|*secret-manager*|*secret-rotation*|*secrets/*|*pii-*|*-pii*)
+      # 0.7.9: bare `*auth*` / `*token*` / `*secret*` / `*pii*` were
+      # matching unrelated paths ("author/", "tokenizer/", "secretary*",
+      # "happiness*"). Tightened to dir-style and high-signal forms.
       printf 'security\n'
       return 0
       ;;
   esac
   case "$paths" in
-    *perf*|*performance*|*algorithm*|*hot-path*|*hot_path*|*query*|*payload*|*concurrency*|*benchmark*|*benchmarks*|*lighthouse*|*latency*|*memory*|*bundle*|*load-test*)
+    *performance*|*algorithm*|*hot-path*|*hot_path*|*sql-query*|*db-query*|*slow-query*|*payload*|*concurrency*|*benchmark*|*benchmarks*|*lighthouse*|*latency*|*memory-leak*|*memory-profile*|*heap-profile*|*bundle-size*|*load-test*)
+      # 0.7.9: dropped `*perf*` (redundant with `*performance*` and
+      # matches "perfect"/"perform"). Tightened `*query*` and `*memory*`
+      # to compound forms. `*bundle*` → `*bundle-size*` to avoid matching
+      # node `bundle/` etc that is not perf-related.
       printf 'performance\n'
       return 0
       ;;
   esac
   case "$paths" in
-    *openapi*|*api*|*controller*|*controllers*|*route*|*routes*|*schema*|*schemas*|*dto*|*interface*|*contract*)
+    *openapi*|*api/*|*apis/*|*public-api*|*restapi*|*controller*|*controllers*|*route*|*routes*|*schema*|*schemas*|*dto*|*src/main/*/interfaces*|*interface.py|*interfaces.py|*contract*)
+      # 0.7.9: bare `*api*` matched "rapid/", "scrappy/", "tapioca*".
+      # bare `*interface*` matched many. Tightened.
       printf 'api-contract\n'
       return 0
       ;;
@@ -686,13 +695,20 @@ review_path_lens_signal() {
       ;;
   esac
   case "$paths" in
-    *figma*|*design*|*wireframe*|*ux*|*ui*|*component*|*.css|*.scss|*.html)
+    *figma*|*design-system*|*wireframe*|*ui/*|*ux/*|*-ui-*|*-ux-*|*react-ui*|*ui-kit*|*component*|*.css|*.scss|*.html)
+      # 0.7.9: bare `*ui*` matched "guide/", "build/", "library/" etc.
+      # bare `*ux*` matched "auxiliary/", "deluxe/" etc. bare `*design*`
+      # matched "redesigned/" and any path containing the substring.
+      # Tightened to dir-style + high-signal forms.
       printf 'design\n'
       return 0
       ;;
   esac
   case "$paths" in
-    *ddd*|*tdd*|*domain-model*|*src/main/*/domain*|*src/main/*/application*|*src/main/*/infrastructure*|*src/main/*/interfaces*)
+    *ddd/*|*-ddd-*|*tdd/*|*-tdd-*|*domain-model*|*src/main/*/domain*|*src/main/*/application*|*src/main/*/infrastructure*|*src/main/*/interfaces*)
+      # 0.7.9: bare `*ddd*` / `*tdd*` (only 3 chars) matched "daddy/",
+      # "boundaddyd/", etc. Tightened to dir-style + DDD/TDD specific
+      # source-tree shapes that already existed.
       printf 'ddd-tdd\n'
       return 0
       ;;
@@ -764,11 +780,19 @@ infer_review_lens() {
       printf 'source-docs\n'
       return 0
       ;;
-    *"security"*|*"hardening"*|*"auth"*|*"authorization"*|*"authentication"*|*"pii"*|*"secret"*|*"token"*|*"untrusted input"*)
+    *"security"*|*"hardening"*|*" auth "*|*"auth:"*|*"auth/"*|*"authn"*|*"authz"*|*"authorization"*|*"authentication"*|*"pii"*|*"secret key"*|*"secret token"*|*"secret manager"*|*"secret rotation"*|*"secret storage"*|*"secrets/"*|*"api token"*|*"bearer token"*|*"access token"*|*"oauth token"*|*"refresh token"*|*"untrusted input"*)
+      # 0.7.9: `*"auth"*` was matching "author", "authority", "authoring".
+      # `*"secret"*` was matching "secretary". `*"token"*` was matching
+      # "tokenize"/"tokenized" (NLP tokens, not security tokens).
+      # Tightened to word-boundary and high-signal phrase forms.
       printf 'security\n'
       return 0
       ;;
-    *"performance"*|*"perf"*|*"algorithm"*|*"hot path"*|*"hot-path"*|*"query"*|*"payload"*|*"concurrency"*|*"latency"*|*"benchmark"*|*"lighthouse"*|*"memory"*|*"bundle size"*)
+    *"performance"*|*"algorithm"*|*"hot path"*|*"hot-path"*|*"sql query"*|*"db query"*|*"slow query"*|*"queries"*|*"payload"*|*"concurrency"*|*"latency"*|*"benchmark"*|*"lighthouse"*|*"memory leak"*|*"memory usage"*|*"out of memory"*|*" oom "*|*"heap usage"*|*"bundle size"*)
+      # 0.7.9: dropped `*"perf"*` (redundant with `*"performance"*`,
+      # and matches "perfect"/"perform"). Tightened `*"query"*` and
+      # `*"memory"*` to high-signal forms — bare "query" matched
+      # "queryable", bare "memory" matched general mentions.
       printf 'performance\n'
       return 0
       ;;
@@ -805,7 +829,9 @@ infer_review_lens() {
       printf 'design\n'
       return 0
       ;;
-    *"ddd"*|*"tdd"*|*"domain model"*|*"test-first"*|*"failing test"*|*"characterization test"*|*"red-green"*|*"aggregate"*|*"value object"*)
+    *"ddd"*|*"tdd"*|*"domain model"*|*"test-first"*|*"failing test"*|*"characterization test"*|*"red-green"*|*" aggregate "*|*"aggregate root"*|*"aggregate boundary"*|*"ddd aggregate"*|*"value object"*)
+      # 0.7.9: bare `*"aggregate"*` matched "aggregated data" / general
+      # statistics. Tightened to DDD-specific phrasings.
       printf 'ddd-tdd\n'
       return 0
       ;;
@@ -817,7 +843,9 @@ infer_review_lens() {
       printf 'strategy\n'
       return 0
       ;;
-    *"artifact types touched"*management-admin*|*"management/admin evidence"*|*"finance"*|*"financial"*|*"bookkeeping"*|*"accounting"*|*"invoice"*|*"receipt"*|*"tax"*|*"cashflow"*|*"payroll"*)
+    *"artifact types touched"*management-admin*|*"management/admin evidence"*|*"finance"*|*"financial"*|*"bookkeeping"*|*"accounting"*|*"invoice"*|*"receipt"*|*" tax "*|*"tax form"*|*"taxpayer"*|*"taxation"*|*"taxes"*|*"tax record"*|*"cashflow"*|*"payroll"*)
+      # 0.7.9: bare `*"tax"*` matched "taxonomy" / "syntax" / "datatax".
+      # Tightened to word-boundary and high-signal tax-form phrases.
       printf 'management-admin\n'
       return 0
       ;;
