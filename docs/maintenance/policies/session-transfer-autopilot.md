@@ -4,8 +4,8 @@ title: "Session transfer autopilot — Continuation Guard 가 걸렸을 때의 �
 visibility: oss-public
 doc_type: maintenance-policy
 language: ko
-updated: 2026-05-28
-summary: "Don't ask whether to /clear or open a new session. Drop a durable handoff first, then invoke whatever host-native transfer control exists."
+updated: 2026-05-29
+summary: "Don't ask whether to /clear or open a new session. Drop a durable handoff first (with the full sync surface enumeration), then invoke whatever host-native transfer control exists."
 load_when: "Read when Session Continuation Guard fires, or when implementing a new agent runtime that needs to handle session boundaries."
 ---
 
@@ -33,6 +33,46 @@ Session Continuation Guard 가 걸리면:
 4. **resume 없는 bare clear 는 금지**. 사용자가 이어갈 수 있는 다리를
    먼저 만들고 끊는다.
 5. host 제어가 없으면 (5) 의 exact next-session prompt 만 남기고 멈춘다.
+
+## Durable handoff artifact — mandatory sync surface
+
+(2) 의 "durable handoff / report" 는 단순 메모가 아니다. 다음 표면을 **모두**
+실제 상태와 일치시켜야 한다. 누락 1건은 다음 세션 인계가 stale 상태로
+시작한다는 뜻이며, 0.6.141 → 0.7.9 ledger lag (16 release) 가 그 결과다.
+
+필수 sync surface (release-bearing project 기준):
+
+1. **product VERSION** — `solon-mvp-dist/VERSION` 의 현재 값.
+2. **CHANGELOG headline** — 가장 최근 release section (`## [X.Y.Z]`) 의
+   첫 `> **요약 줄**` 또는 동등 줄.
+3. **PROGRESS.md `last_completed_release`** — `version` / `source_main` /
+   `evidence_closure` / `product_commit` / `product_tag` 가 위 (1)(2) 와
+   일치하는지.
+4. **PROGRESS.md `recent_session_owner_history`** — 마지막 release 이후
+   세션이 모두 행으로 들어가 있는지. `released_at` 가 시간순으로 정렬
+   돼 있는지.
+5. **PROGRESS.md `resume_hint.default_action`** — 옛 release 의
+   follow-up 을 가리키고 있지는 않은지 (예: 0.7.9 시점에 0.6.114
+   monitor stall guard 를 default 로 가리키고 있으면 stale).
+6. **HANDOFF-next-session.md** — 한 단락 stub 으로 (a) 현재 main
+   sha/branch, (b) active WU (없으면 명시), (c) 다음 한 step 의 mode
+   (C-Cowork / D-Code) 와 trigger 발화를 포함.
+7. **sessions/_INDEX.md** — 마지막 release 이후 모든 session codename
+   행 prepend (역시간순). `updated:` frontmatter 날짜도 갱신.
+8. **200-line policy 준수 상태** — 위 (3)(6)(7) 파일 각각이
+   `templates/.sfs-local-template/context/policies/md-line-budget.md`
+   의 warn(180) / partial(200) / fail(250) 안에 있는지. 넘었다면
+   archive 회전 후 위 sync 적용.
+
+생략 가능 표면 (project-specific, 없으면 skip):
+
+- `NEXT-SESSION-BRIEFING.md` (legacy briefing doc; 0.7.x 이후 신규
+  프로젝트에선 안 만든다).
+- 학습-log per-month index (변경 없으면 skip).
+- domain_locks_summary (활성 lock 변동 없으면 skip).
+
+handoff 작성자는 위 1~8 을 명시적으로 PASS / mismatch / N/A 로 마크해야
+하고, mismatch 1건이라도 있으면 `sfs handoff verify` (0.7.10+) 가 fail.
 
 ## 왜 이 규약이 있나
 
