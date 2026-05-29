@@ -1,5 +1,33 @@
 ## [Unreleased]
 
+> **handoff entry-dir guard — `sfs handoff verify` item 9 + 수신측 cwd guard 로 cross-repo silent non-pickup 차단.**
+
+handoff 가 docset 에 쓰였는데 다음 세션이 distribution repo (또는 그 반대) 에서
+열리면 `PROGRESS`/`sprints`/`CLAUDE.md` 가 없어 trigger 진입 체인이 파일 부재를
+"할 일 없음" 으로 오인하고 조용히 실패했다. 0.7.11 dual-repo handoff verify 의
+sibling gap (그땐 verify 의 단일 `--dir` 가정, 이번엔 resume 의 cwd 가정).
+
+### Added
+
+- `sfs handoff verify` 에 **item 9** 신규 — HANDOFF frontmatter 가
+  `entry_working_dir` + `entry_repo` 를 선언했는지, 그 dir 에서 resume target
+  (`PROGRESS.md` / `sprints/` / `CLAUDE.md`) 이 실제 resolve 되는지 검증.
+  미선언 = WARN(backward-compat, exit 0), 선언했으나 dir 부재/resume target 부재
+  = MISMATCH(exit 1). mandatory sync surface 8 → 9 item.
+- `tests/test-handoff-entry-dir.sh` — resolves(PASS) / no-target(MISMATCH) /
+  missing-dir(MISMATCH) / no-field(WARN backward-compat) 4케이스 잠금.
+
+### Changed
+
+- `docs/maintenance/policies/session-transfer-autopilot.md` — durable handoff
+  필수 정보에 `entry_working_dir` + `entry_repo` 추가, mandatory sync surface
+  item 9 명문화 (SSoT).
+- `templates/.sfs-local-template/context/policies/session-continuation-guard.md`
+  + `context/kernel.md` — transfer capsule 은 `entry_working_dir`/`entry_repo`
+  를 선언하고, 수신 runtime 은 세션 진입 시 cwd 가 일치하는지 확인 후 claim,
+  불일치면 어느 dir 을 열어야 하는지 안내하고 멈춘다 (silent pickup 금지).
+  docset↔distribution 경계 명시.
+
 ## [0.7.11] - 2026-05-29
 
 > **handoff verify dual-repo layout (`--product-dir` / `--docset-dir` + `product_repo_path` fallback) + search-tooling routed policy (rg baseline; ast-grep / Aider PASS).**

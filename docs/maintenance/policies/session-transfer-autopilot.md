@@ -21,13 +21,16 @@ Session Continuation Guard 가 걸리면:
 
 1. **같은 세션 / 새 세션 선택을 사용자에게 묻지 않는다**. `/clear` 를 입력
    하라고 묻지도 않는다.
-2. **먼저 durable handoff / report 를 남긴다**. 다음 5개 정보 포함:
+2. **먼저 durable handoff / report 를 남긴다**. 다음 정보 포함:
    - current branch
    - current commit (`HEAD` SHA)
    - working tree status (`git status -sb`)
    - 진행 중인 작업의 evidence path (sprint dir, decision file, ...)
    - exact next-session prompt (사용자가 새 세션에서 그대로 paste 할 수
      있는 한 줄)
+   - `entry_working_dir` + `entry_repo` (다음 세션을 어느 디렉토리·repo 에서
+     열어야 resume target 이 resolve 되는지; cross-repo docset↔distribution
+     혼동 방지)
 3. **host-native transfer / new-session / archive / clear+resume 제어가
    있으면 직접 호출**해 새 세션에서 즉시 이어간다.
 4. **resume 없는 bare clear 는 금지**. 사용자가 이어갈 수 있는 다리를
@@ -63,6 +66,15 @@ Session Continuation Guard 가 걸리면:
    `templates/.sfs-local-template/context/policies/md-line-budget.md`
    의 warn(180) / partial(200) / fail(250) 안에 있는지. 넘었다면
    archive 회전 후 위 sync 적용.
+9. **HANDOFF `entry_working_dir` + `entry_repo`** — 다음 세션이 열려야 하는
+   working dir + repo 를 HANDOFF frontmatter 에 명시한다. 그 dir 에서 resume
+   target (`PROGRESS.md` 또는 `sprints/` 또는 `CLAUDE.md`) 이 실제로 resolve
+   돼야 한다. 누락 시 수신 runtime 이 잘못된 repo (예: distribution vs docset)
+   에서 열려 trigger 진입 체인이 파일 부재를 "할 일 없음" 으로 오인하고 조용히
+   실패한다 (0.7.11 dual-repo handoff verify 의 sibling gap — 그땐 verify 의
+   단일 `--dir` 가정, 이번엔 resume 의 cwd 가정). `entry_warning` 1줄로 흔한
+   오진입을 막는다. 필드가 없으면 backward-compat 로 기존 동작을 유지하되
+   verify 가 warn 한다.
 
 생략 가능 표면 (project-specific, 없으면 skip):
 

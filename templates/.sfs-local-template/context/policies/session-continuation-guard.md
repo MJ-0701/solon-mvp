@@ -30,6 +30,15 @@ load_when: ["token", "session", "continuation", "loop", "wakeup", "resume", "upg
   write/update the handoff/report or transfer capsule first, including current
   branch/commit/status, latest evidence paths, first next command, and exact
   next-session prompt.
+- The transfer capsule must declare `entry_working_dir` and `entry_repo` — the
+  directory and repo the next session must open in for the resume target
+  (`PROGRESS.md` / `sprints/` / `CLAUDE.md`) to resolve. On session entry, if the
+  current working directory is not the handoff's `entry_working_dir`, stop and
+  tell the user which directory to open; never silently attempt pickup. A handoff
+  authored in the docset but opened in the distribution repo (or vice-versa)
+  finds none of those files and mis-reads the absence as "nothing to do". WU,
+  handoff, and `sprints/` live in the docset; the distribution repo receives only
+  cut results.
 - Only after that durable capsule exists, invoke a host-owned transfer,
   new-session, archive, or clear+resume control that preserves or injects the
   prompt and resumes immediately in the fresh session. Do not call a bare clear

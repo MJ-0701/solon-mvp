@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # sfs handoff verify — session-transfer durable-handoff closure check.
 #
-# Checks the 8-item mandatory sync surface defined in
+# Checks the 9-item mandatory sync surface defined in
 #   docs/maintenance/policies/session-transfer-autopilot.md
 #   (## Durable handoff artifact — mandatory sync surface)
 # That policy doc is the SSoT; this command only mechanizes the checklist.
@@ -24,6 +24,7 @@ fi
 PASS_COUNT=0
 MISMATCH_COUNT=0
 NA_COUNT=0
+WARN_COUNT=0
 
 # Dual-repo layout: items 1-2 (VERSION / CHANGELOG) read from the product repo;
 # items 3-8 (PROGRESS / HANDOFF / sessions / line budget) read from the docset.
@@ -42,7 +43,7 @@ usage() {
 Usage:
   sfs handoff verify [--dir <root>] [--product-dir <path>] [--docset-dir <path>]
 
-Verifies the durable-handoff mandatory sync surface (8 items) from
+Verifies the durable-handoff mandatory sync surface (9 items) from
 session-transfer-autopilot.md. The product VERSION/CHANGELOG (items 1-2) and the
 operational ledger (PROGRESS.md, HANDOFF-next-session.md, sessions/_INDEX.md,
 items 3-8) frequently live in *different* repos under the R-D1 dual-repo layout.
@@ -70,6 +71,11 @@ item_mismatch() {
 item_na() {
   printf "  ${C_DIM}➖ N/A${C_RESET}  %s. %s\n" "$1" "$2"
   NA_COUNT=$((NA_COUNT + 1))
+}
+item_warn() {
+  # Non-fatal: backward-compat gap that should be filled but does not block transfer.
+  printf "  ${C_YELLOW}⚠️  WARN${C_RESET}  %s. %s\n" "$1" "$2"
+  WARN_COUNT=$((WARN_COUNT + 1))
 }
 
 # ── helpers ─────────────────────────────────────────────────────────
@@ -146,6 +152,35 @@ progress_block_value() {
 progress_has_key() {
   local file="$1" key="$2"
   grep -Eq "^[[:space:]]*${key}[[:space:]]*:" "$file" 2>/dev/null
+}
+
+# handoff_fm_value <file> <key> — read a top-level frontmatter key from the
+# leading `---` fence (used for entry_working_dir / entry_repo).
+handoff_fm_value() {
+  local file="$1" key="$2"
+  [ -f "$file" ] || return 1
+  awk -v key="$key" '
+    NR == 1 && $0 != "---" { exit 1 }
+    NR == 1 { next }
+    $0 == "---" { exit }
+    $0 ~ ("^" key ":[[:space:]]*") {
+      v = $0
+      sub(("^" key ":[[:space:]]*"), "", v)
+      sub(/[[:space:]]*#.*$/, "", v)            # strip trailing inline comment
+      gsub(/^["'\'']|["'\'']$/, "", v)
+      sub(/[[:space:]]+$/, "", v)
+      if (v != "") { print v; exit }
+    }
+  ' "$file"
+}
+
+# expand a leading ~ to $HOME for entry_working_dir resolution.
+expand_tilde() {
+  case "$1" in
+    "~") printf '%s' "$HOME" ;;
+    "~/"*) printf '%s/%s' "$HOME" "${1#\~/}" ;;
+    *) printf '%s' "$1" ;;
+  esac
 }
 
 line_count() { wc -l < "$1" 2>/dev/null | tr -d '[:space:]'; }
@@ -316,8 +351,35 @@ else
   item_mismatch "8" "200-line budget exceeded (partial/fail):${budget_detail} — archive-rotate then re-sync"
 fi
 
+# 9. HANDOFF entry_working_dir declared + resume target resolves there.
+# Prevents the cross-repo silent non-pickup: a handoff authored in the docset
+# but opened in the distribution repo (or vice-versa) finds no PROGRESS/sprints/
+# CLAUDE.md and mis-reads the absence as "nothing to do".
+if [ -z "$HANDOFF" ]; then
+  item_na "9" "no HANDOFF-next-session.md; entry-dir check skipped"
+else
+  EWD="$(handoff_fm_value "$HANDOFF" "entry_working_dir" || true)"
+  EREPO="$(handoff_fm_value "$HANDOFF" "entry_repo" || true)"
+  if [ -z "$EWD" ]; then
+    item_warn "9" "HANDOFF has no entry_working_dir — receiver runtime may open the wrong repo (docset vs distribution); add entry_working_dir + entry_repo + entry_warning"
+  else
+    EWD_RESOLVED="$(expand_tilde "$EWD")"
+    case "$EWD_RESOLVED" in
+      /*) : ;;
+      *) EWD_RESOLVED="${DOCSET_DIR%/}/${EWD_RESOLVED}" ;;
+    esac
+    if [ ! -d "$EWD_RESOLVED" ]; then
+      item_mismatch "9" "entry_working_dir '${EWD}' does not resolve to a directory (${EWD_RESOLVED})"
+    elif [ -f "${EWD_RESOLVED}/PROGRESS.md" ] || [ -d "${EWD_RESOLVED}/sprints" ] || [ -f "${EWD_RESOLVED}/CLAUDE.md" ]; then
+      item_pass "9" "entry_working_dir resolves a resume target: ${EWD}${EREPO:+ (repo: ${EREPO})}"
+    else
+      item_mismatch "9" "entry_working_dir '${EWD}' has no resume target (PROGRESS.md / sprints/ / CLAUDE.md) — next session would silently find nothing"
+    fi
+  fi
+fi
+
 printf "\n${C_BOLD}Summary${C_RESET}\n"
-printf "  PASS: %d   MISMATCH: %d   N/A: %d\n" "$PASS_COUNT" "$MISMATCH_COUNT" "$NA_COUNT"
+printf "  PASS: %d   MISMATCH: %d   WARN: %d   N/A: %d\n" "$PASS_COUNT" "$MISMATCH_COUNT" "$WARN_COUNT" "$NA_COUNT"
 if [ "$MISMATCH_COUNT" -gt 0 ]; then
   printf "  ${C_RED}handoff verify FAILED — resolve mismatches before transferring the session.${C_RESET}\n"
   exit 1
