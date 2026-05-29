@@ -35,6 +35,7 @@ module:
 - `policies/ai-work-intake-routing.md` — four-part AI work intake and one-off/repeated/batch routing.
 - `policies/domain-knowledge-assets.md` — turn expert domain know-how into AI-usable assets.
 - `policies/source-driven-development.md` — official-source verification for framework/library patterns.
+- `policies/writing-discipline.md` — user-facing artifact writing discipline (no preamble / hedging / self-congratulation / re-statement / filler conclusions); ko mirror at `policies/writing-discipline.ko.md`.
 - `policies/debugging-and-error-recovery.md` — stop-the-line failure triage and root-cause guardrails.
 - `policies/deprecation-and-migration.md` — legacy state/API cleanup with replacement, archive, and migration evidence.
 - `policies/shipping-and-launch.md` — reversible, observable release/deploy checklist.

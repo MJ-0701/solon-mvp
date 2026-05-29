@@ -1,5 +1,54 @@
 ## [Unreleased]
 
+## [0.7.8] - 2026-05-29
+
+> **Writing discipline policy — the compactness floor in kernel.md now has a ceiling: no preamble, hedging, self-congratulation, re-statement, or filler conclusions in user-facing artifacts.**
+
+User report (study-note README cut by hand after codex shipped a fluffy
+first pass): the "caveman" policy that was supposed to keep user-facing
+writing tight was not enforced. Investigation found the existing
+`docs/ko/10x-value/06-token-diet-10x.md` only treated Caveman as a
+playful *opt-in persona*, and `kernel.md` only had a compactness
+*floor* (do not lose evidence). No actual writing-quality contract
+existed for README / GUIDE / RELEASE-NOTES / reports / study notes.
+0.7.8 ships that contract as a routed policy.
+
+### Added
+
+- `templates/.sfs-local-template/context/policies/writing-discipline.md`
+  and the `.ko.md` mirror. The policy enumerates six forbidden categories
+  (preamble, self-congratulation, hedging without information,
+  re-statement, filler conclusions, marketing prose), five categories
+  to keep (facts, decisions, evidence, boundaries, risk warnings), the
+  review-time check, and an explicit "Caveman persona vs
+  writing-discipline" disambiguation.
+- `templates/.sfs-local-template/context/kernel.md` cross-links the
+  new policy with a one-line summary so an agent reading only the
+  kernel still meets the rule. The line lists the forbidden categories
+  inline, intentionally — kernel readers should not need to follow
+  the link to know what counts as fluff.
+- `templates/.sfs-local-template/context/_INDEX.md` registers
+  `policies/writing-discipline.md` between `source-driven-development`
+  and `debugging-and-error-recovery`.
+- `docs/ko/10x-value/06-token-diet-10x.md` "Persona opt-in" row now
+  carries a one-line disambiguation noting Caveman is a style toggle
+  and pointing at `policies/writing-discipline.md` for the quality
+  contract.
+
+### Tests
+
+- `tests/test-writing-discipline-policy.sh` locks the whole wiring:
+  both policy files exist with the right `load_when` triggers
+  (EN: `readme`, `writing`, `report`, `documentation`, `docs`,
+  `caveman`, `README.md`, `RELEASE-NOTES.md`; KO: `보고서`,
+  `문서 작성`, `안내서`, `미사여구`); the six forbidden categories
+  and five keep-categories are enumerated in both bodies; the
+  Caveman disambiguation heading is present in both; kernel.md
+  cross-links the policy and inlines the forbidden categories;
+  `_INDEX.md` registers the new file; `06-token-diet-10x.md` carries
+  the disambiguation; `sfs context cat policies/writing-discipline`
+  resolves to the EN policy.
+
 ## [0.7.7] - 2026-05-28
 
 > **Flow integration #4 — run-all.sh now reports per-category pass/fail alongside the existing flat summary. Final patch in the 0.7.x flow-integration series.**

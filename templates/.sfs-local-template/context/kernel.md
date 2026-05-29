@@ -108,6 +108,7 @@ load_when: ["always", "sfs", "entry"]
 - Compactness is never a pass condition. Use compact wording only when evidence,
   risk warnings, decisions, source links/paths, raw-source traceability, and
   verification results stay intact; otherwise use full clarity.
+- User-facing writing discipline: no preamble, hedging, self-congratulation, re-statement, or filler conclusions in README/GUIDE/RELEASE-NOTES/reports/study notes. Compactness floor (do not lose evidence) and writing-discipline ceiling (do not pad) compose. See `policies/writing-discipline.md` / `.ko.md`.
 - AI-era software fundamentals are all-phase guardrails, not only implement
   rules: shared design concept, ubiquitous language, tight feedback loops,
   deep-module boundaries, and gray-box delegation must shape brainstorm, plan,

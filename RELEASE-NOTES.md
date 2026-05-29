@@ -7,6 +7,30 @@
 
 ---
 
+## 0.7.8
+
+이번 버전은 사용자용 산출물 (README / GUIDE / RELEASE-NOTES / 보고서
+/ 학습 노트) 의 글쓰기 품질 계약을 정식 routed policy 로 박는 patch
+입니다. 그동안 kernel.md 의 룰은 "evidence 잃지 마라" 라는 floor 만
+있었고, "padding 도 하지 마라" 라는 ceiling 이 없었습니다. codex 가
+사용자 study-note README 에 미사여구 잔뜩 박은 사건이 그 격차를
+드러냈고, 0.7.8 이 그 격차를 닫습니다.
+
+- `policies/writing-discipline.md` + `.ko.md` 신설. 금지 6개 (서두 /
+  자기 칭찬 / 정보 없는 hedging / 재진술 / 마무리 상투구 / 마케팅 톤)
+  와 보존 5개 (사실 / 결정 / 근거 / 경계 / 위험 경고) 를 enumeration
+  으로 명시. review 단계 체크 항목도 포함.
+- `kernel.md` 한 줄 cross-link 추가. 금지 카테고리는 그 한 줄 안에
+  inline 으로 다 있어, kernel 만 읽는 agent 도 룰을 안다.
+- `_INDEX.md` 등재.
+- `docs/ko/10x-value/06-token-diet-10x.md` 의 "Caveman persona" 행에
+  한 줄 disambiguation 추가 — Caveman 은 *스타일 토글* 이지 *글쓰기
+  품질 계약* 이 아님을 명시하고, 품질 계약은 새 policy 로 연결.
+- `test-writing-discipline-policy` contract test 가 위 전체 wiring
+  (양 언어 frontmatter, load_when, 금지/보존 enumeration, kernel
+  cross-link inline 룰, _INDEX 등재, token-diet disambiguation,
+  실 sfs context cat 해석) 을 한꺼번에 잠금.
+
 ## 0.7.7
 
 이번 버전은 0.7.x Flow Integration 4-patch 시리즈의 마지막 patch 입니다.
