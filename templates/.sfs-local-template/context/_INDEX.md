@@ -34,6 +34,7 @@ module:
 - `policies/context-pollution-guard.md` — keep core docs/context free of prompt bodies, transcripts, and scratch residue.
 - `policies/ai-work-intake-routing.md` — four-part AI work intake and one-off/repeated/batch routing.
 - `policies/domain-knowledge-assets.md` — turn expert domain know-how into AI-usable assets.
+- `policies/domain-ontology-discipline.md` — keep domain entities/relationships compiled and reconciled on change; backs the ontology review lens.
 - `policies/source-driven-development.md` — official-source verification for framework/library patterns.
 - `policies/writing-discipline.md` — user-facing artifact writing discipline (no preamble / hedging / self-congratulation / re-statement / filler conclusions); ko mirror at `policies/writing-discipline.ko.md`.
 - `policies/md-line-budget.md` — 200-line ceiling for loadable md (routed context / top-level docs / operational logs / user long-form); warn(180)/partial(200)/fail(250) + archive rotation + harness `md-line-budget-violation`/`operational-log-lag` detectors; ko mirror at `policies/md-line-budget.ko.md`.

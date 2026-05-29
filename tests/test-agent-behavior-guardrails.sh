@@ -65,6 +65,8 @@ assert_contains "${kernel}" "Executable Action Ownership is ambient" "kernel exe
 assert_contains "${kernel}" "Do not hand the user copy-paste commands" "kernel no runnable copy-paste handoff"
 assert_contains "${kernel}" "Distinguish true blockers from approval gates" "kernel blocker approval split"
 assert_contains "${kernel}" "session-scoped authorization" "kernel session authorization"
+assert_contains "${kernel}" "Runtime sandbox denial is a routing signal" "kernel sandbox-to-dev-runtime routing"
+assert_contains "${kernel}" "routing the blocked work to a dev runtime" "kernel route blocked work to dev runtime"
 assert_contains "${kernel}" "Shell state is not a user problem" "kernel shell state ownership"
 assert_contains "${kernel}" "Monitor checkpoint classification is mandatory" "kernel monitor classification"
 assert_contains "${kernel}" "commit delta, PR/head delta, local dirty state" "kernel monitor evidence fields"

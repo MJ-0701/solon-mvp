@@ -71,7 +71,7 @@ fi
 # ─────────────────────────────────────────────────────────────────────
 usage_review() {
   cat <<'EOF'
-Usage: /sfs review [--sprint <id>] [--gate <1..7>] [--stage <auto|self|cross|artifact>] [--lens <auto|artifact|code|docs|source-docs|simplify|process-lean|security|performance|api-contract|strategy|design|taxonomy|ddd-tdd|qa|ops|management-admin|release>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
+Usage: /sfs review [--sprint <id>] [--gate <1..7>] [--stage <auto|self|cross|artifact>] [--lens <auto|artifact|code|docs|source-docs|simplify|process-lean|security|performance|api-contract|strategy|design|taxonomy|ddd-tdd|ontology|qa|ops|management-admin|release>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
 
 Open the active sprint's review.md as the CPO Evaluator review document.
   - --gate <n>    gate number, 1..7. Reports display this as Gate 1..7:
@@ -96,7 +96,7 @@ Open the active sprint's review.md as the CPO Evaluator review document.
   - --lens <name> review lens. Default: auto.
                   auto chooses from artifact, code, docs, source-docs,
                   simplify, process-lean, security, performance, api-contract, strategy,
-                  design, taxonomy, ddd-tdd, qa, ops, management-admin, release using
+                  design, taxonomy, ddd-tdd, ontology, qa, ops, management-admin, release using
                   plan/implement/log text and changed artifact paths. Use an
                   explicit lens only to override a wrong inference. For the
                   same sprint/gate, later auto reviews reuse the previous lens
@@ -376,6 +376,7 @@ normalize_review_lens_value() {
     design|design/frontend|frontend-design|ux|ui) printf 'design\n' ;;
     taxonomy|domain|glossary|naming) printf 'taxonomy\n' ;;
     ddd-tdd|ddd|tdd|domain-model|test-first|red-green|red-green-refactor) printf 'ddd-tdd\n' ;;
+    ontology|domain-ontology|entity-change|entity-relationship|ontology-lens|ubiquitous-language) printf 'ontology\n' ;;
     qa|test|tests|verification) printf 'qa\n' ;;
     ops|infra|infra/devops|devops|runbook|operations) printf 'ops\n' ;;
     management-admin|management/admin|management|admin-finance|finance|financial|bookkeeping|accounting|tax|cashflow|payroll) printf 'management-admin\n' ;;
@@ -408,8 +409,8 @@ fi
 REVIEW_STAGE_REQUEST="${_normalized_stage}"
 _normalized_lens="$(normalize_review_lens_value "${REVIEW_LENS}" || true)"
 if [[ -z "${_normalized_lens}" ]]; then
-  echo "unknown review lens ${REVIEW_LENS}, valid: auto, artifact, code, docs, source-docs, simplify, process-lean, security, performance, api-contract, strategy, design, taxonomy, ddd-tdd, qa, ops, management-admin, release, agent-build" >&2
-  echo "aliases: strategy-pm -> strategy, design/frontend -> design, infra -> ops, source-driven -> source-docs, perf -> performance, performance-algorithm -> performance, process/ceremony -> process-lean, api/schema -> api-contract, DDD/TDD -> ddd-tdd, finance/accounting -> management-admin, agent/agent-sdk/mcp/mcp-server/sub-agent -> agent-build" >&2
+  echo "unknown review lens ${REVIEW_LENS}, valid: auto, artifact, code, docs, source-docs, simplify, process-lean, security, performance, api-contract, strategy, design, taxonomy, ddd-tdd, ontology, qa, ops, management-admin, release, agent-build" >&2
+  echo "aliases: strategy-pm -> strategy, design/frontend -> design, infra -> ops, source-driven -> source-docs, perf -> performance, performance-algorithm -> performance, process/ceremony -> process-lean, api/schema -> api-contract, DDD/TDD -> ddd-tdd, entity-change/domain-ontology -> ontology, finance/accounting -> management-admin, agent/agent-sdk/mcp/mcp-server/sub-agent -> agent-build" >&2
   exit "${SFS_EXIT_BADCLI}"
 fi
 REVIEW_LENS="${_normalized_lens}"
@@ -705,6 +706,12 @@ review_path_lens_signal() {
       ;;
   esac
   case "$paths" in
+    *domain-knowledge-assets*|*llm-wiki/ddd*|*ontology*|*entity-relationship*|*ubiquitous-language*)
+      printf 'ontology\n'
+      return 0
+      ;;
+  esac
+  case "$paths" in
     *ddd/*|*-ddd-*|*tdd/*|*-tdd-*|*domain-model*|*src/main/*/domain*|*src/main/*/application*|*src/main/*/infrastructure*|*src/main/*/interfaces*)
       # 0.7.9: bare `*ddd*` / `*tdd*` (only 3 chars) matched "daddy/",
       # "boundaddyd/", etc. Tightened to dir-style + DDD/TDD specific
@@ -829,6 +836,10 @@ infer_review_lens() {
       printf 'design\n'
       return 0
       ;;
+    *"ontology"*|*"entity relationship"*|*"entity-relationship"*|*"domain knowledge asset"*|*"온톨로지"*|*"도메인 지식 자산"*)
+      printf 'ontology\n'
+      return 0
+      ;;
     *"ddd"*|*"tdd"*|*"domain model"*|*"test-first"*|*"failing test"*|*"characterization test"*|*"red-green"*|*" aggregate "*|*"aggregate root"*|*"aggregate boundary"*|*"ddd aggregate"*|*"value object"*)
       # 0.7.9: bare `*"aggregate"*` matched "aggregated data" / general
       # statistics. Tightened to DDD-specific phrasings.
@@ -887,6 +898,7 @@ review_lens_label() {
     design) printf 'design/UX acceptance lens' ;;
     taxonomy) printf 'taxonomy/domain-language acceptance lens' ;;
     ddd-tdd) printf 'product-level DDD/TDD acceptance lens' ;;
+    ontology) printf 'domain ontology / entity-change acceptance lens' ;;
     qa) printf 'QA/verification acceptance lens' ;;
     ops) printf 'ops/infra readiness lens' ;;
     management-admin) printf 'management/admin finance evidence lens' ;;
@@ -2601,6 +2613,14 @@ EOF
 - When code is touched, check DDD-lite boundaries: domain/application/interfaces/infrastructure responsibilities, aggregate/invariant placement, state/use-case ownership, and adapter dependency direction.
 - Treat product rules hidden in broad entrypoints as findings: UI bootstraps/router/root components/hooks/stores/effects, controllers, repositories, DTO mappers, jobs, external adapters, UI labels, CLI flags, scripts, docs wording, migrations, observability glue, or workflow glue.
 - For Gate 6, build the Implementation Acceptance Ledger from plan AC/ADR/decision rows and verify every required row has implementation files plus evidence, or an explicit user-approved defer/waiver.
+EOF
+      ;;
+    ontology)
+      cat <<'EOF'
+- Check the domain ontology: entity naming against ubiquitous language and glossary, explicit entity relationships, invariants on changed relationships, and backward-compatibility for renamed/removed entities.
+- Treat an entity/relationship change that updates only one dependent surface (domain-knowledge-assets, llm-wiki/ddd/, tests/fixtures) as an incomplete change, not a complete one.
+- Require tacit work-process knowledge behind the change to be captured as an asset with owner and confidence, or recorded as an explicit follow-up; silent drift is a finding.
+- Load policies/domain-ontology-discipline.md (or .ko.md) for the full entity-change checklist and reconciliation gate.
 EOF
       ;;
     qa)

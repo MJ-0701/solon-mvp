@@ -20,7 +20,8 @@ content_policy: "read only when review lens aliases or knowledge-pack mapping ar
 Use public lens names in commands. `strategy-pm` maps to `strategy`,
 `design/frontend` maps to `design`, `infra` maps to `ops`, and
 `finance`/`accounting` maps to `management-admin`. `DDD`, `TDD`,
-`domain-model`, and `test-first` map to `ddd-tdd`.
+`domain-model`, and `test-first` map to `ddd-tdd`. `entity-change` and
+`domain-ontology` map to `ontology`.
 
 Additional public lens names strengthen `sfs review` instead of creating new
 commands:
@@ -41,6 +42,10 @@ commands:
 - `api-contract`: public interface, schema, compatibility, and error semantics.
 - `ddd-tdd`: product-level domain language, behavior boundaries, DDD-lite code
   boundaries when code is touched, and test-first or evidence-first proof.
+- `ontology`: domain entity/relationship and ubiquitous-language change; auto
+  triggers when a diff touches `domain-knowledge-assets` or `llm-wiki/ddd/`.
+  Load `domain-ontology-discipline.md` for the entity-change checklist and the
+  reconciliation gate across assets, wiki, and tests.
 
 Read order:
 
