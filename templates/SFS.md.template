@@ -7,6 +7,8 @@ managed_by: sfs
 detail_sources:
   - packaged-sfs-runtime-context
   - .sfs-local/context/
+  - .sfs-local/presets/solon-safe-permissions.yaml
+  - mcp-server/README.md
 maintenance:
   bloat_check: "sfs doctor"
   bloat_fix: "sfs doctor --fix"

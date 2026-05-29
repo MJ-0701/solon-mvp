@@ -30,6 +30,7 @@ split_children:
   - docs/en/current-product-shape/20-ai-work-intake-routing.md
   - docs/en/current-product-shape/21-domain-knowledge-assets.md
   - docs/en/current-product-shape/22-project-harness-map.md
+  - docs/en/current-product-shape/23-host-channels-and-mcp.md
 ---
 # Current Product Shape
 

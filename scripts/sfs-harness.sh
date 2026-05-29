@@ -151,6 +151,47 @@ detect_release_surface() {
   return 1
 }
 
+# 0.7.6: Host channel + 0.7.0 surface detectors.
+#
+# These are advisory — they report whether the 0.7.0+ host-agnostic
+# surfaces are available to this project, not whether they have been
+# registered with a particular host. Host config files (e.g. Claude
+# Desktop config) live outside the project and intentionally are not
+# scanned to avoid false negatives and personal data exposure.
+
+detect_mcp_server_artifact() {
+  # The MCP server ships inside the installed SFS distribution. Its
+  # presence means consumers can register `solon-mcp` with any MCP host.
+  [ -f "${DIST_DIR}/mcp-server/solon_mcp_server.py" ] && return 0
+  return 1
+}
+
+detect_solon_safe_preset() {
+  # The permission preset can live in two places:
+  #   - distribution: templates/.sfs-local-template/presets/solon-safe-permissions.yaml
+  #   - consumer copy: .sfs-local/presets/solon-safe-permissions.yaml
+  [ -f "${DIST_DIR}/templates/.sfs-local-template/presets/solon-safe-permissions.yaml" ] && return 0
+  [ -f ".sfs-local/presets/solon-safe-permissions.yaml" ] && return 0
+  return 1
+}
+
+detect_agent_sdk_template() {
+  # The Claude Agent SDK zero template ships inside the distribution.
+  [ -d "${DIST_DIR}/templates/claude-agent-sdk-zero" ] && return 0
+  return 1
+}
+
+detect_agent_build_track() {
+  # Consumer project signals that the work itself ships an agent / MCP
+  # server / sub-agent harness. agent-build review lens auto-routes
+  # when these signals are present.
+  [ -f "agent.py" ] && return 0
+  [ -d "mcp-server" ] && return 0
+  [ -f "system_prompt.md" ] && return 0
+  [ -f "solon-safe-permissions.yaml" ] && return 0
+  return 1
+}
+
 print_doctor() {
   section "SFS Project Harness Doctor"
   if ! is_sfs_project; then
@@ -232,6 +273,29 @@ print_doctor() {
     warn "minimum autonomous-work harness has gaps; use 'sfs harness map --write' to make them explicit"
   fi
 
+  section "Host Channels And 0.7.0 Surface"
+  ok "CLI channel: sfs <cmd> (always present)"
+  if detect_mcp_server_artifact; then
+    ok "MCP channel available: ${DIST_DIR}/mcp-server/solon_mcp_server.py"
+  else
+    warn "MCP channel: solon-mcp server not found in distribution (expected mcp-server/solon_mcp_server.py)"
+  fi
+  if detect_solon_safe_preset; then
+    ok "Solon-safe permission preset available"
+  else
+    warn "Solon-safe permission preset not found (presets/solon-safe-permissions.yaml)"
+  fi
+  if detect_agent_sdk_template; then
+    ok "Claude Agent SDK scaffold available: templates/claude-agent-sdk-zero"
+  else
+    warn "Claude Agent SDK scaffold not found (templates/claude-agent-sdk-zero/)"
+  fi
+  if detect_agent_build_track; then
+    info "agent-build track detected (Gate 6 review will auto-route to --lens agent-build)"
+  else
+    info "agent-build track not detected; review lens routing will use the auto/code/docs path"
+  fi
+
   section "Summary"
   printf "  pass: %d   warn: %d   fail: %d\n" "$PASS_COUNT" "$WARN_COUNT" "$FAIL_COUNT"
   if [ "$FAIL_COUNT" -gt 0 ]; then
@@ -305,6 +369,13 @@ EOF
   printf '| Bug recurrence memory | `llm-wiki/bug-reports/` records discovery date, fix date, verification, and recurrence analysis. | %s |\n' "$bug_status"
   printf '| Verification loop | Tests, smoke checks, review ledgers, release verifier, or equivalent checks prove repeated trust. | %s |\n' "$test_status"
   printf '| Release loop | Product release verifier, package channels, CI, or deployment runbooks close distributed changes. | %s |\n' "$release_status"
+  local mcp_status preset_status sdk_status agentbuild_status
+  mcp_status="$(map_status detect_mcp_server_artifact)"
+  preset_status="$(map_status detect_solon_safe_preset)"
+  sdk_status="$(map_status detect_agent_sdk_template)"
+  agentbuild_status="$(map_status detect_agent_build_track)"
+  printf '| Host channels (0.7.0+) | CLI is always present; MCP (`solon-mcp` stdio server) is %s; permission baseline (`solon-safe-permissions.yaml`) is %s; Agent SDK scaffold (`claude-agent-sdk-zero`) is %s; this project'\''s own agent-build track signal is %s. | present |\n' \
+    "$mcp_status" "$preset_status" "$sdk_status" "$agentbuild_status"
   cat <<'EOF'
 
 ## Division Contracts

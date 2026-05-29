@@ -1,5 +1,174 @@
 ## [Unreleased]
 
+## [0.7.7] - 2026-05-28
+
+> **Flow integration #4 — run-all.sh now reports per-category pass/fail alongside the existing flat summary. Final patch in the 0.7.x flow-integration series.**
+
+The test suite grew from 110 (pre-0.7.0) to 122 (0.7.7) and the flat
+"PASS: N / FAIL: M" summary started losing useful signal — a reader
+could not tell at a glance whether failures were in the new host-channel
+surface, the harness, the review path, or the legacy core. 0.7.7 adds a
+per-category breakdown to the run-all summary without changing the
+existing flat shape; CI consumers that grep the old format keep working.
+
+### Added
+
+- `tests/run-all.sh` classifies every `test-*.sh` into one of eight
+  categories — `host-channel`, `harness`, `release`, `packaging`,
+  `review`, `doc-and-context`, `hygiene-and-policy`, `sfs-core`, plus an
+  `other` catch-all — and prints per-category PASS / FAIL counts under
+  a new "by category:" header after the existing flat summary. The
+  category label is also surfaced in the per-test header line
+  (`=== test-X.sh [category] ===`) so a streaming reader can see the
+  classification without waiting for the summary.
+- `tests/test-run-all-categorization.sh` — locks the classifier. The
+  test sources the `categorize()` function out of run-all.sh and probes
+  it with at least one representative filename from each category
+  (including a fall-through case to `other`). Editing run-all.sh to
+  drop a category, rename the summary header, or break the parallel-
+  array bookkeeping triggers an immediate failure.
+
+### Notes
+
+- The flat `--- run-all summary --- / PASS: N / FAIL: M / Failed scripts:`
+  shape is preserved verbatim. The per-category lines appear *after*
+  that block, separated by a `  by category:` header line.
+- Bash 3.2 compat is preserved: the implementation uses parallel arrays
+  (`cat_keys[]`, `cat_pass[]`, `cat_fail[]`) instead of an associative
+  array.
+- This closes the four-patch 0.7.x **Flow Integration** series:
+  0.7.4 (entry surfaces) → 0.7.5 (bootstrap + install) → 0.7.6 (harness
+  doctor + map) → 0.7.7 (test harness categorization). Each patch is
+  pure additive — zero existing flow signature changed, zero rewrite.
+
+## [0.7.6] - 2026-05-28
+
+> **Flow integration #3 — harness doctor + map now know about the 0.7.0 host-channel surface.**
+
+0.7.0~0.7.5 added MCP server, permission preset, Agent SDK scaffold, and
+the agent-build review lens, but `sfs harness doctor` and `sfs harness
+map` did not check or report any of them. 0.7.6 closes that gap. The
+existing harness checks (entry, divisions, tests, release) are unchanged;
+the new "Host Channels And 0.7.0 Surface" section runs alongside them
+and the harness map gains one new row.
+
+### Added
+
+- `sfs harness doctor` now ends with a "Host Channels And 0.7.0 Surface"
+  section that confirms (or warns about) four signals: the MCP server
+  artifact under the distribution, the Solon-safe permission preset
+  (distribution-side or consumer-side `.sfs-local/presets/`), the
+  Claude Agent SDK scaffold under `templates/`, and whether the
+  consumer project itself looks like an agent-build track (an `agent.py`,
+  `mcp-server/`, `system_prompt.md`, or `solon-safe-permissions.yaml`
+  in the project root). The agent-build-track signal is informational
+  only — it tells the user when Gate 6 review will auto-route to the
+  `agent-build` lens.
+- `sfs harness map` (and `sfs harness map --write`) now emits one extra
+  row in the Harness Components table: **Host channels (0.7.0+)**. The
+  row inlines the four channel statuses so the written map captures the
+  same information the doctor prints.
+- Four new detection helpers in `scripts/sfs-harness.sh`:
+  `detect_mcp_server_artifact`, `detect_solon_safe_preset`,
+  `detect_agent_sdk_template`, `detect_agent_build_track`.
+
+### Tests
+
+- `tests/test-harness-host-channel-surface.sh` locks the contract.
+  After a `sfs init`, the doctor section appears with all four signal
+  lines, the map row appears with the same four channel labels, every
+  detector function is statically present, and a positive `agent.py`
+  case is actually classified as the agent-build track.
+
+## [0.7.5] - 2026-05-28
+
+> **Flow integration #2 — bootstrap + install. `sfs bootstrap --template <name>` now scaffolds any directory under `templates/`, and the install completion message lists the four 0.7.0 host-agnostic surfaces.**
+
+0.7.0 shipped `templates/claude-agent-sdk-zero/` but `sfs bootstrap` only
+knew about `spring-kotlin-zero`. The README directed users to
+`sfs bootstrap --template ...`, which did not work. 0.7.5 closes that
+gap and also pulls the four 0.7.0+ surfaces (MCP server, permission
+preset, agent-build lens, Agent SDK template) into the post-install
+hint. Additive — existing Spring/Kotlin bootstrap path is unchanged.
+
+### Added
+
+- `sfs bootstrap --experimental --template <name> <project-name>`
+  scaffolds any directory shipped under `templates/<name>/` (today:
+  `claude-agent-sdk-zero` and `spring-kotlin-zero`; future templates
+  will Just Work). The generic-template path runs only the always-on
+  placeholder substitutions (`<PROJECT-NAME>`, `<DATE>`, `<DOMAIN>`)
+  so non-Spring scaffolds do not get Java values injected. Spring-only
+  flags (`--java-version`, `--spring-boot`, `--package`, `--refresh`)
+  are quietly ignored when `--template` is set; the original
+  `--stack spring-kotlin` path stays default-on for legacy callers.
+- `install.sh` completion message now ends with a §8 "0.7.0+
+  host-agnostic 진입" section that names the MCP bridge install path
+  (with the source-clone caveat), the permission preset path, the
+  scaffold command for `claude-agent-sdk-zero`, and the auto-routing
+  of `agent-build` lens. New users see the four 0.7.0 surfaces on the
+  first `./install.sh` run instead of discovering them later.
+
+### Tests
+
+- `tests/test-bootstrap-template-flag.sh` — locks the contract:
+  `--help` advertises the new flag, scaffold of `claude-agent-sdk-zero`
+  produces the seven expected files with all placeholders substituted,
+  Spring tokens stay absent from the generic path, and a `--template ../escape`
+  attempt is rejected with a clear error.
+- `tests/test-install-completion-hints.sh` — locks the completion
+  message so the four 0.7.0 surface keywords (`solon-mcp`,
+  `mcp-server/README.md`, `solon-safe-permissions.yaml`,
+  `claude-agent-sdk-zero`, `agent-build`) and the source-clone caveat
+  cannot quietly drop out.
+
+## [0.7.4] - 2026-05-28
+
+> **Flow integration #1 — host-agnostic entry surfaces. CLI / MCP / Agent SDK are documented as three equal channels into the same 7-step flow.**
+
+0.7.0~0.7.3 added the host-agnostic surface (`mcp-server/`,
+`solon-safe-permissions.yaml`, `agent-build` review lens,
+`claude-agent-sdk-zero` scaffold) but kept the doc shape from before
+they existed. 0.7.4 closes that documentation gap. Every change is
+additive — no existing section was rewritten, no flow signature changed.
+
+### Added
+
+- `docs/ko/current-product-shape/23-host-channels-and-mcp.md` and the
+  English mirror, registered in each parent index's `split_children`.
+  The new child explains the three host channels (CLI / MCP / Agent SDK)
+  as equal entries into the same bash adapter, lists the per-host
+  registration locations, and cross-links to the underlying 0.7.0
+  artifacts (mcp-server/README.md, agent-build-review-lens.md,
+  solon-safe-permissions.yaml).
+- `README/04-section.md` (설치) gained an "MCP host 채널 (0.7.0+)"
+  subsection right after the existing CLI runtime table, so a first-time
+  reader sees the three channels in one page.
+- `docs/maintenance/methodology-7-step.md` gained a "Host-agnostic 진입
+  (0.7.0+)" section that names the three channels and notes the
+  `agent-build` Gate 6 auto-routing.
+- `templates/SFS.md.template` gained a "Host channel detection (0.7.0+)"
+  router-doc section so the consumer's SFS.md routes the same way under
+  any host.
+- `templates/CLAUDE.md.template`, `templates/AGENTS.md.template`,
+  `templates/GEMINI.md.template`, `templates/SFS.md.template`
+  `detail_sources` frontmatter now lists
+  `.sfs-local/presets/solon-safe-permissions.yaml` and
+  `mcp-server/README.md` alongside the existing routed-context entries.
+  The adapter docs themselves stay thin (CLAUDE/AGENTS/GEMINI stay
+  `frontmatter_only: true`); the new sources are only referenced, never
+  inlined.
+
+### Tests
+
+- `tests/test-host-channel-docs-coverage.sh` locks the additions:
+  the new children exist and are registered in the parent index,
+  every host-channel label (CLI / MCP / Agent SDK) appears, the
+  adapter frontmatter detail_sources include both new pointers, and
+  the SFS.md router gained the Host channel detection section. New
+  host channels added later only need to extend this test's
+  expected-phrase list.
+
 ## [0.7.3] - 2026-05-28
 
 > **Consumer-side AS surface + PyPI publishing recipe + sandbox build artifact hygiene.**

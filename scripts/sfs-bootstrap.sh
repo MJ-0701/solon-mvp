@@ -46,6 +46,7 @@ SUPPORTED_STACKS="spring-kotlin"
 # Parsed config
 EXPERIMENTAL=0
 STACK="${SFS_BOOTSTRAP_STACK:-}"
+TEMPLATE="${SFS_BOOTSTRAP_TEMPLATE:-}"
 PROJECT_NAME=""
 QUICK=1
 REFRESH=0
@@ -94,6 +95,17 @@ Experimental Spring/Kotlin modes:
   (default --quick)  skeleton-only project for the selected experimental stack
   --refresh          spring-kotlin only: re-fetch template from Spring Initializr API
   --no-review        force-skip skeleton-signature emit (rare; explicit override)
+
+Generic template mode (0.7.5):
+  --template <name>  copy templates/<name>/ into <project-name> and substitute
+                     the always-on placeholders (<PROJECT-NAME>, <DATE>,
+                     <DOMAIN>). Use for non-Spring scaffolds shipped with
+                     Solon, e.g. claude-agent-sdk-zero. When --template is
+                     set, the Spring-specific flags (--java-version,
+                     --spring-boot, --package, --refresh) are ignored, and
+                     the experimental skeleton-signature G6 auto-skip is
+                     not applied (the scaffold's own Gate 6 review remains
+                     in force).
 
 Required for experimental helper:
   <project-name>     target directory name (slug: [a-z0-9][a-z0-9-]{0,63}). default: myproject
@@ -356,12 +368,52 @@ substitute_placeholders() {
   done < <(find "${target}" -type f -print0)
 }
 
+# 0.7.5: Generic placeholder substitution for non-Spring templates.
+# Only rewrites the always-on tokens (<PROJECT-NAME>, <DATE>, <DOMAIN>),
+# leaving Spring-specific tokens alone so e.g. claude-agent-sdk-zero does
+# not get Java values injected. Skips binary files and the standard build
+# artifact directories.
+substitute_generic_placeholders() {
+  local target="$1" today
+  today="$(date +%Y-%m-%d)"
+
+  local sed_inplace=()
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    sed_inplace=(-i '')
+  else
+    sed_inplace=(-i)
+  fi
+
+  local file
+  while IFS= read -r -d '' file; do
+    # Skip binary files — sed -i on a binary blob mangles it. file(1) may
+    # be absent; fall back to a cheap "looks like text" probe.
+    if command -v file >/dev/null 2>&1; then
+      case "$(file -b --mime "${file}" 2>/dev/null)" in
+        text/*|*charset=us-ascii*|*charset=utf-8*) ;;
+        application/json*|application/yaml*|application/toml*) ;;
+        *) continue ;;
+      esac
+    fi
+    # nounset-safe: sed_inplace is unconditionally initialized above; never empty.
+    sed "${sed_inplace[@]}" \
+      -e "s|<PROJECT-NAME>|${PROJECT_NAME}|g" \
+      -e "s|<DATE>|${today}|g" \
+      -e "s|<DOMAIN>|${SFS_BOOTSTRAP_DOMAIN:-application}|g" \
+      "${file}" 2>/dev/null || true
+  done < <(find "${target}" \
+    -type d \( -name 'node_modules' -o -name '__pycache__' -o -name '.venv' -o -name 'build' -o -name 'dist' \) -prune -o \
+    -type f -print0)
+}
+
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case "${1}" in
       --experimental) EXPERIMENTAL=1; shift ;;
       --stack) STACK="${2:-}"; shift 2 ;;
       --stack=*) STACK="${1#--stack=}"; shift ;;
+      --template) TEMPLATE="${2:-}"; shift 2 ;;
+      --template=*) TEMPLATE="${1#--template=}"; shift ;;
       --quick) QUICK=1; shift ;;
       --refresh) REFRESH=1; shift ;;
       --no-quick) QUICK=0; shift ;;
@@ -416,7 +468,28 @@ main() {
   parse_args "$@" || return $?
 
   require_experimental "$@" || return $?
-  validate_stack || return 2
+
+  # 0.7.5: when --template is set explicitly, route through the generic
+  # template path: copy templates/<TEMPLATE>/ + substitute the always-on
+  # placeholders (<PROJECT-NAME>, <DATE>, <DOMAIN>) and skip Spring-specific
+  # validation / substitution. spring-kotlin path stays as the default
+  # behavior when neither --template nor a positional spring-kotlin stack
+  # is given (legacy compatibility).
+  local USE_GENERIC_TEMPLATE=0
+  if [[ -n "${TEMPLATE}" ]]; then
+    USE_GENERIC_TEMPLATE=1
+    # Tolerate slash-prefixed or trailing-slash forms.
+    TEMPLATE="${TEMPLATE%/}"
+    TEMPLATE="${TEMPLATE#./}"
+    case "${TEMPLATE}" in
+      *..*|/*)
+        echo "${SCRIPT_NAME}: --template '${TEMPLATE}' must be a directory name under templates/" >&2
+        return 2
+        ;;
+    esac
+  else
+    validate_stack || return 2
+  fi
 
   if [[ -z "${PROJECT_NAME}" ]]; then
     PROJECT_NAME="${DEFAULT_PROJECT_NAME}"
@@ -424,13 +497,20 @@ main() {
 
   validate_slug "project-name" "${PROJECT_NAME}" || return 2
 
-  if ! [[ "${JAVA_VERSION}" =~ ^[0-9]+$ ]]; then
-    echo "${SCRIPT_NAME}: --java-version must be integer (got '${JAVA_VERSION}')" >&2
-    return 2
+  if [[ "${USE_GENERIC_TEMPLATE}" == "0" ]]; then
+    if ! [[ "${JAVA_VERSION}" =~ ^[0-9]+$ ]]; then
+      echo "${SCRIPT_NAME}: --java-version must be integer (got '${JAVA_VERSION}')" >&2
+      return 2
+    fi
   fi
 
   DIST_DIR="$(resolve_dist_dir)" || return 2
-  local cache_dir="${DIST_DIR}/templates/spring-kotlin-zero"
+  local cache_dir
+  if [[ "${USE_GENERIC_TEMPLATE}" == "1" ]]; then
+    cache_dir="${DIST_DIR}/templates/${TEMPLATE}"
+  else
+    cache_dir="${DIST_DIR}/templates/spring-kotlin-zero"
+  fi
 
   # Graceful degradation case (d): cache absent → hard fail
   if [[ ! -d "${cache_dir}" ]]; then
@@ -455,28 +535,40 @@ main() {
   fi
 
   # Refresh cache (graceful degradation cases a/b/c). Internal function — direct call.
-  if [[ "${REFRESH}" == "1" ]]; then
+  if [[ "${REFRESH}" == "1" && "${USE_GENERIC_TEMPLATE}" == "0" ]]; then
     refresh_cache "${cache_dir}" || return $?
   fi
 
   # Copy template — wrapped with alive heartbeat (R-D / AC-perf-5).
   run_with_alive "copy-template" cp -R "${cache_dir}" "${PROJECT_NAME}"
 
-  # Substitute placeholders — internal function, direct call (sub-second on 7 files).
-  substitute_placeholders "${PROJECT_NAME}"
-
-  # G6 review skip check via R-C skeleton signature
-  local skeleton_sig="${DIST_DIR}/scripts/sfs-bootstrap-skeleton-signature.sh"
-  if [[ -x "${skeleton_sig}" && "${NO_REVIEW}" != "1" ]]; then
-    if bash "${skeleton_sig}" "${PROJECT_NAME}" >/dev/null 2>&1; then
-      printf '[bootstrap] skeleton signature detected — G6 review auto-skip\n' >&2
-    fi
+  # Substitute placeholders. The spring-kotlin path needs Java/Spring-specific
+  # rewrites; generic --template path only substitutes the always-on tokens
+  # (PROJECT-NAME, DATE, DOMAIN) so non-Spring scaffolds (e.g. claude-agent-sdk-zero)
+  # do not get unsolicited Spring values.
+  if [[ "${USE_GENERIC_TEMPLATE}" == "1" ]]; then
+    substitute_generic_placeholders "${PROJECT_NAME}"
+  else
+    substitute_placeholders "${PROJECT_NAME}"
   fi
 
-  printf '[bootstrap] %s created (stack=%s java=%s spring-boot=%s package=%s)\n' \
-    "${PROJECT_NAME}" "${STACK}" "${JAVA_VERSION}" "${SPRING_BOOT_VERSION}" "${PACKAGE}" >&2
-  if [[ ! -f "${PROJECT_NAME}/gradlew" ]]; then
-    printf '[bootstrap] hint: Gradle wrapper scripts are not bundled in --quick template; run `gradle wrapper --gradle-version 8.10.2` before `./gradlew build` or `./gradlew test`.\n' >&2
+  if [[ "${USE_GENERIC_TEMPLATE}" == "0" ]]; then
+    # G6 review skip check via R-C skeleton signature — Spring-only.
+    local skeleton_sig="${DIST_DIR}/scripts/sfs-bootstrap-skeleton-signature.sh"
+    if [[ -x "${skeleton_sig}" && "${NO_REVIEW}" != "1" ]]; then
+      if bash "${skeleton_sig}" "${PROJECT_NAME}" >/dev/null 2>&1; then
+        printf '[bootstrap] skeleton signature detected — G6 review auto-skip\n' >&2
+      fi
+    fi
+
+    printf '[bootstrap] %s created (stack=%s java=%s spring-boot=%s package=%s)\n' \
+      "${PROJECT_NAME}" "${STACK}" "${JAVA_VERSION}" "${SPRING_BOOT_VERSION}" "${PACKAGE}" >&2
+    if [[ ! -f "${PROJECT_NAME}/gradlew" ]]; then
+      printf '[bootstrap] hint: Gradle wrapper scripts are not bundled in --quick template; run `gradle wrapper --gradle-version 8.10.2` before `./gradlew build` or `./gradlew test`.\n' >&2
+    fi
+  else
+    printf '[bootstrap] %s created (template=%s)\n' "${PROJECT_NAME}" "${TEMPLATE}" >&2
+    printf '[bootstrap] hint: see %s/templates/%s/README.md for next steps.\n' "${DIST_DIR}" "${TEMPLATE}" >&2
   fi
 
   return 0

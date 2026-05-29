@@ -7,6 +7,88 @@
 
 ---
 
+## 0.7.7
+
+이번 버전은 0.7.x Flow Integration 4-patch 시리즈의 마지막 patch 입니다.
+test suite 가 110 → 122 로 늘면서 flat summary 의 신호가 흐려졌고, 0.7.7
+은 카테고리별 breakdown 을 기존 summary 옆에 붙입니다 — flat 형식은 그대로
+보존되어 CI 가 깨지지 않습니다.
+
+- `tests/run-all.sh` 가 모든 `test-*.sh` 를 8개 카테고리 (`host-channel`
+  / `harness` / `release` / `packaging` / `review` / `doc-and-context` /
+  `hygiene-and-policy` / `sfs-core` + `other` 폴백) 로 분류합니다. 기존
+  `=== test-X.sh ===` 헤더 옆에 `[category]` 가 붙고, 끝의 summary 다음에
+  "by category:" 절이 추가됩니다.
+- 기존 flat `PASS: N / FAIL: M / Failed scripts:` 출력은 그대로 보존 —
+  external grep 깨지지 않음.
+- `test-run-all-categorization` 신규 contract test 가 분류기의 정확성과
+  per-category summary 의 존재를 잠금.
+
+**0.7.x Flow Integration 시리즈 마감**: 0.7.4 (entry surfaces) → 0.7.5
+(bootstrap + install) → 0.7.6 (harness doctor + map) → 0.7.7 (test
+categorization). 4 patch 모두 additive — 기존 flow signature 0건 변경.
+
+## 0.7.6
+
+이번 버전은 0.7.0~0.7.5 가 추가한 4개 host-channel surface 를 sfs
+harness doctor / map 이 직접 점검 + 출력하도록 묶는 patch 입니다. 기존
+harness 검사 (entry / divisions / tests / release) 0건 변경 — 새 절과
+새 행이 옆에 붙는 형태입니다.
+
+- `sfs harness doctor` 끝에 "Host Channels And 0.7.0 Surface" 절이 자동
+  출력됩니다. CLI 채널 (항상 present), MCP server artifact,
+  Solon-safe permission preset, Claude Agent SDK scaffold 의 availability
+  + 본 프로젝트의 agent-build track signal (Gate 6 review 가
+  `agent-build` lens 로 자동 라우팅될지) 까지 한 페이지에 정리.
+- `sfs harness map` / `sfs harness map --write` 의 Harness Components
+  테이블에 "Host channels (0.7.0+)" 행 한 줄 추가. 같은 4 channel 상태가
+  written map 에 그대로 박힙니다.
+- `scripts/sfs-harness.sh` 안 4개 detector helper 신설
+  (`detect_mcp_server_artifact`, `detect_solon_safe_preset`,
+  `detect_agent_sdk_template`, `detect_agent_build_track`).
+- `test-harness-host-channel-surface` 신규 contract test 가 위 변경의
+  회귀를 잠금.
+
+## 0.7.5
+
+이번 버전은 0.7.4 documentation 정리에 이어 bootstrap / install 의 0.7.0
+surface 연결을 마무리하는 patch 입니다. 기존 Spring/Kotlin bootstrap 경로
+0건 변경 — 전부 additive.
+
+- `sfs bootstrap --experimental --template <name> <project-name>` 정식
+  지원. `claude-agent-sdk-zero` 같은 0.7.0+ scaffold 가 한 줄로 작동.
+  always-on placeholder (`<PROJECT-NAME>` / `<DATE>` / `<DOMAIN>`) 만
+  치환하고 Spring-only token 은 건드리지 않음.
+- `install.sh` 의 "다음 단계" 안내 끝에 §8 "0.7.0+ host-agnostic 진입"
+  절 추가. MCP bridge (source clone 만 지원하는 현 상태 그대로 명시),
+  권한 baseline, Agent SDK scaffold 한 줄 명령, agent-build lens 자동
+  라우팅까지 4개 surface 의 진입점을 한 페이지에 정리.
+- `test-bootstrap-template-flag` / `test-install-completion-hints` 신규
+  두 contract test 가 위 변경의 회귀를 잠금.
+
+## 0.7.4
+
+이번 버전은 0.7.0~0.7.3 에서 추가된 host-agnostic surface (MCP server +
+permission preset + agent-build lens + Agent SDK scaffold) 를 사용자가
+처음 만나는 entry 문서들에 명시한 doc-side 정리 patch 입니다. 기존 절
+0건 rewrite — 전부 additive.
+
+- `docs/{ko,en}/current-product-shape/23-host-channels-and-mcp.md` 신규
+  child + parent index 의 split_children 에 등록. CLI / MCP / Agent SDK
+  세 채널을 동등하게 7-step 진입으로 명시하고 host 별 등록 경로 / 권한
+  baseline / agent-build lens 자동 라우팅을 한 페이지에 정리.
+- `README/04-section.md` (설치) 에 "MCP host 채널 (0.7.0+)" subsection
+  추가 — 기존 CLI runtime 표 바로 다음.
+- `docs/maintenance/methodology-7-step.md` 에 "Host-agnostic 진입" 절
+  추가.
+- `templates/SFS.md.template` 에 "Host channel detection" 절 추가.
+- adapter doc frontmatter (`CLAUDE.md.template` / `AGENTS.md.template` /
+  `GEMINI.md.template` / `SFS.md.template`) 의 `detail_sources` 에
+  `mcp-server/README.md` 와 `.sfs-local/presets/solon-safe-permissions.yaml`
+  명시. adapter body 는 여전히 frontmatter-only (오염 0).
+- `test-host-channel-docs-coverage` 신규 — 위 변경이 한 번 들어간 뒤
+  다시 빠지지 않도록 회귀 잠금.
+
 ## 0.7.3
 
 이번 버전은 0.7.2 doc-separation 작업의 consumer-side 후속입니다. 이미

@@ -54,6 +54,30 @@ infra / taxonomy) 이 brainstorm 부터 Gate 6 까지 *항상* 개념적 sub-age
 
 상세 규약: [`policies/six-division-council.md`](policies/six-division-council.md).
 
+## Host-agnostic 진입 (0.7.0+)
+
+7-step flow 는 host transport 와 직교한다. 어떤 호스트로 들어와도 같은
+flow / 같은 sprint state / 같은 Gate / 같은 SSoT 가 적용된다:
+
+- **CLI** — terminal 의 `sfs <cmd>` 직접 호출. Claude Code / Gemini CLI /
+  Codex CLI / Windows PowerShell 모두 이 채널.
+- **MCP** — `mcp-server/` 의 stdio MCP server 가 `sfs_*` tool 로 같은
+  명령을 노출. Claude Desktop / Claude in Chrome / Cursor / Claude Agent
+  SDK 등 MCP host 가 이 채널로 7-step 을 끌어다 쓴다.
+- **Agent SDK** — `templates/claude-agent-sdk-zero/` scaffold 가 Claude
+  Agent SDK 프로젝트를 `solon-mcp` + `solon-safe-permissions.yaml` 로
+  bootstrapping. 자기 agent 안에서 `sfs_*` tool 을 직접 호출.
+
+세 채널 비교 + 호스트별 등록 cheat sheet 는
+[`docs/ko/current-product-shape/23-host-channels-and-mcp.md`](../ko/current-product-shape/23-host-channels-and-mcp.md)
+([EN](../en/current-product-shape/23-host-channels-and-mcp.md)).
+
+`agent-build` review lens 는 agent / MCP / sub-agent 를 ship 하는 sprint
+에서 Gate 6 에 자동 라우팅된다 (0.7.1+). 7개 subsection (tool surface scope
+/ permission posture / sub-agent isolation / system prompt drift / SSoT /
+evidence / failure modes) 을 CPO 가 점검한다. 자세한 lens 정책은
+`sfs context cat policies/agent-build-review-lens`.
+
 ## Routed context SSoT
 
 본 문서는 빠른 참조이고, 실제 SSoT 는 routed context 다:

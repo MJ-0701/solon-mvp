@@ -868,6 +868,19 @@ Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Gi
 
   ${C_BOLD}7.${C_RESET} interactive preview 가 필요하면: ${C_BLUE}sfs upgrade --interactive${C_RESET}
 
+  ${C_BOLD}8.${C_RESET} 0.7.0+ host-agnostic 진입 (선택):
+     - ${C_BOLD}MCP host${C_RESET} (Claude Desktop / Claude in Chrome / Cursor / Agent SDK):
+       ${C_BLUE}solon-mcp${C_RESET} stdio server 가 ${C_BLUE}sfs_*${C_RESET} tool 12개를 노출합니다.
+       설치 + 등록 스니펫: ${C_BLUE}${SOURCE_DIR}/mcp-server/README.md${C_RESET}
+       (0.7.x 동안 source clone 만 지원. PyPI publish 일정은 ${C_BLUE}mcp-server/PUBLISHING.md${C_RESET}.)
+     - ${C_BOLD}solon-safe 권한 baseline${C_RESET}:
+       ${C_BLUE}.sfs-local/presets/solon-safe-permissions.yaml${C_RESET}
+       각 runtime 의 permission config 에 import 해서 auto-push / destructive bash 를 차단합니다.
+     - ${C_BOLD}Claude Agent SDK 프로젝트 스캐폴드${C_RESET}:
+       ${C_BLUE}sfs bootstrap --experimental --template claude-agent-sdk-zero <project-name>${C_RESET}
+     - ${C_BOLD}agent-build review lens${C_RESET}:
+       agent / MCP / sub-agent 작업은 Gate 6 review 에서 ${C_BLUE}--lens agent-build${C_RESET} 가 자동 라우팅됩니다 (explicit 호출도 가능).
+
 문제 발생 시: https://github.com/${SOLON_REPO}/issues
 
 EOF

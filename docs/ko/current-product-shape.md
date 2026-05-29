@@ -30,6 +30,7 @@ split_children:
   - docs/ko/current-product-shape/20-ai-work-intake-routing.md
   - docs/ko/current-product-shape/21-domain-knowledge-assets.md
   - docs/ko/current-product-shape/22-project-harness-map.md
+  - docs/ko/current-product-shape/23-host-channels-and-mcp.md
 ---
 # 현재 제품 구조와 운영 흐름
 

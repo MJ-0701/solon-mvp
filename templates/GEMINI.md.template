@@ -21,6 +21,8 @@ detail_sources:
   - .sfs-local/context/
   - packaged-sfs-runtime-context
   - .gemini/commands/sfs.toml
+  - .sfs-local/presets/solon-safe-permissions.yaml
+  - mcp-server/README.md
 do_not_inline:
   - SFS command tables
   - model routing

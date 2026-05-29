@@ -55,5 +55,16 @@ Claude Code, Gemini CLI, Codex CLI 가 모두 연결되면 각 도구에서 같�
 | Codex CLI | `$sfs status` |
 | Windows PowerShell/cmd | `sfs.cmd status` |
 
+### MCP host 채널 (0.7.0+)
+
+CLI 외에 Claude Desktop / Claude in Chrome / Cursor / Claude Agent SDK 같은
+MCP host 에서도 같은 7-step flow 를 끌어다 쓸 수 있습니다. `mcp-server/`
+디렉토리의 stdio MCP server (`solon-mcp`) 가 `sfs_*` tool 12개로 같은
+명령을 노출하고, bash adapter stdout 을 verbatim forward 합니다 (SSoT 보존).
+
+호스트별 등록 스니펫은 [`mcp-server/README.md`](./mcp-server/README.md), 채널
+일람 + invariant 비교는
+[`docs/ko/current-product-shape/23-host-channels-and-mcp.md`](./docs/ko/current-product-shape/23-host-channels-and-mcp.md).
+
 ---
 
