@@ -7,6 +7,32 @@
 
 ---
 
+## 0.7.10
+
+이번 버전은 세션 인계 누락과 운영 로그 비대화를 같은 뿌리 문제로 보고
+탐지·차단 표면을 추가합니다. 이전에는 PROGRESS.md 의 마지막 릴리스 기록이
+실제 VERSION 보다 16 릴리스나 뒤처져도(0.6.141 vs 0.7.9) 자동으로 잡히지
+않았고, 운영 로그가 455줄까지 자라도 막는 규칙이 prompt 안에 없었습니다.
+
+체감 변화:
+
+- **`sfs harness doctor` 가 운영 로그를 본다.** 새 "Operational Logs And
+  Size" 섹션이 (1) VERSION 과 PROGRESS.md 릴리스 기록의 lag 를, (2)
+  in-scope 마크다운의 200줄 초과를 파일별로 보고합니다. patch 1개 차이는
+  warn, minor 차이/5개 이상은 partial, 250줄 초과는 release-blocking fail.
+- **`sfs handoff verify` 신규 명령.** 세션을 넘기기 전에 durable handoff
+  표면 8개(VERSION / CHANGELOG headline / PROGRESS 릴리스 기록 / 세션
+  history / resume hint / HANDOFF stub / 세션 인덱스 / 200줄 준수)가 실제
+  상태와 일치하는지 PASS / MISMATCH / N/A 로 한 페이지에 출력합니다.
+  하나라도 어긋나면 실패로 끝나, 다음 세션이 stale 한 인계로 시작하지
+  않습니다.
+- **200줄 규칙이 routed policy 가 됐습니다.** `md-line-budget` 정책이
+  컨텍스트에 라우팅되어, 에이전트가 새 문서를 쓸 때 ceiling 과 archive
+  회전 절차를 prompt 안에서 직접 봅니다.
+
+contract test 2건이 정책 문서 자체와 lag detector 동작을 잠가, 향후 이
+표면이 다시 빠지면 즉시 fail 합니다.
+
 ## 0.7.9
 
 이번 버전은 0.7.1 의 `*"ui"*` / `*"ops"*` 좁힘에 이어 review lens 의

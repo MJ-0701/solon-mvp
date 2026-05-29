@@ -98,7 +98,7 @@ Two failures keep recurring otherwise:
   and reports per-path warn/partial counts so projects without the contract
   tests still see violations.
 - 0.7.10 adds an `operational-log-lag` detector for the sibling failure
-  (release lag between `solon-mvp-dist/VERSION` and `PROGRESS.md`
+  (release lag between the product `VERSION` and `PROGRESS.md`
   `last_completed_release.version`).
 
 ## Related policies

@@ -1,5 +1,50 @@
 ## [Unreleased]
 
+## [0.7.10] - 2026-05-29
+
+> **Session-transfer durable-handoff enumeration + 200-line md routed policy + harness operational-log-lag / md-line-budget detectors + `sfs handoff verify`.**
+
+두 버그가 한 뿌리에서 나온다: 운영 로그(릴리스 ledger / 세션 history /
+handoff state)를 first-class 로딩 표면으로 다루지 않아 조용히 drift 하고
+(`0.6.141 → 0.7.9`, 16 release lag) 비대해진다(PROGRESS.md 455줄). 0.7.10 은
+탐지·차단 표면을 추가하고 규칙을 routed policy 로 승격한다.
+
+### Added
+
+- `templates/.sfs-local-template/context/policies/md-line-budget.md`
+  (+ `.ko.md`) — 200줄 ceiling 을 정식 routed policy 로 승격. scope(라우티드
+  컨텍스트 / 최상위 문서 / 운영 로그 / 사용자 long-form), threshold
+  (warn 180 / partial 200 / fail 250), archive 회전 절차, 예외 목록
+  (CHANGELOG / RELEASE-NOTES / QA-REPORT / INTEGRATION-VERIFY / archives /
+  tests fixtures)을 본문에 명시. `_INDEX.md` 에 라우팅 등록.
+- `sfs harness doctor` 에 두 detector 추가 ("Operational Logs And Size"
+  섹션):
+  - `operational-log-lag` — `VERSION` 과 `PROGRESS.md`
+    `last_completed_release.version` 비교. 같은 major.minor 의 patch
+    distance ≥1 → warn, minor/major 차이거나 ≥5 → partial.
+  - `md-line-budget-violation` — 프로젝트 작업트리의 in-scope md 를 walk,
+    파일별 warn(180) / partial(200) / fail(250). fail 은 doctor 를
+    non-zero 로 종료.
+- `sfs handoff verify [--dir <docset-root>]` 신규 명령 — session-transfer
+  -autopilot.md 의 8-item mandatory sync surface(VERSION / CHANGELOG
+  headline / `last_completed_release` / `recent_session_owner_history` /
+  `resume_hint.default_action` / HANDOFF stub / `sessions/_INDEX.md` /
+  200줄 준수)를 PASS / MISMATCH / N/A 로 한 페이지 출력. mismatch 1건이라도
+  있으면 exit 1.
+- `tests/test-md-line-budget-policy.sh` — policy 문서 자체가 frontmatter +
+  200줄 budget + scope/threshold/exception 키워드 + detector 참조를
+  유지하는지 잠금.
+- `tests/test-operational-log-lag-detector.sh` — synthetic PROGRESS.md /
+  VERSION fixture 로 in-sync→ok, patch lag→warn, minor lag→partial,
+  260줄 운영 로그→md-line-budget fail + doctor non-zero 를 잠금.
+
+### Changed
+
+- `docs/maintenance/policies/session-transfer-autopilot.md` — durable
+  handoff artifact 정의에 `## Durable handoff artifact — mandatory sync
+  surface` 8-item enumeration 추가. (8) 은 `sfs handoff verify` 의 검사
+  항목 SSoT.
+
 ## [0.7.9] - 2026-05-29
 
 > **Broad-substring sibling sweep — `auth` / `perf` / `tax` / `aggregate` / `memory` / `query` / `api` / `ui` / `ddd` / `tdd` patterns tightened in both text and path branches of infer_review_lens.**

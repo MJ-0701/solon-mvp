@@ -204,13 +204,14 @@ Usage:
   sfs agent doctor [--fix]
   sfs doctor [--fix]
   sfs harness doctor|map [--write]
+  sfs handoff verify [--dir <docset-root>]
   sfs context path <kernel|index|commands/name.md|policies/name.md>
   sfs <command> [args]
 
 Commands:
   agent install, doctor, upgrade, update, uninstall
   version [--check]
-  status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, capture, note, report, tidy, retro, commit, loop, harness
+  status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, capture, note, report, tidy, retro, commit, loop, harness, handoff
   bootstrap [<plain-language app idea>]   # agent-facing initial setup handoff
   measure --alive -- <command>            # long-running command heartbeat
 
@@ -1626,6 +1627,31 @@ case "${1:-}" in
   harness)
     shift
     exec bash "${DIST_DIR}/scripts/sfs-harness.sh" "$@"
+    ;;
+  handoff)
+    shift
+    sub="${1:-}"
+    case "${sub}" in
+      verify)
+        exec bash "${DIST_DIR}/scripts/sfs-handoff.sh" "$@"
+        ;;
+      -h|--help|help|"")
+        cat <<'EOF'
+sfs handoff <subcommand>
+
+Subcommands:
+  verify [--dir <docset-root>]   Check the 8-item durable-handoff sync surface
+                                 from session-transfer-autopilot.md. Any
+                                 mismatch exits 1. Run before transferring a
+                                 session so the next one starts in sync.
+EOF
+        exit 0
+        ;;
+      *)
+        echo "unknown handoff subcommand: ${sub}" >&2
+        exit 2
+        ;;
+    esac
     ;;
   storage)
     shift

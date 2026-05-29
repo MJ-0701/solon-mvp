@@ -96,7 +96,7 @@ index 는 이번 달 + 지난 달.
   detector 추가 — 정책 scope 전체를 walk 하며 path 별 warn/partial 카운트
   보고. contract test 가 없는 프로젝트도 위반을 본다.
 - 0.7.10 은 `operational-log-lag` detector 도 추가한다 — sibling 실패인
-  `solon-mvp-dist/VERSION` 과 PROGRESS.md `last_completed_release.version`
+  제품 `VERSION` 과 PROGRESS.md `last_completed_release.version`
   간 release lag 검출용.
 
 ## 관련 정책

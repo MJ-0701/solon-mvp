@@ -19,6 +19,10 @@ FAIL_COUNT=0
 
 ok() { printf "  ${C_GREEN}✅${C_RESET} %s\n" "$*"; PASS_COUNT=$((PASS_COUNT + 1)); }
 warn() { printf "  ${C_YELLOW}⚠️${C_RESET}  %s\n" "$*"; WARN_COUNT=$((WARN_COUNT + 1)); }
+# partial: degraded-but-not-release-blocking. Counts as a warn for the exit
+# code (doctor returns 1) but prints a distinct severity word so detectors
+# can signal "past cushion" without hard-failing the whole harness run.
+partial() { printf "  ${C_YELLOW}🟠${C_RESET} partial: %s\n" "$*"; WARN_COUNT=$((WARN_COUNT + 1)); }
 fail() { printf "  ${C_RED}❌${C_RESET} %s\n" "$*"; FAIL_COUNT=$((FAIL_COUNT + 1)); }
 info() { printf "  ${C_DIM}%s${C_RESET}\n" "$*"; }
 section() { printf "\n${C_BOLD}%s${C_RESET}\n" "$*"; }
@@ -192,6 +196,135 @@ detect_agent_build_track() {
   return 1
 }
 
+# 0.7.10: Operational-log + md-line-budget detectors.
+#
+# Sibling failures with one root cause — operational logs are not treated as a
+# first-class loadable surface, so they drift (release lag) and bloat (>200
+# lines) silently. SSoT for thresholds/scope:
+#   templates/.sfs-local-template/context/policies/md-line-budget.md
+# These detectors walk only the consumer project's working tree (not the
+# shipped distribution), so a project's own PROGRESS.md / handoff / index files
+# are checked. Routed context size is already locked by contract tests.
+
+progress_log_path() {
+  local p
+  for p in PROGRESS.md docs/solon/*/PROGRESS.md .sfs-local/PROGRESS.md; do
+    [ -f "$p" ] && { printf '%s' "$p"; return 0; }
+  done
+  return 1
+}
+
+current_release_version() {
+  if [ -f "VERSION" ]; then
+    head -1 "VERSION" | tr -d '[:space:]'
+    return 0
+  fi
+  project_version
+}
+
+progress_last_release_version() {
+  local file="$1"
+  awk '
+    /^[[:space:]]*last_completed_release:/ { in_blk=1; next }
+    in_blk && /^[^[:space:]#]/ { exit }
+    in_blk && /version:/ {
+      v = $0
+      sub(/^.*version:[[:space:]]*/, "", v)
+      gsub(/[[:space:]"'\'']/, "", v)
+      if (v != "") { print v; exit }
+    }
+  ' "$file" 2>/dev/null
+}
+
+# Release lag between two semver strings. Same major.minor → patch distance.
+# Differing major or minor → 999 (a minor bump spans many patch releases, so
+# treat it as "far past the partial threshold" rather than guess a count).
+version_lag() {
+  local a="$1" b="$2" a1 a2 a3 b1 b2 b3 d
+  IFS=. read -r a1 a2 a3 _ <<< "$a"
+  IFS=. read -r b1 b2 b3 _ <<< "$b"
+  case "${a3:-0}${b3:-0}" in *[!0-9]*) echo 999; return ;; esac
+  [ -n "$a3" ] || a3=0
+  [ -n "$b3" ] || b3=0
+  if [ "${a1:-}" != "${b1:-}" ] || [ "${a2:-}" != "${b2:-}" ]; then
+    echo 999
+    return
+  fi
+  d=$((a3 - b3))
+  [ "$d" -lt 0 ] && d=$((-d))
+  echo "$d"
+}
+
+# Exception list from md-line-budget.md "Out of scope".
+md_in_budget_scope() {
+  local f="${1#./}"
+  case "$f" in
+    CHANGELOG.md|RELEASE-NOTES.md) return 1 ;;
+    QA-REPORT-*|*/QA-REPORT-*) return 1 ;;
+    INTEGRATION-VERIFY-*|*/INTEGRATION-VERIFY-*) return 1 ;;
+    archives/*|*/archives/*|.sfs-local/archives/*) return 1 ;;
+    docs/solon/*/archive/*|*/archive/*) return 1 ;;
+    tests/*) return 1 ;;
+  esac
+  return 0
+}
+
+# In-scope project-local markdown: root-level docs + named operational logs.
+list_budget_scope_files() {
+  find . -maxdepth 1 -type f -name '*.md' 2>/dev/null
+  local p
+  for p in PROGRESS.md HANDOFF-next-session.md NEXT-SESSION-BRIEFING.md \
+           sessions/_INDEX.md docs/solon/*/PROGRESS.md \
+           docs/solon/*/HANDOFF-next-session.md docs/solon/*/sessions/_INDEX.md; do
+    [ -f "$p" ] && printf './%s\n' "$p"
+  done
+}
+
+print_operational_log_section() {
+  section "Operational Logs And Size"
+
+  local prog cur led lag
+  if prog="$(progress_log_path 2>/dev/null)" && [ -n "$prog" ]; then
+    cur="$(current_release_version)"
+    led="$(progress_last_release_version "$prog")"
+    if [ -z "$cur" ] || [ -z "$led" ]; then
+      info "operational-log-lag: $prog present but VERSION / last_completed_release.version incomplete; skipping"
+    elif [ "$cur" = "$led" ]; then
+      ok "operational-log-lag: $prog last_completed_release in sync with VERSION ($cur)"
+    else
+      lag="$(version_lag "$cur" "$led")"
+      if [ "$lag" -ge 5 ]; then
+        partial "operational-log-lag: $prog last_completed_release $led is >=5 releases (or a minor) behind VERSION $cur"
+      else
+        warn "operational-log-lag: $prog last_completed_release $led behind VERSION $cur (lag $lag)"
+      fi
+    fi
+  else
+    info "operational-log-lag: no PROGRESS.md operational log in project tree; skipping"
+  fi
+
+  local f lines budget_hits=0
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    md_in_budget_scope "$f" || continue
+    lines="$(wc -l < "$f" 2>/dev/null | tr -d '[:space:]')"
+    case "${lines:-x}" in ''|*[!0-9]*) continue ;; esac
+    if [ "$lines" -ge 250 ]; then
+      fail "md-line-budget-violation: $f $lines lines (>=250 fail; archive-rotate before release)"
+      budget_hits=$((budget_hits + 1))
+    elif [ "$lines" -ge 200 ]; then
+      partial "md-line-budget-violation: $f $lines lines (>=200 partial; rotate to archive)"
+      budget_hits=$((budget_hits + 1))
+    elif [ "$lines" -ge 180 ]; then
+      warn "md-line-budget-violation: $f $lines lines (>=180 warn; shrink or rotate soon)"
+      budget_hits=$((budget_hits + 1))
+    fi
+  done < <(list_budget_scope_files | sort -u)
+  if [ "$budget_hits" -eq 0 ]; then
+    ok "md-line-budget-violation: no in-scope md over 180 lines"
+  fi
+}
+
 print_doctor() {
   section "SFS Project Harness Doctor"
   if ! is_sfs_project; then
@@ -295,6 +428,8 @@ print_doctor() {
   else
     info "agent-build track not detected; review lens routing will use the auto/code/docs path"
   fi
+
+  print_operational_log_section
 
   section "Summary"
   printf "  pass: %d   warn: %d   fail: %d\n" "$PASS_COUNT" "$WARN_COUNT" "$FAIL_COUNT"

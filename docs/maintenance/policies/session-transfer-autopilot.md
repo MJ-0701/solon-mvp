@@ -42,7 +42,7 @@ Session Continuation Guard 가 걸리면:
 
 필수 sync surface (release-bearing project 기준):
 
-1. **product VERSION** — `solon-mvp-dist/VERSION` 의 현재 값.
+1. **product VERSION** — 제품 루트 `VERSION` 의 현재 값.
 2. **CHANGELOG headline** — 가장 최근 release section (`## [X.Y.Z]`) 의
    첫 `> **요약 줄**` 또는 동등 줄.
 3. **PROGRESS.md `last_completed_release`** — `version` / `source_main` /
