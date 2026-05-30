@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.1" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.1" "version output"
-assert_contains_text "${output}" "latest 0.8.1" "latest output"
+[[ "${plain_output}" == "sfs 0.8.2" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.2" "version output"
+assert_contains_text "${output}" "latest 0.8.2" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline 리뷰어-tier enforcement — cross-CPO Gemini fallback" "installed release headline"
+assert_contains_text "${output}" "installed_release_headline 서브에이전트 capsule 계약에" "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline 리뷰 게이트가" "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline 서브에이전트가 자기 작업을 스스로" "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

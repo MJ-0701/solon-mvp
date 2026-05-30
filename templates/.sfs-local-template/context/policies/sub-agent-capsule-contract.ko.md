@@ -46,10 +46,15 @@ lead/C-Level 에이전트가 worker·reviewer·external executor 로 넘기는 c
   worker 는 partial/fail 반환 + 부족 artifact 명시.
 - 이 필드를 표현 못 하는 bridge (예: 전체 chat 을 상속하는 forked-context helper)
   는 default executor 가 아니라 manual escape hatch 다.
+- 검증자 ≠ 저작자: `acceptance_criteria` 를 검증하는 agent 는 저작 agent 와 동일
+  인스턴스여서는 안 된다 (자기평가 편향). "다른 agent" 는 기본적으로 다른
+  인스턴스를 뜻하고, 모델 다양성(Codex/Gemini)은 per-capsule 필드가 아니라 Gate 6
+  cross-CPO 에서만 요구한다.
 
 ## 검증 (agent-build lens)
 
 핸드오프 시 `agent-build` review lens 가 검사한다: 필수 필드 전부 존재,
 `files_scope`·`tools_allowed` 가 좁은지 ("do anything" 금지), `token_budget`·
-`timeout` 설정, `pii_rules` 가 tool 이 닿는 데이터를 커버, `output_paths` 가 구체적인지.
-빠지거나 unbounded 한 필드는 pass 가 아니라 fix 동반 finding 이다.
+`timeout` 설정, `pii_rules` 가 tool 이 닿는 데이터를 커버, `output_paths` 가 구체적인지,
+그리고 검증 agent 가 저작자와 다른 인스턴스인지. 빠지거나 unbounded 한 필드는 pass 가
+아니라 fix 동반 finding 이다.

@@ -47,10 +47,15 @@ convenience.
   evidence → the worker returns partial/fail and names the missing artifact.
 - A bridge that cannot express these fields (e.g. a forked-context helper that
   inherits the whole chat) is a manual escape hatch, not the default executor.
+- Verifier ≠ author: the agent that verifies `acceptance_criteria` must not be
+  the same instance as the authoring agent (self-evaluation bias). "Different
+  agent" means a different instance by default; model diversity (Codex/Gemini)
+  is required only at Gate 6 cross-CPO, not as a per-capsule field.
 
 ## Validation (agent-build lens)
 
 At handoff, the `agent-build` review lens checks: every required field present;
 `files_scope` and `tools_allowed` are narrow (no "do anything"); `token_budget`
 + `timeout` set; `pii_rules` cover any data the tools can reach; `output_paths`
-are concrete. A missing or unbounded field is a finding with a fix, not a pass.
+are concrete; and the verifying agent is a different instance from the author.
+A missing or unbounded field is a finding with a fix, not a pass.

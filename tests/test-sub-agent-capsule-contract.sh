@@ -39,4 +39,22 @@ assert_contains "${policy_ko}" "runtime-token-firewall.md" "KO firewall link"
 # (d) registered in the context index
 assert_contains "${CONTEXT_DIR}/_INDEX.md" "policies/sub-agent-capsule-contract.md" "context index registration"
 
+# (e) WU-E: verifier ≠ author named in both languages (handoff rule + lens)
+assert_contains "${policy}" "the same instance as the authoring agent" "EN verifier≠author handoff rule"
+assert_contains "${policy}" "the verifying agent is a different instance from the author" "EN verifier≠author lens"
+assert_contains "${policy_ko}" "저작 agent 와 동일" "KO verifier≠author handoff rule"
+assert_contains "${policy_ko}" "검증 agent 가 저작자와 다른 인스턴스인지" "KO verifier≠author lens"
+
+# (e') council policy carries the same verifier ≠ author rule
+council="${CONTEXT_DIR}/policies/division-subagent-council.md"
+assert_contains "${council}" "verifier ≠ author" "council verifier≠author rule"
+
+# (f) negative lock — self-verification must never be permitted (WU regression direction)
+refuse() {
+  local file="$1" needle="$2" label="$3"
+  ! grep -Fq -- "${needle}" "${file}" || fail "${label}: forbidden phrase present '${needle}'"
+}
+refuse "${policy}" "the same agent may both author and verify" "EN self-verify allowance"
+refuse "${policy_ko}" "저작 agent 가 자신을 검증해도 된다" "KO self-verify allowance"
+
 echo "PASS: test-sub-agent-capsule-contract.sh"

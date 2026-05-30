@@ -1,5 +1,32 @@
 ## [Unreleased]
 
+## [0.8.2] - 2026-05-31
+
+> **서브에이전트 capsule 계약에 "검증자 ≠ 저작자" 를 명문화 (WU-E B5).**
+
+리뷰/검증 lane 의 agent 가 저작(구현) lane 과 동일 인스턴스이면 자기평가 편향이
+생긴다. capsule 계약에 신규 필수필드를 추가하지 않고(handoff rule + agent-build
+lens assert 만으로) "검증하는 agent 는 저작 agent 와 동일 인스턴스 금지" 를 박았다.
+"다른 agent" 는 기본적으로 **다른 인스턴스**를 뜻하며, 모델 다양성(Codex/Gemini)은
+per-capsule 필드가 아니라 Gate 6 cross-CPO 에서만 요구한다. #7(리뷰어-tier
+enforcement)과 같은 "검증자 계약" 면을 확장한다.
+
+### Added
+
+- **sub-agent-capsule-contract(.md/.ko.md) — 검증자 ≠ 저작자 (EN/KO 패리티)** —
+  Handoff rules 에 "`acceptance_criteria` 를 검증하는 agent 는 저작 agent 와 동일
+  인스턴스여서는 안 된다(자기평가 편향). 모델 다양성은 Gate 6 cross-CPO 의 몫" 규칙
+  추가 + Validation (agent-build lens) 체크리스트에 "검증 agent 가 저작자와 다른
+  인스턴스인지" 추가. 신규 필수필드 없음.
+- **division-subagent-council — 검증 lane 분리** — Implement 절에 "QA/review 검증
+  lane 은 구현(저작) lane 과 다른 agent; 자기검증 금지(verifier ≠ author)" 1절.
+
+### Tests
+
+- **test-sub-agent-capsule-contract.sh** — EN+KO 양쪽 "검증자 ≠ 저작자" 문구 +
+  council 문구 assert, 그리고 "저작=검증 동일 agent 허용" 문구가 들어오면 fail 하는
+  음성잠금(회귀 방향 고정).
+
 ## [0.8.1] - 2026-05-30
 
 > **리뷰어-tier enforcement — cross-CPO Gemini fallback 이 sub-3.x(2.5-pro)로 silent 다운그레이드되던 결함 잠금 (Fixes #7).**
