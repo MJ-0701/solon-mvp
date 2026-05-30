@@ -26,6 +26,14 @@ detail_sources:
   - commands/sfs.toml
   - .sfs-local/presets/solon-safe-permissions.yaml
   - mcp-server/README.md
+  - llm-wiki/README.md                  # when present: Obsidian LLM-wiki vault entry
+  - llm-wiki/00-llm-retrieval-guide.md  # when present: wiki retrieval guide
+knowledge_wiki:                         # pointer only — wiki usage policy stays routed, never inlined here
+  status: optional-recommended          # opt-in retained (not default-on)
+  detect: ["llm-wiki/", ".obsidian/"]
+  on_present: "Check llm-wiki/README.md + llm-wiki/00-llm-retrieval-guide.md before any broad scan."
+  on_absent: "Proceed with plain docs/solon/ artifacts and record a gap/waiver."
+  ssot_policy: "sfs context cat policies/obsidian-llm-wiki"
 do_not_inline:
   - SFS command tables
   - model routing

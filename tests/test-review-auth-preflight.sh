@@ -62,6 +62,12 @@ fake_bin="${TMP_DIR}/fake-bin"
 mkdir -p "${fake_bin}"
 cat > "${fake_bin}/gemini" <<'FAKE_GEMINI'
 #!/usr/bin/env bash
+# solon-product#7: a route-capable CLI advertises --model so the reviewer-tier
+# route (gemini-3.1-pro-preview) can be pinned; otherwise the review now stops.
+if [[ "${1:-}" == "--help" ]]; then
+  echo "Usage: gemini --model <model> --skip-trust --output-format text -p <prompt>"
+  exit 0
+fi
 args="$*"
 if [[ "${args}" == *"SFS_REVIEW_BRIDGE_PROBE_OK"* ]]; then
   printf 'SFS_REVIEW_BRIDGE_PROBE_OK\n'
@@ -154,7 +160,7 @@ run_with_timeout 30 env \
   SFS_FORCE_NONINTERACTIVE=1 \
   SFS_GEMINI_AUTH_READY=1 \
   SFS_REVIEW_BRIDGE_PROBE=0 \
-  SFS_REVIEW_GEMINI_CMD="${fake_bin}/hanging-gemini" \
+  SFS_REVIEW_GEMINI_CMD="${fake_bin}/hanging-gemini --model gemini-3.1-pro-preview" \
   SFS_REVIEW_EXECUTOR_TIMEOUT_SEC=0 \
   SFS_NONINTERACTIVE_REVIEW_EXECUTOR_TIMEOUT_SEC=2 \
   SFS_COMMAND_TIMEOUT_SEC=0 \

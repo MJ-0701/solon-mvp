@@ -136,6 +136,38 @@ is_worker_role() {
   esac
 }
 
+is_reviewer_role() {
+  case "$1" in
+    *cpo*|*evaluator*|*reviewer*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+# review_route_allowlist — the set of model values declared under any
+# review_high: block in model-profiles.yaml (one per line). This anchors the
+# reviewer-tier invariant to the policy SSoT so a reviewer event cannot launder
+# a sub-tier model by simply claiming it as its own route_model (resolved_model
+# == route_model == gemini-2.5-pro). It reads declared review model VALUES, not
+# the per-runtime resolution LOGIC, so it does not duplicate route selection.
+# Empty output (file missing / placeholder-only custom) → caller falls back to
+# the event-internal consistency check rather than blocking.
+review_route_allowlist() {
+  local mp="${SFS_LOCAL_DIR}/model-profiles.yaml"
+  [[ -f "${mp}" ]] || return 0
+  awk '
+    /^[[:space:]]*review_high:[[:space:]]*$/ { inb=1; next }
+    inb && /^[[:space:]]*(model|command_or_model):[[:space:]]*/ {
+      v=$0
+      sub(/^[[:space:]]*(model|command_or_model):[[:space:]]*/, "", v)
+      gsub(/["\047]/, "", v)
+      sub(/[[:space:]]*$/, "", v)
+      if (v != "" && v !~ /^</) print v
+      inb=0; next
+    }
+    inb && /^[[:space:]]*[A-Za-z_]+:/ { inb=0 }
+  ' "${mp}"
+}
+
 # ── fcp-model-tier (critical) ──────────────────────────────────────────────
 mt_ok=1
 for line in "${EV_LINES[@]:-}"; do
@@ -163,6 +195,48 @@ for line in "${EV_LINES[@]:-}"; do
   esac
 done
 [[ "${mt_ok}" -eq 1 ]] && PASS_NOTES+=("fcp-model-tier: worker model resolution conformant")
+
+# ── fcp-reviewer-tier (critical) — solon-product#7 ─────────────────────────
+# CPO/cross-review reviewer model is enforced, not a soft target: a reviewer
+# model_resolved event must resolve to the model-profiles review route carried
+# in the event (route_model), and must not come from the host default
+# (source=current). A sub-tier/downgraded reviewer (e.g. Codex quota exhaustion
+# silently falling back to gemini-2.5-pro) is a CRIT. The route is asserted from
+# the event itself; the invariant does not re-derive it from model-profiles, so
+# the runtime that emitted the event remains the single source of the route.
+rt_ok=1
+rt_seen=0
+rt_allowlist="$(review_route_allowlist 2>/dev/null || true)"
+for line in "${EV_LINES[@]:-}"; do
+  [[ "$(_jf type "${line}")" == "model_resolved" ]] || continue
+  role="$(_jf agent_role "${line}")"
+  is_reviewer_role "${role}" || continue
+  rt_seen=1
+  rmodel="$(_jf resolved_model "${line}")"
+  route="$(_jf route_model "${line}")"
+  rsrc="$(_jf source "${line}")"
+  if [[ -z "${route}" ]]; then
+    rt_ok=0
+    CRIT+=("fcp-reviewer-tier: reviewer '${role}' model_resolved carries no route_model — reviewer tier unenforceable [#7]")
+  elif [[ "${rmodel}" != "${route}" ]]; then
+    rt_ok=0
+    CRIT+=("fcp-reviewer-tier: reviewer '${role}' resolved_model '${rmodel:-?}' != review route '${route}' — sub-tier/downgraded reviewer [#7]")
+  elif [[ -n "${rt_allowlist}" ]] && ! grep -Fxq -- "${route}" <<<"${rt_allowlist}"; then
+    # route_model agrees with resolved_model but is not a model-profiles
+    # review_high route — a laundered sub-tier model (e.g. both = 2.5-pro).
+    rt_ok=0
+    CRIT+=("fcp-reviewer-tier: reviewer '${role}' route_model '${route}' is not a model-profiles review_high route — laundered/sub-tier reviewer [#7]")
+  fi
+  case "${rsrc}" in
+    current)
+      rt_ok=0
+      CRIT+=("fcp-reviewer-tier: reviewer '${role}' resolved via source=current (host default) — review route not enforced [#7]")
+      ;;
+  esac
+done
+if [[ "${rt_seen}" -eq 1 && "${rt_ok}" -eq 1 ]]; then
+  PASS_NOTES+=("fcp-reviewer-tier: reviewer model resolution on enforced review route")
+fi
 
 # ── fcp-conflict-surfaced (critical) ───────────────────────────────────────
 deviation=0

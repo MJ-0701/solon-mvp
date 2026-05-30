@@ -57,7 +57,10 @@ for file in "${root_adapters[@]}"; do
   assert_contains "${file}" "sfs agent doctor --fix" "adapter refactor command ${file}"
 
   lines="$(wc -l <"${file}" | tr -d '[:space:]')"
-  [[ "${lines}" -le 45 ]] || fail "${file}: root adapter too long (${lines} lines)"
+  # Cap is a body-bloat guard; frontmatter-only is enforced by
+  # test-agent-entry-doc-hygiene.sh. WU-B adds the knowledge_wiki pointer
+  # block + 2 detail_sources lines (all frontmatter), so 45→50.
+  [[ "${lines}" -le 50 ]] || fail "${file}: root adapter too long (${lines} lines)"
 
   assert_not_contains "${file}" "Session Continuation Guard" "adapter no session policy body ${file}"
   assert_not_contains "${file}" "Domain knowledge assets are first-class" "adapter no domain policy body ${file}"

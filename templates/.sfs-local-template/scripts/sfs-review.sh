@@ -205,6 +205,15 @@ REVIEW_DIR_EXPANSION_MAX="${SFS_REVIEW_DIR_EXPANSION_MAX:-80}"
 REVIEW_EXECUTOR_TIMEOUT="${SFS_REVIEW_EXECUTOR_TIMEOUT_SEC:-${SFS_REVIEW_COMMAND_TIMEOUT_SEC:-1500}}"
 REVIEW_BRIDGE_PROBE="${SFS_REVIEW_BRIDGE_PROBE:-auto}"
 REVIEW_BRIDGE_PROBE_TIMEOUT="${SFS_REVIEW_BRIDGE_PROBE_TIMEOUT_SEC:-45}"
+# solon-product#7: the CPO/cross-review Gemini route is model-profiles
+# review_high (gemini-3.1-pro-preview). The reviewer model is ENFORCED, not a
+# soft target — a CPO/cross review must be served by the route model, verified
+# by the invocation --model flag (authoritative signal). The reviewer's
+# self-named model in body text is NOT trusted: preview models can self-name a
+# sibling version (e.g. 3.1-pro-preview reporting "gemini-2.5-pro"). When the
+# installed Gemini CLI cannot apply --model, the route is unpinnable and the
+# review stops + surfaces instead of silently downgrading the gate verdict.
+REVIEW_GEMINI_ROUTE_MODEL="${SFS_REVIEW_GEMINI_ROUTE_MODEL:-gemini-3.1-pro-preview}"
 REVIEW_TIMEOUT_GUARD_NOTE=""
 SFS_REVIEW_RESTORE_NOTICE=""
 while [[ $# -gt 0 ]]; do
@@ -2678,12 +2687,12 @@ render_cpo_prompt() {
   printf '%s\n\n' "${persona_note}"
   cat <<'EOF'
 Model routing contract:
-- SFS model tiers are role/profile targets, not a requirement that the executor CLI supports a --model flag.
-- Act under the requested evaluator role using the highest configured host/runtime profile available for this review.
+- The reviewer model is enforced for CPO/cross review, not a soft target: SFS pins the review_high route model and verifies it via the invocation --model flag (or configured profile), NOT your self-reported model name. Do not self-attest your model in the body — SFS does not trust it, because preview models can self-name a sibling version (solon-product#7).
+- Act under the requested evaluator role on the pinned review_high route model. If that model cannot be pinned, stop and surface a profile bridge issue rather than running an unverifiable reviewer.
 - If the host/runtime cannot provide the required advisor/CPO profile, report that as an executor/auth/profile bridge issue instead of silently downgrading the gate verdict.
 - For Codex CPO/cross review, the requested review_high profile is gpt-5.5 with xhigh reasoning.
 - Codex gpt-5.4 worker, gpt-5.3-codex coding-helper, and gpt-5.3-codex-spark mechanical-helper profiles are not acceptable as the CPO/cross-review profile.
-- The default Codex shell bridge does not force model selection with CLI flags; configure the host/runtime profile, or set SFS_REVIEW_CODEX_CMD explicitly only if your Codex CLI supports those flags.
+- The default Codex shell bridge does not pass a --model flag; configure the host/runtime profile to the review_high model (gpt-5.5 xhigh), or set SFS_REVIEW_CODEX_CMD explicitly to pin it. A CPO/cross review that cannot be pinned to the review_high model must stop and surface a profile bridge issue rather than downgrade the gate verdict.
 - Runtime Token Firewall applies to this review: the executor receives this
   capsule prompt and embedded evidence only. Do not use a Claude in-process
   Codex/Gemini plugin, rescue subagent, forked context, or wrapper that forwards
@@ -2825,6 +2834,24 @@ conversation history. Use one of:
 EOF
 }
 
+review_gemini_route_unpinned_hint() {
+  local source="${1:-Gemini review bridge}"
+  cat >&2 <<EOF
+reviewer-tier enforcement (solon-product#7): CPO/cross-review Gemini route not pinnable: ${source}
+The review_high route model is '${REVIEW_GEMINI_ROUTE_MODEL}'. The reviewer model
+is enforced, not a soft target — a CPO/cross review must run on the route model,
+verified by the invocation --model flag. Because the model cannot be pinned here,
+the served model is unverifiable and may silently downgrade to a sub-tier model
+(the #7 defect). Stopping instead of downgrading the gate verdict.
+
+Resolve with one of:
+  - install/point at a Gemini CLI that supports '--model' so the route model is applied
+  - set SFS_REVIEW_GEMINI_CMD to a command that pins '${REVIEW_GEMINI_ROUTE_MODEL}'
+  - run 'sfs review ... --prompt-only' and paste into a route-model Gemini session manually
+  - override the route with SFS_REVIEW_GEMINI_ROUTE_MODEL only if model-profiles review_high changed
+EOF
+}
+
 resolve_review_executor_cmd() {
   case "${EVALUATOR_EXECUTOR}" in
     codex|codex-cli)
@@ -2872,10 +2899,36 @@ EOF
       ;;
     gemini)
       if [[ -n "${SFS_REVIEW_GEMINI_CMD:-}" ]]; then
+        # Explicit override is still subject to reviewer-tier enforcement. Match
+        # the actual `--model <value>` token(s), not a bare model name anywhere
+        # in the string: a comment or unrelated text containing the route name
+        # (e.g. `--model gemini-2.5-pro # gemini-3.1-pro-preview`) must NOT pass.
+        # Require at least one --model and that EVERY --model value is the route.
+        local _gm_models _gm_bad=0 _gm_count=0
+        _gm_models="$(grep -oE -- '--model[=[:space:]]+[^[:space:]]+' <<<"${SFS_REVIEW_GEMINI_CMD}" \
+          | sed -E "s/^--model[=[:space:]]+//; s/^[\"']//; s/[\"']\$//")"
+        if [[ -n "${_gm_models}" ]]; then
+          while IFS= read -r _gm; do
+            [[ -z "${_gm}" ]] && continue
+            _gm_count=$((_gm_count + 1))
+            [[ "${_gm}" != "${REVIEW_GEMINI_ROUTE_MODEL}" ]] && _gm_bad=1
+          done <<<"${_gm_models}"
+        fi
+        if [[ "${_gm_count}" -eq 0 || "${_gm_bad}" -ne 0 ]]; then
+          review_gemini_route_unpinned_hint "SFS_REVIEW_GEMINI_CMD"
+          return "${SFS_EXIT_EXECUTOR}"
+        fi
         printf '%s\n' "${SFS_REVIEW_GEMINI_CMD}"
       elif command -v gemini >/dev/null 2>&1; then
         prepare_executor_auth "gemini" "${AUTH_INTERACTIVE}" || return "${SFS_EXIT_EXECUTOR}"
-        sfs_gemini_default_cmd "gemini-3.1-pro-preview" "Read stdin and perform the requested CPO review."
+        # Reviewer-tier enforcement: the default bridge only applies --model when
+        # the installed CLI advertises it. If it cannot, the route model is
+        # unpinnable for a CPO/cross review → stop+surface (do not downgrade).
+        if ! sfs_gemini_supports_model_flag; then
+          review_gemini_route_unpinned_hint "installed Gemini CLI (--model unsupported)"
+          return "${SFS_EXIT_EXECUTOR}"
+        fi
+        sfs_gemini_default_cmd "${REVIEW_GEMINI_ROUTE_MODEL}" "Read stdin and perform the requested CPO review."
       else
         executor_cli_missing_hint "gemini"
         return "${SFS_EXIT_EXECUTOR}"
@@ -3312,6 +3365,31 @@ EOF
   if [[ "${RUN_RC}" -ne 0 && -z "${RUN_WARNING}" ]]; then
     echo "executor failed: ${EVALUATOR_EXECUTOR} (exit ${RUN_RC}); see ${RUN_ERR}" >&2
     exit "${SFS_EXIT_EXECUTOR}"
+  fi
+
+  # solon-product#7: emit a reviewer model_resolved FCP event so `sfs flowcheck`
+  # can backstop reviewer-tier enforcement over the event stream. Scoped to the
+  # Gemini executor — the only path this fix pins+verifies via the --model flag,
+  # so the route_model we record is attested (resolve_review_executor_cmd stops
+  # before here when the route cannot be pinned). Codex/Claude reviewer-tier
+  # emission is deliberately out of scope (advisor #4); the invariant still fires
+  # on any wrong reviewer event from another source.
+  if [[ "$(normalize_executor_profile "${EVALUATOR_EXECUTOR}")" == "gemini" ]]; then
+    # Role reflects the actual review stage so the audit log is honest: a self
+    # review is the author's self-CPO, a cross review is the independent CPO.
+    if [[ "${REVIEW_STAGE}" == "self" ]]; then
+      reviewer_role="self-cpo-checker"
+    else
+      reviewer_role="cpo-evaluator"
+    fi
+    append_flow_event model_resolved \
+      "agent_role=${reviewer_role}" \
+      "resolved_tier=review_high" \
+      "resolved_model=${REVIEW_GEMINI_ROUTE_MODEL}" \
+      "route_model=${REVIEW_GEMINI_ROUTE_MODEL}" \
+      "source=policy" \
+      "review_stage=${REVIEW_STAGE}" \
+      "signal=invocation-model-flag" 2>/dev/null || true
   fi
 fi
 

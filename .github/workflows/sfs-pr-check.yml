@@ -12,22 +12,64 @@ on:
       - ".github/workflows/sfs-pr-check.yml"
       - ".github/workflows/**"
       - "bin/**"
+      - "commands/**"
+      - "docs/**"
+      - "plugins/**"
       - "scripts/**"
+      - "templates/**"
       - "tests/**"
       - "packaging/**"
       - "VERSION"
       - "CHANGELOG.md"
+      - "AGENTS.md"
+      - "BEGINNER-GUIDE.md"
+      - "CLAUDE.md"
+      - "GEMINI.md"
+      - "GUIDE.md"
+      - "README.md"
+      - "RELEASE-NOTES.md"
+      - "SFS.md"
+      - "BEGINNER-GUIDE/**"
+      - "GUIDE/**"
+      - "README/**"
+      - "install.sh"
+      - "install.ps1"
+      - "upgrade.sh"
+      - "upgrade.ps1"
+      - "uninstall.sh"
+      - "uninstall.ps1"
   push:
     branches: [main]
     paths:
       - ".github/workflows/sfs-pr-check.yml"
       - ".github/workflows/**"
       - "bin/**"
+      - "commands/**"
+      - "docs/**"
+      - "plugins/**"
       - "scripts/**"
+      - "templates/**"
       - "tests/**"
       - "packaging/**"
       - "VERSION"
       - "CHANGELOG.md"
+      - "AGENTS.md"
+      - "BEGINNER-GUIDE.md"
+      - "CLAUDE.md"
+      - "GEMINI.md"
+      - "GUIDE.md"
+      - "README.md"
+      - "RELEASE-NOTES.md"
+      - "SFS.md"
+      - "BEGINNER-GUIDE/**"
+      - "GUIDE/**"
+      - "README/**"
+      - "install.sh"
+      - "install.ps1"
+      - "upgrade.sh"
+      - "upgrade.ps1"
+      - "uninstall.sh"
+      - "uninstall.ps1"
 
 permissions:
   contents: read
@@ -37,12 +79,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: bash -n syntax check (scripts + tests)
         run: |
           set -e
           for f in scripts/*.sh tests/*.sh; do
             bash -n "$f"
           done
+      - name: Gate 6 review flow evidence (PR product changes)
+        if: github.event_name == 'pull_request'
+        env:
+          SFS_PR_BODY: ${{ github.event.pull_request.body }}
+          SFS_PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          SFS_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          bash scripts/sfs-pr-review-flow-check.sh --root .
       - name: storage precommit (strict mode — G6.1 F2 / Option A)
         run: |
           bash scripts/sfs-storage-precommit.sh --root . --strict

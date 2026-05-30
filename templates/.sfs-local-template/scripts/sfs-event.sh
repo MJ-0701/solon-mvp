@@ -27,6 +27,9 @@ sprint_id is stamped automatically. Bounded contract types:
 
   model_resolved     agent_role=.. resolved_tier=.. resolved_model=.. \
                      source=policy|configured|current|user-override [profiles_version=..]
+                     # reviewer roles (cpo-evaluator/*reviewer*) also carry
+                     # route_model=.. for fcp-reviewer-tier enforcement (#7);
+                     # resolved_model must equal route_model or flowcheck CRITs.
   worker_dispatched  role=.. model=.. parallel=true|false [lanes=..]
   gate_passed        gate=.. order_index=.. self_cpo=pass|partial|fail
   conflict_surfaced  kind=.. detail=.. resolved_by=user|capture [scope=wu|sprint|until-revoked]

@@ -1,5 +1,50 @@
 ## [Unreleased]
 
+## [0.8.1] - 2026-05-30
+
+> **리뷰어-tier enforcement — cross-CPO Gemini fallback 이 sub-3.x(2.5-pro)로 silent 다운그레이드되던 결함 잠금 (Fixes #7).**
+
+Gate 6 cross-CPO 에서 Codex quota 가 소진되면 Gemini fallback 이 review_high
+route(`gemini-3.1-pro-preview`)가 아닌 임의 모델(2.5-pro)로 내려가도 게이트가
+그대로 PASS 되던 결함을 닫았다. "선언만 있고 enforcement 게이트 없음" 결함클래스
+(#4 model-tier·proc-activation 과 동일)로, 리뷰어 모델을 **target 이 아니라
+enforced** 로 잠갔다. 자격 판정은 invocation `--model` flag / route pin 기준이며,
+리뷰어가 본문에서 자칭하는 모델명은 신뢰하지 않는다(preview 모델 self-naming
+quirk). config-time(review executor resolve) + runtime(`flowcheck`
+fcp-reviewer-tier) 이중 잠금.
+
+### Fixed
+
+- **review executor 의 Gemini route 미핀 silent 다운그레이드 (#7)** —
+  `sfs-review.sh` 의 CPO/cross 리뷰가 review_high route 모델을 `--model` flag 로
+  핀할 수 없으면(설치된 Gemini CLI 가 `--model` 미지원, 또는
+  `SFS_REVIEW_GEMINI_CMD` 가 route 모델을 안 가리킴) 게이트를 PASS 시키지 않고
+  **stop + surface** 한다(다운그레이드 금지). `render_cpo_prompt` 의 model-routing
+  contract 문구도 "리뷰어 모델 = enforced" 로 정정(stop-not-downgrade 규칙은 유지).
+
+### Added
+
+- **`flowcheck` fcp-reviewer-tier invariant** — 리뷰어 `model_resolved` 이벤트의
+  `resolved_model` 이 이벤트가 실은 `route_model` 과 다르거나, `source=current`
+  (host default)거나, `route_model` 이 없으면 **critical**(exit 8). review executor
+  는 Gemini 리뷰 성공 시 reviewer `model_resolved` 이벤트를 emit 해 이 백스톱을
+  채운다. invariant 는 route 를 model-profiles 에서 재유도하지 않고 이벤트가 실은
+  route 만 검증(단일 출처 유지).
+- **`model-profiles.yaml` review_high `enforcement` 정책 키** + `sfs event`
+  `model_resolved` 의 reviewer `route_model` 필드 문서화.
+- **`tests/test-review-reviewer-tier-enforce.sh`** — (A) `--model` 미지원 CLI →
+  stop, (B) route 미핀 explicit cmd → stop, (C) route-핀 cmd → 본문 self-name
+  "2.5-pro" 무시하고 PASS + reviewer 이벤트 emit, (D~F) flowcheck sub-tier/
+  source=current/route_model 누락 → CRIT 회귀잠금.
+
+### Known limitation / follow-up
+
+- 현재 enforcement 는 Gemini executor 의 `--model` flag/route-pin 신호 기준이다.
+  flag 가 적용됐는데 서버가 다른 모델을 서빙하는 "flag-applied-but-server-downgrade"
+  케이스는 `gemini --output-format json` 의 `stats.models` 를 읽어야 잡히지만, 현
+  verdict-extraction 이 markdown-text 결합 + bash-only(no-jq) 라 별도 작업으로
+  분리했다(follow-up).
+
 ## [0.8.0] - 2026-05-30
 
 > **공식 버그리포트 flow + Flow-Conformance Postflight 탐지층 + #4 model-tier 잠금 + 사용자 명령 우선(scoped override).**

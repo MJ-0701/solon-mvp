@@ -95,6 +95,7 @@ reasoning_tiers:
   review_high:
     purpose: "Independent CPO/Evaluator review; fork/read-only where the runtime supports it"
     cost_latency: "high"
+    enforcement: "The reviewer model is ENFORCED, not a soft target (solon-product#7). A CPO/cross review must run on the runtime's review_high route model (Gemini = gemini-3.1-pro-preview; Claude Opus 4.x; Codex gpt-5.5 xhigh). If the route model cannot be pinned/verified — Codex quota exhaustion with no route-capable Gemini, or a CLI that cannot apply --model — the gate STOPS and surfaces a profile bridge issue rather than silently downgrading to a sub-tier model. Qualification is judged by the invocation --model flag / route pin (or API stats), NOT the reviewer's self-named model in its body text — preview models can self-name a sibling version. Backstopped at runtime by `sfs flowcheck` fcp-reviewer-tier."
     default_roles:
       - self-cpo-checker
       - cpo-evaluator

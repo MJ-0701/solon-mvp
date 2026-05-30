@@ -4,7 +4,7 @@ title: "Solon 제품 사용 가이드"
 visibility: oss-public
 doc_type: user-guide
 language: ko
-updated: 2026-05-22
+updated: 2026-05-28
 summary: "Thin index for Solon 제품 사용 가이드"
 load_when: "Start here, then load only the child section needed."
 split_children:
@@ -34,6 +34,10 @@ split_children:
 
 자세한 제품 철학과 운영 구조는 [현재 제품 구조와 운영 흐름](./docs/ko/current-product-shape.md),
 AI 시대에 Solon 이 주는 가치는 [Solon 10x 가치](./docs/ko/10x-value.md) 에서 이어서 볼 수 있습니다.
+
+제품 PR 은 Gate 6 self-CPO 와 cross-CPO PASS evidence, 또는 구체적인 cross-review fallback
+reason 을 본문에 남겨야 합니다. GitHub `@codex` / PR approval / check PASS 만으로는 SFS
+review 를 대체하지 않습니다.
 
 ---
 

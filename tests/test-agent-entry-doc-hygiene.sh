@@ -81,6 +81,11 @@ for f in "${adapter_templates[@]}"; do
   [[ -f "${f}" ]] || fail "missing adapter template: ${f}"
   grep -qE '^frontmatter_only:[[:space:]]*true' "${f}" \
     || fail "${f}: must keep \`frontmatter_only: true\` marker"
+  # WU-B: wiki awareness is a frontmatter pointer (knowledge_wiki block),
+  # never inlined policy body. Lock the pointer's presence; the body-line
+  # counter below keeps it frontmatter-only.
+  grep -qE '^knowledge_wiki:' "${f}" \
+    || fail "${f}: must keep \`knowledge_wiki:\` pointer block (WU-B)"
   # No body content beyond the closing --- (frontmatter only).
   # Count non-blank lines AFTER the second '---'.
   body_lines="$(awk '
