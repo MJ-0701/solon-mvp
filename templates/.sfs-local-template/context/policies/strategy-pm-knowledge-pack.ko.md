@@ -129,3 +129,26 @@ check 중 무엇이 활성화되는지 판단하고, matching id 만 적용한�
 - PM-GAP-006: Product risk register examples.
 - PM-GAP-007: Adoption and migration playbook for existing users.
 - PM-GAP-008: Decision log templates for AI-assisted product work.
+
+## PM-AIERA - AI 시대 기획 lens
+
+2026-05 실무 강연에서 추린 review-lens 프롬프트. plan/scope/decision 작업의
+토의용 체크이지 hard rule 이 아니다. 인용된 배수·업체·모델 주장은 강연 시점
+주장으로 보고 행동 전 검증한다.
+
+- PM-AIERA-001: "코드 생성 속도"와 "엔지니어링 처리량"을 분리한다. 코드 출력이
+  빨라져도 통합·리뷰·테스트·릴리스가 빨라지는 건 아니다. AI 가속 작업을 기획할
+  때 질문: 출력이 10x 되면 무엇이 먼저 무너지나 — 리뷰 용량, 테스트 실행시간,
+  인프라, 토큰 예산?
+- PM-AIERA-002: 각 plan 에 2-질문 시스템 lens — "왜?"(현재 이해) + "만약?"(미래·
+  2차 효과) — 를 scope 확정 전에 적용한다.
+- PM-AIERA-003: AI 도입을 "대체 ROI"가 아니라 "협업 생산성 극대화"로 프레이밍.
+  "몇 명 줄이나?"를 안티패턴으로 보고, 단계적 내부 우선 rollout + human-in-the-
+  loop 를 지키는 검증 인력 육성을 우선한다.
+- PM-AIERA-004: 만들기 전에 요구를 명확히 한다. "앞 2번 질문이 뒤 5번 수정보다
+  낫다" — 애매한 작업은 착수 전 질문/스펙 lock, 묵시 가정 금지.
+- PM-AIERA-005: 방향을 저울질할 때 "좋은 기회" 축을 명시한다(일·돈·시간·성장;
+  현재 안락보다 미래 상방) — 1인 운영자 커리어·사업 방향 brainstorm 에 유용.
+- PM-AIERA-006: 분석·백테스트를 신뢰하기 전에 편향 체크리스트 — 생존편향·
+  룩어헤드·데이터 스누핑·과적합 — 를 돌려, 확신에 찬 숫자를 건전한 결정으로
+  오인하지 않는다.

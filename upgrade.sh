@@ -1739,6 +1739,35 @@ layout from: $([ -n "${UPGRADE_LAYOUT:-}" ] && echo "upgrade request" || echo "p
 
 EOF
 
+# llm-wiki/ scaffold (WMU-2) — existing consumers materialize the vault on upgrade
+# too (not init-only). Runs before the version branch so it covers both the
+# already-latest path and a version-bump apply. Idempotent + opt-out aware:
+#   - skip-if-exists: existing vault preserved.
+#   - .sfs-local/llm-wiki.waiver present → respect prior opt-out, do not reinstall.
+#   - SFS_INSTALL_LLM_WIKI=0 → record waiver, no copy.
+#   - otherwise (recommended-default) → install.
+LLM_WIKI_SRC="$SOURCE_DIR/templates/.sfs-local-template/llm-wiki"
+if [ -d "$LLM_WIKI_SRC" ]; then
+  if [ -d "$TARGET/llm-wiki" ]; then
+    :
+  elif [ -f "$TARGET/.sfs-local/llm-wiki.waiver" ]; then
+    :
+  else
+    case "${SFS_INSTALL_LLM_WIKI:-}" in
+      0|false|FALSE|no|NO|off|OFF)
+        mkdir -p "$TARGET/.sfs-local"
+        printf 'declined_at=%s\nreason=user-opt-out-at-upgrade\n' \
+          "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$TARGET/.sfs-local/llm-wiki.waiver"
+        ;;
+      *)
+        mkdir -p "$TARGET/llm-wiki"
+        cp -R "$LLM_WIKI_SRC"/. "$TARGET/llm-wiki/" 2>/dev/null || true
+        ok "llm-wiki/ 지식 vault skeleton 설치 (upgrade; 수동 유지, generator 미동반)"
+        ;;
+    esac
+  fi
+fi
+
 if [ "$CUR_VER" = "$NEW_VER" ]; then
   MODEL_PROFILE_REPAIRED=0
   if [ ! -f "$TARGET/.sfs-local/model-profiles.yaml" ] \

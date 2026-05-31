@@ -137,3 +137,31 @@ active for a sprint, plan, review, or release. Apply only the matching ids.
 - PM-GAP-006: Product risk register examples.
 - PM-GAP-007: Adoption and migration playbook for existing users.
 - PM-GAP-008: Decision log templates for AI-assisted product work.
+
+## PM-AIERA - AI-Era Planning Lens
+
+Review-lens prompts distilled from 2026-05 practitioner talks. These are
+discussion checks for plan/scope/decision work, not hard rules. Treat any
+cited multiplier, vendor, or model claim as a speaker-time assertion and
+verify before acting.
+
+- PM-AIERA-001: Separate "code-generation speed" from "engineering throughput".
+  Faster code output does not mean faster integration, review, test, or
+  release. When planning an AI-accelerated effort, ask: if output grows 10x,
+  what breaks first — review capacity, test runtime, infra, or token budget?
+- PM-AIERA-002: Use a two-question systems lens on each plan — "Why?" (current
+  understanding) and "What if?" (future/second-order effects) — before
+  committing scope.
+- PM-AIERA-003: Frame AI adoption as "maximize collaborative productivity",
+  not "replacement ROI". Treat "how many people does it cut?" as an
+  anti-pattern; prefer staged internal-first rollout and growing the reviewers
+  who keep humans in the loop.
+- PM-AIERA-004: Clarify requirements before building. "Two questions up front
+  beat five fixes later" — ambiguous work gets a question or spec lock before
+  start, not silent assumptions.
+- PM-AIERA-005: Make the "good opportunity" axes explicit when weighing a
+  direction (work, money, time, growth; future upside over present comfort) —
+  useful for solo-operator career and business-direction brainstorming.
+- PM-AIERA-006: Run a bias checklist before trusting an analysis or backtest —
+  survivorship, look-ahead, data-snooping, and overfitting — so a confident
+  number is not mistaken for a sound decision.

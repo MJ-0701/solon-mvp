@@ -14,6 +14,9 @@ required checks by project size and risk. This router is not the same surface as
 `.sfs-local/divisions.yaml`: that file is a six-slot compatibility activation
 state, while this router covers the current guidance packs and review lenses.
 This scope is limited to knowledge-pack documents; other documentation is unchanged unless explicitly requested.
+In the Raw / Wiki / Schema (+lint) wiki model (see `obsidian-llm-wiki`), these
+packs are the Schema-layer review lens — not Raw source and not Wiki concept
+corpus; they stay routed and do not move into the wiki.
 The six core divisions are an always-on Division sub-agent council across
 brainstorm, plan, implement, and review. activation_state controls read-depth
 and escalation, not whether strategy-pm/dev/QA/design/infra/taxonomy participate.

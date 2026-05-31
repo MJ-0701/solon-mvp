@@ -7,6 +7,23 @@
 
 ---
 
+## 0.8.4
+
+지식 wiki(llm-wiki)를 제품이 직접 깔고, sprint 를 닫을 때 그 wiki 로 의미가 쌓이도록 했습니다.
+
+체감 변화:
+
+- `sfs init` / `sfs upgrade` 를 하면 프로젝트 루트에 **`llm-wiki/` 지식 vault
+  골격**이 생깁니다(README + 검색 가이드 + frontmatter + ddd/bug-reports 폴더).
+  원치 않으면 `SFS_INSTALL_LLM_WIKI=0` 으로 끌 수 있고, 이미 있으면 덮어쓰지
+  않습니다. 기존 프로젝트도 `sfs upgrade` 시 받습니다.
+- `sfs retro --close` 로 sprint 를 닫으면 **wiki-compile 체크리스트**가 함께
+  생깁니다. report/retro 는 sprint 근거를 그대로 보존하고, llm-wiki 에는 오래
+  남길 **의미만** 승격합니다. 공유지식 승격·삭제·민감자료 이동은 사람이
+  검토한 뒤에만 반영됩니다(자동 승격 금지).
+
+---
+
 ## 0.8.3
 
 `sfs context list` 가 macOS 에서 routed 모듈을 하나도 못 보여주던 문제를 고쳤습니다.

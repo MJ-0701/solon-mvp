@@ -156,6 +156,9 @@ if [[ "${CLOSE}" -eq 1 ]]; then
   REPORT_PATH="$(sfs_prepare_sprint_report "${SPRINT_ID}" "${NOW}" "final")"
   # WU-36: surface cycle-end division activation recommendations inside report/retro.
   sfs_write_cycle_end_division_recommendations "${SPRINT_ID}" "${NOW}" "${REPORT_PATH}" "${RETRO_PATH}" || true
+  # Active Obsidian/wiki projects close with a deterministic compile checklist:
+  # report/retro keep sprint evidence, llm-wiki receives only durable meaning.
+  sfs_write_wiki_compile_checklist "${SPRINT_ID}" "${NOW}" "${REPORT_PATH}" "${RETRO_PATH}" || true
   sprint_close "${SPRINT_DIR}" "${NOW}"
   sfs_compact_sprint_workbench "${SPRINT_ID}" "${NOW}"
 

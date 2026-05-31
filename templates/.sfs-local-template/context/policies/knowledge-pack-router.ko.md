@@ -14,6 +14,9 @@ risk 에 맞는 최소 check 만 활성화하는 것이다. 이 router 는 `.sfs
 같은 표면이 아니다. `divisions.yaml` 은 6개 core activation slot 을 위한 호환성 설정이고,
 이 router 는 현재 guidance pack 과 review lens 를 고른다.
 이 범위는 knowledge-pack 문서에 한정되며, 별도 요청이 없는 한 나머지 문서는 변경하지 않습니다.
+Raw / Wiki / Schema (+lint) wiki 모델(`obsidian-llm-wiki` 참조)에서 이 팩들은
+Schema 계층 review lens 다 — Raw 원천도, Wiki 개념 corpus 도 아니며, routed 상태로
+남고 wiki 로 이동하지 않는다.
 6개 core division 은 brainstorm, plan, implement, review 전 단계의 always-on
 Division sub-agent council 이다. `activation_state` 는 read-depth 와 escalation
 을 조절할 뿐, strategy-pm/dev/QA/design/infra/taxonomy 참여 여부가 아니다.

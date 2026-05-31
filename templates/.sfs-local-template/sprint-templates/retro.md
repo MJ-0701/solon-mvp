@@ -37,3 +37,11 @@ closed_at: ""
 - [ ] report 가 최신이다
 - [ ] review 조치가 완료 또는 이월됐다
 - [ ] workbench 가 접혔다
+
+## 6. Wiki compile
+
+<!-- solon:wiki-compile-checklist:start -->
+- [ ] report/retro 는 sprint close evidence SSoT 로 남겼다
+- [ ] `llm-wiki/` 에는 durable conclusion 과 source link 만 남겼거나 gap/waiver 를 기록했다
+- [ ] report/retro 전문을 wiki 에 복사하지 않았다
+<!-- solon:wiki-compile-checklist:end -->

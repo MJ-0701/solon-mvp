@@ -28,6 +28,11 @@ into project memory, `SFS.md`, `docs/solon/`, or `llm-wiki/`. Batch workspace
 work preserves raw inputs, creates per-source outputs, and then builds the
 requested aggregate artifact.
 
+When the project has weak or missing docs, intake starts with memory formation:
+check code, git history, tests, config, deployment traces, and existing notes,
+then record knowns, unknowns, and already-answered questions before asking the
+user to restate broad background.
+
 This is vendor-neutral. Claude chat/project/cowork, Codex threads, local
 folders, Obsidian, Git, and future tools can all implement the same shape. SFS
 records the durable contract, evidence, and artifact paths instead of making the

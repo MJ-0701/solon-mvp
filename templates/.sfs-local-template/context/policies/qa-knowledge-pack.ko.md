@@ -139,3 +139,19 @@ release 에서 필요한 confidence evidence 를 고르고, matching id 만 blas
 - QA-GAP-006: Release confidence report template.
 - QA-GAP-007: Exploratory testing charter templates.
 - QA-GAP-008: Security QA checklist for auth, PII, and secret exposure.
+
+## QA-AIERA - AI 시대 검증 lens
+
+2026-05 실무 강연에서 추린 review-lens 프롬프트. AI 보조 검증의 토의용
+체크이지 hard rule 이 아니며, 인용 주장은 강연 시점 주장이다.
+
+- QA-AIERA-001: 검증자는 저작자와 달라야 한다. 별도 agent(또는 pass)가 구현
+  agent 의 주장을 반박·검토 → self-attestation 보다 독립 교차검증이 신뢰↑.
+  self-CPO/cross-CPO 게이트 취지와 합치.
+- QA-AIERA-002: "모르면 보류"를 품질 신호로 본다. 고위험 표면에서 추측하느니
+  거부·질문하는 agent 가 그럴듯하지만 틀린 결과를 조용히 내는 것보다 안전.
+- QA-AIERA-003: 규모가 커지면 green 불리언("모든 테스트 통과")의 의미가
+  약해진다(거대·AI 생성 suite). pass/fail 카운트만이 아니라 통계적/샘플 품질
+  신호와 통합테스트 신뢰도를 함께 본다.
+- QA-AIERA-004: 편향은 검증 축이다. 분석·백테스트를 신뢰하기 전 생존편향·
+  룩어헤드·데이터 스누핑·과적합을 점검 — AI 생성 evidence 에도 동일 적용.

@@ -69,3 +69,19 @@ Return partial when evidence is only:
 - a GitHub/PR PASS used as SFS Gate 3 or Gate 6 replacement;
 - performance, security, or accessibility claims without a measurement or
   explicit N/A waiver.
+
+## AI-Era Closed-Loop Evidence
+
+Review-lens prompts distilled from 2026-05 practitioner talks. Discussion
+checks, not hard rules; cited claims are speaker-time assertions.
+
+- Closed loop over open loop: a decision and its outcome should land as a
+  learnable artifact (decision log, PROGRESS row, evidence ledger), not vanish
+  in chat. An open loop — decide, act, forget — is the anti-pattern; durable
+  decision+result records are what make the next pass smarter.
+- Spec and verification are human-owned; implementation is AI-owned. In an
+  "AI software factory", the scarce human inputs are the success definition
+  (spec/AC) and the verification gate — reaffirms spec-first + Gate evidence.
+- "Make the company queryable": durable, structured evidence is what lets an
+  operator (or agent) later query past decisions and results — the operating
+  rationale for keeping evidence durable rather than ephemeral.

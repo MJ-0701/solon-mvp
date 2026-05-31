@@ -145,3 +145,22 @@ matching ids and keep the verification surface proportional to blast radius.
 - QA-GAP-006: Release confidence report template.
 - QA-GAP-007: Exploratory testing charter templates.
 - QA-GAP-008: Security QA checklist for auth, PII, and secret exposure.
+
+## QA-AIERA - AI-Era Verification Lens
+
+Review-lens prompts distilled from 2026-05 practitioner talks. Discussion
+checks for AI-assisted verification, not hard rules; cited claims are
+speaker-time assertions.
+
+- QA-AIERA-001: Verifier must not be the author. Have a separate agent (or pass)
+  challenge/refute the implementing agent's claims; independent cross-check
+  beats self-attestation. Pairs with the self-CPO/cross-CPO gate intent.
+- QA-AIERA-002: Treat "abstain when unsure" as a quality signal. An agent that
+  refuses or asks rather than guessing on a high-risk surface is safer than one
+  that silently produces a plausible-but-wrong result.
+- QA-AIERA-003: At scale, a green boolean ("all tests pass") loses meaning when
+  the suite is huge or AI-generated. Consider statistical/sampled quality
+  signals and flag integration-test confidence, not just pass/fail count.
+- QA-AIERA-004: Bias is a verification axis. Before trusting an analysis or
+  backtest, check survivorship, look-ahead, data-snooping, and overfitting —
+  the same discipline applies to AI-produced evidence.

@@ -97,3 +97,18 @@ SFS 는 그 판단을 AI 가 다시 쓸 수 있는 용어, 규칙, 휴리스틱,
 - 규칙을 실행하는 example/counterexample fixture 또는 review prompt.
 - Verification command/result, dry-run transcript excerpt, reviewer verdict.
 - shared-public, paid, cross-team publication 에 대한 human approval/waiver.
+
+## AI 시대 해자 노트 (AI-Era Moat Notes)
+
+2026-05 실무 강연에서 추린 review-lens 프롬프트. hard rule 이 아닌 토의용
+체크이며, 인용 주장은 강연 시점 주장이다.
+
+- "도메인 지식 > 코딩": AI 가 generic 구현을 평준화할수록 희소한 입력은
+  *무엇을* *왜* 만드는지 아는 것이다. plan 이 AI 코드작성에 기댈 때, 그 뒤의
+  도메인 판단이 암묵으로 남지 않고 재사용 asset 으로 포착됐는지 점검한다.
+- 공개정보 천장 = 비공개 데이터 가치: 공개정보로 학습한 AI 는 운영자의 고유·
+  비공개 데이터나 어렵게 얻은 알파에 닿지 못한다. 사용자 고유의 사적 지식·
+  데이터를 컴파일·보호할 asset 으로 취급한다.
+- 노하우 자산화: 반복 작업과 craft 판단을 재사용 가능한 skill·프롬프트 팩·
+  checklist·review lens 로 묶어, 공유 전문성을 일회성 chat 이 아니라 지속
+  레버리지(및 평판)로 전환한다.

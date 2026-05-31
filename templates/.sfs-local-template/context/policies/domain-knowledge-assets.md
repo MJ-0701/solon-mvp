@@ -116,3 +116,20 @@ asset, create a new one, or mark a concrete gap/waiver.
 - Example/counterexample fixture or review prompt that exercises the rule.
 - Verification command/result, dry-run transcript excerpt, or reviewer verdict.
 - Human approval/waiver for shared-public, paid, or cross-team publication.
+
+## AI-Era Moat Notes
+
+Review-lens prompts distilled from 2026-05 practitioner talks. Discussion
+checks, not hard rules; cited claims are speaker-time assertions.
+
+- "Domain knowledge over coding": as AI evens out generic implementation, the
+  scarce input is knowing *what* to build and *why*. When a plan leans on
+  AI to write code, check that the domain judgment behind it is captured as a
+  reusable asset, not left tacit.
+- Public-data ceiling = private-data value: AI trained on public information
+  cannot reach an operator's proprietary, non-public data or hard-won alpha.
+  Treat the user's own private knowledge and data as the asset worth compiling
+  and protecting.
+- Asset-ize the know-how: package repeated work and craft judgment into
+  reusable skills, prompt packs, checklists, or review lenses — turning shared
+  expertise into durable leverage (and reputation) rather than one-off chat.

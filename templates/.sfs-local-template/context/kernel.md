@@ -12,8 +12,7 @@ load_when: ["always", "sfs", "entry"]
 - Shared handoff/history docs live under `docs/solon/<english-workspace>/<yyyyMMdd>/`;
   project-wide Solon reference docs may live under `docs/solon/`.
   `.sfs-local/` is private local workbench state and should remain thin.
-- Obsidian LLM wiki is a recommended companion, not a hard dependency. If `.obsidian/` or `llm-wiki/` exists, treat it as active context: read
-  `llm-wiki/README.md` and `llm-wiki/ddd/README.md` before broad scans, then update the relevant map or gap/waiver when domain, release, tests, or core components change.
+- Obsidian LLM wiki is a recommended companion, not a hard dependency. If `.obsidian/` or `llm-wiki/` exists, treat it as active context: read `llm-wiki/README.md` and `llm-wiki/ddd/README.md` before broad scans, then update the relevant map or gap/waiver when domain, release, tests, or core components change. When docs are weak, use wiki as memory formation, not just migration: reconstruct from code, git history, tests, config, release traces, and user notes with confidence/gaps before broad questions.
 - Host-local tool/skill bundles and user-home folders are external environment,
   not project SSoT, wiki roots, install targets, or migration sources. Do not
   install, clone, scaffold, or promote them while building an Obsidian wiki
@@ -118,6 +117,7 @@ load_when: ["always", "sfs", "entry"]
 - Approved sprint state never overrides a newer handoff or user intent. If
   evidence shows a mismatch, classify mis-scoped work and re-plan or hand off;
   do not ask the user to restate what the available record already proves.
+- Before asking the user to repeat project background, check SFS history, `docs/solon/`, `llm-wiki/`, git history, and any questions/decision ledger. Already-answered facts become evidence; ask again only when a recorded condition says the answer may be stale.
 - DDD/TDD is a product-level engineering floor, not a backend-only topic:
   product behavior changes name domain language, behavior boundaries, and first
   evidence before worker handoff. Code still uses DDD-lite boundaries, domain

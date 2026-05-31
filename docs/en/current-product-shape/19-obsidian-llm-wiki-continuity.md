@@ -4,7 +4,7 @@ title: "Obsidian LLM Wiki Continuity"
 visibility: oss-public
 doc_type: product-reference
 language: en
-updated: 2026-05-22
+updated: 2026-05-31
 parent: docs/en/current-product-shape.md
 summary: "Obsidian LLM Wiki Continuity"
 load_when: "Read when docs/en/current-product-shape.md routes to this section."
@@ -22,16 +22,33 @@ design, DDD/TDD method, tests, CI, release paths, and durable domain terms.
 For an existing project, `sfs adopt` may recommend a by-reference wiki migration:
 keep the original docs as source truth, index the important docs/components, and
 start the next real sprint by reading the wiki map before broad repo scans.
+If the project never had a real documentation system, the same flow becomes
+memory formation: SFS reconstructs a minimal project memory from code, git
+commit history, tests, config, release/deploy scripts, issue or PR traces, and
+user notes. Missing docs are treated as a gap to fill, not as a reason to ask
+the user to explain the whole project again.
 
-The operating model is raw data source, wiki, and harness. Raw sources remain in
-docs, code, tests, scripts, captures, or external evidence. The wiki is a
-write-time compiled concept/navigation layer: when new source material or an
-accepted agent answer arrives, SFS expects the durable conclusion to become a
-TopicHub, context map, index entry, or gap note with source links.
+The operating model is Raw / Wiki / Schema (+lint). Raw sources remain in docs,
+code, tests, scripts, captures, or external evidence. The wiki is a write-time compiled concept/navigation layer:
+when new source material or an accepted agent answer arrives, SFS expects the
+durable conclusion to become a TopicHub, context map, index entry, or gap note
+with source links. Schema and lint keep frontmatter, routing, line budgets,
+link checks, and generated indexes from turning the wiki into an uncurated pile.
 
 RAG/vector search can still help, but only as a query-time accelerator over
 curated source/wiki metadata. It should not become a pile of arbitrary chunks
 that future agents must reinterpret from scratch.
+
+At sprint close, `report.md` and `retro.md` remain the authoritative close
+records. `llm-wiki/` is the higher-level memory layer: it should receive only
+durable conclusions such as reusable decisions, domain terms, architecture or
+release contract changes, repeated defects, and follow-up gaps. The wiki links to the close artifacts instead of copying them wholesale.
+
+The minimum useful baseline is a project map, domain or DDD map, decision
+ledger, unknowns/gaps, questions ledger, development guardrails, and bug,
+release, or test memory when those surfaces exist. The questions ledger should
+mark what is already answered and when it may become stale, so agents do not
+ask the user to repeat tacit knowledge that the project has already captured.
 
 If `.obsidian/` or `llm-wiki/` already exists, SFS treats the project as
 Obsidian-applied. Agents should check `llm-wiki/README.md` and

@@ -185,6 +185,24 @@ confirm() {
   esac
 }
 
+confirm_default_yes() {
+  # confirm with recommended default = YES (install). Decline only on explicit n/N.
+  # Under ASSUME_YES (--yes) → install. Mirrors confirm() but flips the default
+  # for "recommended-default + opt-out" surfaces (e.g. the llm-wiki vault).
+  local ans
+  if [ "$ASSUME_YES" -eq 1 ]; then
+    case "${SFS_INSTALL_VERBOSE_CONFIRM:-0}" in
+      1|true|TRUE|yes|YES|on|ON) printf "%s (Y/n) [Y]: y\n" "$1" >&2 ;;
+    esac
+    return 0
+  fi
+  ans=$(prompt "$1 (Y/n)" "Y")
+  case "$ans" in
+    n|N|no|NO) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
 tty_available() {
   [ -t 0 ] && return 0
   [ -r /dev/tty ] && { : < /dev/tty; } 2>/dev/null
@@ -678,6 +696,42 @@ ok "  auth.env.example project copy skip (샘플은 packaged runtime 에만 유�
 
 ok "  work dirs lazy mode: sprints/decisions/queue 는 필요할 때만 생성"
 
+# llm-wiki/ — long-horizon knowledge vault (WMU-2). Project-root, BOTH layouts
+# (it is project-committed knowledge like SFS.md, not a vendored-only runtime
+# module). recommended-default + opt-out + waiver — never hard-block.
+#   - skip-if-exists: an existing vault is preserved.
+#   - SFS_INSTALL_LLM_WIKI=0 → scriptable opt-out (records a waiver, no copy).
+#   - SFS_INSTALL_LLM_WIKI=1 / --yes → install.
+#   - interactive (unset) → confirm_default_yes (default Y).
+LLM_WIKI_SRC="$SOURCE_DIR/templates/.sfs-local-template/llm-wiki"
+if [ -d "$TARGET/llm-wiki" ]; then
+  ok "  llm-wiki/ 기존 유지 (사용자 vault 보호)"
+elif [ -d "$LLM_WIKI_SRC" ]; then
+  _wiki_decision=""
+  case "${SFS_INSTALL_LLM_WIKI:-}" in
+    0|false|FALSE|no|NO|off|OFF) _wiki_decision="decline" ;;
+    1|true|TRUE|yes|YES|on|ON)  _wiki_decision="install" ;;
+  esac
+  if [ -z "$_wiki_decision" ]; then
+    if confirm_default_yes "  llm-wiki/ 장기 지식 vault skeleton 을 설치할까요? (수동 유지, generator 미동반)"; then
+      _wiki_decision="install"
+    else
+      _wiki_decision="decline"
+    fi
+  fi
+  if [ "$_wiki_decision" = "install" ]; then
+    mkdir -p "$TARGET/llm-wiki"
+    cp -R "$LLM_WIKI_SRC"/. "$TARGET/llm-wiki/" 2>/dev/null || true
+    ok "  llm-wiki/ 설치 (README + 00-llm-retrieval-guide + _FRONTMATTER + ddd/ + bug-reports/; 수동 유지)"
+  else
+    mkdir -p "$TARGET/.sfs-local"
+    printf 'declined_at=%s\nreason=user-opt-out-at-install\nnote=re-run `sfs init` or copy templates/.sfs-local-template/llm-wiki/ to add the vault later.\n' \
+      "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$TARGET/.sfs-local/llm-wiki.waiver"
+    ok "  llm-wiki/ 설치 생략 — waiver 기록 (.sfs-local/llm-wiki.waiver)"
+  fi
+  unset _wiki_decision
+fi
+
 if [ "$INSTALL_LAYOUT" = "vendored" ]; then
   # context/ — short, routed agent context modules. Thin layout keeps these in
   # the global runtime so the consumer project only shows product state and
@@ -835,6 +889,7 @@ layout:          $INSTALL_LAYOUT
 .sfs-local/:     private local state (${C_BOLD}gitignored by default; 기존 산출물은 보존됨${C_RESET})
 공통 지침:       SFS.md
 런타임 어댑터:   CLAUDE.md / AGENTS.md / GEMINI.md
+지식 vault:      $([ -d "$TARGET/llm-wiki" ] && echo "llm-wiki/ (장기 지식 — 수동 유지, generator 미동반)" || echo "llm-wiki/ 생략 (SFS_INSTALL_LLM_WIKI=0 / waiver)")
 Entry 1급:       $ENTRY_HINT
 Model profiles: .sfs-local/model-profiles.yaml (runtime=$MODEL_RUNTIME, policy=$MODEL_POLICY)
 Agent opt-in:    sfs agent install claude|gemini|codex|all

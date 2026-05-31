@@ -34,6 +34,10 @@ from the user's request and available project context.
 Do not turn these fields into ceremony. Infer missing pieces from nearby
 evidence when safe; ask only the smallest blocking question when the missing
 piece would change product meaning, scope, owner decision, or artifact shape.
+For documentation-poor projects, nearby evidence includes code structure, tests,
+config, git history, release/deploy scripts, and issue/PR traces. The agent must
+form a minimal known/unknown map before asking the user to re-explain broad
+project context.
 
 ## Work-Size Routing
 
@@ -45,6 +49,10 @@ Classify the work before choosing how much SFS machinery to activate.
 - Repeated work: promote stable goal/material/format rules into SFS project
   memory, `SFS.md`, `docs/solon/`, or `llm-wiki/` so the next request can be
   short and still grounded.
+- Memory-formation work: when a project lacks a documentation system, use
+  `llm-wiki/` to create the first durable project memory from evidence. Record
+  project map, domain terms, decision ledger, unknowns/gaps, questions ledger,
+  and guardrails before feature development depends on unstated assumptions.
 - Batch workspace work: when the user provides a folder or many files, preserve
   raw inputs, process each source separately, and create the requested aggregate
   artifact such as a master table, index, status report, or owner/action rollup.
@@ -64,6 +72,8 @@ records the durable contract and evidence, not the vendor brand.
   to per-source outputs?
 - Did the agent ask only blocking questions instead of making the user restate
   context already available in SFS/wiki/docs?
+- For documentation-poor projects, did the agent check code/git/tests/config
+  before broad ask-back, and did it record already-answered facts?
 
 ## Evidence
 
@@ -71,4 +81,6 @@ records the durable contract and evidence, not the vendor brand.
 - Links to materials, wiki maps, source folders, or raw inputs.
 - Output artifact path and format.
 - For repeated work, updated memory/wiki/docs or a recorded gap/waiver.
+- For memory-formation work, a project map, decision/questions ledger, and
+  unknowns/gaps with source links and confidence.
 - For batch work, per-source output plus master index/table/report.

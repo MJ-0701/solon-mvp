@@ -66,3 +66,19 @@ SFS 자체 변경에는 실제 프로젝트 probe 를 선호한다.
 - 같은 generator 의 self-attestation 만 있는 경우
 - GitHub/PR PASS 를 SFS Gate 3/6 대체로 쓰는 경우
 - performance/security/accessibility 주장이 측정 또는 N/A waiver 없이 있는 경우
+
+## AI 시대 폐쇄루프 증거 (AI-Era Closed-Loop Evidence)
+
+2026-05 실무 강연에서 추린 review-lens 프롬프트. hard rule 이 아닌 토의용
+체크이며, 인용 주장은 강연 시점 주장이다.
+
+- open loop 보다 closed loop: 결정과 그 결과는 chat 에서 사라지지 말고 학습
+  가능한 아티팩트(decision log, PROGRESS row, evidence ledger)로 남아야 한다.
+  "결정→실행→망각"의 open loop 가 안티패턴이며, durable 한 결정+결과 기록이
+  다음 pass 를 똑똑하게 만든다.
+- 스펙·검증은 사람 소유, 구현은 AI 소유: "AI 소프트웨어 팩토리"에서 희소한
+  사람 입력은 성공 정의(spec/AC)와 검증 게이트다 — spec-first + Gate evidence
+  재확인.
+- "회사를 쿼리 가능하게": durable·구조화된 증거가 있어야 운영자(또는 agent)가
+  이후 과거 결정·결과를 쿼리할 수 있다 — 증거를 일회성 아닌 durable 로 두는
+  운영 근거.

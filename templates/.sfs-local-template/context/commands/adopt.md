@@ -20,6 +20,16 @@ Rules:
   migration by reference after `adopt --apply`: preserve source docs as SSoT,
   create `llm-wiki/` maps/indexes, and start the next real sprint with that
   wiki as retrieval context. Do not block adoption if the user declines.
+- For projects without a real documentation system, recommend Obsidian LLM wiki
+  memory formation after `adopt --apply`: reconstruct tacit knowledge from
+  code, git commit history, tests, config, release/deploy scripts, issue/PR
+  traces, and user notes. Create only a minimal baseline: project map,
+  domain/DDD map, decision ledger, unknowns/gaps, questions ledger, dev
+  guardrails, and bug/release/test memory.
+- Before asking broad project questions during adoption, check existing docs,
+  commit history, wiki/domain maps, and the questions ledger. Ask only what the
+  evidence cannot prove and mark answered facts so future agents do not ask the
+  user to repeat the same explanation.
 - Retrofit adoption does not move arbitrary project code. If DDD is missing,
   the next real sprint should choose one product behavior slice, write
   characterization/failing/smoke evidence first, then move that slice behind
@@ -54,3 +64,6 @@ Rules:
 - After apply, the next useful move is usually `sfs start "<first real cleanup slice>"`, then Gate 2 (Brainstorm) if scope is still fuzzy.
 - If wiki migration is accepted, the cleanup slice may be
   `sfs start "Obsidian LLM wiki baseline"` before feature implementation.
+- If documentation is missing or weak, name the slice
+  `sfs start "Obsidian LLM wiki memory formation"` and treat code/git/tests as
+  evidence, not as final semantic truth without confidence/gap notes.

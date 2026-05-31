@@ -1,4 +1,26 @@
-## [Unreleased]
+## [0.8.4] - 2026-05-31
+
+> **llm-wiki Wiki 계층을 제품이 직접 깔고(WMU-2), retro-close 가 그 vault 로 의미를 컴파일한다(codex/sfs-wiki-compile-flow).**
+
+### Added
+
+- **retro-close wiki-compile 계약 + llm-wiki memory-formation 계약 (codex/sfs-wiki-compile-flow).**
+  `sfs retro --close` 가 sprint 종료 시 결정론적 **wiki-compile 체크리스트**를
+  쓴다(`sfs_write_wiki_compile_checklist`, `sfs-common.sh`): report/retro 는 sprint
+  근거를 보존하고 **llm-wiki 에는 durable 한 의미만** 승격한다. shared-knowledge
+  promotion·삭제·민감자료 이동·source-truth 충돌은 human review 필수(자동 금지).
+  obsidian-llm-wiki 정책(.md/.ko.md) + report/retro sprint-template + `adopt.md` +
+  ai-work-intake-routing + kernel 에 계약 명문화. 회귀 잠금:
+  `tests/test-sfs-retro-wiki-compile-contract.sh` + `test-sfs-wiki-memory-formation-contract.sh`.
+- **llm-wiki 지식 vault skeleton — `sfs init` / `sfs upgrade` 가 직접 materialize (WMU-2).**
+  `templates/.sfs-local-template/llm-wiki/` 에 generic 빈 수동 skeleton(README +
+  00-llm-retrieval-guide + _FRONTMATTER + ddd/README + bug-reports/README)을 추가.
+  Raw/Wiki/Schema 모델의 **Wiki** 계층을 모든 consumer 프로젝트가 받는다. 프로젝트
+  루트 `llm-wiki/` 에 설치(양 layout 무조건), **수동 유지·generator 미동반**.
+  recommended-default + opt-out(`SFS_INSTALL_LLM_WIKI=0` → `.sfs-local/llm-wiki.waiver`)
+  + skip-if-exists. 기존 consumer 도 `sfs upgrade` 시 받는다(init-only 아님). 회귀
+  잠금: `tests/test-wiki-init-scaffold.sh`(allowlist+golden manifest + R1 private
+  denylist + 라이브 init/opt-out/skip/upgrade). VERSION bump 은 다음 릴리스에서 일괄.
 
 ## [0.8.3] - 2026-05-31
 

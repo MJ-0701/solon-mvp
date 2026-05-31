@@ -1752,6 +1752,58 @@ sfs_write_cycle_end_division_recommendations() {
   return 0
 }
 
+sfs_render_wiki_compile_checklist_body() {
+  local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
+  local report_path="${3:-}" retro_path="${4:-}"
+  local wiki_dir="${SFS_OBSIDIAN_WIKI_DIR:-llm-wiki}"
+  local has_obsidian=0 has_wiki=0 state="not-applied"
+
+  [[ -d ".obsidian" ]] && has_obsidian=1
+  [[ -d "${wiki_dir}" ]] && has_wiki=1
+
+  if [[ "${has_wiki}" -eq 1 ]]; then
+    state="active"
+  elif [[ "${has_obsidian}" -eq 1 ]]; then
+    state="gap"
+  fi
+
+  cat <<EOF
+- status: ${state}
+- sprint_records: \`${report_path}\` and \`${retro_path}\` remain the close evidence SSoT; do not copy them wholesale into the wiki.
+- compile_to_wiki: when durable, update \`${wiki_dir}/\` TopicHubs, DDD maps, glossary/ubiquitous-language, history map, bug reports, or a gap note.
+- compile_only: decisions, domain terms, architecture/release/test contract changes, recurring defects, and follow-up gaps.
+- human_review: shared knowledge promotion, deletion, sensitive/private material movement, and conflict resolution need human review before merge.
+- generated_at: ${ts} (auto) — edit outside the marker block to preserve manual notes
+EOF
+}
+
+sfs_write_wiki_compile_checklist() {
+  local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
+  local report_path="${3:-${SFS_SPRINTS_DIR}/${sid}/report.md}"
+  local retro_path="${4:-${SFS_SPRINTS_DIR}/${sid}/retro.md}"
+  local wiki_dir="${SFS_OBSIDIAN_WIKI_DIR:-llm-wiki}"
+
+  # Keep non-wiki projects quiet. If .obsidian exists without llm-wiki, write
+  # the gap so the close artifact records why long-horizon compile was skipped.
+  [[ -d ".obsidian" || -d "${wiki_dir}" ]] || return 0
+
+  local tmp_dir="${SFS_LOCAL_DIR}/tmp"
+  mkdir -p "${tmp_dir}" 2>/dev/null || true
+  local tmp_file
+  tmp_file="$(mktemp "${tmp_dir}/wiki-compile.${sid}.XXXXXX" 2>/dev/null || mktemp "/tmp/wiki-compile.${sid}.XXXXXX")"
+  sfs_render_wiki_compile_checklist_body "${sid}" "${ts}" "${report_path}" "${retro_path}" > "${tmp_file}"
+
+  if [[ -f "${report_path}" ]]; then
+    sfs_upsert_marked_section_with_heading "${report_path}" "wiki-compile-checklist" "## Wiki Compile Checklist" "${tmp_file}"
+  fi
+  if [[ -f "${retro_path}" ]]; then
+    sfs_upsert_marked_section_with_heading "${retro_path}" "wiki-compile-checklist" "## Wiki Compile Checklist" "${tmp_file}"
+  fi
+
+  rm -f "${tmp_file}" 2>/dev/null || true
+  return 0
+}
+
 # ─────────────────────────────────────────────────────────────────────
 # USAGE STUBS (consumer scripts override / call locally)
 # ─────────────────────────────────────────────────────────────────────

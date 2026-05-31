@@ -48,3 +48,12 @@ closed_at: ""
 ## 7. 다음
 
 -
+
+## 8. Wiki compile
+
+<!-- solon:wiki-compile-checklist:start -->
+- status: pending
+- sprint_records: 이 report/retro 는 sprint close evidence SSoT 로 유지한다.
+- compile_to_wiki: durable decision, domain term, architecture/release/test contract, recurring defect, follow-up gap 만 `llm-wiki/` 로 승격한다.
+- duplication_guard: report/retro 전문을 wiki 에 복사하지 않는다.
+<!-- solon:wiki-compile-checklist:end -->
