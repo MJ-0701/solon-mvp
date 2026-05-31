@@ -267,11 +267,13 @@ context_list() {
     echo "# ${kind}"
     local out=""
     if [[ -d "${runtime_ctx}/${kind}" ]]; then
-      out+="$(find "${runtime_ctx}/${kind}" -maxdepth 1 -name '*.md' -printf '%f\n' 2>/dev/null || true)"
+      # BSD/GNU find 호환: `-printf` 는 GNU 전용이라 macOS BSD-find 에서 무음
+      # 실패(빈 출력)한다. portable 하게 경로를 찾고 sed 로 basename 만 남긴다.
+      out+="$(find "${runtime_ctx}/${kind}" -maxdepth 1 -name '*.md' 2>/dev/null | sed 's#.*/##' || true)"
       [[ -n "${out}" ]] && out+=$'\n'
     fi
     if [[ -d "${local_ctx}/${kind}" ]]; then
-      out+="$(find "${local_ctx}/${kind}" -maxdepth 1 -name '*.md' -printf '%f\n' 2>/dev/null || true)"
+      out+="$(find "${local_ctx}/${kind}" -maxdepth 1 -name '*.md' 2>/dev/null | sed 's#.*/##' || true)"
     fi
     if [[ -n "${out}" ]]; then
       printf '%s\n' "${out}" \

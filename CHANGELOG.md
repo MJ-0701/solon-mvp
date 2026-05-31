@@ -1,5 +1,33 @@
 ## [Unreleased]
 
+## [0.8.3] - 2026-05-31
+
+> **`sfs context list` 의 macOS BSD-find 무음 실패 잠금 (bash 호환, release-policy #1).**
+
+`bin/sfs` 의 `_context_list_section` 이 `find ... -printf '%f\n'` 를 썼는데
+`-printf` 는 **GNU-find 전용** primary 라 macOS BSD-find 에는 없다. macOS 에서는
+`find` 가 무음 실패(빈 출력)해서 `sfs context list` 가 routed 모듈을 하나도
+나열하지 못했고, `test-context-list-command.sh` 가 macOS 에서만 fail 하는
+"run-all 139/1" chip 이 여러 WU 에 걸쳐 반복됐다. portable 한
+`find ... | sed 's#.*/##'` 로 교체해 BSD/GNU 양쪽에서 동일 출력을 보장한다.
+정적 grep 음성잠금 테스트를 추가해 macOS 없이도(Linux CI 에서) 재발을 잡는다 —
+macOS-only green 위험을 차단.
+
+### Fixed
+
+- **`sfs context list` — BSD-find 이식성** — `bin/sfs` 의 두 `find ... -printf`
+  호출을 `find ... -maxdepth 1 -name '*.md' | sed 's#.*/##'` 로 교체. macOS
+  BSD-find 에서 `context list` 가 top-level/commands/policies 모듈을 정상
+  나열한다. 출력은 Linux GNU-find 결과와 byte-identical (검증 완료).
+
+### Tests
+
+- **test-find-bsd-portability.sh** — 출하 bash 트리(`bin/`/`templates/`/
+  `scripts/`)에 GNU 전용 find primary(`-printf`/`-regextype`)가 주석 아닌 코드로
+  들어오면 fail 하는 정적 음성잠금. 플랫폼 비의존(grep 기반)이라 Linux CI 도
+  결함을 잡아 macOS-only green 위험을 차단한다. `test-context-list-command.sh`
+  는 fix 후 macOS 에서 통과한다(headline).
+
 ## [0.8.2] - 2026-05-31
 
 > **서브에이전트 capsule 계약에 "검증자 ≠ 저작자" 를 명문화 (WU-E B5).**
