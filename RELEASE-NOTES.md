@@ -7,6 +7,22 @@
 
 ---
 
+## 0.8.8
+
+docs/solon GC 가 report/retro 계승 후보를 llm-wiki 로 먼저 남기고 정리합니다.
+
+체감 변화:
+
+- `sfs tidy --all --wiki-promote --apply` 로 오래 남는 report/retro 를 바로 지우지
+  않고, 먼저 `llm-wiki/promotion-candidates/` 에 계승 후보를 만듭니다.
+- 후보 노트는 원본 report/retro 링크, 검토 체크리스트, 위키로 승격할 교훈·용어·
+  도메인 맵·결정 placeholder 를 담습니다. 원본의 긴 회고/보고 문장을 통째로
+  복사하지 않아서 wiki 가 다시 쓰레기통이 되는 일을 줄입니다.
+- 원본 report/retro 에도 후보 링크가 남아, 나중에 compact/archive 하더라도 어떤
+  지식이 wiki 승격 검토 대상으로 이어졌는지 추적할 수 있습니다.
+
+---
+
 ## 0.8.7
 
 llm-wiki 코어 진입 mechanic 으로 목적 있는 Raw 수집과 관측-먼저 프로젝트 맥락 부트스트랩을 더했습니다.

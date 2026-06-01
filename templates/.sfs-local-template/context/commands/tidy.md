@@ -25,6 +25,10 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
   the native-language commit message rule. Do not force English when the work
   conversation is Korean or another non-English language.
 - `tidy --apply` archives workbench only after report evidence exists.
+- `tidy --wiki-promote` is the docs/solon GC pre-pass: before compacting or
+  archiving, create source-linked `llm-wiki/promotion-candidates/` notes from
+  report/retro pairs. It promotes candidates, not conclusions; source records
+  stay in `docs/solon/` and human review still decides actual wiki updates.
 - Apply `policies/deprecation-and-migration.md`: every visible leftover needs a
   replacement/handoff reason, cold archive path, or explicit user decision.
   Advisory cleanup may wait; compulsory cleanup needs risk such as stale state,

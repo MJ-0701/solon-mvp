@@ -89,6 +89,10 @@ Obsidian is a recommended companion for SFS projects because it is free, local-f
 - `llm-wiki/` is the long-horizon memory layer. On `sfs retro` close, compile only durable meaning into the wiki: reused decisions, domain terms, architecture/release/test contract changes, recurring defects, and follow-up gaps.
 - Do not copy the full report or retro into the wiki. Link to source artifacts and write the smallest useful TopicHub/map/glossary/bug-report update instead.
 - If `.obsidian/` or `llm-wiki/` is present, the close artifact should include a wiki compile checklist or a gap/waiver. If no wiki surface exists, ordinary `docs/solon/` report/retro artifacts remain sufficient.
+- Periodic docs GC should run **promote first, compact/archive second**.
+  `sfs tidy --wiki-promote` may create `llm-wiki/promotion-candidates/` notes that
+  link to report/retro sources and list promotion roots; it must not delete the
+  source records or copy their full prose into the wiki.
 - Shared knowledge promotion, deletion, sensitive/private material movement, and conflicting wiki/source-truth changes still require human review.
 
 ## Governance
@@ -112,6 +116,8 @@ Obsidian is a recommended companion for SFS projects because it is free, local-f
   instead of being left as query-time RAG residue?
 - On sprint close, did report/retro stay as close evidence while only durable
   meaning was compiled into the wiki?
+- During docs GC, did promotion candidates get created before archive/compact,
+  with source links and without copying report/retro wholesale?
 - If RAG/vector indexing is present, does it index curated wiki/source metadata
   rather than replacing the wiki or source truth?
 - Did the agent avoid treating host-local tools, skills, or user-home folders as

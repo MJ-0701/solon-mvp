@@ -1,5 +1,22 @@
 ## [Unreleased]
 
+## [0.8.8] - 2026-06-01
+
+> **docs/solon GC 가 report/retro 계승 후보를 llm-wiki 로 먼저 남기고 정리합니다.**
+
+### Added
+
+- **`sfs tidy --wiki-promote` docs GC pre-pass.**
+  `docs/solon/**/report.md` and `retro.md` can now be promoted into
+  `llm-wiki/promotion-candidates/` before cleanup. The candidate keeps source
+  report/retro links, a human-review checklist, and placeholders for durable
+  lessons, glossary terms, domain maps, and decisions without copying raw
+  sprint prose wholesale.
+- **Source marker + idempotent reruns.**
+  Apply mode upserts a `Wiki Promotion Candidate` block back into each source
+  report/retro. Re-running the command reuses the same deterministic candidate
+  path and marker instead of multiplying cleanup notes.
+
 ## [0.8.7] - 2026-06-01
 
 > **llm-wiki 코어 진입 mechanic 으로 목적 있는 Raw 수집과 관측-먼저 프로젝트 맥락 부트스트랩을 추가.**

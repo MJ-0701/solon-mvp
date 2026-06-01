@@ -124,6 +124,9 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
   TopicHub/map/glossary/bug-report 업데이트만 남긴다.
 - `.obsidian/` 또는 `llm-wiki/` 가 있으면 close artifact 에 wiki compile checklist 또는 gap/waiver 를
   남긴다. wiki 표면이 없으면 일반 `docs/solon/` report/retro 산출물만으로 충분하다.
+- 주기적 docs GC 는 **먼저 승격 후보를 만들고, 그 다음 compact/archive** 한다.
+  `sfs tidy --wiki-promote` 는 report/retro source 를 링크하는 `llm-wiki/promotion-candidates/`
+  후보 노트를 만들 수 있지만, source record 를 삭제하거나 report/retro 전문을 wiki 에 복사하지 않는다.
 - shared knowledge 승격, 삭제, 민감/private material 이동, wiki/source-truth 충돌 해결은 사람 review 를
   거친다.
 
@@ -144,6 +147,8 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
 - 새 source material 이 query-time RAG residue 로 남지 않고 TopicHub/map/gap note 로 write-time compile
   되었는가?
 - sprint close 시 report/retro 는 close evidence 로 남기고 durable meaning 만 wiki 로 컴파일했는가?
+- docs GC 때 archive/compact 전에 source link 가 있는 promotion candidate 를 만들었고,
+  report/retro 전문 복사를 피했는가?
 - RAG/vector indexing 이 있다면 wiki/source truth 를 대체하지 않고 curated wiki/source metadata 를
   색인하는가?
 - agent 가 host-local tool, skill, user-home folder 를 wiki/project SSoT, install target,

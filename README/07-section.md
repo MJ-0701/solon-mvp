@@ -30,6 +30,7 @@ load_when: "Read when README.md routes to this section."
 | `sfs commit apply --group <name>` | 선택 그룹을 commit 하고 현재 branch push |
 | `sfs upgrade` | 프로젝트의 Solon 파일과 흐름 최신화 |
 | `sfs tidy [--apply]` | 끝난 작업의 임시 기록 정리 |
+| `sfs tidy --all --wiki-promote [--apply]` | `docs/solon` report/retro 에서 llm-wiki 계승 후보를 먼저 만들고 정리 |
 
 Agent 에게 "배포해줘" 라고 말하면 단순 publish 가 아니라 "배포 프로세스 쭉 진행해줘" 로
 해석합니다. 이 흐름은 release readiness check, 관련 테스트, review/검수, release cut,
@@ -41,5 +42,8 @@ archive/evidence path 만 남기세요.
 
 `sfs ingest` 는 원문을 가져오거나 요약하지 않습니다. 먼저 왜 이 source 를 모으는지와
 `article` / `youtube` / `podcast` / `book` / `research` 중 어느 raw schema 인지만 기록합니다.
+
+`sfs tidy --wiki-promote` 는 report/retro 를 지우는 명령이 아닙니다. `llm-wiki/promotion-candidates/`
+에 source-linked 후보 노트를 만들고, 실제 TopicHub/glossary/DDD map 승격은 사람이 검토한 뒤 합니다.
 
 ---

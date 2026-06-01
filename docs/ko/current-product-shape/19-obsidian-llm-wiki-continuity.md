@@ -42,6 +42,11 @@ sprint close 시 `report.md` 와 `retro.md` 는 authoritative close record 로 �
 그 위의 memory layer 이며, 재사용될 결정, domain term, architecture/release contract 변화, 반복 결함,
 follow-up gap 같은 durable conclusion 만 받습니다. wiki 는 close artifact 전문을 복사하지 않고 링크합니다.
 
+주기적 정리에서는 `sfs tidy --wiki-promote` 가 docs GC pre-pass 로 동작합니다.
+`docs/solon` report/retro pair 를 스캔해 source link 와 promotion root 를 가진
+`llm-wiki/promotion-candidates/` 노트를 만들고, source artifact 에도 후보 링크를 되꽂습니다.
+source record 를 삭제하지 않고 report/retro 전문도 wiki 로 복사하지 않습니다.
+
 최소 baseline 은 project map, domain 또는 DDD map, decision ledger, unknowns/gaps, questions ledger,
 dev guardrails, 그리고 해당 표면이 있으면 bug/release/test memory 입니다. questions ledger 는 이미 답한
 내용과 다시 물어도 되는 조건을 기록해서 agent 가 사용자의 암묵지 설명을 반복 질문하지 않게 합니다.

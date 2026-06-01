@@ -49,6 +49,12 @@ records. `llm-wiki/` is the higher-level memory layer: it should receive only
 durable conclusions such as reusable decisions, domain terms, architecture or
 release contract changes, repeated defects, and follow-up gaps. The wiki links to the close artifacts instead of copying them wholesale.
 
+For periodic cleanup, `sfs tidy --wiki-promote` acts like a docs GC pre-pass:
+it scans `docs/solon` report/retro pairs, creates
+`llm-wiki/promotion-candidates/` notes with source links and promotion roots,
+and links those candidates back from the source artifacts. It does not delete
+the source records and does not copy the full report or retro into the wiki.
+
 The minimum useful baseline is a project map, domain or DDD map, decision
 ledger, unknowns/gaps, questions ledger, development guardrails, and bug,
 release, or test memory when those surfaces exist. The questions ledger should

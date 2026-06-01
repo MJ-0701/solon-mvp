@@ -19,6 +19,7 @@ usage_tidy() {
 Usage:
   /sfs tidy [--sprint <id-or-ref>] [--apply]
   /sfs tidy --all [--apply]
+  /sfs tidy --all --wiki-promote [--apply]
 
 Clean up completed sprint workbench docs without leaving loose hidden files.
   - Default is dry-run; it prints what would be archived.
@@ -45,6 +46,9 @@ Clean up completed sprint workbench docs without leaving loose hidden files.
     locations. events.jsonl is kept only while it backs an active sprint/current
     state; historical closed-sprint events are pruned after report/archive
     evidence exists.
+  - --wiki-promote scans docs/solon report/retro pairs before cleanup and
+    creates source-linked llm-wiki promotion candidates. It never copies the
+    full report/retro into the wiki and never deletes source records.
 
 Recommended close flow:
   1. /sfs tidy --sprint <id-or-ref>          # inspect legacy state
@@ -396,6 +400,211 @@ tidy_rehome_flat_shared_handoffs() {
   printf '%s %s\n' "${moved}" "${skipped}"
 }
 
+tidy_wiki_dir() {
+  printf '%s\n' "${SFS_OBSIDIAN_WIKI_DIR:-llm-wiki}"
+}
+
+tidy_wiki_promotion_source_dirs() {
+  local now="${1:?timestamp required}" mode="${2:-selected}" sid report retro dir
+  [[ -d "${SFS_SHARED_DOCS_DIR}" ]] || return "${SFS_EXIT_OK}"
+  if [[ "${mode}" == "all" ]]; then
+    find "${SFS_SHARED_DOCS_DIR}" -type f \( -name report.md -o -name retro.md \) -print 2>/dev/null \
+      | while IFS= read -r path; do dirname "${path}"; done \
+      | sort -u
+    return "${SFS_EXIT_OK}"
+  fi
+
+  while IFS= read -r sid; do
+    [[ -n "${sid}" ]] || continue
+    report="$(sfs_shared_sprint_doc_path "${sid}" "${now}" report)"
+    retro="$(sfs_shared_sprint_doc_path "${sid}" "${now}" retro)"
+    dir="$(dirname "${report}")"
+    if [[ -f "${report}" || -f "${retro}" ]]; then
+      printf '%s\n' "${dir}"
+    fi
+  done <<< "${TARGETS:-}" | sort -u
+}
+
+tidy_wiki_promotion_count() {
+  local now="${1:?timestamp required}" mode="${2:-selected}"
+  tidy_wiki_promotion_source_dirs "${now}" "${mode}" | sed '/^[[:space:]]*$/d' | wc -l | tr -d '[:space:]'
+}
+
+tidy_wiki_source_meta() {
+  local dir="${1:?source dir required}" date_dir feature_dir subdomain_dir domain_dir parent_of_domain
+  local domain subdomain feature
+  date_dir="$(basename "${dir}")"
+  case "${date_dir}" in
+    [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]) ;;
+    *) date_dir="$(date +%Y%m%d 2>/dev/null || date -u +%Y%m%d)" ;;
+  esac
+
+  feature_dir="$(dirname "${dir}")"
+  subdomain_dir="$(dirname "${feature_dir}")"
+  domain_dir="$(dirname "${subdomain_dir}")"
+  parent_of_domain="$(dirname "${domain_dir}")"
+
+  if [[ "${subdomain_dir}" == "${SFS_SHARED_DOCS_DIR}" ]]; then
+    domain="general"
+    subdomain="workspace"
+    feature="$(basename "${feature_dir}")"
+  elif [[ "${parent_of_domain}" == "${SFS_SHARED_DOCS_DIR}" ]]; then
+    domain="$(basename "${domain_dir}")"
+    subdomain="$(basename "${subdomain_dir}")"
+    feature="$(basename "${feature_dir}")"
+  elif [[ "${domain_dir}" == "${SFS_SHARED_DOCS_DIR}" ]]; then
+    domain="$(basename "${subdomain_dir}")"
+    subdomain="general"
+    feature="$(basename "${feature_dir}")"
+  else
+    domain="general"
+    subdomain="workspace"
+    feature="$(basename "${feature_dir}")"
+  fi
+
+  domain="$(sfs_path_segment_from_text "${domain}" "general")"
+  subdomain="$(sfs_path_segment_from_text "${subdomain}" "workspace")"
+  feature="$(sfs_path_segment_from_text "${feature}" "work-slice")"
+  printf '%s\t%s\t%s\t%s\n' "${date_dir}" "${domain}" "${subdomain}" "${feature}"
+}
+
+tidy_render_wiki_promotion_candidate() {
+  local source_dir="${1:?source dir required}" candidate="${2:?candidate required}" now="${3:?timestamp required}"
+  local date_dir domain subdomain feature report retro rel hash doc_id title
+  IFS=$'\t' read -r date_dir domain subdomain feature <<< "$(tidy_wiki_source_meta "${source_dir}")"
+  report="${source_dir}/report.md"
+  retro="${source_dir}/retro.md"
+  rel="${source_dir#./}"
+  hash="$(printf '%s' "${source_dir}" | cksum | awk '{print $1}')"
+  doc_id="wiki-promotion-candidate-${date_dir}-${domain}-${subdomain}-${feature}-${hash}"
+  title="Wiki promotion candidate: ${domain}/${subdomain}/${feature}"
+
+  cat <<EOF
+---
+doc_id: ${doc_id}
+title: "${title}"
+doc_type: wiki-promotion-candidate
+status: candidate
+domain: "${domain}"
+subdomain: "${subdomain}"
+feature: "${feature}"
+source_dir: "${rel}"
+generated_by: "sfs tidy --wiki-promote"
+generated_at: "${now}"
+tags:
+  - llm-wiki
+  - promotion-candidate
+  - docs-gc
+---
+
+# ${title}
+
+This note is a **GC promotion candidate**. Keep the source report/retro as the
+evidence SSoT; promote only durable meaning into TopicHubs, DDD maps, glossary,
+bug memory, or gap notes after human review.
+
+## Source Records
+EOF
+  if [[ -f "${report}" ]]; then
+    printf -- '- report: `%s`\n' "${report#./}"
+  fi
+  if [[ -f "${retro}" ]]; then
+    printf -- '- retro: `%s`\n' "${retro#./}"
+  fi
+  cat <<'EOF'
+
+## Promotion Roots
+
+- [ ] Domain terms or aliases worth adding to `llm-wiki/ddd/`.
+- [ ] Decisions or rejected options that should guide future plans.
+- [ ] Architecture, release, test, or data contract changes.
+- [ ] Recurring defects, regression cases, or operational lessons.
+- [ ] Follow-up gaps that future agents should see before asking the user.
+
+## Do Not Promote
+
+- Full report/retro prose.
+- Command logs, prompt bodies, bridge scratch, or temporary review paths.
+- Unverified guesses that lack source evidence or confidence/gap notes.
+
+## Human Review
+
+- owner: TBD
+- confidence: TBD
+- promoted_to: TBD
+- gaps: TBD
+EOF
+}
+
+tidy_write_wiki_promotion_candidate() {
+  local source_dir="${1:?source dir required}" now="${2:?timestamp required}" wiki_dir="${3:?wiki dir required}"
+  local date_dir domain subdomain feature hash candidate_dir candidate
+  IFS=$'\t' read -r date_dir domain subdomain feature <<< "$(tidy_wiki_source_meta "${source_dir}")"
+  hash="$(printf '%s' "${source_dir}" | cksum | awk '{print $1}')"
+  candidate_dir="${wiki_dir}/promotion-candidates/${domain}"
+  candidate="${candidate_dir}/${date_dir}-${subdomain}-${feature}-${hash}.md"
+  mkdir -p "${candidate_dir}" || return "${SFS_EXIT_PERM}"
+  if [[ ! -f "${candidate}" ]]; then
+    tidy_render_wiki_promotion_candidate "${source_dir}" "${candidate}" "${now}" > "${candidate}" || return "${SFS_EXIT_PERM}"
+    printf 'created\t%s\n' "${candidate}"
+    return "${SFS_EXIT_OK}"
+  fi
+  printf 'existing\t%s\n' "${candidate}"
+}
+
+tidy_mark_wiki_promotion_source() {
+  local file="${1:?source file required}" candidate="${2:?candidate required}" now="${3:?timestamp required}"
+  local tmp_dir tmp_file
+  [[ -f "${file}" ]] || return "${SFS_EXIT_OK}"
+  tmp_dir="${SFS_LOCAL_DIR}/tmp"
+  mkdir -p "${tmp_dir}" 2>/dev/null || true
+  tmp_file="$(mktemp "${tmp_dir}/wiki-promotion-pointer.XXXXXX" 2>/dev/null || mktemp "/tmp/wiki-promotion-pointer.XXXXXX")"
+  cat > "${tmp_file}" <<EOF
+- status: candidate
+- candidate: \`${candidate#./}\`
+- gc_rule: promote durable meaning first; keep this report/retro as source evidence.
+- generated_at: ${now} (auto) — edit outside the marker block to preserve manual notes
+EOF
+  sfs_upsert_marked_section_with_heading "${file}" "wiki-promotion-candidate" "## Wiki Promotion Candidate" "${tmp_file}"
+  rm -f "${tmp_file}" 2>/dev/null || true
+}
+
+tidy_apply_wiki_promotions() {
+  local now="${1:?timestamp required}" mode="${2:-selected}" wiki_dir source_dir status candidate
+  local created=0 existing=0 linked=0 skipped=0 report retro
+  wiki_dir="$(tidy_wiki_dir)"
+  if [[ ! -d "${wiki_dir}" ]]; then
+    printf '0 0 0 missing\n'
+    return "${SFS_EXIT_OK}"
+  fi
+
+  while IFS= read -r source_dir; do
+    [[ -n "${source_dir}" ]] || continue
+    report="${source_dir}/report.md"
+    retro="${source_dir}/retro.md"
+    if [[ ! -f "${report}" && ! -f "${retro}" ]]; then
+      skipped=$((skipped + 1))
+      continue
+    fi
+    IFS=$'\t' read -r status candidate <<< "$(tidy_write_wiki_promotion_candidate "${source_dir}" "${now}" "${wiki_dir}")"
+    if [[ "${status}" == "created" ]]; then
+      created=$((created + 1))
+    else
+      existing=$((existing + 1))
+    fi
+    if [[ -f "${report}" ]]; then
+      tidy_mark_wiki_promotion_source "${report}" "${candidate}" "${now}" || return "${SFS_EXIT_PERM}"
+      linked=$((linked + 1))
+    fi
+    if [[ -f "${retro}" ]]; then
+      tidy_mark_wiki_promotion_source "${retro}" "${candidate}" "${now}" || return "${SFS_EXIT_PERM}"
+      linked=$((linked + 1))
+    fi
+  done < <(tidy_wiki_promotion_source_dirs "${now}" "${mode}")
+
+  printf '%s %s %s active\n' "${created}" "${existing}" "${linked}"
+}
+
 tidy_collapse_non_adopt_archives() {
   local now="${1:?timestamp required}" ids count safe_ts archive_dir archive_file manifest item
   local tar_items=()
@@ -595,6 +804,7 @@ tidy_cleanup_local_residue() {
 SPRINT_ID=""
 ALL=0
 APPLY=0
+WIKI_PROMOTE=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -616,6 +826,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --all)
       ALL=1
+      shift
+      ;;
+    --wiki-promote|--docs-gc)
+      WIKI_PROMOTE=1
       shift
       ;;
     --apply)
@@ -697,6 +911,18 @@ read -r EVENT_PRUNE_COUNT EVENT_KEEP_COUNT EVENT_STATE \
 RESIDUE_COUNT="$(tidy_count_local_residue)"
 ARCHIVE_COLLAPSE_COUNT="$(tidy_non_adopt_archive_count)"
 SHARED_REHOME_COUNT="$(tidy_shared_handoff_rehome_count)"
+WIKI_PROMOTION_MODE="selected"
+[[ "${ALL}" -eq 1 ]] && WIKI_PROMOTION_MODE="all"
+WIKI_PROMOTION_COUNT="0"
+WIKI_PROMOTION_STATE="disabled"
+if [[ "${WIKI_PROMOTE}" -eq 1 ]]; then
+  if [[ -d "$(tidy_wiki_dir)" ]]; then
+    WIKI_PROMOTION_COUNT="$(tidy_wiki_promotion_count "${NOW}" "${WIKI_PROMOTION_MODE}")"
+    WIKI_PROMOTION_STATE="active"
+  else
+    WIKI_PROMOTION_STATE="missing-wiki"
+  fi
+fi
 
 if [[ "${APPLY}" -eq 0 ]]; then
   echo "tidy retention dry-run:"
@@ -712,6 +938,13 @@ if [[ "${APPLY}" -eq 0 ]]; then
   echo "  residue: ${RESIDUE_COUNT} placeholder/broken/empty item(s) would remove"
   echo "  archives: ${ARCHIVE_COLLAPSE_COUNT} non-adopt archive bucket(s) would collapse"
   echo "  shared_docs: ${SHARED_REHOME_COUNT} flat handoff dir(s) would rehome"
+  if [[ "${WIKI_PROMOTE}" -eq 1 ]]; then
+    if [[ "${WIKI_PROMOTION_STATE}" == "missing-wiki" ]]; then
+      echo "  wiki_promotion: skipped (llm-wiki absent)"
+    else
+      echo "  wiki_promotion: ${WIKI_PROMOTION_COUNT} source dir(s) would create/update candidate(s)"
+    fi
+  fi
 fi
 
 # Apply preflight first so --all never half-applies before discovering a
@@ -795,6 +1028,15 @@ if [[ "${APPLY}" -eq 1 ]]; then
   ARCHIVES_COLLAPSED="$(tidy_collapse_non_adopt_archives "${NOW}")"
   SURFACE_CONSOLIDATED="$(tidy_consolidate_surface_cleanup_archives)"
   read -r SHARED_REHOMED SHARED_REHOME_SKIPPED <<< "$(tidy_rehome_flat_shared_handoffs)"
+  if [[ "${WIKI_PROMOTE}" -eq 1 ]]; then
+    read -r WIKI_PROMOTED_CREATED WIKI_PROMOTED_EXISTING WIKI_PROMOTED_LINKED WIKI_PROMOTED_STATE \
+      <<< "$(tidy_apply_wiki_promotions "${NOW}" "${WIKI_PROMOTION_MODE}")"
+  else
+    WIKI_PROMOTED_CREATED=0
+    WIKI_PROMOTED_EXISTING=0
+    WIKI_PROMOTED_LINKED=0
+    WIKI_PROMOTED_STATE="disabled"
+  fi
   echo "retention:"
   echo "  rule: kept files must have a one-line reason"
   echo "  events: ${EVENT_PRUNED} historical line(s) pruned; ${EVENT_COMPACTED} duplicate active line(s) compacted"
@@ -802,6 +1044,13 @@ if [[ "${APPLY}" -eq 1 ]]; then
   echo "  archives: ${ARCHIVES_COLLAPSED} non-adopt bucket(s) collapsed"
   echo "  surface_cleanup: ${SURFACE_CONSOLIDATED} run dir(s) consolidated by date"
   echo "  shared_docs: ${SHARED_REHOMED} flat handoff dir(s) rehomed; ${SHARED_REHOME_SKIPPED} skipped"
+  if [[ "${WIKI_PROMOTE}" -eq 1 ]]; then
+    if [[ "${WIKI_PROMOTED_STATE}" == "missing" ]]; then
+      echo "  wiki_promotion: skipped (llm-wiki absent)"
+    else
+      echo "  wiki_promotion: ${WIKI_PROMOTED_CREATED} candidate(s) created; ${WIKI_PROMOTED_EXISTING} existing; ${WIKI_PROMOTED_LINKED} source file(s) linked"
+    fi
+  fi
 fi
 
 exit "${SFS_EXIT_OK}"
