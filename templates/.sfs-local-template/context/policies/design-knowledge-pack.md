@@ -148,3 +148,16 @@ DES-FILL operating sections:
 - DES-GAP-011: Korean typography and icon-family starter guide.
 - DES-GAP-012: AI-slop review rubric.
 - DES-GAP-013: Playwright/browser QA smoke matrix for frontend handoff.
+
+## DES-AIERA - AI-Era Generative-Asset Lens
+
+Review-lens prompts distilled from 2026-05/06 practitioner talks. Discussion
+checks for AI-generated visual assets, not hard rules; cited claims are
+speaker-time assertions.
+
+- DES-AIERA-001: When visual assets are generated from references, ask whether
+  the prompt borrowed the feeling and recreated an original rather than copying a
+  source work — reference-not-plagiarize IP hygiene for image/video generation.
+  The asset still owes the product's own design language and token consistency
+  (see DES-PROP-020/023 on AI-slop), so "the model produced it" waives neither IP
+  provenance nor design-system fit.

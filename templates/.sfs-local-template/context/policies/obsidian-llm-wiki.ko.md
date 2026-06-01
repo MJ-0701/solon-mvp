@@ -172,3 +172,21 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
   evidence 라는 기록.
 - Obsidian workspace/cache/plugin payload 를 제외하는 `.gitignore` 항목.
 - 기존 프로젝트라면 adoption handoff 와 wiki migration note.
+
+## WIKI-AIERA - AI 시대 wiki 진입 lens
+
+2026-05/06 실무 강연에서 추린 review-lens 프롬프트. AI 시대 wiki 온보딩의 토의용
+체크이지 hard rule 이 아니며, 인용 주장은 강연 시점 주장이다. 여기서는 review 질문만
+다루고, 이 질문이 가리키는 wiki 수집·셋업 메커닉은 core-product 표면으로 남겨 본
+Schema 층 lens 밖에 둔다.
+
+- WIKI-AIERA-001: 낯선 코드베이스·도메인에 진입할 때, agent 가 돌아가는 시스템을
+  먼저 관측했는지 묻는다 — runtime/log/metric 과 git/test/config 신호를, 운영자가
+  프로덕션을 만지기 전에 APM 을 읽듯 — 그리고 그것을 용어집(glossary)과 맵으로 옮긴
+  뒤 넓은 변경에 들어갔는지. wiki 의 glossary 와 `NN-*-map` 페이지가 그 관측의 durable
+  산출물이며 작업 후 형식치레가 아니다. 위 documentation-poor 재구성 질문과는 구분되는
+  진입 규율이다.
+- WIKI-AIERA-002: 수집·작업 전에 목적을 먼저 확인했는지 묻는다 — 왜 이 자료를, 어떤
+  질문을 위해(Gold In, Gold Out). 목적이 무엇을 wiki 에 컴파일할 가치가 있는지
+  결정한다. 먼저 담고 이유는 나중에 묻는 방식은 wiki 를 잔여물로 채운다. ask-first 및
+  최소 질문 규율과 합치.

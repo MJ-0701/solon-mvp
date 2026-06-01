@@ -133,3 +133,16 @@ checks are active for a sprint, review, or release. Apply only the matching ids.
 - TAX-GAP-006: Enum compatibility and unknown-value policy.
 - TAX-GAP-007: AI prompt terminology guardrails.
 - TAX-GAP-008: Bilingual Korean/English naming convention guide.
+
+## TAX-AIERA - AI-Era Asset-Naming Lens
+
+Review-lens prompts distilled from 2026-05/06 practitioner talks. Discussion
+checks for naming reusable automation assets, not hard rules; cited claims are
+speaker-time assertions.
+
+- TAX-AIERA-001: Reusable skills, prompt packs, and self-built automations are
+  classifiable assets, not one-off scripts. Ask whether each carries a stable,
+  reusable name and a classification (purpose, domain, Code/Cowork compatibility)
+  so it can be found, called, and ported later instead of rebuilt. This extends
+  canonical-term discipline (TAX-PROP-016) from domain vocabulary to the agent's
+  own tool/skill library.

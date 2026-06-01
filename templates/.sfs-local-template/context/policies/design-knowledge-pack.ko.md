@@ -140,3 +140,14 @@ responsive/accessibility, browser QA, copy guidance 가 필요할 때만 child p
 - DES-GAP-011: Korean typography and icon-family starter guide.
 - DES-GAP-012: AI-slop review rubric.
 - DES-GAP-013: frontend handoff 용 Playwright/browser QA smoke matrix.
+
+## DES-AIERA - AI 시대 생성 자산 lens
+
+2026-05/06 실무 강연에서 추린 review-lens 프롬프트. AI 생성 시각 자산의 토의용
+체크이지 hard rule 이 아니며, 인용 주장은 강연 시점 주장이다.
+
+- DES-AIERA-001: 레퍼런스로 시각 자산을 생성할 때, 프롬프트가 원작을 베끼지 않고
+  느낌만 빌려 새로 창작했는지 묻는다 — 이미지/영상 생성의 표절-아닌-재창작 IP 위생.
+  생성 자산도 제품 고유의 디자인 언어와 토큰 일관성을 지켜야 하며(AI-slop 은
+  DES-PROP-020/023 참조), "모델이 만들었다"는 IP 출처와 디자인 시스템 적합성 어느
+  쪽도 면제하지 않는다.

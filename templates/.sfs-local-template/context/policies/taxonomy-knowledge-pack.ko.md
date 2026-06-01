@@ -129,3 +129,14 @@ check 중 무엇이 활성화되는지 판단하고 matching id 만 적용한다
 - TAX-GAP-006: Enum compatibility and unknown-value policy.
 - TAX-GAP-007: AI prompt terminology guardrails.
 - TAX-GAP-008: Bilingual Korean/English naming convention guide.
+
+## TAX-AIERA - AI 시대 자산 명명 lens
+
+2026-05/06 실무 강연에서 추린 review-lens 프롬프트. 재사용 자동화 자산 명명의 토의용
+체크이지 hard rule 이 아니며, 인용 주장은 강연 시점 주장이다.
+
+- TAX-AIERA-001: 재사용 스킬, 프롬프트 팩, 자작 자동화는 일회성 스크립트가 아니라
+  분류 가능한 자산이다. 각각이 안정적·재사용 가능한 이름과 분류(목적·도메인·Code/Cowork
+  호환)를 갖춰 나중에 다시 만들지 않고 찾고·호출하고·이식할 수 있는지 묻는다. 이는
+  canonical-term 규율(TAX-PROP-016)을 도메인 어휘에서 agent 자신의 도구·스킬
+  라이브러리로 확장한 것이다.

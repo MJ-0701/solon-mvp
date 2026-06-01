@@ -141,3 +141,22 @@ Obsidian is a recommended companion for SFS projects because it is free, local-f
 - `.gitignore` entries that keep Obsidian workspace/cache/plugin payloads out
   of commits.
 - For existing projects, an adoption handoff plus wiki migration note.
+
+## WIKI-AIERA - AI-Era Wiki-Entry Lens
+
+Review-lens prompts distilled from 2026-05/06 practitioner talks. Discussion
+checks for AI-era wiki onboarding, not hard rules; cited claims are
+speaker-time assertions. These are review questions only; the wiki collection and setup
+mechanics they touch stay core-product surface, outside this Schema-layer lens.
+
+- WIKI-AIERA-001: When entering an unfamiliar codebase or domain, ask whether the
+  agent observed the running system first — runtime/log/metric plus git/test/config
+  signals, the way an operator reads APM before touching production — and turned
+  that into a glossary plus a map before broad change. The wiki glossary and
+  `NN-*-map` pages are the durable output of that observation step, not a
+  formality done afterward. This is the entry discipline, distinct from the
+  documentation-poor reconstruction question above.
+- WIKI-AIERA-002: Ask whether the purpose was confirmed before collecting or
+  working — why this material, for which question (Gold In, Gold Out). Purpose
+  decides what is worth compiling into the wiki; capturing first and asking why
+  later fills it with residue. Pairs with ask-first and the smallest-question rule.

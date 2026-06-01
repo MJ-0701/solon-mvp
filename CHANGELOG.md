@@ -1,3 +1,31 @@
+## [0.8.6] - 2026-06-01
+
+> **AI 시대 wiki 진입·자원·생성자산·자산명명 관점을 4개 정책팩 review-lens 로 확장 (pack-expand pass-2).**
+
+### Added
+
+- **AI-era review-lens 항목 — 4개 knowledge pack 확장 (pack-expand pass-2).**
+  pass-1(0.8.5)이 deferred 한 llm-wiki 진입 관점 + batch1 leftover 를 Schema-layer
+  review-lens(검토 질문, 규칙 직박 아님)로 append-only 흡수. EN/KO 패리티,
+  frontmatter/load_when 불변, ≤200줄.
+  - `obsidian-llm-wiki` §WIKI-AIERA: (001) 새 코드베이스/도메인 진입 = 관측(APM식
+    runtime/log/git/test 신호) 먼저 + 용어집·맵 작성(documentation-poor 재구성
+    질문과 구분), (002) 수집·작업 전 목적 먼저(Gold In, Gold Out). **review-question
+    한정** — ingest 목적게이트/source_type schema/sfs init 인터뷰/회사쿼리 등
+    core-product mechanic 은 직박 금지(WMU-3 잔류), 테스트 section-scoped
+    negative-lock 으로 강제.
+  - `infra-knowledge-pack` §INF-AIERA: AI 산출 증폭 시 빌드/테스트/토큰 물량 +
+    토큰 예산을 1급 자원 차원으로(Jevons 수요), 멀티에이전트 토큰 비용 가시성·
+    agent 수 적정화.
+  - `design-knowledge-pack` §DES-AIERA: 생성 시각자산 = 표절-아닌-재창작 IP 위생 +
+    제품 디자인 언어/토큰 일관성(DES-PROP-020/023 by-reference).
+  - `taxonomy-knowledge-pack` §TAX-AIERA: 재사용 스킬/프롬프트/자동화 = 분류 가능한
+    자산(안정적 이름+분류, Code/Cowork 이식) — TAX-PROP-016 을 도구·스킬
+    라이브러리로 확장.
+  - 회귀 잠금: `tests/test-pack-expand-aiera-lens.sh` 에 4 pack 추가(frontmatter +
+    ≤200캡 + lens-framing disclaimer + by-reference 수치 lock) + per-pack headline
+    assert(EN/KO) + WIKI-AIERA mechanic negative-lock.
+
 ## [0.8.5] - 2026-06-01
 
 > **AI 시대 강의 인사이트를 5개 정책팩의 review-lens 로 흡수 (batch2+batch3 pack-expand).**

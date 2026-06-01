@@ -146,3 +146,17 @@ check 중 무엇이 활성화되는지 판단하고 matching id 만 적용한다
 - INF-GAP-006: Backup/restore and DR drill template.
 - INF-GAP-007: Cost tagging and budget governance.
 - INF-GAP-008: Cross-platform install/upgrade smoke matrix.
+
+## INF-AIERA - AI 시대 용량 lens
+
+2026-05/06 실무 강연에서 추린 review-lens 프롬프트. AI 로 증폭되는 자원 계획의
+토의용 체크이지 hard rule 이 아니며, 인용 주장은 강연 시점 주장이다.
+
+- INF-AIERA-001: AI 가 코드 산출을 늘리면 하류 물량은 더 크게 늘어난다 —
+  빌드/컴파일 시간, 테스트 실행량(코드 변경 하나가 훨씬 많은 테스트로 번질 수
+  있다), 아티팩트 크기, 토큰 소비. 용량 계획이 토큰 예산을 1급 자원 차원으로
+  다루는지, 그리고 Jevons 식 수요(생성 단가가 싸질수록 총소비는 줄기보다 늘어난다)를
+  감안해 per-call 비용만이 아니라 예산·상한을 두는지 묻는다.
+- INF-AIERA-002: 멀티에이전트·fan-out 실행은 토큰 비용을 공짜 배경이 아니라 운영비로
+  만든다. agent 수가 작업에 맞게 적정한지(병렬 agent 는 코드작업엔 제값, 넓은 개방형
+  리서치엔 과소비), 그 소비가 가시적인지(예산·로깅·상한) 묻는다.

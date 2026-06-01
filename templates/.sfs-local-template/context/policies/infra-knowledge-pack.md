@@ -148,3 +148,22 @@ checks are active for a sprint, review, or release. Apply only the matching ids.
 - INF-GAP-006: Backup/restore and DR drill template.
 - INF-GAP-007: Cost tagging and budget governance.
 - INF-GAP-008: Cross-platform install/upgrade smoke matrix.
+
+## INF-AIERA - AI-Era Capacity Lens
+
+Review-lens prompts distilled from 2026-05/06 practitioner talks. Discussion
+checks for AI-amplified resource planning, not hard rules; cited claims are
+speaker-time assertions.
+
+- INF-AIERA-001: When AI multiplies code output, downstream volume multiplies
+  further — build/compile time, test execution (one code change can fan out to
+  many more tests), artifact size, and token spend. Ask whether the capacity plan
+  treats the token budget as a first-class resource dimension and accounts for
+  Jevons-style demand: as a unit of generation gets cheaper, total consumption
+  tends to rise rather than fall, so set budgets and limits, not just per-call
+  cost.
+- INF-AIERA-002: Multi-agent and fan-out runs make token cost an operating cost,
+  not a free background. Ask whether the agent count is right-sized to the task —
+  parallel agents earn their cost on code work but can over-spend on broad
+  open-ended research — and whether that spend is visible (budgeted, logged,
+  capped).

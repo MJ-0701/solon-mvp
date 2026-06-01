@@ -33,6 +33,10 @@ packs=(
   agentic-security-logging-pack
   strategy-pm-knowledge-pack
   domain-knowledge-assets
+  obsidian-llm-wiki
+  infra-knowledge-pack
+  design-knowledge-pack
+  taxonomy-knowledge-pack
 )
 
 # Frontmatter + line-cap + lens-framing disclaimer + by-reference negative lock.
@@ -84,5 +88,44 @@ assert_contains "${POLICIES}/domain-knowledge-assets.md" "Trust, relationship, a
 assert_contains "${POLICIES}/domain-knowledge-assets.md" "AI literacy is a baseline assumption" "EN domain ai-literacy lens"
 assert_contains "${POLICIES}/domain-knowledge-assets.ko.md" "신뢰·관계·희소성이 AI 시대 해자" "KO domain trust-moat lens"
 assert_contains "${POLICIES}/domain-knowledge-assets.ko.md" "AI 리터러시는 옵션이 아니라 baseline 전제" "KO domain ai-literacy lens"
+
+# --- pass-2 (WU-pack-expand): obsidian-llm-wiki + infra/design/taxonomy ---
+
+assert_contains "${POLICIES}/obsidian-llm-wiki.md" "WIKI-AIERA-001" "EN obsidian observe-first id"
+assert_contains "${POLICIES}/obsidian-llm-wiki.md" "operator reads APM" "EN obsidian observe-first lens"
+assert_contains "${POLICIES}/obsidian-llm-wiki.md" "Gold In, Gold Out" "EN obsidian purpose-first lens"
+assert_contains "${POLICIES}/obsidian-llm-wiki.ko.md" "WIKI-AIERA-001" "KO obsidian observe-first id"
+assert_contains "${POLICIES}/obsidian-llm-wiki.ko.md" "APM 을 읽듯" "KO obsidian observe-first lens"
+
+assert_contains "${POLICIES}/infra-knowledge-pack.md" "INF-AIERA-001" "EN infra capacity id"
+assert_contains "${POLICIES}/infra-knowledge-pack.md" "token budget as a first-class resource" "EN infra token lens"
+assert_contains "${POLICIES}/infra-knowledge-pack.md" "Jevons" "EN infra jevons lens"
+assert_contains "${POLICIES}/infra-knowledge-pack.ko.md" "INF-AIERA-001" "KO infra capacity id"
+assert_contains "${POLICIES}/infra-knowledge-pack.ko.md" "토큰 예산을 1급 자원" "KO infra token lens"
+
+assert_contains "${POLICIES}/design-knowledge-pack.md" "DES-AIERA-001" "EN design gen-asset id"
+assert_contains "${POLICIES}/design-knowledge-pack.md" "reference-not-plagiarize" "EN design IP lens"
+assert_contains "${POLICIES}/design-knowledge-pack.ko.md" "DES-AIERA-001" "KO design gen-asset id"
+assert_contains "${POLICIES}/design-knowledge-pack.ko.md" "표절-아닌-재창작" "KO design IP lens"
+
+assert_contains "${POLICIES}/taxonomy-knowledge-pack.md" "TAX-AIERA-001" "EN taxonomy asset id"
+assert_contains "${POLICIES}/taxonomy-knowledge-pack.md" "classifiable assets" "EN taxonomy asset lens"
+assert_contains "${POLICIES}/taxonomy-knowledge-pack.ko.md" "TAX-AIERA-001" "KO taxonomy asset id"
+assert_contains "${POLICIES}/taxonomy-knowledge-pack.ko.md" "분류 가능한 자산" "KO taxonomy asset lens"
+
+# BLOCKER-2 (CEO §1.15 gate C1): the WIKI-AIERA section must stay review-questions
+# only. llm-wiki core mechanic (ingest purpose-gate / source_type schema / sfs init
+# interview / queryable-company) is core-product surface, not a Schema-layer lens
+# rule. Section-scoped negative-lock converts the boundary from prose-judgment to
+# a red-proof gate (mirrors the by-reference number lock above).
+for f in "${POLICIES}/obsidian-llm-wiki.md" "${POLICIES}/obsidian-llm-wiki.ko.md"; do
+  section="$(awk '/## WIKI-AIERA/{f=1} f' "${f}")"
+  [[ -n "${section}" ]] || fail "WIKI-AIERA section missing in $(basename "${f}")"
+  for tok in "source_type" "sfs init" "init interview" "purpose gate" "queryable" "company query"; do
+    if printf '%s' "${section}" | grep -Fq -- "${tok}"; then
+      fail "WIKI-AIERA mechanic leak in $(basename "${f}"): '${tok}'"
+    fi
+  done
+done
 
 echo "test-pack-expand-aiera-lens: OK"
