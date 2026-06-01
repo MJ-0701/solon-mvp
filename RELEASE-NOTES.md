@@ -7,6 +7,18 @@
 
 ---
 
+## 0.8.10
+
+stable product package 경계에 맞춰 wiki anti-drift 검증을 조정합니다.
+
+체감 변화:
+
+- 0.8.9에서 추가한 Solon/wiki 경계 guard가 source repo와 stable product package의 차이를 구분합니다.
+- source repo에서는 `llm-wiki/README.md`까지 계속 검사하고, stable tar/zip처럼 owner-side wiki vault가 포함되지 않는 패키지에서는 packaged README, product-shape docs, SFS policy 파일 기준으로 anti-drift 경계를 검증합니다.
+- 사용자는 0.8.9의 강의 레퍼런스 렌즈와 Solon Advancement Scorecard를 그대로 받되, release guard까지 통과한 패키지를 설치합니다.
+
+---
+
 ## 0.8.9
 
 강의 레퍼런스에서 뽑은 AI-era 운영 렌즈를 SFS 흐름에 흡수하고, wiki 확장이 Solon 의 제품 방향을 흔들지 않도록 scorecard 로 잠급니다.

@@ -1,5 +1,18 @@
 ## [Unreleased]
 
+## [0.8.10] - 2026-06-02
+
+> **stable product package 경계에 맞춰 wiki anti-drift 검증을 조정합니다.**
+
+### Fixed
+
+- **Product identity guard respects stable package contents.**
+  `test-product-identity-wiki-boundary.sh` still verifies `llm-wiki/README.md`
+  when it runs inside the source repo, but no longer fails stable product
+  tar/zip artifacts where the owner-side wiki vault is intentionally outside
+  the packaged runtime allowlist. Packaged README, product-shape docs, and SFS
+  policy files continue to carry the anti-drift boundary.
+
 ## [0.8.9] - 2026-06-02
 
 > **강의 레퍼런스 인사이트를 SFS 검토 렌즈로 흡수하고, wiki 확장이 Solon 제품 방향을 흔들지 않도록 scorecard 로 잠급니다.**

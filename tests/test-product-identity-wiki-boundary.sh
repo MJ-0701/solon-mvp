@@ -34,6 +34,7 @@ obsidian_ko="${DIST_DIR}/docs/ko/current-product-shape/19-obsidian-llm-wiki-cont
 policy_en="${CONTEXT_DIR}/policies/obsidian-llm-wiki.md"
 policy_ko="${CONTEXT_DIR}/policies/obsidian-llm-wiki.ko.md"
 wiki_home="${REPO_ROOT}/llm-wiki/README.md"
+wiki_files=()
 
 assert_contains "${readme}" "AI 의 속도를 제품 운영으로 바꿔 주는 얇은 레일" "README Solon product rail"
 assert_contains "${readme_solon}" "Solon 은 이 문제를 앱 generator 로 풀지 않습니다" "README no generator drift"
@@ -54,10 +55,13 @@ assert_contains "${policy_en}" "Product identity boundary" "EN policy identity b
 assert_contains "${policy_en}" "instead of Solon product scope" "EN policy defer tooling"
 assert_contains "${policy_ko}" "제품 방향이 아니며" "KO policy identity boundary"
 
-assert_contains "${wiki_home}" "wiki 자체가 제품 방향" "wiki home anti-drift"
-assert_contains "${wiki_home}" "SFS flow" "wiki home SFS flow"
+if [[ -f "${wiki_home}" ]]; then
+  wiki_files+=("${wiki_home}")
+  assert_contains "${wiki_home}" "wiki 자체가 제품 방향" "wiki home anti-drift"
+  assert_contains "${wiki_home}" "SFS flow" "wiki home SFS flow"
+fi
 
-for file in "${readme}" "${readme_solon}" "${obsidian_en}" "${obsidian_ko}" "${policy_en}" "${policy_ko}" "${wiki_home}"; do
+for file in "${readme}" "${readme_solon}" "${obsidian_en}" "${obsidian_ko}" "${policy_en}" "${policy_ko}" "${wiki_files[@]}"; do
   assert_not_contains "${file}" "wiki-first product" "no wiki-first product ${file}"
   assert_not_contains "${file}" "Obsidian is required" "no required Obsidian ${file}"
   assert_not_contains "${file}" "must use Obsidian" "no must-use Obsidian ${file}"
