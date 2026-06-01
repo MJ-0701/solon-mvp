@@ -31,7 +31,7 @@ to make plan a real design phase.
 
 | division | plan output |
 |---|---|
-| strategy-pm | product intent, user value, scope/non-goals, rollout/decision boundary |
+| strategy-pm | product intent, user value, winning theory, scope/non-goals, rollout/decision boundary |
 | dev | domain/application/interface/infrastructure boundary, files_scope, slice split |
 | QA | first failing/characterization/smoke/review signal, regression and edge cases |
 | design | workflow, interaction state, accessibility, copy, visible risk or N/A waiver |

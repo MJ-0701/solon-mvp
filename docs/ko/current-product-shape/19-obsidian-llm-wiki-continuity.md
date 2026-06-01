@@ -18,6 +18,11 @@ Markdown 기반이라 원문 문서를 대체하지 않는 LLM retrieval layer �
 source link, map, glossary seed, decision, gap 을 남겨 다음 agent 가 사용자에게 같은 맥락을
 다시 묻지 않고 project question 에 답하게 합니다.
 
+제품 정체성 경계: wiki 기능과 볼륨 증가는 SFS 흐름을 돕는 수단이지 제품 방향이 아닙니다.
+새 wiki 기능은 intent 정리, plan contract, review evidence, handoff, 반복 맥락 retrieval 중 하나를
+개선할 때만 Solon 고도화로 봅니다. 이 핵심 루프를 개선하지 못하면 Solon product scope 가 아니라
+wiki tooling follow-up 으로 미룹니다.
+
 신규 프로젝트에서는 일반 scaffold 가 생긴 뒤 repo root vault 와 작은 `llm-wiki/` 폴더를 권장할 수
 있습니다. wiki 는 product design, DDD/TDD method, tests, CI, release path, durable domain term 으로
 이어지는 지도 역할을 합니다.

@@ -151,3 +151,7 @@ responsive/accessibility, browser QA, copy guidance 가 필요할 때만 child p
   생성 자산도 제품 고유의 디자인 언어와 토큰 일관성을 지켜야 하며(AI-slop 은
   DES-PROP-020/023 참조), "모델이 만들었다"는 IP 출처와 디자인 시스템 적합성 어느
   쪽도 면제하지 않는다.
+- DES-AIERA-002: 생성형 제품 광고는 생성 전 asset-consistency 계약이 필요하다:
+  product reference library, shot/angle inventory, brief/CTA, aspect ratio,
+  duration, prompt preview, approval mode, post-output consistency check.
+  이미지 하나를 다시 첨부하는 것만으로는 acceptance evidence 가 아니다.

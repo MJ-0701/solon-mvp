@@ -21,6 +21,12 @@ load_when: ["brainstorm", "브레인스토밍", "requirements", "요구사항", 
     vague agreement into plan readiness when decisions are unresolved.
 - Gate 2 exists to prevent spec-to-code drift. Do not accept raw requirements as a
   finished plan; interrogate intent until the next gate has enough shape.
+- If the request expands wiki/RAG/graph/ingest/docs memory, run the Solon
+  Advancement Scorecard before `ready-for-plan`: classify it as `product-core`,
+  `product-supporting`, `wiki-tooling-deferred`, or `out-of-scope`. It counts as
+  Solon advancement only when it improves intent capture, plan contracts, review
+  evidence, handoff, or repeated-context retrieval without replacing human
+  product judgment or source truth.
 - Apply `policies/ai-work-intake-routing.md` before drafting questions. Gate 2
   should expose goal, materials, ask-back rule, and output format, then classify
   one-off, repeated, or batch workspace scope so the user is not forced to

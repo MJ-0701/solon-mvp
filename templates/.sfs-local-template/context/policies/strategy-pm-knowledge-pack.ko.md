@@ -42,7 +42,7 @@ check 중 무엇이 활성화되는지 판단하고, matching id 만 적용한�
 
 ## PM-PROP - Proposition Inventory
 
-- PM-PROP-001: Shared intent must state the user, problem, business reason, and expected outcome.
+- PM-PROP-001: Shared intent must state the user, problem, business reason, expected customer-behavior outcome, and winning theory.
 - PM-PROP-002: Scope must include non-goals so AI workers do not expand the wrong surface.
 - PM-PROP-003: Acceptance criteria must be measurable by an evaluator without reading the generator's mind.
 - PM-PROP-004: Prioritization must name tradeoffs, opportunity cost, and what is deliberately deferred.
@@ -65,8 +65,8 @@ check 중 무엇이 활성화되는지 판단하고, matching id 만 적용한�
 
 ### PM-FILL-INTENT - Shared Intent
 
-- scope 를 확장하기 전에 user, problem, business reason, expected outcome 을
-  한 문단으로 쓴다. 넷 중 하나가 비면 plan 은 아직 추측이다.
+- scope 를 확장하기 전에 user, problem, business reason, expected customer-behavior outcome,
+  winning theory 를 한 문단으로 쓴다. 다섯 중 하나가 비면 plan 은 아직 추측이다.
 - user-visible promise 와 internal implementation preference 를 분리한다.
   user promise 는 AC/release note 로, preference 는 design/implementation note 로 간다.
 - non-goal 을 명명한다. AI-assisted work 에서는 non-goal 이 adjacent surface 확장을 막는다.
@@ -164,3 +164,20 @@ check 중 무엇이 활성화되는지 판단하고, matching id 만 적용한�
 - PM-AIERA-010: 자동화 경계가 어디인지 묻는다. 대략 70-80%는 자동화하되 마지막
   ~20%는 사람 판단이 필요하다; 운영자의 레버리지는 생성량이 아니라 그 판단이다.
   작업의 human-in-the-loop 위치를 밝힌다.
+- PM-AIERA-011: trust-sensitive domain 에서는 배포 방식과 데이터 위치가 제품
+  약속이다. local-first, cloud, sync, backup, migration 선택이 기술 보안 모델뿐
+  아니라 사용자의 불안 모델과도 맞는지 묻는다.
+- PM-AIERA-012: 얼리어답터의 기능 요청과 더 넓은 시장의 불안을 분리한다. PMF
+  증거는 고급 기능을 보존하기 전에 interview, 결제 행동, support pattern, 반복
+  objection 을 함께 본다.
+- PM-AIERA-013: support 와 community 를 after-sales 잡무가 아니라 adoption loop 로
+  본다. 빠른 응대, 보이는 개선, mentor network, 현장 전용 자료는 쌓인 신뢰를 만들
+  때 해자가 된다.
+- PM-AIERA-014: 도메인이 불신하는 기술 label 을 앞세우지 않는다. "AI" 같은 구현
+  용어가 도입 마찰을 만들면 사용자 outcome, control boundary, manual override 를
+  먼저 말한다.
+- PM-AIERA-015: 바이브코딩/agent skill 을 수익화 전략이 아니라 레버리지로 본다. 유료 작업을 기획하기 전 무엇을 왜 만들지 설명하는 제품·도메인 뿌리지식이 있는지 묻는다.
+- PM-AIERA-016: 프리랜스/서비스 작업은 구현만이 아니라 문제 진단과 로드맵을 판다. 의사결정권자에게는 비전, 실무자에게는 내부 보고 자료, enterprise 계정에는 장기 신뢰 cadence 로 artifact 를 맞춘다.
+- PM-AIERA-017: product work 는 build 전에 선주문, landing/fake-door, 모객 신호 같은 demand evidence 가 필요하다. B2B/B2G 에서 도메인 전문성이 없으면 도메인 파트너 또는 stop condition 을 우선한다.
+- PM-AIERA-018: AX 는 tool-use training 이 아니라 측정 가능한 시간/비용 절감 프로세스 재설계다. top-down sponsor, lead-workflow 자동화 대상, 측정 방법, 보상/변화저항 계획을 명명한다.
+- PM-AIERA-019: activity-list strategy 를 거부한다. plan 은 통제 가능한 일을, strategy 는 통제 불가능한 고객 행동 변화·winning theory·사실이어야 하는 가정·베팅 조정 evidence cadence 를 명명한다.

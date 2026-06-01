@@ -40,6 +40,13 @@ The lens activates when:
   egress to remote actors (push, deploy, publish) is **denied by
   default**. The `templates/.sfs-local-template/presets/solon-safe-permissions.yaml`
   baseline is the reference shape.
+- Remote MCP media-generation connectors declare endpoint provenance,
+  account/credit owner, approval mode, prompt preview fields, artifact
+  retention, and redaction policy before any spend/action tool is enabled.
+- Chat/messenger bridges declare server/channel/user/actor allowlists, required
+  mention/reply scope, message-content access, attachment/file access, and
+  thread/archive retention. Administrator-style permissions are setup shortcuts,
+  not production defaults.
 - No tool silently bypasses the host's permission system (e.g. by
   shelling out to a wrapper that the host cannot see).
 - Secrets and tokens never appear in tool arguments, tool results, or
@@ -54,12 +61,19 @@ The lens activates when:
 - Sub-agent outputs are written to a known location (file, scratch dir)
   and the parent re-reads from there, rather than streaming raw model
   output back into the parent context.
+- Chat channels are coordination surfaces; task threads are bounded contexts. A
+  new work thread needs a capsule, owner, output path, and close/archive rule;
+  resuming an archived thread needs a summary capsule before work continues.
 
 ### 4. System prompt drift
 
 - The agent's system prompt is in version control, not generated at
   runtime from mutable state. Any runtime overlay (e.g. user-supplied
   context) is appended after the immutable prompt, not blended into it.
+- Identity/persona text is kept separate from operating process. A standing
+  agent may have tone, mission, boundaries, and report format, but common
+  workflow rules belong in routed docs/skills so persona files do not become a
+  second SSoT.
 - Prompt changes are reviewed at the same gate as code changes — a
   reworded system prompt can change behavior more than a refactor.
 - Prompts do not embed credentials, file paths from other users, or
@@ -82,6 +96,12 @@ Codex command, or skill), it must respect kernel.md:
 
 - Every meaningful tool call leaves a trace the human can later
   reconstruct: file written, command run, durable record updated.
+- Scheduled or report-channel agents declare trigger, delivery mode, context
+  source, permission posture, attachment/redaction policy, and disable path;
+  otherwise "AI employee" automation is not auditable.
+- Cross-agent review feedback is adjudicated item by item. The orchestrator
+  records accepted/rejected/deferred findings with evidence or human decision
+  instead of blindly applying another agent's critique.
 - `.sfs-local/events.jsonl` (or the project's equivalent) captures
   agent-driven gate transitions just as it captures CLI-driven ones,
   so the project history is consistent regardless of how the user
@@ -104,6 +124,9 @@ Codex command, or skill), it must respect kernel.md:
   "this tool always succeeds" or "use this tool whenever possible"
   is treating the LLM as the audience for an obedience trick rather
   than a description.
+- ChatOps loop drift — two agents can echo each other's mistakes, revive stale
+  thread context, or auto-respond in the wrong channel unless mention scope,
+  thread lifecycle, and adjudication evidence are explicit.
 
 ## What the CPO does NOT check under this lens
 

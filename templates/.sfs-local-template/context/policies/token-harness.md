@@ -12,6 +12,10 @@ load_when: ["token", "harness", "context", "Claude", "Codex", "Gemini", "MCP", "
   should hold entry rules and project identity, not changelog, long history, or
   full API docs. Move durable detail to routed context modules, docs, reports,
   or ADRs.
+- Treat persona/user memory files as bounded cache, not project truth. Durable
+  knowledge belongs in source-linked docs/wiki/assets; persona memory gets a
+  periodic memory audit for stale facts, noisy preferences, and reload-boundary
+  notes when a runtime only injects memory at session start.
 - Root LLM agent docs are stricter than ordinary entry docs: `CLAUDE.md`,
   `AGENTS.md`, and `GEMINI.md` should be frontmatter-only SFS pointers. Use
   `sfs agent doctor --fix` to archive and rewrite recognized SFS adapter bloat.
@@ -34,6 +38,9 @@ load_when: ["token", "harness", "context", "Claude", "Codex", "Gemini", "MCP", "
 - Harness Engineering raises the AI ceiling by structure, not pleading. Prefer a
   small active tool surface, project-as-prompt consistency, automated checks, and
   human-owned understanding/design boundaries over longer prompts.
+- Agent productivity is the harness target: optimize retrieved context, tool
+  fit, slice size, parallelizable capsules, and verification loops before asking
+  a human or model to "work faster".
 - Project harness commands make that structure inspectable: `sfs harness doctor`
   checks readiness before long autonomy, and `sfs harness map --write` records
   the agent/team/artifact/test/release environment without starting workers.

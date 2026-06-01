@@ -93,3 +93,15 @@ observability evidence 가 없으면 Gate 6 는 partial 이다.
   아니라 기본 경로가 안전 경로인지 묻는다.
 - SEC-AIERA-003: 절차가 시간 압박에 보안 step 을 건너뛸 수 있는지 묻는다. 보안
   체크를 우회할 수 있는 워크플로우는 편의가 아니라 finding 이다.
+- SEC-AIERA-004: unattended 또는 always-approve agent run 은 먼저 격리가 필요하다:
+  worktree/sandbox, bounded files_scope/tools, prompt/log secret 금지, destructive
+  action 금지, artifact review policy. 이 경계가 없으면 반복 승인 prompt 는 제거할
+  마찰이 아니라 안전 신호다.
+- SEC-AIERA-005: 보고 channel bot 은 channel/app permission inventory,
+  server/channel/user/actor allowlist, mention 대 auto-response 범위, 첨부 위치,
+  redacted tool log, thread/archive retention, restart/reinstall evidence 를 명시해야
+  한다. 편한 channel 도 data exfiltration surface 다.
+- SEC-AIERA-006: credit 을 쓰는 generation tool 은 실행 전 preflight manifest 가
+  필요하다: connector endpoint, account/credit owner, approval mode, prompt/asset
+  id, aspect ratio, duration, artifact retention, redaction boundary. 비용 통제와
+  데이터 통제는 같은 review surface 다.

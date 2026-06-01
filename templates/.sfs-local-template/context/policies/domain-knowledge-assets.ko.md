@@ -115,6 +115,18 @@ SFS 는 그 판단을 AI 가 다시 쓸 수 있는 용어, 규칙, 휴리스틱,
 - 신뢰·관계·희소성이 AI 시대 해자: 베끼기와 옵션 폭증으로 raw skill 이 평준화될
   수록 신뢰가 차별점이 된다. 쌓은 신뢰·관계·희소한 판단을 1인 운영자의 부가가
   아니라 포지셔닝 asset 으로 다루고 있는지 묻는다.
+- community 와 support loop 는 도메인 자산이다: 반복 고객 질문, 빠른 개선 안내,
+  mentor 답변, 현장 전용 자료는 chat/inbox history 로 사라지기 전에 playbook,
+  FAQ/checklist, onboarding, review prompt 로 컴파일한다.
 - AI 리터러시는 옵션이 아니라 baseline 전제: AI 활용은 기본 역량이 됐다(거부=
   불리). 온보딩·pack 이 운영자가 이미 AI 를 레버리지한다는 전제로 짜였는지, 그
   위에 어떤 희소한 가치를 포착하는지 묻는다.
+- 뿌리지식은 tool 유행보다 오래 간다: prompt, agent, harness 기법은 바뀌지만
+  제품 목적, 웹/AI 기본 구조, 도메인 언어는 glossary, playbook, checklist, lens 로
+  남길 재사용 substrate 다.
+- 도메인 전문성은 build/no-build gate 다: 유료 product, 특히 B2B/B2G 가 팀이 모르는
+  도메인에 의존하면 AI 구현을 돌리기 전에 expert partner, evidence plan, stop
+  condition 을 기록한다.
+- 위임 근육은 컴파일된 컨텍스트가 있어야 자란다: 반복 업무를 agent work 로 넘기려면
+  goal, material, ask-back rule, output shape, feedback check, agent 가 찾을 second-brain
+  경로가 필요하다.

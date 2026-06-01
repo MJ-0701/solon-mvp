@@ -1,5 +1,31 @@
 ## [Unreleased]
 
+## [0.8.9] - 2026-06-02
+
+> **강의 레퍼런스 인사이트를 SFS 검토 렌즈로 흡수하고, wiki 확장이 Solon 제품 방향을 흔들지 않도록 scorecard 로 잠급니다.**
+
+### Added
+
+- **AI-era lecture reference lenses.**
+  Prompting, RAG knowledge-base setup, AI employee onboarding, MCP/advertising
+  workflow, source-library wiki, ChatOps agent harness, strategy/victory-theory,
+  agent productivity, and Wenote/PMF lecture notes are compiled into routed
+  SFS policy/review lenses and `llm-wiki` reference maps by source link. These
+  additions strengthen existing SFS gates instead of adding new lifecycle
+  commands.
+- **Solon product identity anti-drift boundary.**
+  README/product-shape/wiki policy guidance now states that wiki, RAG, graph,
+  ingest, and docs-memory features are support tools for SFS flow, not the
+  product direction. The new `test-product-identity-wiki-boundary.sh` locks the
+  boundary against "wiki-first product" drift.
+- **Solon Advancement Scorecard.**
+  Gate 2 (Brainstorm), Gate 3 (Plan), and Gate 6 (Review) now classify wiki/
+  RAG/graph/ingest/doc-memory work as `product-core`, `product-supporting`,
+  `wiki-tooling-deferred`, or `out-of-scope`. A candidate counts as Solon
+  advancement only when it improves intent capture, plan contracts, review
+  evidence, handoff, or repeated-context retrieval without replacing human
+  product judgment or source truth.
+
 ## [0.8.8] - 2026-06-01
 
 > **docs/solon GC 가 report/retro 계승 후보를 llm-wiki 로 먼저 남기고 정리합니다.**

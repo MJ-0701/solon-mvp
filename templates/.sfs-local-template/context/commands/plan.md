@@ -163,10 +163,10 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
 - If a researcher pass produced findings, summarize only the durable result in
   the plan: sources checked, domain terms, contradictions, and remaining
   unknowns. Do not copy the full research transcript into the plan.
-- For non-trivial or multi-sprint work, load `policies/obsidian-llm-wiki.md`
-  when Obsidian/wiki/project-doc continuity is in scope. If `llm-wiki/` exists,
-  cite the relevant TopicHub or index in the plan. If it is missing, recommend
-  a non-blocking wiki setup or record why it is skipped.
+- For wiki/RAG/graph/ingest/doc-memory work, load `policies/obsidian-llm-wiki.md`
+  and carry the Solon Advancement Scorecard into requirements/non-goals. A plan
+  can treat it as Solon product scope only when it names the SFS-loop improvement;
+  otherwise defer it as wiki tooling and avoid implementation slices.
 - Load `policies/knowledge-pack-router.md` first, or `policies/knowledge-pack-router.ko.md`
   for Korean preference. Proceed to matching division packs from its mapping.
 - If enterprise, agent-team, QA/QC, performance, algorithm, or large-project

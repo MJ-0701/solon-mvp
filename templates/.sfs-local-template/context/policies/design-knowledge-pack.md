@@ -161,3 +161,7 @@ speaker-time assertions.
   The asset still owes the product's own design language and token consistency
   (see DES-PROP-020/023 on AI-slop), so "the model produced it" waives neither IP
   provenance nor design-system fit.
+- DES-AIERA-002: Generated product ads need an asset-consistency contract before
+  generation: product reference library, shot/angle inventory, brief/CTA, aspect
+  ratio, duration, prompt preview, approval mode, and post-output consistency
+  check. Re-attaching a single image is not acceptance evidence.

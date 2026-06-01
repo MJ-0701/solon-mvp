@@ -41,7 +41,7 @@ active for a sprint, plan, review, or release. Apply only the matching ids.
 
 ## PM-PROP - Proposition Inventory
 
-- PM-PROP-001: Shared intent must state the user, problem, business reason, and expected outcome.
+- PM-PROP-001: Shared intent must state the user, problem, business reason, expected customer-behavior outcome, and winning theory.
 - PM-PROP-002: Scope must include non-goals so AI workers do not expand the wrong surface.
 - PM-PROP-003: Acceptance criteria must be measurable by an evaluator without reading the generator's mind.
 - PM-PROP-004: Prioritization must name tradeoffs, opportunity cost, and what is deliberately deferred.
@@ -64,8 +64,8 @@ active for a sprint, plan, review, or release. Apply only the matching ids.
 
 ### PM-FILL-INTENT - Shared Intent
 
-- Write the user, problem, business reason, and expected outcome in one compact
-  paragraph before expanding scope. If one of those four parts is missing, the
+- Write the user, problem, business reason, expected customer-behavior outcome, and winning theory in one compact
+  paragraph before expanding scope. If one of those five parts is missing, the
   plan is still guessing.
 - Separate user-visible promise from internal implementation preference. A
   user promise belongs in AC or release notes; implementation preference belongs
@@ -180,3 +180,21 @@ verify before acting.
   automated, but the last ~20% needs human judgment; an operator's leverage is
   that judgment, not the volume of generated output. Name where human-in-the-loop
   sits for the task.
+- PM-AIERA-011: For trust-sensitive domains, deployment and data location are
+  part of the product promise. Ask whether local-first, cloud, sync, backup, and
+  migration choices match the user's fear model, not only the technical security
+  model.
+- PM-AIERA-012: Separate early-adopter feature requests from broader-market
+  anxiety. PMF evidence should weigh interviews, payment behavior, support
+  patterns, and repeated objections before preserving advanced features.
+- PM-AIERA-013: Treat support and community as adoption loops, not after-sales
+  chores. Fast response, visible fixes, mentor networks, and exclusive field
+  material can become a moat when they create earned trust.
+- PM-AIERA-014: Do not lead with the technology label when the domain distrusts
+  it. If "AI" or another implementation term raises adoption friction, state the
+  user outcome, control boundary, and manual override first.
+- PM-AIERA-015: Treat vibe-coding or agent skill as leverage, not a monetization strategy; before planning paid work, ask what root product/domain knowledge explains what to build and why.
+- PM-AIERA-016: For freelance/service work, sell the problem diagnosis and roadmap, not just implementation. Match the artifact to the buyer role: vision for decision-makers, internal-report material for practitioners, and trust-building cadence for enterprise accounts.
+- PM-AIERA-017: Product work needs demand evidence before build: preorder, landing/fake-door, recruiting signal, or equivalent. For B2B/B2G without domain expertise, prefer a domain partner or a stop condition over blind build.
+- PM-AIERA-018: AX is process redesign for measurable time/cost reduction, not tool-use training. Name the top-down sponsor, lead-workflow automation target, measurement method, and incentive/change-resistance plan.
+- PM-AIERA-019: Reject activity-list strategy. A plan names controllable work; a strategy names the uncontrollable customer behavior change, the winning theory, the assumptions that must be true, and the evidence cadence that will adjust the bet.

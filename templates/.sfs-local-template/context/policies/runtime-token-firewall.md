@@ -25,6 +25,17 @@ load_when: ["token", "harness", "worker", "review", "executor", "bridge", "Claud
   `evidence`, and touched-file manifests under the current workbench/run
   directory. The lead agent should inspect those compact artifacts instead of
   repeatedly rereading source files, diffs, build logs, or the main thread.
+- Preserve the lead session for user intent and exception judgment. Repetitive
+  phase sequencing belongs in scripts or run ledgers; each worker gets the next
+  bounded capsule and writes back artifacts rather than inheriting the lead's
+  live context.
+- A docs diff, ADR delta, or compact run brief is preferred over a transcript
+  when the worker needs to know what changed. If the change basis is missing,
+  return partial/fail and ask for that artifact.
+- Chat threads are not full-history handoffs. A channel or thread link may
+  identify evidence, but the worker still receives a capsule; resuming an
+  archived thread requires a compact summary artifact instead of replaying the
+  whole chat.
 - If evidence is insufficient, return partial/fail and name the missing
   artifact. Do not ask the host runtime to send the entire conversation or keep
   polling until context accumulates.

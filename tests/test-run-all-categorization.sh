@@ -81,6 +81,8 @@ assert_category test-private-dev-path-hygiene.sh           hygiene-and-policy
 assert_category test-no-data-loss.sh                       hygiene-and-policy
 assert_category test-nounset-empty-array-expansion.sh      hygiene-and-policy
 assert_category test-domain-knowledge-assets.sh            hygiene-and-policy
+assert_category test-product-identity-wiki-boundary.sh     hygiene-and-policy
+assert_category test-solon-advancement-scorecard.sh        hygiene-and-policy
 
 # ── 8) sfs-core — covers the bulk of test-sfs-*.sh and stragglers. ─
 assert_category test-sfs-bootstrap-quick.sh                sfs-core

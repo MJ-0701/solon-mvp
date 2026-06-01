@@ -42,8 +42,12 @@ assert_contains "${CONTEXT_DIR}/_INDEX.md" "policies/sub-agent-capsule-contract.
 # (e) WU-E: verifier ≠ author named in both languages (handoff rule + lens)
 assert_contains "${policy}" "the same instance as the authoring agent" "EN verifier≠author handoff rule"
 assert_contains "${policy}" "the verifying agent is a different instance from the author" "EN verifier≠author lens"
+assert_contains "${policy}" "For chat/channel handoffs" "EN chat/channel handoff boundary"
+assert_contains "${policy}" "server/channel/thread locator" "EN chat locator"
 assert_contains "${policy_ko}" "저작 agent 와 동일" "KO verifier≠author handoff rule"
 assert_contains "${policy_ko}" "검증 agent 가 저작자와 다른 인스턴스인지" "KO verifier≠author lens"
+assert_contains "${policy_ko}" "chat/channel handoff" "KO chat/channel handoff boundary"
+assert_contains "${policy_ko}" "server/channel/thread locator" "KO chat locator"
 
 # (e') council policy carries the same verifier ≠ author rule
 council="${CONTEXT_DIR}/policies/division-subagent-council.md"

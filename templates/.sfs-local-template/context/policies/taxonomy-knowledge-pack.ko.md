@@ -140,3 +140,8 @@ check 중 무엇이 활성화되는지 판단하고 matching id 만 적용한다
   호환)를 갖춰 나중에 다시 만들지 않고 찾고·호출하고·이식할 수 있는지 묻는다. 이는
   canonical-term 규율(TAX-PROP-016)을 도메인 어휘에서 agent 자신의 도구·스킬
   라이브러리로 확장한 것이다.
+- TAX-AIERA-002: 고맥락 언어는 아직 AI 계약이 아니다. 한국어처럼 생략이 많은 입력은
+  worker handoff 전에 actor, object, scope, 대조/강조, acceptance condition 을 정규화한다.
+- TAX-AIERA-003: user-facing copy 에서는 native-language 뉘앙스를 보존하되,
+  AI-facing prompt 는 저맥락 계약으로 컴파일한다: canonical term, 명시적 주어/목적어,
+  예시/반례, 긍정적 목표 행동. 부정 constraint 는 검증 가능한 forbidden move 로만 둔다.

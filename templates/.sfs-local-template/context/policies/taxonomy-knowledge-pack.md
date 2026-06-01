@@ -146,3 +146,10 @@ speaker-time assertions.
   so it can be found, called, and ported later instead of rebuilt. This extends
   canonical-term discipline (TAX-PROP-016) from domain vocabulary to the agent's
   own tool/skill library.
+- TAX-AIERA-002: High-context language is not yet an AI contract. For Korean or
+  other ellipsis-heavy inputs, normalize actor, object, scope, contrast/emphasis,
+  and acceptance condition before worker handoff.
+- TAX-AIERA-003: Preserve native-language nuance in user-facing copy, but compile
+  AI-facing prompts as low-context contracts: canonical terms, explicit subjects
+  and objects, examples/non-examples, and positive target behavior. Negative
+  constraints stay only as checkable forbidden moves.

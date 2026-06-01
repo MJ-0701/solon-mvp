@@ -167,3 +167,10 @@ speaker-time assertions.
   parallel agents earn their cost on code work but can over-spend on broad
   open-ended research — and whether that spend is visible (budgeted, logged,
   capped).
+- INF-AIERA-003: Language shape is part of token capacity. Korean, multilingual,
+  or nuance-heavy prompts can change token spend and translation loss; preserve
+  the user's language where meaning matters, but budget context, summaries, and
+  reviewer capsules as if language choice were an operating input.
+- INF-AIERA-004: Local LLMs are a privacy/capacity tradeoff, not simply "free".
+  Before routing RAG or agents to a local model, record model id, RAM/CPU/GPU
+  expectation, latency budget, quality smoke, and fallback to a stronger model.

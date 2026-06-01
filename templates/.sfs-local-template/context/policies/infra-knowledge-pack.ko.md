@@ -160,3 +160,9 @@ check 중 무엇이 활성화되는지 판단하고 matching id 만 적용한다
 - INF-AIERA-002: 멀티에이전트·fan-out 실행은 토큰 비용을 공짜 배경이 아니라 운영비로
   만든다. agent 수가 작업에 맞게 적정한지(병렬 agent 는 코드작업엔 제값, 넓은 개방형
   리서치엔 과소비), 그 소비가 가시적인지(예산·로깅·상한) 묻는다.
+- INF-AIERA-003: 언어 형태도 토큰 용량의 일부다. 한국어, 다국어, 뉘앙스가 많은
+  prompt 는 토큰 소비와 번역 손실을 바꿀 수 있다. 의미가 중요한 곳은 사용자 언어를
+  보존하되, context·summary·review capsule 예산은 언어 선택도 운영 입력인 것처럼 잡는다.
+- INF-AIERA-004: 로컬 LLM 은 단순한 "무료"가 아니라 privacy/capacity tradeoff 다.
+  RAG 나 agent 를 로컬 모델로 라우팅하기 전에 model id, RAM/CPU/GPU 기대치, latency
+  예산, quality smoke, 더 강한 모델 fallback 을 기록한다.

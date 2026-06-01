@@ -22,6 +22,8 @@ AI 로 만드는 속도는 이미 빠릅니다. 문제는 속도가 아니라 �
 Solon 은 이 문제를 앱 generator 로 풀지 않습니다. 앱 뼈대는 각 프레임워크와 AI 가 가장 잘하는
 방식으로 만들고, Solon 은 그 다음부터의 제품 운영을 맡습니다.
 
+Wiki, RAG, graph, ingest 같은 기억 장치는 이 흐름을 더 정확하고 빠르게 만들기 위한 보조 도구일 뿐이며, Solon 의 제품 방향은 여전히 SFS flow, 사람의 product judgment, 검증 가능한 계약, review/handoff 에 둡니다.
+
 ```text
 fuzzy idea
 -> shared intent
@@ -38,4 +40,3 @@ Solon 을 쓰면 AI 는 더 멀리 혼자 달리는 대신, 사용자가 이해�
 더 깊은 설명은 [Solon 10x 가치](./docs/ko/10x-value.md)에 정리했습니다.
 
 ---
-

@@ -34,6 +34,8 @@ Obsidian is a recommended companion for SFS projects because it is free, local-f
 - Wiki root: `llm-wiki/`.
 - DDD operating model root: `llm-wiki/ddd/`.
 - Keep source truth in existing docs, code, tests, and scripts.
+- Product identity boundary: wiki growth must serve SFS flow. If a wiki feature does not improve intent capture, plan contracts, review evidence, handoff, or repeated-context retrieval, keep it as deferred wiki tooling instead of Solon product scope.
+- Large PDFs, media, and reference libraries may live in an external source manager. The wiki stores stable source IDs, metadata locators, access/rights notes, extraction status, and compile targets; it does not become the file warehouse.
 - Wiki pages are TopicHubs, retrieval paths, DDD context maps, upgrade maps, and generated indexes.
 - Treat the system as three layers: **Raw / Wiki / Schema (+lint)**. Raw is read-only source truth; Wiki is AI-owned, write-time compiled navigation plus glossary/ubiquitous-language home; Schema + lint are frontmatter, budgets, routing, review questions, verification, link checks, generated indexes, and human-approval rules that keep the wiki from becoming an uncurated pile.
 - Knowledge packs are the **Schema-layer review lens** of this model, not wiki pages. They stay as read-only routed context (see `knowledge-pack-router`) and do not move into the wiki.
@@ -75,10 +77,14 @@ Obsidian is a recommended companion for SFS projects because it is free, local-f
 - Keep large raw notes, transcripts, generated output, and external references
   in their source location. The wiki records what the source means, where it is,
   what it connects to, and what is still missing.
+- Source-bundle analysis tools are derived workspaces. Before copying their
+  summaries, Q&A, infographics, PDFs, or slide outputs into the wiki, record the
+  input source set, tool/model, output path, citation coverage, confidence/gaps,
+  and promotion decision.
 - RAG/vector search is an optional query-time accelerator over curated source
-  and wiki metadata, not the source of truth. Sync workers should index the
-  compiled wiki and source links with metadata rather than dumping arbitrary
-  chunks and asking the next agent to reconstruct meaning.
+  and wiki metadata, not the source of truth or a fact guarantee. Sync workers
+  index compiled wiki/source links with metadata and answer surfaces need source
+  citation, no-answer behavior, and parser/chunk/retriever smoke evidence.
 - Accepted AI answers may become wiki updates only after source links and
   confidence/gap notes are attached. Private or personal notes stay private
   unless a human explicitly approves promotion to shared project knowledge.
@@ -114,12 +120,18 @@ Obsidian is a recommended companion for SFS projects because it is free, local-f
 - Did the wiki point to source truth instead of copying large documents?
 - Did new source material get write-time compiled into a TopicHub/map/gap note
   instead of being left as query-time RAG residue?
+- If an external source manager or source-bundle notebook is used, are source IDs,
+  metadata locators, input set, output path, citations/confidence/gaps, and
+  promotion decision recorded?
 - On sprint close, did report/retro stay as close evidence while only durable
   meaning was compiled into the wiki?
 - During docs GC, did promotion candidates get created before archive/compact,
   with source links and without copying report/retro wholesale?
 - If RAG/vector indexing is present, does it index curated wiki/source metadata
-  rather than replacing the wiki or source truth?
+  rather than replacing the wiki or source truth, and does the answer path have
+  citations, no-answer behavior, and retrieval smoke evidence?
+- Does any wiki/RAG/graph/ingest feature pass the Solon Advancement Scorecard,
+  or is it explicitly deferred as wiki tooling outside Solon product scope?
 - Did the agent avoid treating host-local tools, skills, or user-home folders as
   wiki/project SSoT, install targets, or migration sources?
 - Does the active wiki have `llm-wiki/README.md` and `llm-wiki/ddd/README.md`,
@@ -138,6 +150,8 @@ Obsidian is a recommended companion for SFS projects because it is free, local-f
 - `llm-wiki/ddd/README.md` or a recorded DDD wiki gap/waiver.
 - Retrieval guide or TopicHub links to source docs/components.
 - TopicHub/map/gap updates that summarize durable conclusions by reference.
+- External source-library/notebook manifest: source IDs, metadata locator, input
+  set, output path, citations/confidence/gaps, and promotion decision.
 - Minimal memory baseline for documentation-poor projects: project map, domain/DDD map, decision ledger, unknowns/gaps, questions ledger, dev guardrails, and bug/release/test memory when applicable.
 - RAG/sync metadata policy or waiver when a vector/search layer is connected.
 - PR/diff or approval note for promotion from private/member knowledge to shared
@@ -166,3 +180,7 @@ mechanics they touch stay core-product surface, outside this Schema-layer lens.
   working — why this material, for which question (Gold In, Gold Out). Purpose
   decides what is worth compiling into the wiki; capturing first and asking why
   later fills it with residue. Pairs with ask-first and the smallest-question rule.
+- WIKI-AIERA-003: Ask whether the second brain is indexed context, not a
+  warehouse. Useful memory is split by topic/service/question metadata so an
+  agent loads the needed slice, not every note. Pairs with Context Diet and
+  write-time compile.

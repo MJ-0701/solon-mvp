@@ -45,6 +45,10 @@ assert_contains "${firewall_policy}" "Capsule-only handoff is the default" "fire
 assert_contains "${firewall_policy}" "full conversation" "firewall no full history"
 assert_contains "${firewall_policy}" "Claude in-process Codex/Gemini plugin wrappers" "firewall plugin wrapper boundary"
 assert_contains "${firewall_policy}" "Poll artifacts, not thoughts" "firewall artifact polling"
+assert_contains "${firewall_policy}" "Preserve the lead session for user intent" "firewall lead context preservation"
+assert_contains "${firewall_policy}" "docs diff, ADR delta, or compact run brief" "firewall docs-diff capsule"
+assert_contains "${firewall_policy}" "Chat threads are not full-history handoffs" "firewall chat thread boundary"
+assert_contains "${firewall_policy}" "compact summary artifact" "firewall archived thread resume"
 assert_contains "${firewall_policy}" "Budget failure is a product finding" "firewall budget finding"
 
 assert_contains "${kernel}" "Runtime Token Firewall is ambient" "kernel firewall"

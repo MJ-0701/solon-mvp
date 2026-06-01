@@ -66,6 +66,19 @@ do
     || fail "${POLICY_MD} missing review subsection: ${section}"
 done
 
+for onboarding in \
+  'Identity/persona text is kept separate from operating process' \
+  'Scheduled or report-channel agents declare trigger' \
+  'Remote MCP media-generation connectors declare endpoint provenance' \
+  'Chat/messenger bridges declare server/channel/user/actor allowlists' \
+  'Chat channels are coordination surfaces; task threads are bounded contexts' \
+  'Cross-agent review feedback is adjudicated item by item' \
+  'ChatOps loop drift'
+do
+  grep -qF -- "${onboarding}" "${POLICY_MD}" \
+    || fail "${POLICY_MD} missing AI employee onboarding check: ${onboarding}"
+done
+
 # ── 7) Policy doc references the companion artifacts shipped in 0.7.0. ─
 for cross in solon-safe-permissions.yaml mcp-server/README.md agentic-security-logging-pack.md; do
   grep -qF "${cross}" "${POLICY_MD}" \

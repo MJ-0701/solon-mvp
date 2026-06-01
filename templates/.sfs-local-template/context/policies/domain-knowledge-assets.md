@@ -137,7 +137,20 @@ checks, not hard rules; cited claims are speaker-time assertions.
   overload level out raw skill, trust becomes the differentiator. Ask whether
   the work treats earned trust, relationships, and scarce judgment as a solo
   operator's positioning assets rather than soft extras.
+- Community and support loops are domain assets: repeated customer questions,
+  fast fix explanations, mentor answers, and field-exclusive materials should
+  be compiled into playbooks, FAQ/checklists, onboarding, and review prompts
+  before they disappear into chat or inbox history.
 - AI literacy is a baseline assumption, not an option: using AI is now table
   stakes (refusing it is a disadvantage). Ask whether onboarding and packs
   assume the operator already leverages AI, and what scarce value is being
   captured on top of that.
+- Root knowledge beats tool fashion: prompt, agent, and harness techniques will
+  change, but product purpose, web/AI fundamentals, and domain language are the
+  reusable substrate that should become glossary, playbook, checklist, or lens.
+- Domain expertise is a build/no-build gate: when a paid product, especially
+  B2B/B2G, depends on a domain the team does not understand, record the expert
+  partner, evidence plan, or stop condition before letting AI implementation run.
+- Delegation muscle needs compiled context: turning repeated human work into
+  agent work requires explicit goals, materials, ask-back rules, output shape,
+  feedback checks, and a second-brain path the agent can load without searching a pile.

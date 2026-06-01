@@ -170,8 +170,8 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - Performance/algorithm PASS needs measurement, bounded input reasoning, or N/A
   waiver. Pure text confidence is partial when hot path, query, browser runtime,
   payload, memory, or concurrency behavior changed.
-- If `llm-wiki/` exists and the sprint uncovers repeated harness/product failure,
-  record root cause, fix, local tests, project-applied QA/QC, status, follow-up.
+- If wiki/RAG/graph/ingest/doc-memory work grew, return partial unless the
+  Solon Advancement Scorecard proves an SFS-loop improvement, not wiki volume.
 - Load `policies/knowledge-pack-router.md` first, or
   `policies/knowledge-pack-router.ko.md` for Korean preference. Read matching
   split packs only when the router maps the current review scope to them.

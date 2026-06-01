@@ -89,6 +89,8 @@ categorize() {
       | test-mainline-data-security-guardrails.sh \
       | test-obsidian-host-local-boundary.sh \
       | test-obsidian-llm-wiki-guidance.sh \
+      | test-product-identity-wiki-boundary.sh \
+      | test-solon-advancement-scorecard.sh \
       | test-docs-model-routing.sh \
       | test-ai-work-intake-routing.sh \
       | test-print-matrix-schema.sh)

@@ -46,6 +46,10 @@ lead/C-Level 에이전트가 worker·reviewer·external executor 로 넘기는 c
   worker 는 partial/fail 반환 + 부족 artifact 명시.
 - 이 필드를 표현 못 하는 bridge (예: 전체 chat 을 상속하는 forked-context helper)
   는 default executor 가 아니라 manual escape hatch 다.
+- chat/channel handoff 는 server/channel/thread locator 를 evidence 로 기록할 수
+  있지만 unlimited history read 권한이 아니다. mention/allowlist/auto-response
+  범위는 `tools_allowed` 또는 `pii_rules`, thread close/archive 와 resume summary 는
+  `output_paths` 에 둔다.
 - 검증자 ≠ 저작자: `acceptance_criteria` 를 검증하는 agent 는 저작 agent 와 동일
   인스턴스여서는 안 된다 (자기평가 편향). "다른 agent" 는 기본적으로 다른
   인스턴스를 뜻하고, 모델 다양성(Codex/Gemini)은 per-capsule 필드가 아니라 Gate 6

@@ -13,7 +13,7 @@ load_when:
   - 신규 프로젝트
   - sprint continuity
 status: filled-v1
-content_policy: "권고 기본값; 사용자가 거절하거나 프로젝트가 쓸 수 없으면 sprint 를 막지 않는다"
+content_policy: "권고 기본값; wiki 는 SFS flow 를 돕는 도구일 뿐 제품 방향이 아니며, 거절/불가 시 sprint 를 막지 않는다"
 ---
 
 # Obsidian LLM Wiki Policy
@@ -45,18 +45,13 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
 - DDD 운영 모델 root: `llm-wiki/ddd/`.
 - source truth 는 기존 docs, code, tests, scripts 에 남긴다.
 - wiki page 는 TopicHub, retrieval path, DDD context map, upgrade map, generated index 로 쓴다.
-- 이 시스템은 **Raw / Wiki / Schema (+lint)** 의 3계층으로 본다. (구
-  "raw data source / wiki / harness" 명칭을 대체한다. 단일 harness 계층은
-  Schema(config) 와 lint(operation) 로 분해된다.)
-  - **Raw**: read-only source truth — 코드, 테스트, 스크립트, CI, runtime
-    config, 외부 capture, 참조. wiki 가 복제하지 않는다.
-  - **Wiki**: AI 소유, write-time compile — Raw 의 navigation(TopicHub, DDD
-    map, retrieval path, generated index, gap note, 참조 기반) 이자 산문 개념
-    corpus(glossary, ubiquitous language) 의 home/SSoT.
-  - **Schema**(config) + **lint**(operation): Schema = frontmatter, line/token
-    budget, routing/`load_when`, review question. lint = verification 명령,
-    link checker, generated-index 재생성, 사람 승인 규칙. 함께 지식 저장소가
-    쓰레기 산이 되지 않게 막는다.
+- PDF/media/source library 는 외부 source manager 에 둘 수 있다. wiki 는 source id, metadata locator,
+  권한/접근, extraction 상태, compile target 만 기록하고 file warehouse 가 되지 않는다.
+- 이 시스템은 **Raw / Wiki / Schema (+lint)** 의 3계층으로 본다. 구 "raw data source / wiki / harness"
+  명칭을 대체하며, 단일 harness 계층은 Schema(config) 와 lint(operation) 로 분해된다.
+  - **Raw**: read-only source truth — 코드, 테스트, 스크립트, CI, runtime config, 외부 capture, 참조. wiki 가 복제하지 않는다.
+  - **Wiki**: AI 소유, write-time compile — Raw 의 navigation(TopicHub, DDD map, retrieval path, generated index, gap note, 참조 기반) 이자 산문 개념 corpus(glossary, ubiquitous language) 의 home/SSoT.
+  - **Schema**(config) + **lint**(operation): Schema = frontmatter, line/token budget, routing/`load_when`, review question. lint = verification 명령, link checker, generated-index 재생성, 사람 승인 규칙. 함께 지식 저장소가 쓰레기 산이 되지 않게 막는다.
 - Knowledge pack 은 이 모델의 **Schema 계층 review lens** 이지 wiki 페이지가
   아니다. read-only routed context(`knowledge-pack-router` 참조)로 남고 wiki 로
   이동하지 않는다.
@@ -66,8 +61,7 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
   install target, migration source 가 아니다. 사용자가 명시적으로 요청하지 않는 한 wiki 구축 중
   설치, clone, scaffold, 승격을 하지 않는다. 참조가 필요하면 external environment evidence 로만
   기록한다. 이미 SFS 에 흡수된 개념은 host-local tool 대신 SFS command/policy surface 를 쓴다.
-- 프로젝트가 원할 때만 공유 가능한 `.obsidian/` 설정을 둔다. 개인 workspace, cache, community plugin
-  payload 는 커밋하지 않는다.
+- 프로젝트가 원할 때만 공유 가능한 `.obsidian/` 설정을 둔다. 개인 workspace/cache/plugin payload 는 커밋하지 않는다.
 
 ## New Project Flow
 
@@ -108,8 +102,11 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
   query-time 재검색으로 떠넘기지 말고 관련 TopicHub, DDD map, index, gap note 로 즉시 컴파일한다.
 - 큰 raw note, transcript, generated output, external reference 는 원래 위치에 둔다. wiki 에는 그 원문이
   무엇을 의미하는지, 어디에 있는지, 무엇과 연결되는지, 무엇이 비어 있는지를 기록한다.
-- RAG/vector search 는 curated source/wiki metadata 위의 선택적 query-time accelerator 이지 source truth 가
-  아니다. sync worker 는 임의 chunk 를 쌓기보다 컴파일된 wiki 와 source link 를 metadata 로 색인해야 한다.
+- source-bundle 분석 도구 결과(인포그래픽/PDF/PPT 포함)는 derived output 이다. input set, tool/model,
+  output path, citation/confidence/gap, promotion decision 이 있어야 wiki 지식으로 승격한다.
+- RAG/vector search 는 curated source/wiki metadata 위의 선택적 query-time accelerator 이지 source truth
+  나 fact 보장 장치가 아니다. sync worker 는 compiled wiki/source link 를 metadata 로 색인하고,
+  답변 표면은 source citation, no-answer behavior, parser/chunk/retriever smoke evidence 를 가져야 한다.
 - AI 답변은 source link 와 confidence/gap note 가 붙은 뒤에만 wiki 업데이트 후보가 된다. private/personal
   note 는 사람이 명시적으로 shared project knowledge 승격을 승인하기 전까지 private 로 남긴다.
 
@@ -146,11 +143,13 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
 - wiki 가 큰 문서 복사본이 아니라 source truth 링크를 제공하는가?
 - 새 source material 이 query-time RAG residue 로 남지 않고 TopicHub/map/gap note 로 write-time compile
   되었는가?
+- 외부 source manager 또는 source-bundle notebook 을 쓴다면 source id, metadata locator, input set,
+  output path, citation/confidence/gap, promotion decision 이 기록되었는가?
 - sprint close 시 report/retro 는 close evidence 로 남기고 durable meaning 만 wiki 로 컴파일했는가?
 - docs GC 때 archive/compact 전에 source link 가 있는 promotion candidate 를 만들었고,
   report/retro 전문 복사를 피했는가?
 - RAG/vector indexing 이 있다면 wiki/source truth 를 대체하지 않고 curated wiki/source metadata 를
-  색인하는가?
+  색인하며 citation/no-answer/retrieval smoke evidence 를 갖는가?
 - agent 가 host-local tool, skill, user-home folder 를 wiki/project SSoT, install target,
   migration source 로 취급하지 않았는가?
 - active wiki 에 `llm-wiki/README.md` 와 `llm-wiki/ddd/README.md` 가 있거나 gap/waiver 가
@@ -169,6 +168,8 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
 - `llm-wiki/ddd/README.md` 또는 기록된 DDD wiki gap/waiver.
 - source docs/components 로 이어지는 retrieval guide 또는 TopicHub.
 - durable conclusion 을 by-reference 로 요약한 TopicHub/map/gap 업데이트.
+- 외부 source-library/notebook manifest: source id, metadata locator, input set, output path,
+  citation/confidence/gap, promotion decision.
 - documentation-poor 프로젝트의 최소 memory baseline: project map, domain/DDD map, decision ledger,
   unknowns/gaps, questions ledger, dev guardrails, bug/release/test memory.
 - vector/search layer 가 연결된 경우 RAG/sync metadata policy 또는 waiver.
@@ -195,3 +196,4 @@ Schema 층 lens 밖에 둔다.
   질문을 위해(Gold In, Gold Out). 목적이 무엇을 wiki 에 컴파일할 가치가 있는지
   결정한다. 먼저 담고 이유는 나중에 묻는 방식은 wiki 를 잔여물로 채운다. ask-first 및
   최소 질문 규율과 합치.
+- WIKI-AIERA-003: second brain 이 창고가 아니라 색인된 context 인지 묻는다. 쓸 만한 기억은 topic/service/question metadata 로 쪼개져 agent 가 모든 note 가 아니라 필요한 조각만 로드한다. Context Diet 와 write-time compile 과 합치.

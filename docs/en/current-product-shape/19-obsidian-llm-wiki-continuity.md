@@ -20,6 +20,13 @@ locations; `llm-wiki/` keeps source-linked maps, glossary seeds, decisions, and
 gaps so future agents can answer project questions by reference instead of
 asking the user to repeat context.
 
+Product identity boundary: wiki growth serves SFS flow; it is not a product direction.
+New wiki features count as Solon advancement only when they improve intent
+capture, plan contracts, review evidence, handoff, or repeated-context
+retrieval. If they do not improve the core `start -> brainstorm -> plan ->
+implement -> review -> retro` loop, defer them as wiki tooling rather than
+Solon product scope.
+
 For a new project, SFS may recommend a repo-root vault and a small `llm-wiki/`
 folder after the normal scaffold exists. The wiki should point to product
 design, DDD/TDD method, tests, CI, release paths, and durable domain terms.

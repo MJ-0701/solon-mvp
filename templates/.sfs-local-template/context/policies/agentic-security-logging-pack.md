@@ -95,3 +95,16 @@ speaker-time assertions.
 - SEC-AIERA-003: Ask whether a procedure could skip its security step under time
   pressure. A workflow that lets the security check be bypassed is a finding, not
   a convenience.
+- SEC-AIERA-004: Unattended or always-approve agent runs require isolation first:
+  worktree/sandbox, bounded files_scope/tools, no secrets in prompts/logs, no
+  destructive actions, and artifact review policy. Without those boundaries,
+  repeated approval prompts are a safety signal, not friction to remove.
+- SEC-AIERA-005: Report-channel bots need explicit channel/app permission
+  inventory, server/channel/user/actor allowlists, mention-vs-auto-response
+  scope, attachment location, redacted tool logs, thread/archive retention, and
+  restart/reinstall evidence. A convenient channel is still an exfiltration
+  surface.
+- SEC-AIERA-006: Credit-spending generation tools require a preflight manifest
+  before execution: connector endpoint, account/credit owner, approval mode,
+  prompt/asset id, aspect ratio, duration, artifact retention, and redaction
+  boundary. Cost control and data control are the same review surface.

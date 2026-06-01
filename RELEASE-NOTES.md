@@ -7,6 +7,26 @@
 
 ---
 
+## 0.8.9
+
+강의 레퍼런스에서 뽑은 AI-era 운영 렌즈를 SFS 흐름에 흡수하고, wiki 확장이 Solon 의 제품 방향을 흔들지 않도록 scorecard 로 잠급니다.
+
+체감 변화:
+
+- 프롬프팅, RAG 지식창고, AI 직원 온보딩, MCP 광고 제작, source-library wiki,
+  ChatOps agent harness, 승리 이론 전략, agent 생산성, Wenote/PMF 강의 인사이트가
+  기존 SFS 정책팩과 review lens 로 들어갑니다. 새 lifecycle 명령을 늘리지 않고,
+  `brainstorm → plan → implement → review → retro` 흐름을 더 잘 검토하게 만듭니다.
+- wiki, RAG, graph, ingest, docs-memory 기능은 **Solon 을 돕는 도구**로 명시됩니다.
+  wiki 볼륨이 커져도 Solon 의 방향은 SFS flow, 사람의 product judgment, 검증 가능한
+  계약, review/handoff 에 둡니다.
+- `Solon Advancement Scorecard` 가 Gate 2/3/6에 붙습니다. wiki 관련 아이디어는
+  intent capture, plan contract, review evidence, handoff, repeated-context retrieval 중
+  하나를 개선해야 Solon 고도화로 인정되고, 그렇지 않으면 wiki tooling follow-up 으로
+  미뤄집니다.
+
+---
+
 ## 0.8.8
 
 docs/solon GC 가 report/retro 계승 후보를 llm-wiki 로 먼저 남기고 정리합니다.

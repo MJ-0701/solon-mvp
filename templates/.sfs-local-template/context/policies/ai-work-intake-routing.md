@@ -39,10 +39,27 @@ config, git history, release/deploy scripts, and issue/PR traces. The agent must
 form a minimal known/unknown map before asking the user to re-explain broad
 project context.
 
+## High-Context Prompt Normalization
+
+Keep the user's native language, but before worker handoff compile high-context
+or ellipsis-heavy wording into a low-context contract: explicit actor, object,
+scope, desired result, and acceptance signal.
+
+Prefer positive target behavior over negative-only phrasing. Forbidden moves
+still matter, but they should be checkable constraints paired with what the
+output should do.
+
+When tone, emotion, customer empathy, or literary nuance matters, capture
+examples/non-examples and the human review boundary instead of trusting
+translation or summary alone.
+
 ## Work-Size Routing
 
 Classify the work before choosing how much SFS machinery to activate.
 
+- Delegation candidates should start small: repeated work with visible output,
+  low blast radius, and easy before/after measurement. Record feedback so the
+  workflow is iterated instead of trusted once.
 - One-off work: answer or edit directly in the current chat when the task is
   small, non-repeated, and does not need durable project memory. Avoid opening a
   sprint only to format a single note or short answer.
@@ -65,6 +82,8 @@ records the durable contract and evidence, not the vendor brand.
 
 - Are goal, materials, ask-back rule, and output format explicit or safely
   inferred?
+- Was high-context language normalized into explicit actor/object/scope/result
+  before worker or reviewer handoff?
 - Did the agent choose one-off, repeated, or batch workspace scope before adding
   ceremony?
 - For repeated work, was durable project memory updated or was a gap recorded?

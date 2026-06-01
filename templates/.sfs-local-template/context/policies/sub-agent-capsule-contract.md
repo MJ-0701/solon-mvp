@@ -47,6 +47,10 @@ convenience.
   evidence → the worker returns partial/fail and names the missing artifact.
 - A bridge that cannot express these fields (e.g. a forked-context helper that
   inherits the whole chat) is a manual escape hatch, not the default executor.
+- For chat/channel handoffs, encode the server/channel/thread locator as
+  evidence, not permission to read unlimited history. Mention/allowlist/
+  auto-response scope belongs in `tools_allowed` or `pii_rules`; thread
+  close/archive and resume summary belong in `output_paths`.
 - Verifier ≠ author: the agent that verifies `acceptance_criteria` must not be
   the same instance as the authoring agent (self-evaluation bias). "Different
   agent" means a different instance by default; model diversity (Codex/Gemini)

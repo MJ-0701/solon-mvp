@@ -31,7 +31,7 @@ Gate 2 brainstorm 이후, Gate 3 review 전에 사용한다. 목적은 plan 을 
 
 | division | plan output |
 |---|---|
-| strategy-pm | 사용자 가치, scope/non-goal, rollout, decision boundary |
+| strategy-pm | 사용자 가치, winning theory, scope/non-goal, rollout, decision boundary |
 | dev | domain/application/interface/infra boundary, files_scope, slice split |
 | QA | 첫 failing/characterization/smoke/review signal, edge case |
 | design | workflow, interaction state, accessibility, visible risk 또는 N/A |
