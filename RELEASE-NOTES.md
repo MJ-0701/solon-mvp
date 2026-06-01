@@ -7,6 +7,17 @@
 
 ---
 
+## 0.8.11
+
+macOS bash nounset 환경에서도 wiki anti-drift 검증이 stable package 를 통과합니다.
+
+체감 변화:
+
+- stable tar/zip 패키지처럼 `llm-wiki/README.md`가 없는 환경에서 빈 optional 배열 때문에 guard가 실패하던 문제를 제거했습니다.
+- source repo에서는 wiki home anti-drift 문구를 계속 검증하고, packaged runtime에서는 packaged docs/policy 파일로 Solon/wiki 경계를 검증합니다.
+
+---
+
 ## 0.8.10
 
 stable product package 경계에 맞춰 wiki anti-drift 검증을 조정합니다.

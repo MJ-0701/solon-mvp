@@ -1,5 +1,17 @@
 ## [Unreleased]
 
+## [0.8.11] - 2026-06-02
+
+> **macOS bash nounset 환경에서도 wiki anti-drift 검증이 stable package 를 통과합니다.**
+
+### Fixed
+
+- **Stable product guard avoids empty-array nounset traps.**
+  `test-product-identity-wiki-boundary.sh` no longer expands an optional empty
+  array when `llm-wiki/README.md` is absent from stable product tar/zip
+  artifacts. The source-repo wiki assertion remains active when the wiki vault
+  exists.
+
 ## [0.8.10] - 2026-06-02
 
 > **stable product package 경계에 맞춰 wiki anti-drift 검증을 조정합니다.**
