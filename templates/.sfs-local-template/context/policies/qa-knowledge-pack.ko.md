@@ -155,3 +155,6 @@ release 에서 필요한 confidence evidence 를 고르고, matching id 만 blas
   신호와 통합테스트 신뢰도를 함께 본다.
 - QA-AIERA-004: 편향은 검증 축이다. 분석·백테스트를 신뢰하기 전 생존편향·
   룩어헤드·데이터 스누핑·과적합을 점검 — AI 생성 evidence 에도 동일 적용.
+- QA-AIERA-005: 정적분석+테스트는 개인 기량 편차를 구조적 baseline 으로 평준화
+  하는 최소 안전장치다. AI 보조 산출물을 신뢰하기 전 이 baseline(lint/type/정적
+  검사 + behavior 테스트)으로 가드되는지 묻는다 — 단지 도는지가 아니라.

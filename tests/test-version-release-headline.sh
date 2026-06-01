@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.4" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.4" "version output"
-assert_contains_text "${output}" "latest 0.8.4" "latest output"
+[[ "${plain_output}" == "sfs 0.8.5" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.5" "version output"
+assert_contains_text "${output}" "latest 0.8.5" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline llm-wiki Wiki 계층을 제품이 직접 깔고" "installed release headline"
+assert_contains_text "${output}" "installed_release_headline AI 시대 강의 인사이트를 5개 정책팩" "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline 지식 wiki(llm-wiki)를 제품이 직접 깔고" "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline AI 시대 실무 강연에서 추린 검토 관점" "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

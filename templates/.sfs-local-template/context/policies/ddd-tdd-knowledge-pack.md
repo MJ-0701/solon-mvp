@@ -122,3 +122,18 @@ evidence. Backend package layout is one application of this pack, not its scope.
   evidence.
 - Return fail when business invariants are buried in adapters and that creates
   data-loss, money, PII, or partner-state risk.
+
+## DT-AIERA - AI-Era Design/Ownership Lens
+
+Review-lens prompts distilled from 2026-05/06 practitioner talks. Discussion
+checks for AI-assisted design ownership, not hard rules; cited claims are
+speaker-time assertions.
+
+- DT-AIERA-001: AI-generated code still needs a human owner. Business-critical
+  code should not be blindly delegated to AI; ask whether the owner can explain
+  and defend even generated code before it passes review. Unexplained generated
+  code is a design-debt finding, not a completed change.
+- DT-AIERA-002: Spec/test = human, implementation = AI is the closed-loop framing
+  already recorded in enterprise-evidence (§AI-Era Closed-Loop Evidence). The
+  DDD/TDD floor is that human-owned spec/behavior surface; reference that lens
+  rather than restating it here.

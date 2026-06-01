@@ -133,3 +133,11 @@ checks, not hard rules; cited claims are speaker-time assertions.
 - Asset-ize the know-how: package repeated work and craft judgment into
   reusable skills, prompt packs, checklists, or review lenses — turning shared
   expertise into durable leverage (and reputation) rather than one-off chat.
+- Trust, relationship, and scarcity are the AI-era moat: as copying and option
+  overload level out raw skill, trust becomes the differentiator. Ask whether
+  the work treats earned trust, relationships, and scarce judgment as a solo
+  operator's positioning assets rather than soft extras.
+- AI literacy is a baseline assumption, not an option: using AI is now table
+  stakes (refusing it is a disadvantage). Ask whether onboarding and packs
+  assume the operator already leverages AI, and what scarce value is being
+  captured on top of that.

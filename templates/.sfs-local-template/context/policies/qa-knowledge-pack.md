@@ -164,3 +164,7 @@ speaker-time assertions.
 - QA-AIERA-004: Bias is a verification axis. Before trusting an analysis or
   backtest, check survivorship, look-ahead, data-snooping, and overfitting —
   the same discipline applies to AI-produced evidence.
+- QA-AIERA-005: Static analysis plus tests is the minimum safety net that levels
+  uneven individual skill into a structural floor. Ask whether the change is
+  guarded by that baseline (lint/type/static checks + behavior tests) before
+  trusting AI-assisted output, not just whether it runs.

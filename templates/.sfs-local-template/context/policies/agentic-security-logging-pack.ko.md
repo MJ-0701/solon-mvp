@@ -79,3 +79,17 @@ release, user-visible behavior 가 바뀌면 관련 risk 를 OWASP 계열로 매
 
 security/logging 이 scope 인데 abuse/negative, masking, dependency, authz,
 observability evidence 가 없으면 Gate 6 는 partial 이다.
+
+## SEC-AIERA - AI 시대 secure-by-default lens
+
+2026-05/06 실무 강연에서 추린 review-lens 프롬프트. skill/agent 보안 설계의
+토의용 체크이지 hard rule 이 아니며, 인용 주장은 강연 시점 주장이다.
+
+- SEC-AIERA-001: skill/workflow 계약은 단계만이 아니라 지식 + 절차 + 내장 보안
+  가드다. 새 skill·agent flow 가 보안 가드를 나중 리뷰로 미루지 않고 인라인으로
+  품고 있는지 묻는다.
+- SEC-AIERA-002: secure-by-default 를 우선한다 — 위험 경로를 안전 경로로 자동
+  유도(예: 키값을 env/keystore 로, 인라인 금지). 사용자가 안전을 고를 수 있는지가
+  아니라 기본 경로가 안전 경로인지 묻는다.
+- SEC-AIERA-003: 절차가 시간 압박에 보안 step 을 건너뛸 수 있는지 묻는다. 보안
+  체크를 우회할 수 있는 워크플로우는 편의가 아니라 finding 이다.

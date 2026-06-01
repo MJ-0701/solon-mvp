@@ -1,3 +1,24 @@
+## [0.8.5] - 2026-06-01
+
+> **AI 시대 강의 인사이트를 5개 정책팩의 review-lens 로 흡수 (batch2+batch3 pack-expand).**
+
+### Added
+
+- **AI-era review-lens 항목 — 5개 knowledge pack 확장 (batch2+batch3 lecture pack-expand, pass-1).**
+  2026-05~06 실무 강연에서 증류한 검토 관점을 Schema-layer review-lens(검토 질문/체크,
+  규칙 직박 아님)로 append-only 흡수. EN/KO 패리티, frontmatter/load_when 불변, ≤200줄.
+  - `ddd-tdd-knowledge-pack` §DT-AIERA: AI 생성코드 ownership/설명책임 게이트(비즈니스
+    코드 맹목 위임 금지). spec=사람/구현=AI 폐쇄루프는 `enterprise-evidence` §AI-Era
+    Closed-Loop 를 by-reference(중복 정의 회피).
+  - `qa-knowledge-pack` §QA-AIERA-005: 정적분석+테스트 = 코드 평준화 최소 안전장치.
+  - `agentic-security-logging-pack` §SEC-AIERA: skill=지식+절차+보안가드, secure-by-default
+    (위험→안전 경로 자동 유도), 보안 step skip 금지.
+  - `strategy-pm-knowledge-pack` §PM-AIERA-007..010: 요청 4요소(목표·기준·금지·검증),
+    문제 근본원인 깊이, 소수 정예 큐레이션, 자동화 경계(70-80% 자동·마지막 20% 사람).
+  - `domain-knowledge-assets` §AI-Era Moat: 신뢰·관계·희소성 = 해자, AI 리터러시 baseline.
+  - 회귀 잠금: `tests/test-pack-expand-aiera-lens.sh`(frontmatter + ≤200캡 + lens-framing
+    + EN/KO headline + by-reference 수치 negative-lock).
+
 ## [0.8.4] - 2026-05-31
 
 > **llm-wiki Wiki 계층을 제품이 직접 깔고(WMU-2), retro-close 가 그 vault 로 의미를 컴파일한다(codex/sfs-wiki-compile-flow).**

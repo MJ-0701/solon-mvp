@@ -120,3 +120,16 @@ scope 자체가 backend 로 제한되지 않는다.
   판정 가능한데도 user 에게 되물어졌으면 partial.
 - business invariant 가 adapter 에 묻혀 money, PII, data-loss, partner-state
   risk 를 만들면 fail.
+
+## DT-AIERA - AI 시대 설계/소유 lens
+
+2026-05/06 실무 강연에서 추린 review-lens 프롬프트. AI 보조 설계의 소유권
+토의용 체크이지 hard rule 이 아니며, 인용 주장은 강연 시점 주장이다.
+
+- DT-AIERA-001: AI 생성 코드에도 사람 소유자가 필요하다. 비즈니스 핵심 코드는
+  AI 에 맹목 위임하지 말고, 생성 코드라도 소유자가 설명·방어해 리뷰를 통과할 수
+  있는지 묻는다. 설명 못 하는 생성 코드는 완료가 아니라 설계 부채 finding 이다.
+- DT-AIERA-002: 스펙/테스트=사람, 구현=AI 폐쇄루프 프레이밍은 이미
+  enterprise-evidence (§AI-Era Closed-Loop Evidence)에 기록돼 있다. DDD/TDD
+  floor 가 그 사람-소유 스펙/behavior 면이며, 여기서 재정의하지 말고 그 lens 를
+  참조한다.

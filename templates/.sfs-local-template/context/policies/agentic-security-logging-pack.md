@@ -78,3 +78,20 @@ Use only matching risk families:
 
 Gate 6 is partial when security/logging is in scope but no abuse/negative,
 masking, dependency, authz, or observability evidence is recorded.
+
+## SEC-AIERA - AI-Era Secure-By-Default Lens
+
+Review-lens prompts distilled from 2026-05/06 practitioner talks. Discussion
+checks for skill/agent security design, not hard rules; cited claims are
+speaker-time assertions.
+
+- SEC-AIERA-001: A skill/workflow contract is knowledge + procedure + built-in
+  security guard, not just steps. Ask whether a new skill or agent flow carries
+  its security guard inline rather than deferring it to a later review.
+- SEC-AIERA-002: Prefer secure-by-default — steer a risky path to the safe one
+  automatically (for example, route key values to env/keystore, never inline).
+  Ask whether the default path is the safe path, not whether the user could
+  choose safety.
+- SEC-AIERA-003: Ask whether a procedure could skip its security step under time
+  pressure. A workflow that lets the security check be bypassed is a finding, not
+  a convenience.

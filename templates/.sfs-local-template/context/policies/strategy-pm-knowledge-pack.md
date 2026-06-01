@@ -165,3 +165,18 @@ verify before acting.
 - PM-AIERA-006: Run a bias checklist before trusting an analysis or backtest —
   survivorship, look-ahead, data-snooping, and overfitting — so a confident
   number is not mistaken for a sound decision.
+- PM-AIERA-007: Check that a request carries a four-element shape — goal,
+  acceptance criteria, forbidden moves, verification method. This is the concrete
+  structure behind PM-AIERA-004's spec lock; ask whether the verification
+  criterion is embedded so the agent can self-check (flowcheck/self-CPO) instead
+  of waiting for review.
+- PM-AIERA-008: Probe problem depth before scoping. Do not stop at "it is hard";
+  ask why it is hard down to the root cause. A brainstorm/plan entry should
+  carry a one-line root-cause statement, paired with ask-first.
+- PM-AIERA-009: Ask whether the option set is curated rather than infinite. When
+  options explode, three or four well-chosen ones carry more value — mirror this
+  in AskUserQuestion by capping options and leading with a recommendation.
+- PM-AIERA-010: Ask where the automation boundary sits. Roughly 70-80% can be
+  automated, but the last ~20% needs human judgment; an operator's leverage is
+  that judgment, not the volume of generated output. Name where human-in-the-loop
+  sits for the task.
