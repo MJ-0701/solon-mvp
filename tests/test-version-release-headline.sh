@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.6" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.6" "version output"
-assert_contains_text "${output}" "latest 0.8.6" "latest output"
+[[ "${plain_output}" == "sfs 0.8.7" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.7" "version output"
+assert_contains_text "${output}" "latest 0.8.7" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline AI 시대 wiki 진입·자원·생성자산·자산명명 관점을 4개 정책팩" "installed release headline"
+assert_contains_text "${output}" "installed_release_headline llm-wiki 코어 진입 mechanic 으로 목적 있는 Raw 수집과 관측-먼저" "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline AI 시대 wiki 진입·인프라·디자인·분류 관점" "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline llm-wiki 코어 진입 mechanic 으로 목적 있는 Raw 수집과 관측-먼저" "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

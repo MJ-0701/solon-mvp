@@ -20,6 +20,7 @@ load_when: "Read when README.md routes to this section."
 | `sfs plan` | 목표/범위/완료 기준 계약 작성 |
 | `sfs capture [--kind ...] <text>` | 승인/waiver/결정/외부 evidence 같은 최소 사실만 현재 sprint 기록에 남김 |
 | `sfs note <text>` | 짧은 evidence note 를 남기는 capture alias |
+| `sfs ingest --source-type <type> --purpose <why>` | wiki 로 컴파일하기 전 Raw source 목적과 스키마를 잠근 intake 초안 생성 |
 | `sfs harness doctor` | 긴 자율 작업 전에 프로젝트 하네스 준비 상태 점검 |
 | `sfs harness map --write` | agent 역할, artifact, memory, test, release loop 설계도 작성 |
 | `sfs implement [slice|--stdin]` | 작은 실행 조각 진행 |
@@ -37,5 +38,8 @@ stable tag, Homebrew/Scoop 배포, 설치 runtime 검증, evidence 보고까지 
 `sfs capture` 는 lifecycle 단계가 아니라 evidence primitive 입니다. 기본 흐름에 끼워 넣지 말고
 긴 prompt, 전체 대화, bridge/review scratch, command log 는 core docs 에 복사하지 말고
 archive/evidence path 만 남기세요.
+
+`sfs ingest` 는 원문을 가져오거나 요약하지 않습니다. 먼저 왜 이 source 를 모으는지와
+`article` / `youtube` / `podcast` / `book` / `research` 중 어느 raw schema 인지만 기록합니다.
 
 ---

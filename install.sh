@@ -581,6 +581,35 @@ for auto_file in "$TARGET/SFS.md" "$TARGET/CLAUDE.md" "$TARGET/AGENTS.md" "$TARG
 done
 ok "문서 자동 치환: <DATE>=$TODAY, <SOLON-VERSION>=$SOLON_VERSION_VAL"
 
+sed_replacement_escape() {
+  printf '%s' "$1" | sed -e 's/[\/&|]/\\&/g'
+}
+
+fill_llm_wiki_project_context() {
+  local file="$1"
+  [ "$ASSUME_YES" -eq 1 ] && return 0
+  [ -f "$file" ] || return 0
+  grep -Fq '<PROJECT-PURPOSE>' "$file" 2>/dev/null || return 0
+
+  info ""
+  info "llm-wiki 초기 프로젝트 맥락 인터뷰 (Enter = TBD)"
+  local purpose user output question boundary
+  purpose="$(prompt "  프로젝트 목적 1줄" "TBD")"
+  user="$(prompt "  주요 사용자/운영자" "TBD")"
+  output="$(prompt "  핵심 산출물" "TBD")"
+  question="$(prompt "  이 프로젝트에서 먼저 답하고 싶은 질문" "TBD")"
+  boundary="$(prompt "  헷갈리면 안 되는 경계/비범위" "TBD")"
+
+  "${SED_INPLACE[@]}" \
+    -e "s|<PROJECT-PURPOSE>|$(sed_replacement_escape "$purpose")|g" \
+    -e "s|<PROJECT-USER>|$(sed_replacement_escape "$user")|g" \
+    -e "s|<PROJECT-OUTPUT>|$(sed_replacement_escape "$output")|g" \
+    -e "s|<PROJECT-QUESTION>|$(sed_replacement_escape "$question")|g" \
+    -e "s|<PROJECT-BOUNDARY>|$(sed_replacement_escape "$boundary")|g" \
+    "$file" 2>/dev/null || true
+  ok "  llm-wiki/project-context.md 초기 인터뷰 반영"
+}
+
 # ============================================================================
 # 7. .sfs-local/ 스캐폴드 (merge 모드)
 # ============================================================================
@@ -722,7 +751,8 @@ elif [ -d "$LLM_WIKI_SRC" ]; then
   if [ "$_wiki_decision" = "install" ]; then
     mkdir -p "$TARGET/llm-wiki"
     cp -R "$LLM_WIKI_SRC"/. "$TARGET/llm-wiki/" 2>/dev/null || true
-    ok "  llm-wiki/ 설치 (README + 00-llm-retrieval-guide + _FRONTMATTER + ddd/ + bug-reports/; 수동 유지)"
+    ok "  llm-wiki/ 설치 (README + 00-llm-retrieval-guide + project-context + _FRONTMATTER + ddd/ + bug-reports/; 수동 유지)"
+    fill_llm_wiki_project_context "$TARGET/llm-wiki/project-context.md"
   else
     mkdir -p "$TARGET/.sfs-local"
     printf 'declined_at=%s\nreason=user-opt-out-at-install\nnote=re-run `sfs init` or copy templates/.sfs-local-template/llm-wiki/ to add the vault later.\n' \

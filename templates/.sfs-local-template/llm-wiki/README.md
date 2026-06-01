@@ -13,7 +13,9 @@ tags:
 This folder is your project's **long-horizon knowledge vault** — the durable,
 human- and agent-readable layer that survives individual sessions. It is created
 by `sfs init` / `sfs upgrade` as an **empty, manually maintained skeleton**. You
-own it; you grow it.
+own it; you grow it. Its job is queryable project memory: raw work stays in
+source locations, while this wiki keeps source-linked maps, glossary, decisions,
+and gaps so project or company knowledge can be queried by reference.
 
 ## The Raw / Wiki / Schema model
 
@@ -42,6 +44,8 @@ it.
 
 - [00-llm-retrieval-guide.md](00-llm-retrieval-guide.md) — how an agent should
   read this vault (read order + topic routing). Edit it as your map grows.
+- [project-context.md](project-context.md) — the initial interview seed: project
+  purpose, user/operator, core output, core question, and first boundaries.
 - [_FRONTMATTER.md](_FRONTMATTER.md) — the frontmatter convention every note
   follows.
 - [ddd/README.md](ddd/README.md) — domain-model (DDD) operating root: bounded
@@ -57,3 +61,10 @@ it.
 3. Link it from [00-llm-retrieval-guide.md](00-llm-retrieval-guide.md) so agents
    find it.
 4. Keep notes short and atomic; prefer linking over duplicating.
+
+## Entry mechanic
+
+When entering a new codebase or domain, observe first: runtime/log/metric or
+smoke behavior when available, plus git, tests, config, scripts, and release
+signals. Then turn the useful terms into glossary seeds and route the shape of
+the system through maps or gaps before broad change.

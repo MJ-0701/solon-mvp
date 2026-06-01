@@ -32,7 +32,8 @@ expected_manifest="$(printf '%s\n' \
   "README.md" \
   "_FRONTMATTER.md" \
   "bug-reports/README.md" \
-  "ddd/README.md" | sort)"
+  "ddd/README.md" \
+  "project-context.md" | sort)"
 [ -d "${WIKI_TPL}" ] || fail "missing template dir: templates/.sfs-local-template/llm-wiki"
 actual_manifest="$(cd "${WIKI_TPL}" && find . -type f | sed 's#^\./##' | sort)"
 if [ "${actual_manifest}" != "${expected_manifest}" ]; then
@@ -45,11 +46,12 @@ fi
 
 # ── 2) Golden checksums — byte-exact skeleton; any content edit must be re-reviewed. ─
 declare -a GOLDEN=(
-  "00-llm-retrieval-guide.md db99b2a357a42250a85d8af8fca8962d89822848caf70c7ebc4ee6f5b4f1c015"
-  "README.md d28a0efb4f75dd01d8528a2eee0742b6e92e547731f84d3396c97583135f2b10"
+  "00-llm-retrieval-guide.md 7b5e8d5f47b5e6dfbcd07917e4d0a9997f928c943d4eec87be173617b98904ee"
+  "README.md e82268103f17ab96071c3eeede17ff875c4bd78ccc4a81d4f3fbf9eba9126a89"
   "_FRONTMATTER.md 45e6f15ecf6048d0ae26751fafd162992abac8ace620c10e8c8e9ce01f5fb66c"
   "bug-reports/README.md 6ffd032005dffb10b1d141d2b3e8ec48ecab0777a1cdfed3e498ff6749f36eee"
-  "ddd/README.md 19d6366e7643b0ba67f49ef35047b42cafb5c032d91dea01471ce19d15dc0179"
+  "ddd/README.md 2d5e3a9336012a1beb48a724925ac2a530250c3a73d6173c164719d91028b6c0"
+  "project-context.md cd268e7e4072bd25ecbfbaf480cb18a6d0c22b2f16f6756641c45358dc5faa37"
 )
 for row in "${GOLDEN[@]}"; do
   rel="${row%% *}"; want="${row##* }"
@@ -67,7 +69,7 @@ done
 #     itself be the leak (and trips test-private-dev-path-hygiene.sh, which
 #     already covers private dev-path tokens dist-wide). Byte-exact content is
 #     locked by the golden checksums in §2; this is defense-in-depth on links.
-for rel in README.md 00-llm-retrieval-guide.md _FRONTMATTER.md; do
+for rel in README.md 00-llm-retrieval-guide.md _FRONTMATTER.md project-context.md; do
   if grep -nE '\]\(\.\./' "${WIKI_TPL}/${rel}" >/dev/null; then
     fail "vault-root file ${rel} links outside the vault ('../') — skeleton must be self-contained"
   fi
@@ -98,7 +100,7 @@ do_install() { # $1=repo $2..=extra env assignments
 # ── 5) Live: `sfs init --yes` materializes the full vault at project root. ───
 t_install="$(fresh_repo)"
 do_install "${t_install}"
-for rel in README.md 00-llm-retrieval-guide.md _FRONTMATTER.md ddd/README.md bug-reports/README.md; do
+for rel in README.md 00-llm-retrieval-guide.md _FRONTMATTER.md ddd/README.md bug-reports/README.md project-context.md; do
   [ -f "${t_install}/llm-wiki/${rel}" ] || fail "init did not materialize llm-wiki/${rel}"
 done
 [ -f "${t_install}/.sfs-local/llm-wiki.waiver" ] && fail "init default-install must NOT write a waiver"

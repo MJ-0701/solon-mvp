@@ -34,4 +34,12 @@ for key in capture note commands/capture commands/capture.md; do
   esac
 done
 
+for key in ingest commands/ingest commands/ingest.md; do
+  out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" context path "${key}")"
+  case "${out}" in
+    */context/commands/ingest.md) ;;
+    *) fail "context key ${key} resolved to unexpected path: ${out}" ;;
+  esac
+done
+
 echo "test-context-aliases: OK"

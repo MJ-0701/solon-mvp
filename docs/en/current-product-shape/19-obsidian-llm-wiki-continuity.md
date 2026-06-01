@@ -15,6 +15,11 @@ SFS recommends Obsidian as an optional companion for project memory. It is free,
 local-first, and Markdown-native, so it works well as an LLM retrieval layer
 without replacing the source documents.
 
+The practical aim is queryable company memory. Raw work stays in source
+locations; `llm-wiki/` keeps source-linked maps, glossary seeds, decisions, and
+gaps so future agents can answer project questions by reference instead of
+asking the user to repeat context.
+
 For a new project, SFS may recommend a repo-root vault and a small `llm-wiki/`
 folder after the normal scaffold exists. The wiki should point to product
 design, DDD/TDD method, tests, CI, release paths, and durable domain terms.
@@ -49,6 +54,12 @@ ledger, unknowns/gaps, questions ledger, development guardrails, and bug,
 release, or test memory when those surfaces exist. The questions ledger should
 mark what is already answered and when it may become stale, so agents do not
 ask the user to repeat tacit knowledge that the project has already captured.
+
+`sfs ingest` is the Raw-layer entry mechanic for new sources. It requires a
+one-line collection purpose and a `source_type` (`article`, `youtube`,
+`podcast`, `book`, or `research`) before writing an intake draft under
+`.sfs-local/ingest/`. The draft is only a pointer and compile plan; durable
+meaning moves into `llm-wiki/` later by source link, glossary, map, or gap note.
 
 If `.obsidian/` or `llm-wiki/` already exists, SFS treats the project as
 Obsidian-applied. Agents should check `llm-wiki/README.md` and

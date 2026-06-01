@@ -1,3 +1,17 @@
+## [Unreleased]
+
+## [0.8.7] - 2026-06-01
+
+> **llm-wiki 코어 진입 mechanic 으로 목적 있는 Raw 수집과 관측-먼저 프로젝트 맥락 부트스트랩을 추가.**
+
+### Added
+
+- **WMU-3 llm-wiki core entry mechanic.**
+  `sfs ingest` now creates purpose-gated Raw intake stubs under `.sfs-local/ingest/`
+  with `source_type` schemas for `article`, `youtube`, `podcast`, `book`, and
+  `research`. The shipped `llm-wiki/` skeleton gains `project-context.md`,
+  observe-first glossary/map entry guidance, and queryable-company positioning.
+
 ## [0.8.6] - 2026-06-01
 
 > **AI 시대 wiki 진입·자원·생성자산·자산명명 관점을 4개 정책팩 review-lens 로 확장 (pack-expand pass-2).**

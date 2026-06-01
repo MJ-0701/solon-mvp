@@ -34,7 +34,9 @@ to fill in):
 1. When you name a new concept, add it to the ubiquitous language first.
 2. When two parts of the system mean different things by the same word, that is
    a context boundary — record it.
-3. Route domain questions here from
+3. When entering unfamiliar code, observe behavior and source signals first,
+   then record glossary seeds and map gaps before broad change.
+4. Route domain questions here from
    [../00-llm-retrieval-guide.md](../00-llm-retrieval-guide.md).
 
 Keep this aligned with how the code actually names things; the value is a shared

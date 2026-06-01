@@ -17,6 +17,7 @@ module:
 - `commands/implement.md` — implement / build / execute work.
 - `commands/review.md` — review / CPO / verdict.
 - `commands/capture.md` — minimal evidence primitive for approval / waiver / decision / blocker / external evidence; not a lifecycle step.
+- `commands/ingest.md` — purpose-gated raw intake stub before llm-wiki compile.
 - `commands/report-bug.md` — file an SFS-product bug to the official gh channel; confirm gate before fix.
 - `commands/flowcheck.md` — postflight self-check that SFS ran per documented flow; classify divergence and route product bugs to report-bug.
 - `commands/release.md` — release / deploy / Homebrew / Scoop.

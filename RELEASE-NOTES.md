@@ -7,6 +7,23 @@
 
 ---
 
+## 0.8.7
+
+llm-wiki 코어 진입 mechanic 으로 목적 있는 Raw 수집과 관측-먼저 프로젝트 맥락 부트스트랩을 더했습니다.
+
+체감 변화:
+
+- `sfs ingest` 로 자료를 Raw intake draft 로 남길 때 **수집 목적/관점 1줄**을 먼저
+  기록합니다. `article`, `youtube`, `podcast`, `book`, `research` 별로 필요한
+  기본 필드가 갈라져서, 나중에 llm-wiki 로 컴파일할 때 출처와 목적을 잃지 않습니다.
+- `sfs init` 이 까는 `llm-wiki/` 골격에 `project-context.md` 가 추가됩니다. 새 프로젝트
+  초기에 목적, 사용자, 핵심 산출물, 먼저 답할 질문, 비범위를 짧게 남겨서 프로젝트를
+  **쿼리 가능한 기억**으로 만들기 쉬워집니다.
+- wiki 진입 가이드는 새 도메인/코드베이스를 만날 때 관측(runtime/log/git/test/config)
+  먼저, 그 다음 용어집과 맵을 만드는 흐름을 기본으로 안내합니다.
+
+---
+
 ## 0.8.6
 
 AI 시대 wiki 진입·인프라·디자인·분류 관점을 4개 지식팩의 review-lens 로 더했습니다.

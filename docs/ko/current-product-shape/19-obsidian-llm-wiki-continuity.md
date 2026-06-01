@@ -14,6 +14,10 @@ load_when: "Read when docs/ko/current-product-shape.md routes to this section."
 SFS 는 프로젝트 기억을 위해 Obsidian 을 선택적 동반 도구로 권장합니다. 무료이고, 로컬 우선이며,
 Markdown 기반이라 원문 문서를 대체하지 않는 LLM retrieval layer 로 쓰기 좋습니다.
 
+실제 목적은 쿼리 가능한 회사 기억입니다. Raw work 는 source 위치에 두고, `llm-wiki/` 는
+source link, map, glossary seed, decision, gap 을 남겨 다음 agent 가 사용자에게 같은 맥락을
+다시 묻지 않고 project question 에 답하게 합니다.
+
 신규 프로젝트에서는 일반 scaffold 가 생긴 뒤 repo root vault 와 작은 `llm-wiki/` 폴더를 권장할 수
 있습니다. wiki 는 product design, DDD/TDD method, tests, CI, release path, durable domain term 으로
 이어지는 지도 역할을 합니다.
@@ -41,6 +45,11 @@ follow-up gap 같은 durable conclusion 만 받습니다. wiki 는 close artifac
 최소 baseline 은 project map, domain 또는 DDD map, decision ledger, unknowns/gaps, questions ledger,
 dev guardrails, 그리고 해당 표면이 있으면 bug/release/test memory 입니다. questions ledger 는 이미 답한
 내용과 다시 물어도 되는 조건을 기록해서 agent 가 사용자의 암묵지 설명을 반복 질문하지 않게 합니다.
+
+`sfs ingest` 는 새 source 를 넣는 Raw-layer 진입 mechanic 입니다. `.sfs-local/ingest/` 에 intake
+초안을 쓰기 전에 수집 목적 1줄과 `source_type`(`article`, `youtube`, `podcast`, `book`,
+`research`)을 요구합니다. 이 초안은 pointer 와 compile plan 일 뿐이며, durable meaning 은 나중에
+source link, glossary, map, gap note 로 `llm-wiki/` 에 들어갑니다.
 
 이미 `.obsidian/` 또는 `llm-wiki/` 가 있으면 SFS 는 Obsidian 적용 프로젝트로 취급합니다. 이 경우
 agent 는 `llm-wiki/README.md` 와 `llm-wiki/ddd/README.md` 를 먼저 확인하고, 관련 map 이 없으면
