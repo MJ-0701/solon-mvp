@@ -7,6 +7,21 @@
 
 ---
 
+## 0.8.15
+
+0.8.14 Stop hook packaging fix 가 MCP server archive hygiene 까지 보존합니다.
+
+체감 변화:
+
+- 0.8.14 tag archive 에 `mcp-server/__pycache__/*.pyc` 가 함께 들어간 release-cut
+  hygiene 문제를 고쳤습니다.
+- `mcp-server/` 는 공식 MCP host channel 이므로 release cut allowlist 에 포함하고,
+  `--delete` sync 로 stale cache 파일을 제거합니다.
+- Stop hook template 은 계속 포함되지만, Python cache/build/env 파일은 다시 ignore 됩니다.
+  최종 배포판은 0.8.15 입니다.
+
+---
+
 ## 0.8.14
 
 0.8.13 자율주행 루프 배치가 Stop hook template까지 tag archive에 포함되어 설치됩니다.

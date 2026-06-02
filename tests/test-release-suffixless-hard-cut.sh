@@ -52,6 +52,16 @@ if ! grep -Fq '"RELEASE-NOTES.md"' "${CUT_RELEASE}"; then
   exit 1
 fi
 
+if ! grep -Fq '".gitignore"' "${CUT_RELEASE}"; then
+  echo "FAIL: cut-release.sh allowlist omits .gitignore, so package ignore rules can drift" >&2
+  exit 1
+fi
+
+if ! grep -Fq '"mcp-server"' "${CUT_RELEASE}"; then
+  echo "FAIL: cut-release.sh allowlist omits mcp-server, so MCP channel files can go stale" >&2
+  exit 1
+fi
+
 if ! grep -Fq '(-product)?' "${VERIFY_RELEASE}"; then
   echo "FAIL: verify-product-release.sh does not accept suffixless product versions" >&2
   exit 1

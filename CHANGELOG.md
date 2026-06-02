@@ -1,5 +1,18 @@
 ## [Unreleased]
 
+## [0.8.15] - 2026-06-02
+
+> **0.8.14 Stop hook packaging fix now preserves MCP server archive hygiene.**
+
+### Fixed
+
+- **MCP server archive hygiene.**
+  The release cut allowlist now syncs `mcp-server/` with `--delete`, and the
+  product `.gitignore` keeps Python cache files ignored while still unignoring
+  shipped `templates/.claude/**` assets. This rolls forward the 0.8.14 cut,
+  where syncing the minimal source `.gitignore` let a stale
+  `mcp-server/__pycache__/*.pyc` file enter the stable tag archive.
+
 ## [0.8.14] - 2026-06-02
 
 > **0.8.13 자율주행 루프 배치가 Stop hook template까지 tag archive에 포함되어 설치됩니다.**
