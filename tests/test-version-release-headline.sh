@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.13" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.13" "version output"
-assert_contains_text "${output}" "latest 0.8.13" "latest output"
+[[ "${plain_output}" == "sfs 0.8.14" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.14" "version output"
+assert_contains_text "${output}" "latest 0.8.14" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline 자율주행 루프를 모델 진화" "installed release headline"
+assert_contains_text "${output}" "installed_release_headline 0.8.13 자율주행 루프 배치가 Stop hook template" "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline 자율주행 루프를 모델 진화" "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline 0.8.13 자율주행 루프 배치가 Stop hook template" "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

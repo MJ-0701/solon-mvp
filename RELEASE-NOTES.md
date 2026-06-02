@@ -7,6 +7,22 @@
 
 ---
 
+## 0.8.14
+
+0.8.13 자율주행 루프 배치가 Stop hook template까지 tag archive에 포함되어 설치됩니다.
+
+체감 변화:
+
+- 0.8.13 검증 중 packaged archive 에서 `templates/.claude/hooks/solon-stop-suggest.sh` 가
+  빠져 vendored install smoke 가 실패하던 문제를 고쳤습니다.
+- 이제 path-scoped suggest-only Stop hook 이 실제 tar.gz/zip archive 와 Homebrew/Scoop
+  설치본에 포함됩니다.
+- 사용자는 0.8.13의 모델 진화 점검 주기, 창업자 모드 문서, deep-interview,
+  Ralph-grade 검증 pair, 비개발자 Gate 6 렌즈를 그대로 받되, 설치 패키지까지
+  release verifier 를 통과한 0.8.14를 설치합니다.
+
+---
+
 ## 0.8.13
 
 자율주행 루프를 모델 진화, 창업자 모드, deep-interview, Ralph-grade 검증, 비개발자 안전 게이트까지 확장합니다.

@@ -16,6 +16,7 @@ assert_contains() {
 hook="${DIST_DIR}/templates/.claude/hooks/solon-stop-suggest.sh"
 install="${DIST_DIR}/install.sh"
 skill="${DIST_DIR}/templates/.agents/skills/sfs/SKILL.md"
+gitignore="${DIST_DIR}/.gitignore"
 
 assert_contains "${hook}" "suggest-only" "hook suggest-only marker"
 assert_contains "${hook}" "sfs agent doctor --fix" "hook agent doctor suggestion"
@@ -23,6 +24,7 @@ assert_contains "${hook}" "does not edit files" "hook no mutation statement"
 assert_contains "${install}" "templates/.claude/hooks/solon-stop-suggest.sh" "install hook source"
 assert_contains "${install}" ".claude/hooks/solon-stop-suggest.sh" "install hook target"
 assert_contains "${skill}" "Host-local tool/skill bundles" "project-scoped skill boundary"
+assert_contains "${gitignore}" "!templates/.claude/hooks/**" "hook template not ignored"
 
 if grep -Eq 'git[[:space:]]+(add|commit|push)|rm[[:space:]]+-rf|mv[[:space:]]+-f|cp[[:space:]]' "${hook}"; then
   fail "hook must remain suggest-only; found mutating command"

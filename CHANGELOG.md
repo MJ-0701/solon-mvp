@@ -1,5 +1,18 @@
 ## [Unreleased]
 
+## [0.8.14] - 2026-06-02
+
+> **0.8.13 자율주행 루프 배치가 Stop hook template까지 tag archive에 포함되어 설치됩니다.**
+
+### Fixed
+
+- **Stop hook template packaging.**
+  The product `.gitignore` now unignores `templates/.claude/hooks/**`, and the
+  release cut allowlist now syncs `.gitignore` into stable product releases.
+  This rolls forward the 0.8.13 verifier failure where vendored installs looked
+  for `templates/.claude/hooks/solon-stop-suggest.sh` but the tag archive did
+  not contain the ignored template file.
+
 ## [0.8.13] - 2026-06-02
 
 > **자율주행 루프를 모델 진화, 창업자 모드, deep-interview, Ralph-grade 검증, 비개발자 안전 게이트까지 확장합니다.**
