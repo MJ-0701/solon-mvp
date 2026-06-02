@@ -51,7 +51,8 @@ while IFS= read -r file; do
     # route them.
     first_line="$(sed -n '1p' "${file}")"
     [[ "${first_line}" == "---" ]] || fail "${file} missing opening frontmatter"
-    sed -n '2,40p' "${file}" | grep -Fxq -- "---" || fail "${file} missing closing frontmatter"
+    closing_slice="$(sed -n '2,40p' "${file}")"
+    [[ $'\n'"${closing_slice}"$'\n' == *$'\n---\n'* ]] || fail "${file} missing closing frontmatter"
     continue
   fi
 
@@ -59,7 +60,8 @@ while IFS= read -r file; do
 
   first_line="$(sed -n '1p' "${file}")"
   [[ "${first_line}" == "---" ]] || fail "${file} missing opening frontmatter"
-  sed -n '2,40p' "${file}" | grep -Fxq -- "---" || fail "${file} missing closing frontmatter"
+  closing_slice="$(sed -n '2,40p' "${file}")"
+  [[ $'\n'"${closing_slice}"$'\n' == *$'\n---\n'* ]] || fail "${file} missing closing frontmatter"
 done < <(find "${DIST_DIR}" -name '*.md' -type f | sort)
 
 while IFS= read -r file; do
