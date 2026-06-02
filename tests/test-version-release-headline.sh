@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.15" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.15" "version output"
-assert_contains_text "${output}" "latest 0.8.15" "latest output"
+[[ "${plain_output}" == "sfs 0.8.16" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.16" "version output"
+assert_contains_text "${output}" "latest 0.8.16" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline 0.8.14 Stop hook packaging fix now preserves MCP server archive hygiene" "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Local stable release verification ignores host-local root" "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline 0.8.14 Stop hook packaging fix 가 MCP server archive hygiene" "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline Local stable release verification ignores host-local root" "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

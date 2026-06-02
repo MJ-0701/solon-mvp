@@ -1,5 +1,18 @@
 ## [Unreleased]
 
+## [0.8.16] - 2026-06-02
+
+> **Local stable release verification ignores host-local root `.claude` settings while still scanning shipped templates.**
+
+### Fixed
+
+- **Host-local `.claude` verifier boundary.**
+  `test-private-dev-path-hygiene.sh` now prunes the root `.claude/` directory,
+  which is ignored host-local state and can contain maintainer machine paths,
+  while continuing to scan shipped `templates/.claude/**` product assets. This
+  lets local stable release verification check active product surfaces without
+  failing on ignored Claude Code session settings.
+
 ## [0.8.15] - 2026-06-02
 
 > **0.8.14 Stop hook packaging fix now preserves MCP server archive hygiene.**

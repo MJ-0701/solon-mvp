@@ -53,6 +53,7 @@ scan_file="${tmp}/files.txt"
 # forbidden tokens to forbid them).
 find "${DIST_DIR}" \
   \( -path "${DIST_DIR}/.git" \
+     -o -path "${DIST_DIR}/.claude" \
      -o -path "${DIST_DIR}/.sfs-local" \
      -o -path "${DIST_DIR}/docs/maintenance" \) -prune -o \
   -type f \

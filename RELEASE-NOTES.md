@@ -7,6 +7,20 @@
 
 ---
 
+## 0.8.16
+
+Local stable release verification ignores host-local root `.claude` settings while still scanning shipped templates.
+
+체감 변화:
+
+- local stable repo 에 남아 있는 ignored `.claude/settings.local.json` 같은 Claude Code
+  세션 파일이 release verifier 를 깨지 않도록 했습니다.
+- 제품으로 배송되는 `templates/.claude/**` 는 계속 검사합니다. Stop hook template 누락은
+  여전히 잡고, host-local machine path 만 active product surface 에서 제외합니다.
+- 최종 배포판은 0.8.16 입니다.
+
+---
+
 ## 0.8.15
 
 0.8.14 Stop hook packaging fix 가 MCP server archive hygiene 까지 보존합니다.
