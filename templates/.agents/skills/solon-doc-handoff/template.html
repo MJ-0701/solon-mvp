@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<!--
+  Solon handoff artifact template.
+  Placeholder-driven: replace {{TOKENS}} and <PROJECT-NAME>/<DATE> before shipping.
+  The copy-as-prompt export below enforces "a handoff is always a next-session
+  prompt" at the UI level. Do not hardcode project-specific values here.
+-->
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><PROJECT-NAME> — Handoff {{GENERATED_AT}}</title>
+  <style>
+    :root { --bg:#0e1116; --fg:#e6edf3; --muted:#8b949e; --card:#161b22; --accent:#2f81f7; --ok:#3fb950; --warn:#d29922; }
+    * { box-sizing:border-box; }
+    body { margin:0; font:15px/1.55 -apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--fg); }
+    main { max-width:880px; margin:0 auto; padding:32px 20px 80px; }
+    h1 { font-size:24px; margin:0 0 4px; }
+    .sub { color:var(--muted); margin:0 0 24px; }
+    .card { background:var(--card); border:1px solid #30363d; border-radius:10px; padding:18px 20px; margin:14px 0; }
+    .card h2 { font-size:14px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:0 0 10px; }
+    dl { display:grid; grid-template-columns:140px 1fr; gap:6px 16px; margin:0; }
+    dt { color:var(--muted); } dd { margin:0; font-family:ui-monospace,SFMono-Regular,monospace; }
+    ul { margin:6px 0 0; padding-left:20px; } li { margin:3px 0; }
+    pre { background:#0b0f14; border:1px solid #30363d; border-radius:8px; padding:14px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
+    .bar { position:sticky; top:0; display:flex; gap:10px; align-items:center; background:var(--bg); padding:12px 0; }
+    button { font:inherit; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; padding:9px 16px; border-radius:8px; }
+    button.secondary { background:transparent; color:var(--accent); }
+    .toast { color:var(--ok); font-size:13px; opacity:0; transition:opacity .2s; }
+    .toast.show { opacity:1; }
+  </style>
+</head>
+<body>
+<main>
+  <div class="bar">
+    <!-- copy-as-prompt: the standard handoff export. Marker is ASCII so tests
+         can assert it without a multibyte locale grep. -->
+    <button data-copy-as-prompt onclick="copyAsPrompt()">📋 이 결정을 다음 세션 프롬프트로 복사</button>
+    <button class="secondary" onclick="copyAsJson()">copy as JSON</button>
+    <span id="copy-toast" class="toast">복사됨 — 새 세션 첫 프롬프트로 붙여넣으세요</span>
+  </div>
+
+  <h1><PROJECT-NAME> — Handoff</h1>
+  <p class="sub">{{GENERATED_AT}} · session <code>{{SESSION_CODENAME}}</code></p>
+
+  <div class="card">
+    <h2>State</h2>
+    <dl>
+      <dt>branch</dt><dd>{{BRANCH}}</dd>
+      <dt>commit</dt><dd>{{COMMIT_SHA}}</dd>
+      <dt>status</dt><dd>{{GIT_STATUS}}</dd>
+      <dt>current WU</dt><dd>{{CURRENT_WU}}</dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h2>Done this session</h2>
+    <ul>
+      <!-- repeat per item -->
+      <li>{{DONE_ITEM}}</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Evidence</h2>
+    <ul>
+      <!-- repeat per evidence line: test result, gate, link -->
+      <li>{{EVIDENCE_ITEM}}</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Next session — exact prompt</h2>
+    <pre id="next-session-prompt">{{NEXT_SESSION_PROMPT}}</pre>
+  </div>
+
+  <!-- machine-readable mirror for copy-as-json -->
+  <script type="application/json" id="handoff-json">
+  {
+    "project": "<PROJECT-NAME>",
+    "generated_at": "{{GENERATED_AT}}",
+    "session": "{{SESSION_CODENAME}}",
+    "branch": "{{BRANCH}}",
+    "commit": "{{COMMIT_SHA}}",
+    "current_wu": "{{CURRENT_WU}}",
+    "next_session_prompt": "{{NEXT_SESSION_PROMPT}}"
+  }
+  </script>
+</main>
+
+<script>
+  function flashToast() {
+    var t = document.getElementById('copy-toast');
+    t.classList.add('show');
+    setTimeout(function () { t.classList.remove('show'); }, 1800);
+  }
+  // copyAsPrompt: copies the next-session prompt verbatim so the handoff is
+  // re-entered as a prompt, not re-read as a document (§1.29).
+  function copyAsPrompt() {
+    var text = document.getElementById('next-session-prompt').innerText;
+    navigator.clipboard.writeText(text).then(flashToast);
+  }
+  function copyAsJson() {
+    var text = document.getElementById('handoff-json').textContent.trim();
+    navigator.clipboard.writeText(text).then(flashToast);
+  }
+</script>
+</body>
+</html>

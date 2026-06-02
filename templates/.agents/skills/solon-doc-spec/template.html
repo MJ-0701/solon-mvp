@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<!--
+  Solon spec/plan artifact template. Placeholder-driven; replace {{TOKENS}} and
+  <PROJECT-NAME>/<DATE> before shipping. No project-specific fixed values here.
+  "plan = quality gate": the Explicit-assumptions and Acceptance sections are
+  not optional.
+-->
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><PROJECT-NAME> — Spec: {{TITLE}}</title>
+  <style>
+    :root { --bg:#0e1116; --fg:#e6edf3; --muted:#8b949e; --card:#161b22; --accent:#2f81f7; --warn:#d29922; }
+    * { box-sizing:border-box; }
+    body { margin:0; font:15px/1.55 -apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--fg); }
+    main { max-width:880px; margin:0 auto; padding:32px 20px 80px; }
+    h1 { font-size:24px; margin:0 0 4px; }
+    .sub { color:var(--muted); margin:0 0 24px; }
+    .card { background:var(--card); border:1px solid #30363d; border-radius:10px; padding:18px 20px; margin:14px 0; }
+    .card h2 { font-size:14px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:0 0 10px; }
+    .card.warn { border-color:var(--warn); }
+    table { width:100%; border-collapse:collapse; }
+    th,td { text-align:left; padding:8px 10px; border-bottom:1px solid #30363d; vertical-align:top; }
+    th { color:var(--muted); font-weight:600; font-size:13px; }
+    ul { margin:6px 0 0; padding-left:20px; } li { margin:3px 0; }
+    code { font-family:ui-monospace,SFMono-Regular,monospace; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>{{TITLE}}</h1>
+  <p class="sub"><PROJECT-NAME> · {{GENERATED_AT}}</p>
+
+  <div class="card">
+    <h2>Goal — what we are actually building</h2>
+    <p>{{GOAL}}</p>
+  </div>
+
+  <div class="card">
+    <h2>Acceptance criteria</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Criterion</th><th>How verified</th></tr></thead>
+      <tbody>
+        <!-- repeat per criterion -->
+        <tr><td>{{AC_ID}}</td><td>{{AC_CRITERION}}</td><td>{{AC_VERIFY}}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card warn">
+    <h2>Explicit assumptions (implicit → explicit)</h2>
+    <ul>
+      <!-- repeat per assumption -->
+      <li>{{ASSUMPTION_ITEM}}</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Easy-to-forget edge cases</h2>
+    <ul>
+      <!-- repeat per edge case -->
+      <li>{{EDGE_CASE_ITEM}}</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Open decisions (user decides)</h2>
+    <table>
+      <thead><tr><th>Question</th><th>Options</th><th>Owner</th></tr></thead>
+      <tbody>
+        <!-- repeat per open decision -->
+        <tr><td>{{OD_QUESTION}}</td><td>{{OD_OPTIONS}}</td><td>{{OD_OWNER}}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+</body>
+</html>

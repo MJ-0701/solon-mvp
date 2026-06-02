@@ -30,5 +30,13 @@ sfs status
 - `review`: 만든 쪽이 스스로 통과시키지 않도록 검토 역할과 근거를 분리합니다.
 - `retro`: 결과, 배운 점, 다음 action 을 남기고 sprint 를 닫습니다.
 
----
+Founder lifecycle 로 보면 같은 flow 가 네 단계에 걸쳐 반복됩니다.
 
+| stage | Solon focus | Cowork/Chat | Code/CLI |
+|---|---|---|---|
+| Idea | `brainstorm`/`plan` 으로 문제, 고객, 포기할 것 정리 | 의도 인터뷰와 옵션 비교 | 필요 시 prototype scaffold |
+| MVP | AC 가 있는 작은 `implement` slice | product review, handoff | 구현, 테스트, browser/API 검증 |
+| Launch | `review`/release readiness | copy, onboarding, launch notes | deploy/publish 검증과 rollback evidence |
+| Scale | `loop`/`retro`/wiki memory | 전략, 지식 정리, next bets | 반복 구현, regression, automation |
+
+---

@@ -54,6 +54,7 @@ emit model_resolved agent_role=implementation-worker resolved_tier=execution_sta
 emit worker_dispatched role=implementation-worker model=sonnet-4.6 parallel=false
 emit gate_passed gate=G3 order_index=1 self_cpo=pass
 emit gate_passed gate=G5 order_index=2 self_cpo=pass
+emit verification_pair implementer=implementation-worker verifier=cpo-evaluator implementer_context=worker-1 verifier_context=review-1 gate=G5
 run_flowcheck
 [[ "${FLOW_RC}" -eq 0 ]] || fail "conformant case should exit 0, got ${FLOW_RC}: ${FLOW_OUT}"
 grep -q -- "PASS" <<<"${FLOW_OUT}" || fail "conformant case should report PASS: ${FLOW_OUT}"
@@ -63,6 +64,7 @@ reset_events
 emit model_resolved agent_role=implementation-worker resolved_tier=execution_standard resolved_model=sonnet-4.6 source=policy
 emit gate_passed gate=G3 order_index=1 self_cpo=pass
 emit gate_passed gate=G5 order_index=2 self_cpo=partial
+emit verification_pair implementer=implementation-worker verifier=cpo-evaluator implementer_context=worker-1 verifier_context=review-1 gate=G5
 run_flowcheck
 [[ "${FLOW_RC}" -eq 0 ]] || fail "advisory case should exit 0, got ${FLOW_RC}: ${FLOW_OUT}"
 grep -q -- "WARN" <<<"${FLOW_OUT}" || fail "advisory case should report WARN: ${FLOW_OUT}"
@@ -72,6 +74,7 @@ grep -q "fcp-self-cpo" <<<"${FLOW_OUT}" || fail "advisory case should name fcp-s
 reset_events
 emit model_resolved agent_role=implementation-worker resolved_tier=execution_high resolved_model=opus-4.7 source=current
 emit gate_passed gate=G5 order_index=1 self_cpo=pass
+emit verification_pair implementer=implementation-worker verifier=cpo-evaluator implementer_context=worker-1 verifier_context=review-1 gate=G5
 run_flowcheck
 [[ "${FLOW_RC}" -eq 8 ]] || fail "model-tier violation should exit 8 (blocking), got ${FLOW_RC}: ${FLOW_OUT}"
 grep -q "fcp-model-tier" <<<"${FLOW_OUT}" || fail "should name fcp-model-tier: ${FLOW_OUT}"
@@ -80,6 +83,7 @@ grep -q "fcp-model-tier" <<<"${FLOW_OUT}" || fail "should name fcp-model-tier: $
 reset_events
 emit model_resolved agent_role=implementation-worker resolved_tier=execution_high resolved_model=opus-4.7 source=current
 emit gate_passed gate=G5 order_index=1 self_cpo=pass
+emit verification_pair implementer=implementation-worker verifier=cpo-evaluator implementer_context=worker-1 verifier_context=review-1 gate=G5
 emit evidence_capture kind=waiver text_preview="fcp-model-tier: opus run authorized for this hotfix"
 run_flowcheck
 [[ "${FLOW_RC}" -eq 0 ]] || fail "named waiver should downgrade to exit 0, got ${FLOW_RC}: ${FLOW_OUT}"
@@ -90,6 +94,7 @@ reset_events
 emit model_resolved agent_role=implementation-worker resolved_tier=execution_high resolved_model=opus-4.7 source=user-override
 emit evidence_capture kind=exception scope=sprint text_preview="run top model directly this sprint"
 emit gate_passed gate=G5 order_index=1 self_cpo=pass
+emit verification_pair implementer=implementation-worker verifier=cpo-evaluator implementer_context=worker-1 verifier_context=review-1 gate=G5
 run_flowcheck
 [[ "${FLOW_RC}" -eq 8 ]] || fail "unsurfaced override should exit 8, got ${FLOW_RC}: ${FLOW_OUT}"
 grep -q "fcp-conflict-surfaced" <<<"${FLOW_OUT}" || fail "should name fcp-conflict-surfaced: ${FLOW_OUT}"
@@ -100,6 +105,7 @@ emit model_resolved agent_role=implementation-worker resolved_tier=execution_hig
 emit conflict_surfaced kind=model-tier detail="user asked top model directly" resolved_by=user
 emit evidence_capture kind=exception scope=sprint text_preview="run top model directly this sprint"
 emit gate_passed gate=G5 order_index=1 self_cpo=pass
+emit verification_pair implementer=implementation-worker verifier=cpo-evaluator implementer_context=worker-1 verifier_context=review-1 gate=G5
 run_flowcheck
 [[ "${FLOW_RC}" -eq 0 ]] || fail "surfaced+scoped override should exit 0, got ${FLOW_RC}: ${FLOW_OUT}"
 
@@ -115,11 +121,21 @@ reset_events
 emit model_resolved agent_role=implementation-worker resolved_tier=execution_standard resolved_model=sonnet-4.6 source=policy
 emit gate_passed gate=G5 order_index=2 self_cpo=pass
 emit gate_passed gate=G3 order_index=1 self_cpo=pass
+emit verification_pair implementer=implementation-worker verifier=cpo-evaluator implementer_context=worker-1 verifier_context=review-1 gate=G5
 run_flowcheck
 [[ "${FLOW_RC}" -eq 8 ]] || fail "gate order regression should exit 8, got ${FLOW_RC}: ${FLOW_OUT}"
 grep -q "fcp-gate-order" <<<"${FLOW_OUT}" || fail "should name fcp-gate-order: ${FLOW_OUT}"
 
-# ── 9) verdict artifact written ────────────────────────────────────────────
+# ── 9) verifier == implementer → FAIL ──────────────────────────────────────
+reset_events
+emit model_resolved agent_role=implementation-worker resolved_tier=execution_standard resolved_model=sonnet-4.6 source=policy
+emit gate_passed gate=G5 order_index=1 self_cpo=pass
+emit verification_pair implementer=implementation-worker verifier=implementation-worker implementer_context=worker-1 verifier_context=review-1 gate=G5
+run_flowcheck
+[[ "${FLOW_RC}" -eq 8 ]] || fail "self-verification should exit 8, got ${FLOW_RC}: ${FLOW_OUT}"
+grep -q "fcp-verifier-implementer" <<<"${FLOW_OUT}" || fail "should name fcp-verifier-implementer: ${FLOW_OUT}"
+
+# ── 10) verdict artifact written ───────────────────────────────────────────
 [[ -f ".sfs-local/sprints/${SPRINT}/workbench/flowcheck.md" ]] \
   || fail "flowcheck should write verdict artifact"
 

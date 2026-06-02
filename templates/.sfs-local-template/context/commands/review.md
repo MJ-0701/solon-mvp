@@ -70,9 +70,7 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   bodies, transcripts, bridge probes, `.sfs-local/tmp/...`, and old review blobs
   burn future token budget. If insufficient, Do not request full chat history;
   name missing evidence.
-- Summaries should list verdict, findings, required actions, evidence, and next gate.
-  Show gates as `Gate N (Name)`, for example Gate 6 (Review), not a naked
-  internal id.
+- Summaries list verdict, findings, actions, evidence, and next gate; show gates as `Gate N (Name)`, for example Gate 6 (Review), not a naked internal id.
 - Lead with bugs, regressions, missing acceptance evidence, or risky behavior
   changes. Cosmetic drift is secondary unless it changes a documented contract.
 - Label findings by action pressure: `Critical` for security/data-loss/release
@@ -102,6 +100,9 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   for changed data/API/UI/auth/session/migration/cache/persistence/log shapes;
   mock-only evidence is partial without fixture name, invariant, boundary/
   negative coverage, and command/result.
+- Gate 6 nondeveloper safety review checks published-output structure,
+  security/admin/secret exposure, visible UX path, and refactor debt before the
+  result is called shippable.
 - Test output with zero tests run is not acceptance evidence, even when exit code is 0; require corrected discovery/selector evidence or an explicit waiver before PASS.
 - Gate 6 security/logging review maps touched surfaces to OWASP-style web/API/
   LLM/MCP risks, checks authz/secrets/PII/prompt-injection/tool-scope, rejects
@@ -141,8 +142,7 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   meaning is unchanged. Surface findings only when behaviour, traceability, or a
   documented contract changes; public APIs, CLI flags, consumed paths, persisted
   data shapes, and domain ubiquitous terms are contract surfaces and in-scope.
-- Let the adapter's `review_lens` stand unless it is clearly wrong. Use
-  `--lens <name>` only as an override.
+- Let the adapter's `review_lens` stand unless clearly wrong; use `--lens <name>` only as an override.
 - Repeated review for the same sprint/gate must converge. If `--lens auto`
   already selected a lens for that sprint/gate, later auto reviews reuse that
   lens instead of rotating to a new one. To intentionally change lens, pass an

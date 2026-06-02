@@ -3,7 +3,7 @@
 #
 # Solon SFS — `sfs event <type> [key=value ...]`.
 # Agent-facing emit of one non-collapsing Flow-Conformance Postflight (FCP)
-# event to events.jsonl. Bounded to the four contract types; `sfs flowcheck`
+# event to events.jsonl. Bounded to the FCP contract types; `sfs flowcheck`
 # asserts invariants over the resulting stream. An event is structured
 # evidence, never a substitute for a review verdict.
 
@@ -33,6 +33,7 @@ sprint_id is stamped automatically. Bounded contract types:
   worker_dispatched  role=.. model=.. parallel=true|false [lanes=..]
   gate_passed        gate=.. order_index=.. self_cpo=pass|partial|fail
   conflict_surfaced  kind=.. detail=.. resolved_by=user|capture [scope=wu|sprint|until-revoked]
+  verification_pair  implementer=.. verifier=.. [implementer_context=.. verifier_context=.. gate=..]
 
 Exit codes: 0 ok | 5 permission denied | 7 usage.
 EOF
@@ -49,9 +50,9 @@ EVENT_TYPE="$1"
 shift
 
 case "${EVENT_TYPE}" in
-  model_resolved|worker_dispatched|gate_passed|conflict_surfaced) ;;
+  model_resolved|worker_dispatched|gate_passed|conflict_surfaced|verification_pair) ;;
   *)
-    echo "unknown event type: ${EVENT_TYPE} (allowed: model_resolved worker_dispatched gate_passed conflict_surfaced)" >&2
+    echo "unknown event type: ${EVENT_TYPE} (allowed: model_resolved worker_dispatched gate_passed conflict_surfaced verification_pair)" >&2
     usage_event >&2
     exit "${SFS_EXIT_BADCLI}"
     ;;

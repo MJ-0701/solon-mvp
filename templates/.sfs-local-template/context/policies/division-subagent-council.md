@@ -31,9 +31,9 @@ load_when: ["division", "sub-agent", "6본부", "Gate 2", "Gate 3", "Gate 6"]
 - Implement: actual parallel worker lanes remain optional. Division council
   review is not optional; the lead may record the six lenses directly, or route
   read-only/fixed-scope capsules when the bridge supports sub-agents. The
-  QA/review verification lane must be a different agent from the implementing
-  (authoring) lane — never self-verify (see `sub-agent-capsule-contract.md`,
-  verifier ≠ author); model diversity is Gate 6 cross-CPO's responsibility.
+  QA/review verification lane must be a different agent/context from the
+  implementing lane. This verifier != implementer / verifier ≠ author rule is
+  a critical close invariant; model diversity is Gate 6 cross-CPO's responsibility.
 - Review: Gate 6 checks the division ledger along with the implementation
   acceptance ledger. Load `enterprise-evidence-pack.md` when QA/QC or project
   applied evidence is in scope, and `enterprise-performance-review-pack.md`

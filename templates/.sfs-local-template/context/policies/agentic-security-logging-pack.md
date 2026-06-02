@@ -108,3 +108,7 @@ speaker-time assertions.
   before execution: connector endpoint, account/credit owner, approval mode,
   prompt/asset id, aspect ratio, duration, artifact retention, and redaction
   boundary. Cost control and data control are the same review surface.
+- SEC-AIERA-007: Nondeveloper-published output must not expose secrets, admin
+  controls, auth/session internals, or unsafe destructive actions. Any such
+  exposure is critical-blocking until removed or explicitly approved with
+  bounded access and logging evidence.

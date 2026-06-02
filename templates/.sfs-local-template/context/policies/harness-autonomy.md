@@ -36,6 +36,10 @@ SFS applies this as a project-operating contract:
 - Long-running harnesses need a phase/run ledger: current phase, resume point,
   remaining work, expected outputs, recovery path, and stop condition must be
   artifact-backed before automation continues unattended.
+- Autonomy modes are explicit: dialogue/planning, autopilot, and Ralph-grade
+  loop. Ralph-grade ends only when every story AC is PASS, waived, or approved
+  deferred; it records slice evidence, review result, and next stop condition.
+  It still obeys token/session guardrails and mutex ownership.
 - Treat artifacts as coordination, not chat: workers write files, reports,
   ledgers, test output, or release evidence; leads inspect artifacts instead of
   relying on conversational memory.
@@ -52,6 +56,9 @@ SFS applies this as a project-operating contract:
 - Multi-agent review reduces human bottleneck only when the lead adjudicates
   reviewer findings against AC/source evidence; another agent's critique is
   evidence to evaluate, not automatic truth.
+- Verifier != implementer is a critical harness invariant. The authoring
+  worker cannot be the only reviewer for close; use a separate agent/context or
+  record an explicit waiver for low-risk self-CPO fallback.
 - Capture harness evolution deltas: initial harness, shipped harness, what
   changed, why, and which defect/feedback proved the change. Repeated deltas
   become tests, routed policies, skills, or scaffold defaults.

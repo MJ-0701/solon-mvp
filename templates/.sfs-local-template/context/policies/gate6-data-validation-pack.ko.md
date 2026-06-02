@@ -59,3 +59,10 @@ TDD 도구이지 그 자체로 acceptance evidence 가 아니다.
 mock-only PASS 는 fixture 가 이름 있고, synthetic 이며, 관련 boundary/negative case 를
 커버하고 invariant 를 assert 하지 않으면 partial 이다. production snapshot 또는 PII 는
 명시 승인과 redaction 이 필요하다.
+
+## Nondeveloper Output Safety
+
+공개 또는 demo 가능한 산출물은 Gate 6 에서 structure, security, UX, refactor 네
+가지를 사용자 언어로 기록한다. main path 를 찾을 수 있는지, secret/admin/auth
+surface 가 노출되지 않는지, primary task 가 보이는 UI/artifact 에서 작동하는지,
+placeholder/refactor debt 가 제거되었거나 follow-up 으로 명명되었는지 증명한다.

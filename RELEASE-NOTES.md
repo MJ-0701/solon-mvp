@@ -7,6 +7,28 @@
 
 ---
 
+## 0.8.13
+
+자율주행 루프를 모델 진화, 창업자 모드, deep-interview, Ralph-grade 검증, 비개발자 안전 게이트까지 확장합니다.
+
+체감 변화:
+
+- 모델/런타임이 크게 바뀌거나 3-6개월이 지나면 agent adapter, skills, hooks,
+  permissions, local overrides 를 점검하라는 유지보수 리듬이 생깁니다.
+- README/제품 문서가 Chat/Cowork/Code 와 Idea/MVP/Launch/Scale 창업자 흐름을 더
+  명확히 보여줘서, 비개발자도 어떤 모드로 시작할지 고르기 쉬워졌습니다.
+- Brainstorm/intake 는 요구가 흐리면 바로 plan 으로 달리지 않고 audience,
+  success, failure, constraints 기준의 deep-interview 질문으로 모호성을 줄입니다.
+- Stop hook 은 suggest-only 로 설치되어 path-scoped guardrail 을 제안하고, 사용자
+  작업을 강제로 덮어쓰지 않는 운영 boundary 를 지킵니다.
+- critical flow 는 author 와 verifier 를 나눠 verification-pair evidence 를 남깁니다.
+  "나중엔 랄프 루프 모드"의 기반이 될 Ralph-grade 자율 루프 방향이 문서,
+  flowcheck, test 로 잠겼습니다.
+- 비개발자 작업도 구조, 보안, UX, refactor 분리, secret/PII/logging 위험을 Gate 6 에서
+  확인합니다.
+
+---
+
 ## 0.8.12
 
 하네스 레퍼런스와 LLM Wiki 지식 냉장고 관점을 SFS 흐름에 흡수합니다.

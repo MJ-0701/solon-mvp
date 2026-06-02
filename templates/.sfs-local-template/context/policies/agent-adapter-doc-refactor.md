@@ -1,7 +1,7 @@
 ---
 id: sfs-policy-agent-adapter-doc-refactor
-summary: Keep root LLM agent Markdown files as frontmatter-only SFS pointers.
-load_when: ["agent", "adapter", "CLAUDE.md", "AGENTS.md", "GEMINI.md", "frontmatter", "docs bloat"]
+summary: Keep root LLM agent Markdown files as frontmatter-only SFS pointers and review them as models evolve.
+load_when: ["agent", "adapter", "CLAUDE.md", "AGENTS.md", "GEMINI.md", "frontmatter", "docs bloat", "config review", "model evolution"]
 ---
 
 # Agent Adapter Doc Refactor
@@ -23,6 +23,17 @@ points to the real sources of detail.
   `Solon SFS` plus `sfs context cat`, or the old full command-table marker.
 - Non-SFS project instructions are never rewritten automatically. Report them
   as skipped so the user can decide how to split them.
+
+## Config Review Cadence
+
+- Review root agent adapters, `SFS.md`, skills, hooks, plugins, permissions, and
+  `.sfs-local/context/` overrides every 3-6 months, after a major model/runtime
+  release, or when performance plateaus.
+- Remove stale workaround instructions that compensate for limitations the
+  current model/tooling no longer has. Keep durable critical gotchas, but move
+  detailed policy to routed context instead of bloating the adapter.
+- Record the review trigger, date, removed stale rule, and retained critical
+  gotcha in the current sprint report or maintenance note.
 
 ## Command Surface
 

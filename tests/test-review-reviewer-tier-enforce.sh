@@ -192,6 +192,7 @@ run_flowcheck() {
 reset_events
 emit model_resolved agent_role=cpo-evaluator resolved_tier=review_high resolved_model="${ROUTE}" route_model="${ROUTE}" source=policy
 emit gate_passed gate=G6 order_index=1 self_cpo=pass
+emit verification_pair implementer=implementation-worker verifier=cpo-evaluator implementer_context=worker-1 verifier_context=review-1 gate=G6
 run_flowcheck
 [[ "${FLOW_RC}" -eq 0 ]] || fail "flowcheck positive reviewer-tier should exit 0, got ${FLOW_RC}: ${FLOW_OUT}"
 flow_art="${sprint_dir}/workbench/flowcheck.md"
@@ -203,6 +204,7 @@ grep -q "fcp-reviewer-tier: reviewer model resolution on enforced review route" 
 reset_events
 emit model_resolved agent_role=cpo-evaluator resolved_tier=review_high resolved_model=gemini-2.5-pro route_model="${ROUTE}" source=policy
 emit gate_passed gate=G6 order_index=1 self_cpo=pass
+emit verification_pair implementer=implementation-worker verifier=cpo-evaluator implementer_context=worker-1 verifier_context=review-1 gate=G6
 run_flowcheck
 [[ "${FLOW_RC}" -eq 8 ]] || fail "D: sub-tier reviewer should exit 8, got ${FLOW_RC}: ${FLOW_OUT}"
 grep -q "fcp-reviewer-tier" <<<"${FLOW_OUT}" || fail "D: should name fcp-reviewer-tier: ${FLOW_OUT}"
@@ -211,6 +213,7 @@ grep -q "fcp-reviewer-tier" <<<"${FLOW_OUT}" || fail "D: should name fcp-reviewe
 reset_events
 emit model_resolved agent_role=cpo-evaluator resolved_tier=review_high resolved_model="${ROUTE}" route_model="${ROUTE}" source=current
 emit gate_passed gate=G6 order_index=1 self_cpo=pass
+emit verification_pair implementer=implementation-worker verifier=cpo-evaluator implementer_context=worker-1 verifier_context=review-1 gate=G6
 run_flowcheck
 [[ "${FLOW_RC}" -eq 8 ]] || fail "E: source=current reviewer should exit 8, got ${FLOW_RC}: ${FLOW_OUT}"
 grep -q "fcp-reviewer-tier" <<<"${FLOW_OUT}" || fail "E: should name fcp-reviewer-tier: ${FLOW_OUT}"
@@ -219,6 +222,7 @@ grep -q "fcp-reviewer-tier" <<<"${FLOW_OUT}" || fail "E: should name fcp-reviewe
 reset_events
 emit model_resolved agent_role=cpo-evaluator resolved_tier=review_high resolved_model="${ROUTE}" source=policy
 emit gate_passed gate=G6 order_index=1 self_cpo=pass
+emit verification_pair implementer=implementation-worker verifier=cpo-evaluator implementer_context=worker-1 verifier_context=review-1 gate=G6
 run_flowcheck
 [[ "${FLOW_RC}" -eq 8 ]] || fail "F: missing route_model should exit 8, got ${FLOW_RC}: ${FLOW_OUT}"
 grep -q "fcp-reviewer-tier" <<<"${FLOW_OUT}" || fail "F: should name fcp-reviewer-tier: ${FLOW_OUT}"
@@ -228,6 +232,7 @@ grep -q "fcp-reviewer-tier" <<<"${FLOW_OUT}" || fail "F: should name fcp-reviewe
 reset_events
 emit model_resolved agent_role=cpo-evaluator resolved_tier=review_high resolved_model=gemini-2.5-pro route_model=gemini-2.5-pro source=policy
 emit gate_passed gate=G6 order_index=1 self_cpo=pass
+emit verification_pair implementer=implementation-worker verifier=cpo-evaluator implementer_context=worker-1 verifier_context=review-1 gate=G6
 run_flowcheck
 [[ "${FLOW_RC}" -eq 8 ]] || fail "G: laundered sub-tier route (resolved==route==2.5) should exit 8, got ${FLOW_RC}: ${FLOW_OUT}"
 grep -q "fcp-reviewer-tier" <<<"${FLOW_OUT}" || fail "G: should name fcp-reviewer-tier: ${FLOW_OUT}"

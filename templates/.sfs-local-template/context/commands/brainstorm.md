@@ -74,6 +74,12 @@ load_when: ["brainstorm", "브레인스토밍", "requirements", "요구사항", 
   `hard`, ask a compact but demanding round (usually 4-7) and record unresolved
   owner decisions instead of guessing. Keep `status: draft`; final `Next` is
   "answer questions, then brainstorm again".
+- Deep-interview convergence: for ambiguous app/product asks, target
+  `ambiguity <= 20%` before plan. A one-word "ㄱㄱ" is momentum, not readiness.
+  Ask the compact battery that changes output: purpose (business/prototype/demo),
+  domain/product, stack choice or AI recommends, must-have vs not-now features,
+  done bar (core E2E/responsive/README), and desired detail depth. Persist the
+  confirmed Q&A as the plan seed.
 - For Gate 2 blocking choices, do not expose compact option bundles such as
   `A/A/A/C/C 확정`. If the user asks "권장안 다시 보여줘", restate the
   recommended path in plain language, include what would change under the

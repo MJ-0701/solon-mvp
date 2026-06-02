@@ -10,6 +10,15 @@ load_when: ["loop", "queue", "autonomous", "자율", "반복"]
 - Respect queue state: pending, claimed, done, failed, abandoned.
 - Stop on mutex conflict; never steal active work automatically.
 - Keep each loop slice small, evidence-backed, and reviewable.
+- Autonomy spectrum: dialogue/planning -> autopilot -> Ralph-grade loop.
+  Autopilot handles deterministic rework inside the accepted contract. A
+  Ralph-grade loop continues until every story AC is PASS, waived, or approved
+  deferred, with tests/review evidence recorded after each slice.
+- Parallel/team lanes remain opt-in. Default single-runner is safer unless the
+  user selects team mode and each lane has disjoint files_scope, AC ownership,
+  expected evidence, merge policy, and a native-language commit message.
+- Critical loop invariant: verifier != implementer. A reviewer/QA lane must be
+  a different agent/context from the authoring lane before work is closed.
 - Long-running monitor checkpoints must state `progressing`, `slow`,
   `stalled`, `dead`, or `auth_blocked`; record commit delta, PR/head delta,
   local dirty state, test/check delta, review status delta, worker liveness

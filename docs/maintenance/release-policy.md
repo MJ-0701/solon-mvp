@@ -4,9 +4,9 @@ title: "Release policy — distribution / templating / versioning rules"
 visibility: oss-public
 doc_type: maintenance-doc
 language: ko
-updated: 2026-05-28
-summary: "8 release-policy principles that govern install.sh / upgrade.sh / templates / VERSION / CHANGELOG / docs format / session transfer / mainline focus."
-load_when: "Read before editing install.sh / upgrade.sh / uninstall.sh / templates/, before cutting a release, or when deciding whether a change belongs in 0.6.x patch vs 0.7.x minor."
+updated: 2026-06-02
+summary: "Release-policy principles and model-evolution config review cadence for install.sh / upgrade.sh / templates / VERSION / CHANGELOG / docs format / session transfer / mainline focus."
+load_when: "Read before editing install.sh / upgrade.sh / uninstall.sh / templates/, before cutting a release, when deciding whether a change belongs in patch vs minor, or when reviewing stale agent config after model/runtime changes."
 ---
 
 # Release policy — `solon-mvp` distribution
@@ -83,6 +83,31 @@ opt-in 이다.
 - 긴 컨텍스트 wiki checklist reconciliation
 - postdev external review, lean procedure review
 - `process-lean` lens
+
+## Config-review cadence for model evolution
+
+모델과 agent runtime 이 진화하면 예전 `CLAUDE.md` / `AGENTS.md` / `GEMINI.md`,
+skills, hooks, permissions, local routed-context override 가 더 이상 도움이 되지
+않거나 오히려 agent 를 묶을 수 있다. Consumer 는 다음 cadence 로 config review 를
+수행한다:
+
+- 기본 주기: 3-6개월마다 1회.
+- 이벤트 주기: major model release, runtime/tooling release, 또는 성능 정체가
+  보일 때 즉시 1회.
+- 점검 범위: root agent adapter, `SFS.md`, installed skills/hooks/plugins,
+  permissions, `.sfs-local/context/` overrides, project maps, test/lint command
+  scope.
+- 처리 원칙: thin adapter 는 frontmatter pointer 로 유지하고, stale workaround
+  instruction 은 삭제/완화하며, durable policy 는 routed context 또는
+  `docs/maintenance/` 로 옮긴다.
+- 근거 기록: sprint report / `docs/solon/...` maintenance note / CHANGELOG 중
+  현재 작업 표면에 맞는 곳에 review date, trigger, removed stale rule, retained
+  critical gotcha 를 남긴다.
+
+Historical evidence: Anthropic, "How Claude Code works in large codebases"
+(2026-05-14) notes that model evolution can make old CLAUDE.md guidance
+unnecessary or constraining and recommends meaningful config review every
+three to six months or after major model releases.
 
 ## R-D1 dev-first 원칙
 

@@ -57,3 +57,11 @@ Prefer a failing or characterization check before the fix. At Gate 6, record:
 Mock-only PASS is partial unless the fixture is named, synthetic, covers the
 relevant boundary/negative case, and asserts the invariant. Production snapshots
 or PII require explicit approval and redaction.
+
+## Nondeveloper Output Safety
+
+For published or demoable output, Gate 6 records four user-readable checks:
+structure, security, UX, and refactor. The reviewer should prove the main path
+is findable, no secret/admin/auth surface is exposed, the primary task works in
+the visible UI or artifact, and any brittle placeholder/refactor debt is either
+removed or named as follow-up.

@@ -1015,7 +1015,8 @@ append_event() {
 # path instead. The active sprint_id is always stamped because append_event's
 # compaction rewrite drops any events.jsonl line lacking the active sprint_id —
 # without it a later regular capture would silently delete the flow record.
-# Contract types: model_resolved | worker_dispatched | gate_passed | conflict_surfaced.
+# Contract types: model_resolved | worker_dispatched | gate_passed |
+# conflict_surfaced | verification_pair.
 append_flow_event() {
   local etype="${1:?type required}"
   shift || true

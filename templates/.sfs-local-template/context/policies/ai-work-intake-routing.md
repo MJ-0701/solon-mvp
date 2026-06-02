@@ -39,6 +39,18 @@ config, git history, release/deploy scripts, and issue/PR traces. The agent must
 form a minimal known/unknown map before asking the user to re-explain broad
 project context.
 
+## Deep-Interview Intake Battery
+
+When the user gives an ambiguous app/product request, reduce ambiguity before
+Gate 3 rather than rewarding vague agreement. Target `ambiguity <= 20%` for
+plan-ready status; in hard mode, keep Brainstorm as `status: draft` until the
+material owner decisions are answered. Ask only questions that change the
+artifact: purpose (business/prototype/portfolio demo), product/domain, stack
+preference or AI recommendation, must-have vs not-now features, done bar
+(completion: core E2E, responsive UI, README/handoff), and desired detail depth. A bare
+"ㄱㄱ" or "ok" advances the interview only when these answers are already
+captured; otherwise it is not plan readiness.
+
 ## High-Context Prompt Normalization
 
 Keep the user's native language, but before worker handoff compile high-context

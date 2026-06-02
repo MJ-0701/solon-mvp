@@ -1,5 +1,37 @@
 ## [Unreleased]
 
+## [0.8.13] - 2026-06-02
+
+> **자율주행 루프를 모델 진화, 창업자 모드, deep-interview, Ralph-grade 검증, 비개발자 안전 게이트까지 확장합니다.**
+
+### Added
+
+- **Model-evolution config review cadence.**
+  Maintenance policy, routed adapter policy, and consumer agent adapter
+  templates now tell maintainers to review CLAUDE/AGENTS/GEMINI adapters,
+  `SFS.md`, skills, hooks, plugins, permissions, and local context overrides
+  every 3-6 months or after major model/runtime releases so stale workaround
+  instructions do not constrain newer agents.
+- **Path-scoped Stop hook guidance.**
+  The product now ships a suggest-only Stop hook template and installer wiring
+  that can point agents back to SFS guardrails without forcibly interrupting
+  user-owned work.
+- **Founder-mode model and lifecycle references.**
+  README/product docs now expose a model-tier quick reference and a
+  Chat/Cowork/Code x Idea/MVP/Launch/Scale founder matrix so nondeveloper
+  operators can pick the right mode before asking agents to execute.
+- **Deep-interview intake boundary.**
+  Brainstorm and intake policy now treat audience, success, failure, and
+  constraint ambiguity as a pre-plan interview trigger instead of letting fuzzy
+  requests flow straight into implementation.
+- **Ralph-grade verifier loop evidence.**
+  Critical flowcheck paths now require verification-pair evidence and the
+  `fcp-verifier-implementer` invariant so the author lane and verifier lane do
+  not collapse into the same self-check.
+- **Nondeveloper Gate 6 safety lenses.**
+  Structure, security, UX, refactor separation, secret/PII/logging risk, and
+  SEC-AIERA-007 are now explicit review checks for nondeveloper-led work.
+
 ## [0.8.12] - 2026-06-02
 
 > **하네스 레퍼런스와 LLM Wiki 지식 냉장고 관점을 SFS 흐름에 흡수합니다.**

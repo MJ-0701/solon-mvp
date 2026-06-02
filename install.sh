@@ -534,6 +534,10 @@ if [ "$INSTALL_AGENT_ADAPTERS" = "1" ]; then
   mkdir -p "$TARGET/.claude/commands"
   install_file "templates/.claude/commands/sfs.md" ".claude/commands/sfs.md" "Claude Code /sfs 커맨드"
 
+  # 6.2a0) Claude Code Stop hook template: suggest-only self-improve hints.
+  mkdir -p "$TARGET/.claude/hooks"
+  install_file "templates/.claude/hooks/solon-stop-suggest.sh" ".claude/hooks/solon-stop-suggest.sh" "Claude Code Stop hook (suggest-only)"
+
   # 6.2a) Claude Code Skill adapter (current primary command surface)
   mkdir -p "$TARGET/.claude/skills/sfs"
   install_file "templates/.claude/commands/sfs.md" ".claude/skills/sfs/SKILL.md" "Claude Code /sfs Skill"
@@ -549,6 +553,18 @@ if [ "$INSTALL_AGENT_ADAPTERS" = "1" ]; then
   # implicit invocation (사용자 의도 매칭) + explicit invocation ($sfs) 양쪽 작동.
   mkdir -p "$TARGET/.agents/skills/sfs"
   install_file "templates/.agents/skills/sfs/SKILL.md" ".agents/skills/sfs/SKILL.md" "Codex Skill (project-scoped)"
+
+  # 6.2e) Solon HTML output-artifact skills (spec / review / handoff).
+  # Source of truth = templates/.agents/skills/<name>/; installed to both the
+  # Claude Code and Codex skill surfaces so either runtime can render the
+  # shared HTML artifacts. The handoff skill carries the copy-as-prompt export.
+  for _doc_skill in solon-doc-spec solon-doc-review solon-doc-handoff; do
+    mkdir -p "$TARGET/.claude/skills/$_doc_skill" "$TARGET/.agents/skills/$_doc_skill"
+    install_file "templates/.agents/skills/$_doc_skill/SKILL.md" ".claude/skills/$_doc_skill/SKILL.md" "Claude Code Skill ($_doc_skill)"
+    install_file "templates/.agents/skills/$_doc_skill/template.html" ".claude/skills/$_doc_skill/template.html" "Claude Code Skill asset ($_doc_skill)"
+    install_file "templates/.agents/skills/$_doc_skill/SKILL.md" ".agents/skills/$_doc_skill/SKILL.md" "Codex Skill ($_doc_skill)"
+    install_file "templates/.agents/skills/$_doc_skill/template.html" ".agents/skills/$_doc_skill/template.html" "Codex Skill asset ($_doc_skill)"
+  done
 else
   ok "project-local agent command/skill adapters skip (opt-in: sfs agent install all)"
 fi

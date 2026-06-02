@@ -31,16 +31,31 @@ grep -q "silent divergence" <<<"${cmd}" || fail "command missing silent-divergen
 grep -q "blocking" <<<"${cmd}" || fail "command missing hybrid blocking enforcement"
 grep -q "report-bug" <<<"${cmd}" || fail "command missing report-bug routing"
 
+# BWU-2 — plan=quality-gate self-check (암묵 가정 → 명시 스펙) must be exposed in
+# the flowcheck command, integrated with the #3 (conflict-surfaced) / #4
+# (model-tier) divergence locks. ASCII-only markers (no Korean grep / locale trap).
+grep -q "plan = quality gate" <<<"${cmd}" || fail "command missing plan=quality-gate principle"
+for q in intended-output implicit-assumptions edge-cases intent-alignment; do
+  grep -q -- "${q}" <<<"${cmd}" || fail "command missing plan self-check question '${q}'"
+done
+grep -q "fcp-conflict-surfaced" <<<"${cmd}" || fail "command checklist missing #3 (fcp-conflict-surfaced) integration"
+
 pol="$(SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" context cat policies/flow-conformance-postflight.md 2>&1)" \
   || fail "context cat policies/flow-conformance-postflight.md failed: ${pol}"
 
-for inv in fcp-model-tier fcp-conflict-surfaced fcp-gate-order fcp-stop-the-line fcp-pr-reviewed fcp-self-cpo fcp-worker-lane; do
+for inv in fcp-model-tier fcp-conflict-surfaced fcp-gate-order fcp-stop-the-line fcp-pr-reviewed fcp-verifier-implementer fcp-self-cpo fcp-worker-lane; do
   grep -q "${inv}" <<<"${pol}" || fail "policy missing invariant ${inv}"
 done
-for ev in model_resolved worker_dispatched gate_passed conflict_surfaced; do
+for ev in model_resolved worker_dispatched gate_passed conflict_surfaced verification_pair; do
   grep -q "${ev}" <<<"${pol}" || fail "policy missing event ${ev}"
 done
 grep -q "non-collapsing" <<<"${pol}" || fail "policy missing non-collapsing event contract"
 grep -q "GitHub PR" <<<"${pol}" || fail "pr-reviewed should clarify GitHub PR does not satisfy SFS gate"
+
+# BWU-2 — policy must also expose the plan-gate self-check (ASCII markers).
+grep -q "plan = quality gate" <<<"${pol}" || fail "policy missing plan=quality-gate principle"
+for q in intended-output implicit-assumptions edge-cases intent-alignment; do
+  grep -q -- "${q}" <<<"${pol}" || fail "policy missing plan self-check question '${q}'"
+done
 
 echo "PASS: test-context-flowcheck-command.sh"

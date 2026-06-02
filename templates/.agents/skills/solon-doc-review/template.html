@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<!--
+  Solon code-review artifact template. Placeholder-driven; replace {{TOKENS}}
+  and <PROJECT-NAME>/<DATE> before shipping. No project-specific fixed values.
+  Pairs diff context with each finding so code and comment read together.
+-->
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><PROJECT-NAME> — Review: {{BRANCH_OR_PR}}</title>
+  <style>
+    :root { --bg:#0e1116; --fg:#e6edf3; --muted:#8b949e; --card:#161b22; --add:#3fb950; --del:#f85149; }
+    * { box-sizing:border-box; }
+    body { margin:0; font:15px/1.55 -apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--fg); }
+    main { max-width:960px; margin:0 auto; padding:32px 20px 80px; }
+    h1 { font-size:24px; margin:0 0 4px; }
+    .sub { color:var(--muted); margin:0 0 24px; }
+    .card { background:var(--card); border:1px solid #30363d; border-radius:10px; padding:18px 20px; margin:14px 0; }
+    .card h2 { font-size:14px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:0 0 10px; }
+    table { width:100%; border-collapse:collapse; }
+    th,td { text-align:left; padding:8px 10px; border-bottom:1px solid #30363d; vertical-align:top; }
+    th { color:var(--muted); font-weight:600; font-size:13px; }
+    .sev { font-weight:700; font-size:12px; text-transform:uppercase; padding:2px 7px; border-radius:5px; }
+    .sev-blocker { background:#5a1212; color:#ffb3b3; }
+    .sev-major { background:#5a3a12; color:#ffd9a3; }
+    .sev-minor { background:#1f3b5a; color:#a3d1ff; }
+    .sev-nit { background:#2a2f37; color:#c0c6cf; }
+    pre.diff { background:#0b0f14; border:1px solid #30363d; border-radius:8px; padding:0; overflow:auto; }
+    pre.diff code { display:block; font-family:ui-monospace,SFMono-Regular,monospace; font-size:13px; white-space:pre; }
+    .diff-add { color:var(--add); } .diff-del { color:var(--del); }
+    .file { font-family:ui-monospace,SFMono-Regular,monospace; color:var(--muted); margin:14px 0 6px; }
+    ul { margin:6px 0 0; padding-left:20px; } li { margin:3px 0; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Review — {{BRANCH_OR_PR}}</h1>
+  <p class="sub"><PROJECT-NAME> · {{GENERATED_AT}}</p>
+
+  <div class="card">
+    <h2>Summary</h2>
+    <p>{{SUMMARY}}</p>
+  </div>
+
+  <div class="card">
+    <h2>Findings</h2>
+    <table>
+      <thead><tr><th>Severity</th><th>Location</th><th>Problem</th><th>Fix</th></tr></thead>
+      <tbody>
+        <!-- repeat per finding; set class to sev-blocker|sev-major|sev-minor|sev-nit -->
+        <tr>
+          <td><span class="sev sev-minor">{{FINDING_SEVERITY}}</span></td>
+          <td><code>{{FINDING_LOCATION}}</code></td>
+          <td>{{FINDING_PROBLEM}}</td>
+          <td>{{FINDING_FIX}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Diff + inline annotations</h2>
+    <!-- repeat per file -->
+    <div class="file">{{DIFF_FILE}}</div>
+    <pre class="diff"><code>{{DIFF_BODY}}</code></pre>
+    <ul>
+      <!-- repeat per annotation tied to a diff line -->
+      <li>{{ANNOTATION_ITEM}}</li>
+    </ul>
+  </div>
+</main>
+</body>
+</html>

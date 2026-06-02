@@ -105,3 +105,6 @@ observability evidence 가 없으면 Gate 6 는 partial 이다.
   필요하다: connector endpoint, account/credit owner, approval mode, prompt/asset
   id, aspect ratio, duration, artifact retention, redaction boundary. 비용 통제와
   데이터 통제는 같은 review surface 다.
+- SEC-AIERA-007: 비개발자에게 공개되는 산출물은 secret, admin control,
+  auth/session 내부, 위험한 destructive action 을 노출하면 안 된다. 노출되면
+  bounded access 와 logging evidence 가 승인되기 전까지 critical-blocking 이다.

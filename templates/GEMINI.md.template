@@ -40,4 +40,5 @@ do_not_inline:
   - bkit-style Feature Usage footers
 maintenance:
   detect_or_fix_bloat: "sfs agent doctor --fix"
+  config_review_cadence: "Review this adapter, SFS.md, installed skills/hooks/plugins, permissions, and local context overrides every 3-6 months or after a major model/runtime release."
 ---

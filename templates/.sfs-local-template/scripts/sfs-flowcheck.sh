@@ -4,8 +4,8 @@
 # Solon SFS — `sfs flowcheck [--sprint <id>]` Flow-Conformance Postflight (FCP).
 # At work-unit close, assert that SFS executed per its documented default flow by
 # reading the non-collapsing flow events (model_resolved / worker_dispatched /
-# gate_passed / conflict_surfaced) plus the capture ledger (waiver / exception
-# override) from events.jsonl. This is methodology-conformance, NOT product
+# gate_passed / conflict_surfaced / verification_pair) plus the capture ledger
+# (waiver / exception override) from events.jsonl. This is methodology-conformance, NOT product
 # acceptance (Gate 6) and NOT a visible-failure triage (debugging-and-error-
 # recovery): it catches silent divergence that ran without error.
 #
@@ -45,6 +45,8 @@ Critical invariants (blocking unless PASS or a naming waiver):
   fcp-pr-reviewed       ship/done blocked unless an SFS review gate_passed
                         (self_cpo=pass) exists; GitHub PR approval does NOT
                         satisfy this on its own
+  fcp-verifier-implementer
+                        review close needs verifier != implementer
 
 Advisory invariants (warn, exit 0):
   fcp-self-cpo          every gate_passed self_cpo=pass (partial warns)
@@ -294,6 +296,34 @@ if [[ "${review_passed}" -ne 1 ]]; then
   CRIT+=("fcp-pr-reviewed: ship/done blocked — no SFS review gate_passed with self_cpo=pass in this sprint. A GitHub PR approval / @codex review does NOT satisfy this on its own (kernel: GitHub review is separate from SFS review).")
 else
   PASS_NOTES+=("fcp-pr-reviewed: an SFS review gate passed (self_cpo=pass)")
+fi
+
+# ── fcp-verifier-implementer (critical) ────────────────────────────────────
+pair_seen=0
+pair_ok=1
+for line in "${EV_LINES[@]:-}"; do
+  [[ "$(_jf type "${line}")" == "verification_pair" ]] || continue
+  pair_seen=1
+  implementer="$(_jf implementer "${line}")"
+  verifier="$(_jf verifier "${line}")"
+  implementer_context="$(_jf implementer_context "${line}")"
+  verifier_context="$(_jf verifier_context "${line}")"
+  if [[ -z "${implementer}" || -z "${verifier}" ]]; then
+    pair_ok=0
+    CRIT+=("fcp-verifier-implementer: verification_pair missing implementer or verifier")
+  elif [[ "${implementer}" == "${verifier}" ]]; then
+    pair_ok=0
+    CRIT+=("fcp-verifier-implementer: verifier '${verifier}' equals implementer '${implementer}' — self-verification close is blocked")
+  elif [[ -n "${implementer_context}" && "${implementer_context}" == "${verifier_context}" ]]; then
+    pair_ok=0
+    CRIT+=("fcp-verifier-implementer: verifier_context '${verifier_context}' equals implementer_context — use a separate agent/context")
+  fi
+done
+if [[ "${review_passed}" -eq 1 && "${pair_seen}" -ne 1 ]]; then
+  pair_ok=0
+  CRIT+=("fcp-verifier-implementer: review gate passed but no verification_pair event proves verifier != implementer")
+elif [[ "${review_passed}" -eq 1 && "${pair_ok}" -eq 1 ]]; then
+  PASS_NOTES+=("fcp-verifier-implementer: verifier is separated from implementer")
 fi
 
 # ── fcp-worker-lane (advisory) ─────────────────────────────────────────────

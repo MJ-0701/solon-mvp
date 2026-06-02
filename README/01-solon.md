@@ -37,6 +37,10 @@ fuzzy idea
 Solon 을 쓰면 AI 는 더 멀리 혼자 달리는 대신, 사용자가 이해할 수 있는 작은 계약과 검증 루프 안에서
 움직입니다. 결과는 단순히 더 많은 output 이 아니라, 다음 변경도 믿고 이어갈 수 있는 iteration 입니다.
 
+Founder 관점에서 Solon 은 "내가 전부 prompt 하는 사람"을 "AI 팀을 지휘하는 사람"으로 바꿉니다.
+Idea 에서는 의도와 포기할 것을 묻고, MVP 에서는 가장 작은 검증 가능한 slice 로 줄이고, Launch 에서는
+보안/UX/review evidence 를 남기며, Scale 에서는 같은 루프를 더 짧고 안전하게 반복합니다.
+
 더 깊은 설명은 [Solon 10x 가치](./docs/ko/10x-value.md)에 정리했습니다.
 
 ---

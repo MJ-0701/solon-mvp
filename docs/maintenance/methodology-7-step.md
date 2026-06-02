@@ -54,6 +54,15 @@ infra / taxonomy) 이 brainstorm 부터 Gate 6 까지 *항상* 개념적 sub-age
 
 상세 규약: [`policies/six-division-council.md`](policies/six-division-council.md).
 
+## Model-tier quick reference
+
+모델은 역할별로 고른다. Advisor/CPO 판단은 top/high reasoning (Claude Opus,
+Codex `gpt-5.5` xhigh, Gemini Pro 계열), plan sequencing 과 질문 진행은
+standard facilitator (Claude Sonnet, Codex `gpt-5.4`), 좁은 helper I/O 는
+economy tier (Haiku, Codex mini, Gemini lite) 를 쓴다. 구현 slice 는 고정된
+AC 안에서 worker tier 로 실행하고, Codex repo-aware helper 는 `gpt-5.3-codex`
+까지 허용한다. Spark 류는 판단 없는 mechanical helper 전용이다.
+
 ## Host-agnostic 진입 (0.7.0+)
 
 7-step flow 는 host transport 와 직교한다. 어떤 호스트로 들어와도 같은
