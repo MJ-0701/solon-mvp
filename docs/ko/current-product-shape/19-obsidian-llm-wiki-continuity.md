@@ -47,6 +47,14 @@ link check, generated index 를 통해 wiki 가 정리되지 않은 문서 더�
 RAG/vector search 는 계속 쓸 수 있지만 curated source/wiki metadata 위의 query-time accelerator 입니다.
 다음 agent 가 처음부터 의미를 재조립해야 하는 임의 chunk 더미가 되어서는 안 됩니다.
 
+Graphify-style graph analysis 도 같은 경계 안에 둡니다. 넓은 code/doc/media corpus 를 deterministic
+AST extraction, LLM semantic link, file-hash cache, community analysis 로 그래프화하고
+`graphify_out/graph.html`, Markdown report, JSON, GraphML 같은 산출물을 만들 수 있습니다.
+SFS 는 이 산출물을 derived evidence 로 봅니다. wiki 에는 input set, output path, node/edge vocabulary,
+confidence tag(`extracted`, `imputed`, `ambiguous`), suggested question, 승격된 hub, surprising edge,
+gap 을 기록합니다. generated graph cache 와 raw visualization 은 source truth 나 frontmatter-backed wiki
+note 를 대체하지 않습니다.
+
 sprint close 시 `report.md` 와 `retro.md` 는 authoritative close record 로 남깁니다. `llm-wiki/` 는
 그 위의 memory layer 이며, 재사용될 결정, domain term, architecture/release contract 변화, 반복 결함,
 follow-up gap 같은 durable conclusion 만 받습니다. wiki 는 close artifact 전문을 복사하지 않고 링크합니다.

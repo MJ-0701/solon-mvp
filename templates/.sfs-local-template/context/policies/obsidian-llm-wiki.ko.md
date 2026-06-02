@@ -18,14 +18,11 @@ content_policy: "권고 기본값; wiki 는 SFS flow 를 돕는 도구일 뿐 �
 
 # Obsidian LLM Wiki Policy
 
-Obsidian 은 무료, 로컬 우선, Markdown 기반이라 SFS 프로젝트의 LLM retrieval 동반 도구로 권장한다.
-다만 필수 의존성처럼 강제하지 않는다. 사용자가 거절하거나, 환경에 Obsidian 이 없거나, repo 정책상
-vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waiver 또는 blocker 를 기록한다.
+Obsidian 은 무료, 로컬 우선, Markdown 기반이라 SFS 프로젝트의 LLM retrieval 동반 도구로 권장한다. 다만 필수 의존성처럼 강제하지 않는다. 사용자가 거절하거나, 환경에 Obsidian 이 없거나, repo 정책상 vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waiver 또는 blocker 를 기록한다.
 
 ## Activation Rules
 
-- 신규 프로젝트: setup 또는 첫 문서 sprint 에 repo root Obsidian vault 와 작은 `llm-wiki/`
-  navigation layer 를 권장한다.
+- 신규 프로젝트: setup 또는 첫 문서 sprint 에 repo root Obsidian vault 와 작은 `llm-wiki/` navigation layer 를 권장한다.
 - 기존 프로젝트: `sfs adopt` 시 기존 문서를 Obsidian 에서 읽을 수 있는 wiki 로 by-reference
   이관하는 것을 권장하고, 다음 실제 sprint 부터 그 wiki 를 함께 읽는다.
 - 적용 프로젝트: `.obsidian/` 또는 `llm-wiki/` 가 있으면 Obsidian 을 active context 로 본다.
@@ -45,6 +42,7 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
 - DDD 운영 모델 root: `llm-wiki/ddd/`.
 - source truth 는 기존 docs, code, tests, scripts 에 남긴다. wiki 는 agent 가 스스로 꺼내 쓰는 지식 냉장고이지 raw file 창고가 아니다.
 - wiki page 는 TopicHub, retrieval path, DDD context map, upgrade map, generated index 로 쓴다.
+- Graphify 같은 graph-first source-bundle 도구는 Raw 와 Wiki 사이의 derived workspace 로 본다. 넓은 corpus 에서 파일 detect, AST 기반 deterministic 구조 추출, LLM semantic link 추출, file hash cache, graph build/analyze, HTML/Markdown/JSON/GraphML export 를 활용할 수 있다. wiki 에는 input source set, `graphify_out/`, node/edge vocabulary, confidence tag(`extracted`, `imputed`, `ambiguous`), suggested question, promotion decision 을 기록하고 generated graph 를 source truth 로 삼지 않는다.
 - PDF/media/source library 는 외부 source manager 에 둘 수 있다. wiki 는 source id, metadata locator,
   권한/접근, extraction 상태, compile target 만 기록하고 file warehouse 가 되지 않는다.
 - 이 시스템은 **Raw / Wiki / Schema (+lint)** 의 3계층으로 본다. 구 "raw data source / wiki / harness"
@@ -104,6 +102,7 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
   무엇을 의미하는지, 어디에 있는지, 무엇과 연결되는지, 무엇이 비어 있는지를 기록한다.
 - source-bundle 분석 도구 결과(인포그래픽/PDF/PPT 포함)는 derived output 이다. input set, tool/model,
   output path, citation/confidence/gap, promotion decision 이 있어야 wiki 지식으로 승격한다.
+- Graphify-style report 는 durable meaning 만 승격한다. hub, surprising cross-community edge, domain term, dependency path, graph-backed question, explicit gap 이 대상이며 cache, raw graph JSON, transcript, visual export 는 사람이 shared promotion 을 승인하기 전까지 generated 위치에 둔다.
 - RAG/vector search 는 curated source/wiki metadata 위의 선택적 query-time accelerator 이지 source truth
   나 fact 보장 장치가 아니다. sync worker 는 compiled wiki/source link 를 metadata 로 색인하고,
   답변 표면은 source citation, no-answer behavior, parser/chunk/retriever smoke evidence 를 가져야 한다.
@@ -145,6 +144,7 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
   되었는가?
 - 외부 source manager 또는 source-bundle notebook 을 쓴다면 source id, metadata locator, input set,
   output path, citation/confidence/gap, promotion decision 이 기록되었는가?
+- Graphify 또는 graph-first analyzer 를 썼다면 `graphify_out`(또는 동등한 output), node/edge type, confidence tag, suggested question, promoted wiki note 가 generated cache/output 과 분리되어 있는가?
 - sprint close 시 report/retro 는 close evidence 로 남기고 durable meaning 만 wiki 로 컴파일했는가?
 - docs GC 때 archive/compact 전에 source link 가 있는 promotion candidate 를 만들었고,
   report/retro 전문 복사를 피했는가?

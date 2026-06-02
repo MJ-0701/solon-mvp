@@ -55,7 +55,7 @@ Arguments: `$ARGUMENTS`
 8. For implementation and review work, follow the routed context guardrails:
    surface material assumptions, choose the smallest useful slice, keep changes
    surgical, read actual files/errors before fixing, verify before completion,
-   and report exact evidence.
+   and report exact evidence; I/O-heavy verification/investigation uses a compressed-return worker for verdict, failing lines, core evidence paths, and risk while the lead keeps root-cause, attribution, and fix-shape judgment.
    Benchmarked engineering practices strengthen existing commands instead of
    creating new lifecycle commands: source-driven official docs, stop-the-line
    debugging, deprecation/migration, shipping/release checks, and review lenses

@@ -54,6 +54,10 @@ Each line should route a class of question to the note(s) that answer it.
 - **Global question** (a corpus-spanning trend — "what themes recur across the
   whole vault"): skim the topic-routing hubs above and synthesise. With no
   generator, *you* are the synthesiser at read time.
+- **Graph question** (a wide corpus, dependency path, surprising relationship,
+  or cross-community trend): inspect the latest Graphify-style output only as
+  evidence. Use `graphify_out/` paths, node/edge types, confidence tags, and
+  suggested questions to decide which durable notes or gaps belong in this wiki.
 
 ## Retrieval Rules
 

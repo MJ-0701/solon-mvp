@@ -60,7 +60,7 @@ Homebrew/Scoop into `~/.codex/skills/sfs/SKILL.md`.
 12. For implementation and review work, follow the routed context guardrails:
    surface material assumptions, choose the smallest useful slice, keep changes
    surgical, read actual files/errors before fixing, verify before completion,
-   and report exact evidence. User-facing docs HTML-encouraged: agent docs/logs/SSoT
+   and report exact evidence; I/O-heavy verification/investigation uses a compressed-return worker for verdict, failing lines, core evidence paths, and risk while the lead keeps root-cause, attribution, and fix-shape judgment. User-facing docs HTML-encouraged: agent docs/logs/SSoT
    stay Markdown; real-user guides, reports, handbooks, onboarding, and landing
    docs render well in HTML but MD remains acceptable when GitHub-rendered MD is
    the primary read surface. For visible frontend/UI work, verify with Playwright

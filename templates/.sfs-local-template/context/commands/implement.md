@@ -71,6 +71,7 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 - If code or executable artifacts changed, run the smallest relevant test,
   build, typecheck, smoke, or scripted review before marking complete. Record
   the command and result in the implementation evidence.
+- I/O-heavy verification/investigation (build/smoke/test logs, broad grep/file dumps, large diffs) should be delegated as a compressed-return worker slice: return verdict, failing lines, core evidence paths, and risk; keep root-cause, attribution, and fix-shape judgment with the lead.
 - If the plan selected enterprise packs, keep council evidence live while
   coding: update AC/files/evidence rows, record project-applied QA/QC for SFS/
   harness policy changes, and collect performance evidence for triggered hot paths.

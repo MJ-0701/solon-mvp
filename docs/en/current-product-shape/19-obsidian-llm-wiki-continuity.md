@@ -55,6 +55,16 @@ RAG/vector search can still help, but only as a query-time accelerator over
 curated source/wiki metadata. It should not become a pile of arbitrary chunks
 that future agents must reinterpret from scratch.
 
+Graphify-style graph analysis fits the same boundary. It can cheaply turn a
+wide code/doc/media corpus into a graph through deterministic AST extraction,
+LLM semantic links, file-hash caching, community analysis, and outputs such as
+`graphify_out/graph.html`, Markdown reports, JSON, or GraphML. SFS treats those
+outputs as derived evidence: the wiki records input sets, output paths,
+node/edge vocabulary, confidence tags (`extracted`, `imputed`, `ambiguous`),
+suggested questions, promoted hubs, surprising edges, and gaps. Generated graph
+caches and raw visualizations do not replace source truth or frontmatter-backed
+wiki notes.
+
 At sprint close, `report.md` and `retro.md` remain the authoritative close
 records. `llm-wiki/` is the higher-level memory layer: it should receive only
 durable conclusions such as reusable decisions, domain terms, architecture or

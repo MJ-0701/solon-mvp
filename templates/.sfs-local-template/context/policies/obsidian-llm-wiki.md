@@ -38,6 +38,7 @@ Obsidian is a recommended companion for SFS projects because it is free, local-f
 - Product identity boundary: wiki growth must serve SFS flow. If a wiki feature does not improve intent capture, plan contracts, review evidence, handoff, or repeated-context retrieval, keep it as deferred wiki tooling instead of Solon product scope.
 - Large PDFs, media, and reference libraries may live in an external source manager. The wiki stores stable source IDs, metadata locators, access/rights notes, extraction status, and compile targets; it does not become the file warehouse.
 - Wiki pages are TopicHubs, retrieval paths, DDD context maps, upgrade maps, and generated indexes.
+- Graph-first source-bundle tools such as Graphify are derived workspaces between Raw and Wiki: detect files, extract deterministic AST structure plus LLM semantic links, cache by file hash, build/analyze a graph, and export HTML/Markdown/JSON/GraphML for wide corpora. The wiki records input source set, `graphify_out/`, node/edge vocabulary, confidence tags (`extracted`, `imputed`, `ambiguous`), suggested questions, and promotion decision; the generated graph is not source truth.
 - Treat the system as three layers: **Raw / Wiki / Schema (+lint)**. Raw is read-only source truth; Wiki is AI-owned, write-time compiled navigation plus glossary/ubiquitous-language home; Schema + lint are frontmatter, budgets, routing, review questions, verification, link checks, generated indexes, and human-approval rules that keep the wiki from becoming an uncurated pile.
 - Knowledge packs are the **Schema-layer review lens** of this model, not wiki pages. They stay as read-only routed context (see `knowledge-pack-router`) and do not move into the wiki.
 - Taxonomy is not a standalone wiki or org division. Treat it as a domain language/classification lens linked from `llm-wiki/ddd/` and the relevant TopicHubs.
@@ -82,6 +83,7 @@ Obsidian is a recommended companion for SFS projects because it is free, local-f
   summaries, Q&A, infographics, PDFs, or slide outputs into the wiki, record the
   input source set, tool/model, output path, citation coverage, confidence/gaps,
   and promotion decision.
+- Graphify-style reports should promote only durable meaning: hubs, surprising cross-community edges, domain terms, dependency paths, graph-backed questions, and explicit gaps. Keep caches, raw graph JSON, transcripts, and visual exports in their generated location unless a human approves shared promotion.
 - RAG/vector search is an optional query-time accelerator over curated source
   and wiki metadata, not the source of truth or a fact guarantee. Sync workers
   index compiled wiki/source links with metadata and answer surfaces need source
@@ -124,6 +126,7 @@ Obsidian is a recommended companion for SFS projects because it is free, local-f
 - If an external source manager or source-bundle notebook is used, are source IDs,
   metadata locators, input set, output path, citations/confidence/gaps, and
   promotion decision recorded?
+- If Graphify or another graph-first analyzer is used, are `graphify_out` (or equivalent), node/edge types, confidence tags, suggested questions, and promoted wiki notes separated from generated cache/output?
 - On sprint close, did report/retro stay as close evidence while only durable
   meaning was compiled into the wiki?
 - During docs GC, did promotion candidates get created before archive/compact,

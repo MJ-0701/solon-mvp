@@ -605,7 +605,7 @@ Usage:
 Commands:
   agent install, upgrade, update, uninstall
   version [--check]
-  status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, capture, note, ingest, report, tidy, retro, commit, loop
+  status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, capture, note, ingest, report, report-bug, flowcheck, healthcheck, tidy, retro, commit, loop
   bootstrap [plain-language app idea]
   measure --alive -- <command>
 

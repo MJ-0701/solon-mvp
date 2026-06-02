@@ -7,6 +7,37 @@
 
 ---
 
+## Next
+
+다음 release cut 에 포함될 변경:
+
+- 아직 없음.
+
+---
+
+## 0.8.17
+
+`sfs healthcheck` joins the packaged runtime, and LLM Wiki guidance now absorbs Graphify-style graph analysis.
+
+체감 변화:
+
+- `sfs healthcheck [--all|--project <dir>...]` 로 설치된 SFS 런타임과 프로젝트 상태를 읽기 전용으로
+  점검할 수 있습니다. version drift, boosted command dispatch, routed context, status/divisions,
+  `llm-wiki/` frontmatter, `.git/index.lock`, runtime regression subset 를 확인합니다.
+- 이상이 감지되면 `report-bug DRAFT` 만 출력합니다. GitHub issue 를 만들거나 `gh` 를 호출하지 않고,
+  기존 `sfs report-bug` confirm gate 를 유지합니다.
+- `llm-wiki/` 정책과 skeleton 이 Graphify-style graph analysis 를 derived workspace 로 다룹니다.
+  `graphify_out/`, node/edge vocabulary, confidence tag, suggested question, hub/surprising edge/gap 은
+  wiki 승격 판단의 증거가 되지만 generated graph cache 는 source truth 를 대체하지 않습니다.
+- `sfs upgrade` 가 legacy `.sfs-local/` state 와 SFS root docs 를 감지하면,
+  `.sfs-local/VERSION` 하나가 없다는 이유로 “not initialized”에서 멈추지 않고
+  VERSION/config marker 를 복구한 뒤 기존 sprint/events 상태를 보존하며 upgrade 를 이어갑니다.
+- build/smoke/test logs, broad grep/file dump, large diff 처럼 I/O가 무거운
+  검증/조사는 scoped worker 가 압축 verdict/evidence 를 반환하도록 Runtime Token Firewall
+  guidance 를 강화했습니다. lead agent 는 root cause/fix-shape 판단에 집중합니다.
+
+---
+
 ## 0.8.16
 
 Local stable release verification ignores host-local root `.claude` settings while still scanning shipped templates.

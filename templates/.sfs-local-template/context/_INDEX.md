@@ -20,6 +20,7 @@ module:
 - `commands/ingest.md` — purpose-gated raw intake stub before llm-wiki compile.
 - `commands/report-bug.md` — file an SFS-product bug to the official gh channel; confirm gate before fix.
 - `commands/flowcheck.md` — postflight self-check that SFS ran per documented flow; classify divergence and route product bugs to report-bug.
+- `commands/healthcheck.md` — read-only SFS runtime/project drift checker with report-bug draft output.
 - `commands/release.md` — release / deploy / Homebrew / Scoop.
 - `commands/upgrade.md` — upgrade / update / install freshness.
 - `commands/harness.md` — harness doctor/map for project autonomy readiness.

@@ -98,7 +98,7 @@ load_when: ["always", "sfs", "entry"]
 - Runtime Token Firewall is ambient: worker/review/executor handoffs are
   capsule-only. Do not forward the lead agent's full conversation history to a
   worker, plugin wrapper, rescue subagent, or external reviewer; pass only goal,
-  AC, files_scope, commands, expected output paths, and compact evidence.
+  AC, files_scope, commands, expected output paths, compact evidence, and compressed bulk-verification results.
 - Context Pollution Guard is ambient: core product docs and routed context keep
   durable conclusions only. Prompt bodies, full transcripts, bridge/run scratch,
   `.sfs-local/tmp/...` paths, and old workbench bulk stay in temporary files,

@@ -79,6 +79,7 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   context only. Do not make every comment feel equally mandatory.
 - Review actual diff, files, test output, and logs. Do not infer pass from
   intent or from a familiar failure keyword.
+- If review needs large logs, broad file dumps, or repeated command output, route that verification/investigation to a bounded compressed-return worker and review verdict, failing lines, core evidence paths, and risk instead of loading bulk into the lead context.
 - Flag overengineering, speculative abstraction, unrelated refactors, and
   adjacent cleanup when they are not traceable to the request.
 - Check that final evidence names the exact verification command/result, or

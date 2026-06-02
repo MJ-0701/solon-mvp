@@ -25,6 +25,11 @@ load_when: ["token", "harness", "worker", "review", "executor", "bridge", "Claud
   `evidence`, and touched-file manifests under the current workbench/run
   directory. The lead agent should inspect those compact artifacts instead of
   repeatedly rereading source files, diffs, build logs, or the main thread.
+- Bulk verification/investigation work is a compressed-return worker slice:
+  build logs, smoke logs, test logs, broad grep/file dumps, and diff spelunking
+  go to a bounded worker with command/file scope. The lead receives verdict,
+  failing lines, core evidence paths, and risk instead of raw output; high-risk
+  root cause, attribution, and fix-shape judgment stays with the lead.
 - Preserve the lead session for user intent and exception judgment. Repetitive
   phase sequencing belongs in scripts or run ledgers; each worker gets the next
   bounded capsule and writes back artifacts rather than inheriting the lead's

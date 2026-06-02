@@ -1,5 +1,42 @@
 ## [Unreleased]
 
+## [0.8.17] - 2026-06-03
+
+> **`sfs healthcheck` joins the packaged runtime, and LLM Wiki guidance now absorbs Graphify-style graph analysis.**
+
+### Added
+
+- **Read-only `sfs healthcheck`.**
+  `sfs healthcheck [--all|--project <dir>...]` now ships as a packaged runtime
+  subcommand. It checks version drift, boosted command dispatch, routed context
+  availability, status/divisions parse, `llm-wiki/` frontmatter, `.git/index.lock`,
+  and a small runtime regression subset. Failures print a `report-bug DRAFT`
+  only; the command does not call `gh`, append SFS events, or auto-submit issues.
+- **Graphify-aware LLM Wiki guidance.**
+  Obsidian/LLM Wiki policy, product docs, and the wiki skeleton now treat
+  Graphify-style graph outputs as derived workspaces: `graphify_out/`, graph
+  JSON/HTML/GraphML, node/edge vocabulary, confidence tags, suggested questions,
+  hubs, surprising edges, and gaps can guide promotion, but generated graph
+  caches do not replace source truth or frontmatter-backed wiki notes.
+
+### Fixed
+
+- **Legacy marker repair for `sfs upgrade` (Fixes #8).**
+  `sfs upgrade` now treats a project with SFS root docs plus legacy
+  `.sfs-local/` state but no `.sfs-local/VERSION` as an initialized legacy
+  project. Before the normal upgrade flow it recreates `.sfs-local/VERSION` and
+  `.sfs-local/config.yaml`, preserves existing sprint/events/division state,
+  and continues the upgrade instead of falling back to first-time setup.
+
+### Changed
+
+- **Compressed-return verification/investigation workers (Addresses #6).**
+  Runtime Token Firewall, token-harness, implement/review context, and shipped
+  adapter surfaces now route I/O-heavy verification/investigation (build,
+  smoke, test logs, broad grep/file dumps, large diffs) through scoped workers
+  that return verdict, failing lines, core evidence paths, and risk while the
+  lead keeps root-cause, attribution, and fix-shape judgment.
+
 ## [0.8.16] - 2026-06-02
 
 > **Local stable release verification ignores host-local root `.claude` settings while still scanning shipped templates.**

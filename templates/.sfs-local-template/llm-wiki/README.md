@@ -42,6 +42,13 @@ Markdown links, and keep the frontmatter contract. If you later adopt a
 generator or graph tool, it is purely additive — the vault stays valid without
 it.
 
+Graphify-style graph analysis is welcome as a **derived workspace**, not a
+replacement for this vault. Keep `graphify_out/` caches, `graph.json`, HTML
+visualizations, transcripts, and raw reports in their generated location. Promote
+only durable meaning into `llm-wiki/`: hubs, surprising edges, dependency paths,
+domain terms, graph-backed questions, confidence tags (`extracted`, `imputed`,
+`ambiguous`), and explicit gaps with source links.
+
 ## Layout
 
 - [00-llm-retrieval-guide.md](00-llm-retrieval-guide.md) — how an agent should

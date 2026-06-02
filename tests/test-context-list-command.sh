@@ -36,6 +36,7 @@ grep -qE '^  kernel$' <<<"${out}" || fail "context list missing kernel"
 grep -qE '^  index$' <<<"${out}" || fail "context list missing index"
 grep -qE '^  commands/plan$' <<<"${out}" || fail "context list missing commands/plan"
 grep -qE '^  commands/review$' <<<"${out}" || fail "context list missing commands/review"
+grep -qE '^  commands/healthcheck$' <<<"${out}" || fail "context list missing commands/healthcheck"
 
 # ── 2) `list policies` prints policies only. ────────────────────────
 out_pol="$(SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" context list policies 2>&1)"

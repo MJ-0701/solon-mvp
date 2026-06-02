@@ -211,7 +211,7 @@ Usage:
 Commands:
   agent install, doctor, upgrade, update, uninstall
   version [--check]
-  status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, capture, note, ingest, report, report-bug, flowcheck, event, tidy, retro, commit, loop, harness, handoff
+  status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, capture, note, ingest, report, report-bug, flowcheck, healthcheck, event, tidy, retro, commit, loop, harness, handoff
   bootstrap [<plain-language app idea>]   # agent-facing initial setup handoff
   measure --alive -- <command>            # long-running command heartbeat
 
@@ -325,7 +325,7 @@ context_resolve_rel() {
       fi
       ;;
     start|intake|sprint) printf '%s\n' "commands/start.md" ;;
-    adopt|brainstorm|plan|implement|review|release|upgrade|profile|loop|tidy|report-bug|flowcheck|ingest)
+    adopt|brainstorm|plan|implement|review|release|upgrade|profile|loop|tidy|report-bug|flowcheck|healthcheck|ingest)
       printf '%s\n' "commands/${key}.md"
       ;;
     capture|note)
@@ -791,6 +791,85 @@ Tip:
 You tried:
   sfs ${cmd}
 EOF
+}
+
+legacy_sfs_project_evidence() {
+  local local_dir root_evidence=0 state_evidence=0
+  local_dir="$(project_local_dir)"
+  [[ -d "${local_dir}" && ! -f "${local_dir}/VERSION" ]] || return 1
+
+  [[ -f SFS.md ]] && root_evidence=1
+  if [[ "${root_evidence}" -eq 0 ]]; then
+    for doc in AGENTS.md CLAUDE.md GEMINI.md; do
+      if [[ -f "${doc}" ]] && grep -qiE 'solon|sfs|\.sfs-local' "${doc}" 2>/dev/null; then
+        root_evidence=1
+        break
+      fi
+    done
+  fi
+
+  if [[ -f "${local_dir}/current-sprint" \
+        || -f "${local_dir}/events.jsonl" \
+        || -d "${local_dir}/sprints" \
+        || -d "${local_dir}/decisions" \
+        || -f "${local_dir}/divisions.yaml" \
+        || -f "${local_dir}/model-profiles.yaml" \
+        || -f "${local_dir}/config.yaml" ]]; then
+    state_evidence=1
+  fi
+
+  [[ "${root_evidence}" -eq 1 && "${state_evidence}" -eq 1 ]]
+}
+
+repair_legacy_sfs_project_markers_for_upgrade() {
+  local layout="${1:-thin}"
+  local local_dir new_ver installed_at runtime_command
+  legacy_sfs_project_evidence || return 0
+
+  case "${layout}" in
+    thin|vendored) ;;
+    *) layout="thin" ;;
+  esac
+
+  local_dir="$(project_local_dir)"
+  mkdir -p "${local_dir}" || return 5
+  new_ver="$(cat "${DIST_DIR}/VERSION" 2>/dev/null | head -1 || echo "unknown")"
+  installed_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  runtime_command="bash .sfs-local/scripts/sfs-dispatch.sh"
+  if [[ "${layout}" == "thin" ]]; then
+    runtime_command="sfs"
+  fi
+
+  if [[ ! -f "${local_dir}/config.yaml" ]]; then
+    cat > "${local_dir}/config.yaml" <<EOF
+runtime:
+  layout: "${layout}"
+  command: "${runtime_command}"
+  version: "${new_ver}"
+state:
+  dir: ".sfs-local"
+overrides:
+  # Optional local override. Thin layout keeps managed context in the packaged runtime.
+  context: ".sfs-local/context"
+  sprint_templates: ".sfs-local/sprint-templates"
+  decisions_template: ".sfs-local/decisions-template"
+  personas: ".sfs-local/personas"
+  model_profiles: ".sfs-local/model-profiles.yaml"
+EOF
+  fi
+
+  cat > "${local_dir}/VERSION" <<EOF
+solon_mvp_version: ${new_ver}
+installed_at: ${installed_at}
+installed_from: legacy-marker-repair
+install_layout: ${layout}
+source_repo: https://github.com/MJ-0701/solon-product
+EOF
+
+  {
+    printf 'sfs upgrade: legacy SFS state detected without .sfs-local/VERSION; repaired project markers before upgrade.\n'
+    printf 'sfs upgrade: preserved existing .sfs-local workbench state and will continue with normal upgrade.\n'
+  } >&2
 }
 
 ensure_project_initialized() {
@@ -1424,6 +1503,7 @@ upgrade_command() {
       ;;
   esac
 
+  repair_legacy_sfs_project_markers_for_upgrade "${upgrade_layout}" || return $?
   ensure_project_initialized upgrade || return $?
   export SFS_UPGRADE_LAYOUT="${upgrade_layout}"
   if [[ "${no_self_upgrade}" != "1" && "${SFS_UPDATE_SELF:-1}" != "0" ]]; then

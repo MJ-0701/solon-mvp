@@ -63,6 +63,11 @@ load_when: ["token", "harness", "context", "Claude", "Codex", "Gemini", "MCP", "
 - Poll run artifacts instead of chat state. Workers should write status/result/
   evidence files; leads should inspect those files rather than repeatedly
   rereading source, diffs, build logs, or the main thread while waiting.
+- Delegate heavy verification/investigation that produces build logs, smoke
+  logs, test logs, broad grep/file dumps, or large diffs to a scoped worker and
+  take back only verdict, failing lines, core evidence paths, and risk. The lead
+  keeps root-cause, attribution, and fix-shape judgment instead of swallowing
+  raw output into the main context.
 - Token savings is secondary to quality. If compression would lower answer
   quality, hide evidence, weaken a risk warning, or break raw-source
   traceability, do not compress; return to full clarity.
