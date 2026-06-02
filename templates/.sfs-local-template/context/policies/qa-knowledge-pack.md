@@ -60,6 +60,8 @@ matching ids and keep the verification surface proportional to blast radius.
 - QA-PROP-018: Test data governance matters when PII, production snapshots, or shared environments appear.
 - QA-PROP-019: Event/state sync paths require replay, dedupe, ordering, dead-letter, and recovery tests.
 - QA-PROP-020: Batch/transactional tests need real DB-backed integration layers, not only unit-level mocks.
+- QA-PROP-021: Boundary bugs hide when each side is reviewed alone; pair-read
+  producers and consumers before trusting integration semantics.
 
 ## QA-TX - Batch / Transaction Focus
 
@@ -95,6 +97,9 @@ matching ids and keep the verification surface proportional to blast radius.
 
 - API/event/CLI contracts need compatibility checks for required fields, unknown
   fields, versioning, errors, retry, and idempotency.
+- Pair-read integration surfaces: API response vs hook/type, route file vs
+  link/router target, state machine map vs status writes, schema field vs UI
+  rendering. Existence checks alone are not coherence evidence.
 - Contract tests are mandatory when another team, partner, runtime, package
   manager, or automation consumes the surface.
 - If formal contract tooling is unavailable, record sample payloads, command
@@ -168,3 +173,17 @@ speaker-time assertions.
   uneven individual skill into a structural floor. Ask whether the change is
   guarded by that baseline (lint/type/static checks + behavior tests) before
   trusting AI-assisted output, not just whether it runs.
+- QA-AIERA-006: Treat AI-generated-code provenance as a review-depth signal.
+  When a source reports higher finding density for AI-authored changes, such as
+  the lecture's 1.7x issue-rate claim, require explanation ownership, static
+  checks, behavior tests, and an independent review lane before merge.
+- QA-AIERA-007: A practical AI code-review harness has two external layers:
+  local diff review before PR and PR-stage review before merge. Record base
+  branch, commit, severity, actionable findings, and accepted/rejected/deferred
+  disposition; summaries and diagrams help navigation but are not acceptance.
+- QA-AIERA-008: Autofix is not auto-truth. Generated fix prompts or patches must
+  enter bounded rework, rerun the relevant verification, and leave an evidence
+  trail for why each finding was applied, rejected, or deferred.
+- QA-AIERA-009: AI-assisted QA should read both sides of a boundary at once.
+  Green builds can miss API-to-hook, route-to-link, state-map-to-update, or
+  immediate-response-to-async-result mismatches.

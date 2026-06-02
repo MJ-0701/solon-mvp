@@ -7,6 +7,23 @@
 
 ---
 
+## 0.8.12
+
+하네스 레퍼런스와 LLM Wiki 지식 냉장고 관점을 SFS 흐름에 흡수합니다.
+
+체감 변화:
+
+- 외부 하네스 엔지니어링 레퍼런스에서 가져온 Phase 0 audit, 팀 아키텍처 명명, baseline eval,
+  near-miss trigger, QA pair-read 같은 관점이 SFS 하네스/검토 문서에 들어갑니다.
+- `sfs harness map --write` 가 `.sfs-local/harness/evolution-ledger.md` 를 만들고 기존 장부를
+  보존합니다. 반복 피드백과 결함을 다음 guardrail 후보로 남길 수 있습니다.
+- `llm-wiki/` 는 agent 가 스스로 꺼내 쓰는 지식 냉장고로 설명됩니다. agent 는 source-linked
+  note 를 먼저 찾고, 남은 product 판단만 사용자에게 묻는 방향으로 더 분명해졌습니다.
+- Codex 는 contract 가 잠긴 뒤 고정 scope 구현, 검증 반복, docs/index sync, review finding 반영을
+  더 많이 맡는 worker 처리량 방향으로 정리됩니다.
+
+---
+
 ## 0.8.11
 
 macOS bash nounset 환경에서도 wiki anti-drift 검증이 stable package 를 통과합니다.

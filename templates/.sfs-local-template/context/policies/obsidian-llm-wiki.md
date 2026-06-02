@@ -33,7 +33,8 @@ Obsidian is a recommended companion for SFS projects because it is free, local-f
 - Vault root: repository root.
 - Wiki root: `llm-wiki/`.
 - DDD operating model root: `llm-wiki/ddd/`.
-- Keep source truth in existing docs, code, tests, and scripts.
+- Keep source truth in existing docs, code, tests, and scripts; the wiki is the
+  agent self-serve knowledge refrigerator, not the raw-food warehouse.
 - Product identity boundary: wiki growth must serve SFS flow. If a wiki feature does not improve intent capture, plan contracts, review evidence, handoff, or repeated-context retrieval, keep it as deferred wiki tooling instead of Solon product scope.
 - Large PDFs, media, and reference libraries may live in an external source manager. The wiki stores stable source IDs, metadata locators, access/rights notes, extraction status, and compile targets; it does not become the file warehouse.
 - Wiki pages are TopicHubs, retrieval paths, DDD context maps, upgrade maps, and generated indexes.

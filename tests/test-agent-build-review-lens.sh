@@ -73,6 +73,14 @@ for onboarding in \
   'Chat/messenger bridges declare server/channel/user/actor allowlists' \
   'Chat channels are coordination surfaces; task threads are bounded contexts' \
   'Cross-agent review feedback is adjudicated item by item' \
+  'AI code-review harness integrations declare base branch selection' \
+  'Generated or extended agent harnesses start with a Phase 0 audit' \
+  'pipeline, fan-out/fan-in' \
+  'with-skill vs baseline evidence' \
+  'near-miss trigger queries' \
+  'Harness evolution deltas' \
+  'Review-harness theater' \
+  'post-autofix verification' \
   'ChatOps loop drift'
 do
   grep -qF -- "${onboarding}" "${POLICY_MD}" \

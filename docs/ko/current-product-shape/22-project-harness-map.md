@@ -20,4 +20,17 @@ load_when: "Read when docs/ko/current-product-shape.md routes to this section."
 - `sfs harness map --write` 는 `.sfs-local/harness/harness-map.md` 를 작성해 긴 자율 작업이나
   선택적 parallel-agent 작업 전에 운영 설계를 눈으로 확인할 수 있게 한다.
 
+map 은 하네스 자체의 설계 evidence 도 남긴다.
+
+- generated-harness audit: 선언된 agent, skill, orchestrator pointer, change
+  history 가 파일시스템과 맞는지 먼저 대조한다.
+- optional team architecture: pipeline, fan-out/fan-in, expert pool,
+  producer-reviewer, supervisor, hierarchical delegation 중 선택된 패턴을 이름 붙인다.
+- harness evolution: initial design vs shipped design, feedback source, 반복
+  delta 에서 승격한 test/policy/skill/scaffold default 를 기록한다.
+- concrete ledger: `sfs harness map --write` 는 없을 때
+  `.sfs-local/harness/evolution-ledger.md` 도 만든다. source, baseline,
+  shipped delta, hypothesis, acceptance signal, promotion target, decision,
+  evidence path, next check 를 기록한다.
+
 이 명령은 worker 를 실행하지 않습니다. AI 가 빠르게 움직이기 전에 project-as-prompt 구조가 충분히 좋은지 먼저 보이게 합니다.

@@ -94,6 +94,16 @@ assert_contains "${dist_release_policy}" "lean procedure review" "release-policy
 assert_contains "${dist_release_policy}" "process-lean" "release-policy process-lean"
 assert_contains "${dist_claude}" "docs/maintenance/release-policy.md" "dist CLAUDE cross-link to release policy"
 
+postdev_pack="${CONTEXT_DIR}/policies/postdev-external-review-pack.md"
+postdev_pack_ko="${CONTEXT_DIR}/policies/postdev-external-review-pack.ko.md"
+for file in "${postdev_pack}" "${postdev_pack_ko}"; do
+  assert_contains "${file}" "CodeRabbit" "postdev CodeRabbit-style lane ${file}"
+  assert_contains "${file}" "local diff review" "postdev local diff review ${file}"
+  assert_contains "${file}" "PR-stage review" "postdev PR-stage review ${file}"
+  assert_contains "${file}" "Autofix" "postdev autofix adjudication ${file}"
+  assert_contains "${file}" "accepted/rejected/deferred" "postdev finding disposition ${file}"
+done
+
 source_surfaces=(
   "${SOURCE_ROOT}/.claude/commands/sfs.md"
   "${SOURCE_ROOT}/.gemini/commands/sfs.toml"

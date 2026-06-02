@@ -40,7 +40,9 @@ run_sfs init --layout thin --yes >/dev/null
 assert_contains "llm-wiki/project-context.md" "Initial Interview" "project context scaffold"
 assert_contains "llm-wiki/project-context.md" "Core question" "project context question"
 assert_contains "llm-wiki/README.md" "queryable project memory" "wiki queryable positioning"
+assert_contains "llm-wiki/README.md" "knowledge refrigerator" "wiki refrigerator positioning"
 assert_contains "llm-wiki/00-llm-retrieval-guide.md" "Observe first" "observe-first retrieval guide"
+assert_contains "llm-wiki/00-llm-retrieval-guide.md" "Self-serve retrieval comes before broad questions" "self-serve retrieval guide"
 assert_contains "llm-wiki/ddd/README.md" "glossary seeds" "DDD glossary seed guidance"
 
 set +e

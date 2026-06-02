@@ -31,6 +31,8 @@ Observe first. Before broad scans or changes, gather the smallest useful
 evidence set: running behavior, logs or metrics when available, git history,
 tests, config, scripts, and release paths. Convert stable terms into glossary
 seeds and update maps or gaps so the next query starts from structure.
+Self-serve retrieval comes before broad questions: use this vault as the
+knowledge refrigerator, then ask only for the missing product judgment.
 
 ## Topic Routing
 
@@ -61,3 +63,4 @@ Each line should route a class of question to the note(s) that answer it.
   than loading everything.
 - When the vault has no note for a question, that is a signal to **write one**
   after you answer it.
+- Do not ask the user to refill context that the vault already captures.

@@ -1,5 +1,31 @@
 ## [Unreleased]
 
+## [0.8.12] - 2026-06-02
+
+> **하네스 레퍼런스와 LLM Wiki 지식 냉장고 관점을 SFS 흐름에 흡수합니다.**
+
+### Added
+
+- **Harness reference absorption.**
+  Kakao-style harness engineering reference ideas are compiled into SFS policy,
+  docs, and tests: Phase 0 audit, team architecture naming, with-skill vs
+  baseline eval, near-miss triggers, QA pair-read, and the reminder that
+  development is broader than coding.
+- **Harness evolution ledger.**
+  `sfs harness map --write` now creates `.sfs-local/harness/evolution-ledger.md`
+  when absent and preserves existing rows on rerun. The ledger records source,
+  baseline harness, shipped delta, hypothesis, acceptance signal, promotion
+  target, decision, evidence paths, and next check so repeated feedback can
+  become future guardrails.
+- **LLM Wiki knowledge refrigerator language.**
+  The `llm-wiki/` product docs and skeleton now describe the wiki as an agent
+  self-serve knowledge refrigerator: agents should find source-linked project
+  ingredients before asking users to refill context. Codex worker throughput is
+  also clarified: after intent, AC, architecture boundary, and files_scope are
+  fixed, Codex handles more fixed-scope implementation, verification loops,
+  docs/index sync, and accepted review-finding rework while C-Level keeps
+  product judgment and escalation.
+
 ## [0.8.11] - 2026-06-02
 
 > **macOS bash nounset 환경에서도 wiki anti-drift 검증이 stable package 를 통과합니다.**

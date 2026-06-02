@@ -61,6 +61,8 @@ release 에서 필요한 confidence evidence 를 고르고, matching id 만 blas
 - QA-PROP-018: Test data governance matters when PII, production snapshots, or shared environments appear.
 - QA-PROP-019: Event/state sync paths require replay, dedupe, ordering, dead-letter, and recovery tests.
 - QA-PROP-020: Batch/transactional tests need real DB-backed integration layers, not only unit-level mocks.
+- QA-PROP-021: 경계면 버그는 양쪽을 따로 보면 숨어 있다. integration semantics 를
+  신뢰하기 전에 producer 와 consumer 를 pair-read 한다.
 
 ## QA-TX - Batch / Transaction Focus
 
@@ -93,6 +95,9 @@ release 에서 필요한 confidence evidence 를 고르고, matching id 만 blas
 
 - API/event/CLI contract 는 required fields, unknown fields, versioning,
   errors, retry, idempotency compatibility 를 확인한다.
+- integration surface 는 pair-read 한다: API response vs hook/type, route file vs
+  link/router target, state machine map vs status write, schema field vs UI
+  rendering. 존재 확인만으로는 coherence evidence 가 아니다.
 - 다른 team, partner, runtime, package manager, automation 이 소비하는 surface 는
   contract test 가 활성화된다.
 - formal contract tooling 이 없으면 sample payload, command example,
@@ -158,3 +163,17 @@ release 에서 필요한 confidence evidence 를 고르고, matching id 만 blas
 - QA-AIERA-005: 정적분석+테스트는 개인 기량 편차를 구조적 baseline 으로 평준화
   하는 최소 안전장치다. AI 보조 산출물을 신뢰하기 전 이 baseline(lint/type/정적
   검사 + behavior 테스트)으로 가드되는지 묻는다 — 단지 도는지가 아니라.
+- QA-AIERA-006: AI-generated-code provenance 자체를 review-depth 신호로 본다.
+  어떤 source 가 AI 작성 변경의 finding density 가 높다고 보고하면(강의의 1.7x
+  issue-rate 주장처럼), merge 전 설명 책임, static check, behavior test, 독립
+  review lane 을 요구한다.
+- QA-AIERA-007: 실용적인 AI code-review harness 는 외부 2-layer 다: PR 전 local
+  diff review 와 merge 전 PR-stage review. base branch, commit, severity,
+  actionable finding, accepted/rejected/deferred 처리를 남긴다. summary/diagram 은
+  navigation 이지 acceptance 가 아니다.
+- QA-AIERA-008: Autofix 는 auto-truth 가 아니다. 생성 fix prompt/patch 는 bounded
+  rework 로 들어가고, 관련 verification 을 다시 돌린 뒤 finding 별 적용/기각/보류
+  이유를 evidence 로 남긴다.
+- QA-AIERA-009: AI 보조 QA 는 경계면 양쪽을 동시에 읽어야 한다. green build 는
+  API-to-hook, route-to-link, state-map-to-update, immediate-response-to-async-result
+  mismatch 를 놓칠 수 있다.

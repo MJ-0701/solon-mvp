@@ -4,7 +4,7 @@ title: "Model Routing And Responsibility Boundaries"
 visibility: oss-public
 doc_type: product-reference
 language: en
-updated: 2026-05-22
+updated: 2026-06-02
 parent: docs/en/current-product-shape.md
 summary: "Model Routing And Responsibility Boundaries"
 load_when: "Read when docs/en/current-product-shape.md routes to this section."
@@ -54,6 +54,11 @@ release gates, or repeated review failure, escalate to high reasoning or send
 it back to C-Level. Claude coding-capable worker/helper lanes use Sonnet 4.6;
 Haiku must not write code. Substantive research should prefer a Gemini 3.1 Pro Preview
 researcher when available.
+
+The practical direction is Codex worker throughput after the contract is fixed:
+let Codex do more fixed-scope implementation, verification loops, docs/index
+sync, and review-finding rework, while C-Level keeps intent, AC, architecture,
+and escalation ownership.
 
 Implement execution defaults to Single Agent. Users can opt into multiple
 agents, but only after the plan is split into independent lanes. Each lane must

@@ -33,6 +33,12 @@ The lens activates when:
   call is naturally text (e.g. a brainstorm prompt).
 - No two tools overlap. If `sfs_status` and `sfs_dashboard` exist, one
   is dead weight and confuses the LLM's selection.
+- Generated or extended agent harnesses start with a Phase 0 audit: declared
+  agents, skills, orchestrator pointers, and change history must match the
+  filesystem before new roles are added.
+- Multi-agent architecture is named when selected: pipeline, fan-out/fan-in,
+  expert pool, producer-reviewer, supervisor, or hierarchical delegation. SFS
+  still treats multi-agent execution as opt-in, not the default answer.
 
 ### 2. Permission posture
 
@@ -102,12 +108,21 @@ Codex command, or skill), it must respect kernel.md:
 - Cross-agent review feedback is adjudicated item by item. The orchestrator
   records accepted/rejected/deferred findings with evidence or human decision
   instead of blindly applying another agent's critique.
+- AI code-review harness integrations declare base branch selection, local diff
+  review lane, PR review lane, severity taxonomy, autofix approval mode,
+  repository knowledge-base scope, and false-positive feedback retention before
+  the tool is treated as reliable review evidence.
 - `.sfs-local/events.jsonl` (or the project's equivalent) captures
   agent-driven gate transitions just as it captures CLI-driven ones,
   so the project history is consistent regardless of how the user
   invoked the workflow.
 - Reviews of agent-build work attach the **prompt + result pair**
   (redacted), not just the final verdict.
+- Material skill or orchestrator changes attach with-skill vs baseline evidence
+  and near-miss trigger queries, or record why the change is too small for eval.
+- Harness evolution deltas record initial design, shipped design, defect or
+  feedback source, accepted/rejected/deferred changes, and the next scaffold or
+  policy update when the pattern repeats.
 
 ### 7. Failure modes specific to agent-build
 
@@ -127,6 +142,9 @@ Codex command, or skill), it must respect kernel.md:
 - ChatOps loop drift — two agents can echo each other's mistakes, revive stale
   thread context, or auto-respond in the wrong channel unless mention scope,
   thread lifecycle, and adjudication evidence are explicit.
+- Review-harness theater — a bot-generated summary, sequence diagram, or PASS
+  badge can hide missing AC evidence unless the finding list, severity, base
+  branch, and post-autofix verification are attached.
 
 ## What the CPO does NOT check under this lens
 
@@ -143,6 +161,8 @@ A passing agent-build review attaches at minimum:
 - Diff of the tool surface (added / changed / removed tools).
 - Permission preset diff (or "no change" with rationale).
 - One worked tool invocation end-to-end with redacted prompt + result.
+- For AI code-review CLIs/PR bots, one local-diff review or PR review transcript
+  with base branch, commit, severity triage, and autofix accept/reject/defer log.
 - Sub-agent isolation evidence (if sub-agents are involved).
 - System prompt diff (if the prompt changed).
 - Verdict: `pass`, `partial`, or `fail`, with the specific subsection

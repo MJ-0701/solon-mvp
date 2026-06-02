@@ -75,6 +75,7 @@ assert_contains "${ddd_pack}" "natural-language SFS was only decorative" "EN pac
 assert_contains "${ddd_pack}" "clean layered monolith" "EN pack DDD layers"
 assert_contains "${ddd_pack}" "failing acceptance, regression, or" "EN pack TDD first"
 assert_contains "${ddd_pack}" "Product-level evidence may be" "EN pack product evidence"
+assert_contains "${ddd_pack}" "Development is wider than coding" "EN pack dev workflow lens"
 assert_contains "${ddd_pack_ko}" "제품 수준" "KO pack product-level"
 assert_contains "${ddd_pack_ko}" "backend 로 제한되지 않는다" "KO pack backend not scope"
 assert_contains "${ddd_pack_ko}" "product behavior 를 담는 모든 layer" "KO pack cross-layer scope"
@@ -84,6 +85,7 @@ assert_contains "${ddd_pack_ko}" "broad-entrypoint growth" "KO pack broad-entryp
 assert_contains "${ddd_pack_ko}" "handoff/user-intent 와 active-sprint 충돌" "KO pack intent conflict review"
 assert_contains "${ddd_pack_ko}" "clean layered monolith" "KO pack DDD layers"
 assert_contains "${ddd_pack_ko}" "failing acceptance" "KO pack TDD first"
+assert_contains "${ddd_pack_ko}" "개발은 코딩보다 넓다" "KO pack dev workflow lens"
 assert_contains "${plan_template}" "## 6. DDD/TDD 기준" "plan template DDD/TDD section"
 assert_contains "${plan_template}" "product behavior boundary" "plan template product behavior boundary"
 assert_contains "${plan_template}" "TDD evidence 또는 waiver" "plan template DDD/TDD review checklist"
@@ -135,5 +137,6 @@ assert_text_contains "${TMP_DIR}/implement-context.md" "Broad-entrypoint line-co
 assert_text_contains "${TMP_DIR}/implement-context.md" "implementation acceptance ledger" "CLI implement context acceptance ledger"
 assert_text_contains "${TMP_DIR}/ddd-pack.md" "Backend package layout is one application" "CLI DDD/TDD pack backend boundary"
 assert_text_contains "${TMP_DIR}/ddd-pack.md" "natural-language SFS was only decorative" "CLI DDD/TDD pack decorative SFS"
+assert_text_contains "${TMP_DIR}/ddd-pack.md" "Development is wider than coding" "CLI DDD/TDD pack dev workflow lens"
 
 echo "test-ddd-tdd-guardrails: OK"

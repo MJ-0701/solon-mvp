@@ -16,9 +16,17 @@ SFS applies this as a project-operating contract:
 - Diagnose before long autonomy: `sfs harness doctor` checks whether a project
   has thin entry docs, routed context, active divisions, memory, tests, and
   release/check rails.
+- Audit before extending a generated harness: compare declared agents, skills,
+  orchestrator pointers, and change history with the filesystem. Classify the
+  slice as new build, extension, architecture change, or maintenance before
+  adding another worker.
 - Map before parallelization: `sfs harness map --write` records roles, inputs,
   outputs, quality gates, and human-owned boundaries before optional worker
   lanes are split.
+- Name the team architecture only when multi-agent work is actually selected:
+  pipeline, fan-out/fan-in, expert pool, producer-reviewer, supervisor, or
+  hierarchical delegation. The pattern is evidence for routing and handoff, not
+  a reason to override SFS's single-agent default.
 - Lock the change basis before long implementation: write a compact docs/ADR/
   spec diff or equivalent run brief so workers read the changed intent first,
   not the whole conversation or a stale plan.
@@ -44,6 +52,13 @@ SFS applies this as a project-operating contract:
 - Multi-agent review reduces human bottleneck only when the lead adjudicates
   reviewer findings against AC/source evidence; another agent's critique is
   evidence to evaluate, not automatic truth.
+- Capture harness evolution deltas: initial harness, shipped harness, what
+  changed, why, and which defect/feedback proved the change. Repeated deltas
+  become tests, routed policies, skills, or scaffold defaults.
+- Use `.sfs-local/harness/evolution-ledger.md` as the concrete evolution
+  surface: source, baseline, shipped delta, hypothesis, acceptance signal,
+  promotion target, decision, evidence paths, and next check. `sfs harness map
+  --write` creates the skeleton and preserves existing rows.
 - Keep humans on product judgment: goals, domain meaning, tradeoffs, ethics,
   and public-contract changes stay human-owned.
 - Convert repeated defects into harness assets: tests, wiki bug reports,

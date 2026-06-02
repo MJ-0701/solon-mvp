@@ -4,7 +4,7 @@ title: "Obsidian LLM Wiki Continuity"
 visibility: oss-public
 doc_type: product-reference
 language: ko
-updated: 2026-05-31
+updated: 2026-06-02
 parent: docs/ko/current-product-shape.md
 summary: "Obsidian LLM Wiki Continuity"
 load_when: "Read when docs/ko/current-product-shape.md routes to this section."
@@ -17,6 +17,10 @@ Markdown 기반이라 원문 문서를 대체하지 않는 LLM retrieval layer �
 실제 목적은 쿼리 가능한 회사 기억입니다. Raw work 는 source 위치에 두고, `llm-wiki/` 는
 source link, map, glossary seed, decision, gap 을 남겨 다음 agent 가 사용자에게 같은 맥락을
 다시 묻지 않고 project question 에 답하게 합니다.
+
+다르게 말하면 `llm-wiki/` 는 agent 가 스스로 꺼내 쓰는 지식 냉장고입니다. agent 는 답변에
+필요한 재료를 먼저 찾아야 하며, 사용자가 매번 context window 를 다시 채워 주는 구조를 줄여야
+합니다.
 
 제품 정체성 경계: wiki 기능과 볼륨 증가는 SFS 흐름을 돕는 수단이지 제품 방향이 아닙니다.
 새 wiki 기능은 intent 정리, plan contract, review evidence, handoff, 반복 맥락 retrieval 중 하나를
@@ -55,6 +59,9 @@ source record 를 삭제하지 않고 report/retro 전문도 wiki 로 복사하�
 최소 baseline 은 project map, domain 또는 DDD map, decision ledger, unknowns/gaps, questions ledger,
 dev guardrails, 그리고 해당 표면이 있으면 bug/release/test memory 입니다. questions ledger 는 이미 답한
 내용과 다시 물어도 되는 조건을 기록해서 agent 가 사용자의 암묵지 설명을 반복 질문하지 않게 합니다.
+
+wiki 의 acceptance signal 도 여기에 있습니다. agent 가 알맞은 note 를 스스로 찾고 source artifact 를
+인용하며, 남은 product 질문만 최소로 묻는다면 지식 냉장고가 작동하는 것입니다.
 
 `sfs ingest` 는 새 source 를 넣는 Raw-layer 진입 mechanic 입니다. `.sfs-local/ingest/` 에 intake
 초안을 쓰기 전에 수집 목적 1줄과 `source_type`(`article`, `youtube`, `podcast`, `book`,

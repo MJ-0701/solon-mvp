@@ -13,6 +13,9 @@ load_when:
   - skill
   - knowledge asset
   - domain moat
+  - reference absorption
+  - lecture reference
+  - benchmark practice
 status: filled-v1
 content_policy: "compile expert judgment into small reviewable assets; do not publish or share private know-how without human approval"
 ---
@@ -33,6 +36,8 @@ heuristics, examples, counterexamples, checks, and taste boundaries.
 - A user asks to turn notes into a skill, playbook, knowledge pack, checklist,
   wiki page, fixture, test, or agent prompt.
 - A review finds that generic AI output missed domain-specific judgment.
+- A user asks to absorb a lecture, benchmark, tool demo, vendor workflow, or
+  outside reference into Solon without letting product direction drift.
 
 ## Asset Shapes
 
@@ -78,12 +83,14 @@ asset, create a new one, or mark a concrete gap/waiver.
    into core context.
 2. Extract the smallest reusable unit: terms, heuristic, decision rule, example,
    counterexample, or review question.
-3. Choose the narrowest asset shape. Prefer docs/solon, llm-wiki, checklist,
+3. Run the reference absorption guard: separate the durable principle from the
+   source's vendor workflow, tactic, UI, metric, and implementation fashion.
+4. Choose the narrowest asset shape. Prefer docs/solon, llm-wiki, checklist,
    fixture, or review lens before adding a new command or tool.
-4. Record source, owner/expert, confidence, gaps, and promotion status.
-5. Add a feedback check: review question, test, fixture assertion, smoke run,
+5. Record source, owner/expert, confidence, gaps, and promotion status.
+6. Add a feedback check: review question, test, fixture assertion, smoke run,
    or dry-run prompt.
-6. If the asset will be shared outside the private project, require explicit
+7. If the asset will be shared outside the private project, require explicit
    human approval for IP, privacy, attribution, and commercial boundary.
 
 ## Boundaries
@@ -94,6 +101,11 @@ asset, create a new one, or mark a concrete gap/waiver.
   test; humans own meaning, taste, public contract, and publish/share decisions.
 - Do not hard-code one expert's preference as universal product law without
   scope, counterexamples, and review.
+- Reference is input, not direction. Vendor feature is evidence, not product identity.
+  Extract the generalizable Solon protocol, then discard or defer the vendor-specific shape.
+- Ambiguous or vendor-specific details stay wiki-only/deferred until they prove
+  they improve SFS intent capture, plan contracts, handoff, review evidence, or
+  repeated-context retrieval with AC/test/review evidence.
 - A "skill" is an output shape, not a mandatory lifecycle command. Use the SFS
   command/policy surface unless a real tool boundary is needed.
 
@@ -106,6 +118,9 @@ asset, create a new one, or mark a concrete gap/waiver.
 - Are privacy, IP, attribution, and publication status explicit?
 - Did the work avoid turning private notes or host-local skill bundles into
   project SSoT without approval?
+- Did the work avoid treating a lecture, benchmark, vendor workflow, or tool
+  feature as Solon product direction?
+- What was generalized into Solon protocol, and what stayed wiki-only/deferred?
 - If the domain knowledge affects product behavior, is it tied to AC, files,
   docs, tests, wiki, or review evidence?
 

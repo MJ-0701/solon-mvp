@@ -13,6 +13,9 @@ load_when:
   - 업무 규칙
   - 지식 자산
   - 해자
+  - 레퍼런스 흡수
+  - 강의 레퍼런스
+  - 벤치마크 사례
 status: filled-v1
 content_policy: "전문가 판단을 작고 검토 가능한 자산으로 컴파일한다; private 노하우의 공유/공개는 사람 승인 없이는 하지 않는다"
 ---
@@ -33,6 +36,8 @@ SFS 는 그 판단을 AI 가 다시 쓸 수 있는 용어, 규칙, 휴리스틱,
 - 사용자가 노트를 skill, playbook, knowledge pack, checklist, wiki page, fixture, test, agent prompt 로
   바꾸자고 한다.
 - review 가 generic AI output 이 도메인 판단을 놓쳤다고 판정한다.
+- 사용자가 강의, benchmark, tool demo, vendor workflow, 외부 reference 를 Solon 에
+  흡수하되 제품 방향성이 흔들리지 않게 하라고 한다.
 
 ## Asset Shapes
 
@@ -64,11 +69,13 @@ SFS 는 그 판단을 AI 가 다시 쓸 수 있는 용어, 규칙, 휴리스틱,
 
 1. Raw source 는 원래 위치에 둔다. 큰 private note 를 core context 에 붙여넣지 않는다.
 2. 재사용 가능한 최소 단위만 뽑는다: 용어, 휴리스틱, decision rule, 예시, 반례, review question.
-3. 가장 좁은 asset shape 를 고른다. 새 command/tool 보다 `docs/solon`, `llm-wiki`, checklist,
+3. reference absorption guard 를 실행한다: 오래 남는 원리와 source 의 vendor workflow,
+   tactic, UI, metric, implementation fashion 을 분리한다.
+4. 가장 좁은 asset shape 를 고른다. 새 command/tool 보다 `docs/solon`, `llm-wiki`, checklist,
    fixture, review lens 를 먼저 선호한다.
-4. source, owner/expert, confidence, gap, promotion status 를 기록한다.
-5. feedback check 를 붙인다: review question, test, fixture assertion, smoke run, dry-run prompt.
-6. private 프로젝트 밖으로 공유하거나 판매할 asset 은 IP, privacy, attribution, commercial boundary 에
+5. source, owner/expert, confidence, gap, promotion status 를 기록한다.
+6. feedback check 를 붙인다: review question, test, fixture assertion, smoke run, dry-run prompt.
+7. private 프로젝트 밖으로 공유하거나 판매할 asset 은 IP, privacy, attribution, commercial boundary 에
    대해 명시적 사람 승인을 받는다.
 
 ## Boundaries
@@ -77,6 +84,12 @@ SFS 는 그 판단을 AI 가 다시 쓸 수 있는 용어, 규칙, 휴리스틱,
 - AI confidence 를 전문가 권위로 취급하지 않는다. AI 는 포장, 비교, 테스트를 돕고 의미, taste,
   public contract, 공유/공개 결정은 사람이 소유한다.
 - 한 전문가의 선호를 scope, 반례, review 없이 universal product law 로 고정하지 않는다.
+- Reference 는 input 이지 direction 이 아니다. Vendor feature 는 evidence 이지 product
+  identity 가 아니다. 일반화 가능한 Solon protocol 만 뽑고, vendor-specific shape 는 버리거나
+  defer 한다.
+- 애매하거나 vendor-specific 한 detail 은 SFS intent capture, plan contract, handoff,
+  review evidence, repeated-context retrieval 을 AC/test/review evidence 로 개선한다고 증명되기
+  전까지 wiki-only/deferred 로 둔다.
 - "skill" 은 산출물 형태이지 필수 lifecycle command 가 아니다. 실제 tool boundary 가 필요할 때만 새
   command/tool 을 만든다.
 
@@ -88,6 +101,8 @@ SFS 는 그 판단을 AI 가 다시 쓸 수 있는 용어, 규칙, 휴리스틱,
 - 그 지식이 실제 행동을 바꾸는지 확인하는 check 가 있는가?
 - privacy, IP, attribution, publication status 가 명시됐는가?
 - private note 나 host-local skill bundle 을 승인 없이 project SSoT 로 승격하지 않았는가?
+- 강의, benchmark, vendor workflow, tool feature 를 Solon 제품 방향으로 취급하지 않았는가?
+- 무엇이 Solon protocol 로 일반화됐고, 무엇이 wiki-only/deferred 로 남았는가?
 - product behavior 에 영향을 주는 지식이면 AC, file, docs, tests, wiki, review evidence 와 연결됐는가?
 
 ## Evidence

@@ -4,7 +4,7 @@ title: "모델 라우팅과 책임 경계"
 visibility: oss-public
 doc_type: product-reference
 language: ko
-updated: 2026-05-22
+updated: 2026-06-02
 parent: docs/ko/current-product-shape.md
 summary: "모델 라우팅과 책임 경계"
 load_when: "Read when docs/ko/current-product-shape.md routes to this section."
@@ -44,6 +44,10 @@ high reasoning 으로 승격하거나 C-Level 에 다시 넘깁니다. Claude �
 Sonnet 4.6이고, Haiku 는 코딩하지 않습니다. 실질 research 는 가능하면 Gemini 3.1 Pro Preview researcher 로
 보냅니다.
 
+실무 방향은 contract 가 잠긴 뒤 Codex worker 처리량을 키우는 것입니다. Codex 는 고정 files_scope
+구현, 검증 반복, docs/index sync, review finding 반영 같은 많은 일을 맡고, C-Level 은 의도, AC,
+architecture, escalation 소유권을 유지합니다.
+
 Implement 의 실행 모드는 기본적으로 Single Agent 입니다. 사용자가 여러 agent 를 선택할 수는
 있지만, 그 경우 plan 은 먼저 독립 lane 으로 나뉘어야 합니다. 각 lane 은 files_scope 가 겹치지
 않고 proposed commit message 를 한 문장으로 설명할 수 있어야 합니다. 이 기준을 만족하지 못하면
@@ -63,4 +67,3 @@ Solon 작업의 commit grouping 은 host-local `/commit` skill 이 아니라 `sf
 `sfs commit plan` 으로 그룹을 확인하고 `sfs commit apply --group <name>` 으로 선택 그룹을
 commit + push 합니다. push 하면 안 되는 SFS release sandbox 나 offline 작업에서만 `--no-push` 를
 씁니다.
-

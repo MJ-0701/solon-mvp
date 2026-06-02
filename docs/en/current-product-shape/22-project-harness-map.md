@@ -24,5 +24,18 @@ visible and testable. SFS now exposes that environment directly:
   autonomous work and optional parallel-agent work can start from an explicit
   operating design.
 
+The map also records harness-specific design evidence:
+
+- generated-harness audit: declared agents, skills, orchestrator pointers, and
+  change history must match the filesystem before extension;
+- optional team architecture: pipeline, fan-out/fan-in, expert pool,
+  producer-reviewer, supervisor, or hierarchical delegation;
+- harness evolution: initial design vs shipped design, feedback source, and the
+  tests/policies/skills/scaffold defaults promoted from repeated deltas.
+- concrete ledger: `sfs harness map --write` also creates
+  `.sfs-local/harness/evolution-ledger.md` when absent. It records source,
+  baseline, shipped delta, hypothesis, acceptance signal, promotion target,
+  decision, evidence paths, and next check.
+
 The command does not run workers. It makes the project-as-prompt structure
 auditable before the AI starts moving fast.

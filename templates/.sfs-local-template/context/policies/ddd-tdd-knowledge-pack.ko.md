@@ -133,3 +133,6 @@ scope 자체가 backend 로 제한되지 않는다.
   enterprise-evidence (§AI-Era Closed-Loop Evidence)에 기록돼 있다. DDD/TDD
   floor 가 그 사람-소유 스펙/behavior 면이며, 여기서 재정의하지 말고 그 lens 를
   참조한다.
+- DT-AIERA-003: 개발은 코딩보다 넓다. AI 보조 작업에서는 requirements, 화면 또는
+  sequence evidence, test, QA, release, monitoring loop 까지 product behavior
+  contract 로 검증한다. code-only 완료는 partial signal 이다.

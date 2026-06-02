@@ -16,6 +16,8 @@ by `sfs init` / `sfs upgrade` as an **empty, manually maintained skeleton**. You
 own it; you grow it. Its job is queryable project memory: raw work stays in
 source locations, while this wiki keeps source-linked maps, glossary, decisions,
 and gaps so project or company knowledge can be queried by reference.
+Think of it as an agent self-serve knowledge refrigerator: the agent should find
+the ingredients for a project answer here before asking you to restock context.
 
 ## The Raw / Wiki / Schema model
 
@@ -68,3 +70,6 @@ When entering a new codebase or domain, observe first: runtime/log/metric or
 smoke behavior when available, plus git, tests, config, scripts, and release
 signals. Then turn the useful terms into glossary seeds and route the shape of
 the system through maps or gaps before broad change.
+
+Acceptance signal: an agent can open the right notes, cite source artifacts, and
+ask only the smallest remaining product question.

@@ -43,7 +43,7 @@ vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waive
 - Vault root: repository root.
 - Wiki root: `llm-wiki/`.
 - DDD 운영 모델 root: `llm-wiki/ddd/`.
-- source truth 는 기존 docs, code, tests, scripts 에 남긴다.
+- source truth 는 기존 docs, code, tests, scripts 에 남긴다. wiki 는 agent 가 스스로 꺼내 쓰는 지식 냉장고이지 raw file 창고가 아니다.
 - wiki page 는 TopicHub, retrieval path, DDD context map, upgrade map, generated index 로 쓴다.
 - PDF/media/source library 는 외부 source manager 에 둘 수 있다. wiki 는 source id, metadata locator,
   권한/접근, extraction 상태, compile target 만 기록하고 file warehouse 가 되지 않는다.

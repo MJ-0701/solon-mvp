@@ -4,7 +4,7 @@ title: "Obsidian LLM Wiki Continuity"
 visibility: oss-public
 doc_type: product-reference
 language: en
-updated: 2026-05-31
+updated: 2026-06-02
 parent: docs/en/current-product-shape.md
 summary: "Obsidian LLM Wiki Continuity"
 load_when: "Read when docs/en/current-product-shape.md routes to this section."
@@ -19,6 +19,10 @@ The practical aim is queryable company memory. Raw work stays in source
 locations; `llm-wiki/` keeps source-linked maps, glossary seeds, decisions, and
 gaps so future agents can answer project questions by reference instead of
 asking the user to repeat context.
+
+Another way to say it: `llm-wiki/` is the agent self-serve knowledge refrigerator.
+The agent should be able to find the ingredients for a project answer before
+asking the user to restock the whole context window.
 
 Product identity boundary: wiki growth serves SFS flow; it is not a product direction.
 New wiki features count as Solon advancement only when they improve intent
@@ -67,6 +71,10 @@ ledger, unknowns/gaps, questions ledger, development guardrails, and bug,
 release, or test memory when those surfaces exist. The questions ledger should
 mark what is already answered and when it may become stale, so agents do not
 ask the user to repeat tacit knowledge that the project has already captured.
+
+This is also the acceptance signal for the wiki: an agent can self-serve the
+right notes, cite source artifacts, and ask only the smallest remaining product
+question.
 
 `sfs ingest` is the Raw-layer entry mechanic for new sources. It requires a
 one-line collection purpose and a `source_type` (`article`, `youtube`,

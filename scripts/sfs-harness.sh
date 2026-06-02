@@ -378,6 +378,11 @@ print_doctor() {
   else
     info "no active sprint pointer; harness can still map the project"
   fi
+  if [ -f ".sfs-local/harness/evolution-ledger.md" ]; then
+    ok "harness evolution ledger present"
+  else
+    info "harness evolution ledger absent; run 'sfs harness map --write' before evolving generated harnesses"
+  fi
   if [ -d "llm-wiki" ]; then
     ok "llm-wiki present as long-horizon memory"
     if [ -d "llm-wiki/bug-reports" ]; then
@@ -512,6 +517,9 @@ EOF
   printf '| Host channels (0.7.0+) | CLI is always present; MCP (`solon-mcp` stdio server) is %s; permission baseline (`solon-safe-permissions.yaml`) is %s; Agent SDK scaffold (`claude-agent-sdk-zero`) is %s; this project'\''s own agent-build track signal is %s. | present |\n' \
     "$mcp_status" "$preset_status" "$sdk_status" "$agentbuild_status"
   cat <<'EOF'
+| Harness audit | Generated or extended agent harnesses reconcile declared agents, skills, orchestrator pointers, and change history before new workers are added. | present |
+| Team architecture | Optional multi-agent work names the selected pattern: pipeline, fan-out/fan-in, expert pool, producer-reviewer, supervisor, or hierarchical delegation. | present |
+| Harness evolution | Initial-to-shipped deltas, feedback, and repeated defects are promoted into tests, policies, skills, or scaffold defaults. | present |
 
 ## Division Contracts
 
@@ -526,11 +534,21 @@ EOF
 
 ## Autonomy Loop
 
-1. Capture intent as a goal, materials, ask-back rule, and output format.
-2. Split work into a small implementation slice with explicit files and evidence.
-3. Let the division council record findings, waivers, and `asset_candidate` items.
-4. Run checks automatically and convert repeated AI mistakes into tests or guardrails.
-5. Review artifacts, not chat vibes, then release only after the channel/runtime checks pass.
+1. Audit existing harness files, pointers, and history before extending roles or skills.
+2. Capture intent as a goal, materials, ask-back rule, and output format.
+3. Split work into a small implementation slice with explicit files and evidence.
+4. Name an architecture pattern only when optional multi-agent work is selected.
+5. Run checks automatically and convert repeated AI mistakes into tests or guardrails.
+6. Record initial-to-shipped harness evolution deltas before promoting a pattern.
+7. Review artifacts, not chat vibes, then release only after the channel/runtime checks pass.
+
+## Harness Evolution Ledger
+
+`sfs harness map --write` creates `.sfs-local/harness/evolution-ledger.md` when
+it is absent and never overwrites an existing ledger. Record one row per
+feedback, repeated defect, failed eval, review finding, or manual audit delta.
+The ledger columns are source, baseline, shipped delta, hypothesis, acceptance
+signal, promotion target, decision, evidence paths, and next check.
 
 ## Human Boundary
 
@@ -543,6 +561,61 @@ repeatability, and making gaps visible before the AI runs too far.
 - Run `sfs harness doctor` before long autonomous or multi-agent work.
 - Run `sfs harness map --write` after major project structure changes.
 - If the same mistake recurs, add a test, bug report, routed policy, or wiki map instead of another prompt warning.
+EOF
+}
+
+write_evolution_ledger() {
+  local out_path="$1" generated_at project version
+  generated_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  project="$(project_name)"
+  version="$(project_version)"
+
+  cat <<EOF
+---
+doc_id: sfs-harness-evolution-ledger
+title: "SFS Harness Evolution Ledger"
+created: ${generated_at}
+visibility: raw-internal
+doc_type: harness-evolution-ledger
+project: ${project}
+sfs_version: ${version:-unknown}
+---
+
+# SFS Harness Evolution Ledger
+
+Record one concrete harness evolution delta per row. Do not paste long
+transcripts here; link the source report, review, eval output, bug report, or
+user feedback artifact.
+
+## Ledger Columns
+
+| Column | Meaning |
+|:--|:--|
+| ID | Stable id such as HE-YYYYMMDD-01. |
+| Source | user-feedback, repeated-defect, failed-eval, review-finding, manual-audit. |
+| Baseline harness | Map, agent, skill, policy, scaffold, or test state before change. |
+| Shipped delta | What changed: add, split, merge, remove, reroute, eval, guardrail. |
+| Hypothesis | Why this should improve time-to-validated artifact or reduce recurrence. |
+| Acceptance signal | With-skill vs baseline, near-miss trigger eval, test, smoke, defect recurrence, or reviewer disposition. |
+| Promotion target | test, routed policy, skill, scaffold default, wiki map, bug report, or deferred. |
+| Decision | accepted, rejected, deferred, plus owner/date. |
+| Evidence paths | Compact links to reports, tests, diffs, review outputs, or source notes. |
+| Next check | When/how to re-check that the evolution helped. |
+
+## Evolution Entries
+
+| ID | Source | Baseline harness | Shipped delta | Hypothesis | Acceptance signal | Promotion target | Decision | Evidence paths | Next check |
+|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|
+| HE-YYYYMMDD-01 | user-feedback | _TBD_ | _TBD_ | _TBD_ | _TBD_ | _TBD_ | deferred / owner / date | _TBD_ | _TBD_ |
+
+## Promotion Rules
+
+- One-off feedback stays as a ledger row until it repeats or carries high risk.
+- Repeated defects promote to a test, routed policy, skill, scaffold default,
+  wiki map, or bug report.
+- A rejected delta keeps the reason so the same idea does not churn future
+  sessions.
+- Public/shared promotion needs human-owned product judgment.
 EOF
 }
 
@@ -576,9 +649,17 @@ run_map() {
   done
 
   if [ "$write_mode" = "1" ]; then
+    local evolution_path
+    evolution_path="$(dirname "$out_path")/evolution-ledger.md"
     mkdir -p "$(dirname "$out_path")" || return 2
     write_map_body > "$out_path" || return 2
     echo "SFS harness map written: $out_path"
+    if [ -f "$evolution_path" ]; then
+      echo "SFS harness evolution ledger preserved: $evolution_path"
+    else
+      write_evolution_ledger "$evolution_path" > "$evolution_path" || return 2
+      echo "SFS harness evolution ledger written: $evolution_path"
+    fi
   else
     write_map_body
   fi

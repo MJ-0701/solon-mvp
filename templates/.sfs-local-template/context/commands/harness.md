@@ -13,7 +13,10 @@ load_when: ["harness", "doctor", "map", "autonomy", "multi-agent"]
   council, artifact/memory surface, wiki/bug recurrence memory, tests, and
   release/check rails.
 - `sfs harness map` prints a compact project harness map.
-- `sfs harness map --write` writes `.sfs-local/harness/harness-map.md`.
+- `sfs harness map --write` writes `.sfs-local/harness/harness-map.md` and, when
+  absent, `.sfs-local/harness/evolution-ledger.md`. The ledger is append-only
+  for feedback, repeated defects, failed evals, review findings, and promoted
+  guardrails; existing ledgers are preserved.
 
 Use it before long autonomous work, optional parallel-agent work, or a project
 structure refactor. The output is evidence for planning and review, not a

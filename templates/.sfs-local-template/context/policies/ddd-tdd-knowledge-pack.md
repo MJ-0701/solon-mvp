@@ -137,3 +137,7 @@ speaker-time assertions.
   already recorded in enterprise-evidence (§AI-Era Closed-Loop Evidence). The
   DDD/TDD floor is that human-owned spec/behavior surface; reference that lens
   rather than restating it here.
+- DT-AIERA-003: Development is wider than coding. For AI-assisted work, verify
+  the requirements, screen or sequence evidence, tests, QA, release, and
+  monitoring loop as part of the product behavior contract; code-only completion
+  is a partial signal.

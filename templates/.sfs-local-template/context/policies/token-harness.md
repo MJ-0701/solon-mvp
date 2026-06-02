@@ -53,6 +53,10 @@ load_when: ["token", "harness", "context", "Claude", "Codex", "Gemini", "MCP", "
 - Verification automation: when a result must be trusted repeatedly, turn the
   check into a test, smoke, hook, review prompt, or release gate. A reminder in
   chat is only a temporary mitigation.
+- Skill and harness changes need discriminating evals when their value is not
+  obvious: compare with-skill against a baseline, assert objective outcomes
+  where possible, and include near-miss trigger queries so description drift
+  does not steal adjacent work.
 - Human understanding boundary: AI may analyze, code, review, and execute, but
   humans still own why the product exists, what tradeoff is acceptable, and what
   exception changes the design contract.

@@ -46,8 +46,8 @@ fi
 
 # ── 2) Golden checksums — byte-exact skeleton; any content edit must be re-reviewed. ─
 declare -a GOLDEN=(
-  "00-llm-retrieval-guide.md 7b5e8d5f47b5e6dfbcd07917e4d0a9997f928c943d4eec87be173617b98904ee"
-  "README.md e82268103f17ab96071c3eeede17ff875c4bd78ccc4a81d4f3fbf9eba9126a89"
+  "00-llm-retrieval-guide.md 14546806714c360cf3749ad3add38b3e3f48e2a2452c183386e86f735d07f6bb"
+  "README.md 9ab4053837b643ce7cc2222402642e89d4f3a337003a37ec505cdf10992513b7"
   "_FRONTMATTER.md 45e6f15ecf6048d0ae26751fafd162992abac8ace620c10e8c8e9ce01f5fb66c"
   "bug-reports/README.md 6ffd032005dffb10b1d141d2b3e8ec48ecab0777a1cdfed3e498ff6749f36eee"
   "ddd/README.md 2d5e3a9336012a1beb48a724925ac2a530250c3a73d6173c164719d91028b6c0"

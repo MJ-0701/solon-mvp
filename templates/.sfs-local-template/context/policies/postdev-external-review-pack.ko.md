@@ -7,6 +7,8 @@ load_when:
   - Claude Cowork
   - Gemini review
   - Codex review
+  - CodeRabbit
+  - AI code review
   - after implementation
 language: ko
 status: filled-v1
@@ -21,10 +23,19 @@ status: filled-v1
 
 - SFS gate 가 우선이다: self-CPO PASS, SFS cross review, 그 다음 외부 evidence.
 - 외부 reviewer 는 GitHub `@codex`, Claude Code/Cowork, Gemini, future bridge
-  다 가능하지만 이것만으로 SFS PASS 가 되지는 않는다.
+  다 가능하다. CodeRabbit-style 서비스 같은 AI code-review CLI/PR bot 도 optional
+  external lane 이지만 이것만으로 SFS PASS 가 되지는 않는다.
 - CLI bridge 가 인증되어 있으면 agent 가 직접 실행한다. Claude Cowork 가 UI-only
   또는 host-controlled 이면 compact review capsule 을 만들고
   `manual_host_review_pending` 으로 기록한다. user 에게 맥락 반복을 맡기지 않는다.
+- code-review 서비스는 2-layer harness 로 쓴다: PR 전 intended base branch 기준
+  local diff review, merge 전 PR-stage review. base branch, commit, changed files,
+  severity, finding 별 accepted/rejected/deferred 상태를 남긴다.
+- Autofix prompt 나 생성 patch 는 worker 제안이지 진실이 아니다. bounded
+  micro-rework 로만 적용하고 local verification 을 다시 돌린 뒤 무엇을
+  수용/기각/보류했는지 기록한다.
+- change summary, sequence diagram, knowledge-base/team-style context, false-positive
+  학습은 navigation evidence 다. AC-to-evidence, tests, project SSoT 를 대체하지 않는다.
 - Runtime Token Firewall 을 따른다: goal, AC/ADR, diff/files, tests, open risk
   만 보낸다. full chat, secret, raw env, broad log 는 보내지 않는다.
 - 외부 PASS 는 continuation trigger 다. evidence 를 붙이고 다음 unmet SFS step 을
@@ -36,7 +47,9 @@ status: filled-v1
 2. 가능한 독립 executor 로 SFS cross review.
 3. Gemini `gemini-3.1-pro-preview`: 전략/보안/추론 폭이 필요한 review.
 4. Claude Code/Cowork: 구현 가독성, UX/product fit, handoff review.
-5. GitHub `@codex`: PR 위 최종 external PR/code-review evidence.
+5. optional code-review CLI/PR bot lane: local diff review 먼저, PR review 다음,
+   severity triage 와 autofix adjudication 포함.
+6. GitHub `@codex`: PR 위 최종 external PR/code-review evidence.
 
 ## PASS Shape
 
