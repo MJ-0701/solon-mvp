@@ -264,7 +264,7 @@ check_wiki_frontmatter() {
       frontmatter_has_key "${file}" "${key}" \
         || add_issue "${label}" "vault-frontmatter" "$(rel_to_project "${project}" "${file}") missing ${key}"
     done
-  done < <(find "${wiki}" -type f -name '*.md' 2>/dev/null)
+  done < <(find "${wiki}" -type d -name 'graphify_out' -prune -o -type f -name '*.md' -print 2>/dev/null)
   [[ "${found}" -eq 1 ]] || add_issue "${label}" "vault-frontmatter" "llm-wiki has no markdown notes"
   say_ok "${label} llm-wiki frontmatter"
 }

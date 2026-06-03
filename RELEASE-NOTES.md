@@ -15,6 +15,20 @@
 
 ---
 
+## 0.8.18
+
+`sfs healthcheck` ignores Graphify derived Markdown exports when validating LLM Wiki frontmatter.
+
+체감 변화:
+
+- `llm-wiki/graphify_out/` 아래에 Graphify Markdown export 를 둬도
+  `sfs healthcheck` 가 이를 정식 wiki note 로 오인해 frontmatter 오류를 내지 않습니다.
+- `llm-wiki/`의 실제 README/topic/DDD notes 에 대한 frontmatter 검사는 그대로 유지됩니다.
+- 0.8.17의 read-only healthcheck, report-bug draft-only gate, Graphify-derived workspace
+  guidance 는 유지됩니다.
+
+---
+
 ## 0.8.17
 
 `sfs healthcheck` joins the packaged runtime, and LLM Wiki guidance now absorbs Graphify-style graph analysis.

@@ -88,6 +88,19 @@ set -e
 assert_contains "${TMP_DIR}/bad-wiki.out" "vault-frontmatter" "bad wiki issue"
 assert_contains "${TMP_DIR}/bad-wiki.out" "bad-note.md missing opening frontmatter" "bad wiki detail"
 
+GRAPHIFY_EXPORT="${TMP_DIR}/graphify-export"
+create_project "${GRAPHIFY_EXPORT}"
+mkdir -p "${GRAPHIFY_EXPORT}/llm-wiki/graphify_out"
+printf 'derived graph export without frontmatter\n' > "${GRAPHIFY_EXPORT}/llm-wiki/graphify_out/export.md"
+SFS_HEALTHCHECK_SKIP_RUNTIME_TESTS=1 \
+  SFS_DIST_DIR="${DIST_DIR}" \
+  bash "${SFS_BIN}" healthcheck --project "${GRAPHIFY_EXPORT}" > "${TMP_DIR}/graphify-export.out" 2>&1 \
+  || {
+    sed -n '1,220p' "${TMP_DIR}/graphify-export.out" >&2
+    fail "graphify_out markdown exports should not fail vault frontmatter"
+  }
+assert_contains "${TMP_DIR}/graphify-export.out" "Summary: projects=1 issues=0" "graphify export summary"
+
 FAKEBIN="${TMP_DIR}/fakebin"
 mkdir -p "${FAKEBIN}"
 cat > "${FAKEBIN}/gh" <<'EOF'

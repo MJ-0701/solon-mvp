@@ -1,5 +1,18 @@
 ## [Unreleased]
 
+## [0.8.18] - 2026-06-03
+
+> **`sfs healthcheck` ignores Graphify derived Markdown exports when validating LLM Wiki frontmatter.**
+
+### Fixed
+
+- **Graphify export false positive in `sfs healthcheck`.**
+  `sfs healthcheck` now prunes `llm-wiki/graphify_out/` while validating
+  wiki note frontmatter. Generated Graphify Markdown exports are treated as
+  derived workspace artifacts, not frontmatter-backed wiki source notes, so a
+  project can keep graph exports inside the vault without a spurious
+  `vault-frontmatter` failure.
+
 ## [0.8.17] - 2026-06-03
 
 > **`sfs healthcheck` joins the packaged runtime, and LLM Wiki guidance now absorbs Graphify-style graph analysis.**
