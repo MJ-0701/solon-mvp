@@ -19,9 +19,16 @@ is placeholder-driven and ships no project-specific values.
 1. Copy `template.html` to the project's report location.
 2. Replace placeholders:
    - `<PROJECT-NAME>` / `<DATE>`, `{{GENERATED_AT}}`, `{{BRANCH_OR_PR}}`.
+   - `{{ARTIFACT_KIND}}`, `{{ARTIFACT_STATUS}}`, `{{ARTIFACT_OWNER}}`,
+     `{{SOURCE_REF}}` — metadata that makes the review traceable.
+   - `{{REVIEW_VERDICT}}`, `{{REVIEWER}}`, `{{REVIEW_LENS}}` — verdict and
+     evaluator metadata.
    - `{{SUMMARY}}` — verdict + headline counts (blocker/major/minor).
+   - `{{EVIDENCE_ITEM}}` — repeat per test, review run, source link, or artifact path.
    - `{{FINDING_ROW}}` — repeat per finding (severity / file:line / problem /
      fix). Severity in {blocker, major, minor, nit}.
+   - `{{ACTION_ITEM}}`, `{{ACTION_OWNER}}`, `{{ACTION_STATUS}}` — repeat per
+     required CTO action.
    - `{{DIFF_FILE}}`, `{{DIFF_BODY}}` — repeat the diff block per file; keep
      `+`/`-` line prefixes so the diff colors render.
    - `{{ANNOTATION_ITEM}}` — repeat per inline annotation tied to a diff line.
@@ -30,6 +37,8 @@ is placeholder-driven and ships no project-specific values.
 
 - Every finding states a fix, not just a problem.
 - Severity is explicit; do not bury blockers among nits.
+- Verdict, reviewer, evidence, and required-action rails are mandatory, even
+  when a row says "none".
 - Self/cross review verdict is the user's call to accept; present findings,
   do not auto-resolve.
 - Do not hardcode private docset paths or absolute staging paths.

@@ -160,14 +160,17 @@ if [[ "${CLOSE}" -eq 1 ]]; then
   # report/retro keep sprint evidence, llm-wiki receives only durable meaning.
   sfs_write_wiki_compile_checklist "${SPRINT_ID}" "${NOW}" "${REPORT_PATH}" "${RETRO_PATH}" || true
   sprint_close "${SPRINT_DIR}" "${NOW}"
-  sfs_compact_sprint_workbench "${SPRINT_ID}" "${NOW}"
-
-  # current-sprint 클리어
-  rm -f "${SFS_CURRENT_SPRINT_FILE}"
 
   # report_ready + sprint_close events (2-arg signature)
   append_event "report_ready" "{\"sprint_id\":\"${SPRINT_ID}\",\"path\":\"${REPORT_PATH}\"}"
   append_event "sprint_close" "{\"sprint_id\":\"${SPRINT_ID}\"}"
+  sfs_preserve_event_excerpt_from_file "${SPRINT_ID}" "${SFS_EVENTS_FILE}" "retro close before active-ledger prune" \
+    || exit "${SFS_EXIT_PERM}"
+  sfs_compact_sprint_workbench "${SPRINT_ID}" "${NOW}"
+
+  # current-sprint 클리어 + active ledger prune after durable event preservation.
+  rm -f "${SFS_CURRENT_SPRINT_FILE}" || exit "${SFS_EXIT_PERM}"
+  sfs_prune_sprint_event_lines "${SPRINT_ID}" || exit "${SFS_EXIT_PERM}"
 
   # auto commit. Branch push/main merge/main push belong to the AI runtime Git Flow lifecycle.
   auto_commit_close "${SPRINT_ID}"

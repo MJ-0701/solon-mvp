@@ -36,13 +36,16 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
 - `events.jsonl` is allowed only while it has a one-line active-sprint reason:
   current sprint status/gate/review routing. It must be compact, not append-only
   history; repeated command opens replace older lines for the same sprint/gate.
-  After the sprint closes, `report.md`/archive evidence and git history are the
-  durable record, so closed-sprint event lines are pruned and an empty ledger is
-  deleted.
+  Before close/tidy/adopt prune closed-sprint lines, SFS preserves exact raw
+  JSONL excerpts under `.sfs-local/archives/events/sprints/<sprint-id>.jsonl`.
+  That loose archive path is the grep/tail recovery surface; sprint cold
+  archives may include a copy for archaeology. Only after that preservation
+  succeeds may closed-sprint lines be pruned and an empty active ledger deleted.
 - Post-adopt surface cleanup is valid even when no sprint folders remain:
   `sfs tidy --all --apply` removes project-local cache notice files, placeholder
   `auth.env`, orphan `events.jsonl`, empty workbench dirs, and collapses
-  top-level non-adopt archive buckets into `archives/adopt/surface-cleanup/...`.
+  top-level non-adopt archive buckets into `archives/adopt/surface-cleanup/...`;
+  the durable `archives/events/` bucket is not collapsed.
 - `retro` is the normal final close command and ensures `report.md` before
   closing. Do not recommend `report` before `retro` in the normal close path.
   Use `report` only for preview or past-report rebuild. Use `retro --draft`

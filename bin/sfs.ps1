@@ -607,6 +607,7 @@ Commands:
   version [--check]
   status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, capture, note, ingest, report, report-bug, flowcheck, healthcheck, tidy, retro, commit, loop
   bootstrap [plain-language app idea]
+  measure [--json] [--root <dir>]
   measure --alive -- <command>
 
 Windows note:

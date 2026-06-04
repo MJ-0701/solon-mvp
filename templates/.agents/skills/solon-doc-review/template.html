@@ -18,6 +18,8 @@
     .sub { color:var(--muted); margin:0 0 24px; }
     .card { background:var(--card); border:1px solid #30363d; border-radius:10px; padding:18px 20px; margin:14px 0; }
     .card h2 { font-size:14px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:0 0 10px; }
+    dl { display:grid; grid-template-columns:140px 1fr; gap:6px 16px; margin:0; }
+    dt { color:var(--muted); } dd { margin:0; }
     table { width:100%; border-collapse:collapse; }
     th,td { text-align:left; padding:8px 10px; border-bottom:1px solid #30363d; vertical-align:top; }
     th { color:var(--muted); font-weight:600; font-size:13px; }
@@ -39,8 +41,35 @@
   <p class="sub"><PROJECT-NAME> · {{GENERATED_AT}}</p>
 
   <div class="card">
+    <h2>Artifact metadata</h2>
+    <dl>
+      <dt>artifact</dt><dd>{{ARTIFACT_KIND}}</dd>
+      <dt>status</dt><dd>{{ARTIFACT_STATUS}}</dd>
+      <dt>owner</dt><dd>{{ARTIFACT_OWNER}}</dd>
+      <dt>source</dt><dd>{{SOURCE_REF}}</dd>
+    </dl>
+  </div>
+
+  <div class="card">
     <h2>Summary</h2>
     <p>{{SUMMARY}}</p>
+  </div>
+
+  <div class="card">
+    <h2>Review verdict</h2>
+    <dl>
+      <dt>verdict</dt><dd>{{REVIEW_VERDICT}}</dd>
+      <dt>reviewer</dt><dd>{{REVIEWER}}</dd>
+      <dt>lens</dt><dd>{{REVIEW_LENS}}</dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h2>Evidence links</h2>
+    <ul>
+      <!-- repeat per evidence link/path -->
+      <li>{{EVIDENCE_ITEM}}</li>
+    </ul>
   </div>
 
   <div class="card">
@@ -55,6 +84,17 @@
           <td>{{FINDING_PROBLEM}}</td>
           <td>{{FINDING_FIX}}</td>
         </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Required actions</h2>
+    <table>
+      <thead><tr><th>Action</th><th>Owner</th><th>Status</th></tr></thead>
+      <tbody>
+        <!-- repeat per required CTO action -->
+        <tr><td>{{ACTION_ITEM}}</td><td>{{ACTION_OWNER}}</td><td>{{ACTION_STATUS}}</td></tr>
       </tbody>
     </table>
   </div>

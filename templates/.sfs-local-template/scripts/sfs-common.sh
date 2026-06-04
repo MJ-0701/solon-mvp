@@ -935,13 +935,143 @@ sfs_event_line_belongs_to_active_sprint() {
   [[ -n "${sid}" && "${sid}" == "${active_sid}" ]]
 }
 
+sfs_validate_event_archive_sprint_id() {
+  local sid="${1:-}"
+  case "${sid}" in
+    ""|*..*|*/*|*\\*|*$'\n'*|*$'\t'*|*' '*|.*)
+      return 1
+      ;;
+  esac
+  return 0
+}
+
+sfs_event_archive_path_for_sprint() {
+  local sid="${1:?sprint id required}"
+  sfs_validate_event_archive_sprint_id "${sid}" || return "${SFS_EXIT_PERM}"
+  printf '%s\n' "${SFS_ARCHIVES_DIR}/events/sprints/${sid}.jsonl"
+}
+
+sfs_event_archive_manifest_path_for_sprint() {
+  local sid="${1:?sprint id required}"
+  sfs_validate_event_archive_sprint_id "${sid}" || return "${SFS_EXIT_PERM}"
+  printf '%s\n' "${SFS_ARCHIVES_DIR}/events/sprints/${sid}.manifest.txt"
+}
+
+# sfs_preserve_event_excerpt_from_file <sprint-id> <source-jsonl> [reason]
+#
+# Preserve exact SFS event JSONL lines for one sprint before active-ledger
+# cleanup. The output path is intentionally loose and grep-friendly; tar bundles
+# may additionally include a copy, but users should not need extraction for
+# normal timeline recovery.
+sfs_preserve_event_excerpt_from_file() {
+  local sid="${1:?sprint id required}" source_file="${2:-${SFS_EVENTS_FILE}}" reason="${3:-active-ledger prune}"
+  local archive_path manifest archive_dir match_tmp combined_tmp line line_sid count ts
+  [[ -f "${source_file}" ]] || return "${SFS_EXIT_OK}"
+  sfs_validate_event_archive_sprint_id "${sid}" || return "${SFS_EXIT_PERM}"
+
+  archive_path="$(sfs_event_archive_path_for_sprint "${sid}")" || return "${SFS_EXIT_PERM}"
+  manifest="$(sfs_event_archive_manifest_path_for_sprint "${sid}")" || return "${SFS_EXIT_PERM}"
+  archive_dir="$(dirname "${archive_path}")"
+  mkdir -p "${archive_dir}" || return "${SFS_EXIT_PERM}"
+
+  match_tmp="$(mktemp "${archive_dir}/.${sid}.events.XXXXXX")" || return "${SFS_EXIT_PERM}"
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    [[ -n "${line}" ]] || continue
+    line_sid="$(sfs_event_json_string_field "sprint_id" "${line}")"
+    [[ "${line_sid}" == "${sid}" ]] || continue
+    printf '%s\n' "${line}" >> "${match_tmp}" || { rm -f "${match_tmp}" 2>/dev/null || true; return "${SFS_EXIT_PERM}"; }
+  done < "${source_file}"
+
+  if [[ ! -s "${match_tmp}" ]]; then
+    rm -f "${match_tmp}" 2>/dev/null || true
+    return "${SFS_EXIT_OK}"
+  fi
+
+  combined_tmp="$(mktemp "${archive_dir}/.${sid}.combined.XXXXXX")" || { rm -f "${match_tmp}" 2>/dev/null || true; return "${SFS_EXIT_PERM}"; }
+  if [[ -f "${archive_path}" ]]; then
+    cat "${archive_path}" "${match_tmp}" | awk 'NF && !seen[$0]++ { print }' > "${combined_tmp}" \
+      || { rm -f "${match_tmp}" "${combined_tmp}" 2>/dev/null || true; return "${SFS_EXIT_PERM}"; }
+  else
+    awk 'NF && !seen[$0]++ { print }' "${match_tmp}" > "${combined_tmp}" \
+      || { rm -f "${match_tmp}" "${combined_tmp}" 2>/dev/null || true; return "${SFS_EXIT_PERM}"; }
+  fi
+  mv -f "${combined_tmp}" "${archive_path}" || { rm -f "${match_tmp}" "${combined_tmp}" 2>/dev/null || true; return "${SFS_EXIT_PERM}"; }
+  rm -f "${match_tmp}" 2>/dev/null || true
+
+  count="$(wc -l < "${archive_path}" 2>/dev/null | tr -d '[:space:]' || printf '0')"
+  ts="$(date +%Y-%m-%dT%H:%M:%S%z 2>/dev/null | sed -E 's/([0-9]{2})$/:\1/')"
+  {
+    echo "SFS sprint event excerpt"
+    echo "generated_at: ${ts}"
+    echo "sprint_id: ${sid}"
+    echo "source: ${source_file}"
+    echo "archive: ${archive_path}"
+    echo "line_count: ${count}"
+    echo "reason: ${reason}"
+    echo
+    echo "policy:"
+    echo "- .sfs-local/events.jsonl is compact active routing state, not durable cross-sprint history."
+    echo "- before close/tidy/adopt prune closed-sprint lines, SFS preserves raw JSONL excerpts here."
+    echo "- this file is intentionally grep-friendly; use tar archives only for deeper archaeology."
+  } > "${manifest}" || return "${SFS_EXIT_PERM}"
+  return "${SFS_EXIT_OK}"
+}
+
+sfs_event_sprint_ids_in_file() {
+  local source_file="${1:-${SFS_EVENTS_FILE}}" line sid
+  [[ -f "${source_file}" ]] || return "${SFS_EXIT_OK}"
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    [[ -n "${line}" ]] || continue
+    sid="$(sfs_event_json_string_field "sprint_id" "${line}")"
+    [[ -n "${sid}" ]] || continue
+    sfs_validate_event_archive_sprint_id "${sid}" || continue
+    printf '%s\n' "${sid}"
+  done < "${source_file}" | sort -u
+}
+
+sfs_preserve_all_event_excerpts_from_file() {
+  local source_file="${1:-${SFS_EVENTS_FILE}}" reason="${2:-active-ledger reset}" sids sid
+  [[ -f "${source_file}" ]] || return "${SFS_EXIT_OK}"
+  sids="$(sfs_event_sprint_ids_in_file "${source_file}" || true)"
+  [[ -n "${sids}" ]] || return "${SFS_EXIT_OK}"
+  while IFS= read -r sid; do
+    [[ -n "${sid}" ]] || continue
+    sfs_preserve_event_excerpt_from_file "${sid}" "${source_file}" "${reason}" || return "${SFS_EXIT_PERM}"
+  done <<< "${sids}"
+  return "${SFS_EXIT_OK}"
+}
+
+sfs_prune_sprint_event_lines() {
+  local sid="${1:?sprint id required}" tmp line line_sid kept=0
+  [[ -f "${SFS_EVENTS_FILE}" ]] || return "${SFS_EXIT_OK}"
+  sfs_validate_event_archive_sprint_id "${sid}" || return "${SFS_EXIT_PERM}"
+  tmp="$(mktemp "${SFS_EVENTS_FILE}.prune.XXXXXX")" || return "${SFS_EXIT_PERM}"
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    [[ -n "${line}" ]] || continue
+    line_sid="$(sfs_event_json_string_field "sprint_id" "${line}")"
+    if [[ "${line_sid}" == "${sid}" ]]; then
+      continue
+    fi
+    printf '%s\n' "${line}" >> "${tmp}" || { rm -f "${tmp}" 2>/dev/null || true; return "${SFS_EXIT_PERM}"; }
+    kept=$((kept + 1))
+  done < "${SFS_EVENTS_FILE}"
+
+  if [[ "${kept}" -eq 0 ]]; then
+    rm -f "${tmp}" "${SFS_EVENTS_FILE}" || return "${SFS_EXIT_PERM}"
+  else
+    mv -f "${tmp}" "${SFS_EVENTS_FILE}" || return "${SFS_EXIT_PERM}"
+  fi
+  return "${SFS_EXIT_OK}"
+}
+
 # append_event TYPE JSON_PAYLOAD — update the compact active-state JSONL ledger.
 # JSON_PAYLOAD must already be a valid JSON object (e.g. '{"k":"v"}').
 # Auto-injects `ts` (ISO8601 +TZ) and `type` if not present in payload.
 # The ledger is intentionally not append-only: repeated command opens replace
 # the previous line for the same type + natural key (sprint/gate/division/etc.),
 # and only the current sprint's state lines remain visible. Closed-sprint
-# history belongs in shared report/archive evidence and git history.
+# history belongs in shared report/archive evidence, git history, and the
+# per-sprint raw event excerpts under .sfs-local/archives/events/sprints/.
 append_event() {
   local etype="${1:?type required}"
   local payload="${2:-{\}}"
@@ -1400,7 +1530,7 @@ sfs_archive_sprint_cold_bundle() {
   local sid="${1:?sprint id required}" ts="${2:?timestamp required}"
   local sdir="${SFS_SPRINTS_DIR}/${sid}"
   local tmp_root="${SFS_LOCAL_DIR}/tmp"
-  local archive_dir archive_file manifest staging doc path rel dest count=0 tmp_count=0
+  local archive_dir archive_file manifest staging doc path rel dest count=0 tmp_count=0 event_count=0 event_excerpt_path
   local source_paths=()
 
   [[ -d "${sdir}" ]] || return ${SFS_EXIT_NO_INIT}
@@ -1432,7 +1562,15 @@ sfs_archive_sprint_cold_bundle() {
     done < <(sfs_sprint_tmp_artifact_files "${sid}" "${tmp_root}")
   fi
 
-  if [[ "${count}" -eq 0 && "${tmp_count}" -eq 0 ]]; then
+  event_excerpt_path="$(sfs_event_archive_path_for_sprint "${sid}" 2>/dev/null || true)"
+  if [[ -n "${event_excerpt_path}" && -f "${event_excerpt_path}" ]]; then
+    dest="archives/events/sprints/${sid}.jsonl"
+    mkdir -p "$(dirname "${staging}/${dest}")" || return ${SFS_EXIT_PERM}
+    cp "${event_excerpt_path}" "${staging}/${dest}" || return ${SFS_EXIT_PERM}
+    event_count=1
+  fi
+
+  if [[ "${count}" -eq 0 && "${tmp_count}" -eq 0 && "${event_count}" -eq 0 ]]; then
     rm -rf "${staging}" 2>/dev/null || true
     rmdir "${archive_dir}" 2>/dev/null || true
     return ${SFS_EXIT_OK}
@@ -1445,12 +1583,14 @@ sfs_archive_sprint_cold_bundle() {
     echo "archive: ${archive_file}"
     echo "workbench_files: ${count}"
     echo "tmp_review_scratch_files: ${tmp_count}"
+    echo "event_excerpt_files: ${event_count}"
     echo
     echo "policy:"
     echo "- visible files must have a one-line keep reason"
     echo "- report.md remains in docs/solon/<english-workspace>/<yyyyMMdd>/ because it is the final sprint outcome"
     echo "- retro.md remains in docs/solon/<english-workspace>/<yyyyMMdd>/ because it records close/learning notes when present"
     echo "- raw brainstorm/plan/implement/log/review and review prompt/run scratch are cold history"
+    echo "- raw sprint event excerpts are preserved before active-ledger prune and copied into this bundle when present"
     echo "- use this archive only for archaeology, dispute resolution, or deep handoff recovery"
     echo
     echo "items:"
@@ -1462,10 +1602,11 @@ sfs_archive_sprint_cold_bundle() {
   tar -czf "${archive_file}" -C "${staging}" . || return ${SFS_EXIT_PERM}
   rm -rf "${staging}" || return ${SFS_EXIT_PERM}
 
-  # nounset-safe: by this line both `count` and `tmp_count` are > 0 (the (count==0 && tmp_count==0) branch above returns early), so source_paths has at least one element.
-  for path in "${source_paths[@]}"; do
-    rm -f "${path}" || return ${SFS_EXIT_PERM}
-  done
+  if [[ "${#source_paths[@]}" -gt 0 ]]; then
+    for path in "${source_paths[@]}"; do
+      rm -f "${path}" || return ${SFS_EXIT_PERM}
+    done
+  fi
   if [[ -d "${tmp_root}" ]]; then
     find "${tmp_root}" -depth -type d -empty -exec rmdir {} \; 2>/dev/null || true
   fi

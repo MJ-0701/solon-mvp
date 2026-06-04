@@ -196,6 +196,28 @@ RUNTIME_DIR="${DIST_DIR}/templates/.sfs-local-template"
 usage() {
   cat <<'EOF'
 Usage:
+  sfs <command> [args]
+
+First experience:
+  sfs start "<goal>"
+  sfs plan
+  sfs implement "<slice>"
+  sfs review --gate 6
+
+Full command inventory:
+  sfs help --full
+
+Useful setup:
+  sfs init --yes
+  sfs guide
+  sfs harness doctor|map [--write]
+  sfs status
+EOF
+}
+
+usage_full() {
+  cat <<'EOF'
+Usage:
   sfs init [--yes] [--layout thin|vendored]
   sfs upgrade [--skip-existing] [--no-self-upgrade] [--interactive] [--layout thin|vendored]
   sfs update [--skip-existing]          # one-shot runtime + project update
@@ -208,11 +230,12 @@ Usage:
   sfs context path <kernel|index|commands/name.md|policies/name.md>
   sfs <command> [args]
 
-Commands:
+Full command inventory:
   agent install, doctor, upgrade, update, uninstall
   version [--check]
   status, start, guide, auth, profile, division, adopt, brainstorm, plan, implement, review, decision, capture, note, ingest, report, report-bug, flowcheck, healthcheck, event, tidy, retro, commit, loop, harness, handoff
   bootstrap [<plain-language app idea>]   # agent-facing initial setup handoff
+  measure [--json] [--root <dir>]         # local saved-time / decision / token-cost dashboard
   measure --alive -- <command>            # long-running command heartbeat
 
 Project state defaults to .sfs-local/. Override with SFS_LOCAL_DIR when needed.
@@ -1817,7 +1840,18 @@ EOF
     esac
     ;;
   -h|--help|help)
-    usage
+    case "${2:-}" in
+      "" )
+        usage
+        ;;
+      --full|full)
+        usage_full
+        ;;
+      *)
+        echo "unknown help option: ${2}" >&2
+        exit 7
+        ;;
+    esac
     exit 0
     ;;
 esac

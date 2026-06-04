@@ -1,5 +1,28 @@
 ## [Unreleased]
 
+## [0.8.19] - 2026-06-03
+
+> **Sprint event ledger compaction now preserves raw event excerpts before pruning active ledgers.**
+
+### Added
+
+- **Events preserve-before-prune ADR.**
+  ADR 0005 records the release invariant: `close`, `tidy`, and `adopt` preserve
+  each active sprint ledger excerpt under `.sfs-local/archives/events/sprints/<sid>.jsonl`
+  before pruning `.sfs-local/events.jsonl`; archive write failure is fail-closed
+  so raw event evidence is not silently lost.
+
+### Changed
+
+- **Active event ledger compaction.**
+  Runtime close/tidy/adopt paths now compact active event ledgers by preserving
+  sprint-scoped raw excerpts before removing closed-sprint rows from the active
+  ledger, with regression coverage for the preserve-then-prune contract.
+- **C9 docs and SSoT cleanup.**
+  Ignored local zip snapshots are documented as local snapshots under
+  `archives/local-snapshots/`, keeping shipped SSoT/docs surfaces free of
+  host-local archive clutter.
+
 ## [0.8.18] - 2026-06-03
 
 > **`sfs healthcheck` ignores Graphify derived Markdown exports when validating LLM Wiki frontmatter.**

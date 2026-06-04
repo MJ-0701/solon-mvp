@@ -197,8 +197,27 @@ tidy_event_prune_stats() {
 
 tidy_prune_events() {
   local targets="${1:-}" current_sprint="${2:-}" all="${3:-0}"
-  local line tmp pruned=0 kept=0
+  local line tmp pruned=0 kept=0 pruned_sids="" sid
   [[ -f "${SFS_EVENTS_FILE}" ]] || { printf '0\n'; return 0; }
+
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    [[ -n "${line}" ]] || continue
+    if tidy_should_prune_event_line "${line}" "${targets}" "${current_sprint}" "${all}"; then
+      sid="$(tidy_event_line_sprint_id "${line}")"
+      [[ -n "${sid}" ]] || continue
+      case $'\n'"${pruned_sids}" in
+        *$'\n'"${sid}"$'\n'*) ;;
+        *) pruned_sids="${pruned_sids}${sid}"$'\n' ;;
+      esac
+    fi
+  done < "${SFS_EVENTS_FILE}"
+
+  while IFS= read -r sid; do
+    [[ -n "${sid}" ]] || continue
+    sfs_preserve_event_excerpt_from_file "${sid}" "${SFS_EVENTS_FILE}" "tidy before active-ledger prune" \
+      || return "${SFS_EXIT_PERM}"
+  done <<< "${pruned_sids}"
+
   tmp="$(mktemp "${SFS_EVENTS_FILE}.XXXXXX")" || return "${SFS_EXIT_PERM}"
   while IFS= read -r line || [[ -n "${line}" ]]; do
     [[ -n "${line}" ]] || continue
@@ -325,6 +344,7 @@ tidy_non_adopt_archive_ids() {
   find "${SFS_ARCHIVES_DIR}" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null \
     | while IFS= read -r dir; do
         [[ "$(basename "${dir}")" == "adopt" ]] && continue
+        [[ "$(basename "${dir}")" == "events" ]] && continue
         basename "${dir}"
       done \
     | sort
@@ -949,6 +969,8 @@ fi
 
 # Apply preflight first so --all never half-applies before discovering a
 # missing or invalid target.
+TIDY_APPLY_EVENT_PAYLOAD=""
+
 if [[ "${APPLY}" -eq 1 ]]; then
   while IFS= read -r sid; do
     [[ -n "${sid}" ]] || continue
@@ -1006,7 +1028,7 @@ while IFS= read -r sid; do
   _esc_archive="${ARCHIVE_PATH//\\/\\\\}"
   _esc_archive="${_esc_archive//\"/\\\"}"
   if [[ "${sid}" == "${CURRENT_SPRINT}" ]]; then
-    append_event "tidy_apply" "{\"sprint_id\":\"${_esc_sprint}\",\"report\":\"${_esc_report}\",\"archive\":\"${_esc_archive}\",\"workbench_files\":${COUNT},\"tmp_files\":${TMP_COUNT},\"report_created\":${REPORT_CREATED}}"
+    TIDY_APPLY_EVENT_PAYLOAD="{\"sprint_id\":\"${_esc_sprint}\",\"report\":\"${_esc_report}\",\"archive\":\"${_esc_archive}\",\"workbench_files\":${COUNT},\"tmp_files\":${TMP_COUNT},\"report_created\":${REPORT_CREATED}}"
   fi
 
   echo "tidied: ${sid}"
@@ -1023,6 +1045,9 @@ done <<< "${TARGETS}"
 
 if [[ "${APPLY}" -eq 1 ]]; then
   EVENT_PRUNED="$(tidy_prune_events "${TARGETS}" "${CURRENT_SPRINT}" "${ALL}")"
+  if [[ -n "${TIDY_APPLY_EVENT_PAYLOAD}" ]]; then
+    append_event "tidy_apply" "${TIDY_APPLY_EVENT_PAYLOAD}"
+  fi
   EVENT_COMPACTED="$(tidy_compact_events)"
   RESIDUE_REMOVED="$(tidy_cleanup_local_residue)"
   ARCHIVES_COLLAPSED="$(tidy_collapse_non_adopt_archives "${NOW}")"

@@ -44,12 +44,24 @@
   <p class="sub">{{GENERATED_AT}} · session <code>{{SESSION_CODENAME}}</code></p>
 
   <div class="card">
+    <h2>Artifact metadata</h2>
+    <dl>
+      <dt>artifact</dt><dd>{{ARTIFACT_KIND}}</dd>
+      <dt>status</dt><dd>{{ARTIFACT_STATUS}}</dd>
+      <dt>owner</dt><dd>{{ARTIFACT_OWNER}}</dd>
+      <dt>source</dt><dd>{{SOURCE_REF}}</dd>
+    </dl>
+  </div>
+
+  <div class="card">
     <h2>State</h2>
     <dl>
       <dt>branch</dt><dd>{{BRANCH}}</dd>
       <dt>commit</dt><dd>{{COMMIT_SHA}}</dd>
       <dt>status</dt><dd>{{GIT_STATUS}}</dd>
       <dt>current WU</dt><dd>{{CURRENT_WU}}</dd>
+      <dt>parked at</dt><dd>{{PARKED_AT}}</dd>
+      <dt>hard stop</dt><dd>{{HARD_STOP}}</dd>
     </dl>
   </div>
 
@@ -70,6 +82,18 @@
   </div>
 
   <div class="card">
+    <h2>Blockers / owner actions</h2>
+    <ul>
+      <!-- repeat per blocker or parked state -->
+      <li>{{BLOCKER_ITEM}}</li>
+    </ul>
+    <ul>
+      <!-- repeat per owner action -->
+      <li>{{REQUIRED_OWNER_ACTION}}</li>
+    </ul>
+  </div>
+
+  <div class="card">
     <h2>Next session — exact prompt</h2>
     <pre id="next-session-prompt">{{NEXT_SESSION_PROMPT}}</pre>
   </div>
@@ -78,11 +102,17 @@
   <script type="application/json" id="handoff-json">
   {
     "project": "<PROJECT-NAME>",
+    "artifact": "{{ARTIFACT_KIND}}",
+    "status": "{{ARTIFACT_STATUS}}",
+    "owner": "{{ARTIFACT_OWNER}}",
+    "source": "{{SOURCE_REF}}",
     "generated_at": "{{GENERATED_AT}}",
     "session": "{{SESSION_CODENAME}}",
     "branch": "{{BRANCH}}",
     "commit": "{{COMMIT_SHA}}",
     "current_wu": "{{CURRENT_WU}}",
+    "parked_at": "{{PARKED_AT}}",
+    "hard_stop": "{{HARD_STOP}}",
     "next_session_prompt": "{{NEXT_SESSION_PROMPT}}"
   }
   </script>

@@ -554,6 +554,8 @@ archive_and_reset_event_ledger_for_adopt() {
   [[ -f "${SFS_EVENTS_FILE}" ]] || { printf '0\n'; return "${SFS_EXIT_OK}"; }
   line_count="$(event_ledger_line_count_for_adopt)"
   [[ "${line_count}" -gt 0 ]] || { rm -f "${SFS_EVENTS_FILE}" 2>/dev/null || true; printf '0\n'; return "${SFS_EXIT_OK}"; }
+  sfs_preserve_all_event_excerpts_from_file "${SFS_EVENTS_FILE}" "adopt before active-ledger reset" \
+    || return "${SFS_EXIT_PERM}"
   mkdir -p "$(dirname "${backup_path}")" || return "${SFS_EXIT_PERM}"
   cp "${SFS_EVENTS_FILE}" "${backup_path}" || return "${SFS_EXIT_PERM}"
   rm -f "${SFS_EVENTS_FILE}" || return "${SFS_EXIT_PERM}"
@@ -861,6 +863,9 @@ fi
 
 mkdir -p "${ARCHIVE_DIR}" || exit "${SFS_EXIT_PERM}"
 
+ACTIVE_SPRINT_POINTER_REMOVED=0
+EVENT_LEDGER_ARCHIVED_LINES="$(archive_and_reset_event_ledger_for_adopt "${EVENT_LEDGER_BACKUP}")" || exit "${SFS_EXIT_PERM}"
+
 if [[ -d "${TARGET_DIR}" && "${FORCE}" -eq 1 ]]; then
   collapse_dirs_to_cold_archive "${SPRINT_ID}" "${SFS_SPRINTS_DIR}" "${PREEXISTING_TARGET_TARBALL}" "${PREEXISTING_TARGET_MANIFEST}" "SFS adopt preexisting target sprint archive" || exit "${SFS_EXIT_PERM}"
 fi
@@ -868,12 +873,10 @@ fi
 collapse_dirs_to_cold_archive "${EXISTING_SPRINT_IDS}" "${SFS_SPRINTS_DIR}" "${EXISTING_SPRINTS_TARBALL}" "${EXISTING_SPRINTS_MANIFEST}" "SFS adopt preexisting sprint archive" || exit "${SFS_EXIT_PERM}"
 collapse_dirs_to_cold_archive "${EXISTING_ARCHIVE_IDS}" "${SFS_ARCHIVES_DIR}" "${EXISTING_ARCHIVES_TARBALL}" "${EXISTING_ARCHIVES_MANIFEST}" "SFS adopt preexisting expanded archive collapse" || exit "${SFS_EXIT_PERM}"
 collapse_tmp_to_cold_archive "${TMP_ARTIFACTS_TARBALL}" "${TMP_ARTIFACTS_MANIFEST}" || exit "${SFS_EXIT_PERM}"
-ACTIVE_SPRINT_POINTER_REMOVED=0
 if [[ -f "${SFS_CURRENT_SPRINT_FILE}" ]]; then
   rm -f "${SFS_CURRENT_SPRINT_FILE}" || exit "${SFS_EXIT_PERM}"
   ACTIVE_SPRINT_POINTER_REMOVED=1
 fi
-EVENT_LEDGER_ARCHIVED_LINES="$(archive_and_reset_event_ledger_for_adopt "${EVENT_LEDGER_BACKUP}")" || exit "${SFS_EXIT_PERM}"
 LEGACY_SHARED_DOC_ARCHIVED="$(archive_legacy_shared_doc_for_adopt "${LEGACY_SHARED_DOC_PATH}" "${LEGACY_SHARED_DOC_ARCHIVE}" "${LEGACY_SHARED_DOC_MANIFEST}")" || exit "${SFS_EXIT_PERM}"
 collapse_residue_files_to_cold_archive "${RESIDUE_TARBALL}" "${RESIDUE_MANIFEST}" "${RESIDUE_FILES}" || exit "${SFS_EXIT_PERM}"
 rmdir "${SFS_SPRINTS_DIR}" 2>/dev/null || true

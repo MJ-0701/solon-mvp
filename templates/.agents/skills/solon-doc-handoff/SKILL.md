@@ -22,8 +22,14 @@ is placeholder-driven and ships no project-specific values; fill the tokens.
 2. Replace placeholders:
    - `<PROJECT-NAME>` / `<DATE>` — project + date.
    - `{{GENERATED_AT}}`, `{{SESSION_CODENAME}}`.
+   - `{{ARTIFACT_KIND}}`, `{{ARTIFACT_STATUS}}`, `{{ARTIFACT_OWNER}}`,
+     `{{SOURCE_REF}}` — metadata that makes the handoff traceable.
    - `{{BRANCH}}`, `{{COMMIT_SHA}}`, `{{GIT_STATUS}}`, `{{CURRENT_WU}}`.
+   - `{{PARKED_AT}}`, `{{HARD_STOP}}` — explicit stop state for release gates,
+     blocked approvals, or other owner-only actions.
    - `{{DONE_ITEM}}` / `{{EVIDENCE_ITEM}}` — repeat the `<li>` per item.
+   - `{{BLOCKER_ITEM}}`, `{{REQUIRED_OWNER_ACTION}}` — repeat per blocker and
+     morning owner action.
    - `{{NEXT_SESSION_PROMPT}}` — the exact prompt to paste into the next
      session. This is the payload of the copy-as-prompt button.
 3. Keep the `data-copy-as-prompt` button and the `#next-session-prompt` block —
@@ -33,6 +39,8 @@ is placeholder-driven and ships no project-specific values; fill the tokens.
 
 - The next-session prompt must be self-contained: tree roles, current branch /
   commit / status, what was done, evidence, and the exact resume instruction.
+- Blockers, parked state, hard stops, and required owner actions must be
+  explicit, even when the row says "none".
 - Do not hardcode private docset paths or absolute staging paths into the
   rendered artifact (private-path hygiene).
-- The HTML is self-contained (inline CSS/JS); it opens with no server.
+- Self-contained HTML (inline CSS/JS); opens with no server.

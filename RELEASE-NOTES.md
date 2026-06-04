@@ -15,6 +15,21 @@
 
 ---
 
+## 0.8.19
+
+Sprint close/tidy/adopt now preserve raw event excerpts before pruning active ledgers.
+
+체감 변화:
+
+- `sfs retro --close`, `sfs tidy`, `sfs adopt` 계열 정리 흐름이 닫힌 sprint 이벤트를
+  active `.sfs-local/events.jsonl` 에서 줄이기 전에
+  `.sfs-local/archives/events/sprints/<sid>.jsonl` 로 raw excerpt 를 먼저 남깁니다.
+- archive write 가 실패하면 prune 을 진행하지 않는 fail-closed 정책으로 이벤트 원본 유실을 막습니다.
+- C9 문서/SSoT 정리 결과로 ignored zip snapshot 은 `archives/local-snapshots/`
+  local snapshot 으로만 다루며, 제품 문서 표면에는 host-local archive clutter 를 남기지 않습니다.
+
+---
+
 ## 0.8.18
 
 `sfs healthcheck` ignores Graphify derived Markdown exports when validating LLM Wiki frontmatter.

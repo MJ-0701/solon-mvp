@@ -28,13 +28,17 @@ report 가 사용자 결정을 요구할 때는 `Q1` 같은 내부 번호만 남
 압축 migration 으로 정리됩니다. runtime upgrade / agent install / profile rollback 백업도
 loose 파일 대신 `*.tar.gz` + `manifest.txt` bundle 로 남습니다.
 `events.jsonl` 은 영구 히스토리가 아니라 현재 sprint 를 이어가기 위한 active ledger 입니다.
-현재 sprint 가 없거나 오래된 sprint 이벤트만 남은 경우 upgrade/tidy 가 제거 또는 archive 합니다.
+close/tidy/adopt 가 닫힌 sprint 이벤트를 prune 하기 전에는 raw JSONL excerpt 를
+`.sfs-local/archives/events/sprints/<sprint-id>.jsonl` 에 먼저 보존합니다. 이 파일은 tar 를 풀지
+않고 tail/grep 할 수 있는 로컬 타임라인입니다. 보존이 성공한 뒤에만 root active ledger 의
+오래된 sprint line 을 제거하거나 빈 ledger 를 삭제합니다.
 영구 인수인계는 `docs/solon/<domain>/<subdomain>/<feature>/<yyyyMMdd>/` 공유 문서와 git history 로 봅니다.
 `llm-wiki/` 는 그 위의 long-horizon retrieval/domain-memory layer 이며, close record 를 복제하지 않고
 링크합니다.
 반복 cleanup evidence 도 바깥에 같은 날 timestamp 폴더를 여러 개 남기지 않고
 `.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/manifest.txt` 와
-`surface-cleanup.tar.gz` 로 날짜별 묶음 처리합니다.
+`surface-cleanup.tar.gz` 로 날짜별 묶음 처리합니다. 단 `.sfs-local/archives/events/` 는 과거 sprint
+event timeline 을 grep 하기 위한 보존 surface 이므로 cleanup bundle 로 접지 않습니다.
 thin layout 에서는 project-local `.claude/`, `.gemini/`, `.agents/` command/skill adapter 도
 기본 표면에서 빠집니다. root adapter 문서가 global `sfs` runtime 을 안내하고, native
 slash/skill 파일이 필요한 프로젝트만 `sfs agent install all` 로 opt-in 설치합니다.

@@ -20,6 +20,8 @@
     .card { background:var(--card); border:1px solid #30363d; border-radius:10px; padding:18px 20px; margin:14px 0; }
     .card h2 { font-size:14px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:0 0 10px; }
     .card.warn { border-color:var(--warn); }
+    dl { display:grid; grid-template-columns:140px 1fr; gap:6px 16px; margin:0; }
+    dt { color:var(--muted); } dd { margin:0; }
     table { width:100%; border-collapse:collapse; }
     th,td { text-align:left; padding:8px 10px; border-bottom:1px solid #30363d; vertical-align:top; }
     th { color:var(--muted); font-weight:600; font-size:13px; }
@@ -31,6 +33,16 @@
 <main>
   <h1>{{TITLE}}</h1>
   <p class="sub"><PROJECT-NAME> · {{GENERATED_AT}}</p>
+
+  <div class="card">
+    <h2>Artifact metadata</h2>
+    <dl>
+      <dt>artifact</dt><dd>{{ARTIFACT_KIND}}</dd>
+      <dt>status</dt><dd>{{ARTIFACT_STATUS}}</dd>
+      <dt>owner</dt><dd>{{ARTIFACT_OWNER}}</dd>
+      <dt>source</dt><dd>{{SOURCE_REF}}</dd>
+    </dl>
+  </div>
 
   <div class="card">
     <h2>Goal — what we are actually building</h2>
@@ -46,6 +58,25 @@
         <tr><td>{{AC_ID}}</td><td>{{AC_CRITERION}}</td><td>{{AC_VERIFY}}</td></tr>
       </tbody>
     </table>
+  </div>
+
+  <div class="card">
+    <h2>Verification plan</h2>
+    <table>
+      <thead><tr><th>Signal</th><th>Command / source</th><th>Expected result</th></tr></thead>
+      <tbody>
+        <!-- repeat per verification signal -->
+        <tr><td>{{VERIFY_SIGNAL}}</td><td>{{VERIFY_SOURCE}}</td><td>{{VERIFY_EXPECTED}}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Evidence links</h2>
+    <ul>
+      <!-- repeat per evidence link/path -->
+      <li>{{EVIDENCE_ITEM}}</li>
+    </ul>
   </div>
 
   <div class="card warn">
@@ -71,6 +102,17 @@
       <tbody>
         <!-- repeat per open decision -->
         <tr><td>{{OD_QUESTION}}</td><td>{{OD_OPTIONS}}</td><td>{{OD_OWNER}}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Decision and action log</h2>
+    <table>
+      <thead><tr><th>Action</th><th>Owner</th><th>Status</th></tr></thead>
+      <tbody>
+        <!-- repeat per required action -->
+        <tr><td>{{ACTION_ITEM}}</td><td>{{ACTION_OWNER}}</td><td>{{ACTION_STATUS}}</td></tr>
       </tbody>
     </table>
   </div>

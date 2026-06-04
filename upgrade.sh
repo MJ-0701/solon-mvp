@@ -1007,6 +1007,7 @@ non_adopt_archive_ids() {
   find "$root" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null \
     | while IFS= read -r dir; do
         [ "$(basename "$dir")" = "adopt" ] && continue
+        [ "$(basename "$dir")" = "events" ] && continue
         basename "$dir"
       done \
     | sort

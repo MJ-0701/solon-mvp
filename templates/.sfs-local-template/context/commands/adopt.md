@@ -51,15 +51,19 @@ Rules:
 - Visible `.sfs-local` after adopt is intentionally tiny: keep only runtime
   files with a one-line reason (`VERSION`, `config.yaml`, `divisions.yaml`,
   `model-profiles.yaml`) plus private compressed recovery evidence under
-  `archives/adopt/` when evidence exists. Do not leave `events.jsonl`,
-  `current-sprint`, `tmp`, `cache`, empty `sprints`, `auth.env.example`, or
-  template/auth placeholder residue visible after adopt.
+  `archives/adopt/` when evidence exists and raw event excerpts under
+  `archives/events/sprints/<sprint-id>.jsonl` when the preexisting ledger had
+  sprint-scoped lines. Do not leave `events.jsonl`, `current-sprint`, `tmp`,
+  `cache`, empty `sprints`, `auth.env.example`, or template/auth placeholder
+  residue visible after adopt.
 - If a later upgrade or status command leaves `cache/*notice.env` or top-level
   `archives/runtime-*`/`archives/sprints` buckets, treat that as surface
   residue and run `sfs tidy --all --apply` to collapse it back under
-  `archives/adopt/surface-cleanup/...` or remove it. `events.jsonl` is different:
-  it may exist only for an active sprint's compact status/gate/review state; no
-  active sprint means it is residue.
+  `archives/adopt/surface-cleanup/...` or remove it. `archives/events/` is the
+  durable grep/tail surface for preserved event excerpts and must not be
+  collapsed. `events.jsonl` is different: it may exist only for an active
+  sprint's compact status/gate/review state; no active sprint means it is
+  residue after preservation.
 - Do not expand old sprint/archive material into the active working context unless the user asks for archaeology or recovery.
 - After apply, the next useful move is usually `sfs start "<first real cleanup slice>"`, then Gate 2 (Brainstorm) if scope is still fuzzy.
 - If wiki migration is accepted, the cleanup slice may be

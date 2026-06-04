@@ -132,35 +132,22 @@ Solon guide context
   sfs guide 다.
 
 첫 흐름:
-  Terminal:      sfs status
-  Claude/Gemini: /sfs status
-  Codex:         \$sfs status
-  Terminal:      sfs auth status
-  Claude/Gemini: /sfs auth status
-  Codex:         \$sfs auth status
   Terminal:      sfs start "<이번 sprint 목표>"
   Claude/Gemini: /sfs start "<이번 sprint 목표>"
   Codex:         \$sfs start "<이번 sprint 목표>"
-  Terminal:      sfs brainstorm "<아직 정리 안 된 요구사항>"
-  Claude/Gemini: /sfs brainstorm "<아직 정리 안 된 요구사항>"
-  Codex:         \$sfs brainstorm "<아직 정리 안 된 요구사항>"
-  Brainstorm:    --simple 빠른 정리 · default normal 핵심 질문 · --hard 깊은 PO 훈련
-  Setup:         앱 뼈대가 필요해 보이면 AI 가 "초기 프로젝트 구성해드릴까요?"라고 묻고,
-                 동의 후 크기에 맞는 native 구성을 잡음 (bootstrap 은 AI handoff)
   Terminal:      sfs plan
   Claude/Gemini: /sfs plan
   Codex:         \$sfs plan
   Terminal:      sfs implement "<첫 구현 slice>"
   Claude/Gemini: /sfs implement "<첫 구현 slice>"
   Codex:         \$sfs implement "<첫 구현 slice>"
+  Terminal:      sfs review --gate 6
+  Claude/Gemini: /sfs review --gate 6
+  Codex:         \$sfs review --gate 6
 
-작업 중:
-  /sfs decision "<결정 제목>"          결정이 흐려지기 전에 기록
-  /sfs auth probe --executor gemini   bridge 연결만 가볍게 확인
-  /sfs implement "<작은 구현 단위>"    plan 기반 작업 artifact + evidence 기록
-  /sfs review --gate 6                구현 검토 evidence 남기기
-  /sfs retro                          sprint close + local auto-commit
-  Codex 에서는 같은 명령을 \$sfs implement/decision/review/retro ... 로 입력
+필요할 때:
+  full guide 에는 brainstorm, decision, capture, retro, upgrade 같은 고급 명령이 있다.
+  첫 경험은 start → plan → implement → review 만 기억해도 된다.
 
 전체 가이드:
   Terminal:      sfs guide --print
