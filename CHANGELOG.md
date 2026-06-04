@@ -1,5 +1,37 @@
 ## [Unreleased]
 
+## [0.8.20] - 2026-06-04
+
+> **Review budget guardrails, measure dashboard, lite first experience, and richer HTML artifacts ship together.**
+
+### Added
+
+- **Review budget guardrails.**
+  `sfs review` now enforces declared review/advisor budget metadata before the
+  full evaluator call when numeric `estimated_cost_usd` exceeds numeric
+  `budget_usd`. Allowed, blocked, missing-budget, and unknown-estimate paths
+  append privacy-safe local telemetry, while no-budget review flows remain
+  backward-compatible.
+- **Measure dashboard.**
+  `sfs measure` now exposes a local-only dashboard and JSON output for saved
+  time, decision count, and token/cost evidence markers without provider
+  billing calls or network dependencies.
+- **HTML artifact rails.**
+  Spec, review, and handoff HTML templates now carry shared metadata, evidence
+  rails, and status/action fields while preserving existing copy-as-prompt and
+  JSON mirror behavior.
+
+### Changed
+
+- **Lite first experience.**
+  Default help and guide output now foreground the four core commands
+  `start`, `plan`, `implement`, and `review`; full command inventory remains
+  available through explicit full-mode help.
+- **Review profile evidence.**
+  Pinned Claude review commands can contribute whitelisted `--model` and
+  `--effort` invocation flags to SFS-collected profile evidence, so review_high
+  attestation no longer depends on LLM self-reporting.
+
 ## [0.8.19] - 2026-06-03
 
 > **Sprint event ledger compaction now preserves raw event excerpts before pruning active ledgers.**

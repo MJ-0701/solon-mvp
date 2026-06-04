@@ -15,6 +15,26 @@
 
 ---
 
+## 0.8.20
+
+Review budget guardrails, measure dashboard, lite first experience, and richer HTML artifacts ship together.
+
+체감 변화:
+
+- 선언된 review/advisor budget 과 estimated cost 가 함께 있고 estimate 가 budget 을 넘으면
+  `sfs review` 가 evaluator 호출 전에 멈춥니다. budget 이 없거나 estimate 를 모르면 기존 흐름을
+  유지하면서 local telemetry 만 남깁니다.
+- `sfs measure` 가 로컬 evidence 기반 대시보드와 JSON 출력을 제공합니다. provider billing API,
+  live pricing table, network 호출은 포함하지 않습니다.
+- 처음 쓰는 사용자는 `start → plan → implement → review` 네 명령을 중심으로 안내받고,
+  고급 사용자는 full help 에서 전체 명령 목록을 확인할 수 있습니다.
+- spec/review/handoff HTML artifacts 는 공통 metadata, evidence rail, status/action 영역을
+  갖춰 다음 세션 인계와 검토 증거가 더 잘 남습니다.
+- pinned Claude review command 의 `--model opus --effort xhigh` 플래그가 SFS profile evidence 로
+  기록되어 review_high attestation gap 을 줄입니다.
+
+---
+
 ## 0.8.19
 
 Sprint close/tidy/adopt now preserve raw event excerpts before pruning active ledgers.

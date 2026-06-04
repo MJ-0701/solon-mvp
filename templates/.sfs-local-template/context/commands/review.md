@@ -9,10 +9,7 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
 - Adapter-run by default: run `sfs review ...` before summarizing.
 - Do not create a new verdict from memory; use `review.md` and recorded result paths. When a gate review concludes, emit `sfs event gate_passed gate=<G-1..G5> order_index=<n> self_cpo=pass|partial|fail` so flowcheck can verify gate order, stop-the-line, and the pr-review guard (a passing SFS review gate is what `fcp-pr-reviewed` requires; a GitHub PR/@codex PASS does not substitute).
 - If the relevant sprint was compacted/closed and `current-sprint` is missing, use `sfs review --sprint <id> --gate <n>`; do not edit `.sfs-local/current-sprint` or extract tarballs manually.
-- After any external GitHub/@codex/PR/check PASS, do not stop at PASS. Record
-  evidence and continue the gate: self-CPO first, cross-review after self-CPO PASS. Closed sprint with known id uses
-  `sfs review --sprint <id> --gate <n>`; unknown id means ask for it, not restore
-  `.sfs-local/current-sprint` or create a new sprint.
+- After any external GitHub/@codex/PR/check PASS, do not stop at PASS: record evidence and continue the gate: self-CPO first, cross-review after self-CPO PASS. Closed sprint uses `sfs review --sprint <id> --gate <n>`; unknown id means ask, not restore `current-sprint` or create a sprint.
 - Handoff-only scope is a stop contract and overrides continuation triggers: if the user asks only for a handoff, next-session brief, session report, or `인계문서`, immediately record review/PR status as next-session evidence and stop. External review/check PASS does not override handoff-only scope; do not start or continue PR polling, review retriggers, merges, implementation, deploy, or monitor loops; interrupt active or queued batches and do not finish current PRs first unless the same request explicitly asks to continue. If post-request PR/review/merge work already happened, report it as a scope breach, not as a justification.
 - GitHub @codex review is post-implementation only. Do not request, trigger, or
   count GitHub @codex review during brainstorm or Gate 3 plan review.
@@ -56,6 +53,8 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   lane-utilization evidence or waiver, next action, heartbeat/automation cleanup plus durable wiki/report evidence. Probe with static benign payload and
   persist status/category/timestamp/redacted error class only. Raw stdout/stderr,
   tokens/env vars/prompts/model output/workspace/user content/PII are not durable evidence.
+- Declared advisor/review cost controls are enforced before the full executor prompt: numeric budget+estimate over budget exits nonzero before evaluator; missing budget/unknown estimate preserves path; JSONL telemetry stores only ts/surface/executor/generator/budget/estimate/decision/reason.
+- Provider billing APIs, live token accounting, and pricing tables are separate follow-up work.
 - Do not treat review volume as completion. Number of lenses, rounds, advisor
   comments, or elapsed time never unlocks `sfs implement`; only PASS or an
   explicit user waiver does.

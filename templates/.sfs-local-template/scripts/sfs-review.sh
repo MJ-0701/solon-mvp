@@ -205,6 +205,9 @@ REVIEW_DIR_EXPANSION_MAX="${SFS_REVIEW_DIR_EXPANSION_MAX:-80}"
 REVIEW_EXECUTOR_TIMEOUT="${SFS_REVIEW_EXECUTOR_TIMEOUT_SEC:-${SFS_REVIEW_COMMAND_TIMEOUT_SEC:-1500}}"
 REVIEW_BRIDGE_PROBE="${SFS_REVIEW_BRIDGE_PROBE:-auto}"
 REVIEW_BRIDGE_PROBE_TIMEOUT="${SFS_REVIEW_BRIDGE_PROBE_TIMEOUT_SEC:-45}"
+REVIEW_BUDGET_USD="${SFS_REVIEW_BUDGET_USD:-${SFS_ADVISOR_BUDGET_USD:-}}"
+REVIEW_ESTIMATED_COST_USD="${SFS_REVIEW_ESTIMATED_COST_USD:-${SFS_ADVISOR_ESTIMATED_COST_USD:-}}"
+REVIEW_BUDGET_TELEMETRY_FILE="${SFS_REVIEW_BUDGET_TELEMETRY_FILE:-${SFS_LOCAL_DIR}/telemetry/advisor-budget.jsonl}"
 # solon-product#7: the CPO/cross-review Gemini route is model-profiles
 # review_high (gemini-3.1-pro-preview). The reviewer model is ENFORCED, not a
 # soft target — a CPO/cross review must be served by the route model, verified
@@ -3015,8 +3018,13 @@ extract_bridge_probe_field() {
   ' "${err_path}" "${out_path}" 2>/dev/null | sed -n '1p'
 }
 
+extract_executor_cmd_flag() {
+  local cmd="$1" flag="$2"
+  printf '%s\n' "${cmd}" | sed -nE 's/.*(^|[[:space:]])--'"${flag}"'([=[:space:]]+)(["'\''"]?)([^[:space:]"'\''"]+).*/\4/p' | sed -n '1p'
+}
+
 write_bridge_profile_evidence() {
-  local profile="$1" out_path="$2" err_path="$3" dest="$4"
+  local profile="$1" out_path="$2" err_path="$3" dest="$4" invocation_cmd="${5:-}"
   local model reasoning model_lc reasoning_lc status expected_model expected_reasoning
 
   model="$(extract_bridge_probe_field "model" "${err_path}" "${out_path}")"
@@ -3037,6 +3045,23 @@ write_bridge_profile_evidence() {
         status="mismatch"
       fi
       ;;
+    claude)
+      expected_model="${SFS_REVIEW_CLAUDE_EXPECTED_MODEL:-opus}"
+      expected_reasoning="${SFS_REVIEW_CLAUDE_EXPECTED_EFFORT:-xhigh}"
+      if [[ -z "${model}" && -n "${invocation_cmd}" ]]; then
+        model="$(extract_executor_cmd_flag "${invocation_cmd}" "model")"
+      fi
+      if [[ -z "${reasoning}" && -n "${invocation_cmd}" ]]; then
+        reasoning="$(extract_executor_cmd_flag "${invocation_cmd}" "effort")"
+      fi
+      model_lc="$(printf '%s' "${model}" | tr '[:upper:]' '[:lower:]')"
+      reasoning_lc="$(printf '%s' "${reasoning}" | tr '[:upper:]' '[:lower:]')"
+      if [[ "${model_lc}" == "${expected_model}" && "${reasoning_lc}" == "${expected_reasoning}" ]]; then
+        status="matched"
+      elif [[ -n "${model}" || -n "${reasoning}" ]]; then
+        status="mismatch"
+      fi
+      ;;
     *)
       status="not-applicable"
       ;;
@@ -3044,7 +3069,7 @@ write_bridge_profile_evidence() {
 
   {
     printf 'SFS Executor Profile Bridge Evidence\n'
-    printf 'Source: SFS bridge probe stderr/stdout banner, sanitized and whitelisted by SFS; not LLM self-attestation.\n'
+    printf 'Source: SFS bridge probe stderr/stdout banner and invocation flags, sanitized and whitelisted by SFS; not LLM self-attestation.\n'
     printf 'Evaluator executor/profile: %s\n' "${profile}"
     printf 'Requested review profile: review_high\n'
     printf 'Expected model: %s\n' "${expected_model:-not-specified}"
@@ -3054,6 +3079,61 @@ write_bridge_profile_evidence() {
     printf 'Match status: %s\n' "${status}"
     printf 'Instruction: treat matched SFS-collected bridge evidence as executor profile attestation; do not require the reviewer LLM to self-attest its own model. If mismatch/not-detected, report a profile bridge evidence gap rather than an artifact-quality defect.\n'
   } > "${dest}"
+}
+
+sfs_review_cost_is_number() {
+  printf '%s\n' "${1:-}" | grep -Eq '^[0-9]+([.][0-9]+)?$'
+}
+
+sfs_review_cost_gt() {
+  awk -v left="${1:-0}" -v right="${2:-0}" 'BEGIN { exit (left > right) ? 0 : 1 }'
+}
+
+sfs_review_budget_write_telemetry() {
+  local decision="$1" reason="$2" budget="$3" estimate="$4" ts
+  ts="$(date +%Y-%m-%dT%H:%M:%S%z 2>/dev/null | sed -E 's/([0-9]{2})$/:\1/')"
+  mkdir -p "$(dirname "${REVIEW_BUDGET_TELEMETRY_FILE}")" 2>/dev/null || return 1
+  printf '{"ts":"%s","surface":"review","executor":"%s","generator":"%s","budget_usd":"%s","estimated_cost_usd":"%s","decision":"%s","reason":"%s"}\n' \
+    "$(sfs_json_escape "${ts}")" \
+    "$(sfs_json_escape "${EVALUATOR_EXECUTOR}")" \
+    "$(sfs_json_escape "${GENERATOR_EXECUTOR}")" \
+    "$(sfs_json_escape "${budget:-}")" \
+    "$(sfs_json_escape "${estimate:-}")" \
+    "$(sfs_json_escape "${decision}")" \
+    "$(sfs_json_escape "${reason}")" >> "${REVIEW_BUDGET_TELEMETRY_FILE}"
+}
+
+sfs_review_budget_preflight() {
+  local budget="${REVIEW_BUDGET_USD:-}" estimate="${REVIEW_ESTIMATED_COST_USD:-}" decision reason
+  if [[ -z "${budget}" ]]; then
+    decision="not_configured"
+    reason="missing_budget"
+  elif ! sfs_review_cost_is_number "${budget}"; then
+    decision="not_configured"
+    reason="invalid_budget"
+  elif [[ -z "${estimate}" ]]; then
+    decision="unknown_estimate"
+    reason="missing_estimate"
+  elif ! sfs_review_cost_is_number "${estimate}"; then
+    decision="unknown_estimate"
+    reason="invalid_estimate"
+  elif sfs_review_cost_gt "${estimate}" "${budget}"; then
+    decision="blocked"
+    reason="over_budget"
+  else
+    decision="allowed"
+    reason="within_budget"
+  fi
+
+  sfs_review_budget_write_telemetry "${decision}" "${reason}" "${budget}" "${estimate}" || {
+    echo "review budget telemetry write failed: ${REVIEW_BUDGET_TELEMETRY_FILE}" >&2
+    exit "${SFS_EXIT_PERM}"
+  }
+  if [[ "${decision}" == "blocked" ]]; then
+    echo "review budget preflight blocked executor: estimated_cost_usd=${estimate} exceeds budget_usd=${budget}" >&2
+    echo "telemetry: ${REVIEW_BUDGET_TELEMETRY_FILE}" >&2
+    exit "${SFS_EXIT_EXECUTOR}"
+  fi
 }
 
 append_bridge_profile_evidence_to_prompt() {
@@ -3282,7 +3362,7 @@ EOF
       exit "${SFS_EXIT_EXECUTOR}"
     fi
     PROFILE_EVIDENCE="${RUN_INVOCATION_DIR}/executor-profile-evidence.txt"
-    write_bridge_profile_evidence "${PROBE_PROFILE}" "${PROBE_OUT}" "${PROBE_ERR}" "${PROFILE_EVIDENCE}"
+    write_bridge_profile_evidence "${PROBE_PROFILE}" "${PROBE_OUT}" "${PROBE_ERR}" "${PROFILE_EVIDENCE}" "${PROBE_CMD}"
     append_bridge_profile_evidence_to_prompt "${PROFILE_EVIDENCE}" "${PROMPT_PATH}"
     PROMPT_LINES="$(count_file_lines "${PROMPT_PATH}")"
     PROMPT_BYTES="$(count_file_bytes "${PROMPT_PATH}")"
@@ -3303,6 +3383,7 @@ EOF
     echo "  prompt: ${PROMPT_PATH}"
     echo "  If it looks stuck, inspect another terminal with: tail -f ${RUN_ERR}"
   } >&2
+  sfs_review_budget_preflight
   set +e
   sfs_run_eval_with_timeout "${EXECUTOR_CMD}" "${REVIEW_EXECUTOR_TIMEOUT}" "${PROMPT_PATH}" "${RUN_OUT}" "${RUN_ERR}" "review executor (${EVALUATOR_EXECUTOR})"
   RUN_RC=$?

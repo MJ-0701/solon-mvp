@@ -141,4 +141,89 @@ grep -Fq "Match status: matched" "${profile_evidence}" \
 grep -Fq "profile_evidence_status: \`matched\`" "${sprint_dir}/review.md" \
   || fail "review.md should record matched profile evidence status"
 
+cat > "${fake_bin}/claude" <<'FAKE_CLAUDE'
+#!/usr/bin/env bash
+args="$*"
+prompt=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -p)
+      prompt="${2:-}"
+      shift 2
+      ;;
+    --)
+      shift
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+if [[ "${prompt}" == "Solon SFS review bridge probe for claude."* ]]; then
+  printf 'SFS_REVIEW_BRIDGE_PROBE_OK\n'
+  exit 0
+fi
+
+for expected in \
+  'SFS Executor Profile Bridge Evidence' \
+  'Detected model: opus' \
+  'Detected reasoning effort: xhigh' \
+  'Match status: matched' \
+  'do not require the reviewer LLM to self-attest'; do
+  if ! grep -Fq "${expected}" <<<"${prompt}"; then
+    printf 'missing expected Claude profile evidence: %s\n' "${expected}" >&2
+    exit 42
+  fi
+done
+
+cat <<'RESULT'
+Verdict: pass
+Review lens: qa
+Review independence risk: none
+Artifact quality verdict:
+- Claude profile bridge evidence was supplied by SFS invocation flags.
+Evidence bundle verdict:
+- The prompt contained matched Claude profile evidence.
+Evidence checked:
+- SFS Executor Profile Bridge Evidence
+Evidence gaps:
+- none
+Findings:
+- none
+Required CTO actions:
+- none
+Next action:
+- continue
+Final recommendation:
+- pass
+RESULT
+FAKE_CLAUDE
+chmod +x "${fake_bin}/claude"
+
+claude_out="$(
+  PATH="${fake_bin}:$PATH" SFS_CLAUDE_AUTH_READY=1 \
+    SFS_REVIEW_CLAUDE_CMD='claude --model opus --effort xhigh -p "$(cat)"' \
+    SFS_COMMAND_TIMEOUT_SEC=0 SFS_REVIEW_BRIDGE_PROBE_TIMEOUT_SEC=5 \
+    SFS_REVIEW_EXECUTOR_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" \
+    bash "${SFS_BIN}" review --gate 3 --stage cross --lens qa --executor claude --generator codex --allow-empty --no-auth-interactive
+)"
+
+case "${claude_out}" in
+  *"verdict: pass"* ) ;;
+  *)
+    latest_result="$(find .sfs-local/tmp/review-runs -name stdout.md -type f | tail -n 1 || true)"
+    [[ -z "${latest_result}" ]] || sed -n '1,80p' "${latest_result}" >&2
+    fail "Claude review should pass with invocation-flag profile evidence: ${claude_out}"
+    ;;
+esac
+
+claude_profile_evidence="$(find .sfs-local/tmp/review-runs -name executor-profile-evidence.txt -type f -exec grep -l 'Evaluator executor/profile: claude' {} \; | tail -n 1)"
+[[ -n "${claude_profile_evidence}" ]] || fail "missing Claude executor profile evidence file"
+grep -Fq "Detected model: opus" "${claude_profile_evidence}" \
+  || fail "Claude profile evidence missing model"
+grep -Fq "Detected reasoning effort: xhigh" "${claude_profile_evidence}" \
+  || fail "Claude profile evidence missing effort"
+grep -Fq "Match status: matched" "${claude_profile_evidence}" \
+  || fail "Claude profile evidence should be matched"
+
 echo "test-review-profile-evidence-capsule: OK"
