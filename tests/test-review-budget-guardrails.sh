@@ -152,9 +152,13 @@ fi
 
 assert_file_contains "${DIST_DIR}/templates/.sfs-local-template/context/commands/review.md" "Declared advisor/review cost controls are enforced before the full executor" "review context budget enforcement"
 assert_file_contains "${DIST_DIR}/templates/.sfs-local-template/context/commands/review.md" "Provider billing APIs, live token accounting, and pricing tables are separate" "review context pricing deferral"
-assert_file_contains "${DIST_DIR}/../05-gate-framework.md" "실행 전 강제 차단" "gate framework budget enforcement"
-if grep -Fq "Phase 1은 warn only" "${DIST_DIR}/../05-gate-framework.md"; then
-  fail "gate framework still describes budget_usd as warn-only"
+docset_gate_framework="${DIST_DIR}/../05-gate-framework.md"
+# docset-only SSoT sync check: product archives intentionally omit parent docset files.
+if [[ -f "${docset_gate_framework}" ]]; then
+  assert_file_contains "${docset_gate_framework}" "실행 전 강제 차단" "gate framework budget enforcement"
+  if grep -Fq "Phase 1은 warn only" "${docset_gate_framework}"; then
+    fail "gate framework still describes budget_usd as warn-only"
+  fi
 fi
 
 echo "test-review-budget-guardrails: OK"

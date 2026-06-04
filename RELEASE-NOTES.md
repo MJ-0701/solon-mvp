@@ -15,6 +15,21 @@
 
 ---
 
+## 0.8.21
+
+Verifier-caught packaged test path leak is fixed by an in-archive regression gate.
+
+체감 변화:
+
+- 0.8.20은 stable/tag/channels publish 뒤 release verifier 가 product archive 안의
+  `tests/run-all.sh`에서 실패해 완료 릴리스로 닫히지 않았습니다.
+- 실패 원인은 출하 테스트가 product archive 밖의 parent docset 파일을 hard-assert 한 것이었습니다.
+  0.8.21은 이 docset-only SSoT sync check 를 파일이 있을 때만 실행하도록 바꿉니다.
+- 새 정적 테스트가 `${DIST_DIR}/../...` 직접 hard-assert 재유입을 막고, hotfix cut 전
+  product-like tar/extract in-archive full run-all 을 통과했습니다.
+
+---
+
 ## 0.8.20
 
 Review budget guardrails, measure dashboard, lite first experience, and richer HTML artifacts ship together.

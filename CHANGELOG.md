@@ -1,5 +1,25 @@
 ## [Unreleased]
 
+## [0.8.21] - 2026-06-04
+
+> **Verifier-caught packaged test path leak is fixed by an in-archive regression gate.**
+
+### Fixed
+
+- **Packaged test path leak.**
+  0.8.20 was verifier-caught after stable/tag/channels were published because
+  `test-review-budget-guardrails.sh` hard-asserted a parent docset file that is
+  absent from product archives. The docset SSoT sync check now runs only when
+  the parent docset file exists, preserving source-tree coverage without
+  breaking packaged product tests.
+
+### Added
+
+- **In-archive regression lock.**
+  Product tests now reject direct hard assertions against `${DIST_DIR}/../...`,
+  and the release hotfix was verified with a product-like tar/extract full
+  `tests/run-all.sh` simulation before cutting the release.
+
 ## [0.8.20] - 2026-06-04
 
 > **Review budget guardrails, measure dashboard, lite first experience, and richer HTML artifacts ship together.**
