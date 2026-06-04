@@ -43,6 +43,11 @@ SFS applies this as a project-operating contract:
 - Treat artifacts as coordination, not chat: workers write files, reports,
   ledgers, test output, or release evidence; leads inspect artifacts instead of
   relying on conversational memory.
+- Use an advisor-Code file bus for split verification: each reviewer writes an
+  artifact capsule with rule, evidence, finding, uncertainty, and requested
+  action. For parallel review, hold a fan-out/synthesize barrier until all
+  capsules exist; then the lead synthesizes against AC/source evidence instead
+  of copying chat transcripts.
 - ChatOps workrooms are coordination surfaces, not memory SSoT: use project
   channels for routing/status and task threads for bounded work capsules; close
   or archive threads with result/evidence and refresh summaries before
@@ -59,6 +64,9 @@ SFS applies this as a project-operating contract:
 - Verifier != implementer is a critical harness invariant. The authoring
   worker cannot be the only reviewer for close; use a separate agent/context or
   record an explicit waiver for low-risk self-CPO fallback.
+- A separate verifier context should be rule-scoped and skeptical: give the
+  verifier the rule, expected evidence, counterexamples, and false-positive
+  risks, not the author's full reasoning trail.
 - Capture harness evolution deltas: initial harness, shipped harness, what
   changed, why, and which defect/feedback proved the change. Repeated deltas
   become tests, routed policies, skills, or scaffold defaults.

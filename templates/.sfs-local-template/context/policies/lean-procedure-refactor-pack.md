@@ -45,3 +45,19 @@ The output should be less ceremony and equal or stronger quality:
 - clearer trigger conditions and smaller context load;
 - same or stronger automated test, smoke, ledger, or release verifier evidence;
 - no reduction in security, data validation, DDD/TDD, or user approval safety.
+
+## Process self-audit
+
+At each gate, review loop, recurring checklist, or ceremony, ask: Does this gate or ceremony still serve the current objective and prevent a real failure?
+
+- If yes, keep the invariant and make the evidence cheaper where possible.
+- If partly, shrink it into an auto-lens, template row, or post-run assertion.
+- If no, remove, downgrade, defer, or require an explicit waiver instead of
+  preserving ceremony.
+
+## Anti-yak cadence
+
+Use anti-yak cadence as a recommendation, not a hard blocker: after 3 meta-system WUs, schedule at least 1 user-outcome WU or record a waiver with the
+owner reason. A user-outcome WU advances a real product/user result outside the
+SFS method itself; a meta-system WU changes SFS process, policy, templates,
+review rails, or instrumentation.

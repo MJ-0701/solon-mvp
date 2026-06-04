@@ -31,6 +31,9 @@ load_when: ["flowcheck", "postflight", "flow conformance", "작업단위 점검"
 - 제품버그 자동 라우팅은 confirm gate 까지만 — 제출은 사용자 확정 후.
 - pr-review 불변식은 **SFS review gate**(self_cpo=pass) 기준. GitHub PR 승인/`@codex` 만으로는 충족 안 됨.
 - review close 는 `verification_pair` 로 verifier != implementer 를 증명한다.
+- verifier context split 은 separate verifier context 로 rule/evidence package 를
+  보게 하는 documentation-level recommendation 이다. 권장 패턴이지 새 critical invariant 나
+  flowcheck engine 요구사항이 아니다.
 
 ## Plan-gate self-check (암묵 가정 → 명시 스펙, plan = quality gate)
 코드(Do) 진입 전 plan 이 통과해야 하는 자기점검 4문. **plan 품질이 산출물 품질을 결정한다 — 코드 생성이 싸질수록 잘못된 방향의 비용이 커진다.**

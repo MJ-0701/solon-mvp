@@ -112,7 +112,7 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   items are all reconciled with evidence or explicit follow-up.
 - Post-development external review can attach Claude Cowork/Gemini/GitHub `@codex`
   evidence after self-CPO/SFS cross; unavailable lanes record blocked/not-applicable.
-- Lean procedure review keeps safety invariants but shrinks/removes ceremony.
+- Lean procedure review keeps safety invariants but shrinks/removes ceremony; process self-audit asks whether the gate or ceremony still serves the current objective, and anti-yak cadence recommends a user-outcome WU or waiver after repeated meta-system WUs.
 - Review proposed or actual commit messages against the user's
   native/workspace language. English commit messages are correct only when the
   user/repo language is English or the repo explicitly requires English.

@@ -582,6 +582,10 @@ compact_legacy_sprint_archive_dirs() {
 
   while IFS= read -r dir; do
     [ -d "$dir" ] || continue
+    if git_tracked_dir_has_files "$dir"; then
+      warn "git-tracked sprint archive 보존: ${dir#$TARGET/} (legacy archive compaction skipped; commit/remove explicitly before cleanup)"
+      continue
+    fi
     archive_file="$dir/sprint-evidence.tar.gz"
     manifest="$dir/manifest.txt"
 
@@ -1015,11 +1019,22 @@ non_adopt_archive_ids() {
 
 collapse_non_adopt_archive_dirs() {
   local root="$TARGET/.sfs-local/archives"
-  local ids count safe_ts archive_dir archive_file manifest item
+  local ids count safe_ts archive_dir archive_file manifest item skipped=0
   local -a tar_items=()
   [ -d "$root" ] || return 0
   ids="$(non_adopt_archive_ids)"
-  count="$(printf '%s\n' "$ids" | sed '/^[[:space:]]*$/d' | wc -l | tr -d '[:space:]')"
+
+  while IFS= read -r item; do
+    [ -n "$item" ] || continue
+    if git_tracked_dir_has_files "$root/$item"; then
+      warn "git-tracked archive bucket 보존: .sfs-local/archives/$item (archive bucket collapse skipped; commit/remove explicitly before cleanup)"
+      skipped=$((skipped + 1))
+      continue
+    fi
+    tar_items+=("$item")
+  done <<< "$ids"
+
+  count="${#tar_items[@]}"
   [ "${count:-0}" -gt 0 ] || return 0
 
   safe_ts="$(date +%Y%m%d-%H%M%S)"
@@ -1041,24 +1056,19 @@ collapse_non_adopt_archive_dirs() {
     echo "reason: runtime migration/upgrade/sprint buckets are cold recovery evidence, not visible project surface"
     echo "archive: ${archive_file#$TARGET/}"
     echo "count: $count"
+    echo "skipped_git_tracked_buckets: $skipped"
     echo
     echo "items:"
-    printf '%s\n' "$ids" | while IFS= read -r item; do
-      [ -n "$item" ] || continue
+    for item in "${tar_items[@]}"; do
       echo "- .sfs-local/archives/$item"
     done
   } > "$manifest" || return 5
 
-  while IFS= read -r item; do
-    [ -n "$item" ] || continue
-    tar_items+=("$item")
-  done <<< "$ids"
   tar -czf "$archive_file" -C "$root" "${tar_items[@]}" || return 5
 
-  while IFS= read -r item; do
-    [ -n "$item" ] || continue
+  for item in "${tar_items[@]}"; do
     rm -rf "$root/$item" || return 5
-  done <<< "$ids"
+  done
   ok "non-adopt archive buckets 접기: $count bucket(s) → ${archive_file#$TARGET/}"
   return 0
 }
@@ -1273,6 +1283,19 @@ append_upgrade_event() {
   return 0
 }
 
+git_tracked_dir_has_files() {
+  local dir="${1:?directory required}" rel tracked
+  command -v git >/dev/null 2>&1 || return 1
+  [ -d "$dir" ] || return 1
+  git -C "$TARGET" rev-parse --is-inside-work-tree >/dev/null 2>&1 || return 1
+  rel="${dir#$TARGET/}"
+  [ "$rel" != "$dir" ] || return 1
+  rel="${rel%/}"
+  [ -n "$rel" ] || return 1
+  tracked="$(git -C "$TARGET" ls-files -- "$rel/" 2>/dev/null || true)"
+  [ -n "$tracked" ]
+}
+
 strip_frontmatter_body() {
   awk '
     NR == 1 && $0 == "---" { in_fm=1; next }
@@ -1301,6 +1324,10 @@ migrate_legacy_adopt_visible_sprints() {
     sid="$(basename "$sprint_dir")"
     if [ "$sid" != "legacy-baseline" ] \
       && ! grep -Eq 'status:[[:space:]]*"?legacy-baseline"?|Legacy Baseline Intake|Solon Adoption Summary' "$report" 2>/dev/null; then
+      continue
+    fi
+    if git_tracked_dir_has_files "$sprint_dir"; then
+      warn "git-tracked sprint workbench 보존: .sfs-local/sprints/$sid (legacy adopt migration skipped; commit/remove explicitly before cleanup)"
       continue
     fi
 
@@ -1409,6 +1436,10 @@ compact_prefilled_step_doc_residue() {
     [ "$sid" = "legacy-baseline" ] && continue
     report="$sprint_dir/report.md"
     [ ! -f "$report" ] || continue
+    if git_tracked_dir_has_files "$sprint_dir"; then
+      warn "git-tracked sprint workbench 보존: .sfs-local/sprints/$sid (prefilled step-doc compaction skipped; commit/remove explicitly before cleanup)"
+      continue
+    fi
     if sprint_has_phase_event "$sid"; then
       continue
     fi
@@ -1662,6 +1693,11 @@ project_surface_archive_migrations() {
 
 NEW_VER=$(cat "$SOURCE_DIR/VERSION" 2>/dev/null | head -1 || echo "unknown")
 
+read_sfs_version_field() {
+  local field="$1" file="$2"
+  awk -v key="${field}:" '$1 == key { print $2; exit } END { exit 0 }' "$file" 2>/dev/null || true
+}
+
 if [ ! -f "$TARGET/.sfs-local/VERSION" ]; then
   cat >&2 <<EOF
 Solon CLI is installed, but this project is not initialized yet.
@@ -1685,9 +1721,16 @@ EOF
   exit 1
 fi
 
-CUR_VER=$(grep '^solon_mvp_version:' "$TARGET/.sfs-local/VERSION" | awk '{print $2}')
-INSTALLED_AT=$(grep '^installed_at:' "$TARGET/.sfs-local/VERSION" | awk '{print $2}')
-RECORDED_INSTALL_LAYOUT=$(grep '^install_layout:' "$TARGET/.sfs-local/VERSION" 2>/dev/null | awk '{print $2}')
+CUR_VER=$(read_sfs_version_field solon_mvp_version "$TARGET/.sfs-local/VERSION")
+INSTALLED_AT=$(read_sfs_version_field installed_at "$TARGET/.sfs-local/VERSION")
+RECORDED_INSTALL_LAYOUT=$(read_sfs_version_field install_layout "$TARGET/.sfs-local/VERSION")
+if [ -z "$CUR_VER" ]; then
+  warn ".sfs-local/VERSION 에 solon_mvp_version 이 없어 unknown 으로 처리"
+  CUR_VER="unknown"
+fi
+if [ -z "$INSTALLED_AT" ]; then
+  INSTALLED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+fi
 CONFIG_INSTALL_LAYOUT=""
 if [ -f "$TARGET/.sfs-local/config.yaml" ]; then
   CONFIG_INSTALL_LAYOUT=$(awk '

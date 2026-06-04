@@ -21,6 +21,13 @@ thin by default.
   work.
 - Share conclusions through the sprint workbench and `docs/solon/domain-map.md`,
   not through long copied transcripts.
+- For review, use a separate verifier context when a rule is risky or repeated:
+  give the evaluator the rule, AC, evidence paths, and counterexamples, not the
+  author's whole conversation. A skeptic persona checks whether a finding is a
+  real breach or a false positive.
+- For parallel review, use an advisor-Code file bus. Each reviewer writes an
+  artifact capsule first; the lead waits at a fan-out/synthesize barrier and
+  then synthesizes against source evidence.
 
 Model routing follows that boundary and is applied by default. Helper-grade
 simple I/O and non-coding helpers use lighter intake models; Codex maps that to

@@ -32,6 +32,12 @@ closed_at: ""
 
 -
 
+## 4.1 Process self-audit / anti-yak cadence
+
+- Does this gate or ceremony still serve the current objective and prevent a real failure?
+- If not, what should be removed, downgraded, automated, or covered by a waiver?
+- After 3 meta-system WUs, is at least 1 user-outcome WU scheduled or explicitly waived?
+
 ## 5. 종료 체크
 
 - [ ] report 가 최신이다

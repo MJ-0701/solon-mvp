@@ -9,9 +9,29 @@
 
 ## Next
 
-다음 release cut 에 포함될 변경:
+다음 release cut 에 포함될 변경은 아직 확정되지 않았습니다.
 
-- 아직 없음.
+---
+
+## 0.8.22
+
+Legacy upgrade repair, solo KPIs, process self-audit, and verifier context split ship together.
+
+체감 변화:
+
+- `sfs upgrade` 가 오래된 0.5.x marker 를 가진 프로젝트에서도 조용히 실패하지 않고,
+  marker 를 현재 runtime version 으로 갱신합니다. `--opt-in 0.6-storage` 의 no-op
+  migration 은 성공으로 이어지고, 하위 `upgrade.sh` 실패는 원인 메시지를 남깁니다.
+- upgrade 중 git-tracked sprint workbench 디렉토리는 묵묵히 압축/삭제되지 않습니다.
+  보존 가능한 경로만 진행하고, 무고지 삭제를 막는 회귀 테스트가 추가되었습니다.
+- `sfs measure` 는 local evidence 기반으로 onboarding ramp, WU cycle-time, agent-assisted
+  commit ratio 를 함께 보여줍니다. provider billing API 나 network 호출은 여전히 하지 않습니다.
+- review/retro 문맥은 gate·의례가 아직 목적에 맞는지 스스로 점검하고, meta-system 작업이
+  이어질 때 user-outcome 작업을 다시 앞에 올리도록 안내합니다.
+- verifier context split 패턴이 문서화되어, rule 단위 분리 verifier 와 skeptic persona 로
+  self-review false positive 를 줄이는 방식을 권장합니다.
+- dev-only 릴리스 도구인 `cut-release.sh` preview counter 는 content 기반으로 보정되었습니다.
+  제품 runtime 기능은 아니지만 이번 0.8.22 dry-run gate 의 첫 실전 검증 대상입니다.
 
 ---
 

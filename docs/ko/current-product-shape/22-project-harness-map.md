@@ -26,6 +26,10 @@ map 은 하네스 자체의 설계 evidence 도 남긴다.
   history 가 파일시스템과 맞는지 먼저 대조한다.
 - optional team architecture: pipeline, fan-out/fan-in, expert pool,
   producer-reviewer, supervisor, hierarchical delegation 중 선택된 패턴을 이름 붙인다.
+- advisor-Code file bus: reviewer 는 긴 chat transcript 대신 rule, evidence,
+  finding, uncertainty, requested action 을 담은 artifact capsule 을 남긴다.
+- fan-out/synthesize barrier: 여러 verifier 가 병렬로 본 경우 lead 는 모든
+  capsule 이 생긴 뒤 source evidence 기준으로 synthesize 한다.
 - harness evolution: initial design vs shipped design, feedback source, 반복
   delta 에서 승격한 test/policy/skill/scaffold default 를 기록한다.
 - concrete ledger: `sfs harness map --write` 는 없을 때

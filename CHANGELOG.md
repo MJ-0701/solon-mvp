@@ -1,5 +1,52 @@
 ## [Unreleased]
 
+## [0.8.22] - 2026-06-05
+
+> **Legacy upgrade repair, solo KPIs, process self-audit, and verifier context split ship together.**
+
+### Fixed
+
+- **Legacy marker upgrade repair.**
+  `sfs upgrade` now handles projects whose `.sfs-local/VERSION` still records a
+  0.5.x `solon_mvp_version` and lacks newer fields such as `install_layout`.
+  The project upgrader reads optional VERSION fields without tripping
+  `set -euo pipefail`, refreshes the marker to the current runtime version, and
+  preserves idempotent 0.6-storage no-op migrations as successful upgrade flow.
+- **Actionable upgrade failure messages.**
+  `bin/sfs` now wraps child `upgrade.sh` failures with a concrete
+  project-upgrade error while preserving the child exit code, preventing silent
+  exit-1 failures in legacy-marker projects.
+- **Tracked sprint workbench preservation during upgrade.**
+  Legacy sprint/archive compaction now skips git-tracked sprint workbench
+  directories unless an explicit preservation-safe path is available, locking
+  the no silent delete/move rule into the upgrade path.
+
+### Added
+
+- **Mixed legacy upgrade regression lock.**
+  A new fixture covers 0.5.x marker + 0.8.x contents, direct `upgrade.sh`,
+  `sfs upgrade --opt-in 0.6-storage`, marker refresh, preserved sprint evidence,
+  and wrapper failure messaging.
+- **Solo-operator KPI measure dashboard.**
+  `sfs measure` now reports local-only onboarding ramp evidence, WU cycle-time
+  metrics from preserved sprint event archives, and agent-assisted commit ratio
+  alongside the existing dashboard and `--json` output.
+- **Process self-audit and anti-yak guardrails.**
+  Routed review/retro context now asks whether each gate or ritual still serves
+  its purpose, and records the recommendation to schedule user-outcome work
+  after repeated meta-system WUs.
+- **Verifier context split guidance.**
+  Flowcheck/review/harness guidance now documents rule-scoped verifier context,
+  skeptic persona, and fan-out/synthesize barrier patterns to reduce
+  self-preferential false positives without importing vendor workflow details.
+
+### Note
+
+- **Dev release tooling.**
+  The dev-only `cut-release.sh` preview counter was hardened to count content
+  changes instead of metadata drift; this is release-process tooling rather than
+  a product runtime feature.
+
 ## [0.8.21] - 2026-06-04
 
 > **Verifier-caught packaged test path leak is fixed by an in-archive regression gate.**

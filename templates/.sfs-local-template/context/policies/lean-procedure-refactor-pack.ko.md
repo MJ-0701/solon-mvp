@@ -46,3 +46,20 @@ SFS 자체나 SFS 로 관리되는 프로젝트가 품질 향상 없이 절차 �
 - trigger condition 명확화와 context load 축소.
 - test, smoke, ledger, release verifier evidence 는 같거나 강함.
 - security, data validation, DDD/TDD, user approval safety 는 약화 금지.
+
+## Process self-audit
+
+각 gate, review loop, 반복 checklist, ceremony 마다 묻는다: 이 gate 또는 ceremony 가 현재 objective 에 여전히 기여하고 실제 실패를 막는가?
+
+- 그렇다면 invariant 는 유지하고 evidence path 만 더 싸게 만든다.
+- 일부만 그렇다면 auto-lens, template row, post-run assertion 으로 축소한다.
+- 아니라면 ceremony 를 보존하지 말고 제거, downgrade, defer, 또는 명시적
+  waiver 로 처리한다.
+
+## Anti-yak cadence
+
+anti-yak cadence 는 hard blocker 가 아니라 권고다: 3 meta-system WUs 뒤에는
+최소 1 user-outcome WU 를 일정에 넣거나 owner reason 이 있는 waiver 를 남긴다.
+user-outcome WU 는 SFS 방법론 자체가 아니라 실제 product/user 결과를 전진시키는
+작업이고, meta-system WU 는 SFS process, policy, template, review rail,
+instrumentation 을 바꾸는 작업이다.

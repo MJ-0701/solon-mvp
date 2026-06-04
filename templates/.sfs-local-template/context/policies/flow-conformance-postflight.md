@@ -50,6 +50,17 @@ SFS review 와 별개" 계약과 정합(외부 PASS 는 continuation 증거이�
 ## Plan-gate self-check (암묵 가정 → 명시 스펙, plan = quality gate)
 silent divergence 의 plan-time 근원 차단. 코드(Do) 진입 전 plan 자기점검 4문 — `intended-output` / `implicit-assumptions` / `edge-cases` / `intent-alignment` (gate-framework Gate 3 plan-validator check 7). 런타임 divergence 잠금은 `fcp-conflict-surfaced`(#3) + model-tier(#4) 이며, plan 체크리스트는 그 중 #3(silent divergence) 부류를 plan 단계에서 선제 차단한다. plan 품질이 산출물 품질을 결정한다 — 코드 생성이 싸질수록 잘못된 방향의 비용이 커진다. (이 self-check 는 plan 게이트 항목이라 flowcheck 런타임 invariant 가 아니라 노출·교차참조 계약이다.)
 
+## Verifier context split pattern (docs-level)
+For high-risk or repeated FCP/review rules, prepare a rule-scoped verifier context:
+the verifier sees the rule, AC, evidence paths, and known counterexamples, not
+the implementer's full authoring context. Use a skeptic persona for
+false-positive suppression: the verifier must ask whether a finding is caused
+by stale assumptions, self-preferential bias, missing evidence, or an actual
+rule breach. Parallel checks may fan out, but close waits at a
+fan-out/synthesize barrier where each artifact capsule exists and the lead
+synthesizes against source evidence. This is not a new flowcheck critical invariant; it is a documentation-level recommendation for preparing stronger
+`verification_pair` evidence. Tool-specific workflow files stay wiki/deferred.
+
 ## 비목표
 - 제품 데이터/보안 검증은 Gate 6 소관(중복 금지).
 - agent 자가서술만으로 PASS 금지 — 이벤트 증거 기반.

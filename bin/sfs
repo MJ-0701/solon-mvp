@@ -1533,10 +1533,24 @@ upgrade_command() {
     self_upgrade_if_homebrew "${skip_existing}"
     self_upgrade_if_scoop "${skip_existing}"
   fi
+  local upgrade_rc=0
   if [[ "${interactive}" == "1" ]]; then
-    SFS_UPGRADE_LAYOUT="${upgrade_layout}" bash "${DIST_DIR}/upgrade.sh"
+    if SFS_UPGRADE_LAYOUT="${upgrade_layout}" bash "${DIST_DIR}/upgrade.sh"; then
+      :
+    else
+      upgrade_rc=$?
+    fi
   else
-    SFS_UPGRADE_LAYOUT="${upgrade_layout}" bash "${DIST_DIR}/upgrade.sh" --yes
+    if SFS_UPGRADE_LAYOUT="${upgrade_layout}" bash "${DIST_DIR}/upgrade.sh" --yes; then
+      :
+    else
+      upgrade_rc=$?
+    fi
+  fi
+  if [[ "${upgrade_rc}" -ne 0 ]]; then
+    echo "sfs upgrade: project upgrade script failed (exit ${upgrade_rc}) while refreshing managed project files." >&2
+    echo "sfs upgrade: inspect the upgrade.sh message above; rerun with SFS_UPGRADE_TRACE=1 for phase-level diagnostics." >&2
+    return "${upgrade_rc}"
   fi
   if [[ "${SFS_ROUTER_DOC_REFACTOR:-1}" == "0" ]]; then
     echo "SFS.md router refactor: skipped (SFS_ROUTER_DOC_REFACTOR=0)"

@@ -31,19 +31,30 @@ fixture="${tmp}/fixture"
 mkdir -p \
   "${fixture}/.sfs-local/sprints/sprint-alpha" \
   "${fixture}/.sfs-local/sprints/sprint-beta" \
+  "${fixture}/.sfs-local/archives/events/sprints" \
   "${fixture}/.sfs-local/decisions"
 fixture_real="$(cd -P "${fixture}" && pwd)"
 
 cat > "${fixture}/.sfs-local/sprints/sprint-alpha/report.md" <<'EOF'
 # sprint alpha
 
-sfs_measure: saved_minutes=45 decision_count=2 token_count=1200 token_cost_usd=0.15
+sfs_measure: saved_minutes=45 decision_count=2 token_count=1200 token_cost_usd=0.15 onboarding_ramp_minutes=12
 EOF
 
 cat > "${fixture}/.sfs-local/sprints/sprint-beta/retro.md" <<'EOF'
 # sprint beta
 
 sfs_measure: saved_minutes=30 decision_count=1 token_count=unknown token_cost_usd=unknown
+EOF
+
+cat > "${fixture}/.sfs-local/archives/events/sprints/sprint-alpha.jsonl" <<'EOF'
+{"ts":"2026-06-01T09:00:00+09:00","type":"sprint_start","sprint_id":"sprint-alpha"}
+{"ts":"2026-06-01T10:00:00+09:00","type":"sprint_close","sprint_id":"sprint-alpha"}
+EOF
+
+cat > "${fixture}/.sfs-local/events.jsonl" <<'EOF'
+{"ts":"2026-06-02T10:00:00+09:00","type":"sprint_start","sprint_id":"sprint-beta"}
+{"ts":"2026-06-02T12:00:00+09:00","type":"sprint_close","sprint_id":"sprint-beta"}
 EOF
 
 touch \
@@ -62,6 +73,10 @@ assert_contains "${human_root}" "sprint_decisions: 3" "sprint decision total"
 assert_contains "${human_root}" "project_decisions: 2" "project ADR fallback"
 assert_contains "${human_root}" "token_count: unknown" "unknown token total"
 assert_contains "${human_root}" "token_cost_usd: unknown" "unknown cost total"
+assert_contains "${human_root}" "onboarding_ramp_minutes: 12" "onboarding ramp total"
+assert_contains "${human_root}" "wu_cycle_count: 2" "wu cycle count from active+archived events"
+assert_contains "${human_root}" "wu_cycle_avg_minutes: 90" "wu cycle average from active+archived events"
+assert_contains "${human_root}" "agent_assisted_commits: unknown" "non-git commit ratio graceful"
 assert_contains "${human_root}" "- sprint-alpha saved_minutes=45 decision_count=2 token_count=1200 token_cost_usd=0.15" "alpha row"
 assert_contains "${human_root}" "- sprint-beta saved_minutes=30 decision_count=1 token_count=unknown token_cost_usd=unknown" "beta row"
 
@@ -81,6 +96,14 @@ assert_contains "${json_out}" '"token_count": null' "json unknown token"
 assert_contains "${json_out}" '"token_count_known": false' "json token known false"
 assert_contains "${json_out}" '"token_cost_usd": null' "json unknown cost"
 assert_contains "${json_out}" '"token_cost_known": false' "json cost known false"
+assert_contains "${json_out}" '"onboarding_ramp_minutes": 12' "json onboarding ramp"
+assert_contains "${json_out}" '"onboarding_ramp_known": true' "json onboarding known"
+assert_contains "${json_out}" '"wu_cycle_count": 2' "json wu cycle count"
+assert_contains "${json_out}" '"wu_cycle_total_minutes": 180' "json wu cycle total"
+assert_contains "${json_out}" '"wu_cycle_avg_minutes": 90' "json wu cycle average"
+assert_contains "${json_out}" '"agent_commits_total": 0' "json non-git commit total"
+assert_contains "${json_out}" '"agent_assisted_commits": 0' "json non-git assisted commits"
+assert_contains "${json_out}" '"agent_assisted_commit_ratio": null' "json non-git commit ratio"
 assert_contains "${json_out}" '{"id":"sprint-alpha","saved_minutes":45,"decision_count":2,"token_count":1200,"token_count_known":true,"token_cost_usd":0.15,"token_cost_known":true}' "json alpha row"
 assert_contains "${json_out}" '{"id":"sprint-beta","saved_minutes":30,"decision_count":1,"token_count":null,"token_count_known":false,"token_cost_usd":null,"token_cost_known":false}' "json beta row"
 
@@ -129,13 +152,50 @@ assert_contains "${empty_human}" "sprints: 0" "empty sprint count"
 assert_contains "${empty_human}" "saved_minutes: 0" "empty saved minutes"
 assert_contains "${empty_human}" "project_decisions: 0" "empty project decisions"
 assert_contains "${empty_human}" "token_count: unknown" "empty token unknown"
+assert_contains "${empty_human}" "onboarding_ramp_minutes: unknown" "empty onboarding unknown"
+assert_contains "${empty_human}" "wu_cycle_count: 0" "empty wu cycle count"
+assert_contains "${empty_human}" "wu_cycle_avg_minutes: unknown" "empty wu cycle average"
+assert_contains "${empty_human}" "agent_assisted_commits: unknown" "empty non-git commit ratio unknown"
 
 empty_json="${tmp}/empty.json"
 bash "${SCRIPT}" --json --root "${empty}" > "${empty_json}"
 assert_contains "${empty_json}" '"saved_minutes": 0' "empty json saved"
 assert_contains "${empty_json}" '"project_decisions": 0' "empty json decisions"
+assert_contains "${empty_json}" '"onboarding_ramp_minutes": null' "empty json onboarding unknown"
+assert_contains "${empty_json}" '"wu_cycle_count": 0' "empty json wu cycle count"
+assert_contains "${empty_json}" '"wu_cycle_avg_minutes": null' "empty json wu cycle average"
+assert_contains "${empty_json}" '"agent_assisted_commit_ratio": null' "empty json agent ratio unknown"
 assert_contains "${empty_json}" '"sprints": [' "empty json sprints field"
 assert_contains "${empty_json}" '  ]' "empty json empty list"
+
+git_fixture="${tmp}/git-fixture"
+mkdir -p "${git_fixture}/.sfs-local"
+(
+  cd "${git_fixture}"
+  git init -q
+  git config user.name "Human Owner"
+  git config user.email "owner@example.invalid"
+  printf 'one\n' > one.txt
+  git add one.txt
+  git commit -q -m "manual baseline"
+  printf 'two\n' > two.txt
+  git add two.txt
+  GIT_AUTHOR_NAME="Codex Worker" GIT_AUTHOR_EMAIL="codex@example.invalid" \
+    git commit -q -m "feat: assisted slice"
+  printf 'three\n' > three.txt
+  git add three.txt
+  git commit -q -m "SFS release 상태 기록"
+)
+
+git_human="${tmp}/git-human.txt"
+bash "${SCRIPT}" --root "${git_fixture}" > "${git_human}"
+assert_contains "${git_human}" "agent_assisted_commits: 1/3 (0.3333)" "git agent-assisted commit ratio"
+
+git_json="${tmp}/git.json"
+bash "${SCRIPT}" --json --root "${git_fixture}" > "${git_json}"
+assert_contains "${git_json}" '"agent_commits_total": 3' "json git commit total"
+assert_contains "${git_json}" '"agent_assisted_commits": 1' "json git assisted commits"
+assert_contains "${git_json}" '"agent_assisted_commit_ratio": 0.3333' "json git assisted ratio"
 
 help_out="${tmp}/help.txt"
 bash "${SCRIPT}" --help > "${help_out}"
