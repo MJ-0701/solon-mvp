@@ -40,6 +40,16 @@ SFS applies this as a project-operating contract:
   loop. Ralph-grade ends only when every story AC is PASS, waived, or approved
   deferred; it records slice evidence, review result, and next stop condition.
   It still obeys token/session guardrails and mutex ownership.
+- Within-loop discard escalation is quantitative and distinct from the
+  Ralph-grade loop-end condition (the ladder governs progress per iteration; AC
+  PASS/waived/deferred governs when the loop stops). Track consecutive discarded
+  iterations and escalate: at 3 discards `refine` the approach, at 5 `pivot` to a
+  different approach, at 8 `halt` and call a human. A kept iteration resets the
+  counter to 0. Each iteration makes one atomic change (`--micro-steps-per-iter`
+  default 1); a micro-improvement that only adds complexity is discarded, not
+  kept — the kernel's minimum-useful-slice rule applies inside the loop too.
+  `halt` routes to the human-owned product-judgment boundary, never an automatic
+  override.
 - Treat artifacts as coordination, not chat: workers write files, reports,
   ledgers, test output, or release evidence; leads inspect artifacts instead of
   relying on conversational memory.

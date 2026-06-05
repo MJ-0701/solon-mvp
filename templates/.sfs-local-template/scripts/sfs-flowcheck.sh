@@ -407,6 +407,19 @@ for f in "${CRIT_WAIVED[@]:-}"; do [[ -n "${f}" ]] && echo "  waived:   ${f}"; d
 for f in "${ADV[@]:-}"; do [[ -n "${f}" ]] && echo "  advisory: ${f}"; done
 [[ -f "${ART}" ]] && echo "  verdict artifact: ${ART}"
 
+# ── lessons loop (advisory; never changes verdict or exit code) ─────────────
+# Surface the accumulated avoidance-rule ledger and the record obligation so a
+# failure caught this work unit becomes a durable lesson. See
+# policies/lessons-accumulation.md.
+_lessons_file="${SFS_LOCAL_DIR}/lessons.md"
+if [[ -f "${_lessons_file}" ]]; then
+  _lessons_n="$(grep -cE '^## L-[0-9]' "${_lessons_file}" 2>/dev/null || printf '0')"
+else
+  _lessons_n=0
+fi
+case "${_lessons_n}" in ''|*[!0-9]*) _lessons_n=0 ;; esac
+echo "  lessons: consult ${_lessons_file} (${_lessons_n} recorded); record any failure caught this work unit as a lesson"
+
 if (( blocking_n > 0 )); then
   echo "flowcheck: BLOCKING — work unit cannot close until critical invariants PASS or are waived." >&2
   exit "${SFS_EXIT_CRITICAL}"

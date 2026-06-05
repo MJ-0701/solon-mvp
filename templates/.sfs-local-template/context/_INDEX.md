@@ -31,6 +31,7 @@ module:
 - `policies/flow-conformance-postflight.md` — flowcheck invariant registry + non-collapsing event contract; critical vs advisory + divergence classification.
 - `policies/user-override-precedence.md` — explicit user command > SFS default; scoped overrides (wu|sprint|until-revoked) with always-surfaced transitions (#3 guard).
 - `policies/token-harness.md` — token/context hygiene, semantic search, repeated mistake guardrails.
+- `policies/lessons-accumulation.md` — accumulate caught failures as durable avoidance rules in `.sfs-local/lessons.md`; consult on plan/flowcheck, append on failure, Gotchas slot.
 - `policies/harness-autonomy.md` — project harness diagnosis, map, artifacts, human boundary, and autonomy loop.
 - `policies/agent-adapter-doc-refactor.md` — keep root LLM agent docs frontmatter-only and auto-refactor recognized SFS adapter bloat.
 - `policies/sfs-router-doc-refactor.md` — keep `SFS.md` as a thin router and auto-refactor recognized policy dumps.

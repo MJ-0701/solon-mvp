@@ -13,6 +13,24 @@
 
 ---
 
+## 0.8.24
+
+Self-improving loop: lessons ledger, autonomous-loop discard escalation, and feedback flywheel ship together.
+
+체감 변화:
+
+- 실패가 사라지지 않고 쌓입니다. WU / review / gate 에서 잡힌 실패는
+  `.sfs-local/lessons.md` 에 회피 규칙으로 누적되고, `plan` 진입 때 참조하며,
+  `flowcheck` 가 누적 lesson 수와 기록 의무를 advisory 1줄로 보여줍니다(판정/종료
+  코드 불변). 반복된 문제는 검증 도구(test/lint/gate)로 승격해 lesson 에
+  기록합니다 — 기록과 도구 반영이 하나의 루프입니다.
+- 자율 루프가 정량 기준으로 멈출 줄 압니다. 연속 폐기(discard) 카운터가
+  refine@3 / pivot@5 / halt@8(사람 호출)로 에스컬레이션하고, 한 번 채택하면
+  0 으로 리셋됩니다. 이터레이션당 한 가지 원자적 변경만 하고, 복잡도만 늘리는
+  미세 개선은 폐기합니다(단순함 우선). `sfs loop --help` 에 사다리가 노출됩니다.
+
+---
+
 ## 0.8.23
 
 Evidence-at-risk handoff guard and Stop hook registration repair ship together.

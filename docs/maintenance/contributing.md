@@ -71,6 +71,15 @@ maintenance doc 이다. CLAUDE.md 는 이제 agent 지침만 담고, 영역별 �
   와 [scoop-manifest-validate.sh](../../tests/scoop-manifest-validate.sh)
   통과 확인.
 
+## 실패 발생 시 (lessons 누적)
+
+- [ ] WU / review / gate 에서 잡힌, 다른 세션에서도 재발 가능한 실패는
+  `.sfs-local/lessons.md` 에 `L-NNN` 회피 규칙으로 1건 추가 (1회성 오타는 제외).
+- [ ] **두 번 이상** 반복된 문제는 검증 도구(test / lint / gate / fixture)에
+  재반영하고 lesson 의 `promoted` 필드에 그 도구를 기록 (feedback flywheel:
+  record → reflect). 도구 메시지는 다음 에이전트용 actionable 교육 자료로 작성.
+- [ ] 스키마 / 참조·누적 규약: routed context `policies/lessons-accumulation.md`.
+
 ## release cut 시
 
 상세는 [release-policy.md](release-policy.md) 참조. 핵심 체크포인트:

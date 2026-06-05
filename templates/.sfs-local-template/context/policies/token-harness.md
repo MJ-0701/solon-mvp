@@ -80,7 +80,10 @@ load_when: ["token", "harness", "context", "Claude", "Codex", "Gemini", "MCP", "
   before reading entire directories.
 - Treat repeated AI mistakes as harness debt. During review/retro, convert
   repeated corrections into guardrails, hooks, checks, or a short adapter/context
-  rule instead of re-explaining the same warning every session.
+  rule instead of re-explaining the same warning every session. Record the
+  caught failure as a durable avoidance rule in `.sfs-local/lessons.md`
+  (`policies/lessons-accumulation.md`); that ledger is the persistence mechanism
+  for this rule.
 - Use usage reports when token drain feels abnormal. Claude users may use
   Session Report; other agents should use their own usage dashboard/logs. Do
   not guess blindly from vibes.

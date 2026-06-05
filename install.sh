@@ -764,6 +764,14 @@ else
   ok "  events.jsonl lazy mode: 첫 이벤트 발생 시 생성"
 fi
 
+# lessons.md — 누적 회피 규칙 ledger seed (기존 있으면 사용자 누적분 보호).
+if [ ! -f "$TARGET/.sfs-local/lessons.md" ]; then
+  cp "$SOURCE_DIR/templates/.sfs-local-template/lessons.md" "$TARGET/.sfs-local/lessons.md"
+  ok "  lessons.md seed 생성 (실패→회피 규칙 누적)"
+else
+  ok "  lessons.md 기존 유지"
+fi
+
 # auth.env.example — keep the sample in the packaged runtime, not in project state.
 ok "  auth.env.example project copy skip (샘플은 packaged runtime 에만 유지; 필요 시 /sfs auth path)"
 

@@ -154,6 +154,13 @@ Exit codes:
   9  executor resolve failed
   99 unknown internal error
 
+Discard escalation (within-loop progress discipline; advisory):
+  Track consecutive discarded iterations. refine@3 / pivot@5 / halt@8 (halt
+  calls a human). A kept iteration resets the counter to 0. One atomic change
+  per iter (--micro-steps-per-iter); a complexity-only micro-improvement is
+  discarded — simplicity first. Distinct from the Ralph-grade AC-based loop-end
+  condition. See policies/harness-autonomy.md.
+
 Spec: sprints/WU-27.md + sprints/WU-27/sfs-loop-{flow,locking,review-gate,multi-worker}.md
 EOF
 }

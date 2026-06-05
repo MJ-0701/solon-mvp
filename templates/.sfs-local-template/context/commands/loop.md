@@ -14,6 +14,12 @@ load_when: ["loop", "queue", "autonomous", "자율", "반복"]
   Autopilot handles deterministic rework inside the accepted contract. A
   Ralph-grade loop continues until every story AC is PASS, waived, or approved
   deferred, with tests/review evidence recorded after each slice.
+- Consecutive-discard escalation ladder (within-loop progress discipline,
+  separate from the AC-based loop-end condition): refine@3 / pivot@5 / halt@8
+  (halt calls a human). A kept iteration resets the counter to 0. One atomic
+  change per iteration (`--micro-steps-per-iter` default 1); a micro-improvement
+  that only adds complexity is discarded — simplicity first. See
+  `policies/harness-autonomy.md`.
 - Parallel/team lanes remain opt-in. Default single-runner is safer unless the
   user selects team mode and each lane has disjoint files_scope, AC ownership,
   expected evidence, merge policy, and a native-language commit message.

@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.23" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.23" "version output"
-assert_contains_text "${output}" "latest 0.8.23" "latest output"
+[[ "${plain_output}" == "sfs 0.8.24" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.24" "version output"
+assert_contains_text "${output}" "latest 0.8.24" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Evidence-at-risk handoff guard and Stop hook registration repair ship together." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Self-improving loop: lessons ledger, autonomous-loop discard escalation, and feedback flywheel ship together." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline Evidence-at-risk handoff guard and Stop hook registration repair ship together." "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline Self-improving loop: lessons ledger, autonomous-loop discard escalation, and feedback flywheel ship together." "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

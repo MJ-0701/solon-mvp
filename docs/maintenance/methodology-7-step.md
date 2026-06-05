@@ -45,6 +45,17 @@ review 이고, code review 는 자동 또는 명시 `code` lens 일 때만 적�
 Production open 을 수반하면 Release Readiness evidence (secret / auth /
 data / monitoring / rollback / cost) 를 review 또는 retro-light 에 남긴다.
 
+## 피드백 플라이휠 (record → reflect)
+
+review / bug triage 에서 **두 번 이상** 반복 발견된 문제는 검증 도구(테스트 /
+린터 / 게이트 / fixture)에 재반영하는 것이 의무다. 한 번 잡힌 실패는
+`.sfs-local/lessons.md` 에 회피 규칙으로 기록(record)하고, 반복되면 검증 도구로
+승격(reflect)해 lesson 의 `promoted` 필드에 그 도구를 기재한다. 기록과 도구 반영은
+별개 시스템이 아니라 한 루프다 — lesson 이 근거를 보존하고 도구가 강제한다. 도구
+출력(에러 / 테스트 / 체크 메시지)은 다음 에이전트의 교육 자료이므로 무엇이 왜
+실패했고 어떻게 고치는지 actionable 하게 적는다. 규약 SSoT:
+routed context `policies/lessons-accumulation.md`.
+
 ## 6본부 always-on
 
 7-step 과 직교하는 축으로, 6 division (strategy-pm / dev / QA / design /

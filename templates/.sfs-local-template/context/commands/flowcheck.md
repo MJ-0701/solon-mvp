@@ -51,5 +51,10 @@ UX (primary task works visibly), and refactor (no obvious brittle placeholder
 debt). Security exposure is critical-blocking; the others need evidence or a
 named follow-up/waiver.
 
+## Lessons loop
+flowcheck 출력은 `.sfs-local/lessons.md` 의 누적 lesson 수와 "이번 작업단위에서
+잡힌 실패를 lesson 으로 기록하라"는 의무를 advisory 1줄로 surface 한다(verdict/exit
+불변). 실패→회피 규칙 누적 규약은 `policies/lessons-accumulation.md`.
+
 ## invariant SSoT
 `policies/flow-conformance-postflight.md`.

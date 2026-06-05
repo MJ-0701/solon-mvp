@@ -1,5 +1,43 @@
 ## [Unreleased]
 
+## [0.8.24] - 2026-06-06
+
+> **Self-improving loop: lessons ledger, autonomous-loop discard escalation, and feedback flywheel ship together.**
+
+### Added
+
+- **Feedback flywheel codification (WU-3).**
+  `policies/lessons-accumulation.md` and `docs/maintenance/methodology-7-step.md`
+  now make the reflect half of the self-improving loop an explicit obligation: a
+  problem found more than once in review or bug triage must be reflected into a
+  verification tool (test/lint/gate/fixture) and the originating lesson's
+  `promoted` field updated, not merely re-recorded. Tool output (error/test/check
+  messages) is treated as agent training material — actionable what-failed /
+  why / fix. Record (lesson) → reflect (tool) is documented as one loop with the
+  WU-1 ledger, and `contributing.md` gains the reflect step.
+- **Autonomous-loop discard escalation ladder (WU-2).**
+  `policies/harness-autonomy.md` and `commands/loop.md` now define a
+  quantitative within-loop discipline distinct from the Ralph-grade loop-end
+  condition: track consecutive discarded iterations and escalate refine@3 /
+  pivot@5 / halt@8 (halt calls a human), resetting the counter on any kept
+  iteration. One atomic change per iteration reuses the existing
+  `--micro-steps-per-iter` default, and a complexity-only micro-improvement is
+  discarded under the kernel's minimum-useful-slice rule. The `sfs loop --help`
+  banner surfaces the ladder. No new event stream or counter — it extends the
+  existing Ralph-grade loop and verifier≠implementer invariants. Locked by an
+  extended `tests/test-ralph-loop-flowcheck.sh` (policy + doc + command help).
+- **Lessons accumulation loop (WU-1).**
+  A new `policies/lessons-accumulation.md` gives the kernel's "repeated mistake →
+  guardrail" principle one durable home: the local ledger `.sfs-local/lessons.md`
+  (seeded on install, frontmatter-loadable, schema `L-NNN` with a `promoted`
+  field for the future feedback flywheel). `plan` now carries a consult
+  obligation, `flowcheck` surfaces the ledger count and the record obligation as
+  an advisory line that never changes its verdict or exit code, `token-harness`
+  cross-links the ledger as the persistence mechanism, and `contributing.md`
+  gains a failure→lesson checklist. Reference/skill docs may carry a `## Gotchas`
+  slot using the same schema. Locked by `tests/test-lessons-accumulation-loop.sh`
+  (policy/schema/route/obligations + a Red→Green flowcheck output check).
+
 ## [0.8.23] - 2026-06-05
 
 > **Evidence-at-risk handoff guard and Stop hook registration repair ship together.**
