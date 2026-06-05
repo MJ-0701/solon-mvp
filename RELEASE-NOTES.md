@@ -13,6 +13,23 @@
 
 ---
 
+## 0.8.25
+
+Token-zero session recall and thin-client external-reference policies ship together.
+
+체감 변화:
+
+- 지난 작업을 토큰 0 으로 다시 찾습니다. `sfs recall <날짜|키워드>` 가
+  handoff/report/retro 와 sprint 워크벤치, 이벤트 원장을 LLM 없이 grep/날짜
+  인덱스로 검색해 위치만 알려줍니다. 읽기 전용이라 아무것도 바꾸지 않습니다.
+- 외부 지식·오케스트레이터를 얇은 규약으로만 참조합니다. 외부 지식은
+  `idea_wiki:LNNN-In` 같은 네임스페이스 포인터로 인용하고 내용은 복사하지
+  않으며(출처 보존), 위키가 없어도 명령 동작은 그대로입니다. 외부 상주
+  에이전트(Hermes류)는 headless 진입 규약을 따르되 release/push/merge/승인
+  게이트를 우회할 수 없고 첫 권한은 읽기 전용입니다.
+
+---
+
 ## 0.8.24
 
 Self-improving loop: lessons ledger, autonomous-loop discard escalation, and feedback flywheel ship together.

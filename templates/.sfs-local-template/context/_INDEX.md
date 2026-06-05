@@ -21,6 +21,7 @@ module:
 - `commands/report-bug.md` — file an SFS-product bug to the official gh channel; confirm gate before fix.
 - `commands/flowcheck.md` — postflight self-check that SFS ran per documented flow; classify divergence and route product bugs to report-bug.
 - `commands/healthcheck.md` — read-only SFS runtime/project drift checker with report-bug draft output.
+- `commands/recall.md` — token-zero session recall over session/handoff/PROGRESS logs via grep/date index (read-only).
 - `commands/release.md` — release / deploy / Homebrew / Scoop.
 - `commands/upgrade.md` — upgrade / update / install freshness.
 - `commands/harness.md` — harness doctor/map for project autonomy readiness.
@@ -32,6 +33,8 @@ module:
 - `policies/user-override-precedence.md` — explicit user command > SFS default; scoped overrides (wu|sprint|until-revoked) with always-surfaced transitions (#3 guard).
 - `policies/token-harness.md` — token/context hygiene, semantic search, repeated mistake guardrails.
 - `policies/lessons-accumulation.md` — accumulate caught failures as durable avoidance rules in `.sfs-local/lessons.md`; consult on plan/flowcheck, append on failure, Gotchas slot.
+- `policies/source-pointer-citation.md` — cite external knowledge by namespaced pointer (`idea_wiki:LNNN-In`), never by content copy; advisory, runtime-independent, consumer placeholder.
+- `policies/external-orchestrator-entry.md` — headless external orchestrator (Hermes-class) entry contract; inviolable gates, file-bus reporting, first-permission read-only.
 - `policies/harness-autonomy.md` — project harness diagnosis, map, artifacts, human boundary, and autonomy loop.
 - `policies/agent-adapter-doc-refactor.md` — keep root LLM agent docs frontmatter-only and auto-refactor recognized SFS adapter bloat.
 - `policies/sfs-router-doc-refactor.md` — keep `SFS.md` as a thin router and auto-refactor recognized policy dumps.

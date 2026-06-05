@@ -1,5 +1,35 @@
 ## [Unreleased]
 
+## [0.8.25] - 2026-06-06
+
+> **Token-zero session recall and thin-client external-reference policies ship together.**
+
+### Added
+
+- **Thin-client external-reference policies (WU-5).**
+  Two new routed policies let Solon reference external knowledge and external
+  orchestrators by thin convention, with the runtime fully functional when
+  neither is present. `policies/source-pointer-citation.md` requires external
+  knowledge to be cited by namespaced pointer (`idea_wiki:LNNN-In`) with no
+  content copy, treats pointers as advisory/runtime-independent, and gives
+  consumers an `{{EXTERNAL_WIKI_NAMESPACE}}` placeholder.
+  `policies/external-orchestrator-entry.md` defines the headless entry contract
+  for a standing orchestrator (Hermes-class): file-bus reporting, capsule-only
+  handoff, inviolable gates (no orchestrator-initiated release/push/merge or
+  approval bypass), and first-permission read-only. No adapter code ships.
+  Locked by `tests/test-thin-client-source-pointer.sh` and
+  `tests/test-external-orchestrator-entry.sh`.
+- **Token-zero session recall (`sfs recall`, WU-4).**
+  A new read-only runtime command finds past work without spending model tokens:
+  `sfs recall <date|keyword>` greps the structured logs SFS already writes —
+  `docs/solon/<workspace>/<yyyyMMdd>/{handoff,report,retro}.md`,
+  `.sfs-local/sprints/`, and `.sfs-local/events.jsonl` — by date index or
+  keyword and prints where the context lives. It never writes, edits, stages,
+  commits, or mutates a file, and is packaged in the runtime dispatch so
+  thin-layout consumers get it through `brew upgrade` / `scoop update sfs`.
+  Routed at `commands/recall.md`; locked by `tests/test-recall-session-recall.sh`
+  (packaging, read-only contract, date/keyword modes, exit codes).
+
 ## [0.8.24] - 2026-06-06
 
 > **Self-improving loop: lessons ledger, autonomous-loop discard escalation, and feedback flywheel ship together.**
