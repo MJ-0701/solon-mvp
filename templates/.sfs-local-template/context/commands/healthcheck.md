@@ -19,9 +19,28 @@ template work.
   `bug-report-lifecycle`, `flowcheck`, `report-bug`, and `healthcheck`.
 - Project version drift between `.sfs-local/VERSION` and packaged `VERSION`.
 - `sfs-status` compact parse and `.sfs-local/divisions.yaml` parse.
+- Evidence-at-risk handoff guard (advisory `WARN`, never a failure).
 - `llm-wiki/` vault frontmatter when the vault exists.
 - `.git/index.lock` presence.
 - A small packaged runtime regression subset.
+
+## Evidence-at-risk Handoff Guard
+
+`open sprint + passed review + uncommitted tree` is the handoff-loss scenario:
+a full sprint can pass review while the working tree stays uncommitted and the
+sprint never closes, so a working-tree accident would lose all evidence. The
+guard is one read-only predicate shared by three surfaces:
+
+- `sfs status` appends an `evidence-at-risk` flag to its one-line dashboard.
+- `sfs <command>` dispatch prints an escalating stderr notice (gentle, firm,
+  then `URGENT` as more steps pass without a commit/close). Advisory only — it
+  never blocks the command.
+- `sfs healthcheck` emits a `WARN` line (read-only; exit code unchanged).
+
+It flags only when a `review_run` PASS exists for the open sprint and the tree
+has at least `SFS_EVIDENCE_AT_RISK_MIN_UNCOMMITTED` (default 3) uncommitted
+changes (untracked included). Clear it by committing or running
+`sfs retro --close`.
 
 ## Exit Codes
 

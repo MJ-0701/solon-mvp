@@ -143,25 +143,40 @@ if ! [[ "${AHEAD}" =~ ^[0-9]+$ ]]; then
 fi
 
 # ─────────────────────────────────────────────────────────────────────
+# Evidence-at-risk flag (WU-0): open sprint + review PASS + uncommitted tree.
+# Read-only, additive — keeps the dashboard on a single line.
+# ─────────────────────────────────────────────────────────────────────
+RISK="$(sfs_evidence_at_risk_status 2>/dev/null || printf 'ok')"
+RISK_SUFFIX=""
+RISK_SUFFIX_COMPACT=""
+if [[ "${RISK}" == "at-risk" ]]; then
+  EAR_UNCOMMITTED="$(sfs_uncommitted_change_count 2>/dev/null || printf '0')"
+  RISK_SUFFIX=" · evidence-at-risk (${EAR_UNCOMMITTED} uncommitted, commit or retro --close)"
+  RISK_SUFFIX_COMPACT=" evidence_at_risk=${EAR_UNCOMMITTED}"
+fi
+
+# ─────────────────────────────────────────────────────────────────────
 # Render
 # ─────────────────────────────────────────────────────────────────────
 if [[ "${OUTPUT_STYLE}" == "compact" ]]; then
-  render_status_compact_line \
+  _STATUS_LINE="$(render_status_compact_line \
     "${SPRINT_ID}" \
     "${WU_ID}" \
     "${LAST_GATE}" \
     "${VERDICT}" \
     "${AHEAD}" \
-    "${LAST_EVENT_TS}"
+    "${LAST_EVENT_TS}")"
+  printf '%s%s\n' "${_STATUS_LINE}" "${RISK_SUFFIX_COMPACT}"
 else
-  render_status_line \
+  _STATUS_LINE="$(render_status_line \
     "${COLOR_MODE}" \
     "${SPRINT_ID}" \
     "${WU_ID}" \
     "${LAST_GATE}" \
     "${VERDICT}" \
     "${AHEAD}" \
-    "${LAST_EVENT_TS}"
+    "${LAST_EVENT_TS}")"
+  printf '%s%s\n' "${_STATUS_LINE}" "${RISK_SUFFIX}"
 fi
 
 exit "${SFS_EXIT_OK}"

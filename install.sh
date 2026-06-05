@@ -538,6 +538,34 @@ if [ "$INSTALL_AGENT_ADAPTERS" = "1" ]; then
   mkdir -p "$TARGET/.claude/hooks"
   install_file "templates/.claude/hooks/solon-stop-suggest.sh" ".claude/hooks/solon-stop-suggest.sh" "Claude Code Stop hook (suggest-only)"
 
+  # 6.2a1) Register the Stop hook in .claude/settings.json. Claude Code only
+  # runs hooks declared in settings — copying the script alone is a no-op (the
+  # WU-0 root cause for the silent evidence-at-risk gap). Non-destructive:
+  # create settings.json if absent; if it exists, never edit it — just print the
+  # block to add so the consumer keeps ownership of their settings.
+  _SETTINGS="$TARGET/.claude/settings.json"
+  if [ ! -f "$_SETTINGS" ]; then
+    cat > "$_SETTINGS" <<'EOF'
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "bash .claude/hooks/solon-stop-suggest.sh" }
+        ]
+      }
+    ]
+  }
+}
+EOF
+    ok "Claude Code Stop hook registered (.claude/settings.json)"
+  elif grep -q "solon-stop-suggest.sh" "$_SETTINGS" 2>/dev/null; then
+    ok "Claude Code Stop hook already registered (.claude/settings.json)"
+  else
+    warn "existing .claude/settings.json not modified — add the Stop hook manually to enable session-end handoff suggestions:"
+    printf '%s\n' '    "hooks": { "Stop": [ { "hooks": [ { "type": "command", "command": "bash .claude/hooks/solon-stop-suggest.sh" } ] } ] }'
+  fi
+
   # 6.2a) Claude Code Skill adapter (current primary command surface)
   mkdir -p "$TARGET/.claude/skills/sfs"
   install_file "templates/.claude/commands/sfs.md" ".claude/skills/sfs/SKILL.md" "Claude Code /sfs Skill"

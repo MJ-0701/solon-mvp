@@ -80,5 +80,7 @@ done
 
 sfs_maybe_emit_hygiene_notice "${cmd}"
 sfs_maybe_emit_obsidian_wiki_notice "${cmd}"
+# WU-0: advisory-only handoff guard. Must never block the dispatched command.
+sfs_maybe_emit_evidence_at_risk_notice "${cmd}" || true
 
 exec bash "${target}" "$@"

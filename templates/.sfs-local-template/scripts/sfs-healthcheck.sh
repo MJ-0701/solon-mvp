@@ -37,6 +37,14 @@ say_ok() {
   printf 'OK   %s\n' "$1"
 }
 
+# say_warn — advisory line that does NOT count as a health issue and does NOT
+# change the exit code. open-sprint + passed-review + uncommitted is the normal
+# mid-sprint state; bumping the issue count here would cry wolf every sprint.
+say_warn() {
+  local check="$1" project="$2" message="$3"
+  printf 'WARN %-22s %s: %s\n' "[${check}]" "${project}" "${message}"
+}
+
 add_issue() {
   local project="$1" check="$2" message="$3" line
   ISSUE_COUNT=$((ISSUE_COUNT + 1))
@@ -211,6 +219,19 @@ check_status_parse() {
   say_ok "$(project_name "${project}") status parse"
 }
 
+check_evidence_at_risk() {
+  local project="$1" local_dir="$2" out label
+  label="$(project_name "${project}")"
+  out="$(cd "${project}" 2>/dev/null && SFS_LOCAL_DIR="${local_dir}" SFS_RUNTIME_DIR="${SFS_RUNTIME_DIR}" SFS_DIST_DIR="${SFS_DIST_DIR}" bash "${SFS_SCRIPT_DIR}/sfs-status.sh" --compact 2>/dev/null)"
+  if string_contains "${out}" "evidence_at_risk="; then
+    local n="${out##*evidence_at_risk=}"
+    n="${n%% *}"
+    say_warn "evidence-at-risk" "${label}" "open sprint + passed review + ${n} uncommitted change(s) — commit or run \`sfs retro --close\` before handoff (read-only warning, not a failure)"
+  else
+    say_ok "${label} handoff evidence committed"
+  fi
+}
+
 check_divisions_parse() {
   local project="$1" local_dir="$2" file="${local_dir}/divisions.yaml"
   if [[ ! -f "${file}" ]]; then
@@ -297,6 +318,7 @@ check_project() {
   fi
   check_version_drift "${project}" "${local_dir}"
   check_status_parse "${project}" "${local_dir}"
+  check_evidence_at_risk "${project}" "${local_dir}"
   check_divisions_parse "${project}" "${local_dir}"
 }
 

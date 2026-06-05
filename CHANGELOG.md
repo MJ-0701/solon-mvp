@@ -1,5 +1,34 @@
 ## [Unreleased]
 
+## [0.8.23] - 2026-06-05
+
+> **Evidence-at-risk handoff guard and Stop hook registration repair ship together.**
+
+### Added
+
+- **Evidence-at-risk handoff guard (WU-0).**
+  `open sprint + passed review + uncommitted tree` is now surfaced as an
+  advisory signal across three existing surfaces from one shared read-only
+  predicate in `sfs-common.sh`: `sfs status` appends an `evidence-at-risk` flag
+  to its one-line dashboard, `sfs` command dispatch prints an escalating
+  (gentle → firm → `URGENT`) stderr notice that never blocks the command, and
+  `sfs healthcheck` emits a `WARN` line without changing its exit code. The
+  guard composes `read_current_sprint`, the `review_run` PASS verdict reader,
+  and `git status --porcelain` (untracked included); it flags only when a
+  passing review exists for the open sprint and the tree has at least
+  `SFS_EVIDENCE_AT_RISK_MIN_UNCOMMITTED` (default 3) uncommitted changes.
+- **Stop hook registration repair.**
+  `install.sh` now registers the suggest-only Stop hook in
+  `.claude/settings.json` (created when absent, never overwritten when present).
+  Copying `solon-stop-suggest.sh` without registration was a no-op — the
+  verified root cause of the silent handoff gap, since Claude Code only runs
+  hooks declared in settings. The hook also now surfaces the evidence-at-risk
+  state on session end.
+- **Evidence-at-risk regression lock.**
+  A new fixture reproduces the open-sprint + passing-review + untracked-tree
+  scenario and asserts the status flag, the non-blocking escalating dispatch
+  notice, and the read-only healthcheck `WARN`, plus negative cases.
+
 ## [0.8.22] - 2026-06-05
 
 > **Legacy upgrade repair, solo KPIs, process self-audit, and verifier context split ship together.**

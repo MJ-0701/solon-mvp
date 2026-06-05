@@ -1763,6 +1763,109 @@ sfs_latest_review_verdict_for_sprint() {
   printf '%s\n' "unknown"
 }
 
+# ─────────────────────────────────────────────────────────────────────
+# EVIDENCE-AT-RISK GUARD (WU-0)
+#
+# "Never forget the handoff" is a product contract. The exam-prep case study
+# proved a silent gap: a full sprint (S1->S2->verify->review PASS) can run with
+# zero git commits, the sprint never closed, and no surface warning — a
+# working-tree accident there would lose every shred of evidence.
+#
+# These helpers compose EXISTING readers (current-sprint, review_run output
+# verdict, git porcelain) into one advisory signal shared by status, dispatch,
+# and healthcheck. No new state file, no new event type, never blocks.
+# ─────────────────────────────────────────────────────────────────────
+
+# sfs_uncommitted_change_count — stdout: int. git porcelain line count,
+# INCLUDING untracked (`??`) entries — the exam-prep total-untracked failure
+# mode. Prints 0 outside a git repo.
+sfs_uncommitted_change_count() {
+  git rev-parse --git-dir >/dev/null 2>&1 || { printf '0\n'; return 0; }
+  local n
+  n="$(git status --porcelain 2>/dev/null | grep -c '.')" || true
+  case "${n}" in ''|*[!0-9]*) n=0 ;; esac
+  printf '%s\n' "${n}"
+}
+
+# sfs_evidence_at_risk_min_uncommitted — N threshold (default 3). Suppresses the
+# benign just-passed-about-to-commit case while still catching a forgotten tree.
+sfs_evidence_at_risk_min_uncommitted() {
+  local n="${SFS_EVIDENCE_AT_RISK_MIN_UNCOMMITTED:-3}"
+  case "${n}" in ''|*[!0-9]*) n=3 ;; esac
+  printf '%s' "${n}"
+}
+
+# sfs_evidence_at_risk_status — stdout: "at-risk" or "ok".
+# at-risk iff: open sprint AND latest review verdict == pass AND
+#              uncommitted change count >= N. Pure read-only composition.
+sfs_evidence_at_risk_status() {
+  local sprint verdict uncommitted n
+  sprint="$(read_current_sprint 2>/dev/null || true)"
+  [[ -n "${sprint}" ]] || { printf 'ok\n'; return 0; }
+  verdict="$(sfs_latest_review_verdict_for_sprint "${sprint}" 2>/dev/null || true)"
+  [[ "${verdict}" == "pass" ]] || { printf 'ok\n'; return 0; }
+  uncommitted="$(sfs_uncommitted_change_count)"
+  n="$(sfs_evidence_at_risk_min_uncommitted)"
+  if [[ "${uncommitted}" =~ ^[0-9]+$ ]] && (( uncommitted >= n )); then
+    printf 'at-risk\n'
+  else
+    printf 'ok\n'
+  fi
+}
+
+# sfs_events_since_last_passing_review SID — stdout: int. Event lines appended
+# after the last review_run for SID. Used as the escalation magnitude (M):
+# every meaningful command after a PASS appends >=1 event, and sprint_close
+# prunes the sprint's lines, so M resets to 0 once the handoff is preserved.
+sfs_events_since_last_passing_review() {
+  local sid="${1:-}"
+  [[ -n "${sid}" && -f "${SFS_EVENTS_FILE}" ]] || { printf '0\n'; return 0; }
+  awk -v sid="${sid}" '
+    index($0, "\"type\":\"review_run\"") && index($0, "\"sprint_id\":\"" sid "\"") { last = NR }
+    { total = NR }
+    END { print (last ? total - last : 0) }
+  ' "${SFS_EVENTS_FILE}" 2>/dev/null || printf '0\n'
+}
+
+# sfs_maybe_emit_evidence_at_risk_notice CMD — escalating stderr nag while the
+# tree is at risk. Advisory only: ALWAYS returns 0, never blocks the command.
+# Read-only commands are skipped so a status/healthcheck check never escalates.
+sfs_maybe_emit_evidence_at_risk_notice() {
+  local cmd="${1:-}"
+  # Skip read-only commands (no escalation on a status check) and the
+  # remediation commands themselves (commit/retro resolve the risk).
+  case "${cmd}" in
+    status|healthcheck|flowcheck|guide|profile|help|-h|--help|commit|retro) return 0 ;;
+  esac
+  case "${SFS_EVIDENCE_AT_RISK_NOTICE:-1}" in 0|false|off|no) return 0 ;; esac
+
+  local risk sprint m uncommitted firm urgent
+  risk="$(sfs_evidence_at_risk_status 2>/dev/null || printf 'ok')"
+  [[ "${risk}" == "at-risk" ]] || return 0
+
+  sprint="$(read_current_sprint 2>/dev/null || true)"
+  m="$(sfs_events_since_last_passing_review "${sprint}" 2>/dev/null || printf '0')"
+  uncommitted="$(sfs_uncommitted_change_count 2>/dev/null || printf '0')"
+  case "${m}" in ''|*[!0-9]*) m=0 ;; esac
+
+  firm="${SFS_EVIDENCE_AT_RISK_FIRM:-3}"
+  urgent="${SFS_EVIDENCE_AT_RISK_URGENT:-6}"
+  case "${firm}" in ''|*[!0-9]*) firm=3 ;; esac
+  case "${urgent}" in ''|*[!0-9]*) urgent=6 ;; esac
+
+  if (( m >= urgent )); then
+    printf '[evidence-at-risk] URGENT: sprint %s passed review with %s uncommitted change(s), %s steps since with no commit/close — commit now or run `sfs retro --close` to preserve the handoff.\n' \
+      "${sprint}" "${uncommitted}" "${m}" >&2
+  elif (( m >= firm )); then
+    printf '[evidence-at-risk] sprint %s passed review but %s uncommitted change(s) remain after %s steps — commit or close before more work.\n' \
+      "${sprint}" "${uncommitted}" "${m}" >&2
+  else
+    printf '[evidence-at-risk] sprint %s passed review with %s uncommitted change(s) — commit or run `sfs retro --close` to lock in the handoff.\n' \
+      "${sprint}" "${uncommitted}" >&2
+  fi
+  return 0
+}
+
 sfs_repo_infra_signal_count() {
   git rev-parse --git-dir >/dev/null 2>&1 || { printf '0\n'; return 0; }
   git ls-files 2>/dev/null \

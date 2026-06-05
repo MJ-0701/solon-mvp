@@ -13,6 +13,25 @@
 
 ---
 
+## 0.8.23
+
+Evidence-at-risk handoff guard and Stop hook registration repair ship together.
+
+체감 변화:
+
+- review 를 PASS 한 sprint 가 열린 채로 working tree 가 미커밋이면, 인수인계 증거가
+  유실될 위험을 이제 세 곳에서 경고합니다. `sfs status` 는 1줄 대시보드에
+  `evidence-at-risk` 플래그를 붙이고, 다음 `sfs` 명령은 단계가 쌓일수록 강해지는
+  stderr 안내(gentle → firm → URGENT)를 남기되 명령을 막지는 않으며,
+  `sfs healthcheck` 는 종료 코드를 바꾸지 않는 읽기 전용 `WARN` 으로 알립니다.
+  commit 하거나 `sfs retro --close` 로 sprint 를 닫으면 사라집니다.
+- Claude Code Stop hook 이 실제로 동작합니다. 이전에는 hook 스크립트만 설치되고
+  `.claude/settings.json` 에 등록되지 않아 한 번도 울리지 않았습니다. `install.sh`
+  가 기존 설정을 덮어쓰지 않고 hook 을 등록하며, 세션 종료 시 미커밋 인수인계
+  위험을 제안합니다.
+
+---
+
 ## 0.8.22
 
 Legacy upgrade repair, solo KPIs, process self-audit, and verifier context split ship together.
