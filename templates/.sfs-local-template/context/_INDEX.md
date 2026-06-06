@@ -22,6 +22,7 @@ module:
 - `commands/flowcheck.md` — postflight self-check that SFS ran per documented flow; classify divergence and route product bugs to report-bug.
 - `commands/healthcheck.md` — read-only SFS runtime/project drift checker with report-bug draft output.
 - `commands/recall.md` — token-zero session recall over session/handoff/PROGRESS logs via grep/date index (read-only).
+- `commands/daily.md` — bookend daily operating loop (morning brief + evening recap) composing existing `status`/`recall`/`capture`/`tidy`/`loop`; a routine, not a binary.
 - `commands/release.md` — release / deploy / Homebrew / Scoop.
 - `commands/upgrade.md` — upgrade / update / install freshness.
 - `commands/harness.md` — harness doctor/map for project autonomy readiness.

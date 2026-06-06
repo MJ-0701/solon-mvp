@@ -46,4 +46,15 @@ non-decaying 10% the default*. Swap the model freely (the config-review cadence
 assumes you will); the structure on top stays. Same direction as the advice to
 run small things rather than hoard bookmarks — Solon formalizes that "run small"
 as the 7-step.
+
+### External evidence (by-reference)
+
+A seller with no coding background started by picking his single most painful
+recurring task and having the AI build the fix, then went on to redesign his
+team's workflows and move into a GTM-PM role (source: Anthropic blog "How one
+Anthropic seller rebuilt his team's workflows", 2026-06-05, by-reference —
+figures/org details are claims at publication time). It is outside evidence for
+the claim above: the surviving asset is not a "coding background" but *the
+ability to design work structure* — the most direct proof for Solon's target,
+the non-technical one-person operator.
 </content>
