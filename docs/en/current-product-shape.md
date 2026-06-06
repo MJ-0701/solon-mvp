@@ -70,3 +70,4 @@ This file keeps the original route as a thin entry point. Detailed body sections
 - [Domain Knowledge Assets](./current-product-shape/21-domain-knowledge-assets.md)
 - [Project Harness Map](./current-product-shape/22-project-harness-map.md)
 - [Top-down Learning Guide](./current-product-shape/24-topdown-learning-guide.md)
+- [Wiki Start Guide](./current-product-shape/25-wiki-onboarding-guide.md)

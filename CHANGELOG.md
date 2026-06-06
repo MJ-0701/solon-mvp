@@ -1,5 +1,59 @@
 ## [Unreleased]
 
+## [0.8.28] - 2026-06-06
+
+> **Wiki onboarding escalates to strongly recommended: a first-class policy section, active install/adopt/doctor guidance, a personal external knowledge wiki recommendation, and a bilingual wiki-start guide — never hard-blocking, standalone guarantee intact.**
+
+### Changed
+
+- **LLM wiki escalated from recommended-default to strongly-recommended
+  (OWNER-2026-06-06-wiki-strong-reco).** `policies/obsidian-llm-wiki.md`
+  (+`.ko`) gains a first-class **"Strongly recommended by default"** section —
+  why (agent self-serve context, cross-session memory, no repeated explanation),
+  what (project `llm-wiki/` + Obsidian vault), and when (new = before the first
+  sprint, existing = at `sfs adopt`). The escalation is framing only: the
+  `content_policy` and the new section both preserve **never hard-block** and the
+  runtime **standalone guarantee** (the wiki stays advisory; every command
+  behaves identically without it). Strong recommendation = active guidance
+  (install hint, `sfs adopt` prompt, `sfs harness doctor` advisory), not
+  coercion. `commands/adopt.md` aligned to the strongly-recommended tone with an
+  explicit waiver-record path.
+- **Active onboarding surfaces.** `install.sh` adds a single "위키 온보딩 (강력
+  권고)" closing block that points to the new bilingual start guide and notes the
+  skip→re-prompt-at-adopt/doctor→waiver path (integrated with the existing
+  `fill_llm_wiki_project_context` interview, not duplicated). `sfs harness
+  doctor` now emits a one-line **advisory** when `llm-wiki/` is absent **and** no
+  `.sfs-local/llm-wiki.waiver` is recorded, and falls silent (neutral
+  acknowledgement line) once a waiver exists. The advisory is `info`-only — it
+  never changes the doctor exit code or pass/warn/fail counts.
+
+### Added
+
+- **Personal external knowledge wiki recommendation (idea_wiki-class,
+  generalized).** `policies/obsidian-llm-wiki.md` (+`.ko`) gains a short
+  **"Personal knowledge wiki (recommended)"** section: separate from the project
+  wiki, the operator is recommended to keep a personal external knowledge wiki
+  (lectures/insights/ideas) as a private git repo, multi-machine via
+  `clone`/`pull`, wired through the `{{EXTERNAL_WIKI_NAMESPACE}}` pointer
+  (`policies/source-pointer-citation.md`) with its checkout path recorded in
+  `operator-context.md`. Advisory — every command behaves identically without it.
+  `operator-context.md` gains one placeholder line (`External knowledge wiki`,
+  placeholders only, no fixed values).
+- **Bilingual wiki-start guide.**
+  `docs/{en,ko}/current-product-shape/25-wiki-onboarding-guide.md`: why strongly
+  recommended, the 10-minute project `llm-wiki/` start (the four scaffold files),
+  opening the Obsidian vault, starting a personal external knowledge wiki, and
+  the pointer-citation rule — cross-linked to the top-down learning guide (24)
+  and the Obsidian continuity doc (19), by pointer (no duplicated prose). Listed
+  in both `current-product-shape.md` indexes.
+- **Locks.** `tests/test-obsidian-llm-wiki-guidance.sh` extended to assert the
+  two markers together (strongly-recommended section **and** never-hard-block /
+  standalone guarantee), the personal-wiki section, the operator-context line,
+  the adopt/doctor/install surfaces, and the doc-25 guide.
+  `tests/test-wiki-onboarding-doctor-advisory.sh` (new) drives the real `sfs
+  harness doctor` through a fixture: no-wiki/no-waiver → advisory present;
+  waiver recorded → advisory silent; doctor counts identical across both.
+
 ## [0.8.27] - 2026-06-06
 
 > **Self-improving context disciplines (conflict gate, hook-promotion, skill-promotion loop, operator context, delegation startup) plus top-down learning and why-Solon onboarding ship together.**

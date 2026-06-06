@@ -42,6 +42,7 @@ do not ship fixed values in the template.
 - **Connected tools / MCP**: <OPERATOR-TOOLS>
 - **Reporting channel**: <OPERATOR-REPORT-CHANNEL>
 - **Schedule / availability**: <OPERATOR-SCHEDULE>
+- **External knowledge wiki**: <EXTERNAL-WIKI-NAME> → <LOCAL-CHECKOUT-PATH> (namespace, advisory; see `policies/source-pointer-citation.md` + `policies/obsidian-llm-wiki.md`)
 
 ## Standing preferences and boundaries
 

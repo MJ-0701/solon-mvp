@@ -495,8 +495,13 @@ print_doctor() {
     else
       warn "llm-wiki exists but bug-reports/ is missing"
     fi
+  elif [ -f ".sfs-local/llm-wiki.waiver" ]; then
+    info "llm-wiki absent; waiver recorded (.sfs-local/llm-wiki.waiver) — SFS workbench artifacts remain the memory surface"
   else
-    info "llm-wiki absent; SFS workbench artifacts remain the memory surface"
+    # Strongly-recommended-by-default advisory: no wiki and no waiver. Stays
+    # info-only (never warn/fail) so it changes neither doctor's exit code nor
+    # the standalone guarantee. SSoT: policies/obsidian-llm-wiki.md.
+    info "llm-wiki advisory: wiki strongly recommended but absent and no waiver recorded; build llm-wiki/ or record .sfs-local/llm-wiki.waiver (advisory only, never blocks)"
   fi
 
   section "Verification Loop"

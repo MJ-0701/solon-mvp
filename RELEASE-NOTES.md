@@ -13,6 +13,30 @@
 
 ---
 
+## 0.8.28
+
+Wiki onboarding escalates to strongly recommended: a first-class policy section, active install/adopt/doctor guidance, a personal external knowledge wiki recommendation, and a bilingual wiki-start guide — never hard-blocking, standalone guarantee intact.
+
+체감 변화:
+
+- **위키를 강력 권고합니다.** llm-wiki 가 "권고 기본값" 에서 "강력 권고
+  기본값" 으로 올라갑니다. 이유는 분명합니다 — 에이전트 셀프서비스 컨텍스트,
+  세션 간 기억, 반복 설명 제거. 다만 강제는 아닙니다: 거절하면 waiver 를
+  기록하고 그대로 진행하며 모든 명령은 동일하게 동작합니다(standalone 보장 유지).
+- **설치·adopt·doctor 가 능동적으로 안내합니다.** 설치 마무리에 위키 강력 권고
+  블록이 뜨고 시작 가이드로 안내합니다. 건너뛰면 `sfs adopt` 와 `sfs harness
+  doctor` 가 다시 안내하고, `llm-wiki/` 도 waiver 도 없으면 doctor 가 한 줄
+  advisory 를 띄웁니다(차단·exit code 변경 없음, waiver 기록 시 침묵).
+- **개인 외부 지식 위키도 권고합니다.** 프로젝트 위키와 별개로, 강의·인사이트·
+  아이디어를 모으는 개인 외부 지식 위키를 private git repo 로 둘 것을 권고합니다.
+  멀티 머신은 clone/pull, 연동은 `{{EXTERNAL_WIKI_NAMESPACE}}` 포인터 +
+  `operator-context.md` 경로 기재. advisory — 없어도 동작은 같습니다.
+- **위키 시작 가이드(한·영).** 왜 강력 권고인지, 프로젝트 `llm-wiki/` 10분
+  시작(스캐폴드 4파일), Obsidian vault 열기, 개인 지식 위키 시작, 포인터 인용
+  규칙을 한 편으로 묶고 탑다운 학습 가이드와 연결했습니다.
+
+---
+
 ## 0.8.27
 
 Self-improving context disciplines (conflict gate, hook-promotion, skill-promotion loop, operator context, delegation startup) plus top-down learning and why-Solon onboarding ship together.

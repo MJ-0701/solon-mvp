@@ -979,6 +979,15 @@ Project upgrade: sfs upgrade
 Runtime:         $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI" || echo ".sfs-local/scripts/sfs-dispatch.sh")
 Windows wrapper: $([ "$INSTALL_LAYOUT" = "thin" ] && echo "global sfs CLI via Git Bash/WSL" || echo ".sfs-local/scripts/sfs.ps1 (PowerShell → Git Bash)")
 
+${C_BOLD}${C_YELLOW}■ 위키 온보딩 (강력 권고)${C_RESET}
+  Obsidian + llm-wiki 구축을 ${C_BOLD}강력 권고${C_RESET}합니다 — 에이전트 셀프서비스
+  컨텍스트 / 세션 간 기억 / 반복 설명 제거. 강제는 아닙니다 (standalone guarantee 유지).
+  시작 가이드: ${C_BLUE}docs/ko/current-product-shape/25-wiki-onboarding-guide.md${C_RESET}
+            ${C_BLUE}docs/en/current-product-shape/25-wiki-onboarding-guide.md${C_RESET}
+  지금 건너뛰면 나중에 ${C_BLUE}sfs adopt${C_RESET} / ${C_BLUE}sfs harness doctor${C_RESET} 가 다시 안내합니다
+  (거절 시 ${C_BLUE}.sfs-local/llm-wiki.waiver${C_RESET} 기록 후 침묵). 개인 외부 지식 위키(강의·
+  인사이트용 private git repo)도 함께 권고 — 가이드 4단계 참고.
+
 다음 단계:
 
   ${C_BOLD}1.${C_RESET} SFS.md 내용 확인 + 프로젝트 특성 반영 (Stack / 도메인 등).

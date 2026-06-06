@@ -12,12 +12,22 @@ load_when:
   - new project
   - sprint continuity
 status: filled-v1
-content_policy: "recommended default; never hard-block a sprint when the user declines or the project cannot use Obsidian"
+content_policy: "strongly recommended by default; active guidance (install hint, adopt prompt, doctor advisory), never a hard-block — when the user declines or the project cannot use Obsidian, record a waiver and continue, and the runtime standalone guarantee holds"
 ---
 
 # Obsidian LLM Wiki Policy
 
 Obsidian is a recommended companion for SFS projects because it is free, local-first, Markdown-native, and useful for LLM retrieval. Treat it as a recommended default, not a coercive dependency. If the user declines, the environment lacks Obsidian, or the repository policy forbids a vault, continue SFS with ordinary `docs/solon/` artifacts and record the waiver or blocker.
+
+## Strongly recommended by default
+
+Treat the wiki as **strongly recommended by default**, not an optional extra — both the project-local `llm-wiki/` layer and an Obsidian vault over it. The leverage is concrete: **agent self-serve context** (the next agent loads the slice it needs instead of re-deriving from raw code each time), **cross-session memory** (durable meaning survives `/clear`, new sessions, and handoff — the long-horizon layer report/retro logs are not), and **no repeated explanation** (a questions ledger plus TopicHubs end re-explaining the project on every cold start). Build it before the first real sprint (new project) or at `sfs adopt` before the next sprint relies on it (existing project).
+
+**Strong recommendation is active guidance, not coercion.** Solon never hard-blocks on a missing wiki, and the runtime standalone guarantee holds — the wiki is advisory and every command behaves identically without it. If the operator declines, cannot host a vault, or repo policy forbids one, record a waiver and continue with ordinary `docs/solon/` artifacts. Strong recommendation means the agent proactively surfaces the wiki (install hint, `sfs adopt` prompt, `sfs harness doctor` advisory) — it never gates a sprint.
+
+## Personal knowledge wiki (recommended)
+
+Separate from the project wiki, the operator is recommended to keep a personal external knowledge wiki — lectures, insights, and ideas — as a private git repo. Multi-machine use is a `clone`/`pull`. Wire it into Solon by citing it through the `{{EXTERNAL_WIKI_NAMESPACE}}` pointer (see `policies/source-pointer-citation.md`) and recording its checkout path in `operator-context.md`. This is **advisory**: every command behaves identically when the personal wiki is absent, exactly like the project wiki's standalone guarantee.
 
 ## Activation Rules
 

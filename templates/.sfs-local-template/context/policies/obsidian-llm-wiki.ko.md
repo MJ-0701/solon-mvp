@@ -13,12 +13,22 @@ load_when:
   - 신규 프로젝트
   - sprint continuity
 status: filled-v1
-content_policy: "권고 기본값; wiki 는 SFS flow 를 돕는 도구일 뿐 제품 방향이 아니며, 거절/불가 시 sprint 를 막지 않는다"
+content_policy: "강력 권고 기본값; wiki 는 SFS flow 를 돕는 능동 안내(install hint, adopt prompt, doctor advisory)이지 제품 방향이 아니며 hard-block 도 아니다, 거절/불가 시 waiver 기록 후 진행하고 runtime standalone guarantee 가 유지된다"
 ---
 
 # Obsidian LLM Wiki Policy
 
 Obsidian 은 무료, 로컬 우선, Markdown 기반이라 SFS 프로젝트의 LLM retrieval 동반 도구로 권장한다. 다만 필수 의존성처럼 강제하지 않는다. 사용자가 거절하거나, 환경에 Obsidian 이 없거나, repo 정책상 vault 를 둘 수 없으면 일반 `docs/solon/` 산출물로 진행하고 waiver 또는 blocker 를 기록한다.
+
+## Strongly recommended by default
+
+wiki 는 단순 선택이 아니라 **강력 권고 기본값(strongly recommended by default)** 이다 — 프로젝트 로컬 `llm-wiki/` 계층과 그 위의 Obsidian vault 둘 다. 레버리지는 구체적이다: **에이전트 셀프서비스 컨텍스트**(다음 agent 가 raw 코드 재추론 없이 필요한 조각만 로드), **세션 간 기억**(`/clear`·새 세션·handoff 를 넘는 durable meaning, report/retro 로그가 아닌 long-horizon 계층), **반복 설명 제거**(questions ledger + TopicHub 로 매 cold start 재설명 차단). 신규는 첫 실제 sprint 전, 기존은 다음 sprint 가 의존하기 전 `sfs adopt` 시점에 구축한다.
+
+**강력 권고는 능동 안내이지 강제가 아니다.** Solon 은 wiki 부재로 절대 hard-block 하지 않으며 runtime standalone guarantee 가 유지된다 — wiki 는 advisory 이고 없어도 모든 명령은 동일하게 동작한다. 운영자가 거절하거나, 환경이 vault 를 둘 수 없거나, repo 정책이 금지하면 waiver 를 기록하고 일반 `docs/solon/` 산출물로 진행한다. 능동 안내 = install hint · `sfs adopt` prompt · `sfs harness doctor` advisory; sprint 를 막지 않는다.
+
+## Personal knowledge wiki (recommended)
+
+프로젝트 wiki 와 별개로, 운영자는 강의·인사이트·아이디어를 모으는 개인 외부 지식 위키를 private git repo 로 유지할 것을 권고한다. 멀티 머신은 `clone`/`pull` 이다. Solon 연동은 `{{EXTERNAL_WIKI_NAMESPACE}}` 포인터(`policies/source-pointer-citation.md` 참조)로 인용하고 checkout 경로를 `operator-context.md` 에 기재한다. 이는 **advisory** 다 — 개인 wiki 가 없어도 모든 명령은 동일하게 동작하며, 프로젝트 wiki 의 standalone guarantee 와 같다.
 
 ## Activation Rules
 
@@ -81,25 +91,16 @@ Obsidian 은 무료, 로컬 우선, Markdown 기반이라 SFS 프로젝트의 LL
 
 ## Memory Formation And Migration
 
-- **Memory migration** 은 이미 있는 것을 보존한다. SFS sprint 기록, `docs/solon/` 산출물, legacy docs,
-  ADR, README/GUIDE, issue/PR note, git history 를 원문으로 링크하고 wiki 에는 durable meaning 만 남긴다.
-- **Memory formation** 은 문서관리 체계가 없던 프로젝트의 공백을 메운다. 코드 구조, 테스트, config,
-  migration, script, package manifest, commit message, release note, 운영 trace 를 읽어 현재 프로젝트
-  모델을 추론하되, source link, confidence, owner, gap 을 남겨 날조를 막는다.
-- 개발자가 문서를 남기는 이유는 다음 maintainer 가 기존 maintainer 의 암묵지를 빨리 습득해 도메인지식
-  레벨을 올리게 하기 위해서다. wiki 는 이 전이를 도구화해서 다음 agent/developer 가 feature work 전에
-  프로젝트 맥락을 획득하게 해야 한다.
-- 문서가 없다고 사용자에게 프로젝트 전체를 다시 설명하라고 묻지 않는다. 먼저 가능한 증거를 검색하고,
-  아는 것과 모르는 것을 기록한 뒤 product 의미가 바뀌는 최소 질문만 묻는다.
-- questions ledger 는 `answered`, `open`, `stale`, `ask-again-only-if` 를 구분해서 이미 답한 설명을 다시
-  묻지 않게 한다.
+- **Memory migration** 은 이미 있는 것을 보존한다. SFS sprint 기록, `docs/solon/` 산출물, legacy docs, ADR, README/GUIDE, issue/PR note, git history 를 원문으로 링크하고 wiki 에는 durable meaning 만 남긴다.
+- **Memory formation** 은 문서관리 체계가 없던 프로젝트의 공백을 메운다. 코드 구조, 테스트, config, migration, script, package manifest, commit message, release note, 운영 trace 를 읽어 현재 프로젝트 모델을 추론하되, source link, confidence, owner, gap 을 남겨 날조를 막는다.
+- 개발자가 문서를 남기는 이유는 다음 maintainer 가 기존 maintainer 의 암묵지를 빨리 습득해 도메인지식 레벨을 올리게 하기 위해서다. wiki 는 이 전이를 도구화해서 다음 agent/developer 가 feature work 전에 프로젝트 맥락을 획득하게 해야 한다.
+- 문서가 없다고 사용자에게 프로젝트 전체를 다시 설명하라고 묻지 않는다. 먼저 가능한 증거를 검색하고, 아는 것과 모르는 것을 기록한 뒤 product 의미가 바뀌는 최소 질문만 묻는다.
+- questions ledger 는 `answered`, `open`, `stale`, `ask-again-only-if` 를 구분해서 이미 답한 설명을 다시 묻지 않게 한다.
 
 ## Write-Time Compile
 
-- source document, 회의록, capture, decision, 쓸 만한 agent 답변이 들어오면 다음 질문 시점에
-  query-time 재검색으로 떠넘기지 말고 관련 TopicHub, DDD map, index, gap note 로 즉시 컴파일한다.
-- 큰 raw note, transcript, generated output, external reference 는 원래 위치에 둔다. wiki 에는 그 원문이
-  무엇을 의미하는지, 어디에 있는지, 무엇과 연결되는지, 무엇이 비어 있는지를 기록한다.
+- source document, 회의록, capture, decision, 쓸 만한 agent 답변이 들어오면 다음 질문 시점에 query-time 재검색으로 떠넘기지 말고 관련 TopicHub, DDD map, index, gap note 로 즉시 컴파일한다.
+- 큰 raw note, transcript, generated output, external reference 는 원래 위치에 둔다. wiki 에는 그 원문이 무엇을 의미하는지, 어디에 있는지, 무엇과 연결되는지, 무엇이 비어 있는지를 기록한다.
 - source-bundle 분석 도구 결과(인포그래픽/PDF/PPT 포함)는 derived output 이다. input set, tool/model,
   output path, citation/confidence/gap, promotion decision 이 있어야 wiki 지식으로 승격한다.
 - Graphify-style report 는 durable meaning 만 승격한다. hub, surprising cross-community edge, domain term, dependency path, graph-backed question, explicit gap 이 대상이며 cache, raw graph JSON, transcript, visual export 는 사람이 shared promotion 을 승인하기 전까지 generated 위치에 둔다.

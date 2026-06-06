@@ -16,12 +16,16 @@ Rules:
   `sfs adopt --ddd-tdd-retrofit --apply "<brief>"`. It scans source paths for
   DDD-lite boundaries, writes `ddd-tdd-retrofit.md`, and seeds
   `docs/solon/domain-map.md`.
-- For existing projects with meaningful docs, recommend an Obsidian LLM wiki
-  migration by reference after `adopt --apply`: preserve source docs as SSoT,
-  create `llm-wiki/` maps/indexes, and start the next real sprint with that
-  wiki as retrieval context. Do not block adoption if the user declines.
-- For projects without a real documentation system, recommend Obsidian LLM wiki
-  memory formation after `adopt --apply`: reconstruct tacit knowledge from
+- For existing projects with meaningful docs, **strongly recommend** an Obsidian
+  LLM wiki migration by reference after `adopt --apply`: preserve source docs as
+  SSoT, create `llm-wiki/` maps/indexes, and start the next real sprint with that
+  wiki as retrieval context. This is active guidance, not a hard-block — if the
+  user declines, record a waiver (`.sfs-local/llm-wiki.waiver`) and continue
+  adoption. `sfs harness doctor` will surface a one-line advisory until the wiki
+  exists or a waiver is recorded (see `policies/obsidian-llm-wiki.md`).
+- For projects without a real documentation system, **strongly recommend**
+  Obsidian LLM wiki memory formation after `adopt --apply`: reconstruct tacit
+  knowledge from
   code, git commit history, tests, config, release/deploy scripts, issue/PR
   traces, and user notes. Create only a minimal baseline: project map,
   domain/DDD map, decision ledger, unknowns/gaps, questions ledger, dev

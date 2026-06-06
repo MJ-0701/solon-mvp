@@ -137,4 +137,41 @@ assert_contains "${SFS_TEMPLATE_DIR}/llm-wiki/README.md" "derived workspace" "te
 assert_contains "${SFS_TEMPLATE_DIR}/llm-wiki/00-llm-retrieval-guide.md" "Self-serve retrieval comes before broad questions" "template retrieval self-serve"
 assert_contains "${SFS_TEMPLATE_DIR}/llm-wiki/00-llm-retrieval-guide.md" "Graph question" "template retrieval Graph question"
 
+# ── Strong-recommendation escalation: BOTH markers must coexist ─────
+# AC: "strongly recommended" first-class section AND never-hard-block
+# preservation are asserted together (escalation must not delete the
+# standalone guarantee). EN + KO mirrored.
+assert_contains "${policy}" "## Strongly recommended by default" "EN policy strong-reco section"
+assert_contains "${policy}" "Solon never hard-blocks on a missing wiki" "EN policy never-hard-block marker"
+assert_contains "${policy}" "runtime standalone guarantee holds" "EN policy standalone guarantee"
+assert_contains "${policy_ko}" "## Strongly recommended by default" "KO policy strong-reco section"
+assert_contains "${policy_ko}" "절대 hard-block 하지 않으며" "KO policy never-hard-block marker"
+assert_contains "${policy_ko}" "runtime standalone guarantee 가 유지된다" "KO policy standalone guarantee"
+
+# ── Personal external knowledge wiki generalization ────────────────
+assert_contains "${policy}" "## Personal knowledge wiki (recommended)" "EN policy personal wiki section"
+assert_contains "${policy}" '{{EXTERNAL_WIKI_NAMESPACE}}' "EN policy external wiki namespace pointer"
+assert_contains "${policy_ko}" "## Personal knowledge wiki (recommended)" "KO policy personal wiki section"
+assert_contains "${policy_ko}" "개인 외부 지식 위키" "KO policy personal wiki phrase"
+assert_contains "${SFS_TEMPLATE_DIR}/operator-context.md" "External knowledge wiki" "operator-context external wiki line"
+assert_contains "${SFS_TEMPLATE_DIR}/operator-context.md" "<EXTERNAL-WIKI-NAME>" "operator-context external wiki placeholder"
+
+# ── Active guidance surfaces: adopt + doctor advisory + install ────
+assert_contains "${CONTEXT_DIR}/commands/adopt.md" "strongly recommend" "adopt strongly recommended tone"
+assert_contains "${CONTEXT_DIR}/commands/adopt.md" ".sfs-local/llm-wiki.waiver" "adopt waiver record"
+assert_contains "${DIST_DIR}/scripts/sfs-harness.sh" "llm-wiki advisory: wiki strongly recommended but absent" "doctor advisory line"
+assert_contains "${DIST_DIR}/scripts/sfs-harness.sh" "waiver recorded (.sfs-local/llm-wiki.waiver)" "doctor waiver-silence branch"
+assert_contains "${DIST_DIR}/install.sh" "위키 온보딩 (강력 권고)" "install strong-reco block"
+assert_contains "${DIST_DIR}/install.sh" "25-wiki-onboarding-guide.md" "install points to onboarding guide"
+
+# ── Bilingual onboarding guide (doc 25) ────────────────────────────
+assert_contains "${DIST_DIR}/docs/en/current-product-shape/25-wiki-onboarding-guide.md" "strongly recommended by default" "EN onboarding guide strong-reco"
+assert_contains "${DIST_DIR}/docs/en/current-product-shape/25-wiki-onboarding-guide.md" "personal external knowledge wiki" "EN onboarding guide personal wiki"
+assert_contains "${DIST_DIR}/docs/en/current-product-shape/25-wiki-onboarding-guide.md" "24-topdown-learning-guide.md" "EN onboarding guide cross-link"
+assert_contains "${DIST_DIR}/docs/ko/current-product-shape/25-wiki-onboarding-guide.md" "강력 권고 기본값" "KO onboarding guide strong-reco"
+assert_contains "${DIST_DIR}/docs/ko/current-product-shape/25-wiki-onboarding-guide.md" "개인 외부 지식" "KO onboarding guide personal wiki"
+assert_contains "${DIST_DIR}/docs/ko/current-product-shape/25-wiki-onboarding-guide.md" "24-topdown-learning-guide.md" "KO onboarding guide cross-link"
+assert_contains "${DIST_DIR}/docs/en/current-product-shape.md" "25-wiki-onboarding-guide.md" "EN product index lists guide"
+assert_contains "${DIST_DIR}/docs/ko/current-product-shape.md" "25-wiki-onboarding-guide.md" "KO product index lists guide"
+
 echo "test-obsidian-llm-wiki-guidance: OK"
