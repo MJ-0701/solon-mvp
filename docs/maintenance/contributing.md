@@ -49,6 +49,15 @@ maintenance doc 이다. CLAUDE.md 는 이제 agent 지침만 담고, 영역별 �
   ([test-product-md-frontmatter-line-budget.sh](../../tests/test-product-md-frontmatter-line-budget.sh))
 - [ ] script header banner 가 `solon-mvp-dist` 같은 dev staging 라벨을 담지
   않음 (0.6.143 fix)
+- [ ] routed context (`context/commands|policies/*`) 추가·변경 시: 비어있지
+  않은 트리거중심 `load_when` + `_INDEX.md` route + 9-카테고리 갭 렌즈 점검
+  (routed context `policies/skill-catalog-discipline.md`,
+  [test-skill-catalog-discipline.sh](../../tests/test-skill-catalog-discipline.sh))
+- [ ] routed context 변경이 대응 문서·`_INDEX` route 를 **같은 변경에서**
+  동반 수정했는지 (doc colocation; 안 건드린 diff 는 Gate-6 CPO review 에서
+  확인 — 전용 lens 등록 없음). literal route 는 broken-link 잠금됨 (routed context
+  `policies/doc-colocation-provenance.md`,
+  [test-doc-colocation-provenance.sh](../../tests/test-doc-colocation-provenance.sh))
 
 ## mcp-server/ 변경 시 (0.7.0+)
 

@@ -13,6 +13,27 @@
 
 ---
 
+## 0.8.26
+
+Skill-catalog audit and doc colocation/provenance disciplines ship together.
+
+체감 변화:
+
+- 라우팅된 커맨드·정책을 9개 스킬 카테고리로 점검하는 렌즈가 생겼습니다.
+  2026-06-06 점검 결과 실제 빈 칸은 `runbook` 하나, `data-analysis` 는
+  방법론 배포물이라 의도적으로 비워둔 칸, `product-verification` 은 Gate
+  스파인이 이미 가장 임팩트 큰 칸을 채우고 있어 약점이 아니라 강점으로
+  기록됩니다. 모든 라우팅 파일은 트리거 중심의 비어있지 않은 `load_when`
+  을 갖도록 잠겼고, 위험 작업용 `/careful`·`/freeze` 가드레일이 후보로
+  문서화됐습니다.
+- 문서가 코드와 따로 늙지 않게 막습니다. 라우팅 컨텍스트를 바꾸면 대응
+  문서·route 를 같은 변경에서 함께 고치고, `_INDEX` 의 실제 route 는 깨진
+  링크가 없도록 잠깁니다. 참조 문서는 Grain/Scope/Usage/Gotchas/Cross-Ref
+  골격을 따르고, 스스로 검증하기 어려운 7-step 산출물에는 출처 등급·신뢰도·
+  리뷰·신선도·책임자 다섯 필드의 한 줄 provenance footer 를 붙입니다.
+
+---
+
 ## 0.8.25
 
 Token-zero session recall and thin-client external-reference policies ship together.

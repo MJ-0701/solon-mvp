@@ -35,6 +35,8 @@ module:
 - `policies/lessons-accumulation.md` — accumulate caught failures as durable avoidance rules in `.sfs-local/lessons.md`; consult on plan/flowcheck, append on failure, Gotchas slot.
 - `policies/source-pointer-citation.md` — cite external knowledge by namespaced pointer (`idea_wiki:LNNN-In`), never by content copy; advisory, runtime-independent, consumer placeholder.
 - `policies/external-orchestrator-entry.md` — headless external orchestrator (Hermes-class) entry contract; inviolable gates, file-bus reporting, first-permission read-only.
+- `policies/skill-catalog-discipline.md` — audit routed commands/policies against a nine-category skill lens to find coverage gaps; keep `load_when` trigger-centric (lint-locked); on-demand guardrail candidates (`/careful`, `/freeze`); setup-via-placeholder cross-link.
+- `policies/doc-colocation-provenance.md` — change routed-context docs in the same change (colocation); machine-lock literal `_INDEX` routes against broken links (forward direction stays a review-lens flag); reference-doc skeleton (Grain/Scope/Usage/Gotchas/Cross-Ref); five-field provenance footer SSoT.
 - `policies/harness-autonomy.md` — project harness diagnosis, map, artifacts, human boundary, and autonomy loop.
 - `policies/agent-adapter-doc-refactor.md` — keep root LLM agent docs frontmatter-only and auto-refactor recognized SFS adapter bloat.
 - `policies/sfs-router-doc-refactor.md` — keep `SFS.md` as a thin router and auto-refactor recognized policy dumps.

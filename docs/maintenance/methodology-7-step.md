@@ -56,6 +56,15 @@ review / bug triage 에서 **두 번 이상** 반복 발견된 문제는 검증 
 실패했고 어떻게 고치는지 actionable 하게 적는다. 규약 SSoT:
 routed context `policies/lessons-accumulation.md`.
 
+## 산출물 provenance + doc colocation
+
+7-step 산출물 / 리포트 중 **독자가 스스로 검증하기 어려운 것**에는 한 줄
+provenance footer 를 붙여 신뢰 수준을 노출한다 (비기술 1인 운영자 대상). 또
+routed context 를 바꾸면 대응 문서·route 를 같은 변경에서 동반 수정한다 (doc
+colocation). 다섯 필드 정의와 colocation/broken-link 규약 SSoT:
+routed context `policies/doc-colocation-provenance.md` (여기서 필드를 다시
+나열하지 않는다 — 포인터만).
+
 ## 6본부 always-on
 
 7-step 과 직교하는 축으로, 6 division (strategy-pm / dev / QA / design /

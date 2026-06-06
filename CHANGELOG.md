@@ -1,5 +1,47 @@
 ## [Unreleased]
 
+## [0.8.26] - 2026-06-06
+
+> **Skill-catalog audit and doc colocation/provenance disciplines ship together.**
+
+### Added
+
+- **Skill-catalog audit discipline (WU-6).**
+  New routed policy `policies/skill-catalog-discipline.md` ports the Anthropic
+  "how we use skills" lessons onto Solon's routed context. (A) A nine-category
+  lens to audit every `commands/`/`policies/` file for coverage gaps; the
+  2026-06-06 audit finds one real gap (`runbook`), one deliberate absence
+  (`data-analysis`, out of scope for a methodology distribution), and records
+  `product-verification` as a Solon *strength* (the Gate spine already saturates
+  the highest-impact bucket — contra the generic "verification is thin" guess).
+  (B) A trigger-centric `load_when` rule: every routed command/policy carries a
+  non-empty, firing-trigger `load_when` (lint-locked; prose quality stays a
+  review concern, not machine-graded). (C) On-demand guardrail candidates
+  `/careful` (block irreversible shell) and `/freeze <dir>` (scope-lock edits),
+  documented as tracked proposals with their wiring home (the WU-0
+  `settings.json` hook surface). (D) Setup-via-placeholder convention pointing
+  at the existing `CLAUDE.md` placeholder rule rather than a new config
+  mechanism. `_INDEX` route + `contributing.md` checklist line added. Locked by
+  `tests/test-skill-catalog-discipline.sh`.
+- **Doc colocation + output provenance (WU-7).**
+  New routed policy `policies/doc-colocation-provenance.md` ports the Anthropic
+  data-analytics doc-rot lessons. (A) Colocation rule — a routed-context change
+  must update its `_INDEX` route, cross-links, and describing docs in the *same*
+  change. Enforcement is split by what is checkable: the REVERSE direction
+  (every literal `_INDEX` route resolves to an existing file) is machine-locked;
+  the FORWARD direction (touched routed file but no doc update) stays a Gate-6
+  CPO review check (no dedicated lens registered) + `contributing.md` item,
+  matching where the source itself
+  puts enforcement (a forward static check would need a brittle by-design
+  exception list for `.ko` mirrors and indirectly-routed lenses). (B) A fixed
+  reference-doc skeleton (Grain / Scope / Usage / Gotchas / Cross-Ref), with the
+  Gotchas slot reusing `lessons-accumulation.md`. (C) A five-field provenance
+  footer (Source-grade / Confidence / Reviewed / Freshness / Owner) for 7-step
+  outputs a non-technical operator cannot self-verify; this policy is the field
+  SSoT and `docs/maintenance/methodology-7-step.md` cross-links it rather than
+  restating. `_INDEX` route + `contributing.md` checklist line added. Locked by
+  `tests/test-doc-colocation-provenance.sh`.
+
 ## [0.8.25] - 2026-06-06
 
 > **Token-zero session recall and thin-client external-reference policies ship together.**
