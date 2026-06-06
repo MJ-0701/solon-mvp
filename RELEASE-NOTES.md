@@ -13,6 +13,37 @@
 
 ---
 
+## 0.8.27
+
+Self-improving context disciplines (conflict gate, hook-promotion, skill-promotion loop, operator context, delegation startup) plus top-down learning and why-Solon onboarding ship together.
+
+체감 변화:
+
+- **컨텍스트 충돌을 잡아냅니다.** 양보다 충돌이 진짜 문제입니다. 모순될 수
+  있는 지시에 `<!-- conflict-key: <이름> stance: allow|deny -->` 마커를 달아
+  두면 `sfs harness doctor` 가 같은 이름에 allow/deny 가 동시에 선언된 경우를
+  경고합니다. 마커가 붙은 것만 비교하므로 평범한 문서에는 오탐이 없습니다.
+- **어떤 규칙을 훅으로 승격할지 기준이 생겼습니다.** 문서 규칙(기대) →
+  게이트/린트(리뷰) → 훅(코드 강제, 유일한 100% 층) 3계층과, 승격 기준
+  (치명도 + 기계적 탐지 + 사전 차단 필요, 반복은 별도 가속기)을 명문화했습니다.
+  secret 접근·`rm -rf`·force-push 같은 케이스 예시 포함.
+- **반복 작업을 스킬 후보로 제안합니다.** 완료 로그에서 3회 이상 반복된 작업
+  패턴을 `sfs harness doctor` 가 찾아 "스킬/커맨드로 만들 만하다" 고 제안합니다.
+  읽기 전용 제안일 뿐 자동 생성은 없습니다. 실패를 누적하는 lessons 루프의
+  성공판입니다.
+- **운영자 컨텍스트가 자기 자리를 갖습니다.** soul(에이전트 정체성) / user
+  (운영자) / 절차(라우팅) 3분할로 나누고, 운영자 정보용 placeholder 파일
+  (`operator-context.md`) 을 새로 둡니다. 정체성 파일에 운영 규칙이 쌓여
+  비대해지는 것을 막습니다.
+- **위임 판단과 착수 습관 가이드.** 이 일을 WU 로 위임할 가치가 있는지 5요소로
+  판단하고, 착수 전 요구를 복창하고 묻고, quick chat / assisted session /
+  autonomous code 중 맞는 런타임을 고르는 기준을 7-step 1단계에 연결했습니다.
+- **온보딩 문서 2종(한·영).** 1인 운영자용 탑다운 학습 프로토콜(문제 중심 진입
+  + AI 질문 배터리 + 이해 검증)과 "왜 solon 인가 — 남는 것은 작업 구조"
+  서사를 추가했습니다.
+
+---
+
 ## 0.8.26
 
 Skill-catalog audit and doc colocation/provenance disciplines ship together.

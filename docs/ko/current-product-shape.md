@@ -68,3 +68,4 @@ split_children:
 - [AI Work Intake Routing](./current-product-shape/20-ai-work-intake-routing.md)
 - [도메인 지식 자산](./current-product-shape/21-domain-knowledge-assets.md)
 - [Project Harness Map](./current-product-shape/22-project-harness-map.md)
+- [탑다운 학습 가이드](./current-product-shape/24-topdown-learning-guide.md)

@@ -27,6 +27,14 @@ context 가 SSoT 이고 (`kernel.md`, `commands/*.md`, `policies/*.md`), 본
 6. **CTO review 확인 + 사용자 최종 통과**
 7. **회고 / 문서화**
 
+## 착수 전 (step 1 정렬)
+
+WU 를 위임할 가치가 있는지(다중 입력 / 산출물 / 반복성 / "good" 기준 / 지루한
+중간의 5요소), 착수 전 **요구 복창 + 클래리파잉 질문**, 어떤 런타임 tier (quick
+chat / assisted session / autonomous code) 로 돌릴지는 routed context
+`policies/work-delegation-and-startup.md` 가 SSoT 다 (여기서 재나열하지 않는다 —
+포인터만).
+
 ## Gate 표기 규약
 
 - Solon report 에서는 **Gate 1~7 표시**를 쓴다 (Intake / Brainstorm / Plan /

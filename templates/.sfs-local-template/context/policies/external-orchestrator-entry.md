@@ -7,6 +7,8 @@ load_when:
   - headless
   - external agent entry
   - automation entry
+  - standalone guarantee
+  - optional orchestrator
 ---
 
 # External Orchestrator Entry
@@ -15,6 +17,25 @@ A standing external agent (Hermes-class) may drive a Solon project without a
 human at the keyboard. This is the entry contract it must honor. It is a thin
 convention — no adapter code ships here; the orchestrator adapts to SFS, not the
 reverse.
+
+## Optional by design (standalone guarantee)
+
+This is the policy's first frame, ahead of any entry mechanics: an external
+orchestrator is an **optional extension point**, never a dependency.
+
+- **Standalone guarantee.** No Solon command, gate, or release presupposes an
+  orchestrator. Remove every external orchestrator and the full Solon feature
+  set behaves identically. This policy is only "the contract *when* an
+  orchestrator is present" — it does not mean Solon needs one.
+- **Vendor-neutral.** "Hermes-class" names an example category, not a product
+  dependency or recommended install. Product code, default configuration, and
+  tests require no specific orchestrator — none is bundled, pinned, or assumed.
+- **Open evolution path.** This same entry convention stays an open extension
+  point for an operator who *wants* to evolve the product through an
+  orchestrator. Optional does not mean closed.
+
+Discriminating test: **Remove every external orchestrator — do all Solon
+commands still work? Must be yes.**
 
 ## Entry shape
 

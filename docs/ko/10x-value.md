@@ -62,3 +62,4 @@ Fuzzy idea
 - [벤치마크 흡수 10x 루프](./10x-value/09-10x.md)
 - [Solon 이 약속하지 않는 것](./10x-value/10-solon.md)
 - [제품 약속](./10x-value/11-section.md)
+- [왜 solon인가](./10x-value/12-why-solon.md)

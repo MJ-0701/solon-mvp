@@ -42,6 +42,24 @@ maintenance doc 이다. CLAUDE.md 는 이제 agent 지침만 담고, repo 정체
   `phase1-mvp-templates`) 등은 active 제품 파일에서 등장하면 안 된다 —
   `tests/test-private-dev-path-hygiene.sh` 가 이 누설을 회귀-잠근다.
 
+## 오픈소스 경계 (standalone + optional)
+
+owner 가 1급으로 확정한 경계다 (2026-06-06).
+
+- **오픈소스 본체** = Solon runtime + (consumer 가 지정하는) 외부 지식 위키.
+  둘은 각각 **standalone** 으로 동작한다 — 위키가 없어도 runtime 의 모든
+  명령은 동일하게 동작하고 (source-pointer 는 advisory, runtime-independent),
+  외부 위키는 consumer 가 `{{EXTERNAL_WIKI_NAMESPACE}}` placeholder 로
+  자기 위키를 지정해 붙인다.
+- **외부 상주 오케스트레이터** (Hermes-class) = **optional add-on**. 배포 ·
+  기본 동작 · 테스트 어느 것도 그 존재를 전제하지 않는다. 벤더 중립이며 특정
+  제품을 pin / 권장 설치하지 않는다. 자가진화를 원하는 운영자를 위한 열린
+  확장점은 유지하되, 제거해도 전 기능이 동일하게 동작해야 한다 (판별 테스트:
+  `policies/external-orchestrator-entry.md` 의 "Remove every external
+  orchestrator — do all Solon commands still work? Must be yes").
+- **thin CLAUDE.md 복제 금지.** 위 경계의 본문은 본 maintenance doc (또는
+  routed context) 에만 두고, CLAUDE.md 는 cross-link 으로만 연결한다.
+
 ## IP / 소유
 
 - IP 는 사용자 (채명정) 개인 자산이다.

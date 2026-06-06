@@ -325,6 +325,111 @@ print_operational_log_section() {
   fi
 }
 
+# 0.8.27 (WU-1): Context conflict gate.
+#
+# Conflict, not volume, is the real context failure (note 21): two directives
+# that contradict each other leave the agent guessing. Semantic contradiction is
+# not reliably detectable, so this is an OPT-IN marker lint — a directive with a
+# binary stance annotates itself with an invisible HTML-comment marker
+#   <!-- conflict-key: <slug> stance: allow|deny -->
+# and this detector flags any slug declared with BOTH stances. Unannotated prose
+# is never compared, so it cannot false-positive on normal policy text. Scope:
+# consumer working tree only (.sfs-local/context/), mirroring the other
+# detectors — the shipped distribution is never scanned. SSoT:
+#   templates/.sfs-local-template/context/policies/context-conflict-gate.md
+print_context_conflict_section() {
+  section "Context Conflict Gate"
+
+  local ctx_dir=".sfs-local/context"
+  if [ ! -d "$ctx_dir" ]; then
+    info "context-conflict-gate: no project-local context overrides; skipping"
+    return
+  fi
+
+  local markers
+  markers="$(grep -rh -- '<!-- *conflict-key:' "$ctx_dir" 2>/dev/null || true)"
+  if [ -z "$markers" ]; then
+    info "context-conflict-gate: no conflict-key markers declared; skipping"
+    return
+  fi
+
+  # Extract "slug stance" pairs from well-formed single-line markers.
+  local pairs
+  pairs="$(printf '%s\n' "$markers" \
+    | sed -nE 's/.*conflict-key:[[:space:]]*([A-Za-z0-9_-]+).*stance:[[:space:]]*(allow|deny).*/\1 \2/p')"
+
+  local slug stances conflicts=0
+  while IFS= read -r slug; do
+    [ -n "$slug" ] || continue
+    stances="$(printf '%s\n' "$pairs" | awk -v s="$slug" '$1==s {print $2}' | sort -u)"
+    if printf '%s\n' "$stances" | grep -qx 'allow' \
+       && printf '%s\n' "$stances" | grep -qx 'deny'; then
+      warn "context-conflict-gate: '$slug' declared both allow and deny across context (resolve the contradiction)"
+      conflicts=$((conflicts + 1))
+    fi
+  done < <(printf '%s\n' "$pairs" | awk '{print $1}' | sort -u)
+
+  if [ "$conflicts" -eq 0 ]; then
+    ok "context-conflict-gate: no conflicting directives among declared conflict-key markers"
+  fi
+}
+
+# 0.8.27 (WU-3): Skill promotion loop (suggest-only).
+#
+# The flip side of lessons-accumulation: a repeated SUCCESS path is a skill/
+# command waiting to be compiled (note 27 — Hermes turns every task into a
+# reusable skill MD). This detector reads the consumer's completed-work logs,
+# normalizes each finished task into a signature (digits/punctuation stripped),
+# and SUGGESTS promotion when a signature recurs at threshold. It is read-only
+# and emits info/ok only — never warn/fail — so it never changes doctor's exit
+# code and never auto-creates anything. Scope: consumer working tree logs only.
+# SSoT: templates/.sfs-local-template/context/policies/skill-promotion-loop.md
+SKILL_PROMOTE_THRESHOLD=3
+print_skill_promote_section() {
+  section "Skill Promotion Candidates"
+
+  local files=() p
+  for p in PROGRESS.md .sfs-local/PROGRESS.md docs/solon/*/PROGRESS.md \
+           HANDOFF-next-session.md docs/solon/*/HANDOFF-next-session.md; do
+    [ -f "$p" ] && files+=("$p")
+  done
+  if [ "${#files[@]}" -eq 0 ]; then
+    info "skill-promote-candidate: no completed-work log found; skipping"
+    return
+  fi
+
+  # Completed-task lines -> normalized signature (lowercase ASCII, drop digits
+  # and punctuation, collapse whitespace) so "release cut 0.8.23/24/25" collapse
+  # to one "release cut" signature. Punctuation is stripped via [[:punct:]] (not
+  # a whitelist) so non-ASCII text (e.g. Korean task lines) survives instead of
+  # being erased. Checkbox accepts [x] or [X].
+  local sigs
+  sigs="$(grep -hE '^[[:space:]]*-[[:space:]]*\[[xX]\]' "${files[@]}" 2>/dev/null \
+    | sed -E 's/^[[:space:]]*-[[:space:]]*\[[xX]\][[:space:]]*//' \
+    | tr 'A-Z' 'a-z' \
+    | sed -E 's/[0-9]+//g; s/[[:punct:]]+/ /g; s/[[:space:]]+/ /g; s/^ //; s/ $//' \
+    | awk 'NF>=1')"
+  if [ -z "$sigs" ]; then
+    info "skill-promote-candidate: no completed-task entries; skipping"
+    return
+  fi
+
+  local found=0 line count sig
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    count="${line%% *}"
+    sig="${line#* }"
+    if [ "$count" -ge "$SKILL_PROMOTE_THRESHOLD" ]; then
+      info "skill-promote-candidate: '$sig' completed $count times -- consider compiling a skill/command (suggest-only)"
+      found=$((found + 1))
+    fi
+  done < <(printf '%s\n' "$sigs" | sort | uniq -c | sort -rn | sed -E 's/^[[:space:]]*//')
+
+  if [ "$found" -eq 0 ]; then
+    ok "skill-promote-candidate: no repeated work pattern at promote threshold (>=${SKILL_PROMOTE_THRESHOLD})"
+  fi
+}
+
 print_doctor() {
   section "SFS Project Harness Doctor"
   if ! is_sfs_project; then
@@ -435,6 +540,10 @@ print_doctor() {
   fi
 
   print_operational_log_section
+
+  print_context_conflict_section
+
+  print_skill_promote_section
 
   section "Summary"
   printf "  pass: %d   warn: %d   fail: %d\n" "$PASS_COUNT" "$WARN_COUNT" "$FAIL_COUNT"

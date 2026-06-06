@@ -69,3 +69,4 @@ This file keeps the original route as a thin entry point. Detailed body sections
 - [AI Work Intake Routing](./current-product-shape/20-ai-work-intake-routing.md)
 - [Domain Knowledge Assets](./current-product-shape/21-domain-knowledge-assets.md)
 - [Project Harness Map](./current-product-shape/22-project-harness-map.md)
+- [Top-down Learning Guide](./current-product-shape/24-topdown-learning-guide.md)

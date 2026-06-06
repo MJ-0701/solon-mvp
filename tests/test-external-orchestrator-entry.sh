@@ -22,6 +22,14 @@ has "${POLICY}" "File-bus reporting" "file-bus reporting"
 has "${POLICY}" "Inviolable gates" "gate-inviolability section"
 has "${POLICY}" "cannot bypass" "gate bypass prohibition"
 has "${POLICY}" "First-permission read-only" "first-permission read-only"
+
+# Open-source boundary (WU-5-followup): optional/standalone + vendor-neutral +
+# the discriminating test line. ASCII anchors so no LC_ALL juggling is needed.
+has "${POLICY}" "Optional by design (standalone guarantee)" "optional/standalone frame"
+has "${POLICY}" "Standalone guarantee." "standalone guarantee marker"
+has "${POLICY}" "Vendor-neutral." "vendor-neutral marker"
+has "${POLICY}" "Remove every external orchestrator" "discriminating test line"
+
 has "${CTX}/_INDEX.md" "policies/external-orchestrator-entry.md" "index route"
 
 # No implementation/adapter code — this is a thin convention (no code fences with

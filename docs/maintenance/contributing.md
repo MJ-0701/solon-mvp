@@ -58,6 +58,12 @@ maintenance doc 이다. CLAUDE.md 는 이제 agent 지침만 담고, 영역별 �
   확인 — 전용 lens 등록 없음). literal route 는 broken-link 잠금됨 (routed context
   `policies/doc-colocation-provenance.md`,
   [test-doc-colocation-provenance.sh](../../tests/test-doc-colocation-provenance.sh))
+- [ ] `sfs harness doctor` 탐지기 (`scripts/sfs-harness.sh`) 추가·변경 시:
+  consumer working tree (`.sfs-local/context/` / 프로젝트 로그) 만 스캔해
+  배포본 자체는 건드리지 않음 (run-all 무손상) + 합성 fixture 를
+  실 doctor 로 통과시키는 headline 테스트 동반 (예:
+  [test-context-conflict-gate.sh](../../tests/test-context-conflict-gate.sh),
+  [test-skill-promotion-loop.sh](../../tests/test-skill-promotion-loop.sh))
 
 ## mcp-server/ 변경 시 (0.7.0+)
 

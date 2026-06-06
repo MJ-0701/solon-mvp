@@ -65,3 +65,4 @@ This file keeps the original route as a thin entry point. Detailed body sections
 - [Solon Execution Contract](./10x-value/10-solon-execution-contract.md)
 - [What Solon Does Not Promise](./10x-value/11-what-solon-does-not-promise.md)
 - [Product Promise](./10x-value/12-product-promise.md)
+- [Why Solon](./10x-value/13-why-solon.md)

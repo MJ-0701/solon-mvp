@@ -1,5 +1,81 @@
 ## [Unreleased]
 
+## [0.8.27] - 2026-06-06
+
+> **Self-improving context disciplines (conflict gate, hook-promotion, skill-promotion loop, operator context, delegation startup) plus top-down learning and why-Solon onboarding ship together.**
+
+### Added
+
+- **Context conflict gate (WU-1).**
+  New routed policy `policies/context-conflict-gate.md` ports note 21's
+  "conflict, not volume, is the real context failure" onto Solon. Contradiction
+  is not reliably machine-detectable, so the gate is an **opt-in marker lint**: a
+  directive annotates itself with an invisible HTML comment
+  `<!-- conflict-key: <slug> stance: allow|deny -->`, and a new `sfs harness
+  doctor` **Context Conflict Gate** section flags any slug declared with both
+  `allow` and `deny`. Unannotated prose is never compared, so it cannot
+  false-positive on normal policy text; the detector walks only the consumer's
+  `.sfs-local/context/` overrides (the shipped distribution is never scanned, so
+  run-all is unaffected). `_INDEX` route + `contributing.md` checklist item.
+  Locked by `tests/test-context-conflict-gate.sh` (fixtures driven through the
+  real doctor: conflicting pair warns, consistent set is ok, no-marker skips).
+- **Critical-rule hook-promotion criteria (WU-2).**
+  New routed policy `policies/critical-rule-hook-promotion.md` ports note 25
+  ("hooks are the only 100%-enforcement layer") into a classification rule: three
+  enforcement tiers (A doc/expectation, B gate/lint, C code-enforced hook) and
+  the criteria to promote between them — severity + mechanical detectability +
+  pre-action interception, with recurrence (≥2 via `lessons-accumulation`) as an
+  independent escalator. Worked example table (secret/`.env`, `rm -rf`/force-push,
+  scope edits, …). Cross-links the existing on-demand guardrail candidates in
+  `skill-catalog-discipline.md` rather than re-documenting them; wiring home is
+  the `install.sh` → `settings.json` hook surface. `_INDEX` route. Locked by
+  `tests/test-critical-rule-hook-promotion.sh`.
+- **Skill promotion loop (WU-3).**
+  New routed policy `policies/skill-promotion-loop.md` ports note 27's
+  "every task becomes a reusable skill MD" as the success-path twin of
+  `lessons-accumulation` (the failure side). A new `sfs harness doctor`
+  **Skill Promotion Candidates** section reads the consumer's completed-work logs
+  only, normalizes each `- [x]` task to a signature (digits/punctuation stripped
+  so version-stamped repeats collapse), and **suggests** promotion when a
+  signature recurs 3+ times. Strictly read-only and suggest-only — emits
+  `info`/`ok` only (never changes doctor's exit code) and never writes a skill.
+  Acted on at `tidy` (`commands/tidy.md` guidance added). `_INDEX` route. Locked
+  by `tests/test-skill-promotion-loop.sh`.
+- **User-context separation: soul / user / procedure (WU-4).**
+  New operator-context placeholder file
+  `templates/.sfs-local-template/operator-context.md` (placeholders only — no
+  fixed operator values) gives operator preferences their own home, the layer
+  Solon was missing. New routed policy `policies/user-context-separation.md`
+  documents the three-layer split (soul = `personas/`, user = operator-context,
+  procedure = routed context) and why keeping them separate prevents identity
+  bloat (notes 27 + 12). `_INDEX` route. Locked by
+  `tests/test-user-context-separation.sh` (asserts placeholder-only, frontmatter,
+  three layers).
+- **Work delegation + startup (WU-5).**
+  New routed policy `policies/work-delegation-and-startup.md` ports the Cowork
+  getting-started best practices vendor-neutrally: the five-factor test for
+  whether work is worth delegating as a WU, the restate-and-clarify startup habit
+  (before any planning/editing), and a runtime-selection table (quick chat /
+  assisted work session / autonomous code runtime). 7-step step-1 cross-link in
+  `methodology-7-step.md`. `_INDEX` route. Locked by
+  `tests/test-work-delegation-and-startup.sh`.
+- **Top-down learning guide + why-Solon narrative (WU-6, WU-7).**
+  Two user-facing onboarding docs (ko + en): a problem-first / AI-question-battery
+  / explain-it-back learning protocol for a one-person operator
+  (`current-product-shape/24-topdown-learning-guide.md`, note 20), and the
+  "what survives is work structure — context design / evaluation discipline /
+  harness mindset, and Solon is that bundle" framing
+  (`10x-value/{12,13}-why-solon.md`, note 24). Vendor-specific citations stay
+  by-reference. Parent index links added in both languages.
+- **Orchestrator boundary, first-class (WU-5-followup, absorbed here).**
+  `policies/external-orchestrator-entry.md` gains an "Optional by design
+  (standalone guarantee)" section + the discriminating test ("remove every
+  external orchestrator — do all Solon commands still work? must be yes"), and
+  `docs/maintenance/project-identity.md` gains the open-source boundary paragraph
+  (runtime + external wiki each standalone; the Hermes-class orchestrator is an
+  optional, vendor-neutral add-on). Locked by the new ASCII markers in
+  `tests/test-external-orchestrator-entry.sh`.
+
 ## [0.8.26] - 2026-06-06
 
 > **Skill-catalog audit and doc colocation/provenance disciplines ship together.**

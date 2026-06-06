@@ -31,6 +31,11 @@ module:
 - `policies/bug-report-lifecycle.md` — official bug channel, report template, confirm gate, dev-first|hotfix fix routing.
 - `policies/flow-conformance-postflight.md` — flowcheck invariant registry + non-collapsing event contract; critical vs advisory + divergence classification.
 - `policies/user-override-precedence.md` — explicit user command > SFS default; scoped overrides (wu|sprint|until-revoked) with always-surfaced transitions (#3 guard).
+- `policies/context-conflict-gate.md` — detect contradictory directives across loaded context via opt-in `conflict-key`/`stance` markers; `sfs harness doctor` flags any slug declared both allow and deny (consumer `.sfs-local/context/` only). Conflict, not volume, is the real context failure.
+- `policies/critical-rule-hook-promotion.md` — classify which documented rules promote from prose (Tier A) to gate/lint (Tier B) to code-enforced hook (Tier C); criteria = severity + mechanical detectability + pre-action interception, with recurrence as escalator. Hooks are the only 100%-enforcement layer.
+- `policies/skill-promotion-loop.md` — suggest (never auto-create) skill/command candidates from repeated completed-work patterns; `sfs harness doctor` surfaces signatures recurring 3+ times (consumer logs only, read-only). Success-path twin of `lessons-accumulation.md`; acted on at `tidy`.
+- `policies/user-context-separation.md` — split context three ways: soul (agent identity, `personas/`) / user (operator, `operator-context.md`) / procedure (routed). Keeps identity thin and gives operator preferences their own home; template ships placeholders only.
+- `policies/work-delegation-and-startup.md` — five-factor test for whether work is worth delegating as a WU, restate-and-clarify before starting, and runtime-tier selection (quick chat / assisted session / autonomous code). 7-step step-1 alignment.
 - `policies/token-harness.md` — token/context hygiene, semantic search, repeated mistake guardrails.
 - `policies/lessons-accumulation.md` — accumulate caught failures as durable avoidance rules in `.sfs-local/lessons.md`; consult on plan/flowcheck, append on failure, Gotchas slot.
 - `policies/source-pointer-citation.md` — cite external knowledge by namespaced pointer (`idea_wiki:LNNN-In`), never by content copy; advisory, runtime-independent, consumer placeholder.

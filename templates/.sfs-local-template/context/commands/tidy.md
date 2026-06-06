@@ -29,6 +29,11 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
   archiving, create source-linked `llm-wiki/promotion-candidates/` notes from
   report/retro pairs. It promotes candidates, not conclusions; source records
   stay in `docs/solon/` and human review still decides actual wiki updates.
+- Skill promotion loop (`policies/skill-promotion-loop.md`): at tidy/retro,
+  run `sfs harness doctor` and read the **Skill Promotion Candidates** section —
+  repeated completed-work patterns (3+) it surfaces are skill/command candidates.
+  Suggest-only: a human decides whether to compile one; the loop never writes a
+  skill. Success-path twin of `lessons-accumulation.md` (failure side).
 - Apply `policies/deprecation-and-migration.md`: every visible leftover needs a
   replacement/handoff reason, cold archive path, or explicit user decision.
   Advisory cleanup may wait; compulsory cleanup needs risk such as stale state,
