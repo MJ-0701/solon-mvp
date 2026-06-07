@@ -70,3 +70,4 @@ split_children:
 - [Project Harness Map](./current-product-shape/22-project-harness-map.md)
 - [탑다운 학습 가이드](./current-product-shape/24-topdown-learning-guide.md)
 - [위키 시작 가이드](./current-product-shape/25-wiki-onboarding-guide.md)
+- [표준 위임 레퍼토리](./current-product-shape/26-delegation-repertoire.md)

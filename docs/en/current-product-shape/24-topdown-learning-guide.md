@@ -45,4 +45,9 @@ by-reference.)
 - Restate-and-clarify before starting
   (`policies/work-delegation-and-startup.md`) is the same idea as step 2 — when
   it is ambiguous, ask first.
+- External case of non-technical entry: a seller with no coding background who
+  started by "picking the single most painful task and having the AI build the
+  fix" (source: Anthropic blog "How one Anthropic seller rebuilt his team's
+  workflows", 2026-06-05, by-reference) is the same shape as step 1, problem-first
+  entry.
 </content>

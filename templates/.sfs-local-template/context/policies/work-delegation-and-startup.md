@@ -53,10 +53,38 @@ The same Solon 7-step / Gate / SSoT applies across all three (see
 is about supervision and surface, not a different methodology. Vendor mapping
 (e.g. chat assistant / supervised work app / coding agent) is by-reference.
 
+This three-tier split lines up with the official product matrix's three-way
+shape — **conversational draft** / **coding** / **cross-app knowledge work**
+(source: "The Claude Cowork product guide", 2026-06-05, by-reference): quick chat
+maps to conversational draft, autonomous code runtime to coding, and the assisted
+work session to cross-app knowledge work (multi-input file work the operator
+supervises). The mapping is for orientation, not a fourth methodology.
+
+### LONG_RUNNING_AND_SCHEDULED axis
+
+The tier table above sorts by supervision surface; a second axis is **duration /
+trigger** — who owns work that runs long or fires on a schedule rather than in a
+live turn. Route it by this axis, not by habit:
+
+- **Long-running, repo-aware** (multi-step build, migration, audit) → autonomous
+  code runtime under a gated `loop` (`commands/loop.md`), with a durable handoff
+  so a fresh session can resume.
+- **Scheduled / recurring, supervised** (a daily brief, a weekly report) → an
+  assisted session driven by the bookend operating loop (`commands/daily.md`);
+  the host's scheduler is the trigger, the SSoT and gates are unchanged.
+- **One-off, conversational** → quick chat; do not schedule or spin up ceremony.
+
+Scheduling is a trigger, never a methodology bypass: a scheduled or long-running
+run still obeys the same gates, and unattended runs keep the human-boundary
+constraints (`policies/harness-autonomy.md`).
+
 ## CROSS_REFERENCES
 
 - Ask-vs-guess and scoped overrides: `user-override-precedence.md`.
 - AI work intake (one-off / repeated / batch routing): `ai-work-intake-routing.md`.
 - Host-agnostic entry + channel cheat sheet: `docs/maintenance/methodology-7-step.md`.
 - Operator preferences that bias autonomy/ask: `user-context-separation.md`.
+- Bookend daily operating loop: `commands/daily.md`.
+- Standard delegation repertoire (workflow catalog):
+  `docs/{ko,en}/current-product-shape/26-delegation-repertoire.md`.
 </content>

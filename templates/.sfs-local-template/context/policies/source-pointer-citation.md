@@ -38,6 +38,13 @@ target (templates-compatibility principle).
   (no wiki present). Never gate, block, or error on an unresolvable pointer.
 - **No absolute paths.** Cite the namespace (`idea_wiki:`), never a filesystem
   path to anyone's private wiki checkout.
+- **Author from the live source, not memory.** When producing an *outbound*
+  artifact a reader will act on (a customer email, a status report, an external
+  brief), re-read the current routed context / official docs the claim depends on
+  before writing — do not paraphrase from recall. Memory drifts; the pointer is
+  only auditable if the gist behind it reflects the source as it reads now. Cite
+  the pointer plus the freshly-checked gist, and stamp `Freshness` when the
+  artifact carries a provenance footer (`doc-colocation-provenance.md`).
 
 ## Cross-references
 
