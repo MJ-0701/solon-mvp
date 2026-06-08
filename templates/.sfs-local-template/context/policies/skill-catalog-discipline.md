@@ -101,6 +101,20 @@ machinery Solon already has. The hard placeholder rule lives in the root
 locks the narrower invariant (no leaked private path), not placeholder format or
 prompt-when-unset. This section only points there; it adds no new mechanism.
 
+## CURATION_SAFETY
+
+Catalog tidying — pruning stale entries, collapsing near-duplicates — is a
+curation step, and it carries one hard boundary: **only ever touch
+agent-generated artifacts; never auto-edit or auto-archive a human-authored
+skill/command.** A person who wrote a routed file owns its lifecycle; automated
+or agent-driven cleanup leaves it alone and at most *surfaces* it for the author
+to decide (SUGGEST_ONLY, like the rest of this lens). Staleness moves a candidate
+toward dormancy and then an archive path, **never a delete** — overflow and
+disuse are archived as evidence, not flattened (`md-line-budget.md`: archive
+rotation, not deletion). This is additive curation discipline, not a new janitor
+mechanism. Source: Hermes cleanup janitor (note 27) — agent-made skills age
+into archive on disuse while human-made skills are never auto-touched.
+
 ## CROSS_REFERENCES
 
 - Gotchas accumulation: `lessons-accumulation.md` (the Gotchas slot for caught

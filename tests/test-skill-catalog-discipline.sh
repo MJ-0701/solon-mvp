@@ -40,6 +40,12 @@ has "${POLICY}" "/freeze" "freeze guardrail"
 has "${POLICY}" "SETUP_VIA_PLACEHOLDER" "section D anchor"
 has "${POLICY}" "AskUserQuestion" "prompt-when-unset"
 
+# Hermes cleanup janitor: curation safety boundary.
+has "${POLICY}" "CURATION_SAFETY" "curation safety anchor"
+has "${POLICY}" "only ever touch" "agent-generated-only boundary"
+has "${POLICY}" "never a delete" "archive-not-delete rule"
+has "${POLICY}" "Hermes cleanup janitor" "hermes source pointer"
+
 has "${CTX}/_INDEX.md" "policies/skill-catalog-discipline.md" "index route"
 
 # Lint invariant the policy claims: every routed command AND policy carries a

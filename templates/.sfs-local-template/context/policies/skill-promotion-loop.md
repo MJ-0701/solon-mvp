@@ -69,6 +69,30 @@ clutter (`skill-catalog-discipline.md`: do not pad thin buckets). Before
 compiling, check the catalog for a same-intent skill and extend it instead of
 creating a near-duplicate title.
 
+## EVOLUTION_ADOPTION_GATE
+
+Compiling a new skill and *evolving an existing one* are both adoptions, and an
+edit that reads "better" can still be worse. Before adopting either — a fresh
+skill or a change to one already in the catalog — clear four gates; failing any
+one rejects the adoption no matter how good it otherwise looks:
+
+- **Line budget intact** — the skill still fits `md-line-budget.md`; an edit
+  that bloats it past the ceiling is rejected, not flattened.
+- **Description integrity** — frontmatter `summary`/`load_when` still names what
+  the skill actually does, so the router fires it at the right moment
+  (`skill-catalog-discipline.md`: TRIGGER_CENTRIC_LOAD_WHEN). An edit that
+  silently breaks the trigger surface is rejected.
+- **No scope drift (most important)** — the change stays inside the skill's
+  original purpose. A "smarter" edit that quietly widens or repurposes the skill
+  is rejected; split a genuinely new purpose into its own candidate.
+- **Human sign-off** — adoption is a human/agent-under-instruction decision, as
+  everywhere in this loop (SUGGEST_ONLY); there is no auto-adopt on score.
+
+Safe over smart: a higher-scoring edit that drifts scope or breaks the trigger
+is rejected in favor of the steady version. Source: Hermes skill-cleanup eval
+(note 27) — held-out scoring sits behind these adoption checks, never overrides
+them.
+
 ## ACTING_ON_A_CANDIDATE
 
 This runs on the existing `tidy` rail — no new lifecycle command (the kernel
