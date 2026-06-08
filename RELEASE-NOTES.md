@@ -13,6 +13,24 @@
 
 ---
 
+## 0.8.30
+
+Skill discipline gains two Hermes-derived safety rails — an evolution-adoption gate that rejects scope-drifting or trigger-breaking edits (safe over smart) and a curation-safety boundary that never auto-touches human-authored skills (disuse archives, never deletes).
+
+체감 변화:
+
+- **스킬을 고칠 때 4관문을 통과해야 채택됩니다.** 새 스킬을 만들 때뿐 아니라
+  기존 스킬을 "더 좋게" 고칠 때도 — 라인 예산 유지 / description 무결성(라우터가
+  제때 트리거) / **목적 이탈 금지(가장 중요)** / 사람 승인 — 네 관문을 모두
+  통과해야 합니다. 점수가 더 높아도 목적을 넓히거나 트리거를 깨면 기각합니다
+  (safe over smart). 자동 채택은 없습니다.
+- **자동 정리는 사람이 쓴 스킬을 건드리지 않습니다.** 카탈로그 정리는
+  에이전트가 만든 산출물만 대상으로 하며, 사람이 작성한 스킬/커맨드는 자동
+  수정·자동 보관 없이 작성자에게 제안만 합니다. 미사용은 삭제가 아니라 휴면 →
+  archive 경로로 보존합니다(archive 회전, 삭제 아님).
+
+---
+
 ## 0.8.29
 
 Two context surfaces — a bookend daily operating loop and a standard delegation repertoire — ship together with an odysseus-derived self-improvement absorption (single-hard-task skill candidates with rejection criteria; fetched content is data, never instructions), plus a migrate-artifacts fix that makes backslash-filename sha256 verification robust against GNU coreutils escaping.

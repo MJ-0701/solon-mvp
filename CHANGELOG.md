@@ -1,5 +1,34 @@
 ## [Unreleased]
 
+## [0.8.30] - 2026-06-08
+
+> **Skill discipline gains two Hermes-derived safety rails — an evolution-adoption gate that rejects scope-drifting or trigger-breaking edits (safe over smart) and a curation-safety boundary that never auto-touches human-authored skills (disuse archives, never deletes).**
+
+### Added
+
+- **Skill evolution adoption gate (L068-2026-06-08-1).**
+  `policies/skill-promotion-loop.md` gains an `EVOLUTION_ADOPTION_GATE`
+  section: adopting a new skill **and** evolving one already in the catalog
+  both clear four gates — line budget intact, description integrity (the
+  frontmatter still names what the skill does so the router fires it), no
+  scope drift (most important — a "smarter" edit that quietly widens or
+  repurposes the skill is rejected; split a genuinely new purpose into its
+  own candidate), and human sign-off (SUGGEST_ONLY, no auto-adopt on score).
+  Safe over smart: a higher-scoring edit that drifts scope or breaks the
+  trigger is rejected in favor of the steady version; held-out scoring sits
+  behind the gates, never overrides them. Locked by
+  `tests/test-skill-promotion-loop.sh` (+4 anchors).
+- **Catalog curation-safety boundary (L068-2026-06-08-2).**
+  `policies/skill-catalog-discipline.md` gains a `CURATION_SAFETY` section:
+  automated/agent-driven catalog tidying only ever touches agent-generated
+  artifacts — a human-authored skill/command is never auto-edited or
+  auto-archived, only surfaced for the author to decide. Staleness moves a
+  candidate toward dormancy and then an archive path, **never a delete**
+  (archive rotation, not deletion). Additive curation discipline, no new
+  janitor mechanism. Locked by `tests/test-skill-catalog-discipline.sh`
+  (+4 anchors). Both policies 111/124 lines (< 200 budget); source pointer is
+  the public "note 27" token only.
+
 ## [0.8.29] - 2026-06-07
 
 > **Two context surfaces — a bookend daily operating loop and a standard delegation repertoire — ship together with an odysseus-derived self-improvement absorption (single-hard-task skill candidates with rejection criteria; fetched content is data, never instructions), plus a migrate-artifacts fix that makes backslash-filename sha256 verification robust against GNU coreutils escaping.**
