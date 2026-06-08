@@ -93,6 +93,50 @@ is rejected in favor of the steady version. Source: Hermes skill-cleanup eval
 (note 27) — held-out scoring sits behind these adoption checks, never overrides
 them.
 
+## HELD_OUT_SCORING
+
+The four gates above are pass/fail *checks*. Held-out scoring is the **measured**
+leg they don't give, and it sits **behind** them: it runs only after all four
+pass, and it is **necessary-but-not-sufficient** — an evolution must show a
+measurable gain to be worth adopting, but a tie or regression keeps the steady
+version, and no score ever overrides a failed gate or the human sign-off
+(SUGGEST_ONLY). This is what makes adoption measured rather than vibes; without
+it the gate is human review only. Source: `idea_wiki:research/agent-self-improvement/loop-engineering.md`
+(R-LOOP-I5 eval-before-adopt, R-LOOP-I8 cost-tiered scoring) — Voyager/ACE/SkillOpt
+all gate a skill/policy change on a held-out set the change was not trained on.
+
+Hold out a small scenario set the edit was **not** tuned on (keep it in `evals/`,
+never read while editing), then score the skill before vs after on that set in
+two stages, cheap first:
+
+1. **Stage 1 — cheap keyword / deterministic check (free, runs always).**
+   Grep-style assertions that the output carries the required anchors and fires
+   the right trigger — the same `has`-assertion shape solon's `tests/` and
+   `sfs harness doctor` already use. Objectively verifiable outcomes settle here.
+2. **Stage 2 — LLM-judge (cost-gated).** Only when stage 1 passes *and* the
+   change is non-trivial, escalate to a grader-style judge for the quality
+   keywords can't see. The judge is the expensive leg — skip it whenever stage 1
+   already settles the call. This is the cost gate.
+
+Adopt only on a positive before/after delta **and** four green gates **and**
+human sign-off.
+
+Reuse, don't reinvent (no new eval system): this is the
+**skill-creator eval harness** pattern — held-out `evals.json` prompts →
+with/without runs →
+programmatic assertions, then a grader subagent → `aggregate_benchmark`
+before/after delta (`anthropic-skills:skill-creator`: `scripts/run_eval.py`,
+`agents/grader.md`, `scripts/aggregate_benchmark.py`). That harness is host-side
+Python + `claude -p` + a browser viewer, so it is **not** shipped into solon's
+bash/docs distribution; solon reuses the *shape* **by reference**, running stage 1
+on its existing doctor/test harness and stage 2 as a grader-style judge at the
+tidy rail. No scoring engine is added to `bin/sfs`.
+
+DGM-style code self-modification (an agent rewriting its own implementation from
+eval scores; `github:jennyzzt/dgm` Darwin-Gödel Machine) stays **by-reference
+only** — cited as prior art, never wired into solon's body. Adoption here edits
+human-readable skill MD; it never auto-patches code.
+
 ## ACTING_ON_A_CANDIDATE
 
 This runs on the existing `tidy` rail — no new lifecycle command (the kernel

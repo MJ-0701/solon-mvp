@@ -36,7 +36,10 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
   candidate at count 1 (COMPLEXITY_TRIGGER), and every candidate passes the
   policy's REJECTION_CRITERIA (must be a repeatable computer procedure).
   Suggest-only: a human decides whether to compile one; the loop never writes a
-  skill. Success-path twin of `lessons-accumulation.md` (failure side).
+  skill. Success-path twin of `lessons-accumulation.md` (failure side). Before
+  adopting a new OR evolved skill, clear EVOLUTION_ADOPTION_GATE, then run
+  HELD_OUT_SCORING (two-stage cheap-keyword → cost-gated LLM-judge, before/after
+  delta on a held-out set) — measured, but never overrides a gate or sign-off.
 - Apply `policies/deprecation-and-migration.md`: every visible leftover needs a
   replacement/handoff reason, cold archive path, or explicit user decision.
   Advisory cleanup may wait; compulsory cleanup needs risk such as stale state,
