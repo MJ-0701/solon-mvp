@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.30" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.30" "version output"
-assert_contains_text "${output}" "latest 0.8.30" "latest output"
+[[ "${plain_output}" == "sfs 0.8.31" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.31" "version output"
+assert_contains_text "${output}" "latest 0.8.31" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Skill discipline gains two Hermes-derived safety rails — an evolution-adoption gate that rejects scope-drifting or trigger-breaking edits (safe over smart) and a curation-safety boundary that never auto-touches human-authored skills (disuse archives, never deletes)." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Skill evolution adoption becomes measured — held-out scoring now sits behind the four gates as a real procedure: a two-stage cheap-keyword then cost-gated LLM-judge before/after comparison on a held-out set, necessary to adopt but never overriding a failed gate or human sign-off." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline Skill discipline gains two Hermes-derived safety rails — an evolution-adoption gate that rejects scope-drifting or trigger-breaking edits (safe over smart) and a curation-safety boundary that never auto-touches human-authored skills (disuse archives, never deletes)." "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline Skill evolution adoption becomes measured — held-out scoring now sits behind the four gates as a real procedure: a two-stage cheap-keyword then cost-gated LLM-judge before/after comparison on a held-out set, necessary to adopt but never overriding a failed gate or human sign-off." "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

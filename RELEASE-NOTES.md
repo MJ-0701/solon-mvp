@@ -13,6 +13,27 @@
 
 ---
 
+## 0.8.31
+
+Skill evolution adoption becomes measured — held-out scoring now sits behind the four gates as a real procedure: a two-stage cheap-keyword then cost-gated LLM-judge before/after comparison on a held-out set, necessary to adopt but never overriding a failed gate or human sign-off.
+
+체감 변화:
+
+- **스킬을 진화시킬 때 "더 좋아졌다"를 측정으로 입증해야 합니다.** 지금까지
+  채택 게이트는 사람 리뷰만이었습니다(measured 아님). 이제 4관문을 통과한 뒤,
+  학습에 쓰지 않은 **홀드아웃 세트**로 변경 전후 점수를 비교합니다 — 1단계는
+  무료 cheap-keyword 결정적 체크, 2단계는 비용 게이트가 걸린 LLM-judge(1단계
+  통과 + 비자명한 변경일 때만). 점수는 **필요조건이지 충분조건이 아닙니다**:
+  개선이 입증돼야 채택하되, 동점·후퇴면 기존 버전을 유지하고, 어떤 점수도
+  관문 실패나 사람 승인을 뒤집지 못합니다.
+- **새 시스템을 만들지 않았습니다.** skill-creator의 기존 eval 하네스
+  (홀드아웃 프롬프트 → with/without 실행 → 프로그램 단언 + grader 서브에이전트
+  → before/after 델타) 패턴을 **참조로만** 재사용합니다. 그 하네스는 호스트
+  쪽 Python 도구라 solon의 bash/docs 배포본엔 싣지 않으며 `bin/sfs`에 채점
+  엔진을 추가하지 않습니다. DGM류 코드 자기수정은 참조 한정입니다.
+
+---
+
 ## 0.8.30
 
 Skill discipline gains two Hermes-derived safety rails — an evolution-adoption gate that rejects scope-drifting or trigger-breaking edits (safe over smart) and a curation-safety boundary that never auto-touches human-authored skills (disuse archives, never deletes).

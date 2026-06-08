@@ -1,5 +1,37 @@
 ## [Unreleased]
 
+## [0.8.31] - 2026-06-08
+
+> **Skill evolution adoption becomes measured — held-out scoring now sits behind the four gates as a real procedure: a two-stage cheap-keyword then cost-gated LLM-judge before/after comparison on a held-out set, necessary to adopt but never overriding a failed gate or human sign-off.**
+
+### Added
+
+- **Measured held-out scoring behind the adoption gate (RESEARCH-2026-06-08-1).**
+  `policies/skill-promotion-loop.md` fills the `EVOLUTION_ADOPTION_GATE`
+  placeholder ("held-out scoring sits behind these adoption checks") with an
+  actual `HELD_OUT_SCORING` procedure. Until now adoption was human review
+  only — measured, but not actually scored. The new section makes it a real
+  before/after comparison on a held-out scenario set the edit was **not** tuned
+  on, in two cost-tiered stages: **stage 1** a free cheap-keyword/deterministic
+  check (the same `has`-assertion shape `tests/` and `sfs harness doctor`
+  already use), **stage 2** a cost-gated grader-style LLM-judge run only when
+  stage 1 passes and the change is non-trivial. The score is
+  **necessary-but-not-sufficient**: an evolution must show a positive
+  before/after delta to be worth adopting, but a tie/regression keeps the
+  steady version and no score ever overrides a failed gate or the human
+  sign-off (SUGGEST_ONLY). Reuse-not-reinvent: this is the **skill-creator
+  eval harness** pattern (held-out `evals.json` → with/without runs →
+  programmatic assertions then a grader subagent → `aggregate_benchmark`
+  before/after delta) reused **by reference** — that harness is host-side
+  Python + `claude -p` + a browser viewer, so it is not shipped into solon's
+  bash/docs distribution and no scoring engine is added to `bin/sfs`. DGM-style
+  code self-modification stays by-reference only; adoption edits human-readable
+  skill MD, never auto-patches code. `commands/tidy.md` rail updated to run the
+  measured gate at tidy/retro. Source:
+  `idea_wiki:research/agent-self-improvement/loop-engineering.md` (R-LOOP-I5
+  eval-before-adopt, R-LOOP-I8 cost-tiered scoring). Policy 154 lines (< 200
+  budget). Locked by `tests/test-skill-promotion-loop.sh` (+9 anchors).
+
 ## [0.8.30] - 2026-06-08
 
 > **Skill discipline gains two Hermes-derived safety rails — an evolution-adoption gate that rejects scope-drifting or trigger-breaking edits (safe over smart) and a curation-safety boundary that never auto-touches human-authored skills (disuse archives, never deletes).**
