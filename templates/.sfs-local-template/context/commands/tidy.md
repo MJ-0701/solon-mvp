@@ -32,6 +32,9 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
 - Skill promotion loop (`policies/skill-promotion-loop.md`): at tidy/retro,
   run `sfs harness doctor` and read the **Skill Promotion Candidates** section —
   repeated completed-work patterns (3+) it surfaces are skill/command candidates.
+  A single hard task (multiple rounds / nontrivial debugging) is also a
+  candidate at count 1 (COMPLEXITY_TRIGGER), and every candidate passes the
+  policy's REJECTION_CRITERIA (must be a repeatable computer procedure).
   Suggest-only: a human decides whether to compile one; the loop never writes a
   skill. Success-path twin of `lessons-accumulation.md` (failure side).
 - Apply `policies/deprecation-and-migration.md`: every visible leftover needs a

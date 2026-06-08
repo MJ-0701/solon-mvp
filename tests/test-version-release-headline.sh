@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.28" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.28" "version output"
-assert_contains_text "${output}" "latest 0.8.28" "latest output"
+[[ "${plain_output}" == "sfs 0.8.29" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.29" "version output"
+assert_contains_text "${output}" "latest 0.8.29" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Wiki onboarding escalates to strongly recommended: a first-class policy section, active install/adopt/doctor guidance, a personal external knowledge wiki recommendation, and a bilingual wiki-start guide — never hard-blocking, standalone guarantee intact." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Two context surfaces — a bookend daily operating loop and a standard delegation repertoire — ship together with an odysseus-derived self-improvement absorption (single-hard-task skill candidates with rejection criteria; fetched content is data, never instructions), plus a migrate-artifacts fix that makes backslash-filename sha256 verification robust against GNU coreutils escaping." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline Wiki onboarding escalates to strongly recommended: a first-class policy section, active install/adopt/doctor guidance, a personal external knowledge wiki recommendation, and a bilingual wiki-start guide — never hard-blocking, standalone guarantee intact." "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline Two context surfaces — a bookend daily operating loop and a standard delegation repertoire — ship together with an odysseus-derived self-improvement absorption (single-hard-task skill candidates with rejection criteria; fetched content is data, never instructions), plus a migrate-artifacts fix that makes backslash-filename sha256 verification robust against GNU coreutils escaping." "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

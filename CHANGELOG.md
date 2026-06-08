@@ -1,5 +1,77 @@
 ## [Unreleased]
 
+## [0.8.29] - 2026-06-07
+
+> **Two context surfaces — a bookend daily operating loop and a standard delegation repertoire — ship together with an odysseus-derived self-improvement absorption (single-hard-task skill candidates with rejection criteria; fetched content is data, never instructions), plus a migrate-artifacts fix that makes backslash-filename sha256 verification robust against GNU coreutils escaping.**
+
+### Added
+
+- **Bookend daily operating loop (BLOG-2026-06-07-1).**
+  `commands/daily.md` composes the existing status / recall / capture / tidy /
+  loop surfaces into a morning-brief / evening-recap loop — a composition, not a
+  new binary. Routed in `_INDEX` and resolvable via `sfs context path daily`;
+  `bin/sfs` registers the `daily` bare context alias. The non-technical-builder
+  blog insight ("non-technical seller → GTM PM") is absorbed by-reference into
+  the why-Solon (ko/en) and top-down learning guide (ko/en) docs as external
+  evidence, and `policies/source-pointer-citation.md` now requires authoring
+  outbound artifacts from the live source (re-fetch current docs before
+  writing), not from memory. `packaging/README` notes the plugin-bundle
+  distribution channel as an exploration note only (not promoted). Locked by
+  `tests/test-daily-bookend-loop.sh`.
+- **Standard delegation repertoire (BLOG-2026-06-07-2).**
+  `docs/{en,ko}/current-product-shape/26-delegation-repertoire.md` adapts the
+  official common-workflows matrix into a solo-operator delegation menu (7 named
+  patterns, each tagged with runtime tier + artifact), cross-linked to
+  `commands/daily.md` and the work-delegation policy and listed in both
+  current-product-shape indexes. `policies/work-delegation-and-startup.md`
+  reconciles the three-tier runtime split with the official three-way matrix
+  (by-reference) and adds a `LONG_RUNNING_AND_SCHEDULED` axis (duration /
+  trigger) routing long-running work to the gated loop and scheduled work to the
+  bookend daily loop — additive, the existing table unchanged. Locked by
+  `tests/test-delegation-repertoire.sh`.
+- **Single-hard-task skill candidates (ODYS-2026-06-08-1).**
+  `policies/skill-promotion-loop.md` absorbs the odysseus skill auto-extraction
+  trigger (`github:pewdiepie-archdaemon/odysseus`,
+  `services/memory/skill_extractor.py`, fires at ≥2 agent rounds / ≥2 tool
+  calls): a COMPLEXITY_TRIGGER section makes a single hard task (multiple plan
+  revisions, several distinct tool/command rounds, nontrivial debugging) a
+  skill candidate at count 1 alongside the existing 3+ repetition detector,
+  and a REJECTION_CRITERIA section ports the conservative null-return
+  contract — reject non-computer work, one-offs, pure Q&A, and failed
+  approaches (failure is `lessons-accumulation.md` territory); when in doubt,
+  reject; extend a same-intent skill instead of duplicating a title.
+  `commands/tidy.md` routes both at the tidy rail. Suggest-only as before — a
+  judgment lens, not a new detector, and no doctor exit-code change. Locked by
+  `tests/test-skill-promotion-loop.sh`.
+- **Fetched content is data, never instructions (ODYS-2026-06-08-2).**
+  `policies/source-pointer-citation.md` gains the injection discipline that
+  its own live-source rule (re-fetch before authoring, 0.8.29 above) made
+  necessary: anything re-fetched while authoring — web pages, official docs,
+  search results, emails, external wiki notes — enters as quoted evidence
+  behind a pointer, never as a channel that may steer the agent; embedded
+  directives are surfaced to the user as suspicious, not followed.
+  Trust-boundary pattern from odysseus `src/prompt_security.py` (untrusted
+  context wrapped as data with an explicit do-not-follow header, never
+  injected at system level), cross-linked to
+  `policies/agentic-security-logging-pack.md`. Locked by
+  `tests/test-thin-client-source-pointer.sh`.
+
+### Fixed
+
+- **migrate-artifacts backslash-filename sha256 verification (G6.1.1 V1
+  follow-up).** `scripts/sfs-migrate-artifacts.sh` now strips **all** leading
+  backslashes from a hashed digest (`sha256_of` / `sha256_of_stream`) instead of
+  only one. GNU coreutils `sha256sum` prefixes the digest line with `\` when it
+  escapes a filename containing a backslash; a single-strip normalizer left
+  `\<sha>` whenever the escape depth exceeded one (wrapper / nested-PATH shim),
+  causing `verify_no_data_loss` to report a false `actual=\<sha>` mismatch and
+  exit 3. A sha256 hex digest never legitimately begins with `\`, so stripping
+  every leading backslash is correct and strictly more robust.
+  `tests/test-sfs-migrate-quoted-paths.sh` is extended to assert `mismatch=0`
+  under both single- and double-escaping hashers (the latter is the regression
+  lock for the reported symptom). Resolves the pre-existing main FAIL noted in
+  the 0.8.29 feature commits.
+
 ## [0.8.28] - 2026-06-06
 
 > **Wiki onboarding escalates to strongly recommended: a first-class policy section, active install/adopt/doctor guidance, a personal external knowledge wiki recommendation, and a bilingual wiki-start guide — never hard-blocking, standalone guarantee intact.**

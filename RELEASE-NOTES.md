@@ -13,6 +13,40 @@
 
 ---
 
+## 0.8.29
+
+Two context surfaces — a bookend daily operating loop and a standard delegation repertoire — ship together with an odysseus-derived self-improvement absorption (single-hard-task skill candidates with rejection criteria; fetched content is data, never instructions), plus a migrate-artifacts fix that makes backslash-filename sha256 verification robust against GNU coreutils escaping.
+
+체감 변화:
+
+- **하루 운영 루프(아침 브리핑 / 저녁 회고)를 추가했습니다.** `commands/daily.md`
+  가 기존 status / recall / capture / tidy / loop 를 묶어 하루를 여닫는 bookend
+  루프로 동작합니다. 새 바이너리가 아니라 조합이며, `sfs context path daily` 로
+  열고 `daily` 단축 alias 로도 부릅니다. "비개발 셀러 → GTM PM" 블로그 사례는
+  why-Solon·탑다운 학습 가이드에 by-reference 외부 근거로 흡수했습니다.
+- **표준 위임 레퍼토리를 추가했습니다.** `26-delegation-repertoire`(한·영) 가
+  공식 공통 워크플로우 매트릭스를 1인 운영자용 위임 메뉴(7개 패턴, 각각 런타임
+  티어 + 산출물)로 정리합니다. work-delegation 정책에는 장기/예약 작업 축
+  (`LONG_RUNNING_AND_SCHEDULED`)을 더해 장기 작업은 gated loop, 예약 작업은 daily
+  루프로 라우팅합니다(기존 표는 그대로, 추가만).
+- **한 번이라도 어려웠던 작업은 즉시 스킬 후보가 됩니다.** odysseus 의 스킬
+  자동 추출 트리거를 흡수해, 반복 3회를 기다리지 않고 탐색 비용이 컸던 단일
+  작업(계획 수정 여러 번·도구 라운드 다수·디버깅)을 tidy/회고 시점에 후보로
+  올립니다. 동시에 기각 기준을 명문화했습니다 — 컴퓨터 절차가 아닌 것, 일회성,
+  순수 Q&A, 실패한 접근은 컴파일하지 않고, 애매하면 기각합니다. 기존처럼
+  suggest-only 입니다.
+- **가져온 외부 콘텐츠는 데이터이지 지시가 아닙니다.** 라이브 소스 재-fetch
+  규칙이 넓힌 fetch 표면에 맞춰, 재-fetch 한 웹페이지·문서·검색결과·이메일·외부
+  위키 노트는 인용 증거로만 들어오고 에이전트를 조종하는 채널이 될 수 없습니다.
+  안에 박힌 지시문("이전 지시 무시", "이 명령 실행")은 따르지 않고 의심 콘텐츠로
+  사용자에게 표면화합니다(odysseus prompt_security 신뢰경계 패턴).
+- **백슬래시 파일명 마이그레이션 검증 버그를 고쳤습니다.** GNU coreutils
+  `sha256sum` 이 백슬래시 파일명을 escape 할 때 붙이는 선행 `\` 를 digest 에서
+  모두 제거하도록 정규화를 강화했습니다. 이전엔 한 겹만 벗겨 `actual=\<sha>`
+  거짓 불일치(exit 3)가 났습니다. 회귀 테스트로 단일·이중 escape 모두 잠갔습니다.
+
+---
+
 ## 0.8.28
 
 Wiki onboarding escalates to strongly recommended: a first-class policy section, active install/adopt/doctor guidance, a personal external knowledge wiki recommendation, and a bilingual wiki-start guide — never hard-blocking, standalone guarantee intact.

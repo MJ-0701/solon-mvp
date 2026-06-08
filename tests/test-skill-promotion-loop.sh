@@ -24,8 +24,16 @@ grep -q '^load_when:' "${POLICY}" || fail "policy missing load_when"
 has "${POLICY}" "SUGGEST_ONLY" "suggest-only section anchor"
 has "${POLICY}" "read-only" "read-only claim"
 has "${POLICY}" "lessons-accumulation.md" "failure-twin cross-link"
+# ODYS-2026-06-08-1: single-hard-task trigger + conservative rejection contract.
+has "${POLICY}" "COMPLEXITY_TRIGGER" "complexity trigger section anchor"
+has "${POLICY}" "candidate at count 1" "single hard task counts as candidate"
+has "${POLICY}" "REJECTION_CRITERIA" "rejection criteria section anchor"
+has "${POLICY}" "When in doubt, reject" "conservative rejection default"
+has "${POLICY}" "skill_extractor.py" "odysseus source pointer"
 has "${CTX}/_INDEX.md" "policies/skill-promotion-loop.md" "index route"
 has "${CTX}/commands/tidy.md" "skill-promotion-loop.md" "tidy rail guidance"
+has "${CTX}/commands/tidy.md" "COMPLEXITY_TRIGGER" "tidy complexity-trigger guidance"
+has "${CTX}/commands/tidy.md" "REJECTION_CRITERIA" "tidy rejection-criteria guidance"
 if grep -Eq '/Users/|/home/[a-z]' "${POLICY}"; then
   fail "skill-promotion-loop policy leaks an absolute private path"
 fi

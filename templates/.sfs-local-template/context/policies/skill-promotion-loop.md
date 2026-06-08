@@ -1,7 +1,7 @@
 ---
 id: sfs-skill-promotion-loop
-summary: Suggest (never auto-create) skill/command candidates from repeated completed-work patterns; the success-path twin of lessons-accumulation.
-load_when: ["skill promotion", "promote to skill", "repeated task", "skill candidate", "tidy skill-promote", "compile a skill", "recurring workflow", "automate repeated work"]
+summary: Suggest (never auto-create) skill/command candidates from repeated completed-work patterns or a single hard task, with explicit rejection criteria; the success-path twin of lessons-accumulation.
+load_when: ["skill promotion", "promote to skill", "repeated task", "skill candidate", "tidy skill-promote", "compile a skill", "recurring workflow", "automate repeated work", "hard task", "skill rejection"]
 ---
 
 # Skill Promotion Loop
@@ -38,6 +38,37 @@ never changes the doctor exit code.
 The signature is a coarse heuristic; it groups by shared wording, not semantic
 intent. A surfaced candidate is a prompt to look, not a verdict.
 
+## COMPLEXITY_TRIGGER
+
+Repetition (3+) is not the only signal. A **single hard task** is a candidate
+immediately when the session burned real search cost before the approach
+worked — multiple plan revisions, several distinct tool/command rounds, or
+nontrivial debugging. Source: odysseus skill auto-extraction
+(`github:pewdiepie-archdaemon/odysseus`, `services/memory/skill_extractor.py`
+triggers at ≥2 agent rounds / ≥2 tool calls) — the cost already paid to find
+the path is exactly what a compiled skill saves next time. At tidy/retro, ask
+of each completed hard task: "would a written procedure have collapsed this to
+one round?" If yes, it is a candidate at count 1. Suggest-only as ever; this
+trigger is a human/agent judgment at the tidy rail, not a new detector.
+
+## REJECTION_CRITERIA
+
+A candidate must be a concrete, repeatable **computer procedure** (a sequence
+of commands, file edits, API/tool calls). Reject — do not compile — when:
+
+- the real work happened outside the computer (done physically, in person, or
+  on another device; the agent only discussed or advised it);
+- it is one-off, personal, or context-specific (a specific person/place/date)
+  and will not recur;
+- it is pure Q&A or explanation with no transferable method;
+- the approach failed or is not worth repeating — that is
+  `lessons-accumulation.md` territory (the failure twin), not a skill.
+
+When in doubt, reject: a candidate the author is unsure about is catalog
+clutter (`skill-catalog-discipline.md`: do not pad thin buckets). Before
+compiling, check the catalog for a same-intent skill and extend it instead of
+creating a near-duplicate title.
+
 ## ACTING_ON_A_CANDIDATE
 
 This runs on the existing `tidy` rail — no new lifecycle command (the kernel
@@ -54,4 +85,3 @@ without context.
 - Catalog discipline + nine-category lens the new skill must fit: `skill-catalog-discipline.md`.
 - Tidy/retro rail that consumes candidates: `commands/tidy.md`.
 - Line budget for this file: `md-line-budget.md`.
-</content>

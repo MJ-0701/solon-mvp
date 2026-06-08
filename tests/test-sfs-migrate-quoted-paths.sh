@@ -132,11 +132,62 @@ done
 FAKE_SHA256SUM
   chmod +x "${fake_bin}/sha256sum"
   vs_gnu_out="$(PATH="${fake_bin}:$PATH" bash "${MIGRATE}" --verify-snapshot "${snap_iso}" --root . 2>&1)"
-  printf '%s' "${vs_gnu_out}" | grep -q '^verify_no_data_loss:' || {
+  vs_gnu_line="$(printf '%s' "${vs_gnu_out}" | grep '^verify_no_data_loss:' | tail -1)"
+  [[ -n "${vs_gnu_line}" ]] || {
     echo "V1 FAIL: GNU escaped sha256sum verification did not reach verify output"
     echo "  full output: ${vs_gnu_out}"
     exit 1
   }
+  # Strengthened: the digest normalizer MUST strip the escape so backslash
+  # filenames verify cleanly — assert mismatch=0, not merely that verify ran.
+  if printf '%s' "${vs_gnu_line}" | grep -qvE 'mismatch=0( |$)'; then
+    echo "V1 FAIL: single-backslash GNU verify reported a mismatch (normalizer regression)"
+    echo "  line: ${vs_gnu_line}"
+    exit 1
+  fi
+
+  # G6.1.1 V1 regression lock — DOUBLE-escaping hasher (the reported actual=\<sha>
+  # symptom). Some coreutils shims / nested PATH wrappers prefix `\\<sha>` for a
+  # backslash filename; a normalizer that strips only ONE leading backslash leaves
+  # `\<sha>` and verify_no_data_loss reports a false mismatch (exit 3). The fix
+  # strips ALL leading backslashes (a sha256 hex digest never starts with `\`).
+  fake_bin2="${tmp}/fake-bin2"
+  mkdir -p "${fake_bin2}"
+  cat > "${fake_bin2}/sha256sum" <<FAKE_SHA256SUM2
+#!/usr/bin/env bash
+real_sha256sum='${real_sha256sum}'
+hash_file() {
+  if [[ -n "\${real_sha256sum}" && "\${real_sha256sum}" != "\$0" ]]; then
+    "\${real_sha256sum}" "\$1" | awk '{sub(/^\\\\+/, "", \$1); print \$1}'
+  else
+    shasum -a 256 "\$1" | awk '{print \$1}'
+  fi
+}
+if [[ "\$#" -eq 0 ]]; then
+  if [[ -n "\${real_sha256sum}" && "\${real_sha256sum}" != "\$0" ]]; then
+    "\${real_sha256sum}"
+  else
+    shasum -a 256
+  fi
+  exit \$?
+fi
+for f in "\$@"; do
+  sum="\$(hash_file "\$f")"
+  case "\$f" in
+    *\\\\*) printf '\\\\\\\\%s  %s\n' "\${sum}" "\$f" ;;
+    *) printf '%s  %s\n' "\${sum}" "\$f" ;;
+  esac
+done
+FAKE_SHA256SUM2
+  chmod +x "${fake_bin2}/sha256sum"
+  vs_dbl_out="$(PATH="${fake_bin2}:$PATH" bash "${MIGRATE}" --verify-snapshot "${snap_iso}" --root . 2>&1)"
+  vs_dbl_line="$(printf '%s' "${vs_dbl_out}" | grep '^verify_no_data_loss:' | tail -1)"
+  if [[ -z "${vs_dbl_line}" ]] || printf '%s' "${vs_dbl_line}" | grep -qvE 'mismatch=0( |$)'; then
+    echo "V1 FAIL: double-escaping hasher produced a false mismatch (actual=\\<sha> regression — normalizer must strip ALL leading backslashes)"
+    echo "  line: ${vs_dbl_line:-<none>}"
+    echo "  full output: ${vs_dbl_out}"
+    exit 1
+  fi
 fi
 
 # ─── (C) --recover MUST clean BOTH dests (pre-fix would leave the quoted one) ────
