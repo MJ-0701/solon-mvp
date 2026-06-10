@@ -9,6 +9,8 @@ load_when:
   - automation entry
   - standalone guarantee
   - optional orchestrator
+  - typed handoff
+  - structured contract
 ---
 
 # External Orchestrator Entry
@@ -47,6 +49,30 @@ commands still work? Must be yes.**
   orchestrator inspects files, not chat scrollback (Runtime Token Firewall).
 - **Capsule-only handoff.** Forward goal, AC, files_scope, commands, expected
   output paths, and compact evidence — never a full transcript.
+
+## Typed handoff contract
+
+A handoff between stages is a **typed/structured contract, not raw text**. The
+artifact a stage emits must carry fixed, named fields a downstream stage can
+validate before consuming — never free prose the next stage has to re-parse.
+This applies to the advisor↔Code file bus and every capsule handoff above.
+
+- **Tiered handoff.** A light/lead pass (classification, flowcheck, intake)
+  emits the schema-fixed artifact; the heavy reasoning pass consumes only the
+  validated input. The cheap pass owns shape, the expensive pass owns judgment —
+  so the costly call never starts from unvalidated text. Generalized
+  by-reference from a vendor tiered on-device→cloud handoff pattern; the
+  vendor/SDK specifics are out of scope, cite by pointer and never copy
+  (`policies/source-pointer-citation.md`).
+- **Field schema SSoT.** The required handoff/capsule fields are the
+  `sub-agent-capsule-contract.md` table (`goal` / `acceptance_criteria` /
+  `files_scope` / `tools_allowed` / `output_paths` / `token_budget` / `timeout`
+  / `pii_rules`). A handoff block missing a field is a finding, not prose to
+  interpret. This policy does not re-list the fields — that table is the SSoT.
+- **Same discipline on the event bus.** Structured flow/telemetry events
+  (`sfs event` typed `key=value` fields, including the `tool_call` telemetry
+  schema) apply the identical typed-contract rule to the file bus: machine-
+  checkable fields, not narration (`policies/flow-conformance-postflight.md`).
 
 ## Inviolable gates
 

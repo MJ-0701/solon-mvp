@@ -13,6 +13,28 @@
 
 ---
 
+## 0.8.33
+
+Stage-to-stage handoffs become a typed contract — the external-orchestrator entry now requires handoff and capsule outputs to be schema-fixed fields, not raw text, with a light lead pass emitting validated input for the heavy reasoning pass, by-reference to the capsule field schema and the typed event bus.
+
+체감 변화:
+
+- **단계 사이 핸드오프는 raw 텍스트가 아니라 typed/structured contract 입니다.**
+  외부 오케스트레이터 진입 규약에 "핸드오프·capsule 산출물은 스키마 고정 필드여야
+  한다"는 절이 추가됐습니다. 경량 선행 패스(분류·flowcheck·intake)가 스키마 고정
+  산출물을 내고, 무거운 reasoning 패스는 검증된 입력만 소비합니다 — 비싼 호출이
+  검증 안 된 텍스트에서 시작하지 않도록.
+- **필드 스키마는 capsule 계약을 by-reference 로 재사용합니다.** 필수 필드
+  (goal / acceptance_criteria / files_scope / tools_allowed / output_paths /
+  token_budget / timeout / pii_rules)는 `sub-agent-capsule-contract.md` 표가
+  단일 원천이며, 정책은 필드를 다시 나열하지 않습니다. 같은 typed-contract
+  규율이 `sfs event` 타입 필드(0.8.32 `tool_call` 텔레메트리 포함) 파일버스에도
+  동일하게 적용됩니다.
+- **vendor(Apple/Swift) 디테일은 보류했습니다.** 일반화 가능한 원칙 하나만
+  by-reference 로 승격하고, SDK·온디바이스 세부는 포인터로만 인용했습니다.
+
+---
+
 ## 0.8.32
 
 Connector and MCP observability becomes instrumentation — each MCP tool call now emits a per-tool telemetry event (tool, outcome, latency) and flowcheck aggregates them read-only into an advisory tool-health summary that pinpoints the repeated-failure hotspot as a drift-warn and lessons signal, never changing the verdict.

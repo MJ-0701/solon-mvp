@@ -1,5 +1,32 @@
 ## [Unreleased]
 
+## [0.8.33] - 2026-06-10
+
+> **Stage-to-stage handoffs become a typed contract — the external-orchestrator entry now requires handoff and capsule outputs to be schema-fixed fields, not raw text, with a light lead pass emitting validated input for the heavy reasoning pass, by-reference to the capsule field schema and the typed event bus.**
+
+### Added
+
+- **Typed handoff contract clause (BLOG-2026-06-10-2).** Promotes one
+  generalizable principle from the Apple Foundation Models blog while holding
+  all vendor/Swift specifics out: **a handoff between stages is a
+  typed/structured contract, not raw text.** `policies/external-orchestrator-
+  entry.md` gains a *Typed handoff contract* section — (1) **tiered handoff**: a
+  light/lead pass (classification, flowcheck, intake) emits the schema-fixed
+  artifact and the heavy reasoning pass consumes only the validated input, so
+  the costly call never starts from unvalidated text (generalized by-reference
+  from a vendor on-device→cloud pattern, cited by pointer not copied per
+  `policies/source-pointer-citation.md`); (2) **field schema SSoT** by-reference
+  to the `sub-agent-capsule-contract.md` table (`goal` / `acceptance_criteria`
+  / `files_scope` / `tools_allowed` / `output_paths` / `token_budget` /
+  `timeout` / `pii_rules`) — the policy names the required fields by reference
+  and does not re-list them; (3) **same discipline on the event bus** — typed
+  `sfs event` `key=value` fields incl. the 0.8.32 `tool_call` telemetry schema
+  are the identical typed-contract rule applied to the file bus. Applies to the
+  advisor↔Code file bus and every capsule handoff. Policy 106 lines (< 200).
+  Locked by `tests/test-external-orchestrator-entry.sh` (+4 anchors). Source:
+  blog *Building intelligent apps for Apple platforms with Claude in the
+  Foundation Models framework* (`insights/INSIGHT-2026-06-10.md`).
+
 ## [0.8.32] - 2026-06-10
 
 > **Connector and MCP observability becomes instrumentation — each MCP tool call now emits a per-tool telemetry event (tool, outcome, latency) and flowcheck aggregates them read-only into an advisory tool-health summary that pinpoints the repeated-failure hotspot as a drift-warn and lessons signal, never changing the verdict.**

@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.32" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.32" "version output"
-assert_contains_text "${output}" "latest 0.8.32" "latest output"
+[[ "${plain_output}" == "sfs 0.8.33" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.33" "version output"
+assert_contains_text "${output}" "latest 0.8.33" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Connector and MCP observability becomes instrumentation — each MCP tool call now emits a per-tool telemetry event (tool, outcome, latency) and flowcheck aggregates them read-only into an advisory tool-health summary that pinpoints the repeated-failure hotspot as a drift-warn and lessons signal, never changing the verdict." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Stage-to-stage handoffs become a typed contract — the external-orchestrator entry now requires handoff and capsule outputs to be schema-fixed fields, not raw text, with a light lead pass emitting validated input for the heavy reasoning pass, by-reference to the capsule field schema and the typed event bus." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline Connector and MCP observability becomes instrumentation — each MCP tool call now emits a per-tool telemetry event (tool, outcome, latency) and flowcheck aggregates them read-only into an advisory tool-health summary that pinpoints the repeated-failure hotspot as a drift-warn and lessons signal, never changing the verdict." "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline Stage-to-stage handoffs become a typed contract — the external-orchestrator entry now requires handoff and capsule outputs to be schema-fixed fields, not raw text, with a light lead pass emitting validated input for the heavy reasoning pass, by-reference to the capsule field schema and the typed event bus." "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

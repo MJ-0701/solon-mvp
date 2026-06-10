@@ -23,6 +23,14 @@ has "${POLICY}" "Inviolable gates" "gate-inviolability section"
 has "${POLICY}" "cannot bypass" "gate bypass prohibition"
 has "${POLICY}" "First-permission read-only" "first-permission read-only"
 
+# Typed handoff contract (BLOG-2026-06-10-2): handoff interfaces are
+# typed/structured contracts, not raw text; tiered handoff; field schema by
+# reference to the capsule contract (no field re-listing here). ASCII anchors.
+has "${POLICY}" "Typed handoff contract" "typed handoff section"
+has "${POLICY}" "typed/structured contract, not raw text" "typed-contract principle"
+has "${POLICY}" "Tiered handoff." "tiered handoff framing"
+has "${POLICY}" "sub-agent-capsule-contract.md" "capsule field schema by-reference"
+
 # Open-source boundary (WU-5-followup): optional/standalone + vendor-neutral +
 # the discriminating test line. ASCII anchors so no LC_ALL juggling is needed.
 has "${POLICY}" "Optional by design (standalone guarantee)" "optional/standalone frame"
