@@ -1146,7 +1146,9 @@ append_event() {
 # compaction rewrite drops any events.jsonl line lacking the active sprint_id —
 # without it a later regular capture would silently delete the flow record.
 # Contract types: model_resolved | worker_dispatched | gate_passed |
-# conflict_surfaced | verification_pair.
+# conflict_surfaced | verification_pair. The advisory `tool_call` telemetry type
+# (tool/outcome/latency_ms) also rides this non-collapsing path, but it is NOT an
+# FCP invariant — flowcheck aggregates it read-only and it never gates.
 append_flow_event() {
   local etype="${1:?type required}"
   shift || true

@@ -13,6 +13,27 @@
 
 ---
 
+## 0.8.32
+
+Connector and MCP observability becomes instrumentation — each MCP tool call now emits a per-tool telemetry event (tool, outcome, latency) and flowcheck aggregates them read-only into an advisory tool-health summary that pinpoints the repeated-failure hotspot as a drift-warn and lessons signal, never changing the verdict.
+
+체감 변화:
+
+- **MCP 툴이 깨지거나 느려지면 flowcheck 가 짚어줍니다.** MCP 서버가 툴
+  호출마다 `tool_call` 텔레메트리(어떤 툴 / 성공·실패 / 지연 ms)를 프로젝트
+  이벤트 원장에 남기고, `sfs flowcheck` 가 이를 read-only 로 집계해 툴별
+  호출수·에러·에러율·최대지연 요약과 **반복 실패 hotspot**(에러율이 아니라
+  반복 에러 횟수 기준 — 1/1 한 번짜리는 hotspot 이 아님)을 보여줍니다. 이
+  신호는 버그리포트 흐름의 drift-warn 과 lessons 누적 입력이 됩니다.
+- **계측은 추가만, 기존 동작은 그대로입니다.** 텔레메트리는 verbatim 출력을
+  바꾸지 않는 순수 side-write 이고 호출을 실패시키지 않으며, flowcheck 의
+  판정(verdict)·exit 코드를 어느 방향으로도 바꾸지 않습니다.
+  `SOLON_MCP_TELEMETRY=0` 으로 끌 수 있습니다.
+- **차용한 것은 계측 스키마와 health 집계 패턴뿐입니다.** 커넥터 관측성
+  블로그의 대시보드 UI·디렉터리 기능은 제품과 무관하므로 가져오지 않았습니다.
+
+---
+
 ## 0.8.31
 
 Skill evolution adoption becomes measured — held-out scoring now sits behind the four gates as a real procedure: a two-stage cheap-keyword then cost-gated LLM-judge before/after comparison on a held-out set, necessary to adopt but never overriding a failed gate or human sign-off.

@@ -358,6 +358,52 @@ else
   verdict="PASS"
 fi
 
+# ── tool-call telemetry health (ADVISORY, read-only; never gates) ──────────
+# Aggregate non-collapsing `tool_call` telemetry events (tool / outcome /
+# latency_ms), typically emitted per MCP tool call, into a per-tool health
+# summary. This rides the SAME ledger transport as the FCP invariant events but
+# is NOT an FCP invariant: it never enters CRIT/ADV/PASS, never changes the
+# verdict or exit code. It pinpoints the tool with REPEATED failures (error
+# count >= 2) as a drift-warn signal + lessons-accumulation input — the blog
+# "per-tool breakdown to pinpoint what fails" pattern, instrumentation-only.
+# tool_call is high-volume and bounded only by per-sprint event compaction
+# (fine for MVP). Contract SSoT: policies/flow-conformance-postflight.md.
+declare -a TC_ROWS=()
+for line in "${EV_LINES[@]:-}"; do
+  [[ "$(_jf type "${line}")" == "tool_call" ]] || continue
+  tc_tool="$(_jf tool "${line}")"
+  [[ -n "${tc_tool}" ]] || continue
+  TC_ROWS+=("${tc_tool}|$(_jf outcome "${line}")|$(_jf latency_ms "${line}")")
+done
+
+declare -a HEALTH_SUMMARY=()
+HEALTH_HOTSPOT=""
+HEALTH_EVENT_N="${#TC_ROWS[@]}"
+if (( HEALTH_EVENT_N > 0 )); then
+  while IFS=$'\t' read -r kind a b c d; do
+    case "${kind}" in
+      SUMMARY) HEALTH_SUMMARY+=("tool ${a}: ${b} call(s), ${c} error(s), ${d}% error-rate") ;;
+      MAXLAT)  HEALTH_SUMMARY+=("tool ${a}: ${b}ms max latency") ;;
+      HOTSPOT) HEALTH_HOTSPOT="tool ${a} — ${b} error(s) over ${c} call(s) (${d}% error-rate)" ;;
+    esac
+  done < <(printf '%s\n' "${TC_ROWS[@]}" | awk -F'|' '
+    { t=$1; calls[t]++; if ($2=="error") err[t]++;
+      lat=$3+0; if (lat>maxlat[t]) maxlat[t]=lat; seen[t]=1 }
+    END {
+      n=0; for (t in seen) tools[++n]=t
+      for (i=1;i<=n;i++) for (j=i+1;j<=n;j++) if (tools[j]<tools[i]) {x=tools[i];tools[i]=tools[j];tools[j]=x}
+      for (i=1;i<=n;i++) { t=tools[i]; c=calls[t]+0; e=err[t]+0; r=(c>0)?(e*100/c):0;
+        printf "SUMMARY\t%s\t%d\t%d\t%.0f\n", t, c, e, r;
+        printf "MAXLAT\t%s\t%d\n", t, maxlat[t]+0 }
+      # repeated-failure hotspot: err>=2 only; rank err desc, then rate desc, then name asc
+      best=""; bE=-1; bR=-1
+      for (i=1;i<=n;i++) { t=tools[i]; c=calls[t]+0; e=err[t]+0; r=(c>0)?(e*100/c):0;
+        if (e<2) continue;
+        if (e>bE || (e==bE && r>bR)) { best=t; bE=e; bR=r; bC=c } }
+      if (best!="") printf "HOTSPOT\t%s\t%d\t%d\t%.0f\n", best, bE, bC, bR
+    }')
+fi
+
 # ── write verdict artifact ─────────────────────────────────────────────────
 SPRINT_DIR="${SFS_SPRINTS_DIR}/${FLOWCHECK_SPRINT}"
 ART_DIR="${SPRINT_DIR}/workbench"
@@ -389,6 +435,15 @@ if mkdir -p "${ART_DIR}" 2>/dev/null; then
       for f in "${PASS_NOTES[@]}"; do printf -- '- ✅ %s\n' "${f}"; done
       printf '\n'
     fi
+    if (( HEALTH_EVENT_N > 0 )); then
+      printf '## Tool telemetry health (advisory, non-gating)\n'
+      printf -- '- %s tool_call event(s) aggregated read-only; does not affect the verdict.\n' "${HEALTH_EVENT_N}"
+      for f in "${HEALTH_SUMMARY[@]:-}"; do [[ -n "${f}" ]] && printf -- '- %s\n' "${f}"; done
+      if [[ -n "${HEALTH_HOTSPOT}" ]]; then
+        printf -- '- ⚠️ repeated-failure hotspot: %s — drift-warn signal; record as a lesson if recurring.\n' "${HEALTH_HOTSPOT}"
+      fi
+      printf '\n'
+    fi
     if (( blocking_n > 0 )); then
       printf '> Blocking: resolve the findings, or record `sfs capture --kind waiver "<invariant-id>: reason"` to proceed.\n'
     fi
@@ -406,6 +461,14 @@ for f in "${CRIT_BLOCKING[@]:-}"; do [[ -n "${f}" ]] && echo "  CRITICAL: ${f}";
 for f in "${CRIT_WAIVED[@]:-}"; do [[ -n "${f}" ]] && echo "  waived:   ${f}"; done
 for f in "${ADV[@]:-}"; do [[ -n "${f}" ]] && echo "  advisory: ${f}"; done
 [[ -f "${ART}" ]] && echo "  verdict artifact: ${ART}"
+
+# ── tool telemetry health (advisory; never changes verdict or exit code) ────
+if (( HEALTH_EVENT_N > 0 )); then
+  echo "  telemetry: ${HEALTH_EVENT_N} tool_call event(s) aggregated read-only (non-gating)"
+  if [[ -n "${HEALTH_HOTSPOT}" ]]; then
+    echo "  telemetry: repeated-failure hotspot: ${HEALTH_HOTSPOT}"
+  fi
+fi
 
 # ── lessons loop (advisory; never changes verdict or exit code) ─────────────
 # Surface the accumulated avoidance-rule ledger and the record obligation so a

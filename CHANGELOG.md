@@ -1,5 +1,36 @@
 ## [Unreleased]
 
+## [0.8.32] - 2026-06-10
+
+> **Connector and MCP observability becomes instrumentation — each MCP tool call now emits a per-tool telemetry event (tool, outcome, latency) and flowcheck aggregates them read-only into an advisory tool-health summary that pinpoints the repeated-failure hotspot as a drift-warn and lessons signal, never changing the verdict.**
+
+### Added
+
+- **Per-tool telemetry + flowcheck tool-health summary (BLOG-2026-06-10-1).**
+  Adopts the connector-observability blog's *instrumentation schema + health
+  aggregation* pattern (not its dashboard UI). A new advisory `tool_call`
+  telemetry event `{tool, outcome: ok|error, latency_ms}` rides the existing
+  non-collapsing FCP event ledger, and the MCP server
+  (`mcp-server/solon_mcp_server.py`) emits one per tool call as a **pure
+  side-write**: `_run_sfs` now wraps `_run_sfs_inner`, measures wall latency,
+  and best-effort shells out to `sfs event tool_call ...` — it never alters the
+  verbatim stdout forwarded to the host, swallows every exception, and never
+  fails the call (disable with `SOLON_MCP_TELEMETRY=0`). `sfs flowcheck`
+  aggregates these events **read-only** into a *Tool-telemetry health* summary
+  (per-tool calls / errors / error-rate / max latency) and pinpoints the
+  **repeated-failure hotspot** — ranked by error **count** (≥2 floor, not error
+  rate, so a 1/1 one-off never outranks a 3/4 repeated failure; tie-break rate
+  desc then tool name asc) — as a drift-warn signal + `lessons-accumulation`
+  input. `tool_call` is telemetry that rides the ledger transport but is
+  **never** an FCP invariant: it is never CRIT, never advisory-invariant, and
+  never changes the verdict or exit code in either direction (비파괴). `sfs
+  event` gains the bounded `tool_call` type. Routed-context contract:
+  `policies/flow-conformance-postflight.md` (event contract + *Tool-telemetry
+  health* section) and `commands/flowcheck.md`. Source: blog *Observability for
+  developers building connectors* (`insights/INSIGHT-2026-06-10.md`). Locked by
+  `tests/test-flowcheck-telemetry-health.sh` (discriminating hotspot metric +
+  non-destructive in both PASS and FAIL directions).
+
 ## [0.8.31] - 2026-06-08
 
 > **Skill evolution adoption becomes measured — held-out scoring now sits behind the four gates as a real procedure: a two-stage cheap-keyword then cost-gated LLM-judge before/after comparison on a held-out set, necessary to adopt but never overriding a failed gate or human sign-off.**

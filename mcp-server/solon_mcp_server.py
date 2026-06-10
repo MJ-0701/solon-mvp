@@ -45,6 +45,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import time
 from typing import Optional
 
 
@@ -65,9 +66,46 @@ mcp = FastMCP("solon")
 SFS_MCP_TIMEOUT_SEC = int(os.environ.get("SOLON_MCP_TIMEOUT_SEC", "300"))
 
 
-def _run_sfs(args: list[str]) -> str:
-    """Run `sfs <args...>` in CWD and return its verbatim stdout (and a
-    fenced stderr/rc tail on failure). Never reshapes adapter output.
+def _tool_label(args: list[str]) -> str:
+    """Derive the telemetry tool name (`sfs_status`, `sfs_harness_doctor`, ...)
+    from the leading non-flag args, matching the 1:1 `sfs <cmd>` → tool naming."""
+    parts: list[str] = []
+    for a in args:
+        if a.startswith("-"):
+            break
+        parts.append(a.replace("-", "_"))
+    return "sfs_" + "_".join(parts) if parts else "sfs"
+
+
+def _emit_tool_call(tool: str, outcome: str, latency_ms: int) -> None:
+    """Best-effort side-write of one `tool_call` telemetry event to the project's
+    events.jsonl via `sfs event tool_call ...`. This is a PURE side-write: it
+    never alters the wrapped tool's stdout, swallows every exception, and never
+    fails the call. `sfs flowcheck` reads these read-only to pinpoint
+    repeated-failure / slow tools (advisory health summary, never a gate). With
+    no active sprint the event carries no sprint_id and flowcheck's sprint filter
+    drops it — correct graceful degradation. Disable with SOLON_MCP_TELEMETRY=0.
+    """
+    if os.environ.get("SOLON_MCP_TELEMETRY", "1") == "0":
+        return
+    sfs = shutil.which("sfs") or os.environ.get("SOLON_MCP_SFS_PATH") or "sfs"
+    try:
+        subprocess.run(
+            [sfs, "event", "tool_call",
+             f"tool={tool}", f"outcome={outcome}", f"latency_ms={latency_ms}"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    except Exception:
+        pass  # telemetry must never perturb the tool surface
+
+
+def _run_sfs_inner(args: list[str]) -> tuple[str, str]:
+    """Run `sfs <args...>` and return (verbatim stdout + fenced rc tail, outcome).
+    `outcome` is `ok` on rc 0, `error` otherwise (binary missing / timeout /
+    non-zero rc). Never reshapes adapter output.
 
     Honors $SOLON_MCP_TIMEOUT_SEC (default 300s) so a stuck executor
     cannot wedge the host. The non-zero rc message keeps the same shape
@@ -86,12 +124,14 @@ def _run_sfs(args: list[str]) -> str:
         return (
             "solon-mcp: `sfs` binary not found on PATH.\n"
             "Install Solon Product first (Homebrew tap / Scoop bucket / source clone)\n"
-            "or set $SOLON_MCP_SFS_PATH to the absolute path of the `sfs` script.\n"
+            "or set $SOLON_MCP_SFS_PATH to the absolute path of the `sfs` script.\n",
+            "error",
         )
     except subprocess.TimeoutExpired:
         return (
             f"solon-mcp: `sfs {' '.join(args)}` timed out after "
-            f"{SFS_MCP_TIMEOUT_SEC}s. Raise $SOLON_MCP_TIMEOUT_SEC for a one-off run.\n"
+            f"{SFS_MCP_TIMEOUT_SEC}s. Raise $SOLON_MCP_TIMEOUT_SEC for a one-off run.\n",
+            "error",
         )
 
     out = proc.stdout or ""
@@ -102,6 +142,23 @@ def _run_sfs(args: list[str]) -> str:
             f"\n\n[sfs rc={proc.returncode}]\n"
             f"{proc.stderr or '<empty stderr>'}\n"
         )
+        return out, "error"
+    return out, "ok"
+
+
+def _run_sfs(args: list[str]) -> str:
+    """Run `sfs <args...>` in CWD and return its verbatim stdout (and a
+    fenced stderr/rc tail on failure). Never reshapes adapter output.
+
+    Wraps `_run_sfs_inner` with per-tool telemetry: measures wall latency and
+    emits one best-effort `tool_call` event (side-write only — see
+    `_emit_tool_call`). The returned stdout is exactly the inner result.
+    """
+    tool = _tool_label(args)
+    start = time.perf_counter()
+    out, outcome = _run_sfs_inner(args)
+    latency_ms = int((time.perf_counter() - start) * 1000)
+    _emit_tool_call(tool, outcome, latency_ms)
     return out
 
 

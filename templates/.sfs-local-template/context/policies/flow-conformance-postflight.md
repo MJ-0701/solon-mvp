@@ -16,8 +16,15 @@ flow 는 다음을 emit (`sfs event <type> <key=value...>`; 기존 evidence_capt
 - `conflict_surfaced` {kind, detail, resolved_by: user|capture, scope}
 - `verification_pair` {implementer, verifier, implementer_context, verifier_context, gate}
 - (의도 원장) `evidence_capture` kind ∈ {decision, scope-change, user-approval, exception, waiver} (+ `--scope`)
+- (텔레메트리, advisory) `tool_call` {tool, outcome: ok|error, latency_ms} — 보통 MCP 툴 호출마다 1건 emit.
 
 `append_flow_event` 는 collapse 하지 않고 매 emission 을 보존하며 active sprint_id 를 항상 stamp 한다.
+
+`tool_call` 은 위 invariant 이벤트와 **같은 non-collapsing 원장 전송로**를 타지만
+**FCP invariant 가 아니다** — critical 도 advisory invariant 도 아니고, verdict/exit
+에 절대 영향을 주지 않는다. flowcheck 가 read-only 로 집계해 "어떤 툴이 반복 실패·지연"
+하는지 health 요약을 내는 계측 신호일 뿐이다 (아래 Tool-telemetry health). high-volume
+이라 per-sprint event compaction 으로만 경계되며 MVP 에서는 충분하다.
 
 ## invariant registry
 | id | 기대 | class |
@@ -46,6 +53,16 @@ SFS review 와 별개" 계약과 정합(외부 PASS 는 continuation 증거이�
 - 판정 artifact(`<sprint>/workbench/flowcheck.md`) + `flow_conformance` 이벤트.
 - critical unresolved → nonzero exit(blocking). advisory → warn, exit 0.
 - waiver(`sfs capture --kind waiver`)가 invariant id 를 명시하면 해당 critical 을 waived 로 강등.
+- (계측) `tool_call` 이 있으면 artifact·stdout 에 advisory **Tool-telemetry health** 요약을 덧붙인다 (verdict/exit 불변).
+
+## Tool-telemetry health (advisory, non-gating)
+flowcheck 는 sprint 의 `tool_call` 이벤트를 read-only 로 집계해 per-tool
+{call 수, error 수, error-rate, max latency} 를 내고, **반복 실패 hotspot 1개**를
+핀포인트한다. hotspot 순위 기준은 **error count(≥2 floor)** 다 — error *rate* 가
+아니다. 1/1(100%) 같은 one-off 는 "반복"이 아니므로 제외하고, 동률은 rate desc →
+tool 이름 asc 로 결정적 tie-break 한다. 이 hotspot 은 버그리포트 flow 의 drift-warn
+신호원이자 `policies/lessons-accumulation.md` 누적 입력이다. 계측은 **추가만**이고
+기존 invariant 판정과 exit 코드를 어느 방향으로도 바꾸지 않는다 (비파괴 계약).
 
 ## Plan-gate self-check (암묵 가정 → 명시 스펙, plan = quality gate)
 silent divergence 의 plan-time 근원 차단. 코드(Do) 진입 전 plan 자기점검 4문 — `intended-output` / `implicit-assumptions` / `edge-cases` / `intent-alignment` (gate-framework Gate 3 plan-validator check 7). 런타임 divergence 잠금은 `fcp-conflict-surfaced`(#3) + model-tier(#4) 이며, plan 체크리스트는 그 중 #3(silent divergence) 부류를 plan 단계에서 선제 차단한다. plan 품질이 산출물 품질을 결정한다 — 코드 생성이 싸질수록 잘못된 방향의 비용이 커진다. (이 self-check 는 plan 게이트 항목이라 flowcheck 런타임 invariant 가 아니라 노출·교차참조 계약이다.)

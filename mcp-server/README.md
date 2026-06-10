@@ -75,7 +75,12 @@ which solon-mcp
 ```
 
 `solon-mcp` reads `SOLON_MCP_TIMEOUT_SEC` (default 300s) and
-`SOLON_MCP_SFS_PATH` (default: whatever `which sfs` resolves).
+`SOLON_MCP_SFS_PATH` (default: whatever `which sfs` resolves). Each tool call
+also writes one best-effort `tool_call` event (`tool`/`outcome`/`latency_ms`)
+to the project's `events.jsonl` as a pure side-write (never alters verbatim
+stdout, never fails the call); `sfs flowcheck` reads these read-only into an
+advisory tool-health summary that pinpoints repeated-failure / slow tools and
+never gates. `SOLON_MCP_TELEMETRY=0` disables it.
 
 ## Register with a host
 
@@ -180,21 +185,15 @@ This matches how `sfs` itself behaves from a terminal.
 
 ## What it does NOT do
 
-- Does not parse, summarize, or reshape `sfs` output. The host's LLM
-  reads the raw adapter output, exactly as a terminal user would.
-- Does not bypass the Solon permission model. `sfs review` still asks
-  the executor for auth, still respects timeouts, still records evidence.
-- Does not become the SSoT. `sfs` and `.sfs-local/` remain authoritative.
-  If the MCP server and the CLI disagree, the CLI is right.
+- Does not parse, summarize, or reshape `sfs` output — the host's LLM reads the raw adapter output, exactly as a terminal user would.
+- Does not bypass the Solon permission model — `sfs review` still asks the executor for auth, respects timeouts, records evidence.
+- Does not become the SSoT — `sfs` and `.sfs-local/` remain authoritative; if the MCP server and the CLI disagree, the CLI is right.
 
 ## Hacking on it
 
 The server is a single file: `solon_mcp_server.py`. Tools are declared
-as `@mcp.tool()`-decorated functions. To add a new tool:
-
-1. Add the function with a clear docstring (the docstring becomes the
-   tool description LLMs see).
-2. Inside, call `_run_sfs([...])` with the bash adapter args.
-3. Update the table at the top of this README.
-4. Update `tests/test-mcp-server-contract.sh` to assert the new tool
-   is declared.
+as `@mcp.tool()`-decorated functions. To add a new tool: add the function
+with a clear docstring (the docstring becomes the tool description LLMs see),
+call `_run_sfs([...])` with the bash adapter args, update the table at the top
+of this README, then update `tests/test-mcp-server-contract.sh` to assert the
+new tool is declared.
