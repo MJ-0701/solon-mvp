@@ -13,6 +13,32 @@
 
 ---
 
+## 0.8.34
+
+Credential handling becomes an explicit policy — agent-visible surfaces carry placeholders only while real keys live in one store, attach at the boundary with per-consumer scope, and rotate in one place; scheduled/unattended runs gain an operating contract (fresh session per fire, file-borne state, pause/resume/archive/on-demand controls).
+
+체감 변화:
+
+- **API 키를 어디에 둬야 하는지가 정책이 됐습니다.** 새
+  `policies/credential-hygiene.md` — 프롬프트·스케줄 태스크 파일·CLAUDE.md·
+  templates·로그·핸드오프 등 에이전트가 보는 표면에는 placeholder/env-var
+  이름만 둡니다. 실제 키는 운영자가 통제하는 저장소 한 곳에만 살고, 호출
+  경계에서 **소비자(툴/도메인) 스코프로만** 부착됩니다 — 서비스 X 의 키가
+  서비스 Y 로 가는 요청에 실리지 않습니다.
+- **키 교체는 한 곳만 고치면 끝나야 합니다.** grep-and-replace 로 여러 파일을
+  고쳐야 한다면 키가 여러 곳에 있었다는 것 자체가 발견사항입니다. 노출 의심
+  시 "먼저 rotate, 정리는 그 다음".
+- **스케줄/무인 작업에 운영 계약이 생겼습니다.** 매 실행 = 새 세션, 실행 간
+  상태는 파일(큐/seen/핸드오프)로만 전달, pause·resume·archive·수동 트리거
+  4종 제어가 없으면 "운영되는 작업"이 아닙니다. 무인 러너의 키는 spawn 시점
+  env 로만 주입합니다 (`work-delegation-and-startup.md`
+  SCHEDULED_RUN_CONTRACT).
+- **vendor 플랫폼 기능(vault/managed scheduling 자체)은 보류했습니다.**
+  일반화 가능한 원칙 2개만 by-reference 로 승격했고, solon 의 기존 무인 러너
+  패턴은 외부 검증 사례로 등재했습니다.
+
+---
+
 ## 0.8.33
 
 Stage-to-stage handoffs become a typed contract — the external-orchestrator entry now requires handoff and capsule outputs to be schema-fixed fields, not raw text, with a light lead pass emitting validated input for the heavy reasoning pass, by-reference to the capsule field schema and the typed event bus.

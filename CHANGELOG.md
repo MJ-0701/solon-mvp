@@ -1,5 +1,47 @@
 ## [Unreleased]
 
+## [0.8.34] - 2026-06-11
+
+> **Credential handling becomes an explicit policy — agent-visible surfaces carry placeholders only while real keys live in one store, attach at the boundary with per-consumer scope, and rotate in one place; scheduled/unattended runs gain an operating contract (fresh session per fire, file-borne state, pause/resume/archive/on-demand controls).**
+
+### Added
+
+- **Credential-hygiene policy + scheduled-run contract (BLOG-2026-06-11-1).**
+  Adopts two generalizable principles from the Managed Agents
+  schedules-and-vaults blog while holding the vendor platform feature out.
+  (1) **Credential isolation** — new `policies/credential-hygiene.md` (77
+  lines < 200): real keys never appear on agent-visible or durable surfaces
+  (prompts, scheduled-task prompt files, agent entry docs, routed context,
+  templates, logs, handoffs) — those carry indirection only (env-var name /
+  store reference / explicit placeholder); the real key lives in exactly one
+  operator-controlled store and attaches at the boundary **per-consumer-scoped**
+  (a key for service X never rides a request bound for service Y — the
+  credential twin of no-full-history-forwarding, by-reference to
+  `runtime-token-firewall.md`); rotation is a one-place store edit — a
+  grep-and-replace rotation is itself the finding; unattended runners
+  (launchd/cron, headless sessions, MCP server) get keys **via environment at
+  spawn**, never embedded in the job's skill/prompt file. Framed as the
+  secret-specialized form of the templates placeholder-only rule; co-enforced
+  with `agentic-security-logging-pack.md` Secrets/PII and SEC-AIERA-002.
+  Routed from `_INDEX.md`. (2) **SCHEDULED_RUN_CONTRACT** —
+  `policies/work-delegation-and-startup.md` LONG_RUNNING_AND_SCHEDULED axis
+  gains the operating contract for scheduled/recurring jobs (additive; all
+  pre-existing anchors preserved): every fire is a **fresh session** with all
+  inter-run state file-borne (seen/state file, pending queue, handoff doc —
+  never assumed session carryover); **four operational controls** required
+  (pause / resume / archive / on-demand trigger — a job the operator cannot
+  pause or fire manually is an unowned loop, not an operated job); credentials
+  by indirection per the new policy. Solon's own unattended runners already run
+  this way — the blog is registered as external validation, cited by pointer
+  per `policies/source-pointer-citation.md`. Bilingual delegation repertoire
+  (`docs/{ko,en}/current-product-shape/26-delegation-repertoire.md`) pattern 3
+  gains the externally-validated example line (spreadsheet → weekly report,
+  log/metric watch → anomaly brief) + contract pointer. Locked by
+  `tests/test-credential-hygiene.sh` (policy anchors, _INDEX route, 200-line
+  budget, additive guarantee, bilingual pointer). Source: blog *New in Claude
+  Managed Agents: run agents on a schedule and store environment variables in
+  vaults* (`insights/INSIGHT-2026-06-11.md`).
+
 ## [0.8.33] - 2026-06-10
 
 > **Stage-to-stage handoffs become a typed contract — the external-orchestrator entry now requires handoff and capsule outputs to be schema-fixed fields, not raw text, with a light lead pass emitting validated input for the heavy reasoning pass, by-reference to the capsule field schema and the typed event bus.**

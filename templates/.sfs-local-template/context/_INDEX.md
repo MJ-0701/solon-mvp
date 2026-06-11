@@ -73,6 +73,7 @@ module:
 - `policies/enterprise-performance-review-pack.md` — performance and algorithm review lens.
 - `policies/gate6-data-validation-pack.md` — mock/fixture/seed/data validation at Gate 6.
 - `policies/agentic-security-logging-pack.md` — OWASP-style security, console-log, and Datadog evidence guard.
+- `policies/credential-hygiene.md` — placeholders only on agent-visible surfaces; real keys live in one store, attach at the boundary per-consumer-scoped, rotate in one place; unattended runners get keys via env at spawn.
 - `policies/wiki-mission-checklist-skill.md` — live wiki checklist for long-context follow-through.
 - `policies/postdev-external-review-pack.md` — post-development Claude/Gemini/Codex review evidence.
 - `policies/lean-procedure-refactor-pack.md` — keep/shrink/remove procedural bottleneck review.

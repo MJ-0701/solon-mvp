@@ -4,7 +4,7 @@ title: "Standard delegation repertoire — for a one-person operator"
 visibility: oss-public
 doc_type: product-reference
 language: en
-updated: 2026-06-07
+updated: 2026-06-11
 parent: docs/en/current-product-shape.md
 summary: "The official common workflows adapted to a one-person operator — a standard menu of delegation patterns: what to hand off, at which runtime tier, with what artifact."
 load_when: "Read when deciding which recurring knowledge work to hand the agent, or building a personal delegation menu."
@@ -33,6 +33,10 @@ runtime axis (conversational / supervised session / autonomous code).
 3. **Recurring report** — generate the same-shape weekly/monthly report from its
    sources. Tier: supervised session + scheduled trigger. Artifact: a
    structured report.
+   Externally validated: spreadsheet → weekly report, log/metric watch →
+   anomaly brief ("New in Claude Managed Agents", 2026-06-09, by-reference).
+   Operating contract for scheduled runs:
+   `policies/work-delegation-and-startup.md` SCHEDULED_RUN_CONTRACT.
 4. **Inbox / issue triage** — classify and prioritize incoming items and attach
    draft responses. Tier: supervised session. Artifact: a sorted queue + draft
    replies.

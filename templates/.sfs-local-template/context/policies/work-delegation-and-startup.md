@@ -78,6 +78,24 @@ Scheduling is a trigger, never a methodology bypass: a scheduled or long-running
 run still obeys the same gates, and unattended runs keep the human-boundary
 constraints (`policies/harness-autonomy.md`).
 
+### SCHEDULED_RUN_CONTRACT
+
+A scheduled or recurring job is operable only when it satisfies this contract
+(pattern externally validated by managed scheduled agents — "New in Claude
+Managed Agents", 2026-06-09, by-reference; Solon's own unattended runners
+already run this way):
+
+1. **Every fire is a fresh session.** No implicit memory between runs — all
+   inter-run state travels through files the job owns (a seen/state file, a
+   pending queue, a handoff doc). If two runs need to coordinate, they do it
+   through those files, never through assumed session carryover.
+2. **Four operational controls exist**: pause, resume, archive (retire), and
+   on-demand trigger. A scheduled job the operator cannot pause or fire
+   manually for a one-off run is not an operated job — it is an unowned loop.
+3. **Credentials by indirection only.** The job's prompt/skill file is a
+   durable agent-visible surface; real keys arrive via environment at spawn
+   (`policies/credential-hygiene.md`).
+
 ## CROSS_REFERENCES
 
 - Ask-vs-guess and scoped overrides: `user-override-precedence.md`.
@@ -85,6 +103,7 @@ constraints (`policies/harness-autonomy.md`).
 - Host-agnostic entry + channel cheat sheet: `docs/maintenance/methodology-7-step.md`.
 - Operator preferences that bias autonomy/ask: `user-context-separation.md`.
 - Bookend daily operating loop: `commands/daily.md`.
+- Credential handling for unattended/scheduled runs: `credential-hygiene.md`.
 - Standard delegation repertoire (workflow catalog):
   `docs/{ko,en}/current-product-shape/26-delegation-repertoire.md`.
 </content>

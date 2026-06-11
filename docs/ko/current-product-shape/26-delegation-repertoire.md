@@ -4,7 +4,7 @@ title: "표준 위임 레퍼토리 — 1인 운영자용"
 visibility: oss-public
 doc_type: product-reference
 language: ko
-updated: 2026-06-07
+updated: 2026-06-11
 parent: docs/ko/current-product-shape.md
 summary: "공식 공통 워크플로를 1인 운영자 맥락으로 번안한 표준 위임 패턴 모음 — 무엇을, 어느 런타임 티어에, 어떤 산출물로 위임할지."
 load_when: "Read when deciding which recurring knowledge work to hand the agent, or building a personal delegation menu."
@@ -29,6 +29,9 @@ load_when: "Read when deciding which recurring knowledge work to hand the agent,
    티어: 감독형 세션. 산출물: 1쪽 결정 노트.
 3. **반복 리포트** — 같은 형식의 주간/월간 보고를 소스에서 자동 생성.
    티어: 감독형 세션 + 스케줄 트리거. 산출물: 정형 리포트.
+   외부 검증 사례: 스프레드시트 → 주간 리포트, 로그/메트릭 watch → 이상 보고
+   ("New in Claude Managed Agents", 2026-06-09, by-reference). 스케줄 실행의
+   운영 계약은 `policies/work-delegation-and-startup.md` SCHEDULED_RUN_CONTRACT.
 4. **인박스/이슈 트리아지** — 들어온 항목을 분류·우선순위화하고 초안 응답을 단다.
    티어: 감독형 세션. 산출물: 분류된 큐 + 응답 초안.
 5. **소스 기반 초안** — 기존 문서/노트를 근거로 새 발신물(메일·공지·문서) 작성.
