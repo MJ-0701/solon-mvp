@@ -36,6 +36,12 @@ Credential handling becomes an explicit policy — agent-visible surfaces carry 
 - **vendor 플랫폼 기능(vault/managed scheduling 자체)은 보류했습니다.**
   일반화 가능한 원칙 2개만 by-reference 로 승격했고, solon 의 기존 무인 러너
   패턴은 외부 검증 사례로 등재했습니다.
+- **(사후 hardening)** MCP/host 설정 파일(`.mcp.json`, `settings.json` env
+  블록)도 placeholder-only 표면으로 명시, env 키를 echo/출력시키려는 지시
+  (가져온 콘텐츠 속 지시 포함)는 injection 으로 취급, provider 가 지원하면
+  short-lived 자격증명 우선, gitleaks-류 스캐너는 선택 사항으로 언급.
+  그리고 "live key grep match = finding" 규칙을 이 repo 자신에게도
+  적용하는 스캔이 headline test 에 들어갔습니다.
 
 ---
 

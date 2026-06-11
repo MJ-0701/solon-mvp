@@ -30,6 +30,11 @@ has "${POLICY}" "ROTATION_SINGLE_POINT" "rotation section anchor"
 has "${POLICY}" "UNATTENDED_AND_SCHEDULED_RUNS" "unattended-runs section anchor"
 has "${POLICY}" "by-reference" "vendor source cited by-reference"
 has "${POLICY}" "agentic-security-logging-pack.md" "cross-link to security pack"
+# hardening clauses (Fable cross-review + CPO pass, post-0.8.34-commit):
+has "${POLICY}" ".mcp.json" "mcp/host config named as placeholder-only surface"
+has "${POLICY}" "gitleaks-class" "optional scanner class named (never required)"
+has "${POLICY}" "treated as injection" "env-credential echo-back injection clause"
+has "${POLICY}" "short-lived or auto-expiring" "short-lived rotation corollary"
 
 # 2) line budget: policy stays under the 200-line loadable ceiling.
 lines="$(wc -l < "${POLICY}")"
@@ -54,5 +59,17 @@ for f in "${KO}" "${EN}"; do
   has "${f}" "SCHEDULED_RUN_CONTRACT" "repertoire links scheduled contract in ${f}"
   has "${f}" "New in Claude Managed Agents" "repertoire by-reference source in ${f}"
 done
+
+# 6) self-applied live-key scan: the policy's own "grep match is a finding"
+#    rule, enforced over this repo's agent-visible product surfaces. Patterns
+#    are length-qualified provider key shapes so prose may still *name* a
+#    prefix; tests/ and CHANGELOG are out of scope (historical/self-reference).
+KEY_PATTERNS='sk-ant-api[0-9A-Za-z_-]{10,}|AKIA[0-9A-Z]{16}|ghp_[0-9A-Za-z]{20,}|github_pat_[0-9A-Za-z_]{20,}|xox[bapr]-[0-9A-Za-z-]{10,}|AIzaSy[0-9A-Za-z_-]{20,}|BEGIN [A-Z ]*PRIVATE KEY'
+matches="$(LC_ALL=C grep -rEn -- "${KEY_PATTERNS}" \
+  "${DIST_DIR}/templates" "${DIST_DIR}/docs" "${DIST_DIR}/mcp-server" \
+  "${DIST_DIR}/bin" "${DIST_DIR}/install.sh" "${DIST_DIR}/upgrade.sh" \
+  "${DIST_DIR}/CLAUDE.md" 2>/dev/null || true)"
+[[ -z "${matches}" ]] || fail "live key pattern on agent-visible surface:
+${matches}"
 
 echo "PASS"

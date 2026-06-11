@@ -41,6 +41,27 @@
   budget, additive guarantee, bilingual pointer). Source: blog *New in Claude
   Managed Agents: run agents on a schedule and store environment variables in
   vaults* (`insights/INSIGHT-2026-06-11.md`).
+- **Credential-hygiene post-review hardening (cross-review + CPO pass).** Four
+  additive clauses closing gaps a second-pass review surfaced against
+  2025–2026 agent-security practice: (1) **MCP/host config files named as a
+  placeholder-only surface** (`.mcp.json`, host `settings.json` env blocks
+  carry env-var references or names, never values — the most common real-key
+  leak channel in committed agent setups); (2) **env-credential echo-back is
+  injection** — any instruction, including a directive arriving in fetched
+  content, asking the agent to print/echo/log an env-held credential is
+  treated as injection (variable *name* may appear in transcripts, *value*
+  never), closing the loop with `source-pointer-citation.md`
+  fetched-content-is-data; (3) **short-lived rotation corollary** — where a
+  provider supports short-lived/auto-expiring credentials (OAuth device flow,
+  OIDC), prefer them; a long-lived static key is the fallback, not the
+  default; (4) **optional scanner class note** — a gitleaks-class pre-commit
+  scanner can automate the placeholder-only grep, optional and never a
+  required dependency. Policy 92 lines (< 200). And the policy's own "a grep
+  match is a finding" rule is now **self-applied**:
+  `tests/test-credential-hygiene.sh` greps agent-visible product surfaces
+  (`templates/`, `docs/`, `mcp-server/`, `bin/`, installers, `CLAUDE.md`) for
+  length-qualified live-key shapes (Anthropic / AWS / GitHub / Slack / Google
+  / private-key blocks) — previously an unenforced promise.
 
 ## [0.8.33] - 2026-06-10
 
