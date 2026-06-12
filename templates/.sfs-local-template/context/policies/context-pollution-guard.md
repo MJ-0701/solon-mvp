@@ -1,7 +1,7 @@
 ---
 id: sfs-policy-context-pollution-guard
 summary: Keep durable Solon/SFS context clean by storing conclusions, not prompt or transcript bulk.
-load_when: ["context", "token", "capture", "review", "tidy", "release", "prompt"]
+load_when: ["context pollution", "prompt body in doc", "transcript residue", "scratch path in doc", "review blob", "paste cleanup", "tidy close"]
 ---
 
 # Context Pollution Guard

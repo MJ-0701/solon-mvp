@@ -23,7 +23,7 @@ load_when: "Read when this product document is directly relevant."
 3. 작업 종류 결정:
    - **`install.sh` / `upgrade.sh` / `uninstall.sh` 변경** → CLAUDE.md "수정 시 체크리스트" 준수.
    - **`templates/` 변경** → consumer 호환성 영향 평가, placeholder 형식 유지.
-   - **새 release cut** → private dev staging checkout 의 `scripts/cut-release.sh` 에서 진행 (본 repo 에는 cut tooling 없음).
+   - **새 release cut** → 본 repo 에서 직접: `scripts/sfs-release-sequence.sh` (AC11 phases) + 수동 채널 publish + `scripts/verify-product-release.sh`. 절차 SSoT 는 `docs/maintenance/release-policy.md` (dev-staging `cut-release.sh` 경유는 2026-06-06 폐기).
 
 ## 비동작 (Non-Goals)
 

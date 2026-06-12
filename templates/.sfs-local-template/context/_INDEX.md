@@ -66,6 +66,7 @@ module:
 - `policies/obsidian-llm-wiki.md` — recommended Obsidian LLM wiki setup for SFS project continuity.
 - `policies/ddd-tdd-knowledge-pack.md` — DDD/TDD baseline for project scaffolds and implementation.
 - `policies/review-lens-routing.md` — review lens aliases and split knowledge-pack loading.
+- `policies/agent-build-review-lens.md` — review lens for work shipping AI agents / MCP servers / sub-agent harnesses (`lens:agent-build`); failure modes generic code review misses.
 - `policies/knowledge-pack-router.md` — knowledge pack / review lens router (English).
 - `policies/knowledge-pack-router.ko.md` — knowledge pack / review lens router (Korean).
 - `policies/enterprise-agent-team-pack.md` — enterprise 6-division agent team parent pack.
@@ -80,6 +81,7 @@ module:
 - `policies/lean-procedure-refactor-pack.md` — keep/shrink/remove procedural bottleneck review.
 - `policies/*-knowledge-pack.md` — English compact guidance packs for each lens/pack.
 - `policies/*-knowledge-pack.ko.md` — Korean compact guidance packs for each lens/pack.
+- `policies/*.ko.md` (general rule) — every `*.ko.md` is the Korean mirror of its same-named en policy; load the mirror when the session/workspace language is Korean. Mirrors carry the same section anchors as their en counterpart.
 - `policies/*-knowledge-pack-*.md` — split child packs loaded only after a parent pack activates matching ids.
 - Backend split children: `backend-knowledge-pack-runtime*`, `backend-knowledge-pack-transactions*`, `backend-knowledge-pack-integration*`, `backend-knowledge-pack-operating*`.
 - Design split children: `design-knowledge-pack-operating*`.

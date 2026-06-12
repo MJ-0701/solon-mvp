@@ -46,7 +46,7 @@ Usage:
 Verifies the durable-handoff mandatory sync surface (9 items) from
 session-transfer-autopilot.md. The product VERSION/CHANGELOG (items 1-2) and the
 operational ledger (PROGRESS.md, HANDOFF-next-session.md, sessions/_INDEX.md,
-items 3-8) frequently live in *different* repos under the R-D1 dual-repo layout.
+items 3-8) frequently live in *different* repos under the dual-repo layout (product repo + docset).
 
   --dir <root>         set both product and docset roots (default: ".")
   --product-dir <path> product repo holding VERSION + CHANGELOG.md

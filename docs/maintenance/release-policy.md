@@ -97,9 +97,11 @@ skills, hooks, permissions, local routed-context override 가 더 이상 도움�
 - 점검 범위: root agent adapter, `SFS.md`, installed skills/hooks/plugins,
   permissions, `.sfs-local/context/` overrides, project maps, test/lint command
   scope.
-- 처리 원칙: thin adapter 는 frontmatter pointer 로 유지하고, stale workaround
-  instruction 은 삭제/완화하며, durable policy 는 routed context 또는
-  `docs/maintenance/` 로 옮긴다.
+- 처리 원칙: thin adapter 는 frontmatter pointer 로 유지하고, durable policy 는
+  routed context 또는 `docs/maintenance/` 로 옮긴다. **stale workaround
+  instruction 의 제거는 임의 삭제가 아니라** routed context
+  `policies/model-workaround-sunset.md` 의 tagged sunset review (keep /
+  retire / generalize, archive-never-silent-delete) 를 거친다.
 - 근거 기록: sprint report / `docs/solon/...` maintenance note / CHANGELOG 중
   현재 작업 표면에 맞는 곳에 review date, trigger, removed stale rule, retained
   critical gotcha 를 남긴다.
@@ -109,15 +111,25 @@ Historical evidence: Anthropic, "How Claude Code works in large codebases"
 unnecessary or constraining and recommends meaningful config review every
 three to six months or after major model releases.
 
-## R-D1 dev-first 원칙
+## Release cut 절차 (R-D1 dev-first 는 2026-06-06 폐기)
 
-본 repo 는 maintainer 의 dev staging 에서 release cut 된 stable mirror 이므로:
+본 repo 가 SSoT 다 — 변경은 본 repo 에 직접 commit 하고, release cut 도 본
+repo 에서 수행한다. (구 R-D1 dev-first 원칙 — dev staging 에서 작성 후
+`cut-release.sh` 로 forward-sync — 은 2026-06-06 `solon-mvp-dist` 미러
+제거와 함께 폐기됐다. historical changelog 에만 남는다.)
 
-- 본 repo 에 직접 commit 하지 말고, dev staging 에서 변경 후 release cut
-  으로 sync 받는다.
-- 예외 (hotfix path): 사용 중 stable 에서 발견된 critical bug 만 stable
-  직접 수정 허용. 단 같은 사이클 안 dev staging 에 동일 변경 반영
-  (`sync(stable): <sha>` commit message 패턴).
+현행 cut 시퀀스 (0.8.34-36 에서 검증):
+
+1. `git push origin main` (default branch push 가 `Fixes #N` 을 닫는다).
+2. `scripts/sfs-release-sequence.sh --phase tag-push|audit --version X.Y.Z`.
+3. 수동 채널 publish: GitHub archive tar/zip sha256 계산 → `packaging/`
+   템플릿을 Homebrew tap / Scoop bucket 클론에 렌더 → commit + push.
+   (`SOLON_RELEASE_BOT_TOKEN` 있으면 workflow dispatch 가능 — preflight 가
+   판정.)
+4. `--phase tap-update` 마커 → 로컬 brew tap pull → `--phase post-audit`
+   (`brew audit --strict --online sfs`).
+5. `scripts/verify-product-release.sh --version X.Y.Z` 로 출하 검증
+   (VERSION / tag / 4 phase markers / 채널 manifest / 설치본).
 
 ## 관련 산출물
 

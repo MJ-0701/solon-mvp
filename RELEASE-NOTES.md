@@ -13,6 +13,37 @@
 
 ---
 
+## 0.8.37
+
+The upgrade path stops silently skipping runtime adapters and the release runbook becomes executable — upgrade enumerates runtime scripts dynamically (eight adapters were never refreshed before), post-publish verification ships as a script instead of prose, release guidance catches up to the in-repo cut, and a coherence pass closes the routed-context conflicts a full repo+wiki audit surfaced.
+
+체감 변화:
+
+- **(버그픽스) vendored 업그레이드가 runtime 어댑터 8종을 영영 안 갱신하던
+  문제 수정.** upgrade.sh 의 하드코딩 19종 목록이 템플릿 27종을 못 따라가
+  capture/event/flowcheck/ingest/profile/recall/report-bug/tidy 가 갱신에서
+  빠져 있었습니다. context/ 모듈이 받았던 동적 열거 수정과 같은 방식으로
+  고정 — 새 어댑터는 이제 누락될 수 없습니다.
+- **출하 검증이 스크립트가 됐습니다.** preflight 가 안내만 하던
+  `scripts/verify-product-release.sh` 실물 출하 — VERSION/tag/4 phase
+  marker/채널 manifest/설치본을 로컬 증거만으로 일괄 판정 (0.8.34-36 에서
+  수동 반복하던 시퀀스의 코드화).
+- **릴리스 안내문이 현실을 따라잡았습니다.** "이 repo 엔 cut tooling 없음"
+  류 폐기된 R-D1 안내 (AGENTS.md / release-policy / release-sequence 출력문)
+  전부 in-repo cut 절차로 교체.
+- **routed context 정합성 패스.** workaround 수명관리 이중 소유 해소
+  (adapter-refactor → sunset review 경유), orphan 이던 agent-build 리뷰 렌즈
+  라우팅 복구, 과잉 발화하던 load_when 3건 trigger-centric 재작성 ("token"
+  한 단어에 ~300줄 hygiene 정책 동시 로드되던 것 차단), headless
+  orchestrator 게이트에 typed-surface 집행 인용, 핸드오프 픽업 시 이벤트
+  원장 대조 의무 명시.
+- **테스트 스위트 강화.** per-test 워치독 (걸린 테스트 1개가 스위트 전체를
+  못 멈추게) + 미분류 bucket 46건 → 가족 패턴 분류 + ceiling 잠금.
+- **Tier-2 백로그 등재.** command registry / 공용 lib / upgrade.sh 분해 /
+  200줄 정리는 CHANGELOG Deferred 절에 명시 등록.
+
+---
+
 ## 0.8.36
 
 Prompt surfaces become cache surfaces and capability claims get a review rail — routed context loads static-first/dynamic-last with updates by append (never in-place edits), every model upgrade asks what the harness can stop doing with handovers tested not assumed, and boundary actions get typed declarative surfaces the harness can intercept and audit, not prose instructions.

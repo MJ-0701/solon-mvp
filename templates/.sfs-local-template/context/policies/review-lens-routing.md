@@ -46,6 +46,9 @@ commands:
   triggers when a diff touches `domain-knowledge-assets` or `llm-wiki/ddd/`.
   Load `domain-ontology-discipline.md` for the entity-change checklist and the
   reconciliation gate across assets, wiki, and tests.
+- `agent-build`: work that ships AI agents, MCP servers, or sub-agent
+  harnesses; loads `agent-build-review-lens.md` for the failure modes generic
+  code review misses (tool-surface, capsule contract, prompt-injection seams).
 - `flow-conformance`: postflight methodology-conformance lens; calls
   `sfs flowcheck` and loads `flow-conformance-postflight.md` to assert the FCP
   invariants (model-tier / conflict-surfaced / gate-order / stop-the-line /

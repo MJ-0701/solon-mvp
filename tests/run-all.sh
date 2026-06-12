@@ -30,6 +30,7 @@ categorize() {
       | test-solon-safe-permissions-preset.sh \
       | test-agent-build-review-lens.sh \
       | test-claude-agent-sdk-zero-template.sh \
+      | test-mcp-tool-zero-template.sh \
       | test-bootstrap-template-flag.sh \
       | test-install-completion-hints.sh \
       | test-harness-host-channel-surface.sh \
@@ -42,6 +43,7 @@ categorize() {
     test-version-release-headline.sh \
       | test-docs-division-version-sync.sh \
       | test-release-*.sh \
+      | test-cut-release-*.sh \
       | test-upgrade-freshness-summary.sh)
       printf 'release\n'
       ;;
@@ -56,6 +58,12 @@ categorize() {
       | test-sfs-implement-plan-review-*.sh \
       | test-postdev-review-*.sh \
       | test-runtime-token-firewall.sh \
+      | test-flowcheck-*.sh \
+      | test-ralph-loop-flowcheck.sh \
+      | test-pr-review-flow-check.sh \
+      | test-verifier-context-split-docs.sh \
+      | test-evidence-at-risk-guard.sh \
+      | test-nondeveloper-safety-gates.sh \
       | test-auth-probe-liveness.sh)
       printf 'review\n'
       ;;
@@ -67,6 +75,12 @@ categorize() {
       | test-context-md-split-frontmatter.sh \
       | test-status-dashboard-contract.sh \
       | test-friendly-ux-contract.sh \
+      | test-wiki-*.sh \
+      | test-llm-wiki-*.sh \
+      | test-md-*.sh \
+      | test-html-artifact-skills.sh \
+      | test-founder-model-routing-docs.sh \
+      | test-doc-colocation-provenance.sh \
       | test-design-system-anti-slop.sh)
       printf 'doc-and-context\n'
       ;;
@@ -93,10 +107,36 @@ categorize() {
       | test-solon-advancement-scorecard.sh \
       | test-docs-model-routing.sh \
       | test-ai-work-intake-routing.sh \
-      | test-print-matrix-schema.sh)
+      | test-*-policy.sh \
+      | test-*-discipline.sh \
+      | test-*-guardrails.sh \
+      | test-*-hygiene.sh \
+      | test-*-lens.sh \
+      | test-*-lens-lock.sh \
+      | test-*-loop.sh \
+      | test-*-contract.sh \
+      | test-skill-*.sh \
+      | test-pack-*.sh \
+      | test-credential-hygiene.sh \
+      | test-model-workaround-sunset.sh \
+      | test-cache-aware-prompt-layout.sh \
+      | test-delegation-repertoire.sh \
+      | test-brainstorm-deep-interview.sh \
+      | test-work-delegation-and-startup.sh \
+      | test-user-context-separation.sh \
+      | test-external-orchestrator-entry.sh \
+      | test-thin-client-source-pointer.sh)
       printf 'hygiene-and-policy\n'
       ;;
     test-sfs-*.sh \
+      | test-handoff-*.sh \
+      | test-recall-*.sh \
+      | test-daily-*.sh \
+      | test-find-bsd-portability.sh \
+      | test-packaged-tests-no-parent-hard-assert.sh \
+      | test-run-all-categorization.sh \
+      | test-path-scoped-stop-hook.sh \
+      | test-operational-log-lag-detector.sh \
       | test-session-continuation-token-guard.sh \
       | test-sessions-index-retro-complete.sh \
       | test-backup-manifest-schema.sh \
@@ -144,11 +184,40 @@ bump_category() {
   fi
 }
 
+# Per-test watchdog (portable bash-3.2, no GNU timeout): one hung test must
+# not wedge the whole suite. Override with SFS_TEST_TIMEOUT_SEC.
+TEST_TIMEOUT_SEC="${SFS_TEST_TIMEOUT_SEC:-120}"
+run_test_with_timeout() {
+  local t="$1"
+  bash "${t}" &
+  local pid=$!
+  # 1s poll slices: the watcher exits on its own when the test finishes,
+  # so fast tests do not accumulate orphaned long sleeps (CPO D, 0.8.37).
+  (
+    i=0
+    while [ "${i}" -lt "${TEST_TIMEOUT_SEC}" ]; do
+      sleep 1
+      kill -0 "${pid}" 2>/dev/null || exit 0
+      i=$((i + 1))
+    done
+    kill "${pid}" 2>/dev/null
+  ) &
+  local watcher=$!
+  local rc=0
+  wait "${pid}" || rc=$?
+  kill "${watcher}" 2>/dev/null
+  wait "${watcher}" 2>/dev/null || true
+  if [[ "${rc}" -ge 128 ]]; then
+    printf '  (timeout/killed after %ss)\n' "${TEST_TIMEOUT_SEC}"
+  fi
+  return "${rc}"
+}
+
 for t in test-*.sh; do
   [[ -f "${t}" ]] || continue
   category="$(categorize "${t}")"
   printf '\n=== %s [%s] ===\n' "${t}" "${category}"
-  if bash "${t}"; then
+  if run_test_with_timeout "${t}"; then
     pass=$((pass + 1))
     bump_category "${category}" PASS
     printf '  PASS\n'

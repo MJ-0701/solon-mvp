@@ -1,7 +1,7 @@
 ---
 id: sfs-policy-runtime-token-firewall
 summary: Capsule-only handoff rules for worker, reviewer, and external executor bridges.
-load_when: ["token", "harness", "worker", "review", "executor", "bridge", "Claude", "Codex", "Gemini"]
+load_when: ["capsule", "handoff capsule", "worker dispatch", "delegate to worker", "reviewer handoff", "executor", "bridge", "full history forwarding"]
 ---
 
 # Runtime Token Firewall

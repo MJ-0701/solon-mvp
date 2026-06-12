@@ -450,6 +450,18 @@ list_managed_context_rels() {
   )
 }
 
+list_managed_script_rels() {
+  # scripts/ twin of list_managed_context_rels: enumerate runtime adapters
+  # dynamically so a new sfs-*.sh can never be missed by a hard-coded upgrade
+  # list (0.8.34-era audit: 8 adapters were silently never refreshed).
+  local scripts_root="$SOURCE_DIR/templates/.sfs-local-template/scripts"
+  [ -d "$scripts_root" ] || return 0
+  (
+    cd "$scripts_root" || exit 0
+    find . -type f \( -name '*.sh' -o -name '*.ps1' \) -print 2>/dev/null | sed 's#^\./##' | sort
+  )
+}
+
 repair_missing_context_router_targets() {
   local target_context="$TARGET/.sfs-local/context"
   local rel src dst repaired=0
@@ -1965,25 +1977,10 @@ declare -a CHECK_FILES=(
   # context/ modules are appended dynamically from templates/.sfs-local-template/context
   # below so new routed policies cannot be missed by a hard-coded upgrade list.
   ".sfs-local/GUIDE.md|GUIDE.md"
-  # scripts/ — Solon-versioned bash adapters (executable, user 수정 영역 아님)
-  ".sfs-local/scripts/sfs-dispatch.sh|templates/.sfs-local-template/scripts/sfs-dispatch.sh"
-  ".sfs-local/scripts/sfs.ps1|templates/.sfs-local-template/scripts/sfs.ps1"
-  ".sfs-local/scripts/sfs-common.sh|templates/.sfs-local-template/scripts/sfs-common.sh"
-  ".sfs-local/scripts/sfs-status.sh|templates/.sfs-local-template/scripts/sfs-status.sh"
-  ".sfs-local/scripts/sfs-start.sh|templates/.sfs-local-template/scripts/sfs-start.sh"
-  ".sfs-local/scripts/sfs-guide.sh|templates/.sfs-local-template/scripts/sfs-guide.sh"
-  ".sfs-local/scripts/sfs-auth.sh|templates/.sfs-local-template/scripts/sfs-auth.sh"
-  ".sfs-local/scripts/sfs-adopt.sh|templates/.sfs-local-template/scripts/sfs-adopt.sh"
-  ".sfs-local/scripts/sfs-brainstorm.sh|templates/.sfs-local-template/scripts/sfs-brainstorm.sh"
-  ".sfs-local/scripts/sfs-plan.sh|templates/.sfs-local-template/scripts/sfs-plan.sh"
-  ".sfs-local/scripts/sfs-implement.sh|templates/.sfs-local-template/scripts/sfs-implement.sh"
-  ".sfs-local/scripts/sfs-review.sh|templates/.sfs-local-template/scripts/sfs-review.sh"
-  ".sfs-local/scripts/sfs-decision.sh|templates/.sfs-local-template/scripts/sfs-decision.sh"
-  ".sfs-local/scripts/sfs-report.sh|templates/.sfs-local-template/scripts/sfs-report.sh"
-  ".sfs-local/scripts/sfs-healthcheck.sh|templates/.sfs-local-template/scripts/sfs-healthcheck.sh"
-  ".sfs-local/scripts/sfs-retro.sh|templates/.sfs-local-template/scripts/sfs-retro.sh"
-  ".sfs-local/scripts/sfs-commit.sh|templates/.sfs-local-template/scripts/sfs-commit.sh"
-  ".sfs-local/scripts/sfs-loop.sh|templates/.sfs-local-template/scripts/sfs-loop.sh"
+  # scripts/ — Solon-versioned bash adapters (executable, user 수정 영역 아님).
+  # Appended dynamically from templates/.sfs-local-template/scripts below
+  # (list_managed_script_rels) so new runtime adapters cannot be missed by a
+  # hard-coded upgrade list — the same fix context/ modules received.
   # sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용
   ".sfs-local/sprint-templates/brainstorm.md|templates/.sfs-local-template/sprint-templates/brainstorm.md"
   ".sfs-local/sprint-templates/plan.md|templates/.sfs-local-template/sprint-templates/plan.md"
@@ -2010,6 +2007,10 @@ while IFS= read -r rel; do
   [ -n "$rel" ] || continue
   CHECK_FILES+=(".sfs-local/context/${rel}|templates/.sfs-local-template/context/${rel}")
 done < <(list_managed_context_rels)
+while IFS= read -r rel; do
+  [ -n "$rel" ] || continue
+  CHECK_FILES+=(".sfs-local/scripts/${rel}|templates/.sfs-local-template/scripts/${rel}")
+done < <(list_managed_script_rels)
 
 for pair in "${CHECK_FILES[@]}"; do
   dst_rel="${pair%%|*}"
@@ -2531,25 +2532,10 @@ fi
 # scripts/ — Solon-versioned bash adapters (codex finding #4 후속, 25th-6 보강)
 # 신규: sfs-loop / sfs-decision / sfs-retro (0.4.0-mvp 추가 슬롯) + sfs-guide (0.5.2-product)
 mkdir -p "$TARGET/.sfs-local/scripts"
-update_file ".sfs-local/scripts/sfs-dispatch.sh" "templates/.sfs-local-template/scripts/sfs-dispatch.sh" "sfs dispatch compatibility layer" "b"
-update_file ".sfs-local/scripts/sfs.ps1"        "templates/.sfs-local-template/scripts/sfs.ps1"        "Windows PowerShell wrapper" "b"
-update_file ".sfs-local/scripts/sfs-common.sh"   "templates/.sfs-local-template/scripts/sfs-common.sh"   "sfs-common (shared helpers)" "b"
-update_file ".sfs-local/scripts/sfs-status.sh"   "templates/.sfs-local-template/scripts/sfs-status.sh"   "sfs status"   "b"
-update_file ".sfs-local/scripts/sfs-start.sh"    "templates/.sfs-local-template/scripts/sfs-start.sh"    "sfs start"    "b"
-update_file ".sfs-local/scripts/sfs-guide.sh"    "templates/.sfs-local-template/scripts/sfs-guide.sh"    "sfs guide"    "b"
-update_file ".sfs-local/scripts/sfs-auth.sh"     "templates/.sfs-local-template/scripts/sfs-auth.sh"     "sfs auth"     "b"
-update_file ".sfs-local/scripts/sfs-division.sh" "templates/.sfs-local-template/scripts/sfs-division.sh" "sfs division activation" "b"
-update_file ".sfs-local/scripts/sfs-adopt.sh"    "templates/.sfs-local-template/scripts/sfs-adopt.sh"    "sfs adopt (legacy baseline intake)" "b"
-update_file ".sfs-local/scripts/sfs-brainstorm.sh" "templates/.sfs-local-template/scripts/sfs-brainstorm.sh" "sfs brainstorm" "b"
-update_file ".sfs-local/scripts/sfs-plan.sh"     "templates/.sfs-local-template/scripts/sfs-plan.sh"     "sfs plan"     "b"
-update_file ".sfs-local/scripts/sfs-implement.sh" "templates/.sfs-local-template/scripts/sfs-implement.sh" "sfs implement" "b"
-update_file ".sfs-local/scripts/sfs-review.sh"   "templates/.sfs-local-template/scripts/sfs-review.sh"   "sfs review"   "b"
-update_file ".sfs-local/scripts/sfs-decision.sh" "templates/.sfs-local-template/scripts/sfs-decision.sh" "sfs decision (WU-26)" "b"
-update_file ".sfs-local/scripts/sfs-report.sh"   "templates/.sfs-local-template/scripts/sfs-report.sh"   "sfs report (final report + compaction)" "b"
-update_file ".sfs-local/scripts/sfs-healthcheck.sh" "templates/.sfs-local-template/scripts/sfs-healthcheck.sh" "sfs healthcheck" "b"
-update_file ".sfs-local/scripts/sfs-retro.sh"    "templates/.sfs-local-template/scripts/sfs-retro.sh"    "sfs retro close flow" "b"
-update_file ".sfs-local/scripts/sfs-commit.sh"   "templates/.sfs-local-template/scripts/sfs-commit.sh"   "sfs commit" "b"
-update_file ".sfs-local/scripts/sfs-loop.sh"     "templates/.sfs-local-template/scripts/sfs-loop.sh"     "sfs loop (WU-27 spec)" "b"
+while IFS= read -r rel; do
+  [ -n "$rel" ] || continue
+  update_file ".sfs-local/scripts/${rel}" "templates/.sfs-local-template/scripts/${rel}" "sfs runtime script (${rel})" "b"
+done < <(list_managed_script_rels)
 chmod +x "$TARGET/.sfs-local/scripts"/*.sh 2>/dev/null || true
 
 # sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용

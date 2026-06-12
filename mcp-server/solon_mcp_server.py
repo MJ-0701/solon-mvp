@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import os
 import shutil
+import sys
 import subprocess
 import time
 from typing import Optional
@@ -63,7 +64,13 @@ except ImportError as exc:  # pragma: no cover
 mcp = FastMCP("solon")
 
 
-SFS_MCP_TIMEOUT_SEC = int(os.environ.get("SOLON_MCP_TIMEOUT_SEC", "300"))
+try:
+    SFS_MCP_TIMEOUT_SEC = int(os.environ.get("SOLON_MCP_TIMEOUT_SEC", "300"))
+except ValueError:
+    # A malformed override must degrade to the default, not kill host
+    # registration with an import-time traceback.
+    print("solon-mcp: invalid SOLON_MCP_TIMEOUT_SEC, using 300", file=sys.stderr)
+    SFS_MCP_TIMEOUT_SEC = 300
 
 
 def _tool_label(args: list[str]) -> str:

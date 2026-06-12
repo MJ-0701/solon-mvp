@@ -1765,8 +1765,8 @@ Subcommands:
                                  (VERSION/CHANGELOG) read from the product repo,
                                  items 3-8 (PROGRESS/HANDOFF/sessions) from the
                                  docset. --dir sets both (default ".");
-                                 --product-dir / --docset-dir split the R-D1
-                                 dual-repo layout; PROGRESS.md frontmatter
+                                 --product-dir / --docset-dir split the
+                                 dual-repo layout (product + docset); PROGRESS.md frontmatter
                                  `product_repo_path:` is the product fallback.
                                  Any mismatch exits 1. Run before transferring a
                                  session so the next one starts in sync.

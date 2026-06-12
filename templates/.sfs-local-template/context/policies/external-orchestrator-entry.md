@@ -89,6 +89,12 @@ on its own authority:
 A gate that needs human judgment stays human-owned; the orchestrator surfaces
 and waits.
 
+These gate-bypass actions are boundary actions in the
+`critical-rule-hook-promotion.md` DECLARATIVE_BOUNDARY_SURFACE sense: where
+the host supports it, enforce them as Tier B/C typed surfaces (permission
+deny, pre-tool hook, gate check) rather than relying on this prose alone — a
+headless orchestrator is exactly where prose can only be hoped about.
+
 ## First-permission read-only
 
 An orchestrator's first authorized scope is read-only (inspect status, recall,

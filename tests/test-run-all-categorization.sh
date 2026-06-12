@@ -100,4 +100,21 @@ grep -qF 'by category:' "${RUN_ALL}" \
 grep -qF 'cat_keys' "${RUN_ALL}" \
   || fail "run-all.sh must keep the cat_keys parallel-array bookkeeping"
 
+# ── 11) other-bucket ceiling (AUDIT-2026-06-12): the fallthrough bucket
+#       had grown to 46/186 — the per-category breakdown loses meaning
+#       when the biggest bucket is "uncategorized". New test families
+#       must either match an existing pattern or add one. ─────────────
+other_count=0
+for t in "${SCRIPT_DIR}"/test-*.sh; do
+  name="$(basename "${t}")"
+  [[ "$(categorize "${name}")" == "other" ]] && other_count=$((other_count + 1))
+done
+[[ "${other_count}" -le 15 ]] \
+  || fail "other bucket has ${other_count} tests (ceiling 15) — add a categorize() pattern for the new family"
+
+# ── 12) per-test watchdog stays wired (one hung test must not wedge
+#       the suite). ───────────────────────────────────────────────────
+grep -qF 'run_test_with_timeout' "${RUN_ALL}" \
+  || fail "run-all.sh must keep the per-test watchdog wrapper"
+
 echo "test-run-all-categorization: OK"

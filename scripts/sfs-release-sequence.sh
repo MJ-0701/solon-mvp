@@ -137,8 +137,9 @@ case "${phase}" in
           # 0.6.5 hotfix: when the formula still carries the cut-release
           # placeholder for sha256, `brew style` flags the placeholder string
           # itself as 3 separate lint errors (length / chars / case). This is
-          # noise in the pre-cut state — the real sha256 only lands during
-          # tap-update via scripts/cut-release.sh in dev staging. We therefore
+          # noise in the pre-cut state — the real sha256 only lands in the
+          # channel manifests during manual channel publish (in-place tap/
+          # bucket edit, docs/maintenance/release-policy.md). We therefore
           # detect the placeholder and skip `brew style` with an informative
           # message, while still running scoop schema validation.
           # NOTE: the full strict + online audit (URL availability, license
@@ -171,17 +172,19 @@ case "${phase}" in
     if [[ "${dry_run}" == "1" ]]; then
       printf '[dry-run] tap-update is delegated to dev staging cut-release (this stub only marks the order gate)\n'
     else
-      # 0.6.6: this phase is intentionally a stub in the stable mirror repo.
-      # The real tap update (materialize sha256 in formula, push to homebrew
-      # tap repo + scoop bucket) is performed by `scripts/cut-release.sh` in
-      # the private dev staging checkout (see AGENTS.md). The earlier message
-      # "invoke tap-update helper (release tool integration point)" was too
-      # cryptic; this version states the delegation explicitly so users
-      # don't expect the local script to push anything.
+      # This phase is intentionally a marker-only stub: the real tap update
+      # (compute archive sha256, render packaging/ templates into the channel
+      # clones, commit + push) is the manual channel-publish procedure in
+      # docs/maintenance/release-policy.md. cut-release.sh delegation was
+      # retired 2026-06-06; the message below states the manual procedure so
+      # users don't expect the local script to push anything.
       cat >&2 <<EOF
-${SCRIPT_NAME}: tap-update phase — stub (this repo is the release-cut output mirror).
-  Real tap update is performed by scripts/cut-release.sh in the private dev
-  staging checkout. Before dispatching publish-product-channels.yml,
+${SCRIPT_NAME}: tap-update phase — marker-only stub (no push happens here).
+  Real tap update = manual channel publish: compute the GitHub archive
+  sha256s, render packaging/ templates into the Homebrew/Scoop clones,
+  commit + push (docs/maintenance/release-policy.md). Afterwards run
+  scripts/verify-product-release.sh --version ${version}.
+  Before dispatching publish-product-channels.yml,
   run scripts/sfs-channel-publish-preflight.sh. If it reports manual_required,
   skip the workflow and publish v${version} through the local Homebrew tap and
   Scoop bucket repos instead. After publish, return here and run:

@@ -1,5 +1,96 @@
 ## [Unreleased]
 
+## [0.8.37] - 2026-06-12
+
+> **The upgrade path stops silently skipping runtime adapters and the release runbook becomes executable — upgrade enumerates runtime scripts dynamically (eight adapters were never refreshed before), post-publish verification ships as a script instead of prose, release guidance catches up to the in-repo cut, and a coherence pass closes the routed-context conflicts a full repo+wiki audit surfaced.**
+
+### Fixed
+
+- **Vendored upgrades silently skipped 8 runtime adapters (AUDIT-2026-06-12
+  F1, shipped consumer bug).** `upgrade.sh` carried a hard-coded 19-script
+  list in both the preview `CHECK_FILES` and the apply phase while
+  `templates/.sfs-local-template/scripts/` ships 27 — `sfs-capture.sh`,
+  `sfs-event.sh`, `sfs-flowcheck.sh`, `sfs-ingest.sh`, `sfs-profile.sh`,
+  `sfs-recall.sh`, `sfs-report-bug.sh`, `sfs-tidy.sh` were never refreshed on
+  consumer upgrades (and the two lists had drifted from each other:
+  `sfs-division.sh` was applied but not previewed). Both lists are now
+  enumerated dynamically via `list_managed_script_rels()` — the same fix the
+  context/ module list received — so a new runtime adapter can never be
+  missed again. Locked by `tests/test-upgrade-runtime-scripts-coverage.sh`
+  (enumerator parity against the template dir + regression guards against
+  hard-coded lists creeping back).
+- **MCP server import-time crash on malformed `SOLON_MCP_TIMEOUT_SEC`.**
+  A non-numeric override now degrades to the 300s default with a stderr
+  warning instead of killing host registration with a traceback.
+
+### Added
+
+- **`scripts/verify-product-release.sh` — post-publish verification as a
+  script.** The channel-publish preflight has pointed operators at this
+  script while the actual file lived outside the repo (the in-tree reference
+  was a dead end; `tests/test-release-verifier-quiet-smokes.sh` permanently
+  SKIP-passed against it and is retired with this replacement). The verifier
+  codifies the sequence operators repeated by hand for 0.8.34-36: VERSION
+  file / tag-is-ancestor / four release-state phase markers / Homebrew
+  formula + Scoop manifest versions (clone paths env-overridable) /
+  installed `sfs version` (warn-only). Local evidence only — no network, no
+  provider APIs. Locked by `tests/test-verify-product-release.sh` (contract
+  anchors + exit-code semantics + uncut-version FAIL path).
+
+### Changed
+
+- **Release guidance catches up to the in-repo cut (R-D1 fully retired in
+  prose).** `AGENTS.md` no longer claims "this repo has no cut tooling";
+  `docs/maintenance/release-policy.md` replaces the stale R-D1 dev-first
+  section (which still instructed "do not commit directly to this repo" —
+  contradicting six releases of practice) with the verified 0.8.34-36 cut
+  sequence ending in the new verifier; `scripts/sfs-release-sequence.sh`
+  tap-update stub now states the manual channel-publish procedure instead of
+  delegating to the retired `cut-release.sh`; lingering R-D1 namings in
+  `bin/sfs` help text and `sfs-handoff.sh` demoted to "dual-repo layout".
+  The release-policy config-review bullet also routes stale-workaround
+  removal through `model-workaround-sunset.md` instead of ad-hoc deletion.
+- **Routed-context coherence pass (audit findings).**
+  `agent-adapter-doc-refactor.md` no longer instructs untracked removal of
+  stale workaround instructions — it routes them through the
+  `model-workaround-sunset.md` tagged review (the audit's #1 coherence risk:
+  two policies owned the same lifecycle with incompatible procedures);
+  `external-orchestrator-entry.md` inviolable gates now cite
+  DECLARATIVE_BOUNDARY_SURFACE (enforce as Tier B/C typed surfaces where the
+  host supports it — a headless orchestrator is exactly where prose can only
+  be hoped about); `session-continuation-guard.md` marks the handoff as a
+  derivation of the event ledger (verify against `events.jsonl` on pickup
+  per EVENT_LOG_RECONSTRUCTION_SSOT); `agent-build-review-lens.md` (176
+  lines, previously orphaned — reachable from no route) is now routed from
+  `_INDEX.md` and aliased in `review-lens-routing.md` as `agent-build`;
+  `_INDEX.md` gains the generic ko-mirror rule (covers the two `.ko.md`
+  files no route reached); over-generic `load_when` triggers recast
+  trigger-centric on `context-pollution-guard.md` (seven bare common words
+  fired it nearly every session), `runtime-token-firewall.md`, and
+  `session-continuation-guard.md` (the bare-`token`/model-name overlap
+  co-loaded ~300 lines of hygiene policy on any "token" mention — defeating
+  the cache discipline 0.8.36 added).
+- **Test suite hardening.** `tests/run-all.sh` gains a portable per-test
+  watchdog (`SFS_TEST_TIMEOUT_SEC`, default 120s — one hung test no longer
+  wedges the suite) and family patterns for the `other` fallthrough bucket
+  (46/186 tests — the largest "category" was uncategorized; now bounded by
+  an explicit ceiling assertion in `test-run-all-categorization.sh` plus a
+  watchdog-stays-wired anchor). Duplicate categorize entry removed.
+
+### Deferred (registered backlog, AUDIT-2026-06-12 Tier 2)
+
+- Single command/asset registry table for `bin/sfs` dispatch (the audit's #1
+  extensibility risk: ~6 parallel hard-coded lists per new subcommand);
+  router-doc refactor logic dedup (3 near-verbatim copies); shared
+  `scripts/lib/common.sh` (colors/logging/version-parse ×6 copies);
+  `upgrade.sh` monolith split (2.8k lines, 3 tar-backup implementations);
+  `_INDEX.md` grouping + route-description trim; upgrade enumerator
+  subdirectory support (today's scripts dir is flat — `update_file` would
+  need parent-dir creation and recursive chmod before nesting adapters);
+  200-line-ceiling rotations
+  (`commands/plan.md`, `commands/implement.md`, `obsidian-llm-wiki` pair,
+  `strategy-pm-knowledge-pack.md` at exactly 200; `commands/review.md` 199).
+
 ## [0.8.36] - 2026-06-12
 
 > **Prompt surfaces become cache surfaces and capability claims get a review rail — routed context loads static-first/dynamic-last with updates by append (never in-place edits), every model upgrade asks what the harness can stop doing with handovers tested not assumed, and boundary actions get typed declarative surfaces the harness can intercept and audit, not prose instructions.**

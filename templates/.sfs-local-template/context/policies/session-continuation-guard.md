@@ -1,7 +1,7 @@
 ---
 id: sfs-policy-session-continuation-guard
 summary: Stop long-running LLM sessions before conversation history becomes the hidden token budget.
-load_when: ["token", "session", "continuation", "loop", "wakeup", "resume", "upgrade", "Claude", "Codex", "Gemini"]
+load_when: ["session continuation", "fresh session", "handoff", "token meter", "long session", "loop wakeup", "resume", "session transfer"]
 ---
 
 # Session Continuation Guard
@@ -22,6 +22,10 @@ load_when: ["token", "session", "continuation", "loop", "wakeup", "resume", "upg
   - a bridge/plugin/rescue agent would forward full conversation history;
   - the agent notices it is rereading broad files, old logs, or the main chat
     because the session is too large to reason from current artifacts.
+- A handoff is a derivation of the event ledger, not an authority over it: on
+  pickup, verify the handoff against `events.jsonl` (and the preserved raw
+  archives) per `flow-conformance-postflight.md` EVENT_LOG_RECONSTRUCTION_SSOT
+  — when they disagree, the ledger wins and the mismatch surfaces as #3.
 - The handoff is compact: write or reference the current sprint `report.md`,
   `review.md`, latest capture ids, exact commit/branch, failing command, and
   next SFS command. Do not copy the chat transcript.

@@ -29,9 +29,11 @@ points to the real sources of detail.
 - Review root agent adapters, `SFS.md`, skills, hooks, plugins, permissions, and
   `.sfs-local/context/` overrides every 3-6 months, after a major model/runtime
   release, or when performance plateaus.
-- Remove stale workaround instructions that compensate for limitations the
-  current model/tooling no longer has. Keep durable critical gotchas, but move
-  detailed policy to routed context instead of bloating the adapter.
+- A stale workaround instruction for model behavior is not removed ad hoc:
+  route it through `model-workaround-sunset.md` (tagged sunset review — keep /
+  retire / generalize; retire archives per `deprecation-and-migration.md`,
+  never silent-deletes). Keep durable critical gotchas, but move detailed
+  policy to routed context instead of bloating the adapter.
 - Record the review trigger, date, removed stale rule, and retained critical
   gotcha in the current sprint report or maintenance note.
 
