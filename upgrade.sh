@@ -446,7 +446,7 @@ list_managed_context_rels() {
   [ -d "$context_root" ] || return 0
   (
     cd "$context_root" || exit 0
-    find . -type f -name '*.md' -print 2>/dev/null | sed 's#^\./##' | sort
+    find . -type f -name '*.md' -print 2>/dev/null | sed 's#^\./##' | LC_ALL=C sort
   )
 }
 
@@ -458,7 +458,7 @@ list_managed_script_rels() {
   [ -d "$scripts_root" ] || return 0
   (
     cd "$scripts_root" || exit 0
-    find . -type f \( -name '*.sh' -o -name '*.ps1' \) -print 2>/dev/null | sed 's#^\./##' | sort
+    find . -type f \( -name '*.sh' -o -name '*.ps1' \) -print 2>/dev/null | sed 's#^\./##' | LC_ALL=C sort
   )
 }
 
@@ -2172,6 +2172,7 @@ update_file() {
   [ -f "$src" ] || { err "source 없음: $src_rel"; return 1; }
 
   if [ ! -f "$dst" ]; then
+    mkdir -p "$(dirname "$dst")"
     cp "$src" "$dst"
     ok "신규 설치: $dst_rel"
     return 0
@@ -2536,7 +2537,7 @@ while IFS= read -r rel; do
   [ -n "$rel" ] || continue
   update_file ".sfs-local/scripts/${rel}" "templates/.sfs-local-template/scripts/${rel}" "sfs runtime script (${rel})" "b"
 done < <(list_managed_script_rels)
-chmod +x "$TARGET/.sfs-local/scripts"/*.sh 2>/dev/null || true
+find "$TARGET/.sfs-local/scripts" -type f -name '*.sh' -exec chmod +x {} + 2>/dev/null || true
 
 # sprint-templates/ — sfs-start.sh 가 sprint dir 초기화 시 사용
 mkdir -p "$TARGET/.sfs-local/sprint-templates"

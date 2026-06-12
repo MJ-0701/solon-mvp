@@ -13,6 +13,30 @@
 
 ---
 
+## 0.8.38
+
+The command surface gets a drift lock and it caught three real bugs on its first run — every parallel command list (dispatch, adapters, MCP tools, context routing, usage text, router-doc markers) is now cross-checked by one parity test, which immediately surfaced recall missing from help and context-path resolution failing for recall and harness; the routed-context index gains themed sections, and upgrades become subdirectory-safe.
+
+체감 변화:
+
+- **(버그픽스) `sfs context path recall` / `harness` 가 "unknown context
+  key" 로 실패하던 것 수정** + `recall` 이 `help --full` 명령 목록에서 빠져
+  있던 것 보강. 셋 다 신설 패리티 테스트가 첫 실행에서 적발.
+- **명령 표면 drift 잠금.** 디스패치·어댑터·MCP 툴·context 라우팅·usage·
+  router-doc marker — 평행 리스트 6곳을 교차검사하는 테스트 1개. 한 곳에만
+  명령을 추가하면 빠뜨린 곳을 테스트가 전부 호명합니다.
+- **_INDEX 가 6개 주제 섹션으로.** 라우트 원문 그대로, 릴리스마다 추가되는
+  라우트의 탐색 비용이 파일 전체 스캔에서 섹션 단위로.
+- **업그레이드 하위디렉토리 안전화.** 미래의 중첩 어댑터도 정상 설치
+  (부모 디렉토리 생성 + 재귀 chmod + 정렬 LC_ALL=C 고정).
+- **"안 하기로 결정" 5건 사유와 함께 기록.** common.sh 추출(의미론 차이),
+  router-doc lib 화(marker 만이 공유 계약 — drift 잠금으로 대체), backup
+  dedup(표면별 상이), 200줄 분할(디텍터가 설계대로 작동 중 — 다음 내용
+  수정과 동반), dispatch 전면 재작성(패리티 잠금이 같은 효과를 1/10
+  리스크로). 보류가 아니라 결정입니다.
+
+---
+
 ## 0.8.37
 
 The upgrade path stops silently skipping runtime adapters and the release runbook becomes executable — upgrade enumerates runtime scripts dynamically (eight adapters were never refreshed before), post-publish verification ships as a script instead of prose, release guidance catches up to the in-repo cut, and a coherence pass closes the routed-context conflicts a full repo+wiki audit surfaced.

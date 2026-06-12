@@ -1,5 +1,73 @@
 ## [Unreleased]
 
+## [0.8.38] - 2026-06-12
+
+> **The command surface gets a drift lock and it caught three real bugs on its first run — every parallel command list (dispatch, adapters, MCP tools, context routing, usage text, router-doc markers) is now cross-checked by one parity test, which immediately surfaced recall missing from help and context-path resolution failing for recall and harness; the routed-context index gains themed sections, and upgrades become subdirectory-safe.**
+
+### Fixed
+
+- **`sfs context path recall` and `sfs context path harness` errored**
+  ("unknown context key") although both command modules exist and are routed
+  from `_INDEX.md` — `context_resolve_rel` in `bin/sfs` never learned the
+  keys. `recall` was also missing from the `help --full` command list. All
+  three found by the new parity test on its first run (the exact drift class
+  the audit predicted: N parallel lists, no cross-check).
+
+### Added
+
+- **`tests/test-command-surface-parity.sh` — silent drift between command
+  lists becomes a test failure.** The audit's #1 extensibility risk was the
+  command surface defined in ~6 parallel hard-coded lists; a full
+  single-registry rewrite of `bin/sfs` dispatch is high-regression, so this
+  delivers the registry's core promise as locks instead: (1) every
+  `sfs-dispatch.sh` routed command has its template adapter — and no orphan
+  adapters; (2) every MCP `sfs_*` tool maps to a dispatched command;
+  (3) router-doc detection MARKER STRINGS stay identical across their three
+  intentionally-context-specific copies (`bin/sfs` / `upgrade.sh` /
+  `sfs-doctor.sh`); (4) every `commands/*.md` module resolves via
+  `sfs context path`; (5) `help --full` mentions every routed command.
+  Add a command in one place and the test names every place you forgot.
+
+### Changed
+
+- **`_INDEX.md` routed into six themed sections** (commands / flow·gates·
+  delegation / token·context·session hygiene / knowledge·citation·docs /
+  engineering disciplines / packs·lenses·mirrors) — route lines verbatim,
+  selection cost per release addition drops from O(file) to O(section).
+- **Upgrade enumerator hardened**: `update_file` creates parent directories
+  on fresh copies and the runtime-scripts chmod is recursive (a future
+  nested adapter installs correctly); both enumerator sorts pinned
+  `LC_ALL=C` for deterministic ordering.
+
+### Decided not to do (with reasons — not deferred)
+
+- **Shared `scripts/lib/common.sh`**: inspection showed the "duplicated"
+  ok/warn/info helpers differ *semantically* per script (doctor/harness
+  count PASS/WARN as side effects, the verifier counts fails, symbols
+  differ); only ~5 color lines are truly shared. Extraction would trade a
+  sourcing dependency for no real dedup — kernel's no-speculative-abstraction
+  rule applies. Root entry points (`install.sh`/`upgrade.sh`/`uninstall.sh`)
+  stay deliberately self-contained.
+- **Router-doc logic extraction to a lib**: the three copies are not
+  near-verbatim — they differ in call context (PWD vs SOURCE_DIR/TARGET),
+  output language, and flow control by design. The shared contract is the
+  marker strings, and those are now drift-locked by the parity test instead.
+- **Backup-bundle dedup across `bin/sfs`/`upgrade.sh`**: the three tar
+  implementations serve different surfaces (agent-doc vs runtime-upgrade)
+  with different manifests; behavior is already locked by
+  `test-backup-manifest-schema.sh` + `test-rollback-from-snapshot.sh`.
+- **200-line rotations** (`commands/plan.md`/`implement.md` at 200,
+  `review.md` 199, `obsidian-llm-wiki` pair + `strategy-pm-knowledge-pack`
+  at 200): the command files are flat bullet lists with 10+ tests grepping
+  their content — a blind split is anchor churn, and `md-line-budget.md`
+  already fails at 250 (200 is the partial band the detector exists for).
+  Rotation happens with the next content edit that needs the room, in the
+  same change, per `doc-colocation-provenance.md`.
+- **Full `bin/sfs` dispatch table rewrite**: parity locks now convert the
+  drift risk into test failures at a fraction of the regression surface;
+  the rewrite stops paying for itself until the command count grows
+  materially.
+
 ## [0.8.37] - 2026-06-12
 
 > **The upgrade path stops silently skipping runtime adapters and the release runbook becomes executable — upgrade enumerates runtime scripts dynamically (eight adapters were never refreshed before), post-publish verification ships as a script instead of prose, release guidance catches up to the in-repo cut, and a coherence pass closes the routed-context conflicts a full repo+wiki audit surfaced.**
