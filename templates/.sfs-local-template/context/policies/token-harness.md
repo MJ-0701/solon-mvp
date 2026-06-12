@@ -96,3 +96,24 @@ load_when: ["token", "harness", "context", "Claude", "Codex", "Gemini", "MCP", "
 - CLAUDE.md Management is useful as audit/report input, but do not auto-apply
   its suggestions to SFS adapter docs. Propose only small, stable, high-signal
   edits.
+
+## CACHE_AWARE_PROMPT_LAYOUT
+
+Prompt surfaces are cache surfaces: cached input costs a fraction of fresh
+input (~10% — "Harnessing Claude's intelligence", 2026-04-02, by-reference),
+and an edit to a static surface invalidates every cached read after it.
+
+- **Static first, dynamic last.** Entry docs, kernel, and routed policies are
+  the stable layers; volatile state (sprint status, dates, counters, tallies)
+  lives in state files (`events.jsonl`, PROGRESS, status output) loaded after
+  them — never edited into the static surface itself.
+- **Update by append, not in-place edit.** A status change rides a new
+  message/event/file line; editing an entry doc or policy mid-run to carry
+  run state is both a cache break and a context-pollution finding.
+- **Tool surface stable, not just narrow.** The kernel already requires a
+  narrow active tool surface; keep it *stable* too — tool-list churn breaks
+  caching and selection alike. Change the tool set at slice boundaries, not
+  mid-run.
+- **One model per run segment.** Route cost tiers through scoped
+  workers/capsules (`runtime-token-firewall.md`, fcp-model-tier), not by
+  swapping the model mid-conversation.

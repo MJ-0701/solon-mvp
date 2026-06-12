@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.35" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.35" "version output"
-assert_contains_text "${output}" "latest 0.8.35" "latest output"
+[[ "${plain_output}" == "sfs 0.8.36" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.36" "version output"
+assert_contains_text "${output}" "latest 0.8.36" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Harness rules gain a model lifecycle and the run log becomes law — model-specific workarounds must carry a model/date source tag and surface for sunset review on model change (keep / retire / generalize); the append-only event log is the authoritative source for reconstructing any run, over handoff and progress prose; and lessons gain a periodic read-only curation pass that merges repeated patterns and feeds skill-promotion candidates (suggest-only, human-gated)." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Prompt surfaces become cache surfaces and capability claims get a review rail — routed context loads static-first/dynamic-last with updates by append (never in-place edits), every model upgrade asks what the harness can stop doing with handovers tested not assumed, and boundary actions get typed declarative surfaces the harness can intercept and audit, not prose instructions." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline Harness rules gain a model lifecycle and the run log becomes law — model-specific workarounds must carry a model/date source tag and surface for sunset review on model change (keep / retire / generalize); the append-only event log is the authoritative source for reconstructing any run, over handoff and progress prose; and lessons gain a periodic read-only curation pass that merges repeated patterns and feeds skill-promotion candidates (suggest-only, human-gated)." "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline Prompt surfaces become cache surfaces and capability claims get a review rail — routed context loads static-first/dynamic-last with updates by append (never in-place edits), every model upgrade asks what the harness can stop doing with handovers tested not assumed, and boundary actions get typed declarative surfaces the harness can intercept and audit, not prose instructions." "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

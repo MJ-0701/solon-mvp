@@ -57,6 +57,21 @@ the wiring effort.
 | Contradictory directives in context | high | partial | B (WU-1 detector) |
 | Writing discipline (no preamble/hedging) | low | partial | A/B (review lens) |
 
+## DECLARATIVE_BOUNDARY_SURFACE
+
+A boundary action — irreversible, security-sensitive, or anything needing
+confirmation or audit — deserves a **typed declarative surface** (a dedicated
+tool/hook/command with typed arguments), not a prose instruction. Typed
+surfaces can be intercepted, gated, rendered, and audited; prose can only be
+hoped about. This is the same discipline as the typed event bus and capsule
+field contract (`sub-agent-capsule-contract.md`), applied to the enforcement
+layer — and the external validation of Tier C: promote the action itself to a
+surface the harness can see ("Harnessing Claude's intelligence", 2026-04-02,
+by-reference). Two corollaries from the same source: a secondary automated
+validator sitting behind one boundary surface beats proliferating bespoke
+gate tools; and prefer general tools the model already masters over bespoke
+interfaces (the kernel's narrow-tool-surface rule, externally validated).
+
 ## WIRING_HOME
 
 Tier-C promotions land on the hook surface SFS already owns: `install.sh`
@@ -70,6 +85,7 @@ decision and the target hook so it is a tracked proposal, not an orphaned idea.
 
 ## CROSS_REFERENCES
 
+- Typed-surface vein (capsule field contract): `sub-agent-capsule-contract.md`.
 - On-demand guardrail candidates + nine-category lens: `skill-catalog-discipline.md`.
 - Recurrence → guardrail feedback loop: `lessons-accumulation.md`.
 - Security/destructive-action review evidence: `agentic-security-logging-pack.md`.

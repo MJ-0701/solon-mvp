@@ -56,6 +56,20 @@ as sunset-review candidates (suggest-only, same rail as skill-promotion
 candidates — a human decides). Carrying a stale workaround past a model change
 unexamined is the finding; the review itself may well conclude "keep".
 
+## STOP_DOING_REVIEW
+
+Sunset review asks "is this workaround still needed?" Its complement at every
+model upgrade: **"what can the harness stop doing?"** Scaffolding built to
+compensate for a capability gap — pre-filtering tool outputs the model could
+filter itself, pre-digesting context it could route on demand, externally
+orchestrating steps it could sequence on its own — is reviewed for handover to
+the model, not just for deletion. Vendor evidence (same source, by-reference):
+letting the model filter its own tool outputs moved a search benchmark from
+45.3% to 61.6%; self-managed context reached 84% where static context scored
+lower. Same tidy rail, suggest-only, and each handover is verified like any
+harness change (`token-harness.md` discriminating-evals bullet) — capability
+claims are tested, not assumed.
+
 ## DEBT_FRAMING
 
 A model workaround is harness debt with an expiry date, not permanent policy.

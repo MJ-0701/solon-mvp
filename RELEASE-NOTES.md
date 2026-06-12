@@ -13,6 +13,33 @@
 
 ---
 
+## 0.8.36
+
+Prompt surfaces become cache surfaces and capability claims get a review rail — routed context loads static-first/dynamic-last with updates by append (never in-place edits), every model upgrade asks what the harness can stop doing with handovers tested not assumed, and boundary actions get typed declarative surfaces the harness can intercept and audit, not prose instructions.
+
+체감 변화:
+
+- **프롬프트 표면 = 캐시 표면.** 엔트리 문서·kernel·routed 정책은 정적
+  레이어, 휘발 상태(스프린트 상태·날짜·집계)는 그 뒤에 로드되는 상태
+  파일(events.jsonl/PROGRESS)에만 둡니다. 갱신은 append 로 — 정적 표면을
+  중간에 고치면 그 뒤 캐시가 전부 깨집니다 (캐시된 입력은 ~10% 비용).
+  툴 표면은 좁게만이 아니라 **안정적으로** — 툴 목록 churn 도 캐시를
+  깹니다. 모델은 런 구간당 하나, 비용 티어는 capsule 로.
+- **모델 업그레이드마다 "하네스가 뭘 그만둘 수 있나" 질문.** 모델 능력
+  부족을 보완하던 비계(툴 출력 사전 필터링, 컨텍스트 사전 소화, 외부
+  단계 오케스트레이션)는 모델에게 넘길 후보 — 단 능력 주장은 검증 후
+  채택 (vendor 수치: 자가 필터링 45.3%→61.6%). sunset 리뷰의 보완 질문,
+  같은 tidy 레일.
+- **경계 행동엔 typed 선언 표면.** 비가역·보안 민감·감사 필요 행동은 prose
+  지시가 아니라 typed 인자를 가진 전용 도구/훅/커맨드로 — 가로채고,
+  게이트하고, 감사할 수 있는 표면. typed 이벤트 버스/capsule 계약 규율의
+  집행 레이어 적용판.
+- **블로그 워치 잔여분 일괄 처분.** 미정독이던 프롬프트 사용법 글
+  (Harnessing Claude's intelligence)을 흡수했고, 구 리포트 잔여 3건(KPI
+  지표/plan A-B eval/founder PDF 매핑)은 사유와 함께 보류 등재했습니다.
+
+---
+
 ## 0.8.35
 
 Harness rules gain a model lifecycle and the run log becomes law — model-specific workarounds must carry a model/date source tag and surface for sunset review on model change (keep / retire / generalize); the append-only event log is the authoritative source for reconstructing any run, over handoff and progress prose; and lessons gain a periodic read-only curation pass that merges repeated patterns and feeds skill-promotion candidates (suggest-only, human-gated).

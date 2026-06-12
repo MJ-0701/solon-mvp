@@ -1,5 +1,54 @@
 ## [Unreleased]
 
+## [0.8.36] - 2026-06-12
+
+> **Prompt surfaces become cache surfaces and capability claims get a review rail — routed context loads static-first/dynamic-last with updates by append (never in-place edits), every model upgrade asks what the harness can stop doing with handovers tested not assumed, and boundary actions get typed declarative surfaces the harness can intercept and audit, not prose instructions.**
+
+### Added
+
+- **Harnessing-intelligence absorption (BLOG-2026-06-12-2).** Promotes three
+  generalizable principles from the platform-team patterns post (2026-04-02,
+  surfaced by user prompt-usage sweep; vendor benchmark plumbing held out,
+  numbers cited by-reference). (1) **CACHE_AWARE_PROMPT_LAYOUT** —
+  `policies/token-harness.md` gains the cache-surface discipline: prompt
+  surfaces load static-first/dynamic-last (entry docs / kernel / routed
+  policies are stable layers; volatile state lives in `events.jsonl` /
+  PROGRESS / status output loaded after them); updates ride appends, never
+  in-place edits of static surfaces (an edit invalidates every cached read
+  after it — and mid-run state edits were already a context-pollution
+  finding); the active tool surface must be *stable*, not just narrow
+  (tool-list churn breaks caching and selection; change tools at slice
+  boundaries); one model per run segment, cost tiers route through scoped
+  workers/capsules (fcp-model-tier), never mid-conversation swaps. Cached
+  input ~10% cost, by-reference. (2) **STOP_DOING_REVIEW** —
+  `policies/model-workaround-sunset.md` gains the sunset complement: at every
+  model upgrade ask "what can the harness stop doing" — scaffolding that
+  compensates for capability gaps (pre-filtering tool outputs, pre-digesting
+  context, external step orchestration) is reviewed for handover to the
+  model; vendor evidence by-reference (self-filtered tool outputs 45.3% →
+  61.6%, self-managed context 84%); same tidy rail, suggest-only, every
+  handover verified per the token-harness discriminating-evals bullet —
+  capability claims are tested, not assumed. (3)
+  **DECLARATIVE_BOUNDARY_SURFACE** —
+  `policies/critical-rule-hook-promotion.md` codifies: boundary actions
+  (irreversible / security-sensitive / audit-needing) get a typed declarative
+  surface (dedicated tool/hook/command with typed arguments) that can be
+  intercepted, gated, rendered, audited — prose can only be hoped about; the
+  typed-event-bus / capsule-contract discipline applied to the enforcement
+  layer, external validation of Tier C; corollaries: one secondary validator
+  behind a boundary beats gate-tool proliferation, and general tools the
+  model already masters beat bespoke interfaces (kernel narrow-surface rule,
+  externally validated). Locked by
+  `tests/test-cache-aware-prompt-layout.sh` (three section anchors + principle
+  clauses + additive preservation + 200-line budgets). Blog-watch sweep in the
+  same pass: 06-02/06-04 residuals dispositioned — KPI-3 metrics deferred
+  (overlaps `sfs measure` local dashboard; needs host git data, demand
+  unproven), plan-stage A/B eval harness deferred (HELD_OUT_SCORING already
+  carries the measured-eval shape; planning-A/B needs eval infra outside the
+  bash distribution), founder-playbook PDF lifecycle mapping deferred
+  (narrative-level, docs-only delta). Source: blog *Harnessing Claude's
+  intelligence* (Lance Martin, Claude Platform).
+
 ## [0.8.35] - 2026-06-12
 
 > **Harness rules gain a model lifecycle and the run log becomes law — model-specific workarounds must carry a model/date source tag and surface for sunset review on model change (keep / retire / generalize); the append-only event log is the authoritative source for reconstructing any run, over handoff and progress prose; and lessons gain a periodic read-only curation pass that merges repeated patterns and feeds skill-promotion candidates (suggest-only, human-gated).**
