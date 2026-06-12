@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.34" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.34" "version output"
-assert_contains_text "${output}" "latest 0.8.34" "latest output"
+[[ "${plain_output}" == "sfs 0.8.35" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.35" "version output"
+assert_contains_text "${output}" "latest 0.8.35" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Credential handling becomes an explicit policy — agent-visible surfaces carry placeholders only while real keys live in one store, attach at the boundary with per-consumer scope, and rotate in one place; scheduled/unattended runs gain an operating contract (fresh session per fire, file-borne state, pause/resume/archive/on-demand controls)." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Harness rules gain a model lifecycle and the run log becomes law — model-specific workarounds must carry a model/date source tag and surface for sunset review on model change (keep / retire / generalize); the append-only event log is the authoritative source for reconstructing any run, over handoff and progress prose; and lessons gain a periodic read-only curation pass that merges repeated patterns and feeds skill-promotion candidates (suggest-only, human-gated)." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline Credential handling becomes an explicit policy — agent-visible surfaces carry placeholders only while real keys live in one store, attach at the boundary with per-consumer scope, and rotate in one place; scheduled/unattended runs gain an operating contract (fresh session per fire, file-borne state, pause/resume/archive/on-demand controls)." "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline Harness rules gain a model lifecycle and the run log becomes law — model-specific workarounds must carry a model/date source tag and surface for sunset review on model change (keep / retire / generalize); the append-only event log is the authoritative source for reconstructing any run, over handoff and progress prose; and lessons gain a periodic read-only curation pass that merges repeated patterns and feeds skill-promotion candidates (suggest-only, human-gated)." "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

@@ -26,6 +26,23 @@ flow 는 다음을 emit (`sfs event <type> <key=value...>`; 기존 evidence_capt
 하는지 health 요약을 내는 계측 신호일 뿐이다 (아래 Tool-telemetry health). high-volume
 이라 per-sprint event compaction 으로만 경계되며 MVP 에서는 충분하다.
 
+## EVENT_LOG_RECONSTRUCTION_SSOT
+
+런(작업단위 실행 전체)은 이벤트 로그에서 언제든 재구성 가능해야 하고, resume ·
+관측(flowcheck/healthcheck/recall) · 메모리(lessons/핸드오프)는 전부 이 로그에서
+**파생**된다 — 파생물이 로그와 어긋나면 **로그가 권위다**. 핸드오프 문서나
+PROGRESS 서술이 이벤트 원장과 모순될 때 원장 쪽을 믿고, 모순 자체는 #3 으로
+surface 한다 (silent 동기화 금지). 권위 사슬은 active `events.jsonl` +
+tidy 가 보존한 raw 발췌(`.sfs-local/archives/events/sprints/<sprint-id>.jsonl`)
+까지다 — compaction 은 raw 보존이 선행되어야 한다는 기존 tidy 계약이 이 권위를
+지탱한다. 외부 검증 (by-reference): Managed Agents 의 session 리소스 — harness
+(brain) 와 실행 샌드박스 (hands) 를 잇는 것은 append-only 이벤트 로그이고 런
+상태는 전부 거기서 재구성된다 ("The evolution of agentic surfaces", 2026-06-10).
+solon 의 `sfs event` 버스 + session transfer 는 이미 이 형태로 동작한다 — 본
+절은 그것의 명문화 + 외부 검증 등재다. (같은 글의 outcomes rubric 자기채점은
+flowcheck 의 rubric 형 postflight 자기점검의 외부 검증 — 포인터만, 신규 기능
+아님.)
+
 ## invariant registry
 | id | 기대 | class |
 |----|------|-------|

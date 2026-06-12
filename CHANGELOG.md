@@ -1,5 +1,57 @@
 ## [Unreleased]
 
+## [0.8.35] - 2026-06-12
+
+> **Harness rules gain a model lifecycle and the run log becomes law — model-specific workarounds must carry a model/date source tag and surface for sunset review on model change (keep / retire / generalize); the append-only event log is the authoritative source for reconstructing any run, over handoff and progress prose; and lessons gain a periodic read-only curation pass that merges repeated patterns and feeds skill-promotion candidates (suggest-only, human-gated).**
+
+### Added
+
+- **Managed Agents architecture absorption (BLOG-2026-06-12-1).** Promotes
+  three generalizable principles from the Managed Agents architecture blog
+  while holding the vendor infrastructure (managed sessions/sandboxes, console
+  UI) out. (1) **Model-workaround sunset discipline** — new
+  `policies/model-workaround-sunset.md` (73 lines < 200): any rule written to
+  compensate for a specific model's observed behavior (context resets,
+  token-saving phrasing, retry coaching) must carry a
+  `model-workaround: {model, date, behavior}` source tag at the rule site
+  (MODEL_TAG_REQUIRED — an untagged behavior workaround is a review finding,
+  because it can never be safely retired); on model swap every tagged rule
+  becomes a re-review candidate with three outcomes (keep / retire per
+  `deprecation-and-migration.md` / generalize), surfaced by `tidy`
+  suggest-only (SUNSET_REVIEW_ON_MODEL_CHANGE); workarounds are harness debt
+  with an expiry, structural fixes beat model coaching (DEBT_FRAMING). Vendor
+  case by-reference: a context-reset workaround for one model's context
+  anxiety became overhead on its successor. Same lifecycle vein as
+  `critical-rule-hook-promotion.md` / `context-conflict-gate.md`. Routed from
+  `_INDEX.md`. (2) **EVENT_LOG_RECONSTRUCTION_SSOT** —
+  `policies/flow-conformance-postflight.md` codifies: the run is
+  reconstructable from the event log at any time; resume, observability, and
+  memory all derive from it; when handoff/PROGRESS prose disagrees with the
+  event ledger, **the ledger is authoritative** and the mismatch surfaces as
+  #3 (never silent-synced). Authority chain = active `events.jsonl` + raw
+  excerpts preserved at `.sfs-local/archives/events/sprints/` (the existing
+  tidy preserve-before-prune contract is what upholds it). Registered as
+  external validation of the existing `sfs event` bus + session transfer;
+  the blog's outcomes rubric self-scoring is cited as external validation of
+  flowcheck's rubric-style postflight (pointer only, no new feature).
+  (3) **Lessons CURATION_PASS (Dreaming pattern)** —
+  `policies/lessons-accumulation.md` gains a periodic read-only curation
+  pass over the lessons ledger + event archives producing a report that
+  clusters repeated triggers and proposes merges (merged entries keep every
+  source `L-NNN` id), flags `promoted`-field graduations (2+ recurrence →
+  feedback flywheel), and surfaces success-side patterns as skill-promotion
+  candidates — registered in `skill-promotion-loop.md` DETECTION as the
+  second candidate source besides `sfs harness doctor`. Suggest-only: the
+  pass writes the report, never the ledger; application happens at the `tidy`
+  rail under EVOLUTION_ADOPTION_GATE; scheduled/unattended runs obey
+  SCHEDULED_RUN_CONTRACT (0.8.34). `commands/tidy.md` gains the curation and
+  sunset-review consumption bullets. Locked by
+  `tests/test-model-workaround-sunset.sh` (policy anchors + tag schema +
+  _INDEX route + tidy surfacing + FCP/lessons additive preservation +
+  LC_ALL=C-pinned Korean authority-clause grep). Source: blog *The evolution
+  of agentic surfaces: building with Claude Managed Agents*
+  (`insights/INSIGHT-2026-06-12.md`).
+
 ## [0.8.34] - 2026-06-11
 
 > **Credential handling becomes an explicit policy — agent-visible surfaces carry placeholders only while real keys live in one store, attach at the boundary with per-consumer scope, and rotate in one place; scheduled/unattended runs gain an operating contract (fresh session per fire, file-borne state, pause/resume/archive/on-demand controls).**

@@ -38,6 +38,12 @@ never changes the doctor exit code.
 The signature is a coarse heuristic; it groups by shared wording, not semantic
 intent. A surfaced candidate is a prompt to look, not a verdict.
 
+A second candidate source is the lessons **curation pass**
+(`lessons-accumulation.md` CURATION_PASS): its periodic read-only review of
+the ledger and event archives surfaces success-side repeated patterns the
+doctor's completed-work-log heuristic misses. Same contract — suggest-only,
+consumed at the tidy rail.
+
 ## COMPLEXITY_TRIGGER
 
 Repetition (3+) is not the only signal. A **single hard task** is a candidate

@@ -86,6 +86,37 @@ repeated finding becomes an automated check:
   preserves the rationale; the tool enforces it. Neither is deleted once
   promoted.
 
+## CURATION_PASS (periodic, read-only)
+
+Accumulation alone degrades: a ledger that only grows becomes noise. A
+**periodic curation pass** — a scheduled run or a tidy-rail step — reviews
+`.sfs-local/lessons.md` plus the preserved event archives
+(`.sfs-local/archives/events/sprints/`) read-only and produces a curation
+report that:
+
+- clusters lessons repeating the same `trigger`/`category` pattern and
+  proposes merges (the merged entry keeps every source `L-NNN` id in its
+  `source` field — ids are never reused or silently dropped, and a merged
+  entry carries forward any non-`none` `promoted` value: a promoted lesson's
+  rule is never merged away — the flywheel never-delete rule binds merge
+  application too);
+- flags lessons whose `promoted` field should graduate (the same finding
+  caught 2+ times → feedback flywheel: name the check/test/lint);
+- surfaces success-side repeated patterns as **skill-promotion candidates**
+  (input to `skill-promotion-loop.md` DETECTION — the curation pass is a
+  second candidate source besides `sfs harness doctor`).
+
+The pass is **suggest-only**: it writes the report, never the ledger. Applying
+a proposed merge or promotion happens at the `tidy` rail under the same human
+gate as every adoption (`skill-promotion-loop.md` EVOLUTION_ADOPTION_GATE).
+When run scheduled/unattended, the pass obeys
+`work-delegation-and-startup.md` SCHEDULED_RUN_CONTRACT (fresh session,
+file-borne state, four controls). External validation (by-reference): the
+Dreaming pattern — a scheduled process periodically reviews session logs and
+the memory store, extracts patterns, and curates memory ("The evolution of
+agentic surfaces: building with Claude Managed Agents", 2026-06-10; vendor
+infrastructure held out, the curation principle adopted).
+
 ## Gotchas slot
 
 Reference and skill docs may carry a `## Gotchas` section using the same fields

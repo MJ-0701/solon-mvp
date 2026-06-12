@@ -40,6 +40,15 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
   adopting a new OR evolved skill, clear EVOLUTION_ADOPTION_GATE, then run
   HELD_OUT_SCORING (two-stage cheap-keyword → cost-gated LLM-judge, before/after
   delta on a held-out set) — measured, but never overrides a gate or sign-off.
+- Lessons curation pass (`policies/lessons-accumulation.md` CURATION_PASS): a
+  periodic read-only review of the lessons ledger + event archives produces
+  merge/graduation/skill-candidate suggestions; applying them happens here at
+  tidy under the same human gate as skill adoption. Suggest-only — the pass
+  never writes the ledger.
+- Model-workaround sunset (`policies/model-workaround-sunset.md`): at tidy
+  after a model swap/upgrade, surface rules tagged `model-workaround:` whose
+  model no longer matches the active model as sunset-review candidates
+  (keep / retire / generalize). Suggest-only, same rail as skill candidates.
 - Apply `policies/deprecation-and-migration.md`: every visible leftover needs a
   replacement/handoff reason, cold archive path, or explicit user decision.
   Advisory cleanup may wait; compulsory cleanup needs risk such as stale state,

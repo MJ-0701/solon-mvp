@@ -13,6 +13,33 @@
 
 ---
 
+## 0.8.35
+
+Harness rules gain a model lifecycle and the run log becomes law — model-specific workarounds must carry a model/date source tag and surface for sunset review on model change (keep / retire / generalize); the append-only event log is the authoritative source for reconstructing any run, over handoff and progress prose; and lessons gain a periodic read-only curation pass that merges repeated patterns and feeds skill-promotion candidates (suggest-only, human-gated).
+
+체감 변화:
+
+- **모델 땜질 규칙에 유통기한이 생겼습니다.** 새
+  `policies/model-workaround-sunset.md` — 특정 모델 거동에 대응하는 규칙
+  (컨텍스트 리셋, 토큰 절약 지시 등)을 추가할 땐
+  `model-workaround: {model, date, behavior}` 태그가 의무입니다. 태그 없는
+  모델 땜질은 리뷰 발견사항 — 틀려서가 아니라 **안전하게 은퇴시킬 수 없어서**.
+  모델 교체 시 tidy 가 태그된 규칙을 keep / retire / generalize 재검토
+  후보로 표면화합니다 (suggest-only).
+- **이벤트 로그가 런의 법전입니다.** 런 전체는 이벤트 로그에서 언제든 재구성
+  가능해야 하고, resume·관측·메모리는 전부 로그에서 파생됩니다. 핸드오프나
+  PROGRESS 서술이 원장과 어긋나면 **원장이 권위** — 모순은 silent 동기화
+  대신 surface 합니다.
+- **lessons 에 주기 큐레이션 패스가 생겼습니다 (Dreaming 패턴).** 쌓이기만
+  하는 원장은 노이즈가 됩니다. 스케줄/tidy 시점의 read-only 패스가 반복
+  trigger 를 묶어 병합 제안, promoted 졸업 후보, skill 승격 후보(스킬 승격
+  루프의 2번째 입력원)를 리포트로 냅니다. 패스는 리포트만 쓰고 원장은 절대
+  직접 수정하지 않으며, 적용은 tidy 에서 사람 게이트를 거칩니다.
+- **vendor 인프라(managed sessions/sandboxes/콘솔)는 보류했습니다.** 일반화
+  가능한 수명관리·재구성·큐레이션 원칙 3개만 by-reference 로 승격했습니다.
+
+---
+
 ## 0.8.34
 
 Credential handling becomes an explicit policy — agent-visible surfaces carry placeholders only while real keys live in one store, attach at the boundary with per-consumer scope, and rotate in one place; scheduled/unattended runs gain an operating contract (fresh session per fire, file-borne state, pause/resume/archive/on-demand controls).
