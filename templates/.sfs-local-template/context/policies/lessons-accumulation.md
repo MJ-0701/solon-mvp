@@ -117,6 +117,34 @@ the memory store, extracts patterns, and curates memory ("The evolution of
 agentic surfaces: building with Claude Managed Agents", 2026-06-10; vendor
 infrastructure held out, the curation principle adopted).
 
+## PRE_BUILD_AUDIT (audit what exists before building the next thing)
+
+The loop above records failures *after* they are caught. Its forward-looking
+twin: before starting the next build, run a **read-only audit of the artifacts
+already shipped** — ask the agent what is wrong with what exists, rather than
+moving straight to the new thing. The defects this surfaces become `L-NNN`
+lesson entries (and success-side patterns become `skill-promotion-loop.md`
+candidates), so the next build starts from a corrected base instead of
+compounding on a silent flaw.
+
+- **Read-only, suggest-only, non-destructive.** The pass writes a finding list,
+  never patches code or the ledger; applying anything is a human/agent decision
+  at the `tidy` rail under the same gate as every adoption
+  (`skill-promotion-loop.md` EVOLUTION_ADOPTION_GATE).
+- **Cheap and under-used.** It is a separate pass from postflight flowcheck
+  (which checks the run that just happened); this audits the standing body of
+  work before the next slice opens. The flowcheck Plan-gate `eval-first` check
+  points here so the audit lands at plan time
+  (`commands/flowcheck.md`).
+- **Scheduled/unattended runs** obey `work-delegation-and-startup.md`
+  SCHEDULED_RUN_CONTRACT (fresh session, file-borne state, four controls), same
+  as CURATION_PASS.
+
+External validation (by-reference): Claude blog hackathon-winners interviews
+(2026-06-15) — a winning builder's takeaway that the most under-rated loop is
+letting Claude audit what you already built before building the next thing;
+generalized principle adopted, hackathon/name/model-version specifics held out.
+
 ## Gotchas slot
 
 Reference and skill docs may carry a `## Gotchas` section using the same fields

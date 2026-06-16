@@ -35,6 +35,11 @@ chat / assisted session / autonomous code) 로 돌릴지는 routed context
 `policies/work-delegation-and-startup.md` 가 SSoT 다 (여기서 재나열하지 않는다 —
 포인터만).
 
+plan(Gate 3) 진입 시 **eval-first**: 통과/실패를 가를 ground-truth 케이스 + 채점
+차원을 코드보다 먼저 고정한다 ("eval = first commit"). SSoT 는 routed context
+`commands/flowcheck.md` 의 Plan-gate self-check 5번 + `policies/skill-promotion-loop.md`
+HELD_OUT_SCORING (여기서 재나열하지 않는다 — 포인터만).
+
 ## Gate 표기 규약
 
 - Solon report 에서는 **Gate 1~7 표시**를 쓴다 (Intake / Brainstorm / Plan /
