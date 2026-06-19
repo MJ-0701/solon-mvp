@@ -42,6 +42,14 @@ lead/C-Level 에이전트가 worker·reviewer·external executor 로 넘기는 c
 
 - Capsule-only: lead 의 전체 대화 history·hidden chain·무관 이전 turn 을 절대
   forward 하지 않는다 (`runtime-token-firewall.md` 참조).
+- Final-message-only return: worker 자신의 추론·body 는 부모 컨텍스트에 절대
+  들어가지 않고, 최종 메시지(`output_paths` 의 artifact + 짧은 result)만 부모로
+  넘어온다. 격리는 양방향이다 — 부모 history 가 아래로 흐르지 않고 worker body 가
+  위로 흐르지 않아 서로의 window 를 오염시키거나 부모 compaction 에 남지 않는다.
+  worker 의 transcript 를 부모로 흘리는 bridge 는 부모 chat 을 상속하는 것과 같은
+  escape-hatch 실패다. 외부 검증(by-reference): steering coding agents 에 관한
+  Claude 블로그(2026-06-18) — sub-agent 의 body 는 부모 대화에 들어가지 않고 최종
+  메시지만 반환된다.
 - worker 의 생각이 아니라 `output_paths` 의 artifact 를 poll 한다. evidence 부족 시
   worker 는 partial/fail 반환 + 부족 artifact 명시.
 - 이 필드를 표현 못 하는 bridge (예: 전체 chat 을 상속하는 forked-context helper)

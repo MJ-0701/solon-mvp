@@ -26,6 +26,17 @@ deciding *which* prose rules earn promotion to a hard gate or hook.
 - **Tier C — hook (code-enforced, 100%).** A session-scoped or install-time hook
   blocks the action as it is attempted. The only tier that cannot be ignored.
 
+**Authority ceiling (by-reference).** A host with admin-deployed *managed
+settings* can place a rule in a tier even the operator cannot override — the
+strongest possible enforcement surface (external validation: a Claude blog post
+on steering coding agents, 2026-06-18, notes "Never do this" rules belong in
+deterministic enforcement, and managed settings are not user-overridable).
+Solon's bash distribution ships **no** such surface: the operator owns all
+config and overrides every default (`user-override-precedence.md`). So Tier C
+here is operator-installed and operator-removable; the override-impossible tier
+is named only to locate solon's ceiling, not implemented by it. Surface-choice
+decision frame: `steering-surface-taxonomy.md`.
+
 ## PROMOTION_CRITERIA
 
 Promote a Tier-A rule upward when **both** of the first two hold; jump to Tier C

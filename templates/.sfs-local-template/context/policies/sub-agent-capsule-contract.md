@@ -43,6 +43,15 @@ convenience.
 
 - Capsule-only: never forward the lead's full conversation history, hidden
   chain, or unrelated prior turns (see `runtime-token-firewall.md`).
+- Final-message-only return: the worker's own reasoning and body never enter the
+  parent context — only its final message (the artifacts at `output_paths` plus
+  a short result) crosses back. Isolation is bidirectional: parent history does
+  not flow down, worker body does not flow up, so neither pollutes the other's
+  window or survives into the parent's compaction. A bridge that leaks the
+  worker's transcript into the parent is the same escape-hatch failure as one
+  that inherits the parent's chat. External validation (by-reference): a Claude
+  blog post on steering coding agents (2026-06-18) — a sub-agent's body never
+  enters the parent conversation, only the final message returns.
 - Poll artifacts at `output_paths`, not the worker's thoughts. Insufficient
   evidence → the worker returns partial/fail and names the missing artifact.
 - A bridge that cannot express these fields (e.g. a forked-context helper that
