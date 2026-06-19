@@ -55,7 +55,10 @@ commands still work? Must be yes.**
 A handoff between stages is a **typed/structured contract, not raw text**. The
 artifact a stage emits must carry fixed, named fields a downstream stage can
 validate before consuming — never free prose the next stage has to re-parse.
-This applies to the advisor↔Code file bus and every capsule handoff above.
+This applies to the advisor↔Code file bus and every capsule handoff above. A
+bus role may be an **adversarial verifier capsule** (prompted to refute, not
+confirm) as well as author/reviewer — see the verifier capsule patterns in
+`sub-agent-capsule-contract.md`.
 
 - **Tiered handoff.** A light/lead pass (classification, flowcheck, intake)
   emits the schema-fixed artifact; the heavy reasoning pass consumes only the

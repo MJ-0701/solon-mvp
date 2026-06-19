@@ -70,6 +70,14 @@ lower. Same tidy rail, suggest-only, and each handover is verified like any
 harness change (`token-harness.md` discriminating-evals bullet) — capability
 claims are tested, not assumed.
 
+Don't settle for the first method that works when it is expensive. A second
+external validation (by-reference): a Claude blog build-day hackathon writeup
+(2026-06-17) — a costly approach that merely *worked* was reworked into a
+self-evolving clustering scheme for a roughly 10–100x inference-cost reduction.
+Cost, not just correctness, is a sunset trigger: a workaround that ships but
+burns tokens is harness debt to refactor, not a finished answer (generalized;
+vendor/name/model specifics held by-reference).
+
 ## DEBT_FRAMING
 
 A model workaround is harness debt with an expiry date, not permanent policy.

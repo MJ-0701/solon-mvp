@@ -62,6 +62,16 @@ lead/C-Level 에이전트가 worker·reviewer·external executor 로 넘기는 c
   인스턴스여서는 안 된다 (자기평가 편향). "다른 agent" 는 기본적으로 다른
   인스턴스를 뜻하고, 모델 다양성(Codex/Gemini)은 per-capsule 필드가 아니라 Gate 6
   cross-CPO 에서만 요구한다.
+- Verifier capsule patterns (by-reference 선택지, 새 필드 아님): **isolated
+  verifier capsule** 은 clean context 에서 돌고 저작자는 모든 `acceptance_criteria`
+  가 통과할 때까지 **self-correction 루프**를 반복한다;
+  **adversarial verifier capsule** 은 결과를 확인이 아니라 *반박*하도록
+  프롬프트된다 — 게시 전 레드팀
+  규율(`cardnews-redteam` 식 리뷰)을 임의 제품 검증으로 일반화한 것. 둘 다
+  advisor↔Code file bus 의 선택 가능한 role 이다(`external-orchestrator-entry.md`).
+  외부 검증(by-reference): Claude 블로그 build-day 해커톤 글(2026-06-17) — 수상작은
+  agent 를 독립 verifier + adversarial agent 와 짝지어 고정 테스트셋 통과까지
+  루프를 돌렸다.
 
 ## 검증 (agent-build lens)
 

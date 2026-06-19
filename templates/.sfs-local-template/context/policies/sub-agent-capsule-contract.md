@@ -64,6 +64,16 @@ convenience.
   the same instance as the authoring agent (self-evaluation bias). "Different
   agent" means a different instance by default; model diversity (Codex/Gemini)
   is required only at Gate 6 cross-CPO, not as a per-capsule field.
+- Verifier capsule patterns (by-reference options, not new fields): an
+  **isolated verifier capsule** runs in clean context while the author iterates
+  a **self-correction loop** until every `acceptance_criteria` passes; an
+  **adversarial verifier capsule** is prompted to *refute* the result rather
+  than confirm it — the pre-publish red-team discipline (`cardnews-redteam`-style
+  review) generalized to any product verification. Both are selectable roles on
+  the advisor↔Code file bus (`external-orchestrator-entry.md`). External
+  validation (by-reference): a Claude blog build-day hackathon writeup
+  (2026-06-17) — winners paired the agent with an independent verifier and an
+  adversarial agent, looping until a fixed test set passed.
 
 ## Validation (agent-build lens)
 

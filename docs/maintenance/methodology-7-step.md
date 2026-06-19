@@ -40,6 +40,12 @@ plan(Gate 3) 진입 시 **eval-first**: 통과/실패를 가를 ground-truth 케
 `commands/flowcheck.md` 의 Plan-gate self-check 5번 + `policies/skill-promotion-loop.md`
 HELD_OUT_SCORING (여기서 재나열하지 않는다 — 포인터만).
 
+또 **map-first**: 구현 착수 전 작업 전체를 먼저 매핑(PRD + 티켓 분해)한 뒤 독립
+워크플로로 병렬화한다 — 첫 코드 전에 하루 분량의 계획이 나머지를 즉흥 아닌 실행으로
+바꾼다. 외부 검증(by-reference): Claude 블로그 build-day 해커톤 글(2026-06-17)
+1위 조언 "짓기 전에 프로젝트 전체를 매핑". solon dynamic-workflow / advisor 분배와
+정합 (일반화 원칙만 승격, 벤더·인명·모델버전 디테일 보류).
+
 ## Gate 표기 규약
 
 - Solon report 에서는 **Gate 1~7 표시**를 쓴다 (Intake / Brainstorm / Plan /

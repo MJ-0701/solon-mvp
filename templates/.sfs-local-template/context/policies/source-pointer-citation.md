@@ -41,6 +41,14 @@ target (templates-compatibility principle).
   (no wiki present). Never gate, block, or error on an unresolvable pointer.
 - **No absolute paths.** Cite the namespace (`idea_wiki:`), never a filesystem
   path to anyone's private wiki checkout.
+- **Evidence chain — every component traces back to a documented source.** A
+  claim, asset, or generated component is trustworthy only when it can be
+  traced to where it came from; an untraceable component is a gap to surface,
+  not a fact to rely on. The pointer *is* that chain link, and a 7-step output
+  carries it through to the provenance footer (`doc-colocation-provenance.md`).
+  External validation (by-reference): a Claude blog build-day hackathon writeup
+  (2026-06-17) — a winning build traced every component to a documented source
+  (generalized; vendor/name/model specifics held by-reference).
 - **Author from the live source, not memory.** When producing an *outbound*
   artifact a reader will act on (a customer email, a status report, an external
   brief), re-read the current routed context / official docs the claim depends on
