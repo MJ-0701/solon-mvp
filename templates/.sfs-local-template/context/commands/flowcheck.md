@@ -41,6 +41,7 @@ load_when: ["flowcheck", "postflight", "flow conformance", "작업단위 점검"
 2. `implicit-assumptions` — 아직 암묵으로 남은 가정은? 전부 명시로 전환했는가?
 3. `edge-cases` — 잊기 쉬운 엣지케이스는? AC/design 입력으로 박았는가?
 4. `intent-alignment` — rollout 전 의도일치(설계 의도 == 산출물)를 어떻게 확인하는가?
+5. `eval-first` — 통과/실패를 가를 ground-truth 케이스(구체 사례 N개 + 채점 차원)를 코드보다 먼저 고정했는가? **eval = first commit**: 측정 기준을 코드 뒤로 미루면 plan 이 직관에 머문다. 측정 가능한 acceptance 가 곧 plan 산출물이지 사후 합리화가 아니다 (`policies/skill-promotion-loop.md` HELD_OUT_SCORING 의 plan-time 짝). 직전 산출물의 결함을 새 빌드 전에 read-only 로 감사하는 pre-build audit 는 `policies/lessons-accumulation.md` PRE_BUILD_AUDIT 참조. 외부 검증(by-reference): Claude blog 해커톤 수상작 인터뷰(2026-06-15) — "eval 을 first commit 으로", "다음 것을 만들기 전에 이미 만든 것을 Claude 가 감사하게"; 일반화 원칙만 승격, 해커톤·인명·모델버전 디테일 보류.
 
 미전환 암묵 가정 = silent divergence 의 plan-time 근원. 런타임 divergence 잠금은 `fcp-conflict-surfaced`(#3) + model-tier(#4) 이며, plan 체크리스트는 그 중 #3(silent divergence) 부류를 plan 단계에서 선제 차단한다. Gate SSoT: gate-framework Gate 3 plan-validator check 7.
 

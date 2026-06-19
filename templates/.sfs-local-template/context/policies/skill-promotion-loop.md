@@ -111,6 +111,18 @@ it the gate is human review only. Source: `idea_wiki:research/agent-self-improve
 (R-LOOP-I5 eval-before-adopt, R-LOOP-I8 cost-tiered scoring) — Voyager/ACE/SkillOpt
 all gate a skill/policy change on a held-out set the change was not trained on.
 
+**Eval-first (the held-out set is fixed before the change is written).** The
+scoring set is a *plan* artifact, not a post-hoc rationalization: the ground-truth
+cases and scoring dimensions are pinned before the skill edit (or the WU's code)
+exists — "eval = first commit". A measurement bar invented after the work scores
+the work to look good; one fixed first tells the plan what "good" even means. This
+is the success-side mirror of the flowcheck Plan-gate `eval-first` check
+(`commands/flowcheck.md`). External validation (by-reference): Claude blog
+hackathon-winners interviews (2026-06-15) — a winning builder's takeaway that the
+eval should be the first commit, fixed against concrete ground-truth cases before
+the product code; generalized principle adopted, hackathon/name/model-version
+specifics held out.
+
 Hold out a small scenario set the edit was **not** tuned on (keep it in `evals/`,
 never read while editing), then score the skill before vs after on that set in
 two stages, cheap first:
