@@ -13,6 +13,31 @@
 
 ---
 
+## 0.8.39
+
+Three blog-insight work-units absorb into one patch: a steering-surface taxonomy turns WHERE each behavior instruction belongs into an explicit four-axis decision (entry stub / routed policy / Gate·hook / capsule), the sub-agent capsule contract gains final-message-only isolation plus isolated-and-adversarial verifier patterns, and status·flowcheck·PROGRESS can render into one self-updating live-status surface — every promotion is generalized from vendor blog posts by-reference, with managed-settings and the artifacts feature named but never depended on.
+
+체감 변화:
+
+- **지시를 어디에 둘지 결정 프레임.** "항상 지켜라 / 절대 하지 마라" 류 규칙은
+  프롬프트(엔트리 stub)로는 보장이 안 되고 결정론적 강제(Gate·hook)로 가야 한다는
+  4축 결정표가 routed context 에 명문화됐다. 비기술 운영자도 새 규칙을 어느
+  표면에 둘지 판단할 수 있다.
+- **서브에이전트 격리·검증 강화.** capsule 은 최종 메시지만 부모로 반환하고
+  (body 비유출, 양방향 격리), 통과까지 도는 self-correction verifier 와 결과를
+  반박하는 adversarial verifier 를 선택지로 쓸 수 있다.
+- **스스로 채워지는 라이브 상태 표면.** `sfs status` / `flowcheck` / `PROGRESS`
+  를 런이 진행되며 자동 갱신되는 단일 뷰(스스로 체크되는 릴리스 체크리스트)로
+  렌더하는 경로가 명시됐다. 파일 원장이 권위이고 HTML 은 파생 투영일 뿐이라
+  벤더 기능 없이도 동작한다.
+- 계획 단계에 "착수 전 전체 매핑→병렬화"(map-first)와 "eval = first commit"
+  포인터, 출처 역추적(evidence chain), 비용 기반 sunset 트리거가 추가됐다.
+
+모든 승격은 벤더 블로그를 by-reference 로 인용하며, 모델 버전·제품/인명·
+Team/Enterprise 베타 기능에는 의존하지 않습니다.
+
+---
+
 ## 0.8.38
 
 The command surface gets a drift lock and it caught three real bugs on its first run — every parallel command list (dispatch, adapters, MCP tools, context routing, usage text, router-doc markers) is now cross-checked by one parity test, which immediately surfaced recall missing from help and context-path resolution failing for recall and harness; the routed-context index gains themed sections, and upgrades become subdirectory-safe.

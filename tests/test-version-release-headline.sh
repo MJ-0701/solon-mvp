@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.38" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.38" "version output"
-assert_contains_text "${output}" "latest 0.8.38" "latest output"
+[[ "${plain_output}" == "sfs 0.8.39" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.39" "version output"
+assert_contains_text "${output}" "latest 0.8.39" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline The command surface gets a drift lock and it caught three real bugs on its first run — every parallel command list (dispatch, adapters, MCP tools, context routing, usage text, router-doc markers) is now cross-checked by one parity test, which immediately surfaced recall missing from help and context-path resolution failing for recall and harness; the routed-context index gains themed sections, and upgrades become subdirectory-safe." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Three blog-insight work-units absorb into one patch: a steering-surface taxonomy turns WHERE each behavior instruction belongs into an explicit four-axis decision (entry stub / routed policy / Gate·hook / capsule), the sub-agent capsule contract gains final-message-only isolation plus isolated-and-adversarial verifier patterns, and status·flowcheck·PROGRESS can render into one self-updating live-status surface — every promotion is generalized from vendor blog posts by-reference, with managed-settings and the artifacts feature named but never depended on." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline The command surface gets a drift lock and it caught three real bugs on its first run — every parallel command list (dispatch, adapters, MCP tools, context routing, usage text, router-doc markers) is now cross-checked by one parity test, which immediately surfaced recall missing from help and context-path resolution failing for recall and harness; the routed-context index gains themed sections, and upgrades become subdirectory-safe." "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline Three blog-insight work-units absorb into one patch: a steering-surface taxonomy turns WHERE each behavior instruction belongs into an explicit four-axis decision (entry stub / routed policy / Gate·hook / capsule), the sub-agent capsule contract gains final-message-only isolation plus isolated-and-adversarial verifier patterns, and status·flowcheck·PROGRESS can render into one self-updating live-status surface — every promotion is generalized from vendor blog posts by-reference, with managed-settings and the artifacts feature named but never depended on." "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

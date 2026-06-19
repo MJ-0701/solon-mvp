@@ -1,5 +1,58 @@
 ## [Unreleased]
 
+## [0.8.39] - 2026-06-19
+
+> **Three blog-insight work-units absorb into one patch: a steering-surface taxonomy turns WHERE each behavior instruction belongs into an explicit four-axis decision (entry stub / routed policy / Gate·hook / capsule), the sub-agent capsule contract gains final-message-only isolation plus isolated-and-adversarial verifier patterns, and status·flowcheck·PROGRESS can render into one self-updating live-status surface — every promotion is generalized from vendor blog posts by-reference, with managed-settings and the artifacts feature named but never depended on.**
+
+### Added
+
+- **`policies/steering-surface-taxonomy.md` (WU-1, BLOG-2026-06-19-1).** A
+  decision matrix for *where a behavior instruction belongs*: score it on four
+  axes — load-timing, compaction behavior, context cost, authority — then place
+  it on the matching solon surface (entry stub = always-loaded/expensive,
+  routed `load_when` = trigger-scoped/cheap, Gate·hook = deterministic
+  enforcement, capsule = isolated final-message-only). Core rule: "Every time X
+  / Never do Y" cannot be guaranteed by prose and must promote to deterministic
+  enforcement. Routed under flow/gates/delegation; trigger-based `load_when` is
+  distinguished from vendor path-scoped rules.
+- **Verifier capsule patterns (WU-2, BLOG-2026-06-19-2).**
+  `sub-agent-capsule-contract.md` (+ `.ko`) names two by-reference options: an
+  isolated verifier capsule with a self-correction loop (iterate until every
+  `acceptance_criteria` passes) and an adversarial verifier capsule (prompted to
+  refute — the pre-publish red-team discipline generalized to any product
+  verification); the advisor↔Code file bus can take the adversarial role.
+- **Live status surface (WU-3, BLOG-2026-06-19-3).** `commands/flowcheck.md`
+  gains a render path that unifies `sfs status` / `flowcheck` / `PROGRESS` into
+  one self-updating surface (a release checklist that checks its own boxes); the
+  file ledger stays authoritative and the HTML render is derived, never
+  hand-edited. The HTML-encouraged doc strategy (`release-policy.md` §5) gains
+  the matching live-status variant.
+
+### Changed
+
+- **`critical-rule-hook-promotion.md`** notes the managed/admin-deployed
+  authority ceiling — by-reference only; solon's bash distribution ships no such
+  surface, the operator overrides all config (`user-override-precedence.md`).
+- **`sub-agent-capsule-contract.md` (+ `.ko`)** adds final-message-only,
+  bidirectional capsule isolation: the worker's body never enters the parent
+  context, only its final message returns.
+- **`methodology-7-step.md`** plan stage gains map-first (map the whole project
+  before building → parallelize independent workflows) and the eval-first
+  pointer; **`source-pointer-citation.md`** gains the evidence-chain rule (every
+  component traces back to a documented source); **`model-workaround-sunset.md`**
+  STOP_DOING_REVIEW adds cost as a sunset trigger.
+- Headline tests added for each WU
+  (`test-steering-surface-taxonomy.sh`, `test-buildday-verify-map-absorption.sh`,
+  `test-live-status-surface-absorption.sh`). Vendor specifics (model versions,
+  product/person names, Team/Enterprise beta) held by-reference throughout; the
+  artifacts and managed-settings features are cited but never a dependency.
+
+### Fixed
+
+- **0.8.38 Tier-2 retro doc was missing frontmatter**, turning
+  `test-product-md-frontmatter-line-budget.sh` red on `main` (187/1) after the
+  post-release docs commit; frontmatter added to restore the green baseline.
+
 ## [0.8.38] - 2026-06-12
 
 > **The command surface gets a drift lock and it caught three real bugs on its first run — every parallel command list (dispatch, adapters, MCP tools, context routing, usage text, router-doc markers) is now cross-checked by one parity test, which immediately surfaced recall missing from help and context-path resolution failing for recall and harness; the routed-context index gains themed sections, and upgrades become subdirectory-safe.**
