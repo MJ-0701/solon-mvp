@@ -64,5 +64,22 @@ flowcheck 출력은 `.sfs-local/lessons.md` 의 누적 lesson 수와 "이번 작
 잡힌 실패를 lesson 으로 기록하라"는 의무를 advisory 1줄로 surface 한다(verdict/exit
 불변). 실패→회피 규칙 누적 규약은 `policies/lessons-accumulation.md`.
 
+## Live status surface (optional render)
+`sfs status` (sprint/WU state), `flowcheck` (conformance verdict), and the
+`PROGRESS`/handoff/report ledger are the same run's live state seen from three
+angles. They can render into **one self-updating status surface** — a single
+view that fills itself in as the run proceeds (a release checklist that checks
+its own boxes, an incident timeline, a PR walkthrough). The file ledger
+(events.jsonl + `PROGRESS`/report MD) is the authoritative source and the
+default surface; an HTML render is the optional human-facing projection per the
+HTML-encouraged doc strategy (`docs/maintenance/release-policy.md` §5), useful
+when several systems (runtime + orchestrator + wiki) must watch one shared view.
+The render is **derived, never authoritative** — it reflects the ledger and is
+regenerated, never hand-edited (event-log-as-SSoT, `policies/flow-conformance-postflight.md`).
+External validation (by-reference): a Claude blog post on session-captured live
+artifact pages (2026-06-18) — a vendor Team/Enterprise beta; the *pattern*
+(session state → self-updating shared page) is generalized, the vendor feature
+is **not a dependency** and nothing here requires it.
+
 ## invariant SSoT
 `policies/flow-conformance-postflight.md`.

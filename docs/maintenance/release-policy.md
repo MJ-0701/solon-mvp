@@ -50,6 +50,17 @@ AI Agent 참고용 운영 문서 / SSoT / 로그 / 스키마 / README 는 Markdo
 MD 가 이미 주 읽기 표면이라면 MD 유지도 허용한다 (현 `docs/` 는 전부 MD
 유지 선택).
 
+**Live-status 변형 (일반화 패턴).** 세션이 진행되며 산출되는 상태(릴리스
+체크리스트 · 인시던트 타임라인 · PR 워크스루)는 정적 보고서가 아니라 **스스로
+채워지는 단일 라이브 상태 표면**으로 렌더할 수 있다 — 같은 뷰를 여러 시스템이
+함께 보고, 런이 진행되며 in-place 로 갱신되는 형태. 파일 원장(events.jsonl /
+`PROGRESS` / report MD)이 권위 source 이고 HTML 페이지는 그로부터 파생된 사람용
+투영일 뿐, 손으로 고치지 않고 재생성한다. 명령 표면의 렌더 경로 SSoT 는 routed
+context `commands/flowcheck.md` 의 "Live status surface" 절(`status` / `flowcheck`
+/ `PROGRESS` 통합). 외부 검증(by-reference): session-captured live artifact
+페이지에 관한 Claude 블로그(2026-06-18) — 벤더 Team/Enterprise 베타 기능. **패턴만**
+승격하고 벤더 기능 자체에는 의존하지 않는다(제거해도 전 기능 동일 동작).
+
 ## 6. Fresh-session transfer autopilot
 
 Session Continuation Guard 가 걸리면 같은 세션 / 새 세션 선택이나 `/clear`
