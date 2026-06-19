@@ -1,3 +1,14 @@
+---
+doc_id: solon-product-retro-2026-06-15-tier2-audit
+title: "Tier-2 회고 — AUDIT-2026-06-12 / 0.8.38 출하"
+visibility: oss-public
+doc_type: maintenance-doc
+language: ko
+updated: 2026-06-15
+summary: "Retro for the AUDIT-2026-06-12 Tier-2 batch shipped as 0.8.38: 4 items executed, 5 evidence-based deferrals, command-surface parity test caught 3 live bugs on first run."
+load_when: "Read when reviewing the 0.8.38 Tier-2 audit outcome or the rationale for the deferred audit items."
+---
+
 # Tier-2 회고 — AUDIT-2026-06-12 / 0.8.38 출하
 
 작성: 2026-06-15 · 대상 릴리스: 0.8.38 (`a474d55`) · 게이트: 188 PASS / 0 FAIL · CPO A–D PASS + E 채택
