@@ -62,7 +62,9 @@ verdict/exit 를 바꾸지 않는다(기존 동작 비파괴). 계약 SSoT: `pol
 ## Lessons loop
 flowcheck 출력은 `.sfs-local/lessons.md` 의 누적 lesson 수와 "이번 작업단위에서
 잡힌 실패를 lesson 으로 기록하라"는 의무를 advisory 1줄로 surface 한다(verdict/exit
-불변). 실패→회피 규칙 누적 규약은 `policies/lessons-accumulation.md`.
+불변). 실패→회피 규칙 누적 규약은 `policies/lessons-accumulation.md`. flowcheck 의
+telemetry hotspot + lessons surface 는 자기개선 루프의 SIGNAL 단계다 — 전체 8단계
+지도와 불변식 SSoT 는 `policies/self-improvement-loop.md`.
 
 ## Live status surface (optional render)
 `sfs status` (sprint/WU state), `flowcheck` (conformance verdict), and the

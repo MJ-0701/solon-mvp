@@ -13,6 +13,23 @@
 
 ---
 
+## 0.8.40
+
+Five mature-but-scattered self-improving policies gain one end-to-end loop map (signal -> record -> curate -> propose -> measure -> gate -> apply -> capture-delta) that calls each owning policy by-reference and declares the six cross-cutting invariants in one place, ending the dual-SSoT drift; an external orchestrator gains a prep-only self-improvement seam with no runtime wiring, so removing every orchestrator still leaves the loop working on doctor + curation + tidy alone.
+
+체감 변화:
+
+- 새 세션이나 외부 시스템이 "solon 의 자기개선이 한 사이클로 어떻게 도는가"를
+  정책 5~6개를 따로 읽지 않고 `self-improvement-loop.md` 한 장으로 파악한다.
+- suggest-only · 원장 권위 · `L-NNN` 보존 · 점수가 게이트를 못 뒤집음 · 코드
+  자동패치 금지 · 스케줄 무인 실행 계약 — 이 6개 불변식이 이제 한 곳에서만
+  선언돼 두 정책에 흩어져 어긋날 일이 없다.
+- 외부 오케스트레이터(Hermes급)를 붙이고 싶은 운영자를 위한 seam 이 문서로
+  열려 있되, 전부 제거해도 루프는 `doctor + curation + tidy` 만으로 동일하게
+  돈다. 이번 변경엔 런타임 배선이 전혀 없다.
+
+---
+
 ## 0.8.39
 
 Three blog-insight work-units absorb into one patch: a steering-surface taxonomy turns WHERE each behavior instruction belongs into an explicit four-axis decision (entry stub / routed policy / Gate·hook / capsule), the sub-agent capsule contract gains final-message-only isolation plus isolated-and-adversarial verifier patterns, and status·flowcheck·PROGRESS can render into one self-updating live-status surface — every promotion is generalized from vendor blog posts by-reference, with managed-settings and the artifacts feature named but never depended on.

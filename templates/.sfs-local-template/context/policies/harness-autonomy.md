@@ -88,6 +88,9 @@ SFS applies this as a project-operating contract:
   and public-contract changes stay human-owned.
 - Convert repeated defects into harness assets: tests, wiki bug reports,
   routed policies, knowledge packs, fixtures, or review questions.
+- This policy owns the CAPTURE-delta stage of the end-to-end loop map in
+  `self-improvement-loop.md` (evolution-ledger feeds repeated deltas back as new
+  SIGNAL); that map declares the loop's cross-cutting invariants once.
 
 Multi-agent execution remains opt-in. The default upgrade from a single model
 is not "more agents"; it is a better environment for whichever model is active.

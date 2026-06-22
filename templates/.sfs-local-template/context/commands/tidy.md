@@ -29,6 +29,10 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
   archiving, create source-linked `llm-wiki/promotion-candidates/` notes from
   report/retro pairs. It promotes candidates, not conclusions; source records
   stay in `docs/solon/` and human review still decides actual wiki updates.
+- Self-improvement loop (`policies/self-improvement-loop.md`): tidy is the APPLY
+  stage of the end-to-end loop — the curation, skill-promotion, and sunset
+  suggestions below all land here under the one human gate that map's invariants
+  require.
 - Skill promotion loop (`policies/skill-promotion-loop.md`): at tidy/retro,
   run `sfs harness doctor` and read the **Skill Promotion Candidates** section —
   repeated completed-work patterns (3+) it surfaces are skill/command candidates.

@@ -89,6 +89,8 @@ tagged.
 
 ## CROSS_REFERENCES
 
+- End-to-end loop map (sunset re-review is part of the GATE stage; invariants
+  declared once there): `self-improvement-loop.md`.
 - Rule lifecycle tiers (prose → lint → hook): `critical-rule-hook-promotion.md`.
 - Stale-rule conflicts with current defaults: `context-conflict-gate.md`.
 - Retirement procedure (archive, never silent-delete): `deprecation-and-migration.md`.

@@ -167,6 +167,8 @@ without context.
 
 ## CROSS_REFERENCES
 
+- End-to-end loop map (this policy owns PROPOSE / MEASURE / GATE; invariants
+  declared once there): `self-improvement-loop.md`.
 - Failure-side twin (avoidance rules): `lessons-accumulation.md`.
 - Catalog discipline + nine-category lens the new skill must fit: `skill-catalog-discipline.md`.
 - Tidy/retro rail that consumes candidates: `commands/tidy.md`.

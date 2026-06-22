@@ -96,6 +96,8 @@ decision and the target hook so it is a tracked proposal, not an orphaned idea.
 
 ## CROSS_REFERENCES
 
+- End-to-end loop map (hook/gate promotion is part of the APPLY stage;
+  invariants declared once there): `self-improvement-loop.md`.
 - Typed-surface vein (capsule field contract): `sub-agent-capsule-contract.md`.
 - On-demand guardrail candidates + nine-category lens: `skill-catalog-discipline.md`.
 - Recurrence → guardrail feedback loop: `lessons-accumulation.md`.

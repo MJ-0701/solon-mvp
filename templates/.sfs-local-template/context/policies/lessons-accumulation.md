@@ -20,7 +20,9 @@ is recorded once and never re-explained: the local ledger
 
 This is the **record** half of the self-improving loop. The **reflect** half —
 promoting a recorded lesson into an automated check/test/lint — is the feedback
-flywheel; a lesson's `promoted` field is where the two meet.
+flywheel; a lesson's `promoted` field is where the two meet. This policy owns the
+RECORD + CURATE stages of the end-to-end map in `self-improvement-loop.md`, which
+declares the loop's cross-cutting invariants once.
 
 ## Ledger location
 

@@ -106,8 +106,31 @@ incrementally — read → propose → bounded write → release-adjacent — ne
 assumed from a single broad grant. This mirrors the agent runbook Level 0 → 1
 escalation.
 
+## Self-improvement seam
+
+An external orchestrator may plug into the self-improvement loop
+(`policies/self-improvement-loop.md`) at two by-reference seams. This is
+**prep-only**: it documents where an orchestrator *would* attach, with
+**no runtime wiring** — no new command, no `bin/sfs` change, no adapter code.
+
+- **External SIGNAL source.** Cross-system completed-work and detection signals
+  can feed the loop's SIGNAL/CURATE/PROPOSE input, alongside `sfs harness
+  doctor` and the curation pass. The feed is a typed handoff (the contract
+  above), never raw narration.
+- **External proposal-review surface.** Curation and promotion candidates can be
+  reviewed by a human across systems on the orchestrator's surface. The review
+  changes nothing about the loop's authority: candidates stay **suggest-only**,
+  the inviolable gates above still hold, and first authorized scope stays
+  read-only.
+
+**Standalone guarantee (seam form).** Remove every external orchestrator and the
+loop still turns on `doctor + curation + tidy` alone — the seam is an optional
+extension point, not a dependency. The moment a seam adds runtime wiring, this
+guarantee breaks; that is out of scope here.
+
 ## Cross-references
 
+- Self-improvement loop map (the seam's host): `policies/self-improvement-loop.md`.
 - Worker/handoff capsule: `policies/runtime-token-firewall.md`,
   `policies/sub-agent-capsule-contract.md`.
 - Session continuation / single-prompt handoff:

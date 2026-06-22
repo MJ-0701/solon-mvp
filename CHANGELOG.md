@@ -1,5 +1,44 @@
 ## [Unreleased]
 
+## [0.8.40] - 2026-06-23
+
+> **Five mature-but-scattered self-improving policies gain one end-to-end loop map (signal -> record -> curate -> propose -> measure -> gate -> apply -> capture-delta) that calls each owning policy by-reference and declares the six cross-cutting invariants in one place, ending the dual-SSoT drift; an external orchestrator gains a prep-only self-improvement seam with no runtime wiring, so removing every orchestrator still leaves the loop working on doctor + curation + tidy alone.**
+
+### Added
+
+- **`policies/self-improvement-loop.md` (WU-1, UPGRADE-2026-06-22-1).** A single
+  end-to-end map of solon's self-improving capability: eight stages (SIGNAL ->
+  RECORD -> CURATE -> PROPOSE -> MEASURE -> GATE -> APPLY -> CAPTURE delta), each
+  naming the policy that owns its mechanics **by-reference** rather than
+  re-describing them. The five formerly-scattered policies
+  (`lessons-accumulation`, `skill-promotion-loop`, `harness-autonomy`,
+  `model-workaround-sunset`, `critical-rule-hook-promotion`) are now read as one
+  cycle. The six cross-cutting invariants — suggest-only-until-gate /
+  ledger-and-event-log authoritative / `L-NNN` id preserved (promoted rules
+  never merged away) / measured-but-not-sufficient / no code auto-patch (MD
+  edits only; DGM by-reference) / scheduled runs obey SCHEDULED_RUN_CONTRACT —
+  are declared **once here**, so component policies apply them locally and point
+  back instead of re-stating a second SSoT. Includes a typed-handoff artifact
+  table (`lessons.md` -> curation report -> promotion candidates -> `evals/`
+  held-out set -> `evolution-ledger.md`). Routed under flow/gates/delegation;
+  ≤200-line budget. Headline test `test-self-improvement-loop.sh`.
+- **Self-improvement seam in `external-orchestrator-entry.md` (WU-2,
+  UPGRADE-2026-06-22-2).** A **prep-only** section documenting the two
+  by-reference seams where an external standing orchestrator (Hermes-class)
+  *would* attach to the loop — an external SIGNAL source and an external
+  proposal-review surface — with **no runtime wiring** (no new command, no
+  `bin/sfs` change, no adapter code). suggest-only, the inviolable gates, and
+  first-permission read-only all still hold; the standalone guarantee is
+  restated in seam form (`doctor + curation + tidy` alone keeps the loop working
+  when every orchestrator is removed).
+
+### Changed
+
+- **Additive backpointers** in the five component policies + `commands/tidy.md`
+  (APPLY rail) + `commands/flowcheck.md` (SIGNAL rail) name their stage in the
+  loop map and point to `self-improvement-loop.md`; all pre-existing anchors
+  preserved. `_INDEX.md` routes the new SSoT under the self-improvement section.
+
 ## [0.8.39] - 2026-06-19
 
 > **Three blog-insight work-units absorb into one patch: a steering-surface taxonomy turns WHERE each behavior instruction belongs into an explicit four-axis decision (entry stub / routed policy / Gate·hook / capsule), the sub-agent capsule contract gains final-message-only isolation plus isolated-and-adversarial verifier patterns, and status·flowcheck·PROGRESS can render into one self-updating live-status surface — every promotion is generalized from vendor blog posts by-reference, with managed-settings and the artifacts feature named but never depended on.**
