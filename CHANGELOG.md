@@ -1,5 +1,30 @@
 ## [Unreleased]
 
+## [0.8.41] - 2026-06-23
+
+> **Shipped Markdown surfaces are scrubbed of stray closing-tag litter: 14 files under templates/ and docs/ carried a leftover end-of-file closing tag (a </content>, and in two files also a </invoke>) with no matching opening tag, which shipped into consumer installs; all are removed and a regression test locks them out.**
+
+### Fixed
+
+- **Stray closing-tag artifacts removed from 14 shipped surfaces.** The
+  absorption workflow occasionally appended a wrapper's closing tag
+  (`</content>`, and in two files `</invoke>`) to the bottom of a
+  generated Markdown file. With no opening tag these were pure end-of-file
+  litter that shipped into consumer installs. Cleaned: 8 docs
+  (`docs/{ko,en}/10x-value/{12,13}-why-solon.md`,
+  `docs/{ko,en}/current-product-shape/{24-topdown-learning-guide,25-wiki-onboarding-guide,26-delegation-repertoire}.md`)
+  and 6 templates surfaces
+  (`operator-context.md`, `policies/{context-conflict-gate,critical-rule-hook-promotion,steering-surface-taxonomy,user-context-separation,work-delegation-and-startup}.md`).
+  Prose bodies are untouched; only the trailing artifact lines were stripped.
+
+### Added
+
+- **`tests/test-no-stray-content-tag.sh` (headline).** Fails if any
+  shipped Markdown under `templates/` or `docs/` reintroduces a stray
+  closing-tag artifact (`</content>`, `</invoke>`, `</function_calls>`,
+  `</*>`, `</parameter>`). Includes a positive-control probe so a
+  future pattern refactor cannot silently no-op the detector.
+
 ## [0.8.40] - 2026-06-23
 
 > **Five mature-but-scattered self-improving policies gain one end-to-end loop map (signal -> record -> curate -> propose -> measure -> gate -> apply -> capture-delta) that calls each owning policy by-reference and declares the six cross-cutting invariants in one place, ending the dual-SSoT drift; an external orchestrator gains a prep-only self-improvement seam with no runtime wiring, so removing every orchestrator still leaves the loop working on doctor + curation + tidy alone.**

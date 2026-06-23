@@ -59,4 +59,3 @@ runtime axis (conversational / supervised session / autonomous code).
   output stays human (`current-product-shape/24-topdown-learning-guide.md`).
 - One-off / repeated / batch routing follows
   `policies/ai-work-intake-routing.md`.
-</content>

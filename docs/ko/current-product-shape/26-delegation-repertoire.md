@@ -49,4 +49,3 @@ load_when: "Read when deciding which recurring knowledge work to hand the agent,
 - 어떤 패턴이든 산출물을 읽고 이해하고 의견을 갖는 사람 몫은 그대로다
   (`current-product-shape/24-topdown-learning-guide.md`).
 - 일회성/반복/배치 라우팅은 `policies/ai-work-intake-routing.md` 를 따른다.
-</content>

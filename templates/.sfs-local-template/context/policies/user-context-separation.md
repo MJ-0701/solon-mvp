@@ -51,4 +51,3 @@ for via `AskUserQuestion` at runtime rather than defaulted
 - Project (not operator) context: `llm-wiki/project-context.md`.
 - Procedure routing: `_INDEX.md`, `kernel.md`.
 - Setup-via-placeholder convention: `skill-catalog-discipline.md`.
-</content>

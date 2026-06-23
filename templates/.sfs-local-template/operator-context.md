@@ -49,4 +49,3 @@ do not ship fixed values in the template.
 - **Always**: <OPERATOR-ALWAYS>
 - **Never**: <OPERATOR-NEVER>
 - **Decision authority kept by operator**: <OPERATOR-DECISIONS>
-</content>

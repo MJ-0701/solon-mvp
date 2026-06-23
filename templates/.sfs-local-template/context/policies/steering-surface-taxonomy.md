@@ -98,5 +98,3 @@ The axes resolve to a small set of rules:
   `agent-adapter-doc-refactor.md`, `md-line-budget.md`.
 - Trigger-centric `load_when` lint + nine-category lens:
   `skill-catalog-discipline.md`.
-</content>
-</invoke>

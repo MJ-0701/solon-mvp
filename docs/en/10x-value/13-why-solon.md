@@ -57,4 +57,3 @@ figures/org details are claims at publication time). It is outside evidence for
 the claim above: the surviving asset is not a "coding background" but *the
 ability to design work structure* — the most direct proof for Solon's target,
 the non-technical one-person operator.
-</content>

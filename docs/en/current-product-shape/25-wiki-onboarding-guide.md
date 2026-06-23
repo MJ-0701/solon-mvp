@@ -75,4 +75,3 @@ runtime-independent, no absolute paths) is in
   the wiki is where the durable output of that learning protocol lands.
 - Continuity rationale and the standalone guarantee:
   [Obsidian LLM Wiki Continuity](./19-obsidian-llm-wiki-continuity.md).
-</content>

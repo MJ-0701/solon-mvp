@@ -43,4 +43,3 @@ load_when: "Read when an operator needs to learn a new domain/codebase fast to d
   골라 AI 에게 해결책을 빌드시킨다"로 시작한 경로 (근거: Anthropic 블로그 "How
   one Anthropic seller rebuilt his team's workflows", 2026-06-05, by-reference)
   는 1단계 문제 중심 진입과 같은 형태다.
-</content>

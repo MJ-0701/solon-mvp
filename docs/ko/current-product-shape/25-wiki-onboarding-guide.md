@@ -72,4 +72,3 @@ advisory 다 — 없어도 모든 명령은 동일하게 동작한다.
   프로토콜의 durable 산출물이 안착하는 곳이다.
 - 연속성 근거와 standalone guarantee:
   [Obsidian LLM Wiki Continuity](./19-obsidian-llm-wiki-continuity.md).
-</content>

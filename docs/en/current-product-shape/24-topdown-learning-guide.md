@@ -50,4 +50,3 @@ by-reference.)
   fix" (source: Anthropic blog "How one Anthropic seller rebuilt his team's
   workflows", 2026-06-05, by-reference) is the same shape as step 1, problem-first
   entry.
-</content>

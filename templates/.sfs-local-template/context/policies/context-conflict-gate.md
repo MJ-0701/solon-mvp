@@ -64,5 +64,3 @@ directives into one. Record the resolution where the surviving directive lives.
 - Promotion of a violated-when-critical rule to a hard gate/hook:
   `critical-rule-hook-promotion.md`.
 - Line budget for this file: `md-line-budget.md`.
-</content>
-</invoke>

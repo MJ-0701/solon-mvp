@@ -13,6 +13,19 @@
 
 ---
 
+## 0.8.41
+
+Shipped Markdown surfaces are scrubbed of stray closing-tag litter: 14 files under templates/ and docs/ carried a leftover end-of-file closing tag (a </content>, and in two files also a </invoke>) with no matching opening tag, which shipped into consumer installs; all are removed and a regression test locks them out.
+
+체감 변화:
+
+- consumer 설치본의 정책·가이드 문서 끝에 보이던 정체불명의 `</content>` 같은
+  태그 줄이 사라진다. 본문 내용은 그대로다.
+- 같은 아티팩트가 다시 끼어들면 `test-no-stray-content-tag.sh` 가 즉시
+  잡아내므로, 다음 흡수 작업에서 조용히 재유입될 일이 없다.
+
+---
+
 ## 0.8.40
 
 Five mature-but-scattered self-improving policies gain one end-to-end loop map (signal -> record -> curate -> propose -> measure -> gate -> apply -> capture-delta) that calls each owning policy by-reference and declares the six cross-cutting invariants in one place, ending the dual-SSoT drift; an external orchestrator gains a prep-only self-improvement seam with no runtime wiring, so removing every orchestrator still leaves the loop working on doctor + curation + tidy alone.

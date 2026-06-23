@@ -103,4 +103,3 @@ decision and the target hook so it is a tracked proposal, not an orphaned idea.
 - Recurrence → guardrail feedback loop: `lessons-accumulation.md`.
 - Security/destructive-action review evidence: `agentic-security-logging-pack.md`.
 - Mainline protection the hooks reinforce: `mainline-focus-guard.md`.
-</content>

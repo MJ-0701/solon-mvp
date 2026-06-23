@@ -106,4 +106,3 @@ already run this way):
 - Credential handling for unattended/scheduled runs: `credential-hygiene.md`.
 - Standard delegation repertoire (workflow catalog):
   `docs/{ko,en}/current-product-shape/26-delegation-repertoire.md`.
-</content>
