@@ -22,6 +22,7 @@ set -euo pipefail
 ASSUME_YES=0
 INSTALL_LAYOUT="${SFS_INSTALL_LAYOUT:-vendored}"
 INSTALL_AGENT_ADAPTERS="${SFS_INSTALL_AGENT_ADAPTERS:-}"
+INSTALL_TEAM="${SFS_AGENT_TEAM:-solo}"   # solo | pair | trio (기본 solo = 현재 동작 무변경)
 
 usage() {
   cat <<EOF
@@ -36,6 +37,10 @@ Options:
   --with-agent-adapters
                       thin layout 에서도 .claude/.gemini/.agents command/skill
                       adapter 파일을 프로젝트에 설치합니다. 기본값은 opt-in 입니다.
+  --team solo|pair|trio
+                      멀티에이전트 team topology preset. solo(기본)=현재 동작
+                      그대로. pair/trio 는 model-profiles 의 agent_runtime_bindings
+                      를 채우고 어댑터에 role-scoped dispatch rule 을 주입합니다.
   -h, --help          도움말을 출력합니다.
 
 Environment:
@@ -65,8 +70,16 @@ while [ $# -gt 0 ]; do
     --with-agent-adapters|--agent-adapters)
       INSTALL_AGENT_ADAPTERS=1
       ;;
+    --team)
+      shift
+      [ $# -gt 0 ] || { echo "알 수 없는 옵션: --team 값 필요 (solo|pair|trio)" >&2; exit 99; }
+      INSTALL_TEAM="$1"
+      ;;
+    --team=*)
+      INSTALL_TEAM="${1#--team=}"
+      ;;
     *)
-      echo "알 수 없는 옵션: $1 (지원: --yes, --layout, --help)" >&2
+      echo "알 수 없는 옵션: $1 (지원: --yes, --layout, --team, --help)" >&2
       exit 99
       ;;
   esac
@@ -77,6 +90,14 @@ case "$INSTALL_LAYOUT" in
   thin|vendored) ;;
   *)
     echo "알 수 없는 layout: $INSTALL_LAYOUT (지원: thin, vendored)" >&2
+    exit 99
+    ;;
+esac
+
+case "$INSTALL_TEAM" in
+  solo|pair|trio) ;;
+  *)
+    echo "알 수 없는 team preset: $INSTALL_TEAM (지원: solo, pair, trio)" >&2
     exit 99
     ;;
 esac
@@ -742,6 +763,63 @@ else
 fi
 sfs_warn_model_profiles_drift "$TARGET/.sfs-local/model-profiles.yaml" "$MODEL_POLICY"
 
+# --team preset 머티리얼라이즈 (solo = no-op = 현재 동작 무변경).
+# OCP: preset→bindings 는 model-profiles 의 team_preset_catalog(데이터)에서 읽고,
+# install 코드는 enum 을 모른다. 새 preset = 카탈로그 편집만.
+sfs_apply_team_preset() {
+  local team="$1" mp="$TARGET/.sfs-local/model-profiles.yaml"
+  [ "$team" = "solo" ] && return 0
+  [ -f "$mp" ] || { warn "team preset 적용 불가: model-profiles.yaml 없음"; return 0; }
+
+  # 1) team_preset 라인 갱신.
+  "${SED_INPLACE[@]}" -e "s|^team_preset:.*|team_preset: $team|" "$mp" 2>/dev/null || true
+
+  # 2) agent_runtime_bindings 머티리얼라이즈 — 기본 `{}` 일 때만 (사용자 커스텀 보호).
+  local resolver="$SOURCE_DIR/templates/.sfs-local-template/scripts/sfs-team.sh"
+  if grep -Eq '^agent_runtime_bindings:[[:space:]]*\{\}[[:space:]]*$' "$mp" && [ -f "$resolver" ]; then
+    # resolver 출력(`key: value`)을 2칸 들여쓰기로 임시파일에 적재. awk -v 에
+    # 여러 줄을 넘기면 BSD awk 가 'newline in string' 으로 죽으므로 getline 사용.
+    local binds_file="$mp.binds.tmp"
+    SFS_MODEL_PROFILES="$mp" bash "$resolver" preset-bindings "$team" 2>/dev/null | sed 's/^/  /' > "$binds_file" || true
+    if [ -s "$binds_file" ]; then
+      awk -v bf="$binds_file" '
+        $1 == "agent_runtime_bindings:" && index($0, "{}") {
+          print "agent_runtime_bindings:"
+          while ((getline l < bf) > 0) print l
+          close(bf)
+          next
+        }
+        { print }
+      ' "$mp" > "$mp.tmp" && mv "$mp.tmp" "$mp"
+      ok "  team preset '$team' → agent_runtime_bindings 채움"
+    fi
+    rm -f "$binds_file"
+  else
+    warn "  agent_runtime_bindings 가 기본 {} 가 아님 — team preset 자동 적용 skip (직접 편집)"
+  fi
+
+  # 3) 어댑터 dispatch rule 주입 (설치본 frontmatter 의 닫는 --- 앞). entry-agnostic.
+  local adapter
+  for adapter in "$TARGET/CLAUDE.md" "$TARGET/AGENTS.md" "$TARGET/GEMINI.md"; do
+    [ -f "$adapter" ] || continue
+    grep -q '^team_dispatch:' "$adapter" && continue   # idempotent
+    awk -v preset="$team" '
+      BEGIN { fm=0; done=0 }
+      NR==1 && $0=="---" { fm=1; print; next }
+      fm==1 && done==0 && $0=="---" {
+        print "team_dispatch:                          # injected by --team " preset " (P2); solo 면 부재"
+        print "  preset: " preset
+        print "  rule: \"task role 분류(plan/review/docs=lead, 구현=worker, 조사=researcher) → `sfs team resolve-runtime <role>` 로 runtime 해석 → 내 runtime 과 다르면 typed capsule 발행 후 `sfs route <role> <capsule>` 로 위임 → 회수·통합. solo/standalone 은 항상 직접 수행.\""
+        print "  ssot: \"docs/maintenance/2026-06-23-multi-agent-team-topology.design.md §4.4\""
+        done=1; print; next
+      }
+      { print }
+    ' "$adapter" > "$adapter.tmp" && mv "$adapter.tmp" "$adapter"
+  done
+  ok "  team dispatch rule 주입: CLAUDE.md / AGENTS.md / GEMINI.md (preset=$team)"
+}
+sfs_apply_team_preset "$INSTALL_TEAM"
+
 # divisions.yaml — 기존 있으면 skip (사용자 수정분 보호)
 if [ ! -f "$TARGET/.sfs-local/divisions.yaml" ]; then
   cp "$SOURCE_DIR/templates/.sfs-local-template/divisions.yaml" "$TARGET/.sfs-local/divisions.yaml"
@@ -970,7 +1048,8 @@ Solon 버전:      $SOLON_VERSION
 layout:          $INSTALL_LAYOUT
 .sfs-local/:     private local state (${C_BOLD}gitignored by default; 기존 산출물은 보존됨${C_RESET})
 공통 지침:       SFS.md
-런타임 어댑터:   CLAUDE.md / AGENTS.md / GEMINI.md
+런타임 어댑터:   CLAUDE.md / AGENTS.md / GEMINI.md$([ "$INSTALL_TEAM" != "solo" ] && echo " (team_dispatch 주입)" || echo "")
+Team topology:   $INSTALL_TEAM$([ "$INSTALL_TEAM" = "solo" ] && echo " (단일 runtime, dispatch off — 현재 동작 그대로)" || echo " (agent_runtime_bindings + 어댑터 dispatch rule)")
 지식 vault:      $([ -d "$TARGET/llm-wiki" ] && echo "llm-wiki/ (장기 지식 — 수동 유지, generator 미동반)" || echo "llm-wiki/ 생략 (SFS_INSTALL_LLM_WIKI=0 / waiver)")
 Entry 1급:       $ENTRY_HINT
 Model profiles: .sfs-local/model-profiles.yaml (runtime=$MODEL_RUNTIME, policy=$MODEL_POLICY)

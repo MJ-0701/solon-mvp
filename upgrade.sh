@@ -23,20 +23,24 @@ set -euo pipefail
 
 ASSUME_YES=0
 UPGRADE_LAYOUT="${SFS_UPGRADE_LAYOUT:-}"
+UPGRADE_TEAM="${SFS_AGENT_TEAM:-}"   # 빈값 = 미지정 = 기존 team 설정 무변경 (backward-compatible)
 
 usage() {
   cat <<'EOF'
-Usage: sfs upgrade [--yes] [--layout thin|vendored]
+Usage: sfs upgrade [--yes] [--layout thin|vendored] [--team solo|pair|trio]
 
 Options:
   -y, --yes           안전 기본 정책으로 non-interactive upgrade 실행
   --layout thin       project-local runtime/agent adapters 를 global sfs runtime 으로 이관
   --layout vendored   project-local runtime/agent adapters 를 계속 유지
+  --team solo|pair|trio
+                      멀티에이전트 team preset 재적용. 미지정 시 기존 team 설정 무변경.
   -h, --help          도움말 출력
 
 Environment:
   SFS_MODEL_PROFILE_PROMPT=0  agent/model fallback 질문을 이번 upgrade 에서 숨김
   SFS_UPGRADE_LAYOUT=thin|vendored
+  SFS_AGENT_TEAM=solo|pair|trio  team preset 재적용(미지정=무변경)
   SFS_CLI_DISCOVERY_TIMEOUT_SEC=45  cli-discovery hook 최대 실행 시간
 EOF
 }
@@ -53,6 +57,14 @@ while [ $# -gt 0 ]; do
       ;;
     --layout=*)
       UPGRADE_LAYOUT="${1#--layout=}"
+      ;;
+    --team)
+      shift
+      [ $# -gt 0 ] || { echo "알 수 없는 옵션: --team 값 필요 (solo|pair|trio)" >&2; exit 99; }
+      UPGRADE_TEAM="$1"
+      ;;
+    --team=*)
+      UPGRADE_TEAM="${1#--team=}"
       ;;
     -h|--help)
       usage
@@ -71,6 +83,14 @@ case "$UPGRADE_LAYOUT" in
   ""|thin|vendored) ;;
   *)
     echo "알 수 없는 layout: $UPGRADE_LAYOUT (지원: thin, vendored)" >&2
+    exit 99
+    ;;
+esac
+
+case "$UPGRADE_TEAM" in
+  ""|solo|pair|trio) ;;
+  *)
+    echo "알 수 없는 team preset: $UPGRADE_TEAM (지원: solo, pair, trio)" >&2
     exit 99
     ;;
 esac
@@ -1824,6 +1844,58 @@ if [ -d "$LLM_WIKI_SRC" ]; then
   fi
 fi
 
+# --team 재적용 헬퍼 (명시 호출일 때만; 미지정이면 무변경 = backward-compatible).
+# install.sh 의 sfs_apply_team_preset 와 동일 계약: preset→bindings 는 데이터(catalog),
+# bindings 는 기본 `{}` 일 때만 채워 사용자 커스텀 보호, 어댑터 주입은 idempotent.
+# 버전 동일(already-latest) 경로와 version-bump 경로 양쪽에서 호출되므로 여기서 정의.
+upgrade_apply_team_preset() {
+  local team="$1" mp="$TARGET/.sfs-local/model-profiles.yaml"
+  [ -n "$team" ] || return 0
+  [ -f "$mp" ] || { warn "team preset 적용 불가: model-profiles.yaml 없음"; return 0; }
+  sed_inplace -e "s|^team_preset:.*|team_preset: $team|" "$mp" 2>/dev/null || true
+  if [ "$team" = "solo" ]; then
+    ok "team preset solo 재적용 (bindings/dispatch 비활성 — 기존 동작)"
+    return 0
+  fi
+  local resolver="$SOURCE_DIR/templates/.sfs-local-template/scripts/sfs-team.sh"
+  if grep -Eq '^agent_runtime_bindings:[[:space:]]*\{\}[[:space:]]*$' "$mp" && [ -f "$resolver" ]; then
+    local binds_file="$mp.binds.tmp"
+    SFS_MODEL_PROFILES="$mp" bash "$resolver" preset-bindings "$team" 2>/dev/null | sed 's/^/  /' > "$binds_file" || true
+    if [ -s "$binds_file" ]; then
+      awk -v bf="$binds_file" '
+        $1 == "agent_runtime_bindings:" && index($0, "{}") {
+          print "agent_runtime_bindings:"
+          while ((getline l < bf) > 0) print l
+          close(bf); next
+        }
+        { print }
+      ' "$mp" > "$mp.tmp" && mv "$mp.tmp" "$mp"
+      ok "team preset '$team' → agent_runtime_bindings 채움"
+    fi
+    rm -f "$binds_file"
+  else
+    warn "agent_runtime_bindings 가 기본 {} 가 아님 — team preset 자동 적용 skip (직접 편집)"
+  fi
+  local adapter
+  for adapter in "$TARGET/CLAUDE.md" "$TARGET/AGENTS.md" "$TARGET/GEMINI.md"; do
+    [ -f "$adapter" ] || continue
+    grep -q '^team_dispatch:' "$adapter" && continue
+    awk -v preset="$team" '
+      BEGIN { fm=0; done=0 }
+      NR==1 && $0=="---" { fm=1; print; next }
+      fm==1 && done==0 && $0=="---" {
+        print "team_dispatch:                          # injected by --team " preset " (P2); solo 면 부재"
+        print "  preset: " preset
+        print "  rule: \"task role 분류(plan/review/docs=lead, 구현=worker, 조사=researcher) → `sfs team resolve-runtime <role>` 로 runtime 해석 → 내 runtime 과 다르면 typed capsule 발행 후 `sfs route <role> <capsule>` 로 위임 → 회수·통합. solo/standalone 은 항상 직접 수행.\""
+        print "  ssot: \"docs/maintenance/2026-06-23-multi-agent-team-topology.design.md §4.4\""
+        done=1; print; next
+      }
+      { print }
+    ' "$adapter" > "$adapter.tmp" && mv "$adapter.tmp" "$adapter"
+  done
+  ok "team dispatch rule 주입(idempotent): CLAUDE.md / AGENTS.md / GEMINI.md (preset=$team)"
+}
+
 if [ "$CUR_VER" = "$NEW_VER" ]; then
   MODEL_PROFILE_REPAIRED=0
   if [ ! -f "$TARGET/.sfs-local/model-profiles.yaml" ] \
@@ -1847,6 +1919,7 @@ if [ "$CUR_VER" = "$NEW_VER" ]; then
   fi
   project_surface_archive_migrations || die "legacy archive surface migration failed"
   maybe_prompt_model_profile
+  upgrade_apply_team_preset "$UPGRADE_TEAM"
   print_agent_implementation_mode_contract
   ok "이미 최신 버전. 업그레이드 불필요."
   if [ "$MODEL_PROFILE_REPAIRED" -eq 1 ]; then
@@ -2607,6 +2680,9 @@ for auto_file in "$TARGET/SFS.md" "$TARGET/CLAUDE.md" "$TARGET/AGENTS.md" "$TARG
   fi
 done
 ok "문서 자동 치환: <DATE>=$TODAY, <SOLON-VERSION>=$NEW_VER"
+
+# --team 재적용 (명시 호출일 때만; 미지정이면 무변경). already-latest 경로에서도 호출됨.
+upgrade_apply_team_preset "$UPGRADE_TEAM"
 
 # config.yaml — create when upgrading older installs; preserve user edits outside runtime fields.
 runtime_command="bash .sfs-local/scripts/sfs-dispatch.sh"

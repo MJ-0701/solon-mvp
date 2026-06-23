@@ -1,5 +1,41 @@
 ## [Unreleased]
 
+## [0.8.43] - 2026-06-24
+
+> **Multi-agent team topology P2: `--team solo|pair|trio` becomes a real install/upgrade option that materializes the P1 data surface and wires role-scoped auto-dispatch into the adapters — while `solo` (the default) stays byte-for-byte unchanged. `install.sh --team trio` (or `SFS_AGENT_TEAM=trio`) fills `agent_runtime_bindings` from a new data-driven `team_preset_catalog` and injects a `team_dispatch:` rule block into the consumer's `CLAUDE.md`/`AGENTS.md`/`GEMINI.md` frontmatter; `upgrade.sh --team <preset>` re-applies the same, idempotently, even on the already-latest path. Presets are data: adding a 4th preset is one catalog bundle, zero install/resolver code diff (OCP). The dist `*.md.template` files are never touched, so the thin-adapter ≤50-line/frontmatter-only gate stays green and solo behavior is preserved. The dispatch helper is named `sfs route` (P3) — `dispatch` is the router engine itself and `handoff` is taken.**
+
+### Added
+
+- **`--team solo|pair|trio` on `install.sh` (+ `SFS_AGENT_TEAM` env, default
+  `solo`, backward-compatible).** Non-solo presets materialize
+  `agent_runtime_bindings` from `team_preset_catalog` and inject a role-scoped
+  `team_dispatch:` block into the installed root adapters. `solo` is a no-op:
+  `team_preset: solo`, bindings `{}`, no adapter mutation.
+- **`team_preset_catalog` in `model-profiles.yaml` (template `version` 1.8 → 1.9).**
+  Data-driven `preset → binding bundle` map (`solo`/`pair`/`trio`). A new preset is
+  one catalog bundle — install/upgrade code is untouched (OCP, design §4.5).
+- **`sfs team preset-bindings <preset>` resolver subcommand.** Read-only: emits a
+  preset's `agent_runtime_bindings` lines from the catalog (empty for `solo`).
+  install/upgrade consume its output; the resolver never mutates files.
+- **`--team` on `upgrade.sh` (+ `SFS_AGENT_TEAM`).** Re-applies a preset
+  idempotently, including on the already-latest version path; unset = existing team
+  config unchanged. Bindings are only filled when still default `{}` (user custom
+  bindings are preserved); adapter injection skips if `team_dispatch:` already present.
+- **`tests/test-team-preset-install.sh` (headline).** Drives real `install.sh` and
+  `upgrade.sh` runs: `trio`/`pair` materialize the right bindings + resolve through
+  them, adapters carry `team_dispatch:` + `sfs route` and stay frontmatter-only,
+  `solo` is unchanged, `upgrade --team` pivots + is idempotent, a 4th catalog preset
+  is honored with install/resolver SHA unchanged (OCP), and an invalid `--team`
+  value is rejected.
+
+### Notes
+
+- **P2/P3 decisions recorded in the design SSoT** (`docs/maintenance/2026-06-23-multi-agent-team-topology.design.md`
+  §8.1, D5–D8): `sfs route` helper name, data-driven catalog, frontmatter
+  `team_dispatch:` injection site, and the default-solo backward-compatibility contract.
+- Channel publish (brew/scoop) is intentionally deferred — P2 and P3 ship to a
+  single bundled `0.8.4x` channel cut after P3 completes.
+
 ## [0.8.42] - 2026-06-23
 
 > **Multi-agent team topology P1 lands as a data-only surface: `model-profiles.yaml` gains an opt-in `runtime_registry` + `agent_runtime_bindings` + `team_preset` + `unassigned_role_policy` schema, and a new read-only `sfs team` resolver answers role→runtime→invoke-template purely from that data. The default is `solo` with empty bindings, so every role still falls back to `selected_runtime` and behavior is unchanged; removing the team sections entirely degrades cleanly back to standalone solo. Two headline regression locks pin the OCP principle (a one-line binding edit re-routes a role, and a 4th registry runtime is honored, both with zero resolver-code diff) and the standalone guarantee. No dispatch is wired yet — that is P3.**

@@ -13,6 +13,27 @@
 
 ---
 
+## 0.8.43
+
+멀티에이전트 team topology 의 두 번째 단계(P2)입니다. P1 의 데이터 표면을 `--team` 설치/업그레이드 옵션으로 실제 배선하면서, 기본 `solo` 는 바이트 단위로 그대로 둡니다.
+
+체감 변화:
+
+- 기본 동작은 **그대로**입니다. `--team` 을 주지 않으면 `solo` 라서 바인딩이
+  비어 있고 어댑터도 손대지 않습니다(현재 동작 0 변경).
+- 멀티에이전트를 운영하려면 `install.sh --team trio`(또는 `pair`) 한 번이면
+  됩니다. `model-profiles.yaml` 의 `agent_runtime_bindings` 가 채워지고
+  (lead=claude, worker=codex, researcher=antigravity), `CLAUDE.md`/`AGENTS.md`/
+  `GEMINI.md` frontmatter 에 역할별 dispatch 규약(`team_dispatch:`)이 주입됩니다.
+- 이미 설치된 프로젝트는 `sfs upgrade --team trio` 로 같은 전환을 idempotent 하게
+  적용할 수 있습니다(최신 버전이어도 동작). `SFS_AGENT_TEAM=trio` 환경변수도 동일.
+- preset 은 **데이터**입니다 — `team_preset_catalog` 에 묶음 한 개를 더하면 새
+  preset 이 생기고 install/resolver 코드는 그대로입니다(OCP).
+- 실제 자동 호출 헬퍼는 `sfs route`(P3)로 확정됐습니다. 채널(brew/scoop) 배포는
+  P3 까지 끝낸 뒤 `0.8.4x` 로 한 번에 묶어 냅니다.
+
+---
+
 ## 0.8.42
 
 멀티에이전트 team topology 의 첫 단계(P1)가 데이터 표면 + 회귀잠금으로 들어왔습니다. model-profiles.yaml 에 opt-in team 스키마(runtime_registry / agent_runtime_bindings / team_preset)와 그것을 읽는 읽기전용 sfs team resolver 가 추가되고, 기본 solo 는 동작이 0 변경이며 team 섹션을 통째로 지워도 solo 로 안전하게 degrade 됩니다. 실제 자동 호출(dispatch)은 P3 입니다.

@@ -81,6 +81,7 @@ awk '
   /^unassigned_role_policy:/ { next }
   /^runtime_registry:/ { drop=1; next }
   /^agent_runtime_bindings:/ { drop=1; next }
+  /^team_preset_catalog:/ { drop=1; next }
   drop && /^[[:space:]]/ { next }
   drop && /^[[:space:]]*#/ { next }
   drop && /^[[:space:]]*$/ { next }
@@ -90,6 +91,7 @@ awk '
 
 grep -q '^runtime_registry:' "${MP}" && fail "strip failed: runtime_registry still present"
 grep -q '^agent_runtime_bindings:' "${MP}" && fail "strip failed: agent_runtime_bindings still present"
+grep -q '^team_preset_catalog:' "${MP}" && fail "strip failed: team_preset_catalog still present"
 
 # resolve-runtime must not crash and must return selected_runtime.
 if ! got="$(bash "${RESOLVER}" resolve-runtime lead)"; then

@@ -6,7 +6,7 @@
 # cost-aware defaults, but does not block an "all high-end models" policy when
 # the project accepts the cost and latency.
 
-version: 1.8
+version: 1.9
 project: "<PROJECT-NAME>"
 created: "<DATE>"
 solon_mvp_version: "<SOLON-VERSION>"
@@ -59,6 +59,20 @@ runtime_registry:                          # 데이터로 표현한 CLI 호출 �
 #     researcher:  antigravity   # research_high
 # 재배치는 한 줄만 바꾸면 된다(lead: claude → lead: codex). 분기 코드 불변 → OCP.
 agent_runtime_bindings: {}
+
+# preset → binding 묶음 (닫힌 기본값; 데이터, 코드 아님). install/upgrade 의 --team
+# <preset> 은 여기서 묶음을 읽어 위 agent_runtime_bindings 블록을 채운다
+# (`sfs team preset-bindings <preset>` 가 read-only 로 방출). solo 는 비움이라
+# 무변경. **새 preset 신설 = 여기 묶음 한 개 추가, install 코드 diff 0 → OCP.**
+team_preset_catalog:
+  solo: {}                                 # 모든 role → selected_runtime fallback
+  pair:                                    # lead=설계/리뷰/문서, worker=구현
+    lead: claude
+    worker: codex
+  trio:                                    # + researcher=리서치 (기본 추천)
+    lead: claude
+    worker: codex
+    researcher: antigravity
 
 unassigned_role_policy: use_selected_runtime   # 미배정 role 의 standalone fallback
 

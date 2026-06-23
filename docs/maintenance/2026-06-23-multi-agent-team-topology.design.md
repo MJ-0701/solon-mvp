@@ -23,14 +23,12 @@ load_when: "멀티에이전트 team topology, runtime_registry/agent_runtime_bin
 ## 1. 배경 / 문제
 
 solon은 현재 **단일 runtime 가정**이다. `selected_runtime`(claude|codex|gemini|
-custom)이 프로젝트 전체에 하나만 걸리고, 그 안에서 16개 agent-role이 8개 reasoning
-tier로 라우팅된다. divisions(역할 축)와 `selected_runtime`(runtime 축)은 **이미
-분리**돼 있다 — 단, runtime은 프로젝트당 하나.
+custom) 하나가 프로젝트 전체에 걸리고 그 안에서 16개 agent-role이 8 tier로 라우팅된다.
+divisions(역할 축)와 runtime 축은 이미 분리됐지만 runtime은 프로젝트당 하나뿐.
 
-사용자(소수 멀티에이전트 운영자) 요구: ① **이종 역할 전문화**(claude=설계·리뷰·
-문서 lead, codex=구현 worker, gemini/Antigravity=리서치 researcher); ② **자동
-업무분배**(어느 CLI에서 시작하든 적임 agent에게 분배); ③ **OCP**(역할 재배치 +
-4번째 CLI 추가가 설정만으로); ④ **opt-in**(기본 solo는 현재 동작 그대로).
+사용자 요구: ① **이종 역할 전문화**(claude=lead, codex=worker, antigravity=researcher);
+② **자동 업무분배**(진입 CLI 무관); ③ **OCP**(역할 재배치 + N번째 CLI 가 설정만으로);
+④ **opt-in**(기본 solo는 현재 동작 그대로).
 
 ## 2. 목표 / 비목표
 
@@ -43,15 +41,13 @@ agent 강제 spawn/상시 데몬(dispatch는 opt-in, headless 1-shot).
 
 ## 3. 설계 원칙 (1원칙 = OCP)
 
-1. **OCP — binding은 데이터, 코드 아님.** role↔runtime 매핑과 runtime별 CLI 호출
-   방법은 전부 설정 데이터로 표현. 역할 재배치/새 CLI 추가 = **config edit only**,
-   분기 코드 0. preset = 닫힌 기본값, `agent_runtime_bindings` override = 열린 확장점.
-2. **Standalone guarantee.** team/dispatch 레이어 전부 제거해도 `doctor + curation +
-   tidy` 및 모든 gate/release 동일 동작. dispatch는 라우팅이지 기능 의존성 아님.
-3. **기존 표면 재사용.** divisions(역할), capsule-contract(typed handoff 8필드),
-   advisor↔Code 파일버스, external-orchestrator-entry(headless), credential-hygiene
-   (per-runtime 키)를 그대로 쓴다. 새 통신 규약 신설 금지.
-4. **Entry-agnostic.** 진입 agent가 누구든 같은 binding/registry를 읽고 같은 판정.
+1. **OCP — binding은 데이터, 코드 아님.** role↔runtime 매핑·CLI 호출법 전부 설정
+   데이터. 역할 재배치/새 CLI = **config edit only**, 분기 코드 0. preset=닫힌 기본값,
+   `agent_runtime_bindings` override = 열린 확장점.
+2. **Standalone guarantee.** team/dispatch 레이어 제거해도 모든 gate/release 동일 동작.
+3. **기존 표면 재사용.** divisions, capsule-contract(8필드), advisor↔Code 파일버스,
+   external-orchestrator-entry, credential-hygiene 그대로. 새 통신 규약 신설 금지.
+4. **Entry-agnostic.** 진입 agent 무관 같은 binding/registry 읽고 같은 판정.
 
 ## 4. 구성요소
 
@@ -133,31 +129,27 @@ preset은 4.2 binding의 미리 채운 묶음일 뿐. 선택 후 자유 override
   헬퍼 `sfs dispatch <role> <capsule-path>`가 3~4단계 캡슐화. dispatch off(solo)면
   2단계 후 항상 "직접 수행" → standalone 보장.
 
-**예시 (trio, 진입=codex):** codex가 "설계 필요" 작업을 받으면 lead capsule 발행 →
-claude headless → 설계/리뷰 회수 → 자신은 worker 구현 → 리서치 시 gemini dispatch.
-진입이 claude/gemini여도 동일.
+**예시 (trio, 진입=codex):** "설계 필요" 작업 → lead capsule 발행 → claude headless →
+설계/리뷰 회수 → 자신은 worker 구현 → 리서치 시 researcher dispatch. 진입 무관 동일.
 
 ### 4.5 OCP 확장 시나리오 (검증용)
 
-역할 재배치(`lead: claude`→`lead: codex` 한 줄), 새 CLI 추가(`runtime_registry`
-항목 + binding 1줄), preset 신설(binding 묶음 추가) — 셋 다 코드/분기 로직 불변.
+역할 재배치(`lead:` 한 줄), 새 CLI 추가(`runtime_registry` 항목 + binding 1줄),
+preset 신설(`team_preset_catalog` 묶음 추가) — 셋 다 분기 코드 불변.
 
 ## 5. 옵션 표면
 
-- **install.sh / upgrade.sh**: `--team solo|pair|trio` + `SFS_AGENT_TEAM` env, 기본
-  `solo` (`--layout`/`--with-agent-adapters` 패턴 재사용).
-- **model-profiles.yaml**: `runtime_registry` + `agent_runtime_bindings` +
-  `team_preset` + `unassigned_role_policy` 섹션(backward-compatible, 기본 solo).
-- **어댑터 생성**: `INSTALL_AGENT_ADAPTERS=1`일 때 CLAUDE/AGENTS/GEMINI.md에
-  role-scoped 지시 + dispatch rule 주입.
-- **doctor/drift**: bindings ↔ registry ↔ preset 불일치 경고(drift 감지 확장).
+- **install.sh / upgrade.sh**: `--team solo|pair|trio` + `SFS_AGENT_TEAM`, 기본 `solo`.
+- **model-profiles.yaml**: `runtime_registry` + `agent_runtime_bindings` + `team_preset`
+  + `team_preset_catalog` + `unassigned_role_policy`(backward-compatible, 기본 solo).
+- **어댑터**: team≠solo 일 때 CLAUDE/AGENTS/GEMINI.md frontmatter 에 `team_dispatch:` 주입.
+- **doctor/drift**: bindings ↔ registry ↔ preset 불일치 경고.
 
 ## 6. Standalone & 안전
 
-- **제거 테스트**: team/dispatch 전 표면 제거 → solo로 모든 명령·gate·release 통과.
-- **비용/쿼터**: trio = 3 구독/키. doctor advisory로 안내.
-- **credential per-runtime**: 각 CLI 키는 boundary attachment + per-consumer 스코프(credential-hygiene 재사용). prompt/capsule 파일에 키 금지.
-- **무한 dispatch 방지**: dispatch hop 상한 + role 순환 감지.
+- **제거 테스트**: team/dispatch 표면 제거 → solo로 모든 명령·gate·release 통과.
+- **비용/쿼터**: trio = 3 구독/키 (doctor advisory). **무한 dispatch**: hop 상한 + 순환 감지.
+- **credential per-runtime**: CLI 키는 boundary attachment + per-consumer 스코프 재사용. prompt/capsule 에 키 금지.
 
 ## 7. Acceptance Criteria
 
@@ -177,24 +169,32 @@ claude headless → 설계/리뷰 회수 → 자신은 worker 구현 → 리서�
   `claude -p … --output-format json`, codex `codex exec … --sandbox workspace-write`
   (+`CODEX_NON_INTERACTIVE=1`), gemini→**antigravity `agy -p … --output-format json`**
   (gemini-cli 2026-06-18 sunset). registry에 4종 등록, default gemini=antigravity.
-- **D2 — dispatch 실행 주체: `sfs dispatch` 헬퍼가 1차 메커니즘.** 어댑터는 "자기
-  role 아니면 `sfs dispatch <role> <capsule>` 호출" 얇은 규약만. 근거: entry-agnostic
-  · OCP(invoke 템플릿이 sfs 한 곳) · standalone(헬퍼 없어도 solo). 외부
-  오케스트레이터(Hermes)는 그 위 선택적 상위 계층(제거 가능).
-- **D3 — 결과 회수: 동기 1-shot(blocking) 기본 + capsule `timeout` 가드.** 장시간은
-  `output_paths` 폴링(async)을 P3 옵션으로. 무한 dispatch는 hop 상한 + 순환 감지 차단.
-- **D4 — config 위치: `model-profiles.yaml` 내 섹션 확정.** `runtime_registry` +
-  `agent_runtime_bindings` + `team_preset` + `unassigned_role_policy`. 별도 team.yaml
-  분리 안 함(SSoT 일관성, drift 감지 재사용).
+- **D2 — dispatch 실행 주체: 헬퍼가 1차 메커니즘(명칭은 D5 참조).** 어댑터는 "자기
+  role 아니면 헬퍼 호출" 얇은 규약만. 근거: entry-agnostic · OCP · standalone(헬퍼
+  없어도 solo). Hermes 는 그 위 선택적 상위 계층.
+- **D3 — 결과 회수: 동기 1-shot + capsule `timeout`.** 장시간은 async 폴링을 P3 옵션.
+- **D4 — config 위치: `model-profiles.yaml` 내 섹션.** 별도 team.yaml 분리 안 함.
+  남은 실측(P3): codex `exec` JSON 플래그, `agy` 인증/SSH, stdin vs 파일 prompt 한계.
 
-**남은 실측(P3, blocking 아님)**: codex `exec` JSON 플래그 정확형, antigravity `agy` 인증/SSH, 각 CLI stdin vs 파일 prompt 한계 — 구현 중 실측.
+### 8.1 결정 (Resolved — 2026-06-24, P2/P3 구현)
+
+- **D5 — P3 헬퍼명 = `sfs route <role> <capsule>` (D2의 `sfs dispatch` 폐기).**
+  `dispatch`=라우터 엔진 자체(`sfs-dispatch.sh` exec), `handoff`=점유됨. 의미는 D2
+  그대로, 이름만 `route`. usage + dispatch case 등록.
+- **D6 — preset→bindings 는 데이터(`team_preset_catalog`).** `sfs team preset-bindings
+  <preset>` (read-only) 가 묶음을 방출 → install/upgrade 가 `agent_runtime_bindings:` 에
+  박음. 새 preset = 카탈로그 묶음 추가, 코드 diff 0 → OCP(§4.5 3번째 시나리오 잠금).
+- **D7 — dispatch rule 주입 = 설치본 어댑터 frontmatter `team_dispatch:` 키.** dist
+  템플릿 불변(solo 무변경 + `test-thin-agent-adapter-docs.sh` 게이트 통과). team≠solo 일
+  때만 `$TARGET/{CLAUDE,AGENTS,GEMINI}.md` 닫는 `---` 앞에 동일 블록 삽입(entry-agnostic).
+- **D8 — `--team` 기본 solo, backward-compatible.** `--team solo|pair|trio` +
+  `SFS_AGENT_TEAM`. 미지정=solo=무변경(bindings `{}`, dispatch 키 부재). upgrade 는
+  `--team` 명시 시에만 재머티리얼라이즈(idempotent), 미지정 시 기존 team 설정 불변.
 
 ## 9. 단계 (phasing)
 
-- **P0 (이 문서)**: 설계 확정 + AC 합의.
-- **P1**: runtime_registry + agent_runtime_bindings 스키마 + solo 무변경 보장 +
-  OCP/standalone headline test (아직 dispatch 미배선).
-- **P2**: `--team` preset + 어댑터 dispatch rule 주입(규약 문서).
-- **P3**: `sfs dispatch` 헬퍼 + CLI invoke 실측 + loop/cost 가드.
-
-> P1은 "데이터 표면 + 회귀잠금"만으로 끝나 standalone을 안 깬다. 실제 자동 호출(P3)은 그 위에 얹는다 — 점진 도입.
+- **P0**: 설계 확정 + AC 합의. **P1** ✅(0.8.42): registry + bindings 스키마 + solo
+  무변경 + OCP/standalone headline test.
+- **P2** ✅: `--team` preset 머티리얼라이즈 + 어댑터 `team_dispatch:` 주입 (install/upgrade).
+- **P3**: `sfs route` 헬퍼 + CLI invoke 실측 + hop/cost/loop 가드. 각 P는 데이터 표면 +
+  회귀잠금만으로 standalone 불변 — 실제 자동 호출(P3)은 위에 얹음.

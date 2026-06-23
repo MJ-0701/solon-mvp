@@ -20,6 +20,11 @@
 #   resolve-invoke <runtime>  runtime_registry.<runtime>.invoke 템플릿을 출력.
 #                             없으면 빈 줄(standalone 에서 dispatch off 이므로
 #                             호출되지 않음 — crash 금지).
+#   preset-bindings <preset>  team_preset_catalog.<preset> 의 binding 묶음을
+#                             `key: value` 라인으로 방출(install/upgrade 가
+#                             agent_runtime_bindings 블록을 채울 때 사용). solo/
+#                             미정의/빈 묶음 → 빈 출력. 새 preset 추가 = 카탈로그
+#                             편집만 → install 코드 diff 0 (OCP). read-only.
 #   show                      현재 team_preset / bindings / registry 키 요약.
 #
 # Exit codes: 0 ok(미발견 fallback/빈출력 포함), 7 usage.
@@ -35,6 +40,7 @@ usage() {
 Usage:
   sfs team resolve-runtime <token>   role/cluster → runtime (fallback: selected_runtime)
   sfs team resolve-invoke <runtime>  runtime → registry invoke template (empty if absent)
+  sfs team preset-bindings <preset>  preset → agent_runtime_bindings lines (empty for solo)
   sfs team show                      summarize team_preset / bindings / registry
 
 Resolution is pure data lookup over .sfs-local/model-profiles.yaml. Default solo
@@ -106,6 +112,29 @@ read_invoke() {
   ' "${MP}"
 }
 
+# team_preset_catalog.<preset> → emit each `key: value` binding line.
+# Block-style nested map only; `<preset>: {}` (inline empty) emits nothing.
+read_preset_bindings() {
+  local preset="$1"
+  [[ -f "${MP}" ]] || return 0
+  awk -v want="${preset}" '
+    /^team_preset_catalog:/ { inc=1; next }
+    inc && /^[A-Za-z_]/ { inc=0 }
+    inc && /^  [A-Za-z0-9_-]+:/ {
+      name=$0; sub(/^  /, "", name); sub(/:.*/, "", name)
+      cur = (name == want) ? 1 : 0
+      next
+    }
+    inc && cur && /^    [A-Za-z0-9_-]+:[[:space:]]*/ {
+      line=$0; sub(/^    /, "", line)
+      k=line; sub(/:.*/, "", k)
+      v=line; sub(/^[A-Za-z0-9_-]+:[[:space:]]*/, "", v)
+      sub(/[[:space:]]*#.*/, "", v); gsub(/["\047]/, "", v); sub(/[[:space:]]*$/, "", v)
+      if (v != "" && v !~ /^[{]/) { printf "%s: %s\n", k, v }
+    }
+  ' "${MP}"
+}
+
 cmd="${1:-}"
 case "${cmd}" in
   resolve-runtime)
@@ -121,6 +150,11 @@ case "${cmd}" in
     rt="${2:-}"
     [[ -n "${rt}" ]] || { echo "resolve-invoke: missing <runtime>" >&2; usage >&2; exit "${SFS_EXIT_USAGE}"; }
     printf '%s\n' "$(read_invoke "${rt}")"
+    ;;
+  preset-bindings)
+    preset="${2:-}"
+    [[ -n "${preset}" ]] || { echo "preset-bindings: missing <preset>" >&2; usage >&2; exit "${SFS_EXIT_USAGE}"; }
+    read_preset_bindings "${preset}"
     ;;
   show)
     preset="$([[ -f "${MP}" ]] && awk '/^team_preset:/ {v=$0; sub(/^team_preset:[[:space:]]*/,"",v); sub(/[[:space:]]*#.*/,"",v); gsub(/[[:space:]]/,"",v); print v; exit}' "${MP}")"

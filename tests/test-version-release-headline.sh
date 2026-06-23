@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.42" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.42" "version output"
-assert_contains_text "${output}" "latest 0.8.42" "latest output"
+[[ "${plain_output}" == "sfs 0.8.43" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.43" "version output"
+assert_contains_text "${output}" "latest 0.8.43" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Multi-agent team topology P1 lands as a data-only surface: \`model-profiles.yaml\` gains an opt-in \`runtime_registry\` + \`agent_runtime_bindings\` + \`team_preset\` + \`unassigned_role_policy\` schema, and a new read-only \`sfs team\` resolver answers role→runtime→invoke-template purely from that data. The default is \`solo\` with empty bindings, so every role still falls back to \`selected_runtime\` and behavior is unchanged; removing the team sections entirely degrades cleanly back to standalone solo. Two headline regression locks pin the OCP principle (a one-line binding edit re-routes a role, and a 4th registry runtime is honored, both with zero resolver-code diff) and the standalone guarantee. No dispatch is wired yet — that is P3." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Multi-agent team topology P2: \`--team solo|pair|trio\` becomes a real install/upgrade option that materializes the P1 data surface and wires role-scoped auto-dispatch into the adapters — while \`solo\` (the default) stays byte-for-byte unchanged. \`install.sh --team trio\` (or \`SFS_AGENT_TEAM=trio\`) fills \`agent_runtime_bindings\` from a new data-driven \`team_preset_catalog\` and injects a \`team_dispatch:\` rule block into the consumer's \`CLAUDE.md\`/\`AGENTS.md\`/\`GEMINI.md\` frontmatter; \`upgrade.sh --team <preset>\` re-applies the same, idempotently, even on the already-latest path. Presets are data: adding a 4th preset is one catalog bundle, zero install/resolver code diff (OCP). The dist \`*.md.template\` files are never touched, so the thin-adapter ≤50-line/frontmatter-only gate stays green and solo behavior is preserved. The dispatch helper is named \`sfs route\` (P3) — \`dispatch\` is the router engine itself and \`handoff\` is taken." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline 멀티에이전트 team topology 의 첫 단계(P1)가 데이터 표면 + 회귀잠금으로 들어왔습니다. model-profiles.yaml 에 opt-in team 스키마(runtime_registry / agent_runtime_bindings / team_preset)와 그것을 읽는 읽기전용 sfs team resolver 가 추가되고, 기본 solo 는 동작이 0 변경이며 team 섹션을 통째로 지워도 solo 로 안전하게 degrade 됩니다. 실제 자동 호출(dispatch)은 P3 입니다." "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline 멀티에이전트 team topology 의 두 번째 단계(P2)입니다. P1 의 데이터 표면을 \`--team\` 설치/업그레이드 옵션으로 실제 배선하면서, 기본 \`solo\` 는 바이트 단위로 그대로 둡니다." "release notes fallback headline"
 
 echo "test-version-release-headline: OK"
