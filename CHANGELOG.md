@@ -1,5 +1,43 @@
 ## [Unreleased]
 
+## [0.8.44] - 2026-06-24
+
+> **Multi-agent team topology P3 lands the dispatch helper: `sfs route <role> <capsule>` turns the P1/P2 data surface into an actual headless hand-off. It resolves role→runtime→invoke-template→transport purely from `model-profiles.yaml`, fills the capsule's typed fields into `{prompt}`/`{tools}`, and calls the target CLI — with hop-limit + role-cycle guards that refuse runaway dispatch (exit 8) and a clean "act directly" degrade (exit 3, never a crash) when dispatch is off (solo) or the registry is absent. How each CLI is fed is data: a new `transport_kind` scalar (`argv|stdin|file`) selects the delivery strategy, so flipping a runtime's transport is a one-scalar edit with zero `sfs-route.sh` diff. Real CLI execution is mocked in-repo via `SFS_ROUTE_DRY_RUN=1` (no auth reached); the deliverable is adjustability-by-data, not a live call. The helper is named `route` because `dispatch` is the router engine itself and `handoff` is a pre-existing command (design D5). This completes the opt-in team topology — solo remains byte-for-byte unchanged throughout.**
+
+### Added
+
+- **`sfs route <role> <capsule>` dispatch helper
+  (`templates/.sfs-local-template/scripts/sfs-route.sh`).** Resolves
+  role→runtime→invoke→transport via `sfs team`, fills the typed capsule
+  (`goal`/`acceptance_criteria`/`files_scope`/`output_paths` → `{prompt}`,
+  `tools_allowed` → `{tools}`), and calls the runtime headless. Guards:
+  hop limit (`SFS_ROUTE_MAX_HOPS`, default 3) + role-cycle detection
+  (`SFS_ROUTE_CHAIN`) refuse with exit 8; `token_budget` is surfaced as an
+  advisory cost guard. Degrades to exit 3 ("act directly", never a crash) when
+  `team_preset` is `solo` or the registry is stripped — standalone guarantee.
+  Routed via `sfs-dispatch.sh` (`route` case) and listed in `bin/sfs help --full`.
+- **`transport_kind` registry scalar + `sfs team resolve-transport <runtime>`.**
+  Flat scalar (`argv|stdin|file`, default `argv`) selecting prompt delivery;
+  `argv` inlines `{prompt}`, `stdin` pipes it, `file` writes a temp file and fills
+  `{prompt_file}`. Changing the value is a data edit — `sfs-route.sh` is untouched.
+  Template `version` 1.9 → 2.0.
+- **`tests/test-team-route-dispatch.sh` (headline).** Locks: route builds the
+  invoke command for the bound runtime (lead→claude, worker→codex) with the
+  capsule's prompt/tools; an `argv`→`stdin` transport flip changes delivery with
+  route.sh + resolver SHA unchanged (OCP); hop-limit and role-cycle both refuse
+  with exit 8; `solo` and registry-absent both degrade to exit 3 without crashing.
+- **`test-team-standalone-degrade.sh` extended.** Adds a post-strip `sfs route`
+  assertion (exit 3, no crash) so invariant ② (standalone) stays locked now that
+  `route` is new dispatch surface.
+
+### Notes
+
+- P3 OCP claim is honestly narrower than P1/P2: "a new CLI is config-only" holds
+  **provided it uses a supported transport** (`argv`/`stdin`/`file`). Adding a new
+  transport *kind* is code; changing a runtime's transport *value* is data.
+- With P3 done, channel publish (brew/scoop) for the bundled `0.8.4x` cut now
+  follows (P2 0.8.43 + P3 0.8.44).
+
 ## [0.8.43] - 2026-06-24
 
 > **Multi-agent team topology P2: `--team solo|pair|trio` becomes a real install/upgrade option that materializes the P1 data surface and wires role-scoped auto-dispatch into the adapters — while `solo` (the default) stays byte-for-byte unchanged. `install.sh --team trio` (or `SFS_AGENT_TEAM=trio`) fills `agent_runtime_bindings` from a new data-driven `team_preset_catalog` and injects a `team_dispatch:` rule block into the consumer's `CLAUDE.md`/`AGENTS.md`/`GEMINI.md` frontmatter; `upgrade.sh --team <preset>` re-applies the same, idempotently, even on the already-latest path. Presets are data: adding a 4th preset is one catalog bundle, zero install/resolver code diff (OCP). The dist `*.md.template` files are never touched, so the thin-adapter ≤50-line/frontmatter-only gate stays green and solo behavior is preserved. The dispatch helper is named `sfs route` (P3) — `dispatch` is the router engine itself and `handoff` is taken.**

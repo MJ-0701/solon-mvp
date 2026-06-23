@@ -107,4 +107,18 @@ if ! out="$(bash "${RESOLVER}" resolve-invoke "${selected}")"; then
 fi
 [[ -z "${out}" ]] || fail "AC4: resolve-invoke returned '${out}' with registry absent (expected empty)"
 
+# AC4 (P3) — the `sfs route` helper is new dispatch surface and must also degrade
+# cleanly when all team data is stripped: refuse with "act directly" (exit 3),
+# never a crash. invariant ② (standalone) stays locked per phase.
+ROUTE_HELPER="${DIST_DIR}/templates/.sfs-local-template/scripts/sfs-route.sh"
+if [[ -f "${ROUTE_HELPER}" ]]; then
+  printf 'goal: standalone smoke\ntools_allowed: read\n' > capsule.yaml
+  if SFS_MODEL_PROFILES="${MP}" SFS_ROUTE_DRY_RUN=1 bash "${ROUTE_HELPER}" lead capsule.yaml >/dev/null 2>&1; then
+    fail "AC4: route succeeded with team data stripped (must refuse → act directly)"
+  else
+    rc=$?
+    [[ "${rc}" -eq 3 ]] || fail "AC4: route post-strip exit ${rc} (expected 3 act-directly, never a crash)"
+  fi
+fi
+
 echo "test-team-standalone-degrade: OK"

@@ -589,7 +589,7 @@ assert_contains "${model_profiles}" "configured_tier is \`current\`" "model-prof
 assert_contains "${model_profiles}" "explicit non-\`current\` tier overrides the policy map for that agent only" "model-profiles #4 explicit override scope"
 assert_contains "${model_profiles}" "Config-drift validation (warn-only" "model-profiles #4 drift warn-only rule"
 assert_contains "${model_profiles}" "Do not auto-rewrite configured_tier" "model-profiles #4 no auto-rewrite"
-assert_contains "${model_profiles}" "version: 1.9" "model-profiles version bumped to 1.9"
+assert_contains "${model_profiles}" "version: 2.0" "model-profiles version bumped to 2.0"
 assert_contains "${installer}" "model-profiles drift" "install.sh drift WARN path"
 assert_contains "${installer}" "auto-rewrite 안 함" "install.sh drift no auto-rewrite"
 assert_contains "${upgrader}" "model-profiles drift" "upgrade.sh drift WARN path"

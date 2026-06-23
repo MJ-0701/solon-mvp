@@ -6,7 +6,7 @@
 # cost-aware defaults, but does not block an "all high-end models" policy when
 # the project accepts the cost and latency.
 
-version: 1.9
+version: 2.0
 project: "<PROJECT-NAME>"
 created: "<DATE>"
 solon_mvp_version: "<SOLON-VERSION>"
@@ -30,25 +30,32 @@ configuration:
 team_preset: solo                          # solo | pair | trio (install-time prefill 선택)
 
 runtime_registry:                          # 데이터로 표현한 CLI 호출 추상화 (단일 확장점)
+  # transport_kind (P3): prompt 전달 방식. argv = invoke 의 {prompt} 자리에 인라인,
+  # stdin = {prompt} 없이 prompt 를 stdin 으로, file = {prompt_file} 자리에 임시파일 경로.
+  # `sfs route` 가 이 scalar 만 보고 전달 전략을 고른다 — 값을 바꿔도 코드 diff 0.
   claude:
     invoke: "claude -p {prompt} --output-format json --allowedTools {tools}"
+    transport_kind: argv
     capabilities: [plan, review, docs, code]
     models_ref: claude                     # 기존 runtime_model_settings 참조
   codex:
     invoke: "codex exec {prompt} --sandbox workspace-write"
+    transport_kind: argv                   # codex exec 는 prompt 를 argv 로도 받음
     env: { CODEX_NON_INTERACTIVE: "1" }
     capabilities: [code, refactor]
     models_ref: codex
   antigravity:                             # gemini-cli 공식 후속(`agy`), 현역 default
     invoke: "agy -p {prompt} --output-format json"
+    transport_kind: argv
     capabilities: [research, analyze, code]
     models_ref: gemini
   gemini:                                  # DEPRECATED: 개인 Pro/Ultra 2026-06-18 sunset
     invoke: "gemini -p {prompt} --non-interactive --output-format json --yolo"
+    transport_kind: argv
     capabilities: [research, analyze]
     models_ref: gemini
     deprecated: "use antigravity"
-  # 미래의 N번째 CLI = 여기에 항목 추가만. 분기 코드 수정 0 → OCP.
+  # 미래의 N번째 CLI = 여기에 항목 추가만(지원 transport 사용 시). 분기 코드 0 → OCP.
 
 # role → runtime binding. key 는 cluster(lead/worker/researcher) 또는 개별 role.
 # solo 는 비움({}) → 모든 role 이 selected_runtime 으로 fallback (현재 동작 그대로).

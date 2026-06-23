@@ -41,6 +41,7 @@ Usage:
   sfs team resolve-runtime <token>   role/cluster → runtime (fallback: selected_runtime)
   sfs team resolve-invoke <runtime>  runtime → registry invoke template (empty if absent)
   sfs team preset-bindings <preset>  preset → agent_runtime_bindings lines (empty for solo)
+  sfs team resolve-transport <rt>    runtime → transport_kind (argv|stdin|file; argv default)
   sfs team show                      summarize team_preset / bindings / registry
 
 Resolution is pure data lookup over .sfs-local/model-profiles.yaml. Default solo
@@ -135,6 +136,32 @@ read_preset_bindings() {
   ' "${MP}"
 }
 
+# runtime_registry.<runtime>.transport_kind (P3). argv if absent/unknown.
+read_transport() {
+  local rt="$1"
+  [[ -f "${MP}" ]] || { printf 'argv'; return 0; }
+  local v
+  v="$(awk -v want="${rt}" '
+    /^runtime_registry:/ { inr=1; next }
+    inr && /^[A-Za-z_]/ { inr=0 }
+    inr && /^  [A-Za-z0-9_-]+:/ {
+      name=$0; sub(/^  /, "", name); sub(/:.*/, "", name)
+      cur = (name == want) ? 1 : 0
+      next
+    }
+    inr && cur && /^[[:space:]]+transport_kind:[[:space:]]*/ {
+      x=$0
+      sub(/^[[:space:]]+transport_kind:[[:space:]]*/, "", x)
+      sub(/[[:space:]]*#.*/, "", x); gsub(/["\047]/, "", x); sub(/[[:space:]]*$/, "", x)
+      print x; exit
+    }
+  ' "${MP}")"
+  case "${v}" in
+    argv|stdin|file) printf '%s' "${v}" ;;
+    *) printf 'argv' ;;
+  esac
+}
+
 cmd="${1:-}"
 case "${cmd}" in
   resolve-runtime)
@@ -155,6 +182,11 @@ case "${cmd}" in
     preset="${2:-}"
     [[ -n "${preset}" ]] || { echo "preset-bindings: missing <preset>" >&2; usage >&2; exit "${SFS_EXIT_USAGE}"; }
     read_preset_bindings "${preset}"
+    ;;
+  resolve-transport)
+    rt="${2:-}"
+    [[ -n "${rt}" ]] || { echo "resolve-transport: missing <runtime>" >&2; usage >&2; exit "${SFS_EXIT_USAGE}"; }
+    printf '%s\n' "$(read_transport "${rt}")"
     ;;
   show)
     preset="$([[ -f "${MP}" ]] && awk '/^team_preset:/ {v=$0; sub(/^team_preset:[[:space:]]*/,"",v); sub(/[[:space:]]*#.*/,"",v); gsub(/[[:space:]]/,"",v); print v; exit}' "${MP}")"

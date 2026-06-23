@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.43" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.43" "version output"
-assert_contains_text "${output}" "latest 0.8.43" "latest output"
+[[ "${plain_output}" == "sfs 0.8.44" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.44" "version output"
+assert_contains_text "${output}" "latest 0.8.44" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Multi-agent team topology P2: \`--team solo|pair|trio\` becomes a real install/upgrade option that materializes the P1 data surface and wires role-scoped auto-dispatch into the adapters — while \`solo\` (the default) stays byte-for-byte unchanged. \`install.sh --team trio\` (or \`SFS_AGENT_TEAM=trio\`) fills \`agent_runtime_bindings\` from a new data-driven \`team_preset_catalog\` and injects a \`team_dispatch:\` rule block into the consumer's \`CLAUDE.md\`/\`AGENTS.md\`/\`GEMINI.md\` frontmatter; \`upgrade.sh --team <preset>\` re-applies the same, idempotently, even on the already-latest path. Presets are data: adding a 4th preset is one catalog bundle, zero install/resolver code diff (OCP). The dist \`*.md.template\` files are never touched, so the thin-adapter ≤50-line/frontmatter-only gate stays green and solo behavior is preserved. The dispatch helper is named \`sfs route\` (P3) — \`dispatch\` is the router engine itself and \`handoff\` is taken." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Multi-agent team topology P3 lands the dispatch helper: \`sfs route <role> <capsule>\` turns the P1/P2 data surface into an actual headless hand-off. It resolves role→runtime→invoke-template→transport purely from \`model-profiles.yaml\`, fills the capsule's typed fields into \`{prompt}\`/\`{tools}\`, and calls the target CLI — with hop-limit + role-cycle guards that refuse runaway dispatch (exit 8) and a clean \"act directly\" degrade (exit 3, never a crash) when dispatch is off (solo) or the registry is absent. How each CLI is fed is data: a new \`transport_kind\` scalar (\`argv|stdin|file\`) selects the delivery strategy, so flipping a runtime's transport is a one-scalar edit with zero \`sfs-route.sh\` diff. Real CLI execution is mocked in-repo via \`SFS_ROUTE_DRY_RUN=1\` (no auth reached); the deliverable is adjustability-by-data, not a live call. The helper is named \`route\` because \`dispatch\` is the router engine itself and \`handoff\` is a pre-existing command (design D5). This completes the opt-in team topology — solo remains byte-for-byte unchanged throughout." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline 멀티에이전트 team topology 의 두 번째 단계(P2)입니다. P1 의 데이터 표면을 \`--team\` 설치/업그레이드 옵션으로 실제 배선하면서, 기본 \`solo\` 는 바이트 단위로 그대로 둡니다." "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline 멀티에이전트 team topology 의 마지막 단계(P3)입니다. P1/P2 의 데이터 표면 위에 실제 디스패치 헬퍼 \`sfs route <role> <capsule>\` 가 얹혔습니다. solo 는 끝까지 그대로입니다." "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

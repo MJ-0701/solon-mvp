@@ -13,6 +13,25 @@
 
 ---
 
+## 0.8.44
+
+멀티에이전트 team topology 의 마지막 단계(P3)입니다. P1/P2 의 데이터 표면 위에 실제 디스패치 헬퍼 `sfs route <role> <capsule>` 가 얹혔습니다. solo 는 끝까지 그대로입니다.
+
+체감 변화:
+
+- team 을 켠 프로젝트에서 어댑터가 "자기 role 이 아니면 `sfs route <role> <capsule>`"
+  규약대로 적임 runtime 에게 headless 위임할 수 있습니다. role→runtime→호출명령은
+  전부 `model-profiles.yaml` 데이터에서 해석됩니다.
+- CLI 별 prompt 전달 방식은 **데이터**입니다 — `transport_kind`(argv/stdin/file)
+  scalar 하나만 바꾸면 전달 전략이 바뀌고 헬퍼 코드는 그대로입니다.
+- 무한 위임 방지: hop 상한 + role 순환 감지가 폭주를 거부하고, dispatch off(solo)
+  나 registry 부재 시엔 crash 없이 "직접 수행" 으로 안전하게 빠집니다.
+- 실제 CLI 호출은 인증이 필요하므로 배포본 테스트에서는 `SFS_ROUTE_DRY_RUN=1` 로
+  mock 합니다 — 제공물은 "데이터로 조정 가능" 이지 라이브 호출이 아닙니다.
+- P3 까지 끝났으니 채널(brew/scoop) 배포는 0.8.43+0.8.44 를 `0.8.4x` 로 묶어 냅니다.
+
+---
+
 ## 0.8.43
 
 멀티에이전트 team topology 의 두 번째 단계(P2)입니다. P1 의 데이터 표면을 `--team` 설치/업그레이드 옵션으로 실제 배선하면서, 기본 `solo` 는 바이트 단위로 그대로 둡니다.

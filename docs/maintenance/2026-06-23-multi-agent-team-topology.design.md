@@ -57,32 +57,20 @@ agent 강제 spawn/상시 데몬(dispatch는 opt-in, headless 1-shot).
 데이터로 runtime을 안다.
 
 ```yaml
-# model-profiles.yaml
+# model-profiles.yaml — 4종 등록(claude/codex/antigravity/gemini[deprecated]). 발췌:
 runtime_registry:
   claude:
     invoke: "claude -p {prompt} --output-format json --allowedTools {tools}"
+    transport_kind: argv         # P3: argv | stdin | file (flat scalar)
     capabilities: [plan, review, docs, code]
-    models_ref: claude                        # 기존 runtime model_settings 참조
-  codex:
-    invoke: "codex exec {prompt} --sandbox workspace-write"
-    env: { CODEX_NON_INTERACTIVE: "1" }
-    capabilities: [code, refactor]
-    models_ref: codex
-  antigravity:                                 # gemini-cli 공식 후속(`agy`), 현역
-    invoke: "agy -p {prompt} --output-format json"
-    capabilities: [research, analyze, code]
-    models_ref: gemini
-  gemini:                                      # DEPRECATED: 개인 Pro/Ultra 2026-06-18 sunset
-    invoke: "gemini -p {prompt} --non-interactive --output-format json --yolo"
-    capabilities: [research, analyze]
-    models_ref: gemini
-    deprecated: "use antigravity"
-  # 미래의 N번째 CLI = 여기에 항목 추가만. 분기 코드 수정 0 → OCP.
+    models_ref: claude
+  # codex/antigravity/gemini 동형. gemini=DEPRECATED(2026-06-18 sunset, use antigravity).
+  # 미래의 N번째 CLI = 여기 항목 추가만(지원 transport 사용 시). 분기 코드 0 → OCP.
 ```
 
-- `invoke` 템플릿이 CLI 추상화. dispatch는 이 템플릿만 본다 → runtime-agnostic.
-  플레이스홀더(`{prompt}`/`{tools}`)는 dispatch가 capsule에서 채움. `capabilities`는
-  역할↔능력 매칭 힌트.
+- `invoke` 템플릿이 CLI 추상화. dispatch는 이 템플릿(+`transport_kind`)만 본다 →
+  runtime-agnostic. 플레이스홀더(`{prompt}`/`{tools}`/`{prompt_file}`)는 capsule 에서
+  채움. `capabilities`는 역할↔능력 매칭 힌트.
 - **OCP 실증**: gemini-cli sunset(2026-06-18) → antigravity 전환이 default gemini
   runtime 교체 한 줄로 끝남. 코드 분기 0.
 
@@ -190,11 +178,17 @@ preset 신설(`team_preset_catalog` 묶음 추가) — 셋 다 분기 코드 불
 - **D8 — `--team` 기본 solo, backward-compatible.** `--team solo|pair|trio` +
   `SFS_AGENT_TEAM`. 미지정=solo=무변경(bindings `{}`, dispatch 키 부재). upgrade 는
   `--team` 명시 시에만 재머티리얼라이즈(idempotent), 미지정 시 기존 team 설정 불변.
+- **D9 — `sfs route <role> <capsule>` (P3): transport 데이터 + hop/cycle/cost 가드.**
+  registry.invoke + `transport_kind`(argv|stdin|file, flat scalar)로 호출 구성, capsule
+  8필드→`{prompt}`/`{tools}` 채움. 실호출은 `SFS_ROUTE_DRY_RUN=1` mock(인증 불요). hop
+  상한(`SFS_ROUTE_MAX_HOPS`=3)+role 순환=거부(exit 8); solo/registry 부재=act-directly
+  (exit 3, no crash); `token_budget`=advisory. transport 값 변경=route.sh diff 0(새 CLI=
+  config-only, **단 지원 transport 한정** — P3 OCP 범위). `dispatch`/`route` case 등록.
 
 ## 9. 단계 (phasing)
 
 - **P0**: 설계 확정 + AC 합의. **P1** ✅(0.8.42): registry + bindings 스키마 + solo
   무변경 + OCP/standalone headline test.
-- **P2** ✅: `--team` preset 머티리얼라이즈 + 어댑터 `team_dispatch:` 주입 (install/upgrade).
-- **P3**: `sfs route` 헬퍼 + CLI invoke 실측 + hop/cost/loop 가드. 각 P는 데이터 표면 +
-  회귀잠금만으로 standalone 불변 — 실제 자동 호출(P3)은 위에 얹음.
+- **P2** ✅(0.8.43): `--team` preset 머티리얼라이즈 + 어댑터 `team_dispatch:` 주입.
+- **P3** ✅(0.8.44): `sfs route` 헬퍼 + transport_kind 데이터 + hop/cycle/cost 가드. 각
+  P는 데이터 표면 + 회귀잠금만으로 standalone 불변 — 자동 호출은 그 위에 얹음.
