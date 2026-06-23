@@ -1,0 +1,149 @@
+#!/usr/bin/env bash
+# .sfs-local/scripts/sfs-team.sh
+#
+# Solon SFS — multi-agent team topology resolver (read-only, data-driven).
+#
+# OCP 1원칙: runtime 은 데이터(model-profiles.yaml: runtime_registry)로 안다.
+# 본 스크립트는 분기 코드가 아니라 데이터를 조회만 한다 — agent enum 하드코딩 0.
+# 역할 재배치나 새 CLI 추가는 model-profiles.yaml 편집만으로 끝나고 본 파일은
+# 한 글자도 바뀌지 않는다(test-team-runtime-ocp.sh 가 그 불변을 잠근다).
+#
+# 본 P1 표면은 resolution(데이터 조회)까지만 한다. 실제 CLI 호출(dispatch
+# 실행)은 P3 (`sfs dispatch`) 에서 이 resolver 위에 얹는다 — 여기서는 어떤
+# 외부 CLI 도 spawn 하지 않는다.
+#
+# Subcommands:
+#   resolve-runtime <token>   token(cluster lead/worker/researcher 또는 개별
+#                             role)을 agent_runtime_bindings 로 조회 → 없으면
+#                             configuration.selected_runtime 으로 fallback.
+#                             (unassigned_role_policy: use_selected_runtime.)
+#   resolve-invoke <runtime>  runtime_registry.<runtime>.invoke 템플릿을 출력.
+#                             없으면 빈 줄(standalone 에서 dispatch off 이므로
+#                             호출되지 않음 — crash 금지).
+#   show                      현재 team_preset / bindings / registry 키 요약.
+#
+# Exit codes: 0 ok(미발견 fallback/빈출력 포함), 7 usage.
+
+set -euo pipefail
+
+SFS_LOCAL_DIR="${SFS_LOCAL_DIR:-.sfs-local}"
+MP="${SFS_MODEL_PROFILES:-${SFS_LOCAL_DIR}/model-profiles.yaml}"
+SFS_EXIT_USAGE=7
+
+usage() {
+  cat <<'EOF'
+Usage:
+  sfs team resolve-runtime <token>   role/cluster → runtime (fallback: selected_runtime)
+  sfs team resolve-invoke <runtime>  runtime → registry invoke template (empty if absent)
+  sfs team show                      summarize team_preset / bindings / registry
+
+Resolution is pure data lookup over .sfs-local/model-profiles.yaml. Default solo
+(team_preset: solo, empty bindings) → every token falls back to selected_runtime,
+so removing the team sections degrades cleanly to standalone solo behavior.
+EOF
+}
+
+# configuration.selected_runtime (the standalone fallback).
+read_selected_runtime() {
+  [[ -f "${MP}" ]] || return 0
+  awk '
+    /^configuration:/ { inc=1; next }
+    inc && /^[[:space:]]+selected_runtime:/ {
+      v=$0
+      sub(/^[[:space:]]+selected_runtime:[[:space:]]*/, "", v)
+      sub(/[[:space:]]*#.*/, "", v)
+      gsub(/["\047]/, "", v)
+      sub(/[[:space:]]*$/, "", v)
+      print v; exit
+    }
+    inc && /^[A-Za-z_]/ { inc=0 }
+  ' "${MP}"
+}
+
+# agent_runtime_bindings[<key>] — block-style flat map only (solo uses `{}`).
+read_binding() {
+  local key="$1"
+  [[ -f "${MP}" ]] || return 0
+  awk -v want="${key}" '
+    /^agent_runtime_bindings:/ { inb=1; next }
+    inb && /^[A-Za-z_]/ { inb=0 }
+    inb {
+      line=$0
+      if (match(line, /^[[:space:]]+[A-Za-z0-9_-]+:[[:space:]]*/)) {
+        k=line; sub(/^[[:space:]]+/, "", k); sub(/:.*/, "", k)
+        if (k == want) {
+          v=line
+          sub(/^[[:space:]]+[A-Za-z0-9_-]+:[[:space:]]*/, "", v)
+          sub(/[[:space:]]*#.*/, "", v)
+          gsub(/["\047]/, "", v)
+          sub(/[[:space:]]*$/, "", v)
+          if (v != "" && v !~ /^[{]/) { print v; exit }
+        }
+      }
+    }
+  ' "${MP}"
+}
+
+# runtime_registry.<runtime>.invoke
+read_invoke() {
+  local rt="$1"
+  [[ -f "${MP}" ]] || return 0
+  awk -v want="${rt}" '
+    /^runtime_registry:/ { inr=1; next }
+    inr && /^[A-Za-z_]/ { inr=0 }
+    inr && /^  [A-Za-z0-9_-]+:/ {
+      name=$0; sub(/^  /, "", name); sub(/:.*/, "", name)
+      cur = (name == want) ? 1 : 0
+      next
+    }
+    inr && cur && /^[[:space:]]+invoke:[[:space:]]*/ {
+      v=$0
+      sub(/^[[:space:]]+invoke:[[:space:]]*/, "", v)
+      sub(/^"/, "", v); sub(/"[[:space:]]*$/, "", v)
+      sub(/^\x27/, "", v); sub(/\x27[[:space:]]*$/, "", v)
+      print v; exit
+    }
+  ' "${MP}"
+}
+
+cmd="${1:-}"
+case "${cmd}" in
+  resolve-runtime)
+    token="${2:-}"
+    [[ -n "${token}" ]] || { echo "resolve-runtime: missing <token>" >&2; usage >&2; exit "${SFS_EXIT_USAGE}"; }
+    rt="$(read_binding "${token}")"
+    if [[ -z "${rt}" ]]; then
+      rt="$(read_selected_runtime)"   # unassigned_role_policy: use_selected_runtime
+    fi
+    printf '%s\n' "${rt}"
+    ;;
+  resolve-invoke)
+    rt="${2:-}"
+    [[ -n "${rt}" ]] || { echo "resolve-invoke: missing <runtime>" >&2; usage >&2; exit "${SFS_EXIT_USAGE}"; }
+    printf '%s\n' "$(read_invoke "${rt}")"
+    ;;
+  show)
+    preset="$([[ -f "${MP}" ]] && awk '/^team_preset:/ {v=$0; sub(/^team_preset:[[:space:]]*/,"",v); sub(/[[:space:]]*#.*/,"",v); gsub(/[[:space:]]/,"",v); print v; exit}' "${MP}")"
+    printf 'team_preset: %s\n' "${preset:-<none>}"
+    printf 'selected_runtime: %s\n' "$(read_selected_runtime)"
+    printf 'runtimes:'
+    if [[ -f "${MP}" ]]; then
+      awk '
+        /^runtime_registry:/ { inr=1; next }
+        inr && /^[A-Za-z_]/ { inr=0 }
+        inr && /^  [A-Za-z0-9_-]+:/ {
+          name=$0; sub(/^  /, "", name); sub(/:.*/, "", name); printf " %s", name
+        }
+      ' "${MP}"
+    fi
+    printf '\n'
+    ;;
+  ""|-h|--help|help)
+    usage
+    ;;
+  *)
+    echo "unknown subcommand: ${cmd}" >&2
+    usage >&2
+    exit "${SFS_EXIT_USAGE}"
+    ;;
+esac

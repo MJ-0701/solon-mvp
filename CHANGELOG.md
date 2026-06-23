@@ -1,5 +1,45 @@
 ## [Unreleased]
 
+## [0.8.42] - 2026-06-23
+
+> **Multi-agent team topology P1 lands as a data-only surface: `model-profiles.yaml` gains an opt-in `runtime_registry` + `agent_runtime_bindings` + `team_preset` + `unassigned_role_policy` schema, and a new read-only `sfs team` resolver answers role→runtime→invoke-template purely from that data. The default is `solo` with empty bindings, so every role still falls back to `selected_runtime` and behavior is unchanged; removing the team sections entirely degrades cleanly back to standalone solo. Two headline regression locks pin the OCP principle (a one-line binding edit re-routes a role, and a 4th registry runtime is honored, both with zero resolver-code diff) and the standalone guarantee. No dispatch is wired yet — that is P3.**
+
+### Added
+
+- **Team topology schema in `model-profiles.yaml` (P1, design
+  `docs/maintenance/2026-06-23-multi-agent-team-topology.design.md`).** Four new
+  top-level, backward-compatible sections: `team_preset` (`solo|pair|trio`,
+  default `solo`), `runtime_registry` (data-as-CLI-abstraction with `claude`,
+  `codex`, `antigravity`, and a `deprecated` `gemini` entry — the single OCP
+  extension point: a new CLI is one registry entry, no branch code),
+  `agent_runtime_bindings` (`{}` by default → every role falls back to
+  `selected_runtime`), and `unassigned_role_policy: use_selected_runtime`.
+  Template `version` bumped 1.7 → 1.8.
+- **`sfs team` resolver (`templates/.sfs-local-template/scripts/sfs-team.sh`).**
+  Read-only, data-driven, zero agent-enum hardcoding. `resolve-runtime <token>`
+  maps a cluster/role token through `agent_runtime_bindings`, falling back to
+  `selected_runtime`; `resolve-invoke <runtime>` returns the registry invoke
+  template (empty if absent — never crashes); `show` summarizes preset / runtimes.
+  It performs resolution only — no external CLI is spawned (that is P3). Routed
+  via `sfs-dispatch.sh` and listed in `bin/sfs help --full`.
+- **`tests/test-team-runtime-ocp.sh` (headline, AC2+AC3).** OCP regression lock:
+  a one-line `agent_runtime_bindings.lead` edit re-routes resolution, and adding
+  a 4th runtime to `runtime_registry` makes its `invoke` template the one used —
+  both proven with the resolver source SHA unchanged (config edit only, code diff
+  0). Also locks invoke-template reads for registry entries whose header line
+  carries an inline comment (`antigravity`, `gemini`).
+- **`tests/test-team-standalone-degrade.sh` (headline, AC4+AC6).** Standalone
+  regression lock: default install is `solo`; every token resolves to
+  `selected_runtime`; an unbound token falls back; and stripping all team
+  sections degrades the resolver cleanly to `selected_runtime` (no crash) with
+  `resolve-invoke` returning empty when the registry is gone.
+
+### Notes
+
+- **Sibling design doc committed.** `docs/maintenance/2026-06-23-hermes-self-evolution-seam-wiring.design.md`
+  (orchestrator layer; Hermes seam) is added alongside the team-topology design;
+  both now carry frontmatter and stay within the 200-line product-doc budget.
+
 ## [0.8.41] - 2026-06-23
 
 > **Shipped Markdown surfaces are scrubbed of stray closing-tag litter: 14 files under templates/ and docs/ carried a leftover end-of-file closing tag (a </content>, and in two files also a </invoke>) with no matching opening tag, which shipped into consumer installs; all are removed and a regression test locks them out.**

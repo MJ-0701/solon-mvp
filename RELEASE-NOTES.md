@@ -13,6 +13,24 @@
 
 ---
 
+## 0.8.42
+
+멀티에이전트 team topology 의 첫 단계(P1)가 데이터 표면 + 회귀잠금으로 들어왔습니다. model-profiles.yaml 에 opt-in team 스키마(runtime_registry / agent_runtime_bindings / team_preset)와 그것을 읽는 읽기전용 sfs team resolver 가 추가되고, 기본 solo 는 동작이 0 변경이며 team 섹션을 통째로 지워도 solo 로 안전하게 degrade 됩니다. 실제 자동 호출(dispatch)은 P3 입니다.
+
+체감 변화:
+
+- 기본 동작은 **그대로**입니다. 새 설치본의 `team_preset` 은 `solo` 이고
+  바인딩이 비어 있어 모든 역할이 기존처럼 `selected_runtime` 으로 동작합니다.
+- 멀티에이전트를 운영하려는 소수 사용자는 `model-profiles.yaml` 의
+  `runtime_registry` / `agent_runtime_bindings` 를 **설정 편집만으로** 바꿔
+  역할별 CLI(claude/codex/antigravity)를 지정할 수 있는 토대가 생겼습니다.
+  역할 재배치는 한 줄, 새 CLI 추가는 registry 항목 하나입니다(코드 수정 0).
+- `sfs team show` / `sfs team resolve-runtime <역할>` 로 현재 매핑을 확인할 수
+  있습니다. team/dispatch 섹션을 통째로 지워도 solo 로 안전하게 degrade 됩니다.
+- 실제 자동 호출(`sfs dispatch`)은 다음 단계(P3)에서 이 위에 얹힙니다.
+
+---
+
 ## 0.8.41
 
 Shipped Markdown surfaces are scrubbed of stray closing-tag litter: 14 files under templates/ and docs/ carried a leftover end-of-file closing tag (a </content>, and in two files also a </invoke>) with no matching opening tag, which shipped into consumer installs; all are removed and a regression test locks them out.

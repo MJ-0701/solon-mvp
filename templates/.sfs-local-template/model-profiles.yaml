@@ -6,7 +6,7 @@
 # cost-aware defaults, but does not block an "all high-end models" policy when
 # the project accepts the cost and latency.
 
-version: 1.7
+version: 1.8
 project: "<PROJECT-NAME>"
 created: "<DATE>"
 solon_mvp_version: "<SOLON-VERSION>"
@@ -19,6 +19,48 @@ configuration:
   confirmed_at: ""
   note: "Solon recommended role routing applies by default. `current` means infer the active host runtime where possible. Use selected_policy=current_model only when the project explicitly wants the host's currently selected model for every role."
   invocation_note: "Model names are role/profile targets, not a requirement that every CLI supports a --model flag. Default bridges express the requested role/profile in the prompt and rely on the host/runtime configured model; set SFS_REVIEW_<EXECUTOR>_CMD only when a known-good CLI command needs an explicit override."
+
+# ── Multi-agent team topology (opt-in; default solo = 0 behavior change) ──────
+# OCP 1원칙: runtime 은 데이터(runtime_registry)로 안다. 역할 재배치나 새 CLI 추가는
+# 이 섹션 편집만으로 끝나고 분기 코드 수정은 0 이다. team_preset 이 solo 면 dispatch
+# 가 off 이고 모든 role 이 configuration.selected_runtime 으로 resolve 된다(standalone).
+# resolution 은 순수 데이터 조회다: resolve-runtime <token> = agent_runtime_bindings
+# 조회 → 없으면 selected_runtime fallback. 자세한 설계는 dist
+# docs/maintenance/2026-06-23-multi-agent-team-topology.design.md.
+team_preset: solo                          # solo | pair | trio (install-time prefill 선택)
+
+runtime_registry:                          # 데이터로 표현한 CLI 호출 추상화 (단일 확장점)
+  claude:
+    invoke: "claude -p {prompt} --output-format json --allowedTools {tools}"
+    capabilities: [plan, review, docs, code]
+    models_ref: claude                     # 기존 runtime_model_settings 참조
+  codex:
+    invoke: "codex exec {prompt} --sandbox workspace-write"
+    env: { CODEX_NON_INTERACTIVE: "1" }
+    capabilities: [code, refactor]
+    models_ref: codex
+  antigravity:                             # gemini-cli 공식 후속(`agy`), 현역 default
+    invoke: "agy -p {prompt} --output-format json"
+    capabilities: [research, analyze, code]
+    models_ref: gemini
+  gemini:                                  # DEPRECATED: 개인 Pro/Ultra 2026-06-18 sunset
+    invoke: "gemini -p {prompt} --non-interactive --output-format json --yolo"
+    capabilities: [research, analyze]
+    models_ref: gemini
+    deprecated: "use antigravity"
+  # 미래의 N번째 CLI = 여기에 항목 추가만. 분기 코드 수정 0 → OCP.
+
+# role → runtime binding. key 는 cluster(lead/worker/researcher) 또는 개별 role.
+# solo 는 비움({}) → 모든 role 이 selected_runtime 으로 fallback (현재 동작 그대로).
+# 비-solo preset 은 block 스타일로 채운다. 예:
+#   agent_runtime_bindings:
+#     lead:        claude        # plan / ceo / review / docs 클러스터
+#     worker:      codex         # implementation-worker / dev division
+#     researcher:  antigravity   # research_high
+# 재배치는 한 줄만 바꾸면 된다(lead: claude → lead: codex). 분기 코드 불변 → OCP.
+agent_runtime_bindings: {}
+
+unassigned_role_policy: use_selected_runtime   # 미배정 role 의 standalone fallback
 
 role_boundaries:
   intake_facilitator:
