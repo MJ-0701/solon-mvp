@@ -2,7 +2,13 @@ param(
   [ValidateSet("thin", "vendored")]
   [string] $Layout = "thin",
   [switch] $Yes,
-  [switch] $Help
+  [switch] $Help,
+  # Multi-agent team preset (0.8.50). Intentionally NOT a ValidateSet: the bash
+  # core (upgrade.sh) is the single authority that rejects unknown presets, so
+  # the Windows error contract stays byte-identical to the bash path. Omitting
+  # -Team forwards ZERO --team flags, which preserves the "unchanged team /
+  # solo no-op" contract AND keeps the R5 auto-offer reachable on plain upgrade.
+  [string] $Team
 )
 
 $ErrorActionPreference = "Stop"
@@ -38,7 +44,7 @@ function Convert-ToBashPath([string] $Path) {
 
 $bash = Find-SolonBash
 if (-not $bash) {
-  Write-Error "Solon Product upgrade on Windows PowerShell requires Git Bash. Install Git for Windows, or set SFS_BASH to a compatible bash.exe."
+  Write-Error "Solon Product upgrade on Windows PowerShell requires Git Bash. Install Git for Windows, or set SFS_BASH to a compatible bash.exe. To activate a multi-agent team afterwards, run 'sfs team use <solo|pair|trio>' from Git Bash."
   exit 9
 }
 
@@ -72,6 +78,10 @@ try {
   if ($Layout) {
     $argsForBash += "--layout"
     $argsForBash += $Layout
+  }
+  if ($Team) {
+    $argsForBash += "--team"
+    $argsForBash += $Team
   }
   # Skip the bash-side cli-discovery hook on Windows - the PS1 hook below runs
   # natively for PowerShell-aware paths (settings.json, scoop layout, etc.)

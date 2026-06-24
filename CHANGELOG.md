@@ -1,5 +1,47 @@
 ## [Unreleased]
 
+## [0.8.50] - 2026-06-24
+
+> **Patch release: Windows (PowerShell/Scoop) reaches multi-agent team-activation parity with bash 0.8.49 by thin delegation — zero native port, single SSoT. `install.ps1` and `upgrade.ps1` now accept and forward `-Team <solo|pair|trio>` to the bash core (`install.sh` / `upgrade.sh`), so Windows users get the same `--team` materialize, capability preflight (R3), and zero-knowledge `[Y/n]` auto-offer (R5) that bash shipped — the offer and gate run in Git Bash and are byte-for-byte the bash behavior. `sfs.cmd team use <preset>` and `sfs.cmd upgrade --team` already reached the bash core (mutating commands delegate via `bin/sfs.ps1`); that delegation is now locked against a future native-handler regression. Omitting `-Team` forwards zero `--team` flags, preserving the solo no-op and keeping the R5 auto-offer reachable. The Git-Bash-required fallback in all three wrappers now points at `sfs team use`. No bash behavior changed; bash 0.8.49 remains the spec.**
+
+### Added
+
+- **`-Team <solo|pair|trio>` forwarding in `install.ps1` and `upgrade.ps1`.**
+  Each top-level Windows wrapper gains a `[string] $Team` param (no default,
+  intentionally no `ValidateSet` — `install.sh` / `upgrade.sh` stay the single
+  preset authority so the error contract matches bash). The value is forwarded
+  as `--team <preset>` to the bash core only inside an `if ($Team)` guard, so
+  omitting `-Team` forwards nothing: `model-profiles.yaml` stays byte-for-byte,
+  the R5 auto-offer stays reachable, and the standalone/solo lock is intact.
+- **Windows team-activation parity test (`tests/test-windows-team-parity.sh`).**
+  A static delegation-contract guard (no `pwsh` on the CI host, so static is the
+  ceiling — each assertion is made meaningful): both wrappers forward `--team`
+  only when `-Team` is set and carry no default; `bin/sfs.ps1`'s native
+  read-only handler must NOT claim `team`/`upgrade`/`update` (so they delegate
+  to bash — locks P1 against a future native-handler edit);
+  `Normalize-SfsScoopReloadArgs` must not strip `--team` across the Scoop
+  self-upgrade reload; and the "requires Git Bash" fallback surfaces `sfs team
+  use`. Materialize/auto-offer behavior is locked by the existing bash headline
+  tests (`test-team-use-activation.sh`, `test-team-auto-offer.sh`) — the ps1
+  hits that same core, so output parity is by construction.
+
+### Changed
+
+- **`bin/sfs.ps1` / `install.ps1` / `upgrade.ps1` "requires Git Bash" message.**
+  The fallback shown when Git Bash is absent now also names the
+  `sfs team use <solo|pair|trio>` activation path (D0 degrade spec), instead of
+  only telling the user to install Git Bash.
+
+### Notes
+
+- **No native PowerShell port (deliberate).** Team materialize, the R3
+  capability gate, and the R5 auto-offer all live in the bash core; the Windows
+  surface is a thin wrapper that delegates. The capability probe therefore runs
+  in Git Bash (`command -v claude/codex/agy`, `executor_auth_ready`), which sees
+  the same Windows PATH — there is no duplicated PowerShell `Get-Command` probe.
+  This is the D0 decision (single SSoT, zero drift), not a missing item; a native
+  port was rejected for risk/duplication.
+
 ## [0.8.49] - 2026-06-24
 
 > **Minor release: completes hands-off multi-agent team activation on top of 0.8.48's upgrade-path repair. (R1) activation is now its own write command — `sfs team use <solo|pair|trio>` materializes a preset any time, independent of `sfs upgrade`, and both paths share one extracted core (`sfs-team-apply.sh`: scaffold → `team_preset` → bindings → adapter dispatch), so the upgrade and use paths can't drift. (R3) a capability preflight probes each binding's runtime (CLI present + authenticated) before applying — only runnable bindings are written, the rest are held with `install/auth X then sfs team use <preset>` guidance, and an absent `agy` researcher falls back to deprecated `gemini` or is held rather than left guessing; the gate never crashes. (R5) the user no longer needs to know any command — a solo `sfs upgrade` in a team-capable environment surfaces a one-line `[Y/n]` offer, applies only the capable bindings on consent, and records the decision so it never nags again, re-offering once only if the environment goes incapable→capable. Non-interactive, declined, and incapable paths stay solo: byte-for-byte on `model-profiles.yaml`, no `team_dispatch`, standalone lock intact.**

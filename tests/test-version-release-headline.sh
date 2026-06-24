@@ -39,10 +39,10 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.49" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.49" "version output"
-assert_contains_text "${output}" "latest 0.8.49" "latest output"
-assert_contains_text "${output}" "installed_release_headline Minor release: completes hands-off multi-agent team activation on top of 0.8.48's upgrade-path repair. (R1) activation is now its own write command — \`sfs team use <solo|pair|trio>\` materializes a preset any time, independent of \`sfs upgrade\`, and both paths share one extracted core (\`sfs-team-apply.sh\`: scaffold → \`team_preset\` → bindings → adapter dispatch), so the upgrade and use paths can't drift. (R3) a capability preflight probes each binding's runtime (CLI present + authenticated) before applying — only runnable bindings are written, the rest are held with \`install/auth X then sfs team use <preset>\` guidance, and an absent \`agy\` researcher falls back to deprecated \`gemini\` or is held rather than left guessing; the gate never crashes. (R5) the user no longer needs to know any command — a solo \`sfs upgrade\` in a team-capable environment surfaces a one-line \`[Y/n]\` offer, applies only the capable bindings on consent, and records the decision so it never nags again, re-offering once only if the environment goes incapable→capable. Non-interactive, declined, and incapable paths stay solo: byte-for-byte on \`model-profiles.yaml\`, no \`team_dispatch\`, standalone lock intact." "installed release headline"
+[[ "${plain_output}" == "sfs 0.8.50" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.50" "version output"
+assert_contains_text "${output}" "latest 0.8.50" "latest output"
+assert_contains_text "${output}" "installed_release_headline Patch release: Windows (PowerShell/Scoop) reaches multi-agent team-activation parity with bash 0.8.49 by thin delegation — zero native port, single SSoT. \`install.ps1\` and \`upgrade.ps1\` now accept and forward \`-Team <solo|pair|trio>\` to the bash core (\`install.sh\` / \`upgrade.sh\`), so Windows users get the same \`--team\` materialize, capability preflight (R3), and zero-knowledge \`[Y/n]\` auto-offer (R5) that bash shipped — the offer and gate run in Git Bash and are byte-for-byte the bash behavior. \`sfs.cmd team use <preset>\` and \`sfs.cmd upgrade --team\` already reached the bash core (mutating commands delegate via \`bin/sfs.ps1\`); that delegation is now locked against a future native-handler regression. Omitting \`-Team\` forwards zero \`--team\` flags, preserving the solo no-op and keeping the R5 auto-offer reachable. The Git-Bash-required fallback in all three wrappers now points at \`sfs team use\`. No bash behavior changed; bash 0.8.49 remains the spec." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -60,6 +60,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline 0.8.48 의 업그레이드 경로 수리 위에, 사용자가 명령어를 몰라도 멀티에이전트 팀을 켤 수 있게 자동화를 완성한 마이너 릴리스입니다. 이제 \`sfs team use trio\` 로 업그레이드와 무관하게 언제든 팀을 활성화할 수 있고, 켤 수 있는 환경이면 \`sfs upgrade\` 가 한 줄로 적용 여부를 물어봅니다. 거절·비대화·미충족 환경은 solo 무변경입니다." "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline Windows(PowerShell/Scoop) 사용자도 bash 0.8.49 와 동일하게 멀티에이전트 팀을 켤 수 있게 한 패치 릴리스입니다. \`install.ps1\`·\`upgrade.ps1\` 이 \`-Team <solo|pair|trio>\` 를 받아 bash 코어로 그대로 넘기므로, capability 게이트(R3)와 \`[Y/n]\` 자동 제안(R5)이 Windows 에서도 동일하게 동작합니다. \`-Team\` 을 생략하면 아무 플래그도 넘기지 않아 solo 무변경입니다." "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

@@ -1014,7 +1014,7 @@ if ($script:SfsNativeHandled) {
 
 $bash = Find-SfsBash
 if (-not $bash) {
-  Write-Error "Solon SFS on Windows PowerShell requires Git Bash. Install Git for Windows, or set SFS_BASH to a compatible bash.exe."
+  Write-Error "Solon SFS on Windows PowerShell requires Git Bash. Install Git for Windows, or set SFS_BASH to a compatible bash.exe. Multi-agent team activation (sfs team use <solo|pair|trio>, sfs upgrade --team) also runs through Git Bash."
   exit 9
 }
 

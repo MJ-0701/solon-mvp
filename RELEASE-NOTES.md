@@ -13,6 +13,25 @@
 
 ---
 
+## 0.8.50
+
+Windows(PowerShell/Scoop) 사용자도 bash 0.8.49 와 동일하게 멀티에이전트 팀을 켤 수 있게 한 패치 릴리스입니다. `install.ps1`·`upgrade.ps1` 이 `-Team <solo|pair|trio>` 를 받아 bash 코어로 그대로 넘기므로, capability 게이트(R3)와 `[Y/n]` 자동 제안(R5)이 Windows 에서도 동일하게 동작합니다. `-Team` 을 생략하면 아무 플래그도 넘기지 않아 solo 무변경입니다.
+
+체감 변화:
+
+- `.\upgrade.ps1 -Team trio` / `.\install.ps1 -Team trio` — Windows 에서도 팀 preset 을
+  켤 수 있습니다. 켤 수 있는 역할만 적용되고, 안 되는 역할은 "설치/인증 후 `sfs team use`
+  재실행" 안내와 함께 보류됩니다 (bash 와 동일한 코어가 처리).
+- `-Team` 미지정 + 켤 수 있는 환경에서 `.\upgrade.ps1` 은 한 줄로 적용 여부를 물어봅니다
+  (R5 자동 제안). 거절·비대화(`-Yes`)·미충족 환경은 solo 무변경입니다.
+- `sfs.cmd team use <solo|pair|trio>` / `sfs.cmd upgrade --team` 은 이미 bash 코어로
+  위임되어 동작했고, 이번 릴리스에서 그 위임이 회귀하지 않도록 잠갔습니다.
+- Git Bash 가 없을 때의 안내문이 이제 `sfs team use` 활성화 경로를 함께 알려줍니다.
+
+bash 동작은 한 글자도 바뀌지 않았습니다 — bash 0.8.49 가 그대로 spec 입니다.
+
+---
+
 ## 0.8.49
 
 0.8.48 의 업그레이드 경로 수리 위에, 사용자가 명령어를 몰라도 멀티에이전트 팀을 켤 수 있게 자동화를 완성한 마이너 릴리스입니다. 이제 `sfs team use trio` 로 업그레이드와 무관하게 언제든 팀을 활성화할 수 있고, 켤 수 있는 환경이면 `sfs upgrade` 가 한 줄로 적용 여부를 물어봅니다. 거절·비대화·미충족 환경은 solo 무변경입니다.

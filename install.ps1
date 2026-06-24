@@ -3,7 +3,12 @@ param(
   [switch] $Help,
   [ValidateSet("thin", "vendored")]
   [string] $Layout = "thin",
-  [switch] $WithAgentAdapters
+  [switch] $WithAgentAdapters,
+  # Multi-agent team preset (0.8.50). Not a ValidateSet on purpose: install.sh
+  # is the single authority that rejects unknown presets, so the Windows error
+  # contract stays byte-identical to bash. Omitting -Team forwards ZERO --team
+  # flags, so solo stays the default with byte-for-byte unchanged behavior.
+  [string] $Team
 )
 
 $ErrorActionPreference = "Stop"
@@ -42,7 +47,7 @@ function Convert-ToBashPath([string] $Path) {
 
 $bash = Find-SolonBash
 if (-not $bash) {
-  Write-Error "Solon Product install on Windows PowerShell requires Git Bash. Install Git for Windows, or set SFS_BASH to a compatible bash.exe."
+  Write-Error "Solon Product install on Windows PowerShell requires Git Bash. Install Git for Windows, or set SFS_BASH to a compatible bash.exe. To activate a multi-agent team afterwards, run 'sfs team use <solo|pair|trio>' from Git Bash."
   exit 9
 }
 
@@ -54,6 +59,10 @@ if ($Layout) {
   $argsForBash += $Layout
 }
 if ($WithAgentAdapters) { $argsForBash += "--with-agent-adapters" }
+if ($Team) {
+  $argsForBash += "--team"
+  $argsForBash += $Team
+}
 
 $scriptPath = $MyInvocation.MyCommand.Path
 $sourceDir = $null
