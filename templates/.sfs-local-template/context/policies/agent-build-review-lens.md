@@ -57,6 +57,14 @@ The lens activates when:
   shelling out to a wrapper that the host cannot see).
 - Secrets and tokens never appear in tool arguments, tool results, or
   audit logs. Audit logs redact known env-var names.
+- **Zero-knowledge activation (Gate 6 check).** If the change adds or moves an
+  activatable/config state — a feature SFS can detect and safely apply — verify
+  there is a detect → offer → consent → apply path. If turning it on requires
+  the user to know a command, a flag, or to hand-edit a config file, that is a
+  **FAIL** finding, not a nit. solo/default-off, one-time consent, user-intent
+  preservation, and the standalone lock must hold. SSoT:
+  `zero-knowledge-activation.md`; the registered state must also carry an
+  offer-path test (`tests/test-activatable-states-registry.sh`).
 
 ### 3. Sub-agent isolation
 
@@ -174,3 +182,5 @@ A passing agent-build review attaches at minimum:
   checks. agent-build adds the harness-specific layer.
 - `solon-safe-permissions.yaml` — the executable companion preset.
 - `mcp-server/README.md` — the MVP MCP server that this lens reviews.
+- `zero-knowledge-activation.md` — the detect→guide→consent→apply contract the
+  §2 Gate 6 activation check enforces.

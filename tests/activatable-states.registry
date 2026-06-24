@@ -1,0 +1,16 @@
+# Activatable-states registry (P1c) — DATA enumeration of states SFS can both
+# DETECT and SAFELY APPLY. Backs policies/zero-knowledge-activation.md.
+#
+# Format (pipe-delimited):  <state-id>|<offer-path-test>|<description>
+#   - lines starting with '#' and blank lines are ignored.
+#   - <offer-path-test> is a tests/test-*.sh file that proves the
+#     detect -> guide -> consent(once) -> apply path for the state.
+#
+# Contract enforced by tests/test-activatable-states-registry.sh:
+#   every registered state MUST own an existing offer-path test, or run-all
+#   FAILS. A new activatable state added here without an offer-path test cannot
+#   pass — that is the point. States needing genuine human judgement
+#   (architecture/provider choice, irreversible/outward actions) are NOT
+#   activatable states and must not be listed; they stay explicit user choices.
+team-topology-activation|test-team-auto-offer.sh|solo -> trio multi-agent activation: detect capable runtimes (lead+worker) -> R5 one-line [Y/n] offer on upgrade -> apply preset on consent; decline remembered, standalone solo lock.
+deprecated-fallback-promotion|test-team-fallback-promotion.sh|deprecated gemini fallback -> canonical antigravity promotion once canonical becomes capable: detect fallback marker + capability -> offer/consent (team use re-run / team refresh / upgrade) -> promote that one line; user-chosen bindings untouched.

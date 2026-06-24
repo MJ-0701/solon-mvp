@@ -13,6 +13,27 @@
 
 ---
 
+## 0.8.52
+
+trio researcher 가 활성화 시점에 antigravity(`agy`) 부재로 deprecated `gemini` fallback 으로 굳은 프로젝트가, `agy` 설치·인증 후에도 제품 차원에서 canonical 로 돌아올 길이 없던 문제를 고친 패치 릴리스입니다. 이제 fallback binding 에 출처 표식(`# sfs-fallback: <canonical>`)을 남겨, canonical 런타임이 capable 해지면 SFS 가 스스로 감지 -> 제안(동의 1회) -> 그 한 줄만 승격하고 표식을 제거합니다. 사용자가 직접 고른 binding 은 건드리지 않고(R3), 비대화/`--yes` 미동의는 byte-for-byte 무변경(R4)이며, antigravity 게이트는 auth-aware(R5)라 설치만 되고 미인증인 `agy` 는 승격하지 않습니다. solo/standalone 동작은 불변입니다.
+
+체감 변화:
+
+- **fallback 으로 굳은 researcher 가 자동으로 canonical 로 복귀** — `agy` 설치·인증 후
+  `sfs team use trio` 재실행, 신규 `sfs team refresh`, 또는 `sfs upgrade` 가 "deprecated
+  gemini fallback -> antigravity 로 승격? [Y/n]" 한 줄로 제안합니다. 동의하면 그 한 줄만 바뀝니다.
+- **직접 고른 binding 은 절대 자동 변경 안 함** — 표식 없는 custom binding 은 그대로 보존.
+- **설치만 되고 미인증인 `agy` 는 승격하지 않음** — auth-ready(Google 자격증명 /
+  `SFS_ANTIGRAVITY_AUTH_READY`) 일 때만 승격해 런타임 에러를 막습니다.
+- **"켜는 법을 알아야 켜지는" 안티패턴을 제품 규칙으로 못박음** — 새 routed 정책
+  `zero-knowledge-activation`: SFS 가 감지+안전적용 가능한 상태는 반드시
+  감지 -> 안내 -> 동의(1회) -> 적용 경로를 가져야 하고, 명령어/플래그/수동 config 편집을
+  알아야 켜지면 설계버그로 봅니다. Gate 6 리뷰 점검 + activatable-states 메타테스트로 강제.
+
+bash 쪽 동작과 명령 표면은 그대로이며, solo/standalone 락은 불변입니다.
+
+---
+
 ## 0.8.51
 
 같은 PowerShell 창에서 `sfs upgrade` 를 한 번 실행한 뒤 `sfs init` 등 친 명령이 stale `update` 로 둔갑하던 Windows 인자전달 버그를 고친 패치 릴리스입니다. Scoop self-upgrade reload 가 `$env:SFS_NATIVE_*` 를 세션에 남기고 `bin/sfs.ps1` 이 그 env 를 친 인자보다 먼저 골라, 이후 모든 명령이 stale `update` 로 바뀌었습니다 (0.6.45-0.6.56 / 0.8.50 회귀 계열). 이제 친 인자가 항상 inherited env 를 이기고(F1), self-upgrade reload 가 끝나면 세션 env 를 복원합니다(F2). bash 동작은 불변, 207/207 green.

@@ -1,5 +1,68 @@
 ## [Unreleased]
 
+## [0.8.52] - 2026-06-25
+
+> **Patch release: deprecated-fallback -> canonical auto-promotion (SFS level). A project whose trio researcher fell back to the deprecated `gemini` runtime (because `antigravity`/`agy` was absent at activation time) had no product-level path back to canonical after `agy` was later installed+authed: re-running `sfs team use trio` hit the 3-way bindings guard's "custom bindings 보존" skip, so the only way forward was a manual `model-profiles.yaml` edit — the "must know the command/YAML" anti-pattern 0.8.49/0.8.50 removed. 0.8.52 makes the guard 4-way. Fallback bindings are now MARKED at materialize time (`# sfs-fallback: <canonical>`), and when the canonical runtime becomes capable SFS detects -> offers (one consent) -> promotes only that one line and strips the marker. (R1) the provenance marker distinguishes a deprecated fallback from a user-chosen `gemini`; (R2) `sfs team use <preset>` re-run, the new `sfs team refresh [--yes]`, and `sfs upgrade` all re-evaluate capability and surface the promotion; (R3) unmarked user-custom bindings are never auto-changed (4-way = absent / `{}` / fallback(promote) / user-custom(preserve)); (R4) non-interactive / `--yes` without consent = byte-for-byte no change; (R5) the antigravity capability gate is now auth-aware (presence + Google-cred env / `SFS_ANTIGRAVITY_AUTH_READY`), so an installed-but-unauthed `agy` no longer promotes into a "promoted but unauthed" runtime error. solo/standalone behavior unchanged; the marker is comment-only so `resolve-runtime` is unaffected. Locked by `tests/test-team-fallback-promotion.sh`.**
+
+### Added
+
+- **`sfs team refresh [--yes]` — independent capability re-evaluation + fallback promotion (R2).**
+  Re-evaluates runtime capability without changing the active preset and promotes
+  any `# sfs-fallback:`-marked binding whose canonical runtime is now capable back
+  to canonical (one consent; `--yes` promotes without prompting). Routes through
+  the same shared materialize core (`sfs-team-apply.sh`) as `sfs team use` and
+  `sfs upgrade --team`, so the promotion logic lives in exactly one place.
+- **Zero-knowledge-activation invariant layer (PART 1 / P1a+P1c).**
+  Generalizes the fallback-promotion feature into a standing product rule so the
+  next activatable state inherits it instead of re-deriving it. New routed policy
+  `policies/zero-knowledge-activation.md` (routed in `_INDEX.md`): any state SFS
+  can detect AND safely apply must be reachable via
+  detect -> guide -> consent(once) -> apply; requiring the user to know a command,
+  a flag, or to hand-edit a config to turn it on is a design bug. solo default /
+  one-time consent / user-intent preservation / standalone lock are invariant;
+  the R5 auto-offer and R2 fallback promotion are the reference implementations.
+  Enforced as data: `tests/activatable-states.registry` enumerates activatable
+  states and `tests/test-activatable-states-registry.sh` fails `run-all` if any
+  registered state lacks an existing offer-path test (a new activatable state
+  without an offer path cannot pass). These enforcement artifacts live in the
+  SFS repo's own `tests/`, not in consumer installs.
+
+### Fixed
+
+- **Deprecated fallback bindings can now be promoted to canonical (R1+R2).**
+  `team_gate_binding_line` writes a provenance marker
+  (`researcher: gemini   # sfs-fallback: antigravity`) when it applies a
+  deprecated fallback. The `agent_runtime_bindings` guard in
+  `team_materialize_preset` is split inside its custom-bindings branch: a custom
+  block with NO marker behaves exactly as before (preserve + skip), while a block
+  WITH a marker runs `team_promote_fallbacks`, which promotes only the marked
+  line(s) whose canonical is capable and strips the marker. Promotion fires on
+  `sfs team use <preset>` re-run, `sfs team refresh`, and `sfs upgrade`.
+- **antigravity capability gate is auth-aware (R5).**
+  `team_runtime_capable antigravity` was presence-only (`command -v agy`), which
+  classified an installed-but-unauthed `agy` as capable and promoted
+  `researcher=antigravity`, then failed at runtime. It now requires presence AND
+  auth readiness (antigravity is `models_ref: gemini`, so it follows gemini's
+  Google-cred idiom: `GEMINI_API_KEY` / `GOOGLE_API_KEY` /
+  `GOOGLE_APPLICATION_CREDENTIALS` / `SFS_ANTIGRAVITY_AUTH_READY=1`), behind the
+  existing `SFS_TEAM_FORCE_CAPABLE_*` test override.
+
+### Changed
+
+- **3-way bindings guard -> 4-way (R3+R4).**
+  The four categories are now: key absent (scaffold first) / literal `{}` (fill) /
+  fallback-marked (promote-on-capable) / user-custom (preserve, untouched).
+  Consent is gated: `SFS_TEAM_PROMOTE_YES=1` (used by `team refresh --yes` and the
+  interactive `sfs upgrade` accept path) force-promotes; an interactive TTY prompts
+  `[Y/n]`; non-interactive without the flag makes zero file writes. `sfs upgrade`
+  promotion is nag-controlled via `.sfs-local/team_promote_state` (capability
+  fingerprint), so a declined offer is not repeated until capability changes.
+- **Gate 6 review gains a zero-knowledge-activation check (PART 1 / P1b).**
+  `policies/agent-build-review-lens.md` §2 now requires that any change adding or
+  moving an activatable/config state has a detect -> offer -> consent -> apply
+  path; if turning it on requires manual command/flag/config knowledge, that is a
+  FAIL finding (not a nit). Cross-linked to `zero-knowledge-activation.md`.
+
 ## [0.8.51] - 2026-06-25
 
 > **Patch release: Windows (PowerShell/Scoop) typed-command argv fix — after an in-session `sfs upgrade`, a later `sfs init` (or any typed command) was silently rewritten to a stale `update`. Root cause: the Scoop self-upgrade reload set `$env:SFS_NATIVE_*` on the in-process PowerShell session and never cleared it, and `bin/sfs.ps1` selected that env channel before the typed args, so the stale `update` shadowed every later command in the same window (the 0.6.45-0.6.56 / 0.8.50 regression class). Belt-and-suspenders fix: (F1) current typed/automatic args are now authoritative and beat the inherited env channel, which is consulted only when no typed args are present — the cmd-shim path forwards zero positional args, so that bridge stays byte-for-byte; (F2) the self-upgrade reload snapshots and restores `$env:SFS_NATIVE_*` and `SFS_SKIP_SELF_UPGRADE`, so the interactive session is never polluted. Also: the not-initialized onboarding hint now branches by OS (Windows -> Scoop/PC, not brew/Mac) and reflects the real typed command, and Windows JSON writes use BOM-less UTF-8 to stop `Unrecognized token` failures. No bash behavior changed; bash 0.8.50 stays green (207/207). Locked by `tests/test-windows-argv-stale-env.sh`.**

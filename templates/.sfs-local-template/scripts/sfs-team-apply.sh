@@ -108,7 +108,16 @@ team_runtime_capable() {
   case "$rt" in
     claude)      executor_auth_ready claude ;;
     codex)       executor_auth_ready codex ;;
-    antigravity) command -v agy >/dev/null 2>&1 ;;
+    antigravity)
+      # R5: presence-only(command -v agy)는 "설치됐으나 미인증"을 capable 로 오판해
+      # researcher 를 승격했다가 런타임 에러("promoted but unauthed")를 냈다. claude/codex
+      # 처럼 auth-ready 까지 확인한다. antigravity(agy)는 models_ref: gemini → Google
+      # 자격증명을 공유하므로 gemini 의 env 관용을 따른다(+ SFS_ANTIGRAVITY_AUTH_READY).
+      command -v agy >/dev/null 2>&1 && {
+        [ -n "${GEMINI_API_KEY:-}" ] || [ -n "${GOOGLE_API_KEY:-}" ] \
+          || [ -n "${GOOGLE_APPLICATION_CREDENTIALS:-}" ] \
+          || [ "${SFS_ANTIGRAVITY_AUTH_READY:-0}" = "1" ]
+      } ;;
     gemini)      executor_auth_ready gemini || command -v gemini >/dev/null 2>&1 ;;
     *)           return 0 ;;   # unknown/custom runtime: trust intent
   esac
@@ -128,8 +137,11 @@ team_gate_binding_line() {
   fi
   if [ "$role" = "researcher" ] && [ "$rt" = "antigravity" ]; then
     if team_runtime_capable gemini; then
-      ta_warn "researcher 런타임 antigravity(agy) 미탐지 — gemini fallback 적용 (DEPRECATED: 'agy' 설치/인증 후 'sfs team use ${preset}' 재실행 권장)" >&2
-      printf '  %s: %s\n' "$role" "gemini"
+      ta_warn "researcher 런타임 antigravity(agy) 미탐지/미인증 — gemini fallback 적용 (DEPRECATED: 'agy' 설치/인증 후 'sfs team use ${preset}' 또는 'sfs team refresh' 로 자동 승격)" >&2
+      # R1: fallback provenance 표식. canonical(antigravity)을 명시해 두면 나중에
+      # capability 회복 시 이 한 줄만 골라 승격할 수 있다(사용자가 고른 gemini 와 구분).
+      # resolver(read_binding)는 주석을 strip 하므로 resolve-runtime 결과엔 영향 없음.
+      printf '  %s: %s   # sfs-fallback: %s\n' "$role" "gemini" "$rt"
       return 0
     fi
   fi
@@ -181,6 +193,10 @@ team_materialize_preset() {
     else
       ta_warn "team preset 적용 불가: resolver(sfs-team.sh) 없음 — agent_runtime_bindings 미충전"
     fi
+  elif grep -q '# sfs-fallback:' "$MP"; then
+    # R2: bindings 가 채워진 상태. 사용자 커스텀은 그대로 보존하되, deprecated
+    # fallback 표식 binding 은 canonical 이 이제 capable 이면 1줄만 승격 제안.
+    team_promote_fallbacks "$MP" "$team"
   else
     ta_warn "agent_runtime_bindings 사용자 커스텀 값 감지 — team preset 자동 적용 skip (보존). 직접 편집하세요."
   fi
@@ -233,12 +249,96 @@ EOF
   [ "$cap_lead" = 1 ] && [ "$cap_worker" = 1 ] && return 0 || return 3
 }
 
+# ── R2: deprecated-fallback → canonical 자동 승격 ────────────────────────────
+# fallback 표식(`# sfs-fallback:<canonical>`)을 단 binding 만 골라, canonical 런타임이
+# 이제 capable 이면 그 한 줄을 canonical 로 rewrite(표식 제거)한다. 표식 없는 사용자
+# 커스텀 binding 은 절대 건드리지 않는다(4-way: 부재 / {} / fallback(승격대상) /
+# user-custom(보존)). 동의: SFS_TEAM_PROMOTE_YES=1 = 무프롬프트 강제(refresh --yes),
+# 아니면 interactive tty Y/n, 그 외(비대화+미force) = 무변경(byte-for-byte).
+
+# bindings 블록에서 fallback 표식 라인을 `role rt canonical` 로 방출.
+team_scan_fallback_lines() {
+  awk '
+    /^agent_runtime_bindings:/ { inb=1; next }
+    inb && /^[A-Za-z_]/ { inb=0 }
+    inb && /#[[:space:]]*sfs-fallback:[[:space:]]*[A-Za-z0-9_-]+/ {
+      role=$0; sub(/^[[:space:]]+/,"",role); sub(/:.*/,"",role)
+      rt=$0; sub(/^[[:space:]]+[A-Za-z0-9_-]+:[[:space:]]*/,"",rt); sub(/[[:space:]]*#.*/,"",rt); sub(/[[:space:]]*$/,"",rt)
+      canon=$0; sub(/^.*#[[:space:]]*sfs-fallback:[[:space:]]*/,"",canon); sub(/[^A-Za-z0-9_-].*$/,"",canon)
+      print role, rt, canon
+    }
+  ' "$1"
+}
+
+# 표식 binding 중 canonical 이 capable 인 집합을 정렬·중복제거해 출력(R5 게이트와 동일
+# capability 판정 = team_runtime_capable). upgrade.sh 의 nag-게이트가 사용.
+team_promotable_canonicals() {
+  local role rt canon out=""
+  while read -r role rt canon; do
+    [ -n "${canon:-}" ] || continue
+    if team_runtime_capable "$canon"; then out="${out}${canon}\n"; fi
+  done < <(team_scan_fallback_lines "$1")
+  printf '%b' "$out" | sed '/^$/d' | sort -u | paste -sd, - 2>/dev/null || true
+}
+
+# bindings 블록 안에서 role 의 fallback-표식 라인만 canonical 로 rewrite(표식 제거).
+# 표식 없는 동일 role 라인이나 bindings 밖 다른 `role:` 키(model 설정 등)는 건드리지 않음.
+team_rewrite_binding_line() {
+  local mp="$1" role="$2" canon="$3"
+  awk -v role="$role" -v canon="$canon" '
+    /^agent_runtime_bindings:/ { inb=1; print; next }
+    inb && /^[A-Za-z_]/ { inb=0 }
+    inb && $0 ~ ("^[[:space:]]+" role ":") && /#[[:space:]]*sfs-fallback:/ {
+      print "  " role ": " canon; next
+    }
+    { print }
+  ' "$mp" > "$mp.tmp" && mv "$mp.tmp" "$mp"
+}
+
+team_promote_consent() {
+  case "${SFS_TEAM_PROMOTE_YES:-0}" in 1|true|TRUE|yes|YES) return 0 ;; esac
+  executor_interactive_tty_available || return 1
+  local ans
+  printf '%s [Y/n]: ' "$1" > /dev/tty 2>/dev/null || return 1
+  read -r ans < /dev/tty 2>/dev/null || ans=""
+  case "${ans:-Y}" in n|N|no|NO|No) return 1 ;; *) return 0 ;; esac
+}
+
+team_promote_fallbacks() {
+  local mp="$1" preset="${2:-}"
+  if ! grep -q '# sfs-fallback:' "$mp"; then
+    ta_warn "agent_runtime_bindings 사용자 커스텀 값 감지 — team preset 자동 적용 skip (보존). 직접 편집하세요."
+    return 0
+  fi
+  local role rt canon promos=""
+  while read -r role rt canon; do
+    [ -n "${canon:-}" ] || continue
+    if team_runtime_capable "$canon"; then promos="${promos}${role}|${canon}"$'\n'; fi
+  done < <(team_scan_fallback_lines "$mp")
+  if [ -z "$promos" ]; then
+    ta_info "deprecated fallback binding 유지 — canonical 런타임 아직 미탐지/미인증 (변경 없음). 설치/인증 후 'sfs team refresh'."
+    return 0
+  fi
+  local desc p
+  desc="$(printf '%s' "$promos" | sed '/^$/d' | while IFS='|' read -r r c; do printf '%s→%s ' "$r" "$c"; done)"
+  if ! team_promote_consent "deprecated fallback 승격 가능: ${desc}— canonical 로 승격?"; then
+    ta_info "fallback 승격 보류 — binding 무변경 (나중에 'sfs team refresh' 로 다시 제안)"
+    return 0
+  fi
+  while IFS= read -r p; do
+    [ -n "$p" ] || continue
+    role="${p%%|*}"; canon="${p##*|}"
+    team_rewrite_binding_line "$mp" "$role" "$canon"
+    ta_ok "${role} 승격: deprecated fallback → ${canon} (표식 제거)"
+  done < <(printf '%s' "$promos" | sed '/^$/d')
+}
+
 # ── entry ───────────────────────────────────────────────────────────────────
 ARG="${1:-}"
 if [ ! -f "$MP" ]; then
   case "$ARG" in
-    --capability-fp) printf 'fp=\n'; exit 3 ;;
-    --scaffold-only) exit 0 ;;
+    --capability-fp|--promotable-fp) printf 'fp=\n'; exit 3 ;;
+    --scaffold-only|--refresh) exit 0 ;;
     *) ta_warn "team preset 적용 불가: model-profiles.yaml 없음"; exit 0 ;;
   esac
 fi
@@ -247,6 +347,21 @@ case "$ARG" in
   --capability-fp)
     team_capability_fp "${2:-trio}"
     exit $?
+    ;;
+  --promotable-fp)
+    fp="$(team_promotable_canonicals "$MP")"
+    printf 'fp=%s\n' "$fp"
+    [ -n "$fp" ] && exit 0 || exit 3
+    ;;
+  --refresh)
+    # R2: preset 불변. fallback-표식 binding 만 canonical 승격 스캔/제안.
+    PRESET_NOW="$(awk '/^team_preset:/ {v=$0; sub(/^team_preset:[[:space:]]*/,"",v); sub(/[[:space:]]*#.*/,"",v); gsub(/[[:space:]]/,"",v); print v; exit}' "$MP")"
+    if grep -q '^agent_runtime_bindings:' "$MP" && grep -q '# sfs-fallback:' "$MP"; then
+      team_promote_fallbacks "$MP" "${PRESET_NOW:-}"
+    else
+      ta_info "deprecated fallback 표식 없음 — 승격할 binding 없음 (변경 없음)"
+    fi
+    exit 0
     ;;
   --scaffold-only)
     team_scaffold_schema "$MP"

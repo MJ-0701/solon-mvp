@@ -1941,6 +1941,45 @@ upgrade_team_offer_surface() {
   esac
 }
 
+# R2: 이미 활성(non-solo)인 프로젝트에서 deprecated fallback → canonical 승격
+# 발견가능성. canonical 이 이제 capable 인 fallback-표식 binding 이 있으면 interactive
+# 1줄 제안 → 동의 시 공유 코어(--refresh, PROMOTE_YES)로 그 한 줄만 승격. nag 제어:
+# team_promote_state 에 capability fp 와 결정을 기억해 같은 fp 면 재제안 안 함.
+# 비대화(--yes)·미동의 = 무변경(사용자 binding byte-for-byte).
+upgrade_team_promote_surface() {
+  local mp="$1"
+  grep -q '^team_preset:[[:space:]]*solo' "$mp" && return 0     # solo 는 offer-surface 담당
+  grep -q '# sfs-fallback:' "$mp" || return 0                   # 승격할 표식 없음
+  local fp rc=0
+  fp="$(SFS_TEAM_TARGET="$TARGET" \
+    SFS_TEAM_RESOLVER="$SOURCE_DIR/templates/.sfs-local-template/scripts/sfs-team.sh" \
+    bash "$TEAM_APPLY_CORE" --promotable-fp 2>/dev/null)" || rc=$?
+  fp="${fp#fp=}"
+  [ "$rc" -eq 0 ] && [ -n "$fp" ] || return 0                   # 승격 가능 후보 없음
+  local sf="$TARGET/.sfs-local/team_promote_state"
+  if [ -f "$sf" ]; then
+    local prev
+    prev="$(sed -n 's/^promote_fp=//p' "$sf" | head -1)"
+    [ "$prev" = "$fp" ] && return 0                             # 같은 fp 에서 이미 결정 → nag 금지
+  fi
+  if [ "$ASSUME_YES" -eq 1 ]; then
+    info "deprecated fallback 승격 가능(${fp}). 켜려면 'sfs team refresh'. 자동 승격은 대화형 동의에서만."
+    return 0
+  fi
+  mkdir -p "$TARGET/.sfs-local"
+  local ans
+  ans="$(prompt_always "deprecated fallback 승격 가능(${fp}) — canonical 로 승격? [Y/n]" "Y")"
+  case "$ans" in
+    n|N|no|NO|No) { printf 'decision=declined\npromote_fp=%s\n' "$fp"; } > "$sf"; info "fallback 승격 보류 — 나중에 'sfs team refresh' 로 켤 수 있음." ;;
+    *) SFS_TEAM_TARGET="$TARGET" \
+       SFS_TEAM_TEMPLATE="$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml" \
+       SFS_TEAM_RESOLVER="$SOURCE_DIR/templates/.sfs-local-template/scripts/sfs-team.sh" \
+       SFS_TEAM_PROMOTE_YES=1 \
+         bash "$TEAM_APPLY_CORE" --refresh \
+       && { printf 'decision=applied\npromote_fp=%s\n' "$fp"; } > "$sf" ;;
+  esac
+}
+
 upgrade_apply_team_preset() {
   local team="$1" mp="$TARGET/.sfs-local/model-profiles.yaml"
   if [ ! -f "$mp" ]; then
@@ -1953,6 +1992,7 @@ upgrade_apply_team_preset() {
   # 1회-기억 offer 로 확장. 비대화(--yes)=hint 1줄(파일 무변경, standalone 락 유지).
   if [ -z "$team" ]; then
     upgrade_team_offer_surface "$mp"
+    upgrade_team_promote_surface "$mp"
     return 0
   fi
   # 명시 --team <preset>: 0.8.48 B-path. capability 게이트 off (intent 그대로 materialize).

@@ -47,6 +47,12 @@ Usage:
                                      team_preset + capability-gated bindings +
                                      adapter dispatch. Idempotent; works any time,
                                      independent of `sfs upgrade`.
+  sfs team refresh [--yes]           RE-EVALUATE capability and promote any
+                                     deprecated fallback binding (e.g. researcher
+                                     gemini fallback) back to its canonical runtime
+                                     once that runtime is installed+authed. Preset
+                                     unchanged; user-chosen bindings untouched.
+                                     --yes promotes without prompting.
 
 Resolution is pure data lookup over .sfs-local/model-profiles.yaml. Default solo
 (team_preset: solo, empty bindings) → every token falls back to selected_runtime,
@@ -226,6 +232,20 @@ case "${cmd}" in
     SFS_TEAM_RESOLVER="${SCRIPT_DIR}/sfs-team.sh" \
     SFS_TEAM_CAPABILITY_GATE="${SFS_TEAM_CAPABILITY_GATE:-1}" \
       exec bash "${apply}" "${preset}"
+    ;;
+  refresh)
+    # R2: independent re-evaluation. preset 불변, fallback-표식 binding 만 canonical
+    # 승격(동의 1회). 같은 materialize 코어를 공유 — 승격 로직 SSoT 1곳.
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    apply="${SCRIPT_DIR}/sfs-team-apply.sh"
+    [[ -f "${apply}" ]] || { echo "team refresh: apply core missing (${apply})" >&2; exit 4; }
+    yes=0
+    case "${2:-}" in --yes|-y|yes) yes=1 ;; esac
+    SFS_TEAM_TARGET="${SFS_TEAM_USE_TARGET:-$PWD}" \
+    SFS_TEAM_TEMPLATE="${SFS_TEAM_TEMPLATE:-${SCRIPT_DIR}/../model-profiles.yaml}" \
+    SFS_TEAM_RESOLVER="${SCRIPT_DIR}/sfs-team.sh" \
+    SFS_TEAM_PROMOTE_YES="${SFS_TEAM_PROMOTE_YES:-${yes}}" \
+      exec bash "${apply}" --refresh
     ;;
   ""|-h|--help|help)
     usage
