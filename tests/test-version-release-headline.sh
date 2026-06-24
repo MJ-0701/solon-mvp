@@ -39,11 +39,10 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.47" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.47" "version output"
-assert_contains_text "${output}" "latest 0.8.47" "latest output"
-assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Hermes self-evolution seam P3 wires Seam B and closes the dispatch injection seam. Two new write verbs on \`sfs orchestrator\`: \`export --from <candidates>\` emits a pointer-only typed proposal to the \`review_outbox\` (file-drop transport — id + evidence_pointer + metadata, a candidate's raw body structurally cannot leave), and \`import-review --file <review>\` validates and sanitizes a typed human review (\`candidate_id\` / \`decision\` ∈ approve|defer|reject / \`comment\` / \`reviewer\` / \`ts\`) into an advisory review log. The review log changes nothing about the loop's authority — an \`approve\` writes only that log; APPLY stays the \`tidy\` rail under a human gate, untriggerable from here. Security precondition first: team topology P3's \`sfs-route.sh\` real-exec path no longer \`eval\`s an interpolated command string — it builds an argv array and executes it directly, so a capsule goal carrying \`\$(...)\` / backticks is inert data, not shell. Credentials stay indirection-only (\`credential_ref\` placeholder, never a value). This completes the opt-in Hermes seam (P1 schema → P2 SIGNAL ingest → P3 export/import); standalone holds throughout — disable the seam and the loop runs on doctor+curation+tidy alone." "installed release headline"
+[[ "${plain_output}" == "sfs 0.8.48" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.48" "version output"
+assert_contains_text "${output}" "latest 0.8.48" "latest output"
+assert_contains_text "${output}" "installed_release_headline Patch release: repairs the multi-agent team-topology upgrade path for legacy (pre-0.8.42) consumers — three bugs and one discoverability gap left by the 0.8.42..0.8.47 cut. (B1) \`sfs upgrade --team <preset>\` was swallowed by bin/sfs's front-door arg parser as an \"unknown arg\" even though \`upgrade.sh\` parsed it, so only the \`SFS_AGENT_TEAM\` env var worked; the front door now validates \`solo|pair|trio\` and forwards the flag, matching install's contract. (B2) \`upgrade\` assumed the team schema already existed, so a legacy profile with zero team keys was skipped forever — the adapter got \`team_dispatch\` injected while \`agent_runtime_bindings\` stayed empty, a half-applied routing no-op (real consumer breakage); upgrade now scaffolds the packaged team block (default \`team_preset: solo\` = zero behavior change) into the profile right after the \`configuration:\` block, then materializes the requested preset. (B3) the skip warning misdiagnosed an absent key as a user customization; the bindings-fill guard is now 3-way (absent vs literal \`{}\` vs custom) with corrected messages. (UX) the team preset had no interactive surface — install and upgrade now offer it (default solo). Solo/standalone invariants are locked: a no-flag \`--yes\` upgrade is byte-for-byte on \`model-profiles.yaml\` and never injects \`team_dispatch\`." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +60,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline Hermes 자체진화 seam 의 마지막 단계(P3)입니다. Seam B — 큐레이션/승격 후보를 외부 검토 표면으로 내보내고(포인터만), 사람이 내린 검토 결과를 다시 받아 advisory 로그에 적재합니다. 실제 적용(APPLY)은 끝까지 \`tidy\` 레일 + 사람 게이트입니다." "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline team topology 출하본(0.8.42..0.8.47)의 업그레이드 경로 버그 3개 + 발견가능성 결함 1개를 고친 패치 릴리스입니다. 기존(pre-0.8.42) 프로젝트도 이제 \`sfs upgrade --team trio\` 로 멀티에이전트를 켤 수 있습니다. solo 기본 무변경·standalone 불변식은 그대로입니다." "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

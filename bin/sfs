@@ -444,7 +444,7 @@ upgrade_usage() {
   cat <<'EOF'
 Usage:
   sfs upgrade [--skip-existing] [--no-self-upgrade] [--interactive] [--layout thin|vendored]
-              [--opt-in 0.6-storage] [--commit]
+              [--opt-in 0.6-storage] [--commit] [--team solo|pair|trio]
   sfs update  [--skip-existing] [--no-self-upgrade]   # same one-shot flow
 
 Updates the current project from the latest Solon runtime:
@@ -466,7 +466,9 @@ R-E deprecation behavior (AC5.1~AC5.4):
 Use `--interactive` to run the project-file preview instead of the safe
 non-interactive default. Use `--layout vendored` to keep project-local runtime
 assets and command/skill adapters. Use `--no-self-upgrade` or `SFS_UPDATE_SELF=0`
-to skip the package-manager step.
+to skip the package-manager step. Use `--team solo|pair|trio` (or env
+SFS_AGENT_TEAM) to re-apply the multi-agent team preset; omit it to leave the
+current team setting unchanged (solo = zero behavior change).
 EOF
 }
 
@@ -1441,10 +1443,23 @@ upgrade_command() {
   local upgrade_layout="${SFS_UPGRADE_LAYOUT:-thin}"
   local opt_in=""
   local do_commit=0
+  local team="${SFS_AGENT_TEAM:-}"
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --skip-existing)
         skip_existing=1
+        shift
+        ;;
+      --team)
+        team="${2:-}"
+        if [[ -z "${team}" ]]; then
+          echo "missing value for --team (solo|pair|trio)" >&2
+          return 1
+        fi
+        shift 2
+        ;;
+      --team=*)
+        team="${1#--team=}"
         shift
         ;;
       --no-self-upgrade)
@@ -1525,6 +1540,19 @@ upgrade_command() {
       return 1
       ;;
   esac
+  # Multi-agent team preset front-door validation. The flag is forwarded to
+  # upgrade.sh below (same contract as install --team); env SFS_AGENT_TEAM is
+  # the default. Validate here so a bad value fails fast at the front door
+  # rather than being swallowed as an "unknown arg".
+  if [[ -n "${team}" ]]; then
+    case "${team}" in
+      solo|pair|trio) ;;
+      *)
+        echo "unknown team preset: ${team} (expected solo|pair|trio)" >&2
+        return 1
+        ;;
+    esac
+  fi
 
   repair_legacy_sfs_project_markers_for_upgrade "${upgrade_layout}" || return $?
   ensure_project_initialized upgrade || return $?
@@ -1534,14 +1562,17 @@ upgrade_command() {
     self_upgrade_if_scoop "${skip_existing}"
   fi
   local upgrade_rc=0
+  # Forward the validated team preset as a flag (parity with install --team).
+  local team_args=()
+  [[ -n "${team}" ]] && team_args+=(--team "${team}")
   if [[ "${interactive}" == "1" ]]; then
-    if SFS_UPGRADE_LAYOUT="${upgrade_layout}" bash "${DIST_DIR}/upgrade.sh"; then
+    if SFS_UPGRADE_LAYOUT="${upgrade_layout}" bash "${DIST_DIR}/upgrade.sh" "${team_args[@]+"${team_args[@]}"}"; then
       :
     else
       upgrade_rc=$?
     fi
   else
-    if SFS_UPGRADE_LAYOUT="${upgrade_layout}" bash "${DIST_DIR}/upgrade.sh" --yes; then
+    if SFS_UPGRADE_LAYOUT="${upgrade_layout}" bash "${DIST_DIR}/upgrade.sh" --yes "${team_args[@]+"${team_args[@]}"}"; then
       :
     else
       upgrade_rc=$?

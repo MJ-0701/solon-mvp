@@ -13,6 +13,22 @@
 
 ---
 
+## 0.8.48
+
+team topology 출하본(0.8.42..0.8.47)의 업그레이드 경로 버그 3개 + 발견가능성 결함 1개를 고친 패치 릴리스입니다. 기존(pre-0.8.42) 프로젝트도 이제 `sfs upgrade --team trio` 로 멀티에이전트를 켤 수 있습니다. solo 기본 무변경·standalone 불변식은 그대로입니다.
+
+체감 변화:
+
+- `sfs upgrade --team solo|pair|trio` 플래그가 실제로 동작합니다. 그동안은 front-door 가
+  플래그를 "unknown arg" 로 거부해 `SFS_AGENT_TEAM` 환경변수로만 켤 수 있었습니다.
+- 0.8.42 이전에 설치한 프로젝트(team 키가 없던 profile)도 업그레이드 시 team 스키마가
+  자동 주입되어 `--team trio` 가 정상 적용됩니다. 예전엔 스키마가 없어 영구 skip 되며
+  dispatch 만 주입되고 bindings 는 비어 라우팅이 동작하지 않던 '반쪽 적용' 버그가 있었습니다.
+- team preset 을 install/upgrade 에서 직접 안내합니다(기본 solo). 비대화/`--yes` 는 solo
+  유지 — 단독 실행 기본값과 standalone 보장은 변함없습니다.
+
+---
+
 ## 0.8.47
 
 Hermes 자체진화 seam 의 마지막 단계(P3)입니다. Seam B — 큐레이션/승격 후보를 외부 검토 표면으로 내보내고(포인터만), 사람이 내린 검토 결과를 다시 받아 advisory 로그에 적재합니다. 실제 적용(APPLY)은 끝까지 `tidy` 레일 + 사람 게이트입니다.

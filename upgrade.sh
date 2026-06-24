@@ -1848,33 +1848,95 @@ fi
 # install.sh 의 sfs_apply_team_preset 와 동일 계약: preset→bindings 는 데이터(catalog),
 # bindings 는 기본 `{}` 일 때만 채워 사용자 커스텀 보호, 어댑터 주입은 idempotent.
 # 버전 동일(already-latest) 경로와 version-bump 경로 양쪽에서 호출되므로 여기서 정의.
+# F2: legacy(pre-0.8.42, team 키 부재) profile 감지 시 packaged template 의 team
+# 블록을 configuration 블록 직후에 idempotent 하게 주입한다. 기존 키/tier 커스텀은
+# 보존하고, team_preset 은 solo 로 들어가 무변경(behavior)을 보장한다. 현행 스키마
+# (team_preset 키 존재)면 no-op → 현행 solo 는 byte-for-byte 불변.
+upgrade_scaffold_team_schema() {
+  local mp="$1"
+  grep -q '^team_preset:' "$mp" && return 0   # sentinel: 이미 현행 스키마 → no-op
+  local template="$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml"
+  [ -f "$template" ] || { warn "team 스키마 스캐폴딩 불가: packaged template 없음"; return 0; }
+  local block_file="$mp.teamblock.tmp"
+  # template 의 team 섹션(주석 헤더 ~ unassigned_role_policy)만 추출(데이터, 코드 아님).
+  awk '
+    /^# ── Multi-agent team topology/ { p=1 }
+    p { print }
+    /^unassigned_role_policy:/ { if (p) exit }
+  ' "$template" > "$block_file"
+  [ -s "$block_file" ] || { rm -f "$block_file"; warn "team 스키마 스캐폴딩 불가: template team 블록 추출 실패"; return 0; }
+  # configuration 블록(들여쓰기/빈줄 포함) 직후, 다음 top-level 키 앞에 삽입.
+  awk -v bf="$block_file" '
+    ins==0 && /^configuration:/ { print; inconf=1; next }
+    inconf==1 {
+      if ($0 ~ /^[[:space:]]/ || $0 ~ /^[[:space:]]*$/) { print; next }
+      print ""; while ((getline l < bf) > 0) print l; close(bf); print ""
+      ins=1; inconf=0; print; next
+    }
+    { print }
+    END { if (inconf==1 && ins==0) { print ""; while ((getline l < bf) > 0) print l; close(bf) } }
+  ' "$mp" > "$mp.tmp" && mv "$mp.tmp" "$mp"
+  rm -f "$block_file"
+  ok "team 스키마 스캐폴딩: legacy profile 에 team 블록 주입(기본 solo = 무변경)"
+}
+
 upgrade_apply_team_preset() {
   local team="$1" mp="$TARGET/.sfs-local/model-profiles.yaml"
-  [ -n "$team" ] || return 0
-  [ -f "$mp" ] || { warn "team preset 적용 불가: model-profiles.yaml 없음"; return 0; }
+  if [ ! -f "$mp" ]; then
+    [ -n "$team" ] && warn "team preset 적용 불가: model-profiles.yaml 없음"
+    return 0
+  fi
+  # F2: legacy(team 키 부재) profile 은 명시 호출 없이도 스키마 스캐폴딩(solo 기본).
+  upgrade_scaffold_team_schema "$mp"
+  # F4: 미지정 + 현행 solo → 발견가능성 surface(파일 무변경). 비대화(--yes)=hint 1줄,
+  # TTY=preset 선택 prompt. 옵션 발견 경로가 0 이던 결함을 해소하되 기본은 solo 유지.
+  if [ -z "$team" ]; then
+    if grep -q '^team_preset:[[:space:]]*solo' "$mp"; then
+      if [ "$ASSUME_YES" -eq 1 ]; then
+        info "멀티에이전트 team topology: 현재 solo(단독 실행). 켜려면 'sfs upgrade --team trio' (또는 pair)."
+      else
+        local sel
+        sel="$(prompt_always "멀티에이전트 team preset (solo/pair/trio)" "solo")"
+        case "$sel" in
+          pair|trio) upgrade_apply_team_preset "$sel"; return 0 ;;
+          solo|"") : ;;
+          *) warn "알 수 없는 team preset '$sel' — solo 유지" ;;
+        esac
+      fi
+    fi
+    return 0
+  fi
   sed_inplace -e "s|^team_preset:.*|team_preset: $team|" "$mp" 2>/dev/null || true
   if [ "$team" = "solo" ]; then
     ok "team preset solo 재적용 (bindings/dispatch 비활성 — 기존 동작)"
     return 0
   fi
   local resolver="$SOURCE_DIR/templates/.sfs-local-template/scripts/sfs-team.sh"
-  if grep -Eq '^agent_runtime_bindings:[[:space:]]*\{\}[[:space:]]*$' "$mp" && [ -f "$resolver" ]; then
-    local binds_file="$mp.binds.tmp"
-    SFS_MODEL_PROFILES="$mp" bash "$resolver" preset-bindings "$team" 2>/dev/null | sed 's/^/  /' > "$binds_file" || true
-    if [ -s "$binds_file" ]; then
-      awk -v bf="$binds_file" '
-        $1 == "agent_runtime_bindings:" && index($0, "{}") {
-          print "agent_runtime_bindings:"
-          while ((getline l < bf) > 0) print l
-          close(bf); next
-        }
-        { print }
-      ' "$mp" > "$mp.tmp" && mv "$mp.tmp" "$mp"
-      ok "team preset '$team' → agent_runtime_bindings 채움"
+  # F3: bindings-fill 가드 3-way 분기 (부재 vs 리터럴 {} vs 사용자 커스텀). 경고문 정정 —
+  # 키 부재를 "기본 {} 가 아님"으로 오진하던 B3 픽스.
+  if ! grep -q '^agent_runtime_bindings:' "$mp"; then
+    warn "agent_runtime_bindings 키 부재 — team 스키마 스캐폴딩 후 재적용 필요 (preset 적용 skip)"
+  elif grep -Eq '^agent_runtime_bindings:[[:space:]]*\{\}[[:space:]]*$' "$mp"; then
+    if [ -f "$resolver" ]; then
+      local binds_file="$mp.binds.tmp"
+      SFS_MODEL_PROFILES="$mp" bash "$resolver" preset-bindings "$team" 2>/dev/null | sed 's/^/  /' > "$binds_file" || true
+      if [ -s "$binds_file" ]; then
+        awk -v bf="$binds_file" '
+          $1 == "agent_runtime_bindings:" && index($0, "{}") {
+            print "agent_runtime_bindings:"
+            while ((getline l < bf) > 0) print l
+            close(bf); next
+          }
+          { print }
+        ' "$mp" > "$mp.tmp" && mv "$mp.tmp" "$mp"
+        ok "team preset '$team' → agent_runtime_bindings 채움"
+      fi
+      rm -f "$binds_file"
+    else
+      warn "team preset 적용 불가: resolver(sfs-team.sh) 없음 — agent_runtime_bindings 미충전"
     fi
-    rm -f "$binds_file"
   else
-    warn "agent_runtime_bindings 가 기본 {} 가 아님 — team preset 자동 적용 skip (직접 편집)"
+    warn "agent_runtime_bindings 사용자 커스텀 값 감지 — team preset 자동 적용 skip (보존). 직접 편집하세요."
   fi
   local adapter
   for adapter in "$TARGET/CLAUDE.md" "$TARGET/AGENTS.md" "$TARGET/GEMINI.md"; do

@@ -1,5 +1,57 @@
 ## [Unreleased]
 
+## [0.8.48] - 2026-06-24
+
+> **Patch release: repairs the multi-agent team-topology upgrade path for legacy (pre-0.8.42) consumers — three bugs and one discoverability gap left by the 0.8.42..0.8.47 cut. (B1) `sfs upgrade --team <preset>` was swallowed by bin/sfs's front-door arg parser as an "unknown arg" even though `upgrade.sh` parsed it, so only the `SFS_AGENT_TEAM` env var worked; the front door now validates `solo|pair|trio` and forwards the flag, matching install's contract. (B2) `upgrade` assumed the team schema already existed, so a legacy profile with zero team keys was skipped forever — the adapter got `team_dispatch` injected while `agent_runtime_bindings` stayed empty, a half-applied routing no-op (real consumer breakage); upgrade now scaffolds the packaged team block (default `team_preset: solo` = zero behavior change) into the profile right after the `configuration:` block, then materializes the requested preset. (B3) the skip warning misdiagnosed an absent key as a user customization; the bindings-fill guard is now 3-way (absent vs literal `{}` vs custom) with corrected messages. (UX) the team preset had no interactive surface — install and upgrade now offer it (default solo). Solo/standalone invariants are locked: a no-flag `--yes` upgrade is byte-for-byte on `model-profiles.yaml` and never injects `team_dispatch`.**
+
+### Fixed
+
+- **bin/sfs front-door `--team` flag (`bin/sfs` `upgrade_command`).** `sfs upgrade
+  --team solo|pair|trio` (and `--team=<v>`) is now accepted, validated, and
+  forwarded to `upgrade.sh` (the env `SFS_AGENT_TEAM` remains the default). Before
+  the fix the front-door arg loop rejected the flag with `unknown arg: --team`
+  even though `upgrade.sh` understood it — flag/doc/runtime were inconsistent and
+  only the env var worked. `--help` text and usage updated to match install.
+- **legacy team-schema scaffolding on upgrade (`upgrade.sh`
+  `upgrade_scaffold_team_schema`).** A profile written before 0.8.42 has no
+  `team_preset` / `runtime_registry` / `agent_runtime_bindings` /
+  `team_preset_catalog` / `unassigned_role_policy` keys, so the old
+  preset-apply's `sed`/`grep` all missed and the preset was skipped permanently —
+  leaving dispatch injected but bindings empty (a routing no-op). Upgrade now
+  detects the absence (sentinel: missing `team_preset`) and injects the packaged
+  template's team block — pure data — directly after the `configuration:` block,
+  idempotently, preserving every existing key and tier customization. The block
+  enters as `team_preset: solo` so a plain upgrade is still zero behavior change;
+  a `--team <preset>` upgrade then materializes the preset on top of it. Current-
+  schema profiles are a no-op (`team_preset` already present).
+- **3-way bindings-fill guard + corrected warnings (`upgrade.sh`
+  `upgrade_apply_team_preset`).** The fill guard now distinguishes three states
+  instead of two: absent key (`agent_runtime_bindings 키 부재` — scaffolding
+  needed), literal `{}` (fill from catalog), and a user customization
+  (`사용자 커스텀 ... 보존` — preserved, skipped). B3's misdiagnosis — printing
+  "not default `{}`" when the key was simply absent — is gone.
+
+### Added
+
+- **team preset interactive surface on install and upgrade (`install.sh`
+  `choose_initial_team_preset`, `upgrade.sh` `upgrade_apply_team_preset` F4
+  hint).** Install now offers `solo/pair/trio` (default solo) alongside the
+  model-profile prompt; upgrade prints a one-line discoverability hint when a
+  solo project runs without `--team`, and prompts for the preset on a TTY.
+  `--yes`/non-interactive stays solo, keeping the standalone lock and the
+  zero-behavior-change default intact.
+
+### Tests
+
+- **`tests/test-team-upgrade-migration.sh` (headline).** Locks all four fixes:
+  T1 legacy-schema (zero team keys) → `upgrade --team trio` scaffolds + fills
+  bindings, resolver returns `worker=codex`; T2 `sfs upgrade --team trio` flag
+  path equals the `SFS_AGENT_TEAM` env path (and the front door rejects an
+  invalid value); T3 the absent/`{}`/custom 3-way branch with warning-string
+  assertions; T4 a no-flag `--yes` solo upgrade is byte-for-byte on
+  `model-profiles.yaml` with no `team_dispatch` injection (standalone degrade
+  lock).
+
 ## [0.8.47] - 2026-06-24
 
 > **Hermes self-evolution seam P3 wires Seam B and closes the dispatch injection seam. Two new write verbs on `sfs orchestrator`: `export --from <candidates>` emits a pointer-only typed proposal to the `review_outbox` (file-drop transport — id + evidence_pointer + metadata, a candidate's raw body structurally cannot leave), and `import-review --file <review>` validates and sanitizes a typed human review (`candidate_id` / `decision` ∈ approve|defer|reject / `comment` / `reviewer` / `ts`) into an advisory review log. The review log changes nothing about the loop's authority — an `approve` writes only that log; APPLY stays the `tidy` rail under a human gate, untriggerable from here. Security precondition first: team topology P3's `sfs-route.sh` real-exec path no longer `eval`s an interpolated command string — it builds an argv array and executes it directly, so a capsule goal carrying `$(...)` / backticks is inert data, not shell. Credentials stay indirection-only (`credential_ref` placeholder, never a value). This completes the opt-in Hermes seam (P1 schema → P2 SIGNAL ingest → P3 export/import); standalone holds throughout — disable the seam and the loop runs on doctor+curation+tidy alone.**

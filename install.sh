@@ -448,6 +448,25 @@ EOF
 
 choose_initial_model_profile
 
+# F4: team preset 발견가능성 surface. model-profile 선택과 동일 게이트(인터랙티브 +
+# SFS_MODEL_PROFILE_PROMPT=1)에서 함께 묻는다. 기본 solo = 무변경, --team/SFS_AGENT_TEAM
+# 로 이미 비-solo 가 지정됐으면 그 값을 존중하고 묻지 않는다. 비대화/--yes = solo 유지.
+choose_initial_team_preset() {
+  [ "$INSTALL_TEAM" = "solo" ] || return 0
+  [ "${SFS_MODEL_PROFILE_PROMPT:-0}" = "1" ] || return 0
+  tty_available || return 0
+  info "멀티에이전트 team preset 선택:"
+  info "    solo  단독 실행(기본, 현재 동작) / pair  lead+worker / trio  lead+worker+researcher"
+  local choice
+  choice="$(prompt_model_always "team preset? (solo/pair/trio, 기본 solo)" "solo")"
+  case "$choice" in
+    pair|trio) INSTALL_TEAM="$choice" ;;
+    solo|"") INSTALL_TEAM="solo" ;;
+    *) warn "알 수 없는 team preset '$choice' — solo 로 설치"; INSTALL_TEAM="solo" ;;
+  esac
+}
+choose_initial_team_preset
+
 case "$MODEL_RUNTIME" in
   current|claude|codex|gemini|custom) ;;
   unset|"")
