@@ -1,5 +1,56 @@
 ## [Unreleased]
 
+## [0.8.53] - 2026-06-25
+
+> **Patch release: legacy UNMARKED deprecated-fallback -> canonical promotion via provenance inference. 0.8.52 promotes a fallback binding back to canonical only when it carries the `# sfs-fallback: <canonical>` marker — but that marker is written at materialize time, so a binding that hardened to the deprecated `gemini` runtime BEFORE 0.8.52 (no marker — e.g. a hand-spliced `product-image-studio` researcher) was classified user-custom and preserved forever, with no product path back to canonical once `agy` was installed+authed. 0.8.53 adds a second detection signal (OR with the marker): an UNMARKED binding pointing at a runtime the `runtime_registry` marks `deprecated`, whose active-preset `team_preset_catalog` canonical differs and is now capable, is inferred to be a legacy fallback and flows through the SAME detect -> offer(one consent) -> apply path. The two signals share one core (`team_promote_fallbacks` in `sfs-team-apply.sh`); the consent is now 3-valued so the legacy decline can be honored distinctly: (R1) offer-only, accept rewrites just that one line; (R2) an explicit decline writes `# sfs-pinned: <rt> (user)` and the binding is never re-offered (legacy `# sfs-pinned:` is the new "user-chose-this" provenance, replacing "unmarked = preserve"); (R3) only divergence to a *deprecated* runtime triggers — a user override to a non-deprecated runtime is never offered or changed; (R4) if the canonical is not capable (agy absent/unauthed, auth-aware gate) there is no offer and no pin; (R5) non-interactive / no-consent = byte-for-byte no change, no pin; (R6) trigger surface is identical to 0.8.52 (`sfs team use` / `sfs team refresh` / `sfs upgrade`), shared core. The pin is comment-only so `resolve-runtime` is unaffected; solo/standalone behavior unchanged. Registered as the `legacy-fallback-promotion` activatable state (zero-knowledge-activation invariant) and locked by `tests/test-team-legacy-fallback-promotion.sh`.**
+
+### Added
+
+- **2nd promotion signal: legacy unmarked deprecated-fallback inference (R1+R6).**
+  New helpers in `sfs-team-apply.sh`: `team_registry_deprecated` (is a runtime
+  `deprecated` in `runtime_registry`), `team_catalog_canonical` (the active
+  preset's `team_preset_catalog.<preset>.<role>` canonical, read via the resolver),
+  `team_scan_legacy_lines` (emit `role rt canon` for each unmarked, unpinned binding
+  whose runtime is deprecated and whose catalog canonical differs), and
+  `team_pin_binding_line` (R2 decline → `# sfs-pinned:`). `team_promote_fallbacks`
+  now unifies marked (0.8.52) + legacy (0.8.53) candidates; `team_promotable_canonicals`
+  / `--promotable-fp` and `--refresh` thread the active preset so the catalog
+  canonical can be inferred.
+- **`tests/test-team-legacy-fallback-promotion.sh` (headline).** T1 legacy unmarked
+  gemini + agy capable → promoted (refresh & team use); T2 explicit decline → pinned
+  → never re-offered even when later capable; T3 non-deprecated override never
+  offered/changed; T4 agy installed-but-unauthed → no promote, no pin → authed →
+  promote; T5 non-interactive without consent = byte-for-byte, no pin; T6 the
+  `legacy-fallback-promotion` activatable state is registered and the meta-test passes.
+
+### Fixed
+
+- **Pre-0.8.52 deprecated bindings are no longer stranded as user-custom.**
+  The 4-way guard's `user-custom(preserve)` branch previously swallowed any unmarked
+  binding, including a deprecated `gemini` that was really a pre-marker fallback.
+  The filled-bindings branch in `team_materialize_preset` now always routes through
+  `team_promote_fallbacks`, which preserves genuine (non-deprecated / pinned) custom
+  bindings but offers promotion for legacy deprecated ones. `upgrade.sh`
+  `upgrade_team_promote_surface` no longer gates on `grep '# sfs-fallback:'` (legacy
+  has no marker) — `--promotable-fp` is the sole capability gate — and its decline
+  path now pins legacy candidates so "ask once" survives a capability-fingerprint change.
+
+### Changed
+
+- **Promotion consent is 3-valued (R2 vs R5).** `team_promote_decide` replaces the
+  2-valued `team_promote_consent`: promote (`SFS_TEAM_PROMOTE_YES` / interactive Y),
+  explicit decline (`SFS_TEAM_PROMOTE_DECLINE` / interactive N → pin a legacy
+  candidate), and no-interaction (non-interactive without a flag → byte-for-byte no
+  change, no pin). A marked-fallback decline still leaves the marker re-offerable;
+  only a legacy decline pins, because an unmarked deprecated binding cannot otherwise
+  be distinguished from a deliberate one on the next run.
+- **`tests/test-team-fallback-promotion.sh` T2 + `tests/test-team-upgrade-migration.sh`
+  T3-custom updated.** Their "unmarked binding = preserved user-custom" assertions
+  used a *deprecated* runtime (`gemini`), which is now a legacy promotion candidate by
+  design. Both switched to a *non-deprecated* deliberate override (`claude`/`codex`) —
+  the durable R3 "user intent preserved" invariant — while the unmarked-deprecated
+  path moves to the new legacy test.
+
 ## [0.8.52] - 2026-06-25
 
 > **Patch release: deprecated-fallback -> canonical auto-promotion (SFS level). A project whose trio researcher fell back to the deprecated `gemini` runtime (because `antigravity`/`agy` was absent at activation time) had no product-level path back to canonical after `agy` was later installed+authed: re-running `sfs team use trio` hit the 3-way bindings guard's "custom bindings 보존" skip, so the only way forward was a manual `model-profiles.yaml` edit — the "must know the command/YAML" anti-pattern 0.8.49/0.8.50 removed. 0.8.52 makes the guard 4-way. Fallback bindings are now MARKED at materialize time (`# sfs-fallback: <canonical>`), and when the canonical runtime becomes capable SFS detects -> offers (one consent) -> promotes only that one line and strips the marker. (R1) the provenance marker distinguishes a deprecated fallback from a user-chosen `gemini`; (R2) `sfs team use <preset>` re-run, the new `sfs team refresh [--yes]`, and `sfs upgrade` all re-evaluate capability and surface the promotion; (R3) unmarked user-custom bindings are never auto-changed (4-way = absent / `{}` / fallback(promote) / user-custom(preserve)); (R4) non-interactive / `--yes` without consent = byte-for-byte no change; (R5) the antigravity capability gate is now auth-aware (presence + Google-cred env / `SFS_ANTIGRAVITY_AUTH_READY`), so an installed-but-unauthed `agy` no longer promotes into a "promoted but unauthed" runtime error. solo/standalone behavior unchanged; the marker is comment-only so `resolve-runtime` is unaffected. Locked by `tests/test-team-fallback-promotion.sh`.**

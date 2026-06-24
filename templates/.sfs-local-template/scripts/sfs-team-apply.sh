@@ -193,12 +193,12 @@ team_materialize_preset() {
     else
       ta_warn "team preset 적용 불가: resolver(sfs-team.sh) 없음 — agent_runtime_bindings 미충전"
     fi
-  elif grep -q '# sfs-fallback:' "$MP"; then
-    # R2: bindings 가 채워진 상태. 사용자 커스텀은 그대로 보존하되, deprecated
-    # fallback 표식 binding 은 canonical 이 이제 capable 이면 1줄만 승격 제안.
-    team_promote_fallbacks "$MP" "$team"
   else
-    ta_warn "agent_runtime_bindings 사용자 커스텀 값 감지 — team preset 자동 적용 skip (보존). 직접 편집하세요."
+    # bindings 가 채워진 상태(4-way 가드의 4번째). 사용자 커스텀은 보존하되, deprecated
+    # fallback 은 승격 제안: (a) `# sfs-fallback:` 표식 [0.8.52] 또는 (b) 표식 없는 legacy
+    # deprecated binding(catalog canonical 이 다르고 capable) [0.8.53]. 둘 다 없으면
+    # team_promote_fallbacks 가 "보존" 통지만 하고 무변경.
+    team_promote_fallbacks "$MP" "$team"
   fi
   local adapter
   for adapter in "$TARGET/CLAUDE.md" "$TARGET/AGENTS.md" "$TARGET/GEMINI.md"; do
@@ -273,64 +273,179 @@ team_scan_fallback_lines() {
 # 표식 binding 중 canonical 이 capable 인 집합을 정렬·중복제거해 출력(R5 게이트와 동일
 # capability 판정 = team_runtime_capable). upgrade.sh 의 nag-게이트가 사용.
 team_promotable_canonicals() {
+  local mp="$1" preset="${2:-}"
   local role rt canon out=""
   while read -r role rt canon; do
     [ -n "${canon:-}" ] || continue
     if team_runtime_capable "$canon"; then out="${out}${canon}\n"; fi
-  done < <(team_scan_fallback_lines "$1")
+  done < <(team_scan_fallback_lines "$mp"; team_scan_legacy_lines "$mp" "$preset")
   printf '%b' "$out" | sed '/^$/d' | sort -u | paste -sd, - 2>/dev/null || true
 }
 
-# bindings 블록 안에서 role 의 fallback-표식 라인만 canonical 로 rewrite(표식 제거).
-# 표식 없는 동일 role 라인이나 bindings 밖 다른 `role:` 키(model 설정 등)는 건드리지 않음.
+# bindings 블록 안에서 role 의 binding 라인을 canonical 로 rewrite(있던 표식/핀 제거).
+# 호출 전 scan 이 이미 승격 대상 role 만 골라줬다(표식 fallback 또는 legacy deprecated).
+# bindings 밖 다른 `role:` 키(model 설정 등)는 inb 가드로 건드리지 않음.
 team_rewrite_binding_line() {
   local mp="$1" role="$2" canon="$3"
   awk -v role="$role" -v canon="$canon" '
     /^agent_runtime_bindings:/ { inb=1; print; next }
     inb && /^[A-Za-z_]/ { inb=0 }
-    inb && $0 ~ ("^[[:space:]]+" role ":") && /#[[:space:]]*sfs-fallback:/ {
+    inb && $0 ~ ("^[[:space:]]+" role ":") {
       print "  " role ": " canon; next
     }
     { print }
   ' "$mp" > "$mp.tmp" && mv "$mp.tmp" "$mp"
 }
 
-team_promote_consent() {
+# ── 0.8.53: legacy UNMARKED deprecated-fallback inference ─────────────────────
+# 0.8.52 의 provenance 표식(`# sfs-fallback:`)은 0.8.52 이후 materialize 된 binding
+# 에만 찍힌다. 그 이전에 antigravity 부재로 gemini 로 굳은 binding(표식 없음, 예 수동
+# splice)은 user-custom 으로 보존돼 승격되지 않았다. 0.8.53 은 2번째 신호로 이 legacy
+# 케이스를 추론한다: 표식/핀 없는 binding 이 deprecated 런타임을 가리키고(runtime_registry
+# 의 deprecated 키), 활성 preset 의 team_preset_catalog canonical 이 다른 런타임이며 그게
+# capable 이면 — 표식 fallback 과 동일하게 detect→offer→consent→promote 한다.
+
+# runtime_registry.<rt> 에 deprecated 키가 있으면 0, 없으면 1.
+team_registry_deprecated() {
+  local mp="$1" rt="$2"
+  awk -v want="$rt" '
+    /^runtime_registry:/ { inr=1; next }
+    inr && /^[A-Za-z_]/ { inr=0 }
+    inr && /^  [A-Za-z0-9_-]+:/ {
+      name=$0; sub(/^  /,"",name); sub(/:.*/,"",name); cur=(name==want)?1:0; next
+    }
+    inr && cur && /^[[:space:]]+deprecated:/ { found=1 }
+    END { exit (found?0:1) }
+  ' "$mp"
+}
+
+# team_preset_catalog.<preset>.<role> 의 canonical 런타임 (데이터 SSoT = resolver).
+team_catalog_canonical() {
+  local preset="$1" role="$2"
+  [ -n "$preset" ] || return 0
+  SFS_MODEL_PROFILES="$MP" bash "$RESOLVER" preset-bindings "$preset" 2>/dev/null \
+    | awk -v r="$role" '$1==r":" { print $2; exit }'
+}
+
+# bindings 블록에서 legacy-shaped 라인을 `role rt canon` 로 방출(capability 미필터 —
+# 표식 스캐너와 대칭, capability 는 promote 에서 판정). 표식(`# sfs-fallback:`)이나
+# 핀(`# sfs-pinned:`)이 있는 라인은 제외. rt 가 deprecated 이고 catalog canonical 이
+# 존재하며 rt 와 다를 때만 후보.
+team_scan_legacy_lines() {
+  local mp="$1" preset="${2:-}"
+  [ -n "$preset" ] || return 0
+  local role rt canon
+  while read -r role rt; do
+    [ -n "${rt:-}" ] || continue
+    team_registry_deprecated "$mp" "$rt" || continue
+    canon="$(team_catalog_canonical "$preset" "$role")"
+    [ -n "$canon" ] && [ "$canon" != "$rt" ] && printf '%s %s %s\n' "$role" "$rt" "$canon"
+  done < <(awk '
+    /^agent_runtime_bindings:/ { inb=1; next }
+    inb && /^[A-Za-z_]/ { inb=0 }
+    inb && /^[[:space:]]+[A-Za-z0-9_-]+:/ && !/#[[:space:]]*sfs-fallback:/ && !/#[[:space:]]*sfs-pinned:/ {
+      role=$0; sub(/^[[:space:]]+/,"",role); sub(/:.*/,"",role)
+      rt=$0; sub(/^[[:space:]]+[A-Za-z0-9_-]+:[[:space:]]*/,"",rt); sub(/[[:space:]]*#.*/,"",rt); sub(/[[:space:]]*$/,"",rt)
+      if (rt != "" && rt !~ /^[{]/) print role, rt
+    }
+  ' "$mp")
+}
+
+# R2: 거절(N)을 사용자 의도로 확정 — role 의 binding 라인에 `# sfs-pinned: <rt> (user)`
+# 표식을 붙인다(이미 표식/핀 있으면 무시). legacy 스캐너가 핀 라인을 제외하므로 이후 영영
+# 재제안되지 않는다. 주석이라 resolver(read_binding)가 strip → resolve-runtime 무영향.
+team_pin_binding_line() {
+  local mp="$1" role="$2" rt="$3"
+  awk -v role="$role" -v rt="$rt" '
+    /^agent_runtime_bindings:/ { inb=1; print; next }
+    inb && /^[A-Za-z_]/ { inb=0 }
+    inb && $0 ~ ("^[[:space:]]+" role ":") && $0 !~ /#[[:space:]]*sfs-(fallback|pinned):/ {
+      sub(/[[:space:]]*$/, "")
+      print $0 "   # sfs-pinned: " rt " (user)"; next
+    }
+    { print }
+  ' "$mp" > "$mp.tmp" && mv "$mp.tmp" "$mp"
+}
+
+# 3-valued consent (0.8.53). A 2-valued accept/not-accept collapses "interactive
+# N" and "no interaction" into one branch — fine for MARKED fallbacks (don't-apply
+# = leave marker, re-offerable) but wrong for LEGACY unmarked candidates, where an
+# explicit N must PIN (R2: 영영 재제안 안 함) while no-interaction must be byte-for-
+# byte无변경 with NO pin write (R5). So return three states:
+#   0 = promote (accept)         SFS_TEAM_PROMOTE_YES / interactive Y
+#   1 = explicit decline         SFS_TEAM_PROMOTE_DECLINE / interactive N
+#   2 = no interaction           non-interactive without an explicit flag
+team_promote_decide() {
   case "${SFS_TEAM_PROMOTE_YES:-0}" in 1|true|TRUE|yes|YES) return 0 ;; esac
-  executor_interactive_tty_available || return 1
+  case "${SFS_TEAM_PROMOTE_DECLINE:-0}" in 1|true|TRUE|yes|YES) return 1 ;; esac
+  executor_interactive_tty_available || return 2
   local ans
-  printf '%s [Y/n]: ' "$1" > /dev/tty 2>/dev/null || return 1
+  printf '%s [Y/n]: ' "$1" > /dev/tty 2>/dev/null || return 2
   read -r ans < /dev/tty 2>/dev/null || ans=""
   case "${ans:-Y}" in n|N|no|NO|No) return 1 ;; *) return 0 ;; esac
 }
 
+# Unified deprecated-fallback → canonical promotion (0.8.52 marked + 0.8.53 legacy).
+# Gathers two signals (OR): (a) `# sfs-fallback:`-marked binding [0.8.52], and
+# (b) legacy UNMARKED binding to a deprecated runtime whose preset catalog canonical
+# differs and is capable [0.8.53]. capability(team_runtime_capable, auth-aware)
+# filters both. One consent covers all promotable lines. Decline action branches by
+# source: a LEGACY decline PINS (`# sfs-pinned:`, R2 — 영영 재제안 안 함); a MARKED
+# decline leaves the marker re-offerable (0.8.52 behavior). No-interaction (R5) =
+# byte-for-byte 무변경, no pin. user-custom(비-deprecated/핀) binding 은 불변.
 team_promote_fallbacks() {
   local mp="$1" preset="${2:-}"
-  if ! grep -q '# sfs-fallback:' "$mp"; then
-    ta_warn "agent_runtime_bindings 사용자 커스텀 값 감지 — team preset 자동 적용 skip (보존). 직접 편집하세요."
-    return 0
-  fi
-  local role rt canon promos=""
+  # any-shaped (capability 미필터) detection for messaging.
+  local any_marked any_legacy
+  any_marked="$(team_scan_fallback_lines "$mp")"
+  any_legacy="$(team_scan_legacy_lines "$mp" "$preset")"
+
+  # promotable candidates: capability-filtered, tagged with source.
+  local role rt canon cands=""
   while read -r role rt canon; do
     [ -n "${canon:-}" ] || continue
-    if team_runtime_capable "$canon"; then promos="${promos}${role}|${canon}"$'\n'; fi
-  done < <(team_scan_fallback_lines "$mp")
-  if [ -z "$promos" ]; then
-    ta_info "deprecated fallback binding 유지 — canonical 런타임 아직 미탐지/미인증 (변경 없음). 설치/인증 후 'sfs team refresh'."
+    team_runtime_capable "$canon" && cands="${cands}${role}|${rt}|${canon}|marked"$'\n'
+  done < <(printf '%s\n' "$any_marked")
+  while read -r role rt canon; do
+    [ -n "${canon:-}" ] || continue
+    team_runtime_capable "$canon" && cands="${cands}${role}|${rt}|${canon}|legacy"$'\n'
+  done < <(printf '%s\n' "$any_legacy")
+  cands="$(printf '%s' "$cands" | sed '/^$/d')"
+
+  if [ -z "$cands" ]; then
+    if [ -n "$any_marked" ] || [ -n "$any_legacy" ]; then
+      ta_info "deprecated fallback binding 유지 — canonical 런타임 아직 미탐지/미인증 (변경 없음). 설치/인증 후 'sfs team refresh'."
+    else
+      ta_warn "agent_runtime_bindings 사용자 커스텀 값 감지 — team preset 자동 적용 skip (보존). 직접 편집하세요."
+    fi
     return 0
   fi
-  local desc p
-  desc="$(printf '%s' "$promos" | sed '/^$/d' | while IFS='|' read -r r c; do printf '%s→%s ' "$r" "$c"; done)"
-  if ! team_promote_consent "deprecated fallback 승격 가능: ${desc}— canonical 로 승격?"; then
-    ta_info "fallback 승격 보류 — binding 무변경 (나중에 'sfs team refresh' 로 다시 제안)"
-    return 0
-  fi
-  while IFS= read -r p; do
-    [ -n "$p" ] || continue
-    role="${p%%|*}"; canon="${p##*|}"
-    team_rewrite_binding_line "$mp" "$role" "$canon"
-    ta_ok "${role} 승격: deprecated fallback → ${canon} (표식 제거)"
-  done < <(printf '%s' "$promos" | sed '/^$/d')
+
+  local desc decision=0
+  desc="$(printf '%s\n' "$cands" | while IFS='|' read -r r rt c s; do [ -n "$r" ] && printf '%s→%s ' "$r" "$c"; done)"
+  team_promote_decide "deprecated fallback 승격 가능: ${desc}— canonical 로 승격?" || decision=$?
+  case "$decision" in
+    0)  # accept → promote every candidate (strip marker for marked; replace for legacy)
+      printf '%s\n' "$cands" | while IFS='|' read -r role rt canon src; do
+        [ -n "$role" ] || continue
+        team_rewrite_binding_line "$mp" "$role" "$canon"
+        ta_ok "${role} 승격: deprecated fallback → ${canon} (표식 제거)"
+      done
+      ;;
+    1)  # explicit decline → PIN legacy candidates (R2); leave marked re-offerable
+      printf '%s\n' "$cands" | while IFS='|' read -r role rt canon src; do
+        [ -n "$role" ] || continue
+        if [ "$src" = "legacy" ]; then
+          team_pin_binding_line "$mp" "$role" "$rt"
+          ta_info "${role} = ${rt} 사용자 의도로 확정(pin) — 다시 제안 안 함."
+        fi
+      done
+      ta_info "fallback 승격 보류 — binding 무변경 (나중에 'sfs team refresh' 로 다시 제안)"
+      ;;
+    *)  # no interaction (R5) → byte-for-byte 무변경, no pin
+      ta_info "fallback 승격 보류 — binding 무변경 (나중에 'sfs team refresh' 로 다시 제안)"
+      ;;
+  esac
 }
 
 # ── entry ───────────────────────────────────────────────────────────────────
@@ -349,14 +464,18 @@ case "$ARG" in
     exit $?
     ;;
   --promotable-fp)
-    fp="$(team_promotable_canonicals "$MP")"
+    # 표식(0.8.52) + legacy 추론(0.8.53) 둘 다 포함 → preset 필요(catalog canonical).
+    PRESET_NOW="$(awk '/^team_preset:/ {v=$0; sub(/^team_preset:[[:space:]]*/,"",v); sub(/[[:space:]]*#.*/,"",v); gsub(/[[:space:]]/,"",v); print v; exit}' "$MP")"
+    fp="$(team_promotable_canonicals "$MP" "${PRESET_NOW:-}")"
     printf 'fp=%s\n' "$fp"
     [ -n "$fp" ] && exit 0 || exit 3
     ;;
   --refresh)
-    # R2: preset 불변. fallback-표식 binding 만 canonical 승격 스캔/제안.
+    # R2: preset 불변. deprecated fallback 만 canonical 승격 스캔/제안 — 표식 fallback
+    # [0.8.52] + 표식 없는 legacy deprecated binding [0.8.53] 둘 다. bindings 가 채워져
+    # 있어야(리터럴 {} 아님) 후보가 생긴다.
     PRESET_NOW="$(awk '/^team_preset:/ {v=$0; sub(/^team_preset:[[:space:]]*/,"",v); sub(/[[:space:]]*#.*/,"",v); gsub(/[[:space:]]/,"",v); print v; exit}' "$MP")"
-    if grep -q '^agent_runtime_bindings:' "$MP" && grep -q '# sfs-fallback:' "$MP"; then
+    if grep -q '^agent_runtime_bindings:' "$MP" && ! grep -Eq '^agent_runtime_bindings:[[:space:]]*\{\}[[:space:]]*$' "$MP"; then
       team_promote_fallbacks "$MP" "${PRESET_NOW:-}"
     else
       ta_info "deprecated fallback 표식 없음 — 승격할 binding 없음 (변경 없음)"

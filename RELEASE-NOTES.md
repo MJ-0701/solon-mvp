@@ -13,6 +13,24 @@
 
 ---
 
+## 0.8.53
+
+0.8.52 는 `# sfs-fallback:` 출처 표식이 있는 fallback binding 만 canonical 로 승격했습니다. 그런데 이 표식은 0.8.52 이후 굳은 binding 에만 찍히므로, 그 이전에 antigravity 부재로 deprecated `gemini` 로 굳은 binding(표식 없음 — 예: 수동으로 끼워 넣은 researcher)은 user-custom 으로 영영 보존돼 `agy` 설치·인증 후에도 canonical 로 돌아올 길이 없었습니다. 0.8.53 은 두 번째 신호를 추가합니다: 표식이 없어도, binding 이 `runtime_registry` 의 deprecated 런타임을 가리키고 활성 preset 의 catalog canonical 이 다른 런타임이며 그게 capable 이면 — legacy fallback 으로 추론해 0.8.52 와 같은 감지 -> 제안(동의 1회) -> 승격 경로를 탑니다. 거절하면 `# sfs-pinned:` 표식을 남겨 다시 묻지 않고(사용자 의도로 확정), deprecated 가 아닌 런타임으로의 사용자 override 는 절대 건드리지 않습니다.
+
+체감 변화:
+
+- **0.8.52 이전에 gemini 로 굳은 researcher 도 자동 복귀** — `agy` 설치·인증 후
+  `sfs team use trio`, `sfs team refresh`, 또는 `sfs upgrade` 가 "deprecated gemini ->
+  antigravity 로 승격? [Y/n]" 한 줄로 제안합니다. 표식이 없던 legacy binding 도 이제 포함됩니다.
+- **일부러 고른 gemini 면 거절하면 끝** — 거절 시 `# sfs-pinned:` 가 기록돼 다시 제안하지 않고
+  그 binding 을 그대로 보존합니다. 한 번만 묻습니다.
+- **deprecated 아닌 override 는 불변** — 사용자가 고른 비-deprecated 런타임(claude 등)은
+  제안 대상이 아니며 절대 자동 변경되지 않습니다.
+- **동의 없으면 무변경** — 비대화/미동의는 byte-for-byte 그대로이고 pin 도 쓰지 않습니다.
+  solo/standalone 동작은 불변입니다.
+
+---
+
 ## 0.8.52
 
 trio researcher 가 활성화 시점에 antigravity(`agy`) 부재로 deprecated `gemini` fallback 으로 굳은 프로젝트가, `agy` 설치·인증 후에도 제품 차원에서 canonical 로 돌아올 길이 없던 문제를 고친 패치 릴리스입니다. 이제 fallback binding 에 출처 표식(`# sfs-fallback: <canonical>`)을 남겨, canonical 런타임이 capable 해지면 SFS 가 스스로 감지 -> 제안(동의 1회) -> 그 한 줄만 승격하고 표식을 제거합니다. 사용자가 직접 고른 binding 은 건드리지 않고(R3), 비대화/`--yes` 미동의는 byte-for-byte 무변경(R4)이며, antigravity 게이트는 auth-aware(R5)라 설치만 되고 미인증인 `agy` 는 승격하지 않습니다. solo/standalone 동작은 불변입니다.

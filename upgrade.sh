@@ -1949,7 +1949,8 @@ upgrade_team_offer_surface() {
 upgrade_team_promote_surface() {
   local mp="$1"
   grep -q '^team_preset:[[:space:]]*solo' "$mp" && return 0     # solo 는 offer-surface 담당
-  grep -q '# sfs-fallback:' "$mp" || return 0                   # 승격할 표식 없음
+  # 0.8.53: 표식(`# sfs-fallback:`) 유무로 게이트하지 않는다 — 표식 없는 legacy deprecated
+  # binding 도 승격 후보다. --promotable-fp 가 표식+legacy 둘 다 판정하므로 그게 유일 게이트.
   local fp rc=0
   fp="$(SFS_TEAM_TARGET="$TARGET" \
     SFS_TEAM_RESOLVER="$SOURCE_DIR/templates/.sfs-local-template/scripts/sfs-team.sh" \
@@ -1970,7 +1971,15 @@ upgrade_team_promote_surface() {
   local ans
   ans="$(prompt_always "deprecated fallback 승격 가능(${fp}) — canonical 로 승격? [Y/n]" "Y")"
   case "$ans" in
-    n|N|no|NO|No) { printf 'decision=declined\npromote_fp=%s\n' "$fp"; } > "$sf"; info "fallback 승격 보류 — 나중에 'sfs team refresh' 로 켤 수 있음." ;;
+    n|N|no|NO|No)
+       # 0.8.53: 명시 거절 = 사용자 의도 확정. legacy 후보는 core 가 `# sfs-pinned:` 로
+       # 핀(영영 재제안 안 함); 표식 fallback 은 re-offerable 유지. nag-state 도 함께 기록.
+       SFS_TEAM_TARGET="$TARGET" \
+       SFS_TEAM_RESOLVER="$SOURCE_DIR/templates/.sfs-local-template/scripts/sfs-team.sh" \
+       SFS_TEAM_PROMOTE_DECLINE=1 \
+         bash "$TEAM_APPLY_CORE" --refresh >/dev/null 2>&1 || true
+       { printf 'decision=declined\npromote_fp=%s\n' "$fp"; } > "$sf"
+       info "fallback 승격 보류 — 나중에 'sfs team refresh' 로 켤 수 있음." ;;
     *) SFS_TEAM_TARGET="$TARGET" \
        SFS_TEAM_TEMPLATE="$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml" \
        SFS_TEAM_RESOLVER="$SOURCE_DIR/templates/.sfs-local-template/scripts/sfs-team.sh" \

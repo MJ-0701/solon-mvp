@@ -39,10 +39,26 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.52" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.52" "version output"
-assert_contains_text "${output}" "latest 0.8.52" "latest output"
-assert_contains_text "${output}" "installed_release_headline Patch release: deprecated-fallback -> canonical auto-promotion (SFS level). A project whose trio researcher fell back to the deprecated \`gemini\` runtime (because \`antigravity\`/\`agy\` was absent at activation time) had no product-level path back to canonical after \`agy\` was later installed+authed: re-running \`sfs team use trio\` hit the 3-way bindings guard's \"custom bindings 보존\" skip, so the only way forward was a manual \`model-profiles.yaml\` edit — the \"must know the command/YAML\" anti-pattern 0.8.49/0.8.50 removed. 0.8.52 makes the guard 4-way. Fallback bindings are now MARKED at materialize time (\`# sfs-fallback: <canonical>\`), and when the canonical runtime becomes capable SFS detects -> offers (one consent) -> promotes only that one line and strips the marker. (R1) the provenance marker distinguishes a deprecated fallback from a user-chosen \`gemini\`; (R2) \`sfs team use <preset>\` re-run, the new \`sfs team refresh [--yes]\`, and \`sfs upgrade\` all re-evaluate capability and surface the promotion; (R3) unmarked user-custom bindings are never auto-changed (4-way = absent / \`{}\` / fallback(promote) / user-custom(preserve)); (R4) non-interactive / \`--yes\` without consent = byte-for-byte no change; (R5) the antigravity capability gate is now auth-aware (presence + Google-cred env / \`SFS_ANTIGRAVITY_AUTH_READY\`), so an installed-but-unauthed \`agy\` no longer promotes into a \"promoted but unauthed\" runtime error. solo/standalone behavior unchanged; the marker is comment-only so \`resolve-runtime\` is unaffected. Locked by \`tests/test-team-fallback-promotion.sh\`." "installed release headline"
+[[ "${plain_output}" == "sfs 0.8.53" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.53" "version output"
+assert_contains_text "${output}" "latest 0.8.53" "latest output"
+# Headline drift-lock: the printed headline must (a) reproduce, byte-for-byte, the
+# `> **...**` blockquote the awk extracts from CHANGELOG for the installed version
+# (so the machinery and the source file stay in sync), and (b) carry the version's
+# distinctive opening clause (so a stale CHANGELOG can't silently pass). Deriving
+# (a) from source avoids a brittle hand-escaped megastring while staying a real lock.
+expected_changelog_headline="$(
+  awk -v version="$(head -1 "${DIST_DIR}/VERSION")" '
+    $0 ~ "^## \\[" version "\\]" { in_entry=1; next }
+    in_entry && /^## / { exit }
+    in_entry && /^> / { line=$0; sub(/^> /,"",line); gsub(/\*\*/,"",line); h=h (h?" ":"") line; next }
+    in_entry && h != "" { exit }
+    END { if (h!=""){ gsub(/[[:space:]]+/," ",h); sub(/^[[:space:]]+/,"",h); sub(/[[:space:]]+$/,"",h); print h } }
+  ' "${DIST_DIR}/CHANGELOG.md"
+)"
+[[ -n "${expected_changelog_headline}" ]] || fail "no CHANGELOG headline for installed version"
+assert_contains_text "${output}" "installed_release_headline ${expected_changelog_headline}" "installed release headline"
+assert_contains_text "${output}" "legacy UNMARKED deprecated-fallback -> canonical promotion via provenance inference" "0.8.53 headline opening clause"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -60,6 +76,17 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline trio researcher 가 활성화 시점에 antigravity(\`agy\`) 부재로 deprecated \`gemini\` fallback 으로 굳은 프로젝트가, \`agy\` 설치·인증 후에도 제품 차원에서 canonical 로 돌아올 길이 없던 문제를 고친 패치 릴리스입니다. 이제 fallback binding 에 출처 표식(\`# sfs-fallback: <canonical>\`)을 남겨, canonical 런타임이 capable 해지면 SFS 가 스스로 감지 -> 제안(동의 1회) -> 그 한 줄만 승격하고 표식을 제거합니다. 사용자가 직접 고른 binding 은 건드리지 않고(R3), 비대화/\`--yes\` 미동의는 byte-for-byte 무변경(R4)이며, antigravity 게이트는 auth-aware(R5)라 설치만 되고 미인증인 \`agy\` 는 승격하지 않습니다. solo/standalone 동작은 불변입니다." "release notes fallback headline"
+# Fallback headline (no CHANGELOG): first non-empty line of the RELEASE-NOTES
+# `## <version>` section. Same derive-from-source drift-lock + a distinctive substring.
+expected_notes_headline="$(
+  awk -v version="$(head -1 "${fallback_dist}/VERSION")" '
+    $0 == "## " version { in_entry=1; next }
+    in_entry && /^## / { exit }
+    in_entry && $0 != "" { line=$0; gsub(/[[:space:]]+/," ",line); sub(/^[[:space:]]+/,"",line); sub(/[[:space:]]+$/,"",line); print line; exit }
+  ' "${fallback_dist}/RELEASE-NOTES.md"
+)"
+[[ -n "${expected_notes_headline}" ]] || fail "no RELEASE-NOTES headline for installed version"
+assert_contains_text "${fallback_output}" "installed_release_headline ${expected_notes_headline}" "release notes fallback headline"
+assert_contains_text "${fallback_output}" "표식이 없어도" "0.8.53 release-notes distinctive clause"
 
 echo "test-version-release-headline: OK"

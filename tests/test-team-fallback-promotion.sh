@@ -14,8 +14,11 @@
 #   T1 (R1+R2): fallback-marked researcher=gemini + agy now capable →
 #               `sfs team use trio` re-run promotes researcher→antigravity and
 #               strips the marker (one consent via SFS_TEAM_PROMOTE_YES).
-#   T2 (R3):    user-custom researcher=gemini (NO marker) → no offer, no change
-#               (preservation), even with agy capable + promote-yes.
+#   T2 (R3):    user override to a NON-deprecated runtime (researcher=claude, NO
+#               marker) → no offer, no change (preservation), even with everything
+#               capable + promote-yes. (An UNMARKED *deprecated* binding is a legacy
+#               fallback candidate as of 0.8.53 — that path is covered by
+#               tests/test-team-legacy-fallback-promotion.sh, not here.)
 #   T3:         agy absent → fallback kept, `sfs team refresh` = no change, no crash.
 #   T4 (R5):    agy installed but UNAUTHED → not promoted (auth-ready unmet);
 #               once authed (SFS_ANTIGRAVITY_AUTH_READY=1) → promoted.
@@ -85,13 +88,15 @@ grep -q '# sfs-fallback: antigravity' "${MP1}" || fail "T1 seed: fallback marker
 grep -q '# sfs-fallback:' "${MP1}" && fail "T1: marker not stripped after promotion"
 [[ "$(resolve "${MP1}" worker)" == "codex" ]] || fail "T1: worker binding disturbed by promotion"
 
-# ── T2 (R3): user-custom gemini (NO marker) → never touched ──────────────────
+# ── T2 (R3): user override to a NON-deprecated runtime → never touched ───────
+# (As of 0.8.53 an unmarked *deprecated* binding is a legacy candidate, so the
+# durable "user intent preserved" invariant uses a non-deprecated override.)
 T2="${TMP_ROOT}/t2"; mkdir -p "${T2}"; init_project "${T2}"; seed_fallback "${T2}"
 MP2="$(mp_of "${T2}")"
-# Strip the marker to simulate a deliberate user choice of gemini.
-if [ "$(uname)" = "Darwin" ]; then sed -i '' 's/[[:space:]]*# sfs-fallback:.*$//' "${MP2}"; else sed -i 's/[[:space:]]*# sfs-fallback:.*$//' "${MP2}"; fi
+# Replace the fallback line with a deliberate user choice of a NON-deprecated runtime.
+if [ "$(uname)" = "Darwin" ]; then sed -i '' 's/^\([[:space:]]*\)researcher:.*$/\1researcher: claude/' "${MP2}"; else sed -i 's/^\([[:space:]]*\)researcher:.*$/\1researcher: claude/' "${MP2}"; fi
 grep -q '# sfs-fallback:' "${MP2}" && fail "T2 setup: marker not stripped"
-[[ "$(resolve "${MP2}" researcher)" == "gemini" ]] || fail "T2 setup: researcher not gemini"
+[[ "$(resolve "${MP2}" researcher)" == "claude" ]] || fail "T2 setup: researcher not claude"
 before2="$(sha "${MP2}")"
 ( cd "${T2}" \
   && SFS_DIST_DIR="${DIST_DIR}" SFS_SKIP_SELF_UPGRADE=1 SFS_SKIP_CLI_DISCOVERY=1 \
@@ -100,7 +105,7 @@ before2="$(sha "${MP2}")"
      SFS_TEAM_PROMOTE_YES=1 \
      bash "${SFS_BIN}" team use trio ) >"${T2}/use.log" 2>&1 </dev/null \
   || fail "T2: team use trio failed (see ${T2}/use.log)"
-[[ "$(resolve "${MP2}" researcher)" == "gemini" ]] || fail "T2: user-custom gemini was clobbered (preservation broken)"
+[[ "$(resolve "${MP2}" researcher)" == "claude" ]] || fail "T2: non-deprecated override was clobbered (preservation broken)"
 [[ "$(sha "${MP2}")" == "${before2}" ]] || fail "T2: user-custom bindings mutated"
 grep -q '보존' "${T2}/use.log" || fail "T2: no preservation notice emitted"
 

@@ -141,11 +141,15 @@ fi
 
 # ── T3 (F3): 3-way bindings guard + corrected warning strings ───────────────
 # (a) custom bindings preserved + "사용자 커스텀 ... 보존" warning.
+# Use a NON-deprecated deliberate choice (lead: codex). As of 0.8.53 an unmarked
+# binding to a *deprecated* runtime is inferred to be a legacy fallback (offered,
+# not silently preserved — see test-team-legacy-fallback-promotion.sh), so the
+# durable "user-custom preserved" invariant rides on a non-deprecated override.
 T3C="${TMP_ROOT}/t3-custom"; mkdir -p "${T3C}"; init_project "${T3C}"
 MP3C="$(mp_of "${T3C}")"
 # Hand-customize bindings (team_preset present so scaffold skips, 3-way runs).
 awk '
-  /^agent_runtime_bindings:/ { print "agent_runtime_bindings:"; print "  lead: gemini"; skip=1; next }
+  /^agent_runtime_bindings:/ { print "agent_runtime_bindings:"; print "  lead: codex"; skip=1; next }
   skip && /^[[:space:]]+[A-Za-z_]+:[[:space:]]/ { next }
   skip && /^[[:space:]]*$/ { next }
   skip { skip=0 }
@@ -154,7 +158,7 @@ awk '
 sed_i() { if sed --version >/dev/null 2>&1; then sed -i "$@"; else sed -i '' "$@"; fi; }
 sed_i 's|^team_preset:.*|team_preset: solo|' "${MP3C}"   # leave preset solo; ask trio at upgrade
 run_upgrade "${T3C}" --team trio || fail "T3-custom: upgrade failed (see ${T3C}/upgrade.log)"
-grep -q '^  lead: gemini' "${MP3C}" || fail "T3-custom: custom binding 'lead: gemini' was clobbered"
+grep -q '^  lead: codex' "${MP3C}" || fail "T3-custom: custom binding 'lead: codex' was clobbered"
 grep -q '사용자 커스텀' "${T3C}/upgrade.log" || fail "T3-custom: missing '사용자 커스텀' warning"
 grep -q '보존' "${T3C}/upgrade.log"       || fail "T3-custom: missing '보존' (preserve) warning"
 

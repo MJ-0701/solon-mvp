@@ -34,9 +34,12 @@ For any activatable state, SFS owns all four steps:
 
 The reference implementation is the R5 auto-offer
 (`upgrade_team_offer_surface` in `upgrade.sh`, locked by
-`tests/test-team-auto-offer.sh`) and the R2 fallback promotion
-(`team_promote_fallbacks` in `sfs-team-apply.sh`, locked by
-`tests/test-team-fallback-promotion.sh`).
+`tests/test-team-auto-offer.sh`) and the fallback promotion
+(`team_promote_fallbacks` in `sfs-team-apply.sh`), which detects a fallback by
+two signals — a `# sfs-fallback:` provenance marker (locked by
+`tests/test-team-fallback-promotion.sh`) and, for pre-marker bindings,
+deprecation-inference (locked by
+`tests/test-team-legacy-fallback-promotion.sh`).
 
 ## Invariants (never traded for convenience)
 
@@ -44,10 +47,15 @@ The reference implementation is the R5 auto-offer
   or untouched project behaves exactly as if the feature did not exist.
 - **No apply without consent.** Non-interactive / no-`--yes` / undecided =
   byte-for-byte no change. Forcing an apply because it "would help" is a bug.
-- **User intent is never clobbered.** A value the user chose deliberately is
-  distinguished from a value SFS picked as a fallback (provenance marker), and
-  only the latter is auto-promoted. See
-  [user-override-precedence](user-override-precedence.md).
+- **User intent is never clobbered.** A value SFS picked as a fallback is
+  distinguished from one the user chose deliberately, and only a fallback is
+  auto-promoted. The fallback is identified by **either** a provenance marker
+  (`# sfs-fallback:`, written at materialize time) **or** deprecation-inference
+  (an unmarked binding to a `deprecated` runtime whose preset canonical differs
+  and is capable — for bindings that hardened before markers existed). Intent is
+  the inverse signal: a non-deprecated choice, or an explicit `# sfs-pinned:`
+  recorded when the user declines a promotion offer (asked once, then preserved).
+  See [user-override-precedence](user-override-precedence.md).
 - **standalone lock.** Removing the feature's config degrades cleanly back to
   the default; the standalone path keeps working with zero feature knowledge.
 - **manual-knowledge requirement = FAIL.** If a reviewer can only reach the
