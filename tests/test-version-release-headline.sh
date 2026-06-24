@@ -39,10 +39,10 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.48" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.48" "version output"
-assert_contains_text "${output}" "latest 0.8.48" "latest output"
-assert_contains_text "${output}" "installed_release_headline Patch release: repairs the multi-agent team-topology upgrade path for legacy (pre-0.8.42) consumers — three bugs and one discoverability gap left by the 0.8.42..0.8.47 cut. (B1) \`sfs upgrade --team <preset>\` was swallowed by bin/sfs's front-door arg parser as an \"unknown arg\" even though \`upgrade.sh\` parsed it, so only the \`SFS_AGENT_TEAM\` env var worked; the front door now validates \`solo|pair|trio\` and forwards the flag, matching install's contract. (B2) \`upgrade\` assumed the team schema already existed, so a legacy profile with zero team keys was skipped forever — the adapter got \`team_dispatch\` injected while \`agent_runtime_bindings\` stayed empty, a half-applied routing no-op (real consumer breakage); upgrade now scaffolds the packaged team block (default \`team_preset: solo\` = zero behavior change) into the profile right after the \`configuration:\` block, then materializes the requested preset. (B3) the skip warning misdiagnosed an absent key as a user customization; the bindings-fill guard is now 3-way (absent vs literal \`{}\` vs custom) with corrected messages. (UX) the team preset had no interactive surface — install and upgrade now offer it (default solo). Solo/standalone invariants are locked: a no-flag \`--yes\` upgrade is byte-for-byte on \`model-profiles.yaml\` and never injects \`team_dispatch\`." "installed release headline"
+[[ "${plain_output}" == "sfs 0.8.49" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.49" "version output"
+assert_contains_text "${output}" "latest 0.8.49" "latest output"
+assert_contains_text "${output}" "installed_release_headline Minor release: completes hands-off multi-agent team activation on top of 0.8.48's upgrade-path repair. (R1) activation is now its own write command — \`sfs team use <solo|pair|trio>\` materializes a preset any time, independent of \`sfs upgrade\`, and both paths share one extracted core (\`sfs-team-apply.sh\`: scaffold → \`team_preset\` → bindings → adapter dispatch), so the upgrade and use paths can't drift. (R3) a capability preflight probes each binding's runtime (CLI present + authenticated) before applying — only runnable bindings are written, the rest are held with \`install/auth X then sfs team use <preset>\` guidance, and an absent \`agy\` researcher falls back to deprecated \`gemini\` or is held rather than left guessing; the gate never crashes. (R5) the user no longer needs to know any command — a solo \`sfs upgrade\` in a team-capable environment surfaces a one-line \`[Y/n]\` offer, applies only the capable bindings on consent, and records the decision so it never nags again, re-offering once only if the environment goes incapable→capable. Non-interactive, declined, and incapable paths stay solo: byte-for-byte on \`model-profiles.yaml\`, no \`team_dispatch\`, standalone lock intact." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -60,6 +60,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline team topology 출하본(0.8.42..0.8.47)의 업그레이드 경로 버그 3개 + 발견가능성 결함 1개를 고친 패치 릴리스입니다. 기존(pre-0.8.42) 프로젝트도 이제 \`sfs upgrade --team trio\` 로 멀티에이전트를 켤 수 있습니다. solo 기본 무변경·standalone 불변식은 그대로입니다." "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline 0.8.48 의 업그레이드 경로 수리 위에, 사용자가 명령어를 몰라도 멀티에이전트 팀을 켤 수 있게 자동화를 완성한 마이너 릴리스입니다. 이제 \`sfs team use trio\` 로 업그레이드와 무관하게 언제든 팀을 활성화할 수 있고, 켤 수 있는 환경이면 \`sfs upgrade\` 가 한 줄로 적용 여부를 물어봅니다. 거절·비대화·미충족 환경은 solo 무변경입니다." "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

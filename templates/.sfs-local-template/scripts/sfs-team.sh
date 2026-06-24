@@ -43,6 +43,10 @@ Usage:
   sfs team preset-bindings <preset>  preset → agent_runtime_bindings lines (empty for solo)
   sfs team resolve-transport <rt>    runtime → transport_kind (argv|stdin|file; argv default)
   sfs team show                      summarize team_preset / bindings / registry
+  sfs team use <solo|pair|trio>      ACTIVATE a preset now (write): scaffold +
+                                     team_preset + capability-gated bindings +
+                                     adapter dispatch. Idempotent; works any time,
+                                     independent of `sfs upgrade`.
 
 Resolution is pure data lookup over .sfs-local/model-profiles.yaml. Default solo
 (team_preset: solo, empty bindings) → every token falls back to selected_runtime,
@@ -203,6 +207,25 @@ case "${cmd}" in
       ' "${MP}"
     fi
     printf '\n'
+    ;;
+  use)
+    # R1: independent ACTIVATION write command. Delegates to the shared
+    # materialize core (sfs-team-apply.sh) — same core `sfs upgrade --team`
+    # uses — so activation no longer needs an upgrade. Capability-gated (R3).
+    preset="${2:-}"
+    [[ -n "${preset}" ]] || { echo "team use: missing <solo|pair|trio>" >&2; usage >&2; exit "${SFS_EXIT_USAGE}"; }
+    case "${preset}" in
+      solo|pair|trio) ;;
+      *) echo "team use: unknown preset '${preset}' (expected solo|pair|trio)" >&2; exit "${SFS_EXIT_USAGE}" ;;
+    esac
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    apply="${SCRIPT_DIR}/sfs-team-apply.sh"
+    [[ -f "${apply}" ]] || { echo "team use: apply core missing (${apply})" >&2; exit 4; }
+    SFS_TEAM_TARGET="${SFS_TEAM_USE_TARGET:-$PWD}" \
+    SFS_TEAM_TEMPLATE="${SFS_TEAM_TEMPLATE:-${SCRIPT_DIR}/../model-profiles.yaml}" \
+    SFS_TEAM_RESOLVER="${SCRIPT_DIR}/sfs-team.sh" \
+    SFS_TEAM_CAPABILITY_GATE="${SFS_TEAM_CAPABILITY_GATE:-1}" \
+      exec bash "${apply}" "${preset}"
     ;;
   ""|-h|--help|help)
     usage

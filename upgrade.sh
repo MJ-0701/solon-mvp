@@ -1852,32 +1852,93 @@ fi
 # 블록을 configuration 블록 직후에 idempotent 하게 주입한다. 기존 키/tier 커스텀은
 # 보존하고, team_preset 은 solo 로 들어가 무변경(behavior)을 보장한다. 현행 스키마
 # (team_preset 키 존재)면 no-op → 현행 solo 는 byte-for-byte 불변.
-upgrade_scaffold_team_schema() {
+# 0.8.49 R1: scaffold→materialize→adapter-injection 로직은 공유 코어
+# (templates/.sfs-local-template/scripts/sfs-team-apply.sh) 로 추출됐다. upgrade 와
+# `sfs team use` 가 같은 코어를 부른다. 여기서는 그 코어를 호출하는 thin wrapper +
+# upgrade-시점 전용 F4/R5 발견가능성 offer 만 유지한다.
+TEAM_APPLY_CORE="$SOURCE_DIR/templates/.sfs-local-template/scripts/sfs-team-apply.sh"
+
+# 공유 코어 호출. $1 = solo|pair|trio|--scaffold-only. capability gate 는 env
+# SFS_TEAM_CAPABILITY_GATE 로 전달(기본 0 = 명시 --team 경로는 0.8.48 동작 보존).
+team_apply_core() {
+  local arg="$1" gate="${2:-0}"
+  SFS_TEAM_TARGET="$TARGET" \
+  SFS_TEAM_TEMPLATE="$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml" \
+  SFS_TEAM_RESOLVER="$SOURCE_DIR/templates/.sfs-local-template/scripts/sfs-team.sh" \
+  SFS_TEAM_CAPABILITY_GATE="$gate" \
+    bash "$TEAM_APPLY_CORE" "$arg"
+}
+
+# R5 capability fingerprint via shared core (single SSoT). stdout = capable set,
+# return 0 = offer-worthy (lead+worker capable). rc!=0 = 환경 미충족.
+team_capability_fp() {
+  local preset="$1" out rc=0
+  out="$(SFS_TEAM_TARGET="$TARGET" \
+    SFS_TEAM_TEMPLATE="$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml" \
+    SFS_TEAM_RESOLVER="$SOURCE_DIR/templates/.sfs-local-template/scripts/sfs-team.sh" \
+    bash "$TEAM_APPLY_CORE" --capability-fp "$preset" 2>/dev/null)" || rc=$?
+  printf '%s' "${out#fp=}"
+  return "$rc"
+}
+
+# R5c: persist the offer decision + capability fingerprint at decision time.
+team_offer_record() {
+  local decision="$1" fp="$2" sf="$TARGET/.sfs-local/team_offer_state"
+  mkdir -p "$TARGET/.sfs-local"
+  { printf 'decision=%s\n' "$decision"; printf 'capability_fp=%s\n' "$fp"; } > "$sf"
+}
+
+# cur 집합이 prev 집합을 진부분집합으로 포함(incapable→capable 전이)하면 0.
+team_fp_strictly_exceeds() {
+  local cur="$1" prev="$2" p c found_extra=0 IFS=,
+  for p in $prev; do
+    [ -n "$p" ] || continue
+    case ",$cur," in *",$p,"*) ;; *) return 1 ;; esac
+  done
+  for c in $cur; do
+    [ -n "$c" ] || continue
+    case ",$prev," in *",$c,"*) ;; *) found_extra=1 ;; esac
+  done
+  [ "$found_extra" = 1 ]
+}
+
+# F4/R5 발견가능성 auto-offer. 사용자가 명령어를 몰라도 알아서 노출(R5 1순위 요구).
+# R5a capability 게이트: 현행 solo + 환경이 켤 수 있을 때만 제안. R5b 1줄 제안 Y/n.
+# R5c 동의/거절 1회 기억(team_offer_state) → 매 upgrade 보챔 방지, incapable→capable
+# 전이 시 1회 재제안. R5d 비대화(--yes)·미동의·capability 불충족 = solo 무변경.
+upgrade_team_offer_surface() {
   local mp="$1"
-  grep -q '^team_preset:' "$mp" && return 0   # sentinel: 이미 현행 스키마 → no-op
-  local template="$SOURCE_DIR/templates/.sfs-local-template/model-profiles.yaml"
-  [ -f "$template" ] || { warn "team 스키마 스캐폴딩 불가: packaged template 없음"; return 0; }
-  local block_file="$mp.teamblock.tmp"
-  # template 의 team 섹션(주석 헤더 ~ unassigned_role_policy)만 추출(데이터, 코드 아님).
-  awk '
-    /^# ── Multi-agent team topology/ { p=1 }
-    p { print }
-    /^unassigned_role_policy:/ { if (p) exit }
-  ' "$template" > "$block_file"
-  [ -s "$block_file" ] || { rm -f "$block_file"; warn "team 스키마 스캐폴딩 불가: template team 블록 추출 실패"; return 0; }
-  # configuration 블록(들여쓰기/빈줄 포함) 직후, 다음 top-level 키 앞에 삽입.
-  awk -v bf="$block_file" '
-    ins==0 && /^configuration:/ { print; inconf=1; next }
-    inconf==1 {
-      if ($0 ~ /^[[:space:]]/ || $0 ~ /^[[:space:]]*$/) { print; next }
-      print ""; while ((getline l < bf) > 0) print l; close(bf); print ""
-      ins=1; inconf=0; print; next
-    }
-    { print }
-    END { if (inconf==1 && ins==0) { print ""; while ((getline l < bf) > 0) print l; close(bf) } }
-  ' "$mp" > "$mp.tmp" && mv "$mp.tmp" "$mp"
-  rm -f "$block_file"
-  ok "team 스키마 스캐폴딩: legacy profile 에 team 블록 주입(기본 solo = 무변경)"
+  grep -q '^team_preset:[[:space:]]*solo' "$mp" || return 0   # 이미 활성 → 제안 안 함
+  local fp rc=0
+  fp="$(team_capability_fp trio)" || rc=$?
+  if [ "$rc" -ne 0 ]; then
+    # R5a/R5d: 환경 미충족 → 제안/적용 없음(파일·상태 무변경). 발견용 hint 만.
+    info "멀티에이전트 team topology: 현재 solo(단독 실행). 런타임(claude/codex) 설치·인증 후 'sfs team use trio' 로 켤 수 있음."
+    return 0
+  fi
+  # R5c: 1회-기억 조회.
+  local sf="$TARGET/.sfs-local/team_offer_state"
+  if [ -f "$sf" ]; then
+    local dec prev
+    dec="$(sed -n 's/^decision=//p' "$sf" | head -1)"
+    prev="$(sed -n 's/^capability_fp=//p' "$sf" | head -1)"
+    [ "$dec" = "applied" ] && return 0                      # 이미 적용 → 제안 멈춤
+    if [ "$dec" = "declined" ]; then
+      team_fp_strictly_exceeds "$fp" "$prev" || return 0    # 환경 변화 없으면 재제안 안 함
+    fi
+  fi
+  # R5d: 비대화는 자동 적용 금지(동의 없는 적용 아님). 제안만 hint 로.
+  if [ "$ASSUME_YES" -eq 1 ]; then
+    info "이 환경은 멀티에이전트(trio) 가능. 켜려면 'sfs team use trio' (또는 'sfs upgrade --team trio'). 자동 적용은 대화형 동의에서만."
+    return 0
+  fi
+  # R5b: 1줄 제안. 사용자는 Y/n 만.
+  local ans
+  ans="$(prompt_always "이 환경은 멀티에이전트(trio) 가능. 적용? [Y/n]" "Y")"
+  case "$ans" in
+    n|N|no|NO|No) team_offer_record declined "$fp"; info "team 적용 보류 — 나중에 'sfs team use trio' 로 켤 수 있음." ;;
+    *) team_apply_core trio 1 && team_offer_record applied "$fp" ;;   # Y/엔터 → R1 코어(R3 게이트)
+  esac
 }
 
 upgrade_apply_team_preset() {
@@ -1887,75 +1948,15 @@ upgrade_apply_team_preset() {
     return 0
   fi
   # F2: legacy(team 키 부재) profile 은 명시 호출 없이도 스키마 스캐폴딩(solo 기본).
-  upgrade_scaffold_team_schema "$mp"
-  # F4: 미지정 + 현행 solo → 발견가능성 surface(파일 무변경). 비대화(--yes)=hint 1줄,
-  # TTY=preset 선택 prompt. 옵션 발견 경로가 0 이던 결함을 해소하되 기본은 solo 유지.
+  team_apply_core --scaffold-only
+  # F4/R5: 미지정 + 현행 solo → 발견가능성 surface. 0.8.49 R5 에서 capability 게이트 +
+  # 1회-기억 offer 로 확장. 비대화(--yes)=hint 1줄(파일 무변경, standalone 락 유지).
   if [ -z "$team" ]; then
-    if grep -q '^team_preset:[[:space:]]*solo' "$mp"; then
-      if [ "$ASSUME_YES" -eq 1 ]; then
-        info "멀티에이전트 team topology: 현재 solo(단독 실행). 켜려면 'sfs upgrade --team trio' (또는 pair)."
-      else
-        local sel
-        sel="$(prompt_always "멀티에이전트 team preset (solo/pair/trio)" "solo")"
-        case "$sel" in
-          pair|trio) upgrade_apply_team_preset "$sel"; return 0 ;;
-          solo|"") : ;;
-          *) warn "알 수 없는 team preset '$sel' — solo 유지" ;;
-        esac
-      fi
-    fi
+    upgrade_team_offer_surface "$mp"
     return 0
   fi
-  sed_inplace -e "s|^team_preset:.*|team_preset: $team|" "$mp" 2>/dev/null || true
-  if [ "$team" = "solo" ]; then
-    ok "team preset solo 재적용 (bindings/dispatch 비활성 — 기존 동작)"
-    return 0
-  fi
-  local resolver="$SOURCE_DIR/templates/.sfs-local-template/scripts/sfs-team.sh"
-  # F3: bindings-fill 가드 3-way 분기 (부재 vs 리터럴 {} vs 사용자 커스텀). 경고문 정정 —
-  # 키 부재를 "기본 {} 가 아님"으로 오진하던 B3 픽스.
-  if ! grep -q '^agent_runtime_bindings:' "$mp"; then
-    warn "agent_runtime_bindings 키 부재 — team 스키마 스캐폴딩 후 재적용 필요 (preset 적용 skip)"
-  elif grep -Eq '^agent_runtime_bindings:[[:space:]]*\{\}[[:space:]]*$' "$mp"; then
-    if [ -f "$resolver" ]; then
-      local binds_file="$mp.binds.tmp"
-      SFS_MODEL_PROFILES="$mp" bash "$resolver" preset-bindings "$team" 2>/dev/null | sed 's/^/  /' > "$binds_file" || true
-      if [ -s "$binds_file" ]; then
-        awk -v bf="$binds_file" '
-          $1 == "agent_runtime_bindings:" && index($0, "{}") {
-            print "agent_runtime_bindings:"
-            while ((getline l < bf) > 0) print l
-            close(bf); next
-          }
-          { print }
-        ' "$mp" > "$mp.tmp" && mv "$mp.tmp" "$mp"
-        ok "team preset '$team' → agent_runtime_bindings 채움"
-      fi
-      rm -f "$binds_file"
-    else
-      warn "team preset 적용 불가: resolver(sfs-team.sh) 없음 — agent_runtime_bindings 미충전"
-    fi
-  else
-    warn "agent_runtime_bindings 사용자 커스텀 값 감지 — team preset 자동 적용 skip (보존). 직접 편집하세요."
-  fi
-  local adapter
-  for adapter in "$TARGET/CLAUDE.md" "$TARGET/AGENTS.md" "$TARGET/GEMINI.md"; do
-    [ -f "$adapter" ] || continue
-    grep -q '^team_dispatch:' "$adapter" && continue
-    awk -v preset="$team" '
-      BEGIN { fm=0; done=0 }
-      NR==1 && $0=="---" { fm=1; print; next }
-      fm==1 && done==0 && $0=="---" {
-        print "team_dispatch:                          # injected by --team " preset " (P2); solo 면 부재"
-        print "  preset: " preset
-        print "  rule: \"task role 분류(plan/review/docs=lead, 구현=worker, 조사=researcher) → `sfs team resolve-runtime <role>` 로 runtime 해석 → 내 runtime 과 다르면 typed capsule 발행 후 `sfs route <role> <capsule>` 로 위임 → 회수·통합. solo/standalone 은 항상 직접 수행.\""
-        print "  ssot: \"docs/maintenance/2026-06-23-multi-agent-team-topology.design.md §4.4\""
-        done=1; print; next
-      }
-      { print }
-    ' "$adapter" > "$adapter.tmp" && mv "$adapter.tmp" "$adapter"
-  done
-  ok "team dispatch rule 주입(idempotent): CLAUDE.md / AGENTS.md / GEMINI.md (preset=$team)"
+  # 명시 --team <preset>: 0.8.48 B-path. capability 게이트 off (intent 그대로 materialize).
+  team_apply_core "$team" 0
 }
 
 if [ "$CUR_VER" = "$NEW_VER" ]; then

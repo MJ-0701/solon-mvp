@@ -1,5 +1,68 @@
 ## [Unreleased]
 
+## [0.8.49] - 2026-06-24
+
+> **Minor release: completes hands-off multi-agent team activation on top of 0.8.48's upgrade-path repair. (R1) activation is now its own write command — `sfs team use <solo|pair|trio>` materializes a preset any time, independent of `sfs upgrade`, and both paths share one extracted core (`sfs-team-apply.sh`: scaffold → `team_preset` → bindings → adapter dispatch), so the upgrade and use paths can't drift. (R3) a capability preflight probes each binding's runtime (CLI present + authenticated) before applying — only runnable bindings are written, the rest are held with `install/auth X then sfs team use <preset>` guidance, and an absent `agy` researcher falls back to deprecated `gemini` or is held rather than left guessing; the gate never crashes. (R5) the user no longer needs to know any command — a solo `sfs upgrade` in a team-capable environment surfaces a one-line `[Y/n]` offer, applies only the capable bindings on consent, and records the decision so it never nags again, re-offering once only if the environment goes incapable→capable. Non-interactive, declined, and incapable paths stay solo: byte-for-byte on `model-profiles.yaml`, no `team_dispatch`, standalone lock intact.**
+
+### Added
+
+- **independent activation command `sfs team use <solo|pair|trio>` (R1)
+  (`templates/.sfs-local-template/scripts/sfs-team.sh` `use` subcommand).** A
+  write verb that activates a preset on demand, decoupled from `sfs upgrade`.
+  Idempotent; handles preset transitions (e.g. `trio→pair`). It and `sfs upgrade
+  --team` now call the same materialize core, so activation no longer waits for
+  an upgrade and the two entry points cannot diverge.
+- **shared materialize core `sfs-team-apply.sh` (R1)
+  (`templates/.sfs-local-template/scripts/`).** The 0.8.48 scaffold→`team_preset`
+  write→3-way bindings fill→idempotent adapter dispatch injection logic — which
+  had been duplicated across `upgrade.sh` and `install.sh` — is extracted into
+  one script. `upgrade.sh` and `sfs team use` both delegate to it; warning/ok
+  strings and the standalone invariants are preserved verbatim. Auto-deployed by
+  the dynamic runtime-script enumerator (no hard-coded list).
+- **capability preflight gate (R3) (`sfs-team-apply.sh` `team_runtime_capable`
+  / `team_gate_binding_line`).** Before applying a preset via `team use` / the
+  auto-offer, each binding's runtime is probed for CLI presence + auth (reusing
+  `executor_auth_ready`; `antigravity`=`agy` presence probe). Only capable
+  bindings are written; incapable ones are held with explicit `설치/인증 후 'sfs
+  team use <preset>' 재실행` guidance. An absent `agy` researcher falls back to
+  the deprecated `gemini` runtime (with a notice) or, if that too is absent, is
+  held — degrading to `selected_runtime` rather than leaving the user to guess.
+  The gate never crashes and exits 0. Deterministic test injection via
+  `SFS_TEAM_FORCE_CAPABLE_<RT>=0|1`. The explicit `sfs upgrade --team <preset>`
+  flag path keeps 0.8.48 behavior (gate off = full intent materialize) so its
+  headline lock stays green.
+- **zero-knowledge auto-offer on upgrade (R5) (`upgrade.sh`
+  `upgrade_team_offer_surface`).** When a solo project runs `sfs upgrade` in a
+  team-capable environment, a one-line `이 환경은 멀티에이전트(trio) 가능. 적용?
+  [Y/n]` offer appears; consent applies only the capability-gated bindings. The
+  decision plus a capability fingerprint is recorded in
+  `.sfs-local/team_offer_state` (gitignored) so the offer never nags on later
+  upgrades — re-offering exactly once if capability strictly expands
+  (incapable→capable). Non-interactive (`--yes`), declined, and incapable paths
+  apply nothing.
+
+### Changed
+
+- **`upgrade.sh` team functions are now thin wrappers.**
+  `upgrade_scaffold_team_schema` / `upgrade_apply_team_preset` delegate to
+  `sfs-team-apply.sh` via `team_apply_core`; the upgrade file no longer carries a
+  second copy of the materialize logic.
+
+### Tests
+
+- **`tests/test-team-use-activation.sh` (headline, R1/R3).** T1 legacy schema +
+  `sfs team use trio` materializes with zero manual edits
+  (`worker=codex`/`lead=claude`/`researcher=antigravity`); T2 `team use` and
+  `upgrade --team` produce identical bindings and `trio→pair` toggles; T3 the
+  capability gate — `agy` absent → `gemini` fallback, `agy`+`gemini` absent →
+  researcher held (degrades to `selected_runtime`), never crashing.
+- **`tests/test-team-auto-offer.sh` (headline, R5).** T4 capable+solo+undecided
+  surfaces the `[Y/n]` offer; decline is recorded; a same-capability re-upgrade
+  does not re-offer; an incapable→capable transition re-offers once. T5 a `--yes`
+  capable upgrade is byte-for-byte on `model-profiles.yaml`, writes no state,
+  prompts nothing, and injects no `team_dispatch`; an incapable interactive
+  upgrade stays silent (standalone lock).
+
 ## [0.8.48] - 2026-06-24
 
 > **Patch release: repairs the multi-agent team-topology upgrade path for legacy (pre-0.8.42) consumers — three bugs and one discoverability gap left by the 0.8.42..0.8.47 cut. (B1) `sfs upgrade --team <preset>` was swallowed by bin/sfs's front-door arg parser as an "unknown arg" even though `upgrade.sh` parsed it, so only the `SFS_AGENT_TEAM` env var worked; the front door now validates `solo|pair|trio` and forwards the flag, matching install's contract. (B2) `upgrade` assumed the team schema already existed, so a legacy profile with zero team keys was skipped forever — the adapter got `team_dispatch` injected while `agent_runtime_bindings` stayed empty, a half-applied routing no-op (real consumer breakage); upgrade now scaffolds the packaged team block (default `team_preset: solo` = zero behavior change) into the profile right after the `configuration:` block, then materializes the requested preset. (B3) the skip warning misdiagnosed an absent key as a user customization; the bindings-fill guard is now 3-way (absent vs literal `{}` vs custom) with corrected messages. (UX) the team preset had no interactive surface — install and upgrade now offer it (default solo). Solo/standalone invariants are locked: a no-flag `--yes` upgrade is byte-for-byte on `model-profiles.yaml` and never injects `team_dispatch`.**
