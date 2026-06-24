@@ -39,10 +39,10 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.50" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.50" "version output"
-assert_contains_text "${output}" "latest 0.8.50" "latest output"
-assert_contains_text "${output}" "installed_release_headline Patch release: Windows (PowerShell/Scoop) reaches multi-agent team-activation parity with bash 0.8.49 by thin delegation — zero native port, single SSoT. \`install.ps1\` and \`upgrade.ps1\` now accept and forward \`-Team <solo|pair|trio>\` to the bash core (\`install.sh\` / \`upgrade.sh\`), so Windows users get the same \`--team\` materialize, capability preflight (R3), and zero-knowledge \`[Y/n]\` auto-offer (R5) that bash shipped — the offer and gate run in Git Bash and are byte-for-byte the bash behavior. \`sfs.cmd team use <preset>\` and \`sfs.cmd upgrade --team\` already reached the bash core (mutating commands delegate via \`bin/sfs.ps1\`); that delegation is now locked against a future native-handler regression. Omitting \`-Team\` forwards zero \`--team\` flags, preserving the solo no-op and keeping the R5 auto-offer reachable. The Git-Bash-required fallback in all three wrappers now points at \`sfs team use\`. No bash behavior changed; bash 0.8.49 remains the spec." "installed release headline"
+[[ "${plain_output}" == "sfs 0.8.51" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.51" "version output"
+assert_contains_text "${output}" "latest 0.8.51" "latest output"
+assert_contains_text "${output}" "installed_release_headline Patch release: Windows (PowerShell/Scoop) typed-command argv fix — after an in-session \`sfs upgrade\`, a later \`sfs init\` (or any typed command) was silently rewritten to a stale \`update\`. Root cause: the Scoop self-upgrade reload set \`\$env:SFS_NATIVE_*\` on the in-process PowerShell session and never cleared it, and \`bin/sfs.ps1\` selected that env channel before the typed args, so the stale \`update\` shadowed every later command in the same window (the 0.6.45-0.6.56 / 0.8.50 regression class). Belt-and-suspenders fix: (F1) current typed/automatic args are now authoritative and beat the inherited env channel, which is consulted only when no typed args are present — the cmd-shim path forwards zero positional args, so that bridge stays byte-for-byte; (F2) the self-upgrade reload snapshots and restores \`\$env:SFS_NATIVE_*\` and \`SFS_SKIP_SELF_UPGRADE\`, so the interactive session is never polluted. Also: the not-initialized onboarding hint now branches by OS (Windows -> Scoop/PC, not brew/Mac) and reflects the real typed command, and Windows JSON writes use BOM-less UTF-8 to stop \`Unrecognized token\` failures. No bash behavior changed; bash 0.8.50 stays green (207/207). Locked by \`tests/test-windows-argv-stale-env.sh\`." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -60,6 +60,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline Windows(PowerShell/Scoop) 사용자도 bash 0.8.49 와 동일하게 멀티에이전트 팀을 켤 수 있게 한 패치 릴리스입니다. \`install.ps1\`·\`upgrade.ps1\` 이 \`-Team <solo|pair|trio>\` 를 받아 bash 코어로 그대로 넘기므로, capability 게이트(R3)와 \`[Y/n]\` 자동 제안(R5)이 Windows 에서도 동일하게 동작합니다. \`-Team\` 을 생략하면 아무 플래그도 넘기지 않아 solo 무변경입니다." "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline 같은 PowerShell 창에서 \`sfs upgrade\` 를 한 번 실행한 뒤 \`sfs init\` 등 친 명령이 stale \`update\` 로 둔갑하던 Windows 인자전달 버그를 고친 패치 릴리스입니다. Scoop self-upgrade reload 가 \`\$env:SFS_NATIVE_*\` 를 세션에 남기고 \`bin/sfs.ps1\` 이 그 env 를 친 인자보다 먼저 골라, 이후 모든 명령이 stale \`update\` 로 바뀌었습니다 (0.6.45-0.6.56 / 0.8.50 회귀 계열). 이제 친 인자가 항상 inherited env 를 이기고(F1), self-upgrade reload 가 끝나면 세션 env 를 복원합니다(F2). bash 동작은 불변, 207/207 green." "release notes fallback headline"
 
 echo "test-version-release-headline: OK"

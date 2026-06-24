@@ -233,15 +233,29 @@ Write-SfsArgTrace "PS_ENV_SAVED_CMDLINE" ([Environment]::GetEnvironmentVariable(
 Write-SfsArgTrace "PS_ENV_CMDCMDLINE" ([Environment]::GetEnvironmentVariable("CMDCMDLINE"))
 Write-SfsArgTrace "PS_ENV_ARGS" $SfsEnvArgs
 $SfsSelectedArgSource = "empty"
-$SfsArgs = Resolve-SfsArgs -ParamArgs $SfsEnvArgs -AutomaticArgs $SfsParamArgs -UnboundArgs $args
-if (Test-SfsUsableArgs $SfsArgs) {
-  if (Test-SfsUsableArgs $SfsEnvArgs) {
-    $SfsSelectedArgSource = "env"
-  } elseif (Test-SfsUsableArgs $SfsParamArgs) {
+# F1 (0.8.51): current typed/automatic args ($args / UnboundArguments) are
+# AUTHORITATIVE and beat the inherited SFS_NATIVE_* env channel. A prior
+# `sfs upgrade` reload sets $env:SFS_NATIVE_* on the in-process PowerShell
+# session (ps1-shim runs sfs.ps1 in-process) and never clears it, so checking
+# env first let a stale "update" shadow every later typed command (the
+# 0.6.45-0.6.56 / 0.8.50 regression). Typed args reach sfs.ps1 only on the
+# ps1-shim path; the cmd-shim forwards ZERO positional args (env channel only),
+# so a typed-empty invocation falls through to env below and the cmd bridge is
+# preserved byte-for-byte.
+$SfsTypedArgs = Resolve-SfsArgs -ParamArgs @() -AutomaticArgs $SfsParamArgs -UnboundArgs $args
+Write-SfsArgTrace "PS_TYPED_ARGS" $SfsTypedArgs
+$SfsArgs = [string[]] @()
+if (Test-SfsUsableArgs $SfsTypedArgs) {
+  $SfsArgs = $SfsTypedArgs
+  if (Test-SfsUsableArgs $SfsParamArgs) {
     $SfsSelectedArgSource = "param"
   } else {
     $SfsSelectedArgSource = "automatic"
   }
+}
+if (-not (Test-SfsUsableArgs $SfsArgs)) {
+  $SfsArgs = Resolve-SfsArgs -ParamArgs $SfsEnvArgs -AutomaticArgs @() -UnboundArgs @()
+  if (Test-SfsUsableArgs $SfsArgs) { $SfsSelectedArgSource = "env" }
 }
 if (-not (Test-SfsUsableArgs $SfsArgs)) {
   $SfsRawArgs = Resolve-SfsRawArgs
@@ -371,6 +385,40 @@ function Set-SfsNativeArgEnv([string[]] $InvocationArgs) {
   $rawArgs = if ($newCount -gt 0) { ($InvocationArgs -join " ") } else { "" }
   $env:SFS_NATIVE_RAW_ARGS = $rawArgs
   $env:SFS_NATIVE_CMDLINE = if ($rawArgs) { "sfs.cmd $rawArgs" } else { "sfs.cmd" }
+}
+
+# F2 (0.8.51): the scoop self-upgrade reload runs in-process on the interactive
+# PowerShell session (ps1-shim path), so Set-SfsNativeArgEnv would otherwise
+# leak $env:SFS_NATIVE_* into the caller and poison every later command. Snapshot
+# before the reload and restore after, mirroring the SFS_SCOOP_PROJECT_UPGRADE
+# save->restore pattern. Belt to F1's suspenders: even bare `sfs` (no typed args)
+# stays clean because no stale env survives the upgrade hop.
+function Restore-SfsEnvValue([string] $Name, $Value) {
+  if ($null -eq $Value) {
+    Remove-Item "Env:$Name" -ErrorAction SilentlyContinue
+  } else {
+    Set-Item "Env:$Name" $Value
+  }
+}
+
+function Get-SfsNativeArgEnvSnapshot {
+  $snap = @{}
+  foreach ($entry in (Get-ChildItem Env: -ErrorAction SilentlyContinue)) {
+    if ($entry.Name -like "SFS_NATIVE_*") { $snap[$entry.Name] = $entry.Value }
+  }
+  return $snap
+}
+
+function Restore-SfsNativeArgEnvSnapshot([hashtable] $Snapshot) {
+  if ($null -eq $Snapshot) { $Snapshot = @{} }
+  foreach ($entry in (Get-ChildItem Env: -ErrorAction SilentlyContinue)) {
+    if ($entry.Name -like "SFS_NATIVE_*" -and -not $Snapshot.ContainsKey($entry.Name)) {
+      Remove-Item "Env:$($entry.Name)" -ErrorAction SilentlyContinue
+    }
+  }
+  foreach ($name in $Snapshot.Keys) {
+    Set-Item "Env:$name" $Snapshot[$name]
+  }
 }
 
 function Add-SfsPowerShellModulePath([string] $ModuleRoot) {
@@ -520,14 +568,25 @@ function Invoke-ScoopSelfUpgrade([string[]] $InvocationArgs) {
   }
 
   Write-Host "reloading installed sfs runtime..."
-  $env:SFS_SKIP_SELF_UPGRADE = "1"
-  $reloadArgs = [string[]] @(Normalize-SfsScoopReloadArgs $InvocationArgs)
-  Set-SfsNativeArgEnv $reloadArgs
-  $reloadScriptPath = Resolve-SfsScoopCurrentScriptPath $CurrentScriptPath
-  Write-SfsArgTrace "PS_RELOAD_SCRIPT" $reloadScriptPath
-  Write-SfsArgTrace "PS_RELOAD_ARGS" $reloadArgs
-  & $reloadScriptPath @reloadArgs
-  exit $LASTEXITCODE
+  # F2 (0.8.51): snapshot the session arg env (and skip-self-upgrade flag) so the
+  # in-process reload below does NOT leak SFS_NATIVE_* / SFS_SKIP_SELF_UPGRADE
+  # into the caller's interactive session - a leak that let the next typed
+  # command read stale "update" args.
+  $nativeArgSnapshot = Get-SfsNativeArgEnvSnapshot
+  $oldSkipSelfUpgrade = $env:SFS_SKIP_SELF_UPGRADE
+  try {
+    $env:SFS_SKIP_SELF_UPGRADE = "1"
+    $reloadArgs = [string[]] @(Normalize-SfsScoopReloadArgs $InvocationArgs)
+    Set-SfsNativeArgEnv $reloadArgs
+    $reloadScriptPath = Resolve-SfsScoopCurrentScriptPath $CurrentScriptPath
+    Write-SfsArgTrace "PS_RELOAD_SCRIPT" $reloadScriptPath
+    Write-SfsArgTrace "PS_RELOAD_ARGS" $reloadArgs
+    & $reloadScriptPath @reloadArgs
+    exit $LASTEXITCODE
+  } finally {
+    Restore-SfsNativeArgEnvSnapshot $nativeArgSnapshot
+    Restore-SfsEnvValue "SFS_SKIP_SELF_UPGRADE" $oldSkipSelfUpgrade
+  }
 }
 
 Invoke-ScoopSelfUpgrade -InvocationArgs $SfsArgs | Out-Null

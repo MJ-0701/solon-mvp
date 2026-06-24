@@ -794,6 +794,17 @@ project_local_dir() {
 
 project_onboarding_hint() {
   local cmd="${1:-command}"
+  # B-WIN2 (0.8.51): branch the global-install line by host OS so Windows users
+  # are not told to run brew "on this Mac". Git Bash reports MINGW*/MSYS*/CYGWIN*.
+  local install_line
+  case "$(uname -s 2>/dev/null)" in
+    MINGW*|MSYS*|CYGWIN*)
+      install_line='scoop install sfs                       installs the global sfs CLI on this PC (solon-product bucket).' ;;
+    Darwin)
+      install_line='brew install MJ-0701/solon-product/sfs  installs the global sfs CLI on this Mac.' ;;
+    *)
+      install_line='brew install MJ-0701/solon-product/sfs  installs the global sfs CLI on this machine.' ;;
+  esac
   cat <<EOF
 Solon CLI is installed, but this project is not initialized yet.
 
@@ -806,7 +817,7 @@ First-time project setup:
   sfs guide
 
 What this means:
-  brew install MJ-0701/solon-product/sfs  installs the global sfs CLI on this Mac.
+  ${install_line}
   sfs init --yes                          injects SFS.md, root agent docs, and .sfs-local/ state into this project.
   sfs upgrade                             upgrades the global CLI first, then refreshes this project.
 

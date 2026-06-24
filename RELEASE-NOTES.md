@@ -13,6 +13,23 @@
 
 ---
 
+## 0.8.51
+
+같은 PowerShell 창에서 `sfs upgrade` 를 한 번 실행한 뒤 `sfs init` 등 친 명령이 stale `update` 로 둔갑하던 Windows 인자전달 버그를 고친 패치 릴리스입니다. Scoop self-upgrade reload 가 `$env:SFS_NATIVE_*` 를 세션에 남기고 `bin/sfs.ps1` 이 그 env 를 친 인자보다 먼저 골라, 이후 모든 명령이 stale `update` 로 바뀌었습니다 (0.6.45-0.6.56 / 0.8.50 회귀 계열). 이제 친 인자가 항상 inherited env 를 이기고(F1), self-upgrade reload 가 끝나면 세션 env 를 복원합니다(F2). bash 동작은 불변, 207/207 green.
+
+체감 변화:
+
+- **같은 창에서 `sfs upgrade` 후 `sfs init`/`sfs status`/`sfs team use` 가 정상 동작** — 더는
+  stale `upgrade` 로 둔갑하지 않습니다. (재검증: 같은 창에서 `scoop update sfs` → `sfs upgrade`
+  → `sfs init --yes` → 진짜 init.)
+- **초기화 안 된 폴더 안내가 OS 에 맞게 표시** — Windows 는 `scoop install sfs ... on this PC`,
+  Mac 는 `brew ... on this Mac`. "You tried: sfs <친 명령>" 도 실제 명령을 반영합니다.
+- **Windows 에서 생성되는 JSON 의 BOM 제거** — `Unrecognized token` 파싱 오류를 막습니다.
+
+bash 쪽 동작과 명령 표면은 그대로입니다 (0.8.50 과 동일, 207/207 green).
+
+---
+
 ## 0.8.50
 
 Windows(PowerShell/Scoop) 사용자도 bash 0.8.49 와 동일하게 멀티에이전트 팀을 켤 수 있게 한 패치 릴리스입니다. `install.ps1`·`upgrade.ps1` 이 `-Team <solo|pair|trio>` 를 받아 bash 코어로 그대로 넘기므로, capability 게이트(R3)와 `[Y/n]` 자동 제안(R5)이 Windows 에서도 동일하게 동작합니다. `-Team` 을 생략하면 아무 플래그도 넘기지 않아 solo 무변경입니다.

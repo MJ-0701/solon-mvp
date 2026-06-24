@@ -25,6 +25,23 @@ function Write-Warn  ($msg) { Write-Host "  [WARN] $msg" -ForegroundColor Yellow
 function Write-Fail  ($msg) { Write-Host "  [FAIL] $msg" -ForegroundColor Red }
 function Write-Info  ($msg) { Write-Host "  $msg" }
 
+# B-WIN3 (0.8.51): Windows PowerShell 5.1 `Set-Content -Encoding UTF8` prepends a
+# UTF-8 BOM (EF BB BF). JSON consumers that do not strip it fail with
+# "Unrecognized token '<BOM>'". Write BOM-less UTF-8 instead. Drop-in for the
+# `... | ConvertTo-Json | Set-SfsBomlessFile $path` pipelines below.
+function Set-SfsBomlessFile {
+  param(
+    [Parameter(ValueFromPipeline = $true)] $InputObject,
+    [Parameter(Position = 0, Mandatory = $true)] [string] $Path
+  )
+  begin { $sb = New-Object System.Text.StringBuilder }
+  process { [void] $sb.AppendLine([string] $InputObject) }
+  end {
+    $enc = New-Object System.Text.UTF8Encoding $false
+    [System.IO.File]::WriteAllText($Path, $sb.ToString(), $enc)
+  }
+}
+
 function Test-CommandExists($cmd) {
   $null = Get-Command $cmd -ErrorAction SilentlyContinue
   return $?
@@ -74,7 +91,7 @@ function Set-PriorityMarker([string]$key) {
   $obj.promoted | Add-Member -Force -NotePropertyName $key -NotePropertyValue $true
   $obj.lastPromotedAt | Add-Member -Force -NotePropertyName $key -NotePropertyValue ((Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ"))
   $obj | Add-Member -Force -NotePropertyName 'policy' -NotePropertyValue 'promote solon to first on install/update; if user later changes order, respect unless SFS_DISCOVERY_FORCE_PROMOTE=1'
-  $obj | ConvertTo-Json -Depth 20 | Set-Content -Encoding UTF8 $marker
+  $obj | ConvertTo-Json -Depth 20 | Set-SfsBomlessFile $marker
 }
 
 function Should-PromotePriority([string]$key, [string]$currentFirst, [string]$desiredFirst, [string]$label) {
@@ -138,7 +155,7 @@ function Promote-ClaudePriority {
       $root[$p.Name] = $p.Value
     }
   }
-  $root | ConvertTo-Json -Depth 20 | Set-Content -Encoding UTF8 $settings
+  $root | ConvertTo-Json -Depth 20 | Set-SfsBomlessFile $settings
   Write-Ok "Claude Code: solon promoted to first enabled plugin in ~/.claude/settings.json"
 
   $installed = "$HomeDir\.claude\plugins\installed_plugins.json"
@@ -155,7 +172,7 @@ function Promote-ClaudePriority {
           if ($p.Name -eq "plugins") { $instRoot["plugins"] = $plugins }
           else { $instRoot[$p.Name] = $p.Value }
         }
-        $instRoot | ConvertTo-Json -Depth 20 | Set-Content -Encoding UTF8 $installed
+        $instRoot | ConvertTo-Json -Depth 20 | Set-SfsBomlessFile $installed
         Write-Ok "Claude Code: solon promoted to first plugin registry entry"
       }
     } catch {
@@ -176,7 +193,7 @@ function Promote-ClaudePriority {
       foreach ($p in $km.PSObject.Properties) {
         if ($p.Name -ne "solon") { $kmRoot[$p.Name] = $p.Value }
       }
-      $kmRoot | ConvertTo-Json -Depth 20 | Set-Content -Encoding UTF8 $known
+      $kmRoot | ConvertTo-Json -Depth 20 | Set-SfsBomlessFile $known
       Write-Ok "Claude Code: solon promoted to first marketplace registry entry"
     } catch {
       Write-Warn "Claude Code: could not reorder known_marketplaces.json"
@@ -205,7 +222,7 @@ function Promote-GeminiPriority {
   foreach ($p in $obj.PSObject.Properties) {
     if ($p.Name -ne "solon") { $root[$p.Name] = $p.Value }
   }
-  $root | ConvertTo-Json -Depth 20 | Set-Content -Encoding UTF8 $enable
+  $root | ConvertTo-Json -Depth 20 | Set-SfsBomlessFile $enable
   Write-Ok "Gemini CLI: solon promoted to first extension enablement entry"
   Set-PriorityMarker "gemini"
 }

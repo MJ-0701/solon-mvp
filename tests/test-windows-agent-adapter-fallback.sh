@@ -145,7 +145,11 @@ assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs $SfsRawArgs -Automat
 assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs $SfsSavedCmdLineArgs -AutomaticArgs @() -UnboundArgs @()' "ps1 saved cmdline args fallback order"
 assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs $SfsParentCmdLineArgs -AutomaticArgs @() -UnboundArgs @()' "ps1 parent cmdline args fallback order"
 assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs $SfsCmdLineArgs -AutomaticArgs @() -UnboundArgs @()' "ps1 cmdcmdline args fallback order"
-assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs $SfsEnvArgs -AutomaticArgs $SfsParamArgs -UnboundArgs $args' "ps1 env/param/automatic args fallback"
+# 0.8.51: typed/automatic args ($args) are selected FIRST; the env channel is a
+# guarded fallback (was env-first, which let a stale upgrade reload shadow every
+# later typed command). Order + hygiene lock: tests/test-windows-argv-stale-env.sh.
+assert_contains "${ps_wrapper}" '$SfsTypedArgs = Resolve-SfsArgs -ParamArgs @() -AutomaticArgs $SfsParamArgs -UnboundArgs $args' "ps1 selects typed/automatic args first"
+assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs $SfsEnvArgs -AutomaticArgs @() -UnboundArgs @()' "ps1 env args are a typed-empty fallback (cmd-shim path)"
 assert_contains "${ps_wrapper}" 'Resolve-SfsArgs -ParamArgs @() -AutomaticArgs @() -UnboundArgs $MyInvocation.UnboundArguments' "ps1 unbound args final fallback"
 assert_contains "${ps_wrapper}" 'Invoke-SfsNativeReadonly -InvocationArgs $SfsArgs' "ps1 passes resolved args as one array"
 assert_contains "${ps_wrapper}" 'Invoke-ScoopSelfUpgrade -InvocationArgs $SfsArgs' "ps1 self-upgrade sees the full resolved arg array"

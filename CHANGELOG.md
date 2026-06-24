@@ -1,5 +1,58 @@
 ## [Unreleased]
 
+## [0.8.51] - 2026-06-25
+
+> **Patch release: Windows (PowerShell/Scoop) typed-command argv fix — after an in-session `sfs upgrade`, a later `sfs init` (or any typed command) was silently rewritten to a stale `update`. Root cause: the Scoop self-upgrade reload set `$env:SFS_NATIVE_*` on the in-process PowerShell session and never cleared it, and `bin/sfs.ps1` selected that env channel before the typed args, so the stale `update` shadowed every later command in the same window (the 0.6.45-0.6.56 / 0.8.50 regression class). Belt-and-suspenders fix: (F1) current typed/automatic args are now authoritative and beat the inherited env channel, which is consulted only when no typed args are present — the cmd-shim path forwards zero positional args, so that bridge stays byte-for-byte; (F2) the self-upgrade reload snapshots and restores `$env:SFS_NATIVE_*` and `SFS_SKIP_SELF_UPGRADE`, so the interactive session is never polluted. Also: the not-initialized onboarding hint now branches by OS (Windows -> Scoop/PC, not brew/Mac) and reflects the real typed command, and Windows JSON writes use BOM-less UTF-8 to stop `Unrecognized token` failures. No bash behavior changed; bash 0.8.50 stays green (207/207). Locked by `tests/test-windows-argv-stale-env.sh`.**
+
+### Fixed
+
+- **Stale `$env:SFS_NATIVE_*` no longer shadows typed commands (F1).**
+  `bin/sfs.ps1` now selects the current typed/automatic args (`$args` /
+  `UnboundArguments`) FIRST and falls back to the `SFS_NATIVE_*` env channel only
+  when no typed args are present. The env channel exists for the cmd-shim path,
+  which forwards zero positional args (env-only), so that bridge is preserved
+  byte-for-byte; the ps1-shim path (typed args present) now always wins. Confirmed
+  trace: in one PowerShell window, `sfs upgrade` then `sfs init --yes` previously
+  resolved `SELECTED_SOURCE=env` / `FINAL_ARGS=update` and ran an upgrade instead
+  of initializing.
+- **Scoop self-upgrade reload no longer leaks session env (F2).**
+  `Invoke-ScoopSelfUpgrade` snapshots `$env:SFS_NATIVE_*` (and
+  `SFS_SKIP_SELF_UPGRADE`) before `Set-SfsNativeArgEnv` and restores it in a
+  `finally`, mirroring the existing `SFS_SCOOP_PROJECT_UPGRADE` save->restore
+  pattern. The in-process reload (ps1-shim runs `bin/sfs.ps1` in the interactive
+  session) can no longer poison later commands even without F1.
+
+### Changed
+
+- **Not-initialized onboarding hint is OS-aware (B-WIN2).**
+  `project_onboarding_hint` (`bin/sfs`) branches the global-install line by host:
+  Windows (Git Bash `MINGW*`/`MSYS*`/`CYGWIN*`) -> `scoop install sfs ... on this
+  PC`; macOS -> `brew ... on this Mac`; other -> `brew ... on this machine`. The
+  `You tried: sfs <cmd>` line already reflected the real command — with F1 that
+  command is no longer a stale `update`.
+- **Windows JSON writes are BOM-less UTF-8 (B-WIN3).**
+  `scripts/install-cli-discovery.ps1` replaced `Set-Content -Encoding UTF8`
+  (which prepends a UTF-8 BOM on Windows PowerShell 5.1) with a BOM-less
+  `Set-SfsBomlessFile` helper for all generated JSON (settings, markers, known
+  marketplaces), stopping `Unrecognized token '<BOM>'` parse failures. The
+  pre-existing `Enable-SfsUtf8Bridge` console UTF-8 setup (chcp 65001 equivalent)
+  runs before any delegated output; `bin/sfs.ps1` stays ASCII-only (PS 5.1
+  BOM-less).
+
+### Tests
+
+- **`tests/test-windows-argv-stale-env.sh` (new).** Locks the 0.8.51 contract two
+  ways with no `pwsh` on the CI host: an executable bash oracle that encodes the
+  precedence invariant (typed args beat inherited env; env only when typed empty)
+  and proves the canonical stale-env case resolves to the typed command, plus
+  semantic source asserts that BREAK if the precedence flips back to env-first or
+  the reload stops restoring session env (line-order relationship, guarded env
+  fallback, snapshot -> set -> restore-in-finally). Stronger than a static text
+  match — it enforces the relationship that regressed.
+- **`tests/test-windows-agent-adapter-fallback.sh` updated** to assert the new
+  typed-first selection (`$SfsTypedArgs = Resolve-SfsArgs -ParamArgs @() ...`) and
+  the guarded env fallback instead of the old env-first one-liner.
+
 ## [0.8.50] - 2026-06-24
 
 > **Patch release: Windows (PowerShell/Scoop) reaches multi-agent team-activation parity with bash 0.8.49 by thin delegation — zero native port, single SSoT. `install.ps1` and `upgrade.ps1` now accept and forward `-Team <solo|pair|trio>` to the bash core (`install.sh` / `upgrade.sh`), so Windows users get the same `--team` materialize, capability preflight (R3), and zero-knowledge `[Y/n]` auto-offer (R5) that bash shipped — the offer and gate run in Git Bash and are byte-for-byte the bash behavior. `sfs.cmd team use <preset>` and `sfs.cmd upgrade --team` already reached the bash core (mutating commands delegate via `bin/sfs.ps1`); that delegation is now locked against a future native-handler regression. Omitting `-Team` forwards zero `--team` flags, preserving the solo no-op and keeping the R5 auto-offer reachable. The Git-Bash-required fallback in all three wrappers now points at `sfs team use`. No bash behavior changed; bash 0.8.49 remains the spec.**
