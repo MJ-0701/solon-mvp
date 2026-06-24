@@ -6,7 +6,7 @@
 # cost-aware defaults, but does not block an "all high-end models" policy when
 # the project accepts the cost and latency.
 
-version: 2.0
+version: 2.2
 project: "<PROJECT-NAME>"
 created: "<DATE>"
 solon_mvp_version: "<SOLON-VERSION>"
@@ -82,6 +82,31 @@ team_preset_catalog:
     researcher: antigravity
 
 unassigned_role_policy: use_selected_runtime   # 미배정 role 의 standalone fallback
+
+# ── External self-improvement orchestrator (Hermes seam; opt-in; default off) ──
+# 오케스트레이터 층 OCP 확장점. team topology 의 runtime_registry 가 워커 CLI 를 데이터로
+# 추상화하듯, 여기서는 외부 상주 오케스트레이터(Hermes-class)의 실제 인터페이스(REST/
+# webhook/CLI/file-drop)를 transport_kind 스칼라 하나로 추상화한다. 값을 바꿔도
+# sfs-orchestrator.sh 는 한 글자도 안 바뀐다(데이터 = 단일 교체점 → OCP). 다른
+# 오케스트레이터로 교체 = adapter/transport_kind 값 교체뿐, 루프 코드 diff 0.
+#   - enabled:false 가 기본 → 설치/업그레이드가 standalone 루프를 안 깬다. seam 을 전부
+#     떼도 루프는 doctor+curation+tidy 로 동일 동작(standalone guarantee).
+#   - 본 P1 표면은 스키마 + read-only resolver(계약)까지만이다. 실제 SIGNAL ingest 는 P2,
+#     proposal export/review import + transport 실구현은 P3 에서 이 위에 얹는다.
+# standalone / no-code-auto-patch / inviolable-gate 불변식은 policies/self-improvement
+# -loop.md + policies/external-orchestrator-entry.md 가 SSoT 1곳에서 선언하며 여기선
+# 적용만 한다(복제 금지). 설계 SSoT: dist docs/maintenance/
+# 2026-06-23-hermes-self-evolution-seam-wiring.design.md.
+external_orchestrator:
+  enabled: false                 # 기본 off = standalone (opt-in). seam 전체 비활성.
+  adapter: hermes                # 어댑터 id. 다른 오케스트레이터면 이 값만 교체.
+  transport_kind: file-drop      # api|webhook|cli|file-drop (flat scalar = OCP 교체점).
+  endpoint: ""                   # credential 은 여기 두지 않음 (per-runtime store 참조).
+  credential_ref: ""             # indirection-only: env-var 이름 / store key / <PLACEHOLDER>.
+                                 # 절대 평문 시크릿 금지 (credential-hygiene). file-drop 는 불필요.
+  scope: read-only               # first-permission read-only; read→propose→bounded-write 점진.
+  signal_inbox: ".sfs-local/orchestrator/inbox/"     # Seam A typed capsule drop (P2).
+  review_outbox: ".sfs-local/orchestrator/outbox/"   # Seam B typed export (P3).
 
 role_boundaries:
   intake_facilitator:

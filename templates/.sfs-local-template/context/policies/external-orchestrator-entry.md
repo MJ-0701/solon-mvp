@@ -109,24 +109,53 @@ escalation.
 ## Self-improvement seam
 
 An external orchestrator may plug into the self-improvement loop
-(`policies/self-improvement-loop.md`) at two by-reference seams. This is
-**prep-only**: it documents where an orchestrator *would* attach, with
-**no runtime wiring** — no new command, no `bin/sfs` change, no adapter code.
+(`policies/self-improvement-loop.md`) at two by-reference seams. The seam is an
+**opt-in extension point, default off.** The `external_orchestrator` block in
+`model-profiles.yaml` ships `enabled: false`, and a read-only resolver
+(`scripts/sfs-orchestrator.sh`, surfaced as `sfs orchestrator`) exposes that
+schema as data. The resolve-* surface is read-only; the write verbs
+(`ingest` / `export` / `import-review`) touch only the orchestrator's own
+artifacts — the signal queue, the outbox export, the review log — never the
+loop's authoritative state (suggest-only), and each refuses when the seam is
+disabled. So `scope: read-only` in the schema is about loop state: the seam's own
+staging files are bounded write. The orchestrator's transport (REST / webhook /
+CLI / file-drop) is abstracted to a single `transport_kind` scalar, so swapping
+orchestrators is a config edit, not a loop-code change (OCP — the
+orchestrator-layer mirror of the worker-layer `runtime_registry`).
 
-- **External SIGNAL source.** Cross-system completed-work and detection signals
-  can feed the loop's SIGNAL/CURATE/PROPOSE input, alongside `sfs harness
-  doctor` and the curation pass. The feed is a typed handoff (the contract
-  above), never raw narration.
-- **External proposal-review surface.** Curation and promotion candidates can be
-  reviewed by a human across systems on the orchestrator's surface. The review
-  changes nothing about the loop's authority: candidates stay **suggest-only**,
-  the inviolable gates above still hold, and first authorized scope stays
+- **External SIGNAL source** (wired, Seam A). Cross-system completed-work,
+  detection, and hotspot signals feed the loop's SIGNAL/CURATE/PROPOSE input,
+  alongside `sfs harness doctor` and the curation pass. A signal is dropped as a
+  typed capsule (design §4 fields: `source`, `kind`, `evidence_pointer`,
+  `confidence`, `ts` — the typed-handoff discipline above, never raw narration);
+  `sfs orchestrator ingest` validates it and appends one typed entry to
+  `.sfs-local/orchestrator/signal-queue.md`, which the curation pass reads
+  read-only. `evidence_pointer` carries a pointer, not the inlined original.
+- **External proposal-review surface** (wired, Seam B). Curation and promotion
+  candidates are reviewed by a human across systems on the orchestrator's surface.
+  `sfs orchestrator export` emits a **pointer-only** typed proposal to the
+  `review_outbox` (file-drop transport — id + `evidence_pointer` + metadata, never
+  a raw body), and `sfs orchestrator import-review` validates and sanitizes a
+  typed review (`candidate_id` / `decision` ∈ approve|defer|reject / `comment` /
+  `reviewer` / `ts`) into an advisory review log. The review changes nothing about
+  the loop's authority: candidates stay **suggest-only**, the inviolable gates
+  above still hold, and import-review cannot trigger an apply or any boundary
+  action — APPLY stays the `tidy` rail + human gate. First authorized scope stays
   read-only.
 
-**Standalone guarantee (seam form).** Remove every external orchestrator and the
-loop still turns on `doctor + curation + tidy` alone — the seam is an optional
-extension point, not a dependency. The moment a seam adds runtime wiring, this
-guarantee breaks; that is out of scope here.
+Wiring lands incrementally on top of this default-off schema, each step keeping
+the invariants below: the read-only schema surface, the typed SIGNAL ingest, then
+the proposal export + review import above with a real (file-drop) transport. The
+actual
+seam mechanics are owned by the design SSoT, not re-described here.
+
+**Standalone guarantee (seam form).** Remove every external orchestrator — or
+simply leave `external_orchestrator.enabled: false` — and the loop still turns on
+`doctor + curation + tidy` alone; the resolver degrades to disabled with no crash.
+The default-off schema is exactly what keeps this guarantee intact *while* the
+seam is wired: nothing in the loop presupposes an orchestrator, and no
+orchestrator signal can auto-write a ledger/skill or trip an inviolable gate
+(those invariants are declared once in `policies/self-improvement-loop.md`).
 
 ## Cross-references
 

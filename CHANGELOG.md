@@ -1,5 +1,172 @@
 ## [Unreleased]
 
+## [0.8.47] - 2026-06-24
+
+> **Hermes self-evolution seam P3 wires Seam B and closes the dispatch injection seam. Two new write verbs on `sfs orchestrator`: `export --from <candidates>` emits a pointer-only typed proposal to the `review_outbox` (file-drop transport — id + evidence_pointer + metadata, a candidate's raw body structurally cannot leave), and `import-review --file <review>` validates and sanitizes a typed human review (`candidate_id` / `decision` ∈ approve|defer|reject / `comment` / `reviewer` / `ts`) into an advisory review log. The review log changes nothing about the loop's authority — an `approve` writes only that log; APPLY stays the `tidy` rail under a human gate, untriggerable from here. Security precondition first: team topology P3's `sfs-route.sh` real-exec path no longer `eval`s an interpolated command string — it builds an argv array and executes it directly, so a capsule goal carrying `$(...)` / backticks is inert data, not shell. Credentials stay indirection-only (`credential_ref` placeholder, never a value). This completes the opt-in Hermes seam (P1 schema → P2 SIGNAL ingest → P3 export/import); standalone holds throughout — disable the seam and the loop runs on doctor+curation+tidy alone.**
+
+### Security
+
+- **`sfs-route.sh` real-exec `eval` → argv array
+  (`templates/.sfs-local-template/scripts/sfs-route.sh`).** The dispatch helper
+  previously substituted capsule text into a command string and `eval`'d it — a
+  capsule whose `goal` contained `$(...)` / backticks would have executed as shell
+  the moment a real headless call was wired. P3 splits the invoke template into
+  argv words and places each capsule value as a single array element, then
+  executes the array directly (no shell re-parse). The dry-run path renders the
+  same array for display, so `test-team-route-dispatch.sh` is unchanged.
+- **`tests/test-route-exec-argv-injection.sh` (headline).** Drives the REAL exec
+  path against a mock runtime: a `$(touch PWNED)` / backtick payload in the
+  capsule goal does NOT execute and reaches the runtime as one literal argv
+  element; statically asserts the `eval` is gone and the argv array is in place.
+
+### Added
+
+- **`sfs orchestrator export` + `import-review` (Seam B)
+  (`templates/.sfs-local-template/scripts/sfs-orchestrator.sh`).** `export` reads
+  a candidates file and emits a **whitelisted, pointer-only** proposal
+  (`id`/`kind`/`evidence_pointer`/`title`) to the `review_outbox` — a `body=`/`raw=`
+  field is structurally never carried out. `import-review` validates the typed
+  review schema (decision enum, required fields) and **sanitizes every inbound
+  free-text field** (`comment`/`reviewer`/`candidate_id`/`ts` — pipe-delimiter +
+  control chars stripped, length-capped) so a review can never forge a structured
+  field or an extra log line through any of them, then appends one advisory entry
+  to `.sfs-local/orchestrator/review-log.md`. The same field sanitize is applied
+  on the P2 `ingest` write and the `export` emit, so no write site interpolates a
+  raw inbound value into a pipe-delimited line. Both gated on
+  `enabled` (disabled/absent → exit 3, no write); schema reject is exit 5.
+- **`credential_ref` indirection scalar in the `external_orchestrator` schema
+  (template `version` 2.1 → 2.2).** Carries an env-var name / store key /
+  `<PLACEHOLDER>` only — never a plaintext secret (`credential-hygiene`); file-drop
+  needs none.
+- **`tests/test-hermes-seam-p3.sh` (headline).** Locks: (A) export pointer-only —
+  a raw candidate body does not reach the outbox; (B) import-review — valid review
+  logs one entry, a non-enum decision rejects, a pipe-smuggled forged approve in
+  the comment is neutralized; (C) suggest-only / gate-bypass — an approve writes
+  only the advisory log, no ledger/skill, no apply/gate/push/merge path in the
+  script; (D) standalone — export and import-review both refuse and write nothing
+  when disabled; (E) credential — the schema's `credential_ref` ships a
+  placeholder, never a value.
+
+### Changed
+
+- **Seam framing reconciled across SSoTs.** `external-orchestrator-entry.md`
+  §"Self-improvement seam" replaces the "one write verb" claim with the three
+  write verbs (ingest/export/import-review) touching only the orchestrator's own
+  artifacts, and wires the proposal-review bullet to Seam B; the script header and
+  `usage()` match. `scope: read-only` is explicitly framed as loop-state, not the
+  seam's own staging files. The `sfs-orchestrator.sh` `ingest` arm now shares the
+  `require_enabled` gate with the new verbs. No invariant SSoT duplicated.
+
+### Notes
+
+- Transport: **file-drop** is the implemented delivery (the default
+  `transport_kind`). `api`/`webhook`/`cli` remain config + a future adapter —
+  OCP-narrow, the same honesty as team topology's route P3 ("a new transport
+  *kind* is code; changing a runtime's transport *value* is data").
+- Gate-bypass enforcement at this phase is the test-enforced absence of any apply/
+  boundary path plus the behavioral lock (an approve writes only the advisory
+  log), not a Tier B/C permission hook — stated as what it is.
+- Channel publish (brew/scoop) for the bundled `0.8.4x` Hermes-seam cut
+  (0.8.45 P1 + 0.8.46 P2 + 0.8.47 P3) now follows, same pattern as team topology.
+
+## [0.8.46] - 2026-06-24
+
+> **Hermes self-evolution seam P2 wires Seam A: typed SIGNAL ingest, suggest-only. `sfs orchestrator ingest --file <capsule>` validates a dropped SIGNAL capsule and appends one typed entry to the orchestrator's own queue (`.sfs-local/orchestrator/signal-queue.md`), which the curation pass reads read-only as an extra SIGNAL input — alongside `sfs harness doctor` and the lessons/event archives. The ingest stages a suggestion and nothing more: it never writes the loop's authoritative state, it refuses (no-op, no queue) when the seam is disabled or absent, and it carries no eval, no CLI spawn, and no gate path. The SIGNAL schema is the five typed fields the design SSoT names (`source`, `kind` ∈ completed-work|detection|hotspot, `evidence_pointer`, `confidence`, `ts`); a bad kind, a missing field, or a non-pointer (blob) evidence each rejects with the queue left intact. APPLY stays exactly where it was — the `tidy` rail under a human gate.**
+
+### Added
+
+- **`sfs orchestrator ingest --file <capsule>` (Seam A) +
+  `sfs orchestrator queue-path`
+  (`templates/.sfs-local-template/scripts/sfs-orchestrator.sh`).** `ingest` is the
+  one write verb on the orchestrator surface: it validates a typed SIGNAL capsule
+  and appends a single typed `key=value` entry to
+  `.sfs-local/orchestrator/signal-queue.md`. Gated on `enabled` — a disabled or
+  absent seam refuses (exit 3) and writes nothing (standalone). Schema reject is
+  exit 5; the queue is never partially written. `queue-path` prints the queue
+  location (read-only). The resolve-* surface is unchanged and still read-only.
+- **`tests/test-hermes-seam-p2.sh` (headline).** Locks: (1) a valid 5-field
+  capsule ingests and appends exactly one entry, while a bad `kind`, a missing
+  field, and a blob (non-pointer) evidence each reject with the queue intact;
+  (2) suggest-only — ingest creates only the queue, no avoidance/evolution ledger
+  or skill artifact; (3) standalone — disabled and stripped-section ingest both
+  refuse and create no queue; (4) the read-only resolver and the no-eval /
+  no-CLI-spawn / no-gate-path invariants carry to the new write verb.
+
+### Changed
+
+- **Curation-pass consumption documented (by-reference).**
+  `lessons-accumulation.md` CURATION_PASS now lists the staged SIGNAL queue as an
+  additional read-only input; `external-orchestrator-entry.md` §"Self-improvement
+  seam" promotes the External SIGNAL source bullet from "can feed" to the wired
+  ingest mechanism, and replaces the P1 "opens nothing on its own" claim with the
+  read-only-resolve + one-suggest-only-write-verb framing. No invariant SSoT
+  duplicated.
+
+### Notes
+
+- **SIGNAL schema = 5 fields, by design.** The task brief says "8필드 schema";
+  the 8-field `sub-agent-capsule-contract` is the typed-handoff *discipline*
+  (named fields, validate-before-consume), not a literal field count for a SIGNAL.
+  The design SSoT §4 names the SIGNAL's own five fields, and a `detection`/
+  `hotspot` signal has no `acceptance_criteria`/`token_budget` — so a single
+  8-field schema cannot model it. Recorded so a future grep does not read the
+  5-field validator as a miss (same disclosure style as P1's flat-scalar deviation).
+- Deep inbound **content sanitize** / injection defense and the `evidence_pointer`
+  origin-fetch boundary remain P3 (this phase does the pointer-*shape* check only).
+- Channel publish (brew/scoop) still bundles once after P3.
+
+## [0.8.45] - 2026-06-24
+
+> **Hermes self-evolution seam P1 lands the orchestrator-layer schema + adapter abstraction as a contract-only surface — the sibling track to the team topology that just shipped. An `external_orchestrator` block in `model-profiles.yaml` (default `enabled: false`) abstracts an external standing orchestrator (Hermes-class), and a read-only resolver (`sfs orchestrator`) exposes it as data. Its transport (REST/webhook/CLI/file-drop) is a single `transport_kind` scalar, so swapping orchestrators is a config edit with zero `sfs-orchestrator.sh` diff (OCP — the orchestrator-layer mirror of the worker-layer `runtime_registry`). P1 opens no seam: no SIGNAL ingest (that is P2), no proposal export / review import or live transport (that is P3). The default-off schema is exactly what keeps the standalone guarantee intact while the seam gets wired — remove the orchestrator or leave it disabled and the loop still turns on doctor+curation+tidy alone, with no orchestrator signal able to auto-write a ledger/skill or trip an inviolable gate.**
+
+### Added
+
+- **`external_orchestrator` schema in `model-profiles.yaml`
+  (template `version` 2.0 → 2.1).** Flat-scalar block adjacent to the team
+  topology sections, same BSD-awk-safe discipline (no nested map): `enabled:
+  false` (default off), `adapter: hermes`, `transport_kind: file-drop`
+  (`api|webhook|cli|file-drop` — the single OCP switch point), `endpoint`,
+  `scope: read-only`, `signal_inbox`, `review_outbox`. `enabled: false` keeps
+  install/upgrade standalone.
+- **`sfs orchestrator` read-only resolver
+  (`templates/.sfs-local-template/scripts/sfs-orchestrator.sh`).** The
+  orchestrator-layer companion to `sfs-team.sh`: pure data lookup over the
+  `external_orchestrator` block — `resolve-enabled` (true only when the scalar
+  is exactly `true`), `resolve-adapter`, `resolve-transport`, `resolve-inbox`,
+  `resolve-outbox`, `show`. Block-scoped awk so `transport_kind` never
+  cross-reads `runtime_registry.<rt>.transport_kind`. Missing section / missing
+  file / disabled flag all resolve to disabled with exit 0 — no crash, no seam
+  opened. Routed via `sfs-dispatch.sh` (`orchestrator` case) and listed in
+  `bin/sfs help --full`.
+- **`tests/test-hermes-seam-p1.sh` (headline).** Locks the four P1 invariants:
+  (a) standalone — `enabled: false` default and a stripped section both resolve
+  to disabled with no crash; (b) no-code-auto-patch — the resolver carries no
+  `eval`, no CLI spawn, and no ledger/skill write path, and the invariant SSoT
+  marker still stands in `self-improvement-loop.md`; (c) inviolable gates — the
+  typed gate surface is intact and the resolver carries no release/push/merge
+  path; (d) OCP — flipping `external_orchestrator.transport_kind`
+  (`file-drop`→`api`) changes the resolved transport with the resolver script
+  SHA unchanged, and the block-scoped flip never leaks into `runtime_registry`.
+
+### Changed
+
+- **`external-orchestrator-entry.md` §"Self-improvement seam" reworded** from
+  prep-only ("no runtime wiring") to the P1 reality: a default-off schema + a
+  read-only resolver surface, with the standalone / suggest-only /
+  inviolable-gate invariants still owned by `self-improvement-loop.md` (no SSoT
+  duplication). The "guarantee breaks the moment a seam is wired" line is
+  replaced — the default-off schema is what holds the guarantee *while* wiring
+  proceeds.
+
+### Notes
+
+- P1 ships the contract only. (c) gate-bypass is asserted **structurally** at
+  this stage (the resolver has no execution path); the live gate-refusal test
+  arrives with P3's review-import, where an execution path exists.
+- This is the first of three Hermes-seam phases; channel publish (brew/scoop)
+  follows the bundled `0.8.4x` cut once P3 lands, same as the team topology
+  track.
+
 ## [0.8.44] - 2026-06-24
 
 > **Multi-agent team topology P3 lands the dispatch helper: `sfs route <role> <capsule>` turns the P1/P2 data surface into an actual headless hand-off. It resolves role→runtime→invoke-template→transport purely from `model-profiles.yaml`, fills the capsule's typed fields into `{prompt}`/`{tools}`, and calls the target CLI — with hop-limit + role-cycle guards that refuse runaway dispatch (exit 8) and a clean "act directly" degrade (exit 3, never a crash) when dispatch is off (solo) or the registry is absent. How each CLI is fed is data: a new `transport_kind` scalar (`argv|stdin|file`) selects the delivery strategy, so flipping a runtime's transport is a one-scalar edit with zero `sfs-route.sh` diff. Real CLI execution is mocked in-repo via `SFS_ROUTE_DRY_RUN=1` (no auth reached); the deliverable is adjustability-by-data, not a live call. The helper is named `route` because `dispatch` is the router engine itself and `handoff` is a pre-existing command (design D5). This completes the opt-in team topology — solo remains byte-for-byte unchanged throughout.**

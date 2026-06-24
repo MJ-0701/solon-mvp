@@ -129,6 +129,9 @@ categorize() {
       printf 'hygiene-and-policy\n'
       ;;
     test-sfs-*.sh \
+      | test-hermes-*.sh \
+      | test-team-*.sh \
+      | test-route-*.sh \
       | test-handoff-*.sh \
       | test-recall-*.sh \
       | test-daily-*.sh \

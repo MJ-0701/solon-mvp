@@ -157,14 +157,39 @@ external_orchestrator:
 - review 결과 회수의 동기/비동기 + 충돌(로컬 gate vs Hermes 의견 불일치 → 로컬
   우선, 충돌 surface).
 
+## 9.1 보안 결정 (P3 선행): route real-exec `eval` → argv array
+
+P3 가 transport 를 실제 외부 호출에 연결하면 team topology P3 의 `sfs-route.sh`
+real-exec 경로에 닿는다. 그 경로는 invoke 템플릿에 capsule 텍스트를 치환한 뒤 `eval`
+했다 — **goal 에 `$(…)`/백틱이 있으면 shell 실행되는 injection seam** (dry-run 만 테스트돼
+잠재적이었음). **수정**: 템플릿을 argv WORD 로 분해, `{prompt}`/`{tools}`/`{prompt_file}`
+값을 각각 1개 argv 원소로 넣은 배열을 직접 실행 → capsule 은 inert data, shell 재파싱 없음.
+dry-run 은 같은 배열을 공백 join 표시만. **회귀**: `test-route-exec-argv-injection.sh` —
+REAL exec 로 `$(touch PWNED)`/백틱이 실행 안 되고 1 literal argv 로 전달됨 + 정적 eval 부재
+확인. dry-run 표시 문자열 동일 → team-route-dispatch 무변경.
+
 ## 10. 단계 (phasing)
 
-- **P0 (이 문서)**: 설계 확정 + AC 합의 + Hermes 인터페이스 실측.
-- **P1**: `external_orchestrator` 스키마 + 어댑터 추상화 + `enabled:false` 기본 +
-  standalone/no-auto-patch/gate-bypass 회귀잠금 headline test (배선 전, 계약만).
-- **P2**: Seam A — typed signal ingest(inbox 소비를 curation 패스에 연결).
-- **P3**: Seam B — proposal export + review import(suggest-only, gate 불변) +
-  Hermes 어댑터 transport 1종 실구현 + 신뢰/credential 경계.
+각 완료 항목의 커밋 sha 는 호스트 commit/push 시 기록.
 
-> P1은 "계약 + 회귀잠금"만으로 끝나 standalone·no-auto-patch를 못 깬다. 실제
-> Hermes 호출(P3)은 그 위에 얹는다 — team topology와 동일한 점진 도입 철학.
+- **P0 (이 문서)**: 설계 확정 + AC 합의 + Hermes 인터페이스 실측.
+- **P1** ✅(0.8.45): `external_orchestrator` 스키마(flat-scalar, `enabled:false`, template
+  2.0→2.1) + read-only resolver `sfs orchestrator`(`sfs-orchestrator.sh`, sfs-team.sh 동형)
+  + `test-hermes-seam-p1.sh`(standalone / no-auto-patch / gate 구조적 / OCP transport_kind).
+  policy §seam prep-only→default-off 재서술(불변식 SSoT 복제 0). 계약만. run-all 199/0.
+- **P2** ✅(0.8.46): Seam A — `sfs orchestrator ingest` 가 typed SIGNAL 캡슐을 검증해
+  `.sfs-local/orchestrator/signal-queue.md` 에 1 항목 append; curation 이 read-only 추가
+  입력으로 소비(prose, by-ref). enabled-gate(off→exit3 큐0), schema reject(exit5 큐보존),
+  suggest-only. **SIGNAL schema = 설계 §4 의 5 필드** — task "8필드" 는 capsule-contract 의
+  typed-handoff *규율*(필드 수 아님; detection/hotspot 은 AC/budget 없어 8필드로 못 담음).
+  `test-hermes-seam-p2.sh`. run-all 200/0.
+- **P3** ✅(0.8.47): §9.1 eval→argv 선행 후 Seam B — `sfs orchestrator export`(pointer-only,
+  whitelist id/kind/evidence_pointer/title, raw body 유출 0) + `import-review`(decision
+  enum + 전 inbound 필드 sanitize=pipe/control strip+cap, advisory review-log, APPLY 불가)
+  + file-drop transport 실구현(api/webhook/cli 는 config+future adapter, OCP-narrow) +
+  credential_ref indirection scalar(평문 0, template 2.1→2.2). enabled-gate 양쪽(off→exit3
+  무쓰기), schema reject exit5. `test-hermes-seam-p3.sh` + `test-route-exec-argv-injection.sh`.
+  run-all 202/0. 채널 publish 는 0.8.45+46+47 묶어서.
+
+> 점진 도입: 각 phase 는 계약+회귀잠금 위에 다음을 얹고 standalone·no-auto-patch 를
+> 유지한다 — team topology 와 동일 철학.

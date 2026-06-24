@@ -13,6 +13,60 @@
 
 ---
 
+## 0.8.47
+
+Hermes 자체진화 seam 의 마지막 단계(P3)입니다. Seam B — 큐레이션/승격 후보를 외부 검토 표면으로 내보내고(포인터만), 사람이 내린 검토 결과를 다시 받아 advisory 로그에 적재합니다. 실제 적용(APPLY)은 끝까지 `tidy` 레일 + 사람 게이트입니다.
+
+체감 변화:
+
+- `sfs orchestrator export --from <candidates>` 가 후보를 **포인터 전용**(id +
+  evidence_pointer + 메타)으로 review_outbox 에 내보냅니다 — 원문 body 는 구조적으로
+  나가지 않습니다(file-drop transport).
+- `sfs orchestrator import-review --file <review>` 가 사람 검토(approve|defer|reject +
+  코멘트)를 검증·정화해 review-log 에 1줄 적재합니다. approve 라도 advisory 일 뿐, 적용·
+  원격쓰기·게이트를 트리거하지 못합니다.
+- **보안**: team topology 의 `sfs route` 실행 경로가 `eval` → argv 배열로 바뀌어, capsule
+  goal 의 `$(…)`/백틱이 shell 로 실행되지 않습니다(주입 차단). 자격증명은 평문 금지,
+  `credential_ref` 는 indirection placeholder 만.
+- standalone: seam 을 끄면(기본) export/import 모두 거부하고 아무것도 쓰지 않습니다 —
+  루프는 doctor+curation+tidy 만으로 동일 동작.
+
+---
+
+## 0.8.46
+
+Hermes 자체진화 seam 의 2단계(P2)입니다. Seam A — 외부 오케스트레이터가 떨군 typed SIGNAL 캡슐을 받아 큐에 적재하는 경로가 열립니다. 제안만 쌓을 뿐, 루프의 실제 상태는 건드리지 않습니다.
+
+체감 변화:
+
+- `sfs orchestrator ingest --file <capsule>` 가 SIGNAL 캡슐(5개 typed 필드: source /
+  kind / evidence_pointer / confidence / ts)을 검증하고 한 줄짜리 typed 항목을
+  `.sfs-local/orchestrator/signal-queue.md` 에 append 합니다. curation 패스가 이 큐를
+  읽기전용 추가 입력으로 소비합니다(doctor + lessons 아카이브와 나란히).
+- suggest-only: ingest 는 큐만 씁니다 — lessons/evolution 원장이나 skill 을 자동기록하지
+  않고, APPLY 는 여전히 `tidy` 레일 + 사람 게이트입니다.
+- standalone: seam 이 꺼져 있거나(기본) 없으면 ingest 는 거부하고 큐를 만들지 않습니다.
+  잘못된 kind·누락 필드·포인터 아닌 blob 증거는 큐를 그대로 둔 채 reject 됩니다.
+
+---
+
+## 0.8.45
+
+team topology 의 자매 트랙인 Hermes 자체진화 seam 의 1단계(P1)입니다. 외부 상주 오케스트레이터(Hermes-class)를 데이터로 추상화하는 스키마 + 읽기전용 리졸버만 얹습니다 — 기본 비활성이라 끄면 지금과 100% 동일합니다.
+
+체감 변화:
+
+- `model-profiles.yaml` 에 `external_orchestrator` 블록이 생깁니다(`enabled: false` 기본).
+  외부 오케스트레이터의 전송 방식(REST/webhook/CLI/file-drop)은 `transport_kind`
+  scalar 하나로 추상화돼, 오케스트레이터 교체가 코드 수정 없이 설정 한 줄로 끝납니다(OCP).
+- `sfs orchestrator show` 로 현재 seam 설정을 읽기전용으로 확인합니다. 이 단계는 스키마와
+  리졸버(계약)까지만이며 실제 신호 주입·검토 표면은 다음 단계(P2/P3)에서 얹힙니다.
+- 기본 비활성 스키마가 standalone 보장을 그대로 유지합니다 — 오케스트레이터를 떼거나 꺼두면
+  루프는 doctor+curation+tidy 만으로 동일하게 돌고, 어떤 외부 신호도 코드/원장/스킬을 자동
+  수정하거나 게이트를 우회하지 못합니다.
+
+---
+
 ## 0.8.44
 
 멀티에이전트 team topology 의 마지막 단계(P3)입니다. P1/P2 의 데이터 표면 위에 실제 디스패치 헬퍼 `sfs route <role> <capsule>` 가 얹혔습니다. solo 는 끝까지 그대로입니다.

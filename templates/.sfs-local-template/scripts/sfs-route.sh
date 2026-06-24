@@ -136,29 +136,69 @@ prompt="GOAL: ${goal}"
 # advisory cost 가드 (차단 아님 — product finding 으로 표면화만).
 [[ -n "${budget}" ]] && echo "route: advisory token_budget=${budget} (worker 초과 시 product finding)" >&2
 
-# ── invoke 템플릿 채움 + transport 전달 전략 ─────────────────────────────────
-cmd_str="${invoke//\{tools\}/${tools}}"
+# ── invoke 템플릿 채움 + transport 전달 전략 (argv ARRAY — no eval) ───────────
+# SECURITY: the invoke template is split into argv WORDS and each capsule value
+# ({prompt}/{tools}/{prompt_file}) is placed as a SINGLE array element, then the
+# resulting argv array (cmd_arr) is executed directly. A capsule whose goal
+# contains `$(...)` / backticks is therefore passed as inert data, never re-parsed
+# by a shell — closing the injection seam that an eval of an interpolated string
+# would open. This matters the moment a real headless call is wired (Hermes P3);
+# the dry-run path renders the same array for display but executes nothing.
 prompt_file=""
 case "${transport}" in
-  argv)
-    cmd_str="${cmd_str//\{prompt\}/${prompt}}"
-    delivery="argv (inline {prompt})"
-    ;;
-  stdin)
-    cmd_str="${cmd_str//\{prompt\}/}"
-    delivery="stdin (prompt piped)"
-    ;;
+  argv)  delivery="argv (inline {prompt})" ;;
+  stdin) delivery="stdin (prompt piped)" ;;
   file)
     prompt_file="$(mktemp "${TMPDIR:-/tmp}/sfs-route-prompt.XXXXXX")"
     printf '%s\n' "${prompt}" > "${prompt_file}"
-    cmd_str="${cmd_str//\{prompt_file\}/${prompt_file}}"
     delivery="file (${prompt_file})"
     ;;
-  *)
-    cmd_str="${cmd_str//\{prompt\}/${prompt}}"
-    delivery="argv (fallback)"
-    ;;
+  *)     delivery="argv (fallback)" ;;
 esac
+
+# Word-split the template (templates use unquoted single-token placeholders) and
+# substitute per word, keeping each capsule value as exactly one argv element.
+cmd_arr=()
+# shellcheck disable=SC2206
+tmpl_words=( ${invoke} )
+# nounset/empty-array guard (macOS bash 3.2 + set -u): invoke is non-empty here
+# (dispatch-off already returned above), but assert before expanding the arrays.
+if (( ${#tmpl_words[@]} == 0 )); then
+  echo "route: empty invoke template for runtime='${runtime}' — act directly" >&2
+  exit "${SFS_EXIT_DISPATCH_OFF}"
+fi
+for w in "${tmpl_words[@]}"; do
+  case "${w}" in
+    '{prompt}')
+      case "${transport}" in
+        stdin|file) : ;;                       # delivered out-of-band, omit from argv
+        *) cmd_arr+=( "${prompt}" ) ;;
+      esac
+      ;;
+    '{prompt_file}')
+      [[ -n "${prompt_file}" ]] && cmd_arr+=( "${prompt_file}" )
+      ;;
+    '{tools}')
+      cmd_arr+=( "${tools}" )
+      ;;
+    *'{prompt}'*|*'{tools}'*|*'{prompt_file}'*)
+      sub="${w//\{tools\}/${tools}}"
+      if [[ "${transport}" == "stdin" ]]; then sub="${sub//\{prompt\}/}"; else sub="${sub//\{prompt\}/${prompt}}"; fi
+      sub="${sub//\{prompt_file\}/${prompt_file}}"
+      cmd_arr+=( "${sub}" )
+      ;;
+    *)
+      cmd_arr+=( "${w}" )
+      ;;
+  esac
+done
+if (( ${#cmd_arr[@]} == 0 )); then
+  echo "route: invoke template produced no command — act directly" >&2
+  exit "${SFS_EXIT_DISPATCH_OFF}"
+fi
+# Display rendering only (dry-run): a plain space-join, NOT shell-quoted, so the
+# command line stays human-readable. The real exec never uses this string.
+cmd_str="${cmd_arr[*]}"
 
 # ── 실행 (또는 dry-run mock) ─────────────────────────────────────────────────
 if [[ "${SFS_ROUTE_DRY_RUN:-0}" == "1" ]]; then
@@ -171,18 +211,14 @@ if [[ "${SFS_ROUTE_DRY_RUN:-0}" == "1" ]]; then
   exit 0
 fi
 
-# real exec: guards propagate via env so a worker that itself routes stays bounded.
-# ⚠️ SECURITY (future real-exec wiring, P4/Hermes): the eval below substitutes the
-# capsule's goal/AC text into the command string. A capsule whose goal contains
-# `$(...)`/backticks would execute as shell. The dry-run path (the only one tested
-# here) never evals; before wiring real headless calls, build an argv ARRAY per
-# transport_kind instead of eval-ing an interpolated string — close the injection seam.
+# real exec: argv array (no eval). Guards propagate via env so a worker that itself
+# routes stays bounded.
 export SFS_ROUTE_HOP="${next_hop}" SFS_ROUTE_CHAIN="${next_chain}"
 rc=0
 if [[ "${transport}" == "stdin" ]]; then
-  printf '%s\n' "${prompt}" | eval "${cmd_str}" || rc=$?
+  printf '%s\n' "${prompt}" | "${cmd_arr[@]}" || rc=$?
 else
-  eval "${cmd_str}" || rc=$?
+  "${cmd_arr[@]}" || rc=$?
 fi
 [[ -n "${prompt_file}" ]] && rm -f "${prompt_file}"
 exit "${rc}"

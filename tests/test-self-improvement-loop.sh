@@ -64,6 +64,14 @@ has "${SSOT}" "measured-but-not-sufficient" "invariant 4 measured-but-not-suffic
 has "${SSOT}" "auto-patch" "invariant 5 no code auto-patch (MD edits only)"
 has "${SSOT}" "SCHEDULED_RUN_CONTRACT" "invariant 6 scheduled/unattended contract"
 
+# ── standalone + external seam reflects Hermes-seam P1 (default-off, not prep-only) ─
+# The loop SSoT must not call the seam "prep-only" once P1 wired a default-off
+# schema; it points at the entry contract and locks the opt-in/default-off framing.
+has "${SSOT}" "Standalone + external seam" "standalone-seam section anchor"
+has "${SSOT}" "default off" "seam is opt-in default-off (post-P1)"
+has "${SSOT}" "external_orchestrator.enabled: false" "default-off schema scalar referenced"
+grep -Fq "prep-only" "${SSOT}" && fail "loop SSoT still calls the seam prep-only (P1 promoted it to default-off schema)"
+
 # ── stage handoff artifact chain (typed handoff) ───────────────────
 has "${SSOT}" "lessons.md" "handoff artifact lessons.md"
 has "${SSOT}" "curation report" "handoff artifact curation report"
@@ -96,13 +104,21 @@ absent "${SSOT}" "consecutive discarded iterations" "no harness discard-ladder m
 absent "${SSOT}" "Tier C — hook (code-enforced" "no critical-rule-hook tier-mechanics copy"
 absent "${SSOT}" "category: gate | review" "no lessons schema-block copy"
 
-# ── WU-2: prep-only self-improvement seam in external-orchestrator-entry ──
-has "${ORCH}" "Self-improvement seam" "WU-2 seam section anchor"
-has "${ORCH}" "self-improvement-loop.md" "WU-2 seam points to loop SSoT"
-has "${ORCH}" "External SIGNAL source" "WU-2 seam 1 external signal source"
-has "${ORCH}" "proposal-review surface" "WU-2 seam 2 external review surface"
-has "${ORCH}" "doctor + curation + tidy" "WU-2 seam standalone-guarantee discriminator"
-has "${ORCH}" "no runtime wiring" "WU-2 seam prep-only (no runtime wiring)"
+# ── Self-improvement seam in external-orchestrator-entry ──
+# WU-2 introduced this as a prep-only seam; Hermes-seam P1 (0.8.45) promoted it to
+# a default-off schema + read-only resolver. The anchors below now lock the P1
+# reality: the two seam attachment points + the standalone discriminator stay, and
+# the prep-only "no runtime wiring" line is replaced by the default-off invariant
+# that holds standalone *while* the seam is wired.
+has "${ORCH}" "Self-improvement seam" "seam section anchor"
+has "${ORCH}" "self-improvement-loop.md" "seam points to loop SSoT"
+has "${ORCH}" "External SIGNAL source" "seam 1 external signal source"
+has "${ORCH}" "proposal-review surface" "seam 2 external review surface"
+has "${ORCH}" "doctor + curation + tidy" "seam standalone-guarantee discriminator"
+has "${ORCH}" "default off" "P1 seam is opt-in default-off"
+has "${ORCH}" "enabled: false" "P1 default-off schema scalar referenced"
+has "${ORCH}" "read-only resolver" "P1 read-only resolver surface"
+has "${ORCH}" "transport_kind" "P1 OCP transport abstraction scalar"
 # suggest-only + first-permission read-only apply to the seam too (pre-existing
 # anchor must stay).
 has "${ORCH}" "First-permission read-only" "WU-2 pre-existing read-only anchor preserved"

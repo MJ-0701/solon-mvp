@@ -93,8 +93,11 @@ repeated finding becomes an automated check:
 Accumulation alone degrades: a ledger that only grows becomes noise. A
 **periodic curation pass** — a scheduled run or a tidy-rail step — reviews
 `.sfs-local/lessons.md` plus the preserved event archives
-(`.sfs-local/archives/events/sprints/`) read-only and produces a curation
-report that:
+(`.sfs-local/archives/events/sprints/`) read-only — and, when an external
+orchestrator seam is wired, the staged SIGNAL queue
+`.sfs-local/orchestrator/signal-queue.md` as an additional read-only input
+(typed entries from `sfs orchestrator ingest`; suggest-only, by-reference to
+`external-orchestrator-entry.md`) — and produces a curation report that:
 
 - clusters lessons repeating the same `trigger`/`category` pattern and
   proposes merges (the merged entry keeps every source `L-NNN` id in its

@@ -102,9 +102,12 @@ them and point back, so there is no second copy to drift.
 The loop runs **standalone**: with no external orchestrator present, it still
 turns on `doctor + curation + tidy` alone. An external standing orchestrator
 (Hermes-class) is an optional extension point that may feed SIGNAL or host a
-cross-system proposal-review surface — documented as a prep-only seam in
-`external-orchestrator-entry.md`, with the invariants above unchanged. Removing
-every external orchestrator must leave the loop fully working.
+cross-system proposal-review surface — its attachment contract and the
+default-off schema that holds standalone while it is wired are owned by
+`external-orchestrator-entry.md`, with the invariants above unchanged. The seam
+ships **opt-in, default off** (`external_orchestrator.enabled: false`), so
+removing every external orchestrator — or simply leaving it disabled — must leave
+the loop fully working.
 
 ## Cross-references
 

@@ -39,11 +39,11 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.44" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.44" "version output"
-assert_contains_text "${output}" "latest 0.8.44" "latest output"
+[[ "${plain_output}" == "sfs 0.8.47" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.47" "version output"
+assert_contains_text "${output}" "latest 0.8.47" "latest output"
 assert_contains_text "${output}" "status up-to-date" "status output"
-assert_contains_text "${output}" "installed_release_headline Multi-agent team topology P3 lands the dispatch helper: \`sfs route <role> <capsule>\` turns the P1/P2 data surface into an actual headless hand-off. It resolves role→runtime→invoke-template→transport purely from \`model-profiles.yaml\`, fills the capsule's typed fields into \`{prompt}\`/\`{tools}\`, and calls the target CLI — with hop-limit + role-cycle guards that refuse runaway dispatch (exit 8) and a clean \"act directly\" degrade (exit 3, never a crash) when dispatch is off (solo) or the registry is absent. How each CLI is fed is data: a new \`transport_kind\` scalar (\`argv|stdin|file\`) selects the delivery strategy, so flipping a runtime's transport is a one-scalar edit with zero \`sfs-route.sh\` diff. Real CLI execution is mocked in-repo via \`SFS_ROUTE_DRY_RUN=1\` (no auth reached); the deliverable is adjustability-by-data, not a live call. The helper is named \`route\` because \`dispatch\` is the router engine itself and \`handoff\` is a pre-existing command (design D5). This completes the opt-in team topology — solo remains byte-for-byte unchanged throughout." "installed release headline"
+assert_contains_text "${output}" "installed_release_headline Hermes self-evolution seam P3 wires Seam B and closes the dispatch injection seam. Two new write verbs on \`sfs orchestrator\`: \`export --from <candidates>\` emits a pointer-only typed proposal to the \`review_outbox\` (file-drop transport — id + evidence_pointer + metadata, a candidate's raw body structurally cannot leave), and \`import-review --file <review>\` validates and sanitizes a typed human review (\`candidate_id\` / \`decision\` ∈ approve|defer|reject / \`comment\` / \`reviewer\` / \`ts\`) into an advisory review log. The review log changes nothing about the loop's authority — an \`approve\` writes only that log; APPLY stays the \`tidy\` rail under a human gate, untriggerable from here. Security precondition first: team topology P3's \`sfs-route.sh\` real-exec path no longer \`eval\`s an interpolated command string — it builds an argv array and executes it directly, so a capsule goal carrying \`\$(...)\` / backticks is inert data, not shell. Credentials stay indirection-only (\`credential_ref\` placeholder, never a value). This completes the opt-in Hermes seam (P1 schema → P2 SIGNAL ingest → P3 export/import); standalone holds throughout — disable the seam and the loop runs on doctor+curation+tidy alone." "installed release headline"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -61,6 +61,6 @@ fallback_output="$(
   "${fallback_dist}/bin/sfs" version --check
 )"
 
-assert_contains_text "${fallback_output}" "installed_release_headline 멀티에이전트 team topology 의 마지막 단계(P3)입니다. P1/P2 의 데이터 표면 위에 실제 디스패치 헬퍼 \`sfs route <role> <capsule>\` 가 얹혔습니다. solo 는 끝까지 그대로입니다." "release notes fallback headline"
+assert_contains_text "${fallback_output}" "installed_release_headline Hermes 자체진화 seam 의 마지막 단계(P3)입니다. Seam B — 큐레이션/승격 후보를 외부 검토 표면으로 내보내고(포인터만), 사람이 내린 검토 결과를 다시 받아 advisory 로그에 적재합니다. 실제 적용(APPLY)은 끝까지 \`tidy\` 레일 + 사람 게이트입니다." "release notes fallback headline"
 
 echo "test-version-release-headline: OK"
