@@ -178,10 +178,11 @@ if grep -Fq '& $CurrentScriptPath @reloadArgs' "${ps_wrapper}"; then
 fi
 assert_contains "${ps_wrapper}" '$bashArgs = [string[]] @($SfsArgs)' "ps1 bash bridge preserves whole arg tokens"
 assert_contains "${ps_wrapper}" 'Write-SfsArgTrace "PS_BASH_ARGS" $bashArgs' "ps1 traces final bash bridge args"
-# 0.8.54 (issue #9): the bridge now launches bash via `-c <prelude> $0 $@` so the
+# 0.8.54 (issue #9): the bridge now launches bash via `-c <prelude>` so the
 # POSIX-PATH prelude prepends /usr/bin:/bin before the real entrypoint runs. The
-# normalized arg array is still splatted (now as the post-$0 positionals).
-assert_contains "${ps_wrapper}" '& $bash -c $bridgePrelude $sfsShBash @bashArgs' "ps1 bash bridge splats normalized arg array through POSIX-PATH prelude"
+# normalized arg array is still splatted, now as $@ after the script path (the
+# `exec bash "$@"` form smoke-verified on real Windows).
+assert_contains "${ps_wrapper}" '& $bash -c $bridgePrelude "sfs" $sfsShBash @bashArgs' "ps1 bash bridge splats normalized arg array through POSIX-PATH prelude"
 assert_contains "${ps_wrapper}" '$bashExitCode = $LASTEXITCODE' "ps1 captures final bash bridge exit code before exiting"
 assert_contains "${ps_wrapper}" 'Write-SfsArgTrace "PS_AFTER_BASH_BRIDGE_LASTEXITCODE" $bashExitCode' "ps1 traces final bash bridge return"
 if grep -Fq '& $bash (Convert-ToBashPath $sfsSh) @SfsArgs' "${ps_wrapper}"; then

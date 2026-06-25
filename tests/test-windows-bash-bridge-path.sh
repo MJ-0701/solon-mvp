@@ -36,11 +36,18 @@ fail() { echo "FAIL: $*" >&2; exit 1; }
 [[ -f "${PS1}" ]] || fail "missing ${PS1}"
 [[ -f "${SFS}" ]] || fail "missing ${SFS}"
 
-# ── S1: bridge launches bash via `-c <prelude>` with the entrypoint as $0 ─────
-grep -Fq '& $bash -c $bridgePrelude $sfsShBash @bashArgs' "${PS1}" \
-  || fail "S1: bridge must invoke 'bash -c \$bridgePrelude \$sfsShBash @bashArgs' (the -c prelude path)"
+# ── S1: bridge launches bash via `-c <prelude>` (NOT -lc), entrypoint via $@ ──
+# Smoke-verified form on real Windows: `bash -c <prelude> <sentinel> <script> <args>`
+# so $@ = script + args and `exec bash "$@"` preserves the original path/args.
+grep -Fq '& $bash -c $bridgePrelude "sfs" $sfsShBash @bashArgs' "${PS1}" \
+  || fail "S1: bridge must invoke 'bash -c \$bridgePrelude \"sfs\" \$sfsShBash @bashArgs' (the -c prelude path, script via \$@)"
 grep -Fq '$sfsShBash = Convert-ToBashPath $sfsSh' "${PS1}" \
-  || fail "S1: \$sfsShBash must be the bash-form entrypoint passed as \$0"
+  || fail "S1: \$sfsShBash must be the bash-form entrypoint forwarded into \$@"
+# Negative: the bridge must NOT use a login shell (`-lc`) — that would source the
+# user's profile scripts (the Windows-side fix explicitly switched -lc -> -c).
+if grep -Eq '& \$bash -lc ' "${PS1}"; then
+  fail "S1: bridge must use 'bash -c', never 'bash -lc' (no user-profile sourcing)"
+fi
 
 # ── S2: the prelude prepends /usr/bin:/bin AHEAD of $PATH (POSIX-first) ───────
 # The exact ordering is the whole fix: /usr/bin:/bin must come BEFORE "$PATH" so
@@ -66,8 +73,8 @@ fi
 # so the probe uses `||` + printf to stderr and STILL `exec bash`, no exit.
 grep -Fq 'command -v mktemp >/dev/null 2>&1 ||' "${PS1}" \
   || fail "S4: prelude must probe mktemp with a warn-only '|| printf ...' guard"
-grep -Fq 'exec bash "$0" "$@"' "${PS1}" \
-  || fail "S4: prelude must 'exec bash \"\$0\" \"\$@\"' after the warn-only probe"
+grep -Fq 'exec bash "$@"' "${PS1}" \
+  || fail "S4: prelude must 'exec bash \"\$@\"' (script+args via \$@) after the warn-only probe"
 # The prelude line itself must not contain an `exit` (which would hard-fail a
 # working install). Extract the single-quoted prelude assignment and check it.
 prelude_line="$(grep -F '$bridgePrelude =' "${PS1}" | head -1)"

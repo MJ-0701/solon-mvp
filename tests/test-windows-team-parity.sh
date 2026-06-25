@@ -111,4 +111,23 @@ done
 grep -q -- '--team' "${DIST_DIR}/install.sh" || fail "install.sh: missing --team front door"
 grep -q -- '--team' "${DIST_DIR}/upgrade.sh" || fail "upgrade.sh: missing --team front door"
 
+# ── 0.8.54 (issue #9): bash-bridge POSIX PATH guarantee ─────────────────────
+# team / auth / report-bug are bash-delegated, so the very bridge that reaches
+# the bash core must give it Git for Windows' POSIX utils. A non-login
+# `bash <script>` inherited the Windows PATH WITHOUT /usr/bin, so mktemp/dirname/
+# timeout were "command not found" and every team command died before SFS logic.
+# The smoke-verified fix: launch bash with `-c` (NOT `-lc` — no profile sourcing),
+# prepend /usr/bin:/bin INSIDE bash, then `exec bash "$@"` to preserve the
+# original script path + args. These asserts mirror the dedicated regression in
+# tests/test-windows-bash-bridge-path.sh so team parity owns the contract too.
+grep -Fq 'export PATH=/usr/bin:/bin:"$PATH"' "${sfs_ps1}" \
+  || fail "bin/sfs.ps1: bash bridge must prepend /usr/bin:/bin ahead of \$PATH (POSIX utils for team/auth/report-bug)"
+grep -Fq 'exec bash "$@"' "${sfs_ps1}" \
+  || fail "bin/sfs.ps1: bash bridge must 'exec bash \"\$@\"' to preserve the original script path + args"
+grep -Fq '& $bash -c $bridgePrelude "sfs" $sfsShBash @bashArgs' "${sfs_ps1}" \
+  || fail "bin/sfs.ps1: bash bridge must launch via 'bash -c' with the script + args forwarded as \$@"
+if grep -Eq '& \$bash -lc ' "${sfs_ps1}"; then
+  fail "bin/sfs.ps1: bash bridge must use 'bash -c', never 'bash -lc' (a login shell sources user profile scripts)"
+fi
+
 echo "PASS: Windows ps1 team-activation parity (delegation contract intact)"
