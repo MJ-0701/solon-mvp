@@ -13,6 +13,17 @@
 
 ---
 
+## 0.8.55
+
+0.8.54 의 Windows ps1 bash bridge 수정을 실 Windows 에서 smoke 검증된 형태(`exec bash "$@"`, `-lc` 아닌 `-c`)와 byte 단위로 일치시킵니다. 동작은 0.8.54 와 동일(POSIX `/usr/bin:/bin` 을 PATH 앞에 붙여 mktemp/dirname/timeout 정상 해석)하며, 공식 배포본과 검증된 hotpatch 의 소스 발산을 막는 정합성 정리입니다.
+
+체감 변화:
+
+- **Windows**: `scoop update sfs` 로 0.8.55 교체 후 `sfs.cmd team show` / `sfs.cmd team resolve-runtime researcher` 가 동일하게 정상 동작 (issue #9).
+- **macOS / Linux / Git Bash**: 변화 없음.
+
+---
+
 ## 0.8.54
 
 Windows 에서 `sfs.cmd team` / `auth` / `report-bug` 같은 명령이 PATH 나 `SFS_COMMAND_TIMEOUT_SEC=0` 우회를 몰라도 바로 동작합니다. 그동안 Windows PowerShell/Codex 에서 bash core 가 Git for Windows 의 POSIX 유틸 경로(`/usr/bin`)를 PATH 에서 못 찾아 `mktemp: command not found` / `dirname: command not found` 로 SFS 로직 진입 전에 죽었는데(issue #9), 이제 bridge 가 bash 안에서 `/usr/bin:/bin` 을 PATH 맨 앞에 붙여 실행하므로 POSIX `timeout`·`mktemp`·`dirname` 이 정상 해석됩니다.

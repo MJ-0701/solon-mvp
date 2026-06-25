@@ -1,5 +1,25 @@
 ## [Unreleased]
 
+## [0.8.55] - 2026-06-25
+
+> **Patch release: Windows ps1 bash-bridge aligned to the real-Windows-verified exec form (issue #9). 0.8.54 fixed the POSIX PATH gap with `bash -c '...; exec bash "$0" "$@"'` — functionally correct and audit-passed, but the form smoke-verified on a real Windows host uses `exec bash "$@"` (the script path + args forwarded as `$@`, `$0` a sentinel) and launches with `-c`, never `-lc` (a login shell would source the user's profile scripts). 0.8.55 aligns the shipped runtime to that exact byte-form so the official artifact and the verified Windows hotpatch do not diverge. Behavior is identical — both run `bash <entrypoint> <args>` with `/usr/bin:/bin` prepended ahead of `$PATH`, leak-proof and root-agnostic — so this is a source-parity refinement, not a functional change. The non-Windows (bash/macOS) path is byte-for-byte unchanged. Locked by `tests/test-windows-bash-bridge-path.sh` (now asserting the `exec bash "$@"` form + a `-lc` negative guard) and mirrored into `tests/test-windows-team-parity.sh`, so the bash-delegated team path owns the bridge contract it depends on.**
+
+### Changed
+
+- **Windows `bin/sfs.ps1` bash bridge aligned to the real-Windows-verified form
+  (issue #9).** The bridge now runs `& $bash -c $bridgePrelude "sfs" $sfsShBash
+  @bashArgs`; the prelude prepends `/usr/bin:/bin` ahead of `$PATH`, then
+  `exec bash "$@"` re-runs the entrypoint with the script path + args via `$@`.
+  Supersedes 0.8.54's equivalent `exec bash "$0" "$@"` form. `-c`, never `-lc`.
+
+### Tests
+
+- `tests/test-windows-bash-bridge-path.sh` S1/S4 now assert the `exec bash "$@"`
+  launch (script + args via `$@`) and reject `bash -lc`.
+- `tests/test-windows-team-parity.sh` gains bridge parity asserts (POSIX prepend,
+  `exec bash "$@"`, `-c` not `-lc`) so the team-activation path locks the bridge
+  contract it depends on.
+
 ## [0.8.54] - 2026-06-25
 
 > **Patch release: Windows ps1 bash-bridge POSIX PATH guarantee (issue #9). On Windows, `bin/sfs.ps1` launched the bash core as a non-login `bash <script>`, which inherits the Windows PATH WITHOUT Git for Windows' `<GitRoot>\usr\bin` — so before any SFS logic ran, the watchdog's `timeout` bound to `C:\Windows\System32\timeout.exe` and `mktemp` / `dirname` were "command not found", killing every bash-delegated command (`team`, `auth`, `report-bug`) at `bin/sfs` line 110 (mktemp) / 173 (dirname). Users had to know to `export PATH=/usr/bin:/bin:$PATH` or pass `SFS_COMMAND_TIMEOUT_SEC=0` — a zero-knowledge-activation violation. The fix prepends the POSIX dirs INSIDE bash via `bash -c 'export PATH=/usr/bin:/bin:"$PATH"; ...; exec bash "$@"'` (`-c`, never `-lc` — a login shell would source the user's profile; `$@` carries the original script path + args): leak-proof — the parent `$env:PATH` is never mutated, so repeated `sfs.cmd` calls do not grow the session PATH; root-agnostic — `/usr/bin` resolves through the Git Bash mount table for any install dir, plus a custom `SFS_BASH` / WSL, with no GitRoot derivation. POSIX `timeout` now wins over `timeout.exe` by ordering (the prepend is FRONT), so `sfs_has_posix_timeout` passes and the mktemp watchdog fallback is never reached. A warn-only `mktemp` probe emits a clear Git-for-Windows recovery hint on a genuinely incomplete install but never hard-fails a working one (PATH already correct / WSL / custom bash). The non-Windows (bash/macOS) path is byte-for-byte unchanged — the workaround is confined to the ps1 wrapper. Locked by `tests/test-windows-bash-bridge-path.sh` (static source asserts + an executable PATH-ordering oracle).**
