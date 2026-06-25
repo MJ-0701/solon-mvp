@@ -1,5 +1,32 @@
 ## [Unreleased]
 
+## [0.8.54] - 2026-06-25
+
+> **Patch release: Windows ps1 bash-bridge POSIX PATH guarantee (issue #9). On Windows, `bin/sfs.ps1` launched the bash core as a non-login `bash <script>`, which inherits the Windows PATH WITHOUT Git for Windows' `<GitRoot>\usr\bin` — so before any SFS logic ran, the watchdog's `timeout` bound to `C:\Windows\System32\timeout.exe` and `mktemp` / `dirname` were "command not found", killing every bash-delegated command (`team`, `auth`, `report-bug`) at `bin/sfs` line 110 (mktemp) / 173 (dirname). Users had to know to `export PATH=/usr/bin:/bin:$PATH` or pass `SFS_COMMAND_TIMEOUT_SEC=0` — a zero-knowledge-activation violation. The fix prepends the POSIX dirs INSIDE bash via `bash -c 'export PATH=/usr/bin:/bin:"$PATH"; ...; exec bash "$0" "$@"'` (Approach B): leak-proof — the parent `$env:PATH` is never mutated, so repeated `sfs.cmd` calls do not grow the session PATH; root-agnostic — `/usr/bin` resolves through the Git Bash mount table for any install dir, plus a custom `SFS_BASH` / WSL, with no GitRoot derivation. POSIX `timeout` now wins over `timeout.exe` by ordering (the prepend is FRONT), so `sfs_has_posix_timeout` passes and the mktemp watchdog fallback is never reached. A warn-only `mktemp` probe emits a clear Git-for-Windows recovery hint on a genuinely incomplete install but never hard-fails a working one (PATH already correct / WSL / custom bash). The non-Windows (bash/macOS) path is byte-for-byte unchanged — the workaround is confined to the ps1 wrapper. Locked by `tests/test-windows-bash-bridge-path.sh` (static source asserts + an executable PATH-ordering oracle).**
+
+### Fixed
+
+- **Windows `sfs.cmd team` / `auth` / `report-bug` reach SFS logic without manual
+  PATH / env workarounds (issue #9).** The `bin/sfs.ps1` bash bridge now runs
+  `& $bash -c $bridgePrelude $sfsShBash @bashArgs`, where `$bridgePrelude`
+  prepends `/usr/bin:/bin` ahead of `$PATH` and `exec bash "$0" "$@"` re-runs the
+  entrypoint with byte-for-byte arg parity. Replaces the cryptic
+  `line 110: mktemp: command not found` / `line 173: dirname: command not found`
+  failures with either a working command or a clear recovery hint.
+
+### Tests
+
+- **`tests/test-windows-bash-bridge-path.sh` (regression).** S1 the bridge uses
+  the `-c <prelude>` launch; S2 `/usr/bin:/bin` is prepended AHEAD of `$PATH`
+  (with a negative assert against appending behind it); S3 leak-proof — no
+  `$env:PATH =` mutation in the wrapper; S4 the `mktemp` probe is warn-only (no
+  `exit` in the prelude); S5 the workaround is confined to the ps1 wrapper (the
+  bash core `bin/sfs` carries no `/usr/bin:/bin` prepend). L1 is an executable
+  oracle proving the prepend makes a POSIX `mktemp` win over a shadowing PATH and
+  actually run.
+- Updated `tests/test-windows-agent-adapter-fallback.sh` bash-bridge assertion to
+  the new `-c` launch form.
+
 ## [0.8.53] - 2026-06-25
 
 > **Patch release: legacy UNMARKED deprecated-fallback -> canonical promotion via provenance inference. 0.8.52 promotes a fallback binding back to canonical only when it carries the `# sfs-fallback: <canonical>` marker — but that marker is written at materialize time, so a binding that hardened to the deprecated `gemini` runtime BEFORE 0.8.52 (no marker — e.g. a hand-spliced `product-image-studio` researcher) was classified user-custom and preserved forever, with no product path back to canonical once `agy` was installed+authed. 0.8.53 adds a second detection signal (OR with the marker): an UNMARKED binding pointing at a runtime the `runtime_registry` marks `deprecated`, whose active-preset `team_preset_catalog` canonical differs and is now capable, is inferred to be a legacy fallback and flows through the SAME detect -> offer(one consent) -> apply path. The two signals share one core (`team_promote_fallbacks` in `sfs-team-apply.sh`); the consent is now 3-valued so the legacy decline can be honored distinctly: (R1) offer-only, accept rewrites just that one line; (R2) an explicit decline writes `# sfs-pinned: <rt> (user)` and the binding is never re-offered (legacy `# sfs-pinned:` is the new "user-chose-this" provenance, replacing "unmarked = preserve"); (R3) only divergence to a *deprecated* runtime triggers — a user override to a non-deprecated runtime is never offered or changed; (R4) if the canonical is not capable (agy absent/unauthed, auth-aware gate) there is no offer and no pin; (R5) non-interactive / no-consent = byte-for-byte no change, no pin; (R6) trigger surface is identical to 0.8.52 (`sfs team use` / `sfs team refresh` / `sfs upgrade`), shared core. The pin is comment-only so `resolve-runtime` is unaffected; solo/standalone behavior unchanged. Registered as the `legacy-fallback-promotion` activatable state (zero-knowledge-activation invariant) and locked by `tests/test-team-legacy-fallback-promotion.sh`.**

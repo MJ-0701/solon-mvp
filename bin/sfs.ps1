@@ -1086,7 +1086,25 @@ if (-not (Test-Path $sfsSh)) {
 
 $bashArgs = [string[]] @($SfsArgs)
 Write-SfsArgTrace "PS_BASH_ARGS" $bashArgs
-& $bash (Convert-ToBashPath $sfsSh) @bashArgs
+# 0.8.54 (issue #9): Git for Windows ships the POSIX coreutils (mktemp, dirname,
+# timeout) under <GitRoot>\usr\bin, but a non-login `bash <script>` launched from
+# PowerShell/Codex inherits the Windows PATH WITHOUT /usr/bin. So the watchdog's
+# `timeout` resolved to C:\Windows\System32\timeout.exe and `mktemp` / `dirname`
+# were "command not found" before any SFS logic ran (team / auth / report-bug
+# died at bin/sfs line 110 / 173). Prepend the POSIX dirs INSIDE bash via `-c`,
+# never the parent $env:PATH: leak-proof (repeated sfs.cmd calls do not grow the
+# session PATH) and root-agnostic (/usr/bin resolves through the Git Bash mount
+# table for any install dir, and also for a custom SFS_BASH / WSL). `exec bash`
+# re-runs the real entrypoint with $0=script and $@=forwarded args, so arg
+# parity with the prior direct splat is preserved byte-for-byte. The mktemp
+# probe is warn-only (never hard-fail): an install that already works - PATH
+# already correct, WSL, or a complete custom bash - is left untouched, while a
+# genuinely incomplete Git for Windows gets a clear recovery hint instead of the
+# cryptic "line 110: mktemp: command not found".
+$sfsShBash = Convert-ToBashPath $sfsSh
+$bridgePrelude = 'export PATH=/usr/bin:/bin:"$PATH"; command -v mktemp >/dev/null 2>&1 || printf "sfs: POSIX utilities (mktemp/dirname/timeout) not found even after adding /usr/bin:/bin to PATH; your Git for Windows install may be incomplete - reinstall Git for Windows or set SFS_BASH to a complete bash.exe.\n" >&2; exec bash "$0" "$@"'
+Write-SfsArgTrace "PS_BASH_BRIDGE_PRELUDE" $bridgePrelude
+& $bash -c $bridgePrelude $sfsShBash @bashArgs
 $bashExitCode = $LASTEXITCODE
 Write-SfsArgTrace "PS_AFTER_BASH_BRIDGE_LASTEXITCODE" $bashExitCode
 exit $bashExitCode

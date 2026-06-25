@@ -13,6 +13,17 @@
 
 ---
 
+## 0.8.54
+
+Windows 에서 `sfs.cmd team` / `auth` / `report-bug` 같은 명령이 PATH 나 `SFS_COMMAND_TIMEOUT_SEC=0` 우회를 몰라도 바로 동작합니다. 그동안 Windows PowerShell/Codex 에서 bash core 가 Git for Windows 의 POSIX 유틸 경로(`/usr/bin`)를 PATH 에서 못 찾아 `mktemp: command not found` / `dirname: command not found` 로 SFS 로직 진입 전에 죽었는데(issue #9), 이제 bridge 가 bash 안에서 `/usr/bin:/bin` 을 PATH 맨 앞에 붙여 실행하므로 POSIX `timeout`·`mktemp`·`dirname` 이 정상 해석됩니다.
+
+체감 변화:
+
+- **Windows**: `scoop update sfs` 후 `sfs.cmd team show`, `sfs.cmd team resolve-runtime researcher` 가 별도 PATH/환경 설정 없이 `team_preset: trio` 등 정상 출력까지 도달.
+- **macOS / Linux / Git Bash**: 변화 없음 (수정은 Windows wrapper 한정).
+
+---
+
 ## 0.8.53
 
 0.8.52 는 `# sfs-fallback:` 출처 표식이 있는 fallback binding 만 canonical 로 승격했습니다. 그런데 이 표식은 0.8.52 이후 굳은 binding 에만 찍히므로, 그 이전에 antigravity 부재로 deprecated `gemini` 로 굳은 binding(표식 없음 — 예: 수동으로 끼워 넣은 researcher)은 user-custom 으로 영영 보존돼 `agy` 설치·인증 후에도 canonical 로 돌아올 길이 없었습니다. 0.8.53 은 두 번째 신호를 추가합니다: 표식이 없어도, binding 이 `runtime_registry` 의 deprecated 런타임을 가리키고 활성 preset 의 catalog canonical 이 다른 런타임이며 그게 capable 이면 — legacy fallback 으로 추론해 0.8.52 와 같은 감지 -> 제안(동의 1회) -> 승격 경로를 탑니다. 거절하면 `# sfs-pinned:` 표식을 남겨 다시 묻지 않고(사용자 의도로 확정), deprecated 가 아닌 런타임으로의 사용자 override 는 절대 건드리지 않습니다.
