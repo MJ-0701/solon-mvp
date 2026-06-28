@@ -44,6 +44,8 @@ has "${HARNESS}" "advisor-Code file bus" "pre-existing advisor-Code bus anchor p
 has "${DELEG}" "NORTH_STAR" "north-star section anchor"
 has "${DELEG}" "proactive" "proactive-proposal authority named"
 has "${DELEG}" "harness-autonomy.md" "north-star proactivity gated on verification trust (cross-ref)"
+has "${DELEG}" "trust-gated" "north-star proactivity is trust-gated, not default-on"
+has "${DELEG}" "verification capability is the precondition" "north-star links the verification-autonomy anchor"
 has "${DELEG}" "HUMAN_ATTENTION_IS_SCARCE" "human-attention section anchor"
 has "${DELEG}" "batch" "question-batching discipline"
 # pre-existing anchors preserved (additive guarantee).
