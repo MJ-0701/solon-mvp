@@ -111,6 +111,14 @@ orchestrator seam is wired, the staged SIGNAL queue
   (input to `skill-promotion-loop.md` DETECTION — the curation pass is a
   second candidate source besides `sfs harness doctor`).
 
+A recurring team **"lessons and missteps" report** — a periodic digest of what
+failed and what was corrected, shared so trust can expand on evidence — is
+exactly this curation pass in report form; it is the artifact that backs the
+`harness-autonomy.md` rule that verification capability precedes expanding
+autonomy (external validation, by-reference: a Claude blog post on effective
+human-agent teams, 2026-06-24 — the weekly lessons-and-missteps review; vendor
+specifics held out).
+
 The pass is **suggest-only**: it writes the report, never the ledger. Applying
 a proposed merge or promotion happens at the `tidy` rail under the same human
 gate as every adoption (`skill-promotion-loop.md` EVOLUTION_ADOPTION_GATE).

@@ -44,6 +44,11 @@ do not ship fixed values in the template.
 - **Schedule / availability**: <OPERATOR-SCHEDULE>
 - **External knowledge wiki**: <EXTERNAL-WIKI-NAME> → <LOCAL-CHECKOUT-PATH> (namespace, advisory; see `policies/source-pointer-citation.md` + `policies/obsidian-llm-wiki.md`)
 
+## Direction (north star)
+
+- **North star (ambitious goal)**: <OPERATOR-NORTH-STAR>
+- **Agents allowed to propose proactively**: <OPERATOR-PROACTIVE-AGENTS> (trust-gated; see `policies/work-delegation-and-startup.md` NORTH_STAR)
+
 ## Standing preferences and boundaries
 
 - **Always**: <OPERATOR-ALWAYS>

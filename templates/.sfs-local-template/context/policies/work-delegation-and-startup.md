@@ -1,7 +1,7 @@
 ---
 id: sfs-work-delegation-and-startup
 summary: Decide whether work is worth delegating as a WU (five-factor test), restate-and-clarify before starting, and pick the right runtime tier.
-load_when: ["delegate", "is this a WU", "worth automating", "should I make a sprint", "before we begin", "restate the ask", "clarify first", "which runtime", "chat vs cowork vs code", "getting started"]
+load_when: ["delegate", "is this a WU", "worth automating", "should I make a sprint", "before we begin", "restate the ask", "clarify first", "which runtime", "chat vs cowork vs code", "getting started", "north star", "proactive proposal", "human attention", "ambitious goal"]
 ---
 
 # Work Delegation And Startup
@@ -37,6 +37,49 @@ misunderstanding while it is still free to fix. It composes with the kernel's
 "ask only 1-3 blocking questions" and `user-override-precedence.md` (when intent
 is ambiguous, ask rather than guess). Skip the questions only when the user has
 already given a self-contained, unambiguous spec.
+
+## NORTH_STAR
+
+Direction makes an agent proactive; absent it, an agent only reacts. The
+operator documents an **ambitious goal (north star)** the team is aiming at, and
+names **which agents hold proactive-proposal authority** — the right to suggest
+next work toward that goal rather than wait to be asked. Both live in the
+operator layer (`operator-context.md` `<OPERATOR-NORTH-STAR>` /
+`<OPERATOR-PROACTIVE-AGENTS>`), not the agent identity file.
+
+Proactivity is **trust-gated, not default-on**: an agent earns proposal
+authority for a task type only after it has accumulated enough context and a
+verification means the operator trusts — the `harness-autonomy.md` anchor that
+verification capability is the precondition for expanding autonomy. So the north
+star sets the destination; the verification/trust gate sets how far an agent may
+run toward it unprompted. A proposal is still suggest-only until a human or a
+gate accepts it; north star never bypasses the inviolable gates. External
+validation (by-reference): a Claude blog post on effective human-agent teams,
+2026-06-24 — a documented ambitious goal plus explicit proactive-agent
+designation is what turns reactive agents into ones that drive toward the goal;
+vendor product specifics held out.
+
+## HUMAN_ATTENTION_IS_SCARCE
+
+The operator's attention is the team's scarcest resource, so an agent budgets
+it deliberately rather than interrupting freely:
+
+- **Batch questions.** Collect blocking clarifications and ask them together at a
+  decision point, not one trickle at a time (composes with the kernel's "1-3
+  blocking questions" and `RESTATE_AND_CLARIFY`).
+- **Repeat key context.** Restate the critical constraint or decision in the
+  surface the human reads, so following a thread does not require reloading
+  earlier scrollback.
+- **Limit one-time-exposure items.** Anything shown only once and never
+  re-surfaced (a transient prompt, a buried log line) is easy to miss — keep the
+  count of such items low and prefer durable artifacts the human can re-find.
+- **Communicate a workload guardrail.** Surface the daily/iteration workload the
+  agent is taking on so the operator can see and cap it, rather than discovering
+  an unbounded queue after the fact.
+
+External validation (by-reference): the same effective-human-agent-teams source
+treats human attention as the limiting input and recommends question batching
+and bounded exposure; the principle is adopted, vendor surfaces held out.
 
 ## RUNTIME_SELECTION
 

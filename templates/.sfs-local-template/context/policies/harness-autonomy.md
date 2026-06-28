@@ -1,7 +1,7 @@
 ---
 id: sfs-policy-harness-autonomy
 summary: Convert Harness Engineering from principle into project-operating evidence.
-load_when: ["harness", "autonomy", "parallel agents", "long-running", "quality"]
+load_when: ["harness", "autonomy", "parallel agents", "long-running", "quality", "team roster", "agent roles tools", "who owns what"]
 ---
 
 # Project Harness Autonomy
@@ -27,6 +27,16 @@ SFS applies this as a project-operating contract:
   pipeline, fan-out/fan-in, expert pool, producer-reviewer, supervisor, or
   hierarchical delegation. The pattern is evidence for routing and handoff, not
   a reason to override SFS's single-agent default.
+- Team roster is an explicit artifact, not tribal knowledge. Each human and
+  agent on a selected team declares its **owns/scope/tools** on a durable
+  surface — a skill/persona file or routed-context line, the same place
+  `model-profiles.yaml` already binds `role -> runtime`. The roster makes
+  "which agent does what, with which tools" inspectable instead of implied.
+  Motive (external validation, by-reference): when roles are left unspecified,
+  operators spin up side personal AI assistants and context fragments across
+  unshared workspaces — the roster is the antidote. This is the team-layer
+  twin of the advisor-Code file bus below: declare the players, then route work
+  to them by artifact.
 - Lock the change basis before long implementation: write a compact docs/ADR/
   spec diff or equivalent run brief so workers read the changed intent first,
   not the whole conversation or a stale plan.
@@ -73,7 +83,16 @@ SFS applies this as a project-operating contract:
   evidence to evaluate, not automatic truth.
 - Verifier != implementer is a critical harness invariant. The authoring
   worker cannot be the only reviewer for close; use a separate agent/context or
-  record an explicit waiver for low-risk self-CPO fallback.
+  record an explicit waiver for low-risk self-CPO fallback. The corollary that
+  drives autonomy: **verification capability is the precondition for expanding
+  autonomy** — a delegated task earns more autonomy only once it has a
+  verification means (test, rubric, style guide, or a separate verifier) the
+  human can trust before reviewing the work. No verifier yet → keep it
+  supervised. Trust is built per task type over time, not granted up front
+  (external validation, by-reference). The recurring "lessons and missteps"
+  review that feeds this trust is the lessons curation pass
+  (`lessons-accumulation.md` CURATION_PASS); north-star proactivity
+  (`work-delegation-and-startup.md` NORTH_STAR) is gated on this same anchor.
 - A separate verifier context should be rule-scoped and skeptical: give the
   verifier the rule, expected evidence, counterexamples, and false-positive
   risks, not the author's full reasoning trail.
