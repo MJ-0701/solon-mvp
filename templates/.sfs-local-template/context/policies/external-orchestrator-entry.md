@@ -104,7 +104,11 @@ An orchestrator's first authorized scope is read-only (inspect status, recall,
 healthcheck, read artifacts). Mutation scope is granted explicitly and
 incrementally — read → propose → bounded write → release-adjacent — never
 assumed from a single broad grant. This mirrors the agent runbook Level 0 → 1
-escalation.
+escalation, and is the orchestrator-layer twin of the credential
+`GRANT_LIFECYCLE` (audit-driven, one grant at a time) and per-compartment
+scoping (`credential-hygiene.md`, `user-context-separation.md` COMPARTMENT_SCOPING):
+an orchestrator's grants are scoped to the compartment it drives, never inherited
+across boundaries.
 
 ## Self-improvement seam
 

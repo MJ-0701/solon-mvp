@@ -1,7 +1,7 @@
 ---
 id: sfs-user-context-separation
 summary: Split context three ways — soul (agent identity) / user (operator) / procedure (routed) — so identity stays thin and operator context has its own home.
-load_when: ["operator context", "user context", "soul user procedure", "identity layer", "context separation", "who is the operator", "personalize agent", "thin identity"]
+load_when: ["operator context", "user context", "soul user procedure", "identity layer", "context separation", "who is the operator", "personalize agent", "thin identity", "compartment", "per-channel scope", "cross-boundary memory", "private learning leak"]
 ---
 
 # User Context Separation
@@ -35,6 +35,33 @@ procedure live in routed docs/skills, or the identity file drifts and bloats).
   versioned. Mixing them couples edits that should move independently.
 - Operator context is the personalization point for a one-person operator — the
   same Solon runtime serves different operators by swapping only the user layer.
+
+## COMPARTMENT_SCOPING
+
+The three layers above split *kinds* of context; a compartment splits *boundaries
+of work*. Access and memory belong to the **compartment** (the work boundary — a
+project, repo, or channel) **not to the user** who happens to be present. The
+model:
+
+- **Baseline inherited, per-boundary override.** A workspace baseline applies to
+  every compartment; a compartment narrows or overrides it for its own scope. A
+  grant given for one compartment is not a grant everywhere.
+- **Cross-boundary memory does not leak.** What an agent learns inside one
+  compartment stays scoped to it — a private compartment's memory and access
+  **does not leak** into another. Private learning in one boundary never silently
+  surfaces in a different one.
+
+For a one-person operator this is not multi-tenant overhead: the live boundaries
+are the operator's own — a personal/learning docset versus a company project. The
+rule keeps private-docset learning from bleeding into company-project output (the
+product-leak boundary the distribution already guards with
+`tests/test-private-dev-path-hygiene.sh`). It is the memory-scope companion to the
+agent's own per-identity credential scope (`credential-hygiene.md` AGENT_IDENTITY)
+and the worker handoff isolation of `runtime-token-firewall.md`. External
+validation (by-reference): a Claude blog post on the agent identity access model,
+2026-06-24 — permissions move from per-user to per-compartment, each private
+boundary keeping a separate memory and access scope; principle adopted, vendor
+surfaces held out.
 
 ## TEMPLATE_DISCIPLINE
 
