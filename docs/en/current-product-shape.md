@@ -31,6 +31,11 @@ split_children:
   - docs/en/current-product-shape/21-domain-knowledge-assets.md
   - docs/en/current-product-shape/22-project-harness-map.md
   - docs/en/current-product-shape/23-host-channels-and-mcp.md
+  - docs/en/current-product-shape/24-topdown-learning-guide.md
+  - docs/en/current-product-shape/25-wiki-onboarding-guide.md
+  - docs/en/current-product-shape/26-delegation-repertoire.md
+  - docs/en/current-product-shape/27-human-agent-teams.md
+  - docs/en/current-product-shape/28-agent-identity-and-compartments.md
 ---
 # Current Product Shape
 
@@ -69,6 +74,9 @@ This file keeps the original route as a thin entry point. Detailed body sections
 - [AI Work Intake Routing](./current-product-shape/20-ai-work-intake-routing.md)
 - [Domain Knowledge Assets](./current-product-shape/21-domain-knowledge-assets.md)
 - [Project Harness Map](./current-product-shape/22-project-harness-map.md)
+- [Host Channels And MCP](./current-product-shape/23-host-channels-and-mcp.md)
 - [Top-down Learning Guide](./current-product-shape/24-topdown-learning-guide.md)
 - [Wiki Start Guide](./current-product-shape/25-wiki-onboarding-guide.md)
 - [Standard Delegation Repertoire](./current-product-shape/26-delegation-repertoire.md)
+- [Working As A Human-Agent Team](./current-product-shape/27-human-agent-teams.md)
+- [Agent Identity And Compartments](./current-product-shape/28-agent-identity-and-compartments.md)

@@ -31,6 +31,11 @@ split_children:
   - docs/ko/current-product-shape/21-domain-knowledge-assets.md
   - docs/ko/current-product-shape/22-project-harness-map.md
   - docs/ko/current-product-shape/23-host-channels-and-mcp.md
+  - docs/ko/current-product-shape/24-topdown-learning-guide.md
+  - docs/ko/current-product-shape/25-wiki-onboarding-guide.md
+  - docs/ko/current-product-shape/26-delegation-repertoire.md
+  - docs/ko/current-product-shape/27-human-agent-teams.md
+  - docs/ko/current-product-shape/28-agent-identity-and-compartments.md
 ---
 # 현재 제품 구조와 운영 흐름
 
@@ -68,6 +73,9 @@ split_children:
 - [AI Work Intake Routing](./current-product-shape/20-ai-work-intake-routing.md)
 - [도메인 지식 자산](./current-product-shape/21-domain-knowledge-assets.md)
 - [Project Harness Map](./current-product-shape/22-project-harness-map.md)
+- [Host Channels 와 MCP](./current-product-shape/23-host-channels-and-mcp.md)
 - [탑다운 학습 가이드](./current-product-shape/24-topdown-learning-guide.md)
 - [위키 시작 가이드](./current-product-shape/25-wiki-onboarding-guide.md)
 - [표준 위임 레퍼토리](./current-product-shape/26-delegation-repertoire.md)
+- [인간-에이전트 팀으로 일하기](./current-product-shape/27-human-agent-teams.md)
+- [에이전트 신원과 구획](./current-product-shape/28-agent-identity-and-compartments.md)
