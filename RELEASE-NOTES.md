@@ -13,6 +13,19 @@
 
 ---
 
+## 0.8.58
+
+블로그 인사이트 반영: 루프 선택을 한 장의 결정 렌즈로 + 저장소 자체점검 후속 (동작 변화 없음).
+
+체감 변화:
+
+- **새 정책 `loop-taxonomy`**: "어떤 루프를 쓸까"를 trigger 축(prompt/goal/interval/event) × stop 축(judgment/criteria+turn-cap/cancel/goal-met)으로 채점해 **최소 복잡도 primitive** 를 고르는 단일 기준. 4 유형(turn/goal/time/proactive)은 solon 이 이미 가진 조각 — 기본 세션 / `loop` 커맨드 AC 루프 / SCHEDULED_RUN_CONTRACT / 무인 러너+NORTH_STAR — 에 by-reference 로만 연결되고 메커니즘 중복 없음. 벤더 커맨드명은 제품 규칙으로 승격하지 않음.
+- **10x-value 문서 정합성**: 집계 문서 frontmatter 가 마지막 챕터(en 13 / ko 12)를 누락하던 드리프트 수정. 0.8.57 에 만든 split 동기화 잠금 테스트를 모든 split 집계로 일반화 (81개 챕터 3면 잠금).
+- **`_INDEX` ko 미러 문구 교정**: 미러는 ASCII anchor 토큰을 보존하고 제목 문구는 현지화될 수 있음을 명시.
+- 운영 동작·명령은 변화 없음.
+
+---
+
 ## 0.8.57
 
 0.8.56 자체점검 후속: 위키 보강 + 문서 정합성 잠금 (동작 변화 없음). 0.8.56 이 라우티드 정책으로 승격한 인간-에이전트 팀 / 에이전트 신원 개념을 사람이 읽는 `current-product-shape` 위키에도 올렸습니다.
