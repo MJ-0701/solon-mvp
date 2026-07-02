@@ -6,6 +6,10 @@ load_when: ["loop", "queue", "autonomous", "자율", "반복"]
 
 # Loop
 
+- Before entering a loop, confirm the loop type fits: score trigger x stop and
+  pick the minimum-complexity primitive (`policies/loop-taxonomy.md`). This
+  command owns the GOAL_BASED execution rail; time/proactive triggers route
+  through SCHEDULED_RUN_CONTRACT instead.
 - Default mode is single-runner.
 - Respect queue state: pending, claimed, done, failed, abandoned.
 - Stop on mutex conflict; never steal active work automatically.

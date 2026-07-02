@@ -20,6 +20,7 @@ split_children:
   - docs/en/10x-value/10-solon-execution-contract.md
   - docs/en/10x-value/11-what-solon-does-not-promise.md
   - docs/en/10x-value/12-product-promise.md
+  - docs/en/10x-value/13-why-solon.md
 ---
 # Solon 10x Value
 

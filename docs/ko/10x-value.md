@@ -19,6 +19,7 @@ split_children:
   - docs/ko/10x-value/09-10x.md
   - docs/ko/10x-value/10-solon.md
   - docs/ko/10x-value/11-section.md
+  - docs/ko/10x-value/12-why-solon.md
 ---
 # Solon 10x 가치
 
