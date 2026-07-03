@@ -117,3 +117,24 @@ and an edit to a static surface invalidates every cached read after it.
 - **One model per run segment.** Route cost tiers through scoped
   workers/capsules (`runtime-token-firewall.md`, fcp-model-tier), not by
   swapping the model mid-conversation.
+
+### Cache-prefix discipline
+
+The layout above fixes *order*; this fixes *lifecycle* — the invalidation
+rule in the section intro makes the stable layers session-scoped commitments,
+not just ordering preferences.
+
+- **Prefix surfaces are frozen for the session.** Root adapter docs, kernel,
+  routed policy text, and the model tier are picked at session start from the
+  work type (mid-run model swaps are already banned above; the same freeze
+  covers the docs). If one must change mid-session:
+  land the change, then start a fresh session on the new prefix instead of
+  continuing on an invalidated cache.
+- **Long sessions end; they are not repeatedly compacted.** Each in-place
+  compaction rewrites the prefix and forfeits the cache again. At Session
+  Continuation Guard thresholds, prefer a durable handoff plus fresh session
+  (`session-continuation-guard.md`) over another compaction pass.
+- **Delegation keeps the lead prefix warm.** Heavy exploration/verification
+  goes to a scoped worker (Runtime Token Firewall above): the worker spends
+  its own context and cache, and only the compact verdict re-enters the lead
+  session instead of churning the lead window.

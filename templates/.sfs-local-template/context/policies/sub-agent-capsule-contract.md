@@ -39,6 +39,11 @@ convenience.
 | `timeout` | wall-clock ceiling; on hit, return partial + name the missing artifact. |
 | `pii_rules` | redaction/persistence rules for any user/workspace data the worker may touch. |
 
+One optional field complements the table: `exemplar` — a pointer to one
+known-good reference output or pattern the worker should imitate. Attach it
+when one exists; a worked example steers a worker more cheaply than longer
+prose. Absence is not a validation finding.
+
 ## Handoff rules
 
 - Capsule-only: never forward the lead's full conversation history, hidden

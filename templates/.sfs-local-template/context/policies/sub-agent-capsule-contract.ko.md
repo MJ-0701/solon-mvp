@@ -38,6 +38,10 @@ lead/C-Level 에이전트가 worker·reviewer·external executor 로 넘기는 c
 | `timeout` | wall-clock 상한. 도달 시 partial 반환 + 부족 artifact 명시. |
 | `pii_rules` | worker 가 닿는 user/workspace 데이터의 redaction/persistence 규칙. |
 
+표를 보완하는 optional 필드 1개: `exemplar` — worker 가 모방할 known-good
+참조 출력/패턴 1건의 포인터. 있으면 첨부한다 — worked example 이 긴 지시문보다
+싸게 worker 를 조향한다. 없어도 validation finding 은 아니다.
+
 ## 핸드오프 규칙
 
 - Capsule-only: lead 의 전체 대화 history·hidden chain·무관 이전 turn 을 절대
