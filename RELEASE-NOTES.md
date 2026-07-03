@@ -13,6 +13,24 @@
 
 ---
 
+## 0.8.62
+
+Codex/Gemini 비용 어댑터 추가: 세션 비용 신호가 이제 세 런타임(Claude Code / Codex CLI / Gemini CLI)의 실 세션 로그를 읽습니다 (여전히 신호만, 차단 없음).
+
+체감 변화:
+
+- Codex CLI: 프로젝트 경로가 일치하는 최신 rollout 로그에서 누적 토큰
+  카운트(마지막 값)와 모델 구성을 읽습니다. apply_patch=편집,
+  web_search=탐색으로 분류합니다.
+- Gemini CLI: CLI 자체의 프로젝트 레지스트리로 세션 로그를 찾아 턴별 토큰을
+  합산합니다. tool 이름이 로그에 없어 read/edit 는 0으로 정직하게 표시합니다.
+- `SFS_COST_RUNTIME=codex` 처럼 어댑터를 고정할 수 있습니다 (기본값: 자동
+  탐지). 고정한 런타임에 로그가 없으면 다른 런타임이 대신 답하지 않고 "no
+  cost signal source" 로 조용히 넘어갑니다.
+- 세 어댑터 모두 토큰 집계와 도구 이름만 읽고 메시지 본문은 읽지 않습니다.
+
+---
+
 ## 0.8.61
 
 AI-readiness 진단 추가: 코드베이스 지도를 그리기 전에 `sfs harness doctor` 가 Sanity 4축을 0-2점으로 채점합니다 (신호만, 차단 없음).
