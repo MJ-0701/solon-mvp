@@ -39,9 +39,9 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.8.58" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.8.58" "version output"
-assert_contains_text "${output}" "latest 0.8.58" "latest output"
+[[ "${plain_output}" == "sfs 0.8.59" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.8.59" "version output"
+assert_contains_text "${output}" "latest 0.8.59" "latest output"
 # Headline drift-lock: the printed headline must (a) reproduce, byte-for-byte, the
 # `> **...**` blockquote the awk extracts from CHANGELOG for the installed version
 # (so the machinery and the source file stay in sync), and (b) carry the version's
@@ -58,7 +58,7 @@ expected_changelog_headline="$(
 )"
 [[ -n "${expected_changelog_headline}" ]] || fail "no CHANGELOG headline for installed version"
 assert_contains_text "${output}" "installed_release_headline ${expected_changelog_headline}" "installed release headline"
-assert_contains_text "${output}" "four-loop taxonomy" "0.8.58 headline opening clause"
+assert_contains_text "${output}" "Cache-prefix discipline" "0.8.59 headline opening clause"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -87,6 +87,6 @@ expected_notes_headline="$(
 )"
 [[ -n "${expected_notes_headline}" ]] || fail "no RELEASE-NOTES headline for installed version"
 assert_contains_text "${fallback_output}" "installed_release_headline ${expected_notes_headline}" "release notes fallback headline"
-assert_contains_text "${fallback_output}" "결정 렌즈" "0.8.58 release-notes distinctive clause"
+assert_contains_text "${fallback_output}" "캐시 프리픽스 규율" "0.8.59 release-notes distinctive clause"
 
 echo "test-version-release-headline: OK"

@@ -13,6 +13,24 @@
 
 ---
 
+## 0.8.59
+
+캐시 프리픽스 규율 추가: 세션 중간 어댑터 문서·모델 변경은 prompt cache 를 무효화하므로 반영 후 새 세션으로 — 반복 컴팩트 대신 handoff 재시작, 무거운 탐색은 워커 위임 (문서/정책만, 동작 변화 없음).
+
+체감 변화:
+
+- routed context `policies/token-harness.md` 에 Cache-prefix discipline 절이
+  생겨, 세션 시작 시 고른 어댑터 문서 / 정책 / 모델 등급을 세션 단위로
+  고정하라는 규율이 명문화됩니다. 바꿔야 하면 반영 후 새 세션에서 이어갑니다.
+- 긴 세션은 반복 컴팩트 대신 Session Continuation Guard handoff 로 새 세션
+  재시작을 권장합니다 (컴팩트마다 캐시가 다시 무효화되기 때문).
+- 워커 위임 캡슐에 optional `exemplar` 필드가 추가됩니다 — known-good 참조
+  출력 1건의 포인터로, 긴 지시문보다 싸게 worker 를 조향합니다.
+- 코스트 지표 / readiness 진단(P2·P3)은 이번엔 설계 문서만 추가됐고 구현은
+  없습니다 (`docs/maintenance/2026-07-03-cost-signal-readiness-adapter.design.md`).
+
+---
+
 ## 0.8.58
 
 블로그 인사이트 반영: 루프 선택을 한 장의 결정 렌즈로 + 저장소 자체점검 후속 (동작 변화 없음).
