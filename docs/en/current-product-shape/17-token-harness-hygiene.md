@@ -33,6 +33,9 @@ not need to install separate plugins. The normal operating flow absorbs these ha
   prefix surfaces (adapter docs, policies, model tier) frozen per session —
   a mid-session change invalidates the prompt cache, so land it and restart
   in a fresh session; heavy exploration goes to a scoped worker.
+- AI-readiness audit: `sfs harness doctor` scores Sanity (tests, dead code,
+  convention consistency, entry-doc freshness) 0-2 per axis before you draw
+  the codebase map — signal-only, waivable via `.sfs-local/readiness-waiver`.
 
 The same hygiene applies to Claude, Codex, Gemini, and any other agent through
 their equivalent usage reports, LSP/index tools, and hook mechanisms.

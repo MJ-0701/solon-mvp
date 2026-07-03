@@ -23,6 +23,10 @@ SFS applies this as a project-operating contract:
 - Map before parallelization: `sfs harness map --write` records roles, inputs,
   outputs, quality gates, and human-owned boundaries before optional worker
   lanes are split.
+- Sanity before cartography: the readiness audit (doctor's AI Readiness
+  section) or an explicit `.sfs-local/readiness-waiver` is recommended before
+  `map --write` — a map over an unhealthy codebase is false information.
+  Rubric, waiver, and order discipline: `harness-readiness.md` (signal-only).
 - Name the team architecture only when multi-agent work is actually selected:
   pipeline, fan-out/fan-in, expert pool, producer-reviewer, supervisor, or
   hierarchical delegation. The pattern is evidence for routing and handoff, not

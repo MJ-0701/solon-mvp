@@ -57,6 +57,7 @@ module:
 
 ## Policies — token / context / session hygiene
 
+- `policies/harness-readiness.md` — AI-readiness (Sanity) audit: 4-axis 0-2 rubric in `sfs harness doctor`, `.sfs-local/readiness-waiver`, readiness-before-cartography order discipline, knowledge graphs as opt-in pointers only (all signal-only).
 - `policies/token-harness.md` — token/context hygiene, semantic search, repeated mistake guardrails.
 - `policies/runtime-token-firewall.md` — capsule-only worker/review handoff and no full-history forwarding.
 - `policies/sub-agent-capsule-contract.md` — structured field contract (goal/ac/files_scope/tools_allowed/output_paths/token_budget/timeout/pii_rules) for that capsule handoff.

@@ -29,6 +29,9 @@ SFS 는 토큰과 어텐션 낭비를 줄이고 하네스 품질을 높이는 �
   (어댑터 문서 / 정책 / 모델 등급)은 세션 단위로 고정한다 — 세션 중간 변경은
   prompt cache 를 무효화하므로 변경을 반영한 뒤 새 세션으로 재시작하고, 무거운
   탐색은 스코프드 워커에 위임한다.
+- AI-readiness 감사: `sfs harness doctor` 가 지도(map)를 그리기 전에 Sanity
+  (테스트 / dead code / 컨벤션 일관성 / 엔트리 문서 신선도)를 축당 0-2점으로
+  채점한다 — signal-only, `.sfs-local/readiness-waiver` 로 waive 가능.
 
 이 원칙은 특정 agent 에 묶이지 않습니다. Claude, Codex, Gemini 등 각 agent 의 usage report,
 LSP/index, hook 수단으로 동일하게 적용할 수 있습니다.

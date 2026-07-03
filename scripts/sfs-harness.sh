@@ -430,6 +430,165 @@ print_skill_promote_section() {
   fi
 }
 
+# 0.8.61 (DESIGN-2026-07-03 P3): AI-readiness (Sanity) audit.
+#
+# Signal-only (ALT-INV-3): info/ok lines only, never warn/fail, so scores can
+# never change doctor's exit code (locked by tests/test-harness-readiness.sh).
+# Deterministic file-level heuristics only (decision D3) over the consumer
+# working tree, always excluding .sfs-local/ (SFS-owned files are not the
+# consumer's codebase health). Waiver: .sfs-local/readiness-waiver (D4).
+# Rubric SSoT: templates/.sfs-local-template/context/policies/harness-readiness.md
+
+readiness_tracked_files() {
+  git ls-files 2>/dev/null | grep -v '^\.sfs-local/' | head -2000
+}
+
+# Each axis echoes "score|evidence".
+readiness_axis_self_verification() {
+  if [ -f "tests/run-all.sh" ] || [ -f "tests/run-tests.sh" ]; then
+    echo "2|named entrypoint: tests runner script"
+    return
+  fi
+  if [ -f "package.json" ] && grep -Eq '"test"[[:space:]]*:' package.json 2>/dev/null; then
+    echo "2|named entrypoint: package.json test script"
+    return
+  fi
+  if [ -f "Makefile" ] && grep -Eq '^test:' Makefile 2>/dev/null; then
+    echo "2|named entrypoint: Makefile test target"
+    return
+  fi
+  if [ -x "./gradlew" ] || [ -f "pom.xml" ] || [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
+    echo "2|named entrypoint: gradle/maven standard runner"
+    return
+  fi
+  if detect_test_surface; then
+    echo "1|test surface without a named entrypoint"
+    return
+  fi
+  echo "0|no test runner detected"
+}
+
+readiness_axis_dead_code() {
+  if [ ! -d "scripts" ]; then
+    echo "2|no script candidates (scripts/ absent)"
+    return
+  fi
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "2|no git index; dead-code axis skipped"
+    return
+  fi
+  local total=0 unref=0 f base refs
+  for f in scripts/*.sh; do
+    [ -f "$f" ] || continue
+    total=$((total + 1))
+    base="$(basename "$f")"
+    refs="$(git grep -I -l -F -- "$base" 2>/dev/null | grep -v '^\.sfs-local/' | grep -v -F "$f" | head -1)"
+    [ -z "$refs" ] && unref=$((unref + 1))
+  done
+  if [ "$total" -eq 0 ]; then
+    echo "2|no script candidates"
+  elif [ "$unref" -eq 0 ]; then
+    echo "2|unreferenced scripts: 0 (candidates ${total})"
+  elif [ "$unref" -le 2 ]; then
+    echo "1|unreferenced scripts: ${unref} (candidates ${total})"
+  else
+    echo "0|unreferenced scripts: ${unref} (candidates ${total})"
+  fi
+}
+
+readiness_axis_convention() {
+  local files ext worst=0 worst_ext="" snake kebab camel styles name b
+  files="$(readiness_tracked_files)"
+  if [ -z "$files" ]; then
+    echo "2|insufficient sample (no tracked files)"
+    return
+  fi
+  for ext in $(printf '%s\n' "$files" \
+      | sed -n 's/.*\.\([A-Za-z0-9][A-Za-z0-9]*\)$/\1/p' \
+      | sort | uniq -c | awk '$1 >= 5 {print $2}'); do
+    snake=0; kebab=0; camel=0
+    while IFS= read -r b; do
+      [ -n "$b" ] || continue
+      name="$(basename "$b")"
+      name="${name%.*}"
+      # Ordering prefixes (00-...) and sentinel prefixes (_...) are file-role
+      # conventions, not naming styles — strip them before classifying.
+      name="$(printf '%s' "$name" | sed -E 's/^[_.0-9-]+//')"
+      [ -n "$name" ] || continue
+      case "$name" in
+        *_*) snake=1 ;;
+        *-*) kebab=1 ;;
+        *) printf '%s' "$name" | grep -Eq '^[a-z][a-z0-9]*[A-Z]' && camel=1 ;;
+      esac
+    done <<EOF_CONV
+$(printf '%s\n' "$files" | grep "\.${ext}\$")
+EOF_CONV
+    styles=$((snake + kebab + camel))
+    if [ "$styles" -gt "$worst" ]; then
+      worst=$styles
+      worst_ext=$ext
+    fi
+  done
+  if [ "$worst" -ge 3 ]; then
+    echo "0|filename styles in .${worst_ext} group: 3 coexist"
+  elif [ "$worst" -eq 2 ]; then
+    echo "1|filename styles in .${worst_ext} group: 2 coexist"
+  elif [ "$worst" -eq 1 ]; then
+    echo "2|single filename style per extension group"
+  else
+    echo "2|insufficient sample (no extension group with 5+ files)"
+  fi
+}
+
+readiness_axis_entry_docs() {
+  local d t found=0 broken=0
+  for d in SFS.md CLAUDE.md AGENTS.md GEMINI.md; do
+    [ -f "$d" ] || continue
+    found=1
+    while IFS= read -r t; do
+      [ -n "$t" ] || continue
+      case "$t" in
+        http://*|https://*|mailto:*|/*|\#*) continue ;;
+      esac
+      [ -e "$t" ] || broken=$((broken + 1))
+    done <<EOF_LINKS
+$(grep -oE '\]\([^)]+\)' "$d" 2>/dev/null | sed -E 's/^\]\(//; s/\)$//; s/[#?].*$//')
+EOF_LINKS
+  done
+  if [ "$found" -eq 0 ]; then
+    echo "0|no entry docs found (SFS.md / root adapter docs)"
+  elif [ "$broken" -eq 0 ]; then
+    echo "2|broken relative links: 0"
+  elif [ "$broken" -le 2 ]; then
+    echo "1|broken relative links: ${broken}"
+  else
+    echo "0|broken relative links: ${broken}"
+  fi
+}
+
+readiness_print_axis() { # $1=axis-token $2="score|evidence"
+  local score="${2%%|*}" evidence="${2#*|}"
+  if [ "$score" = "2" ]; then
+    ok "readiness: $1 ${score}/2 — ${evidence}"
+  else
+    info "readiness: $1 ${score}/2 — ${evidence}"
+  fi
+  READINESS_TOTAL=$((READINESS_TOTAL + score))
+}
+
+print_readiness_section() {
+  section "AI Readiness (Sanity)"
+  READINESS_TOTAL=0
+  if [ -f ".sfs-local/readiness-waiver" ]; then
+    info "readiness waiver recorded: $(head -1 .sfs-local/readiness-waiver)"
+  fi
+  readiness_print_axis "self-verification" "$(readiness_axis_self_verification)"
+  readiness_print_axis "dead-code" "$(readiness_axis_dead_code)"
+  readiness_print_axis "convention-consistency" "$(readiness_axis_convention)"
+  readiness_print_axis "entry-doc-freshness" "$(readiness_axis_entry_docs)"
+  info "readiness: total ${READINESS_TOTAL}/8 (advisory, signal-only — never blocks 'sfs harness map')"
+}
+
 # 0.8.60 (DESIGN-2026-07-03 P2): Cost signals from the host session log.
 #
 # Signal-only (ALT-INV-3): this section emits info/ok ONLY — never warn/fail —
@@ -616,6 +775,8 @@ print_doctor() {
   print_context_conflict_section
 
   print_skill_promote_section
+
+  print_readiness_section
 
   print_cost_signal_section
 
@@ -842,6 +1003,13 @@ run_map() {
     else
       write_evolution_ledger "$evolution_path" > "$evolution_path" || return 2
       echo "SFS harness evolution ledger written: $evolution_path"
+    fi
+    # Sanity-before-cartography (policies/harness-readiness.md): advisory
+    # only — the map above is already written and never blocked.
+    if [ -f ".sfs-local/readiness-waiver" ]; then
+      echo "readiness waiver recorded: $(head -1 .sfs-local/readiness-waiver)"
+    else
+      echo "readiness advisory: run 'sfs harness doctor' (AI Readiness section) or record .sfs-local/readiness-waiver before relying on this map — signal-only, map written regardless"
     fi
   else
     write_map_body
