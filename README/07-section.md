@@ -4,7 +4,7 @@ title: "자주 쓰는 명령"
 visibility: oss-public
 doc_type: product-intro
 language: ko
-updated: 2026-05-25
+updated: 2026-07-03
 parent: README.md
 summary: "자주 쓰는 명령"
 load_when: "Read when README.md routes to this section."
@@ -21,8 +21,10 @@ load_when: "Read when README.md routes to this section."
 | `sfs capture [--kind ...] <text>` | 승인/waiver/결정/외부 evidence 같은 최소 사실만 현재 sprint 기록에 남김 |
 | `sfs note <text>` | 짧은 evidence note 를 남기는 capture alias |
 | `sfs ingest --source-type <type> --purpose <why>` | wiki 로 컴파일하기 전 Raw source 목적과 스키마를 잠근 intake 초안 생성 |
-| `sfs harness doctor` | 긴 자율 작업 전에 프로젝트 하네스 준비 상태 점검 |
-| `sfs harness map --write` | agent 역할, artifact, memory, test, release loop 설계도 작성 |
+| `sfs harness doctor` | 긴 자율 작업 전에 하네스 준비 상태 점검 + AI-readiness(Sanity) 4축 채점 + 세션 비용 신호(토큰/캐시 적중률/탐색·편집 비율) — 전부 신호만, 차단 없음 |
+| `sfs harness map --write` | agent 역할, artifact, memory, test, release loop 설계도 작성. Sanity 미감사·waiver 없음이면 readiness advisory 한 줄 출력 (지도는 항상 기록) |
+| `sfs team use <solo\|pair\|trio>` | 팀 preset 활성화 (scaffold + runtime binding 작성) |
+| `sfs team refresh` | capability 재평가 + binding 재적용 (deprecated fallback 승격 제안 포함) |
 | `sfs implement [slice|--stdin]` | 작은 실행 조각 진행 |
 | `sfs review [--sprint <id>] [--lens ...]` | 산출물 검토, 닫힌 sprint review 복구 |
 | `sfs retro [--draft]` | 회고와 마무리 |

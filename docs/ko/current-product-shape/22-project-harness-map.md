@@ -15,10 +15,15 @@ load_when: "Read when docs/ko/current-product-shape.md routes to this section."
 
 - `sfs harness doctor` 는 현재 프로젝트에 얇은 진입 문서, routed context, 활성 6본부 council,
   artifact/memory 표면, wiki 또는 bug recurrence memory, test, release/check rail 이 있는지 확인한다.
+  여기에 AI-readiness(Sanity) 루브릭 4축(0-2점) 채점과 호스트 세션 로그 기반 비용 신호
+  (Claude Code / Codex / Gemini 어댑터: 토큰, 캐시 적중률, 탐색/편집 비율)도 함께 표시한다 —
+  전부 신호만, 차단 없음.
 - `sfs harness map` 은 agent, skill/policy, orchestrator rail, artifact, memory, test, release loop,
   human-owned boundary 를 프로젝트 하네스 설계도로 출력한다.
 - `sfs harness map --write` 는 `.sfs-local/harness/harness-map.md` 를 작성해 긴 자율 작업이나
-  선택적 parallel-agent 작업 전에 운영 설계를 눈으로 확인할 수 있게 한다.
+  선택적 parallel-agent 작업 전에 운영 설계를 눈으로 확인할 수 있게 한다. readiness 감사도
+  `.sfs-local/readiness-waiver` 도 없으면 advisory 한 줄을 출력한다 (Sanity before
+  cartography) — 지도 자체는 항상 기록된다.
 
 map 은 하네스 자체의 설계 evidence 도 남긴다.
 

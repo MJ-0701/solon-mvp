@@ -16,13 +16,18 @@ visible and testable. SFS now exposes that environment directly:
 
 - `sfs harness doctor` checks whether the current project has thin entry docs,
   routed context, active six-division council, artifact/memory surfaces, wiki or
-  bug recurrence memory, tests, and release/check rails.
+  bug recurrence memory, tests, and release/check rails. It also scores the
+  AI-readiness (Sanity) rubric (4 axes, 0-2 each) and surfaces session cost
+  signals from the host log (Claude Code / Codex / Gemini adapters: tokens,
+  cache-read ratio, explore/edit mix) — all signal-only, never blocking.
 - `sfs harness map` prints the project harness: agents, skills/policies,
   orchestrator rails, artifacts, memory, tests, release loop, and human-owned
   boundaries.
 - `sfs harness map --write` writes `.sfs-local/harness/harness-map.md` so long
   autonomous work and optional parallel-agent work can start from an explicit
-  operating design.
+  operating design. When no readiness audit or `.sfs-local/readiness-waiver` is
+  recorded it prints a one-line readiness advisory (Sanity before cartography)
+  — the map itself is always written.
 
 The map also records harness-specific design evidence:
 
