@@ -4,7 +4,7 @@ title: "Current Product Shape"
 visibility: oss-public
 doc_type: product-reference
 language: en
-updated: 2026-05-28
+updated: 2026-07-03
 summary: "Thin index for Current Product Shape"
 load_when: "Start here, then load only the child section needed."
 split_children:
@@ -36,6 +36,7 @@ split_children:
   - docs/en/current-product-shape/26-delegation-repertoire.md
   - docs/en/current-product-shape/27-human-agent-teams.md
   - docs/en/current-product-shape/28-agent-identity-and-compartments.md
+  - docs/en/current-product-shape/29-feature-overview.md
 ---
 # Current Product Shape
 
@@ -80,3 +81,4 @@ This file keeps the original route as a thin entry point. Detailed body sections
 - [Standard Delegation Repertoire](./current-product-shape/26-delegation-repertoire.md)
 - [Working As A Human-Agent Team](./current-product-shape/27-human-agent-teams.md)
 - [Agent Identity And Compartments](./current-product-shape/28-agent-identity-and-compartments.md)
+- [Feature Overview](./current-product-shape/29-feature-overview.md)

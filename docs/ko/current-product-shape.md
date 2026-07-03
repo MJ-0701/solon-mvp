@@ -4,7 +4,7 @@ title: "현재 제품 구조와 운영 흐름"
 visibility: oss-public
 doc_type: product-reference
 language: ko
-updated: 2026-05-28
+updated: 2026-07-03
 summary: "Thin index for 현재 제품 구조와 운영 흐름"
 load_when: "Start here, then load only the child section needed."
 split_children:
@@ -36,6 +36,7 @@ split_children:
   - docs/ko/current-product-shape/26-delegation-repertoire.md
   - docs/ko/current-product-shape/27-human-agent-teams.md
   - docs/ko/current-product-shape/28-agent-identity-and-compartments.md
+  - docs/ko/current-product-shape/29-feature-overview.md
 ---
 # 현재 제품 구조와 운영 흐름
 
@@ -79,3 +80,4 @@ split_children:
 - [표준 위임 레퍼토리](./current-product-shape/26-delegation-repertoire.md)
 - [인간-에이전트 팀으로 일하기](./current-product-shape/27-human-agent-teams.md)
 - [에이전트 신원과 구획](./current-product-shape/28-agent-identity-and-compartments.md)
+- [기능 총람 (Feature Overview)](./current-product-shape/29-feature-overview.md)
