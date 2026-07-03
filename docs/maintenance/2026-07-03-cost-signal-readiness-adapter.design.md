@@ -110,13 +110,16 @@ slug 화한 디렉토리 아래 세션당 JSONL 1개. 라인 1개 = 이벤트 1�
   waiver round-trip 테스트, readiness→map 순서 권장 문구 앵커 잠금.
 - 릴리스: VERSION semver + CHANGELOG + Gate 6 리뷰 경유.
 
-## 6. 미해결 질문 (구현 착수 전 결정 필요)
+## 6. 결정 사항 (2026-07-03 사용자 확정 — 구현 착수 시 이 값이 기준)
 
-1. `harness cost` 신규 서브커맨드 대 doctor 통합 — command-surface parity
-   테스트 갱신 비용과 tool-surface budget 어느 쪽이 우선인가.
-2. Claude Code JSONL 의 `version` 필드별 스키마 drift 를 어댑터가 어느
-   범위까지 흡수할지 (미지원 version = detect 실패 강등이 기본안).
-3. dead-code / convention 휴리스틱의 도메인 중립 구현 범위 — 언어별 도구
-   (예: 컴파일러 경고) 의존 없이 파일-수준 휴리스틱만으로 시작할지.
-4. readiness waiver 상태 파일의 위치/스키마 (`.sfs-local/` 기존 상태 파일
-   패턴 재사용 여부).
+1. **진입점 = doctor 통합.** `sfs harness doctor` 에 cost 섹션 추가 (신규
+   서브커맨드 없음 — tool-surface budget 유지, command-surface parity 갱신
+   불필요). 지표가 커지면 그때 분리 재검토.
+2. **JSONL drift = detect 실패 강등.** 파서가 아는 필드를 못 찾으면 "no cost
+   signal source" 한 줄로 강등. best-effort 부분 파싱 하지 않음 — 오판 지표보다
+   무신호가 안전.
+3. **P3 휴리스틱 = 파일-수준만.** 언어별 도구(컴파일러 경고 / linter) 의존
+   없이 미참조 스크립트 / orphan 문서 / 동일 목적 패턴 공존 휴리스틱으로 시작.
+   결정론 + bash 호환 + 도메인 중립 보장.
+4. **waiver = `.sfs-local/` 기존 상태 파일 패턴 재사용.** 사유 1줄 + 날짜
+   (예: `.sfs-local/readiness-waiver`). 신규 스키마 발명 없음.
