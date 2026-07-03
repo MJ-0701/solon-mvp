@@ -616,6 +616,12 @@ print_cost_signal_section() {
   if [ -d "$adapters_dir" ]; then
     for adapter in "$adapters_dir"/*.sh; do
       [ -f "$adapter" ] || continue
+      # SFS_COST_RUNTIME pins one adapter by filename (e.g. codex, gemini);
+      # unset = first adapter whose detect+emit succeeds, alphabetically.
+      if [ -n "${SFS_COST_RUNTIME:-}" ] \
+         && [ "$(basename "$adapter" .sh)" != "${SFS_COST_RUNTIME}" ]; then
+        continue
+      fi
       if bash "$adapter" detect >/dev/null 2>&1; then
         if out="$(bash "$adapter" emit 2>/dev/null)" && [ -n "$out" ]; then
           break

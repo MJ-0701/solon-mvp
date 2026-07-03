@@ -15,6 +15,11 @@ load_when: "sfs harness doctor 의 코스트/readiness 지표 구현 착수 시,
   `scripts/sfs-harness-cost-adapters/claude-code.sh`) / P3 구현됨 (0.8.61 —
   doctor "AI Readiness (Sanity)" 섹션 + `policies/harness-readiness.md` +
   `.sfs-local/readiness-waiver` + map --write 순서 advisory). §6 결정 반영 완료.
+  **0.8.62**: Codex/Gemini seam 을 실 어댑터로 채움 (2026-07-03 실측:
+  codex rollout JSONL 은 token_count **누적** — 마지막 값 채택, session_meta.cwd
+  로 프로젝트 매칭, turn_context.model; gemini chats JSONL 은 per-turn tokens
+  합산, projects.json 이 경로→slug 결정론 매핑, tool 이름 미기록 → read/edit 0
+  정직 보고) + doctor `SFS_COST_RUNTIME` 어댑터 핀.
 - **parent**: [2026-07-03-ai-ready-codebase-token-efficiency.design.md](2026-07-03-ai-ready-codebase-token-efficiency.design.md)
 - **date**: 2026-07-03
 - **불변 조건**: 모든 신호는 signal-only (ALT-INV-3 never-hard-block). 외부
