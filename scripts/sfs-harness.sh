@@ -430,6 +430,73 @@ print_skill_promote_section() {
   fi
 }
 
+# 0.8.60 (DESIGN-2026-07-03 P2): Cost signals from the host session log.
+#
+# Signal-only (ALT-INV-3): this section emits info/ok ONLY — never warn/fail —
+# so it can never change doctor's exit code (locked by
+# tests/test-harness-cost-signal.sh). Metrics come from a runtime adapter
+# (scripts/sfs-harness-cost-adapters/<runtime>.sh detect|emit); any missing
+# log, missing parser, or schema drift degrades to a single "no cost signal
+# source" info line. Aggregate token counts and tool names only — never
+# message text. SSoT:
+#   docs/maintenance/2026-07-03-cost-signal-readiness-adapter.design.md
+COST_CACHE_READ_LOW_PCT=50
+COST_EXPLORE_MIN_READS=20
+COST_EXPLORE_RATIO=10
+COST_DELEGATE_MIN_OUT=50000
+
+cost_val() {
+  printf '%s\n' "$1" | sed -n "s/^${2}=//p" | head -1
+}
+
+print_cost_signal_section() {
+  section "Cost Signals (Session Log)"
+
+  local adapters_dir="${DIST_DIR}/scripts/sfs-harness-cost-adapters"
+  local adapter out=""
+  if [ -d "$adapters_dir" ]; then
+    for adapter in "$adapters_dir"/*.sh; do
+      [ -f "$adapter" ] || continue
+      if bash "$adapter" detect >/dev/null 2>&1; then
+        if out="$(bash "$adapter" emit 2>/dev/null)" && [ -n "$out" ]; then
+          break
+        fi
+        out=""
+      fi
+    done
+  fi
+  if [ -z "$out" ]; then
+    info "cost-signal: no cost signal source (no session log, parser, or known schema); skipping — signal-only, never blocks"
+    return
+  fi
+
+  local runtime sf out_tok ratio rd ed so_pct mc models
+  runtime="$(cost_val "$out" runtime)"
+  sf="$(cost_val "$out" session_file)"
+  out_tok="$(cost_val "$out" output_tokens)"
+  ratio="$(cost_val "$out" cache_read_ratio_pct)"
+  rd="$(cost_val "$out" read_tool_uses)"
+  ed="$(cost_val "$out" edit_tool_uses)"
+  so_pct="$(cost_val "$out" sidechain_share_pct)"
+  mc="$(cost_val "$out" model_count)"
+  models="$(cost_val "$out" models)"
+
+  ok "cost-signal: runtime=${runtime} session=${sf} output_tokens=${out_tok} cache_read_ratio=${ratio}%"
+  if [ "${mc:-1}" -ge 2 ] 2>/dev/null; then
+    info "cost-signal: model_mix ${models} — ${mc} model tiers in one session; cache-prefix discipline signal (policies/token-harness.md)"
+  fi
+  if [ "${ratio:-0}" -lt "$COST_CACHE_READ_LOW_PCT" ] 2>/dev/null; then
+    info "cost-signal: cache_read_ratio ${ratio}% below ${COST_CACHE_READ_LOW_PCT}% — prefix churn or fresh-session-heavy pattern (signal-only)"
+  fi
+  if [ "${rd:-0}" -ge "$COST_EXPLORE_MIN_READS" ] 2>/dev/null \
+     && { [ "${ed:-0}" -eq 0 ] || [ "${rd:-0}" -ge $(( ${ed:-0} * COST_EXPLORE_RATIO )) ]; } 2>/dev/null; then
+    info "cost-signal: exploration-heavy session (read_tool_uses=${rd}, edit_tool_uses=${ed}) — consider scoped-worker delegation (policies/runtime-token-firewall.md)"
+  fi
+  if [ "${so_pct:-0}" -eq 0 ] 2>/dev/null && [ "${out_tok:-0}" -ge "$COST_DELEGATE_MIN_OUT" ] 2>/dev/null; then
+    info "cost-signal: no sidechain usage in a ${out_tok}-output-token session — delegation unused (signal-only)"
+  fi
+}
+
 print_doctor() {
   section "SFS Project Harness Doctor"
   if ! is_sfs_project; then
@@ -549,6 +616,8 @@ print_doctor() {
   print_context_conflict_section
 
   print_skill_promote_section
+
+  print_cost_signal_section
 
   section "Summary"
   printf "  pass: %d   warn: %d   fail: %d\n" "$PASS_COUNT" "$WARN_COUNT" "$FAIL_COUNT"

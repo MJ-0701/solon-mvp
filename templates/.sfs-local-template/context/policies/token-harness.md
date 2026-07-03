@@ -44,6 +44,8 @@ load_when: ["token", "harness", "context", "Claude", "Codex", "Gemini", "MCP", "
 - Project harness commands make that structure inspectable: `sfs harness doctor`
   checks readiness before long autonomy, and `sfs harness map --write` records
   the agent/team/artifact/test/release environment without starting workers.
+  Doctor also surfaces session cost metrics (tokens, cache-read ratio,
+  explore/edit mix, sidechain share) as signal-only advisories — never a block.
 - Tool-surface budget: give agents the few tools, skills, MCPs, and routed
   context modules needed for the current slice. Defer or remove attractive but
   irrelevant tools so selection cost does not steal attention from the work.

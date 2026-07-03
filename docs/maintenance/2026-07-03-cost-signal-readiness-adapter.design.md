@@ -11,7 +11,9 @@ load_when: "sfs harness doctor 의 코스트/readiness 지표 구현 착수 시,
 
 # Design — 코스트 지표 파서 어댑터 seam + AI-readiness 채점 루브릭
 
-- **status**: draft (design-only — 구현 금지 범위; 부모 설계의 P2·P3)
+- **status**: P2 구현됨 (0.8.60 — doctor "Cost Signals" 섹션 +
+  `scripts/sfs-harness-cost-adapters/claude-code.sh`, §6 결정 반영).
+  P3 은 여전히 design-only.
 - **parent**: [2026-07-03-ai-ready-codebase-token-efficiency.design.md](2026-07-03-ai-ready-codebase-token-efficiency.design.md)
 - **date**: 2026-07-03
 - **불변 조건**: 모든 신호는 signal-only (ALT-INV-3 never-hard-block). 외부
