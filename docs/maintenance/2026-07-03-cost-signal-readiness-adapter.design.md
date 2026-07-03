@@ -118,6 +118,52 @@ slug 화한 디렉토리 아래 세션당 JSONL 1개. 라인 1개 = 이벤트 1�
   waiver round-trip 테스트, readiness→map 순서 권장 문구 앵커 잠금.
 - 릴리스: VERSION semver + CHANGELOG + Gate 6 리뷰 경유.
 
+## 5-A. 설계 원칙 — 결정론적 코어 / 비결정론적 쉘 (2026-07-03 추가 지시 layering)
+
+근거: idea_wiki 강의 노트 085(결정론적 코어)·086(에이전틱 엔지니어), 기존
+L078-I12(결정론만 강제력)·L048-I10(결정론 도구 우선)과 한 축. 배경
+by-reference (일반화 원칙만 승격, 강연자/벤더/채널 디테일 보류 —
+`methodology-7-step.md` 의 map-first 기록과 같은 방식):
+
+- solon 7-step Gate 구조 자체가 결정론적 코어 패턴의 선례다 — 흐름(게이트
+  순서·evidence 계약)은 결정론 rail 이 소유하고, LLM 은 게이트 안의 지정
+  지점에서만 호출된다 (L085-I5·I8).
+- P3 readiness 진단은 '컨텍스트 설계' 역량의 제품화이고, P2 코스트 신호는
+  "생성이 빨라질수록 자동 검증 > 눈 리뷰"(L086-I4) 수요에 대한 응답이다 —
+  제품 포지셔닝 근거로만 기록.
+
+설계 제약 3건 (P2·P3 파이프라인 적용, 출하 구현 0.8.60-62 대조 결과 포함):
+
+1. **흐름은 결정론 코드가 소유 — LLM 은 지정 지점에서만 선택 호출**
+   (L085-I5). 지표 수집(adapter detect/emit)·readiness 채점·순서 advisory
+   전부 bash+jq/python3 결정론이고 LLM 호출 지점은 0개다. 지표의 해석·요약은
+   doctor 출력을 읽는 세션의 선택 작업이지 파이프라인 단계가 아니다.
+   **검증: LLM 없이 파이프라인 완결 ✓** — doctor/adapter 는 오프라인 단독
+   실행되며 합성 fixture 테스트가 이를 잠근다.
+2. **순서는 상태 머신으로 강제 가능하게 설계 — 차단 대상은 전이 순서지 판정
+   결과가 아니다** (L085-I6, ALT-INV-3 양립). 현 출하 상태(Stage 0) =
+   advisory: `map --write` 가 readiness advisory/waiver 를 출력만 하고 진입은
+   막지 않는다. Stage 1 (미구현, 설계만): `.sfs-local/readiness-state` 상태
+   파일 — 상태 {UNAUDITED, SANITY_PASS, WAIVED}, 이벤트 {doctor 채점 완료 /
+   waiver 기록 / 구조 변경 감지}, 전환 규칙 "Cartography(map --write) 진입은
+   SANITY_PASS 또는 WAIVED 에서만". 낮은 점수도 waiver 로 전이 가능 — 결과
+   점수는 어떤 단계도 차단하지 않는다. 프레임워크 검토 결과: 신규 의존성
+   불필요 — 기존 `sfs-common.sh` 스타일 k=v 상태 파일 + release-state 마커
+   디렉토리 패턴으로 충분.
+3. **검증 게이트는 결정론으로 고정** (L085-I7) — 테스트·스키마·fixture 가
+   계약을 잠그고, 프롬프트 지시에 의존하는 검증 설계는 금지. 현 구현: emit
+   k=v 스키마 byte-일치 테스트, rc-equality signal-only 잠금, 합성 fixture —
+   전부 결정론 ✓.
+
+4대 역량 매핑 (L086-I3) — 갭은 기록만, 구현 금지:
+
+| 역량 | solon 표면 | 갭 |
+|---|---|---|
+| 문제 정의 | `work-delegation-and-startup.md` (요구 복창+클래리파잉) + eval-first plan gate | **문제 정의 품질을 진단하는 표면 부재** — doctor 는 codebase readiness 만 채점, problem-statement readiness 축 없음 (기록만) |
+| 컨텍스트 설계 | routed context + `token-harness.md` + P3 readiness | — (제품화 완료) |
+| 검증 | Gate 6 + verification automation + P2 cost signals + capsule verifier≠author | — |
+| 오케스트레이션 | 7-step rail + division council + capsule contract | — |
+
 ## 6. 결정 사항 (2026-07-03 사용자 확정 — 구현 착수 시 이 값이 기준)
 
 1. **진입점 = doctor 통합.** `sfs harness doctor` 에 cost 섹션 추가 (신규
