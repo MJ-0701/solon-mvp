@@ -13,6 +13,27 @@
 
 ---
 
+## 0.8.61
+
+AI-readiness 진단 추가: 코드베이스 지도를 그리기 전에 `sfs harness doctor` 가 Sanity 4축을 0-2점으로 채점합니다 (신호만, 차단 없음).
+
+체감 변화:
+
+- doctor 에 "AI Readiness (Sanity)" 섹션이 생깁니다: self-verification
+  (에이전트가 스스로 돌릴 테스트 진입점), dead-code (미참조 스크립트),
+  convention-consistency (파일명 스타일 혼재), entry-doc-freshness (엔트리
+  문서의 깨진 링크). 축당 근거 한 줄 + 총점 N/8.
+- 순서 규율: `sfs harness map --write` 가 waiver 없으면 "readiness 먼저"
+  advisory 한 줄을 출력합니다 — 지도는 항상 기록되고, 아무것도 막지 않습니다.
+- waiver 는 `.sfs-local/readiness-waiver` 한 줄 (사유 + 날짜). 기록하면
+  doctor / map 이 advisory 대신 waiver 를 표시합니다.
+- 채점은 파일-수준 휴리스틱만 사용하고 (컴파일러/린터 불요), `.sfs-local/` 은
+  항상 제외합니다.
+- 지식 그래프(Graphify 류)는 opt-in 외부 포인터로만 문서화 — 본체 의존 없음.
+- 이로써 2026-07-03 설계 3건 완결 (P1 0.8.59 / P2 0.8.60 / P3 0.8.61).
+
+---
+
 ## 0.8.60
 
 세션 비용 신호 진단 추가: `sfs harness doctor` 가 세션 로그에서 토큰·캐시 적중률·탐색/편집 비율을 읽어 신호만 표시합니다 (차단 없음).
