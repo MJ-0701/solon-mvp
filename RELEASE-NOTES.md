@@ -13,6 +13,23 @@
 
 ---
 
+## 0.8.65
+
+Windows pwsh 7 무동작 수리: bash 브리지 prelude 를 파일로 패키징해, 0.8.54 이후 pwsh 7 에서 bash 위임 명령이 조용히 아무것도 안 하던 문제를 고쳤습니다.
+
+체감 변화:
+
+- pwsh 7 (PowerShell 7.3+) 에서 `sfs.cmd init / start / upgrade / team` 등
+  bash 위임 명령이 정상 동작합니다. 이전에는 rc 0 으로 조용히 무동작이었습니다
+  (PowerShell 5.1 / cmd 경로는 원래부터 정상).
+- 원인은 인라인 `-c` prelude 의 따옴표가 PS 에디션별 인자 전달 차이와
+  충돌한 것 — prelude 를 `bin/sfs-bridge.sh` 파일로 옮겨 따옴표 변수를
+  제거했습니다. PATH 선행 보장·경고-only 진단 등 계약은 그대로입니다.
+- Windows scoop-smoke CI 가 0.8.54 이후 처음으로 green 입니다 (실 Windows
+  러너에서 설치→init→sprint→업그레이드→복구 전 구간 통과).
+
+---
+
 ## 0.8.64
 
 사용량=가치 신호 + 경보 후 차단 + 산식 투명성: 성공측 반복 사용을 가치 신호로 집계하고, 예산 한계는 잘리기 전에 경보하며, 점수는 산식을 공개합니다 (전부 신호만, 차단 없음).
