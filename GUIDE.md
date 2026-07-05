@@ -23,6 +23,7 @@ split_children:
   - GUIDE/13-12.md
   - GUIDE/14-13.md
   - GUIDE/15-14-sprint.md
+  - GUIDE/16-15-team-rollout.md
 ---
 # Solon 제품 사용 가이드
 
@@ -60,3 +61,4 @@ review 를 대체하지 않습니다.
 - [12. 업데이트](./GUIDE/13-12.md)
 - [13. 자주 헷갈리는 것](./GUIDE/14-13.md)
 - [14. 첫 sprint 예시](./GUIDE/15-14-sprint.md)
+- [15. 팀 도입: 챔피언 + 저장소 우선](./GUIDE/16-15-team-rollout.md)

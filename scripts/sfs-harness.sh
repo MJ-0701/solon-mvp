@@ -576,6 +576,83 @@ readiness_print_axis() { # $1=axis-token $2="score|evidence"
   READINESS_TOTAL=$((READINESS_TOTAL + score))
 }
 
+# 0.8.63 (DESIGN-2026-07-03 §1.5): AI-friendly surface axes. A second axis
+# group next to the Sanity four: the repo-standard four elements
+# (idea_wiki:L087-I5 — repo guide MD / rules-guardrails / repeated work as
+# commands-skills / AI reviewer) map 1:1 onto solon-installed surfaces, so
+# each axis is a file-existence/freshness check. Same signal-only contract
+# (info/ok only). Rubric SSoT: policies/harness-readiness.md AI_FRIENDLY_SURFACE.
+
+surface_axis_repo_guide() {
+  local adapters=0 d
+  for d in CLAUDE.md AGENTS.md GEMINI.md; do
+    [ -f "$d" ] && adapters=$((adapters + 1))
+  done
+  if [ -f "SFS.md" ] && [ "$adapters" -ge 1 ]; then
+    echo "2|SFS.md router + ${adapters} root adapter doc(s)"
+  elif [ -f "SFS.md" ] || [ "$adapters" -ge 1 ]; then
+    echo "1|repo guide partial (SFS.md or root adapter docs missing)"
+  else
+    echo "0|no repo guide surface (SFS.md / root adapter docs absent)"
+  fi
+}
+
+surface_axis_guardrails() {
+  local kernel="" index=""
+  [ -f ".sfs-local/context/kernel.md" ] && kernel="local"
+  [ -z "$kernel" ] && [ -f "${DIST_DIR}/templates/.sfs-local-template/context/kernel.md" ] && kernel="packaged"
+  [ -f ".sfs-local/context/_INDEX.md" ] && index="local"
+  [ -z "$index" ] && [ -f "${DIST_DIR}/templates/.sfs-local-template/context/_INDEX.md" ] && index="packaged"
+  if [ -n "$kernel" ] && [ -n "$index" ]; then
+    echo "2|routed guardrails loadable (kernel: ${kernel}, index: ${index})"
+  elif [ -n "$kernel" ] || [ -n "$index" ]; then
+    echo "1|routed guardrails partial (kernel or _INDEX unavailable)"
+  else
+    echo "0|no routed guardrails (kernel and _INDEX unavailable)"
+  fi
+}
+
+surface_axis_command_skill() {
+  local compiled p
+  compiled="$(find .claude/commands .claude/skills .sfs-local/skills -type f 2>/dev/null | grep -vc '^$' || true)"
+  if [ "${compiled:-0}" -ge 1 ] 2>/dev/null; then
+    echo "2|project command/skill artifacts: ${compiled}"
+    return
+  fi
+  for p in PROGRESS.md .sfs-local/PROGRESS.md docs/solon/*/PROGRESS.md \
+           HANDOFF-next-session.md docs/solon/*/HANDOFF-next-session.md; do
+    if [ -f "$p" ]; then
+      echo "1|no compiled command/skill yet; completed-work logs available for promotion (policies/skill-promotion-loop.md)"
+      return
+    fi
+  done
+  echo "0|no command/skill artifacts and no completed-work log to promote from"
+}
+
+surface_axis_ai_reviewer() {
+  local reviewed=0 f
+  for f in .sfs-local/sprints/*/review.md; do
+    [ -f "$f" ] && reviewed=$((reviewed + 1))
+  done
+  if [ "$reviewed" -ge 1 ]; then
+    echo "2|Gate 6 review evidence in ${reviewed} sprint(s)"
+  elif [ -f "${DIST_DIR}/templates/.sfs-local-template/sprint-templates/review.md" ]; then
+    echo "1|review rail installed (sprint template) but no sprint review evidence yet"
+  else
+    echo "0|no AI review rail detected"
+  fi
+}
+
+surface_print_axis() { # $1=axis-token $2="score|evidence"
+  local score="${2%%|*}" evidence="${2#*|}"
+  if [ "$score" = "2" ]; then
+    ok "readiness: ai-surface $1 ${score}/2 — ${evidence}"
+  else
+    info "readiness: ai-surface $1 ${score}/2 — ${evidence}"
+  fi
+  SURFACE_TOTAL=$((SURFACE_TOTAL + score))
+}
+
 print_readiness_section() {
   section "AI Readiness (Sanity)"
   READINESS_TOTAL=0
@@ -587,6 +664,66 @@ print_readiness_section() {
   readiness_print_axis "convention-consistency" "$(readiness_axis_convention)"
   readiness_print_axis "entry-doc-freshness" "$(readiness_axis_entry_docs)"
   info "readiness: total ${READINESS_TOTAL}/8 (advisory, signal-only — never blocks 'sfs harness map')"
+  SURFACE_TOTAL=0
+  surface_print_axis "repo-guide" "$(surface_axis_repo_guide)"
+  surface_print_axis "guardrails" "$(surface_axis_guardrails)"
+  surface_print_axis "command-skill" "$(surface_axis_command_skill)"
+  surface_print_axis "ai-reviewer" "$(surface_axis_ai_reviewer)"
+  info "readiness: ai-surface total ${SURFACE_TOTAL}/8 (repo-standard 4-element surface, idea_wiki:L087-I5 — advisory, signal-only)"
+}
+
+# 0.8.63 (DESIGN-2026-07-03 P4, idea_wiki:L087-I2): AI maturity self-diagnosis.
+#
+# Adoption is not impact (idea_wiki:L087-I1): the ladder is scored from impact
+# evidence in existing workbench artifacts — completed/reviewed sprints,
+# autonomous queue results, lessons ledger — never from usage counts, and the
+# scan shares the .sfs-local collection base with sfs-measure and the cost
+# signals. Signal-only (ALT-INV-3): info lines only, never warn/fail, so the
+# level can never change doctor's exit code. Deterministic bash — no LLM.
+# Levels 1-2 (autocomplete/chat) leave no repo artifact, so level 2 is the
+# honest floor for an initialized project without delegation evidence.
+# Rubric SSoT: templates/.sfs-local-template/context/policies/harness-maturity.md
+print_maturity_section() {
+  section "AI Maturity (Self-Diagnosis)"
+  local sprints=0 completed=0 reviewed=0 queue_done=0 cross=0 lessons=0 d f
+  for d in .sfs-local/sprints/*/; do
+    [ -d "$d" ] || continue
+    sprints=$((sprints + 1))
+    [ -f "${d}report.md" ] && completed=$((completed + 1))
+    [ -f "${d}review.md" ] && reviewed=$((reviewed + 1))
+    if [ -f "${d}implement.md" ] \
+       && grep -Eq 'cross review(er)?:[[:space:]]*[^[:space:]]' "${d}implement.md" 2>/dev/null; then
+      cross=$((cross + 1))
+    fi
+  done
+  for f in .sfs-local/queue/done/*; do
+    [ -f "$f" ] || continue
+    case "$(basename "$f")" in .gitkeep) continue ;; esac
+    queue_done=$((queue_done + 1))
+  done
+  if [ -f ".sfs-local/lessons.md" ]; then
+    lessons="$(grep -Ec '^#{2,3} L-[0-9]+' .sfs-local/lessons.md 2>/dev/null || true)"
+  fi
+
+  info "maturity: signal delegated-wu — completed WUs: ${completed} of ${sprints} sprint(s)"
+  info "maturity: signal review-loop — review evidence in ${reviewed} of ${sprints} sprint(s)"
+  info "maturity: signal parallel-capsule — queue done: ${queue_done}, cross-review sprints: ${cross}"
+  info "maturity: signal rework — lessons recorded: ${lessons:-0} L-NNN entr(ies) across ${completed} completed WU(s)"
+
+  local level=2 label="chat/assist stage — no whole-WU delegation evidence yet (levels 1-2 leave no repo artifact)"
+  if [ "$completed" -ge 1 ]; then
+    level=3; label="whole-task delegation + human inspection"
+  fi
+  if [ "$queue_done" -ge 1 ] || [ "$cross" -ge 1 ]; then
+    level=4; label="multi-agent / parallel capsules"
+  fi
+  if [ "$queue_done" -ge 1 ] && [ "$reviewed" -ge 1 ] && detect_release_surface; then
+    level=5; label="unattended-capable outputs (autonomous queue + review loop + release surface)"
+  fi
+  info "maturity: level ${level}/5 — ${label} (signal-only; rubric: policies/harness-maturity.md)"
+  if [ "$level" -le 2 ]; then
+    info "maturity: onboarding starts with locating the current level — delegate one whole WU and review it to reach level 3 (suggest-only)"
+  fi
 }
 
 # 0.8.60 (DESIGN-2026-07-03 P2): Cost signals from the host session log.
@@ -783,6 +920,8 @@ print_doctor() {
   print_skill_promote_section
 
   print_readiness_section
+
+  print_maturity_section
 
   print_cost_signal_section
 

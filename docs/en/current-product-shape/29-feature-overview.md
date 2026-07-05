@@ -46,6 +46,8 @@ inside each gate.
 |---|---|---|
 | harness readiness check | `sfs harness doctor` | [harness map](./22-project-harness-map.md) |
 | AI-readiness (Sanity) rubric, 4 axes | doctor "AI Readiness" section, `.sfs-local/readiness-waiver` | policy `policies/harness-readiness.md` |
+| AI-friendly surface, 4 axes (repo-standard 4 elements) | same section `ai-surface` axis group — repo guide/guardrails/commands-skills/AI reviewer | policy `policies/harness-readiness.md` |
+| AI maturity self-diagnosis (5-level ladder) | doctor "AI Maturity" section — delegated-wu/review-loop/parallel-capsule/rework signals | policy `policies/harness-maturity.md` |
 | session cost signals (3 runtimes) | doctor "Cost Signals" — Claude Code / Codex / Gemini adapters, `SFS_COST_RUNTIME` pin | [token harness](./17-token-harness-hygiene.md) |
 | harness blueprint + evolution ledger | `sfs harness map --write` | [harness map](./22-project-harness-map.md) |
 | saved-time / cost dashboard | `sfs measure [--json]` / `measure --alive` | `bin/sfs` usage |

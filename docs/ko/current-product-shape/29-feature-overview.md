@@ -44,6 +44,8 @@ Solon(SFS)의 전체 기능을 한 장으로 봅니다. 각 행은 상세 문서
 |---|---|---|
 | 하네스 준비도 점검 | `sfs harness doctor` | [harness map](./22-project-harness-map.md) |
 | AI-readiness(Sanity) 4축 채점 | doctor "AI Readiness" 섹션, `.sfs-local/readiness-waiver` | 정책 `policies/harness-readiness.md` |
+| AI-friendly 표면 4축 (저장소 표준 4요소) | 같은 섹션 `ai-surface` 축 그룹 — 안내서/가드레일/커맨드·스킬/AI 리뷰어 | 정책 `policies/harness-readiness.md` |
+| AI 성숙도 셀프 진단 (5단계 사다리) | doctor "AI Maturity" 섹션 — delegated-wu/review-loop/parallel-capsule/rework 신호 | 정책 `policies/harness-maturity.md` |
 | 세션 비용 신호 (3 런타임) | doctor "Cost Signals" 섹션 — Claude Code / Codex / Gemini 어댑터, `SFS_COST_RUNTIME` 핀 | [token harness](./17-token-harness-hygiene.md) |
 | 하네스 설계도 + 진화 원장 | `sfs harness map --write` | [harness map](./22-project-harness-map.md) |
 | 시간/비용 대시보드 | `sfs measure [--json]` / `measure --alive` | `bin/sfs` usage |

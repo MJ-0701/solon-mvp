@@ -39,6 +39,32 @@ Total is advisory (`N/8`). Scores read the consumer working tree only —
 never the shipped distribution — and skip `.sfs-local/` (SFS-owned files are
 not the consumer's codebase health).
 
+## AI_FRIENDLY_SURFACE
+
+A second axis group next to the Sanity four (own `ai-surface total N/8`
+line, same 0-2 form, same signal-only contract). The repo-standard four
+elements a 3,500-engineer rollout converged on (external case, cite:
+`idea_wiki:L087-I5`) map 1:1 onto surfaces solon installs, so scoring is
+file existence/freshness:
+
+| repo-standard element | solon surface | axis token |
+|---|---|---|
+| repository guide (MD) | `SFS.md` router + root adapter docs (`CLAUDE.md`/`AGENTS.md`/`GEMINI.md`) | `repo-guide` |
+| rules / guardrails file | routed context loadable (`kernel.md` + `_INDEX.md`, packaged or `.sfs-local/context/` override) | `guardrails` |
+| repeated work as slash commands / skills | project command/skill artifacts (`.claude/commands|skills`, `.sfs-local/skills`); completed-work logs count as promotion material (1/2) | `command-skill` |
+| AI code reviewer active | Gate 6 review rail — sprint `review.md` evidence (2/2) vs installed-but-unused (1/2) | `ai-reviewer` |
+
+| axis | 0 | 1 | 2 |
+|---|---|---|---|
+| `repo-guide` | neither surface | `SFS.md` or adapter docs, not both | `SFS.md` + >= 1 root adapter doc |
+| `guardrails` | kernel and `_INDEX` both unavailable | one of the two | both loadable |
+| `command-skill` | no artifacts, no promotion material | completed-work logs only | >= 1 compiled command/skill |
+| `ai-reviewer` | no review rail | rail installed, no sprint evidence | review evidence in >= 1 sprint |
+
+Unlike the Sanity axes these intentionally check solon-installed surfaces
+(including the packaged distribution for `guardrails`); doc freshness itself
+stays with the Sanity `entry-doc-freshness` axis and is not re-scored here.
+
 ## ORDER_DISCIPLINE
 
 - Run the readiness audit (doctor section) before `sfs harness map --write`;

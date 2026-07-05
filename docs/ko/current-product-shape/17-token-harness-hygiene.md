@@ -32,6 +32,12 @@ SFS 는 토큰과 어텐션 낭비를 줄이고 하네스 품질을 높이는 �
 - AI-readiness 감사: `sfs harness doctor` 가 지도(map)를 그리기 전에 Sanity
   (테스트 / dead code / 컨벤션 일관성 / 엔트리 문서 신선도)를 축당 0-2점으로
   채점한다 — signal-only, `.sfs-local/readiness-waiver` 로 waive 가능.
+- AI-friendly 표면 축: 같은 doctor 섹션이 저장소 표준 4요소(저장소 안내서 MD /
+  routed 가드레일 / 반복 작업의 커맨드·스킬화 / AI 리뷰어 활성)를 별도 0-2 축
+  그룹으로 채점한다 — solon 이 설치하는 표면과 1:1 매핑.
+- AI 성숙도 셀프 진단: doctor 의 AI Maturity 섹션이 사용량이 아니라 워크벤치
+  증거로 5단계 임팩트 사다리(채팅/보조 → WU 통째 위임 → 병렬 캡슐 → 무인
+  가능)에서 현재 위치를 찾아 준다 — 도입 ≠ 임팩트, 온보딩의 첫 질문.
 
 이 원칙은 특정 agent 에 묶이지 않습니다. Claude, Codex, Gemini 등 각 agent 의 usage report,
 LSP/index, hook 수단으로 동일하게 적용할 수 있습니다.

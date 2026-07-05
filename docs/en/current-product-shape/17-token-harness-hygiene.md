@@ -36,6 +36,14 @@ not need to install separate plugins. The normal operating flow absorbs these ha
 - AI-readiness audit: `sfs harness doctor` scores Sanity (tests, dead code,
   convention consistency, entry-doc freshness) 0-2 per axis before you draw
   the codebase map — signal-only, waivable via `.sfs-local/readiness-waiver`.
+- AI-friendly surface axes: the same doctor section scores the repo-standard
+  four elements (repo guide MD, routed guardrails, commands/skills for
+  repeated work, active AI reviewer) as a second 0-2 axis group — they map
+  1:1 onto surfaces solon installs.
+- AI maturity self-diagnosis: doctor's AI Maturity section locates the
+  project on a 5-level impact ladder (chat/assist → whole-WU delegation →
+  parallel capsules → unattended-capable) from workbench evidence, not usage
+  counts — adoption is not impact; onboarding starts here.
 
 The same hygiene applies to Claude, Codex, Gemini, and any other agent through
 their equivalent usage reports, LSP/index tools, and hook mechanisms.

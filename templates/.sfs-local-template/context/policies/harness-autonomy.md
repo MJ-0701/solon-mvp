@@ -27,6 +27,11 @@ SFS applies this as a project-operating contract:
   section) or an explicit `.sfs-local/readiness-waiver` is recommended before
   `map --write` — a map over an unhealthy codebase is false information.
   Rubric, waiver, and order discipline: `harness-readiness.md` (signal-only).
+- Locate the maturity level before expanding autonomy: doctor's AI Maturity
+  section scores a 5-level impact ladder (delegation, review loop, parallel
+  capsules, unattended outputs) from workbench artifacts — climbing one level
+  at a time beats tool-count growth. Rubric: `harness-maturity.md`
+  (signal-only).
 - Name the team architecture only when multi-agent work is actually selected:
   pipeline, fan-out/fan-in, expert pool, producer-reviewer, supervisor, or
   hierarchical delegation. The pattern is evidence for routing and handoff, not
