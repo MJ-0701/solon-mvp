@@ -164,7 +164,21 @@ jobs:
           Set-Location $project
 
           git init
-          sfs.cmd init --layout thin --yes
+          # Bridge diagnosis (red since 0.8.54): native ps1 commands pass while
+          # bash-bridge commands silently no-op with rc 0 on the pwsh runner.
+          # Trace the first bridge call and fail fast with hard evidence.
+          Write-Host "::group::sfs.cmd init live trace (bash bridge diagnosis)"
+          Write-Host "[sfs-trace] PSVersion=$($PSVersionTable.PSVersion) PSNativeCommandArgumentPassing=$PSNativeCommandArgumentPassing"
+          $env:SFS_WINDOWS_ARG_TRACE = "1"
+          & sfs.cmd init --layout thin --yes 2>&1 | Tee-Object -Variable initTrace
+          $initExit = $LASTEXITCODE
+          Remove-Item Env:SFS_WINDOWS_ARG_TRACE -ErrorAction SilentlyContinue
+          Write-Host "[sfs-trace] init exit=$initExit"
+          Write-Host "::endgroup::"
+          if ($initExit -ne 0) { throw "sfs.cmd init failed with exit ${initExit}: $($initTrace | Out-String)" }
+          if (-not (Test-Path ".sfs-local" -PathType Container)) {
+            throw "sfs.cmd init returned 0 but created no .sfs-local (silent bash-bridge no-op). Trace: $($initTrace | Out-String)"
+          }
           sfs.cmd status
           sfs.cmd auth status codex
           sfs.cmd context cat kernel | Out-String | Select-String "SFS Kernel" | Out-Null
