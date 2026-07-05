@@ -116,18 +116,22 @@ grep -q -- '--team' "${DIST_DIR}/upgrade.sh" || fail "upgrade.sh: missing --team
 # the bash core must give it Git for Windows' POSIX utils. A non-login
 # `bash <script>` inherited the Windows PATH WITHOUT /usr/bin, so mktemp/dirname/
 # timeout were "command not found" and every team command died before SFS logic.
-# The smoke-verified fix: launch bash with `-c` (NOT `-lc` — no profile sourcing),
-# prepend /usr/bin:/bin INSIDE bash, then `exec bash "$@"` to preserve the
-# original script path + args. These asserts mirror the dedicated regression in
-# tests/test-windows-bash-bridge-path.sh so team parity owns the contract too.
-grep -Fq 'export PATH=/usr/bin:/bin:"$PATH"' "${sfs_ps1}" \
-  || fail "bin/sfs.ps1: bash bridge must prepend /usr/bin:/bin ahead of \$PATH (POSIX utils for team/auth/report-bug)"
-grep -Fq 'exec bash "$@"' "${sfs_ps1}" \
-  || fail "bin/sfs.ps1: bash bridge must 'exec bash \"\$@\"' to preserve the original script path + args"
-grep -Fq '& $bash -c $bridgePrelude "sfs" $sfsShBash @bashArgs' "${sfs_ps1}" \
-  || fail "bin/sfs.ps1: bash bridge must launch via 'bash -c' with the script + args forwarded as \$@"
-if grep -Eq '& \$bash -lc ' "${sfs_ps1}"; then
-  fail "bin/sfs.ps1: bash bridge must use 'bash -c', never 'bash -lc' (a login shell sources user profile scripts)"
+# The fix (0.8.65 file-bridge form): launch `bash <bridge-file> <script> <args>`
+# where bin/sfs-bridge.sh prepends /usr/bin:/bin INSIDE bash, then
+# `exec bash "$@"` preserves the original script path + args (the inline -c
+# prelude form silently no-opped under pwsh 7 argument passing). These asserts
+# mirror the dedicated regression in tests/test-windows-bash-bridge-path.sh so
+# team parity owns the contract too.
+sfs_bridge="${DIST_DIR}/bin/sfs-bridge.sh"
+[[ -f "${sfs_bridge}" ]] || fail "missing bin/sfs-bridge.sh (packaged bash bridge)"
+grep -Fq 'export PATH=/usr/bin:/bin:"$PATH"' "${sfs_bridge}" \
+  || fail "bin/sfs-bridge.sh: bash bridge must prepend /usr/bin:/bin ahead of \$PATH (POSIX utils for team/auth/report-bug)"
+grep -Fq 'exec bash "$@"' "${sfs_bridge}" \
+  || fail "bin/sfs-bridge.sh: bash bridge must 'exec bash \"\$@\"' to preserve the original script path + args"
+grep -Fq '& $bash $bridgeShBash $sfsShBash @bashArgs' "${sfs_ps1}" \
+  || fail "bin/sfs.ps1: bash bridge must launch the bridge FILE with the script + args forwarded as \$@"
+if grep -Eq '& \$bash -l?c ' "${sfs_ps1}"; then
+  fail "bin/sfs.ps1: bash bridge must invoke the bridge file, never an inline 'bash -c/-lc' prelude (pwsh arg-passing re-parse bug)"
 fi
 
 echo "PASS: Windows ps1 team-activation parity (delegation contract intact)"

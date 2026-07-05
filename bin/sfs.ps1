@@ -1090,24 +1090,32 @@ Write-SfsArgTrace "PS_BASH_ARGS" $bashArgs
 # timeout) under <GitRoot>\usr\bin, but a non-login `bash <script>` launched from
 # PowerShell/Codex inherits the Windows PATH WITHOUT /usr/bin. So the watchdog's
 # `timeout` resolved to C:\Windows\System32\timeout.exe and `mktemp` / `dirname`
-# were "command not found" before any SFS logic ran (team / auth / report-bug
-# died at bin/sfs line 110 / 173). Launch bash with `-c` (NOT `-lc`: a login
-# shell would source the user's profile scripts, an unwanted side effect) and,
-# INSIDE bash, prepend the POSIX dirs to PATH then `exec bash "$@"` to re-run the
-# real entrypoint with the original script path + args preserved ($0 is a sentinel
-# label, $@ = script followed by the forwarded args). The parent $env:PATH is
-# never mutated: leak-proof (repeated sfs.cmd calls do not grow the session PATH)
-# and root-agnostic (/usr/bin resolves through the Git Bash mount table for any
-# install dir, and also for a custom SFS_BASH / WSL). The mktemp probe is
-# warn-only (never hard-fail): an install that already works - PATH already
-# correct, WSL, or a complete custom bash - is left untouched, while a genuinely
-# incomplete Git for Windows gets a clear recovery hint instead of the cryptic
-# "line 110: mktemp: command not found". This is the exact form smoke-verified on
-# real Windows (team / auth / report-bug reach SFS logic).
+# were "command not found" before any SFS logic ran. The fix prepends the POSIX
+# dirs INSIDE bash then `exec bash "$@"` re-runs the real entrypoint with the
+# original script path + args preserved. The parent $env:PATH is never mutated:
+# leak-proof and root-agnostic (/usr/bin resolves through the Git Bash mount
+# table for any install dir, and also for a custom SFS_BASH / WSL).
+#
+# 0.8.65 (pwsh arg passing): 0.8.54/0.8.55 inlined that prelude as
+# `bash -c '<prelude>' "sfs" <script> <args>`. Windows PowerShell 5.1 (Legacy
+# raw argument passing) delivered it in the real-Windows-verified form, but
+# pwsh 7.3+ (PSNativeCommandArgumentPassing=Windows -> Standard escaping for
+# bash.exe) collides with the MSYS2 command-line re-parse: the quoted prelude
+# swallowed the script path + args, `exec bash "$@"` saw an empty $@, and every
+# bash-delegated command silently no-opped with rc 0 (scoop-smoke red since
+# 0.8.54; hard evidence in run 28742085408). The prelude now ships as a
+# packaged FILE (bin/sfs-bridge.sh) so the native command line carries only
+# plain path/word arguments - no embedded quotes, nothing for the two PS
+# editions to re-parse differently.
 $sfsShBash = Convert-ToBashPath $sfsSh
-$bridgePrelude = 'export PATH=/usr/bin:/bin:"$PATH"; command -v mktemp >/dev/null 2>&1 || printf "sfs: POSIX utilities (mktemp/dirname/timeout) not found even after adding /usr/bin:/bin to PATH; your Git for Windows install may be incomplete - reinstall Git for Windows or set SFS_BASH to a complete bash.exe.\n" >&2; exec bash "$@"'
-Write-SfsArgTrace "PS_BASH_BRIDGE_PRELUDE" $bridgePrelude
-& $bash -c $bridgePrelude "sfs" $sfsShBash @bashArgs
+$bridgeSh = Join-Path $scriptDir "sfs-bridge.sh"
+if (-not (Test-Path $bridgeSh)) {
+  Write-Error "missing packaged SFS bash bridge: $bridgeSh"
+  exit 4
+}
+$bridgeShBash = Convert-ToBashPath $bridgeSh
+Write-SfsArgTrace "PS_BASH_BRIDGE_SCRIPT" $bridgeShBash
+& $bash $bridgeShBash $sfsShBash @bashArgs
 $bashExitCode = $LASTEXITCODE
 Write-SfsArgTrace "PS_AFTER_BASH_BRIDGE_LASTEXITCODE" $bashExitCode
 exit $bashExitCode
