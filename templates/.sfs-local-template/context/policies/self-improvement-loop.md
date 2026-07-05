@@ -46,8 +46,10 @@ SIGNAL -> RECORD -> CURATE -> PROPOSE -> MEASURE -> GATE -> APPLY -> CAPTURE -> 
    skill/command candidates, and `promoted` fields surface graduation
    candidates. Owner: `skill-promotion-loop.md` (DETECTION / COMPLEXITY_TRIGGER).
 5. **MEASURE** — a held-out set fixed before the change scores it before/after
-   (eval-first; cheap deterministic stage, then a cost-gated judge). Owner:
-   `skill-promotion-loop.md` (HELD_OUT_SCORING).
+   (eval-first; cheap deterministic stage, then a cost-gated judge); after
+   adoption, the success-side usage-value signal (repeated real invocations,
+   flowcheck telemetry aggregation) is the complementary field measure. Owner:
+   `skill-promotion-loop.md` (HELD_OUT_SCORING / DETECTION usage aggregation).
 6. **GATE** — the four EVOLUTION_ADOPTION_GATE checks, plus model-swap sunset
    re-review (keep / retire / generalize), decide adoption. Owners:
    `skill-promotion-loop.md` (EVOLUTION_ADOPTION_GATE), `model-workaround-sunset.md`.

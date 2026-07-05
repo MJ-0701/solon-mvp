@@ -378,6 +378,7 @@ done
 
 declare -a HEALTH_SUMMARY=()
 HEALTH_HOTSPOT=""
+HEALTH_USAGE=""
 HEALTH_EVENT_N="${#TC_ROWS[@]}"
 if (( HEALTH_EVENT_N > 0 )); then
   while IFS=$'\t' read -r kind a b c d; do
@@ -385,6 +386,7 @@ if (( HEALTH_EVENT_N > 0 )); then
       SUMMARY) HEALTH_SUMMARY+=("tool ${a}: ${b} call(s), ${c} error(s), ${d}% error-rate") ;;
       MAXLAT)  HEALTH_SUMMARY+=("tool ${a}: ${b}ms max latency") ;;
       HOTSPOT) HEALTH_HOTSPOT="tool ${a} — ${b} error(s) over ${c} call(s) (${d}% error-rate)" ;;
+      USAGE)   HEALTH_USAGE="tool ${a} — ${b} successful call(s) over ${c} total" ;;
     esac
   done < <(printf '%s\n' "${TC_ROWS[@]}" | awk -F'|' '
     { t=$1; calls[t]++; if ($2=="error") err[t]++;
@@ -401,6 +403,13 @@ if (( HEALTH_EVENT_N > 0 )); then
         if (e<2) continue;
         if (e>bE || (e==bE && r>bR)) { best=t; bE=e; bR=r; bC=c } }
       if (best!="") printf "HOTSPOT\t%s\t%d\t%d\t%.0f\n", best, bE, bC, bR
+      # usage-value signal (success twin of the hotspot): non-error calls >= 3;
+      # rank success desc, then name asc. Repeated real use = field-tested value.
+      bestU=""; bU=-1
+      for (i=1;i<=n;i++) { t=tools[i]; c=calls[t]+0; e=err[t]+0; s=c-e;
+        if (s<3) continue;
+        if (s>bU) { bestU=t; bU=s; bUC=c } }
+      if (bestU!="") printf "USAGE\t%s\t%d\t%d\n", bestU, bU, bUC
     }')
 fi
 
@@ -442,6 +451,9 @@ if mkdir -p "${ART_DIR}" 2>/dev/null; then
       if [[ -n "${HEALTH_HOTSPOT}" ]]; then
         printf -- '- ⚠️ repeated-failure hotspot: %s — drift-warn signal; record as a lesson if recurring.\n' "${HEALTH_HOTSPOT}"
       fi
+      if [[ -n "${HEALTH_USAGE}" ]]; then
+        printf -- '- usage-value signal: %s — repeated use is field-tested value; skill-promotion input (advisory).\n' "${HEALTH_USAGE}"
+      fi
       printf '\n'
     fi
     if (( blocking_n > 0 )); then
@@ -467,6 +479,9 @@ if (( HEALTH_EVENT_N > 0 )); then
   echo "  telemetry: ${HEALTH_EVENT_N} tool_call event(s) aggregated read-only (non-gating)"
   if [[ -n "${HEALTH_HOTSPOT}" ]]; then
     echo "  telemetry: repeated-failure hotspot: ${HEALTH_HOTSPOT}"
+  fi
+  if [[ -n "${HEALTH_USAGE}" ]]; then
+    echo "  telemetry: usage-value signal: ${HEALTH_USAGE}"
   fi
 fi
 

@@ -44,6 +44,14 @@ the ledger and event archives surfaces success-side repeated patterns the
 doctor's completed-work-log heuristic misses. Same contract — suggest-only,
 consumed at the tidy rail.
 
+A third candidate source is **success-side usage aggregation**: flowcheck's
+tool-telemetry health reads the same `tool_call` ledger and surfaces the
+most-invoked tool with 3+ successful calls as a `usage-value signal` line —
+repeated real use is field-tested value, the strongest promotion evidence
+there is (external case, by-reference: Claude blog admin spend controls,
+2026-07-02 — org-scale dashboards treat repeated skill execution as the value
+signal). Read-only, advisory, consumed here as DETECTION input.
+
 ## COMPLEXITY_TRIGGER
 
 Repetition (3+) is not the only signal. A **single hard task** is a candidate
@@ -138,6 +146,13 @@ two stages, cheap first:
 
 Adopt only on a positive before/after delta **and** four green gates **and**
 human sign-off.
+
+Score reports expose their formula and inputs, and the inputs stay adjustable
+("every formula is visible" — external admin-analytics case, by-reference):
+a black-box score cannot be audited or challenged, so it cannot serve as the
+measured leg. After adoption, sustained real usage (the DETECTION
+usage-value signal) is the field twin of the held-out delta — same
+necessary-but-not-sufficient standing, never overriding a gate.
 
 Reuse, don't reinvent (no new eval system): this is the
 **skill-creator eval harness** pattern — held-out `evals.json` prompts →

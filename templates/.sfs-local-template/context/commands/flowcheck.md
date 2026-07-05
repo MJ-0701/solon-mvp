@@ -56,8 +56,12 @@ named follow-up/waiver.
 sprint 에 `tool_call` 이벤트(보통 MCP 툴 호출마다 1건; `tool`/`outcome`/`latency_ms`)가
 있으면 flowcheck 가 read-only 로 집계해 per-tool call·error·error-rate·max-latency 와
 **반복 실패 hotspot**(error count ≥2 기준)을 artifact·stdout 에 advisory 로 덧붙인다.
-이 hotspot 은 버그리포트 flow 의 drift-warn 신호원 + lessons 입력이다. 계측은 추가만이고
-verdict/exit 를 바꾸지 않는다(기존 동작 비파괴). 계약 SSoT: `policies/flow-conformance-postflight.md`.
+이 hotspot 은 버그리포트 flow 의 drift-warn 신호원 + lessons 입력이다. 같은 원장에서
+**성공측 집계**도 read-only 로 1줄 노출한다: 성공 호출(비-error) 3회 이상인 최다 tool 을
+usage-value 신호로 표시 — "반복 사용 = 실전 검증된 가치" (외부 admin-analytics 사례
+by-reference, Claude blog 2026-07-02), `skill-promotion-loop` DETECTION 입력원.
+계측은 추가만이고 verdict/exit 를 바꾸지 않는다(기존 동작 비파괴). 계약 SSoT:
+`policies/flow-conformance-postflight.md`.
 
 ## Lessons loop
 flowcheck 출력은 `.sfs-local/lessons.md` 의 누적 lesson 수와 "이번 작업단위에서

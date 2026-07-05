@@ -44,6 +44,13 @@ known-good reference output or pattern the worker should imitate. Attach it
 when one exists; a worked example steers a worker more cheaply than longer
 prose. Absence is not a validation finding.
 
+`token_budget` and `timeout` follow **warn-before-block**: surface a threshold
+warning before the ceiling (the 75/90% two-step alert pattern, external
+admin-controls case by-reference) so the worker decides refine / pivot / halt
+at the warning instead of being cut mid-task at the cap — the same quantitative
+escalation shape as `harness-autonomy.md`'s discard ladder. The cap itself is
+unchanged; the warning is a signal, not a new gate.
+
 ## Handoff rules
 
 - Capsule-only: never forward the lead's full conversation history, hidden
