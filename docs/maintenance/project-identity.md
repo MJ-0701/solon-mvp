@@ -4,7 +4,7 @@ title: "Project identity — `solon-mvp` distribution repo"
 visibility: oss-public
 doc_type: maintenance-doc
 language: ko
-updated: 2026-05-28
+updated: 2026-07-05
 summary: "What this repo is, who owns it, and how it relates to the full Solon methodology."
 load_when: "Read when discussing the repo's role, IP boundary, or relationship to the maintainer's private docset."
 ---
@@ -28,6 +28,18 @@ maintenance doc 이다. CLAUDE.md 는 이제 agent 지침만 담고, repo 정체
 - consumer 가 `sfs init --layout thin --yes` 한 번으로 `SFS.md`,
   `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.sfs-local/` 를 받고 7-step 을
   돌릴 수 있게 한다.
+
+## 포지셔닝 (2026-07-05 확정)
+
+- solon 은 "방법론 도구"가 아니라 **저장소 우선 전환 전략의 제품화**다.
+  대규모 조직 사례(`idea_wiki:L087`)가 실증한 전환 지렛대 — 소수 챔피언이
+  핵심 저장소를 AI 친화적으로 정비하면 팀 전원이 매일 지나는 길목이 올라간다
+  — 에서, solon 이 설치하는 표면(어댑터 MD · routed 정책 · commands/스킬 ·
+  Gate 리뷰 레일)이 그 정비의 표준 4요소와 1:1 이다. 진단 입구는
+  `sfs harness doctor` 의 AI Readiness(ai-surface 축) + AI Maturity 섹션,
+  팀 도입 순서는 GUIDE 의 "팀 도입: 챔피언 + 저장소 우선" 절.
+- 근거·결정 이력: `docs/maintenance/2026-07-03-ai-ready-codebase-token-efficiency.design.md`
+  §1.5 / §6-F.
 
 ## 해석 경계
 
