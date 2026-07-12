@@ -19,6 +19,7 @@ split_children:
   - docs/en/guide/09-8-upgrade.md
   - docs/en/guide/10-9-optional-multi-agent-use.md
   - docs/en/guide/11-10-team-rollout.md
+  - docs/en/guide/12-11-undocumented-takeover.md
 ---
 # Solon Product - 30-Minute Guide
 
@@ -50,3 +51,4 @@ This file keeps the original route as a thin entry point. Detailed body sections
 - [8. Upgrade](./guide/09-8-upgrade.md)
 - [9. Optional Multi-Agent Use](./guide/10-9-optional-multi-agent-use.md)
 - [10. Team Adoption: Champion + Repository First](./guide/11-10-team-rollout.md)
+- [11. Taking Over an Undocumented Codebase (dig)](./guide/12-11-undocumented-takeover.md)

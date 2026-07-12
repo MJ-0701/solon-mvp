@@ -49,6 +49,7 @@ Solon(SFS)의 전체 기능을 한 장으로 봅니다. 각 행은 상세 문서
 | 세션 비용 신호 (3 런타임) | doctor "Cost Signals" 섹션 — Claude Code / Codex / Gemini 어댑터, `SFS_COST_RUNTIME` 핀 | [token harness](./17-token-harness-hygiene.md) |
 | 하네스 설계도 + 진화 원장 | `sfs harness map --write` | [harness map](./22-project-harness-map.md) |
 | 시간/비용 대시보드 | `sfs measure [--json]` / `measure --alive` | `bin/sfs` usage |
+| 무문서 코드베이스 역추적 (L0 스캔·ERD·L1 그래프·fact card·확증 상태) | `sfs dig scan|graph|card|status` | routed context `commands/dig.md` |
 
 Sanity→Cartography 순서 규율과 모든 지표의 signal-only(차단 없음) 계약이
 함께 적용됩니다.

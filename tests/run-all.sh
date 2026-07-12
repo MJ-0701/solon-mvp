@@ -133,6 +133,7 @@ categorize() {
       printf 'hygiene-and-policy\n'
       ;;
     test-sfs-*.sh \
+      | test-dig-*.sh \
       | test-hermes-*.sh \
       | test-team-*.sh \
       | test-route-*.sh \

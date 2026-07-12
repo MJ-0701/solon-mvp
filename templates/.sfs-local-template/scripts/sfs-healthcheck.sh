@@ -299,6 +299,30 @@ check_git_index_lock() {
   fi
 }
 
+# excavation(dig) 정합 — advisory only: 무효 카드 수와 게이트-추월을 알리되
+# 이슈로 세지 않고 exit 코드도 바꾸지 않는다 (signal-only).
+check_excavation_conformance() {
+  local project="$1" label="$2" exc dig invalid queue cards_dir
+  dig="${SFS_DIST_DIR:-}/scripts/sfs-dig.sh"
+  [[ -n "${SFS_DIST_DIR:-}" && -f "${dig}" ]] || return 0
+  for exc in "${project}"/docs/solon/*/excavation; do
+    [[ -d "${exc}" ]] || continue
+    cards_dir="${exc}/cards"
+    if [[ -d "${cards_dir}" ]]; then
+      invalid="$( (cd "${project}" && bash "${dig}" card validate "${cards_dir#"${project}"/}" --root . 2>/dev/null) | grep -c '^REJECT' || true)"
+      if [[ "${invalid:-0}" -gt 0 ]]; then
+        say_warn "excavation-cards" "${label}" "${invalid} card(s) fail validation under ${exc#"${project}"/} (advisory)"
+      fi
+    fi
+    queue="${exc}/l2-queue.md"
+    if [[ -f "${queue}" ]] && file_contains "${queue}" "L2-GATE: NOT-READY" && [[ -d "${cards_dir}" ]] \
+      && ls "${cards_dir}"/*.md >/dev/null 2>&1; then
+      say_warn "excavation-gate" "${label}" "L2 cards exist while l2-queue gate is NOT-READY — record a sanity waiver or re-run scan (advisory)"
+    fi
+  done
+  return 0
+}
+
 check_project() {
   local project="$1" local_dir label
   PROJECT_COUNT=$((PROJECT_COUNT + 1))
@@ -310,6 +334,7 @@ check_project() {
   fi
   check_git_index_lock "${project}"
   check_wiki_frontmatter "${project}"
+  check_excavation_conformance "${project}" "${label}"
 
   local_dir="${project}/.sfs-local"
   if [[ ! -d "${local_dir}" ]]; then

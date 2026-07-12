@@ -28,6 +28,7 @@ module:
 - `commands/release.md` — release / deploy / Homebrew / Scoop.
 - `commands/upgrade.md` — upgrade / update / install freshness.
 - `commands/harness.md` — harness doctor/map for project autonomy readiness.
+- `commands/dig.md` — bottom-up excavation of an undocumented codebase: deterministic L0 scan + ERD / L1 graph + queue, capsule-delegated L2 fact cards (validator-enforced evidence), L3 synthesis (#추정-marked reverse-spec + unknowns question list), L4 confirmation states.
 - `commands/tidy.md` — tidy / report / retro / archive.
 - `commands/loop.md` — loop / autonomous work / queue.
 
