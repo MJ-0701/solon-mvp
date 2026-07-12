@@ -4,7 +4,7 @@ title: "Design — Multi-agent team topology + entry-agnostic auto-dispatch"
 visibility: oss-public
 doc_type: design-doc
 language: ko
-updated: 2026-06-23
+updated: 2026-07-12
 summary: "Opt-in 멀티에이전트 역할 전문화 + 자동 업무분배 설계. runtime_registry(데이터로 runtime) + agent_runtime_bindings(role→runtime) + team preset(solo/pair/trio) + entry-agnostic dispatch. OCP 1원칙, solo 무변경, standalone guarantee."
 load_when: "멀티에이전트 team topology, runtime_registry/agent_runtime_bindings 스키마, --team preset, sfs dispatch, 어댑터 dispatch rule 주입 작업 시. Hermes seam 설계(2026-06-23-hermes-self-evolution-seam-wiring.design.md)의 자매 문서(워커 층)."
 ---
@@ -48,6 +48,12 @@ agent 강제 spawn/상시 데몬(dispatch는 opt-in, headless 1-shot).
 3. **기존 표면 재사용.** divisions, capsule-contract(8필드), advisor↔Code 파일버스,
    external-orchestrator-entry, credential-hygiene 그대로. 새 통신 규약 신설 금지.
 4. **Entry-agnostic.** 진입 agent 무관 같은 binding/registry 읽고 같은 판정.
+5. **DISPATCHER_SPECIALIST_SEPARATION — dispatcher 는 라우팅만.** dispatch 층은
+   role 판정 + capsule 발행·회수만 하고 실행은 항상 specialist 가 한다. 그래서
+   각 specialist 는 독립 개선 가능(한 역할의 skill/프롬프트 교체 = 라우터·타
+   역할 diff 0) — OCP "binding=데이터"의 실행층 대응물. 외부검증(by-reference):
+   마케팅 ops 사례(Claude 블로그, 2026-07-08) — 라우팅 전용 dispatcher skill +
+   독립 진화하는 specialist skill 들.
 
 ## 4. 구성요소
 

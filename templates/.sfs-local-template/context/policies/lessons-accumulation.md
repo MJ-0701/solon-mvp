@@ -124,6 +124,15 @@ autonomy (external validation, by-reference: a Claude blog post on effective
 human-agent teams, 2026-06-24 — the weekly lessons-and-missteps review; vendor
 specifics held out).
 
+An **end-of-session reflect pass** is the same curation in micro form: before
+closing a working session, ask the agent what in this session should flow back
+into skills, lessons, or checks — corrections given, procedures repeated,
+surprises hit. Findings route to the same suggest-only outputs (L-NNN
+candidates, skill-promotion candidates), applied at the tidy rail. External
+validation (by-reference): a marketing-operations case (Claude blog,
+2026-07-08) closes each session with a reflect request that feeds skill
+updates — the CURATION_PASS run at session grain by non-technical operators.
+
 The pass is **suggest-only**: it writes the report, never the ledger. Applying
 a proposed merge or promotion happens at the `tidy` rail under the same human
 gate as every adoption (`skill-promotion-loop.md` EVOLUTION_ADOPTION_GATE).

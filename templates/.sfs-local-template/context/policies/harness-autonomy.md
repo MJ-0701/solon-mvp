@@ -104,7 +104,12 @@ SFS applies this as a project-operating contract:
   (`work-delegation-and-startup.md` NORTH_STAR) is gated on this same anchor.
 - A separate verifier context should be rule-scoped and skeptical: give the
   verifier the rule, expected evidence, counterexamples, and false-positive
-  risks, not the author's full reasoning trail.
+  risks, not the author's full reasoning trail. External validation
+  (by-reference): a marketing-operations case (Claude blog, 2026-07-08) runs a
+  dedicated **fresh-context audit agent** — a verifier that starts with no
+  builder context — over every automated build before ship; the
+  verifier != implementer invariant proven outside engineering, by
+  non-technical operators.
 - Capture harness evolution deltas: initial harness, shipped harness, what
   changed, why, and which defect/feedback proved the change. Repeated deltas
   become tests, routed policies, skills, or scaffold defaults.

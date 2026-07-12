@@ -52,6 +52,15 @@ there is (external case, by-reference: Claude blog admin spend controls,
 2026-07-02 — org-scale dashboards treat repeated skill execution as the value
 signal). Read-only, advisory, consumed here as DETECTION input.
 
+A fourth signal is the **repeated-correction trigger**: the same human
+correction given twice is a candidate immediately — a correction is costlier
+evidence than a mere repeat, so it earns a lower floor (2) than the
+completed-work signature (3+). The correction itself also flows to the
+failure twin (`lessons-accumulation.md`). External validation (by-reference):
+the same marketing-operations case (Claude blog, 2026-07-08) — the team's
+standing rule is "corrected the same thing twice → promote it into the
+skill", maintained by non-technical operators.
+
 ## COMPLEXITY_TRIGGER
 
 Repetition (3+) is not the only signal. A **single hard task** is a candidate

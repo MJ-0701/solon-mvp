@@ -4,7 +4,7 @@ title: "10. Team Adoption: Champion + Repository First"
 visibility: oss-public
 doc_type: user-guide
 language: en
-updated: 2026-07-05
+updated: 2026-07-12
 parent: docs/en/guide.md
 summary: "10. Team Adoption: Champion + Repository First"
 load_when: "Read when docs/en/guide.md routes to this section."
@@ -34,7 +34,13 @@ repository's own docs.
    current level on a 5-level ladder.
 2. **Surface work** — fix the lowest-scoring axes first: a thin `SFS.md`
    router and root adapter docs, a named test entrypoint, repeated work
-   compiled into commands/skills.
+   compiled into commands/skills. Compiling a skill needs no technical
+   knowledge — **Claude builds the skill for you**. If you corrected the
+   same thing twice, ask "fold that correction into the skill"; before
+   closing a session, ask "reflect on this session — anything worth keeping
+   as a skill?" (the repeated-correction trigger in
+   `policies/skill-promotion-loop.md` plus the end-of-session reflect pass
+   in `policies/lessons-accumulation.md`).
 3. **Delegation entry** — once the surface is ready, start delegating whole
    WUs (`sfs start` → plan → implement). Maturity level 3 is the target.
 4. **Review loop** — turn the Gate 6 review rail into a standing loop only

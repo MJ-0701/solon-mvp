@@ -4,7 +4,7 @@ title: "15. 팀 도입: 챔피언 + 저장소 우선"
 visibility: oss-public
 doc_type: user-guide
 language: ko
-updated: 2026-07-05
+updated: 2026-07-12
 parent: GUIDE.md
 summary: "15. 팀 도입: 챔피언 + 저장소 우선"
 load_when: "Read when GUIDE.md routes to this section."
@@ -31,6 +31,12 @@ load_when: "Read when GUIDE.md routes to this section."
    입니다 — AI Maturity 섹션이 5단계 사다리에서 현재 레벨을 알려줍니다.
 2. **표면 정비** — 점수가 낮은 축부터: 얇은 `SFS.md` 라우터와 루트 어댑터 문서,
    테스트 진입점, 반복 작업의 커맨드/스킬화. 이것이 위 표면 4요소의 실체입니다.
+   스킬화에 기술 지식은 필요 없습니다 — **skill 은 Claude 가 대신 만들어
+   줍니다**. 같은 교정을 두 번 했다면 "방금 교정한 걸 스킬에 반영해줘"라고,
+   세션을 닫기 전엔 "이번 세션에서 스킬로 남길 게 있는지 돌아봐줘"라고
+   요청하면 됩니다 (routed 정책 `policies/skill-promotion-loop.md` 의
+   repeated-correction 트리거 + `policies/lessons-accumulation.md` 의
+   세션말 reflect 패스).
 3. **위임 입구** — 표면이 준비되면 WU 통째 위임을 시작합니다 (`sfs start` →
    plan → implement). 성숙도 레벨 3 이 목표입니다.
 4. **리뷰 루프** — 위임이 흐르기 시작한 뒤에 Gate 6 리뷰 레일을 상시화합니다.
