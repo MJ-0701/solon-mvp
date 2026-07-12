@@ -13,6 +13,31 @@
 
 ---
 
+## 0.9.0
+
+무문서 코드베이스 역추적 파이프라인 `sfs dig` 탑재: 인계 문서 없는 외주/레거시 코드베이스에서 프로젝트 개요와 ERD 를 코드만으로 복원합니다 — L0 스캔·ERD 와 L1 그래프는 LLM 없이 결정론으로 완결됩니다.
+
+체감 변화:
+
+- `sfs dig scan --write` 한 번으로 프레임워크/엔트리포인트/라우트/환경변수
+  키/스키마 소스를 탐지하고 **ERD 를 먼저** 뽑습니다 (mermaid + file:line
+  근거). 실 DB 를 볼 수 있으면 information_schema 덤프 TSV 로 코드 추정과
+  diff — 접속 정보·데이터 로우는 어디에도 저장되지 않습니다.
+- `sfs dig graph --write` 가 import/라우트→서비스→테이블 그래프와 L2 순회
+  큐(진입점 BFS, dead-code 후보 후순위)를 만듭니다. 외부 도구 없이 grep
+  축소 모드로 동작하고, Sanity 미비 시 큐에 L2-GATE 마커가 남습니다
+  (signal-only — 아무것도 막지 않음, waiver 로 진행 가능).
+- 모듈별 fact card 는 캡슐로 위임하되, **근거(file:line) 없는 서술은
+  `sfs dig card validate` 가 기계적으로 거부**합니다 — 존재하지 않는 파일
+  인용도 reject. 카드는 근거가 쌓이면 unverified → corroborated → verified
+  로 자동 파생됩니다 (`sfs dig status` 로 커버리지 확인).
+- 확신도 낮은 항목은 unknowns(외주사 질문 리스트)로 모아 인수인계 미팅에
+  들고 가고, 안정된 산출물만 `sfs tidy --wiki-promote` 로 위키 승격합니다.
+- GUIDE 에 "무문서 코드베이스 인수" 절과 첫날 30분 체크리스트가 추가됐습니다.
+- 대상 저장소는 read-only — dig 는 대상 코드를 절대 수정하지 않습니다.
+
+---
+
 ## 0.8.70
 
 인용 검증 2단 패스 탑재: 인용을 가져오는 것(retrieve)과 제시 전 검증하는 것(validate)을 구분하는 cite-then-validate 계약, 가장 어려운 작업엔 인간을 산출물 개발 루프에 넣는 패턴, 그리고 "work around the work" 사용 데이터가 why-solon 외부 근거로 등재됐습니다.
