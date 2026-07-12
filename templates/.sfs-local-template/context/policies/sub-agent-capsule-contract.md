@@ -66,6 +66,14 @@ unchanged; the warning is a signal, not a new gate.
   enters the parent conversation, only the final message returns.
 - Poll artifacts at `output_paths`, not the worker's thoughts. Insufficient
   evidence → the worker returns partial/fail and names the missing artifact.
+- Deviation convention: when the territory contradicts the capsule's plan or
+  `acceptance_criteria` assumptions mid-slice, the worker makes the
+  conservative choice, records it under a `## Deviations` heading in the
+  `output_paths` evidence (what the plan said / what was found / choice /
+  why conservative), and continues — no silent improvisation, no hard stop
+  for non-blocking gaps (`unknowns-and-deviations.md` DEVIATIONS_LOG). The
+  lead reviews deviations with the result; recurring classes feed
+  `lessons-accumulation.md`.
 - A bridge that cannot express these fields (e.g. a forked-context helper that
   inherits the whole chat) is a manual escape hatch, not the default executor.
 - For chat/channel handoffs, encode the server/channel/thread locator as

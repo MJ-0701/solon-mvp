@@ -66,6 +66,11 @@ Append one entry per lesson, newest first under `## Lessons`:
 - Any failure caught by a WU, review, or gate that could recur in another
   session gets one `L-NNN` entry. A one-off typo does not; a class of mistake
   does.
+- Deviation entries are a signal source: a `## Deviations` log entry
+  (`unknowns-and-deviations.md` DEVIATIONS_LOG — plan met contradicting
+  territory, worker made the conservative choice and recorded it) that
+  recurs as a class gets one `L-NNN` entry the same way a caught failure
+  does. The deviation preserves the evidence; the lesson generalizes it.
 - Recording happens at review or retro, the same place the kernel already routes
   "repeated mistake → guardrail". A lesson that warrants enforcement now becomes
   a guardrail/check immediately and is recorded with that `promoted` value.

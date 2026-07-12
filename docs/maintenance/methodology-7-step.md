@@ -4,7 +4,7 @@ title: "Methodology — 7-step flow + Gate 1~7 표기"
 visibility: oss-public
 doc_type: maintenance-doc
 language: ko
-updated: 2026-05-28
+updated: 2026-07-12
 summary: "7-step flow summary applied even to this repo's own development. Gate display labels are 1~7; new CLI examples use --gate 6 style."
 load_when: "Read for a quick refresher on the 7-step / Gate label convention. Deeper policy lives in routed context (kernel.md, commands/*.md, policies/*.md)."
 ---
@@ -39,6 +39,14 @@ plan(Gate 3) 진입 시 **eval-first**: 통과/실패를 가를 ground-truth 케
 차원을 코드보다 먼저 고정한다 ("eval = first commit"). SSoT 는 routed context
 `commands/flowcheck.md` 의 Plan-gate self-check 5번 + `policies/skill-promotion-loop.md`
 HELD_OUT_SCORING (여기서 재나열하지 않는다 — 포인터만).
+
+같은 plan 진입 시 **unknowns 프리플라이트**: 프롬프트/계획(맵)과 코드베이스
+(territory) 의 간극을 4분면(UNKNOWNS_QUADRANT)으로 분해하고, 계약 확정 전
+BLIND_SPOT_PASS 한 번으로 에이전트에게 "내가 말하지 않은 것"을 묻는다. 구현 중
+계획 이탈은 보수적 선택 + `## Deviations` 기록 후 계속(DEVIATIONS_LOG, lessons
+SIGNAL 입력원), 구현 후 explainer/quiz 는 운영자 이해도 게이트다
+(COMPREHENSION_GATE, signal-only). SSoT 는 routed context
+`policies/unknowns-and-deviations.md` (여기서 재나열하지 않는다 — 포인터만).
 
 또 **map-first**: 구현 착수 전 작업 전체를 먼저 매핑(PRD + 티켓 분해)한 뒤 독립
 워크플로로 병렬화한다 — 첫 코드 전에 하루 분량의 계획이 나머지를 즉흥 아닌 실행으로

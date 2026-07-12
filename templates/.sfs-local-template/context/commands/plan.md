@@ -8,7 +8,7 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
 
 - Adapter-first: run `sfs plan`, then read the same sprint's `brainstorm.md`.
   Treat Gate 2 `§1-§8` as source material, not decoration.
-- Consult `.sfs-local/lessons.md` on plan entry; fold any matching lesson's rule into AC/design/non-goals before code (`policies/lessons-accumulation.md`).
+- Consult `.sfs-local/lessons.md` on plan entry; fold any matching lesson's rule into AC/design/non-goals before code (`policies/lessons-accumulation.md`). Run the unknowns preflight from `policies/unknowns-and-deviations.md` in the same pass: decompose the slice across the UNKNOWNS_QUADRANT and spend one BLIND_SPOT_PASS prompt before the contract freezes.
 - If `brainstorm.md` is still draft or has unresolved blocking questions, do not smooth over them with assumptions. Ask 1-3 questions and keep the plan draft until shared intent is clear.
 - Carry Gate 2 AI work intake forward: goal, materials, ask-back rule, and output format become requirements, AC, evidence, and artifact shape.
 - If Gate 3 remains draft because the user must choose scope, do not end with

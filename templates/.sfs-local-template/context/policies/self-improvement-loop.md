@@ -33,8 +33,9 @@ points back here, rather than re-stating the rule as a second SSoT.
 SIGNAL -> RECORD -> CURATE -> PROPOSE -> MEASURE -> GATE -> APPLY -> CAPTURE -> (back to SIGNAL)
 ```
 
-1. **SIGNAL** — flow/`tool_call` telemetry hotspots, caught failures, and
-   completed-work signatures enter the loop. Owners:
+1. **SIGNAL** — flow/`tool_call` telemetry hotspots, caught failures,
+   plan-deviation log entries (`unknowns-and-deviations.md` DEVIATIONS_LOG),
+   and completed-work signatures enter the loop. Owners:
    `flow-conformance-postflight.md`, `skill-promotion-loop.md` (DETECTION).
 2. **RECORD** — a caught failure that could recur becomes one durable `L-NNN`
    avoidance rule in the local ledger. Owner: `lessons-accumulation.md`.
