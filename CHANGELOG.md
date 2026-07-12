@@ -1,5 +1,22 @@
 ## [Unreleased]
 
+## [0.8.66] - 2026-07-12
+
+> **The map-vs-territory unknowns loop lands from the finding-your-unknowns field guide (2026-07-06, INSIGHT-2026-07-12), all additive: the gap between the prompt/plan (map) and the codebase (territory) is the operator's unknowns, and quality is bottlenecked by how fast they surface — not by model capability. One new routed policy (`unknowns-and-deviations.md`) gives the gap three touchpoints. (1) Plan preflight: UNKNOWNS_QUADRANT decomposes the slice across known/unknown × known/unknown (known-knowns → AC, known-unknowns → risk rows, unknown-knowns → flushed by restate-and-clarify, unknown-unknowns → BLIND_SPOT_PASS: one prompt asking the agent what the operator did not say — the largest quadrant for non-technical operators); plan.md folds it into the existing lessons-consult entry with zero line-budget growth. (2) DEVIATIONS_LOG: when territory contradicts the plan mid-slice, the worker makes the conservative choice, records it under `## Deviations` in the sprint workbench (capsule workers: in `output_paths` evidence), and continues — no silent improvisation, no hard stop; deviation entries register as a SIGNAL source in lessons-accumulation and self-improvement-loop, and Gate 6 treats an unresolved deviation without lesson/waiver as a finding. (3) COMPREHENSION_GATE: post-implementation explainer + quiz as operator understanding evidence — the operator-side twin of Gate 6 review, tied to the HTML-encouraged user-facing docs strategy, signal-only (failing routes to re-reading, never blocks). Vendor/model names are locked out of the new policy by test.**
+
+### Added
+
+- **`templates/.sfs-local-template/context/policies/unknowns-and-deviations.md`** — UNKNOWNS_QUADRANT / BLIND_SPOT_PASS / DEVIATIONS_LOG / COMPREHENSION_GATE, all advisory (ALT-INV-3 signal-only).
+- **`tests/test-unknowns-deviation-loop.sh`** — headline: anchors + pointers + vendor hygiene + 200-line budgets + pre-existing anchor preservation.
+
+### Changed
+
+- **`commands/plan.md`** — unknowns preflight joined the lessons-consult plan-entry pass (same line, no budget growth).
+- **`commands/review.md`** — Gate 6 checks the `## Deviations` log and accepts the comprehension gate as operator evidence.
+- **`policies/lessons-accumulation.md` / `policies/self-improvement-loop.md`** — deviation entries registered as a SIGNAL source.
+- **`policies/sub-agent-capsule-contract.md`** — capsule deviation convention (conservative + record to `output_paths` + continue).
+- **`docs/maintenance/methodology-7-step.md`** — plan-entry unknowns preflight pointer (by-reference only).
+
 ## [0.8.65] - 2026-07-05
 
 > **The Windows bash-bridge prelude ships as a packaged file — pwsh had been silently no-opping every bash-delegated command since 0.8.54. The scoop-smoke CI had been red since the 0.8.54 bridge landed: native ps1 commands (version/help/status) passed while init/context/start/upgrade/team returned rc 0 without doing anything, so real pwsh 7 users got a wrapper that looked installed but executed nothing bash-side. A traced run (28742085408; pwsh 7.6.3, `PSNativeCommandArgumentPassing=Windows`) pinned the mechanism: `PS_BASH_ARGS` still carried the full argument vector, the bridge returned rc 0, and no `.sfs-local` appeared — the inline `bash -c '<prelude>' "sfs" <script> <args>` form works under Windows PowerShell 5.1's Legacy raw argument passing (the form real-Windows-verified in 0.8.55) but pwsh 7.3+ applies Standard escaping to bash.exe, which collides with the MSYS2 command-line re-parse: the quoted prelude swallows the script path and args, so `exec bash "$@"` ran with an empty `$@`. The fix removes the quoting variable entirely: the prelude now lives in `bin/sfs-bridge.sh` and the ps1 invokes `bash <bridge> <script> <args>` — only plain path/word arguments on the native command line, identical under both PS editions. The prelude contract is byte-equivalent (POSIX dirs prepended ahead of `$PATH`, parent `$env:PATH` never mutated, warn-only mktemp probe, `exec bash "$@"`), and `bin/sfs` stays untouched (non-Windows byte-for-byte invariant). Verified on real Windows: the scoop-smoke workflow went green for the first time since 0.8.54 (run 28742287143 — full pass incl. thin-project init/start, Korean sprint, upgrade round-trip, saved-cmdline fallback, and broken-shim recovery). The smoke also now traces the first bridge call and fails fast when a bridge call returns 0 without side effects, so a silent no-op can never again hide behind a later assertion.**
