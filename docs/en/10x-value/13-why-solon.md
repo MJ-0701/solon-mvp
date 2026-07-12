@@ -4,7 +4,7 @@ title: "Why Solon — what survives is work structure"
 visibility: oss-public
 doc_type: product-reference
 language: en
-updated: 2026-06-06
+updated: 2026-07-12
 parent: docs/en/10x-value.md
 summary: "Most AI advice decays fast. The surviving asset is work structure — context design / evaluation discipline / harness mindset — and Solon is exactly that bundle."
 load_when: "Read for the 'why Solon' framing when positioning the product or onboarding a skeptic."
@@ -57,3 +57,12 @@ figures/org details are claims at publication time). It is outside evidence for
 the claim above: the surviving asset is not a "coding background" but *the
 ability to design work structure* — the most direct proof for Solon's target,
 the non-technical one-person operator.
+
+A large-scale usage-session analysis points the same way: the majority of use
+was non-development work, and the biggest block was the connective work
+*between* roles — business operations and content production (reports,
+trackers, decks), the "work around the work" (source: Claude blog "How people
+are using Claude Cowork", 2026-07-07, by-reference — figures stay in the
+source, not copied here). In a one-person company all of that connective work
+falls on the operator. This is the data backing for Solon's target narrative:
+structuring delegation is half the value.

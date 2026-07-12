@@ -4,7 +4,7 @@ title: "왜 solon인가 — 남는 것은 작업 구조다"
 visibility: oss-public
 doc_type: product-reference
 language: ko
-updated: 2026-06-06
+updated: 2026-07-12
 parent: docs/ko/10x-value.md
 summary: "AI 조언 대부분은 빠르게 낡는다. 남는 자산은 작업 구조 — 컨텍스트 설계 / 평가 규율 / 하네스 — 이고, solon 이 바로 그 묶음이다."
 load_when: "Read for the 'why Solon' framing when positioning the product or onboarding a skeptic."
@@ -47,3 +47,11 @@ solon 은 그 "작게 실행"을 7-step 으로 정형화한다.
 team's workflows", 2026-06-05, by-reference — 수치/조직 디테일은 발신 시점
 주장). 남은 자산이 "코딩 배경"이 아니라 *작업 구조를 설계하는 능력*이라는 위
 주장의 외부 근거이며, solon 의 타깃(비기술 1인 운영자)에게 가장 직접적인 증거다.
+
+대규모 사용 세션 분석에서도 같은 방향이 확인됐다: 사용의 대다수가 소프트웨어
+개발이 아닌 업무였고, 가장 큰 덩어리는 역할과 역할 *사이*의 연결 작업 — 비즈니스
+운영과 콘텐츠 제작(리포트·트래커·덱), 이른바 "work around the work" — 이었다
+(근거: Claude 블로그 "How people are using Claude Cowork", 2026-07-07,
+by-reference — 수치는 원문 참조, 본문 비복제). 1인 회사에서는 그 연결 작업이
+전부 운영자 몫이다. 위임을 구조화하는 것이 가치의 절반이라는 solon 타깃 서사의
+데이터 근거.
