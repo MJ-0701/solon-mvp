@@ -1,5 +1,20 @@
 ## [Unreleased]
 
+## [0.8.70] - 2026-07-13
+
+> **The cite-then-validate pass lands with the human-in-the-work-product-loop pattern and the work-around-the-work usage evidence (2026-07-07/08, INSIGHT-2026-07-12), all additive by-reference — a batch of the two low-priority items from the same insight sweep. (1) CITE_THEN_VALIDATE (source-pointer-citation): retrieving a citation and validating it before presenting are two distinct passes — the validation asks whether the cited source actually says what the gist claims, whether it still says it (freshness), and whether it supports this specific claim rather than the topic in general; a citation fetched but never validated is a gap to surface, not evidence. For report-class capsule outputs the pass is an acceptance-criterion candidate named in the capsule's `acceptance_criteria`. (2) HUMAN_IN_THE_LOOP_OF_WORK_PRODUCT (work-delegation-and-startup, complementary to HUMAN_ATTENTION_IS_SCARCE): the hardest jobs get the human into the loop of developing the work product itself — draft → operator steer → revise — instead of a demanded one-shot answer, spending the scarce attention where it changes the outcome most. (3) The why-solon external-evidence section (ko/en) gains one by-reference item: a large-scale usage-session analysis found the majority of use is non-development work, the biggest block being the connective work between roles ("work around the work") — in a one-person company all of it falls on the operator, so structuring delegation is half the value; vendor figures stay in the source and are locked out of the docs body by test.**
+
+### Added
+
+- **`tests/test-cite-then-validate.sh`** — headline: both policy anchors + why-solon evidence item + vendor-figure lockout + budgets + preserved anchors.
+
+### Changed
+
+- **`policies/source-pointer-citation.md`** — CITE_THEN_VALIDATE contract bullet (retrieve vs validate-before-present; report-class capsule AC candidate).
+- **`policies/work-delegation-and-startup.md`** — HUMAN_IN_THE_LOOP_OF_WORK_PRODUCT complementary pattern.
+- **`docs/ko/10x-value/12-why-solon.md` / `docs/en/10x-value/13-why-solon.md`** — work-around-the-work usage data as a second external-evidence item (figures by-reference only).
+- **`tests/run-all.sh`** — new insight test registered under hygiene-and-policy.
+
 ## [0.8.69] - 2026-07-12
 
 > **The long-horizon autonomy trust patterns land (2026-07-10, INSIGHT-2026-07-12), three additive by-reference principles: before risky work the agent declares the invariants it will hold, during diagnosis it says what it does not know, and before adoption real-work dogfooding must beat the bench. (1) PRE_WORK_INVARIANT_DECLARATION (harness-autonomy): before a migration-grade WU — data moves, destructive rewrites, broad refactors, long unattended runs — the agent declares the invariants it will preserve as a workbench artifact and executes against them; the declaration is a verification target, the self-generated counterpart of acceptance criteria, and a declared-invariant breach is a finding even when every AC passes. (2) HONEST_UNKNOWNS (flow-conformance-postflight, docs-level — same standing as verifier-context-split): diagnostic artifacts state what is verified (evidence paths), what is inferred (confidence), and what was not examined (unverified list); "stopped at the first plausible conclusion" is classified as a drift finding — the trust-breaking anti-pattern is not a wrong answer but a wrong answer wrapped in confidence. FCP verdict/exit untouched in both directions; the naming of unverified items is the post-hoc twin of the unknowns preflight (known-unknowns). (3) Dogfooding-beats-bench ("trust no eval") registers as external validation of the measured-but-not-sufficient invariant (self-improvement-loop, field twin) and HELD_OUT_SCORING (skill-promotion-loop, same-line extension — the file stays at 199 lines). Vendor lab/product/model names locked out of all five touched files by test.**
