@@ -161,7 +161,7 @@ Score reports expose their formula and inputs, and the inputs stay adjustable
 a black-box score cannot be audited or challenged, so it cannot serve as the
 measured leg. After adoption, sustained real usage (the DETECTION
 usage-value signal) is the field twin of the held-out delta — same
-necessary-but-not-sufficient standing, never overriding a gate.
+necessary-but-not-sufficient standing, never overriding a gate. Dogfooding-beats-bench carries the same standing (external validation, by-reference: a frontier-lab adoption gate, Claude blog 2026-07-10 — "trust no eval"): real-work dogfooding confirms what the bench claims before adoption, and a bench score alone never adopts (`self-improvement-loop.md` measured-but-not-sufficient).
 
 Reuse, don't reinvent (no new eval system): this is the
 **skill-creator eval harness** pattern — held-out `evals.json` prompts →

@@ -34,6 +34,9 @@ load_when: ["flowcheck", "postflight", "flow conformance", "작업단위 점검"
 - verifier context split 은 separate verifier context 로 rule/evidence package 를
   보게 하는 documentation-level recommendation 이다. 권장 패턴이지 새 critical invariant 나
   flowcheck engine 요구사항이 아니다.
+- 진단 산출물의 honest-unknowns 계약(확신도·미확인 항목 명시, "첫 그럴듯한
+  결론에서 멈춤" = drift finding)도 같은 documentation-level 계약이다 — SSoT:
+  `policies/flow-conformance-postflight.md` HONEST_UNKNOWNS (verdict/exit 불변).
 
 ## Plan-gate self-check (암묵 가정 → 명시 스펙, plan = quality gate)
 코드(Do) 진입 전 plan 이 통과해야 하는 자기점검 4문. **plan 품질이 산출물 품질을 결정한다 — 코드 생성이 싸질수록 잘못된 방향의 비용이 커진다.**

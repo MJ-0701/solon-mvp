@@ -84,6 +84,21 @@ tool 이름 asc 로 결정적 tie-break 한다. 이 hotspot 은 버그리포트 
 ## Plan-gate self-check (암묵 가정 → 명시 스펙, plan = quality gate)
 silent divergence 의 plan-time 근원 차단. 코드(Do) 진입 전 plan 자기점검 4문 — `intended-output` / `implicit-assumptions` / `edge-cases` / `intent-alignment` (gate-framework Gate 3 plan-validator check 7). 런타임 divergence 잠금은 `fcp-conflict-surfaced`(#3) + model-tier(#4) 이며, plan 체크리스트는 그 중 #3(silent divergence) 부류를 plan 단계에서 선제 차단한다. plan 품질이 산출물 품질을 결정한다 — 코드 생성이 싸질수록 잘못된 방향의 비용이 커진다. (이 self-check 는 plan 게이트 항목이라 flowcheck 런타임 invariant 가 아니라 노출·교차참조 계약이다.)
 
+## HONEST_UNKNOWNS (docs-level)
+
+진단 산출물 — triage, root-cause 분석, healthcheck/flowcheck 부속 리포트, 장애
+분석 — 은 **확신도와 미확인 항목을 명시**한다: 무엇이 검증됐고(증거 경로),
+무엇이 추정이며(확신도), 무엇을 아직 안 봤는지(unverified 목록). **"첫
+그럴듯한 결론에서 멈춤"**(confident first-plausible answer)은 drift finding
+으로 분류한다 — 신뢰를 깨는 안티패턴은 오답 자체가 아니라 오답을 확신으로
+포장하는 것이고, "모르는 것은 모른다"고 말하는 진단이 자율성 신뢰의 전제다.
+미확인 항목 명명은 unknowns 프리플라이트의 사후 짝이다
+(`unknowns-and-deviations.md` known-unknowns). verdict/exit 는 어느 방향으로도
+불변 — 새 critical invariant 가 아니라 아래 verifier-context-split 과 같은
+documentation-level 계약이다. 외부 검증 (by-reference): frontier-lab 사례
+(Claude blog, 2026-07-10) — root cause 를 짚되 모르는 것을 모른다고 말하는
+것이 장시간 무인 자율성 신뢰의 근거 중 하나; vendor 디테일 보류.
+
 ## Verifier context split pattern (docs-level)
 For high-risk or repeated FCP/review rules, prepare a rule-scoped verifier context:
 the verifier sees the rule, AC, evidence paths, and known counterexamples, not

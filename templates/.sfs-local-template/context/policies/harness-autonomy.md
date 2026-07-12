@@ -49,6 +49,16 @@ SFS applies this as a project-operating contract:
 - Lock the change basis before long implementation: write a compact docs/ADR/
   spec diff or equivalent run brief so workers read the changed intent first,
   not the whole conversation or a stale plan.
+- PRE_WORK_INVARIANT_DECLARATION: before a risky WU (migration-grade — data
+  moves, destructive rewrites, broad refactors, long unattended runs), the
+  agent declares the invariants it will preserve as a workbench artifact and
+  executes against them. The declaration is a verification target — the
+  self-generated counterpart of acceptance criteria that reviewers and
+  verifiers check the result against — and a declared-invariant breach is a
+  finding even when every AC passes. External validation (by-reference): a
+  frontier-lab case (Claude blog, 2026-07-10) — overnight autonomous
+  migration work earned trust because the agent declared the invariants it
+  would hold before starting; vendor and model specifics held out.
 - Measure agent productivity as time-to-validated artifact, not human busywork
   avoided. Improve context routing, memory indexing, tool boundaries, slice
   size, and automated feedback before adding more agents.

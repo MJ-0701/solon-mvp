@@ -92,7 +92,12 @@ them and point back, so there is no second copy to drift.
   binds merge application too).
 - **measured-but-not-sufficient** — a held-out score is necessary but never
   sufficient: it cannot override a failed gate or the human sign-off, and a tie
-  or regression keeps the steady version.
+  or regression keeps the steady version. External validation (by-reference):
+  a frontier-lab adoption gate (Claude blog, 2026-07-10) — "trust no eval":
+  a change ships only when practitioner **dogfooding on real work** beats the
+  bench; the bench score alone never adopts. Dogfooding-beats-bench is this
+  invariant's field twin, feeding EVOLUTION_ADOPTION_GATE and HELD_OUT_SCORING
+  (`skill-promotion-loop.md`).
 - **no code auto-patch** — applying an adoption edits human-readable MD only.
   DGM-style code self-modification is cited by-reference as prior art, never
   wired into solon's body.
