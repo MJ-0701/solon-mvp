@@ -123,6 +123,7 @@ categorize() {
       | test-dispatcher-specialist-reflect.sh \
       | test-knob-diagnostic-ladder.sh \
       | test-invariant-declaration-honest-unknowns.sh \
+      | test-cite-then-validate.sh \
       | test-delegation-repertoire.sh \
       | test-brainstorm-deep-interview.sh \
       | test-work-delegation-and-startup.sh \

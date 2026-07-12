@@ -81,6 +81,14 @@ External validation (by-reference): the same effective-human-agent-teams source
 treats human attention as the limiting input and recommends question batching
 and bounded exposure; the principle is adopted, vendor surfaces held out.
 
+Complementary pattern — HUMAN_IN_THE_LOOP_OF_WORK_PRODUCT: for the hardest
+jobs, do not demand a one-shot answer; bring the human into the loop of
+developing the work product itself (draft → operator steer → revise), spending
+the scarce attention where it changes the outcome most instead of on
+interruptions. External validation (by-reference): a high-stakes
+professional-work case (Claude blog, 2026-07-08); enterprise and domain
+specifics held out.
+
 ## RUNTIME_SELECTION
 
 Pick the runtime tier by the shape of the task, not by habit:
