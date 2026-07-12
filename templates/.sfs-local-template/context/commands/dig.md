@@ -41,8 +41,13 @@ waiver 는 `sfs dig scan --write --waive-sanity "<이유>"` 또는 기존
 ## L2 fact card (캡슐 위임 계약)
 
 큐 항목별로 워커 캡슐(`policies/sub-agent-capsule-contract.md` 8필드) 을 발행
-한다. `goal` = 카드 1장, `files_scope` = 해당 모듈 + 직접 의존, `output_paths`
-= `excavation/cards/<card_id>.md`, `exemplar` = 기존 검증 통과 카드 1장.
+한다. **발행은 결정론 헬퍼가 한다**: `sfs dig capsule [--next|--target <file>]
+--write` 가 큐에서 항목을 골라 8필드 캡슐을 생성한다 — `goal` = 카드 1장,
+`files_scope` = 해당 모듈 + L1 그래프의 직접 의존/피의존, `output_paths` =
+`excavation/cards/<card_id>.md`, `exemplar` = 기존 검증 통과 카드 1장 자동
+포인터(첫 카드면 생략 허용). capsule 발행이 L2 게이트의 집행점이다 —
+NOT-READY 큐에서는 발행을 거부하고 waiver 경로를 안내한다 (exit 3,
+act-directly 계열; dig 밖 명령은 아무것도 막지 않는다).
 
 카드 고정 스키마 (검증기 `sfs dig card validate` 가 강제):
 

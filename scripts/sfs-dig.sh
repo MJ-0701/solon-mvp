@@ -14,6 +14,7 @@ usage() {
 Usage:
   sfs dig scan  [--domain <name>] [--write] [--live-schema <tsv>] [--waive-sanity "<reason>"]
   sfs dig graph [--domain <name>] [--write]
+  sfs dig capsule [--domain <name>] [--next | --target <file>] [--write]
   sfs dig card validate <file|dir> [--root <repo-root>]
   sfs dig status [--domain <name>]
 
@@ -63,7 +64,7 @@ exc_dir() { printf 'docs/solon/%s/excavation' "$(domain_slug)"; }
 emit() {
   local name="$1"
   if [ "${WRITE}" = "1" ]; then
-    mkdir -p "$(exc_dir)"
+    mkdir -p "$(dirname "$(exc_dir)/${name}")"
     cat > "$(exc_dir)/${name}"
     echo "  wrote $(exc_dir)/${name}" >&2
   else
@@ -636,6 +637,104 @@ cmd_graph() {
   echo "graph done (gate: ${queue_gate})" >&2
 }
 
+# ── L2: capsule 발행 헬퍼 (결정론) ────────────────────────────────────
+CAPSULE_NEXT=0
+CAPSULE_TARGET=""
+
+parse_capsule_flags() {
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --domain) DOMAIN="${2:-}"; shift 2 ;;
+      --write) WRITE=1; shift ;;
+      --next) CAPSULE_NEXT=1; shift ;;
+      --target) CAPSULE_TARGET="${2:-}"; shift 2 ;;
+      *) echo "unknown flag: $1" >&2; exit 2 ;;
+    esac
+  done
+}
+
+first_valid_card() { # stdout: repo-relative path of first validator-PASS card, or nothing
+  local dir="$(exc_dir)/cards" f
+  [ -d "${dir}" ] || return 0
+  for f in "${dir}"/*.md; do
+    [ -f "$f" ] || continue
+    if validate_card "$f" >/dev/null 2>&1; then printf '%s\n' "$f"; return 0; fi
+  done
+  return 0
+}
+
+cmd_capsule() {
+  parse_capsule_flags "$@"
+  local queue dir target slug edges_block scope exemplar gate budget timeout
+  dir="$(exc_dir)"
+  queue="${dir}/l2-queue.md"
+  [ -f "${queue}" ] || { echo "no l2-queue.md — run: sfs dig graph --write" >&2; exit 3; }
+
+  # L2 게이트 강제 지점: 캡슐 발행은 순서 규율의 집행점이다. NOT-READY 면 발행을
+  # 거부하고 waiver 경로를 안내한다 (act-directly 계열 exit 3 — dig 밖 명령은
+  # 아무것도 막지 않는다; ALT-INV-3 유지).
+  gate="$(grep -m1 '^L2-GATE:' "${queue}" || echo 'L2-GATE: unknown')"
+  case "${gate}" in
+    "L2-GATE: READY"*) : ;;
+    *)
+      echo "capsule refused — ${gate}" >&2
+      echo "record a waiver first: sfs dig scan --write --waive-sanity \"<reason>\" && sfs dig graph --write" >&2
+      exit 3
+      ;;
+  esac
+
+  if [ -n "${CAPSULE_TARGET}" ]; then
+    target="${CAPSULE_TARGET}"
+  else
+    target="$(grep -m1 -E '^- \[ \] (depth=[0-9]+|dead-code-candidate) ' "${queue}" | sed -E 's/^- \[ \] (depth=[0-9]+|dead-code-candidate) //')"
+  fi
+  [ -n "${target}" ] || { echo "l2-queue has no open item (or pass --target <file>)" >&2; exit 3; }
+  slug="$(printf '%s' "${target}" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9' '-' | sed 's/-*$//;s/^-*//')"
+
+  # files_scope = target + 직접 의존(그래프 import edges) + 직접 피의존
+  edges_block="$(sed -n '/^## Import edges/,/^## /p' "${dir}/graph.md" 2>/dev/null | grep -E '^[^#`]' || true)"
+  scope="$(printf '%s\n' "${target}"; printf '%s\n' "${edges_block}" | awk -F'\t' -v t="${target}" '$1==t {print $2} $2==t {print $1}')"
+  scope="$(printf '%s\n' "${scope}" | awk 'NF' | LC_ALL=C sort -u)"
+  exemplar="$(first_valid_card)"
+  budget="${SFS_DIG_CAPSULE_TOKEN_BUDGET:-8000}"
+  timeout="${SFS_DIG_CAPSULE_TIMEOUT:-15m}"
+
+  {
+    echo "---"
+    echo "capsule_id: dig-card-${slug}"
+    echo "generated_by: sfs dig capsule (deterministic)"
+    echo "---"
+    echo ""
+    echo "# L2 fact-card capsule — ${target}"
+    echo ""
+    echo "goal: Write one fact card for \`${target}\` that passes \`sfs dig card validate\`."
+    echo ""
+    echo "acceptance_criteria:"
+    echo "- card exists at the output path and \`sfs dig card validate <card> --root .\` exits 0"
+    echo "- every narrative claim cites file:line evidence inside files_scope"
+    echo "- confidence is an honest 0-2 self-rating; low confidence goes to unknowns, not prose padding"
+    echo "- if the territory contradicts this capsule's assumptions, make the conservative choice and record it under a \`## Deviations\` heading in the card (unknowns-and-deviations DEVIATIONS_LOG)"
+    echo ""
+    echo "files_scope:"
+    printf '%s\n' "${scope}" | awk '{print "- " $0}'
+    echo ""
+    echo "tools_allowed: read-only file access within files_scope + \`sfs dig card validate\`. No edits outside output_paths, no network, no credentials."
+    echo ""
+    echo "output_paths:"
+    echo "- $(exc_dir)/cards/${slug}.md"
+    echo ""
+    echo "token_budget: ${budget} (warn-before-block: surface a threshold warning at ~75/90% and decide refine/pivot/halt — do not run to the cap)"
+    echo "timeout: ${timeout}"
+    echo "pii_rules: never copy env values, credentials, or data rows into the card — key names and schema structure only."
+    if [ -n "${exemplar}" ]; then
+      echo "exemplar: ${exemplar} (validator-PASS card — imitate its shape)"
+    else
+      echo "# exemplar: none yet — first card of this excavation (omission is allowed by the capsule contract)"
+    fi
+  } | emit "capsules/${slug}.capsule.md"
+  echo "capsule ready (target: ${target})" >&2
+}
+
 # ── card validator + 확증 상태 머신 ───────────────────────────────────
 validate_card() { # $1: card file. echoes verdict line; returns 0/1
   local f="$1" reason="" conf evid_files evid_count runtime_count sec state
@@ -731,6 +830,7 @@ cmd_status() {
 case "${COMMAND}" in
   scan) cmd_scan "$@" ;;
   graph) cmd_graph "$@" ;;
+  capsule) cmd_capsule "$@" ;;
   card) cmd_card "$@" ;;
   status) cmd_status "$@" ;;
   help|-h|--help) usage ;;

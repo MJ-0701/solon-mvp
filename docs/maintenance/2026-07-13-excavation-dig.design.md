@@ -62,6 +62,12 @@ load_when: "sfs dig / excavation 파이프라인의 설계 근거, 네이밍 결
 - **D6 — 외부 그래프 도구는 opt-in 보강.** grep/정규식 축소 모드가 기본이자
   완결 경로. tree-sitter/madge/jdeps 는 설치돼 있어도 기본 경로를 바꾸지
   않는 확장점 (제거해도 동일 동작 계약).
+- **D8 — L2 캡슐 발행은 결정론 헬퍼 (`sfs dig capsule`, 0.9.1).** 큐에서
+  항목을 골라(`--next`/`--target`) 8필드 캡슐을 생성 — files_scope = 대상 +
+  L1 그래프 직접 의존/피의존, exemplar = 첫 validator-PASS 카드 자동 포인터.
+  **capsule 발행이 L2 게이트의 집행점**: NOT-READY 큐에서 발행 거부(exit 3,
+  act-directly 계열) + waiver 경로 안내. D4 의 "마커는 signal-only" 와 양립 —
+  dig 밖 명령은 아무것도 막지 않는다.
 - **D7 — flowcheck 아닌 healthcheck 에 정합 점검.** flowcheck 는 방법론 실행
   적합성(이벤트 기반), excavation 정합은 프로젝트 상태 드리프트 — healthcheck
   소관. advisory 2종: 무효 카드 수(excavation-cards), 게이트 추월
@@ -73,7 +79,7 @@ load_when: "sfs dig / excavation 파이프라인의 설계 근거, 네이밍 결
 |---|---|---|
 | L0 | `00-scan.md`, `erd.md`, (`erd-diff.md`) | `sfs dig scan` — 결정론 |
 | L1 | `graph.md`, `l2-queue.md` | `sfs dig graph` — 결정론 |
-| L2 | `cards/*.md` | 캡슐 위임(LLM), 검증은 `card validate` |
+| L2 | `capsules/*.capsule.md`, `cards/*.md` | 캡슐 발행 `sfs dig capsule`(결정론) → 카드 작성(LLM) → `card validate`(결정론) |
 | L3 | `feature-map.md`, `reverse-spec.md`(#추정 표기), `unknowns.md`(질문 리스트) | LLM, 규칙은 dig.md |
 | L4 | 카드 확증 상태 | 결정론 파생 |
 

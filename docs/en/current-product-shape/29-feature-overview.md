@@ -51,7 +51,7 @@ inside each gate.
 | session cost signals (3 runtimes) | doctor "Cost Signals" — Claude Code / Codex / Gemini adapters, `SFS_COST_RUNTIME` pin | [token harness](./17-token-harness-hygiene.md) |
 | harness blueprint + evolution ledger | `sfs harness map --write` | [harness map](./22-project-harness-map.md) |
 | saved-time / cost dashboard | `sfs measure [--json]` / `measure --alive` | `bin/sfs` usage |
-| undocumented-codebase excavation (L0 scan/ERD, L1 graph, fact cards, confirmation states) | `sfs dig scan|graph|card|status` | routed context `commands/dig.md` |
+| undocumented-codebase excavation (L0 scan/ERD, L1 graph, fact cards, confirmation states) | `sfs dig scan|graph|capsule|card|status` | routed context `commands/dig.md` |
 
 The Sanity-before-Cartography order discipline and the signal-only
 (never-blocking) contract apply across all of these.
