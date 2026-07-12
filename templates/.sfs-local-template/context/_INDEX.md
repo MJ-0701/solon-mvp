@@ -60,7 +60,7 @@ module:
 
 - `policies/harness-readiness.md` — AI-readiness (Sanity) audit: 4-axis 0-2 rubric in `sfs harness doctor`, AI-friendly surface axis group (repo-standard 4-element mapping), `.sfs-local/readiness-waiver`, readiness-before-cartography order discipline, knowledge graphs as opt-in pointers only (all signal-only).
 - `policies/harness-maturity.md` — AI maturity self-diagnosis: 5-level impact ladder in `sfs harness doctor` (delegated-wu / review-loop / parallel-capsule / rework signals), adoption != impact, onboarding starts with locating the current level (signal-only).
-- `policies/token-harness.md` — token/context hygiene, semantic search, repeated mistake guardrails.
+- `policies/token-harness.md` — token/context hygiene, semantic search, repeated mistake guardrails; KNOB_DIAGNOSTIC_LADDER (failure escalation: context/skills → effort ↑ → model tier ↑, routine stretches downshift).
 - `policies/runtime-token-firewall.md` — capsule-only worker/review handoff and no full-history forwarding.
 - `policies/sub-agent-capsule-contract.md` — structured field contract (goal/ac/files_scope/tools_allowed/output_paths/token_budget/timeout/pii_rules) for that capsule handoff.
 - `policies/session-continuation-guard.md` — stop long-session token bleed with fresh-session handoff.

@@ -120,6 +120,8 @@ categorize() {
       | test-credential-hygiene.sh \
       | test-model-workaround-sunset.sh \
       | test-cache-aware-prompt-layout.sh \
+      | test-dispatcher-specialist-reflect.sh \
+      | test-knob-diagnostic-ladder.sh \
       | test-delegation-repertoire.sh \
       | test-brainstorm-deep-interview.sh \
       | test-work-delegation-and-startup.sh \

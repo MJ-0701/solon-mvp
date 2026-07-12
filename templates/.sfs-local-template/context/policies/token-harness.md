@@ -99,6 +99,31 @@ load_when: ["token", "harness", "context", "Claude", "Codex", "Gemini", "MCP", "
   its suggestions to SFS adapter docs. Propose only small, stable, high-signal
   edits.
 
+## KNOB_DIAGNOSTIC_LADDER (context first, then effort, then model)
+
+Model tier and effort/thoroughness are different knobs for different failure
+modes: the model tier sets the **capability range** (what the agent can know
+and reason about), effort sets **how thoroughly it works** (files read,
+verification depth, how far it goes before checking in). The discriminating
+question on a failed slice: **"did it fail because it didn't know (capability
+→ model tier), or because it didn't look (thoroughness → effort)?"**
+
+- **Escalation order on failure:** (1) check context/skills first — most
+  failures are missing context, not missing capability (the map-vs-territory
+  gap, `unknowns-and-deviations.md`); (2) raise effort/thoroughness; (3) only
+  then raise the model tier. Inverting the order buys cost without fixing the
+  cause.
+- **Downshift discipline (the mirror):** routine, judgment-free stretches
+  route to a smaller tier and default effort — sustained success on a task
+  class is the downshift signal, consumed by the existing capsule/worker
+  routing (`runtime-token-firewall.md`, fcp-model-tier) rather than a new
+  mechanism. Default effort first; tune per task-type preference, not per
+  task.
+
+External validation (by-reference): a Claude blog post on choosing model and
+effort level (2026-07-07); vendor model names and effort-UI specifics held
+out.
+
 ## CACHE_AWARE_PROMPT_LAYOUT
 
 Prompt surfaces are cache surfaces: cached input costs a fraction of fresh

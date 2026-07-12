@@ -110,6 +110,12 @@ economy tier (Haiku, Codex mini, Gemini lite) 를 쓴다. 구현 slice 는 고�
 AC 안에서 worker tier 로 실행하고, Codex repo-aware helper 는 `gpt-5.3-codex`
 까지 허용한다. Spark 류는 판단 없는 mechanical helper 전용이다.
 
+실패 시 knob 에스컬레이션 순서는 컨텍스트/스킬 점검 → effort(철저함) ↑ →
+모델 티어 ↑ 이고, 판별 질문은 "몰라서 틀렸나(모델) vs 대충해서 틀렸나
+(effort)". 루틴 구간은 작은 티어로 다운시프트한다. SSoT 는 routed context
+`policies/token-harness.md` 의 KNOB_DIAGNOSTIC_LADDER (여기서 재나열하지
+않는다 — 포인터만).
+
 ## Host-agnostic 진입 (0.7.0+)
 
 7-step flow 는 host transport 와 직교한다. 어떤 호스트로 들어와도 같은
