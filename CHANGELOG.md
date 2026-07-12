@@ -1,5 +1,20 @@
 ## [Unreleased]
 
+## [0.8.68] - 2026-07-12
+
+> **The knob diagnostic ladder lands (choosing model and effort level, 2026-07-07, INSIGHT-2026-07-12), additive: model tier and effort/thoroughness are different knobs for different failure modes — the tier sets the capability range, effort sets how thoroughly the agent works (files read, verification depth, progress before check-in). token-harness gains KNOB_DIAGNOSTIC_LADDER with the discriminating question "did it fail because it didn't know (capability → model tier), or because it didn't look (thoroughness → effort)?" and the escalation order on failure: (1) check context/skills first — most failures are missing context, not missing capability (the map-vs-territory gap, `unknowns-and-deviations.md`); (2) raise effort; (3) only then raise the model tier — inverting the order buys cost without fixing the cause. The downshift mirror routes routine judgment-free stretches to a smaller tier and default effort, with sustained success as the signal, consumed by the existing capsule/worker routing (`runtime-token-firewall.md`, fcp-model-tier) rather than a new mechanism. methodology-7-step's model-tier quick reference points by-reference (ko discriminating question included); vendor model names and effort-UI specifics are locked out of the policy by test. run-all's categorize() also registers the two new insight tests under hygiene-and-policy, restoring the other-bucket ceiling.**
+
+### Added
+
+- **`tests/test-knob-diagnostic-ladder.sh`** — headline: ladder anchors + escalation ordering + downshift + vendor lockout + budgets + preserved anchors.
+
+### Changed
+
+- **`templates/.sfs-local-template/context/policies/token-harness.md`** — KNOB_DIAGNOSTIC_LADDER section (two knobs / escalation order / downshift discipline).
+- **`docs/maintenance/methodology-7-step.md`** — knob escalation pointer (컨텍스트 → effort ↑ → 모델 티어 ↑, "몰라서 틀렸나 vs 대충해서 틀렸나").
+- **`templates/.sfs-local-template/context/_INDEX.md`** — token-harness route names the ladder.
+- **`tests/run-all.sh`** — categorize() registers test-dispatcher-specialist-reflect.sh / test-knob-diagnostic-ladder.sh under hygiene-and-policy.
+
 ## [0.8.67] - 2026-07-12
 
 > **The marketing-ops automation patterns land (2026-07-08, INSIGHT-2026-07-12), four additive by-reference principles — the dispatch layer routes only, and everything the ops team learned about keeping specialists honest maps onto existing solon invariants as external validation. (1) DISPATCHER_SPECIALIST_SEPARATION becomes team-topology design principle 5: the dispatcher's whole job is role check + capsule issue/collect — execution always belongs to a specialist that can evolve independently (one role's skill/prompt swap = zero diff on the router and other roles), the execution-layer counterpart of the OCP binding=data principle. (2) The fresh-context audit agent — a verifier that starts with no builder context, run over every automated build before ship by non-technical operators — registers in harness-autonomy as external validation of the verifier != implementer invariant. (3) The repeated-correction trigger joins skill-promotion-loop DETECTION as a fourth signal: the same human correction given twice is a candidate immediately, at a lower floor (2) than the completed-work signature (3+), because a correction is costlier evidence than a mere repeat. (4) The end-of-session reflect pass joins lessons-accumulation as CURATION_PASS at session grain — ask the agent what should flow back into skills/lessons before closing — and the GUIDE team-rollout section (ko/en) gains the non-technical operator wording: Claude builds the skill for you; corrected twice → ask to fold it in. Vendor product name locked out of the touched routed policies by test.**
