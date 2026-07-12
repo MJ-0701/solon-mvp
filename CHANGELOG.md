@@ -1,5 +1,21 @@
 ## [Unreleased]
 
+## [0.8.67] - 2026-07-12
+
+> **The marketing-ops automation patterns land (2026-07-08, INSIGHT-2026-07-12), four additive by-reference principles — the dispatch layer routes only, and everything the ops team learned about keeping specialists honest maps onto existing solon invariants as external validation. (1) DISPATCHER_SPECIALIST_SEPARATION becomes team-topology design principle 5: the dispatcher's whole job is role check + capsule issue/collect — execution always belongs to a specialist that can evolve independently (one role's skill/prompt swap = zero diff on the router and other roles), the execution-layer counterpart of the OCP binding=data principle. (2) The fresh-context audit agent — a verifier that starts with no builder context, run over every automated build before ship by non-technical operators — registers in harness-autonomy as external validation of the verifier != implementer invariant. (3) The repeated-correction trigger joins skill-promotion-loop DETECTION as a fourth signal: the same human correction given twice is a candidate immediately, at a lower floor (2) than the completed-work signature (3+), because a correction is costlier evidence than a mere repeat. (4) The end-of-session reflect pass joins lessons-accumulation as CURATION_PASS at session grain — ask the agent what should flow back into skills/lessons before closing — and the GUIDE team-rollout section (ko/en) gains the non-technical operator wording: Claude builds the skill for you; corrected twice → ask to fold it in. Vendor product name locked out of the touched routed policies by test.**
+
+### Added
+
+- **`tests/test-dispatcher-specialist-reflect.sh`** — headline: four-principle anchors + GUIDE ko/en wording + vendor lockout + budgets + pre-existing anchor preservation.
+
+### Changed
+
+- **`docs/maintenance/2026-06-23-multi-agent-team-topology.design.md`** — design principle 5: DISPATCHER_SPECIALIST_SEPARATION (라우팅만).
+- **`policies/harness-autonomy.md`** — fresh-context audit agent as verifier != implementer external validation.
+- **`policies/skill-promotion-loop.md`** — repeated-correction trigger (fourth DETECTION signal, floor 2).
+- **`policies/lessons-accumulation.md`** — end-of-session reflect pass (CURATION_PASS at session grain).
+- **`GUIDE/16-15-team-rollout.md` / `docs/en/guide/11-10-team-rollout.md`** — operator wording: skill 은 Claude 가 대신 만들어 줍니다 / Claude builds the skill for you.
+
 ## [0.8.66] - 2026-07-12
 
 > **The map-vs-territory unknowns loop lands from the finding-your-unknowns field guide (2026-07-06, INSIGHT-2026-07-12), all additive: the gap between the prompt/plan (map) and the codebase (territory) is the operator's unknowns, and quality is bottlenecked by how fast they surface — not by model capability. One new routed policy (`unknowns-and-deviations.md`) gives the gap three touchpoints. (1) Plan preflight: UNKNOWNS_QUADRANT decomposes the slice across known/unknown × known/unknown (known-knowns → AC, known-unknowns → risk rows, unknown-knowns → flushed by restate-and-clarify, unknown-unknowns → BLIND_SPOT_PASS: one prompt asking the agent what the operator did not say — the largest quadrant for non-technical operators); plan.md folds it into the existing lessons-consult entry with zero line-budget growth. (2) DEVIATIONS_LOG: when territory contradicts the plan mid-slice, the worker makes the conservative choice, records it under `## Deviations` in the sprint workbench (capsule workers: in `output_paths` evidence), and continues — no silent improvisation, no hard stop; deviation entries register as a SIGNAL source in lessons-accumulation and self-improvement-loop, and Gate 6 treats an unresolved deviation without lesson/waiver as a finding. (3) COMPREHENSION_GATE: post-implementation explainer + quiz as operator understanding evidence — the operator-side twin of Gate 6 review, tied to the HTML-encouraged user-facing docs strategy, signal-only (failing routes to re-reading, never blocks). Vendor/model names are locked out of the new policy by test.**
