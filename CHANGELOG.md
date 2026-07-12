@@ -1,5 +1,20 @@
 ## [Unreleased]
 
+## [0.9.1] - 2026-07-13
+
+> **Deterministic L2 capsule emission completes the excavation pipeline's work item C — `sfs dig capsule [--next|--target <file>] --write` picks an item from the L2 queue and generates the full 8-field worker capsule so the fact-card handoff no longer depends on a hand-written prompt. files_scope is computed from the L1 graph (target + direct import dependencies and dependents), the acceptance criteria wire the card validator and the DEVIATIONS_LOG convention, token_budget carries the warn-before-block note, and pii_rules forbid env values / credentials / data rows. The exemplar field is an auto-pointer: the first validator-PASS card in cards/ is attached as the shape to imitate, and the first capsule of an excavation omits it with an explicit note (allowed by the capsule contract). Capsule emission is also where the L2 ordering gate is actually enforced (design decision D8): a NOT-READY queue refuses emission with exit 3 and names the waiver path — consistent with the signal-only marker contract, since nothing outside dig is ever blocked.**
+
+### Added
+
+- **`sfs dig capsule`** (`scripts/sfs-dig.sh`) — deterministic 8-field capsule emitter with exemplar auto-pointer and L2-gate enforcement.
+- **`tests/test-dig-capsule.sh`** — gate refusal (exit 3 + waiver guidance), 8 fields, files_scope graph deps, exemplar absent-then-present, `--next` selection.
+
+### Changed
+
+- **`templates/.sfs-local-template/context/commands/dig.md`** — L2 section names the deterministic emitter and the enforcement point.
+- **`docs/maintenance/2026-07-13-excavation-dig.design.md`** — decision D8 + layer table row.
+- **`bin/sfs` usage / feature-overview ko+en** — command surface now `dig scan|graph|capsule|card|status`.
+
 ## [0.9.0] - 2026-07-13
 
 > **The excavation pipeline ships as a new command surface — `sfs dig scan|graph|card|status` reverse-engineers an undocumented handover codebase from the code itself, bottom-up (code → evidence → synthesis), with the target repository strictly read-only. The deterministic core runs on zero LLM tokens: L0 scan detects frameworks/entrypoints/routes/env-keys/schema-sources and extracts the ERD first (SQL migration > Prisma > JPA priority) as mermaid with file:line evidence — a user-dumped `information_schema` TSV can diff against it via `--live-schema` (connection credentials are never accepted or stored; only schema structure enters any artifact, never data rows); L1 graph builds import edges and route→handler→service→table chains in grep reduced mode (external tools stay opt-in enrichment) plus a BFS L2 queue with dead-code candidates last. LLM enters only at designated points: L2 fact cards (one capsule per queue item, 8-field capsule contract) and L3 synthesis (#추정-marked reverse-spec, unknowns.md as the vendor question list) — and hallucination control belongs to the deterministic validator, not the prompt: `sfs dig card validate` REJECTs narrative without a file:line citation, confidence outside 0-2, and evidence citing nonexistent files, then derives the L4 confirmation state per run (unverified → corroborated on 2+ independent evidence files → verified on runtime evidence). Ordering discipline reuses readiness-before-cartography: the L2 queue carries a deterministic L2-GATE READY/NOT-READY marker gated on Sanity pass or a recorded waiver — signal-only, nothing blocks (ALT-INV-3). dig is not a tidy replacement but its upstream feeder: promotion to the wiki goes only through `sfs tidy --wiki-promote`. healthcheck gains two advisory conformance signals (invalid cards, gate overtaking; issue count and exit unchanged). Naming decision D1 (new `sfs dig` command over a harness-map extension, adopt/ingest/measure precedent) plus D2-D7 are recorded in docs/maintenance/2026-07-13-excavation-dig.design.md. Two framework fixtures (spring-jpa, node-prisma) and six card fixtures back three deterministic tests, including a static zero-LLM/zero-network lock on the script.**

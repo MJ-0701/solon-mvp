@@ -13,6 +13,24 @@
 
 ---
 
+## 0.9.1
+
+dig 의 L2 캡슐 발행 자동화: `sfs dig capsule` 이 큐에서 항목을 골라 8필드 워커 캡슐을 결정론으로 생성합니다 — fact card 위임이 손 프롬프트 없이 돌아갑니다.
+
+체감 변화:
+
+- `sfs dig capsule --next --write` (또는 `--target <파일>`) 한 번으로 goal/
+  수용기준/files_scope/tools_allowed/output_paths/token_budget/timeout/
+  pii_rules 8필드 캡슐이 나옵니다. files_scope 는 L1 그래프에서 대상 +
+  직접 의존·피의존을 자동 계산합니다.
+- exemplar 자동 포인터: 검증 통과 카드가 생기면 다음 캡슐부터 "이 모양을
+  따라 하라"로 자동 첨부됩니다 (첫 캡슐은 생략 허용 표기).
+- L2 순서 게이트가 여기서 실제로 집행됩니다: Sanity 미통과 + waiver 없음
+  이면 캡슐 발행을 거부하고 waiver 경로를 안내합니다 (dig 밖 명령은 여전히
+  아무것도 막지 않습니다).
+
+---
+
 ## 0.9.0
 
 무문서 코드베이스 역추적 파이프라인 `sfs dig` 탑재: 인계 문서 없는 외주/레거시 코드베이스에서 프로젝트 개요와 ERD 를 코드만으로 복원합니다 — L0 스캔·ERD 와 L1 그래프는 LLM 없이 결정론으로 완결됩니다.
