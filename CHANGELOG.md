@@ -1,5 +1,22 @@
 ## [Unreleased]
 
+## [0.8.69] - 2026-07-12
+
+> **The long-horizon autonomy trust patterns land (2026-07-10, INSIGHT-2026-07-12), three additive by-reference principles: before risky work the agent declares the invariants it will hold, during diagnosis it says what it does not know, and before adoption real-work dogfooding must beat the bench. (1) PRE_WORK_INVARIANT_DECLARATION (harness-autonomy): before a migration-grade WU — data moves, destructive rewrites, broad refactors, long unattended runs — the agent declares the invariants it will preserve as a workbench artifact and executes against them; the declaration is a verification target, the self-generated counterpart of acceptance criteria, and a declared-invariant breach is a finding even when every AC passes. (2) HONEST_UNKNOWNS (flow-conformance-postflight, docs-level — same standing as verifier-context-split): diagnostic artifacts state what is verified (evidence paths), what is inferred (confidence), and what was not examined (unverified list); "stopped at the first plausible conclusion" is classified as a drift finding — the trust-breaking anti-pattern is not a wrong answer but a wrong answer wrapped in confidence. FCP verdict/exit untouched in both directions; the naming of unverified items is the post-hoc twin of the unknowns preflight (known-unknowns). (3) Dogfooding-beats-bench ("trust no eval") registers as external validation of the measured-but-not-sufficient invariant (self-improvement-loop, field twin) and HELD_OUT_SCORING (skill-promotion-loop, same-line extension — the file stays at 199 lines). Vendor lab/product/model names locked out of all five touched files by test.**
+
+### Added
+
+- **`tests/test-invariant-declaration-honest-unknowns.sh`** — headline: three-principle anchors + docs-level standing + vendor lockout + budgets + preserved anchors.
+
+### Changed
+
+- **`policies/harness-autonomy.md`** — PRE_WORK_INVARIANT_DECLARATION bullet (declaration = verification target).
+- **`policies/flow-conformance-postflight.md`** — HONEST_UNKNOWNS section (확신도·미확인 항목 명시, 첫 그럴듯한 결론 정지 = drift finding).
+- **`commands/flowcheck.md`** — honest-unknowns pointer under 절대 규칙 (verdict/exit 불변).
+- **`policies/self-improvement-loop.md`** — measured-but-not-sufficient gains the trust-no-eval field twin.
+- **`policies/skill-promotion-loop.md`** — HELD_OUT_SCORING registers dogfooding-beats-bench (same-line, no budget growth).
+- **`tests/run-all.sh`** — new insight test registered under hygiene-and-policy.
+
 ## [0.8.68] - 2026-07-12
 
 > **The knob diagnostic ladder lands (choosing model and effort level, 2026-07-07, INSIGHT-2026-07-12), additive: model tier and effort/thoroughness are different knobs for different failure modes — the tier sets the capability range, effort sets how thoroughly the agent works (files read, verification depth, progress before check-in). token-harness gains KNOB_DIAGNOSTIC_LADDER with the discriminating question "did it fail because it didn't know (capability → model tier), or because it didn't look (thoroughness → effort)?" and the escalation order on failure: (1) check context/skills first — most failures are missing context, not missing capability (the map-vs-territory gap, `unknowns-and-deviations.md`); (2) raise effort; (3) only then raise the model tier — inverting the order buys cost without fixing the cause. The downshift mirror routes routine judgment-free stretches to a smaller tier and default effort, with sustained success as the signal, consumed by the existing capsule/worker routing (`runtime-token-firewall.md`, fcp-model-tier) rather than a new mechanism. methodology-7-step's model-tier quick reference points by-reference (ko discriminating question included); vendor model names and effort-UI specifics are locked out of the policy by test. run-all's categorize() also registers the two new insight tests under hygiene-and-policy, restoring the other-bucket ceiling.**
