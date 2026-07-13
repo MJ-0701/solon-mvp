@@ -36,9 +36,9 @@ dig 와 같은 아래→위(코드→발견→OWASP 계열 매핑)이고, 스캔
 | `deps` | A06 | 매니페스트·락파일 유무, 느슨한 핀 + 직접 돌릴 생태계 audit 명령(네트워크는 수동) |
 | `hygiene` | A09 | stray 디버그 출력, 보안성 TODO/FIXME (프로젝트 이슈) |
 
-산출: `00-audit.md` (severity 정렬 표, redact 증거, counts) + `.sfs-local/
-audit-findings.tsv`. `sfs audit report` 는 마지막 리포트 출력, `sfs audit status`
-는 severity/waived 카운트 + open critical 목록.
+산출: `00-audit.md` (severity 정렬 표, redact 증거, counts) + `findings.tsv`
+(status 인덱스) — 둘 다 audit 디렉토리에만 쓴다. `sfs audit report` 는 마지막
+리포트 출력, `sfs audit status` 는 severity/waived 카운트 + open critical 목록.
 
 ## Waiver (수용 판정)
 

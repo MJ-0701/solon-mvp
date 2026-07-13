@@ -52,10 +52,12 @@ parse_flags() {
   done
 }
 
+# 도메인 slug 는 항상 [a-z0-9-] 로 정규화한다 — 명시 --domain 도 예외 없이 통과시켜
+# `../` / 절대경로 / 공백 traversal 로 docs/solon/ 밖에 쓰는 것을 원천 차단한다.
 domain_slug() {
-  if [ -n "${DOMAIN}" ]; then printf '%s' "${DOMAIN}"; else
-    basename "$PWD" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-' '-' | sed 's/-*$//;s/^-*//'
-  fi
+  local raw
+  if [ -n "${DOMAIN}" ]; then raw="${DOMAIN}"; else raw="$(basename "$PWD")"; fi
+  printf '%s' "${raw}" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-' '-' | sed 's/-*$//;s/^-*//'
 }
 
 exc_dir() { printf 'docs/solon/%s/excavation' "$(domain_slug)"; }
@@ -131,13 +133,13 @@ detect_routes() {
   grep -rn -E '@(Get|Post|Put|Delete|Patch|Request)Mapping' --include='*.java' --include='*.kt' . 2>/dev/null \
     | sed 's|^\./||' \
     | awk -F: '{line=$0; sub(/^[^:]*:[^:]*:/, "", line); gsub(/^[[:space:]]+/, "", line); print $1":"$2"\tspring\t" line}'
-  grep -rn -E '\b(app|router)\.(get|post|put|delete|patch)\(' --include='*.js' --include='*.ts' . 2>/dev/null \
+  grep -rn -E '(^|[^A-Za-z0-9_])(app|router)\.(get|post|put|delete|patch)\(' --include='*.js' --include='*.ts' . 2>/dev/null \
     | grep -v node_modules | sed 's|^\./||' \
     | awk -F: '{line=$0; sub(/^[^:]*:[^:]*:/, "", line); gsub(/^[[:space:]]+/, "", line); print $1":"$2"\texpress\t" line}'
   grep -rn -E "@(Get|Post|Put|Delete|Patch)\(" --include='*.ts' . 2>/dev/null \
     | grep -v node_modules | sed 's|^\./||' \
     | awk -F: '{line=$0; sub(/^[^:]*:[^:]*:/, "", line); gsub(/^[[:space:]]+/, "", line); print $1":"$2"\tnestjs\t" line}'
-  grep -rn -E "^\s*(path|re_path|url)\(" --include='urls.py' . 2>/dev/null | sed 's|^\./||' \
+  grep -rn -E "^[[:space:]]*(path|re_path|url)\(" --include='urls.py' . 2>/dev/null | sed 's|^\./||' \
     | awk -F: '{line=$0; sub(/^[^:]*:[^:]*:/, "", line); gsub(/^[[:space:]]+/, "", line); print $1":"$2"\tdjango\t" line}'
 }
 
@@ -172,9 +174,9 @@ count_functions() {
   local total=0 n
   n=$(grep -rc -E '(public|private|protected)[^=;]*\)[[:space:]]*\{' --include='*.java' --include='*.kt' . 2>/dev/null | awk -F: '{s+=$2} END {print s+0}')
   total=$((total + n))
-  n=$(grep -rhc -E '(^|[[:space:]])(function [A-Za-z_]|const [A-Za-z_][A-Za-z0-9_]* = (async )?\(|[A-Za-z_][A-Za-z0-9_]*\s*: (async )?\()' --include='*.js' --include='*.ts' . 2>/dev/null | awk '{s+=$1} END {print s+0}')
+  n=$(grep -rhc -E '(^|[[:space:]])(function [A-Za-z_]|const [A-Za-z_][A-Za-z0-9_]* = (async )?\(|[A-Za-z_][A-Za-z0-9_]*[[:space:]]*: (async )?\()' --include='*.js' --include='*.ts' . 2>/dev/null | awk '{s+=$1} END {print s+0}')
   total=$((total + n))
-  n=$(grep -rhc -E '^\s*def [a-zA-Z_]' --include='*.py' . 2>/dev/null | awk '{s+=$1} END {print s+0}')
+  n=$(grep -rhc -E '^[[:space:]]*def [a-zA-Z_]' --include='*.py' . 2>/dev/null | awk '{s+=$1} END {print s+0}')
   total=$((total + n))
   echo "${total}"
 }
@@ -194,33 +196,46 @@ run_sanity_precheck() {
 
 # ── ERD parsers ──────────────────────────────────────────────────────
 erd_from_sql() { # args: sql files. stdout: TABLE/COL/FK/IDX rows (TSV)
+  # 키워드 판정은 tolower(line) 토큰으로 — BSD awk 는 IGNORECASE 를 무시하므로
+  # 대소문자 무관 매칭을 명시 소문자화로 보장한다 (대문자/소문자 SQL 모두 인식).
   awk '
-    BEGIN { IGNORECASE=1 }
-    /CREATE[[:space:]]+TABLE/ {
-      line=$0; gsub(/[`"]/, "", line)
-      match(line, /CREATE[[:space:]]+TABLE[[:space:]]+(IF[[:space:]]+NOT[[:space:]]+EXISTS[[:space:]]+)?[A-Za-z0-9_.]+/)
-      t=substr(line, RSTART, RLENGTH)
-      sub(/CREATE[[:space:]]+TABLE[[:space:]]+/, "", t); sub(/IF[[:space:]]+NOT[[:space:]]+EXISTS[[:space:]]+/, "", t)
-      sub(/^.*\./, "", t)
+    function strip(x){ gsub(/[`",;]/,"",x); return x }
+    {
+      line=$0; gsub(/[`"]/,"",line); gsub(/^[[:space:]]+/,"",line)
+      L=tolower(line)
+      nl=split(L, tl, /[[:space:]()]+/)   # 소문자 토큰(키워드용)
+      no=split(line, to, /[[:space:]()]+/) # 원문 토큰(식별자용)
+    }
+    (tl[1]=="create" && tl[2]=="table") {
+      i=3; if (tl[3]=="if" && tl[4]=="not" && tl[5]=="exists") i=6
+      t=strip(to[i]); sub(/^.*\./,"",t)
       table=t; intable=1
-      printf "TABLE\t%s\t%s:%d\n", table, FILENAME, FNR
+      printf "TABLE\t%s\t%s:%d\n", t, FILENAME, FNR
       next
     }
-    intable && /^[[:space:]]*\)/ { intable=0; next }
+    intable && L ~ /^[[:space:]]*\)/ { intable=0; next }
     intable {
-      line=$0; gsub(/[`",]/, "", line); gsub(/^[[:space:]]+/, "", line)
-      if (line ~ /^FOREIGN[[:space:]]+KEY/) {
-        match(line, /\([A-Za-z0-9_]+\)/); col=substr(line, RSTART+1, RLENGTH-2)
-        match(line, /REFERENCES[[:space:]]+[A-Za-z0-9_.]+/); ref=substr(line, RSTART, RLENGTH)
-        sub(/REFERENCES[[:space:]]+/, "", ref); sub(/^.*\./, "", ref)
-        printf "FK\t%s\t%s\t%s\t%s:%d\n", table, col, ref, FILENAME, FNR; next
+      if (tl[1]=="foreign" && tl[2]=="key") {
+        # FOREIGN KEY (col) REFERENCES parent(...)
+        col=""; ref=""
+        for (k=1;k<=nl;k++) { if (tl[k]=="references") { col=strip(to[3]); ref=strip(to[k+1]); break } }
+        sub(/^.*\./,"",ref)
+        if (col!="" && ref!="") printf "FK\t%s\t%s\t%s\t%s:%d\n", table, col, ref, FILENAME, FNR
+        next
       }
-      if (line ~ /^(PRIMARY[[:space:]]+KEY|UNIQUE|KEY|INDEX|CONSTRAINT)/) {
-        printf "IDX\t%s\t%s\t%s:%d\n", table, line, FILENAME, FNR; next
+      if (tl[1]=="primary"||tl[1]=="unique"||tl[1]=="key"||tl[1]=="index"||tl[1]=="constraint") {
+        line2=line; gsub(/^[[:space:]]+/,"",line2)
+        printf "IDX\t%s\t%s\t%s:%d\n", table, line2, FILENAME, FNR; next
       }
-      if (line ~ /^[A-Za-z_][A-Za-z0-9_]*[[:space:]]/) {
-        split(line, a, /[[:space:]]+/)
-        printf "COL\t%s\t%s\t%s\t%s:%d\n", table, a[1], a[2], FILENAME, FNR
+      # 일반 컬럼 정의: 첫 토큰이 식별자
+      if (to[1] ~ /^[A-Za-z_][A-Za-z0-9_]*$/) {
+        printf "COL\t%s\t%s\t%s\t%s:%d\n", table, strip(to[1]), strip(to[2]), FILENAME, FNR
+        # 인라인 REFERENCES: col TYPE REFERENCES parent(id)
+        for (k=1;k<=nl;k++) if (tl[k]=="references") {
+          ref=strip(to[k+1]); sub(/^.*\./,"",ref)
+          if (ref!="") printf "FK\t%s\t%s\t%s\t%s:%d\n", table, strip(to[1]), ref, FILENAME, FNR
+          break
+        }
       }
     }
   ' "$@"
@@ -236,9 +251,12 @@ erd_from_prisma() { # args: schema.prisma files
       if (line ~ /^@@/) { printf "IDX\t%s\t%s\t%s:%d\n", model, line, FILENAME, FNR; next }
       split(line, a, /[[:space:]]+/)
       fname=a[1]; ftype=a[2]
-      if (line ~ /@relation\(/) {
-        match(line, /fields:[[:space:]]*\[[A-Za-z0-9_]+\]/)
+      # 실 FK 는 @relation(fields: [...]) 를 가진 소유측만 — fields: 없는 역방향
+      # 관계(예: posts Post[] @relation("...")) 는 빈 FK 를 만들지 않고 건너뛴다.
+      if (line ~ /@relation\(/ && line ~ /fields:[[:space:]]*\[/) {
+        match(line, /fields:[[:space:]]*\[[A-Za-z0-9_, ]+\]/)
         fk=substr(line, RSTART, RLENGTH); sub(/fields:[[:space:]]*\[/, "", fk); sub(/\]/, "", fk)
+        gsub(/[[:space:]]/, "", fk)   # 콤마 구분 다중 필드도 그대로 보존
         reftype=ftype; gsub(/[\[\]?]/, "", reftype)
         printf "FK\t%s\t%s\t%s\t%s:%d\n", model, fk, reftype, FILENAME, FNR
         next
@@ -340,22 +358,27 @@ render_erd_md() { # stdin: TSV rows -> mermaid + 근거 표
 }
 
 collect_erd_rows() {
-  local sources sql_files prisma_files jpa_files
+  local sources kind path
+  local -a sql_files=() prisma_files=() jpa_files=()
   sources="$(detect_schema_sources)"
-  sql_files="$(printf '%s\n' "${sources}" | awk -F'\t' '$1=="sql-migration" {print $2}')"
-  prisma_files="$(printf '%s\n' "${sources}" | awk -F'\t' '$1=="prisma" {print $2}')"
-  jpa_files="$(printf '%s\n' "${sources}" | awk -F'\t' '$1=="jpa-entity" {print $2}')"
-  # 우선순위: 마이그레이션 SQL(가장 권위) > ORM 스키마. 둘 다 있으면 SQL 채택 +
-  # ORM 은 diff 참고용으로 뒤에 병기하지 않고 스캔 리포트에 소스만 남긴다.
-  if [ -n "${sql_files}" ]; then
-    # shellcheck disable=SC2086
-    erd_from_sql ${sql_files}
-  elif [ -n "${prisma_files}" ]; then
-    # shellcheck disable=SC2086
-    erd_from_prisma ${prisma_files}
-  elif [ -n "${jpa_files}" ]; then
-    # shellcheck disable=SC2086
-    erd_from_jpa ${jpa_files}
+  # newline-분리 목록을 배열로 — 공백 포함 파일명이 word-split 되지 않게 한다.
+  while IFS="$(printf '\t')" read -r kind path; do
+    [ -z "${path}" ] && continue
+    case "${kind}" in
+      sql-migration) sql_files+=("${path}") ;;
+      prisma) prisma_files+=("${path}") ;;
+      jpa-entity) jpa_files+=("${path}") ;;
+    esac
+  done <<EOF
+${sources}
+EOF
+  # 우선순위: 마이그레이션 SQL(가장 권위) > ORM 스키마.
+  if [ "${#sql_files[@]}" -gt 0 ]; then
+    erd_from_sql "${sql_files[@]}"
+  elif [ "${#prisma_files[@]}" -gt 0 ]; then
+    erd_from_prisma "${prisma_files[@]}"
+  elif [ "${#jpa_files[@]}" -gt 0 ]; then
+    erd_from_jpa "${jpa_files[@]}"
   fi
 }
 
@@ -515,12 +538,16 @@ cmd_graph() {
   erd_rows="$(collect_erd_rows)"
 
   # entity file -> table name map (JPA 엔티티에서 직접; ERD 소스 우선순위와 무관)
-  local tmp_entity_map
+  local tmp_entity_map jpa_path
+  local -a jpa_entity_files=()
   tmp_entity_map="$(mktemp)"
-  jpa_entity_files="$(detect_schema_sources | awk -F'\t' '$1=="jpa-entity" {print $2}')"
-  if [ -n "${jpa_entity_files}" ]; then
-    # shellcheck disable=SC2086
-    erd_from_jpa ${jpa_entity_files} | awk -F'\t' '$1=="TABLE" {split($3, a, ":"); print a[1] "\t" $2}' > "${tmp_entity_map}"
+  while IFS= read -r jpa_path; do
+    [ -n "${jpa_path}" ] && jpa_entity_files+=("${jpa_path}")
+  done <<EOF
+$(detect_schema_sources | awk -F'\t' '$1=="jpa-entity" {print $2}')
+EOF
+  if [ "${#jpa_entity_files[@]}" -gt 0 ]; then
+    erd_from_jpa "${jpa_entity_files[@]}" | awk -F'\t' '$1=="TABLE" {split($3, a, ":"); print a[1] "\t" $2}' > "${tmp_entity_map}"
   fi
 
   # route -> handler-file -> imported services -> tables touched (heuristic, deterministic)
@@ -683,8 +710,18 @@ cmd_capsule() {
       ;;
   esac
 
+  if [ "${CAPSULE_NEXT}" = "1" ] && [ -n "${CAPSULE_TARGET}" ]; then
+    echo "capsule: pass either --next or --target, not both" >&2; exit 2
+  fi
   if [ -n "${CAPSULE_TARGET}" ]; then
     target="${CAPSULE_TARGET}"
+    # 임의 경로·traversal 거부: --target 은 반드시 열린 큐 항목이어야 한다.
+    case "${target}" in
+      /*|*..*) echo "capsule: --target must be a repo-relative path inside the queue (no absolute/.. paths): ${target}" >&2; exit 2 ;;
+    esac
+    if ! grep -qE "^- \[ \] (depth=[0-9]+|dead-code-candidate) ${target}\$" "${queue}"; then
+      echo "capsule: --target '${target}' is not an open l2-queue item — pick one from ${queue}" >&2; exit 3
+    fi
   else
     target="$(grep -m1 -E '^- \[ \] (depth=[0-9]+|dead-code-candidate) ' "${queue}" | sed -E 's/^- \[ \] (depth=[0-9]+|dead-code-candidate) //')"
   fi
@@ -761,7 +798,7 @@ ${evid_files}
 EOF
   [ -z "${missing}" ] || { echo "REJECT ${f}: evidence cites nonexistent file '${missing}'"; return 1; }
   # 확증 상태 파생 (결정론): runtime evidence -> verified; 독립 근거 파일 2+ -> corroborated
-  runtime_count="$(sed -n '/^## Runtime evidence/,/^## /p' "${f}" | grep -cE '^\s*- ' || true)"
+  runtime_count="$(sed -n '/^## Runtime evidence/,/^## /p' "${f}" | grep -cE '^[[:space:]]*- ' || true)"
   if [ "${runtime_count:-0}" -ge 1 ]; then state="verified"
   elif [ "${evid_count}" -ge 2 ]; then state="corroborated"
   else state="unverified"; fi

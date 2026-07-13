@@ -53,10 +53,12 @@ parse_flags() {
   done
 }
 
+# 도메인 slug 는 항상 [a-z0-9-] 로 정규화한다 — 명시 --domain 도 예외 없이 통과시켜
+# `../` / 절대경로 / 공백 traversal 로 docs/solon/ 밖에 쓰는 것을 원천 차단한다.
 domain_slug() {
-  if [ -n "${DOMAIN}" ]; then printf '%s' "${DOMAIN}"; else
-    basename "$PWD" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-' '-' | sed 's/-*$//;s/^-*//'
-  fi
+  local raw
+  if [ -n "${DOMAIN}" ]; then raw="${DOMAIN}"; else raw="$(basename "$PWD")"; fi
+  printf '%s' "${raw}" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-' '-' | sed 's/-*$//;s/^-*//'
 }
 
 audit_dir() { printf 'docs/solon/%s/audit' "$(domain_slug)"; }
@@ -88,9 +90,13 @@ src_files() {
     ! -name 'sfs-audit.sh' 2>/dev/null | sed 's|^\./||' | LC_ALL=C sort
 }
 
+# 테스트/픽스처 경로 판정 — 경로 컴포넌트/접미사 단위로만 매칭한다.
+# `src/contest/auth.js` 같은 프로덕션 파일이 substring `test` 로 스킵되는 false
+# negative 를 막는다 (Codex 리뷰 #3).
 is_test_path() {
-  case "$1" in
-    *test*|*spec*|*__tests__*|*/fixtures/*|*.example|*.sample) return 0 ;;
+  case "/$1" in
+    */test/*|*/tests/*|*/spec/*|*/specs/*|*/__tests__/*|*/fixtures/*|*/testdata/*) return 0 ;;
+    *.test.*|*.spec.*|*.example|*.sample|*_test.*|*_spec.*|*Test.java|*Tests.java|*Spec.*) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -118,11 +124,11 @@ scan_secret() {
     # 라인 스캔 (grep -n 으로 file:line 확보)
     while IFS=: read -r ln content; do
       [ -z "${ln}" ] && continue
-      # AWS access key
-      m="$(printf '%s' "${content}" | grep -oE 'AKIA[0-9A-Z]{16}' | head -1)"
+      # AWS access key id — long-term AKIA + temporary ASIA
+      m="$(printf '%s' "${content}" | grep -oE '(AKIA|ASIA)[0-9A-Z]{16}' | head -1)"
       [ -n "${m}" ] && add_finding critical "A02" "AWS access key id" "${f}:${ln}" "$(redact "${m}")"
-      # GitHub token
-      m="$(printf '%s' "${content}" | grep -oE '(ghp|gho|ghs|ghr)_[A-Za-z0-9]{36}' | head -1)"
+      # GitHub token — classic ghp/gho/ghs/ghr + fine-grained github_pat_
+      m="$(printf '%s' "${content}" | grep -oE '(ghp|gho|ghs|ghr)_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{20,}' | head -1)"
       [ -n "${m}" ] && add_finding critical "A02" "GitHub token" "${f}:${ln}" "$(redact "${m}")"
       # Slack token
       m="$(printf '%s' "${content}" | grep -oE 'xox[baprs]-[A-Za-z0-9-]{10,}' | head -1)"
@@ -141,7 +147,7 @@ scan_secret() {
         esac
       fi
     done <<EOF
-$(grep -niE 'AKIA[0-9A-Z]{16}|(ghp|gho|ghs|ghr)_[A-Za-z0-9]{36}|xox[baprs]-|BEGIN [A-Z ]*PRIVATE KEY|(api[_-]?key|secret|passwo?rd|access[_-]?token|auth[_-]?token)["'"'"' ]*[=:]' "${f}" 2>/dev/null)
+$(grep -niE '(AKIA|ASIA)[0-9A-Z]{16}|(ghp|gho|ghs|ghr)_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{20,}|xox[baprs]-|BEGIN [A-Z ]*PRIVATE KEY|(api[_-]?key|secret|passwo?rd|access[_-]?token|auth[_-]?token)["'"'"' ]*[=:]' "${f}" 2>/dev/null)
 EOF
   done <<EOF
 $(src_files)
@@ -364,8 +370,10 @@ cmd_scan() {
   } | emit "00-audit.md"
 
   if [ "${WRITE}" = "1" ]; then
-    mkdir -p ".sfs-local"
-    printf '%s\n' "${sorted}" | awk 'NF' > ".sfs-local/audit-findings.tsv" 2>/dev/null || true
+    # findings 인덱스도 audit 산출물 디렉토리에 둔다 — "쓰기는 docs/solon/<domain>/
+    # audit/ 에만" 계약을 문자 그대로 지킨다 (Codex 리뷰 #4).
+    mkdir -p "$(audit_dir)"
+    printf '%s\n' "${sorted}" | awk 'NF' > "$(audit_dir)/findings.tsv" 2>/dev/null || true
   fi
   echo "audit done (findings=${total}, critical=${crit})" >&2
 }
@@ -380,7 +388,7 @@ cmd_report() {
 cmd_status() {
   parse_flags "$@"
   echo "sfs audit status — $(domain_slug) (signal-only)"
-  local tsv=".sfs-local/audit-findings.tsv"
+  local tsv="$(audit_dir)/findings.tsv"
   [ -f "${tsv}" ] || { echo "  no scan yet — run: sfs audit scan --write"; exit 0; }
   local c h m l i w
   c="$(awk -F'\t' '$1=="critical"' "${tsv}" | wc -l | tr -d '[:space:]')"

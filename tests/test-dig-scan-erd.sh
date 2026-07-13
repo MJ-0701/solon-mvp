@@ -66,4 +66,36 @@ fhas "${EXC}/erd.md" "schema.prisma:" "prisma evidence file:line"
 fhas "${EXC}/erd-diff.md" "user.deleted_at" "live-only column surfaced in diff"
 fnot "${EXC}/erd-diff.md" "postgres://" "diff carries structure only"
 
+# ── regression: lowercase SQL + inline REFERENCES (BSD-awk portability #5) ──
+mkdir -p "${TMP}/lc/db/migration"
+printf 'create table teams (\n  id bigint primary key,\n  name varchar(80),\n  owner_id bigint references users(id)\n);\n' \
+  > "${TMP}/lc/db/migration/0001_init.sql"
+cd "${TMP}/lc"
+bash "${DIG}" scan --write >/dev/null 2>&1 || fail "lowercase SQL scan failed"
+LC="docs/solon/lc/excavation/erd.md"
+fhas "${LC}" "teams {" "#5 lowercase CREATE TABLE parsed"
+fhas "${LC}" "owner_id" "#5 lowercase column parsed"
+fhas "${LC}" 'teams }o--|| users : "owner_id"' "#5 inline REFERENCES becomes an FK edge"
+
+# ── regression: Prisma inverse relation must NOT invent a phantom FK (#6) ──
+mkdir -p "${TMP}/inv/prisma"
+cat > "${TMP}/inv/prisma/schema.prisma" <<'PRISMA'
+model User {
+  id    Int    @id @default(autoincrement())
+  posts Post[] @relation("UserPosts")
+}
+
+model Post {
+  id       Int  @id @default(autoincrement())
+  author   User @relation("UserPosts", fields: [authorId], references: [id])
+  authorId Int
+}
+PRISMA
+printf '{"name":"inv","dependencies":{"@prisma/client":"^5.0.0"}}\n' > "${TMP}/inv/package.json"
+cd "${TMP}/inv"
+bash "${DIG}" scan --write >/dev/null 2>&1 || fail "prisma inverse scan failed"
+INV="docs/solon/inv/excavation/erd.md"
+fhas "${INV}" 'Post }o--|| User : "authorId"' "#6 owner-side FK present"
+grep -qE 'User \}o--\|\| Post' "${INV}" && fail "#6 inverse relation must not emit a phantom FK"
+
 echo "test-dig-scan-erd: OK"

@@ -71,17 +71,47 @@ out="$(bash "${AUD}" scan --severity-min high 2>&1)"
 grep -q "command execution sink" <<<"${out}" || fail "severity-min high keeps high findings"
 grep -q "security-flavored TODO" <<<"${out}" && fail "severity-min high must drop low findings"
 
-# ── waiver flip + fix-clears-finding ─────────────────────────────────
+# ── findings index lives under the audit dir (not .sfs-local) — invariant #4
 cd "${TMP}/vuln-node"
+bash "${AUD}" scan --write >/dev/null 2>&1
+TSV="docs/solon/vuln-node/audit/findings.tsv"
+[[ -f "${TSV}" ]] || fail "findings index must be written under docs/solon/<domain>/audit/"
+[[ ! -f ".sfs-local/audit-findings.tsv" ]] || fail "findings index must NOT be written under .sfs-local (contract #4)"
+
+# ── waiver flip + fix-clears-finding ─────────────────────────────────
 mkdir -p .sfs-local
 echo 'src/server.js:10|stray debug output — reviewed dev-only logger' > .sfs-local/audit-waivers
 bash "${AUD}" scan --write >/dev/null 2>&1
-awk -F'\t' '$1=="waived"{print $4}' .sfs-local/audit-findings.tsv | grep -q 'src/server.js:10' \
+awk -F'\t' '$1=="waived"{print $4}' "${TSV}" | grep -q 'src/server.js:10' \
   || fail "waiver must flip the finding to waived"
 # fix the AWS key -> re-scan clears the critical
 sed -i.bak 's/AKIAIOSFODNN7EXAMPLE/process.env.AWS_KEY/' src/handlers.js && rm -f src/handlers.js.bak
 bash "${AUD}" scan --write >/dev/null 2>&1
-awk -F'\t' '$1=="critical"' .sfs-local/audit-findings.tsv | grep -q . \
+awk -F'\t' '$1=="critical"' "${TSV}" | grep -q . \
   && fail "fixing the AWS key must clear the critical finding on re-scan"
+
+# ── regression locks from the Codex review (negative tests) ──────────
+# #1 domain traversal: an explicit --domain with ../ must be slugified, never
+# escape docs/solon/
+cd "${TMP}"
+mkdir -p trav/src && printf 'const x=1;\n' > trav/src/a.js
+cd trav
+bash "${AUD}" scan --write --domain '../../escape' >/dev/null 2>&1 || true
+[[ ! -e "${TMP}/escape" && ! -e "${TMP}/trav/../../escape" ]] || fail "#1 --domain must not write outside docs/solon/"
+ls docs/solon/ >/dev/null 2>&1 || fail "#1 slugified domain must still write under docs/solon/"
+
+# #3 is_test_path component match: a 'contest' dir is production, must be scanned
+mkdir -p contest && printf 'const AWS="AKIAIOSFODNN7EXAMPLE";\n' > contest/pay.js
+bash "${AUD}" scan --write --domain contestcase >/dev/null 2>&1
+grep -q 'contest/pay.js' docs/solon/contestcase/audit/00-audit.md \
+  || fail "#3 'contest' must not be treated as a test path (false negative)"
+
+# #10 current token families: ASIA temp keys + github_pat_ fine-grained
+printf 'a="ASIAIOSFODNN7EXAMPLE"\nb="github_pat_11ABCDE0123456789_abcdefghijklmnopqrstuvwx"\n' > contest/tok.js
+bash "${AUD}" scan --write --domain tokcase >/dev/null 2>&1
+REP2="docs/solon/tokcase/audit/00-audit.md"
+grep -q 'AWS access key id' "${REP2}" || fail "#10 ASIA temporary key must be detected"
+grep -q 'GitHub token' "${REP2}" || fail "#10 github_pat_ fine-grained token must be detected"
+fnot "${REP2}" "ASIAIOSFODNN7EXAMPLE" "#10 ASIA value must be redacted"
 
 echo "test-audit-scan: OK"

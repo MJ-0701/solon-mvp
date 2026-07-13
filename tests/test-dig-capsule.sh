@@ -69,4 +69,21 @@ fhas "${CAP2}" "exemplar: ${EXC}/cards/good-corroborated.md" "exemplar points to
 bash "${DIG}" capsule --next --write >/dev/null 2>&1 || fail "--next emission failed"
 ls "${EXC}/capsules"/*.capsule.md >/dev/null 2>&1 || fail "--next produced no capsule"
 
+# ── regression locks from the Codex review ──────────────────────────
+# #2a: --target outside the queue / with .. must be refused (no capsule written)
+before="$(ls "${EXC}/capsules" | wc -l | tr -d '[:space:]')"
+set +e
+bash "${DIG}" capsule --target ../../.ssh/id_rsa --write >/dev/null 2>&1
+rc=$?
+set -e
+[[ "${rc}" -ne 0 ]] || fail "#2 --target with .. must be refused"
+after="$(ls "${EXC}/capsules" | wc -l | tr -d '[:space:]')"
+[[ "${before}" == "${after}" ]] || fail "#2 refused --target must not emit a capsule"
+# #2b: a path not present as an open queue item is refused
+set +e; bash "${DIG}" capsule --target src/not/in/queue.java --write >/dev/null 2>&1; rc=$?; set -e
+[[ "${rc}" -ne 0 ]] || fail "#2 --target not in queue must be refused"
+# #2c: --next together with --target is a usage error
+set +e; bash "${DIG}" capsule --next --target src/main/java/com/acme/App.java --write >/dev/null 2>&1; rc=$?; set -e
+[[ "${rc}" -eq 2 ]] || fail "#2 --next plus --target must be a usage error (exit 2)"
+
 echo "test-dig-capsule: OK"
