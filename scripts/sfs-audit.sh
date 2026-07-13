@@ -120,7 +120,10 @@ scan_secret() {
   local f line ln content m
   while IFS= read -r f; do
     [ -z "${f}" ] && continue
-    case "${f}" in *.env) is_test_path "${f}" || add_finding critical "A02" "committed .env file" "${f}:1" "environment file tracked in source" ;; esac
+    # 테스트/픽스처 파일의 의도적 시크릿 샘플은 모든 secret 규칙에서 건너뛴다
+    # (raw 토큰 규칙도 예외 없이 — Codex 재리뷰 #5).
+    is_test_path "${f}" && continue
+    case "${f}" in *.env) add_finding critical "A02" "committed .env file" "${f}:1" "environment file tracked in source" ;; esac
     # 라인 스캔 (grep -n 으로 file:line 확보)
     while IFS=: read -r ln content; do
       [ -z "${ln}" ] && continue
@@ -136,14 +139,22 @@ scan_secret() {
       # private key block
       printf '%s' "${content}" | grep -qE 'BEGIN [A-Z ]*PRIVATE KEY' \
         && add_finding critical "A02" "private key material" "${f}:${ln}" "PEM private key block in source"
-      # generic assigned secret (redact value)
+      # generic assigned secret — 따옴표 있는 값과 없는 값(.properties/.env 스타일) 모두
+      local val=""
       m="$(printf '%s' "${content}" | grep -oiE '(api[_-]?key|secret|passwo?rd|access[_-]?token|auth[_-]?token)["'"'"' ]*[=:][ ]*["'"'"'][^"'"'"']{8,}["'"'"']' | head -1)"
       if [ -n "${m}" ]; then
-        local val
         val="$(printf '%s' "${m}" | sed -E 's/.*["'"'"']([^"'"'"']{8,})["'"'"']$/\1/')"
+      else
+        # 따옴표 없는 할당: db.password=s3cr3t (값에 공백 없음, 8자 이상)
+        m="$(printf '%s' "${content}" | grep -oiE '(api[_-]?key|secret|passwo?rd|access[_-]?token|auth[_-]?token)[[:space:]]*[=:][[:space:]]*[^"'"'"'[:space:]]{8,}' | head -1)"
+        [ -n "${m}" ] && val="$(printf '%s' "${m}" | sed -E 's/^.*[=:][[:space:]]*//')"
+      fi
+      if [ -n "${val}" ]; then
         case "${val}" in
-          *'${'*|*'process.env'*|*'os.environ'*|*'System.getenv'*|CHANGE*|change*|xxx*|XXX*|your-*|placeholder*|example*) : ;;
-          *) is_test_path "${f}" || add_finding high "A02" "hardcoded secret assignment" "${f}:${ln}" "$(redact "${val}")" ;;
+          # 플레이스홀더/템플릿/환경참조 는 하드코딩 시크릿이 아니다:
+          *'<'*|*'>'*|*'${'*|*'{{'*|*'%('*|*'process.env'*|*'os.environ'*|*'System.getenv'*|*'getenv'*) : ;;
+          *your-*|*CHANGE*|*change-me*|*xxxx*|*XXXX*|placeholder*|example*|dummy*|test-*|null|true|false|[0-9]*) : ;;
+          *) add_finding high "A02" "hardcoded secret assignment" "${f}:${ln}" "$(redact "${val}")" ;;
         esac
       fi
     done <<EOF
@@ -168,13 +179,18 @@ scan_owasp() {
       # eval
       printf '%s' "${content}" | grep -qE '(^|[^A-Za-z_])eval\(' \
         && add_finding high "A03" "eval() dynamic execution" "${f}:${ln}" "eval on runtime data — verify source is trusted"
-      # SQL string concatenation
-      printf '%s' "${content}" | grep -qiE '(select|insert|update|delete)[^;]*"[[:space:]]*\+|execute\([^)]*\+|query\([^)]*\+[^)]*(req|param|input|user)' \
-        && add_finding high "A03" "possible SQL injection (string concat)" "${f}:${ln}" "SQL built by concatenation — prefer parameterized queries"
-      # unsafe deserialization (yaml.load with an explicit safe loader is excluded)
+      # SQL string concatenation — 홑/겹따옴표·백틱 문자열 결합 모두 포함
+      printf '%s' "${content}" | grep -qiE "(select|insert|update|delete)[^;]*[\"'\`][[:space:]]*\+|execute\([^)]*\+|query\([^)]*\+" \
+        && add_finding high "A03" "possible SQL injection (string concat)" "${f}:${ln}" "SQL built by concatenation — verify taint; prefer parameterized queries"
+      # unsafe deserialization — yaml.load 는 SafeLoader/safe_load 만 안전으로 면제.
+      # yaml.Loader / FullLoader / 임의 Loader= 는 여전히 취약으로 본다 (재리뷰 #1).
       if printf '%s' "${content}" | grep -qE '(pickle\.loads|yaml\.load\(|ObjectInputStream|unserialize\(|Marshal\.load)'; then
-        printf '%s' "${content}" | grep -qE 'yaml\.load\(' && printf '%s' "${content}" | grep -qE '(SafeLoader|Loader[[:space:]]*=)' \
-          || add_finding high "A08" "unsafe deserialization" "${f}:${ln}" "deserializing untrusted data — use a safe loader/allowlist"
+        if printf '%s' "${content}" | grep -qE 'yaml\.load\('; then
+          printf '%s' "${content}" | grep -qE '(SafeLoader|yaml\.safe_load)' \
+            || add_finding high "A08" "unsafe deserialization" "${f}:${ln}" "yaml.load without SafeLoader — use yaml.safe_load / SafeLoader"
+        else
+          add_finding high "A08" "unsafe deserialization" "${f}:${ln}" "deserializing untrusted data — use a safe loader/allowlist"
+        fi
       fi
       # XSS sinks
       printf '%s' "${content}" | grep -qE '(dangerouslySetInnerHTML|\.innerHTML[[:space:]]*=|v-html=)' \
@@ -227,13 +243,17 @@ scan_deps() {
   check_manifest build.gradle "gradle.lockfile" "gradle dependencyCheckAnalyze"
   check_manifest Gemfile "Gemfile.lock" "bundle audit"
   check_manifest go.mod "go.sum" "govulncheck ./..."
-  # loose pins in package.json
+  # loose pins in package.json — here-string 사용: 파이프 서브셸이면 add_finding 이
+  # FINDINGS 에 누적되지 않고 사라진다 (재리뷰 #6).
   if [ -f package.json ]; then
     loose="$(grep -nE '":[[:space:]]*"(\*|latest)"' package.json 2>/dev/null | head -5)"
     if [ -n "${loose}" ]; then
-      printf '%s\n' "${loose}" | while IFS=: read -r ln _; do
+      while IFS=: read -r ln _; do
+        [ -z "${ln}" ] && continue
         add_finding low "A06" "unpinned dependency (* or latest)" "package.json:${ln}" "wildcard version — pin to a reviewed range"
-      done
+      done <<EOF
+${loose}
+EOF
     fi
   fi
 }

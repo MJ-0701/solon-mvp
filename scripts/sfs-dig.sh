@@ -215,15 +215,23 @@ erd_from_sql() { # args: sql files. stdout: TABLE/COL/FK/IDX rows (TSV)
     }
     intable && L ~ /^[[:space:]]*\)/ { intable=0; next }
     intable {
-      if (tl[1]=="foreign" && tl[2]=="key") {
-        # FOREIGN KEY (col) REFERENCES parent(...)
-        col=""; ref=""
-        for (k=1;k<=nl;k++) { if (tl[k]=="references") { col=strip(to[3]); ref=strip(to[k+1]); break } }
+      # FK: "FOREIGN KEY (col) REFERENCES p(id)" 또는
+      # "CONSTRAINT x FOREIGN KEY (col) REFERENCES p(id)" — foreign+key 가 어디에
+      # 있든 잡는다(앞에 CONSTRAINT 가 있어도).
+      has_fk=0; fkcol=""; ref=""
+      for (k=1;k<nl;k++) if (tl[k]=="foreign" && tl[k+1]=="key") has_fk=1
+      if (has_fk) {
+        for (k=1;k<=nl;k++) {
+          if (tl[k]=="key" && fkcol=="") fkcol=strip(to[k+1])
+          if (tl[k]=="references") ref=strip(to[k+1])
+        }
         sub(/^.*\./,"",ref)
-        if (col!="" && ref!="") printf "FK\t%s\t%s\t%s\t%s:%d\n", table, col, ref, FILENAME, FNR
+        if (fkcol!="" && ref!="") printf "FK\t%s\t%s\t%s\t%s:%d\n", table, fkcol, ref, FILENAME, FNR
         next
       }
-      if (tl[1]=="primary"||tl[1]=="unique"||tl[1]=="key"||tl[1]=="index"||tl[1]=="constraint") {
+      # 제약/인덱스 키워드(CHECK 포함) 는 컬럼이 아니라 IDX 로 — CHECK 가 컬럼명으로
+      # 오분류되던 문제 수정.
+      if (tl[1]=="primary"||tl[1]=="unique"||tl[1]=="key"||tl[1]=="index"||tl[1]=="constraint"||tl[1]=="check") {
         line2=line; gsub(/^[[:space:]]+/,"",line2)
         printf "IDX\t%s\t%s\t%s:%d\n", table, line2, FILENAME, FNR; next
       }
@@ -719,7 +727,9 @@ cmd_capsule() {
     case "${target}" in
       /*|*..*) echo "capsule: --target must be a repo-relative path inside the queue (no absolute/.. paths): ${target}" >&2; exit 2 ;;
     esac
-    if ! grep -qE "^- \[ \] (depth=[0-9]+|dead-code-candidate) ${target}\$" "${queue}"; then
+    # 큐 항목의 파일 경로만 뽑아 고정 문자열 비교 — 경로의 정규식 메타문자
+    # (`[id].js` 등)가 매칭을 깨거나 오탐하지 않도록 grep -Fx 를 쓴다 (재리뷰 #4).
+    if ! sed -nE 's/^- \[ \] (depth=[0-9]+|dead-code-candidate) //p' "${queue}" | grep -Fxq -- "${target}"; then
       echo "capsule: --target '${target}' is not an open l2-queue item — pick one from ${queue}" >&2; exit 3
     fi
   else

@@ -44,6 +44,11 @@ fhas "${REP}" "XSS sink" "node: XSS (A03)"
 fhas "${REP}" "permissive CORS" "node: CORS (A05)"
 fhas "${REP}" "dependency manifest without lockfile" "node: deps (A06)"
 fhas "${REP}" "stray debug output" "node: hygiene (A09)"
+# round-2: unquoted secret assignment in .properties (#2) + value redacted
+fhas "${REP}" "config/app.properties" "node: unquoted secret in .properties (A02 #2)"
+fnot "${REP}" "s3cr3tDbPass2024xyz" "node: unquoted secret value must be redacted"
+# round-2: unpinned deps low finding must survive (subshell fix #6)
+fhas "${REP}" "unpinned dependency" "node: loose-pin A06 low (#6 subshell fix)"
 # redaction: the raw secret values must NEVER appear
 fnot "${REP}" "AKIAIOSFODNN7EXAMPLE" "node: AWS key value must be redacted"
 fnot "${REP}" "sk_live_abcd1234efgh5678ijkl" "node: API key value must be redacted"
@@ -62,6 +67,9 @@ fhas "${REP}" "TLS certificate verification disabled" "py: verify=False (A05)"
 fhas "${REP}" "command execution sink" "py: subprocess shell=True (A03)"
 fhas "${REP}" "debug mode enabled" "py: DEBUG=True (A05)"
 fhas "${REP}" "security-flavored TODO" "py: security TODO (A09)"
+# round-2 #1: yaml.load with an unsafe Loader= must still be flagged (pickle + yaml = 2)
+[[ "$(grep -c 'unsafe deserialization' "${REP}")" -ge 2 ]] \
+  || fail "py: yaml.load(Loader=yaml.Loader) must be flagged too (#1)"
 fnot "${REP}" "s3cr3t-admin-pw-2024" "py: admin password must be redacted"
 # env-var reference must NOT be flagged as a hardcoded secret
 grep -q 'views.py:26' "${REP}" && fail "py: os.environ reference wrongly flagged as secret"
@@ -113,5 +121,12 @@ REP2="docs/solon/tokcase/audit/00-audit.md"
 grep -q 'AWS access key id' "${REP2}" || fail "#10 ASIA temporary key must be detected"
 grep -q 'GitHub token' "${REP2}" || fail "#10 github_pat_ fine-grained token must be detected"
 fnot "${REP2}" "ASIAIOSFODNN7EXAMPLE" "#10 ASIA value must be redacted"
+
+# #5 round-2: a *_test.* / *Test.java file's fixture token must NOT be flagged
+printf 'const k="AKIAIOSFODNN7EXAMPLE";\n' > contest/auth_test.js
+bash "${AUD}" scan --write --domain testfilecase >/dev/null 2>&1
+REP3="docs/solon/testfilecase/audit/00-audit.md"
+grep -q 'auth_test.js' "${REP3}" && fail "#5 raw token in a *_test.* file must be skipped (is_test_path applies to all secret rules)"
+grep -q 'tok.js' "${REP3}" || fail "#5 production tok.js must still be scanned"
 
 echo "test-audit-scan: OK"

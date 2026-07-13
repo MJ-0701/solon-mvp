@@ -12,6 +12,11 @@ def fetch(url):
 def load_state(blob):
     return pickle.loads(blob)
 
+# yaml.load with an explicit UNSAFE loader must still be flagged (A08)
+import yaml
+def load_yaml(blob):
+    return yaml.load(blob, Loader=yaml.Loader)
+
 # command injection via shell=True (A03)
 def run(name):
     return subprocess.run("report " + name, shell=True)

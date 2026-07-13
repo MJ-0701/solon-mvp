@@ -98,4 +98,21 @@ INV="docs/solon/inv/excavation/erd.md"
 fhas "${INV}" 'Post }o--|| User : "authorId"' "#6 owner-side FK present"
 grep -qE 'User \}o--\|\| Post' "${INV}" && fail "#6 inverse relation must not emit a phantom FK"
 
+# ── regression: named CONSTRAINT FK + CHECK constraint (round-2 #3) ──
+mkdir -p "${TMP}/con/db/migrations"
+cat > "${TMP}/con/db/migrations/0001.sql" <<'SQL'
+CREATE TABLE accounts (
+  id BIGINT PRIMARY KEY,
+  balance BIGINT,
+  owner_id BIGINT,
+  CHECK (balance >= 0),
+  CONSTRAINT fk_owner FOREIGN KEY (owner_id) REFERENCES users(id)
+);
+SQL
+cd "${TMP}/con"
+bash "${DIG}" scan --write >/dev/null 2>&1 || fail "constraint SQL scan failed"
+CON="docs/solon/con/excavation/erd.md"
+fhas "${CON}" 'accounts }o--|| users : "owner_id"' "#3 named CONSTRAINT FK is an FK edge, not IDX"
+grep -qE '^ *(CHECK|check) ' "${CON}" && fail "#3 CHECK must not become a column named CHECK"
+
 echo "test-dig-scan-erd: OK"
