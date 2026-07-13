@@ -13,6 +13,28 @@
 
 ---
 
+## 0.10.1
+
+Codex 독립 리뷰 2라운드 반영: 방금 출하한 dig·audit 결정론 코어의 실 결함 18건을 픽스했습니다. Critical 은 없었고, 전부 회귀 테스트로 잠갔습니다.
+
+체감 변화:
+
+- **보안 강화**: `--domain ../../src` 같은 경로 traversal 로 저장소 밖에 쓰던
+  경로를 원천 차단(read-only 불변식), audit 시크릿 렌즈가 따옴표 없는 값
+  (`.properties`)·AWS 임시키(ASIA)·GitHub fine-grained 토큰·안전하지 않은
+  yaml.load 를 추가로 잡고, 테스트 파일의 픽스처 토큰 오탐을 제거.
+- **macOS 이식성**: SQL ERD 파서가 GNU 전용 IGNORECASE 대신 이식 가능한
+  방식으로 재작성돼 소문자 SQL·인라인 REFERENCES·명명 제약(CONSTRAINT FK)·
+  CHECK 를 정확히 처리. 그래프 grep 의 비이식 패턴도 교체.
+- **정확도**: Prisma 역방향 관계의 유령 FK, capsule --target 의 정규식
+  메타문자 경로 매칭, deps 느슨한 핀 finding 유실 등 수정.
+- 두 라운드 리뷰 원문은 `docs/solon/reviews/` 에 증거로 보관.
+
+참고: 요청하신 gpt-5.6-sol 은 설치된 Codex CLI 0.142.0(현재 npm 최신)이 아직
+지원하지 않아(앱 전용) 최상위 가용 티어 gpt-5.5 xhigh 로 리뷰했습니다.
+
+---
+
 ## 0.10.0
 
 정적 보안 감사 rail `sfs audit` 탑재: 운영자 자기 저장소의 취약점 표면을 코드에서 정적으로 뽑아 OWASP 계열로 정리합니다 — 스캔·severity·시크릿 마스킹은 LLM 없이 결정론으로 완결됩니다.

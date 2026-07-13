@@ -84,6 +84,21 @@ load_when: "sfs audit / security audit 파이프라인의 설계 근거, 안전 
 
 severity: critical/high/medium/low/info + waived. `--severity-min` 필터.
 
+## 5.1 Codex 독립 리뷰 (0.10.1)
+
+출하 후 Codex 2라운드 리뷰(gpt-5.5 xhigh — gpt-5.6-sol 은 CLI 0.142.0 미지원,
+앱 전용)로 dig+audit 실 결함 18건(Critical 0) 확인·수정. 상세 증거:
+`docs/solon/reviews/2026-07-13-dig-audit-codex-review.md`. 핵심 교훈:
+
+- **read-only 불변식은 slug 강제로 지킨다** — 명시 `--domain` 도 예외 없이
+  `[a-z0-9-]` 정규화(traversal 차단). 산출물 인덱스도 audit 디렉토리로.
+- **BSD/GNU 이식성은 테스트로만 잡히지 않는다** — macOS 개발 fixture 가
+  대문자 SQL 이라 GNU-only IGNORECASE 결함이 통과했다. 토큰 기반 tolower 로
+  재작성 + 소문자 fixture 회귀 추가.
+- **서브셸 파이프에서 누적 변수는 사라진다** — deps 느슨한 핀 loop 를
+  here-string 으로. 스캐너 규칙 리터럴·테스트 픽스처 시크릿의 자기 오탐은
+  경로/파일 제외로.
+
 ## 6. 회귀 잠금
 
 - `tests/test-audit-scan.sh` — 2 취약 fixture(vuln-node/vuln-python) 전 렌즈
