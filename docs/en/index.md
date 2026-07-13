@@ -62,6 +62,10 @@ Useful agent-skills benchmark practices are absorbed into
 commands. This includes source-driven implementation, stop-the-line debugging,
 deprecation/migration cleanup, shipping checks, and the `source-docs`,
 `simplify`, `security`, `performance`, and `api-contract` review lenses.
+When adopting an existing codebase, `sfs adopt --ddd-tdd-retrofit --apply`
+diagnoses the DDD-lite boundary state and plants a contract so the next sprint
+writes characterization/TDD evidence first, then refactors just one behavior
+slice.
 
 Obsidian can be used as a recommended project memory layer. New SFS projects may
 start a repo-root vault and `llm-wiki/` map after the scaffold exists; existing
