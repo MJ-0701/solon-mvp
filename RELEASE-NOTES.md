@@ -13,6 +13,27 @@
 
 ---
 
+## 0.10.2
+
+SFS 전체 4축 검토(셸 정확성·routed context·문서·테스트) 결과 반영: 보안 결함 1건 수정 + 문서 링크·테스트 안전경계 갭 보강.
+
+체감 변화:
+
+- **보안(HIGH)**: `sfs team` 의 런타임 capability 판정이 프로젝트에서 편집
+  가능한 `model-profiles.yaml` 의 런타임 이름을 `eval` 로 확장하던 문제를
+  고쳤습니다. `x}$(명령)` 같은 악성 값이 코드 실행으로 이어질 수 있었고,
+  이제 이름을 `[a-z0-9-]` 로 검증하고 eval 대신 안전한 간접 확장을 씁니다.
+  `sfs upgrade` 로 전파됩니다.
+- **문서**: README/GUIDE 분할 문서와 일부 docs 의 깨진 내부 링크(하위 폴더에서
+  루트 문서를 `./` 로 가리켜 404)를 `../` 로 교정했습니다.
+- **테스트**: dig 의 무네트워크·무LLM 보장을 실제 런타임 경로(harness)까지
+  확장하고, dig 의 no-write 기본동작·대상 read-only 무결성·`--domain`
+  traversal, audit 의 status/report/`--lens` 를 회귀로 잠갔습니다.
+- routed context(100 정책+21 커맨드)는 구조적 무결함이었습니다. 검토 원문:
+  `docs/solon/reviews/2026-07-14-sfs-full-review.md`.
+
+---
+
 ## 0.10.1
 
 Codex 독립 리뷰 2라운드 반영: 방금 출하한 dig·audit 결정론 코어의 실 결함 18건을 픽스했습니다. Critical 은 없었고, 전부 회귀 테스트로 잠갔습니다.

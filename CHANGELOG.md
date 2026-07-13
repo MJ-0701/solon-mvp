@@ -1,5 +1,27 @@
 ## [Unreleased]
 
+## [0.10.2] - 2026-07-14
+
+> **A full four-axis review of SFS (shell correctness, routed context, docs, tests) hardened one security defect and closed real coverage/consistency gaps. Security (HIGH): `sfs-team-apply.sh`'s `team_runtime_capable` ran `eval` on a runtime name read unvalidated from the project-editable `model-profiles.yaml`, so a value like `x}$(cmd)` reached the eval and executed — a consumer who ran `sfs team`/upgrade against a hostile config could get arbitrary code execution. Fixed by replacing the eval with bash indirect expansion (`${!var}`) and gating the runtime name to `[a-z0-9-]`; a new regression test (`test-team-apply-eval-safety.sh`) statically forbids the eval and dynamically proves a malicious name runs nothing. Docs (MEDIUM): broken internal links across README/GUIDE split children and three docs — root-level targets linked with `./` from a subfolder (404) — were rewritten to `../` (including the dig/audit rows added last release). Tests (HIGH/MED): real safety boundaries were untested and are now locked — dig's zero-LLM/zero-network guard extends to the runtime path it actually shells (`sfs-harness.sh doctor`), plus dig no-write-default, target-source read-only integrity (checksum before/after), and a `--domain` traversal negative; audit gains status/report(+exit-3)/`--lens` smokes; and the categorize() classifier pins the dig/audit/team tests to sfs-core. Low-severity script hygiene: `verify-product-release.sh` uses `grep -F` for version substrings, and two `sfs-loop.sh` atomic-rewrite sites no longer leak their tempfile on awk failure. Routed context (100 policies + 21 commands) was structurally clean — 0 defects. Full evidence: `docs/solon/reviews/2026-07-14-sfs-full-review.md`. run-all 232 → 233.**
+
+### Security
+
+- **`templates/.sfs-local-template/scripts/sfs-team-apply.sh`** — eval-injection closed (indirect expansion + `[a-z0-9-]` runtime-name gate); consumers receive it via `sfs upgrade`.
+
+### Added
+
+- **`tests/test-team-apply-eval-safety.sh`** — eval-injection regression (static + dynamic).
+- **`docs/solon/reviews/2026-07-14-sfs-full-review.md`** — four-axis review evidence.
+
+### Fixed
+
+- **README/GUIDE split children + docs** — `./`→`../` root-level links (README/07 dig+audit rows, README/08 document map, windows-incident links in docs/{ko,en}).
+- **`tests/test-dig-scan-erd.sh`** — determinism guard covers `sfs-harness.sh`; no-write-default, read-only integrity, `--domain` traversal negatives.
+- **`tests/test-audit-scan.sh`** — status/report(+exit 3)/`--lens` smokes.
+- **`tests/test-run-all-categorization.sh`** — dig/audit/team-eval tests pinned to sfs-core.
+- **`scripts/verify-product-release.sh`** — `grep -F` version substrings.
+- **`templates/.sfs-local-template/scripts/sfs-loop.sh`** — tempfile cleanup on awk-failure path.
+
 ## [0.10.1] - 2026-07-13
 
 > **Two rounds of independent Codex review (gpt-5.5 xhigh; gpt-5.6-sol was requested but the installed Codex CLI 0.142.0 — the current npm latest — rejects it as app-only for now) hardened the freshly-shipped dig + audit deterministic cores. No Critical was found in either round, but 18 real defects were verified in-source and fixed. Round 1 (10): an explicit `--domain` is now slugified like an auto one so `--domain ../../src` can never write outside docs/solon/ (read-only invariant, both scanners); `sfs dig capsule --target` must name an open l2-queue item and rejects absolute/.. paths and --next+--target; audit's is_test_path matches path components/suffixes instead of substrings (so src/contest/ is no longer skipped); the audit findings index moved from .sfs-local to docs/solon/<domain>/audit/findings.tsv to match the stated contract; the SQL ERD parser dropped the GNU-only IGNORECASE for token-based tolower() matching (BSD awk / macOS) and gained inline REFERENCES parsing; Prisma emits an FK only when @relation carries fields: (no phantom inverse FK); ERD/JPA file lists pass through bash arrays (space-safe); the graph greps replaced non-portable \b/\s with POSIX classes; and the secret lens added AWS temp keys (ASIA) and GitHub fine-grained tokens (github_pat_). Round 2 (7 deeper, found only after round 1 landed): yaml.load is exempt only for SafeLoader/safe_load (Loader=yaml.Loader is flagged again); unquoted hardcoded secrets (.properties key=value) are parsed and redacted; a named CONSTRAINT … FOREIGN KEY is an FK not an index, and CHECK(...) is no longer a bogus column; the capsule queue match is fixed-string (grep -Fx) so paths with regex metachars like src/routes/[id].js match; is_test_path applies to every secret rule (a fixture token in *_test.* is not flagged critical); the loose-pin dependency finding no longer vanishes in a pipe subshell; and SQL-concat detection covers single-quote/backtick strings. Every fix carries a regression lock; run-all is 232/232 and solon-product self-scans clean. The full two-round review evidence is saved under docs/solon/reviews/2026-07-13-dig-audit-codex-review.md.**
