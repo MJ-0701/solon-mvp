@@ -1,0 +1,8 @@
+{
+  "name": "vuln-node",
+  "dependencies": {
+    "express": "*",
+    "mysql": "^2.18.1",
+    "cors": "latest"
+  }
+}

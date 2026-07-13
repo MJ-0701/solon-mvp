@@ -29,6 +29,7 @@ module:
 - `commands/upgrade.md` — upgrade / update / install freshness.
 - `commands/harness.md` — harness doctor/map for project autonomy readiness.
 - `commands/dig.md` — bottom-up excavation of an undocumented codebase: deterministic L0 scan + ERD / L1 graph + queue, capsule-delegated L2 fact cards (validator-enforced evidence), L3 synthesis (#추정-marked reverse-spec + unknowns question list), L4 confirmation states.
+- `commands/audit.md` — static read-only security audit of the operator's own repo: deterministic OWASP-family scan (secret/owasp/config/deps/hygiene lenses, secret values redacted), then LLM threat-model / exploit-hypothesis (reasoning only, never execution) / fix; signal-only, defensive-scope only, standing scan surface for `agentic-security-logging-pack.md`.
 - `commands/tidy.md` — tidy / report / retro / archive.
 - `commands/loop.md` — loop / autonomous work / queue.
 

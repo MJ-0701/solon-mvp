@@ -323,6 +323,19 @@ check_excavation_conformance() {
   return 0
 }
 
+# security audit 정합 — advisory only: open critical finding 수를 알리되 이슈로
+# 세지 않고 exit 코드도 바꾸지 않는다 (signal-only).
+check_audit_conformance() {
+  local project="$1" label="$2" tsv crit
+  tsv="${project}/.sfs-local/audit-findings.tsv"
+  [[ -f "${tsv}" ]] || return 0
+  crit="$(awk -F'\t' '$1=="critical"' "${tsv}" 2>/dev/null | grep -c '' || true)"
+  if [[ "${crit:-0}" -gt 0 ]]; then
+    say_warn "audit-critical" "${label}" "${crit} open critical security finding(s) — see docs/solon/*/audit/00-audit.md and commands/audit.md threat-model step (advisory)"
+  fi
+  return 0
+}
+
 check_project() {
   local project="$1" local_dir label
   PROJECT_COUNT=$((PROJECT_COUNT + 1))
@@ -335,6 +348,7 @@ check_project() {
   check_git_index_lock "${project}"
   check_wiki_frontmatter "${project}"
   check_excavation_conformance "${project}" "${label}"
+  check_audit_conformance "${project}" "${label}"
 
   local_dir="${project}/.sfs-local"
   if [[ ! -d "${local_dir}" ]]; then

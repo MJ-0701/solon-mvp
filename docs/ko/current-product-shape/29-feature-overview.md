@@ -50,6 +50,7 @@ Solon(SFS)의 전체 기능을 한 장으로 봅니다. 각 행은 상세 문서
 | 하네스 설계도 + 진화 원장 | `sfs harness map --write` | [harness map](./22-project-harness-map.md) |
 | 시간/비용 대시보드 | `sfs measure [--json]` / `measure --alive` | `bin/sfs` usage |
 | 무문서 코드베이스 역추적 (L0 스캔·ERD·L1 그래프·fact card·확증 상태) | `sfs dig scan|graph|capsule|card|status` | routed context `commands/dig.md` |
+| 정적 보안 감사 (OWASP 계열, secret redact, 방어 범위) | `sfs audit scan|report|status` | routed context `commands/audit.md` |
 
 Sanity→Cartography 순서 규율과 모든 지표의 signal-only(차단 없음) 계약이
 함께 적용됩니다.

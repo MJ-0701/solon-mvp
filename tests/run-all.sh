@@ -134,6 +134,7 @@ categorize() {
       ;;
     test-sfs-*.sh \
       | test-dig-*.sh \
+      | test-audit-*.sh \
       | test-hermes-*.sh \
       | test-team-*.sh \
       | test-route-*.sh \
