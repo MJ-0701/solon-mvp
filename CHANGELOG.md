@@ -1,5 +1,22 @@
 ## [Unreleased]
 
+## [0.10.0] - 2026-07-13
+
+> **A static security-audit rail ships as a new command surface — `sfs audit scan|report|status` surfaces the operator's OWN repository's vulnerability surface from the code, organized by OWASP family, fully deterministic (zero LLM tokens, zero network). The safety boundary is a first-class design decision (S1): this is a static threat-model surface, NOT an active exploit/pen-testing engine — it never runs attack payloads against a live target, scans only the operator's authorized repo (S2), always redacts secret values to the first four characters (S3), and every finding is signal-only (ALT-INV-3). Five OWASP-family lenses run offline: secret (A02 — AWS/GitHub/Slack tokens, PEM private keys, hardcoded credential assignments, committed .env), owasp (A03/A08 — command/eval sinks, SQL string concatenation, unsafe deserialization, XSS sinks), config (A05 — debug on, TLS verification off, wildcard CORS), deps (A06 — manifest/lockfile posture plus the offline ecosystem audit command to run yourself, since live CVE lookup needs network and stays manual), and hygiene (A09 — stray debug residue, security-flavored TODO/FIXME). Findings carry a severity model (critical..info) with a `--severity-min` filter and verify/fix guidance rather than weaponized exploit steps; a waiver line in `.sfs-local/audit-waivers` (`<file:line>|<reason>`) flips a finding to waived on re-scan, and fixing the code clears it by deterministic re-derivation. The judgment work — threat model, exploit hypothesis (reasoning only, never execution), fix — are LLM designated points in routed context commands/audit.md, which makes audit the standing scan surface for agentic-security-logging-pack.md (its Gate 6 review lens). Test/spec/fixture paths and the scanner's own file are excluded from scans (standard scanner hygiene, found via dogfooding — solon-product self-scans clean). Cadence is manual by default; periodic automation is opt-in via the existing SCHEDULED_RUN_CONTRACT or a daily hook, with no new scheduler infrastructure. Design decisions S1-S3 + D1-D6 are recorded in docs/maintenance/2026-07-13-security-audit.design.md.**
+
+### Added
+
+- **`scripts/sfs-audit.sh`** + `bin/sfs audit` dispatch — scan (five OWASP-family lenses, redacted, severity-sorted), report, status.
+- **`templates/.sfs-local-template/context/commands/audit.md`** — lens contract, safety boundary, waiver, LLM designated points, review-lens link, opt-in cadence; `_INDEX` route + `sfs context path audit`.
+- **`GUIDE/18-17-security-audit.md` / `docs/en/guide/13-12-security-audit.md`** — security-audit section; feature-overview rows (ko/en).
+- **`docs/maintenance/2026-07-13-security-audit.design.md`** — safety boundary S1-S3 + decisions D1-D6.
+- **`tests/test-audit-scan.sh`** + fixtures `tests/fixtures/audit/` (vuln-node, vuln-python).
+
+### Changed
+
+- **`templates/.sfs-local-template/scripts/sfs-healthcheck.sh`** — advisory audit conformance (open critical count), say_warn only.
+- **`tests/run-all.sh`** — `test-audit-*.sh` family registered under sfs-core.
+
 ## [0.9.1] - 2026-07-13
 
 > **Deterministic L2 capsule emission completes the excavation pipeline's work item C — `sfs dig capsule [--next|--target <file>] --write` picks an item from the L2 queue and generates the full 8-field worker capsule so the fact-card handoff no longer depends on a hand-written prompt. files_scope is computed from the L1 graph (target + direct import dependencies and dependents), the acceptance criteria wire the card validator and the DEVIATIONS_LOG convention, token_budget carries the warn-before-block note, and pii_rules forbid env values / credentials / data rows. The exemplar field is an auto-pointer: the first validator-PASS card in cards/ is attached as the shape to imitate, and the first capsule of an excavation omits it with an explicit note (allowed by the capsule contract). Capsule emission is also where the L2 ordering gate is actually enforced (design decision D8): a NOT-READY queue refuses emission with exit 3 and names the waiver path — consistent with the signal-only marker contract, since nothing outside dig is ever blocked.**
