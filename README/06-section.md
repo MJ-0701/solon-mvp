@@ -4,7 +4,7 @@ title: "어디에 기록되나"
 visibility: oss-public
 doc_type: product-intro
 language: ko
-updated: 2026-07-03
+updated: 2026-07-13
 parent: README.md
 summary: "어디에 기록되나"
 load_when: "Read when README.md routes to this section."

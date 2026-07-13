@@ -4,7 +4,7 @@ title: "Solon 제품"
 visibility: oss-public
 doc_type: product-intro
 language: ko
-updated: 2026-07-03
+updated: 2026-07-13
 summary: "Thin index for Solon 제품"
 load_when: "Start here, then load only the child section needed."
 split_children:
