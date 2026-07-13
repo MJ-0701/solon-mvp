@@ -22,9 +22,18 @@ TMP="$(mktemp -d "${TMPDIR:-/tmp}/sfs-dig-scan.XXXXXX")"
 trap 'rm -rf "${TMP}"' EXIT
 
 # ── zero-LLM / zero-network guarantee (static) ───────────────────────
-if grep -nE 'curl|wget|claude -p|codex exec|gemini|agy ' "${DIG}"; then
-  fail "sfs-dig.sh must be deterministic: no network/LLM invocation allowed"
-fi
+# Guard the transitive closure dig actually executes at runtime: sfs-dig.sh
+# itself AND sfs-harness.sh (dig scan shells `sfs-harness.sh doctor` for the
+# Sanity precheck). A network/LLM call added to either would break determinism.
+# Invocation-shaped patterns (not the bare vendor word, which appears as an
+# adapter-name string / comment in sfs-harness.sh); comment lines are skipped.
+det_pattern='(curl|wget)[[:space:]]|claude[[:space:]]+-p|codex[[:space:]]+exec|gemini[[:space:]]+-p|agy[[:space:]]+-p'
+for det in "${DIG}" "${DIST_DIR}/scripts/sfs-harness.sh"; do
+  if grep -nE "${det_pattern}" "${det}" | grep -vqE '^[0-9]+:[[:space:]]*#'; then
+    grep -nE "${det_pattern}" "${det}" | grep -vE '^[0-9]+:[[:space:]]*#' >&2
+    fail "$(basename "${det}") must be deterministic: no network/LLM invocation on dig's runtime path"
+  fi
+done
 
 # ── spring-jpa fixture ───────────────────────────────────────────────
 cp -R "${SCRIPT_DIR}/fixtures/dig/spring-jpa" "${TMP}/spring-jpa"
@@ -114,5 +123,32 @@ bash "${DIG}" scan --write >/dev/null 2>&1 || fail "constraint SQL scan failed"
 CON="docs/solon/con/excavation/erd.md"
 fhas "${CON}" 'accounts }o--|| users : "owner_id"' "#3 named CONSTRAINT FK is an FK edge, not IDX"
 grep -qE '^ *(CHECK|check) ' "${CON}" && fail "#3 CHECK must not become a column named CHECK"
+
+# ── safety boundary: no-write default + target read-only + traversal ──
+# (review-round-3 gaps — dig runs against a user's undocumented repo)
+mkdir -p "${TMP}/safe/src"
+printf 'const x=1;\n' > "${TMP}/safe/src/a.js"
+printf '{"name":"safe","dependencies":{"express":"^4.0.0"}}\n' > "${TMP}/safe/package.json"
+cd "${TMP}/safe"
+# checksum every source file before any dig run (target must stay byte-identical)
+pre_sum="$(find . -type f ! -path './docs/solon/*' -exec shasum {} \; | LC_ALL=C sort)"
+
+# no-write default: stdout preview only, NO docs/solon/ created
+out="$(bash "${DIG}" scan 2>/dev/null)"
+[[ -n "${out}" ]] || fail "dig scan without --write must print a preview to stdout"
+[[ ! -d "docs/solon" ]] || fail "dig scan without --write must NOT create docs/solon/"
+bash "${DIG}" graph >/dev/null 2>&1
+[[ ! -d "docs/solon" ]] || fail "dig graph without --write must NOT create docs/solon/"
+
+# target source read-only: even with --write, only docs/solon/ appears; source unchanged
+bash "${DIG}" scan --write >/dev/null 2>&1
+bash "${DIG}" graph --write >/dev/null 2>&1
+post_sum="$(find . -type f ! -path './docs/solon/*' -exec shasum {} \; | LC_ALL=C sort)"
+[[ "${pre_sum}" == "${post_sum}" ]] || fail "dig must never modify target source files (read-only invariant)"
+
+# --domain path traversal must be slugified, never escape docs/solon/
+bash "${DIG}" scan --write --domain '../../escape' >/dev/null 2>&1 || true
+[[ ! -e "${TMP}/escape" && ! -e "${TMP}/safe/../../escape" ]] \
+  || fail "dig --domain must not write outside docs/solon/ (traversal guard)"
 
 echo "test-dig-scan-erd: OK"

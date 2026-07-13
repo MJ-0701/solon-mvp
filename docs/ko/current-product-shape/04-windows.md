@@ -43,5 +43,5 @@ Windows runtime `.ps1` / `.cmd` 파일을 ASCII-safe 로 유지해 `context cat`
 `brainstorm`, `plan`, `review`, `retro` 에서 필요할 때 생성됩니다. 하지만 명령 출력이 비어 있거나
 `sfs.cmd status` / `sfs.cmd context cat kernel` 이 usage 만 출력하면 실패로 봐야 합니다.
 자세한 원인과 확인 절차는
-[Windows SFS 래퍼 장애 요약 보고서](./windows-wrapper-incident-0.6.56.md) 에 정리되어 있습니다.
+[Windows SFS 래퍼 장애 요약 보고서](../windows-wrapper-incident-0.6.56.md) 에 정리되어 있습니다.
 

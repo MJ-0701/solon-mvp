@@ -129,4 +129,23 @@ REP3="docs/solon/testfilecase/audit/00-audit.md"
 grep -q 'auth_test.js' "${REP3}" && fail "#5 raw token in a *_test.* file must be skipped (is_test_path applies to all secret rules)"
 grep -q 'tok.js' "${REP3}" || fail "#5 production tok.js must still be scanned"
 
+# ── subcommand + flag smokes (review-round-3: status/report/--lens untested) ──
+cd "${TMP}/vuln-node"
+# audit status reflects the last scan's counts
+bash "${AUD}" scan --write >/dev/null 2>&1
+bash "${AUD}" status 2>&1 | grep -qE 'critical=[0-9]+ high=[0-9]+' \
+  || fail "audit status must print severity counts"
+# audit report prints the saved report; exit 3 when none exists
+bash "${AUD}" report 2>&1 | grep -q 'Security audit' || fail "audit report must print the saved report"
+cd "${TMP}"
+mkdir -p noreport && cd noreport
+set +e; bash "${AUD}" report >/dev/null 2>&1; rc=$?; set -e
+[[ "${rc}" -eq 3 ]] || fail "audit report must exit 3 when no report exists (got ${rc})"
+# --lens secret isolates the secret lens (no config/hygiene findings)
+cd "${TMP}/vuln-node"
+lens_out="$(bash "${AUD}" scan --lens secret 2>&1)"
+grep -q 'A02' <<<"${lens_out}" || fail "--lens secret must still surface A02 findings"
+grep -q 'permissive CORS' <<<"${lens_out}" && fail "--lens secret must NOT run the config lens"
+grep -q 'stray debug output' <<<"${lens_out}" && fail "--lens secret must NOT run the hygiene lens"
+
 echo "test-audit-scan: OK"

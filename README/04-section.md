@@ -11,7 +11,7 @@ load_when: "Read when README.md routes to this section."
 ---
 ## 설치
 
-개발, 터미널, CLI 환경이 낯설다면 먼저 [BEGINNER-GUIDE.md](./BEGINNER-GUIDE.md)를 보시면 됩니다.
+개발, 터미널, CLI 환경이 낯설다면 먼저 [BEGINNER-GUIDE.md](../BEGINNER-GUIDE.md)를 보시면 됩니다.
 
 ### Mac
 
@@ -64,7 +64,7 @@ MCP host 에서도 같은 7-step flow 를 끌어다 쓸 수 있습니다. `mcp-s
 
 호스트별 등록 스니펫은 [`mcp-server/README.md`](./mcp-server/README.md), 채널
 일람 + invariant 비교는
-[`docs/ko/current-product-shape/23-host-channels-and-mcp.md`](./docs/ko/current-product-shape/23-host-channels-and-mcp.md).
+[`docs/ko/current-product-shape/23-host-channels-and-mcp.md`](../docs/ko/current-product-shape/23-host-channels-and-mcp.md).
 
 ---
 

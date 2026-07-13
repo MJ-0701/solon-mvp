@@ -65,7 +65,7 @@ done
 # 4) Homebrew tap clone
 brew_clone="${SFS_HOMEBREW_CLONE:-$HOME/tmp/homebrew-solon-product}"
 if [ -f "${brew_clone}/Formula/sfs.rb" ]; then
-  if grep -q "v${version}.tar.gz" "${brew_clone}/Formula/sfs.rb"; then
+  if grep -qF "v${version}.tar.gz" "${brew_clone}/Formula/sfs.rb"; then
     ok "homebrew formula carries v${version}"
   else
     bad "homebrew formula at ${brew_clone} does not carry v${version}"
@@ -77,7 +77,7 @@ fi
 # 5) Scoop bucket clone
 scoop_clone="${SFS_SCOOP_CLONE:-$HOME/tmp/scoop-solon-product}"
 if [ -f "${scoop_clone}/bucket/sfs.json" ]; then
-  if grep -q "\"version\": \"${version}\"" "${scoop_clone}/bucket/sfs.json"; then
+  if grep -qF "\"version\": \"${version}\"" "${scoop_clone}/bucket/sfs.json"; then
     ok "scoop manifest carries ${version}"
   else
     bad "scoop manifest at ${scoop_clone} does not carry ${version}"

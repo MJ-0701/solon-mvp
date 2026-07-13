@@ -48,5 +48,5 @@ An empty sprint directory after `sfs start` can be normal. Step files are create
 later by `brainstorm`, `plan`, `review`, and `retro`. Empty command output,
 usage-only `sfs.cmd status`, or usage-only `sfs.cmd context cat kernel` is a
 failure signal. The full root cause and validation flow are in the
-[Windows SFS wrapper incident report](./windows-wrapper-incident-0.6.56.md).
+[Windows SFS wrapper incident report](../windows-wrapper-incident-0.6.56.md).
 

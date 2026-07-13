@@ -41,6 +41,6 @@ Founder 관점에서 Solon 은 "내가 전부 prompt 하는 사람"을 "AI 팀�
 Idea 에서는 의도와 포기할 것을 묻고, MVP 에서는 가장 작은 검증 가능한 slice 로 줄이고, Launch 에서는
 보안/UX/review evidence 를 남기며, Scale 에서는 같은 루프를 더 짧고 안전하게 반복합니다.
 
-더 깊은 설명은 [Solon 10x 가치](./docs/ko/10x-value.md)에 정리했습니다.
+더 깊은 설명은 [Solon 10x 가치](../docs/ko/10x-value.md)에 정리했습니다.
 
 ---

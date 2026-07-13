@@ -101,9 +101,16 @@ team_scaffold_schema() {
 # (SFS_TEAM_FORCE_CAPABLE_<RT>). executor_auth_ready(sfs-common) 재사용,
 # antigravity(agy)는 별도 presence probe.
 team_runtime_capable() {
-  local rt="$1" up force
+  local rt="$1" up force force_var
+  # rt 는 project-editable model-profiles.yaml 에서 온다. eval 로 확장하면
+  # `x}$(cmd)` 같은 값이 코드 실행으로 이어진다 — 런타임 이름은 [a-z0-9-] 만
+  # 허용하고, override 조회는 eval 이 아니라 bash 간접 확장(${!var})으로 한다.
+  case "$rt" in
+    *[!a-z0-9-]*|'') return 0 ;;   # 비정상 runtime 이름: 신뢰 안 함, 무해 통과
+  esac
   up="$(printf '%s' "$rt" | tr '[:lower:]-' '[:upper:]_')"
-  eval "force=\${SFS_TEAM_FORCE_CAPABLE_${up}:-}"
+  force_var="SFS_TEAM_FORCE_CAPABLE_${up}"
+  force="${!force_var:-}"
   case "${force}" in 1) return 0 ;; 0) return 1 ;; esac
   case "$rt" in
     claude)      executor_auth_ready claude ;;

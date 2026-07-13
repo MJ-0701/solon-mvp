@@ -23,8 +23,8 @@ load_when: "Read when README.md routes to this section."
 | `sfs ingest --source-type <type> --purpose <why>` | wiki 로 컴파일하기 전 Raw source 목적과 스키마를 잠근 intake 초안 생성 |
 | `sfs harness doctor` | 긴 자율 작업 전에 하네스 준비 상태 점검 + AI-readiness(Sanity) 4축 채점 + 세션 비용 신호(토큰/캐시 적중률/탐색·편집 비율) — 전부 신호만, 차단 없음 |
 | `sfs harness map --write` | agent 역할, artifact, memory, test, release loop 설계도 작성. Sanity 미감사·waiver 없음이면 readiness advisory 한 줄 출력 (지도는 항상 기록) |
-| `sfs dig scan\|graph\|capsule\|card\|status` | 인계 문서 없는 코드베이스를 코드에서 역추적 — L0 스캔+ERD·L1 그래프는 LLM 0토큰, 대상 read-only ([가이드](./GUIDE/17-16-undocumented-takeover.md)) |
-| `sfs audit scan\|report\|status` | 자기 저장소 정적 보안 감사 — OWASP 계열 취약점 표면(시크릿·injection·설정·의존성·위생), 시크릿 값 마스킹, 방어 전용·신호만 ([가이드](./GUIDE/18-17-security-audit.md)) |
+| `sfs dig scan\|graph\|capsule\|card\|status` | 인계 문서 없는 코드베이스를 코드에서 역추적 — L0 스캔+ERD·L1 그래프는 LLM 0토큰, 대상 read-only ([가이드](../GUIDE/17-16-undocumented-takeover.md)) |
+| `sfs audit scan\|report\|status` | 자기 저장소 정적 보안 감사 — OWASP 계열 취약점 표면(시크릿·injection·설정·의존성·위생), 시크릿 값 마스킹, 방어 전용·신호만 ([가이드](../GUIDE/18-17-security-audit.md)) |
 | `sfs team use <solo\|pair\|trio>` | 팀 preset 활성화 (scaffold + runtime binding 작성) |
 | `sfs team refresh` | capability 재평가 + binding 재적용 (deprecated fallback 승격 제안 포함) |
 | `sfs implement [slice|--stdin]` | 작은 실행 조각 진행 |

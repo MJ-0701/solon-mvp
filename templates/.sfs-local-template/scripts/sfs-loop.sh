@@ -898,7 +898,7 @@ _queue_rewrite_status() {
       if (owner != "") { print "claimed_at: " now; seen_claimed=1; next }
     }
     { print }
-  ' "$path" > "$tmp" && mv -f "$tmp" "$path"
+  ' "$path" > "$tmp" && mv -f "$tmp" "$path" || { rm -f "$tmp"; return 1; }
 }
 
 # _claim_queue_task — claim the next pending task with atomic mv.
@@ -1189,7 +1189,7 @@ _queue_rewrite_lifecycle() {
       next
     }
     { print }
-  ' "$path" > "$tmp" && mv -f "$tmp" "$path"
+  ' "$path" > "$tmp" && mv -f "$tmp" "$path" || { rm -f "$tmp"; return 1; }
 }
 
 # _bump_heartbeat — sed PROGRESS.md frontmatter `last_overwrite` to now (UTC ISO).

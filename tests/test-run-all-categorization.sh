@@ -89,6 +89,12 @@ assert_category test-sfs-bootstrap-quick.sh                sfs-core
 assert_category test-sfs-router-doc-refactor.sh            sfs-core
 assert_category test-bad-fixture.sh                        sfs-core
 assert_category test-cli-discovery-macos.sh                sfs-core
+# dig/audit rails + team eval-safety: pinned so a categorize() reorder that
+# dropped them into `other` is caught directly, not only via the bucket ceiling.
+assert_category test-dig-scan-erd.sh                       sfs-core
+assert_category test-dig-capsule.sh                        sfs-core
+assert_category test-audit-scan.sh                         sfs-core
+assert_category test-team-apply-eval-safety.sh             sfs-core
 
 # ── 9) other — anything that falls through. ─────────────────────────
 assert_category test-something-completely-unknown.sh       other
