@@ -6,7 +6,7 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
 
 # Implement
 
-- Do not stop at artifact creation: execute the requested slice and record evidence.
+- Do not stop at artifact creation: execute the requested slice and record evidence. If the plan carries `references`, read them before the first edit and record the read trace in the implementation log (`policies/unknowns-and-deviations.md` REFERENCES_FIELD); when the territory contradicts the plan mid-slice, follow DEVIATIONS_LOG — conservative choice + `## Deviations` record + continue, with `none observed` stated explicitly when clean; a completion claim without a stated deviation ledger is unverified.
 - Preflight is strict: `sfs implement` requires a Gate 3 Plan review PASS
   (`sfs review --gate 3`) before implementation starts. If review evidence is
   missing, return to plan review; bypass only with an explicit user waiver or

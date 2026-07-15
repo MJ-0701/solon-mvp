@@ -56,6 +56,23 @@ as sunset-review candidates (suggest-only, same rail as skill-promotion
 candidates — a human decides). Carrying a stale workaround past a model change
 unexamined is the finding; the review itself may well conclude "keep".
 
+## MODEL_HEAD_TO_HEAD_ON_UPGRADE
+
+The swap decision that triggers sunset review is itself measured, not
+impressionistic: judge a candidate model by running the **same domain eval
+head-to-head** against the incumbent — the held-out set the harness already
+keeps (`skill-promotion-loop.md` HELD_OUT_SCORING; eval-first means the set
+predates the candidate). An upgrade adopted on vibes cannot be safely
+reversed, exactly like an untagged workaround. And the **benchmark surface
+expands release-over-release**: as models improve, a static bench saturates
+and reads as "no gain" — grow the measured surface (new cases, new scoring
+dimensions) with each release so stagnation and improvement stay
+distinguishable (`self-improvement-loop.md` MEASURE). External validation
+(by-reference): a frontier finance-diligence platform benchmarks every new
+model head-to-head against its incumbent on domain evals and widens the bench
+each release (Claude blog, 2026-07-13); vendor, product, and performance
+figures held out.
+
 ## STOP_DOING_REVIEW
 
 Sunset review asks "is this workaround still needed?" Its complement at every

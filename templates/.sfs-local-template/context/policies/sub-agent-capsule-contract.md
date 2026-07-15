@@ -22,6 +22,13 @@ contract so a worker/sub-agent handoff can be validated, not just described. It
 adds no new lifecycle command — it is the schema behind the existing
 capsule-only rule, and the `agent-build` review lens checks it at handoff.
 
+Decomposition is a model-invariant discipline: however capable the model,
+splitting work into small, repeatable, **checked steps with controlled
+inputs** stays — capsules are that discipline's contract form. External
+validation (by-reference): a frontier finance-diligence builder kept
+deterministic step composition over single-model runs even on its strongest
+model (Claude blog, 2026-07-13); vendor and product specifics held out.
+
 ## Required fields
 
 A capsule passed from a lead/C-Level agent to a worker, reviewer, or external

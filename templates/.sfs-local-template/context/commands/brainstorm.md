@@ -54,6 +54,11 @@ load_when: ["brainstorm", "브레인스토밍", "requirements", "요구사항", 
 - For unfamiliar domains or large existing codebases, a read-only researcher
   pass may happen before plan. The researcher maps sources, domain terms,
   contradictions, and unknowns; it does not implement or approve quality.
+- If the ask cannot be verbalized, run PROTOTYPE_FORK
+  (`policies/unknowns-and-deviations.md`): 2–4 cheap variants, a short
+  comparison table, operator picks; record the selection and rejection
+  reasons in §5 선택지 / §9 추가 기록. Record the BLIND_SPOT_PASS output as
+  the kickoff `blind_spots` list (answered / delegated / open) in §6.1.
 - Non-developer initial setup proposal:
   - Do not require the user to know framework names such as Next.js, Spring,
     FastAPI, NestJS, React, Vue, or Nuxt.

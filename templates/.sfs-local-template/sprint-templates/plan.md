@@ -48,6 +48,7 @@ user_approval_evidence: ""
 - 인터페이스/산출물 경계:
 - 사용자 결정 지점:
 - AI 위임 범위:
+- references (경로/리포/커밋 + 모방할 점 한 줄, 지정 시 구현 전 필독 + 로그 흔적):
 
 ## 5.1 Mainline Focus Ledger
 
@@ -145,5 +146,8 @@ Gate 3 review PASS 는 사용자 승인으로 간주하지 않는다. 사용자�
 - [ ] 재사용 가능한 도메인 노하우가 있으면 Domain Asset Promotion Ledger 에 source/owner/promotion/check 가 있다
 - [ ] non-trivial product-bearing work 이면 Enterprise Plan Council risk flag / selected pack / AC evidence / asset row 가 있다
 - [ ] 제품 의미/IA/visible UI/workflow/public contract/AC 의미 변경이면 사용자 승인 경계가 pending 으로 표시되어 있다
+- [ ] 인터뷰 열린 질문이 남아 있지 않다 (답변이 스펙에 병합되었거나 명시적 skip 사유가 기록되어 있다)
+- [ ] blind_spots 항목이 전부 answered / delegated 상태다
+- [ ] references 가 있으면 구현 전 필독 + 구현 로그 확인 흔적 계획이 있다
 - [ ] slice별 파일/산출물 매핑이 있다
 - [ ] worker 모델 라우팅이 명시되어 있다: Codex 일반 worker는 `gpt-5.4`, bounded coding helper는 `gpt-5.3-codex`, Spark는 scope/files_scope/AC/정확한 수정 의도가 잠긴 무판단 기계적 구현 보조 작업에만 쓴다

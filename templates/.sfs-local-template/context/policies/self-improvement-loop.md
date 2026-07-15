@@ -49,7 +49,11 @@ SIGNAL -> RECORD -> CURATE -> PROPOSE -> MEASURE -> GATE -> APPLY -> CAPTURE -> 
 5. **MEASURE** — a held-out set fixed before the change scores it before/after
    (eval-first; cheap deterministic stage, then a cost-gated judge); after
    adoption, the success-side usage-value signal (repeated real invocations,
-   flowcheck telemetry aggregation) is the complementary field measure. Owner:
+   flowcheck telemetry aggregation) is the complementary field measure. The
+   measured surface itself expands release-over-release — a static set
+   saturates as capability grows — and a model swap scores incumbent vs
+   candidate head-to-head on the same domain set
+   (`model-workaround-sunset.md` MODEL_HEAD_TO_HEAD_ON_UPGRADE). Owner:
    `skill-promotion-loop.md` (HELD_OUT_SCORING / DETECTION usage aggregation).
 6. **GATE** — the four EVOLUTION_ADOPTION_GATE checks, plus model-swap sunset
    re-review (keep / retire / generalize), decide adoption. Owners:

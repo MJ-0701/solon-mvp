@@ -42,11 +42,24 @@ HELD_OUT_SCORING (여기서 재나열하지 않는다 — 포인터만).
 
 같은 plan 진입 시 **unknowns 프리플라이트**: 프롬프트/계획(맵)과 코드베이스
 (territory) 의 간극을 4분면(UNKNOWNS_QUADRANT)으로 분해하고, 계약 확정 전
-BLIND_SPOT_PASS 한 번으로 에이전트에게 "내가 말하지 않은 것"을 묻는다. 구현 중
+BLIND_SPOT_PASS 한 번으로 에이전트에게 "내가 말하지 않은 것"을 묻는다
+(kickoff `blind_spots` 목록, answered/delegated/open 상태). 방향 자체가
+말로 표현 안 되면 PROTOTYPE_FORK(2~4 시안 + 비교표 + 선택/탈락 사유 기록),
+방향 확정 후엔 SPEC_INTERVIEW_GATE(질문 영향도순 정렬 → 답변 스펙 병합 →
+명시적 skip 만 허용), 원하는 동작을 이미 하는 코드가 있으면 REFERENCES_FIELD
+(경로/커밋 + 의도 1줄, 구현 전 필독)로 맵을 좁힌다. 구현 중
 계획 이탈은 보수적 선택 + `## Deviations` 기록 후 계속(DEVIATIONS_LOG, lessons
-SIGNAL 입력원), 구현 후 explainer/quiz 는 운영자 이해도 게이트다
-(COMPREHENSION_GATE, signal-only). SSoT 는 routed context
+SIGNAL 입력원, 완료 주장은 ledger 명시 — entries 또는 `none observed`), 구현 후
+explainer/quiz 는 운영자 이해도 게이트다 (COMPREHENSION_GATE, signal-only,
+변경 기반 3~5문항). SSoT 는 routed context
 `policies/unknowns-and-deviations.md` (여기서 재나열하지 않는다 — 포인터만).
+
+단계 분해는 모델 성능과 무관한 **불변 규율**이다 — 입력 통제·작고 반복
+가능한 단계·checked steps 는 모델이 아무리 뛰어나도 유지된다 (외부 검증
+by-reference: 최전선 finance-diligence 사례, Claude 블로그 2026-07-13;
+vendor/성과 수치 보류). 모델 교체 판단은 같은 도메인 eval head-to-head 로
+한다 — SSoT 는 `policies/model-workaround-sunset.md`
+MODEL_HEAD_TO_HEAD_ON_UPGRADE (여기서 재나열하지 않는다 — 포인터만).
 
 또 **map-first**: 구현 착수 전 작업 전체를 먼저 매핑(PRD + 티켓 분해)한 뒤 독립
 워크플로로 병렬화한다 — 첫 코드 전에 하루 분량의 계획이 나머지를 즉흥 아닌 실행으로

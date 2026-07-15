@@ -52,6 +52,15 @@ status: draft
 
 -
 
+### 6.1 blind_spots
+
+- 사용자가 말하지 않았지만 결정이 필요한 지점 (`policies/unknowns-and-deviations.md`
+  BLIND_SPOT_PASS). 계약 확정 전 open 항목은 plan readiness finding 입니다.
+
+| blind spot | 상태 (answered / delegated / open) | 답 / 위임 근거 |
+|---|---|---|
+|  |  |  |
+
 ## 7. Plan 재료
 
 - 목표:

@@ -72,6 +72,16 @@ last_touched_at: ""
 - 수동 확인:
 - agent cross review:
 
+## Deviations
+
+- 계획과 다르게 간 지점이 없으면 `none observed` 한 줄을 남깁니다. 이탈이
+  있으면 보수적 선택 + 기록 + 계속 (`policies/unknowns-and-deviations.md`
+  DEVIATIONS_LOG). 미기록 이탈이 있는 완료 주장은 unverified 입니다.
+
+| 계획(맵)이 말한 것 | 실제(territory)에서 본 것 | 선택 | 보수적 이유 |
+|---|---|---|---|
+|  |  |  |  |
+
 ## 5. Implementation Acceptance Ledger
 
 | AC/ADR/decision | status (implemented/missing/deferred/waived) | files/artifacts | tests/evidence | gap/follow-up |
