@@ -39,9 +39,9 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.10.2" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.10.2" "version output"
-assert_contains_text "${output}" "latest 0.10.2" "latest output"
+[[ "${plain_output}" == "sfs 0.11.0" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.11.0" "version output"
+assert_contains_text "${output}" "latest 0.11.0" "latest output"
 # Headline drift-lock: the printed headline must (a) reproduce, byte-for-byte, the
 # `> **...**` blockquote the awk extracts from CHANGELOG for the installed version
 # (so the machinery and the source file stay in sync), and (b) carry the version's
@@ -58,7 +58,7 @@ expected_changelog_headline="$(
 )"
 [[ -n "${expected_changelog_headline}" ]] || fail "no CHANGELOG headline for installed version"
 assert_contains_text "${output}" "installed_release_headline ${expected_changelog_headline}" "installed release headline"
-assert_contains_text "${output}" "A full four-axis review of SFS" "0.10.2 headline opening clause"
+assert_contains_text "${output}" "A lecture/blog insight batch closes the map-vs-territory loop" "0.11.0 headline opening clause"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -87,6 +87,6 @@ expected_notes_headline="$(
 )"
 [[ -n "${expected_notes_headline}" ]] || fail "no RELEASE-NOTES headline for installed version"
 assert_contains_text "${fallback_output}" "installed_release_headline ${expected_notes_headline}" "release notes fallback headline"
-assert_contains_text "${fallback_output}" "SFS 전체 4축 검토" "0.10.2 release-notes distinctive clause"
+assert_contains_text "${fallback_output}" "지도(계획)와 영토(코드베이스)의 간극" "0.11.0 release-notes distinctive clause"
 
 echo "test-version-release-headline: OK"
