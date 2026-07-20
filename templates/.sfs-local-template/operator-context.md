@@ -54,3 +54,7 @@ do not ship fixed values in the template.
 - **Always**: <OPERATOR-ALWAYS>
 - **Never**: <OPERATOR-NEVER>
 - **Decision authority kept by operator**: <OPERATOR-DECISIONS>
+- **Reference pairs (standards by example)**: <OPERATOR-REFERENCE-PAIRS>
+  (pointers to representative before/after artifact pairs — e.g. draft→final —
+  the agent infers the quality bar from; pointers, not pasted bodies. See
+  `policies/skill-promotion-loop.md` REFERENCE_PAIR_STANDARD_INFERENCE)

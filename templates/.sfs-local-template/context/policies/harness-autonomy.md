@@ -100,6 +100,32 @@ SFS applies this as a project-operating contract:
 - Multi-agent review reduces human bottleneck only when the lead adjudicates
   reviewer findings against AC/source evidence; another agent's critique is
   evidence to evaluate, not automatic truth.
+- FIX_THE_LOOP_NOT_THE_CODE: when review catches the **same mistake class
+  across artifacts repeatedly**, the fix goes upstream — add one rule to the
+  loop that produces them (rulebook, routed policy, skill, prompt) and
+  **regenerate the affected batch**; artifacts are never hand-patched against
+  the rule. Per-artifact hand-patching hides the loop defect and diverges the
+  batch from its generator. The repeated-correction trigger
+  (`skill-promotion-loop.md` DETECTION, floor 2) detects the repeat; this
+  names the follow-through. External validation (by-reference): a Claude blog
+  large-scale migration writeup (2026-07-16) — "fix the loop, not the code";
+  vendor, language, and scale figures held out.
+- JUDGE_NEGATIVE_CONTROL: before a judge (test, AC check, verifier, headline
+  assert) is trusted to gate work, validate it in **both directions**: it
+  passes on a known-good input *and* fails on a deliberately-broken fixture.
+  A judge that cannot catch breakage is not a judge — it is a rubber stamp
+  that will approve regressions silently. This is the precondition step of
+  the verifier != implementer invariant below (same migration source,
+  by-reference: judges were proven against intentionally-broken code before
+  the fleet ran).
+- BOUNDS_OUTLIVE_MODEL_LIMITS: design boundaries from **what the operator
+  permits**, never from what today's model cannot do — prompt scaffolds and
+  capability gaps are not control points, and they expire at the next model
+  swap (`model-workaround-sunset.md` MODEL_UPGRADE_SETUP_AUDIT retires the
+  coaching; the permission boundary stays). After an upgrade, new emergent
+  behavior *inside* the boundary is expected — observability catches and
+  reviews it; it is not a breach (external validation, by-reference: a Claude
+  blog CISO guide, 2026-07-17; vendor and survey figures held out).
 - Verifier != implementer is a critical harness invariant. The authoring
   worker cannot be the only reviewer for close; use a separate agent/context or
   record an explicit waiver for low-risk self-CPO fallback. The corollary that

@@ -51,6 +51,19 @@ known-good reference output or pattern the worker should imitate. Attach it
 when one exists; a worked example steers a worker more cheaply than longer
 prose. Absence is not a validation finding.
 
+LEAST_AGENCY_VERB_SCOPING: `tools_allowed` narrows at the **verb/action**
+grain, not just the tool grain — grant the minimum *actions* the goal needs,
+and remove irreversible verbs (delete / send / publish / push / pay-class
+actions) from the list entirely when the goal does not require them. A verb
+absent from the world cannot be attempted: removal is a by-construction block,
+strictly stronger than prompting the worker not to use it. This is the
+access-control face of the typed boundary rule
+(`critical-rule-hook-promotion.md` DECLARATIVE_BOUNDARY_SURFACE); when an
+irreversible verb *is* required, it stays behind that typed gate. External
+validation (by-reference): a Claude blog CISO guide (2026-07-17) — controls
+scope to verbs, and least agency beats least privilege for agents; vendor
+specifics held out.
+
 `token_budget` and `timeout` follow **warn-before-block**: surface a threshold
 warning before the ceiling (the 75/90% two-step alert pattern, external
 admin-controls case by-reference) so the worker decides refine / pivot / halt
@@ -73,6 +86,19 @@ unchanged; the warning is a signal, not a new gate.
   enters the parent conversation, only the final message returns.
 - Poll artifacts at `output_paths`, not the worker's thoughts. Insufficient
   evidence → the worker returns partial/fail and names the missing artifact.
+- DONE_IS_ARTIFACT_ON_DISK: in a parallel work queue, an item is done **iff
+  its artifact exists at `output_paths` on disk** — never because a status
+  message said so. The queue is re-derived from disk state each round, so
+  interruption and resume are correct by construction: a crashed or killed
+  run resumes by rebuilding the queue from what actually shipped (same
+  migration source as the serialization rule, by-reference,
+  `token-harness.md` SERIALIZE_EXPENSIVE_OPS).
+- SHARED_SURFACE_CONFLICT_SCAN: before a worker edits a **shared surface**
+  (a file or contract other lanes also touch), it scans the recent commits
+  and the live queue for overlapping work and surfaces the conflict *before*
+  editing — a preflight flag beats a merge conflict after both lanes spent
+  their budget. Composes with the disjoint-`files_scope` rule; this covers
+  the surfaces that cannot be made disjoint.
 - Deviation convention: when the territory contradicts the capsule's plan or
   `acceptance_criteria` assumptions mid-slice, the worker makes the
   conservative choice, records it under a `## Deviations` heading in the

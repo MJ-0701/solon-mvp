@@ -1,7 +1,7 @@
 ---
 id: sfs-policy-credential-hygiene
 summary: Agent-visible surfaces carry credential placeholders only; real keys live in a store, attach at the boundary with per-consumer scope, and rotate in one place.
-load_when: ["api key", "API key", "secret", "credential", "token", "env var", ".env", "rotate key", "key rotation", "vault", "keychain", "unattended runner", "scheduled run auth", "mcp server auth", "agent identity", "service account", "grant lifecycle", "revoke access", "act as user"]
+load_when: ["api key", "API key", "secret", "credential", "token", "env var", ".env", "rotate key", "key rotation", "vault", "keychain", "unattended runner", "scheduled run auth", "mcp server auth", "agent identity", "service account", "grant lifecycle", "revoke access", "act as user", "new connector", "risk preflight", "커넥터 연결", "blast radius"]
 ---
 
 # Credential Hygiene
@@ -119,6 +119,29 @@ that defines the job — the prompt file is a durable agent-visible surface
 reports obey the same redaction rules as any production log. An unattended run
 that would need a *new* credential mid-flight stops and surfaces instead of
 improvising one (human boundary, `harness-autonomy.md`).
+
+## FOUR_QUESTION_RISK_PREFLIGHT
+
+Before wiring a **new connector, MCP server, or external tool** into a
+workflow, answer four questions once — a suggest-only decision lens, never a
+hard block:
+
+1. **Ingest** — does the workflow take in untrusted content (web pages,
+   third-party docs, inbound mail/tickets)? Untrusted input is where
+   injection-class risk enters.
+2. **Actions & identity** — what actions can it take, under whose identity
+   (AGENT_IDENTITY above)? An action without a named identity is unauditable.
+3. **Blast radius** — scope × severity if it misbehaves: what can it reach,
+   and how bad is the worst write it can make?
+4. **Observability** — will you see what it did (audit trail, `events.jsonl`
+   / `tool_call` telemetry, GRANT_LIFECYCLE's trail-reading)?
+
+The answers make the risk legible and bounded before the grant, instead of
+discovered after. Speed rule, promoted intact: **when the workflow ingests no
+untrusted content, agent-specific risk is near its baseline — move fast**;
+reserve the slow path for workflows where question 1 is yes. External
+validation (by-reference): a Claude blog CISO guide to agentic AI
+(2026-07-17); author, survey, and figure specifics held out.
 
 ## Cross-references
 

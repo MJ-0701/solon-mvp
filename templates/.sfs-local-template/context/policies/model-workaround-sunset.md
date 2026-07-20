@@ -73,6 +73,25 @@ model head-to-head against its incumbent on domain evals and widens the bench
 each release (Claude blog, 2026-07-13); vendor, product, and performance
 figures held out.
 
+## MODEL_UPGRADE_SETUP_AUDIT
+
+SUNSET_REVIEW_ON_MODEL_CHANGE re-judges rules that carry a `model-workaround:`
+tag — but untagged standing instructions absorb old-model corrections too.
+Skills, lessons, operator-context notes, and memory-grade docs written while
+driving one model quietly encode that model's failure modes as standing
+guidance, and those corrections constrain the next model the same way a tagged
+workaround does. On a model swap, run one **read-only setup audit delegated to
+the new model itself**: hand it the standing-instruction surfaces (skills /
+`.sfs-local/lessons.md` / operator-context / memory docs) and ask which
+instructions read like corrections for an older model. Output is a candidate
+list — retire / generalize / keep, with the reason — consumed at the `tidy`
+rail; suggest-only, nothing is edited by the audit pass itself. The new model
+is the best detector of scaffolding it no longer needs (the same delegation
+STOP_DOING_REVIEW makes for capability scaffolds). Boundary design stays
+operator-owned either way: what the audit retires is old-model *coaching*,
+never the operator's permission boundaries
+(`harness-autonomy.md` BOUNDS_OUTLIVE_MODEL_LIMITS).
+
 ## STOP_DOING_REVIEW
 
 Sunset review asks "is this workaround still needed?" Its complement at every

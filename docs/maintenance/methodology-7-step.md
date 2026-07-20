@@ -61,6 +61,15 @@ vendor/성과 수치 보류). 모델 교체 판단은 같은 도메인 eval head
 한다 — SSoT 는 `policies/model-workaround-sunset.md`
 MODEL_HEAD_TO_HEAD_ON_UPGRADE (여기서 재나열하지 않는다 — 포인터만).
 
+대규모 배치/마이그레이션급 작업의 루프 규율 4개 — 반복 적발은 룰 상류 수정 +
+배치 재생성(FIX_THE_LOOP_NOT_THE_CODE), 판정자는 음성 대조 선검증
+(JUDGE_NEGATIVE_CONTROL), done = 디스크 산출물(DONE_IS_ARTIFACT_ON_DISK),
+비싼 연산 단일 직렬화(SERIALIZE_EXPENSIVE_OPS) — 의 SSoT 는 routed context
+`policies/harness-autonomy.md` / `sub-agent-capsule-contract.md` /
+`token-harness.md` (여기서 재나열하지 않는다 — 포인터만). 불확실성 높은
+slice 는 본 시도 전 read-only 정찰(RECON_RUN_BEFORE_COMMIT,
+`policies/unknowns-and-deviations.md`)로 사실을 모아 plan 에 반영한다.
+
 또 **map-first**: 구현 착수 전 작업 전체를 먼저 매핑(PRD + 티켓 분해)한 뒤 독립
 워크플로로 병렬화한다 — 첫 코드 전에 하루 분량의 계획이 나머지를 즉흥 아닌 실행으로
 바꾼다. 외부 검증(by-reference): Claude 블로그 build-day 해커톤 글(2026-06-17)

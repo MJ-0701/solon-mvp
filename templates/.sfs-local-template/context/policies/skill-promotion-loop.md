@@ -141,7 +141,7 @@ the product code; generalized principle adopted, hackathon/name/model-version
 specifics held out.
 
 Hold out a small scenario set the edit was **not** tuned on (keep it in `evals/`,
-never read while editing), then score the skill before vs after on that set in
+never read while editing — the fixture axis includes wrong-premise cases, `evals/README.md` WRONG_PREMISE_EVAL_FIXTURE), then score the skill before vs after on that set in
 two stages, cheap first:
 
 1. **Stage 1 — cheap keyword / deterministic check (free, runs always).**
@@ -185,7 +185,7 @@ This runs on the existing `tidy` rail — no new lifecycle command (the kernel
 absorbs disciplines as policies/lenses, not commands). At `tidy`/retro time, run
 `sfs harness doctor`, read the candidates, and for a worthwhile one compile a
 skill/command the normal way: give it a trigger-centric `load_when`, an `_INDEX`
-route, and the workflow+guard shape from `skill-catalog-discipline.md`. Record
+route, and the workflow+guard shape from `skill-catalog-discipline.md`; its quality bar may be given as a before/after artifact-pair pointer instead of rule prose (REFERENCE_PAIR_STANDARD_INFERENCE — the model infers the standard from one representative pair, e.g. draft→final; pointers, never pasted payloads, `source-pointer-citation.md`; pair slots live in `operator-context.md`). Record
 the decision (promoted, or deferred with reason) so a candidate is not re-surfaced
 without context.
 

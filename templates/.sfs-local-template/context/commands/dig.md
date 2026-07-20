@@ -80,7 +80,11 @@ confidence: 0|1|2          # 필수 — 이 스케일 밖이면 REJECT
 
 fact card 의 `file:line` 근거 포인터는 이후 sprint plan 의 `references` 필드
 (`policies/unknowns-and-deviations.md` REFERENCES_FIELD) 에 그대로 넣을 수 있는
-기성 항목이다 — 발굴된 영토가 다음 계약의 지도가 된다.
+기성 항목이다 — 발굴된 영토가 다음 계약의 지도가 된다. 같은 표면이
+SOLVED_ELSEWHERE_FIRST(`policies/lessons-accumulation.md`) 의 1차 탐색면이다:
+막힌 문제는 저장소 어딘가에서 이미 풀렸다는 가설로 scan/graph/card 를 먼저
+뒤진다. 불확실성 높은 slice 의 사전 정찰(RECON_RUN_BEFORE_COMMIT,
+`policies/unknowns-and-deviations.md`)도 같은 read-only 표면을 쓴다.
 
 ## L3 합성 규칙
 

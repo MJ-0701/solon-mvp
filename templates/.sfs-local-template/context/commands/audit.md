@@ -6,6 +6,11 @@ load_when: ["audit", "보안감사", "security scan", "취약점", "OWASP", "모
 
 # Audit (Static Security Audit)
 
+새 커넥터/MCP/외부 도구를 워크플로에 붙이기 *전*의 결정 렌즈는 별도로
+`policies/credential-hygiene.md` FOUR_QUESTION_RISK_PREFLIGHT (untrusted
+ingest / 액션·신원 / blast radius / 관측성) — audit 은 이미 있는 코드 표면을
+사후 스캔하고, preflight 는 연결 전에 리스크를 legible 하게 만든다.
+
 운영자 **자기 저장소**의 보안 취약점 표면을 코드에서 정적으로 뽑는다. 방향은
 dig 와 같은 아래→위(코드→발견→OWASP 계열 매핑)이고, 스캔·severity·redaction·
 재스캔 diff 는 LLM 0토큰 결정론이다. 대상 소스는 **read-only** — audit 은 대상

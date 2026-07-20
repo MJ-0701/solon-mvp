@@ -15,6 +15,8 @@ load_when:
   - 레퍼런스 코드
   - prototype
   - 시안
+  - recon
+  - 정찰
 ---
 
 # Unknowns & Deviations Loop
@@ -62,6 +64,20 @@ The fork is an optional pre-spec step on the existing Gate 2 rail — no new
 lifecycle command, signal-only; once a variant is chosen, the spec freezes
 through the normal interview + plan path below.
 
+## RECON_RUN_BEFORE_COMMIT (collect telemetry before the real attempt)
+
+For a high-uncertainty slice, a cheap **read-only recon pass** before the main
+attempt beats a brave first try: explore the territory (`sfs dig` surfaces,
+targeted reads, a dry-run) to collect facts, then fold them into the plan the
+real attempt executes. Recon output lands in existing plan sections
+(assumptions, risks, `references`) — no new artifact, no new command. This is
+the single-variant sibling of PROTOTYPE_FORK above: fork when *direction* is
+unknown, recon when direction is known but the *territory* is (external
+validation, by-reference: a frontier eval-design case, Claude blog
+2026-07-17 — a strong agent flew a reconnaissance orbit to gather telemetry
+before committing to the landing plan; vendor, bench, and score specifics
+held out).
+
 ## BLIND_SPOT_PASS (ask the agent what you did not say)
 
 Before the Gate 3 contract freezes, spend one prompt asking the agent to name
@@ -73,6 +89,15 @@ pass. It matters most for non-technical operators, whose unknown-unknowns
 quadrant is the largest; the pass converts them into known-unknowns while
 they are still cheap. Findings fold into plan AC/risks, same as a matching
 lesson (`lessons-accumulation.md` consult obligation).
+
+EVAL_SURFACE_BLIND_SPOT: the pass's checklist includes the **eval/test
+surface itself** — what can the acceptance criteria and existing tests *not*
+see (a cost axis, a cache hit, a latency cliff)? When the agent discovers
+mid-work an axis the AC is blind to, it surfaces that as a finding rather
+than silently optimizing an unmeasured dimension — the verifier blind spot's
+self-report path (external validation, by-reference: a frontier
+platform-engineering case, Claude blog 2026-07-15; vendor and figures held
+out).
 
 The pass output is a concrete `blind_spots` list in the kickoff artifact
 (brainstorm workbench): decisions the operator never mentioned but the work

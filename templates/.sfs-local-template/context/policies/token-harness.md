@@ -112,7 +112,9 @@ question on a failed slice: **"did it fail because it didn't know (capability
   failures are missing context, not missing capability (the map-vs-territory
   gap, `unknowns-and-deviations.md`); (2) raise effort/thoroughness; (3) only
   then raise the model tier. Inverting the order buys cost without fixing the
-  cause.
+  cause. One uncertainty shortcut: when you cannot even *name where the fix
+  lives* (route-unknown, not just detail-unknown), that is a capability gap —
+  take the strong tier for the recon pass, then downshift for execution.
 - **Downshift discipline (the mirror):** routine, judgment-free stretches
   route to a smaller tier and default effort — sustained success on a task
   class is the downshift signal, consumed by the existing capsule/worker
@@ -123,6 +125,19 @@ question on a failed slice: **"did it fail because it didn't know (capability
 External validation (by-reference): a Claude blog post on choosing model and
 effort level (2026-07-07); vendor model names and effort-UI specifics held
 out.
+
+## SERIALIZE_EXPENSIVE_OPS
+
+In any fan-out (parallel capsules, worker fleets, batch fixes), the **most
+expensive operations — full build, full test suite, whole-repo verification —
+run at a single serialization point**, never per-worker. Workers write patches
+and small local checks only; a single runner (one daemon, one lead pass, one
+scheduled batch) collects the accumulated patches, runs the expensive
+operation once, and distributes results back. N workers each triggering a full
+build multiplies the costliest step by N for no added signal. External
+validation (by-reference): a Claude blog large-scale migration writeup
+(2026-07-16) — fixers wrote patches while a single build daemon batched and
+rebuilt; vendor and scale figures held out.
 
 ## CACHE_AWARE_PROMPT_LAYOUT
 

@@ -60,6 +60,11 @@ Append one entry per lesson, newest first under `## Lessons`:
   `rule` into AC, design, or non-goals before writing code.
 - On `flowcheck`, the command surfaces the ledger count and the record
   obligation as an advisory line (never changes the verdict or exit code).
+- SOLVED_ELSEWHERE_FIRST: when stuck mid-slice, the first hypothesis is that
+  the same problem is **already solved somewhere** — search the ledger and the
+  repo (`sfs dig` scan/graph/card surfaces, by-reference) before another naive
+  retry. Repeated naive retries without a search pass are a drift signal, not
+  persistence.
 
 ## Append obligation (failure → lesson)
 
@@ -92,6 +97,9 @@ repeated finding becomes an automated check:
 - record (lesson) → reflect (tool) is one loop, not two systems. The lesson
   preserves the rationale; the tool enforces it. Neither is deleted once
   promoted.
+- When the repeat spans a **generated batch**, the reflection goes upstream:
+  fix the producing rule and regenerate the batch, never hand-patch artifacts
+  against the rule (`harness-autonomy.md` FIX_THE_LOOP_NOT_THE_CODE).
 
 ## CURATION_PASS (periodic, read-only)
 

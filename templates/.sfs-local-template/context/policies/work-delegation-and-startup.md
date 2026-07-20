@@ -146,6 +146,11 @@ already run this way):
 3. **Credentials by indirection only.** The job's prompt/skill file is a
    durable agent-visible surface; real keys arrive via environment at spawn
    (`policies/credential-hygiene.md`).
+4. **Periodic schedule audit.** Scheduled jobs consume budget whether or not
+   their output is still read: periodically list every scheduled task and ask
+   what consumed its recent fires. A job whose recent fires produced no
+   consumed value is a retirement candidate — surface it for the archive
+   control above (suggest-only; retiring stays an operator decision).
 
 ## CROSS_REFERENCES
 

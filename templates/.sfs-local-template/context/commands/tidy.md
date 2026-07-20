@@ -53,6 +53,9 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
   after a model swap/upgrade, surface rules tagged `model-workaround:` whose
   model no longer matches the active model as sunset-review candidates
   (keep / retire / generalize). Suggest-only, same rail as skill candidates.
+  The same rail consumes the MODEL_UPGRADE_SETUP_AUDIT candidate list — the
+  read-only pass where the new model audits untagged standing instructions
+  (skills/lessons/operator-context) for old-model corrections.
 - Apply `policies/deprecation-and-migration.md`: every visible leftover needs a
   replacement/handoff reason, cold archive path, or explicit user decision.
   Advisory cleanup may wait; compulsory cleanup needs risk such as stale state,

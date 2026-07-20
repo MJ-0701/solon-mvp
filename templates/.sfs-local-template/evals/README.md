@@ -51,6 +51,18 @@ Stage 2 (cost-gated LLM judge) 는 stage 1 통과 후 non-trivial 변경에만 �
 tidy 레일에서 grader-style 로 수행하고, 엔진은 배포에 추가하지 않습니다
 (by-reference: skill-creator eval harness 패턴).
 
+## WRONG_PREMISE_EVAL_FIXTURE (fixture 유형 축)
+
+케이스 세트에 **"underspecified 프롬프트 + 일부러 틀린 전제"** 유형을
+포함합니다 — 스택트레이스에 "fix" 한 단어, 또는 엉뚱한 모듈을 범인으로
+지목한 지시. 판정 대상은 정답 산출이 아니라 **잘못된 전제를 반박하고 root
+cause 로 갔는가** — `Must contain` 에 반박/재진술 앵커를, `Must NOT contain`
+에 틀린 전제를 그대로 따른 흔적을 둡니다. restate-and-clarify
+(`policies/work-delegation-and-startup.md`) / unknown-knowns flush
+(`policies/unknowns-and-deviations.md`) 의 eval 짝입니다. 또한 judge 자체는
+음성 대조를 통과해야 합니다 — 일부러 깨뜨린 fixture 에서 fail 이 나는지 1회
+확인 (`policies/harness-autonomy.md` JUDGE_NEGATIVE_CONTROL).
+
 ## 위치
 
 - 케이스 파일: 이 디렉토리 (`.sfs-local/evals/*.md`) 또는 프로젝트가 정한
