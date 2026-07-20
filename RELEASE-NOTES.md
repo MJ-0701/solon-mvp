@@ -13,6 +13,24 @@
 
 ---
 
+## 0.12.1
+
+문서가 최근 세 릴리스를 따라잡습니다 — Unknowns 루프 사용자 가이드 신설 + 기능 총람(ko/en) 갱신.
+
+체감 변화:
+
+- **Unknowns 루프 사용자 가이드** 신설 (`docs/{ko,en}/current-product-shape/30-unknowns-loop.md`) —
+  0.11.0~0.12.0 에 걸쳐 출하된 루프 전체(시안 fork·정찰·blind_spots·인터뷰·
+  references·deviation ledger·solved-elsewhere·eval 사각지대·이해 퀴즈)를
+  스프린트 타임라인 순 표 하나로, healthcheck/doctor 런타임 신호와 함께
+  안내합니다.
+- **기능 총람(29) 갱신** — unknowns 루프, 런타임 신호, held-out evals
+  scaffold, 모델 교체 규율, 대규모 배치 루프 규율, capsule 확장(verb 스코핑·
+  디스크 done·충돌 스캔), 4질문 리스크 프리플라이트 안전 계약 항목이 ko/en
+  모두 추가됐습니다.
+
+---
+
 ## 0.12.0
 
 블로그 5건 인사이트 배치 — 루프 규율·리스크 프리플라이트·모델 교체 감사·eval 설계가 한 번에 강화됩니다. 전부 additive, suggest-only.
