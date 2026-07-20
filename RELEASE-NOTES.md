@@ -13,6 +13,25 @@
 
 ---
 
+## 0.11.1
+
+0.11.0 의 unknowns-loop 정책 계약이 런타임 신호와 실행 발판을 얻습니다. 전부 advisory — exit code 를 바꾸지 않습니다.
+
+체감 변화:
+
+- **`sfs healthcheck`** — 완료 주장(review/report 존재) 상태에서 `## Deviations`
+  ledger 가 미명시면 `deviation-ledger` WARN, 구현이 시작됐는데 인터뷰/
+  blind_spots/references readiness 항목이 unchecked 면 `plan-readiness` WARN.
+- **held-out evals scaffold** — `.sfs-local/evals/README.md` 가 설치되어
+  eval-first·held-out·표면 확장·model head-to-head 규율과 stage-1 grep-assert
+  케이스 형식을 안내합니다. `sfs harness doctor` 가 "Held-Out Evals" 섹션에서
+  케이스 파일 수를 보여줍니다 (내용은 읽지 않음).
+- **dig → plan 브리지** — `sfs dig` fact card 의 `file:line` 근거 포인터를 plan
+  `references` 필드에 그대로 쓸 수 있음이 명문화됐습니다.
+- plan 템플릿에 `status: draft` frontmatter 가 추가됐습니다 (다른 템플릿과 동일).
+
+---
+
 ## 0.11.0
 
 강의·블로그 인사이트 배치: 지도(계획)와 영토(코드베이스)의 간극을 다루는 루프가 스프린트 전 구간으로 확장됐습니다. 전부 additive, signal-only 입니다.
