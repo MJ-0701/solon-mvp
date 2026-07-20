@@ -323,6 +323,65 @@ check_excavation_conformance() {
   return 0
 }
 
+# unknowns 루프 정합 — advisory only (policies/unknowns-and-deviations.md).
+# (a) deviation-ledger: review/report 가 존재(완료 주장)하는데 implement.md 의
+#     `## Deviations` 가 없거나 비어 있으면 (entries 도 `none observed` 도 없음)
+#     advisory. (b) plan-readiness: 구현이 시작됐는데 plan.md 의 unknowns-loop
+#     readiness 체크 항목이 unchecked 로 남아 있으면 advisory. 둘 다 say_warn
+#     only — 이슈로 세지 않고 exit 코드도 바꾸지 않는다 (signal-only).
+# ledger 가 "명시" 되었는가 — `## Deviations` 섹션 안에 (a) 독립 `none observed`
+# 라인 (guidance 문장 속 인용은 제외 — 라인 전체가 sentinel 일 때만) 또는
+# (b) 비어 있지 않은 테이블 데이터 행이 있으면 stated.
+deviation_ledger_stated() {
+  local file="$1"
+  awk '
+    /^## Deviations/ { in_sec=1; next }
+    in_sec && /^## /  { in_sec=0 }
+    in_sec {
+      line=$0
+      tmp=line
+      gsub(/[-*`[:space:]]/, "", tmp)
+      if (tmp == "noneobserved") { found=1 }
+      if (line ~ /^\|/) {
+        if (line ~ /^\|[[:space:]]*-/) next          # separator row
+        else if (index(line, "계획") > 0) next        # header row
+        else {
+          gsub(/[|[:space:]]/, "", line)
+          if (length(line) > 0) { found=1 }
+        }
+      }
+    }
+    END { exit(found ? 0 : 1) }
+  ' "${file}" 2>/dev/null
+}
+
+check_unknowns_conformance() {
+  local project="$1" label="$2" local_dir="$3" sid sdir impl plan n=0
+  sid="$(head -n1 "${local_dir}/current-sprint" 2>/dev/null | tr -d '[:space:]')"
+  [[ -n "${sid}" ]] || return 0
+  sdir="${local_dir}/sprints/${sid}"
+  impl="${sdir}/implement.md"
+  plan="${sdir}/plan.md"
+
+  if [[ -f "${impl}" ]] && { [[ -f "${sdir}/review.md" ]] || [[ -f "${sdir}/report.md" ]]; }; then
+    if ! file_contains "${impl}" "## Deviations"; then
+      say_warn "deviation-ledger" "${label}" "review/report exists but implement.md has no '## Deviations' ledger — state entries or 'none observed' (policies/unknowns-and-deviations.md, advisory)"
+    elif ! deviation_ledger_stated "${impl}"; then
+      say_warn "deviation-ledger" "${label}" "completion claimed but the '## Deviations' ledger is unstated — add entries or 'none observed' (policies/unknowns-and-deviations.md, advisory)"
+    fi
+  fi
+
+  if [[ -f "${impl}" && -f "${plan}" ]]; then
+    file_contains "${plan}" "- [ ] 인터뷰 열린 질문" && n=$((n + 1))
+    file_contains "${plan}" "- [ ] blind_spots 항목" && n=$((n + 1))
+    file_contains "${plan}" "- [ ] references 가 있으면" && n=$((n + 1))
+    if [[ "${n}" -gt 0 ]]; then
+      say_warn "plan-readiness" "${label}" "${n} unknowns-loop readiness item(s) unchecked in plan.md while implementation already started (interview/blind_spots/references, advisory)"
+    fi
+  fi
+  return 0
+}
+
 # security audit 정합 — advisory only: open critical finding 수를 알리되 이슈로
 # 세지 않고 exit 코드도 바꾸지 않는다 (signal-only).
 check_audit_conformance() {
@@ -361,6 +420,7 @@ check_project() {
   check_version_drift "${project}" "${local_dir}"
   check_status_parse "${project}" "${local_dir}"
   check_evidence_at_risk "${project}" "${local_dir}"
+  check_unknowns_conformance "${project}" "${label}" "${local_dir}"
   check_divisions_parse "${project}" "${local_dir}"
 }
 

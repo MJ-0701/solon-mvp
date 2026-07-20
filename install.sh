@@ -947,6 +947,14 @@ if [ "$INSTALL_LAYOUT" = "vendored" ]; then
     ok "  sprint-templates/ 복사 (brainstorm + plan + implement + log + review + retro + report + decision-light)"
   fi
 
+  # evals/ — held-out 채점 세트 scaffold (README 만; 케이스는 사용자 소유)
+  EVALS_SRC="$SOURCE_DIR/templates/.sfs-local-template/evals"
+  if [ -d "$EVALS_SRC" ]; then
+    mkdir -p "$TARGET/.sfs-local/evals"
+    cp "$EVALS_SRC/README.md" "$TARGET/.sfs-local/evals/README.md" 2>/dev/null || true
+    ok "  evals/ scaffold 복사 (held-out 채점 세트 입구, README only)"
+  fi
+
   # personas/ — CEO / CTO Generator / Implementation Worker / CPO Evaluator 기본 persona
   PERSONAS_SRC="$SOURCE_DIR/templates/.sfs-local-template/personas"
   if [ -d "$PERSONAS_SRC" ]; then

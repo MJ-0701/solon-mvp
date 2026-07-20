@@ -430,6 +430,29 @@ print_skill_promote_section() {
   fi
 }
 
+# 0.11.1: Held-out evals presence — info/ok only (signal-only, never warn/fail).
+# Points the operator at the fixed-before-change scoring discipline
+# (skill-promotion-loop HELD_OUT_SCORING / model-workaround-sunset
+# MODEL_HEAD_TO_HEAD_ON_UPGRADE). Counts case files, never reads their bodies
+# (held-out sets are not consumed by tooling).
+print_evals_section() {
+  section "Held-Out Evals"
+  local dir count=0 found=0
+  for dir in .sfs-local/evals evals; do
+    [ -d "$dir" ] || continue
+    found=1
+    count="$(find "$dir" -maxdepth 1 -type f -name '*.md' ! -name 'README.md' 2>/dev/null | wc -l | tr -d '[:space:]')"
+    if [ "${count:-0}" -gt 0 ]; then
+      ok "evals: ${count} held-out case file(s) under ${dir}/ (fixed-before-change, not read while editing)"
+    else
+      info "evals: ${dir}/ present but no case files yet — see .sfs-local/evals/README.md for the stage-1 grep-assert shape (advisory)"
+    fi
+  done
+  if [ "$found" -eq 0 ]; then
+    info "evals: no held-out eval scaffold — skill/model changes score on vibes; sfs upgrade installs .sfs-local/evals/README.md (advisory, never blocks)"
+  fi
+}
+
 # 0.8.61 (DESIGN-2026-07-03 P3): AI-readiness (Sanity) audit.
 #
 # Signal-only (ALT-INV-3): info/ok lines only, never warn/fail, so scores can
@@ -918,6 +941,8 @@ print_doctor() {
   print_context_conflict_section
 
   print_skill_promote_section
+
+  print_evals_section
 
   print_readiness_section
 

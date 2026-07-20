@@ -2071,7 +2071,7 @@ recommend_action() {
         fi
         return 0
         ;;
-      ".sfs-local/GUIDE.md"|.sfs-local/scripts/*|.sfs-local/sprint-templates/*|.sfs-local/personas/*|.sfs-local/decisions-template/*)
+      ".sfs-local/GUIDE.md"|.sfs-local/scripts/*|.sfs-local/sprint-templates/*|.sfs-local/personas/*|.sfs-local/decisions-template/*|".sfs-local/evals/README.md")
         printf "skip (thin runtime)"
         return 0
         ;;
@@ -2112,8 +2112,9 @@ recommend_action() {
       # Solon-versioned runtime code, user 수정 영역 아님
       printf "backup+overwrite"
       ;;
-    .sfs-local/sprint-templates/*.md|.sfs-local/decisions-template/*.md|.sfs-local/personas/*.md)
+    .sfs-local/sprint-templates/*.md|.sfs-local/decisions-template/*.md|.sfs-local/personas/*.md|".sfs-local/evals/README.md")
       # 배포판 관리 템플릿, user 수정 영역 아님 (install.sh 정책 정합)
+      # evals/ 는 README(scaffold 입구)만 관리 — 케이스 파일은 사용자 소유라 목록에 없음
       printf "backup+overwrite"
       ;;
     *)
@@ -2183,6 +2184,8 @@ declare -a CHECK_FILES=(
   # decisions-template/ — sfs-decision.sh 가 ADR 신설 시 사용 (WU-26)
   ".sfs-local/decisions-template/ADR-TEMPLATE.md|templates/.sfs-local-template/decisions-template/ADR-TEMPLATE.md"
   ".sfs-local/decisions-template/_INDEX.md|templates/.sfs-local-template/decisions-template/_INDEX.md"
+  # evals/ — held-out 채점 세트 scaffold (README 만 관리, 케이스는 사용자 소유)
+  ".sfs-local/evals/README.md|templates/.sfs-local-template/evals/README.md"
   # 0.5.0-mvp 신규: multi-adaptor parity (Gemini CLI command + Codex Skill)
   ".gemini/commands/sfs.toml|templates/.gemini/commands/sfs.toml"
   ".agents/skills/sfs/SKILL.md|templates/.agents/skills/sfs/SKILL.md"

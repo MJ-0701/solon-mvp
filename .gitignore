@@ -31,3 +31,10 @@ venv/
 !templates/.claude/commands/**
 !templates/.claude/hooks/
 !templates/.claude/hooks/**
+
+# Local release-state phase markers (verify-product-release reads them locally)
+.sfs-local/release-state/
+
+# FUSE leftovers from externally-mounted editors
+.fuse_hidden*
+**/.fuse_hidden*

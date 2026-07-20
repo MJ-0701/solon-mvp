@@ -78,6 +78,10 @@ confidence: 0|1|2          # 필수 — 이 스케일 밖이면 REJECT
 
 전부 signal-only — 상태가 어떤 명령도 막지 않는다.
 
+fact card 의 `file:line` 근거 포인터는 이후 sprint plan 의 `references` 필드
+(`policies/unknowns-and-deviations.md` REFERENCES_FIELD) 에 그대로 넣을 수 있는
+기성 항목이다 — 발굴된 영토가 다음 계약의 지도가 된다.
+
 ## L3 합성 규칙
 
 카드가 쌓이면 클러스터링해 두 산출물을 작성한다:

@@ -1,5 +1,6 @@
 ---
 phase: plan
+status: draft
 gate_number: 3
 gate_label: "Gate 3 (Plan)"
 gate_id: G1
