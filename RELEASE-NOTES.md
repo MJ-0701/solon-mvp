@@ -13,6 +13,34 @@
 
 ---
 
+## 0.12.0
+
+블로그 5건 인사이트 배치 — 루프 규율·리스크 프리플라이트·모델 교체 감사·eval 설계가 한 번에 강화됩니다. 전부 additive, suggest-only.
+
+체감 변화:
+
+- **모델 교체 시** — 태그된 workaround 만이 아니라 태그 없는 standing 지시
+  (skills/lessons/operator-context)도 새 모델 자신이 read-only 로 감사해
+  retire/generalize/keep 후보를 tidy 레일에 올립니다
+  (MODEL_UPGRADE_SETUP_AUDIT). 스케줄 태스크도 주기 감사 대상 — 아무도 안
+  읽는 fire 는 은퇴 후보.
+- **대규모 배치/마이그레이션** — 반복 적발은 룰 상류 수정 + 배치 재생성
+  (hand-patch 금지), 판정자는 일부러 깨뜨린 fixture 로 fail 방향 선검증,
+  done = 디스크 산출물(재개 by-construction), 전체 빌드/테스트는 단일 지점
+  직렬화.
+- **새 커넥터/MCP 연결 전** — 4질문 리스크 프리플라이트(untrusted ingest /
+  액션·신원 / blast radius / 관측성). untrusted ingest 가 0 이면 빠르게.
+  capsule 도구는 verb 단위 최소화 — 비가역 verb 는 목록 제거 =
+  by-construction 차단. 경계는 오늘 모델 한계가 아니라 운영자 허용 기준.
+- **eval 설계** — "일부러 틀린 전제" fixture 유형(반박 여부를 판정),
+  불확실 slice 는 본 시도 전 read-only 정찰, 막히면 "이 저장소 어딘가에서
+  이미 풀렸다"를 1차 가설로(`sfs dig` 표면), AC 가 못 보는 축은 blind-spot
+  finding 으로 surface.
+- **기준은 예시 쌍으로** — 규칙 나열 대신 초안→최종본 같은 before/after
+  포인터 한 쌍으로 기준을 줄 수 있습니다 (operator-context 슬롯).
+
+---
+
 ## 0.11.1
 
 0.11.0 의 unknowns-loop 정책 계약이 런타임 신호와 실행 발판을 얻습니다. 전부 advisory — exit code 를 바꾸지 않습니다.
