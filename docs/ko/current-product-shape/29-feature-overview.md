@@ -4,7 +4,7 @@ title: "기능 총람 (Feature Overview)"
 visibility: oss-public
 doc_type: product-reference
 language: ko
-updated: 2026-07-03
+updated: 2026-07-20
 parent: docs/ko/current-product-shape.md
 summary: "Solon/SFS 전체 기능을 축별 한 장으로 정리한 총람 — 명령 표면과 상세 문서 라우팅."
 load_when: "Read when you need the whole feature surface at a glance, before routing into a detailed section."
@@ -27,6 +27,8 @@ Solon(SFS)의 전체 기능을 한 장으로 봅니다. 각 행은 상세 문서
 | 산출물 수용 리뷰 (Gate 6) | `sfs review [--lens ...]` | [review](./10-review-artifact-acceptance-review.md), [렌즈](./14-review-lens.md) |
 | 회고/종결 (Gate 7) | `sfs retro [--draft]` | [retro](./15-retro-sprint-close.md) |
 | 흐름 정합 점검 | `sfs flowcheck` / `sfs healthcheck` | routed context `commands/flowcheck.md` |
+| unknowns 루프 (정찰·시안 fork·인터뷰 게이트·blind_spots·references·deviation ledger·이해 퀴즈) | plan/implement/review 레일 + 스프린트 템플릿 섹션 (signal-only) | [Unknowns 루프](./30-unknowns-loop.md) |
+| unknowns 런타임 신호 (deviation-ledger / plan-readiness advisory) | `sfs healthcheck` WARN (exit 불변) | [Unknowns 루프](./30-unknowns-loop.md) |
 
 ### 2. Evidence·기록 프리미티브
 
@@ -51,6 +53,8 @@ Solon(SFS)의 전체 기능을 한 장으로 봅니다. 각 행은 상세 문서
 | 시간/비용 대시보드 | `sfs measure [--json]` / `measure --alive` | `bin/sfs` usage |
 | 무문서 코드베이스 역추적 (L0 스캔·ERD·L1 그래프·fact card·확증 상태) | `sfs dig scan|graph|capsule|card|status` | routed context `commands/dig.md` |
 | 정적 보안 감사 (OWASP 계열, secret redact, 방어 범위) | `sfs audit scan|report|status` | routed context `commands/audit.md` |
+| held-out evals scaffold (eval-first·wrong-premise fixture 축) | `.sfs-local/evals/README.md` + doctor "Held-Out Evals" 섹션 (케이스 수만, 내용 미열람) | [Unknowns 루프](./30-unknowns-loop.md) |
+| 모델 교체 규율 (head-to-head 벤치 + 새 모델의 셋업 감사) | 정책 `model-workaround-sunset.md` (MODEL_HEAD_TO_HEAD_ON_UPGRADE / MODEL_UPGRADE_SETUP_AUDIT, tidy 레일) | routed context `policies/model-workaround-sunset.md` |
 
 Sanity→Cartography 순서 규율과 모든 지표의 signal-only(차단 없음) 계약이
 함께 적용됩니다.
@@ -62,7 +66,8 @@ Sanity→Cartography 순서 규율과 모든 지표의 signal-only(차단 없음
 | routed context 조회 | `sfs context path\|cat\|list` | [토큰 다이어트](./03-token-diet-compact-i-o.md) |
 | 얇은 어댑터 유지 | `sfs agent doctor --fix` / `sfs doctor --fix` | [토큰·하네스 위생](./17-token-harness-hygiene.md) |
 | 캐시 프리픽스 규율 | 정책 `policies/token-harness.md` (세션 고정 prefix, 새 세션 재시작) | 같은 문서 |
-| 워커 위임 캡슐 | 정책 `sub-agent-capsule-contract.md` (goal/AC/scope/budget + optional exemplar) | [위임 레퍼토리](./26-delegation-repertoire.md) |
+| 워커 위임 캡슐 | 정책 `sub-agent-capsule-contract.md` (goal/AC/scope/budget + optional exemplar; verb 단위 least-agency, done=디스크 산출물, 공유표면 충돌 스캔) | [위임 레퍼토리](./26-delegation-repertoire.md) |
+| 대규모 배치 루프 규율 (룰 상류 수정·judge 음성대조·비싼 연산 직렬화) | 정책 `harness-autonomy.md` / `token-harness.md` (FIX_THE_LOOP / JUDGE_NEGATIVE_CONTROL / SERIALIZE_EXPENSIVE_OPS) | routed context `policies/harness-autonomy.md` |
 
 ### 5. 팀·오케스트레이션
 
@@ -106,6 +111,12 @@ Sanity→Cartography 순서 규율과 모든 지표의 signal-only(차단 없음
 
 - 게이트·지표·advisory 는 **전부 signal-only** — 어떤 판정도 명령을 차단하지
   않습니다 (차단 가능한 것은 상태 전이 순서 설계뿐, 그것도 waiver 로 전이).
+- 새 커넥터/MCP/외부 도구 연결 전 **4질문 리스크 프리플라이트** (untrusted
+  ingest / 액션·신원 / blast radius / 관측성 — suggest-only, `policies/credential-hygiene.md`);
+  capsule 도구는 verb 단위 최소화 — 비가역 verb 는 목록 제거 = by-construction 차단.
+- 경계는 오늘 모델 한계가 아니라 **운영자 허용 기준**으로 설계 —
+  모델 업그레이드 후 경계 안 emergent 행동은 관측성이 잡습니다
+  (`policies/harness-autonomy.md` BOUNDS_OUTLIVE_MODEL_LIMITS).
 - 쓰기 작업은 consent-gated: `--yes`/`--apply`/dry-run 프리뷰가 기본.
 - 외부 오케스트레이터·지식 그래프·위키는 opt-in — 제거해도 전 기능 동일
   동작 (standalone 보증).

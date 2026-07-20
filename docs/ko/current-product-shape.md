@@ -7,36 +7,18 @@ language: ko
 updated: 2026-07-03
 summary: "Thin index for 현재 제품 구조와 운영 흐름"
 load_when: "Start here, then load only the child section needed."
-split_children:
-  - docs/ko/current-product-shape/01-section.md
-  - docs/ko/current-product-shape/02-start.md
-  - docs/ko/current-product-shape/03-token-diet-compact-i-o.md
-  - docs/ko/current-product-shape/04-windows.md
-  - docs/ko/current-product-shape/05-brainstorm-3.md
-  - docs/ko/current-product-shape/06-hard-mode.md
-  - docs/ko/current-product-shape/07-plan-transcript.md
-  - docs/ko/current-product-shape/08-capture-evidence-primitive.md
-  - docs/ko/current-product-shape/09-implement.md
-  - docs/ko/current-product-shape/10-review-artifact-acceptance-review.md
-  - docs/ko/current-product-shape/11-section.md
-  - docs/ko/current-product-shape/12-section.md
-  - docs/ko/current-product-shape/13-design-md-ai.md
-  - docs/ko/current-product-shape/14-review-lens.md
-  - docs/ko/current-product-shape/15-retro-sprint-close.md
-  - docs/ko/current-product-shape/16-section.md
-  - docs/ko/current-product-shape/17-token-harness-hygiene.md
-  - docs/ko/current-product-shape/18-section.md
-  - docs/ko/current-product-shape/19-obsidian-llm-wiki-continuity.md
-  - docs/ko/current-product-shape/20-ai-work-intake-routing.md
-  - docs/ko/current-product-shape/21-domain-knowledge-assets.md
-  - docs/ko/current-product-shape/22-project-harness-map.md
-  - docs/ko/current-product-shape/23-host-channels-and-mcp.md
-  - docs/ko/current-product-shape/24-topdown-learning-guide.md
-  - docs/ko/current-product-shape/25-wiki-onboarding-guide.md
-  - docs/ko/current-product-shape/26-delegation-repertoire.md
-  - docs/ko/current-product-shape/27-human-agent-teams.md
-  - docs/ko/current-product-shape/28-agent-identity-and-compartments.md
-  - docs/ko/current-product-shape/29-feature-overview.md
+split_children: [
+  docs/ko/current-product-shape/01-section.md, docs/ko/current-product-shape/02-start.md, docs/ko/current-product-shape/03-token-diet-compact-i-o.md,
+  docs/ko/current-product-shape/04-windows.md, docs/ko/current-product-shape/05-brainstorm-3.md, docs/ko/current-product-shape/06-hard-mode.md,
+  docs/ko/current-product-shape/07-plan-transcript.md, docs/ko/current-product-shape/08-capture-evidence-primitive.md, docs/ko/current-product-shape/09-implement.md,
+  docs/ko/current-product-shape/10-review-artifact-acceptance-review.md, docs/ko/current-product-shape/11-section.md, docs/ko/current-product-shape/12-section.md,
+  docs/ko/current-product-shape/13-design-md-ai.md, docs/ko/current-product-shape/14-review-lens.md, docs/ko/current-product-shape/15-retro-sprint-close.md,
+  docs/ko/current-product-shape/16-section.md, docs/ko/current-product-shape/17-token-harness-hygiene.md, docs/ko/current-product-shape/18-section.md,
+  docs/ko/current-product-shape/19-obsidian-llm-wiki-continuity.md, docs/ko/current-product-shape/20-ai-work-intake-routing.md, docs/ko/current-product-shape/21-domain-knowledge-assets.md,
+  docs/ko/current-product-shape/22-project-harness-map.md, docs/ko/current-product-shape/23-host-channels-and-mcp.md, docs/ko/current-product-shape/24-topdown-learning-guide.md,
+  docs/ko/current-product-shape/25-wiki-onboarding-guide.md, docs/ko/current-product-shape/26-delegation-repertoire.md, docs/ko/current-product-shape/27-human-agent-teams.md,
+  docs/ko/current-product-shape/28-agent-identity-and-compartments.md, docs/ko/current-product-shape/29-feature-overview.md, docs/ko/current-product-shape/30-unknowns-loop.md
+]
 ---
 # 현재 제품 구조와 운영 흐름
 
@@ -81,3 +63,4 @@ split_children:
 - [인간-에이전트 팀으로 일하기](./current-product-shape/27-human-agent-teams.md)
 - [에이전트 신원과 구획](./current-product-shape/28-agent-identity-and-compartments.md)
 - [기능 총람 (Feature Overview)](./current-product-shape/29-feature-overview.md)
+- [Unknowns 루프 (지도-영토 간극)](./current-product-shape/30-unknowns-loop.md)

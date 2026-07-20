@@ -4,7 +4,7 @@ title: "Feature Overview"
 visibility: oss-public
 doc_type: product-reference
 language: en
-updated: 2026-07-03
+updated: 2026-07-20
 parent: docs/en/current-product-shape.md
 summary: "One-page overview of the whole Solon/SFS feature surface — command surfaces plus routing into the detailed sections."
 load_when: "Read when you need the whole feature surface at a glance, before routing into a detailed section."
@@ -29,6 +29,8 @@ inside each gate.
 | artifact acceptance review (Gate 6) | `sfs review [--lens ...]` | [review](./10-review-is-artifact-acceptance.md), [lenses](./14-divisions-knowledge-packs-review-lenses.md) |
 | retro / close (Gate 7) | `sfs retro [--draft]` | [retro](./15-retro-closes-the-sprint-by-default.md) |
 | flow conformance | `sfs flowcheck` / `sfs healthcheck` | routed context `commands/flowcheck.md` |
+| unknowns loop (recon, prototype fork, interview gate, blind_spots, references, deviation ledger, comprehension quiz) | plan/implement/review rails + sprint template sections (signal-only) | [Unknowns Loop](./30-unknowns-loop.md) |
+| unknowns runtime signals (deviation-ledger / plan-readiness advisories) | `sfs healthcheck` WARN (exit unchanged) | [Unknowns Loop](./30-unknowns-loop.md) |
 
 ### 2. Evidence and record primitives
 
@@ -53,6 +55,8 @@ inside each gate.
 | saved-time / cost dashboard | `sfs measure [--json]` / `measure --alive` | `bin/sfs` usage |
 | undocumented-codebase excavation (L0 scan/ERD, L1 graph, fact cards, confirmation states) | `sfs dig scan|graph|capsule|card|status` | routed context `commands/dig.md` |
 | static security audit (OWASP-family, secret redaction, defensive scope) | `sfs audit scan|report|status` | routed context `commands/audit.md` |
+| held-out evals scaffold (eval-first, wrong-premise fixture axis) | `.sfs-local/evals/README.md` + doctor "Held-Out Evals" section (case count only, bodies never read) | [Unknowns Loop](./30-unknowns-loop.md) |
+| model-swap discipline (head-to-head bench + new-model setup audit) | policy `model-workaround-sunset.md` (MODEL_HEAD_TO_HEAD_ON_UPGRADE / MODEL_UPGRADE_SETUP_AUDIT, tidy rail) | routed context `policies/model-workaround-sunset.md` |
 
 The Sanity-before-Cartography order discipline and the signal-only
 (never-blocking) contract apply across all of these.
@@ -64,7 +68,8 @@ The Sanity-before-Cartography order discipline and the signal-only
 | routed context access | `sfs context path\|cat\|list` | [token diet](./03-token-diet-compact-i-o.md) |
 | thin adapters kept thin | `sfs agent doctor --fix` / `sfs doctor --fix` | [token/harness hygiene](./17-token-harness-hygiene.md) |
 | cache-prefix discipline | policy `policies/token-harness.md` (session-frozen prefix, fresh-session restart) | same doc |
-| worker delegation capsules | policy `sub-agent-capsule-contract.md` (goal/AC/scope/budget + optional exemplar) | [delegation repertoire](./26-delegation-repertoire.md) |
+| worker delegation capsules | policy `sub-agent-capsule-contract.md` (goal/AC/scope/budget + optional exemplar; verb-grain least agency, done = artifact on disk, shared-surface conflict scan) | [delegation repertoire](./26-delegation-repertoire.md) |
+| large-batch loop discipline (rule-upstream fix, judge negative control, expensive-op serialization) | policies `harness-autonomy.md` / `token-harness.md` (FIX_THE_LOOP / JUDGE_NEGATIVE_CONTROL / SERIALIZE_EXPENSIVE_OPS) | routed context `policies/harness-autonomy.md` |
 
 ### 5. Teams and orchestration
 
@@ -109,6 +114,15 @@ The Sanity-before-Cartography order discipline and the signal-only
 - Gates, metrics, and advisories are **all signal-only** — no verdict ever
   blocks a command (only transition *order* may be enforced by design, and
   even that is waiver-transitionable).
+- Before wiring a new connector/MCP/external tool: the **four-question risk
+  preflight** (untrusted ingest / actions+identity / blast radius /
+  observability — suggest-only, `policies/credential-hygiene.md`); capsule
+  tools narrow at the verb grain — irreversible verbs removed from the list
+  are blocked by construction.
+- Boundaries are designed from **what the operator permits**, never today's
+  model limits — emergent in-bounds behavior after an upgrade is
+  observability's job (`policies/harness-autonomy.md`
+  BOUNDS_OUTLIVE_MODEL_LIMITS).
 - Writes are consent-gated: `--yes` / `--apply` / dry-run previews by default.
 - External orchestrators, knowledge graphs, and the wiki are opt-in —
   removing them leaves every feature working (standalone guarantee).

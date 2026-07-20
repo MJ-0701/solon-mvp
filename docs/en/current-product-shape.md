@@ -7,36 +7,18 @@ language: en
 updated: 2026-07-03
 summary: "Thin index for Current Product Shape"
 load_when: "Start here, then load only the child section needed."
-split_children:
-  - docs/en/current-product-shape/01-one-line-summary.md
-  - docs/en/current-product-shape/02-handoff-after-start.md
-  - docs/en/current-product-shape/03-token-diet-compact-i-o.md
-  - docs/en/current-product-shape/04-windows-wrapper-stabilization.md
-  - docs/en/current-product-shape/05-three-brainstorm-depths.md
-  - docs/en/current-product-shape/06-purpose-of-hard-mode.md
-  - docs/en/current-product-shape/07-plan-is-a-contract.md
-  - docs/en/current-product-shape/08-capture-is-an-evidence-primitive.md
-  - docs/en/current-product-shape/09-implement-is-not-only-code.md
-  - docs/en/current-product-shape/10-review-is-artifact-acceptance.md
-  - docs/en/current-product-shape/11-thin-multi-agent-supervision.md
-  - docs/en/current-product-shape/12-model-routing-and-responsibility-boundaries.md
-  - docs/en/current-product-shape/13-design-md-and-anti-ai-slop-guardrails.md
-  - docs/en/current-product-shape/14-divisions-knowledge-packs-review-lenses.md
-  - docs/en/current-product-shape/15-retro-closes-the-sprint-by-default.md
-  - docs/en/current-product-shape/16-documentation-shape.md
-  - docs/en/current-product-shape/17-token-harness-hygiene.md
-  - docs/en/current-product-shape/18-choosing-a-mode.md
-  - docs/en/current-product-shape/19-obsidian-llm-wiki-continuity.md
-  - docs/en/current-product-shape/20-ai-work-intake-routing.md
-  - docs/en/current-product-shape/21-domain-knowledge-assets.md
-  - docs/en/current-product-shape/22-project-harness-map.md
-  - docs/en/current-product-shape/23-host-channels-and-mcp.md
-  - docs/en/current-product-shape/24-topdown-learning-guide.md
-  - docs/en/current-product-shape/25-wiki-onboarding-guide.md
-  - docs/en/current-product-shape/26-delegation-repertoire.md
-  - docs/en/current-product-shape/27-human-agent-teams.md
-  - docs/en/current-product-shape/28-agent-identity-and-compartments.md
-  - docs/en/current-product-shape/29-feature-overview.md
+split_children: [
+  docs/en/current-product-shape/01-one-line-summary.md, docs/en/current-product-shape/02-handoff-after-start.md, docs/en/current-product-shape/03-token-diet-compact-i-o.md,
+  docs/en/current-product-shape/04-windows-wrapper-stabilization.md, docs/en/current-product-shape/05-three-brainstorm-depths.md, docs/en/current-product-shape/06-purpose-of-hard-mode.md,
+  docs/en/current-product-shape/07-plan-is-a-contract.md, docs/en/current-product-shape/08-capture-is-an-evidence-primitive.md, docs/en/current-product-shape/09-implement-is-not-only-code.md,
+  docs/en/current-product-shape/10-review-is-artifact-acceptance.md, docs/en/current-product-shape/11-thin-multi-agent-supervision.md, docs/en/current-product-shape/12-model-routing-and-responsibility-boundaries.md,
+  docs/en/current-product-shape/13-design-md-and-anti-ai-slop-guardrails.md, docs/en/current-product-shape/14-divisions-knowledge-packs-review-lenses.md, docs/en/current-product-shape/15-retro-closes-the-sprint-by-default.md,
+  docs/en/current-product-shape/16-documentation-shape.md, docs/en/current-product-shape/17-token-harness-hygiene.md, docs/en/current-product-shape/18-choosing-a-mode.md,
+  docs/en/current-product-shape/19-obsidian-llm-wiki-continuity.md, docs/en/current-product-shape/20-ai-work-intake-routing.md, docs/en/current-product-shape/21-domain-knowledge-assets.md,
+  docs/en/current-product-shape/22-project-harness-map.md, docs/en/current-product-shape/23-host-channels-and-mcp.md, docs/en/current-product-shape/24-topdown-learning-guide.md,
+  docs/en/current-product-shape/25-wiki-onboarding-guide.md, docs/en/current-product-shape/26-delegation-repertoire.md, docs/en/current-product-shape/27-human-agent-teams.md,
+  docs/en/current-product-shape/28-agent-identity-and-compartments.md, docs/en/current-product-shape/29-feature-overview.md, docs/en/current-product-shape/30-unknowns-loop.md
+]
 ---
 # Current Product Shape
 
@@ -82,3 +64,4 @@ This file keeps the original route as a thin entry point. Detailed body sections
 - [Working As A Human-Agent Team](./current-product-shape/27-human-agent-teams.md)
 - [Agent Identity And Compartments](./current-product-shape/28-agent-identity-and-compartments.md)
 - [Feature Overview](./current-product-shape/29-feature-overview.md)
+- [The Unknowns Loop (map-vs-territory)](./current-product-shape/30-unknowns-loop.md)
