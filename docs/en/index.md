@@ -4,7 +4,7 @@ title: "Solon Product Docs"
 visibility: oss-public
 doc_type: docs-index
 language: en
-updated: 2026-05-23
+updated: 2026-07-24
 summary: "Solon Product Docs entry document"
 load_when: "Read when this product document is directly relevant."
 ---
@@ -14,6 +14,39 @@ load_when: "Read when this product document is directly relevant."
 
 The README is the product overview and table of contents. These pages hold the
 deeper operating model, judgment rules, philosophy, and examples.
+
+## The Problem
+
+Making things with AI is already fast. The bottleneck is flow, not speed.
+
+- Conversations grow long, but **decisions land nowhere**.
+- AI changes a lot, yet **what counts as the pass bar blurs**.
+- The implementer approves their own output and **independent review slides to the back**.
+- Run Claude, Codex, and Gemini together and each agent **behaves as if it sees a different project**.
+- A sprint ends with **no one-page context** for whoever picks it up next.
+
+Solon does not build the app skeleton for you. Frameworks and AI do that; Solon
+owns **product operation** after that point — intent shaping, verifiable
+contracts, independent review, records, handoff — on a thin rail a human can
+follow.
+
+## What Solon Provides
+
+The full table is [Feature Overview](./current-product-shape/29-feature-overview.md).
+In short, six axes:
+
+| Axis | What it does | Representative surface |
+|---|---|---|
+| 7-step work rail | deterministic rails own the flow; LLMs are called only inside gates | `sfs start` / `plan` / `implement` / `review` / `retro` |
+| Evidence & record | pin approvals, decisions, waivers, external evidence as minimal facts | `sfs capture` / `note` / `recall` |
+| Harness engineering | readiness/maturity/cost diagnosis, blueprint, undocumented-codebase excavation, static security audit | `sfs harness doctor` / `dig` / `audit` |
+| Context & token hygiene | routed context, thin adapters, delegation capsule contracts | `sfs context` / `agent doctor` |
+| Teams & orchestration | team presets, six-division council, work routing/loops | `sfs team` / `division` / `route` |
+| Memory & wiki | long-horizon memory, raw intake, promotion pipeline, derived-doc annotation survival | `sfs ingest` / `tidy --wiki-promote` |
+
+You do not need to memorize commands — tell an agent in plain language and it
+maps to these rails (e.g. "배포해줘" → readiness → tests → review → cut → tag →
+channel publish → install verify → report).
 
 ## Start Here
 
