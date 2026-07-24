@@ -1,7 +1,7 @@
 ---
 id: sfs-doc-colocation-provenance
-summary: Keep routed-context changes co-located with their docs in one change; lock routes against broken links; ship reference docs on a fixed skeleton; footer 7-step outputs with a provenance line.
-load_when: ["doc colocation", "colocation", "provenance", "reference doc", "skeleton", "broken link", "route resolves", "doc drift", "stale doc", "freshness"]
+summary: Keep routed-context changes co-located with their docs in one change; lock routes against broken links; ship reference docs on a fixed skeleton; footer 7-step outputs with a provenance line; preserve human notes anchored to a derived doc across regeneration.
+load_when: ["doc colocation", "colocation", "provenance", "reference doc", "skeleton", "broken link", "route resolves", "doc drift", "stale doc", "freshness", "derived doc", "regeneration", "annotation", "correction note"]
 ---
 
 # Doc Colocation and Provenance
@@ -66,8 +66,40 @@ fields (this policy is their SSoT; other docs cross-link, do not restate):
 Keep it one line; it is a trust label, not a section. Apply selectively to
 outputs a reader cannot self-verify, not to every line.
 
+## DERIVED_DOC_ANNOTATION
+
+A doc *derived* from a source-of-truth artifact (code, schema, config,
+migrations — `obsidian-llm-wiki.md` Memory Formation) is regenerated when the
+artifact changes; that is the whole reason to derive it instead of hand-authoring
+one that drifts (COLOCATION_RULE). But derivation only sees what the code
+*expresses*. Operator knowledge the code cannot state — *why* a shape was chosen,
+a *correction* to what the evidence implies, a *constraint* that must hold — is
+anchored to the specific derived item as a typed note, and a re-derivation
+**preserves** those notes rather than overwriting them. Silently clobbering an
+anchored note on regen is drift in the other direction: the map loses tacit
+knowledge the source never carried.
+
+- Anchor a note to the item (a doc / section / entry id), not to a line number
+  the next regen renumbers.
+- Durable note kinds: `why` / `correction` / `constraint` / `context`. A
+  `correction` outranks the derived sentence it corrects; a regen that would
+  contradict it surfaces the conflict as a gap
+  (`unknowns-and-deviations.md` DEVIATIONS_LOG), it does not delete the note.
+- Notes are meaning, not copied source: record the tacit conclusion and its
+  origin pointer (`source-pointer-citation.md`), never paste the artifact body.
+- Promoting a recurring `correction` back into the deriving rule is the lessons
+  loop, not a second mechanism here (`lessons-accumulation.md`).
+
+External exemplar (by-reference, third-party tool — an *exemplar*, not
+authoritative validation): a static-analysis→doc generator pairs derived docs
+with an operator note layer for exactly this why/correction/constraint tacit
+knowledge. The generalizable principle — derivation preserves anchored human
+notes — is promoted; the tool identity and its pipeline specifics are not.
+
 ## CROSS_REFERENCES
 
+- Derived-doc formation + evidence-first inference: `obsidian-llm-wiki.md`
+  Memory Formation / Write-Time Compile.
 - Gotchas accumulation + feedback flywheel: `lessons-accumulation.md`.
 - Skill-catalog audit + `load_when` discipline: `skill-catalog-discipline.md`.
 - Line budget for this file: `md-line-budget.md` (200-line ceiling).

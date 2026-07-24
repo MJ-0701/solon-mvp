@@ -1,5 +1,20 @@
 ## [Unreleased]
 
+## [0.12.2] - 2026-07-24
+
+> **A derived-doc insight sharpens the provenance rail and the product surface catches up. `doc-colocation-provenance` gains DERIVED_DOC_ANNOTATION: a doc *derived* from a source-of-truth artifact (code, schema, config, migrations) is regenerated when the artifact changes, but the human why/correction/constraint notes anchored to a specific item survive re-derivation instead of being clobbered — a `correction` outranks the derived sentence it corrects, and a regen that would contradict it surfaces the conflict as a gap (`unknowns-and-deviations` DEVIATIONS_LOG) rather than deleting the note; a recurring correction is promoted back into the deriving rule via the lessons loop, not a second mechanism. The principle is promoted by-reference from an external static-analysis→docgen exemplar, cited as an exemplar rather than authoritative validation; the tool identity and pipeline specifics are locked out by test. On the product surface, README.md regains an inline problem statement and a six-axis feature-offering table so a reader sees what Solon solves and what it provides without clicking through the split children, and the feature overview (ko/en §6) gains the derived-doc-annotation row. One headline test (`test-annotation-survives-rederive-policy.sh`) locks the anchor, the by-reference cross-links, additive preservation of the existing colocation/skeleton/provenance anchors, the vendor lockout, and the 200-line budget. run-all 247 → 248.**
+
+### Added
+
+- **`doc-colocation-provenance.md` DERIVED_DOC_ANNOTATION** — derived-doc human-annotation survival across regeneration (anchor-to-item not line, `why`/`correction`/`constraint`/`context` kinds, conflict→gap, correction-promotion via the lessons loop, by-reference external exemplar with tool identity held out).
+- **`tests/test-annotation-survives-rederive-policy.sh`** — headline lock (anchor / by-reference cross-links / additive preservation / vendor lockout / 200-line budget).
+
+### Changed
+
+- **`README.md`** — inline `## 해결하는 문제` restatement + `## 제공 기능 (한눈에)` six-axis table routing to the feature overview, so the thin index answers "what problem / what features" without a child hop; `updated: 2026-07-24`.
+- **`docs/{ko,en}/current-product-shape/29-feature-overview.md`** — §6 (memory/wiki) gains the derived-doc-annotation-survival row; `updated: 2026-07-24`.
+- **`tests/test-version-release-headline.sh` / `tests/test-docs-division-version-sync.sh`** — version drift-locks bumped 0.12.1 → 0.12.2 with the new headline opening clause.
+
 ## [0.12.1] - 2026-07-21
 
 > **Docs catch up with the last three releases. A new user guide — `docs/{ko,en}/current-product-shape/30-unknowns-loop.md` — walks the operator through the whole unknowns loop shipped across 0.11.0→0.12.0 in sprint-timeline order (prototype fork, recon run, blind_spots, interview gate, references, deviation ledger, solved-elsewhere-first, eval-surface blind spot, comprehension quiz) plus the runtime signals (`sfs healthcheck` deviation-ledger/plan-readiness advisories, doctor "Held-Out Evals" section) and the evals scaffold's wrong-premise fixture axis — closing the docs gap deferred as item E in the 0.11.1 batch. The feature overview (`29-feature-overview.md`, ko/en) gains rows for the unknowns loop, its runtime signals, the held-out evals scaffold, model-swap discipline (head-to-head + setup audit), large-batch loop discipline, and the capsule verb-scoping/disk-done/conflict-scan extensions, plus safety-contract bullets for the four-question risk preflight and BOUNDS_OUTLIVE_MODEL_LIMITS. Both current-product-shape aggregates wire the new child in frontmatter and Document Map (split-sync lock now covers 86 children). One headline test (`test-md-unknowns-loop-guide.sh`) locks the guide anchors, aggregate wiring, overview rows, and vendor hygiene. run-all 246 → 247.**

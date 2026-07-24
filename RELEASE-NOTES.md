@@ -13,6 +13,25 @@
 
 ---
 
+## 0.12.2
+
+파생 문서 주석 보존 규율 신설 + README/기능 총람이 제품 표면을 다시 따라잡습니다.
+
+체감 변화:
+
+- **파생 문서 주석 보존** — 코드·스키마·설정에서 파생한 문서를 재생성할 때,
+  사람이 항목에 단 why/correction/constraint 주석을 덮어쓰지 않고 보존합니다.
+  correction 은 파생 문장보다 우선하고, 충돌하면 삭제가 아니라 gap 으로 드러납니다
+  (`policies/doc-colocation-provenance.md` DERIVED_DOC_ANNOTATION). 원칙은 외부
+  static-analysis→docgen 사례에서 by-reference 로만 승격하고, 도구 이름·파이프라인
+  세부는 테스트로 잠급니다.
+- **README 재정비** — "해결하는 문제" 와 6축 "제공 기능" 표를 README.md 상단에
+  직접 넣어, child 문서를 열지 않아도 Solon 이 무엇을 풀고 무엇을 제공하는지
+  한눈에 보입니다.
+- **기능 총람(29, ko/en)** — §6 기억·위키 축에 파생 문서 주석 보존 행이 추가됐습니다.
+
+---
+
 ## 0.12.1
 
 문서가 최근 세 릴리스를 따라잡습니다 — Unknowns 루프 사용자 가이드 신설 + 기능 총람(ko/en) 갱신.

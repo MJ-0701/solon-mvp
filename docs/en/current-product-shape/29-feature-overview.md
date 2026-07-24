@@ -4,7 +4,7 @@ title: "Feature Overview"
 visibility: oss-public
 doc_type: product-reference
 language: en
-updated: 2026-07-20
+updated: 2026-07-24
 parent: docs/en/current-product-shape.md
 summary: "One-page overview of the whole Solon/SFS feature surface — command surfaces plus routing into the detailed sections."
 load_when: "Read when you need the whole feature surface at a glance, before routing into a detailed section."
@@ -89,6 +89,7 @@ The Sanity-before-Cartography order discipline and the signal-only
 | raw source intake | `sfs ingest --source-type --purpose` | [intake routing](./20-ai-work-intake-routing.md) |
 | promotion pipeline | `sfs tidy --all --wiki-promote [--apply]` | [domain knowledge assets](./21-domain-knowledge-assets.md) |
 | repeated-mistake ledger | `.sfs-local/lessons.md` (record→reflect flywheel) | routed context `policies/lessons-accumulation.md` |
+| derived-doc annotation survival | regenerating a doc derived from code preserves the human why/correction/constraint notes anchored to an item instead of clobbering them (conflict → gap) | routed context `policies/doc-colocation-provenance.md` (DERIVED_DOC_ANNOTATION) |
 
 ### 7. Host channels and platforms
 

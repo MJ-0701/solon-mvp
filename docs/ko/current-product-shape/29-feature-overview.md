@@ -4,7 +4,7 @@ title: "기능 총람 (Feature Overview)"
 visibility: oss-public
 doc_type: product-reference
 language: ko
-updated: 2026-07-20
+updated: 2026-07-24
 parent: docs/ko/current-product-shape.md
 summary: "Solon/SFS 전체 기능을 축별 한 장으로 정리한 총람 — 명령 표면과 상세 문서 라우팅."
 load_when: "Read when you need the whole feature surface at a glance, before routing into a detailed section."
@@ -87,6 +87,7 @@ Sanity→Cartography 순서 규율과 모든 지표의 signal-only(차단 없음
 | Raw source intake | `sfs ingest --source-type --purpose` | [인입 라우팅](./20-ai-work-intake-routing.md) |
 | 승격 파이프라인 | `sfs tidy --all --wiki-promote [--apply]` | [도메인 지식 자산](./21-domain-knowledge-assets.md) |
 | 반복 실수 원장 | `.sfs-local/lessons.md` (record→reflect 플라이휠) | routed context `policies/lessons-accumulation.md` |
+| 파생 문서 주석 보존 | 코드에서 파생한 문서를 재생성할 때 사람이 항목에 단 why/correction/constraint 주석을 덮어쓰지 않고 보존 (충돌은 gap 으로) | routed context `policies/doc-colocation-provenance.md` (DERIVED_DOC_ANNOTATION) |
 
 ### 7. 호스트 채널·플랫폼
 
