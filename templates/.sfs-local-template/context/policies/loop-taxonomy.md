@@ -1,7 +1,7 @@
 ---
 id: sfs-policy-loop-taxonomy
 summary: Single decision lens for choosing a loop type — score trigger axis (prompt/goal/interval/event) x stop axis (judgment/criteria+turn-cap/cancel/goal-met), then pick the minimum-complexity primitive; four loop types mapped by-reference to existing solon primitives.
-load_when: ["which loop", "loop type", "loop taxonomy", "choose loop", "recurring or autonomous", "goal loop", "scheduled loop", "proactive loop", "turn-based", "stop condition", "루프 선택", "어떤 루프"]
+load_when: ["which loop", "loop type", "loop taxonomy", "choose loop", "recurring or autonomous", "goal loop", "scheduled loop", "proactive loop", "turn-based", "stop condition", "where should this check live", "run it every time", "chain the check", "verification loop", "루프 선택", "어떤 루프"]
 ---
 
 # Loop Taxonomy
@@ -69,6 +69,56 @@ Four types, each mapped to the solon primitive that owns it:
 A task that seems to need a hybrid usually decomposes: a proactive detector
 (type 4) that opens a goal-based WU (type 2) is two simple loops, not one
 complex one.
+
+## CHECK_PLACEMENT_LADDER
+
+DECISION_FRAME sizes the work loop; a verification check needs a second
+decision — **where it lives**. Four placements, least to most coupled:
+
+1. **Standalone** — the operator invokes the check by hand. Right for
+   cross-cutting sweeps, and for a check still earning trust
+   (`policies/skill-catalog-discipline.md` SHADOW_MODE_TRUST_LADDER).
+2. **Embedded** — the check is a step inside the producing rail, so producing
+   without checking is not a reachable path.
+3. **Chained** — the producing rail calls the check when it finishes. A rail
+   that cannot be edited is chained through a thin wrapper that calls the
+   original and then the check.
+4. **Every-change** — the check runs on every change to the surface (a gate, a
+   hook, a required pre-merge step): the enforcement tier, and
+   `policies/critical-rule-hook-promotion.md` owns when a rule earns it.
+
+Promotion signal: **repeated invocation**. Running a standalone check by hand
+after every change means the check has already graduated and needs a permanent
+home — the verification-side twin of the repeated-correction trigger
+(`policies/skill-promotion-loop.md` DETECTION, floor 2). Same floor, same
+suggest-only handling: the ladder proposes the next placement; a human accepts
+it.
+
+## HABIT_TO_CONTRACT_CHAINING
+
+Placement 3 above is one specific conversion: an operator habit ("I always run
+Y after X") becomes a contract ("X calls Y when it finishes"). The habit
+depends on the operator remembering; the contract does not. Convert when the
+pairing is unconditional, and keep the trade explicit:
+
+- Chaining spends tokens on every run of X, whether or not Y was needed.
+- Chaining costs flexibility: if Y is genuinely useful on its own, or X is
+  sometimes run precisely to skip Y, do not chain — leave it at placement 1.
+- Do not chain a check the operator has not yet come to trust; that is a
+  placement-4 move made early, and it turns X's output into Y's false alarms.
+
+The capture side is not a new mechanism: taking the manual follow-up you repeat
+most and encoding it as a check is the verification-side instance of
+`policies/lessons-accumulation.md` CURATION_PASS and
+`policies/harness-autonomy.md` FIX_THE_LOOP_NOT_THE_CODE. One addition to the
+capture scope: **project-specific deterministic rules count** — the domain rule
+a generic linter cannot know (rejecting a migration that drops a column with no
+backfill, say) is as capturable as a qualitative check, and cheaper to trust.
+
+External validation (by-reference): a Claude blog post on building verification
+loops with skills (2026-07-22) — the placement classification and the "if you
+run it after every change, it has graduated" signal; the vendor's command and
+feature names are held out entirely.
 
 ## VERIFICATION_AND_SYSTEM_ENCODING (by-reference)
 

@@ -44,6 +44,10 @@ load_when: ["tidy", "report", "retro", "archive", "close", "정리"]
   adopting a new OR evolved skill, clear EVOLUTION_ADOPTION_GATE, then run
   HELD_OUT_SCORING (two-stage cheap-keyword → cost-gated LLM-judge, before/after
   delta on a held-out set) — measured, but never overrides a gate or sign-off.
+  A promoted **verification** check also needs a placement decision, not only a
+  compile decision: `policies/loop-taxonomy.md` CHECK_PLACEMENT_LADDER (repeated
+  manual invocation = graduated) and HABIT_TO_CONTRACT_CHAINING (an always-run
+  pairing becomes a call, with the flexibility/token trade stated) own that step.
 - Lessons curation pass (`policies/lessons-accumulation.md` CURATION_PASS): a
   periodic read-only review of the lessons ledger + event archives produces
   merge/graduation/skill-candidate suggestions; applying them happens here at
