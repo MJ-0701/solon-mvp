@@ -131,6 +131,15 @@ reference named in the plan with no read trace in the log is a review
 finding. References are pointers, not payloads: cite locations, do not paste
 bodies (`source-pointer-citation.md`).
 
+REFERENCE_FIDELITY_LADDER — references differ in how much they carry. Prefer,
+in order: an **artifact that behaves** (rendered HTML mockup, test suite, a
+function elsewhere that already does it) > a **frozen depiction** (screenshot,
+fixture, sample output) > a **description in prose**. Each rung down loses
+detail the worker must re-invent. A rubric is the executable rung for quality
+rather than behavior: written before the work, it is what a verifier checks
+against (`sub-agent-capsule-contract.md`; `source-pointer-citation.md`
+PROOF_CARRYING_FINDING). Ranks references already allowed — no new field.
+
 ## DEVIATIONS_LOG (conservative choice + record + continue)
 
 When implementation meets territory that contradicts the plan (a missing API,

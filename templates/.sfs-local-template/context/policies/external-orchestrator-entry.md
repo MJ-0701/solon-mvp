@@ -98,10 +98,9 @@ a binding is data, not code), the **call conditions are a data surface** beside
 - the slice is declared **low-confidence** (`unknowns-and-deviations.md`).
 
 Anything outside those conditions runs worker-only. By-reference, not restated:
-the tier ladder (start strong, downshift by effort) and the completion-ratio ×
-cost-per-task routing evidence are owned by `token-harness.md`
-KNOB_DIAGNOSTIC_LADDER, swap decisions are measured head-to-head
-(`model-workaround-sunset.md`), and the capsule-side default is
+the tier ladder and the completion-ratio × cost-per-task routing evidence are
+owned by `token-harness.md` KNOB_DIAGNOSTIC_LADDER, swap decisions are measured
+head-to-head (`model-workaround-sunset.md`), and the capsule-side default is
 `sub-agent-capsule-contract.md` SUBAGENT_TIER_DEFAULT. External validation
 (by-reference): a Claude blog model-selection guide and an overnight-agent
 operator interview (2026-07-20/24); class names, benchmarks, figures held out.

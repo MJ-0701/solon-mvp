@@ -339,7 +339,11 @@ print_operational_log_section() {
 #   templates/.sfs-local-template/context/policies/context-conflict-gate.md
 print_context_conflict_section() {
   section "Context Conflict Gate"
+  conflict_marker_check
+  rightsize_context_check
+}
 
+conflict_marker_check() {
   local ctx_dir=".sfs-local/context"
   if [ ! -d "$ctx_dir" ]; then
     info "context-conflict-gate: no project-local context overrides; skipping"
@@ -372,6 +376,80 @@ print_context_conflict_section() {
   if [ "$conflicts" -eq 0 ]; then
     ok "context-conflict-gate: no conflicting directives among declared conflict-key markers"
   fi
+}
+
+# 0.13.0 (WU-5): RIGHTSIZE_CONTEXT_PASS — overconstraint as a defect.
+#
+# The marker lint above catches contradictions a directive DECLARED. This pass
+# catches the two shapes nobody declares: the same standing directive restated
+# across more than one agent-visible surface (redundant guidance — the reader
+# cannot tell which copy is authoritative, and edits drift), and narrative
+# absolutes ("always"/"never") carried as prose with no enforcement behind them
+# (trim candidates under RULE_VS_GUARDRAIL). Both are INFO-ONLY: they never
+# warn, never fail, and never change doctor's exit code — trimming standing
+# guidance is an operator judgment call, not a lint verdict. Scope: consumer
+# working tree only. SSoT:
+#   templates/.sfs-local-template/context/policies/context-conflict-gate.md
+rightsize_context_check() {
+  local files=() p
+  for p in CLAUDE.md AGENTS.md GEMINI.md SFS.md; do
+    [ -f "$p" ] && files+=("$p")
+  done
+  while IFS= read -r p; do
+    [ -n "$p" ] && files+=("$p")
+  done < <(find .sfs-local/context .claude/skills -name '*.md' -type f 2>/dev/null | sort)
+
+  if [ "${#files[@]}" -eq 0 ]; then
+    info "rightsize-context: no agent-visible guidance surface found; skipping"
+    return
+  fi
+
+  # One "<normalized directive>\t<file>" row per narrative-absolute line.
+  # Normalization drops markdown emphasis, list markers, punctuation and case so
+  # a restatement with different formatting still matches its twin.
+  local rows
+  rows="$(
+    for p in "${files[@]}"; do
+      awk -v f="$p" '
+        # Frontmatter is routing metadata, not standing guidance: a shipped
+        # frontmatter comment is identical across every adapter stub and would
+        # otherwise report as redundant guidance on a fresh install.
+        NR == 1 && $0 == "---" { infm = 1; next }
+        infm && $0 == "---"    { infm = 0; next }
+        infm                   { next }
+        /^[[:space:]]*[#|>]/ { next }
+        /^[[:space:]]*```/   { infence = !infence; next }
+        infence              { next }
+        {
+          line = tolower($0)
+          if (line !~ /(^|[^a-z])(always|never)([^a-z]|$)/) next
+          gsub(/[^a-z0-9 ]/, " ", line)
+          gsub(/[[:space:]]+/, " ", line)
+          sub(/^ /, "", line); sub(/ $/, "", line)
+          if (length(line) < 20) next
+          print line "\t" f
+        }
+      ' "$p"
+    done
+  )"
+
+  if [ -z "$rows" ]; then
+    info "rightsize-context: no narrative always/never directives found"
+    return
+  fi
+
+  local absolutes redundant
+  absolutes="$(printf '%s\n' "$rows" | wc -l | tr -d '[:space:]')"
+  # A directive is redundant when the same normalized text appears in 2+ files.
+  redundant="$(printf '%s\n' "$rows" | sort -u \
+    | awk -F'\t' '{ c[$1]++ } END { n = 0; for (k in c) if (c[k] > 1) n++; print n }')"
+
+  if [ "$redundant" -gt 0 ]; then
+    info "rightsize-context: ${redundant} standing directive(s) restated across 2+ agent-visible surfaces (redundant guidance — pick one authoritative home)"
+  else
+    ok "rightsize-context: no standing directive restated across surfaces"
+  fi
+  info "rightsize-context: ${absolutes} narrative always/never line(s) across ${#files[@]} surface(s) — inviolable ones belong on an enforcement surface, the rest are trim candidates (RULE_VS_GUARDRAIL)"
 }
 
 # 0.8.27 (WU-3): Skill promotion loop (suggest-only).

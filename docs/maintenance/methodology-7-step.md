@@ -174,3 +174,10 @@ evidence / failure modes) 을 CPO 가 점검한다. 자세한 lens 정책은
 - `sfs context cat commands/<name>`
 - `sfs context cat policies/<name>`
 - `sfs context list` (0.7.1+) — slug 색인 출력
+
+라우팅의 설계 근거는 **deferred loading — context until needed** 다. `_INDEX`
+가 trigger 로 고르고 필요한 모듈만 그때 열리므로, 상시 로드되는 표면은 얇게
+유지되고 나머지는 트리거 전까지 비용이 0 이다. 분해 규율의 공통 근거
+(`policies/md-line-budget.md` ARTIFACT_FITS_IN_HEAD) 와 같은 뿌리이고,
+과제약·중복 지시 진단은 `policies/context-conflict-gate.md`
+RIGHTSIZE_CONTEXT_PASS 가 소유한다 (여기서 재나열하지 않는다 — 포인터만).

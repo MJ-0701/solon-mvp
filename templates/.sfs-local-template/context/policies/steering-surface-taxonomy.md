@@ -76,6 +76,37 @@ The axes resolve to a small set of rules:
   (`sub-agent-capsule-contract.md`); its body returns final-message-only and
   never pollutes the parent window.
 
+## RULE_VS_GUARDRAIL
+
+FOUR_AXES decides where an instruction goes. This rule decides whether it should
+exist as prose at all — the question a stronger model makes worth asking, since
+guidance written to compensate for a weaker one now competes with judgment that
+no longer needs it. Two kinds hide behind the same "always/never" wording:
+
+- **Inviolable gate** — a single violation is unacceptable (destructive action,
+  credential exposure, published contract, release authority). Prose cannot
+  guarantee it, so it belongs on an enforcement surface and is **never**
+  trimmed. Solon's rules-as-tests are exactly this: deterministic regression
+  locks that hold by construction, not by asking.
+- **Narrative advisory** — an "always/never" that is really a preference,
+  a worked default, or worst-case defence against a failure mode the current
+  model handles on its own. It costs context every load and constrains judgment
+  in return for little, which makes it a **trim candidate**.
+
+The discriminating question is not "how strongly do I mean it" but **"what
+happens on one violation"** — catastrophe means promote to enforcement (the
+PLACEMENT_RULES clause above), tolerable means the prose is a candidate for
+removal or for demotion to a trigger-scoped policy.
+
+Two boundaries. Trimming is suggest-only: `sfs harness doctor` surfaces the
+counts (`context-conflict-gate.md` RIGHTSIZE_CONTEXT_PASS) and the operator
+decides — nothing auto-deletes standing guidance. And labelling is not
+deletion: an advisory that keeps earning its place stays. External validation
+(by-reference): a Claude blog post on context engineering for newer-generation
+models (2026-07-24) — the durable instructions are the guardrails, and much of
+the rest is scaffolding a stronger model no longer needs; vendor tooling names
+and removal figures held out.
+
 ## DECISION_TABLE
 
 | Instruction shape | Axes that dominate | Home |
