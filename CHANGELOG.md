@@ -31,6 +31,7 @@
 
 - ADVISOR_STRATEGY_BINDING's semantic home is the team-topology design doc, which sits at the 200-line ceiling with zero headroom. The binding lives on the advisor-bus SSoT (`external-orchestrator-entry.md`) and cites the design doc's OCP rule instead; the headline test records the reason.
 - Vendor lockouts are deliberately scoped rather than blanket: "Datadog", "Managed Agents", "GitHub Actions", and the model class names are pre-existing legitimate references elsewhere in the routed context, so each lockout is narrowed to the files its insight touched or to identities with no prior legitimate use.
+- Budget asymmetry worth knowing before the next batch: `test-product-md-frontmatter-line-budget.sh` asserts `-le 200`, but `test-self-improvement-loop.sh`, `test-buildday-verify-map-absorption.sh`, and `test-agent-identity-compartment-scoping.sh` assert `-lt 200` for the files they cover. `external-orchestrator-entry.md` was trimmed to 199 for that reason; the stricter tests were left alone. `unknowns-and-deviations.md` now sits at exactly 200 — green today, zero headroom tomorrow, so the next anchor targeting it needs a host reassignment rather than a trim.
 
 ## [0.12.2] - 2026-07-24
 
