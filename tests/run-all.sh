@@ -108,6 +108,7 @@ categorize() {
       | test-docs-model-routing.sh \
       | test-ai-work-intake-routing.sh \
       | test-*-policy.sh \
+      | test-advisor-*.sh \
       | test-*-discipline.sh \
       | test-*-guardrails.sh \
       | test-*-hygiene.sh \
