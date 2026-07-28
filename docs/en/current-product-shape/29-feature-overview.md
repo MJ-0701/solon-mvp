@@ -4,7 +4,7 @@ title: "Feature Overview"
 visibility: oss-public
 doc_type: product-reference
 language: en
-updated: 2026-07-24
+updated: 2026-07-28
 parent: docs/en/current-product-shape.md
 summary: "One-page overview of the whole Solon/SFS feature surface — command surfaces plus routing into the detailed sections."
 load_when: "Read when you need the whole feature surface at a glance, before routing into a detailed section."
@@ -57,6 +57,8 @@ inside each gate.
 | static security audit (OWASP-family, secret redaction, defensive scope) | `sfs audit scan|report|status` | routed context `commands/audit.md` |
 | held-out evals scaffold (eval-first, wrong-premise fixture axis) | `.sfs-local/evals/README.md` + doctor "Held-Out Evals" section (case count only, bodies never read) | [Unknowns Loop](./30-unknowns-loop.md) |
 | model-swap discipline (head-to-head bench + new-model setup audit) | policy `model-workaround-sunset.md` (MODEL_HEAD_TO_HEAD_ON_UPGRADE / MODEL_UPGRADE_SETUP_AUDIT, tidy rail) | routed context `policies/model-workaround-sunset.md` |
+| overconstraint / redundant-guidance detection (rightsize) | doctor "Context Conflict Gate" section — standing directives restated across 2+ surfaces, plus a narrative always/never count (info-only) | routed context `policies/context-conflict-gate.md` (RIGHTSIZE_CONTEXT_PASS) |
+| in-flight intent recheck | a long or unattended WU records assumption-change detection and an original-AC comparison at each step boundary (silent progress = drift finding, advisory) | routed context `policies/flow-conformance-postflight.md` (MID_RUN_INTENT_RECHECK) |
 
 The Sanity-before-Cartography order discipline and the signal-only
 (never-blocking) contract apply across all of these.
@@ -70,6 +72,9 @@ The Sanity-before-Cartography order discipline and the signal-only
 | cache-prefix discipline | policy `policies/token-harness.md` (session-frozen prefix, fresh-session restart) | same doc |
 | worker delegation capsules | policy `sub-agent-capsule-contract.md` (goal/AC/scope/budget + optional exemplar; verb-grain least agency, done = artifact on disk, shared-surface conflict scan) | [delegation repertoire](./26-delegation-repertoire.md) |
 | large-batch loop discipline (rule-upstream fix, judge negative control, expensive-op serialization) | policies `harness-autonomy.md` / `token-harness.md` (FIX_THE_LOOP / JUDGE_NEGATIVE_CONTROL / SERIALIZE_EXPENSIVE_OPS) | routed context `policies/harness-autonomy.md` |
+| instruction classification (inviolable gate vs narrative advisory) | if one violation is catastrophic it belongs on an enforcement surface; otherwise it is a trim candidate — labelling, not deletion | routed context `policies/steering-surface-taxonomy.md` (RULE_VS_GUARDRAIL) |
+| verification check placement ladder | standalone → embedded → chained → every-change; repeated manual invocation is the promotion signal, and habit→contract chaining ships with its trade-offs | routed context `policies/loop-taxonomy.md` (CHECK_PLACEMENT_LADDER) |
+| spec-is-the-artifact / control-logic-as-data | no translation layer between the verified and the executed artifact; routines, transitions, and gates live on a readable, editable data surface | routed context `policies/harness-autonomy.md` (SPEC_IS_THE_ARTIFACT / CONTROL_LOGIC_AS_DATA) |
 
 ### 5. Teams and orchestration
 
@@ -80,6 +85,8 @@ The Sanity-before-Cartography order discipline and the signal-only
 | work routing / orchestration | `sfs route` / `sfs orchestrator` / `sfs dispatch` | [work intake routing](./20-ai-work-intake-routing.md) |
 | recurring loops | `sfs loop` + the loop-taxonomy policy (four-type decision lens) | routed context `policies/loop-taxonomy.md` |
 | agent identity / compartments | `agent-identity` and compartment policies | [identity and compartments](./28-agent-identity-and-compartments.md) |
+| selective advisor coaching binding | a fast worker plus an advisor called only when needed — the call conditions (stuck / verification gate / low-confidence) are a data surface beside `agent_runtime_bindings` | routed context `policies/external-orchestrator-entry.md` (ADVISOR_STRATEGY_BINDING) |
+| delegation unit ladder | chunk → task → decision, climbing on trusted verification and capped by the target surface's risk tier | routed context `policies/work-delegation-and-startup.md` (DELEGATION_UNIT_LADDER) |
 
 ### 6. Memory and wiki (long-horizon memory)
 
@@ -89,6 +96,8 @@ The Sanity-before-Cartography order discipline and the signal-only
 | raw source intake | `sfs ingest --source-type --purpose` | [intake routing](./20-ai-work-intake-routing.md) |
 | promotion pipeline | `sfs tidy --all --wiki-promote [--apply]` | [domain knowledge assets](./21-domain-knowledge-assets.md) |
 | repeated-mistake ledger | `.sfs-local/lessons.md` (record→reflect flywheel) | routed context `policies/lessons-accumulation.md` |
+| security finding class closed loop | a waiver or point fix closes an instance, not a class — a recurring class is promoted to a routed rule, skill rule, or regression lock | routed context `commands/audit.md` (VULNERABILITY_CLASS_CLOSED_LOOP) |
+| manual review promoted to evals | perform the task by hand once to fix what "good" means, then promote structured review into held-out cases (judge agent scores transcripts) | routed context `policies/self-improvement-loop.md` (BE_THE_AGENT_FIRST / REFLECTION_TO_EVAL_PIPELINE) |
 | derived-doc annotation survival | regenerating a doc derived from code preserves the human why/correction/constraint notes anchored to an item instead of clobbering them (conflict → gap) | routed context `policies/doc-colocation-provenance.md` (DERIVED_DOC_ANNOTATION) |
 
 ### 7. Host channels and platforms
@@ -124,6 +133,13 @@ The Sanity-before-Cartography order discipline and the signal-only
   model limits — emergent in-bounds behavior after an upgrade is
   observability's job (`policies/harness-autonomy.md`
   BOUNDS_OUTLIVE_MODEL_LIMITS).
+- What must hold every time lives in the **harness**, not the prompt — over a
+  long run prompt sentences go unheeded, so standing rules move down to rails,
+  gates, and regression locks (`policies/harness-autonomy.md`
+  PROMPTS_ARE_SUGGESTIONS).
+- Every point where the agent touches untrusted content carries an injection
+  checkpoint, and a successful hijack is assumed and bounded by narrowing what
+  it can reach (`policies/credential-hygiene.md` INGRESS_TRUST_CHECKPOINT).
 - Writes are consent-gated: `--yes` / `--apply` / dry-run previews by default.
 - External orchestrators, knowledge graphs, and the wiki are opt-in —
   removing them leaves every feature working (standalone guarantee).

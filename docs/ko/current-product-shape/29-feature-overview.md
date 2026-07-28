@@ -4,7 +4,7 @@ title: "기능 총람 (Feature Overview)"
 visibility: oss-public
 doc_type: product-reference
 language: ko
-updated: 2026-07-24
+updated: 2026-07-28
 parent: docs/ko/current-product-shape.md
 summary: "Solon/SFS 전체 기능을 축별 한 장으로 정리한 총람 — 명령 표면과 상세 문서 라우팅."
 load_when: "Read when you need the whole feature surface at a glance, before routing into a detailed section."
@@ -55,6 +55,8 @@ Solon(SFS)의 전체 기능을 한 장으로 봅니다. 각 행은 상세 문서
 | 정적 보안 감사 (OWASP 계열, secret redact, 방어 범위) | `sfs audit scan|report|status` | routed context `commands/audit.md` |
 | held-out evals scaffold (eval-first·wrong-premise fixture 축) | `.sfs-local/evals/README.md` + doctor "Held-Out Evals" 섹션 (케이스 수만, 내용 미열람) | [Unknowns 루프](./30-unknowns-loop.md) |
 | 모델 교체 규율 (head-to-head 벤치 + 새 모델의 셋업 감사) | 정책 `model-workaround-sunset.md` (MODEL_HEAD_TO_HEAD_ON_UPGRADE / MODEL_UPGRADE_SETUP_AUDIT, tidy 레일) | routed context `policies/model-workaround-sunset.md` |
+| 과제약·중복 지시 감지 (rightsize) | doctor "Context Conflict Gate" 섹션 — 2개 이상 표면에 재기술된 상시 지시 + 서술형 always/never 카운트 (info-only) | routed context `policies/context-conflict-gate.md` (RIGHTSIZE_CONTEXT_PASS) |
+| 런 중(in-flight) intent 재검증 | 장시간·무인 WU 의 스텝 경계마다 가정 변화 + 원 AC 대조를 산출물에 남김 (침묵 직진 = drift finding, advisory) | routed context `policies/flow-conformance-postflight.md` (MID_RUN_INTENT_RECHECK) |
 
 Sanity→Cartography 순서 규율과 모든 지표의 signal-only(차단 없음) 계약이
 함께 적용됩니다.
@@ -68,6 +70,9 @@ Sanity→Cartography 순서 규율과 모든 지표의 signal-only(차단 없음
 | 캐시 프리픽스 규율 | 정책 `policies/token-harness.md` (세션 고정 prefix, 새 세션 재시작) | 같은 문서 |
 | 워커 위임 캡슐 | 정책 `sub-agent-capsule-contract.md` (goal/AC/scope/budget + optional exemplar; verb 단위 least-agency, done=디스크 산출물, 공유표면 충돌 스캔) | [위임 레퍼토리](./26-delegation-repertoire.md) |
 | 대규모 배치 루프 규율 (룰 상류 수정·judge 음성대조·비싼 연산 직렬화) | 정책 `harness-autonomy.md` / `token-harness.md` (FIX_THE_LOOP / JUDGE_NEGATIVE_CONTROL / SERIALIZE_EXPENSIVE_OPS) | routed context `policies/harness-autonomy.md` |
+| 지시 배치 판별 (비우회 게이트 vs 서술 advisory) | 한 번의 위반이 치명적이면 집행 표면으로, 아니면 trim 후보 — 라벨링이지 삭제가 아님 | routed context `policies/steering-surface-taxonomy.md` (RULE_VS_GUARDRAIL) |
+| 검증 체크 배치 사다리 | standalone → embedded → chained → 매 변경; 수동 반복 호출 = 승격 신호, 습관→계약 체이닝은 트레이드오프 동반 | routed context `policies/loop-taxonomy.md` (CHECK_PLACEMENT_LADDER) |
+| 스펙=아티팩트 / 제어로직=데이터 | 검증 대상과 실행 대상 사이 번역층 금지, 루틴·전이·게이트는 읽고 고칠 수 있는 데이터 표면 | routed context `policies/harness-autonomy.md` (SPEC_IS_THE_ARTIFACT / CONTROL_LOGIC_AS_DATA) |
 
 ### 5. 팀·오케스트레이션
 
@@ -78,6 +83,8 @@ Sanity→Cartography 순서 규율과 모든 지표의 signal-only(차단 없음
 | 작업 라우팅/오케스트레이터 | `sfs route` / `sfs orchestrator` / `sfs dispatch` | [작업 인입 라우팅](./20-ai-work-intake-routing.md) |
 | 반복 루프 | `sfs loop` + loop-taxonomy 정책 (4유형 결정 렌즈) | routed context `policies/loop-taxonomy.md` |
 | 에이전트 신원/권한 구획 | 정책 `agent-identity`·compartment 계열 | [신원과 구획](./28-agent-identity-and-compartments.md) |
+| advisor 선택 코칭 바인딩 | 빠른 worker + 필요 시에만 advisor — 호출 조건(막힘/검증 게이트/저신뢰)이 `agent_runtime_bindings` 옆 데이터 표면 | routed context `policies/external-orchestrator-entry.md` (ADVISOR_STRATEGY_BINDING) |
+| 위임 단위 사다리 | chunk → task → decision, 검증 신뢰로 올라가고 대상 표면의 위험 티어로 상한 | routed context `policies/work-delegation-and-startup.md` (DELEGATION_UNIT_LADDER) |
 
 ### 6. 기억·위키 (장기 메모리)
 
@@ -87,6 +94,8 @@ Sanity→Cartography 순서 규율과 모든 지표의 signal-only(차단 없음
 | Raw source intake | `sfs ingest --source-type --purpose` | [인입 라우팅](./20-ai-work-intake-routing.md) |
 | 승격 파이프라인 | `sfs tidy --all --wiki-promote [--apply]` | [도메인 지식 자산](./21-domain-knowledge-assets.md) |
 | 반복 실수 원장 | `.sfs-local/lessons.md` (record→reflect 플라이휠) | routed context `policies/lessons-accumulation.md` |
+| 보안 finding 클래스 폐루프 | waiver·수정으로 끝내지 않고 재발 클래스는 routed 룰·skill·회귀잠금으로 승격 | routed context `commands/audit.md` (VULNERABILITY_CLASS_CLOSED_LOOP) |
+| 수동 리뷰 → eval 승격 | 자동화 전 손으로 한 번 수행해 "good" 고정 후, 구조화한 리뷰를 held-out 케이스로 승격 (judge 에이전트 채점) | routed context `policies/self-improvement-loop.md` (BE_THE_AGENT_FIRST / REFLECTION_TO_EVAL_PIPELINE) |
 | 파생 문서 주석 보존 | 코드에서 파생한 문서를 재생성할 때 사람이 항목에 단 why/correction/constraint 주석을 덮어쓰지 않고 보존 (충돌은 gap 으로) | routed context `policies/doc-colocation-provenance.md` (DERIVED_DOC_ANNOTATION) |
 
 ### 7. 호스트 채널·플랫폼
@@ -118,6 +127,12 @@ Sanity→Cartography 순서 규율과 모든 지표의 signal-only(차단 없음
 - 경계는 오늘 모델 한계가 아니라 **운영자 허용 기준**으로 설계 —
   모델 업그레이드 후 경계 안 emergent 행동은 관측성이 잡습니다
   (`policies/harness-autonomy.md` BOUNDS_OUTLIVE_MODEL_LIMITS).
+- 매번 지켜야 할 것은 프롬프트가 아니라 **harness** 에 둡니다 — 장기 런에서
+  프롬프트 문장은 결국 무시되므로, 상시 규칙은 레일·게이트·회귀잠금으로
+  내려갑니다 (`policies/harness-autonomy.md` PROMPTS_ARE_SUGGESTIONS).
+- 신뢰불가 입력에 닿는 **접점마다** 인젝션 채점 체크포인트를 두고, 하이재킹은
+  막는 게 아니라 도달 범위를 미리 좁혀 봉쇄합니다
+  (`policies/credential-hygiene.md` INGRESS_TRUST_CHECKPOINT).
 - 쓰기 작업은 consent-gated: `--yes`/`--apply`/dry-run 프리뷰가 기본.
 - 외부 오케스트레이터·지식 그래프·위키는 opt-in — 제거해도 전 기능 동일
   동작 (standalone 보증).
