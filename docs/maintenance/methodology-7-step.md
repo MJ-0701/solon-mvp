@@ -60,6 +60,9 @@ by-reference: 최전선 finance-diligence 사례, Claude 블로그 2026-07-13;
 vendor/성과 수치 보류). 모델 교체 판단은 같은 도메인 eval head-to-head 로
 한다 — SSoT 는 `policies/model-workaround-sunset.md`
 MODEL_HEAD_TO_HEAD_ON_UPGRADE (여기서 재나열하지 않는다 — 포인터만).
+분해 규율의 공통 설계 근거 — 사람 머리에 안 담기는 산출물은 리뷰 불가라
+원점으로 되돌아간다 — 는 `policies/md-line-budget.md` ARTIFACT_FITS_IN_HEAD
+가 SSoT 다 (200줄 예산 · thin entry · capsule 분해 = 같은 이유의 세 표면).
 
 대규모 배치/마이그레이션급 작업의 루프 규율 4개 — 반복 적발은 룰 상류 수정 +
 배치 재생성(FIX_THE_LOOP_NOT_THE_CODE), 판정자는 음성 대조 선검증

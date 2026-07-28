@@ -1,7 +1,7 @@
 ---
 id: sfs-policy-md-line-budget
 summary: Active markdown stays loadable. Operational logs, routed context, top-level project docs, and user-authored long-form md must stay under 200 lines per file; overflow is archived, not flattened.
-load_when: ["writing", "readme", "progress", "handoff", "session index", "200 line", "md cleanup", "log retention", "operational log", "routed context", "policy doc", "wiki", "guide", "report"]
+load_when: ["writing", "readme", "progress", "handoff", "session index", "200 line", "md cleanup", "log retention", "operational log", "routed context", "policy doc", "wiki", "guide", "report", "artifact size", "fits in head"]
 ---
 
 # MD line budget
@@ -75,6 +75,21 @@ content compression that loses evidence:
 `recent N`, in practice: PROGRESS.md keeps ~5-8 session rows; sessions/_INDEX
 keeps the most recent ~15 ledger rows; HANDOFF keeps the latest single
 handoff body; learning-log indexes keep current month + previous month.
+
+## ARTIFACT_FITS_IN_HEAD
+
+The ceiling is not a formatting preference — it is the design rationale shared
+by every decomposition surface SFS runs. An artifact no reader can hold in
+their head is an artifact nobody can review, so the loop returns to where it
+started: unreviewable output. The same rationale, by-reference rather than
+restated, backs the thin agent entry (adapter docs carry pointers; bodies live
+in routed context) and capsule decomposition
+(`sub-agent-capsule-contract.md`) — three surfaces, one reason. When a new
+artifact kind is added, the question is not "how many lines may it have" but
+"can one reader hold it", and the answer sets the budget. External validation
+(by-reference): a Claude blog deterministic-kernel writeup (2026-07-21) — an
+output too large to fit in a head sends the work back to square one; vendor and
+product names held out.
 
 ## Why this exists
 

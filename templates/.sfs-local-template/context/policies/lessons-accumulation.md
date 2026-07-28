@@ -100,6 +100,10 @@ repeated finding becomes an automated check:
 - When the repeat spans a **generated batch**, the reflection goes upstream:
   fix the producing rule and regenerate the batch, never hand-patch artifacts
   against the rule (`harness-autonomy.md` FIX_THE_LOOP_NOT_THE_CODE).
+- Security findings enter the same loop: an `sfs audit` finding closed only by
+  a waiver or a point fix leaves the **class** open, so a recurring class is
+  promoted to a routed policy line, skill rule, or regression lock and named in
+  `promoted` (`commands/audit.md` VULNERABILITY_CLASS_CLOSED_LOOP).
 
 ## CURATION_PASS (periodic, read-only)
 

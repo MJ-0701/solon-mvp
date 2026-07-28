@@ -81,6 +81,34 @@ target (templates-compatibility principle).
   `src/prompt_security.py`: untrusted context is wrapped as data with an
   explicit do-not-follow header, never injected at system level.)
 
+## PROOF_CARRYING_FINDING
+
+The citation rules above govern claims an artifact *makes*; the same rule
+governs claims a reviewer or auditor *reports*. A review, audit, or verifier
+finding earns trust only when it arrives with the proof that it is valid — the
+`file:line` (or command output, or failing case) a reader can check without
+re-deriving the reasoning. This is the generalization of the excavation card
+rule (`commands/dig.md`: a fact card without a `file:line` evidence pointer is
+REJECTed) and of CITE_THEN_VALIDATE above, widened from cited claims to review
+findings of every kind.
+
+- A finding without a checkable pointer is a **hypothesis**, and it is reported
+  as one, under the honest-unknowns contract
+  (`flow-conformance-postflight.md` HONEST_UNKNOWNS) — not dropped, not dressed
+  up as a result.
+- Trust in a reviewer accrues from its proof-carrying findings, which is what
+  makes the shadow ladder measurable (`skill-catalog-discipline.md`
+  SHADOW_MODE_TRUST_LADDER consumes this signal).
+- A rubric is the same instrument pointed forward: written as the expected
+  evidence *before* the work, it becomes what a verifier agent checks against
+  (`sub-agent-capsule-contract.md` verifier capsule patterns; the evals
+  scaffold owns scoring). Named here once so the ladder and the rubric share
+  one definition of proof.
+
+External validation (by-reference): a Claude blog AI-SDLC security guide
+(2026-07-21) — findings must carry proof of validity before they accrue
+reviewer trust; vendor, org, and measurement figures held out.
+
 ## Cross-references
 
 - External orchestrator entry: `policies/external-orchestrator-entry.md`.

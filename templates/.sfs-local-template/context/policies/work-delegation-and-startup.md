@@ -28,6 +28,28 @@ these hold. The more that hold, the better the fit:
 Few factors hold → handle it inline (a quick chat), do not spin up ceremony.
 Most hold → make it a WU with explicit acceptance criteria.
 
+## DELEGATION_UNIT_LADDER
+
+*Whether* to delegate is the five factors above; *how large a unit* is a
+separate ladder that climbs on two inputs — the verification the operator
+trusts, and the risk tier of the surface being touched.
+
+- Units, smallest first: `chunk` (a pre-cut step) → `task` (a whole outcome) →
+  `decision` (the agent picks the approach). A unit is earned, not assumed.
+- Input 1 — verification: a unit advances only once a test, rubric, or separate
+  verifier covers its outcome and has held across repeats of this task type
+  (`harness-autonomy.md` verifier != implementer owns that precondition).
+- Input 2 — risk tier: the operator tiers surfaces by blast radius (public
+  contract, auth/secrets, data migration = high; docs, fixtures, local tooling
+  = low) and caps the delegable unit per tier. A high-tier surface stays at
+  `chunk` even when the verifier is strong — the tier caps the ladder, it does
+  not average with it.
+- Suggest-only: the ladder recommends a unit; it never auto-promotes one.
+  External validation (by-reference): a Claude blog AI-SDLC security guide and
+  an overnight-agent operator interview (2026-07-20/21) — risk-tiered
+  automation levels, and the delegation unit moving task → decision once in-run
+  self-verification became trustworthy; vendor, org, and scale figures held out.
+
 ## RESTATE_AND_CLARIFY
 
 Before starting a delegated WU, the agent **restates the ask in its own words,

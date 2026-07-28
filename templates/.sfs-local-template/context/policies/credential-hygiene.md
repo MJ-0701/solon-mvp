@@ -132,7 +132,12 @@ hard block:
 2. **Actions & identity** — what actions can it take, under whose identity
    (AGENT_IDENTITY above)? An action without a named identity is unauditable.
 3. **Blast radius** — scope × severity if it misbehaves: what can it reach,
-   and how bad is the worst write it can make?
+   and how bad is the worst write it can make? **Other agents count.** A
+   request arriving from another agent is reach, not rapport: the boundary is
+   drawn at access and action, never at trusting a peer's instruction or
+   believing it is incapable of the ask. Solon's agent-to-agent channels are
+   already explicit and inspectable (the advisor↔Code file bus, `sfs route`
+   dispatch) — which is what keeps them auditable, not what exempts them.
 4. **Observability** — will you see what it did (audit trail, `events.jsonl`
    / `tool_call` telemetry, GRANT_LIFECYCLE's trail-reading)?
 

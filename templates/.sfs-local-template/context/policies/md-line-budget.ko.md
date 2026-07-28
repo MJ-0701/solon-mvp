@@ -75,6 +75,18 @@ scope 안 파일이 200줄을 넘기면, **archive 회전**으로 해결한다. 
 는 최근 약 15 ledger row, HANDOFF 는 최근 단일 handoff body, learning-log
 index 는 이번 달 + 지난 달.
 
+## ARTIFACT_FITS_IN_HEAD
+
+ceiling 은 서식 취향이 아니라 SFS 의 모든 분해 표면이 공유하는 설계 근거다.
+읽는 사람이 머리에 담을 수 없는 산출물은 아무도 리뷰할 수 없는 산출물이라,
+루프가 출발점(리뷰 불가 출력)으로 되돌아간다. 같은 근거가 — 재기술이 아니라
+by-reference 로 — thin agent entry (어댑터 문서는 포인터만, 본문은 routed
+context) 와 capsule 분해 (`sub-agent-capsule-contract.md`) 를 받친다. 표면은
+셋, 이유는 하나다. 새 산출물 종류를 추가할 때 물을 것은 "몇 줄까지 되는가"
+가 아니라 "한 사람이 담을 수 있는가" 이고, 그 답이 예산을 정한다. 외부검증
+(by-reference): 결정론 커널 관련 Claude 블로그(2026-07-21) — 머리에 안 담기는
+출력은 작업을 원점으로 되돌린다. 벤더·제품명은 보류.
+
 ## 이 정책이 필요한 이유
 
 이 정책이 없을 때 반복되는 두 가지 실패:

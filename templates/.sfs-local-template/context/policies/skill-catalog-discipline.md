@@ -115,6 +115,32 @@ rotation, not deletion). This is additive curation discipline, not a new janitor
 mechanism. Source: Hermes cleanup janitor (note 27) — agent-made skills age
 into archive on disuse while human-made skills are never auto-touched.
 
+## SHADOW_MODE_TRUST_LADDER
+
+A new automated reviewer, checker, or skill does not enter the catalog with
+authority — it enters in **shadow**: it runs on real work and writes its
+findings where a human reads them, but nothing it says gates or auto-applies.
+Authority is earned in three steps and one of them never ends:
+
+1. **Shadow** — suggest-only output, compared against what the human decided
+   anyway. False positives and misses are the data being collected.
+2. **Promote** — once its findings hold up across a run of real cases, it is
+   wired to the surface it belongs on and named in the catalog.
+3. **Sample after promotion** — a promoted checker keeps a sampling audit: a
+   fraction of its auto-approvals is re-reviewed by a human on an ongoing
+   basis. A checker nobody re-checks silently becomes an unowned gate.
+
+Scoring the shadow period is not a new mechanism: `skill-promotion-loop.md`
+HELD_OUT_SCORING owns how candidate quality is measured on held-out cases, and
+this section only names the deployment ladder that consumes that score
+(promotion itself stays SUGGEST_ONLY, like the rest of this lens). The model
+counterpart is `model-workaround-sunset.md` MODEL_UPGRADE_SETUP_AUDIT — same
+shape, applied to a swapped model instead of a new reviewer. External
+validation (by-reference): a Claude blog AI-SDLC security guide (2026-07-21) —
+new AI reviewers run in shadow mode to build trust before promotion, and
+auto-approvals stay sampled afterwards; vendor, org, and measurement figures
+held out.
+
 ## CROSS_REFERENCES
 
 - Gotchas accumulation: `lessons-accumulation.md` (the Gotchas slot for caught

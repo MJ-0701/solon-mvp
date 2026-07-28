@@ -1,7 +1,7 @@
 ---
 id: sfs-policy-harness-autonomy
 summary: Convert Harness Engineering from principle into project-operating evidence.
-load_when: ["harness", "autonomy", "parallel agents", "long-running", "quality", "team roster", "agent roles tools", "who owns what"]
+load_when: ["harness", "autonomy", "parallel agents", "long-running", "quality", "team roster", "agent roles tools", "who owns what", "spec drift", "translation layer", "state machine", "implicit control flow"]
 ---
 
 # Project Harness Autonomy
@@ -49,6 +49,22 @@ SFS applies this as a project-operating contract:
 - Lock the change basis before long implementation: write a compact docs/ADR/
   spec diff or equivalent run brief so workers read the changed intent first,
   not the whole conversation or a stale plan.
+- SPEC_IS_THE_ARTIFACT: the artifact that is **verified** must be the artifact
+  that is **executed or consumed** — a translation layer between them is a
+  drift source by construction, because the check ages against a copy. SFS's
+  instances are by-reference: capsule `acceptance_criteria` are checked on the
+  capsule the worker runs (`sub-agent-capsule-contract.md`), and plan AC on the
+  plan the implement rail consumes. A new surface names which artifact is
+  authoritative and deletes the copy, never syncs two. External validation
+  (by-reference): a Claude blog deterministic-kernel writeup (2026-07-21);
+  vendor and product names held out.
+- CONTROL_LOGIC_AS_DATA: routines, transitions, and gates belong on a data
+  surface the agent can read, edit, and verify — not an implicit state machine
+  spread through prose or code branches. Instances by-reference: routed context
+  plus `_INDEX.md` routes, `model-profiles.yaml` bindings, and the team-topology
+  OCP rule that a binding is data, not code. A new mechanism earns its place
+  only when its control flow is declared somewhere inspectable; implicit control
+  flow is a design finding, not a style preference (same source as above).
 - PRE_WORK_INVARIANT_DECLARATION: before a risky WU (migration-grade — data
   moves, destructive rewrites, broad refactors, long unattended runs), the
   agent declares the invariants it will preserve as a workbench artifact and
@@ -133,7 +149,9 @@ SFS applies this as a project-operating contract:
   autonomy** — a delegated task earns more autonomy only once it has a
   verification means (test, rubric, style guide, or a separate verifier) the
   human can trust before reviewing the work. No verifier yet → keep it
-  supervised. Trust is built per task type over time, not granted up front
+  supervised. Failures accumulate in the **verification gap**, not in
+  generation — invest in the checking surface before raising throughput.
+  Trust is built per task type over time, not granted up front
   (external validation, by-reference). The recurring "lessons and missteps"
   review that feeds this trust is the lessons curation pass
   (`lessons-accumulation.md` CURATION_PASS); north-star proactivity

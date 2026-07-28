@@ -51,6 +51,18 @@ dig 와 같은 아래→위(코드→발견→OWASP 계열 매핑)이고, 스캔
 `<file:line>|<rule ...사유>` 한 줄로 기록한다. 재스캔이 `waived` 로 반영한다.
 코드를 고치면 다음 스캔에서 finding 이 사라진다(결정론 재파생 — 저장 상태 아님).
 
+## VULNERABILITY_CLASS_CLOSED_LOOP (finding → 재발 방지 룰)
+
+waiver 와 fix 는 **그 인스턴스**를 닫을 뿐 클래스를 닫지 않는다. 같은 클래스가
+다시 나오면 finding 은 상류로 승격된다 — 그 클래스를 재생산하지 못하게 막는
+표면 하나(routed policy 한 줄, skill 규칙, 또는 회귀잠금 테스트). 새 메커니즘이
+아니라 기존 flywheel 의 보안측 인스턴스다: 반복 적발의 상류 수정은
+`policies/harness-autonomy.md` FIX_THE_LOOP_NOT_THE_CODE, 승격 기록·스키마는
+`policies/lessons-accumulation.md` 가 소유한다 (여기서 재나열하지 않는다 —
+포인터만). audit finding 은 그 루프의 SIGNAL 입력원이고, 승격된 도구는 lesson
+의 `promoted` 필드에 남는다. 승격 없이 waiver 만 쌓이는 클래스는 그 자체가
+finding 이다.
+
 ## LLM 지정 지점 (스크립트 밖)
 
 결정론 스캔 뒤, 판단이 필요한 세 단계는 LLM 이 수행한다 — 리포트 말미가 이 순서
