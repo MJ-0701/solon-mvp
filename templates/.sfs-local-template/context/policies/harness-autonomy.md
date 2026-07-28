@@ -134,6 +134,18 @@ SFS applies this as a project-operating contract:
   the verifier != implementer invariant below (same migration source,
   by-reference: judges were proven against intentionally-broken code before
   the fleet ran).
+- PROMPTS_ARE_SUGGESTIONS / INVARIANT_LIVES_IN_HARNESS: over a long run every
+  sentence of a prompt eventually goes unheeded, so patching a failure by adding
+  one more "when X, do Y" to an instruction file is a fix with a decay curve.
+  Anything that must hold **every time** moves out of the prompt and into the
+  harness — a routed rail, a Gate, a regression lock, a verb removed from the
+  tool surface — which also reclaims the context budget that sentence was
+  spending. SFS's enforcement surfaces already are that harness (by-reference;
+  where a given instruction belongs is scored by
+  `steering-surface-taxonomy.md`). Composes with BOUNDS_OUTLIVE_MODEL_LIMITS
+  (a bound is operator permission, not prompting) and FIX_THE_LOOP_NOT_THE_CODE
+  (the repeat is fixed upstream). External validation (by-reference): a Claude
+  blog long-running-agent writeup (2026-07-22); vendor and figures held out.
 - BOUNDS_OUTLIVE_MODEL_LIMITS: design boundaries from **what the operator
   permits**, never from what today's model cannot do — prompt scaffolds and
   capability gaps are not control points, and they expire at the next model

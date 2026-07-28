@@ -1,7 +1,7 @@
 ---
 id: sfs-policy-flow-conformance-postflight
 summary: Invariant registry + event contract for flowcheck postflight; defines critical vs advisory and divergence classification.
-load_when: ["flowcheck", "flow conformance", "postflight", "invariant", "flow 점검"]
+load_when: ["flowcheck", "flow conformance", "postflight", "invariant", "flow 점검", "long run drift", "still on track", "assumption changed", "무인 런 점검"]
 ---
 
 # Flow-Conformance Postflight — invariants & event contract
@@ -83,6 +83,25 @@ tool 이름 asc 로 결정적 tie-break 한다. 이 hotspot 은 버그리포트 
 
 ## Plan-gate self-check (암묵 가정 → 명시 스펙, plan = quality gate)
 silent divergence 의 plan-time 근원 차단. 코드(Do) 진입 전 plan 자기점검 4문 — `intended-output` / `implicit-assumptions` / `edge-cases` / `intent-alignment` (gate-framework Gate 3 plan-validator check 7). 런타임 divergence 잠금은 `fcp-conflict-surfaced`(#3) + model-tier(#4) 이며, plan 체크리스트는 그 중 #3(silent divergence) 부류를 plan 단계에서 선제 차단한다. plan 품질이 산출물 품질을 결정한다 — 코드 생성이 싸질수록 잘못된 방향의 비용이 커진다. (이 self-check 는 plan 게이트 항목이라 flowcheck 런타임 invariant 가 아니라 노출·교차참조 계약이다.)
+
+## MID_RUN_INTENT_RECHECK (in-flight, docs-level)
+
+본 정책의 나머지는 **사후** 표면이다. 장시간·무인 런은 사후만으로 늦다 —
+초반에 세운 잘못된 가정 하나가 남은 런 전체에 복리로 쌓이고, 끝나서야 드러난다.
+그래서 장시간/무인 WU 는 **스텝 경계마다** 두 가지를 산출물 흔적으로 남긴다:
+
+1. **가정 변화 감지** — 이 런이 의존하는 가정 중 territory 에서 바뀐 것이
+   있는가. 있으면 DEVIATIONS_LOG (`policies/unknowns-and-deviations.md`) 로.
+2. **원 intent 대조** — 지금 하는 일이 원래 AC/intent 를 여전히 만족하는가.
+
+둘 다 침묵한 채 직진하면 그 자체가 drift finding 이다 (advisory — 명령을
+막지 않는다). 시점이 다른 세 표면을 구분해 둔다: 착수 **전** 선언은
+`policies/harness-autonomy.md` PRE_WORK_INVARIANT_DECLARATION, **도중** 은
+본 절, **사후** 는 본 정책의 invariant registry 와 Gate 6. 무인 런에서는
+SCHEDULED_RUN_CONTRACT 1번 (상태는 파일로) 이 그 흔적의 거처다
+(`policies/work-delegation-and-startup.md`). 외부검증 (by-reference): 야간
+무인 에이전트 운영 인터뷰 관련 Claude 블로그(2026-07-20) — 매 스텝 자기검증
+과 원 의도 재검증이 초기 오가정의 복리화를 막는다. 벤더·조직·모델·수치는 보류.
 
 ## HONEST_UNKNOWNS (docs-level)
 

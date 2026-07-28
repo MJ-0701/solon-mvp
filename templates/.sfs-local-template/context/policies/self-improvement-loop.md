@@ -13,6 +13,9 @@ load_when:
   - end-to-end loop
   - loop SSoT
   - improvement cycle
+  - before automating
+  - what is good
+  - turn review into eval
 ---
 
 # Self-Improvement Loop
@@ -35,7 +38,8 @@ SIGNAL -> RECORD -> CURATE -> PROPOSE -> MEASURE -> GATE -> APPLY -> CAPTURE -> 
 
 1. **SIGNAL** — flow/`tool_call` telemetry hotspots, caught failures,
    plan-deviation log entries (`unknowns-and-deviations.md` DEVIATIONS_LOG),
-   and completed-work signatures enter the loop. Owners:
+   completed-work signatures, and the agent's own tool-gap self-report
+   (REFLECTION_TO_EVAL_PIPELINE below) enter the loop. Owners:
    `flow-conformance-postflight.md`, `skill-promotion-loop.md` (DETECTION).
 2. **RECORD** — a caught failure that could recur becomes one durable `L-NNN`
    avoidance rule in the local ledger. Owner: `lessons-accumulation.md`.
@@ -78,6 +82,48 @@ never free prose to re-parse (contract SSoT: `external-orchestrator-entry.md`).
 | PROPOSE         | promotion candidates (suggest-only)         |
 | MEASURE         | `evals/` held-out set + before/after delta  |
 | CAPTURE delta   | `.sfs-local/harness/evolution-ledger.md`    |
+
+## BE_THE_AGENT_FIRST (upstream of MEASURE)
+
+Before automating a task, the operator performs it by hand — once, for real —
+and that run becomes the definition of "good". Without it there is nothing to
+measure against: MEASURE scores a candidate against a held-out set, but the set
+encodes a standard someone had to fix first, and a standard invented *after* the
+automation exists tends to describe what the automation already does. So the
+manual run comes first, and every later iteration is compared to it rather than
+to the previous automated run.
+
+This is the upstream step of anchors that already exist, not a new mechanism:
+the held-out set (`skill-promotion-loop.md` HELD_OUT_SCORING) needs a standard
+to encode, and a judge needs a known-good case before it can be trusted to fail
+on a deliberately-broken one (`harness-autonomy.md` JUDGE_NEGATIVE_CONTROL). It
+is also what makes a wrong-premise fixture checkable at all (`evals/README.md`).
+
+## REFLECTION_TO_EVAL_PIPELINE (SIGNAL -> MEASURE)
+
+Manual review is where quality judgments get made and then lost. This pipeline
+keeps them:
+
+1. **Structure the reflection.** A manual review of a run is written as scored
+   dimensions with an explicit pass/fail line, not prose impressions.
+2. **Promote it to an eval case.** Each scored dimension becomes a case in the
+   held-out set, so the same judgment applies automatically next time.
+3. **Delegate transcript scoring to a judge agent.** Reading long run
+   transcripts by hand does not scale; a judge agent scores them and the human
+   adjudicates disagreements — the judge clears JUDGE_NEGATIVE_CONTROL first.
+
+Two consequences worth naming. **An eval is a speed instrument before it is a
+quality gate**: its first payoff is a faster development cycle, so an incomplete
+eval set started early beats a complete one started late — adoption authority
+still comes from the gate, never the score (measured-but-not-sufficient, below).
+And the agent's **tool-gap self-report** — "I could not do X because tool Y did
+not exist" — is a first-class SIGNAL input: it names the next thing to build
+from the one vantage point the operator does not have.
+
+External validation (by-reference): a Claude blog writeup on a long-running
+autonomous investigator (2026-07-22) — perform the work yourself before
+automating it, and convert manual reflection into automated scoring for cycle
+speed; vendor, product, and business figures held out.
 
 ## Invariants (declared once)
 

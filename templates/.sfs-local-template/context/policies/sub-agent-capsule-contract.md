@@ -64,6 +64,33 @@ validation (by-reference): a Claude blog CISO guide (2026-07-17) — controls
 scope to verbs, and least agency beats least privilege for agents; vendor
 specifics held out.
 
+CONSTRAIN_ORCHESTRATION_FREE_JUDGMENT: the capsule's fields and
+LEAST_AGENCY_VERB_SCOPING above constrain the **orchestration** layer — what
+always happens, in what order, with which verbs reachable. They are not
+licence to constrain the **judgment** interval as well. Inside `files_scope`
+and `tools_allowed`, how the worker gets to the outcome is left open:
+open-ended tools (read, search, shell within scope) are what let it route
+around a surprise instead of failing at it, and prescribing the method is how
+a capsule loses the improvisation that produced the best results. The dividing
+line is a placement rule, not a strength dial — **what must always happen is
+hard-coded in the harness; how it is solved is free** (`harness-autonomy.md`
+PROMPTS_ARE_SUGGESTIONS puts the first half in the harness rather than in
+prose). It is also why the dispatcher/specialist split holds: the dispatcher
+constrains routing, the specialist keeps its judgment. A capsule whose
+`acceptance_criteria` pin the method rather than the outcome has crossed the
+line, and it shows up as a deviation the worker must log rather than as better
+control. External validation (by-reference): a Claude blog writeup on a
+long-running autonomous investigator (2026-07-22) — constrain orchestration,
+free judgment; vendor, product, and business figures held out.
+
+SUBAGENT_TIER_DEFAULT: for high-volume worker capsules the economical default
+is a mid-tier runtime, with escalation to the strongest tier reserved for
+low-confidence or genuinely hard slices — the routing decision and its
+call conditions are data, owned by `external-orchestrator-entry.md`
+ADVISOR_STRATEGY_BINDING and the `agent_runtime_bindings` surface. Not
+restated here; named so a capsule author knows a tier is a routing input, not
+a per-capsule field.
+
 `token_budget` and `timeout` follow **warn-before-block**: surface a threshold
 warning before the ceiling (the 75/90% two-step alert pattern, external
 admin-controls case by-reference) so the worker decides refine / pivot / halt

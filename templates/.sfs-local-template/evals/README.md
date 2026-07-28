@@ -26,6 +26,14 @@ load_when: ["evals", "held-out", "eval set", "benchmark", "head-to-head", "eval-
 - **model head-to-head** — 모델 교체 판단은 같은 도메인 세트로 현행 vs 후보를
   나란히 채점합니다.
 
+- **BE_THE_AGENT_FIRST (선행 단계)** — 케이스를 고정하기 전에 운영자가 그
+  작업을 한 번 손으로 수행해 "good" 기준을 만듭니다. 자동화가 생긴 뒤에 만든
+  기준은 그 자동화가 이미 하는 일을 기술하기 쉽습니다. SSoT 는
+  `policies/self-improvement-loop.md` (BE_THE_AGENT_FIRST /
+  REFLECTION_TO_EVAL_PIPELINE) — 여기서 재나열하지 않습니다. 같은 정책이
+  "eval 은 품질 게이트이기 전에 개발 사이클 속도 장치" 라는 이유로 불완전한
+  세트라도 일찍 시작하도록 요구합니다.
+
 ## 케이스 형식 (stage 1 — deterministic, LLM 0토큰)
 
 케이스 하나 = md 파일 하나. grep-assert 형식 (`tests/` 의 has-assert 와 동형):

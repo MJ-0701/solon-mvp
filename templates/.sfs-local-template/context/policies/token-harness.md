@@ -121,10 +121,20 @@ question on a failed slice: **"did it fail because it didn't know (capability
   routing (`runtime-token-firewall.md`, fcp-model-tier) rather than a new
   mechanism. Default effort first; tune per task-type preference, not per
   task.
+- **Route from a record, not a feel.** The ladder's tier decision is decided
+  against two recorded numbers per task class — **task completion ratio** and
+  **cost per task** — and the second is why "start at the strongest tier, then
+  downshift" is not extravagant: a stronger tier that needs fewer turns and
+  less thinking often wins on cost *per task* while losing on cost per token.
+  This pair is the measured binding behind every routing surface that consumes
+  it (`external-orchestrator-entry.md` ADVISOR_STRATEGY_BINDING for selective
+  advisor calls, `model-workaround-sunset.md` MODEL_HEAD_TO_HEAD_ON_UPGRADE for
+  swap decisions) — recorded once here, not re-derived per surface.
 
 External validation (by-reference): a Claude blog post on choosing model and
-effort level (2026-07-07); vendor model names and effort-UI specifics held
-out.
+effort level (2026-07-07), a model-selection guide, and an overnight-agent
+operator interview (2026-07-20/24); vendor model names, benchmark names,
+effort-UI specifics, and every performance figure held out.
 
 ## SERIALIZE_EXPENSIVE_OPS
 

@@ -11,6 +11,7 @@ load_when:
   - optional orchestrator
   - typed handoff
   - structured contract
+  - advisor strategy
 ---
 
 # External Orchestrator Entry
@@ -76,6 +77,34 @@ confirm) as well as author/reviewer — see the verifier capsule patterns in
   (`sfs event` typed `key=value` fields, including the `tool_call` telemetry
   schema) apply the identical typed-contract rule to the file bus: machine-
   checkable fields, not narration (`policies/flow-conformance-postflight.md`).
+
+## ADVISOR_STRATEGY_BINDING
+
+The advisor↔Code file bus is not only a review channel; it is a **cost/quality
+routing strategy**, stated here so it is configured rather than improvised. A
+fast worker runtime does the work and a stronger advisor runtime is invoked
+**selectively** — to check a plan before it executes, or to judge a result —
+not on every step. The measured claim adopted as a binding: worker-plus-
+selective-advisor lands close to advisor-only quality at much lower cost per
+task, so "route everything to the strongest runtime" is not the default. Cost
+is compared **per task**, not per token.
+
+Per OCP (`docs/maintenance/2026-06-23-multi-agent-team-topology.design.md` §3 —
+a binding is data, not code), the **call conditions are a data surface** beside
+`agent_runtime_bindings`:
+
+- the worker is **stuck** (discard ladder refine/pivot, `harness-autonomy.md`);
+- a **verification gate** is being crossed (Gate 3 / Gate 6, self-CPO);
+- the slice is declared **low-confidence** (`unknowns-and-deviations.md`).
+
+Anything outside those conditions runs worker-only. By-reference, not restated:
+the tier ladder (start strong, downshift by effort) and the completion-ratio ×
+cost-per-task routing evidence are owned by `token-harness.md`
+KNOB_DIAGNOSTIC_LADDER, swap decisions are measured head-to-head
+(`model-workaround-sunset.md`), and the capsule-side default is
+`sub-agent-capsule-contract.md` SUBAGENT_TIER_DEFAULT. External validation
+(by-reference): a Claude blog model-selection guide and an overnight-agent
+operator interview (2026-07-20/24); class names, benchmarks, figures held out.
 
 ## Inviolable gates
 
