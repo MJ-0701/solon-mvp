@@ -13,20 +13,17 @@ checks.
 
 SFS applies this as a project-operating contract:
 
-- Diagnose before long autonomy: `sfs harness doctor` checks whether a project
-  has thin entry docs, routed context, active divisions, memory, tests, and
-  release/check rails.
+- Diagnose before long autonomy: `sfs harness doctor` checks whether a project has
+  thin entry docs, routed context, active divisions, memory, tests, and release/check rails.
 - Audit before extending a generated harness: compare declared agents, skills,
   orchestrator pointers, and change history with the filesystem. Classify the
   slice as new build, extension, architecture change, or maintenance before
   adding another worker.
-- Map before parallelization: `sfs harness map --write` records roles, inputs,
-  outputs, quality gates, and human-owned boundaries before optional worker
-  lanes are split.
-- Sanity before cartography: the readiness audit (doctor's AI Readiness
-  section) or an explicit `.sfs-local/readiness-waiver` is recommended before
-  `map --write` — a map over an unhealthy codebase is false information.
-  Rubric, waiver, and order discipline: `harness-readiness.md` (signal-only).
+- Map before parallelization: `sfs harness map --write` records roles, inputs, outputs,
+  quality gates, and human-owned boundaries before optional worker lanes are split.
+- Sanity before cartography: the readiness audit (doctor's AI Readiness section) or an explicit
+  `.sfs-local/readiness-waiver` is recommended before `map --write` — a map over an unhealthy
+  codebase is false information. Rubric, waiver, order: `harness-readiness.md` (signal-only).
 - Locate the maturity level before expanding autonomy: doctor's AI Maturity
   section scores a 5-level impact ladder (delegation, review loop, parallel
   capsules, unattended outputs) from workbench artifacts — climbing one level
@@ -46,9 +43,8 @@ SFS applies this as a project-operating contract:
   unshared workspaces — the roster is the antidote. This is the team-layer
   twin of the advisor-Code file bus below: declare the players, then route work
   to them by artifact.
-- Lock the change basis before long implementation: write a compact docs/ADR/
-  spec diff or equivalent run brief so workers read the changed intent first,
-  not the whole conversation or a stale plan.
+- Lock the change basis before long implementation: write a compact docs/ADR/spec diff or equivalent
+  run brief so workers read the changed intent first, not the whole conversation or a stale plan.
 - SPEC_IS_THE_ARTIFACT: the artifact that is **verified** must be the artifact
   that is **executed or consumed** — a translation layer between them is a
   drift source by construction, because the check ages against a copy. SFS's
@@ -95,9 +91,8 @@ SFS applies this as a project-operating contract:
   kept — the kernel's minimum-useful-slice rule applies inside the loop too.
   `halt` routes to the human-owned product-judgment boundary, never an automatic
   override.
-- Treat artifacts as coordination, not chat: workers write files, reports,
-  ledgers, test output, or release evidence; leads inspect artifacts instead of
-  relying on conversational memory.
+- Treat artifacts as coordination, not chat: workers write files, reports, ledgers, test output,
+  or release evidence; leads inspect artifacts instead of relying on conversational memory.
 - Use an advisor-Code file bus for split verification: each reviewer writes an
   artifact capsule with rule, evidence, finding, uncertainty, and requested
   action. For parallel review, hold a fan-out/synthesize barrier until all
@@ -144,8 +139,17 @@ SFS applies this as a project-operating contract:
   where a given instruction belongs is scored by
   `steering-surface-taxonomy.md`). Composes with BOUNDS_OUTLIVE_MODEL_LIMITS
   (a bound is operator permission, not prompting) and FIX_THE_LOOP_NOT_THE_CODE
-  (the repeat is fixed upstream). External validation (by-reference): a Claude
-  blog long-running-agent writeup (2026-07-22); vendor and figures held out.
+  (the repeat is fixed upstream). APPROVAL_FATIGUE_DECAY is the quantitative twin
+  and closes the last escape hatch: a per-step human approval gate catches only a
+  small minority of risky steps to begin with, and **fewer the longer the session
+  runs**, while an always-on classifier layer holds its rate throughout. So "a
+  human approves every step" is not the safety argument that lets a standing rule
+  stay in a prompt — least of all on the long or unattended runs where it decays
+  most. Scarce consent is spent only where no layer may decide alone
+  (`credential-hygiene.md` NEVER_APPROVE_CLASS). External validation
+  (by-reference): Claude blog writeups on long-running agents (2026-07-22) and on
+  default tool-call approval (2026-08-07); vendor, mode names, study figures, and
+  product thresholds held out.
 - BOUNDS_OUTLIVE_MODEL_LIMITS: design boundaries from **what the operator
   permits**, never from what today's model cannot do — prompt scaffolds and
   capability gaps are not control points, and they expire at the next model

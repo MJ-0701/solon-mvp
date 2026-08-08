@@ -11,21 +11,19 @@ load_when: "Read when registering Solon with an MCP-capable host or when extendi
 
 # Solon MCP Server
 
-This is an **optional bridge**, not part of the Solon runtime itself. It
-exposes the bash-first `sfs` CLI as a small set of [MCP](https://modelcontextprotocol.io)
-tools so any MCP-capable host — Claude Desktop, Claude in Chrome, Cursor,
-the Claude Agent SDK, and others — can drive a Solon project without
-shelling out to bash manually.
+This is an **optional bridge**, not part of the Solon runtime itself. It exposes the
+bash-first `sfs` CLI as a small set of [MCP](https://modelcontextprotocol.io) tools so any
+MCP-capable host — Claude Desktop, Claude in Chrome, Cursor, the Claude Agent SDK, and
+others — can drive a Solon project without shelling out to bash manually.
 
-Solon stays bash-first. The MCP server is a thin Python process that
-shells out to `sfs` and forwards its stdout **verbatim**, in line with
-the `kernel.md` SSoT rule: bash adapter output is the source of truth
-and must not be reshaped.
+Solon stays bash-first. The MCP server is a thin Python process that shells out to `sfs`
+and forwards its stdout **verbatim**, in line with the `kernel.md` SSoT rule: bash adapter
+output is the source of truth and must not be reshaped.
 
 ## What it ships
 
-12 tools that map 1:1 onto the `sfs` 7-step flow plus a handful of
-read-only and evidence surfaces:
+12 tools that map 1:1 onto the `sfs` 7-step flow plus a handful of read-only and
+evidence surfaces:
 
 | Tool name             | `sfs` command          | Purpose                                   |
 | --------------------- | ---------------------- | ----------------------------------------- |
@@ -44,19 +42,18 @@ read-only and evidence surfaces:
 | `sfs_decision`        | `sfs decision`         | Durable decision record                   |
 | `sfs_capture`         | `sfs capture`          | Side-quest / incident evidence note       |
 
-Intentionally excluded from this MVP: `sfs commit`, `sfs loop`, `sfs tidy`.
-Those need MCP-specific UX work (confirmation flows, multi-stream output,
-audit framing) and will land in follow-up patches.
+Intentionally excluded from this MVP: `sfs commit`, `sfs loop`, `sfs tidy`. Those need
+MCP-specific UX work (confirmation flows, multi-stream output, audit framing) and will
+land in follow-up patches.
 
 ## Install
 
 You need a working `sfs` CLI on `PATH` first. Then install the bridge.
 
-> ℹ️ **Source-clone is the only path supported in 0.7.x.** The
-> `pipx install solon-mcp` command below is the *target shape* once
-> `solon-mcp` is published to PyPI. See [`PUBLISHING.md`](PUBLISHING.md)
-> for the maintainer-side cut recipe; the current schedule is that PyPI
-> publish lands in a 0.7.x follow-up patch.
+> ℹ️ **Source-clone is the only path supported in 0.7.x.** The `pipx install solon-mcp`
+> command below is the *target shape* once `solon-mcp` is published to PyPI. See
+> [`PUBLISHING.md`](PUBLISHING.md) for the maintainer-side cut recipe; the current
+> schedule is that PyPI publish lands in a 0.7.x follow-up patch.
 
 ```bash
 # 0.7.x — source clone (the only currently supported path):
@@ -82,6 +79,14 @@ stdout, never fails the call); `sfs flowcheck` reads these read-only into an
 advisory tool-health summary that pinpoints repeated-failure / slow tools and
 never gates. `SOLON_MCP_TELEMETRY=0` disables it.
 
+## Protocol revision
+
+The MCP spec revision this server targets is declared once in the source, as
+`MCP_PROTOCOL_REVISION` in `solon_mcp_server.py` — this README deliberately does not
+restate the date, because two copies are two things to forget to bump. A spec revision moves
+three things together: bump the constant, record whether the previous revision stays
+supported, and name both in `CHANGELOG.md`.
+
 ## Register with a host
 
 ### Claude Desktop
@@ -106,23 +111,11 @@ Restart Claude Desktop. The 12 `sfs_*` tools appear in the tool list.
 Same JSON shape, in the extension's MCP configuration panel. Use the
 `solon-mcp` console script (absolute path is safer on Chrome's PATH).
 
-### Cursor
+### Cursor and Claude Code
 
-Add to `~/.cursor/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "solon": {
-      "command": "solon-mcp"
-    }
-  }
-}
-```
-
-### Claude Code
-
-`claude-code` honors `~/.claude/mcp_servers.json` (path may vary):
+Cursor reads `~/.cursor/mcp.json` and takes the same `mcpServers` shape as Claude Desktop
+above. Claude Code honors `~/.claude/mcp_servers.json` (path may vary) with the server keyed
+at the top level:
 
 ```json
 {
@@ -165,10 +158,13 @@ process reads JSON-RPC frames from stdin and writes them to stdout.
 
 ## Where it runs
 
-The MCP server is **stateless** — every tool call runs in the host's
-current working directory. To drive a specific Solon project, change
-the host's working directory to that project, or set `cwd` explicitly
-in the host's MCP server config when the host supports it.
+The MCP server is **stateless by construction** — every tool shells out to the installed
+`sfs` binary and returns its stdout verbatim, keeping no handle, cursor, or accumulated
+context between calls, and durable state lives on disk in the consumer's `.sfs-local/`.
+A server restart, a second parallel session, and a resume after interruption are therefore
+all correct without recovery code. Every call runs in the host's current working directory;
+to drive a specific Solon project, change the host's working directory to that project, or
+set `cwd` explicitly in the host's MCP server config when the host supports it.
 
 ```json
 {
@@ -191,9 +187,8 @@ This matches how `sfs` itself behaves from a terminal.
 
 ## Hacking on it
 
-The server is a single file: `solon_mcp_server.py`. Tools are declared
-as `@mcp.tool()`-decorated functions. To add a new tool: add the function
-with a clear docstring (the docstring becomes the tool description LLMs see),
-call `_run_sfs([...])` with the bash adapter args, update the table at the top
-of this README, then update `tests/test-mcp-server-contract.sh` to assert the
-new tool is declared.
+The server is a single file: `solon_mcp_server.py`. Tools are declared as
+`@mcp.tool()`-decorated functions. To add a new tool: add the function with a clear
+docstring (the docstring becomes the tool description LLMs see), call `_run_sfs([...])`
+with the bash adapter args, update the table at the top of this README, then update
+`tests/test-mcp-server-contract.sh` to assert the new tool is declared.

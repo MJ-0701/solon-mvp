@@ -141,6 +141,34 @@ new AI reviewers run in shadow mode to build trust before promotion, and
 auto-approvals stay sampled afterwards; vendor, org, and measurement figures
 held out.
 
+## VERSIONED_EXTENSION_SURFACE
+
+One question before any new capability lands: **is this a core change, or does
+it belong on a versioned extension surface?** Fix the core contract, and add
+features as extensions that carry their own version. When there is no official
+path to extend without touching the core, extension pressure has nowhere to go
+but into the core, and the contract everything else depends on starts absorbing
+features it was never scoped for.
+
+Solon already runs this shape in three places, named here by reference rather
+than re-derived per surface: a new `policies/*` or `commands/*` file extends the
+routed context while `kernel.md` stays fixed; `templates/` grows placeholders
+under a stable placeholder contract (`docs/maintenance/release-policy.md` §2);
+and this catalog's own nine buckets absorb new skills without renegotiating what
+a skill is. `mcp-server`'s declared spec revision is the same discipline pointed
+outward — a pinned core contract with the version stated in one place
+(`MCP_PROTOCOL_REVISION`).
+
+The answers differ in cost, which is the point of asking first: an extension is
+additive and reversible, a core change obligates every consumer through an
+upgrade. A capability that can only be built by widening the core is a design
+finding worth surfacing before it is built, not a routine patch. External
+validation (by-reference): the MCP specification release that moved features
+onto a versioned extensions framework while holding the core protocol fixed —
+the revision `mcp-server` pins, which this file deliberately does not restate
+(`MCP_PROTOCOL_REVISION` is the one copy). Vendor surfaces, extension product
+names, and auth/enterprise specifics held out.
+
 ## CROSS_REFERENCES
 
 - Gotchas accumulation: `lessons-accumulation.md` (the Gotchas slot for caught

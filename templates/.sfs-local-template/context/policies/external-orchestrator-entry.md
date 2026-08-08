@@ -94,7 +94,7 @@ a binding is data, not code), the **call conditions are a data surface** beside
 `agent_runtime_bindings`:
 
 - the worker is **stuck** (discard ladder refine/pivot, `harness-autonomy.md`);
-- a **verification gate** is being crossed (Gate 3 / Gate 6, self-CPO);
+- a **verification gate** is being crossed (Gate 3 / Gate 6, self-CPO) — the ship-eve evaluation at Gate 6 is the representative call point, the last moment a wrong result is still cheap;
 - the slice is declared **low-confidence** (`unknowns-and-deviations.md`).
 
 Anything outside those conditions runs worker-only. By-reference, not restated:

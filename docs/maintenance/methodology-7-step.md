@@ -63,6 +63,10 @@ MODEL_HEAD_TO_HEAD_ON_UPGRADE (여기서 재나열하지 않는다 — 포인터
 분해 규율의 공통 설계 근거 — 사람 머리에 안 담기는 산출물은 리뷰 불가라
 원점으로 되돌아간다 — 는 `policies/md-line-budget.md` ARTIFACT_FITS_IN_HEAD
 가 SSoT 다 (200줄 예산 · thin entry · capsule 분해 = 같은 이유의 세 표면).
+Gate 를 "사람이 매 스텝 승인하니 안전" 으로 읽지 말 것 — 승인 검출력은 세션이
+길수록 떨어지므로 (APPROVAL_FATIGUE_DECAY, `policies/harness-autonomy.md`),
+상시 규칙은 harness 층에 두고 재량 불가 클래스는 별도 선언한다 (SSoT 는
+`policies/credential-hygiene.md` NEVER_APPROVE_CLASS — 여기서 재나열하지 않는다).
 
 대규모 배치/마이그레이션급 작업의 루프 규율 4개 — 반복 적발은 룰 상류 수정 +
 배치 재생성(FIX_THE_LOOP_NOT_THE_CODE), 판정자는 음성 대조 선검증

@@ -88,7 +88,7 @@ reference reads, and an implementation-plan read-back are all forms of this
 pass. It matters most for non-technical operators, whose unknown-unknowns
 quadrant is the largest; the pass converts them into known-unknowns while
 they are still cheap. Findings fold into plan AC/risks, same as a matching
-lesson (`lessons-accumulation.md` consult obligation).
+lesson (`lessons-accumulation.md` consult obligation). Its adversarial sibling — attack the answer you did find, not the question you did not ask — is ANTAGONISTIC_RESEARCH_PASS (`source-pointer-citation.md`), which runs after research and before implementation.
 
 EVAL_SURFACE_BLIND_SPOT: the pass's checklist includes the **eval/test
 surface itself** — what can the acceptance criteria and existing tests *not*

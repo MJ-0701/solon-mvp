@@ -61,6 +61,30 @@ except ImportError as exc:  # pragma: no cover
     ) from exc
 
 
+# ─────────────────────────────────────────────────────────────────────
+# Protocol revision — single source
+# ─────────────────────────────────────────────────────────────────────
+#
+# The MCP spec revision this server is written and verified against. It is
+# declared in exactly one place: the README, the release checklist, and any
+# future capability negotiation read it from here rather than restating a date
+# that then drifts. On a spec revision, three things move together — bump this
+# constant, decide and record whether the older revision stays supported, and
+# name both in CHANGELOG.md (docs/maintenance/release-policy.md).
+#
+# STATELESS_TRANSPORT_ASSUMPTION holds here by construction, and the audit that
+# established it is worth stating so a later patch does not quietly break it:
+# every tool below is a thin shell-out to the installed `sfs` binary that
+# returns its stdout verbatim. This module keeps no handle, cursor, or
+# accumulated context across calls — the only module-level values are immutable
+# config read once from the environment. All durable state lives on disk in the
+# consumer's `.sfs-local/`, which is what makes server restart, parallel
+# sessions, and resume-after-interrupt correct by construction rather than by
+# recovery code (the transport-layer counterpart of DONE_IS_ARTIFACT_ON_DISK).
+# A future tool that wants per-session memory writes an artifact; it does not
+# add a module global.
+MCP_PROTOCOL_REVISION = "2026-07-28"
+
 mcp = FastMCP("solon")
 
 

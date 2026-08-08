@@ -118,6 +118,29 @@ documentation-level 계약이다. 외부 검증 (by-reference): frontier-lab 사
 (Claude blog, 2026-07-10) — root cause 를 짚되 모르는 것을 모른다고 말하는
 것이 장시간 무인 자율성 신뢰의 근거 중 하나; vendor 디테일 보류.
 
+## REASONING_LOG_AS_AUDIT_ARTIFACT (docs-level, 위험 티어 한정)
+
+solon 은 **무엇을 만들었는지**(plan/report/deviations)는 계약하지만 **왜 그렇게
+판단했는지**의 흔적은 리뷰어 재량으로 남겨 둔다. **최상위 위험 티어에 한해** 그
+흔적도 산출물로 계약한다 — `harness-autonomy.md` PRE_WORK_INVARIANT_DECLARATION
+의 사후 짝이다. 사전 선언은 "무엇을 지킬 것인가"를, 추론 로그는 "가는 길에 무엇을
+저울질하고 무엇을 버렸는가"를 남기므로, 리뷰어가 판단을 재구성하지 않고 감사할 수
+있다. 위 HONEST_UNKNOWNS 와도 짝이다 — 그쪽은 확신도와 미확인을 말하게 하고,
+이쪽은 도달한 판단의 경로를 남긴다.
+
+**전면 적용 아님 — 조건부가 설계다.** 발동 조건은
+`work-delegation-and-startup.md` DELEGATION_UNIT_LADDER 의 위험 티어 상단(파괴적
+· 마이그레이션급 작업, 장시간 무인 런)이며, 새 티어를 만들지 않고 그 티어링을
+그대로 재사용한다. 그 밖에서는 꺼 둔다: 일상 작업의 추론 로그는 아무도 읽지 않을
+감사를 위해 반복 토큰 비용을 내는 것이고, 좋은 관행이 의례로 굳는 경로가 그것이다.
+로그는 기존 증거 표면(workbench 산출물 또는 capsule `output_paths`)에 실린다 —
+새 파일 클래스도, 새 명령도 없다. verdict/exit 불변, signal-only.
+
+샌드박스 선행 실행과 인간 승인 게이트는 Gate 6 · capsule 계약이 이미 커버하므로
+재기안하지 않는다. 외부 검증 (by-reference): 공동 개발된 리스크 분석 에이전트
+(Claude blog, 2026-08-06) — 추론 과정 로그 자체를 감사 산출물로 삼는다; 회사명 ·
+업권 · 자산군 서술 보류.
+
 ## Verifier context split pattern (docs-level)
 For high-risk or repeated FCP/review rules, prepare a rule-scoped verifier context:
 the verifier sees the rule, AC, evidence paths, and known counterexamples, not

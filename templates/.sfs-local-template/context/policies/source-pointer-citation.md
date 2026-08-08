@@ -10,6 +10,11 @@ load_when:
   - fetched content
   - untrusted content
   - prompt injection
+  - refute my conclusion
+  - antagonistic research
+  - pressure-test assumptions
+  - research pass
+  - 반증
 ---
 
 # Source Pointer Citation
@@ -108,6 +113,42 @@ findings of every kind.
 External validation (by-reference): a Claude blog AI-SDLC security guide
 (2026-07-21) — findings must carry proof of validity before they accrue
 reviewer trust; vendor, org, and measurement figures held out.
+
+## ANTAGONISTIC_RESEARCH_PASS
+
+PROOF_CARRYING_FINDING asks whether a claim carries evidence. This asks the
+harder question about the agent's *own* research: before acting on a conclusion
+it reached itself, the agent spends one pass trying to **refute** it.
+
+It is the third and missing member of a family whose other two Solon already
+owns, and the distinction is the whole point:
+
+- HONEST_UNKNOWNS (`flow-conformance-postflight.md`) — *say what you do not
+  know*. It governs the gaps the agent can see.
+- BLIND_SPOT_PASS (`unknowns-and-deviations.md`) — *ask what was never said*.
+  It governs the gaps the operator can see.
+- ANTAGONISTIC_RESEARCH_PASS — *attack the answer you already found*. It
+  governs the gap neither can see, because a plausible first conclusion looks
+  the same from both sides as a correct one.
+
+The pass is adversarial on purpose: name what would have to be true for the
+conclusion to be wrong, then go look for exactly that — a counter-example in
+the codebase, a contradicting source, a case the reasoning does not cover. It
+runs once, after research and **before implementation begins**, which is the
+last moment the answer is still cheap to change.
+
+The trace is the deliverable, not the confidence. The plan records what was
+attacked and what survived (one line per attempt: the assumption, what was
+tried against it, what it did to the conclusion), and a research-backed plan
+with **no** refutation trace is a review finding — the same standing as a
+reference named with no read trace (REFERENCES_FIELD). A pass that finds
+nothing is a valid result and is recorded as one; a pass that never happened is
+not. Signal-only: it moves plan readiness and review findings, never exit codes.
+
+External validation (by-reference): an operator account of running agents with
+broad autonomy in production (Claude blog, 2026-08-07) — the agent commits its
+gathered context, then pressure-tests its own assumptions before it writes
+code; company names, product surfaces, and every figure held out.
 
 ## Cross-references
 

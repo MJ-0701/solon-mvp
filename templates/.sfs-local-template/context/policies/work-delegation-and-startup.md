@@ -44,6 +44,11 @@ trusts, and the risk tier of the surface being touched.
   = low) and caps the delegable unit per tier. A high-tier surface stays at
   `chunk` even when the verifier is strong — the tier caps the ladder, it does
   not average with it.
+- Input 3 — a measurable signal to climb: an unattended stretch is delegable at
+  `decision` only when the task carries a score the agent can hill-climb on its
+  own (a passing test, a benchmark, a metric that moves). Without one there is
+  nothing to steer by overnight and the unit stays capped, however low the risk
+  tier — the practical test for "can this run while I sleep?"
 - Suggest-only: the ladder recommends a unit; it never auto-promotes one.
   External validation (by-reference): a Claude blog AI-SDLC security guide and
   an overnight-agent operator interview (2026-07-20/21) — risk-tiered

@@ -53,6 +53,14 @@ a fresh session handoff with `report.md`, `review.md`, capture ids,
 commit/branch, and the next SFS command. `.sfs-local/` size is a tidy signal,
 not a token-meter substitute.
 
+On cost, **take stock for a month before you restrict**. You cannot set a sane
+limit before you have watched a month of real usage, so the first move is to see
+where the spend actually goes, not to cap it. And judge in the right unit: not
+tokens but **cost per outcome** — "what would this have cost without an agent,
+counting the work that would simply not have been done?" and "is this hard work,
+or merely a lot of work?" The full rubric lives in routed context:
+`policies/token-harness.md` KNOB_DIAGNOSTIC_LADDER is the SSoT.
+
 If a blank app would help before a sprint, the user should not need to know words
 like Next.js, Spring, Java, or API. The user can simply describe what they want
 to make. During brainstorm, the AI should infer when an initial project setup

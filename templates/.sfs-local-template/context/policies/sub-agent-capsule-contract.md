@@ -91,6 +91,13 @@ ADVISOR_STRATEGY_BINDING and the `agent_runtime_bindings` surface. Not
 restated here; named so a capsule author knows a tier is a routing input, not
 a per-capsule field.
 
+Effort is allocated **at issue time, per pipeline stage**, not only escalated
+after a failure. Routing, extraction, and summarization stages issue at low
+effort; the final judgment and review stages issue high. The failure-driven
+escalation in `token-harness.md` KNOB_DIAGNOSTIC_LADDER still applies on top —
+this is the opening bid, not a ceiling. Deciding it up front is what makes an
+unattended run's cost predictable instead of discovered the next morning.
+
 `token_budget` and `timeout` follow **warn-before-block**: surface a threshold
 warning before the ceiling (the 75/90% two-step alert pattern, external
 admin-controls case by-reference) so the worker decides refine / pivot / halt
@@ -119,7 +126,12 @@ unchanged; the warning is a signal, not a new gate.
   interruption and resume are correct by construction: a crashed or killed
   run resumes by rebuilding the queue from what actually shipped (same
   migration source as the serialization rule, by-reference,
-  `token-harness.md` SERIALIZE_EXPENSIVE_OPS).
+  `token-harness.md` SERIALIZE_EXPENSIVE_OPS). **The research step is inside
+  this contract, not upstream of it**: context an agent explores is committed
+  as a file the next step reads, so what the implementation is built on is
+  reviewable and re-derivable rather than living in one session's window. The
+  refutation trace of ANTAGONISTIC_RESEARCH_PASS
+  (`source-pointer-citation.md`) rides that same artifact.
 - SHARED_SURFACE_CONFLICT_SCAN: before a worker edits a **shared surface**
   (a file or contract other lanes also touch), it scans the recent commits
   and the live queue for overlapping work and surfaces the conflict *before*

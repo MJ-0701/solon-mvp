@@ -63,6 +63,12 @@ waiver 와 fix 는 **그 인스턴스**를 닫을 뿐 클래스를 닫지 않는
 의 `promoted` 필드에 남는다. 승격 없이 waiver 만 쌓이는 클래스는 그 자체가
 finding 이다.
 
+**광역 waiver 는 예외가 아니라 게이트 폐지다.** 임의 실행·임의 송출을 통째로
+통과시키는 넓은 waiver/allow 규칙 (한 클래스 전체, 한 디렉토리 전체, 와일드카드
+명령) 은 인스턴스를 닫는 게 아니라 게이트 자체를 없앤다 — waiver 는 finding 단위
+로만 쓰고, 넓히고 싶으면 규칙을 고쳐라. 재량에 넘길 수 없는 클래스는 애초에
+waiver 대상이 아니다 (`policies/credential-hygiene.md` NEVER_APPROVE_CLASS).
+
 ## LLM 지정 지점 (스크립트 밖)
 
 결정론 스캔 뒤, 판단이 필요한 세 단계는 LLM 이 수행한다 — 리포트 말미가 이 순서

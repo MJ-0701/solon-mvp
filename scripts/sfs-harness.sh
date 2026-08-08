@@ -783,6 +783,53 @@ print_readiness_section() {
 # level can never change doctor's exit code. Deterministic bash — no LLM.
 # Levels 1-2 (autocomplete/chat) leave no repo artifact, so level 2 is the
 # honest floor for an initialized project without delegation evidence.
+# A gate that never fires is not a healthy gate — it is an unverified one,
+# either because nothing ever tripped it or because work is routing around it.
+# Solon's countable "the gate did something" evidence is the deviation ledger
+# (`## Deviations` entries) and the lessons file, both already written by the
+# existing rails. Info-only, never a warn/fail: a genuinely clean stretch and a
+# dead ledger look identical from here, so this reports the count and leaves the
+# reading to the operator. Rationale SSoT: policies/unknowns-and-deviations.md
+# DEVIATIONS_LOG + policies/lessons-accumulation.md.
+gate_activity_check() {
+  local sprints=0 with_ledger=0 with_entries=0 lessons=0 d
+
+  for d in .sfs-local/sprints/*/; do
+    [ -d "$d" ] || continue
+    sprints=$((sprints + 1))
+    local f found_ledger=0 found_entries=0
+    for f in "${d}implement.md" "${d}log.md" "${d}report.md"; do
+      [ -f "$f" ] || continue
+      grep -q '^##[[:space:]]*Deviations' "$f" 2>/dev/null || continue
+      found_ledger=1
+      # Entries, not the literal 'none observed' completion claim.
+      if awk '/^##[[:space:]]*Deviations/ { inledger = 1; next }
+              /^##[[:space:]]/           { inledger = 0 }
+              inledger && /[^[:space:]]/ && !/none observed/ { found = 1 }
+              END { exit !found }' "$f" 2>/dev/null; then
+        found_entries=1
+      fi
+    done
+    [ "$found_ledger" -eq 1 ] && with_ledger=$((with_ledger + 1))
+    [ "$found_entries" -eq 1 ] && with_entries=$((with_entries + 1))
+  done
+
+  if [ -f ".sfs-local/lessons.md" ]; then
+    lessons="$(grep -cE '^[[:space:]]*[-*#]?[[:space:]]*L-[0-9]+' .sfs-local/lessons.md 2>/dev/null || true)"
+    [ -n "$lessons" ] || lessons=0
+  fi
+
+  if [ "$sprints" -eq 0 ]; then
+    info "gate activity: no sprint workbench yet; skipping (signal-only, never blocks)"
+    return
+  fi
+
+  info "gate activity: ${with_ledger}/${sprints} sprint(s) carry a deviation ledger, ${with_entries} recorded an actual deviation, ${lessons} lesson(s) accumulated"
+  if [ "$with_entries" -eq 0 ] && [ "$lessons" -eq 0 ]; then
+    info "gate activity: nothing has tripped a gate across ${sprints} sprint(s) — either the work really was clean or the ledger is not being written; a gate with no recorded activity is unverified, not proven safe (signal-only)"
+  fi
+}
+
 # Rubric SSoT: templates/.sfs-local-template/context/policies/harness-maturity.md
 print_maturity_section() {
   section "AI Maturity (Self-Diagnosis)"
@@ -990,6 +1037,7 @@ print_doctor() {
   else
     warn "minimum autonomous-work harness has gaps; use 'sfs harness map --write' to make them explicit"
   fi
+  gate_activity_check
 
   section "Host Channels And 0.7.0 Surface"
   ok "CLI channel: sfs <cmd> (always present)"

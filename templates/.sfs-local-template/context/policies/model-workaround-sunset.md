@@ -67,7 +67,10 @@ reversed, exactly like an untagged workaround. And the **benchmark surface
 expands release-over-release**: as models improve, a static bench saturates
 and reads as "no gain" — grow the measured surface (new cases, new scoring
 dimensions) with each release so stagnation and improvement stay
-distinguishable (`self-improvement-loop.md` MEASURE). External validation
+distinguishable (`self-improvement-loop.md` MEASURE). Keep one real project
+pinned as the **fixed reference repository** the head-to-head always runs
+against, so successive swaps are compared on constant ground rather than on
+whichever codebase happened to be open. External validation
 (by-reference): a frontier finance-diligence platform benchmarks every new
 model head-to-head against its incumbent on domain evals and widens the bench
 each release (Claude blog, 2026-07-13); vendor, product, and performance

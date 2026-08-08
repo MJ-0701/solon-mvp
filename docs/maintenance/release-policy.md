@@ -28,6 +28,12 @@ wrapper 를 통해 Git Bash 기반 bash adapter SSoT 로 내려간다.
 을 고려한다. consumer 가 0.6.x → 0.7.x 로 `sfs upgrade` 했을 때 자기
 프로젝트 상태가 깨지지 않아야 한다.
 
+**외부 프로토콜 개정은 같은 층의 호환성 문제다.** `mcp-server` 가 선언하는 MCP
+spec revision (`MCP_PROTOCOL_REVISION`, 소스 단일 지점) 이 바뀌는 릴리스는 세
+가지를 함께 옮긴다 — (a) 상수 bump, (b) 직전 revision 하위호환 유지 여부 결정,
+(c) CHANGELOG 에 둘 다 명기. 회귀잠금:
+`tests/test-protocol-revision-single-source-policy.sh`.
+
 ## 3. VERSION 은 semver
 
 `VERSION` 은 semver `X.Y.Z-mvp` 또는 `X.Y.Z`. mvp suffix 는 풀스펙 수렴 전까지

@@ -101,6 +101,13 @@ load_when: ["token", "harness", "context", "Claude", "Codex", "Gemini", "MCP", "
 
 ## KNOB_DIAGNOSTIC_LADDER (context first, then effort, then model)
 
+Enter the ladder on **cost per outcome**, never cost per token — the unit that decides anything
+is what one finished result costs. Two questions before the knobs: **"what would this have cost
+without an agent, counting the work that would simply not have been done?"**, and **"is this
+hard work, or merely a lot of work?"** The second is the routing question — hard work on a small
+tier is dearer once retries and human correction are counted, bulk work on the strongest tier
+buys capability that goes unused, and a mixed pipeline inside one project is normal.
+
 Model tier and effort/thoroughness are different knobs for different failure
 modes: the model tier sets the **capability range** (what the agent can know
 and reason about), effort sets **how thoroughly it works** (files read,
