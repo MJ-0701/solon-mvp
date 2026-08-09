@@ -68,10 +68,26 @@ done < <(find "${CTX}" "${DIST_DIR}/docs" -name '*.md' -type f)
 grep -Eq '^#{1,6}[[:space:]]+NEVER_APPROVE_CLASS[[:space:]]*$' "${CRED}" \
   || fail "NEVER_APPROVE_CLASS owner must be credential-hygiene.md"
 
-# OUTBOUND_COMMUNICATION_NEVER_AUTO is merged into that class, not a rival SSoT
-outbound_files="$( { grep -rlF 'OUTBOUND_COMMUNICATION_NEVER_AUTO' "${CTX}" || true; } | wc -l | tr -d ' ')"
-[[ "${outbound_files}" -eq 1 ]] \
-  || fail "OUTBOUND_COMMUNICATION_NEVER_AUTO must live only in its merged owner (found ${outbound_files} files)"
+# OUTBOUND_COMMUNICATION_NEVER_AUTO is a *member* of that class, not a rival anchor.
+# So: it must never get a heading of its own anywhere, and its substantive statement
+# must sit inside the NEVER_APPROVE_CLASS section. `_INDEX.md` naming it is routing,
+# which is required elsewhere in this suite — not a second SSoT.
+while IFS= read -r f; do
+  grep -Eq '^#{1,6}[[:space:]]+OUTBOUND_COMMUNICATION_NEVER_AUTO' "$f" \
+    && fail "OUTBOUND_COMMUNICATION_NEVER_AUTO is a member of NEVER_APPROVE_CLASS, not its own anchor (heading in ${f#${DIST_DIR}/})"
+done < <(find "${CTX}" "${DIST_DIR}/docs" -name '*.md' -type f)
+
+nac_sect="$(awk '/^## NEVER_APPROVE_CLASS/{f=1;next} f&&/^## /{exit} f' "${CRED}")"
+[[ -n "${nac_sect}" ]] || fail "NEVER_APPROVE_CLASS section is empty"
+printf '%s\n' "${nac_sect}" | grep -Fq 'OUTBOUND_COMMUNICATION_NEVER_AUTO' \
+  || fail "OUTBOUND_COMMUNICATION_NEVER_AUTO must be stated inside the NEVER_APPROVE_CLASS section"
+
+# No policy file other than the owner may state it (the routing index may name it).
+while IFS= read -r f; do
+  [[ "$f" == "${CRED}" ]] && continue
+  grep -Fq 'OUTBOUND_COMMUNICATION_NEVER_AUTO' "$f" \
+    && fail "rival statement of OUTBOUND_COMMUNICATION_NEVER_AUTO in ${f#${DIST_DIR}/}"
+done < <(find "${CTX}/policies" "${CTX}/commands" -name '*.md' -type f)
 
 # ── (e) blanket waiver = gate removal (audit.md) ────────────────────
 fhasu "${AUDIT}" "광역 waiver 는 예외가 아니라 게이트 폐지다" "audit blanket-waiver rule"
