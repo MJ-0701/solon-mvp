@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 0.13.1 — the thin index feature table must stay in sync with what shipped.
+# 0.13.1 / 0.14.1 — the thin index feature table must stay in sync with what shipped.
 #
 # README.md (ko) and docs/en/index.md (en) both carry the six-axis "what Solon
 # provides" table. It is the first thing a reader sees, so it drifts silently
@@ -43,6 +43,19 @@ fhas "${EN}" "instruction classification" "en axis: instruction classification"
 fhas "${EN}" "advisor coaching binding" "en axis: advisor binding"
 fhas "${EN}" "security finding class closed loop" "en axis: security closed loop"
 
+# ── (b2) the 0.14.0 clauses reached BOTH indexes ────────────────────
+khas "${RM}" "구현 착수 전 자기 반증 패스" "ko axis: self-refutation pass"
+khas "${RM}" "고위험 티어는 추론 로그" "ko axis: reasoning log"
+khas "${RM}" "게이트 활동 계측" "ko axis: gate activity reading"
+khas "${RM}" "결과당 비용 프레임" "ko axis: cost per outcome"
+khas "${RM}" "단계별 effort 사전 배분" "ko axis: staged effort"
+
+fhas "${EN}" "self-refutation pass runs before implementation" "en axis: self-refutation pass"
+fhas "${EN}" "reasoning log on the top risk tier" "en axis: reasoning log"
+fhas "${EN}" "gate activity reading" "en axis: gate activity reading"
+fhas "${EN}" "cost-per-outcome framing" "en axis: cost per outcome"
+fhas "${EN}" "per-stage effort allocation" "en axis: staged effort"
+
 # ── (c) thin index — the table routes, it does not restate ──────────
 fhas "${RM}" "29-feature-overview.md" "README routes to the feature overview"
 for f in "${KO_OVERVIEW}" "${EN_OVERVIEW}"; do
@@ -51,7 +64,10 @@ done
 # Every anchor named in an index clause must have its full row in the overview,
 # so the index stays a pointer and the overview stays the SSoT.
 for anchor in RIGHTSIZE_CONTEXT_PASS RULE_VS_GUARDRAIL ADVISOR_STRATEGY_BINDING \
-              VULNERABILITY_CLASS_CLOSED_LOOP MID_RUN_INTENT_RECHECK; do
+              VULNERABILITY_CLASS_CLOSED_LOOP MID_RUN_INTENT_RECHECK \
+              ANTAGONISTIC_RESEARCH_PASS REASONING_LOG_AS_AUDIT_ARTIFACT \
+              KNOB_DIAGNOSTIC_LADDER VERSIONED_EXTENSION_SURFACE \
+              SUBAGENT_TIER_DEFAULT DELEGATION_UNIT_LADDER gate_activity_check; do
   grep -Ewq -- "${anchor}" "${KO_OVERVIEW}" || fail "ko overview missing anchor row: ${anchor}"
   grep -Ewq -- "${anchor}" "${EN_OVERVIEW}" || fail "en overview missing anchor row: ${anchor}"
 done
@@ -65,6 +81,16 @@ khas "${SAFETY}" "다른 에이전트의 요청도" "safety: agents are inside t
 # The pre-existing contract must survive the addition.
 khas "${SAFETY}" "조용히 덮어쓰지 않습니다" "safety: no silent overwrite preserved"
 khas "${SAFETY}" "최종 제품 판단은 항상 사용자" "safety: human owns product judgment preserved"
+
+# ── (d2) 0.14.0 safety additions, ko README section + both overviews ─
+khas "${SAFETY}" "그 자체로 안전 근거가 아닙니다" "safety: approval is not the argument"
+khas "${SAFETY}" "재량에 넘기지 않는 클래스" "safety: the never-approve class"
+khas "${SAFETY}" "광역 waiver 는 예외가 아니라 게이트 폐지" "safety: blanket waiver is gate removal"
+khas "${KO_OVERVIEW}" "APPROVAL_FATIGUE_DECAY" "ko overview safety: approval decay anchor"
+khas "${KO_OVERVIEW}" "NEVER_APPROVE_CLASS" "ko overview safety: never-approve anchor"
+fhas "${EN_OVERVIEW}" "APPROVAL_FATIGUE_DECAY" "en overview safety: approval decay anchor"
+fhas "${EN_OVERVIEW}" "NEVER_APPROVE_CLASS" "en overview safety: never-approve anchor"
+fhas "${EN_OVERVIEW}" "not a safety argument" "en overview safety: the discarded assumption"
 
 # ── (e) commands named by the axes actually exist ───────────────────
 # Asserted against the real runtime's own inventory rather than by grepping

@@ -49,11 +49,11 @@ Solon 은 앱 뼈대를 대신 만들지 않습니다. 뼈대는 각 프레임�
 
 | 축 | 무엇을 하나 | 대표 표면 |
 |---|---|---|
-| 7-step 작업 레일 | 흐름을 결정론 rail 이 소유, LLM 은 각 게이트 안에서만 호출. 장시간·무인 런은 런 중 intent 재검증 | `sfs start` / `plan` / `implement` / `review` / `retro` |
-| Evidence·기록 | 승인 · 결정 · waiver · 외부 근거를 최소 사실로 고정 | `sfs capture` / `note` / `recall` |
-| 하네스 엔지니어링 | 준비도 · 성숙도 · 비용 진단, 설계도, 무문서 역추적, 정적 보안 감사, 과제약·중복 지시 감지 | `sfs harness doctor` / `dig` / `audit` |
-| 컨텍스트·토큰 위생 | routed context, 얇은 어댑터, 위임 캡슐 계약, 지시 배치 판별 (비우회 게이트 vs 서술 advisory) | `sfs context` / `agent doctor` |
-| 팀·오케스트레이션 | 팀 preset, 6본부 council, 작업 라우팅/루프, advisor 선택 코칭 바인딩 | `sfs team` / `division` / `route` |
+| 7-step 작업 레일 | 흐름을 결정론 rail 이 소유, LLM 은 각 게이트 안에서만 호출. 장시간·무인 런은 런 중 intent 재검증, 구현 착수 전 자기 반증 패스 | `sfs start` / `plan` / `implement` / `review` / `retro` |
+| Evidence·기록 | 승인 · 결정 · waiver · 외부 근거를 최소 사실로 고정, 고위험 티어는 추론 로그까지 | `sfs capture` / `note` / `recall` |
+| 하네스 엔지니어링 | 준비도 · 성숙도 · 비용 진단, 설계도, 무문서 역추적, 정적 보안 감사, 과제약·중복 지시 감지, 게이트 활동 계측 | `sfs harness doctor` / `dig` / `audit` |
+| 컨텍스트·토큰 위생 | routed context, 얇은 어댑터, 위임 캡슐 계약, 지시 배치 판별 (비우회 게이트 vs 서술 advisory), 결과당 비용 프레임 | `sfs context` / `agent doctor` |
+| 팀·오케스트레이션 | 팀 preset, 6본부 council, 작업 라우팅/루프, advisor 선택 코칭 바인딩, 단계별 effort 사전 배분 | `sfs team` / `division` / `route` |
 | 기억·위키 | 장기 메모리, raw intake, 승격 파이프라인, 파생문서 주석 보존, 보안 finding 클래스 폐루프 | `sfs ingest` / `tidy --wiki-promote` |
 
 명령을 몰라도 됩니다. agent 에게 자연어로 지시하면 위 레일로 해석합니다

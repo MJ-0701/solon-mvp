@@ -29,6 +29,7 @@ Solon(SFS)의 전체 기능을 한 장으로 봅니다. 각 행은 상세 문서
 | 흐름 정합 점검 | `sfs flowcheck` / `sfs healthcheck` | routed context `commands/flowcheck.md` |
 | unknowns 루프 (정찰·시안 fork·인터뷰 게이트·blind_spots·references·deviation ledger·이해 퀴즈) | plan/implement/review 레일 + 스프린트 템플릿 섹션 (signal-only) | [Unknowns 루프](./30-unknowns-loop.md) |
 | unknowns 런타임 신호 (deviation-ledger / plan-readiness advisory) | `sfs healthcheck` WARN (exit 불변) | [Unknowns 루프](./30-unknowns-loop.md) |
+| 자기 반증 패스 (구현 착수 전 1회) | 리서치 결론을 스스로 공격 — 반증 시도와 살아남은 것을 plan 에 기록, 흔적 없으면 리뷰 finding (signal-only) | routed context `policies/source-pointer-citation.md` (ANTAGONISTIC_RESEARCH_PASS) |
 
 ### 2. Evidence·기록 프리미티브
 
@@ -39,6 +40,7 @@ Solon(SFS)의 전체 기능을 한 장으로 봅니다. 각 행은 상세 문서
 | 보고/버그 | `sfs report` / `sfs report-bug` | bug-report lifecycle 정책 |
 | 과거 회수 | `sfs recall` | routed context `commands/recall.md` |
 | 공유 산출물 | `docs/solon/<domain>/.../report.md`·`retro.md` | [design.md](./13-design-md-ai.md) |
+| 추론 로그 = 감사 산출물 (고위험 티어 한정) | 파괴적·장시간 무인 작업에 한해 판단 경로를 산출물로 계약 — 사전 invariant 선언의 사후 짝, 일상 작업엔 미적용 | routed context `policies/flow-conformance-postflight.md` (REASONING_LOG_AS_AUDIT_ARTIFACT) |
 
 ### 3. 하네스 엔지니어링 (진단·지표·설계도)
 
@@ -57,6 +59,7 @@ Solon(SFS)의 전체 기능을 한 장으로 봅니다. 각 행은 상세 문서
 | 모델 교체 규율 (head-to-head 벤치 + 새 모델의 셋업 감사) | 정책 `model-workaround-sunset.md` (MODEL_HEAD_TO_HEAD_ON_UPGRADE / MODEL_UPGRADE_SETUP_AUDIT, tidy 레일) | routed context `policies/model-workaround-sunset.md` |
 | 과제약·중복 지시 감지 (rightsize) | doctor "Context Conflict Gate" 섹션 — 2개 이상 표면에 재기술된 상시 지시 + 서술형 always/never 카운트 (info-only) | routed context `policies/context-conflict-gate.md` (RIGHTSIZE_CONTEXT_PASS) |
 | 런 중(in-flight) intent 재검증 | 장시간·무인 WU 의 스텝 경계마다 가정 변화 + 원 AC 대조를 산출물에 남김 (침묵 직진 = drift finding, advisory) | routed context `policies/flow-conformance-postflight.md` (MID_RUN_INTENT_RECHECK) |
+| 게이트 활동 계측 | doctor "Verification Loop" 섹션 — deviation ledger·lessons 를 읽어 게이트가 실제로 무언가를 잡았는지 표시. 활동 0 = 안전 입증이 아니라 미검증 (info-only, exit 불변) | `scripts/sfs-harness.sh` `gate_activity_check` |
 
 Sanity→Cartography 순서 규율과 모든 지표의 signal-only(차단 없음) 계약이
 함께 적용됩니다.
@@ -71,6 +74,8 @@ Sanity→Cartography 순서 규율과 모든 지표의 signal-only(차단 없음
 | 워커 위임 캡슐 | 정책 `sub-agent-capsule-contract.md` (goal/AC/scope/budget + optional exemplar; verb 단위 least-agency, done=디스크 산출물, 공유표면 충돌 스캔) | [위임 레퍼토리](./26-delegation-repertoire.md) |
 | 대규모 배치 루프 규율 (룰 상류 수정·judge 음성대조·비싼 연산 직렬화) | 정책 `harness-autonomy.md` / `token-harness.md` (FIX_THE_LOOP / JUDGE_NEGATIVE_CONTROL / SERIALIZE_EXPENSIVE_OPS) | routed context `policies/harness-autonomy.md` |
 | 지시 배치 판별 (비우회 게이트 vs 서술 advisory) | 한 번의 위반이 치명적이면 집행 표면으로, 아니면 trim 후보 — 라벨링이지 삭제가 아님 | routed context `policies/steering-surface-taxonomy.md` (RULE_VS_GUARDRAIL) |
+| 결과당 비용 프레임 | 토큰이 아니라 결과 하나당 비용으로 진입 — "에이전트 없이 했다면 얼마였나(안 했을 일 포함)", "어려운 일인가 그냥 양이 많은 일인가" | routed context `policies/token-harness.md` (KNOB_DIAGNOSTIC_LADDER) |
+| 코어 고정 · 확장은 버전 표면 | 신규 기능이 코어 변경인지 버전 붙은 확장인지 먼저 판별 — 확장 경로가 없으면 압력이 코어를 오염시킴 | routed context `policies/skill-catalog-discipline.md` (VERSIONED_EXTENSION_SURFACE) |
 | 검증 체크 배치 사다리 | standalone → embedded → chained → 매 변경; 수동 반복 호출 = 승격 신호, 습관→계약 체이닝은 트레이드오프 동반 | routed context `policies/loop-taxonomy.md` (CHECK_PLACEMENT_LADDER) |
 | 스펙=아티팩트 / 제어로직=데이터 | 검증 대상과 실행 대상 사이 번역층 금지, 루틴·전이·게이트는 읽고 고칠 수 있는 데이터 표면 | routed context `policies/harness-autonomy.md` (SPEC_IS_THE_ARTIFACT / CONTROL_LOGIC_AS_DATA) |
 
@@ -83,7 +88,9 @@ Sanity→Cartography 순서 규율과 모든 지표의 signal-only(차단 없음
 | 작업 라우팅/오케스트레이터 | `sfs route` / `sfs orchestrator` / `sfs dispatch` | [작업 인입 라우팅](./20-ai-work-intake-routing.md) |
 | 반복 루프 | `sfs loop` + loop-taxonomy 정책 (4유형 결정 렌즈) | routed context `policies/loop-taxonomy.md` |
 | 에이전트 신원/권한 구획 | 정책 `agent-identity`·compartment 계열 | [신원과 구획](./28-agent-identity-and-compartments.md) |
-| advisor 선택 코칭 바인딩 | 빠른 worker + 필요 시에만 advisor — 호출 조건(막힘/검증 게이트/저신뢰)이 `agent_runtime_bindings` 옆 데이터 표면 | routed context `policies/external-orchestrator-entry.md` (ADVISOR_STRATEGY_BINDING) |
+| advisor 선택 코칭 바인딩 | 빠른 worker + 필요 시에만 advisor — 호출 조건(막힘/검증 게이트 · 출하 직전 검증이 대표 지점/저신뢰)이 `agent_runtime_bindings` 옆 데이터 표면 | routed context `policies/external-orchestrator-entry.md` (ADVISOR_STRATEGY_BINDING) |
+| 단계별 effort 사전 배분 | capsule 발행 시점에 배분 — 라우팅·추출·요약은 저 effort, 최종 판단·리뷰는 고 effort. 실패 후 에스컬레이션과 별개(상한 아님) | routed context `policies/sub-agent-capsule-contract.md` (SUBAGENT_TIER_DEFAULT) |
+| 무인 위임 판별 신호 | 에이전트가 스스로 올라탈 측정 신호가 없으면 위험이 낮아도 `decision` 단위로 못 올라감 — "밤새 돌릴 수 있는 일인가" | routed context `policies/work-delegation-and-startup.md` (DELEGATION_UNIT_LADDER) |
 | 위임 단위 사다리 | chunk → task → decision, 검증 신뢰로 올라가고 대상 표면의 위험 티어로 상한 | routed context `policies/work-delegation-and-startup.md` (DELEGATION_UNIT_LADDER) |
 
 ### 6. 기억·위키 (장기 메모리)
@@ -133,6 +140,14 @@ Sanity→Cartography 순서 규율과 모든 지표의 signal-only(차단 없음
 - 신뢰불가 입력에 닿는 **접점마다** 인젝션 채점 체크포인트를 두고, 하이재킹은
   막는 게 아니라 도달 범위를 미리 좁혀 봉쇄합니다
   (`policies/credential-hygiene.md` INGRESS_TRUST_CHECKPOINT).
+- 매 스텝 사람 승인은 **안전 근거가 아닙니다** — 승인 검출력은 세션이 길수록
+  떨어지므로, 상시 규칙은 harness 층에 두고 희소한 승인은 재량 불가 클래스에만
+  씁니다 (`policies/harness-autonomy.md` APPROVAL_FATIGUE_DECAY).
+- **재량에 넘기지 않는 클래스**가 따로 있습니다 — 자격증명·소스 외부 송출,
+  그리고 사람에게 나가는 메시지(메일·메신저·티켓 코멘트). 설정 데이터 표면에
+  선언되고 사용자 요청으로 열리지 않으며, 런 시작 전 선언 변경만 가능합니다
+  (`policies/credential-hygiene.md` NEVER_APPROVE_CLASS). 게이트를 통째로
+  우회시키는 광역 waiver 는 예외가 아니라 게이트 폐지로 분류됩니다.
 - 쓰기 작업은 consent-gated: `--yes`/`--apply`/dry-run 프리뷰가 기본.
 - 외부 오케스트레이터·지식 그래프·위키는 opt-in — 제거해도 전 기능 동일
   동작 (standalone 보증).

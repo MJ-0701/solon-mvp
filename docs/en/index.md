@@ -37,11 +37,11 @@ In short, six axes:
 
 | Axis | What it does | Representative surface |
 |---|---|---|
-| 7-step work rail | deterministic rails own the flow; LLMs are called only inside gates, and long or unattended runs recheck intent mid-run | `sfs start` / `plan` / `implement` / `review` / `retro` |
-| Evidence & record | pin approvals, decisions, waivers, external evidence as minimal facts | `sfs capture` / `note` / `recall` |
-| Harness engineering | readiness/maturity/cost diagnosis, blueprint, undocumented-codebase excavation, static security audit, overconstraint and redundant-guidance detection | `sfs harness doctor` / `dig` / `audit` |
-| Context & token hygiene | routed context, thin adapters, delegation capsule contracts, instruction classification (inviolable gate vs narrative advisory) | `sfs context` / `agent doctor` |
-| Teams & orchestration | team presets, six-division council, work routing/loops, selective advisor coaching binding | `sfs team` / `division` / `route` |
+| 7-step work rail | deterministic rails own the flow; LLMs are called only inside gates, long or unattended runs recheck intent mid-run, and a self-refutation pass runs before implementation | `sfs start` / `plan` / `implement` / `review` / `retro` |
+| Evidence & record | pin approvals, decisions, waivers, external evidence as minimal facts, and the reasoning log on the top risk tier | `sfs capture` / `note` / `recall` |
+| Harness engineering | readiness/maturity/cost diagnosis, blueprint, undocumented-codebase excavation, static security audit, overconstraint and redundant-guidance detection, gate activity reading | `sfs harness doctor` / `dig` / `audit` |
+| Context & token hygiene | routed context, thin adapters, delegation capsule contracts, instruction classification (inviolable gate vs narrative advisory), cost-per-outcome framing | `sfs context` / `agent doctor` |
+| Teams & orchestration | team presets, six-division council, work routing/loops, selective advisor coaching binding, per-stage effort allocation | `sfs team` / `division` / `route` |
 | Memory & wiki | long-horizon memory, raw intake, promotion pipeline, derived-doc annotation survival, security finding class closed loop | `sfs ingest` / `tidy --wiki-promote` |
 
 You do not need to memorize commands — tell an agent in plain language and it
