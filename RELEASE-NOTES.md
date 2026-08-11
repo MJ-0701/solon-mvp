@@ -13,6 +13,26 @@
 
 ---
 
+## 0.14.2
+
+brew 로 설치한 sfs 가 자기 CHANGELOG 를 못 읽던 문제를 고쳤습니다.
+
+체감 변화:
+
+- **`sfs version --check` 가 제대로 된 헤드라인을 보여줍니다** — 지금까지 brew 설치본은
+  릴리스마다 쓰는 CHANGELOG 요약 대신 RELEASE-NOTES 첫 줄로 조용히 대체되고 있었습니다.
+  Homebrew 가 `CHANGELOG.md`·`README.md`·`LICENSE` 를 설치 위치에서 한 단계 위로
+  옮기는 게 원인인데, 이건 Homebrew 의 의도된 배치라 억지로 되돌리는 대신 읽는 쪽이
+  두 곳을 다 보도록 고쳤습니다.
+- **엉뚱한 파일을 집지 않습니다** — 상위 디렉토리의 CHANGELOG 는 **설치된 버전 항목이
+  실제로 들어 있을 때만** 인정합니다. 다른 저장소 안에 체크아웃해 둔 경우 상위의 무관한
+  CHANGELOG 를 잘못 읽는 일이 없습니다.
+- Windows(`sfs.ps1`)도 같은 규칙으로 맞췄습니다.
+
+CHANGELOG 를 아예 못 찾는 환경에서는 기존 RELEASE-NOTES fallback 이 그대로 동작합니다.
+
+---
+
 ## 0.14.1
 
 0.14.0 신규 기능이 README 와 영문 index 의 "제공 기능" 표, 그리고 기능 총람에

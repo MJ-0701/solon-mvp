@@ -719,8 +719,20 @@ function Invoke-SfsNativeVersion([string[]] $InvocationArgs) {
 function Get-SfsReleaseHeadline {
   param([string]$Version)
   if (-not $Version -or $Version -eq "unknown") { return $null }
-  $changelog = Join-Path (Get-SfsDistDir) "CHANGELOG.md"
-  if (Test-Path -LiteralPath $changelog) {
+  # Parity with bin/sfs sfs_resolve_installed_changelog: some packagers relocate
+  # metafiles (CHANGELOG.md) one level above the dist dir, so look there too, but
+  # accept the parent copy only when it carries an entry for this version.
+  $distDir = Get-SfsDistDir
+  $changelog = $null
+  foreach ($candidate in @((Join-Path $distDir "CHANGELOG.md"), (Join-Path (Split-Path -Parent $distDir) "CHANGELOG.md"))) {
+    if (-not (Test-Path -LiteralPath $candidate)) { continue }
+    $marker = "## [" + $Version + "]"
+    if (Select-String -LiteralPath $candidate -SimpleMatch -Pattern $marker -Quiet) {
+      $changelog = $candidate
+      break
+    }
+  }
+  if ($changelog) {
     $capture = $false
     $parts = @()
     foreach ($line in Get-Content -LiteralPath $changelog) {

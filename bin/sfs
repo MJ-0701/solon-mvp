@@ -528,10 +528,29 @@ EOF
   fi
 }
 
+# Some packagers relocate "metafiles" (CHANGELOG.md, README.md, LICENSE) out of
+# the directory the package installed them into and up one level: a Homebrew keg
+# has CHANGELOG.md at the prefix root while SFS_DIST_DIR points at libexec. So
+# look one level up as well — but accept the parent copy only when it actually
+# carries an entry for the installed version. That check is what makes the
+# widened search safe: an unrelated CHANGELOG.md that happens to sit in a parent
+# directory (a source checkout nested inside another repo) will not have a
+# `## [<this version>]` heading, so it is ignored rather than misreported.
+sfs_resolve_installed_changelog() {
+  local version="$1" candidate
+  for candidate in "${DIST_DIR}/CHANGELOG.md" "${DIST_DIR}/../CHANGELOG.md"; do
+    [[ -f "${candidate}" ]] || continue
+    grep -Fq -- "## [${version}]" "${candidate}" 2>/dev/null || continue
+    printf '%s\n' "${candidate}"
+    return 0
+  done
+  return 1
+}
+
 sfs_print_installed_release_headline() {
-  local version="$1" changelog="${DIST_DIR}/CHANGELOG.md" notes="${DIST_DIR}/RELEASE-NOTES.md"
+  local version="$1" changelog notes="${DIST_DIR}/RELEASE-NOTES.md"
   [[ "${version}" != "unknown" ]] || return 0
-  if [[ -f "${changelog}" ]]; then
+  if changelog="$(sfs_resolve_installed_changelog "${version}")"; then
     sfs_print_changelog_release_headline "${version}" "${changelog}"
   elif [[ -f "${notes}" ]]; then
     sfs_print_release_notes_headline "${version}" "${notes}"
