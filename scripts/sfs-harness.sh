@@ -341,6 +341,7 @@ print_context_conflict_section() {
   section "Context Conflict Gate"
   conflict_marker_check
   rightsize_context_check
+  stale_context_check
 }
 
 conflict_marker_check() {
@@ -450,6 +451,53 @@ rightsize_context_check() {
     ok "rightsize-context: no standing directive restated across surfaces"
   fi
   info "rightsize-context: ${absolutes} narrative always/never line(s) across ${#files[@]} surface(s) — inviolable ones belong on an enforcement surface, the rest are trim candidates (RULE_VS_GUARDRAIL)"
+}
+
+# 0.15.0 (WU-1): STALE_CONTEXT_CANDIDATES — the time axis of context rot.
+#
+# The two checks above compare surfaces to each other (declared contradiction,
+# restatement). Neither notices that guidance has outlived the thing it
+# describes. The deterministic form of that is a DANGLING ROUTED REFERENCE: a
+# local override cites `policies/<name>.md` or `commands/<name>.md` which
+# resolves in neither the consumer's own override tree nor the shipped context,
+# so the rule points at a module that was renamed, retired, or never existed.
+# INFO-ONLY: never warns, never fails, never moves doctor's exit code —
+# confirming staleness is an operator judgment, exactly as with the rightsize
+# pass. Scope: consumer working tree only; the shipped tree is read but never
+# reported on. SSoT:
+#   templates/.sfs-local-template/context/policies/context-conflict-gate.md
+stale_context_check() {
+  local ctx_dir=".sfs-local/context"
+  local shipped_ctx="${DIST_DIR}/templates/.sfs-local-template/context"
+
+  if [ ! -d "$ctx_dir" ]; then
+    info "stale-context: no project-local context overrides; skipping"
+    return
+  fi
+
+  # Every routed module citation appearing in a local override, deduplicated.
+  local refs
+  refs="$(grep -rhoE '(policies|commands)/[A-Za-z0-9._-]+\.md' "$ctx_dir" 2>/dev/null \
+    | sort -u)"
+  if [ -z "$refs" ]; then
+    info "stale-context: no routed module references in local overrides; skipping"
+    return
+  fi
+
+  local ref dangling=0 first=""
+  while IFS= read -r ref; do
+    [ -n "$ref" ] || continue
+    [ -f "${ctx_dir}/${ref}" ] && continue
+    [ -f "${shipped_ctx}/${ref}" ] && continue
+    dangling=$((dangling + 1))
+    [ -n "$first" ] || first="$ref"
+  done < <(printf '%s\n' "$refs")
+
+  if [ "$dangling" -gt 0 ]; then
+    info "stale-context: ${dangling} stale candidate(s) — local guidance cites routed module(s) that no longer resolve (e.g. ${first}); confirm and archive-rotate, never silent-delete"
+  else
+    ok "stale-context: every routed module cited by local overrides still resolves"
+  fi
 }
 
 # 0.8.27 (WU-3): Skill promotion loop (suggest-only).

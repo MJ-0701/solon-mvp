@@ -48,7 +48,7 @@ load_when: ["token", "harness", "context", "Claude", "Codex", "Gemini", "MCP", "
   explore/edit mix, sidechain share) as signal-only advisories — never a block.
 - Tool-surface budget: give agents the few tools, skills, MCPs, and routed
   context modules needed for the current slice. Defer or remove attractive but
-  irrelevant tools so selection cost does not steal attention from the work.
+  irrelevant tools so selection cost does not steal attention from the work. The same economy applies over time to standing checks: a surface that keeps coming back empty is demoted in check *frequency* and restored on change or on call, with inviolable gates exempt (`policies/loop-taxonomy.md` ATTENTION_DECAY_ON_BARREN_SURFACES).
 - Project-as-prompt audit: folder shape, filenames, domain terms, test names,
   adapters, docs, and style are all prompts. If repeated AI mistakes trace to a
   messy structure, fix the structure or routing instead of restating warnings.

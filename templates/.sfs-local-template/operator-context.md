@@ -35,6 +35,9 @@ do not ship fixed values in the template.
 - **Ask-vs-act bias**: <OPERATOR-ASK-BIAS>
 - **Explanation depth**: <OPERATOR-EXPLANATION-DEPTH>
 - **Risk tolerance**: <OPERATOR-RISK-TOLERANCE>
+- **Per-surface proactivity**: <OPERATOR-PROACTIVITY> (one plain sentence per
+  surface — how forward to be where, in your own words. Rungs and rubric:
+  `policies/loop-taxonomy.md` PROACTIVE_INTERVENTION_LADDER)
 
 ## Runtimes, tools, reporting
 

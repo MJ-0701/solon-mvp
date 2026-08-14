@@ -56,7 +56,7 @@ A fourth signal is the **repeated-correction trigger**: the same human
 correction given twice is a candidate immediately — a correction is costlier
 evidence than a mere repeat, so it earns a lower floor (2) than the
 completed-work signature (3+). The correction itself also flows to the
-failure twin (`lessons-accumulation.md`). External validation (by-reference):
+failure twin (`lessons-accumulation.md`), and the *reason* it was given is kept separately (`self-improvement-loop.md` REJECTION_REASON_CAPTURE) — this floor counts, that invariant explains. External validation (by-reference):
 the same marketing-operations case (Claude blog, 2026-07-08) — the team's
 standing rule is "corrected the same thing twice → promote it into the
 skill", maintained by non-technical operators.
@@ -185,7 +185,7 @@ This runs on the existing `tidy` rail — no new lifecycle command (the kernel
 absorbs disciplines as policies/lenses, not commands). At `tidy`/retro time, run
 `sfs harness doctor`, read the candidates, and for a worthwhile one compile a
 skill/command the normal way: give it a trigger-centric `load_when`, an `_INDEX`
-route, and the workflow+guard shape from `skill-catalog-discipline.md`; its quality bar may be given as a before/after artifact-pair pointer instead of rule prose (REFERENCE_PAIR_STANDARD_INFERENCE — the model infers the standard from one representative pair, e.g. draft→final; pointers, never pasted payloads, `source-pointer-citation.md`; pair slots live in `operator-context.md`). Record
+route, and the workflow+guard shape from `skill-catalog-discipline.md` (GENERALIZATION_BEFORE_SHARING is the precondition on that edit: parameterize the one-project particulars or hold the promotion); its quality bar may be given as a before/after artifact-pair pointer instead of rule prose (REFERENCE_PAIR_STANDARD_INFERENCE — the model infers the standard from one representative pair, e.g. draft→final; pointers, never pasted payloads, `source-pointer-citation.md`; pair slots live in `operator-context.md`). Record
 the decision (promoted, or deferred with reason) so a candidate is not re-surfaced
 without context.
 

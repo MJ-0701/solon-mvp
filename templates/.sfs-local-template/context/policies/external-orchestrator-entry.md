@@ -162,7 +162,7 @@ orchestrator-layer mirror of the worker-layer `runtime_registry`).
   `confidence`, `ts` — the typed-handoff discipline above, never raw narration);
   `sfs orchestrator ingest` validates it and appends one typed entry to
   `.sfs-local/orchestrator/signal-queue.md`, which the curation pass reads
-  read-only. `evidence_pointer` carries a pointer, not the inlined original.
+  read-only. `evidence_pointer` carries a pointer, not the inlined original, and the entry names which coverage tier its runtime sits in (`flow-conformance-postflight.md` RUNTIME_EVIDENCE_COVERAGE) — an untiered inflow blurs the ledger's authority.
 - **External proposal-review surface** (wired, Seam B). Curation and promotion
   candidates are reviewed by a human across systems on the orchestrator's surface.
   `sfs orchestrator export` emits a **pointer-only** typed proposal to the

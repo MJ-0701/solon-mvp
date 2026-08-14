@@ -141,6 +141,25 @@ new AI reviewers run in shadow mode to build trust before promotion, and
 auto-approvals stay sampled afterwards; vendor, org, and measurement figures
 held out.
 
+## GENERALIZATION_BEFORE_SHARING
+
+SHADOW_MODE_TRUST_LADDER decides *when* a skill earns a wider surface. This
+decides *what must change* before it gets one. A skill compiled out of one
+project's runs carries that project's particulars — an absolute path, a project
+or repository name, a personal routine, a pinned branch or host — and every one
+of them is a fixed value sitting on a surface meant to be reused elsewhere.
+
+Before promotion, replace each particular with a placeholder resolved at use time
+(SETUP_VIA_PLACEHOLDER above). If one cannot be parameterized, the promotion is
+**held** — a skill shipped with the particular baked in has not been shared, it
+has been copied, and the next reader inherits a path that was never theirs.
+
+This is the templates rule one layer up: `templates/` may carry placeholders but
+never project-specific fixed values (`docs/maintenance/release-policy.md` §2),
+and a shared skill is a template under another name. Promotion timing and
+adoption gating are unchanged and stay with `skill-promotion-loop.md` (DETECTION
+/ EVOLUTION_ADOPTION_GATE) — this is a precondition on the edit, not a new gate.
+
 ## VERSIONED_EXTENSION_SURFACE
 
 One question before any new capability lands: **is this a core change, or does

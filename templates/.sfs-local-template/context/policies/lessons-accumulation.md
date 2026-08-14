@@ -147,7 +147,7 @@ updates — the CURATION_PASS run at session grain by non-technical operators.
 
 The pass is **suggest-only**: it writes the report, never the ledger. Applying
 a proposed merge or promotion happens at the `tidy` rail under the same human
-gate as every adoption (`skill-promotion-loop.md` EVOLUTION_ADOPTION_GATE).
+gate as every adoption (`skill-promotion-loop.md` EVOLUTION_ADOPTION_GATE). Why a proposal was rejected or edited down is an input to the *next* pass, kept under `self-improvement-loop.md` REJECTION_REASON_CAPTURE and landing here as an `L-NNN` only when it names a recurring failure class.
 When run scheduled/unattended, the pass obeys
 `work-delegation-and-startup.md` SCHEDULED_RUN_CONTRACT (fresh session,
 file-borne state, four controls). External validation (by-reference): the

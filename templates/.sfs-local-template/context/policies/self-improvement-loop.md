@@ -41,6 +41,13 @@ SIGNAL -> RECORD -> CURATE -> PROPOSE -> MEASURE -> GATE -> APPLY -> CAPTURE -> 
    completed-work signatures, and the agent's own tool-gap self-report
    (REFLECTION_TO_EVAL_PIPELINE below) enter the loop. Owners:
    `flow-conformance-postflight.md`, `skill-promotion-loop.md` (DETECTION).
+   A **COMBINED_SIGNAL_WINDOW** pair is an input in its own right: two signals of
+   *different kinds* about one subject inside a single review window — a
+   deviation entry and a lesson, say — each below its own floor. Every counter
+   downstream measures inside one source (signature 3+, repeated-correction
+   floor 2, flowcheck hotspot floor 2), so a pair that is already the stronger
+   evidence is invisible to all of them. It enters as a candidate under the same
+   suggest-only handling, never as an adoption.
 2. **RECORD** — a caught failure that could recur becomes one durable `L-NNN`
    avoidance rule in the local ledger. Owner: `lessons-accumulation.md`.
 3. **CURATE** — a periodic read-only pass (plus a pre-build audit of already
@@ -127,8 +134,8 @@ speed; vendor, product, and business figures held out.
 
 ## Invariants (declared once)
 
-These six rules cut across every stage. They live here; component policies apply
-them and point back, so there is no second copy to drift.
+These seven rules cut across every stage. They live here; component policies
+apply them and point back, so there is no second copy to drift.
 
 - **suggest-only until human gate** — every stage only proposes; applying a
   merge, promotion, or adoption is a human decision (or an agent under explicit
@@ -154,6 +161,16 @@ them and point back, so there is no second copy to drift.
 - **scheduled / unattended runs obey SCHEDULED_RUN_CONTRACT** — a scheduled
   CURATE or PRE_BUILD_AUDIT fire is a fresh session, carries state by file only,
   and exposes the four controls (`work-delegation-and-startup.md`).
+- **REJECTION_REASON_CAPTURE** — when a suggest-only output is rejected or edited
+  down, the rejection is recorded with a one-line reason; a rejection carrying no
+  reason is signal loss, not a decision. Count and reason are different signals
+  and only the count was being kept: the repeated-correction floor
+  (`skill-promotion-loop.md` DETECTION) knows *how often*, this knows *why*, and
+  the why is what tells the next pass whether to fix the proposal or retire the
+  rule that produced it. The reason lands where the run already writes — an
+  `L-NNN` entry when it names a recurring failure class
+  (`lessons-accumulation.md`), otherwise the next CURATE pass's input. No new
+  file class, no new command.
 
 ## Standalone + external seam
 

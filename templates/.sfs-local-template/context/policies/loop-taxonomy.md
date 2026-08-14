@@ -120,6 +120,53 @@ loops with skills (2026-07-22) — the placement classification and the "if you
 run it after every change, it has graduated" signal; the vendor's command and
 feature names are held out entirely.
 
+## PROACTIVE_INTERVENTION_LADDER
+
+DECISION_FRAME picks the loop and CHECK_PLACEMENT_LADDER places the check; this
+places the **response**. A proactive surface (type 4) with something to say has
+had two settings — file a candidate or stay silent — which is why one subject
+gets re-filed under a new title every pass. Four rungs:
+
+1. **No action.** A first-class choice, not a failure to decide: a finding below
+   the rubric bar is dropped, and a noisy agent is worse than an idle one.
+2. **Inline note.** It rides an artifact already being written (report,
+   flowcheck output, curation report) and opens nothing new.
+3. **New candidate.** A fresh suggest-only entry — promotion candidate, `L-NNN`,
+   doctor line. This rung was carrying all the traffic.
+4. **Merge into an open unit.** Read the open queue before minting a candidate:
+   when an unclosed unit already covers the subject — a pending item, a live
+   capsule, an open sprint AC — append there rather than file a rival entry.
+   Merging appends to a proposal, never to an accepted one.
+
+**Rubric — three axes, no new scorer.** Clearing rung 1 is scored on
+**usefulness** (does acting change what happens next), **confidence** (checkable
+evidence — `policies/source-pointer-citation.md` PROOF_CARRYING_FINDING), and
+**is a human better suited** — the decision-side pair of
+`policies/work-delegation-and-startup.md` HUMAN_ATTENTION_IS_SCARCE, sending that
+call to the operator as rung 2 instead of rung 3 work. No new scorer:
+`policies/skill-promotion-loop.md` HELD_OUT_SCORING measures it.
+
+## ATTENTION_DECAY_ON_BARREN_SURFACES
+
+A standing check costs the same on a surface that has produced nothing for months
+as on the one where the work is. After N consecutive barren passes a surface is
+demoted in **check frequency**, returning to full cadence at once when the
+surface changes or the operator names it. Never removal.
+
+**Inviolable gates are exempt.** Decay applies only to observation surfaces,
+where a miss costs a delayed finding. An enforcement surface, where one miss is
+the whole failure, is never decayed — a decayed gate is a trimmed gate wearing a
+schedule. Classify with `policies/steering-surface-taxonomy.md`
+RULE_VS_GUARDRAIL; if the answer is inviolable, stop. Grain twin:
+SCHEDULED_RUN_CONTRACT item 5 (`policies/work-delegation-and-startup.md`) asks
+whether a scheduled *job* still earns its fires; this is surface-grain and its
+outcome is a frequency. Cost rationale: `policies/token-harness.md`. External
+validation for both sections (by-reference): a Claude blog post on proactive
+assistance across a shared surface (2026-08-13) — a four-way outcome including
+doing nothing and joining open work, plus attention lowered where there is
+nothing to contribute; vendor product, chat platform, invocation UI, plan names
+and figures held out.
+
 ## VERIFICATION_AND_SYSTEM_ENCODING (by-reference)
 
 Three secondary lessons from the same source land on existing anchors, one line

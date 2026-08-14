@@ -185,7 +185,7 @@ A user request does not unlock the class — that is exactly what separates it f
 request can only change the *declaration*, in config, before the run. This is where the
 consent that APPROVAL_FATIGUE_DECAY (`harness-autonomy.md`) says is scarce actually gets
 spent; a blanket allow rule that would let the class through is not an exception to the gate
-but its removal (`commands/audit.md`). External validation (by-reference): Claude blog
+but its removal (`commands/audit.md`). An action inside an allowed class can still point away from what was asked; that residual case is a separate layer, not a widening of this one (`flow-conformance-postflight.md` IRREVERSIBLE_ACTION_INTENT_GATE). External validation (by-reference): Claude blog
 writeups on default tool-call approval and on running it in production (2026-08-07); vendor
 mode names, category lists, and every figure held out.
 

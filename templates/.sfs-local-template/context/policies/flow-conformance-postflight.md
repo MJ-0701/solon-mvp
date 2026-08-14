@@ -103,6 +103,28 @@ SCHEDULED_RUN_CONTRACT 1번 (상태는 파일로) 이 그 흔적의 거처다
 무인 에이전트 운영 인터뷰 관련 Claude 블로그(2026-07-20) — 매 스텝 자기검증
 과 원 의도 재검증이 초기 오가정의 복리화를 막는다. 벤더·조직·모델·수치는 보류.
 
+## IRREVERSIBLE_ACTION_INTENT_GATE (행위측, docs-level)
+
+바로 위 MID_RUN_INTENT_RECHECK 는 런 전체를 **스텝 경계마다 스스로** 되짚는다. 본 절은
+**개별 비가역 행동 직전 1회**, **실행자가 아닌 검사자**가 그 행동을 원 요청문과 대조한다
+— 시점(주기 vs 행동 직전)도 주체(자기점검 vs 분리 검사자)도 달라 두 앵커는 병존한다.
+기존 세 층 — 입력측(`policies/credential-hygiene.md` INGRESS_TRUST_CHECKPOINT), 부류측
+(같은 파일 NEVER_APPROVE_CLASS), 피로측(`policies/harness-autonomy.md`
+APPROVAL_FATIGUE_DECAY) — 은 **허용 부류 안에 있으면서 원 요청과 방향이 다른 행동**을
+셋 다 통과시킨다.
+
+- **대상**: 취소가 새 행동을 요구하는 것 — 발송 · 게시 · 제출 · 결제 · 삭제 · 강제 push.
+- **입력**: 원 요청문과 AC. 행동이 둘 중 어느 것으로도 설명되지 않으면 불일치이고, 불일치면 진행하지 않고 surface 한다.
+- **검사자 분리 필수**: 실행자의 자기신고는 게이트가 아니다. `policies/harness-autonomy.md` 의 verifier != implementer 를 재사용하며 새 검사 기구를 만들지 않는다. 분리 검사자를 못 세우는 런은 그 행동을 자동으로 하지 않는다.
+- **행동 직전 1회**: 세션 초입의 승인은 한 시간 뒤 행동의 근거가 아니다.
+
+invariant registry 에 행을 추가하지 않으며 verdict/exit 는 양방향 불변인
+documentation-level 계약이다. 신뢰 구역 선행(SHADOW_MODE_TRUST_LADDER)과 세션이 원장에
+사는 성질(EVENT_LOG_RECONSTRUCTION_SSOT + DONE_IS_ARTIFACT_ON_DISK)은 기커버라
+재기안하지 않는다. 외부 검증 (by-reference): 자동 승인 하에서도 결과가 큰 행동 직전에
+별도 검사가 원 요청과 대조해 차단하는 층 (Claude 블로그, 2026-08-12); 브라우저 · 확장
+· 사이드 패널 · 제품명 · 플랜명 보류.
+
 ## HONEST_UNKNOWNS (docs-level)
 
 진단 산출물 — triage, root-cause 분석, healthcheck/flowcheck 부속 리포트, 장애
@@ -117,6 +139,25 @@ SCHEDULED_RUN_CONTRACT 1번 (상태는 파일로) 이 그 흔적의 거처다
 documentation-level 계약이다. 외부 검증 (by-reference): frontier-lab 사례
 (Claude blog, 2026-07-10) — root cause 를 짚되 모르는 것을 모른다고 말하는
 것이 장시간 무인 자율성 신뢰의 근거 중 하나; vendor 디테일 보류.
+
+## RUNTIME_EVIDENCE_COVERAGE (docs-level)
+
+HONEST_UNKNOWNS 는 한 산출물 안에서 모르는 것을 말하게 한다. 그 사후 짝은 **원장 자체의
+공백**이다: 증거 계약이 적용되는 런타임 목록과 **known-blind 런타임 목록**을 **함께**
+선언한다. 한쪽만 적힌 선언은 선언이 아니다.
+
+- **covered** — `sfs event` 버스를 타 `events.jsonl` 에 남는 런타임: 대화형 세션,
+  CLI 세션, 같은 rail 을 타는 무인 스케줄 러너.
+- **known-blind** — 안 남거나 부분만 남는 런타임: 제품 밖 호스트 UI 에서만 끝난 작업,
+  파일버스만 거친 보조 검토, 외부 오케스트레이터가 자체 실행하고 결과만 넣은 구간.
+- 선언되지 않은 런타임의 완료 주장은 **unverified** — 거짓이 아니라 원장이 뒷받침하지 않는다는 뜻이다. 외부 SIGNAL 주입 seam 은 커버리지 티어를 함께 실어야 하고, 티어 없는 유입은 원장 권위를 흐린다 (`policies/external-orchestrator-entry.md`).
+- 런타임별 증거는 **run 단위로 합쳐 읽을 수 있어야** 한다 — 신규 계약이 아니라 위 EVENT_LOG_RECONSTRUCTION_SSOT + DONE_IS_ARTIFACT_ON_DISK 의 재확인이다.
+
+verdict/exit 양방향 불변. additive 확장 규율(VERSIONED_EXTENSION_SURFACE)과 접근키 ·
+신원(`policies/credential-hygiene.md` AGENT_IDENTITY / GRANT_LIFECYCLE)은 기커버라
+재기안하지 않는다. 외부 검증 (by-reference): 세션 1건을 통합 증거 레코드로 반환하면서
+**커버리지 제외 목록을 본문에 명시**한 커버리지 확대 공지 (Claude 블로그, 2026-08-11);
+제품 · API 명, 규정준수 프로그램명, 클라우드 제공자명, 플랜명 보류.
 
 ## REASONING_LOG_AS_AUDIT_ARTIFACT (docs-level, 위험 티어 한정)
 
