@@ -117,7 +117,7 @@ role_boundaries:
     cannot: "act as the normal implementation worker or approve its own output"
   advisor:
     owns: "top-model review of lower-model question framing, answer interpretation, product direction, architecture, AC, files_scope, and gate advancement"
-    runtime_model: "the highest configured runtime tier: Claude Opus 4.7, Codex gpt-5.5/xhigh, Gemini gemini-3.1-pro-preview, or the custom high-end equivalent"
+    runtime_model: "the highest configured runtime tier: Claude Opus 4.7, Codex gpt-5.6-sol/xhigh, Gemini gemini-3.1-pro-preview, or the custom high-end equivalent"
     cannot: "be replaced by the lower model whose output is under review"
   self_cpo_check:
     owns: "local CPO mini-check before external/Codex/Claude/Gemini cross review"
@@ -183,7 +183,7 @@ reasoning_tiers:
   review_high:
     purpose: "Independent CPO/Evaluator review; fork/read-only where the runtime supports it"
     cost_latency: "high"
-    enforcement: "The reviewer model is ENFORCED, not a soft target (solon-product#7). A CPO/cross review must run on the runtime's review_high route model (Gemini = gemini-3.1-pro-preview; Claude Opus 4.x; Codex gpt-5.5 xhigh). If the route model cannot be pinned/verified — Codex quota exhaustion with no route-capable Gemini, or a CLI that cannot apply --model — the gate STOPS and surfaces a profile bridge issue rather than silently downgrading to a sub-tier model. Qualification is judged by the invocation --model flag / route pin (or API stats), NOT the reviewer's self-named model in its body text — preview models can self-name a sibling version. Backstopped at runtime by `sfs flowcheck` fcp-reviewer-tier."
+    enforcement: "The reviewer model is ENFORCED, not a soft target (solon-product#7). A CPO/cross review must run on the runtime's review_high route model (Gemini = gemini-3.1-pro-preview; Claude Opus 4.x; Codex gpt-5.6-sol xhigh). If the route model cannot be pinned/verified — Codex quota exhaustion with no route-capable Gemini, or a CLI that cannot apply --model — the gate STOPS and surfaces a profile bridge issue rather than silently downgrading to a sub-tier model. Qualification is judged by the invocation --model flag / route pin (or API stats), NOT the reviewer's self-named model in its body text — preview models can self-name a sibling version. Backstopped at runtime by `sfs flowcheck` fcp-reviewer-tier."
     default_roles:
       - self-cpo-checker
       - cpo-evaluator
@@ -360,17 +360,17 @@ runtime_model_settings:
     facilitator_standard:
       model: "gpt-5.4"
       reasoning_effort: "medium"
-      description: "Default Codex route for SFS question generation, brainstorm facilitation, option framing, and user-answer summarization before plan. Escalate to gpt-5.5 when the question or answer changes product identity, architecture, gate status, AC, or files_scope."
+      description: "Default Codex route for SFS question generation, brainstorm facilitation, option framing, and user-answer summarization before plan. Escalate to gpt-5.6-sol when the question or answer changes product identity, architecture, gate status, AC, or files_scope."
     strategic_high:
-      model: "gpt-5.5"
+      model: "gpt-5.6-sol"
       reasoning_effort: "xhigh"
       reasoning_label: "very_high"
     review_high:
-      model: "gpt-5.5"
+      model: "gpt-5.6-sol"
       reasoning_effort: "xhigh"
       reasoning_label: "very_high"
     research_high:
-      model: "gpt-5.5"
+      model: "gpt-5.6-sol"
       reasoning_effort: "high"
       reasoning_label: "high"
     execution_standard:
@@ -553,7 +553,7 @@ resolution_rules:
   - "If selected_policy is all_high, resolve every agent through the highest configured tier/profile unless an explicit agent override exists."
   - "Solon recommendations are advisory. Higher-end overrides are allowed when cost/latency are intentional."
   - "Question routing is cost-aware: deterministic relay and missing-argument prompts use intake_economy; focused question generation and brainstorm facilitation use facilitator_standard; product identity, architecture, gate, AC, or files_scope shifts escalate to strategic_high."
-  - "Advisor means the highest configured model for the active runtime: Claude Opus 4.7, Codex gpt-5.5 with xhigh reasoning, Gemini gemini-3.1-pro-preview, or the custom high-end equivalent."
+  - "Advisor means the highest configured model for the active runtime: Claude Opus 4.7, Codex gpt-5.6-sol with xhigh reasoning, Gemini gemini-3.1-pro-preview, or the custom high-end equivalent."
   - "For Claude runtime, solon_recommended resolves implementation-worker, division-worker, coding-helper, and mechanical-implementation-helper to sonnet-4.6. Haiku is a non-coding helper tier only and must not write code."
   - "Named-policy precedence (#4): when selected_policy is a named policy (solon_recommended or all_high), policies.<selected_policy>.agent_tiers is authoritative for every agent whose agent_defaults.<agent>.configured_tier is `current`. A per-agent configured_tier set to an explicit non-`current` tier overrides the policy map for that agent only; `current` defers to the selected policy's agent_tiers. selected_policy=current_model resolves every role to the host current model regardless of configured_tier. This closes the worker-tiering leak where every-agent configured_tier=current allowed a worker to resolve to the host model instead of the policy worker tier."
   - "Config-drift validation (warn-only, #4): install, upgrade, and flowcheck must WARN when an agent's tier resolved via selected_policy.agent_tiers differs from what agent_defaults.<agent>.configured_tier would produce (e.g. a worker resolving to the host model instead of the policy worker tier). Do not auto-rewrite configured_tier; surface the divergence and let the project owner decide."
@@ -569,7 +569,7 @@ resolution_rules:
   - "Worker/helper outputs still require independent review; a stronger model does not approve its own work."
   - "Division sub-agent council is always_on from brainstorm through Gate 6: strategy-pm, dev, QA, design, infra, and taxonomy each record finding/evidence/waiver or not-applicable status in division_subagent_ledger. Actual parallel worker lanes remain opt-in."
   - "Single-agent implementation is the default. Multi-agent implementation is opt-in and requires disjoint files_scope, AC/ADR subset ownership, expected tests/evidence, output report path, merge/conflict policy, coherent commit-unit messages, lane verification, and cross review."
-  - "For Codex runtime, solon_recommended resolves relay-helper, missing-argument-helper, parser, formatter, and sync-helper to gpt-5.4-mini; intake-facilitator, question-facilitator, implementation-worker, and division-worker to gpt-5.4; C-Level/review/research to gpt-5.5; bounded repo-aware coding-helper to gpt-5.3-codex; and judgment-free mechanical-implementation-helper to gpt-5.3-codex-spark."
+  - "For Codex runtime, solon_recommended resolves relay-helper, missing-argument-helper, parser, formatter, and sync-helper to gpt-5.4-mini; intake-facilitator, question-facilitator, implementation-worker, and division-worker to gpt-5.4; C-Level/review/research to gpt-5.6-sol; bounded repo-aware coding-helper to gpt-5.3-codex; and judgment-free mechanical-implementation-helper to gpt-5.3-codex-spark."
   - "For Codex runtime, solon_recommended resolves implementation-worker and division-worker to gpt-5.4 when the slice still needs coding judgment; bounded code helper work resolves to gpt-5.3-codex; judgment-free mechanical implementation helper work resolves to gpt-5.3-codex-spark."
   - "Do not use gpt-5.4-mini or gpt-5.4 as a substitute for gpt-5.5 when the question itself is direction design."
   - "Use gpt-5.3-codex-spark only through mechanical_implementation_economy after C-Level scope, files_scope, AC, and exact edit intent are locked and no product or code-design judgment remains."

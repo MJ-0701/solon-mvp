@@ -217,6 +217,10 @@ REVIEW_BUDGET_TELEMETRY_FILE="${SFS_REVIEW_BUDGET_TELEMETRY_FILE:-${SFS_LOCAL_DI
 # installed Gemini CLI cannot apply --model, the route is unpinnable and the
 # review stops + surfaces instead of silently downgrading the gate verdict.
 REVIEW_GEMINI_ROUTE_MODEL="${SFS_REVIEW_GEMINI_ROUTE_MODEL:-gemini-3.1-pro-preview}"
+SFS_REVIEW_CODEX_MODEL="${SFS_REVIEW_CODEX_MODEL:-}"
+SFS_REVIEW_CODEX_REASONING_EFFORT="${SFS_REVIEW_CODEX_REASONING_EFFORT:-}"
+SFS_REVIEW_CODEX_MODEL_SOURCE=""
+SFS_REVIEW_CODEX_REASONING_EFFORT_SOURCE=""
 REVIEW_TIMEOUT_GUARD_NOTE=""
 SFS_REVIEW_RESTORE_NOTICE=""
 while [[ $# -gt 0 ]]; do
@@ -2693,9 +2697,7 @@ Model routing contract:
 - The reviewer model is enforced for CPO/cross review, not a soft target: SFS pins the review_high route model and verifies it via the invocation --model flag (or configured profile), NOT your self-reported model name. Do not self-attest your model in the body — SFS does not trust it, because preview models can self-name a sibling version (solon-product#7).
 - Act under the requested evaluator role on the pinned review_high route model. If that model cannot be pinned, stop and surface a profile bridge issue rather than running an unverifiable reviewer.
 - If the host/runtime cannot provide the required advisor/CPO profile, report that as an executor/auth/profile bridge issue instead of silently downgrading the gate verdict.
-- For Codex CPO/cross review, the requested review_high profile is gpt-5.5 with xhigh reasoning.
 - Codex gpt-5.4 worker, gpt-5.3-codex coding-helper, and gpt-5.3-codex-spark mechanical-helper profiles are not acceptable as the CPO/cross-review profile.
-- The default Codex shell bridge does not pass a --model flag; configure the host/runtime profile to the review_high model (gpt-5.5 xhigh), or set SFS_REVIEW_CODEX_CMD explicitly to pin it. A CPO/cross review that cannot be pinned to the review_high model must stop and surface a profile bridge issue rather than downgrade the gate verdict.
 - Runtime Token Firewall applies to this review: the executor receives this
   capsule prompt and embedded evidence only. Do not use a Claude in-process
   Codex/Gemini plugin, rescue subagent, forked context, or wrapper that forwards
@@ -2704,6 +2706,12 @@ Model routing contract:
   whole chat.
 
 EOF
+  printf -- '- For Codex CPO/cross review, the requested review_high profile is %s with %s reasoning.\n' \
+    "${SFS_REVIEW_CODEX_MODEL}" "${SFS_REVIEW_CODEX_REASONING_EFFORT}"
+  printf -- '- Codex review profile source: model=%s, effort=%s\n' \
+    "${SFS_REVIEW_CODEX_MODEL_SOURCE}" "${SFS_REVIEW_CODEX_REASONING_EFFORT_SOURCE}"
+  printf -- '- Set SFS_REVIEW_CODEX_MODEL and SFS_REVIEW_CODEX_REASONING_EFFORT to override the Codex review profile for this invocation. Precedence: env > local model-profiles.yaml > defaults (gpt-5.5 and xhigh).\n'
+  printf -- '- The default Codex shell bridge does not pass a --model flag; configure the host/runtime profile to the requested review_high model/reasoning, or set SFS_REVIEW_CODEX_CMD explicitly to pin it.\n'
   printf 'Review gate: %s\n' "${GATE_DISPLAY}"
   printf 'Review stage: %s\n' "${REVIEW_STAGE}"
   printf 'Review lens: %s (%s; source=%s)\n' "${REVIEW_LENS}" "${REVIEW_LENS_LABEL}" "${REVIEW_LENS_SOURCE}"
@@ -3001,6 +3009,146 @@ resolve_review_bridge_probe_cmd() {
   esac
 }
 
+read_runtime_model_setting() {
+  local runtime="$1" tier="$2" field="$3" file value
+  file="${SFS_LOCAL_DIR}/model-profiles.yaml"
+  [[ -f "${file}" ]] || return 0
+
+  value="$(awk -v runtime="${runtime}" -v tier="${tier}" -v field="${field}" '
+    function trim(s) {
+      gsub(/^[[:space:]]+/, "", s)
+      gsub(/[[:space:]]+$/, "", s)
+      return s
+    }
+    function count_indent(s,    i, c, n) {
+      n = 0
+      for (i = 1; i <= length(s); i++) {
+        c = substr(s, i, 1)
+        if (c == " ") {
+          n = n + 1
+        } else if (c == "\t") {
+          n = n + 2
+        } else {
+          break
+        }
+      }
+      return n
+    }
+    function unquote(s,  first, last) {
+      first = substr(s, 1, 1)
+      if (s == "") {
+        return s
+      }
+      last = substr(s, length(s), 1)
+      if (first == "\"" && last == "\"") {
+        return substr(s, 2, length(s) - 2)
+      }
+      if (first == "\047" && last == "\047") {
+        return substr(s, 2, length(s) - 2)
+      }
+      return s
+    }
+
+    {
+      line = $0
+      sub(/\r$/, "", line)
+      if (line ~ /^[[:space:]]*$/ || line ~ /^[[:space:]]*#/) {
+        next
+      }
+
+      indent = count_indent(line)
+      idx = index(line, ":")
+      if (idx == 0) {
+        next
+      }
+
+      key = trim(substr(line, 1, idx - 1))
+      val = substr(line, idx + 1)
+
+      if (indent == 0) {
+        if (key == "runtime_model_settings") {
+          in_root = 1
+        } else {
+          in_root = 0
+        }
+        in_runtime = 0
+        in_tier = 0
+        next
+      }
+
+      if (!in_root) {
+        next
+      }
+
+      if (indent == 2) {
+        in_tier = 0
+        if (key == runtime) {
+          in_runtime = 1
+        } else {
+          in_runtime = 0
+        }
+        next
+      }
+
+      if (!in_runtime) {
+        next
+      }
+
+      if (indent == 4) {
+        if (key == tier) {
+          in_tier = 1
+        } else {
+          in_tier = 0
+        }
+        next
+      }
+
+      if (!in_tier) {
+        next
+      }
+
+      if (indent == 6 && key == field) {
+        val = trim(val)
+        if (val == "") {
+          next
+        }
+        sub(/[[:space:]]*#.*/, "", val)
+        val = trim(val)
+        print unquote(val)
+        exit
+      }
+    }
+  ' "${file}")"
+
+  printf '%s' "${value}"
+}
+
+resolve_codex_review_profile_setting() {
+  local field="$1" env_value="$2" fallback="$3" out_var="$4" src_var="$5" profile_value resolved source
+
+  if [[ -n "${env_value}" ]]; then
+    resolved="${env_value}"
+    source="env"
+  else
+    profile_value="$(read_runtime_model_setting codex review_high "${field}")"
+    if [[ -n "${profile_value}" ]]; then
+      resolved="${profile_value}"
+      source="profile"
+    else
+      resolved="${fallback}"
+      source="default"
+    fi
+  fi
+
+  printf -v "${out_var}" '%s' "${resolved}"
+  printf -v "${src_var}" '%s' "${source}"
+}
+
+resolve_codex_review_profile_values() {
+  resolve_codex_review_profile_setting "model" "${SFS_REVIEW_CODEX_MODEL}" "gpt-5.5" "SFS_REVIEW_CODEX_MODEL" "SFS_REVIEW_CODEX_MODEL_SOURCE"
+  resolve_codex_review_profile_setting "reasoning_effort" "${SFS_REVIEW_CODEX_REASONING_EFFORT}" "xhigh" "SFS_REVIEW_CODEX_REASONING_EFFORT" "SFS_REVIEW_CODEX_REASONING_EFFORT_SOURCE"
+}
+
 extract_bridge_probe_field() {
   local field="$1" err_path="$2" out_path="$3"
   awk -v field="${field}" '
@@ -3026,6 +3174,7 @@ extract_executor_cmd_flag() {
 write_bridge_profile_evidence() {
   local profile="$1" out_path="$2" err_path="$3" dest="$4" invocation_cmd="${5:-}"
   local model reasoning model_lc reasoning_lc status expected_model expected_reasoning
+  local expected_model_source expected_reasoning_source
 
   model="$(extract_bridge_probe_field "model" "${err_path}" "${out_path}")"
   reasoning="$(extract_bridge_probe_field "reasoning effort" "${err_path}" "${out_path}")"
@@ -3037,8 +3186,21 @@ write_bridge_profile_evidence() {
 
   case "${profile}" in
     codex)
-      expected_model="gpt-5.5"
-      expected_reasoning="xhigh"
+      expected_model="${SFS_REVIEW_CODEX_MODEL}"
+      expected_reasoning="${SFS_REVIEW_CODEX_REASONING_EFFORT}"
+      expected_model_source="${SFS_REVIEW_CODEX_MODEL_SOURCE}"
+      expected_reasoning_source="${SFS_REVIEW_CODEX_REASONING_EFFORT_SOURCE}"
+      if [[ -z "${model}" && -n "${invocation_cmd}" ]]; then
+        model="$(extract_executor_cmd_flag "${invocation_cmd}" "model")"
+      fi
+      if [[ -z "${reasoning}" && -n "${invocation_cmd}" ]]; then
+        reasoning="$(extract_executor_cmd_flag "${invocation_cmd}" "reasoning-effort")"
+        if [[ -z "${reasoning}" ]]; then
+          reasoning="$(extract_executor_cmd_flag "${invocation_cmd}" "effort")"
+        fi
+      fi
+      model_lc="$(printf '%s' "${model}" | tr '[:upper:]' '[:lower:]')"
+      reasoning_lc="$(printf '%s' "${reasoning}" | tr '[:upper:]' '[:lower:]')"
       if [[ "${model_lc}" == "${expected_model}" && "${reasoning_lc}" == "${expected_reasoning}" ]]; then
         status="matched"
       elif [[ -n "${model}" || -n "${reasoning}" ]]; then
@@ -3074,6 +3236,8 @@ write_bridge_profile_evidence() {
     printf 'Requested review profile: review_high\n'
     printf 'Expected model: %s\n' "${expected_model:-not-specified}"
     printf 'Expected reasoning effort: %s\n' "${expected_reasoning:-not-specified}"
+    printf 'Expected model source: %s\n' "${expected_model_source:-not-specified}"
+    printf 'Expected reasoning source: %s\n' "${expected_reasoning_source:-not-specified}"
     printf 'Detected model: %s\n' "${model:-not-detected}"
     printf 'Detected reasoning effort: %s\n' "${reasoning:-not-detected}"
     printf 'Match status: %s\n' "${status}"
@@ -3257,6 +3421,8 @@ if [[ "${RUN_REVIEW}" == "true" && "${ALLOW_EMPTY_REVIEW}" != "true" ]] && ! has
   fi
   exit "${SFS_EXIT_OK}"
 fi
+
+resolve_codex_review_profile_values
 
 if ! mkdir -p "${PROMPT_INVOCATION_DIR}" "${RUN_INVOCATION_DIR}" 2>/dev/null; then
   echo "permission denied creating ${PROMPT_INVOCATION_DIR} / ${RUN_INVOCATION_DIR}" >&2

@@ -133,7 +133,7 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   external evidence when available: `sfs review --gate 6 --stage self`, then
   `--stage cross`, then push/PR for @codex. Record constraints.
 - Before done, require self-agent top-model CPO evidence. Claude uses Opus 4.7,
-  Codex uses `gpt-5.5` with xhigh reasoning, Gemini uses
+  Codex uses `gpt-5.6-sol` with xhigh reasoning, Gemini uses
   `gemini-3.1-pro-preview`, and custom runtimes use their top equivalent.
   Partial/fail repeats rework + self-CPO until PASS or waiver.
 - Review scope is functional correctness + consistency only: declared behaviour,

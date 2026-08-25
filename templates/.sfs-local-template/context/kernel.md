@@ -186,7 +186,7 @@ load_when: ["always", "sfs", "entry"]
 - Model routing reflects role split. Claude coding-capable lanes use Sonnet 4.6; Haiku is non-coding helper-only. Substantive research should prefer Gemini `gemini-3.1-pro-preview`; Gemini agentic coding routes to `gemini-3-flash-preview`; helper/probe lanes use `gemini-3.1-flash-lite`.
   Codex uses `gpt-5.4` for general workers, `gpt-5.4-mini` for helper I/O, `gpt-5.3-codex` for bounded coding helpers, and `gpt-5.3-codex-spark` for judgment-free mechanical implementation.
 - Work is not complete until self-agent top-model CPO records PASS: Claude
-  Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3.1-pro-preview`, or custom
+  Opus 4.7, Codex `gpt-5.6-sol` xhigh, Gemini `gemini-3.1-pro-preview`, or custom
   top-model equivalent. Partial/fail repeats rework + self-CPO until PASS/waiver.
 - Multi-agent work is thin supervision; Division sub-agent council is always-on:
   strategy-pm, dev, QA, design, infra, and taxonomy each records finding/evidence/

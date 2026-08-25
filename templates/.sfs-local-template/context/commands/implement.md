@@ -113,7 +113,7 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   compact fresh-session handoff instead of spending another slice in-chat.
 - After tests/smokes pass, run a self-agent top-model CPO review before pushing
   product code or marking done. Claude routes self-CPO to Opus 4.7, Codex to
-  `gpt-5.5` with xhigh reasoning, and Gemini routes it to `gemini-3.1-pro-preview`.
+  `gpt-5.6-sol` with xhigh reasoning, and Gemini routes it to `gemini-3.1-pro-preview`.
   If the verdict is partial/fail, let the CPO redirect the slice, rework it,
   rerun verification, and repeat self-CPO until PASS or an explicit user waiver.
 - Use current sprint artifacts for plan/checklist/context notes. Create

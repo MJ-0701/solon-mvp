@@ -13,6 +13,28 @@
 
 ---
 
+## 0.15.1
+
+Codex review 프로필이 **고정 문구가 아니라 실제 설정 우선순위**로 해석되는
+릴리스입니다.
+
+체감 변화:
+
+- **Codex review_high 프로필이 순서대로 결정됩니다** — `SFS_REVIEW_CODEX_MODEL`
+  / `SFS_REVIEW_CODEX_REASONING_EFFORT` 환경변수가 가장 먼저이고, 없으면 로컬
+  `model-profiles.yaml`, 그것도 없으면 기본값 `gpt-5.5` + `xhigh` 로
+  내려갑니다.
+- **어디서 결정됐는지 같이 남깁니다** — 프롬프트와 executor profile evidence 에
+  값뿐 아니라 source(`env` / `profile` / `default`)도 함께 적습니다.
+- **브리지 배너가 있으면 그 값이 권위입니다** — probe 배너가 model/effort 를
+  내면 그 값을 증거로 쓰고, 배너가 비어 있을 때만 custom Codex command 의
+  `--model`, `--reasoning-effort`, `--effort` 플래그에서 보강합니다.
+- **Codex review 는 계속 read-only 입니다** — `--sandbox read-only` 와
+  `approval_policy=never` 계약은 그대로 유지되고, 테스트가 그 계약과 새
+  precedence/fallback 규칙을 함께 잠급니다.
+
+---
+
 ## 0.15.0
 
 에이전트가 **언제 말을 걸고, 무엇을 되돌릴 수 없게 하기 전에 무엇을 확인하며,
