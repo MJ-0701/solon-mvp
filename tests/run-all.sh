@@ -48,7 +48,7 @@ categorize() {
       printf 'release\n'
       ;;
     test-packaging-*.sh \
-      | test-homebrew-formula-style.sh \
+      | test-homebrew-*.sh \
       | scoop-manifest-validate.sh \
       | test-windows-*.sh)
       printf 'packaging\n'

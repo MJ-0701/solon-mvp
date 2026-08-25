@@ -1590,8 +1590,13 @@ upgrade_command() {
   ensure_project_initialized upgrade || return $?
   export SFS_UPGRADE_LAYOUT="${upgrade_layout}"
   if [[ "${no_self_upgrade}" != "1" && "${SFS_UPDATE_SELF:-1}" != "0" ]]; then
-    self_upgrade_if_homebrew "${skip_existing}"
-    self_upgrade_if_scoop "${skip_existing}"
+    if is_homebrew_runtime; then
+      self_upgrade_if_homebrew "${skip_existing}"
+    elif is_scoop_runtime; then
+      self_upgrade_if_scoop "${skip_existing}"
+    else
+      echo "global runtime self-upgrade: skipped (runtime is not managed by Homebrew or Scoop)"
+    fi
   fi
   local upgrade_rc=0
   # Forward the validated team preset as a flag (parity with install --team).
@@ -1641,11 +1646,13 @@ upgrade_command() {
 
 is_homebrew_runtime() {
   command -v brew >/dev/null 2>&1 || return 1
-  local prefix info
+  local prefix physical_prefix physical_dist info
   prefix="$(brew --prefix MJ-0701/solon-product/sfs 2>/dev/null || brew --prefix sfs 2>/dev/null || true)"
   [[ -n "${prefix}" ]] || return 1
-  case "${DIST_DIR}" in
-    "${prefix}"|"${prefix}/"*) ;;
+  physical_prefix="$(cd -P "${prefix}" 2>/dev/null && pwd)" || return 1
+  physical_dist="$(cd -P "${DIST_DIR}" 2>/dev/null && pwd)" || return 1
+  case "${physical_dist}" in
+    "${physical_prefix}"|"${physical_prefix}/"*) ;;
     *) return 1 ;;
   esac
   info="$(brew info MJ-0701/solon-product/sfs 2>/dev/null || brew info sfs 2>/dev/null || true)"
@@ -1666,7 +1673,6 @@ refresh_homebrew_tap() {
 
 self_upgrade_if_homebrew() {
   local skip_existing="${1:-0}" sfs_bin
-  is_homebrew_runtime || return 0
 
   echo "global runtime self-upgrade:"
   refresh_homebrew_tap || return 1
@@ -1728,7 +1734,6 @@ run_scoop_command() {
 
 self_upgrade_if_scoop() {
   local skip_existing="${1:-0}" sfs_bin
-  is_scoop_runtime || return 0
 
   echo "global runtime self-upgrade:"
   echo "  scoop update"

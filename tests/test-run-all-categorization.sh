@@ -63,6 +63,7 @@ assert_category test-upgrade-freshness-summary.sh          release
 # ── 4) packaging ────────────────────────────────────────────────────
 assert_category test-packaging-channel-map.sh              packaging
 assert_category test-homebrew-formula-style.sh             packaging
+assert_category test-homebrew-runtime-detection.sh         packaging
 assert_category test-windows-wrapper-incident-report.sh    packaging
 
 # ── 5) review ───────────────────────────────────────────────────────
