@@ -49,6 +49,19 @@ fake_bin="${TMP_DIR}/fake-bin"
 mkdir -p "${fake_bin}"
 cat > "${fake_bin}/codex" <<'FAKE_CODEX'
 #!/usr/bin/env bash
+args=" $* "
+case "${args}" in
+  *" --sandbox read-only "*) ;;
+  *) echo "missing read-only review sandbox: $*" >&2; exit 40 ;;
+esac
+case "${args}" in
+  *" -c approval_policy=never "*) ;;
+  *) echo "missing never approval policy: $*" >&2; exit 41 ;;
+esac
+case "${args}" in
+  *" --full-auto "*|*" workspace-write "*) echo "write-enabled review bridge used: $*" >&2; exit 42 ;;
+esac
+
 result_path=""
 while [[ $# -gt 0 ]]; do
   case "$1" in

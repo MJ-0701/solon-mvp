@@ -326,7 +326,7 @@ Return exactly:
 SFS_AUTH_PROBE_OK ${profile}
 EOF
     case "$profile" in
-      codex)  PROBE_CMD="${SFS_REVIEW_CODEX_CMD:-codex exec --full-auto}" ;;
+      codex)  PROBE_CMD="${SFS_REVIEW_CODEX_CMD:-codex exec --sandbox read-only -c approval_policy=\"never\"}" ;;
       claude)
         if [[ -n "${SFS_REVIEW_CLAUDE_CMD:-}" ]]; then
           PROBE_CMD="${SFS_REVIEW_CLAUDE_CMD}"

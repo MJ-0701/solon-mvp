@@ -413,7 +413,7 @@ assert_contains "${review_script}" "User-escalation premise guard" "review promp
 assert_contains "${review_script}" "reject-delete-with-dependents" "review prompt delete dependents default"
 assert_contains "${review_script}" "User-call minimalism" "review prompt user-call minimalism"
 assert_contains "${review_script}" "autopilot patch" "review prompt autopilot patch"
-assert_contains "${review_script}" 'codex exec --full-auto --ephemeral --output-last-message \"${RUN_RESULT}\" -' "review codex prompt-based bridge"
+assert_contains "${review_script}" 'codex exec --sandbox read-only -c approval_policy=\"never\" --ephemeral --output-last-message \"${RUN_RESULT}\" -' "review codex read-only prompt-based bridge"
 assert_not_contains "${review_script}" 'SFS_REVIEW_CODEX_MODEL:-gpt-5.5' "review codex no default model cli flag"
 assert_not_contains "${review_script}" 'SFS_REVIEW_CODEX_REASONING_EFFORT:-xhigh' "review codex no default reasoning cli flag"
 assert_contains "${installer}" 'MODEL_POLICY="${SFS_MODEL_POLICY:-solon_recommended}"' "install recommended default"

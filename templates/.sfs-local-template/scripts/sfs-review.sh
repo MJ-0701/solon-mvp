@@ -130,7 +130,7 @@ Open the active sprint's review.md as the CPO Evaluator review document.
                   (default timeout: 45s) so a broken CLI wrapper/auth path
                   fails before the full CPO prompt is sent.
                   Named profiles:
-                    codex        $SFS_REVIEW_CODEX_CMD, else `codex exec --full-auto --ephemeral --output-last-message <result> -`
+                    codex        $SFS_REVIEW_CODEX_CMD, else `codex exec --sandbox read-only -c approval_policy="never" --ephemeral --output-last-message <result> -`
                     codex-plugin unsupported: Claude in-process Codex wrappers are blocked by Runtime Token Firewall
                     gemini       $SFS_REVIEW_GEMINI_CMD, else a compatibility bridge that uses `--model gemini-3.1-pro-preview` only when the installed Gemini CLI advertises `--model`
                     claude       $SFS_REVIEW_CLAUDE_CMD, else `claude -p "\$(cat)"`
@@ -2832,7 +2832,7 @@ Do not route SFS review through Claude in-process Codex/Gemini plugin wrappers,
 rescue subagents, forked contexts, or commands that forward the lead
 conversation history. Use one of:
   - sfs review --gate <1..7> --executor codex
-  - SFS_REVIEW_CODEX_CMD='codex exec --full-auto --ephemeral --output-last-message "\${RUN_RESULT}" -'
+  - SFS_REVIEW_CODEX_CMD='codex exec --sandbox read-only -c approval_policy="never" --ephemeral --output-last-message "\${RUN_RESULT}" -'
   - sfs review --gate <1..7> --executor codex --prompt-only
 EOF
 }
@@ -2871,7 +2871,7 @@ Windows commonly denies direct execution from:
   C:\Program Files\WindowsApps\OpenAI.Codex_...\app\resources\codex.exe
 
 Use the App Execution Alias or another accessible shim instead, for example:
-  SFS_REVIEW_CODEX_CMD='codex exec --full-auto --ephemeral --output-last-message "${RUN_RESULT}" -'
+  SFS_REVIEW_CODEX_CMD='codex exec --sandbox read-only -c approval_policy="never" --ephemeral --output-last-message "${RUN_RESULT}" -'
 
 If the alias is not visible from Git Bash, use the per-user alias path:
   /c/Users/<you>/AppData/Local/Microsoft/WindowsApps/codex.exe
@@ -2882,7 +2882,7 @@ EOF
         printf '%s\n' "${SFS_REVIEW_CODEX_CMD}"
       elif command -v codex >/dev/null 2>&1; then
         prepare_executor_auth "codex" "${AUTH_INTERACTIVE}" || return "${SFS_EXIT_EXECUTOR}"
-        printf '%s\n' "codex exec --full-auto --ephemeral --output-last-message \"${RUN_RESULT}\" -"
+        printf '%s\n' "codex exec --sandbox read-only -c approval_policy=\"never\" --ephemeral --output-last-message \"${RUN_RESULT}\" -"
       else
         executor_cli_missing_hint "codex"
         return "${SFS_EXIT_EXECUTOR}"
@@ -2978,7 +2978,7 @@ resolve_review_bridge_probe_cmd() {
       if [[ -n "${SFS_REVIEW_CODEX_CMD:-}" ]]; then
         printf '%s\n' "${SFS_REVIEW_CODEX_CMD}"
       else
-        printf 'codex exec --full-auto --ephemeral --output-last-message "%s" -\n' "${result_path}"
+        printf 'codex exec --sandbox read-only -c approval_policy="never" --ephemeral --output-last-message "%s" -\n' "${result_path}"
       fi
       ;;
     gemini)
