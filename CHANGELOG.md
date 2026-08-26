@@ -1,5 +1,19 @@
 ## [Unreleased]
 
+## [0.15.2] - 2026-08-26
+
+> **Six-division ledger completeness becomes a lifecycle-gated, advisory-only `sfs healthcheck` signal: plan §7 is checked only after `implement.md` exists, and review §5 only after a real `result_verdict` is recorded. Blank substantive rows emit WARN guidance naming the affected divisions, while filled rows and explicit N/A or waiver entries pass; the lint never changes issue counts, exit codes, relevance judgment, or Gate PASS. Regression coverage locks the lifecycle gates, advisory-only contract, accepted ledger entries, and resilient Markdown heading, label-format, and CRLF handling.**
+
+### Added
+
+- **`templates/.sfs-local-template/scripts/sfs-healthcheck.sh`** — Tier-B `division-ledger` advisory for blank six-division rows in lifecycle-eligible plan and review ledgers; it reports through `say_warn` only.
+- **`tests/test-sfs-healthcheck-division-ledger-advisory.sh`** — regression coverage for plan/review lifecycle gating, non-failing advisory behavior, substantive/N/A/waiver entries, canonical division matching, heading variants, and CRLF/byte-oriented parsing.
+
+### Changed
+
+- **`docs/maintenance/policies/six-division-council.md`** — documents the Tier-B advisory scope, lifecycle gates, and preserved semantic council/review ownership.
+- **Version drift-locks** bumped 0.15.1 → 0.15.2.
+
 ## [0.15.1] - 2026-08-25
 
 > **Codex review profile resolution now follows a real precedence chain instead of a hard-coded pair. `sfs-review.sh` resolves the Codex `review_high` profile from env first, then local `model-profiles.yaml`, then the default `gpt-5.5` + `xhigh`, and writes both the resolved values and their sources into the prompt and executor-profile evidence. When the bridge probe banner reports model/effort, that banner remains authoritative; when it omits them, SFS backfills detection from explicit Codex command flags instead of trusting reviewer self-attestation. The Codex review bridge remains read-only, and the guardrail suite extends its fixtures to lock env/profile/default precedence, per-field fallback, banner authority, command-flag fallback, cross-provider isolation, and the retained read-only review contract.**

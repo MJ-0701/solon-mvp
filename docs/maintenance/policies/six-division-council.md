@@ -4,8 +4,8 @@ title: "6본부 council always-on — 운영 원칙 / cross-link"
 visibility: oss-public
 doc_type: maintenance-policy
 language: ko
-updated: 2026-05-28
-summary: "Pointer doc for the always-on 6-division council. The actual SSoT is the routed context policies; this file is just maintainer-side documentation of the principle."
+updated: 2026-08-26
+summary: "Pointer doc for the always-on 6-division council, including the current Tier-B ledger-completeness advisory. The actual SSoT remains the routed context policies."
 load_when: "Read when discussing why divisions.yaml activation_state only controls depth, not participation. For the actual prompt-driven contract, load policies/division-subagent-council.md from routed context."
 ---
 
@@ -33,21 +33,28 @@ brainstorm 부터 Gate 6 까지 *항상* 개념적 sub-agent 로 개입한다.**
 
 ## 어디서 강제되나
 
-1. **`plan.md` 템플릿 구조** — `templates/.sfs-local-template/sprint-templates/plan.md`
-   가 §7 (Division Sub-agent Ledger 6행), §7.1 (Domain Asset Promotion
-   Ledger), §8 (Enterprise Plan Council 6행 + risk_flag) 세 개 테이블을
-   자동 scaffold 한다. LLM 이 이걸 비우면 §12 리뷰 체크리스트가 실패
-   신호를 낸다.
-2. **`enterprise-plan-council-pack.md` 정책** — "Empty six-division
+1. **템플릿 scaffold** — `templates/.sfs-local-template/sprint-templates/plan.md`
+   의 §7과 `review.md`의 §5가 각각 6행 Division Sub-agent Ledger를 만든다.
+   plan §7.1/§8의 자산·enterprise council 표도 별도 scaffold 이다. 템플릿의
+   리뷰 체크리스트는 사람/agent 검토 계약이며, 그 자체가 기계적 실패는 아니다.
+2. **Tier-B healthcheck lint (현재 release 는 advisory)** — active sprint에서
+   `implement.md`가 생긴 뒤 `plan.md` §7을, 실제 `result_verdict`가 기록된 뒤
+   `review.md` §5를 검사한다. division 이름 뒤의 모든 substantive cell이 빈
+   6본부 row를 `sfs healthcheck`가 WARN으로 보고한다. `finding`, `evidence`,
+   `asset_candidate`, 명시적 N/A 또는 waiver 중 하나가 있으면 통과한다. 이 lint는
+   `say_warn` 전용이라 issue count/exit code를 바꾸지 않으며, relevance나 Gate
+   PASS 판단까지 대신하지 않는다.
+3. **`enterprise-plan-council-pack.md` 정책** — "Empty six-division
    ceremony is not PASS; each row needs a finding, evidence,
    asset_candidate, waiver, or concrete N/A reason."
-3. **0.6.138 enhancement (asset_candidate + domain-knowledge-assets)** —
+4. **0.6.138 enhancement (asset_candidate + domain-knowledge-assets)** —
    council 결과가 재사용 가능한 도메인 자산 후보까지 끌어올리는 단계.
    회의 결과 = 자산 promotion 후보 명세.
-4. **회귀 잠금 contract test 3개**:
+5. **회귀 잠금 contract test**:
    - `tests/test-domain-knowledge-assets.sh`
    - `tests/test-enterprise-agent-team-knowledge-packs.sh`
    - `tests/test-division-subagent-continuation-guard.sh`
+   - `tests/test-sfs-healthcheck-division-ledger-advisory.sh`
 
 ## 6본부 vs parallel worker
 

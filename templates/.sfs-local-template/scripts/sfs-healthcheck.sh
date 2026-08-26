@@ -382,6 +382,132 @@ check_unknowns_conformance() {
   return 0
 }
 
+# Six-division ledger completeness — Tier-B mechanical detection, advisory only.
+# The semantic Gate 3/Gate 6 verdict remains with the council/review policy.
+# A plan ledger is relevant once implement.md exists; a review ledger is
+# relevant only after a real verdict is persisted. This avoids treating fresh
+# scaffolds as missing work. The check then finds named division rows whose
+# cells after the division name are all blank. Any explicit finding, evidence,
+# asset, waiver, or N/A reason is accepted without judging relevance or PASS.
+division_ledger_blank_rows() {
+  local file="$1" section="$2"
+  awk -v section="${section}" '
+    function trim(value) {
+      sub(/^[[:space:]]+/, "", value)
+      sub(/[[:space:]]+$/, "", value)
+      return value
+    }
+    function markdown_heading_level(line, text, level) {
+      text=line
+      sub(/^[[:space:]]*/, "", text)
+      level=0
+      while (substr(text, level + 1, 1) == "#") level++
+      return level
+    }
+    function markdown_heading_text(line, text) {
+      text=line
+      sub(/^[[:space:]]*#+[[:space:]]*/, "", text)
+      text=trim(text)
+      sub(/[[:space:]]+#+[[:space:]]*$/, "", text)
+      return trim(text)
+    }
+    function is_ledger_heading(line, target, text) {
+      if (markdown_heading_level(line) == 0) return 0
+      text=tolower(markdown_heading_text(line))
+      gsub(/[-_[:space:]]+/, " ", text)
+      text=trim(text)
+      if (index(text, "§") == 1) text=substr(text, length("§") + 1)
+      return text ~ ("^" target "[.):]*[[:space:]]+division sub agent ledger$")
+    }
+    function canonical_division(value) {
+      value=trim(value)
+      if (value ~ /^`[^`]+`$/) {
+        sub(/^`/, "", value)
+        sub(/`$/, "", value)
+      } else if (value ~ /^\*\*[^*]+\*\*$/ || value ~ /^__[^_]+__$/) {
+        sub(/^[*_][*_]/, "", value)
+        sub(/[*_][*_]$/, "", value)
+      } else if (value ~ /^\*[^*]+\*$/ || value ~ /^_[^_]+_$/) {
+        sub(/^[*_]/, "", value)
+        sub(/[*_]$/, "", value)
+      }
+      value=tolower(trim(value))
+      if (value == "strategy-pm" || value == "strategy pm") return "strategy-pm"
+      if (value == "dev") return "dev"
+      if (value == "qa") return "QA"
+      if (value == "design") return "design"
+      if (value == "infra") return "infra"
+      if (value == "taxonomy") return "taxonomy"
+      return ""
+    }
+    !in_section && is_ledger_heading($0, section) {
+      in_section=1
+      section_level=markdown_heading_level($0)
+      next
+    }
+    in_section && markdown_heading_level($0) > 0 && markdown_heading_level($0) <= section_level { exit }
+    in_section && /^\|/ {
+      row=$0
+      sub(/^[[:space:]]*\|/, "", row)
+      count=split(row, cells, "|")
+      division=canonical_division(cells[1])
+      if (division == "") next
+      substantive=0
+      for (column=2; column<=count; column++) {
+        if (trim(cells[column]) != "") {
+          substantive=1
+          break
+        }
+      }
+      if (substantive) next
+      if (found) printf ", "
+      printf "%s", division
+      found=1
+    }
+    END { if (found) printf "\n" }
+  ' "${file}" 2>/dev/null
+}
+
+review_verdict_recorded() {
+  local file="$1"
+  awk '
+    {
+      line=tolower($0)
+      if (line ~ /^[[:space:]>-]*verdict:[[:space:]]*(pass|partial|fail)[[:space:]]*$/ ||
+          line ~ /^[[:space:]>-]*result_verdict:[[:space:]]*`?(pass|partial|fail)`?[[:space:]]*$/) {
+        found=1
+        exit
+      }
+    }
+    END { exit(found ? 0 : 1) }
+  ' "${file}" 2>/dev/null
+}
+
+check_division_ledger_completeness() {
+  local project="$1" label="$2" local_dir="$3" sid sdir plan impl review blank
+  sid="$(head -n1 "${local_dir}/current-sprint" 2>/dev/null | tr -d '[:space:]')"
+  [[ -n "${sid}" ]] || return 0
+  sdir="${local_dir}/sprints/${sid}"
+  plan="${sdir}/plan.md"
+  impl="${sdir}/implement.md"
+  review="${sdir}/review.md"
+
+  if [[ -f "${plan}" && -f "${impl}" ]]; then
+    blank="$(division_ledger_blank_rows "${plan}" "7")"
+    if [[ -n "${blank}" ]]; then
+      say_warn "division-ledger" "${label}" "plan.md §7 has blank substantive row(s): ${blank} — add a finding/evidence/asset, or explicit N/A/waiver (Tier-B advisory)"
+    fi
+  fi
+
+  if [[ -f "${review}" ]] && review_verdict_recorded "${review}"; then
+    blank="$(division_ledger_blank_rows "${review}" "5")"
+    if [[ -n "${blank}" ]]; then
+      say_warn "division-ledger" "${label}" "review.md §5 has blank substantive row(s): ${blank} — add a finding/evidence/asset, or explicit N/A/waiver (Tier-B advisory)"
+    fi
+  fi
+  return 0
+}
+
 # security audit 정합 — advisory only: open critical finding 수를 알리되 이슈로
 # 세지 않고 exit 코드도 바꾸지 않는다 (signal-only).
 check_audit_conformance() {
@@ -421,6 +547,7 @@ check_project() {
   check_status_parse "${project}" "${local_dir}"
   check_evidence_at_risk "${project}" "${local_dir}"
   check_unknowns_conformance "${project}" "${label}" "${local_dir}"
+  check_division_ledger_completeness "${project}" "${label}" "${local_dir}"
   check_divisions_parse "${project}" "${local_dir}"
 }
 

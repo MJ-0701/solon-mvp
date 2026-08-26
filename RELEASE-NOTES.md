@@ -13,6 +13,25 @@
 
 ---
 
+## 0.15.2
+
+6본부 원장이 실제 작업 단계에 들어간 뒤에도 비어 있으면, `sfs healthcheck`가
+**실패가 아닌 경고**로 알려 주는 릴리스입니다.
+
+체감 변화:
+
+- **새로 만든 템플릿에는 경고하지 않습니다** — plan 원장은 `implement.md`가 생긴
+  뒤에만, review 원장은 실제 `result_verdict`가 기록된 뒤에만 확인합니다.
+- **무엇이 비었는지 바로 보입니다** — 6개 division 중 substantive cell이 모두 빈
+  행만 이름과 함께 WARN으로 표시합니다.
+- **적지 않아도 되는 이유는 명시할 수 있습니다** — finding/evidence/asset을 남기거나,
+  명시적 N/A 또는 waiver를 기록한 행은 통과합니다.
+- **판정 강도는 바뀌지 않습니다** — issue count, 종료 코드, relevance 판단, Gate PASS를
+  바꾸지 않습니다. 기계적 완결성 신호는 advisory이고, 의미 판단은 기존 council/review
+  계약에 남습니다.
+
+---
+
 ## 0.15.1
 
 Codex review 프로필이 **고정 문구가 아니라 실제 설정 우선순위**로 해석되는
