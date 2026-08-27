@@ -13,6 +13,24 @@
 
 ---
 
+## 0.15.4
+
+활성 sprint 원장의 flow·evidence 기록이 upgrade 중 사라지지 않도록 고친
+hotfix입니다.
+
+체감 변화:
+
+- **승인 증거가 남습니다** — 같은 Gate에 나중 note를 남겨도 기존의 scoped
+  `user-approval` capture와 capture ID가 유지됩니다.
+- **flowcheck override 판단이 유지됩니다** — upgrade 뒤에도 scoped approval을
+  읽어 user override를 이전처럼 판정합니다.
+- **`approval`도 같은 승인입니다** — 기존 `sfs capture --kind approval` 입력은
+  계속 받되, 저장할 때 `user-approval`으로 통일해 flowcheck가 인식합니다.
+- **tool telemetry 정리는 그대로입니다** — 고빈도 `tool_call`만 최신 기록으로
+  compact하고 flow/evidence 이벤트는 compact하지 않습니다.
+
+---
+
 ## 0.15.3
 
 조직 본부와 taxonomy의 역할을 정확히 구분하면서도, 여섯 council role의

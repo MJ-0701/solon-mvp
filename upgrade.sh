@@ -1260,6 +1260,12 @@ write_compact_upgrade_event_line() {
   if ! upgrade_event_line_belongs_to_active_sprint "$line" "$active_sid"; then
     return 0
   fi
+  # Flow/evidence records are append-only. Only high-volume tool telemetry is
+  # eligible for active-ledger compaction during upgrade.
+  if [ "$event_type" != "tool_call" ]; then
+    printf '%s\n' "$line" >> "$events_file" || return 5
+    return 0
+  fi
   tmp="${events_file}.tmp.$$"
   : > "$tmp" || return 5
   if [ -f "$events_file" ]; then

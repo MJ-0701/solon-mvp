@@ -133,6 +133,12 @@ case "${CAPTURE_KIND}" in
     ;;
 esac
 
+# `approval` remains an accepted compatibility spelling, while all persisted
+# evidence uses the canonical kind flowcheck consumes.
+if [[ "${CAPTURE_KIND}" == "approval" ]]; then
+  CAPTURE_KIND="user-approval"
+fi
+
 # --scope marks how long a user override / decision is authoritative. Required
 # shape for user-override-precedence (policies/user-override-precedence.md):
 # every override capture carries one. Valid for any kind; meaningful for

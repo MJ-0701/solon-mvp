@@ -1,5 +1,18 @@
 ## [Unreleased]
 
+## [0.15.4] - 2026-08-27
+
+> **Upgrade now preserves every active-sprint flow and evidence event, compacting only high-volume `tool_call` telemetry. A later note can no longer erase a scoped user-approval capture at the same gate, so flowcheck retains its override evidence. The accepted `sfs capture --kind approval` compatibility spelling now persists as canonical `user-approval`, which flowcheck recognizes.**
+
+### Fixed
+
+- **Active event-ledger preservation** — `upgrade.sh` passes through all active non-`tool_call` records, including `evidence_capture`, while retaining existing latest-record compaction for active `tool_call` telemetry.
+- **Approval capture compatibility** — `approval` remains accepted at the CLI, but capture logs, event payloads, output, and downstream flowcheck now use the canonical `user-approval` kind.
+
+### Changed
+
+- **Regression and release drift-locks** — an isolated upgrade fixture proves same-gate evidence captures and scoped flowcheck overrides survive an upgrade, locks `tool_call` compaction, and verifies `approval` normalization; release surfaces bumped 0.15.3 → 0.15.4.
+
 ## [0.15.3] - 2026-08-27
 
 > **Five organization divisions plus taxonomy, the cross-cutting product function/lens, now form the six required council roles consistently across runtime guidance, routed policy, templates, and product documentation. New sprint templates call the artifact a Council Participation Ledger without removing taxonomy's required row; existing consumer ledgers headed Division Sub-agent Ledger remain parseable, and legacy command, config, and event keys stay compatible. The healthcheck keeps the existing lifecycle gates and remains WARN-only: it does not change issue counts, exit codes, relevance judgment, or Gate PASS.**
