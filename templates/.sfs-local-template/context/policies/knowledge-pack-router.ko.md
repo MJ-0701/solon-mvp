@@ -17,9 +17,10 @@ risk 에 맞는 최소 check 만 활성화하는 것이다. 이 router 는 `.sfs
 Raw / Wiki / Schema (+lint) wiki 모델(`obsidian-llm-wiki` 참조)에서 이 팩들은
 Schema 계층 review lens 다 — Raw 원천도, Wiki 개념 corpus 도 아니며, routed 상태로
 남고 wiki 로 이동하지 않는다.
-6개 core division 은 brainstorm, plan, implement, review 전 단계의 always-on
-Division sub-agent council 이다. `activation_state` 는 read-depth 와 escalation
-을 조절할 뿐, strategy-pm/dev/QA/design/infra/taxonomy 참여 여부가 아니다.
+organization division은 다섯 개(strategy-pm, dev, QA, design, infra)다.
+taxonomy는 필수 cross-cutting product function/lens다. 여섯 role은 brainstorm,
+plan, implement, review 전 단계의 required council role이다. legacy
+`activation_state`는 read-depth와 escalation만 조절하고 참여를 끄지 않는다.
 
 ## Lens activation
 
@@ -43,7 +44,7 @@ Division sub-agent council 이다. `activation_state` 는 read-depth 와 escalat
 - Obsidian/wiki signals: `Obsidian`, `옵시디언`, `llm-wiki`, `위키`,
   `knowledge base`, `문서 이관`, `existing project`, `new project`,
   `sprint continuity`.
-- Enterprise team signals: `enterprise`, `agent team`, `6본부`, `sub-agent`,
+- Enterprise team signals: `enterprise`, `agent team`, `six council roles`, `sub-agent`,
   `대기업급`, `team agentic coding`, `QA/QC`, `metrics`.
 - Performance/algorithm signals: `performance`, `algorithm`, `optimization`,
   `hot path`, `query plan`, `Core Web Vitals`, `memory`, `concurrency`.
@@ -124,7 +125,7 @@ Division sub-agent council 이다. `activation_state` 는 read-depth 와 escalat
 ## Depth Rules
 
 - 첫 pass 는 router signal 과 matching pack 1개만 사용한다.
-- multi-division work 는 AC 또는 risk evidence 가 여러 division 을 실제로 건드릴 때만 여러 pack 을 읽는다.
+- multi-role work는 AC 또는 risk evidence가 여러 council role을 실제로 건드릴 때만 여러 pack을 읽는다.
 - 모든 pack 을 blocker 로 승격하지 않는다. 각 pack 은 matching scope, evidence,
   review question 을 고르는 decision aid 다.
 - non-trivial product-bearing work 의 plan 은 enterprise plan council pack 을 연다.

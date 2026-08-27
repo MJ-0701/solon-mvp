@@ -1,6 +1,6 @@
 ---
 id: sfs-policy-enterprise-agent-team-pack-ko
-summary: SFS 계획/리뷰용 엔터프라이즈 6본부 agent team 운영 팩.
+summary: SFS 계획/리뷰용 엔터프라이즈 6-role council 운영 팩.
 language: ko
 load_when:
   - enterprise
@@ -19,15 +19,15 @@ split_children:
 
 # Enterprise Agent Team Pack
 
-이 팩은 SFS 의 6본부를 장식용 표가 아니라 실제 계획/검수에 참여하는
-개념적 sub-agent 팀으로 만든다. FE/BE 가 아니라 모든 product-bearing
+이 팩은 SFS의 council role을 장식용 표가 아니라 실제 계획/검수에 참여하는
+개념적 sub-agent 팀으로 만든다. FE/BE가 아니라 모든 product-bearing
 entrypoint 에 적용한다.
 
 ## 원칙
 
-- strategy-pm, dev, QA, design, infra, taxonomy 는 brainstorm 부터 Gate 6 까지
-  항상 참여한다.
-- 6본부는 기본 domain-asset loop 이기도 하다. 각 본부는 자기 전문 판단을 재사용 가능한 용어,
+- organization division은 다섯 개(strategy-pm, dev, QA, design, infra)다.
+  taxonomy는 cross-cutting product function/lens다. 여섯 role은 모두 required council role로 brainstorm부터 Gate 6까지 항상 참여한다.
+- 여섯 council role은 기본 domain-asset loop이기도 하다. 각 role은 자기 전문 판단을 재사용 가능한 용어,
   playbook, check, fixture, review question, wiki map, skill/knowledge-pack 재료로 바꾼다.
 - plan 은 brainstorm 직후 계약서가 아니라 설계 단계다. 코딩 전 위험,
   증거, 파일/산출물 경계를 드러내야 한다.
@@ -63,7 +63,7 @@ entrypoint 에 적용한다.
 - algorithm/query/UI runtime/batch/network/storage/performance:
   `enterprise-performance-review-pack.ko.md`
 
-## 본부별 자산화 역할
+## Council role별 자산화 역할
 
 - strategy-pm 은 시장/사용자/비즈니스 판단을 priority, rollout, decision-boundary 자산으로 만든다.
 - taxonomy 는 언어 판단을 canonical term, alias, state, event, classification 자산으로 만든다.
@@ -74,8 +74,8 @@ entrypoint 에 적용한다.
 
 ## PASS 모양
 
-- 관련 본부마다 finding/evidence/waiver 가 있다.
-- 관련 본부마다 `asset_candidate` 가 있거나 생성/재사용하지 않는 concrete reason 이 있다.
+- 관련 council role마다 finding/evidence/waiver가 있다.
+- 관련 council role마다 `asset_candidate`가 있거나 생성/재사용하지 않는 concrete reason이 있다.
 - AC 가 file/artifact/evidence 에 연결된다.
 - hot path 는 측정 또는 bounded proof 가 있다.
 - SFS 제품 정책이면 실제 프로젝트 적용 QA/QC 를 남긴다.

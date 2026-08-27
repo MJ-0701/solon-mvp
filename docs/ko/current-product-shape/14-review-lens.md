@@ -1,23 +1,23 @@
 ---
 doc_id: sfs-current-product-shape-ko-14
-title: "본부 / 지식팩 / Review Lens"
+title: "조직 본부 / 지식팩 / Review Lens"
 visibility: oss-public
 doc_type: product-reference
 language: ko
-updated: 2026-05-25
+updated: 2026-08-27
 parent: docs/ko/current-product-shape.md
-summary: "본부 / 지식팩 / Review Lens"
+summary: "조직 본부 / 지식팩 / Review Lens"
 load_when: "Read when docs/ko/current-product-shape.md routes to this section."
 ---
-## 본부 / 지식팩 / Review Lens
+## 조직 본부 / 지식팩 / Review Lens
 
-현재 Solon 은 본부, 지식팩, review lens 를 같은 층위로 섞지 않습니다.
-`.sfs-local/divisions.yaml` 은 기존 프로젝트 호환을 위한 6개 core activation slot
-(`dev`, `strategy-pm`, `qa`, `design`, `infra`, `taxonomy`) 입니다. 이 파일은 activation 상태를
-읽기 위한 runtime 설정이지, 전체 지식팩/review lens registry 가 아닙니다.
-다만 6개 core division 은 brainstorm 부터 Gate 6 까지 always-on conceptual sub-agent
-council 로 참여합니다. `activation_state` 는 read-depth/escalation 을 뜻하며, division 이
-참여하지 않아도 된다는 뜻이 아닙니다.
+Solon의 조직 division은 `dev`, `strategy-pm`, `qa`, `design`, `infra` 다섯 개뿐입니다.
+조직 본부, 지식팩, review lens는 서로 다른 층위로 설명합니다.
+`.sfs-local/divisions.yaml` 은 기존 프로젝트 호환을 위해 6개 activation slot을 유지하지만,
+`taxonomy` slot은 조직 division이 아니라 foundational cross-cutting product function/lens입니다.
+이 여섯 role은 brainstorm부터 Gate 6까지 모두 필수 conceptual council participation role입니다.
+`activation_state` 는 read-depth/escalation 을 뜻하며, council role이 참여하지 않아도 된다는
+뜻이 아닙니다.
 
 현재 filled guidance 는 product-level DDD/TDD, backend, 전략/PM, QA, 디자인/frontend,
 infra/DevOps, management-admin, taxonomy 지식팩/review lens 와 enterprise agent-team
@@ -34,18 +34,18 @@ postdev external review pack 은 구현 완료 후 Claude Cowork/Gemini/GitHub C
 중요한 점은 사용자가 이 목록을 외우지 않아도 된다는 것입니다. Solon 은 작업 성격을 보고 필요한
 관점만 읽습니다. 작은 문서 수정은 작게 보고, 배포나 구조 변경처럼 위험이 큰 작업은 더 단단하게
 봅니다. 기준은 늘어나지만, 사용자가 마주하는 표면은 그대로 가볍게 유지하는 것이 방향입니다.
-enterprise-triggered work 에서는 관련 본부마다 risk flag 와 finding/evidence/waiver 또는
+enterprise-triggered work 에서는 관련 council role마다 risk flag 와 finding/evidence/waiver 또는
 구체적 not-applicable reason 을 남깁니다. 성능/알고리즘 PASS 는 측정, bounded proof, 또는
 explicit N/A waiver 가 있어야 합니다.
 backend 는 `dev` 의 기술 specialization 이고, management-admin 은 재무/경리/세무/회계 관점입니다.
 taxonomy slot 은 legacy activation 호환성 때문에 남아 있지만, 제품 설명에서는 독립 조직 본부가
-아니라 모든 본부에 걸치는 용어/분류 lens 로 다룹니다.
+아니라 모든 본부에 걸치는 foundational cross-cutting product function이자 용어/분류 lens로 다룹니다.
 
-이것이 AI 시대에 6본부 지식팩이 필요한 이유이기도 합니다. 6본부는 기본 domain-asset capture
-loop 입니다. 전략/PM, taxonomy, design, dev, QA, infra 는 각각 다른 종류의 실무 판단을
+이것이 AI 시대에 6개 필수 role council이 필요한 이유이기도 합니다. 이 council은 기본
+domain-asset capture loop입니다. 전략/PM, taxonomy, design, dev, QA, infra 는 각각 다른 종류의 실무 판단을
 발견합니다. row 안에서 반복 가능한 규칙, 예외, taste 판단, 운영 제약이 나오면 council 은
 `asset_candidate` 를 기록합니다. 기존 glossary/playbook/review lens/test 를 재사용할지, 새로
-만들지, durable asset 으로 승격하지 않을 이유가 있는지를 남깁니다. 그래서 본부 표는 장식이
+만들지, durable asset 으로 승격하지 않을 이유가 있는지를 남깁니다. 그래서 Council Participation Ledger는 장식이
 아니라 사람 머릿속 노하우를 AI 가 다시 쓸 수 있는 제품 기억으로 바꾸는 장치입니다.
 
 agent-skills 벤치마크에서 유용한 discipline 도 같은 방식으로 흡수했습니다.

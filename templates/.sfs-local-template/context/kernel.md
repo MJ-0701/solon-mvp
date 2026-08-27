@@ -188,12 +188,13 @@ load_when: ["always", "sfs", "entry"]
 - Work is not complete until self-agent top-model CPO records PASS: Claude
   Opus 4.7, Codex `gpt-5.6-sol` xhigh, Gemini `gemini-3.1-pro-preview`, or custom
   top-model equivalent. Partial/fail repeats rework + self-CPO until PASS/waiver.
-- Multi-agent work is thin supervision; Division sub-agent council is always-on:
-  strategy-pm, dev, QA, design, infra, and taxonomy each records finding/evidence/
-  waiver in SFS artifacts. Actual parallel worker lanes remain opt-in.
+- Multi-agent work is thin supervision; Council participation is always-on:
+  five organization divisions (strategy-pm, dev, QA, design, infra) plus the
+  taxonomy cross-cutting product function/lens are six required council roles;
+  each records finding/evidence/waiver. Actual parallel worker lanes remain opt-in.
 - For non-trivial product-bearing work, plan is an enterprise council design
   step: load the routed enterprise plan pack, record risk flags, map AC to
-  files/evidence per relevant division, and reserve user calls for real product
+  files/evidence per relevant council role, and reserve user calls for real product
   judgment. Gate 6 performance claims need measurement, bounded proof, or waiver.
 - Do not advance a gate on raw requirements; if intent, terms, checks, or
   boundaries are unclear, stop and ask the smallest blockers.

@@ -1,24 +1,24 @@
 ---
 doc_id: sfs-current-product-shape-en-14
-title: "Divisions / Knowledge Packs / Review Lenses"
+title: "Organization Divisions / Knowledge Packs / Review Lenses"
 visibility: oss-public
 doc_type: product-reference
 language: en
-updated: 2026-05-25
+updated: 2026-08-27
 parent: docs/en/current-product-shape.md
-summary: "Divisions / Knowledge Packs / Review Lenses"
+summary: "Organization Divisions / Knowledge Packs / Review Lenses"
 load_when: "Read when docs/en/current-product-shape.md routes to this section."
 ---
-## Divisions / Knowledge Packs / Review Lenses
+## Organization Divisions / Knowledge Packs / Review Lenses
 
-Current Solon documents divisions, knowledge packs, and review lenses as
-separate surfaces. `.sfs-local/divisions.yaml` is the six core activation slots
-for compatibility with existing projects: `dev`, `strategy-pm`, `qa`, `design`,
-`infra`, and `taxonomy`. It is runtime activation state, not the full
-knowledge-pack/review-lens registry.
-However, the six core divisions participate as an always-on conceptual
-sub-agent council from brainstorm through Gate 6. `activation_state` controls
-read depth and escalation; it does not decide whether a division participates.
+Solon has exactly five organization divisions: `dev`, `strategy-pm`, `qa`,
+`design`, and `infra`. It documents those divisions, knowledge packs, and review
+lenses as separate surfaces. `.sfs-local/divisions.yaml` retains six activation
+slots for compatibility with existing projects, but the `taxonomy` slot is the
+foundational cross-cutting product function/lens, not an organization division.
+All six are required conceptual council participation roles from brainstorm
+through Gate 6. `activation_state` controls read depth and escalation; it does
+not decide whether a council role participates.
 
 Current filled guidance is provided through the product-level DDD/TDD, backend,
 strategy/PM, QA, design/frontend, infra/DevOps, management-admin, and taxonomy
@@ -39,21 +39,22 @@ The user should not need to memorize this list. Solon reads only the lens that
 fits the work. A small docs edit stays light. A release, architecture change, or
 risky workflow gets stronger questions and evidence checks. The criteria become
 richer while the user-facing surface stays simple.
-For enterprise-triggered work, each relevant division records risk flags plus a
+For enterprise-triggered work, each relevant council role records risk flags plus a
 finding, evidence path, waiver, or concrete not-applicable reason. Performance
 and algorithm PASS requires measurement, bounded proof, or explicit N/A waiver.
 Backend is a dev specialization, and management-admin covers finance,
 bookkeeping, tax, and accounting. The taxonomy slot remains in the legacy
-activation file for compatibility, but product guidance treats taxonomy as a
-cross-cutting language/classification lens rather than an org department.
+activation file for compatibility, but product guidance treats taxonomy as the
+foundational cross-cutting product function/language-and-classification lens
+rather than an org department.
 
-This is also why the six-division pack matters in the AI era: it is the default
+This is also why the six-role council matters in the AI era: it is the default
 domain-asset capture loop. Strategy-PM, taxonomy, design, dev, QA, and infra
 each notice a different kind of practitioner judgment. When a row exposes a
 repeatable rule, edge case, taste call, or operating constraint, the council
 records `asset_candidate`: reuse an existing glossary/playbook/review lens/test,
 create a new one, or explain why no durable asset should be promoted. The
-division table therefore turns expert know-how into AI-usable product memory
+Council Participation Ledger therefore turns expert know-how into AI-usable product memory
 instead of leaving it inside one person's head.
 
 Useful disciplines from the agent-skills benchmark are absorbed

@@ -1,6 +1,6 @@
 ---
 id: sfs-policy-enterprise-agent-team-pack
-summary: Enterprise-grade 6-division agent team operating pack for SFS planning and review.
+summary: Enterprise six-role council operating pack for SFS planning and review.
 load_when:
   - enterprise
   - agent team
@@ -20,20 +20,21 @@ split_children:
 
 # Enterprise Agent Team Pack
 
-This pack upgrades SFS from decorative division labels to a working agent-team
+This pack upgrades SFS from decorative role labels to a working agent-team
 contract. It applies to any product-bearing work, not only frontend or backend.
 
 ## Principles
 
-- Six divisions are conceptual sub-agents from brainstorm through Gate 6:
-  strategy-pm, dev, QA, design, infra, and taxonomy.
-- The six divisions are also the default domain-asset loop: each division turns
+- There are five organization divisions: strategy-pm, dev, QA, design, and infra.
+  Taxonomy is the cross-cutting product function/lens. All six are required council roles
+  and conceptual sub-agents from brainstorm through Gate 6.
+- The six council roles are also the default domain-asset loop: each role turns
   its expert judgment into reusable terms, playbooks, checks, fixtures, review
   questions, wiki maps, or skill/knowledge-pack material.
 - Plan is a design phase, not a post-brainstorm contract stamp. The team must
   expose risks, missing evidence, and files/artifact boundaries before coding.
-- Load context just in time. Every division participates, but deep packs load
-  only when AC, risk, or artifact scope touches that division.
+- Load context just in time. Every council role participates, but deep packs
+  load only when AC, risk, or artifact scope touches that role.
 - Prefer execution evidence over paper evidence. A checklist without a command,
   artifact, diff, test, trace, screenshot, or explicit waiver is not enough.
 - Optimize for modern product teams: small slices, trunk-friendly commits,
@@ -78,7 +79,7 @@ Do not import heavyweight or stale rituals as universal blockers:
   Claude Cowork/Gemini/Codex evidence.
 - Load `lean-procedure-refactor-pack.md` when process itself becomes a bottleneck.
 
-## Division Asset Duties
+## Council Role Asset Duties
 
 - strategy-pm captures market/user/business judgment as prioritization, rollout,
   and decision-boundary assets.
@@ -97,8 +98,8 @@ Do not import heavyweight or stale rituals as universal blockers:
 
 An enterprise PASS means:
 
-- each relevant division has a finding, evidence path, or explicit waiver;
-- each relevant division has an `asset_candidate` or a concrete reason it is not
+- each relevant council role has a finding, evidence path, or explicit waiver;
+- each relevant council role has an `asset_candidate` or a concrete reason it is not
   creating/reusing one;
 - AC maps to files/artifacts and a verification signal;
 - hot paths have measured or bounded performance evidence;

@@ -17,9 +17,10 @@ This scope is limited to knowledge-pack documents; other documentation is unchan
 In the Raw / Wiki / Schema (+lint) wiki model (see `obsidian-llm-wiki`), these
 packs are the Schema-layer review lens — not Raw source and not Wiki concept
 corpus; they stay routed and do not move into the wiki.
-The six core divisions are an always-on Division sub-agent council across
-brainstorm, plan, implement, and review. activation_state controls read-depth
-and escalation, not whether strategy-pm/dev/QA/design/infra/taxonomy participate.
+The organization has five organization divisions: strategy-pm, dev, QA, design,
+and infra. Taxonomy is the required cross-cutting product function/lens.
+All six are required council roles across brainstorm, plan, implement, and review.
+The legacy activation_state controls read-depth and escalation, not participation.
 
 If Korean is requested, read `knowledge-pack-router.ko.md` first.
 
@@ -44,7 +45,7 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
   test`, `red-green`.
 - Obsidian/wiki signals: `Obsidian`, `llm-wiki`, `knowledge base`, `docs
   migration`, `existing project`, `new project`, `sprint continuity`.
-- Enterprise team signals: `enterprise`, `agent team`, `6 divisions`,
+- Enterprise team signals: `enterprise`, `agent team`, `six council roles`,
   `sub-agent`, `대기업급`, `team agentic coding`, `QA/QC`, `metrics`.
 - Performance/algorithm signals: `performance`, `algorithm`, `optimization`,
   `hot path`, `query plan`, `Core Web Vitals`, `memory`, `concurrency`.
@@ -126,8 +127,8 @@ If Korean is requested, read `knowledge-pack-router.ko.md` first.
 ## Depth Rules
 
 - First pass: use router signals plus 1 matching pack.
-- Multi-division work: read several packs only when AC or risk evidence touches
-  several divisions.
+- Multi-role work: read several packs only when AC or risk evidence touches
+  several council roles.
 - Do not promote every pack into a blocker. Each pack is a decision aid for
   matching scope, evidence, and review questions.
 - For non-trivial product-bearing work, plan should load the enterprise plan

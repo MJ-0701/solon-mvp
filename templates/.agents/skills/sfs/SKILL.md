@@ -86,7 +86,7 @@ description: Solon SFS command router for Codex. Dispatch `$sfs` / `sfs` / visib
    files_scope require top-model advisor review before gate advancement
    (Claude Opus 4.7, Codex `gpt-5.5` xhigh, Gemini `gemini-3.1-pro-preview`).
    Complex shared behavior escalates to high reasoning before coding.
-   Division sub-agent council is always-on from brainstorm through Gate 6: strategy-pm, dev, QA, design, infra, and taxonomy each records finding/evidence/waiver; actual parallel worker lanes remain opt-in. Multi-agent implement is optional, never the default: use single-agent mode unless the user selects parallel agents, each lane has disjoint files_scope, AC/ADR subset ownership, expected tests/evidence, output report path, merge/conflict policy, and a clear native-language commit message, and post-implement cross review is recorded before Gate 6. Commit messages default to the user's native/workspace language; English is only the default when that is the user or repo language.
+   Five organization divisions plus taxonomy, the cross-cutting product function/lens, form six required council roles. Council participation is always-on from brainstorm through Gate 6: strategy-pm, dev, QA, design, infra, and taxonomy each records finding/evidence/waiver; actual parallel worker lanes remain opt-in. Multi-agent implement is optional, never the default: use single-agent mode unless the user selects parallel agents, each lane has disjoint files_scope, AC/ADR subset ownership, expected tests/evidence, output report path, merge/conflict policy, and a clear native-language commit message, and post-implement cross review is recorded before Gate 6. Commit messages default to the user's native/workspace language; English is only the default when that is the user or repo language.
    Gate 3 review must self-review until PASS before cross review. Review round
    count, lens count, or "enough review" is not a PASS; partial/fail routes to
    rework and same-gate self-review. If no other agent subscription exists,
@@ -186,7 +186,7 @@ description: Solon SFS command router for Codex. Dispatch `$sfs` / `sfs` / visib
     guardrail: clean layered monolith for MVP/small projects, CQRS for
     non-initial backend work even on one DB, Hexagonal transition only after
     user acceptance, and MSA transition only after explicit approval.
-21. For `implement`, non-Dev divisions also follow routed policy ladders:
+21. For `implement`, non-Dev council roles also follow routed policy ladders:
     strategy-pm, taxonomy, design/frontend, QA, and infra start lightweight,
     strengthen on trigger evidence, and require user acceptance/approval before
     large roadmap, rename, redesign, release-readiness, or infra transitions.

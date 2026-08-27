@@ -4,7 +4,7 @@ title: "Solon Product Docs"
 visibility: oss-public
 doc_type: docs-index
 language: en
-updated: 2026-07-28
+updated: 2026-08-27
 summary: "Solon Product Docs entry document"
 load_when: "Read when this product document is directly relevant."
 ---
@@ -41,7 +41,7 @@ In short, six axes:
 | Evidence & record | pin approvals, decisions, waivers, external evidence as minimal facts, and the reasoning log on the top risk tier | `sfs capture` / `note` / `recall` |
 | Harness engineering | readiness/maturity/cost diagnosis, blueprint, undocumented-codebase excavation, static security audit, overconstraint and redundant-guidance detection, gate activity reading | `sfs harness doctor` / `dig` / `audit` |
 | Context & token hygiene | routed context, thin adapters, delegation capsule contracts, instruction classification (inviolable gate vs narrative advisory), cost-per-outcome framing | `sfs context` / `agent doctor` |
-| Teams & orchestration | team presets, six-division council, work routing/loops, selective advisor coaching binding, per-stage effort allocation | `sfs team` / `division` / `route` |
+| Teams & orchestration | team presets, five organization divisions plus the cross-cutting taxonomy lens as six required council roles, work routing/loops, selective advisor coaching binding, per-stage effort allocation | `sfs team` / `division` / `route` |
 | Memory & wiki | long-horizon memory, raw intake, promotion pipeline, derived-doc annotation survival, security finding class closed loop | `sfs ingest` / `tidy --wiki-promote` |
 
 You do not need to memorize commands — tell an agent in plain language and it
@@ -76,9 +76,11 @@ The point is not to outsource all thinking to AI. Solon lets AI assist the work
 while the user keeps product ownership over intent, priority, tradeoffs,
 validation, boundaries, and language.
 
-Current Solon documents divisions, knowledge packs, and review lenses as
-separate surfaces. `.sfs-local/divisions.yaml` is the six-slot compatibility
-activation state for older projects, while actual guidance is read from the
+Current Solon documents organization divisions, knowledge packs, and review lenses as
+separate surfaces. It has five organization divisions: `dev`, `strategy-pm`,
+`qa`, `design`, and `infra`. `.sfs-local/divisions.yaml` retains six compatibility
+activation slots for older projects; the `taxonomy` slot is the foundational
+cross-cutting product function/lens, not an organization division. Actual guidance is read from the
 product-level DDD/TDD, backend, strategy/PM, QA, design/frontend, infra/DevOps,
 management-admin, and taxonomy knowledge packs/review lenses. DDD/TDD is the
 cross-cutting product behavior floor. Backend is a dev specialization,
@@ -86,9 +88,8 @@ management-admin covers finance/bookkeeping/tax/accounting, and taxonomy is a
 cross-cutting language/classification lens. The user does not need to memorize
 those labels. Solon reads the relevant lens and turns it into plain questions,
 plan criteria, or review judgment.
-At the same time, the six core divisions always participate as a conceptual
-sub-agent council. Activation controls read depth and escalation, not whether a
-division participates.
+At the same time, all six roles always participate in the conceptual council.
+Activation controls read depth and escalation, not whether a council role participates.
 
 Useful agent-skills benchmark practices are absorbed into
 `implement`, `review`, `adopt`, `tidy`, and `release` instead of becoming new

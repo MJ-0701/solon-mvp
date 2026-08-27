@@ -4,7 +4,7 @@ title: "Domain Knowledge Assets"
 visibility: oss-public
 doc_type: product-reference-section
 language: en
-updated: 2026-05-28
+updated: 2026-08-27
 summary: "Expert know-how becomes durable leverage when SFS compiles it into AI-usable assets."
 load_when: "Read when the user wants to turn domain expertise, repeated explanations, or craft rules into reusable SFS memory."
 ---
@@ -20,12 +20,14 @@ agent. A useful asset can be a glossary, domain map, playbook, checklist,
 knowledge pack, review lens, skill, fixture, test, or wiki TopicHub. The form
 depends on what will make the next sprint behave better.
 
-The six-division council is the product's default collector for those assets.
+The six required council roles are the product's default collector for those
+assets: five organization divisions plus taxonomy, the foundational
+cross-cutting product function/lens.
 Strategy-PM catches positioning and priority judgment; taxonomy catches naming
 and classification; design catches workflow, copy, and taste; dev catches
 architecture and invariants; QA catches risk and acceptance edge cases; infra
 catches reliability, security, deployment, and rollback knowledge. Each relevant
-division row should name an `asset_candidate` so repeated know-how has a path
+council role row should name an `asset_candidate` so repeated know-how has a path
 from one task into durable SFS memory.
 
 That path is executable in the sprint artifacts. Plan has `Domain Asset Promotion Ledger`;

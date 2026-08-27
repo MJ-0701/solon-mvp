@@ -1626,7 +1626,7 @@ sfs_compact_sprint_workbench() {
 }
 
 # ─────────────────────────────────────────────────────────────────────
-# CYCLE-END HELPERS — Division activation recommender (WU-36)
+# CYCLE-END HELPERS — Council-role activation recommender (legacy names retained)
 # Surfaces recommendations during report/retro close without changing stdout
 # contracts. Recommendations are written into report.md/retro.md within marker
 # blocks so user edits outside the block remain untouched.
@@ -1910,10 +1910,10 @@ EOF
     fi
   fi
 
-  # Taxonomy: multi-domain / growth signals
+  # Taxonomy product function/lens: multi-domain / growth signals
   if [[ "${taxonomy_state}" != "active" ]]; then
     if (( domain_count >= 2 )) || [[ "${size_bucket}" == "large" ]]; then
-      echo "- recommend: \`taxonomy\` activate (light) — glossary + naming/aggregation rules; triggers: multi-domain or large codebase"
+      echo "- recommend: \`taxonomy\` product function/lens activate (light) — glossary + naming/aggregation rules; triggers: multi-domain or large codebase"
     fi
   fi
 
@@ -1989,10 +1989,10 @@ sfs_write_cycle_end_division_recommendations() {
   sfs_render_division_activation_recommendations_body "${sid}" "${ts}" > "${tmp_file}"
 
   if [[ -f "${report_path}" ]]; then
-    sfs_upsert_marked_section_with_heading "${report_path}" "division-recommendations" "## §8. Next Cycle — Division Activation Recommendations" "${tmp_file}"
+    sfs_upsert_marked_section_with_heading "${report_path}" "division-recommendations" "## §8. Next Cycle — Council Role Activation Recommendations" "${tmp_file}"
   fi
   if [[ -f "${retro_path}" ]]; then
-    sfs_upsert_marked_section_with_heading "${retro_path}" "division-recommendations" "## §6. 다음 cycle 본부 활성 추천 (auto)" "${tmp_file}"
+    sfs_upsert_marked_section_with_heading "${retro_path}" "division-recommendations" "## §6. 다음 cycle council role 활성 추천 (auto)" "${tmp_file}"
   fi
 
   rm -f "${tmp_file}" 2>/dev/null || true

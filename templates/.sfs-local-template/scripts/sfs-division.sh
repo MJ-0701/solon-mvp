@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # .sfs-local/scripts/sfs-division.sh
 #
-# Solon SFS — `/sfs division` command implementation.
-# Makes abstract core divisions executable by updating `.sfs-local/divisions.yaml`
-# and recording decision/event evidence.
+# Solon SFS — legacy `/sfs division` compatibility command implementation.
+# It updates six council-role activation slots: five organization divisions and
+# the taxonomy cross-cutting product function/lens. Existing command/config/event
+# names remain for consumer compatibility and do not classify taxonomy as a division.
 
 set -euo pipefail
 
@@ -22,21 +23,21 @@ Usage: /sfs division <list|status|activate|deactivate> [args]
 Commands:
   list
   status
-      Print division activation states from .sfs-local/divisions.yaml.
+      Print council-role activation states from legacy .sfs-local/divisions.yaml.
 
-  activate <division|all|--all-abstract> [--scope full|scoped|temporal] [--parent <division>] [--sunset <date>] [--reason <text>]
-      Activate one division, or every currently abstract division.
+  activate <council-role|all|--all-abstract> [--scope full|scoped|temporal] [--parent <division>] [--sunset <date>] [--reason <text>]
+      Activate one organization division or the taxonomy function, or every abstract slot.
       Writes .sfs-local/divisions.yaml, creates a decision file, and appends a
-      division_activated event.
+      legacy division_activated event.
 
-  deactivate <division> [--reason <text>]
-      Return a division to abstract state and record a division_deactivated event.
+  deactivate <council-role> [--reason <text>]
+      Return a council role to abstract state and record a legacy division_deactivated event.
 
 Examples:
   /sfs division list
   /sfs division activate design
   /sfs division activate taxonomy --scope scoped --parent strategy-pm
-  /sfs division activate all --reason "Need all division guardrails for this sprint"
+  /sfs division activate all --reason "Need all council-role guardrails for this sprint"
 EOF
 }
 
@@ -128,7 +129,7 @@ division_summary() {
     design) echo "Owns UX flow, interaction states, accessibility, responsive fit, and design-system consistency." ;;
     infra) echo "Owns secrets, deploy path, observability, rollback, cost, and production readiness." ;;
     taxonomy) echo "Owns canonical domain terms, entities, states, naming rules, and drift detection." ;;
-    *) echo "Owns scoped division outputs, review evidence, and handoff notes for its domain." ;;
+    *) echo "Owns scoped council-role outputs, review evidence, and handoff notes for its domain." ;;
   esac
 }
 
@@ -140,19 +141,27 @@ division_outputs() {
     design) echo "user flow + screen/state inventory|accessibility/responsive checklist|design-system token/component notes" ;;
     infra) echo "secret/auth/data risk checklist|deploy/rollback notes|monitoring/cost notes" ;;
     taxonomy) echo "canonical terms + forbidden aliases|entity/state naming map|drift notes across code/docs/UI" ;;
-    *) echo "division checklist|evidence notes|handoff risks" ;;
+    *) echo "council-role checklist|evidence notes|handoff risks" ;;
+  esac
+}
+
+council_role_kind() {
+  case "${1:-}" in
+    taxonomy) echo "taxonomy product function/lens" ;;
+    *) echo "organization division" ;;
   esac
 }
 
 write_decision_file() {
   local id="$1" action="$2" scope="$3" parent="$4" reason="$5" sunset="$6"
-  local decision_id title slug path now summary outputs
+  local decision_id title slug path now summary outputs role_kind
 
   decision_id="$(next_decision_id)"
+  role_kind="$(council_role_kind "${id}")"
   case "${action}" in
-    activate) title="Activate ${id} division" ;;
-    deactivate) title="Deactivate ${id} division" ;;
-    *) title="${action} ${id} division" ;;
+    activate) title="Activate ${id} ${role_kind}" ;;
+    deactivate) title="Deactivate ${id} ${role_kind}" ;;
+    *) title="${action} ${id} ${role_kind}" ;;
   esac
   slug="$(printf '%s' "${action}-${id}-division" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9' '-' | sed 's/--*/-/g; s/^-//; s/-$//')"
   path="${SFS_DECISIONS_DIR}/${decision_id}-${slug}.md"
@@ -177,10 +186,11 @@ write_decision_file() {
     printf -- '---\n\n'
     printf '# %s\n\n' "${title}"
     printf '## Context\n\n'
-    printf 'The `%s` division needed a concrete runtime state instead of staying only as an abstract concept.\n\n' "${id}"
+    printf 'The `%s` council role (%s) needed a concrete runtime state instead of staying only as an abstract concept.\n\n' "${id}" "${role_kind}"
     printf '## Decision\n\n'
     printf -- '- action: `%s`\n' "${action}"
-    printf -- '- division: `%s`\n' "${id}"
+    printf -- '- council_role: `%s`\n' "${id}"
+    printf -- '- division: `%s` (legacy compatibility key)\n' "${id}"
     printf -- '- activation_scope: `%s`\n' "${scope}"
     if [[ -n "${parent}" ]]; then
       printf -- '- parent_division: `%s`\n' "${parent}"
@@ -195,7 +205,7 @@ write_decision_file() {
     printf '%s\n' "${outputs}" | tr '|' '\n' | sed 's/^/- /'
     printf '\n## Consequences\n\n'
     if [[ "${action}" == "activate" ]]; then
-      printf 'SFS commands may now treat `%s` as executable division scope and should record evidence in sprint workbench/report artifacts.\n' "${id}"
+      printf 'SFS commands may now treat `%s` as executable council-role scope and should record evidence in sprint workbench/report artifacts.\n' "${id}"
     else
       printf 'SFS commands should treat `%s` as abstract again unless a later decision reactivates it.\n' "${id}"
     fi
@@ -406,7 +416,7 @@ case "${cmd}" in
     scope="full"
     parent=""
     sunset=""
-    reason="Manual division activation"
+    reason="Manual council-role activation"
     all_abstract=0
     while [[ $# -gt 0 ]]; do
       case "$1" in
@@ -490,7 +500,7 @@ EOF
     ;;
   deactivate)
     target=""
-    reason="Manual division deactivation"
+    reason="Manual council-role deactivation"
     while [[ $# -gt 0 ]]; do
       case "$1" in
         --reason)

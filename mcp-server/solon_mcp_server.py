@@ -243,9 +243,10 @@ def sfs_flowcheck(sprint: str = "") -> str:
 @mcp.tool()
 def sfs_harness_doctor() -> str:
     """Run `sfs harness doctor` — diagnose whether the current project is
-    a safe environment for long autonomous or parallel-worker work
-    (thin entry docs, routed context, six-division council, evidence
-    loops, tests, release/check rails)."""
+    a safe environment for long autonomous or parallel-worker work.
+    Five organization divisions plus taxonomy, the cross-cutting product function/lens, form six required council roles.
+    It also checks thin entry docs, routed context, evidence loops, tests,
+    and release/check rails."""
     return _run_sfs(["harness", "doctor"])
 
 

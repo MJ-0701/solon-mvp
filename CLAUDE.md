@@ -43,8 +43,8 @@ Consumer 프로젝트에 설치되는 어댑터는 `templates/CLAUDE.md.template
    — repo 정체성 / IP / 도메인 경계.
 2. [`docs/maintenance/release-policy.md`](docs/maintenance/release-policy.md)
    — 8개 배포 원칙 (bash 호환 / templates 호환성 / VERSION semver /
-   CHANGELOG / HTML-encouraged docs / session transfer / 6본부 council /
-   mainline-first + Gate 6).
+   CHANGELOG / HTML-encouraged docs / session transfer / mainline-first + Gate 6).
+   Council contract: Five organization divisions plus taxonomy, the cross-cutting product function/lens, form six required council roles.
 3. 작업 영역별 체크리스트는
    [`docs/maintenance/contributing.md`](docs/maintenance/contributing.md)
    (`install.sh` / `upgrade.sh` / `templates/` / `mcp-server/` /

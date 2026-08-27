@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Enterprise 6-division agent team packs stay routed, split, and measurable.
+# Enterprise six-role council packs stay routed, split, and measurable without
+# classifying the taxonomy function as an organization division.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -76,8 +77,12 @@ for file in "${router}" "${router_ko}" "${index}"; do
 done
 
 assert_contains "${CONTEXT_DIR}/policies/enterprise-agent-team-pack.md" "default domain-asset loop" "EN enterprise domain asset loop"
+assert_contains "${CONTEXT_DIR}/policies/enterprise-agent-team-pack.md" "five organization divisions" "EN enterprise five-division boundary"
+assert_contains "${CONTEXT_DIR}/policies/enterprise-agent-team-pack.md" "All six are required council roles" "EN enterprise council roles"
 assert_contains "${CONTEXT_DIR}/policies/enterprise-agent-team-pack.md" "asset_candidate" "EN enterprise asset candidate"
 assert_contains "${CONTEXT_DIR}/policies/enterprise-agent-team-pack.ko.md" "domain-asset loop" "KO enterprise domain asset loop"
+assert_contains "${CONTEXT_DIR}/policies/enterprise-agent-team-pack.ko.md" "organization division은 다섯 개" "KO enterprise five-division boundary"
+assert_contains "${CONTEXT_DIR}/policies/enterprise-agent-team-pack.ko.md" "여섯 role은 모두 required council role" "KO enterprise council roles"
 assert_contains "${CONTEXT_DIR}/policies/enterprise-agent-team-pack.ko.md" "asset_candidate" "KO enterprise asset candidate"
 assert_contains "${CONTEXT_DIR}/policies/enterprise-plan-council-pack.md" "asset_candidate" "EN plan council asset candidate"
 assert_contains "${CONTEXT_DIR}/policies/enterprise-plan-council-pack.md" "winning theory" "EN plan council winning theory"
@@ -91,7 +96,7 @@ assert_contains "${DIST_DIR}/docs/ko/current-product-shape/14-review-lens.md" "a
 
 assert_contains "${plan}" "enterprise-plan-council-pack" "plan loads enterprise council"
 assert_contains "${plan}" "risk flags" "plan risk flags"
-assert_contains "${plan}" "Empty six-division ceremony is not PASS" "plan no decorative council"
+assert_contains "${plan}" "Empty six-role council ceremony is not PASS" "plan no decorative council"
 assert_contains "${plan_template}" "Enterprise Plan Council" "plan template enterprise section"
 assert_contains "${plan_template}" "risk flags" "plan template risk flags"
 assert_contains "${plan_template}" "selected knowledge packs" "plan template selected packs"
@@ -113,12 +118,16 @@ assert_contains "${lens_router}" "performance-algorithm" "review lens performanc
 assert_contains "${model_profiles}" 'model: "gemini-3.1-pro-preview"' "gemini pro route"
 assert_contains "${model_profiles}" 'model: "gemini-3-flash-preview"' "gemini coding route"
 assert_contains "${model_profiles}" 'model: "gemini-3.1-flash-lite"' "gemini economy route"
+assert_contains "${model_profiles}" "five organization divisions plus the taxonomy cross-cutting product function/lens" "model profile taxonomy boundary"
+assert_contains "${model_profiles}" "all six required council roles" "model profile council role requirement"
 assert_not_contains "${model_profiles}" "gemini-3.5-flash" "no unsupported gemini 3.5 route"
 assert_not_contains "${model_profiles}" 'model: "gemini-3-pro-auto"' "no stale gemini auto route"
 assert_not_contains "${model_profiles}" "for every SFS role" "no stale gemini every-role rule"
 assert_not_contains "${model_profiles}" "gemini-2.5" "no gemini 2.5"
 
 assert_contains "${common_script}" "Executable Action Ownership" "auth flow agent ownership note"
+assert_contains "${common_script}" "Council Role Activation Recommendations" "cycle-end council role heading"
+assert_contains "${common_script}" "Taxonomy product function/lens" "cycle-end taxonomy function"
 assert_contains "${auth_script}" "gemini-3.1-flash-lite" "auth probe cheap gemini route"
 assert_contains "${review_script}" "gemini-3.1-pro-preview" "review gemini pro route"
 

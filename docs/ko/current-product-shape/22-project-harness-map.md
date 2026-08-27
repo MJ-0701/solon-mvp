@@ -4,7 +4,7 @@ title: "Project Harness Map"
 visibility: oss-public
 doc_type: product-reference
 language: ko
-updated: 2026-05-28
+updated: 2026-08-27
 parent: docs/ko/current-product-shape.md
 summary: "Project Harness Map"
 load_when: "Read when docs/ko/current-product-shape.md routes to this section."
@@ -13,7 +13,8 @@ load_when: "Read when docs/ko/current-product-shape.md routes to this section."
 
 하네스 엔지니어링은 모델 주변 환경이 보이고 검증 가능할 때 힘이 납니다. SFS 는 이제 그 환경을 직접 점검합니다.
 
-- `sfs harness doctor` 는 현재 프로젝트에 얇은 진입 문서, routed context, 활성 6본부 council,
+- `sfs harness doctor` 는 현재 프로젝트에 얇은 진입 문서, routed context, 5개 조직 본부와
+  cross-cutting taxonomy product function/lens로 이루어진 6개 필수 council role,
   artifact/memory 표면, wiki 또는 bug recurrence memory, test, release/check rail 이 있는지 확인한다.
   여기에 AI-readiness(Sanity) 루브릭 4축(0-2점) 채점과 호스트 세션 로그 기반 비용 신호
   (Claude Code / Codex / Gemini 어댑터: 토큰, 캐시 적중률, 탐색/편집 비율)도 함께 표시한다 —

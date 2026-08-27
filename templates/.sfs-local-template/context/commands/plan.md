@@ -66,14 +66,14 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   - gray-box delegation and Harness Engineering mark human-owned understanding/
     design, AI-owned execution, narrow tool surface, project-as-prompt structure, and verification checks.
 - If expert/domain know-how becomes reusable project memory, load `policies/domain-knowledge-assets.md` and fill the Domain Asset Promotion Ledger: raw source, owner/expert, `asset_candidate`, promotion boundary, and behavior check before worker handoff.
-- Gate 3 must include a `division_subagent_ledger`: strategy-pm, dev, QA,
-  design, infra, and taxonomy map to AC/files/evidence or record a waiver/
-  not-applicable. Actual parallel implementation is optional; this council
-  review is mandatory.
+- Gate 3 must include all six required council roles in the legacy `division_subagent_ledger`:
+  five organization divisions (strategy-pm, dev, QA, design, infra) plus the taxonomy
+  cross-cutting product function/lens map to AC/files/evidence or record a
+  waiver/not-applicable. Actual parallel implementation is optional; this council review is mandatory.
 - For non-trivial product-bearing work, load
   `policies/enterprise-plan-council-pack.md` or `.ko.md` before Gate 3 review.
   Plan must record risk flags, selected child packs, and an enterprise council
-  row for each relevant division. Empty six-division ceremony is not PASS; each
+  row for each relevant council role. Empty six-role council ceremony is not PASS; each
   row needs a finding, evidence, `asset_candidate`, waiver, or concrete N/A reason.
 - Load `policies/mainline-focus-guard.md` when tool/auth/model setup appears
   beside the user's real objective. Plan must classify side work as mainline,
@@ -169,10 +169,10 @@ load_when: ["plan", "계획", "Gate 3", "contract", "AC"]
   can treat it as Solon product scope only when it names the SFS-loop improvement;
   otherwise defer it as wiki tooling and avoid implementation slices.
 - Load `policies/knowledge-pack-router.md` first, or `policies/knowledge-pack-router.ko.md`
-  for Korean preference. Proceed to matching division packs from its mapping.
+  for Korean preference. Proceed to matching council-role packs from its mapping.
 - If enterprise, agent-team, QA/QC, performance, algorithm, or large-project
   signals are present, route through `policies/enterprise-agent-team-pack.md`
-  and its matching child pack instead of treating the division ledger as a
+  and its matching child pack instead of treating the council ledger as a
   cosmetic table.
 - If mainline focus, data validation, OWASP/security/logging, Datadog, console
   log cleanup, or checklist signals are present, route through the matching

@@ -4,7 +4,7 @@ title: "Methodology — 7-step flow + Gate 1~7 표기"
 visibility: oss-public
 doc_type: maintenance-doc
 language: ko
-updated: 2026-07-12
+updated: 2026-08-27
 summary: "7-step flow summary applied even to this repo's own development. Gate display labels are 1~7; new CLI examples use --gate 6 style."
 load_when: "Read for a quick refresher on the 7-step / Gate label convention. Deeper policy lives in routed context (kernel.md, commands/*.md, policies/*.md)."
 ---
@@ -121,12 +121,14 @@ colocation). 다섯 필드 정의와 colocation/broken-link 규약 SSoT:
 routed context `policies/doc-colocation-provenance.md` (여기서 필드를 다시
 나열하지 않는다 — 포인터만).
 
-## 6본부 always-on
+## Council participation always-on
 
-7-step 과 직교하는 축으로, 6 division (strategy-pm / dev / QA / design /
-infra / taxonomy) 이 brainstorm 부터 Gate 6 까지 *항상* 개념적 sub-agent 로
-개입한다. `.sfs-local/divisions.yaml` 의 `activation_state` 는 *깊이* 만
-제어하지 참여 여부를 제어하지 않는다.
+7-step 과 직교하는 축으로, organization division은 strategy-pm / dev / QA /
+design / infra 다섯 개다. taxonomy는 조직 division이 아니라 foundational
+cross-cutting product function/lens다. 이 여섯 required council participation
+role은 brainstorm부터 Gate 6까지 *항상* 개념적 sub-agent로 개입한다.
+`.sfs-local/divisions.yaml` 의 `activation_state` 는 *깊이* 만 제어하지 참여
+여부를 제어하지 않는다.
 
 상세 규약: [`policies/six-division-council.md`](policies/six-division-council.md).
 

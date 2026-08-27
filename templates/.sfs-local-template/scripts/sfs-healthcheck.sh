@@ -382,14 +382,17 @@ check_unknowns_conformance() {
   return 0
 }
 
-# Six-division ledger completeness — Tier-B mechanical detection, advisory only.
+# Six-role council ledger completeness — Tier-B mechanical detection, advisory only.
 # The semantic Gate 3/Gate 6 verdict remains with the council/review policy.
 # A plan ledger is relevant once implement.md exists; a review ledger is
 # relevant only after a real verdict is persisted. This avoids treating fresh
-# scaffolds as missing work. The check then finds named division rows whose
-# cells after the division name are all blank. Any explicit finding, evidence,
-# asset, waiver, or N/A reason is accepted without judging relevance or PASS.
-division_ledger_blank_rows() {
+# scaffolds as missing work. The check then finds named council-role rows whose
+# cells after the role name are all blank. The five organization divisions and
+# the cross-cutting taxonomy lens are six required roles. Legacy Division
+# Sub-agent Ledger headings and the division-ledger warning key remain accepted
+# compatibility surfaces. Any explicit finding, evidence, asset, waiver, or N/A
+# reason is accepted without judging relevance or PASS.
+council_role_ledger_blank_rows() {
   local file="$1" section="$2"
   awk -v section="${section}" '
     function trim(value) {
@@ -417,9 +420,9 @@ division_ledger_blank_rows() {
       gsub(/[-_[:space:]]+/, " ", text)
       text=trim(text)
       if (index(text, "§") == 1) text=substr(text, length("§") + 1)
-      return text ~ ("^" target "[.):]*[[:space:]]+division sub agent ledger$")
+      return text ~ ("^" target "[.):]*[[:space:]]+(council participation|division sub agent) ledger$")
     }
-    function canonical_division(value) {
+    function canonical_council_role(value) {
       value=trim(value)
       if (value ~ /^`[^`]+`$/) {
         sub(/^`/, "", value)
@@ -450,8 +453,8 @@ division_ledger_blank_rows() {
       row=$0
       sub(/^[[:space:]]*\|/, "", row)
       count=split(row, cells, "|")
-      division=canonical_division(cells[1])
-      if (division == "") next
+      role=canonical_council_role(cells[1])
+      if (role == "") next
       substantive=0
       for (column=2; column<=count; column++) {
         if (trim(cells[column]) != "") {
@@ -461,7 +464,7 @@ division_ledger_blank_rows() {
       }
       if (substantive) next
       if (found) printf ", "
-      printf "%s", division
+      printf "%s", role
       found=1
     }
     END { if (found) printf "\n" }
@@ -483,7 +486,7 @@ review_verdict_recorded() {
   ' "${file}" 2>/dev/null
 }
 
-check_division_ledger_completeness() {
+check_council_role_ledger_completeness() {
   local project="$1" label="$2" local_dir="$3" sid sdir plan impl review blank
   sid="$(head -n1 "${local_dir}/current-sprint" 2>/dev/null | tr -d '[:space:]')"
   [[ -n "${sid}" ]] || return 0
@@ -493,16 +496,16 @@ check_division_ledger_completeness() {
   review="${sdir}/review.md"
 
   if [[ -f "${plan}" && -f "${impl}" ]]; then
-    blank="$(division_ledger_blank_rows "${plan}" "7")"
+    blank="$(council_role_ledger_blank_rows "${plan}" "7")"
     if [[ -n "${blank}" ]]; then
-      say_warn "division-ledger" "${label}" "plan.md §7 has blank substantive row(s): ${blank} — add a finding/evidence/asset, or explicit N/A/waiver (Tier-B advisory)"
+      say_warn "division-ledger" "${label}" "plan.md §7 has blank required council role row(s): ${blank} — add a finding/evidence/asset, or explicit N/A/waiver (Tier-B advisory)"
     fi
   fi
 
   if [[ -f "${review}" ]] && review_verdict_recorded "${review}"; then
-    blank="$(division_ledger_blank_rows "${review}" "5")"
+    blank="$(council_role_ledger_blank_rows "${review}" "5")"
     if [[ -n "${blank}" ]]; then
-      say_warn "division-ledger" "${label}" "review.md §5 has blank substantive row(s): ${blank} — add a finding/evidence/asset, or explicit N/A/waiver (Tier-B advisory)"
+      say_warn "division-ledger" "${label}" "review.md §5 has blank required council role row(s): ${blank} — add a finding/evidence/asset, or explicit N/A/waiver (Tier-B advisory)"
     fi
   fi
   return 0
@@ -547,7 +550,7 @@ check_project() {
   check_status_parse "${project}" "${local_dir}"
   check_evidence_at_risk "${project}" "${local_dir}"
   check_unknowns_conformance "${project}" "${label}" "${local_dir}"
-  check_division_ledger_completeness "${project}" "${label}" "${local_dir}"
+  check_council_role_ledger_completeness "${project}" "${label}" "${local_dir}"
   check_divisions_parse "${project}" "${local_dir}"
 }
 

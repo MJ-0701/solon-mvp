@@ -1,6 +1,6 @@
 ---
 id: sfs-policy-enterprise-plan-council-pack
-summary: Plan-stage six-division council contract for enterprise SFS work.
+summary: Plan-stage six-role council contract for enterprise SFS work.
 load_when:
   - plan
   - Gate 3
@@ -22,14 +22,18 @@ to make plan a real design phase.
 1. Read brainstorm, latest handoff/user intent, active sprint state, and wiki or
    domain maps when present.
 2. Build the smallest useful work slice and AC list.
-3. For each division, record one row: finding, risk flags, AC/files/evidence
+3. For each council role, record one row: finding, risk flags, AC/files/evidence
    mapping, `asset_candidate`, waiver or N/A reason, and next action.
 4. Load deeper knowledge packs only when that row has a real trigger.
-5. If any relevant division lacks finding/evidence/waiver, Gate 3 is partial.
+5. If any relevant council role lacks finding/evidence/waiver, Gate 3 is partial.
 
-## Division Outputs
+## Council Role Outputs
 
-| division | plan output |
+There are five organization divisions (strategy-pm, dev, QA, design, infra)
+plus taxonomy, the cross-cutting product function/lens. All six are required
+council roles.
+
+| council role | plan output |
 |---|---|
 | strategy-pm | product intent, user value, winning theory, scope/non-goals, rollout/decision boundary |
 | dev | domain/application/interface/infrastructure boundary, files_scope, slice split |
@@ -57,7 +61,7 @@ Gate 3 plan must include:
 
 - `enterprise_council_ledger` or extended `division_subagent_ledger`;
 - risk flags and selected child packs;
-- per-division asset candidates or concrete N/A reasons;
+- per-role asset candidates or concrete N/A reasons;
 - AC to file/artifact/evidence mapping;
 - DDD/TDD boundary for every product-bearing entrypoint;
 - user approval boundary only for real product judgment;
@@ -65,6 +69,6 @@ Gate 3 plan must include:
 
 ## No-Filler Rule
 
-Do not create empty six-division boilerplate. If a division is not relevant,
+Do not create empty six-role council boilerplate. If a council role is not relevant,
 record `not-applicable` plus one concrete reason. If it is relevant, name the
 finding and evidence. Missing meaningful rows block Gate 3.

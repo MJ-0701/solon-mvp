@@ -48,8 +48,9 @@ load_when: ["brainstorm", "브레인스토밍", "requirements", "요구사항", 
     the non-code artifact boundary is named.
   - gray-box delegation: human-owned strategy/interface decisions are separated
     from AI-fillable internals.
-- Run the Division Sub-agent Council before `ready-for-plan`: strategy-pm,
-  dev, QA, design, infra, and taxonomy each records a one-line
+- Run Council Participation before `ready-for-plan`: five organization divisions
+  (strategy-pm, dev, QA, design, infra) plus taxonomy, the cross-cutting product
+  function/lens, are six required council roles. Each records a one-line legacy
   `division_subagent_ledger` finding, evidence/waiver, or `not-applicable`.
 - For unfamiliar domains or large existing codebases, a read-only researcher
   pass may happen before plan. The researcher maps sources, domain terms,

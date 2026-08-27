@@ -4,7 +4,7 @@ title: "도메인 지식 자산"
 visibility: oss-public
 doc_type: product-reference-section
 language: ko
-updated: 2026-05-28
+updated: 2026-08-27
 summary: "전문가 노하우는 AI 가 재사용할 수 있는 자산으로 컴파일될 때 해자가 된다."
 load_when: "도메인 전문성, 반복 설명, craft rule 을 SFS 기억으로 만들 때 읽는다."
 ---
@@ -19,10 +19,11 @@ Solon 은 그 지식을 agent 가 재사용할 수 있게 되었을 때 자산�
 domain map, playbook, checklist, knowledge pack, review lens, skill, fixture, test,
 wiki TopicHub 중 하나일 수 있습니다. 중요한 것은 다음 sprint 의 AI 행동이 실제로 좋아지는지입니다.
 
-6본부 council 은 이 자산을 모으는 기본 수집 장치입니다. 전략/PM 은 포지셔닝과 우선순위 판단을,
+5개 조직 본부와 foundational cross-cutting product function/lens인 taxonomy로 이루어진
+6개 필수 council role은 이 자산을 모으는 기본 수집 장치입니다. 전략/PM 은 포지셔닝과 우선순위 판단을,
 taxonomy 는 명명과 분류를, design 은 workflow/copy/taste 를, dev 는 구조와 invariant 를, QA 는
 risk 와 acceptance edge case 를, infra 는 reliability/security/deploy/rollback 지식을 잡습니다.
-관련 본부 row 는 `asset_candidate` 를 남겨야 합니다. 그래야 한 번 나온 실무 노하우가 다음 작업의
+관련 council role row 는 `asset_candidate` 를 남겨야 합니다. 그래야 한 번 나온 실무 노하우가 다음 작업의
 durable SFS memory 로 승격될 경로를 갖습니다.
 
 이 경로는 sprint artifact 에서 실행됩니다. plan 은 `Domain Asset Promotion Ledger` 를 남기고,

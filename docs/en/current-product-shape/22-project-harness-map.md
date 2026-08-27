@@ -4,7 +4,7 @@ title: "Project Harness Map"
 visibility: oss-public
 doc_type: product-reference
 language: en
-updated: 2026-05-28
+updated: 2026-08-27
 parent: docs/en/current-product-shape.md
 summary: "Project Harness Map"
 load_when: "Read when docs/en/current-product-shape.md routes to this section."
@@ -15,7 +15,8 @@ Harness Engineering becomes useful when the environment around the model is
 visible and testable. SFS now exposes that environment directly:
 
 - `sfs harness doctor` checks whether the current project has thin entry docs,
-  routed context, active six-division council, artifact/memory surfaces, wiki or
+  routed context, all six required council roles (five organization divisions
+  plus the cross-cutting taxonomy product function/lens), artifact/memory surfaces, wiki or
   bug recurrence memory, tests, and release/check rails. It also scores the
   AI-readiness (Sanity) rubric (4 axes, 0-2 each) and surfaces session cost
   signals from the host log (Claude Code / Codex / Gemini adapters: tokens,

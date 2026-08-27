@@ -50,10 +50,11 @@ SFS 는 그 판단을 AI 가 다시 쓸 수 있는 용어, 규칙, 휴리스틱,
 - Fixture/test/smoke: 지침이 장식이 아니라 실행 가능하다는 것을 보여주는 예시/반례 쌍.
 - Wiki TopicHub/index: source truth 와 compiled asset 을 연결하는 retrieval map.
 
-## Six-Division Asset Loop
+## 6개 필수 council role Asset Loop
 
-6본부 council 은 도메인 자산을 수집하는 기본 장치다. 각 row 는 다음에도 재사용할 사람 노하우가
-무엇인지 묻는다.
+organization division은 다섯 개(strategy-pm, dev, QA, design, infra)다. Taxonomy는
+cross-cutting product function/lens다. 6개 필수 council role 모두 도메인 자산을
+수집하며, 각 row는 다음에도 재사용할 사람 노하우가 무엇인지 묻는다.
 
 - Strategy-PM: 시장, 포지셔닝, 우선순위, rollout, decision-boundary 판단을 roadmap/playbook/AC 지침으로 만든다.
 - Taxonomy: vocabulary, state, event, alias, classification 판단을 glossary, domain map, naming rule, review lens 로 만든다.
@@ -62,7 +63,7 @@ SFS 는 그 판단을 AI 가 다시 쓸 수 있는 용어, 규칙, 휴리스틱,
 - QA: defect, risk, regression, edge-case, acceptance 판단을 fixture set, smoke check, acceptance ledger, review question 으로 만든다.
 - Infra: deploy, observability, security, reliability, rollback, cost 판단을 runbook, monitor, shipping check, operations evidence 로 만든다.
 
-각 division ledger row 는 `asset_candidate` 를 기록한다. 기존 asset 재사용, 신규 asset 생성,
+각 council-role ledger row 는 `asset_candidate` 를 기록한다. 기존 asset 재사용, 신규 asset 생성,
 구체적 gap/waiver 중 하나가 있어야 한다.
 
 ## Compile Flow

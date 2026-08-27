@@ -125,7 +125,7 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   search or precise `rg` before broad reads, and do not carry old workbench
   history into the turn unless current report/plan evidence is insufficient.
 - Prefer deep modules and Harness Engineering: design the public interface, narrow active tools, project-as-prompt structure, and checks so AI can fill internals.
-- Record artifact type, domain terms, human-owned design decisions, feedback checks, design/interface notes, review handoff, and a `division_subagent_ledger`: strategy-pm/dev/QA/design/infra/taxonomy finding/evidence/waiver plus `asset_candidate`.
+- Record artifact type, domain terms, human-owned design decisions, feedback checks, design/interface notes, review handoff, and all six required council roles in the legacy `division_subagent_ledger`: five organization divisions (strategy-pm/dev/QA/design/infra) plus the taxonomy cross-cutting product function/lens, with finding/evidence/waiver and `asset_candidate`.
 - When delegating worker slices, keep files_scope explicit and disjoint. Workers
   may implement fixed internals, but architecture, public API, domain terms, and
   acceptance criteria stay with CEO/CTO/user decisions.
@@ -172,7 +172,7 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   evidence. Missing self-CPO, stale evidence, small guard/test gaps, and path
   issues are autopilot patch+verify+review work, not user questions.
 - Load `policies/knowledge-pack-router.md` first, or `policies/knowledge-pack-router.ko.md`
-  for Korean preference. Apply only the matching division router ids.
+  for Korean preference. Apply only the matching council-role/router ids.
 - Load `policies/enterprise-evidence-pack.md` for harness/product-policy QA/QC
   and `policies/enterprise-performance-review-pack.md` for hot-path, algorithm,
   query, browser runtime, memory, payload, or concurrency changes.

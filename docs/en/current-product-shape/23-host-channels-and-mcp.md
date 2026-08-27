@@ -4,7 +4,7 @@ title: "Host channels — CLI / MCP / Agent SDK"
 visibility: oss-public
 doc_type: product-reference
 language: en
-updated: 2026-05-28
+updated: 2026-08-27
 parent: docs/en/current-product-shape.md
 summary: "Solon's 7-step flow is transport-agnostic. CLI / MCP / Agent SDK all land on the same bash adapter, the same sprint state, and the same review gates."
 load_when: "Read when deciding how to drive Solon from a host other than the terminal, or when reviewing the 0.7.0+ host-agnostic surface."
@@ -37,7 +37,7 @@ All three channels share the same invariants:
 - the same `divisions.yaml` activation states
 - the same routed context (`sfs context cat kernel` / `index` /
   `commands/*` / `policies/*`)
-- the same Gate 6 review contract (an empty six-division ledger is a
+- the same Gate 6 review contract (an empty six-role Council Participation Ledger is a
   partial verdict, not PASS)
 - the same `kernel.md` SSoT rule (output is verbatim)
 - the same review lenses (including agent-build auto-routing)

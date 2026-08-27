@@ -4,7 +4,7 @@ title: "Feature Overview"
 visibility: oss-public
 doc_type: product-reference
 language: en
-updated: 2026-07-28
+updated: 2026-08-27
 parent: docs/en/current-product-shape.md
 summary: "One-page overview of the whole Solon/SFS feature surface — command surfaces plus routing into the detailed sections."
 load_when: "Read when you need the whole feature surface at a glance, before routing into a detailed section."
@@ -86,7 +86,7 @@ The Sanity-before-Cartography order discipline and the signal-only
 | feature | surface | detail |
 |---|---|---|
 | team preset activation | `sfs team use <solo\|pair\|trio>` / `team refresh` / `team show` | [human-agent teams](./27-human-agent-teams.md) |
-| six-division council (always-on) | `sfs division` + `.sfs-local/divisions.yaml` | [review lenses](./14-divisions-knowledge-packs-review-lenses.md) |
+| six required council roles: five organization divisions + cross-cutting taxonomy lens (always-on) | `sfs division` + `.sfs-local/divisions.yaml` | [review lenses](./14-divisions-knowledge-packs-review-lenses.md) |
 | work routing / orchestration | `sfs route` / `sfs orchestrator` / `sfs dispatch` | [work intake routing](./20-ai-work-intake-routing.md) |
 | recurring loops | `sfs loop` + the loop-taxonomy policy (four-type decision lens) | routed context `policies/loop-taxonomy.md` |
 | agent identity / compartments | `agent-identity` and compartment policies | [identity and compartments](./28-agent-identity-and-compartments.md) |

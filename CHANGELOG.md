@@ -1,5 +1,20 @@
 ## [Unreleased]
 
+## [0.15.3] - 2026-08-27
+
+> **Five organization divisions plus taxonomy, the cross-cutting product function/lens, now form the six required council roles consistently across runtime guidance, routed policy, templates, and product documentation. New sprint templates call the artifact a Council Participation Ledger without removing taxonomy's required row; existing consumer ledgers headed Division Sub-agent Ledger remain parseable, and legacy command, config, and event keys stay compatible. The healthcheck keeps the existing lifecycle gates and remains WARN-only: it does not change issue counts, exit codes, relevance judgment, or Gate PASS.**
+
+### Fixed
+
+- **Council taxonomy boundary** — `strategy-pm`, `dev`, `QA`, `design`, and `infra` are the five organization divisions; taxonomy is the required cross-cutting product function and domain-language/classification lens. All six continue to participate from brainstorm through Gate 6.
+- **Ledger terminology without consumer breakage** — new brainstorm/plan/implement/review scaffolds and generated harness maps use council-role language, while the healthcheck parser still accepts the legacy `Division Sub-agent Ledger` heading and the runtime retains legacy `division`, `divisions.yaml`, `division_subagent_ledger`, and event-key compatibility surfaces.
+
+### Changed
+
+- **`sfs healthcheck` council-role advisory** — blank eligible plan/review rows are described as required council-role rows, including taxonomy. Detection still uses `say_warn` only and preserves the existing plan/review lifecycle gates, accepted finding/evidence/asset/N/A/waiver entries, issue count, exit code, relevance judgment, and Gate PASS behavior.
+- **Taxonomy regression coverage and documentation** — routed context, model profiles, adapters, user documentation, MCP descriptions, and focused tests now lock five organization divisions plus taxonomy as six required council roles, including legacy-ledger heading parsing.
+- **Release and packaging drift-locks** bumped 0.15.2 → 0.15.3.
+
 ## [0.15.2] - 2026-08-26
 
 > **Six-division ledger completeness becomes a lifecycle-gated, advisory-only `sfs healthcheck` signal: plan §7 is checked only after `implement.md` exists, and review §5 only after a real `result_verdict` is recorded. Blank substantive rows emit WARN guidance naming the affected divisions, while filled rows and explicit N/A or waiver entries pass; the lint never changes issue counts, exit codes, relevance judgment, or Gate PASS. Regression coverage locks the lifecycle gates, advisory-only contract, accepted ledger entries, and resilient Markdown heading, label-format, and CRLF handling.**

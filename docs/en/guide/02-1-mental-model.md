@@ -4,7 +4,7 @@ title: "1. Mental Model"
 visibility: oss-public
 doc_type: user-guide
 language: en
-updated: 2026-05-22
+updated: 2026-08-27
 parent: docs/en/guide.md
 summary: "1. Mental Model"
 load_when: "Read when docs/en/guide.md routes to this section."
@@ -36,7 +36,7 @@ If root agent docs accumulated SFS policy text, run `sfs agent doctor --fix`.
 It archives recognized SFS adapters and rewrites them as frontmatter-only
 pointers.
 Before long autonomous work, run `sfs harness doctor` to check the project
-harness around the model: agent entry, routed context, division council, memory,
+harness around the model: agent entry, routed context, council participation, memory,
 tests, and release/check rails. Run `sfs harness map --write` to write that
 operating design to `.sfs-local/harness/harness-map.md`.
 
@@ -60,9 +60,12 @@ evidence is date-bucketed as
 `.sfs-local/archives/adopt/surface-cleanup/<yyyyMMdd>/surface-cleanup.tar.gz`
 instead of many visible timestamp folders.
 
-Current Solon separates divisions, knowledge packs, and review lenses. The local
-`.sfs-local/divisions.yaml` file is the six-slot compatibility activation state
-for older projects. Actual guidance is read from product-level DDD/TDD, backend,
+Current Solon separates organization divisions, knowledge packs, and review lenses.
+It has five organization divisions: `dev`, `strategy-pm`, `qa`, `design`, and
+`infra`. The local `.sfs-local/divisions.yaml` file retains six compatibility
+activation slots for older projects, but the `taxonomy` slot is the foundational
+cross-cutting product function/lens, not an organization division. All six are
+required council participation roles. Actual guidance is read from product-level DDD/TDD, backend,
 strategy/PM, QA, design/frontend, infra/DevOps, management-admin, and taxonomy
 packs/lenses. DDD/TDD is the cross-cutting product behavior floor. Backend is a
 dev specialization, management-admin covers finance/bookkeeping/tax/accounting,

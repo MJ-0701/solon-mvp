@@ -46,7 +46,7 @@ mkdir tests
 run_sfs harness doctor > doctor.out
 assert_contains doctor.out "SFS Project Harness Doctor" "doctor title"
 assert_contains doctor.out "division active: strategy-pm" "doctor strategy division"
-assert_contains doctor.out "division declared: taxonomy" "doctor taxonomy division"
+assert_contains doctor.out "product function declared: taxonomy" "doctor taxonomy function"
 assert_contains doctor.out "test/build surface detected" "doctor test surface"
 assert_contains doctor.out "minimum autonomous-work harness is present" "doctor minimum harness"
 assert_contains doctor.out "harness evolution ledger absent" "doctor ledger absent"
@@ -57,7 +57,9 @@ assert_contains map.out "Harness Components" "map components"
 assert_contains map.out "Harness audit" "map harness audit row"
 assert_contains map.out "Team architecture" "map team architecture row"
 assert_contains map.out "Harness evolution" "map harness evolution row"
-assert_contains map.out "Division Contracts" "map division contracts"
+assert_contains map.out "Council Participation Contracts" "map council contracts"
+assert_contains map.out "five organization divisions plus the taxonomy cross-cutting product function/lens" "map taxonomy boundary"
+assert_contains map.out "| Council role |" "map council role table"
 assert_contains map.out "Human Boundary" "map human boundary"
 
 run_sfs harness map --write > write.out

@@ -4,7 +4,7 @@ title: "왜 solon인가 — 남는 것은 작업 구조다"
 visibility: oss-public
 doc_type: product-reference
 language: ko
-updated: 2026-07-12
+updated: 2026-08-27
 parent: docs/ko/10x-value.md
 summary: "AI 조언 대부분은 빠르게 낡는다. 남는 자산은 작업 구조 — 컨텍스트 설계 / 평가 규율 / 하네스 — 이고, solon 이 바로 그 묶음이다."
 load_when: "Read for the 'why Solon' framing when positioning the product or onboarding a skeptic."
@@ -32,7 +32,8 @@ solon 은 이 셋을 제품으로 구현한 것이다:
 
 - 컨텍스트 설계 → **routed context** (kernel / commands / policies, on-demand 로딩).
 - 평가 규율 → **Gate 시스템**과 flowcheck (작업단위 자기점검·통과 조건).
-- 하네스 → **7-step / loop** + 6본부 council + host-agnostic 진입(MCP 포함).
+- 하네스 → **7-step / loop** + 5개 조직 본부와 cross-cutting taxonomy lens로
+  이루어진 6개 필수 council role + host-agnostic 진입(MCP 포함).
 
 즉 solon 은 "최신 도구 모음"이 아니라 *낡지 않는 10%를 기본값으로 만든 작업대*다.
 모델은 갈아끼우면 되고(설정 리뷰 cadence 가 그것을 전제한다), 그 위의 구조는

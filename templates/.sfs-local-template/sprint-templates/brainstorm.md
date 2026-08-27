@@ -69,9 +69,13 @@ status: draft
 - 사용자가 결정할 것:
 - AI 가 채울 수 있는 것:
 
-## 8. Division Sub-agent Ledger
+## 8. Council Participation Ledger
 
-| division | status | finding/question | evidence/waiver |
+조직 division은 `strategy-pm`, `dev`, `QA`, `design`, `infra` 다섯 개다.
+`taxonomy`는 조직 division이 아니라 필수 cross-cutting product function/lens다.
+아래 여섯 행은 모두 required council participation role이다.
+
+| council role | status | finding/question | evidence/waiver |
 |---|---|---|---|
 | strategy-pm |  |  |  |
 | dev |  |  |  |

@@ -54,9 +54,11 @@ heuristics, examples, counterexamples, checks, and taste boundaries.
 - Wiki TopicHub/index: retrieval map that points to the source truth and the
   compiled asset.
 
-## Six-Division Asset Loop
+## Six Required Council Roles Asset Loop
 
-The six-division council is the default collector for domain assets. Each row
+The organization has five organization divisions: strategy-pm, dev, QA, design,
+and infra. Taxonomy is the cross-cutting product function/lens. All six are
+required council roles and form the default domain-asset collector. Each row
 asks what human know-how should be reused next time:
 
 - Strategy-PM: market, positioning, priority, rollout, and decision-boundary
@@ -74,7 +76,7 @@ asks what human know-how should be reused next time:
 - Infra: deploy, observability, security, reliability, rollback, and cost
   judgment becomes runbook, monitor, shipping check, or operations evidence.
 
-Each division ledger row should record `asset_candidate`: reuse an existing
+Each council-role ledger row should record `asset_candidate`: reuse an existing
 asset, create a new one, or mark a concrete gap/waiver.
 
 ## Compile Flow

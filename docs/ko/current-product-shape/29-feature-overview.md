@@ -4,7 +4,7 @@ title: "기능 총람 (Feature Overview)"
 visibility: oss-public
 doc_type: product-reference
 language: ko
-updated: 2026-07-28
+updated: 2026-08-27
 parent: docs/ko/current-product-shape.md
 summary: "Solon/SFS 전체 기능을 축별 한 장으로 정리한 총람 — 명령 표면과 상세 문서 라우팅."
 load_when: "Read when you need the whole feature surface at a glance, before routing into a detailed section."
@@ -84,7 +84,7 @@ Sanity→Cartography 순서 규율과 모든 지표의 signal-only(차단 없음
 | 기능 | 표면 | 상세 |
 |---|---|---|
 | 팀 preset 활성화 | `sfs team use <solo\|pair\|trio>` / `team refresh` / `team show` | [인간-에이전트 팀](./27-human-agent-teams.md) |
-| 6본부 council (always-on) | `sfs division` + `.sfs-local/divisions.yaml` | [리뷰 렌즈](./14-review-lens.md) |
+| 5개 조직 본부 + cross-cutting taxonomy lens의 6개 필수 council role (always-on) | `sfs division` + `.sfs-local/divisions.yaml` | [리뷰 렌즈](./14-review-lens.md) |
 | 작업 라우팅/오케스트레이터 | `sfs route` / `sfs orchestrator` / `sfs dispatch` | [작업 인입 라우팅](./20-ai-work-intake-routing.md) |
 | 반복 루프 | `sfs loop` + loop-taxonomy 정책 (4유형 결정 렌즈) | routed context `policies/loop-taxonomy.md` |
 | 에이전트 신원/권한 구획 | 정책 `agent-identity`·compartment 계열 | [신원과 구획](./28-agent-identity-and-compartments.md) |

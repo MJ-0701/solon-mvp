@@ -4,7 +4,7 @@ title: "Why Solon — what survives is work structure"
 visibility: oss-public
 doc_type: product-reference
 language: en
-updated: 2026-07-12
+updated: 2026-08-27
 parent: docs/en/10x-value.md
 summary: "Most AI advice decays fast. The surviving asset is work structure — context design / evaluation discipline / harness mindset — and Solon is exactly that bundle."
 load_when: "Read for the 'why Solon' framing when positioning the product or onboarding a skeptic."
@@ -38,7 +38,8 @@ Solon implements those three as a product:
   demand).
 - Evaluation discipline → the **Gate system** and flowcheck (per-unit self-check
   and pass conditions).
-- Harness → **7-step / loop** + the six-division council + host-agnostic entry
+- Harness → **7-step / loop** + six required council roles (five organization
+  divisions plus the cross-cutting taxonomy lens) + host-agnostic entry
   (including MCP).
 
 So Solon is not "a pile of the latest tools" — it is *a workbench that makes the

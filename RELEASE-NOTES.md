@@ -13,6 +13,26 @@
 
 ---
 
+## 0.15.3
+
+조직 본부와 taxonomy의 역할을 정확히 구분하면서도, 여섯 council role의
+필수 참여를 그대로 유지하는 릴리스입니다.
+
+체감 변화:
+
+- **조직 division은 5개입니다** — `strategy-pm`, `dev`, `QA`, `design`, `infra`가
+  조직 본부이고, `taxonomy`는 모든 본부에 걸치는 product function이자
+  용어·분류 lens입니다.
+- **필수 council role은 여전히 6개입니다** — 5개 조직 division과 taxonomy가
+  brainstorm부터 Gate 6까지 모두 finding/evidence/waiver를 남깁니다.
+- **새 원장은 council role 용어를 씁니다** — 신규 템플릿은
+  `Council Participation Ledger`를 사용하지만, 기존 consumer의
+  `Division Sub-agent Ledger` heading도 계속 인식합니다.
+- **healthcheck는 계속 WARN-only입니다** — 빈 필수 role을 경고로 알리지만
+  issue count, 종료 코드, relevance 판단, Gate PASS를 바꾸지 않습니다.
+
+---
+
 ## 0.15.2
 
 6본부 원장이 실제 작업 단계에 들어간 뒤에도 비어 있으면, `sfs healthcheck`가

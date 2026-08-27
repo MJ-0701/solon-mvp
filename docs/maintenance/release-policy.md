@@ -4,7 +4,7 @@ title: "Release policy — distribution / templating / versioning rules"
 visibility: oss-public
 doc_type: maintenance-doc
 language: ko
-updated: 2026-06-02
+updated: 2026-08-27
 summary: "Release-policy principles and model-evolution config review cadence for install.sh / upgrade.sh / templates / VERSION / CHANGELOG / docs format / session transfer / mainline focus."
 load_when: "Read before editing install.sh / upgrade.sh / uninstall.sh / templates/, before cutting a release, when deciding whether a change belongs in patch vs minor, or when reviewing stale agent config after model/runtime changes."
 ---
@@ -78,11 +78,12 @@ next-session prompt 만 남기고 멈춘다.
 
 상세 규약: [`policies/session-transfer-autopilot.md`](policies/session-transfer-autopilot.md).
 
-## 7. 6본부 council always-on
+## 7. Council participation always-on
 
-strategy-pm / dev / QA / design / infra / taxonomy 는 brainstorm 부터 Gate 6
-까지 개념적 sub-agent 로 evidence / waiver 를 남긴다. parallel worker 는 별도
-opt-in 이다.
+organization division은 strategy-pm / dev / QA / design / infra 다섯 개다.
+taxonomy는 조직 division이 아니라 foundational cross-cutting product function/lens다.
+이 여섯 required council participation role은 brainstorm부터 Gate 6까지 개념적
+sub-agent로 evidence / waiver를 남긴다. parallel worker는 별도 opt-in이다.
 
 상세 규약 + plan-stage council 메서드는 routed context 의
 `policies/division-subagent-council.md` 와 `policies/enterprise-plan-council-pack.md`

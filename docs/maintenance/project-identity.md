@@ -4,7 +4,7 @@ title: "Project identity — `solon-mvp` distribution repo"
 visibility: oss-public
 doc_type: maintenance-doc
 language: ko
-updated: 2026-07-05
+updated: 2026-08-27
 summary: "What this repo is, who owns it, and how it relates to the full Solon methodology."
 load_when: "Read when discussing the repo's role, IP boundary, or relationship to the maintainer's private docset."
 ---
@@ -90,5 +90,6 @@ owner 가 1급으로 확정한 경계다 (2026-06-06).
 - [policies/session-transfer-autopilot.md](policies/session-transfer-autopilot.md)
   — Session Continuation Guard 가 걸렸을 때 fresh-session transfer 규약.
 - [policies/six-division-council.md](policies/six-division-council.md)
-  — 6본부 council 의 항상-개입 원칙 (실 구현은
+  — 5개 조직 본부와 cross-cutting taxonomy product function/lens로 이루어진
+  6개 필수 council role의 항상-개입 원칙 (실 구현은
   `templates/.sfs-local-template/context/policies/division-subagent-council.md`).

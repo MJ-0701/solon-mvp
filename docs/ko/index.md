@@ -4,7 +4,7 @@ title: "Solon Product 문서"
 visibility: oss-public
 doc_type: docs-index
 language: ko
-updated: 2026-05-23
+updated: 2026-08-27
 summary: "Solon Product 문서 entry document"
 load_when: "Read when this product document is directly relevant."
 ---
@@ -43,14 +43,16 @@ sfs status
 사용자가 product owner 로서 의도, 우선순위, 포기할 것, 검증 방식, 용어를 계속 더 선명하게
 잡도록 돕습니다.
 
-현재 본부, 지식팩, review lens 는 분리해서 설명합니다. `.sfs-local/divisions.yaml` 은
-기존 프로젝트 호환용 6개 core activation slot 이고, 실제 안내는 product-level DDD/TDD,
+현재 조직 본부, 지식팩, review lens 는 분리해서 설명합니다. 조직 division은
+`dev`, `strategy-pm`, `qa`, `design`, `infra` 다섯 개입니다. `.sfs-local/divisions.yaml` 은
+기존 프로젝트 호환용 6개 activation slot을 유지하지만, `taxonomy` slot은 조직 division이
+아니라 foundational cross-cutting product function/lens입니다. 실제 안내는 product-level DDD/TDD,
 backend, 전략/PM, QA, 디자인/frontend, infra/DevOps, management-admin, taxonomy 지식팩/review
 lens 로 읽습니다. DDD/TDD 는 모든 product behavior 에 걸리는 기본선이고, backend 는 dev
 specialization, management-admin 은 재무/경리/세무/회계 관점, taxonomy 는 모든 본부에 걸치는
 언어/분류 lens 입니다. 사용자는 분야 이름을 외울 필요가 없습니다. Solon 이 필요한
 관점만 읽고, plan/review 에서는 사용자가 이해할 수 있는 질문과 기준으로 풀어냅니다.
-동시에 6개 core division 은 항상 conceptual sub-agent council 로 참여합니다. activation 은
+동시에 이 여섯 role은 모두 필수 conceptual council participation role입니다. activation 은
 참여 여부가 아니라 read-depth 와 escalation 을 조절합니다.
 
 agent-skills 벤치마크에서 쓸 만한 practice 는 새 명령으로 늘리지 않고

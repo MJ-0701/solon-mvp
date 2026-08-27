@@ -34,7 +34,7 @@ Usage:
   sfs harness map [--write] [--path <file>]
 
 Harness commands inspect the current project as an AI work environment: agent
-entry docs, routed context, division council, artifacts/memory, wiki, tests,
+entry docs, routed context, council participation, artifacts/memory, wiki, tests,
 and release/check loops. They do not create a sprint or run workers.
 EOF
 }
@@ -1030,8 +1030,8 @@ print_doctor() {
   done
 
   section "Team And Memory"
-  local division state missing_divisions=0
-  for division in strategy-pm dev qa design infra taxonomy; do
+  local division state taxonomy_state missing_council_roles=0
+  for division in strategy-pm dev qa design infra; do
     if state="$(division_state "$division" 2>/dev/null)"; then
       if [ "$state" = "active" ]; then
         ok "division active: $division"
@@ -1040,9 +1040,19 @@ print_doctor() {
       fi
     else
       warn "division not declared: $division"
-      missing_divisions=$((missing_divisions + 1))
+      missing_council_roles=$((missing_council_roles + 1))
     fi
   done
+  if taxonomy_state="$(division_state taxonomy 2>/dev/null)"; then
+    if [ "$taxonomy_state" = "active" ]; then
+      ok "product function active: taxonomy"
+    else
+      ok "product function declared: taxonomy (state: $taxonomy_state)"
+    fi
+  else
+    warn "product function not declared: taxonomy"
+    missing_council_roles=$((missing_council_roles + 1))
+  fi
   if [ -f ".sfs-local/current-sprint" ]; then
     ok "current sprint pointer exists"
   else
@@ -1080,7 +1090,7 @@ print_doctor() {
   else
     info "release/check surface not detected; fine for non-distributed projects"
   fi
-  if [ "$missing_divisions" -eq 0 ] && detect_test_surface; then
+  if [ "$missing_council_roles" -eq 0 ] && detect_test_surface; then
     ok "minimum autonomous-work harness is present"
   else
     warn "minimum autonomous-work harness has gaps; use 'sfs harness map --write' to make them explicit"
@@ -1190,7 +1200,7 @@ EOF
   cat <<'EOF'
 | Orchestrator | SFS commands route work through brainstorm, plan, implement, review, retro, and release rails. | present |
 EOF
-  printf '| Division council | strategy-pm, dev, QA, design, infra, taxonomy provide always-on conceptual review. | %s |\n' "$division_status"
+  printf '| Council participation | five organization divisions plus the taxonomy cross-cutting product function/lens provide six required review roles. | %s |\n' "$division_status"
   printf '| Skills and policies | Packaged `.sfs-local/context/` modules load only when the slice triggers them. | %s |\n' "$policy_status"
   printf '| Artifacts and memory | `.sfs-local/sprints/`, `docs/solon/`, reports, retros, decisions, and wiki maps hold durable state. | %s |\n' "$artifact_status"
   printf '| Long-horizon wiki | `llm-wiki/` keeps retrieval maps, DDD language, quality maps, and bug recurrence tracking. | %s |\n' "$wiki_status"
@@ -1209,9 +1219,9 @@ EOF
 | Team architecture | Optional multi-agent work names the selected pattern: pipeline, fan-out/fan-in, expert pool, producer-reviewer, supervisor, or hierarchical delegation. | present |
 | Harness evolution | Initial-to-shipped deltas, feedback, and repeated defects are promoted into tests, policies, skills, or scaffold defaults. | present |
 
-## Division Contracts
+## Council Participation Contracts
 
-| Division | Input | Output | Quality Gate |
+| Council role | Input | Output | Quality Gate |
 |:--|:--|:--|:--|
 | strategy-pm | user goal, constraints, market/product intent | AC, scope, risk flags, decision boundary | plan contract maps requirement to evidence |
 | dev | implementation slice, files scope, failing/characterization evidence | code/docs/scripts/config changes | smallest relevant test/build/smoke passes |

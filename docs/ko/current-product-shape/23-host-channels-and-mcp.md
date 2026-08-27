@@ -4,7 +4,7 @@ title: "Host channels — CLI / MCP / Agent SDK"
 visibility: oss-public
 doc_type: product-reference
 language: ko
-updated: 2026-05-28
+updated: 2026-08-27
 parent: docs/ko/current-product-shape.md
 summary: "Solon 7-step 은 transport 에 독립적이다. CLI / MCP / Agent SDK 어떤 host 로 들어와도 같은 bash adapter, 같은 sprint state, 같은 review gate 를 만난다."
 load_when: "Read when deciding how to drive Solon from a host other than the terminal, or when reviewing the 0.7.0+ host-agnostic surface."
@@ -34,7 +34,7 @@ Solon 7-step flow 는 transport 에 독립적입니다. 0.7.0 이후 세 가지 
 - 같은 `divisions.yaml` 활성화 상태
 - 같은 routed context (`sfs context cat kernel` / `index` / `commands/*` /
   `policies/*`)
-- 같은 Gate 6 review 룰 (6본부 council ledger 비어 있으면 partial)
+- 같은 Gate 6 review 룰 (6개 필수 role의 Council Participation Ledger가 비어 있으면 partial)
 - 같은 `kernel.md` SSoT 원칙 (output verbatim)
 - 같은 review lens (agent-build 자동 라우팅 포함)
 

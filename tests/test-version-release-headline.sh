@@ -39,9 +39,9 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.15.2" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.15.2" "version output"
-assert_contains_text "${output}" "latest 0.15.2" "latest output"
+[[ "${plain_output}" == "sfs 0.15.3" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.15.3" "version output"
+assert_contains_text "${output}" "latest 0.15.3" "latest output"
 # Headline drift-lock: the printed headline must (a) reproduce, byte-for-byte, the
 # `> **...**` blockquote the awk extracts from CHANGELOG for the installed version
 # (so the machinery and the source file stay in sync), and (b) carry the version's
@@ -58,7 +58,7 @@ expected_changelog_headline="$(
 )"
 [[ -n "${expected_changelog_headline}" ]] || fail "no CHANGELOG headline for installed version"
 assert_contains_text "${output}" "installed_release_headline ${expected_changelog_headline}" "installed release headline"
-assert_contains_text "${output}" "Six-division ledger completeness becomes a lifecycle-gated, advisory-only" "0.15.2 headline opening clause"
+assert_contains_text "${output}" "Five organization divisions plus taxonomy, the cross-cutting product function/lens" "0.15.3 headline opening clause"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -87,7 +87,7 @@ expected_notes_headline="$(
 )"
 [[ -n "${expected_notes_headline}" ]] || fail "no RELEASE-NOTES headline for installed version"
 assert_contains_text "${fallback_output}" "installed_release_headline ${expected_notes_headline}" "release notes fallback headline"
-assert_contains_text "${fallback_output}" "6본부 원장이 실제 작업 단계에 들어간 뒤에도 비어 있으면, `sfs healthcheck`가" "0.15.2 release-notes distinctive clause (first line only — fallback headline)"
+assert_contains_text "${fallback_output}" "조직 본부와 taxonomy의 역할을 정확히 구분하면서도, 여섯 council role의" "0.15.3 release-notes distinctive clause (first line only — fallback headline)"
 
 # ── Homebrew keg layout: metafiles sit one level ABOVE the dist dir ──
 # A brew keg has SFS_DIST_DIR=<prefix>/libexec while Homebrew relocates

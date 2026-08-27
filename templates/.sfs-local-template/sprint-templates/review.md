@@ -42,9 +42,13 @@ generator_executor: ""
 |---|---|---|---|---|
 |  |  |  |  |  |
 
-## 5. Division Sub-agent Ledger
+## 5. Council Participation Ledger
 
-| division | status | finding/evidence/waiver | asset_candidate | reviewer verdict |
+조직 division은 `strategy-pm`, `dev`, `QA`, `design`, `infra` 다섯 개다.
+`taxonomy`는 조직 division이 아니라 필수 cross-cutting product function/lens다.
+아래 여섯 행은 모두 required council participation role이다.
+
+| council role | status | finding/evidence/waiver | asset_candidate | reviewer verdict |
 |---|---|---|---|---|
 | strategy-pm |  |  |  |  |
 | dev |  |  |  |  |

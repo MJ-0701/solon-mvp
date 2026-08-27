@@ -71,9 +71,13 @@ user_approval_evidence: ""
 - first failing, characterization, smoke, or review evidence:
 - TDD waiver / alternate evidence:
 
-## 7. Division Sub-agent Ledger
+## 7. Council Participation Ledger
 
-| division | AC/files/evidence mapping | asset_candidate | status/finding/waiver |
+조직 division은 `strategy-pm`, `dev`, `QA`, `design`, `infra` 다섯 개다.
+`taxonomy`는 조직 division이 아니라 필수 cross-cutting product function/lens다.
+아래 여섯 행은 모두 required council participation role이다.
+
+| council role | AC/files/evidence mapping | asset_candidate | status/finding/waiver |
 |---|---|---|---|
 | strategy-pm |  |  |  |
 | dev |  |  |  |
@@ -84,7 +88,7 @@ user_approval_evidence: ""
 
 ## 7.1 Domain Asset Promotion Ledger
 
-| source/ref | owner/expert | division | asset_candidate | promotion action | behavior check |
+| source/ref | owner/expert | council role | asset_candidate | promotion action | behavior check |
 |---|---|---|---|---|---|
 |  |  |  | reuse / create / gap / waiver |  |  |
 
@@ -94,7 +98,7 @@ user_approval_evidence: ""
 - selected knowledge packs:
 - enterprise_council_ledger:
 
-| division | risk flag | finding | AC/files/evidence | asset_candidate | waiver/N/A |
+| council role | risk flag | finding | AC/files/evidence | asset_candidate | waiver/N/A |
 |---|---|---|---|---|---|
 | strategy-pm |  |  |  |  |  |
 | dev |  |  |  |  |  |
@@ -143,7 +147,7 @@ Gate 3 review PASS 는 사용자 승인으로 간주하지 않는다. 사용자�
 - [ ] data/mock/fixture/seed/API/UI/auth/session/persistence 변경이면 대표 데이터와 invariant 검증 계획이 있다
 - [ ] security/logging/deploy 변경이면 OWASP family, console/debug log 정책, Datadog/equivalent evidence 가 있다
 - [ ] 긴 컨텍스트/멀티 결함이면 wiki/workbench mission checklist 경로가 있다
-- [ ] strategy-pm/dev/QA/design/infra/taxonomy division ledger 가 AC/files/evidence, `asset_candidate`, 또는 waiver 로 채워져 있다
+- [ ] 5개 organization division과 cross-cutting taxonomy lens로 이루어진 6개 council role ledger가 AC/files/evidence, `asset_candidate`, 또는 waiver로 채워져 있다
 - [ ] 재사용 가능한 도메인 노하우가 있으면 Domain Asset Promotion Ledger 에 source/owner/promotion/check 가 있다
 - [ ] non-trivial product-bearing work 이면 Enterprise Plan Council risk flag / selected pack / AC evidence / asset row 가 있다
 - [ ] 제품 의미/IA/visible UI/workflow/public contract/AC 의미 변경이면 사용자 승인 경계가 pending 으로 표시되어 있다
