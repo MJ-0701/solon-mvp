@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DIST_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 CONTEXT_DIR="${DIST_DIR}/templates/.sfs-local-template/context"
 GUIDE_SCRIPT="${DIST_DIR}/templates/.sfs-local-template/scripts/sfs-guide.sh"
+GUIDE="${DIST_DIR}/GUIDE.md"
 BIN="${DIST_DIR}/bin/sfs"
 
 . "${SCRIPT_DIR}/helpers/doc-search.sh"
@@ -155,35 +156,74 @@ guide_lines="$(wc -l <"${GUIDE_SCRIPT}" | tr -d '[:space:]')"
 tmp="$(mktemp -d "${TMPDIR:-/tmp}/sfs-design-intake.XXXXXX")"
 cleanup() { rm -rf "${tmp}"; }
 trap cleanup EXIT
-mkdir -p "${tmp}/project/.sfs-local"
-printf '%s\n' 'solon_mvp_version: test' 'installed_at: test' 'install_layout: thin' \
-  > "${tmp}/project/.sfs-local/VERSION"
-guide_output="$(
+
+# Fresh thin init must discover the installed global guide and route its policy
+# through the current runtime, without vendoring that policy into .sfs-local.
+mkdir -p "${tmp}/project"
+(
+  cd "${tmp}/project"
+  SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" \
+    bash "${BIN}" init --layout thin --yes >/dev/null
+)
+
+guide_path="$(
+  cd "${tmp}/project"
+  SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${BIN}" guide --path
+)"
+[[ "${guide_path}" == "${GUIDE}" ]] \
+  || fail "thin init should read the installed global guide, got: ${guide_path}"
+
+guide_default_output="$(
   cd "${tmp}/project"
   SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${BIN}" guide
 )"
-for convention in 'Terminal / shell:' 'Claude Code / Gemini CLI:' 'Codex app / Codex CLI:'; do
-  assert_text_contains "${guide_output}" "${convention}" "guide command convention"
-done
-assert_text_contains "${guide_output}" \
-  '디자인 도움이 필요하거나 큰 새 화면·흐름을 만들면, 아래 지침을 열어 필요한 내용을 정하세요.' \
-  "guide design intake call to action"
+assert_text_contains "${guide_default_output}" "sfs guide --print" \
+  "default guide leads to the full guide command"
+assert_text_contains "${guide_default_output}" "path: ${GUIDE}" \
+  "default guide leads to the installed global guide"
+
+guide_output="$(
+  cd "${tmp}/project"
+  SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${BIN}" guide --print
+)"
+guide_design_section="$(
+  awk '
+    /^## 디자인이 처음이라면$/ { active=1; next }
+    active && /^## / { exit }
+    active { print }
+  ' <<<"${guide_output}"
+)"
+[[ -n "${guide_design_section}" ]] \
+  || fail "installed guide is missing the beginner-design section"
+assert_text_contains "${guide_design_section}" \
+  '새 화면이나 흐름을 만들 때 디자인 방향이 막막하면, 아래 안내를 열어 필요한 내용을 순서대로 정하세요. 디자인 경험이 없어도 됩니다.' \
+  "installed guide beginner-design discovery"
+assert_text_contains "${guide_design_section}" \
+  'sfs context cat policies/design-intake-flow.ko' \
+  "installed guide Korean intake route"
 for guide_jargon in '여섯 문항' 'seed' 'gap' 'UNVERIFIED' 'Ready'; do
-  assert_text_not_contains "${guide_output}" "${guide_jargon}" "guide design intake stays plain-language"
+  assert_text_not_contains "${guide_design_section}" "${guide_jargon}" "guide design intake stays plain-language"
 done
 
-for guide_route in \
-  'Terminal:      sfs context cat policies/design-intake-flow.ko' \
-  'Claude/Gemini: /sfs context cat policies/design-intake-flow.ko' \
-  'Codex:         $sfs context cat policies/design-intake-flow.ko'; do
-  assert_text_contains "${guide_output}" "${guide_route}" "localized guide intake route"
-done
+policy_path="$(
+  cd "${tmp}/project"
+  SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" \
+    bash "${BIN}" context path policies/design-intake-flow.ko
+)"
+[[ "${policy_path}" == "${POLICY_KO}" ]] \
+  || fail "thin init should route Korean intake policy globally, got: ${policy_path}"
+[[ ! -e "${tmp}/project/.sfs-local/context/policies/design-intake-flow.ko.md" ]] \
+  || fail "thin init must not copy Korean intake policy into .sfs-local"
 
-context_output="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${BIN}" context cat policies/design-intake-flow.ko)"
+context_output="$(
+  cd "${tmp}/project"
+  SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" \
+    bash "${BIN}" context cat policies/design-intake-flow.ko
+)"
 assert_text_contains "${context_output}" "DES-INTAKE-01" "verified intake context command"
 
 for file in "${POLICY_EN}" "${POLICY_KO}" "${INDEX}" "${IMPLEMENT}" "${REVIEW}" \
-  "${REVIEW_SCRIPT}" "${DOC_EN}" "${DOC_KO}" "${GUIDE_SCRIPT}"; do
+  "${REVIEW_SCRIPT}" "${DOC_EN}" "${DOC_KO}" "${GUIDE_SCRIPT}" "${GUIDE}"; do
   assert_no_private_paths "${file}" "design intake surface"
 done
 

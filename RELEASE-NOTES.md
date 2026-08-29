@@ -13,6 +13,17 @@
 
 ---
 
+## 0.16.1
+
+Thin layout / thin layout 사용자가 실제 전역 `sfs guide`에서 초심자 디자인 안내를 찾을 수 있게 고친 hotfix입니다.
+
+체감 변화:
+
+- **얇은 설치에서도 안내가 보입니다** — `sfs init --layout thin --yes` 뒤 `sfs guide --print`를 열면, 디자인이 처음인 사용자를 위한 짧은 안내와 한국어 intake 경로가 공용 guide에 표시됩니다.
+- **정책을 프로젝트마다 복사하지 않습니다** — 안내가 가리키는 정책은 계속 설치된 전역 runtime에서 읽으므로, thin layout의 가벼운 구조를 유지합니다.
+
+---
+
 ## 0.16.0
 
 Beginner design guidance / 초심자 디자인 안내를 추가한 릴리스입니다. 디자인 경험이

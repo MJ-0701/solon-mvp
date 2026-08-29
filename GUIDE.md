@@ -42,6 +42,14 @@ AI 시대에 Solon 이 주는 가치는 [Solon 10x 가치](./docs/ko/10x-value.m
 reason 을 본문에 남겨야 합니다. GitHub `@codex` / PR approval / check PASS 만으로는 SFS
 review 를 대체하지 않습니다.
 
+## 디자인이 처음이라면
+
+새 화면이나 흐름을 만들 때 디자인 방향이 막막하면, 아래 안내를 열어 필요한 내용을 순서대로 정하세요. 디자인 경험이 없어도 됩니다.
+
+```bash
+sfs context cat policies/design-intake-flow.ko
+```
+
 ---
 
 ## 문서 지도

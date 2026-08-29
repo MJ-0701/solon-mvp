@@ -1,5 +1,13 @@
 ## [Unreleased]
 
+## [0.16.1] - 2026-08-29
+
+> **Thin-layout users now discover the beginner design route from the actual global `sfs guide` surface. Thin layout 사용자는 실제 전역 `sfs guide`에서 초심자 디자인 안내를 찾습니다.**
+
+### Fixed / 수정
+
+- **Global guide discovery for thin layouts / thin layout 전역 가이드 발견성** — The installed shared `GUIDE.md` now exposes the beginner-design entry and its Korean intake route after `sfs init --layout thin --yes`; the policy remains in the global runtime rather than being copied into the project. 설치된 공용 `GUIDE.md`가 `sfs init --layout thin --yes` 뒤 초심자 디자인 안내와 한국어 intake 경로를 보여 주며, 정책은 프로젝트에 복사하지 않고 전역 runtime에 둡니다.
+
 ## [0.16.0] - 2026-08-29
 
 > **Beginner design guidance turns a vague new-screen request into a six-question brief, a safe starter direction, and a documented `CONFIRMED` or `UNVERIFIED` seed—not a fabricated `Ready` state. 초심자 디자인 안내는 막연한 새 화면 요청을 여섯 문항, 안전한 시작 방향, `CONFIRMED` 또는 `UNVERIFIED` seed로 정리하며, 확인되지 않은 결과를 `Ready`로 꾸미지 않습니다.**
