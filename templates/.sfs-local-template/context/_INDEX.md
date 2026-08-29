@@ -110,4 +110,6 @@ module:
 - `policies/*.ko.md` (general rule) — every `*.ko.md` is the Korean mirror of its same-named en policy; load the mirror when the session/workspace language is Korean. Mirrors keep their en counterpart's ASCII anchor tokens (uppercase section ids and check ids) verbatim; heading prose may be localized, so cross-reference by anchor token, not heading text.
 - `policies/*-knowledge-pack-*.md` — split child packs loaded only after a parent pack activates matching ids.
 - Backend split children: `backend-knowledge-pack-runtime*`, `backend-knowledge-pack-transactions*`, `backend-knowledge-pack-integration*`, `backend-knowledge-pack-operating*`.
+- Beginner design intake: `policies/design-intake-flow.md`; use
+  `policies/design-intake-flow.ko.md` for Korean.
 - Design split children: `design-knowledge-pack-operating*`.

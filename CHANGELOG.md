@@ -1,5 +1,19 @@
 ## [Unreleased]
 
+## [0.16.0] - 2026-08-29
+
+> **Beginner design guidance turns a vague new-screen request into a six-question brief, a safe starter direction, and a documented `CONFIRMED` or `UNVERIFIED` seed—not a fabricated `Ready` state. 초심자 디자인 안내는 막연한 새 화면 요청을 여섯 문항, 안전한 시작 방향, `CONFIRMED` 또는 `UNVERIFIED` seed로 정리하며, 확인되지 않은 결과를 `Ready`로 꾸미지 않습니다.**
+
+### Added / 추가
+
+- **Conditional beginner design intake / 조건부 초심자 디자인 인테이크** — A design-inexperienced request or broad new screen, workflow, or redesign without a confirmed seed receives one focused six-question brief; a confirmed seed proceeds directly, and a minor existing-UI edit retains its established pattern. 확인된 seed가 없는 초심자 요청이나 넓은 새 화면·흐름·리디자인에만 여섯 문항 brief를 적용하며, 확인된 seed와 작은 기존 UI 수정은 불필요하게 멈추지 않습니다.
+- **Safe starter and honest evidence state / 안전한 출발 방향과 정직한 증거 상태** — Figma, then a screenshot or reference, informs the design direction; without any reference, Solon proposes a calm task-first starter without copying protected treatment. One available human confirmation marks a seed `CONFIRMED`; absent confirmation or CI records `UNVERIFIED`, not `Ready` and not a new hard gate. Figma·스크린샷·reference가 없으면 복제 없이 안전한 기본 방향을 제안하고, 확인할 수 없거나 CI이면 `Ready` 대신 `UNVERIFIED`를 남깁니다.
+
+### Changed / 변경
+
+- **Guide, implementation, and review guidance / 가이드·구현·review 안내** — The localized guide exposes the beginner route, while implementation and review preserve established tokens, reject invented values, and require desktop/mobile evidence before the route is called `Ready`. 로컬 가이드에서 초심자 경로를 안내하고, 구현·review는 기존 token을 지키며 임의 값을 막고 desktop/mobile 증거가 갖춰질 때만 `Ready`를 사용합니다.
+- **Focused regression coverage and release drift-locks / 집중 회귀 검증과 릴리스 드리프트 잠금** — Tests cover the bilingual intake policy, trigger exemptions, fallback, evidence states, public routes, guide output, vendored upgrade sync, and source-package release fields. 테스트는 양언어 정책, 적용 제외, fallback, 증거 상태, 공개 경로, 가이드 출력, vendored upgrade 동기화와 패키지 릴리스 필드를 잠급니다.
+
 ## [0.15.4] - 2026-08-27
 
 > **Upgrade now preserves every active-sprint flow and evidence event, compacting only high-volume `tool_call` telemetry. A later note can no longer erase a scoped user-approval capture at the same gate, so flowcheck retains its override evidence. The accepted `sfs capture --kind approval` compatibility spelling now persists as canonical `user-approval`, which flowcheck recognizes.**

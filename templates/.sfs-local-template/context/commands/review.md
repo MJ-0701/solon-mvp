@@ -182,8 +182,8 @@ load_when: ["review", "검토", "CPO", "verdict", "gate"]
   `agentic-security-logging-pack.md`, `wiki-mission-checklist-skill.md`,
   `postdev-external-review-pack.md`, and `lean-procedure-refactor-pack.md` for
   tool/setup drift, data/security/checklist, external review, and process lean review.
-- For design/frontend work, check `design.md` or `docs/solon/design.md` when
-  present. AI-slop risk such as arbitrary colors, token drift, or missing reusable UI contract can be findings.
+- For design/frontend work, check `design.md` or `docs/solon/design.md` when present; AI-slop risk includes arbitrary colors, token drift, or a missing reusable UI contract.
+- When `design-intake-flow` applies, skipped intake or no confirmation is `UNVERIFIED`, never `Ready`; record seed/gap and reason. Evidence only, not a hard gate: review/waiver rules decide verdict.
 - For visible frontend/UI implementation, missing pre-user browser evidence is
   a finding. Look for automation, desktop/mobile evidence, primary interaction,
   text/responsive checks, console note, or exact blocker plus alternate evidence.

@@ -25,7 +25,11 @@ DESIGN_EN="${DIST_DIR}/templates/.sfs-local-template/context/policies/design-kno
 DESIGN_KO="${DIST_DIR}/templates/.sfs-local-template/context/policies/design-knowledge-pack.ko.md"
 DESIGN_OPS_EN="${DIST_DIR}/templates/.sfs-local-template/context/policies/design-knowledge-pack-operating.md"
 DESIGN_OPS_KO="${DIST_DIR}/templates/.sfs-local-template/context/policies/design-knowledge-pack-operating.ko.md"
+INTAKE_EN="${DIST_DIR}/templates/.sfs-local-template/context/policies/design-intake-flow.md"
+INTAKE_KO="${DIST_DIR}/templates/.sfs-local-template/context/policies/design-intake-flow.ko.md"
+INDEX="${DIST_DIR}/templates/.sfs-local-template/context/_INDEX.md"
 IMPLEMENT="${DIST_DIR}/templates/.sfs-local-template/context/commands/implement.md"
+DIVISIONS="${DIST_DIR}/templates/.sfs-local-template/divisions.yaml"
 REVIEW="${DIST_DIR}/templates/.sfs-local-template/context/commands/review.md"
 REVIEW_SCRIPT="${DIST_DIR}/templates/.sfs-local-template/scripts/sfs-review.sh"
 TENX_KO="${DIST_DIR}/docs/ko/10x-value.md"
@@ -49,9 +53,26 @@ assert_contains "${DESIGN_OPS_KO}" "Coolicons" "KO icon starter"
 assert_contains "${DESIGN_OPS_KO}" "Pretendard" "KO font starter"
 assert_contains "${DESIGN_OPS_KO}" "letter-spacing 은 기본 0" "KO typography"
 
+[[ -f "${INTAKE_EN}" ]] || fail "missing EN design intake policy: ${INTAKE_EN}"
+[[ -f "${INTAKE_KO}" ]] || fail "missing KO design intake policy: ${INTAKE_KO}"
+# Intake prose is localized; retain only the stable semantic contract tokens.
+for intake in "${INTAKE_EN}" "${INTAKE_KO}"; do
+  for token in six_question_keys intake_states DES-INTAKE-01 DES-INTAKE-05 \
+    CONFIRMED UNVERIFIED CI Ready docs/solon/design.md prohibited; do
+    assert_contains "${intake}" "${token}" "design intake contract"
+  done
+done
+
+assert_contains "${DESIGN_EN}" "design-intake-flow.md" "EN intake route"
+assert_contains "${DESIGN_KO}" "design-intake-flow.ko.md" "KO intake route"
+assert_contains "${INDEX}" "design-intake-flow.md" "context intake route"
+assert_contains "${INDEX}" "design-intake-flow.ko.md" "context KO intake route"
 assert_contains "${IMPLEMENT}" "design.md" "implement design.md"
-assert_contains "${IMPLEMENT}" "drift: colors" "implement token drift"
+assert_contains "${IMPLEMENT}" "token drift: colors" "implement token drift"
+assert_contains "${IMPLEMENT}" "prohibited" "implement prohibited values"
+assert_contains "${DIVISIONS}" "design-intake-flow" "divisions intake comment"
 assert_contains "${REVIEW}" "AI-slop risk" "review AI slop"
+assert_contains "${REVIEW}" 'docs/solon/design.md` when present' "review conditional design contract"
 assert_contains "${REVIEW}" "arbitrary colors" "review arbitrary tokens"
 assert_contains "${REVIEW_SCRIPT}" "design.md/token adherence" "review script design checklist"
 

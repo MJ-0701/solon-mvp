@@ -186,10 +186,10 @@ load_when: ["implement", "구현", "build", "execute", "작업"]
   future sprints.
 - Read backend, strategy-pm, QA, design/frontend, infra, management-admin, or
   taxonomy packs only after router selection; do not broaden ordinary work.
-- For visible design/frontend implementation, read `design.md` or
-  `docs/solon/design.md` when present; otherwise record the design-system gap or
-  seed. After editing, check token drift: colors, type, spacing, radius, shadows,
-  and icons.
+- For visible design/frontend work, bind confirmed `design.md` or `docs/solon/design.md` and do not reopen intake; otherwise use conditional
+  `policies/design-intake-flow.md` (Korean mirror when needed): it exempts minor edits; in noninteractive/CI records proposed seed/gaps as
+  `UNVERIFIED`, never `Ready`, requires listed/established values, and rejects prohibited/invented ones.
+- For every visible design/frontend change, after either the confirmed design-contract or intake path, verify token drift: colors, type, spacing, radius, shadows, and icons.
 - Backend architecture ladder: clean layered monolith for MVP/small projects;
   CQRS for non-initial backend work even with one DB; propose Hexagonal
   transition when domain seams grow; propose MSA only when independent deploy,

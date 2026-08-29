@@ -27,7 +27,15 @@ SFS_COMMAND_TIMEOUT_SEC=0 \
 SFS_DIST_DIR="${DIST_DIR}" \
 bash "${SFS_BIN}" init --layout vendored --yes >/dev/null
 
+for intake_policy in \
+  .sfs-local/context/policies/design-intake-flow.md \
+  .sfs-local/context/policies/design-intake-flow.ko.md; do
+  [[ -f "${intake_policy}" ]] || fail "vendored init missed ${intake_policy}"
+done
+
 rm -f .sfs-local/context/policies/session-continuation-guard.md
+rm -f .sfs-local/context/policies/design-intake-flow.md
+rm -f .sfs-local/context/policies/design-intake-flow.ko.md
 awk '
   /^solon_mvp_version:/ { print "solon_mvp_version: 0.6.91"; next }
   { print }
@@ -48,6 +56,11 @@ fi
 guard=".sfs-local/context/policies/session-continuation-guard.md"
 [[ -f "${guard}" ]] || fail "missing restored session continuation guard"
 grep -Fq "30%" "${guard}" || fail "restored guard is not the current policy"
+for intake_policy in \
+  .sfs-local/context/policies/design-intake-flow.md \
+  .sfs-local/context/policies/design-intake-flow.ko.md; do
+  [[ -f "${intake_policy}" ]] || fail "vendored upgrade missed ${intake_policy}"
+done
 
 expected_version="$(head -1 "${DIST_DIR}/VERSION")"
 grep -Fq "solon_mvp_version: ${expected_version}" .sfs-local/VERSION \

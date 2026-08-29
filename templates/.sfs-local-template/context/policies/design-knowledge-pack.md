@@ -39,6 +39,12 @@ active for a sprint, review, or release. Apply only the matching ids.
   `docs/solon/design.md` exists, read it before editing; if neither exists and
   the work creates visible UI, record the gap or create a compact seed contract
   before broad screen generation.
+- Use `policies/design-intake-flow.md` only when a requester needs design help
+  or lacks design experience, or when broad new UI work has no confirmed seed.
+  A confirmed seed goes directly to this pack; a minor existing visible-UI edit
+  keeps its established pattern and records a narrow `UNVERIFIED` gap if needed.
+  In noninteractive or CI work, record the proposed seed or gap as `UNVERIFIED`
+  rather than blocking or calling the route `Ready`.
 
 ## DES-SCALE - Review Depth By Project Size
 

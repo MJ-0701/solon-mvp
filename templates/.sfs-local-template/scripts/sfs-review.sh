@@ -2615,6 +2615,7 @@ EOF
 - Check interaction clarity, UX states, accessibility, design-system fit, and handoff completeness.
 - Treat visual or flow ambiguity as acceptance risk, even without code defects.
 - Check design.md/token adherence when a design contract exists. Treat token drift, mixed icon styles, arbitrary spacing/radius, and generic AI-slop visual language as review evidence.
+- When the conditional design-intake route applied, report a skipped intake or missing human confirmation as UNVERIFIED, never silently Ready; name the proposed seed/gap and reason. This is evidence, not a new hard gate.
 EOF
       ;;
     taxonomy)

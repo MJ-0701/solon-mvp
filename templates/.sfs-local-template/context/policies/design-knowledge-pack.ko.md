@@ -39,6 +39,11 @@ review, release 에서 workflow, layout, state, accessibility, copy check 중 �
   `docs/solon/design.md` exists, read it before editing; if neither exists and
   the work creates visible UI, record the gap or create a compact seed contract
   before broad screen generation.
+- 요청자가 디자인 도움이 필요하거나 디자인 경험이 없다고 했을 때, 또는 넓은 새 UI에
+  확인된 seed가 없을 때만 `policies/design-intake-flow.ko.md`를 쓴다. 확인된 seed는
+  바로 이 pack에 적용하고, 기존 visible UI의 작은 수정은 기존 pattern을 지키며 필요할
+  때만 좁은 `UNVERIFIED` gap을 기록한다. noninteractive 또는 CI에서는 막거나
+  `Ready`라고 부르지 말고 proposed seed 또는 gap을 `UNVERIFIED`로 기록한다.
 
 ## DES-SCALE - Review Depth By Project Size
 

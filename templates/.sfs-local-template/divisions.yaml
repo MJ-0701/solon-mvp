@@ -11,6 +11,10 @@
 # - strategy-pm, qa, design/frontend, infra/DevOps
 # - management-admin: finance/bookkeeping/tax/accounting lens
 # - taxonomy: cross-cutting language/classification lens, not an org division
+# A design-help request or broad new UI without a confirmed `docs/solon/design.md`
+# follows `context/policies/design-intake-flow.md` (or `.ko.md`); a minor existing
+# UI edit retains its observed pattern and may record an UNVERIFIED gap instead.
+# This does not change activation depth.
 # 프로젝트 특성에 따라 activation_state 를 조정하고, 변경 사유는
 # `docs/solon/decisions/*.md` 또는 해당 sprint handoff 에 기록.
 

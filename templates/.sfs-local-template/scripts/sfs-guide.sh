@@ -145,6 +145,11 @@ Solon guide context
   Claude/Gemini: /sfs review --gate 6
   Codex:         \$sfs review --gate 6
 
+디자인 도움이 필요하거나 큰 새 화면·흐름을 만들면, 아래 지침을 열어 필요한 내용을 정하세요.
+  Terminal:      sfs context cat policies/design-intake-flow.ko
+  Claude/Gemini: /sfs context cat policies/design-intake-flow.ko
+  Codex:         \$sfs context cat policies/design-intake-flow.ko
+
 필요할 때:
   full guide 에는 brainstorm, decision, capture, retro, upgrade 같은 고급 명령이 있다.
   첫 경험은 start → plan → implement → review 만 기억해도 된다.
