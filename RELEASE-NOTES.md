@@ -13,6 +13,16 @@
 
 ---
 
+## 0.16.3
+
+Source packaging fixtures now match the already-released ADR-aware daily-handoff feature / 이미 출시된 ADR 연동 일일 인계 기능에 맞춰 소스 패키징 fixture를 동기화한 follow-up patch release입니다.
+
+체감 변화 / What changes:
+
+- **출하 metadata를 맞춥니다 / Shipping metadata is aligned** — Homebrew와 Scoop source fixture가 0.16.3 URL, version, extract_dir를 가리키며 SHA placeholder는 release cut까지 유지됩니다. 이미 발행한 `v0.16.2` tag는 변경하지 않습니다. The fixtures point to 0.16.3 while keeping the SHA placeholder until the release cut; the published `v0.16.2` tag remains immutable.
+
+---
+
 ## 0.16.2
 
 ADR-aware daily handoffs / ADR 연동 일일 인계가 완료된 각 작업 단위마다 자동으로 갱신되고 retro에서 최종화되는 patch release입니다.
