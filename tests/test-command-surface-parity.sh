@@ -30,10 +30,11 @@ done
 # inverse: every template adapter is reachable from dispatch.sh (no orphans).
 # non-command adapters by design: sfs-common (lib), sfs-dispatch (router),
 # sfs-capture (aliased via capture|note branch), sfs-team-apply (shared
-# materialize core invoked by sfs-team.sh `use` + upgrade.sh, not a command).
+# materialize core invoked by sfs-team.sh `use` + upgrade.sh), and
+# sfs-publish-daily-handoff (Gate 6/7-only helper, never a user command).
 for f in "${SCRIPTS_DIR}"/sfs-*.sh; do
   base="$(basename "${f}" .sh)"; cmd="${base#sfs-}"
-  case "${cmd}" in common|dispatch|capture|team-apply) continue ;; esac
+  case "${cmd}" in common|dispatch|capture|team-apply|publish-daily-handoff) continue ;; esac
   printf '%s\n' "${routed}" | grep -qx "${cmd}" \
     || fail "template adapter sfs-${cmd}.sh exists but dispatch.sh never routes '${cmd}' (orphan adapter)"
 done

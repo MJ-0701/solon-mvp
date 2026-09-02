@@ -1,5 +1,14 @@
 ## [Unreleased]
 
+## [0.16.2] - 2026-09-02
+
+> **ADR-aware daily handoffs now refresh for each completed work unit and finalize on retro. ADR 연동 일일 인계는 완료된 작업 단위마다 갱신되고 retro에서 최종화됩니다.**
+
+### Added / 추가
+
+- **Durable-decision trail / 지속되는 결정의 추적성** — Qualifying Gate 3 decisions can use the ADR policy and registry, while Gate 6 carries only existing `ADR-NNNN` evidence into the handoff. Gate 3의 해당 결정은 ADR 정책·레지스트리를 사용하고, Gate 6는 이미 존재하는 `ADR-NNNN` 증거만 인계에 반영합니다.
+- **Automatic daily handoffs / 자동 일일 인계** — Each non-failing recorded Gate 6 evaluation refreshes the manager-readable Markdown handoff and derived HTML; normal Gate 7 retro finalizes the same artifacts before compaction, preserves marked human notes, and fails rather than silently skipping publication. 기록된 Gate 6 평가가 실패하지 않으면 작업 단위마다 관리자용 Markdown 인계와 파생 HTML을 갱신하며, 일반 Gate 7 retro는 compact 전에 같은 산출물을 최종화하고 표시된 사람 메모를 보존하며 발행을 조용히 건너뛰지 않습니다.
+
 ## [0.16.1] - 2026-08-29
 
 > **Thin-layout users now discover the beginner design route from the actual global `sfs guide` surface. Thin layout 사용자는 실제 전역 `sfs guide`에서 초심자 디자인 안내를 찾습니다.**

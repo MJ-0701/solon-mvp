@@ -27,6 +27,15 @@ context 가 SSoT 이고 (`kernel.md`, `commands/*.md`, `policies/*.md`), 본
 6. **CTO review 확인 + 사용자 최종 통과**
 7. **회고 / 문서화**
 
+## Decision → evidence → publication
+
+Gate 3 (Plan)은 ADR eligibility가 있는 durable decision을 기록한다. Gate 6
+(Review)는 그 ADR id를 포함한 완료·검증·위험·후속 evidence를 report/retro에
+남긴다. Gate 7 (Retro)의 기본 `sfs retro` close는 두 기록이 준비된 뒤, 그리고
+workbench/event compaction 전에 `daily-handoff.md`와 파생
+`daily-handoff.html`을 자동 발행한다. 이 발행은 별도 사용자 명령이 아니며,
+실패하면 close도 실패한다.
+
 ## 착수 전 (step 1 정렬)
 
 WU 를 위임할 가치가 있는지(다중 입력 / 산출물 / 반복성 / "good" 기준 / 지루한

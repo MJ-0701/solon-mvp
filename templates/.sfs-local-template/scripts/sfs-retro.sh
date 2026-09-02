@@ -4,15 +4,16 @@
 # Solon SFS — `/sfs retro` command implementation.
 # WU-26 §2 spec implementation. WU-23 §1.6 정합:
 #   · 파일 path stdout 출력만 (에디터 launch 안 함).
-#   · 기본 `retro` 는 docs/solon/<english-workspace>/<yyyyMMdd> handoff report.md ensure + workbench archive + sprint close + auto commit + stdout 3줄.
+#   · 기본 `retro` 는 docs/solon/<english-workspace>/<yyyyMMdd> handoff report.md ensure + Gate 6 review evidence + retro를 daily handoff 에 최종 반영 (manager HTML, sfs-publish-daily-handoff.sh) + workbench archive + sprint close + auto commit + stdout 4줄.
 #   · `--close` 는 backward-compatible alias.
-#   · `--draft` / `--no-close` 지정 시 retro.md 진입만, stdout 1줄.
+#   · `--draft` / `--no-close` 지정 시 retro.md 진입만 (daily handoff 미발행), stdout 1줄.
 #   · auto commit (sfs-common.sh::auto_commit_close) 은 사용자 명시 retro 호출 시에만 동작 (§1.5' 정합).
 #
-# Output (1~3 lines):
+# Output (1~4 lines):
 #   retro.md ready: <path>
 #   report.md ready: <path>      # default close 시 추가
 #   sprint closed: <sprint-id>     # default close 시 추가
+#   daily handoff ready: <path>    # default close 시 추가 (manager HTML)
 #
 # Exit codes (WU-26 §2.3 / WU-23 §1.6 정합):
 #   0  success
@@ -60,15 +61,19 @@ while [[ $# -gt 0 ]]; do
 Usage: /sfs retro [--draft|--no-close|--close]
 
 Close the current sprint: open/create docs/solon/<english-workspace>/<yyyyMMdd>/retro.md,
-ensure the matching report.md exists, archive workbench evidence, mark the
-sprint closed, and commit the result.
+ensure the matching report.md exists, publish the manager-facing daily handoff
+(daily-handoff.md + daily-handoff.html via scripts/sfs-publish-daily-handoff.sh),
+archive workbench evidence, mark the sprint closed, and commit the result.
+Daily handoff publication failure aborts the close (it is never silently
+skipped); the publisher's nonzero exit code propagates.
 The AI runtime owns branch push/main merge/main push after this local close commit.
 
 Options:
   --draft,
-  --no-close    Open/create retro.md only. Does not ensure report.md, archive,
-                close the sprint, or auto-commit.
-  --close       Backward-compatible alias for the default close behavior.
+  --no-close    Open/create retro.md only. Does not ensure report.md, publish
+                the daily handoff, archive, close the sprint, or auto-commit.
+  --close       Backward-compatible alias for the default close behavior
+                (includes the automatic daily handoff publication).
   -h, --help    Show this help.
 
 Exit codes:
@@ -78,6 +83,7 @@ Exit codes:
   7  unknown CLI flag
   8  close requested but review.md missing (run /sfs review first)
   99 unknown (bash trap)
+  (daily handoff publish failure exits with the publisher's nonzero code)
 EOF
       exit 0
       ;;
@@ -148,9 +154,6 @@ if [[ "${CLOSE}" -eq 1 ]]; then
     exit "${SFS_EXIT_REVIEW_REQUIRED}"
   fi
 
-  # sprint frontmatter status=closed + closed_at + closed_at on retro.md too
-  update_frontmatter "${RETRO_PATH}" "closed_at" "${NOW}"
-
   # Completed sprint artifact lifecycle:
   # report.md becomes the final work artifact; workbench docs move to archive.
   REPORT_PATH="$(sfs_prepare_sprint_report "${SPRINT_ID}" "${NOW}" "final")"
@@ -159,6 +162,44 @@ if [[ "${CLOSE}" -eq 1 ]]; then
   # Active Obsidian/wiki projects close with a deterministic compile checklist:
   # report/retro keep sprint evidence, llm-wiki receives only durable meaning.
   sfs_write_wiki_compile_checklist "${SPRINT_ID}" "${NOW}" "${REPORT_PATH}" "${RETRO_PATH}" || true
+
+  # Gate 7 publication finalizes the same handoff refreshed at Gate 6. It runs
+  # after report, review, and retro records contain available evidence, and before any
+  # workbench/event compaction can remove the source material. A failed
+  # publisher leaves the sprint active and propagates its nonzero exit code.
+  HANDOFF_DIR="$(dirname "${REPORT_PATH}")"
+  HANDOFF_MD="${HANDOFF_DIR}/daily-handoff.md"
+  HANDOFF_HTML="${HANDOFF_DIR}/daily-handoff.html"
+  REVIEW_PATH="${SPRINT_DIR}/review.md"
+  PUBLISHER="${SCRIPT_DIR}/sfs-publish-daily-handoff.sh"
+  if [[ ! -x "${PUBLISHER}" ]]; then
+    echo "daily handoff publisher missing or not executable: ${PUBLISHER}" >&2
+    exit "${SFS_EXIT_NO_TEMPLATES}"
+  fi
+  PUBLISH_ARGS=(--report "${REPORT_PATH}")
+  # Legacy sprints may have valid report + retro evidence without a persisted
+  # review.md. Do not invent a source path; Gate 6 passes review evidence when
+  # it actually exists.
+  if [[ -f "${REVIEW_PATH}" ]]; then
+    PUBLISH_ARGS+=(--review "${REVIEW_PATH}")
+  fi
+  PUBLISH_ARGS+=(--retro "${RETRO_PATH}" --sprint "${SPRINT_ID}" --out-dir "${HANDOFF_DIR}")
+  set +e
+  PUBLISH_OUTPUT="$("${PUBLISHER}" "${PUBLISH_ARGS[@]+"${PUBLISH_ARGS[@]}"}")"
+  _handoff_publish_rc=$?
+  set -e
+  if [[ "${_handoff_publish_rc}" -ne 0 ]]; then
+    [[ -z "${PUBLISH_OUTPUT}" ]] || printf '%s\n' "${PUBLISH_OUTPUT}" >&2
+    echo "daily handoff publication failed; sprint remains open" >&2
+    exit "${_handoff_publish_rc}"
+  fi
+  if [[ ! -f "${HANDOFF_MD}" || ! -f "${HANDOFF_HTML}" ]]; then
+    echo "daily handoff publication failed; expected both ${HANDOFF_MD} and ${HANDOFF_HTML}" >&2
+    exit "${SFS_EXIT_UNKNOWN}"
+  fi
+
+  # Only publication success allows close metadata and source compaction.
+  update_frontmatter "${RETRO_PATH}" "closed_at" "${NOW}"
   sprint_close "${SPRINT_DIR}" "${NOW}"
 
   # report_ready + sprint_close events (2-arg signature)
@@ -177,6 +218,7 @@ if [[ "${CLOSE}" -eq 1 ]]; then
 
   echo "report.md ready: ${REPORT_PATH}"
   echo "sprint closed: ${SPRINT_ID}"
+  echo "daily handoff ready: ${HANDOFF_HTML}"
 fi
 
 exit 0

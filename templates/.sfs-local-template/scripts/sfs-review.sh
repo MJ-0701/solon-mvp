@@ -13,7 +13,8 @@
 #     gate_id 추론 (sfs-common.sh::infer_last_gate_id, WU-25 row 4 신설).
 #   · CPO Evaluator persona prompt 를 review.md 에 append.
 #   · verdict 자체는 CPO agent output 으로 기록한다. 본 bash 명령은 prompt/evidence
-#     scaffold + executor bridge + event 기록을 담당한다.
+#     scaffold + executor bridge + event 기록을 담당한다. A successful Gate 6
+#     evaluator result also refreshes the active dated manager handoff.
 #
 # Output:
 #   review.md ready: <path> | gate <Gate N (Name)> prompt ready | executor <executor> | prompt <path>
@@ -3471,6 +3472,7 @@ RUN_RESULT=""
 RESULT_PATH=""
 RUN_RC=""
 RUN_WARNING=""
+DAILY_HANDOFF_HTML=""
 if [[ "${RUN_REVIEW}" == "true" ]]; then
   RUN_OUT="${RUN_INVOCATION_DIR}/stdout.md"
   RUN_ERR="${RUN_INVOCATION_DIR}/stderr.txt"
@@ -3615,6 +3617,41 @@ EOF
     exit "${SFS_EXIT_EXECUTOR}"
   fi
 
+  # A real, non-failing Gate 6 evaluator result is the verified task-unit
+  # seam. Publish before review_run/completion output so a renderer failure
+  # cannot leave this invocation claiming a completed review with a stale
+  # manager handoff. Prompt-only, --show-last, other gates, failed executors,
+  # unknown verdicts, and explicit FAIL results never enter this branch.
+  if [[ "${RUN_RC}" -eq 0 && "${GATE_NUMBER}" == "6" ]]; then
+    case "${RUN_VERDICT}" in
+      pass|partial)
+        REPORT_PATH="$(sfs_prepare_sprint_report "${SPRINT_ID}" "${NOW}" "draft")" || exit $?
+        HANDOFF_DIR="$(dirname "${REPORT_PATH}")"
+        HANDOFF_MD="${HANDOFF_DIR}/daily-handoff.md"
+        HANDOFF_HTML="${HANDOFF_DIR}/daily-handoff.html"
+        PUBLISHER="${SFS_SCRIPT_DIR}/sfs-publish-daily-handoff.sh"
+        if [[ ! -x "${PUBLISHER}" ]]; then
+          echo "daily handoff publisher missing or not executable: ${PUBLISHER}" >&2
+          exit "${SFS_EXIT_NO_TEMPLATES}"
+        fi
+        set +e
+        PUBLISH_OUTPUT="$("${PUBLISHER}" --report "${REPORT_PATH}" --review "${REVIEW_PATH}" --sprint "${SPRINT_ID}" --out-dir "${HANDOFF_DIR}")"
+        _handoff_publish_rc=$?
+        set -e
+        if [[ "${_handoff_publish_rc}" -ne 0 ]]; then
+          [[ -z "${PUBLISH_OUTPUT}" ]] || printf '%s\n' "${PUBLISH_OUTPUT}" >&2
+          echo "daily handoff publication failed; review remains incomplete" >&2
+          exit "${_handoff_publish_rc}"
+        fi
+        if [[ ! -f "${HANDOFF_MD}" || ! -f "${HANDOFF_HTML}" ]]; then
+          echo "daily handoff publication failed; expected both ${HANDOFF_MD} and ${HANDOFF_HTML}" >&2
+          exit "${SFS_EXIT_UNKNOWN}"
+        fi
+        DAILY_HANDOFF_HTML="${HANDOFF_HTML}"
+        ;;
+    esac
+  fi
+
   # solon-product#7: emit a reviewer model_resolved FCP event so `sfs flowcheck`
   # can backstop reviewer-tier enforcement over the event stream. Scoped to the
   # Gemini executor — the only path this fix pins+verifies via the --model flag,
@@ -3720,6 +3757,9 @@ if [[ "${PRINT_PROMPT}" == "true" ]]; then
 elif [[ "${RUN_REVIEW}" == "true" ]]; then
   if [[ -n "${SFS_REVIEW_RESTORE_NOTICE}" ]]; then
     echo "${SFS_REVIEW_RESTORE_NOTICE}" >&2
+  fi
+  if [[ -n "${DAILY_HANDOFF_HTML}" ]]; then
+    echo "daily handoff refreshed: ${DAILY_HANDOFF_HTML}"
   fi
   if [[ -n "${RUN_WARNING}" ]]; then
     echo "review.md ready: ${REVIEW_PATH} | gate ${GATE_DISPLAY} | stage ${REVIEW_STAGE} | lens ${REVIEW_LENS} (${REVIEW_LENS_SOURCE}) CPO run complete with executor warning | executor ${EVALUATOR_EXECUTOR} | output ${RESULT_PATH}"

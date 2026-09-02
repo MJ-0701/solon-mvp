@@ -13,6 +13,18 @@
 
 ---
 
+## 0.16.2
+
+ADR-aware daily handoffs / ADR 연동 일일 인계가 완료된 각 작업 단위마다 자동으로 갱신되고 retro에서 최종화되는 patch release입니다.
+
+체감 변화 / What changes:
+
+- **결정 근거가 인계에 이어집니다 / Decisions remain traceable** — Gate 3에서 ADR 대상인 지속 결정은 정책과 레지스트리로 기록하고, Gate 6 인계에는 이미 기록된 `ADR-NNNN` 근거만 반영합니다. Qualifying durable decisions use the policy and registry at Gate 3, and the Gate 6 handoff includes only evidence from an existing `ADR-NNNN`.
+- **작업 단위마다 최신 인계를 봅니다 / Handoffs stay current per work unit** — 실패하지 않은 Gate 6 평가마다 관리자용 `daily-handoff.md`와 파생 `daily-handoff.html`이 갱신되고, 일반 Gate 7 retro가 compact 전에 최종화합니다. Each non-failing Gate 6 evaluation refreshes the manager-readable Markdown and derived HTML; normal Gate 7 retro finalizes them before compaction.
+- **메모와 발행 실패를 숨기지 않습니다 / Notes and publication failures stay visible** — 표시된 사람 메모는 재발행해도 유지되며, 발행에 실패하면 review나 close가 성공으로 끝나지 않습니다. Marked human notes survive regeneration, and a publication failure prevents the review or close from reporting success.
+
+---
+
 ## 0.16.1
 
 Thin layout / thin layout 사용자가 실제 전역 `sfs guide`에서 초심자 디자인 안내를 찾을 수 있게 고친 hotfix입니다.
