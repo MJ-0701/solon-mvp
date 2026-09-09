@@ -24,7 +24,7 @@ assert_not_contains() {
   fi
 }
 
-expected_version="0.17.0"
+expected_version="0.18.0"
 actual_version="$(tr -d '[:space:]' < "${DIST_DIR}/VERSION")"
 [[ "${actual_version}" == "${expected_version}" ]] \
   || fail "VERSION is ${actual_version}, expected ${expected_version}"

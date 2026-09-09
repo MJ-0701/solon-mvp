@@ -81,6 +81,15 @@ write_event() {
   esac
 }
 
+run_quality_gate() {
+  # The CI workflow exports real PR evidence. This fixture asserts each event
+  # mode independently, so it must not inherit that ambient PR context.
+  (
+    unset SFS_PR_BODY SFS_PR_BASE_SHA SFS_PR_HEAD_SHA
+    bash "${SCRIPT}" "$@"
+  )
+}
+
 repo="${tmp}/repo"
 make_fake_repo "${repo}"
 step_log="${tmp}/steps.log"
@@ -94,7 +103,7 @@ printf '%s\n' "${help_out}" | grep -q "tests/test-sfs-quality-gate.sh" || fail "
 printf '%s\n' "${help_out}" | grep -q "tests/test-aws-agent-toolkit-setup-policy.sh" || fail "--help must document AWS policy coverage"
 printf '%s\n' "${help_out}" | grep -q "tests/test-sfs-pr-check-strict.sh" || fail "--help must document PR strict-contract regression"
 
-pr_out="$(FAKE_STEP_LOG="${step_log}" bash "${SCRIPT}" --root "${repo}" --mode pr)"
+pr_out="$(FAKE_STEP_LOG="${step_log}" run_quality_gate --root "${repo}" --mode pr)"
 printf '%s\n' "${pr_out}" | grep -q 'SKIP pr-review-flow-evidence' || fail "pr mode should skip review-flow without explicit PR context"
 printf '%s\n' "${pr_out}" | grep -q 'PASS storage-precommit' || fail "pr mode should run storage-precommit"
 printf '%s\n' "${pr_out}" | grep -q 'PASS quality-gate-contract' || fail "pr mode should run wrapper contract coverage"
@@ -110,33 +119,33 @@ grep -q 'test-sfs-quality-gate.sh' "${step_log}" || fail "pr mode should execute
 grep -q 'test-aws-agent-toolkit-setup-policy.sh' "${step_log}" || fail "pr mode should execute AWS policy coverage"
 grep -q 'test-sfs-pr-check-strict.sh' "${step_log}" || fail "pr mode should execute tests/test-sfs-pr-check-strict.sh"
 
-full_out="$(FAKE_STEP_LOG="${step_log}" bash "${SCRIPT}" --root "${repo}" --mode full)"
+full_out="$(FAKE_STEP_LOG="${step_log}" run_quality_gate --root "${repo}" --mode full)"
 printf '%s\n' "${full_out}" | grep -q 'PASS run-all' || fail "full mode should run run-all"
 grep -q 'run-all.sh' "${step_log}" || fail "full mode should execute tests/run-all.sh"
 
 push_event="${tmp}/push-event.json"
 write_event "${push_event}" push
-push_out="$(GITHUB_EVENT_PATH="${push_event}" FAKE_STEP_LOG="${step_log}" bash "${SCRIPT}" --root "${repo}" --mode pr)"
+push_out="$(GITHUB_EVENT_PATH="${push_event}" FAKE_STEP_LOG="${step_log}" run_quality_gate --root "${repo}" --mode pr)"
 printf '%s\n' "${push_out}" | grep -q 'SKIP pr-review-flow-evidence' || fail "push event payload must not trigger PR review-flow step"
 
 pr_event="${tmp}/pr-event.json"
 write_event "${pr_event}" pr
-pr_event_out="$(GITHUB_EVENT_PATH="${pr_event}" FAKE_STEP_LOG="${step_log}" bash "${SCRIPT}" --root "${repo}" --mode pr)"
+pr_event_out="$(GITHUB_EVENT_PATH="${pr_event}" FAKE_STEP_LOG="${step_log}" run_quality_gate --root "${repo}" --mode pr)"
 printf '%s\n' "${pr_event_out}" | grep -q 'PASS pr-review-flow-evidence' || fail "pull_request event payload should trigger PR review-flow step"
 grep -q 'sfs-pr-review-flow-check.sh --root .* --strict' "${step_log}" || fail "PR event payload should execute review-flow step"
 
 rc=0
-bash "${SCRIPT}" --root "${repo}" --mode release >/dev/null 2>&1 || rc=$?
+run_quality_gate --root "${repo}" --mode release >/dev/null 2>&1 || rc=$?
 [[ "${rc}" -eq 2 ]] || fail "release mode without --version must exit 2 (got ${rc})"
 
-release_out="$(PATH="/usr/bin:/bin" FAKE_STEP_LOG="${step_log}" bash "${SCRIPT}" --root "${repo}" --mode release --version 1.2.3)"
+release_out="$(PATH="/usr/bin:/bin" FAKE_STEP_LOG="${step_log}" run_quality_gate --root "${repo}" --mode release --version 1.2.3)"
 printf '%s\n' "${release_out}" | grep -q 'PASS verify-product-release' || fail "release mode should run release verifier"
 printf '%s\n' "${release_out}" | grep -q 'SKIP channel-publish-preflight' || fail "release mode should skip gh preflight when gh is unavailable"
 
 rc=0
 set +e
 FAIL_STEP="sfs-storage-precommit.sh" FAIL_RC=9 FAKE_STEP_LOG="${step_log}" \
-  bash "${SCRIPT}" --root "${repo}" --mode pr >"${tmp}/fail.out" 2>&1
+  run_quality_gate --root "${repo}" --mode pr >"${tmp}/fail.out" 2>&1
 rc=$?
 set -e
 [[ "${rc}" -eq 9 ]] || fail "failing child step must preserve exit code 9 (got ${rc})"

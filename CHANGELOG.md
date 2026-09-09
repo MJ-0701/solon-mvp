@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.18.0] - 2026-09-09
+
+> **A deterministic review-verdict contract keeps converged reviews closed on the stated PASS criteria, while the shipped consumer quality gate gives Python, Node, and Gradle projects seven redacted, fail-closed verification stages. 결정적 리뷰 판정 계약은 수렴한 리뷰를 명시된 PASS 조건에 따라 닫고, 배포된 소비자 품질 게이트는 Python·Node·Gradle 프로젝트에 마스킹 증거 기반 7단계 fail-closed 검증을 제공합니다.**
+
 ### Added / 추가
 
 - **Consumer review quality gate / 소비자 리뷰 품질 게이트** — The distributed `quality-gate.sh` runs seven sequential, redacted evidence stages for detected Python, Node, and Gradle projects; missing credential scanning or unit-test tooling fails closed. 배포되는 `quality-gate.sh`는 감지한 Python·Node·Gradle 프로젝트에 대해 7단계 순차·마스킹 증거를 실행하며 자격증명 검사나 단위 테스트 도구가 없으면 실패로 처리합니다.

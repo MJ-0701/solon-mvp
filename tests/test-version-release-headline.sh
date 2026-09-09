@@ -39,9 +39,9 @@ plain_output="$(
   "${DIST_DIR}/bin/sfs" version
 )"
 
-[[ "${plain_output}" == "sfs 0.17.0" ]] || fail "plain version output changed: ${plain_output}"
-assert_contains_text "${output}" "sfs 0.17.0" "version output"
-assert_contains_text "${output}" "latest 0.17.0" "latest output"
+[[ "${plain_output}" == "sfs 0.18.0" ]] || fail "plain version output changed: ${plain_output}"
+assert_contains_text "${output}" "sfs 0.18.0" "version output"
+assert_contains_text "${output}" "latest 0.18.0" "latest output"
 # Headline drift-lock: the printed headline must (a) reproduce, byte-for-byte, the
 # `> **...**` blockquote the awk extracts from CHANGELOG for the installed version
 # (so the machinery and the source file stay in sync), and (b) carry the version's
@@ -58,7 +58,7 @@ expected_changelog_headline="$(
 )"
 [[ -n "${expected_changelog_headline}" ]] || fail "no CHANGELOG headline for installed version"
 assert_contains_text "${output}" "installed_release_headline ${expected_changelog_headline}" "installed release headline"
-assert_contains_text "${output}" "A canonical PR quality gate now provides one visible CI entrypoint" "0.17.0 headline opening clause"
+assert_contains_text "${output}" "A deterministic review-verdict contract keeps converged reviews closed on the stated PASS criteria" "0.18.0 headline opening clause"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "installed_release_headline" "PowerShell headline output"
 assert_contains_text "$(cat "${DIST_DIR}/bin/sfs.ps1")" "Get-SfsReleaseHeadline" "PowerShell headline parser"
 
@@ -87,7 +87,7 @@ expected_notes_headline="$(
 )"
 [[ -n "${expected_notes_headline}" ]] || fail "no RELEASE-NOTES headline for installed version"
 assert_contains_text "${fallback_output}" "installed_release_headline ${expected_notes_headline}" "release notes fallback headline"
-assert_contains_text "${fallback_output}" 'Canonical PR quality-gate wrapper and human-controlled AWS Agent Toolkit setup reference / Canonical PR 품질 게이트 wrapper와 사람 제어형 AWS Agent Toolkit setup reference를 추가한 minor release입니다.' "0.17.0 release-notes distinctive clause (first line only — fallback headline)"
+assert_contains_text "${fallback_output}" 'Deterministic review verdicts and a shipped seven-stage consumer quality gate / 결정적 리뷰 판정과 배포된 7단계 소비자 품질 게이트를 제공하는 minor release입니다.' "0.18.0 release-notes distinctive clause (first line only — fallback headline)"
 
 # ── Homebrew keg layout: metafiles sit one level ABOVE the dist dir ──
 # A brew keg has SFS_DIST_DIR=<prefix>/libexec while Homebrew relocates

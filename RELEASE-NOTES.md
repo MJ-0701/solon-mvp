@@ -7,9 +7,14 @@
 
 ---
 
-## Next
+## 0.18.0
 
-결정적 리뷰 판정 계약과 Python·Node·Gradle 소비자용 7단계 품질 게이트를 추가합니다.
+Deterministic review verdicts and a shipped seven-stage consumer quality gate / 결정적 리뷰 판정과 배포된 7단계 소비자 품질 게이트를 제공하는 minor release입니다.
+
+체감 변화 / What changes:
+
+- **리뷰가 명시된 PASS 조건으로 수렴합니다 / Reviews converge on stated PASS criteria** — Gate 판정은 열거된 PASS 조건과 심각도로 결정합니다. 조건 밖 관찰은 수렴한 리뷰를 다시 여는 대신 advisory로 남습니다. Gate verdicts now follow enumerated PASS criteria and severity, leaving observations outside those criteria as advisories rather than reopening a converged review.
+- **소비자 프로젝트를 7단계로 검증합니다 / Consumer projects receive a seven-stage quality gate** — 배포되는 `quality-gate.sh`는 감지한 Python·Node·Gradle 프로젝트에서 순차적인 마스킹 증거 단계를 실행하며, credential scan이나 unit-test tooling이 없으면 fail-closed로 중단합니다. The shipped gate runs sequential redacted-evidence stages for detected Python, Node, and Gradle projects and fails closed when credential scanning or unit-test tooling is unavailable.
 
 ---
 
