@@ -72,7 +72,7 @@ fi
 # ─────────────────────────────────────────────────────────────────────
 usage_review() {
   cat <<'EOF'
-Usage: /sfs review [--sprint <id>] [--gate <1..7>] [--stage <auto|self|cross|artifact>] [--lens <auto|artifact|code|docs|source-docs|simplify|process-lean|security|performance|api-contract|strategy|design|taxonomy|ddd-tdd|ontology|qa|ops|management-admin|release>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--auth-interactive|--no-auth-interactive]
+Usage: /sfs review [--sprint <id>] [--gate <1..7>] [--stage <auto|self|cross|artifact>] [--lens <auto|artifact|code|docs|source-docs|simplify|process-lean|security|performance|api-contract|strategy|design|taxonomy|ddd-tdd|ontology|qa|ops|management-admin|release>] [--executor <profile|cmd>] [--generator <profile|cmd>] [--persona <path>] [--prompt-only|--print-prompt] [--show-last] [--allow-empty] [--force-rerun] [--auth-interactive|--no-auth-interactive]
 
 Open the active sprint's review.md as the CPO Evaluator review document.
   - --gate <n>    gate number, 1..7. Reports display this as Gate 1..7:
@@ -113,6 +113,8 @@ Open the active sprint's review.md as the CPO Evaluator review document.
   - --executor <profile|cmd>
                   CPO review tool/profile. Default: $SFS_REVIEW_EXECUTOR or codex.
                   Typical: codex, gemini, claude, or a custom command.
+                  A self stage without this explicit flag records the author's
+                  local mini-check without starting an executor bridge.
   - --generator <profile|cmd>
                   CTO implementation tool/profile, for self-validation tracking.
   - --persona <path>
@@ -140,6 +142,7 @@ Open the active sprint's review.md as the CPO Evaluator review document.
   - --allow-empty
                   Force executor invocation even when SFS finds no reviewable project/sprint evidence.
                   Prefer `/sfs auth probe --executor <tool>` for cheap bridge request/response tests.
+  - --force-rerun  Do not apply the self-stage convergence cap for this run.
   - --auth-interactive
                   If a named executor is missing auth, allow its CLI login/browser
                   flow before running review. Requires a real terminal.
@@ -187,6 +190,7 @@ REVIEW_SPRINT_ID=""
 REVIEW_STAGE_REQUEST="${SFS_REVIEW_STAGE:-auto}"
 REVIEW_LENS="${SFS_REVIEW_LENS:-auto}"
 EVALUATOR_EXECUTOR="${SFS_REVIEW_EXECUTOR:-codex}"
+EXECUTOR_EXPLICIT=false
 GENERATOR_EXECUTOR="${SFS_GENERATOR_EXECUTOR:-unknown}"
 PERSONA_PATH="$(sfs_persona_file cpo-evaluator)"
 PRINT_PROMPT=false
@@ -195,15 +199,15 @@ SHOW_LAST=false
 ALLOW_EMPTY_REVIEW="${SFS_REVIEW_ALLOW_EMPTY:-false}"
 AUTH_INTERACTIVE="${SFS_AUTH_INTERACTIVE:-auto}"
 REVIEW_MD_EXCERPT_LINES="${SFS_REVIEW_MD_EXCERPT_LINES:-0}"
-REVIEW_FILE_EXCERPT_MAX="${SFS_REVIEW_FILE_EXCERPT_MAX:-12}"
-REVIEW_FILE_EXCERPT_LINES="${SFS_REVIEW_FILE_EXCERPT_LINES:-120}"
+REVIEW_FILE_EXCERPT_MAX="${SFS_REVIEW_FILE_EXCERPT_MAX:-6}"
+REVIEW_FILE_EXCERPT_LINES="${SFS_REVIEW_FILE_EXCERPT_LINES:-60}"
 REVIEW_DIFF_LINES="${SFS_REVIEW_DIFF_LINES:-180}"
 REVIEW_TARGET_EXCERPT_RADIUS="${SFS_REVIEW_TARGET_EXCERPT_RADIUS:-32}"
 REVIEW_INDEXED_TARGET_MAX="${SFS_REVIEW_INDEXED_TARGET_MAX:-80}"
 REVIEW_SMALL_FILE_EXCERPT_LINES="${SFS_REVIEW_SMALL_FILE_EXCERPT_LINES:-450}"
 REVIEW_FIRST_CLASS_EXCERPT_MAX="${SFS_REVIEW_FIRST_CLASS_EXCERPT_MAX:-40}"
 REVIEW_DIR_EXPANSION_MAX="${SFS_REVIEW_DIR_EXPANSION_MAX:-80}"
-REVIEW_EXECUTOR_TIMEOUT="${SFS_REVIEW_EXECUTOR_TIMEOUT_SEC:-${SFS_REVIEW_COMMAND_TIMEOUT_SEC:-1500}}"
+REVIEW_EXECUTOR_TIMEOUT="${SFS_REVIEW_EXECUTOR_TIMEOUT_SEC:-${SFS_REVIEW_COMMAND_TIMEOUT_SEC:-300}}"
 REVIEW_BRIDGE_PROBE="${SFS_REVIEW_BRIDGE_PROBE:-auto}"
 REVIEW_BRIDGE_PROBE_TIMEOUT="${SFS_REVIEW_BRIDGE_PROBE_TIMEOUT_SEC:-45}"
 REVIEW_BUDGET_USD="${SFS_REVIEW_BUDGET_USD:-${SFS_ADVISOR_BUDGET_USD:-}}"
@@ -224,6 +228,7 @@ SFS_REVIEW_CODEX_MODEL_SOURCE=""
 SFS_REVIEW_CODEX_REASONING_EFFORT_SOURCE=""
 REVIEW_TIMEOUT_GUARD_NOTE=""
 SFS_REVIEW_RESTORE_NOTICE=""
+FORCE_RERUN=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
@@ -284,10 +289,12 @@ while [[ $# -gt 0 ]]; do
         exit "${SFS_EXIT_BADCLI}"
       fi
       EVALUATOR_EXECUTOR="$2"
+      EXECUTOR_EXPLICIT=true
       shift 2
       ;;
     --executor=*)
       EVALUATOR_EXECUTOR="${1#--executor=}"
+      EXECUTOR_EXPLICIT=true
       shift
       ;;
     --generator)
@@ -334,6 +341,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --allow-empty)
       ALLOW_EMPTY_REVIEW=true
+      shift
+      ;;
+    --force-rerun)
+      FORCE_RERUN=true
       shift
       ;;
     --auth-interactive)
@@ -441,10 +452,10 @@ if (( REVIEW_MD_EXCERPT_LINES > 80 )); then
   REVIEW_MD_EXCERPT_LINES=80
 fi
 case "${REVIEW_FILE_EXCERPT_MAX}" in
-  ''|*[!0-9]*) REVIEW_FILE_EXCERPT_MAX=12 ;;
+  ''|*[!0-9]*) REVIEW_FILE_EXCERPT_MAX=6 ;;
 esac
 case "${REVIEW_FILE_EXCERPT_LINES}" in
-  ''|*[!0-9]*) REVIEW_FILE_EXCERPT_LINES=120 ;;
+  ''|*[!0-9]*) REVIEW_FILE_EXCERPT_LINES=60 ;;
 esac
 case "${REVIEW_DIFF_LINES}" in
   ''|*[!0-9]*) REVIEW_DIFF_LINES=180 ;;
@@ -996,6 +1007,11 @@ review_json_string_field() {
   printf '%s\n' "$line" | sed -nE 's/.*"'"${field}"'"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/p'
 }
 
+review_json_scalar_field() {
+  local field="$1" line="$2"
+  printf '%s\n' "$line" | sed -nE 's/.*"'"${field}"'"[[:space:]]*:[[:space:]]*([0-9]+).*/\1/p'
+}
+
 review_plan_requires_user_approval() {
   local file="$1"
   [[ -f "${file}" ]] || return 1
@@ -1069,23 +1085,165 @@ latest_review_md_excerpt() {
   ' "${REVIEW_PATH}"
 }
 
+RESULT_DECLARED_VERDICT=""
+RESULT_VERDICT=""
+RESULT_BLOCKING_FINDINGS=""
+RESULT_ADVISORIES=""
+RESULT_CONTRACT_STATUS="invalid"
+RESULT_NORMALIZED_FACT=""
+RESULT_CONTRACT_FAILURE=""
+
+# Parse only the narrow, machine-readable result contract. The gate is allowed
+# to advance only from a single Findings block whose declared blocking count can
+# be reconciled with its labeled, Gate-PASS-criterion findings.
+parse_result_contract() {
+  local file="$1" line key value
+  RESULT_DECLARED_VERDICT=""
+  RESULT_VERDICT=""
+  RESULT_BLOCKING_FINDINGS=""
+  RESULT_ADVISORIES=""
+  RESULT_CONTRACT_STATUS="invalid"
+  RESULT_NORMALIZED_FACT=""
+  RESULT_CONTRACT_FAILURE=""
+  [[ -f "${file}" ]] || {
+    RESULT_CONTRACT_FAILURE="result file missing"
+    return 1
+  }
+
+  while IFS=$'\t' read -r key value; do
+    case "${key}" in
+      declared_verdict) RESULT_DECLARED_VERDICT="${value}" ;;
+      verdict) RESULT_VERDICT="${value}" ;;
+      blocking_findings) RESULT_BLOCKING_FINDINGS="${value}" ;;
+      advisories) RESULT_ADVISORIES="${value}" ;;
+      contract_status) RESULT_CONTRACT_STATUS="${value}" ;;
+      normalized_fact) RESULT_NORMALIZED_FACT="${value}" ;;
+      contract_failure) RESULT_CONTRACT_FAILURE="${value}" ;;
+    esac
+  done < <(
+    awk '
+      function trim(value) {
+        sub(/^[[:space:]]+/, "", value)
+        sub(/[[:space:]]+$/, "", value)
+        return value
+      }
+      function add_failure(value) {
+        if (failure != "") failure = failure "; "
+        failure = failure value
+      }
+      {
+        raw = $0
+        sub(/\r$/, "", raw)
+        low = tolower(raw)
+
+        if (low ~ /^[[:space:]>-]*verdict:/) {
+          verdict_seen++
+          value = raw
+          sub(/^[[:space:]>-]*[Vv][Ee][Rr][Dd][Ii][Cc][Tt]:[[:space:]]*/, "", value)
+          value = trim(value)
+          if (value !~ /^(pass|partial|fail)$/) add_failure("invalid Verdict meta")
+          else declared_verdict = tolower(value)
+          next
+        }
+        if (low ~ /^[[:space:]>-]*blocking findings:/) {
+          blocking_seen++
+          value = raw
+          sub(/^[[:space:]>-]*[Bb][Ll][Oo][Cc][Kk][Ii][Nn][Gg][[:space:]]+[Ff][Ii][Nn][Dd][Ii][Nn][Gg][Ss]:[[:space:]]*/, "", value)
+          value = trim(value)
+          if (value !~ /^[0-9]+$/) add_failure("invalid Blocking findings meta")
+          else declared_blocking = value
+          next
+        }
+        if (low ~ /^[[:space:]>-]*advisories:/) {
+          advisory_seen++
+          value = raw
+          sub(/^[[:space:]>-]*[Aa][Dd][Vv][Ii][Ss][Oo][Rr][Ii][Ee][Ss]:[[:space:]]*/, "", value)
+          value = trim(value)
+          if (value !~ /^[0-9]+$/) add_failure("invalid Advisories meta")
+          else advisories = value
+          next
+        }
+        if (low ~ /^[[:space:]>-]*findings:/) {
+          findings_blocks++
+          if (low !~ /^[[:space:]>-]*findings:[[:space:]]*$/) add_failure("invalid Findings block header")
+          in_findings = 1
+          next
+        }
+
+        if (in_findings) {
+          if (raw ~ /^[[:space:]>]*[[:alpha:]][[:alpha:] _\/-]*:[[:space:]]*$/) {
+            in_findings = 0
+            next
+          }
+          if (raw ~ /^[[:space:]>]*$/) next
+          if (raw !~ /^[[:space:]>]*-[[:space:]]+/) {
+            add_failure("unlabeled Findings content")
+            next
+          }
+          item = raw
+          sub(/^[[:space:]>]*-[[:space:]]*/, "", item)
+          item = trim(item)
+          if (tolower(item) ~ /^(none|none\.|no blocking findings\.?)$/) {
+            none_entries++
+            next
+          }
+
+          severity_labels = item
+          severity_count = gsub(/\[(Critical|Required)\]/, "&", severity_labels)
+          criterion_labels = item
+          criterion_count = gsub(/\[Gate PASS:[[:space:]]*[[:alnum:]][[:alnum:]_.\/-]*[[:space:]]*\]/, "&", criterion_labels)
+          labels = item
+          gsub(/\[(Critical|Required)\]/, "", labels)
+          gsub(/\[Gate PASS:[[:space:]]*[[:alnum:]][[:alnum:]_.\/-]*[[:space:]]*\]/, "", labels)
+          labels = trim(labels)
+          if (severity_count != 1 || criterion_count != 1 || labels ~ /\[[^]]+\]/ || labels == "") {
+            add_failure("invalid Findings severity or Gate PASS criterion label")
+            next
+          }
+          validated_blocking++
+        }
+      }
+      END {
+        if (verdict_seen != 1) add_failure("missing or duplicate Verdict meta")
+        if (blocking_seen != 1) add_failure("missing or duplicate Blocking findings meta")
+        if (advisory_seen != 1) add_failure("missing or duplicate Advisories meta")
+        if (findings_blocks != 1) add_failure("missing or duplicate Findings block")
+        if (none_entries > 1 || (none_entries > 0 && validated_blocking > 0)) add_failure("inconsistent Findings none marker")
+        if (validated_blocking == 0 && none_entries != 1) add_failure("zero blocking findings require an explicit none marker")
+        if (declared_blocking != "" && (declared_blocking + 0) != (validated_blocking + 0)) add_failure("declared Blocking findings count does not match validated Findings")
+
+        effective_verdict = declared_verdict
+        normalized_fact = ""
+        if (declared_verdict == "partial" && declared_blocking == 0 && validated_blocking == 0) {
+          effective_verdict = "pass"
+          normalized_fact = "declared partial with 0 validated blocking findings normalized to pass"
+        }
+        if (effective_verdict == "pass" && validated_blocking != 0) add_failure("PASS cannot contain validated blocking findings")
+        if (declared_verdict == "fail" && validated_blocking == 0) add_failure("FAIL requires a validated blocking finding")
+
+        print "declared_verdict\t" declared_verdict
+        print "blocking_findings\t" (declared_blocking == "" ? "unknown" : declared_blocking)
+        print "advisories\t" (advisories == "" ? "unknown" : advisories)
+        if (failure == "") {
+          print "verdict\t" effective_verdict
+          print "contract_status\tvalid"
+          print "normalized_fact\t" normalized_fact
+        } else {
+          print "verdict\tunknown"
+          print "contract_status\tinvalid"
+          print "contract_failure\t" failure
+        }
+      }
+    ' "${file}"
+  )
+
+  [[ "${RESULT_CONTRACT_STATUS}" == "valid" && -n "${RESULT_VERDICT}" ]]
+}
+
 extract_result_verdict() {
   local file="$1"
-  [[ -f "${file}" ]] || return 1
-  awk '
-    {
-      low = tolower($0)
-      if (low ~ /^[[:space:]>-]*verdict:[[:space:]]*(pass|partial|fail)[[:space:]]*$/) {
-        line = $0
-        sub(/^[[:space:]>-]*[Vv][Ee][Rr][Dd][Ii][Cc][Tt]:[[:space:]]*/, "", line)
-        sub(/[[:space:]]*$/, "", line)
-        print tolower(line)
-        found = 1
-        exit
-      }
-    }
-    END { if (!found) exit 1 }
-  ' "${file}"
+  parse_result_contract "${file}" || return 1
+  printf '%s\n' "${RESULT_VERDICT}"
 }
 
 latest_gate_review_stage_pass() {
@@ -1101,6 +1259,87 @@ latest_gate_review_stage_pass() {
     verdict="$(extract_result_verdict "${out_path}" || true)"
     [[ "${verdict}" == "pass" ]] || continue
     printf '%s\n' "${out_path}"
+    return 0
+  done < <(reverse_lines "${SFS_EVENTS_FILE}")
+  return 1
+}
+
+self_zero_blocking_round_count() {
+  # events.jsonl is deliberately compacted to current state, so repeated
+  # review_run records for one gate are not a reliable round-history source.
+  # review.md preserves each evaluator-result section without changing the
+  # event/storage format; count only completed same-gate self runs there.
+  local gate="$1" gate_display
+  gate_display="$(sfs_gate_display_label "${gate}")"
+  [[ -f "${REVIEW_PATH}" ]] || {
+    printf '0\n'
+    return 0
+  }
+  awk -v gate_display="${gate_display}" '
+    function reset_result() {
+      active = 0
+      blocking = ""
+      contract = ""
+      self_cpo = ""
+    }
+    function flush_result() {
+      if (active && blocking == "0" && contract == "valid" && self_cpo != "" && self_cpo != "converged") count++
+      reset_result()
+    }
+    /^### .* — CPO evaluator result \(/ {
+      flush_result()
+      active = index($0, "(" gate_display ")") > 0
+      next
+    }
+    active && /^- blocking_findings: `/ {
+      value = $0
+      sub(/^- blocking_findings: `/, "", value)
+      sub(/`$/, "", value)
+      blocking = value
+      next
+    }
+    active && /^- result_contract: `/ {
+      value = $0
+      sub(/^- result_contract: `/, "", value)
+      sub(/`$/, "", value)
+      contract = value
+      next
+    }
+    active && /^- self_cpo: `/ {
+      value = $0
+      sub(/^- self_cpo: `/, "", value)
+      sub(/`$/, "", value)
+      self_cpo = value
+      next
+    }
+    END {
+      flush_result()
+      print count + 0
+    }
+  ' "${REVIEW_PATH}"
+}
+
+latest_gate_review_stage_waiver() {
+  local gate="$1" stage="$2" line kind scope preview capture_id capture_path preview_low
+  [[ -f "${SFS_EVENTS_FILE}" ]] || return 1
+  while IFS= read -r line; do
+    [[ "${line}" == *'"type":"evidence_capture"'* ]] || continue
+    [[ "${line}" == *"\"sprint_id\":\"${SPRINT_ID}\""* ]] || continue
+    [[ "${line}" == *"\"gate_id\":\"${gate}\""* ]] || continue
+    kind="$(review_json_string_field "kind" "${line}" || true)"
+    [[ "${kind}" == "waiver" ]] || continue
+    scope="$(review_json_string_field "scope" "${line}" || true)"
+    [[ "${scope}" == "review-stage:${stage}" ]] || continue
+    preview="$(review_json_string_field "text_preview" "${line}" || true)"
+    preview_low="$(printf '%s' "${preview}" | tr '[:upper:]' '[:lower:]')"
+    case "${preview_low}" in
+      *"user approval"*|*"user-approved"*|*"user approved"*|*"approved by user"*) ;;
+      *) continue ;;
+    esac
+    capture_id="$(review_json_string_field "capture_id" "${line}" || true)"
+    capture_path="$(review_json_string_field "path" "${line}" || true)"
+    [[ -n "${capture_id}" && -n "${capture_path}" && -f "${capture_path}" ]] || continue
+    printf '%s\t%s\n' "${capture_id}" "${capture_path}"
     return 0
   done < <(reverse_lines "${SFS_EVENTS_FILE}")
   return 1
@@ -1131,6 +1370,10 @@ resolve_review_stage() {
 
 review_next_action_line() {
   local gate="${1:-}" verdict="${2:-unknown}" stage="${3:-artifact}" gate_display gate_number
+  if [[ "${SELF_CPO_MODE:-}" == "converged" ]]; then
+    printf 'converged pass-with-advisories after the self same-gate round cap; continue with the next eligible same-gate stage\n'
+    return 0
+  fi
   gate_display="$(sfs_gate_display_label "${gate}" 2>/dev/null || printf '%s' "${gate:-Gate -}")"
   gate_number="$(sfs_gate_number "${gate}" 2>/dev/null || printf '%s' "${gate#G}")"
   case "${verdict}" in
@@ -1178,11 +1421,21 @@ review_next_action_line() {
 
 emit_result_metadata_stdout() {
   local file="$1" state="${2:-ready}" gate="${3:-}" stage="${4:-artifact}" verdict next_action
-  verdict="$(extract_result_verdict "${file}" || true)"
+  if ! parse_result_contract "${file}"; then
+    :
+  fi
+  verdict="${RESULT_VERDICT:-unknown}"
   [[ -n "${verdict}" ]] || verdict="unknown"
   next_action="$(review_next_action_line "${gate}" "${verdict}" "${stage}")"
   echo "review result ${state}:"
   echo "  verdict: ${verdict}"
+  echo "  declared_verdict: ${RESULT_DECLARED_VERDICT:-unknown}"
+  echo "  blocking_findings: ${RESULT_BLOCKING_FINDINGS:-unknown}"
+  echo "  advisories: ${RESULT_ADVISORIES:-unknown}"
+  echo "  result_contract: ${RESULT_CONTRACT_STATUS:-invalid}"
+  if [[ -n "${RESULT_NORMALIZED_FACT:-}" ]]; then
+    echo "  normalized_fact: ${RESULT_NORMALIZED_FACT}"
+  fi
   echo "  output: ${file}"
   echo "  display: 사용자 언어로 요약/해야 할 일 레포트 렌더링; 원문은 파일에 보관"
   echo "  next: ${next_action}"
@@ -1266,6 +1519,38 @@ REVIEW_STAGE="$(resolve_review_stage "${REVIEW_STAGE_REQUEST}" "${GATE_ID}")"
 REVIEW_CROSS_REVIEW=false
 if [[ "${REVIEW_STAGE}" == "cross" ]]; then
   REVIEW_CROSS_REVIEW=true
+fi
+SELF_ZERO_BLOCKING_ROUNDS=0
+SELF_ROUND_NUMBER=0
+SELF_CPO_MODE="not-run"
+CROSS_PREREQUISITE_KIND=""
+CROSS_PREREQUISITE_VALUE=""
+if [[ "${REVIEW_STAGE}" == "cross" ]]; then
+  _prior_self_pass="$(latest_gate_review_stage_pass "${GATE_ID}" "self" || true)"
+  if [[ -n "${_prior_self_pass}" ]]; then
+    CROSS_PREREQUISITE_KIND="self-pass"
+    CROSS_PREREQUISITE_VALUE="${_prior_self_pass}"
+  else
+    _prior_self_waiver="$(latest_gate_review_stage_waiver "${GATE_ID}" "self" || true)"
+    if [[ -n "${_prior_self_waiver}" ]]; then
+      CROSS_PREREQUISITE_KIND="waiver"
+      CROSS_PREREQUISITE_VALUE="${_prior_self_waiver}"
+    else
+      echo "cross review requires a same-gate self-CPO PASS or a structured user-approved waiver capture: sfs capture --kind waiver --gate ${GATE_NUMBER} --scope review-stage:self \"User approval: waive the same-gate self-CPO prerequisite.\"" >&2
+      exit "${SFS_EXIT_GATE}"
+    fi
+  fi
+fi
+if [[ "${RUN_REVIEW}" == "true" && "${REVIEW_STAGE}" == "self" ]]; then
+  SELF_ZERO_BLOCKING_ROUNDS="$(self_zero_blocking_round_count "${GATE_ID}")"
+  SELF_ROUND_NUMBER=$((SELF_ZERO_BLOCKING_ROUNDS + 1))
+  if (( SELF_ZERO_BLOCKING_ROUNDS >= 2 )) && [[ "${FORCE_RERUN}" != "true" ]]; then
+    SELF_CPO_MODE="converged"
+  elif [[ "${EXECUTOR_EXPLICIT}" != "true" ]]; then
+    SELF_CPO_MODE="author-check"
+  else
+    SELF_CPO_MODE="executor"
+  fi
 fi
 REVIEW_LENS_SOURCE="explicit"
 if [[ "${REVIEW_LENS}" == "auto" ]]; then
@@ -2392,16 +2677,26 @@ render_indexed_target_source_excerpts() {
 }
 
 render_same_gate_self_cpo_pass_evidence() {
-  local self_result_path verdict
+  local self_result_path verdict waiver_capture waiver_path
   [[ "${REVIEW_STAGE}" == "cross" ]] || return 0
 
   printf '\n### same-gate self-CPO PASS evidence for cross review\n\n'
-  self_result_path="$(latest_gate_review_stage_pass "${GATE_ID}" "self" || true)"
-  if [[ -z "${self_result_path}" ]]; then
-    printf '(no prior same-gate self-CPO PASS found in SFS review_run events)\n'
+  if [[ "${CROSS_PREREQUISITE_KIND}" == "waiver" ]]; then
+    IFS=$'\t' read -r waiver_capture waiver_path <<< "${CROSS_PREREQUISITE_VALUE}"
+    printf -- '- gate: `%s`\n' "${GATE_DISPLAY}"
+    printf -- '- review_stage: `self`\n'
+    printf -- '- prerequisite: `structured user-approved waiver`\n'
+    printf -- '- capture_id: `%s`\n' "${waiver_capture}"
+    printf -- '- capture_path: `%s`\n' "${waiver_path}"
+    printf -- '- policy: matching gate/stage/scope, user-approval text, and capture evidence satisfy the prior self-CPO prerequisite for this cross review.\n\n'
     return 0
   fi
 
+  self_result_path="${CROSS_PREREQUISITE_VALUE:-$(latest_gate_review_stage_pass "${GATE_ID}" "self" || true)}"
+  if [[ -z "${self_result_path}" ]]; then
+    printf '(no prior same-gate self-CPO PASS or structured waiver found)\n'
+    return 0
+  fi
   verdict="$(extract_result_verdict "${self_result_path}" || true)"
   printf -- '- gate: `%s`\n' "${GATE_DISPLAY}"
   printf -- '- review_stage: `self`\n'
@@ -2415,36 +2710,107 @@ render_same_gate_self_cpo_pass_evidence() {
   fi
 }
 
+redact_review_bundle_stream() {
+  # Keep this BSD/GNU portable: macOS sed rejects GNU's range `c\` spelling.
+  # Evidence is copied into durable scratch prompts, so redact ordinary secret
+  # assignments and replace complete private-key bodies before output.
+  awk '
+    function redact_assignment(line, lower, prefix, tail) {
+      lower = tolower(line)
+      if (match(lower, /(api[_-]?key|token|password|secret)[[:space:]]*[:=][[:space:]]*/)) {
+        prefix = substr(line, 1, RSTART + RLENGTH - 1)
+        tail = substr(line, RSTART + RLENGTH)
+        sub(/^[^[:space:]]+/, "[REDACTED]", tail)
+        return prefix tail
+      }
+      return line
+    }
+    {
+      if (in_private_key) {
+        if (index($0, "-----END ") && index($0, "PRIVATE KEY-----")) in_private_key = 0
+        next
+      }
+      if (index($0, "-----BEGIN ") && index($0, "PRIVATE KEY-----")) {
+        in_private_key = 1
+        print "[REDACTED PRIVATE KEY]"
+        next
+      }
+      print redact_assignment($0)
+    }
+  '
+}
+
+render_markdown_numbered_sections() {
+  local file="$1" wanted="$2" label="$3"
+  printf '\n### %s: %s\n\n' "${label}" "${file}"
+  [[ -f "${file}" ]] || { printf '(missing)\n'; return 0; }
+  awk -v wanted=" ${wanted} " '
+    /^[[:space:]]*#{1,6}[[:space:]]+[0-9]+([.][0-9]+)*[.)]?[[:space:]]/ {
+      heading=$0
+      sub(/^[[:space:]]*#{1,6}[[:space:]]+/, "", heading)
+      split(heading, parts, /[. )]/)
+      active=(index(wanted, " " parts[1] " ") > 0)
+    }
+    active { print }
+  ' "${file}" | redact_review_bundle_stream
+}
+
+plan_declared_reference_paths() {
+  [[ -f "${PLAN_PATH}" ]] || return 0
+  awk '
+    BEGIN { in_refs=0; frontmatter=0 }
+    NR == 1 && $0 == "---" { frontmatter=1; next }
+    frontmatter && $0 == "---" { frontmatter=0; next }
+    frontmatter && /^[[:space:]]*references:[[:space:]]*$/ { in_refs=1; next }
+    frontmatter && in_refs && /^[[:space:]]*-/ { print; next }
+    frontmatter && in_refs { in_refs=0 }
+    /^#{1,6}[[:space:]]+[Rr]eferences[[:space:]]*$/ { in_refs=1; next }
+    /^#{1,6}[[:space:]]+/ { in_refs=0 }
+    in_refs { print }
+  ' "${PLAN_PATH}" \
+    | grep -Eo '([.]/)?[A-Za-z0-9_@%+=,.-]+(/[A-Za-z0-9_@%+=,.-]+)+|([.]/)?[A-Za-z0-9_@%+=,-]+[.][A-Za-z0-9_@%+=,-]+' \
+    | sed -E 's#^\./##' \
+    | awk '!seen[$0]++'
+}
+
+render_plan_declared_reference_excerpts() {
+  local count=0 path
+  printf '\n### plan-declared references (contract-only)\n\n'
+  while IFS= read -r path; do
+    [[ -n "${path}" ]] || continue
+    [[ -f "${path}" ]] || { printf '(declared reference missing: %s)\n' "${path}"; continue; }
+    count=$((count + 1))
+    if (( count > REVIEW_FILE_EXCERPT_MAX )); then
+      printf '(declared reference limit reached: %s files)\n' "${REVIEW_FILE_EXCERPT_MAX}"
+      break
+    fi
+    render_review_file_excerpt "${path}" "${REVIEW_FILE_EXCERPT_LINES}" | redact_review_bundle_stream
+  done < <(plan_declared_reference_paths)
+  (( count > 0 )) || printf '(no exact plan `references` declaration)\n'
+}
+
+render_gate6_quality_gate_summary() {
+  local quality_gate summary
+  [[ "${GATE_NUMBER}" == "6" ]] || return 0
+  quality_gate="${SFS_SCRIPT_DIR}/quality-gate.sh"
+  [[ -x "${quality_gate}" ]] || { printf '### consumer quality-gate.sh summary\n\n(missing or not executable)\n'; return 0; }
+  summary="${RUN_INVOCATION_DIR}/quality-gate-summary.txt"
+  "${quality_gate}" --mode pr > "${summary}" 2>&1 || true
+  printf '### consumer quality-gate.sh summary (first evidence)\n\n'
+  sed -n '1,160p' "${summary}" | redact_review_bundle_stream
+}
+
 render_evidence_bundle() {
   printf '## Embedded Evidence Bundle\n\n'
-  printf 'The following evidence was collected by SFS before invoking the executor. Review this embedded evidence first; do not assume your CLI has project file/tool access. If evidence is insufficient, return partial/fail and list the missing evidence instead of calling unsupported tools.\n\n'
-
-  printf '### git status --short (review-filtered)\n\n'
-  render_review_git_status
-
-  printf '\n### git diff --stat (review-filtered)\n\n'
-  render_review_git_diff_stat
-
-  render_sfs_scope_classification
-
-  render_untracked_manifest
-  render_latest_commit_manifest
-  render_current_sprint_handoff_manifest
-  render_reviewable_file_manifest
-  render_excerpt_priority_manifest
-  render_priority_evidence_sections "${IMPLEMENT_PATH}" 120
-  render_evidence_file "${BRAINSTORM_PATH}" 220
-  render_evidence_file "${PLAN_PATH}" 260
-  render_evidence_file "${IMPLEMENT_PATH}" 420
-  render_evidence_file "${LOG_PATH}" 260
-  render_review_file_diffs
-  render_indexed_target_source_excerpts
-  render_first_class_review_file_excerpts
-  render_review_file_excerpts
-  render_same_gate_self_cpo_pass_evidence
-  printf '\n### review.md note\n\n'
-  printf 'Only the first 80 lines of review.md are embedded to prevent recursive prompt growth. Full CPO prompts live under .sfs-local/tmp/review-prompts/.\n'
-  render_evidence_file "${REVIEW_PATH}" 80
+  printf 'This contract-only bundle contains plan.md, brainstorm sections 6-7, review.md sections 1-5, the captured log, and exact plan `references` declarations only. Auto-discovered files, git manifests/diffs, rework logs, review archives, and llm-wiki content are excluded unless exactly declared by plan.md references.\n\n'
+  # Gate 6 quality output is intentionally first: it is the consumer acceptance
+  # gate, not an incidental source excerpt.
+  render_gate6_quality_gate_summary
+  render_evidence_file "${PLAN_PATH}" 260 | redact_review_bundle_stream
+  render_markdown_numbered_sections "${BRAINSTORM_PATH}" "6 7" "brainstorm contract sections 6-7"
+  render_markdown_numbered_sections "${REVIEW_PATH}" "1 2 3 4 5" "review contract sections 1-5"
+  render_priority_evidence_sections "${LOG_PATH}" 120 | redact_review_bundle_stream
+  render_plan_declared_reference_excerpts
 }
 
 is_sfs_managed_review_path() {
@@ -2795,6 +3161,8 @@ EOF
 
 Return exactly this shape:
 Verdict: pass | partial | fail
+Blocking findings: <non-negative integer>
+Advisories: <non-negative integer>
 Review lens: <lens>
 Review independence risk: none | warning | blocking
 Artifact quality verdict:
@@ -2810,7 +3178,9 @@ Implementation acceptance ledger:
 Wiki QA/QC ledger:
 - problem/root cause/fix | local tests | project-applied result | production/applied status | follow-up/waiver
 Findings:
-- ...
+- Use exactly `- none` when Blocking findings is 0. Otherwise list every blocking finding as exactly `- [Critical] [Gate PASS: <criterion-id>] <finding>` or `- [Required] [Gate PASS: <criterion-id>] <finding>`; no other finding labels are valid.
+Advisory details:
+- List non-blocking advisories, or `- none` when Advisories is 0.
 Required CTO actions:
 - ...
 Next action:
@@ -3312,7 +3682,7 @@ append_bridge_profile_evidence_to_prompt() {
   } >> "${prompt_path}"
 }
 
-if [[ -n "${EVALUATOR_EXECUTOR}" && -n "${GENERATOR_EXECUTOR}" && "${EVALUATOR_EXECUTOR}" == "${GENERATOR_EXECUTOR}" ]]; then
+if [[ "${SELF_CPO_MODE}" != "author-check" && "${SELF_CPO_MODE}" != "converged" && -n "${EVALUATOR_EXECUTOR}" && -n "${GENERATOR_EXECUTOR}" && "${EVALUATOR_EXECUTOR}" == "${GENERATOR_EXECUTOR}" ]]; then
   echo "warning: evaluator executor equals generator executor (${EVALUATOR_EXECUTOR}); self-validation risk" >&2
 fi
 
@@ -3448,6 +3818,12 @@ PROMPT_BYTES="$(count_file_bytes "${PROMPT_PATH}")"
   printf -- '- review_lens: `%s` (%s, %s)\n' "${REVIEW_LENS}" "${REVIEW_LENS_LABEL}" "${REVIEW_LENS_SOURCE}"
   printf -- '- evaluator_executor: `%s`\n' "${EVALUATOR_EXECUTOR}"
   printf -- '- generator_executor: `%s`\n' "${GENERATOR_EXECUTOR}"
+  if [[ "${SELF_CPO_MODE}" != "not-run" ]]; then
+    printf -- '- self_cpo: `%s`\n' "${SELF_CPO_MODE}"
+    printf -- '- self_zero_blocking_rounds_before_run: `%s`\n' "${SELF_ZERO_BLOCKING_ROUNDS}"
+    printf -- '- self_round_number: `%s`\n' "${SELF_ROUND_NUMBER}"
+    printf -- '- force_rerun: `%s`\n' "${FORCE_RERUN}"
+  fi
   printf -- '- prompt_path: `%s`\n' "${PROMPT_PATH}"
   if [[ "${RUN_REVIEW}" == "true" ]]; then
     printf -- '- run_requested: true\n'
@@ -3473,26 +3849,90 @@ RESULT_PATH=""
 RUN_RC=""
 RUN_WARNING=""
 DAILY_HANDOFF_HTML=""
+RUN_STARTED_EPOCH="$(date +%s)"
+RUN_WALL_TIME_SEC=0
+
+write_local_self_cpo_result() {
+  local result_path="$1"
+  case "${SELF_CPO_MODE}" in
+    author-check)
+      cat > "${result_path}" <<EOF
+Verdict: pass
+Blocking findings: 0
+Advisories: 1
+Review lens: ${REVIEW_LENS}
+Author-check mini checklist:
+- requirements -> acceptance criteria -> implementation slices -> ADR/decision ids: author checked
+- every acceptance criterion -> file/artifact/evidence mapping: author checked
+- SEED/placeholder/mock/fallback material remains non-acceptance: author checked
+Findings:
+- none
+Advisory details:
+- Author-check only: no independent executor bridge was requested; use --executor for an external CPO run.
+Required CTO actions:
+- Keep the self-CPO record with the next cross review.
+Next action:
+- Run the configured cross CPO after this same-gate self record passes.
+Final recommendation:
+- pass-with-advisories
+EOF
+      ;;
+    converged)
+      cat > "${result_path}" <<EOF
+Verdict: pass
+Blocking findings: 0
+Advisories: 1
+Review lens: ${REVIEW_LENS}
+Self-round convergence:
+- ${SELF_ZERO_BLOCKING_ROUNDS} prior same-gate self runs recorded 0 validated blocking findings.
+- This round is capped and converges without an executor bridge; pass --force-rerun to run another self review.
+Findings:
+- none
+Advisory details:
+- converged pass-with-advisories after the self same-gate round cap.
+Required CTO actions:
+- Preserve advisory follow-up in the next review record.
+Next action:
+- Continue with the next eligible same-gate stage.
+Final recommendation:
+- pass-with-advisories
+EOF
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 if [[ "${RUN_REVIEW}" == "true" ]]; then
   RUN_OUT="${RUN_INVOCATION_DIR}/stdout.md"
   RUN_ERR="${RUN_INVOCATION_DIR}/stderr.txt"
   RUN_RESULT="${RUN_INVOCATION_DIR}/result.md"
 
-  set +e
-  EXECUTOR_CMD="$(resolve_review_executor_cmd)"
-  _resolve_rc=$?
-  set -e
-  if [[ "${_resolve_rc}" -ne 0 ]] || [[ -z "${EXECUTOR_CMD:-}" ]]; then
-    {
-      printf '\n### %s — CPO evaluator run failed before start\n\n' "${NOW}"
-      printf -- '- executor: `%s`\n' "${EVALUATOR_EXECUTOR}"
-      printf -- '- prompt_path: `%s`\n' "${PROMPT_PATH}"
-      printf -- '- reason: executor bridge missing\n'
-    } >> "${REVIEW_PATH}" || true
-    exit "${SFS_EXIT_EXECUTOR}"
-  fi
+  if [[ "${SELF_CPO_MODE}" == "author-check" || "${SELF_CPO_MODE}" == "converged" ]]; then
+    : > "${RUN_OUT}"
+    : > "${RUN_ERR}"
+    if ! write_local_self_cpo_result "${RUN_RESULT}"; then
+      echo "permission denied writing local self-CPO result: ${RUN_RESULT}" >&2
+      exit "${SFS_EXIT_PERM}"
+    fi
+    RUN_RC=0
+  else
+    set +e
+    EXECUTOR_CMD="$(resolve_review_executor_cmd)"
+    _resolve_rc=$?
+    set -e
+    if [[ "${_resolve_rc}" -ne 0 ]] || [[ -z "${EXECUTOR_CMD:-}" ]]; then
+      {
+        printf '\n### %s — CPO evaluator run failed before start\n\n' "${NOW}"
+        printf -- '- executor: `%s`\n' "${EVALUATOR_EXECUTOR}"
+        printf -- '- prompt_path: `%s`\n' "${PROMPT_PATH}"
+        printf -- '- reason: executor bridge missing\n'
+      } >> "${REVIEW_PATH}" || true
+      exit "${SFS_EXIT_EXECUTOR}"
+    fi
 
-  if review_bridge_probe_enabled; then
+    if review_bridge_probe_enabled; then
     PROBE_PROFILE="$(normalize_executor_profile "${EVALUATOR_EXECUTOR}")"
     PROBE_PROMPT="${RUN_INVOCATION_DIR}/bridge-probe.prompt.txt"
     PROBE_OUT="${RUN_INVOCATION_DIR}/bridge-probe.stdout.txt"
@@ -3542,21 +3982,27 @@ EOF
       printf -- '- profile_evidence_status: `%s`\n' "$(sed -nE 's/^Match status:[[:space:]]*//p' "${PROFILE_EVIDENCE}" | sed -n '1p')"
       printf -- '- profile_evidence_policy: SFS-collected bridge metadata is profile evidence; do not require LLM self-attestation.\n'
     } >> "${REVIEW_PATH}" || true
+    fi
+
+    {
+      echo "executor running: ${EVALUATOR_EXECUTOR}"
+      echo "  stdout: ${RUN_OUT}"
+      echo "  stderr: ${RUN_ERR}"
+      echo "  result: ${RUN_RESULT}"
+      echo "  prompt: ${PROMPT_PATH}"
+      echo "  If it looks stuck, inspect another terminal with: tail -f ${RUN_ERR}"
+    } >&2
+    sfs_review_budget_preflight
+    set +e
+    sfs_run_eval_with_timeout "${EXECUTOR_CMD}" "${REVIEW_EXECUTOR_TIMEOUT}" "${PROMPT_PATH}" "${RUN_OUT}" "${RUN_ERR}" "review executor (${EVALUATOR_EXECUTOR})"
+    RUN_RC=$?
+    set -e
   fi
 
-  {
-    echo "executor running: ${EVALUATOR_EXECUTOR}"
-    echo "  stdout: ${RUN_OUT}"
-    echo "  stderr: ${RUN_ERR}"
-    echo "  result: ${RUN_RESULT}"
-    echo "  prompt: ${PROMPT_PATH}"
-    echo "  If it looks stuck, inspect another terminal with: tail -f ${RUN_ERR}"
-  } >&2
-  sfs_review_budget_preflight
-  set +e
-  sfs_run_eval_with_timeout "${EXECUTOR_CMD}" "${REVIEW_EXECUTOR_TIMEOUT}" "${PROMPT_PATH}" "${RUN_OUT}" "${RUN_ERR}" "review executor (${EVALUATOR_EXECUTOR})"
-  RUN_RC=$?
-  set -e
+  RUN_FINISHED_EPOCH="$(date +%s)"
+  if [[ "${RUN_FINISHED_EPOCH}" =~ ^[0-9]+$ ]] && [[ "${RUN_STARTED_EPOCH}" =~ ^[0-9]+$ ]] && (( RUN_FINISHED_EPOCH >= RUN_STARTED_EPOCH )); then
+    RUN_WALL_TIME_SEC=$(( RUN_FINISHED_EPOCH - RUN_STARTED_EPOCH ))
+  fi
 
   if [[ -s "${RUN_RESULT}" ]]; then
     RESULT_PATH="${RUN_RESULT}"
@@ -3579,14 +4025,23 @@ EOF
   RUN_ERR_BYTES="$(count_file_bytes "${RUN_ERR}")"
   RUN_RESULT_LINES="$(count_file_lines "${RESULT_PATH}")"
   RUN_RESULT_BYTES="$(count_file_bytes "${RESULT_PATH}")"
-  RUN_VERDICT="$(extract_result_verdict "${RESULT_PATH}" || true)"
+  if ! parse_result_contract "${RESULT_PATH}"; then
+    :
+  fi
+  RUN_DECLARED_VERDICT="${RESULT_DECLARED_VERDICT:-unknown}"
+  RUN_VERDICT="${RESULT_VERDICT:-unknown}"
   [[ -n "${RUN_VERDICT}" ]] || RUN_VERDICT="unknown"
+  RUN_BLOCKING_FINDINGS="${RESULT_BLOCKING_FINDINGS:-unknown}"
+  RUN_ADVISORIES="${RESULT_ADVISORIES:-unknown}"
+  RUN_RESULT_CONTRACT="${RESULT_CONTRACT_STATUS:-invalid}"
+  RUN_NORMALIZED_FACT="${RESULT_NORMALIZED_FACT:-}"
+  RUN_CONTRACT_FAILURE="${RESULT_CONTRACT_FAILURE:-}"
 
   {
     printf '\n### %s — CPO evaluator result (%s)\n\n' "${NOW}" "${GATE_DISPLAY}"
     printf -- '- review_lens: `%s` (%s, %s)\n' "${REVIEW_LENS}" "${REVIEW_LENS_LABEL}" "${REVIEW_LENS_SOURCE}"
     printf -- '- executor: `%s`\n' "${EVALUATOR_EXECUTOR}"
-    printf -- '- executor_cmd: `%s`\n' "${EXECUTOR_CMD}"
+    printf -- '- executor_cmd: `%s`\n' "${EXECUTOR_CMD:-not-invoked}"
     printf -- '- exit_code: `%s`\n' "${RUN_RC}"
     if [[ -n "${RUN_WARNING}" ]]; then
       printf -- '- warning: `%s`\n' "${RUN_WARNING}"
@@ -3597,7 +4052,25 @@ EOF
     printf -- '- stderr_size: `%s bytes / %s lines`\n' "${RUN_ERR_BYTES}" "${RUN_ERR_LINES}"
     printf -- '- result_path: `%s`\n' "${RESULT_PATH}"
     printf -- '- result_size: `%s bytes / %s lines`\n' "${RUN_RESULT_BYTES}" "${RUN_RESULT_LINES}"
+    printf -- '- prompt_bytes: `%s`\n' "${PROMPT_BYTES}"
+    printf -- '- wall_time_sec: `%s`\n' "${RUN_WALL_TIME_SEC}"
+    printf -- '- declared_result_verdict: `%s`\n' "${RUN_DECLARED_VERDICT}"
     printf -- '- result_verdict: `%s`\n' "${RUN_VERDICT}"
+    printf -- '- blocking_findings: `%s`\n' "${RUN_BLOCKING_FINDINGS}"
+    printf -- '- advisories: `%s`\n' "${RUN_ADVISORIES}"
+    printf -- '- result_contract: `%s`\n' "${RUN_RESULT_CONTRACT}"
+    if [[ -n "${RUN_NORMALIZED_FACT}" ]]; then
+      printf -- '- normalized_verdict_fact: `%s`\n' "${RUN_NORMALIZED_FACT}"
+    fi
+    if [[ -n "${RUN_CONTRACT_FAILURE}" ]]; then
+      printf -- '- result_contract_failure: `%s`\n' "${RUN_CONTRACT_FAILURE}"
+    fi
+    if [[ "${SELF_CPO_MODE}" != "not-run" ]]; then
+      printf -- '- self_cpo: `%s`\n' "${SELF_CPO_MODE}"
+      printf -- '- self_zero_blocking_rounds_before_run: `%s`\n' "${SELF_ZERO_BLOCKING_ROUNDS}"
+      printf -- '- self_round_number: `%s`\n' "${SELF_ROUND_NUMBER}"
+      printf -- '- force_rerun: `%s`\n' "${FORCE_RERUN}"
+    fi
     if (( REVIEW_MD_EXCERPT_LINES > 0 )); then
       printf -- '- result_excerpt: `%s lines max; full result stored in result_path`\n\n' "${REVIEW_MD_EXCERPT_LINES}"
       printf '#### result excerpt\n\n'
@@ -3613,6 +4086,17 @@ EOF
   }
 
   if [[ "${RUN_RC}" -ne 0 && -z "${RUN_WARNING}" ]]; then
+    if [[ "${RUN_RC}" -eq "${SFS_EXIT_SAFETY}" ]]; then
+      {
+        printf '\n### %s — CPO evaluator timeout (%s)\n\n' "${NOW}" "${GATE_DISPLAY}"
+        printf -- '- executor: `%s`\n' "${EVALUATOR_EXECUTOR}"
+        printf -- '- timeout: `%ss`\n' "${REVIEW_EXECUTOR_TIMEOUT}"
+        printf -- '- prompt_bytes: `%s`\n' "${PROMPT_BYTES}"
+        printf -- '- wall_time_sec: `%s`\n' "${RUN_WALL_TIME_SEC}"
+        printf -- '- retry_policy: `manual only; no automatic retry`\n'
+        printf -- '- next: timeout: 번들 축소 후 1회 재시도\n'
+      } >> "${REVIEW_PATH}" || true
+    fi
     echo "executor failed: ${EVALUATOR_EXECUTOR} (exit ${RUN_RC}); see ${RUN_ERR}" >&2
     exit "${SFS_EXIT_EXECUTOR}"
   fi
@@ -3622,7 +4106,7 @@ EOF
   # cannot leave this invocation claiming a completed review with a stale
   # manager handoff. Prompt-only, --show-last, other gates, failed executors,
   # unknown verdicts, and explicit FAIL results never enter this branch.
-  if [[ "${RUN_RC}" -eq 0 && "${GATE_NUMBER}" == "6" ]]; then
+  if [[ "${RUN_RC}" -eq 0 && "${GATE_NUMBER}" == "6" && "${SELF_CPO_MODE}" != "author-check" && "${SELF_CPO_MODE}" != "converged" ]]; then
     case "${RUN_VERDICT}" in
       pass|partial)
         REPORT_PATH="$(sfs_prepare_sprint_report "${SPRINT_ID}" "${NOW}" "draft")" || exit $?
@@ -3659,7 +4143,7 @@ EOF
   # before here when the route cannot be pinned). Codex/Claude reviewer-tier
   # emission is deliberately out of scope (advisor #4); the invariant still fires
   # on any wrong reviewer event from another source.
-  if [[ "$(normalize_executor_profile "${EVALUATOR_EXECUTOR}")" == "gemini" ]]; then
+  if [[ "${SELF_CPO_MODE}" != "author-check" && "${SELF_CPO_MODE}" != "converged" && "$(normalize_executor_profile "${EVALUATOR_EXECUTOR}")" == "gemini" ]]; then
     # Role reflects the actual review stage so the audit log is honest: a self
     # review is the author's self-CPO, a cross review is the independent CPO.
     if [[ "${REVIEW_STAGE}" == "self" ]]; then
@@ -3726,9 +4210,11 @@ _esc_lens_source="${REVIEW_LENS_SOURCE//\\/\\\\}"
 _esc_lens_source="${_esc_lens_source//\"/\\\"}"
 _esc_review_stage="${REVIEW_STAGE//\\/\\\\}"
 _esc_review_stage="${_esc_review_stage//\"/\\\"}"
+_esc_self_cpo="${SELF_CPO_MODE//\\/\\\\}"
+_esc_self_cpo="${_esc_self_cpo//\"/\\\"}"
 
 if ! append_event "review_open" \
-  "{\"sprint_id\":\"${_esc_sprint}\",\"gate_id\":\"${_esc_gate}\",\"path\":\"${_esc_path}\",\"prompt_path\":\"${_esc_prompt}\",\"review_lens\":\"${_esc_lens}\",\"review_lens_source\":\"${_esc_lens_source}\",\"review_stage\":\"${_esc_review_stage}\",\"cross_review\":${REVIEW_CROSS_REVIEW},\"evaluator_role\":\"CPO\",\"evaluator_executor\":\"${_esc_eval}\",\"generator_executor\":\"${_esc_gen}\",\"persona\":\"${_esc_persona}\",\"run_requested\":${RUN_REVIEW},\"auth_mode\":\"${_esc_auth_mode}\"}" \
+  "{\"sprint_id\":\"${_esc_sprint}\",\"gate_id\":\"${_esc_gate}\",\"path\":\"${_esc_path}\",\"prompt_path\":\"${_esc_prompt}\",\"review_lens\":\"${_esc_lens}\",\"review_lens_source\":\"${_esc_lens_source}\",\"review_stage\":\"${_esc_review_stage}\",\"cross_review\":${REVIEW_CROSS_REVIEW},\"evaluator_role\":\"CPO\",\"evaluator_executor\":\"${_esc_eval}\",\"generator_executor\":\"${_esc_gen}\",\"persona\":\"${_esc_persona}\",\"run_requested\":${RUN_REVIEW},\"auth_mode\":\"${_esc_auth_mode}\",\"self_cpo\":\"${_esc_self_cpo}\",\"self_zero_blocking_rounds_before_run\":${SELF_ZERO_BLOCKING_ROUNDS},\"force_rerun\":${FORCE_RERUN}}" \
   2>/dev/null; then
   echo "permission denied appending event to ${SFS_EVENTS_FILE}" >&2
   exit "${SFS_EXIT_PERM}"
@@ -3738,8 +4224,26 @@ if [[ "${RUN_REVIEW}" == "true" ]]; then
   _esc_out="${RESULT_PATH//\\/\\\\}"
   _esc_out="${_esc_out//\"/\\\"}"
   _esc_rc="${RUN_RC:-0}"
+  _esc_declared_verdict="${RUN_DECLARED_VERDICT//\\/\\\\}"
+  _esc_declared_verdict="${_esc_declared_verdict//\"/\\\"}"
+  _esc_run_verdict="${RUN_VERDICT//\\/\\\\}"
+  _esc_run_verdict="${_esc_run_verdict//\"/\\\"}"
+  _esc_run_contract="${RUN_RESULT_CONTRACT//\\/\\\\}"
+  _esc_run_contract="${_esc_run_contract//\"/\\\"}"
+  _esc_normalized_fact="${RUN_NORMALIZED_FACT//\\/\\\\}"
+  _esc_normalized_fact="${_esc_normalized_fact//\"/\\\"}"
+  _esc_contract_failure="${RUN_CONTRACT_FAILURE//\\/\\\\}"
+  _esc_contract_failure="${_esc_contract_failure//\"/\\\"}"
+  _blocking_json="\"${RUN_BLOCKING_FINDINGS//\\/\\\\}\""
+  _advisories_json="\"${RUN_ADVISORIES//\\/\\\\}\""
+  [[ "${RUN_BLOCKING_FINDINGS}" =~ ^[0-9]+$ ]] && _blocking_json="${RUN_BLOCKING_FINDINGS}"
+  [[ "${RUN_ADVISORIES}" =~ ^[0-9]+$ ]] && _advisories_json="${RUN_ADVISORIES}"
+  EXECUTOR_INVOKED=true
+  if [[ "${SELF_CPO_MODE}" == "author-check" || "${SELF_CPO_MODE}" == "converged" ]]; then
+    EXECUTOR_INVOKED=false
+  fi
   if ! append_event "review_run" \
-    "{\"sprint_id\":\"${_esc_sprint}\",\"gate_id\":\"${_esc_gate}\",\"path\":\"${_esc_path}\",\"output_path\":\"${_esc_out}\",\"review_lens\":\"${_esc_lens}\",\"review_stage\":\"${_esc_review_stage}\",\"cross_review\":${REVIEW_CROSS_REVIEW},\"evaluator_role\":\"CPO\",\"evaluator_executor\":\"${_esc_eval}\",\"generator_executor\":\"${_esc_gen}\",\"exit_code\":${_esc_rc}}" \
+    "{\"sprint_id\":\"${_esc_sprint}\",\"gate_id\":\"${_esc_gate}\",\"path\":\"${_esc_path}\",\"output_path\":\"${_esc_out}\",\"review_lens\":\"${_esc_lens}\",\"review_stage\":\"${_esc_review_stage}\",\"cross_review\":${REVIEW_CROSS_REVIEW},\"evaluator_role\":\"CPO\",\"evaluator_executor\":\"${_esc_eval}\",\"generator_executor\":\"${_esc_gen}\",\"exit_code\":${_esc_rc},\"declared_verdict\":\"${_esc_declared_verdict}\",\"result_verdict\":\"${_esc_run_verdict}\",\"blocking_findings\":${_blocking_json},\"advisories\":${_advisories_json},\"result_contract\":\"${_esc_run_contract}\",\"normalized_fact\":\"${_esc_normalized_fact}\",\"result_contract_failure\":\"${_esc_contract_failure}\",\"self_cpo\":\"${_esc_self_cpo}\",\"self_zero_blocking_rounds_before_run\":${SELF_ZERO_BLOCKING_ROUNDS},\"self_round_number\":${SELF_ROUND_NUMBER},\"force_rerun\":${FORCE_RERUN},\"executor_invoked\":${EXECUTOR_INVOKED}}" \
     2>/dev/null; then
     echo "permission denied appending event to ${SFS_EVENTS_FILE}" >&2
     exit "${SFS_EXIT_PERM}"

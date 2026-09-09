@@ -1,5 +1,17 @@
 ## [Unreleased]
 
+## [0.18.0] - 2026-09-09
+
+> **A deterministic review-verdict contract keeps converged reviews closed on the stated PASS criteria, while the shipped consumer quality gate gives Python, Node, and Gradle projects seven redacted, fail-closed verification stages. 결정적 리뷰 판정 계약은 수렴한 리뷰를 명시된 PASS 조건에 따라 닫고, 배포된 소비자 품질 게이트는 Python·Node·Gradle 프로젝트에 마스킹 증거 기반 7단계 fail-closed 검증을 제공합니다.**
+
+### Added / 추가
+
+- **Consumer review quality gate / 소비자 리뷰 품질 게이트** — The distributed `quality-gate.sh` runs seven sequential, redacted evidence stages for detected Python, Node, and Gradle projects; missing credential scanning or unit-test tooling fails closed. 배포되는 `quality-gate.sh`는 감지한 Python·Node·Gradle 프로젝트에 대해 7단계 순차·마스킹 증거를 실행하며 자격증명 검사나 단위 테스트 도구가 없으면 실패로 처리합니다.
+
+### Changed / 변경
+
+- **Review verdict contract / 리뷰 판정 계약** — Gate verdicts are determined by enumerated PASS criteria and severity, so non-criterion observations remain advisories rather than reopening a converged review. Gate 판정은 열거된 PASS 조건과 심각도로 결정되어 조건 밖 지적은 수렴한 리뷰를 다시 여는 대신 advisory로 남습니다.
+
 ## [0.17.0] - 2026-09-09
 
 > **A canonical PR quality gate now provides one visible CI entrypoint, and the shipped AWS Agent Toolkit reference keeps human control and credential boundaries explicit. 이제 canonical PR 품질 게이트가 하나의 명확한 CI 진입점을 제공하고, 배포되는 AWS Agent Toolkit reference는 사람의 제어와 자격 증명 경계를 분명히 합니다.**

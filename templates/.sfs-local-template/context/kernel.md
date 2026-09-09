@@ -139,6 +139,7 @@ load_when: ["always", "sfs", "entry"]
 - Review verdicts are success criteria, not effort counters. A high number of
   review rounds, lenses, or advisor comments never substitutes for PASS.
   Partial/fail routes to rework and same-gate review, not to implementation.
+- Apply the numbered Verdict Contract in `commands/review.md`: only `Critical` and `Required` violations of an applicable PASS criterion can block a verdict.
 - Same-cycle micro-rework is autopilot for deterministic low-risk findings
   inside the brainstorm/plan contract: missing self-CPO evidence, grep/file
   coverage, small guard/test or regex gaps, traceability, stale evidence, or
@@ -192,9 +193,8 @@ load_when: ["always", "sfs", "entry"]
   five organization divisions (strategy-pm, dev, QA, design, infra) plus the
   taxonomy cross-cutting product function/lens are six required council roles;
   each records finding/evidence/waiver. Actual parallel worker lanes remain opt-in.
-- For non-trivial product-bearing work, plan is an enterprise council design
-  step: load the routed enterprise plan pack, record risk flags, map AC to
-  files/evidence per relevant council role, and reserve user calls for real product
-  judgment. Gate 6 performance claims need measurement, bounded proof, or waiver.
-- Do not advance a gate on raw requirements; if intent, terms, checks, or
-  boundaries are unclear, stop and ask the smallest blockers.
+- For non-trivial product-bearing work, plan is an enterprise council design step:
+  load the routed enterprise plan pack, map AC to relevant council role evidence,
+  and reserve user calls for real product judgment; Gate 6 performance claims need bounded proof or waiver.
+- Do not advance a gate on raw requirements; unclear intent, terms, checks, or
+  boundaries require the smallest blocker question.

@@ -76,6 +76,8 @@ fi
 while IFS= read -r _line; do :; done
 cat <<'RESULT'
 Verdict: pass
+Blocking findings: 0
+Advisories: 0
 Review lens: docs
 Review independence risk: none
 Artifact quality verdict:
@@ -101,7 +103,7 @@ chmod +x "${fake_bin}/gemini"
 set +e
 env -u GEMINI_API_KEY -u GOOGLE_API_KEY -u GOOGLE_APPLICATION_CREDENTIALS -u SFS_GEMINI_AUTH_READY \
   PATH="${fake_bin}:$PATH" SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" \
-  bash "${SFS_BIN}" review --gate 3 --executor gemini --no-auth-interactive >"${TMP_DIR}/missing.out" 2>"${TMP_DIR}/missing.err"
+  bash "${SFS_BIN}" review --gate 3 --stage self --executor gemini --no-auth-interactive >"${TMP_DIR}/missing.out" 2>"${TMP_DIR}/missing.err"
 missing_rc=$?
 set -e
 [[ "${missing_rc}" == "9" ]] || {
@@ -128,7 +130,7 @@ fi
 
 review_out="$(
   PATH="${fake_bin}:$PATH" SFS_GEMINI_AUTH_READY=1 SFS_REVIEW_BRIDGE_PROBE=0 SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" \
-    bash "${SFS_BIN}" review --gate 3 --executor gemini
+    bash "${SFS_BIN}" review --gate 3 --stage self --executor gemini
 )"
 case "${review_out}" in
   *"CPO run complete"*"executor gemini"* ) ;;
@@ -165,7 +167,7 @@ run_with_timeout 30 env \
   SFS_NONINTERACTIVE_REVIEW_EXECUTOR_TIMEOUT_SEC=2 \
   SFS_COMMAND_TIMEOUT_SEC=0 \
   SFS_DIST_DIR="${DIST_DIR}" \
-  bash "${SFS_BIN}" review --gate 3 --executor gemini \
+  bash "${SFS_BIN}" review --gate 3 --stage self --executor gemini \
     >"${TMP_DIR}/hang.out" 2>"${TMP_DIR}/hang.err"
 hang_rc=$?
 set -e

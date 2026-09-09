@@ -44,7 +44,7 @@ status: ready-for-review
 Artifact types touched: docs
 PLAN
 
-first_out="$(run_sfs review --gate 3 --prompt-only)"
+first_out="$(run_sfs review --gate 3 --stage self --prompt-only)"
 case "${first_out}" in
   *"lens docs (auto) prompt ready"* ) ;;
   *) fail "first auto review should infer docs: ${first_out}" ;;
@@ -62,7 +62,7 @@ Artifact types touched: design
 UX and UI review signals are now prominent.
 PLAN
 
-second_out="$(run_sfs review --gate 3 --prompt-only)"
+second_out="$(run_sfs review --gate 3 --stage self --prompt-only)"
 case "${second_out}" in
   *"lens docs (auto-locked) prompt ready"* ) ;;
   *) fail "second auto review should reuse docs lens: ${second_out}" ;;
@@ -77,7 +77,7 @@ grep -Fq 'review_lens_source: "auto-locked"' "${review_path}" \
 grep -Fq '"review_lens_source":"auto-locked"' .sfs-local/events.jsonl \
   || fail "events should record auto-locked lens source"
 
-explicit_out="$(run_sfs review --gate 3 --lens design --prompt-only)"
+explicit_out="$(run_sfs review --gate 3 --stage self --lens design --prompt-only)"
 case "${explicit_out}" in
   *"lens design (explicit) prompt ready"* ) ;;
   *) fail "explicit lens should still override lock: ${explicit_out}" ;;
@@ -87,8 +87,25 @@ mkdir -p .sfs-local/tmp/review-runs
 result_path=".sfs-local/tmp/review-runs/${sprint_id}-gate3-pass.md"
 cat > "${result_path}" <<'RESULT'
 Verdict: pass
-
-Required items:
+Blocking findings: 0
+Advisories: 0
+Review lens: design
+Review independence risk: none
+Artifact quality verdict:
+- Synthetic evaluator result is contract-valid.
+Evidence bundle verdict:
+- Synthetic evidence is readable.
+Evidence checked:
+- plan.md
+Evidence gaps:
+- none
+Implementation acceptance ledger:
+- plan acceptance criteria | implemented | synthetic evidence | none
+Findings:
+- none
+Advisory details:
+- none
+Required CTO actions:
 - Carry reviewed requirements into the first implementation slice.
 RESULT
 cat >> "${review_path}" <<EOF
@@ -98,7 +115,7 @@ cat >> "${review_path}" <<EOF
 - result_path: \`${result_path}\`
 - result_verdict: \`pass\`
 EOF
-printf '{"ts":"2026-05-09T02:00:00+09:00","type":"review_run","sprint_id":"%s","gate_id":"G1","output_path":"%s","review_lens":"design","evaluator_executor":"codex","generator_executor":"claude","exit_code":0}\n' \
+printf '{"ts":"2026-05-09T02:00:00+09:00","type":"review_run","sprint_id":"%s","gate_id":"G1","stage":"self","self_cpo":"executor","output_path":"%s","review_lens":"design","evaluator_executor":"codex","generator_executor":"claude","exit_code":0,"declared_verdict":"pass","result_verdict":"pass","blocking_findings":0,"advisories":0,"result_contract":"valid"}\n' \
   "${sprint_id}" "${result_path}" >> .sfs-local/events.jsonl
 
 last_out="$(run_sfs review --last --gate 3)"
