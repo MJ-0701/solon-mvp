@@ -34,6 +34,12 @@ postdev external review pack 은 구현 완료 후 Claude Cowork/Gemini/GitHub C
 중요한 점은 사용자가 이 목록을 외우지 않아도 된다는 것입니다. Solon 은 작업 성격을 보고 필요한
 관점만 읽습니다. 작은 문서 수정은 작게 보고, 배포나 구조 변경처럼 위험이 큰 작업은 더 단단하게
 봅니다. 기준은 늘어나지만, 사용자가 마주하는 표면은 그대로 가볍게 유지하는 것이 방향입니다.
+
+### 리뷰 판정 계약
+
+Gate 3/6 판정은 열거된 PASS 조건과 심각도로 결정합니다. `Critical` 또는 `Required`가 해당 조건을
+위반할 때만 판정을 막고, 조건을 가리키지 못하는 문구·형식 지적은 advisory입니다. 소비자 Gate 6는
+`quality-gate.sh --mode pr|full`의 7단계 증거를 먼저 사용하며 자격증명 검사와 단위 테스트의 SKIP은 실패입니다.
 enterprise-triggered work 에서는 관련 council role마다 risk flag 와 finding/evidence/waiver 또는
 구체적 not-applicable reason 을 남깁니다. 성능/알고리즘 PASS 는 측정, bounded proof, 또는
 explicit N/A waiver 가 있어야 합니다.

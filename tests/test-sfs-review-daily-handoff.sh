@@ -32,6 +32,9 @@ init_fixture() { # $1 = fixture directory, $2 = workspace
     cat > tools/fake-pass-review.sh <<'EOF_PASS'
 #!/usr/bin/env bash
 printf 'Verdict: pass\n'
+printf 'Blocking findings: 0\n'
+printf 'Advisories: 0\n'
+printf 'Findings:\n- none\n'
 printf 'Validation:\n- fake evaluator verified the task unit\n'
 EOF_PASS
     cat > tools/fake-fail-review.sh <<'EOF_FAIL'

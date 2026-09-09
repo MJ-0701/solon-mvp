@@ -38,6 +38,7 @@ git commit -qm 'install sfs'
 
 SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" start "root module architecture redesign" --workspace root-module-frontend >/dev/null
 sprint_id="$(cat .sfs-local/current-sprint)"
+sprint_dir=".sfs-local/sprints/${sprint_id}"
 date_dir="$(date +%Y%m%d)"
 handoff_dir="docs/solon/root-module-frontend/${date_dir}"
 adr_path="docs/solon/decisions/0007-module-architecture-redistribution.md"
@@ -121,18 +122,34 @@ git commit -qm 'docs: add architecture ADR and handoff report'
 
 [[ -z "$(git status --porcelain --untracked-files=no)" ]] || fail "tracked working tree should be clean before review"
 
+# The frozen contract bundle includes only review contract artifacts and exact
+# plan references; committed files no longer enter merely because they changed.
+cat > "${sprint_dir}/plan.md" <<PLAN
+---
+phase: plan
+status: ready-for-review
+---
+
+# Plan
+
+## References
+- \`${adr_path}\`
+- \`${report_path}\`
+PLAN
+
 review_out="$(SFS_COMMAND_TIMEOUT_SEC=0 SFS_DIST_DIR="${DIST_DIR}" bash "${SFS_BIN}" review --gate 4 --prompt-only)"
 prompt_path="$(printf '%s\n' "${review_out}" | sed -nE 's/.* prompt ([^[:space:]]+)$/\1/p' | tail -n 1)"
 [[ -n "${prompt_path}" ]] || fail "could not parse prompt path from review output: ${review_out}"
 [[ -f "${prompt_path}" ]] || fail "prompt path missing: ${prompt_path}"
 
-assert_contains_file "${prompt_path}" "latest commit reviewable file manifest" "prompt latest commit manifest"
 assert_contains_file "${prompt_path}" "${adr_path}" "prompt ADR path"
 assert_contains_file "${prompt_path}" "${report_path}" "prompt handoff report path"
-assert_contains_file "${prompt_path}" "current sprint shared handoff evidence manifest" "prompt handoff manifest"
 assert_contains_file "${prompt_path}" "## 18. Operational assumptions" "prompt full ADR tail section"
 assert_contains_file "${prompt_path}" "REVIEW_COMMIT_AWARE_REPORT" "prompt handoff report body"
-assert_contains_file "${prompt_path}" "first-class review target; full file included" "prompt full small-file marker"
+if grep -Fq "latest commit reviewable file manifest" "${prompt_path}" \
+  || grep -Fq "current sprint shared handoff evidence manifest" "${prompt_path}"; then
+  fail "contract-only prompt must not include broad commit or handoff manifests"
+fi
 
 review_path=".sfs-local/sprints/${sprint_id}/review.md"
 assert_contains_file "${review_path}" 'goal: "root module architecture redesign"' "review goal frontmatter"

@@ -39,6 +39,14 @@ The user should not need to memorize this list. Solon reads only the lens that
 fits the work. A small docs edit stays light. A release, architecture change, or
 risky workflow gets stronger questions and evidence checks. The criteria become
 richer while the user-facing surface stays simple.
+
+### Review verdict contract
+
+Gate 3/6 verdicts follow enumerated PASS criteria and severity. Only a
+`Critical` or `Required` violation of an applicable criterion blocks a verdict;
+wording or formatting observations without a criterion are advisories. Consumer
+Gate 6 first uses the seven-stage `quality-gate.sh --mode pr|full` evidence, and
+a skipped credential scan or unit-test tool fails the gate.
 For enterprise-triggered work, each relevant council role records risk flags plus a
 finding, evidence path, waiver, or concrete not-applicable reason. Performance
 and algorithm PASS requires measurement, bounded proof, or explicit N/A waiver.

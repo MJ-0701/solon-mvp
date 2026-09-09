@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Gate 6 cross review must receive the latest same-gate self-CPO PASS evidence
-# explicitly, not only the first 80 lines of review.md.
+# Gate 6 cross review requires a same-gate self-CPO PASS, but its frozen prompt
+# bundle must not leak the legacy self-review capsule.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -70,8 +70,29 @@ IMPLEMENT
 cat > tools/fake-partial-review.sh <<'PARTIAL'
 #!/usr/bin/env bash
 cat >/dev/null
-printf 'Verdict: partial\n'
-printf 'Summary: deliberate partial for next-action formatting test.\n'
+cat <<'RESULT'
+Verdict: partial
+Blocking findings: 1
+Advisories: 0
+Review lens: qa
+Review independence risk: none
+Artifact quality verdict:
+- Deliberate partial for next-action formatting test.
+Evidence bundle verdict:
+- Prompt was readable.
+Evidence checked:
+- implement.md
+Evidence gaps:
+- none
+Implementation acceptance ledger:
+- implementation acceptance | missing | synthetic fixture | required follow-up
+Findings:
+- [Required] [Gate PASS: G6-1] deliberate partial for next-action formatting test.
+Advisory details:
+- none
+Required CTO actions:
+- Resolve the required fixture finding.
+RESULT
 PARTIAL
 chmod +x tools/fake-partial-review.sh
 
@@ -83,25 +104,40 @@ assert_not_contains "${partial_out}" "sfs review --gate 4" "partial next action 
 
 cat > tools/fake-capsule-review.sh <<'FAKE'
 #!/usr/bin/env bash
-prompt="$(cat)"
-if grep -Fq "Review stage: cross" <<<"${prompt}"; then
-  for expected in \
-    "same-gate self-CPO PASS evidence for cross review" \
-    'result_verdict: `pass`' \
-    "SELF_REVIEW_SENTINEL"; do
-    if ! grep -Fq "${expected}" <<<"${prompt}"; then
-      printf 'Verdict: partial\n'
-      printf 'Summary: missing expected cross capsule evidence: %s\n' "${expected}"
-      exit 0
-    fi
-  done
-fi
+cat > tools/latest-cross-prompt.txt
 
-printf 'Verdict: pass\n'
-printf 'Review lens: qa\n'
-printf 'Evidence checked:\n- SELF_REVIEW_SENTINEL\n'
+cat <<'RESULT'
+Verdict: pass
+Blocking findings: 0
+Advisories: 0
+Review lens: qa
+Review independence risk: none
+Artifact quality verdict:
+- Self-CPO capsule is available.
+Evidence bundle verdict:
+- Prompt was accepted.
+Evidence checked:
+- SELF_REVIEW_SENTINEL
+Evidence gaps:
+- none
+Implementation acceptance ledger:
+- implementation acceptance | implemented | synthetic fixture | SELF_REVIEW_SENTINEL
+Findings:
+- none
+Advisory details:
+- none
+Required CTO actions:
+- none
+RESULT
 FAKE
 chmod +x tools/fake-capsule-review.sh
+
+set +e
+cross_before_self_out="$(run_sfs review --gate 6 --stage cross --executor ./tools/fake-capsule-review.sh --generator codex 2>&1)"
+cross_before_self_rc=$?
+set -e
+[[ "${cross_before_self_rc}" == "6" ]] || fail "cross review without same-gate self PASS must exit 6, got ${cross_before_self_rc}"
+assert_contains "${cross_before_self_out}" "cross review requires a same-gate self-CPO PASS" "cross self prerequisite"
 
 self_out="$(run_sfs review --gate 6 --stage self --executor ./tools/fake-capsule-review.sh --generator codex)"
 assert_contains "${self_out}" "verdict: pass" "self review pass"
@@ -112,9 +148,11 @@ assert_contains "${cross_out}" "verdict: pass" "cross review should pass with em
 
 latest_cross_prompt="$(find .sfs-local/tmp/review-prompts -name prompt.txt -type f | sort | tail -n 1)"
 [[ -f "${latest_cross_prompt}" ]] || fail "missing latest cross prompt"
-grep -Fq "same-gate self-CPO PASS evidence for cross review" "${latest_cross_prompt}" \
-  || fail "cross prompt missing explicit same-gate self-CPO section"
-grep -Fq "SELF_REVIEW_SENTINEL" "${latest_cross_prompt}" \
-  || fail "cross prompt missing self review result excerpt"
+grep -Fq "Review stage: cross" tools/latest-cross-prompt.txt \
+  || fail "cross executor did not receive a cross-stage prompt"
+if grep -Fq "same-gate self-CPO PASS evidence for cross review" "${latest_cross_prompt}" \
+  || grep -Fq "SELF_REVIEW_SENTINEL" "${latest_cross_prompt}"; then
+  fail "contract-only cross prompt must not embed the legacy self-review capsule"
+fi
 
 echo "test-sfs-review-cross-self-pass-capsule: OK"

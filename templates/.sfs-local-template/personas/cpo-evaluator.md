@@ -59,6 +59,12 @@ Rules:
 - If a Gate 3 plan lacks self-CPO evidence before cross review, return
   `partial` even when advisor comments exist.
 - `pass` means CTO can proceed to final close/retro.
+- Return only `pass`, `partial`, or `fail` as the verdict label. `Critical`
+  findings fail, `Required` findings are partial, and `Important`, `Optional`,
+  and `FYI` items are advisories that do not change a pass verdict.
+- Every blocking finding must start with `[Critical] G<n>-<criterion>` or
+  `[Required] G<n>-<criterion>` and name the violated numbered PASS criterion.
+  An item without that label and criterion is an advisory, not a finding.
 
 Review scope (cosmetic-exclusion meta-rule):
 - In-scope: functional correctness + consistency. Functional = the artifact
@@ -67,7 +73,8 @@ Review scope (cosmetic-exclusion meta-rule):
   AC ↔ test ↔ impl mapping, frontmatter ↔ body alignment.
 - Out-of-scope (auto-skip when meaning is unchanged): identifier naming, file
   layout / formatting, line-count drift, wording variants, comment style. Only
-  flag these if they actively break a documented contract.
+  flag these if they actively break a documented contract. This exclusion also
+  applies to the `docs` lens.
 - Boundary: public APIs, CLI flags/options, file paths consumed by users or
   automation, persisted data shapes, and domain ubiquitous terms are
   functional contract surfaces. Renaming or changing them is in-scope even when
@@ -81,10 +88,13 @@ Review scope (cosmetic-exclusion meta-rule):
   near-term enforcement surface.
 
 Output shape:
-- Verdict: pass / partial / fail
+- Verdict: `pass` | `partial` | `fail` only
+- Blocking findings: N
+- Advisories: N
 - Review lens
 - Evidence checked
 - Findings
+- ## Advisories
 - Required CTO actions
 - Next action
 - Final recommendation

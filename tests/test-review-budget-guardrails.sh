@@ -66,6 +66,8 @@ touch "${SFS_TEST_MARKER:?}"
 while IFS= read -r _line; do :; done
 cat <<'RESULT'
 Verdict: pass
+Blocking findings: 0
+Advisories: 0
 Review lens: qa
 Review independence risk: none
 Artifact quality verdict:
@@ -94,7 +96,7 @@ set +e
 SFS_TEST_MARKER="${marker}" \
 SFS_REVIEW_BUDGET_USD=0.01 \
 SFS_REVIEW_ESTIMATED_COST_USD=0.02 \
-run_sfs review --gate 3 --executor "${fake_reviewer}" --generator codex --allow-empty \
+run_sfs review --gate 3 --stage self --executor "${fake_reviewer}" --generator codex --allow-empty \
   >"${TMP_DIR}/blocked.out" 2>"${TMP_DIR}/blocked.err"
 blocked_rc=$?
 set -e
@@ -114,7 +116,7 @@ allowed_out="$(
   SFS_TEST_MARKER="${marker}" \
   SFS_REVIEW_BUDGET_USD=0.02 \
   SFS_REVIEW_ESTIMATED_COST_USD=0.01 \
-  run_sfs review --gate 3 --executor "${fake_reviewer}" --generator codex --allow-empty
+  run_sfs review --gate 3 --stage self --executor "${fake_reviewer}" --generator codex --allow-empty
 )"
 [[ -e "${marker}" ]] || fail "under-budget review did not invoke executor: ${allowed_out}"
 assert_jsonl_contains '"decision":"allowed"' "${telemetry}" "allowed telemetry"
@@ -124,7 +126,7 @@ rm -f "${marker}"
 missing_out="$(
   SFS_TEST_MARKER="${marker}" \
   SFS_REVIEW_ESTIMATED_COST_USD=0.01 \
-  run_sfs review --gate 3 --executor "${fake_reviewer}" --generator codex --allow-empty
+  run_sfs review --gate 3 --stage self --executor "${fake_reviewer}" --generator codex --allow-empty
 )"
 [[ -e "${marker}" ]] || fail "missing-budget review did not preserve executor flow: ${missing_out}"
 assert_jsonl_contains '"decision":"not_configured"' "${telemetry}" "missing budget telemetry"
@@ -134,7 +136,7 @@ rm -f "${marker}"
 unknown_out="$(
   SFS_TEST_MARKER="${marker}" \
   SFS_REVIEW_BUDGET_USD=0.02 \
-  run_sfs review --gate 3 --executor "${fake_reviewer}" --generator codex --allow-empty
+  run_sfs review --gate 3 --stage self --force-rerun --executor "${fake_reviewer}" --generator codex --allow-empty
 )"
 [[ -e "${marker}" ]] || fail "unknown-estimate review did not preserve executor flow: ${unknown_out}"
 assert_jsonl_contains '"decision":"unknown_estimate"' "${telemetry}" "unknown estimate telemetry"

@@ -29,12 +29,24 @@ generator_executor: ""
 ## 2. 판정
 
 - 판정: pass / partial / fail
+- Blocking findings: 0
+- Advisories: 0
 - 근거:
 - 빠진 것/위험:
+
+### PASS 체크리스트
+
+| PASS criterion | 확인 근거 | 상태 (pass/missing/waived) |
+|---|---|---|
+| G<n>-<criterion> |  |  |
 
 ## 3. 필요한 조치
 
 - [ ]
+
+## 3.1 Advisories
+
+- `Important` / `Optional` / `FYI` 항목은 advisory로 기록하며 verdict를 바꾸지 않는다.
 
 ## 4. Implementation Acceptance Ledger
 

@@ -8,6 +8,8 @@ load_when:
   - source-docs
   - api-contract
   - performance-algorithm
+  - docs
+  - artifact
 status: filled-v1
 parent_doc: commands/review.md
 split_from_section: "Review lens aliases and knowledge-pack loading"
@@ -40,6 +42,24 @@ commands:
   `enterprise-performance-review-pack.md` for hot-path, query, algorithm,
   browser runtime, memory, concurrency, or payload risk.
 - `api-contract`: public interface, schema, compatibility, and error semantics.
+- `docs`: accuracy of the **public contract surfaces** a document states —
+  public API signatures, CLI commands and flags, file and route paths, data
+  shapes, and domain terminology — plus **AC traceability**: every contract
+  claim in the document resolves to a requirement, AC, or work unit, and every
+  AC the document names is verifiable. Nothing else is in the checklist.
+  Specifically, these are **advisories**, never findings, and never change the
+  verdict: wording variants of an already-correct statement, enumeration scope
+  (which examples or cases a list happens to include), time and date notation,
+  and optional frontmatter keys. Route them to the "구현 시 참고" section
+  instead of re-running the gate.
+- `artifact`: lifecycle-artifact completeness lens. It reviews the artifact
+  against its gate's enumerated PASS criteria in `commands/review.md`
+  (`## Verdict Contract`) rather than as prose — for a plan, the Gate 3
+  checklist: goal/scope/non-goals present, R↔AC↔WU(slice) traceability
+  complete, a verify-by command per AC, security/PII/data-loss coverage or an
+  explicit waiver, user-approval boundaries marked, zero open questions or
+  blind spots, and static checks (links, frontmatter, secret scan) passing. A
+  gap must name the criterion it breaks; if it names none it is an advisory.
 - `ddd-tdd`: product-level domain language, behavior boundaries, DDD-lite code
   boundaries when code is touched, and test-first or evidence-first proof.
 - `ontology`: domain entity/relationship and ubiquitous-language change; auto
@@ -54,6 +74,18 @@ commands:
   invariants (model-tier / conflict-surfaced / gate-order / stop-the-line /
   pr-reviewed) over the sprint's non-collapsing flow events. Catches silent
   divergence that ran without error; distinct from Gate 6 product acceptance.
+
+## Default lens by gate
+
+Gate 3 plan review defaults to `artifact`, not `docs`. A plan is a contract
+artifact, so it is reviewed against the enumerated Gate 3 PASS criteria; using
+`docs` there opened an unbounded prose surface and produced repeat `partial`
+verdicts with no blocking finding behind them.
+
+Route `docs` explicitly only when the change edits documentation whose contract
+surface is itself at stake — a published API, CLI, path, data shape, or domain
+term. Naming `docs` on any review does not widen the verdict surface: its
+advisory classes above stay advisories at every gate.
 
 Read order:
 
