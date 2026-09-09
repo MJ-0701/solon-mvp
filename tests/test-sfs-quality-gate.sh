@@ -143,9 +143,13 @@ rc=0
 run_quality_gate --root "${repo}" --mode release >/dev/null 2>&1 || rc=$?
 [[ "${rc}" -eq 2 ]] || fail "release mode without --version must exit 2 (got ${rc})"
 
-release_out="$(PATH="/usr/bin:/bin" FAKE_STEP_LOG="${step_log}" run_quality_gate --root "${repo}" --mode release --version 1.2.3)"
+release_out="$(FAKE_STEP_LOG="${step_log}" run_quality_gate --root "${repo}" --mode release --version 1.2.3)"
 printf '%s\n' "${release_out}" | grep -q 'PASS verify-product-release' || fail "release mode should run release verifier"
-printf '%s\n' "${release_out}" | grep -q 'SKIP channel-publish-preflight' || fail "release mode should skip gh preflight when gh is unavailable"
+if command -v gh >/dev/null 2>&1; then
+  printf '%s\n' "${release_out}" | grep -q 'PASS channel-publish-preflight' || fail "release mode should run gh preflight when gh is available"
+else
+  printf '%s\n' "${release_out}" | grep -q 'SKIP channel-publish-preflight' || fail "release mode should skip gh preflight when gh is unavailable"
+fi
 
 rc=0
 set +e
