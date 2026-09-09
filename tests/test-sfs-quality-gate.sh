@@ -83,9 +83,14 @@ write_event() {
 
 run_quality_gate() {
   # The CI workflow exports real PR evidence. This fixture asserts each event
-  # mode independently, so it must not inherit that ambient PR context.
+  # mode independently, so it must not inherit ambient PR context or event
+  # payloads. Fixture event payloads use FAKE_GITHUB_EVENT_PATH instead.
+  local fake_github_event_path="${FAKE_GITHUB_EVENT_PATH:-}"
   (
-    unset SFS_PR_BODY SFS_PR_BASE_SHA SFS_PR_HEAD_SHA
+    unset SFS_PR_BODY SFS_PR_BASE_SHA SFS_PR_HEAD_SHA GITHUB_EVENT_PATH
+    if [[ -n "${fake_github_event_path}" ]]; then
+      export GITHUB_EVENT_PATH="${fake_github_event_path}"
+    fi
     bash "${SCRIPT}" "$@"
   )
 }
@@ -125,12 +130,12 @@ grep -q 'run-all.sh' "${step_log}" || fail "full mode should execute tests/run-a
 
 push_event="${tmp}/push-event.json"
 write_event "${push_event}" push
-push_out="$(GITHUB_EVENT_PATH="${push_event}" FAKE_STEP_LOG="${step_log}" run_quality_gate --root "${repo}" --mode pr)"
+push_out="$(FAKE_GITHUB_EVENT_PATH="${push_event}" FAKE_STEP_LOG="${step_log}" run_quality_gate --root "${repo}" --mode pr)"
 printf '%s\n' "${push_out}" | grep -q 'SKIP pr-review-flow-evidence' || fail "push event payload must not trigger PR review-flow step"
 
 pr_event="${tmp}/pr-event.json"
 write_event "${pr_event}" pr
-pr_event_out="$(GITHUB_EVENT_PATH="${pr_event}" FAKE_STEP_LOG="${step_log}" run_quality_gate --root "${repo}" --mode pr)"
+pr_event_out="$(FAKE_GITHUB_EVENT_PATH="${pr_event}" FAKE_STEP_LOG="${step_log}" run_quality_gate --root "${repo}" --mode pr)"
 printf '%s\n' "${pr_event_out}" | grep -q 'PASS pr-review-flow-evidence' || fail "pull_request event payload should trigger PR review-flow step"
 grep -q 'sfs-pr-review-flow-check.sh --root .* --strict' "${step_log}" || fail "PR event payload should execute review-flow step"
 
