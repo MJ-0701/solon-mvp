@@ -102,6 +102,13 @@ sub-agent로 evidence / waiver를 남긴다. parallel worker는 별도 opt-in이
 - postdev external review, lean procedure review
 - `process-lean` lens
 
+PR 품질 게이트의 canonical entry 도 같은 원칙을 따른다. PR CI 는
+`scripts/sfs-quality-gate.sh --mode pr` 하나를 호출하고, 더 무거운
+`full` / `release` 확장은 필요 surface 에서만 올린다. Gate 6 deep-review 성격의
+PR review-flow check 역시 broad always-on nightly 가 아니라 risk-triggered
+policy 다: product-bearing PR 이며 formal self/cross evidence 판단이 필요한
+경우에만 `pr` gate 내부에서 실행한다.
+
 ## Config-review cadence for model evolution
 
 모델과 agent runtime 이 진화하면 예전 `CLAUDE.md` / `AGENTS.md` / `GEMINI.md`,

@@ -86,6 +86,23 @@ maintenance doc 이다. CLAUDE.md 는 이제 agent 지침만 담고, 영역별 �
   와 [scoop-manifest-validate.sh](../../tests/scoop-manifest-validate.sh)
   통과 확인.
 
+## quality-gate wrapper 사용
+
+- [ ] PR CI 의 정식 진입점은 `bash scripts/sfs-quality-gate.sh --root . --mode pr`
+  하나로 유지한다. `.github/workflows/sfs-pr-check.yml` 에서는 기존 개별 체크를
+  다시 풀어 쓰지 않는다.
+- [ ] `pr` 는 현재 PR CI baseline 과 distributed-reference contract coverage를
+  돈다: bash syntax, `tests/test-sfs-quality-gate.sh`,
+  `tests/test-aws-agent-toolkit-setup-policy.sh`, PR review-flow evidence, strict
+  storage precommit, bad-fixture, workflow permissions, scoop manifest, hash parity.
+- [ ] `full` 은 `pr` + `bash tests/run-all.sh` 이다.
+- [ ] `release` 는 `full` + `bash scripts/verify-product-release.sh --version X.Y.Z`
+  이며 `gh` 가 있을 때만 channel preflight 를 추가한다.
+- [ ] PR review-flow deep review 는 상시 강제가 아니라 risk-triggered escalation
+  이다. 제품-bearing PR 에서 Gate 6 self/cross evidence 가 필요할 때만 `pr`
+  모드가 해당 체크를 실행하고, non-PR / non-product context 는 documented SKIP
+  으로 남긴다.
+
 ## 실패 발생 시 (lessons 누적)
 
 - [ ] WU / review / gate 에서 잡힌, 다른 세션에서도 재발 가능한 실패는

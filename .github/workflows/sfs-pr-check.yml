@@ -81,32 +81,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: bash -n syntax check (scripts + tests)
-        run: |
-          set -e
-          for f in scripts/*.sh tests/*.sh; do
-            bash -n "$f"
-          done
-      - name: Gate 6 review flow evidence (PR product changes)
-        if: github.event_name == 'pull_request'
+      - name: quality gate (canonical PR invocation)
         env:
-          SFS_PR_BODY: ${{ github.event.pull_request.body }}
-          SFS_PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          SFS_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          SFS_PR_BODY: ${{ github.event_name == 'pull_request' && github.event.pull_request.body || '' }}
+          SFS_PR_BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
+          SFS_PR_HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || '' }}
         run: |
-          bash scripts/sfs-pr-review-flow-check.sh --root .
-      - name: storage precommit (strict mode — G6.1 F2 / Option A)
-        run: |
-          bash scripts/sfs-storage-precommit.sh --root . --strict
-      - name: bad-fixture validator (must reject every misformed yml)
-        run: |
-          bash tests/test-bad-fixture.sh
-      - name: workflow permissions audit (AC13)
-        run: |
-          bash tests/test-workflow-permissions.sh
-      - name: scoop manifest schema (AC7.5 surrogate)
-        run: |
-          bash tests/scoop-manifest-validate.sh
-      - name: hash parity (AC12 LF normalization audit)
-        run: |
-          bash tests/test-hash-parity.sh
+          bash scripts/sfs-quality-gate.sh --root . --mode pr

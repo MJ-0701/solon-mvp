@@ -2,10 +2,12 @@
 # tests/test-sfs-pr-check-strict.sh — G6.1 F2 regression.
 #
 # Contract:
-#   1) .github/workflows/sfs-pr-check.yml MUST invoke sfs-storage-precommit.sh in
-#      --strict mode (Option A — fail PR on storage validator violations).
-#   2) The --advisory invocation in that workflow step MUST be removed (any
-#      lingering --advisory in the precommit step would silently mask failures).
+#   1) .github/workflows/sfs-pr-check.yml MUST invoke the canonical
+#      scripts/sfs-quality-gate.sh --root . --mode pr wrapper, not an inlined
+#      storage-precommit step.
+#   2) scripts/sfs-quality-gate.sh in pr mode MUST invoke
+#      sfs-storage-precommit.sh in --strict mode and must not downgrade that
+#      step to --advisory.
 #   3) sfs-storage-precommit.sh --strict MUST reject a synthetic orphan Layer 2
 #      sprint (regression for the strict-mode rejection itself).
 set -euo pipefail
@@ -13,21 +15,30 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DIST_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 WORKFLOW="${DIST_DIR}/.github/workflows/sfs-pr-check.yml"
+QUALITY_GATE="${DIST_DIR}/scripts/sfs-quality-gate.sh"
 PRECOMMIT="${DIST_DIR}/scripts/sfs-storage-precommit.sh"
 
 [[ -f "${WORKFLOW}" ]]   || { echo "F2 FAIL: ${WORKFLOW} missing"; exit 1; }
+[[ -x "${QUALITY_GATE}" ]]|| { echo "F2 FAIL: ${QUALITY_GATE} not executable"; exit 1; }
 [[ -x "${PRECOMMIT}" ]]  || { echo "F2 FAIL: ${PRECOMMIT} not executable"; exit 1; }
 
-# Contract 1: workflow invokes sfs-storage-precommit.sh with --strict.
-if ! grep -qE 'sfs-storage-precommit\.sh.*--strict' "${WORKFLOW}"; then
-  echo "F2 FAIL: ${WORKFLOW} does not invoke sfs-storage-precommit.sh with --strict"
+# Contract 1: workflow invokes canonical quality gate wrapper.
+if ! grep -Fq 'bash scripts/sfs-quality-gate.sh --root . --mode pr' "${WORKFLOW}"; then
+  echo "F2 FAIL: ${WORKFLOW} does not invoke canonical sfs-quality-gate.sh --root . --mode pr"
+  exit 1
+fi
+if grep -qE 'sfs-storage-precommit\.sh' "${WORKFLOW}"; then
+  echo "F2 FAIL: ${WORKFLOW} must not inline sfs-storage-precommit.sh after quality-gate canonicalization"
   exit 1
 fi
 
-# Contract 2: no --advisory in the storage precommit step.
-# Allow --advisory to appear in unrelated locations only if accompanied by --strict on the same line.
-if grep -E 'sfs-storage-precommit\.sh' "${WORKFLOW}" | grep -v -- '--strict' | grep -q -- '--advisory'; then
-  echo "F2 FAIL: ${WORKFLOW} still invokes sfs-storage-precommit.sh with --advisory (G6.1 F2 fix incomplete)"
+# Contract 2: canonical wrapper keeps the storage precommit step strict.
+if ! grep -qE 'sfs-storage-precommit\.sh.*--strict' "${QUALITY_GATE}"; then
+  echo "F2 FAIL: ${QUALITY_GATE} does not invoke sfs-storage-precommit.sh with --strict"
+  exit 1
+fi
+if grep -E 'sfs-storage-precommit\.sh' "${QUALITY_GATE}" | grep -v -- '--strict' | grep -q -- '--advisory'; then
+  echo "F2 FAIL: ${QUALITY_GATE} still invokes sfs-storage-precommit.sh with --advisory (G6.1 F2 fix incomplete)"
   exit 1
 fi
 
@@ -69,4 +80,4 @@ if [[ "${advisory_ec}" -ne 0 ]]; then
   exit 1
 fi
 
-echo "test-sfs-pr-check-strict: OK (workflow contract --strict + orphan rejection: strict=${strict_ec}, advisory=${advisory_ec})"
+echo "test-sfs-pr-check-strict: OK (workflow canonical wrapper + wrapper strict-storage + orphan rejection: strict=${strict_ec}, advisory=${advisory_ec})"

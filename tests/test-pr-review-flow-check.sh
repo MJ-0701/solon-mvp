@@ -78,8 +78,13 @@ fallback_body=$'SFS evidence:\nGate 6 self-CPO PASS\nSelf-CPO fallback: true\nFa
 fallback_out="$(run_check $'bin/sfs' "${fallback_body}")"
 assert_contains "${fallback_out}" "formal SFS Gate 6 self/cross evidence" "fallback evidence pass"
 
-assert_file_contains "${WORKFLOW}" "sfs-pr-review-flow-check.sh --root ." "workflow invokes review-flow check"
-assert_file_contains "${WORKFLOW}" "github.event_name == 'pull_request'" "workflow PR-only review-flow check"
+assert_file_contains "${WORKFLOW}" "sfs-quality-gate.sh --root . --mode pr" "workflow invokes canonical quality gate"
+assert_file_contains "${WORKFLOW}" "SFS_PR_BODY:" "workflow passes PR body into canonical quality gate"
+assert_file_contains "${WORKFLOW}" "SFS_PR_BASE_SHA:" "workflow passes PR diff base into canonical quality gate"
+assert_file_contains "${WORKFLOW}" "SFS_PR_HEAD_SHA:" "workflow passes PR diff head into canonical quality gate"
+if grep -Fq 'sfs-pr-review-flow-check.sh --root .' "${WORKFLOW}"; then
+  fail "workflow must not bypass the canonical quality gate with a direct review-flow step"
+fi
 assert_file_contains "${WORKFLOW}" "templates/**" "workflow covers templates"
 assert_file_contains "${WORKFLOW}" "docs/**" "workflow covers docs"
 assert_file_contains "${WORKFLOW}" "install.sh" "workflow covers root installer"

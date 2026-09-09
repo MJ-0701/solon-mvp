@@ -1,5 +1,18 @@
 ## [Unreleased]
 
+## [0.17.0] - 2026-09-09
+
+> **A canonical PR quality gate now provides one visible CI entrypoint, and the shipped AWS Agent Toolkit reference keeps human control and credential boundaries explicit. 이제 canonical PR 품질 게이트가 하나의 명확한 CI 진입점을 제공하고, 배포되는 AWS Agent Toolkit reference는 사람의 제어와 자격 증명 경계를 분명히 합니다.**
+
+### Added / 추가
+
+- **Canonical PR quality gate / canonical PR 품질 게이트** — `scripts/sfs-quality-gate.sh` provides explicit `pr`, `full`, and `release` modes. PR CI calls the one `--mode pr` entrypoint while the heavier modes add the existing full-suite and release-verification layers. `scripts/sfs-quality-gate.sh`는 명시적인 `pr`·`full`·`release` 모드를 제공하며, PR CI는 하나의 `--mode pr` 진입점만 호출하고 더 무거운 모드는 기존 전수 검증과 release 검증 계층을 추가합니다.
+- **AWS Agent Toolkit setup reference / AWS Agent Toolkit 설정 reference** — The distributed dev reference guides a human-controlled named-profile setup, preserves existing agent and MCP configuration, and keeps credentials and identity output out of prompts and durable logs. 배포되는 dev reference는 사람이 제어하는 named profile 설정을 안내하고 기존 agent·MCP 구성을 보존하며 자격 증명과 identity output이 prompt나 영속 로그에 남지 않게 합니다.
+
+### Changed / 변경
+
+- **PR quality-gate policy and regression coverage / PR 품질 게이트 정책 및 회귀 검증** — Workflow, maintenance guidance, and focused tests lock the canonical wrapper, strict PR baseline, documented non-PR skip, and risk-triggered review-flow escalation. Workflow·maintenance 안내·집중 테스트가 canonical wrapper, strict PR baseline, 문서화된 non-PR SKIP, risk-triggered review-flow escalation을 함께 잠급니다.
+
 ## [0.16.3] - 2026-09-02
 
 > **Source packaging fixtures now match the already-released ADR-aware daily-handoff feature. 이미 출시된 ADR 연동 일일 인계 기능에 맞춰 소스 패키징 fixture를 동기화합니다.**

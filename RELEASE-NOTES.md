@@ -13,6 +13,17 @@
 
 ---
 
+## 0.17.0
+
+Canonical PR quality-gate wrapper and human-controlled AWS Agent Toolkit setup reference / Canonical PR 품질 게이트 wrapper와 사람 제어형 AWS Agent Toolkit setup reference를 추가한 minor release입니다.
+
+체감 변화 / What changes:
+
+- **PR 검증을 한 곳에서 실행합니다 / One PR verification entrypoint** — PR CI는 `scripts/sfs-quality-gate.sh --mode pr` 하나를 호출합니다. `full`과 `release`는 필요할 때만 기존 전수 테스트와 release 검증을 추가해, PR 기본 검증을 무겁게 만들지 않습니다. PR CI calls one canonical gate; `full` and `release` add the existing full-suite and release-verification layers only when needed.
+- **AWS 설정의 사람 제어와 자격 증명 경계를 지킵니다 / AWS setup remains human-controlled and credential-safe** — 배포되는 reference는 named profile, browser sign-in pause, 기존 MCP/agent 설정 보존, credential·identity output 비기록 원칙을 안내합니다. The shipped reference guides named profiles, a browser-sign-in pause, preservation of existing MCP/agent settings, and non-recording of credentials or identity output.
+
+---
+
 ## 0.16.3
 
 Source packaging fixtures now match the already-released ADR-aware daily-handoff feature / 이미 출시된 ADR 연동 일일 인계 기능에 맞춰 소스 패키징 fixture를 동기화한 follow-up patch release입니다.

@@ -92,6 +92,7 @@ module:
 
 ## Policies — knowledge packs, review lenses, ko mirrors
 
+- `policies/aws-agent-toolkit-setup.md` — dev reference runbook for human-controlled AWS Agent Toolkit configuration, named profiles, and AWS MCP profile wiring.
 - `policies/ddd-tdd-knowledge-pack.md` — DDD/TDD baseline for project scaffolds and implementation.
 - `policies/review-lens-routing.md` — review lens aliases and split knowledge-pack loading.
 - `policies/agent-build-review-lens.md` — review lens for work shipping AI agents / MCP servers / sub-agent harnesses (`lens:agent-build`); failure modes generic code review misses.
